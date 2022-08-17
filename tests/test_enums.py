@@ -31,9 +31,9 @@ def test_init_followup_enum():
     "bases",
     [
         # Too few bases...
-        ((enums.Enum,),),
+        (enums.Enum,),
         # Too many bases...
-        ((str, int, enums.Enum),),
+        (str, int, enums.Enum),
     ],
 )
 def test_init_enum_incorrect_base_number(bases):
@@ -216,5 +216,5 @@ def test_try_enum_miss(value: Any, unknown: Any):
 
     new = enums.try_enum(Enum, unknown)
 
-    assert new.value not in Enum
+    assert new not in Enum
     assert new == unknown
