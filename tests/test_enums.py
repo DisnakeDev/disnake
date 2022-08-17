@@ -216,5 +216,5 @@ def test_try_enum_miss(value: Any, unknown: Any):
 
     new = enums.try_enum(Enum, unknown)
 
-    assert new not in Enum
+    assert new not in Enum  # type: ignore
     assert new == unknown
