@@ -151,10 +151,12 @@ jobs:
         pip install -U build
         python -m build
 
-    # run the libcst parsers and check for errors
+    # run the libcst parsers and check for changes
     - name: libcst codemod
+      env:
+        LIBCST_PARSER_TYPE: "native"
       run: |
-        nox -s codemod
+        nox -s codemod -- run-all
         if [ -n "$(git status --porcelain disnake/)" ]; then
           exit 1;
         else

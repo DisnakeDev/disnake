@@ -165,7 +165,7 @@ def slotscheck(session: nox.Session):
 @nox.session(name="codemod")
 @depends("tools")
 def codemod(session: nox.Session):
-    """Run check-manifest."""
+    """Run libcst codemods."""
     if session.posargs and session.posargs[0] == "run-all" or not session.interactive:
         # run all of the transformers on disnake
         session.log("Running all transformers.")
