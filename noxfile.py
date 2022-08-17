@@ -130,6 +130,8 @@ def docs(session: nox.Session):
                 "../changelog",
                 "--port",
                 "8009",
+                "-j",
+                "auto",
                 *args,
             )
         else:

@@ -4,7 +4,6 @@
 
 from typing import Any, Dict, List, Tuple
 
-import sphinx
 from docutils import nodes, utils
 from docutils.nodes import Node, system_message
 from docutils.parsers.rst.states import Inliner
@@ -41,4 +40,8 @@ def add_link_role(app: Sphinx) -> None:
 def setup(app: Sphinx) -> Dict[str, Any]:
     app.add_config_value("resource_links", {}, "env")
     app.connect("builder-inited", add_link_role)
-    return {"version": sphinx.__display_version__, "parallel_read_safe": True}
+
+    return {
+        "parallel_read_safe": True,
+        "parallel_write_safe": True,
+    }
