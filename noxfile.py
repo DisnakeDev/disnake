@@ -21,6 +21,7 @@ nox.options.error_on_external_run = True
 nox.options.reuse_existing_virtualenvs = True
 nox.options.sessions = [
     "lint",
+    "check-manifest",
     "slotscheck",
     "pyright",
     "test",
@@ -129,6 +130,8 @@ def docs(session: nox.Session):
                 "../changelog",
                 "--port",
                 "8009",
+                "-j",
+                "auto",
                 *args,
             )
         else:
@@ -143,6 +146,13 @@ def docs(session: nox.Session):
 def lint(session: nox.Session):
     """Check all files for linting errors"""
     session.run("pre-commit", "run", "--all-files", *session.posargs)
+
+
+@nox.session(name="check-manifest")
+@depends("tools")
+def check_manifest(session: nox.Session):
+    """Run check-manifest."""
+    session.run("check-manifest", "-v", "--no-build-isolation")
 
 
 @nox.session()

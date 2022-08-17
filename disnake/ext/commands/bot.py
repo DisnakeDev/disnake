@@ -77,6 +77,11 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
         :attr:`.Context.prefix`. To avoid confusion empty iterables are not
         allowed.
 
+        If the prefix is ``None``, the bot won't listen to any prefixes, and prefix
+        commands will not be processed. If you don't need prefix commands, consider
+        using :class:`InteractionBot` or :class:`AutoShardedInteractionBot` instead,
+        which are drop-in replacements, just without prefix command support.
+
         .. note::
 
             When passing multiple prefixes be careful to not pass a prefix
@@ -167,6 +172,12 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
         Defaults to ``False``.
 
         .. versionadded:: 2.5
+
+    i18n: :class:`.LocalizationProtocol`
+        An implementation of :class:`.LocalizationProtocol` used for localization of
+        application commands.
+
+        .. versionadded:: 2.5
     """
 
     pass
@@ -251,6 +262,12 @@ class InteractionBot(InteractionBotBase, disnake.Client):
         as missing localized names will automatically fall back to the default/base name without it.
         Only applicable if the ``localization_provider`` parameter is not provided.
         Defaults to ``False``.
+
+        .. versionadded:: 2.5
+
+    i18n: :class:`.LocalizationProtocol`
+        An implementation of :class:`.LocalizationProtocol` used for localization of
+        application commands.
 
         .. versionadded:: 2.5
     """

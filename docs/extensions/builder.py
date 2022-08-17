@@ -30,7 +30,7 @@ class DPYStandaloneHTMLBuilder(StandaloneHTMLBuilder):
     def write_genindex(self) -> None:
         # the total count of lines for each index letter, used to distribute
         # the entries into two columns
-        genindex = IndexEntries(self.env).create_index(self, group_entries=False)  # type: ignore
+        genindex = IndexEntries(self.env).create_index(self, group_entries=False)
         indexcounts = []
         for _k, entries in genindex:
             indexcounts.append(sum(1 + len(subitems) for _, (_, subitems, _) in entries))
@@ -100,3 +100,8 @@ def setup(app):
     add_builders(app)
     app.connect("config-inited", disable_mathjax)
     app.connect("builder-inited", add_custom_jinja2)
+
+    return {
+        "parallel_read_safe": True,
+        "parallel_write_safe": True,
+    }

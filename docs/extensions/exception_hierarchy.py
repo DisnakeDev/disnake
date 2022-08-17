@@ -29,3 +29,8 @@ def setup(app):
         exception_hierarchy, html=(visit_exception_hierarchy_node, depart_exception_hierarchy_node)
     )
     app.add_directive("exception_hierarchy", ExceptionHierarchyDirective)
+
+    return {
+        "parallel_read_safe": True,
+        "parallel_write_safe": True,
+    }

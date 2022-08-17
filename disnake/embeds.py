@@ -125,6 +125,7 @@ class Embed:
 
             Returns the total size of the embed.
             Useful for checking if it's within the 6000 character limit.
+            Check if all aspects of the embed are within the limits with :func:`Embed.check_limits`.
 
         .. describe:: bool(b)
 
@@ -269,16 +270,16 @@ class Embed:
         return embed
 
     def __len__(self) -> int:
-        total = len(self.title or "") + len(self.description or "")
+        total = len((self.title or "").strip()) + len((self.description or "").strip())
         if self._fields:
             for field in self._fields:
-                total += len(field["name"]) + len(field["value"])
+                total += len(field["name"].strip()) + len(field["value"].strip())
 
         if self._footer and (footer_text := self._footer.get("text")):
-            total += len(footer_text)
+            total += len(footer_text.strip())
 
         if self._author and (author_name := self._author.get("name")):
-            total += len(author_name)
+            total += len(author_name.strip())
 
         return total
 
@@ -794,3 +795,65 @@ class Embed:
         else:
             self._files.pop(key, None)
             return str(url) if url is not None else None
+
+    def check_limits(self) -> None:
+        """
+        Checks if this embed fits within the limits dictated by Discord.
+        There is also a 6000 character limit across all embeds in a message.
+
+        Returns nothing on success, raises :exc:`ValueError` if an attribute exceeds the limits.
+
+        +--------------------------+------------------------------------+
+        |   Field                  |              Limit                 |
+        +--------------------------+------------------------------------+
+        | title                    |        256 characters              |
+        +--------------------------+------------------------------------+
+        | description              |        4096 characters             |
+        +--------------------------+------------------------------------+
+        | fields                   |        Up to 25 field objects      |
+        +--------------------------+------------------------------------+
+        | field.name               |        256 characters              |
+        +--------------------------+------------------------------------+
+        | field.value              |        1024 characters             |
+        +--------------------------+------------------------------------+
+        | footer.text              |        2048 characters             |
+        +--------------------------+------------------------------------+
+        | author.name              |        256 characters              |
+        +--------------------------+------------------------------------+
+
+        .. versionadded:: 2.6
+
+        Raises
+        ------
+        ValueError
+            One or more of the embed attributes are too long.
+        """
+
+        if self.title and len(self.title.strip()) > 256:
+            raise ValueError("Embed title cannot be longer than 256 characters")
+
+        if self.description and len(self.description.strip()) > 4096:
+            raise ValueError("Embed description cannot be longer than 4096 characters")
+
+        if self._footer and len(self._footer.get("text", "").strip()) > 2048:
+            raise ValueError("Embed footer text cannot be longer than 2048 characters")
+
+        if self._author and len(self._author.get("name", "").strip()) > 256:
+            raise ValueError("Embed author name cannot be longer than 256 characters")
+
+        if self._fields:
+            if len(self._fields) > 25:
+                raise ValueError("Embeds cannot have more than 25 fields")
+
+            for field_index, field in enumerate(self._fields):
+                if len(field["name"].strip()) > 256:
+                    raise ValueError(
+                        f"Embed field {field_index} name cannot be longer than 256 characters"
+                    )
+                if len(field["value"].strip()) > 1024:
+                    raise ValueError(
+                        f"Embed field {field_index} value cannot be longer than 1024 characters"
+                    )
+
+        if len(self) > 6000:
+            raise ValueError("Embed total size cannot be longer than 6000 characters")
