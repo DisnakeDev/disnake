@@ -65,7 +65,7 @@ class PermissionTypings(codemod.VisitorBasedCodemodCommand):
     DESCRIPTION: str = "Adds overloads for all permissions."
 
     def transform_module(self, tree: cst.Module) -> cst.Module:
-        if "@_overload_with_permissions" not in tree.code:
+        if "@_overload_with_permissions" not in tree.code and "@_generated" not in tree.code:
             raise codemod.SkipFile(
                 "this module does not contain the required decorator: `@_overload_with_permissions`."
             )
