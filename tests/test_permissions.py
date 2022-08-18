@@ -299,7 +299,7 @@ class TestPermissionOverwrite:
         assert po.manage_emojis is None
 
         # invalid names are silently ignored
-        po.update(h=True)
+        po.update(h=True)  # type: ignore
         assert not hasattr(po, "h")
 
     @pytest.mark.parametrize(
