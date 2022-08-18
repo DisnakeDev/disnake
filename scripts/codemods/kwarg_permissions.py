@@ -25,10 +25,7 @@ def get_perm_kwargs(annotation: cst.Annotation):
 
 
 def remove_existing_permissions(params: cst.Parameters, *, is_overload: bool) -> cst.Parameters:
-    """Remove all of the existing permissions from the kwargs of the provided cst.Parameters.
-
-    Additionally removes **kwargs if this is an overload.
-    """
+    """Remove all of the existing permissions from the kwargs of the provided cst.Parameters."""
 
     for param in params.params:
         if m.matches(param, PERMISSION_MATCHERS):
