@@ -1,3 +1,4 @@
+import itertools
 from typing import Optional
 
 import libcst as cst
@@ -38,19 +39,23 @@ def remove_existing_permissions(params: cst.Parameters, *, is_overload: bool) ->
 
     # unlike params, these may contain generated objects
     # we only have to do this for overloads, as we only change overloads directly
-    existing_kwonly_params = list(params.kwonly_params)
+    def is_not_permission(p: cst.Param) -> bool:
+        return not m.matches(p.name, PERMISSION_MATCHERS)
+
+    # n.b. this has a small implementation detail that if the first permission in ALL_PERMISSIONS
+    # changed or was renamed, then this *may not* remove all permissions from the overloads.
+    # this is only true when is_overload is true, but it is unlikely the first permission will change much
+    # as such, this is fine for our usecase, IMO.
     if is_overload:
-        # make matches
-        found_start = False
-        for param in existing_kwonly_params.copy():
-            if m.matches(param.name, PERMISSION_MATCHERS):
-                found_start = True
-            if found_start:
-                existing_kwonly_params.remove(param)
+        filter_func = itertools.takewhile
     else:
-        for param in existing_kwonly_params.copy():
-            if m.matches(param.name, PERMISSION_MATCHERS):
-                existing_kwonly_params.remove(param)
+        filter_func = filter
+    existing_kwonly_params = list(
+        filter_func(
+            is_not_permission,
+            params.kwonly_params,
+        )
+    )
 
     star_arg = params.star_arg if existing_kwonly_params else cst.MaybeSentinel.DEFAULT
     return params.with_changes(
@@ -112,11 +117,7 @@ class PermissionTypings(codemod.VisitorBasedCodemodCommand):
             # use the first permission annotation if it exists, otherwise default to `bool`
             # make a matcher instance of all valid permission names
             for kw_param in node.params.kwonly_params:
-                if (
-                    kw_param.annotation
-                    and m.matches(kw_param.name, PERMISSION_MATCHERS)
-                    and m.matches(kw_param.annotation, m.Annotation())
-                ):
+                if kw_param.annotation and m.matches(kw_param.name, PERMISSION_MATCHERS):
                     annotation = kw_param.annotation
                     break
             else:
