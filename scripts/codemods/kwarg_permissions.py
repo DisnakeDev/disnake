@@ -7,14 +7,60 @@ from libcst import codemod
 
 from disnake import Permissions
 
+ALL_PERMISSIONS = sorted(Permissions.VALID_FLAGS.keys())
+
+PERMISSION_MATCHERS = m.OneOf(*map(m.Name, ALL_PERMISSIONS))
+
+
+def get_perm_kwargs(annotation: cst.Annotation):
+    return [
+        cst.Param(
+            cst.Name(perm),
+            annotation,
+            default=cst.Ellipsis(),
+        )
+        for perm in ALL_PERMISSIONS
+    ]
+
+
+def remove_existing_permissions(params: cst.Parameters, *, is_overload: bool) -> cst.Parameters:
+    """Remove all of the existing permissions from the kwargs of the provided cst.Parameters.
+
+    Additionally removes **kwargs if this is an overload.
+    """
+
+    for param in params.params:
+        if m.matches(param, PERMISSION_MATCHERS):
+            raise RuntimeError(
+                f"an existing permission '{param.name.value}' is defined as a "
+                "non-keyword argument in a permission overloaded method."
+            )
+
+    # unlike params, these may contain generated objects
+    # we only have to do this for overloads, as we only change overloads directly
+    existing_kwonly_params = list(params.kwonly_params)
+    if is_overload:
+        # make matches
+        found_start = False
+        for param in existing_kwonly_params.copy():
+            if m.matches(param.name, PERMISSION_MATCHERS):
+                found_start = True
+            if found_start:
+                existing_kwonly_params.remove(param)
+    else:
+        for param in existing_kwonly_params.copy():
+            if m.matches(param.name, PERMISSION_MATCHERS):
+                existing_kwonly_params.remove(param)
+
+    star_arg = params.star_arg if existing_kwonly_params else cst.MaybeSentinel.DEFAULT
+    return params.with_changes(
+        kwonly_params=existing_kwonly_params,
+        star_arg=star_arg,
+    )
+
 
 class PermissionTypings(codemod.VisitorBasedCodemodCommand):
     DESCRIPTION: str = "Adds overloads for all permissions."
-
-    def __init__(self, context: codemod.CodemodContext):
-        super().__init__(context)
-        # add all of the permissions
-        self.permissions = sorted(Permissions.VALID_FLAGS.keys())
 
     def transform_module(self, tree: cst.Module) -> cst.Module:
         if "@_overload_with_permissions" not in tree.code:
@@ -49,11 +95,6 @@ class PermissionTypings(codemod.VisitorBasedCodemodCommand):
         if not has_overload_deco:
             return node
 
-        # create permission matchers
-        perm_matchers = m.Name(self.permissions[0])
-        for perm in self.permissions[1:]:
-            perm_matchers |= m.Name(perm)
-
         if not node.params.star_kwarg and not is_overload:
             raise RuntimeError(
                 'a function cannot be decorated with "_overload_with_permissions" and not take any kwargs unless it is an overload.'
@@ -73,7 +114,7 @@ class PermissionTypings(codemod.VisitorBasedCodemodCommand):
             for kw_param in node.params.kwonly_params:
                 if (
                     kw_param.annotation
-                    and m.matches(kw_param.name, perm_matchers)
+                    and m.matches(kw_param.name, PERMISSION_MATCHERS)
                     and m.matches(kw_param.annotation, m.Annotation())
                 ):
                     annotation = kw_param.annotation
@@ -81,55 +122,14 @@ class PermissionTypings(codemod.VisitorBasedCodemodCommand):
             else:
                 annotation = cst.Annotation(cst.Name("bool"))
 
-        # remove all of the existing permissions from the params
-        def remove_existing_permissions(params: cst.Parameters) -> cst.Parameters:
-
-            existing_params = list(params.params)
-            for param in existing_params.copy():
-                if param.name.value in self.permissions:
-                    existing_params.remove(param)
-
-            # unlike params, these may contain generated objects
-            # we only have to do this for overloads, as we only change overloads directly
-            existing_kwonly_params = list(params.kwonly_params)
-            if is_overload:
-                # make matches
-                found_start = False
-                for param in existing_kwonly_params.copy():
-                    if m.matches(param.name, perm_matchers):
-                        found_start = True
-                    if found_start:
-                        existing_kwonly_params.remove(param)
-            else:
-                for param in existing_kwonly_params.copy():
-                    if m.matches(param.name, perm_matchers):
-                        existing_kwonly_params.remove(param)
-
-            star_arg = params.star_arg if existing_kwonly_params else cst.MaybeSentinel.DEFAULT
-            return params.with_changes(
-                params=existing_params,
-                kwonly_params=existing_kwonly_params,
-                star_arg=star_arg,
-            )
-
-        def get_perm_kwargs():
-            return [
-                cst.Param(
-                    cst.Name(perm),
-                    annotation,
-                    default=cst.Ellipsis(),
-                )
-                for perm in self.permissions
-            ]
-
         # get a Params with all of the new params that we should have
-        params = remove_existing_permissions(node.params)
+        params = remove_existing_permissions(node.params, is_overload=is_overload)
         params = params.with_changes(star_kwarg=None)
         empty_overload_params = params.deep_clone()
 
         # add the permissions to the kw_only params
         kwonly_params = list(params.kwonly_params)
-        kwonly_params.extend(get_perm_kwargs())
+        kwonly_params.extend(get_perm_kwargs(annotation))
         params = params.with_changes(kwonly_params=kwonly_params)
 
         if is_overload:
@@ -147,8 +147,7 @@ class PermissionTypings(codemod.VisitorBasedCodemodCommand):
         )
         # if the decorated method is an overload we make an in-place change and don't add overloads
 
-        overload = empty_overload.deep_clone()
-        overload = overload.with_changes(params=params)
+        overload = empty_overload.deep_clone().with_changes(params=params)
 
         codevisitors.AddImportsVisitor.add_needed_import(self.context, "typing", "overload")
         codevisitors.AddImportsVisitor.add_needed_import(
