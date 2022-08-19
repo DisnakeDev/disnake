@@ -136,11 +136,11 @@ class Select(Item[V_co]):
     def __init__(
         self: Select[None],
         *,
-        custom_id: str = MISSING,
+        custom_id: str = ...,
         placeholder: Optional[str] = None,
         min_values: int = 1,
         max_values: int = 1,
-        options: Union[List[SelectOption], List[str], Dict[str, str]] = MISSING,
+        options: Union[List[SelectOption], List[str], Dict[str, str]] = ...,
         disabled: bool = False,
         row: Optional[int] = None,
     ):
@@ -150,11 +150,11 @@ class Select(Item[V_co]):
     def __init__(
         self: Select[V_co],
         *,
-        custom_id: str = MISSING,
+        custom_id: str = ...,
         placeholder: Optional[str] = None,
         min_values: int = 1,
         max_values: int = 1,
-        options: Union[List[SelectOption], List[str], Dict[str, str]] = MISSING,
+        options: Union[List[SelectOption], List[str], Dict[str, str]] = ...,
         disabled: bool = False,
         row: Optional[int] = None,
     ):
@@ -355,10 +355,10 @@ class Select(Item[V_co]):
 def select(
     *,
     placeholder: Optional[str] = None,
-    custom_id: str = MISSING,
+    custom_id: str = ...,
     min_values: int = 1,
     max_values: int = 1,
-    options: Union[List[SelectOption], List[str], Dict[str, str]] = MISSING,
+    options: Union[List[SelectOption], List[str], Dict[str, str]] = ...,
     disabled: bool = False,
     row: Optional[int] = None,
 ) -> Callable[[ItemCallbackType[Select[V_co]]], DecoratedItem[Select[V_co]]]:

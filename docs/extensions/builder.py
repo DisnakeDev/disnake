@@ -100,3 +100,8 @@ def setup(app):
     add_builders(app)
     app.connect("config-inited", disable_mathjax)
     app.connect("builder-inited", add_custom_jinja2)
+
+    return {
+        "parallel_read_safe": True,
+        "parallel_write_safe": True,
+    }
