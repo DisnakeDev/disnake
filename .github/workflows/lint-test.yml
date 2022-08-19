@@ -158,6 +158,7 @@ jobs:
       run: |
         nox -s codemod -- run-all
         if [ -n "$(git status --porcelain disnake/)" ]; then
+          echo "::error::Please run `nox -s codemod - run-all` locally and commit the changes." >&2;
           exit 1;
         else
           exit 0;
