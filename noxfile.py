@@ -171,7 +171,7 @@ def codemod(session: nox.Session):
         session.log("Running all transformers.")
         res: str = session.run("python", "-m", "libcst.tool", "list", silent=True)
         transformers = [line.split("-")[0].strip() for line in res.splitlines()]
-        session.log("Transformers: " + ",".join(transformers))
+        session.log("Transformers: " + ", ".join(transformers))
 
         for trans in transformers:
             session.run(
