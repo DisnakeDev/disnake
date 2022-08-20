@@ -970,8 +970,10 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
         collected = collect_nested_params(injection.function)
         if injection.autocompleters is not Ellipsis:
             for p in collected:
-                if f := injection.autocompleters.get(p.name):
+                if f := injection.autocompleters.pop(p.name, None):
                     p.autocomplete = f
+            if len(injection.autocompleters):
+                raise ValueError("Couldn't set autocompleters for non-existent options: " + ', '.join(["'" + x + "'" for x in injection.autocompleters.keys()]))
         params += collected
 
     params = sorted(params, key=lambda param: not param.required)
