@@ -202,8 +202,14 @@ class InvokableApplicationCommand(ABC):
         if self._max_concurrency != other._max_concurrency:
             # _max_concurrency won't be None at this point
             other._max_concurrency = cast(MaxConcurrency, self._max_concurrency).copy()
+
         if self.body._default_member_permissions != other.body._default_member_permissions:
-            other.body._default_member_permissions = self.body._default_member_permissions
+            if "default_member_permissions" not in other.__original_kwargs__:
+                other.body._default_member_permissions = self.body._default_member_permissions
+            elif self.body._default_member_permissions is not None:
+                raise ValueError(
+                    "Cannot set `default_member_permissions` in both decorator and slash_command_attrs"
+                )
 
         try:
             other.on_error = self.on_error
