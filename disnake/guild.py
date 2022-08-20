@@ -3270,11 +3270,16 @@ class Guild(Hashable):
         ----------
         member_id: :class:`int`
             The ID to search for.
+        strict: :class:`bool`
+            Whether to propagate exceptions from :func:`fetch_member`
+            instead of returning ``None`` in case of failure
+            (e.g. if the member wasn't found).
+            Defaults to ``False``.
 
         Returns
         -------
-        :class:`Member`
-            The member with the given ID.
+        Optional[:class:`Member`]
+            The member with the given ID, or ``None`` if not found and ``strict`` is set to ``False``.
         """
         member = self.get_member(member_id)
         if member is not None:
