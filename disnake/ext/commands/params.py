@@ -187,7 +187,7 @@ class Injection:
     .. versionadded:: 2.3
 
     .. versionchanged:: 2.6
-        Constructor now accept keyword-only argument ``autocompleters``
+        Added keyword-only argument ``autocompleters``.
 
     Attributes
     ----------
