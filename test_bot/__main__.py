@@ -48,13 +48,16 @@ class TestBot(commands.Bot):
         )
         # fmt: on
 
-    def add_cog(self, cog, *, override: bool = False) -> None:
-        logger.info(f"Loading cog {cog}.")
+    def add_cog(self, cog: commands.Cog, *, override: bool = False) -> None:
+        logger.info(f"Loading cog {cog.qualified_name}.")
         return super().add_cog(cog, override=override)
 
     async def on_command_error(self, ctx: commands.Context, error: commands.CommandError) -> None:
+        msg = f"Command `{ctx.command}` failed due to `{error}`"
+        logger.error(msg, exc_info=True)
+
         embed = disnake.Embed(
-            title=f"Command `{ctx.command}` failed due to `{error}`",
+            title=msg,
             description=fancy_traceback(error),
             color=disnake.Color.red(),
         )
@@ -65,8 +68,11 @@ class TestBot(commands.Bot):
         inter: disnake.AppCmdInter,
         error: commands.CommandError,
     ) -> None:
+        msg = f"Slash command `{inter.data.name}` failed due to `{error}`"
+        logger.error(msg, exc_info=True)
+
         embed = disnake.Embed(
-            title=f"Slash command `{inter.data.name}` failed due to `{error}`",
+            title=msg,
             description=fancy_traceback(error),
             color=disnake.Color.red(),
         )
@@ -81,8 +87,10 @@ class TestBot(commands.Bot):
         inter: disnake.AppCmdInter,
         error: commands.CommandError,
     ) -> None:
+        msg = f"User command `{inter.data.name}` failed due to `{error}`"
+        logger.error(msg, exc_info=True)
         embed = disnake.Embed(
-            title=f"User command `{inter.data.name}` failed due to `{error}`",
+            title=msg,
             description=fancy_traceback(error),
             color=disnake.Color.red(),
         )
@@ -97,8 +105,10 @@ class TestBot(commands.Bot):
         inter: disnake.AppCmdInter,
         error: commands.CommandError,
     ) -> None:
+        msg = f"Message command `{inter.data.name}` failed due to `{error}`"
+        logger.error(msg, exc_info=True)
         embed = disnake.Embed(
-            title=f"Message command `{inter.data.name}` failed due to `{error}`",
+            title=msg,
             description=fancy_traceback(error),
             color=disnake.Color.red(),
         )
