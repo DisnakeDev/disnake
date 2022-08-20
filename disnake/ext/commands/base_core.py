@@ -26,12 +26,24 @@ import asyncio
 import datetime
 import functools
 from abc import ABC
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, TypeVar, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    TypeVar,
+    Union,
+    cast,
+    overload,
+)
 
 from disnake.app_commands import ApplicationCommand
 from disnake.enums import ApplicationCommandType
 from disnake.permissions import Permissions
-from disnake.utils import async_all, maybe_coroutine
+from disnake.utils import _generated, _overload_with_permissions, async_all, maybe_coroutine
 
 from .cooldowns import BucketType, CooldownMapping, MaxConcurrency
 from .errors import CheckFailure, CommandError, CommandInvokeError, CommandOnCooldown
@@ -643,6 +655,71 @@ class InvokableApplicationCommand(ABC):
             inter.application_command = original
 
 
+@overload
+@_generated
+def default_member_permissions(
+    value: int = 0,
+    *,
+    add_reactions: bool = ...,
+    administrator: bool = ...,
+    attach_files: bool = ...,
+    ban_members: bool = ...,
+    change_nickname: bool = ...,
+    connect: bool = ...,
+    create_forum_threads: bool = ...,
+    create_instant_invite: bool = ...,
+    create_private_threads: bool = ...,
+    create_public_threads: bool = ...,
+    deafen_members: bool = ...,
+    embed_links: bool = ...,
+    external_emojis: bool = ...,
+    external_stickers: bool = ...,
+    kick_members: bool = ...,
+    manage_channels: bool = ...,
+    manage_emojis: bool = ...,
+    manage_emojis_and_stickers: bool = ...,
+    manage_events: bool = ...,
+    manage_guild: bool = ...,
+    manage_messages: bool = ...,
+    manage_nicknames: bool = ...,
+    manage_permissions: bool = ...,
+    manage_roles: bool = ...,
+    manage_threads: bool = ...,
+    manage_webhooks: bool = ...,
+    mention_everyone: bool = ...,
+    moderate_members: bool = ...,
+    move_members: bool = ...,
+    mute_members: bool = ...,
+    priority_speaker: bool = ...,
+    read_message_history: bool = ...,
+    read_messages: bool = ...,
+    request_to_speak: bool = ...,
+    send_messages: bool = ...,
+    send_messages_in_threads: bool = ...,
+    send_tts_messages: bool = ...,
+    speak: bool = ...,
+    start_embedded_activities: bool = ...,
+    stream: bool = ...,
+    use_external_emojis: bool = ...,
+    use_external_stickers: bool = ...,
+    use_slash_commands: bool = ...,
+    use_voice_activation: bool = ...,
+    view_audit_log: bool = ...,
+    view_channel: bool = ...,
+    view_guild_insights: bool = ...,
+) -> Callable[[T], T]:
+    ...
+
+
+@overload
+@_generated
+def default_member_permissions(
+    value: int = 0,
+) -> Callable[[T], T]:
+    ...
+
+
+@_overload_with_permissions
 def default_member_permissions(value: int = 0, **permissions: bool) -> Callable[[T], T]:
     """
     A decorator that sets default required member permissions for the command.

@@ -77,6 +77,11 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
         :attr:`.Context.prefix`. To avoid confusion empty iterables are not
         allowed.
 
+        If the prefix is ``None``, the bot won't listen to any prefixes, and prefix
+        commands will not be processed. If you don't need prefix commands, consider
+        using :class:`InteractionBot` or :class:`AutoShardedInteractionBot` instead,
+        which are drop-in replacements, just without prefix command support.
+
         .. note::
 
             When passing multiple prefixes be careful to not pass a prefix
