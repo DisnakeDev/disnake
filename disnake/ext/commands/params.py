@@ -192,7 +192,7 @@ class Injection:
     Attributes
     ----------
     function: Callable
-        The underlying injection
+        The underlying injection function.
     """
 
     _registered: ClassVar[Dict[Any, Injection]] = {}
