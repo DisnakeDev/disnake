@@ -1188,7 +1188,7 @@ def injection(*, autocompleters: Dict[str, Callable] = ...) -> Any:
     ):
         raise TypeError("Some of your autocompleters are not coroutines")
 
-    def decorator(function: Callable[..., Any]) -> Injection:
+    def decorator(function: Callable[..., Any]) -> Any:
         return inject(function, autocompleters=autocompleters)
 
     return decorator
