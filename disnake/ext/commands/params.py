@@ -1145,9 +1145,9 @@ def inject(function: Callable[..., Any], *, autocompleters: Dict[str, Callable] 
     Parameters
     ----------
     function: Callable
-        The injection
+        The injection function.
     autocompleters: Dict[:class:`str`, Callable]
-        A mapping of injection's parameter names to their respective autocompleters
+        A mapping of injection's parameter names to their respective autocompleters.
 
     Raises
     ------
