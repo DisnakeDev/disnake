@@ -429,7 +429,7 @@ Injections
     :members:
     :exclude-members: autocomplete
 
-    .. automethod:: Injection.autocomplete()
+    .. automethod:: Injection.autocomplete
         :decorator:
 
 .. autofunction:: disnake.ext.commands.inject
