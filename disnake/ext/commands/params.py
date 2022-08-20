@@ -230,12 +230,12 @@ class Injection:
         return self
 
     def autocomplete(self, param_name: str) -> Callable:
-        """A decorator that adds an autocomplete for a given parameter
+        """A decorator that registers an autocomplete function for the specified option.
 
         Parameters
         ----------
         param_name: :class:`str`
-            The name of the parameter to assign autocomplete to
+            The name of the option.
 
         Raises
         ------
