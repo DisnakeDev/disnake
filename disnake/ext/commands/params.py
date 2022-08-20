@@ -193,6 +193,8 @@ class Injection:
     ----------
     function: Callable
         The underlying injection function.
+    autocompleters: Dict[:class:`str`, Callable]
+        A mapping of injection's option names to their respective autocompleters.
     """
 
     _registered: ClassVar[Dict[Any, Injection]] = {}
@@ -201,14 +203,6 @@ class Injection:
     autocompleters: Dict[str, Callable]
 
     def __init__(self, function: Callable, *, autocompleters: Dict[str, Callable] = ...) -> None:
-        if not asyncio.iscoroutinefunction(function):
-            raise TypeError("Injection must be a function")
-
-        if autocompleters is not Ellipsis and any(
-            [not asyncio.iscoroutinefunction(f) for f in autocompleters.values()]
-        ):
-            raise TypeError("Some of your autocompleters are not coroutines")
-
         self.function = function
         self.autocompleters = autocompleters if autocompleters is not Ellipsis else {}
 
@@ -216,14 +210,6 @@ class Injection:
     def register(
         cls, function: Callable, annotation: Any, *, autocompleters: Dict[str, Callable] = ...
     ) -> Self:
-        if not asyncio.iscoroutinefunction(function):
-            raise TypeError("Function must be a coroutine")
-
-        if autocompleters is not Ellipsis and any(
-            [not asyncio.iscoroutinefunction(f) for f in autocompleters.values()]
-        ):
-            raise TypeError("Some of your autocompleters are not coroutines")
-
         self = cls(function)
         cls._registered[annotation] = self
         self.autocompleters = autocompleters if autocompleters is not Ellipsis else {}
@@ -243,8 +229,6 @@ class Injection:
             This injection already have autocompleter set for the given param
         TypeError
             ``param_name`` is not :class:`str`
-
-            The function passed is not coroutine
         """
         if not isinstance(param_name, str):
             raise TypeError("param_name must be a type of str")
@@ -255,9 +239,6 @@ class Injection:
             )
 
         def decorator(func: CallableT) -> CallableT:
-            if not asyncio.iscoroutinefunction(func):
-                raise TypeError("Function must be a coroutine")
-
             self.autocompleters[param_name] = func
             return func
 
@@ -1149,20 +1130,11 @@ def inject(function: Callable[..., Any], *, autocompleters: Dict[str, Callable] 
     autocompleters: Dict[:class:`str`, Callable]
         A mapping of injection's parameter names to their respective autocompleters.
 
-    Raises
-    ------
-    TypeError
-        Any of autocompleters is not a coroutine
-
     Returns
     -------
     :class:`Injection`
         The resulting injection
     """
-    if autocompleters is not Ellipsis and any(
-        [not asyncio.iscoroutinefunction(f) for f in autocompleters.values()]
-    ):
-        raise TypeError("Some of your autocompleters are not coroutines")
 
     return Injection(function, autocompleters=autocompleters)
 
@@ -1177,17 +1149,7 @@ def injection(*, autocompleters: Dict[str, Callable] = ...) -> Callable[[Callabl
     ----------
     autocompleters: Dict[:class:`str`, Callable]
         A mapping of injection's parameter names to their respective autocompleters
-
-    Raises
-    ------
-    TypeError
-        Any of autocompleters is not a coroutine
     """
-    if autocompleters is not Ellipsis and any(
-        [not asyncio.iscoroutinefunction(f) for f in autocompleters.values()]
-    ):
-        raise TypeError("Some of your autocompleters are not coroutines")
-
     def decorator(function: Callable[..., Any]) -> Any:
         return inject(function, autocompleters=autocompleters)
 
@@ -1258,8 +1220,6 @@ def register_injection(
         Injection don't have a return annotation
 
         Injection cannot overwrite builtin types
-
-        Any of autocompleters is not a coroutine
     """
     sig = signature(function)
     tp = sig.return_annotation
@@ -1268,10 +1228,6 @@ def register_injection(
         raise TypeError("Injection must have a return annotation")
     if tp in ParamInfo.TYPES:
         raise TypeError("Injection cannot overwrite builtin types")
-    if autocompleters is not Ellipsis and any(
-        [not asyncio.iscoroutinefunction(f) for f in autocompleters.values()]
-    ):
-        raise TypeError("Some of your autocompleters are not coroutines")
 
     inj = Injection.register(function, sig.return_annotation, autocompleters=autocompleters)
 
