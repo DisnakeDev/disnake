@@ -178,7 +178,6 @@ class TableElement(NamedTuple):
 
 
 def process_attributetable(app: Sphinx, doctree: nodes.document, docname: str) -> None:
-    assert app.builder and app.builder.env  # noqa: S101
     env = app.builder.env
 
     lookup = build_lookup_table(env)
