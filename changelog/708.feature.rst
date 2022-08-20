@@ -1,0 +1,1 @@
+Add permission typings to all methods that take permissions directly, for example :func:`disnake.abc.GuildChannel.set_permissions` and :func:`disnake.ext.commands.bot_has_permissions` to name a few.
