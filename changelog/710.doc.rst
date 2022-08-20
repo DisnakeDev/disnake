@@ -1,0 +1,1 @@
+Add documentation for the ``strict`` parameter to :func:`Client.get_or_fetch_user` and :func:`Guild.get_or_fetch_member`.
