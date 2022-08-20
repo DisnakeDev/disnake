@@ -1140,7 +1140,7 @@ def inject(function: Callable[..., Any], *, autocompleters: Dict[str, Callable] 
     .. versionadded:: 2.3
 
     .. versionchanged:: 2.6
-        - Added ``autocompleters`` keyword-only argument
+        Added ``autocompleters`` keyword-only argument.
 
     Parameters
     ----------
