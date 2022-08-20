@@ -1,7 +1,7 @@
 |commands| Add support for injected parameters autocompletion
 	Document :class:`.ext.commands.Injection`
 
-	:meth:`.ext.commands.Injection.register` now returns :class:`.ext.commands.Injection`
+	:meth:`Injection.register <ext.commands.Injection.register>` now returns :class:`Injection <ext.commands.Injection>`
 
 	:func:`.ext.commands.register_injection` now returns :class:`.ext.commands.Injection`
 
