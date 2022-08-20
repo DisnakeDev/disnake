@@ -3270,11 +3270,16 @@ class Guild(Hashable):
         ----------
         member_id: :class:`int`
             The ID to search for.
+        strict: :class:`bool`
+            Whether to propagate exceptions from :func:`fetch_member`
+            instead of returning ``None`` in case of failure
+            (e.g. if the member wasn't found).
+            Defaults to ``False``.
 
         Returns
         -------
-        :class:`Member`
-            The member with the given ID.
+        Optional[:class:`Member`]
+            The member with the given ID, or ``None`` if not found and ``strict`` is set to ``False``.
         """
         member = self.get_member(member_id)
         if member is not None:
@@ -4357,8 +4362,8 @@ class Guild(Hashable):
             The type of events that this rule will be applied to.
         trigger_type: :class:`AutoModTriggerType`
             The type of trigger that determines whether this rule's actions should run for a specific event.
-            If set to :attr:`~AutoModTriggerType.keyword` or :attr:`~AutoModTriggerType.keyword_preset`,
-            ``trigger_metadata`` must be set accordingly.
+            If set to :attr:`~AutoModTriggerType.keyword`, :attr:`~AutoModTriggerType.keyword_preset`,
+            or :attr:`~AutoModTriggerType.mention_spam`, ``trigger_metadata`` must be set accordingly.
             This cannot be changed after creation.
         actions: Sequence[Union[:class:`AutoModBlockMessageAction`, :class:`AutoModSendAlertAction`, :class:`AutoModTimeoutAction`, :class:`AutoModAction`]]
             The list of actions that will execute if a matching event triggered this rule.
@@ -4395,6 +4400,7 @@ class Guild(Hashable):
         if not trigger_metadata and trigger_type_int in (
             AutoModTriggerType.keyword.value,
             AutoModTriggerType.keyword_preset.value,
+            AutoModTriggerType.mention_spam.value,
         ):
             raise ValueError("Specified trigger type requires `trigger_metadata` to not be empty")
 
