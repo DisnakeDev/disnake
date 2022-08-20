@@ -1273,7 +1273,6 @@ def register_injection(
     ):
         raise TypeError("Some of your autocompleters are not coroutines")
 
-    inj = Injection.register(function, sig.return_annotation)
-    inj.autocompleters = autocompleters if autocompleters is not Ellipsis else {}
+    inj = Injection.register(function, sig.return_annotation, autocompleters=autocompleters)
 
     return inj
