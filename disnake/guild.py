@@ -2137,13 +2137,30 @@ class Guild(Hashable):
         self,
         *,
         name: str,
+        channel: Snowflake,
+        scheduled_start_time: datetime.datetime,
         entity_type: Literal[
             GuildScheduledEventEntityType.voice,
             GuildScheduledEventEntityType.stage_instance,
-        ],
-        channel: Snowflake,
-        scheduled_start_time: datetime.datetime,
+        ] = ...,
         scheduled_end_time: Optional[datetime.datetime] = ...,
+        privacy_level: GuildScheduledEventPrivacyLevel = ...,
+        description: str = ...,
+        image: AssetBytes = ...,
+        reason: Optional[str] = ...,
+    ) -> GuildScheduledEvent:
+        ...
+
+    @overload
+    async def create_scheduled_event(
+        self,
+        *,
+        name: str,
+        channel: None,
+        scheduled_start_time: datetime.datetime,
+        scheduled_end_time: datetime.datetime,
+        entity_metadata: GuildScheduledEventMetadata,
+        entity_type: Literal[GuildScheduledEventEntityType.external] = ...,
         privacy_level: GuildScheduledEventPrivacyLevel = ...,
         description: str = ...,
         image: AssetBytes = ...,
@@ -2155,10 +2172,10 @@ class Guild(Hashable):
         self,
         *,
         name: str,
-        entity_type: GuildScheduledEventEntityType,
         scheduled_start_time: datetime.datetime,
+        channel: Optional[Snowflake] = MISSING,
+        entity_type: GuildScheduledEventEntityType = MISSING,
         scheduled_end_time: Optional[datetime.datetime] = MISSING,
-        channel: Snowflake = MISSING,
         privacy_level: GuildScheduledEventPrivacyLevel = MISSING,
         entity_metadata: GuildScheduledEventMetadata = MISSING,
         description: str = MISSING,
@@ -2169,11 +2186,19 @@ class Guild(Hashable):
 
         Creates a :class:`GuildScheduledEvent`.
 
-        If ``entity_type`` is :class:`GuildScheduledEventEntityType.external`:
+        Based on the channel/entity type, there are different restrictions regarding
+        other parameter values, as shown in this table:
 
-        - ``channel`` should not be set
-        - ``entity_metadata`` with a location field must be provided
-        - ``scheduled_end_time`` must be provided
+
+        .. csv-table::
+            :widths: 30, 30, 20, 20
+            :header: "``channel``", "``entity_type``", "``scheduled_end_time``", "``entity_metadata`` with location"
+
+            :class:`.abc.Snowflake` with ``type`` attribute being :class:`ChannelType.voice` , :attr:`~GuildScheduledEventEntityType.voice` (set automatically), optional, unset
+            :class:`.abc.Snowflake` with ``type`` attribute being :class:`ChannelType.stage_voice`, :attr:`~GuildScheduledEventEntityType.stage_instance` (set automatically), optional, unset
+            :class:`.abc.Snowflake` with missing/other ``type`` attribute, required, optional, unset
+            ``None``, :attr:`~GuildScheduledEventEntityType.external` (set automatically), required, required
+            unset, :attr:`~GuildScheduledEventEntityType.external`, required, required
 
         .. versionadded:: 2.3
 
@@ -2187,6 +2212,9 @@ class Guild(Hashable):
         .. versionchanged:: 2.6
             Naive datetime parameters are now assumed to be in the local
             timezone instead of UTC.
+
+        .. versionchanged:: 2.6
+            Infer ``entity_type`` from channel if provided.
 
         Parameters
         ----------
@@ -2202,8 +2230,9 @@ class Guild(Hashable):
             .. versionchanged:: 2.5
                 Now accepts various resource types in addition to :class:`bytes`.
 
-        channel: :class:`.abc.Snowflake`
+        channel: Optional[:class:`.abc.Snowflake`]
             The channel in which the guild scheduled event will be hosted.
+            Passing in `None` assumes the ``entity_type`` to be :class:`GuildScheduledEventEntityType.external`
 
             .. versionadded:: 2.6
 
@@ -2230,14 +2259,31 @@ class Guild(Hashable):
             The request failed.
         TypeError
             The ``image`` asset is a lottie sticker (see :func:`Sticker.read`),
-            or one of ``entity_type``, ``privacy_level``, or ``entity_metadata``
-            is not of the correct type.
+            one of ``entity_type``, ``privacy_level``, or ``entity_metadata``
+            is not of the correct type, or the ``entity_type`` was not provided and
+            could not be assumed from the ``channel``.
 
         Returns
         -------
         :class:`GuildScheduledEvent`
             The newly created guild scheduled event.
         """
+
+        if entity_type is MISSING:
+            if channel is None:
+                entity_type = GuildScheduledEventEntityType.external
+            elif isinstance(channel_type := getattr(channel, "type", None), ChannelType):
+                if channel_type is ChannelType.voice:
+                    entity_type = GuildScheduledEventEntityType.voice
+                elif channel_type is ChannelType.stage_voice:
+                    entity_type = GuildScheduledEventEntityType.stage_instance
+                else:
+                    raise TypeError("channel type must be either 'voice' or 'stage_voice'")
+            else:
+                raise TypeError(
+                    "`entity_type` must be provided if it cannot be derived from `channel`"
+                )
+
         if not isinstance(entity_type, GuildScheduledEventEntityType):
             raise TypeError("entity_type must be an instance of GuildScheduledEventEntityType")
 
@@ -2267,7 +2313,7 @@ class Guild(Hashable):
         if image is not MISSING:
             fields["image"] = await utils._assetbytes_to_base64_data(image)
 
-        if channel is not MISSING:
+        if channel:
             fields["channel_id"] = channel.id
 
         if scheduled_end_time is not MISSING:
@@ -3225,11 +3271,16 @@ class Guild(Hashable):
         ----------
         member_id: :class:`int`
             The ID to search for.
+        strict: :class:`bool`
+            Whether to propagate exceptions from :func:`fetch_member`
+            instead of returning ``None`` in case of failure
+            (e.g. if the member wasn't found).
+            Defaults to ``False``.
 
         Returns
         -------
-        :class:`Member`
-            The member with the given ID.
+        Optional[:class:`Member`]
+            The member with the given ID, or ``None`` if not found and ``strict`` is set to ``False``.
         """
         member = self.get_member(member_id)
         if member is not None:
@@ -4312,8 +4363,8 @@ class Guild(Hashable):
             The type of events that this rule will be applied to.
         trigger_type: :class:`AutoModTriggerType`
             The type of trigger that determines whether this rule's actions should run for a specific event.
-            If set to :attr:`~AutoModTriggerType.keyword` or :attr:`~AutoModTriggerType.keyword_preset`,
-            ``trigger_metadata`` must be set accordingly.
+            If set to :attr:`~AutoModTriggerType.keyword`, :attr:`~AutoModTriggerType.keyword_preset`,
+            or :attr:`~AutoModTriggerType.mention_spam`, ``trigger_metadata`` must be set accordingly.
             This cannot be changed after creation.
         actions: Sequence[Union[:class:`AutoModBlockMessageAction`, :class:`AutoModSendAlertAction`, :class:`AutoModTimeoutAction`, :class:`AutoModAction`]]
             The list of actions that will execute if a matching event triggered this rule.
@@ -4350,6 +4401,7 @@ class Guild(Hashable):
         if not trigger_metadata and trigger_type_int in (
             AutoModTriggerType.keyword.value,
             AutoModTriggerType.keyword_preset.value,
+            AutoModTriggerType.mention_spam.value,
         ):
             raise ValueError("Specified trigger type requires `trigger_metadata` to not be empty")
 
