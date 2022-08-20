@@ -182,7 +182,7 @@ def _xt_to_xe(xe: Optional[float], xt: Optional[float], direction: float = 1) ->
 
 
 class Injection:
-    """Represents a slash command injection
+    """Represents a slash command injection.
 
     .. versionadded:: 2.3
 
