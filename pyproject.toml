@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core==1.1.0rc1"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
@@ -75,7 +75,6 @@ pyright = "1.1.271"
 pre-commit = { version = "~=2.19.0" }
 black = {version = "==22.6.0" }
 isort = "==5.10.1"
-slotscheck = { version = "~=0.15.0" }
 flake8 = { version = "~=4.0.1" }
 flake8-bandit = { version = "~=3.0.0" }
 flake8-bugbear = { version = "==22.7.1" }
@@ -83,7 +82,7 @@ flake8-comprehensions = { version = "~=3.10.0" }
 flake8-noqa = { version = "~=1.2.5" }
 flake8-pytest-style = { version = "~=1.6.0" }
 
-[tool.poetry.group.test.dependencies]
+[tool.poetry.group.tests.dependencies]
 pytest = { version = "~=7.1.2" }
 pytest-cov = { version = "~=3.0.0" }
 pytest-asyncio = { version = "~=0.18.3" }
@@ -92,8 +91,11 @@ coverage = { version = "~=6.3.2", extras = ["toml"] }
 
 [tool.poetry.group.tools.dependencies]
 pre-commit = { version = "~=2.19.0" }
+slotscheck = { version = "~=0.15.0" }
 libcst = "^0.4.7"
 taskipy = ">=1.10.1,<1.11.0"
+build = "^0.8.0"
+twine = "^4.0.1"
 
 
 [tool.black]
