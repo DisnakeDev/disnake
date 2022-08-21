@@ -10,15 +10,14 @@ inputs:
     description: The path(s) to use for pip caching, defaults to requirements + setup
     required: false
     default: |
-      requirements/
-      requirements.txt
-      setup.py
+      pyproject.toml
+      poetry.lock
   dependencies:
     description: Other python dependencies to install
     required: false
-  nox-setup:
+  dependency-groups:
     description: |
-      The dependencies to install using `nox -s setup`.
+      The dependencies to install using `poetry install`.
       Automatically installs nox as well.
       Use `*` to install all dependencies.
     required: false
@@ -30,20 +29,28 @@ runs:
       uses: actions/setup-python@v3
       with:
         python-version: ${{ inputs.python-version }}
-        cache: "pip"
-        cache-dependency-path: ${{ inputs.cache-dependency-path }}
+        # cache: "pip"
+        # cache-dependency-path: ${{ inputs.cache-dependency-path }}
+
+    - name: Create and activate vrtual environment
+      shell: bash
+      run: |
+        pipx install poetry==1.2.0rc1
+        python -m venv .venv
+        PATH="$(poetry env info --path)/bin:$PATH"
+
     - name: Install dependencies
-      if: inputs.nox-setup || inputs.dependencies
+      if: inputs.dependency-groups || inputs.dependencies
       env:
-        NOX_SETUP: ${{ inputs.nox-setup }}
+        DEPENDENCY_GROUPS: ${{ inputs.dependency-groups }}
         DEPS: ${{ inputs.dependencies }}
       shell: bash
       run: |
-        [ -n "$NOX_SETUP" ] && DEPS="$DEPS nox"
+        [ -n "$DEPENDENCY_GROUPS" ] && DEPS="$DEPS nox"
         python -m pip install $DEPS
 
-        if [ "*" == "$NOX_SETUP" ]; then
-          nox -s setup
-        elif [ -n "$NOX_SETUP" ]; then
-          nox -s setup -- $NOX_SETUP
+        if [ "*" == "$DEPENDENCY_GROUPS" ]; then
+          poetry install --all-extras
+        elif [ -n "$DEPENDENCY_GROUPS" ]; then
+           poetry install --only $DEPENDENCY_GROUPS
         fi

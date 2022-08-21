@@ -92,6 +92,7 @@ coverage = { version = "~=6.3.2", extras = ["toml"] }
 [tool.poetry.group.tools.dependencies]
 pre-commit = { version = "~=2.19.0" }
 slotscheck = { version = "~=0.15.0" }
+black = {version = "==22.6.0" }
 libcst = "^0.4.7"
 taskipy = ">=1.10.1,<1.11.0"
 build = "^0.8.0"
