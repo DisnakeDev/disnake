@@ -678,7 +678,7 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
     @classmethod
     def from_dict(cls, data: ApplicationCommandPayload) -> Self:
         cmd_type = data.get("type", 0)
-        if cmd_type != ApplicationCommandType.user:
+        if cmd_type != ApplicationCommandType.user.value:
             raise ValueError(f"Invalid payload type for UserCommand: {cmd_type}")
 
         self = cls(
@@ -775,7 +775,7 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
     @classmethod
     def from_dict(cls, data: ApplicationCommandPayload) -> Self:
         cmd_type = data.get("type", 0)
-        if cmd_type != ApplicationCommandType.message:
+        if cmd_type != ApplicationCommandType.message.value:
             raise ValueError(f"Invalid payload type for MessageCommand: {cmd_type}")
 
         self = cls(
@@ -968,7 +968,7 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
     @classmethod
     def from_dict(cls, data: ApplicationCommandPayload) -> Self:
         cmd_type = data.get("type", 0)
-        if cmd_type != ApplicationCommandType.chat_input:
+        if cmd_type != ApplicationCommandType.chat_input.value:
             raise ValueError(f"Invalid payload type for SlashCommand: {cmd_type}")
 
         self = cls(

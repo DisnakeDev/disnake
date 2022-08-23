@@ -300,7 +300,7 @@ class Interaction:
         """:class:`Webhook`: Returns the follow up webhook for follow up interactions."""
         payload = {
             "id": self.application_id,
-            "type": WebhookType.application,
+            "type": WebhookType.application.value,
             "token": self.token,
         }
         return Webhook.from_state(data=payload, state=self._state)
@@ -776,7 +776,7 @@ class InteractionResponse:
                 parent.id,
                 parent.token,
                 session=parent._session,
-                type=InteractionResponseType.pong,
+                type=InteractionResponseType.pong.value,
             )
             self._responded = True
 
@@ -922,7 +922,7 @@ class InteractionResponse:
                 parent.id,
                 parent.token,
                 session=parent._session,
-                type=InteractionResponseType.channel_message,
+                type=InteractionResponseType.channel_message.value,
                 data=payload,
                 files=files or None,
             )
@@ -1104,7 +1104,7 @@ class InteractionResponse:
                 parent.id,
                 parent.token,
                 session=parent._session,
-                type=InteractionResponseType.message_update,
+                type=InteractionResponseType.message_update.value,
                 data=payload,
                 files=files,
             )
@@ -1163,7 +1163,7 @@ class InteractionResponse:
             parent.id,
             parent.token,
             session=parent._session,
-            type=InteractionResponseType.application_command_autocomplete_result,
+            type=InteractionResponseType.application_command_autocomplete_result.value,
             data={"choices": choices_data},
         )
 
@@ -1262,7 +1262,7 @@ class InteractionResponse:
             parent.id,
             parent.token,
             session=parent._session,
-            type=InteractionResponseType.modal,
+            type=InteractionResponseType.modal.value,
             data=modal_data,  # type: ignore
         )
         self._responded = True

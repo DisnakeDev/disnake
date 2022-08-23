@@ -416,7 +416,11 @@ class Game(BaseActivity):
         if self._end:
             timestamps["end"] = self._end
 
-        return {"type": ActivityType.playing, "name": str(self.name), "timestamps": timestamps}
+        return {
+            "type": ActivityType.playing.value,
+            "name": str(self.name),
+            "timestamps": timestamps,
+        }
 
     def __eq__(self, other: Any) -> bool:
         return isinstance(other, Game) and other.name == self.name
@@ -514,7 +518,7 @@ class Streaming(BaseActivity):
 
     def to_dict(self) -> Dict[str, Any]:
         ret: Dict[str, Any] = {
-            "type": ActivityType.streaming,
+            "type": ActivityType.streaming.value,
             "name": str(self.name),
             "url": str(self.url),
             "assets": self.assets,
@@ -791,13 +795,13 @@ class CustomActivity(BaseActivity):
         o: Dict[str, Any]
         if self.name == self.state:
             o = {
-                "type": ActivityType.custom,
+                "type": ActivityType.custom.value,
                 "state": self.name,
                 "name": "Custom Status",
             }
         else:
             o = {
-                "type": ActivityType.custom,
+                "type": ActivityType.custom.value,
                 "name": self.name,
             }
 
