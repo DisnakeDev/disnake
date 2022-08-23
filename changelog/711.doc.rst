@@ -1,0 +1,1 @@
+Remove note about application command localization requiring a client build override.
