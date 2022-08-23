@@ -240,7 +240,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         This always returns :attr:`ChannelType.text` or :attr:`ChannelType.news`.
         """
-        if self._type == ChannelType.text.value:
+        if self._type == ChannelType.text.value:  # pyright: ignore[reportUnnecessaryComparison]
             return ChannelType.text
         return ChannelType.news
 
@@ -288,7 +288,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         :return type: :class:`bool`
         """
-        return self._type == ChannelType.news.value
+        return self._type == ChannelType.news.value  # pyright: ignore[reportUnnecessaryComparison]
 
     @property
     def last_message(self) -> Optional[Message]:
