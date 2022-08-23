@@ -1,85 +1,55 @@
+import functools
 import inspect
+from typing import TYPE_CHECKING, Any
 
+from _types import SphinxExtensionMeta
+from docutils import nodes
 from sphinx.application import Sphinx
-from sphinx.builders.html import StandaloneHTMLBuilder
 from sphinx.config import Config
 from sphinx.environment.adapters.indexentries import IndexEntries
 from sphinx.writers.html5 import HTML5Translator
 
+if TYPE_CHECKING:
+    translator_base = HTML5Translator
+else:
+    translator_base = object
 
-class DPYHTML5Translator(HTML5Translator):
-    def visit_section(self, node):
-        self.section_level += 1
-        self.body.append(self.starttag(node, "section"))
 
-    def depart_section(self, node):
-        self.section_level -= 1
-        self.body.append("</section>\n")
-
-    def visit_table(self, node):
+class CustomHTML5TranslatorMixin(translator_base):
+    def visit_table(self, node: nodes.table) -> None:
         self.body.append('<div class="table-wrapper">')
         super().visit_table(node)
 
-    def depart_table(self, node):
+    def depart_table(self, node: nodes.table) -> None:
         super().depart_table(node)
         self.body.append("</div>")
 
 
-class DPYStandaloneHTMLBuilder(StandaloneHTMLBuilder):
-    # This is mostly copy pasted from Sphinx.
-    def write_genindex(self) -> None:
-        # the total count of lines for each index letter, used to distribute
-        # the entries into two columns
-        genindex = IndexEntries(self.env).create_index(self, group_entries=False)
-        indexcounts = []
-        for _k, entries in genindex:
-            indexcounts.append(sum(1 + len(subitems) for _, (_, subitems, _) in entries))
+def set_translator(app: Sphinx) -> None:
+    if app.builder.format != "html":
+        return
 
-        genindexcontext = {
-            "genindexentries": genindex,
-            "genindexcounts": indexcounts,
-            "split_index": self.config.html_split_index,
-        }
+    # Insert the `CustomHTML5TranslatorMixin` mixin into all defined
+    # translator types, as well as the default translator if not registered already
 
-        if self.config.html_split_index:
-            self.handle_page("genindex", genindexcontext, "genindex-split.html")
-            self.handle_page("genindex-all", genindexcontext, "genindex.html")
-            for (key, entries), count in zip(genindex, indexcounts):
-                ctx = {"key": key, "entries": entries, "count": count, "genindexentries": genindex}
-                self.handle_page("genindex-" + key, ctx, "genindex-single.html")
-        else:
-            self.handle_page("genindex", genindexcontext, "genindex.html")
+    translators = app.registry.translators.copy()
+    translators.setdefault(app.builder.name, app.builder.default_translator_class)
 
-    def post_process_images(self, doctree) -> None:
-        super().post_process_images(doctree)
-
-        for path in self.app.config.copy_static_images:
-            self.images[path] = path.split("/")[-1]
-
-
-def add_custom_jinja2(app):
-    env = app.builder.templates.environment
-    env.tests["prefixedwith"] = str.startswith
-    env.tests["suffixedwith"] = str.endswith
-
-
-def add_builders(app):
-    """This is necessary because RTD injects their own for some reason."""
-    app.set_translator("html", DPYHTML5Translator, override=True)
-    app.add_builder(DPYStandaloneHTMLBuilder, override=True)
-
-    try:
-        original = app.registry.builders["readthedocs"]
-    except KeyError:
-        pass
-    else:
-        injected_mro = tuple(
-            base if base is not StandaloneHTMLBuilder else DPYStandaloneHTMLBuilder
-            for base in original.mro()[1:]
+    for name, cls in translators.items():
+        translator = type(
+            "CustomHTML5Translator",
+            (CustomHTML5TranslatorMixin, cls),
+            {},
         )
-        new_builder = type(original.__name__, injected_mro, {"name": "readthedocs"})
-        app.set_translator("readthedocs", DPYHTML5Translator, override=True)
-        app.add_builder(new_builder, override=True)
+        app.set_translator(name, translator, override=True)
+
+
+def patch_genindex(*args: Any) -> None:
+    # Instead of overriding `write_genindex` in a custom builder and
+    # copying the entire method body while only changing one parameter (group_entries),
+    # we just patch the method we want to change instead.
+    new_create_index = functools.partialmethod(IndexEntries.create_index, group_entries=False)
+    IndexEntries.create_index = new_create_index  # type: ignore
 
 
 def disable_mathjax(app: Sphinx, config: Config) -> None:
@@ -94,12 +64,10 @@ def disable_mathjax(app: Sphinx, config: Config) -> None:
             app.disconnect(listener.id)
 
 
-def setup(app):
-    app.add_config_value("copy_static_images", [], "env")
-
-    add_builders(app)
+def setup(app: Sphinx) -> SphinxExtensionMeta:
+    app.connect("config-inited", patch_genindex)
     app.connect("config-inited", disable_mathjax)
-    app.connect("builder-inited", add_custom_jinja2)
+    app.connect("builder-inited", set_translator)
 
     return {
         "parallel_read_safe": True,

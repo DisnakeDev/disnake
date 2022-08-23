@@ -150,6 +150,7 @@ ignore = [
     ".flake8",
     ".pre-commit-config.yaml",
     ".readthedocs.yml",
+    ".libcst.codemod.yaml",
     "noxfile.py",
     # docs
     "CONTRIBUTING.md",
@@ -161,4 +162,5 @@ ignore = [
     "test_bot/**",
     "test_launcher.py",
     "tests/**",
+    "scripts/**",
 ]

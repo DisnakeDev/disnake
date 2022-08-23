@@ -89,27 +89,34 @@ GuildFeature = Literal[
     "AUTO_MODERATION",
     "BANNER",
     "COMMUNITY",
+    "CREATOR_MONETIZABLE",  # not yet documented/finalised
     "DISCOVERABLE",
     "ENABLED_DISCOVERABLE_BEFORE",
     "FEATURABLE",
+    "GUILD_HOME_TEST",  # not yet documented/finalised
     "HAS_DIRECTORY_ENTRY",
     "HUB",
     "INVITE_SPLASH",
     "LINKED_TO_HUB",
+    "MEMBER_PROFILES",  # not sure what this does, if anything
     "MEMBER_VERIFICATION_GATE_ENABLED",
     "MONETIZATION_ENABLED",
     "MORE_EMOJI",
     "MORE_STICKERS",
     "NEWS",
-    "NEW_THREAD_PERMISSIONS",
+    "NEW_THREAD_PERMISSIONS",  # deprecated
     "PARTNERED",
     "PREVIEW_ENABLED",
     "PRIVATE_THREADS",
+    "RELAY_ENABLED",
     "ROLE_ICONS",
-    "SEVEN_DAY_THREAD_ARCHIVE",
-    "THREADS_ENABLED",
-    "THREE_DAY_THREAD_ARCHIVE",
-    "TICKETED_EVENTS_ENABLED",
+    "ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE",  # not yet documented/finalised
+    "ROLE_SUBSCRIPTIONS_ENABLED",  # not yet documented/finalised
+    "SEVEN_DAY_THREAD_ARCHIVE",  # deprecated
+    "TEXT_IN_VOICE_ENABLED",  # deprecated
+    "THREADS_ENABLED",  # deprecated
+    "THREE_DAY_THREAD_ARCHIVE",  # deprecated
+    "TICKETED_EVENTS_ENABLED",  # deprecated
     "VANITY_URL",
     "VERIFIED",
     "VIP_REGIONS",

@@ -25,7 +25,7 @@ class TestPermissions:
 
     def test_init_invalid_perms(self) -> None:
         with pytest.raises(TypeError, match="'h' is not a valid permission name."):
-            Permissions(h=True)
+            Permissions(h=True)  # type: ignore
 
     @pytest.mark.parametrize(
         ("perms_int", "other_int", "expected"),
@@ -134,7 +134,7 @@ class TestPermissions:
 
     def test_update_ignores(self) -> None:
         perms = Permissions()
-        perms.update(h=True)
+        perms.update(h=True)  # type: ignore
 
     @pytest.mark.parametrize(
         ("initial", "allow", "deny", "expected"),
@@ -191,7 +191,7 @@ class TestPermissionOverwrite:
 
     def test_init_invalid_perms(self) -> None:
         with pytest.raises(ValueError, match="'h' is not a valid permission name."):
-            PermissionOverwrite(h=True)
+            PermissionOverwrite(h=True)  # type: ignore
 
     def test_equality(self) -> None:
         one = PermissionOverwrite()
@@ -299,7 +299,7 @@ class TestPermissionOverwrite:
         assert po.manage_emojis is None
 
         # invalid names are silently ignored
-        po.update(h=True)
+        po.update(h=True)  # type: ignore
         assert not hasattr(po, "h")
 
     @pytest.mark.parametrize(
