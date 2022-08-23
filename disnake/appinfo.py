@@ -96,6 +96,11 @@ class PartialAppInfo:
 
     .. versionadded:: 2.0
 
+    .. versionchanged:: 2.6
+        Removed ``rpc_origins``, ``summary``, ``verify_key``, ``terms_of_service_url``,
+        and ``privacy_policy_url`` attributes; these are now part of :class:`AppInfo` instead.
+        Added :attr:`cover_image`.
+
     Attributes
     ----------
     id: :class:`int`
@@ -149,6 +154,9 @@ class AppInfo(PartialAppInfo):
     """Represents application information, for example applications in invites.
 
     .. versionadded:: 2.0
+
+    .. versionchanged:: 2.6
+        Removed deprecated ``summary`` attribute.
 
     Attributes
     ----------
@@ -269,6 +277,9 @@ class AppInfo(PartialAppInfo):
 class BotAppInfo(AppInfo):
     """Represents the application info for the bot provided by Discord.
 
+    Equivalent to :class:`AppInfo`, but with additional :attr:`owner`
+    and :attr:`team` attributes.
+
     .. versionadded:: 2.6
 
     Attributes
@@ -297,48 +308,25 @@ class BotAppInfo(AppInfo):
     guild_id: Optional[:class:`int`]
         If this application is a game sold on Discord,
         this field will be the guild to which it has been linked to.
-
-        .. versionadded:: 1.3
-
     primary_sku_id: Optional[:class:`int`]
         If this application is a game sold on Discord,
         this field will be the ID of the "Game SKU" that is created,
         if it exists.
-
-        .. versionadded:: 1.3
-
     slug: Optional[:class:`str`]
         If this application is a game sold on Discord,
         this field will be the URL slug that links to the store page.
-
-        .. versionadded:: 1.3
-
     flags: Optional[:class:`ApplicationFlags`]
         The application's public flags.
-
-        .. versionadded:: 2.3
-
     tags: Optional[List[:class:`str`]]
         The application's tags.
-
-        .. versionadded:: 2.5
-
     install_params: Optional[:class:`InstallParams`]
         The installation parameters for this application.
-
-        .. versionadded:: 2.5
-
     custom_install_url: Optional[:class:`str`]
         The custom installation url for this application.
-
-        .. versionadded:: 2.5
-
     owner: :class:`User`
         The application's owner.
     team: Optional[:class:`Team`]
         The application's team.
-
-        .. versionadded:: 1.3
     """
 
     __slots__ = (
