@@ -1,0 +1,1 @@
+Fixes message initialization failing with threads and no intents by explicitly checking we have a guild object where one is required.
