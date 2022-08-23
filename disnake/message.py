@@ -1251,7 +1251,7 @@ class Message(Hashable):
 
         .. versionadded:: 2.4
         """
-        if not isinstance(self.guild, disnake.Guild):
+        if not isinstance(self.guild, Guild):
             return None
 
         return self.guild.get_thread(self.id)
