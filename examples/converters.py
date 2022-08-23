@@ -1,4 +1,9 @@
-# This example requires the 'members' privileged intent to use the Member converter.
+"""
+An example showcasing different builtin converter types.
+"""
+
+# A list of all available converter types can be found at
+# https://docs.disnake.dev/en/latest/ext/commands/commands.html#discord-converters.
 
 import os
 import typing
@@ -19,12 +24,10 @@ async def userinfo(ctx: commands.Context, user: disnake.User):
     # parameter is typehinted to `disnake.User`. This means that
     # during command invocation we will attempt to convert
     # the value passed as `user` to a `disnake.User` instance.
+
     # The documentation notes what can be converted, in the case of `disnake.User`
     # you pass an ID, mention or username (discrim optional)
-    # E.g. 80088516616269824, @Danny or Danny#0007
-
-    # NOTE: typehinting acts as a converter within the `commands` framework only.
-    # In standard Python, it is use for documentation and IDE assistance purposes.
+    # e.g. 80088516616269824, @Danny or Danny#0007
 
     # If the conversion is successful, we will have a `disnake.User` instance
     # and can do the following:
@@ -36,9 +39,9 @@ async def userinfo(ctx: commands.Context, user: disnake.User):
 
 @userinfo.error
 async def userinfo_error(ctx: commands.Context, error: commands.CommandError):
-    # if the conversion above fails for any reason, it will raise `commands.BadArgument`
+    # if the conversion above fails for any reason, it will raise `commands.UserNotFound`
     # so we handle this in this error handler:
-    if isinstance(error, commands.BadArgument):
+    if isinstance(error, commands.UserNotFound):
         return await ctx.send("Couldn't find that user.")
 
 
@@ -49,15 +52,14 @@ async def ignore(ctx: commands.Context, target: typing.Union[disnake.Member, dis
     # So, it will attempt to convert whatever is passed to `target` to a `disnake.Member` instance.
     # If that fails, it will attempt to convert it to a `disnake.TextChannel` instance.
     # See: https://docs.disnake.dev/en/latest/ext/commands/commands.html#typing-union
+
     # NOTE: If a Union typehint converter fails it will raise `commands.BadUnionArgument`
     # instead of `commands.BadArgument`.
 
     # To check the resulting type, `isinstance` is used
     if isinstance(target, disnake.Member):
         await ctx.send(f"Member found: {target.mention}, adding them to the ignore list.")
-    elif isinstance(
-        target, disnake.TextChannel
-    ):  # this could be an `else` but for completeness' sake.
+    else:
         await ctx.send(f"Channel found: {target.mention}, adding it to the ignore list.")
 
 

@@ -1,4 +1,6 @@
-# This example requires the 'members' privileged intents
+"""
+An example sending welcome messages for newly joined members.
+"""
 
 import os
 
@@ -10,9 +12,9 @@ class MyClient(disnake.Client):
         print(f"Logged in as {self.user} (ID: {self.user.id})")
         print("------")
 
-    async def on_member_join(self, member):
+    async def on_member_join(self, member: disnake.Member):
         guild = member.guild
-        if guild.system_channel is not None:
+        if guild.system_channel:
             to_send = f"Welcome {member.mention} to {guild.name}!"
             await guild.system_channel.send(to_send)
 

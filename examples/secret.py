@@ -1,5 +1,9 @@
+"""
+Shhhh! It's a secret.
+"""
+
 import os
-import typing
+from typing import Union
 
 import disnake
 from disnake.ext import commands
@@ -7,7 +11,7 @@ from disnake.ext import commands
 bot = commands.Bot(command_prefix=commands.when_mentioned, description="Nothing to see here!")
 
 
-# the `hidden` keyword argument hides it from the help command.
+# the `hidden` keyword argument hides this command group from the help command.
 @bot.group(hidden=True)
 async def secret(ctx: commands.Context):
     """What is this "secret" you speak of?"""
@@ -15,7 +19,7 @@ async def secret(ctx: commands.Context):
         await ctx.send("Shh!", delete_after=5)
 
 
-def create_overwrites(ctx, *objects):
+def create_overwrites(ctx: commands.GuildContext, *objects: Union[disnake.Role, disnake.Member]):
     """This is just a helper function that creates the overwrites for the
     voice/text channels.
 
@@ -46,7 +50,7 @@ def create_overwrites(ctx, *objects):
 @secret.command()
 @commands.guild_only()
 async def text(
-    ctx: commands.GuildContext, name: str, *objects: typing.Union[disnake.Role, disnake.Member]
+    ctx: commands.GuildContext, name: str, *objects: Union[disnake.Role, disnake.Member]
 ):
     """This makes a text channel with a specified name
     that is only visible to roles or members that are specified.
@@ -65,7 +69,7 @@ async def text(
 @secret.command()
 @commands.guild_only()
 async def voice(
-    ctx: commands.GuildContext, name: str, *objects: typing.Union[disnake.Role, disnake.Member]
+    ctx: commands.GuildContext, name: str, *objects: Union[disnake.Role, disnake.Member]
 ):
     """This does the same thing as the `text` subcommand
     but instead creates a voice channel.
@@ -81,9 +85,7 @@ async def voice(
 @secret.command()
 @commands.guild_only()
 async def emoji(ctx: commands.GuildContext, emoji: disnake.PartialEmoji, *roles: disnake.Role):
-    """This clones a specified emoji that only specified roles
-    are allowed to use.
-    """
+    """This clones a specified emoji that only specified roles are allowed to use."""
 
     # fetch the emoji asset and read it as bytes.
     emoji_bytes = await emoji.read()

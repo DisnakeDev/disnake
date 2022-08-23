@@ -1,3 +1,7 @@
+"""
+An example showing how to reply to received messages.
+"""
+
 import os
 
 import disnake
@@ -8,7 +12,7 @@ class MyClient(disnake.Client):
         print(f"Logged in as {self.user} (ID: {self.user.id})")
         print("------")
 
-    async def on_message(self, message):
+    async def on_message(self, message: disnake.Message):
         # we do not want the bot to reply to itself
         if message.author.id == self.user.id:
             return
@@ -17,5 +21,8 @@ class MyClient(disnake.Client):
             await message.reply("Hello!", mention_author=True)
 
 
-client = MyClient()
+intents = disnake.Intents.default()
+intents.message_content = True
+
+client = MyClient(intents=intents)
 client.run(os.getenv("BOT_TOKEN"))

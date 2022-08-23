@@ -1,4 +1,8 @@
-# This example requires the 'members' privileged intents
+"""
+An example to showcase the disnake.ext.commands extension module.
+
+There are a number of utility commands being showcased here.
+"""
 
 import os
 import random
@@ -6,18 +10,11 @@ import random
 import disnake
 from disnake.ext import commands
 
-description = """An example bot to showcase the disnake.ext.commands extension
-module.
-
-There are a number of utility commands being showcased here."""
-
 intents = disnake.Intents.default()
 intents.members = True
 intents.message_content = True
 
-bot = commands.Bot(
-    command_prefix=commands.when_mentioned_or("?"), description=description, intents=intents
-)
+bot = commands.Bot(command_prefix=commands.when_mentioned_or("!"), intents=intents)
 
 
 @bot.event
@@ -27,13 +24,13 @@ async def on_ready():
 
 
 @bot.command()
-async def add(ctx, left: int, right: int):
+async def add(ctx: commands.Context, left: int, right: int):
     """Adds two numbers together."""
-    await ctx.send(left + right)
+    await ctx.send(str(left + right))
 
 
 @bot.command()
-async def roll(ctx, dice: str):
+async def roll(ctx: commands.Context, dice: str):
     """Rolls a dice in NdN format."""
     try:
         rolls, limit = map(int, dice.split("d"))
@@ -46,26 +43,31 @@ async def roll(ctx, dice: str):
 
 
 @bot.command(description="For when you wanna settle the score some other way")
-async def choose(ctx, *choices: str):
+async def choose(ctx: commands.Context, *choices: str):
     """Chooses between multiple choices."""
     await ctx.send(random.choice(choices))
 
 
 @bot.command()
-async def repeat(ctx, times: int, content="repeating..."):
+async def repeat(ctx: commands.Context, times: int, content: str = "repeating..."):
     """Repeats a message multiple times."""
     for _ in range(times):
         await ctx.send(content)
 
 
 @bot.command()
-async def joined(ctx, member: disnake.Member):
+async def joined(ctx: commands.Context, member: disnake.Member):
     """Says when a member joined."""
-    await ctx.send(f"{member.name} joined in {member.joined_at}")
+    if member.joined_at:
+        # formats the join time/date like "5 years ago"
+        date_str = disnake.utils.format_dt(member.joined_at, "R")
+    else:
+        date_str = "<unknown>"
+    await ctx.send(f"{member} joined {date_str}")
 
 
 @bot.group()
-async def cool(ctx):
+async def cool(ctx: commands.Context):
     """Says if a user is cool.
 
     In reality this just checks if a subcommand is being invoked.
@@ -75,7 +77,7 @@ async def cool(ctx):
 
 
 @cool.command(name="bot")
-async def bot_(ctx):
+async def bot_subcommand(ctx: commands.Context):
     """Is the bot cool?"""
     await ctx.send("Yes, the bot is cool.")
 
