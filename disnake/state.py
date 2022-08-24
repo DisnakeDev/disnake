@@ -242,10 +242,9 @@ class ConnectionState:
         else:
             self._activity: Optional[ActivityPayload] = None
 
+        self._status: Optional[str] = None
         if status:
-            self._status: Optional[str] = None
-        else:
-            self._status: Optional[str] = "invisible" if status is Status.offline else str(status)
+            self._status = "invisible" if status is Status.offline else str(status)
 
         if intents is not None:
             if not isinstance(intents, Intents):

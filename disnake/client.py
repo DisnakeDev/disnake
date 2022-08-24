@@ -225,7 +225,7 @@ class Client:
         The total number of shards.
     application_id: :class:`int`
         The client's application ID.
-    intents: :class:`Intents`
+    intents: Optional[:class:`Intents`]
         The intents that you want to enable for the session. This is a way of
         disabling and enabling certain gateway events from triggering and being sent.
         If not given, defaults to a regularly constructed :class:`Intents` class.
@@ -247,7 +247,7 @@ class Client:
 
         .. versionadded:: 1.5
 
-    status: Optional[:class:`.Status`]
+    status: Optional[Union[class:`str`, :class:`.Status`]]
         A status to start your presence with upon logging on to Discord.
     activity: Optional[:class:`.BaseActivity`]
         An activity to start your presence with upon logging on to Discord.
@@ -363,6 +363,8 @@ class Client:
         shard_id: Optional[int] = None,
         shard_count: Optional[int] = None,
         enable_debug_events: bool = False,
+        localization_provider: Optional[LocalizationProtocol] = None,
+        strict_localization: bool = False,
         connector: Optional[aiohttp.BaseConnector] = None,
         proxy: Optional[str] = None,
         proxy_auth: Optional[aiohttp.BasicAuth] = None,
@@ -374,11 +376,9 @@ class Client:
         allowed_mentions: Optional[AllowedMentions] = None,
         activity: Optional[BaseActivity] = None,
         status: Optional[Union[Status, str]] = None,
-        intents: Intents = None,
+        intents: Optional[Intents] = None,
         chunk_guilds_at_startup: Optional[bool] = None,
         member_cache_flags: MemberCacheFlags = None,
-        localization_provider: Optional[LocalizationProtocol] = None,
-        strict_localization: bool = False,
     ):
         # self.ws is set in the connect method
         self.ws: DiscordWebSocket = None  # type: ignore
@@ -447,18 +447,19 @@ class Client:
     ) -> DiscordWebSocket:
         return self.ws
 
-    def _get_state(  # Keep this as **options such that we can have ConnectionState handle defaults?
+    def _get_state(
         self,
-        max_messages: Optional[int] = 1000,
-        application_id: Optional[int] = None,
-        heartbeat_timeout: float = 60.0,
-        guild_ready_timeout: float = 2.0,
-        allowed_mentions: Optional[AllowedMentions] = None,
-        activity: Optional[BaseActivity] = None,
-        status: Optional[Union[str, Status]] = None,
-        intents: Optional[Intents] = None,
-        chunk_guilds_at_startup: Optional[bool] = None,
-        member_cache_flags: Optional[MemberCacheFlags] = None,
+        *,
+        max_messages: Optional[int],
+        application_id: Optional[int],
+        heartbeat_timeout: float,
+        guild_ready_timeout: float,
+        allowed_mentions: Optional[AllowedMentions],
+        activity: Optional[BaseActivity],
+        status: Optional[Union[str, Status]],
+        intents: Optional[Intents],
+        chunk_guilds_at_startup: Optional[bool],
+        member_cache_flags: Optional[MemberCacheFlags],
     ) -> ConnectionState:
         return ConnectionState(
             dispatch=self.dispatch,

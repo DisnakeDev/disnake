@@ -37,13 +37,17 @@ if TYPE_CHECKING:
     import asyncio
 
     import aiohttp
+    from typing_extensions import Self
 
     from disnake.activity import BaseActivity
     from disnake.enums import Status
     from disnake.flags import Intents, MemberCacheFlags
     from disnake.i18n import LocalizationProtocol
     from disnake.mentions import AllowedMentions
+    from disnake.message import Message
 
+    from . import bot_base
+    from ._types import MaybeCoro
     from .help import HelpCommand
 
 
@@ -194,13 +198,17 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
 
         def __init__(
             self,
-            command_prefix: Optional[Union[str, List[str], Callable]] = None,
+            command_prefix: Optional[
+                Union[
+                    bot_base.PrefixType, Callable[[Self, Message], MaybeCoro[bot_base.PrefixType]]
+                ]
+            ] = None,
             help_command: HelpCommand = ...,
             description: str = None,
             *,
             strip_after_prefix: bool = False,
             owner_id: Optional[int] = None,
-            owner_ids: Set[int] = ...,
+            owner_ids: Optional[Set[int]] = None,
             reload: bool = False,
             case_insensitive: bool = False,
             sync_commands: bool = True,
@@ -223,7 +231,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
             allowed_mentions: Optional[AllowedMentions] = None,
             activity: Optional[BaseActivity] = None,
             status: Optional[Union[Status, str]] = None,
-            intents: Intents = ...,
+            intents: Optional[Intents] = None,
             chunk_guilds_at_startup: Optional[bool] = None,
             member_cache_flags: MemberCacheFlags = None,
             localization_provider: Optional[LocalizationProtocol] = None,
@@ -241,13 +249,17 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
 
         def __init__(
             self,
-            command_prefix: Optional[Union[str, List[str], Callable]] = None,
+            command_prefix: Optional[
+                Union[
+                    bot_base.PrefixType, Callable[[Self, Message], MaybeCoro[bot_base.PrefixType]]
+                ]
+            ] = None,
             help_command: HelpCommand = ...,
             description: str = None,
             *,
             strip_after_prefix: bool = False,
             owner_id: Optional[int] = None,
-            owner_ids: Set[int] = ...,
+            owner_ids: Optional[Set[int]] = None,
             reload: bool = False,
             case_insensitive: bool = False,
             sync_commands: bool = True,
@@ -270,7 +282,7 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
             allowed_mentions: Optional[AllowedMentions] = None,
             activity: Optional[BaseActivity] = None,
             status: Optional[Union[Status, str]] = None,
-            intents: Intents = ...,
+            intents: Optional[Intents] = None,
             chunk_guilds_at_startup: Optional[bool] = None,
             member_cache_flags: MemberCacheFlags = None,
             localization_provider: Optional[LocalizationProtocol] = None,
@@ -366,7 +378,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
             self,
             *,
             owner_id: Optional[int] = None,
-            owner_ids: Set[int] = ...,
+            owner_ids: Optional[Set[int]] = None,
             reload: bool = False,
             sync_commands: bool = True,
             sync_commands_debug: bool = False,
@@ -388,7 +400,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
             allowed_mentions: Optional[AllowedMentions] = None,
             activity: Optional[BaseActivity] = None,
             status: Optional[Union[Status, str]] = None,
-            intents: Intents = ...,
+            intents: Optional[Intents] = None,
             chunk_guilds_at_startup: Optional[bool] = None,
             member_cache_flags: MemberCacheFlags = None,
             localization_provider: Optional[LocalizationProtocol] = None,
@@ -408,7 +420,7 @@ class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
             self,
             *,
             owner_id: Optional[int] = None,
-            owner_ids: Set[int] = ...,
+            owner_ids: Optional[Set[int]] = None,
             reload: bool = False,
             sync_commands: bool = True,
             sync_commands_debug: bool = False,
@@ -430,7 +442,7 @@ class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
             allowed_mentions: Optional[AllowedMentions] = None,
             activity: Optional[BaseActivity] = None,
             status: Optional[Union[Status, str]] = None,
-            intents: Intents = ...,
+            intents: Optional[Intents] = None,
             chunk_guilds_at_startup: Optional[bool] = None,
             member_cache_flags: MemberCacheFlags = None,
             localization_provider: Optional[LocalizationProtocol] = None,
