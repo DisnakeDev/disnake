@@ -26,25 +26,21 @@ class MyView(disnake.ui.View):
         await self.message.edit(view=self)
 
     @disnake.ui.button(label="Disable the view", style=disnake.ButtonStyle.grey)
-    async def disable_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
-    ):
+    async def disable_button(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
         # We disable every single component in this view
         for child in self.children:
             if isinstance(child, disnake.ui.Button):
                 child.disabled = True
         # make sure to update the message with the new buttons
-        await interaction.response.edit_message(view=self)
+        await inter.response.edit_message(view=self)
 
         # Prevents on_timeout from being triggered after the buttons are disabled
         self.stop()
 
     @disnake.ui.button(label="Remove the view", style=disnake.ButtonStyle.red)
-    async def remove_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
-    ):
+    async def remove_button(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
         # view=None removes the view
-        await interaction.response.edit_message(view=None)
+        await inter.response.edit_message(view=None)
 
         # Prevents on_timeout from being triggered after the view is removed
         self.stop()

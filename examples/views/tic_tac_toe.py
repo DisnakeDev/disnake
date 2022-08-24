@@ -41,7 +41,7 @@ class TicTacToeButton(disnake.ui.Button["TicTacToe"]):
 
     # This function is called whenever this particular button is pressed
     # This is part of the "meat" of the game logic
-    async def callback(self, interaction: disnake.MessageInteraction):
+    async def callback(self, inter: disnake.MessageInteraction):
         view = self.view
         state = view.board[self.y][self.x]
         if state in (Player.X, Player.O):
@@ -69,7 +69,7 @@ class TicTacToeButton(disnake.ui.Button["TicTacToe"]):
 
             view.stop()
 
-        await interaction.response.edit_message(content=content, view=view)
+        await inter.response.edit_message(content=content, view=view)
 
 
 # This is our actual board View

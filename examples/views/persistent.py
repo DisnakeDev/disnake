@@ -24,20 +24,20 @@ class PersistentView(disnake.ui.View):
     @disnake.ui.button(
         label="Green", style=disnake.ButtonStyle.green, custom_id="persistent_example:green"
     )
-    async def green(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
-        await interaction.response.send_message("This is green.", ephemeral=True)
+    async def green(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
+        await inter.response.send_message("This is green.", ephemeral=True)
 
     @disnake.ui.button(
         label="Red", style=disnake.ButtonStyle.red, custom_id="persistent_example:red"
     )
-    async def red(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
-        await interaction.response.send_message("This is red.", ephemeral=True)
+    async def red(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
+        await inter.response.send_message("This is red.", ephemeral=True)
 
     @disnake.ui.button(
         label="Grey", style=disnake.ButtonStyle.grey, custom_id="persistent_example:grey"
     )
-    async def grey(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
-        await interaction.response.send_message("This is grey.", ephemeral=True)
+    async def grey(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
+        await inter.response.send_message("This is grey.", ephemeral=True)
 
 
 class PersistentViewBot(commands.Bot):
