@@ -1,3 +1,5 @@
+import os
+
 import disnake
 from disnake.ext import commands
 
@@ -92,3 +94,6 @@ async def ranges(
 @bot.slash_command()
 async def large(inter: disnake.CommandInteraction, largenumber: commands.LargeInt):
     ...
+
+
+bot.run(os.getenv("BOT_TOKEN"))
