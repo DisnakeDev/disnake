@@ -30,7 +30,7 @@ async def simple(
 
 # builtins are not the only types supported.
 # You can also use various other types like User, Member, Role, TextChannel, Emoji, ...,
-# as well as `Union`s of those types (see the documentation for more details).
+# as well as `Union`s of those types in many cases (see the documentation for more details).
 @bot.slash_command()
 async def other_types(
     inter: disnake.CommandInteraction,
@@ -71,11 +71,12 @@ async def defaults(
     ...
 
 
-# You may limit numbers into a certain range using `commands.Range`.
+# You may limit numbers to a certain range using `commands.Range`.
 # "..." is impicitly infinity. Range[0, ...] therefore means any integer from 0 to infinity,
 # and Range[..., 0] means anything from -inf to 0.
-# The 1.0 in the `fraction` parameter is important - the usage of a float specifies
-# that the argument may be any float in that range, not just an integer.
+
+# The 1.0 in the `fraction` parameter below is important - the usage of a float specifies
+# that the argument may be a float in that range, not just an integer.
 # All of these bounds are inclusive, meaning `Range[1, 4]` would allow any of 1, 2, 3, or 4.
 @bot.slash_command()
 async def ranges(

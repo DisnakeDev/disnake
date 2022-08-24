@@ -1,5 +1,5 @@
 """
-An example using the `on_message_delete` event.
+An example using the `on_message_edit` and `on_message_delete` events.
 """
 
 import asyncio
@@ -46,14 +46,12 @@ async def edit(ctx: commands.Context):
 
 @bot.command()
 async def delete(ctx: commands.Context):
-    channel = ctx.channel
-
     # send and immediately delete a message
-    msg = await channel.send("I will delete myself now...")
+    msg = await ctx.channel.send("I will delete myself now...")
     await msg.delete()
 
     # `delete_after` can also be used
-    await channel.send("Goodbye in 3 seconds...", delete_after=3.0)
+    await ctx.channel.send("Goodbye in 3 seconds...", delete_after=3.0)
 
 
 bot.run(os.getenv("BOT_TOKEN"))

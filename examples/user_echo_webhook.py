@@ -48,7 +48,7 @@ async def userecho(ctx: commands.Context, member: disnake.Member, *, content: st
         content=content,
         username=member.display_name,
         avatar_url=member.display_avatar.url,
-        allowed_mentions=disnake.AllowedMentions(everyone=False),
+        allowed_mentions=disnake.AllowedMentions.none(),
     )
 
     # Note: This method cannot impersonate the member's roles, since it works using webhooks.

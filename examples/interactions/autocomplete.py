@@ -1,6 +1,5 @@
 """
-An example showcasing the two ways of adding autocompletion
-to slash command options.
+An example showcasing the two ways of adding autocompletion to slash command options.
 """
 
 import os

@@ -56,7 +56,7 @@ async def command_with_clsmethod(
 
 # An even better approach is to register a method as the class converter,
 # to be able to use only an annotation for the slash command option.
-# Here, `@converter_method` works similarly to `@classmethod`,
+# `@converter_method` works like `@classmethod`,
 # except it also stores the converter callback in an internal registry.
 class OtherCustomClass:
     def __init__(self, username: str, discriminator: str) -> None:

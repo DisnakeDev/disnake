@@ -29,15 +29,15 @@ class Menu(disnake.ui.View):
     @disnake.ui.button(emoji="⏪", style=disnake.ButtonStyle.blurple)
     async def first_page(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
         self.index = 0
-
         self._update_state()
+
         await interaction.response.edit_message(embed=self.embeds[self.index], view=self)
 
     @disnake.ui.button(emoji="◀", style=disnake.ButtonStyle.secondary)
     async def prev_page(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
         self.index -= 1
-
         self._update_state()
+
         await interaction.response.edit_message(embed=self.embeds[self.index], view=self)
 
     @disnake.ui.button(emoji="🗑️", style=disnake.ButtonStyle.red)
@@ -47,15 +47,15 @@ class Menu(disnake.ui.View):
     @disnake.ui.button(emoji="▶", style=disnake.ButtonStyle.secondary)
     async def next_page(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
         self.index += 1
-
         self._update_state()
+
         await interaction.response.edit_message(embed=self.embeds[self.index], view=self)
 
     @disnake.ui.button(emoji="⏩", style=disnake.ButtonStyle.blurple)
     async def last_page(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
         self.index = len(self.embeds) - 1
-
         self._update_state()
+
         await interaction.response.edit_message(embed=self.embeds[self.index], view=self)
 
 
