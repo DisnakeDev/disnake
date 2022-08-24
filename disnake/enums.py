@@ -2137,6 +2137,9 @@ class Locale(str, Enum):
     zh_TW = "zh-TW"
     """The ``zh-TW`` (Chinese, Taiwan | 繁體中文) locale."""
 
+    def __str__(self):
+        return self.value
+
 
 class AutoModActionType(int, Enum):
     """Represents the type of action an auto moderation rule will take upon execution.
