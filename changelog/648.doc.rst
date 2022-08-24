@@ -1,1 +1,1 @@
-625.doc.rst
+Update :attr:`InteractionReference.name` description, now includes group and subcommand.

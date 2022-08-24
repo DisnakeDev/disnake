@@ -1,1 +1,6 @@
-605.feature.rst
+Add support of more operators to all ``Flag`` classes. This list includes :class:`Intents` and :class:`Permissions`.
+- ``&``, ``|``, ``^``, and ``~`` bitwise operator support.
+- ``<``, ``<=``, ``>``, and ``>=`` comparsion operator support.
+- Support ``|`` operators between flag instances and flag values.
+- Support ``~`` operator on flag values, which create a flag instance with all except this specific flag enabled.
+- Support ``|`` operators between flag values which create a flag instance with both flag values enabled.
