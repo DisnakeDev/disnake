@@ -1,18 +1,20 @@
+"""
+An example with multiple rows of buttons in a view.
+"""
+
+# The end result would look like this: https://i.imgur.com/ZYdX1Jw.png
+
 import os
 
 import disnake
 from disnake.enums import ButtonStyle
 from disnake.ext import commands
 
-bot = commands.Bot(command_prefix=commands.when_mentioned)
-
 
 # Defines a simple view of row buttons.
 class RowButtons(disnake.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
-
-    # Creates a row of buttons and when one of them is pressed, it will send a message with the number of the button.
 
     @disnake.ui.button(label="Hi", style=ButtonStyle.red)
     async def first_button(
@@ -45,13 +47,13 @@ class RowButtons(disnake.ui.View):
         await interaction.response.send_message("This is the fifth button.")
 
 
+bot = commands.Bot(command_prefix=commands.when_mentioned)
+
+
 @bot.command()
 async def buttons(ctx):
-
     # Sends a message with a row of buttons.
     await ctx.send("Here are some buttons!", view=RowButtons())
-
-    # This is how the command would look like: https://i.imgur.com/ZYdX1Jw.png
 
 
 bot.run(os.getenv("BOT_TOKEN"))
