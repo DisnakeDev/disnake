@@ -101,17 +101,19 @@ if TYPE_CHECKING:
 
 
 class _BaseActivity:
-    __slots__ = ("_created_at", "_timestamps")
+    __slots__ = ("_created_at", "_timestamps", "assets")
 
     def __init__(
         self,
         *,
         created_at: Optional[float] = None,
         timestamps: Optional[ActivityTimestamps] = None,
+        assets: Optional[ActivityAssets] = None,
         **kwargs: Any,  # discarded
     ):
         self._created_at: Optional[float] = created_at
         self._timestamps: ActivityTimestamps = timestamps or {}
+        self.assets: ActivityAssets = assets or {}
 
     @property
     def created_at(self) -> Optional[datetime.datetime]:
@@ -242,7 +244,6 @@ class Activity(BaseActivity):
     __slots__ = (
         "state",
         "details",
-        "assets",
         "party",
         "flags",
         "sync_id",
@@ -263,7 +264,6 @@ class Activity(BaseActivity):
         type: Optional[Union[ActivityType, int]] = None,
         state: Optional[str] = None,
         details: Optional[str] = None,
-        assets: Optional[ActivityAssets] = None,
         party: Optional[ActivityParty] = None,
         application_id: Optional[Union[str, int]] = None,
         flags: Optional[int] = None,
@@ -276,7 +276,6 @@ class Activity(BaseActivity):
         super().__init__(**kwargs)
         self.state: Optional[str] = state
         self.details: Optional[str] = details
-        self.assets: ActivityAssets = assets or {}
         self.party: ActivityParty = party or {}
         self.application_id: Optional[int] = (
             int(application_id) if application_id is not None else None
@@ -403,6 +402,8 @@ class Game(BaseActivity):
     ----------
     name: :class:`str`
         The game's name.
+    assets: :class:`dict`
+        A dictionary with the same structure as :attr:`Activity.assets`.
     """
 
     __slots__ = ("name",)
@@ -434,6 +435,7 @@ class Game(BaseActivity):
             "type": ActivityType.playing.value,
             "name": str(self.name),
             "timestamps": self._timestamps,
+            "assets": self.assets,
         }
 
     def __eq__(self, other: Any) -> bool:
@@ -488,10 +490,10 @@ class Streaming(BaseActivity):
     url: :class:`str`
         The stream's URL.
     assets: :class:`dict`
-        A dictionary comprising of similar keys than those in :attr:`Activity.assets`.
+        A dictionary with the same structure as :attr:`Activity.assets`.
     """
 
-    __slots__ = ("platform", "name", "game", "url", "details", "assets")
+    __slots__ = ("platform", "name", "game", "url", "details")
 
     def __init__(
         self,
@@ -500,7 +502,6 @@ class Streaming(BaseActivity):
         url: str,
         details: Optional[str] = None,
         state: Optional[str] = None,
-        assets: Optional[ActivityAssets] = None,
         **kwargs: Any,
     ):
         super().__init__(**kwargs)
@@ -509,7 +510,6 @@ class Streaming(BaseActivity):
         self.details: Optional[str] = self.name  # compatibility
         self.url: str = url
         self.game: Optional[str] = state
-        self.assets: ActivityAssets = assets or {}
 
     @property
     def type(self) -> Literal[ActivityType.streaming]:
@@ -585,7 +585,6 @@ class Spotify(_BaseActivity):
     __slots__ = (
         "_state",
         "_details",
-        "_assets",
         "_party",
         "_sync_id",
         "_session_id",
@@ -596,7 +595,6 @@ class Spotify(_BaseActivity):
         *,
         state: Optional[str] = None,
         details: Optional[str] = None,
-        assets: Optional[ActivityAssets] = None,
         party: Optional[ActivityParty] = None,
         sync_id: Optional[str] = None,
         session_id: Optional[str] = None,
@@ -605,7 +603,6 @@ class Spotify(_BaseActivity):
         super().__init__(**kwargs)
         self._state: str = state or ""
         self._details: str = details or ""
-        self._assets: ActivityAssets = assets or {}
         self._party: ActivityParty = party or {}
         self._sync_id: str = sync_id or ""
         self._session_id: Optional[str] = session_id
@@ -636,7 +633,7 @@ class Spotify(_BaseActivity):
         return {
             "flags": 48,  # SYNC | PLAY
             "name": "Spotify",
-            "assets": self._assets,
+            "assets": self.assets,
             "party": self._party,
             "sync_id": self._sync_id,
             "session_id": self._session_id,
@@ -692,12 +689,12 @@ class Spotify(_BaseActivity):
     @property
     def album(self) -> str:
         """:class:`str`: The album that the song being played belongs to."""
-        return self._assets.get("large_text", "")
+        return self.assets.get("large_text", "")
 
     @property
     def album_cover_url(self) -> str:
         """:class:`str`: The album cover image URL from Spotify's CDN."""
-        large_image = self._assets.get("large_image", "")
+        large_image = self.assets.get("large_image", "")
         if large_image[:8] != "spotify:":
             return ""
         album_image_id = large_image[8:]
