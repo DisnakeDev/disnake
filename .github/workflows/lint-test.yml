@@ -151,6 +151,19 @@ jobs:
         pip install -U build
         python -m build
 
+    # run the libcst parsers and check for changes
+    - name: libcst codemod
+      env:
+        LIBCST_PARSER_TYPE: "native"
+      run: |
+        nox -s codemod -- run-all
+        if [ -n "$(git status --porcelain disnake/)" ]; then
+          echo "::error::Please run 'nox -s codemod - run-all' locally and commit the changes." >&2;
+          exit 1;
+        else
+          exit 0;
+        fi
+
   pytest:
     # Thanks to black for this rule
     # We want to run on external PRs, but not on our own internal PRs as they'll be run

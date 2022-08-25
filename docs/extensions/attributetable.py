@@ -3,14 +3,16 @@ import importlib
 import inspect
 import re
 from collections import defaultdict
-from typing import DefaultDict, Dict, List, NamedTuple, Optional
+from typing import DefaultDict, Dict, List, NamedTuple, Optional, Tuple
 
+from _types import SphinxExtensionMeta
 from docutils import nodes
 from sphinx import addnodes
 from sphinx.application import Sphinx
 from sphinx.environment import BuildEnvironment
 from sphinx.locale import _
 from sphinx.util.docutils import SphinxDirective
+from sphinx.writers.html import HTMLTranslator
 
 
 class attributetable(nodes.General, nodes.Element):
@@ -37,20 +39,20 @@ class attributetable_item(nodes.Part, nodes.Element):
     pass
 
 
-def visit_attributetable_node(self, node):
+def visit_attributetable_node(self: HTMLTranslator, node: nodes.Element) -> None:
     class_ = node["python-class"]
     self.body.append(f'<div class="py-attribute-table" data-move-to-id="{class_}">')
 
 
-def visit_attributetablecolumn_node(self, node):
+def visit_attributetablecolumn_node(self: HTMLTranslator, node: nodes.Element) -> None:
     self.body.append(self.starttag(node, "div", CLASS="py-attribute-table-column"))
 
 
-def visit_attributetabletitle_node(self, node):
+def visit_attributetabletitle_node(self: HTMLTranslator, node: nodes.Element) -> None:
     self.body.append(self.starttag(node, "span"))
 
 
-def visit_attributetablebadge_node(self, node):
+def visit_attributetablebadge_node(self: HTMLTranslator, node: nodes.Element) -> None:
     """Add a class to each badge of the type that it is."""
     badge_type: str = node["badge-type"]
     if badge_type not in ("coroutine", "decorator", "method", "classmethod"):
@@ -61,27 +63,27 @@ def visit_attributetablebadge_node(self, node):
     self.body.append(self.starttag(node, "span", **attributes))
 
 
-def visit_attributetable_item_node(self, node):
+def visit_attributetable_item_node(self: HTMLTranslator, node: nodes.Element) -> None:
     self.body.append(self.starttag(node, "li"))
 
 
-def depart_attributetable_node(self, node):
+def depart_attributetable_node(self: HTMLTranslator, node: nodes.Element) -> None:
     self.body.append("</div>")
 
 
-def depart_attributetablecolumn_node(self, node):
+def depart_attributetablecolumn_node(self: HTMLTranslator, node: nodes.Element) -> None:
     self.body.append("</div>")
 
 
-def depart_attributetabletitle_node(self, node):
+def depart_attributetabletitle_node(self: HTMLTranslator, node: nodes.Element) -> None:
     self.body.append("</span>")
 
 
-def depart_attributetablebadge_node(self, node):
+def depart_attributetablebadge_node(self: HTMLTranslator, node: nodes.Element) -> None:
     self.body.append("</span>")
 
 
-def depart_attributetable_item_node(self, node):
+def depart_attributetable_item_node(self: HTMLTranslator, node: nodes.Element) -> None:
     self.body.append("</li>")
 
 
@@ -95,7 +97,7 @@ class PyAttributeTable(SphinxDirective):
     final_argument_whitespace = False
     option_spec = {}
 
-    def parse_name(self, content):
+    def parse_name(self, content: str) -> Tuple[str, Optional[str]]:
         match = _name_parser_regex.match(content)
         path, name = match.groups() if match else (None, None)
         if path:
@@ -109,7 +111,7 @@ class PyAttributeTable(SphinxDirective):
 
         return modulename, name
 
-    def run(self):
+    def run(self) -> List[nodes.Node]:
         """If you're curious on the HTML this is meant to generate:
 
         <div class="py-attribute-table">
@@ -175,8 +177,7 @@ class TableElement(NamedTuple):
     badge: Optional[attributetablebadge]
 
 
-def process_attributetable(app: Sphinx, doctree: nodes.document, docname: str):
-    assert app.builder and app.builder.env  # noqa: S101
+def process_attributetable(app: Sphinx, doctree: nodes.document, docname: str) -> None:
     env = app.builder.env
 
     lookup = build_lookup_table(env)
@@ -278,7 +279,7 @@ def class_results_to_node(key: str, elements: List[TableElement]) -> attributeta
     return attributetablecolumn("", title, ul)
 
 
-def setup(app: Sphinx):
+def setup(app: Sphinx) -> SphinxExtensionMeta:
     app.add_directive("attributetable", PyAttributeTable)
     app.add_node(attributetable, html=(visit_attributetable_node, depart_attributetable_node))
     app.add_node(
