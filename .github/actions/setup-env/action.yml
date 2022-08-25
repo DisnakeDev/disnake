@@ -29,8 +29,8 @@ runs:
       uses: actions/setup-python@v3
       with:
         python-version: ${{ inputs.python-version }}
-        # cache: "pip"
-        # cache-dependency-path: ${{ inputs.cache-dependency-path }}
+        cache: "pip"
+        cache-dependency-path: ${{ inputs.cache-dependency-path }}
 
     - name: Create and activate vrtual environment
       shell: bash
