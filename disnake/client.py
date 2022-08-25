@@ -647,11 +647,16 @@ class Client:
         ----------
         user_id: :class:`int`
             The ID to search for.
+        strict: :class:`bool`
+            Whether to propagate exceptions from :func:`fetch_user`
+            instead of returning ``None`` in case of failure
+            (e.g. if the user wasn't found).
+            Defaults to ``False``.
 
         Returns
         -------
-        :class:`~disnake.User`
-            The user with the given ID
+        Optional[:class:`~disnake.User`]
+            The user with the given ID, or ``None`` if not found and ``strict`` is set to ``False``.
         """
         user = self.get_user(user_id)
         if user is not None:

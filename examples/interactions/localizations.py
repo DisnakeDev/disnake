@@ -2,6 +2,7 @@
 An example on how to set up localized application commands.
 """
 
+import os
 from typing import Any
 
 import disnake
@@ -79,4 +80,4 @@ async def game_autocomp(inter: disnake.CommandInteraction, string: str):
 
 
 bot.i18n.load("locale/")
-bot.run("token")
+bot.run(os.getenv("BOT_TOKEN"))

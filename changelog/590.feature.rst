@@ -1,0 +1,1 @@
+Allow ``entity_type`` parameter :attr:`Guild.create_scheduled_event` to be missing.
