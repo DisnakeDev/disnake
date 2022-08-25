@@ -397,7 +397,6 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         options: List[Option] = None,
         dm_permission: bool = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-        nsfw: bool = None,
         guild_ids: Sequence[int] = None,
         connectors: Dict[str, str] = None,
         auto_sync: bool = None,
@@ -432,7 +431,6 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             options=options or [],
             dm_permission=dm_permission and not self._guild_only,
             default_member_permissions=default_member_permissions,
-            nsfw=nsfw,
         )
 
     def _ensure_assignment_on_copy(self, other: SlashCommandT) -> SlashCommandT:
@@ -699,7 +697,6 @@ def slash_command(
     description: LocalizedOptional = None,
     dm_permission: bool = None,
     default_member_permissions: Optional[Union[Permissions, int]] = None,
-    nsfw: bool = None,
     options: List[Option] = None,
     guild_ids: Sequence[int] = None,
     connectors: Dict[str, str] = None,
@@ -724,12 +721,6 @@ def slash_command(
 
         .. versionchanged:: 2.5
             Added support for localizations.
-
-    nsfw: :class:`bool`
-        Whether this command can only be used in NSFW channels.
-        Defaults to ``False``.
-
-        .. versionadded:: 2.6
 
     options: List[:class:`.Option`]
         The list of slash command options. The options will be visible in Discord.
@@ -780,7 +771,6 @@ def slash_command(
             options=options,
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
-            nsfw=nsfw,
             guild_ids=guild_ids,
             connectors=connectors,
             auto_sync=auto_sync,

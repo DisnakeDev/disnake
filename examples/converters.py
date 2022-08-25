@@ -1,5 +1,6 @@
 # This example requires the 'members' privileged intent to use the Member converter.
 
+import os
 import typing
 
 import disnake
@@ -72,4 +73,4 @@ async def multiply(ctx: commands.Context, number: int, maybe: bool):
     await ctx.send(str(number * 5))
 
 
-bot.run("token")
+bot.run(os.getenv("BOT_TOKEN"))
