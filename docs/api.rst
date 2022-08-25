@@ -864,15 +864,15 @@ Members
     :param payload: The raw event payload data.
     :type payload: :class:`RawGuildMemberRemoveEvent`
 
-.. function:: on_raw_member_update(payload)
+.. function:: on_raw_member_update(member)
 
     Called when a member updates their profile.
     Unlike :func:`on_member_update`, this is called regardless of the member cache.
 
     .. versionadded:: 2.6
 
-    :param payload: The raw event payload data.
-    :type payload: :class:`RawGuildMemberUpdateEvent`
+    :param member: The member that was updated.
+    :type member: :class:`Member`
 
 .. function:: on_member_ban(guild, user)
 
@@ -5410,14 +5410,6 @@ RawGuildMemberRemoveEvent
 .. attributetable:: RawGuildMemberRemoveEvent
 
 .. autoclass:: RawGuildMemberRemoveEvent()
-    :members:
-
-RawGuildMemberUpdateEvent
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. attributetable:: RawGuildMemberUpdateEvent
-
-.. autoclass:: RawGuildMemberUpdateEvent()
     :members:
 
 PartialWebhookGuild

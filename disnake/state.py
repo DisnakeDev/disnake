@@ -85,7 +85,6 @@ from .partial_emoji import PartialEmoji
 from .raw_models import (
     RawBulkMessageDeleteEvent,
     RawGuildMemberRemoveEvent,
-    RawGuildMemberUpdateEvent,
     RawGuildScheduledEventUserActionEvent,
     RawIntegrationDeleteEvent,
     RawMessageDeleteEvent,
@@ -1303,25 +1302,18 @@ class ConnectionState:
                 self.dispatch("user_update", user_update[0], user_update[1])
 
             self.dispatch("member_update", old_member, member)
-            user = member
         else:
+            member = Member(data=data, guild=guild, state=self)
+
+            # Force an update on the inner user if necessary
+            user_update = member._update_inner_user(data["user"])
+            if user_update:
+                self.dispatch("user_update", user_update[0], user_update[1])
+
             if self.member_cache_flags.joined:
-                member = Member(data=data, guild=guild, state=self)
-
-                # Force an update on the inner user if necessary
-                user_update = member._update_inner_user(data["user"])
-                if user_update:
-                    self.dispatch("user_update", user_update[0], user_update[1])
-
                 guild._add_member(member)
-                user = member
-            else:
-                user = self.store_user(
-                    data["user"]
-                )  # TODO: https://github.com/DisnakeDev/disnake/pull/643#discussion_r934047176
 
-        raw = RawGuildMemberUpdateEvent(data, user)
-        self.dispatch("raw_member_update", raw)
+        self.dispatch("raw_member_update", member)
 
     def parse_guild_emojis_update(self, data: gateway.GuildEmojisUpdateEvent) -> None:
         guild = self._get_guild(int(data["guild_id"]))
