@@ -46,8 +46,8 @@ if TYPE_CHECKING:
     from disnake.mentions import AllowedMentions
     from disnake.message import Message
 
-    from . import bot_base
     from ._types import MaybeCoro
+    from .bot_base import PrefixType
     from .help import HelpCommand
 
 
@@ -199,9 +199,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
         def __init__(
             self,
             command_prefix: Optional[
-                Union[
-                    bot_base.PrefixType, Callable[[Self, Message], MaybeCoro[bot_base.PrefixType]]
-                ]
+                Union[PrefixType, Callable[[Self, Message], MaybeCoro[PrefixType]]]
             ] = None,
             help_command: HelpCommand = ...,
             description: str = None,
@@ -250,9 +248,7 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
         def __init__(
             self,
             command_prefix: Optional[
-                Union[
-                    bot_base.PrefixType, Callable[[Self, Message], MaybeCoro[bot_base.PrefixType]]
-                ]
+                Union[PrefixType, Callable[[Self, Message], MaybeCoro[PrefixType]]]
             ] = None,
             help_command: HelpCommand = ...,
             description: str = None,
