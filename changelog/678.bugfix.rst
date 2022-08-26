@@ -1,0 +1,1 @@
+Make the :func:`.ext.commands.default_member_permissions` decorator always work in cogs.

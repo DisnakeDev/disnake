@@ -223,6 +223,12 @@ class InvokableApplicationCommand(ABC):
             # _max_concurrency won't be None at this point
             other._max_concurrency = cast(MaxConcurrency, self._max_concurrency).copy()
 
+        if self.body._default_member_permissions != other.body._default_member_permissions and (
+            "default_member_permissions" not in other.__original_kwargs__
+            or self.body._default_member_permissions is not None
+        ):
+            other.body._default_member_permissions = self.body._default_member_permissions
+
         try:
             other.on_error = self.on_error
         except AttributeError:
