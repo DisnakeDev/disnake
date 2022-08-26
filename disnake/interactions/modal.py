@@ -91,7 +91,7 @@ class ModalInteraction(Interaction):
         The interaction client.
     """
 
-    __slots__ = ("data", "message", "_cs_text_values")
+    __slots__ = ("message", "_cs_text_values")
 
     def __init__(self, *, data: ModalInteractionPayload, state: ConnectionState):
         super().__init__(data=data, state=state)
