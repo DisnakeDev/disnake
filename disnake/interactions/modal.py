@@ -95,7 +95,7 @@ class ModalInteraction(Interaction):
 
     def __init__(self, *, data: ModalInteractionPayload, state: ConnectionState):
         super().__init__(data=data, state=state)
-        self.data = ModalInteractionData(data=data["data"])
+        self.data: ModalInteractionData = ModalInteractionData(data=data["data"])
 
         if message_data := data.get("message"):
             message = Message(state=self._state, channel=self.channel, data=message_data)

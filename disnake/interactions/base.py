@@ -148,6 +148,7 @@ class Interaction:
     """
 
     __slots__: Tuple[str, ...] = (
+        "data",
         "id",
         "type",
         "guild_id",
@@ -172,6 +173,7 @@ class Interaction:
     )
 
     def __init__(self, *, data: InteractionPayload, state: ConnectionState):
+        self.data: Mapping[str, Any] = data
         self._state: ConnectionState = state
         # TODO: Maybe use a unique session
         self._session: ClientSession = state.http._HTTPClient__session  # type: ignore
