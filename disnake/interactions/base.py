@@ -111,6 +111,8 @@ class Interaction:
 
     Attributes
     ----------
+    data: Mapping[:class:`str`, Any]
+        The interaction's raw data. This might be replaced with a more processed version in subclasses.
     id: :class:`int`
         The interaction's ID.
     type: :class:`InteractionType`
