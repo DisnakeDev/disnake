@@ -1,0 +1,1 @@
+|commands| Change :func:`commands.has_permissions` and :func:`commands.bot_has_permissions` to take timeouts into consideration.
