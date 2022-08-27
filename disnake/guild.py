@@ -1991,7 +1991,7 @@ class Guild(Hashable):
             features = set(self.features)
             if community is not MISSING:
                 if not isinstance(community, bool):
-                    raise TypeError("community must be a bool instance")
+                    raise TypeError("community must be a bool")
                 if community:
                     if "rules_channel_id" in fields and "public_updates_channel_id" in fields:
                         features.add("COMMUNITY")
@@ -2004,7 +2004,7 @@ class Guild(Hashable):
 
             if invites_disabled is not MISSING:
                 if not isinstance(invites_disabled, bool):
-                    raise TypeError("invites_disabled must be a bool instance")
+                    raise TypeError("invites_disabled must be a bool")
                 if invites_disabled:
                     features.add("INVITES_DISABLED")
                 else:
