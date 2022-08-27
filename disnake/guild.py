@@ -1834,6 +1834,10 @@ class Guild(Hashable):
         invites_disabled: :class:`bool`
             Whether the guild can be joined.
 
+            This is only available to guilds that contain ``COMMUNITY``
+            in :attr:`Guild.features`.
+
+
             .. versionadded:: 2.6
         afk_channel: Optional[:class:`VoiceChannel`]
             The new channel that is the AFK channel. Could be ``None`` for no AFK channel.
