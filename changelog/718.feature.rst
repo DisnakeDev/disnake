@@ -1,1 +1,1 @@
-Add support for the ``INVITES_DISABLED`` Guild Feature.
+Add support for modifying the ``INVITES_DISABLED`` guild feature using :func:`Guild.edit`.
