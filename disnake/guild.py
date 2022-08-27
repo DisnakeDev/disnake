@@ -1986,25 +1986,21 @@ class Guild(Hashable):
                 raise RuntimeError(
                     "cannot modify features of an unavailable guild due to potentially destructive results."
                 )
-            features = self.features
-            if community:
-                if "rules_channel_id" in fields and "public_updates_channel_id" in fields:
-                    if "COMMUNITY" not in features:
-                        features.append("COMMUNITY")
+            features = set(self.features)
+            if community is not MISSING:
+                if not isinstance(community, bool):
+                    raise TypeError("community must be a bool instance")
+                if community:
+                    if "rules_channel_id" in fields and "public_updates_channel_id" in fields:
+                        features.add("COMMUNITY")
                     else:
-                        features = MISSING
+                        raise ValueError(
+                            "community field requires both rules_channel and public_updates_channel fields to be provided"
+                        )
                 else:
-                    raise ValueError(
-                        "community field requires both rules_channel and public_updates_channel fields to be provided"
-                    )
-            else:
-                try:
-                    features.remove("COMMUNITY")
-                except ValueError:
-                    features = MISSING
+                    features.discard("COMMUNITY")
 
-            if features is not MISSING:
-                fields["features"] = features
+            fields["features"] = list(features)
 
         if premium_progress_bar_enabled is not MISSING:
             fields["premium_progress_bar_enabled"] = premium_progress_bar_enabled
