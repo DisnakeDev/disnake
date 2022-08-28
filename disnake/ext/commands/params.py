@@ -968,14 +968,16 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
 
     for injection in injections.values():
         collected = collect_nested_params(injection.function)
-        if injection.autocompleters: # != {}
+        if injection.autocompleters:  # != {}
             for p in collected:
                 if f := injection.autocompleters.pop(p.name, None):
                     p.autocomplete = f
             if len(injection.autocompleters):
                 raise ValueError(
                     f"Couldn't set autocompleters on injection {injection.function.__qualname__} for non-existent"
-                    " options: " + ', '.join(["'" + x + "'" for x in injection.autocompleters.keys()]))
+                    " options: "
+                    + ", ".join(["'" + x + "'" for x in injection.autocompleters.keys()])
+                )
         params += collected
 
     params = sorted(params, key=lambda param: not param.required)
@@ -1154,6 +1156,7 @@ def injection(*, autocompleters: Dict[str, Callable] = None) -> Callable[[Callab
     autocompleters: Dict[:class:`str`, Callable]
         A mapping of injection's option names to their respective autocompleters
     """
+
     def decorator(function: Callable[..., Any]) -> Any:
         return inject(function, autocompleters=autocompleters)
 
@@ -1217,7 +1220,7 @@ def register_injection(
 
     .. versionchanged:: 2.6
         Now returns :class:`disnake.ext.commands.Injection`
-        
+
         Added ``autocompleters`` keyword-only argument
 
     Raises
