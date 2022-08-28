@@ -1,14 +1,9 @@
 |commands| Add support for injected parameters autocompletion
-	Document :class:`.ext.commands.Injection`
-
-	:meth:`Injection.register <ext.commands.Injection.register>` now returns :class:`Injection <ext.commands.Injection>`
-
-	:func:`.ext.commands.register_injection` now returns :class:`.ext.commands.Injection`
-
-	Add decorator interface for :func:`.ext.commands.inject`: :func:`.ext.commands.injection`
-
-	Add :meth:`.ext.commands.Injection.autocomplete` decorator
-
-	Add ``autocompleters`` keyword-only argument to :class:`.ext.commands.Injection` constructor
-
-	Add ``autocompleters`` keyword-only argument to :func:`.ext.commands.inject`
+- Document :class:`.ext.commands.Injection`
+- :meth:`Injection.register <ext.commands.Injection.register>` now returns :class:`Injection <ext.commands.Injection>`
+- :func:`.ext.commands.register_injection` now returns :class:`.ext.commands.Injection`
+- Add decorator interface for :func:`.ext.commands.inject`: :func:`.ext.commands.injection`
+- Add :meth:`.ext.commands.Injection.autocomplete` decorator
+- Add ``autocompleters`` keyword-only argument to :class:`.ext.commands.Injection` constructor
+- Add ``autocompleters`` keyword-only argument to :func:`.ext.commands.inject`
+- Add ``autocompleters`` keyword-only argument to :func:`.ext.commands.register_injection` constructor

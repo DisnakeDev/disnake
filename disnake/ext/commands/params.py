@@ -202,17 +202,17 @@ class Injection:
     function: Callable
     autocompleters: Dict[str, Callable]
 
-    def __init__(self, function: Callable, *, autocompleters: Dict[str, Callable] = ...) -> None:
+    def __init__(self, function: Callable, *, autocompleters: Dict[str, Callable] = None) -> None:
         self.function = function
-        self.autocompleters = autocompleters if autocompleters is not Ellipsis else {}
+        self.autocompleters = autocompleters if autocompleters else {}
 
     @classmethod
     def register(
-        cls, function: Callable, annotation: Any, *, autocompleters: Dict[str, Callable] = ...
+        cls, function: Callable, annotation: Any, *, autocompleters: Dict[str, Callable] = None
     ) -> Self:
         self = cls(function)
         cls._registered[annotation] = self
-        self.autocompleters = autocompleters if autocompleters is not Ellipsis else {}
+        self.autocompleters = autocompleters if autocompleters else {}
         return self
 
     def autocomplete(self, option_name: str) -> Callable:
@@ -968,12 +968,14 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
 
     for injection in injections.values():
         collected = collect_nested_params(injection.function)
-        if injection.autocompleters is not Ellipsis:
+        if injection.autocompleters: # != {}
             for p in collected:
                 if f := injection.autocompleters.pop(p.name, None):
                     p.autocomplete = f
             if len(injection.autocompleters):
-                raise ValueError("Couldn't set autocompleters for non-existent options: " + ', '.join(["'" + x + "'" for x in injection.autocompleters.keys()]))
+                raise ValueError(
+                    f"Couldn't set autocompleters on injection {injection.function.__qualname__} for non-existent"
+                    " options: " + ', '.join(["'" + x + "'" for x in injection.autocompleters.keys()]))
         params += collected
 
     params = sorted(params, key=lambda param: not param.required)
@@ -1116,7 +1118,7 @@ def Param(
 param = Param
 
 
-def inject(function: Callable[..., Any], *, autocompleters: Dict[str, Callable] = ...) -> Any:
+def inject(function: Callable[..., Any], *, autocompleters: Dict[str, Callable] = None) -> Any:
     """A special function to use the provided function for injections.
     This should be assigned to a parameter of a function representing your slash command.
 
@@ -1141,7 +1143,7 @@ def inject(function: Callable[..., Any], *, autocompleters: Dict[str, Callable] 
     return Injection(function, autocompleters=autocompleters)
 
 
-def injection(*, autocompleters: Dict[str, Callable] = ...) -> Callable[[Callable[..., Any]], Any]:
+def injection(*, autocompleters: Dict[str, Callable] = None) -> Callable[[Callable[..., Any]], Any]:
     """Decorator interface for :func:`inject`.
     You can then assign this value to your slash commands' parameters.
 
@@ -1207,7 +1209,7 @@ else:
 
 
 def register_injection(
-    function: Callable, *, autocompleters: Dict[str, Callable] = ...
+    function: Callable, *, autocompleters: Dict[str, Callable] = None
 ) -> Injection:
     """A decorator to register a global injection.
 
@@ -1215,13 +1217,14 @@ def register_injection(
 
     .. versionchanged:: 2.6
         Now returns :class:`disnake.ext.commands.Injection`
+        
+        Added ``autocompleters`` keyword-only argument
 
     Raises
     ------
     TypeError
-        Injection don't have a return annotation
-
-        Injection cannot overwrite builtin types
+        Injection doesn't have a return annotation,
+        or tries to overwrite builtin types.
     """
     sig = signature(function)
     tp = sig.return_annotation
