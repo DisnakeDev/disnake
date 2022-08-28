@@ -1,0 +1,1 @@
+Fixed an issue where it would be possible to remove other features when enabling or disabling the ``COMMUNITY`` feature for a :class:`.Guild`.
