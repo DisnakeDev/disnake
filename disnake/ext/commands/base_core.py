@@ -169,6 +169,14 @@ class InvokableApplicationCommand(ABC):
                 "See `default_member_permissions` and `dm_permission` instead."
             )
 
+        # n.b. this was supported previously, but reverted due to
+        # uncertainty about upcoming upstream changes
+        if "nsfw" in kwargs:
+            raise TypeError(
+                "The `nsfw` parameter is not supported. "
+                "If you set it before, use an earlier version to reset it to `False`."
+            )
+
         try:
             checks = func.__commands_checks__
             checks.reverse()
@@ -214,6 +222,12 @@ class InvokableApplicationCommand(ABC):
         if self._max_concurrency != other._max_concurrency:
             # _max_concurrency won't be None at this point
             other._max_concurrency = cast(MaxConcurrency, self._max_concurrency).copy()
+
+        if self.body._default_member_permissions != other.body._default_member_permissions and (
+            "default_member_permissions" not in other.__original_kwargs__
+            or self.body._default_member_permissions is not None
+        ):
+            other.body._default_member_permissions = self.body._default_member_permissions
 
         try:
             other.on_error = self.on_error
