@@ -1,3 +1,5 @@
+import os
+
 import disnake
 from disnake.ext import commands
 
@@ -51,4 +53,4 @@ async def userecho(ctx: commands.Context, member: disnake.Member, *, content):
     # Note: This method cannot impersonate the member's roles, since it works using webhooks.
 
 
-client.run("YOUR_BOT_TOKEN")
+client.run(os.getenv("BOT_TOKEN"))

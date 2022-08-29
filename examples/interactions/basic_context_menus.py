@@ -1,13 +1,10 @@
+import os
+
 import disnake
 from disnake.ext import commands
 
 bot = commands.Bot(
     command_prefix=commands.when_mentioned,
-    # Insert IDs of your test guilds below, if
-    # you want the context menus to instantly appear.
-    # Without test_guilds specified, your commands will
-    # register globally.
-    test_guilds=[12345],
 )
 
 
@@ -27,7 +24,7 @@ async def avatar(inter: disnake.ApplicationCommandInteraction, user: disnake.Use
 
 
 # Here we create a message command. The function below the decorator
-# should only have one requierd argument, which is
+# should only have one required argument, which is
 # an instance of ApplicationCommandInteraction.
 @bot.message_command(name="Reverse")  # optional
 async def reverse(inter: disnake.ApplicationCommandInteraction, message: disnake.Message):
@@ -35,4 +32,4 @@ async def reverse(inter: disnake.ApplicationCommandInteraction, message: disnake
     await inter.response.send_message(message.content[::-1])
 
 
-bot.run("TOKEN")
+bot.run(os.getenv("BOT_TOKEN"))

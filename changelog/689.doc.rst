@@ -1,0 +1,1 @@
+|commands| Improve documentation around using ``None`` for :attr:`Bot.command_prefix <disnake.ext.commands.Bot.command_prefix>`.

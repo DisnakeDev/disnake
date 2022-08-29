@@ -1,0 +1,1 @@
+Add :attr:`ApplicationFlags.application_command_badge` flag which shows whether an application has at least one globally registered application command.

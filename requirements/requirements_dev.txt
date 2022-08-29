@@ -7,7 +7,7 @@ pyright==1.1.264
 
 
 ## linting
-slotscheck~=0.14.0
+slotscheck~=0.15.0
 flake8~=4.0.1
 flake8-bandit~=3.0.0
 flake8-bugbear==22.7.1

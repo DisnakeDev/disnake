@@ -98,6 +98,11 @@ def _validate_name(name: str) -> None:
     # used for slash command names and option names
     # see https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-naming
 
+    if not isinstance(name, str):
+        raise TypeError(
+            f"Slash command name and option names must be an instance of class 'str', received '{name.__class__}'"
+        )
+
     if name != name.lower() or not re.fullmatch(r"[\w-]{1,32}", name):
         raise ValueError(
             f"Slash command or option name '{name}' should be lowercase, "
@@ -473,12 +478,6 @@ class ApplicationCommand(ABC):
         Defaults to ``True``.
 
         .. versionadded:: 2.5
-
-    nsfw: :class:`bool`
-        Whether this command can only be used in NSFW channels.
-        Defaults to ``False``.
-
-        .. versionadded:: 2.6
     """
 
     __repr_info__: ClassVar[Tuple[str, ...]] = (
@@ -486,7 +485,6 @@ class ApplicationCommand(ABC):
         "name",
         "dm_permission",
         "default_member_permisions",
-        "nsfw",
     )
 
     def __init__(
@@ -495,14 +493,12 @@ class ApplicationCommand(ABC):
         name: LocalizedRequired,
         dm_permission: bool = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-        nsfw: bool = None,
     ):
         self.type: ApplicationCommandType = enum_if_int(ApplicationCommandType, type)
 
         name_loc = Localized._cast(name, True)
         self.name: str = name_loc.string
         self.name_localizations: LocalizationValue = name_loc.localizations
-        self.nsfw: bool = False if nsfw is None else nsfw
 
         self.dm_permission: bool = True if dm_permission is None else dm_permission
 
@@ -552,7 +548,6 @@ class ApplicationCommand(ABC):
             self.type == other.type
             and self.name == other.name
             and self.name_localizations == other.name_localizations
-            and self.nsfw == other.nsfw
             and self._default_member_permissions == other._default_member_permissions
             # ignore `dm_permission` if comparing guild commands
             and (
@@ -571,7 +566,6 @@ class ApplicationCommand(ABC):
             "name": self.name,
             "dm_permission": self.dm_permission,
             "default_permission": True,
-            "nsfw": self.nsfw,
         }
 
         if self._default_member_permissions is None:
@@ -618,12 +612,6 @@ class UserCommand(ApplicationCommand):
         Defaults to ``True``.
 
         .. versionadded:: 2.5
-
-    nsfw: :class:`bool`
-        Whether this command can only be used in NSFW channels.
-        Defaults to ``False``.
-
-        .. versionadded:: 2.6
     """
 
     __repr_info__ = ("name", "dm_permission", "default_member_permissions")
@@ -633,14 +621,12 @@ class UserCommand(ApplicationCommand):
         name: LocalizedRequired,
         dm_permission: bool = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-        nsfw: bool = None,
     ):
         super().__init__(
             type=ApplicationCommandType.user,
             name=name,
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
-            nsfw=nsfw,
         )
 
 
@@ -665,11 +651,6 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
 
         .. versionadded:: 2.5
 
-    nsfw: :class:`bool`
-        Whether this command can only be used in NSFW channels.
-
-        .. versionadded:: 2.6
-
     id: :class:`int`
         The user command's ID.
     application_id: :class:`int`
@@ -692,7 +673,6 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
             name=Localized(data["name"], data=data.get("name_localizations")),
             dm_permission=data.get("dm_permission") is not False,
             default_member_permissions=_get_as_snowflake(data, "default_member_permissions"),
-            nsfw=data.get("nsfw"),
         )
         self._update_common(data)
         return self
@@ -717,12 +697,6 @@ class MessageCommand(ApplicationCommand):
         Defaults to ``True``.
 
         .. versionadded:: 2.5
-
-    nsfw: :class:`bool`
-        Whether this command can only be used in NSFW channels.
-        Defaults to ``False``.
-
-        .. versionadded:: 2.6
     """
 
     __repr_info__ = ("name", "dm_permission", "default_member_permissions")
@@ -732,14 +706,12 @@ class MessageCommand(ApplicationCommand):
         name: LocalizedRequired,
         dm_permission: bool = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-        nsfw: bool = None,
     ):
         super().__init__(
             type=ApplicationCommandType.message,
             name=name,
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
-            nsfw=nsfw,
         )
 
 
@@ -764,11 +736,6 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
 
         .. versionadded:: 2.5
 
-    nsfw: :class:`bool`
-        Whether this command can only be used in NSFW channels.
-
-        .. versionadded:: 2.6
-
     id: :class:`int`
         The message command's ID.
     application_id: :class:`int`
@@ -791,7 +758,6 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
             name=Localized(data["name"], data=data.get("name_localizations")),
             dm_permission=data.get("dm_permission") is not False,
             default_member_permissions=_get_as_snowflake(data, "default_member_permissions"),
-            nsfw=data.get("nsfw"),
         )
         self._update_common(data)
         return self
@@ -824,12 +790,6 @@ class SlashCommand(ApplicationCommand):
 
         .. versionadded:: 2.5
 
-    nsfw: :class:`bool`
-        Whether this command can only be used in NSFW channels.
-        Defaults to ``False``.
-
-        .. versionadded:: 2.6
-
     options: List[:class:`Option`]
         The list of options the slash command has.
     """
@@ -849,14 +809,12 @@ class SlashCommand(ApplicationCommand):
         options: List[Option] = None,
         dm_permission: bool = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-        nsfw: bool = None,
     ):
         super().__init__(
             type=ApplicationCommandType.chat_input,
             name=name,
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
-            nsfw=nsfw,
         )
         _validate_name(self.name)
 
@@ -957,11 +915,6 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
 
         .. versionadded:: 2.5
 
-    nsfw: :class:`bool`
-        Whether this command can only be used in NSFW channels.
-
-        .. versionadded:: 2.6
-
     id: :class:`int`
         The slash command's ID.
     options: List[:class:`Option`]
@@ -990,7 +943,6 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
             ),
             dm_permission=data.get("dm_permission") is not False,
             default_member_permissions=_get_as_snowflake(data, "default_member_permissions"),
-            nsfw=data.get("nsfw"),
         )
         self._update_common(data)
         return self
