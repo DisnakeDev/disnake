@@ -122,9 +122,7 @@ class _EnumDict(Dict[str, Any]):
             "name",
             "value",
         }:
-            # The main Enum must not be checked or its name and value fields will be flagged...
-            if EnumMeta.__is_enum_instantiated__:
-                raise ValueError(f"Invalid Enum member name: {name}")
+            raise ValueError(f"Invalid Enum member name: {name}")
 
         if name.startswith("_") or _is_descriptor(value):
             super().__setitem__(name, value)
