@@ -1774,6 +1774,14 @@ class ApplicationFlags(BaseFlags):
         """
         return 1 << 19
 
+    @flag_value
+    def application_command_badge(self):
+        """:class:`bool`: Returns ``True`` if the application has registered global application commands.
+
+        .. versionadded:: 2.6
+        """
+        return 1 << 23
+
 
 class ChannelFlags(BaseFlags):
     """Wraps up the Discord Channel flags.

@@ -1,3 +1,4 @@
+import os
 import random
 
 import disnake
@@ -44,10 +45,4 @@ async def guess(ctx, number: int):
     await ctx.tick(number == value)
 
 
-# IMPORTANT: You shouldn't hard code your token
-# these are very important, and leaking them can
-# let people do very malicious things with your
-# bot. Try to use a file or something to keep
-# them private, and don't commit it to GitHub
-token = "your token here"
-bot.run(token)
+bot.run(os.getenv("BOT_TOKEN"))
