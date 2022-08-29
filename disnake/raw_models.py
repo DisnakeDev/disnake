@@ -50,6 +50,7 @@ if TYPE_CHECKING:
         ThreadDeleteEvent,
         TypingStartEvent,
     )
+    from .user import User
 
 
 __all__ = (
@@ -64,6 +65,7 @@ __all__ = (
     "RawThreadDeleteEvent",
     "RawThreadMemberRemoveEvent",
     "RawTypingEvent",
+    "RawGuildMemberRemoveEvent",
 )
 
 
@@ -415,3 +417,26 @@ class RawTypingEvent(_RawReprMixin):
             self.guild_id: Optional[int] = int(data["guild_id"])
         except KeyError:
             self.guild_id: Optional[int] = None
+
+
+class RawGuildMemberRemoveEvent(_RawReprMixin):
+    """Represents the event payload for an :func:`on_raw_member_remove` event.
+
+    .. versionadded:: 2.6
+
+    Attributes
+    ----------
+    guild_id: :class:`int`
+        The ID of the guild where the member was removed from.
+    user: Union[:class:`User`, :class:`Member`]
+        The user object of the member that was removed.
+    """
+
+    __slots__ = (
+        "guild_id",
+        "user",
+    )
+
+    def __init__(self, user: Union[User, Member], guild_id: int):
+        self.user: Union[User, Member] = user
+        self.guild_id: int = guild_id
