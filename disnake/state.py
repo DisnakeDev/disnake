@@ -84,6 +84,7 @@ from .object import Object
 from .partial_emoji import PartialEmoji
 from .raw_models import (
     RawBulkMessageDeleteEvent,
+    RawGuildMemberRemoveEvent,
     RawGuildScheduledEventUserActionEvent,
     RawIntegrationDeleteEvent,
     RawMessageDeleteEvent,
@@ -1271,6 +1272,11 @@ class ConnectionState:
             if member is not None:
                 guild._remove_member(member)
                 self.dispatch("member_remove", member)
+                user = member
+            else:
+                user = self.store_user(data["user"])
+            raw = RawGuildMemberRemoveEvent(user, guild.id)
+            self.dispatch("raw_member_remove", raw)
         else:
             _log.debug(
                 "GUILD_MEMBER_REMOVE referencing an unknown guild ID: %s. Discarding.",
@@ -1279,8 +1285,7 @@ class ConnectionState:
 
     def parse_guild_member_update(self, data: gateway.GuildMemberUpdateEvent) -> None:
         guild = self._get_guild(int(data["guild_id"]))
-        user = data["user"]
-        user_id = int(user["id"])
+        user_id = int(data["user"]["id"])
         if guild is None:
             _log.debug(
                 "GUILD_MEMBER_UPDATE referencing an unknown guild ID: %s. Discarding.",
@@ -1292,24 +1297,23 @@ class ConnectionState:
         if member is not None:
             old_member = Member._copy(member)
             member._update(data)
-            user_update = member._update_inner_user(user)
+            user_update = member._update_inner_user(data["user"])
             if user_update:
                 self.dispatch("user_update", user_update[0], user_update[1])
 
             self.dispatch("member_update", old_member, member)
         else:
+            member = Member(data=data, guild=guild, state=self)
+
+            # Force an update on the inner user if necessary
+            user_update = member._update_inner_user(data["user"])
+            if user_update:
+                self.dispatch("user_update", user_update[0], user_update[1])
+
             if self.member_cache_flags.joined:
-                member = Member(data=data, guild=guild, state=self)
-
-                # Force an update on the inner user if necessary
-                user_update = member._update_inner_user(user)
-                if user_update:
-                    self.dispatch("user_update", user_update[0], user_update[1])
-
                 guild._add_member(member)
-            _log.debug(
-                "GUILD_MEMBER_UPDATE referencing an unknown member ID: %s. Discarding.", user_id
-            )
+
+        self.dispatch("raw_member_update", member)
 
     def parse_guild_emojis_update(self, data: gateway.GuildEmojisUpdateEvent) -> None:
         guild = self._get_guild(int(data["guild_id"]))
