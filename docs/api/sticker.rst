@@ -1,0 +1,121 @@
+.. currentmodule:: disnake
+
+Stickers
+========
+
+This section documents everything related to stickers.
+
+Classes
+-------
+
+Sticker
+~~~~~~~
+
+.. attributetable:: Sticker
+
+.. autoclass:: Sticker()
+    :members:
+    :inherited-members:
+
+StandardSticker
+~~~~~~~~~~~~~~~~
+
+.. attributetable:: StandardSticker
+
+.. autoclass:: StandardSticker()
+    :members:
+    :inherited-members:
+
+GuildSticker
+~~~~~~~~~~~~~
+
+.. attributetable:: GuildSticker
+
+.. autoclass:: GuildSticker()
+    :members:
+    :inherited-members:
+
+StickerItem
+~~~~~~~~~~~~~
+
+.. attributetable:: StickerItem
+
+.. autoclass:: StickerItem()
+    :members:
+    :inherited-members:
+
+Data Classes
+------------
+
+StickerPack
+~~~~~~~~~~~~~
+
+.. attributetable:: StickerPack
+
+.. autoclass:: StickerPack()
+    :members:
+
+Enumerations
+------------
+
+StickerType
+~~~~~~~~~~~
+
+.. class:: StickerType
+
+    |discord_enum|
+
+    Represents the type of sticker.
+
+    .. versionadded:: 2.0
+
+    .. attribute:: standard
+
+        Represents a standard sticker that all Nitro users can use.
+
+    .. attribute:: guild
+
+        Represents a custom sticker created in a guild.
+
+StickerFormatType
+~~~~~~~~~~~~~~~~~
+
+.. class:: StickerFormatType
+
+    |discord_enum|
+
+    Represents the type of sticker images.
+
+    .. versionadded:: 1.6
+
+    .. attribute:: png
+
+        Represents a sticker with a png image.
+
+    .. attribute:: apng
+
+        Represents a sticker with an apng image.
+
+    .. attribute:: lottie
+
+        Represents a sticker with a lottie image.
+
+Events
+------
+
+.. function:: on_guild_stickers_update(guild, before, after)
+
+    |discord_event|
+
+    Called when a :class:`Guild` updates its stickers.
+
+    This requires :attr:`Intents.emojis_and_stickers` to be enabled.
+
+    .. versionadded:: 2.0
+
+    :param guild: The guild who got their stickers updated.
+    :type guild: :class:`Guild`
+    :param before: A list of stickers before the update.
+    :type before: Sequence[:class:`GuildSticker`]
+    :param after: A list of stickers after the update.
+    :type after: Sequence[:class:`GuildSticker`]

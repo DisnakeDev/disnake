@@ -1,0 +1,3 @@
+[console_scripts]
+task=taskipy.cli:main
+

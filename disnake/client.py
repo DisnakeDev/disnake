@@ -150,7 +150,9 @@ def _cleanup_loop(loop: asyncio.AbstractEventLoop) -> None:
 
 
 class SessionStartLimit:
-    """A class that contains information about the current session start limit,
+    """|data_class|
+
+    A class that contains information about the current session start limit,
     at the time when the client connected for the first time.
 
     .. versionadded:: 2.5

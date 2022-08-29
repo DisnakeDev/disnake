@@ -40,7 +40,9 @@ __all__ = (
 
 
 class Colour:
-    """Represents a Discord role colour. This class is similar
+    """|data_class|
+
+    Represents a Discord role colour. This class is similar
     to a (red, green, blue) :class:`tuple`.
 
     There is an alias for this called Color.

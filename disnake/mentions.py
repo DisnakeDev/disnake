@@ -54,7 +54,9 @@ default: Any = _FakeBool()
 
 
 class AllowedMentions:
-    """A class that represents what mentions are allowed in a message.
+    """|data_class|
+
+    A class that represents what mentions are allowed in a message.
 
     This class can be set during :class:`Client` initialisation to apply
     to every message sent. It can also be applied on a per message basis

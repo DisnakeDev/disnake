@@ -1,7 +1,7 @@
 .. _discord_ext_tasks:
 
 ``disnake.ext.tasks`` -- asyncio.Task helpers
-====================================================
+=============================================
 
 .. versionadded:: 1.1.0
 

@@ -58,7 +58,7 @@ These pages go into great detail about everything the API can do.
 .. toctree::
   :maxdepth: 1
 
-  api
+  disnake API Reference <api/index.rst>
   disnake.ext.commands API Reference <ext/commands/api.rst>
   disnake.ext.tasks API Reference <ext/tasks/index.rst>
 

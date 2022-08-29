@@ -1,7 +1,7 @@
 .. currentmodule:: disnake
 
 API Reference
-===============
+=============
 
 The following section outlines the API of disnake's command extension module.
 

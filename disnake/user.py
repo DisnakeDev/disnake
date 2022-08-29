@@ -413,7 +413,9 @@ class ClientUser(BaseUser):
 
 
 class User(BaseUser, disnake.abc.Messageable):
-    """Represents a Discord user.
+    """|discord_model|
+
+    Represents a Discord user.
 
     .. container:: operations
 

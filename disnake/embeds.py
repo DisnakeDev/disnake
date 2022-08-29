@@ -117,7 +117,9 @@ if TYPE_CHECKING:
 
 
 class Embed:
-    """Represents a Discord embed.
+    """|data_class|
+
+    Represents a Discord embed.
 
     .. container:: operations
 

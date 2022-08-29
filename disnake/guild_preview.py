@@ -37,7 +37,9 @@ __all__ = ("GuildPreview",)
 
 
 class GuildPreview:
-    """Represents a :class:`.Guild` preview object.
+    """|data_class|
+
+    Represents a :class:`.Guild` preview object.
 
     .. versionadded:: 2.5
 

@@ -53,7 +53,9 @@ if TYPE_CHECKING:
 
 
 class RoleTags:
-    """Represents tags on a role.
+    """|data_class|
+
+    Represents tags on a role.
 
     A role tag is a piece of extra information attached to a managed role
     that gives it context for the reason the role is managed.
@@ -115,7 +117,9 @@ class RoleTags:
 
 
 class Role(Hashable):
-    """Represents a Discord role in a :class:`Guild`.
+    """|discord_model|
+
+    Represents a Discord role in a :class:`Guild`.
 
     .. container:: operations
 

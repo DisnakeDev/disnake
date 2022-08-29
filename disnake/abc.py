@@ -107,7 +107,9 @@ MISSING = utils.MISSING
 
 @runtime_checkable
 class Snowflake(Protocol):
-    """An ABC that details the common operations on a Discord model.
+    """|discord_abc|
+
+    An ABC that details the common operations on a Discord model.
 
     Almost all :ref:`Discord models <discord_api_models>` meet this
     abstract base class.
@@ -127,7 +129,9 @@ class Snowflake(Protocol):
 
 @runtime_checkable
 class User(Snowflake, Protocol):
-    """An ABC that details the common operations on a Discord user.
+    """|discord_abc|
+
+    An ABC that details the common operations on a Discord user.
 
     The following classes implement this ABC:
 
@@ -169,7 +173,9 @@ class User(Snowflake, Protocol):
 
 @runtime_checkable
 class PrivateChannel(Snowflake, Protocol):
-    """An ABC that details the common operations on a private Discord channel.
+    """|discord_abc|
+
+    An ABC that details the common operations on a private Discord channel.
 
     The following classes implement this ABC:
 
@@ -217,7 +223,9 @@ class _Overwrites:
 
 
 class GuildChannel(ABC):
-    """An ABC that details the common operations on a Discord guild channel.
+    """|discord_abc|
+
+    An ABC that details the common operations on a Discord guild channel.
 
     The following classes implement this ABC:
 
@@ -1244,7 +1252,9 @@ class GuildChannel(ABC):
 
 
 class Messageable:
-    """An ABC that details the common operations on a model that can send messages.
+    """|discord_abc|
+
+    An ABC that details the common operations on a model that can send messages.
 
     The following classes implement this ABC:
 
@@ -1754,7 +1764,9 @@ class Messageable:
 
 
 class Connectable(Protocol):
-    """An ABC that details the common operations on a channel that can
+    """|discord_abc|
+
+    An ABC that details the common operations on a channel that can
     connect to a voice server.
 
     The following classes implement this ABC:

@@ -90,7 +90,9 @@ if TYPE_CHECKING:
 
 
 class VoiceState:
-    """Represents a Discord user's voice state.
+    """|data_class|
+
+    Represents a Discord user's voice state.
 
     Attributes
     ----------
@@ -230,7 +232,9 @@ def flatten_user(cls):
 
 @flatten_user
 class Member(disnake.abc.Messageable, _UserTag):
-    """Represents a Discord member to a :class:`Guild`.
+    """|discord_model|
+
+    Represents a Discord member to a :class:`Guild`.
 
     This implements a lot of the functionality of :class:`User`.
 

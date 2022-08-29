@@ -40,7 +40,9 @@ if TYPE_CHECKING:
 
 
 class Reaction:
-    """Represents a reaction to a message.
+    """|discord_model|
+
+    Represents a reaction to a message.
 
     Depending on the way this object was created, some of the attributes can
     have a value of ``None``.
