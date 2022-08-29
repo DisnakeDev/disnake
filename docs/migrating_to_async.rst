@@ -91,7 +91,7 @@ After:
     def on_socket_raw_send(payload): pass
 
 Note that ``on_status`` was removed. If you want its functionality, use :func:`on_member_update`.
-See :ref:`discord-api-events` for more information. Other removed events include ``on_socket_closed``, ``on_socket_receive``, and ``on_socket_opened``.
+See :ref:`discord_event` for more information. Other removed events include ``on_socket_closed``, ``on_socket_receive``, and ``on_socket_opened``.
 
 
 Coroutines
@@ -180,7 +180,7 @@ After:
     channel.type == disnake.ChannelType.text
 
 The main reason for this change was to reduce the use of finicky strings in the API as this
-could give users a false sense of power. More information can be found in the :ref:`discord-api-enums` page.
+could give users a false sense of power. More information can be found in the :ref:`discord_enum` page.
 
 Properties
 -----------

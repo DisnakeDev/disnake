@@ -12,7 +12,7 @@ The amount of changes are so massive and long that for all intents and purposes,
 new library.
 
 Part of the redesign involves making things more easy to use and natural. Things are done on the
-:ref:`models <discord_api_models>` instead of requiring a :class:`Client` instance to do any work.
+:ref:`models <discord_model>` instead of requiring a :class:`Client` instance to do any work.
 
 Python Version Change
 -----------------------
@@ -87,7 +87,7 @@ Models are Stateful
 ~~~~~~~~~~~~~~~~~~~~~
 
 As mentioned earlier, a lot of functionality was moved out of :class:`Client` and
-put into their respective :ref:`model <discord_api_models>`.
+put into their respective :ref:`model <discord_model>`.
 
 A list of these changes is enumerated below.
 
@@ -291,7 +291,7 @@ In order to save memory the channels have been split into 4 different types:
 
 With this split came the removal of the ``is_private`` attribute. You should now use :func:`isinstance`.
 
-The types are split into two different :ref:`discord_api_abcs`:
+The types are split into two different :ref:`discord_abc`:
 
 - :class:`abc.GuildChannel` for guild channels.
 - :class:`abc.PrivateChannel` for private channels (DMs and group DMs).
@@ -342,7 +342,7 @@ They will be enumerated here.
 
 - ``Channel.is_private``
 
-    - Use ``isinstance`` instead with one of the :ref:`discord_api_abcs` instead.
+    - Use ``isinstance`` instead with one of the :ref:`discord_abc` instead.
     - e.g. ``isinstance(channel, disnake.abc.GuildChannel)`` will check if it isn't a private channel.
 
 - ``Client.accept_invite``

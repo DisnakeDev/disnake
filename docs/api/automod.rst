@@ -152,6 +152,12 @@ AutoModTriggerType
 
         This trigger type requires additional :class:`metadata <AutoModTriggerMetadata>`.
 
+    .. attribute:: mention_spam
+
+        The rule will filter messages based on the number of member/role mentions they contain.
+
+        This trigger type requires additional :class:`metadata <AutoModTriggerMetadata>`.
+
 Events
 ------
 

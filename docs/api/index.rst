@@ -1,5 +1,7 @@
 .. currentmodule:: disnake
 
+.. _discord_api_index:
+
 API Reference
 =============
 
