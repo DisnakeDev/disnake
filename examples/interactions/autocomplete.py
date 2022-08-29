@@ -1,3 +1,4 @@
+import os
 from typing import List
 
 import disnake
@@ -25,7 +26,7 @@ async def autocomplete(
     ...
 
 
-# In case you need don't want to use Param or need to use self in a cog you may
+# In case you don't want to use Param or need to use self in a cog you may
 # create autocomplete options with the decorator @slash_command.autocomplete()
 @bot.slash_command()
 async def languages(inter: disnake.CommandInteraction, language: str):
@@ -36,3 +37,6 @@ async def languages(inter: disnake.CommandInteraction, language: str):
 async def language_autocomp(inter: disnake.CommandInteraction, string: str):
     string = string.lower()
     return [lang for lang in LANGUAGES if string in lang.lower()]
+
+
+bot.run(os.getenv("BOT_TOKEN"))

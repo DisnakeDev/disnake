@@ -1,3 +1,0 @@
-Add support for NSFW application commands.
-- Add :attr:`ApplicationCommand.nsfw`.
-- Add ``nsfw`` parameter to command constructors and decorators.
