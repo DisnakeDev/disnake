@@ -6,23 +6,23 @@ import pytest
 from disnake import enums
 
 
-@mock.patch.object(enums.EnumMeta, "_EnumMeta__is_enum_instantiated", new=False)
+@mock.patch.object(enums.EnumMeta, "__is_enum_instantiated__", new=False)
 def test_init_first_enum():
-    assert enums.EnumMeta._EnumMeta__is_enum_instantiated is False  # type: ignore
+    assert enums.EnumMeta.__is_enum_instantiated__ is False
 
     class Enum(metaclass=enums.EnumMeta):
         pass
 
-    assert enums.EnumMeta._EnumMeta__is_enum_instantiated is True  # type: ignore
+    assert enums.EnumMeta.__is_enum_instantiated__ is True
 
 
 def test_init_followup_enum():
-    assert enums.EnumMeta._EnumMeta__is_enum_instantiated is True  # type: ignore
+    assert enums.EnumMeta.__is_enum_instantiated__ is True
 
     class TestEnum(int, enums.Enum):
         pass
 
-    assert enums.EnumMeta._EnumMeta__is_enum_instantiated is True  # type: ignore
+    assert enums.EnumMeta.__is_enum_instantiated__ is True
 
     assert TestEnum.__mro__ == (TestEnum, int, enums.Enum, object)
 

@@ -23,6 +23,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
 from __future__ import annotations
+from operator import attrgetter
 
 import types
 from typing import (
@@ -37,7 +38,6 @@ from typing import (
     Tuple,
     Type,
     TypeVar,
-    Union,
 )
 
 __all__ = (
@@ -93,6 +93,17 @@ def _is_descriptor(obj):
 
 
 class _EnumDict(Dict[str, Any]):
+    """
+    Enforces proper enum value typing and prevents duplicate names.
+
+    This is used as the ephemeral namespace in enum class creation.
+
+    Class attributes such as descriptors and private attributes will be directly stored inside this
+    dict, whereas any actual enum members are stored inside ``self.member_map``.
+
+    ``EnumMeta`` will use the collected items in ``self.member_map`` as the enum members.
+    """
+
     def __init__(self, base: Type[Any]):
         # We explicitly take a base in __init__, unlike default Enums, to more easily
         # enforce proper value typing. This should ensure better performance, as e.g.
@@ -102,11 +113,19 @@ class _EnumDict(Dict[str, Any]):
         super().__init__()
         self.base = base
         self.member_map: Dict[str, Any] = {}
-        self.value_map: Dict[Any, str] = {}
 
     def __setitem__(self, name: str, value: Any) -> None:
-        if name in {"mro", ""}:  # illegal names defined in original python enums
-            raise ValueError(f"Invalid Enum member name: {name}")
+        if name in {
+            # Illegal names defined in original python enums:
+            "mro",
+            "",
+            # Additional illegal names to prevent overwriting:
+            "name",
+            "value",
+        }:
+            # The main Enum must not be checked or its name and value fields will be flagged...
+            if EnumMeta.__is_enum_instantiated__:
+                raise ValueError(f"Invalid Enum member name: {name}")
 
         if name.startswith("_") or _is_descriptor(value):
             super().__setitem__(name, value)
@@ -119,20 +138,15 @@ class _EnumDict(Dict[str, Any]):
 
         if name in self.member_map:
             raise TypeError(f"Cannot create multiple members with the same name: {name!r}")
-        if value in self.value_map:
-            # We'll have to settle for slower value lookup in case of a dupe
-            self.member_map[name] = value
-            return
 
         self.member_map[name] = value
-        self.value_map[value] = name
 
 
 class EnumMeta(type):
-    __is_enum_instantiated: ClassVar[bool] = False
+    __is_enum_instantiated__: ClassVar[bool] = False
 
-    _name_map_: ClassVar[Mapping[str, Enum]]
-    _value2member_map_: ClassVar[Mapping[Any, Enum]]
+    _member_map_: Mapping[str, Enum]
+    _value2member_map_: Mapping[Any, Enum]
 
     def __new__(
         metacls: Type[_T],  # pyright: reportSelfClsParameterName=false
@@ -141,8 +155,8 @@ class EnumMeta(type):
         namespace: _EnumDict,
     ) -> _T:
 
-        if not EnumMeta.__is_enum_instantiated:
-            EnumMeta.__is_enum_instantiated = True
+        if not EnumMeta.__is_enum_instantiated__:
+            EnumMeta.__is_enum_instantiated__ = True
             return super().__new__(metacls, name, bases, namespace)
 
         base, enum_type = bases  # ensured possible in __prepare__
@@ -150,13 +164,9 @@ class EnumMeta(type):
         ns: Dict[str, Any] = {
             "__objtype__": base,
             "__enumtype__": enum_type,
-            "_name_map_": (name_map := {}),
+            "_member_map_": (name_map := {}),
             "_value2member_map_": (value_map := {}),
-            **{
-                name_: value_
-                for name_, value_ in Enum.__dict__.items()
-                if name_ not in ("__class__", "__module__", "__doc__")
-            },
+            **Enum.__dict__,
         }
 
         ns.update(namespace)
@@ -176,10 +186,10 @@ class EnumMeta(type):
     @classmethod
     def __prepare__(
         metacls, name: str, bases: Tuple[Type[Any], ...] = (), /, **kwds: Any
-    ) -> Union[Dict[str, Any], _EnumDict]:
+    ) -> _EnumDict:
         # with this we get to ensure the new class' namespace is an _EnumDict
 
-        if not EnumMeta.__is_enum_instantiated:
+        if not EnumMeta.__is_enum_instantiated__:
             return _EnumDict(object)
 
         try:
@@ -195,31 +205,31 @@ class EnumMeta(type):
     def __repr__(cls) -> str:
         return f"<enum {cls.__name__}>"
 
-    def __call__(cls, value: Any) -> Any:
+    def __call__(cls, value: Any) -> Enum:
         try:
             return cls._value2member_map_[value]
         except KeyError:
             raise ValueError(f"{value} is not a valid {cls.__name__}") from None
 
-    def __getitem__(cls, name: str) -> Any:
-        return cls._name_map_[name]
+    def __getitem__(cls, name: str) -> Enum:
+        return cls._member_map_[name]
 
-    def __contains__(cls, value: Any) -> bool:
+    def __contains__(cls, value: Enum) -> bool:
         return value in cls._value2member_map_
 
-    def __iter__(cls) -> Iterator[Any]:
-        yield from cls._name_map_.values()
+    def __iter__(cls) -> Iterator[Enum]:
+        yield from cls._member_map_.values()
 
     @property
     def __members__(cls) -> Mapping[str, Enum]:
-        return types.MappingProxyType(cls._name_map_)
+        return types.MappingProxyType(cls._member_map_)
 
     @property
     def _member_names_(cls) -> Sequence[str]:
         # I *think* this should be fine as a property?
         # Hardly ever gets used so I don't really see the value in pre-computing it like
         # vanilla Enums do. I decided to save memory but we can always just revert this.
-        return tuple(cls._name_map_)
+        return tuple(cls._member_map_)
 
 
 if TYPE_CHECKING:
@@ -227,20 +237,11 @@ if TYPE_CHECKING:
 else:
 
     class Enum(metaclass=EnumMeta):
-        _name_map_: ClassVar[Mapping[str, Enum]]
-        _value2member_map_: ClassVar[Mapping[Any, Enum]]
         _name_: str
         _value_: Any
 
-        @property
-        def name(self) -> str:
-            """The name of the enum member."""
-            return self._name_
-
-        @property
-        def value(self):
-            """The value of the enum member."""
-            return self._value_
+        name = property(attrgetter("_name_"), doc="The name of the enum member.")
+        value = property(attrgetter("_value_"), doc="The value of the enum member.")
 
         def __repr__(self) -> str:
             return f"<{type(self).__name__}.{self._name_}: {self._value_!r}>"
