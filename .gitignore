@@ -1,6 +1,7 @@
 *.json
 *.py[cod]
 *.log
+*.log.[0-9]*
 *.egg-info
 venv
 .venv
