@@ -1,9 +1,10 @@
 import os
+import sys
 
 try:
     import dotenv
 except ModuleNotFoundError:
-    print("Not loading .env")
+    print("Not loading .env", file=sys.stderr)
 else:
     dotenv.load_dotenv()
 
