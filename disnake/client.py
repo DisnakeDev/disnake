@@ -693,6 +693,37 @@ class Client:
         print(f"Ignoring exception in {event_method}", file=sys.stderr)
         traceback.print_exc()
 
+    async def _dispatch_gateway_error(
+        self, event: str, data: Any, shard_id: Optional[int], exc: Exception, /
+    ) -> None:
+        # This is an internal hook that calls the public one,
+        # enabling additional handling while still allowing users to
+        # overwrite `on_gateway_error`.
+        # Even though this is always meant to be an async func, we use `maybe_coroutine`
+        # just in case the client gets subclassed and the method is overwritten with a sync one.
+        await utils.maybe_coroutine(self.on_gateway_error, event, data, shard_id, exc)
+
+    async def on_gateway_error(
+        self, event: str, data: Any, shard_id: Optional[int], exc: Exception, /
+    ) -> None:
+        """|coro|
+
+        The default gateway error handler provided by the client.
+
+        By default this prints to :data:`sys.stderr` however it could be
+        overridden to have a different implementation.
+        Check :func:`~disnake.on_gateway_error` for more details.
+
+        .. note::
+            Unlike :func:`on_error`, the exception is available as the ``exc``
+            parameter and cannot be obtained through :func:`sys.exc_info`.
+        """
+        print(
+            f"Ignoring exception in {event} gateway event handler (shard ID {shard_id})",
+            file=sys.stderr,
+        )
+        traceback.print_exception(type(exc), exc, exc.__traceback__)
+
     # hooks
 
     async def _call_before_identify_hook(

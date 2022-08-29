@@ -88,6 +88,12 @@ if TYPE_CHECKING:
         def __call__(self, event: str, *args: Any) -> None:
             ...
 
+    class GatewayErrorFunc(Protocol):
+        async def __call__(
+            self, event: str, data: Any, shard_id: Optional[int], exc: Exception, /
+        ) -> None:
+            ...
+
     class CallHooksFunc(Protocol):
         async def __call__(self, key: str, *args: Any, **kwargs: Any) -> None:
             ...
@@ -365,7 +371,11 @@ class DiscordWebSocket:
         self.loop: asyncio.AbstractEventLoop = loop
 
         # an empty dispatcher to prevent crashes
+        async def _dispatch_gateway_error(*args: Any):
+            pass
+
         self._dispatch: DispatchFunc = lambda event, *args: None
+        self._dispatch_gateway_error: GatewayErrorFunc = _dispatch_gateway_error
         # generic event listeners
         self._dispatch_listeners: List[EventListener] = []
         # the keep alive
@@ -429,6 +439,7 @@ class DiscordWebSocket:
         ws._connection = client._connection
         ws._discord_parsers = client._connection.parsers
         ws._dispatch = client.dispatch
+        ws._dispatch_gateway_error = client._dispatch_gateway_error
         ws.gateway = gateway
         ws.call_hooks = client._connection.call_hooks
         ws._initial_identify = initial
@@ -644,12 +655,9 @@ class DiscordWebSocket:
                 if event in {"READY", "RESUMED"}:  # exceptions in these events are fatal
                     raise
 
-                self.loop.call_exception_handler(
-                    {
-                        "task": asyncio.current_task(self.loop),
-                        "message": f"Exception occurred in Shard ID {self.shard_id}, {event} gateway event handler",
-                        "exception": e,
-                    }
+                event_name: str = event  # type: ignore  # event can't be None here
+                asyncio.create_task(
+                    self._dispatch_gateway_error(event_name, data, self.shard_id, e)
                 )
 
         # remove the dispatched listeners
