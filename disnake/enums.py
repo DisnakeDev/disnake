@@ -23,9 +23,9 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
 from __future__ import annotations
-from operator import attrgetter
 
 import types
+from operator import attrgetter
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -2138,8 +2138,8 @@ class Locale(str, Enum):
     zh_TW = "zh-TW"
     """The ``zh-TW`` (Chinese, Taiwan | 繁體中文) locale."""
 
-    def __str__(self):
-        return self.value
+    # def __str__(self):
+    #     return self.value
 
 
 class AutoModActionType(int, Enum):
