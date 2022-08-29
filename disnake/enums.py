@@ -25,7 +25,6 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import types
-from operator import attrgetter
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -149,7 +148,7 @@ class EnumMeta(type):
     _value2member_map_: Mapping[Any, Enum]
 
     def __new__(
-        metacls: Type[_T],  # pyright: reportSelfClsParameterName=false
+        metacls: Type[_T],  # pyright: ignore[reportSelfClsParameterName]
         name: str,
         bases: Tuple[Type[Any], Type[Any]],
         namespace: _EnumDict,
@@ -175,8 +174,11 @@ class EnumMeta(type):
 
         for name_, value_ in namespace.member_map.items():
             member = cls.__new__(cls, value_)  # type: ignore
-            member._name_ = name_
-            member._value_ = value_
+
+            # We use object's setattr method to bypass Enum's protected setattr.
+            object.__setattr__(member, "name", name_)
+            object.__setattr__(member, "value", value_)
+
             name_map[name_] = member
             value_map.setdefault(value_, member)  # Prioritize first defined in case of alias
             setattr(cls, name_, member)
@@ -185,7 +187,11 @@ class EnumMeta(type):
 
     @classmethod
     def __prepare__(
-        metacls, name: str, bases: Tuple[Type[Any], ...] = (), /, **kwds: Any
+        metacls,  # pyright: ignore[reportSelfClsParameterName]
+        name: str,
+        bases: Tuple[Type[Any], ...] = (),
+        /,
+        **kwds: Any,
     ) -> _EnumDict:
         # with this we get to ensure the new class' namespace is an _EnumDict
 
@@ -237,17 +243,27 @@ if TYPE_CHECKING:
 else:
 
     class Enum(metaclass=EnumMeta):
-        _name_: str
-        _value_: Any
-
-        name = property(attrgetter("_name_"), doc="The name of the enum member.")
-        value = property(attrgetter("_value_"), doc="The value of the enum member.")
+        _name_map_: ClassVar[Mapping[str, Enum]]
+        _value2member_map_: ClassVar[Mapping[Any, Enum]]
+        name: str
+        value: Any
 
         def __repr__(self) -> str:
-            return f"<{type(self).__name__}.{self._name_}: {self._value_!r}>"
+            return f"<{type(self).__name__}.{self.name}: {self.value!r}>"
 
         def __str__(self) -> str:
-            return self._name_
+            return self.name
+
+        def __setattr__(self, name: str, value: Any) -> None:
+            if name in {"name", "value"}:
+                # We disallow overwriting enum members' names and values as this could very easily
+                # break a bot, and would be extremely hard to debug from an outside perspective.
+                # This is done via direct attributes and a setattr check to make reading these
+                # attributes as fast as possible, which is relevant because enums are used extensively
+                # in (de)serializing data sent to/received from discord.
+                raise AttributeError(f"Overwriting {type(self).__name__}.{name} is not allowed.")
+
+            super().__setattr__(name, value)
 
 
 class ChannelType(int, Enum):
