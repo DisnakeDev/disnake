@@ -1,1 +1,1 @@
-Call current loop's exception handler instead of crashing the process if an unhandled exception occurs while deserializing a received gateway event.
+Call new :func:`disnake.on_gateway_error` instead of letting exceptions propagate that occurred while deserializing a received gateway event.
