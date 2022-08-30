@@ -26,5 +26,6 @@ venvs/
 .idea
 .coverage*
 coverage.xml
+lib/
 
 !test_bot/locale/*.json
