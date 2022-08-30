@@ -1324,6 +1324,13 @@ def walk_extensions(
         or ``admin.eval_cmd`` is given, but not with ``admin.eval`` or ``cmd``, to name
         a few examples.
 
+    Raises
+    ------
+    TypeError
+        The ``ignore`` parameter is of an invalid type.
+    ImportError
+        A package couldn't be imported.
+
     Yields
     ------
     :class:`str`

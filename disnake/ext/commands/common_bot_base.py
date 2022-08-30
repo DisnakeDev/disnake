@@ -588,6 +588,9 @@ class CommonBotBase(Generic[CogT]):
 
         See :func:`disnake.utils.walk_extensions` for details on how packages are found.
 
+        This may raise any errors that :func:`load_extension` can raise, in addition to
+        the ones documented below.
+
         .. versionadded:: 2.4
 
         .. versionchanged:: 2.6
@@ -609,6 +612,17 @@ class CommonBotBase(Generic[CogT]):
 
             See :func:`disnake.utils.walk_extensions` for details.
 
+        Raises
+        ------
+        ExtensionNotFound
+            The given root module could not be found.
+            This is also raised if the name of the root module could not
+            be resolved using the provided ``package`` parameter.
+
+            This, as well as other extension-related errors, may also be
+            raised as this method calls :func:`load_extension` on all found extensions.
+            See :func:`load_extension` for further details on raised exceptions.
+
         Yields
         ------
         :class:`str`
@@ -624,16 +638,21 @@ class CommonBotBase(Generic[CogT]):
 
             path = os.path.relpath(root_module)
             if ".." in path:
-                raise ImportError(
+                raise ValueError(
                     "Paths outside the cwd are not supported. Try using the module name instead."
                 )
             root_module = path.replace(os.sep, ".")
 
-        if not (spec := importlib.util.find_spec(root_module, package)):
-            raise ImportError(f"Unable to find root module '{root_module}' in package '{package}'")
+        # `find_spec` already calls `resolve_name`, but we want our custom error handling here
+        root_module = self._resolve_name(root_module, package)
+
+        if not (spec := importlib.util.find_spec(root_module)):
+            raise errors.ExtensionNotFound(
+                f"Unable to find root module '{root_module}' in package '{package}'"
+            )
 
         if not (paths := spec.submodule_search_locations):
-            raise ImportError(f"Module '{root_module}' is not a package")
+            raise errors.ExtensionNotFound(f"Module '{root_module}' is not a package")
 
         for ext_name in disnake.utils.walk_extensions(paths, prefix=f"{spec.name}.", ignore=ignore):
             self.load_extension(ext_name)
