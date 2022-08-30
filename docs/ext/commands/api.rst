@@ -163,7 +163,7 @@ Prefix Helpers
 Event Reference
 -----------------
 
-These events function similar to :ref:`the regular events <discord-api-events>`, except they
+These events function similar to :ref:`the regular events <discord_event>`, except they
 are custom to the command extension module.
 
 .. function:: disnake.ext.commands.on_command_error(ctx, error)
