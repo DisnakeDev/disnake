@@ -371,11 +371,8 @@ class DiscordWebSocket:
         self.loop: asyncio.AbstractEventLoop = loop
 
         # an empty dispatcher to prevent crashes
-        async def _dispatch_gateway_error(*args: Any):
-            pass
-
         self._dispatch: DispatchFunc = lambda event, *args: None
-        self._dispatch_gateway_error: GatewayErrorFunc = _dispatch_gateway_error
+        self._dispatch_gateway_error: Optional[GatewayErrorFunc] = None
         # generic event listeners
         self._dispatch_listeners: List[EventListener] = []
         # the keep alive
@@ -439,7 +436,6 @@ class DiscordWebSocket:
         ws._connection = client._connection
         ws._discord_parsers = client._connection.parsers
         ws._dispatch = client.dispatch
-        ws._dispatch_gateway_error = client._dispatch_gateway_error
         ws.gateway = gateway
         ws.call_hooks = client._connection.call_hooks
         ws._initial_identify = initial
@@ -453,6 +449,9 @@ class DiscordWebSocket:
         if client._enable_debug_events:
             ws.send = ws.debug_send
             ws.log_receive = ws.debug_log_receive
+
+        if client._enable_gateway_error_handler:
+            ws._dispatch_gateway_error = client._dispatch_gateway_error
 
         client._connection._update_references(ws)
 
@@ -652,6 +651,10 @@ class DiscordWebSocket:
             try:
                 func(data)
             except Exception as e:
+                if self._dispatch_gateway_error is None:
+                    # error handler disabled, raise immediately
+                    raise
+
                 if event in {"READY", "RESUMED"}:  # exceptions in these events are fatal
                     raise
 

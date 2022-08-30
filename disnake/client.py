@@ -285,6 +285,15 @@ class Client:
 
         .. versionadded:: 2.0
 
+    enable_gateway_error_handler: :class:`bool`
+        Whether to enable the :func:`disnake.on_gateway_error` event.
+
+        If this is disabled, exceptions that occur while parsing (known) gateway events
+        won't be handled and the pre-v2.6 behavior of letting the exception propagate up to
+        the :func:`connect`/:func:`start`/:func:`run` call is used instead.
+
+        .. versionadded:: 2.6
+
     test_guilds: List[:class:`int`]
         The list of IDs of the guilds where you're going to test your application commands.
         Defaults to ``None``, which means global registration of commands across
@@ -379,6 +388,7 @@ class Client:
         self._hooks: Dict[str, Callable] = {"before_identify": self._call_before_identify_hook}
 
         self._enable_debug_events: bool = options.pop("enable_debug_events", False)
+        self._enable_gateway_error_handler: bool = options.pop("enable_gateway_error_handler", True)
         self._connection: ConnectionState = self._get_state(**options)
         self._connection.shard_count = self.shard_count
         self._closed: bool = False
@@ -713,6 +723,8 @@ class Client:
         By default this prints to :data:`sys.stderr` however it could be
         overridden to have a different implementation.
         Check :func:`~disnake.on_gateway_error` for more details.
+
+        .. versionadded:: 2.6
 
         .. note::
             Unlike :func:`on_error`, the exception is available as the ``exc``

@@ -262,8 +262,13 @@ This section documents events related to :class:`Client` and its connectivity to
     When a (known) gateway event cannot be parsed, a traceback is printed to
     stderr and the exception is ignored by default. This should generally
     not happen and is usually either a library issue, or caused by a breaking API change.
-    To change this behaviour, for example to completely stop the process like in versions
-    prior to v2.6, this event can be overridden.
+
+    To change this behaviour, for example to completely stop the bot, this event can be overridden.
+
+    This can also be disabled completely by passing ``enable_gateway_error_handler=False``
+    to the client on initialization, restoring the pre-v2.6 behavior.
+
+    .. versionadded:: 2.6
 
     .. note::
         ``on_gateway_error`` will only be dispatched to :meth:`Client.event`.
