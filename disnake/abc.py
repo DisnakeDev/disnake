@@ -58,6 +58,7 @@ from .permissions import PermissionOverwrite, Permissions
 from .role import Role
 from .sticker import GuildSticker, StickerItem
 from .ui.action_row import components_to_dict
+from .utils import _overload_with_permissions
 from .voice_client import VoiceClient, VoiceProtocol
 
 __all__ = (
@@ -624,13 +625,17 @@ class GuildChannel(ABC):
             are not computed.
         ignore_timeout: :class:`bool`
             Whether or not to ignore the user's timeout.
-            Defaults to ``True`` for backwards compatibility.
+            Defaults to ``False``.
 
             .. versionadded:: 2.4
 
             .. note::
 
                 This only applies to :class:`~disnake.Member` objects.
+
+            .. versionchanged:: 2.6
+
+                The default was changed to ``False``.
 
         Raises
         ------
@@ -660,7 +665,7 @@ class GuildChannel(ABC):
             raise TypeError("ignore_timeout is only supported for disnake.Member objects")
 
         if ignore_timeout is MISSING:
-            ignore_timeout = True
+            ignore_timeout = False
 
         if self.guild.owner_id == obj.id:
             return Permissions.all()
@@ -789,12 +794,59 @@ class GuildChannel(ABC):
         ...
 
     @overload
+    @_overload_with_permissions
     async def set_permissions(
         self,
         target: Union[Member, Role],
         *,
         reason: Optional[str] = ...,
-        **permissions: Optional[bool],
+        add_reactions: Optional[bool] = ...,
+        administrator: Optional[bool] = ...,
+        attach_files: Optional[bool] = ...,
+        ban_members: Optional[bool] = ...,
+        change_nickname: Optional[bool] = ...,
+        connect: Optional[bool] = ...,
+        create_forum_threads: Optional[bool] = ...,
+        create_instant_invite: Optional[bool] = ...,
+        create_private_threads: Optional[bool] = ...,
+        create_public_threads: Optional[bool] = ...,
+        deafen_members: Optional[bool] = ...,
+        embed_links: Optional[bool] = ...,
+        external_emojis: Optional[bool] = ...,
+        external_stickers: Optional[bool] = ...,
+        kick_members: Optional[bool] = ...,
+        manage_channels: Optional[bool] = ...,
+        manage_emojis: Optional[bool] = ...,
+        manage_emojis_and_stickers: Optional[bool] = ...,
+        manage_events: Optional[bool] = ...,
+        manage_guild: Optional[bool] = ...,
+        manage_messages: Optional[bool] = ...,
+        manage_nicknames: Optional[bool] = ...,
+        manage_permissions: Optional[bool] = ...,
+        manage_roles: Optional[bool] = ...,
+        manage_threads: Optional[bool] = ...,
+        manage_webhooks: Optional[bool] = ...,
+        mention_everyone: Optional[bool] = ...,
+        moderate_members: Optional[bool] = ...,
+        move_members: Optional[bool] = ...,
+        mute_members: Optional[bool] = ...,
+        priority_speaker: Optional[bool] = ...,
+        read_message_history: Optional[bool] = ...,
+        read_messages: Optional[bool] = ...,
+        request_to_speak: Optional[bool] = ...,
+        send_messages: Optional[bool] = ...,
+        send_messages_in_threads: Optional[bool] = ...,
+        send_tts_messages: Optional[bool] = ...,
+        speak: Optional[bool] = ...,
+        start_embedded_activities: Optional[bool] = ...,
+        stream: Optional[bool] = ...,
+        use_external_emojis: Optional[bool] = ...,
+        use_external_stickers: Optional[bool] = ...,
+        use_slash_commands: Optional[bool] = ...,
+        use_voice_activation: Optional[bool] = ...,
+        view_audit_log: Optional[bool] = ...,
+        view_channel: Optional[bool] = ...,
+        view_guild_insights: Optional[bool] = ...,
     ) -> None:
         ...
 

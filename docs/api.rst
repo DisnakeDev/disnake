@@ -826,6 +826,7 @@ Members
               on_member_remove(member)
 
     Called when a :class:`Member` leaves or joins a :class:`Guild`.
+    If :func:`on_member_remove` is being used then consider using :func:`on_raw_member_remove` which will be called regardless of the cache.
 
     This requires :attr:`Intents.members` to be enabled.
 
@@ -834,7 +835,8 @@ Members
 
 .. function:: on_member_update(before, after)
 
-    Called when a :class:`Member` is updated.
+    Called when a :class:`Member` updates their profile.
+    Consider using :func:`on_raw_member_update` which will be called regardless of the cache.
 
     This is called when one or more of the following things change, but is not limited to:
 
@@ -851,6 +853,26 @@ Members
     :type before: :class:`Member`
     :param after: The member's updated info.
     :type after: :class:`Member`
+
+.. function:: on_raw_member_remove(payload)
+
+    Called when a member leaves a :class:`Guild`.
+    Unlike :func:`on_member_remove`, this is called regardless of the member cache.
+
+    .. versionadded:: 2.6
+
+    :param payload: The raw event payload data.
+    :type payload: :class:`RawGuildMemberRemoveEvent`
+
+.. function:: on_raw_member_update(member)
+
+    Called when a member updates their profile.
+    Unlike :func:`on_member_update`, this is called regardless of the member cache.
+
+    .. versionadded:: 2.6
+
+    :param member: The member that was updated.
+    :type member: :class:`Member`
 
 .. function:: on_member_ban(guild, user)
 
@@ -3132,7 +3154,27 @@ of :class:`enum.Enum`.
 
         - ``channel``: A :class:`~abc.GuildChannel`, :class:`Thread` or :class:`Object` with the channel ID where the message got blocked.
         - ``rule_name``: A :class:`str` with the name of the rule that matched.
-        - ``rule_trigger_type``: A :class:`AutoModTriggerType` value with the trigger type of the rule.
+        - ``rule_trigger_type``: An :class:`AutoModTriggerType` value with the trigger type of the rule.
+
+    .. attribute:: automod_send_alert_message
+
+        An alert message was sent by an auto moderation rule.
+
+        When this is the action, the type of :attr:`~AuditLogEntry.target` is
+        the :class:`Member` or :class:`User` who had their message flagged.
+
+        See :attr:`automod_block_message` for more information on how the
+        :attr:`~AuditLogEntry.extra` field is set.
+
+    .. attribute:: automod_timeout
+
+        A user was timed out by an auto moderation rule.
+
+        When this is the action, the type of :attr:`~AuditLogEntry.target` is
+        the :class:`Member` or :class:`User` who was timed out.
+
+        See :attr:`automod_block_message` for more information on how the
+        :attr:`~AuditLogEntry.extra` field is set.
 
 .. class:: AuditLogActionCategory
 
@@ -3613,8 +3655,8 @@ of :class:`enum.Enum`.
 
         .. note::
             This action type is only available for rules with trigger type
-            :attr:`~AutoModTriggerType.keyword`, and :attr:`~Permissions.moderate_members`
-            permissions are required to use it.
+            :attr:`~AutoModTriggerType.keyword` or :attr:`~AutoModTriggerType.mention_spam`,
+            and :attr:`~Permissions.moderate_members` permissions are required to use it.
 
 .. class:: AutoModEventType
 
@@ -3649,6 +3691,12 @@ of :class:`enum.Enum`.
     .. attribute:: keyword_preset
 
         The rule will filter messages based on predefined lists containing commonly flagged words.
+
+        This trigger type requires additional :class:`metadata <AutoModTriggerMetadata>`.
+
+    .. attribute:: mention_spam
+
+        The rule will filter messages based on the number of member/role mentions they contain.
 
         This trigger type requires additional :class:`metadata <AutoModTriggerMetadata>`.
 
@@ -5354,6 +5402,14 @@ RawTypingEvent
 .. attributetable:: RawTypingEvent
 
 .. autoclass:: RawTypingEvent()
+    :members:
+
+RawGuildMemberRemoveEvent
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: RawGuildMemberRemoveEvent
+
+.. autoclass:: RawGuildMemberRemoveEvent()
     :members:
 
 PartialWebhookGuild

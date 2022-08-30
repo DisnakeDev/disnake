@@ -54,7 +54,6 @@ class _ApplicationCommandOptional(TypedDict, total=False):
     dm_permission: Optional[bool]
     name_localizations: Optional[ApplicationCommandLocalizations]
     description_localizations: Optional[ApplicationCommandLocalizations]
-    nsfw: Optional[bool]
 
 
 class ApplicationCommand(_ApplicationCommandOptional):
@@ -303,6 +302,8 @@ Interaction = Union[
     ModalInteraction,
 ]
 
+BaseInteraction = Union[Interaction, PingInteraction]
+
 
 class InteractionApplicationCommandCallbackData(TypedDict, total=False):
     tts: bool
@@ -350,7 +351,6 @@ class _EditApplicationCommandOptional(TypedDict, total=False):
     default_permission: bool  # deprecated
     name_localizations: Optional[ApplicationCommandLocalizations]
     description_localizations: Optional[ApplicationCommandLocalizations]
-    nsfw: Optional[bool]
 
 
 class EditApplicationCommand(_EditApplicationCommandOptional):

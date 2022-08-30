@@ -54,14 +54,12 @@ if TYPE_CHECKING:
         GroupInviteRecipient as GroupInviteRecipientPayload,
         InviteChannel as InviteChannelPayload,
     )
+    from .types.gateway import InviteCreateEvent, InviteDeleteEvent
     from .types.guild import GuildFeature
-    from .types.invite import (
-        GatewayInvite as GatewayInvitePayload,
-        Invite as InvitePayload,
-        InviteGuild as InviteGuildPayload,
-    )
+    from .types.invite import Invite as InvitePayload, InviteGuild as InviteGuildPayload
     from .user import User
 
+    GatewayInvitePayload = Union[InviteCreateEvent, InviteDeleteEvent]
     InviteGuildType = Union[Guild, "PartialInviteGuild", Object]
     InviteChannelType = Union[GuildChannel, "PartialInviteChannel", Object]
 
@@ -414,7 +412,7 @@ class Invite(Hashable):
         self,
         *,
         state: ConnectionState,
-        data: InvitePayload,
+        data: Union[InvitePayload, GatewayInvitePayload],
         guild: Optional[Union[PartialInviteGuild, Guild]] = None,
         channel: Optional[Union[PartialInviteChannel, GuildChannel]] = None,
     ):
@@ -511,7 +509,13 @@ class Invite(Hashable):
             guild = Object(id=guild_id) if guild_id is not None else None
             channel = Object(id=channel_id)
 
-        return cls(state=state, data=data, guild=guild, channel=channel)  # type: ignore
+        return cls(
+            state=state,
+            data=data,
+            # objects may be partial due to missing cache
+            guild=guild,  # type: ignore
+            channel=channel,  # type: ignore
+        )
 
     def _resolve_guild(
         self,

@@ -386,6 +386,8 @@ class AuditLogAction(Enum):
     automod_rule_update                   = 141
     automod_rule_delete                   = 142
     automod_block_message                 = 143
+    automod_send_alert_message            = 144
+    automod_timeout                       = 145
     # fmt: on
 
     @property
@@ -444,6 +446,8 @@ class AuditLogAction(Enum):
             AuditLogAction.automod_rule_update:                   AuditLogActionCategory.update,
             AuditLogAction.automod_rule_delete:                   AuditLogActionCategory.delete,
             AuditLogAction.automod_block_message:                 None,
+            AuditLogAction.automod_send_alert_message:            None,
+            AuditLogAction.automod_timeout:                       None,
         }
         # fmt: on
         return lookup[self]
@@ -487,7 +491,7 @@ class AuditLogAction(Enum):
             return None
         elif v < 143:
             return "automod_rule"
-        elif v == 143:
+        elif v < 146:
             return "user"
         else:
             return None
@@ -805,6 +809,7 @@ class AutoModTriggerType(Enum):
     harmful_link = 2
     spam = 3
     keyword_preset = 4
+    mention_spam = 5
 
 
 T = TypeVar("T")

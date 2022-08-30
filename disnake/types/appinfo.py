@@ -79,3 +79,8 @@ class _PartialAppInfoOptional(TypedDict, total=False):
 
 class PartialAppInfo(_PartialAppInfoOptional, BaseAppInfo):
     pass
+
+
+class PartialGatewayAppInfo(TypedDict):
+    id: Snowflake
+    flags: int

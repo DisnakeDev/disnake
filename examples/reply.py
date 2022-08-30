@@ -1,3 +1,5 @@
+import os
+
 import disnake
 
 
@@ -16,4 +18,4 @@ class MyClient(disnake.Client):
 
 
 client = MyClient()
-client.run("token")
+client.run(os.getenv("BOT_TOKEN"))

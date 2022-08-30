@@ -1,3 +1,5 @@
+import os
+
 from disnake.ext import commands
 
 bot = commands.Bot(command_prefix=commands.when_mentioned)
@@ -30,10 +32,10 @@ async def bar(inter, option: int):
 # Define a new command with sub command groups (this time in a cog)
 class MyCog(commands.Cog):
     @commands.slash_command()
-    async def command(self, inter):
+    async def command_in_cog(self, inter):
         print("This code is ran every time any subcommand is invoked")
 
-    @command.sub_command_group()
+    @command_in_cog.sub_command_group()
     async def foo(self, inter):
         print("This code is ran every time any subcommand of foo is invoked")
 
@@ -41,10 +43,15 @@ class MyCog(commands.Cog):
     async def a(self, inter, option: int):
         await inter.response.send_message(f"You ran /command foo a {option}")
 
-    @command.sub_command_group()
+    @command_in_cog.sub_command_group()
     async def bar(self, inter):
         print("This code is ran every time any subcommand of bar is invoked")
 
     @bar.sub_command()
     async def b(self, inter, option: float):
         await inter.response.send_message(f"You ran /command bar b {option}")
+
+
+bot.add_cog(MyCog())
+
+bot.run(os.getenv("BOT_TOKEN"))
