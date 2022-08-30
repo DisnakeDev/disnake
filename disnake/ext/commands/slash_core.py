@@ -417,15 +417,9 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         desc_loc = Localized._cast(description, False)
 
         try:
-            default_perms: int = func.__default_member_permissions__
+            default_member_permissions = func.__default_member_permissions__
         except AttributeError:
             pass
-        else:
-            if default_member_permissions is not None:
-                raise ValueError(
-                    "Cannot set `default_member_permissions` in both parameter and decorator"
-                )
-            default_member_permissions = default_perms
 
         dm_permission = True if dm_permission is None else dm_permission
 

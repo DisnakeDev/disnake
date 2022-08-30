@@ -1790,7 +1790,7 @@ class Guild(Hashable):
             The new name of the guild.
         description: Optional[:class:`str`]
             The new description of the guild. Could be ``None`` for no description.
-            This is only available to guilds that contain ``PUBLIC`` in :attr:`Guild.features`.
+            This is only available to guilds that contain ``COMMUNITY`` in :attr:`Guild.features`.
         icon: Optional[|resource_type|]
             The new guild icon. Only PNG/JPG is supported.
             GIF is only available to guilds that contain ``ANIMATED_ICON`` in :attr:`Guild.features`.
@@ -1856,11 +1856,11 @@ class Guild(Hashable):
 
         rules_channel: Optional[:class:`TextChannel`]
             The new channel that is used for rules. This is only available to
-            guilds that contain ``PUBLIC`` in :attr:`Guild.features`. Could be ``None`` for no rules
+            guilds that contain ``COMMUNITY`` in :attr:`Guild.features`. Could be ``None`` for no rules
             channel.
         public_updates_channel: Optional[:class:`TextChannel`]
             The new channel that is used for public updates from Discord. This is only available to
-            guilds that contain ``PUBLIC`` in :attr:`Guild.features`. Could be ``None`` for no
+            guilds that contain ``COMMUNITY`` in :attr:`Guild.features`. Could be ``None`` for no
             public updates channel.
         premium_progress_bar_enabled: :class:`bool`
             Whether the server boost progress bar is enabled.
@@ -1975,16 +1975,28 @@ class Guild(Hashable):
             fields["system_channel_flags"] = system_channel_flags.value
 
         if community is not MISSING:
-            features = []
-            if community:
-                if "rules_channel_id" in fields and "public_updates_channel_id" in fields:
-                    features.append("COMMUNITY")
+            # If we don't have complete feature information for the guild,
+            # it is possible to disable or enable other features that we didn't intend to touch.
+            # To enable or disable a feature, we will need to provide all of the existing features in advance.
+            if self.unavailable:
+                raise RuntimeError(
+                    "cannot modify features of an unavailable guild due to potentially destructive results."
+                )
+            features = set(self.features)
+            if community is not MISSING:
+                if not isinstance(community, bool):
+                    raise TypeError("community must be a bool instance")
+                if community:
+                    if "rules_channel_id" in fields and "public_updates_channel_id" in fields:
+                        features.add("COMMUNITY")
+                    else:
+                        raise ValueError(
+                            "community field requires both rules_channel and public_updates_channel fields to be provided"
+                        )
                 else:
-                    raise ValueError(
-                        "community field requires both rules_channel and public_updates_channel fields to be provided"
-                    )
+                    features.discard("COMMUNITY")
 
-            fields["features"] = features
+            fields["features"] = list(features)
 
         if premium_progress_bar_enabled is not MISSING:
             fields["premium_progress_bar_enabled"] = premium_progress_bar_enabled

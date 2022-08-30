@@ -2104,6 +2104,9 @@ def has_permissions(**perms: bool) -> Callable[[T], T]:
     This check raises a special exception, :exc:`.MissingPermissions`
     that is inherited from :exc:`.CheckFailure`.
 
+    .. versionchanged:: 2.6
+        Considers if the author is timed out.
+
     Parameters
     ----------
     perms
@@ -2126,7 +2129,7 @@ def has_permissions(**perms: bool) -> Callable[[T], T]:
 
     def predicate(ctx: AnyContext) -> bool:
         ch = ctx.channel
-        permissions = ch.permissions_for(ctx.author)  # type: ignore
+        permissions = ch.permissions_for(ctx.author, ignore_timeout=False)  # type: ignore
 
         missing = [perm for perm, value in perms.items() if getattr(permissions, perm) != value]
 
@@ -2206,13 +2209,16 @@ def bot_has_permissions(**perms: bool) -> Callable[[T], T]:
 
     This check raises a special exception, :exc:`.BotMissingPermissions`
     that is inherited from :exc:`.CheckFailure`.
+
+    .. versionchanged:: 2.6
+        Considers if the author is timed out.
     """
     invalid = set(perms) - set(disnake.Permissions.VALID_FLAGS)
     if invalid:
         raise TypeError(f"Invalid permission(s): {', '.join(invalid)}")
 
     def predicate(ctx: AnyContext) -> bool:
-        permissions = ctx.channel.permissions_for(ctx.me)  # type: ignore
+        permissions = ctx.channel.permissions_for(ctx.me, ignore_timeout=False)  # type: ignore
 
         missing = [perm for perm, value in perms.items() if getattr(permissions, perm) != value]
 

@@ -826,6 +826,7 @@ Members
               on_member_remove(member)
 
     Called when a :class:`Member` leaves or joins a :class:`Guild`.
+    If :func:`on_member_remove` is being used then consider using :func:`on_raw_member_remove` which will be called regardless of the cache.
 
     This requires :attr:`Intents.members` to be enabled.
 
@@ -834,7 +835,8 @@ Members
 
 .. function:: on_member_update(before, after)
 
-    Called when a :class:`Member` is updated.
+    Called when a :class:`Member` updates their profile.
+    Consider using :func:`on_raw_member_update` which will be called regardless of the cache.
 
     This is called when one or more of the following things change, but is not limited to:
 
@@ -851,6 +853,26 @@ Members
     :type before: :class:`Member`
     :param after: The member's updated info.
     :type after: :class:`Member`
+
+.. function:: on_raw_member_remove(payload)
+
+    Called when a member leaves a :class:`Guild`.
+    Unlike :func:`on_member_remove`, this is called regardless of the member cache.
+
+    .. versionadded:: 2.6
+
+    :param payload: The raw event payload data.
+    :type payload: :class:`RawGuildMemberRemoveEvent`
+
+.. function:: on_raw_member_update(member)
+
+    Called when a member updates their profile.
+    Unlike :func:`on_member_update`, this is called regardless of the member cache.
+
+    .. versionadded:: 2.6
+
+    :param member: The member that was updated.
+    :type member: :class:`Member`
 
 .. function:: on_member_ban(guild, user)
 
@@ -5381,6 +5403,14 @@ RawTypingEvent
 .. attributetable:: RawTypingEvent
 
 .. autoclass:: RawTypingEvent()
+    :members:
+
+RawGuildMemberRemoveEvent
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: RawGuildMemberRemoveEvent
+
+.. autoclass:: RawGuildMemberRemoveEvent()
     :members:
 
 PartialWebhookGuild
