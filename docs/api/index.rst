@@ -51,12 +51,12 @@ The first way is through the use of the :meth:`Client.event` decorator: ::
     import disnake
 
     client = disnake.Client()
-    
+
     @client.event
     async def on_message(message):
         if message.author.bot:
             return
-        
+
         if message.content.startswith('$hello'):
             await message.reply(f'Hello, {message.author}!')
 
@@ -82,7 +82,7 @@ when a user sends "$hello" message.
     :class:`Client`'s event handlers are *unique*: you can't have two :func:`on_message`, two
     :func:`on_member_ban` etc. With :class:`~ext.commands.Bot` however, you can have as much *listeners*
     of the same type as you want.
-    
+
     Please also note that using :meth:`Bot.event() <disnake.ext.commands.Bot.event>` decorator is the same as using :class:`Client`'s
     :meth:`~Client.event` (since :class:`~ext.commands.Bot` subclasses :class:`Client`) and does not allow to listen/watch
     for multiple events of the same type. Consider using :meth:`Bot.listen() <disnake.ext.commands.Bot.listen>` for that.

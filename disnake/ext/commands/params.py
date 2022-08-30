@@ -105,8 +105,6 @@ __all__ = (
 )
 
 
-
-
 def issubclass_(obj: Any, tp: Union[TypeT, Tuple[TypeT, ...]]) -> TypeGuard[TypeT]:
     if not isinstance(tp, (type, tuple)):
         return False

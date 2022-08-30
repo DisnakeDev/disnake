@@ -79,4 +79,3 @@ TextInput
 
 .. autoclass:: TextInput
     :members:
-
