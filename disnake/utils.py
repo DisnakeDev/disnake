@@ -6,8 +6,8 @@ import array
 import asyncio
 import datetime
 import functools
+import importlib
 import json
-import os
 import pkgutil
 import re
 import sys
@@ -69,7 +69,7 @@ __all__ = (
     "escape_mentions",
     "as_chunks",
     "format_dt",
-    "search_directory",
+    "walk_extensions",
     "as_valid_locale",
 )
 
@@ -1282,40 +1282,79 @@ def format_dt(dt: Union[datetime.datetime, float], /, style: TimestampStyle = "f
     return f"<t:{int(dt)}:{style}>"
 
 
-def search_directory(path: str) -> Iterator[str]:
-    """Walk through a directory and yield all modules.
+def walk_extensions(
+    paths: Iterable[str],
+    prefix: str = "",
+    ignore: Optional[Union[Iterable[str], Callable[[str], bool]]] = None,
+) -> Iterator[str]:
+    """
+    Walk through the given package paths, and recursively yield modules.
+
+    This is similar to :func:`py:pkgutil.walk_packages`, but supports ignoring
+    modules/packages.
+
+    Namespace packages are not considered, meaning every package must have an
+    ``__init__.py`` file. If a package has a ``setup`` function, this method will
+    yield its name and not traverse the package further.
+
+    Nonexistent paths are silently ignored.
+
+    .. note::
+        This imports all *packages* (not all modules) in the given path(s)
+        to access the ``__path__`` attribute for finding submodules,
+        unless they are filtered by the ``ignore`` parameter.
 
     Parameters
     ----------
-    path: :class:`str`
-        The path to search for modules
+    paths: Iterable[:class:`str`]
+        The filesystem paths of packages to search in.
+    prefix: :class:`str`
+        The prefix to prepend to all module names. This should be set
+        accordingly to produce importable package names.
+
+        For example, if ``paths`` contains ``/bot/cogs/admin``, this should
+        be set to `cogs.admin.` assuming the current working directory is ``/bot``.
+    ignore: Optional[Union[Iterable[:class:`str`], Callable[[:class:`str`], :class:`bool`]]]
+        An iterable of module names to ignore, or a callable that's used for ignoring
+        modules (where the callable returning ``True`` results in the module being ignored).
+        Defaults to ``None``, i.e. no modules are ignored.
+
+        If it's an iterable, the elements must be module names. That is,
+        a module like ``cogs.admin.eval_cmd`` will be ignored if ``admin``, ``eval_cmd``,
+        or ``admin.eval_cmd`` is given, but not with ``admin.eval`` or ``cmd``, to name
+        a few examples.
 
     Yields
-    -------
+    ------
     :class:`str`
-        The name of the found module. (usable in load_extension)
+        The full module names in the given package paths.
     """
-    relpath = os.path.relpath(path)  # relative and normalized
-    if ".." in relpath:
-        raise ValueError("Modules outside the cwd require a package to be specified")
+    if isinstance(ignore, str):
+        raise TypeError("`ignore` must be an iterable of strings or a callable")
 
-    abspath = os.path.abspath(path)
-    if not os.path.exists(relpath):
-        raise ValueError(f"Provided path '{abspath}' does not exist")
-    if not os.path.isdir(relpath):
-        raise ValueError(f"Provided path '{abspath}' is not a directory")
+    if isinstance(ignore, Iterable):
+        ignore_parts = "|".join(re.escape(i) for i in ignore)
+        ignore_re = re.compile(rf"(^|\.)({ignore_parts})(\.|$)")
+        ignore = lambda path: ignore_re.search(path) is not None
+    # else, it's already a callable or None
 
-    prefix = relpath.replace(os.sep, ".")
-    if prefix in ("", "."):
-        prefix = ""
-    else:
-        prefix += "."
+    for _, name, ispkg in pkgutil.iter_modules(paths, prefix):
+        if ignore and ignore(name):
+            continue
 
-    for _, name, ispkg in pkgutil.iter_modules([path]):
         if ispkg:
-            yield from search_directory(os.path.join(path, name))
+            mod = importlib.import_module(name)
+
+            # if this module is a package but also has a `setup` function,
+            # yield it and don't look for other files in this module
+            if hasattr(mod, "setup"):
+                yield name
+                continue
+
+            if sub_paths := mod.__path__:
+                yield from walk_extensions(sub_paths, prefix=f"{name}.", ignore=ignore)
         else:
-            yield prefix + name
+            yield name
 
 
 def as_valid_locale(locale: str) -> Optional[str]:

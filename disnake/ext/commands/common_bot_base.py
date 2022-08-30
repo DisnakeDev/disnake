@@ -16,6 +16,7 @@ from typing import (
     Callable,
     Dict,
     Generic,
+    Iterable,
     List,
     Mapping,
     Optional,
@@ -574,18 +575,62 @@ class CommonBotBase(Generic[CogT]):
             sys.modules.update(modules)
             raise
 
-    def load_extensions(self, path: str) -> None:
-        """Loads all extensions in a directory.
+    def load_extensions(
+        self,
+        root_module: str,
+        *,
+        package: Optional[str] = None,
+        ignore: Optional[Union[Iterable[str], Callable[[str], bool]]] = None,
+    ) -> None:
+        """
+        Loads all extensions in a given module, also traversing into sub-packages.
+
+        See :func:`disnake.utils.walk_extensions` for details on how packages are found.
 
         .. versionadded:: 2.4
 
+        .. versionchanged:: 2.6
+            Now accepts a module name instead of a filesystem path.
+            Also improved package traversal, adding support for more complex extensions
+            with ``__init__.py`` files, and added ``ignore`` parameter.
+
         Parameters
         ----------
-        path: :class:`str`
-            The path to search for extensions
+        root_module: :class:`str`
+            The module/package name to search in, for example `cogs.admin`.
+        package: Optional[:class:`str`]
+            The package name to resolve relative imports with.
+            This is required when ``root_module`` is relative, e.g ``.cogs.admin``.
+            Defaults to ``None``.
+        ignore: Union[Iterable[:class:`str`], Callable[[:class:`str`], :class:`bool`]]
+            An iterable of module names to ignore, or a callable that's used for ignoring
+            modules (where the callable returning ``True`` results in the module being ignored).
+
+            See :func:`disnake.utils.walk_extensions` for details.
         """
-        for extension in disnake.utils.search_directory(path):
-            self.load_extension(extension)
+        if "/" in root_module or "\\" in root_module:
+            # likely a path, try to be backwards compatible by converting to
+            # a relative path and using that as the module name
+            disnake.utils.warn_deprecated(
+                "Using a directory with `load_extensions` is deprecated. Use a module name (optionally with a package) instead.",
+                stacklevel=2,
+            )
+
+            path = os.path.relpath(root_module)
+            if ".." in path:
+                raise ImportError(
+                    "Paths outside the cwd are not supported. Try using the module name instead."
+                )
+            root_module = path.replace(os.sep, ".")
+
+        if not (spec := importlib.util.find_spec(root_module, package)):
+            raise ImportError(f"Unable to find root module '{root_module}' in package '{package}'")
+
+        if not (paths := spec.submodule_search_locations):
+            raise ImportError(f"Module '{root_module}' is not a package")
+
+        for ext_name in disnake.utils.walk_extensions(paths, prefix=f"{spec.name}.", ignore=ignore):
+            self.load_extension(ext_name)
 
     @property
     def extensions(self) -> Mapping[str, types.ModuleType]:

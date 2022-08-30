@@ -1560,7 +1560,7 @@ Utility Functions
 
 .. autofunction:: disnake.utils.as_chunks
 
-.. autofunction:: disnake.utils.search_directory
+.. autofunction:: disnake.utils.walk_extensions
 
 .. autofunction:: disnake.utils.as_valid_locale
 
