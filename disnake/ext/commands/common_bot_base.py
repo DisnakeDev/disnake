@@ -17,6 +17,7 @@ from typing import (
     Dict,
     Generic,
     Iterable,
+    Iterator,
     List,
     Mapping,
     Optional,
@@ -581,7 +582,7 @@ class CommonBotBase(Generic[CogT]):
         *,
         package: Optional[str] = None,
         ignore: Optional[Union[Iterable[str], Callable[[str], bool]]] = None,
-    ) -> None:
+    ) -> Iterator[str]:
         """
         Loads all extensions in a given module, also traversing into sub-packages.
 
@@ -607,6 +608,11 @@ class CommonBotBase(Generic[CogT]):
             modules (where the callable returning ``True`` results in the module being ignored).
 
             See :func:`disnake.utils.walk_extensions` for details.
+
+        Yields
+        ------
+        :class:`str`
+            The module names as they are being loaded.
         """
         if "/" in root_module or "\\" in root_module:
             # likely a path, try to be backwards compatible by converting to
@@ -631,6 +637,7 @@ class CommonBotBase(Generic[CogT]):
 
         for ext_name in disnake.utils.walk_extensions(paths, prefix=f"{spec.name}.", ignore=ignore):
             self.load_extension(ext_name)
+            yield ext_name
 
     @property
     def extensions(self) -> Mapping[str, types.ModuleType]:
