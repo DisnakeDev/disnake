@@ -35,7 +35,7 @@ runs:
     - name: Create and activate vrtual environment
       shell: bash
       run: |
-        pipx install poetry==1.2.0rc1
+        pipx install poetry==1.2.0
         python -m venv .venv
         PATH="$(poetry env info --path)/bin:$PATH"
 

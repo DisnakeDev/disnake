@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 [build-system]
-requires = ["poetry-core==1.1.0rc1"]
+requires = ["poetry-core>=1.1.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
