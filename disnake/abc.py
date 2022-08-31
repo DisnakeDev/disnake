@@ -93,7 +93,7 @@ if TYPE_CHECKING:
     from .threads import AnyThreadArchiveDuration
     from .types.channel import (
         Channel as ChannelPayload,
-        ForumEmoji as ForumEmojiPayload,
+        DefaultReaction as DefaultReactionPayload,
         GuildChannel as GuildChannelPayload,
         OverwriteType,
         PermissionOverwrite as PermissionOverwritePayload,
@@ -414,7 +414,7 @@ class GuildChannel(ABC):
         else:
             flags_payload = MISSING
 
-        default_reaction_emoji_payload: Optional[ForumEmojiPayload]
+        default_reaction_emoji_payload: Optional[DefaultReactionPayload]
         if default_reaction is not MISSING:
             if default_reaction is not None:
                 emoji_name, emoji_id = PartialEmoji._to_name_id(default_reaction)

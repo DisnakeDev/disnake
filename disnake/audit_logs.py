@@ -83,7 +83,7 @@ if TYPE_CHECKING:
         AutoModTriggerMetadata as AutoModTriggerMetadataPayload,
     )
     from .types.channel import (
-        ForumEmoji as ForumEmojiPayload,
+        DefaultReaction as DefaultReactionPayload,
         PermissionOverwrite as PermissionOverwritePayload,
     )
     from .types.role import Role as RolePayload
@@ -304,7 +304,7 @@ def _transform_automod_trigger_metadata(
 
 
 def _transform_forum_emoji(
-    entry: AuditLogEntry, data: Optional[ForumEmojiPayload]
+    entry: AuditLogEntry, data: Optional[DefaultReactionPayload]
 ) -> Optional[Union[Emoji, PartialEmoji]]:
     if data is None:
         return None

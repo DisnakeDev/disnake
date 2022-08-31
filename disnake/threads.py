@@ -999,6 +999,7 @@ class ThreadMember(Hashable):
 
 
 # TODO: just `Tag` instead of `ThreadTag`?
+# TODO: or perhaps `ForumTag` to match apidocs name?
 class ThreadTag(Hashable):
     """
     Represents a tag for threads in forum channels.

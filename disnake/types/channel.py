@@ -143,9 +143,8 @@ class ThreadChannel(_BaseChannel, _ThreadChannelOptional):
     thread_metadata: ThreadMetadata
 
 
-# TODO: naming
-class ForumEmoji(TypedDict):
-    emoji_id: Snowflake  # note: may be 0
+class DefaultReaction(TypedDict):
+    emoji_id: Snowflake
     emoji_name: Optional[str]
 
 
@@ -153,8 +152,8 @@ class _ForumChannelOptional(TypedDict, total=False):
     topic: Optional[str]
     last_message_id: Optional[Snowflake]
     default_auto_archive_duration: ThreadArchiveDurationLiteral
-    available_tags: List[ThreadTag]  # TODO: optional?
-    default_reaction_emoji: ForumEmoji
+    available_tags: List[ThreadTag]
+    default_reaction_emoji: Optional[DefaultReaction]
     default_thread_rate_limit_per_user: int
 
 
