@@ -2129,7 +2129,10 @@ def has_permissions(**perms: bool) -> Callable[[T], T]:
 
     def predicate(ctx: AnyContext) -> bool:
         ch = ctx.channel
-        permissions = ch.permissions_for(ctx.author, ignore_timeout=False)  # type: ignore
+        if isinstance(ctx, disnake.Interaction):
+            permissions = ctx.permissions
+        else:
+            permissions = ch.permissions_for(ctx.author, ignore_timeout=False)  # type: ignore
 
         missing = [perm for perm, value in perms.items() if getattr(permissions, perm) != value]
 
@@ -2218,7 +2221,10 @@ def bot_has_permissions(**perms: bool) -> Callable[[T], T]:
         raise TypeError(f"Invalid permission(s): {', '.join(invalid)}")
 
     def predicate(ctx: AnyContext) -> bool:
-        permissions = ctx.channel.permissions_for(ctx.me, ignore_timeout=False)  # type: ignore
+        if isinstance(ctx, disnake.Interaction):
+            permissions = ctx.app_permissions
+        else:
+            permissions = ctx.channel.permissions_for(ctx.me, ignore_timeout=False)  # type: ignore
 
         missing = [perm for perm, value in perms.items() if getattr(permissions, perm) != value]
 
