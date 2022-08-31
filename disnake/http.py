@@ -1011,7 +1011,6 @@ class HTTPClient:
             "invitable",
             "default_auto_archive_duration",
             "flags",
-            "template",
             "applied_tags",
             "default_reaction_emoji",
         )

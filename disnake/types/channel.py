@@ -154,7 +154,6 @@ class _ForumChannelOptional(TypedDict, total=False):
     last_message_id: Optional[Snowflake]
     default_auto_archive_duration: ThreadArchiveDurationLiteral
     available_tags: List[ThreadTag]  # TODO: optional?
-    template: str
     default_reaction_emoji: ForumEmoji
     default_thread_rate_limit_per_user: int
 

@@ -2504,11 +2504,6 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         :attr:`~Permissions.manage_messages` bypass slowmode.
 
         .. versionadded:: 2.6
-
-    template: Optional[:class:`str`]
-        The message template for new forum threads, if any.
-
-        .. versionadded:: 2.6
     """
 
     __slots__ = (
@@ -2524,7 +2519,6 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         "guild",
         "slowmode_delay",
         "thread_slowmode_delay",
-        "template",
         "_available_tags",
         "_default_reaction_emoji_id",
         "_default_reaction_emoji_name",
@@ -2576,7 +2570,6 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             for tag in data.get("available_tags", [])
         ]
         self._available_tags: Dict[int, ThreadTag] = {tag.id: tag for tag in tags}
-        self.template: Optional[str] = data.get("template") or None
 
         default_reaction_emoji = data.get("default_reaction_emoji") or {}
         # emoji_id may be `0`, use `None` instead
@@ -2805,11 +2798,6 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         flags: :class:`ChannelFlags`
             The new flags to set for this channel. This will overwrite any existing flags set on this channel.
             If parameter ``require_tag`` is provided, that will override the setting of :attr:`ChannelFlags.require_tag`.
-
-            .. versionadded:: 2.6
-
-        template: Optional[:class:`str`]
-            The message template for new forum threads. Up to 256 characters.
 
             .. versionadded:: 2.6
 

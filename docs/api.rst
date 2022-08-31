@@ -2344,7 +2344,6 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.slowmode_delay`
         - :attr:`~AuditLogDiff.thread_slowmode_delay`
         - :attr:`~AuditLogDiff.nsfw`
-        - :attr:`~AuditLogDiff.template`
         - :attr:`~AuditLogDiff.available_tags`
         - :attr:`~AuditLogDiff.default_reaction`
 
@@ -2372,7 +2371,6 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.slowmode_delay`
         - :attr:`~AuditLogDiff.thread_slowmode_delay`
         - :attr:`~AuditLogDiff.nsfw`
-        - :attr:`~AuditLogDiff.template`
         - :attr:`~AuditLogDiff.available_tags`
         - :attr:`~AuditLogDiff.default_reaction`
 
@@ -4514,12 +4512,6 @@ AuditLogDiff
         If a channel is not found then it is an :class:`Object` with the ID being set.
 
         :type: List[Union[:class:`abc.GuildChannel`, :class:`Object`]]
-
-    .. attribute:: template
-
-        The template for new threads in a forum channel being changed.
-
-        :type: :class:`str`
 
     .. attribute:: tags
 

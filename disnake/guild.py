@@ -1556,7 +1556,6 @@ class Guild(Hashable):
         default_auto_archive_duration: AnyThreadArchiveDuration = None,
         nsfw: bool = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
-        # TODO: template currently doesn't seem to be supported?
         default_reaction: Union[str, Emoji, PartialEmoji] = None,
         reason: Optional[str] = None,
     ) -> ForumChannel:
