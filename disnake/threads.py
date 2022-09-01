@@ -243,6 +243,7 @@ class Thread(Messageable, Hashable):
 
         self.slowmode_delay = data.get("rate_limit_per_user", 0)
         self._flags = data.get("flags", 0)
+        self._tags = list(map(int, data.get("applied_tags", [])))
 
         try:
             self._unroll_metadata(data["thread_metadata"])
