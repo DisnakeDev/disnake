@@ -111,7 +111,7 @@ if TYPE_CHECKING:
     from .permissions import Permissions
     from .state import ConnectionState
     from .template import Template
-    from .threads import AnyThreadArchiveDuration
+    from .threads import AnyThreadArchiveDuration, PartialThreadTag
     from .types.guild import Ban as BanPayload, Guild as GuildPayload, GuildFeature, MFALevel
     from .types.integration import IntegrationType
     from .types.sticker import CreateGuildSticker as CreateStickerPayload
@@ -1556,6 +1556,7 @@ class Guild(Hashable):
         default_auto_archive_duration: AnyThreadArchiveDuration = None,
         nsfw: bool = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
+        available_tags: Sequence[PartialThreadTag] = None,
         default_reaction: Union[str, Emoji, PartialEmoji] = None,
         reason: Optional[str] = None,
     ) -> ForumChannel:
@@ -1594,6 +1595,11 @@ class Guild(Hashable):
             A :class:`dict` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply upon creation of a channel.
             Useful for creating secret channels.
+        available_tags: Optional[Sequence[:class:`PartialThreadTag`]]
+            The tags available for threads in this channel.
+
+            .. versionadded:: 2.6
+
         default_reaction: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
             The default emoji shown for reacting to new threads.
 
@@ -1633,6 +1639,9 @@ class Guild(Hashable):
             options["default_auto_archive_duration"] = cast(
                 "ThreadArchiveDurationLiteral", try_enum_to_int(default_auto_archive_duration)
             )
+
+        if available_tags is not None:
+            options["available_tags"] = [tag.to_dict() for tag in available_tags]
 
         if default_reaction is not None:
             emoji_name, emoji_id = PartialEmoji._to_name_id(default_reaction)

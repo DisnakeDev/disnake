@@ -2314,6 +2314,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.user_limit`
         - :attr:`~AuditLogDiff.slowmode_delay`
         - :attr:`~AuditLogDiff.nsfw`
+        - :attr:`~AuditLogDiff.available_tags`
         - :attr:`~AuditLogDiff.default_reaction`
 
     .. attribute:: channel_update
@@ -3020,6 +3021,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.slowmode_delay`
         - :attr:`~AuditLogDiff.invitable`
         - :attr:`~AuditLogDiff.flags`
+        - :attr:`~AuditLogDiff.tags`
 
         .. versionadded:: 2.0
 

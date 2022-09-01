@@ -1224,6 +1224,7 @@ class ThreadTag(Hashable, PartialThreadTag):
                 self._channel.id, reason=reason, available_tags=list(new_tags.values())
             ),
         )
+        # TODO: update channel state here so that subsequent edits don't send old state?
         for tag in channel_data.get("available_tags", []):
             if int(tag["id"]) == self.id:
                 return ThreadTag(data=tag, channel=self._channel, state=self._state)

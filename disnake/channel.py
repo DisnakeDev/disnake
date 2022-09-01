@@ -2811,7 +2811,8 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             .. versionadded:: 2.6
 
         available_tags: Sequence[:class:`PartialThreadTag`]
-            The new :class:`PartialThreadTag`\\s or :class:`ThreadTag`\\s available in this channel.
+            The new :class:`PartialThreadTag`\\s or :class:`ThreadTag`\\s available
+            for threads in this channel.
             Can also be used to reorder existing tags.
 
             Note that this overwrites all tags, removing existing tags unless they're passed as well.
