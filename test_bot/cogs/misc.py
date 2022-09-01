@@ -48,4 +48,3 @@ class Misc(commands.Cog):
 
 def setup(bot):
     bot.add_cog(Misc(bot))
-    print(f"> Extension {__name__} is ready\n")
