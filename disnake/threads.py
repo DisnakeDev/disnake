@@ -1237,6 +1237,8 @@ class ThreadTag(Hashable, PartialThreadTag):
         You must have :attr:`~Permissions.manage_channels` permission to
         do this.
 
+        To bulk-delete tags, see :class:`ForumChannel.edit`.
+
         Parameters
         ----------
         reason: Optional[:class:`str`]
