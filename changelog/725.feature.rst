@@ -1,0 +1,7 @@
+Implement new forum channel features.
+- Add :class:`PartialThreadTag` and :class:`ThreadTag` types.
+- Add :attr:`ForumChannel.available_tags` and :attr:`Thread.tags`.
+- Add :func:`ForumChannel.get_tag`, :func:`ForumChannel.create_tag`
+- Add :attr:`ForumChannel.thread_slowmode_delay` and :attr:`ForumChannel.default_reaction`.
+- Add :attr:`ChannelFlags.require_tag` and :attr:`ForumChannel.requires_tag`.
+- New audit log fields for the above features.
