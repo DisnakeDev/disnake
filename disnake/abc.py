@@ -90,7 +90,7 @@ if TYPE_CHECKING:
     from .member import Member
     from .message import Message, MessageReference, PartialMessage
     from .state import ConnectionState
-    from .threads import AnyThreadArchiveDuration
+    from .threads import AnyThreadArchiveDuration, PartialThreadTag
     from .types.channel import (
         Channel as ChannelPayload,
         DefaultReaction as DefaultReactionPayload,
@@ -98,6 +98,7 @@ if TYPE_CHECKING:
         OverwriteType,
         PermissionOverwrite as PermissionOverwritePayload,
     )
+    from .types.threads import ThreadTag as ThreadTagPayload
     from .ui.action_row import Components, MessageUIComponent
     from .ui.view import View
     from .user import ClientUser
@@ -330,6 +331,7 @@ class GuildChannel(ABC):
         rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
         flags: ChannelFlags = MISSING,
+        available_tags: Sequence[PartialThreadTag] = MISSING,
         default_reaction: Union[str, Emoji, PartialEmoji] = MISSING,
         reason: Optional[str] = None,
     ) -> Optional[ChannelPayload]:
@@ -414,13 +416,17 @@ class GuildChannel(ABC):
         else:
             flags_payload = MISSING
 
+        available_tags_payload: List[ThreadTagPayload] = MISSING
+        if available_tags is not MISSING:
+            available_tags_payload = [tag.to_dict() for tag in available_tags]
+
         default_reaction_emoji_payload: Optional[DefaultReactionPayload]
         if default_reaction is not MISSING:
             if default_reaction is not None:
                 emoji_name, emoji_id = PartialEmoji._to_name_id(default_reaction)
                 default_reaction_emoji_payload = {
                     "emoji_name": emoji_name,
-                    "emoji_id": emoji_id or 0,
+                    "emoji_id": emoji_id,
                 }
             else:
                 default_reaction_emoji_payload = None
@@ -443,6 +449,7 @@ class GuildChannel(ABC):
             "video_quality_mode": video_quality_mode_payload,
             "default_auto_archive_duration": default_auto_archive_duration_payload,
             "flags": flags_payload,
+            "available_tags": available_tags_payload,
             "default_reaction_emoji": default_reaction_emoji_payload,
         }
         options = {k: v for k, v in options.items() if v is not MISSING}

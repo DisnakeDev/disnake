@@ -1011,6 +1011,7 @@ class HTTPClient:
             "invitable",
             "default_auto_archive_duration",
             "flags",
+            "available_tags",
             "applied_tags",
             "default_reaction_emoji",
         )
@@ -1244,53 +1245,6 @@ class HTTPClient:
             )
 
         return self.request(route, json=payload, params=query_params, reason=reason)
-
-    def create_thread_tag(
-        self,
-        channel_id: Snowflake,
-        *,
-        name: str,
-        emoji_id: Optional[Snowflake] = None,
-        emoji_name: Optional[str] = None,
-        moderated: Optional[bool] = None,
-        reason: Optional[str] = None,
-    ) -> Response[channel.ForumChannel]:
-        payload: threads.CreateThreadTag = {"name": name}
-        # TODO: these ifs are probably not needed
-        if emoji_id is not None:
-            payload["emoji_id"] = emoji_id
-        if emoji_name is not None:
-            payload["emoji_name"] = emoji_name
-        if moderated is not None:
-            payload["moderated"] = moderated
-
-        r = Route("POST", "/channels/{channel_id}/tags", channel_id=channel_id)
-        return self.request(r, json=payload, reason=reason)
-
-    def edit_thread_tag(
-        self,
-        channel_id: Snowflake,
-        tag_id: Snowflake,
-        *,
-        reason: Optional[str] = None,
-        **fields: Any,
-    ) -> Response[channel.ForumChannel]:
-        r = Route(
-            "PUT", "/channels/{channel_id}/tags/{tag_id}", channel_id=channel_id, tag_id=tag_id
-        )
-        return self.request(r, json=fields, reason=reason)
-
-    def delete_thread_tag(
-        self,
-        channel_id: Snowflake,
-        tag_id: Snowflake,
-        *,
-        reason: Optional[str] = None,
-    ) -> Response[channel.ForumChannel]:
-        r = Route(
-            "DELETE", "/channels/{channel_id}/tags/{tag_id}", channel_id=channel_id, tag_id=tag_id
-        )
-        return self.request(r, reason=reason)
 
     # Webhook management
 

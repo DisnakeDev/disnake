@@ -95,26 +95,6 @@ class ThreadPaginationPayload(TypedDict):
 class ThreadTag(TypedDict):
     id: Snowflake
     name: str
-    emoji_id: Snowflake
-    emoji_name: Optional[str]
-    moderated: bool
-
-
-class _CreateThreadTagOptional(TypedDict, total=False):
     emoji_id: Optional[Snowflake]
     emoji_name: Optional[str]
-    moderated: Optional[bool]
-
-
-class CreateThreadTag(_CreateThreadTagOptional):
-    name: str
-
-
-class _EditThreadTagOptional(TypedDict, total=False):
     moderated: bool
-
-
-class EditThreadTag(_EditThreadTagOptional):
-    name: str
-    emoji_id: Optional[Snowflake]
-    emoji_name: Optional[str]

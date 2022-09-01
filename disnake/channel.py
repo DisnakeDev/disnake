@@ -53,7 +53,7 @@ from . import utils
 from .asset import Asset
 from .context_managers import Typing
 from .enums import ChannelType, StagePrivacyLevel, VideoQualityMode, try_enum, try_enum_to_int
-from .errors import ClientException
+from .errors import ClientException, InvalidData
 from .file import File
 from .flags import ChannelFlags, MessageFlags
 from .iterators import ArchivedThreadIterator
@@ -61,7 +61,7 @@ from .mixins import Hashable
 from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite, Permissions
 from .stage_instance import StageInstance
-from .threads import Thread, ThreadTag
+from .threads import PartialThreadTag, Thread, ThreadTag
 from .utils import MISSING
 
 __all__ = (
@@ -2670,6 +2670,8 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
     def available_tags(self) -> List[ThreadTag]:
         """List[:class:`ThreadTag`]: The available tags for threads in this forum channel.
 
+        The returned list can be mutated, and will not change internal state.
+
         .. versionadded:: 2.6
         """
         return list(self._available_tags.values())
@@ -2728,6 +2730,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
         flags: ChannelFlags = ...,
         require_tag: bool = ...,
+        available_tags: Sequence[PartialThreadTag] = MISSING,
         default_reaction: Union[str, Emoji, PartialEmoji] = ...,
         reason: Optional[str] = ...,
     ) -> ForumChannel:
@@ -2748,6 +2751,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
         flags: ChannelFlags = MISSING,
         require_tag: bool = MISSING,
+        available_tags: Sequence[PartialThreadTag] = MISSING,
         default_reaction: Union[str, Emoji, PartialEmoji] = MISSING,
         reason: Optional[str] = None,
         **kwargs: Never,
@@ -2806,6 +2810,11 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
             .. versionadded:: 2.6
 
+        available_tags: Sequence[:class:`PartialThreadTag`]
+            The new :class:`PartialThreadTag`\\s or :class:`ThreadTag`\\s available in this channel.
+
+            .. versionadded:: 2.6
+
         default_reaction: Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]
             The default emoji shown for reacting to new threads.
 
@@ -2848,6 +2857,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             default_auto_archive_duration=default_auto_archive_duration,
             overwrites=overwrites,
             flags=flags,
+            available_tags=available_tags,
             default_reaction=default_reaction,
             reason=reason,
             **kwargs,
@@ -3285,19 +3295,21 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         :class:`ThreadTag`
             The newly created tag.
         """
-        emoji_name, emoji_id = PartialEmoji._to_name_id(emoji)
+        partial_tag = PartialThreadTag(name=name, emoji=emoji, moderated=moderated)
 
-        # note: returns updated channel data instead of tag data
-        data = await self._state.http.create_thread_tag(
-            self.id,
-            name=name,
-            emoji_id=emoji_id,
-            emoji_name=emoji_name,
-            moderated=moderated,
-            reason=reason,
+        channel_data = cast(
+            "ForumChannelPayload",
+            self._edit(
+                available_tags=self.available_tags + [partial_tag],
+                reason=reason,
+            ),
         )
-        # TODO: parse entire channel here and update cache, instead of just relying on gw event?
-        return ThreadTag._find_in_response(data, name, self, self._state)
+        new_tags = channel_data.get("available_tags", [])
+        if not new_tags:
+            raise InvalidData("Could not find tag in response")
+
+        tag_data = max(new_tags, key=lambda t: int(t["id"]))
+        return ThreadTag(data=tag_data, channel=self, state=self._state)
 
 
 class DMChannel(disnake.abc.Messageable, Hashable):

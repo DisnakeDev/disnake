@@ -144,7 +144,7 @@ class ThreadChannel(_BaseChannel, _ThreadChannelOptional):
 
 
 class DefaultReaction(TypedDict):
-    emoji_id: Snowflake
+    emoji_id: Optional[Snowflake]
     emoji_name: Optional[str]
 
 

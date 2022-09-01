@@ -27,7 +27,18 @@ from __future__ import annotations
 
 import asyncio
 import time
-from typing import TYPE_CHECKING, Callable, Dict, Iterable, List, Literal, Optional, Sequence, Union
+from typing import (
+    TYPE_CHECKING,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Literal,
+    Optional,
+    Sequence,
+    Union,
+    cast,
+)
 
 from .abc import Messageable
 from .enums import ChannelType, ThreadArchiveDuration, try_enum, try_enum_to_int
@@ -41,6 +52,7 @@ from .utils import MISSING, _get_as_snowflake, parse_time, snowflake_time
 __all__ = (
     "Thread",
     "ThreadMember",
+    "PartialThreadTag",
     "ThreadTag",
 )
 
@@ -59,7 +71,6 @@ if TYPE_CHECKING:
     from .types.channel import ForumChannel as ForumChannelPayload
     from .types.snowflake import SnowflakeList
     from .types.threads import (
-        EditThreadTag as EditThreadTagPayload,
         Thread as ThreadPayload,
         ThreadArchiveDurationLiteral,
         ThreadMember as ThreadMemberPayload,
@@ -998,9 +1009,52 @@ class ThreadMember(Hashable):
         return self.parent
 
 
+class PartialThreadTag:
+    """
+    TODO
+    """
+
+    __slots__ = ("name", "moderated", "_emoji_id", "_emoji_name")
+
+    def __init__(
+        self,
+        name: str,
+        emoji: Optional[Union[str, PartialEmoji, Emoji]] = None,
+        *,
+        moderated: bool = False,
+    ):
+        self.name: str = name
+        self.moderated: bool = moderated
+
+        emoji_name, emoji_id = PartialEmoji._to_name_id(emoji)
+        self._emoji_id: Optional[int] = emoji_id
+        self._emoji_name: Optional[str] = emoji_name
+
+    def __str__(self) -> str:
+        return self.name
+
+    def __eq__(self, other):
+        return (
+            isinstance(other, PartialThreadTag)
+            and self.name == other.name
+            and self.moderated == other.moderated
+            and self._emoji_id == other._emoji_id
+            and self._emoji_name == other._emoji_name
+        )
+
+    def to_dict(self) -> ThreadTagPayload:
+        return {
+            "id": 0,
+            "name": self.name,
+            "emoji_id": self._emoji_id,
+            "emoji_name": self._emoji_name,
+            "moderated": self.moderated,
+        }
+
+
 # TODO: just `Tag` instead of `ThreadTag`?
 # TODO: or perhaps `ForumTag` to match apidocs name?
-class ThreadTag(Hashable):
+class ThreadTag(Hashable, PartialThreadTag):
     """
     Represents a tag for threads in forum channels.
 
@@ -1034,15 +1088,23 @@ class ThreadTag(Hashable):
         Whether only moderators can apply this tag to threads.
     """
 
-    __slots__ = ("id", "name", "moderated", "_emoji_id", "_emoji_name", "_channel_id", "_state")
+    __slots__ = ("id", "_channel", "_state")
 
-    def __init__(self, *, data: ThreadTagPayload, channel: Snowflake, state: ConnectionState):
-        self._channel_id = channel.id
-        self._state = state
+    def __init__(
+        self,
+        *,
+        data: ThreadTagPayload,
+        # Object is used by audit logs
+        channel: Union[ForumChannel, Object],
+        state: ConnectionState,
+    ):
+        # emoji is set below
+        super().__init__(data["name"], emoji=None, moderated=data["moderated"])
+
+        self._channel: Union[ForumChannel, Object] = channel
+        self._state: ConnectionState = state
 
         self.id: int = int(data["id"])
-        self.name: str = data["name"]
-        self.moderated: bool = data["moderated"]
         # emoji_id may be `0`, use `None` instead
         self._emoji_id: Optional[int] = _get_as_snowflake(data, "emoji_id") or None
         self._emoji_name: Optional[str] = data.get("emoji_name")
@@ -1053,13 +1115,15 @@ class ThreadTag(Hashable):
             f" moderated={self.moderated!r} emoji={self.emoji!r}>"
         )
 
-    def __str__(self) -> str:
-        return self.name
-
     @property
     def emoji(self) -> Optional[Union[Emoji, PartialEmoji]]:
         """Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]: The emoji associated with this tag, if any."""
         return PartialEmoji._from_name_id(self._emoji_name, self._emoji_id, state=self._state)
+
+    def to_dict(self) -> ThreadTagPayload:
+        payload = super().to_dict()
+        payload["id"] = self.id
+        return payload
 
     async def edit(
         self,
@@ -1067,7 +1131,6 @@ class ThreadTag(Hashable):
         name: str = MISSING,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
         moderated: bool = MISSING,
-        # TODO: reason support tbd
         reason: Optional[str] = None,
     ) -> ThreadTag:
         """|coro|
@@ -1102,25 +1165,39 @@ class ThreadTag(Hashable):
         :class:`ThreadTag`
             The newly edited tag.
         """
-        # seems like emoji fields always have to be provided when editing  # TODO
-        new_name = name or self.name
-        if emoji:
+        if isinstance(self._channel, Object):
+            raise TypeError("Cannot edit thread with no associated forum channel")
+
+        if self.id not in self._channel._available_tags:
+            # should only happen if tag was stored and tags were edited afterwards
+            raise ValueError("This tag is not part of the associated forum channel")
+
+        # we always have to patch the channel with the entire tag list,
+        # so serialize all tags and only replace the one matching `self.id`
+        new_tags = {tag_id: tag.to_dict() for tag_id, tag in self._channel._available_tags.items()}
+        # this always exists, see check above
+        new_tag_payload = new_tags[self.id]
+
+        if name is not MISSING:
+            new_tag_payload["name"] = name
+        # TODO: do emoji fields always have to be provided when editing?
+        if emoji is not MISSING:
             emoji_name, emoji_id = PartialEmoji._to_name_id(emoji)
-        else:
-            emoji_name, emoji_id = self._emoji_name, self._emoji_id
-
-        payload: EditThreadTagPayload = {
-            "name": new_name,
-            "emoji_id": emoji_id,
-            "emoji_name": emoji_name,
-        }
+            new_tag_payload["emoji_name"] = emoji_name
+            new_tag_payload["emoji_id"] = emoji_id
         if moderated is not MISSING:
-            payload["moderated"] = moderated
+            new_tag_payload["moderated"] = moderated
 
-        data = await self._state.http.edit_thread_tag(
-            self._channel_id, self.id, reason=reason, **payload
+        channel_data = cast(
+            "ForumChannelPayload",
+            await self._state.http.edit_channel(
+                self._channel.id, reason=reason, available_tags=list(new_tags.values())
+            ),
         )
-        return self._find_in_response(data, new_name, Object(self._channel_id), self._state)
+        for tag in channel_data.get("available_tags", []):
+            if int(tag["id"]) == self.id:
+                return ThreadTag(data=tag, channel=self._channel, state=self._state)
+        raise InvalidData("Could not find tag in response")
 
     async def delete(self, *, reason: Optional[str] = None) -> None:
         """|coro|
@@ -1142,14 +1219,14 @@ class ThreadTag(Hashable):
         HTTPException
             An error occurred deleting the tag.
         """
-        await self._state.http.delete_thread_tag(self._channel_id, self.id, reason=reason)
+        if isinstance(self._channel, Object):
+            raise TypeError("Cannot edit thread with no associated forum channel")
 
-    @staticmethod
-    def _find_in_response(
-        data: ForumChannelPayload, name: str, channel: Snowflake, state: ConnectionState
-    ) -> ThreadTag:
-        for tag in data.get("available_tags", []):
-            # tag names are unique
-            if tag["name"] == name:
-                return ThreadTag(data=tag, channel=channel, state=state)
-        raise InvalidData("Could not find created tag in response")
+        new_tags = [
+            tag.to_dict()
+            for tag_id, tag in self._channel._available_tags.items()
+            if tag_id != self.id
+        ]
+        await self._state.http.edit_channel(
+            self._channel.id, reason=reason, available_tags=new_tags
+        )
