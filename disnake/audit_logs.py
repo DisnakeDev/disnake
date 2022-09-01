@@ -199,12 +199,13 @@ def _transform_tag_id(
 ) -> Optional[Union[ThreadTag, Object]]:
     if data is None:
         return None
-    tag_id = int(data)
-    tag: Optional[ThreadTag] = None
 
-    from .channel import ForumChannel  # cyclic import
+    # cyclic imports
+    from .channel import ForumChannel
     from .threads import Thread
 
+    tag: Optional[ThreadTag] = None
+    tag_id = int(data)
     thread = entry.target
     # try thread parent first
     if isinstance(thread, Thread) and isinstance(thread.parent, ForumChannel):
@@ -303,7 +304,7 @@ def _transform_automod_trigger_metadata(
     return AutoModTriggerMetadata._from_dict(data)
 
 
-def _transform_forum_emoji(
+def _transform_default_reaction(
     entry: AuditLogEntry, data: Optional[DefaultReactionPayload]
 ) -> Optional[Union[Emoji, PartialEmoji]]:
     if data is None:
@@ -384,9 +385,9 @@ class AuditLogChanges:
         "trigger_metadata":                   (None, _transform_automod_trigger_metadata),
         "exempt_roles":                       (None, _list_transformer(_transform_role)),
         "exempt_channels":                    (None, _list_transformer(_transform_channel)),
-        "applied_tags":                       ("tags", _list_transformer(_transform_tag)),
+        "applied_tags":                       ("tags", _list_transformer(_transform_tag_id)),
         "available_tags":                     (None, _list_transformer(_transform_tag)),
-        "default_reaction_emoji":             ("default_reaction", _transform_forum_emoji),
+        "default_reaction_emoji":             ("default_reaction", _transform_default_reaction),
     }
     # fmt: on
 
