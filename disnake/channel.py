@@ -922,7 +922,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
                 self.id,
                 name=name,
                 auto_archive_duration=auto_archive_duration or self.default_auto_archive_duration,
-                type=type.value,  # type:ignore
+                type=type.value,  # type: ignore
                 invitable=invitable if invitable is not None else True,
                 rate_limit_per_user=slowmode_delay or 0,
                 reason=reason,
@@ -3013,7 +3013,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
             If not provided, slowmode is disabled.
         tags: Sequence[:class:`abc.Snowflake`]
-            The tags to apply to the new thread. Maximum of 2.
+            The tags to apply to the new thread. Maximum of 5.
 
             .. versionadded:: 2.6
 
@@ -3108,6 +3108,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
                 self.id,
                 name=name,
                 auto_archive_duration=auto_archive_duration or self.default_auto_archive_duration,
+                # TODO: use `None` here instead to inherit thread_slowmode_delay?
                 rate_limit_per_user=slowmode_delay or 0,
                 applied_tags=applied_tags,
                 type=ChannelType.public_thread.value,
