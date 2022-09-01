@@ -3300,7 +3300,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
         channel_data = cast(
             "ForumChannelPayload",
-            self._edit(
+            await self._edit(
                 available_tags=self.available_tags + [partial_tag],
                 reason=reason,
             ),

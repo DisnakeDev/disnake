@@ -71,6 +71,7 @@ if TYPE_CHECKING:
     from .types.channel import ForumChannel as ForumChannelPayload
     from .types.snowflake import SnowflakeList
     from .types.threads import (
+        PartialThreadTag as PartialThreadTagPayload,
         Thread as ThreadPayload,
         ThreadArchiveDurationLiteral,
         ThreadMember as ThreadMemberPayload,
@@ -1045,9 +1046,8 @@ class PartialThreadTag:
             and self._emoji_name == other._emoji_name
         )
 
-    def to_dict(self) -> ThreadTagPayload:
+    def to_dict(self) -> PartialThreadTagPayload:
         return {
-            "id": 0,
             "name": self.name,
             "emoji_id": self._emoji_id,
             "emoji_name": self._emoji_name,
@@ -1127,7 +1127,7 @@ class ThreadTag(Hashable, PartialThreadTag):
         return PartialEmoji._from_name_id(self._emoji_name, self._emoji_id, state=self._state)
 
     def to_dict(self) -> ThreadTagPayload:
-        payload = super().to_dict()
+        payload: ThreadTagPayload = super().to_dict()  # type: ignore
         payload["id"] = self.id
         return payload
 
