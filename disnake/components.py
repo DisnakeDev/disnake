@@ -80,7 +80,7 @@ ComponentT = TypeVar("ComponentT", bound=NestedComponent)
 
 
 class Component:
-    """|data_class|
+    """|discord_model|
 
     Represents a Discord Bot UI Kit Component.
 
@@ -127,7 +127,7 @@ class Component:
 
 
 class ActionRow(Component, Generic[ComponentT]):
-    """|data_class|
+    """|discord_model|
 
     Represents an action row.
 
@@ -163,7 +163,7 @@ class ActionRow(Component, Generic[ComponentT]):
 
 
 class Button(Component):
-    """|data_class|
+    """|discord_model|
 
     Represents a button from the Discord Bot UI Kit.
 
@@ -240,7 +240,7 @@ class Button(Component):
 
 
 class SelectMenu(Component):
-    """|data_class|
+    """|discord_model|
 
     Represents a select menu from the Discord Bot UI Kit.
 
@@ -419,7 +419,7 @@ class SelectOption:
 
 
 class TextInput(Component):
-    """|data_class|
+    """|discord_model|
 
     Represents a text input from the Discord Bot UI Kit.
 

@@ -47,7 +47,7 @@ MISSING = utils.MISSING
 
 
 class WelcomeScreenChannel:
-    """|data_class|
+    """|discord_model|
 
     Represents a Discord welcome screen channel.
 

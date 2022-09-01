@@ -56,7 +56,7 @@ if TYPE_CHECKING:
 
 
 class IntegrationAccount:
-    """|data_class|
+    """|discord_model|
 
     Represents an integration account.
 
@@ -81,7 +81,7 @@ class IntegrationAccount:
 
 
 class PartialIntegration:
-    """|data_class|
+    """|discord_model|
 
     Represents a partial guild integration.
 
@@ -343,7 +343,7 @@ class StreamIntegration(Integration):
 
 
 class IntegrationApplication:
-    """|data_class|
+    """|discord_model|
 
     Represents an application for a bot integration.
 
@@ -397,7 +397,7 @@ class IntegrationApplication:
 
 
 class BotIntegration(Integration):
-    """|data_class|
+    """|discord_model|
 
     Represents a bot integration on Discord.
 

@@ -53,7 +53,7 @@ class _EmojiTag:
 
 
 class PartialEmoji(_EmojiTag, AssetMixin):
-    """|data_class|
+    """|discord_model|
 
     Represents a "partial" emoji.
 

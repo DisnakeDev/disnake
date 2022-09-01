@@ -43,7 +43,7 @@ __all__ = (
 
 
 class Team:
-    """|data_class|
+    """|discord_model|
 
     Represents an application team for a bot provided by Discord.
 
@@ -91,7 +91,7 @@ class Team:
 
 
 class TeamMember(BaseUser):
-    """|data_class|
+    """|discord_model|
 
     Represents a team member in a team.
 

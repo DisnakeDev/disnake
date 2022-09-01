@@ -37,7 +37,7 @@ __all__ = ("GuildPreview",)
 
 
 class GuildPreview:
-    """|data_class|
+    """|discord_model|
 
     Represents a :class:`.Guild` preview object.
 

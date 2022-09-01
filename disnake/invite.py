@@ -65,7 +65,7 @@ if TYPE_CHECKING:
 
 
 class PartialInviteChannel:
-    """|data_class|
+    """|discord_model|
 
     Represents a "partial" invite channel.
 
@@ -157,7 +157,7 @@ class PartialInviteChannel:
 
 
 class PartialInviteGuild:
-    """|data_class|
+    """|discord_model|
 
     Represents a "partial" invite guild.
 

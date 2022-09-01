@@ -60,7 +60,7 @@ if TYPE_CHECKING:
 
 
 class StickerPack(Hashable):
-    """|data_class|
+    """|discord_model|
 
     Represents a sticker pack.
 

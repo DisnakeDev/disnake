@@ -54,7 +54,7 @@ __all__ = (
 
 
 class WidgetChannel:
-    """|data_class|
+    """|discord_model|
 
     Represents a "partial" widget channel.
 
@@ -111,7 +111,7 @@ class WidgetChannel:
 
 
 class WidgetMember(BaseUser):
-    """|data_class|
+    """|discord_model|
 
     Represents a "partial" member of the widget's guild.
 

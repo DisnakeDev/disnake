@@ -631,7 +631,7 @@ class UserCommand(ApplicationCommand):
 
 
 class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
-    """|data_class|
+    """|discord_model|
 
     A user context menu command returned by the API.
 
@@ -716,7 +716,7 @@ class MessageCommand(ApplicationCommand):
 
 
 class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
-    """|data_class|
+    """|discord_model|
 
     A message context menu command returned by the API.
 
@@ -888,7 +888,7 @@ class SlashCommand(ApplicationCommand):
 
 
 class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
-    """|data_class|
+    """|discord_model|
 
     A slash command returned by the API.
 

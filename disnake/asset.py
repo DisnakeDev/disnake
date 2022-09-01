@@ -172,7 +172,7 @@ class AssetMixin:
 
 
 class Asset(AssetMixin):
-    """|data_class|
+    """|discord_model|
 
     Represents a CDN asset on Discord.
 

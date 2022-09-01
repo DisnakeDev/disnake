@@ -85,7 +85,7 @@ StringT = TypeVar("StringT", str, Optional[str], covariant=True)
 
 
 class Localized(Generic[StringT]):
-    """|data_class|
+    """|data_class_constructible|
 
     A container type used for localized parameters.
 

@@ -90,7 +90,7 @@ if TYPE_CHECKING:
 
 
 class VoiceState:
-    """|data_class|
+    """|discord_model|
 
     Represents a Discord user's voice state.
 

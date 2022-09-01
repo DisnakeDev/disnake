@@ -53,7 +53,7 @@ if TYPE_CHECKING:
 
 
 class RoleTags:
-    """|data_class|
+    """|discord_model|
 
     Represents tags on a role.
 

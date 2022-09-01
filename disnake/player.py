@@ -72,7 +72,7 @@ else:
     CREATE_NO_WINDOW = 0x08000000
 
 
-class AudioSource:
+class AudioSource:a
     """Represents an audio stream.
 
     The audio stream can be Opus encoded or not, however if the audio stream

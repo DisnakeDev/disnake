@@ -3451,7 +3451,7 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
 
 
 class PartialMessageable(disnake.abc.Messageable, Hashable):
-    """|data_class|
+    """|discord_model|
 
     Represents a partial messageable to aid with working messageable channels when
     only a channel ID is present.

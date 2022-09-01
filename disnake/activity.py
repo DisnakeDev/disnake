@@ -145,7 +145,7 @@ class BaseActivity:
 
 
 class Activity(BaseActivity):
-    """|data_class|
+    """|data_class_constructible|
 
     Represents an activity in Discord.
 
@@ -336,7 +336,7 @@ class Activity(BaseActivity):
 
 
 class Game(BaseActivity):
-    """|data_class|
+    """|data_class_constructible|
 
     A slimmed down version of :class:`Activity` that represents a Discord game.
 
@@ -439,7 +439,7 @@ class Game(BaseActivity):
 
 
 class Streaming(BaseActivity):
-    """|data_class|
+    """|data_class_constructible|
 
     A slimmed down version of :class:`Activity` that represents a Discord streaming status.
 
@@ -546,7 +546,7 @@ class Streaming(BaseActivity):
 
 
 class Spotify:
-    """|data_class|
+    """|discord_model|
 
     Represents a Spotify listening activity from Discord. This is a special case of
     :class:`Activity` that makes it easier to work with the Spotify integration.
@@ -734,7 +734,7 @@ class Spotify:
 
 
 class CustomActivity(BaseActivity):
-    """|data_class|
+    """|data_class_constructible|
 
     Represents a Custom activity from Discord.
 

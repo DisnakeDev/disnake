@@ -494,7 +494,7 @@ class Attachment(Hashable):
 
 
 class DeletedReferencedMessage:
-    """|data_class|
+    """|discord_model|
 
     A special sentinel type that denotes whether the
     resolved message referenced message had since been deleted.

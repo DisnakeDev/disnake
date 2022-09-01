@@ -890,7 +890,7 @@ class Thread(Messageable, Hashable):
 
 
 class ThreadMember(Hashable):
-    """|data_class|
+    """|discord_model|
 
     Represents a Discord thread member.
 

@@ -63,7 +63,7 @@ __all__ = ("GuildScheduledEventMetadata", "GuildScheduledEvent")
 
 
 class GuildScheduledEventMetadata:
-    """|data_class|
+    """|discord_model|
 
     Represents a guild scheduled event entity metadata.
 
