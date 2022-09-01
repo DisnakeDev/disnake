@@ -332,7 +332,7 @@ class GuildChannel(ABC):
         video_quality_mode: VideoQualityMode = MISSING,
         flags: ChannelFlags = MISSING,
         available_tags: Sequence[PartialThreadTag] = MISSING,
-        default_reaction: Union[str, Emoji, PartialEmoji] = MISSING,
+        default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
         reason: Optional[str] = None,
     ) -> Optional[ChannelPayload]:
         parent_id: Optional[int]
@@ -420,7 +420,7 @@ class GuildChannel(ABC):
         if available_tags is not MISSING:
             available_tags_payload = [tag.to_dict() for tag in available_tags]
 
-        default_reaction_emoji_payload: Optional[DefaultReactionPayload]
+        default_reaction_emoji_payload: Optional[DefaultReactionPayload] = MISSING
         if default_reaction is not MISSING:
             if default_reaction is not None:
                 emoji_name, emoji_id = PartialEmoji._to_name_id(default_reaction)
@@ -430,8 +430,6 @@ class GuildChannel(ABC):
                 }
             else:
                 default_reaction_emoji_payload = None
-        else:
-            default_reaction_emoji_payload = MISSING
 
         options: Dict[str, Any] = {
             "name": name,

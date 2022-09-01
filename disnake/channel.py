@@ -2731,7 +2731,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         flags: ChannelFlags = ...,
         require_tag: bool = ...,
         available_tags: Sequence[PartialThreadTag] = ...,
-        default_reaction: Union[str, Emoji, PartialEmoji] = ...,
+        default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = ...,
         reason: Optional[str] = ...,
     ) -> ForumChannel:
         ...
@@ -2752,7 +2752,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         flags: ChannelFlags = MISSING,
         require_tag: bool = MISSING,
         available_tags: Sequence[PartialThreadTag] = MISSING,
-        default_reaction: Union[str, Emoji, PartialEmoji] = MISSING,
+        default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
         reason: Optional[str] = None,
         **kwargs: Never,
     ) -> Optional[ForumChannel]:
@@ -2821,7 +2821,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
             .. versionadded:: 2.6
 
-        default_reaction: Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]
+        default_reaction: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
             The default emoji shown for reacting to new threads.
 
             .. versionadded:: 2.6

@@ -1557,7 +1557,7 @@ class Guild(Hashable):
         nsfw: bool = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
         available_tags: Sequence[PartialThreadTag] = None,
-        default_reaction: Union[str, Emoji, PartialEmoji] = None,
+        default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = None,
         reason: Optional[str] = None,
     ) -> ForumChannel:
         """|coro|
