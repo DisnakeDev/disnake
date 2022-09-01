@@ -429,12 +429,11 @@ class Thread(Messageable, Hashable):
         from .channel import ForumChannel  # cyclic import
 
         parent = self.parent
-        if not parent or not isinstance(parent, ForumChannel):
+        if not isinstance(parent, ForumChannel):
             return []
 
         # threads may have tag IDs for tags that don't exist anymore
-        tags = (parent._available_tags.get(tag_id) for tag_id in self._tags)
-        return [tag for tag in tags if tag]
+        return list(filter(None, map(parent._available_tags.get, self._tags)))
 
     def permissions_for(
         self,

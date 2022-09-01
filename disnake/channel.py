@@ -2561,7 +2561,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             "default_auto_archive_duration", 1440
         )
         self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
-        # TODO: add to .clone and Guild.create_forum_channel, unsupported atm
+        # TODO: add to Guild.create_forum_channel, unsupported atm
         # TODO: naming
         self.thread_slowmode_delay: int = data.get("default_thread_rate_limit_per_user", 0)
 
@@ -2811,9 +2811,8 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             .. versionadded:: 2.6
 
         available_tags: Sequence[:class:`PartialThreadTag`]
-            The new :class:`PartialThreadTag`\\s or :class:`ThreadTag`\\s available
-            for threads in this channel.
-            Can also be used to reorder existing tags.
+            The new :class:`PartialThreadTag`\\s or :class:`ThreadTag`\\s available for threads in this channel.
+            Can also be used to reorder existing tags. Maximum of 20.
 
             Note that this overwrites all tags, removing existing tags unless they're passed as well.
 
@@ -3114,7 +3113,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
                 self.id,
                 name=name,
                 auto_archive_duration=auto_archive_duration or self.default_auto_archive_duration,
-                # TODO: use `None` here instead to inherit thread_slowmode_delay?
+                # TODO: use `None` instead of `0` here instead to inherit thread_slowmode_delay?
                 rate_limit_per_user=slowmode_delay or 0,
                 applied_tags=applied_tags,
                 type=ChannelType.public_thread.value,
@@ -3262,16 +3261,16 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
     async def create_tag(
         self,
-        *,
         name: str,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        *,
         moderated: bool = False,
         reason: Optional[str] = None,
     ) -> ThreadTag:
         """|coro|
 
         Creates a :class:`ThreadTag` for the forum channel.
-        A forum channel can have a maximum of 10 tags.
+        A forum channel can have a maximum of 20 tags.
 
         You must have :attr:`~Permissions.manage_channels` permission to
         do this.
