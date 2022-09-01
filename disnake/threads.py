@@ -1210,7 +1210,6 @@ class ThreadTag(Hashable, PartialThreadTag):
 
         if name is not MISSING:
             new_tag_payload["name"] = name
-        # TODO: do emoji fields always have to be provided when editing?
         if emoji is not MISSING:
             emoji_name, emoji_id = PartialEmoji._to_name_id(emoji)
             new_tag_payload["emoji_name"] = emoji_name
