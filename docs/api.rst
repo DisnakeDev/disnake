@@ -5127,6 +5127,14 @@ ThreadMember
 .. autoclass:: ThreadMember()
     :members:
 
+PartialThreadTag
+~~~~~~~~~~~~~~~~~
+
+.. attributetable:: PartialThreadTag
+
+.. autoclass:: PartialThreadTag()
+    :members:
+
 ThreadTag
 ~~~~~~~~~~
 
@@ -5134,6 +5142,7 @@ ThreadTag
 
 .. autoclass:: ThreadTag()
     :members:
+    :inherited-members:
 
 VoiceChannel
 ~~~~~~~~~~~~~

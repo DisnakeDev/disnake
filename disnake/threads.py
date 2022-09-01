@@ -1015,7 +1015,31 @@ class ThreadMember(Hashable):
 
 class PartialThreadTag:
     """
-    TODO
+    Represents a partial tag for threads in forum channels,
+    used for creating new tags.
+
+    .. container:: operations
+
+        .. describe:: x == y
+
+            Checks if two tags are equal.
+
+        .. describe:: x != y
+
+            Checks if two tags are not equal.
+
+        .. describe:: str(x)
+
+            Returns the tag's name.
+
+    .. versionadded:: 2.6
+
+    Attributes
+    ----------
+    name: :class:`str`
+        The tag's name.
+    moderated: :class:`bool`
+        Whether only moderators can apply this tag to threads.
     """
 
     __slots__ = ("name", "moderated", "_emoji_id", "_emoji_name")
