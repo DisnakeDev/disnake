@@ -2730,7 +2730,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
         flags: ChannelFlags = ...,
         require_tag: bool = ...,
-        available_tags: Sequence[PartialThreadTag] = MISSING,
+        available_tags: Sequence[PartialThreadTag] = ...,
         default_reaction: Union[str, Emoji, PartialEmoji] = ...,
         reason: Optional[str] = ...,
     ) -> ForumChannel:
