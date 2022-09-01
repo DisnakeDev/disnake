@@ -277,8 +277,12 @@ class PartialEmoji(_EmojiTag, AssetMixin):
     def _to_name_id(
         emoji: Optional[Union[str, Emoji, PartialEmoji]]
     ) -> Tuple[Optional[str], Optional[int]]:
+        # API only supports exactly one of `name` and `id` being set
         if isinstance(emoji, _EmojiTag):
-            return None, emoji.id
+            if emoji.id:
+                return None, emoji.id
+            else:
+                return emoji.name, None
         else:
             return emoji, None
 

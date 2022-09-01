@@ -1056,7 +1056,10 @@ class PartialThreadTag:
 
 
 # TODO: just `Tag` instead of `ThreadTag`?
-# TODO: or perhaps `ForumTag` to match apidocs name?
+#       or perhaps `ForumTag` to match apidocs name?
+
+# TODO: don't inherit from `Hashable` and inherit `__eq__` from `PartialThreadTag` instead?
+#       would make things like comparing `available_tags` in auditlogs easier
 class ThreadTag(Hashable, PartialThreadTag):
     """
     Represents a tag for threads in forum channels.
