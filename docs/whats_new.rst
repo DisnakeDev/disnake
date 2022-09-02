@@ -12,6 +12,17 @@ This page keeps a detailed human friendly rendering of what's new and changed
 in specific versions.
 
 
+.. _vp2p4p2:
+
+v2.4.2
+------
+
+Bug Fixes
+~~~~~~~~~~
+
+- Backport fix for message content intent incorrectly always being enabled (:issue:`728`)
+
+
 .. _vp2p4p1:
 
 v2.4.1
