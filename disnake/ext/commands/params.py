@@ -233,7 +233,7 @@ class Injection:
         if not isinstance(option_name, str):
             raise TypeError("option_name must be a type of str")
 
-        if self.autocompleters.get(option_name) is not None:
+        if option_name in self.autocompleters:
             raise ValueError(
                 "This injection already has an autocompleter set for option '{}'".format(option_name)
             )
