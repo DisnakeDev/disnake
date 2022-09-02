@@ -210,9 +210,8 @@ class Injection:
     def register(
         cls, function: Callable, annotation: Any, *, autocompleters: Dict[str, Callable] = None
     ) -> Self:
-        self = cls(function)
+        self = cls(function, autocompleters=autocompleters)
         cls._registered[annotation] = self
-        self.autocompleters = autocompleters if autocompleters else {}
         return self
 
     def autocomplete(self, option_name: str) -> Callable[[CallableT], CallableT]:
