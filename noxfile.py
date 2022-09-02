@@ -52,7 +52,7 @@ def depends(
                     arg = "--only"
                 cmd.extend([arg, dep])
 
-            session.run_always(*cmd, external=True)
+            session.run_always(*cmd, external=True, env={"POETRY_VIRTUALENVS_CREATE": "false"})
             return f(session, *args, **kwargs)
 
         return wrapper

@@ -25,32 +25,38 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Install poetry
+      shell: bash
+      run: pipx install poetry==1.2.0
+
     - name: Set up python ${{ inputs.python-version }}
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v4.2.0
+      id: setup_python
       with:
         python-version: ${{ inputs.python-version }}
         cache: "pip"
         cache-dependency-path: ${{ inputs.cache-dependency-path }}
 
-    - name: Create and activate vrtual environment
+    - name: Configure Poetry
+      id: venv
       shell: bash
       run: |
-        pipx install poetry==1.2.0
-        python -m venv .venv
-        PATH="$(poetry env info --path)/bin:$PATH"
+         python -m virtualenv .venv
+         source .venv/bin/activate
 
     - name: Install dependencies
       if: inputs.dependency-groups || inputs.dependencies
       env:
         DEPENDENCY_GROUPS: ${{ inputs.dependency-groups }}
         DEPS: ${{ inputs.dependencies }}
+        POETRY_VIRTUALENVS_CREATE: false
       shell: bash
       run: |
         [ -n "$DEPENDENCY_GROUPS" ] && DEPS="$DEPS nox"
         python -m pip install $DEPS
 
         if [ "*" == "$DEPENDENCY_GROUPS" ]; then
-          poetry install --all-extras
+          poetry install --all-extras --sync
         elif [ -n "$DEPENDENCY_GROUPS" ]; then
-           poetry install --only $DEPENDENCY_GROUPS
+           poetry install --only $DEPENDENCY_GROUPS --sync
         fi

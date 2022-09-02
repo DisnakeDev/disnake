@@ -48,7 +48,7 @@ jobs:
     - name: Run flake8
       id: flake8
       if: always() && (steps.pre-commit.outcome == 'success' || steps.pre-commit.outcome == 'failure')
-      run: "poetry run flake8 \
+      run: "flake8 \
       --format='::error file=%(path)s,line=%(row)d,col=%(col)d::\
       [flake8] %(code)s: %(text)s'"
 
@@ -91,31 +91,27 @@ jobs:
 
     - name: Set up environment
       uses: ./.github/actions/setup-env
+      id: set_env
       with:
         python-version: ${{ matrix.python-version }}
         dependency-groups: "*"
 
     - name: Set pyright version
       run: |
-        PYRIGHT_VERSION="$(poetry run python -c 'import pyright; print(pyright.__pyright_version__)')"
+        PYRIGHT_VERSION="$(python -c 'import pyright; print(pyright.__pyright_version__)')"
         echo "PYRIGHT_VERSION=$PYRIGHT_VERSION" >> $GITHUB_ENV
 
-    - name: Find venv
-      run: |
-        poetry env info --path
-
     - name: Run pyright (Linux)
-      uses: jakebailey/pyright-action@v1.0.3
+      uses: jakebailey/pyright-action@v1.4.1
       with:
         version: ${{ env.PYRIGHT_VERSION }}
         python-version: ${{ matrix.python-version }}
         python-platform: "Linux"
         no-comments: ${{ matrix.python-version != '3.8' }}  # only add comments for one version
         warnings: true
-        venv-path:
 
     - name: Run pyright (Windows)
-      uses: jakebailey/pyright-action@v1.0.3
+      uses: jakebailey/pyright-action@v1.4.1
       if: ${{ success() || failure() }}  # run regardless of previous step's result
       with:
         version: ${{ env.PYRIGHT_VERSION }}
@@ -123,7 +119,6 @@ jobs:
         python-platform: "Windows"
         no-comments: true  # only add comments for one platform (see above)
         warnings: true
-        venv-path:
 
   misc:
     # We want to run on external PRs, but not on our own internal PRs as they'll be run
