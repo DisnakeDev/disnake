@@ -226,7 +226,7 @@ class Injection:
         Raises
         ------
         ValueError
-            This injection already have autocompleter set for the given option
+            This injection already has an autocompleter set for the given option
         TypeError
             ``option_name`` is not :class:`str`
         """
@@ -235,7 +235,7 @@ class Injection:
 
         if self.autocompleters.get(option_name) is not None:
             raise ValueError(
-                "This injection already have autocompleter set for option '{}'".format(option_name)
+                "This injection already has an autocompleter set for option '{}'".format(option_name)
             )
 
         def decorator(func: CallableT) -> CallableT:
