@@ -1,0 +1,1 @@
+Fix :attr:`Spotify.start`, :attr:`Spotify.end`, :attr:`Spotify.duration` raising :exc:`KeyError` instead of returning ``None``, improve activity typing.
