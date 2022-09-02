@@ -976,7 +976,7 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
                 raise ValueError(
                     f"Couldn't set autocompleters on injection {injection.function.__qualname__} for non-existent"
                     " options: "
-                    + ", ".join(["'" + x + "'" for x in injection.autocompleters.keys()])
+                    + ", ".join([f"'{option}'" for option in injection.autocompleters.keys()])
                 )
         params += collected
 
