@@ -1239,6 +1239,4 @@ def register_injection(
     if tp in ParamInfo.TYPES:
         raise TypeError("Injection cannot overwrite builtin types")
 
-    inj = Injection.register(function, sig.return_annotation, autocompleters=autocompleters)
-
-    return inj
+    return Injection.register(function, sig.return_annotation, autocompleters=autocompleters)
