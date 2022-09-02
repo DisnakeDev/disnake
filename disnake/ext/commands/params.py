@@ -1156,7 +1156,9 @@ def injection(*, autocompleters: Dict[str, Callable] = None) -> Callable[[Callab
     Parameters
     ----------
     autocompleters: Dict[:class:`str`, Callable]
-        A mapping of injection's option names to their respective autocompleters
+        A mapping of the injection's option names to their respective autocompleters.
+
+        See also :func:`.Injection.autocomplete`.
     """
 
     def decorator(function: Callable[..., Any]) -> Any:
