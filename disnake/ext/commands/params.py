@@ -215,7 +215,7 @@ class Injection:
         self.autocompleters = autocompleters if autocompleters else {}
         return self
 
-    def autocomplete(self, option_name: str) -> Callable:
+    def autocomplete(self, option_name: str) -> Callable[[CallableT], CallableT]:
         """A decorator that registers an autocomplete function for the specified option.
 
         Parameters
