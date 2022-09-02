@@ -90,7 +90,7 @@ when a user sends "$hello" message.
 .. note::
 
     Events can be sent not only by Discord. For instance, if you use :ref:`commands extension <discord_ext_commands>`,
-    you'll also receive :ref:`various events <ext_commands_api_events>` related to your commands' execution process.
+    you'll also receive various events related to your commands' execution process.
 
 If an event handler raises an exception, :func:`on_error` will be called
 to handle it, which defaults to print a traceback and ignoring the exception.
