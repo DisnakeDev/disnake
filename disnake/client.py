@@ -287,6 +287,7 @@ class Client:
 
     enable_gateway_error_handler: :class:`bool`
         Whether to enable the :func:`disnake.on_gateway_error` event.
+        Defaults to ``True``.
 
         If this is disabled, exceptions that occur while parsing (known) gateway events
         won't be handled and the pre-v2.6 behavior of letting the exception propagate up to
