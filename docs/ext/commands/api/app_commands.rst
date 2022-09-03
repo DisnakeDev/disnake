@@ -128,6 +128,30 @@ Message Command
     .. automethod:: InvokableMessageCommand.error()
         :decorator:
 
+ParamInfo
+~~~~~~~~~
+
+.. attributetable:: ParamInfo
+
+.. autoclass:: ParamInfo
+
+LargeInt
+~~~~~~~~
+
+.. autoclass:: disnake.ext.commands.LargeInt
+
+    This is a class which inherits from :class:`int` to allow large numbers in slash commands, meant to be used only for annotations.
+
+Range
+~~~~~
+
+.. autoclass:: disnake.ext.commands.Range
+
+String
+~~~~~~
+
+.. autoclass:: disnake.ext.commands.String
+
 Events
 ------
 
