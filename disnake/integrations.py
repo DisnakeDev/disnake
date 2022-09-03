@@ -26,7 +26,7 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Type
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type
 
 from .enums import ExpireBehaviour, try_enum
 from .user import User
@@ -419,8 +419,10 @@ class BotIntegration(Integration):
 
     def _from_data(self, data: BotIntegrationPayload) -> None:
         super()._from_data(data)
-        self.application = IntegrationApplication(data=data["application"], state=self._state)
-        self.scopes = data.get("scopes") or []
+        self.application: IntegrationApplication = IntegrationApplication(
+            data=data["application"], state=self._state
+        )
+        self.scopes: List[str] = data.get("scopes") or []
 
 
 def _integration_factory(value: str) -> Tuple[Type[Integration], str]:
