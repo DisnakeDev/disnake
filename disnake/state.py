@@ -606,7 +606,13 @@ class ConnectionState:
         )
 
     def _get_guild_channel(
-        self, data: Union[MessagePayload, gateway.TypingStartEvent]
+        self,
+        data: Union[
+            MessagePayload,
+            gateway.TypingStartEvent,
+            gateway.MessageDeleteBulkEvent,
+            gateway.MessageDeleteEvent,
+        ],
     ) -> Tuple[Union[PartialChannel, Thread], Optional[Guild]]:
         channel_id = int(data["channel_id"])
         try:
@@ -621,7 +627,11 @@ class ConnectionState:
                     user_id = int(data["author"]["id"])
                 else:
                     # TypingStartEvent
-                    user_id = int(data["user_id"])
+                    try:
+                        user_id = int(data["user_id"])
+                    # MessageDeleteBulkEvent or MessageDeleteEvent
+                    except KeyError:
+                        user_id = 0
                 channel = DMChannel._from_message(self, channel_id, user_id)
             guild = None
         else:
