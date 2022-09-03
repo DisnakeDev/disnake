@@ -122,7 +122,7 @@ class _EnumDict(Dict[str, Any]):
             "name",
             "value",
         }:
-            raise ValueError(f"Invalid Enum member name: {name}")
+            raise ValueError(f"Invalid Enum member name: {name}.")
 
         if name.startswith("_") or _is_descriptor(value):
             super().__setitem__(name, value)
@@ -130,11 +130,11 @@ class _EnumDict(Dict[str, Any]):
 
         if not isinstance(value, self.base):
             raise TypeError(
-                f"Member {name} must be of type {self.base.__name__}, got {type(value).__name__}"
+                f"Member {name} must be of type {self.base.__name__}, got {type(value).__name__}."
             )
 
         if name in self.member_map:
-            raise TypeError(f"Cannot create multiple members with the same name: {name!r}")
+            raise TypeError(f"Cannot create multiple members with the same name: {name!r}.")
 
         self.member_map[name] = value
 
@@ -148,28 +148,41 @@ class EnumMeta(type):
     def __new__(
         metacls: Type[_T],  # pyright: ignore[reportSelfClsParameterName]
         name: str,
-        bases: Tuple[Type[Any], Type[Any]],
+        bases: Tuple[Type[Any], Type[Enum]],
         namespace: _EnumDict,
     ) -> _T:
-
-        if not EnumMeta.__is_enum_instantiated__:
-            EnumMeta.__is_enum_instantiated__ = True
-            return super().__new__(metacls, name, bases, namespace)
-
-        base, enum_type = bases  # ensured possible in __prepare__
-
+        # Initialise basic namespace.
+        # Falling back to dict here is fine; the class' __dict__ will be a normal dict regardless.
         ns: Dict[str, Any] = {
-            "__objtype__": base,
-            "__enumtype__": enum_type,
+            "__base_type__": (base := namespace.base),
             "_member_map_": (name_map := {}),
             "_value2member_map_": (value_map := {}),
-            **Enum.__dict__,
         }
 
         ns.update(namespace)
 
-        cls = super().__new__(metacls, name, bases, ns)
+        # Member creation logic is not required for the base Enum class.
+        # Set internal flag to True such that all following enums get proper member handling.
+        if not EnumMeta.__is_enum_instantiated__:
+            EnumMeta.__is_enum_instantiated__ = True
+            ns["__enum_type__"] = enum = super().__new__(metacls, name, bases, ns)
+            return enum
 
+        # Ensure we aren't creating an enum with members and __base_type__ object.
+        # This allows untyped enums to provide methods to all its further subclasses,
+        # while disallowing untyped enum members.
+        if base is object and namespace.member_map:
+            raise TypeError(f"Cannot create enum {name} with members but no defined member type.")
+
+        if len(bases) == 1:
+            ns["__enum_type__"] = bases[0]
+        else:
+            _, ns["__enum_type__"] = bases  # ensured possible in __prepare__
+
+        # Create new enum class...
+        cls = super().__new__(metacls, name, bases, Enum.__dict__ | ns)
+
+        # Create and populate new members...
         for name_, value_ in namespace.member_map.items():
             member = cls.__new__(cls, value_)  # type: ignore
 
@@ -196,13 +209,27 @@ class EnumMeta(type):
         if not EnumMeta.__is_enum_instantiated__:
             return _EnumDict(object)
 
-        try:
-            base, _ = bases  # 'loss' of functionality: only (type, Enum) enums are allowed
-        except ValueError:
-            raise TypeError("Expected exactly two base classes for an enum") from None
+        if len(bases) == 1:
+            # If single base, that base must be a predefined enum; get the base type from that
+            # enum and use it for the new enum.
+            enum_type = bases[0]
+            base: Type[Any] = enum_type.__base_type__  # type: ignore
 
-        if isinstance(base, EnumMeta):
-            raise TypeError("An Enum's first base class must be its values' type")
+        else:
+            # If multiple bases, the first base must be the base type, and the second must be
+            # the enum to extend.
+            try:
+                base, enum_type = bases
+            except ValueError:
+                raise TypeError("Expected at most two base classes for an enum.") from None
+
+            if isinstance(base, EnumMeta):
+                raise TypeError("A typed Enum's first base class must be its values' type.")
+
+        for enum_type_base in enum_type.__mro__:
+            # Ensure the inherited base does not have any defined members...
+            if issubclass(enum_type_base, Enum) and enum_type_base._member_map_:
+                raise TypeError(f"{name} cannot extend enumeration {enum_type_base.__name__}.")
 
         return _EnumDict(base)
 
@@ -213,7 +240,7 @@ class EnumMeta(type):
         try:
             return cls._value2member_map_[value]
         except KeyError:
-            raise ValueError(f"{value} is not a valid {cls.__name__}") from None
+            raise ValueError(f"{value} is not a valid {cls.__name__}.") from None
 
     def __getitem__(cls, name: str) -> Enum:
         return cls._member_map_[name]
@@ -241,8 +268,8 @@ if TYPE_CHECKING:
 else:
 
     class Enum(metaclass=EnumMeta):
-        _name_map_: ClassVar[Mapping[str, Enum]]
-        _value2member_map_: ClassVar[Mapping[Any, Enum]]
+        __base_type__: ClassVar[Type[Any]]
+        __enum_type__: ClassVar[Type[Enum]]
         name: str
         value: Any
 

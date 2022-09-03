@@ -27,19 +27,10 @@ def test_init_followup_enum():
     assert TestEnum.__mro__ == (TestEnum, int, enums.Enum, object)
 
 
-@pytest.mark.parametrize(
-    "bases",
-    [
-        # Too few bases...
-        (enums.Enum,),
-        # Too many bases...
-        (str, int, enums.Enum),
-    ],
-)
-def test_init_enum_incorrect_base_number(bases):
-    with pytest.raises(TypeError, match="exactly two base classes"):
+def test_init_enum_incorrect_base_number():
+    with pytest.raises(TypeError, match="at most two base classes"):
 
-        class FailedEnum(*bases):
+        class FailedEnum(int, str, enums.Enum):
             pass
 
 
@@ -48,6 +39,62 @@ def test_init_enum_incorrect_base_order():
 
         class FailedEnum(enums.Enum, int):
             pass
+
+
+def test_init_enum_untyped_no_members():
+    class UntypedEnum(enums.Enum):
+        _private = "a"
+
+    assert UntypedEnum._private == "a"
+
+
+def test_init_enum_untyped_inheritance():
+    with pytest.raises(TypeError):
+
+        class UntypedEnum(enums.Enum):
+            member = "a"
+
+
+def test_init_enum_inheritance():
+    class UntypedBaseEnum(enums.Enum):
+        def x(self):
+            return "woo"
+
+    class TypedInheritor(int, UntypedBaseEnum):
+        y = 1
+
+    assert TypedInheritor.__base_type__ is int  # type: ignore
+    assert TypedInheritor.y.x() == "woo"
+
+
+def test_init_enum_typed_inheritance():
+    class TypedBaseEnum(int, enums.Enum):
+        def x(self):
+            return "woo"
+
+    class UntypedInheritor(TypedBaseEnum):
+        # Base type <int> inferred from TypedBaseEnum
+        y = 1
+
+    assert UntypedInheritor.__base_type__ is int  # type: ignore
+    assert UntypedInheritor.y.x() == "woo"
+
+
+def test_init_enum_member_inheritance():
+    class BaseEnum(int, enums.Enum):
+        a = 1
+
+    with pytest.raises(TypeError):
+
+        class ChildEnum(BaseEnum):  # type: ignore
+            b = 2
+
+
+@pytest.mark.parametrize("name", ["mro", "name", "value"])
+def test_init_enum_illegal_name(name: str):
+    with pytest.raises(ValueError, match="Invalid Enum member name"):
+        # TODO: come up with a better way of running this test.
+        exec(f"class PainEnum(int, enums.Enum):\n\t{name} = 1\n", {"enums": enums})  # noqa: S102
 
 
 def test_init_enum_type_mismatch():
