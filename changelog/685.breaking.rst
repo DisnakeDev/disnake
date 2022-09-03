@@ -1,0 +1,4 @@
+Update activity attributes to match API types.
+- Make :attr:`Spotify.start`, :attr:`Spotify.end`, :attr:`Spotify.duration` optional.
+- Remove :attr:`Activity.timestamps`, values are accessible through :attr:`Activity.start`, :attr:`Activity.end`.
+- Change type of :attr:`Activity.buttons` to List[:class:`str`].
