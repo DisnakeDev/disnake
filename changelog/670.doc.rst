@@ -1,0 +1,1 @@
+Document :class:`Injection <ext.commands.Injection>`.
