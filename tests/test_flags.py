@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+
 import pytest
 
 from disnake import flags
@@ -119,11 +121,34 @@ class TestBaseFlags:
 
         assert ins.value & TestFlags.sixteen.flag
 
+        ins = TestFlags()
+        assert ins.value == 0
+        assert (ins | TestFlags.one).value == TestFlags.one.flag
+        ins |= TestFlags.one
+        assert ins.value == TestFlags.one.flag
+
+        with pytest.raises(TypeError, match="unsupported operand type(s) for |:"):
+            _ = TestFlags.four | 32  # type: ignore
+
+        with pytest.raises(TypeError, match="unsupported operand type(s) for |:"):
+            _ = 32 | TestFlags.four  # type: ignore
+
     def test_flag_value_invert(self) -> None:
         ins = ~TestFlags.four
         assert isinstance(ins, TestFlags)
 
         assert ins.value == 23 - 4
+
+    def test_flag_value_xor(self) -> None:
+        ins = TestFlags(one=True, two=True)
+
+        ins ^= TestFlags.two
+        assert ins.value == 1
+
+        ins ^= TestFlags.three
+        assert ins.value == 2
+
+        assert (ins ^ TestFlags.four).value == 6
 
     def test__eq__(self) -> None:
         ins = TestFlags(one=True, two=True)
@@ -151,6 +176,12 @@ class TestBaseFlags:
         assert third is not ins
         assert third.value == 0b010
 
+        with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for &:")):
+            _ = ins & "44"  # type: ignore
+
+        with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for &:")):
+            _ = "44" & ins  # type: ignore
+
     def test__iand__(self) -> None:
         ins = TestFlags(one=True, two=True)
         other = TestFlags(one=True, two=True)
@@ -165,6 +196,9 @@ class TestBaseFlags:
         ins &= other
         assert third is ins
         assert ins.value == 0b001
+
+        with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for &=:")):
+            ins &= 14  # type: ignore
 
     def test__or__(self) -> None:
         ins = TestFlags(one=True, two=False)
@@ -186,6 +220,12 @@ class TestBaseFlags:
         assert third is not ins
         assert third.value == 0b10
 
+        with pytest.raises(TypeError, match="unsupported operand type(s) for |:"):
+            _ = ins | 28  # type: ignore
+
+        with pytest.raises(TypeError, match="unsupported operand type(s) for |:"):
+            _ = 28 | ins  # type: ignore
+
     def test__ior__(self) -> None:
         ins = TestFlags(one=True, two=False)
         other = TestFlags(one=False, two=True)
@@ -200,6 +240,9 @@ class TestBaseFlags:
         ins |= other
         assert ins.value == 0b111
 
+        with pytest.raises(TypeError, match="unsupported operand type(s) for |=:"):
+            ins |= True  # type: ignore
+
     def test__xor__(self) -> None:
         ins = TestFlags(one=True, two=False)
         other = TestFlags(one=False, two=True)
@@ -211,6 +254,12 @@ class TestBaseFlags:
         other.one = True
         third = ins ^ other
         assert third.value == 0b010
+
+        with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for ^:")):
+            _ = ins ^ "h"  # type: ignore
+
+        with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for ^:")):
+            _ = "h" ^ ins  # type: ignore
 
     def test__ixor__(self) -> None:
         ins = TestFlags(one=True, two=False)
@@ -225,6 +274,9 @@ class TestBaseFlags:
         other.one = True
         ins ^= other
         assert ins.value == 0b010
+
+        with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for ^=:")):
+            ins ^= "stabilty"  # type: ignore
 
     def test__le__(self) -> None:
         ins = TestFlags(one=True, two=False)
