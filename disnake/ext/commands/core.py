@@ -125,7 +125,7 @@ HookT = TypeVar("HookT", bound="Hook")
 ErrorT = TypeVar("ErrorT", bound="Error")
 
 
-if TYPE_CHECKING:  #
+if TYPE_CHECKING:
     P = ParamSpec("P")
 
     CommandCallback = Union[
