@@ -1009,22 +1009,14 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
 
     for injection in injections.values():
         collected = collect_nested_params(injection.function)
-        if injection.autocompleters:  # != {}
-            for p in collected:
-                if f := injection.autocompleters.get(p.name):
-                    p.autocomplete = f
-
-            if len(injection.autocompleters) > len(collected):
-                raise ValueError(
-                    f"Couldn't set autocompleters on injection {injection.function.__qualname__} for non-existent"
-                    f" options: "
-                    + ", ".join(
-                        f"'{k}'"
-                        for k in _get_superfluous_autocompleters(
-                            collected, injection.autocompleters
-                        )
-                    )
-                )
+        if injection.autocompleters:
+            lookup = {p.name: p for p in collected}
+            for name, func in injection.autocompleters.items():
+                param = lookup.get(name)
+                if param is None:
+                    raise ValueError(f"Option '{name}' doesn't exist in '{command.qualified_name}'")
+                func.__slash_command__ = command
+                param.autocomplete = func
         params += collected
 
     params = sorted(params, key=lambda param: not param.required)
