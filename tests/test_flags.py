@@ -108,6 +108,23 @@ class TestBaseFlags:
         with pytest.raises(TypeError, match="Value to set for TestFlags must be a bool."):
             ins.two = "h"  # type: ignore
 
+    def test_flag_value_or(self) -> None:
+        ins = TestFlags.four | TestFlags.one
+
+        assert isinstance(ins, TestFlags)
+        assert ins.value == (TestFlags.four.flag | TestFlags.one.flag)
+
+        assert not ins.value & TestFlags.sixteen.flag
+        ins |= TestFlags.sixteen
+
+        assert ins.value & TestFlags.sixteen.flag
+
+    def test_flag_value_invert(self) -> None:
+        ins = ~TestFlags.four
+        assert isinstance(ins, TestFlags)
+
+        assert ins.value == 23 - 4
+
     def test__eq__(self) -> None:
         ins = TestFlags(one=True, two=True)
         other = TestFlags(one=True, two=True)
