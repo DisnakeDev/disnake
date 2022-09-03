@@ -1153,7 +1153,7 @@ def inject(function: Callable[..., Any], *, autocompleters: Dict[str, Callable] 
     autocompleters: Dict[:class:`str`, Callable]
         A mapping of the injection's option names to their respective autocompleters.
 
-        See also :func:`.Injection.autocomplete`.
+        See also :func:`Injection.autocomplete`.
 
     Returns
     -------
@@ -1177,7 +1177,7 @@ def injection(
     autocompleters: Dict[:class:`str`, Callable]
         A mapping of the injection's option names to their respective autocompleters.
 
-        See also :func:`.Injection.autocomplete`.
+        See also :func:`Injection.autocomplete`.
 
     Returns
     -------
