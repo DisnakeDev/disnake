@@ -38,6 +38,7 @@ from typing import (
     Dict,
     Final,
     FrozenSet,
+    Generic,
     List,
     Literal,
     Optional,
@@ -63,20 +64,34 @@ from disnake.utils import maybe_coroutine
 from . import errors
 from .converter import CONVERTER_MAPPING
 
+T_ = TypeVar("T_")
+
 if TYPE_CHECKING:
-    from typing_extensions import Self
+    from typing_extensions import Concatenate, ParamSpec, Self
 
     from disnake.app_commands import Choices
     from disnake.i18n import LocalizationValue, LocalizedOptional
     from disnake.types.interactions import ApplicationCommandOptionChoiceValue
 
+    from .cog import Cog
     from .slash_core import InvokableSlashCommand, SubCommand
 
     AnySlashCommand = Union[InvokableSlashCommand, SubCommand]
 
+    CogT = TypeVar("CogT", bound="Optional[Cog]")
+
+    P = ParamSpec("P")
+
+    InjectionCallback = Union[
+        Callable[Concatenate[CogT, ApplicationCommandInteraction, P], T_],
+        Callable[Concatenate[ApplicationCommandInteraction, P], T_],
+    ]
+
     from typing_extensions import TypeGuard
 
     TChoice = TypeVar("TChoice", bound=ApplicationCommandOptionChoiceValue)
+else:
+    P = TypeVar("P")
 
 if sys.version_info >= (3, 10):
     from types import EllipsisType, UnionType
@@ -181,7 +196,7 @@ def _xt_to_xe(xe: Optional[float], xt: Optional[float], direction: float = 1) ->
         return None
 
 
-class Injection:
+class Injection(Generic[P, T_]):
     """Represents a slash command injection.
 
     .. versionadded:: 2.3
@@ -205,6 +220,21 @@ class Injection:
     def __init__(self, function: Callable, *, autocompleters: Dict[str, Callable] = None) -> None:
         self.function = function
         self.autocompleters = autocompleters if autocompleters else {}
+
+    async def __call__(
+        self, inter: ApplicationCommandInteraction, *args: P.args, **kwargs: P.kwargs
+    ) -> T_:
+        """Calls the underlying function that the injection holds.
+
+        .. versionadded:: 2.6
+        """
+        cog = getattr(inter.application_command, "cog", None)  # haxxor
+        base_args = [cog, inter] if cog else [inter]
+
+        if asyncio.iscoroutinefunction(self.function):
+            return await self.function(*base_args, *args, **kwargs)
+        else:
+            return self.function(*base_args, *args, **kwargs)
 
     @classmethod
     def register(
