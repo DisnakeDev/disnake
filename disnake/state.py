@@ -777,7 +777,7 @@ class ConnectionState:
         # we ensure that the channel is a type that implements last_message_id
         if channel and channel.__class__ in (TextChannel, Thread, VoiceChannel):
             channel.last_message_id = message.id  # type: ignore
-        if channel and channel.__class__ is Thread:
+        if channel and isinstance(channel, Thread):
             channel.total_message_sent += 1
             channel.message_count += 1
 
@@ -786,8 +786,8 @@ class ConnectionState:
         found = self._get_message(raw.message_id)
         raw.cached_message = found
         self.dispatch("raw_message_delete", raw)
-        channel, _ = self._get_guild_channel(found)
-        if channel and channel.__class__ is Thread:
+        channel, _ = self._get_guild_channel(data)
+        if channel and isinstance(channel, Thread):
             channel.message_count -= 1
         if self._messages is not None and found is not None:
             self.dispatch("message_delete", found)
@@ -803,9 +803,9 @@ class ConnectionState:
             found_messages = []
         raw.cached_messages = found_messages
         self.dispatch("raw_bulk_message_delete", raw)
-        for message in found_messages:
-            channel, _ = self._get_guild_channel(message)
-            if channel and channel.__class__ is Thread:
+        for _ in found_messages:
+            channel, _ = self._get_guild_channel(data)
+            if channel and isinstance(channel, Thread):
                 channel.message_count -= 1
             else:
                 continue
