@@ -409,13 +409,18 @@ class BotIntegration(Integration):
         The integration account information.
     application: :class:`IntegrationApplication`
         The application tied to this integration.
+    scopes: List[:class:`str`]
+        The OAuth2 scopes the application has been authorized for.
+
+        .. versionadded:: 2.6
     """
 
-    __slots__ = ("application",)
+    __slots__ = ("application", "scopes")
 
     def _from_data(self, data: BotIntegrationPayload) -> None:
         super()._from_data(data)
         self.application = IntegrationApplication(data=data["application"], state=self._state)
+        self.scopes = data.get("scopes") or []
 
 
 def _integration_factory(value: str) -> Tuple[Type[Integration], str]:
