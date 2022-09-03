@@ -80,6 +80,10 @@ class flag_value(Generic[T]):
                     f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and flags of '{other.__class__.__name__}'"
                 )
             return other._from_value(self.flag | other.value)
+        if not isinstance(other, flag_value):
+            raise TypeError(
+                f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and {other.__class__}"
+            )
         if self._parent is not other._parent:
             raise TypeError(
                 f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and flags of '{other._parent.__name__}'"
