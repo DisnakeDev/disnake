@@ -1,6 +1,6 @@
 .. currentmodule:: disnake.ext.commands
 
-.. _commands_exceptions:
+.. _ext_commands_exceptions:
 
 Exceptions and Warnings
 =======================

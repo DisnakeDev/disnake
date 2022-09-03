@@ -1,4 +1,4 @@
-.. _discord_ext_commands:
+.. _disnake_ext_commands:
 
 ``disnake.ext.commands`` -- Bot commands framework
 ====================================================

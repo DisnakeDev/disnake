@@ -1403,7 +1403,7 @@ class Client:
 
         In case the event returns multiple arguments, a :class:`tuple` containing those
         arguments is returned instead. Please check the
-        :ref:`documentation <discord_api_index>` for a list of events and their
+        :ref:`documentation <disnake_api_index>` for a list of events and their
         parameters.
 
         This function returns the **first event that meets the requirements**.
@@ -1491,7 +1491,7 @@ class Client:
     def event(self, coro: CoroT) -> CoroT:
         """A decorator that registers an event to listen to.
 
-        You can find more info about the events in the :ref:`documentation <discord_api_index>`.
+        You can find more info about the events in the :ref:`documentation <disnake_api_index>`.
 
         The events must be a :ref:`coroutine <coroutine>`, if not, :exc:`TypeError` is raised.
 

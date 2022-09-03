@@ -184,7 +184,7 @@ Converters
 
 Adding bot arguments with function parameters is only the first step in defining your bot's command interface. To actually
 make use of the arguments, we usually want to convert the data into a target type. We call these
-:ref:`commands_converters`.
+:ref:`ext_commands_converters`.
 
 Converters come in a few flavours:
 
@@ -796,14 +796,14 @@ handlers that allow us to do just that. First we decorate an error handler funct
             await ctx.send('I could not find that member...')
 
 The first parameter of the error handler is the :class:`.Context` while the second one is an exception that is derived from
-:exc:`~ext.commands.CommandError`. A list of errors is found in the :ref:`commands_exceptions` page of the documentation.
+:exc:`~ext.commands.CommandError`. A list of errors is found in the :ref:`ext_commands_exceptions` page of the documentation.
 
 Checks
 -------
 
 There are cases when we don't want a user to use our commands. They don't have permissions to do so or maybe we blocked
 them from using our bot earlier. The commands extension comes with full support for these things in a concept called a
-:ref:`commands_checks`.
+:ref:`ext_commands_checks`.
 
 A check is a basic predicate that can take in a :class:`.Context` as its sole parameter. Within it, you have the following
 options:

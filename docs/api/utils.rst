@@ -1,6 +1,6 @@
 .. currentmodule:: disnake.utils
 
-.. _discord-api-utils:
+.. _disnake_utils:
 
 Utility Functions
 =================

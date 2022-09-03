@@ -1,6 +1,6 @@
 .. currentmodule:: disnake.ext.commands
 
-.. _commands_converters:
+.. _ext_commands_converters:
 
 Converters
 ==========

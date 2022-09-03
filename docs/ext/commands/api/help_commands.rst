@@ -1,6 +1,6 @@
 .. currentmodule:: disnake.ext.commands
 
-.. _commands_help_commands:
+.. _ext_commands_help_commands:
 
 Help Commands
 =============

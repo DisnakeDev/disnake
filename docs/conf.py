@@ -82,7 +82,7 @@ rst_prolog = """
 .. _coroutine_link: https://docs.python.org/3/library/asyncio-task.html#coroutine
 .. |data_class| replace:: This class is a :ref:`Data Class <data_class>`
 .. |data_class_constructible| replace:: This class is a constructible :ref:`Data Class <data_class>`
-.. |discord_abc| replace:: This class is an :ref:`ABC <discord_abc>`
+.. |discord_abc| replace:: This class is an :ref:`ABC <disnake_abc>`
 .. |discord_model| replace:: This class is a :ref:`Discord Model <discord_model>`
 .. |discord_event| replace:: This function is an :ref:`Event <discord_event>`
 .. |discord_events| replace:: These functions are :ref:`Events <discord_event>`

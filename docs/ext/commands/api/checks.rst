@@ -1,6 +1,6 @@
 .. currentmodule:: disnake.ext.commands
 
-.. _commands_checks:
+.. _ext_commands_checks:
 
 Checks
 ======

@@ -291,7 +291,7 @@ In order to save memory the channels have been split into 4 different types:
 
 With this split came the removal of the ``is_private`` attribute. You should now use :func:`isinstance`.
 
-The types are split into two different :ref:`discord_abc`:
+The types are split into two different :ref:`disnake_abc`:
 
 - :class:`abc.GuildChannel` for guild channels.
 - :class:`abc.PrivateChannel` for private channels (DMs and group DMs).
@@ -342,7 +342,7 @@ They will be enumerated here.
 
 - ``Channel.is_private``
 
-    - Use ``isinstance`` instead with one of the :ref:`discord_abc` instead.
+    - Use ``isinstance`` instead with one of the :ref:`disnake_abc` instead.
     - e.g. ``isinstance(channel, disnake.abc.GuildChannel)`` will check if it isn't a private channel.
 
 - ``Client.accept_invite``
@@ -1002,7 +1002,7 @@ For example, to implement a :class:`~.commands.HelpCommand` in a cog, the follow
         def cog_unload(self):
             self.bot.help_command = self._original_help_command
 
-For more information, check out the relevant :ref:`documentation <commands_help_commands>`.
+For more information, check out the relevant :ref:`documentation <ext_commands_help_commands>`.
 
 Cog Changes
 ~~~~~~~~~~~

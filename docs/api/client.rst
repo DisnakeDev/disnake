@@ -120,7 +120,7 @@ Events
         ``on_error`` will only be dispatched to :meth:`Client.event`.
 
         It will not be received by :meth:`Client.wait_for`, or, if used,
-        :ref:`commands_bots` listeners such as
+        :ref:`ext_commands_bots` listeners such as
         :meth:`~ext.commands.Bot.listen` or :meth:`~ext.commands.Cog.listener`.
 
     :param event: The name of the event that raised the exception.

@@ -1,4 +1,4 @@
-.. _discord_ext_tasks:
+.. _disnake_ext_tasks:
 
 ``disnake.ext.tasks`` -- asyncio.Task helpers
 =============================================

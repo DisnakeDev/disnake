@@ -1,6 +1,6 @@
 .. currentmodule:: disnake
 
-.. _discord_components:
+.. _disnake_components:
 
 Message Components
 ==================

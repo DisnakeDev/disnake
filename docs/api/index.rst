@@ -1,6 +1,6 @@
 .. currentmodule:: disnake
 
-.. _discord_api_index:
+.. _disnake_api_index:
 
 API Reference
 =============
@@ -89,7 +89,7 @@ when a user sends "$hello" message.
 
 .. note::
 
-    Events can be sent not only by Discord. For instance, if you use :ref:`commands extension <discord_ext_commands>`,
+    Events can be sent not only by Discord. For instance, if you use :ref:`commands extension <disnake_ext_commands>`,
     you'll also receive various events related to your commands' execution process.
 
 If an event handler raises an exception, :func:`on_error` will be called
@@ -153,7 +153,7 @@ impossible to have dynamic attributes on them.
 The only exception to this rule is :class:`Object`, which is made with
 dynamic attributes in mind.
 
-.. _discord_abc:
+.. _disnake_abc:
 
 Abstract Base Classes
 ---------------------
@@ -163,7 +163,7 @@ to get their behaviour. **Abstract base classes should not be instantiated**.
 They are mainly there for usage with :func:`isinstance` and :func:`issubclass`\.
 
 This library has a module related to abstract base classes, in which all the ABCs are subclasses of
-:class:`typing.Protocol` - :ref:`discord_abcs_ref`.
+:class:`typing.Protocol` - :ref:`disnake_abcs_ref`.
 
 Documents
 ---------

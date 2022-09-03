@@ -100,7 +100,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
     help_command: Optional[:class:`.HelpCommand`]
         The help command implementation to use. This can be dynamically
         set at runtime. To remove the help command pass ``None``. For more
-        information on implementing a help command, see :ref:`commands_help_commands`.
+        information on implementing a help command, see :ref:`ext_commands_help_commands`.
     owner_id: Optional[:class:`int`]
         The user ID that owns the bot. If this is not set and is then queried via
         :meth:`.is_owner` then it is fetched automatically using

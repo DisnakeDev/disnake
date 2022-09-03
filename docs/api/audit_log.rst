@@ -1,6 +1,6 @@
 .. currentmodule:: disnake
 
-.. _discord-api-audit-logs:
+.. _disnake_api_audit_logs:
 
 Audit Logs
 ==========

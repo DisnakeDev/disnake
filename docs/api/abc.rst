@@ -1,6 +1,6 @@
 .. currentmodule:: disnake.abc
 
-.. _discord_abcs_ref:
+.. _disnake_abcs_ref:
 
 Abstract Base Classes
 =====================

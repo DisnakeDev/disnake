@@ -1,7 +1,7 @@
 .. currentmodule:: disnake
 
-.. |commands| replace:: [:ref:`ext.commands <discord_ext_commands>`]
-.. |tasks| replace:: [:ref:`ext.tasks <discord_ext_tasks>`]
+.. |commands| replace:: [:ref:`ext.commands <disnake_ext_commands>`]
+.. |tasks| replace:: [:ref:`ext.tasks <disnake_ext_tasks>`]
 
 .. _whats_new:
 
@@ -1362,7 +1362,7 @@ New Features
 - Add :attr:`VoiceRegion.europe` and :attr:`VoiceRegion.dubai`. (:issue-dpy:`2358`, :issue-dpy:`2490`)
 - Add :meth:`TextChannel.follow` to follow a news channel. (:issue-dpy:`2367`)
 - Add :attr:`Permissions.view_guild_insights` permission. (:issue-dpy:`2415`)
-- Add support for new audit log types. See :ref:`discord-api-audit-logs` for more information. (:issue-dpy:`2427`)
+- Add support for new audit log types. See :ref:`disnake_api_audit_logs` for more information. (:issue-dpy:`2427`)
     - Note that integration support is not finalized.
 
 - Add :attr:`Webhook.type` to query the type of webhook (:class:`WebhookType`). (:issue-dpy:`2441`)
