@@ -234,7 +234,9 @@ class Injection:
 
         if option_name in self.autocompleters:
             raise ValueError(
-                "This injection already has an autocompleter set for option '{}'".format(option_name)
+                "This injection already has an autocompleter set for option '{}'".format(
+                    option_name
+                )
             )
 
         def decorator(func: CallableT) -> CallableT:
@@ -954,6 +956,16 @@ async def call_param_func(
     return await maybe_coroutine(safe_call, function, **kwargs)
 
 
+def _get_superfluous_autocompleters(
+    params: List[ParamInfo], autocompleters: Dict[str, Callable]
+) -> List[str]:
+    """Returns a list of superfluous autocompleters names"""
+
+    param_names = [p.name for p in params]
+
+    return [key for key in autocompleters.keys() if key not in param_names]
+
+
 def expand_params(command: AnySlashCommand) -> List[Option]:
     """Update an option with its params *in-place*
 
@@ -969,13 +981,19 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
         collected = collect_nested_params(injection.function)
         if injection.autocompleters:  # != {}
             for p in collected:
-                if f := injection.autocompleters.pop(p.name, None):
+                if f := injection.autocompleters.get(p.name):
                     p.autocomplete = f
-            if len(injection.autocompleters):
+
+            if len(injection.autocompleters) > len(collected):
                 raise ValueError(
                     f"Couldn't set autocompleters on injection {injection.function.__qualname__} for non-existent"
-                    " options: "
-                    + ", ".join([f"'{option}'" for option in injection.autocompleters.keys()])
+                    f" options: "
+                    + ", ".join(
+                        f"'{k}'"
+                        for k in _get_superfluous_autocompleters(
+                            collected, injection.autocompleters
+                        )
+                    )
                 )
         params += collected
 
@@ -1146,7 +1164,9 @@ def inject(function: Callable[..., Any], *, autocompleters: Dict[str, Callable] 
     return Injection(function, autocompleters=autocompleters)
 
 
-def injection(*, autocompleters: Dict[str, Callable] = None) -> Callable[[Callable[..., Any]], Any]:
+def injection(
+    *, autocompleters: Dict[str, Callable] = None
+) -> Callable[[Callable[..., Any]], Injection]:
     """Decorator interface for :func:`inject`.
     You can then assign this value to your slash commands' parameters.
 
@@ -1158,9 +1178,14 @@ def injection(*, autocompleters: Dict[str, Callable] = None) -> Callable[[Callab
         A mapping of the injection's option names to their respective autocompleters.
 
         See also :func:`.Injection.autocomplete`.
+
+    Returns
+    -------
+    Callable[[Callable[..., Any]], :class:`Injection`]
+        Decorator which turns your injection function into actual :class:`Injection`.
     """
 
-    def decorator(function: Callable[..., Any]) -> Any:
+    def decorator(function: Callable[..., Any]) -> Injection:
         return inject(function, autocompleters=autocompleters)
 
     return decorator
