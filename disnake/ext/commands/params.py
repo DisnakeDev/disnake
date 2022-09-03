@@ -1196,7 +1196,7 @@ def inject(function: Callable[..., Any], *, autocompleters: Dict[str, Callable] 
 
 def injection(
     *, autocompleters: Dict[str, Callable] = None
-) -> Callable[[Callable[..., Any]], Injection]:
+) -> Callable[[Callable[..., Any]], Any]:
     """Decorator interface for :func:`inject`.
     You can then assign this value to your slash commands' parameters.
 
