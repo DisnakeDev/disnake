@@ -777,12 +777,18 @@ class ConnectionState:
         # we ensure that the channel is a type that implements last_message_id
         if channel and channel.__class__ in (TextChannel, Thread, VoiceChannel):
             channel.last_message_id = message.id  # type: ignore
+        if channel and channel.__class__ is Thread:
+            channel.total_message_sent += 1
+            channel.message_count += 1
 
     def parse_message_delete(self, data: gateway.MessageDeleteEvent) -> None:
         raw = RawMessageDeleteEvent(data)
         found = self._get_message(raw.message_id)
         raw.cached_message = found
         self.dispatch("raw_message_delete", raw)
+        channel, _ = self._get_guild_channel(found)
+        if channel and channel.__class__ is Thread:
+            channel.message_count -= 1
         if self._messages is not None and found is not None:
             self.dispatch("message_delete", found)
             self._messages.remove(found)
@@ -797,6 +803,12 @@ class ConnectionState:
             found_messages = []
         raw.cached_messages = found_messages
         self.dispatch("raw_bulk_message_delete", raw)
+        for message in found_messages:
+            channel, _ = self._get_guild_channel(message)
+            if channel and channel.__class__ is Thread:
+                channel.message_count -= 1
+            else:
+                continue
         if found_messages:
             self.dispatch("bulk_message_delete", found_messages)
             for msg in found_messages:

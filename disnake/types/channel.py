@@ -127,6 +127,8 @@ class _ThreadChannelOptional(TypedDict, total=False):
     rate_limit_per_user: int
     last_message_id: Optional[Snowflake]
     last_pin_timestamp: str
+    total_message_sent: Optional[int]
+    message_count: Optional[int]
 
 
 class ThreadChannel(_BaseChannel, _ThreadChannelOptional):
@@ -139,6 +141,7 @@ class ThreadChannel(_BaseChannel, _ThreadChannelOptional):
     last_message_id: Optional[Snowflake]
     rate_limit_per_user: int
     message_count: int
+    total_message_sent: int
     member_count: int
     thread_metadata: ThreadMetadata
 
@@ -147,6 +150,8 @@ class _ForumChannelOptional(TypedDict, total=False):
     topic: Optional[str]
     last_message_id: Optional[Snowflake]
     default_auto_archive_duration: ThreadArchiveDurationLiteral
+    message_count: Optional[int]
+    total_message_sent: Optional[int]
 
 
 class ForumChannel(_BaseGuildChannel, _ForumChannelOptional):

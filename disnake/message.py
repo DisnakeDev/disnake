@@ -749,6 +749,13 @@ class Message(Hashable):
     channel: Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`Thread`, :class:`DMChannel`, :class:`GroupChannel`, :class:`PartialMessageable`]
         The channel that the message was sent from.
         Could be a :class:`DMChannel` or :class:`GroupChannel` if it's a private message.
+    position: Union[:class:`int`, :class:`NoneType`]
+        A number that indicate the approximate position of a message in a :class:`Thread`.
+        This is a number that starts at 0. e.g. the first message is position 0.
+        Is `None` if the message that was sent is not from a :class:`Thread`.
+
+        .. versionadded:: 2.6
+
     reference: Optional[:class:`~disnake.MessageReference`]
         The message that this message references. This is only applicable to messages of
         type :attr:`MessageType.pins_add`, crossposted messages created by a
@@ -849,6 +856,7 @@ class Message(Hashable):
         "tts",
         "content",
         "channel",
+        "position",
         "application_id",
         "webhook_id",
         "mention_everyone",
@@ -904,6 +912,7 @@ class Message(Hashable):
         # for user experience, on_message has no business getting partials
         # TODO: Subscripted message to include the channel
         self.channel: Union[GuildMessageable, DMChannel] = channel  # type: ignore
+        self.position: Union[int, None] = data.get("position", None)
         self._edited_timestamp: Optional[datetime.datetime] = utils.parse_time(
             data["edited_timestamp"]
         )

@@ -111,9 +111,21 @@ class Thread(Messageable, Hashable):
         Bots and users with :attr:`~Permissions.manage_channels` or
         :attr:`~Permissions.manage_messages` bypass slowmode.
     message_count: Optional[:class:`int`]
-        An approximate number of messages in this thread. This caps at 50.
+        An approximate number of messages in this thread.
+
+        .. note::
+
+            If the thread was created before July 1, 2022, it stops counting at 50
     member_count: Optional[:class:`int`]
         An approximate number of members in this thread. This caps at 50.
+    total_message_sent: Optional[:class:`int`]
+        The total messages sent in the thread including the initial message and deleted messages
+
+        .. versionadded:: 2.6
+
+        .. note::
+
+            If the thread was created before July 1, 2022, it stops counting at 50
     me: Optional[:class:`ThreadMember`]
         A thread member representing yourself, if you've joined the thread.
         This could not be available.
@@ -149,6 +161,7 @@ class Thread(Messageable, Hashable):
         "parent_id",
         "last_message_id",
         "message_count",
+        "total_message_sent",
         "member_count",
         "slowmode_delay",
         "me",
@@ -193,6 +206,7 @@ class Thread(Messageable, Hashable):
         self.last_message_id = _get_as_snowflake(data, "last_message_id")
         self.slowmode_delay = data.get("rate_limit_per_user", 0)
         self.message_count = data.get("message_count")
+        self.total_message_sent = data.get("total_message_sent", 0)
         self.member_count = data.get("member_count")
         self.last_pin_timestamp: Optional[datetime.datetime] = parse_time(
             data.get("last_pin_timestamp")
