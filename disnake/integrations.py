@@ -26,7 +26,7 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Type
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type
 
 from .enums import ExpireBehaviour, try_enum
 from .user import User
@@ -409,13 +409,26 @@ class BotIntegration(Integration):
         The integration account information.
     application: :class:`IntegrationApplication`
         The application tied to this integration.
+    scopes: List[:class:`str`]
+        The OAuth2 scopes the application has been authorized for.
+
+        .. versionadded:: 2.6
     """
 
-    __slots__ = ("application",)
+    __slots__ = ("application", "scopes")
 
     def _from_data(self, data: BotIntegrationPayload) -> None:
         super()._from_data(data)
-        self.application = IntegrationApplication(data=data["application"], state=self._state)
+        self.application: IntegrationApplication = IntegrationApplication(
+            data=data["application"], state=self._state
+        )
+        self.scopes: List[str] = data.get("scopes") or []
+
+    def __repr__(self):
+        return (
+            f"<{self.__class__.__name__} id={self.id}"
+            f" name={self.name!r} scopes={self.scopes!r}>"
+        )
 
 
 def _integration_factory(value: str) -> Tuple[Type[Integration], str]:
