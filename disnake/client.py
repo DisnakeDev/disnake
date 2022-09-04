@@ -208,14 +208,14 @@ class GatewayParams(NamedTuple):
     Parameters
     ----------
     encoding: :class:`str`
-        The payload encoding (``json`` is the only supported encoding currently).
-        Defaults to ``json``.
+        The payload encoding (``json`` is currently the only supported encoding).
+        Defaults to ``"json"``.
     zlib: :class:`bool`
         Whether to enable transport compression.
         Defaults to ``True``.
     """
 
-    encoding: str = "json"
+    encoding: Literal["json"] = "json"
     zlib: bool = True
 
 
@@ -430,6 +430,8 @@ class Client:
         self.i18n: LocalizationProtocol = i18n
 
         self.gateway_params: GatewayParams = options.get("gateway_params", GatewayParams())
+        if self.gateway_params.encoding != "json":
+            raise ValueError("Gateway encodings other than `json` are currently not supported.")
 
     # internals
 
