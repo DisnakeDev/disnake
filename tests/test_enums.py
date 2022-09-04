@@ -270,6 +270,6 @@ def test_try_enum_miss(value: Any, unknown: Any):
 def test_enum_aliasing():
     class DupeEnum(int, enums.Enum):
         a = 1
-        b = 2
+        b = 1
 
     assert DupeEnum.a is DupeEnum.b
