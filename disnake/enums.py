@@ -184,14 +184,17 @@ class EnumMeta(type):
 
         # Create and populate new members...
         for name_, value_ in namespace.member_map.items():
-            member = cls.__new__(cls, value_)  # type: ignore
+            if value_ in value_map:
+                member = name_map[name_] = value_map[value_]
 
-            # We use object's setattr method to bypass Enum's protected setattr.
-            object.__setattr__(member, "name", name_)
-            object.__setattr__(member, "value", value_)
+            else:
+                member = cls.__new__(cls, value_)  # type: ignore
+                name_map[name_] = value_map[value_] = member
 
-            name_map[name_] = member
-            value_map.setdefault(value_, member)  # Prioritize first defined in case of alias
+                # We use object's setattr method to bypass Enum's protected setattr.
+                object.__setattr__(member, "name", name_)
+                object.__setattr__(member, "value", value_)
+
             setattr(cls, name_, member)
 
         return cls

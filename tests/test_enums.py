@@ -265,3 +265,11 @@ def test_try_enum_miss(value: Any, unknown: Any):
 
     assert new not in Enum  # type: ignore
     assert new == unknown
+
+
+def test_enum_aliasing():
+    class DupeEnum(int, enums.Enum):
+        a = 1
+        b = 2
+
+    assert DupeEnum.a is DupeEnum.b
