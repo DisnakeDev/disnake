@@ -33,11 +33,6 @@ class TestFlags(flags.BaseFlags):
         return 1 << 4
 
 
-def test_flag_value_creation() -> None:
-    flag = flags.flag_value(lambda x: 1 << 2)
-    assert 1 << 2 == flag.flag
-
-
 def test_all_flags_value() -> None:
     assert flags.all_flags_value(TestFlags.VALID_FLAGS) == 0b10111
 
@@ -87,28 +82,10 @@ def test_flag_creation_inverted() -> None:
     assert InvertedFlags.DEFAULT_VALUE == 0b10111
 
 
-class TestBaseFlags:
-    def test__init__default_value(self) -> None:
-        ins = TestFlags()
-        assert ins.DEFAULT_VALUE is ins.value
-
-    def test__init__kwargs(self) -> None:
-        ins = TestFlags(one=True, two=False)
-        assert ins.one is True
-        assert ins.two is False
-
-    def test__init__invalid_kwargs(self) -> None:
-        with pytest.raises(TypeError, match="'h' is not a valid flag name."):
-            TestFlags(h=True)
-
-    def test_set_require_bool(self) -> None:
-        with pytest.raises(TypeError, match="Value to set for TestFlags must be a bool."):
-            TestFlags(one="h")  # type: ignore
-
-        ins = TestFlags()
-
-        with pytest.raises(TypeError, match="Value to set for TestFlags must be a bool."):
-            ins.two = "h"  # type: ignore
+class TestFlagValue:
+    def test_flag_value_creation(self) -> None:
+        flag = flags.flag_value(lambda x: 1 << 2)
+        assert 1 << 2 == flag.flag
 
     def test_flag_value_or(self) -> None:
         ins = TestFlags.four | TestFlags.one
@@ -149,6 +126,30 @@ class TestBaseFlags:
         assert ins.value == 2
 
         assert (ins ^ TestFlags.four).value == 6
+
+
+class TestBaseFlags:
+    def test__init__default_value(self) -> None:
+        ins = TestFlags()
+        assert ins.DEFAULT_VALUE is ins.value
+
+    def test__init__kwargs(self) -> None:
+        ins = TestFlags(one=True, two=False)
+        assert ins.one is True
+        assert ins.two is False
+
+    def test__init__invalid_kwargs(self) -> None:
+        with pytest.raises(TypeError, match="'h' is not a valid flag name."):
+            TestFlags(h=True)
+
+    def test_set_require_bool(self) -> None:
+        with pytest.raises(TypeError, match="Value to set for TestFlags must be a bool."):
+            TestFlags(one="h")  # type: ignore
+
+        ins = TestFlags()
+
+        with pytest.raises(TypeError, match="Value to set for TestFlags must be a bool."):
+            ins.two = "h"  # type: ignore
 
     def test__eq__(self) -> None:
         ins = TestFlags(one=True, two=True)
