@@ -44,6 +44,7 @@ extensions = [
     "sphinx.ext.linkcode",
     "sphinxcontrib_trio",
     "sphinxcontrib.towncrier",
+    "fulltoc",
     "hoverxref.extension",
     "exception_hierarchy",
     "attributetable",
@@ -98,8 +99,8 @@ source_suffix = ".rst"
 # The encoding of source files.
 # source_encoding = 'utf-8-sig'
 
-# The master toctree document.
-master_doc = "index"
+# The root toctree document.
+root_doc = "index"
 
 # General information about the project.
 project = "disnake"
