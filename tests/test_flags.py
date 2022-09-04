@@ -117,16 +117,16 @@ class TestFlagValue:
         assert ins.value == 0
         assert (ins | TestFlags.one).value == 1
 
-        with pytest.raises(TypeError, match="unsupported operand type(s) for |:"):
+        with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for |:")):
             _ = TestFlags.four | 32  # type: ignore
 
-        with pytest.raises(TypeError, match="unsupported operand type(s) for |:"):
+        with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for |:")):
             _ = 32 | TestFlags.four  # type: ignore
 
-        with pytest.raises(TypeError, match="unsupported operand type(s) for |:"):
+        with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for |:")):
             _ = TestFlags.four | OtherTestFlags.other_one  # type: ignore
 
-        with pytest.raises(TypeError, match="unsupported operand type(s) for |:"):
+        with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for |:")):
             _ = TestFlags.four | OtherTestFlags(other_one=True)  # type: ignore
 
     def test_flag_value_invert(self) -> None:
@@ -240,13 +240,13 @@ class TestBaseFlags:
         assert third is not ins
         assert third.value == 0b10
 
-        with pytest.raises(TypeError, match="unsupported operand type(s) for |:"):
+        with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for |:")):
             _ = ins | 28  # type: ignore
 
-        with pytest.raises(TypeError, match="unsupported operand type(s) for |:"):
+        with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for |:")):
             _ = 28 | ins  # type: ignore
 
-        with pytest.raises(TypeError, match="unsupported operand type(s) for |:"):
+        with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for |:")):
             _ = ins | OtherTestFlags.other_one  # type: ignore
 
     def test__ior__(self) -> None:
@@ -263,10 +263,10 @@ class TestBaseFlags:
         ins |= other
         assert ins.value == 0b111
 
-        with pytest.raises(TypeError, match="unsupported operand type(s) for |=:"):
+        with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for |=:")):
             ins |= True  # type: ignore
 
-        with pytest.raises(TypeError, match="unsupported operand type(s) for |=:"):
+        with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for |=:")):
             ins |= OtherTestFlags.other_one  # type: ignore
 
     def test__xor__(self) -> None:
@@ -472,7 +472,7 @@ class TestListBaseFlags:
 
     @pytest.mark.parametrize("value", [-10, -1, 100])
     def test_from_values__invalid(self, value) -> None:
-        with pytest.raises(ValueError, match=r"Flag values must be within \[0, 64\)"):
+        with pytest.raises(ValueError, match=re.escape("Flag values must be within [0, 64)")):
             _ListFlags._from_values([0, 2, value, 3])
 
     def test_update(self) -> None:
