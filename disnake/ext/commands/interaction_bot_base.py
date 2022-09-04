@@ -154,9 +154,6 @@ class InteractionBotBase(CommonBotBase):
         if test_guilds and not all(isinstance(guild_id, int) for guild_id in test_guilds):
             raise ValueError("test_guilds must be a sequence of int.")
 
-        if options.pop("sync_permissions", None) is not None:
-            warnings.warn("'sync_permissions' has been removed in 2.5", ConfigWarning, stacklevel=3)
-
         super().__init__(**options)
 
         test_guilds = None if test_guilds is None else tuple(test_guilds)
