@@ -607,12 +607,7 @@ class ConnectionState:
 
     def _get_guild_channel(
         self,
-        data: Union[
-            MessagePayload,
-            gateway.TypingStartEvent,
-            gateway.MessageDeleteBulkEvent,
-            gateway.MessageDeleteEvent,
-        ],
+        data: Union[MessagePayload, gateway.TypingStartEvent],
     ) -> Tuple[Union[PartialChannel, Thread], Optional[Guild]]:
         channel_id = int(data["channel_id"])
         try:
@@ -627,11 +622,7 @@ class ConnectionState:
                     user_id = int(data["author"]["id"])
                 else:
                     # TypingStartEvent
-                    try:
-                        user_id = int(data["user_id"])
-                    # MessageDeleteBulkEvent or MessageDeleteEvent
-                    except KeyError:
-                        user_id = 0
+                    user_id = int(data["user_id"])
                 channel = DMChannel._from_message(self, channel_id, user_id)
             guild = None
         else:
@@ -796,9 +787,10 @@ class ConnectionState:
         found = self._get_message(raw.message_id)
         raw.cached_message = found
         self.dispatch("raw_message_delete", raw)
-        channel, _ = self._get_guild_channel(data)
-        if channel and isinstance(channel, Thread):
-            channel.message_count -= 1
+        guild = self._get_guild(raw.guild_id)
+        thread = guild and guild.get_thread(raw.channel_id)
+        if thread:
+            thread.message_count -= 1
         if self._messages is not None and found is not None:
             self.dispatch("message_delete", found)
             self._messages.remove(found)
@@ -813,10 +805,11 @@ class ConnectionState:
             found_messages = []
         raw.cached_messages = found_messages
         self.dispatch("raw_bulk_message_delete", raw)
+        guild = self._get_guild(raw.guild_id)
+        thread = guild and guild.get_thread(raw.channel_id)
         for _ in found_messages:
-            channel, _ = self._get_guild_channel(data)
-            if channel and isinstance(channel, Thread):
-                channel.message_count -= 1
+            if thread:
+                thread.message_count -= 1
             else:
                 continue
         if found_messages:
