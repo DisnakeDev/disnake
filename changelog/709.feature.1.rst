@@ -1,0 +1,1 @@
+Add :class:`GatewayParams` for configuring gateway connection parameters (e.g. disabling compression).
