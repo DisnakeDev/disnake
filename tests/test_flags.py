@@ -33,6 +33,14 @@ class TestFlags(flags.BaseFlags):
         return 1 << 4
 
 
+class OtherTestFlags(flags.BaseFlags):
+    """Another test class for flag testing."""
+
+    @flags.flag_value
+    def other_one(self):
+        return 1 << 0
+
+
 def test_all_flags_value() -> None:
     assert flags.all_flags_value(TestFlags.VALID_FLAGS) == 0b10111
 
@@ -82,6 +90,13 @@ def test_flag_creation_inverted() -> None:
     assert InvertedFlags.DEFAULT_VALUE == 0b10111
 
 
+def test_flag_creation_empty() -> None:
+    with pytest.raises(RuntimeError, match="At least one flag must be defined"):
+
+        class InvertedFlags(flags.BaseFlags):
+            not_a_flag = 2
+
+
 class TestFlagValue:
     def test_flag_value_creation(self) -> None:
         flag = flags.flag_value(lambda x: 1 << 2)
@@ -91,24 +106,28 @@ class TestFlagValue:
         ins = TestFlags.four | TestFlags.one
 
         assert isinstance(ins, TestFlags)
-        assert ins.value == (TestFlags.four.flag | TestFlags.one.flag)
+        assert ins.value == 5
+        assert (TestFlags.two | ins).value == 7
 
         assert not ins.value & TestFlags.sixteen.flag
         ins |= TestFlags.sixteen
-
-        assert ins.value & TestFlags.sixteen.flag
+        assert ins.value == 21
 
         ins = TestFlags()
         assert ins.value == 0
-        assert (ins | TestFlags.one).value == TestFlags.one.flag
-        ins |= TestFlags.one
-        assert ins.value == TestFlags.one.flag
+        assert (ins | TestFlags.one).value == 1
 
         with pytest.raises(TypeError, match="unsupported operand type(s) for |:"):
             _ = TestFlags.four | 32  # type: ignore
 
         with pytest.raises(TypeError, match="unsupported operand type(s) for |:"):
             _ = 32 | TestFlags.four  # type: ignore
+
+        with pytest.raises(TypeError, match="unsupported operand type(s) for |:"):
+            _ = TestFlags.four | OtherTestFlags.other_one  # type: ignore
+
+        with pytest.raises(TypeError, match="unsupported operand type(s) for |:"):
+            _ = TestFlags.four | OtherTestFlags(other_one=True)  # type: ignore
 
     def test_flag_value_invert(self) -> None:
         ins = ~TestFlags.four
@@ -227,6 +246,9 @@ class TestBaseFlags:
         with pytest.raises(TypeError, match="unsupported operand type(s) for |:"):
             _ = 28 | ins  # type: ignore
 
+        with pytest.raises(TypeError, match="unsupported operand type(s) for |:"):
+            _ = ins | OtherTestFlags.other_one  # type: ignore
+
     def test__ior__(self) -> None:
         ins = TestFlags(one=True, two=False)
         other = TestFlags(one=False, two=True)
@@ -243,6 +265,9 @@ class TestBaseFlags:
 
         with pytest.raises(TypeError, match="unsupported operand type(s) for |=:"):
             ins |= True  # type: ignore
+
+        with pytest.raises(TypeError, match="unsupported operand type(s) for |=:"):
+            ins |= OtherTestFlags.other_one  # type: ignore
 
     def test__xor__(self) -> None:
         ins = TestFlags(one=True, two=False)
@@ -262,6 +287,9 @@ class TestBaseFlags:
         with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for ^:")):
             _ = "h" ^ ins  # type: ignore
 
+        with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for ^:")):
+            _ = ins ^ OtherTestFlags.other_one  # type: ignore
+
     def test__ixor__(self) -> None:
         ins = TestFlags(one=True, two=False)
         other = TestFlags(one=False, two=True)
@@ -278,6 +306,9 @@ class TestBaseFlags:
 
         with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for ^=:")):
             ins ^= "stabilty"  # type: ignore
+
+        with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for ^=:")):
+            ins ^= OtherTestFlags.other_one  # type: ignore
 
     def test__le__(self) -> None:
         ins = TestFlags(one=True, two=False)
