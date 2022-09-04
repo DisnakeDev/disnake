@@ -517,21 +517,13 @@ You can implement double nesting and build commands like ``/parent group subcmd`
 Injections
 ----------
 
-We have them, look at `this example <https://github.com/DisnakeDev/disnake/blob/master/examples/slash_commands/injections.py>`_ for more information ✨
+We have them, look at `this example <https://github.com/DisnakeDev/disnake/blob/master/examples/interactions/injections.py>`__ for more information ✨
 
 
 .. _localizations:
 
 Localizations
 -------------
-
-.. note::
-    At the time of writing, Discord clients do not support localization right out of the box yet.
-    To enable localization support in your client, a build override from the `Discord Developers <https://discord.gg/discord-developers>`__
-    server is most likely required, which can be found by joining that server and looking around/asking for the override.
-
-    Note that the build override is not necessarily up to date with the other client branches/releases,
-    so you may want to only enable it while you're working on this feature.
 
 The names and descriptions of commands and options, as well as the names of choices
 (for use with fixed choices or autocompletion), support localization for a fixed set of locales.

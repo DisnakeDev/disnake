@@ -1,3 +1,5 @@
+import os
+
 import disnake
 from disnake.ext import commands
 
@@ -70,4 +72,4 @@ async def colour(ctx):
     await ctx.send("Pick your favourite colour:", view=view)
 
 
-bot.run("token")
+bot.run(os.getenv("BOT_TOKEN"))
