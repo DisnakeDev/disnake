@@ -180,7 +180,7 @@ class EnumMeta(type):
             _, ns["__enum_type__"] = bases  # ensured possible in __prepare__
 
         # Create new enum class...
-        cls = super().__new__(metacls, name, bases, Enum.__dict__ | ns)
+        cls = super().__new__(metacls, name, bases, {**Enum.__dict__, **ns})
 
         # Create and populate new members...
         for name_, value_ in namespace.member_map.items():
