@@ -45,7 +45,7 @@ from typing import (
 
 import disnake
 from disnake.app_commands import ApplicationCommand, Option
-from disnake.custom_warnings import ConfigWarning, SyncWarning
+from disnake.custom_warnings import SyncWarning
 from disnake.enums import ApplicationCommandType
 
 from . import errors
