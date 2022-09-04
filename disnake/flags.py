@@ -203,7 +203,7 @@ class BaseFlags:
         if isinstance(other, flag_value):
             if self.__class__ is not other._parent:
                 raise TypeError(
-                    f"unsupported operand type(s) for |: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
+                    f"unsupported operand type(s) for |=: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
                 )
             self.value |= other.flag
             return self
@@ -218,7 +218,7 @@ class BaseFlags:
         if isinstance(other, flag_value):
             if self.__class__ is not other._parent:
                 raise TypeError(
-                    f"unsupported operand type(s) for |: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
+                    f"unsupported operand type(s) for ^: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
                 )
             return self._from_value(self.value ^ other.flag)
         if not isinstance(other, self.__class__):
@@ -231,7 +231,7 @@ class BaseFlags:
         if isinstance(other, flag_value):
             if self.__class__ is not other._parent:
                 raise TypeError(
-                    f"unsupported operand type(s) for |: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
+                    f"unsupported operand type(s) for ^=: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
                 )
             self.value ^= other.flag
             return self
