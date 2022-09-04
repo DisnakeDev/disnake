@@ -2,7 +2,7 @@ docutils>=0.17
 sphinx~=5.1.1
 sphinxcontrib-trio~=1.1.2
 # sphinx-hoverxref==1.1.3
-sphinx-hoverxref @ git+https://github.com/bast0006/sphinx-hoverxref@8c36803a3da891182543f599ac3799cbc1ef8a3c
+sphinx-hoverxref @ git+https://github.com/bast0006/sphinx-hoverxref@3e2d5e40e83e5046293a277936e0175bf91214ac
 sphinx-autobuild~=2021.3
 sphinxcontrib-towncrier==0.2.1a0
 towncrier==21.9.0
