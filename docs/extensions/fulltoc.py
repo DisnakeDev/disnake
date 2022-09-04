@@ -85,7 +85,7 @@ def build_full_toctree(builder: StandaloneHTMLBuilder, docname: str, index: str,
     """Return a single toctree starting from docname containing all
     sub-document doctrees.
     """
-    env: BuildEnvironment = builder.env  # type: ignore
+    env: BuildEnvironment = builder.env
     doctree = env.get_doctree(index)
     toctrees: List[nodes.Element] = []
     for toctreenode in doctree.traverse(addnodes.toctree):
