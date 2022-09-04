@@ -28,6 +28,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, List, cast
 
+from _types import SphinxExtensionMeta
 from docutils import nodes
 from sphinx import addnodes
 
@@ -109,5 +110,10 @@ def build_full_toctree(builder: StandaloneHTMLBuilder, docname: str, index: str,
     return result
 
 
-def setup(app: Sphinx):
+def setup(app: Sphinx) -> SphinxExtensionMeta:
     app.connect("html-page-context", html_page_context)
+
+    return {
+        "parallel_read_safe": True,
+        "parallel_write_safe": True,
+    }
