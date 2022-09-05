@@ -339,7 +339,7 @@ class AutoShardedClient(Client):
         *,
         asyncio_debug: bool = False,
         loop: Optional[asyncio.AbstractEventLoop] = None,
-        shard_ids: List[int] = None,  # instead of Client's shard_id: Optional[int]
+        shard_ids: Optional[List[int]] = None,  # instead of Client's shard_id: Optional[int]
         shard_count: Optional[int] = None,
         enable_debug_events: bool = False,
         connector: Optional[aiohttp.BaseConnector] = None,
@@ -355,7 +355,7 @@ class AutoShardedClient(Client):
         status: Optional[Union[Status, str]] = None,
         intents: Intents = None,
         chunk_guilds_at_startup: Optional[bool] = None,
-        member_cache_flags: MemberCacheFlags = None,
+        member_cache_flags: Optional[MemberCacheFlags] = None,
         localization_provider: Optional[LocalizationProtocol] = None,
         strict_localization: bool = False,
     ):

@@ -378,7 +378,7 @@ class Client:
         status: Optional[Union[Status, str]] = None,
         intents: Optional[Intents] = None,
         chunk_guilds_at_startup: Optional[bool] = None,
-        member_cache_flags: MemberCacheFlags = None,
+        member_cache_flags: Optional[MemberCacheFlags] = None,
     ):
         # self.ws is set in the connect method
         self.ws: DiscordWebSocket = None  # type: ignore
