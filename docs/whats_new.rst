@@ -541,7 +541,7 @@ New Features
     - New :class:`VoiceChannel` methods:
       :func:`.is_nsfw <VoiceChannel.is_nsfw>`, :func:`.get_partial_message <VoiceChannel.get_partial_message>`
     - ``nsfw`` and ``slowmode_delay`` parameters for :func:`VoiceChannel.edit`
-- |commands| Add parameter injections (`example <https://github.com/DisnakeDev/disnake/blob/master/examples/slash_commands/injections.py>`_) (:issue:`130`)
+- |commands| Add parameter injections (`example <https://github.com/DisnakeDev/disnake/blob/master/examples/interactions/injections.py>`__) (:issue:`130`)
     - :func:`inject <ext.commands.inject>`
     - :func:`register_injection <ext.commands.register_injection>`
     - :func:`converter_method <ext.commands.converter_method>`

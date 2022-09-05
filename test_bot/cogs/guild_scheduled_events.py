@@ -45,4 +45,3 @@ class GuildScheduledEvents(commands.Cog):
 
 def setup(bot: commands.Bot):
     bot.add_cog(GuildScheduledEvents(bot))
-    print(f"> Extension {__name__} is ready\n")
