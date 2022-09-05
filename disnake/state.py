@@ -807,11 +807,8 @@ class ConnectionState:
         self.dispatch("raw_bulk_message_delete", raw)
         guild = self._get_guild(raw.guild_id)
         thread = guild and guild.get_thread(raw.channel_id)
-        for _ in found_messages:
-            if thread:
-                thread.message_count -= 1
-            else:
-                continue
+        if thread:
+            thread.message_count -= len(raw.message_ids)
         if found_messages:
             self.dispatch("bulk_message_delete", found_messages)
             for msg in found_messages:
