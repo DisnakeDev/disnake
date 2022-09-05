@@ -223,6 +223,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
             shard_id: Optional[int] = None,
             shard_count: Optional[int] = None,
             enable_debug_events: bool = False,
+            enable_gateway_error_handler: bool = True,
             connector: Optional[aiohttp.BaseConnector] = None,
             proxy: Optional[str] = None,
             proxy_auth: Optional[aiohttp.BasicAuth] = None,
@@ -272,6 +273,7 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
             shard_ids: Optional[List[int]] = None,  # instead of shard_id
             shard_count: Optional[int] = None,
             enable_debug_events: bool = False,
+            enable_gateway_error_handler: bool = True,
             connector: Optional[aiohttp.BaseConnector] = None,
             proxy: Optional[str] = None,
             proxy_auth: Optional[aiohttp.BasicAuth] = None,
@@ -390,6 +392,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
             shard_id: Optional[int] = None,
             shard_count: Optional[int] = None,
             enable_debug_events: bool = False,
+            enable_gateway_error_handler: bool = True,
             connector: Optional[aiohttp.BaseConnector] = None,
             proxy: Optional[str] = None,
             proxy_auth: Optional[aiohttp.BasicAuth] = None,
@@ -432,6 +435,7 @@ class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
             shard_ids: Optional[List[int]] = None,  # instead of shard_id
             shard_count: Optional[int] = None,
             enable_debug_events: bool = False,
+            enable_gateway_error_handler: bool = True,
             connector: Optional[aiohttp.BaseConnector] = None,
             proxy: Optional[str] = None,
             proxy_auth: Optional[aiohttp.BasicAuth] = None,

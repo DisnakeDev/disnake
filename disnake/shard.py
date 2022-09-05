@@ -342,6 +342,7 @@ class AutoShardedClient(Client):
         shard_ids: Optional[List[int]] = None,  # instead of Client's shard_id: Optional[int]
         shard_count: Optional[int] = None,
         enable_debug_events: bool = False,
+        enable_gateway_error_handler: bool = True,
         connector: Optional[aiohttp.BaseConnector] = None,
         proxy: Optional[str] = None,
         proxy_auth: Optional[aiohttp.BasicAuth] = None,
