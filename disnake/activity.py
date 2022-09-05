@@ -246,14 +246,16 @@ class Activity(BaseActivity):
         "details",
         "party",
         "flags",
-        "sync_id",
-        "session_id",
         "type",
         "name",
         "url",
         "application_id",
         "emoji",
         "buttons",
+        "id",
+        "platform",
+        "sync_id",
+        "session_id",
     )
 
     def __init__(
@@ -267,10 +269,12 @@ class Activity(BaseActivity):
         party: Optional[ActivityParty] = None,
         application_id: Optional[Union[str, int]] = None,
         flags: Optional[int] = None,
-        sync_id: Optional[str] = None,
-        session_id: Optional[str] = None,
         buttons: Optional[List[str]] = None,
         emoji: Optional[Union[PartialEmojiPayload, ActivityEmojiPayload]] = None,
+        id: Optional[str] = None,
+        platform: Optional[str] = None,
+        sync_id: Optional[str] = None,
+        session_id: Optional[str] = None,
         **kwargs: Any,
     ):
         super().__init__(**kwargs)
@@ -283,9 +287,13 @@ class Activity(BaseActivity):
         self.name: Optional[str] = name
         self.url: Optional[str] = url
         self.flags: int = flags or 0
+        self.buttons: List[str] = buttons or []
+
+        # undocumented fields:
+        self.id: Optional[str] = id
+        self.platform: Optional[str] = platform
         self.sync_id: Optional[str] = sync_id
         self.session_id: Optional[str] = session_id
-        self.buttons: List[str] = buttons or []
 
         activity_type = type if type is not None else 0
         self.type: ActivityType = (
@@ -406,15 +414,20 @@ class Game(BaseActivity):
         A dictionary with the same structure as :attr:`Activity.assets`.
     """
 
-    __slots__ = ("name",)
+    __slots__ = ("name", "platform")
 
     def __init__(
         self,
         name: str,
+        *,
+        platform: Optional[str] = None,
         **kwargs: Any,
     ):
         super().__init__(**kwargs)
         self.name: str = name
+
+        # undocumented
+        self.platform: Optional[str] = platform
 
     @property
     def type(self) -> Literal[ActivityType.playing]:
