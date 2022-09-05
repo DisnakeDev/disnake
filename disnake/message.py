@@ -912,7 +912,7 @@ class Message(Hashable):
         # for user experience, on_message has no business getting partials
         # TODO: Subscripted message to include the channel
         self.channel: Union[GuildMessageable, DMChannel] = channel  # type: ignore
-        self.position: Union[int, None] = data.get("position", None)
+        self.position: Optional[int] = data.get("position", None)
         self._edited_timestamp: Optional[datetime.datetime] = utils.parse_time(
             data["edited_timestamp"]
         )
