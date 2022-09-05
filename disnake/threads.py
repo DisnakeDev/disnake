@@ -125,7 +125,7 @@ class Thread(Messageable, Hashable):
 
         .. note::
 
-            If the thread was created before July 1, 2022, it stops counting at 50
+            If the thread was created before July 1, 2022, this stops counting at 50.
     me: Optional[:class:`ThreadMember`]
         A thread member representing yourself, if you've joined the thread.
         This could not be available.
