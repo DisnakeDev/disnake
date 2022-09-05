@@ -37,12 +37,23 @@ runs:
         cache: "pip"
         cache-dependency-path: ${{ inputs.cache-dependency-path }}
 
-    - name: Configure Poetry
-      id: venv
+    - name: Configure Poetry on Linux/Mac
+      if: runner.os != 'Windows'
       shell: bash
       run: |
-         python -m virtualenv .venv
-         source .venv/bin/activate
+        python -m venv ~/.venv
+        source ~/.venv/bin/activate
+        echo "PATH=$PATH" >> $GITHUB_ENV
+        echo "VIRTUAL_ENV=$VIRTUAL_ENV" >> $GITHUB_ENV
+
+    - name: Configure Poetry on Windows
+      if: runner.os == 'Windows'
+      shell: bash
+      run: |
+        python -m venv ~/.venv
+        source ~/.venv/Scripts/activate
+        echo "PATH=$PATH" >> $GITHUB_ENV
+        echo "VIRTUAL_ENV=$VIRTUAL_ENV" >> $GITHUB_ENV
 
     - name: Install dependencies
       if: inputs.dependency-groups || inputs.dependencies
