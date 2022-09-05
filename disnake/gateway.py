@@ -88,6 +88,12 @@ if TYPE_CHECKING:
         def __call__(self, event: str, *args: Any) -> None:
             ...
 
+    class GatewayErrorFunc(Protocol):
+        async def __call__(
+            self, event: str, data: Any, shard_id: Optional[int], exc: Exception, /
+        ) -> None:
+            ...
+
     class CallHooksFunc(Protocol):
         async def __call__(self, key: str, *args: Any, **kwargs: Any) -> None:
             ...
@@ -366,6 +372,7 @@ class DiscordWebSocket:
 
         # an empty dispatcher to prevent crashes
         self._dispatch: DispatchFunc = lambda event, *args: None
+        self._dispatch_gateway_error: Optional[GatewayErrorFunc] = None
         # generic event listeners
         self._dispatch_listeners: List[EventListener] = []
         # the keep alive
@@ -442,6 +449,9 @@ class DiscordWebSocket:
         if client._enable_debug_events:
             ws.send = ws.debug_send
             ws.log_receive = ws.debug_log_receive
+
+        if client._enable_gateway_error_handler:
+            ws._dispatch_gateway_error = client._dispatch_gateway_error
 
         client._connection._update_references(ws)
 
@@ -638,7 +648,20 @@ class DiscordWebSocket:
         except KeyError:
             _log.debug("Unknown event %s.", event)
         else:
-            func(data)
+            try:
+                func(data)
+            except Exception as e:
+                if self._dispatch_gateway_error is None:
+                    # error handler disabled, raise immediately
+                    raise
+
+                if event in {"READY", "RESUMED"}:  # exceptions in these events are fatal
+                    raise
+
+                event_name: str = event  # type: ignore  # event can't be None here
+                asyncio.create_task(
+                    self._dispatch_gateway_error(event_name, data, self.shard_id, e)
+                )
 
         # remove the dispatched listeners
         removed: List[int] = []
