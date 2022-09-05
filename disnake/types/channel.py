@@ -150,7 +150,6 @@ class _ForumChannelOptional(TypedDict, total=False):
     topic: Optional[str]
     last_message_id: Optional[Snowflake]
     default_auto_archive_duration: ThreadArchiveDurationLiteral
-    message_count: Optional[int]
 
 
 class ForumChannel(_BaseGuildChannel, _ForumChannelOptional):
