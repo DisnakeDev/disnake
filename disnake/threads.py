@@ -115,7 +115,7 @@ class Thread(Messageable, Hashable):
 
         .. note::
 
-            If the thread was created before July 1, 2022, it stops counting at 50
+            If the thread was created before July 1, 2022, this stops counting at 50.
     member_count: Optional[:class:`int`]
         An approximate number of members in this thread. This caps at 50.
     total_message_sent: Optional[:class:`int`]
