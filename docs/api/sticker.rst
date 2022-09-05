@@ -99,23 +99,3 @@ StickerFormatType
     .. attribute:: lottie
 
         Represents a sticker with a lottie image.
-
-Events
-------
-
-.. function:: on_guild_stickers_update(guild, before, after)
-
-    |discord_event|
-
-    Called when a :class:`Guild` updates its stickers.
-
-    This requires :attr:`Intents.emojis_and_stickers` to be enabled.
-
-    .. versionadded:: 2.0
-
-    :param guild: The guild who got their stickers updated.
-    :type guild: :class:`Guild`
-    :param before: A list of stickers before the update.
-    :type before: Sequence[:class:`GuildSticker`]
-    :param after: A list of stickers after the update.
-    :type after: Sequence[:class:`GuildSticker`]

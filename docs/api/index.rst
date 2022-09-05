@@ -34,73 +34,6 @@ There are two main ways to query version information about the library. For guar
     A string representation of the version. e.g. ``'1.0.0rc1'``. This is based
     off of :pep:`440`.
 
-.. _discord_event:
-
-Events
-------
-
-Most of the :class:`Client` application cycle is based on *events* - special "notifications" usually sent by Discord
-to notify client about certain actions like message deletion, ``:mmlol:`` emoji creation, member nickname update, etc.
-This allows you to respond to certain actions by making another actions, about which Discord will notify other
-connected clients (i.e., other bots and users). This library provides two main ways to register an
-*event handler* - a special function which will *watch* to certain types of events and allow you to do anything you
-want in response to those events.
-
-The first way is through the use of the :meth:`Client.event` decorator: ::
-
-    import disnake
-
-    client = disnake.Client()
-
-    @client.event
-    async def on_message(message):
-        if message.author.bot:
-            return
-
-        if message.content.startswith('$hello'):
-            await message.reply(f'Hello, {message.author}!')
-
-The second way is through subclassing :class:`Client` and
-overriding the specific events. For example: ::
-
-    import disnake
-
-    class MyClient(disnake.Client):
-        async def on_message(self, message):
-            if message.author.bot:
-                return
-
-            if message.content.startswith('$hello'):
-                await message.reply(f'Hello, {message.author}!')
-
-The above pieces of code are essentially equal, and both respond with "Hello, {message author's username here}!" message
-when a user sends "$hello" message.
-
-.. warning::
-
-    Event handlers described here are a bit different from :class:`~ext.commands.Bot`'s *event listeners*.
-    :class:`Client`'s event handlers are *unique*: you can't have two :func:`on_message`, two
-    :func:`on_member_ban` etc. With :class:`~ext.commands.Bot` however, you can have as much *listeners*
-    of the same type as you want.
-
-    Please also note that using :meth:`Bot.event() <disnake.ext.commands.Bot.event>` decorator is the same as using :class:`Client`'s
-    :meth:`~Client.event` (since :class:`~ext.commands.Bot` subclasses :class:`Client`) and does not allow to listen/watch
-    for multiple events of the same type. Consider using :meth:`Bot.listen() <disnake.ext.commands.Bot.listen>` for that.
-
-.. note::
-
-    Events can be sent not only by Discord. For instance, if you use :ref:`commands extension <disnake_ext_commands>`,
-    you'll also receive various events related to your commands' execution process.
-
-If an event handler raises an exception, :func:`on_error` will be called
-to handle it, which defaults to print a traceback and ignoring the exception.
-
-.. warning::
-
-    All the events must be a |coroutine_link|_. If they aren't, then you might get unexpected
-    errors. In order to turn a function into a coroutine they must be ``async def``
-    functions.
-
 .. _discord_enum:
 
 Enumerations
@@ -130,7 +63,7 @@ the user of the library.
 
     If you want to get one of these model classes instances they'd have to be through
     the cache, and a common way of doing so is through the :func:`utils.find` function
-    or attributes of model classes that you receive from the :ref:`Events <discord_event>`.
+    or attributes of model classes that you receive from the :ref:`Events <discord_events>`.
 
 .. note::
 
@@ -181,6 +114,7 @@ Documents
     Channels <channels.rst>
     Clients <client.rst>
     Emoji <emoji.rst>
+    Events <events.rst>
     Exceptions and Warnings <exceptions.rst>
     Guild <guild.rst>
     Guild Scheduled Event <guild_scheduled_event.rst>

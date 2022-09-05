@@ -141,26 +141,3 @@ DefaultAvatar
 
         Represents the default avatar with the color red.
         See also :attr:`Colour.red`
-
-Events
-------
-
-.. function:: on_user_update(before, after)
-
-    |discord_event|
-
-    Called when a :class:`User` is updated.
-
-    This is called when one or more of the following things change, but is not limited to:
-
-    - avatar
-    - discriminator
-    - name
-    - public_flags
-
-    This requires :attr:`Intents.members` to be enabled.
-
-    :param before: The user's old info.
-    :type before: :class:`User`
-    :param after: The user's updated info.
-    :type after: :class:`User`

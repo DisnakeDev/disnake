@@ -138,28 +138,3 @@ PartyType
         The "Ocho" activity.
 
         .. versionadded:: 2.4
-
-Events
-------
-
-.. function:: on_voice_state_update(member, before, after)
-
-    |discord_event|
-
-    Called when a :class:`Member` changes their :class:`VoiceState`.
-
-    The following, but not limited to, examples illustrate when this event is called:
-
-    - A member joins a voice or stage channel.
-    - A member leaves a voice or stage channel.
-    - A member is muted or deafened by their own accord.
-    - A member is muted or deafened by a guild administrator.
-
-    This requires :attr:`Intents.voice_states` to be enabled.
-
-    :param member: The member whose voice states changed.
-    :type member: :class:`Member`
-    :param before: The voice state prior to the changes.
-    :type before: :class:`VoiceState`
-    :param after: The voice state after the changes.
-    :type after: :class:`VoiceState`

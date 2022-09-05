@@ -4,7 +4,12 @@
    contain the root `toctree` directive.
 
 Welcome to disnake
-===========================
+==================
+
+.. toctree::
+    :hidden:
+
+    api
 
 .. image:: /images/snake.svg
 .. image:: /images/snake_dark.svg

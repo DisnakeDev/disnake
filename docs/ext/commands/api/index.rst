@@ -16,6 +16,7 @@ Documents
     Checks <checks.rst>
     Context <context.rst>
     Converters <converters.rst>
+    Events <events.rst>
     Exceptions <exceptions.rst>
     Help Commands <help_commands.rst>
     Miscellaneous <misc.rst>

@@ -127,26 +127,3 @@ Status
         The member is live streaming to Twitch.
 
         .. versionadded:: 2.3
-
-Events
-------
-
-.. function:: on_presence_update(before, after)
-
-    |discord_event|
-
-    Called when a :class:`Member` updates their presence.
-
-    This is called when one or more of the following things change:
-
-    - status
-    - activity
-
-    This requires :attr:`Intents.presences` and :attr:`Intents.members` to be enabled.
-
-    .. versionadded:: 2.0
-
-    :param before: The updated member's old info.
-    :type before: :class:`Member`
-    :param after: The updated member's updated info.
-    :type after: :class:`Member`

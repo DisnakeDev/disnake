@@ -60,26 +60,3 @@ InviteTarget
     .. attribute:: embedded_application
 
         A stream invite that targets an embedded application.
-
-Events
-------
-
-.. function:: on_invite_create(invite)
-              on_invite_delete(invite)
-
-    |discord_events|
-
-    Called when an :class:`Invite` is created/deleted.
-    You must have the :attr:`~Permissions.manage_channels` permission to receive this.
-
-    .. versionadded:: 1.3
-
-    .. note::
-
-        There is a rare possibility that the :attr:`Invite.guild` and :attr:`Invite.channel`
-        attributes will be of :class:`Object` rather than the respective models.
-
-    This requires :attr:`Intents.invites` to be enabled.
-
-    :param invite: The invite that was created/deleted.
-    :type invite: :class:`Invite`

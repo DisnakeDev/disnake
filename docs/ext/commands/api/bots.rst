@@ -150,18 +150,3 @@ AutoShardedInteractionBot
 
 .. autoclass:: AutoShardedInteractionBot
     :members:
-
-Data Classes
-------------
-
-...
-
-Enumerations
-------------
-
-...
-
-Events
-------
-
-...

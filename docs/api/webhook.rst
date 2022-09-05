@@ -88,17 +88,3 @@ WebhookType
         Represents a webhook that is used for interactions or applications.
 
         .. versionadded:: 2.0
-
-Events
-------
-
-.. function:: on_webhooks_update(channel)
-
-    |discord_event|
-
-    Called whenever a webhook is created, modified, or removed from a guild channel.
-
-    This requires :attr:`Intents.webhooks` to be enabled.
-
-    :param channel: The channel that had its webhooks updated.
-    :type channel: :class:`abc.GuildChannel`

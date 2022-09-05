@@ -44,6 +44,7 @@ extensions = [
     "sphinx.ext.linkcode",
     "sphinxcontrib_trio",
     "sphinxcontrib.towncrier",
+    "sphinx_reredirects",
     "fulltoc",
     "hoverxref.extension",
     "exception_hierarchy",
@@ -51,6 +52,8 @@ extensions = [
     "resourcelinks",
     "nitpick_file_ignorer",
 ]
+
+redirects = {"api": "api/index.html", "ext/commands/api": "api/index.html"}
 
 autodoc_member_order = "bysource"
 autodoc_typehints = "none"
@@ -85,8 +88,6 @@ rst_prolog = """
 .. |data_class_constructible| replace:: This class is a constructible :ref:`Data Class <data_class>`
 .. |discord_abc| replace:: This class is an :ref:`ABC <disnake_abc>`
 .. |discord_model| replace:: This class is a :ref:`Discord Model <discord_model>`
-.. |discord_event| replace:: This function is an :ref:`Event <discord_event>`
-.. |discord_events| replace:: These functions are :ref:`Events <discord_event>`
 .. |discord_enum| replace:: This class is an :ref:`Enumeration <discord_enum>`
 """
 

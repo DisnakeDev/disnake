@@ -196,21 +196,3 @@ ApplicationCommandPermissionType
     .. attribute:: channel
 
         Represents a permission that affects channels.
-
-Events
-------
-
-.. function:: on_application_command_permissions_update(permissions)
-
-    |discord_event|
-
-    Called when the permissions of an application command or
-    the application-wide command permissions are updated.
-
-    Note that this will also be called when permissions of other applications change,
-    not just this application's permissions.
-
-    .. versionadded:: 2.5
-
-    :param permissions: The updated permission object.
-    :type permissions: :class:`GuildApplicationCommandPermissions`
