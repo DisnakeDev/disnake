@@ -1,3 +1,4 @@
+import types
 from typing import Any
 from unittest import mock
 
@@ -92,9 +93,15 @@ def test_init_enum_member_inheritance():
 
 @pytest.mark.parametrize("name", ["mro", "name", "value"])
 def test_init_enum_illegal_name(name: str):
+    # For this test, we emulate making a class using types.new_class, and use `exec_body` to
+    # simulate adding a member with an illegal name to the enum namespace.
+
     with pytest.raises(ValueError, match="Invalid Enum member name"):
-        # TODO: come up with a better way of running this test.
-        exec(f"class PainEnum(int, enums.Enum):\n\t{name} = 1\n", {"enums": enums})  # noqa: S102
+        types.new_class(
+            "TestEnum",
+            (int, enums.Enum),
+            exec_body=lambda ns: ns.__setitem__(name, 1),
+        )
 
 
 def test_init_enum_type_mismatch():
