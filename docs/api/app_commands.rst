@@ -196,3 +196,8 @@ ApplicationCommandPermissionType
     .. attribute:: channel
 
         Represents a permission that affects channels.
+
+Events
+------
+
+Check out the :ref:`related events <related_events_appcmds>`!

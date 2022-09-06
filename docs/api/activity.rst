@@ -127,3 +127,10 @@ Status
         The member is live streaming to Twitch.
 
         .. versionadded:: 2.3
+
+Events
+------
+
+.. "!" at the end makes people happy!
+
+Check out the :ref:`related events <related_events_activity>`!

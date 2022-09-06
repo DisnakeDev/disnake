@@ -78,6 +78,8 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     errors. In order to turn a function into a coroutine they must be ``async def``
     functions.
 
+.. _related_events_client:
+
 Client
 ~~~~~~
 
@@ -234,6 +236,8 @@ This section documents events related to :class:`Client` and its connectivity to
     :param payload: The message that is about to be passed on to the
                     WebSocket library. It can be :class:`bytes` to denote a binary
                     message or :class:`str` to denote a regular text message.
+
+.. _related_events_channels_and_threads:
 
 Channels/Threads
 ~~~~~~~~~~~~~~~~
@@ -455,6 +459,8 @@ Guilds
 
 This section documents events related to Discord guilds.
 
+.. _related_events_guild:
+
 General
 +++++++
 
@@ -513,6 +519,8 @@ General
 
     :param guild: The :class:`Guild` that has changed availability.
 
+.. _related_events_appcmds:
+
 Application Commands
 ++++++++++++++++++++
 
@@ -528,6 +536,8 @@ Application Commands
 
     :param permissions: The updated permission object.
     :type permissions: :class:`GuildApplicationCommandPermissions`
+
+.. _related_events_automod:
 
 AutoMod
 +++++++
@@ -589,6 +599,8 @@ AutoMod
     :param rule: The auto moderation rule that was deleted.
     :type rule: :class:`AutoModRule`
 
+.. _related_events_emoji:
+
 Emojis
 ++++++
 
@@ -604,6 +616,8 @@ Emojis
     :type before: Sequence[:class:`Emoji`]
     :param after: A list of emojis after the update.
     :type after: Sequence[:class:`Emoji`]
+
+.. _related_events_integration:
 
 Integrations
 ++++++++++++
@@ -652,6 +666,8 @@ Integrations
     :param payload: The raw event payload data.
     :type payload: :class:`RawIntegrationDeleteEvent`
 
+.. _related_events_invite:
+
 Invites
 +++++++
 
@@ -691,6 +707,8 @@ Invites
 
     :param invite: The invite that was deleted.
     :type invite: :class:`Invite`
+
+.. _related_events_member:
 
 Members
 +++++++
@@ -771,6 +789,8 @@ Members
     :param user: The user that got unbanned.
     :type user: :class:`User`
 
+.. _related_events_activity:
+
 .. function:: on_presence_update(before, after)
 
     Called when a :class:`Member` updates their presence.
@@ -788,6 +808,8 @@ Members
     :type before: :class:`Member`
     :param after: The updated member's updated info.
     :type after: :class:`Member`
+
+.. _related_events_user:
 
 .. function:: on_user_update(before, after)
 
@@ -807,6 +829,7 @@ Members
     :param after: The user's updated info.
     :type after: :class:`User`
 
+.. _related_events_guild_scheduled_event:
 
 Scheduled Events
 ++++++++++++++++
@@ -861,6 +884,8 @@ Scheduled Events
     :param payload: The raw event payload data.
     :type payload: :class:`RawGuildScheduledEventUserActionEvent`
 
+.. _related_events_stage_instance:
+
 Stage Instances
 +++++++++++++++
 
@@ -890,6 +915,8 @@ Stage Instances
     :param after: The stage instance after the update.
     :type after: :class:`StageInstance`
 
+.. _related_events_sticker:
+
 Stickers
 ++++++++
 
@@ -907,6 +934,8 @@ Stickers
     :type before: Sequence[:class:`GuildSticker`]
     :param after: A list of stickers after the update.
     :type after: Sequence[:class:`GuildSticker`]
+
+.. _related_events_role:
 
 Roles
 +++++
@@ -934,6 +963,8 @@ Roles
     :param after: The updated role's updated info.
     :type after: :class:`Role`
 
+.. _related_events_voice:
+
 Voice
 +++++
 
@@ -957,7 +988,7 @@ Voice
     :param after: The voice state after the changes.
     :type after: :class:`VoiceState`
 
-.. _discord-api-utils:
+.. _related_events_interactions:
 
 Interactions
 ~~~~~~~~~~~~
@@ -1055,6 +1086,8 @@ This section documents events related to application commands and other interact
 
     :param interaction: The interaction object.
     :type interaction: :class:`ModalInteraction`
+
+.. _related_events_message:
 
 Messages
 ~~~~~~~~

@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 
-# original copyright notice as follows
+# Original copyright notice as follows
 
 # Copyright © 2012 New Dream Network, LLC (DreamHost)
 #
@@ -22,6 +22,8 @@
 # - added typehinting
 # - formatted with black
 # - removed `display_toc` being forced to True
+
+# This is done by arl and shift, not by me
 
 
 from __future__ import annotations

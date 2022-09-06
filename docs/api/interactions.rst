@@ -205,3 +205,8 @@ InteractionResponseType
         Responds to the interaction by displaying a modal.
 
         See also :meth:`InteractionResponse.send_modal`
+
+Events
+------
+
+Check out the :ref:`related events <related_events_interactions>`!

@@ -60,3 +60,8 @@ InviteTarget
     .. attribute:: embedded_application
 
         A stream invite that targets an embedded application.
+
+Events
+------
+
+Check out the :ref:`related events <related_events_invite>`!

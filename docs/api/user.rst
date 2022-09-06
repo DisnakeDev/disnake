@@ -141,3 +141,8 @@ DefaultAvatar
 
         Represents the default avatar with the color red.
         See also :attr:`Colour.red`
+
+Events
+------
+
+Check out the :ref:`related events <related_events_user>`!

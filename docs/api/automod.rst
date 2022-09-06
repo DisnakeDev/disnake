@@ -157,3 +157,8 @@ AutoModTriggerType
         The rule will filter messages based on the number of member/role mentions they contain.
 
         This trigger type requires additional :class:`metadata <AutoModTriggerMetadata>`.
+
+Events
+------
+
+Check out the :ref:`related events <related_events_automod>`!

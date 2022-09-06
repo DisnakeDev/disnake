@@ -45,3 +45,8 @@ StagePrivacyLevel
     .. attribute:: guild_only
 
         Alias for :attr:`.closed`
+
+Events
+------
+
+Check out the :ref:`related events <related_events_stage_instance>`!

@@ -1447,7 +1447,7 @@ class Client:
         Parameters
         ----------
         event: :class:`str`
-            The event name, similar to the :ref:`events <discord_event>`,
+            The event name, similar to the :ref:`events <discord_events>`,
             but without the ``on_`` prefix, to wait for.
         check: Optional[Callable[..., :class:`bool`]]
             A predicate to check what to wait for. The arguments must meet the
@@ -1466,7 +1466,7 @@ class Client:
         Any
             Returns no arguments, a single argument, or a :class:`tuple` of multiple
             arguments that mirrors the parameters passed in the
-            :ref:`event <discord_event>`.
+            :ref:`event <discord_events>`.
         """
         future = self.loop.create_future()
         if check is None:

@@ -81,3 +81,8 @@ Functions
 .. autofunction:: when_mentioned
 
 .. autofunction:: when_mentioned_or
+
+Events
+------
+
+Check out the :ref:`related events <related_events_ext_commands_prefixcmds>`!

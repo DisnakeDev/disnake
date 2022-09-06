@@ -108,3 +108,8 @@ GuildScheduledEventPrivacyLevel
     .. attribute:: guild_only
 
         The guild scheduled event is only for a specific guild.
+
+Events
+------
+
+Check out the :ref:`related events <related_events_guild_scheduled_event>`!

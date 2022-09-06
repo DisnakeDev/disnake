@@ -289,3 +289,8 @@ MessageType
         The system message denoting that an auto moderation action was executed.
 
         .. versionadded:: 2.5
+
+Events
+------
+
+Check out the :ref:`related events <related_events_message>`!

@@ -276,3 +276,8 @@ VideoQualityMode
     .. attribute:: full
 
         Represents full camera video quality.
+
+Events
+------
+
+Check out the :ref:`related events <related_events_channels_and_threads>`!

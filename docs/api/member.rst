@@ -31,3 +31,8 @@ VoiceState
 
 .. autoclass:: VoiceState()
     :members:
+
+Events
+------
+
+Check out the :ref:`related events <related_events_member>`!

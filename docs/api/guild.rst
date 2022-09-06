@@ -271,3 +271,9 @@ NSFWLevel
     .. attribute:: age_restricted
 
         The guild may contain NSFW content.
+
+
+Events
+------
+
+Check out the :ref:`related events <related_events_guild>`!

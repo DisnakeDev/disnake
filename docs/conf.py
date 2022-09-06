@@ -44,7 +44,6 @@ extensions = [
     "sphinx.ext.linkcode",
     "sphinxcontrib_trio",
     "sphinxcontrib.towncrier",
-    "sphinx_reredirects",
     "fulltoc",
     "hoverxref.extension",
     "exception_hierarchy",
@@ -52,8 +51,6 @@ extensions = [
     "resourcelinks",
     "nitpick_file_ignorer",
 ]
-
-redirects = {"api": "api/index.html", "ext/commands/api": "api/index.html"}
 
 autodoc_member_order = "bysource"
 autodoc_typehints = "none"

@@ -151,3 +151,8 @@ String
 ~~~~~~
 
 .. autoclass:: disnake.ext.commands.String
+
+Events
+------
+
+Check out the :ref:`related events <related_events_ext_commands_appcmds>`!

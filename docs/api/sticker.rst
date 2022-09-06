@@ -99,3 +99,8 @@ StickerFormatType
     .. attribute:: lottie
 
         Represents a sticker with a lottie image.
+
+Events
+------
+
+Check out the :ref:`related events <related_events_sticker>`!

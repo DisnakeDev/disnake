@@ -71,3 +71,8 @@ ExpireBehaviour
     .. attribute:: kick
 
         This will kick the user when their subscription is finished.
+
+Events
+------
+
+Check out the :ref:`related events <related_events_integration>`!
