@@ -20,6 +20,14 @@ function main() {
         }
     }
 
+    if (postfix.includes("disnake.ext.commands") && !url.pathname.endsWith(ext_cmds_api)) {
+        postfix = "api/index.html"
+    } else {
+        if (!postfix.includes(".ext.commands.")) {
+            postfix = "ext/commands/api/index.html";
+        }
+    }
+
     if (url.pathname.endsWith(ext_cmds_api)) {
         window.location.href = url.origin + url.pathname.slice(0, -ext_cmds_api.length) + postfix;
     } else {
@@ -28,5 +36,10 @@ function main() {
 }
 
 function get_link(url) {
+    /*
+    * redirects_map is set by redirects sphinx extension
+    * and actually exists here at the time of loading
+    * page, please sorry for eslint errors...
+    */
     return redirects_map[url.hash.slice(1)];
 }
