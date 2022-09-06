@@ -108,6 +108,7 @@ class _MessageOptional(TypedDict, total=False):
     flags: int
     sticker_items: List[StickerItem]
     referenced_message: Optional[Message]
+    position: int
     interaction: InteractionMessageReference
     components: List[Component]
     thread: Thread
@@ -129,7 +130,6 @@ class Message(_MessageOptional):
     mention_roles: SnowflakeList
     attachments: List[Attachment]
     embeds: List[Embed]
-    position: Optional[int]
     pinned: bool
     type: MessageType
 

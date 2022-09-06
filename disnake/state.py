@@ -791,7 +791,7 @@ class ConnectionState:
         guild = self._get_guild(raw.guild_id)
         thread = guild and guild.get_thread(raw.channel_id)
         if thread:
-            thread.message_count -= 1
+            thread.message_count = max(0, thread.message_count - 1)
         if self._messages is not None and found is not None:
             self.dispatch("message_delete", found)
             self._messages.remove(found)
@@ -809,7 +809,7 @@ class ConnectionState:
         guild = self._get_guild(raw.guild_id)
         thread = guild and guild.get_thread(raw.channel_id)
         if thread:
-            thread.message_count -= len(raw.message_ids)
+            thread.message_count = max(0, thread.message_count - len(raw.message_ids))
         if found_messages:
             self.dispatch("bulk_message_delete", found_messages)
             for msg in found_messages:
