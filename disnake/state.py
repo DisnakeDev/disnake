@@ -65,7 +65,7 @@ from .channel import (
     _guild_channel_factory,
 )
 from .emoji import Emoji
-from .enums import ApplicationCommandType, ChannelType, ComponentType, Status, try_enum
+from .enums import ApplicationCommandType, ChannelType, ComponentType, MessageType, Status, try_enum
 from .flags import ApplicationFlags, Intents, MemberCacheFlags
 from .guild import Guild
 from .guild_scheduled_event import GuildScheduledEvent
@@ -781,7 +781,8 @@ class ConnectionState:
                 channel.last_message_id = message.id  # type: ignore
             if type(channel) is Thread:
                 channel.total_message_sent += 1
-                channel.message_count += 1
+                if message.type is not MessageType.thread_starter_message:
+                    channel.message_count += 1
 
     def parse_message_delete(self, data: gateway.MessageDeleteEvent) -> None:
         raw = RawMessageDeleteEvent(data)
