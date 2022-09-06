@@ -140,8 +140,6 @@ class ThreadChannel(_BaseChannel, _ThreadChannelOptional):
     nsfw: bool
     last_message_id: Optional[Snowflake]
     rate_limit_per_user: int
-    message_count: Optional[int]
-    total_message_sent: Optional[int]
     member_count: int
     thread_metadata: ThreadMetadata
 
