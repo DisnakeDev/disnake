@@ -776,11 +776,12 @@ class ConnectionState:
         if self._messages is not None:
             self._messages.append(message)
         # we ensure that the channel is a type that implements last_message_id
-        if channel and channel.__class__ in (TextChannel, Thread, VoiceChannel):
-            channel.last_message_id = message.id  # type: ignore
-        if channel and isinstance(channel, Thread):
-            channel.total_message_sent += 1
-            channel.message_count += 1
+        if channel:
+            if channel.__class__ in (TextChannel, Thread, VoiceChannel):
+                channel.last_message_id = message.id  # type: ignore
+            if channel.__class__ is Thread:
+                channel.total_message_sent += 1
+                channel.message_count += 1
 
     def parse_message_delete(self, data: gateway.MessageDeleteEvent) -> None:
         raw = RawMessageDeleteEvent(data)
