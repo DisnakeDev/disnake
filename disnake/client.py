@@ -427,8 +427,10 @@ class Client:
             chunk_guilds_at_startup=chunk_guilds_at_startup,
             member_cache_flags=member_cache_flags,
         )
-        self.shard_id = shard_id
-        self._connection.shard_count = self.shard_count = shard_count
+        self.shard_id: Optional[int] = shard_id
+        self.shard_count: Optional[int] = shard_count
+        self._connection.shard_count = shard_count
+
         self._closed: bool = False
         self._ready: asyncio.Event = asyncio.Event()
         self._first_connect: asyncio.Event = asyncio.Event()
