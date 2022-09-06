@@ -138,22 +138,24 @@ ParamInfo
 LargeInt
 ~~~~~~~~
 
-.. autoclass:: disnake.ext.commands.LargeInt
+.. autoclass:: LargeInt
 
     This is a class which inherits from :class:`int` to allow large numbers in slash commands, meant to be used only for annotations.
 
 Range
 ~~~~~
 
-.. autoclass:: disnake.ext.commands.Range
+.. autoclass:: Range
 
 String
 ~~~~~~
 
-.. autoclass:: disnake.ext.commands.String
+.. autoclass:: String
 
 Functions
 ---------
+
+.. autofunction:: Param
 
 .. autofunction:: slash_command
 

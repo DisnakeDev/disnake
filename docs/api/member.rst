@@ -32,6 +32,17 @@ VoiceState
 .. autoclass:: VoiceState()
     :members:
 
+Data Classes
+------------
+
+RawGuildMemberRemoveEvent
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: RawGuildMemberRemoveEvent
+
+.. autoclass:: RawGuildMemberRemoveEvent()
+    :members:
+
 Events
 ------
 
