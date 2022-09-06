@@ -1,0 +1,1 @@
+Remove the internal ``fill_with_flags`` decorator for flags classes and use the built in :meth:`object.__init_subclass__` method.
