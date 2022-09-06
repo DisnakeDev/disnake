@@ -305,7 +305,7 @@ class TestBaseFlags:
         assert ins.value == 0b010
 
         with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for ^=:")):
-            ins ^= "stabilty"  # type: ignore
+            ins ^= "stability"  # type: ignore
 
         with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for ^=:")):
             ins ^= OtherTestFlags.other_one  # type: ignore
