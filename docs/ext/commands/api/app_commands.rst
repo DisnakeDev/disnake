@@ -152,6 +152,15 @@ String
 
 .. autoclass:: disnake.ext.commands.String
 
+Functions
+---------
+
+.. autofunction:: slash_command
+
+.. autofunction:: message_command
+
+.. autofunction:: user_command
+
 Events
 ------
 
