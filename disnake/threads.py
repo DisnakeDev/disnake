@@ -119,7 +119,7 @@ class Thread(Messageable, Hashable):
     member_count: Optional[:class:`int`]
         An approximate number of members in this thread. This caps at 50.
     total_message_sent: Optional[:class:`int`]
-        The total messages sent in the thread including the initial message and deleted messages
+        The total number of messages sent in the thread, including deleted messages.
 
         .. versionadded:: 2.6
 
