@@ -2,24 +2,31 @@
 
 window.onload = main;
 
+const api = "api.html"
+const ext_cmds_api = "ext/commands/api.html"
+
 function main() {
-    const url = new URL("https://docs.disnake.dev/en/latest/api.html"); // (window.location.href)
+    const url = new URL(document.location.href);
 
-    if (!url.pathname.endsWith('api.html')) return; // Ensure we're on legacy api.html page
+    if (!url.pathname.endsWith('api.html')) return;
 
-    let redirect_to = '';
+    let postfix = get_link(url);
 
-    if (url.pathname.endsWith('ext/commands/api.html')) {
-        redirect_to = get_ext_commands_api_link(url);
+    if (!postfix) {
+        if (url.pathname.endsWith(ext_cmds_api)) {
+            postfix = "ext/commands/api/index.html";
+        } else {
+            postfix = "api/index.html";
+        }
+    }
+
+    if (url.pathname.endsWith(ext_cmds_api)) {
+        window.location.href = url.origin + url.pathname.slice(0, -ext_cmds_api.length) + postfix;
     } else {
-        redirect_to = get_api_link(url);
+        window.location.href = url.origin + url.pathname.slice(0, -api.length) + postfix;
     }
 }
 
-function get_api_link(url) {
-    console.log(require('./searchindex.js'.Search));
-}
-
-function get_ext_commands_api_link(url) {
-    console.log(require('./searchindex.js'.Search));
+function get_link(url) {
+    return redirects_map[url.hash.slice(1)];
 }
