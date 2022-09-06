@@ -227,10 +227,10 @@ class ConnectionState:
         self.heartbeat_timeout: float = heartbeat_timeout
         self.guild_ready_timeout: float = guild_ready_timeout
         if self.guild_ready_timeout < 0:
-            raise ValueError("guild_ready_timeout cannot be negative")
+            raise ValueError("guild_ready_timeout cannot be negative.")
 
         if allowed_mentions is not None and not isinstance(allowed_mentions, AllowedMentions):
-            raise TypeError("allowed_mentions parameter must be AllowedMentions")
+            raise TypeError("allowed_mentions parameter must be AllowedMentions.")
 
         self.allowed_mentions: Optional[AllowedMentions] = allowed_mentions
         self._chunk_requests: Dict[Union[int, str], ChunkRequest] = {}
@@ -249,7 +249,7 @@ class ConnectionState:
 
         if intents is not None:
             if not isinstance(intents, Intents):
-                raise TypeError(f"intents parameter must be Intent not {type(intents)!r}")
+                raise TypeError(f"intents parameter must be Intents, not {type(intents)!r}.")
 
             if not intents.guilds:
                 _log.warning(

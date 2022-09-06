@@ -366,9 +366,9 @@ class AutoShardedClient(Client):
     def __init__(self):
         ...
 
-    def __init__(self, *, shard_ids: Optional[List[int]] = None, **kwargs: Any) -> None:
+    def __init__(self, *args: Any, shard_ids: Optional[List[int]] = None, **kwargs: Any) -> None:
         self.shard_ids = shard_ids
-        super().__init__(**kwargs)
+        super().__init__(*args, **kwargs)
 
         if self.shard_ids is not None:
             if self.shard_count is None:

@@ -76,11 +76,11 @@ def _is_submodule(parent: str, child: str) -> bool:
 class CommonBotBase(Generic[CogT]):
     def __init__(
         self,
-        *args,
+        *args: Any,
         owner_id: Optional[int] = None,
         owner_ids: Optional[Set[int]] = None,
         reload: bool = False,
-        **kwargs,
+        **kwargs: Any,
     ):
         self.__cogs: Dict[str, Cog] = {}
         self.__extensions: Dict[str, types.ModuleType] = {}
