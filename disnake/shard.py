@@ -27,7 +27,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Type
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Type, Union, overload
 
 import aiohttp
 
@@ -49,6 +49,9 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from .activity import BaseActivity
+    from .flags import Intents, MemberCacheFlags
+    from .i18n import LocalizationProtocol
+    from .mentions import AllowedMentions
 
 __all__ = (
     "AutoShardedClient",
@@ -330,12 +333,42 @@ class AutoShardedClient(Client):
     if TYPE_CHECKING:
         _connection: AutoShardedConnectionState
 
+    @overload
     def __init__(
-        self, *args: Any, loop: Optional[asyncio.AbstractEventLoop] = None, **kwargs: Any
-    ) -> None:
-        kwargs.pop("shard_id", None)
-        self.shard_ids: Optional[List[int]] = kwargs.pop("shard_ids", None)
-        super().__init__(*args, loop=loop, **kwargs)
+        self,
+        *,
+        asyncio_debug: bool = False,
+        loop: Optional[asyncio.AbstractEventLoop] = None,
+        shard_ids: Optional[List[int]] = None,  # instead of Client's shard_id: Optional[int]
+        shard_count: Optional[int] = None,
+        enable_debug_events: bool = False,
+        enable_gateway_error_handler: bool = True,
+        connector: Optional[aiohttp.BaseConnector] = None,
+        proxy: Optional[str] = None,
+        proxy_auth: Optional[aiohttp.BasicAuth] = None,
+        assume_unsync_clock: bool = True,
+        max_messages: Optional[int] = 1000,
+        application_id: Optional[int] = None,
+        heartbeat_timeout: float = 60.0,
+        guild_ready_timeout: float = 2.0,
+        allowed_mentions: Optional[AllowedMentions] = None,
+        activity: Optional[BaseActivity] = None,
+        status: Optional[Union[Status, str]] = None,
+        intents: Intents = None,
+        chunk_guilds_at_startup: Optional[bool] = None,
+        member_cache_flags: Optional[MemberCacheFlags] = None,
+        localization_provider: Optional[LocalizationProtocol] = None,
+        strict_localization: bool = False,
+    ):
+        ...
+
+    @overload
+    def __init__(self):
+        ...
+
+    def __init__(self, *args: Any, shard_ids: Optional[List[int]] = None, **kwargs: Any) -> None:
+        self.shard_ids = shard_ids
+        super().__init__(*args, **kwargs)
 
         if self.shard_ids is not None:
             if self.shard_count is None:
