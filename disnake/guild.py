@@ -3610,6 +3610,10 @@ class Guild(Hashable):
 
             .. versionadded:: 2.6
 
+            .. note::
+                This may not be accurate with small durations (e.g. a few minutes)
+                and delete a couple minutes' worth of messages more than specified.
+
         delete_message_days: :class:`int`
             The number of days worth of messages to delete from the user
             in the guild. The minimum is 0 and the maximum is 7.
