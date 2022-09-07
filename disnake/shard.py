@@ -32,7 +32,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Ty
 import aiohttp
 
 from .backoff import ExponentialBackoff
-from .client import Client, SessionStartLimit
+from .client import Client, GatewayParams, SessionStartLimit
 from .enums import Status
 from .errors import (
     ClientException,
@@ -344,6 +344,7 @@ class AutoShardedClient(Client):
         shard_count: Optional[int] = None,
         enable_debug_events: bool = False,
         enable_gateway_error_handler: bool = True,
+        gateway_params: Optional[GatewayParams] = None,
         connector: Optional[aiohttp.BaseConnector] = None,
         proxy: Optional[str] = None,
         proxy_auth: Optional[aiohttp.BasicAuth] = None,

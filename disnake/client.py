@@ -408,6 +408,7 @@ class Client:
         enable_gateway_error_handler: bool = True,
         localization_provider: Optional[LocalizationProtocol] = None,
         strict_localization: bool = False,
+        gateway_params: Optional[GatewayParams] = None,
         connector: Optional[aiohttp.BaseConnector] = None,
         proxy: Optional[str] = None,
         proxy_auth: Optional[aiohttp.BasicAuth] = None,
@@ -420,7 +421,6 @@ class Client:
         activity: Optional[BaseActivity] = None,
         status: Optional[Union[Status, str]] = None,
         intents: Optional[Intents] = None,
-        gateway_params: Optional[GatewayParams] = None,
         chunk_guilds_at_startup: Optional[bool] = None,
         member_cache_flags: Optional[MemberCacheFlags] = None,
     ):
