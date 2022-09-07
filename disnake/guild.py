@@ -2007,6 +2007,11 @@ class Guild(Hashable):
                     features.discard("COMMUNITY")
 
             if invites_disabled is not MISSING:
+                if community is not MISSING:
+                    raise ValueError(
+                        "cannot modify both the COMMUNITY feature and INVITES_DISABLED feature at the "
+                        "same time due to a discord limitation."
+                    )
                 if not isinstance(invites_disabled, bool):
                     raise TypeError("invites_disabled must be a bool")
                 if invites_disabled:
