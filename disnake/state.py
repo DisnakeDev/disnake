@@ -786,7 +786,10 @@ class ConnectionState:
         if channel:
             if channel.__class__ in (TextChannel, Thread, VoiceChannel):
                 channel.last_message_id = message.id  # type: ignore
-            if channel.__class__ is Thread and message.type is not MessageType.thread_starter_message:
+            if (
+                channel.__class__ is Thread 
+                and message.type is not MessageType.thread_starter_message
+            ):
                 channel.total_message_sent += 1  # type: ignore
                 channel.message_count += 1  # type: ignore
 
