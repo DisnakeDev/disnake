@@ -3613,10 +3613,6 @@ class Guild(Hashable):
         delete_message_days: :class:`int`
             The number of days worth of messages to delete from the user
             in the guild. The minimum is 0 and the maximum is 7.
-
-            .. deprecated:: 2.6
-                Use ``delete_message_seconds`` instead.
-
         reason: Optional[:class:`str`]
             The reason for banning this user. Shows up on the audit log.
 
@@ -3628,10 +3624,6 @@ class Guild(Hashable):
             Banning failed.
         """
         if delete_message_days is not MISSING:
-            utils.warn_deprecated(
-                "`delete_message_days` is deprecated and will be removed in a future version. Consider using `delete_message_seconds` instead.",
-                stacklevel=2,
-            )
             delete_message_seconds = delete_message_days * 86400
         await self._state.http.ban(
             user.id, self.id, delete_message_seconds=delete_message_seconds, reason=reason
