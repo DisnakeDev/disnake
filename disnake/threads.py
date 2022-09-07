@@ -205,8 +205,8 @@ class Thread(Messageable, Hashable):
         self._type: ThreadType = try_enum(ChannelType, data["type"])  # type: ignore
         self.last_message_id = _get_as_snowflake(data, "last_message_id")
         self.slowmode_delay = data.get("rate_limit_per_user", 0)
-        self.message_count = data.get("message_count", 0)
-        self.total_message_sent = data.get("total_message_sent", 0)
+        self.message_count = data.get("message_count") or 0
+        self.total_message_sent = data.get("total_message_sent") or 0
         self.member_count = data.get("member_count")
         self.last_pin_timestamp: Optional[datetime.datetime] = parse_time(
             data.get("last_pin_timestamp")
