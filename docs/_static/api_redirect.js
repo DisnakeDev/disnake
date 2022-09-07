@@ -12,19 +12,24 @@ function main() {
 
     let postfix = get_link(url);
 
+    let fixed_postfix = false;
+
     if (!postfix) {
         if (url.pathname.endsWith(ext_cmds_api)) {
             postfix = "ext/commands/api/index.html";
         } else {
             postfix = "api/index.html";
         }
+        fixed_postfix = true;
     }
 
-    if (postfix.includes("disnake.ext.commands") && !url.pathname.endsWith(ext_cmds_api)) {
-        postfix = "api/index.html"
-    } else {
-        if (!postfix.includes(".ext.commands.")) {
-            postfix = "ext/commands/api/index.html";
+    if (!fixed_postfix) {
+        if (postfix.includes("disnake.ext.commands") && !url.pathname.endsWith(ext_cmds_api)) {
+            postfix = "api/index.html"
+        } else {
+            if ((!postfix.includes("disnake.ext.commands.") && url.pathname.endsWith(ext_cmds_api))) {
+                postfix = "ext/commands/api/index.html";
+            }
         }
     }
 
