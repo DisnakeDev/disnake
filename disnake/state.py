@@ -65,7 +65,7 @@ from .channel import (
     _guild_channel_factory,
 )
 from .emoji import Emoji
-from .enums import ApplicationCommandType, ChannelType, ComponentType, Status, try_enum
+from .enums import ApplicationCommandType, ChannelType, ComponentType, MessageType, Status, try_enum
 from .flags import ApplicationFlags, Intents, MemberCacheFlags
 from .guild import Guild
 from .guild_scheduled_event import GuildScheduledEvent
@@ -613,7 +613,8 @@ class ConnectionState:
         )
 
     def _get_guild_channel(
-        self, data: Union[MessagePayload, gateway.TypingStartEvent]
+        self,
+        data: Union[MessagePayload, gateway.TypingStartEvent],
     ) -> Tuple[Union[PartialChannel, Thread], Optional[Guild]]:
         channel_id = int(data["channel_id"])
         try:
@@ -782,14 +783,25 @@ class ConnectionState:
         if self._messages is not None:
             self._messages.append(message)
         # we ensure that the channel is a type that implements last_message_id
-        if channel and channel.__class__ in (TextChannel, Thread, VoiceChannel):
-            channel.last_message_id = message.id  # type: ignore
+        if channel:
+            if channel.__class__ in (TextChannel, Thread, VoiceChannel):
+                channel.last_message_id = message.id  # type: ignore
+            if (
+                channel.__class__ is Thread
+                and message.type is not MessageType.thread_starter_message
+            ):
+                channel.total_message_sent += 1  # type: ignore
+                channel.message_count += 1  # type: ignore
 
     def parse_message_delete(self, data: gateway.MessageDeleteEvent) -> None:
         raw = RawMessageDeleteEvent(data)
         found = self._get_message(raw.message_id)
         raw.cached_message = found
         self.dispatch("raw_message_delete", raw)
+        guild = self._get_guild(raw.guild_id)
+        thread = guild and guild.get_thread(raw.channel_id)
+        if thread:
+            thread.message_count = max(0, thread.message_count - 1)
         if self._messages is not None and found is not None:
             self.dispatch("message_delete", found)
             self._messages.remove(found)
@@ -804,6 +816,10 @@ class ConnectionState:
             found_messages = []
         raw.cached_messages = found_messages
         self.dispatch("raw_bulk_message_delete", raw)
+        guild = self._get_guild(raw.guild_id)
+        thread = guild and guild.get_thread(raw.channel_id)
+        if thread:
+            thread.message_count = max(0, thread.message_count - len(raw.message_ids))
         if found_messages:
             self.dispatch("bulk_message_delete", found_messages)
             for msg in found_messages:
