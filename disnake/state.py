@@ -201,11 +201,20 @@ class ConnectionState:
         hooks: Dict[str, Callable],
         http: HTTPClient,
         loop: asyncio.AbstractEventLoop,
-        **options: Any,
+        max_messages: Optional[int] = 1000,
+        application_id: Optional[int] = None,
+        heartbeat_timeout: float = 60.0,
+        guild_ready_timeout: float = 2.0,
+        allowed_mentions: Optional[AllowedMentions] = None,
+        activity: Optional[BaseActivity] = None,
+        status: Optional[Union[str, Status]] = None,
+        intents: Optional[Intents] = None,
+        chunk_guilds_at_startup: Optional[bool] = None,
+        member_cache_flags: Optional[MemberCacheFlags] = None,
     ) -> None:
         self.loop: asyncio.AbstractEventLoop = loop
         self.http: HTTPClient = http
-        self.max_messages: Optional[int] = options.get("max_messages", 1000)
+        self.max_messages: Optional[int] = max_messages
         if self.max_messages is not None and self.max_messages <= 0:
             self.max_messages = 1000
 
@@ -214,67 +223,65 @@ class ConnectionState:
         self.hooks: Dict[str, Callable] = hooks
         self.shard_count: Optional[int] = None
         self._ready_task: Optional[asyncio.Task] = None
-        self.application_id: Optional[int] = utils._get_as_snowflake(options, "application_id")
-        self.heartbeat_timeout: float = options.get("heartbeat_timeout", 60.0)
-        self.guild_ready_timeout: float = options.get("guild_ready_timeout", 2.0)
+        self.application_id: Optional[int] = None if application_id is None else int(application_id)
+        self.heartbeat_timeout: float = heartbeat_timeout
+        self.guild_ready_timeout: float = guild_ready_timeout
         if self.guild_ready_timeout < 0:
-            raise ValueError("guild_ready_timeout cannot be negative")
-
-        allowed_mentions = options.get("allowed_mentions")
+            raise ValueError("guild_ready_timeout cannot be negative.")
 
         if allowed_mentions is not None and not isinstance(allowed_mentions, AllowedMentions):
-            raise TypeError("allowed_mentions parameter must be AllowedMentions")
+            raise TypeError("allowed_mentions parameter must be AllowedMentions.")
 
         self.allowed_mentions: Optional[AllowedMentions] = allowed_mentions
         self._chunk_requests: Dict[Union[int, str], ChunkRequest] = {}
 
-        activity = options.get("activity", None)
         if activity:
             if not isinstance(activity, BaseActivity):
                 raise TypeError("activity parameter must derive from BaseActivity.")
 
-            activity = activity.to_dict()
+            self._activity: Optional[ActivityPayload] = activity.to_dict()
+        else:
+            self._activity: Optional[ActivityPayload] = None
 
-        status = options.get("status", None)
+        self._status: Optional[str] = None
         if status:
-            if status is Status.offline:
-                status = "invisible"
-            else:
-                status = str(status)
+            self._status = "invisible" if status is Status.offline else str(status)
 
-        intents = options.get("intents", None)
         if intents is not None:
             if not isinstance(intents, Intents):
-                raise TypeError(f"intents parameter must be Intent not {type(intents)!r}")
-        else:
-            intents = Intents.default()
+                raise TypeError(f"intents parameter must be Intents, not {type(intents)!r}.")
 
-        if not intents.guilds:
-            _log.warning("Guilds intent seems to be disabled. This may cause state related issues.")
-
-        self._chunk_guilds: bool = options.get("chunk_guilds_at_startup", intents.members)
-
-        # Ensure these two are set properly
-        if not intents.members and self._chunk_guilds:
-            raise ValueError("Intents.members must be enabled to chunk guilds at startup.")
-
-        cache_flags = options.get("member_cache_flags", None)
-        if cache_flags is None:
-            cache_flags = MemberCacheFlags.from_intents(intents)
-        else:
-            if not isinstance(cache_flags, MemberCacheFlags):
-                raise TypeError(
-                    f"member_cache_flags parameter must be MemberCacheFlags not {type(cache_flags)!r}"
+            if not intents.guilds:
+                _log.warning(
+                    "Guilds intent seems to be disabled. This may cause state related issues."
                 )
 
-            cache_flags._verify_intents(intents)
+            self._intents: Intents = intents
+        else:
+            self._intents: Intents = Intents.default()
 
-        self.member_cache_flags: MemberCacheFlags = cache_flags
-        self._activity: Optional[ActivityPayload] = activity
-        self._status: Optional[str] = status
-        self._intents: Intents = intents
+        self._chunk_guilds: bool = (
+            self._intents.members if chunk_guilds_at_startup is None else chunk_guilds_at_startup
+        )
 
-        if not intents.members or cache_flags._empty:
+        # Ensure these two are set properly
+        if not self._intents.members and self._chunk_guilds:
+            raise ValueError("Intents.members must be enabled to chunk guilds at startup.")
+
+        if member_cache_flags is None:
+            member_cache_flags = MemberCacheFlags.from_intents(self._intents)
+        else:
+            if not isinstance(member_cache_flags, MemberCacheFlags):
+                raise TypeError(
+                    "member_cache_flags parameter must be MemberCacheFlags, "
+                    f"not {type(member_cache_flags)!r}"
+                )
+
+            member_cache_flags._verify_intents(self._intents)
+
+        self.member_cache_flags: MemberCacheFlags = member_cache_flags
+
+        if not self._intents.members or member_cache_flags._empty:
             self.store_user = self.create_user
             self.deref_user = self.deref_user_no_intents
 
