@@ -427,6 +427,7 @@ Injections
 
 .. autoclass:: disnake.ext.commands.Injection
     :members:
+    :special-members: __call__
     :exclude-members: autocomplete
 
     .. automethod:: Injection.autocomplete

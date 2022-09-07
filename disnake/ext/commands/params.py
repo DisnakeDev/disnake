@@ -220,21 +220,26 @@ class Injection(Generic[P, T_]):
     def __init__(self, function: Callable, *, autocompleters: Dict[str, Callable] = None) -> None:
         self.function = function
         self.autocompleters = autocompleters if autocompleters else {}
+        self._injected: Optional[Cog] = None
 
-    async def __call__(
-        self, inter: ApplicationCommandInteraction, *args: P.args, **kwargs: P.kwargs
-    ) -> T_:
+    def __get__(self, obj: Optional[Any], _: Type[Any]) -> Self:
+        if obj is None:
+            return self
+
+        copy = type(self)(function=self.function, autocompleters=self.autocompleters)
+        copy._injected = obj
+        setattr(obj, self.function.__name__, copy)
+
+        return copy
+
+    def __call__(self, *args: P.args, **kwargs: P.kwargs) -> T_:
         """Calls the underlying function that the injection holds.
 
         .. versionadded:: 2.6
         """
-        cog = getattr(inter.application_command, "cog", None)  # haxxor
-        base_args = [cog, inter] if cog else [inter]
-
-        if asyncio.iscoroutinefunction(self.function):
-            return await self.function(*base_args, *args, **kwargs)
-        else:
-            return self.function(*base_args, *args, **kwargs)
+        if self._injected is not None:
+            args = (self._injected, *args)  # type: ignore
+        return self.function(*args, **kwargs)
 
     @classmethod
     def register(
@@ -986,16 +991,6 @@ async def call_param_func(
     return await maybe_coroutine(safe_call, function, **kwargs)
 
 
-def _get_superfluous_autocompleters(
-    params: List[ParamInfo], autocompleters: Dict[str, Callable]
-) -> List[str]:
-    """Returns a list of superfluous autocompleters names"""
-
-    param_names = [p.name for p in params]
-
-    return [key for key in autocompleters.keys() if key not in param_names]
-
-
 def expand_params(command: AnySlashCommand) -> List[Option]:
     """Update an option with its params *in-place*
 
@@ -1186,9 +1181,7 @@ def inject(function: Callable[..., Any], *, autocompleters: Dict[str, Callable] 
     return Injection(function, autocompleters=autocompleters)
 
 
-def injection(
-    *, autocompleters: Dict[str, Callable] = None
-) -> Callable[[Callable[..., Any]], Any]:
+def injection(*, autocompleters: Dict[str, Callable] = None) -> Callable[[Callable[..., Any]], Any]:
     """Decorator interface for :func:`inject`.
     You can then assign this value to your slash commands' parameters.
 
