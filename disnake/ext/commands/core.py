@@ -1187,8 +1187,7 @@ class GroupMixin(Generic[CogT]):
         Whether the commands should be case insensitive. Defaults to ``False``.
     """
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        case_insensitive = kwargs.get("case_insensitive", False)
+    def __init__(self, *args: Any, case_insensitive: bool = False, **kwargs: Any) -> None:
         self.all_commands: Dict[str, Command[CogT, Any, Any]] = (
             _CaseInsensitiveDict() if case_insensitive else {}
         )
@@ -2128,8 +2127,11 @@ def has_permissions(**perms: bool) -> Callable[[T], T]:
         raise TypeError(f"Invalid permission(s): {', '.join(invalid)}")
 
     def predicate(ctx: AnyContext) -> bool:
-        ch = ctx.channel
-        permissions = ch.permissions_for(ctx.author, ignore_timeout=False)  # type: ignore
+        if isinstance(ctx, disnake.Interaction):
+            permissions = ctx.permissions
+        else:
+            ch = ctx.channel
+            permissions = ch.permissions_for(ctx.author, ignore_timeout=False)  # type: ignore
 
         missing = [perm for perm, value in perms.items() if getattr(permissions, perm) != value]
 
@@ -2218,7 +2220,11 @@ def bot_has_permissions(**perms: bool) -> Callable[[T], T]:
         raise TypeError(f"Invalid permission(s): {', '.join(invalid)}")
 
     def predicate(ctx: AnyContext) -> bool:
-        permissions = ctx.channel.permissions_for(ctx.me, ignore_timeout=False)  # type: ignore
+        if isinstance(ctx, disnake.Interaction):
+            permissions = ctx.app_permissions
+        else:
+            ch = ctx.channel
+            permissions = ch.permissions_for(ctx.me, ignore_timeout=False)  # type: ignore
 
         missing = [perm for perm, value in perms.items() if getattr(permissions, perm) != value]
 
