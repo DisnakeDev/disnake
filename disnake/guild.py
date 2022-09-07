@@ -1837,8 +1837,8 @@ class Guild(Hashable):
             This is only available to guilds that contain ``COMMUNITY``
             in :attr:`Guild.features`.
 
-
             .. versionadded:: 2.6
+
         afk_channel: Optional[:class:`VoiceChannel`]
             The new channel that is the AFK channel. Could be ``None`` for no AFK channel.
         afk_timeout: :class:`int`
