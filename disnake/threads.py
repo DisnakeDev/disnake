@@ -115,7 +115,7 @@ class Thread(Messageable, Hashable):
 
         .. note::
 
-            If the thread was created before July 1, 2022, this stops counting at 50.
+            If the thread was created before July 1, 2022, this could be inaccurate.
     member_count: Optional[:class:`int`]
         An approximate number of members in this thread. This caps at 50.
     total_message_sent: Optional[:class:`int`]
@@ -125,7 +125,7 @@ class Thread(Messageable, Hashable):
 
         .. note::
 
-            If the thread was created before July 1, 2022, this stops counting at 50.
+            If the thread was created before July 1, 2022, this could be inaccurate.
     me: Optional[:class:`ThreadMember`]
         A thread member representing yourself, if you've joined the thread.
         This could not be available.
