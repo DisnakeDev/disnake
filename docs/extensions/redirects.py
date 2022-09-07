@@ -13,7 +13,7 @@ def setup(app: Sphinx) -> None:
 def main(app: Sphinx, exception: Exception) -> None:
     # mapping of html node id (i.e., thing after "#" in URLs) to the same but
     # prefixed with the right doc name
-    # e.g, api.html#disnake.Thread => api/threads.html#disnake.Thread
+    # e.g, api.html#disnake.Thread => api/channels.html#disnake.Thread
     actual_redirects: Dict[str, str] = {}
 
     for domainname, domain in app.env.domains.items():
@@ -21,7 +21,7 @@ def main(app: Sphinx, exception: Exception) -> None:
             continue  # skip non-python objects
 
         # first is the real object name - we dont need it
-        # second is object's "display name" (idk what' that mmlol), we dont need it
+        # second is object's "display name" (idk what is that mmlol), we dont need it
         # third is object type (class, method etc), we too dont need it
         # sixth is whether the object is aliased (not sure what does it actually mean,
         # i guess whether you did :ref:`abcedfg <hijklm>` instead of just :ref:`hijklm`
