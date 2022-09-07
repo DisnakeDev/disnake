@@ -221,7 +221,7 @@ class Guild(Hashable):
         - ``HAS_DIRECTORY_ENTRY``: Guild is listed in a student hub.
         - ``HUB``: Guild is a student hub.
         - ``INVITE_SPLASH``: Guild's invite page can have a special splash.
-        - ``INVITES_DISABLED``: Guild has disabled invite usage, preventing users from joining.
+        - ``INVITES_DISABLED``: Guild has paused invites, preventing new users from joining.
         - ``LINKED_TO_HUB``: Guild is linked to a student hub.
         - ``MEMBER_VERIFICATION_GATE_ENABLED``: Guild has Membership Screening enabled.
         - ``MONETIZATION_ENABLED``: Guild has enabled monetization.
