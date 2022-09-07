@@ -1832,10 +1832,12 @@ class Guild(Hashable):
             Whether the guild should be a Community guild. If set to ``True``\\, both ``rules_channel``
             and ``public_updates_channel`` parameters are required.
         invites_disabled: :class:`bool`
-            Whether the guild can be joined.
+            Whether the guild has paused invites, preventing new users from joining.
 
             This is only available to guilds that contain ``COMMUNITY``
             in :attr:`Guild.features`.
+
+            This cannot be changed at the same time as the ``community`` feature due a Discord API limitation.
 
             .. versionadded:: 2.6
 
@@ -1893,7 +1895,8 @@ class Guild(Hashable):
         ValueError
             ``community`` was set without setting both ``rules_channel`` and ``public_updates_channel`` parameters,
             or if you are not the owner of the guild and request an ownership transfer,
-            or the image format passed in to ``icon`` is invalid.
+            or the image format passed in to ``icon`` is invalid,
+            or both ``community`` and ``invites_disabled`` were provided.
 
         Returns
         -------
