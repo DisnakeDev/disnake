@@ -752,7 +752,7 @@ class Message(Hashable):
     position: Optional[:class:`int`]
         A number that indicate the approximate position of a message in a :class:`Thread`.
         This is a number that starts at 0. e.g. the first message is position 0.
-        This is `None` if the message that was sent is not from a :class:`Thread`.
+        This is `None` if the message was not sent in a :class:`Thread`, or if it was sent before July 1, 2022.
 
         .. versionadded:: 2.6
 
