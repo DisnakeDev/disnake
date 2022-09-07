@@ -750,7 +750,7 @@ class Message(Hashable):
         The channel that the message was sent from.
         Could be a :class:`DMChannel` or :class:`GroupChannel` if it's a private message.
     position: Optional[:class:`int`]
-        A number that indicate the approximate position of a message in a :class:`Thread`.
+        A number that indicates the approximate position of a message in a :class:`Thread`.
         This is a number that starts at 0. e.g. the first message is position 0.
         This is `None` if the message was not sent in a :class:`Thread`, or if it was sent before July 1, 2022.
 
