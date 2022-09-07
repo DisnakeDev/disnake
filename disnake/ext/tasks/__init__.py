@@ -44,6 +44,7 @@ from typing import (
     TypeVar,
     Union,
     cast,
+    get_origin,
     overload,
 )
 
@@ -221,7 +222,7 @@ class Loop(Generic[CoroP]):
         return clone
 
     def clone(self) -> Self:
-        instance = self.__class__(
+        instance = type(self)(
             self.coro,
             seconds=self._seconds,
             hours=self._hours,
@@ -522,7 +523,7 @@ class Loop(Generic[CoroP]):
             raise TypeError(f"Expected coroutine function, received {coro.__class__.__name__!r}.")
 
         self._before_loop = coro
-        return coro
+        return coro  # type: ignore
 
     def after_loop(self, coro: FT) -> FT:
         """A decorator that register a coroutine to be called after the loop finished running.
@@ -549,7 +550,7 @@ class Loop(Generic[CoroP]):
             raise TypeError(f"Expected coroutine function, received {coro.__class__.__name__!r}.")
 
         self._after_loop = coro
-        return coro
+        return coro  # type: ignore
 
     def error(self, coro: ET) -> ET:
         """A decorator that registers a coroutine to be called if the task encounters an unhandled exception.
@@ -574,8 +575,8 @@ class Loop(Generic[CoroP]):
         if not asyncio.iscoroutinefunction(coro):
             raise TypeError(f"Expected coroutine function, received {coro.__class__.__name__!r}.")
 
-        self._error = coro  # type: ignore
-        return coro
+        self._error = coro
+        return coro  # type: ignore
 
     def _get_next_sleep_time(self) -> datetime.datetime:
         if self._sleep is not MISSING:
@@ -765,7 +766,7 @@ def loop(
     cls: Type[:class:`Loop`]
         The loop subclass to create an instance of. If provided, the following parameters
         described below do no apply. Instead, this decorator will accept the same keywords
-        as the passed cls does.
+        as the passed subclass does.
 
         .. versionadded:: 2.6
 
@@ -804,9 +805,16 @@ def loop(
     ValueError
         An invalid value was given.
     TypeError
-        The function was not a coroutine, an invalid value for the ``time`` parameter was passed,
+        The function was not a coroutine, the ``cls`` parameter was not a subclass of ``Loop``,
+        an invalid value for the ``time`` parameter was passed,
         or ``time`` parameter was passed in conjunction with relative time parameters.
     """
+
+    if (origin := get_origin(cls)) is not None:
+        cls = origin
+
+    if not isinstance(cls, type) or not issubclass(cls, Loop):
+        raise TypeError(f"cls argument must be a subclass of Loop, got {cls!r}")
 
     def decorator(func: Coro[CoroP]) -> L_co:
         if not asyncio.iscoroutinefunction(func):
