@@ -1060,11 +1060,17 @@ class Message(Hashable):
         private channel or the user has the left the guild, then it is a :class:`User` instead.
     content: :class:`str`
         The actual contents of the message.
+
+        This may be empty if the message content intent is not enabled,
+        see :attr:`Intents.message_content` for details.
     nonce: :class:`str` | :class:`int` | :data:`None`
         The value used by the Discord guild and the client to verify that the message is successfully sent.
         This is not stored long term within Discord's servers and is only used ephemerally.
     embeds: :class:`list`\[:class:`Embed`]
         A list of embeds the message has.
+
+        This may be empty if the message content intent is not enabled,
+        see :attr:`Intents.message_content` for details.
     channel: :class:`TextChannel` | :class:`VoiceChannel` | :class:`StageChannel` | :class:`Thread` | :class:`DMChannel` | :class:`GroupChannel` | :class:`PartialMessageable`
         The channel that the message was sent from.
         Could be a :class:`DMChannel` or :class:`GroupChannel` if it's a private message.
@@ -1121,6 +1127,9 @@ class Message(Hashable):
         message.
     attachments: :class:`list`\[:class:`Attachment`]
         A list of attachments given to a message.
+
+        This may be empty if the message content intent is not enabled,
+        see :attr:`Intents.message_content` for details.
     pinned: :class:`bool`
         Specifies if the message is currently pinned.
     flags: :class:`MessageFlags`
@@ -1155,6 +1164,9 @@ class Message(Hashable):
 
     components: :class:`list`\[:class:`Component`]
         A list of components in the message.
+
+        This may be empty if the message content intent is not enabled,
+        see :attr:`Intents.message_content` for details.
 
         .. versionadded:: 2.0
 
