@@ -1,5 +1,6 @@
 import os
 import sys
+from typing import List, Optional
 
 try:
     import dotenv
@@ -19,10 +20,11 @@ class Config:
     cogs_folder = os.environ.get("COGS_FOLDER", "cogs")
     auto_reload = get_bool("AUTO_RELOAD")
     strict_localization = get_bool("STRICT_LOCALIZATION", default=True)
+    enable_gateway_error_handler = get_bool("ENABLE_GATEWAY_ERROR_HANDLER", default=False)
     sync_commands_debug = get_bool("SYNC_COMMANDS_DEBUG", default=True)
-    test_guilds = (
-        [int(x.strip()) for x in test_guilds.split(",")]
-        if (test_guilds := os.environ.get("TEST_GUILDS", None))
+    test_guilds: Optional[List[int]] = (
+        [int(x.strip()) for x in var.split(",")]
+        if (var := os.environ.get("TEST_GUILDS", None))
         else None
     )
     debug = get_bool("DEBUG")

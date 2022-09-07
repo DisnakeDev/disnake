@@ -257,6 +257,43 @@ This section documents events related to :class:`Client` and its connectivity to
     :param kwargs: The keyword arguments for the event that raised the
         exception.
 
+.. function:: on_gateway_error(event, data, shard_id, exc)
+
+    When a (known) gateway event cannot be parsed, a traceback is printed to
+    stderr and the exception is ignored by default. This should generally
+    not happen and is usually either a library issue, or caused by a breaking API change.
+
+    To change this behaviour, for example to completely stop the bot, this event can be overridden.
+
+    This can also be disabled completely by passing ``enable_gateway_error_handler=False``
+    to the client on initialization, restoring the pre-v2.6 behavior.
+
+    .. versionadded:: 2.6
+
+    .. note::
+        ``on_gateway_error`` will only be dispatched to :meth:`Client.event`.
+
+        It will not be received by :meth:`Client.wait_for`, or, if used,
+        :ref:`ext_commands_api_bot` listeners such as
+        :meth:`~ext.commands.Bot.listen` or :meth:`~ext.commands.Cog.listener`.
+
+    .. note::
+        This will not be dispatched for exceptions that occur while parsing ``READY`` and
+        ``RESUMED`` event payloads, as exceptions in these events are considered fatal.
+
+    :param event: The name of the gateway event that was the cause of the exception,
+        for example ``MESSAGE_CREATE``.
+    :type event: :class:`str`
+
+    :param data: The raw event payload.
+    :type data: :class:`Any`
+
+    :param shard_id: The ID of the shard the exception occurred in, if applicable.
+    :type shard_id: Optional[:class:`int`]
+
+    :param exc: The exception that was raised.
+    :type exc: :class:`Exception`
+
 .. function:: on_ready()
 
     Called when the client is done preparing the data received from Discord. Usually after login is successful
