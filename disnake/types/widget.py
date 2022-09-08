@@ -53,7 +53,7 @@ class WidgetMember(User, total=False):
 class Widget(TypedDict):
     id: Snowflake
     name: str
-    instant_invite: Optional[str]
+    instant_invite: str
     channels: NotRequired[List[WidgetChannel]]
     members: NotRequired[List[WidgetMember]]
     presence_count: NotRequired[int]
