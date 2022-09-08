@@ -27,6 +27,8 @@ from __future__ import annotations
 
 from typing import List, Literal, Optional, TypedDict
 
+from typing_extensions import NotRequired
+
 from .activity import PresenceData
 from .member import Member
 from .message import Message
@@ -49,37 +51,31 @@ class ThreadMemberWithPresence(ThreadMember):
     presence: Optional[PresenceData]
 
 
-class _ThreadMetadataOptional(TypedDict, total=False):
-    locked: bool
-    invitable: bool
-    create_timestamp: str
-
-
-class ThreadMetadata(_ThreadMetadataOptional):
+class ThreadMetadata(TypedDict):
     archived: bool
     auto_archive_duration: ThreadArchiveDurationLiteral
     archive_timestamp: str
+    locked: bool
+    invitable: NotRequired[bool]
+    create_timestamp: NotRequired[Optional[str]]
 
 
-class _ThreadOptional(TypedDict, total=False):
-    member: ThreadMember
-    owner_id: Snowflake
-    last_message_id: Optional[Snowflake]
-    last_pin_timestamp: Optional[str]
-    flags: int
-
-
-class Thread(_ThreadOptional):
+class Thread(TypedDict):
     id: Snowflake
-    guild_id: Snowflake
-    parent_id: Snowflake
-    name: str
     type: ThreadType
-    member_count: int
-    message_count: int
-    total_message_sent: int
+    guild_id: Snowflake
+    name: str
+    last_message_id: NotRequired[Optional[Snowflake]]
     rate_limit_per_user: int
+    owner_id: NotRequired[Snowflake]
+    parent_id: Snowflake
+    last_pin_timestamp: NotRequired[Optional[str]]
+    message_count: NotRequired[int]
+    member_count: NotRequired[int]
     thread_metadata: ThreadMetadata
+    member: NotRequired[ThreadMember]
+    flags: NotRequired[int]
+    total_message_sent: NotRequired[int]
 
 
 class ForumThread(Thread):

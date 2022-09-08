@@ -25,30 +25,26 @@ DEALINGS IN THE SOFTWARE.
 
 from typing import List, Literal, TypedDict
 
-
-class _EmbedFooterOptional(TypedDict, total=False):
-    icon_url: str
-    proxy_icon_url: str
+from typing_extensions import NotRequired
 
 
-class EmbedFooter(_EmbedFooterOptional):
+class EmbedFooter(TypedDict):
     text: str
+    icon_url: NotRequired[str]
+    proxy_icon_url: NotRequired[str]
 
 
-class _EmbedFieldOptional(TypedDict, total=False):
-    inline: bool
-
-
-class EmbedField(_EmbedFieldOptional):
+class EmbedField(TypedDict):
     name: str
     value: str
+    inline: NotRequired[bool]
 
 
-class EmbedThumbnail(TypedDict, total=False):
+class EmbedThumbnail(TypedDict):
     url: str
-    proxy_url: str
-    height: int
-    width: int
+    proxy_url: NotRequired[str]
+    height: NotRequired[int]
+    width: NotRequired[int]
 
 
 class EmbedVideo(TypedDict, total=False):
@@ -58,11 +54,11 @@ class EmbedVideo(TypedDict, total=False):
     width: int
 
 
-class EmbedImage(TypedDict, total=False):
+class EmbedImage(TypedDict):
     url: str
-    proxy_url: str
-    height: int
-    width: int
+    proxy_url: NotRequired[str]
+    height: NotRequired[int]
+    width: NotRequired[int]
 
 
 class EmbedProvider(TypedDict, total=False):
@@ -70,11 +66,11 @@ class EmbedProvider(TypedDict, total=False):
     url: str
 
 
-class EmbedAuthor(TypedDict, total=False):
+class EmbedAuthor(TypedDict):
     name: str
-    url: str
-    icon_url: str
-    proxy_icon_url: str
+    url: NotRequired[str]
+    icon_url: NotRequired[str]
+    proxy_icon_url: NotRequired[str]
 
 
 EmbedType = Literal["rich", "image", "video", "gifv", "article", "link"]

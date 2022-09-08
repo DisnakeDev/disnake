@@ -25,6 +25,8 @@ DEALINGS IN THE SOFTWARE.
 
 from typing import List, Optional, TypedDict
 
+from typing_extensions import NotRequired
+
 from .activity import Activity
 from .snowflake import Snowflake
 from .user import User
@@ -48,16 +50,13 @@ class WidgetMember(User, total=False):
     suppress: bool
 
 
-class _WidgetOptional(TypedDict, total=False):
-    channels: List[WidgetChannel]
-    members: List[WidgetMember]
-    presence_count: int
-
-
-class Widget(_WidgetOptional):
+class Widget(TypedDict):
     id: Snowflake
     name: str
-    instant_invite: str
+    instant_invite: Optional[str]
+    channels: NotRequired[List[WidgetChannel]]
+    members: NotRequired[List[WidgetMember]]
+    presence_count: NotRequired[int]
 
 
 class WidgetSettings(TypedDict):

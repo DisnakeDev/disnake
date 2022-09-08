@@ -98,16 +98,13 @@ class IdentifyProperties(TypedDict):
     device: str
 
 
-class _IdentifyDataOptional(TypedDict, total=False):
-    compress: bool
-    large_threshold: int
-    shard: Tuple[int, int]
-    presence: PresenceUpdateData
-
-
-class IdentifyData(_IdentifyDataOptional):
+class IdentifyData(TypedDict):
     token: str
     properties: IdentifyProperties
+    compress: NotRequired[bool]
+    large_threshold: NotRequired[int]
+    shard: NotRequired[Tuple[int, int]]
+    presence: NotRequired[PresenceUpdateData]
     intents: int
 
 
@@ -163,16 +160,13 @@ class ResumeCommand(TypedDict):
 # opcode 8
 
 
-class _RequestMembersDataOptional(TypedDict, total=False):
-    query: str
-    presences: bool
-    user_ids: Union[Snowflake, SnowflakeList]
-    nonce: str
-
-
-class RequestMembersData(_RequestMembersDataOptional):
+class RequestMembersData(TypedDict):
     guild_id: Snowflake
+    query: NotRequired[str]
     limit: int
+    presences: NotRequired[bool]
+    user_ids: NotRequired[Union[Snowflake, SnowflakeList]]
+    nonce: NotRequired[str]
 
 
 class RequestMembersCommand(TypedDict):

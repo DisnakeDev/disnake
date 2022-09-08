@@ -25,26 +25,26 @@ DEALINGS IN THE SOFTWARE.
 
 from typing import List, Literal, Optional, TypedDict
 
+from typing_extensions import NotRequired
+
 from .member import MemberWithUser
 from .snowflake import Snowflake
 
 SupportedModes = Literal["xsalsa20_poly1305_lite", "xsalsa20_poly1305_suffix", "xsalsa20_poly1305"]
 
 
-class _PartialVoiceStateOptional(TypedDict, total=False):
-    member: MemberWithUser
-    self_stream: bool
-
-
-class _VoiceState(_PartialVoiceStateOptional):
+class _VoiceState(TypedDict):
     user_id: Snowflake
+    member: NotRequired[MemberWithUser]
     session_id: str
     deaf: bool
     mute: bool
     self_deaf: bool
     self_mute: bool
+    self_stream: NotRequired[bool]
     self_video: bool
     suppress: bool
+    request_to_speak_timestamp: Optional[str]
 
 
 class GuildVoiceState(_VoiceState):

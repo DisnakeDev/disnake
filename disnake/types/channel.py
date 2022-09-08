@@ -25,6 +25,8 @@ DEALINGS IN THE SOFTWARE.
 
 from typing import List, Literal, Optional, TypedDict, Union
 
+from typing_extensions import NotRequired
+
 from .snowflake import Snowflake
 from .threads import ThreadArchiveDurationLiteral, ThreadMember, ThreadMetadata
 from .user import PartialUser
@@ -46,18 +48,15 @@ class _BaseChannel(TypedDict):
     id: Snowflake
 
 
-class _BaseGuildChannelOptional(TypedDict, total=False):
-    flags: int
-    # In theory, this will never be None and will always be present. In practice...
-    name: Optional[str]
-
-
-class _BaseGuildChannel(_BaseChannel, _BaseGuildChannelOptional):
+class _BaseGuildChannel(_BaseChannel):
     guild_id: Snowflake
     position: int
     permission_overwrites: List[PermissionOverwrite]
+    # In theory, this will never be None and will always be present. In practice...
+    name: NotRequired[Optional[str]]
     nsfw: bool
     parent_id: Optional[Snowflake]
+    flags: NotRequired[int]
 
 
 class PartialChannel(_BaseChannel):
@@ -74,7 +73,7 @@ class InviteChannel(PartialChannel, total=False):
     icon: Optional[str]
 
 
-class _TextChannelOptional(TypedDict, total=False):
+class _BaseTextChannel(_BaseGuildChannel, total=False):
     topic: Optional[str]
     last_message_id: Optional[Snowflake]
     last_pin_timestamp: Optional[str]
@@ -82,76 +81,61 @@ class _TextChannelOptional(TypedDict, total=False):
     default_auto_archive_duration: ThreadArchiveDurationLiteral
 
 
-class TextChannel(_BaseGuildChannel, _TextChannelOptional):
+class TextChannel(_BaseTextChannel):
     type: Literal[0]
 
 
-class NewsChannel(_BaseGuildChannel, _TextChannelOptional):
+class NewsChannel(_BaseTextChannel):
     type: Literal[5]
 
 
 VideoQualityMode = Literal[1, 2]
 
 
-class _VoiceChannelOptional(TypedDict, total=False):
-    rtc_region: Optional[str]
-    video_quality_mode: VideoQualityMode
-    last_message_id: Optional[Snowflake]
-    rate_limit_per_user: int
-
-
-class VoiceChannel(_BaseGuildChannel, _VoiceChannelOptional):
-    type: Literal[2]
+class _BaseVocalGuildChannel(_BaseGuildChannel):
     bitrate: int
     user_limit: int
+    rtc_region: NotRequired[Optional[str]]
+
+
+class VoiceChannel(_BaseVocalGuildChannel):
+    type: Literal[2]
+    last_message_id: NotRequired[Optional[Snowflake]]
+    rate_limit_per_user: NotRequired[int]
+    video_quality_mode: NotRequired[VideoQualityMode]
 
 
 class CategoryChannel(_BaseGuildChannel):
     type: Literal[4]
 
 
-class _StageChannelOptional(TypedDict, total=False):
-    rtc_region: Optional[str]
-    topic: Optional[str]
-
-
-class StageChannel(_BaseGuildChannel, _StageChannelOptional):
+class StageChannel(_BaseVocalGuildChannel):
     type: Literal[13]
-    bitrate: int
-    user_limit: int
+    topic: NotRequired[Optional[str]]
 
 
-class _ThreadChannelOptional(TypedDict, total=False):
-    member: ThreadMember
-    owner_id: Snowflake
-    rate_limit_per_user: int
-    last_message_id: Optional[Snowflake]
-    last_pin_timestamp: str
-    total_message_sent: Optional[int]
-    message_count: Optional[int]
-
-
-class ThreadChannel(_BaseChannel, _ThreadChannelOptional):
+class ThreadChannel(_BaseChannel):
     type: Literal[10, 11, 12]
-    name: str
     guild_id: Snowflake
-    parent_id: Snowflake
-    owner_id: Snowflake
+    name: str
     nsfw: bool
-    last_message_id: Optional[Snowflake]
-    rate_limit_per_user: int
-    member_count: int
+    last_message_id: NotRequired[Optional[Snowflake]]
+    rate_limit_per_user: NotRequired[int]
+    owner_id: NotRequired[Snowflake]
+    parent_id: Snowflake
+    last_pin_timestamp: NotRequired[Optional[str]]
+    message_count: NotRequired[int]
+    member_count: NotRequired[int]
     thread_metadata: ThreadMetadata
+    member: NotRequired[ThreadMember]
+    total_message_sent: NotRequired[int]
 
 
-class _ForumChannelOptional(TypedDict, total=False):
-    topic: Optional[str]
-    last_message_id: Optional[Snowflake]
-    default_auto_archive_duration: ThreadArchiveDurationLiteral
-
-
-class ForumChannel(_BaseGuildChannel, _ForumChannelOptional):
+class ForumChannel(_BaseGuildChannel):
     type: Literal[15]
+    topic: NotRequired[Optional[str]]
+    last_message_id: NotRequired[Optional[Snowflake]]
+    default_auto_archive_duration: NotRequired[ThreadArchiveDurationLiteral]
 
 
 GuildChannel = Union[

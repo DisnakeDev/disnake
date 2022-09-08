@@ -26,6 +26,8 @@ from __future__ import annotations
 
 from typing import List, Literal, TypedDict, Union
 
+from typing_extensions import NotRequired
+
 from .snowflake import Snowflake, SnowflakeList
 
 AutoModTriggerType = Literal[1, 2, 3, 4, 5]
@@ -53,12 +55,9 @@ AutoModActionMetadata = Union[
 ]
 
 
-class _AutoModActionOptional(TypedDict, total=False):
-    metadata: AutoModActionMetadata
-
-
-class AutoModAction(_AutoModActionOptional):
+class AutoModAction(TypedDict):
     type: AutoModActionType
+    metadata: NotRequired[AutoModActionMetadata]
 
 
 class AutoModTriggerMetadata(TypedDict, total=False):
@@ -92,15 +91,12 @@ class EditAutoModRule(TypedDict, total=False):
     exempt_channels: SnowflakeList
 
 
-class _CreateAutoModRuleOptional(TypedDict, total=False):
-    trigger_metadata: AutoModTriggerMetadata
-    enabled: bool
-    exempt_roles: SnowflakeList
-    exempt_channels: SnowflakeList
-
-
-class CreateAutoModRule(_CreateAutoModRuleOptional):
+class CreateAutoModRule(TypedDict):
     name: str
     event_type: AutoModEventType
     trigger_type: AutoModTriggerType
+    trigger_metadata: NotRequired[AutoModTriggerMetadata]
     actions: List[AutoModAction]
+    enabled: NotRequired[bool]
+    exempt_roles: NotRequired[SnowflakeList]
+    exempt_channels: NotRequired[SnowflakeList]
