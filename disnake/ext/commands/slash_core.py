@@ -598,10 +598,6 @@ class InvokableSlashCommand(InvokableApplicationCommand, SlashCommand):
     def description_localizations(self) -> LocalizationValue:
         return self._description_localised.localizations
 
-    add_option = SlashCommand.add_option
-    to_dict = SlashCommand.to_dict
-    localize = SlashCommand.localize
-
     def sub_command(
         self,
         name: LocalizedOptional = None,
