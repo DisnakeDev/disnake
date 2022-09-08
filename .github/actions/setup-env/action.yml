@@ -37,19 +37,23 @@ runs:
         python-version: ${{ inputs.python-version }}
         cache: "pip"
         cache-dependency-path: ${{ inputs.cache-dependency-path }}
+        update-environment: false
 
-    - name: Configure Poetry environment
+    - name: Configure Poetry and Python environment
       shell: bash
       run: |
         venv_path=~/.venv
-        python -m venv $venv_path
+        global_python=${{ env.pythonLocation }}
+        $global_python -m venv $venv_path
         bin_dir="bin"
         if [ -n "$MSYSTEM" ]; then
           bin_dir="Scripts"
         fi
 
-        echo "PATH=$venv_path/$bin_dir:$PATH" >> $GITHUB_ENV
         echo "VIRTUAL_ENV=$venv_path" >> $GITHUB_ENV
+
+        # add both the virtualenv bin and the global bin to the path
+        echo "PATH=$venv_path/$bin_dir:$global_python/$bin_dir:$PATH" >> $GITHUB_ENV
 
     - name: Install dependencies
       if: inputs.dependency-groups || inputs.dependencies
@@ -60,7 +64,7 @@ runs:
       shell: bash
       run: |
         [ -n "$DEPENDENCY_GROUPS" ] && DEPS="$DEPS nox"
-        python -m pip install $DEPS
+        ${{ env.pythonLocation }} -m pip install $DEPS
 
         if [ "*" == "$DEPENDENCY_GROUPS" ]; then
           poetry install --all-extras --sync
