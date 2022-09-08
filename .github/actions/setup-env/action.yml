@@ -64,7 +64,7 @@ runs:
       shell: bash
       run: |
         [ -n "$DEPENDENCY_GROUPS" ] && DEPS="$DEPS nox"
-        ${{ env.pythonLocation }} -m pip install $DEPS
+        ${{ env.pythonLocation }}/python -m pip install $DEPS
 
         if [ "*" == "$DEPENDENCY_GROUPS" ]; then
           poetry install --all-extras --sync
