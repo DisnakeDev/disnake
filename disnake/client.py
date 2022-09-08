@@ -987,7 +987,7 @@ class Client:
                     session=self.ws.session_id,
                     # use current (possibly new) gateway if resuming,
                     # reset to default if not
-                    gateway=self.ws.gateway if e.resume else initial_gateway,
+                    gateway=self.ws.resume_gateway if e.resume else initial_gateway,
                 )
                 continue
             except (
@@ -1016,7 +1016,7 @@ class Client:
                         initial=False,
                         resume=True,
                         session=self.ws.session_id,
-                        gateway=self.ws.gateway,
+                        gateway=self.ws.resume_gateway,
                     )
                     continue
 
@@ -1050,7 +1050,7 @@ class Client:
                         sequence=self.ws.sequence,
                         resume=True,
                         session=self.ws.session_id,
-                        gateway=self.ws.gateway,
+                        gateway=self.ws.resume_gateway,
                     )
 
     async def close(self) -> None:
