@@ -49,7 +49,7 @@ runs:
         if [ -n "$MSYSTEM" ]; then
           bin_dir="Scripts"
         fi
-        python=${{ env.pythonLocation }}/python
+        python=$pythonLocation/python
         $python -m venv $venv_path
 
         echo "VIRTUAL_ENV=$venv_path" >> $GITHUB_ENV
@@ -64,7 +64,7 @@ runs:
       shell: bash
       run: |
         [ -n "$DEPENDENCY_GROUPS" ] && DEPS="$DEPS nox"
-        ${{ env.pythonLocation }}/python -m pip install $DEPS
+        $pythonLocation/python -m pip install $DEPS
 
         if [ "*" == "$DEPENDENCY_GROUPS" ]; then
           poetry install --all-extras --sync
