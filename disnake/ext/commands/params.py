@@ -67,7 +67,7 @@ from .converter import CONVERTER_MAPPING
 T_ = TypeVar("T_")
 
 if TYPE_CHECKING:
-    from typing_extensions import Concatenate, ParamSpec, Self
+    from typing_extensions import ParamSpec, Self
 
     from disnake.app_commands import Choices
     from disnake.i18n import LocalizationValue, LocalizedOptional
@@ -78,14 +78,7 @@ if TYPE_CHECKING:
 
     AnySlashCommand = Union[InvokableSlashCommand, SubCommand]
 
-    CogT = TypeVar("CogT", bound="Optional[Cog]")
-
     P = ParamSpec("P")
-
-    InjectionCallback = Union[
-        Callable[Concatenate[CogT, ApplicationCommandInteraction, P], T_],
-        Callable[Concatenate[ApplicationCommandInteraction, P], T_],
-    ]
 
     from typing_extensions import TypeGuard
 
