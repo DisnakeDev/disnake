@@ -98,6 +98,7 @@ jobs:
 
     - run: |
         which python
+        env
         python -m pip list
 
     - name: Dump env context
