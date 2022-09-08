@@ -102,6 +102,8 @@ class Message(TypedDict):
     edited_timestamp: Optional[str]
     tts: bool
     mention_everyone: bool
+    # this only contains (partial) member data in gateway events
+    mentions: Union[List[User], List[UserWithMember]]
     mention_roles: SnowflakeList
     mention_channels: NotRequired[List[ChannelMention]]
     attachments: List[Attachment]
@@ -126,7 +128,6 @@ class Message(TypedDict):
     # specific to MESSAGE_CREATE/MESSAGE_UPDATE events
     guild_id: NotRequired[Snowflake]
     member: NotRequired[Member]
-    mentions: List[UserWithMember]
 
 
 AllowedMentionType = Literal["roles", "users", "everyone"]
