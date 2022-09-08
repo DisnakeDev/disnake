@@ -49,7 +49,7 @@ runs:
         if [ -n "$MSYSTEM" ]; then
           bin_dir="Scripts"
         fi
-        python=$global_python/$bin_dir/python
+        python=${{ env.pythonLocation }}/python
         $python -m venv $venv_path
 
         echo "VIRTUAL_ENV=$venv_path" >> $GITHUB_ENV
