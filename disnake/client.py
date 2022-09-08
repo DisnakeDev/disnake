@@ -410,7 +410,8 @@ class Client:
             loop=self.loop,
         )
 
-        self.large_treshold: int = large_treshold or 250
+        large_treshold_: int = large_treshold or 250
+        self.large_treshold: int = large_treshold_
 
         self._handlers: Dict[str, Callable] = {
             "ready": self._handle_ready,
@@ -432,7 +433,7 @@ class Client:
             intents=intents,
             chunk_guilds_at_startup=chunk_guilds_at_startup,
             member_cache_flags=member_cache_flags,
-            large_treshold=large_treshold,
+            large_treshold=large_treshold_,
         )
         self.shard_id: Optional[int] = shard_id
         self.shard_count: Optional[int] = shard_count

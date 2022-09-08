@@ -643,7 +643,7 @@ class Guild(Hashable):
     def large(self) -> bool:
         """:class:`bool`: Whether the guild is a 'large' guild.
 
-        A large guild is defined as having more than :attr:`Client.large_threshold` count
+        A large guild is defined as having more than :attr:`Client.large_treshold` count
         members, which defaults to the maximum of 250, though can be configured.
         """
         if self._large is None:
