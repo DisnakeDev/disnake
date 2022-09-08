@@ -203,6 +203,8 @@ class Injection(Generic[P, T_]):
         The underlying injection function.
     autocompleters: Dict[:class:`str`, Callable]
         A mapping of injection's option names to their respective autocompleters.
+
+        .. versionadded:: 2.6
     """
 
     _registered: ClassVar[Dict[Any, Injection]] = {}
