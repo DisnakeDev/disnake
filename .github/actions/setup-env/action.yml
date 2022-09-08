@@ -53,7 +53,8 @@ runs:
         echo "VIRTUAL_ENV=$venv_path" >> $GITHUB_ENV
 
         # add both the virtualenv bin and the global bin to the path
-        echo "PATH=$venv_path/$bin_dir:$global_python/$bin_dir:$PATH" >> $GITHUB_ENV
+        # additionally add the pipx bin to the path
+        echo "PATH=$venv_path/$bin_dir:$global_python/$bin_dir:$PIPX_BIN_DIR:$PATH" >> $GITHUB_ENV
 
     - name: Install dependencies
       if: inputs.dependency-groups || inputs.dependencies
