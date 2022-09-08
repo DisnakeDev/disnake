@@ -590,7 +590,7 @@ class Guild(Hashable):
                 self._add_member(member)
 
         self._sync(guild)
-        self._large: Optional[bool] = None if member_count is None else self._member_count >= 250
+        self._large: Optional[bool] = None if member_count is None else self._member_count >= state.large_threshold
 
         self.owner_id: Optional[int] = utils._get_as_snowflake(guild, "owner_id")
         self.afk_channel: Optional[VocalGuildChannel] = self.get_channel(utils._get_as_snowflake(guild, "afk_channel_id"))  # type: ignore
@@ -641,14 +641,14 @@ class Guild(Hashable):
     def large(self) -> bool:
         """:class:`bool`: Whether the guild is a 'large' guild.
 
-        A large guild is defined as having more than ``large_threshold`` count
-        members, which for this library is set to the maximum of 250.
+        A large guild is defined as having more than :attr:`Client.large_threshold` count
+        members, which defaults to the maximum of 250, though can be configured.
         """
         if self._large is None:
             try:
-                return self._member_count >= 250
+                return self._member_count >= self._state.large_threshold
             except AttributeError:
-                return len(self._members) >= 250
+                return len(self._members) >= self._state.large_threshold
         return self._large
 
     @property

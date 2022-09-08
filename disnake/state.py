@@ -211,12 +211,15 @@ class ConnectionState:
         intents: Optional[Intents] = None,
         chunk_guilds_at_startup: Optional[bool] = None,
         member_cache_flags: Optional[MemberCacheFlags] = None,
+        large_treshold: Optional[int] = None
     ) -> None:
         self.loop: asyncio.AbstractEventLoop = loop
         self.http: HTTPClient = http
         self.max_messages: Optional[int] = max_messages
         if self.max_messages is not None and self.max_messages <= 0:
             self.max_messages = 1000
+        
+        self.large_treshold: int = large_treshold or 250
 
         self.dispatch: Callable = dispatch
         self.handlers: Dict[str, Callable] = handlers

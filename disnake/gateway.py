@@ -445,6 +445,7 @@ class DiscordWebSocket:
         ws.session_id = session
         ws.sequence = sequence
         ws._max_heartbeat_timeout = client._connection.heartbeat_timeout
+        ws.large_threshold = client.large_threshold
 
         if client._enable_debug_events:
             ws.send = ws.debug_send
@@ -512,7 +513,7 @@ class DiscordWebSocket:
                     "device": "disnake",
                 },
                 "compress": True,
-                "large_threshold": 250,
+                "large_threshold": self.large_threshold,
                 "intents": state._intents.value,
             },
         }

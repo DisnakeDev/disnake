@@ -363,6 +363,9 @@ class Client:
         application commands.
 
         .. versionadded:: 2.5
+    large_treshold: :class:`int`
+        The count of members after which the :class:`Guild` is considered 'large'.
+        Defaults to ``250``. Usually you may not worry about this.
     """
 
     def __init__(
@@ -390,6 +393,7 @@ class Client:
         intents: Optional[Intents] = None,
         chunk_guilds_at_startup: Optional[bool] = None,
         member_cache_flags: Optional[MemberCacheFlags] = None,
+        large_treshold: Optional[int] = None
     ):
         # self.ws is set in the connect method
         self.ws: DiscordWebSocket = None  # type: ignore
@@ -405,6 +409,8 @@ class Client:
             unsync_clock=assume_unsync_clock,
             loop=self.loop,
         )
+        
+        self.large_treshold: int = large_treshold or 250
 
         self._handlers: Dict[str, Callable] = {
             "ready": self._handle_ready,
@@ -425,7 +431,8 @@ class Client:
             status=status,
             intents=intents,
             chunk_guilds_at_startup=chunk_guilds_at_startup,
-            member_cache_flags=member_cache_flags,
+            member_cache_flags=member_cache_flags
+            large_treshold=large_treshold
         )
         self.shard_id: Optional[int] = shard_id
         self.shard_count: Optional[int] = shard_count
