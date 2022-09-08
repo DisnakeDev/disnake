@@ -35,9 +35,11 @@ runs:
       id: setup_python
       with:
         python-version: ${{ inputs.python-version }}
-        # cache: "pip"
-        # cache-dependency-path: ${{ inputs.cache-dependency-path }}
-        update-environment: false
+        cache: "pip"
+        cache-dependency-path: ${{ inputs.cache-dependency-path }}
+
+    - run: env
+      shell: bash
 
     - name: Configure Poetry and Python environment
       shell: bash
