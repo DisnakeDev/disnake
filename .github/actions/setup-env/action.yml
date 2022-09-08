@@ -76,3 +76,7 @@ runs:
       shell: bash
       run: |
         echo "pythonLocation=$VIRTUAL_ENV" >> $GITHUB_ENV
+        echo "Python_ROOT_DIR=$VIRTUAL_ENV" >> $GITHUB_ENV
+        echo "Python2_ROOT_DIR=$VIRTUAL_ENV" >> $GITHUB_ENV
+        echo "Python3_ROOT_DIR=$VIRTUAL_ENV" >> $GITHUB_ENV
+        echo "LD_LIBRARY_PATH=$VIRTUAL_ENV" >> $GITHUB_ENV
