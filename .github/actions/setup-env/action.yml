@@ -45,12 +45,12 @@ runs:
       shell: bash
       run: |
         venv_path=~/.venv
-        global_python=${{ env.pythonLocation }}
-        $global_python -m venv $venv_path
         bin_dir="bin"
         if [ -n "$MSYSTEM" ]; then
           bin_dir="Scripts"
         fi
+        python=$global_python/$bin_dir/python
+        $python -m venv $venv_path
 
         echo "VIRTUAL_ENV=$venv_path" >> $GITHUB_ENV
         echo "PATH=$venv_path/$bin_dir:$global_python/$bin_dir:$PIPX_BIN_DIR:$PATH" >> $GITHUB_ENV
