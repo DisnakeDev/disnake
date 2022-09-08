@@ -175,7 +175,7 @@ class Interaction:
     )
 
     def __init__(self, *, data: InteractionPayload, state: ConnectionState):
-        self.data: Mapping[str, Any] = data
+        self.data: Mapping[str, Any] = data["data"]
         self._state: ConnectionState = state
         # TODO: Maybe use a unique session
         self._session: ClientSession = state.http._HTTPClient__session  # type: ignore
