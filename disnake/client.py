@@ -393,7 +393,7 @@ class Client:
         intents: Optional[Intents] = None,
         chunk_guilds_at_startup: Optional[bool] = None,
         member_cache_flags: Optional[MemberCacheFlags] = None,
-        large_treshold: Optional[int] = None
+        large_treshold: Optional[int] = None,
     ):
         # self.ws is set in the connect method
         self.ws: DiscordWebSocket = None  # type: ignore
@@ -409,7 +409,7 @@ class Client:
             unsync_clock=assume_unsync_clock,
             loop=self.loop,
         )
-        
+
         self.large_treshold: int = large_treshold or 250
 
         self._handlers: Dict[str, Callable] = {
@@ -431,8 +431,8 @@ class Client:
             status=status,
             intents=intents,
             chunk_guilds_at_startup=chunk_guilds_at_startup,
-            member_cache_flags=member_cache_flags
-            large_treshold=large_treshold
+            member_cache_flags=member_cache_flags,
+            large_treshold=large_treshold,
         )
         self.shard_id: Optional[int] = shard_id
         self.shard_count: Optional[int] = shard_count
@@ -481,6 +481,7 @@ class Client:
         intents: Optional[Intents],
         chunk_guilds_at_startup: Optional[bool],
         member_cache_flags: Optional[MemberCacheFlags],
+        large_treshold: Optional[int],
     ) -> ConnectionState:
         return ConnectionState(
             dispatch=self.dispatch,
@@ -498,6 +499,7 @@ class Client:
             intents=intents,
             chunk_guilds_at_startup=chunk_guilds_at_startup,
             member_cache_flags=member_cache_flags,
+            large_treshold=large_treshold,
         )
 
     def _handle_ready(self) -> None:

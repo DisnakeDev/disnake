@@ -590,7 +590,9 @@ class Guild(Hashable):
                 self._add_member(member)
 
         self._sync(guild)
-        self._large: Optional[bool] = None if member_count is None else self._member_count >= state.large_threshold
+        self._large: Optional[bool] = (
+            None if member_count is None else self._member_count >= state.large_treshold
+        )
 
         self.owner_id: Optional[int] = utils._get_as_snowflake(guild, "owner_id")
         self.afk_channel: Optional[VocalGuildChannel] = self.get_channel(utils._get_as_snowflake(guild, "afk_channel_id"))  # type: ignore
@@ -646,9 +648,9 @@ class Guild(Hashable):
         """
         if self._large is None:
             try:
-                return self._member_count >= self._state.large_threshold
+                return self._member_count >= self._state.large_treshold
             except AttributeError:
-                return len(self._members) >= self._state.large_threshold
+                return len(self._members) >= self._state.large_treshold
         return self._large
 
     @property

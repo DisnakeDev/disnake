@@ -397,6 +397,7 @@ class DiscordWebSocket:
         self.shard_id: Optional[int]
         self.shard_count: Optional[int]
         self._max_heartbeat_timeout: float
+        self.large_treshold: int
 
     @property
     def open(self) -> bool:
@@ -445,7 +446,7 @@ class DiscordWebSocket:
         ws.session_id = session
         ws.sequence = sequence
         ws._max_heartbeat_timeout = client._connection.heartbeat_timeout
-        ws.large_threshold = client.large_threshold
+        ws.large_treshold = client.large_treshold
 
         if client._enable_debug_events:
             ws.send = ws.debug_send
@@ -513,7 +514,7 @@ class DiscordWebSocket:
                     "device": "disnake",
                 },
                 "compress": True,
-                "large_threshold": self.large_threshold,
+                "large_threshold": self.large_treshold,
                 "intents": state._intents.value,
             },
         }
