@@ -1165,6 +1165,8 @@ def inject(function: Callable[..., Any], *, autocompleters: Dict[str, Callable] 
 
         See also :func:`Injection.autocomplete`.
 
+        .. versionadded:: 2.6
+
     Returns
     -------
     :class:`Injection`
