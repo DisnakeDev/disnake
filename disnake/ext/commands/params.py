@@ -67,12 +67,13 @@ from .converter import CONVERTER_MAPPING
 T_ = TypeVar("T_")
 
 if TYPE_CHECKING:
-    from typing_extensions import ParamSpec, Self
+    from typing_extensions import Concatenate, ParamSpec, Self, TypeGuard
 
     from disnake.app_commands import Choices
     from disnake.i18n import LocalizationValue, LocalizedOptional
     from disnake.types.interactions import ApplicationCommandOptionChoiceValue
 
+    from .base_core import CogT
     from .cog import Cog
     from .slash_core import InvokableSlashCommand, SubCommand
 
@@ -80,7 +81,10 @@ if TYPE_CHECKING:
 
     P = ParamSpec("P")
 
-    from typing_extensions import TypeGuard
+    InjectionCallback = Union[
+        Callable[Concatenate[CogT, P], T_],
+        Callable[P, T_],
+    ]
 
     TChoice = TypeVar("TChoice", bound=ApplicationCommandOptionChoiceValue)
 else:
@@ -209,12 +213,14 @@ class Injection(Generic[P, T_]):
 
     _registered: ClassVar[Dict[Any, Injection]] = {}
 
-    function: Callable
-    autocompleters: Dict[str, Callable]
-
-    def __init__(self, function: Callable, *, autocompleters: Dict[str, Callable] = None) -> None:
-        self.function = function
-        self.autocompleters = autocompleters if autocompleters else {}
+    def __init__(
+        self,
+        function: InjectionCallback[CogT, P, T_],
+        *,
+        autocompleters: Dict[str, Callable] = None,
+    ) -> None:
+        self.function: InjectionCallback[CogT, P, T_] = function
+        self.autocompleters: Dict[str, Callable] = autocompleters if autocompleters else {}
         self._injected: Optional[Cog] = None
 
     def __get__(self, obj: Optional[Any], _: Type[Any]) -> Self:
@@ -233,13 +239,18 @@ class Injection(Generic[P, T_]):
         .. versionadded:: 2.6
         """
         if self._injected is not None:
-            args = (self._injected, *args)  # type: ignore
-        return self.function(*args, **kwargs)
+            return self.function(self._injected, *args, **kwargs)  # type: ignore
+        else:
+            return self.function(*args, **kwargs)  # type: ignore
 
     @classmethod
     def register(
-        cls, function: Callable, annotation: Any, *, autocompleters: Dict[str, Callable] = None
-    ) -> Self:
+        cls,
+        function: InjectionCallback[CogT, P, T_],
+        annotation: Any,
+        *,
+        autocompleters: Dict[str, Callable] = None,
+    ) -> Injection[P, T_]:
         self = cls(function, autocompleters=autocompleters)
         cls._registered[annotation] = self
         return self
@@ -1254,8 +1265,8 @@ else:
 
 
 def register_injection(
-    function: Callable, *, autocompleters: Dict[str, Callable] = None
-) -> Injection:
+    function: InjectionCallback[CogT, P, T_], *, autocompleters: Dict[str, Callable] = None
+) -> Injection[P, T_]:
     """A decorator to register a global injection.
 
     .. versionadded:: 2.3
