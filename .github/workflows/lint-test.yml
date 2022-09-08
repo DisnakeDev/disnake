@@ -314,3 +314,5 @@ jobs:
       run: echo '${{ toJSON(matrix) }}'
     - name: Dump env context
       run: echo '${{ toJSON(env) }}'
+    - name: dump PKG_CONFIG_PATH
+      run: ls $PKG_CONFIG_PATH
