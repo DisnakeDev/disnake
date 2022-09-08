@@ -96,7 +96,12 @@ jobs:
         python-version: ${{ matrix.python-version }}
         dependency-groups: "*"
 
-    - run: python -m pip list
+    - run: |
+        which python
+        python -m pip list
+
+    - name: Dump env context
+      run: echo '${{ toJSON(env) }}'
 
     - name: Set pyright version
       run: |
