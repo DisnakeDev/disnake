@@ -71,3 +71,8 @@ runs:
         elif [ -n "$DEPENDENCY_GROUPS" ]; then
            poetry install --only $DEPENDENCY_GROUPS --sync
         fi
+
+    - name: Hack the environment variables maybe
+      shell: bash
+      run: |
+        echo "pythonLocation=$VIRTUAL_ENV" >> $GITHUB_ENV
