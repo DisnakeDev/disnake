@@ -49,8 +49,8 @@ runs:
           bin_dir="Scripts"
         fi
 
-        echo "PATH=$PATH_TO_VENV/$bin_dir:$PATH" >> $GITHUB_ENV
-        echo "VIRTUAL_ENV=$PATH_TO_VENV" >> $GITHUB_ENV
+        echo "PATH=$venv_path/$bin_dir:$PATH" >> $GITHUB_ENV
+        echo "VIRTUAL_ENV=$venv_path" >> $GITHUB_ENV
 
     - name: Install dependencies
       if: inputs.dependency-groups || inputs.dependencies
