@@ -29,7 +29,6 @@ runs:
       shell: bash
       run: |
         pipx install poetry==1.2.0
-        pipx ensurepath
 
     - name: Set up python ${{ inputs.python-version }}
       uses: actions/setup-python@v4.2.0

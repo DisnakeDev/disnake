@@ -96,6 +96,8 @@ jobs:
         python-version: ${{ matrix.python-version }}
         dependency-groups: "*"
 
+    - run: python -m pip list
+
     - name: Set pyright version
       run: |
         PYRIGHT_VERSION="$(python -c 'import pyright; print(pyright.__pyright_version__)')"
