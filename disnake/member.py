@@ -728,7 +728,7 @@ class Member(disnake.abc.Messageable, _UserTag):
     async def ban(
         self,
         *,
-        delete_message_seconds: int = 86400,
+        delete_message_duration: Union[int, datetime.timedelta] = 86400,
         reason: Optional[str] = None,
     ) -> None:
         ...
@@ -745,7 +745,7 @@ class Member(disnake.abc.Messageable, _UserTag):
     async def ban(
         self,
         *,
-        delete_message_seconds: int = 86400,
+        delete_message_duration: Union[int, datetime.timedelta] = 86400,
         delete_message_days: Literal[0, 1, 2, 3, 4, 5, 6, 7] = MISSING,
         reason: Optional[str] = None,
     ) -> None:
@@ -756,7 +756,9 @@ class Member(disnake.abc.Messageable, _UserTag):
         if delete_message_days is not MISSING:
             await self.guild.ban(self, reason=reason, delete_message_days=delete_message_days)
         else:
-            await self.guild.ban(self, reason=reason, delete_message_seconds=delete_message_seconds)
+            await self.guild.ban(
+                self, reason=reason, delete_message_duration=delete_message_duration
+            )
 
     async def unban(self, *, reason: Optional[str] = None) -> None:
         """|coro|

@@ -3567,7 +3567,7 @@ class Guild(Hashable):
         self,
         user: Snowflake,
         *,
-        delete_message_seconds: int = 86400,
+        delete_message_duration: Union[int, datetime.timedelta] = 86400,
         reason: Optional[str] = None,
     ) -> None:
         ...
@@ -3586,7 +3586,7 @@ class Guild(Hashable):
         self,
         user: Snowflake,
         *,
-        delete_message_seconds: int = 86400,
+        delete_message_duration: Union[int, datetime.timedelta] = 86400,
         delete_message_days: Literal[0, 1, 2, 3, 4, 5, 6, 7] = MISSING,
         reason: Optional[str] = None,
     ) -> None:
@@ -3603,10 +3603,12 @@ class Guild(Hashable):
         ----------
         user: :class:`abc.Snowflake`
             The user to ban from the guild.
-        delete_message_seconds: :class:`int`
-            The number of seconds worth of messages to delete from the user
-            in the guild, between 0 and 604800 (7 days).
-            Defaults to 86400 (1 day).
+        delete_message_duration: Union[:class:`int`, :class:`datetime.timedelta`]
+            The timespan (seconds or timedelta) of messages to delete from the user
+            in the guild, up to 7 days (604800 seconds).
+            Defaults to 1 day (86400 seconds).
+
+            This is incompatible with ``delete_message_days``.
 
             .. versionadded:: 2.6
 
@@ -3617,6 +3619,8 @@ class Guild(Hashable):
         delete_message_days: :class:`int`
             The number of days worth of messages to delete from the user
             in the guild. The minimum is 0 and the maximum is 7.
+
+            This is incompatible with ``delete_message_duration``.
         reason: Optional[:class:`str`]
             The reason for banning this user. Shows up on the audit log.
 
@@ -3629,6 +3633,11 @@ class Guild(Hashable):
         """
         if delete_message_days is not MISSING:
             delete_message_seconds = delete_message_days * 86400
+        elif isinstance(delete_message_duration, datetime.timedelta):
+            delete_message_seconds = delete_message_duration.seconds
+        else:
+            delete_message_seconds = delete_message_duration
+
         await self._state.http.ban(
             user.id, self.id, delete_message_seconds=delete_message_seconds, reason=reason
         )
