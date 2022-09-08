@@ -245,6 +245,8 @@ class Injection(Generic[P, T_]):
     def autocomplete(self, option_name: str) -> Callable[[CallableT], CallableT]:
         """A decorator that registers an autocomplete function for the specified option.
 
+        .. versionadded:: 2.6
+
         Parameters
         ----------
         option_name: :class:`str`
