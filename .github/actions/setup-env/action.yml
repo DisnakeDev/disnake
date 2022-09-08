@@ -42,13 +42,12 @@ runs:
     - name: Configure Poetry environment
       shell: bash
       run: |
-        python -m venv ~/.venv
+        venv_path=~/.venv
+        python -m venv $venv_path
         bin_dir="bin"
         if [ -n "$MSYSTEM" ]; then
           bin_dir="Scripts"
         fi
-
-        PATH_TO_VENV = ~/.venv
 
         echo "PATH=$PATH_TO_VENV/$bin_dir:$PATH" >> $GITHUB_ENV
         echo "VIRTUAL_ENV=$PATH_TO_VENV" >> $GITHUB_ENV
