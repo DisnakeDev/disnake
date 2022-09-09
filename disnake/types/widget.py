@@ -25,7 +25,6 @@ DEALINGS IN THE SOFTWARE.
 
 from typing import List, Optional, TypedDict
 
-from .activity import Activity
 from .snowflake import Snowflake
 from .user import User
 
@@ -36,9 +35,15 @@ class WidgetChannel(TypedDict):
     position: int
 
 
+class WidgetActivity(TypedDict):
+    name: str
+
+
 class WidgetMember(User, total=False):
     nick: str
-    game: Activity
+    # `activity` is used starting api v8, `game` is used before
+    activity: WidgetActivity
+    game: WidgetActivity
     status: str
     avatar_url: str
     deaf: bool

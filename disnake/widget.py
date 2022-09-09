@@ -149,7 +149,7 @@ class WidgetMember(BaseUser):
         however the format is always static and cannot be changed
         through :func:`Asset.with_format` or similar methods.
     activity: Optional[Union[:class:`BaseActivity`, :class:`Spotify`]]
-        The member's activity.
+        The member's activity. This generally only has the ``name`` set.
     deafened: Optional[:class:`bool`]
         Whether the member is currently deafened.
     muted: Optional[:class:`bool`]
@@ -194,14 +194,9 @@ class WidgetMember(BaseUser):
         if avatar_url := data.get("avatar_url"):
             self.avatar = Asset(state, url=avatar_url, key=avatar_url, animated=False)
 
-        try:
-            game = data["game"]
-        except KeyError:
-            activity = None
-        else:
-            activity = create_activity(game, state=state)
-
-        self.activity: Optional[Union[BaseActivity, Spotify]] = activity
+        self.activity: Optional[Union[BaseActivity, Spotify]] = None
+        if activity := (data.get("activity") or data.get("game")):
+            self.activity = create_activity(activity, state=state)
 
         self.connected_channel: Optional[WidgetChannel] = connected_channel
 

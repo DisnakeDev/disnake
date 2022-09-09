@@ -98,6 +98,7 @@ if TYPE_CHECKING:
         ActivityTimestamps,
     )
     from .types.emoji import PartialEmoji as PartialEmojiPayload
+    from .types.widget import WidgetActivity as WidgetActivityPayload
 
 
 class _BaseActivity:
@@ -861,7 +862,7 @@ ActivityTypes = Union[Activity, Game, CustomActivity, Streaming, Spotify]
 
 @overload
 def create_activity(
-    data: ActivityPayload, *, state: Optional[ConnectionState] = None
+    data: Union[ActivityPayload, WidgetActivityPayload], *, state: Optional[ConnectionState] = None
 ) -> ActivityTypes:
     ...
 
@@ -872,7 +873,9 @@ def create_activity(data: None, *, state: Optional[ConnectionState] = None) -> N
 
 
 def create_activity(
-    data: Optional[ActivityPayload], *, state: Optional[ConnectionState] = None
+    data: Optional[Union[ActivityPayload, WidgetActivityPayload]],
+    *,
+    state: Optional[ConnectionState] = None,
 ) -> Optional[ActivityTypes]:
     if not data:
         return None
@@ -880,9 +883,9 @@ def create_activity(
     activity: ActivityTypes
     game_type = try_enum(ActivityType, data.get("type", -1))
     if game_type is ActivityType.playing and not ("application_id" in data or "session_id" in data):
-        activity = Game(**data)
+        activity = Game(**data)  # type: ignore  # pyright bug(?)
     elif game_type is ActivityType.custom and "name" in data:
-        activity = CustomActivity(**data)
+        activity = CustomActivity(**data)  # type: ignore
     elif game_type is ActivityType.streaming and "url" in data:
         # url won't be None here
         activity = Streaming(**data)  # type: ignore
