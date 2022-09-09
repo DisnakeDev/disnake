@@ -1,9 +1,9 @@
 'use-strict';
 
-window.onload = main;
+window.addEventListener("DOMContentLoaded", main)
 
-const api = "api.html"
-const ext_cmds_api = "ext/commands/api.html"
+const api = "api.html";
+const ext_cmds_api = "ext/commands/api.html";
 
 function main() {
     const url = new URL(document.location.href);
@@ -25,7 +25,7 @@ function main() {
 
     if (!fixed_postfix) {
         if (postfix.includes("disnake.ext.commands") && !url.pathname.endsWith(ext_cmds_api)) {
-            postfix = "api/index.html"
+            postfix = "api/index.html";
         } else {
             if ((!postfix.includes("disnake.ext.commands.") && url.pathname.endsWith(ext_cmds_api))) {
                 postfix = "ext/commands/api/index.html";

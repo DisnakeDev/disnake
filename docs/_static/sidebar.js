@@ -115,6 +115,19 @@ document.addEventListener('DOMContentLoaded', () => {
   sidebar = new Sidebar(document.getElementById('sidebar'));
   sidebar.createCollapsableSections();
 
+  let icons = document.getElementById('sidebar').querySelector('ul').querySelectorAll('span.material-icons.collapsible-arrow');
+
+  const url = new URL(document.location.href);
+
+  for (const ic of icons) {
+      if ((new URL(ic.parentNode.children[1].href)).hash) {
+          continue;
+      }
+
+      console.log(ic.parentNode.children[1].href)
+      sidebar.collapseSection(ic);
+  }
+
   window.addEventListener('scroll', () => {
     sidebar.setActiveLink(getCurrentSection());
   });
