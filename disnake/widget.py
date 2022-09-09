@@ -361,7 +361,10 @@ class Widget:
         return False
 
     def __repr__(self) -> str:
-        return f"<Widget id={self.id} name={self.name!r} invite_url={self.invite_url!r}>"
+        return (
+            f"<Widget id={self.id} name={self.name!r}"
+            f" invite_url={self.invite_url!r} presence_count={self.presence_count!r}>"
+        )
 
     @property
     def created_at(self) -> datetime.datetime:
