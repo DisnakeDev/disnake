@@ -325,7 +325,7 @@ class Widget:
 
     def __init__(self, *, state: ConnectionState, data: WidgetPayload) -> None:
         self._state = state
-        self._invite = data["instant_invite"]
+        self._invite = data.get("instant_invite")
         self.name: str = data["name"]
         self.id: int = int(data["id"])
 
@@ -369,11 +369,11 @@ class Widget:
         return f"https://discord.com/api/guilds/{self.id}/widget.json"
 
     @property
-    def invite_url(self) -> str:
+    def invite_url(self) -> Optional[str]:
         """Optional[:class:`str`]: The invite URL for the guild, if available."""
         return self._invite
 
-    async def fetch_invite(self, *, with_counts: bool = True) -> Invite:
+    async def fetch_invite(self, *, with_counts: bool = True) -> Optional[Invite]:
         """|coro|
 
         Retrieves an :class:`Invite` from the widget's invite URL.
@@ -389,9 +389,12 @@ class Widget:
 
         Returns
         -------
-        :class:`Invite`
-            The invite from the widget's invite URL.
+        Optional[:class:`Invite`]
+            The invite from the widget's invite URL, if available.
         """
+        if not self._invite:
+            return None
+
         invite_id = resolve_invite(self._invite)
         data = await self._state.http.get_invite(invite_id, with_counts=with_counts)
         return Invite.from_incomplete(state=self._state, data=data)
