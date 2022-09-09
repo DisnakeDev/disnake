@@ -307,7 +307,7 @@ class Widget:
     name: :class:`str`
         The guild's name.
     channels: List[:class:`WidgetChannel`]
-        The accessible voice channels in the guild.
+        The accessible voice and stage channels in the guild.
     members: List[:class:`WidgetMember`]
         The online members in the server. Offline members
         do not appear in the widget.
@@ -319,15 +319,20 @@ class Widget:
             information being incorrect. Likewise, the number of members
             retrieved is capped.
 
+    presence_count: :class:`int`
+        The number of online members in the server.
+
+        .. versionadded:: 2.6
     """
 
-    __slots__ = ("_state", "channels", "_invite", "id", "members", "name")
+    __slots__ = ("_state", "channels", "_invite", "id", "members", "name", "presence_count")
 
     def __init__(self, *, state: ConnectionState, data: WidgetPayload) -> None:
         self._state = state
         self._invite = data.get("instant_invite")
         self.name: str = data["name"]
         self.id: int = int(data["id"])
+        self.presence_count: int = data["presence_count"]
 
         self.channels: List[WidgetChannel] = []
         for channel in data.get("channels", []):
