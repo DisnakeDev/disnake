@@ -133,13 +133,11 @@ class WidgetMember(BaseUser):
     Attributes
     ----------
     id: :class:`int`
-        The member's ID.
+        The member's anonymized ID.
     name: :class:`str`
         The member's username.
     discriminator: :class:`str`
-        The member's discriminator.
-    bot: :class:`bool`
-        Whether the member is a bot.
+        The member's anonymized discriminator.
     status: :class:`Status`
         The member's status.
     nick: Optional[:class:`str`]
