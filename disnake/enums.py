@@ -255,7 +255,7 @@ class EnumMeta(type):
         yield from cls._member_map_.values()
 
     def __len__(cls) -> int:
-        return len(cls._member_map_)
+        return len(cls._value2member_map_)
 
     @property
     def __members__(cls) -> Mapping[str, Enum]:
