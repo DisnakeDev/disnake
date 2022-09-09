@@ -393,6 +393,10 @@ class Widget:
         This is the same as :meth:`Client.fetch_invite`; the invite
         code is abstracted away.
 
+        .. versionchanged:: 2.6
+            This may now return ``None`` if the widget does not have
+            an attached invite URL.
+
         Parameters
         ----------
         with_counts: :class:`bool`
