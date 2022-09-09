@@ -2,12 +2,12 @@
 
 window.addEventListener("DOMContentLoaded", main);
 
-const url = new URL(window.location.href);
+const url_ss = new URL(window.location.href);
 
 function main() {
     let num = 0;
 
-    if (url.host.startsWith("disnake--") && url.host.endsWith(".org.readthedocs.build")) {
+    if (url_ss.host.startsWith("disnake--") && url_ss.host.endsWith(".org.readthedocs.build")) {
         // when building docs for PRs, rtd inserts the fucking
         // "warning" telling that the page was created from PR
         // just before the main ul, thus we need to increment
