@@ -2798,7 +2798,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         name: str,
         auto_archive_duration: AnyThreadArchiveDuration = ...,
         slowmode_delay: int = ...,
-        content: str,
+        content: str = ...,
         embed: Embed = ...,
         file: File = ...,
         suppress_embeds: bool = ...,
@@ -2817,7 +2817,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         name: str,
         auto_archive_duration: AnyThreadArchiveDuration = ...,
         slowmode_delay: int = ...,
-        content: str,
+        content: str = ...,
         embed: Embed = ...,
         files: List[File] = ...,
         suppress_embeds: bool = ...,
@@ -2836,7 +2836,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         name: str,
         auto_archive_duration: AnyThreadArchiveDuration = ...,
         slowmode_delay: int = ...,
-        content: str,
+        content: str = ...,
         embeds: List[Embed] = ...,
         file: File = ...,
         suppress_embeds: bool = ...,
@@ -2855,7 +2855,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         name: str,
         auto_archive_duration: AnyThreadArchiveDuration = ...,
         slowmode_delay: int = ...,
-        content: str,
+        content: str = ...,
         embeds: List[Embed] = ...,
         files: List[File] = ...,
         suppress_embeds: bool = ...,
@@ -2873,7 +2873,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         name: str,
         auto_archive_duration: AnyThreadArchiveDuration = MISSING,
         slowmode_delay: int = MISSING,
-        content: str,
+        content: str = MISSING,
         embed: Embed = MISSING,
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
@@ -2890,6 +2890,9 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         Creates a thread in this forum channel.
 
         You must have the :attr:`~Permissions.create_forum_threads` permission to do this.
+
+        At least one of ``content``, ``embed``/``embeds``, ``file``/``files``,
+        ``stickers``, ``components``, or ``view`` must be provided.
 
         .. versionchanged:: 2.6
             Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
