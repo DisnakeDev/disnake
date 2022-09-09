@@ -1,0 +1,1 @@
+Add :attr:`Thread.message_count`, :attr:`Thread.total_message_sent` and :attr:`Message.position` attributes.
