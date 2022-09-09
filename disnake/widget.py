@@ -161,12 +161,12 @@ class WidgetMember(BaseUser):
     __slots__ = (
         "status",
         "nick",
-        "avatar",
         "activity",
         "deafened",
         "suppress",
         "muted",
         "connected_channel",
+        "_avatar_url",
     )
 
     if TYPE_CHECKING:
@@ -185,12 +185,7 @@ class WidgetMember(BaseUser):
         self.deafened: Optional[bool] = data.get("deaf", False) or data.get("self_deaf", False)
         self.muted: Optional[bool] = data.get("mute", False) or data.get("self_mute", False)
         self.suppress: Optional[bool] = data.get("suppress", False)
-
-        # overwrite base type's @property since widget members always seem to have `avatar: null`,
-        # and instead a separate `avatar_url` field with a full url
-        self.avatar: Optional[Asset] = None
-        if avatar_url := data.get("avatar_url"):
-            self.avatar = Asset(state, url=avatar_url, key=avatar_url, animated=False)
+        self._avatar_url: Optional[str] = data.get("avatar_url")
 
         self.activity: Optional[Union[BaseActivity, Spotify]] = None
         if activity := (data.get("activity") or data.get("game")):
@@ -203,6 +198,14 @@ class WidgetMember(BaseUser):
             f"<WidgetMember name={self.name!r} discriminator={self.discriminator!r}"
             f" nick={self.nick!r}>"
         )
+
+    # overwrite base type's @property since widget members always seem to have `avatar: null`,
+    # and instead a separate `avatar_url` field with a full url
+    @property
+    def avatar(self) -> Optional[Asset]:
+        if (url := self._avatar_url) is not None:
+            return Asset(self._state, url=url, key=url, animated=False)
+        return None
 
     @property
     def display_name(self) -> str:
