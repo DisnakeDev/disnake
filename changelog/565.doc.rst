@@ -1,1 +1,1 @@
-Update sphinx from 4.5.0 to version 5.1, and take advantage of new options.
+Update sphinx from 4.4.0 to version 5.1, and take advantage of new options.

@@ -80,6 +80,10 @@ class flag_value(Generic[T]):
                     f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and flags of '{other.__class__.__name__}'"
                 )
             return other._from_value(self.flag | other.value)
+        if not isinstance(other, flag_value):
+            raise TypeError(
+                f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and {other.__class__}"
+            )
         if self._parent is not other._parent:
             raise TypeError(
                 f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and flags of '{other._parent.__name__}'"
@@ -199,7 +203,7 @@ class BaseFlags:
         if isinstance(other, flag_value):
             if self.__class__ is not other._parent:
                 raise TypeError(
-                    f"unsupported operand type(s) for |: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
+                    f"unsupported operand type(s) for |=: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
                 )
             self.value |= other.flag
             return self
@@ -214,7 +218,7 @@ class BaseFlags:
         if isinstance(other, flag_value):
             if self.__class__ is not other._parent:
                 raise TypeError(
-                    f"unsupported operand type(s) for |: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
+                    f"unsupported operand type(s) for ^: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
                 )
             return self._from_value(self.value ^ other.flag)
         if not isinstance(other, self.__class__):
@@ -227,7 +231,7 @@ class BaseFlags:
         if isinstance(other, flag_value):
             if self.__class__ is not other._parent:
                 raise TypeError(
-                    f"unsupported operand type(s) for |: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
+                    f"unsupported operand type(s) for ^=: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
                 )
             self.value ^= other.flag
             return self
@@ -1773,6 +1777,14 @@ class ApplicationFlags(BaseFlags):
         receive limited message content over the gateway.
         """
         return 1 << 19
+
+    @flag_value
+    def application_command_badge(self):
+        """:class:`bool`: Returns ``True`` if the application has registered global application commands.
+
+        .. versionadded:: 2.6
+        """
+        return 1 << 23
 
 
 class ChannelFlags(BaseFlags):
