@@ -662,11 +662,21 @@ class InteractionResponse:
     __slots__: Tuple[str, ...] = (
         "_responded",
         "_parent",
+        "_response_type",
     )
 
     def __init__(self, parent: Interaction):
         self._parent: Interaction = parent
         self._responded: bool = False
+        self._response_type: Optional[InteractionResponseType] = None
+
+    @property
+    def response_type(self) -> Optional[InteractionResponseType]:
+        """Optional[:class:`InteractionResponseType`]: If a response was made, this is the type of successful response.
+
+        ..versionadded:: 2.6
+        """
+        return self._response_type
 
     def is_done(self) -> bool:
         """Whether an interaction response has been done before.
@@ -751,6 +761,7 @@ class InteractionResponse:
             data=data or None,
         )
         self._responded = True
+        self._response_type = defer_type
 
     async def pong(self) -> None:
         """|coro|
@@ -772,13 +783,15 @@ class InteractionResponse:
         parent = self._parent
         if parent.type is InteractionType.ping:
             adapter = async_context.get()
+            response_type = InteractionResponseType.pong
             await adapter.create_interaction_response(
                 parent.id,
                 parent.token,
                 session=parent._session,
-                type=InteractionResponseType.pong.value,
+                type=response_type.value,
             )
             self._responded = True
+            self._response_type = response_type
 
     async def send_message(
         self,
@@ -917,12 +930,13 @@ class InteractionResponse:
 
         parent = self._parent
         adapter = async_context.get()
+        response_type = InteractionResponseType.channel_message
         try:
             await adapter.create_interaction_response(
                 parent.id,
                 parent.token,
                 session=parent._session,
-                type=InteractionResponseType.channel_message.value,
+                type=response_type.value,
                 data=payload,
                 files=files or None,
             )
@@ -936,6 +950,7 @@ class InteractionResponse:
                     f.close()
 
         self._responded = True
+        self._response_type = response_type
 
         if view is not MISSING:
             if ephemeral and view.timeout is None:
@@ -1099,12 +1114,13 @@ class InteractionResponse:
             payload["components"] = [] if components is None else components_to_dict(components)
 
         adapter = async_context.get()
+        response_type = InteractionResponseType.message_update
         try:
             await adapter.create_interaction_response(
                 parent.id,
                 parent.token,
                 session=parent._session,
-                type=InteractionResponseType.message_update.value,
+                type=response_type.value,
                 data=payload,
                 files=files,
             )
@@ -1117,6 +1133,7 @@ class InteractionResponse:
             state.store_view(view, message.id)
 
         self._responded = True
+        self._response_type = response_type
 
     async def autocomplete(self, *, choices: Choices) -> None:
         """|coro|
@@ -1159,15 +1176,17 @@ class InteractionResponse:
 
         parent = self._parent
         adapter = async_context.get()
+        response_type = InteractionResponseType.application_command_autocomplete_result
         await adapter.create_interaction_response(
             parent.id,
             parent.token,
             session=parent._session,
-            type=InteractionResponseType.application_command_autocomplete_result.value,
+            type=response_type.value,
             data={"choices": choices_data},
         )
 
         self._responded = True
+        self._response_type = response_type
 
     @overload
     async def send_modal(self, modal: Modal) -> None:
@@ -1258,14 +1277,16 @@ class InteractionResponse:
             raise TypeError("Either modal or title, custom_id, components must be provided")
 
         adapter = async_context.get()
+        response_type = InteractionResponseType.modal
         await adapter.create_interaction_response(
             parent.id,
             parent.token,
             session=parent._session,
-            type=InteractionResponseType.modal.value,
+            type=response_type.value,
             data=modal_data,  # type: ignore
         )
         self._responded = True
+        self._response_type = response_type
 
         if modal is not None:
             parent._state.store_modal(parent.author.id, modal)
