@@ -326,7 +326,7 @@ class Interaction:
         """
         return self.expires_at <= utils.utcnow()
 
-    async def original_message(self) -> InteractionMessage:
+    async def original_response(self) -> InteractionMessage:
         """|coro|
 
         Fetches the original interaction response message associated with the interaction.
@@ -342,6 +342,10 @@ class Interaction:
             "Other response types", "None"
 
         Repeated calls to this will return a cached value.
+
+        .. versionchanged 2.6::
+
+            This function was renamed from ``original_message``.
 
         Raises
         ------
@@ -367,7 +371,7 @@ class Interaction:
         self._original_message = message
         return message
 
-    async def edit_original_message(
+    async def edit_original_response(
         self,
         content: Optional[str] = MISSING,
         *,
@@ -395,6 +399,10 @@ class Interaction:
             (using the ``file`` parameter with :meth:`Embed.set_image` or :meth:`Embed.set_thumbnail`),
             those images will be removed if the message's attachments are edited in any way
             (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
+
+        .. versionchanged 2.6::
+
+            This function was renamed from ``edit_original_message``.
 
         Parameters
         ----------
@@ -458,7 +466,7 @@ class Interaction:
         # if no attachment list was provided but we're uploading new files,
         # use current attachments as the base
         if attachments is MISSING and (file or files):
-            attachments = (await self.original_message()).attachments
+            attachments = (await self.original_response()).attachments
 
         previous_mentions: Optional[AllowedMentions] = self._state.allowed_mentions
         params = handle_message_parameters(
@@ -499,13 +507,17 @@ class Interaction:
             self._state.store_view(view, message.id)
         return message
 
-    async def delete_original_message(self, *, delay: float = None) -> None:
+    async def delete_original_response(self, *, delay: float = None) -> None:
         """|coro|
 
         Deletes the original interaction response message.
 
         This is a lower level interface to :meth:`InteractionMessage.delete` in case
         you do not want to fetch the message and save an HTTP request.
+
+        .. versionchanged 2.6::
+
+            This function was renamed from ``delete_original_message``.
 
         Parameters
         ----------
@@ -547,6 +559,12 @@ class Interaction:
                 raise InteractionNotResponded(self) from e
             raise
 
+    # legacy namings
+    # these MAY begin a deprecation warning in 2.7 but SHOULD have a deprecation version in 2.8
+    original_message = original_response
+    edit_original_message = edit_original_response
+    delete_original_message = delete_original_response
+
     async def send(
         self,
         content: Optional[str] = None,
@@ -573,7 +591,7 @@ class Interaction:
 
         .. note::
             This method does not return a :class:`Message` object. If you need a message object,
-            use :meth:`original_message` to fetch it, or use :meth:`followup.send <Webhook.send>`
+            use :meth:`original_response` to fetch it, or use :meth:`followup.send <Webhook.send>`
             directly instead of this method if you're sending a followup message.
 
         Parameters
@@ -944,7 +962,7 @@ class InteractionResponse:
             self._parent._state.store_view(view)
 
         if delete_after is not MISSING:
-            await self._parent.delete_original_message(delay=delete_after)
+            await self._parent.delete_original_response(delay=delete_after)
 
     async def edit_message(
         self,
@@ -1299,7 +1317,7 @@ class InteractionMessage(Message):
     """Represents the original interaction response message.
 
     This allows you to edit or delete the message associated with
-    the interaction response. To retrieve this object see :meth:`Interaction.original_message`.
+    the interaction response. To retrieve this object see :meth:`Interaction.original_response`.
 
     This inherits from :class:`disnake.Message` with changes to
     :meth:`edit` and :meth:`delete` to work.
@@ -1531,7 +1549,7 @@ class InteractionMessage(Message):
         if attachments is MISSING and (file or files):
             attachments = self.attachments
 
-        return await self._state._interaction.edit_original_message(
+        return await self._state._interaction.edit_original_response(
             content=content,
             embed=embed,
             embeds=embeds,
@@ -1570,10 +1588,10 @@ class InteractionMessage(Message):
             async def inner_call(delay: float = delay):
                 await asyncio.sleep(delay)
                 try:
-                    await self._state._interaction.delete_original_message()
+                    await self._state._interaction.delete_original_response()
                 except HTTPException:
                     pass
 
             asyncio.create_task(inner_call())
         else:
-            await self._state._interaction.delete_original_message()
+            await self._state._interaction.delete_original_response()
