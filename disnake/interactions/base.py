@@ -631,7 +631,7 @@ class Interaction:
         ValueError
             The length of ``embeds`` was invalid.
         """
-        if self.response._responded:
+        if self.response._response_type is not None:
             sender = self.followup.send
         else:
             sender = self.response.send_message
@@ -660,14 +660,12 @@ class InteractionResponse:
     """
 
     __slots__: Tuple[str, ...] = (
-        "_responded",
         "_parent",
         "_response_type",
     )
 
     def __init__(self, parent: Interaction):
         self._parent: Interaction = parent
-        self._responded: bool = False
         self._response_type: Optional[InteractionResponseType] = None
 
     @property
@@ -685,7 +683,7 @@ class InteractionResponse:
 
         :return type: :class:`bool`
         """
-        return self._responded
+        return self._response_type is not None
 
     async def defer(
         self,
@@ -726,7 +724,7 @@ class InteractionResponse:
         TypeError
             This interaction cannot be deferred.
         """
-        if self._responded:
+        if self._response_type is not None:
             raise InteractionResponded(self._parent)
 
         defer_type: Optional[InteractionResponseType] = None
@@ -760,7 +758,6 @@ class InteractionResponse:
             type=defer_type.value,
             data=data or None,
         )
-        self._responded = True
         self._response_type = defer_type
 
     async def pong(self) -> None:
@@ -777,7 +774,7 @@ class InteractionResponse:
         InteractionResponded
             This interaction has already been responded to before.
         """
-        if self._responded:
+        if self._response_type is not None:
             raise InteractionResponded(self._parent)
 
         parent = self._parent
@@ -790,7 +787,6 @@ class InteractionResponse:
                 session=parent._session,
                 type=response_type.value,
             )
-            self._responded = True
             self._response_type = response_type
 
     async def send_message(
@@ -865,7 +861,7 @@ class InteractionResponse:
         InteractionResponded
             This interaction has already been responded to before.
         """
-        if self._responded:
+        if self._response_type is not None:
             raise InteractionResponded(self._parent)
 
         payload: Dict[str, Any] = {
@@ -949,7 +945,6 @@ class InteractionResponse:
                 for f in files:
                     f.close()
 
-        self._responded = True
         self._response_type = response_type
 
         if view is not MISSING:
@@ -1044,7 +1039,7 @@ class InteractionResponse:
         InteractionResponded
             This interaction has already been responded to before.
         """
-        if self._responded:
+        if self._response_type is not None:
             raise InteractionResponded(self._parent)
 
         parent = self._parent
@@ -1132,7 +1127,6 @@ class InteractionResponse:
         if view and not view.is_finished():
             state.store_view(view, message.id)
 
-        self._responded = True
         self._response_type = response_type
 
     async def autocomplete(self, *, choices: Choices) -> None:
@@ -1153,7 +1147,7 @@ class InteractionResponse:
         InteractionResponded
             This interaction has already been responded to before.
         """
-        if self._responded:
+        if self._response_type is not None:
             raise InteractionResponded(self._parent)
 
         choices_data: List[ApplicationCommandOptionChoicePayload]
@@ -1185,7 +1179,6 @@ class InteractionResponse:
             data={"choices": choices_data},
         )
 
-        self._responded = True
         self._response_type = response_type
 
     @overload
@@ -1255,7 +1248,7 @@ class InteractionResponse:
         if parent.type is InteractionType.modal_submit:
             raise ModalChainNotSupported(parent)  # type: ignore
 
-        if self._responded:
+        if self._response_type is not None:
             raise InteractionResponded(parent)
 
         modal_data: ModalPayload
@@ -1285,7 +1278,6 @@ class InteractionResponse:
             type=response_type.value,
             data=modal_data,  # type: ignore
         )
-        self._responded = True
         self._response_type = response_type
 
         if modal is not None:
