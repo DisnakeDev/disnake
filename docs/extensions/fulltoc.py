@@ -116,6 +116,8 @@ def build_full_toctree(builder: StandaloneHTMLBuilder, docname: str, index: str,
 def setup(app: Sphinx) -> SphinxExtensionMeta:
     app.connect("html-page-context", html_page_context)
 
+    print(app.registry.post_transforms)
+
     return {
         "parallel_read_safe": True,
         "parallel_write_safe": True,
