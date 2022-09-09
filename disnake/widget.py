@@ -313,7 +313,7 @@ class Widget:
     name: :class:`str`
         The guild's name.
     channels: List[:class:`WidgetChannel`]
-        The accessible voice and stage channels in the guild.
+        The publicly accessible voice and stage channels in the guild.
     members: List[:class:`WidgetMember`]
         The online members in the server. Offline members
         do not appear in the widget.
