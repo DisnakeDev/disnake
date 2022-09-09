@@ -2,12 +2,8 @@ import json
 import os
 from typing import Dict
 
+from _types import SphinxExtensionMeta
 from sphinx.application import Sphinx
-
-
-def setup(app: Sphinx) -> None:
-    app.connect("build-finished", main)
-    # app.add_config_value("redirects", {}, "env")
 
 
 def main(app: Sphinx, exception: Exception) -> None:
@@ -36,3 +32,12 @@ def main(app: Sphinx, exception: Exception) -> None:
         javascript = prefix + redirect_data  # yeah, raw json doesnt look cool in js, but who cares
 
         redirects_js.write(javascript)
+
+
+def setup(app: Sphinx) -> SphinxExtensionMeta:
+    app.connect("build-finished", main)
+    # app.add_config_value("redirects", {}, "env")
+    return {
+        "parallel_read_safe": True,
+        "parallel_write_safe": True,
+    }
