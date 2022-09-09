@@ -142,10 +142,6 @@ class WidgetMember(BaseUser):
         The member's status.
     nick: Optional[:class:`str`]
         The member's nickname.
-    avatar: Optional[:class:`Asset`]
-        The user's avatar. The size can be chosen using :func:`Asset.with_size`,
-        however the format is always static and cannot be changed
-        through :func:`Asset.with_format` or similar methods.
     activity: Optional[Union[:class:`BaseActivity`, :class:`Spotify`]]
         The member's activity. This generally only has the ``name`` set.
     deafened: Optional[:class:`bool`]
@@ -203,6 +199,11 @@ class WidgetMember(BaseUser):
     # and instead a separate `avatar_url` field with a full url
     @property
     def avatar(self) -> Optional[Asset]:
+        """
+        Optional[:class:`Asset`]: The user's avatar.
+        The size can be chosen using :func:`Asset.with_size`, however the format is always
+        static and cannot be changed through :func:`Asset.with_format` or similar methods.
+        """
         if (url := self._avatar_url) is not None:
             return Asset(self._state, url=url, key=url, animated=False)
         return None
