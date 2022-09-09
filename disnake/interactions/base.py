@@ -163,7 +163,7 @@ class Interaction:
         "_permissions",
         "_state",
         "_session",
-        "_original_message",
+        "_original_response",
         "_cs_response",
         "_cs_followup",
         "_cs_channel",
@@ -176,7 +176,7 @@ class Interaction:
         # TODO: Maybe use a unique session
         self._session: ClientSession = state.http._HTTPClient__session  # type: ignore
         self.client: Client = state._get_client()
-        self._original_message: Optional[InteractionMessage] = None
+        self._original_response: Optional[InteractionMessage] = None
 
         self.id: int = int(data["id"])
         self.type: InteractionType = try_enum(InteractionType, data["type"])
@@ -357,8 +357,8 @@ class Interaction:
         InteractionMessage
             The original interaction response message.
         """
-        if self._original_message is not None:
-            return self._original_message
+        if self._original_response is not None:
+            return self._original_response
 
         adapter = async_context.get()
         data = await adapter.get_original_interaction_response(
@@ -368,7 +368,7 @@ class Interaction:
         )
         state = _InteractionMessageState(self, self._state)
         message = InteractionMessage(state=state, channel=self.channel, data=data)  # type: ignore
-        self._original_message = message
+        self._original_response = message
         return message
 
     async def edit_original_response(
