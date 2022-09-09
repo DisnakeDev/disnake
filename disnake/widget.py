@@ -28,6 +28,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from .activity import BaseActivity, Spotify, create_activity
+from .asset import Asset
 from .enums import Status, WidgetStyle, try_enum
 from .invite import Invite
 from .user import BaseUser
@@ -143,8 +144,10 @@ class WidgetMember(BaseUser):
         The member's status.
     nick: Optional[:class:`str`]
         The member's nickname.
-    avatar: Optional[:class:`str`]
-        The member's avatar hash.
+    avatar: Optional[:class:`Asset`]
+        The user's avatar. The size can be chosen using :func:`Asset.with_size`,
+        however the format is always static and cannot be changed
+        through :func:`Asset.with_format` or similar methods.
     activity: Optional[Union[:class:`BaseActivity`, :class:`Spotify`]]
         The member's activity.
     deafened: Optional[:class:`bool`]
@@ -184,6 +187,12 @@ class WidgetMember(BaseUser):
         self.deafened: Optional[bool] = data.get("deaf", False) or data.get("self_deaf", False)
         self.muted: Optional[bool] = data.get("mute", False) or data.get("self_mute", False)
         self.suppress: Optional[bool] = data.get("suppress", False)
+
+        # overwrite base type's @property since widget members always seem to have `avatar: null`,
+        # and instead a separate `avatar_url` field with a full url
+        self.avatar: Optional[Asset] = None
+        if avatar_url := data.get("avatar_url"):
+            self.avatar = Asset(state, url=avatar_url, key=avatar_url, animated=False)
 
         try:
             game = data["game"]
