@@ -1,0 +1,3 @@
+Fix some widget fields.
+- :attr:`Widget.invite_url` and :attr:`Widget.fetch_invite` are now optional.
+- :attr:`WidgetMember.avatar` and :attr:`WidgetMember.activity` are no longer always ``None``.
