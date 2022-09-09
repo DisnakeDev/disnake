@@ -331,10 +331,10 @@ class Interaction:
 
         Fetches the original interaction response message associated with the interaction.
 
-        Here is a table with response types and their associated original message:
+        Here is a table with response types and their associated original response:
 
         .. csv-table::
-            :header: "Response type", "Original message"
+            :header: "Response type", "Original response"
 
             :meth:`InteractionResponse.send_message`, "The message you sent"
             :meth:`InteractionResponse.edit_message`, "The message you edited"
@@ -391,11 +391,11 @@ class Interaction:
         This is a lower level interface to :meth:`InteractionMessage.edit` in case
         you do not want to fetch the message and save an HTTP request.
 
-        This method is also the only way to edit the original message if
+        This method is also the only way to edit the original response if
         the message sent was ephemeral.
 
         .. note::
-            If the original message has embeds with images that were created from local files
+            If the original response message has embeds with images that were created from local files
             (using the ``file`` parameter with :meth:`Embed.set_image` or :meth:`Embed.set_thumbnail`),
             those images will be removed if the message's attachments are edited in any way
             (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
@@ -523,7 +523,7 @@ class Interaction:
         ----------
         delay: :class:`float`
             If provided, the number of seconds to wait in the background
-            before deleting the original message. If the deletion fails,
+            before deleting the original response message. If the deletion fails,
             then it is silently ignored.
 
         Raises
@@ -985,7 +985,7 @@ class InteractionResponse:
 
         .. versionchanged:: 2.5
 
-            Now supports editing the original message of modal interactions.
+            Now supports editing the original message of modal interactions that started from a component.
 
         .. note::
             If the original message has embeds with images that were created from local files
