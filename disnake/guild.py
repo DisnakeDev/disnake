@@ -516,10 +516,10 @@ class Guild(Hashable):
         self.name: str = guild.get("name", "")
         self._region: str = guild.get("region", "")
         self.verification_level: VerificationLevel = try_enum(
-            VerificationLevel, guild.get("verification_level")
+            VerificationLevel, guild.get("verification_level", 0)
         )
         self.default_notifications: NotificationLevel = try_enum(
-            NotificationLevel, guild.get("default_message_notifications")
+            NotificationLevel, guild.get("default_message_notifications", 0)
         )
         self.explicit_content_filter: ContentFilter = try_enum(
             ContentFilter, guild.get("explicit_content_filter", 0)

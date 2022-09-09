@@ -254,6 +254,9 @@ class EnumMeta(type):
     def __iter__(cls) -> Iterator[Enum]:
         yield from cls._member_map_.values()
 
+    def __len__(cls) -> int:
+        return len(cls._member_map_)
+
     @property
     def __members__(cls) -> Mapping[str, Enum]:
         return types.MappingProxyType(cls._member_map_)
@@ -2249,11 +2252,21 @@ EnumT = TypeVar("EnumT", bound=Enum)
 def try_enum(cls: Type[EnumT], val: Any) -> EnumT:
     """A function that tries to turn the value into enum ``cls``.
     If it fails it returns a proxy invalid value instead.
+    If this fails, too, just return the value unedited.
     """
     try:
         return cls._value2member_map_[val]  # type: ignore
+
     except KeyError:
-        return val
+        try:
+            unknown = cls.__new__(cls, val)
+            object.__setattr__(unknown, "name", "unknown")
+            object.__setattr__(unknown, "value", val)
+
+            return unknown
+
+        except TypeError:
+            return val
 
 
 # These can probably be deprecated:
