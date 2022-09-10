@@ -25,7 +25,7 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import Literal, Optional, TypedDict, Union
+from typing import List, Literal, Optional, TypedDict, Union
 
 from .appinfo import PartialAppInfo
 from .snowflake import Snowflake
@@ -76,6 +76,7 @@ class StreamIntegration(BaseIntegration):
 
 class BotIntegration(BaseIntegration):
     application: IntegrationApplication
+    scopes: List[str]
 
 
 Integration = Union[BaseIntegration, StreamIntegration, BotIntegration]

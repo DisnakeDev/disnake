@@ -45,7 +45,7 @@ from typing import (
 
 import disnake
 from disnake.app_commands import ApplicationCommand, Option
-from disnake.custom_warnings import ConfigWarning, SyncWarning
+from disnake.custom_warnings import SyncWarning
 from disnake.enums import ApplicationCommandType
 
 from . import errors
@@ -153,9 +153,6 @@ class InteractionBotBase(CommonBotBase):
     ):
         if test_guilds and not all(isinstance(guild_id, int) for guild_id in test_guilds):
             raise ValueError("test_guilds must be a sequence of int.")
-
-        if options.pop("sync_permissions", None) is not None:
-            warnings.warn("'sync_permissions' has been removed in 2.5", ConfigWarning, stacklevel=3)
 
         super().__init__(**options)
 
@@ -443,7 +440,6 @@ class InteractionBotBase(CommonBotBase):
         description: LocalizedOptional = None,
         dm_permission: bool = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-        nsfw: bool = None,
         options: List[Option] = None,
         guild_ids: Sequence[int] = None,
         connectors: Dict[str, str] = None,
@@ -480,12 +476,6 @@ class InteractionBotBase(CommonBotBase):
 
             .. versionadded:: 2.5
 
-        nsfw: :class:`bool`
-            Whether this command can only be used in NSFW channels.
-            Defaults to ``False``.
-
-            .. versionadded:: 2.6
-
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
         guild_ids: Sequence[:class:`int`]
@@ -518,7 +508,6 @@ class InteractionBotBase(CommonBotBase):
                 options=options,
                 dm_permission=dm_permission,
                 default_member_permissions=default_member_permissions,
-                nsfw=nsfw,
                 guild_ids=guild_ids,
                 connectors=connectors,
                 auto_sync=auto_sync,
@@ -536,7 +525,6 @@ class InteractionBotBase(CommonBotBase):
         name: LocalizedOptional = None,
         dm_permission: bool = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-        nsfw: bool = None,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = None,
         extras: Dict[str, Any] = None,
@@ -564,12 +552,6 @@ class InteractionBotBase(CommonBotBase):
 
             .. versionadded:: 2.5
 
-        nsfw: :class:`bool`
-            Whether this command can only be used in NSFW channels.
-            Defaults to ``False``.
-
-            .. versionadded:: 2.6
-
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``.
         guild_ids: Sequence[:class:`int`]
@@ -596,7 +578,6 @@ class InteractionBotBase(CommonBotBase):
                 name=name,
                 dm_permission=dm_permission,
                 default_member_permissions=default_member_permissions,
-                nsfw=nsfw,
                 guild_ids=guild_ids,
                 auto_sync=auto_sync,
                 extras=extras,
@@ -613,7 +594,6 @@ class InteractionBotBase(CommonBotBase):
         name: LocalizedOptional = None,
         dm_permission: bool = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-        nsfw: bool = None,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = None,
         extras: Dict[str, Any] = None,
@@ -641,12 +621,6 @@ class InteractionBotBase(CommonBotBase):
 
             .. versionadded:: 2.5
 
-        nsfw: :class:`bool`
-            Whether this command can only be used in NSFW channels.
-            Defaults to ``False``.
-
-            .. versionadded:: 2.6
-
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
         guild_ids: Sequence[:class:`int`]
@@ -673,7 +647,6 @@ class InteractionBotBase(CommonBotBase):
                 name=name,
                 dm_permission=dm_permission,
                 default_member_permissions=default_member_permissions,
-                nsfw=nsfw,
                 guild_ids=guild_ids,
                 auto_sync=auto_sync,
                 extras=extras,

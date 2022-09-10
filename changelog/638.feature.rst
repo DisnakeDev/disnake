@@ -1,0 +1,1 @@
+Add :func:`on_raw_member_remove` and :func:`on_raw_member_update` events, with the :class:`RawGuildMemberRemoveEvent` model.

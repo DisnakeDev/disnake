@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import os
 import sys
 import traceback
@@ -8,6 +9,13 @@ from disnake.ext import commands
 
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+from .config import Config
+
+logger = logging.getLogger(__name__)
+
+if not Config.test_guilds:
+    logger.warning("No test guilds configured. Using global commands.")
 
 
 def fancy_traceback(exc: Exception) -> str:
@@ -19,21 +27,17 @@ def fancy_traceback(exc: Exception) -> str:
 class TestBot(commands.Bot):
     def __init__(self):
         super().__init__(
-            command_prefix="..",
+            command_prefix=Config.prefix,
             intents=disnake.Intents.all(),
             help_command=None,  # type: ignore
-            sync_commands_debug=True,
-            strict_localization=True,
+            sync_commands_debug=Config.sync_commands_debug,
+            strict_localization=Config.strict_localization,
+            test_guilds=Config.test_guilds,
+            reload=Config.auto_reload,
+            enable_gateway_error_handler=Config.enable_gateway_error_handler,
         )
 
         self.i18n.load("test_bot/locale")
-
-    def load_all_extensions(self, folder: str) -> None:
-        py_path = f"test_bot.{folder}"
-        folder = f"test_bot/{folder}"
-        for name in os.listdir(folder):
-            if name.endswith(".py") and os.path.isfile(f"{folder}/{name}"):
-                self.load_extension(f"{py_path}.{name[:-3]}")
 
     async def on_ready(self):
         # fmt: off
@@ -45,9 +49,16 @@ class TestBot(commands.Bot):
         )
         # fmt: on
 
+    def add_cog(self, cog: commands.Cog, *, override: bool = False) -> None:
+        logger.info(f"Loading cog {cog.qualified_name}.")
+        return super().add_cog(cog, override=override)
+
     async def on_command_error(self, ctx: commands.Context, error: commands.CommandError) -> None:
+        msg = f"Command `{ctx.command}` failed due to `{error}`"
+        logger.error(msg, exc_info=True)
+
         embed = disnake.Embed(
-            title=f"Command `{ctx.command}` failed due to `{error}`",
+            title=msg,
             description=fancy_traceback(error),
             color=disnake.Color.red(),
         )
@@ -58,8 +69,11 @@ class TestBot(commands.Bot):
         inter: disnake.AppCmdInter,
         error: commands.CommandError,
     ) -> None:
+        msg = f"Slash command `{inter.data.name}` failed due to `{error}`"
+        logger.error(msg, exc_info=True)
+
         embed = disnake.Embed(
-            title=f"Slash command `{inter.data.name}` failed due to `{error}`",
+            title=msg,
             description=fancy_traceback(error),
             color=disnake.Color.red(),
         )
@@ -74,8 +88,10 @@ class TestBot(commands.Bot):
         inter: disnake.AppCmdInter,
         error: commands.CommandError,
     ) -> None:
+        msg = f"User command `{inter.data.name}` failed due to `{error}`"
+        logger.error(msg, exc_info=True)
         embed = disnake.Embed(
-            title=f"User command `{inter.data.name}` failed due to `{error}`",
+            title=msg,
             description=fancy_traceback(error),
             color=disnake.Color.red(),
         )
@@ -90,8 +106,10 @@ class TestBot(commands.Bot):
         inter: disnake.AppCmdInter,
         error: commands.CommandError,
     ) -> None:
+        msg = f"Message command `{inter.data.name}` failed due to `{error}`"
+        logger.error(msg, exc_info=True)
         embed = disnake.Embed(
-            title=f"Message command `{inter.data.name}` failed due to `{error}`",
+            title=msg,
             description=fancy_traceback(error),
             color=disnake.Color.red(),
         )
@@ -104,6 +122,7 @@ class TestBot(commands.Bot):
 
 print(f"disnake: {disnake.__version__}\n")
 
-bot = TestBot()
-bot.load_all_extensions("cogs")
-bot.run(os.environ.get("BOT_TOKEN"))
+if __name__ == "__main__":
+    bot = TestBot()
+    bot.load_extensions(os.path.join(__package__, Config.cogs_folder))
+    bot.run(Config.token)

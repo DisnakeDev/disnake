@@ -221,6 +221,7 @@ class Guild(Hashable):
         - ``HAS_DIRECTORY_ENTRY``: Guild is listed in a student hub.
         - ``HUB``: Guild is a student hub.
         - ``INVITE_SPLASH``: Guild's invite page can have a special splash.
+        - ``INVITES_DISABLED``: Guild has paused invites, preventing new users from joining.
         - ``LINKED_TO_HUB``: Guild is linked to a student hub.
         - ``MEMBER_VERIFICATION_GATE_ENABLED``: Guild has Membership Screening enabled.
         - ``MONETIZATION_ENABLED``: Guild has enabled monetization.
@@ -1746,6 +1747,7 @@ class Guild(Hashable):
         splash: Optional[AssetBytes] = MISSING,
         discovery_splash: Optional[AssetBytes] = MISSING,
         community: bool = MISSING,
+        invites_disabled: bool = MISSING,
         afk_channel: Optional[VoiceChannel] = MISSING,
         owner: Snowflake = MISSING,
         afk_timeout: int = MISSING,
@@ -1790,7 +1792,7 @@ class Guild(Hashable):
             The new name of the guild.
         description: Optional[:class:`str`]
             The new description of the guild. Could be ``None`` for no description.
-            This is only available to guilds that contain ``PUBLIC`` in :attr:`Guild.features`.
+            This is only available to guilds that contain ``COMMUNITY`` in :attr:`Guild.features`.
         icon: Optional[|resource_type|]
             The new guild icon. Only PNG/JPG is supported.
             GIF is only available to guilds that contain ``ANIMATED_ICON`` in :attr:`Guild.features`.
@@ -1829,6 +1831,16 @@ class Guild(Hashable):
         community: :class:`bool`
             Whether the guild should be a Community guild. If set to ``True``\\, both ``rules_channel``
             and ``public_updates_channel`` parameters are required.
+        invites_disabled: :class:`bool`
+            Whether the guild has paused invites, preventing new users from joining.
+
+            This is only available to guilds that contain ``COMMUNITY``
+            in :attr:`Guild.features`.
+
+            This cannot be changed at the same time as the ``community`` feature due a Discord API limitation.
+
+            .. versionadded:: 2.6
+
         afk_channel: Optional[:class:`VoiceChannel`]
             The new channel that is the AFK channel. Could be ``None`` for no AFK channel.
         afk_timeout: :class:`int`
@@ -1856,11 +1868,11 @@ class Guild(Hashable):
 
         rules_channel: Optional[:class:`TextChannel`]
             The new channel that is used for rules. This is only available to
-            guilds that contain ``PUBLIC`` in :attr:`Guild.features`. Could be ``None`` for no rules
+            guilds that contain ``COMMUNITY`` in :attr:`Guild.features`. Could be ``None`` for no rules
             channel.
         public_updates_channel: Optional[:class:`TextChannel`]
             The new channel that is used for public updates from Discord. This is only available to
-            guilds that contain ``PUBLIC`` in :attr:`Guild.features`. Could be ``None`` for no
+            guilds that contain ``COMMUNITY`` in :attr:`Guild.features`. Could be ``None`` for no
             public updates channel.
         premium_progress_bar_enabled: :class:`bool`
             Whether the server boost progress bar is enabled.
@@ -1883,7 +1895,8 @@ class Guild(Hashable):
         ValueError
             ``community`` was set without setting both ``rules_channel`` and ``public_updates_channel`` parameters,
             or if you are not the owner of the guild and request an ownership transfer,
-            or the image format passed in to ``icon`` is invalid.
+            or the image format passed in to ``icon`` is invalid,
+            or both ``community`` and ``invites_disabled`` were provided.
 
         Returns
         -------
@@ -1974,17 +1987,42 @@ class Guild(Hashable):
 
             fields["system_channel_flags"] = system_channel_flags.value
 
-        if community is not MISSING:
-            features = []
-            if community:
-                if "rules_channel_id" in fields and "public_updates_channel_id" in fields:
-                    features.append("COMMUNITY")
+        if community is not MISSING or invites_disabled is not MISSING:
+            # If we don't have complete feature information for the guild,
+            # it is possible to disable or enable other features that we didn't intend to touch.
+            # To enable or disable a feature, we will need to provide all of the existing features in advance.
+            if self.unavailable:
+                raise RuntimeError(
+                    "cannot modify features of an unavailable guild due to potentially destructive results."
+                )
+            features = set(self.features)
+            if community is not MISSING:
+                if not isinstance(community, bool):
+                    raise TypeError("community must be a bool")
+                if community:
+                    if "rules_channel_id" in fields and "public_updates_channel_id" in fields:
+                        features.add("COMMUNITY")
+                    else:
+                        raise ValueError(
+                            "community field requires both rules_channel and public_updates_channel fields to be provided"
+                        )
                 else:
-                    raise ValueError(
-                        "community field requires both rules_channel and public_updates_channel fields to be provided"
-                    )
+                    features.discard("COMMUNITY")
 
-            fields["features"] = features
+            if invites_disabled is not MISSING:
+                if community is not MISSING:
+                    raise ValueError(
+                        "cannot modify both the COMMUNITY feature and INVITES_DISABLED feature at the "
+                        "same time due to a discord limitation."
+                    )
+                if not isinstance(invites_disabled, bool):
+                    raise TypeError("invites_disabled must be a bool")
+                if invites_disabled:
+                    features.add("INVITES_DISABLED")
+                else:
+                    features.discard("INVITES_DISABLED")
+
+            fields["features"] = list(features)
 
         if premium_progress_bar_enabled is not MISSING:
             fields["premium_progress_bar_enabled"] = premium_progress_bar_enabled
