@@ -93,12 +93,12 @@ class ThreadPaginationPayload(TypedDict):
     has_more: bool
 
 
-class PartialThreadTag(TypedDict):
+class PartialForumTag(TypedDict):
     name: str
     emoji_id: Optional[Snowflake]
     emoji_name: Optional[str]
     moderated: bool
 
 
-class ThreadTag(PartialThreadTag):
+class ForumTag(PartialForumTag):
     id: Snowflake

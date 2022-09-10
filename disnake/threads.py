@@ -52,8 +52,8 @@ from .utils import MISSING, _get_as_snowflake, parse_time, snowflake_time
 __all__ = (
     "Thread",
     "ThreadMember",
-    "PartialThreadTag",
-    "ThreadTag",
+    "PartialForumTag",
+    "ForumTag",
 )
 
 if TYPE_CHECKING:
@@ -71,12 +71,12 @@ if TYPE_CHECKING:
     from .types.channel import ForumChannel as ForumChannelPayload
     from .types.snowflake import SnowflakeList
     from .types.threads import (
-        PartialThreadTag as PartialThreadTagPayload,
+        ForumTag as ForumTagPayload,
+        PartialForumTag as PartialForumTagPayload,
         Thread as ThreadPayload,
         ThreadArchiveDurationLiteral,
         ThreadMember as ThreadMemberPayload,
         ThreadMetadata,
-        ThreadTag as ThreadTagPayload,
     )
 
     AnyThreadArchiveDuration = Union[ThreadArchiveDuration, ThreadArchiveDurationLiteral]
@@ -432,8 +432,8 @@ class Thread(Messageable, Hashable):
 
     # TODO: `applied_tags` instead of `tags`?
     @property
-    def tags(self) -> List[ThreadTag]:
-        """List[:class:`ThreadTag`]: The tags currently applied to this thread.
+    def tags(self) -> List[ForumTag]:
+        """List[:class:`ForumTag`]: The tags currently applied to this thread.
         Only applicable to threads in :class:`ForumChannel`\\s.
 
         The returned list can be mutated, and will not change internal state.
@@ -1026,7 +1026,7 @@ class ThreadMember(Hashable):
         return self.parent
 
 
-class PartialThreadTag:
+class PartialForumTag:
     """
     Represents a partial tag for threads in forum channels,
     used for creating new tags.
@@ -1076,14 +1076,14 @@ class PartialThreadTag:
 
     def __eq__(self, other):
         return (
-            isinstance(other, PartialThreadTag)
+            isinstance(other, PartialForumTag)
             and self.name == other.name
             and self.moderated == other.moderated
             and self._emoji_id == other._emoji_id
             and self._emoji_name == other._emoji_name
         )
 
-    def to_dict(self) -> PartialThreadTagPayload:
+    def to_dict(self) -> PartialForumTagPayload:
         return {
             "name": self.name,
             "emoji_id": self._emoji_id,
@@ -1092,12 +1092,9 @@ class PartialThreadTag:
         }
 
 
-# TODO: just `Tag` instead of `ThreadTag`?
-#       or perhaps `ForumTag` to match apidocs name?
-
-# TODO: don't inherit from `Hashable` and inherit `__eq__` from `PartialThreadTag` instead?
+# TODO: don't inherit from `Hashable` and inherit `__eq__` from `PartialForumTag` instead?
 #       would make things like comparing `available_tags` in auditlogs easier
-class ThreadTag(Hashable, PartialThreadTag):
+class ForumTag(Hashable, PartialForumTag):
     """
     Represents a tag for threads in forum channels.
 
@@ -1136,7 +1133,7 @@ class ThreadTag(Hashable, PartialThreadTag):
     def __init__(
         self,
         *,
-        data: ThreadTagPayload,
+        data: ForumTagPayload,
         # Object is used by audit logs
         channel: Union[ForumChannel, Object],
         state: ConnectionState,
@@ -1154,7 +1151,7 @@ class ThreadTag(Hashable, PartialThreadTag):
 
     def __repr__(self) -> str:
         return (
-            f"<ThreadTag id={self.id!r} name={self.name!r}"
+            f"<ForumTag id={self.id!r} name={self.name!r}"
             f" moderated={self.moderated!r} emoji={self.emoji!r}>"
         )
 
@@ -1163,8 +1160,8 @@ class ThreadTag(Hashable, PartialThreadTag):
         """Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]: The emoji associated with this tag, if any."""
         return PartialEmoji._from_name_id(self._emoji_name, self._emoji_id, state=self._state)
 
-    def to_dict(self) -> ThreadTagPayload:
-        payload: ThreadTagPayload = super().to_dict()  # type: ignore
+    def to_dict(self) -> ForumTagPayload:
+        payload: ForumTagPayload = super().to_dict()  # type: ignore
         payload["id"] = self.id
         return payload
 
@@ -1175,7 +1172,7 @@ class ThreadTag(Hashable, PartialThreadTag):
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
         moderated: bool = MISSING,
         reason: Optional[str] = None,
-    ) -> ThreadTag:
+    ) -> ForumTag:
         """|coro|
 
         Edits the tag.
@@ -1205,7 +1202,7 @@ class ThreadTag(Hashable, PartialThreadTag):
 
         Returns
         -------
-        :class:`ThreadTag`
+        :class:`ForumTag`
             The newly edited tag.
         """
         if isinstance(self._channel, Object):
@@ -1239,7 +1236,7 @@ class ThreadTag(Hashable, PartialThreadTag):
         # TODO: update channel state here so that subsequent edits don't send old state?
         for tag in channel_data.get("available_tags", []):
             if int(tag["id"]) == self.id:
-                return ThreadTag(data=tag, channel=self._channel, state=self._state)
+                return ForumTag(data=tag, channel=self._channel, state=self._state)
         raise InvalidData("Could not find tag in response")
 
     async def delete(self, *, reason: Optional[str] = None) -> None:

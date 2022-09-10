@@ -54,7 +54,7 @@ class TestGuildChannelEdit:
             rtc_region="there",
             video_quality_mode=disnake.VideoQualityMode.full,
             flags=disnake.ChannelFlags(pinned=False, require_tag=True),
-            available_tags=[disnake.PartialThreadTag("tag", emoji="woo")],
+            available_tags=[disnake.PartialForumTag("tag", emoji="woo")],
             default_reaction=disnake.PartialEmoji(name="woo", id=9876),
             reason="stuff",
         )

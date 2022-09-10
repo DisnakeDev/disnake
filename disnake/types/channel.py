@@ -26,7 +26,7 @@ DEALINGS IN THE SOFTWARE.
 from typing import List, Literal, Optional, TypedDict, Union
 
 from .snowflake import Snowflake
-from .threads import ThreadArchiveDurationLiteral, ThreadMember, ThreadMetadata, ThreadTag
+from .threads import ForumTag, ThreadArchiveDurationLiteral, ThreadMember, ThreadMetadata
 from .user import PartialUser
 
 OverwriteType = Literal[0, 1]
@@ -153,7 +153,7 @@ class _ForumChannelOptional(TypedDict, total=False):
     topic: Optional[str]
     last_message_id: Optional[Snowflake]
     default_auto_archive_duration: ThreadArchiveDurationLiteral
-    available_tags: List[ThreadTag]
+    available_tags: List[ForumTag]
     default_reaction_emoji: Optional[DefaultReaction]
     default_thread_rate_limit_per_user: int
 

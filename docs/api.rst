@@ -4559,13 +4559,13 @@ AuditLogDiff
         If a tag is not found, then it is an :class:`Object` with the ID
         being set.
 
-        :type: List[Union[:class:`ThreadTag`, :class:`Object`]]
+        :type: List[Union[:class:`ForumTag`, :class:`Object`]]
 
     .. attribute:: available_tags
 
         The available tags for threads in a forum channel being changed.
 
-        :type: List[:class:`ThreadTag`]
+        :type: List[:class:`ForumTag`]
 
     .. attribute:: default_reaction
 
@@ -5167,20 +5167,20 @@ ThreadMember
 .. autoclass:: ThreadMember()
     :members:
 
-PartialThreadTag
-~~~~~~~~~~~~~~~~~
+PartialForumTag
+~~~~~~~~~~~~~~~~
 
-.. attributetable:: PartialThreadTag
+.. attributetable:: PartialForumTag
 
-.. autoclass:: PartialThreadTag()
+.. autoclass:: PartialForumTag()
     :members:
 
-ThreadTag
-~~~~~~~~~~
+ForumTag
+~~~~~~~~~
 
-.. attributetable:: ThreadTag
+.. attributetable:: ForumTag
 
-.. autoclass:: ThreadTag()
+.. autoclass:: ForumTag()
     :members:
     :inherited-members:
 

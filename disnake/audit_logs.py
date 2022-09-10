@@ -72,7 +72,7 @@ if TYPE_CHECKING:
     from .role import Role
     from .stage_instance import StageInstance
     from .sticker import GuildSticker
-    from .threads import Thread, ThreadTag
+    from .threads import ForumTag, Thread
     from .types.audit_log import (
         AuditLogChange as AuditLogChangePayload,
         AuditLogEntry as AuditLogEntryPayload,
@@ -88,7 +88,7 @@ if TYPE_CHECKING:
     )
     from .types.role import Role as RolePayload
     from .types.snowflake import Snowflake
-    from .types.threads import ThreadTag as ThreadTagPayload
+    from .types.threads import ForumTag as ForumTagPayload
     from .user import User
     from .webhook import Webhook
 
@@ -185,18 +185,18 @@ def _guild_hash_transformer(path: str) -> Callable[[AuditLogEntry, Optional[str]
     return _transform
 
 
-def _transform_tag(entry: AuditLogEntry, data: Optional[ThreadTagPayload]) -> Optional[ThreadTag]:
+def _transform_tag(entry: AuditLogEntry, data: Optional[ForumTagPayload]) -> Optional[ForumTag]:
     if data is None:
         return None
-    from .threads import ThreadTag  # cyclic import
+    from .threads import ForumTag  # cyclic import
 
     target_id: int = entry._target_id  # type: ignore
-    return ThreadTag(data=data, channel=Object(target_id), state=entry._state)
+    return ForumTag(data=data, channel=Object(target_id), state=entry._state)
 
 
 def _transform_tag_id(
     entry: AuditLogEntry, data: Optional[str]
-) -> Optional[Union[ThreadTag, Object]]:
+) -> Optional[Union[ForumTag, Object]]:
     if data is None:
         return None
 
@@ -204,7 +204,7 @@ def _transform_tag_id(
     from .channel import ForumChannel
     from .threads import Thread
 
-    tag: Optional[ThreadTag] = None
+    tag: Optional[ForumTag] = None
     tag_id = int(data)
     thread = entry.target
     # try thread parent first

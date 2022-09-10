@@ -90,7 +90,7 @@ if TYPE_CHECKING:
     from .member import Member
     from .message import Message, MessageReference, PartialMessage
     from .state import ConnectionState
-    from .threads import AnyThreadArchiveDuration, PartialThreadTag
+    from .threads import AnyThreadArchiveDuration, PartialForumTag
     from .types.channel import (
         Channel as ChannelPayload,
         DefaultReaction as DefaultReactionPayload,
@@ -98,7 +98,7 @@ if TYPE_CHECKING:
         OverwriteType,
         PermissionOverwrite as PermissionOverwritePayload,
     )
-    from .types.threads import PartialThreadTag as PartialThreadTagPayload
+    from .types.threads import PartialForumTag as PartialForumTagPayload
     from .ui.action_row import Components, MessageUIComponent
     from .ui.view import View
     from .user import ClientUser
@@ -331,7 +331,7 @@ class GuildChannel(ABC):
         rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
         flags: ChannelFlags = MISSING,
-        available_tags: Sequence[PartialThreadTag] = MISSING,
+        available_tags: Sequence[PartialForumTag] = MISSING,
         default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
         reason: Optional[str] = None,
     ) -> Optional[ChannelPayload]:
@@ -416,7 +416,7 @@ class GuildChannel(ABC):
         else:
             flags_payload = MISSING
 
-        available_tags_payload: List[PartialThreadTagPayload] = MISSING
+        available_tags_payload: List[PartialForumTagPayload] = MISSING
         if available_tags is not MISSING:
             available_tags_payload = [tag.to_dict() for tag in available_tags]
 
