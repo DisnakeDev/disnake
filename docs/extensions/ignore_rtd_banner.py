@@ -59,7 +59,7 @@ def main(app: Sphinx) -> None:
             app.events.listeners["doctree-resolved"].pop(index)
 
 
-def setup(app: Sphinx) -> None:
+def setup(app: Sphinx) -> dict:
     app.connect("builder-inited", main)
     app.connect("doctree-resolved", custom)
 
