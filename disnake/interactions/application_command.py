@@ -139,7 +139,7 @@ class ApplicationCommandInteraction(Interaction):
 
     def __init__(self, *, data: ApplicationCommandInteractionPayload, state: ConnectionState):
         super().__init__(data=data, state=state)
-        self.data = ApplicationCommandInteractionData(
+        self.data: ApplicationCommandInteractionData = ApplicationCommandInteractionData(
             data=data["data"], state=state, guild_id=self.guild_id
         )
         self.application_command: InvokableApplicationCommand = MISSING
