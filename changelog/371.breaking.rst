@@ -1,0 +1,2 @@
+Update :class:`Client` classes such that their initialization kwargs are explicitly stated and typehinted.
+- Replaced ``**kwargs`` / ``**options`` with explicit keyword arguments for the ``__init__`` methods of :class:`Client`, :class:`ext.commands.Bot`, :class:`ext.commands.InteractionBot`, all ``AutoSharded*`` variants, and all relevant parent classes.

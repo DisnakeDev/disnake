@@ -1,0 +1,1 @@
+Call new :func:`disnake.on_gateway_error` instead of letting exceptions propagate that occurred while deserializing a received gateway event.
