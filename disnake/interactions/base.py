@@ -111,6 +111,8 @@ class Interaction:
 
     Attributes
     ----------
+    data: Mapping[:class:`str`, Any]
+        The interaction's raw data. This might be replaced with a more processed version in subclasses.
     id: :class:`int`
         The interaction's ID.
     type: :class:`InteractionType`
@@ -148,6 +150,7 @@ class Interaction:
     """
 
     __slots__: Tuple[str, ...] = (
+        "data",
         "id",
         "type",
         "guild_id",
@@ -172,6 +175,7 @@ class Interaction:
     )
 
     def __init__(self, *, data: InteractionPayload, state: ConnectionState):
+        self.data: Mapping[str, Any] = data.get("data") or {}
         self._state: ConnectionState = state
         # TODO: Maybe use a unique session
         self._session: ClientSession = state.http._HTTPClient__session  # type: ignore
