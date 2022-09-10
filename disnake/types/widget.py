@@ -41,7 +41,9 @@ class WidgetActivity(TypedDict):
 
 class WidgetMember(User, total=False):
     nick: str
-    # `activity` is used starting api v8, `game` is used before
+    # `activity` is used starting api v8, `game` is used in older versions.
+    # Since widgets are sometimes used with the unversioned URL, we support both
+    # as long as v6 is still the default.
     activity: WidgetActivity
     game: WidgetActivity
     status: str
