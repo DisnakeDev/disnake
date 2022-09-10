@@ -435,8 +435,6 @@ class Thread(Messageable, Hashable):
         """List[:class:`ForumTag`]: The tags currently applied to this thread.
         Only applicable to threads in :class:`ForumChannel`\\s.
 
-        The returned list can be mutated, and will not change internal state.
-
         .. versionadded:: 2.6
         """
         from .channel import ForumChannel  # cyclic import

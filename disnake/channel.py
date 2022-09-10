@@ -2670,8 +2670,6 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
     def available_tags(self) -> List[ForumTag]:
         """List[:class:`ForumTag`]: The available tags for threads in this forum channel.
 
-        The returned list can be mutated, and will not change internal state.
-
         .. versionadded:: 2.6
         """
         return list(self._available_tags.values())
