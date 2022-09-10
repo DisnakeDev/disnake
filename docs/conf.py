@@ -15,17 +15,11 @@ import importlib.util
 import inspect
 import os
 import re
-import subprocess # noqa: S404
+import subprocess  # noqa: S404
 import sys
 from typing import Any, Dict, Optional
-from collections import UserList
 
 from sphinx.application import Sphinx
-
-class RTDExtIgnorer(UserList):
-    def insert(self, index: int, object_: Any) -> None:
-        if object_ != "readthedocs_ext.readthedocs":
-            self.data.insert(index, object_)
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -41,7 +35,7 @@ sys.path.append(os.path.abspath("extensions"))
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = RTDExtIgnorer([
+extensions = [
     "builder",
     "sphinx.ext.autodoc",
     "sphinx.ext.extlinks",
@@ -57,7 +51,7 @@ extensions = RTDExtIgnorer([
     "attributetable",
     "resourcelinks",
     "nitpick_file_ignorer",
-])
+]
 
 autodoc_member_order = "bysource"
 autodoc_typehints = "none"
