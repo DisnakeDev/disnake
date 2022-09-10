@@ -1,5 +1,6 @@
 from docutils import nodes
 from sphinx.application import Sphinx
+from sphinx.errors import ExtensionError
 
 
 def custom(app, doctree, fromdocname):
@@ -62,8 +63,11 @@ def setup(app: Sphinx) -> None:
     app.connect("builder-inited", main)
     app.connect("doctree-resolved", custom)
 
-    app.add_config_value("readthedocs_vcs_url", "", "html")
-    app.add_config_value("readthedocs_build_url", "", "html")
+    try:
+        app.add_config_value("readthedocs_vcs_url", "", "html")
+        app.add_config_value("readthedocs_build_url", "", "html")
+    except ExtensionError:
+        pass
 
     return {
         "parallel_read_safe": True,
