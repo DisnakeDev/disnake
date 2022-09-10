@@ -3626,6 +3626,8 @@ class Guild(Hashable):
 
         Raises
         ------
+        TypeError
+            ``delete_message_duration`` has an invalid type.
         Forbidden
             You do not have the proper permissions to ban.
         HTTPException
@@ -3635,8 +3637,13 @@ class Guild(Hashable):
             delete_message_seconds = delete_message_days * 86400
         elif isinstance(delete_message_duration, datetime.timedelta):
             delete_message_seconds = delete_message_duration.seconds
-        else:
+        elif isinstance(delete_message_duration, int):
             delete_message_seconds = delete_message_duration
+        else:
+            raise TypeError(
+                "`delete_message_duration` should be int or timedelta, "
+                f"not {type(delete_message_duration).__name__}"
+            )
 
         await self._state.http.ban(
             user.id, self.id, delete_message_seconds=delete_message_seconds, reason=reason
