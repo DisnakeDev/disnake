@@ -303,7 +303,7 @@ class PartialEmoji(_EmojiTag, AssetMixin):
                 state=state,
                 # TODO: this renders correctly, but apparently shouldn't be done
                 # according to https://github.com/discord/discord-api-docs/pull/4983
-                name=name or "_",
+                name=name or "__",
                 id=id,
                 # note: `animated` is unknown but presumably we already got the (animated)
                 # emoji from the guild cache at this point
