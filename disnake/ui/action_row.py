@@ -420,15 +420,20 @@ class ActionRow(Generic[UIComponentT]):
 
         return self
 
-    def clear_items(self) -> None:
+    def clear_items(self) -> Self:
         """Remove all components from the action row.
+
+        This function returns the class instance to allow for fluent-style chaining.
 
         .. versionadded:: 2.6
         """
         self._children.clear()
+        return self
 
-    def remove_item(self, item: UIComponentT) -> None:
+    def remove_item(self, item: UIComponentT) -> Self:
         """Remove a component from the action row.
+
+        This function returns the class instance to allow for fluent-style chaining.
 
         .. versionadded:: 2.6
 
@@ -443,6 +448,7 @@ class ActionRow(Generic[UIComponentT]):
             The component could not be found on the action row.
         """
         self._children.remove(item)
+        return self
 
     def pop(self, index: int) -> UIComponentT:
         """Pop the component at the provided index from the action row.

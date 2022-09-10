@@ -4,3 +4,5 @@ Return the :class:`disnake.ui.ActionRow` instance on multiple methods to allow f
 - :func:`ActionRow.add_button <disnake.ui.ActionRow.add_button>`
 - :func:`ActionRow.add_select <disnake.ui.ActionRow.add_select>`
 - :func:`ActionRow.add_text_input <disnake.ui.ActionRow.add_text_input>`
+- :func:`ActionRow.clear_items <disnake.ui.ActionRow.clear_items>`
+- :func:`ActionRow.remove_item <disnake.ui.ActionRow.remove_item>`
