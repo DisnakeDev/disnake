@@ -41,7 +41,7 @@ sys.path.append(os.path.abspath("extensions"))
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = RTDExtIgnorer(
+extensions = RTDExtIgnorer([
     "builder",
     "sphinx.ext.autodoc",
     "sphinx.ext.extlinks",
@@ -57,7 +57,7 @@ extensions = RTDExtIgnorer(
     "attributetable",
     "resourcelinks",
     "nitpick_file_ignorer",
-)
+])
 
 autodoc_member_order = "bysource"
 autodoc_typehints = "none"
