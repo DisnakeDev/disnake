@@ -192,7 +192,7 @@ class Thread(Messageable, Hashable):
         "create_timestamp",
         "last_pin_timestamp",
         "_flags",
-        "_tags",
+        "_applied_tags",
         "_type",
         "_state",
         "_members",
@@ -211,7 +211,7 @@ class Thread(Messageable, Hashable):
         return (
             f"<Thread id={self.id!r} name={self.name!r} parent={self.parent!r} "
             f"owner_id={self.owner_id!r} locked={self.locked!r} archived={self.archived!r} "
-            f"flags={self.flags!r} tags={self.tags!r}>"
+            f"flags={self.flags!r} applied_tags={self.applied_tags!r}>"
         )
 
     def __str__(self) -> str:
@@ -232,7 +232,7 @@ class Thread(Messageable, Hashable):
             data.get("last_pin_timestamp")
         )
         self._flags: int = data.get("flags", 0)
-        self._tags = list(map(int, data.get("applied_tags", [])))
+        self._applied_tags = list(map(int, data.get("applied_tags", [])))
         self._unroll_metadata(data["thread_metadata"])
 
         try:
@@ -258,7 +258,7 @@ class Thread(Messageable, Hashable):
 
         self.slowmode_delay = data.get("rate_limit_per_user", 0)
         self._flags = data.get("flags", 0)
-        self._tags = list(map(int, data.get("applied_tags", [])))
+        self._applied_tags = list(map(int, data.get("applied_tags", [])))
 
         try:
             self._unroll_metadata(data["thread_metadata"])
@@ -430,9 +430,8 @@ class Thread(Messageable, Hashable):
         """
         return self.flags.pinned
 
-    # TODO: `applied_tags` instead of `tags`?
     @property
-    def tags(self) -> List[ForumTag]:
+    def applied_tags(self) -> List[ForumTag]:
         """List[:class:`ForumTag`]: The tags currently applied to this thread.
         Only applicable to threads in :class:`ForumChannel`\\s.
 
@@ -447,7 +446,7 @@ class Thread(Messageable, Hashable):
             return []
 
         # threads may have tag IDs for tags that don't exist anymore
-        return list(filter(None, map(parent._available_tags.get, self._tags)))
+        return list(filter(None, map(parent._available_tags.get, self._applied_tags)))
 
     def permissions_for(
         self,
@@ -682,7 +681,7 @@ class Thread(Messageable, Hashable):
         auto_archive_duration: AnyThreadArchiveDuration = MISSING,
         pinned: bool = MISSING,
         flags: ChannelFlags = MISSING,
-        tags: Sequence[Snowflake] = MISSING,
+        applied_tags: Sequence[Snowflake] = MISSING,
         reason: Optional[str] = None,
     ) -> Thread:
         """|coro|
@@ -724,7 +723,7 @@ class Thread(Messageable, Hashable):
 
             .. versionadded:: 2.6
 
-        tags: Sequence[:class:`abc.Snowflake`]
+        applied_tags: Sequence[:class:`abc.Snowflake`]
             The new tags of the thread. Maximum of 5.
             This is only available for threads created in a :class:`ForumChannel`.
 
@@ -771,8 +770,8 @@ class Thread(Messageable, Hashable):
                 raise TypeError("flags field must be of type ChannelFlags")
             payload["flags"] = flags.value
 
-        if tags is not MISSING:
-            payload["applied_tags"] = [t.id for t in tags]
+        if applied_tags is not MISSING:
+            payload["applied_tags"] = [t.id for t in applied_tags]
 
         data = await self._state.http.edit_channel(self.id, **payload, reason=reason)
         # The data payload will always be a Thread payload

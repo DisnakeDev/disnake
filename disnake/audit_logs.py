@@ -385,7 +385,7 @@ class AuditLogChanges:
         "trigger_metadata":                   (None, _transform_automod_trigger_metadata),
         "exempt_roles":                       (None, _list_transformer(_transform_role)),
         "exempt_channels":                    (None, _list_transformer(_transform_channel)),
-        "applied_tags":                       ("tags", _list_transformer(_transform_tag_id)),
+        "applied_tags":                       (None, _list_transformer(_transform_tag_id)),
         "available_tags":                     (None, _list_transformer(_transform_tag)),
         "default_reaction_emoji":             ("default_reaction", _transform_default_reaction),
     }

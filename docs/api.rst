@@ -3058,7 +3058,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.slowmode_delay`
         - :attr:`~AuditLogDiff.invitable`
         - :attr:`~AuditLogDiff.flags`
-        - :attr:`~AuditLogDiff.tags`
+        - :attr:`~AuditLogDiff.applied_tags`
 
         .. versionadded:: 2.0
 
@@ -3079,7 +3079,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.slowmode_delay`
         - :attr:`~AuditLogDiff.invitable`
         - :attr:`~AuditLogDiff.flags`
-        - :attr:`~AuditLogDiff.tags`
+        - :attr:`~AuditLogDiff.applied_tags`
 
         .. versionadded:: 2.0
 
@@ -3100,7 +3100,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.slowmode_delay`
         - :attr:`~AuditLogDiff.invitable`
         - :attr:`~AuditLogDiff.flags`
-        - :attr:`~AuditLogDiff.tags`
+        - :attr:`~AuditLogDiff.applied_tags`
 
         .. versionadded:: 2.0
 
@@ -4552,9 +4552,9 @@ AuditLogDiff
 
         :type: List[Union[:class:`abc.GuildChannel`, :class:`Object`]]
 
-    .. attribute:: tags
+    .. attribute:: applied_tags
 
-        The applied tags of a thread in a forum channel being changed.
+        The tags applied to a thread in a forum channel being changed.
 
         If a tag is not found, then it is an :class:`Object` with the ID
         being set.

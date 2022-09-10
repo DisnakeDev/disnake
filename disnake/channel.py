@@ -2983,7 +2983,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         name: str,
         auto_archive_duration: AnyThreadArchiveDuration = MISSING,
         slowmode_delay: int = MISSING,
-        tags: Sequence[Snowflake] = MISSING,
+        applied_tags: Sequence[Snowflake] = MISSING,
         content: str,
         embed: Embed = MISSING,
         embeds: List[Embed] = MISSING,
@@ -3017,7 +3017,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             Specifies the slowmode rate limit for users in this thread, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
             If not provided, slowmode is disabled.
-        tags: Sequence[:class:`abc.Snowflake`]
+        applied_tags: Sequence[:class:`abc.Snowflake`]
             The tags to apply to the new thread. Maximum of 5.
 
             .. versionadded:: 2.6
@@ -3096,7 +3096,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
                 "ThreadArchiveDurationLiteral", try_enum_to_int(auto_archive_duration)
             )
 
-        applied_tags = [t.id for t in tags] if tags else []
+        tag_ids = [t.id for t in applied_tags] if applied_tags else []
 
         if params.files and len(params.files) > 10:
             raise ValueError("files parameter must be a list of up to 10 elements")
@@ -3115,7 +3115,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
                 auto_archive_duration=auto_archive_duration or self.default_auto_archive_duration,
                 # TODO: use `None` instead of `0` here instead to inherit thread_slowmode_delay?
                 rate_limit_per_user=slowmode_delay or 0,
-                applied_tags=applied_tags,
+                applied_tags=tag_ids,
                 type=ChannelType.public_thread.value,
                 files=params.files,
                 flags=flags,
