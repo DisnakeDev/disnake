@@ -85,16 +85,16 @@ Components = Union[
 ]
 
 # this is cursed
-ButtonCompatibleActionRow = TypeVar(
-    "ButtonCompatibleActionRow",
+ButtonCompatibleActionRowT = TypeVar(
+    "ButtonCompatibleActionRowT",
     bound="Union[ActionRow[MessageUIComponent], ActionRow[WrappedComponent]]",
 )
-SelectCompatibleActionRow = TypeVar(
-    "SelectCompatibleActionRow",
-    bound="Union[ActionRow[MessageUIComponent], ActionRow[WrappedComponent]]",  # to add: ActionRow[ModalUIComponent]
+SelectCompatibleActionRowT = TypeVar(
+    "SelectCompatibleActionRowT",
+    bound="Union[ActionRow[MessageUIComponent],ActionRow[WrappedComponent]]",  # to add: ActionRow[ModalUIComponent]
 )
-TextInputCompatibleActionRow = TypeVar(
-    "TextInputCompatibleActionRow",
+TextInputCompatibleActionRowT = TypeVar(
+    "TextInputCompatibleActionRowT",
     bound="Union[ActionRow[ModalUIComponent], ActionRow[WrappedComponent]]",
 )
 
@@ -247,7 +247,7 @@ class ActionRow(Generic[UIComponentT]):
         return self
 
     def add_button(
-        self: ButtonCompatibleActionRow,
+        self: ButtonCompatibleActionRowT,
         index: Optional[int] = None,
         *,
         style: ButtonStyle = ButtonStyle.secondary,
@@ -256,7 +256,7 @@ class ActionRow(Generic[UIComponentT]):
         custom_id: Optional[str] = None,
         url: Optional[str] = None,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
-    ) -> ButtonCompatibleActionRow:
+    ) -> ButtonCompatibleActionRowT:
         """Add a button to the action row. Can only be used if the action
         row holds message components.
 
@@ -307,7 +307,7 @@ class ActionRow(Generic[UIComponentT]):
         return self
 
     def add_select(
-        self: SelectCompatibleActionRow,
+        self: SelectCompatibleActionRowT,
         *,
         custom_id: str = MISSING,
         placeholder: Optional[str] = None,
@@ -315,7 +315,7 @@ class ActionRow(Generic[UIComponentT]):
         max_values: int = 1,
         options: List[SelectOption] = MISSING,
         disabled: bool = False,
-    ) -> SelectCompatibleActionRow:
+    ) -> SelectCompatibleActionRowT:
         """Add a select menu to the action row. Can only be used if the action
         row holds message components.
 
@@ -360,7 +360,7 @@ class ActionRow(Generic[UIComponentT]):
         return self
 
     def add_text_input(
-        self: TextInputCompatibleActionRow,
+        self: TextInputCompatibleActionRowT,
         *,
         label: str,
         custom_id: str,
@@ -370,7 +370,7 @@ class ActionRow(Generic[UIComponentT]):
         required: bool = True,
         min_length: Optional[int] = None,
         max_length: Optional[int] = None,
-    ) -> TextInputCompatibleActionRow:
+    ) -> TextInputCompatibleActionRowT:
         """Add a text input to the action row. Can only be used if the action
         row holds modal components.
 
