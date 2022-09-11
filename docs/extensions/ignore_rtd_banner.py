@@ -1,3 +1,4 @@
+from _types import SphinxExtensionMeta
 from docutils import nodes
 from sphinx.application import Sphinx
 from sphinx.errors import ExtensionError
@@ -59,7 +60,7 @@ def main(app: Sphinx) -> None:
             app.events.listeners["doctree-resolved"].pop(index)
 
 
-def setup(app: Sphinx) -> dict:
+def setup(app: Sphinx) -> SphinxExtensionMeta:
     app.connect("builder-inited", main)
     app.connect("doctree-resolved", custom)
 
