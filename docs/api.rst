@@ -4910,6 +4910,7 @@ Interaction
 .. autoclass:: Interaction()
     :members:
     :inherited-members:
+    :exclude-members: original_message, edit_original_message, delete_original_message
 
 ApplicationCommandInteraction
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
