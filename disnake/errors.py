@@ -322,7 +322,7 @@ class InteractionTimedOut(InteractionException):
             "Interaction took more than 3 seconds to be responded to. "
             'Please defer it using "interaction.response.defer" on the start of your command. '
             "Later you may send a response by editing the deferred message "
-            'using "interaction.edit_original_message"'
+            'using "interaction.edit_original_response"'
             "\n"
             "Note: This might also be caused by a misconfiguration in the components "
             "make sure you do not respond twice in case this is a component."
