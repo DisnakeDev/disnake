@@ -1,0 +1,1 @@
+Return the :class:`disnake.ui.View` instance from :func:`View.add_item <disnake.ui.View.add_item>`, :func:`View.remove_item <disnake.ui.View.remove_item>` and :func:`View.clear_items <disnake.ui.View.clear_items>` to allow for fluent-style chaining.
