@@ -1,1 +1,1 @@
-Add :class:`InteractionResponse.response_type`, which contains the type of the response made, if any.
+Add :class:`InteractionResponse.type`, which contains the type of the response made, if any.
