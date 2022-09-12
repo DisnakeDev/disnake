@@ -74,7 +74,6 @@ SelectOptionInput = Union[List[SelectOption], List[str], Dict[str, str]]
 
 
 def _parse_select_options(options: SelectOptionInput) -> List[SelectOption]:
-
     if isinstance(options, dict):
         return [SelectOption(label=key, value=val) for key, val in options.items()]
 
