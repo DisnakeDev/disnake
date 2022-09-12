@@ -135,13 +135,11 @@ class WidgetMember(BaseUser):
     id: :class:`int`
         The member's anonymized ID.
     name: :class:`str`
-        The member's username.
+        The member's nickname (if set in the guild) or username.
     discriminator: :class:`str`
         The member's anonymized discriminator.
     status: :class:`Status`
         The member's status.
-    nick: Optional[:class:`str`]
-        The member's nickname.
     activity: Optional[Union[:class:`BaseActivity`, :class:`Spotify`]]
         The member's activity. This generally only has the ``name`` set.
     deafened: Optional[:class:`bool`]
@@ -156,7 +154,6 @@ class WidgetMember(BaseUser):
 
     __slots__ = (
         "status",
-        "nick",
         "activity",
         "deafened",
         "suppress",
@@ -176,7 +173,6 @@ class WidgetMember(BaseUser):
         connected_channel: Optional[WidgetChannel] = None,
     ) -> None:
         super().__init__(state=state, data=data)
-        self.nick: Optional[str] = data.get("nick")
         self.status: Status = try_enum(Status, data.get("status"))
         self.deafened: Optional[bool] = data.get("deaf", False) or data.get("self_deaf", False)
         self.muted: Optional[bool] = data.get("mute", False) or data.get("self_mute", False)
@@ -190,10 +186,7 @@ class WidgetMember(BaseUser):
         self.connected_channel: Optional[WidgetChannel] = connected_channel
 
     def __repr__(self) -> str:
-        return (
-            f"<WidgetMember name={self.name!r} discriminator={self.discriminator!r}"
-            f" nick={self.nick!r}>"
-        )
+        return f"<WidgetMember name={self.name!r} discriminator={self.discriminator!r}"
 
     # overwrite base type's @property since widget members always seem to have `avatar: null`,
     # and instead a separate `avatar_url` field with a full url
@@ -210,8 +203,8 @@ class WidgetMember(BaseUser):
 
     @property
     def display_name(self) -> str:
-        """:class:`str`: Returns the member's display name."""
-        return self.nick or self.name
+        """:class:`str`: Returns the member's name."""
+        return self.name
 
 
 class WidgetSettings:
