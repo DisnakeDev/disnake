@@ -1,0 +1,4 @@
+Add aliases to the ``original_message`` methods.
+- :func:`Interaction.original_response` is aliased to :func:`Interaction.original_message`
+- :func:`Interaction.edit_original_response` is aliased to :func:`Interaction.edit_original_message`
+- :func:`Interaction.delete_original_response` is aliased to :func:`Interaction.delete_original_message`
