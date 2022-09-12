@@ -694,7 +694,7 @@ class InteractionResponse:
     def type(self) -> Optional[InteractionResponseType]:
         """Optional[:class:`InteractionResponseType`]: If a response was successfully made, this is the type of the response.
 
-        ..versionadded:: 2.6
+        .. versionadded:: 2.6
         """
         return self._response_type
 
