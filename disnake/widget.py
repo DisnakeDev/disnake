@@ -162,9 +162,6 @@ class WidgetMember(BaseUser):
         "_avatar_url",
     )
 
-    if TYPE_CHECKING:
-        activity: Optional[Union[BaseActivity, Spotify]]
-
     def __init__(
         self,
         *,
