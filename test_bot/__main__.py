@@ -77,7 +77,7 @@ class TestBot(commands.Bot):
             description=fancy_traceback(error),
             color=disnake.Color.red(),
         )
-        if inter.response._responded:
+        if inter.response.is_done():
             send = inter.channel.send
         else:
             send = inter.response.send_message
@@ -95,7 +95,7 @@ class TestBot(commands.Bot):
             description=fancy_traceback(error),
             color=disnake.Color.red(),
         )
-        if inter.response._responded:
+        if inter.response.is_done():
             send = inter.channel.send
         else:
             send = inter.response.send_message
@@ -113,7 +113,7 @@ class TestBot(commands.Bot):
             description=fancy_traceback(error),
             color=disnake.Color.red(),
         )
-        if inter.response._responded:
+        if inter.response.is_done():
             send = inter.channel.send
         else:
             send = inter.response.send_message
