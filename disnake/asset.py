@@ -168,6 +168,14 @@ class AssetMixin:
         """
         data = await self.read()
         filename = filename or yarl.URL(self.url).name
+
+        # if the filename doesn't have an extension (e.g. widget member avatars),
+        # try to infer it from the data
+        if not os.path.splitext(filename)[1]:
+            ext = utils._get_extension_for_image(data)
+            if ext:
+                filename += ext
+
         return File(io.BytesIO(data), filename=filename, spoiler=spoiler, description=description)
 
 
