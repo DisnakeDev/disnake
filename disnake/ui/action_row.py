@@ -46,13 +46,12 @@ from ..components import (
     Button as ButtonComponent,
     NestedComponent,
     SelectMenu as SelectComponent,
-    SelectOption,
 )
 from ..enums import ButtonStyle, ComponentType, TextInputStyle
 from ..utils import MISSING, SequenceProxy
 from .button import Button
 from .item import WrappedComponent
-from .select import Select
+from .select import Select, SelectOptionInput
 from .text_input import TextInput
 
 if TYPE_CHECKING:
@@ -313,7 +312,7 @@ class ActionRow(Generic[UIComponentT]):
         placeholder: Optional[str] = None,
         min_values: int = 1,
         max_values: int = 1,
-        options: List[SelectOption] = MISSING,
+        options: SelectOptionInput = MISSING,
         disabled: bool = False,
     ) -> SelectCompatibleActionRowT:
         """Add a select menu to the action row. Can only be used if the action
