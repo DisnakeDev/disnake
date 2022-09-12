@@ -691,7 +691,7 @@ class InteractionResponse:
         self._response_type: Optional[InteractionResponseType] = None
 
     @property
-    def response_type(self) -> Optional[InteractionResponseType]:
+    def type(self) -> Optional[InteractionResponseType]:
         """Optional[:class:`InteractionResponseType`]: If a response was successfully made, this is the type of the response.
 
         ..versionadded:: 2.6
