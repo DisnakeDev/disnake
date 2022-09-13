@@ -1037,7 +1037,7 @@ class Client:
 
                 if connecting:
                     # Always identify back to the initial gateway if we failed while connecting.
-                    # This is just in case the resume gateway instance is broken.
+                    # This is in case we fail to connect to the resume_gateway instance.
                     ws_params.update(
                         resume=False,
                         gateway=initial_gateway,
