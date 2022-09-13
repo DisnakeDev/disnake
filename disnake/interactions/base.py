@@ -653,7 +653,7 @@ class Interaction:
         ValueError
             The length of ``embeds`` was invalid.
         """
-        if self.response._responded:
+        if self.response._response_type is not None:
             sender = self.followup.send
         else:
             sender = self.response.send_message
@@ -682,13 +682,21 @@ class InteractionResponse:
     """
 
     __slots__: Tuple[str, ...] = (
-        "_responded",
         "_parent",
+        "_response_type",
     )
 
     def __init__(self, parent: Interaction):
         self._parent: Interaction = parent
-        self._responded: bool = False
+        self._response_type: Optional[InteractionResponseType] = None
+
+    @property
+    def type(self) -> Optional[InteractionResponseType]:
+        """Optional[:class:`InteractionResponseType`]: If a response was successfully made, this is the type of the response.
+
+        .. versionadded:: 2.6
+        """
+        return self._response_type
 
     def is_done(self) -> bool:
         """Whether an interaction response has been done before.
@@ -697,7 +705,7 @@ class InteractionResponse:
 
         :return type: :class:`bool`
         """
-        return self._responded
+        return self._response_type is not None
 
     async def defer(
         self,
@@ -738,7 +746,7 @@ class InteractionResponse:
         TypeError
             This interaction cannot be deferred.
         """
-        if self._responded:
+        if self._response_type is not None:
             raise InteractionResponded(self._parent)
 
         defer_type: Optional[InteractionResponseType] = None
@@ -772,7 +780,7 @@ class InteractionResponse:
             type=defer_type.value,
             data=data or None,
         )
-        self._responded = True
+        self._response_type = defer_type
 
     async def pong(self) -> None:
         """|coro|
@@ -788,19 +796,20 @@ class InteractionResponse:
         InteractionResponded
             This interaction has already been responded to before.
         """
-        if self._responded:
+        if self._response_type is not None:
             raise InteractionResponded(self._parent)
 
         parent = self._parent
         if parent.type is InteractionType.ping:
             adapter = async_context.get()
+            response_type = InteractionResponseType.pong
             await adapter.create_interaction_response(
                 parent.id,
                 parent.token,
                 session=parent._session,
-                type=InteractionResponseType.pong.value,
+                type=response_type.value,
             )
-            self._responded = True
+            self._response_type = response_type
 
     async def send_message(
         self,
@@ -874,7 +883,7 @@ class InteractionResponse:
         InteractionResponded
             This interaction has already been responded to before.
         """
-        if self._responded:
+        if self._response_type is not None:
             raise InteractionResponded(self._parent)
 
         payload: Dict[str, Any] = {
@@ -939,12 +948,13 @@ class InteractionResponse:
 
         parent = self._parent
         adapter = async_context.get()
+        response_type = InteractionResponseType.channel_message
         try:
             await adapter.create_interaction_response(
                 parent.id,
                 parent.token,
                 session=parent._session,
-                type=InteractionResponseType.channel_message.value,
+                type=response_type.value,
                 data=payload,
                 files=files or None,
             )
@@ -957,7 +967,7 @@ class InteractionResponse:
                 for f in files:
                     f.close()
 
-        self._responded = True
+        self._response_type = response_type
 
         if view is not MISSING:
             if ephemeral and view.timeout is None:
@@ -1051,7 +1061,7 @@ class InteractionResponse:
         InteractionResponded
             This interaction has already been responded to before.
         """
-        if self._responded:
+        if self._response_type is not None:
             raise InteractionResponded(self._parent)
 
         parent = self._parent
@@ -1121,12 +1131,13 @@ class InteractionResponse:
             payload["components"] = [] if components is None else components_to_dict(components)
 
         adapter = async_context.get()
+        response_type = InteractionResponseType.message_update
         try:
             await adapter.create_interaction_response(
                 parent.id,
                 parent.token,
                 session=parent._session,
-                type=InteractionResponseType.message_update.value,
+                type=response_type.value,
                 data=payload,
                 files=files,
             )
@@ -1138,7 +1149,7 @@ class InteractionResponse:
         if view and not view.is_finished():
             state.store_view(view, message.id)
 
-        self._responded = True
+        self._response_type = response_type
 
     async def autocomplete(self, *, choices: Choices) -> None:
         """|coro|
@@ -1158,7 +1169,7 @@ class InteractionResponse:
         InteractionResponded
             This interaction has already been responded to before.
         """
-        if self._responded:
+        if self._response_type is not None:
             raise InteractionResponded(self._parent)
 
         choices_data: List[ApplicationCommandOptionChoicePayload]
@@ -1181,15 +1192,16 @@ class InteractionResponse:
 
         parent = self._parent
         adapter = async_context.get()
+        response_type = InteractionResponseType.application_command_autocomplete_result
         await adapter.create_interaction_response(
             parent.id,
             parent.token,
             session=parent._session,
-            type=InteractionResponseType.application_command_autocomplete_result.value,
+            type=response_type.value,
             data={"choices": choices_data},
         )
 
-        self._responded = True
+        self._response_type = response_type
 
     @overload
     async def send_modal(self, modal: Modal) -> None:
@@ -1258,7 +1270,7 @@ class InteractionResponse:
         if parent.type is InteractionType.modal_submit:
             raise ModalChainNotSupported(parent)  # type: ignore
 
-        if self._responded:
+        if self._response_type is not None:
             raise InteractionResponded(parent)
 
         modal_data: ModalPayload
@@ -1280,14 +1292,15 @@ class InteractionResponse:
             raise TypeError("Either modal or title, custom_id, components must be provided")
 
         adapter = async_context.get()
+        response_type = InteractionResponseType.modal
         await adapter.create_interaction_response(
             parent.id,
             parent.token,
             session=parent._session,
-            type=InteractionResponseType.modal.value,
+            type=response_type.value,
             data=modal_data,  # type: ignore
         )
-        self._responded = True
+        self._response_type = response_type
 
         if modal is not None:
             parent._state.store_modal(parent.author.id, modal)
