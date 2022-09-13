@@ -25,7 +25,6 @@ DEALINGS IN THE SOFTWARE.
 
 from typing import List, Optional, TypedDict
 
-from .activity import Activity
 from .snowflake import Snowflake
 from .user import User
 
@@ -36,9 +35,16 @@ class WidgetChannel(TypedDict):
     position: int
 
 
+class WidgetActivity(TypedDict):
+    name: str
+
+
 class WidgetMember(User, total=False):
-    nick: str
-    game: Activity
+    # `activity` is used starting api v8, `game` is used in older versions.
+    # Since widgets are sometimes used with the unversioned URL, we support both
+    # as long as v6 is still the default.
+    activity: WidgetActivity
+    game: WidgetActivity
     status: str
     avatar_url: str
     deaf: bool
@@ -48,16 +54,13 @@ class WidgetMember(User, total=False):
     suppress: bool
 
 
-class _WidgetOptional(TypedDict, total=False):
+class Widget(TypedDict):
+    id: Snowflake
+    name: str
+    instant_invite: Optional[str]
     channels: List[WidgetChannel]
     members: List[WidgetMember]
     presence_count: int
-
-
-class Widget(_WidgetOptional):
-    id: Snowflake
-    name: str
-    instant_invite: str
 
 
 class WidgetSettings(TypedDict):
