@@ -2620,13 +2620,15 @@ class HTTPClient:
 
     @staticmethod
     def _format_gateway_url(url: str, *, encoding: str, zlib: bool) -> str:
-        params = {
-            "v": _API_VERSION,
-            "encoding": encoding,
-        }
+        _url = yarl.URL(url)
+        params = _url.query.copy()
+        params["v"] = str(_API_VERSION)
+        params["encoding"] = encoding
         if zlib:
             params["compress"] = "zlib-stream"
-        return str(yarl.URL(url).update_query(params))
+        else:
+            params.popall("compress", None)
+        return str(_url.with_query(params))
 
     def get_user(self, user_id: Snowflake) -> Response[user.User]:
         return self.request(Route("GET", "/users/{user_id}", user_id=user_id))
