@@ -528,7 +528,17 @@ def _maybe_cast(value: V, converter: Callable[[V], T], default: T = None) -> Opt
     return converter(value)
 
 
-def _get_mime_type_for_image(data: bytes):
+# stdlib mimetypes doesn't know webp in <3.11, so we ship
+# our own map with the needed types
+_mime_type_extensions = {
+    "image/png": ".png",
+    "image/jpeg": ".jpg",
+    "image/gif": ".gif",
+    "image/webp": ".webp",
+}
+
+
+def _get_mime_type_for_image(data: bytes) -> str:
     if data[0:8] == b"\x89\x50\x4E\x47\x0D\x0A\x1A\x0A":
         return "image/png"
     elif data[0:3] == b"\xff\xd8\xff" or data[6:10] in (b"JFIF", b"Exif"):
@@ -546,6 +556,14 @@ def _bytes_to_base64_data(data: bytes) -> str:
     mime = _get_mime_type_for_image(data)
     b64 = b64encode(data).decode("ascii")
     return fmt.format(mime=mime, data=b64)
+
+
+def _get_extension_for_image(data: bytes) -> Optional[str]:
+    try:
+        mime_type = _get_mime_type_for_image(data)
+    except ValueError:
+        return None
+    return _mime_type_extensions.get(mime_type)
 
 
 @overload

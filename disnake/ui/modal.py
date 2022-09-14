@@ -232,7 +232,7 @@ class Modal:
         finally:
             # if the interaction was responded to (no matter if in the callback or error handler),
             # the modal closed for the user and therefore can be removed from the store
-            if interaction.response._responded:
+            if interaction.response._response_type is not None:
                 interaction._state._modal_store.remove_modal(
                     interaction.author.id, interaction.custom_id
                 )

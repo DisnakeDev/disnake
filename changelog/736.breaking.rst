@@ -1,0 +1,1 @@
+Remove :attr:`WidgetMember.nick`; :attr:`WidgetMember.name` contains the member's nickname, if set.

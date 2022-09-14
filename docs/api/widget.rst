@@ -44,6 +44,7 @@ WidgetMember
 .. autoclass:: WidgetMember()
     :members:
     :inherited-members:
+    :exclude-members: public_flags, default_avatar, banner, accent_colour, accent_color, colour, color, mention, created_at, mentioned_in
 
 Enumerations
 ------------
