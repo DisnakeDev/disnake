@@ -46,13 +46,12 @@ from ..components import (
     Button as ButtonComponent,
     NestedComponent,
     SelectMenu as SelectComponent,
-    SelectOption,
 )
 from ..enums import ButtonStyle, ComponentType, TextInputStyle
 from ..utils import MISSING, SequenceProxy
 from .button import Button
 from .item import WrappedComponent
-from .select import Select
+from .select import Select, SelectOptionInput
 from .text_input import TextInput
 
 if TYPE_CHECKING:
@@ -313,7 +312,7 @@ class ActionRow(Generic[UIComponentT]):
         placeholder: Optional[str] = None,
         min_values: int = 1,
         max_values: int = 1,
-        options: List[SelectOption] = MISSING,
+        options: SelectOptionInput = MISSING,
         disabled: bool = False,
     ) -> SelectCompatibleActionRowT:
         """Add a select menu to the action row. Can only be used if the action
@@ -337,8 +336,10 @@ class ActionRow(Generic[UIComponentT]):
         max_values: :class:`int`
             The maximum number of items that must be chosen for this select menu.
             Defaults to 1 and must be between 1 and 25.
-        options: List[:class:`~disnake.SelectOption`]
-            A list of options that can be selected in this menu.
+        options: Union[List[:class:`disnake.SelectOption`], List[:class:`str`], Dict[:class:`str`, :class:`str`]]
+            A list of options that can be selected in this menu. Use explicit :class:`.SelectOption`\\s
+            for fine-grained control over the options. Alternatively, a list of strings will be treated
+            as a list of labels, and a dict will be treated as a mapping of labels to values.
         disabled: :class:`bool`
             Whether the select is disabled or not.
 

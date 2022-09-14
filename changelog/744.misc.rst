@@ -1,0 +1,1 @@
+Update annotation and description of ``options`` parameter of :func:`ui.ActionRow.add_select <disnake.ui.ActionRow.add_select>` to match :class:`ui.Select <disnake.ui.Select>`.
