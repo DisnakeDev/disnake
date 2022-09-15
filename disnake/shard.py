@@ -32,7 +32,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Ty
 import aiohttp
 
 from .backoff import ExponentialBackoff
-from .client import Client, SessionStartLimit
+from .client import Client, GatewayParams, SessionStartLimit
 from .enums import Status
 from .errors import (
     ClientException,
@@ -197,6 +197,7 @@ class Shard:
                 shard_id=self.id,
                 session=self.ws.session_id,
                 sequence=self.ws.sequence,
+                gateway=self.ws.resume_gateway if exc.resume else None,
             )
             self.ws = await asyncio.wait_for(coro, timeout=60.0)
         except self._handled_exceptions as e:
@@ -343,6 +344,7 @@ class AutoShardedClient(Client):
         shard_count: Optional[int] = None,
         enable_debug_events: bool = False,
         enable_gateway_error_handler: bool = True,
+        gateway_params: Optional[GatewayParams] = None,
         connector: Optional[aiohttp.BaseConnector] = None,
         proxy: Optional[str] = None,
         proxy_auth: Optional[aiohttp.BasicAuth] = None,
@@ -459,7 +461,10 @@ class AutoShardedClient(Client):
         ret.launch()
 
     async def launch_shards(self, *, ignore_session_start_limit: bool = False) -> None:
-        shard_count, gateway, session_start_limit = await self.http.get_bot_gateway()
+        shard_count, gateway, session_start_limit = await self.http.get_bot_gateway(
+            encoding=self.gateway_params.encoding,
+            zlib=self.gateway_params.zlib,
+        )
 
         self.session_start_limit = SessionStartLimit(session_start_limit)
 
