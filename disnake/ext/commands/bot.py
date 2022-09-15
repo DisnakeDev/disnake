@@ -40,6 +40,7 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from disnake.activity import BaseActivity
+    from disnake.client import GatewayParams
     from disnake.enums import Status
     from disnake.flags import Intents, MemberCacheFlags
     from disnake.i18n import LocalizationProtocol
@@ -224,6 +225,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
             shard_count: Optional[int] = None,
             enable_debug_events: bool = False,
             enable_gateway_error_handler: bool = True,
+            gateway_params: Optional[GatewayParams] = None,
             connector: Optional[aiohttp.BaseConnector] = None,
             proxy: Optional[str] = None,
             proxy_auth: Optional[aiohttp.BasicAuth] = None,
@@ -274,6 +276,7 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
             shard_count: Optional[int] = None,
             enable_debug_events: bool = False,
             enable_gateway_error_handler: bool = True,
+            gateway_params: Optional[GatewayParams] = None,
             connector: Optional[aiohttp.BaseConnector] = None,
             proxy: Optional[str] = None,
             proxy_auth: Optional[aiohttp.BasicAuth] = None,
@@ -393,6 +396,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
             shard_count: Optional[int] = None,
             enable_debug_events: bool = False,
             enable_gateway_error_handler: bool = True,
+            gateway_params: Optional[GatewayParams] = None,
             connector: Optional[aiohttp.BaseConnector] = None,
             proxy: Optional[str] = None,
             proxy_auth: Optional[aiohttp.BasicAuth] = None,
@@ -436,6 +440,7 @@ class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
             shard_count: Optional[int] = None,
             enable_debug_events: bool = False,
             enable_gateway_error_handler: bool = True,
+            gateway_params: Optional[GatewayParams] = None,
             connector: Optional[aiohttp.BaseConnector] = None,
             proxy: Optional[str] = None,
             proxy_auth: Optional[aiohttp.BasicAuth] = None,
