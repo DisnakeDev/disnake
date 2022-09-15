@@ -2911,7 +2911,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         slowmode_delay: :class:`int`
             Specifies the slowmode rate limit for users in this thread, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
-            If not provided, slowmode is disabled.
+            If not provided, slowmode is inherited from the parent's :attr:`~ForumChannel.thread_slowmode_delay`.
         content: :class:`str`
             The content of the message to send.
         embed: :class:`.Embed`
@@ -2996,13 +2996,19 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         else:
             flags = 0
 
+        channel_data = {
+            "name": name,
+            "auto_archive_duration": auto_archive_duration or self.default_auto_archive_duration,
+            "type": ChannelType.public_thread.value,
+        }
+
+        if slowmode_delay is not MISSING:
+            channel_data["rate_limit_per_user"] = slowmode_delay
+
         try:
             data = await self._state.http.start_thread_in_forum_channel(
                 self.id,
-                name=name,
-                auto_archive_duration=auto_archive_duration or self.default_auto_archive_duration,
-                rate_limit_per_user=slowmode_delay or 0,
-                type=ChannelType.public_thread.value,
+                **channel_data,
                 files=params.files,
                 flags=flags,
                 reason=reason,
