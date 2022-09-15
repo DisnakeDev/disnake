@@ -55,7 +55,7 @@ from .context_managers import Typing
 from .enums import ChannelType, StagePrivacyLevel, VideoQualityMode, try_enum, try_enum_to_int
 from .errors import ClientException
 from .file import File
-from .flags import ChannelFlags, MessageFlags
+from .flags import ChannelFlags
 from .iterators import ArchivedThreadIterator
 from .mixins import Hashable
 from .permissions import PermissionOverwrite, Permissions
@@ -2975,6 +2975,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             embeds=embeds,
             file=file,
             files=files,
+            suppress_embeds=suppress_embeds,
             view=view,
             components=components,
             allowed_mentions=allowed_mentions,
@@ -2991,11 +2992,6 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         elif params.files and not all(isinstance(file, File) for file in params.files):
             raise TypeError("files parameter must be a list of File")
 
-        if suppress_embeds:
-            flags = MessageFlags.suppress_embeds.flag
-        else:
-            flags = 0
-
         channel_data = {
             "name": name,
             "auto_archive_duration": auto_archive_duration or self.default_auto_archive_duration,
@@ -3009,7 +3005,6 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
                 self.id,
                 **channel_data,
                 files=params.files,
-                flags=flags,
                 reason=reason,
                 **params.payload,
             )
