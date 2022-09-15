@@ -786,7 +786,6 @@ class ConnectionState:
         if channel:
             if type(channel) in (TextChannel, Thread, VoiceChannel):
                 channel.last_message_id = message.id  # type: ignore
-            # woo fun logic
             # Essentially, messages *don't* count towards message_count, if:
             # - they're the thread starter message
             # - or, they're the initial message of a forum channel thread (which uses MessageType.default)
