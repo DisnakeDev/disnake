@@ -2911,7 +2911,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         slowmode_delay: :class:`int`
             Specifies the slowmode rate limit for users in this thread, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
-            If not provided, slowmode is inherited from the parent.
+            If not provided, slowmode is inherited from the parent's configured default thread slowmode.
         content: :class:`str`
             The content of the message to send.
         embed: :class:`.Embed`
