@@ -1,0 +1,2 @@
+Change :func:`ForumChannel.create_thread` to not require the ``content`` parameter to be provided.
+- Like :func:`TextChannel.send`, at least one of ``content``, ``embed``/``embeds``, ``file``/``files``, ``stickers``, ``components``, or ``view`` must be provided.
