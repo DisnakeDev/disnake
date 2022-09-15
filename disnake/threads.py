@@ -854,6 +854,8 @@ class Thread(Messageable, Hashable):
         Deletes this thread.
 
         You must have :attr:`~Permissions.manage_threads` to delete threads.
+        Alternatively, you may delete a thread if it's in a :class:`ForumChannel`,
+        you are the thread creator, and there are no messages other than the initial message.
 
         Parameters
         ----------
