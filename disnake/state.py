@@ -803,10 +803,14 @@ class ConnectionState:
         found = self._get_message(raw.message_id)
         raw.cached_message = found
         self.dispatch("raw_message_delete", raw)
-        guild = self._get_guild(raw.guild_id)
-        thread = guild and guild.get_thread(raw.channel_id)
-        if thread:
-            thread.message_count = max(0, thread.message_count - 1)
+
+        # the initial message isn't counted, and hence shouldn't be subtracted from the count either
+        if raw.message_id != raw.channel_id:
+            guild = self._get_guild(raw.guild_id)
+            thread = guild and guild.get_thread(raw.channel_id)
+            if thread:
+                thread.message_count = max(0, thread.message_count - 1)
+
         if self._messages is not None and found is not None:
             self.dispatch("message_delete", found)
             self._messages.remove(found)
@@ -824,7 +828,11 @@ class ConnectionState:
         guild = self._get_guild(raw.guild_id)
         thread = guild and guild.get_thread(raw.channel_id)
         if thread:
-            thread.message_count = max(0, thread.message_count - len(raw.message_ids))
+            to_subtract = len(raw.message_ids)
+            # the initial message isn't counted, and hence shouldn't be subtracted from the count either
+            if raw.channel_id in raw.message_ids:
+                to_subtract -= 1
+            thread.message_count = max(0, thread.message_count - to_subtract)
         if found_messages:
             self.dispatch("bulk_message_delete", found_messages)
             for msg in found_messages:
