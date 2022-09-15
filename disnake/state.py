@@ -792,11 +792,7 @@ class ConnectionState:
             # This mirrors the current client and API behavior.
             if type(channel) is Thread and not (
                 message.type is MessageType.thread_starter_message
-                or (
-                    channel.parent
-                    and channel.parent.type is ChannelType.forum
-                    and channel.id == message.id
-                )
+                or (type(channel.parent) is ForumChannel and channel.id == message.id)
             ):
                 channel.total_message_sent += 1
                 channel.message_count += 1
