@@ -382,6 +382,7 @@ class DiscordWebSocket:
         # ws related stuff
         self.session_id: Optional[str] = None
         self.sequence: Optional[int] = None
+        self.resume_gateway: Optional[str] = None
         self._zlib: zlib._Decompress = zlib.decompressobj()
         self._buffer: bytearray = bytearray()
         self._close_code: Optional[int] = None
@@ -427,7 +428,16 @@ class DiscordWebSocket:
 
         This is for internal use only.
         """
-        gateway = gateway or await client.http.get_gateway()
+        params = client.gateway_params
+        if gateway:
+            gateway = client.http._format_gateway_url(
+                gateway,
+                encoding=params.encoding,
+                zlib=params.zlib,
+            )
+        else:
+            gateway = await client.http.get_gateway(encoding=params.encoding, zlib=params.zlib)
+
         socket = await client.http.ws_connect(gateway)
         ws = cls(socket, loop=client.loop)
 
@@ -511,7 +521,6 @@ class DiscordWebSocket:
                     "browser": "disnake",
                     "device": "disnake",
                 },
-                "compress": True,
                 "large_threshold": 250,
                 "intents": state._intents.value,
             },
@@ -612,6 +621,7 @@ class DiscordWebSocket:
 
                 self.sequence = None
                 self.session_id = None
+                self.resume_gateway = None
                 _log.info("Shard ID %s session has been invalidated.", self.shard_id)
                 await self.close(code=1000)
                 raise ReconnectWebSocket(self.shard_id, resume=False)
@@ -623,13 +633,15 @@ class DiscordWebSocket:
             self._trace = trace = data.get("_trace", [])
             self.sequence = seq
             self.session_id = data["session_id"]
+            self.resume_gateway = data["resume_gateway_url"]
             # pass back shard ID to ready handler
             data["__shard_id__"] = self.shard_id
             _log.info(
-                "Shard ID %s has connected to Gateway: %s (Session ID: %s).",
+                "Shard ID %s has connected to Gateway: %s (Session ID: %s, Resume URL: %s).",
                 self.shard_id,
                 ", ".join(trace),
                 self.session_id,
+                self.resume_gateway,
             )
 
         elif event == "RESUMED":
