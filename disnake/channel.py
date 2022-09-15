@@ -55,7 +55,7 @@ from .context_managers import Typing
 from .enums import ChannelType, StagePrivacyLevel, VideoQualityMode, try_enum, try_enum_to_int
 from .errors import ClientException, InvalidData
 from .file import File
-from .flags import ChannelFlags, MessageFlags
+from .flags import ChannelFlags
 from .iterators import ArchivedThreadIterator
 from .mixins import Hashable
 from .partial_emoji import PartialEmoji
@@ -3089,6 +3089,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             embeds=embeds,
             file=file,
             files=files,
+            suppress_embeds=suppress_embeds,
             view=view,
             components=components,
             allowed_mentions=allowed_mentions,
@@ -3107,22 +3108,20 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         elif params.files and not all(isinstance(file, File) for file in params.files):
             raise TypeError("files parameter must be a list of File")
 
-        if suppress_embeds:
-            flags = MessageFlags.suppress_embeds.flag
-        else:
-            flags = 0
+        channel_data = {
+            "name": name,
+            "auto_archive_duration": auto_archive_duration or self.default_auto_archive_duration,
+            "applied_tags": tag_ids,
+        }
+
+        if slowmode_delay is not MISSING:
+            channel_data["rate_limit_per_user"] = slowmode_delay
 
         try:
             data = await self._state.http.start_thread_in_forum_channel(
                 self.id,
-                name=name,
-                auto_archive_duration=auto_archive_duration or self.default_auto_archive_duration,
-                # TODO: use `None` instead of `0` here instead to inherit thread_slowmode_delay?
-                rate_limit_per_user=slowmode_delay or 0,
-                applied_tags=tag_ids,
-                type=ChannelType.public_thread.value,
+                **channel_data,
                 files=params.files,
-                flags=flags,
                 reason=reason,
                 **params.payload,
             )
