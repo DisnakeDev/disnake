@@ -2999,7 +2999,6 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         channel_data = {
             "name": name,
             "auto_archive_duration": auto_archive_duration or self.default_auto_archive_duration,
-            "type": ChannelType.public_thread.value,
         }
 
         if slowmode_delay is not MISSING:
