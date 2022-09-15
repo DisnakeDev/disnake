@@ -28,6 +28,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from .activity import BaseActivity, Spotify, create_activity
+from .asset import Asset
 from .enums import Status, WidgetStyle, try_enum
 from .invite import Invite
 from .user import BaseUser
@@ -132,21 +133,15 @@ class WidgetMember(BaseUser):
     Attributes
     ----------
     id: :class:`int`
-        The member's ID.
+        The member's anonymized ID.
     name: :class:`str`
-        The member's username.
+        The member's nickname (if set in the guild) or username.
     discriminator: :class:`str`
-        The member's discriminator.
-    bot: :class:`bool`
-        Whether the member is a bot.
+        The member's anonymized discriminator.
     status: :class:`Status`
         The member's status.
-    nick: Optional[:class:`str`]
-        The member's nickname.
-    avatar: Optional[:class:`str`]
-        The member's avatar hash.
     activity: Optional[Union[:class:`BaseActivity`, :class:`Spotify`]]
-        The member's activity.
+        The member's activity. This generally only has the ``name`` set.
     deafened: Optional[:class:`bool`]
         Whether the member is currently deafened.
     muted: Optional[:class:`bool`]
@@ -159,17 +154,13 @@ class WidgetMember(BaseUser):
 
     __slots__ = (
         "status",
-        "nick",
-        "avatar",
         "activity",
         "deafened",
         "suppress",
         "muted",
         "connected_channel",
+        "_avatar_url",
     )
-
-    if TYPE_CHECKING:
-        activity: Optional[Union[BaseActivity, Spotify]]
 
     def __init__(
         self,
@@ -179,33 +170,38 @@ class WidgetMember(BaseUser):
         connected_channel: Optional[WidgetChannel] = None,
     ) -> None:
         super().__init__(state=state, data=data)
-        self.nick: Optional[str] = data.get("nick")
         self.status: Status = try_enum(Status, data.get("status"))
         self.deafened: Optional[bool] = data.get("deaf", False) or data.get("self_deaf", False)
         self.muted: Optional[bool] = data.get("mute", False) or data.get("self_mute", False)
         self.suppress: Optional[bool] = data.get("suppress", False)
+        self._avatar_url: Optional[str] = data.get("avatar_url")
 
-        try:
-            game = data["game"]
-        except KeyError:
-            activity = None
-        else:
-            activity = create_activity(game, state=state)
-
-        self.activity: Optional[Union[BaseActivity, Spotify]] = activity
+        self.activity: Optional[Union[BaseActivity, Spotify]] = None
+        if activity := (data.get("activity") or data.get("game")):
+            self.activity = create_activity(activity, state=state)
 
         self.connected_channel: Optional[WidgetChannel] = connected_channel
 
     def __repr__(self) -> str:
-        return (
-            f"<WidgetMember name={self.name!r} discriminator={self.discriminator!r}"
-            f" bot={self.bot} nick={self.nick!r}>"
-        )
+        return f"<WidgetMember name={self.name!r} discriminator={self.discriminator!r}"
+
+    # overwrite base type's @property since widget members always seem to have `avatar: null`,
+    # and instead a separate `avatar_url` field with a full url
+    @property
+    def avatar(self) -> Optional[Asset]:
+        """
+        Optional[:class:`Asset`]: The user's avatar.
+        The size can be chosen using :func:`Asset.with_size`, however the format is always
+        static and cannot be changed through :func:`Asset.with_format` or similar methods.
+        """
+        if (url := self._avatar_url) is not None:
+            return Asset(self._state, url=url, key=url, animated=False)
+        return None
 
     @property
     def display_name(self) -> str:
-        """:class:`str`: Returns the member's display name."""
-        return self.nick or self.name
+        """:class:`str`: Returns the member's name."""
+        return self.name
 
 
 class WidgetSettings:
@@ -307,7 +303,7 @@ class Widget:
     name: :class:`str`
         The guild's name.
     channels: List[:class:`WidgetChannel`]
-        The accessible voice channels in the guild.
+        The publicly accessible voice and stage channels in the guild.
     members: List[:class:`WidgetMember`]
         The online members in the server. Offline members
         do not appear in the widget.
@@ -319,15 +315,20 @@ class Widget:
             information being incorrect. Likewise, the number of members
             retrieved is capped.
 
+    presence_count: :class:`int`
+        The number of online members in the server.
+
+        .. versionadded:: 2.6
     """
 
-    __slots__ = ("_state", "channels", "_invite", "id", "members", "name")
+    __slots__ = ("_state", "channels", "_invite", "id", "members", "name", "presence_count")
 
     def __init__(self, *, state: ConnectionState, data: WidgetPayload) -> None:
         self._state = state
-        self._invite = data["instant_invite"]
+        self._invite = data.get("instant_invite")
         self.name: str = data["name"]
         self.id: int = int(data["id"])
+        self.presence_count: int = data["presence_count"]
 
         self.channels: List[WidgetChannel] = []
         for channel in data.get("channels", []):
@@ -356,7 +357,10 @@ class Widget:
         return False
 
     def __repr__(self) -> str:
-        return f"<Widget id={self.id} name={self.name!r} invite_url={self.invite_url!r}>"
+        return (
+            f"<Widget id={self.id} name={self.name!r}"
+            f" invite_url={self.invite_url!r} presence_count={self.presence_count!r}>"
+        )
 
     @property
     def created_at(self) -> datetime.datetime:
@@ -369,16 +373,20 @@ class Widget:
         return f"https://discord.com/api/guilds/{self.id}/widget.json"
 
     @property
-    def invite_url(self) -> str:
+    def invite_url(self) -> Optional[str]:
         """Optional[:class:`str`]: The invite URL for the guild, if available."""
         return self._invite
 
-    async def fetch_invite(self, *, with_counts: bool = True) -> Invite:
+    async def fetch_invite(self, *, with_counts: bool = True) -> Optional[Invite]:
         """|coro|
 
         Retrieves an :class:`Invite` from the widget's invite URL.
         This is the same as :meth:`Client.fetch_invite`; the invite
         code is abstracted away.
+
+        .. versionchanged:: 2.6
+            This may now return ``None`` if the widget does not have
+            an attached invite URL.
 
         Parameters
         ----------
@@ -389,9 +397,12 @@ class Widget:
 
         Returns
         -------
-        :class:`Invite`
-            The invite from the widget's invite URL.
+        Optional[:class:`Invite`]
+            The invite from the widget's invite URL, if available.
         """
+        if not self._invite:
+            return None
+
         invite_id = resolve_invite(self._invite)
         data = await self._state.http.get_invite(invite_id, with_counts=with_counts)
         return Invite.from_incomplete(state=self._state, data=data)

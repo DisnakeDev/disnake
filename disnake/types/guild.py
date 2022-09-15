@@ -97,6 +97,7 @@ GuildFeature = Literal[
     "HAS_DIRECTORY_ENTRY",
     "HUB",
     "INVITE_SPLASH",
+    "INVITES_DISABLED",
     "LINKED_TO_HUB",
     "MEMBER_PROFILES",  # not sure what this does, if anything
     "MEMBER_VERIFICATION_GATE_ENABLED",
