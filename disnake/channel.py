@@ -55,7 +55,7 @@ from .context_managers import Typing
 from .enums import ChannelType, StagePrivacyLevel, VideoQualityMode, try_enum, try_enum_to_int
 from .errors import ClientException
 from .file import File
-from .flags import ChannelFlags, MessageFlags
+from .flags import ChannelFlags
 from .iterators import ArchivedThreadIterator
 from .mixins import Hashable
 from .permissions import PermissionOverwrite, Permissions
@@ -2798,7 +2798,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         name: str,
         auto_archive_duration: AnyThreadArchiveDuration = ...,
         slowmode_delay: int = ...,
-        content: str,
+        content: str = ...,
         embed: Embed = ...,
         file: File = ...,
         suppress_embeds: bool = ...,
@@ -2817,7 +2817,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         name: str,
         auto_archive_duration: AnyThreadArchiveDuration = ...,
         slowmode_delay: int = ...,
-        content: str,
+        content: str = ...,
         embed: Embed = ...,
         files: List[File] = ...,
         suppress_embeds: bool = ...,
@@ -2836,7 +2836,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         name: str,
         auto_archive_duration: AnyThreadArchiveDuration = ...,
         slowmode_delay: int = ...,
-        content: str,
+        content: str = ...,
         embeds: List[Embed] = ...,
         file: File = ...,
         suppress_embeds: bool = ...,
@@ -2855,7 +2855,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         name: str,
         auto_archive_duration: AnyThreadArchiveDuration = ...,
         slowmode_delay: int = ...,
-        content: str,
+        content: str = ...,
         embeds: List[Embed] = ...,
         files: List[File] = ...,
         suppress_embeds: bool = ...,
@@ -2873,7 +2873,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         name: str,
         auto_archive_duration: AnyThreadArchiveDuration = MISSING,
         slowmode_delay: int = MISSING,
-        content: str,
+        content: str = MISSING,
         embed: Embed = MISSING,
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
@@ -2891,8 +2891,14 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
         You must have the :attr:`~Permissions.create_forum_threads` permission to do this.
 
+        At least one of ``content``, ``embed``/``embeds``, ``file``/``files``,
+        ``stickers``, ``components``, or ``view`` must be provided.
+
         .. versionchanged:: 2.6
             Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
+
+        .. versionchanged:: 2.6
+            The ``content`` parameter is no longer required.
 
         Parameters
         ----------
@@ -2905,7 +2911,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         slowmode_delay: :class:`int`
             Specifies the slowmode rate limit for users in this thread, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
-            If not provided, slowmode is disabled.
+            If not provided, slowmode is inherited from the parent's configured default thread slowmode.
         content: :class:`str`
             The content of the message to send.
         embed: :class:`.Embed`
@@ -2969,6 +2975,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             embeds=embeds,
             file=file,
             files=files,
+            suppress_embeds=suppress_embeds,
             view=view,
             components=components,
             allowed_mentions=allowed_mentions,
@@ -2985,20 +2992,19 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         elif params.files and not all(isinstance(file, File) for file in params.files):
             raise TypeError("files parameter must be a list of File")
 
-        if suppress_embeds:
-            flags = MessageFlags.suppress_embeds.flag
-        else:
-            flags = 0
+        channel_data = {
+            "name": name,
+            "auto_archive_duration": auto_archive_duration or self.default_auto_archive_duration,
+        }
+
+        if slowmode_delay is not MISSING:
+            channel_data["rate_limit_per_user"] = slowmode_delay
 
         try:
             data = await self._state.http.start_thread_in_forum_channel(
                 self.id,
-                name=name,
-                auto_archive_duration=auto_archive_duration or self.default_auto_archive_duration,
-                rate_limit_per_user=slowmode_delay or 0,
-                type=ChannelType.public_thread.value,
+                **channel_data,
                 files=params.files,
-                flags=flags,
                 reason=reason,
                 **params.payload,
             )

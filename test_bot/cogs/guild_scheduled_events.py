@@ -25,7 +25,7 @@ class GuildScheduledEvents(commands.Cog):
             gse2 = await gse.edit(image=image.fp.read())
         else:
             gse2 = await gse.edit(image=None)
-        await inter.edit_original_message(content=str(gse2.image))
+        await inter.edit_original_response(content=str(gse2.image))
 
     @commands.slash_command()
     async def create_event(

@@ -1,0 +1,3 @@
+Fix invalid widget fields.
+- :attr:`Widget.invite_url` and :attr:`Widget.fetch_invite` are now optional.
+- :attr:`WidgetMember.avatar` and :attr:`WidgetMember.activity` now work properly and no longer always raise an exception or return ``None``.

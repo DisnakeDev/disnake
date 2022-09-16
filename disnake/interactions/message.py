@@ -94,7 +94,7 @@ class MessageInteraction(Interaction):
 
     def __init__(self, *, data: MessageInteractionPayload, state: ConnectionState):
         super().__init__(data=data, state=state)
-        self.data = MessageInteractionData(data=data["data"])
+        self.data: MessageInteractionData = MessageInteractionData(data=data["data"])
         self.message = Message(state=self._state, channel=self.channel, data=data["message"])
 
     @property
