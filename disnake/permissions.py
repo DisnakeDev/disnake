@@ -87,6 +87,14 @@ class Permissions(BaseFlags):
     bits using the properties as if they were regular bools. This allows
     you to edit permissions.
 
+    To construct an object you can pass keyword arguments denoting the permissions
+    to enable or disable.
+    Arguments are applied in order, which notably also means that supplying a flag
+    and its alias will make whatever comes last overwrite the first one; as an example,
+    ``Permissions(external_emojis=True, use_external_emojis=False)`` and
+    ``Permissions(use_external_emojis=True, external_emojis=False)``
+    both result in the same permissions value (``0``).
+
     .. versionchanged:: 1.3
         You can now use keyword arguments to initialize :class:`Permissions`
         similar to :meth:`update`.
