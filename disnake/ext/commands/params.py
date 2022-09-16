@@ -1280,6 +1280,11 @@ def register_injection(
     TypeError
         Injection doesn't have a return annotation,
         or tries to overwrite builtin types.
+
+    Returns
+    -------
+    :class:`Injection`
+        The injection being registered.
     """
     sig = signature(function)
     tp = sig.return_annotation
