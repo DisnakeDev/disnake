@@ -1129,6 +1129,12 @@ def Param(
     -------
     :class:`ParamInfo`
         An instance with the option info.
+
+        .. warning::
+
+            In terms of typing, this returns ``Any`` to avoid typing issues caused by how this
+            extension work, but at runtime this is always an :class:`ParamInfo` instance.
+            You can find more in-depth explanation :ref:`here <why_params_and_injections_return_any>`
     """
     description = kwargs.pop("desc", description)
     converter = kwargs.pop("conv", converter)
@@ -1186,6 +1192,12 @@ def inject(function: Callable[..., Any], *, autocompleters: Dict[str, Callable] 
     -------
     :class:`Injection`
         The resulting injection
+
+        .. warning::
+
+            In terms of typing, this returns ``Any`` to avoid typing issues caused by how this
+            extension work, but at runtime this is always an :class:`Injection` instance.
+            You can find more in-depth explanation :ref:`here <why_params_and_injections_return_any>`
     """
 
     return Injection(function, autocompleters=autocompleters)
@@ -1208,6 +1220,12 @@ def injection(*, autocompleters: Dict[str, Callable] = None) -> Callable[[Callab
     -------
     Callable[[Callable[..., Any]], :class:`Injection`]
         Decorator which turns your injection function into actual :class:`Injection`.
+
+        .. warning::
+
+            In terms of typing, this returns ``Any`` to avoid typing issues caused by how this
+            extension work, but at runtime this is always an :class:`Injection` instance.
+            You can find more in-depth explanation :ref:`here <why_params_and_injections_return_any>`
     """
 
     def decorator(function: Callable[..., Any]) -> Injection:
@@ -1285,6 +1303,12 @@ def register_injection(
     -------
     :class:`Injection`
         The injection being registered.
+
+        .. warning::
+
+            In terms of typing, this returns ``Any`` to avoid typing issues caused by how this
+            extension work, but at runtime this is always an :class:`Injection` instance.
+            You can find more in-depth explanation :ref:`here <why_params_and_injections_return_any>`
     """
     sig = signature(function)
     tp = sig.return_annotation
