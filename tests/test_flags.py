@@ -432,6 +432,12 @@ class TestBaseFlags:
         assert ins.two is False
         assert ins.one is True
 
+        ins = TestFlags(two=False, three=True)
+        assert ins.value == 0b11
+
+        ins = TestFlags(two=True, three=False)
+        assert ins.value == 0
+
 
 class _ListFlags(flags.ListBaseFlags):
     @flags.flag_value

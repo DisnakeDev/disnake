@@ -16,8 +16,10 @@ class TestPermissions:
 
     def test_init_permissions_keyword_arguments_with_aliases(self) -> None:
         assert Permissions(read_messages=True, view_channel=False).value == 0
+        assert Permissions(view_channel=True, read_messages=False).value == 0
 
-        assert Permissions(read_messages=False, view_channel=True).view_channel is True
+        assert Permissions(read_messages=False, view_channel=True).value == 1024
+        assert Permissions(view_channel=False, read_messages=True).value == 1024
 
     def test_init_invalid_value(self) -> None:
         with pytest.raises(TypeError, match="Expected int parameter, received str instead."):
