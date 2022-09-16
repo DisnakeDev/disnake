@@ -39,8 +39,8 @@ Why ``Param`` and ``Injection``-related functions return ``Any``?
 -----------------------------------------------------------------
 
 If your editor of choice supports type-checking, you might have been noticed that :func:`~ext.commands.Param`, :func:`~ext.commands.inject`,
-:func:`ext.commands.injection` and :func:`ext.commands.register_injection` return ``Any`` (in terms of typing), but at runtime
-return :class:`Injection` (as mentioned in API reference for them). "Why?", you could think, and here's the reason for this.
+:func:`~ext.commands.injection` and :func:`~ext.commands.register_injection` return ``Any`` (in terms of typing), but at runtime
+return :class:`~ext.commands.Injection` (as mentioned in API reference for them). "Why?", you could think, and here's the reason for this.
 
 We'll explain this on example of ``Param`` usage (because this is the thing most users are familair with), but everything here applies to
 ``Injection`` usage as well.
