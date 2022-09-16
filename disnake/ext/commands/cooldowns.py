@@ -50,28 +50,15 @@ __all__ = (
 
 
 class BucketType(int, Enum):
-    """Specifies a type of bucket for e.g. a cooldown."""
-
     default = 0
-    """The default bucket operates on a global basis."""
     user = 1
-    """The user bucket operates on a per-user basis."""
     guild = 2
-    """The guild bucket operates on a per-guild basis."""
     channel = 3
-    """The channel bucket operates on a per-channel basis."""
     member = 4
-    """The member bucket operates on a per-member basis."""
     category = 5
-    """The category bucket operates on a per-category basis."""
     role = 6
-    """The role bucket operates on a per-role basis.
-
-    New in version 1.3.
-    """
 
     def get_key(self, msg: Message) -> Any:
-        """Create a key with this bucket type for the provided message."""
         if self is BucketType.user:
             return msg.author.id
         elif self is BucketType.guild:
