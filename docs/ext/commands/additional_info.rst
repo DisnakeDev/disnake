@@ -41,9 +41,6 @@ Why ``Param`` and ``Injection``-related functions return ``Any``?
 If your editor of choice supports type-checking, you may have noticed that :func:`~ext.commands.Param`, :func:`~ext.commands.inject`,
 :func:`~ext.commands.injection` and :func:`~ext.commands.register_injection` do not have a specific return type, but at runtime these return :class:`~ext.commands.Injection`.
 
-We'll explain this on example of ``Param`` usage (because this is the thing most users are familair with), but everything here applies to
-``Injection`` usage as well.
-
 A typical example of slash command might look like this: ::
 
     @bot.slash_command(description="Replies with the given text!")
@@ -58,3 +55,5 @@ Here, you have two parameters in your command's function: ``inter``, an instance
 That's the thing. When your editor type-checks your (any library's) code, it would normally complain if you tried to do the above, because
 you're trying to "convert" ``ParamInfo`` into ``str``, but since library have set ``Param``'s return type as ``Any``, type-checker "accepts"
 your code, because ``str`` (and any type) is the subset of ``Any``. Win-win!
+
+Same thing applies to ``Injection``-related functions.

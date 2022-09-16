@@ -1,2 +1,1 @@
 :func:`register_injection <ext.commands.register_injection>` now returns an :class:`Injection <ext.commands.Injection>` object
-- Only typings are affected, the functionality stays the same.
