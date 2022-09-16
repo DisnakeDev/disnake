@@ -38,7 +38,7 @@ because global registration of application commands doesn't depend on sharding.
 Why ``Param`` and ``Injection``-related functions return ``Any``?
 -----------------------------------------------------------------
 
-If your editor of choice supports type-checking, you might have been noticed that :func:`~ext.commands.Param`, :func:`~ext.commands.inject`,
+If your editor of choice supports type-checking, you may have noticed that :func:`~ext.commands.Param`, :func:`~ext.commands.inject`,
 :func:`~ext.commands.injection` and :func:`~ext.commands.register_injection` do not have a specific return type, but at runtime these return :class:`~ext.commands.Injection`.
 
 We'll explain this on example of ``Param`` usage (because this is the thing most users are familair with), but everything here applies to
