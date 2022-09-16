@@ -1130,7 +1130,7 @@ def Param(
     :class:`ParamInfo`
         An instance with the option info.
 
-        .. warning::
+        .. note::
 
             In terms of typing, this returns ``Any`` to avoid typing issues caused by how this
             extension work, but at runtime this is always an :class:`ParamInfo` instance.
@@ -1193,7 +1193,7 @@ def inject(function: Callable[..., Any], *, autocompleters: Dict[str, Callable] 
     :class:`Injection`
         The resulting injection
 
-        .. warning::
+        .. note::
 
             In terms of typing, this returns ``Any`` to avoid typing issues caused by how this
             extension work, but at runtime this is always an :class:`Injection` instance.
@@ -1221,7 +1221,7 @@ def injection(*, autocompleters: Dict[str, Callable] = None) -> Callable[[Callab
     Callable[[Callable[..., Any]], :class:`Injection`]
         Decorator which turns your injection function into actual :class:`Injection`.
 
-        .. warning::
+        .. note::
 
             In terms of typing, this returns ``Any`` to avoid typing issues caused by how this
             extension work, but at runtime this is always an :class:`Injection` instance.
@@ -1304,7 +1304,7 @@ def register_injection(
     :class:`Injection`
         The injection being registered.
 
-        .. warning::
+        .. note::
 
             In terms of typing, this returns ``Any`` to avoid typing issues caused by how this
             extension work, but at runtime this is always an :class:`Injection` instance.
