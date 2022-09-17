@@ -31,7 +31,6 @@ import inspect
 import sys
 import traceback
 from collections.abc import Sequence
-from types import CoroutineType
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -534,7 +533,7 @@ class Loop(Generic[CoroP]):
             raise TypeError(f"Expected coroutine function, received {coro.__class__.__name__!r}.")
 
         self._before_loop = coro
-        return coro  # type: ignore
+        return coro
 
     def after_loop(self, coro: FT) -> FT:
         """A decorator that register a coroutine to be called after the loop finished running.
@@ -561,7 +560,7 @@ class Loop(Generic[CoroP]):
             raise TypeError(f"Expected coroutine function, received {coro.__class__.__name__!r}.")
 
         self._after_loop = coro
-        return coro  # type: ignore
+        return coro
 
     def error(self, coro: ET) -> ET:
         """A decorator that registers a coroutine to be called if the task encounters an unhandled exception.
