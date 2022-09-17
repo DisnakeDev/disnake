@@ -111,7 +111,7 @@ if TYPE_CHECKING:
     from .permissions import Permissions
     from .state import ConnectionState
     from .template import Template
-    from .threads import AnyThreadArchiveDuration, PartialForumTag
+    from .threads import AnyThreadArchiveDuration, ForumTag
     from .types.guild import Ban as BanPayload, Guild as GuildPayload, GuildFeature, MFALevel
     from .types.integration import IntegrationType
     from .types.sticker import CreateGuildSticker as CreateStickerPayload
@@ -1557,7 +1557,7 @@ class Guild(Hashable):
         default_auto_archive_duration: AnyThreadArchiveDuration = None,
         nsfw: bool = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
-        available_tags: Sequence[PartialForumTag] = None,
+        available_tags: Sequence[ForumTag] = None,
         default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = None,
         reason: Optional[str] = None,
     ) -> ForumChannel:
@@ -1596,7 +1596,7 @@ class Guild(Hashable):
             A :class:`dict` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply upon creation of a channel.
             Useful for creating secret channels.
-        available_tags: Optional[Sequence[:class:`PartialForumTag`]]
+        available_tags: Optional[Sequence[:class:`ForumTag`]]
             The tags available for threads in this channel.
 
             .. versionadded:: 2.6

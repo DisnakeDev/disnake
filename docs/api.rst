@@ -5168,14 +5168,6 @@ ThreadMember
 .. autoclass:: ThreadMember()
     :members:
 
-PartialForumTag
-~~~~~~~~~~~~~~~~
-
-.. attributetable:: PartialForumTag
-
-.. autoclass:: PartialForumTag()
-    :members:
-
 ForumTag
 ~~~~~~~~~
 

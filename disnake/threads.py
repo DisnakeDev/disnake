@@ -46,18 +46,19 @@ from .errors import ClientException, InvalidData
 from .flags import ChannelFlags
 from .mixins import Hashable
 from .object import Object
-from .partial_emoji import PartialEmoji
+from .partial_emoji import PartialEmoji, _EmojiTag
 from .utils import MISSING, _get_as_snowflake, parse_time, snowflake_time
 
 __all__ = (
     "Thread",
     "ThreadMember",
-    "PartialForumTag",
     "ForumTag",
 )
 
 if TYPE_CHECKING:
     import datetime
+
+    from typing_extensions import Self
 
     from .abc import Snowflake, SnowflakeTime
     from .channel import CategoryChannel, ForumChannel, TextChannel
@@ -72,7 +73,6 @@ if TYPE_CHECKING:
     from .types.snowflake import SnowflakeList
     from .types.threads import (
         ForumTag as ForumTagPayload,
-        PartialForumTag as PartialForumTagPayload,
         Thread as ThreadPayload,
         ThreadArchiveDurationLiteral,
         ThreadMember as ThreadMemberPayload,
@@ -1025,75 +1025,7 @@ class ThreadMember(Hashable):
         return self.parent
 
 
-class PartialForumTag:
-    """
-    Represents a partial tag for threads in forum channels,
-    used for creating new tags.
-
-    .. container:: operations
-
-        .. describe:: x == y
-
-            Checks if two tags are equal.
-
-        .. describe:: x != y
-
-            Checks if two tags are not equal.
-
-        .. describe:: str(x)
-
-            Returns the tag's name.
-
-    .. versionadded:: 2.6
-
-    Attributes
-    ----------
-    name: :class:`str`
-        The tag's name.
-    moderated: :class:`bool`
-        Whether only moderators can apply this tag to threads.
-    """
-
-    __slots__ = ("name", "moderated", "_emoji_id", "_emoji_name")
-
-    def __init__(
-        self,
-        name: str,
-        emoji: Optional[Union[str, PartialEmoji, Emoji]] = None,
-        *,
-        moderated: bool = False,
-    ):
-        self.name: str = name
-        self.moderated: bool = moderated
-
-        emoji_name, emoji_id = PartialEmoji._to_name_id(emoji)
-        self._emoji_id: Optional[int] = emoji_id
-        self._emoji_name: Optional[str] = emoji_name
-
-    def __str__(self) -> str:
-        return self.name
-
-    def __eq__(self, other):
-        return (
-            isinstance(other, PartialForumTag)
-            and self.name == other.name
-            and self.moderated == other.moderated
-            and self._emoji_id == other._emoji_id
-            and self._emoji_name == other._emoji_name
-        )
-
-    def to_dict(self) -> PartialForumTagPayload:
-        return {
-            "name": self.name,
-            "emoji_id": self._emoji_id,
-            "emoji_name": self._emoji_name,
-            "moderated": self.moderated,
-        }
-
-
-# TODO: don't inherit from `Hashable` and inherit `__eq__` from `PartialForumTag` instead?
-#       would make things like comparing `available_tags` in auditlogs easier
-class ForumTag(Hashable, PartialForumTag):
+class ForumTag(Hashable):
     """
     Represents a tag for threads in forum channels.
 
@@ -1120,33 +1052,42 @@ class ForumTag(Hashable, PartialForumTag):
     Attributes
     ----------
     id: :class:`int`
-        The tag's ID.
+        The tag's ID. Note that if this tag was manually constructed,
+        this will be ``0``.
     name: :class:`str`
         The tag's name.
     moderated: :class:`bool`
         Whether only moderators can apply this tag to threads.
+        Defaults to ``False``.
     """
 
-    __slots__ = ("id", "_channel", "_state")
+    __slots__ = ("id", "name", "moderated", "emoji", "_channel")
 
     def __init__(
         self,
+        name: str,
+        emoji: Optional[Union[str, PartialEmoji, Emoji]] = None,
         *,
-        data: ForumTagPayload,
-        # Object is used by audit logs
-        channel: Union[ForumChannel, Object],
-        state: ConnectionState,
+        moderated: bool = False,
     ):
-        # emoji is set below
-        super().__init__(data["name"], emoji=None, moderated=data["moderated"])
+        self.id: int = 0
+        self.name: str = name
+        self.moderated: bool = moderated
 
-        self._channel: Union[ForumChannel, Object] = channel
-        self._state: ConnectionState = state
+        self.emoji: Optional[Union[Emoji, PartialEmoji]] = None
+        if emoji is None:
+            self.emoji = None
+        elif isinstance(emoji, str):
+            self.emoji = PartialEmoji.from_str(emoji)
+        elif isinstance(emoji, _EmojiTag):
+            self.emoji = emoji  # TODO: _to_partial? currently doesn't attach state
+        else:
+            raise TypeError("emoji must be None, a str, PartialEmoji, or Emoji instance.")
 
-        self.id: int = int(data["id"])
-        # emoji_id may be `0`, use `None` instead
-        self._emoji_id: Optional[int] = _get_as_snowflake(data, "emoji_id") or None
-        self._emoji_name: Optional[str] = data.get("emoji_name")
+        self._channel: Optional[Union[ForumChannel, Object]] = None
+
+    def __str__(self) -> str:
+        return self.name
 
     def __repr__(self) -> str:
         return (
@@ -1154,15 +1095,33 @@ class ForumTag(Hashable, PartialForumTag):
             f" moderated={self.moderated!r} emoji={self.emoji!r}>"
         )
 
-    @property
-    def emoji(self) -> Optional[Union[Emoji, PartialEmoji]]:
-        """Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]: The emoji associated with this tag, if any."""
-        return PartialEmoji._from_name_id(self._emoji_name, self._emoji_id, state=self._state)
-
     def to_dict(self) -> ForumTagPayload:
-        payload: ForumTagPayload = super().to_dict()  # type: ignore
-        payload["id"] = self.id
-        return payload
+        emoji_name, emoji_id = PartialEmoji._to_name_id(self.emoji)
+        return {
+            "id": self.id,
+            "name": self.name,
+            "emoji_id": emoji_id,
+            "emoji_name": emoji_name,
+            "moderated": self.moderated,
+        }
+
+    @classmethod
+    def _from_data(
+        cls, *, data: ForumTagPayload, channel: Union[ForumChannel, Object], state: ConnectionState
+    ) -> Self:
+        emoji_id = _get_as_snowflake(data, "emoji_id") or None
+        emoji_name = data.get("emoji_name")
+        emoji = PartialEmoji._from_name_id(emoji_name, emoji_id, state=state)
+
+        self = cls(
+            name=data["name"],
+            emoji=emoji,
+            moderated=data["moderated"],
+        )
+        self.id = int(data["id"])
+        self._channel = channel
+
+        return self
 
     async def edit(
         self,
@@ -1204,7 +1163,7 @@ class ForumTag(Hashable, PartialForumTag):
         :class:`ForumTag`
             The newly edited tag.
         """
-        if isinstance(self._channel, Object):
+        if not self._channel or isinstance(self._channel, Object):
             raise TypeError("Cannot edit thread with no associated forum channel")
 
         if self.id not in self._channel._available_tags:
@@ -1226,16 +1185,18 @@ class ForumTag(Hashable, PartialForumTag):
         if moderated is not MISSING:
             new_tag_payload["moderated"] = moderated
 
+        state = self._channel._state
+
         channel_data = cast(
             "ForumChannelPayload",
-            await self._state.http.edit_channel(
+            await state.http.edit_channel(
                 self._channel.id, reason=reason, available_tags=list(new_tags.values())
             ),
         )
         # TODO: update channel state here so that subsequent edits don't send old state?
         for tag in channel_data.get("available_tags", []):
             if int(tag["id"]) == self.id:
-                return ForumTag(data=tag, channel=self._channel, state=self._state)
+                return ForumTag._from_data(data=tag, channel=self._channel, state=state)
         raise InvalidData("Could not find tag in response")
 
     async def delete(self, *, reason: Optional[str] = None) -> None:
@@ -1260,7 +1221,7 @@ class ForumTag(Hashable, PartialForumTag):
         HTTPException
             An error occurred deleting the tag.
         """
-        if isinstance(self._channel, Object):
+        if not self._channel or isinstance(self._channel, Object):
             raise TypeError("Cannot edit thread with no associated forum channel")
 
         new_tags = [
@@ -1268,6 +1229,6 @@ class ForumTag(Hashable, PartialForumTag):
             for tag_id, tag in self._channel._available_tags.items()
             if tag_id != self.id
         ]
-        await self._state.http.edit_channel(
+        await self._channel._state.http.edit_channel(
             self._channel.id, reason=reason, available_tags=new_tags
         )

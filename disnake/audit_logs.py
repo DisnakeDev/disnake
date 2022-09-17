@@ -191,7 +191,7 @@ def _transform_tag(entry: AuditLogEntry, data: Optional[ForumTagPayload]) -> Opt
     from .threads import ForumTag  # cyclic import
 
     target_id: int = entry._target_id  # type: ignore
-    return ForumTag(data=data, channel=Object(target_id), state=entry._state)
+    return ForumTag._from_data(data=data, channel=Object(target_id), state=entry._state)
 
 
 def _transform_tag_id(

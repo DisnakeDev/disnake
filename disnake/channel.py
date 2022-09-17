@@ -61,7 +61,7 @@ from .mixins import Hashable
 from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite, Permissions
 from .stage_instance import StageInstance
-from .threads import ForumTag, PartialForumTag, Thread
+from .threads import ForumTag, Thread
 from .utils import MISSING
 
 __all__ = (
@@ -2566,7 +2566,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         self.thread_slowmode_delay: int = data.get("default_thread_rate_limit_per_user", 0)
 
         tags = [
-            ForumTag(data=tag, channel=self, state=self._state)
+            ForumTag._from_data(data=tag, channel=self, state=self._state)
             for tag in data.get("available_tags", [])
         ]
         self._available_tags: Dict[int, ForumTag] = {tag.id: tag for tag in tags}
@@ -2728,7 +2728,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
         flags: ChannelFlags = ...,
         require_tag: bool = ...,
-        available_tags: Sequence[PartialForumTag] = ...,
+        available_tags: Sequence[ForumTag] = ...,
         default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = ...,
         reason: Optional[str] = ...,
     ) -> ForumChannel:
@@ -2749,7 +2749,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
         flags: ChannelFlags = MISSING,
         require_tag: bool = MISSING,
-        available_tags: Sequence[PartialForumTag] = MISSING,
+        available_tags: Sequence[ForumTag] = MISSING,
         default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
         reason: Optional[str] = None,
         **kwargs: Never,
@@ -2808,8 +2808,8 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
             .. versionadded:: 2.6
 
-        available_tags: Sequence[:class:`PartialForumTag`]
-            The new :class:`PartialForumTag`\\s or :class:`ForumTag`\\s available for threads in this channel.
+        available_tags: Sequence[:class:`ForumTag`]
+            The new :class:`ForumTag`\\s available for threads in this channel.
             Can also be used to reorder existing tags. Maximum of 20.
 
             Note that this overwrites all tags, removing existing tags unless they're passed as well.
@@ -3306,12 +3306,12 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         :class:`ForumTag`
             The newly created tag.
         """
-        partial_tag = PartialForumTag(name=name, emoji=emoji, moderated=moderated)
+        tag = ForumTag(name=name, emoji=emoji, moderated=moderated)
 
         channel_data = cast(
             "ForumChannelPayload",
             await self._edit(
-                available_tags=self.available_tags + [partial_tag],
+                available_tags=self.available_tags + [tag],
                 reason=reason,
             ),
         )
@@ -3320,7 +3320,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             raise InvalidData("Could not find tag in response")
 
         tag_data = max(new_tags, key=lambda t: int(t["id"]))
-        return ForumTag(data=tag_data, channel=self, state=self._state)
+        return ForumTag._from_data(data=tag_data, channel=self, state=self._state)
 
 
 class DMChannel(disnake.abc.Messageable, Hashable):
