@@ -1074,13 +1074,13 @@ class ForumTag(Hashable):
         self.name: str = name
         self.moderated: bool = moderated
 
-        self.emoji: Optional[Union[Emoji, PartialEmoji]] = None
+        self.emoji: Optional[PartialEmoji] = None
         if emoji is None:
             self.emoji = None
         elif isinstance(emoji, str):
             self.emoji = PartialEmoji.from_str(emoji)
         elif isinstance(emoji, _EmojiTag):
-            self.emoji = emoji  # TODO: _to_partial? currently doesn't attach state
+            self.emoji = emoji._to_partial()
         else:
             raise TypeError("emoji must be None, a str, PartialEmoji, or Emoji instance.")
 
