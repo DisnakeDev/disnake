@@ -74,14 +74,21 @@ def _is_submodule(parent: str, child: str) -> bool:
 
 
 class CommonBotBase(Generic[CogT]):
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        *args: Any,
+        owner_id: Optional[int] = None,
+        owner_ids: Optional[Set[int]] = None,
+        reload: bool = False,
+        **kwargs: Any,
+    ):
         self.__cogs: Dict[str, Cog] = {}
         self.__extensions: Dict[str, types.ModuleType] = {}
         self.extra_events: Dict[str, List[CoroFunc]] = {}
         self._is_closed: bool = False
 
-        self.owner_id: Optional[int] = kwargs.get("owner_id")
-        self.owner_ids: Set[int] = kwargs.get("owner_ids", set())
+        self.owner_id: Optional[int] = owner_id
+        self.owner_ids: Set[int] = owner_ids or set()
         self.owner: Optional[disnake.User] = None
         self.owners: Set[disnake.TeamMember] = set()
 
@@ -91,7 +98,7 @@ class CommonBotBase(Generic[CogT]):
         if self.owner_ids and not isinstance(self.owner_ids, collections.abc.Collection):
             raise TypeError(f"owner_ids must be a collection not {self.owner_ids.__class__!r}")
 
-        self.reload: bool = kwargs.get("reload", False)
+        self.reload: bool = reload
 
         loop = asyncio.get_event_loop()
         loop.create_task(self._fill_owners())

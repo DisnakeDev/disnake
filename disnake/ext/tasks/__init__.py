@@ -54,8 +54,6 @@ import disnake
 from disnake.backoff import ExponentialBackoff
 from disnake.utils import MISSING, utcnow
 
-T = TypeVar("T")
-
 if TYPE_CHECKING:
     from typing_extensions import Concatenate, ParamSpec, Self
 
@@ -68,10 +66,11 @@ else:
     CoroP = TypeVar("CoroP")
     # When ParamSpec is replaced with TypeVar, Callable's first argument typecheck
     # would fail at runtime as it expects a list of args
-    Coro = Callable[[T], Awaitable[Any]]
+    Coro = Callable[[CoroP], Awaitable[Any]]
 
 __all__ = ("loop",)
 
+T = TypeVar("T")
 FT = TypeVar("FT", bound=Callable[..., Awaitable[Any]])
 ET = TypeVar("ET", bound=Callable[[Any, BaseException], Awaitable[Any]])
 
@@ -746,13 +745,13 @@ class Object(Protocol[T_co, P]):
 @overload
 def loop(
     *,
-    seconds: float = MISSING,
-    minutes: float = MISSING,
-    hours: float = MISSING,
-    time: Union[datetime.time, Sequence[datetime.time]] = MISSING,
+    seconds: float = ...,
+    minutes: float = ...,
+    hours: float = ...,
+    time: Union[datetime.time, Sequence[datetime.time]] = ...,
     count: Optional[int] = None,
     reconnect: bool = True,
-    loop: asyncio.AbstractEventLoop = MISSING,
+    loop: asyncio.AbstractEventLoop = ...,
 ) -> Callable[[Coro[CoroP]], Loop[CoroP]]:
     ...
 
@@ -776,7 +775,7 @@ def loop(
     cls: Type[:class:`Loop`]
         The loop subclass to create an instance of. If provided, the following parameters
         described below do no apply. Instead, this decorator will accept the same keywords
-        as the passed subclass does.
+        as the passed cls does.
 
         .. versionadded:: 2.6
 
