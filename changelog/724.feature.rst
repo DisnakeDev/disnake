@@ -1,7 +1,7 @@
 Implement new forum channel features.
 - Add :class:`ForumTag` type.
 - Add :attr:`ForumChannel.available_tags` and :attr:`Thread.applied_tags`.
-- Add :func:`ForumChannel.get_tag`, :func:`ForumChannel.create_tag`
+- Add :func:`ForumChannel.get_tag`, :func:`ForumChannel.create_tag`, :func:`Thread.add_tags` and :func:`Thread.remove_tags`.
 - Add :attr:`ForumChannel.thread_slowmode_delay` and :attr:`ForumChannel.default_reaction`.
 - Add :attr:`ChannelFlags.require_tag` and :attr:`ForumChannel.requires_tag`.
 - New audit log fields for the above features.

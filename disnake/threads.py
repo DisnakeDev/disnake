@@ -47,7 +47,7 @@ from .flags import ChannelFlags
 from .mixins import Hashable
 from .object import Object
 from .partial_emoji import PartialEmoji, _EmojiTag
-from .utils import MISSING, _get_as_snowflake, parse_time, snowflake_time
+from .utils import MISSING, _get_as_snowflake, _unique, parse_time, snowflake_time
 
 __all__ = (
     "Thread",
@@ -687,7 +687,7 @@ class Thread(Messageable, Hashable):
         Edits the thread.
 
         Editing the thread requires :attr:`.Permissions.manage_threads`. The thread
-        creator can also edit ``name``, ``archived`` or ``auto_archive_duration``.
+        creator can also edit ``name``, ``archived``, ``auto_archive_duration`` and ``applied_tags``.
         Note that if the thread is locked then only those with :attr:`.Permissions.manage_threads`
         can unarchive a thread.
 
@@ -723,7 +723,14 @@ class Thread(Messageable, Hashable):
 
         applied_tags: Sequence[:class:`abc.Snowflake`]
             The new tags of the thread. Maximum of 5.
-            This is only available for threads created in a :class:`ForumChannel`.
+            Can also be used to reorder existing tags.
+
+            This is only available for threads in a :class:`ForumChannel`.
+
+            If :attr:`~ForumTag.moderated` tags are edited, :attr:`Permissions.manage_threads`
+            permissions are required.
+
+            See also :func:`add_tags` and :func:`remove_tags`.
 
             .. versionadded:: 2.6
 
@@ -920,6 +927,81 @@ class Thread(Messageable, Hashable):
             Deleting the thread failed.
         """
         await self._state.http.delete_channel(self.id, reason=reason)
+
+    async def add_tags(self, *tags: Snowflake, reason: Optional[str] = None) -> None:
+        """|coro|
+
+        Adds the given tags to this thread, up to 5 in total.
+
+        The thread must be in a :class:`ForumChannel`.
+
+        Adding tags requires you to have :attr:`.Permissions.manage_threads` permissions,
+        or be the owner of the thread.
+        Additionally, adding :attr:`~ForumTag.moderated` tags always requires said permissions.
+
+        .. versionadded:: 2.6
+
+        Parameters
+        ----------
+        *tags: :class:`abc.Snowflake`
+            An argument list of :class:`abc.Snowflake` representing the :class:`ForumTag`\\s
+            to add to the thread.
+        reason: Optional[:class:`str`]
+            The reason for editing this thread. Shows up on the audit log.
+
+        Raises
+        ------
+        Forbidden
+            You do not have permission to add these tags.
+        HTTPException
+            Editing the thread failed.
+        """
+
+        if not tags:
+            return
+
+        new_tags: List[int] = self._applied_tags.copy()
+        new_tags.extend(t.id for t in tags)
+        new_tags = _unique(new_tags)
+
+        await self._state.http.edit_channel(self.id, applied_tags=new_tags, reason=reason)
+
+    async def remove_tags(self, *tags: Snowflake, reason: Optional[str] = None) -> None:
+        """|coro|
+
+        Removes the given tags from this thread.
+
+        The thread must be in a :class:`ForumChannel`.
+
+        Removing tags requires you to have :attr:`.Permissions.manage_threads` permissions,
+        or be the owner of the thread.
+        Additionally, removing :attr:`~ForumTag.moderated` tags always requires said permissions.
+
+        .. versionadded:: 2.6
+
+        Parameters
+        ----------
+        *tags: :class:`abc.Snowflake`
+            An argument list of :class:`abc.Snowflake` representing the :class:`ForumTag`\\s
+            to remove from the thread.
+        reason: Optional[:class:`str`]
+            The reason for editing this thread. Shows up on the audit log.
+
+        Raises
+        ------
+        Forbidden
+            You do not have permission to remove these tags.
+        HTTPException
+            Editing the thread failed.
+        """
+
+        if not tags:
+            return
+
+        to_remove = {t.id for t in tags}
+        new_tags: List[int] = [tag_id for tag_id in self._applied_tags if tag_id not in to_remove]
+
+        await self._state.http.edit_channel(self.id, applied_tags=new_tags, reason=reason)
 
     def get_partial_message(self, message_id: int, /) -> PartialMessage:
         """Creates a :class:`PartialMessage` from the message ID.
