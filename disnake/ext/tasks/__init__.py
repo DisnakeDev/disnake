@@ -54,17 +54,24 @@ import disnake
 from disnake.backoff import ExponentialBackoff
 from disnake.utils import MISSING, utcnow
 
+T = TypeVar("T")
+
 if TYPE_CHECKING:
     from typing_extensions import Concatenate, ParamSpec, Self
 
+    P = ParamSpec("P")
+    CoroP = ParamSpec("CoroP")
+    Coro = Callable[CoroP, Awaitable[Any]]
+
 else:
-    ParamSpec = TypeVar
+    P = TypeVar("P")
+    CoroP = TypeVar("CoroP")
+    # When ParamSpec is replaced with TypeVar, Callable's first argument typecheck
+    # would fail at runtime as it expects a list of args
+    Coro = Callable[[T], Awaitable[Any]]
 
 __all__ = ("loop",)
 
-T = TypeVar("T")
-CoroP = ParamSpec("CoroP")
-Coro = Callable[CoroP, Awaitable[Any]]
 FT = TypeVar("FT", bound=Callable[..., Awaitable[Any]])
 ET = TypeVar("ET", bound=Callable[[Any, BaseException], Awaitable[Any]])
 
@@ -111,6 +118,10 @@ class Loop(Generic[CoroP]):
         reconnect: bool = True,
         loop: asyncio.AbstractEventLoop = MISSING,
     ) -> None:
+        """
+            .. Note:
+                If you're going to overwrite __init__ arguments, make sure to redefine .clone too
+        """
         self.coro: Coro[CoroP] = coro
         self.reconnect: bool = reconnect
         self.loop: asyncio.AbstractEventLoop = loop
@@ -118,7 +129,7 @@ class Loop(Generic[CoroP]):
         self._current_loop = 0
         self._handle: SleepHandle = MISSING
         self._task: asyncio.Task[None] = MISSING
-        self._injected = None
+        self._injected: Any = None
         self._valid_exception = (
             OSError,
             disnake.GatewayNotFound,
@@ -720,7 +731,6 @@ class Loop(Generic[CoroP]):
                 self._handle.recalculate(self._next_iteration)
 
 
-P = ParamSpec("P")
 T_co = TypeVar("T_co", covariant=True)
 L_co = TypeVar("L_co", bound=Loop, covariant=True)
 
