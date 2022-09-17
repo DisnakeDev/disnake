@@ -57,4 +57,4 @@ That's the thing. When your editor type-checks your (any library's) code, it wou
 you're trying to "convert" ``ParamInfo`` into ``str``, but since library have set ``Param``'s return type as ``Any``, type-checker "accepts"
 your code, because ``str`` (and any type) is the subset of ``Any``. Win-win!
 
-Same thing applies to ``Injection``-related functions.
+The same thing applies to :func:`~ext.commands.inject`, :func:`~ext.commands.injection` and :func:`~ext.commands.register_injection`.
