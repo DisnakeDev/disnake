@@ -31,11 +31,12 @@ import inspect
 import sys
 import traceback
 from collections.abc import Sequence
+from types import CoroutineType
 from typing import (
     TYPE_CHECKING,
     Any,
-    Awaitable,
     Callable,
+    Coroutine,
     Generic,
     List,
     Optional,
@@ -59,20 +60,20 @@ if TYPE_CHECKING:
 
     P = ParamSpec("P")
     CoroP = ParamSpec("CoroP")
-    Coro = Callable[CoroP, Awaitable[Any]]
+    Coro = Callable[CoroP, Coroutine[Any, Any, Any]]
 
 else:
     P = TypeVar("P")
     CoroP = TypeVar("CoroP")
     # When ParamSpec is replaced with TypeVar, Callable's first argument typecheck
     # would fail at runtime as it expects a list of args
-    Coro = Callable[[CoroP], Awaitable[Any]]
+    Coro = Callable[[CoroP], Coroutine[Any, Any, Any]]
 
 __all__ = ("loop",)
 
 T = TypeVar("T")
-FT = TypeVar("FT", bound=Callable[..., Awaitable[Any]])
-ET = TypeVar("ET", bound=Callable[[Any, BaseException], Awaitable[Any]])
+FT = TypeVar("FT", bound=Callable[..., Coroutine[Any, Any, Any]])
+ET = TypeVar("ET", bound=Callable[[Any, BaseException], Coroutine[Any, Any, Any]])
 
 
 class SleepHandle:
@@ -118,8 +119,8 @@ class Loop(Generic[CoroP]):
         loop: asyncio.AbstractEventLoop = MISSING,
     ) -> None:
         """
-            .. Note:
-                If you're going to overwrite __init__ arguments, make sure to redefine .clone too
+        .. Note:
+            If you're going to overwrite __init__ arguments, make sure to redefine .clone too
         """
         self.coro: Coro[CoroP] = coro
         self.reconnect: bool = reconnect
@@ -586,7 +587,7 @@ class Loop(Generic[CoroP]):
             raise TypeError(f"Expected coroutine function, received {coro.__class__.__name__!r}.")
 
         self._error = coro
-        return coro  # type: ignore
+        return coro
 
     def _get_next_sleep_time(self) -> datetime.datetime:
         if self._sleep is not MISSING:

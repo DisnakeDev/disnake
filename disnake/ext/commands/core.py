@@ -394,7 +394,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         self.require_var_positional: bool = kwargs.get("require_var_positional", False)
         self.ignore_extra: bool = kwargs.get("ignore_extra", True)
         self.cooldown_after_parsing: bool = kwargs.get("cooldown_after_parsing", False)
-        self.cog: CogT = None
+        self.cog: CogT = None  # type: ignore
 
         # bandaid for the fact that sometimes parent can be the bot instance
         parent = kwargs.get("parent")

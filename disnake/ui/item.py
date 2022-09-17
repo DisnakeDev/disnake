@@ -120,7 +120,7 @@ class Item(WrappedComponent, Generic[V_co]):
         ...
 
     def __init__(self):
-        self._view: V_co = None
+        self._view: V_co = None  # type: ignore
         self._row: Optional[int] = None
         self._rendered_row: Optional[int] = None
         # This works mostly well but there is a gotcha with

@@ -143,7 +143,7 @@ class Localized(Generic[StringT]):
         key: str = MISSING,
         data: Union[Optional[LocalizationsDict], LocalizationValue] = MISSING,
     ):
-        self.string: StringT = string
+        self.string: StringT = string  # type: ignore  # default values for generic parameters don't quite work
 
         if not (key is MISSING) ^ (data is MISSING):
             raise TypeError("Exactly one of `key` or `data` must be provided")
@@ -181,7 +181,7 @@ class Localized(Generic[StringT]):
         ...
 
     def _upgrade(
-        self, string: Optional[str] = None, *, key: Optional[str] = None
+        self: Localized[Any], string: Optional[str] = None, *, key: Optional[str] = None
     ) -> Localized[Any]:
         # update key if provided and not already set
         self.localizations._upgrade(key)
