@@ -63,7 +63,10 @@ __all__ = ("loop",)
 
 T = TypeVar("T")
 CoroP = ParamSpec("CoroP")
-Coro = Callable[CoroP, Awaitable[Any]]
+if TYPE_CHECKING:
+    Coro = Callable[CoroP, Awaitable[Any]]
+else:
+    Coro = Callable[[CoroP], Awaitable[Any]]
 FT = TypeVar("FT", bound=Callable[..., Awaitable[Any]])
 ET = TypeVar("ET", bound=Callable[[Any, BaseException], Awaitable[Any]])
 
