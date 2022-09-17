@@ -1,9 +1,9 @@
 import datetime
-from typing import Any
+from typing import Any, Tuple
+
 import pytest
 
 from disnake.ext import commands
-
 from disnake.ext.tasks import Coro, CoroP, Loop, loop
 
 
@@ -18,29 +18,29 @@ class TestLoops:
             assert c.task.seconds == 30
 
         with pytest.raises(TypeError, match="must be a coroutine"):
+
             @loop()  # type: ignore
             def task() -> None:
                 ...
 
     def test_mixing_time(self):
+        async def callback():
+            pass
+
         with pytest.raises(TypeError):
-
-            async def callback():
-                pass
-
             Loop(callback, seconds=30, time=datetime.time())
 
         with pytest.raises(TypeError):
 
-            class Cog(commands.Cog):
-                @loop(seconds=30, time=datetime.time())
-                async def task(self) -> None:
-                    ...
+            @loop(seconds=30, time=datetime.time())
+            async def task() -> None:
+                ...
 
     def test_inheritance(self):
         class HyperLoop(Loop[CoroP]):
-            def __init__(self, coro: Coro[CoroP], time_tup: tuple[float, float, float]) -> None:
-                super().__init__(coro, *time_tup)
+            def __init__(self, coro: Coro[CoroP], time_tup: Tuple[float, float, float]) -> None:
+                s, m, h = time_tup
+                super().__init__(coro, seconds=s, minutes=m, hours=h)
 
             def clone(self):
                 instance = type(self)(self.coro, (self._seconds, self._minutes, self._hours))
@@ -72,6 +72,7 @@ class TestLoops:
             assert (c.task.seconds, c.task.minutes, c.task.hours) == (1, 2, 3)
 
         with pytest.raises(TypeError, match="subclass of Loop"):
+
             @loop(cls=WhileTrueLoop)  # type: ignore
             async def task() -> None:
                 ...
