@@ -1,1 +1,1 @@
-Document :class:`Injection <ext.commands.Injection>`.
+|commands| Document :class:`commands.Injection <ext.commands.Injection>`.
