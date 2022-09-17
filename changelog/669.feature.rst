@@ -1,1 +1,1 @@
-:func:`register_injection <ext.commands.register_injection>` now returns an :class:`Injection <ext.commands.Injection>` object
+|commands| Change :func:`commands.register_injection <ext.commands.register_injection>` to now return an instance of :class:`Injection <ext.commands.Injection>`.
