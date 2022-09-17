@@ -738,13 +738,13 @@ class Object(Protocol[T_co, P]):
 @overload
 def loop(
     *,
-    seconds: float = MISSING,
-    minutes: float = MISSING,
-    hours: float = MISSING,
-    time: Union[datetime.time, Sequence[datetime.time]] = MISSING,
+    seconds: float = ...,
+    minutes: float = ...,
+    hours: float = ...,
+    time: Union[datetime.time, Sequence[datetime.time]] = ...,
     count: Optional[int] = None,
     reconnect: bool = True,
-    loop: asyncio.AbstractEventLoop = MISSING,
+    loop: asyncio.AbstractEventLoop = ...,
 ) -> Callable[[Coro[CoroP]], Loop[CoroP]]:
     ...
 
