@@ -302,11 +302,10 @@ class PartialEmoji(_EmojiTag, AssetMixin):
         if not emoji:
             emoji = PartialEmoji.with_state(
                 state=state,
-                # TODO: this renders correctly, but apparently shouldn't be done
-                # according to https://github.com/discord/discord-api-docs/pull/4983
-                name=name or "__",
+                # Note: this does not render correctly if it's a custom emoji, there's just no name information for those here.
+                # This may change in a future API version, but for now we'll just have to accept it.
+                name=name or "",
                 id=id,
-                # note: `animated` is unknown but presumably we already got the (animated)
-                # emoji from the guild cache at this point
+                # `animated` is unknown but presumably we already got the (animated) emoji from the guild cache at this point
             )
         return emoji

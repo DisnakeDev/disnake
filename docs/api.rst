@@ -4571,6 +4571,8 @@ AuditLogDiff
 
         The default emoji shown for reacting to new threads being changed.
 
+        Note that this will have an empty :attr:`~PartialEmoji.name` if it is a custom :class:`PartialEmoji`.
+
         :type: Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]
 
 Webhook Support

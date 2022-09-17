@@ -2640,6 +2640,8 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         """Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]:
         The default emoji shown for reacting to new threads.
 
+        Note that this will have an empty :attr:`~PartialEmoji.name` if it is a custom :class:`PartialEmoji`.
+
         .. versionadded:: 2.6
         """
         return PartialEmoji._from_name_id(
