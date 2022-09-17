@@ -116,6 +116,20 @@ class TestPermissions:
         assert perms.value == expected_perms.value
 
     @pytest.mark.parametrize(
+        ("update", "expected"),
+        [
+            ({"read_messages": True, "view_channel": False}, 8),
+            ({"view_channel": True, "read_messages": False}, 8),
+            ({"read_messages": False, "view_channel": True}, 8 + 1024),
+            ({"view_channel": False, "read_messages": True}, 8 + 1024),
+        ],
+    )
+    def test_update_aliases(self, update: Dict[str, bool], expected: int) -> None:
+        perms = Permissions(administrator=True)
+        perms.update(**update)
+        assert perms.value == expected
+
+    @pytest.mark.parametrize(
         ("parameters", "expected"),
         [
             ({"view_channel": True, "move_members": True}, None),
