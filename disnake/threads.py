@@ -1139,7 +1139,7 @@ class ForumTag(Hashable):
     name: :class:`str`
         The tag's name.
     moderated: :class:`bool`
-        Whether only moderators can apply this tag to threads.
+        Whether only moderators can add this tag to threads or remove it.
         Defaults to ``False``.
     """
 
