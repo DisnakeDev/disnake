@@ -348,6 +348,7 @@ class SystemChannelFlags(BaseFlags, inverted=True):
 
     To construct an object you can pass keyword arguments denoting the flags
     to enable or disable.
+    Arguments are applied in order, similar to :class:`Permissions`.
 
     .. container:: operations
 
@@ -1468,6 +1469,7 @@ class MemberCacheFlags(BaseFlags):
 
     To construct an object you can pass keyword arguments denoting the flags
     to enable or disable.
+    Arguments are applied in order, similar to :class:`Permissions`.
 
     The default value is all flags enabled.
 

@@ -589,6 +589,8 @@ class Permissions(BaseFlags):
         arguments. The names must be equivalent to the properties
         listed. Extraneous key/value pairs will be silently ignored.
 
+        Arguments are applied in order, similar to the constructor.
+
         Parameters
         ----------
         **kwargs
