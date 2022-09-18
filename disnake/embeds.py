@@ -331,9 +331,6 @@ class Embed:
             )
         )
 
-    def __ne__(self, other: Any) -> bool:
-        return not self.__eq__(other)
-
     @property
     def colour(self) -> Optional[Colour]:
         col = self._colour
