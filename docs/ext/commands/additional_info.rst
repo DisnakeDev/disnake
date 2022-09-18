@@ -39,7 +39,7 @@ Why do ``Param`` and ``Injection``-related functions return ``Any``?
 --------------------------------------------------------------------
 
 If your editor of choice supports type-checking, you may have noticed that :func:`~ext.commands.Param`, :func:`~ext.commands.inject`,
-:func:`~ext.commands.injection` and :func:`~ext.commands.register_injection` do not have a specific return type, but at runtime these return :class:`~ext.commands.ParamInfo` and
+and :func:`~ext.commands.injection` do not have a specific return type, but at runtime these return :class:`~ext.commands.ParamInfo` and
 :class:`~ext.commands.Injection` respectively.
 
 A typical example of a slash command might look like this: ::
