@@ -109,6 +109,7 @@ class Loop(Generic[CoroP]):
     def __init__(
         self,
         coro: Coro[CoroP],
+        *,
         seconds: float = 0,
         minutes: float = 0,
         hours: float = 0,
