@@ -1,0 +1,1 @@
+Deprecate :attr:`Permissions.start_embedded_activities` in favour of :attr:`Permissions.use_embedded_activities`.
