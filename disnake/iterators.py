@@ -282,7 +282,7 @@ class HistoryIterator(_AsyncIterator["Message"]):
         before: Optional[Union[Snowflake, datetime.datetime]] = None,
         after: Optional[Union[Snowflake, datetime.datetime]] = None,
         around: Optional[Union[Snowflake, datetime.datetime]] = None,
-        oldest_first: bool = None,
+        oldest_first: Optional[bool] = None,
     ):
 
         if isinstance(before, datetime.datetime):
@@ -514,7 +514,7 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
     def __init__(
         self,
         guild: Guild,
-        limit: int = None,
+        limit: Optional[int] = None,
         before: Optional[Union[Snowflake, datetime.datetime]] = None,
         after: Optional[Union[Snowflake, datetime.datetime]] = None,
         user_id: Optional[int] = None,

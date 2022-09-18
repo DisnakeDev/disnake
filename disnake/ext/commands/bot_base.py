@@ -146,7 +146,7 @@ class BotBase(CommonBotBase, GroupMixin):
             Union[PrefixType, Callable[[Self, Message], MaybeCoro[PrefixType]]]
         ] = None,
         help_command: HelpCommand = _default,
-        description: str = None,
+        description: Optional[str] = None,
         *,
         strip_after_prefix: bool = False,
         **options: Any,

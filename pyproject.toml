@@ -111,7 +111,6 @@ reportUnknownArgumentType = false
 reportMissingParameterType = false
 reportUnknownVariableType = false
 reportMissingTypeArgument = false
-strictParameterNoneValue = false
 
 
 [tool.pytest.ini_options]

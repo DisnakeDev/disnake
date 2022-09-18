@@ -188,9 +188,9 @@ class SubCommandGroup(InvokableApplicationCommand):
         self,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        options: list = None,
-        connectors: dict = None,
-        extras: Dict[str, Any] = None,
+        options: Optional[list] = None,
+        connectors: Optional[dict] = None,
+        extras: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> Callable[[CommandCallback], SubCommand]:
         """
@@ -265,8 +265,8 @@ class SubCommand(InvokableApplicationCommand):
         *,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        options: list = None,
-        connectors: Dict[str, str] = None,
+        options: Optional[list] = None,
+        connectors: Optional[Dict[str, str]] = None,
         **kwargs,
     ):
         name_loc = Localized._cast(name, False)
@@ -394,12 +394,12 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         *,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        options: List[Option] = None,
-        dm_permission: bool = None,
+        options: Optional[List[Option]] = None,
+        dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-        guild_ids: Sequence[int] = None,
-        connectors: Dict[str, str] = None,
-        auto_sync: bool = None,
+        guild_ids: Optional[Sequence[int]] = None,
+        connectors: Optional[Dict[str, str]] = None,
+        auto_sync: Optional[bool] = None,
         **kwargs,
     ):
         name_loc = Localized._cast(name, False)
@@ -464,9 +464,9 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         self,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        options: list = None,
-        connectors: dict = None,
-        extras: Dict[str, Any] = None,
+        options: Optional[list] = None,
+        connectors: Optional[dict] = None,
+        extras: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> Callable[[CommandCallback], SubCommand]:
         """
@@ -529,7 +529,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
     def sub_command_group(
         self,
         name: LocalizedOptional = None,
-        extras: Dict[str, Any] = None,
+        extras: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> Callable[[CommandCallback], SubCommandGroup]:
         """
@@ -695,13 +695,13 @@ def slash_command(
     *,
     name: LocalizedOptional = None,
     description: LocalizedOptional = None,
-    dm_permission: bool = None,
+    dm_permission: Optional[bool] = None,
     default_member_permissions: Optional[Union[Permissions, int]] = None,
-    options: List[Option] = None,
-    guild_ids: Sequence[int] = None,
-    connectors: Dict[str, str] = None,
-    auto_sync: bool = None,
-    extras: Dict[str, Any] = None,
+    options: Optional[List[Option]] = None,
+    guild_ids: Optional[Sequence[int]] = None,
+    connectors: Optional[Dict[str, str]] = None,
+    auto_sync: Optional[bool] = None,
+    extras: Optional[Dict[str, Any]] = None,
     **kwargs,
 ) -> Callable[[CommandCallback], InvokableSlashCommand]:
     """A decorator that builds a slash command.
