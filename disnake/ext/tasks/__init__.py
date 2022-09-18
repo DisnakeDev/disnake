@@ -119,8 +119,8 @@ class Loop(Generic[CoroP]):
         loop: asyncio.AbstractEventLoop = MISSING,
     ) -> None:
         """
-        .. Note:
-            If you're going to overwrite __init__ arguments, make sure to redefine .clone too
+        .. note:
+            If you overwrite ``__init__`` arguments, make sure to redefine .clone too.
         """
         self.coro: Coro[CoroP] = coro
         self.reconnect: bool = reconnect
