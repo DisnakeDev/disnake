@@ -3568,7 +3568,7 @@ class Guild(Hashable):
         self,
         user: Snowflake,
         *,
-        delete_message_duration: Union[int, datetime.timedelta] = 86400,
+        clean_history_duration: Union[int, datetime.timedelta] = 86400,
         reason: Optional[str] = None,
     ) -> None:
         ...
@@ -3587,7 +3587,7 @@ class Guild(Hashable):
         self,
         user: Snowflake,
         *,
-        delete_message_duration: Union[int, datetime.timedelta] = 86400,
+        clean_history_duration: Union[int, datetime.timedelta] = 86400,
         delete_message_days: Literal[0, 1, 2, 3, 4, 5, 6, 7] = MISSING,
         reason: Optional[str] = None,
     ) -> None:
@@ -3604,7 +3604,7 @@ class Guild(Hashable):
         ----------
         user: :class:`abc.Snowflake`
             The user to ban from the guild.
-        delete_message_duration: Union[:class:`int`, :class:`datetime.timedelta`]
+        clean_history_duration: Union[:class:`int`, :class:`datetime.timedelta`]
             The timespan (seconds or timedelta) of messages to delete from the user
             in the guild, up to 7 days (604800 seconds).
             Defaults to 1 day (86400 seconds).
@@ -3621,14 +3621,14 @@ class Guild(Hashable):
             The number of days worth of messages to delete from the user
             in the guild. The minimum is 0 and the maximum is 7.
 
-            This is incompatible with ``delete_message_duration``.
+            This is incompatible with ``clean_history_duration``.
         reason: Optional[:class:`str`]
             The reason for banning this user. Shows up on the audit log.
 
         Raises
         ------
         TypeError
-            ``delete_message_duration`` has an invalid type.
+            ``clean_history_duration`` has an invalid type.
         Forbidden
             You do not have the proper permissions to ban.
         HTTPException
@@ -3636,14 +3636,14 @@ class Guild(Hashable):
         """
         if delete_message_days is not MISSING:
             delete_message_seconds = delete_message_days * 86400
-        elif isinstance(delete_message_duration, datetime.timedelta):
-            delete_message_seconds = delete_message_duration.seconds
-        elif isinstance(delete_message_duration, int):
-            delete_message_seconds = delete_message_duration
+        elif isinstance(clean_history_duration, datetime.timedelta):
+            delete_message_seconds = clean_history_duration.seconds
+        elif isinstance(clean_history_duration, int):
+            delete_message_seconds = clean_history_duration
         else:
             raise TypeError(
-                "`delete_message_duration` should be int or timedelta, "
-                f"not {type(delete_message_duration).__name__}"
+                "`clean_history_duration` should be int or timedelta, "
+                f"not {type(clean_history_duration).__name__}"
             )
 
         await self._state.http.ban(
