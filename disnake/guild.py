@@ -1845,6 +1845,7 @@ class Guild(Hashable):
             The new channel that is the AFK channel. Could be ``None`` for no AFK channel.
         afk_timeout: :class:`int`
             The number of seconds until someone is moved to the AFK channel.
+            This can be set to ``60``, ``300``, ``900``, ``1800``, and ``3600``.
         owner: :class:`Member`
             The new owner of the guild to transfer ownership to. Note that you must
             be owner of the guild to do this.
