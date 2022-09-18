@@ -1,1 +1,1 @@
-Add support for subclassing ``.ext.tasks.Loop`` and using subclasses in :func:`.ext.tasks.loop` decorator
+|tasks| Add support for subclassing :class:`.ext.tasks.Loop` and using subclasses in :func:`.ext.tasks.loop` decorator
