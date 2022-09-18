@@ -840,6 +840,7 @@ class GuildChannel(ABC):
         speak: Optional[bool] = ...,
         start_embedded_activities: Optional[bool] = ...,
         stream: Optional[bool] = ...,
+        use_application_commands: Optional[bool] = ...,
         use_embedded_activities: Optional[bool] = ...,
         use_external_emojis: Optional[bool] = ...,
         use_external_stickers: Optional[bool] = ...,
