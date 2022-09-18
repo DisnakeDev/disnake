@@ -143,7 +143,7 @@ class Localized(Generic[StringT]):
         key: str = MISSING,
         data: Union[Optional[LocalizationsDict], LocalizationValue] = MISSING,
     ):
-        self.string: StringT = string  # type: ignore  # default values for generic parameters don't quite work
+        self.string: StringT = string
 
         if not (key is MISSING) ^ (data is MISSING):
             raise TypeError("Exactly one of `key` or `data` must be provided")

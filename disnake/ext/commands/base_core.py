@@ -150,7 +150,7 @@ class InvokableApplicationCommand(ABC):
         self.__original_kwargs__ = {k: v for k, v in kwargs.items() if v is not None}
         return self
 
-    def __init__(self, func: CommandCallback, *, name: str = None, **kwargs):
+    def __init__(self, func: CommandCallback, *, name: Optional[str] = None, **kwargs):
         self.__command_flag__ = None
         self._callback: CommandCallback = func
         self.name: str = name or func.__name__

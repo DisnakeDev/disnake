@@ -93,10 +93,10 @@ class InvokableUserCommand(InvokableApplicationCommand):
         func: InteractionCommandCallback[CogT, UserCommandInteraction, P],
         *,
         name: LocalizedOptional = None,
-        dm_permission: bool = None,
+        dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-        guild_ids: Sequence[int] = None,
-        auto_sync: bool = None,
+        guild_ids: Optional[Sequence[int]] = None,
+        auto_sync: Optional[bool] = None,
         **kwargs,
     ):
         name_loc = Localized._cast(name, False)
@@ -193,10 +193,10 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         func: InteractionCommandCallback[CogT, MessageCommandInteraction, P],
         *,
         name: LocalizedOptional = None,
-        dm_permission: bool = None,
+        dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-        guild_ids: Sequence[int] = None,
-        auto_sync: bool = None,
+        guild_ids: Optional[Sequence[int]] = None,
+        auto_sync: Optional[bool] = None,
         **kwargs,
     ):
         name_loc = Localized._cast(name, False)
@@ -247,11 +247,11 @@ class InvokableMessageCommand(InvokableApplicationCommand):
 def user_command(
     *,
     name: LocalizedOptional = None,
-    dm_permission: bool = None,
+    dm_permission: Optional[bool] = None,
     default_member_permissions: Optional[Union[Permissions, int]] = None,
-    guild_ids: Sequence[int] = None,
-    auto_sync: bool = None,
-    extras: Dict[str, Any] = None,
+    guild_ids: Optional[Sequence[int]] = None,
+    auto_sync: Optional[bool] = None,
+    extras: Optional[Dict[str, Any]] = None,
     **kwargs,
 ) -> Callable[[InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand]:
     """A shortcut decorator that builds a user command.
@@ -318,11 +318,11 @@ def user_command(
 def message_command(
     *,
     name: LocalizedOptional = None,
-    dm_permission: bool = None,
+    dm_permission: Optional[bool] = None,
     default_member_permissions: Optional[Union[Permissions, int]] = None,
-    guild_ids: Sequence[int] = None,
-    auto_sync: bool = None,
-    extras: Dict[str, Any] = None,
+    guild_ids: Optional[Sequence[int]] = None,
+    auto_sync: Optional[bool] = None,
+    extras: Optional[Dict[str, Any]] = None,
     **kwargs,
 ) -> Callable[
     [InteractionCommandCallback[CogT, MessageCommandInteraction, P]],
