@@ -68,9 +68,6 @@ class EmbedProxy:
     def __eq__(self, other: Any) -> bool:
         return isinstance(other, EmbedProxy) and self.__dict__ == other.__dict__
 
-    def __ne__(self, other: Any) -> bool:
-        return not self.__eq__(other)
-
 
 if TYPE_CHECKING:
     from typing_extensions import Self
