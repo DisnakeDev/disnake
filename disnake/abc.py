@@ -1398,19 +1398,19 @@ class Messageable:
         content: Optional[str] = None,
         *,
         tts: bool = False,
-        embed: Embed = None,
-        embeds: List[Embed] = None,
-        file: File = None,
-        files: List[File] = None,
-        stickers: Sequence[Union[GuildSticker, StickerItem]] = None,
-        delete_after: float = None,
-        nonce: Union[str, int] = None,
+        embed: Optional[Embed] = None,
+        embeds: Optional[List[Embed]] = None,
+        file: Optional[File] = None,
+        files: Optional[List[File]] = None,
+        stickers: Optional[Sequence[Union[GuildSticker, StickerItem]]] = None,
+        delete_after: Optional[float] = None,
+        nonce: Optional[Union[str, int]] = None,
         suppress_embeds: bool = False,
-        allowed_mentions: AllowedMentions = None,
-        reference: Union[Message, MessageReference, PartialMessage] = None,
-        mention_author: bool = None,
-        view: View = None,
-        components: Components[MessageUIComponent] = None,
+        allowed_mentions: Optional[AllowedMentions] = None,
+        reference: Optional[Union[Message, MessageReference, PartialMessage]] = None,
+        mention_author: Optional[bool] = None,
+        view: Optional[View] = None,
+        components: Optional[Components[MessageUIComponent]] = None,
     ):
         """|coro|
 
@@ -1418,8 +1418,8 @@ class Messageable:
 
         The content must be a type that can convert to a string through ``str(content)``.
 
-        At least one of ``content``, ``embed``/``embeds``, ``file``/``files``
-        or ``stickers`` must be provided.
+        At least one of ``content``, ``embed``/``embeds``, ``file``/``files``,
+        ``stickers``, ``components``, or ``view`` must be provided.
 
         To upload a single file, the ``file`` parameter should be used with a
         single :class:`.File` object. To upload multiple files, the ``files``

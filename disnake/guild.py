@@ -1553,7 +1553,7 @@ class Guild(Hashable):
         category: Optional[CategoryChannel] = None,
         position: int = MISSING,
         slowmode_delay: int = MISSING,
-        default_auto_archive_duration: AnyThreadArchiveDuration = None,
+        default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = None,
         nsfw: bool = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
         reason: Optional[str] = None,
@@ -1845,6 +1845,7 @@ class Guild(Hashable):
             The new channel that is the AFK channel. Could be ``None`` for no AFK channel.
         afk_timeout: :class:`int`
             The number of seconds until someone is moved to the AFK channel.
+            This can be set to ``60``, ``300``, ``900``, ``1800``, and ``3600``.
         owner: :class:`Member`
             The new owner of the guild to transfer ownership to. Note that you must
             be owner of the guild to do this.
@@ -3739,8 +3740,8 @@ class Guild(Hashable):
         limit: Optional[int] = 100,
         before: Optional[SnowflakeTime] = None,
         after: Optional[SnowflakeTime] = None,
-        user: Snowflake = None,
-        action: AuditLogAction = None,
+        user: Optional[Snowflake] = None,
+        action: Optional[AuditLogAction] = None,
     ) -> AuditLogIterator:
         """Returns an :class:`AsyncIterator` that enables receiving the guild's audit logs.
 
@@ -4427,7 +4428,7 @@ class Guild(Hashable):
         event_type: AutoModEventType,
         trigger_type: AutoModTriggerType,
         actions: Sequence[AutoModAction],
-        trigger_metadata: AutoModTriggerMetadata = None,
+        trigger_metadata: Optional[AutoModTriggerMetadata] = None,
         enabled: bool = False,
         exempt_roles: Optional[Sequence[Snowflake]] = None,
         exempt_channels: Optional[Sequence[Snowflake]] = None,

@@ -1,0 +1,1 @@
+Clarify :func:`Thread.delete` criteria for threads in forum channels.
