@@ -923,7 +923,7 @@ class SyncWebhook(BaseWebhook):
         suppress_embeds: bool = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         thread: Snowflake = MISSING,
-        thread_name: str = None,
+        thread_name: Optional[str] = None,
         wait: bool = False,
     ) -> Optional[SyncWebhookMessage]:
         """Sends a message using the webhook.
