@@ -47,7 +47,7 @@ A typical example of a slash command might look like this: ::
     @bot.slash_command(description="Replies with the given text!")
     async def echo(
         inter: disnake.ApplicationCommandInteraction,
-        text: str = commands.Param(description="Echo~")
+        text: str = commands.Param(description="Echo~"),
     ) -> None:
         await inter.response.send_message(text)
 
