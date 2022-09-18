@@ -1,0 +1,1 @@
+Deprecate :attr:`Permissions.use_slash_commands` in favour of :attr:`Permissions.use_application_commands`.
