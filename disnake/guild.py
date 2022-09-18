@@ -3645,7 +3645,7 @@ class Guild(Hashable):
             )
             delete_message_seconds = delete_message_days * 86400
         elif isinstance(clean_history_duration, datetime.timedelta):
-            delete_message_seconds = clean_history_duration.seconds
+            delete_message_seconds = int(clean_history_duration.total_seconds())
         elif isinstance(clean_history_duration, int):
             delete_message_seconds = clean_history_duration
         else:
