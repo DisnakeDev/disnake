@@ -272,6 +272,7 @@ class ReadyEvent(TypedDict):
     user: User
     guilds: List[UnavailableGuild]
     session_id: str
+    resume_gateway_url: str
     shard: NotRequired[Tuple[int, int]]
     application: PartialGatewayAppInfo
 

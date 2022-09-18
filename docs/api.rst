@@ -4910,6 +4910,7 @@ Interaction
 .. autoclass:: Interaction()
     :members:
     :inherited-members:
+    :exclude-members: original_message, edit_original_message, delete_original_message
 
 ApplicationCommandInteraction
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -5254,6 +5255,7 @@ WidgetMember
 .. autoclass:: WidgetMember()
     :members:
     :inherited-members:
+    :exclude-members: public_flags, default_avatar, banner, accent_colour, accent_color, colour, color, mention, created_at, mentioned_in
 
 WidgetSettings
 ~~~~~~~~~~~~~~
@@ -5762,6 +5764,15 @@ SessionStartLimit
 
 .. autoclass:: SessionStartLimit()
     :members:
+
+GatewayParams
+~~~~~~~~~~~~~~
+
+.. attributetable:: GatewayParams
+
+.. autoclass:: GatewayParams()
+    :members:
+    :exclude-members: encoding, zlib
 
 SystemChannelFlags
 ~~~~~~~~~~~~~~~~~~~~

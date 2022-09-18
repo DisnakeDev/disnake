@@ -94,8 +94,8 @@ conn: Any = ...  # a placeholder for an actual database connection
 @commands.register_injection
 async def get_game_user(
     inter: disnake.CommandInteraction,
-    user: str = None,
-    server: Literal["eu", "us", "cn"] = None,
+    user: Optional[str] = None,
+    server: Optional[Literal["eu", "us", "cn"]] = None,
 ) -> GameUser:
     """Search a game user from the database
 

@@ -70,11 +70,10 @@ S_co = TypeVar("S_co", bound="Select", covariant=True)
 V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
 P = ParamSpec("P")
 
+SelectOptionInput = Union[List[SelectOption], List[str], Dict[str, str]]
 
-def _parse_select_options(
-    options: Union[List[SelectOption], List[str], Dict[str, str]]
-) -> List[SelectOption]:
 
+def _parse_select_options(options: SelectOptionInput) -> List[SelectOption]:
     if isinstance(options, dict):
         return [SelectOption(label=key, value=val) for key, val in options.items()]
 
@@ -140,7 +139,7 @@ class Select(Item[V_co]):
         placeholder: Optional[str] = None,
         min_values: int = 1,
         max_values: int = 1,
-        options: Union[List[SelectOption], List[str], Dict[str, str]] = ...,
+        options: SelectOptionInput = ...,
         disabled: bool = False,
         row: Optional[int] = None,
     ):
@@ -154,7 +153,7 @@ class Select(Item[V_co]):
         placeholder: Optional[str] = None,
         min_values: int = 1,
         max_values: int = 1,
-        options: Union[List[SelectOption], List[str], Dict[str, str]] = ...,
+        options: SelectOptionInput = ...,
         disabled: bool = False,
         row: Optional[int] = None,
     ):
@@ -167,7 +166,7 @@ class Select(Item[V_co]):
         placeholder: Optional[str] = None,
         min_values: int = 1,
         max_values: int = 1,
-        options: Union[List[SelectOption], List[str], Dict[str, str]] = MISSING,
+        options: SelectOptionInput = MISSING,
         disabled: bool = False,
         row: Optional[int] = None,
     ) -> None:
@@ -358,7 +357,7 @@ def select(
     custom_id: str = ...,
     min_values: int = 1,
     max_values: int = 1,
-    options: Union[List[SelectOption], List[str], Dict[str, str]] = ...,
+    options: SelectOptionInput = ...,
     disabled: bool = False,
     row: Optional[int] = None,
 ) -> Callable[[ItemCallbackType[Select[V_co]]], DecoratedItem[Select[V_co]]]:

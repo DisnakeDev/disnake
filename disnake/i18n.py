@@ -181,7 +181,7 @@ class Localized(Generic[StringT]):
         ...
 
     def _upgrade(
-        self, string: Optional[str] = None, *, key: Optional[str] = None
+        self: Localized[Any], string: Optional[str] = None, *, key: Optional[str] = None
     ) -> Localized[Any]:
         # update key if provided and not already set
         self.localizations._upgrade(key)

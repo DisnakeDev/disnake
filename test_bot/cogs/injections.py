@@ -109,7 +109,7 @@ class InjectionSlashCommands(commands.Cog):
         self,
         inter: disnake.CommandInteraction,
         perhaps: PerhapsThis,
-        god: HopeToGod = None,
+        god: Optional[HopeToGod] = None,
     ):
         """A command gotten just with annotations
 

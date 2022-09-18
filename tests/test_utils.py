@@ -242,24 +242,27 @@ def test_maybe_cast():
 
 
 @pytest.mark.parametrize(
-    ("data", "expected"),
+    ("data", "expected_mime", "expected_ext"),
     [
-        (b"\x89\x50\x4E\x47\x0D\x0A\x1A\x0A", "image/png"),
-        (b"\xFF\xD8\xFFxxxJFIF", "image/jpeg"),
-        (b"\xFF\xD8\xFFxxxExif", "image/jpeg"),
-        (b"\xFF\xD8\xFFxxxxxxxxxxxx", "image/jpeg"),
-        (b"xxxxxxJFIF", "image/jpeg"),
-        (b"\x47\x49\x46\x38\x37\x61", "image/gif"),
-        (b"\x47\x49\x46\x38\x39\x61", "image/gif"),
-        (b"RIFFxxxxWEBP", "image/webp"),
+        (b"\x89\x50\x4E\x47\x0D\x0A\x1A\x0A", "image/png", ".png"),
+        (b"\xFF\xD8\xFFxxxJFIF", "image/jpeg", ".jpg"),
+        (b"\xFF\xD8\xFFxxxExif", "image/jpeg", ".jpg"),
+        (b"\xFF\xD8\xFFxxxxxxxxxxxx", "image/jpeg", ".jpg"),
+        (b"xxxxxxJFIF", "image/jpeg", ".jpg"),
+        (b"\x47\x49\x46\x38\x37\x61", "image/gif", ".gif"),
+        (b"\x47\x49\x46\x38\x39\x61", "image/gif", ".gif"),
+        (b"RIFFxxxxWEBP", "image/webp", ".webp"),
     ],
 )
-def test_mime_type_valid(data, expected):
-    assert utils._get_mime_type_for_image(data) == expected
-    assert utils._get_mime_type_for_image(data + b"\xFF") == expected
+def test_mime_type_valid(data, expected_mime, expected_ext):
+    for d in (data, data + b"\xFF"):
+        assert utils._get_mime_type_for_image(d) == expected_mime
+        assert utils._get_extension_for_image(d) == expected_ext
 
+    prefixed = b"\xFF" + data
     with pytest.raises(ValueError, match=r"Unsupported image type given"):
-        utils._get_mime_type_for_image(b"\xFF" + data)
+        utils._get_mime_type_for_image(prefixed)
+    assert utils._get_extension_for_image(prefixed) is None
 
 
 @pytest.mark.parametrize(
@@ -275,6 +278,7 @@ def test_mime_type_valid(data, expected):
 def test_mime_type_invalid(data):
     with pytest.raises(ValueError, match=r"Unsupported image type given"):
         utils._get_mime_type_for_image(data)
+    assert utils._get_extension_for_image(data) is None
 
 
 @pytest.mark.asyncio
