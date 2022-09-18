@@ -42,7 +42,7 @@ If your editor of choice supports type-checking, you may have noticed that :func
 :func:`~ext.commands.injection` and :func:`~ext.commands.register_injection` do not have a specific return type, but at runtime these return :class:`~ext.commands.ParamInfo` and
 :class:`~ext.commands.Injection` respectively.
 
-A typical example of slash command might look like this: ::
+A typical example of a slash command might look like this: ::
 
     @bot.slash_command(description="Replies with the given text!")
     async def echo(
