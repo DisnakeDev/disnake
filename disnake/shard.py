@@ -356,7 +356,7 @@ class AutoShardedClient(Client):
         allowed_mentions: Optional[AllowedMentions] = None,
         activity: Optional[BaseActivity] = None,
         status: Optional[Union[Status, str]] = None,
-        intents: Intents = None,
+        intents: Optional[Intents] = None,
         chunk_guilds_at_startup: Optional[bool] = None,
         member_cache_flags: Optional[MemberCacheFlags] = None,
         localization_provider: Optional[LocalizationProtocol] = None,
@@ -542,7 +542,7 @@ class AutoShardedClient(Client):
         *,
         activity: Optional[BaseActivity] = None,
         status: Optional[Status] = None,
-        shard_id: int = None,
+        shard_id: Optional[int] = None,
     ) -> None:
         """|coro|
 

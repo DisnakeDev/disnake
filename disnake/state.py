@@ -516,14 +516,14 @@ class ConnectionState:
         self._guild_application_commands.pop(guild_id, None)
 
     def _get_global_command_named(
-        self, name: str, cmd_type: ApplicationCommandType = None
+        self, name: str, cmd_type: Optional[ApplicationCommandType] = None
     ) -> Optional[APIApplicationCommand]:
         for cmd in self._global_application_commands.values():
             if cmd.name == name and (cmd_type is None or cmd.type is cmd_type):
                 return cmd
 
     def _get_guild_command_named(
-        self, guild_id: int, name: str, cmd_type: ApplicationCommandType = None
+        self, guild_id: int, name: str, cmd_type: Optional[ApplicationCommandType] = None
     ) -> Optional[APIApplicationCommand]:
         granula = self._guild_application_commands.get(guild_id, {})
         for cmd in granula.values():
