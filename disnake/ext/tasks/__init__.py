@@ -31,7 +31,7 @@ import inspect
 import sys
 import traceback
 from collections.abc import Sequence
-from typing import Any, Awaitable, Callable, Generic, List, Optional, Type, TypeVar, Union
+from typing import Any, Callable, Coroutine, Generic, List, Optional, Type, TypeVar, Union
 
 import aiohttp
 
@@ -42,10 +42,10 @@ from disnake.utils import MISSING, utcnow
 __all__ = ("loop",)
 
 T = TypeVar("T")
-_func = Callable[..., Awaitable[Any]]
+_func = Callable[..., Coroutine[Any, Any, Any]]
 LF = TypeVar("LF", bound=_func)
 FT = TypeVar("FT", bound=_func)
-ET = TypeVar("ET", bound=Callable[[Any, BaseException], Awaitable[Any]])
+ET = TypeVar("ET", bound=Callable[[Any, BaseException], Coroutine[Any, Any, Any]])
 
 
 class SleepHandle:
@@ -550,7 +550,7 @@ class Loop(Generic[LF]):
         if not asyncio.iscoroutinefunction(coro):
             raise TypeError(f"Expected coroutine function, received {coro.__class__.__name__!r}.")
 
-        self._error = coro  # type: ignore
+        self._error = coro
         return coro
 
     def _get_next_sleep_time(self) -> datetime.datetime:

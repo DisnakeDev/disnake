@@ -418,19 +418,18 @@ class TestBaseFlags:
     def test_alias_priority(self) -> None:
         ins = TestFlags(three=False, two=True, one=False)
         assert ins.value == 0b10
-        assert ins.three is False
-        assert ins.two is True
-        assert ins.one is False
 
         ins = TestFlags(three=True, two=False, one=False)
-        assert ins.three is False
-        assert ins.two is False
-        assert ins.one is False
+        assert ins.value == 0b00
 
         ins = TestFlags(three=True, two=False)
-        assert ins.three is False
-        assert ins.two is False
-        assert ins.one is True
+        assert ins.value == 0b01
+
+        ins = TestFlags(two=False, three=True)
+        assert ins.value == 0b11
+
+        ins = TestFlags(two=True, three=False)
+        assert ins.value == 0b00
 
 
 class _ListFlags(flags.ListBaseFlags):

@@ -55,7 +55,7 @@ from .context_managers import Typing
 from .enums import ChannelType, StagePrivacyLevel, VideoQualityMode, try_enum, try_enum_to_int
 from .errors import ClientException
 from .file import File
-from .flags import ChannelFlags, MessageFlags
+from .flags import ChannelFlags
 from .iterators import ArchivedThreadIterator
 from .mixins import Hashable
 from .permissions import PermissionOverwrite, Permissions
@@ -2911,7 +2911,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         slowmode_delay: :class:`int`
             Specifies the slowmode rate limit for users in this thread, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
-            If not provided, slowmode is disabled.
+            If not provided, slowmode is inherited from the parent's configured default thread slowmode.
         content: :class:`str`
             The content of the message to send.
         embed: :class:`.Embed`
@@ -2975,6 +2975,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             embeds=embeds,
             file=file,
             files=files,
+            suppress_embeds=suppress_embeds,
             view=view,
             components=components,
             allowed_mentions=allowed_mentions,
@@ -2991,20 +2992,19 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         elif params.files and not all(isinstance(file, File) for file in params.files):
             raise TypeError("files parameter must be a list of File")
 
-        if suppress_embeds:
-            flags = MessageFlags.suppress_embeds.flag
-        else:
-            flags = 0
+        channel_data = {
+            "name": name,
+            "auto_archive_duration": auto_archive_duration or self.default_auto_archive_duration,
+        }
+
+        if slowmode_delay is not MISSING:
+            channel_data["rate_limit_per_user"] = slowmode_delay
 
         try:
             data = await self._state.http.start_thread_in_forum_channel(
                 self.id,
-                name=name,
-                auto_archive_duration=auto_archive_duration or self.default_auto_archive_duration,
-                rate_limit_per_user=slowmode_delay or 0,
-                type=ChannelType.public_thread.value,
+                **channel_data,
                 files=params.files,
-                flags=flags,
                 reason=reason,
                 **params.payload,
             )

@@ -1,0 +1,1 @@
+Fix creation of forum threads without :class:`Permissions.manage_threads`.
