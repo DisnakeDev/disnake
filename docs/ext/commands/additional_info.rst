@@ -52,7 +52,7 @@ A typical example of a slash command might look like this: ::
         await inter.response.send_message(text)
 
 Here, you have two parameters in your command's function: ``inter``, an instance of :class:`disnake.ApplicationCommandInteraction`, and
-``text``, which is.. Noticed? You annotate ``text`` as ``str``, but at the same time, assign :class:`~ext.commands.ParamInfo` instance to it.
+``text``, which is somewhat unusual: you annotate ``text`` as ``str``, but at the same time, assign a :class:`~ext.commands.ParamInfo` instance to it.
 That's the thing. When your editor type-checks your (any library's) code, it would normally complain if you tried to do the above, because
 you're trying to "convert" ``ParamInfo`` into ``str``, but since library have set ``Param``'s return type as ``Any``, type-checker "accepts"
 your code, because ``str`` (and any type) is the subset of ``Any``. Win-win!
