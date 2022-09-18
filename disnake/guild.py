@@ -3622,6 +3622,10 @@ class Guild(Hashable):
             in the guild. The minimum is 0 and the maximum is 7.
 
             This is incompatible with ``clean_history_duration``.
+
+            .. deprecated:: 2.6
+                Use ``clean_history_duration`` instead.
+
         reason: Optional[:class:`str`]
             The reason for banning this user. Shows up on the audit log.
 
@@ -3635,6 +3639,10 @@ class Guild(Hashable):
             Banning failed.
         """
         if delete_message_days is not MISSING:
+            utils.warn_deprecated(
+                "`delete_message_days` is deprecated and will be removed in a future version. Consider using `clean_history_duration` instead.",
+                stacklevel=2,
+            )
             delete_message_seconds = delete_message_days * 86400
         elif isinstance(clean_history_duration, datetime.timedelta):
             delete_message_seconds = clean_history_duration.seconds

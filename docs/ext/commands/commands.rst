@@ -584,7 +584,7 @@ When mixed with the :data:`typing.Optional` converter you can provide simple and
                        reason: str):
         """Mass bans members with an optional delete_days parameter"""
         for member in members:
-            await member.ban(delete_message_days=delete_days, reason=reason)
+            await member.ban(clean_history_duration=delete_days * 86400, reason=reason)
 
 
 This command can be invoked any of the following ways:
@@ -714,7 +714,7 @@ For example, augmenting the example above:
     @commands.command()
     async def ban(ctx, *, flags: BanFlags):
         for member in flags.members:
-            await member.ban(reason=flags.reason, delete_message_days=flags.days)
+            await member.ban(reason=flags.reason, clean_history_duration=flags.days * 86400)
 
         members = ', '.join(str(member) for member in flags.members)
         plural = f'{flags.days} days' if flags.days != 1 else f'{flags.days} day'
