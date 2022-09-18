@@ -1223,8 +1223,8 @@ def injection(*, autocompleters: Dict[str, Callable] = None) -> Callable[[Callab
 
         .. note::
 
-            In terms of typing, this returns ``Any`` to avoid typing issues caused by how this
-            extension work, but at runtime this is always an :class:`Injection` instance.
+            The decorator return type is annotated with ``Any`` to avoid typing issues caused by how this
+            extension works, but at runtime this is always an :class:`Injection` instance.
             You can find more in-depth explanation :ref:`here <why_params_and_injections_return_any>`.
     """
 
