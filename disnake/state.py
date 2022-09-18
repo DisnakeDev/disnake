@@ -784,18 +784,21 @@ class ConnectionState:
             self._messages.append(message)
         # we ensure that the channel is a type that implements last_message_id
         if channel:
-            if type(channel) in (TextChannel, Thread, VoiceChannel):
+            if channel.__class__ in (TextChannel, Thread, VoiceChannel):
                 channel.last_message_id = message.id  # type: ignore
             # Essentially, messages *don't* count towards message_count, if:
             # - they're the thread starter message
             # - or, they're the initial message of a forum channel thread (which uses MessageType.default)
             # This mirrors the current client and API behavior.
-            if type(channel) is Thread and not (
+            if channel.__class__ is Thread and not (
                 message.type is MessageType.thread_starter_message
-                or (type(channel.parent) is ForumChannel and channel.id == message.id)
+                or (
+                    type(channel.parent) is ForumChannel  # type: ignore
+                    and channel.id == message.id
+                )
             ):
-                channel.total_message_sent += 1
-                channel.message_count += 1
+                channel.total_message_sent += 1  # type: ignore
+                channel.message_count += 1  # type: ignore
 
     def parse_message_delete(self, data: gateway.MessageDeleteEvent) -> None:
         raw = RawMessageDeleteEvent(data)
