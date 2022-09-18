@@ -1,5 +1,4 @@
 import os
-from typing import Optional
 
 import disnake
 from disnake.ext import commands
@@ -64,7 +63,7 @@ async def full_description(
 @bot.slash_command()
 async def defaults(
     inter: disnake.CommandInteraction,
-    string: Optional[str] = None,
+    string: str = "this is a default value",
     user: disnake.User = commands.Param(lambda inter: inter.author),
 ):
     ...
