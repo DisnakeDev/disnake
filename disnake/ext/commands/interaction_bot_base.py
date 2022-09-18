@@ -148,7 +148,7 @@ class InteractionBotBase(CommonBotBase):
         sync_commands: bool = True,
         sync_commands_debug: bool = False,
         sync_commands_on_cog_unload: bool = True,
-        test_guilds: Sequence[int] = None,
+        test_guilds: Optional[Sequence[int]] = None,
         **options: Any,
     ):
         if test_guilds and not all(isinstance(guild_id, int) for guild_id in test_guilds):
@@ -438,13 +438,13 @@ class InteractionBotBase(CommonBotBase):
         *,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        dm_permission: bool = None,
+        dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-        options: List[Option] = None,
-        guild_ids: Sequence[int] = None,
-        connectors: Dict[str, str] = None,
-        auto_sync: bool = None,
-        extras: Dict[str, Any] = None,
+        options: Optional[List[Option]] = None,
+        guild_ids: Optional[Sequence[int]] = None,
+        connectors: Optional[Dict[str, str]] = None,
+        auto_sync: Optional[bool] = None,
+        extras: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> Callable[[CommandCallback], InvokableSlashCommand]:
         """A shortcut decorator that invokes :func:`~disnake.ext.commands.slash_command` and adds it to
@@ -523,11 +523,11 @@ class InteractionBotBase(CommonBotBase):
         self,
         *,
         name: LocalizedOptional = None,
-        dm_permission: bool = None,
+        dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-        guild_ids: Sequence[int] = None,
-        auto_sync: bool = None,
-        extras: Dict[str, Any] = None,
+        guild_ids: Optional[Sequence[int]] = None,
+        auto_sync: Optional[bool] = None,
+        extras: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> Callable[
         [InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand
@@ -592,11 +592,11 @@ class InteractionBotBase(CommonBotBase):
         self,
         *,
         name: LocalizedOptional = None,
-        dm_permission: bool = None,
+        dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-        guild_ids: Sequence[int] = None,
-        auto_sync: bool = None,
-        extras: Dict[str, Any] = None,
+        guild_ids: Optional[Sequence[int]] = None,
+        auto_sync: Optional[bool] = None,
+        extras: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> Callable[
         [InteractionCommandCallback[CogT, MessageCommandInteraction, P]], InvokableMessageCommand
@@ -660,7 +660,7 @@ class InteractionBotBase(CommonBotBase):
     # command synchronisation
 
     def _ordered_unsynced_commands(
-        self, test_guilds: Sequence[int] = None
+        self, test_guilds: Optional[Sequence[int]] = None
     ) -> Tuple[List[ApplicationCommand], Dict[int, List[ApplicationCommand]]]:
         global_cmds = []
         guilds = {}

@@ -40,6 +40,7 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from disnake.activity import BaseActivity
+    from disnake.client import GatewayParams
     from disnake.enums import Status
     from disnake.flags import Intents, MemberCacheFlags
     from disnake.i18n import LocalizationProtocol
@@ -207,7 +208,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
                 Union[PrefixType, Callable[[Self, Message], MaybeCoro[PrefixType]]]
             ] = None,
             help_command: HelpCommand = ...,
-            description: str = None,
+            description: Optional[str] = None,
             *,
             strip_after_prefix: bool = False,
             owner_id: Optional[int] = None,
@@ -217,13 +218,14 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
             sync_commands: bool = True,
             sync_commands_debug: bool = False,
             sync_commands_on_cog_unload: bool = True,
-            test_guilds: Sequence[int] = None,
+            test_guilds: Optional[Sequence[int]] = None,
             asyncio_debug: bool = False,
             loop: Optional[asyncio.AbstractEventLoop] = None,
             shard_id: Optional[int] = None,
             shard_count: Optional[int] = None,
             enable_debug_events: bool = False,
             enable_gateway_error_handler: bool = True,
+            gateway_params: Optional[GatewayParams] = None,
             connector: Optional[aiohttp.BaseConnector] = None,
             proxy: Optional[str] = None,
             proxy_auth: Optional[aiohttp.BasicAuth] = None,
@@ -237,7 +239,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
             status: Optional[Union[Status, str]] = None,
             intents: Optional[Intents] = None,
             chunk_guilds_at_startup: Optional[bool] = None,
-            member_cache_flags: MemberCacheFlags = None,
+            member_cache_flags: Optional[MemberCacheFlags] = None,
             localization_provider: Optional[LocalizationProtocol] = None,
             strict_localization: bool = False,
         ):
@@ -257,7 +259,7 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
                 Union[PrefixType, Callable[[Self, Message], MaybeCoro[PrefixType]]]
             ] = None,
             help_command: HelpCommand = ...,
-            description: str = None,
+            description: Optional[str] = None,
             *,
             strip_after_prefix: bool = False,
             owner_id: Optional[int] = None,
@@ -267,13 +269,14 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
             sync_commands: bool = True,
             sync_commands_debug: bool = False,
             sync_commands_on_cog_unload: bool = True,
-            test_guilds: Sequence[int] = None,
+            test_guilds: Optional[Sequence[int]] = None,
             asyncio_debug: bool = False,
             loop: Optional[asyncio.AbstractEventLoop] = None,
             shard_ids: Optional[List[int]] = None,  # instead of shard_id
             shard_count: Optional[int] = None,
             enable_debug_events: bool = False,
             enable_gateway_error_handler: bool = True,
+            gateway_params: Optional[GatewayParams] = None,
             connector: Optional[aiohttp.BaseConnector] = None,
             proxy: Optional[str] = None,
             proxy_auth: Optional[aiohttp.BasicAuth] = None,
@@ -287,7 +290,7 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
             status: Optional[Union[Status, str]] = None,
             intents: Optional[Intents] = None,
             chunk_guilds_at_startup: Optional[bool] = None,
-            member_cache_flags: MemberCacheFlags = None,
+            member_cache_flags: Optional[MemberCacheFlags] = None,
             localization_provider: Optional[LocalizationProtocol] = None,
             strict_localization: bool = False,
         ):
@@ -386,13 +389,14 @@ class InteractionBot(InteractionBotBase, disnake.Client):
             sync_commands: bool = True,
             sync_commands_debug: bool = False,
             sync_commands_on_cog_unload: bool = True,
-            test_guilds: Sequence[int] = None,
+            test_guilds: Optional[Sequence[int]] = None,
             asyncio_debug: bool = False,
             loop: Optional[asyncio.AbstractEventLoop] = None,
             shard_id: Optional[int] = None,
             shard_count: Optional[int] = None,
             enable_debug_events: bool = False,
             enable_gateway_error_handler: bool = True,
+            gateway_params: Optional[GatewayParams] = None,
             connector: Optional[aiohttp.BaseConnector] = None,
             proxy: Optional[str] = None,
             proxy_auth: Optional[aiohttp.BasicAuth] = None,
@@ -406,7 +410,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
             status: Optional[Union[Status, str]] = None,
             intents: Optional[Intents] = None,
             chunk_guilds_at_startup: Optional[bool] = None,
-            member_cache_flags: MemberCacheFlags = None,
+            member_cache_flags: Optional[MemberCacheFlags] = None,
             localization_provider: Optional[LocalizationProtocol] = None,
             strict_localization: bool = False,
         ):
@@ -429,13 +433,14 @@ class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
             sync_commands: bool = True,
             sync_commands_debug: bool = False,
             sync_commands_on_cog_unload: bool = True,
-            test_guilds: Sequence[int] = None,
+            test_guilds: Optional[Sequence[int]] = None,
             asyncio_debug: bool = False,
             loop: Optional[asyncio.AbstractEventLoop] = None,
             shard_ids: Optional[List[int]] = None,  # instead of shard_id
             shard_count: Optional[int] = None,
             enable_debug_events: bool = False,
             enable_gateway_error_handler: bool = True,
+            gateway_params: Optional[GatewayParams] = None,
             connector: Optional[aiohttp.BaseConnector] = None,
             proxy: Optional[str] = None,
             proxy_auth: Optional[aiohttp.BasicAuth] = None,
@@ -449,7 +454,7 @@ class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
             status: Optional[Union[Status, str]] = None,
             intents: Optional[Intents] = None,
             chunk_guilds_at_startup: Optional[bool] = None,
-            member_cache_flags: MemberCacheFlags = None,
+            member_cache_flags: Optional[MemberCacheFlags] = None,
             localization_provider: Optional[LocalizationProtocol] = None,
             strict_localization: bool = False,
         ):

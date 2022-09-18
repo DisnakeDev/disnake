@@ -249,16 +249,16 @@ class Option:
         self,
         name: LocalizedRequired,
         description: LocalizedOptional = None,
-        type: Union[OptionType, int] = None,
+        type: Optional[Union[OptionType, int]] = None,
         required: bool = False,
-        choices: Choices = None,
-        options: list = None,
-        channel_types: List[ChannelType] = None,
+        choices: Optional[Choices] = None,
+        options: Optional[list] = None,
+        channel_types: Optional[List[ChannelType]] = None,
         autocomplete: bool = False,
-        min_value: float = None,
-        max_value: float = None,
-        min_length: int = None,
-        max_length: int = None,
+        min_value: Optional[float] = None,
+        max_value: Optional[float] = None,
+        min_length: Optional[int] = None,
+        max_length: Optional[int] = None,
     ):
         name_loc = Localized._cast(name, True)
         _validate_name(name_loc.string)
@@ -376,16 +376,16 @@ class Option:
         self,
         name: LocalizedRequired,
         description: LocalizedOptional = None,
-        type: OptionType = None,
+        type: Optional[OptionType] = None,
         required: bool = False,
-        choices: List[OptionChoice] = None,
-        options: list = None,
-        channel_types: List[ChannelType] = None,
+        choices: Optional[List[OptionChoice]] = None,
+        options: Optional[list] = None,
+        channel_types: Optional[List[ChannelType]] = None,
         autocomplete: bool = False,
-        min_value: float = None,
-        max_value: float = None,
-        min_length: int = None,
-        max_length: int = None,
+        min_value: Optional[float] = None,
+        max_value: Optional[float] = None,
+        min_length: Optional[int] = None,
+        max_length: Optional[int] = None,
     ) -> None:
         """Adds an option to the current list of options,
         parameters are the same as for :class:`Option`."""
@@ -491,7 +491,7 @@ class ApplicationCommand(ABC):
         self,
         type: ApplicationCommandType,
         name: LocalizedRequired,
-        dm_permission: bool = None,
+        dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
     ):
         self.type: ApplicationCommandType = enum_if_int(ApplicationCommandType, type)
@@ -619,7 +619,7 @@ class UserCommand(ApplicationCommand):
     def __init__(
         self,
         name: LocalizedRequired,
-        dm_permission: bool = None,
+        dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
     ):
         super().__init__(
@@ -704,7 +704,7 @@ class MessageCommand(ApplicationCommand):
     def __init__(
         self,
         name: LocalizedRequired,
-        dm_permission: bool = None,
+        dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
     ):
         super().__init__(
@@ -806,8 +806,8 @@ class SlashCommand(ApplicationCommand):
         self,
         name: LocalizedRequired,
         description: LocalizedRequired,
-        options: List[Option] = None,
-        dm_permission: bool = None,
+        options: Optional[List[Option]] = None,
+        dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
     ):
         super().__init__(
@@ -836,16 +836,16 @@ class SlashCommand(ApplicationCommand):
         self,
         name: LocalizedRequired,
         description: LocalizedOptional = None,
-        type: OptionType = None,
+        type: Optional[OptionType] = None,
         required: bool = False,
-        choices: List[OptionChoice] = None,
-        options: list = None,
-        channel_types: List[ChannelType] = None,
+        choices: Optional[List[OptionChoice]] = None,
+        options: Optional[list] = None,
+        channel_types: Optional[List[ChannelType]] = None,
         autocomplete: bool = False,
-        min_value: float = None,
-        max_value: float = None,
-        min_length: int = None,
-        max_length: int = None,
+        min_value: Optional[float] = None,
+        max_value: Optional[float] = None,
+        min_length: Optional[int] = None,
+        max_length: Optional[int] = None,
     ) -> None:
         """Adds an option to the current list of options,
         parameters are the same as for :class:`Option`

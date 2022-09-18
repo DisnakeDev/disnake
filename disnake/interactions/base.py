@@ -511,7 +511,7 @@ class Interaction:
             self._state.store_view(view, message.id)
         return message
 
-    async def delete_original_response(self, *, delay: float = None) -> None:
+    async def delete_original_response(self, *, delay: Optional[float] = None) -> None:
         """|coro|
 
         Deletes the original interaction response message.
@@ -1219,11 +1219,11 @@ class InteractionResponse:
 
     async def send_modal(
         self,
-        modal: Modal = None,
+        modal: Optional[Modal] = None,
         *,
-        title: str = None,
-        custom_id: str = None,
-        components: Components[ModalUIComponent] = None,
+        title: Optional[str] = None,
+        custom_id: Optional[str] = None,
+        components: Optional[Components[ModalUIComponent]] = None,
     ) -> None:
         """|coro|
 

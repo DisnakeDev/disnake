@@ -1862,8 +1862,8 @@ class Message(Hashable):
         self,
         *,
         name: str,
-        auto_archive_duration: AnyThreadArchiveDuration = None,
-        slowmode_delay: int = None,
+        auto_archive_duration: Optional[AnyThreadArchiveDuration] = None,
+        slowmode_delay: Optional[int] = None,
         reason: Optional[str] = None,
     ) -> Thread:
         """|coro|
