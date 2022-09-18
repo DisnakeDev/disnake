@@ -217,7 +217,7 @@ class Injection(Generic[P, T_]):
         self,
         function: InjectionCallback[CogT, P, T_],
         *,
-        autocompleters: Dict[str, Callable] = None,
+        autocompleters: Optional[Dict[str, Callable]] = None,
     ) -> None:
         self.function: InjectionCallback[CogT, P, T_] = function
         self.autocompleters: Dict[str, Callable] = autocompleters if autocompleters else {}
@@ -249,7 +249,7 @@ class Injection(Generic[P, T_]):
         function: InjectionCallback[CogT, P, T_],
         annotation: Any,
         *,
-        autocompleters: Dict[str, Callable] = None,
+        autocompleters: Optional[Dict[str, Callable]] = None,
     ) -> Injection[P, T_]:
         self = cls(function, autocompleters=autocompleters)
         cls._registered[annotation] = self
@@ -1168,7 +1168,11 @@ def Param(
 param = Param
 
 
-def inject(function: Callable[..., Any], *, autocompleters: Dict[str, Callable] = None) -> Any:
+def inject(
+    function: Callable[..., Any],
+    *,
+    autocompleters: Optional[Dict[str, Callable]] = None,
+) -> Any:
     """A special function to use the provided function for injections.
     This should be assigned to a parameter of a function representing your slash command.
 
@@ -1203,7 +1207,10 @@ def inject(function: Callable[..., Any], *, autocompleters: Dict[str, Callable] 
     return Injection(function, autocompleters=autocompleters)
 
 
-def injection(*, autocompleters: Dict[str, Callable] = None) -> Callable[[Callable[..., Any]], Any]:
+def injection(
+    *,
+    autocompleters: Optional[Dict[str, Callable]] = None,
+) -> Callable[[Callable[..., Any]], Any]:
     """Decorator interface for :func:`inject`.
     You can then assign this value to your slash commands' parameters.
 
@@ -1283,7 +1290,9 @@ else:
 
 
 def register_injection(
-    function: InjectionCallback[CogT, P, T_], *, autocompleters: Dict[str, Callable] = None
+    function: InjectionCallback[CogT, P, T_],
+    *,
+    autocompleters: Optional[Dict[str, Callable]] = None,
 ) -> Injection[P, T_]:
     """A decorator to register a global injection.
 
