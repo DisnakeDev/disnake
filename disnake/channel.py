@@ -809,8 +809,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         *,
         name: str,
         message: Snowflake,
-        auto_archive_duration: AnyThreadArchiveDuration = None,
-        slowmode_delay: int = None,
+        auto_archive_duration: Optional[AnyThreadArchiveDuration] = None,
+        slowmode_delay: Optional[int] = None,
         reason: Optional[str] = None,
     ) -> Thread:
         ...
@@ -821,9 +821,9 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         *,
         name: str,
         type: ThreadType,
-        auto_archive_duration: AnyThreadArchiveDuration = None,
-        invitable: bool = None,
-        slowmode_delay: int = None,
+        auto_archive_duration: Optional[AnyThreadArchiveDuration] = None,
+        invitable: Optional[bool] = None,
+        slowmode_delay: Optional[int] = None,
         reason: Optional[str] = None,
     ) -> Thread:
         ...
@@ -833,10 +833,10 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         *,
         name: str,
         message: Optional[Snowflake] = None,
-        auto_archive_duration: AnyThreadArchiveDuration = None,
+        auto_archive_duration: Optional[AnyThreadArchiveDuration] = None,
         type: Optional[ThreadType] = None,
-        invitable: bool = None,
-        slowmode_delay: int = None,
+        invitable: Optional[bool] = None,
+        slowmode_delay: Optional[int] = None,
         reason: Optional[str] = None,
     ) -> Thread:
         """|coro|

@@ -2505,7 +2505,7 @@ class HTTPClient:
         self,
         application_id: Snowflake,
         token: str,
-        files: List[File] = None,
+        files: Optional[List[File]] = None,
         content: Optional[str] = None,
         tts: bool = False,
         embeds: Optional[List[embed.Embed]] = None,

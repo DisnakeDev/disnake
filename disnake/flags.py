@@ -348,6 +348,7 @@ class SystemChannelFlags(BaseFlags, inverted=True):
 
     To construct an object you can pass keyword arguments denoting the flags
     to enable or disable.
+    Arguments are applied in order, similar to :class:`Permissions`.
 
     .. container:: operations
 
@@ -829,6 +830,7 @@ class Intents(BaseFlags):
 
     To construct an object you can pass keyword arguments denoting the flags
     to enable or disable.
+    Arguments are applied in order, similar to :class:`Permissions`.
 
     This is used to disable certain gateway features that are unnecessary to
     run your bot. To make use of this, it is passed to the ``intents`` keyword
@@ -1467,6 +1469,7 @@ class MemberCacheFlags(BaseFlags):
 
     To construct an object you can pass keyword arguments denoting the flags
     to enable or disable.
+    Arguments are applied in order, similar to :class:`Permissions`.
 
     The default value is all flags enabled.
 
