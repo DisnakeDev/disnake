@@ -315,20 +315,9 @@ class Embed:
 
     def __eq__(self, other: Any) -> bool:
         return isinstance(other, Embed) and all(
-            (
-                (self.title or None) == (other.title or None),
-                (self.description or None) == (other.description or None),
-                (self.url or None) == (other.url or None),
-                (self._timestamp or None) == (other._timestamp or None),
-                (self._colour or None) == (other._colour or None),
-                (self._thumbnail or None) == (other._thumbnail or None),
-                (self._video or None) == (other._video or None),
-                (self._provider or None) == (other._provider or None),
-                (self._author or None) == (other._author or None),
-                (self._image or None) == (other._image or None),
-                (self._footer or None) == (other._footer or None),
-                (self._fields or None) == (other._fields or None),
-            )
+            getattr(self, slot) == getattr(other, slot)
+            for slot in self.__slots__
+            if getattr(self, slot) is not MISSING or getattr(other, slot) is not MISSING
         )
 
     @property
