@@ -7,11 +7,9 @@ API Reference
 
 The following documents outlines the API of disnake's command extension module.
 
-Documents
----------
-
 .. toctree::
     :maxdepth: 1
+    :hidden:
 
     Application Commands <app_commands.rst>
     Bots <bots.rst>
