@@ -1557,7 +1557,7 @@ class Guild(Hashable):
         default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = None,
         nsfw: bool = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
-        available_tags: Sequence[ForumTag] = None,
+        available_tags: Optional[Sequence[ForumTag]] = None,
         default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = None,
         reason: Optional[str] = None,
     ) -> ForumChannel:
