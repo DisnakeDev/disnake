@@ -20,5 +20,5 @@ extension library that handles this for you.
     slash_commands
     cogs
     extensions
-    api/index.rst
+    api/index
     additional_info
