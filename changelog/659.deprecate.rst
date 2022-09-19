@@ -1,1 +1,1 @@
-The ``delete_message_days`` parameter of :func:`Guild.ban` and :func:`Member.ban` was deprecated in favour of ``clean_history_duration``.
+The ``delete_message_days`` parameter of :func:`Guild.ban` and :func:`Member.ban` is deprecated in favour of ``clean_history_duration``.
