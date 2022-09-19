@@ -3587,7 +3587,7 @@ class Guild(Hashable):
         self,
         user: Snowflake,
         *,
-        clean_history_duration: Union[int, datetime.timedelta] = 86400,
+        clean_history_duration: Union[int, datetime.timedelta] = MISSING,
         delete_message_days: Literal[0, 1, 2, 3, 4, 5, 6, 7] = MISSING,
         reason: Optional[str] = None,
     ) -> None:
@@ -3638,12 +3638,19 @@ class Guild(Hashable):
         HTTPException
             Banning failed.
         """
+        if not (delete_message_days is MISSING) ^ (clean_history_duration is MISSING):
+            raise ValueError(
+                "Exactly one of `clean_history_duration` and `delete_message_days` must be provided."
+            )
+
         if delete_message_days is not MISSING:
             utils.warn_deprecated(
                 "`delete_message_days` is deprecated and will be removed in a future version. Consider using `clean_history_duration` instead.",
                 stacklevel=2,
             )
             delete_message_seconds = delete_message_days * 86400
+        elif clean_history_duration is MISSING:
+            delete_message_seconds = 86400
         elif isinstance(clean_history_duration, datetime.timedelta):
             delete_message_seconds = int(clean_history_duration.total_seconds())
         elif isinstance(clean_history_duration, int):
