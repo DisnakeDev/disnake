@@ -322,7 +322,7 @@ class GuildChannel(ABC):
         sync_permissions: bool = MISSING,
         category: Optional[Snowflake] = MISSING,
         slowmode_delay: Optional[int] = MISSING,
-        thread_slowmode_delay: Optional[int] = MISSING,
+        default_thread_slowmode_delay: Optional[int] = MISSING,
         default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
         type: ChannelType = MISSING,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
@@ -441,7 +441,7 @@ class GuildChannel(ABC):
             # note: not passing `position` as it already got updated before, if passed
             "permission_overwrites": overwrites_payload,
             "rate_limit_per_user": slowmode_delay,
-            "default_thread_rate_limit_per_user": thread_slowmode_delay,
+            "default_thread_rate_limit_per_user": default_thread_slowmode_delay,
             "type": type_payload,
             "rtc_region": rtc_region_payload,
             "video_quality_mode": video_quality_mode_payload,

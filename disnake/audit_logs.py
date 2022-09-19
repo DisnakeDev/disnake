@@ -363,7 +363,7 @@ class AuditLogChanges:
         "icon_hash":                          ("icon", _transform_icon),
         "avatar_hash":                        ("avatar", _transform_avatar),
         "rate_limit_per_user":                ("slowmode_delay", None),
-        "default_thread_rate_limit_per_user": ("thread_slowmode_delay", None),
+        "default_thread_rate_limit_per_user": ("default_thread_slowmode_delay", None),
         "guild_id":                           ("guild", _transform_guild_id),
         "tags":                               ("emoji", None),
         "unicode_emoji":                      ("emoji", None),

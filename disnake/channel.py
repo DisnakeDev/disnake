@@ -2494,9 +2494,9 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         Bots and users with :attr:`~Permissions.manage_channels` or
         :attr:`~Permissions.manage_messages` bypass slowmode.
 
-        See also :attr:`thread_slowmode_delay`.
+        See also :attr:`default_thread_slowmode_delay`.
 
-    thread_slowmode_delay: :class:`int`
+    default_thread_slowmode_delay: :class:`int`
         The number of seconds a member must wait between sending messages
         in newly created threads in this channel.
         A value of `0` denotes that it is disabled.
@@ -2518,7 +2518,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         "default_auto_archive_duration",
         "guild",
         "slowmode_delay",
-        "thread_slowmode_delay",
+        "default_thread_slowmode_delay",
         "_available_tags",
         "_default_reaction_emoji_id",
         "_default_reaction_emoji_name",
@@ -2562,8 +2562,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         )
         self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
         # TODO: add to Guild.create_forum_channel, unsupported atm
-        # TODO: naming
-        self.thread_slowmode_delay: int = data.get("default_thread_rate_limit_per_user", 0)
+        self.default_thread_slowmode_delay: int = data.get("default_thread_rate_limit_per_user", 0)
 
         tags = [
             ForumTag._from_data(data=tag, channel=self, state=self._state)
@@ -2725,7 +2724,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         sync_permissions: bool = ...,
         category: Optional[Snowflake] = ...,
         slowmode_delay: Optional[int] = ...,
-        thread_slowmode_delay: Optional[int] = ...,
+        default_thread_slowmode_delay: Optional[int] = ...,
         default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = ...,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
         flags: ChannelFlags = ...,
@@ -2746,7 +2745,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         sync_permissions: bool = MISSING,
         category: Optional[Snowflake] = MISSING,
         slowmode_delay: Optional[int] = MISSING,
-        thread_slowmode_delay: Optional[int] = MISSING,
+        default_thread_slowmode_delay: Optional[int] = MISSING,
         default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
         flags: ChannelFlags = MISSING,
@@ -2786,7 +2785,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             Specifies the slowmode rate limit at which users can create
             threads in this channel, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
-        thread_slowmode_delay: Optional[:class:`int`]
+        default_thread_slowmode_delay: Optional[:class:`int`]
             Specifies the slowmode rate limit at which users can send messages
             in newly created threads in this channel, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
@@ -2858,7 +2857,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             sync_permissions=sync_permissions,
             category=category,
             slowmode_delay=slowmode_delay,
-            thread_slowmode_delay=thread_slowmode_delay,
+            default_thread_slowmode_delay=default_thread_slowmode_delay,
             default_auto_archive_duration=default_auto_archive_duration,
             overwrites=overwrites,
             flags=flags,
@@ -3022,7 +3021,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         slowmode_delay: :class:`int`
             Specifies the slowmode rate limit for users in this thread, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
-            If not provided, slowmode is inherited from the parent's :attr:`~ForumChannel.thread_slowmode_delay`.
+            If not provided, slowmode is inherited from the parent's :attr:`~ForumChannel.default_thread_slowmode_delay`.
         applied_tags: Sequence[:class:`abc.Snowflake`]
             The tags to apply to the new thread. Maximum of 5.
 

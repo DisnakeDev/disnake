@@ -42,7 +42,7 @@ class TestGuildChannelEdit:
             sync_permissions=False,
             category=disnake.Object(321),
             slowmode_delay=8,
-            thread_slowmode_delay=42,
+            default_thread_slowmode_delay=42,
             default_auto_archive_duration=disnake.ThreadArchiveDuration.hour,
             type=disnake.ChannelType.news,
             overwrites={
