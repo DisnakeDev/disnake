@@ -2629,7 +2629,6 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         """
         return self.nsfw
 
-    # TODO: name, property
     def requires_tag(self) -> bool:
         """Whether all newly created threads in this channel are required to have a tag.
 
