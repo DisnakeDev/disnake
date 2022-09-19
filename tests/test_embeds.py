@@ -80,6 +80,48 @@ def test_len(embed: Embed) -> None:
     assert len(embed) == 69
 
 
+def test_eq() -> None:
+    embed_1, embed_2 = Embed(), Embed()
+    assert embed_1 == embed_2
+
+    # attribute=MISSING should not affect __eq__ (with attribute i mean any attribute of an Embed object)
+    embed_1.color = Color(123456)
+    assert not embed_1 == embed_2
+
+    embed_1.color = MISSING
+    assert embed_1 == embed_2
+
+    embed_1.add_field(name="This is a test field", value="69 test 69")
+    embed_2.add_field(name="This is a test field", value="69 test 69", inline=False)
+    assert not embed_1 == embed_2
+
+    embed_1.clear_fields(), embed_2.clear_fields()  # type: ignore
+
+    embed_1.title, embed_2.title = MISSING, MISSING
+    assert embed_1 == embed_2
+
+    # testing if two embeds with all MISSING attributes are equal
+    for i in Embed.__slots__:
+        setattr(embed_1, i, MISSING), setattr(embed_2, i, MISSING)  # type: ignore
+    assert embed_1 == embed_2
+
+    # testing if an embed with all values set to None is not equal to an embed with all values set to MISSING
+    for i in Embed.__slots__:
+        setattr(embed_1, i, None)
+    assert not embed_1 == embed_2
+
+
+def test_embed_proxy_eq() -> None:
+    embed_1, embed_2 = Embed(), Embed()
+
+    embed_1.set_image("https://disnake.dev/assets/disnake-logo.png")
+    embed_2.set_image(None)
+    assert not embed_1.image == embed_2.image
+
+    embed_2.set_image("https://disnake.dev/assets/disnake-logo.png")
+    assert embed_1.image == embed_2.image
+
+
 def test_color_zero() -> None:
     e = Embed()
     assert not e
