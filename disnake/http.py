@@ -1051,12 +1051,15 @@ class HTTPClient:
             "position",
             "permission_overwrites",
             "rate_limit_per_user",
+            "default_thread_rate_limit_per_user",
             "rtc_region",
             "video_quality_mode",
             "auto_archive_duration",
             "default_auto_archive_duration",
+            "flags",
             "available_tags",
             "default_reaction_emoji",
+            "default_sort_order",
         )
         payload.update({k: v for k, v in options.items() if k in valid_keys and v is not None})
 
