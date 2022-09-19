@@ -2490,16 +2490,19 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         The default auto archive duration in minutes for threads created in this channel.
     slowmode_delay: :class:`int`
         The number of seconds a member must wait between creating threads
-        in this channel. A value of `0` denotes that it is disabled.
+        in this channel.
+
+        A value of ``0`` denotes that it is disabled.
         Bots and users with :attr:`~Permissions.manage_channels` or
         :attr:`~Permissions.manage_messages` bypass slowmode.
 
         See also :attr:`default_thread_slowmode_delay`.
 
     default_thread_slowmode_delay: :class:`int`
-        The number of seconds a member must wait between sending messages
+        The default number of seconds a member must wait between sending messages
         in newly created threads in this channel.
-        A value of `0` denotes that it is disabled.
+
+        A value of ``0`` denotes that it is disabled.
         Bots and users with :attr:`~Permissions.manage_channels` or
         :attr:`~Permissions.manage_messages` bypass slowmode.
 
