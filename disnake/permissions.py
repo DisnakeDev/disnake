@@ -919,9 +919,8 @@ class Permissions(BaseFlags):
 
         .. versionadded:: 2.3
 
-        .. deprecated:: 2.6
-
-            This has been deprecated in favour of :attr:`use_embedded_activities`.
+        .. versionchanged:: 2.6
+            Became an alias for :attr:`use_embedded_activities`.
         """
         return 1 << 39
 
