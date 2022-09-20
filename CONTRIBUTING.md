@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: MIT -->
+
 # Contributing to disnake
 
 First off, thanks for taking the time to contribute. It makes the library substantially better. :+1:

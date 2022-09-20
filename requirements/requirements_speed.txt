@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 orjson~=3.6
 # taken from aiohttp[speedups]
 aiodns>=1.1

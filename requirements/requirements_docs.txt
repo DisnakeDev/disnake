@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 docutils>=0.17
 sphinx~=5.1.1
 sphinxcontrib-trio~=1.1.2
