@@ -95,10 +95,7 @@ def test_eq() -> None:
     embed_2.add_field(name="This is a test field", value="69 test 69", inline=False)
     assert not embed_1 == embed_2
 
-    embed_1.clear_fields(), embed_2.clear_fields()  # type: ignore
-
-    embed_1.title, embed_2.title = MISSING, MISSING
-    assert embed_1 == embed_2
+    embed_1, embed_2 = Embed(), Embed()
 
     # testing if two embeds with all MISSING attributes are equal
     for i in Embed.__slots__:
