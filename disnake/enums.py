@@ -850,7 +850,7 @@ def try_enum(cls: Type[EnumT], val: Any) -> EnumT:
     except KeyError:
         try:
             unknown = cls.__new__(cls, val)
-            object.__setattr__(unknown, "name", "unknown")
+            object.__setattr__(unknown, "name", f"unknown_{val}")
             object.__setattr__(unknown, "value", val)
 
             return unknown
