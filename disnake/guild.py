@@ -3638,9 +3638,9 @@ class Guild(Hashable):
         HTTPException
             Banning failed.
         """
-        if not (delete_message_days is MISSING) ^ (clean_history_duration is MISSING):
+        if delete_message_days is not MISSING and clean_history_duration is not MISSING:
             raise ValueError(
-                "Exactly one of `clean_history_duration` and `delete_message_days` must be provided."
+                "Only one of `clean_history_duration` and `delete_message_days` may be provided."
             )
 
         if delete_message_days is not MISSING:
