@@ -326,7 +326,7 @@ class Loop(Generic[CoroP]):
 
         return await self.coro(*args, **kwargs)
 
-    def start(self, *args: Any, **kwargs: Any) -> asyncio.Task[None]:
+    def start(self, *args: CoroP.args, **kwargs: CoroP.kwargs) -> asyncio.Task[None]:
         """
         Starts the internal task in the event loop.
 
@@ -351,7 +351,7 @@ class Loop(Generic[CoroP]):
             raise RuntimeError("Task is already launched and is not completed.")
 
         if self._injected is not None:
-            args = (self._injected, *args)
+            args = (self._injected, *args)  # type: ignore
 
         if self.loop is MISSING:
             self.loop = asyncio.get_event_loop()
@@ -389,7 +389,7 @@ class Loop(Generic[CoroP]):
         if self._can_be_cancelled():
             self._task.cancel()
 
-    def restart(self, *args: Any, **kwargs: Any) -> None:
+    def restart(self, *args: CoroP.args, **kwargs: CoroP.kwargs) -> None:
         """
         A convenience method to restart the internal task.
 
@@ -830,6 +830,6 @@ def loop(
         if not asyncio.iscoroutinefunction(func):
             raise TypeError("decorated function must be a coroutine")
 
-        return cast(Type[L_co], cls)(func, **kwargs)
+        return cast("Type[L_co]", cls)(func, **kwargs)
 
     return decorator
