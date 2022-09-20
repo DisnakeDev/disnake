@@ -2825,7 +2825,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             .. versionadded:: 2.6
 
         default_reaction: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
-            The default emoji shown for reacting to new threads.
+            The new default emoji shown for reacting to new threads.
 
             .. versionadded:: 2.6
 
