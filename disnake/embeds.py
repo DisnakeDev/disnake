@@ -314,10 +314,17 @@ class Embed:
         )
 
     def __eq__(self, other: Any) -> bool:
+        self_attributes_values, other_attributes_values = tuple(), tuple()  # noqa: C408
+        for slot in self.__slots__:
+            if slot == "_colour":
+                slot = "color"
+
+            self_attributes_values += (self.__getattribute__(slot) or None,)
+            other_attributes_values += (other.__getattribute__(slot) or None,)
+
         return isinstance(other, Embed) and all(
-            getattr(self, slot) == getattr(other, slot)
-            for slot in self.__slots__
-            if getattr(self, slot) is not MISSING or getattr(other, slot) is not MISSING
+            self_attr == other_attr
+            for self_attr, other_attr in zip(self_attributes_values, other_attributes_values)
         )
 
     @property
