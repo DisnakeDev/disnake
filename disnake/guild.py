@@ -3631,6 +3631,8 @@ class Guild(Hashable):
 
         Raises
         ------
+        ValueError
+            Both ``clean_history_duration`` and ``delete_message_days`` were provided.
         TypeError
             ``clean_history_duration`` has an invalid type.
         Forbidden
