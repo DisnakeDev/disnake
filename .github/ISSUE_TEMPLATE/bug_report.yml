@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 name: Bug Report
 description: Report broken or incorrect behaviour
 labels: ["unconfirmed bug"]
