@@ -576,15 +576,16 @@ When mixed with the :data:`typing.Optional` converter you can provide simple and
 
 .. code-block:: python3
 
-    import typing
+    from datetime import timedelta
+    from typing import Optional
 
     @bot.command()
     async def ban(ctx, members: commands.Greedy[disnake.Member],
-                       delete_days: typing.Optional[int] = 0, *,
+                       delete_days: Optional[int] = 0, *,
                        reason: str):
         """Mass bans members with an optional delete_days parameter"""
         for member in members:
-            await member.ban(clean_history_duration=delete_days * 86400, reason=reason)
+            await member.ban(clean_history_duration=timedelta(days=delete_days), reason=reason)
 
 
 This command can be invoked any of the following ways:
@@ -702,19 +703,18 @@ For example, augmenting the example above:
 
 .. code-block:: python3
 
-    from disnake.ext import commands
+    from datetime import timedelta
     from typing import List
-    import disnake
 
     class BanFlags(commands.FlagConverter):
         members: List[disnake.Member] = commands.flag(name='member')
         reason: str
         days: int = 1
 
-    @commands.command()
+    @bot.command()
     async def ban(ctx, *, flags: BanFlags):
         for member in flags.members:
-            await member.ban(reason=flags.reason, clean_history_duration=flags.days * 86400)
+            await member.ban(reason=flags.reason, clean_history_duration=timedelta(days=flags.days))
 
         members = ', '.join(str(member) for member in flags.members)
         plural = f'{flags.days} days' if flags.days != 1 else f'{flags.days} day'
