@@ -221,6 +221,7 @@ class Permissions(BaseFlags):
         speak: bool = ...,
         start_embedded_activities: bool = ...,
         stream: bool = ...,
+        use_application_commands: bool = ...,
         use_embedded_activities: bool = ...,
         use_external_emojis: bool = ...,
         use_external_stickers: bool = ...,
@@ -564,6 +565,7 @@ class Permissions(BaseFlags):
         speak: bool = ...,
         start_embedded_activities: bool = ...,
         stream: bool = ...,
+        use_application_commands: bool = ...,
         use_embedded_activities: bool = ...,
         use_external_emojis: bool = ...,
         use_external_stickers: bool = ...,
@@ -833,10 +835,21 @@ class Permissions(BaseFlags):
         return 1 << 30
 
     @flag_value
+    def use_application_commands(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can use application commands.
+
+        .. versionadded:: 2.6
+        """
+        return 1 << 31
+
+    @make_permission_alias("use_application_commands")
     def use_slash_commands(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can use slash commands.
+        """:class:`bool`: An alias for :attr:`use_application_commands`.
 
         .. versionadded:: 1.7
+
+        .. versionchanged:: 2.6
+            Became an alias for :attr:`use_application_commands`.
         """
         return 1 << 31
 
@@ -1094,6 +1107,7 @@ class PermissionOverwrite:
         speak: Optional[bool] = ...,
         start_embedded_activities: Optional[bool] = ...,
         stream: Optional[bool] = ...,
+        use_application_commands: Optional[bool] = ...,
         use_embedded_activities: Optional[bool] = ...,
         use_external_emojis: Optional[bool] = ...,
         use_external_stickers: Optional[bool] = ...,
@@ -1220,6 +1234,7 @@ class PermissionOverwrite:
         speak: Optional[bool] = ...,
         start_embedded_activities: Optional[bool] = ...,
         stream: Optional[bool] = ...,
+        use_application_commands: Optional[bool] = ...,
         use_embedded_activities: Optional[bool] = ...,
         use_external_emojis: Optional[bool] = ...,
         use_external_stickers: Optional[bool] = ...,
