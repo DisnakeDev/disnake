@@ -292,7 +292,7 @@ class AutoModTriggerMetadata:
         self.allow_list: Optional[Sequence[str]] = allow_list
         self.mention_total_limit: Optional[int] = mention_total_limit
 
-    def with_edits(
+    def with_changes(
         self,
         *,
         keyword_filter: Optional[Sequence[str]] = MISSING,
@@ -301,7 +301,7 @@ class AutoModTriggerMetadata:
         mention_total_limit: Optional[int] = MISSING,
     ) -> Self:
         """
-        Returns a new instance with the given edits applied.
+        Returns a new instance with the given changes applied.
         All other fields will be kept intact.
 
         Returns
