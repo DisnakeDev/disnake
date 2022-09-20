@@ -3631,17 +3631,16 @@ class Guild(Hashable):
 
         Raises
         ------
-        ValueError
-            Both ``clean_history_duration`` and ``delete_message_days`` were provided.
         TypeError
-            ``clean_history_duration`` has an invalid type.
+            Both ``clean_history_duration`` and ``delete_message_days`` were provided,
+            or ``clean_history_duration`` has an invalid type.
         Forbidden
             You do not have the proper permissions to ban.
         HTTPException
             Banning failed.
         """
         if delete_message_days is not MISSING and clean_history_duration is not MISSING:
-            raise ValueError(
+            raise TypeError(
                 "Only one of `clean_history_duration` and `delete_message_days` may be provided."
             )
 
