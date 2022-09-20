@@ -906,8 +906,8 @@ class Permissions(BaseFlags):
 
     @flag_value
     def use_embedded_activities(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can launch activities (applications
-        with the :attr:`embedded <ApplicationFlags.embedded>` flag) in a voice channel.
+        """:class:`bool`: Returns ``True`` if a user can use activities (applications
+        with the :attr:`~ApplicationFlags.embedded` flag) in a voice channel.
 
         .. versionadded:: 2.6
         """
@@ -915,8 +915,7 @@ class Permissions(BaseFlags):
 
     @make_permission_alias("use_embedded_activities")
     def start_embedded_activities(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can launch activities (applications
-        with the :attr:`embedded <ApplicationFlags.embedded>` flag) in a voice channel.
+        """:class:`bool`: An alias for :attr:`use_embedded_activities`.
 
         .. versionadded:: 2.3
 
