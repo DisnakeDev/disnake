@@ -84,7 +84,7 @@ def test_eq() -> None:
     embed_1, embed_2 = Embed(), Embed()
     assert embed_1 == embed_2
 
-    # attribute=MISSING should not affect __eq__ (with attribute i mean any attribute of an Embed object)
+    # color=MISSING should not affect __eq__
     embed_1.color = Color(123456)
     assert not embed_1 == embed_2
 
@@ -97,14 +97,13 @@ def test_eq() -> None:
 
     embed_1, embed_2 = Embed(), Embed()
 
-    # testing if two embeds with all MISSING attributes are equal
-    for i in Embed.__slots__:
-        setattr(embed_1, i, MISSING), setattr(embed_2, i, MISSING)  # type: ignore
+    embed_1.title, embed_2.title = None, ""
     assert embed_1 == embed_2
 
-    # testing if an embed with all values set to None is not equal to an embed with all values set to MISSING
-    for i in Embed.__slots__:
-        setattr(embed_1, i, None)
+    embed_1, embed_2 = Embed(color=None), Embed()
+    assert embed_1 == embed_2
+
+    embed_1.set_default_color(123456)
     assert not embed_1 == embed_2
 
 
