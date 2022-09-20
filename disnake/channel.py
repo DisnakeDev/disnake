@@ -52,14 +52,7 @@ import disnake.abc
 from . import utils
 from .asset import Asset
 from .context_managers import Typing
-from .enums import (
-    ChannelType,
-    StagePrivacyLevel,
-    ThreadSortOrder,
-    VideoQualityMode,
-    try_enum,
-    try_enum_to_int,
-)
+from .enums import ChannelType, StagePrivacyLevel, VideoQualityMode, try_enum, try_enum_to_int
 from .errors import ClientException
 from .file import File
 from .flags import ChannelFlags
@@ -2514,12 +2507,6 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         :attr:`~Permissions.manage_messages` bypass slowmode.
 
         .. versionadded:: 2.6
-
-    default_sort_order: Optional[:class:`ThreadSortOrder`]
-        The default sort order of threads in this channel.
-        Members will still be able to change this locally.
-
-        .. versionadded:: 2.6
     """
 
     __slots__ = (
@@ -2535,7 +2522,6 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         "guild",
         "slowmode_delay",
         "default_thread_slowmode_delay",
-        "default_sort_order",
         "_available_tags",
         "_default_reaction_emoji_id",
         "_default_reaction_emoji_name",
@@ -2593,12 +2579,6 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             utils._get_as_snowflake(default_reaction_emoji, "emoji_id") or None
         )
         self._default_reaction_emoji_name: Optional[str] = default_reaction_emoji.get("emoji_name")
-
-        self.default_sort_order: Optional[ThreadSortOrder] = (
-            try_enum(ThreadSortOrder, order)
-            if (order := data.get("default_sort_order")) is not None
-            else None
-        )
 
         self._fill_overwrites(data)
 
@@ -2755,7 +2735,6 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         require_tag: bool = ...,
         available_tags: Sequence[ForumTag] = ...,
         default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = ...,
-        default_sort_order: Optional[ThreadSortOrder] = ...,
         reason: Optional[str] = ...,
     ) -> ForumChannel:
         ...
@@ -2777,7 +2756,6 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         require_tag: bool = MISSING,
         available_tags: Sequence[ForumTag] = MISSING,
         default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
-        default_sort_order: Optional[ThreadSortOrder] = MISSING,
         reason: Optional[str] = None,
         **kwargs: Never,
     ) -> Optional[ForumChannel]:
@@ -2847,12 +2825,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             .. versionadded:: 2.6
 
         default_reaction: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
-            The new default emoji shown for reacting to new threads.
-
-            .. versionadded:: 2.6
-
-        default_sort_order: Optional[:class:`ThreadSortOrder`]
-            The new default sort order of threads in this channel.
+            The default emoji shown for reacting to new threads.
 
             .. versionadded:: 2.6
 
@@ -2895,7 +2868,6 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             flags=flags,
             available_tags=available_tags,
             default_reaction=default_reaction,
-            default_sort_order=default_sort_order,
             reason=reason,
             **kwargs,
         )

@@ -69,7 +69,6 @@ __all__ = (
     "AutoModTriggerType",
     "AutoModEventType",
     "AutoModActionType",
-    "ThreadSortOrder",
 )
 
 
@@ -811,11 +810,6 @@ class AutoModTriggerType(Enum):
     spam = 3
     keyword_preset = 4
     mention_spam = 5
-
-
-class ThreadSortOrder(Enum):
-    latest_activity = 0
-    creation_date = 1
 
 
 T = TypeVar("T")
