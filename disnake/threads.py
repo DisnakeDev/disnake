@@ -1201,7 +1201,7 @@ class ForumTag(Hashable):
         moderated: bool = MISSING,
     ) -> Self:
         """
-        Returns a new instance with the given edits applied,
+        Returns a new instance with the given changes applied,
         for easy use with :func:`ForumChannel.edit`.
         All other fields will be kept intact.
 
