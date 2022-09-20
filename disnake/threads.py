@@ -27,22 +27,11 @@ from __future__ import annotations
 
 import asyncio
 import time
-from typing import (
-    TYPE_CHECKING,
-    Callable,
-    Dict,
-    Iterable,
-    List,
-    Literal,
-    Optional,
-    Sequence,
-    Union,
-    cast,
-)
+from typing import TYPE_CHECKING, Callable, Dict, Iterable, List, Literal, Optional, Sequence, Union
 
 from .abc import Messageable
 from .enums import ChannelType, ThreadArchiveDuration, try_enum, try_enum_to_int
-from .errors import ClientException, InvalidData
+from .errors import ClientException
 from .flags import ChannelFlags
 from .mixins import Hashable
 from .object import Object
@@ -69,7 +58,6 @@ if TYPE_CHECKING:
     from .permissions import Permissions
     from .role import Role
     from .state import ConnectionState
-    from .types.channel import ForumChannel as ForumChannelPayload
     from .types.snowflake import SnowflakeList
     from .types.threads import (
         ForumTag as ForumTagPayload,
@@ -1146,7 +1134,7 @@ class ForumTag(Hashable):
         Note that this will have an empty :attr:`~PartialEmoji.name` if it is a custom emoji.
     """
 
-    __slots__ = ("id", "name", "moderated", "emoji", "_channel")
+    __slots__ = ("id", "name", "moderated", "emoji")
 
     def __init__(
         self,
@@ -1168,8 +1156,6 @@ class ForumTag(Hashable):
             self.emoji = emoji._to_partial()
         else:
             raise TypeError("emoji must be None, a str, PartialEmoji, or Emoji instance.")
-
-        self._channel: Optional[Union[ForumChannel, Object]] = None
 
     def __str__(self) -> str:
         return self.name
@@ -1204,116 +1190,5 @@ class ForumTag(Hashable):
             moderated=data["moderated"],
         )
         self.id = int(data["id"])
-        self._channel = channel
 
         return self
-
-    async def edit(
-        self,
-        *,
-        name: str = MISSING,
-        emoji: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
-        moderated: bool = MISSING,
-        reason: Optional[str] = None,
-    ) -> ForumTag:
-        """|coro|
-
-        Edits the tag.
-
-        You must have the :attr:`~Permissions.manage_channels` permission to
-        do this.
-
-        Parameters
-        ----------
-        name: :class:`str`
-            The new tag name.
-        emoji: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
-            The new tag emoji. Set to ``None`` to remove the emoji.
-        moderated: :class:`bool`
-            Whether only moderators can apply this tag to threads.
-        reason: Optional[:class:`str`]
-            The reason for editing the tag. Shows up on the audit log.
-
-        Raises
-        ------
-        InvalidData
-            Invalid channel/tag data was received from Discord.
-        Forbidden
-            You do not have permissions to edit the tag.
-        HTTPException
-            Editing the tag failed.
-
-        Returns
-        -------
-        :class:`ForumTag`
-            The newly edited tag.
-        """
-        if not self._channel or isinstance(self._channel, Object):
-            raise TypeError("Cannot edit thread with no associated forum channel")
-
-        if self.id not in self._channel._available_tags:
-            # should only happen if tag was stored and tags were edited afterwards
-            raise ValueError("This tag is not part of the associated forum channel")
-
-        # we always have to patch the channel with the entire tag list,
-        # so serialize all tags and only replace the one matching `self.id`
-        new_tags = {tag_id: tag.to_dict() for tag_id, tag in self._channel._available_tags.items()}
-        # this always exists, see check above
-        new_tag_payload = new_tags[self.id]
-
-        if name is not MISSING:
-            new_tag_payload["name"] = name
-        if emoji is not MISSING:
-            emoji_name, emoji_id = PartialEmoji._to_name_id(emoji)
-            new_tag_payload["emoji_name"] = emoji_name
-            new_tag_payload["emoji_id"] = emoji_id
-        if moderated is not MISSING:
-            new_tag_payload["moderated"] = moderated
-
-        state = self._channel._state
-
-        channel_data = cast(
-            "ForumChannelPayload",
-            await state.http.edit_channel(
-                self._channel.id, reason=reason, available_tags=list(new_tags.values())
-            ),
-        )
-        # TODO: update channel state here so that subsequent edits don't send old state?
-        for tag in channel_data.get("available_tags", []):
-            if int(tag["id"]) == self.id:
-                return ForumTag._from_data(data=tag, channel=self._channel, state=state)
-        raise InvalidData("Could not find tag in response")
-
-    async def delete(self, *, reason: Optional[str] = None) -> None:
-        """|coro|
-
-        Deletes the tag.
-
-        You must have :attr:`~Permissions.manage_channels` permission to
-        do this.
-
-        To bulk-delete tags, see :class:`ForumChannel.edit`.
-
-        Parameters
-        ----------
-        reason: Optional[:class:`str`]
-            The reason for deleting this tag. Shows up on the audit log.
-
-        Raises
-        ------
-        Forbidden
-            You are not allowed to delete tags.
-        HTTPException
-            An error occurred deleting the tag.
-        """
-        if not self._channel or isinstance(self._channel, Object):
-            raise TypeError("Cannot edit thread with no associated forum channel")
-
-        new_tags = [
-            tag.to_dict()
-            for tag_id, tag in self._channel._available_tags.items()
-            if tag_id != self.id
-        ]
-        await self._channel._state.http.edit_channel(
-            self._channel.id, reason=reason, available_tags=new_tags
-        )

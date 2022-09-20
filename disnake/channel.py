@@ -60,7 +60,7 @@ from .enums import (
     try_enum,
     try_enum_to_int,
 )
-from .errors import ClientException, InvalidData
+from .errors import ClientException
 from .file import File
 from .flags import ChannelFlags
 from .iterators import ArchivedThreadIterator
@@ -2835,11 +2835,10 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
         available_tags: Sequence[:class:`ForumTag`]
             The new :class:`ForumTag`\\s available for threads in this channel.
-            Can also be used to reorder existing tags. Maximum of 20.
+            Can be used to create new tags and edit/reorder/delete existing tags.
+            Maximum of 20.
 
             Note that this overwrites all tags, removing existing tags unless they're passed as well.
-
-            See also :func:`ForumChannel.create_tag`, :func:`ForumTag.edit`, and :func:`ForumTag.delete`.
 
             .. versionadded:: 2.6
 
@@ -3292,66 +3291,6 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             The tag with the given ID, or ``None`` if not found.
         """
         return self._available_tags.get(tag_id)
-
-    async def create_tag(
-        self,
-        name: str,
-        emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
-        *,
-        moderated: bool = False,
-        reason: Optional[str] = None,
-    ) -> ForumTag:
-        """|coro|
-
-        Creates a :class:`ForumTag` for the forum channel.
-        A forum channel can have a maximum of 20 tags.
-
-        You must have :attr:`~Permissions.manage_channels` permission to
-        do this.
-
-        To bulk-create tags, see :class:`ForumChannel.edit`.
-
-        Parameters
-        ----------
-        name: :class:`str`
-            The tag name.
-        emoji: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
-            The tag emoji, if any.
-        moderated: :class:`bool`
-            Whether only moderators can apply this tag to threads.
-            Defaults to ``False``.
-        reason: Optional[:class:`str`]
-            The reason for creating this tag. Shows up on the audit log.
-
-        Raises
-        ------
-        InvalidData
-            Invalid channel/tag data was received from Discord.
-        Forbidden
-            You do not have permissions to create the tag.
-        HTTPException
-            Creating the tag failed.
-
-        Returns
-        -------
-        :class:`ForumTag`
-            The newly created tag.
-        """
-        tag = ForumTag(name=name, emoji=emoji, moderated=moderated)
-
-        channel_data = cast(
-            "ForumChannelPayload",
-            await self._edit(
-                available_tags=self.available_tags + [tag],
-                reason=reason,
-            ),
-        )
-        new_tags = channel_data.get("available_tags", [])
-        if not new_tags:
-            raise InvalidData("Could not find tag in response")
-
-        tag_data = max(new_tags, key=lambda t: int(t["id"]))
-        return ForumTag._from_data(data=tag_data, channel=self, state=self._state)
 
 
 class DMChannel(disnake.abc.Messageable, Hashable):
