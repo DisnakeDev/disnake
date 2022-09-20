@@ -844,13 +844,12 @@ class Permissions(BaseFlags):
 
     @make_permission_alias("use_application_commands")
     def use_slash_commands(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can use application commands.
+        """:class:`bool`: An alias for :attr:`use_application_commands`.
 
         .. versionadded:: 1.7
 
-        .. deprecated:: 2.6
-
-            This is deprecated in favour of :attr:`use_application_commands`.
+        .. versionchanged:: 2.6
+            Became an alias for :attr:`use_application_commands`.
         """
         return 1 << 31
 
