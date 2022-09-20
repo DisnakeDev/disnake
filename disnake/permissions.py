@@ -221,6 +221,8 @@ class Permissions(BaseFlags):
         speak: bool = ...,
         start_embedded_activities: bool = ...,
         stream: bool = ...,
+        use_application_commands: bool = ...,
+        use_embedded_activities: bool = ...,
         use_external_emojis: bool = ...,
         use_external_stickers: bool = ...,
         use_slash_commands: bool = ...,
@@ -325,7 +327,7 @@ class Permissions(BaseFlags):
            :attr:`request_to_speak` permissions.
 
         .. versionchanged:: 2.3
-            Added :attr:`start_embedded_activities` permission.
+            Added :attr:`use_embedded_activities` permission.
         """
         guild_specific_perms = {
             "administrator",
@@ -425,13 +427,13 @@ class Permissions(BaseFlags):
         "Voice" permissions from the official Discord UI set to ``True``.
 
         .. versionchanged:: 2.3
-            Added :attr:`start_embedded_activities` permission.
+            Added :attr:`use_embedded_activities` permission.
         """
         return cls(
             connect=True,
             speak=True,
             stream=True,
-            start_embedded_activities=True,
+            use_embedded_activities=True,
             use_voice_activation=True,
             priority_speaker=True,
             mute_members=True,
@@ -563,6 +565,8 @@ class Permissions(BaseFlags):
         speak: bool = ...,
         start_embedded_activities: bool = ...,
         stream: bool = ...,
+        use_application_commands: bool = ...,
+        use_embedded_activities: bool = ...,
         use_external_emojis: bool = ...,
         use_external_stickers: bool = ...,
         use_slash_commands: bool = ...,
@@ -831,10 +835,21 @@ class Permissions(BaseFlags):
         return 1 << 30
 
     @flag_value
+    def use_application_commands(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can use application commands.
+
+        .. versionadded:: 2.6
+        """
+        return 1 << 31
+
+    @make_permission_alias("use_application_commands")
     def use_slash_commands(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can use slash commands.
+        """:class:`bool`: An alias for :attr:`use_application_commands`.
 
         .. versionadded:: 1.7
+
+        .. versionchanged:: 2.6
+            Became an alias for :attr:`use_application_commands`.
         """
         return 1 << 31
 
@@ -903,11 +918,22 @@ class Permissions(BaseFlags):
         return 1 << 38
 
     @flag_value
+    def use_embedded_activities(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can use activities (applications
+        with the :attr:`~ApplicationFlags.embedded` flag) in a voice channel.
+
+        .. versionadded:: 2.6
+        """
+        return 1 << 39
+
+    @make_permission_alias("use_embedded_activities")
     def start_embedded_activities(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can launch activities (applications
-        with the :attr:`embedded <ApplicationFlags.embedded>` flag) in a voice channel.
+        """:class:`bool`: An alias for :attr:`use_embedded_activities`.
 
         .. versionadded:: 2.3
+
+        .. versionchanged:: 2.6
+            Became an alias for :attr:`use_embedded_activities`.
         """
         return 1 << 39
 
@@ -1081,6 +1107,8 @@ class PermissionOverwrite:
         speak: Optional[bool] = ...,
         start_embedded_activities: Optional[bool] = ...,
         stream: Optional[bool] = ...,
+        use_application_commands: Optional[bool] = ...,
+        use_embedded_activities: Optional[bool] = ...,
         use_external_emojis: Optional[bool] = ...,
         use_external_stickers: Optional[bool] = ...,
         use_slash_commands: Optional[bool] = ...,
@@ -1206,6 +1234,8 @@ class PermissionOverwrite:
         speak: Optional[bool] = ...,
         start_embedded_activities: Optional[bool] = ...,
         stream: Optional[bool] = ...,
+        use_application_commands: Optional[bool] = ...,
+        use_embedded_activities: Optional[bool] = ...,
         use_external_emojis: Optional[bool] = ...,
         use_external_stickers: Optional[bool] = ...,
         use_slash_commands: Optional[bool] = ...,
