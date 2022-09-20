@@ -1,3 +1,5 @@
+.. SPDX-License-Identifier: MIT
+
 .. _version_guarantees:
 
 Version Guarantees
