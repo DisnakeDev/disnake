@@ -1192,3 +1192,28 @@ class ForumTag(Hashable):
         self.id = int(data["id"])
 
         return self
+
+    def with_changes(
+        self,
+        *,
+        name: str = MISSING,
+        emoji: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
+        moderated: bool = MISSING,
+    ) -> Self:
+        """
+        Returns a new instance with the given edits applied,
+        for easy use with :func:`ForumChannel.edit`.
+        All other fields will be kept intact.
+
+        Returns
+        -------
+        :class:`ForumTag`
+            The new tag instance.
+        """
+        new_self = self.__class__(
+            name=self.name if name is MISSING else name,
+            emoji=self.emoji if emoji is MISSING else emoji,
+            moderated=self.moderated if moderated is MISSING else moderated,
+        )
+        new_self.id = self.id
+        return new_self

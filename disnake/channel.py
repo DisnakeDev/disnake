@@ -2842,6 +2842,8 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
             Note that this overwrites all tags, removing existing tags unless they're passed as well.
 
+            See :func:`ThreadTag.edit` to help with editing tags.
+
             .. versionadded:: 2.6
 
         default_reaction: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
