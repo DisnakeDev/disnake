@@ -1167,7 +1167,7 @@ class ForumTag(Hashable):
         )
 
     def to_dict(self) -> ForumTagPayload:
-        emoji_name, emoji_id = PartialEmoji._to_name_id(self.emoji)
+        emoji_name, emoji_id = PartialEmoji._emoji_to_name_id(self.emoji)
         return {
             "id": self.id,
             "name": self.name,
@@ -1182,7 +1182,7 @@ class ForumTag(Hashable):
     ) -> Self:
         emoji_id = _get_as_snowflake(data, "emoji_id") or None
         emoji_name = data.get("emoji_name")
-        emoji = PartialEmoji._from_name_id(emoji_name, emoji_id, state=state)
+        emoji = PartialEmoji._emoji_from_name_id(emoji_name, emoji_id, state=state)
 
         self = cls(
             name=data["name"],

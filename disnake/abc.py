@@ -424,7 +424,7 @@ class GuildChannel(ABC):
         default_reaction_emoji_payload: Optional[DefaultReactionPayload] = MISSING
         if default_reaction is not MISSING:
             if default_reaction is not None:
-                emoji_name, emoji_id = PartialEmoji._to_name_id(default_reaction)
+                emoji_name, emoji_id = PartialEmoji._emoji_to_name_id(default_reaction)
                 default_reaction_emoji_payload = {
                     "emoji_name": emoji_name,
                     "emoji_id": emoji_id,

@@ -274,7 +274,7 @@ class PartialEmoji(_EmojiTag, AssetMixin):
         return await super().read()
 
     @staticmethod
-    def _to_name_id(
+    def _emoji_to_name_id(
         emoji: Optional[Union[str, Emoji, PartialEmoji]]
     ) -> Tuple[Optional[str], Optional[int]]:
         if emoji is None:
@@ -290,7 +290,7 @@ class PartialEmoji(_EmojiTag, AssetMixin):
             return emoji.name, None
 
     @staticmethod
-    def _from_name_id(
+    def _emoji_from_name_id(
         name: Optional[str], id: Optional[int], *, state: ConnectionState
     ) -> Optional[Union[Emoji, PartialEmoji]]:
         if not (name or id):

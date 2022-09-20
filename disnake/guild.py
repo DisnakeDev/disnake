@@ -1645,7 +1645,7 @@ class Guild(Hashable):
             options["available_tags"] = [tag.to_dict() for tag in available_tags]
 
         if default_reaction is not None:
-            emoji_name, emoji_id = PartialEmoji._to_name_id(default_reaction)
+            emoji_name, emoji_id = PartialEmoji._emoji_to_name_id(default_reaction)
             options["default_reaction_emoji"] = {
                 "emoji_name": emoji_name,
                 "emoji_id": emoji_id,
