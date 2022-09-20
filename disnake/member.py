@@ -751,10 +751,12 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         Bans this member. Equivalent to :meth:`Guild.ban`.
         """
-        if delete_message_days is not MISSING:
-            await self.guild.ban(self, reason=reason, delete_message_days=delete_message_days)
-        else:
-            await self.guild.ban(self, reason=reason, clean_history_duration=clean_history_duration)
+        await self.guild.ban(  # type: ignore  # no matching overload
+            self,
+            reason=reason,
+            clean_history_duration=clean_history_duration,
+            delete_message_days=delete_message_days,
+        )
 
     async def unban(self, *, reason: Optional[str] = None) -> None:
         """|coro|
