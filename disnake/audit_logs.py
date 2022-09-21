@@ -51,6 +51,7 @@ from .mixins import Hashable
 from .object import Object
 from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite, Permissions
+from .threads import ForumTag, Thread
 
 __all__ = (
     "AuditLogDiff",
@@ -72,7 +73,6 @@ if TYPE_CHECKING:
     from .role import Role
     from .stage_instance import StageInstance
     from .sticker import GuildSticker
-    from .threads import ForumTag, Thread
     from .types.audit_log import (
         AuditLogChange as AuditLogChangePayload,
         AuditLogEntry as AuditLogEntryPayload,
@@ -188,8 +188,6 @@ def _guild_hash_transformer(path: str) -> Callable[[AuditLogEntry, Optional[str]
 def _transform_tag(entry: AuditLogEntry, data: Optional[ForumTagPayload]) -> Optional[ForumTag]:
     if data is None:
         return None
-    from .threads import ForumTag  # cyclic import
-
     target_id: int = entry._target_id  # type: ignore
     return ForumTag._from_data(data=data, channel=Object(target_id), state=entry._state)
 
@@ -202,7 +200,6 @@ def _transform_tag_id(
 
     # cyclic imports
     from .channel import ForumChannel
-    from .threads import Thread
 
     tag: Optional[ForumTag] = None
     tag_id = int(data)
