@@ -706,6 +706,8 @@ def default_member_permissions(
     speak: bool = ...,
     start_embedded_activities: bool = ...,
     stream: bool = ...,
+    use_application_commands: bool = ...,
+    use_embedded_activities: bool = ...,
     use_external_emojis: bool = ...,
     use_external_stickers: bool = ...,
     use_slash_commands: bool = ...,
