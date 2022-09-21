@@ -188,8 +188,7 @@ def _guild_hash_transformer(path: str) -> Callable[[AuditLogEntry, Optional[str]
 def _transform_tag(entry: AuditLogEntry, data: Optional[ForumTagPayload]) -> Optional[ForumTag]:
     if data is None:
         return None
-    target_id: int = entry._target_id  # type: ignore
-    return ForumTag._from_data(data=data, channel=Object(target_id), state=entry._state)
+    return ForumTag._from_data(data=data, state=entry._state)
 
 
 def _transform_tag_id(

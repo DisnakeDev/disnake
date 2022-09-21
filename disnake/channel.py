@@ -2568,7 +2568,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         self.default_thread_slowmode_delay: int = data.get("default_thread_rate_limit_per_user", 0)
 
         tags = [
-            ForumTag._from_data(data=tag, channel=self, state=self._state)
+            ForumTag._from_data(data=tag, state=self._state)
             for tag in data.get("available_tags", [])
         ]
         self._available_tags: Dict[int, ForumTag] = {tag.id: tag for tag in tags}

@@ -34,7 +34,6 @@ from .enums import ChannelType, ThreadArchiveDuration, try_enum, try_enum_to_int
 from .errors import ClientException
 from .flags import ChannelFlags
 from .mixins import Hashable
-from .object import Object
 from .partial_emoji import PartialEmoji, _EmojiTag
 from .utils import MISSING, _get_as_snowflake, _unique, parse_time, snowflake_time
 
@@ -1179,9 +1178,7 @@ class ForumTag(Hashable):
         }
 
     @classmethod
-    def _from_data(
-        cls, *, data: ForumTagPayload, channel: Union[ForumChannel, Object], state: ConnectionState
-    ) -> Self:
+    def _from_data(cls, *, data: ForumTagPayload, state: ConnectionState) -> Self:
         emoji_id = _get_as_snowflake(data, "emoji_id") or None
         emoji_name = data.get("emoji_name")
         emoji = PartialEmoji._emoji_from_name_id(emoji_name, emoji_id, state=state)
