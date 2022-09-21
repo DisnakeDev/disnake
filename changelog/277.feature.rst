@@ -3,3 +3,5 @@
 - Add :attr:`SubCommandGroup.parent <ext.commands.SubCommandGroup.parent>`
 - Add :attr:`SubCommand.root_command <ext.commands.SubCommand.root_command>` property
 - Add :attr:`SubCommandGroup.root_command <ext.commands.SubCommandGroup.root_command>` property
+- Add a new required argument (``parent``) to :attr:`SubCommand <ext.commands.SubCommand>`
+- Add a new required argument (``parent``) to :attr:`SubCommandGroup <ext.commands.SubCommandGroup>`
