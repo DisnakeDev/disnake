@@ -753,9 +753,9 @@ class InteractionResponse:
         data: Dict[str, Any] = {}
         parent = self._parent
 
-        if parent.type in (InteractionType.application_command, InteractionType.modal_submit):
+        if parent.type is InteractionType.application_command:
             defer_type = InteractionResponseType.deferred_channel_message
-        elif parent.type is InteractionType.component:
+        elif parent.type in (InteractionType.component, InteractionType.modal_submit):
             if with_message:
                 defer_type = InteractionResponseType.deferred_channel_message
             else:
