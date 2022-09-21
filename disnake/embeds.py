@@ -314,18 +314,14 @@ class Embed:
         )
 
     def __eq__(self, other: Any) -> bool:
-        self_attributes_values, other_attributes_values = tuple(), tuple()  # noqa: C408
+        if not isinstance(other, Embed):
+            return False
         for slot in self.__slots__:
             if slot == "_colour":
                 slot = "color"
-
-            self_attributes_values += (self.__getattribute__(slot) or None,)
-            other_attributes_values += (other.__getattribute__(slot) or None,)
-
-        return isinstance(other, Embed) and all(
-            self_attr == other_attr
-            for self_attr, other_attr in zip(self_attributes_values, other_attributes_values)
-        )
+            if (self.__getattribute__(slot) or None) != (other.__getattribute__(slot) or None):
+                return False
+        return True
 
     @property
     def colour(self) -> Optional[Colour]:
