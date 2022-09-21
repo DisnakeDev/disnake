@@ -1,0 +1,3 @@
+- Add :attr:`SubCommand.parent <ext.commands.SubCommand.parent>`
+- Add :attr:`SubCommandGroup.parent <ext.commands.SubCommandGroup.parent>`
+- Add :attr:`SubCommand.root_command <ext.commands.SubCommand.root_command>` property

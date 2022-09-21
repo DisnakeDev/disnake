@@ -131,6 +131,10 @@ class SubCommandGroup(InvokableApplicationCommand):
     qualified_name: :class:`str`
         The full command name, including parent names in the case of slash subcommands or groups.
         For example, the qualified name for ``/one two three`` would be ``one two three``.
+    parent: :class:`InvokableSlashCommand`
+        The parent command this group belongs to.
+
+        .. versionadded:: 2.6
     option: :class:`.Option`
         API representation of this subcommand.
     callback: :ref:`coroutine <coroutine>`
@@ -156,12 +160,14 @@ class SubCommandGroup(InvokableApplicationCommand):
     def __init__(
         self,
         func: CommandCallback,
+        parent: InvokableSlashCommand,
         *,
         name: LocalizedOptional = None,
         **kwargs,
     ):
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
+        self.parent: InvokableSlashCommand = parent
         self.children: Dict[str, SubCommand] = {}
         self.option = Option(
             name=name_loc._upgrade(self.name),
@@ -169,7 +175,7 @@ class SubCommandGroup(InvokableApplicationCommand):
             type=OptionType.sub_command_group,
             options=[],
         )
-        self.qualified_name: str = ""
+        self.qualified_name: str = f"{parent.name} {self.name}"
 
         if (
             "dm_permission" in kwargs
@@ -206,6 +212,7 @@ class SubCommandGroup(InvokableApplicationCommand):
         def decorator(func: CommandCallback) -> SubCommand:
             new_func = SubCommand(
                 func,
+                self,
                 name=name,
                 description=description,
                 options=options,
@@ -213,8 +220,6 @@ class SubCommandGroup(InvokableApplicationCommand):
                 extras=extras,
                 **kwargs,
             )
-            qualified_name = self.qualified_name or self.name
-            new_func.qualified_name = f"{qualified_name} {new_func.name}"
             self.children[new_func.name] = new_func
             self.option.options.append(new_func.option)
             return new_func
@@ -235,6 +240,10 @@ class SubCommand(InvokableApplicationCommand):
     qualified_name: :class:`str`
         The full command name, including parent names in the case of slash subcommands or groups.
         For example, the qualified name for ``/one two three`` would be ``one two three``.
+    parent: Union[:class:`InvokableSlashCommand`, :class:`SubCommandGroup`]
+        The parent command or group this subcommand belongs to.
+
+        .. versionadded:: 2.6
     option: :class:`.Option`
         API representation of this subcommand.
     callback: :ref:`coroutine <coroutine>`
@@ -262,6 +271,7 @@ class SubCommand(InvokableApplicationCommand):
     def __init__(
         self,
         func: CommandCallback,
+        parent: Union[InvokableSlashCommand, SubCommandGroup],
         *,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
@@ -271,6 +281,7 @@ class SubCommand(InvokableApplicationCommand):
     ):
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
+        self.parent: Union[InvokableSlashCommand, SubCommandGroup] = parent
         self.connectors: Dict[str, str] = connectors or {}
         self.autocompleters: Dict[str, Any] = kwargs.get("autocompleters", {})
 
@@ -288,7 +299,7 @@ class SubCommand(InvokableApplicationCommand):
             type=OptionType.sub_command,
             options=options,
         )
-        self.qualified_name = ""
+        self.qualified_name = f"{parent.qualified_name} {self.name}"
 
         if (
             "dm_permission" in kwargs
@@ -298,6 +309,15 @@ class SubCommand(InvokableApplicationCommand):
             raise TypeError(
                 "Cannot set `default_member_permissions` or `dm_permission` on subcommands"
             )
+
+    @property
+    def root_command(self) -> InvokableSlashCommand:
+        """:class:`InvokableSlashCommand`: Returns the root command containing this subcommand,
+        even if the parent is an instance of :class:`SubCommandGroup`.
+
+        .. versionadded:: 2.6
+        """
+        return self.parent.parent if isinstance(self.parent, SubCommandGroup) else self.parent
 
     @property
     def description(self) -> str:
@@ -512,6 +532,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                 self.body.options = []
             new_func = SubCommand(
                 func,
+                self,
                 name=name,
                 description=description,
                 options=options,
@@ -519,7 +540,6 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                 extras=extras,
                 **kwargs,
             )
-            new_func.qualified_name = f"{self.qualified_name} {new_func.name}"
             self.children[new_func.name] = new_func
             self.body.options.append(new_func.option)
             return new_func
@@ -561,11 +581,11 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                 self.body.options = []
             new_func = SubCommandGroup(
                 func,
+                self,
                 name=name,
                 extras=extras,
                 **kwargs,
             )
-            new_func.qualified_name = f"{self.qualified_name} {new_func.name}"
             self.children[new_func.name] = new_func
             self.body.options.append(new_func.option)
             return new_func
