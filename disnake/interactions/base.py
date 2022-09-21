@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 # SPDX-License-Identifier: MIT
-
 
 from __future__ import annotations
 
