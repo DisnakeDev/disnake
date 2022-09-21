@@ -187,6 +187,15 @@ class SubCommandGroup(InvokableApplicationCommand):
             )
 
     @property
+    def root_command(self) -> InvokableSlashCommand:
+        """:class:`InvokableSlashCommand`: Returns the root command containing this group.
+        This is mainly for consistency with :class:`SubCommand`
+
+        .. versionadded:: 2.6
+        """
+        return self.parent
+
+    @property
     def body(self) -> Option:
         return self.option
 
