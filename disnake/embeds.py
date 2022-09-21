@@ -128,9 +128,13 @@ class Embed:
 
             Checks if two embeds are equal.
 
+            .. versionadded:: 2.6
+
         .. describe:: x != y
 
             Checks if two embeds are not equal.
+
+            .. versionadded:: 2.6
 
         .. describe:: len(x)
 
