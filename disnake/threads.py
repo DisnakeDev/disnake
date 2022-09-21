@@ -412,6 +412,8 @@ class Thread(Messageable, Hashable):
 
         Pinned threads are not affected by the auto archive duration.
 
+        This is a shortcut to :attr:`self.flags.pinned <ChannelFlags.pinned>`.
+
         .. versionadded:: 2.5
 
         :return type: :class:`bool`

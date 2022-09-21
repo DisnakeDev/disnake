@@ -2632,6 +2632,10 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
     def requires_tag(self) -> bool:
         """Whether all newly created threads in this channel are required to have a tag.
 
+        This is a shortcut to :attr:`self.flags.require_tag <ChannelFlags.require_tag>`.
+
+        .. versionadded:: 2.6
+
         :return type: :class:`bool`
         """
         return self.flags.require_tag
