@@ -323,7 +323,7 @@ class Embed:
         for slot in self.__slots__:
             if slot == "_colour":
                 slot = "color"
-            if (getattr(self, slot) or None) != getattr(other, slot) or None):
+            if (getattr(self, slot) or None) != (getattr(other, slot) or None):
                 return False
         return True
 
