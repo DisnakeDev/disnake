@@ -727,15 +727,32 @@ class InteractionResponse:
         Parameters
         ----------
         with_message: :class:`bool`
-            Whether the response will be a message with thinking state (bot is thinking...).
-            This only applies to interactions of type :attr:`InteractionType.component`.
+            Whether the response will be a separate message with thinking state (bot is thinking...).
+            This only applies to interactions of type :attr:`InteractionType.component` and
+            :attr:`InteractionType.modal_submit`.
+
+            ``True`` corresponds to a :attr:`~InteractionResponseType.deferred_channel_message` response type,
+            while ``False`` corresponds to the default :attr:`~InteractionResponseType.deferred_message_update`.
+
+            Responses to interactions of type :attr:`InteractionType.application_command` must
+            use a :attr:`~InteractionResponseType.deferred_channel_message` response, i.e. this will
+            effectively always be ``True`` for those.
+
+            Defaults to ``False``.
 
             .. versionadded:: 2.4
 
+            .. versionchanged:: 2.7
+
+                Added support for ``False`` with modal interactions, and changed
+                default value for modal interactions to ``False`` as well.
+
         ephemeral: :class:`bool`
             Whether the deferred message will eventually be ephemeral.
-            This applies to interactions of type :attr:`InteractionType.application_command` and :attr:`InteractionType.modal_submit`
+            This applies to interactions of type :attr:`InteractionType.application_command`,
             or when the ``with_message`` parameter is ``True``.
+
+            Defaults to ``False``.
 
         Raises
         ------
