@@ -1,7 +1,7 @@
 .. currentmodule:: disnake
 
-Stage Instance
-==============
+Stage Instances
+===============
 
 This section documents everything related to stage instances - TODO: understand what stage instances are
 

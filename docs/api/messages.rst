@@ -1,7 +1,7 @@
 .. currentmodule:: disnake
 
-Message
-=======
+Messages
+========
 
 This section documents everything related to chat messages.
 

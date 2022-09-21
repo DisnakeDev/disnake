@@ -1,7 +1,7 @@
 .. currentmodule:: disnake
 
-Invite
-======
+Invites
+=======
 
 This section documents everything related to channel invites.
 

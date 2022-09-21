@@ -1,7 +1,7 @@
 .. currentmodule:: disnake
 
-Guild Scheduled Event
-=====================
+Guild Scheduled Events
+======================
 
 This section documents everything related to Guild Scheduled Events.
 

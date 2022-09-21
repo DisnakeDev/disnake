@@ -1,7 +1,7 @@
 .. currentmodule:: disnake
 
-User
-====
+Users
+=====
 
 This section documents everything related to users.
 

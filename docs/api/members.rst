@@ -1,7 +1,7 @@
 .. currentmodule:: disnake
 
-Member
-======
+Members
+=======
 
 This sections documents everything related to guild members.
 

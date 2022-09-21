@@ -1,7 +1,7 @@
 .. currentmodule:: disnake
 
-Guild
-=====
+Guilds
+======
 
 This section documents everything related to Guilds - collections of users, roles, channels etc. and main
 hubs for communication in Discord, referred to as a Servers in the official UI.
