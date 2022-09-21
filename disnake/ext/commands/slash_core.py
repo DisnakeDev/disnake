@@ -462,6 +462,17 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             default_member_permissions=default_member_permissions,
         )
 
+    @property
+    def root_command(self) -> InvokableSlashCommand:
+        """:class:`InvokableSlashCommand`: Returns this command.
+
+        This allows to avoid instance checks in situations where an object is either
+        a command, a subcommand, or a group, since all of them have this property.
+
+        .. versionadded:: 2.6
+        """
+        return self
+
     def _ensure_assignment_on_copy(self, other: SlashCommandT) -> SlashCommandT:
         super()._ensure_assignment_on_copy(other)
         if self.connectors != other.connectors:
