@@ -726,17 +726,41 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         return self._communication_disabled_until
 
+    @overload
+    async def ban(
+        self,
+        *,
+        clean_history_duration: Union[int, datetime.timedelta] = 86400,
+        reason: Optional[str] = None,
+    ) -> None:
+        ...
+
+    @overload
     async def ban(
         self,
         *,
         delete_message_days: Literal[0, 1, 2, 3, 4, 5, 6, 7] = 1,
         reason: Optional[str] = None,
     ) -> None:
+        ...
+
+    async def ban(
+        self,
+        *,
+        clean_history_duration: Union[int, datetime.timedelta] = 86400,
+        delete_message_days: Literal[0, 1, 2, 3, 4, 5, 6, 7] = MISSING,
+        reason: Optional[str] = None,
+    ) -> None:
         """|coro|
 
         Bans this member. Equivalent to :meth:`Guild.ban`.
         """
-        await self.guild.ban(self, reason=reason, delete_message_days=delete_message_days)
+        await self.guild.ban(  # type: ignore  # no matching overload
+            self,
+            reason=reason,
+            clean_history_duration=clean_history_duration,
+            delete_message_days=delete_message_days,
+        )
 
     async def unban(self, *, reason: Optional[str] = None) -> None:
         """|coro|

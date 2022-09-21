@@ -3565,12 +3565,33 @@ class Guild(Hashable):
         """
         await self._state.http.kick(user.id, self.id, reason=reason)
 
+    @overload
     async def ban(
         self,
         user: Snowflake,
         *,
+        clean_history_duration: Union[int, datetime.timedelta] = 86400,
         reason: Optional[str] = None,
+    ) -> None:
+        ...
+
+    @overload
+    async def ban(
+        self,
+        user: Snowflake,
+        *,
         delete_message_days: Literal[0, 1, 2, 3, 4, 5, 6, 7] = 1,
+        reason: Optional[str] = None,
+    ) -> None:
+        ...
+
+    async def ban(
+        self,
+        user: Snowflake,
+        *,
+        clean_history_duration: Union[int, datetime.timedelta] = MISSING,
+        delete_message_days: Literal[0, 1, 2, 3, 4, 5, 6, 7] = MISSING,
+        reason: Optional[str] = None,
     ) -> None:
         """|coro|
 
@@ -3585,20 +3606,67 @@ class Guild(Hashable):
         ----------
         user: :class:`abc.Snowflake`
             The user to ban from the guild.
+        clean_history_duration: Union[:class:`int`, :class:`datetime.timedelta`]
+            The timespan (seconds or timedelta) of messages to delete from the user
+            in the guild, up to 7 days (604800 seconds).
+            Defaults to 1 day (86400 seconds).
+
+            This is incompatible with ``delete_message_days``.
+
+            .. versionadded:: 2.6
+
+            .. note::
+                This may not be accurate with small durations (e.g. a few minutes)
+                and delete a couple minutes' worth of messages more than specified.
+
         delete_message_days: :class:`int`
             The number of days worth of messages to delete from the user
             in the guild. The minimum is 0 and the maximum is 7.
+
+            This is incompatible with ``clean_history_duration``.
+
+            .. deprecated:: 2.6
+                Use ``clean_history_duration`` instead.
+
         reason: Optional[:class:`str`]
             The reason for banning this user. Shows up on the audit log.
 
         Raises
         ------
+        TypeError
+            Both ``clean_history_duration`` and ``delete_message_days`` were provided,
+            or ``clean_history_duration`` has an invalid type.
         Forbidden
             You do not have the proper permissions to ban.
         HTTPException
             Banning failed.
         """
-        await self._state.http.ban(user.id, self.id, delete_message_days, reason=reason)
+        if delete_message_days is not MISSING and clean_history_duration is not MISSING:
+            raise TypeError(
+                "Only one of `clean_history_duration` and `delete_message_days` may be provided."
+            )
+
+        if delete_message_days is not MISSING:
+            utils.warn_deprecated(
+                "`delete_message_days` is deprecated and will be removed in a future version. Consider using `clean_history_duration` instead.",
+                stacklevel=2,
+            )
+            delete_message_seconds = delete_message_days * 86400
+        elif clean_history_duration is MISSING:
+            delete_message_seconds = 86400
+        elif isinstance(clean_history_duration, datetime.timedelta):
+            delete_message_seconds = int(clean_history_duration.total_seconds())
+        elif isinstance(clean_history_duration, int):
+            delete_message_seconds = clean_history_duration
+        else:
+            raise TypeError(
+                "`clean_history_duration` should be int or timedelta, "
+                f"not {type(clean_history_duration).__name__}"
+            )
+
+        await self._state.http.ban(
+            user.id, self.id, delete_message_seconds=delete_message_seconds, reason=reason
+        )
 
     async def unban(self, user: Snowflake, *, reason: Optional[str] = None) -> None:
         """|coro|
