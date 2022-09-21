@@ -65,6 +65,9 @@ class EmbedProxy:
     def __getattr__(self, attr: str) -> None:
         return None
 
+    def __eq__(self, other: Any) -> bool:
+        return isinstance(other, EmbedProxy) and self.__dict__ == other.__dict__
+
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -120,6 +123,18 @@ class Embed:
     """Represents a Discord embed.
 
     .. container:: operations
+
+        .. describe:: x == y
+
+            Checks if two embeds are equal.
+
+            .. versionadded:: 2.6
+
+        .. describe:: x != y
+
+            Checks if two embeds are not equal.
+
+            .. versionadded:: 2.6
 
         .. describe:: len(x)
 
@@ -301,6 +316,16 @@ class Embed:
                 self._video,
             )
         )
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, Embed):
+            return False
+        for slot in self.__slots__:
+            if slot == "_colour":
+                slot = "color"
+            if (getattr(self, slot) or None) != (getattr(other, slot) or None):
+                return False
+        return True
 
     @property
     def colour(self) -> Optional[Colour]:
