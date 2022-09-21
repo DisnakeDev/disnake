@@ -42,6 +42,7 @@ from typing import (
     List,
     Literal,
     Optional,
+    Sequence,
     Tuple,
     Type,
     TypeVar,
@@ -84,6 +85,11 @@ if TYPE_CHECKING:
     InjectionCallback = Union[
         Callable[Concatenate[CogT, P], T_],
         Callable[P, T_],
+    ]
+    AnyAutocompleter = Union[
+        Sequence[Any],
+        Callable[Concatenate[ApplicationCommandInteraction, str, P], Any],
+        Callable[Concatenate[CogT, ApplicationCommandInteraction, str, P], Any],
     ]
 
     TChoice = TypeVar("TChoice", bound=ApplicationCommandOptionChoiceValue)
@@ -219,8 +225,12 @@ class Injection(Generic[P, T_]):
         *,
         autocompleters: Optional[Dict[str, Callable]] = None,
     ) -> None:
+        if autocompleters is not None:
+            for autocomp in autocompleters.values():
+                classify_autocompleter(autocomp)
+
         self.function: InjectionCallback[CogT, P, T_] = function
-        self.autocompleters: Dict[str, Callable] = autocompleters if autocompleters else {}
+        self.autocompleters: Dict[str, Callable] = autocompleters or {}
         self._injected: Optional[Cog] = None
 
     def __get__(self, obj: Optional[Any], _: Type[Any]) -> Self:
@@ -277,12 +287,11 @@ class Injection(Generic[P, T_]):
 
         if option_name in self.autocompleters:
             raise ValueError(
-                "This injection already has an autocompleter set for option '{}'".format(
-                    option_name
-                )
+                f"This injection already has an autocompleter set for option '{option_name}'"
             )
 
         def decorator(func: CallableT) -> CallableT:
+            classify_autocompleter(func)
             self.autocompleters[option_name] = func
             return func
 
@@ -506,7 +515,7 @@ class ParamInfo:
         description: LocalizedOptional = None,
         converter: Optional[Callable[[ApplicationCommandInteraction, Any], Any]] = None,
         convert_default: bool = False,
-        autcomplete: Optional[Callable[[ApplicationCommandInteraction, str], Any]] = None,
+        autocomplete: Optional[AnyAutocompleter] = None,
         choices: Optional[Choices] = None,
         type: Optional[type] = None,
         channel_types: Optional[List[ChannelType]] = None,
@@ -518,6 +527,9 @@ class ParamInfo:
         min_length: Optional[int] = None,
         max_length: Optional[int] = None,
     ) -> None:
+        if autocomplete is not None:
+            classify_autocompleter(autocomplete)
+
         name_loc = Localized._cast(name, False)
         self.name: str = name_loc.string or ""
         self.name_localizations: LocalizationValue = name_loc.localizations
@@ -530,7 +542,7 @@ class ParamInfo:
         self.param_name: str = self.name
         self.converter = converter
         self.convert_default = convert_default
-        self.autocomplete = autcomplete
+        self.autocomplete = autocomplete
         self.choices = choices or []
         self.type = type or str
         self.channel_types = channel_types or []
@@ -873,6 +885,39 @@ def isolate_self(
     return (cog_param, inter_param), parameters
 
 
+def classify_autocompleter(autocompleter: AnyAutocompleter) -> None:
+    """Detects whether an autocomplete function can take a cog as the first argument.
+    The result is then saved as a boolean value in `func.__has_cog_param__`
+    """
+    if not callable(autocompleter):
+        return
+
+    sig = inspect.signature(autocompleter)
+    positional_param_count = 0
+
+    for param in sig.parameters.values():
+        if (
+            param.kind in (param.POSITIONAL_ONLY, param.POSITIONAL_OR_KEYWORD)
+        ) and param.default is param.empty:
+            positional_param_count += 1
+        else:
+            break
+
+    if positional_param_count < 2:
+        raise ValueError(
+            "An autocomplete function should have 2 or 3 non-optional positional arguments. "
+            "For example, foo(inter, string) or foo(cog, inter, string)"
+        )
+
+    if positional_param_count > 3:
+        raise ValueError(
+            "Any additional arguments of an autocomplete function "
+            "(apart from the first 3) should be keyword-only"
+        )
+
+    autocompleter.__has_cog_param__ = positional_param_count == 3
+
+
 def collect_params(
     function: Callable,
 ) -> Tuple[Optional[str], Optional[str], List[ParamInfo], Dict[str, Injection]]:
@@ -1018,7 +1063,6 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
                 param = lookup.get(name)
                 if param is None:
                     raise ValueError(f"Option '{name}' doesn't exist in '{command.qualified_name}'")
-                func.__slash_command__ = command
                 param.autocomplete = func
         params += collected
 
@@ -1045,7 +1089,7 @@ def Param(
     choices: Optional[Choices] = None,
     converter: Optional[Callable[[ApplicationCommandInteraction, Any], Any]] = None,
     convert_defaults: bool = False,
-    autocomplete: Optional[Callable[[ApplicationCommandInteraction, str], Any]] = None,
+    autocomplete: Optional[AnyAutocompleter] = None,
     channel_types: Optional[List[ChannelType]] = None,
     lt: Optional[float] = None,
     le: Optional[float] = None,
@@ -1153,7 +1197,7 @@ def Param(
         choices=choices,
         converter=converter,
         convert_default=convert_defaults,
-        autcomplete=autocomplete,
+        autocomplete=autocomplete,
         channel_types=channel_types,
         lt=lt,
         le=le,
