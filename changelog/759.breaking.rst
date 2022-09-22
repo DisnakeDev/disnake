@@ -1,2 +1,2 @@
-- Add a new required argument (``parent``) to :attr:`SubCommand <ext.commands.SubCommand>` init
-- Add a new required argument (``parent``) to :attr:`SubCommandGroup <ext.commands.SubCommandGroup>` init
+|commands| Changed parameters of :attr:`SubCommand <ext.commands.SubCommand>` and  :attr:`SubCommandGroup <ext.commands.SubCommandGroup>` to now require their parent command.
+- This only affects code that creates an instance of SubCommand or SubCommandGroup manually by calling their constructors.
