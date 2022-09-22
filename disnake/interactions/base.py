@@ -347,7 +347,7 @@ class Interaction:
 
         Repeated calls to this will return a cached value.
 
-        .. versionchanged 2.6::
+        .. versionchanged:: 2.6
 
             This function was renamed from ``original_message``.
 
@@ -404,7 +404,7 @@ class Interaction:
             those images will be removed if the message's attachments are edited in any way
             (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
 
-        .. versionchanged 2.6::
+        .. versionchanged:: 2.6
 
             This function was renamed from ``edit_original_message``.
 
@@ -519,7 +519,7 @@ class Interaction:
         This is a lower level interface to :meth:`InteractionMessage.delete` in case
         you do not want to fetch the message and save an HTTP request.
 
-        .. versionchanged 2.6::
+        .. versionchanged:: 2.6
 
             This function was renamed from ``delete_original_message``.
 

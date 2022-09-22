@@ -195,7 +195,7 @@ class InvalidData(ClientException):
 class WebhookTokenMissing(DiscordException):
     """Exception that's raised when a :class:`Webhook` or :class:`SyncWebhook` is missing a token to make requests with.
 
-    .. versionadded :: 2.6
+    .. versionadded:: 2.6
     """
 
     pass
