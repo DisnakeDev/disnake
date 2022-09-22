@@ -4,7 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ title|striptags|e }}{{ titlesuffix }}</title>
-  {%- block extrahead %} {% endblock %}
+  <!-- begin extra head -->
+  {%- block extrahead %}
+    {% if pagename.endswith("api") %}
+      <script type="text/javascript" src="./_static/api_redirect.js"></script>
+    {% endif %}
+  {% endblock %}
   <!-- end extra head -->
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   {%- block css %}
