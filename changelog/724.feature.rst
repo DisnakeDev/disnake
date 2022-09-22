@@ -1,4 +1,4 @@
-Implement new forum channel features.
+Implement remaining forum channel features.
 - Add :class:`ForumTag` dataclass.
 - Add :attr:`ForumChannel.available_tags` and :attr:`Thread.applied_tags`.
 - Add :func:`ForumChannel.get_tag`, :func:`ForumChannel.create_tag`, :func:`Thread.add_tags` and :func:`Thread.remove_tags`.
