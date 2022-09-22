@@ -778,17 +778,16 @@ class InteractionResponse:
                 defer_type = InteractionResponseType.deferred_channel_message
             else:
                 defer_type = InteractionResponseType.deferred_message_update
+        else:
+            raise TypeError(
+                "This interaction must be of type 'application_command', 'modal_submit', or 'component' in order to defer."
+            )
 
         if defer_type is InteractionResponseType.deferred_channel_message:
             # we only want to set flags if we are sending a message
             data["flags"] = 0
             if ephemeral:
                 data["flags"] |= MessageFlags.ephemeral.flag
-
-        if not defer_type:
-            raise TypeError(
-                "This interaction must be of type 'application_command', 'modal_submit', or 'component' in order to defer."
-            )
 
         adapter = async_context.get()
         await adapter.create_interaction_response(
