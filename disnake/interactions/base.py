@@ -740,7 +740,7 @@ class InteractionResponse:
 
             .. versionadded:: 2.4
 
-            .. versionchanged:: 2.7
+            .. versionchanged:: 2.6
                 Added support for setting this to ``False`` in modal interactions.
 
         ephemeral: :class:`bool`
