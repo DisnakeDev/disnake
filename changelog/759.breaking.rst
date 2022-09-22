@@ -1,0 +1,2 @@
+- Add a new required argument (``parent``) to :attr:`SubCommand <ext.commands.SubCommand>` init
+- Add a new required argument (``parent``) to :attr:`SubCommandGroup <ext.commands.SubCommandGroup>` init
