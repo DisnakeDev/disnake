@@ -728,24 +728,20 @@ class InteractionResponse:
         ----------
         with_message: :class:`bool`
             Whether the response will be a separate message with thinking state (bot is thinking...).
-            This only applies to interactions of type :attr:`InteractionType.component` and
-            :attr:`InteractionType.modal_submit`.
+            This only applies to interactions of type :attr:`InteractionType.component`
+            (default ``False``) and :attr:`InteractionType.modal_submit` (default ``True``).
 
             ``True`` corresponds to a :attr:`~InteractionResponseType.deferred_channel_message` response type,
-            while ``False`` corresponds to the default :attr:`~InteractionResponseType.deferred_message_update`.
+            while ``False`` corresponds to :attr:`~InteractionResponseType.deferred_message_update`.
 
-            Responses to interactions of type :attr:`InteractionType.application_command` must
-            use a :attr:`~InteractionResponseType.deferred_channel_message` response, i.e. this will
-            effectively always be ``True`` for those.
-
-            Defaults to ``False``.
+            .. note::
+                Responses to interactions of type :attr:`InteractionType.application_command` must
+                defer using a message, i.e. this will effectively always be ``True`` for those.
 
             .. versionadded:: 2.4
 
             .. versionchanged:: 2.7
-
-                Added support for ``False`` with modal interactions, and changed
-                default value for modal interactions to ``False`` as well.
+                Added support for setting this to ``False`` in modal interactions.
 
         ephemeral: :class:`bool`
             Whether the deferred message will eventually be ephemeral.
@@ -773,6 +769,11 @@ class InteractionResponse:
         if parent.type is InteractionType.application_command:
             defer_type = InteractionResponseType.deferred_channel_message
         elif parent.type in (InteractionType.component, InteractionType.modal_submit):
+            # if not provided, set default based on interaction type
+            # (true for modal_submit, false for component)
+            if with_message is MISSING:
+                with_message = parent.type is InteractionType.modal_submit
+
             if with_message:
                 defer_type = InteractionResponseType.deferred_channel_message
             else:
