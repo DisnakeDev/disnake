@@ -4584,7 +4584,7 @@ AuditLogDiff
 
     .. attribute:: default_reaction
 
-        The default emoji shown for reacting to threads of a forum channel being changed.
+        The default emoji shown for reacting to threads in a forum channel being changed.
 
         Note that this will have an empty :attr:`~PartialEmoji.name` if it is a custom :class:`PartialEmoji`.
 
@@ -4592,7 +4592,7 @@ AuditLogDiff
 
     .. attribute:: default_sort_order
 
-        The default sort order of threads of a forum channel being changed.
+        The default sort order of threads in a forum channel being changed.
 
         :type: Optional[:class:`ThreadSortOrder`]
 
