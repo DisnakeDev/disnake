@@ -1614,7 +1614,7 @@ class Guild(Hashable):
             .. versionadded:: 2.6
 
         default_reaction: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
-            The default emoji shown for reacting to new threads.
+            The default emoji shown for reacting to threads.
 
             .. versionadded:: 2.6
 

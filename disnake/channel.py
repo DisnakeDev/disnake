@@ -2663,7 +2663,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
     @property
     def default_reaction(self) -> Optional[Union[Emoji, PartialEmoji]]:
         """Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]:
-        The default emoji shown for reacting to new threads.
+        The default emoji shown for reacting to threads.
 
         Note that this will have an empty :attr:`~PartialEmoji.name` if it is a custom :class:`PartialEmoji`.
 
@@ -2852,7 +2852,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             .. versionadded:: 2.6
 
         default_reaction: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
-            The new default emoji shown for reacting to new threads.
+            The new default emoji shown for reacting to threads.
 
             .. versionadded:: 2.6
 
