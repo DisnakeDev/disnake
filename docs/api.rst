@@ -4590,6 +4590,12 @@ AuditLogDiff
 
         :type: Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]
 
+    .. attribute:: default_sort_order
+
+        The default sort order of threads in this channel.
+
+        :type: Optional[:class:`ThreadSortOrder`]
+
 Webhook Support
 ------------------
 

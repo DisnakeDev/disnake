@@ -384,6 +384,7 @@ class AuditLogChanges:
         "applied_tags":                       (None, _list_transformer(_transform_tag_id)),
         "available_tags":                     (None, _list_transformer(_transform_tag)),
         "default_reaction_emoji":             ("default_reaction", _transform_default_reaction),
+        "default_sort_order":                 (None, _enum_transformer(enums.ThreadSortOrder)),
     }
     # fmt: on
 
