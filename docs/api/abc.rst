@@ -1,3 +1,5 @@
+.. SPDX-License-Identifier: MIT
+
 .. currentmodule:: disnake.abc
 
 .. _disnake_abcs_ref:

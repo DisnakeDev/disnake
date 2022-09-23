@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 # -*- encoding: utf-8 -*-
 
 # Original copyright notice as follows
@@ -23,7 +25,7 @@
 # - formatted with black
 # - removed `display_toc` being forced to True
 
-# This is done by arl and shift, not by me
+# This is done by arl and shift
 
 
 from __future__ import annotations

@@ -1,3 +1,5 @@
+.. SPDX-License-Identifier: MIT
+
 .. currentmodule:: disnake
 
 .. 29 votes for this and only 6 for splited up version. kill me
