@@ -273,6 +273,8 @@ class PartialEmoji(_EmojiTag, AssetMixin):
 
         return await super().read()
 
+    # utility method for unusual emoji model in forums
+    # (e.g. default reaction, tag emoji)
     @staticmethod
     def _emoji_to_name_id(
         emoji: Optional[Union[str, Emoji, PartialEmoji]]
@@ -289,6 +291,7 @@ class PartialEmoji(_EmojiTag, AssetMixin):
         else:
             return emoji.name, None
 
+    # utility method for unusual emoji model in forums
     @staticmethod
     def _emoji_from_name_id(
         name: Optional[str], id: Optional[int], *, state: ConnectionState
