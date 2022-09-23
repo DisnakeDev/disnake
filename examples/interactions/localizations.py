@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """
 An example on how to set up localized application commands.
 """

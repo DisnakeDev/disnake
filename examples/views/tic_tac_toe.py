@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """
 A Tic Tac Toe game, implemented using views.
 """

@@ -1,27 +1,4 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
@@ -749,6 +726,13 @@ class Message(Hashable):
     channel: Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`Thread`, :class:`DMChannel`, :class:`GroupChannel`, :class:`PartialMessageable`]
         The channel that the message was sent from.
         Could be a :class:`DMChannel` or :class:`GroupChannel` if it's a private message.
+    position: Optional[:class:`int`]
+        A number that indicates the approximate position of a message in a :class:`Thread`.
+        This is a number that starts at 0. e.g. the first message is position 0.
+        This is `None` if the message was not sent in a :class:`Thread`, or if it was sent before July 1, 2022.
+
+        .. versionadded:: 2.6
+
     reference: Optional[:class:`~disnake.MessageReference`]
         The message that this message references. This is only applicable to messages of
         type :attr:`MessageType.pins_add`, crossposted messages created by a
@@ -849,6 +833,7 @@ class Message(Hashable):
         "tts",
         "content",
         "channel",
+        "position",
         "application_id",
         "webhook_id",
         "mention_everyone",
@@ -904,6 +889,7 @@ class Message(Hashable):
         # for user experience, on_message has no business getting partials
         # TODO: Subscripted message to include the channel
         self.channel: Union[GuildMessageable, DMChannel] = channel  # type: ignore
+        self.position: Optional[int] = data.get("position", None)
         self._edited_timestamp: Optional[datetime.datetime] = utils.parse_time(
             data["edited_timestamp"]
         )
@@ -935,7 +921,7 @@ class Message(Hashable):
             self.guild = state._get_guild(utils._get_as_snowflake(data, "guild_id"))
 
         if thread_data := data.get("thread"):
-            if not self.thread and self.guild:
+            if not self.thread and isinstance(self.guild, Guild):
                 self.guild._store_thread(thread_data)
 
         try:
@@ -1251,7 +1237,10 @@ class Message(Hashable):
 
         .. versionadded:: 2.4
         """
-        return self.guild and self.guild.get_thread(self.id)
+        if not isinstance(self.guild, Guild):
+            return None
+
+        return self.guild.get_thread(self.id)
 
     def is_system(self) -> bool:
         """Whether the message is a system message.
@@ -1842,8 +1831,8 @@ class Message(Hashable):
         self,
         *,
         name: str,
-        auto_archive_duration: AnyThreadArchiveDuration = None,
-        slowmode_delay: int = None,
+        auto_archive_duration: Optional[AnyThreadArchiveDuration] = None,
+        slowmode_delay: Optional[int] = None,
         reason: Optional[str] = None,
     ) -> Thread:
         """|coro|

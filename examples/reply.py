@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """
 An example showing how to reply to received messages.
 """

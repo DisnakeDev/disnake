@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """
 A confirm/cancel button example using views.
 """

@@ -1,0 +1,1 @@
+Refactor the test bot to be easier to use for all users.

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 [tool.black]
 line-length = 100
 target-version = ["py38", "py39", "py310"]
@@ -111,7 +113,6 @@ reportUnknownArgumentType = false
 reportMissingParameterType = false
 reportUnknownVariableType = false
 reportMissingTypeArgument = false
-strictParameterNoneValue = false
 
 
 [tool.pytest.ini_options]

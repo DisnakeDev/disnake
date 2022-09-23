@@ -3,8 +3,10 @@
 ## type checking
 typing_extensions~=4.2.0
 # this is not pyright itself, but the python wrapper
-pyright==1.1.264
+pyright==1.1.271
 
+## test bot
+python-dotenv~=0.20.0
 
 ## linting
 slotscheck~=0.15.0

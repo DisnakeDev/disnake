@@ -1,3 +1,5 @@
+.. SPDX-License-Identifier: MIT
+
 .. currentmodule:: disnake
 
 API Reference
@@ -256,6 +258,43 @@ This section documents events related to :class:`Client` and its connectivity to
         exception.
     :param kwargs: The keyword arguments for the event that raised the
         exception.
+
+.. function:: on_gateway_error(event, data, shard_id, exc)
+
+    When a (known) gateway event cannot be parsed, a traceback is printed to
+    stderr and the exception is ignored by default. This should generally
+    not happen and is usually either a library issue, or caused by a breaking API change.
+
+    To change this behaviour, for example to completely stop the bot, this event can be overridden.
+
+    This can also be disabled completely by passing ``enable_gateway_error_handler=False``
+    to the client on initialization, restoring the pre-v2.6 behavior.
+
+    .. versionadded:: 2.6
+
+    .. note::
+        ``on_gateway_error`` will only be dispatched to :meth:`Client.event`.
+
+        It will not be received by :meth:`Client.wait_for`, or, if used,
+        :ref:`ext_commands_api_bot` listeners such as
+        :meth:`~ext.commands.Bot.listen` or :meth:`~ext.commands.Cog.listener`.
+
+    .. note::
+        This will not be dispatched for exceptions that occur while parsing ``READY`` and
+        ``RESUMED`` event payloads, as exceptions in these events are considered fatal.
+
+    :param event: The name of the gateway event that was the cause of the exception,
+        for example ``MESSAGE_CREATE``.
+    :type event: :class:`str`
+
+    :param data: The raw event payload.
+    :type data: :class:`Any`
+
+    :param shard_id: The ID of the shard the exception occurred in, if applicable.
+    :type shard_id: Optional[:class:`int`]
+
+    :param exc: The exception that was raised.
+    :type exc: :class:`Exception`
 
 .. function:: on_ready()
 
@@ -826,6 +865,7 @@ Members
               on_member_remove(member)
 
     Called when a :class:`Member` leaves or joins a :class:`Guild`.
+    If :func:`on_member_remove` is being used then consider using :func:`on_raw_member_remove` which will be called regardless of the cache.
 
     This requires :attr:`Intents.members` to be enabled.
 
@@ -834,7 +874,8 @@ Members
 
 .. function:: on_member_update(before, after)
 
-    Called when a :class:`Member` is updated.
+    Called when a :class:`Member` updates their profile.
+    Consider using :func:`on_raw_member_update` which will be called regardless of the cache.
 
     This is called when one or more of the following things change, but is not limited to:
 
@@ -851,6 +892,26 @@ Members
     :type before: :class:`Member`
     :param after: The member's updated info.
     :type after: :class:`Member`
+
+.. function:: on_raw_member_remove(payload)
+
+    Called when a member leaves a :class:`Guild`.
+    Unlike :func:`on_member_remove`, this is called regardless of the member cache.
+
+    .. versionadded:: 2.6
+
+    :param payload: The raw event payload data.
+    :type payload: :class:`RawGuildMemberRemoveEvent`
+
+.. function:: on_raw_member_update(member)
+
+    Called when a member updates their profile.
+    Unlike :func:`on_member_update`, this is called regardless of the member cache.
+
+    .. versionadded:: 2.6
+
+    :param member: The member that was updated.
+    :type member: :class:`Member`
 
 .. function:: on_member_ban(guild, user)
 
@@ -4851,6 +4912,7 @@ Interaction
 .. autoclass:: Interaction()
     :members:
     :inherited-members:
+    :exclude-members: original_message, edit_original_message, delete_original_message
 
 ApplicationCommandInteraction
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -4974,6 +5036,7 @@ Spotify
 
 .. autoclass:: Spotify()
     :members:
+    :inherited-members:
 
 VoiceState
 ~~~~~~~~~~~
@@ -5194,6 +5257,7 @@ WidgetMember
 .. autoclass:: WidgetMember()
     :members:
     :inherited-members:
+    :exclude-members: public_flags, default_avatar, banner, accent_colour, accent_color, colour, color, mention, created_at, mentioned_in
 
 WidgetSettings
 ~~~~~~~~~~~~~~
@@ -5380,6 +5444,14 @@ RawTypingEvent
 .. attributetable:: RawTypingEvent
 
 .. autoclass:: RawTypingEvent()
+    :members:
+
+RawGuildMemberRemoveEvent
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: RawGuildMemberRemoveEvent
+
+.. autoclass:: RawGuildMemberRemoveEvent()
     :members:
 
 PartialWebhookGuild
@@ -5625,6 +5697,7 @@ BaseActivity
 
 .. autoclass:: BaseActivity
     :members:
+    :inherited-members:
 
 Activity
 ~~~~~~~~~
@@ -5633,6 +5706,7 @@ Activity
 
 .. autoclass:: Activity
     :members:
+    :inherited-members:
 
 Game
 ~~~~~
@@ -5641,6 +5715,7 @@ Game
 
 .. autoclass:: Game
     :members:
+    :inherited-members:
 
 Streaming
 ~~~~~~~~~~~
@@ -5649,6 +5724,7 @@ Streaming
 
 .. autoclass:: Streaming
     :members:
+    :inherited-members:
 
 CustomActivity
 ~~~~~~~~~~~~~~~
@@ -5657,6 +5733,7 @@ CustomActivity
 
 .. autoclass:: CustomActivity
     :members:
+    :inherited-members:
 
 Permissions
 ~~~~~~~~~~~~
@@ -5689,6 +5766,15 @@ SessionStartLimit
 
 .. autoclass:: SessionStartLimit()
     :members:
+
+GatewayParams
+~~~~~~~~~~~~~~
+
+.. attributetable:: GatewayParams
+
+.. autoclass:: GatewayParams()
+    :members:
+    :exclude-members: encoding, zlib
 
 SystemChannelFlags
 ~~~~~~~~~~~~~~~~~~~~

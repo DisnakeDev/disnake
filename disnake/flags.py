@@ -1,27 +1,4 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
@@ -80,6 +57,10 @@ class flag_value(Generic[T]):
                     f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and flags of '{other.__class__.__name__}'"
                 )
             return other._from_value(self.flag | other.value)
+        if not isinstance(other, flag_value):
+            raise TypeError(
+                f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and {other.__class__}"
+            )
         if self._parent is not other._parent:
             raise TypeError(
                 f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and flags of '{other._parent.__name__}'"
@@ -199,7 +180,7 @@ class BaseFlags:
         if isinstance(other, flag_value):
             if self.__class__ is not other._parent:
                 raise TypeError(
-                    f"unsupported operand type(s) for |: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
+                    f"unsupported operand type(s) for |=: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
                 )
             self.value |= other.flag
             return self
@@ -214,7 +195,7 @@ class BaseFlags:
         if isinstance(other, flag_value):
             if self.__class__ is not other._parent:
                 raise TypeError(
-                    f"unsupported operand type(s) for |: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
+                    f"unsupported operand type(s) for ^: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
                 )
             return self._from_value(self.value ^ other.flag)
         if not isinstance(other, self.__class__):
@@ -227,7 +208,7 @@ class BaseFlags:
         if isinstance(other, flag_value):
             if self.__class__ is not other._parent:
                 raise TypeError(
-                    f"unsupported operand type(s) for |: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
+                    f"unsupported operand type(s) for ^=: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
                 )
             self.value ^= other.flag
             return self
@@ -344,6 +325,7 @@ class SystemChannelFlags(BaseFlags, inverted=True):
 
     To construct an object you can pass keyword arguments denoting the flags
     to enable or disable.
+    Arguments are applied in order, similar to :class:`Permissions`.
 
     .. container:: operations
 
@@ -825,6 +807,7 @@ class Intents(BaseFlags):
 
     To construct an object you can pass keyword arguments denoting the flags
     to enable or disable.
+    Arguments are applied in order, similar to :class:`Permissions`.
 
     This is used to disable certain gateway features that are unnecessary to
     run your bot. To make use of this, it is passed to the ``intents`` keyword
@@ -1463,6 +1446,7 @@ class MemberCacheFlags(BaseFlags):
 
     To construct an object you can pass keyword arguments denoting the flags
     to enable or disable.
+    Arguments are applied in order, similar to :class:`Permissions`.
 
     The default value is all flags enabled.
 
@@ -1773,6 +1757,14 @@ class ApplicationFlags(BaseFlags):
         receive limited message content over the gateway.
         """
         return 1 << 19
+
+    @flag_value
+    def application_command_badge(self):
+        """:class:`bool`: Returns ``True`` if the application has registered global application commands.
+
+        .. versionadded:: 2.6
+        """
+        return 1 << 23
 
 
 class ChannelFlags(BaseFlags):

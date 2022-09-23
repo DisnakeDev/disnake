@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """
 An example demonstrating two methods of sending modals and handling modal responses.
 """

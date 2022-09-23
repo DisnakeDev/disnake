@@ -1,0 +1,1 @@
+Add support for :attr:`Interaction.data` which guarantees that every subclass of ``Interaction`` has the ``data`` attribute.

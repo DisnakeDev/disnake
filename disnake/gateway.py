@@ -1,27 +1,4 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
@@ -86,6 +63,12 @@ if TYPE_CHECKING:
 
     class DispatchFunc(Protocol):
         def __call__(self, event: str, *args: Any) -> None:
+            ...
+
+    class GatewayErrorFunc(Protocol):
+        async def __call__(
+            self, event: str, data: Any, shard_id: Optional[int], exc: Exception, /
+        ) -> None:
             ...
 
     class CallHooksFunc(Protocol):
@@ -366,6 +349,7 @@ class DiscordWebSocket:
 
         # an empty dispatcher to prevent crashes
         self._dispatch: DispatchFunc = lambda event, *args: None
+        self._dispatch_gateway_error: Optional[GatewayErrorFunc] = None
         # generic event listeners
         self._dispatch_listeners: List[EventListener] = []
         # the keep alive
@@ -375,6 +359,7 @@ class DiscordWebSocket:
         # ws related stuff
         self.session_id: Optional[str] = None
         self.sequence: Optional[int] = None
+        self.resume_gateway: Optional[str] = None
         self._zlib: zlib._Decompress = zlib.decompressobj()
         self._buffer: bytearray = bytearray()
         self._close_code: Optional[int] = None
@@ -420,7 +405,16 @@ class DiscordWebSocket:
 
         This is for internal use only.
         """
-        gateway = gateway or await client.http.get_gateway()
+        params = client.gateway_params
+        if gateway:
+            gateway = client.http._format_gateway_url(
+                gateway,
+                encoding=params.encoding,
+                zlib=params.zlib,
+            )
+        else:
+            gateway = await client.http.get_gateway(encoding=params.encoding, zlib=params.zlib)
+
         socket = await client.http.ws_connect(gateway)
         ws = cls(socket, loop=client.loop)
 
@@ -442,6 +436,9 @@ class DiscordWebSocket:
         if client._enable_debug_events:
             ws.send = ws.debug_send
             ws.log_receive = ws.debug_log_receive
+
+        if client._enable_gateway_error_handler:
+            ws._dispatch_gateway_error = client._dispatch_gateway_error
 
         client._connection._update_references(ws)
 
@@ -501,7 +498,6 @@ class DiscordWebSocket:
                     "browser": "disnake",
                     "device": "disnake",
                 },
-                "compress": True,
                 "large_threshold": 250,
                 "intents": state._intents.value,
             },
@@ -602,6 +598,7 @@ class DiscordWebSocket:
 
                 self.sequence = None
                 self.session_id = None
+                self.resume_gateway = None
                 _log.info("Shard ID %s session has been invalidated.", self.shard_id)
                 await self.close(code=1000)
                 raise ReconnectWebSocket(self.shard_id, resume=False)
@@ -613,13 +610,15 @@ class DiscordWebSocket:
             self._trace = trace = data.get("_trace", [])
             self.sequence = seq
             self.session_id = data["session_id"]
+            self.resume_gateway = data["resume_gateway_url"]
             # pass back shard ID to ready handler
             data["__shard_id__"] = self.shard_id
             _log.info(
-                "Shard ID %s has connected to Gateway: %s (Session ID: %s).",
+                "Shard ID %s has connected to Gateway: %s (Session ID: %s, Resume URL: %s).",
                 self.shard_id,
                 ", ".join(trace),
                 self.session_id,
+                self.resume_gateway,
             )
 
         elif event == "RESUMED":
@@ -638,7 +637,20 @@ class DiscordWebSocket:
         except KeyError:
             _log.debug("Unknown event %s.", event)
         else:
-            func(data)
+            try:
+                func(data)
+            except Exception as e:
+                if self._dispatch_gateway_error is None:
+                    # error handler disabled, raise immediately
+                    raise
+
+                if event in {"READY", "RESUMED"}:  # exceptions in these events are fatal
+                    raise
+
+                event_name: str = event  # type: ignore  # event can't be None here
+                asyncio.create_task(
+                    self._dispatch_gateway_error(event_name, data, self.shard_id, e)
+                )
 
         # remove the dispatched listeners
         removed: List[int] = []

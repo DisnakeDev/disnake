@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """
 An example showing how to regularly run a task in the background.
 """

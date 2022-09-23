@@ -1,0 +1,1 @@
+Add :attr:`Permissions.use_embedded_activities` as an alias for :attr:`Permissions.start_embedded_activities`.

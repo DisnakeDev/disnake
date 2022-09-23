@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """
 Shhhh! It's a secret.
 """

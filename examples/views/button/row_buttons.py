@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """
 An example with multiple rows of buttons in a view.
 """

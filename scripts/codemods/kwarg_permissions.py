@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 import itertools
 from typing import Optional
 

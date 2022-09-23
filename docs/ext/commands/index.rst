@@ -1,3 +1,5 @@
+.. SPDX-License-Identifier: MIT
+
 .. _discord_ext_commands:
 
 ``disnake.ext.commands`` -- Bot commands framework

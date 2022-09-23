@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """
 A simple example using custom a command context type.
 """

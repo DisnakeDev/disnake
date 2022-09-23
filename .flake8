@@ -1,3 +1,5 @@
+; SPDX-License-Identifier: MIT
+
 [flake8]
 max-line-length = 100
 statistics = true
@@ -19,7 +21,6 @@ exclude =
     .mypy_cache
     .pytest_cache
     build
-    test_bot
 
 # For error codes, see this https://flake8.pycqa.org/en/latest/user/error-codes.html
 ignore =

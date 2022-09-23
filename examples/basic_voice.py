@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """
 A basic example showing how to integrate audio from youtube-dl into voice chat.
 """

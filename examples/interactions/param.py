@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """
 Some examples showing how to customize slash command options.
 """
@@ -65,7 +67,7 @@ async def description(
 @bot.slash_command()
 async def defaults(
     inter: disnake.CommandInteraction,
-    string: str = None,
+    string: str = "this is a default value",
     user: disnake.User = commands.Param(lambda inter: inter.author),
 ):
     ...

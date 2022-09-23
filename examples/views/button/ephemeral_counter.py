@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """
 An example making use of ephemeral responses,
 to show a message only to the initiating user.

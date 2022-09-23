@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """
 An example showcasing different builtin converter types.
 """

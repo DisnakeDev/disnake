@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """
 A role self-assign example, using reactions.
 """

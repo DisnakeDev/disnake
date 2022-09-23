@@ -1,0 +1,1 @@
+Add previously missing inherited attributes to activity types.

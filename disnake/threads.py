@@ -1,27 +1,4 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
@@ -111,9 +88,21 @@ class Thread(Messageable, Hashable):
         Bots and users with :attr:`~Permissions.manage_channels` or
         :attr:`~Permissions.manage_messages` bypass slowmode.
     message_count: Optional[:class:`int`]
-        An approximate number of messages in this thread. This caps at 50.
+        An approximate number of messages in this thread.
+
+        .. note::
+
+            If the thread was created before July 1, 2022, this could be inaccurate.
     member_count: Optional[:class:`int`]
         An approximate number of members in this thread. This caps at 50.
+    total_message_sent: Optional[:class:`int`]
+        The total number of messages sent in the thread, including deleted messages.
+
+        .. versionadded:: 2.6
+
+        .. note::
+
+            If the thread was created before July 1, 2022, this could be inaccurate.
     me: Optional[:class:`ThreadMember`]
         A thread member representing yourself, if you've joined the thread.
         This could not be available.
@@ -149,6 +138,7 @@ class Thread(Messageable, Hashable):
         "parent_id",
         "last_message_id",
         "message_count",
+        "total_message_sent",
         "member_count",
         "slowmode_delay",
         "me",
@@ -192,7 +182,8 @@ class Thread(Messageable, Hashable):
         self._type: ThreadType = try_enum(ChannelType, data["type"])  # type: ignore
         self.last_message_id = _get_as_snowflake(data, "last_message_id")
         self.slowmode_delay = data.get("rate_limit_per_user", 0)
-        self.message_count = data.get("message_count")
+        self.message_count = data.get("message_count") or 0
+        self.total_message_sent = data.get("total_message_sent") or 0
         self.member_count = data.get("member_count")
         self.last_pin_timestamp: Optional[datetime.datetime] = parse_time(
             data.get("last_pin_timestamp")
@@ -840,6 +831,8 @@ class Thread(Messageable, Hashable):
         Deletes this thread.
 
         You must have :attr:`~Permissions.manage_threads` to delete threads.
+        Alternatively, you may delete a thread if it's in a :class:`ForumChannel`,
+        you are the thread creator, and there are no messages other than the initial message.
 
         Parameters
         ----------

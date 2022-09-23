@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """
 A simple example showing context menu commands.
 User commands show up in the context menu (right-click/tap) of users,

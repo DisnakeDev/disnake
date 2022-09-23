@@ -1,27 +1,4 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
@@ -887,15 +864,16 @@ class HTTPClient:
         self,
         user_id: Snowflake,
         guild_id: Snowflake,
-        delete_message_days: int = 1,
+        *,
+        delete_message_seconds: int = 86400,
         reason: Optional[str] = None,
     ) -> Response[None]:
         r = Route("PUT", "/guilds/{guild_id}/bans/{user_id}", guild_id=guild_id, user_id=user_id)
-        params = {
-            "delete_message_days": delete_message_days,
+        payload = {
+            "delete_message_seconds": delete_message_seconds,
         }
 
-        return self.request(r, params=params, reason=reason)
+        return self.request(r, json=payload, reason=reason)
 
     def unban(
         self, user_id: Snowflake, guild_id: Snowflake, *, reason: Optional[str] = None
@@ -2498,7 +2476,7 @@ class HTTPClient:
         self,
         application_id: Snowflake,
         token: str,
-        files: List[File] = None,
+        files: Optional[List[File]] = None,
         content: Optional[str] = None,
         tts: bool = False,
         embeds: Optional[List[embed.Embed]] = None,
@@ -2601,11 +2579,8 @@ class HTTPClient:
             data: gateway.Gateway = await self.request(Route("GET", "/gateway"))
         except HTTPException as exc:
             raise GatewayNotFound() from exc
-        if zlib:
-            value = "{url}?encoding={encoding}&v={version}&compress=zlib-stream"
-        else:
-            value = "{url}?encoding={encoding}&v={version}"
-        return value.format(url=data["url"], encoding=encoding, version=_API_VERSION)
+
+        return self._format_gateway_url(data["url"], encoding=encoding, zlib=zlib)
 
     async def get_bot_gateway(
         self, *, encoding: str = "json", zlib: bool = True
@@ -2615,15 +2590,23 @@ class HTTPClient:
         except HTTPException as exc:
             raise GatewayNotFound() from exc
 
-        if zlib:
-            value = "{url}?encoding={encoding}&v={version}&compress=zlib-stream"
-        else:
-            value = "{url}?encoding={encoding}&v={version}"
         return (
             data["shards"],
-            value.format(url=data["url"], encoding=encoding, version=_API_VERSION),
+            self._format_gateway_url(data["url"], encoding=encoding, zlib=zlib),
             data["session_start_limit"],
         )
+
+    @staticmethod
+    def _format_gateway_url(url: str, *, encoding: str, zlib: bool) -> str:
+        _url = yarl.URL(url)
+        params = _url.query.copy()
+        params["v"] = str(_API_VERSION)
+        params["encoding"] = encoding
+        if zlib:
+            params["compress"] = "zlib-stream"
+        else:
+            params.popall("compress", None)
+        return str(_url.with_query(params))
 
     def get_user(self, user_id: Snowflake) -> Response[user.User]:
         return self.request(Route("GET", "/users/{user_id}", user_id=user_id))
