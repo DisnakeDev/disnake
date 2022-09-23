@@ -2350,6 +2350,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.default_auto_archive_duration`
         - :attr:`~AuditLogDiff.user_limit`
         - :attr:`~AuditLogDiff.slowmode_delay`
+        - :attr:`~AuditLogDiff.default_thread_slowmode_delay`
         - :attr:`~AuditLogDiff.nsfw`
         - :attr:`~AuditLogDiff.available_tags`
         - :attr:`~AuditLogDiff.default_reaction`
