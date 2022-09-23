@@ -1,5 +1,9 @@
 |commands| Add a way to get the parent or root commands of slash commands.
 - Add :attr:`SubCommand.parent <ext.commands.SubCommand.parent>`
 - Add :attr:`SubCommandGroup.parent <ext.commands.SubCommandGroup.parent>`
-- Add :attr:`SubCommand.root_command <ext.commands.SubCommand.root_command>` property
-- Add :attr:`SubCommandGroup.root_command <ext.commands.SubCommandGroup.root_command>` property
+- Add :attr:`SubCommand.root_parent <ext.commands.SubCommand.root_parent>` property
+- Add :attr:`SubCommandGroup.root_parent <ext.commands.SubCommandGroup.root_parent>` property
+- Add :attr:`InvokableSlashCommand.root_parent <ext.commands.InvokableSlashCommand.root_parent>` property
+- Add :attr:`SubCommand.parents <ext.commands.SubCommand.parents>` property
+- Add :attr:`SubCommandGroup.parents <ext.commands.SubCommandGroup.parents>` property
+- Add :attr:`InvokableSlashCommand.parents <ext.commands.InvokableSlashCommand.parents>` property

@@ -175,7 +175,7 @@ class SubCommandGroup(InvokableApplicationCommand):
             type=OptionType.sub_command_group,
             options=[],
         )
-        self.qualified_name: str = f"{parent.name} {self.name}"
+        self.qualified_name: str = f"{parent.qualified_name} {self.name}"
 
         if (
             "dm_permission" in kwargs
@@ -187,13 +187,22 @@ class SubCommandGroup(InvokableApplicationCommand):
             )
 
     @property
-    def root_command(self) -> InvokableSlashCommand:
-        """:class:`InvokableSlashCommand`: Returns the root command containing this group.
-        This is mainly for consistency with :class:`SubCommand`
+    def root_parent(self) -> InvokableSlashCommand:
+        """:class:`InvokableSlashCommand`: Returns the slash command containing this group.
+        This is mainly for consistency with :class:`SubCommand`, and is equivalent to :attr:`parent`.
 
         .. versionadded:: 2.6
         """
         return self.parent
+
+    @property
+    def parents(self) -> Tuple[InvokableSlashCommand]:
+        """Tuple[:class:`InvokableSlashCommand`]: Returns all parents of this group.
+        This is mainly for consistency with :class:`SubCommand`, and is equivalent to a tuple with the :attr:`parent`.
+
+        .. versionadded:: 2.6
+        """
+        return (self.parent,)
 
     @property
     def body(self) -> Option:
@@ -320,13 +329,27 @@ class SubCommand(InvokableApplicationCommand):
             )
 
     @property
-    def root_command(self) -> InvokableSlashCommand:
-        """:class:`InvokableSlashCommand`: Returns the root command containing this subcommand,
-        even if the parent is an instance of :class:`SubCommandGroup`.
+    def root_parent(self) -> InvokableSlashCommand:
+        """:class:`InvokableSlashCommand`: Returns the slash command containing this subcommand,
+        even if the parent is a :class:`SubCommandGroup`.
 
         .. versionadded:: 2.6
         """
         return self.parent.parent if isinstance(self.parent, SubCommandGroup) else self.parent
+
+    @property
+    def parents(
+        self,
+    ) -> Union[Tuple[InvokableSlashCommand], Tuple[InvokableSlashCommand, SubCommandGroup]]:
+        """Union[Tuple[:class:`InvokableSlashCommand`], Tuple[:class:`InvokableSlashCommand`, :class:`SubCommandGroup`]]:
+        Returns all parents of this subcommand.
+
+        .. versionadded:: 2.6
+        """
+        # here I'm not using 'self.parent.parents + (self.parent,)' because it causes typing issues
+        if isinstance(self.parent, SubCommandGroup):
+            return (self.parent.parent, self.parent)
+        return (self.parent,)
 
     @property
     def description(self) -> str:
@@ -433,6 +456,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
     ):
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
+        self.parent = None
         self.connectors: Dict[str, str] = connectors or {}
         self.children: Dict[str, Union[SubCommand, SubCommandGroup]] = {}
         self.auto_sync: bool = True if auto_sync is None else auto_sync
@@ -463,7 +487,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         )
 
     @property
-    def root_command(self) -> InvokableSlashCommand:
+    def root_parent(self) -> InvokableSlashCommand:
         """:class:`InvokableSlashCommand`: Returns this command.
 
         This allows to avoid instance checks in situations where an object is either
@@ -472,6 +496,14 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         .. versionadded:: 2.6
         """
         return self
+
+    @property
+    def parents(self) -> Tuple[()]:
+        """Tuple[()]: This is mainly for consistency with :class:`SubCommand`, and is equivalent to na empty tuple.
+
+        .. versionadded:: 2.6
+        """
+        return ()
 
     def _ensure_assignment_on_copy(self, other: SlashCommandT) -> SlashCommandT:
         super()._ensure_assignment_on_copy(other)
