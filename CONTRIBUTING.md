@@ -55,7 +55,7 @@ to match the project's style. Note that you will have to stage and commit again 
 
 Most of the time, running pre-commit will automatically fix any issues that arise, but this is not always the case.
 We have a few hooks that *don't* resolve their issues automatically, and must be fixed manually.
-One of these is our license headers, which must exist in all files unless comments are not supported in those files, or they
+One of these is the license header, which must exist in all files unless comments are not supported in those files, or they
 are not text files, in which case exceptions can be made. These headers must exist following the format
 documented at [https://spdx.dev/ids/](https://spdx.dev/ids/).
 
