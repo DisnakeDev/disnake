@@ -27,6 +27,8 @@ from __future__ import annotations
 
 from typing import List, Literal, Optional, TypedDict
 
+from typing_extensions import NotRequired
+
 from .activity import PresenceData
 from .member import Member
 from .message import Message
@@ -93,9 +95,13 @@ class ThreadPaginationPayload(TypedDict):
     has_more: bool
 
 
-class ForumTag(TypedDict):
-    id: Snowflake
+class PartialForumTag(TypedDict):
+    id: NotRequired[Snowflake]
     name: str
     emoji_id: Optional[Snowflake]
     emoji_name: Optional[str]
     moderated: bool
+
+
+class ForumTag(PartialForumTag):
+    id: Snowflake

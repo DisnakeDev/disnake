@@ -98,7 +98,7 @@ if TYPE_CHECKING:
         OverwriteType,
         PermissionOverwrite as PermissionOverwritePayload,
     )
-    from .types.threads import ForumTag as ForumTagPayload
+    from .types.threads import PartialForumTag as PartialForumTagPayload
     from .ui.action_row import Components, MessageUIComponent
     from .ui.view import View
     from .user import ClientUser
@@ -417,7 +417,7 @@ class GuildChannel(ABC):
         else:
             flags_payload = MISSING
 
-        available_tags_payload: List[ForumTagPayload] = MISSING
+        available_tags_payload: List[PartialForumTagPayload] = MISSING
         if available_tags is not MISSING:
             available_tags_payload = [tag.to_dict() for tag in available_tags]
 

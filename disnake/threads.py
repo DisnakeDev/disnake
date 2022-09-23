@@ -60,6 +60,7 @@ if TYPE_CHECKING:
     from .types.snowflake import SnowflakeList
     from .types.threads import (
         ForumTag as ForumTagPayload,
+        PartialForumTag as PartialForumTagPayload,
         Thread as ThreadPayload,
         ThreadArchiveDurationLiteral,
         ThreadMember as ThreadMemberPayload,
@@ -1167,15 +1168,19 @@ class ForumTag(Hashable):
             f" moderated={self.moderated!r} emoji={self.emoji!r}>"
         )
 
-    def to_dict(self) -> ForumTagPayload:
+    def to_dict(self) -> PartialForumTagPayload:
         emoji_name, emoji_id = PartialEmoji._emoji_to_name_id(self.emoji)
-        return {
-            "id": self.id,
+        data: PartialForumTagPayload = {
             "name": self.name,
             "emoji_id": emoji_id,
             "emoji_name": emoji_name,
             "moderated": self.moderated,
         }
+
+        if self.id:
+            data["id"] = self.id
+
+        return data
 
     @classmethod
     def _from_data(cls, *, data: ForumTagPayload, state: ConnectionState) -> Self:
