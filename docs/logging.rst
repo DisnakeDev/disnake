@@ -1,3 +1,5 @@
+.. SPDX-License-Identifier: MIT
+
 :orphan:
 
 .. versionadded:: 0.6.0

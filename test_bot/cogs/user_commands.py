@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 import disnake
 from disnake.ext import commands
 

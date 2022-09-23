@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 # pyright: reportUnknownLambdaType=false
 
 from __future__ import annotations
