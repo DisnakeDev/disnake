@@ -56,6 +56,7 @@ class TestGuildChannelEdit:
             flags=disnake.ChannelFlags(pinned=False, require_tag=True),
             available_tags=[disnake.ForumTag("tag", emoji="woo")],
             default_reaction=disnake.PartialEmoji(name="woo", id=9876),
+            default_sort_order=disnake.ThreadSortOrder.creation_date,
             reason="stuff",
         )
         assert res is channel._state.http.edit_channel.return_value
@@ -82,9 +83,10 @@ class TestGuildChannelEdit:
             video_quality_mode=2,
             flags=16,
             available_tags=[
-                {"id": 0, "name": "tag", "moderated": False, "emoji_name": "woo", "emoji_id": None}
+                {"name": "tag", "moderated": False, "emoji_name": "woo", "emoji_id": None}
             ],
             default_reaction_emoji={"emoji_name": None, "emoji_id": 9876},
+            default_sort_order=1,
             reason="stuff",
         )
 
