@@ -517,6 +517,9 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                     autocompleter.__slash_command__ = other
         if self.children != other.children:
             other.children = self.children.copy()
+            # update parents...
+            for child in other.children.values():
+                child.parent = other
         if self.description != other.description and "description" not in other.__original_kwargs__:
             # Allows overriding the default description cog-wide.
             other.body.description = self.description
