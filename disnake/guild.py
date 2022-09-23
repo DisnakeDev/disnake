@@ -72,6 +72,7 @@ from .enums import (
     Locale,
     NotificationLevel,
     NSFWLevel,
+    ThreadSortOrder,
     VerificationLevel,
     VideoQualityMode,
     WidgetStyle,
@@ -1559,6 +1560,7 @@ class Guild(Hashable):
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
         available_tags: Optional[Sequence[ForumTag]] = None,
         default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        default_sort_order: Optional[ThreadSortOrder] = None,
         reason: Optional[str] = None,
     ) -> ForumChannel:
         """|coro|
@@ -1606,6 +1608,11 @@ class Guild(Hashable):
 
             .. versionadded:: 2.6
 
+        default_sort_order: Optional[:class:`ThreadSortOrder`]
+            The default sort order of threads in this channel.
+
+            .. versionadded:: 2.6
+
         reason: Optional[:class:`str`]
             The reason for creating this channel. Shows up on the audit log.
 
@@ -1650,6 +1657,9 @@ class Guild(Hashable):
                 "emoji_name": emoji_name,
                 "emoji_id": emoji_id,
             }
+
+        if default_sort_order is not None:
+            options["default_sort_order"] = try_enum_to_int(default_sort_order)
 
         data = await self._create_channel(
             name,
