@@ -2578,7 +2578,6 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             "default_auto_archive_duration", 1440
         )
         self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
-        # TODO: add to Guild.create_forum_channel, unsupported atm
         self.default_thread_slowmode_delay: int = data.get("default_thread_rate_limit_per_user", 0)
 
         tags = [
