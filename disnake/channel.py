@@ -3301,6 +3301,26 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         """
         return self._available_tags.get(tag_id)
 
+    def get_tag_by_name(self, name: str, /) -> Optional[ForumTag]:
+        """Returns a thread tag with the given name.
+
+        Tags can be uniquely identified based on the name, as tag names
+        in a forum channel must be unique.
+
+        .. versionadded:: 2.6
+
+        Parameters
+        ----------
+        name: :class:`str`
+            The name to search for.
+
+        Returns
+        -------
+        Optional[:class:`ForumTag`]
+            The tag with the given name, or ``None`` if not found.
+        """
+        return utils.get(self._available_tags.values(), name=name)
+
 
 class DMChannel(disnake.abc.Messageable, Hashable):
     """Represents a Discord direct message channel.
