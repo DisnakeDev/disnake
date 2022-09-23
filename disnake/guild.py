@@ -1555,7 +1555,7 @@ class Guild(Hashable):
         category: Optional[CategoryChannel] = None,
         position: int = MISSING,
         slowmode_delay: int = MISSING,
-        default_thread_slowmode_delay: Optional[int] = MISSING,
+        default_thread_slowmode_delay: int = MISSING,
         default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = None,
         nsfw: bool = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
@@ -1587,13 +1587,15 @@ class Guild(Hashable):
             The position in the channel list. This is a number that starts
             at 0. e.g. the top channel is position 0.
         slowmode_delay: :class:`int`
-            Specifies the slowmode rate limit for users in this channel, in seconds.
+            Specifies the slowmode rate limit at which users can create
+            threads in this channel, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
             If not provided, slowmode is disabled.
-        default_thread_slowmode_delay: Optional[:class:`int`]
+        default_thread_slowmode_delay: :class:`int`
             Specifies the slowmode rate limit at which users can send messages
             in newly created threads in this channel, in seconds.
-            A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
+            A value of ``0`` disables slowmode by default. The maximum value possible is ``21600``.
+            If not provided, slowmode is disabled.
 
             .. versionadded:: 2.6
 

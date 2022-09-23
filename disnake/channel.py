@@ -2814,11 +2814,12 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         slowmode_delay: Optional[:class:`int`]
             Specifies the slowmode rate limit at which users can create
             threads in this channel, in seconds.
-            A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
+            A value of ``0`` or ``None`` disables slowmode. The maximum value possible is ``21600``.
         default_thread_slowmode_delay: Optional[:class:`int`]
             Specifies the slowmode rate limit at which users can send messages
             in newly created threads in this channel, in seconds.
-            A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
+            This does not apply retroactively to existing threads.
+            A value of ``0`` or ``None`` disables slowmode. The maximum value possible is ``21600``.
 
             .. versionadded:: 2.6
 

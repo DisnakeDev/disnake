@@ -4356,7 +4356,7 @@ AuditLogDiff
 
     .. attribute:: default_thread_slowmode_delay
 
-        The number of seconds members have to wait before
+        The default number of seconds members have to wait before
         sending another message in new threads created in the channel.
 
         See also :attr:`ForumChannel.default_thread_slowmode_delay`.
