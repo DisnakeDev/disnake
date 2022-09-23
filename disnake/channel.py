@@ -2697,7 +2697,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
     def available_tags(self) -> List[ForumTag]:
         """List[:class:`ForumTag`]: The available tags for threads in this forum channel.
 
-        To create/edit/delete tags, use :func:`ForumChannel.edit`.
+        To create/edit/delete tags, use :func:`~ForumChannel.edit`.
 
         .. versionadded:: 2.6
         """
@@ -2847,7 +2847,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
             Note that this overwrites all tags, removing existing tags unless they're passed as well.
 
-            See :func:`ForumTag.with_changes` to help with editing tags.
+            See :class:`ForumTag` for examples regarding creating/editing tags.
 
             .. versionadded:: 2.6
 

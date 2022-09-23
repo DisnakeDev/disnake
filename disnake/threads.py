@@ -1121,6 +1121,30 @@ class ForumTag(Hashable):
 
     .. versionadded:: 2.6
 
+
+    Examples
+    --------
+
+    Creating a new tag:
+
+    .. code-block:: python3
+
+        tags = list(forum.available_tags)
+        tags.append(ForumTag(name="cool new tag", moderated=True))
+        await forum.edit(available_tags=tags)
+
+    Editing an existing tag:
+
+    .. code-block:: python3
+
+        tags = []
+        for tag in forum.available_tags:
+            if tag.id == 1234:
+                tag = tag.with_changes(name="whoa new name")
+            tags.append(tag)
+        await forum.edit(available_tags=tags)
+
+
     Attributes
     ----------
     id: :class:`int`
