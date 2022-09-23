@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 class Sidebar {
   constructor(element) {
     this.element = element;

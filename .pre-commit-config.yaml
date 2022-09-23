@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 ## Pre-commit setup
 
 repos:
@@ -25,6 +27,15 @@ repos:
         language: fail
         files: 'changelog/'
         exclude: '/(\d+\.[a-z]+(\.\d+)?\.rst|_template.rst.jinja|README.rst)$'
+      - id: spdx-licensing
+        name: SPDX License Identifiers
+        description: Check for the SPDX-License-Identifier in each file.
+        language: pygrep
+        entry: 'SPDX-License-Identifier: '
+        args: [--negate]
+        types: [text]
+        exclude_types: [json, pofile]
+        exclude: 'changelog/|py.typed|disnake/bin/COPYING|.github/PULL_REQUEST_TEMPLATE.md|LICENSE|MANIFEST.in|requirements/|requirements.txt'
 
   - repo: https://github.com/pycqa/isort
     rev: 5.10.1

@@ -1,3 +1,5 @@
+.. SPDX-License-Identifier: MIT
+
 .. currentmodule:: disnake
 
 .. |commands| replace:: [:ref:`ext.commands <disnake_ext_commands>`]

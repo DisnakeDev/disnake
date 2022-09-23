@@ -1,4 +1,5 @@
-#
+# SPDX-License-Identifier: MIT
+
 # disnake documentation build configuration file, created by
 # sphinx-quickstart on Fri Aug 21 05:43:30 2015.
 #

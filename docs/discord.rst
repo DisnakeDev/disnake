@@ -1,3 +1,5 @@
+.. SPDX-License-Identifier: MIT
+
 :orphan:
 
 .. _discord_intro:

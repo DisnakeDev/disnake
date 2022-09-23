@@ -1,3 +1,5 @@
+.. SPDX-License-Identifier: MIT
+
 .. disnake documentation master file, created by
    sphinx-quickstart on Fri Aug 21 05:43:30 2015.
    You can adapt this file completely to your liking, but it should at least
