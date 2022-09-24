@@ -1,27 +1,4 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
@@ -516,14 +493,14 @@ class ConnectionState:
         self._guild_application_commands.pop(guild_id, None)
 
     def _get_global_command_named(
-        self, name: str, cmd_type: ApplicationCommandType = None
+        self, name: str, cmd_type: Optional[ApplicationCommandType] = None
     ) -> Optional[APIApplicationCommand]:
         for cmd in self._global_application_commands.values():
             if cmd.name == name and (cmd_type is None or cmd.type is cmd_type):
                 return cmd
 
     def _get_guild_command_named(
-        self, guild_id: int, name: str, cmd_type: ApplicationCommandType = None
+        self, guild_id: int, name: str, cmd_type: Optional[ApplicationCommandType] = None
     ) -> Optional[APIApplicationCommand]:
         granula = self._guild_application_commands.get(guild_id, {})
         for cmd in granula.values():
@@ -782,13 +759,21 @@ class ConnectionState:
         self.dispatch("message", message)
         if self._messages is not None:
             self._messages.append(message)
-        # we ensure that the channel is a type that implements last_message_id
+
         if channel:
+            # we ensure that the channel is a type that implements last_message_id
             if channel.__class__ in (TextChannel, Thread, VoiceChannel):
                 channel.last_message_id = message.id  # type: ignore
-            if (
-                channel.__class__ is Thread
-                and message.type is not MessageType.thread_starter_message
+            # Essentially, messages *don't* count towards message_count, if:
+            # - they're the thread starter message
+            # - or, they're the initial message of a forum channel thread (which uses MessageType.default)
+            # This mirrors the current client and API behavior.
+            if channel.__class__ is Thread and not (
+                message.type is MessageType.thread_starter_message
+                or (
+                    type(channel.parent) is ForumChannel  # type: ignore
+                    and channel.id == message.id
+                )
             ):
                 channel.total_message_sent += 1  # type: ignore
                 channel.message_count += 1  # type: ignore
@@ -798,10 +783,14 @@ class ConnectionState:
         found = self._get_message(raw.message_id)
         raw.cached_message = found
         self.dispatch("raw_message_delete", raw)
-        guild = self._get_guild(raw.guild_id)
-        thread = guild and guild.get_thread(raw.channel_id)
-        if thread:
-            thread.message_count = max(0, thread.message_count - 1)
+
+        # the initial message isn't counted, and hence shouldn't be subtracted from the count either
+        if raw.message_id != raw.channel_id:
+            guild = self._get_guild(raw.guild_id)
+            thread = guild and guild.get_thread(raw.channel_id)
+            if thread:
+                thread.message_count = max(0, thread.message_count - 1)
+
         if self._messages is not None and found is not None:
             self.dispatch("message_delete", found)
             self._messages.remove(found)
@@ -819,7 +808,11 @@ class ConnectionState:
         guild = self._get_guild(raw.guild_id)
         thread = guild and guild.get_thread(raw.channel_id)
         if thread:
-            thread.message_count = max(0, thread.message_count - len(raw.message_ids))
+            to_subtract = len(raw.message_ids)
+            # the initial message isn't counted, and hence shouldn't be subtracted from the count either
+            if raw.channel_id in raw.message_ids:
+                to_subtract -= 1
+            thread.message_count = max(0, thread.message_count - to_subtract)
         if found_messages:
             self.dispatch("bulk_message_delete", found_messages)
             for msg in found_messages:

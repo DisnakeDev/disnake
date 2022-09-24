@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: MIT -->
+
 [![Disnake Banner](https://raw.githubusercontent.com/DisnakeDev/disnake/master/assets/banner.png)](https://disnake.dev/)
 
 disnake

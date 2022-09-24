@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 import functools
 import inspect
 from typing import TYPE_CHECKING, Any

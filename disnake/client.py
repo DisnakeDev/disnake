@@ -1,27 +1,4 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
@@ -40,6 +17,7 @@ from typing import (
     Generator,
     List,
     Literal,
+    NamedTuple,
     Optional,
     Sequence,
     Tuple,
@@ -106,7 +84,11 @@ if TYPE_CHECKING:
     from .voice_client import VoiceProtocol
 
 
-__all__ = ("Client", "SessionStartLimit")
+__all__ = (
+    "Client",
+    "SessionStartLimit",
+    "GatewayParams",
+)
 
 CoroT = TypeVar("CoroT", bound=Callable[..., Coroutine[Any, Any, Any]])
 
@@ -192,6 +174,26 @@ class SessionStartLimit:
             f"<SessionStartLimit total={self.total!r} remaining={self.remaining!r} "
             f"reset_after={self.reset_after!r} max_concurrency={self.max_concurrency!r} reset_time={self.reset_time!s}>"
         )
+
+
+class GatewayParams(NamedTuple):
+    """
+    Container type for configuring gateway connections.
+
+    .. versionadded:: 2.6
+
+    Parameters
+    ----------
+    encoding: :class:`str`
+        The payload encoding (``json`` is currently the only supported encoding).
+        Defaults to ``"json"``.
+    zlib: :class:`bool`
+        Whether to enable transport compression.
+        Defaults to ``True``.
+    """
+
+    encoding: Literal["json"] = "json"
+    zlib: bool = True
 
 
 class Client:
@@ -344,6 +346,13 @@ class Client:
             Can no longer be provided together with ``localization_provider``, as this parameter is
             ignored for custom localization providers.
 
+    gateway_params: :class:`.GatewayParams`
+        Allows configuring parameters used for establishing gateway connections,
+        notably enabling/disabling compression (enabled by default).
+        Encodings other than JSON are not supported.
+
+        .. versionadded:: 2.6
+
     Attributes
     ----------
     ws
@@ -376,6 +385,7 @@ class Client:
         enable_gateway_error_handler: bool = True,
         localization_provider: Optional[LocalizationProtocol] = None,
         strict_localization: bool = False,
+        gateway_params: Optional[GatewayParams] = None,
         connector: Optional[aiohttp.BaseConnector] = None,
         proxy: Optional[str] = None,
         proxy_auth: Optional[aiohttp.BasicAuth] = None,
@@ -453,6 +463,10 @@ class Client:
             if localization_provider is None
             else localization_provider
         )
+
+        self.gateway_params: GatewayParams = gateway_params or GatewayParams()
+        if self.gateway_params.encoding != "json":
+            raise ValueError("Gateway encodings other than `json` are currently not supported.")
 
     # internals
 
@@ -908,7 +922,10 @@ class Client:
             However, if ``ignore_session_start_limit`` is ``True``, the client will connect regardless
             and this exception will not be raised.
         """
-        _, gateway, session_start_limit = await self.http.get_bot_gateway()
+        _, initial_gateway, session_start_limit = await self.http.get_bot_gateway(
+            encoding=self.gateway_params.encoding,
+            zlib=self.gateway_params.zlib,
+        )
         self.session_start_limit = SessionStartLimit(session_start_limit)
 
         if not ignore_session_start_limit and self.session_start_limit.remaining == 0:
@@ -917,22 +934,37 @@ class Client:
         ws_params = {
             "initial": True,
             "shard_id": self.shard_id,
-            "gateway": gateway,
+            "gateway": initial_gateway,
         }
 
         backoff = ExponentialBackoff()
         while not self.is_closed():
+            # "connecting" in this case means "waiting for HELLO"
+            connecting = True
+
             try:
                 coro = DiscordWebSocket.from_client(self, **ws_params)
                 self.ws = await asyncio.wait_for(coro, timeout=60.0)
+
+                # If we got to this point:
+                # - connection was established
+                # - received a HELLO
+                # - and sent an IDENTIFY or RESUME
+                connecting = False
                 ws_params["initial"] = False
+
                 while True:
                     await self.ws.poll_event()
             except ReconnectWebSocket as e:
                 _log.info("Got a request to %s the websocket.", e.op)
                 self.dispatch("disconnect")
                 ws_params.update(
-                    sequence=self.ws.sequence, resume=e.resume, session=self.ws.session_id
+                    sequence=self.ws.sequence,
+                    resume=e.resume,
+                    session=self.ws.session_id,
+                    # use current (possibly new) gateway if resuming,
+                    # reset to default if not
+                    gateway=self.ws.resume_gateway if e.resume else initial_gateway,
                 )
                 continue
             except (
@@ -943,7 +975,6 @@ class Client:
                 aiohttp.ClientError,
                 asyncio.TimeoutError,
             ) as exc:
-
                 self.dispatch("disconnect")
                 if not reconnect:
                     await self.close()
@@ -962,6 +993,7 @@ class Client:
                         initial=False,
                         resume=True,
                         session=self.ws.session_id,
+                        gateway=self.ws.resume_gateway,
                     )
                     continue
 
@@ -979,10 +1011,24 @@ class Client:
                 retry = backoff.delay()
                 _log.exception("Attempting a reconnect in %.2fs", retry)
                 await asyncio.sleep(retry)
-                # Always try to RESUME the connection
-                # If the connection is not RESUME-able then the gateway will invalidate the session.
-                # This is apparently what the official Discord client does.
-                ws_params.update(sequence=self.ws.sequence, resume=True, session=self.ws.session_id)
+
+                if connecting:
+                    # Always identify back to the initial gateway if we failed while connecting.
+                    # This is in case we fail to connect to the resume_gateway instance.
+                    ws_params.update(
+                        resume=False,
+                        gateway=initial_gateway,
+                    )
+                else:
+                    # Just try to resume the session.
+                    # If it's not RESUME-able then the gateway will invalidate the session.
+                    # This is apparently what the official Discord client does.
+                    ws_params.update(
+                        sequence=self.ws.sequence,
+                        resume=True,
+                        session=self.ws.session_id,
+                        gateway=self.ws.resume_gateway,
+                    )
 
     async def close(self) -> None:
         """|coro|
@@ -1434,7 +1480,7 @@ class Client:
         return self._connection._get_guild_application_command(guild_id, id)
 
     def get_global_command_named(
-        self, name: str, cmd_type: ApplicationCommandType = None
+        self, name: str, cmd_type: Optional[ApplicationCommandType] = None
     ) -> Optional[APIApplicationCommand]:
         """
         Returns a global application command matching the given name.
@@ -1454,7 +1500,7 @@ class Client:
         return self._connection._get_global_command_named(name, cmd_type)
 
     def get_guild_command_named(
-        self, guild_id: int, name: str, cmd_type: ApplicationCommandType = None
+        self, guild_id: int, name: str, cmd_type: Optional[ApplicationCommandType] = None
     ) -> Optional[APIApplicationCommand]:
         """
         Returns a guild application command matching the given name.
@@ -1692,8 +1738,8 @@ class Client:
         self,
         *,
         limit: Optional[int] = 100,
-        before: SnowflakeTime = None,
-        after: SnowflakeTime = None,
+        before: Optional[SnowflakeTime] = None,
+        after: Optional[SnowflakeTime] = None,
     ) -> GuildIterator:
         """Retrieves an :class:`.AsyncIterator` that enables receiving your guilds.
 

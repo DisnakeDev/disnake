@@ -1,26 +1,7 @@
-# The MIT License (MIT)
-
-# Copyright (c) 2021-present EQUENOS
-
-# Permission is hereby granted, free of charge, to any person obtaining a
-# copy of this software and associated documentation files (the "Software"),
-# to deal in the Software without restriction, including without limitation
-# the rights to use, copy, modify, merge, publish, distribute, sublicense,
-# and/or sell copies of the Software, and to permit persons to whom the
-# Software is furnished to do so, subject to the following conditions:
-
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-# DEALINGS IN THE SOFTWARE.
+# SPDX-License-Identifier: MIT
 
 """Repsonsible for handling Params for slash commands"""
+
 from __future__ import annotations
 
 import asyncio
@@ -230,13 +211,13 @@ class Range(type, metaclass=RangeMeta):
     @classmethod
     def create(
         cls,
-        min_value: int = None,
-        max_value: int = None,
+        min_value: Optional[int] = None,
+        max_value: Optional[int] = None,
         *,
-        le: int = None,
-        lt: int = None,
-        ge: int = None,
-        gt: int = None,
+        le: Optional[int] = None,
+        lt: Optional[int] = None,
+        ge: Optional[int] = None,
+        gt: Optional[int] = None,
     ) -> Type[int]:
         ...
 
@@ -244,26 +225,26 @@ class Range(type, metaclass=RangeMeta):
     @classmethod
     def create(
         cls,
-        min_value: float = None,
-        max_value: float = None,
+        min_value: Optional[float] = None,
+        max_value: Optional[float] = None,
         *,
-        le: float = None,
-        lt: float = None,
-        ge: float = None,
-        gt: float = None,
+        le: Optional[float] = None,
+        lt: Optional[float] = None,
+        ge: Optional[float] = None,
+        gt: Optional[float] = None,
     ) -> Type[float]:
         ...
 
     @classmethod
     def create(
         cls,
-        min_value: float = None,
-        max_value: float = None,
+        min_value: Optional[float] = None,
+        max_value: Optional[float] = None,
         *,
-        le: float = None,
-        lt: float = None,
-        ge: float = None,
-        gt: float = None,
+        le: Optional[float] = None,
+        lt: Optional[float] = None,
+        ge: Optional[float] = None,
+        gt: Optional[float] = None,
     ) -> Any:
         """Construct a new range with any possible constraints"""
         self = cls(cls.__name__, (), {})
@@ -310,8 +291,8 @@ class String(type, metaclass=StringMeta):
     @classmethod
     def create(
         cls,
-        min_length: int = None,
-        max_length: int = None,
+        min_length: Optional[int] = None,
+        max_length: Optional[int] = None,
     ) -> Any:
         """Construct a new String with constraints."""
         self = cls(cls.__name__, (), {})
@@ -409,16 +390,16 @@ class ParamInfo:
         *,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        converter: Callable[[ApplicationCommandInteraction, Any], Any] = None,
+        converter: Optional[Callable[[ApplicationCommandInteraction, Any], Any]] = None,
         convert_default: bool = False,
-        autcomplete: Callable[[ApplicationCommandInteraction, str], Any] = None,
-        choices: Choices = None,
-        type: type = None,
-        channel_types: List[ChannelType] = None,
-        lt: float = None,
-        le: float = None,
-        gt: float = None,
-        ge: float = None,
+        autcomplete: Optional[Callable[[ApplicationCommandInteraction, str], Any]] = None,
+        choices: Optional[Choices] = None,
+        type: Optional[type] = None,
+        channel_types: Optional[List[ChannelType]] = None,
+        lt: Optional[float] = None,
+        le: Optional[float] = None,
+        gt: Optional[float] = None,
+        ge: Optional[float] = None,
         large: bool = False,
         min_length: Optional[int] = None,
         max_length: Optional[int] = None,
@@ -468,7 +449,7 @@ class ParamInfo:
         cls,
         param: inspect.Parameter,
         type_hints: Dict[str, Any],
-        parsed_docstring: Dict[str, disnake.utils._DocstringParam] = None,
+        parsed_docstring: Optional[Dict[str, disnake.utils._DocstringParam]] = None,
     ) -> Self:
         # hopefully repeated parsing won't cause any problems
         parsed_docstring = parsed_docstring or {}
@@ -842,8 +823,8 @@ def collect_nested_params(function: Callable) -> List[ParamInfo]:
 
 def format_kwargs(
     interaction: ApplicationCommandInteraction,
-    cog_param: str = None,
-    inter_param: str = None,
+    cog_param: Optional[str] = None,
+    inter_param: Optional[str] = None,
     /,
     *args: Any,
     **kwargs: Any,
@@ -938,18 +919,18 @@ def Param(
     *,
     name: LocalizedOptional = None,
     description: LocalizedOptional = None,
-    choices: Choices = None,
-    converter: Callable[[ApplicationCommandInteraction, Any], Any] = None,
+    choices: Optional[Choices] = None,
+    converter: Optional[Callable[[ApplicationCommandInteraction, Any], Any]] = None,
     convert_defaults: bool = False,
-    autocomplete: Callable[[ApplicationCommandInteraction, str], Any] = None,
-    channel_types: List[ChannelType] = None,
-    lt: float = None,
-    le: float = None,
-    gt: float = None,
-    ge: float = None,
+    autocomplete: Optional[Callable[[ApplicationCommandInteraction, str], Any]] = None,
+    channel_types: Optional[List[ChannelType]] = None,
+    lt: Optional[float] = None,
+    le: Optional[float] = None,
+    gt: Optional[float] = None,
+    ge: Optional[float] = None,
     large: bool = False,
-    min_length: int = None,
-    max_length: int = None,
+    min_length: Optional[int] = None,
+    max_length: Optional[int] = None,
     **kwargs: Any,
 ) -> Any:
     """A special function that creates an instance of :class:`ParamInfo` that contains some information about a

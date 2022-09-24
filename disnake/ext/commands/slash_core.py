@@ -1,24 +1,4 @@
-# The MIT License (MIT)
-
-# Copyright (c) 2021-present EQUENOS
-
-# Permission is hereby granted, free of charge, to any person obtaining a
-# copy of this software and associated documentation files (the "Software"),
-# to deal in the Software without restriction, including without limitation
-# the rights to use, copy, modify, merge, publish, distribute, sublicense,
-# and/or sell copies of the Software, and to permit persons to whom the
-# Software is furnished to do so, subject to the following conditions:
-
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-# DEALINGS IN THE SOFTWARE.
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
@@ -188,9 +168,9 @@ class SubCommandGroup(InvokableApplicationCommand):
         self,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        options: list = None,
-        connectors: dict = None,
-        extras: Dict[str, Any] = None,
+        options: Optional[list] = None,
+        connectors: Optional[dict] = None,
+        extras: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> Callable[[CommandCallback], SubCommand]:
         """
@@ -265,8 +245,8 @@ class SubCommand(InvokableApplicationCommand):
         *,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        options: list = None,
-        connectors: Dict[str, str] = None,
+        options: Optional[list] = None,
+        connectors: Optional[Dict[str, str]] = None,
         **kwargs,
     ):
         name_loc = Localized._cast(name, False)
@@ -394,12 +374,12 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         *,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        options: List[Option] = None,
-        dm_permission: bool = None,
+        options: Optional[List[Option]] = None,
+        dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-        guild_ids: Sequence[int] = None,
-        connectors: Dict[str, str] = None,
-        auto_sync: bool = None,
+        guild_ids: Optional[Sequence[int]] = None,
+        connectors: Optional[Dict[str, str]] = None,
+        auto_sync: Optional[bool] = None,
         **kwargs,
     ):
         name_loc = Localized._cast(name, False)
@@ -464,9 +444,9 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         self,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        options: list = None,
-        connectors: dict = None,
-        extras: Dict[str, Any] = None,
+        options: Optional[list] = None,
+        connectors: Optional[dict] = None,
+        extras: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> Callable[[CommandCallback], SubCommand]:
         """
@@ -529,7 +509,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
     def sub_command_group(
         self,
         name: LocalizedOptional = None,
-        extras: Dict[str, Any] = None,
+        extras: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> Callable[[CommandCallback], SubCommandGroup]:
         """
@@ -695,13 +675,13 @@ def slash_command(
     *,
     name: LocalizedOptional = None,
     description: LocalizedOptional = None,
-    dm_permission: bool = None,
+    dm_permission: Optional[bool] = None,
     default_member_permissions: Optional[Union[Permissions, int]] = None,
-    options: List[Option] = None,
-    guild_ids: Sequence[int] = None,
-    connectors: Dict[str, str] = None,
-    auto_sync: bool = None,
-    extras: Dict[str, Any] = None,
+    options: Optional[List[Option]] = None,
+    guild_ids: Optional[Sequence[int]] = None,
+    connectors: Optional[Dict[str, str]] = None,
+    auto_sync: Optional[bool] = None,
+    extras: Optional[Dict[str, Any]] = None,
     **kwargs,
 ) -> Callable[[CommandCallback], InvokableSlashCommand]:
     """A decorator that builds a slash command.
