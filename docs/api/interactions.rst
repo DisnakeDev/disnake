@@ -21,6 +21,18 @@ Interaction
     :inherited-members:
     :exclude-members: original_message, edit_original_message, delete_original_message
 
+    .. method:: original_message
+
+        An alias of :func:`original_response`.
+
+    .. method:: edit_original_message
+
+        An alias of :func:`edit_original_response`.
+
+    .. method:: delete_original_message
+
+        An alias of :func:`delete_original_response`.
+
 ApplicationCommandInteraction
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -29,11 +41,37 @@ ApplicationCommandInteraction
 .. autoclass:: ApplicationCommandInteraction()
     :members:
     :inherited-members:
+    :exclude-members: original_message, edit_original_message, delete_original_message
+
+    .. method:: original_message
+
+        An alias of :func:`original_response`.
+
+    .. method:: edit_original_message
+
+        An alias of :func:`edit_original_response`.
+
+    .. method:: delete_original_message
+
+        An alias of :func:`delete_original_response`.
 
 GuildCommandInteraction
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 .. autoclass:: GuildCommandInteraction()
+    :exclude-members: original_message, edit_original_message, delete_original_message
+
+    .. method:: original_message
+
+        An alias of :func:`original_response`.
+
+    .. method:: edit_original_message
+
+        An alias of :func:`edit_original_response`.
+
+    .. method:: delete_original_message
+
+        An alias of :func:`delete_original_response`.
 
 UserCommandInteraction
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -62,6 +100,19 @@ ModalInteraction
 .. autoclass:: ModalInteraction()
     :members:
     :inherited-members:
+    :exclude-members: original_message, edit_original_message, delete_original_message
+
+    .. method:: original_message
+
+        An alias of :func:`original_response`.
+
+    .. method:: edit_original_message
+
+        An alias of :func:`edit_original_response`.
+
+    .. method:: delete_original_message
+
+        An alias of :func:`delete_original_response`.
 
 InteractionResponse
 ~~~~~~~~~~~~~~~~~~~~
