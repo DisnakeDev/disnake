@@ -139,8 +139,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
     slowmode_delay: :class:`int`
         The number of seconds a member must wait between sending messages
         in this channel. A value of `0` denotes that it is disabled.
-        Bots and users with :attr:`~Permissions.manage_channels` or
-        :attr:`~Permissions.manage_messages` permissions bypass slowmode.
+        Bots, and users with :attr:`~Permissions.manage_channels` or
+        :attr:`~Permissions.manage_messages` permissions, bypass slowmode.
     nsfw: :class:`bool`
         Whether the channel is marked as "not safe for work".
 
@@ -1118,8 +1118,8 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
     slowmode_delay: :class:`int`
         The number of seconds a member must wait between sending messages
         in this channel. A value of `0` denotes that it is disabled.
-        Bots and users with :attr:`~Permissions.manage_channels` or
-        :attr:`~Permissions.manage_messages` bypass slowmode.
+        Bots, and users with :attr:`~Permissions.manage_channels` or
+        :attr:`~Permissions.manage_messages`, bypass slowmode.
 
         .. versionadded:: 2.3
 
@@ -2477,8 +2477,8 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         in this channel.
 
         A value of ``0`` denotes that it is disabled.
-        Bots and users with :attr:`~Permissions.manage_channels` or
-        :attr:`~Permissions.manage_messages` bypass slowmode.
+        Bots, and users with :attr:`~Permissions.manage_channels` or
+        :attr:`~Permissions.manage_messages`, bypass slowmode.
 
         See also :attr:`default_thread_slowmode_delay`.
 
@@ -2487,8 +2487,8 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         in newly created threads in this channel.
 
         A value of ``0`` denotes that it is disabled.
-        Bots and users with :attr:`~Permissions.manage_channels` or
-        :attr:`~Permissions.manage_messages` bypass slowmode.
+        Bots, and users with :attr:`~Permissions.manage_channels` or
+        :attr:`~Permissions.manage_messages`, bypass slowmode.
 
         .. versionadded:: 2.6
 
