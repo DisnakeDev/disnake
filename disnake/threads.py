@@ -1134,7 +1134,7 @@ class ForumTag(Hashable):
         Defaults to ``False``.
     emoji: Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]
         The emoji associated with this tag, if any.
-        Note that due to a Discord limitation, this will have an empty
+        Due to a Discord limitation, this will have an empty
         :attr:`~PartialEmoji.name` if it is a custom :class:`PartialEmoji`.
     """
 

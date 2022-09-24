@@ -4588,7 +4588,7 @@ AuditLogDiff
 
         The default emoji shown for reacting to threads in a forum channel being changed.
 
-        Note that due to a Discord limitation, this will have an empty
+        Due to a Discord limitation, this will have an empty
         :attr:`~PartialEmoji.name` if it is a custom :class:`PartialEmoji`.
 
         :type: Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]
