@@ -8,7 +8,7 @@ A basic example showing how to integrate audio from youtube-dl into voice chat.
 
 import asyncio
 import os
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import disnake
 import youtube_dl  # type: ignore
@@ -44,7 +44,9 @@ class YTDLSource(disnake.PCMVolumeTransformer):
         self.title = data.get("title")
 
     @classmethod
-    async def from_url(cls, url, *, loop: asyncio.AbstractEventLoop = None, stream: bool = False):
+    async def from_url(
+        cls, url, *, loop: Optional[asyncio.AbstractEventLoop] = None, stream: bool = False
+    ):
         loop = loop or asyncio.get_event_loop()
         data: Any = await loop.run_in_executor(
             None, lambda: ytdl.extract_info(url, download=not stream)
