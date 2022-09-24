@@ -1,7 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
 
-# -*- encoding: utf-8 -*-
-
 # Original copyright notice as follows
 
 # Copyright © 2012 New Dream Network, LLC (DreamHost)
