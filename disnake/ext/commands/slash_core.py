@@ -198,7 +198,6 @@ class SubCommandGroup(InvokableApplicationCommand):
     @property
     def parents(self) -> Tuple[InvokableSlashCommand]:
         """Tuple[:class:`InvokableSlashCommand`]: Returns all parents of this group.
-        This is mainly for consistency with :class:`SubCommand`, and is equivalent to a tuple with the :attr:`parent`.
 
         .. versionadded:: 2.6
         """
@@ -340,15 +339,15 @@ class SubCommand(InvokableApplicationCommand):
     @property
     def parents(
         self,
-    ) -> Union[Tuple[InvokableSlashCommand], Tuple[InvokableSlashCommand, SubCommandGroup]]:
-        """Union[Tuple[:class:`InvokableSlashCommand`], Tuple[:class:`InvokableSlashCommand`, :class:`SubCommandGroup`]]:
+    ) -> Union[Tuple[InvokableSlashCommand], Tuple[SubCommandGroup, InvokableSlashCommand]]:
+        """Union[Tuple[:class:`InvokableSlashCommand`], Tuple[:class:`SubCommandGroup`, :class:`InvokableSlashCommand`]]:
         Returns all parents of this subcommand.
 
         .. versionadded:: 2.6
         """
         # here I'm not using 'self.parent.parents + (self.parent,)' because it causes typing issues
         if isinstance(self.parent, SubCommandGroup):
-            return (self.parent.parent, self.parent)
+            return (self.parent, self.parent.parent)
         return (self.parent,)
 
     @property
@@ -499,7 +498,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
     @property
     def parents(self) -> Tuple[()]:
-        """Tuple[()]: This is mainly for consistency with :class:`SubCommand`, and is equivalent to na empty tuple.
+        """Tuple[()]: This is mainly for consistency with :class:`SubCommand`, and is equivalent to an empty tuple.
 
         .. versionadded:: 2.6
         """
