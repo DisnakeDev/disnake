@@ -1134,7 +1134,8 @@ class ForumTag(Hashable):
         Defaults to ``False``.
     emoji: Optional[:class:`PartialEmoji`]
         The emoji associated with this tag, if any.
-        Note that this will have an empty :attr:`~PartialEmoji.name` if it is a custom emoji.
+        Note that due to a Discord limitation, this may have an empty
+        :attr:`~PartialEmoji.name` if it is a custom emoji.
     """
 
     __slots__ = ("id", "name", "moderated", "emoji")
