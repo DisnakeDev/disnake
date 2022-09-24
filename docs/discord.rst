@@ -56,8 +56,6 @@ Creating a Bot account is a pretty straightforward process.
 
 And that's it. You now have a bot account and you can login with that token.
 
-.. .. _discord_invite_bot:
-
 Inviting Your Bot
 -------------------
 
