@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 name: changelog entry
 
 on:

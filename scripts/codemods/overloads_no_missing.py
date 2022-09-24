@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 from typing import List, Optional, Sequence
 
 import libcst as cst

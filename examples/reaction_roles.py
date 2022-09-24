@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 # This example requires the 'members' privileged intents
 
 import os
