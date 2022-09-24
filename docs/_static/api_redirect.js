@@ -12,7 +12,11 @@ function main() {
 
     if (!url.pathname.endsWith('api.html')) return;
 
-    let postfix = get_link(url);
+    /*
+    * redirects_map is set by the redirects sphinx extension
+    * and actually exists here at the time of loading the page
+    */
+    let postfix = redirects_map[url.hash.slice(1)];
 
     let fixed_postfix = false;
 
@@ -40,12 +44,4 @@ function main() {
     } else {
         window.location.href = url.origin + url.pathname.slice(0, -api.length) + postfix;
     }
-}
-
-function get_link(url) {
-    /*
-    * redirects_map is set by redirects sphinx extension
-    * and actually exists here at the time of loading the page
-    */
-    return redirects_map[url.hash.slice(1)];
 }
