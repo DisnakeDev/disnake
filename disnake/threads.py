@@ -1106,7 +1106,7 @@ class ForumTag(Hashable):
 
     .. code-block:: python3
 
-        tags = list(forum.available_tags)
+        tags = forum.available_tags
         tags.append(ForumTag(name="cool new tag", moderated=True))
         await forum.edit(available_tags=tags)
 
