@@ -1991,7 +1991,7 @@ class Message(Hashable):
 
 
 class PartialMessage(Hashable):
-    """Represents a partial :class:`.Message` to aid with working messages when only
+    """Represents a partial message to aid with working messages when only
     a message and channel ID are present.
 
     There are two ways to construct this class. The first one is through

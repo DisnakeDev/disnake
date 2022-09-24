@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-'use-strict';
+"use strict";
 
 window.addEventListener("DOMContentLoaded", main);
 

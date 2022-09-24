@@ -21,12 +21,8 @@ def main(app: Sphinx, exception: Exception) -> None:
     actual_redirects: Dict[str, str] = {}
 
     domain = app.env.domains["py"]
-    # first is the real object name - we dont need it
-    # second is object's "display name" (idk what is that mmlol), we dont need it
-    # third is object type (class, method etc), we too dont need it
-    # sixth is whether the object is aliased (not sure what does it actually mean,
-    # i guess whether you did :ref:`abcedfg <hijklm>` instead of just :ref:`hijklm`
-    # idk), again, we dont need it
+
+    # see https://www.sphinx-doc.org/en/master/extdev/domainapi.html#sphinx.domains.Domain.get_objects
     for _, _, _, document, html_node_id, _ in domain.get_objects():
         actual_redirects[html_node_id] = document + ".html#" + html_node_id
 
@@ -39,7 +35,7 @@ def main(app: Sphinx, exception: Exception) -> None:
         redirect_data = json.dumps(actual_redirects)
         prefix = "const redirects_map = "
 
-        javascript = prefix + redirect_data  # yeah, raw json doesnt look cool in js, but who cares
+        javascript = prefix + redirect_data
 
         redirects_js.write(javascript)
 

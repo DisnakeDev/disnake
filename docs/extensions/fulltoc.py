@@ -1,7 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
 
-# -*- encoding: utf-8 -*-
-
 # Original copyright notice as follows
 
 # Copyright © 2012 New Dream Network, LLC (DreamHost)
@@ -23,10 +21,7 @@
 # changes made:
 # - added typehinting
 # - formatted with black
-# - removed `display_toc` being forced to True
-
-# This is done by arl and shift
-
+# - refactored generated toc to suit project documentation structure
 
 from __future__ import annotations
 
