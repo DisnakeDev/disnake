@@ -5,7 +5,7 @@
 AutoMod
 =======
 
-This section documents everything related to guilds' AutoMod feature.
+This section documents everything related to Discord's AutoMod features.
 
 Classes
 -------
