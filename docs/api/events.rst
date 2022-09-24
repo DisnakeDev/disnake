@@ -2,13 +2,9 @@
 
 .. currentmodule:: disnake
 
-.. 29 votes for this and only 6 for splited up version. kill me
-.. anyway, you want it, you got it
-.. conservants lmao
-.. i hope everyone will change their mind when see how weird this looks together with
-.. other documentation being split up :P
+.. The message was deleted. - disnake users
 
-.. _discord_events:
+.. _discord_api_events:
 
 Events
 ======
@@ -79,6 +75,9 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     All the events must be a |coroutine_link|_. If they aren't, then you might get unexpected
     errors. In order to turn a function into a coroutine they must be ``async def``
     functions.
+
+Reference
+---------
 
 .. _related_events_client:
 

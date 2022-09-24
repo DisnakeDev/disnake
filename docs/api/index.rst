@@ -17,25 +17,6 @@ The following documents outline the API of disnake.
     more information on how to set up and use the logging module with
     disnake.
 
-.. _version_related:
-
-Version Related Info
---------------------
-
-There are two main ways to query version information about the library. For guarantees, check :ref:`version_guarantees`.
-
-.. data:: version_info
-
-    A named tuple that is similar to :obj:`py:sys.version_info`.
-
-    Just like :obj:`py:sys.version_info` the valid values for ``releaselevel`` are
-    'alpha', 'beta', 'candidate' and 'final'.
-
-.. data:: __version__
-
-    A string representation of the version. e.g. ``'1.0.0rc1'``. This is based
-    off of :pep:`440`.
-
 .. _discord_enum:
 
 Enumerations
@@ -65,7 +46,7 @@ the user of the library.
 
     If you want to get one of these model classes instances they'd have to be through
     the cache, and a common way of doing so is through the :func:`utils.find` function
-    or attributes of model classes that you receive from the :ref:`Events <discord_events>`.
+    or attributes of model classes that you receive from the :ref:`Events <discord_api_events>`.
 
 .. note::
 

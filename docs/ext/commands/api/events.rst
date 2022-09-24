@@ -7,7 +7,7 @@ Events
 
 This section documents events related to the commands extention.
 
-These events function similar to :ref:`the regular events <discord_events>`, except they
+These events function similar to :ref:`the regular events <discord_api_events>`, except they
 are custom to the command extension module.
 
 .. _related_events_ext_commands_prefixcmds:

@@ -11,11 +11,6 @@ creating a bot command framework that is extensible, flexible, and powerful. For
 extension library that handles this for you.
 
 .. toctree::
-    :hidden:
-
-    api
-
-.. toctree::
     :maxdepth: 2
 
     commands

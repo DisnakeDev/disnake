@@ -5,7 +5,8 @@
 Emoji
 =====
 
-This section documents everything related to guilds' emojis.
+This section documents everything related to Discord
+`emoji <https://discord.com/developers/docs/resources/emoji>`_.
 
 Classes
 -------

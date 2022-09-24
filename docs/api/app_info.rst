@@ -5,7 +5,7 @@
 Application Info
 ================
 
-This section documents everything related to :class:`Client`'s application information.
+This section documents everything related to application's (either yours or someone's else) information.
 
 Classes
 -------

@@ -1561,7 +1561,7 @@ class Client:
 
         In case the event returns multiple arguments, a :class:`tuple` containing those
         arguments is returned instead. Please check the
-        :ref:`documentation <disnake_api_index>` for a list of events and their
+        :ref:`documentation <discord_api_events>` for a list of events and their
         parameters.
 
         This function returns the **first event that meets the requirements**.
@@ -1605,7 +1605,7 @@ class Client:
         Parameters
         ----------
         event: :class:`str`
-            The event name, similar to the :ref:`events <discord_events>`,
+            The event name, similar to the :ref:`events <discord_api_events>`,
             but without the ``on_`` prefix, to wait for.
         check: Optional[Callable[..., :class:`bool`]]
             A predicate to check what to wait for. The arguments must meet the
@@ -1624,7 +1624,7 @@ class Client:
         Any
             Returns no arguments, a single argument, or a :class:`tuple` of multiple
             arguments that mirrors the parameters passed in the
-            :ref:`event <discord_events>`.
+            :ref:`event <discord_api_events>`.
         """
         future = self.loop.create_future()
         if check is None:

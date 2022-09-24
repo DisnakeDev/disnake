@@ -8,11 +8,6 @@
 Welcome to disnake
 ==================
 
-.. toctree::
-    :hidden:
-
-    api
-
 .. image:: /images/snake.svg
 .. image:: /images/snake_dark.svg
 
@@ -27,8 +22,10 @@ for Discord.
 - Easy to use with an object oriented design
 - Optimised for both speed and memory
 
+.. _disnake_getting_started:
+
 Getting started
------------------
+---------------
 
 Is this your first time using the library? This is the place to get started!
 
@@ -37,7 +34,7 @@ Is this your first time using the library? This is the place to get started!
 - **Examples:** Many examples are available in the :resource:`repository <examples>`.
 
 Getting help
---------------
+------------
 
 If you're having trouble with something, these resources might help.
 
@@ -47,7 +44,7 @@ If you're having trouble with something, these resources might help.
 - Report bugs in the :resource:`issue tracker <issues>`.
 
 Extensions
-------------
+----------
 
 These extensions help you during development when it comes to common tasks.
 
@@ -58,7 +55,7 @@ These extensions help you during development when it comes to common tasks.
   ext/tasks/index.rst
 
 Manuals
----------
+-------
 
 These pages go into great detail about everything the API can do.
 
@@ -70,7 +67,7 @@ These pages go into great detail about everything the API can do.
   disnake.ext.tasks API Reference <ext/tasks/index.rst>
 
 Meta
-------
+----
 
 If you're looking for something related to the project itself, it's here.
 
