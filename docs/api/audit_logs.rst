@@ -468,6 +468,15 @@ AuditLogDiff
 
         :type: :class:`int`
 
+    .. attribute:: default_thread_slowmode_delay
+
+        The default number of seconds members have to wait before
+        sending another message in new threads created in the channel.
+
+        See also :attr:`ForumChannel.default_thread_slowmode_delay`.
+
+        :type: :class:`int`
+
     .. attribute:: rtc_region
 
         The region for the voice or stage channel's voice communication.
@@ -672,6 +681,36 @@ AuditLogDiff
 
         :type: List[Union[:class:`abc.GuildChannel`, :class:`Object`]]
 
+    .. attribute:: applied_tags
+
+        The tags applied to a thread in a forum channel being changed.
+
+        If a tag is not found, then it is an :class:`Object` with the ID
+        being set.
+
+        :type: List[Union[:class:`ForumTag`, :class:`Object`]]
+
+    .. attribute:: available_tags
+
+        The available tags for threads in a forum channel being changed.
+
+        :type: List[:class:`ForumTag`]
+
+    .. attribute:: default_reaction
+
+        The default emoji shown for reacting to threads in a forum channel being changed.
+
+        Due to a Discord limitation, this will have an empty
+        :attr:`~PartialEmoji.name` if it is a custom :class:`PartialEmoji`.
+
+        :type: Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]
+
+    .. attribute:: default_sort_order
+
+        The default sort order of threads in a forum channel being changed.
+
+        :type: Optional[:class:`ThreadSortOrder`]
+
 Enumerations
 ------------
 
@@ -747,7 +786,10 @@ AuditLogAction
         - :attr:`~AuditLogDiff.default_auto_archive_duration`
         - :attr:`~AuditLogDiff.user_limit`
         - :attr:`~AuditLogDiff.slowmode_delay`
+        - :attr:`~AuditLogDiff.default_thread_slowmode_delay`
         - :attr:`~AuditLogDiff.nsfw`
+        - :attr:`~AuditLogDiff.available_tags`
+        - :attr:`~AuditLogDiff.default_reaction`
 
     .. attribute:: channel_update
 
@@ -775,7 +817,10 @@ AuditLogAction
         - :attr:`~AuditLogDiff.default_auto_archive_duration`
         - :attr:`~AuditLogDiff.user_limit`
         - :attr:`~AuditLogDiff.slowmode_delay`
+        - :attr:`~AuditLogDiff.default_thread_slowmode_delay`
         - :attr:`~AuditLogDiff.nsfw`
+        - :attr:`~AuditLogDiff.available_tags`
+        - :attr:`~AuditLogDiff.default_reaction`
 
     .. attribute:: channel_delete
 
@@ -799,7 +844,10 @@ AuditLogAction
         - :attr:`~AuditLogDiff.default_auto_archive_duration`
         - :attr:`~AuditLogDiff.user_limit`
         - :attr:`~AuditLogDiff.slowmode_delay`
+        - :attr:`~AuditLogDiff.default_thread_slowmode_delay`
         - :attr:`~AuditLogDiff.nsfw`
+        - :attr:`~AuditLogDiff.available_tags`
+        - :attr:`~AuditLogDiff.default_reaction`
 
     .. attribute:: overwrite_create
 
@@ -1447,6 +1495,7 @@ AuditLogAction
         - :attr:`~AuditLogDiff.slowmode_delay`
         - :attr:`~AuditLogDiff.invitable`
         - :attr:`~AuditLogDiff.flags`
+        - :attr:`~AuditLogDiff.applied_tags`
 
         .. versionadded:: 2.0
 
@@ -1467,6 +1516,7 @@ AuditLogAction
         - :attr:`~AuditLogDiff.slowmode_delay`
         - :attr:`~AuditLogDiff.invitable`
         - :attr:`~AuditLogDiff.flags`
+        - :attr:`~AuditLogDiff.applied_tags`
 
         .. versionadded:: 2.0
 
@@ -1487,6 +1537,7 @@ AuditLogAction
         - :attr:`~AuditLogDiff.slowmode_delay`
         - :attr:`~AuditLogDiff.invitable`
         - :attr:`~AuditLogDiff.flags`
+        - :attr:`~AuditLogDiff.applied_tags`
 
         .. versionadded:: 2.0
 

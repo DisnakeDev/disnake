@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
 
 from . import utils
 from .asset import Asset, AssetMixin
@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import Self
 
+    from .emoji import Emoji
     from .state import ConnectionState
     from .types.activity import ActivityEmoji as ActivityEmojiPayload
     from .types.emoji import Emoji as EmojiPayload, PartialEmoji as PartialEmojiPayload
@@ -250,3 +251,43 @@ class PartialEmoji(_EmojiTag, AssetMixin):
             raise TypeError("PartialEmoji is not a custom emoji")
 
         return await super().read()
+
+    # utility method for unusual emoji model in forums
+    # (e.g. default reaction, tag emoji)
+    @staticmethod
+    def _emoji_to_name_id(
+        emoji: Optional[Union[str, Emoji, PartialEmoji]]
+    ) -> Tuple[Optional[str], Optional[int]]:
+        if emoji is None:
+            return None, None
+
+        if isinstance(emoji, str):
+            emoji = PartialEmoji.from_str(emoji)
+
+        # note: API only supports exactly one of `name` and `id` being set
+        if emoji.id:
+            return None, emoji.id
+        else:
+            return emoji.name, None
+
+    # utility method for unusual emoji model in forums
+    @staticmethod
+    def _emoji_from_name_id(
+        name: Optional[str], id: Optional[int], *, state: ConnectionState
+    ) -> Optional[Union[Emoji, PartialEmoji]]:
+        if not (name or id):
+            return None
+
+        emoji: Optional[Union[Emoji, PartialEmoji]] = None
+        if id:
+            emoji = state.get_emoji(id)
+        if not emoji:
+            emoji = PartialEmoji.with_state(
+                state=state,
+                # Note: this does not render correctly if it's a custom emoji, there's just no name information for those here.
+                # This may change in a future API version, but for now we'll just have to accept it.
+                name=name or "",
+                id=id,
+                # `animated` is unknown but presumably we already got the (animated) emoji from the guild cache at this point
+            )
+        return emoji

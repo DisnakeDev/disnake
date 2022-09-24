@@ -25,12 +25,13 @@ from typing import (
 
 from . import utils
 from .context_managers import Typing
-from .enums import ChannelType, PartyType, VideoQualityMode, try_enum_to_int
+from .enums import ChannelType, PartyType, ThreadSortOrder, VideoQualityMode, try_enum_to_int
 from .errors import ClientException
 from .file import File
 from .flags import ChannelFlags, MessageFlags
 from .invite import Invite
 from .mentions import AllowedMentions
+from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite, Permissions
 from .role import Role
 from .sticker import GuildSticker, StickerItem
@@ -58,6 +59,7 @@ if TYPE_CHECKING:
     from .channel import CategoryChannel, DMChannel, PartialMessageable
     from .client import Client
     from .embeds import Embed
+    from .emoji import Emoji
     from .enums import InviteTarget
     from .guild import Guild, GuildMessageable
     from .guild_scheduled_event import GuildScheduledEvent
@@ -65,13 +67,15 @@ if TYPE_CHECKING:
     from .member import Member
     from .message import Message, MessageReference, PartialMessage
     from .state import ConnectionState
-    from .threads import AnyThreadArchiveDuration
+    from .threads import AnyThreadArchiveDuration, ForumTag
     from .types.channel import (
         Channel as ChannelPayload,
+        DefaultReaction as DefaultReactionPayload,
         GuildChannel as GuildChannelPayload,
         OverwriteType,
         PermissionOverwrite as PermissionOverwritePayload,
     )
+    from .types.threads import PartialForumTag as PartialForumTagPayload
     from .ui.action_row import Components, MessageUIComponent
     from .ui.view import View
     from .user import ClientUser
@@ -303,6 +307,7 @@ class GuildChannel(ABC):
         sync_permissions: bool = MISSING,
         category: Optional[Snowflake] = MISSING,
         slowmode_delay: Optional[int] = MISSING,
+        default_thread_slowmode_delay: Optional[int] = MISSING,
         default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
         type: ChannelType = MISSING,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
@@ -311,6 +316,9 @@ class GuildChannel(ABC):
         rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
         flags: ChannelFlags = MISSING,
+        available_tags: Sequence[ForumTag] = MISSING,
+        default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
+        default_sort_order: Optional[ThreadSortOrder] = MISSING,
         reason: Optional[str] = None,
     ) -> Optional[ChannelPayload]:
         parent_id: Optional[int]
@@ -386,12 +394,34 @@ class GuildChannel(ABC):
         else:
             type_payload = MISSING
 
+        flags_payload: int
         if flags is not MISSING:
             if not isinstance(flags, ChannelFlags):
                 raise TypeError("flags field must be of type ChannelFlags")
             flags_payload = flags.value
         else:
             flags_payload = MISSING
+
+        available_tags_payload: List[PartialForumTagPayload] = MISSING
+        if available_tags is not MISSING:
+            available_tags_payload = [tag.to_dict() for tag in available_tags]
+
+        default_reaction_emoji_payload: Optional[DefaultReactionPayload] = MISSING
+        if default_reaction is not MISSING:
+            if default_reaction is not None:
+                emoji_name, emoji_id = PartialEmoji._emoji_to_name_id(default_reaction)
+                default_reaction_emoji_payload = {
+                    "emoji_name": emoji_name,
+                    "emoji_id": emoji_id,
+                }
+            else:
+                default_reaction_emoji_payload = None
+
+        default_sort_order_payload: Optional[int] = MISSING
+        if default_sort_order is not MISSING:
+            default_sort_order_payload = (
+                try_enum_to_int(default_sort_order) if default_sort_order is not None else None
+            )
 
         options: Dict[str, Any] = {
             "name": name,
@@ -403,11 +433,15 @@ class GuildChannel(ABC):
             # note: not passing `position` as it already got updated before, if passed
             "permission_overwrites": overwrites_payload,
             "rate_limit_per_user": slowmode_delay,
+            "default_thread_rate_limit_per_user": default_thread_slowmode_delay,
             "type": type_payload,
             "rtc_region": rtc_region_payload,
             "video_quality_mode": video_quality_mode_payload,
             "default_auto_archive_duration": default_auto_archive_duration_payload,
             "flags": flags_payload,
+            "available_tags": available_tags_payload,
+            "default_reaction_emoji": default_reaction_emoji_payload,
+            "default_sort_order": default_sort_order_payload,
         }
         options = {k: v for k, v in options.items() if v is not MISSING}
 

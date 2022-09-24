@@ -68,6 +68,15 @@ ThreadMember
 .. autoclass:: ThreadMember()
     :members:
 
+ForumTag
+~~~~~~~~~
+
+.. attributetable:: ForumTag
+
+.. autoclass:: ForumTag()
+    :members:
+    :inherited-members:
+
 StageChannel
 ~~~~~~~~~~~~
 
@@ -278,6 +287,23 @@ VideoQualityMode
     .. attribute:: full
 
         Represents full camera video quality.
+
+ThreadSortOrder
+~~~~~~~~~~~~~~~
+
+.. class:: ThreadSortOrder
+
+    Represents the sort order of threads in :class:`ForumChannel`\s.
+
+    .. versionadded:: 2.6
+
+    .. attribute:: latest_activity
+
+        Sort forum threads by activity.
+
+    .. attribute:: creation_date
+
+        Sort forum threads by creation date/time (from newest to oldest).
 
 Events
 ------

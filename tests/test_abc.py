@@ -44,6 +44,7 @@ class TestGuildChannelEdit:
             sync_permissions=False,
             category=disnake.Object(321),
             slowmode_delay=8,
+            default_thread_slowmode_delay=42,
             default_auto_archive_duration=disnake.ThreadArchiveDuration.hour,
             type=disnake.ChannelType.news,
             overwrites={
@@ -54,6 +55,10 @@ class TestGuildChannelEdit:
             user_limit=3,
             rtc_region="there",
             video_quality_mode=disnake.VideoQualityMode.full,
+            flags=disnake.ChannelFlags(pinned=False, require_tag=True),
+            available_tags=[disnake.ForumTag(name="tag", emoji="woo")],
+            default_reaction=disnake.PartialEmoji(name="woo", id=9876),
+            default_sort_order=disnake.ThreadSortOrder.creation_date,
             reason="stuff",
         )
         assert res is channel._state.http.edit_channel.return_value
@@ -67,6 +72,7 @@ class TestGuildChannelEdit:
             topic="talk about things here",
             nsfw=True,
             rate_limit_per_user=8,
+            default_thread_rate_limit_per_user=42,
             default_auto_archive_duration=60,
             type=5,
             permission_overwrites=[
@@ -77,6 +83,12 @@ class TestGuildChannelEdit:
             user_limit=3,
             rtc_region="there",
             video_quality_mode=2,
+            flags=16,
+            available_tags=[
+                {"name": "tag", "moderated": False, "emoji_name": "woo", "emoji_id": None}
+            ],
+            default_reaction_emoji={"emoji_name": None, "emoji_id": 9876},
+            default_sort_order=1,
             reason="stuff",
         )
 
