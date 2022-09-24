@@ -18,12 +18,7 @@ def main(app: Sphinx, exception: Exception) -> None:
         if domainname != "py":
             continue  # skip non-python objects
 
-        # first is the real object name - we dont need it
-        # second is object's "display name" (idk what is that mmlol), we dont need it
-        # third is object type (class, method etc), we too dont need it
-        # sixth is whether the object is aliased (not sure what does it actually mean,
-        # i guess whether you did :ref:`abcedfg <hijklm>` instead of just :ref:`hijklm`
-        # idk), again, we dont need it
+        # see https://www.sphinx-doc.org/en/master/extdev/domainapi.html#sphinx.domains.Domain.get_objects
         for _, _, _, document, html_node_id, _ in domain.get_objects():
             actual_redirects[html_node_id] = document + ".html#" + html_node_id
 
