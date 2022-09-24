@@ -78,6 +78,7 @@ jobs:
     # We want to run on external PRs, but not on our own internal PRs as they'll be run
     # by the push to the branch. Without this if check, checks are duplicated since
     # internal PRs match both the push and pull_request events.
+    continue-on-error: ${{ matrix.allow_failures }}
     if:
       github.event_name == 'push' || github.event.pull_request.head.repo.full_name !=
       github.repository
@@ -85,6 +86,10 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.8", "3.9", "3.10"]
+        allow_failures: [false]
+        include:
+          - python-version: '3.11.0-alpha - 3.11'
+            allow_failures: true
       fail-fast: false
     steps:
     - uses: actions/checkout@v3
@@ -170,6 +175,7 @@ jobs:
     # We want to run on external PRs, but not on our own internal PRs as they'll be run
     # by the push to the branch. Without this if check, checks are duplicated since
     # internal PRs match both the push and pull_request events.
+    continue-on-error: ${{ matrix.allow_failures }}
     if:
       github.event_name == 'push' || github.event.pull_request.head.repo.full_name !=
       github.repository
@@ -177,6 +183,17 @@ jobs:
       matrix:
         python-version: ["3.8", "3.9", "3.10"]
         os: ["windows-latest", "ubuntu-latest", "macos-latest"]
+        allow_failures: [false]
+        include:
+          - python-version: '3.11.0-alpha - 3.11'
+            os: "ubuntu-latest"
+            allow_failures: true
+          - python-version: '3.11.0-alpha - 3.11'
+            os: "macos-latest"
+            allow_failures: true
+          - python-version: '3.11.0-alpha - 3.11'
+            os: "windows-latest"
+            allow_failures: true
       fail-fast: true
 
     runs-on: ${{ matrix.os }}
@@ -205,7 +222,7 @@ jobs:
         TZ: "America/New_York"
       run: |
         echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/Test Summary/" >> $GITHUB_STEP_SUMMARY
-        nox -s test-${{ matrix.python-version }} -- --color=no --cov-report= | tee -a $GITHUB_STEP_SUMMARY
+        nox --force-python ${{ matrix.python-version }} -s test -- --color=no --cov-report= | tee -a $GITHUB_STEP_SUMMARY
         echo "$GITHUB_STEP_SUMMARY_FOOTER" >> $GITHUB_STEP_SUMMARY
 
     - name: Print Coverage Output
