@@ -1132,10 +1132,10 @@ class ForumTag(Hashable):
     moderated: :class:`bool`
         Whether only moderators can add this tag to threads or remove it.
         Defaults to ``False``.
-    emoji: Optional[:class:`PartialEmoji`]
+    emoji: Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]
         The emoji associated with this tag, if any.
-        Note that due to a Discord limitation, this may have an empty
-        :attr:`~PartialEmoji.name` if it is a custom emoji.
+        Note that due to a Discord limitation, this will have an empty
+        :attr:`~PartialEmoji.name` if it is a custom :class:`PartialEmoji`.
     """
 
     __slots__ = ("id", "name", "moderated", "emoji")
@@ -1151,13 +1151,13 @@ class ForumTag(Hashable):
         self.name: str = name
         self.moderated: bool = moderated
 
-        self.emoji: Optional[PartialEmoji] = None
+        self.emoji: Optional[Union[Emoji, PartialEmoji]] = None
         if emoji is None:
             self.emoji = None
         elif isinstance(emoji, str):
             self.emoji = PartialEmoji.from_str(emoji)
         elif isinstance(emoji, _EmojiTag):
-            self.emoji = emoji._to_partial()
+            self.emoji = emoji
         else:
             raise TypeError("emoji must be None, a str, PartialEmoji, or Emoji instance.")
 

@@ -103,9 +103,7 @@ class Emoji(_EmojiTag, AssetMixin):
         self.user: Optional[User] = User(state=self._state, data=user) if user else None
 
     def _to_partial(self) -> PartialEmoji:
-        emoji = PartialEmoji(name=self.name, animated=self.animated, id=self.id)
-        emoji._state = self._state
-        return emoji
+        return PartialEmoji(name=self.name, animated=self.animated, id=self.id)
 
     def __iter__(self) -> Iterator[Tuple[str, Any]]:
         for attr in self.__slots__:
