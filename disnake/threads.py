@@ -1142,9 +1142,9 @@ class ForumTag(Hashable):
 
     def __init__(
         self,
+        *,
         name: str,
         emoji: Optional[Union[str, PartialEmoji, Emoji]] = None,
-        *,
         moderated: bool = False,
     ):
         self.id: int = 0
