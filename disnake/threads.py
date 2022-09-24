@@ -904,7 +904,7 @@ class Thread(Messageable, Hashable):
 
         Adding tags requires you to have :attr:`.Permissions.manage_threads` permissions,
         or be the owner of the thread.
-        Additionally, adding :attr:`~ForumTag.moderated` tags always requires said permissions.
+        However, adding :attr:`~ForumTag.moderated` tags always requires :attr:`.Permissions.manage_threads` permissions.
 
         .. versionadded:: 2.6
 
@@ -942,7 +942,7 @@ class Thread(Messageable, Hashable):
 
         Removing tags requires you to have :attr:`.Permissions.manage_threads` permissions,
         or be the owner of the thread.
-        Additionally, removing :attr:`~ForumTag.moderated` tags always requires said permissions.
+        However, removing :attr:`~ForumTag.moderated` tags always requires :attr:`.Permissions.manage_threads` permissions.
 
         .. versionadded:: 2.6
 
