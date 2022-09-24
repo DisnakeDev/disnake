@@ -979,6 +979,7 @@ class HTTPClient:
             "position",
             "permission_overwrites",
             "rate_limit_per_user",
+            "default_thread_rate_limit_per_user",
             "type",
             "rtc_region",
             "video_quality_mode",
@@ -988,6 +989,10 @@ class HTTPClient:
             "invitable",
             "default_auto_archive_duration",
             "flags",
+            "available_tags",
+            "applied_tags",
+            "default_reaction_emoji",
+            "default_sort_order",
         )
         payload = {k: v for k, v in options.items() if k in valid_keys}
         return self.request(r, reason=reason, json=payload)
@@ -1024,10 +1029,15 @@ class HTTPClient:
             "position",
             "permission_overwrites",
             "rate_limit_per_user",
+            "default_thread_rate_limit_per_user",
             "rtc_region",
             "video_quality_mode",
             "auto_archive_duration",
             "default_auto_archive_duration",
+            "flags",
+            "available_tags",
+            "default_reaction_emoji",
+            "default_sort_order",
         )
         payload.update({k: v for k, v in options.items() if k in valid_keys and v is not None})
 
@@ -1194,6 +1204,7 @@ class HTTPClient:
             "name",
             "auto_archive_duration",
             "rate_limit_per_user",
+            "applied_tags",
             "type",
         )
         valid_message_keys = (
