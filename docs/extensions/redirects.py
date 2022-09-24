@@ -9,25 +9,33 @@ from sphinx.application import Sphinx
 
 
 def main(app: Sphinx, exception: Exception) -> None:
+    # In case of error, static files (including api_redirects.js) are not copied yet.
+    # We want to exit in this case to let sphinx error with the right exception
+    # instead of ExtensionError telling that api_redirects.js dont exist.
+    if exception:
+        raise exception
+
     # mapping of html node id (i.e., thing after "#" in URLs) to the same but
     # prefixed with the right doc name
     # e.g, api.html#disnake.Thread => api/channels.html#disnake.Thread
     actual_redirects: Dict[str, str] = {}
 
-    for domainname, domain in app.env.domains.items():
-        if domainname != "py":
-            continue  # skip non-python objects
+    domain = app.env.domains["py"]
+    # first is the real object name - we dont need it
+    # second is object's "display name" (idk what is that mmlol), we dont need it
+    # third is object type (class, method etc), we too dont need it
+    # sixth is whether the object is aliased (not sure what does it actually mean,
+    # i guess whether you did :ref:`abcedfg <hijklm>` instead of just :ref:`hijklm`
+    # idk), again, we dont need it
+    for _, _, _, document, html_node_id, _ in domain.get_objects():
+        actual_redirects[html_node_id] = document + ".html#" + html_node_id
 
-        # first is the real object name - we dont need it
-        # second is object's "display name" (idk what is that mmlol), we dont need it
-        # third is object type (class, method etc), we too dont need it
-        # sixth is whether the object is aliased (not sure what does it actually mean,
-        # i guess whether you did :ref:`abcedfg <hijklm>` instead of just :ref:`hijklm`
-        # idk), again, we dont need it
-        for _, _, _, document, html_node_id, _ in domain.get_objects():
-            actual_redirects[html_node_id] = document + ".html#" + html_node_id
+    path = os.path.join(app.outdir, "_static", "api_redirect.js")
 
-    with open(os.path.join(app.outdir, "_static", "api_redirect.js"), "a") as redirects_js:
+    if not os.path.exists(path):
+        raise RuntimeError("api_redirects.js is somehow missing")
+
+    with open(path, "a") as redirects_js:
         redirect_data = json.dumps(actual_redirects)
         prefix = "const redirects_map = "
 
@@ -38,7 +46,7 @@ def main(app: Sphinx, exception: Exception) -> None:
 
 def setup(app: Sphinx) -> SphinxExtensionMeta:
     app.connect("build-finished", main)
-    # app.add_config_value("redirects", {}, "env")
+
     return {
         "parallel_read_safe": True,
         "parallel_write_safe": True,
