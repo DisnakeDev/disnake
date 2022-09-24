@@ -74,9 +74,9 @@ class PartialAppInfo:
     .. versionadded:: 2.0
 
     .. versionchanged:: 2.7
-        Removed ``rpc_origins``, ``summary``, ``verify_key``, ``terms_of_service_url``,
-        and ``privacy_policy_url`` attributes; these are now part of :class:`AppInfo` instead.
-        Added :attr:`cover_image`.
+        Moved ``rpc_origins``, ``verify_key``, ``terms_of_service_url``,
+        and ``privacy_policy_url`` attributes to the :class:`AppInfo` class instead.
+        Added :attr:`cover_image`, and removed deprecated ``summary`` attribute.
 
     Attributes
     ----------
