@@ -1,27 +1,4 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
@@ -72,6 +49,7 @@ from .enums import (
     Locale,
     NotificationLevel,
     NSFWLevel,
+    ThreadSortOrder,
     VerificationLevel,
     VideoQualityMode,
     WidgetStyle,
@@ -87,6 +65,7 @@ from .invite import Invite
 from .iterators import AuditLogIterator, BanIterator, MemberIterator
 from .member import Member, VoiceState
 from .mixins import Hashable
+from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite
 from .role import Role
 from .stage_instance import StageInstance
@@ -110,7 +89,7 @@ if TYPE_CHECKING:
     from .permissions import Permissions
     from .state import ConnectionState
     from .template import Template
-    from .threads import AnyThreadArchiveDuration
+    from .threads import AnyThreadArchiveDuration, ForumTag
     from .types.guild import Ban as BanPayload, Guild as GuildPayload, GuildFeature, MFALevel
     from .types.integration import IntegrationType
     from .types.sticker import CreateGuildSticker as CreateStickerPayload
@@ -1553,9 +1532,13 @@ class Guild(Hashable):
         category: Optional[CategoryChannel] = None,
         position: int = MISSING,
         slowmode_delay: int = MISSING,
+        default_thread_slowmode_delay: int = MISSING,
         default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = None,
         nsfw: bool = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
+        available_tags: Optional[Sequence[ForumTag]] = None,
+        default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        default_sort_order: Optional[ThreadSortOrder] = None,
         reason: Optional[str] = None,
     ) -> ForumChannel:
         """|coro|
@@ -1581,9 +1564,18 @@ class Guild(Hashable):
             The position in the channel list. This is a number that starts
             at 0. e.g. the top channel is position 0.
         slowmode_delay: :class:`int`
-            Specifies the slowmode rate limit for users in this channel, in seconds.
+            Specifies the slowmode rate limit at which users can create
+            threads in this channel, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
             If not provided, slowmode is disabled.
+        default_thread_slowmode_delay: :class:`int`
+            Specifies the slowmode rate limit at which users can send messages
+            in newly created threads in this channel, in seconds.
+            A value of ``0`` disables slowmode by default. The maximum value possible is ``21600``.
+            If not provided, slowmode is disabled.
+
+            .. versionadded:: 2.6
+
         default_auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
             The default auto archive duration in minutes for threads created in this channel.
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
@@ -1593,6 +1585,21 @@ class Guild(Hashable):
             A :class:`dict` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply upon creation of a channel.
             Useful for creating secret channels.
+        available_tags: Optional[Sequence[:class:`ForumTag`]]
+            The tags available for threads in this channel.
+
+            .. versionadded:: 2.6
+
+        default_reaction: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
+            The default emoji shown for reacting to threads.
+
+            .. versionadded:: 2.6
+
+        default_sort_order: Optional[:class:`ThreadSortOrder`]
+            The default sort order of threads in this channel.
+
+            .. versionadded:: 2.6
+
         reason: Optional[:class:`str`]
             The reason for creating this channel. Shows up on the audit log.
 
@@ -1620,6 +1627,9 @@ class Guild(Hashable):
         if slowmode_delay is not MISSING:
             options["rate_limit_per_user"] = slowmode_delay
 
+        if default_thread_slowmode_delay is not MISSING:
+            options["default_thread_rate_limit_per_user"] = default_thread_slowmode_delay
+
         if nsfw is not MISSING:
             options["nsfw"] = nsfw
 
@@ -1627,6 +1637,19 @@ class Guild(Hashable):
             options["default_auto_archive_duration"] = cast(
                 "ThreadArchiveDurationLiteral", try_enum_to_int(default_auto_archive_duration)
             )
+
+        if available_tags is not None:
+            options["available_tags"] = [tag.to_dict() for tag in available_tags]
+
+        if default_reaction is not None:
+            emoji_name, emoji_id = PartialEmoji._emoji_to_name_id(default_reaction)
+            options["default_reaction_emoji"] = {
+                "emoji_name": emoji_name,
+                "emoji_id": emoji_id,
+            }
+
+        if default_sort_order is not None:
+            options["default_sort_order"] = try_enum_to_int(default_sort_order)
 
         data = await self._create_channel(
             name,

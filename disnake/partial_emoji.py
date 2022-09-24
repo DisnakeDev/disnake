@@ -1,32 +1,9 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
 
 from . import utils
 from .asset import Asset, AssetMixin
@@ -38,6 +15,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import Self
 
+    from .emoji import Emoji
     from .state import ConnectionState
     from .types.activity import ActivityEmoji as ActivityEmojiPayload
     from .types.emoji import Emoji as EmojiPayload, PartialEmoji as PartialEmojiPayload
@@ -271,3 +249,43 @@ class PartialEmoji(_EmojiTag, AssetMixin):
             raise TypeError("PartialEmoji is not a custom emoji")
 
         return await super().read()
+
+    # utility method for unusual emoji model in forums
+    # (e.g. default reaction, tag emoji)
+    @staticmethod
+    def _emoji_to_name_id(
+        emoji: Optional[Union[str, Emoji, PartialEmoji]]
+    ) -> Tuple[Optional[str], Optional[int]]:
+        if emoji is None:
+            return None, None
+
+        if isinstance(emoji, str):
+            emoji = PartialEmoji.from_str(emoji)
+
+        # note: API only supports exactly one of `name` and `id` being set
+        if emoji.id:
+            return None, emoji.id
+        else:
+            return emoji.name, None
+
+    # utility method for unusual emoji model in forums
+    @staticmethod
+    def _emoji_from_name_id(
+        name: Optional[str], id: Optional[int], *, state: ConnectionState
+    ) -> Optional[Union[Emoji, PartialEmoji]]:
+        if not (name or id):
+            return None
+
+        emoji: Optional[Union[Emoji, PartialEmoji]] = None
+        if id:
+            emoji = state.get_emoji(id)
+        if not emoji:
+            emoji = PartialEmoji.with_state(
+                state=state,
+                # Note: this does not render correctly if it's a custom emoji, there's just no name information for those here.
+                # This may change in a future API version, but for now we'll just have to accept it.
+                name=name or "",
+                id=id,
+                # `animated` is unknown but presumably we already got the (animated) emoji from the guild cache at this point
+            )
+        return emoji
