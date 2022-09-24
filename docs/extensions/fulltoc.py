@@ -21,10 +21,7 @@
 # changes made:
 # - added typehinting
 # - formatted with black
-# - removed `display_toc` being forced to True
-
-# This is done by arl and shift
-
+# - refactored generated toc to suit project documentation structure
 
 from __future__ import annotations
 
