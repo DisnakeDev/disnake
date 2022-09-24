@@ -45,8 +45,7 @@ function main() {
 function get_link(url) {
     /*
     * redirects_map is set by redirects sphinx extension
-    * and actually exists here at the time of loading
-    * page, please sorry for eslint errors...
+    * and actually exists here at the time of loading the page
     */
     return redirects_map[url.hash.slice(1)];
 }
