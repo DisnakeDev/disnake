@@ -33,35 +33,29 @@ title_format = "v{version}"
 underlines = "-~"
 issue_format = ":issue:`{issue}`"
 
-    [[tool.towncrier.type]]
-    directory = "breaking"
-    name = "Breaking Changes"
-    showcontent = true
+[tool.towncrier.fragment.breaking]
+name = "Breaking Changes"
+showcontent = true
 
-    [[tool.towncrier.type]]
-    directory = "deprecate"
-    name = "Deprecations"
-    showcontent = true
+[tool.towncrier.fragment.deprecate]
+name = "Deprecations"
+showcontent = true
 
-    [[tool.towncrier.type]]
-    directory = "feature"
-    name = "New Features"
-    showcontent = true
+[tool.towncrier.fragment.feature]
+name = "New Features"
+showcontent = true
 
-    [[tool.towncrier.type]]
-    directory = "bugfix"
-    name = "Bug Fixes"
-    showcontent = true
+[tool.towncrier.fragment.bugfix]
+name = "Bug Fixes"
+showcontent = true
 
-    [[tool.towncrier.type]]
-    directory = "doc"
-    name = "Documentation"
-    showcontent = true
+[tool.towncrier.fragment.doc]
+name = "Documentation"
+showcontent = true
 
-    [[tool.towncrier.type]]
-    directory = "misc"
-    name = "Miscellaneous"
-    showcontent = true
+[tool.towncrier.fragment.misc]
+name = "Miscellaneous"
+showcontent = true
 
 
 [tool.slotscheck]
