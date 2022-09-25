@@ -1,10 +1,4 @@
 |commands| Add a way to get the parent or root commands of slash commands.
-- Add :attr:`SubCommand.parent <ext.commands.SubCommand.parent>`
-- Add :attr:`SubCommandGroup.parent <ext.commands.SubCommandGroup.parent>`
-- Add :attr:`InvokableSlashCommand.parent <ext.commands.InvokableSlashCommand.parent>`
-- Add :attr:`SubCommand.root_parent <ext.commands.SubCommand.root_parent>` property
-- Add :attr:`SubCommandGroup.root_parent <ext.commands.SubCommandGroup.root_parent>` property
-- Add :attr:`InvokableSlashCommand.root_parent <ext.commands.InvokableSlashCommand.root_parent>` property
-- Add :attr:`SubCommand.parents <ext.commands.SubCommand.parents>` property
-- Add :attr:`SubCommandGroup.parents <ext.commands.SubCommandGroup.parents>` property
-- Add :attr:`InvokableSlashCommand.parents <ext.commands.InvokableSlashCommand.parents>` property
+- Add :attr:`InvokableSlashCommand.parent <ext.commands.InvokableSlashCommand.parent>`, :attr:`SubCommandGroup.parent <ext.commands.SubCommandGroup.parent>`, and :attr:`SubCommand.parent <ext.commands.SubCommand.parent>`.
+- Add :attr:`InvokableSlashCommand.parents <ext.commands.InvokableSlashCommand.parents>`, :attr:`SubCommandGroup.parents <ext.commands.SubCommandGroup.parents>`, and :attr:`SubCommand.parents <ext.commands.SubCommand.parents>`.
+- Add :attr:`InvokableSlashCommand.root_parent <ext.commands.InvokableSlashCommand.root_parent>`, :attr:`SubCommandGroup.root_parent <ext.commands.SubCommandGroup.root_parent>`, and :attr:`SubCommand.root_parent <ext.commands.SubCommand.root_parent>`.
