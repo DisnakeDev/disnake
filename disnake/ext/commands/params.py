@@ -508,9 +508,6 @@ class ParamInfo:
         min_length: Optional[int] = None,
         max_length: Optional[int] = None,
     ) -> None:
-        if autocomplete is not None:
-            classify_autocompleter(autocomplete)
-
         name_loc = Localized._cast(name, False)
         self.name: str = name_loc.string or ""
         self.name_localizations: LocalizationValue = name_loc.localizations
@@ -1070,7 +1067,7 @@ def Param(
     choices: Optional[Choices] = None,
     converter: Optional[Callable[[ApplicationCommandInteraction, Any], Any]] = None,
     convert_defaults: bool = False,
-    autocomplete: Optional[AnyAutocompleter] = None,
+    autocomplete: Optional[Callable[[ApplicationCommandInteraction, str], Any]] = None,
     channel_types: Optional[List[ChannelType]] = None,
     lt: Optional[float] = None,
     le: Optional[float] = None,
