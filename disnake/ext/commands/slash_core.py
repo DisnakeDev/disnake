@@ -329,7 +329,7 @@ class SubCommand(InvokableApplicationCommand):
 
     @property
     def root_parent(self) -> InvokableSlashCommand:
-        """:class:`InvokableSlashCommand`: Returns the slash command containing this subcommand,
+        """:class:`InvokableSlashCommand`: Returns the top-level slash command containing this subcommand,
         even if the parent is a :class:`SubCommandGroup`.
 
         .. versionadded:: 2.6
@@ -342,6 +342,8 @@ class SubCommand(InvokableApplicationCommand):
     ) -> Union[Tuple[InvokableSlashCommand], Tuple[SubCommandGroup, InvokableSlashCommand]]:
         """Union[Tuple[:class:`InvokableSlashCommand`], Tuple[:class:`SubCommandGroup`, :class:`InvokableSlashCommand`]]:
         Returns all parents of this subcommand.
+
+        For example the parents of the ``c`` subcommand in ``/a b c`` are ``(b, a)``.
 
         .. versionadded:: 2.6
         """
