@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 import math
 from typing import Tuple
 

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 import io
 from datetime import datetime, timedelta
 

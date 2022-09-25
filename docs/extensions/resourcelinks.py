@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: BSD
 # Credit to sphinx.ext.extlinks for being a good starter
 # Copyright 2007-2020 by the Sphinx team
 # Licensed under BSD.

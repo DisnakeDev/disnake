@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 import os
 from urllib.parse import quote_plus
 

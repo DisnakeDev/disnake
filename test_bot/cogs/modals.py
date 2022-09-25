@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 import disnake
 from disnake.enums import TextInputStyle
 from disnake.ext import commands

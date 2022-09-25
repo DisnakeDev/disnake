@@ -2,6 +2,3 @@
 - Add :meth:`Injection.autocomplete <ext.commands.Injection.autocomplete>` decorator
 - Add :func:`injection <ext.commands.injection>` as a decorator interface for :func:`inject <ext.commands.inject>`
 - Add ``autocompleters`` keyword-only argument to :class:`Injection <ext.commands.Injection>`, :func:`inject <ext.commands.inject>`, and :func:`register_injection <ext.commands.register_injection>`
-- Add :attr:`SubCommand.parent <ext.commands.SubCommand.parent>`
-- Add :attr:`SubCommandGroup.parent <ext.commands.SubCommandGroup.parent>`
-- Add :attr:`SubCommand.parent_command <ext.commands.SubCommand.parent_command>` property

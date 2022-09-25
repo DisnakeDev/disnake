@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 # This example requires the 'members' privileged intent to use the Member converter.
 
 import os

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 from typing import Dict, Literal, Optional
 
 import pytest
