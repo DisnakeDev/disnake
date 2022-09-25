@@ -410,10 +410,6 @@ class InvokableSlashCommand(InvokableApplicationCommand):
     ----------
     name: :class:`str`
         The name of the command.
-    parent: None
-        This exists for consistency with :class:`SubCommand` and :class:`SubCommandGroup`. Always ``None``.
-
-        .. versionadded:: 2.6
     qualified_name: :class:`str`
         The full command name, including parent names in the case of slash subcommands or groups.
         For example, the qualified name for ``/one two three`` would be ``one two three``.
@@ -443,6 +439,11 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             This object may be copied by the library.
 
         .. versionadded:: 2.5
+
+    parent: None
+        This exists for consistency with :class:`SubCommand` and :class:`SubCommandGroup`. Always ``None``.
+
+        .. versionadded:: 2.6
     """
 
     def __init__(
