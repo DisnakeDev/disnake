@@ -420,7 +420,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
         .. versionadded:: 2.5
 
-    parent: Literal[``None``]
+    parent: ``None``
         This exists for consistency with :class:`SubCommand` and :class:`SubCommandGroup`. Always ``None``.
 
         .. versionadded:: 2.6
