@@ -486,15 +486,12 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         )
 
     @property
-    def root_parent(self) -> InvokableSlashCommand:
-        """:class:`InvokableSlashCommand`: Returns this command.
-
-        This allows to avoid instance checks in situations where an object is either
-        a command, a subcommand, or a group, since all of them have this property.
+    def root_parent(self) -> None:
+        """``None``: This is for consistency with :class:`SubCommand` and :class:`SubCommandGroup`.
 
         .. versionadded:: 2.6
         """
-        return self
+        return None
 
     @property
     def parents(self) -> Tuple[()]:
