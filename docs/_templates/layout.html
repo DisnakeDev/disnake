@@ -7,11 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ title|striptags|e }}{{ titlesuffix }}</title>
   <!-- begin extra head -->
-  {%- block extrahead %}
-    {% if pagename.endswith("api") %}
-      <script type="text/javascript" src="./_static/api_redirect.js"></script>
-    {% endif %}
-  {% endblock %}
+
   <!-- end extra head -->
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   {%- block css %}
@@ -27,6 +23,9 @@
   <link rel="stylesheet" href="{{ pathto('_static/codeblocks.css', 1) }}" type="text/css" />
   <link rel="stylesheet" href="{{ pathto('_static/icons.css', 1)|e }}" type="text/css" />
   {%- block scripts %}
+  {% if pagename.endswith("api") %}
+    <script type="text/javascript" src="./_static/api_redirect.js"></script>
+  {% endif %}
   <script id="documentation_options" data-url_root="{{ pathto('', 1) }}" src="{{ pathto('_static/documentation_options.js', 1) }}"></script>
   {%- for js in script_files %}
   {{ js_tag(js) }}

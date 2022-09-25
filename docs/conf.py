@@ -83,11 +83,11 @@ rst_prolog = """
 .. |components_type| replace:: Union[:class:`disnake.ui.ActionRow`, :class:`disnake.ui.WrappedComponent`, List[Union[:class:`disnake.ui.ActionRow`, :class:`disnake.ui.WrappedComponent`, List[:class:`disnake.ui.WrappedComponent`]]]]
 .. |resource_type| replace:: Union[:class:`bytes`, :class:`.Asset`, :class:`.Emoji`, :class:`.PartialEmoji`, :class:`.StickerItem`, :class:`.Sticker`]
 .. _coroutine_link: https://docs.python.org/3/library/asyncio-task.html#coroutine
-.. |data_class| replace:: *This class is a :ref:`Data Class <data_class>`.*
-.. |data_class_constructible| replace:: *This class is a constructible :ref:`Data Class <data_class>`.*
-.. |discord_abc| replace:: *This class is an :ref:`ABC <disnake_abc>`.*
-.. |discord_model| replace:: *This class is a :ref:`Discord Model <discord_model>`.*
-.. |discord_enum| replace:: *This class is an :ref:`Enumeration <discord_enum>`.*
+.. |data_class| replace:: This class is a :ref:`Data Class <data_class>`.
+.. |data_class_constructible| replace:: This class is a constructible :ref:`Data Class <data_class>`.
+.. |discord_abc| replace:: This class is an :ref:`ABC <disnake_abc>`.
+.. |discord_model| replace:: This class is a :ref:`Discord Model <discord_model>`.
+.. |discord_enum| replace:: This class is an :ref:`Enumeration <discord_enum>`.
 """
 
 # Add any paths that contain templates here, relative to this directory.
