@@ -1154,9 +1154,9 @@ def Param(
 
         .. note::
 
-            In terms of typing, this returns ``Any`` to avoid typing issues caused by how this
-            extension work, but at runtime this is always a :class:`ParamInfo` instance.
-            You can find more in-depth explanation :ref:`here <why_params_and_injections_return_any>`.
+            In terms of typing, this returns ``Any`` to avoid typing issues,
+            but at runtime this is always a :class:`ParamInfo` instance.
+            You can find a more in-depth explanation :ref:`here <why_params_and_injections_return_any>`.
     """
     description = kwargs.pop("desc", description)
     converter = kwargs.pop("conv", converter)
