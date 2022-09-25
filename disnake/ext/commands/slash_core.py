@@ -323,7 +323,7 @@ class SubCommand(InvokableApplicationCommand):
         """Union[Tuple[:class:`InvokableSlashCommand`], Tuple[:class:`SubCommandGroup`, :class:`InvokableSlashCommand`]]:
         Returns all parents of this subcommand.
 
-        For example the parents of the ``c`` subcommand in ``/a b c`` are ``(b, a)``.
+        For example, the parents of the ``c`` subcommand in ``/a b c`` are ``(b, a)``.
 
         .. versionadded:: 2.6
         """
