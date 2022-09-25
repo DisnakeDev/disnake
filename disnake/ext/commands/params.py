@@ -1322,6 +1322,8 @@ def register_injection(
 
     .. versionchanged:: 2.6
         Now returns :class:`disnake.ext.commands.Injection`.
+
+    .. versionchanged:: 2.6
         Added ``autocompleters`` keyword-only argument.
 
     Raises
