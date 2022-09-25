@@ -1,27 +1,4 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
@@ -1002,6 +979,7 @@ class HTTPClient:
             "position",
             "permission_overwrites",
             "rate_limit_per_user",
+            "default_thread_rate_limit_per_user",
             "type",
             "rtc_region",
             "video_quality_mode",
@@ -1011,6 +989,10 @@ class HTTPClient:
             "invitable",
             "default_auto_archive_duration",
             "flags",
+            "available_tags",
+            "applied_tags",
+            "default_reaction_emoji",
+            "default_sort_order",
         )
         payload = {k: v for k, v in options.items() if k in valid_keys}
         return self.request(r, reason=reason, json=payload)
@@ -1047,10 +1029,15 @@ class HTTPClient:
             "position",
             "permission_overwrites",
             "rate_limit_per_user",
+            "default_thread_rate_limit_per_user",
             "rtc_region",
             "video_quality_mode",
             "auto_archive_duration",
             "default_auto_archive_duration",
+            "flags",
+            "available_tags",
+            "default_reaction_emoji",
+            "default_sort_order",
         )
         payload.update({k: v for k, v in options.items() if k in valid_keys and v is not None})
 
@@ -1217,6 +1204,7 @@ class HTTPClient:
             "name",
             "auto_archive_duration",
             "rate_limit_per_user",
+            "applied_tags",
             "type",
         )
         valid_message_keys = (

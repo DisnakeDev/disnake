@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 name: Lint & Test
 
 on: [push, pull_request]

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 import re
 
 from setuptools import setup

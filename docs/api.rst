@@ -1,3 +1,5 @@
+.. SPDX-License-Identifier: MIT
+
 .. currentmodule:: disnake
 
 API Reference
@@ -2350,7 +2352,10 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.default_auto_archive_duration`
         - :attr:`~AuditLogDiff.user_limit`
         - :attr:`~AuditLogDiff.slowmode_delay`
+        - :attr:`~AuditLogDiff.default_thread_slowmode_delay`
         - :attr:`~AuditLogDiff.nsfw`
+        - :attr:`~AuditLogDiff.available_tags`
+        - :attr:`~AuditLogDiff.default_reaction`
 
     .. attribute:: channel_update
 
@@ -2378,7 +2383,10 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.default_auto_archive_duration`
         - :attr:`~AuditLogDiff.user_limit`
         - :attr:`~AuditLogDiff.slowmode_delay`
+        - :attr:`~AuditLogDiff.default_thread_slowmode_delay`
         - :attr:`~AuditLogDiff.nsfw`
+        - :attr:`~AuditLogDiff.available_tags`
+        - :attr:`~AuditLogDiff.default_reaction`
 
     .. attribute:: channel_delete
 
@@ -2402,7 +2410,10 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.default_auto_archive_duration`
         - :attr:`~AuditLogDiff.user_limit`
         - :attr:`~AuditLogDiff.slowmode_delay`
+        - :attr:`~AuditLogDiff.default_thread_slowmode_delay`
         - :attr:`~AuditLogDiff.nsfw`
+        - :attr:`~AuditLogDiff.available_tags`
+        - :attr:`~AuditLogDiff.default_reaction`
 
     .. attribute:: overwrite_create
 
@@ -3050,6 +3061,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.slowmode_delay`
         - :attr:`~AuditLogDiff.invitable`
         - :attr:`~AuditLogDiff.flags`
+        - :attr:`~AuditLogDiff.applied_tags`
 
         .. versionadded:: 2.0
 
@@ -3070,6 +3082,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.slowmode_delay`
         - :attr:`~AuditLogDiff.invitable`
         - :attr:`~AuditLogDiff.flags`
+        - :attr:`~AuditLogDiff.applied_tags`
 
         .. versionadded:: 2.0
 
@@ -3090,6 +3103,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.slowmode_delay`
         - :attr:`~AuditLogDiff.invitable`
         - :attr:`~AuditLogDiff.flags`
+        - :attr:`~AuditLogDiff.applied_tags`
 
         .. versionadded:: 2.0
 
@@ -3737,6 +3751,20 @@ of :class:`enum.Enum`.
 
         This trigger type requires additional :class:`metadata <AutoModTriggerMetadata>`.
 
+.. class:: ThreadSortOrder
+
+    Represents the sort order of threads in :class:`ForumChannel`\s.
+
+    .. versionadded:: 2.6
+
+    .. attribute:: latest_activity
+
+        Sort forum threads by activity.
+
+    .. attribute:: creation_date
+
+        Sort forum threads by creation date/time (from newest to oldest).
+
 Async Iterator
 ----------------
 
@@ -4328,6 +4356,15 @@ AuditLogDiff
 
         :type: :class:`int`
 
+    .. attribute:: default_thread_slowmode_delay
+
+        The default number of seconds members have to wait before
+        sending another message in new threads created in the channel.
+
+        See also :attr:`ForumChannel.default_thread_slowmode_delay`.
+
+        :type: :class:`int`
+
     .. attribute:: rtc_region
 
         The region for the voice or stage channel's voice communication.
@@ -4531,6 +4568,36 @@ AuditLogDiff
         If a channel is not found then it is an :class:`Object` with the ID being set.
 
         :type: List[Union[:class:`abc.GuildChannel`, :class:`Object`]]
+
+    .. attribute:: applied_tags
+
+        The tags applied to a thread in a forum channel being changed.
+
+        If a tag is not found, then it is an :class:`Object` with the ID
+        being set.
+
+        :type: List[Union[:class:`ForumTag`, :class:`Object`]]
+
+    .. attribute:: available_tags
+
+        The available tags for threads in a forum channel being changed.
+
+        :type: List[:class:`ForumTag`]
+
+    .. attribute:: default_reaction
+
+        The default emoji shown for reacting to threads in a forum channel being changed.
+
+        Due to a Discord limitation, this will have an empty
+        :attr:`~PartialEmoji.name` if it is a custom :class:`PartialEmoji`.
+
+        :type: Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]
+
+    .. attribute:: default_sort_order
+
+        The default sort order of threads in a forum channel being changed.
+
+        :type: Optional[:class:`ThreadSortOrder`]
 
 Webhook Support
 ------------------
@@ -4912,6 +4979,18 @@ Interaction
     :inherited-members:
     :exclude-members: original_message, edit_original_message, delete_original_message
 
+    .. method:: original_message
+
+        An alias of :func:`original_response`.
+
+    .. method:: edit_original_message
+
+        An alias of :func:`edit_original_response`.
+
+    .. method:: delete_original_message
+
+        An alias of :func:`delete_original_response`.
+
 ApplicationCommandInteraction
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -4920,6 +4999,19 @@ ApplicationCommandInteraction
 .. autoclass:: ApplicationCommandInteraction()
     :members:
     :inherited-members:
+    :exclude-members: original_message, edit_original_message, delete_original_message
+
+    .. method:: original_message
+
+        An alias of :func:`original_response`.
+
+    .. method:: edit_original_message
+
+        An alias of :func:`edit_original_response`.
+
+    .. method:: delete_original_message
+
+        An alias of :func:`delete_original_response`.
 
 GuildCommandInteraction
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -4944,6 +5036,19 @@ MessageInteraction
 .. autoclass:: MessageInteraction()
     :members:
     :inherited-members:
+    :exclude-members: original_message, edit_original_message, delete_original_message
+
+    .. method:: original_message
+
+        An alias of :func:`original_response`.
+
+    .. method:: edit_original_message
+
+        An alias of :func:`edit_original_response`.
+
+    .. method:: delete_original_message
+
+        An alias of :func:`delete_original_response`.
 
 ModalInteraction
 ~~~~~~~~~~~~~~~~
@@ -4953,6 +5058,19 @@ ModalInteraction
 .. autoclass:: ModalInteraction()
     :members:
     :inherited-members:
+    :exclude-members: original_message, edit_original_message, delete_original_message
+
+    .. method:: original_message
+
+        An alias of :func:`original_response`.
+
+    .. method:: edit_original_message
+
+        An alias of :func:`edit_original_response`.
+
+    .. method:: delete_original_message
+
+        An alias of :func:`delete_original_response`.
 
 InteractionResponse
 ~~~~~~~~~~~~~~~~~~~~
@@ -5126,6 +5244,15 @@ ThreadMember
 
 .. autoclass:: ThreadMember()
     :members:
+
+ForumTag
+~~~~~~~~~
+
+.. attributetable:: ForumTag
+
+.. autoclass:: ForumTag()
+    :members:
+    :inherited-members:
 
 VoiceChannel
 ~~~~~~~~~~~~~

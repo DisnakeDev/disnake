@@ -1,3 +1,5 @@
+.. SPDX-License-Identifier: MIT
+
 .. _discord_ext_tasks:
 
 ``disnake.ext.tasks`` -- asyncio.Task helpers

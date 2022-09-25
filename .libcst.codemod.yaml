@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 # String that LibCST should look for in code which indicates that the
 # module is generated code.
 generated_code_marker: '@generated_module'

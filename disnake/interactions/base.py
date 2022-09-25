@@ -1,29 +1,4 @@
-# -*- coding: utf-8 -*-
-
-"""
-The MIT License (MIT)
-
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
@@ -727,15 +702,28 @@ class InteractionResponse:
         Parameters
         ----------
         with_message: :class:`bool`
-            Whether the response will be a message with thinking state (bot is thinking...).
-            This only applies to interactions of type :attr:`InteractionType.component`.
+            Whether the response will be a separate message with thinking state (bot is thinking...).
+            This only applies to interactions of type :attr:`InteractionType.component`
+            (default ``False``) and :attr:`InteractionType.modal_submit` (default ``True``).
+
+            ``True`` corresponds to a :attr:`~InteractionResponseType.deferred_channel_message` response type,
+            while ``False`` corresponds to :attr:`~InteractionResponseType.deferred_message_update`.
+
+            .. note::
+                Responses to interactions of type :attr:`InteractionType.application_command` must
+                defer using a message, i.e. this will effectively always be ``True`` for those.
 
             .. versionadded:: 2.4
 
+            .. versionchanged:: 2.6
+                Added support for setting this to ``False`` in modal interactions.
+
         ephemeral: :class:`bool`
             Whether the deferred message will eventually be ephemeral.
-            This applies to interactions of type :attr:`InteractionType.application_command` and :attr:`InteractionType.modal_submit`
+            This applies to interactions of type :attr:`InteractionType.application_command`,
             or when the ``with_message`` parameter is ``True``.
+
+            Defaults to ``False``.
 
         Raises
         ------
@@ -753,24 +741,28 @@ class InteractionResponse:
         data: Dict[str, Any] = {}
         parent = self._parent
 
-        if parent.type in (InteractionType.application_command, InteractionType.modal_submit):
+        if parent.type is InteractionType.application_command:
             defer_type = InteractionResponseType.deferred_channel_message
-        elif parent.type is InteractionType.component:
+        elif parent.type in (InteractionType.component, InteractionType.modal_submit):
+            # if not provided, set default based on interaction type
+            # (true for modal_submit, false for component)
+            if with_message is MISSING:
+                with_message = parent.type is InteractionType.modal_submit
+
             if with_message:
                 defer_type = InteractionResponseType.deferred_channel_message
             else:
                 defer_type = InteractionResponseType.deferred_message_update
+        else:
+            raise TypeError(
+                "This interaction must be of type 'application_command', 'modal_submit', or 'component' in order to defer."
+            )
 
         if defer_type is InteractionResponseType.deferred_channel_message:
             # we only want to set flags if we are sending a message
             data["flags"] = 0
             if ephemeral:
                 data["flags"] |= MessageFlags.ephemeral.flag
-
-        if not defer_type:
-            raise TypeError(
-                "This interaction must be of type 'application_command', 'modal_submit', or 'component' in order to defer."
-            )
 
         adapter = async_context.get()
         await adapter.create_interaction_response(
