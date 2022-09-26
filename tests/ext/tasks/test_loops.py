@@ -6,7 +6,7 @@ from typing import Any, Tuple
 import pytest
 
 from disnake.ext import commands
-from disnake.ext.tasks import Coro, CoroP, Loop, loop
+from disnake.ext.tasks import LF, Loop, loop
 
 
 class TestLoops:
@@ -39,8 +39,8 @@ class TestLoops:
                 ...
 
     def test_inheritance(self):
-        class HyperLoop(Loop[CoroP]):
-            def __init__(self, coro: Coro[CoroP], time_tup: Tuple[float, float, float]) -> None:
+        class HyperLoop(Loop[LF]):
+            def __init__(self, coro: LF, time_tup: Tuple[float, float, float]) -> None:
                 s, m, h = time_tup
                 super().__init__(coro, seconds=s, minutes=m, hours=h)
 
@@ -57,7 +57,7 @@ class TestLoops:
                 return instance
 
         class WhileTrueLoop:
-            def __init__(self, coro: Coro[CoroP]) -> None:
+            def __init__(self, coro: Any) -> None:
                 ...
 
         async def callback():

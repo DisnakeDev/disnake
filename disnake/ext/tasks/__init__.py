@@ -35,20 +35,16 @@ if TYPE_CHECKING:
     from typing_extensions import Concatenate, ParamSpec, Self
 
     P = ParamSpec("P")
-    CoroP = ParamSpec("CoroP")
-    Coro = Callable[CoroP, Coroutine[Any, Any, Any]]
 
 else:
     P = TypeVar("P")
-    CoroP = TypeVar("CoroP")
-    # When ParamSpec is replaced with TypeVar, Callable's first argument typecheck
-    # would fail at runtime as it expects a list of args
-    Coro = Callable[[CoroP], Coroutine[Any, Any, Any]]
 
 __all__ = ("loop",)
 
 T = TypeVar("T")
-FT = TypeVar("FT", bound=Callable[..., Coroutine[Any, Any, Any]])
+_func = Callable[..., Coroutine[Any, Any, Any]]
+LF = TypeVar("LF", bound=_func)
+FT = TypeVar("FT", bound=_func)
 ET = TypeVar("ET", bound=Callable[[Any, BaseException], Coroutine[Any, Any, Any]])
 
 
@@ -77,7 +73,7 @@ class SleepHandle:
         self.future.cancel()
 
 
-class Loop(Generic[CoroP]):
+class Loop(Generic[LF]):
     """A background task helper that abstracts the loop and reconnection logic for you.
 
     The main interface to create this is through :func:`loop`.
@@ -85,7 +81,7 @@ class Loop(Generic[CoroP]):
 
     def __init__(
         self,
-        coro: Coro[CoroP],
+        coro: LF,
         *,
         seconds: float = 0,
         minutes: float = 0,
@@ -99,7 +95,7 @@ class Loop(Generic[CoroP]):
         .. note:
             If you overwrite ``__init__`` arguments, make sure to redefine .clone too.
         """
-        self.coro: Coro[CoroP] = coro
+        self.coro: LF = coro
         self.reconnect: bool = reconnect
         self.loop: asyncio.AbstractEventLoop = loop
         self.count: Optional[int] = count
@@ -146,7 +142,7 @@ class Loop(Generic[CoroP]):
         self._handle = SleepHandle(dt=dt, loop=self.loop)
         return self._handle.wait()
 
-    async def _loop(self, *args: CoroP.args, **kwargs: CoroP.kwargs) -> None:
+    async def _loop(self, *args: Any, **kwargs: Any) -> None:
         backoff = ExponentialBackoff()
         await self._call_loop_function("before_loop")
         self._last_iteration_failed = False
@@ -283,7 +279,7 @@ class Loop(Generic[CoroP]):
             return None
         return self._next_iteration
 
-    async def __call__(self, *args: CoroP.args, **kwargs: CoroP.kwargs) -> Any:
+    async def __call__(self, *args: Any, **kwargs: Any) -> Any:
         """
         |coro|
 
@@ -299,11 +295,11 @@ class Loop(Generic[CoroP]):
             The keyword arguments to use.
         """
         if self._injected is not None:
-            args = (self._injected, *args)  # type: ignore
+            args = (self._injected, *args)
 
         return await self.coro(*args, **kwargs)
 
-    def start(self, *args: CoroP.args, **kwargs: CoroP.kwargs) -> asyncio.Task[None]:
+    def start(self, *args: Any, **kwargs: Any) -> asyncio.Task[None]:
         """
         Starts the internal task in the event loop.
 
@@ -328,7 +324,7 @@ class Loop(Generic[CoroP]):
             raise RuntimeError("Task is already launched and is not completed.")
 
         if self._injected is not None:
-            args = (self._injected, *args)  # type: ignore
+            args = (self._injected, *args)
 
         if self.loop is MISSING:
             self.loop = asyncio.get_event_loop()
@@ -366,7 +362,7 @@ class Loop(Generic[CoroP]):
         if self._can_be_cancelled():
             self._task.cancel()
 
-    def restart(self, *args: CoroP.args, **kwargs: CoroP.kwargs) -> None:
+    def restart(self, *args: Any, **kwargs: Any) -> None:
         """
         A convenience method to restart the internal task.
 
@@ -730,21 +726,21 @@ def loop(
     count: Optional[int] = None,
     reconnect: bool = True,
     loop: asyncio.AbstractEventLoop = ...,
-) -> Callable[[Coro[CoroP]], Loop[CoroP]]:
+) -> Callable[[LF], Loop[LF]]:
     ...
 
 
 @overload
 def loop(
-    cls: Type[Object[L_co, Concatenate[Coro[CoroP], P]]], *_: P.args, **kwargs: P.kwargs
-) -> Callable[[Coro[CoroP]], L_co]:
+    cls: Type[Object[L_co, Concatenate[LF, P]]], *_: P.args, **kwargs: P.kwargs
+) -> Callable[[LF], L_co]:
     ...
 
 
 def loop(
-    cls: Type[Object[L_co, Concatenate[Coro[CoroP], P]]] = Loop[CoroP],
+    cls: Type[Object[L_co, Concatenate[LF, P]]] = Loop[LF],
     **kwargs: Any,
-) -> Callable[[Coro[CoroP]], L_co]:
+) -> Callable[[LF], L_co]:
     """A decorator that schedules a task in the background for you with
     optional reconnect logic. The decorator returns a :class:`Loop`.
 
@@ -803,7 +799,7 @@ def loop(
     if not isinstance(cls, type) or not issubclass(cls, Loop):
         raise TypeError(f"cls argument must be a subclass of Loop, got {cls!r}")
 
-    def decorator(func: Coro[CoroP]) -> L_co:
+    def decorator(func: LF) -> L_co:
         if not asyncio.iscoroutinefunction(func):
             raise TypeError("decorated function must be a coroutine")
 
