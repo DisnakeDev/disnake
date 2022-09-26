@@ -1,0 +1,1 @@
+``EmptyEmbed`` and ``Embed.Empty`` are deprecated in favor of ``None``.
