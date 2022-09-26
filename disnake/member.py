@@ -1,27 +1,4 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
@@ -722,17 +699,41 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         return self._communication_disabled_until
 
+    @overload
+    async def ban(
+        self,
+        *,
+        clean_history_duration: Union[int, datetime.timedelta] = 86400,
+        reason: Optional[str] = None,
+    ) -> None:
+        ...
+
+    @overload
     async def ban(
         self,
         *,
         delete_message_days: Literal[0, 1, 2, 3, 4, 5, 6, 7] = 1,
         reason: Optional[str] = None,
     ) -> None:
+        ...
+
+    async def ban(
+        self,
+        *,
+        clean_history_duration: Union[int, datetime.timedelta] = 86400,
+        delete_message_days: Literal[0, 1, 2, 3, 4, 5, 6, 7] = MISSING,
+        reason: Optional[str] = None,
+    ) -> None:
         """|coro|
 
         Bans this member. Equivalent to :meth:`Guild.ban`.
         """
-        await self.guild.ban(self, reason=reason, delete_message_days=delete_message_days)
+        await self.guild.ban(  # type: ignore  # no matching overload
+            self,
+            reason=reason,
+            clean_history_duration=clean_history_duration,
+            delete_message_days=delete_message_days,
+        )
 
     async def unban(self, *, reason: Optional[str] = None) -> None:
         """|coro|

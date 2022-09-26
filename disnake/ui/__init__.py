@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """
 disnake.ui
 ~~~~~~~~~~~
@@ -8,7 +10,6 @@ Bot UI Kit helper for the Discord API
 :license: MIT, see LICENSE for more details.
 
 """
-
 from .action_row import *
 from .button import *
 from .item import *
