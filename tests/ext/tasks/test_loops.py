@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 import datetime
 from typing import Any, Tuple
 
