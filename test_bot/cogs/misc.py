@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 import io
 from base64 import b64decode
 

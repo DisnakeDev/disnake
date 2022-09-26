@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 from datetime import timedelta
 
 import disnake
