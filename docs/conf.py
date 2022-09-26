@@ -436,3 +436,8 @@ def setup(app: Sphinx) -> None:
         app.config.intersphinx_mapping["py"] = ("https://docs.python.org/ja/3", None)
         app.config.html_context["discord_invite"] = "https://discord.gg/disnake"
         app.config.resource_links["disnake"] = "https://discord.gg/disnake"
+
+    # HACK: avoid deprecation warnings caused by sphinx always iterating over all class attributes
+    import disnake
+
+    del disnake.Embed.Empty  # type: ignore
