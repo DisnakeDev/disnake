@@ -1,9 +1,11 @@
+# SPDX-License-Identifier: MIT
+
 import io
 from datetime import datetime, timedelta
 
 import pytest
 
-from disnake import Color, Embed, File
+from disnake import Color, Embed, File, embeds
 from disnake.utils import MISSING, utcnow
 
 _BASE = {"type": "rich"}
@@ -78,6 +80,44 @@ def test_len(embed: Embed) -> None:
     embed.add_field("field name", "field value")
     embed.add_field("another field", "woooo")
     assert len(embed) == 69
+
+
+def test_eq() -> None:
+    embed_1, embed_2 = Embed(), Embed()
+    assert embed_1 == embed_2
+
+    # color=MISSING should not affect __eq__
+    embed_1.color = Color(123456)
+    assert not embed_1 == embed_2
+
+    embed_1.color = MISSING
+    assert embed_1 == embed_2
+
+    embed_1.add_field(name="This is a test field", value="69 test 69")
+    embed_2.add_field(name="This is a test field", value="69 test 69", inline=False)
+    assert not embed_1 == embed_2
+
+    embed_1, embed_2 = Embed(), Embed()
+
+    embed_1.title, embed_2.title = None, ""
+    assert embed_1 == embed_2
+
+    embed_1, embed_2 = Embed(color=None), Embed()
+    assert embed_1 == embed_2
+
+    embed_1.set_default_color(123456)
+    assert not embed_1 == embed_2
+
+
+def test_embed_proxy_eq() -> None:
+    embed_1, embed_2 = Embed(), Embed()
+
+    embed_1.set_image("https://disnake.dev/assets/disnake-logo.png")
+    embed_2.set_image(None)
+    assert not embed_1.image == embed_2.image
+
+    embed_2.set_image("https://disnake.dev/assets/disnake-logo.png")
+    assert embed_1.image == embed_2.image
 
 
 def test_color_zero() -> None:
@@ -383,3 +423,17 @@ def test_copy_empty() -> None:
     e = Embed.from_dict({})
     copy = e.copy()
     assert e.to_dict() == copy.to_dict() == {}
+
+
+# backwards compatibility
+def test_emptyembed() -> None:
+    with pytest.warns(DeprecationWarning):
+        assert embeds.EmptyEmbed is None  # type: ignore
+    with pytest.warns(DeprecationWarning):
+        assert Embed.Empty is None  # type: ignore
+    with pytest.warns(DeprecationWarning):
+        assert Embed().Empty is None  # type: ignore
+
+    # make sure unknown module attrs continue to raise
+    with pytest.raises(AttributeError):
+        embeds.this_does_not_exist  # type: ignore

@@ -1,27 +1,4 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
@@ -72,6 +49,7 @@ from .enums import (
     Locale,
     NotificationLevel,
     NSFWLevel,
+    ThreadSortOrder,
     VerificationLevel,
     VideoQualityMode,
     WidgetStyle,
@@ -87,6 +65,7 @@ from .invite import Invite
 from .iterators import AuditLogIterator, BanIterator, MemberIterator
 from .member import Member, VoiceState
 from .mixins import Hashable
+from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite
 from .role import Role
 from .stage_instance import StageInstance
@@ -110,7 +89,7 @@ if TYPE_CHECKING:
     from .permissions import Permissions
     from .state import ConnectionState
     from .template import Template
-    from .threads import AnyThreadArchiveDuration
+    from .threads import AnyThreadArchiveDuration, ForumTag
     from .types.guild import Ban as BanPayload, Guild as GuildPayload, GuildFeature, MFALevel
     from .types.integration import IntegrationType
     from .types.sticker import CreateGuildSticker as CreateStickerPayload
@@ -1553,9 +1532,13 @@ class Guild(Hashable):
         category: Optional[CategoryChannel] = None,
         position: int = MISSING,
         slowmode_delay: int = MISSING,
-        default_auto_archive_duration: AnyThreadArchiveDuration = None,
+        default_thread_slowmode_delay: int = MISSING,
+        default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = None,
         nsfw: bool = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
+        available_tags: Optional[Sequence[ForumTag]] = None,
+        default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        default_sort_order: Optional[ThreadSortOrder] = None,
         reason: Optional[str] = None,
     ) -> ForumChannel:
         """|coro|
@@ -1581,9 +1564,18 @@ class Guild(Hashable):
             The position in the channel list. This is a number that starts
             at 0. e.g. the top channel is position 0.
         slowmode_delay: :class:`int`
-            Specifies the slowmode rate limit for users in this channel, in seconds.
+            Specifies the slowmode rate limit at which users can create
+            threads in this channel, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
             If not provided, slowmode is disabled.
+        default_thread_slowmode_delay: :class:`int`
+            Specifies the slowmode rate limit at which users can send messages
+            in newly created threads in this channel, in seconds.
+            A value of ``0`` disables slowmode by default. The maximum value possible is ``21600``.
+            If not provided, slowmode is disabled.
+
+            .. versionadded:: 2.6
+
         default_auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
             The default auto archive duration in minutes for threads created in this channel.
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
@@ -1593,6 +1585,21 @@ class Guild(Hashable):
             A :class:`dict` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply upon creation of a channel.
             Useful for creating secret channels.
+        available_tags: Optional[Sequence[:class:`ForumTag`]]
+            The tags available for threads in this channel.
+
+            .. versionadded:: 2.6
+
+        default_reaction: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
+            The default emoji shown for reacting to threads.
+
+            .. versionadded:: 2.6
+
+        default_sort_order: Optional[:class:`ThreadSortOrder`]
+            The default sort order of threads in this channel.
+
+            .. versionadded:: 2.6
+
         reason: Optional[:class:`str`]
             The reason for creating this channel. Shows up on the audit log.
 
@@ -1620,6 +1627,9 @@ class Guild(Hashable):
         if slowmode_delay is not MISSING:
             options["rate_limit_per_user"] = slowmode_delay
 
+        if default_thread_slowmode_delay is not MISSING:
+            options["default_thread_rate_limit_per_user"] = default_thread_slowmode_delay
+
         if nsfw is not MISSING:
             options["nsfw"] = nsfw
 
@@ -1627,6 +1637,19 @@ class Guild(Hashable):
             options["default_auto_archive_duration"] = cast(
                 "ThreadArchiveDurationLiteral", try_enum_to_int(default_auto_archive_duration)
             )
+
+        if available_tags is not None:
+            options["available_tags"] = [tag.to_dict() for tag in available_tags]
+
+        if default_reaction is not None:
+            emoji_name, emoji_id = PartialEmoji._emoji_to_name_id(default_reaction)
+            options["default_reaction_emoji"] = {
+                "emoji_name": emoji_name,
+                "emoji_id": emoji_id,
+            }
+
+        if default_sort_order is not None:
+            options["default_sort_order"] = try_enum_to_int(default_sort_order)
 
         data = await self._create_channel(
             name,
@@ -1845,6 +1868,7 @@ class Guild(Hashable):
             The new channel that is the AFK channel. Could be ``None`` for no AFK channel.
         afk_timeout: :class:`int`
             The number of seconds until someone is moved to the AFK channel.
+            This can be set to ``60``, ``300``, ``900``, ``1800``, and ``3600``.
         owner: :class:`Member`
             The new owner of the guild to transfer ownership to. Note that you must
             be owner of the guild to do this.
@@ -3562,12 +3586,33 @@ class Guild(Hashable):
         """
         await self._state.http.kick(user.id, self.id, reason=reason)
 
+    @overload
     async def ban(
         self,
         user: Snowflake,
         *,
+        clean_history_duration: Union[int, datetime.timedelta] = 86400,
         reason: Optional[str] = None,
+    ) -> None:
+        ...
+
+    @overload
+    async def ban(
+        self,
+        user: Snowflake,
+        *,
         delete_message_days: Literal[0, 1, 2, 3, 4, 5, 6, 7] = 1,
+        reason: Optional[str] = None,
+    ) -> None:
+        ...
+
+    async def ban(
+        self,
+        user: Snowflake,
+        *,
+        clean_history_duration: Union[int, datetime.timedelta] = MISSING,
+        delete_message_days: Literal[0, 1, 2, 3, 4, 5, 6, 7] = MISSING,
+        reason: Optional[str] = None,
     ) -> None:
         """|coro|
 
@@ -3582,20 +3627,67 @@ class Guild(Hashable):
         ----------
         user: :class:`abc.Snowflake`
             The user to ban from the guild.
+        clean_history_duration: Union[:class:`int`, :class:`datetime.timedelta`]
+            The timespan (seconds or timedelta) of messages to delete from the user
+            in the guild, up to 7 days (604800 seconds).
+            Defaults to 1 day (86400 seconds).
+
+            This is incompatible with ``delete_message_days``.
+
+            .. versionadded:: 2.6
+
+            .. note::
+                This may not be accurate with small durations (e.g. a few minutes)
+                and delete a couple minutes' worth of messages more than specified.
+
         delete_message_days: :class:`int`
             The number of days worth of messages to delete from the user
             in the guild. The minimum is 0 and the maximum is 7.
+
+            This is incompatible with ``clean_history_duration``.
+
+            .. deprecated:: 2.6
+                Use ``clean_history_duration`` instead.
+
         reason: Optional[:class:`str`]
             The reason for banning this user. Shows up on the audit log.
 
         Raises
         ------
+        TypeError
+            Both ``clean_history_duration`` and ``delete_message_days`` were provided,
+            or ``clean_history_duration`` has an invalid type.
         Forbidden
             You do not have the proper permissions to ban.
         HTTPException
             Banning failed.
         """
-        await self._state.http.ban(user.id, self.id, delete_message_days, reason=reason)
+        if delete_message_days is not MISSING and clean_history_duration is not MISSING:
+            raise TypeError(
+                "Only one of `clean_history_duration` and `delete_message_days` may be provided."
+            )
+
+        if delete_message_days is not MISSING:
+            utils.warn_deprecated(
+                "`delete_message_days` is deprecated and will be removed in a future version. Consider using `clean_history_duration` instead.",
+                stacklevel=2,
+            )
+            delete_message_seconds = delete_message_days * 86400
+        elif clean_history_duration is MISSING:
+            delete_message_seconds = 86400
+        elif isinstance(clean_history_duration, datetime.timedelta):
+            delete_message_seconds = int(clean_history_duration.total_seconds())
+        elif isinstance(clean_history_duration, int):
+            delete_message_seconds = clean_history_duration
+        else:
+            raise TypeError(
+                "`clean_history_duration` should be int or timedelta, "
+                f"not {type(clean_history_duration).__name__}"
+            )
+
+        await self._state.http.ban(
+            user.id, self.id, delete_message_seconds=delete_message_seconds, reason=reason
+        )
 
     async def unban(self, user: Snowflake, *, reason: Optional[str] = None) -> None:
         """|coro|
@@ -3687,8 +3779,8 @@ class Guild(Hashable):
         limit: Optional[int] = 100,
         before: Optional[SnowflakeTime] = None,
         after: Optional[SnowflakeTime] = None,
-        user: Snowflake = None,
-        action: AuditLogAction = None,
+        user: Optional[Snowflake] = None,
+        action: Optional[AuditLogAction] = None,
     ) -> AuditLogIterator:
         """Returns an :class:`AsyncIterator` that enables receiving the guild's audit logs.
 
@@ -4375,7 +4467,7 @@ class Guild(Hashable):
         event_type: AutoModEventType,
         trigger_type: AutoModTriggerType,
         actions: Sequence[AutoModAction],
-        trigger_metadata: AutoModTriggerMetadata = None,
+        trigger_metadata: Optional[AutoModTriggerMetadata] = None,
         enabled: bool = False,
         exempt_roles: Optional[Sequence[Snowflake]] = None,
         exempt_channels: Optional[Sequence[Snowflake]] = None,

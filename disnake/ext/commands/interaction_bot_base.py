@@ -1,24 +1,4 @@
-# The MIT License (MIT)
-
-# Copyright (c) 2021-present EQUENOS
-
-# Permission is hereby granted, free of charge, to any person obtaining a
-# copy of this software and associated documentation files (the "Software"),
-# to deal in the Software without restriction, including without limitation
-# the rights to use, copy, modify, merge, publish, distribute, sublicense,
-# and/or sell copies of the Software, and to permit persons to whom the
-# Software is furnished to do so, subject to the following conditions:
-
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-# DEALINGS IN THE SOFTWARE.
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
@@ -148,7 +128,7 @@ class InteractionBotBase(CommonBotBase):
         sync_commands: bool = True,
         sync_commands_debug: bool = False,
         sync_commands_on_cog_unload: bool = True,
-        test_guilds: Sequence[int] = None,
+        test_guilds: Optional[Sequence[int]] = None,
         **options: Any,
     ):
         if test_guilds and not all(isinstance(guild_id, int) for guild_id in test_guilds):
@@ -438,13 +418,13 @@ class InteractionBotBase(CommonBotBase):
         *,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        dm_permission: bool = None,
+        dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-        options: List[Option] = None,
-        guild_ids: Sequence[int] = None,
-        connectors: Dict[str, str] = None,
-        auto_sync: bool = None,
-        extras: Dict[str, Any] = None,
+        options: Optional[List[Option]] = None,
+        guild_ids: Optional[Sequence[int]] = None,
+        connectors: Optional[Dict[str, str]] = None,
+        auto_sync: Optional[bool] = None,
+        extras: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> Callable[[CommandCallback], InvokableSlashCommand]:
         """A shortcut decorator that invokes :func:`.slash_command` and adds it to
@@ -523,11 +503,11 @@ class InteractionBotBase(CommonBotBase):
         self,
         *,
         name: LocalizedOptional = None,
-        dm_permission: bool = None,
+        dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-        guild_ids: Sequence[int] = None,
-        auto_sync: bool = None,
-        extras: Dict[str, Any] = None,
+        guild_ids: Optional[Sequence[int]] = None,
+        auto_sync: Optional[bool] = None,
+        extras: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> Callable[
         [InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand
@@ -592,11 +572,11 @@ class InteractionBotBase(CommonBotBase):
         self,
         *,
         name: LocalizedOptional = None,
-        dm_permission: bool = None,
+        dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-        guild_ids: Sequence[int] = None,
-        auto_sync: bool = None,
-        extras: Dict[str, Any] = None,
+        guild_ids: Optional[Sequence[int]] = None,
+        auto_sync: Optional[bool] = None,
+        extras: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> Callable[
         [InteractionCommandCallback[CogT, MessageCommandInteraction, P]], InvokableMessageCommand
@@ -660,7 +640,7 @@ class InteractionBotBase(CommonBotBase):
     # command synchronisation
 
     def _ordered_unsynced_commands(
-        self, test_guilds: Sequence[int] = None
+        self, test_guilds: Optional[Sequence[int]] = None
     ) -> Tuple[List[ApplicationCommand], Dict[int, List[ApplicationCommand]]]:
         global_cmds = []
         guilds = {}

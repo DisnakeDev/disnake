@@ -1,0 +1,1 @@
+Clarify behavior of kwargs in flag methods when both a flag and an alias are given.

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 from _types import SphinxExtensionMeta
 from docutils import nodes
 from docutils.parsers.rst import Directive

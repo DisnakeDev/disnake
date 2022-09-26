@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 from typing import Dict, Literal, Optional
 
 import pytest
@@ -16,8 +18,10 @@ class TestPermissions:
 
     def test_init_permissions_keyword_arguments_with_aliases(self) -> None:
         assert Permissions(read_messages=True, view_channel=False).value == 0
+        assert Permissions(view_channel=True, read_messages=False).value == 0
 
-        assert Permissions(read_messages=False, view_channel=True).view_channel is True
+        assert Permissions(read_messages=False, view_channel=True).value == 1024
+        assert Permissions(view_channel=False, read_messages=True).value == 1024
 
     def test_init_invalid_value(self) -> None:
         with pytest.raises(TypeError, match="Expected int parameter, received str instead."):
@@ -112,6 +116,20 @@ class TestPermissions:
         expected_perms = Permissions(**expected)
 
         assert perms.value == expected_perms.value
+
+    @pytest.mark.parametrize(
+        ("update", "expected"),
+        [
+            ({"read_messages": True, "view_channel": False}, 8),
+            ({"view_channel": True, "read_messages": False}, 8),
+            ({"read_messages": False, "view_channel": True}, 8 + 1024),
+            ({"view_channel": False, "read_messages": True}, 8 + 1024),
+        ],
+    )
+    def test_update_aliases(self, update: Dict[str, bool], expected: int) -> None:
+        perms = Permissions(administrator=True)
+        perms.update(**update)
+        assert perms.value == expected
 
     @pytest.mark.parametrize(
         ("parameters", "expected"),
