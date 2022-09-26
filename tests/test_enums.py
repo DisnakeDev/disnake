@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 import types
 from typing import Any
 from unittest import mock
