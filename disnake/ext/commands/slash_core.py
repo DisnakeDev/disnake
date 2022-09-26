@@ -26,7 +26,7 @@ from disnake.permissions import Permissions
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
 from .errors import CommandError, CommandInvokeError
-from .params import call_param_func, expand_params
+from .params import call_param_func, classify_autocompleter, expand_params
 
 if TYPE_CHECKING:
     from disnake.app_commands import Choices
@@ -45,18 +45,15 @@ SlashCommandT = TypeVar("SlashCommandT", bound="InvokableSlashCommand")
 def _autocomplete(
     self: Union[SubCommand, InvokableSlashCommand], option_name: str
 ) -> Callable[[Callable], Callable]:
-    exists = False
     for option in self.body.options:
         if option.name == option_name:
             option.autocomplete = True
-            exists = True
             break
-
-    if not exists:
+    else:  # nobreak
         raise ValueError(f"Option '{option_name}' doesn't exist in '{self.qualified_name}'")
 
     def decorator(func: Callable) -> Callable:
-        func.__slash_command__ = self
+        classify_autocompleter(func)
         self.autocompleters[option_name] = func
         return func
 
@@ -76,22 +73,24 @@ async def _call_autocompleter(
         return autocomp
 
     try:
-        cog = autocomp.__slash_command__.cog
+        requires_cog_param = autocomp.__has_cog_param__
     except AttributeError:
-        cog = None
+        requires_cog_param = False
 
+    cog = self.root_parent.cog if isinstance(self, SubCommand) else self.cog
     filled = inter.filled_options
     del filled[inter.data.focused_option.name]
+
     try:
-        if cog is None:
-            choices = autocomp(inter, user_input, **filled)
-        else:
+        if requires_cog_param:
             choices = autocomp(cog, inter, user_input, **filled)
-    except TypeError:
-        if cog is None:
-            choices = autocomp(inter, user_input)
         else:
+            choices = autocomp(inter, user_input, **filled)
+    except TypeError:
+        if requires_cog_param:
             choices = autocomp(cog, inter, user_input)
+        else:
+            choices = autocomp(inter, user_input)
 
     if inspect.isawaitable(choices):
         return await choices
@@ -494,10 +493,6 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             other.connectors = self.connectors.copy()
         if self.autocompleters != other.autocompleters:
             other.autocompleters = self.autocompleters.copy()
-            # Link existing autocompleter to the newly copied slash command...
-            for autocompleter in other.autocompleters.values():
-                if callable(autocompleter):
-                    autocompleter.__slash_command__ = other
         if self.children != other.children:
             other.children = self.children.copy()
             # update parents...
