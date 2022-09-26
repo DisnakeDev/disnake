@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from disnake import Color, Embed, File
+from disnake import Color, Embed, File, embeds
 from disnake.utils import MISSING, utcnow
 
 _BASE = {"type": "rich"}
@@ -423,3 +423,17 @@ def test_copy_empty() -> None:
     e = Embed.from_dict({})
     copy = e.copy()
     assert e.to_dict() == copy.to_dict() == {}
+
+
+# backwards compatibility
+def test_emptyembed() -> None:
+    with pytest.warns(DeprecationWarning):
+        assert embeds.EmptyEmbed is None  # type: ignore
+    with pytest.warns(DeprecationWarning):
+        assert Embed.Empty is None  # type: ignore
+    with pytest.warns(DeprecationWarning):
+        assert Embed().Empty is None  # type: ignore
+
+    # make sure unknown module attrs continue to raise
+    with pytest.raises(AttributeError):
+        embeds.this_does_not_exist  # type: ignore
