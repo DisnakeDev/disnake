@@ -56,4 +56,5 @@ async def userecho(ctx: commands.Context, member: disnake.Member, *, content: st
     # Note: This method cannot impersonate the member's roles, since it works using webhooks.
 
 
-client.run(os.getenv("BOT_TOKEN"))
+if __name__ == "__main__":
+    client.run(os.getenv("BOT_TOKEN"))

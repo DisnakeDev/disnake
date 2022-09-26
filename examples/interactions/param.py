@@ -106,4 +106,5 @@ async def large(inter: disnake.CommandInteraction, largenumber: commands.LargeIn
     ...
 
 
-bot.run(os.getenv("BOT_TOKEN"))
+if __name__ == "__main__":
+    bot.run(os.getenv("BOT_TOKEN"))

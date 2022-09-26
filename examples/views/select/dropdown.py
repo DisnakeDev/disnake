@@ -69,4 +69,5 @@ async def colour(ctx):
     await ctx.send("Pick your favourite colour:", view=view)
 
 
-bot.run(os.getenv("BOT_TOKEN"))
+if __name__ == "__main__":
+    bot.run(os.getenv("BOT_TOKEN"))

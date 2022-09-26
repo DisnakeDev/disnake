@@ -119,4 +119,5 @@ async def create_tag_low(inter: disnake.CommandInteraction):
     await modal_inter.response.send_message(embed=embed)
 
 
-bot.run(os.getenv("BOT_TOKEN"))
+if __name__ == "__main__":
+    bot.run(os.getenv("BOT_TOKEN"))

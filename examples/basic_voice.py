@@ -143,4 +143,6 @@ async def on_ready():
 
 
 bot.add_cog(Music(bot))
-bot.run(os.getenv("BOT_TOKEN"))
+
+if __name__ == "__main__":
+    bot.run(os.getenv("BOT_TOKEN"))

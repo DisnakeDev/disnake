@@ -43,5 +43,6 @@ class MyClient(disnake.Client):
         self.channel = channel
 
 
-client = MyClient()
-client.run(os.getenv("BOT_TOKEN"))
+if __name__ == "__main__":
+    client = MyClient()
+    client.run(os.getenv("BOT_TOKEN"))

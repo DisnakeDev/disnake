@@ -50,4 +50,5 @@ async def guess(ctx: MyContext, number: int):
     await ctx.tick(number == value)
 
 
-bot.run(os.getenv("BOT_TOKEN"))
+if __name__ == "__main__":
+    bot.run(os.getenv("BOT_TOKEN"))

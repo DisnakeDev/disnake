@@ -99,4 +99,5 @@ async def emoji(ctx: commands.GuildContext, emoji: disnake.PartialEmoji, *roles:
     )
 
 
-bot.run(os.getenv("BOT_TOKEN"))
+if __name__ == "__main__":
+    bot.run(os.getenv("BOT_TOKEN"))

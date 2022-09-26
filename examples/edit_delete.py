@@ -56,4 +56,5 @@ async def delete(ctx: commands.Context):
     await ctx.channel.send("Goodbye in 3 seconds...", delete_after=3.0)
 
 
-bot.run(os.getenv("BOT_TOKEN"))
+if __name__ == "__main__":
+    bot.run(os.getenv("BOT_TOKEN"))

@@ -68,4 +68,5 @@ async def ask(ctx: commands.Context):
     await message.edit(view=view)
 
 
-bot.run(os.getenv("BOT_TOKEN"))
+if __name__ == "__main__":
+    bot.run(os.getenv("BOT_TOKEN"))

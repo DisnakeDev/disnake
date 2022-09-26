@@ -81,4 +81,6 @@ async def game_autocomp(inter: disnake.CommandInteraction, string: str):
 # Don't forget to load the localizations:
 bot.i18n.load("locale/")
 
-bot.run(os.getenv("BOT_TOKEN"))
+
+if __name__ == "__main__":
+    bot.run(os.getenv("BOT_TOKEN"))

@@ -70,4 +70,5 @@ class MyCog(commands.Cog):
 
 bot.add_cog(MyCog())
 
-bot.run(os.getenv("BOT_TOKEN"))
+if __name__ == "__main__":
+    bot.run(os.getenv("BOT_TOKEN"))

@@ -116,4 +116,5 @@ async def grid_listener(inter: disnake.MessageInteraction):
 # the listener would have to be `self`.
 
 
-bot.run(os.getenv("BOT_TOKEN"))
+if __name__ == "__main__":
+    bot.run(os.getenv("BOT_TOKEN"))

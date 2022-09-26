@@ -78,4 +78,5 @@ async def command_with_convmethod(
     ...
 
 
-bot.run(os.getenv("BOT_TOKEN"))
+if __name__ == "__main__":
+    bot.run(os.getenv("BOT_TOKEN"))

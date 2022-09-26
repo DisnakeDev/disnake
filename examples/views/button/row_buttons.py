@@ -48,4 +48,5 @@ async def buttons(ctx):
     await ctx.send("Here are some buttons!", view=RowButtons())
 
 
-bot.run(os.getenv("BOT_TOKEN"))
+if __name__ == "__main__":
+    bot.run(os.getenv("BOT_TOKEN"))

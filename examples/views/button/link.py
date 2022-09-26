@@ -47,4 +47,5 @@ async def google(ctx: commands.Context, *, query: str):
     await ctx.send(f"Google Result for: `{clean_query}`", view=Google(query))
 
 
-bot.run(os.getenv("BOT_TOKEN"))
+if __name__ == "__main__":
+    bot.run(os.getenv("BOT_TOKEN"))

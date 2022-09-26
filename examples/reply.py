@@ -26,5 +26,6 @@ class MyClient(disnake.Client):
 intents = disnake.Intents.default()
 intents.message_content = True
 
-client = MyClient(intents=intents)
-client.run(os.getenv("BOT_TOKEN"))
+if __name__ == "__main__":
+    client = MyClient(intents=intents)
+    client.run(os.getenv("BOT_TOKEN"))

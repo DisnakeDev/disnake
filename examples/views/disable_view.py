@@ -60,4 +60,5 @@ async def view(ctx: commands.Context):
     view.message = message
 
 
-bot.run(os.getenv("BOT_TOKEN"))
+if __name__ == "__main__":
+    bot.run(os.getenv("BOT_TOKEN"))
