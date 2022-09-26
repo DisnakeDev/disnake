@@ -38,6 +38,10 @@ bot = commands.Bot(command_prefix=commands.when_mentioned)
 # }
 
 
+# localizations need to be loaded before the commands are defined
+bot.i18n.load("locale/")
+
+
 @bot.slash_command()
 async def highscore(
     inter: disnake.CommandInteraction,
@@ -76,10 +80,6 @@ async def game_autocomp(inter: disnake.CommandInteraction, string: str):
         for game in games
         if string.lower() in game.lower()
     ]
-
-
-# Don't forget to load the localizations:
-bot.i18n.load("locale/")
 
 
 if __name__ == "__main__":
