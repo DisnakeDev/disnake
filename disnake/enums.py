@@ -815,7 +815,7 @@ class AutoModTriggerType(int, Enum):
     mention_spam = 5
 
 
-class ThreadSortOrder(Enum):
+class ThreadSortOrder(int, Enum):
     latest_activity = 0
     creation_date = 1
 
