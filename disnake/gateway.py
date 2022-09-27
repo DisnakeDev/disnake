@@ -359,6 +359,7 @@ class DiscordWebSocket:
         # ws related stuff
         self.session_id: Optional[str] = None
         self.sequence: Optional[int] = None
+        # this may or may not include url parameters, we only need the host part of the url anyway
         self.resume_gateway: Optional[str] = None
         self._zlib: zlib._Decompress = zlib.decompressobj()
         self._buffer: bytearray = bytearray()
@@ -424,6 +425,7 @@ class DiscordWebSocket:
         ws._discord_parsers = client._connection.parsers
         ws._dispatch = client.dispatch
         ws.gateway = gateway
+        ws.resume_gateway = gateway
         ws.call_hooks = client._connection.call_hooks
         ws._initial_identify = initial
         ws.shard_id = shard_id
