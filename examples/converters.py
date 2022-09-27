@@ -29,7 +29,7 @@ async def userinfo(ctx: commands.Context, user: disnake.User):
 
     # The documentation notes what can be converted, in the case of `disnake.User`
     # you pass an ID, mention or username (discrim optional)
-    # e.g. 206758669896729152, @woo or woo#9876
+    # e.g. 941192261427920937, @Snakebot or Snakebot#5949
 
     # If the conversion is successful, we will have a full `disnake.User` instance
     # and can do the following:
