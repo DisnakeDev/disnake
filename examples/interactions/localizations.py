@@ -14,7 +14,7 @@ from disnake.ext import commands
 bot = commands.Bot(command_prefix=commands.when_mentioned)
 
 
-# For more details, see https://docs.disnake.dev/en/latest/ext/commands/slash_commands.html#localizations
+# For more details, see https://docs.disnake.dev/en/stable/ext/commands/slash_commands.html#localizations
 
 # Consider an example file `locale/de.json` containing:
 #
