@@ -1,0 +1,2 @@
+|commands| Changed parameters of :attr:`SubCommand <ext.commands.SubCommand>` and  :attr:`SubCommandGroup <ext.commands.SubCommandGroup>` to now require their parent command.
+- This only affects code that creates an instance of SubCommand or SubCommandGroup manually by calling their constructors.

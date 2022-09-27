@@ -3,7 +3,7 @@
 from typing import List, Literal, Optional, TypedDict, Union
 
 from .snowflake import Snowflake
-from .threads import ThreadArchiveDurationLiteral, ThreadMember, ThreadMetadata
+from .threads import ForumTag, ThreadArchiveDurationLiteral, ThreadMember, ThreadMetadata
 from .user import PartialUser
 
 OverwriteType = Literal[0, 1]
@@ -121,10 +121,18 @@ class ThreadChannel(_BaseChannel, _ThreadChannelOptional):
     thread_metadata: ThreadMetadata
 
 
+class DefaultReaction(TypedDict):
+    emoji_id: Optional[Snowflake]
+    emoji_name: Optional[str]
+
+
 class _ForumChannelOptional(TypedDict, total=False):
     topic: Optional[str]
     last_message_id: Optional[Snowflake]
     default_auto_archive_duration: ThreadArchiveDurationLiteral
+    available_tags: List[ForumTag]
+    default_reaction_emoji: Optional[DefaultReaction]
+    default_thread_rate_limit_per_user: int
 
 
 class ForumChannel(_BaseGuildChannel, _ForumChannelOptional):
