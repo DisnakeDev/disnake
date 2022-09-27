@@ -13,16 +13,10 @@ intents = disnake.Intents.default()
 intents.members = True
 intents.message_content = True
 
-client = commands.Bot(command_prefix=commands.when_mentioned_or("!"), intents=intents)
+bot = commands.Bot(command_prefix=commands.when_mentioned_or("!"), intents=intents)
 
 
-@client.event
-async def on_ready():
-    print(f"Logged in as {client.user} (ID: {client.user.id})")
-    print("------")
-
-
-@client.command()
+@bot.command()
 @commands.has_permissions(
     administrator=True  # To make sure that not everyone can use this command.
 )
@@ -39,7 +33,7 @@ async def userecho(ctx: commands.Context, member: disnake.Member, *, content: st
     # Check if the bot's webhook already exists in the channel.
     for webhook in channel_webhooks:
         # Check if the creator of the webhook is the same as the bot, and if the name is the same.
-        if webhook.user == client.user and webhook.name == "Bot Webhook":
+        if webhook.user == bot.user and webhook.name == "Bot Webhook":
             break
     else:
         # If the webhook does not exist, it will be created.
@@ -56,5 +50,10 @@ async def userecho(ctx: commands.Context, member: disnake.Member, *, content: st
     # Note: This method cannot impersonate the member's roles, since it works using webhooks.
 
 
+@bot.event
+async def on_ready():
+    print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------")
+
+
 if __name__ == "__main__":
-    client.run(os.getenv("BOT_TOKEN"))
+    bot.run(os.getenv("BOT_TOKEN"))

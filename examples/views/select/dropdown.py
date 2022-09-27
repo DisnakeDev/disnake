@@ -52,12 +52,6 @@ class DropdownView(disnake.ui.View):
 bot = commands.Bot(command_prefix=commands.when_mentioned)
 
 
-@bot.event
-async def on_ready():
-    print(f"Logged in as {bot.user} (ID: {bot.user.id})")
-    print("------")
-
-
 @bot.command()
 async def colour(ctx):
     """Sends a message with our dropdown containing colours"""
@@ -67,6 +61,11 @@ async def colour(ctx):
 
     # Sending a message containing our view
     await ctx.send("Pick your favourite colour:", view=view)
+
+
+@bot.event
+async def on_ready():
+    print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------")
 
 
 if __name__ == "__main__":

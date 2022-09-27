@@ -59,8 +59,7 @@ class PersistentViewBot(commands.Bot):
             self.add_view(PersistentView())
             self.persistent_views_added = True
 
-        print(f"Logged in as {self.user} (ID: {self.user.id})")
-        print("------")
+        print(f"Logged in as {self.user} (ID: {self.user.id})\n------")
 
 
 bot = PersistentViewBot()

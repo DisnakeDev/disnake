@@ -10,10 +10,6 @@ import disnake
 
 
 class MyClient(disnake.Client):
-    async def on_ready(self):
-        print(f"Logged in as {self.user} (ID: {self.user.id})")
-        print("------")
-
     async def on_message(self, message: disnake.Message):
         # we do not want the bot to reply to itself
         if message.author.id == self.user.id:
@@ -21,6 +17,9 @@ class MyClient(disnake.Client):
 
         if message.content.startswith("!hello"):
             await message.reply("Hello!", mention_author=True)
+
+    async def on_ready(self):
+        print(f"Logged in as {self.user} (ID: {self.user.id})\n------")
 
 
 intents = disnake.Intents.default()

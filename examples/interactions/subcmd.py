@@ -68,6 +68,11 @@ class MyCog(commands.Cog):
         await inter.response.send_message(f"You ran `/command bar b` with {option}")
 
 
+@bot.event
+async def on_ready():
+    print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------")
+
+
 bot.add_cog(MyCog())
 
 if __name__ == "__main__":

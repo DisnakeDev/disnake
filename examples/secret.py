@@ -99,5 +99,10 @@ async def emoji(ctx: commands.GuildContext, emoji: disnake.PartialEmoji, *roles:
     )
 
 
+@bot.event
+async def on_ready():
+    print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------")
+
+
 if __name__ == "__main__":
     bot.run(os.getenv("BOT_TOKEN"))

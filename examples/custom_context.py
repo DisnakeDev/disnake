@@ -36,6 +36,9 @@ class MyBot(commands.Bot):
         # use the new MyContext class
         return await super().get_context(message, cls=cls)
 
+    async def on_ready(self):
+        print(f"Logged in as {self.user} (ID: {self.user.id})\n------")
+
 
 bot = MyBot(command_prefix=commands.when_mentioned)
 

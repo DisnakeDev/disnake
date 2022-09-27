@@ -16,12 +16,6 @@ intents.message_content = True
 bot = commands.Bot(command_prefix=commands.when_mentioned_or("!"), intents=intents)
 
 
-@bot.event
-async def on_ready():
-    print(f"Logged in as {bot.user} (ID: {bot.user.id})")
-    print("------")
-
-
 # When a message gets edited, the `on_message_edit` event will be called
 # with the old and new message objects.
 # NOTE: This only works as long as the message is in the bot's message cache.
@@ -54,6 +48,11 @@ async def delete(ctx: commands.Context):
 
     # `delete_after` can also be used
     await ctx.channel.send("Goodbye in 3 seconds...", delete_after=3.0)
+
+
+@bot.event
+async def on_ready():
+    print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------")
 
 
 if __name__ == "__main__":

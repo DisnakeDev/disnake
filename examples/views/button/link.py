@@ -34,17 +34,16 @@ class Google(disnake.ui.View):
 bot = commands.Bot(command_prefix=commands.when_mentioned)
 
 
-@bot.event
-async def on_ready():
-    print(f"Logged in as {bot.user} (ID: {bot.user.id})")
-    print("------")
-
-
 @bot.command()
 async def google(ctx: commands.Context, *, query: str):
     """Returns a google link for a query"""
     clean_query = await commands.clean_content().convert(ctx, query)
     await ctx.send(f"Google Result for: `{clean_query}`", view=Google(query))
+
+
+@bot.event
+async def on_ready():
+    print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------")
 
 
 if __name__ == "__main__":

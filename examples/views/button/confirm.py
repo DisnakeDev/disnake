@@ -37,12 +37,6 @@ class Confirm(disnake.ui.View):
 bot = commands.Bot(command_prefix=commands.when_mentioned)
 
 
-@bot.event
-async def on_ready():
-    print(f"Logged in as {bot.user} (ID: {bot.user.id})")
-    print("------")
-
-
 @bot.command()
 async def ask(ctx: commands.Context):
     """Asks the user a question to confirm something."""
@@ -66,6 +60,11 @@ async def ask(ctx: commands.Context):
         if isinstance(child, disnake.ui.Button):
             child.disabled = True
     await message.edit(view=view)
+
+
+@bot.event
+async def on_ready():
+    print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------")
 
 
 if __name__ == "__main__":

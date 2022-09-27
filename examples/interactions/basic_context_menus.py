@@ -33,5 +33,10 @@ async def reverse(inter: disnake.MessageCommandInteraction, message: disnake.Mes
     await inter.response.send_message(message.content[::-1])
 
 
+@bot.event
+async def on_ready():
+    print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------")
+
+
 if __name__ == "__main__":
     bot.run(os.getenv("BOT_TOKEN"))

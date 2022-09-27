@@ -17,12 +17,6 @@ intents.message_content = True
 bot = commands.Bot(command_prefix=commands.when_mentioned_or("!"), intents=intents)
 
 
-@bot.event
-async def on_ready():
-    print(f"Logged in as {bot.user} (ID: {bot.user.id})")
-    print("------")
-
-
 @bot.command()
 async def guess(ctx: commands.Context):
     await ctx.send("Guess a number between 1 and 10.")
@@ -41,6 +35,11 @@ async def guess(ctx: commands.Context):
         await ctx.send("You guessed correctly!")
     else:
         await ctx.send(f"Oops. It is actually {answer}.")
+
+
+@bot.event
+async def on_ready():
+    print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------")
 
 
 if __name__ == "__main__":

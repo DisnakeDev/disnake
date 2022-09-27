@@ -19,12 +19,6 @@ intents.message_content = True
 bot = commands.Bot(command_prefix=commands.when_mentioned_or("!"), intents=intents)
 
 
-@bot.event
-async def on_ready():
-    print(f"Logged in as {bot.user} (ID: {bot.user.id})")
-    print("------")
-
-
 @bot.command()
 async def add(ctx: commands.Context, left: int, right: int):
     """Adds two numbers together."""
@@ -82,6 +76,11 @@ async def cool(ctx: commands.Context):
 async def bot_subcommand(ctx: commands.Context):
     """Is the bot cool?"""
     await ctx.send("Yes, the bot is cool.")
+
+
+@bot.event
+async def on_ready():
+    print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------")
 
 
 if __name__ == "__main__":

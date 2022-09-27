@@ -137,16 +137,15 @@ class TicTacToe(disnake.ui.View):
 bot = commands.Bot(command_prefix=commands.when_mentioned)
 
 
-@bot.event
-async def on_ready():
-    print(f"Logged in as {bot.user} (ID: {bot.user.id})")
-    print("------")
-
-
 @bot.command()
 async def tic(ctx: commands.Context):
     """Starts a tic-tac-toe game with yourself."""
     await ctx.send("Tic Tac Toe: X goes first", view=TicTacToe())
+
+
+@bot.event
+async def on_ready():
+    print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------")
 
 
 if __name__ == "__main__":

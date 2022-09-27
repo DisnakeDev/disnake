@@ -89,6 +89,9 @@ class MyClient(disnake.Client):
             # If we want to do something in case of errors we'd do it here.
             pass
 
+    async def on_ready(self):
+        print(f"Logged in as {self.user} (ID: {self.user.id})\n------")
+
 
 intents = disnake.Intents.default()
 intents.members = True

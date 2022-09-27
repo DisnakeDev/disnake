@@ -22,10 +22,6 @@ class MyClient(disnake.Client):
         # start the task to run in the background
         self.my_background_task.start()
 
-    async def on_ready(self):
-        print(f"Logged in as {self.user} (ID: {self.user.id})")
-        print("------")
-
     @tasks.loop(seconds=60)  # task runs every 60 seconds
     async def my_background_task(self):
         self.counter += 1
@@ -41,6 +37,9 @@ class MyClient(disnake.Client):
             raise ValueError("Invalid channel")
 
         self.channel = channel
+
+    async def on_ready(self):
+        print(f"Logged in as {self.user} (ID: {self.user.id})\n------")
 
 
 if __name__ == "__main__":

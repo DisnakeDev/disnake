@@ -24,24 +24,21 @@ bot = commands.Bot(commands.when_mentioned_or("!"), intents=intents)
 async def userinfo(ctx: commands.Context, user: disnake.User):
     # In the command signature above, you can see that the `user`
     # parameter is typehinted to `disnake.User`. This means that
-    # during command invocation we will attempt to convert
+    # during command invocation, we will attempt to convert
     # the value passed as `user` to a `disnake.User` instance.
 
     # The documentation notes what can be converted, in the case of `disnake.User`
     # you pass an ID, mention or username (discrim optional)
-    # e.g. 80088516616269824, @Danny or Danny#0007
+    # e.g. 206758669896729152, @woo or woo#9876
 
-    # If the conversion is successful, we will have a `disnake.User` instance
+    # If the conversion is successful, we will have a full `disnake.User` instance
     # and can do the following:
-    user_id = user.id
-    username = user.name
-    avatar = user.display_avatar.url
-    await ctx.send(f"User found: {user_id} -- {username}\n{avatar}")
+    await ctx.send(f"User found: {user.id} -- {user.name}\n{user.display_avatar.url}")
 
 
 @userinfo.error
 async def userinfo_error(ctx: commands.Context, error: commands.CommandError):
-    # if the conversion above fails for any reason, it will raise `commands.UserNotFound`
+    # If the conversion above fails for any reason, it will raise `commands.UserNotFound`
     # so we handle this in this error handler:
     if isinstance(error, commands.UserNotFound):
         return await ctx.send("Couldn't find that user.")
@@ -75,6 +72,11 @@ async def multiply(ctx: commands.Context, number: int, maybe: bool):
     if maybe is True:
         return await ctx.send(str(number * 2))
     await ctx.send(str(number * 5))
+
+
+@bot.event
+async def on_ready():
+    print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------")
 
 
 if __name__ == "__main__":
