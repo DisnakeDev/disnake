@@ -4,6 +4,9 @@
 A basic example showing how to integrate audio from youtube-dl into voice chat.
 """
 
+# NOTE: this example requires ffmpeg (https://ffmpeg.org/download.html) to be installed
+#       and available in your `%PATH%` or `$PATH`
+
 # pyright: reportUnknownLambdaType=false
 
 import asyncio
