@@ -16,30 +16,31 @@ bot = commands.Bot(command_prefix=commands.when_mentioned)
 
 # For more details, see https://docs.disnake.dev/en/stable/ext/commands/slash_commands.html#localizations
 
-# Consider an example file `locale/de.json` containing:
-#
-# {
-#     "HIGHSCORE_COMMAND_NAME": "rekord",
-#     "HIGHSCORE_COMMAND_DESCRIPTION": "Zeigt die Rekordpunktzahl des Users innerhalb des gewählten Zeitraums.",
-#     "HIGHSCORE_USER_NAME": "user",
-#     "HIGHSCORE_USER_DESCRIPTION": "Der User, dessen Punktzahl gezeigt werden soll.",
-#     "HIGHSCORE_GAME_NAME": "spiel",
-#     "HIGHSCORE_GAME_DESCRIPTION": "Spiel, für das Punktzahlen gefiltert werden.",
-#     "HIGHSCORE_RANGE_NAME": "zeitraum",
-#     "HIGHSCORE_RANGE_DESCRIPTION": "Der Zeitraum zur Berechnung der Rekordpunktzahl.",
-#
-#     "CHOICE_DAY": "Letzter Tag",
-#     "CHOICE_WEEK": "Letzte Woche",
-#     "CHOICE_MONTH": "Letzter Monat",
-#
-#     "GAME_TIC-TAC-TOE": "Tic-Tac-Toe",
-#     "GAME_CHESS": "Schach",
-#     "GAME_RISK": "Risiko"
-# }
+# For this example to work, you need to create a file `locale/de.json` containing the following:
+"""
+{
+    "HIGHSCORE_COMMAND_NAME": "rekord",
+    "HIGHSCORE_COMMAND_DESCRIPTION": "Zeigt die Rekordpunktzahl des Users innerhalb des gewählten Zeitraums.",
+    "HIGHSCORE_USER_NAME": "user",
+    "HIGHSCORE_USER_DESCRIPTION": "Der User, dessen Punktzahl gezeigt werden soll.",
+    "HIGHSCORE_GAME_NAME": "spiel",
+    "HIGHSCORE_GAME_DESCRIPTION": "Spiel, für das Punktzahlen gefiltert werden.",
+    "HIGHSCORE_RANGE_NAME": "zeitraum",
+    "HIGHSCORE_RANGE_DESCRIPTION": "Der Zeitraum zur Berechnung der Rekordpunktzahl.",
+
+    "CHOICE_DAY": "Letzter Tag",
+    "CHOICE_WEEK": "Letzte Woche",
+    "CHOICE_MONTH": "Letzter Monat",
+
+    "GAME_TIC-TAC-TOE": "Tic-Tac-Toe",
+    "GAME_CHESS": "Schach",
+    "GAME_RISK": "Risiko"
+}
+"""
 
 
 # localizations need to be loaded before the commands are defined
-bot.i18n.load("locale/")
+bot.i18n.load(f"{os.path.dirname(__file__)}/locale/")
 
 
 @bot.slash_command()
