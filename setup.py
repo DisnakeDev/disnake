@@ -49,7 +49,7 @@ extras_require = {
         "orjson>=3.5.4",
         "aiodns>=1.1",
         "Brotli",
-        "cchardet",
+        'cchardet; python_version < "3.10"',
     ],
     "discord": ["discord-disnake"],
 }
