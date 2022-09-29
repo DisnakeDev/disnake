@@ -17,7 +17,7 @@ in specific versions.
 v2.5.3
 ------
 
-This release is a bugfix release with backports from v2.6.0.
+This is a maintenance release with backports from v2.6.0.
 
 Bug Fixes
 ~~~~~~~~~
