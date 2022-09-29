@@ -22,6 +22,8 @@ in specific versions.
 v2.6.0
 ------
 
+This release contains support for forum channels (and their tags) as well as full support for the automoderation API and gateway events.
+
 Breaking Changes
 ~~~~~~~~~~~~~~~~
 - Update :class:`Client` classes such that their initialization kwargs are explicitly stated and typehinted. (:issue:`371`)
