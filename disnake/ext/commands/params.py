@@ -105,7 +105,7 @@ def issubclass_(obj: Any, tp: Union[TypeT, Tuple[TypeT, ...]]) -> TypeGuard[Type
         # Assume we have a type hint
         if get_origin(obj) in (Union, UnionType, Optional):
             obj = get_args(obj)
-            return any(issubclass(o, tp) for o in obj)
+            return any(isinstance(o, type) and issubclass(o, tp) for o in obj)
         else:
             # Other type hint specializations are not supported
             return False
