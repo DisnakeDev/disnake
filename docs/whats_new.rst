@@ -189,10 +189,10 @@ Bug Fixes
 - No longer use deprecated `@!` syntax for mentioning users. (:issue:`743`)
 - Fix creation of forum threads without :class:`Permissions.manage_threads`. (:issue:`746`)
 - Don't count initial message in forum threads towards :attr:`Thread.message_count` and :attr:`Thread.total_message_sent`. (:issue:`747`)
-- Fix edge case with parsing command annotations that contain a union of non-type objects, like ``Optional[Literal[1, 2, 3]]``. (:issue:`770`)
 - |commands| Handle :class:`.VoiceChannel` in :func:`commands.is_nsfw`. (:issue:`536`)
 - |commands| Handle ``Union[User, Member]`` annotations on slash commands arguments when using the decorator interface. (:issue:`584`)
 - |commands| Change :func:`has_permissions <ext.commands.has_permissions>` and :func:`bot_has_permissions <ext.commands.bot_has_permissions>` checks to work with interations in guilds that only added the ``applications.commands`` scope, and in DMs. (:issue:`673`)
+- |commands| Fix edge case with parsing command annotations that contain a union of non-type objects, like ``Optional[Literal[1, 2, 3]]``. (:issue:`770`)
 
 Documentation
 ~~~~~~~~~~~~~
