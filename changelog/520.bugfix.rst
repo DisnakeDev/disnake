@@ -1,1 +1,0 @@
-Warn the user that bools are not supported for ``default_member_permissions``.

@@ -1,2 +1,0 @@
-Refactor :class:`.ui.ActionRow` with complete typings.
-- :attr:`.ui.ActionRow.children` now returns an immutable :class:`Sequence` instead of a :class:`list`.

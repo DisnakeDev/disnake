@@ -1,1 +1,0 @@
-Add ``resume_gateway_url`` handling to gateway/websocket resume flow.

@@ -1,1 +1,0 @@
-Update pyright to 1.1.254.
