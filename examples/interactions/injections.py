@@ -12,9 +12,8 @@ from disnake.ext import commands
 
 bot = commands.Bot(command_prefix=commands.when_mentioned)
 
-# Instead of repeating boiler-plate code you may use injections
-# Here we give each command a config and a few options in case they're not set
-# very useful with sub commands
+# Instead of repeating boiler-plate code you may use injections.
+# Here we give each command a config with a few default options.
 
 
 @dataclass
@@ -33,8 +32,8 @@ async def get_config(
     """Let the user enter a config
 
     Note:
-        The docstring header of injections does not show up in the final command description,
-        only the option descriptions matter
+        The docstring description of injections does not show up in the final command description,
+        only the option descriptions matter.
 
     Parameters
     ----------
@@ -44,7 +43,7 @@ async def get_config(
     """
     # if a locale is not provided use the guild's locale
     if locale is None:
-        locale = inter.guild and str(inter.guild.preferred_locale) or "en-US"
+        locale = str(inter.guild_locale or "en-US")
 
     # parse a timezone from a string using pytz (maybe even use the locale if you feel like it)
     tzinfo = pytz.timezone(timezone)
@@ -52,7 +51,8 @@ async def get_config(
     return Config(locale, tzinfo, theme)
 
 
-# Note that the following command will have 4 options: `number`, `locale`, `timezone` and `theme`.
+# Note that the following command will have 4 options:
+# `number`, `locale`, `timezone` and `theme`.
 # `config` will be whatever `get_config()` returns.
 @bot.slash_command()
 async def injected1(
@@ -82,15 +82,18 @@ async def injected2(
     """
 
 
-# If the injection returns a custom object and has a return type annotation
-# then even the `commands.inject()` can be left out of the command signature
+# If the injection returns a custom type and has a return type annotation,
+# then `commands.inject()` can be left out of the command signature,
+# and `@register_injection` can be used instead.
+
+# This stores the injection callback in an internal registry,
+# which allows you to use just `user: GameUser` in the command signature.
+
+
 class GameUser:
     username: str
     level: int
     ...
-
-
-conn: Any = ...  # a placeholder for an actual database connection
 
 
 @commands.register_injection
@@ -106,10 +109,12 @@ async def get_game_user(
     user: The username of the user, uses the author by default
     server: The server to search
     """
-    if user is None:
-        return await conn.get_game_user(id=inter.author.id)
+    db: Any = ...  # a placeholder for an actual database connection
 
-    game_user: GameUser = await conn.search_game_user(username=user, server=server)
+    if user is None:
+        return await db.get_game_user(id=inter.author.id)
+
+    game_user: GameUser = await db.search_game_user(username=user, server=server)
     if game_user is None:
         raise commands.CommandError(f"User with username {user!r} could not be found")
 
@@ -121,4 +126,10 @@ async def implicit_injection(inter: disnake.CommandInteraction, user: GameUser):
     """A command which uses an implicit injection"""
 
 
-bot.run(os.getenv("BOT_TOKEN"))
+@bot.event
+async def on_ready():
+    print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------")
+
+
+if __name__ == "__main__":
+    bot.run(os.getenv("BOT_TOKEN"))

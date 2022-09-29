@@ -1,6 +1,11 @@
 # SPDX-License-Identifier: MIT
 
-# This example requires the 'members' privileged intent to use the Member converter.
+"""
+An example showcasing different builtin converter types.
+"""
+
+# A list of all available converter types can be found at
+# https://docs.disnake.dev/en/stable/ext/commands/commands.html#discord-converters.
 
 import os
 import typing
@@ -19,28 +24,23 @@ bot = commands.Bot(commands.when_mentioned_or("!"), intents=intents)
 async def userinfo(ctx: commands.Context, user: disnake.User):
     # In the command signature above, you can see that the `user`
     # parameter is typehinted to `disnake.User`. This means that
-    # during command invocation we will attempt to convert
+    # during command invocation, we will attempt to convert
     # the value passed as `user` to a `disnake.User` instance.
+
     # The documentation notes what can be converted, in the case of `disnake.User`
     # you pass an ID, mention or username (discrim optional)
-    # E.g. 80088516616269824, @Danny or Danny#0007
+    # e.g. 941192261427920937, @Snakebot or Snakebot#5949
 
-    # NOTE: typehinting acts as a converter within the `commands` framework only.
-    # In standard Python, it is use for documentation and IDE assistance purposes.
-
-    # If the conversion is successful, we will have a `disnake.User` instance
+    # If the conversion is successful, we will have a full `disnake.User` instance
     # and can do the following:
-    user_id = user.id
-    username = user.name
-    avatar = user.display_avatar.url
-    await ctx.send(f"User found: {user_id} -- {username}\n{avatar}")
+    await ctx.send(f"User found: {user.id} -- {user.name}\n{user.display_avatar.url}")
 
 
 @userinfo.error
 async def userinfo_error(ctx: commands.Context, error: commands.CommandError):
-    # if the conversion above fails for any reason, it will raise `commands.BadArgument`
+    # If the conversion above fails for any reason, it will raise `commands.UserNotFound`
     # so we handle this in this error handler:
-    if isinstance(error, commands.BadArgument):
+    if isinstance(error, commands.UserNotFound):
         return await ctx.send("Couldn't find that user.")
 
 
@@ -50,16 +50,15 @@ async def ignore(ctx: commands.Context, target: typing.Union[disnake.Member, dis
     # The `commands` framework attempts a conversion of each type in this Union *in order*.
     # So, it will attempt to convert whatever is passed to `target` to a `disnake.Member` instance.
     # If that fails, it will attempt to convert it to a `disnake.TextChannel` instance.
-    # See: https://docs.disnake.dev/en/latest/ext/commands/commands.html#typing-union
+    # See: https://docs.disnake.dev/en/stable/ext/commands/commands.html#typing-union
+
     # NOTE: If a Union typehint converter fails it will raise `commands.BadUnionArgument`
     # instead of `commands.BadArgument`.
 
     # To check the resulting type, `isinstance` is used
     if isinstance(target, disnake.Member):
         await ctx.send(f"Member found: {target.mention}, adding them to the ignore list.")
-    elif isinstance(
-        target, disnake.TextChannel
-    ):  # this could be an `else` but for completeness' sake.
+    else:
         await ctx.send(f"Channel found: {target.mention}, adding it to the ignore list.")
 
 
@@ -68,11 +67,17 @@ async def ignore(ctx: commands.Context, target: typing.Union[disnake.Member, dis
 async def multiply(ctx: commands.Context, number: int, maybe: bool):
     # We want an `int` and a `bool` parameter here.
     # `bool` is a slightly special case, as shown here:
-    # See: https://docs.disnake.dev/en/latest/ext/commands/commands.html#bool
+    # See: https://docs.disnake.dev/en/stable/ext/commands/commands.html#bool
 
     if maybe is True:
         return await ctx.send(str(number * 2))
     await ctx.send(str(number * 5))
 
 
-bot.run(os.getenv("BOT_TOKEN"))
+@bot.event
+async def on_ready():
+    print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------")
+
+
+if __name__ == "__main__":
+    bot.run(os.getenv("BOT_TOKEN"))

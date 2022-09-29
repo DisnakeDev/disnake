@@ -1,0 +1,1 @@
+Restructure the ``examples/`` directory, and update + clean up all examples.
