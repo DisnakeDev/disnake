@@ -12,6 +12,25 @@ This page keeps a detailed human friendly rendering of what's new and changed
 in specific versions.
 
 
+.. _vp2p5p3:
+
+v2.5.3
+------
+
+This is a maintenance release with backports from v2.6.0.
+
+Bug Fixes
+~~~~~~~~~
+
+- Fix creation of forum threads without :class:`Permissions.manage_threads`. (:issue:`746`)
+- |commands| Fix edge case with parsing command annotations that contain a union of non-type objects, like ``Optional[Literal[1, 2, 3]]``. (:issue:`771`)
+
+Miscellaneous
+~~~~~~~~~~~~~
+
+- Limit installation of ``cchardet`` in the ``[speed]`` extra to Python versions below 3.10 (see `aiohttp#6857 <https://github.com/aio-libs/aiohttp/pull/6857>`__). (:issue:`772`)
+
+
 .. _vp2p5p2:
 
 v2.5.2
