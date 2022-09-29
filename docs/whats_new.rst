@@ -24,7 +24,6 @@ v2.6.0
 
 Breaking Changes
 ~~~~~~~~~~~~~~~~
-- |commands| Change :func:`has_permissions <ext.commands.has_permissions>` and :func:`bot_has_permissions <ext.commands.bot_has_permissions>` checks to take timeouts into consideration. (:issue:`318`, :issue:`672`)
 - Update :class:`Client` classes such that their initialization kwargs are explicitly stated and typehinted. (:issue:`371`)
     - Replaced ``**kwargs`` / ``**options`` with explicit keyword arguments for the ``__init__`` methods of :class:`Client`, :class:`ext.commands.Bot`, :class:`ext.commands.InteractionBot`, all ``AutoSharded*`` variants, and all relevant parent classes.
 - Call new :func:`disnake.on_gateway_error` instead of letting exceptions propagate that occurred while deserializing a received gateway event. (:issue:`401`)
@@ -40,16 +39,17 @@ Breaking Changes
 - Assume the local timezone instead of UTC when providing naive datetimes to scheduled event related methods. (:issue:`579`)
 - Update :class:`ModalInteraction` typings. (:issue:`583`)
     - ``ModalInteraction.walk_components`` is replaced by :meth:`ModalInteraction.walk_raw_components`.
-- |tasks| Change :class:`.ext.tasks.Loop` to use keyword-only parameters. (:issue:`655`)
-- |commands| Change :func:`commands.register_injection <ext.commands.register_injection>` to now return an instance of :class:`Injection <ext.commands.Injection>`. (:issue:`669`)
 - Change the default of the ``ignore_timeout`` parameter for all ``permissions_for`` methods to ``False``. (:issue:`672`)
 - Update activity attributes to match API types. (:issue:`685`)
     - Make :attr:`Spotify.start`, :attr:`Spotify.end`, :attr:`Spotify.duration` optional.
     - Remove :attr:`Activity.timestamps`, values are accessible through :attr:`Activity.start`, :attr:`Activity.end`.
     - Change type of :attr:`Activity.buttons` to List[:class:`str`].
 - Remove :attr:`WidgetMember.nick`; :attr:`WidgetMember.name` contains the member's nickname, if set. (:issue:`736`)
+- |commands| Change :func:`has_permissions <ext.commands.has_permissions>` and :func:`bot_has_permissions <ext.commands.bot_has_permissions>` checks to take timeouts into consideration. (:issue:`318`, :issue:`672`)
+- |commands| Change :func:`commands.register_injection <ext.commands.register_injection>` to now return an instance of :class:`Injection <ext.commands.Injection>`. (:issue:`669`)
 - |commands| Changed parameters of :attr:`SubCommand <ext.commands.SubCommand>` and  :attr:`SubCommandGroup <ext.commands.SubCommandGroup>` to now require their parent command. (:issue:`759`)
     - This only affects code that creates an instance of SubCommand or SubCommandGroup manually by calling their constructors.
+- |tasks| Change :class:`.ext.tasks.Loop` to use keyword-only parameters. (:issue:`655`)
 
 Deprecations
 ~~~~~~~~~~~~
@@ -59,10 +59,6 @@ Deprecations
 
 New Features
 ~~~~~~~~~~~~
-- |commands| Add a way to get the parent or root commands of slash commands. (:issue:`277`)
-    - Add :attr:`InvokableSlashCommand.parent <ext.commands.InvokableSlashCommand.parent>`, :attr:`SubCommandGroup.parent <ext.commands.SubCommandGroup.parent>`, and :attr:`SubCommand.parent <ext.commands.SubCommand.parent>`.
-    - Add :attr:`InvokableSlashCommand.parents <ext.commands.InvokableSlashCommand.parents>`, :attr:`SubCommandGroup.parents <ext.commands.SubCommandGroup.parents>`, and :attr:`SubCommand.parents <ext.commands.SubCommand.parents>`.
-    - Add :attr:`InvokableSlashCommand.root_parent <ext.commands.InvokableSlashCommand.root_parent>`, :attr:`SubCommandGroup.root_parent <ext.commands.SubCommandGroup.root_parent>`, and :attr:`SubCommand.root_parent <ext.commands.SubCommand.root_parent>`.
 - Add custom type support for :func:`disnake.ui.button` and :func:`disnake.ui.select` decorators using ``cls`` parameter. (:issue:`281`)
 - Add :func:`disnake.on_gateway_error`, :func:`Client.on_gateway_error` and ``enable_gateway_error_handler`` client parameter. (:issue:`401`)
 - Update channel edit method annotations. (:issue:`418`)
@@ -104,8 +100,6 @@ New Features
 - Add the :attr:`Interaction.app_permissions` property, which shows the app permissions in the channel. (:issue:`586`)
 - Allow ``entity_type`` parameter :attr:`Guild.create_scheduled_event` to be missing. (:issue:`590`)
 - Add ``min_length`` and ``max_length`` support to :class:`.Option` and :class:`.ext.commands.Param`. (:issue:`593`)
-- |commands| Introduce :class:`commands.String <disnake.ext.commands.String>` for defining string option length limitations. (:issue:`593`)
-- |commands| Add support for Union[:class:`User`, :class:`Role`] and Union[:class:`User`, :class:`Member`, :class:`Role`] annotations in slash commands. (:issue:`595`)
 - Add :attr:`.AllowedMentions.from_message` for constructing an allowed mentions object from a :class:`Message`. (:issue:`603`)
 - Add support of more operators to all ``Flag`` classes. This list includes :class:`Intents` and :class:`Permissions`. (:issue:`605`, :issue:`615`, :issue:`616`)
     - ``&``, ``|``, ``^``, and ``~`` bitwise operator support.
@@ -120,12 +114,7 @@ New Features
 - Add support for setting :class:`ChannelFlags` directly when editing a channel or thread. (:issue:`642`)
 - Add :attr:`ApplicationFlags.application_command_badge` flag which shows whether an application has at least one globally registered application command. (:issue:`649`)
 - Add support for :attr:`Interaction.data` which guarantees that every subclass of ``Interaction`` has the ``data`` attribute. (:issue:`654`)
-- |tasks| Add support for subclassing :class:`.ext.tasks.Loop` and using subclasses in :func:`.ext.tasks.loop` decorator. (:issue:`655`)
 - Add ``clean_history_duration`` parameter to :func:`Guild.ban` and :func:`Member.ban`. (:issue:`659`)
-- |commands| Add support for injected parameters autocompletion (:issue:`670`)
-    - Add :meth:`Injection.autocomplete <ext.commands.Injection.autocomplete>` decorator
-    - Add :func:`injection <ext.commands.injection>` as a decorator interface for :func:`inject <ext.commands.inject>`
-    - Add ``autocompleters`` keyword-only argument to :class:`Injection <ext.commands.Injection>`, :func:`inject <ext.commands.inject>`, and :func:`register_injection <ext.commands.register_injection>`
 - Add :attr:`Game.assets`. (:issue:`685`)
 - Add permission typings to all methods that take permissions directly, for example :func:`disnake.abc.GuildChannel.set_permissions` and :func:`disnake.ext.commands.bot_has_permissions` to name a few. (:issue:`708`)
 - Add :class:`GatewayParams` for configuring gateway connection parameters (e.g. disabling compression). (:issue:`709`)
@@ -154,6 +143,17 @@ New Features
 - Add :attr:`Permissions.use_embedded_activities` as an alias for :attr:`Permissions.start_embedded_activities`. (:issue:`754`)
 - Add :attr:`Permissions.use_application_commands` as an alias for :attr:`Permissions.use_slash_commands`. (:issue:`755`)
 - Support setting ``with_message`` parameter of :class:`InteractionResponse.defer` for modal interactions to ``False``. (:issue:`758`)
+- |commands| Add a way to get the parent or root commands of slash commands. (:issue:`277`)
+    - Add :attr:`InvokableSlashCommand.parent <ext.commands.InvokableSlashCommand.parent>`, :attr:`SubCommandGroup.parent <ext.commands.SubCommandGroup.parent>`, and :attr:`SubCommand.parent <ext.commands.SubCommand.parent>`.
+    - Add :attr:`InvokableSlashCommand.parents <ext.commands.InvokableSlashCommand.parents>`, :attr:`SubCommandGroup.parents <ext.commands.SubCommandGroup.parents>`, and :attr:`SubCommand.parents <ext.commands.SubCommand.parents>`.
+    - Add :attr:`InvokableSlashCommand.root_parent <ext.commands.InvokableSlashCommand.root_parent>`, :attr:`SubCommandGroup.root_parent <ext.commands.SubCommandGroup.root_parent>`, and :attr:`SubCommand.root_parent <ext.commands.SubCommand.root_parent>`.
+- |commands| Introduce :class:`commands.String <disnake.ext.commands.String>` for defining string option length limitations. (:issue:`593`)
+- |commands| Add support for Union[:class:`User`, :class:`Role`] and Union[:class:`User`, :class:`Member`, :class:`Role`] annotations in slash commands. (:issue:`595`)
+- |commands| Add support for injected parameters autocompletion (:issue:`670`)
+    - Add :meth:`Injection.autocomplete <ext.commands.Injection.autocomplete>` decorator
+    - Add :func:`injection <ext.commands.injection>` as a decorator interface for :func:`inject <ext.commands.inject>`
+    - Add ``autocompleters`` keyword-only argument to :class:`Injection <ext.commands.Injection>`, :func:`inject <ext.commands.inject>`, and :func:`register_injection <ext.commands.register_injection>`
+- |tasks| Add support for subclassing :class:`.ext.tasks.Loop` and using subclasses in :func:`.ext.tasks.loop` decorator. (:issue:`655`)
 
 Bug Fixes
 ~~~~~~~~~
@@ -168,18 +168,15 @@ Bug Fixes
 - Handle optional :class:`Locale` instances (no longer create an enum value). (:issue:`533`)
 - Update the type field handling for audit logs. (:issue:`535`)
     - :attr:`AuditLogDiff.type` objects are no longer always :class:`ChannelType` instances.
-- |commands| Handle :class:`.VoiceChannel` in :func:`commands.is_nsfw`. (:issue:`536`)
 - Dispatch :func:`disnake.on_reaction_remove` for :class:`.Thread` instances. (:issue:`536`)
 - Update :attr:`Guild.bitrate_limit` to use the correct value for the ``VIP_REGIONS`` feature flag. (:issue:`538`)
 - Handle :class:`ThreadAutoArchiveDuration` instances for ``default_auto_archive_duration`` when editing channels. (:issue:`568`)
 - Assume that ``None`` is an empty channel name and keep ``channel.name`` a string. (:issue:`569`)
 - Remove the ``$`` prefix from ``IDENTIFY`` payload properties. (:issue:`572`)
 - Replace old application command objects in cogs with the new/copied objects. (:issue:`575`)
-- |commands| Handle ``Union[User, Member]`` annotations on slash commands arguments when using the decorator interface. (:issue:`584`)
 - Fix opus function calls on arm64 macOS. (:issue:`620`)
 - Improve channel/guild fallback in resolved interaction data, using :class:`PartialMessageable` for unhandled/unknown channels instead of using ``None``. (:issue:`646`)
 - Check the type of the provided parameter when validating names to improve end-user errors when passing an incorrect object to slash command and option names. (:issue:`653`)
-- |commands| Change :func:`has_permissions <ext.commands.has_permissions>` and :func:`bot_has_permissions <ext.commands.bot_has_permissions>` checks to work with interations in guilds that only added the ``applications.commands`` scope, and in DMs. (:issue:`673`)
 - Make the :func:`.ext.commands.default_member_permissions` decorator always work in cogs. (:issue:`678`)
 - Fix :attr:`Spotify.start`, :attr:`Spotify.end`, :attr:`Spotify.duration` raising :exc:`KeyError` instead of returning ``None``, improve activity typing. (:issue:`685`)
 - Fixes message initialization failing with threads and no intents by explicitly checking we have a guild object where one is required. (:issue:`699`, :issue:`712`)
@@ -191,6 +188,9 @@ Bug Fixes
 - Fix creation of forum threads without :class:`Permissions.manage_threads`. (:issue:`746`)
 - Don't count initial message in forum threads towards :attr:`Thread.message_count` and :attr:`Thread.total_message_sent`. (:issue:`747`)
 - Fix edge case with parsing command annotations that contain a union of non-type objects, like ``Optional[Literal[1, 2, 3]]``. (:issue:`770`)
+- |commands| Handle :class:`.VoiceChannel` in :func:`commands.is_nsfw`. (:issue:`536`)
+- |commands| Handle ``Union[User, Member]`` annotations on slash commands arguments when using the decorator interface. (:issue:`584`)
+- |commands| Change :func:`has_permissions <ext.commands.has_permissions>` and :func:`bot_has_permissions <ext.commands.bot_has_permissions>` checks to work with interations in guilds that only added the ``applications.commands`` scope, and in DMs. (:issue:`673`)
 
 Documentation
 ~~~~~~~~~~~~~
@@ -209,16 +209,16 @@ Documentation
 - Update :attr:`InteractionReference.name` description, now includes group and subcommand. (:issue:`625`, :issue:`648`)
 - Note that :attr:`Interaction.channel` may be a :class:`PartialMessageable` in inaccessible threads, in addition to DMs. (:issue:`632`)
 - Fix the grammatical errors in :class:`Guild` channel properties. (:issue:`645`)
-- |commands| Document the ``i18n`` attribute on :class:`.ext.commands.Bot` and :class:`.ext.commands.InteractionBot` classes. (:issue:`652`)
-- |commands| Document :class:`commands.Injection <ext.commands.Injection>`. (:issue:`669`)
 - Update fields listed in :func:`on_user_update` and :func:`on_member_update` docs. (:issue:`671`)
 - Add previously missing inherited attributes to activity types. (:issue:`685`)
-- |commands| Improve documentation around using ``None`` for :attr:`Bot.command_prefix <disnake.ext.commands.Bot.command_prefix>`. (:issue:`689`)
 - Add documentation for the ``strict`` parameter to :func:`Client.get_or_fetch_user` and :func:`Guild.get_or_fetch_member`. (:issue:`710`)
 - Remove note about application command localization requiring a client build override. (:issue:`711`)
 - Change references to public guilds to reference the ``COMMUNITY`` feature instead. (:issue:`720`)
 - Clarify :func:`Thread.delete` criteria for threads in forum channels. (:issue:`745`)
 - Clarify behavior of kwargs in flag methods when both a flag and an alias are given. (:issue:`749`)
+- |commands| Document the ``i18n`` attribute on :class:`.ext.commands.Bot` and :class:`.ext.commands.InteractionBot` classes. (:issue:`652`)
+- |commands| Document :class:`commands.Injection <ext.commands.Injection>`. (:issue:`669`)
+- |commands| Improve documentation around using ``None`` for :attr:`Bot.command_prefix <disnake.ext.commands.Bot.command_prefix>`. (:issue:`689`)
 
 Miscellaneous
 ~~~~~~~~~~~~~
