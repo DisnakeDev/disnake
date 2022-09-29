@@ -1,1 +1,0 @@
-Fix edge case with parsing command annotations that contain a union of non-type objects, like ``Optional[Literal[1, 2, 3]]``.

@@ -1,1 +1,0 @@
-Add the :func:`Embed.check_limits` method to check if an Embed would be rejected from Discord.

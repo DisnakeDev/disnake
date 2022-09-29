@@ -1,1 +1,0 @@
-Add flake8-comprehensions for catching inefficient comphrehensions.

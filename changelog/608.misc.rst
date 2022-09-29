@@ -1,1 +1,0 @@
-Add ``flake8-pytest-style`` for linting pytest specific features with flake8.
