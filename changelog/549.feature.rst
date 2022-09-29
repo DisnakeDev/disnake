@@ -1,1 +1,0 @@
-Make all \*InteractionData dataclasses dicts (:class:`MessageInteractionData`, :class:`ApplicationCommandInteractionData`, and so on).

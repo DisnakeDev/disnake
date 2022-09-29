@@ -1,1 +1,0 @@
-Improve channel/guild fallback in resolved interaction data, using :class:`PartialMessageable` for unhandled/unknown channels instead of using ``None``.

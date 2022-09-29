@@ -1,1 +1,0 @@
-Add support for equality checks between two :class:`disnake.Embed`\s.

@@ -1,1 +1,0 @@
-Add ``clean_history_duration`` parameter to :func:`Guild.ban` and :func:`Member.ban`.

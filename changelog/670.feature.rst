@@ -1,4 +1,0 @@
-|commands| Add support for injected parameters autocompletion
-- Add :meth:`Injection.autocomplete <ext.commands.Injection.autocomplete>` decorator
-- Add :func:`injection <ext.commands.injection>` as a decorator interface for :func:`inject <ext.commands.inject>`
-- Add ``autocompleters`` keyword-only argument to :class:`Injection <ext.commands.Injection>`, :func:`inject <ext.commands.inject>`, and :func:`register_injection <ext.commands.register_injection>`

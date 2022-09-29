@@ -1,1 +1,0 @@
-``EmptyEmbed`` and ``Embed.Empty`` are deprecated in favor of ``None``, have been removed from the documentation, and will result in type-checking errors.

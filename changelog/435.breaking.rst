@@ -1,4 +1,0 @@
-Rework :class:`.Embed` internals.
-- :meth:`Embed.set_footer` now requires the ``text`` parameter.
-- :attr:`Embed.type` is now optional, although this could previously be ``Embed.Empty``.
-- ``EmptyEmbed`` and ``Embed.Empty`` are deprecated in favor of ``None``, have been removed from the documentation, and will result in type-checking errors.
