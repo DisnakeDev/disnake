@@ -22,7 +22,10 @@ in specific versions.
 v2.6.0
 ------
 
-This release contains support for forum channels (and their tags) as well as full support for the automoderation API and gateway events.
+This release adds support for new forum channel features (like tags) as well as auto moderation, among other things. See below for more.
+
+Also note the breaking changes listed below, which may require additional code changes.
+
 
 Breaking Changes
 ~~~~~~~~~~~~~~~~
