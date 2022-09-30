@@ -10,13 +10,6 @@ from libcst import codemod
 
 from disnake import flags
 
-# whew
-# this code was a pain to write
-# seriously, i regret everything
-# please, save me
-# these comments were written before the code was actually written
-# they were written as procrastination
-
 BASE_FLAG_CLASSES = ("BaseFlags", "ListBaseFlags")
 
 
@@ -80,7 +73,7 @@ class FlagTypings(codemod.VisitorBasedCodemodCommand):
                     body.remove(b)
                     continue
                 hide_behind_typechecking = False
-                init = b  # type: ignore
+                init = b
                 break
         node = node.with_deep_changes(node.body, body=body)
 
@@ -89,9 +82,9 @@ class FlagTypings(codemod.VisitorBasedCodemodCommand):
             for b in body:
                 if m.matches(b, m.If(test=m.Name("TYPE_CHECKING"))):
                     # iterate through the options to see if one of the body is __init__
-                    for line in b.body.body:
+                    for line in b.body.body:  # type: ignore
                         if m.matches(line, m.FunctionDef(m.Name("__init__"))):
-                            if_block = b
+                            if_block = b  # type: ignore
                             break
                 if if_block:
                     break
@@ -147,8 +140,7 @@ class FlagTypings(codemod.VisitorBasedCodemodCommand):
             # then we remove all parameters except for self, and save that as our first overload
             # next, we need to add all of the flag values and that is our second overload
             # then we put them together and insert them before the existing overload
-            # todo: this is very complicated, and i think this visitor should be split into another visitor
-            # aka never
+            # todo: this is very complicated, and maybe this visitor should be split into another visitor just to do this logic
             assert init  # noqa: S101
             no_body_init = init.with_changes(
                 body=cst.IndentedBlock([cst.SimpleStatementLine([cst.Expr(cst.Ellipsis())])]),
