@@ -1290,7 +1290,11 @@ class Message(Hashable):
         # MessageType.call cannot be read by bots.
 
         if self.type is MessageType.channel_name_change:
-            if self.channel.type is ChannelType.public_thread and self.channel.parent.type is ChannelType.forum:  # type: ignore
+            if (
+                self.channel.type is ChannelType.public_thread
+                and (parent := getattr(self.channel, "parent", None))
+                and parent.type is ChannelType.forum
+            ):
                 return f"{self.author.name} changed the post title: **{self.content}**"
             return f"{self.author.name} changed the channel name: **{self.content}**"
 
