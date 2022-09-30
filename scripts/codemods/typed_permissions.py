@@ -75,7 +75,7 @@ class PermissionTypings(codemod.VisitorBasedCodemodCommand):
 
     def leave_ClassDef(self, _: cst.ClassDef, node: cst.ClassDef):
         # this method manages where PermissionOverwrite defines the typed augmented permissions.
-        # in order to type these properly, we destory that node and recreate it with the proper permissions.
+        # in order to type these properly, we destroy that node and recreate it with the proper permissions.
         if not m.matches(node.name, m.Name("PermissionOverwrite")):
             return node
 
