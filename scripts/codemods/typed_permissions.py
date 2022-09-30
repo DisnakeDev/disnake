@@ -73,6 +73,43 @@ class PermissionTypings(codemod.VisitorBasedCodemodCommand):
             )
         return super().transform_module(tree)
 
+    def leave_ClassDef(self, _: cst.ClassDef, node: cst.ClassDef):
+        # this method manages where PermissionOverwrite defines the typed augmented permissions.
+        # in order to type these properly, we destroy that node and recreate it with the proper permissions.
+        if not m.matches(node.name, m.Name("PermissionOverwrite")):
+            return node
+
+        # we're in the defintion of PermissionOverwrite
+        body = node.body
+        for b in body.children:
+            if m.matches(b, m.If(test=m.Name("TYPE_CHECKING"))):
+                break
+        else:
+            raise RuntimeError("could not find TYPE_CHECKING block in PermissionOverwrite.")
+
+        og_type_check: cst.If = b  # type: ignore
+
+        body = [
+            cst.SimpleStatementLine(
+                [
+                    cst.AnnAssign(
+                        cst.Name(perm),
+                        cst.Annotation(
+                            cst.Subscript(
+                                cst.Name("Optional"),
+                                [cst.SubscriptElement(cst.Index(cst.Name("bool")))],
+                            )
+                        ),
+                    )
+                ]
+            )
+            for perm in ALL_PERMISSIONS
+        ]
+
+        new_type_check = og_type_check.with_deep_changes(og_type_check.body, body=body)
+
+        return node.deep_replace(og_type_check, new_type_check)
+
     def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
         # don't recurse into the body of a function
         return False
