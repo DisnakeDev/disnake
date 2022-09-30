@@ -409,6 +409,7 @@ class SystemChannelFlags(BaseFlags, inverted=True):
 
     if TYPE_CHECKING:
 
+        @_generated
         def __init__(
             self,
             *,

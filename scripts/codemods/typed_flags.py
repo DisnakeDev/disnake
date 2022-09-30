@@ -131,6 +131,10 @@ class FlagTypings(codemod.VisitorBasedCodemodCommand):
                     break
             else:
                 raise RuntimeError
+            # add to the init the generated decorator
+            old_init = init
+            init = old_init.with_changes(decorators=[cst.Decorator(cst.Name("_generated"))])
+            node = node.deep_replace(old_init, init)  # type: ignore
             node = node.with_deep_changes(init.params, kwonly_params=kwonly_params, star_kwarg=None)
 
         else:
