@@ -434,6 +434,8 @@ class GuildScheduledEvent(Hashable):
             The entity metadata of the guild scheduled event.
         status: :class:`GuildScheduledEventStatus`
             The status of the guild scheduled event.
+
+            See also :func:`start`, :func:`end`, and :func:`cancel`.
         reason: Optional[:class:`str`]
             The reason for editing the guild scheduled event. Shows up on the audit log.
 
@@ -526,6 +528,120 @@ class GuildScheduledEvent(Hashable):
 
         data = await self._state.http.edit_guild_scheduled_event(
             guild_id=self.guild_id, event_id=self.id, reason=reason, **fields
+        )
+        return GuildScheduledEvent(state=self._state, data=data)
+
+    async def start(self, *, reason: Optional[str] = None) -> GuildScheduledEvent:
+        """|coro|
+
+        Starts the guild scheduled event.
+
+        Changes the event status to :attr:`~GuildScheduledEventStatus.active`.
+
+        You must have :attr:`.Permissions.manage_events` permission to do this.
+
+        .. versionadded:: 2.7
+
+        Parameters
+        ----------
+        reason: Optional[:class:`str`]
+            The reason for starting the guild scheduled event. Shows up on the audit log.
+
+        Raises
+        ------
+        ValueError
+            The event has already started or ended, or was cancelled.
+        Forbidden
+            You do not have permissions to start the event.
+        HTTPException
+            Starting the event failed.
+
+        Returns
+        -------
+        :class:`GuildScheduledEvent`
+            The started guild scheduled event instance.
+        """
+        if self.status is not GuildScheduledEventStatus.scheduled:
+            raise ValueError("This event is not scheduled")
+        return await self._edit_status(GuildScheduledEventStatus.active, reason=reason)
+
+    async def end(self, *, reason: Optional[str] = None) -> GuildScheduledEvent:
+        """|coro|
+
+        Ends the guild scheduled event.
+
+        Changes the event status to :attr:`~GuildScheduledEventStatus.completed`.
+
+        You must have :attr:`.Permissions.manage_events` permission to do this.
+
+        .. versionadded:: 2.7
+
+        Parameters
+        ----------
+        reason: Optional[:class:`str`]
+            The reason for ending the guild scheduled event. Shows up on the audit log.
+
+        Raises
+        ------
+        ValueError
+            The event has not started yet, has already ended, or was cancelled.
+        Forbidden
+            You do not have permissions to end the event.
+        HTTPException
+            Ending the event failed.
+
+        Returns
+        -------
+        :class:`GuildScheduledEvent`
+            The ended guild scheduled event instance.
+        """
+        if self.status is not GuildScheduledEventStatus.active:
+            raise ValueError("This event is not active")
+        return await self._edit_status(GuildScheduledEventStatus.completed, reason=reason)
+
+    async def cancel(self, *, reason: Optional[str] = None) -> GuildScheduledEvent:
+        """|coro|
+
+        Cancels the guild scheduled event.
+
+        Changes the event status to :attr:`~GuildScheduledEventStatus.cancelled`.
+
+        You must have :attr:`.Permissions.manage_events` permission to do this.
+
+        .. versionadded:: 2.7
+
+        Parameters
+        ----------
+        reason: Optional[:class:`str`]
+            The reason for cancelling the guild scheduled event. Shows up on the audit log.
+
+        Raises
+        ------
+        ValueError
+            The event has already started or ended, or was already cancelled.
+        Forbidden
+            You do not have permissions to cancel the event.
+        HTTPException
+            Cancelling the event failed.
+
+        Returns
+        -------
+        :class:`GuildScheduledEvent`
+            The cancelled guild scheduled event instance.
+        """
+        if self.status is not GuildScheduledEventStatus.scheduled:
+            raise ValueError("This event is not scheduled")
+        return await self._edit_status(GuildScheduledEventStatus.cancelled, reason=reason)
+
+    # shortcut for editing just the event status, bypasses other edit logic
+    async def _edit_status(
+        self, status: GuildScheduledEventStatus, *, reason: Optional[str]
+    ) -> GuildScheduledEvent:
+        data = await self._state.http.edit_guild_scheduled_event(
+            guild_id=self.guild_id,
+            event_id=self.id,
+            reason=reason,
+            status=status.value,
         )
         return GuildScheduledEvent(state=self._state, data=data)
 
