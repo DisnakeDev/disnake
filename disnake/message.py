@@ -1261,16 +1261,16 @@ class Message(Hashable):
         )
 
     @utils.cached_slot_property("_cs_system_content")
-    def system_content(self) -> str:
+    def system_content(self) -> Optional[str]:
         """
-        :class:`str`: A property that returns the content that is rendered
+        Optional[:class:`str`]: A property that returns the content that is rendered
         regardless of the :attr:`Message.type`.
 
         In the case of :attr:`MessageType.default` and :attr:`MessageType.reply`\\,
         this just returns the regular :attr:`Message.content`. Otherwise this
         returns an English message denoting the contents of the system message.
 
-        If the message type is unrecognised this method will return an empty string.
+        If the message type is unrecognised this method will return ``None``.
         """
         if self.type in (MessageType.default, MessageType.reply):
             return self.content
@@ -1388,8 +1388,8 @@ class Message(Hashable):
         if self.type is MessageType.auto_moderation_action:
             return self.content
 
-        # in the event of an unknown or unsupported message type, we return an empty string.
-        return ""
+        # in the event of an unknown or unsupported message type, we return nothing
+        return None
 
     async def delete(self, *, delay: Optional[float] = None) -> None:
         """|coro|
