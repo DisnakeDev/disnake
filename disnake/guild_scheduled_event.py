@@ -255,6 +255,8 @@ class GuildScheduledEvent(Hashable):
 
         Deletes the guild scheduled event.
 
+        You must have :attr:`.Permissions.manage_events` permission to do this.
+
         Raises
         ------
         Forbidden
@@ -381,6 +383,8 @@ class GuildScheduledEvent(Hashable):
         """|coro|
 
         Edits the guild scheduled event.
+
+        You must have :attr:`.Permissions.manage_events` permission to do this.
 
         .. versionchanged:: 2.6
             Updates must follow requirements of :func:`Guild.create_scheduled_event`
