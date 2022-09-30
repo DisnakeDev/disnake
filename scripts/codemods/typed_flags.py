@@ -70,7 +70,7 @@ class FlagTypings(codemod.VisitorBasedCodemodCommand):
         init: Optional[cst.FunctionDef] = None
         body = list(node.body.body)
         kwonly_params = [
-            cst.Param(cst.Name(flag_name), cst.Annotation(cst.Name("bool")))
+            cst.Param(cst.Name(flag_name), cst.Annotation(cst.Name("bool")), default=cst.Ellipsis())
             for flag_name in all_flags
         ]
         for b in body.copy():

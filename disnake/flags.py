@@ -414,10 +414,10 @@ class SystemChannelFlags(BaseFlags, inverted=True):
         def __init__(
             self,
             *,
-            guild_reminder_notifications: bool,
-            join_notification_replies: bool,
-            join_notifications: bool,
-            premium_subscriptions: bool,
+            guild_reminder_notifications: bool = ...,
+            join_notification_replies: bool = ...,
+            join_notifications: bool = ...,
+            premium_subscriptions: bool = ...,
         ):
             ...
 
@@ -562,15 +562,15 @@ class MessageFlags(BaseFlags):
         def __init__(
             self,
             *,
-            crossposted: bool,
-            ephemeral: bool,
-            failed_to_mention_roles_in_thread: bool,
-            has_thread: bool,
-            is_crossposted: bool,
-            loading: bool,
-            source_message_deleted: bool,
-            suppress_embeds: bool,
-            urgent: bool,
+            crossposted: bool = ...,
+            ephemeral: bool = ...,
+            failed_to_mention_roles_in_thread: bool = ...,
+            has_thread: bool = ...,
+            is_crossposted: bool = ...,
+            loading: bool = ...,
+            source_message_deleted: bool = ...,
+            suppress_embeds: bool = ...,
+            urgent: bool = ...,
         ):
             ...
 
@@ -733,23 +733,23 @@ class PublicUserFlags(BaseFlags):
         def __init__(
             self,
             *,
-            bug_hunter: bool,
-            bug_hunter_level_2: bool,
-            discord_certified_moderator: bool,
-            early_supporter: bool,
-            early_verified_bot_developer: bool,
-            http_interactions_bot: bool,
-            hypesquad: bool,
-            hypesquad_balance: bool,
-            hypesquad_bravery: bool,
-            hypesquad_brilliance: bool,
-            partner: bool,
-            spammer: bool,
-            staff: bool,
-            system: bool,
-            team_user: bool,
-            verified_bot: bool,
-            verified_bot_developer: bool,
+            bug_hunter: bool = ...,
+            bug_hunter_level_2: bool = ...,
+            discord_certified_moderator: bool = ...,
+            early_supporter: bool = ...,
+            early_verified_bot_developer: bool = ...,
+            http_interactions_bot: bool = ...,
+            hypesquad: bool = ...,
+            hypesquad_balance: bool = ...,
+            hypesquad_bravery: bool = ...,
+            hypesquad_brilliance: bool = ...,
+            partner: bool = ...,
+            spammer: bool = ...,
+            staff: bool = ...,
+            system: bool = ...,
+            team_user: bool = ...,
+            verified_bot: bool = ...,
+            verified_bot_developer: bool = ...,
         ):
             ...
 
@@ -965,30 +965,30 @@ class Intents(BaseFlags):
         self,
         value: Optional[int] = None,
         *,
-        automod: bool,
-        automod_configuration: bool,
-        automod_execution: bool,
-        bans: bool,
-        dm_messages: bool,
-        dm_reactions: bool,
-        dm_typing: bool,
-        emojis: bool,
-        emojis_and_stickers: bool,
-        guild_messages: bool,
-        guild_reactions: bool,
-        guild_scheduled_events: bool,
-        guild_typing: bool,
-        guilds: bool,
-        integrations: bool,
-        invites: bool,
-        members: bool,
-        message_content: bool,
-        messages: bool,
-        presences: bool,
-        reactions: bool,
-        typing: bool,
-        voice_states: bool,
-        webhooks: bool,
+        automod: bool = ...,
+        automod_configuration: bool = ...,
+        automod_execution: bool = ...,
+        bans: bool = ...,
+        dm_messages: bool = ...,
+        dm_reactions: bool = ...,
+        dm_typing: bool = ...,
+        emojis: bool = ...,
+        emojis_and_stickers: bool = ...,
+        guild_messages: bool = ...,
+        guild_reactions: bool = ...,
+        guild_scheduled_events: bool = ...,
+        guild_typing: bool = ...,
+        guilds: bool = ...,
+        integrations: bool = ...,
+        invites: bool = ...,
+        members: bool = ...,
+        message_content: bool = ...,
+        messages: bool = ...,
+        presences: bool = ...,
+        reactions: bool = ...,
+        typing: bool = ...,
+        voice_states: bool = ...,
+        webhooks: bool = ...,
     ):
         ...
 
@@ -1632,7 +1632,7 @@ class MemberCacheFlags(BaseFlags):
 
     @overload
     @_generated
-    def __init__(self, *, joined: bool, voice: bool):
+    def __init__(self, *, joined: bool = ..., voice: bool = ...):
         ...
 
     @overload
@@ -1816,15 +1816,15 @@ class ApplicationFlags(BaseFlags):
         def __init__(
             self,
             *,
-            application_command_badge: bool,
-            embedded: bool,
-            gateway_guild_members: bool,
-            gateway_guild_members_limited: bool,
-            gateway_message_content: bool,
-            gateway_message_content_limited: bool,
-            gateway_presence: bool,
-            gateway_presence_limited: bool,
-            verification_pending_guild_limit: bool,
+            application_command_badge: bool = ...,
+            embedded: bool = ...,
+            gateway_guild_members: bool = ...,
+            gateway_guild_members_limited: bool = ...,
+            gateway_message_content: bool = ...,
+            gateway_message_content_limited: bool = ...,
+            gateway_presence: bool = ...,
+            gateway_presence_limited: bool = ...,
+            verification_pending_guild_limit: bool = ...,
         ):
             ...
 
@@ -1982,7 +1982,7 @@ class ChannelFlags(BaseFlags):
     if TYPE_CHECKING:
 
         @_generated
-        def __init__(self, *, pinned: bool, require_tag: bool):
+        def __init__(self, *, pinned: bool = ..., require_tag: bool = ...):
             ...
 
     @flag_value
@@ -2077,7 +2077,7 @@ class AutoModKeywordPresets(ListBaseFlags):
     if TYPE_CHECKING:
 
         @_generated
-        def __init__(self, *, profanity: bool, sexual_content: bool, slurs: bool):
+        def __init__(self, *, profanity: bool = ..., sexual_content: bool = ..., slurs: bool = ...):
             ...
 
     @classmethod
