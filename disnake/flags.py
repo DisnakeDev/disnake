@@ -13,6 +13,7 @@ from typing import (
     Generic,
     Iterator,
     List,
+    NoReturn,
     Optional,
     Sequence,
     Tuple,
@@ -993,9 +994,7 @@ class Intents(BaseFlags):
 
     @overload
     @_generated
-    def __init__(
-        self,
-    ):
+    def __init__(self: NoReturn):
         ...
 
     def __init__(self, value: Optional[int] = None, **kwargs: bool):
@@ -1638,9 +1637,7 @@ class MemberCacheFlags(BaseFlags):
 
     @overload
     @_generated
-    def __init__(
-        self,
-    ):
+    def __init__(self: NoReturn):
         ...
 
     def __init__(self, **kwargs: bool):

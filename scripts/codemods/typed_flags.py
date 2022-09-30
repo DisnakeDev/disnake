@@ -160,7 +160,9 @@ class FlagTypings(codemod.VisitorBasedCodemodCommand):
 
             # todo: remove all parameters except the first
             empty_init = no_body_init.with_changes(
-                params=init.params.with_changes(params=init.params.params[:1], star_kwarg=None),
+                params=cst.Parameters(
+                    params=[cst.Param(cst.Name("self"), cst.Annotation(cst.Name("NoReturn")))]
+                )
             )
             full_init = no_body_init.with_deep_changes(
                 no_body_init.params, kwonly_params=kwonly_params, star_kwarg=None
@@ -175,6 +177,7 @@ class FlagTypings(codemod.VisitorBasedCodemodCommand):
 
         # we need to add the import if it doesn't exist
         codevisitors.AddImportsVisitor.add_needed_import(self.context, "typing", "overload")
+        codevisitors.AddImportsVisitor.add_needed_import(self.context, "typing", "NoReturn")
         codevisitors.AddImportsVisitor.add_needed_import(
             self.context, "disnake.utils", "_generated"
         )
