@@ -380,12 +380,21 @@ class NotificationLevel(int, Enum):
 
 
 class AuditLogActionCategory(int, Enum):
+    """Represents the category that the :class:`AuditLogAction` belongs to.
+
+    This can be retrieved via :attr:`AuditLogEntry.category`.
+    """
+
     create = 1
     delete = 2
     update = 3
 
 
 class AuditLogAction(int, Enum):
+    """Represents the type of action being done for a :class:`AuditLogEntry`\\,
+    which is retrievable via :meth:`Guild.audit_logs`.
+    """
+
     # fmt: off
     guild_update                     = 1
     channel_create                   = 10
@@ -445,6 +454,7 @@ class AuditLogAction(int, Enum):
 
     @property
     def category(self) -> Optional[AuditLogActionCategory]:
+        """The category of this :class:`AuditLogAction`."""
 
         # fmt: off
         lookup: Dict[AuditLogAction, Optional[AuditLogActionCategory]] = {
@@ -508,6 +518,7 @@ class AuditLogAction(int, Enum):
 
     @property
     def target_type(self) -> Optional[str]:
+        """The target of this :class:`AuditLogAction`."""
 
         v = self.value
         if v == -1:
@@ -615,6 +626,7 @@ class StickerFormatType(int, Enum):
 
     @property
     def file_extension(self) -> str:
+        """The file extension associated with this type of sticker."""
 
         lookup: Dict[StickerFormatType, str] = {
             StickerFormatType.png: "png",

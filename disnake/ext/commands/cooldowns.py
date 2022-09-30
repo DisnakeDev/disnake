@@ -36,6 +36,8 @@ class BucketType(int, Enum):
     role = 6
 
     def get_key(self, msg: Message) -> Any:
+        """Create a key with this bucket type for the provided message."""
+
         if self is BucketType.user:
             return msg.author.id
         elif self is BucketType.guild:
