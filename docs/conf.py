@@ -44,7 +44,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.linkcode",
     "sphinxcontrib_trio",
-    "sphinxcontrib.towncrier",
+    "sphinxcontrib.towncrier.ext",
     "hoverxref.extension",
     "exception_hierarchy",
     "attributetable",
