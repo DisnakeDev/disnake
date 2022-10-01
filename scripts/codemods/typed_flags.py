@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 
 import textwrap
-from typing import Optional
+from typing import List, Optional
 
 import libcst as cst
 import libcst.codemod.visitors as codevisitors
@@ -10,7 +10,7 @@ from libcst import codemod
 
 from disnake import flags
 
-BASE_FLAG_CLASSES = ("BaseFlags", "ListBaseFlags")
+BASE_FLAG_CLASSES = (flags.BaseFlags, flags.ListBaseFlags)
 
 
 class FlagTypings(codemod.VisitorBasedCodemodCommand):
@@ -18,9 +18,24 @@ class FlagTypings(codemod.VisitorBasedCodemodCommand):
         "Types every flag classes's init method, using overloads or if typechecking blocks."
     )
 
+    flag_classes: List[str]
+
     def transform_module(self, tree: cst.Module) -> cst.Module:
         if self.context.full_module_name != "disnake.flags":
             raise codemod.SkipFile("this module contains no definitions of flag classes.")
+
+        # we preformulate a list of all flag classes on the imported flags module
+        all_flag_classes = []
+        for attr_name in dir(flags):
+            obj = getattr(flags, attr_name)
+            if (
+                isinstance(obj, type)
+                and issubclass(obj, BASE_FLAG_CLASSES)
+                and obj not in BASE_FLAG_CLASSES
+            ):
+                all_flag_classes.append(obj.__name__)
+        self.flag_classes = all_flag_classes
+
         return super().transform_module(tree)
 
     def visit_ClassDef(self, node: cst.ClassDef) -> Optional[bool]:
@@ -28,16 +43,7 @@ class FlagTypings(codemod.VisitorBasedCodemodCommand):
         return False
 
     def leave_ClassDef(self, _: cst.ClassDef, node: cst.ClassDef):
-        # this might not match every flag, like new classes, but it works for now
-        # todo: consider preformulating a list with dir and getattr
-        # todo: on the module and simply checking the class name here
-        if m.matches(node.name, m.OneOf(*map(m.Name, BASE_FLAG_CLASSES))):
-            return node
-        for base in node.bases:
-            if m.matches(base, m.OneOf(*[m.Arg(m.Name(klass)) for klass in BASE_FLAG_CLASSES])):
-                # valid node
-                break
-        else:
+        if not m.matches(node.name, m.OneOf(*map(m.Name, self.flag_classes))):
             return node
 
         # now the meat of the function
