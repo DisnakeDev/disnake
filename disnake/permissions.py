@@ -1,27 +1,4 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
@@ -221,6 +198,8 @@ class Permissions(BaseFlags):
         speak: bool = ...,
         start_embedded_activities: bool = ...,
         stream: bool = ...,
+        use_application_commands: bool = ...,
+        use_embedded_activities: bool = ...,
         use_external_emojis: bool = ...,
         use_external_stickers: bool = ...,
         use_slash_commands: bool = ...,
@@ -325,7 +304,7 @@ class Permissions(BaseFlags):
            :attr:`request_to_speak` permissions.
 
         .. versionchanged:: 2.3
-            Added :attr:`start_embedded_activities` permission.
+            Added :attr:`use_embedded_activities` permission.
         """
         guild_specific_perms = {
             "administrator",
@@ -425,13 +404,13 @@ class Permissions(BaseFlags):
         "Voice" permissions from the official Discord UI set to ``True``.
 
         .. versionchanged:: 2.3
-            Added :attr:`start_embedded_activities` permission.
+            Added :attr:`use_embedded_activities` permission.
         """
         return cls(
             connect=True,
             speak=True,
             stream=True,
-            start_embedded_activities=True,
+            use_embedded_activities=True,
             use_voice_activation=True,
             priority_speaker=True,
             mute_members=True,
@@ -563,6 +542,8 @@ class Permissions(BaseFlags):
         speak: bool = ...,
         start_embedded_activities: bool = ...,
         stream: bool = ...,
+        use_application_commands: bool = ...,
+        use_embedded_activities: bool = ...,
         use_external_emojis: bool = ...,
         use_external_stickers: bool = ...,
         use_slash_commands: bool = ...,
@@ -831,10 +812,21 @@ class Permissions(BaseFlags):
         return 1 << 30
 
     @flag_value
+    def use_application_commands(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can use application commands.
+
+        .. versionadded:: 2.6
+        """
+        return 1 << 31
+
+    @make_permission_alias("use_application_commands")
     def use_slash_commands(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can use slash commands.
+        """:class:`bool`: An alias for :attr:`use_application_commands`.
 
         .. versionadded:: 1.7
+
+        .. versionchanged:: 2.6
+            Became an alias for :attr:`use_application_commands`.
         """
         return 1 << 31
 
@@ -903,11 +895,22 @@ class Permissions(BaseFlags):
         return 1 << 38
 
     @flag_value
+    def use_embedded_activities(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can use activities (applications
+        with the :attr:`~ApplicationFlags.embedded` flag) in a voice channel.
+
+        .. versionadded:: 2.6
+        """
+        return 1 << 39
+
+    @make_permission_alias("use_embedded_activities")
     def start_embedded_activities(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can launch activities (applications
-        with the :attr:`embedded <ApplicationFlags.embedded>` flag) in a voice channel.
+        """:class:`bool`: An alias for :attr:`use_embedded_activities`.
 
         .. versionadded:: 2.3
+
+        .. versionchanged:: 2.6
+            Became an alias for :attr:`use_embedded_activities`.
         """
         return 1 << 39
 
@@ -984,57 +987,61 @@ class PermissionOverwrite:
 
     __slots__ = ("_values",)
 
+    # n. b. this typechecking block must be first and seperate from the secondary one, due to codemodding
+    if TYPE_CHECKING:
+        add_reactions: Optional[bool]
+        administrator: Optional[bool]
+        attach_files: Optional[bool]
+        ban_members: Optional[bool]
+        change_nickname: Optional[bool]
+        connect: Optional[bool]
+        create_forum_threads: Optional[bool]
+        create_instant_invite: Optional[bool]
+        create_private_threads: Optional[bool]
+        create_public_threads: Optional[bool]
+        deafen_members: Optional[bool]
+        embed_links: Optional[bool]
+        external_emojis: Optional[bool]
+        external_stickers: Optional[bool]
+        kick_members: Optional[bool]
+        manage_channels: Optional[bool]
+        manage_emojis: Optional[bool]
+        manage_emojis_and_stickers: Optional[bool]
+        manage_events: Optional[bool]
+        manage_guild: Optional[bool]
+        manage_messages: Optional[bool]
+        manage_nicknames: Optional[bool]
+        manage_permissions: Optional[bool]
+        manage_roles: Optional[bool]
+        manage_threads: Optional[bool]
+        manage_webhooks: Optional[bool]
+        mention_everyone: Optional[bool]
+        moderate_members: Optional[bool]
+        move_members: Optional[bool]
+        mute_members: Optional[bool]
+        priority_speaker: Optional[bool]
+        read_message_history: Optional[bool]
+        read_messages: Optional[bool]
+        request_to_speak: Optional[bool]
+        send_messages: Optional[bool]
+        send_messages_in_threads: Optional[bool]
+        send_tts_messages: Optional[bool]
+        speak: Optional[bool]
+        start_embedded_activities: Optional[bool]
+        stream: Optional[bool]
+        use_application_commands: Optional[bool]
+        use_embedded_activities: Optional[bool]
+        use_external_emojis: Optional[bool]
+        use_external_stickers: Optional[bool]
+        use_slash_commands: Optional[bool]
+        use_voice_activation: Optional[bool]
+        view_audit_log: Optional[bool]
+        view_channel: Optional[bool]
+        view_guild_insights: Optional[bool]
+
     if TYPE_CHECKING:
         VALID_NAMES: ClassVar[Set[str]]
         PURE_FLAGS: ClassVar[Set[str]]
-        # NOTE: these are not automatically provided with codemodding
-        create_instant_invite: Optional[bool]
-        kick_members: Optional[bool]
-        ban_members: Optional[bool]
-        administrator: Optional[bool]
-        manage_channels: Optional[bool]
-        manage_guild: Optional[bool]
-        add_reactions: Optional[bool]
-        view_audit_log: Optional[bool]
-        priority_speaker: Optional[bool]
-        stream: Optional[bool]
-        read_messages: Optional[bool]
-        view_channel: Optional[bool]
-        send_messages: Optional[bool]
-        create_forum_threads: Optional[bool]
-        send_tts_messages: Optional[bool]
-        manage_messages: Optional[bool]
-        embed_links: Optional[bool]
-        attach_files: Optional[bool]
-        read_message_history: Optional[bool]
-        mention_everyone: Optional[bool]
-        external_emojis: Optional[bool]
-        use_external_emojis: Optional[bool]
-        view_guild_insights: Optional[bool]
-        connect: Optional[bool]
-        speak: Optional[bool]
-        mute_members: Optional[bool]
-        deafen_members: Optional[bool]
-        move_members: Optional[bool]
-        use_voice_activation: Optional[bool]
-        change_nickname: Optional[bool]
-        manage_nicknames: Optional[bool]
-        manage_roles: Optional[bool]
-        manage_permissions: Optional[bool]
-        manage_webhooks: Optional[bool]
-        manage_emojis: Optional[bool]
-        manage_emojis_and_stickers: Optional[bool]
-        use_slash_commands: Optional[bool]
-        request_to_speak: Optional[bool]
-        manage_events: Optional[bool]
-        manage_threads: Optional[bool]
-        create_public_threads: Optional[bool]
-        create_private_threads: Optional[bool]
-        external_stickers: Optional[bool]
-        use_external_stickers: Optional[bool]
-        send_messages_in_threads: Optional[bool]
-        start_embedded_activities: Optional[bool]
-        moderate_members: Optional[bool]
 
     @overload
     @_generated
@@ -1081,6 +1088,8 @@ class PermissionOverwrite:
         speak: Optional[bool] = ...,
         start_embedded_activities: Optional[bool] = ...,
         stream: Optional[bool] = ...,
+        use_application_commands: Optional[bool] = ...,
+        use_embedded_activities: Optional[bool] = ...,
         use_external_emojis: Optional[bool] = ...,
         use_external_stickers: Optional[bool] = ...,
         use_slash_commands: Optional[bool] = ...,
@@ -1206,6 +1215,8 @@ class PermissionOverwrite:
         speak: Optional[bool] = ...,
         start_embedded_activities: Optional[bool] = ...,
         stream: Optional[bool] = ...,
+        use_application_commands: Optional[bool] = ...,
+        use_embedded_activities: Optional[bool] = ...,
         use_external_emojis: Optional[bool] = ...,
         use_external_stickers: Optional[bool] = ...,
         use_slash_commands: Optional[bool] = ...,

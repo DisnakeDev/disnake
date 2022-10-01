@@ -1,1 +1,0 @@
-Update typings to explicitly specify optional types for parameters with a ``None`` default.

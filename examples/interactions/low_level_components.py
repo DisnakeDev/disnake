@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """
 An example on how to send and process components without using views.
 """
@@ -22,7 +24,8 @@ bot = commands.Bot(command_prefix=commands.when_mentioned)
 @bot.command()
 async def send_button(ctx: commands.Context):
     await ctx.send(
-        "Here's a button!", components=disnake.ui.Button(label="Click me!", custom_id="cool_button")
+        "Here's a button!",
+        components=disnake.ui.Button(label="Click me!", custom_id="cool_button"),
     )
 
 
@@ -30,8 +33,7 @@ async def send_button(ctx: commands.Context):
 async def send_select(ctx: commands.Context):
     await ctx.send(
         "Here's a select!",
-        components=disnake.ui.Select(options=["1", "2", "3"], custom_id="cool_select")
-        # Note: specifying select options in a list/dict requires disnake version 2.5.0 or newer.
+        components=disnake.ui.Select(options=["1", "2", "3"], custom_id="cool_select"),
     )
 
 
@@ -44,7 +46,8 @@ async def send_select(ctx: commands.Context):
 async def send_all_the_buttons(ctx: commands.Context):
     buttons = []
     for y in range(4):
-        buttons.append(row := disnake.ui.ActionRow())
+        row = disnake.ui.ActionRow()
+        buttons.append(row)
         for x in range(4):
             row.add_button(label=f"({x}, {y})", custom_id=f"gridbutton_{x}_{y}")
 
@@ -66,18 +69,18 @@ async def send_all_the_buttons(ctx: commands.Context):
 @bot.listen("on_button_click")
 async def cool_button_listener(inter: disnake.MessageInteraction):
     if inter.component.custom_id != "cool_button":
-        # This is used to filter interactions for components other than the button we wish to
-        # process with this listener. Since `inter.component` returns the component that triggered
-        # the interaction, in this case the button that was pressed, by means of comparison we can
-        # filter any other button presses out.
+        # Since `inter.component` returns the component that triggered the interaction,
+        # this is used to filter interactions for components other than the button we wish to
+        # process with this listener.
         return
 
-    # And thus, we end up with only buttons sent by command `send_button`.
+    # Thus, we end up with only buttons sent by the `send_button` command,
+    # since those buttons were sent with `custom_id=cool_button`.
     # At this point, this listener is practically identical to the callback of a view button.
     await inter.response.send_message("You clicked the cool button!")
 
 
-# Similarly, a listener for the select can be created:
+# Similarly, a listener for the select menu can be created:
 
 
 @bot.listen("on_dropdown")
@@ -86,7 +89,6 @@ async def cool_select_listener(inter: disnake.MessageInteraction):
         # The same principle as for the button, any selects with the wrong `custom_id` are ignored.
         return
 
-    # At this point, this listener is practically identical to the callback of a view select.
     await inter.response.send_message(f"You selected {inter.values}!")
 
 
@@ -111,7 +113,13 @@ async def grid_listener(inter: disnake.MessageInteraction):
 
 # Note that listeners can also be added inside of cogs. For this, the only changes that would have
 # to be made are to use `commands.Cog.listener` instead of `bot.listen`, and the first argument of
-# the listener would have to be self.
+# the listener would have to be `self`.
 
 
-bot.run(os.getenv("BOT_TOKEN"))
+@bot.event
+async def on_ready():
+    print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------")
+
+
+if __name__ == "__main__":
+    bot.run(os.getenv("BOT_TOKEN"))

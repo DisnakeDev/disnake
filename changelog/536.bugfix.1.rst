@@ -1,1 +1,0 @@
-Dispatch :func:`disnake.on_reaction_remove` for :class:`.Thread` instances.

@@ -1,26 +1,7 @@
-# The MIT License (MIT)
-
-# Copyright (c) 2021-present EQUENOS
-
-# Permission is hereby granted, free of charge, to any person obtaining a
-# copy of this software and associated documentation files (the "Software"),
-# to deal in the Software without restriction, including without limitation
-# the rights to use, copy, modify, merge, publish, distribute, sublicense,
-# and/or sell copies of the Software, and to permit persons to whom the
-# Software is furnished to do so, subject to the following conditions:
-
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-# DEALINGS IN THE SOFTWARE.
+# SPDX-License-Identifier: MIT
 
 """Repsonsible for handling Params for slash commands"""
+
 from __future__ import annotations
 
 import asyncio
@@ -38,9 +19,11 @@ from typing import (
     Dict,
     Final,
     FrozenSet,
+    Generic,
     List,
     Literal,
     Optional,
+    Sequence,
     Tuple,
     Type,
     TypeVar,
@@ -63,20 +46,36 @@ from disnake.utils import maybe_coroutine
 from . import errors
 from .converter import CONVERTER_MAPPING
 
+T_ = TypeVar("T_")
+
 if TYPE_CHECKING:
-    from typing_extensions import Self
+    from typing_extensions import Concatenate, ParamSpec, Self, TypeGuard
 
     from disnake.app_commands import Choices
     from disnake.i18n import LocalizationValue, LocalizedOptional
     from disnake.types.interactions import ApplicationCommandOptionChoiceValue
 
+    from .base_core import CogT
+    from .cog import Cog
     from .slash_core import InvokableSlashCommand, SubCommand
 
     AnySlashCommand = Union[InvokableSlashCommand, SubCommand]
 
-    from typing_extensions import TypeGuard
+    P = ParamSpec("P")
+
+    InjectionCallback = Union[
+        Callable[Concatenate[CogT, P], T_],
+        Callable[P, T_],
+    ]
+    AnyAutocompleter = Union[
+        Sequence[Any],
+        Callable[Concatenate[ApplicationCommandInteraction, str, P], Any],
+        Callable[Concatenate[CogT, ApplicationCommandInteraction, str, P], Any],
+    ]
 
     TChoice = TypeVar("TChoice", bound=ApplicationCommandOptionChoiceValue)
+else:
+    P = TypeVar("P")
 
 if sys.version_info >= (3, 10):
     from types import EllipsisType, UnionType
@@ -99,6 +98,8 @@ __all__ = (
     "Param",
     "param",
     "inject",
+    "injection",
+    "Injection",
     "option_enum",
     "register_injection",
     "converter_method",
@@ -112,7 +113,7 @@ def issubclass_(obj: Any, tp: Union[TypeT, Tuple[TypeT, ...]]) -> TypeGuard[Type
         # Assume we have a type hint
         if get_origin(obj) in (Union, UnionType, Optional):
             obj = get_args(obj)
-            return any(issubclass(o, tp) for o in obj)
+            return any(isinstance(o, type) and issubclass(o, tp) for o in obj)
         else:
             # Other type hint specializations are not supported
             return False
@@ -179,19 +180,103 @@ def _xt_to_xe(xe: Optional[float], xt: Optional[float], direction: float = 1) ->
         return None
 
 
-class Injection:
+class Injection(Generic[P, T_]):
+    """Represents a slash command injection.
+
+    .. versionadded:: 2.3
+
+    .. versionchanged:: 2.6
+        Added keyword-only argument ``autocompleters``.
+
+    Attributes
+    ----------
+    function: Callable
+        The underlying injection function.
+    autocompleters: Dict[:class:`str`, Callable]
+        A mapping of injection's option names to their respective autocompleters.
+
+        .. versionadded:: 2.6
+    """
+
     _registered: ClassVar[Dict[Any, Injection]] = {}
 
-    function: Callable
+    def __init__(
+        self,
+        function: InjectionCallback[CogT, P, T_],
+        *,
+        autocompleters: Optional[Dict[str, Callable]] = None,
+    ) -> None:
+        if autocompleters is not None:
+            for autocomp in autocompleters.values():
+                classify_autocompleter(autocomp)
 
-    def __init__(self, function: Callable) -> None:
-        self.function = function
+        self.function: InjectionCallback[CogT, P, T_] = function
+        self.autocompleters: Dict[str, Callable] = autocompleters or {}
+        self._injected: Optional[Cog] = None
+
+    def __get__(self, obj: Optional[Any], _: Type[Any]) -> Self:
+        if obj is None:
+            return self
+
+        copy = type(self)(function=self.function, autocompleters=self.autocompleters)
+        copy._injected = obj
+        setattr(obj, self.function.__name__, copy)
+
+        return copy
+
+    def __call__(self, *args: P.args, **kwargs: P.kwargs) -> T_:
+        """Calls the underlying function that the injection holds.
+
+        .. versionadded:: 2.6
+        """
+        if self._injected is not None:
+            return self.function(self._injected, *args, **kwargs)  # type: ignore
+        else:
+            return self.function(*args, **kwargs)  # type: ignore
 
     @classmethod
-    def register(cls, function: CallableT, annotation: Any) -> CallableT:
-        self = cls(function)
+    def register(
+        cls,
+        function: InjectionCallback[CogT, P, T_],
+        annotation: Any,
+        *,
+        autocompleters: Optional[Dict[str, Callable]] = None,
+    ) -> Injection[P, T_]:
+        self = cls(function, autocompleters=autocompleters)
         cls._registered[annotation] = self
-        return function
+        return self
+
+    def autocomplete(self, option_name: str) -> Callable[[CallableT], CallableT]:
+        """A decorator that registers an autocomplete function for the specified option.
+
+        .. versionadded:: 2.6
+
+        Parameters
+        ----------
+        option_name: :class:`str`
+            The name of the option.
+
+        Raises
+        ------
+        ValueError
+            This injection already has an autocompleter set for the given option
+        TypeError
+            ``option_name`` is not :class:`str`
+        """
+        if not isinstance(option_name, str):
+            raise TypeError("option_name must be a type of str")
+
+        if option_name in self.autocompleters:
+            raise ValueError(
+                f"This injection already has an autocompleter set for option '{option_name}'"
+            )
+
+        def decorator(func: CallableT) -> CallableT:
+            classify_autocompleter(func)
+            self.autocompleters[option_name] = func
+            return func
+
+        return decorator
 
 
 class RangeMeta(type):
@@ -411,7 +496,7 @@ class ParamInfo:
         description: LocalizedOptional = None,
         converter: Optional[Callable[[ApplicationCommandInteraction, Any], Any]] = None,
         convert_default: bool = False,
-        autcomplete: Optional[Callable[[ApplicationCommandInteraction, str], Any]] = None,
+        autocomplete: Optional[AnyAutocompleter] = None,
         choices: Optional[Choices] = None,
         type: Optional[type] = None,
         channel_types: Optional[List[ChannelType]] = None,
@@ -435,7 +520,7 @@ class ParamInfo:
         self.param_name: str = self.name
         self.converter = converter
         self.convert_default = convert_default
-        self.autocomplete = autcomplete
+        self.autocomplete = autocomplete
         self.choices = choices or []
         self.type = type or str
         self.channel_types = channel_types or []
@@ -778,6 +863,39 @@ def isolate_self(
     return (cog_param, inter_param), parameters
 
 
+def classify_autocompleter(autocompleter: AnyAutocompleter) -> None:
+    """Detects whether an autocomplete function can take a cog as the first argument.
+    The result is then saved as a boolean value in `func.__has_cog_param__`
+    """
+    if not callable(autocompleter):
+        return
+
+    sig = inspect.signature(autocompleter)
+    positional_param_count = 0
+
+    for param in sig.parameters.values():
+        if (
+            param.kind in (param.POSITIONAL_ONLY, param.POSITIONAL_OR_KEYWORD)
+        ) and param.default is param.empty:
+            positional_param_count += 1
+        else:
+            break
+
+    if positional_param_count < 2:
+        raise ValueError(
+            "An autocomplete function should have 2 or 3 non-optional positional arguments. "
+            "For example, foo(inter, string) or foo(cog, inter, string)"
+        )
+
+    if positional_param_count > 3:
+        raise ValueError(
+            "Any additional arguments of an autocomplete function "
+            "(apart from the first 3) should be keyword-only"
+        )
+
+    autocompleter.__has_cog_param__ = positional_param_count == 3
+
+
 def collect_params(
     function: Callable,
 ) -> Tuple[Optional[str], Optional[str], List[ParamInfo], Dict[str, Injection]]:
@@ -916,7 +1034,15 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
         raise TypeError(f"Couldn't find an interaction parameter in {command.callback}")
 
     for injection in injections.values():
-        params += collect_nested_params(injection.function)
+        collected = collect_nested_params(injection.function)
+        if injection.autocompleters:
+            lookup = {p.name: p for p in collected}
+            for name, func in injection.autocompleters.items():
+                param = lookup.get(name)
+                if param is None:
+                    raise ValueError(f"Option '{name}' doesn't exist in '{command.qualified_name}'")
+                param.autocomplete = func
+        params += collected
 
     params = sorted(params, key=lambda param: not param.required)
 
@@ -1025,6 +1151,12 @@ def Param(
     -------
     :class:`ParamInfo`
         An instance with the option info.
+
+        .. note::
+
+            In terms of typing, this returns ``Any`` to avoid typing issues,
+            but at runtime this is always a :class:`ParamInfo` instance.
+            You can find a more in-depth explanation :ref:`here <why_params_and_injections_return_any>`.
     """
     description = kwargs.pop("desc", description)
     converter = kwargs.pop("conv", converter)
@@ -1043,7 +1175,7 @@ def Param(
         choices=choices,
         converter=converter,
         convert_default=convert_defaults,
-        autcomplete=autocomplete,
+        autocomplete=autocomplete,
         channel_types=channel_types,
         lt=lt,
         le=le,
@@ -1058,13 +1190,77 @@ def Param(
 param = Param
 
 
-def inject(function: Callable[..., Any]) -> Any:
+def inject(
+    function: Callable[..., Any],
+    *,
+    autocompleters: Optional[Dict[str, Callable]] = None,
+) -> Any:
     """A special function to use the provided function for injections.
     This should be assigned to a parameter of a function representing your slash command.
 
     .. versionadded:: 2.3
+
+    .. versionchanged:: 2.6
+        Added ``autocompleters`` keyword-only argument.
+
+    Parameters
+    ----------
+    function: Callable
+        The injection function.
+    autocompleters: Dict[:class:`str`, Callable]
+        A mapping of the injection's option names to their respective autocompleters.
+
+        See also :func:`Injection.autocomplete`.
+
+        .. versionadded:: 2.6
+
+    Returns
+    -------
+    :class:`Injection`
+        The resulting injection
+
+        .. note::
+
+            The return type is annotated with ``Any`` to avoid typing issues caused by how this
+            extension works, but at runtime this is always an :class:`Injection` instance.
+            You can find more in-depth explanation :ref:`here <why_params_and_injections_return_any>`.
     """
-    return Injection(function)
+
+    return Injection(function, autocompleters=autocompleters)
+
+
+def injection(
+    *,
+    autocompleters: Optional[Dict[str, Callable]] = None,
+) -> Callable[[Callable[..., Any]], Any]:
+    """Decorator interface for :func:`inject`.
+    You can then assign this value to your slash commands' parameters.
+
+    .. versionadded:: 2.6
+
+    Parameters
+    ----------
+    autocompleters: Dict[:class:`str`, Callable]
+        A mapping of the injection's option names to their respective autocompleters.
+
+        See also :func:`Injection.autocomplete`.
+
+    Returns
+    -------
+    Callable[[Callable[..., Any]], :class:`Injection`]
+        Decorator which turns your injection function into actual :class:`Injection`.
+
+        .. note::
+
+            The decorator return type is annotated with ``Any`` to avoid typing issues caused by how this
+            extension works, but at runtime this is always an :class:`Injection` instance.
+            You can find more in-depth explanation :ref:`here <why_params_and_injections_return_any>`.
+    """
+
+    def decorator(function: Callable[..., Any]) -> Injection:
+        return inject(function, autocompleters=autocompleters)
+
+    return decorator
 
 
 def option_enum(
@@ -1115,10 +1311,31 @@ else:
         return ConverterMethod(function)
 
 
-def register_injection(function: CallableT) -> CallableT:
+def register_injection(
+    function: InjectionCallback[CogT, P, T_],
+    *,
+    autocompleters: Optional[Dict[str, Callable]] = None,
+) -> Injection[P, T_]:
     """A decorator to register a global injection.
 
     .. versionadded:: 2.3
+
+    .. versionchanged:: 2.6
+        Now returns :class:`disnake.ext.commands.Injection`.
+
+    .. versionchanged:: 2.6
+        Added ``autocompleters`` keyword-only argument.
+
+    Raises
+    ------
+    TypeError
+        Injection doesn't have a return annotation,
+        or tries to overwrite builtin types.
+
+    Returns
+    -------
+    :class:`Injection`
+        The injection being registered.
     """
     sig = signature(function)
     tp = sig.return_annotation
@@ -1128,5 +1345,4 @@ def register_injection(function: CallableT) -> CallableT:
     if tp in ParamInfo.TYPES:
         raise TypeError("Injection cannot overwrite builtin types")
 
-    Injection.register(function, sig.return_annotation)
-    return function
+    return Injection.register(function, sig.return_annotation, autocompleters=autocompleters)

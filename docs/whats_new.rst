@@ -1,3 +1,5 @@
+.. SPDX-License-Identifier: MIT
+
 .. currentmodule:: disnake
 
 .. |commands| replace:: [:ref:`ext.commands <discord_ext_commands>`]
@@ -14,6 +16,272 @@ in specific versions.
 .. towncrier-draft-entries:: |release| [UNRELEASED]
 
 .. towncrier release notes start
+
+.. _vp2p6p0:
+
+v2.6.0
+------
+
+This release adds support for new forum channel features (like tags) as well as auto moderation, among other things. See below for more.
+
+Also note the breaking changes listed below, which may require additional code changes.
+
+
+Breaking Changes
+~~~~~~~~~~~~~~~~
+- Update :class:`Client` classes such that their initialization kwargs are explicitly stated and typehinted. (:issue:`371`)
+    - Replaced ``**kwargs`` / ``**options`` with explicit keyword arguments for the ``__init__`` methods of :class:`Client`, :class:`ext.commands.Bot`, :class:`ext.commands.InteractionBot`, all ``AutoSharded*`` variants, and all relevant parent classes.
+- Call new :func:`disnake.on_gateway_error` instead of letting exceptions propagate that occurred while deserializing a received gateway event. (:issue:`401`)
+- Rework :class:`.Embed` internals. (:issue:`435`)
+    - :meth:`Embed.set_footer` now requires the ``text`` parameter.
+    - :attr:`Embed.type` is now optional, although this could previously be ``Embed.Empty``.
+    - ``EmptyEmbed`` and ``Embed.Empty`` are deprecated in favor of ``None``, have been removed from the documentation, and will result in type-checking errors.
+- Refactor :class:`.ui.ActionRow` with complete typings. (:issue:`462`)
+    - :attr:`.ui.ActionRow.children` now returns an immutable :class:`Sequence` instead of a :class:`list`.
+- Remove ``InvalidArgument`` and replace it with :exc:`TypeError` and :exc:`ValueError`. (:issue:`471`)
+- Rename ``channel_id`` parameter to ``channel`` on :attr:`Guild.create_scheduled_event` and :meth:`GuildScheduledEvent.edit`. (:issue:`548`, :issue:`590`)
+- Raise :exc:`TypeError` instead of :exc:`ValueError` in :class:`GuildScheduledEvent` validation. (:issue:`560`)
+- Assume the local timezone instead of UTC when providing naive datetimes to scheduled event related methods. (:issue:`579`)
+- Update :class:`ModalInteraction` typings. (:issue:`583`)
+    - ``ModalInteraction.walk_components`` is replaced by :meth:`ModalInteraction.walk_raw_components`.
+- Change the default of the ``ignore_timeout`` parameter for all ``permissions_for`` methods to ``False``. (:issue:`672`)
+- Update activity attributes to match API types. (:issue:`685`)
+    - Make :attr:`Spotify.start`, :attr:`Spotify.end`, :attr:`Spotify.duration` optional.
+    - Remove :attr:`Activity.timestamps`, values are accessible through :attr:`Activity.start`, :attr:`Activity.end`.
+    - Change type of :attr:`Activity.buttons` to List[:class:`str`].
+- Remove :attr:`WidgetMember.nick`; :attr:`WidgetMember.name` contains the member's nickname, if set. (:issue:`736`)
+- |commands| Change :func:`has_permissions <ext.commands.has_permissions>` and :func:`bot_has_permissions <ext.commands.bot_has_permissions>` checks to take timeouts into consideration. (:issue:`318`, :issue:`672`)
+- |commands| Change :func:`commands.register_injection <ext.commands.register_injection>` to now return an instance of :class:`Injection <ext.commands.Injection>`. (:issue:`669`)
+- |commands| Changed parameters of :attr:`SubCommand <ext.commands.SubCommand>` and  :attr:`SubCommandGroup <ext.commands.SubCommandGroup>` to now require their parent command. (:issue:`759`)
+    - This only affects code that creates an instance of SubCommand or SubCommandGroup manually by calling their constructors.
+- |tasks| Change :class:`.ext.tasks.Loop` to use keyword-only parameters. (:issue:`655`)
+
+Deprecations
+~~~~~~~~~~~~
+- ``EmptyEmbed`` and ``Embed.Empty`` are deprecated in favor of ``None``, have been removed from the documentation, and will result in type-checking errors. (:issue:`435`, :issue:`768`)
+- The ``delete_message_days`` parameter of :func:`Guild.ban` and :func:`Member.ban` is deprecated in favour of ``clean_history_duration``. (:issue:`659`)
+- |commands| Using ``command_prefix=None`` with :class:`~disnake.ext.commands.Bot` is now deprecated in favour of :class:`~disnake.ext.commands.InteractionBot`. (:issue:`689`)
+
+New Features
+~~~~~~~~~~~~
+- Add custom type support for :func:`disnake.ui.button` and :func:`disnake.ui.select` decorators using ``cls`` parameter. (:issue:`281`)
+- Add :func:`disnake.on_gateway_error`, :func:`Client.on_gateway_error` and ``enable_gateway_error_handler`` client parameter. (:issue:`401`)
+- Update channel edit method annotations. (:issue:`418`)
+    - ``slowmode_delay`` and ``default_auto_archive_duration`` are now optional.
+    - ``category`` may now be any :class:`abc.Snowflake`, not necessarily a :class:`CategoryChannel`.
+- Add new :class:`.ui.ActionRow` methods: :meth:`~.ui.ActionRow.insert_item`, :meth:`~.ui.ActionRow.clear_items`, :meth:`~.ui.ActionRow.remove_item`, :meth:`~.ui.ActionRow.pop`, as well as an ``index`` parameter for :meth:`~.ui.ActionRow.add_button`. (:issue:`462`)
+    - Also support item access/deletion through ``row[i]``.
+- Expose the icon and recipient data for :class:`Invite`\s whose target is a channel of type :attr:`ChannelType.group`. (:issue:`498`)
+- Implement auto moderation. (:issue:`530`, :issue:`698`, :issue:`757`)
+    - New types: :class:`AutoModAction`, :class:`AutoModTriggerMetadata`, :class:`AutoModRule`, :class:`AutoModActionExecution`
+    - New enums: :class:`AutoModTriggerType`, :class:`AutoModEventType`, :class:`AutoModActionType`
+    - New flags: :class:`AutoModKeywordPresets`
+    - New methods: :func:`Guild.create_automod_rule`, :func:`Guild.fetch_automod_rule`, :func:`Guild.fetch_automod_rules`
+    - New intents: :attr:`Intents.automod_configuration`, :attr:`Intents.automod_execution` (+ :attr:`Intents.automod` shortcut for both)
+    - New events: :func:`on_automod_rule_create`, :func:`on_automod_rule_update`, :func:`on_automod_rule_delete`, :func:`on_automod_action_execution`
+    - \+ all the relevant :class:`AuditLogEntry` and :class:`AuditLogChanges` fields.
+- Expose additional provided objects by Discord in audit log handling. (:issue:`532`)
+    - Also adds :class:`PartialIntegration`, and an ``integration`` attribute on :attr:`AuditLogEntry.extra` when the type is :attr:`AuditLogAction.application_command_permission_update`.
+- Add :attr:`.Webhook.application_id` for accessing the ID of the app that created the webhook, if any. (:issue:`534`)
+- Use :attr:`SessionStartLimit.remaining` when attempting to connect to Discord. (:issue:`537`)
+    - Now raises :exc:`SessionStartLimitReached` if there are not enough remaining starts to start the client.
+- Add multiple converters for previously undocumented fields for audit logs. (:issue:`546`)
+
+    :class:`AuditLogDiff` can now have the following attributes with the specified types:
+
+    - :attr:`~AuditLogDiff.flags` --- :class:`ChannelFlags`
+    - :attr:`~AuditLogDiff.system_channel_flags` --- :class:`SystemChannelFlags`
+
+    ``AuditLogDiff.unicode_emoji``, used for role icons, was renamed to :attr:`AuditLogDiff.emoji`.
+- Implement :class:`ChannelFlags` on all channel types. (:issue:`547`)
+- Make all \*InteractionData dataclasses dicts (:class:`MessageInteractionData`, :class:`ApplicationCommandInteractionData`, and so on). (:issue:`549`)
+- Add support for :class:`.Webhook` in :class:`ForumChannel` instances. (:issue:`550`)
+- Add :attr:`GuildScheduledEvent.created_at` and :attr:`GuildScheduledEvent.url` properties. (:issue:`561`)
+- Add the :func:`Embed.check_limits` method to check if an Embed would be rejected from Discord. (:issue:`567`)
+- Add ``bitrate`` parameter to :meth:`Guild.create_stage_channel`. (:issue:`571`)
+- Add :meth:`Guild.edit_mfa_level` for modifying the guild's MFA level. (:issue:`574`)
+- Add the ``slowmode_delay`` parameter to :meth:`Guild.create_voice_channel`. (:issue:`582`)
+- Add :attr:`ModalInteractionData.components`. (:issue:`583`)
+- Add the :attr:`Interaction.app_permissions` property, which shows the app permissions in the channel. (:issue:`586`)
+- Allow ``entity_type`` parameter :attr:`Guild.create_scheduled_event` to be missing. (:issue:`590`)
+- Add ``min_length`` and ``max_length`` support to :class:`.Option` and :class:`.ext.commands.Param`. (:issue:`593`)
+- Add :attr:`.AllowedMentions.from_message` for constructing an allowed mentions object from a :class:`Message`. (:issue:`603`)
+- Add support of more operators to all ``Flag`` classes. This list includes :class:`Intents` and :class:`Permissions`. (:issue:`605`, :issue:`615`, :issue:`616`)
+    - ``&``, ``|``, ``^``, and ``~`` bitwise operator support.
+    - ``<``, ``<=``, ``>``, and ``>=`` comparsion operator support.
+    - Support ``|`` operators between flag instances and flag values.
+    - Support ``~`` operator on flag values, which create a flag instance with all except this specific flag enabled.
+    - Support ``|`` operators between flag values which create a flag instance with both flag values enabled.
+- Support passing raw integer value to :class:`Intents` constructor. (:issue:`613`)
+- Add :attr:`GuildScheduledEventStatus.cancelled` as an alias for :attr:`~GuildScheduledEventStatus.canceled`. (:issue:`630`)
+- Add :func:`on_raw_member_remove` and :func:`on_raw_member_update` events, with the :class:`RawGuildMemberRemoveEvent` model. (:issue:`638`)
+- Add :attr:`Thread.message_count`, :attr:`Thread.total_message_sent` and :attr:`Message.position` attributes. (:issue:`640`)
+- Add support for setting :class:`ChannelFlags` directly when editing a channel or thread. (:issue:`642`)
+- Add :attr:`ApplicationFlags.application_command_badge` flag which shows whether an application has at least one globally registered application command. (:issue:`649`)
+- Add support for :attr:`Interaction.data` which guarantees that every subclass of ``Interaction`` has the ``data`` attribute. (:issue:`654`)
+- Add ``clean_history_duration`` parameter to :func:`Guild.ban` and :func:`Member.ban`. (:issue:`659`)
+- Add :attr:`Game.assets`. (:issue:`685`)
+- Add permission typings to all methods that take permissions directly, for example :func:`disnake.abc.GuildChannel.set_permissions` and :func:`disnake.ext.commands.bot_has_permissions` to name a few. (:issue:`708`)
+- Add :class:`GatewayParams` for configuring gateway connection parameters (e.g. disabling compression). (:issue:`709`)
+- Add ``resume_gateway_url`` handling to gateway/websocket resume flow. (:issue:`709`, :issue:`769`)
+- Add support for modifying the ``INVITES_DISABLED`` guild feature using :func:`Guild.edit`. (:issue:`718`)
+- Implement remaining forum channel features. (:issue:`724`)
+    - Add :class:`ForumTag` dataclass.
+    - Add :attr:`ForumChannel.available_tags` and :attr:`Thread.applied_tags`.
+    - Add :func:`ForumChannel.get_tag`, :func:`ForumChannel.get_tag_by_name`, :func:`Thread.add_tags` and :func:`Thread.remove_tags`.
+    - Add :attr:`ForumChannel.default_thread_slowmode_delay`, :attr:`ForumChannel.default_reaction`, and :attr:`ForumChannel.default_sort_order`.
+    - Add :attr:`ChannelFlags.require_tag` and :attr:`ForumChannel.requires_tag`.
+    - New audit log fields for the above features.
+- Add :attr:`BotIntegration.scopes`. (:issue:`729`)
+- Return the :class:`disnake.ui.View` instance from :func:`View.add_item <disnake.ui.View.add_item>`, :func:`View.remove_item <disnake.ui.View.remove_item>` and :func:`View.clear_items <disnake.ui.View.clear_items>` to allow for fluent-style chaining. (:issue:`733`)
+- Add :attr:`Widget.presence_count`. (:issue:`736`)
+- Add :class:`InteractionResponse.type`, which contains the type of the response made, if any. (:issue:`737`)
+- Add aliases to the ``original_message`` methods. (:issue:`738`)
+    - :func:`Interaction.original_response` is aliased to :func:`Interaction.original_message`
+    - :func:`Interaction.edit_original_response` is aliased to :func:`Interaction.edit_original_message`
+    - :func:`Interaction.delete_original_response` is aliased to :func:`Interaction.delete_original_message`
+- Change :func:`ForumChannel.create_thread` to not require the ``content`` parameter to be provided. (:issue:`739`)
+    - Like :func:`TextChannel.send`, at least one of ``content``, ``embed``/``embeds``, ``file``/``files``, ``stickers``, ``components``, or ``view`` must be provided.
+- Return the :class:`disnake.ui.ActionRow` instance on multiple methods to allow for fluent-style chaining. (:issue:`740`)
+    - This applies to :func:`ActionRow.append_item <disnake.ui.ActionRow.append_item>`, :func:`ActionRow.insert_item <disnake.ui.ActionRow.insert_item>`, :func:`ActionRow.add_button <disnake.ui.ActionRow.add_button>`, :func:`ActionRow.add_select <disnake.ui.ActionRow.add_select>`, :func:`ActionRow.add_text_input <disnake.ui.ActionRow.add_text_input>`, :func:`ActionRow.clear_items <disnake.ui.ActionRow.clear_items>`, and :func:`ActionRow.remove_item <disnake.ui.ActionRow.remove_item>`.
+- Add support for equality checks between two :class:`disnake.Embed`\s. (:issue:`742`)
+- Add :attr:`Permissions.use_embedded_activities` as an alias for :attr:`Permissions.start_embedded_activities`. (:issue:`754`)
+- Add :attr:`Permissions.use_application_commands` as an alias for :attr:`Permissions.use_slash_commands`. (:issue:`755`)
+- Support setting ``with_message`` parameter of :class:`InteractionResponse.defer` for modal interactions to ``False``. (:issue:`758`)
+- |commands| Add a way to get the parent or root commands of slash commands. (:issue:`277`)
+    - Add :attr:`InvokableSlashCommand.parent <ext.commands.InvokableSlashCommand.parent>`, :attr:`SubCommandGroup.parent <ext.commands.SubCommandGroup.parent>`, and :attr:`SubCommand.parent <ext.commands.SubCommand.parent>`.
+    - Add :attr:`InvokableSlashCommand.parents <ext.commands.InvokableSlashCommand.parents>`, :attr:`SubCommandGroup.parents <ext.commands.SubCommandGroup.parents>`, and :attr:`SubCommand.parents <ext.commands.SubCommand.parents>`.
+    - Add :attr:`InvokableSlashCommand.root_parent <ext.commands.InvokableSlashCommand.root_parent>`, :attr:`SubCommandGroup.root_parent <ext.commands.SubCommandGroup.root_parent>`, and :attr:`SubCommand.root_parent <ext.commands.SubCommand.root_parent>`.
+- |commands| Introduce :class:`commands.String <disnake.ext.commands.String>` for defining string option length limitations. (:issue:`593`)
+- |commands| Add support for Union[:class:`User`, :class:`Role`] and Union[:class:`User`, :class:`Member`, :class:`Role`] annotations in slash commands. (:issue:`595`)
+- |commands| Add support for injected parameters autocompletion (:issue:`670`)
+    - Add :meth:`Injection.autocomplete <ext.commands.Injection.autocomplete>` decorator
+    - Add :func:`injection <ext.commands.injection>` as a decorator interface for :func:`inject <ext.commands.inject>`
+    - Add ``autocompleters`` keyword-only argument to :class:`Injection <ext.commands.Injection>`, :func:`inject <ext.commands.inject>`, and :func:`register_injection <ext.commands.register_injection>`
+- |tasks| Add support for subclassing :class:`.ext.tasks.Loop` and using subclasses in :func:`.ext.tasks.loop` decorator. (:issue:`655`)
+
+Bug Fixes
+~~~~~~~~~
+- Update incorrect channel edit method annotations. (:issue:`418`)
+    - Fix ``sync_permissions`` parameter type.
+    - Remove ``topic`` parameter from :func:`StageChannel.edit`, add ``bitrate``.
+- Properly close sockets when receiving a voice server update event. (:issue:`488`)
+- Warn the user that bools are not supported for ``default_member_permissions``. (:issue:`520`)
+- Update the Guild Iterator to not get stuck in an infinite loop. (:issue:`526`)
+    - Add a missing import for the scheduled event user iterator.
+- Change the default guild :class:`.GuildSticker` limit to 5. (:issue:`531`)
+- Handle optional :class:`Locale` instances (no longer create an enum value). (:issue:`533`)
+- Update the type field handling for audit logs. (:issue:`535`)
+    - :attr:`AuditLogDiff.type` objects are no longer always :class:`ChannelType` instances.
+- Dispatch :func:`disnake.on_reaction_remove` for :class:`.Thread` instances. (:issue:`536`)
+- Update :attr:`Guild.bitrate_limit` to use the correct value for the ``VIP_REGIONS`` feature flag. (:issue:`538`)
+- Handle :class:`ThreadAutoArchiveDuration` instances for ``default_auto_archive_duration`` when editing channels. (:issue:`568`)
+- Assume that ``None`` is an empty channel name and keep ``channel.name`` a string. (:issue:`569`)
+- Remove the ``$`` prefix from ``IDENTIFY`` payload properties. (:issue:`572`)
+- Replace old application command objects in cogs with the new/copied objects. (:issue:`575`)
+- Fix opus function calls on arm64 macOS. (:issue:`620`)
+- Improve channel/guild fallback in resolved interaction data, using :class:`PartialMessageable` for unhandled/unknown channels instead of using ``None``. (:issue:`646`)
+- Check the type of the provided parameter when validating names to improve end-user errors when passing an incorrect object to slash command and option names. (:issue:`653`)
+- Make the :func:`.ext.commands.default_member_permissions` decorator always work in cogs. (:issue:`678`)
+- Fix :attr:`Spotify.start`, :attr:`Spotify.end`, :attr:`Spotify.duration` raising :exc:`KeyError` instead of returning ``None``, improve activity typing. (:issue:`685`)
+- Fixes message initialization failing with threads and no intents by explicitly checking we have a guild object where one is required. (:issue:`699`, :issue:`712`)
+- Fixed an issue where it would be possible to remove other features when enabling or disabling the ``COMMUNITY`` feature for a :class:`.Guild`. (:issue:`705`)
+- Fix invalid widget fields. (:issue:`736`)
+    - :attr:`Widget.invite_url` and :attr:`Widget.fetch_invite` are now optional.
+    - :attr:`WidgetMember.avatar` and :attr:`WidgetMember.activity` now work properly and no longer always raise an exception or return ``None``.
+- No longer use deprecated `@!` syntax for mentioning users. (:issue:`743`)
+- Fix creation of forum threads without :class:`Permissions.manage_threads`. (:issue:`746`)
+- Don't count initial message in forum threads towards :attr:`Thread.message_count` and :attr:`Thread.total_message_sent`. (:issue:`747`)
+- |commands| Handle :class:`.VoiceChannel` in :func:`commands.is_nsfw`. (:issue:`536`)
+- |commands| Handle ``Union[User, Member]`` annotations on slash commands arguments when using the decorator interface. (:issue:`584`)
+- |commands| Change :func:`has_permissions <ext.commands.has_permissions>` and :func:`bot_has_permissions <ext.commands.bot_has_permissions>` checks to work with interations in guilds that only added the ``applications.commands`` scope, and in DMs. (:issue:`673`)
+- |commands| Fix edge case with parsing command annotations that contain a union of non-type objects, like ``Optional[Literal[1, 2, 3]]``. (:issue:`770`)
+
+Documentation
+~~~~~~~~~~~~~
+- Add sidebar-navigable sub-sections to Event Reference section of API Reference documentation. (:issue:`460`)
+- Remove notes that global application command rollout takes up to an hour. (:issue:`518`)
+- Update sphinx from 4.4.0 to version 5.1, and take advantage of new options. (:issue:`522`, :issue:`565`)
+- Update the requests intersphinx url to the new url of the requests documentation. (:issue:`539`)
+- Build an htmlzip version of the documentation for downloading. (:issue:`541`)
+- Fix broken :class:`~ext.commands.Range` references. (:issue:`542`)
+- Expand and complete the attribute documentation for :class:`AuditLogDiff`. (:issue:`546`)
+- Add note about currently required client override for slash localisations. (:issue:`553`)
+- Restructure the ``examples/`` directory, and update + clean up all examples. (:issue:`562`, :issue:`716`)
+- Clarify vanity invite handling in :attr:`Guild.invites`. (:issue:`576`)
+- Clarify the targets of :func:`Permissions.is_strict_subset` and :func:`Permissions.is_strict_superset`. (:issue:`612`)
+- Clarify when the user is a :class:`Member` or a :class:`User` in :func:`disnake.on_member_ban` events. (:issue:`623`)
+- Update :attr:`InteractionReference.name` description, now includes group and subcommand. (:issue:`625`, :issue:`648`)
+- Note that :attr:`Interaction.channel` may be a :class:`PartialMessageable` in inaccessible threads, in addition to DMs. (:issue:`632`)
+- Fix the grammatical errors in :class:`Guild` channel properties. (:issue:`645`)
+- Update fields listed in :func:`on_user_update` and :func:`on_member_update` docs. (:issue:`671`)
+- Add previously missing inherited attributes to activity types. (:issue:`685`)
+- Add documentation for the ``strict`` parameter to :func:`Client.get_or_fetch_user` and :func:`Guild.get_or_fetch_member`. (:issue:`710`)
+- Remove note about application command localization requiring a client build override. (:issue:`711`)
+- Change references to public guilds to reference the ``COMMUNITY`` feature instead. (:issue:`720`)
+- Clarify :func:`Thread.delete` criteria for threads in forum channels. (:issue:`745`)
+- Clarify behavior of kwargs in flag methods when both a flag and an alias are given. (:issue:`749`)
+- |commands| Document the ``i18n`` attribute on :class:`.ext.commands.Bot` and :class:`.ext.commands.InteractionBot` classes. (:issue:`652`)
+- |commands| Document :class:`commands.Injection <ext.commands.Injection>`. (:issue:`669`)
+- |commands| Improve documentation around using ``None`` for :attr:`Bot.command_prefix <disnake.ext.commands.Bot.command_prefix>`. (:issue:`689`)
+
+Miscellaneous
+~~~~~~~~~~~~~
+- Refactor the test bot to be easier to use for all users. (:issue:`247`)
+- Refactor channel edit overloads and internals, improving typing. (:issue:`418`)
+- Run pyright on examples and fix any typing issues uncovered by this change. (:issue:`519`)
+- Add initial testing framework. (:issue:`529`)
+- Explicitly type activity types with literal return values. (:issue:`543`)
+- Explicitly type channel types with literal return values. (:issue:`543`)
+- Update PyPI url and minor wording in the README. (:issue:`556`)
+- Add ``flake8`` as our linter. (:issue:`557`)
+- Update pyright to 1.1.254. (:issue:`559`)
+- Add generic parameters to user/message command decorators. (:issue:`563`)
+    - Update default parameter type to improve compatibilty with callable/dynamic defaults.
+- Run docs creation in GitHub actions to test for warnings before a pull is merged. (:issue:`564`)
+- Add more typing overrides to :class:`GuildCommandInteraction`. (:issue:`580`)
+- Rework internal typings for interaction payloads. (:issue:`588`)
+- Add typings for all gateway payloads. (:issue:`594`)
+- Add ``towncrier`` and ``sphinxcontrib-towncrier`` to manage changelogs. (:issue:`600`)
+    - Use ``towncrier`` for changelog management.
+    - Use ``sphinxcontrib-towncrier`` to build changelogs for the in-development documentation.
+- Expand contributing documentation to include more information on creating pull requests and writing features. (:issue:`601`)
+- Add flake8-comprehensions for catching inefficient comphrehensions. (:issue:`602`)
+- Resolve minor flake8 issues. (:issue:`606`)
+    - Don't use star imports except in ``__init__.py`` files.
+    - Don't use ambigious variable names.
+    - Don't use setattr and getattr with constant variable names.
+- Add ``flake8-pytest-style`` for linting pytest specific features with flake8. (:issue:`608`)
+- Replace all :class:`TypeVar` instances with ``typing_extensions.Self`` across the entire library where possible. (:issue:`610`)
+- Remove the internal ``fill_with_flags`` decorator for flags classes and use the built in :meth:`object.__init_subclass__` method. (:issue:`616`, :issue:`660`)
+- Add :class:`slice` to :class:`.ui.ActionRow` ``__getattr__`` and ``__delattr__`` annotations. (:issue:`624`)
+- Update and standardise all internal Snowflake regexes to match between 17 and 19 characters (inclusive). (:issue:`651`)
+- Rename internal module ``disnake.ext.commands.flags`` to ``disnake.ext.commands.flag_converter``. (:issue:`667`)
+- Improve parallel documentation build speed. (:issue:`690`)
+- Limit installation of ``cchardet`` in the ``[speed]`` extra to Python versions below 3.10 (see `aiohttp#6857 <https://github.com/aio-libs/aiohttp/pull/6857>`__). (:issue:`702`)
+- Update annotation and description of ``options`` parameter of :func:`ui.ActionRow.add_select <disnake.ui.ActionRow.add_select>` to match :class:`ui.Select <disnake.ui.Select>`. (:issue:`744`)
+- Update typings to explicitly specify optional types for parameters with a ``None`` default. (:issue:`751`)
+- Adopt `SPDX License Headers <https://spdx.dev/ids>`_ across all project files. (:issue:`756`)
+
+
+.. _vp2p5p3:
+
+v2.5.3
+------
+
+This is a maintenance release with backports from v2.6.0.
+
+Bug Fixes
+~~~~~~~~~
+
+- Fix creation of forum threads without :class:`Permissions.manage_threads`. (:issue:`746`)
+- |commands| Fix edge case with parsing command annotations that contain a union of non-type objects, like ``Optional[Literal[1, 2, 3]]``. (:issue:`771`)
+
+Miscellaneous
+~~~~~~~~~~~~~
+
+- Limit installation of ``cchardet`` in the ``[speed]`` extra to Python versions below 3.10 (see `aiohttp#6857 <https://github.com/aio-libs/aiohttp/pull/6857>`__). (:issue:`772`)
+
 
 .. _vp2p5p2:
 

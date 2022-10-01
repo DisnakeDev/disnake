@@ -1,3 +1,0 @@
-Update channel edit method annotations.
-- ``slowmode_delay`` and ``default_auto_archive_duration`` are now optional.
-- ``category`` may now be any :class:`abc.Snowflake`, not necessarily a :class:`CategoryChannel`.

@@ -1,1 +1,0 @@
-Don't count initial message in forum threads towards :attr:`Thread.message_count` and :attr:`Thread.total_message_sent`.

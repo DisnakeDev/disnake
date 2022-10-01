@@ -1,1 +1,0 @@
-Replace old application command objects in cogs with the new/copied objects.
