@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 from __future__ import annotations
 
 import functools
@@ -21,6 +23,7 @@ nox.options.error_on_external_run = True
 nox.options.reuse_existing_virtualenvs = True
 nox.options.sessions = [
     "lint",
+    "check-manifest",
     "slotscheck",
     "pyright",
     "test",
@@ -129,6 +132,8 @@ def docs(session: nox.Session):
                 "../changelog",
                 "--port",
                 "8009",
+                "-j",
+                "auto",
                 *args,
             )
         else:
@@ -145,11 +150,49 @@ def lint(session: nox.Session):
     session.run("pre-commit", "run", "--all-files", *session.posargs)
 
 
+@nox.session(name="check-manifest")
+@depends("tools")
+def check_manifest(session: nox.Session):
+    """Run check-manifest."""
+    session.run("check-manifest", "-v", "--no-build-isolation")
+
+
 @nox.session()
 @depends("dev")
 def slotscheck(session: nox.Session):
     """Run slotscheck."""
     session.run("python", "-m", "slotscheck", "--verbose", "-m", "disnake")
+
+
+@nox.session(name="codemod")
+@depends("tools")
+def codemod(session: nox.Session):
+    """Run libcst codemods."""
+    if session.posargs and session.posargs[0] == "run-all" or not session.interactive:
+        # run all of the transformers on disnake
+        session.log("Running all transformers.")
+        res: str = session.run("python", "-m", "libcst.tool", "list", silent=True)
+        transformers = [line.split("-")[0].strip() for line in res.splitlines()]
+        session.log("Transformers: " + ", ".join(transformers))
+
+        for trans in transformers:
+            session.run(
+                "python", "-m", "libcst.tool", "codemod", trans, "disnake", "--hide-progress"
+            )
+        session.log("Finished running all transformers.")
+    else:
+        if session.posargs:
+            if len(session.posargs) < 2:
+                session.posargs.append("disnake")
+            session.run(
+                "python",
+                "-m",
+                "libcst.tool",
+                "codemod",
+                *session.posargs,
+            )
+        else:
+            session.run("python", "-m", "libcst.tool", "list")
 
 
 @nox.session()

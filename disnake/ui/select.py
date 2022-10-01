@@ -1,27 +1,4 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
@@ -70,11 +47,10 @@ S_co = TypeVar("S_co", bound="Select", covariant=True)
 V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
 P = ParamSpec("P")
 
+SelectOptionInput = Union[List[SelectOption], List[str], Dict[str, str]]
 
-def _parse_select_options(
-    options: Union[List[SelectOption], List[str], Dict[str, str]]
-) -> List[SelectOption]:
 
+def _parse_select_options(options: SelectOptionInput) -> List[SelectOption]:
     if isinstance(options, dict):
         return [SelectOption(label=key, value=val) for key, val in options.items()]
 
@@ -136,11 +112,11 @@ class Select(Item[V_co]):
     def __init__(
         self: Select[None],
         *,
-        custom_id: str = MISSING,
+        custom_id: str = ...,
         placeholder: Optional[str] = None,
         min_values: int = 1,
         max_values: int = 1,
-        options: Union[List[SelectOption], List[str], Dict[str, str]] = MISSING,
+        options: SelectOptionInput = ...,
         disabled: bool = False,
         row: Optional[int] = None,
     ):
@@ -150,11 +126,11 @@ class Select(Item[V_co]):
     def __init__(
         self: Select[V_co],
         *,
-        custom_id: str = MISSING,
+        custom_id: str = ...,
         placeholder: Optional[str] = None,
         min_values: int = 1,
         max_values: int = 1,
-        options: Union[List[SelectOption], List[str], Dict[str, str]] = MISSING,
+        options: SelectOptionInput = ...,
         disabled: bool = False,
         row: Optional[int] = None,
     ):
@@ -167,7 +143,7 @@ class Select(Item[V_co]):
         placeholder: Optional[str] = None,
         min_values: int = 1,
         max_values: int = 1,
-        options: Union[List[SelectOption], List[str], Dict[str, str]] = MISSING,
+        options: SelectOptionInput = MISSING,
         disabled: bool = False,
         row: Optional[int] = None,
     ) -> None:
@@ -355,10 +331,10 @@ class Select(Item[V_co]):
 def select(
     *,
     placeholder: Optional[str] = None,
-    custom_id: str = MISSING,
+    custom_id: str = ...,
     min_values: int = 1,
     max_values: int = 1,
-    options: Union[List[SelectOption], List[str], Dict[str, str]] = MISSING,
+    options: SelectOptionInput = ...,
     disabled: bool = False,
     row: Optional[int] = None,
 ) -> Callable[[ItemCallbackType[Select[V_co]]], DecoratedItem[Select[V_co]]]:

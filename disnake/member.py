@@ -1,27 +1,4 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
@@ -72,7 +49,8 @@ if TYPE_CHECKING:
     from .partial_emoji import PartialEmoji
     from .role import Role
     from .state import ConnectionState
-    from .types.activity import PartialPresenceUpdate
+    from .types.activity import PresenceData
+    from .types.gateway import GuildMemberUpdateEvent
     from .types.member import (
         BaseMember as BaseMemberPayload,
         Member as MemberPayload,
@@ -315,7 +293,7 @@ class Member(disnake.abc.Messageable, _UserTag):
     def __init__(
         self,
         *,
-        data: MemberWithUserPayload,
+        data: Union[MemberWithUserPayload, GuildMemberUpdateEvent],
         guild: Guild,
         state: ConnectionState,
     ):
@@ -335,7 +313,7 @@ class Member(disnake.abc.Messageable, _UserTag):
     def __init__(
         self,
         *,
-        data: Union[BaseMemberPayload, MemberWithUserPayload],
+        data: Union[BaseMemberPayload, MemberWithUserPayload, GuildMemberUpdateEvent],
         guild: Guild,
         state: ConnectionState,
         user_data: Optional[UserPayload] = None,
@@ -431,7 +409,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         ch = await self.create_dm()
         return ch
 
-    def _update(self, data: MemberPayload) -> None:
+    def _update(self, data: GuildMemberUpdateEvent) -> None:
         # the nickname change is optional,
         # if it isn't in the payload then it didn't change
         try:
@@ -451,7 +429,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         self._communication_disabled_until = timeout_datetime
 
     def _presence_update(
-        self, data: PartialPresenceUpdate, user: UserPayload
+        self, data: PresenceData, user: UserPayload
     ) -> Optional[Tuple[User, User]]:
         self.activities = tuple(create_activity(a, state=self._state) for a in data["activities"])
         self._client_status = {
@@ -576,8 +554,6 @@ class Member(disnake.abc.Messageable, _UserTag):
     @property
     def mention(self) -> str:
         """:class:`str`: Returns a string that allows you to mention the member."""
-        if self.nick:
-            return f"<@!{self._user.id}>"
         return f"<@{self._user.id}>"
 
     @property
@@ -723,17 +699,41 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         return self._communication_disabled_until
 
+    @overload
+    async def ban(
+        self,
+        *,
+        clean_history_duration: Union[int, datetime.timedelta] = 86400,
+        reason: Optional[str] = None,
+    ) -> None:
+        ...
+
+    @overload
     async def ban(
         self,
         *,
         delete_message_days: Literal[0, 1, 2, 3, 4, 5, 6, 7] = 1,
         reason: Optional[str] = None,
     ) -> None:
+        ...
+
+    async def ban(
+        self,
+        *,
+        clean_history_duration: Union[int, datetime.timedelta] = 86400,
+        delete_message_days: Literal[0, 1, 2, 3, 4, 5, 6, 7] = MISSING,
+        reason: Optional[str] = None,
+    ) -> None:
         """|coro|
 
         Bans this member. Equivalent to :meth:`Guild.ban`.
         """
-        await self.guild.ban(self, reason=reason, delete_message_days=delete_message_days)
+        await self.guild.ban(  # type: ignore  # no matching overload
+            self,
+            reason=reason,
+            clean_history_duration=clean_history_duration,
+            delete_message_days=delete_message_days,
+        )
 
     async def unban(self, *, reason: Optional[str] = None) -> None:
         """|coro|

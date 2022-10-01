@@ -1,24 +1,4 @@
-# The MIT License (MIT)
-
-# Copyright (c) 2021-present EQUENOS
-
-# Permission is hereby granted, free of charge, to any person obtaining a
-# copy of this software and associated documentation files (the "Software"),
-# to deal in the Software without restriction, including without limitation
-# the rights to use, copy, modify, merge, publish, distribute, sublicense,
-# and/or sell copies of the Software, and to permit persons to whom the
-# Software is furnished to do so, subject to the following conditions:
-
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-# DEALINGS IN THE SOFTWARE.
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
@@ -93,11 +73,10 @@ class InvokableUserCommand(InvokableApplicationCommand):
         func: InteractionCommandCallback[CogT, UserCommandInteraction, P],
         *,
         name: LocalizedOptional = None,
-        dm_permission: bool = None,
+        dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-        nsfw: bool = None,
-        guild_ids: Sequence[int] = None,
-        auto_sync: bool = None,
+        guild_ids: Optional[Sequence[int]] = None,
+        auto_sync: Optional[bool] = None,
         **kwargs,
     ):
         name_loc = Localized._cast(name, False)
@@ -122,7 +101,6 @@ class InvokableUserCommand(InvokableApplicationCommand):
             name=name_loc._upgrade(self.name),
             dm_permission=dm_permission and not self._guild_only,
             default_member_permissions=default_member_permissions,
-            nsfw=nsfw,
         )
 
     async def _call_external_error_handlers(
@@ -195,11 +173,10 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         func: InteractionCommandCallback[CogT, MessageCommandInteraction, P],
         *,
         name: LocalizedOptional = None,
-        dm_permission: bool = None,
+        dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-        nsfw: bool = None,
-        guild_ids: Sequence[int] = None,
-        auto_sync: bool = None,
+        guild_ids: Optional[Sequence[int]] = None,
+        auto_sync: Optional[bool] = None,
         **kwargs,
     ):
         name_loc = Localized._cast(name, False)
@@ -208,15 +185,9 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         self.auto_sync: bool = True if auto_sync is None else auto_sync
 
         try:
-            default_perms: int = func.__default_member_permissions__
+            default_member_permissions = func.__default_member_permissions__
         except AttributeError:
             pass
-        else:
-            if default_member_permissions is not None:
-                raise ValueError(
-                    "Cannot set `default_member_permissions` in both parameter and decorator"
-                )
-            default_member_permissions = default_perms
 
         dm_permission = True if dm_permission is None else dm_permission
 
@@ -224,7 +195,6 @@ class InvokableMessageCommand(InvokableApplicationCommand):
             name=name_loc._upgrade(self.name),
             dm_permission=dm_permission and not self._guild_only,
             default_member_permissions=default_member_permissions,
-            nsfw=nsfw,
         )
 
     async def _call_external_error_handlers(
@@ -257,12 +227,11 @@ class InvokableMessageCommand(InvokableApplicationCommand):
 def user_command(
     *,
     name: LocalizedOptional = None,
-    dm_permission: bool = None,
+    dm_permission: Optional[bool] = None,
     default_member_permissions: Optional[Union[Permissions, int]] = None,
-    nsfw: bool = None,
-    guild_ids: Sequence[int] = None,
-    auto_sync: bool = None,
-    extras: Dict[str, Any] = None,
+    guild_ids: Optional[Sequence[int]] = None,
+    auto_sync: Optional[bool] = None,
+    extras: Optional[Dict[str, Any]] = None,
     **kwargs,
 ) -> Callable[[InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand]:
     """A shortcut decorator that builds a user command.
@@ -283,12 +252,6 @@ def user_command(
         See :attr:`.ApplicationCommand.default_member_permissions` for details.
 
         .. versionadded:: 2.5
-
-    nsfw: :class:`bool`
-        Whether this command can only be used in NSFW channels.
-        Defaults to ``False``.
-
-        .. versionadded:: 2.6
 
     auto_sync: :class:`bool`
         Whether to automatically register the command. Defaults to ``True``.
@@ -323,7 +286,6 @@ def user_command(
             name=name,
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
-            nsfw=nsfw,
             guild_ids=guild_ids,
             auto_sync=auto_sync,
             extras=extras,
@@ -336,12 +298,11 @@ def user_command(
 def message_command(
     *,
     name: LocalizedOptional = None,
-    dm_permission: bool = None,
+    dm_permission: Optional[bool] = None,
     default_member_permissions: Optional[Union[Permissions, int]] = None,
-    nsfw: bool = None,
-    guild_ids: Sequence[int] = None,
-    auto_sync: bool = None,
-    extras: Dict[str, Any] = None,
+    guild_ids: Optional[Sequence[int]] = None,
+    auto_sync: Optional[bool] = None,
+    extras: Optional[Dict[str, Any]] = None,
     **kwargs,
 ) -> Callable[
     [InteractionCommandCallback[CogT, MessageCommandInteraction, P]],
@@ -365,12 +326,6 @@ def message_command(
         See :attr:`.ApplicationCommand.default_member_permissions` for details.
 
         .. versionadded:: 2.5
-
-    nsfw: :class:`bool`
-        Whether this command can only be used in NSFW channels.
-        Defaults to ``False``.
-
-        .. versionadded:: 2.6
 
     auto_sync: :class:`bool`
         Whether to automatically register the command. Defaults to ``True``.
@@ -405,7 +360,6 @@ def message_command(
             name=name,
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
-            nsfw=nsfw,
             guild_ids=guild_ids,
             auto_sync=auto_sync,
             extras=extras,

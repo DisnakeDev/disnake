@@ -1,27 +1,4 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
@@ -48,16 +25,18 @@ from typing import (
 
 from . import utils
 from .context_managers import Typing
-from .enums import ChannelType, PartyType, VideoQualityMode, try_enum_to_int
+from .enums import ChannelType, PartyType, ThreadSortOrder, VideoQualityMode, try_enum_to_int
 from .errors import ClientException
 from .file import File
 from .flags import ChannelFlags, MessageFlags
 from .invite import Invite
 from .mentions import AllowedMentions
+from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite, Permissions
 from .role import Role
 from .sticker import GuildSticker, StickerItem
 from .ui.action_row import components_to_dict
+from .utils import _overload_with_permissions
 from .voice_client import VoiceClient, VoiceProtocol
 
 __all__ = (
@@ -80,6 +59,7 @@ if TYPE_CHECKING:
     from .channel import CategoryChannel, DMChannel, PartialMessageable
     from .client import Client
     from .embeds import Embed
+    from .emoji import Emoji
     from .enums import InviteTarget
     from .guild import Guild, GuildMessageable
     from .guild_scheduled_event import GuildScheduledEvent
@@ -87,13 +67,15 @@ if TYPE_CHECKING:
     from .member import Member
     from .message import Message, MessageReference, PartialMessage
     from .state import ConnectionState
-    from .threads import AnyThreadArchiveDuration
+    from .threads import AnyThreadArchiveDuration, ForumTag
     from .types.channel import (
         Channel as ChannelPayload,
+        DefaultReaction as DefaultReactionPayload,
         GuildChannel as GuildChannelPayload,
         OverwriteType,
         PermissionOverwrite as PermissionOverwritePayload,
     )
+    from .types.threads import PartialForumTag as PartialForumTagPayload
     from .ui.action_row import Components, MessageUIComponent
     from .ui.view import View
     from .user import ClientUser
@@ -317,6 +299,7 @@ class GuildChannel(ABC):
         sync_permissions: bool = MISSING,
         category: Optional[Snowflake] = MISSING,
         slowmode_delay: Optional[int] = MISSING,
+        default_thread_slowmode_delay: Optional[int] = MISSING,
         default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
         type: ChannelType = MISSING,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
@@ -325,6 +308,9 @@ class GuildChannel(ABC):
         rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
         flags: ChannelFlags = MISSING,
+        available_tags: Sequence[ForumTag] = MISSING,
+        default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
+        default_sort_order: Optional[ThreadSortOrder] = MISSING,
         reason: Optional[str] = None,
     ) -> Optional[ChannelPayload]:
         parent_id: Optional[int]
@@ -400,12 +386,34 @@ class GuildChannel(ABC):
         else:
             type_payload = MISSING
 
+        flags_payload: int
         if flags is not MISSING:
             if not isinstance(flags, ChannelFlags):
                 raise TypeError("flags field must be of type ChannelFlags")
             flags_payload = flags.value
         else:
             flags_payload = MISSING
+
+        available_tags_payload: List[PartialForumTagPayload] = MISSING
+        if available_tags is not MISSING:
+            available_tags_payload = [tag.to_dict() for tag in available_tags]
+
+        default_reaction_emoji_payload: Optional[DefaultReactionPayload] = MISSING
+        if default_reaction is not MISSING:
+            if default_reaction is not None:
+                emoji_name, emoji_id = PartialEmoji._emoji_to_name_id(default_reaction)
+                default_reaction_emoji_payload = {
+                    "emoji_name": emoji_name,
+                    "emoji_id": emoji_id,
+                }
+            else:
+                default_reaction_emoji_payload = None
+
+        default_sort_order_payload: Optional[int] = MISSING
+        if default_sort_order is not MISSING:
+            default_sort_order_payload = (
+                try_enum_to_int(default_sort_order) if default_sort_order is not None else None
+            )
 
         options: Dict[str, Any] = {
             "name": name,
@@ -417,11 +425,15 @@ class GuildChannel(ABC):
             # note: not passing `position` as it already got updated before, if passed
             "permission_overwrites": overwrites_payload,
             "rate_limit_per_user": slowmode_delay,
+            "default_thread_rate_limit_per_user": default_thread_slowmode_delay,
             "type": type_payload,
             "rtc_region": rtc_region_payload,
             "video_quality_mode": video_quality_mode_payload,
             "default_auto_archive_duration": default_auto_archive_duration_payload,
             "flags": flags_payload,
+            "available_tags": available_tags_payload,
+            "default_reaction_emoji": default_reaction_emoji_payload,
+            "default_sort_order": default_sort_order_payload,
         }
         options = {k: v for k, v in options.items() if v is not MISSING}
 
@@ -624,13 +636,17 @@ class GuildChannel(ABC):
             are not computed.
         ignore_timeout: :class:`bool`
             Whether or not to ignore the user's timeout.
-            Defaults to ``True`` for backwards compatibility.
+            Defaults to ``False``.
 
             .. versionadded:: 2.4
 
             .. note::
 
                 This only applies to :class:`~disnake.Member` objects.
+
+            .. versionchanged:: 2.6
+
+                The default was changed to ``False``.
 
         Raises
         ------
@@ -660,7 +676,7 @@ class GuildChannel(ABC):
             raise TypeError("ignore_timeout is only supported for disnake.Member objects")
 
         if ignore_timeout is MISSING:
-            ignore_timeout = True
+            ignore_timeout = False
 
         if self.guild.owner_id == obj.id:
             return Permissions.all()
@@ -789,12 +805,61 @@ class GuildChannel(ABC):
         ...
 
     @overload
+    @_overload_with_permissions
     async def set_permissions(
         self,
         target: Union[Member, Role],
         *,
         reason: Optional[str] = ...,
-        **permissions: Optional[bool],
+        add_reactions: Optional[bool] = ...,
+        administrator: Optional[bool] = ...,
+        attach_files: Optional[bool] = ...,
+        ban_members: Optional[bool] = ...,
+        change_nickname: Optional[bool] = ...,
+        connect: Optional[bool] = ...,
+        create_forum_threads: Optional[bool] = ...,
+        create_instant_invite: Optional[bool] = ...,
+        create_private_threads: Optional[bool] = ...,
+        create_public_threads: Optional[bool] = ...,
+        deafen_members: Optional[bool] = ...,
+        embed_links: Optional[bool] = ...,
+        external_emojis: Optional[bool] = ...,
+        external_stickers: Optional[bool] = ...,
+        kick_members: Optional[bool] = ...,
+        manage_channels: Optional[bool] = ...,
+        manage_emojis: Optional[bool] = ...,
+        manage_emojis_and_stickers: Optional[bool] = ...,
+        manage_events: Optional[bool] = ...,
+        manage_guild: Optional[bool] = ...,
+        manage_messages: Optional[bool] = ...,
+        manage_nicknames: Optional[bool] = ...,
+        manage_permissions: Optional[bool] = ...,
+        manage_roles: Optional[bool] = ...,
+        manage_threads: Optional[bool] = ...,
+        manage_webhooks: Optional[bool] = ...,
+        mention_everyone: Optional[bool] = ...,
+        moderate_members: Optional[bool] = ...,
+        move_members: Optional[bool] = ...,
+        mute_members: Optional[bool] = ...,
+        priority_speaker: Optional[bool] = ...,
+        read_message_history: Optional[bool] = ...,
+        read_messages: Optional[bool] = ...,
+        request_to_speak: Optional[bool] = ...,
+        send_messages: Optional[bool] = ...,
+        send_messages_in_threads: Optional[bool] = ...,
+        send_tts_messages: Optional[bool] = ...,
+        speak: Optional[bool] = ...,
+        start_embedded_activities: Optional[bool] = ...,
+        stream: Optional[bool] = ...,
+        use_application_commands: Optional[bool] = ...,
+        use_embedded_activities: Optional[bool] = ...,
+        use_external_emojis: Optional[bool] = ...,
+        use_external_stickers: Optional[bool] = ...,
+        use_slash_commands: Optional[bool] = ...,
+        use_voice_activation: Optional[bool] = ...,
+        view_audit_log: Optional[bool] = ...,
+        view_channel: Optional[bool] = ...,
+        view_guild_insights: Optional[bool] = ...,
     ) -> None:
         ...
 
@@ -1346,19 +1411,19 @@ class Messageable:
         content: Optional[str] = None,
         *,
         tts: bool = False,
-        embed: Embed = None,
-        embeds: List[Embed] = None,
-        file: File = None,
-        files: List[File] = None,
-        stickers: Sequence[Union[GuildSticker, StickerItem]] = None,
-        delete_after: float = None,
-        nonce: Union[str, int] = None,
+        embed: Optional[Embed] = None,
+        embeds: Optional[List[Embed]] = None,
+        file: Optional[File] = None,
+        files: Optional[List[File]] = None,
+        stickers: Optional[Sequence[Union[GuildSticker, StickerItem]]] = None,
+        delete_after: Optional[float] = None,
+        nonce: Optional[Union[str, int]] = None,
         suppress_embeds: bool = False,
-        allowed_mentions: AllowedMentions = None,
-        reference: Union[Message, MessageReference, PartialMessage] = None,
-        mention_author: bool = None,
-        view: View = None,
-        components: Components[MessageUIComponent] = None,
+        allowed_mentions: Optional[AllowedMentions] = None,
+        reference: Optional[Union[Message, MessageReference, PartialMessage]] = None,
+        mention_author: Optional[bool] = None,
+        view: Optional[View] = None,
+        components: Optional[Components[MessageUIComponent]] = None,
     ):
         """|coro|
 
@@ -1366,8 +1431,8 @@ class Messageable:
 
         The content must be a type that can convert to a string through ``str(content)``.
 
-        At least one of ``content``, ``embed``/``embeds``, ``file``/``files``
-        or ``stickers`` must be provided.
+        At least one of ``content``, ``embed``/``embeds``, ``file``/``files``,
+        ``stickers``, ``components``, or ``view`` must be provided.
 
         To upload a single file, the ``file`` parameter should be used with a
         single :class:`.File` object. To upload multiple files, the ``files``

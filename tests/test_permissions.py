@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 from typing import Dict, Literal, Optional
 
 import pytest
@@ -16,8 +18,10 @@ class TestPermissions:
 
     def test_init_permissions_keyword_arguments_with_aliases(self) -> None:
         assert Permissions(read_messages=True, view_channel=False).value == 0
+        assert Permissions(view_channel=True, read_messages=False).value == 0
 
-        assert Permissions(read_messages=False, view_channel=True).view_channel is True
+        assert Permissions(read_messages=False, view_channel=True).value == 1024
+        assert Permissions(view_channel=False, read_messages=True).value == 1024
 
     def test_init_invalid_value(self) -> None:
         with pytest.raises(TypeError, match="Expected int parameter, received str instead."):
@@ -25,7 +29,7 @@ class TestPermissions:
 
     def test_init_invalid_perms(self) -> None:
         with pytest.raises(TypeError, match="'h' is not a valid permission name."):
-            Permissions(h=True)
+            Permissions(h=True)  # type: ignore
 
     @pytest.mark.parametrize(
         ("perms_int", "other_int", "expected"),
@@ -114,6 +118,20 @@ class TestPermissions:
         assert perms.value == expected_perms.value
 
     @pytest.mark.parametrize(
+        ("update", "expected"),
+        [
+            ({"read_messages": True, "view_channel": False}, 8),
+            ({"view_channel": True, "read_messages": False}, 8),
+            ({"read_messages": False, "view_channel": True}, 8 + 1024),
+            ({"view_channel": False, "read_messages": True}, 8 + 1024),
+        ],
+    )
+    def test_update_aliases(self, update: Dict[str, bool], expected: int) -> None:
+        perms = Permissions(administrator=True)
+        perms.update(**update)
+        assert perms.value == expected
+
+    @pytest.mark.parametrize(
         ("parameters", "expected"),
         [
             ({"view_channel": True, "move_members": True}, None),
@@ -134,7 +152,7 @@ class TestPermissions:
 
     def test_update_ignores(self) -> None:
         perms = Permissions()
-        perms.update(h=True)
+        perms.update(h=True)  # type: ignore
 
     @pytest.mark.parametrize(
         ("initial", "allow", "deny", "expected"),
@@ -191,7 +209,7 @@ class TestPermissionOverwrite:
 
     def test_init_invalid_perms(self) -> None:
         with pytest.raises(ValueError, match="'h' is not a valid permission name."):
-            PermissionOverwrite(h=True)
+            PermissionOverwrite(h=True)  # type: ignore
 
     def test_equality(self) -> None:
         one = PermissionOverwrite()
@@ -299,7 +317,7 @@ class TestPermissionOverwrite:
         assert po.manage_emojis is None
 
         # invalid names are silently ignored
-        po.update(h=True)
+        po.update(h=True)  # type: ignore
         assert not hasattr(po, "h")
 
     @pytest.mark.parametrize(

@@ -1,24 +1,4 @@
-# The MIT License (MIT)
-
-# Copyright (c) 2021-present EQUENOS
-
-# Permission is hereby granted, free of charge, to any person obtaining a
-# copy of this software and associated documentation files (the "Software"),
-# to deal in the Software without restriction, including without limitation
-# the rights to use, copy, modify, merge, publish, distribute, sublicense,
-# and/or sell copies of the Software, and to permit persons to whom the
-# Software is furnished to do so, subject to the following conditions:
-
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-# DEALINGS IN THE SOFTWARE.
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
@@ -26,12 +6,24 @@ import asyncio
 import datetime
 import functools
 from abc import ABC
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, TypeVar, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    TypeVar,
+    Union,
+    cast,
+    overload,
+)
 
 from disnake.app_commands import ApplicationCommand
 from disnake.enums import ApplicationCommandType
 from disnake.permissions import Permissions
-from disnake.utils import async_all, maybe_coroutine
+from disnake.utils import _generated, _overload_with_permissions, async_all, maybe_coroutine
 
 from .cooldowns import BucketType, CooldownMapping, MaxConcurrency
 from .errors import CheckFailure, CommandError, CommandInvokeError, CommandOnCooldown
@@ -138,7 +130,7 @@ class InvokableApplicationCommand(ABC):
         self.__original_kwargs__ = {k: v for k, v in kwargs.items() if v is not None}
         return self
 
-    def __init__(self, func: CommandCallback, *, name: str = None, **kwargs):
+    def __init__(self, func: CommandCallback, *, name: Optional[str] = None, **kwargs):
         self.__command_flag__ = None
         self._callback: CommandCallback = func
         self.name: str = name or func.__name__
@@ -155,6 +147,14 @@ class InvokableApplicationCommand(ABC):
             raise TypeError(
                 "`default_permission` is deprecated and will always be set to `True`. "
                 "See `default_member_permissions` and `dm_permission` instead."
+            )
+
+        # n.b. this was supported previously, but reverted due to
+        # uncertainty about upcoming upstream changes
+        if "nsfw" in kwargs:
+            raise TypeError(
+                "The `nsfw` parameter is not supported. "
+                "If you set it before, use an earlier version to reset it to `False`."
             )
 
         try:
@@ -202,6 +202,12 @@ class InvokableApplicationCommand(ABC):
         if self._max_concurrency != other._max_concurrency:
             # _max_concurrency won't be None at this point
             other._max_concurrency = cast(MaxConcurrency, self._max_concurrency).copy()
+
+        if self.body._default_member_permissions != other.body._default_member_permissions and (
+            "default_member_permissions" not in other.__original_kwargs__
+            or self.body._default_member_permissions is not None
+        ):
+            other.body._default_member_permissions = self.body._default_member_permissions
 
         try:
             other.on_error = self.on_error
@@ -635,6 +641,73 @@ class InvokableApplicationCommand(ABC):
             inter.application_command = original
 
 
+@overload
+@_generated
+def default_member_permissions(
+    value: int = 0,
+    *,
+    add_reactions: bool = ...,
+    administrator: bool = ...,
+    attach_files: bool = ...,
+    ban_members: bool = ...,
+    change_nickname: bool = ...,
+    connect: bool = ...,
+    create_forum_threads: bool = ...,
+    create_instant_invite: bool = ...,
+    create_private_threads: bool = ...,
+    create_public_threads: bool = ...,
+    deafen_members: bool = ...,
+    embed_links: bool = ...,
+    external_emojis: bool = ...,
+    external_stickers: bool = ...,
+    kick_members: bool = ...,
+    manage_channels: bool = ...,
+    manage_emojis: bool = ...,
+    manage_emojis_and_stickers: bool = ...,
+    manage_events: bool = ...,
+    manage_guild: bool = ...,
+    manage_messages: bool = ...,
+    manage_nicknames: bool = ...,
+    manage_permissions: bool = ...,
+    manage_roles: bool = ...,
+    manage_threads: bool = ...,
+    manage_webhooks: bool = ...,
+    mention_everyone: bool = ...,
+    moderate_members: bool = ...,
+    move_members: bool = ...,
+    mute_members: bool = ...,
+    priority_speaker: bool = ...,
+    read_message_history: bool = ...,
+    read_messages: bool = ...,
+    request_to_speak: bool = ...,
+    send_messages: bool = ...,
+    send_messages_in_threads: bool = ...,
+    send_tts_messages: bool = ...,
+    speak: bool = ...,
+    start_embedded_activities: bool = ...,
+    stream: bool = ...,
+    use_application_commands: bool = ...,
+    use_embedded_activities: bool = ...,
+    use_external_emojis: bool = ...,
+    use_external_stickers: bool = ...,
+    use_slash_commands: bool = ...,
+    use_voice_activation: bool = ...,
+    view_audit_log: bool = ...,
+    view_channel: bool = ...,
+    view_guild_insights: bool = ...,
+) -> Callable[[T], T]:
+    ...
+
+
+@overload
+@_generated
+def default_member_permissions(
+    value: int = 0,
+) -> Callable[[T], T]:
+    ...
+
+
+@_overload_with_permissions
 def default_member_permissions(value: int = 0, **permissions: bool) -> Callable[[T], T]:
     """
     A decorator that sets default required member permissions for the command.

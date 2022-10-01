@@ -1,1 +1,0 @@
-Add ``flake8`` as our linter.

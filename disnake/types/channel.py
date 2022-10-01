@@ -1,32 +1,9 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from typing import List, Literal, Optional, TypedDict, Union
 
 from .snowflake import Snowflake
-from .threads import ThreadArchiveDurationLiteral, ThreadMember, ThreadMetadata
+from .threads import ForumTag, ThreadArchiveDurationLiteral, ThreadMember, ThreadMetadata
 from .user import PartialUser
 
 OverwriteType = Literal[0, 1]
@@ -127,6 +104,8 @@ class _ThreadChannelOptional(TypedDict, total=False):
     rate_limit_per_user: int
     last_message_id: Optional[Snowflake]
     last_pin_timestamp: str
+    total_message_sent: Optional[int]
+    message_count: Optional[int]
 
 
 class ThreadChannel(_BaseChannel, _ThreadChannelOptional):
@@ -138,15 +117,22 @@ class ThreadChannel(_BaseChannel, _ThreadChannelOptional):
     nsfw: bool
     last_message_id: Optional[Snowflake]
     rate_limit_per_user: int
-    message_count: int
     member_count: int
     thread_metadata: ThreadMetadata
+
+
+class DefaultReaction(TypedDict):
+    emoji_id: Optional[Snowflake]
+    emoji_name: Optional[str]
 
 
 class _ForumChannelOptional(TypedDict, total=False):
     topic: Optional[str]
     last_message_id: Optional[Snowflake]
     default_auto_archive_duration: ThreadArchiveDurationLiteral
+    available_tags: List[ForumTag]
+    default_reaction_emoji: Optional[DefaultReaction]
+    default_thread_rate_limit_per_user: int
 
 
 class ForumChannel(_BaseGuildChannel, _ForumChannelOptional):

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 import io
 from base64 import b64decode
 
@@ -48,4 +50,3 @@ class Misc(commands.Cog):
 
 def setup(bot):
     bot.add_cog(Misc(bot))
-    print(f"> Extension {__name__} is ready\n")

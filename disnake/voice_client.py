@@ -1,28 +1,6 @@
+# SPDX-License-Identifier: MIT
+
 """
-The MIT License (MIT)
-
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-
-
 Some documentation to refer to:
 
 - Our main web socket (mWS) sends opcode 4 with a guild ID and channel ID.
@@ -37,7 +15,6 @@ Some documentation to refer to:
 - When that's all done, we receive opcode 4 from the vWS.
 - Finally we can transmit data to endpoint:port.
 """
-
 from __future__ import annotations
 
 import asyncio
@@ -60,11 +37,8 @@ if TYPE_CHECKING:
     from .guild import Guild
     from .opus import Encoder
     from .state import ConnectionState
-    from .types.voice import (
-        GuildVoiceState as GuildVoiceStatePayload,
-        SupportedModes,
-        VoiceServerUpdate as VoiceServerUpdatePayload,
-    )
+    from .types.gateway import VoiceServerUpdateEvent
+    from .types.voice import GuildVoiceState as GuildVoiceStatePayload, SupportedModes
     from .user import ClientUser
 
 
@@ -129,7 +103,7 @@ class VoiceProtocol:
         """
         raise NotImplementedError
 
-    async def on_voice_server_update(self, data: VoiceServerUpdatePayload) -> None:
+    async def on_voice_server_update(self, data: VoiceServerUpdateEvent) -> None:
         """|coro|
 
         An abstract method that is called when initially connecting to voice.
@@ -238,7 +212,7 @@ class VoiceClient(VoiceProtocol):
         super().__init__(client, channel)
         state = client._connection
         self.token: str = MISSING
-        self.socket = MISSING
+        self.socket: socket.socket = MISSING
         self.loop: asyncio.AbstractEventLoop = state.loop
         self._state: ConnectionState = state
         # this will be used in the AudioPlayer thread
@@ -303,7 +277,7 @@ class VoiceClient(VoiceProtocol):
         else:
             self._voice_state_complete.set()
 
-    async def on_voice_server_update(self, data: VoiceServerUpdatePayload) -> None:
+    async def on_voice_server_update(self, data: VoiceServerUpdateEvent) -> None:
         if self._voice_server_complete.is_set():
             _log.info("Ignoring extraneous voice server update.")
             return
@@ -327,12 +301,15 @@ class VoiceClient(VoiceProtocol):
         # This gets set later
         self.endpoint_ip = MISSING
 
+        if self.socket:
+            self.socket.close()
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.setblocking(False)
 
         if not self._handshaking:
             # If we're not handshaking then we need to terminate our previous connection in the websocket
-            await self.ws.close(4000)
+            if self.ws:
+                await self.ws.close(4000)
             return
 
         self._voice_server_complete.set()
@@ -569,7 +546,7 @@ class VoiceClient(VoiceProtocol):
         return header + box.encrypt(bytes(data), bytes(nonce)).ciphertext + nonce[:4]
 
     def play(
-        self, source: AudioSource, *, after: Callable[[Optional[Exception]], Any] = None
+        self, source: AudioSource, *, after: Optional[Callable[[Optional[Exception]], Any]] = None
     ) -> None:
         """Plays an :class:`AudioSource`.
 
