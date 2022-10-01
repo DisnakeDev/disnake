@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Literal, Optional, Sequence, Tuple, Union
 
 from disnake.app_commands import MessageCommand, UserCommand
+from disnake.enums import ApplicationCommandType
 from disnake.i18n import Localized
 from disnake.permissions import Permissions
 
@@ -16,7 +17,7 @@ from .params import safe_call
 if TYPE_CHECKING:
     from typing_extensions import ParamSpec
 
-    from disnake.i18n import LocalizedOptional
+    from disnake.i18n import LocalizationValue, LocalizedOptional
     from disnake.interactions import (
         ApplicationCommandInteraction,
         MessageCommandInteraction,
@@ -30,7 +31,7 @@ if TYPE_CHECKING:
 __all__ = ("InvokableUserCommand", "InvokableMessageCommand", "user_command", "message_command")
 
 
-class InvokableUserCommand(InvokableApplicationCommand):
+class InvokableUserCommand(InvokableApplicationCommand, UserCommand):
     """A class that implements the protocol for a bot user command (context menu).
 
     These are not created manually, instead they are created via the
@@ -103,6 +104,20 @@ class InvokableUserCommand(InvokableApplicationCommand):
             default_member_permissions=default_member_permissions,
         )
 
+        self._name_localised = name_loc
+
+    @property
+    def type(self) -> Literal[ApplicationCommandType.user]:
+        return ApplicationCommandType.user
+
+    @property
+    def qualified_name(self) -> str:
+        return self.name
+
+    @property
+    def name_localizations(self) -> LocalizationValue:
+        return self._name_localised.localizations
+
     async def _call_external_error_handlers(
         self, inter: ApplicationCommandInteraction, error: CommandError
     ) -> None:
@@ -130,7 +145,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
             await safe_call(self.callback, interaction, *args, **kwargs)
 
 
-class InvokableMessageCommand(InvokableApplicationCommand):
+class InvokableMessageCommand(InvokableApplicationCommand, MessageCommand):
     """A class that implements the protocol for a bot message command (context menu).
 
     These are not created manually, instead they are created via the
@@ -196,6 +211,19 @@ class InvokableMessageCommand(InvokableApplicationCommand):
             dm_permission=dm_permission and not self._guild_only,
             default_member_permissions=default_member_permissions,
         )
+        self._name_localised = name_loc
+
+    @property
+    def type(self) -> Literal[ApplicationCommandType.message]:
+        return ApplicationCommandType.message
+
+    @property
+    def qualified_name(self) -> str:
+        return self.name
+
+    @property
+    def name_localizations(self) -> LocalizationValue:
+        return self._name_localised.localizations
 
     async def _call_external_error_handlers(
         self, inter: ApplicationCommandInteraction, error: CommandError

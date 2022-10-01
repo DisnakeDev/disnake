@@ -134,7 +134,6 @@ class InvokableApplicationCommand(ABC):
         self.__command_flag__ = None
         self._callback: CommandCallback = func
         self.name: str = name or func.__name__
-        self.qualified_name: str = self.name
         # Annotation parser needs this attribute because body doesn't exist at this moment.
         # We will use this attribute later in order to set the dm_permission.
         self._guild_only: bool = kwargs.get("guild_only", False)
@@ -240,6 +239,10 @@ class InvokableApplicationCommand(ABC):
     def dm_permission(self) -> bool:
         """:class:`bool`: Whether this command can be used in DMs."""
         return self.body.dm_permission
+
+    @property
+    def qualified_name(self) -> str:
+        return self.name
 
     @property
     def default_member_permissions(self) -> Optional[Permissions]:

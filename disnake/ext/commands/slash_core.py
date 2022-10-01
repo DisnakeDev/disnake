@@ -10,6 +10,7 @@ from typing import (
     Callable,
     Dict,
     List,
+    Literal,
     Optional,
     Sequence,
     Tuple,
@@ -19,7 +20,7 @@ from typing import (
 
 from disnake import utils
 from disnake.app_commands import Option, SlashCommand
-from disnake.enums import OptionType
+from disnake.enums import ApplicationCommandType, OptionType
 from disnake.i18n import Localized
 from disnake.interactions import ApplicationCommandInteraction
 from disnake.permissions import Permissions
@@ -30,7 +31,7 @@ from .params import call_param_func, classify_autocompleter, expand_params
 
 if TYPE_CHECKING:
     from disnake.app_commands import Choices
-    from disnake.i18n import LocalizedOptional
+    from disnake.i18n import LocalizationValue, LocalizedOptional
 
     from .base_core import CommandCallback
 
@@ -146,7 +147,7 @@ class SubCommandGroup(InvokableApplicationCommand):
     ):
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
-        self.parent: InvokableSlashCommand = parent
+        self._parent: InvokableSlashCommand = parent
         self.children: Dict[str, SubCommand] = {}
         self.option = Option(
             name=name_loc._upgrade(self.name),
@@ -154,7 +155,6 @@ class SubCommandGroup(InvokableApplicationCommand):
             type=OptionType.sub_command_group,
             options=[],
         )
-        self.qualified_name: str = f"{parent.qualified_name} {self.name}"
 
         if (
             "dm_permission" in kwargs
@@ -172,7 +172,7 @@ class SubCommandGroup(InvokableApplicationCommand):
 
         .. versionadded:: 2.6
         """
-        return self.parent
+        return self._parent
 
     @property
     def parents(self) -> Tuple[InvokableSlashCommand]:
@@ -180,11 +180,19 @@ class SubCommandGroup(InvokableApplicationCommand):
 
         .. versionadded:: 2.6
         """
-        return (self.parent,)
+        return (self._parent,)
 
     @property
     def body(self) -> Option:
         return self.option
+
+    @property
+    def qualified_name(self) -> str:
+        return f"{self._parent.qualified_name} {self.name}"
+
+    @property
+    def parent(self) -> Optional[InvokableSlashCommand]:
+        return self._parent
 
     def sub_command(
         self,
@@ -216,6 +224,7 @@ class SubCommandGroup(InvokableApplicationCommand):
                 extras=extras,
                 **kwargs,
             )
+            new_func._parent = self
             self.children[new_func.name] = new_func
             self.option.options.append(new_func.option)
             return new_func
@@ -262,6 +271,9 @@ class SubCommand(InvokableApplicationCommand):
             This object may be copied by the library.
 
         .. versionadded:: 2.5
+    parent: ...
+
+        .. versionadded:: 2.6
     """
 
     def __init__(
@@ -277,7 +289,7 @@ class SubCommand(InvokableApplicationCommand):
     ):
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
-        self.parent: Union[InvokableSlashCommand, SubCommandGroup] = parent
+        self._parent: Union[InvokableSlashCommand, SubCommandGroup] = parent
         self.connectors: Dict[str, str] = connectors or {}
         self.autocompleters: Dict[str, Any] = kwargs.get("autocompleters", {})
 
@@ -295,7 +307,6 @@ class SubCommand(InvokableApplicationCommand):
             type=OptionType.sub_command,
             options=options,
         )
-        self.qualified_name = f"{parent.qualified_name} {self.name}"
 
         if (
             "dm_permission" in kwargs
@@ -339,6 +350,16 @@ class SubCommand(InvokableApplicationCommand):
     def body(self) -> Option:
         return self.option
 
+    @property
+    def qualified_name(self) -> str:
+        if not self._parent:
+            return self.name
+        return f"{self._parent.qualified_name} {self.name}"
+
+    @property
+    def parent(self) -> Optional[Union[InvokableSlashCommand, SubCommandGroup]]:
+        return self._parent
+
     async def _call_autocompleter(
         self, param: str, inter: ApplicationCommandInteraction, user_input: str
     ) -> Optional[Choices]:
@@ -379,7 +400,7 @@ class SubCommand(InvokableApplicationCommand):
         return _autocomplete(self, option_name)
 
 
-class InvokableSlashCommand(InvokableApplicationCommand):
+class InvokableSlashCommand(InvokableApplicationCommand, SlashCommand):
     """A class that implements the protocol for a bot slash command.
 
     These are not created manually, instead they are created via the
@@ -440,8 +461,11 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         **kwargs,
     ):
         name_loc = Localized._cast(name, False)
-        super().__init__(func, name=name_loc.string, **kwargs)
-        self.parent = None
+        super().__init__(
+            func,
+            name=name_loc.string,
+            **kwargs,
+        )
         self.connectors: Dict[str, str] = connectors or {}
         self.children: Dict[str, Union[SubCommand, SubCommandGroup]] = {}
         self.auto_sync: bool = True if auto_sync is None else auto_sync
@@ -453,6 +477,8 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
         self.docstring = utils.parse_docstring(func)
         desc_loc = Localized._cast(description, False)
+        self._name_localised = name_loc
+        self._description_localised = desc_loc
 
         try:
             default_member_permissions = func.__default_member_permissions__
@@ -497,7 +523,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             other.children = self.children.copy()
             # update parents...
             for child in other.children.values():
-                child.parent = other
+                child._parent = other
         if self.description != other.description and "description" not in other.__original_kwargs__:
             # Allows overriding the default description cog-wide.
             other.body.description = self.description
@@ -506,12 +532,28 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         return other
 
     @property
+    def type(self) -> Literal[ApplicationCommandType.chat_input]:
+        return ApplicationCommandType.chat_input
+
+    @property
     def description(self) -> str:
         return self.body.description
 
     @property
     def options(self) -> List[Option]:
         return self.body.options
+
+    @property
+    def name_localizations(self) -> LocalizationValue:
+        return self._name_localised.localizations
+
+    @property
+    def description_localizations(self) -> LocalizationValue:
+        return self._description_localised.localizations
+
+    add_option = SlashCommand.add_option
+    to_dict = SlashCommand.to_dict
+    localize = SlashCommand.localize
 
     def sub_command(
         self,
@@ -573,6 +615,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                 extras=extras,
                 **kwargs,
             )
+            new_func._parent = self
             self.children[new_func.name] = new_func
             self.body.options.append(new_func.option)
             return new_func
@@ -619,6 +662,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                 extras=extras,
                 **kwargs,
             )
+            new_func._parent = self
             self.children[new_func.name] = new_func
             self.body.options.append(new_func.option)
             return new_func
