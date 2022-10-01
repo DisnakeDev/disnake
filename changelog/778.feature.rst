@@ -1,0 +1,1 @@
+Typehint all Flag classes, which now enables typechecking for Intents(members=True)`` which used to be untyped.
