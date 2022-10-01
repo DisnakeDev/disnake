@@ -135,6 +135,45 @@ class _BaseActivity:
     def to_dict(self) -> ActivityPayload:
         raise NotImplementedError
 
+    def _create_image_url(self, asset: str) -> Optional[str]:
+        # `asset` can be a simple ID (see `Activity._create_image_url`),
+        # or a string of the format `<prefix>:<id>`
+        prefix, _, asset_id = asset.partition(":")
+
+        if asset_id and (url_fmt := _ACTIVITY_URLS.get(prefix)):
+            return url_fmt.format(asset_id)
+        return None
+
+    @property
+    def large_image_url(self) -> Optional[str]:
+        """Optional[:class:`str`]: Returns a URL pointing to the large image asset of this activity, if applicable."""
+        try:
+            large_image = self.assets["large_image"]
+        except KeyError:
+            return None
+        else:
+            return self._create_image_url(large_image)
+
+    @property
+    def small_image_url(self) -> Optional[str]:
+        """Optional[:class:`str`]: Returns a URL pointing to the small image asset of this activity, if applicable."""
+        try:
+            small_image = self.assets["small_image"]
+        except KeyError:
+            return None
+        else:
+            return self._create_image_url(small_image)
+
+    @property
+    def large_image_text(self) -> Optional[str]:
+        """Optional[:class:`str`]: Returns the large image asset hover text of this activity, if applicable."""
+        return self.assets.get("large_text", None)
+
+    @property
+    def small_image_text(self) -> Optional[str]:
+        """Optional[:class:`str`]: Returns the small image asset hover text of this activity, if applicable."""
+        return self.assets.get("small_text", None)
+
 
 # tag type for user-settable activities
 class BaseActivity(_BaseActivity):
@@ -328,47 +367,16 @@ class Activity(BaseActivity):
         return ret
 
     def _create_image_url(self, asset: str) -> Optional[str]:
-        # `asset` can be a simple ID, or a string of the format `<prefix>:<id>`
-        prefix, _, asset_id = asset.partition(":")
+        # if parent method already returns valid url, use that
+        if url := super()._create_image_url(asset):
+            return url
 
-        if not asset_id:
-            if not self.application_id:
-                return None
-            return f"{Asset.BASE}/app-assets/{self.application_id}/{prefix}.png"
+        # if it's not a `<prefix:id>` asset and we have an application ID, create url
+        if ":" not in asset and self.application_id:
+            return f"{Asset.BASE}/app-assets/{self.application_id}/{asset}.png"
 
-        if url_fmt := _ACTIVITY_URLS.get(prefix):
-            return url_fmt.format(asset_id)
+        # else, it's an unknown asset url
         return None
-
-    @property
-    def large_image_url(self) -> Optional[str]:
-        """Optional[:class:`str`]: Returns a URL pointing to the large image asset of this activity, if applicable."""
-        try:
-            large_image = self.assets["large_image"]
-        except KeyError:
-            return None
-        else:
-            return self._create_image_url(large_image)
-
-    @property
-    def small_image_url(self) -> Optional[str]:
-        """Optional[:class:`str`]: Returns a URL pointing to the small image asset of this activity, if applicable."""
-        try:
-            small_image = self.assets["small_image"]
-        except KeyError:
-            return None
-        else:
-            return self._create_image_url(small_image)
-
-    @property
-    def large_image_text(self) -> Optional[str]:
-        """Optional[:class:`str`]: Returns the large image asset hover text of this activity, if applicable."""
-        return self.assets.get("large_text", None)
-
-    @property
-    def small_image_text(self) -> Optional[str]:
-        """Optional[:class:`str`]: Returns the small image asset hover text of this activity, if applicable."""
-        return self.assets.get("small_text", None)
 
 
 class Game(BaseActivity):
