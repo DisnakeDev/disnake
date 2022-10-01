@@ -468,7 +468,7 @@ class ApplicationCommand(ABC):
         name: LocalizedRequired,
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-        id: int = None,
+        id: Optional[int] = None,
     ):
         self.type: ApplicationCommandType = enum_if_int(ApplicationCommandType, type)
 
@@ -605,7 +605,7 @@ class UserCommand(ApplicationCommand):
         name: LocalizedRequired,
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-        id: int = None,
+        id: Optional[int] = None,
     ):
         super().__init__(
             type=ApplicationCommandType.user,
@@ -693,7 +693,7 @@ class MessageCommand(ApplicationCommand):
         name: LocalizedRequired,
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-        id: int = None,
+        id: Optional[int] = None,
     ):
         super().__init__(
             type=ApplicationCommandType.message,
@@ -799,7 +799,7 @@ class SlashCommand(ApplicationCommand):
         options: Optional[List[Option]] = None,
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-        id: int = None,
+        id: Optional[int] = None,
     ):
         super().__init__(
             type=ApplicationCommandType.chat_input,

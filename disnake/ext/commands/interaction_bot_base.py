@@ -142,7 +142,7 @@ class InteractionBotBase(CommonBotBase):
     def __init__(
         self,
         *,
-        command_sync: ApplicationCommandSyncFlags = None,
+        command_sync: Optional[ApplicationCommandSyncFlags] = None,
         test_guilds: Optional[Sequence[int]] = None,
         **options: Any,
     ):
@@ -178,9 +178,7 @@ class InteractionBotBase(CommonBotBase):
         self._schedule_app_command_preparation()
 
     def application_commands_iterator(self) -> Iterable[InvokableApplicationCommand]:
-        return chain(
-            self._all_app_commands.values(),
-        )
+        yield from self._all_app_commands.values()
 
     @property
     def all_app_commands(self) -> List[InvokableApplicationCommand]:
@@ -371,7 +369,7 @@ class InteractionBotBase(CommonBotBase):
             ] = message_command
 
     def remove_slash_command(
-        self, name: str, *, guild_id: int = None
+        self, name: str, *, guild_id: Optional[int] = None
     ) -> Optional[InvokableSlashCommand]:
         """Removes an :class:`InvokableSlashCommand` from the internal list
         of slash commands.
@@ -400,7 +398,7 @@ class InteractionBotBase(CommonBotBase):
         return command
 
     def remove_user_command(
-        self, name: str, *, guild_id: int = None
+        self, name: str, *, guild_id: Optional[int] = None
     ) -> Optional[InvokableUserCommand]:
         """Removes an :class:`InvokableUserCommand` from the internal list
         of user commands.
@@ -422,7 +420,7 @@ class InteractionBotBase(CommonBotBase):
         return command
 
     def remove_message_command(
-        self, name: str, *, guild_id: int = None
+        self, name: str, *, guild_id: Optional[int] = None
     ) -> Optional[InvokableMessageCommand]:
         """Removes an :class:`InvokableMessageCommand` from the internal list
         of message commands.
@@ -445,24 +443,36 @@ class InteractionBotBase(CommonBotBase):
 
     @overload
     def get_app_command(
-        self, name: str, type: Literal[ApplicationCommandType.chat_input], *, guild_id: int = None
+        self,
+        name: str,
+        type: Literal[ApplicationCommandType.chat_input],
+        *,
+        guild_id: Optional[int] = None,
     ) -> Optional[InvokableSlashCommand]:
         ...
 
     @overload
     def get_app_command(
-        self, name: str, type: Literal[ApplicationCommandType.message], *, guild_id: int = None
+        self,
+        name: str,
+        type: Literal[ApplicationCommandType.message],
+        *,
+        guild_id: Optional[int] = None,
     ) -> Optional[InvokableMessageCommand]:
         ...
 
     @overload
     def get_app_command(
-        self, name: str, type: Literal[ApplicationCommandType.user], *, guild_id: int = None
+        self,
+        name: str,
+        type: Literal[ApplicationCommandType.user],
+        *,
+        guild_id: Optional[int] = None,
     ) -> Optional[InvokableUserCommand]:
         ...
 
     def get_app_command(
-        self, name: str, type: ApplicationCommandType, *, guild_id: int = None
+        self, name: str, type: ApplicationCommandType, *, guild_id: Optional[int] = None
     ) -> Optional[InvokableApplicationCommand]:
         # this does not get commands by ID, use (some other method) to do that
         if not isinstance(name, str):
@@ -473,7 +483,7 @@ class InteractionBotBase(CommonBotBase):
         return command
 
     def get_slash_command(
-        self, name: str, *, guild_id: int = None
+        self, name: str, *, guild_id: Optional[int] = None
     ) -> Optional[Union[InvokableSlashCommand, SubCommandGroup, SubCommand]]:
         """Works like ``Bot.get_command``, but for slash commands.
 
@@ -515,7 +525,7 @@ class InteractionBotBase(CommonBotBase):
                 return group.children.get(chain[2])
 
     def get_user_command(
-        self, name: str, *, guild_id: int = None
+        self, name: str, *, guild_id: Optional[int] = None
     ) -> Optional[InvokableUserCommand]:
         """Gets an :class:`InvokableUserCommand` from the internal list
         of user commands.
@@ -533,7 +543,7 @@ class InteractionBotBase(CommonBotBase):
         return self.get_app_command(name, ApplicationCommandType.user, guild_id=guild_id)
 
     def get_message_command(
-        self, name: str, *, guild_id: int = None
+        self, name: str, *, guild_id: Optional[int] = None
     ) -> Optional[InvokableMessageCommand]:
         """Gets an :class:`InvokableMessageCommand` from the internal list
         of message commands.

@@ -176,7 +176,11 @@ class SubCommandGroup(InvokableApplicationCommand):
 
     @property
     def parents(self) -> Tuple[InvokableSlashCommand]:
-        """Tuple[:class:`InvokableSlashCommand`]: Returns all parents of this group.
+        """Tuple[:class:`InvokableSlashCommand`]: Retrieves the parents of this command.
+
+        If the command has no parents then it returns an empty :class:`tuple`.
+
+        For example in commands ``/a b test``, the parents are ``(b, a)``.
 
         .. versionadded:: 2.6
         """
@@ -195,24 +199,9 @@ class SubCommandGroup(InvokableApplicationCommand):
         # todo: add docs and make ID non-nullable
         return f"</{self.qualified_name}:{self.id}>"
 
-    # todo: refactor this class to make this not optional
     @property
-    def parent(self) -> Optional[InvokableSlashCommand]:
+    def parent(self) -> InvokableSlashCommand:
         return self._parent
-
-    @property
-    def parents(
-        self,
-    ) -> Tuple[InvokableSlashCommand]:
-        """Tuple[:class:`InvokableSlashCommand`]: Retrieves the parents of this command.
-
-        If the command has no parents then it returns an empty :class:`tuple`.
-
-        For example in commands ``/a b test``, the parents are ``(b, a)``.
-
-        .. versionadded:: 2.6
-        """
-        return (self.parent,)  # type: ignore
 
     def sub_command(
         self,
@@ -344,7 +333,7 @@ class SubCommand(InvokableApplicationCommand):
 
         .. versionadded:: 2.6
         """
-        return self.parent.parent if isinstance(self.parent, SubCommandGroup) else self.parent
+        return self._parent._parent if isinstance(self._parent, SubCommandGroup) else self._parent
 
     @property
     def parents(
@@ -357,10 +346,10 @@ class SubCommand(InvokableApplicationCommand):
 
         .. versionadded:: 2.6
         """
-        # here I'm not using 'self.parent.parents + (self.parent,)' because it causes typing issues
-        if isinstance(self.parent, SubCommandGroup):
-            return (self.parent, self.parent.parent)
-        return (self.parent,)
+        # here I'm not using 'self._parent._parents + (self._parent,)' because it causes typing issues
+        if isinstance(self._parent, SubCommandGroup):
+            return (self._parent, self._parent._parent)
+        return (self._parent,)
 
     @property
     def description(self) -> str:
@@ -382,28 +371,8 @@ class SubCommand(InvokableApplicationCommand):
         return f"</{self.qualified_name}:{self.id}>"
 
     @property
-    def parent(self) -> Optional[Union[InvokableSlashCommand, SubCommandGroup]]:
+    def parent(self) -> Union[InvokableSlashCommand, SubCommandGroup]:
         return self._parent
-
-    @property
-    def parents(
-        self,
-    ) -> Union[Tuple[InvokableSlashCommand], Tuple[SubCommandGroup, InvokableSlashCommand]]:
-        """Union[Tuple[:class:`InvokableSlashCommand`], Tuple[:class:`SubCommandGroup`, :class:`InvokableSlashCommand`]]: Retrieves the parents of this command.
-
-        If the command has no parents then it returns an empty :class:`tuple`.
-
-        For example in commands ``/a b test``, the parents are ``(b, a)``.
-
-        .. versionadded:: 2.6
-        """
-        entries = []
-        command = self
-        while command.parent is not None:  # type: ignore
-            command = command.parent  # type: ignore
-            entries.append(command)
-
-        return tuple(entries)
 
     async def _call_autocompleter(
         self, param: str, inter: ApplicationCommandInteraction, user_input: str
@@ -559,6 +528,13 @@ class InvokableSlashCommand(InvokableApplicationCommand, SlashCommand):
         .. versionadded:: 2.6
         """
         return ()
+
+    @property
+    def parent(self) -> None:
+        """``None``: This is for consistency with :class:`SubCommand` and :class:`SubCommandGroup`.
+
+        .. versionadded:: 2.6
+        """
 
     def _ensure_assignment_on_copy(self, other: SlashCommandT) -> SlashCommandT:
         super()._ensure_assignment_on_copy(other)

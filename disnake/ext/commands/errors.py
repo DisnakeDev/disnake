@@ -1016,7 +1016,9 @@ class CommandRegistrationError(ClientException):
         Whether the name that conflicts is an alias of the command we try to add.
     """
 
-    def __init__(self, name: str, *, alias_conflict: bool = False, guild_id: int = None) -> None:
+    def __init__(
+        self, name: str, *, alias_conflict: bool = False, guild_id: Optional[int] = None
+    ) -> None:
         self.name: str = name
         self.alias_conflict: bool = alias_conflict
         self.guild_id: Optional[int] = guild_id
