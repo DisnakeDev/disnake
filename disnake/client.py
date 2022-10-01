@@ -1,27 +1,4 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
@@ -40,6 +17,7 @@ from typing import (
     Generator,
     List,
     Literal,
+    NamedTuple,
     Optional,
     Sequence,
     Tuple,
@@ -72,7 +50,7 @@ from .errors import (
     PrivilegedIntentsRequired,
     SessionStartLimitReached,
 )
-from .flags import ApplicationFlags, Intents
+from .flags import ApplicationFlags, Intents, MemberCacheFlags
 from .gateway import DiscordWebSocket, ReconnectWebSocket
 from .guild import Guild, GuildBuilder
 from .guild_preview import GuildPreview
@@ -106,7 +84,11 @@ if TYPE_CHECKING:
     from .voice_client import VoiceProtocol
 
 
-__all__ = ("Client", "SessionStartLimit")
+__all__ = (
+    "Client",
+    "SessionStartLimit",
+    "GatewayParams",
+)
 
 CoroT = TypeVar("CoroT", bound=Callable[..., Coroutine[Any, Any, Any]])
 
@@ -194,6 +176,26 @@ class SessionStartLimit:
         )
 
 
+class GatewayParams(NamedTuple):
+    """
+    Container type for configuring gateway connections.
+
+    .. versionadded:: 2.6
+
+    Parameters
+    ----------
+    encoding: :class:`str`
+        The payload encoding (``json`` is currently the only supported encoding).
+        Defaults to ``"json"``.
+    zlib: :class:`bool`
+        Whether to enable transport compression.
+        Defaults to ``True``.
+    """
+
+    encoding: Literal["json"] = "json"
+    zlib: bool = True
+
+
 class Client:
     """
     Represents a client connection that connects to Discord.
@@ -225,7 +227,7 @@ class Client:
         The total number of shards.
     application_id: :class:`int`
         The client's application ID.
-    intents: :class:`Intents`
+    intents: Optional[:class:`Intents`]
         The intents that you want to enable for the session. This is a way of
         disabling and enabling certain gateway events from triggering and being sent.
         If not given, defaults to a regularly constructed :class:`Intents` class.
@@ -247,7 +249,7 @@ class Client:
 
         .. versionadded:: 1.5
 
-    status: Optional[:class:`.Status`]
+    status: Optional[Union[class:`str`, :class:`.Status`]]
         A status to start your presence with upon logging on to Discord.
     activity: Optional[:class:`.BaseActivity`]
         An activity to start your presence with upon logging on to Discord.
@@ -285,6 +287,16 @@ class Client:
 
         .. versionadded:: 2.0
 
+    enable_gateway_error_handler: :class:`bool`
+        Whether to enable the :func:`disnake.on_gateway_error` event.
+        Defaults to ``True``.
+
+        If this is disabled, exceptions that occur while parsing (known) gateway events
+        won't be handled and the pre-v2.6 behavior of letting the exception propagate up to
+        the :func:`connect`/:func:`start`/:func:`run` call is used instead.
+
+        .. versionadded:: 2.6
+
     test_guilds: List[:class:`int`]
         The list of IDs of the guilds where you're going to test your application commands.
         Defaults to ``None``, which means global registration of commands across
@@ -317,6 +329,10 @@ class Client:
 
         .. versionadded:: 2.5
 
+        .. versionchanged:: 2.6
+            Can no longer be provided together with ``strict_localization``, as it does
+            not apply to the custom localization provider entered in this parameter.
+
     strict_localization: :class:`bool`
         Whether to raise an exception when localizations for a specific key couldn't be found.
         This is mainly useful for testing/debugging, consider disabling this eventually
@@ -325,6 +341,17 @@ class Client:
         Defaults to ``False``.
 
         .. versionadded:: 2.5
+
+        .. versionchanged:: 2.6
+            Can no longer be provided together with ``localization_provider``, as this parameter is
+            ignored for custom localization providers.
+
+    gateway_params: :class:`.GatewayParams`
+        Allows configuring parameters used for establishing gateway connections,
+        notably enabling/disabling compression (enabled by default).
+        Encodings other than JSON are not supported.
+
+        .. versionadded:: 2.6
 
     Attributes
     ----------
@@ -352,23 +379,41 @@ class Client:
         *,
         asyncio_debug: bool = False,
         loop: Optional[asyncio.AbstractEventLoop] = None,
-        **options: Any,
+        shard_id: Optional[int] = None,
+        shard_count: Optional[int] = None,
+        enable_debug_events: bool = False,
+        enable_gateway_error_handler: bool = True,
+        localization_provider: Optional[LocalizationProtocol] = None,
+        strict_localization: bool = False,
+        gateway_params: Optional[GatewayParams] = None,
+        connector: Optional[aiohttp.BaseConnector] = None,
+        proxy: Optional[str] = None,
+        proxy_auth: Optional[aiohttp.BasicAuth] = None,
+        assume_unsync_clock: bool = True,
+        max_messages: Optional[int] = 1000,
+        application_id: Optional[int] = None,
+        heartbeat_timeout: float = 60.0,
+        guild_ready_timeout: float = 2.0,
+        allowed_mentions: Optional[AllowedMentions] = None,
+        activity: Optional[BaseActivity] = None,
+        status: Optional[Union[Status, str]] = None,
+        intents: Optional[Intents] = None,
+        chunk_guilds_at_startup: Optional[bool] = None,
+        member_cache_flags: Optional[MemberCacheFlags] = None,
     ):
         # self.ws is set in the connect method
         self.ws: DiscordWebSocket = None  # type: ignore
         self.loop: asyncio.AbstractEventLoop = asyncio.get_event_loop() if loop is None else loop
         self.loop.set_debug(asyncio_debug)
         self._listeners: Dict[str, List[Tuple[asyncio.Future, Callable[..., bool]]]] = {}
-        self.shard_id: Optional[int] = options.get("shard_id")
-        self.shard_count: Optional[int] = options.get("shard_count")
         self.session_start_limit: Optional[SessionStartLimit] = None
 
-        connector: Optional[aiohttp.BaseConnector] = options.pop("connector", None)
-        proxy: Optional[str] = options.pop("proxy", None)
-        proxy_auth: Optional[aiohttp.BasicAuth] = options.pop("proxy_auth", None)
-        unsync_clock: bool = options.pop("assume_unsync_clock", True)
         self.http: HTTPClient = HTTPClient(
-            connector, proxy=proxy, proxy_auth=proxy_auth, unsync_clock=unsync_clock, loop=self.loop
+            connector,
+            proxy=proxy,
+            proxy_auth=proxy_auth,
+            unsync_clock=assume_unsync_clock,
+            loop=self.loop,
         )
 
         self._handlers: Dict[str, Callable] = {
@@ -378,9 +423,24 @@ class Client:
 
         self._hooks: Dict[str, Callable] = {"before_identify": self._call_before_identify_hook}
 
-        self._enable_debug_events: bool = options.pop("enable_debug_events", False)
-        self._connection: ConnectionState = self._get_state(**options)
-        self._connection.shard_count = self.shard_count
+        self._enable_debug_events: bool = enable_debug_events
+        self._enable_gateway_error_handler: bool = enable_gateway_error_handler
+        self._connection: ConnectionState = self._get_state(
+            max_messages=max_messages,
+            application_id=application_id,
+            heartbeat_timeout=heartbeat_timeout,
+            guild_ready_timeout=guild_ready_timeout,
+            allowed_mentions=allowed_mentions,
+            activity=activity,
+            status=status,
+            intents=intents,
+            chunk_guilds_at_startup=chunk_guilds_at_startup,
+            member_cache_flags=member_cache_flags,
+        )
+        self.shard_id: Optional[int] = shard_id
+        self.shard_count: Optional[int] = shard_count
+        self._connection.shard_count = shard_count
+
         self._closed: bool = False
         self._ready: asyncio.Event = asyncio.Event()
         self._first_connect: asyncio.Event = asyncio.Event()
@@ -391,11 +451,22 @@ class Client:
             VoiceClient.warn_nacl = False
             _log.warning("PyNaCl is not installed, voice will NOT be supported")
 
-        i18n_strict: bool = options.pop("strict_localization", False)
-        i18n = options.pop("localization_provider", None)
-        if i18n is None:
-            i18n = LocalizationStore(strict=i18n_strict)
-        self.i18n: LocalizationProtocol = i18n
+        if strict_localization and localization_provider is not None:
+            raise ValueError(
+                "Providing both `localization_provider` and `strict_localization` is not supported."
+                " If strict localization is desired for a customized localization provider, this"
+                " should be implemented by that custom provider."
+            )
+
+        self.i18n: LocalizationProtocol = (
+            LocalizationStore(strict=strict_localization)
+            if localization_provider is None
+            else localization_provider
+        )
+
+        self.gateway_params: GatewayParams = gateway_params or GatewayParams()
+        if self.gateway_params.encoding != "json":
+            raise ValueError("Gateway encodings other than `json` are currently not supported.")
 
     # internals
 
@@ -404,14 +475,36 @@ class Client:
     ) -> DiscordWebSocket:
         return self.ws
 
-    def _get_state(self, **options: Any) -> ConnectionState:
+    def _get_state(
+        self,
+        *,
+        max_messages: Optional[int],
+        application_id: Optional[int],
+        heartbeat_timeout: float,
+        guild_ready_timeout: float,
+        allowed_mentions: Optional[AllowedMentions],
+        activity: Optional[BaseActivity],
+        status: Optional[Union[str, Status]],
+        intents: Optional[Intents],
+        chunk_guilds_at_startup: Optional[bool],
+        member_cache_flags: Optional[MemberCacheFlags],
+    ) -> ConnectionState:
         return ConnectionState(
             dispatch=self.dispatch,
             handlers=self._handlers,
             hooks=self._hooks,
             http=self.http,
             loop=self.loop,
-            **options,
+            max_messages=max_messages,
+            application_id=application_id,
+            heartbeat_timeout=heartbeat_timeout,
+            guild_ready_timeout=guild_ready_timeout,
+            allowed_mentions=allowed_mentions,
+            activity=activity,
+            status=status,
+            intents=intents,
+            chunk_guilds_at_startup=chunk_guilds_at_startup,
+            member_cache_flags=member_cache_flags,
         )
 
     def _handle_ready(self) -> None:
@@ -582,11 +675,16 @@ class Client:
         ----------
         user_id: :class:`int`
             The ID to search for.
+        strict: :class:`bool`
+            Whether to propagate exceptions from :func:`fetch_user`
+            instead of returning ``None`` in case of failure
+            (e.g. if the user wasn't found).
+            Defaults to ``False``.
 
         Returns
         -------
-        :class:`~disnake.User`
-            The user with the given ID
+        Optional[:class:`~disnake.User`]
+            The user with the given ID, or ``None`` if not found and ``strict`` is set to ``False``.
         """
         user = self.get_user(user_id)
         if user is not None:
@@ -687,6 +785,39 @@ class Client:
         """
         print(f"Ignoring exception in {event_method}", file=sys.stderr)
         traceback.print_exc()
+
+    async def _dispatch_gateway_error(
+        self, event: str, data: Any, shard_id: Optional[int], exc: Exception, /
+    ) -> None:
+        # This is an internal hook that calls the public one,
+        # enabling additional handling while still allowing users to
+        # overwrite `on_gateway_error`.
+        # Even though this is always meant to be an async func, we use `maybe_coroutine`
+        # just in case the client gets subclassed and the method is overwritten with a sync one.
+        await utils.maybe_coroutine(self.on_gateway_error, event, data, shard_id, exc)
+
+    async def on_gateway_error(
+        self, event: str, data: Any, shard_id: Optional[int], exc: Exception, /
+    ) -> None:
+        """|coro|
+
+        The default gateway error handler provided by the client.
+
+        By default this prints to :data:`sys.stderr` however it could be
+        overridden to have a different implementation.
+        Check :func:`~disnake.on_gateway_error` for more details.
+
+        .. versionadded:: 2.6
+
+        .. note::
+            Unlike :func:`on_error`, the exception is available as the ``exc``
+            parameter and cannot be obtained through :func:`sys.exc_info`.
+        """
+        print(
+            f"Ignoring exception in {event} gateway event handler (shard ID {shard_id})",
+            file=sys.stderr,
+        )
+        traceback.print_exception(type(exc), exc, exc.__traceback__)
 
     # hooks
 
@@ -791,7 +922,10 @@ class Client:
             However, if ``ignore_session_start_limit`` is ``True``, the client will connect regardless
             and this exception will not be raised.
         """
-        _, gateway, session_start_limit = await self.http.get_bot_gateway()
+        _, initial_gateway, session_start_limit = await self.http.get_bot_gateway(
+            encoding=self.gateway_params.encoding,
+            zlib=self.gateway_params.zlib,
+        )
         self.session_start_limit = SessionStartLimit(session_start_limit)
 
         if not ignore_session_start_limit and self.session_start_limit.remaining == 0:
@@ -800,22 +934,37 @@ class Client:
         ws_params = {
             "initial": True,
             "shard_id": self.shard_id,
-            "gateway": gateway,
+            "gateway": initial_gateway,
         }
 
         backoff = ExponentialBackoff()
         while not self.is_closed():
+            # "connecting" in this case means "waiting for HELLO"
+            connecting = True
+
             try:
                 coro = DiscordWebSocket.from_client(self, **ws_params)
                 self.ws = await asyncio.wait_for(coro, timeout=60.0)
+
+                # If we got to this point:
+                # - connection was established
+                # - received a HELLO
+                # - and sent an IDENTIFY or RESUME
+                connecting = False
                 ws_params["initial"] = False
+
                 while True:
                     await self.ws.poll_event()
             except ReconnectWebSocket as e:
                 _log.info("Got a request to %s the websocket.", e.op)
                 self.dispatch("disconnect")
                 ws_params.update(
-                    sequence=self.ws.sequence, resume=e.resume, session=self.ws.session_id
+                    sequence=self.ws.sequence,
+                    resume=e.resume,
+                    session=self.ws.session_id,
+                    # use current (possibly new) gateway if resuming,
+                    # reset to default if not
+                    gateway=self.ws.resume_gateway if e.resume else initial_gateway,
                 )
                 continue
             except (
@@ -826,7 +975,6 @@ class Client:
                 aiohttp.ClientError,
                 asyncio.TimeoutError,
             ) as exc:
-
                 self.dispatch("disconnect")
                 if not reconnect:
                     await self.close()
@@ -845,6 +993,7 @@ class Client:
                         initial=False,
                         resume=True,
                         session=self.ws.session_id,
+                        gateway=self.ws.resume_gateway,
                     )
                     continue
 
@@ -862,10 +1011,24 @@ class Client:
                 retry = backoff.delay()
                 _log.exception("Attempting a reconnect in %.2fs", retry)
                 await asyncio.sleep(retry)
-                # Always try to RESUME the connection
-                # If the connection is not RESUME-able then the gateway will invalidate the session.
-                # This is apparently what the official Discord client does.
-                ws_params.update(sequence=self.ws.sequence, resume=True, session=self.ws.session_id)
+
+                if connecting:
+                    # Always identify back to the initial gateway if we failed while connecting.
+                    # This is in case we fail to connect to the resume_gateway instance.
+                    ws_params.update(
+                        resume=False,
+                        gateway=initial_gateway,
+                    )
+                else:
+                    # Just try to resume the session.
+                    # If it's not RESUME-able then the gateway will invalidate the session.
+                    # This is apparently what the official Discord client does.
+                    ws_params.update(
+                        sequence=self.ws.sequence,
+                        resume=True,
+                        session=self.ws.session_id,
+                        gateway=self.ws.resume_gateway,
+                    )
 
     async def close(self) -> None:
         """|coro|
@@ -1317,7 +1480,7 @@ class Client:
         return self._connection._get_guild_application_command(guild_id, id)
 
     def get_global_command_named(
-        self, name: str, cmd_type: ApplicationCommandType = None
+        self, name: str, cmd_type: Optional[ApplicationCommandType] = None
     ) -> Optional[APIApplicationCommand]:
         """
         Returns a global application command matching the given name.
@@ -1337,7 +1500,7 @@ class Client:
         return self._connection._get_global_command_named(name, cmd_type)
 
     def get_guild_command_named(
-        self, guild_id: int, name: str, cmd_type: ApplicationCommandType = None
+        self, guild_id: int, name: str, cmd_type: Optional[ApplicationCommandType] = None
     ) -> Optional[APIApplicationCommand]:
         """
         Returns a guild application command matching the given name.
@@ -1575,8 +1738,8 @@ class Client:
         self,
         *,
         limit: Optional[int] = 100,
-        before: SnowflakeTime = None,
-        after: SnowflakeTime = None,
+        before: Optional[SnowflakeTime] = None,
+        after: Optional[SnowflakeTime] = None,
     ) -> GuildIterator:
         """Retrieves an :class:`.AsyncIterator` that enables receiving your guilds.
 

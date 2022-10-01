@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 # pyright: reportUnknownLambdaType=false
 
 from __future__ import annotations
@@ -109,7 +111,7 @@ class InjectionSlashCommands(commands.Cog):
         self,
         inter: disnake.CommandInteraction,
         perhaps: PerhapsThis,
-        god: HopeToGod = None,
+        god: Optional[HopeToGod] = None,
     ):
         """A command gotten just with annotations
 
@@ -123,4 +125,3 @@ class InjectionSlashCommands(commands.Cog):
 
 def setup(bot):
     bot.add_cog(InjectionSlashCommands(bot))
-    print(f"> Extension {__name__} is ready\n")

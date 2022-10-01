@@ -1,27 +1,4 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
@@ -73,6 +50,7 @@ from .enums import (
     Locale,
     NotificationLevel,
     NSFWLevel,
+    ThreadSortOrder,
     VerificationLevel,
     VideoQualityMode,
     WidgetStyle,
@@ -88,6 +66,7 @@ from .invite import Invite
 from .iterators import AuditLogIterator, BanIterator, MemberIterator
 from .member import Member, VoiceState
 from .mixins import Hashable
+from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite
 from .role import Role
 from .stage_instance import StageInstance
@@ -114,7 +93,7 @@ if TYPE_CHECKING:
     from .permissions import Permissions
     from .state import ConnectionState
     from .template import Template
-    from .threads import AnyThreadArchiveDuration
+    from .threads import AnyThreadArchiveDuration, ForumTag
     from .types.channel import PermissionOverwrite as PermissionOverwritePayload
     from .types.guild import (
         Ban as BanPayload,
@@ -221,7 +200,7 @@ class Guild(Hashable):
         A list of features that the guild has. The features that a guild can have are
         subject to arbitrary change by Discord.
 
-        They are currently as follows:
+        A partial list of features is below:
 
         - ``ANIMATED_BANNER``: Guild can upload an animated banner.
         - ``ANIMATED_ICON``: Guild can upload an animated icon.
@@ -234,6 +213,7 @@ class Guild(Hashable):
         - ``HAS_DIRECTORY_ENTRY``: Guild is listed in a student hub.
         - ``HUB``: Guild is a student hub.
         - ``INVITE_SPLASH``: Guild's invite page can have a special splash.
+        - ``INVITES_DISABLED``: Guild has paused invites, preventing new users from joining.
         - ``LINKED_TO_HUB``: Guild is linked to a student hub.
         - ``MEMBER_VERIFICATION_GATE_ENABLED``: Guild has Membership Screening enabled.
         - ``MONETIZATION_ENABLED``: Guild has enabled monetization.
@@ -245,10 +225,11 @@ class Guild(Hashable):
         - ``PREVIEW_ENABLED``: Guild can be viewed before being accepted via Membership Screening.
         - ``PRIVATE_THREADS``: Guild has access to create private threads.
         - ``ROLE_ICONS``: Guild has access to role icons.
-        - ``SEVEN_DAY_THREAD_ARCHIVE``: Guild has access to the seven day archive time for threads.
-        - ``THREE_DAY_THREAD_ARCHIVE``: Guild has access to the three day archive time for threads.
-        - ``THREADS_ENABLED``: Guild had early access to threads.
-        - ``TICKETED_EVENTS_ENABLED``: Guild has enabled ticketed events.
+        - ``SEVEN_DAY_THREAD_ARCHIVE``: Guild has access to the seven day archive time for threads (no longer has any effect).
+        - ``TEXT_IN_VOICE_ENABLED``: Guild has text in voice channels enabled (no longer has any effect).
+        - ``THREE_DAY_THREAD_ARCHIVE``: Guild has access to the three day archive time for threads (no longer has any effect).
+        - ``THREADS_ENABLED``: Guild has access to threads (no longer has any effect).
+        - ``TICKETED_EVENTS_ENABLED``: Guild has enabled ticketed events (no longer has any effect).
         - ``VANITY_URL``: Guild can have a vanity invite URL (e.g. discord.gg/disnake).
         - ``VERIFIED``: Guild is a verified server.
         - ``VIP_REGIONS``: Guild has VIP voice regions.
@@ -1564,9 +1545,13 @@ class Guild(Hashable):
         category: Optional[CategoryChannel] = None,
         position: int = MISSING,
         slowmode_delay: int = MISSING,
-        default_auto_archive_duration: AnyThreadArchiveDuration = None,
+        default_thread_slowmode_delay: int = MISSING,
+        default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = None,
         nsfw: bool = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
+        available_tags: Optional[Sequence[ForumTag]] = None,
+        default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        default_sort_order: Optional[ThreadSortOrder] = None,
         reason: Optional[str] = None,
     ) -> ForumChannel:
         """|coro|
@@ -1592,9 +1577,18 @@ class Guild(Hashable):
             The position in the channel list. This is a number that starts
             at 0. e.g. the top channel is position 0.
         slowmode_delay: :class:`int`
-            Specifies the slowmode rate limit for users in this channel, in seconds.
+            Specifies the slowmode rate limit at which users can create
+            threads in this channel, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
             If not provided, slowmode is disabled.
+        default_thread_slowmode_delay: :class:`int`
+            Specifies the slowmode rate limit at which users can send messages
+            in newly created threads in this channel, in seconds.
+            A value of ``0`` disables slowmode by default. The maximum value possible is ``21600``.
+            If not provided, slowmode is disabled.
+
+            .. versionadded:: 2.6
+
         default_auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
             The default auto archive duration in minutes for threads created in this channel.
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
@@ -1604,6 +1598,21 @@ class Guild(Hashable):
             A :class:`dict` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply upon creation of a channel.
             Useful for creating secret channels.
+        available_tags: Optional[Sequence[:class:`ForumTag`]]
+            The tags available for threads in this channel.
+
+            .. versionadded:: 2.6
+
+        default_reaction: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
+            The default emoji shown for reacting to threads.
+
+            .. versionadded:: 2.6
+
+        default_sort_order: Optional[:class:`ThreadSortOrder`]
+            The default sort order of threads in this channel.
+
+            .. versionadded:: 2.6
+
         reason: Optional[:class:`str`]
             The reason for creating this channel. Shows up on the audit log.
 
@@ -1631,6 +1640,9 @@ class Guild(Hashable):
         if slowmode_delay is not MISSING:
             options["rate_limit_per_user"] = slowmode_delay
 
+        if default_thread_slowmode_delay is not MISSING:
+            options["default_thread_rate_limit_per_user"] = default_thread_slowmode_delay
+
         if nsfw is not MISSING:
             options["nsfw"] = nsfw
 
@@ -1638,6 +1650,19 @@ class Guild(Hashable):
             options["default_auto_archive_duration"] = cast(
                 "ThreadArchiveDurationLiteral", try_enum_to_int(default_auto_archive_duration)
             )
+
+        if available_tags is not None:
+            options["available_tags"] = [tag.to_dict() for tag in available_tags]
+
+        if default_reaction is not None:
+            emoji_name, emoji_id = PartialEmoji._emoji_to_name_id(default_reaction)
+            options["default_reaction_emoji"] = {
+                "emoji_name": emoji_name,
+                "emoji_id": emoji_id,
+            }
+
+        if default_sort_order is not None:
+            options["default_sort_order"] = try_enum_to_int(default_sort_order)
 
         data = await self._create_channel(
             name,
@@ -1758,6 +1783,7 @@ class Guild(Hashable):
         splash: Optional[AssetBytes] = MISSING,
         discovery_splash: Optional[AssetBytes] = MISSING,
         community: bool = MISSING,
+        invites_disabled: bool = MISSING,
         afk_channel: Optional[VoiceChannel] = MISSING,
         owner: Snowflake = MISSING,
         afk_timeout: int = MISSING,
@@ -1802,7 +1828,7 @@ class Guild(Hashable):
             The new name of the guild.
         description: Optional[:class:`str`]
             The new description of the guild. Could be ``None`` for no description.
-            This is only available to guilds that contain ``PUBLIC`` in :attr:`Guild.features`.
+            This is only available to guilds that contain ``COMMUNITY`` in :attr:`Guild.features`.
         icon: Optional[|resource_type|]
             The new guild icon. Only PNG/JPG is supported.
             GIF is only available to guilds that contain ``ANIMATED_ICON`` in :attr:`Guild.features`.
@@ -1841,10 +1867,21 @@ class Guild(Hashable):
         community: :class:`bool`
             Whether the guild should be a Community guild. If set to ``True``\\, both ``rules_channel``
             and ``public_updates_channel`` parameters are required.
+        invites_disabled: :class:`bool`
+            Whether the guild has paused invites, preventing new users from joining.
+
+            This is only available to guilds that contain ``COMMUNITY``
+            in :attr:`Guild.features`.
+
+            This cannot be changed at the same time as the ``community`` feature due a Discord API limitation.
+
+            .. versionadded:: 2.6
+
         afk_channel: Optional[:class:`VoiceChannel`]
             The new channel that is the AFK channel. Could be ``None`` for no AFK channel.
         afk_timeout: :class:`int`
             The number of seconds until someone is moved to the AFK channel.
+            This can be set to ``60``, ``300``, ``900``, ``1800``, and ``3600``.
         owner: :class:`Member`
             The new owner of the guild to transfer ownership to. Note that you must
             be owner of the guild to do this.
@@ -1868,11 +1905,11 @@ class Guild(Hashable):
 
         rules_channel: Optional[:class:`TextChannel`]
             The new channel that is used for rules. This is only available to
-            guilds that contain ``PUBLIC`` in :attr:`Guild.features`. Could be ``None`` for no rules
+            guilds that contain ``COMMUNITY`` in :attr:`Guild.features`. Could be ``None`` for no rules
             channel.
         public_updates_channel: Optional[:class:`TextChannel`]
             The new channel that is used for public updates from Discord. This is only available to
-            guilds that contain ``PUBLIC`` in :attr:`Guild.features`. Could be ``None`` for no
+            guilds that contain ``COMMUNITY`` in :attr:`Guild.features`. Could be ``None`` for no
             public updates channel.
         premium_progress_bar_enabled: :class:`bool`
             Whether the server boost progress bar is enabled.
@@ -1895,7 +1932,8 @@ class Guild(Hashable):
         ValueError
             ``community`` was set without setting both ``rules_channel`` and ``public_updates_channel`` parameters,
             or if you are not the owner of the guild and request an ownership transfer,
-            or the image format passed in to ``icon`` is invalid.
+            or the image format passed in to ``icon`` is invalid,
+            or both ``community`` and ``invites_disabled`` were provided.
 
         Returns
         -------
@@ -1986,17 +2024,42 @@ class Guild(Hashable):
 
             fields["system_channel_flags"] = system_channel_flags.value
 
-        if community is not MISSING:
-            features = []
-            if community:
-                if "rules_channel_id" in fields and "public_updates_channel_id" in fields:
-                    features.append("COMMUNITY")
+        if community is not MISSING or invites_disabled is not MISSING:
+            # If we don't have complete feature information for the guild,
+            # it is possible to disable or enable other features that we didn't intend to touch.
+            # To enable or disable a feature, we will need to provide all of the existing features in advance.
+            if self.unavailable:
+                raise RuntimeError(
+                    "cannot modify features of an unavailable guild due to potentially destructive results."
+                )
+            features = set(self.features)
+            if community is not MISSING:
+                if not isinstance(community, bool):
+                    raise TypeError("community must be a bool")
+                if community:
+                    if "rules_channel_id" in fields and "public_updates_channel_id" in fields:
+                        features.add("COMMUNITY")
+                    else:
+                        raise ValueError(
+                            "community field requires both rules_channel and public_updates_channel fields to be provided"
+                        )
                 else:
-                    raise ValueError(
-                        "community field requires both rules_channel and public_updates_channel fields to be provided"
-                    )
+                    features.discard("COMMUNITY")
 
-            fields["features"] = features
+            if invites_disabled is not MISSING:
+                if community is not MISSING:
+                    raise ValueError(
+                        "cannot modify both the COMMUNITY feature and INVITES_DISABLED feature at the "
+                        "same time due to a discord limitation."
+                    )
+                if not isinstance(invites_disabled, bool):
+                    raise TypeError("invites_disabled must be a bool")
+                if invites_disabled:
+                    features.add("INVITES_DISABLED")
+                else:
+                    features.discard("INVITES_DISABLED")
+
+            fields["features"] = list(features)
 
         if premium_progress_bar_enabled is not MISSING:
             fields["premium_progress_bar_enabled"] = premium_progress_bar_enabled
@@ -2149,13 +2212,30 @@ class Guild(Hashable):
         self,
         *,
         name: str,
+        channel: Snowflake,
+        scheduled_start_time: datetime.datetime,
         entity_type: Literal[
             GuildScheduledEventEntityType.voice,
             GuildScheduledEventEntityType.stage_instance,
-        ],
-        channel: Snowflake,
-        scheduled_start_time: datetime.datetime,
+        ] = ...,
         scheduled_end_time: Optional[datetime.datetime] = ...,
+        privacy_level: GuildScheduledEventPrivacyLevel = ...,
+        description: str = ...,
+        image: AssetBytes = ...,
+        reason: Optional[str] = ...,
+    ) -> GuildScheduledEvent:
+        ...
+
+    @overload
+    async def create_scheduled_event(
+        self,
+        *,
+        name: str,
+        channel: None,
+        scheduled_start_time: datetime.datetime,
+        scheduled_end_time: datetime.datetime,
+        entity_metadata: GuildScheduledEventMetadata,
+        entity_type: Literal[GuildScheduledEventEntityType.external] = ...,
         privacy_level: GuildScheduledEventPrivacyLevel = ...,
         description: str = ...,
         image: AssetBytes = ...,
@@ -2167,10 +2247,10 @@ class Guild(Hashable):
         self,
         *,
         name: str,
-        entity_type: GuildScheduledEventEntityType,
         scheduled_start_time: datetime.datetime,
+        channel: Optional[Snowflake] = MISSING,
+        entity_type: GuildScheduledEventEntityType = MISSING,
         scheduled_end_time: Optional[datetime.datetime] = MISSING,
-        channel: Snowflake = MISSING,
         privacy_level: GuildScheduledEventPrivacyLevel = MISSING,
         entity_metadata: GuildScheduledEventMetadata = MISSING,
         description: str = MISSING,
@@ -2181,11 +2261,19 @@ class Guild(Hashable):
 
         Creates a :class:`GuildScheduledEvent`.
 
-        If ``entity_type`` is :class:`GuildScheduledEventEntityType.external`:
+        Based on the channel/entity type, there are different restrictions regarding
+        other parameter values, as shown in this table:
 
-        - ``channel`` should not be set
-        - ``entity_metadata`` with a location field must be provided
-        - ``scheduled_end_time`` must be provided
+
+        .. csv-table::
+            :widths: 30, 30, 20, 20
+            :header: "``channel``", "``entity_type``", "``scheduled_end_time``", "``entity_metadata`` with location"
+
+            :class:`.abc.Snowflake` with ``type`` attribute being :class:`ChannelType.voice` , :attr:`~GuildScheduledEventEntityType.voice` (set automatically), optional, unset
+            :class:`.abc.Snowflake` with ``type`` attribute being :class:`ChannelType.stage_voice`, :attr:`~GuildScheduledEventEntityType.stage_instance` (set automatically), optional, unset
+            :class:`.abc.Snowflake` with missing/other ``type`` attribute, required, optional, unset
+            ``None``, :attr:`~GuildScheduledEventEntityType.external` (set automatically), required, required
+            unset, :attr:`~GuildScheduledEventEntityType.external`, required, required
 
         .. versionadded:: 2.3
 
@@ -2199,6 +2287,9 @@ class Guild(Hashable):
         .. versionchanged:: 2.6
             Naive datetime parameters are now assumed to be in the local
             timezone instead of UTC.
+
+        .. versionchanged:: 2.6
+            Infer ``entity_type`` from channel if provided.
 
         Parameters
         ----------
@@ -2214,8 +2305,9 @@ class Guild(Hashable):
             .. versionchanged:: 2.5
                 Now accepts various resource types in addition to :class:`bytes`.
 
-        channel: :class:`.abc.Snowflake`
+        channel: Optional[:class:`.abc.Snowflake`]
             The channel in which the guild scheduled event will be hosted.
+            Passing in `None` assumes the ``entity_type`` to be :class:`GuildScheduledEventEntityType.external`
 
             .. versionadded:: 2.6
 
@@ -2242,14 +2334,31 @@ class Guild(Hashable):
             The request failed.
         TypeError
             The ``image`` asset is a lottie sticker (see :func:`Sticker.read`),
-            or one of ``entity_type``, ``privacy_level``, or ``entity_metadata``
-            is not of the correct type.
+            one of ``entity_type``, ``privacy_level``, or ``entity_metadata``
+            is not of the correct type, or the ``entity_type`` was not provided and
+            could not be assumed from the ``channel``.
 
         Returns
         -------
         :class:`GuildScheduledEvent`
             The newly created guild scheduled event.
         """
+
+        if entity_type is MISSING:
+            if channel is None:
+                entity_type = GuildScheduledEventEntityType.external
+            elif isinstance(channel_type := getattr(channel, "type", None), ChannelType):
+                if channel_type is ChannelType.voice:
+                    entity_type = GuildScheduledEventEntityType.voice
+                elif channel_type is ChannelType.stage_voice:
+                    entity_type = GuildScheduledEventEntityType.stage_instance
+                else:
+                    raise TypeError("channel type must be either 'voice' or 'stage_voice'")
+            else:
+                raise TypeError(
+                    "`entity_type` must be provided if it cannot be derived from `channel`"
+                )
+
         if not isinstance(entity_type, GuildScheduledEventEntityType):
             raise TypeError("entity_type must be an instance of GuildScheduledEventEntityType")
 
@@ -2279,7 +2388,7 @@ class Guild(Hashable):
         if image is not MISSING:
             fields["image"] = await utils._assetbytes_to_base64_data(image)
 
-        if channel is not MISSING:
+        if channel:
             fields["channel_id"] = channel.id
 
         if scheduled_end_time is not MISSING:
@@ -3237,11 +3346,16 @@ class Guild(Hashable):
         ----------
         member_id: :class:`int`
             The ID to search for.
+        strict: :class:`bool`
+            Whether to propagate exceptions from :func:`fetch_member`
+            instead of returning ``None`` in case of failure
+            (e.g. if the member wasn't found).
+            Defaults to ``False``.
 
         Returns
         -------
-        :class:`Member`
-            The member with the given ID.
+        Optional[:class:`Member`]
+            The member with the given ID, or ``None`` if not found and ``strict`` is set to ``False``.
         """
         member = self.get_member(member_id)
         if member is not None:
@@ -3485,12 +3599,33 @@ class Guild(Hashable):
         """
         await self._state.http.kick(user.id, self.id, reason=reason)
 
+    @overload
     async def ban(
         self,
         user: Snowflake,
         *,
+        clean_history_duration: Union[int, datetime.timedelta] = 86400,
         reason: Optional[str] = None,
+    ) -> None:
+        ...
+
+    @overload
+    async def ban(
+        self,
+        user: Snowflake,
+        *,
         delete_message_days: Literal[0, 1, 2, 3, 4, 5, 6, 7] = 1,
+        reason: Optional[str] = None,
+    ) -> None:
+        ...
+
+    async def ban(
+        self,
+        user: Snowflake,
+        *,
+        clean_history_duration: Union[int, datetime.timedelta] = MISSING,
+        delete_message_days: Literal[0, 1, 2, 3, 4, 5, 6, 7] = MISSING,
+        reason: Optional[str] = None,
     ) -> None:
         """|coro|
 
@@ -3505,20 +3640,67 @@ class Guild(Hashable):
         ----------
         user: :class:`abc.Snowflake`
             The user to ban from the guild.
+        clean_history_duration: Union[:class:`int`, :class:`datetime.timedelta`]
+            The timespan (seconds or timedelta) of messages to delete from the user
+            in the guild, up to 7 days (604800 seconds).
+            Defaults to 1 day (86400 seconds).
+
+            This is incompatible with ``delete_message_days``.
+
+            .. versionadded:: 2.6
+
+            .. note::
+                This may not be accurate with small durations (e.g. a few minutes)
+                and delete a couple minutes' worth of messages more than specified.
+
         delete_message_days: :class:`int`
             The number of days worth of messages to delete from the user
             in the guild. The minimum is 0 and the maximum is 7.
+
+            This is incompatible with ``clean_history_duration``.
+
+            .. deprecated:: 2.6
+                Use ``clean_history_duration`` instead.
+
         reason: Optional[:class:`str`]
             The reason for banning this user. Shows up on the audit log.
 
         Raises
         ------
+        TypeError
+            Both ``clean_history_duration`` and ``delete_message_days`` were provided,
+            or ``clean_history_duration`` has an invalid type.
         Forbidden
             You do not have the proper permissions to ban.
         HTTPException
             Banning failed.
         """
-        await self._state.http.ban(user.id, self.id, delete_message_days, reason=reason)
+        if delete_message_days is not MISSING and clean_history_duration is not MISSING:
+            raise TypeError(
+                "Only one of `clean_history_duration` and `delete_message_days` may be provided."
+            )
+
+        if delete_message_days is not MISSING:
+            utils.warn_deprecated(
+                "`delete_message_days` is deprecated and will be removed in a future version. Consider using `clean_history_duration` instead.",
+                stacklevel=2,
+            )
+            delete_message_seconds = delete_message_days * 86400
+        elif clean_history_duration is MISSING:
+            delete_message_seconds = 86400
+        elif isinstance(clean_history_duration, datetime.timedelta):
+            delete_message_seconds = int(clean_history_duration.total_seconds())
+        elif isinstance(clean_history_duration, int):
+            delete_message_seconds = clean_history_duration
+        else:
+            raise TypeError(
+                "`clean_history_duration` should be int or timedelta, "
+                f"not {type(clean_history_duration).__name__}"
+            )
+
+        await self._state.http.ban(
+            user.id, self.id, delete_message_seconds=delete_message_seconds, reason=reason
+        )
 
     async def unban(self, user: Snowflake, *, reason: Optional[str] = None) -> None:
         """|coro|
@@ -3610,8 +3792,8 @@ class Guild(Hashable):
         limit: Optional[int] = 100,
         before: Optional[SnowflakeTime] = None,
         after: Optional[SnowflakeTime] = None,
-        user: Snowflake = None,
-        action: AuditLogAction = None,
+        user: Optional[Snowflake] = None,
+        action: Optional[AuditLogAction] = None,
     ) -> AuditLogIterator:
         """Returns an :class:`AsyncIterator` that enables receiving the guild's audit logs.
 
@@ -4298,7 +4480,7 @@ class Guild(Hashable):
         event_type: AutoModEventType,
         trigger_type: AutoModTriggerType,
         actions: Sequence[AutoModAction],
-        trigger_metadata: AutoModTriggerMetadata = None,
+        trigger_metadata: Optional[AutoModTriggerMetadata] = None,
         enabled: bool = False,
         exempt_roles: Optional[Sequence[Snowflake]] = None,
         exempt_channels: Optional[Sequence[Snowflake]] = None,
@@ -4324,8 +4506,8 @@ class Guild(Hashable):
             The type of events that this rule will be applied to.
         trigger_type: :class:`AutoModTriggerType`
             The type of trigger that determines whether this rule's actions should run for a specific event.
-            If set to :attr:`~AutoModTriggerType.keyword` or :attr:`~AutoModTriggerType.keyword_preset`,
-            ``trigger_metadata`` must be set accordingly.
+            If set to :attr:`~AutoModTriggerType.keyword`, :attr:`~AutoModTriggerType.keyword_preset`,
+            or :attr:`~AutoModTriggerType.mention_spam`, ``trigger_metadata`` must be set accordingly.
             This cannot be changed after creation.
         actions: Sequence[Union[:class:`AutoModBlockMessageAction`, :class:`AutoModSendAlertAction`, :class:`AutoModTimeoutAction`, :class:`AutoModAction`]]
             The list of actions that will execute if a matching event triggered this rule.
@@ -4362,6 +4544,7 @@ class Guild(Hashable):
         if not trigger_metadata and trigger_type_int in (
             AutoModTriggerType.keyword.value,
             AutoModTriggerType.keyword_preset.value,
+            AutoModTriggerType.mention_spam.value,
         ):
             raise ValueError("Specified trigger type requires `trigger_metadata` to not be empty")
 

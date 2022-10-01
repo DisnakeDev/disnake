@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 import disnake
 from disnake.ext import commands
 
@@ -13,4 +15,3 @@ class MessageCommands(commands.Cog):
 
 def setup(bot):
     bot.add_cog(MessageCommands(bot))
-    print(f"> Extension {__name__} is ready\n")

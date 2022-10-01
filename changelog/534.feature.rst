@@ -1,1 +1,0 @@
-Add :attr:`.Webhook.application_id` for accessing the ID of the app that created the webhook, if any.

@@ -1,1 +1,0 @@
-Add :attr:`GuildScheduledEventStatus.cancelled` as an alias for :attr:`~GuildScheduledEventStatus.canceled`.

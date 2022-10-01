@@ -1,1 +1,0 @@
-Update :attr:`InteractionReference.name` description, now includes group and subcommand.

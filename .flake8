@@ -1,3 +1,5 @@
+; SPDX-License-Identifier: MIT
+
 [flake8]
 max-line-length = 100
 statistics = true
@@ -19,7 +21,6 @@ exclude =
     .mypy_cache
     .pytest_cache
     build
-    test_bot
 
 # For error codes, see this https://flake8.pycqa.org/en/latest/user/error-codes.html
 ignore =
@@ -47,6 +48,9 @@ per-file-ignores =
     disnake/player.py:S404,S603
     # ignore whitespacing after `:`
     disnake/ext/commands/params.py:E241
+    # upstream bug: https://github.com/PyCQA/bandit/issues/926
+    disnake/backoff.py:S311
+    disnake/colour.py:S311
     # pytest uses assert for testing
     tests/**: S101
     # ignore pytest issues outside of tests directory
@@ -58,6 +62,7 @@ per-file-ignores =
     # S311: examples don't misuse random generation
     # S105: possible hardcoded passwords TODO
     examples/**:B008,S311,S105
+    test_bot/**:B008
     # usage of assert and interface binding, allowable for the third party lib at use
     # also have to reignore whatever is from the last check that pops up here
     examples/basic_voice.py:S101,S104

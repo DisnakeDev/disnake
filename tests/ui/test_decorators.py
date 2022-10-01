@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 import contextlib
 from typing import Any, Iterator, Type, TypeVar
 

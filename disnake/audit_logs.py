@@ -1,27 +1,4 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
@@ -49,7 +26,9 @@ from .colour import Colour
 from .invite import Invite
 from .mixins import Hashable
 from .object import Object
+from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite, Permissions
+from .threads import ForumTag, Thread
 
 __all__ = (
     "AuditLogDiff",
@@ -71,7 +50,6 @@ if TYPE_CHECKING:
     from .role import Role
     from .stage_instance import StageInstance
     from .sticker import GuildSticker
-    from .threads import Thread
     from .types.audit_log import (
         AuditLogChange as AuditLogChangePayload,
         AuditLogEntry as AuditLogEntryPayload,
@@ -81,9 +59,13 @@ if TYPE_CHECKING:
         AutoModAction as AutoModActionPayload,
         AutoModTriggerMetadata as AutoModTriggerMetadataPayload,
     )
-    from .types.channel import PermissionOverwrite as PermissionOverwritePayload
+    from .types.channel import (
+        DefaultReaction as DefaultReactionPayload,
+        PermissionOverwrite as PermissionOverwritePayload,
+    )
     from .types.role import Role as RolePayload
     from .types.snowflake import Snowflake
+    from .types.threads import ForumTag as ForumTagPayload
     from .user import User
     from .webhook import Webhook
 
@@ -180,6 +162,36 @@ def _guild_hash_transformer(path: str) -> Callable[[AuditLogEntry, Optional[str]
     return _transform
 
 
+def _transform_tag(entry: AuditLogEntry, data: Optional[ForumTagPayload]) -> Optional[ForumTag]:
+    if data is None:
+        return None
+    return ForumTag._from_data(data=data, state=entry._state)
+
+
+def _transform_tag_id(
+    entry: AuditLogEntry, data: Optional[str]
+) -> Optional[Union[ForumTag, Object]]:
+    if data is None:
+        return None
+
+    # cyclic imports
+    from .channel import ForumChannel
+
+    tag: Optional[ForumTag] = None
+    tag_id = int(data)
+    thread = entry.target
+    # try thread parent first
+    if isinstance(thread, Thread) and isinstance(thread.parent, ForumChannel):
+        tag = thread.parent.get_tag(tag_id)
+    else:
+        # if not found (possibly deleted thread), search all forum channels
+        for forum in entry.guild.forum_channels:
+            if tag := forum.get_tag(tag_id):
+                break
+
+    return tag or Object(id=tag_id)
+
+
 T = TypeVar("T")
 EnumT = TypeVar("EnumT", bound=enums.Enum)
 FlagsT = TypeVar("FlagsT", bound=flags.BaseFlags)
@@ -265,6 +277,16 @@ def _transform_automod_trigger_metadata(
     return AutoModTriggerMetadata._from_dict(data)
 
 
+def _transform_default_reaction(
+    entry: AuditLogEntry, data: Optional[DefaultReactionPayload]
+) -> Optional[Union[Emoji, PartialEmoji]]:
+    if data is None:
+        return None
+    return PartialEmoji._emoji_from_name_id(
+        data.get("emoji_name"), utils._get_as_snowflake(data, "emoji_id"), state=entry._state
+    )
+
+
 class AuditLogDiff:
     def __len__(self) -> int:
         return len(self.__dict__)
@@ -291,50 +313,55 @@ Transformer = Callable[["AuditLogEntry", Any], Any]
 class AuditLogChanges:
     # fmt: off
     TRANSFORMERS: ClassVar[Dict[str, Tuple[Optional[str], Optional[Transformer]]]] = {
-        "verification_level":            (None, _enum_transformer(enums.VerificationLevel)),
-        "explicit_content_filter":       (None, _enum_transformer(enums.ContentFilter)),
-        "allow":                         (None, _transform_permissions),
-        "deny":                          (None, _transform_permissions),
-        "permissions":                   (None, _transform_permissions),
-        "id":                            (None, _transform_snowflake),
-        "application_id":                (None, _transform_snowflake),
-        "color":                         ("colour", _transform_color),
-        "owner_id":                      ("owner", _transform_member_id),
-        "inviter_id":                    ("inviter", _transform_member_id),
-        "channel_id":                    ("channel", _transform_channel),
-        "afk_channel_id":                ("afk_channel", _transform_channel),
-        "system_channel_id":             ("system_channel", _transform_channel),
-        "widget_channel_id":             ("widget_channel", _transform_channel),
-        "rules_channel_id":              ("rules_channel", _transform_channel),
-        "public_updates_channel_id":     ("public_updates_channel", _transform_channel),
-        "permission_overwrites":         ("overwrites", _transform_overwrites),
-        "splash_hash":                   ("splash", _guild_hash_transformer("splashes")),
-        "banner_hash":                   ("banner", _guild_hash_transformer("banners")),
-        "discovery_splash_hash":         ("discovery_splash", _guild_hash_transformer("discovery-splashes")),
-        "icon_hash":                     ("icon", _transform_icon),
-        "avatar_hash":                   ("avatar", _transform_avatar),
-        "rate_limit_per_user":           ("slowmode_delay", None),
-        "guild_id":                      ("guild", _transform_guild_id),
-        "tags":                          ("emoji", None),
-        "unicode_emoji":                 ("emoji", None),
-        "default_message_notifications": ("default_notifications", _enum_transformer(enums.NotificationLevel)),
-        "communication_disabled_until":  ("timeout", _transform_datetime),
-        "image_hash":                    ("image", _transform_guild_scheduled_event_image),
-        "video_quality_mode":            (None, _enum_transformer(enums.VideoQualityMode)),
-        "preferred_locale":              (None, _enum_transformer(enums.Locale)),
-        "privacy_level":                 (None, _transform_privacy_level),
-        "format_type":                   (None, _enum_transformer(enums.StickerFormatType)),
-        "entity_type":                   (None, _enum_transformer(enums.GuildScheduledEventEntityType)),
-        "status":                        (None, _enum_transformer(enums.GuildScheduledEventStatus)),
-        "type":                          (None, _transform_type),
-        "flags":                         (None, _flags_transformer(flags.ChannelFlags)),
-        "system_channel_flags":          (None, _flags_transformer(flags.SystemChannelFlags)),
-        "trigger_type":                  (None, _enum_transformer(enums.AutoModTriggerType)),
-        "event_type":                    (None, _enum_transformer(enums.AutoModEventType)),
-        "actions":                       (None, _list_transformer(_transform_automod_action)),
-        "trigger_metadata":              (None, _transform_automod_trigger_metadata),
-        "exempt_roles":                  (None, _list_transformer(_transform_role)),
-        "exempt_channels":               (None, _list_transformer(_transform_channel)),
+        "verification_level":                 (None, _enum_transformer(enums.VerificationLevel)),
+        "explicit_content_filter":            (None, _enum_transformer(enums.ContentFilter)),
+        "allow":                              (None, _transform_permissions),
+        "deny":                               (None, _transform_permissions),
+        "permissions":                        (None, _transform_permissions),
+        "id":                                 (None, _transform_snowflake),
+        "application_id":                     (None, _transform_snowflake),
+        "color":                              ("colour", _transform_color),
+        "owner_id":                           ("owner", _transform_member_id),
+        "inviter_id":                         ("inviter", _transform_member_id),
+        "channel_id":                         ("channel", _transform_channel),
+        "afk_channel_id":                     ("afk_channel", _transform_channel),
+        "system_channel_id":                  ("system_channel", _transform_channel),
+        "widget_channel_id":                  ("widget_channel", _transform_channel),
+        "rules_channel_id":                   ("rules_channel", _transform_channel),
+        "public_updates_channel_id":          ("public_updates_channel", _transform_channel),
+        "permission_overwrites":              ("overwrites", _transform_overwrites),
+        "splash_hash":                        ("splash", _guild_hash_transformer("splashes")),
+        "banner_hash":                        ("banner", _guild_hash_transformer("banners")),
+        "discovery_splash_hash":              ("discovery_splash", _guild_hash_transformer("discovery-splashes")),
+        "icon_hash":                          ("icon", _transform_icon),
+        "avatar_hash":                        ("avatar", _transform_avatar),
+        "rate_limit_per_user":                ("slowmode_delay", None),
+        "default_thread_rate_limit_per_user": ("default_thread_slowmode_delay", None),
+        "guild_id":                           ("guild", _transform_guild_id),
+        "tags":                               ("emoji", None),
+        "unicode_emoji":                      ("emoji", None),
+        "default_message_notifications":      ("default_notifications", _enum_transformer(enums.NotificationLevel)),
+        "communication_disabled_until":       ("timeout", _transform_datetime),
+        "image_hash":                         ("image", _transform_guild_scheduled_event_image),
+        "video_quality_mode":                 (None, _enum_transformer(enums.VideoQualityMode)),
+        "preferred_locale":                   (None, _enum_transformer(enums.Locale)),
+        "privacy_level":                      (None, _transform_privacy_level),
+        "format_type":                        (None, _enum_transformer(enums.StickerFormatType)),
+        "entity_type":                        (None, _enum_transformer(enums.GuildScheduledEventEntityType)),
+        "status":                             (None, _enum_transformer(enums.GuildScheduledEventStatus)),
+        "type":                               (None, _transform_type),
+        "flags":                              (None, _flags_transformer(flags.ChannelFlags)),
+        "system_channel_flags":               (None, _flags_transformer(flags.SystemChannelFlags)),
+        "trigger_type":                       (None, _enum_transformer(enums.AutoModTriggerType)),
+        "event_type":                         (None, _enum_transformer(enums.AutoModEventType)),
+        "actions":                            (None, _list_transformer(_transform_automod_action)),
+        "trigger_metadata":                   (None, _transform_automod_trigger_metadata),
+        "exempt_roles":                       (None, _list_transformer(_transform_role)),
+        "exempt_channels":                    (None, _list_transformer(_transform_channel)),
+        "applied_tags":                       (None, _list_transformer(_transform_tag_id)),
+        "available_tags":                     (None, _list_transformer(_transform_tag)),
+        "default_reaction_emoji":             ("default_reaction", _transform_default_reaction),
+        "default_sort_order":                 (None, _enum_transformer(enums.ThreadSortOrder)),
     }
     # fmt: on
 
@@ -608,7 +635,11 @@ class AuditLogEntry(Hashable):
                     "integration": self._get_integration_by_application_id(app_id) or Object(app_id)
                 }
                 self.extra = type("_AuditLogProxy", (), elems)()
-            elif self.action is enums.AuditLogAction.automod_block_message:
+            elif self.action in (
+                enums.AuditLogAction.automod_block_message,
+                enums.AuditLogAction.automod_send_alert_message,
+                enums.AuditLogAction.automod_timeout,
+            ):
                 channel_id = int(extra["channel_id"])
                 elems = {
                     "channel": (

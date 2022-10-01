@@ -1,6 +1,9 @@
+# SPDX-License-Identifier: MIT
+
 *.json
 *.py[cod]
 *.log
+*.log.[0-9]*
 *.egg-info
 venv
 .venv
@@ -21,6 +24,7 @@ ADVANCED.rst
 secrets/
 *_test.py
 *.env
+!example.env
 venvs/
 .nox/
 .idea

@@ -1,26 +1,4 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
@@ -250,9 +228,17 @@ class AutoModTriggerMetadata:
 
     allow_list: Optional[Sequence[:class:`str`]]
         The keywords that should be exempt from a preset. Used with :attr:`AutoModTriggerType.keyword_preset`.
+
+    mention_total_limit: Optional[:class:`int`]
+        The maximum number of mentions (members + roles) allowed. Used with :attr:`AutoModTriggerType.mention_spam`.
     """
 
-    __slots__ = ("keyword_filter", "presets", "allow_list")
+    __slots__ = (
+        "keyword_filter",
+        "presets",
+        "allow_list",
+        "mention_total_limit",
+    )
 
     @overload
     def __init__(self, *, keyword_filter: Sequence[str]):
@@ -267,26 +253,33 @@ class AutoModTriggerMetadata:
     ):
         ...
 
+    @overload
+    def __init__(self, *, mention_total_limit: int):
+        ...
+
     def __init__(
         self,
         *,
         keyword_filter: Optional[Sequence[str]] = None,
         presets: Optional[AutoModKeywordPresets] = None,
         allow_list: Optional[Sequence[str]] = None,
+        mention_total_limit: Optional[int] = None,
     ):
         self.keyword_filter: Optional[Sequence[str]] = keyword_filter
         self.presets: Optional[AutoModKeywordPresets] = presets
         self.allow_list: Optional[Sequence[str]] = allow_list
+        self.mention_total_limit: Optional[int] = mention_total_limit
 
-    def with_edits(
+    def with_changes(
         self,
         *,
         keyword_filter: Optional[Sequence[str]] = MISSING,
         presets: Optional[AutoModKeywordPresets] = MISSING,
         allow_list: Optional[Sequence[str]] = MISSING,
+        mention_total_limit: Optional[int] = MISSING,
     ) -> Self:
         """
-        Returns a new instance with the given edits applied.
+        Returns a new instance with the given changes applied.
         All other fields will be kept intact.
 
         Returns
@@ -298,6 +291,9 @@ class AutoModTriggerMetadata:
             keyword_filter=self.keyword_filter if keyword_filter is MISSING else keyword_filter,
             presets=self.presets if presets is MISSING else presets,
             allow_list=self.allow_list if allow_list is MISSING else allow_list,
+            mention_total_limit=(
+                self.mention_total_limit if mention_total_limit is MISSING else mention_total_limit
+            ),
         )
 
     @classmethod
@@ -311,6 +307,7 @@ class AutoModTriggerMetadata:
             keyword_filter=data.get("keyword_filter"),
             presets=presets,
             allow_list=data.get("allow_list"),
+            mention_total_limit=data.get("mention_total_limit"),
         )
 
     def to_dict(self) -> AutoModTriggerMetadataPayload:
@@ -321,6 +318,8 @@ class AutoModTriggerMetadata:
             data["presets"] = self.presets.values  # type: ignore  # `values` contains ints instead of preset literal values
         if self.allow_list is not None:
             data["allow_list"] = list(self.allow_list)
+        if self.mention_total_limit is not None:
+            data["mention_total_limit"] = self.mention_total_limit
         return data
 
     def __repr__(self) -> str:
@@ -331,6 +330,8 @@ class AutoModTriggerMetadata:
             s += f" presets={self.presets!r}"
         if self.allow_list is not None:
             s += f" allow_list={self.allow_list!r}"
+        if self.mention_total_limit is not None:
+            s += f" mention_total_limit={self.mention_total_limit!r}"
         return f"{s}>"
 
 

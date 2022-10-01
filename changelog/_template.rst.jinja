@@ -1,7 +1,7 @@
 .. _vp{{ versiondata.version.replace(".", "p") }}:
 
-{{ top_line }}
-{{ top_underline * top_line|length }}
+{{ "v" + versiondata.version }}
+{{ top_underline * ((versiondata.version)|length + 1) }}
 {% for section, _ in sections.items() %}
 {% set underline = underlines[0] %}
 

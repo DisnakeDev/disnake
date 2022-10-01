@@ -1,3 +1,5 @@
+.. SPDX-License-Identifier: MIT
+
 .. currentmodule:: disnake
 
 API Reference
@@ -256,6 +258,43 @@ This section documents events related to :class:`Client` and its connectivity to
         exception.
     :param kwargs: The keyword arguments for the event that raised the
         exception.
+
+.. function:: on_gateway_error(event, data, shard_id, exc)
+
+    When a (known) gateway event cannot be parsed, a traceback is printed to
+    stderr and the exception is ignored by default. This should generally
+    not happen and is usually either a library issue, or caused by a breaking API change.
+
+    To change this behaviour, for example to completely stop the bot, this event can be overridden.
+
+    This can also be disabled completely by passing ``enable_gateway_error_handler=False``
+    to the client on initialization, restoring the pre-v2.6 behavior.
+
+    .. versionadded:: 2.6
+
+    .. note::
+        ``on_gateway_error`` will only be dispatched to :meth:`Client.event`.
+
+        It will not be received by :meth:`Client.wait_for`, or, if used,
+        :ref:`ext_commands_api_bot` listeners such as
+        :meth:`~ext.commands.Bot.listen` or :meth:`~ext.commands.Cog.listener`.
+
+    .. note::
+        This will not be dispatched for exceptions that occur while parsing ``READY`` and
+        ``RESUMED`` event payloads, as exceptions in these events are considered fatal.
+
+    :param event: The name of the gateway event that was the cause of the exception,
+        for example ``MESSAGE_CREATE``.
+    :type event: :class:`str`
+
+    :param data: The raw event payload.
+    :type data: :class:`Any`
+
+    :param shard_id: The ID of the shard the exception occurred in, if applicable.
+    :type shard_id: Optional[:class:`int`]
+
+    :param exc: The exception that was raised.
+    :type exc: :class:`Exception`
 
 .. function:: on_ready()
 
@@ -826,6 +865,7 @@ Members
               on_member_remove(member)
 
     Called when a :class:`Member` leaves or joins a :class:`Guild`.
+    If :func:`on_member_remove` is being used then consider using :func:`on_raw_member_remove` which will be called regardless of the cache.
 
     This requires :attr:`Intents.members` to be enabled.
 
@@ -834,7 +874,8 @@ Members
 
 .. function:: on_member_update(before, after)
 
-    Called when a :class:`Member` is updated.
+    Called when a :class:`Member` updates their profile.
+    Consider using :func:`on_raw_member_update` which will be called regardless of the cache.
 
     This is called when one or more of the following things change, but is not limited to:
 
@@ -851,6 +892,26 @@ Members
     :type before: :class:`Member`
     :param after: The member's updated info.
     :type after: :class:`Member`
+
+.. function:: on_raw_member_remove(payload)
+
+    Called when a member leaves a :class:`Guild`.
+    Unlike :func:`on_member_remove`, this is called regardless of the member cache.
+
+    .. versionadded:: 2.6
+
+    :param payload: The raw event payload data.
+    :type payload: :class:`RawGuildMemberRemoveEvent`
+
+.. function:: on_raw_member_update(member)
+
+    Called when a member updates their profile.
+    Unlike :func:`on_member_update`, this is called regardless of the member cache.
+
+    .. versionadded:: 2.6
+
+    :param member: The member that was updated.
+    :type member: :class:`Member`
 
 .. function:: on_member_ban(guild, user)
 
@@ -2291,7 +2352,10 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.default_auto_archive_duration`
         - :attr:`~AuditLogDiff.user_limit`
         - :attr:`~AuditLogDiff.slowmode_delay`
+        - :attr:`~AuditLogDiff.default_thread_slowmode_delay`
         - :attr:`~AuditLogDiff.nsfw`
+        - :attr:`~AuditLogDiff.available_tags`
+        - :attr:`~AuditLogDiff.default_reaction`
 
     .. attribute:: channel_update
 
@@ -2319,7 +2383,10 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.default_auto_archive_duration`
         - :attr:`~AuditLogDiff.user_limit`
         - :attr:`~AuditLogDiff.slowmode_delay`
+        - :attr:`~AuditLogDiff.default_thread_slowmode_delay`
         - :attr:`~AuditLogDiff.nsfw`
+        - :attr:`~AuditLogDiff.available_tags`
+        - :attr:`~AuditLogDiff.default_reaction`
 
     .. attribute:: channel_delete
 
@@ -2343,7 +2410,10 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.default_auto_archive_duration`
         - :attr:`~AuditLogDiff.user_limit`
         - :attr:`~AuditLogDiff.slowmode_delay`
+        - :attr:`~AuditLogDiff.default_thread_slowmode_delay`
         - :attr:`~AuditLogDiff.nsfw`
+        - :attr:`~AuditLogDiff.available_tags`
+        - :attr:`~AuditLogDiff.default_reaction`
 
     .. attribute:: overwrite_create
 
@@ -2991,6 +3061,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.slowmode_delay`
         - :attr:`~AuditLogDiff.invitable`
         - :attr:`~AuditLogDiff.flags`
+        - :attr:`~AuditLogDiff.applied_tags`
 
         .. versionadded:: 2.0
 
@@ -3011,6 +3082,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.slowmode_delay`
         - :attr:`~AuditLogDiff.invitable`
         - :attr:`~AuditLogDiff.flags`
+        - :attr:`~AuditLogDiff.applied_tags`
 
         .. versionadded:: 2.0
 
@@ -3031,6 +3103,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.slowmode_delay`
         - :attr:`~AuditLogDiff.invitable`
         - :attr:`~AuditLogDiff.flags`
+        - :attr:`~AuditLogDiff.applied_tags`
 
         .. versionadded:: 2.0
 
@@ -3132,7 +3205,27 @@ of :class:`enum.Enum`.
 
         - ``channel``: A :class:`~abc.GuildChannel`, :class:`Thread` or :class:`Object` with the channel ID where the message got blocked.
         - ``rule_name``: A :class:`str` with the name of the rule that matched.
-        - ``rule_trigger_type``: A :class:`AutoModTriggerType` value with the trigger type of the rule.
+        - ``rule_trigger_type``: An :class:`AutoModTriggerType` value with the trigger type of the rule.
+
+    .. attribute:: automod_send_alert_message
+
+        An alert message was sent by an auto moderation rule.
+
+        When this is the action, the type of :attr:`~AuditLogEntry.target` is
+        the :class:`Member` or :class:`User` who had their message flagged.
+
+        See :attr:`automod_block_message` for more information on how the
+        :attr:`~AuditLogEntry.extra` field is set.
+
+    .. attribute:: automod_timeout
+
+        A user was timed out by an auto moderation rule.
+
+        When this is the action, the type of :attr:`~AuditLogEntry.target` is
+        the :class:`Member` or :class:`User` who was timed out.
+
+        See :attr:`automod_block_message` for more information on how the
+        :attr:`~AuditLogEntry.extra` field is set.
 
 .. class:: AuditLogActionCategory
 
@@ -3613,8 +3706,8 @@ of :class:`enum.Enum`.
 
         .. note::
             This action type is only available for rules with trigger type
-            :attr:`~AutoModTriggerType.keyword`, and :attr:`~Permissions.moderate_members`
-            permissions are required to use it.
+            :attr:`~AutoModTriggerType.keyword` or :attr:`~AutoModTriggerType.mention_spam`,
+            and :attr:`~Permissions.moderate_members` permissions are required to use it.
 
 .. class:: AutoModEventType
 
@@ -3651,6 +3744,26 @@ of :class:`enum.Enum`.
         The rule will filter messages based on predefined lists containing commonly flagged words.
 
         This trigger type requires additional :class:`metadata <AutoModTriggerMetadata>`.
+
+    .. attribute:: mention_spam
+
+        The rule will filter messages based on the number of member/role mentions they contain.
+
+        This trigger type requires additional :class:`metadata <AutoModTriggerMetadata>`.
+
+.. class:: ThreadSortOrder
+
+    Represents the sort order of threads in :class:`ForumChannel`\s.
+
+    .. versionadded:: 2.6
+
+    .. attribute:: latest_activity
+
+        Sort forum threads by activity.
+
+    .. attribute:: creation_date
+
+        Sort forum threads by creation date/time (from newest to oldest).
 
 Async Iterator
 ----------------
@@ -4243,6 +4356,15 @@ AuditLogDiff
 
         :type: :class:`int`
 
+    .. attribute:: default_thread_slowmode_delay
+
+        The default number of seconds members have to wait before
+        sending another message in new threads created in the channel.
+
+        See also :attr:`ForumChannel.default_thread_slowmode_delay`.
+
+        :type: :class:`int`
+
     .. attribute:: rtc_region
 
         The region for the voice or stage channel's voice communication.
@@ -4446,6 +4568,36 @@ AuditLogDiff
         If a channel is not found then it is an :class:`Object` with the ID being set.
 
         :type: List[Union[:class:`abc.GuildChannel`, :class:`Object`]]
+
+    .. attribute:: applied_tags
+
+        The tags applied to a thread in a forum channel being changed.
+
+        If a tag is not found, then it is an :class:`Object` with the ID
+        being set.
+
+        :type: List[Union[:class:`ForumTag`, :class:`Object`]]
+
+    .. attribute:: available_tags
+
+        The available tags for threads in a forum channel being changed.
+
+        :type: List[:class:`ForumTag`]
+
+    .. attribute:: default_reaction
+
+        The default emoji shown for reacting to threads in a forum channel being changed.
+
+        Due to a Discord limitation, this will have an empty
+        :attr:`~PartialEmoji.name` if it is a custom :class:`PartialEmoji`.
+
+        :type: Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]
+
+    .. attribute:: default_sort_order
+
+        The default sort order of threads in a forum channel being changed.
+
+        :type: Optional[:class:`ThreadSortOrder`]
 
 Webhook Support
 ------------------
@@ -4834,6 +4986,19 @@ Interaction
 .. autoclass:: Interaction()
     :members:
     :inherited-members:
+    :exclude-members: original_message, edit_original_message, delete_original_message
+
+    .. method:: original_message
+
+        An alias of :func:`original_response`.
+
+    .. method:: edit_original_message
+
+        An alias of :func:`edit_original_response`.
+
+    .. method:: delete_original_message
+
+        An alias of :func:`delete_original_response`.
 
 ApplicationCommandInteraction
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -4843,6 +5008,19 @@ ApplicationCommandInteraction
 .. autoclass:: ApplicationCommandInteraction()
     :members:
     :inherited-members:
+    :exclude-members: original_message, edit_original_message, delete_original_message
+
+    .. method:: original_message
+
+        An alias of :func:`original_response`.
+
+    .. method:: edit_original_message
+
+        An alias of :func:`edit_original_response`.
+
+    .. method:: delete_original_message
+
+        An alias of :func:`delete_original_response`.
 
 GuildCommandInteraction
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -4867,6 +5045,19 @@ MessageInteraction
 .. autoclass:: MessageInteraction()
     :members:
     :inherited-members:
+    :exclude-members: original_message, edit_original_message, delete_original_message
+
+    .. method:: original_message
+
+        An alias of :func:`original_response`.
+
+    .. method:: edit_original_message
+
+        An alias of :func:`edit_original_response`.
+
+    .. method:: delete_original_message
+
+        An alias of :func:`delete_original_response`.
 
 ModalInteraction
 ~~~~~~~~~~~~~~~~
@@ -4876,6 +5067,19 @@ ModalInteraction
 .. autoclass:: ModalInteraction()
     :members:
     :inherited-members:
+    :exclude-members: original_message, edit_original_message, delete_original_message
+
+    .. method:: original_message
+
+        An alias of :func:`original_response`.
+
+    .. method:: edit_original_message
+
+        An alias of :func:`edit_original_response`.
+
+    .. method:: delete_original_message
+
+        An alias of :func:`delete_original_response`.
 
 InteractionResponse
 ~~~~~~~~~~~~~~~~~~~~
@@ -4957,6 +5161,7 @@ Spotify
 
 .. autoclass:: Spotify()
     :members:
+    :inherited-members:
 
 VoiceState
 ~~~~~~~~~~~
@@ -5048,6 +5253,15 @@ ThreadMember
 
 .. autoclass:: ThreadMember()
     :members:
+
+ForumTag
+~~~~~~~~~
+
+.. attributetable:: ForumTag
+
+.. autoclass:: ForumTag()
+    :members:
+    :inherited-members:
 
 VoiceChannel
 ~~~~~~~~~~~~~
@@ -5177,6 +5391,7 @@ WidgetMember
 .. autoclass:: WidgetMember()
     :members:
     :inherited-members:
+    :exclude-members: public_flags, default_avatar, banner, accent_colour, accent_color, colour, color, mention, created_at, mentioned_in
 
 WidgetSettings
 ~~~~~~~~~~~~~~
@@ -5363,6 +5578,14 @@ RawTypingEvent
 .. attributetable:: RawTypingEvent
 
 .. autoclass:: RawTypingEvent()
+    :members:
+
+RawGuildMemberRemoveEvent
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: RawGuildMemberRemoveEvent
+
+.. autoclass:: RawGuildMemberRemoveEvent()
     :members:
 
 PartialWebhookGuild
@@ -5608,6 +5831,7 @@ BaseActivity
 
 .. autoclass:: BaseActivity
     :members:
+    :inherited-members:
 
 Activity
 ~~~~~~~~~
@@ -5616,6 +5840,7 @@ Activity
 
 .. autoclass:: Activity
     :members:
+    :inherited-members:
 
 Game
 ~~~~~
@@ -5624,6 +5849,7 @@ Game
 
 .. autoclass:: Game
     :members:
+    :inherited-members:
 
 Streaming
 ~~~~~~~~~~~
@@ -5632,6 +5858,7 @@ Streaming
 
 .. autoclass:: Streaming
     :members:
+    :inherited-members:
 
 CustomActivity
 ~~~~~~~~~~~~~~~
@@ -5640,6 +5867,7 @@ CustomActivity
 
 .. autoclass:: CustomActivity
     :members:
+    :inherited-members:
 
 Permissions
 ~~~~~~~~~~~~
@@ -5672,6 +5900,15 @@ SessionStartLimit
 
 .. autoclass:: SessionStartLimit()
     :members:
+
+GatewayParams
+~~~~~~~~~~~~~~
+
+.. attributetable:: GatewayParams
+
+.. autoclass:: GatewayParams()
+    :members:
+    :exclude-members: encoding, zlib
 
 SystemChannelFlags
 ~~~~~~~~~~~~~~~~~~~~

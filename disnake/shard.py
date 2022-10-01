@@ -1,38 +1,15 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
 import asyncio
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Type
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Type, Union, overload
 
 import aiohttp
 
 from .backoff import ExponentialBackoff
-from .client import Client, SessionStartLimit
+from .client import Client, GatewayParams, SessionStartLimit
 from .enums import Status
 from .errors import (
     ClientException,
@@ -49,6 +26,9 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from .activity import BaseActivity
+    from .flags import Intents, MemberCacheFlags
+    from .i18n import LocalizationProtocol
+    from .mentions import AllowedMentions
 
 __all__ = (
     "AutoShardedClient",
@@ -194,6 +174,7 @@ class Shard:
                 shard_id=self.id,
                 session=self.ws.session_id,
                 sequence=self.ws.sequence,
+                gateway=self.ws.resume_gateway if exc.resume else None,
             )
             self.ws = await asyncio.wait_for(coro, timeout=60.0)
         except self._handled_exceptions as e:
@@ -330,12 +311,43 @@ class AutoShardedClient(Client):
     if TYPE_CHECKING:
         _connection: AutoShardedConnectionState
 
+    @overload
     def __init__(
-        self, *args: Any, loop: Optional[asyncio.AbstractEventLoop] = None, **kwargs: Any
-    ) -> None:
-        kwargs.pop("shard_id", None)
-        self.shard_ids: Optional[List[int]] = kwargs.pop("shard_ids", None)
-        super().__init__(*args, loop=loop, **kwargs)
+        self,
+        *,
+        asyncio_debug: bool = False,
+        loop: Optional[asyncio.AbstractEventLoop] = None,
+        shard_ids: Optional[List[int]] = None,  # instead of Client's shard_id: Optional[int]
+        shard_count: Optional[int] = None,
+        enable_debug_events: bool = False,
+        enable_gateway_error_handler: bool = True,
+        gateway_params: Optional[GatewayParams] = None,
+        connector: Optional[aiohttp.BaseConnector] = None,
+        proxy: Optional[str] = None,
+        proxy_auth: Optional[aiohttp.BasicAuth] = None,
+        assume_unsync_clock: bool = True,
+        max_messages: Optional[int] = 1000,
+        application_id: Optional[int] = None,
+        heartbeat_timeout: float = 60.0,
+        guild_ready_timeout: float = 2.0,
+        allowed_mentions: Optional[AllowedMentions] = None,
+        activity: Optional[BaseActivity] = None,
+        status: Optional[Union[Status, str]] = None,
+        intents: Optional[Intents] = None,
+        chunk_guilds_at_startup: Optional[bool] = None,
+        member_cache_flags: Optional[MemberCacheFlags] = None,
+        localization_provider: Optional[LocalizationProtocol] = None,
+        strict_localization: bool = False,
+    ):
+        ...
+
+    @overload
+    def __init__(self):
+        ...
+
+    def __init__(self, *args: Any, shard_ids: Optional[List[int]] = None, **kwargs: Any) -> None:
+        self.shard_ids = shard_ids
+        super().__init__(*args, **kwargs)
 
         if self.shard_ids is not None:
             if self.shard_count is None:
@@ -426,7 +438,10 @@ class AutoShardedClient(Client):
         ret.launch()
 
     async def launch_shards(self, *, ignore_session_start_limit: bool = False) -> None:
-        shard_count, gateway, session_start_limit = await self.http.get_bot_gateway()
+        shard_count, gateway, session_start_limit = await self.http.get_bot_gateway(
+            encoding=self.gateway_params.encoding,
+            zlib=self.gateway_params.zlib,
+        )
 
         self.session_start_limit = SessionStartLimit(session_start_limit)
 
@@ -504,7 +519,7 @@ class AutoShardedClient(Client):
         *,
         activity: Optional[BaseActivity] = None,
         status: Optional[Status] = None,
-        shard_id: int = None,
+        shard_id: Optional[int] = None,
     ) -> None:
         """|coro|
 

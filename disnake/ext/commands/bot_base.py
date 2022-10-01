@@ -1,27 +1,4 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
@@ -146,36 +123,55 @@ class BotBase(CommonBotBase, GroupMixin):
             Union[PrefixType, Callable[[Self, Message], MaybeCoro[PrefixType]]]
         ] = None,
         help_command: HelpCommand = _default,
-        description: str = None,
+        description: Optional[str] = None,
+        *,
+        strip_after_prefix: bool = False,
         **options: Any,
     ):
         super().__init__(**options)
-        self.command_prefix = command_prefix
-        if (
-            command_prefix is not when_mentioned
-            and not self.intents.message_content  # type: ignore
-        ):
 
+        if not isinstance(self, disnake.Client):
+            raise RuntimeError("BotBase mixin must be used with disnake.Client")
+
+        alternative = (
+            "AutoShardedInteractionBot"
+            if isinstance(self, disnake.AutoShardedClient)
+            else "InteractionBot"
+        )
+        if command_prefix is None:
+            disnake.utils.warn_deprecated(
+                "Using `command_prefix=None` is deprecated and will result in "
+                "an error in future versions. "
+                f"If you don't need any prefix functionality, consider using {alternative}.",
+                stacklevel=2,
+            )
+        elif (
+            # note: no need to check for empty iterables,
+            # as they won't be allowed by `get_prefix`
+            command_prefix is not when_mentioned
+            and not self.intents.message_content
+        ):
             warnings.warn(
                 "Message Content intent is not enabled and a prefix is configured. "
                 "This may cause limited functionality for prefix commands. "
                 "If you want prefix commands, pass an intents object with message_content set to True. "
-                "If you don't need any prefix functionality, "
-                "consider using InteractionBot instead. "
+                f"If you don't need any prefix functionality, consider using {alternative}. "
                 "Alternatively, set prefix to disnake.ext.commands.when_mentioned to silence this warning.",
                 MessageContentPrefixWarning,
                 stacklevel=2,
             )
 
-        self._checks: List[Check] = []
-        self._check_once = []
+        self.command_prefix = command_prefix
 
-        self._before_invoke = None
-        self._after_invoke = None
+        self._checks: List[Check] = []
+        self._check_once: List[Check] = []
+
+        self._before_invoke: Optional[CoroFunc] = None
+        self._after_invoke: Optional[CoroFunc] = None
 
         self._help_command = None
         self.description: str = inspect.cleandoc(description) if description else ""
-        self.strip_after_prefix: bool = options.get("strip_after_prefix", False)
+        self.strip_after_prefix: bool = strip_after_prefix
 
         if help_command is _default:
             self.help_command = DefaultHelpCommand()
