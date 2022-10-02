@@ -130,7 +130,6 @@ class PermissionTypings(codemod.VisitorBasedCodemodCommand):
             elif name == "_generated":
                 previously_generated = True
 
-        # knew this would bite me
         if previously_generated:
             return cst.RemovalSentinel.REMOVE
 
