@@ -31,9 +31,13 @@ def show_version():
     print("\n".join(entries))
 
 
-def core(parser, args):
+def core(parser: argparse.ArgumentParser, args):
+    # this method runs when no subcommands are provided
+    # as such, we can assume that we want to print help
     if args.version:
         show_version()
+    else:
+        parser.print_help()
 
 
 _bot_template = """#!/usr/bin/env python3
