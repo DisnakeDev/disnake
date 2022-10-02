@@ -91,7 +91,6 @@ class FlagTypings(codemod.VisitorBasedCodemodCommand):
                 hide_behind_typechecking = False
                 init = b
                 break
-        node = node.with_deep_changes(node.body, body=body)
 
         if hide_behind_typechecking:
             # find the existing one if one exists
@@ -119,17 +118,15 @@ class FlagTypings(codemod.VisitorBasedCodemodCommand):
                 assert if_block  # noqa: S101
                 # now we need to add this if_block into the CST of node
                 # find the first function definition and insert it before there
-                body = list(node.body.body)
-                for pos, b in enumerate(body):
+                for pos, b in enumerate(body):  # noqa: B007
                     if m.matches(b, m.FunctionDef()):
-                        body.insert(pos, if_block)
-                        node = node.with_deep_changes(node.body, body=body)
                         break
                 else:
                     # so there wasn't any function, not sure why
                     # doesn't really matter, we just insert at the end
-                    body.append(if_block)
-                    node = node.with_deep_changes(node.body, body=body)
+                    pos = len(body)
+                body.insert(pos, if_block)
+                node = node.with_deep_changes(node.body, body=body)
 
             # find the init
             for b in if_block.body.body:
@@ -166,7 +163,6 @@ class FlagTypings(codemod.VisitorBasedCodemodCommand):
                 ],
             )
 
-            # todo: remove all parameters except the first
             empty_init = no_body_init.with_changes(
                 params=cst.Parameters(
                     params=[cst.Param(cst.Name("self"), cst.Annotation(cst.Name("NoReturn")))]
@@ -175,7 +171,6 @@ class FlagTypings(codemod.VisitorBasedCodemodCommand):
             full_init = no_body_init.with_deep_changes(
                 no_body_init.params, kwonly_params=kwonly_params, star_kwarg=None
             )
-            body = list(node.body.body)
             for pos, b in enumerate(body):
                 if m.matches(b, m.FunctionDef(m.Name("__init__"))):
                     body.insert(pos, empty_init)
