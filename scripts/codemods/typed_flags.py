@@ -179,8 +179,13 @@ class FlagTypings(codemod.VisitorBasedCodemodCommand):
             node = node.with_deep_changes(node.body, body=body)
 
         # we need to add the import if it doesn't exist
-        codevisitors.AddImportsVisitor.add_needed_import(self.context, "typing", "overload")
-        codevisitors.AddImportsVisitor.add_needed_import(self.context, "typing", "NoReturn")
+        if hide_behind_typechecking:
+            codevisitors.AddImportsVisitor.add_needed_import(
+                self.context, "typing", "TYPE_CHECKING"
+            )
+        else:
+            codevisitors.AddImportsVisitor.add_needed_import(self.context, "typing", "NoReturn")
+            codevisitors.AddImportsVisitor.add_needed_import(self.context, "typing", "overload")
         codevisitors.AddImportsVisitor.add_needed_import(
             self.context, "disnake.utils", "_generated"
         )
