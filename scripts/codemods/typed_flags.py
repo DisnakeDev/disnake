@@ -84,8 +84,7 @@ class FlagTypings(codemod.VisitorBasedCodemodCommand):
         ]
         for b in body.copy():
             if m.matches(b, m.FunctionDef(m.Name("__init__"))) and isinstance(b, cst.FunctionDef):
-                deco_names = [getattr(deco.decorator, "value", "") for deco in b.decorators]
-                if "_generated" in deco_names:
+                if any(m.matches(deco.decorator, m.Name("_generated")) for deco in b.decorators):
                     body.remove(b)
                     continue
                 hide_behind_typechecking = False
