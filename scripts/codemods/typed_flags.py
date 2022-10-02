@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: MIT
 
+import importlib
 import textwrap
+import types
 from typing import List, Optional
 
 import libcst as cst
@@ -12,6 +14,8 @@ from disnake import flags
 
 BASE_FLAG_CLASSES = (flags.BaseFlags, flags.ListBaseFlags)
 
+MODULES = ("disnake.flags",)
+
 
 class FlagTypings(codemod.VisitorBasedCodemodCommand):
     DESCRIPTION: str = (
@@ -19,22 +23,28 @@ class FlagTypings(codemod.VisitorBasedCodemodCommand):
     )
 
     flag_classes: List[str]
+    imported_module: types.ModuleType
 
     def transform_module(self, tree: cst.Module) -> cst.Module:
-        if self.context.full_module_name != "disnake.flags":
+        current_module = self.context.full_module_name
+        if current_module != "disnake.flags":
             raise codemod.SkipFile("this module contains no definitions of flag classes.")
 
+        # import and load the module
+        module = importlib.import_module(current_module)
         # we preformulate a list of all flag classes on the imported flags module
         all_flag_classes = []
-        for attr_name in dir(flags):
-            obj = getattr(flags, attr_name)
+        for attr_name in dir(module):
+            obj = getattr(module, attr_name)
             if (
                 isinstance(obj, type)
                 and issubclass(obj, BASE_FLAG_CLASSES)
                 and obj not in BASE_FLAG_CLASSES
             ):
                 all_flag_classes.append(obj.__name__)
+
         self.flag_classes = all_flag_classes
+        self.imported_module = module
 
         return super().transform_module(tree)
 
@@ -54,7 +64,7 @@ class FlagTypings(codemod.VisitorBasedCodemodCommand):
         # we also check and remove previously existing TYPE_CHECKING and overloads
 
         # and we have to import the module anyways, to get a list of valid flags for each subclass.
-        flag: flags.BaseFlags = getattr(flags, node.name.value)
+        flag: flags.BaseFlags = getattr(self.imported_module, node.name.value)
         all_flags = sorted(flag.VALID_FLAGS.keys())
 
         # determine which method to use for creating the init overload, and possibly the update overload too.
