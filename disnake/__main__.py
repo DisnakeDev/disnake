@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: MIT
 
 import argparse
+import importlib.metadata
 import platform
 import sys
 from pathlib import Path
 
 import aiohttp
-import pkg_resources
 
 import disnake
 
@@ -22,8 +22,8 @@ def show_version():
     entries.append(
         f"- disnake v{disnake_ver.major}.{disnake_ver.minor}.{disnake_ver.micro}-{disnake_ver.releaselevel}"
     )
-    if pkg := pkg_resources.get_distribution("disnake"):
-        entries.append(f"    - disnake pkg_resources: v{pkg.version}")
+    if version := importlib.metadata.version("disnake"):
+        entries.append(f"    - disnake importlib.metadata: v{version}")
 
     entries.append(f"- aiohttp v{aiohttp.__version__}")
     uname = platform.uname()
