@@ -46,6 +46,7 @@ from disnake.ext import commands
 import disnake
 import config
 
+
 class Bot(commands.{base}):
     def __init__(self, **kwargs):
         super().__init__(command_prefix=commands.when_mentioned_or("{prefix}"), **kwargs)
@@ -63,7 +64,8 @@ bot = Bot()
 
 # write general commands here
 
-bot.run(config.token)
+if __name__ == "__main__":
+    bot.run(config.token)
 """
 
 _gitignore_template = """# Byte-compiled / optimized / DLL files
