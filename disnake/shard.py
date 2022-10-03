@@ -10,7 +10,7 @@ from typing import (
     Callable,
     Dict,
     List,
-    NoReturn,
+    NoReturn as Never,
     Optional,
     Tuple,
     Type,
@@ -354,7 +354,7 @@ class AutoShardedClient(Client):
         ...
 
     @overload
-    def __init__(self: NoReturn):
+    def __init__(self: Never):
         ...
 
     def __init__(self, *args: Any, shard_ids: Optional[List[int]] = None, **kwargs: Any) -> None:
