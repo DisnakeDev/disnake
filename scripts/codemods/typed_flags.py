@@ -3,7 +3,7 @@
 import importlib
 import textwrap
 import types
-from typing import List, Optional
+from typing import List, Optional, cast
 
 import libcst as cst
 import libcst.codemod.visitors as codevisitors
@@ -113,11 +113,10 @@ class FlagTypings(codemod.VisitorBasedCodemodCommand):
                             ...
                     """
                 )
-                if_block = cst.parse_statement(code)  # type: ignore
+                if_block = cast("cst.If", cst.parse_statement(code))
                 codevisitors.AddImportsVisitor.add_needed_import(
                     self.context, "typing", "TYPE_CHECKING"
                 )
-                assert if_block  # noqa: S101
                 # now we need to add this if_block into the CST of node
                 # find the first function definition and insert it before there
                 for pos, b in enumerate(body):  # noqa: B007
