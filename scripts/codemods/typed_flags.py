@@ -117,9 +117,6 @@ class FlagTypings(codemod.VisitorBasedCodemodCommand):
                 codevisitors.AddImportsVisitor.add_needed_import(
                     self.context, "typing", "TYPE_CHECKING"
                 )
-                codevisitors.AddImportsVisitor.add_needed_import(
-                    self.context, "disnake.utils", "_generated"
-                )
                 assert if_block  # noqa: S101
                 # now we need to add this if_block into the CST of node
                 # find the first function definition and insert it before there
@@ -144,9 +141,14 @@ class FlagTypings(codemod.VisitorBasedCodemodCommand):
                 raise RuntimeError
             # add to the init the generated decorator
             old_init = init
-            init = old_init.with_changes(decorators=[cst.Decorator(cst.Name("_generated"))])
+            init = old_init.with_changes(
+                decorators=[cst.Decorator(cst.Name("_generated"))],
+                params=old_init.params.with_changes(kwonly_params=kwonly_params, star_kwarg=None),
+            )
+            codevisitors.AddImportsVisitor.add_needed_import(
+                self.context, "disnake.utils", "_generated"
+            )
             node = node.deep_replace(old_init, init)  # type: ignore
-            node = node.with_deep_changes(init.params, kwonly_params=kwonly_params, star_kwarg=None)
 
         else:
             # the init exists, so we need to make overloads
