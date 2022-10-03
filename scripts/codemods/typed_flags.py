@@ -74,7 +74,6 @@ class FlagTypings(codemod.VisitorBasedCodemodCommand):
         # insert it near the beginning of the class body.
         # we also decorate with @_generated so we can delete it later.
 
-        hide_behind_typechecking: bool = True
         if_block: Optional[cst.If] = None
         init: Optional[cst.FunctionDef] = None
         body = list(node.body.body)
@@ -87,11 +86,11 @@ class FlagTypings(codemod.VisitorBasedCodemodCommand):
                 if any(m.matches(deco.decorator, m.Name("_generated")) for deco in b.decorators):
                     body.remove(b)
                     continue
-                hide_behind_typechecking = False
                 init = b
                 break
 
-        if hide_behind_typechecking:
+        if not init:
+
             # find the existing one if one exists
             for b in body:
                 if m.matches(b, m.If(test=m.Name("TYPE_CHECKING"))):
@@ -103,6 +102,7 @@ class FlagTypings(codemod.VisitorBasedCodemodCommand):
                 if if_block:
                     break
             else:
+
                 # one doesn't currently exist, great.
                 # so we have two options here... we could make a typechecking block from scratch or... we could cheat
                 code = textwrap.dedent(
@@ -114,6 +114,12 @@ class FlagTypings(codemod.VisitorBasedCodemodCommand):
                     """
                 )
                 if_block = cst.parse_statement(code)  # type: ignore
+                codevisitors.AddImportsVisitor.add_needed_import(
+                    self.context, "typing", "TYPE_CHECKING"
+                )
+                codevisitors.AddImportsVisitor.add_needed_import(
+                    self.context, "disnake.utils", "_generated"
+                )
                 assert if_block  # noqa: S101
                 # now we need to add this if_block into the CST of node
                 # find the first function definition and insert it before there
@@ -153,7 +159,6 @@ class FlagTypings(codemod.VisitorBasedCodemodCommand):
             # next, we need to add all of the flag values and that is our second overload
             # then we put them together and insert them before the existing overload
             # todo: this is very complicated, and maybe this visitor should be split into another visitor just to do this logic
-            assert init  # noqa: S101
             no_body_init = init.with_changes(
                 body=cst.IndentedBlock([cst.SimpleStatementLine([cst.Expr(cst.Ellipsis())])]),
                 decorators=[
@@ -161,12 +166,16 @@ class FlagTypings(codemod.VisitorBasedCodemodCommand):
                     cst.Decorator(cst.Name("_generated")),
                 ],
             )
-
+            codevisitors.AddImportsVisitor.add_needed_import(self.context, "typing", "overload")
+            codevisitors.AddImportsVisitor.add_needed_import(
+                self.context, "disnake.utils", "_generated"
+            )
             empty_init = no_body_init.with_changes(
                 params=cst.Parameters(
                     params=[cst.Param(cst.Name("self"), cst.Annotation(cst.Name("NoReturn")))]
                 )
             )
+            codevisitors.AddImportsVisitor.add_needed_import(self.context, "typing", "NoReturn")
             full_init = no_body_init.with_deep_changes(
                 no_body_init.params, kwonly_params=kwonly_params, star_kwarg=None
             )
@@ -177,15 +186,4 @@ class FlagTypings(codemod.VisitorBasedCodemodCommand):
                     break
             node = node.with_deep_changes(node.body, body=body)
 
-        # we need to add the import if it doesn't exist
-        if hide_behind_typechecking:
-            codevisitors.AddImportsVisitor.add_needed_import(
-                self.context, "typing", "TYPE_CHECKING"
-            )
-        else:
-            codevisitors.AddImportsVisitor.add_needed_import(self.context, "typing", "NoReturn")
-            codevisitors.AddImportsVisitor.add_needed_import(self.context, "typing", "overload")
-        codevisitors.AddImportsVisitor.add_needed_import(
-            self.context, "disnake.utils", "_generated"
-        )
         return node
