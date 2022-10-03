@@ -159,31 +159,27 @@ class FlagTypings(codemod.VisitorBasedCodemodCommand):
             # next, we need to add all of the flag values and that is our second overload
             # then we put them together and insert them before the existing overload
             # todo: this is very complicated, and maybe this visitor should be split into another visitor just to do this logic
-            no_body_init = init.with_changes(
+            full_init = init.with_changes(
                 body=cst.IndentedBlock([cst.SimpleStatementLine([cst.Expr(cst.Ellipsis())])]),
                 decorators=[
                     cst.Decorator(cst.Name("overload")),
                     cst.Decorator(cst.Name("_generated")),
                 ],
+                params=init.params.with_changes(kwonly_params=kwonly_params, star_kwarg=None),
             )
             codevisitors.AddImportsVisitor.add_needed_import(self.context, "typing", "overload")
             codevisitors.AddImportsVisitor.add_needed_import(
                 self.context, "disnake.utils", "_generated"
             )
-            empty_init = no_body_init.with_changes(
+            empty_init = full_init.with_changes(
                 params=cst.Parameters(
                     params=[cst.Param(cst.Name("self"), cst.Annotation(cst.Name("NoReturn")))]
                 )
             )
             codevisitors.AddImportsVisitor.add_needed_import(self.context, "typing", "NoReturn")
-            full_init = no_body_init.with_deep_changes(
-                no_body_init.params, kwonly_params=kwonly_params, star_kwarg=None
-            )
-            for pos, b in enumerate(body):
-                if m.matches(b, m.FunctionDef(m.Name("__init__"))):
-                    body.insert(pos, empty_init)
-                    body.insert(pos, full_init)
-                    break
+            pos = body.index(init)
+            body.insert(pos, empty_init)
+            body.insert(pos, full_init)
             node = node.with_deep_changes(node.body, body=body)
 
         return node
