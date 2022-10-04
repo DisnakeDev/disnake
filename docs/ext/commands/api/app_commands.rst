@@ -130,6 +130,19 @@ Message Command
     .. automethod:: InvokableMessageCommand.error()
         :decorator:
 
+Injection
+~~~~~~~~~
+
+.. attributetable:: Injection
+
+.. autoclass:: Injection
+    :members:
+    :special-members: __call__
+    :exclude-members: autocomplete
+
+    .. automethod:: Injection.autocomplete
+        :decorator:
+
 ParamInfo
 ~~~~~~~~~
 
@@ -164,6 +177,14 @@ Functions
 .. autofunction:: message_command
 
 .. autofunction:: user_command
+
+.. autofunction:: inject
+
+.. autofunction:: register_injection
+    :decorator:
+
+.. autofunction:: injection
+    :decorator:
 
 Events
 ------
