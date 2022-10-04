@@ -1,1 +1,0 @@
-Add :attr:`Permissions.use_application_commands` as an alias for :attr:`Permissions.use_slash_commands`.

@@ -1,1 +1,0 @@
-Support setting ``with_message`` parameter of :class:`InteractionResponse.defer` for modal interactions to ``False``.

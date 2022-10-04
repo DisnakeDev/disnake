@@ -95,7 +95,7 @@ class AllowedMentions:
 
     @classmethod
     def from_message(cls, message: Message) -> Self:
-        """A factory method that returns a :class:`AllowedMentions` dervived from the current :class:`.Message` state.
+        """A factory method that returns a :class:`AllowedMentions` derived from the current :class:`.Message` state.
 
         Note that this is not what AllowedMentions the message was sent with, but what the message actually mentioned.
         For example, a message that successfully mentioned everyone will have :attr:`~AllowedMentions.everyone` set to ``True``.

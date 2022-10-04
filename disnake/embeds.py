@@ -22,9 +22,22 @@ from typing import (
 from . import utils
 from .colour import Colour
 from .file import File
-from .utils import MISSING
+from .utils import MISSING, classproperty, warn_deprecated
 
 __all__ = ("Embed",)
+
+
+# backwards compatibility, hidden from type-checkers to have them show errors when accessed
+if not TYPE_CHECKING:
+
+    def __getattr__(name: str) -> None:
+        if name == "EmptyEmbed":
+            warn_deprecated(
+                "`EmptyEmbed` is deprecated and will be removed in a future version. Use `None` instead.",
+                stacklevel=2,
+            )
+            return None
+        raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
 
 
 class EmbedProxy:
@@ -211,6 +224,17 @@ class Embed:
         self._fields: Optional[List[EmbedFieldPayload]] = None
 
         self._files: Dict[_FileKey, File] = {}
+
+    # see `EmptyEmbed` above
+    if not TYPE_CHECKING:
+
+        @classproperty
+        def Empty(self) -> None:
+            warn_deprecated(
+                "`Embed.Empty` is deprecated and will be removed in a future version. Use `None` instead.",
+                stacklevel=3,
+            )
+            return None
 
     @classmethod
     def from_dict(cls, data: EmbedData) -> Self:

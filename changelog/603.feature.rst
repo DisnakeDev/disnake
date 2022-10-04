@@ -1,1 +1,0 @@
-Add :attr:`.AllowedMentions.from_message` for constructing an allowed mentions object from a :class:`Message`.

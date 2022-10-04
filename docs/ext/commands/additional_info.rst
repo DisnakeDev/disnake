@@ -12,7 +12,7 @@ This section contains explanations of some library mechanics which may be useful
 .. _app_command_sync:
 
 App command sync
------------------
+----------------
 
 If you're using :ref:`disnake_ext_commands` for application commands (slash commands, context menus) you should
 understand how your commands show up in Discord. If ``sync_commands`` kwarg of :class:`Bot <ext.commands.Bot>` (or a similar class) is set to ``True`` (which is the default value)
@@ -34,3 +34,29 @@ If your bot requires shard distribution across several machines, you should set 
 This will prevent conflicts and race conditions. Discord API doesn't provide users with events related to application command updates,
 so it's impossible to keep the cache of multiple machines synced. Having only 1 machine with ``sync_commands`` set to ``True`` is enough
 because global registration of application commands doesn't depend on sharding.
+
+.. _why_params_and_injections_return_any:
+
+Why do ``Param`` and ``Injection``-related functions return ``Any``?
+--------------------------------------------------------------------
+
+If your editor of choice supports type-checking, you may have noticed that :func:`~ext.commands.Param`, :func:`~ext.commands.inject`,
+and :func:`~ext.commands.injection` do not have a specific return type, but at runtime these return :class:`~ext.commands.ParamInfo` and
+:class:`~ext.commands.Injection` respectively.
+
+A typical example of a slash command might look like this: ::
+
+    @bot.slash_command(description="Replies with the given text!")
+    async def echo(
+        inter: disnake.ApplicationCommandInteraction,
+        text: str = commands.Param(description="Echo~"),
+    ) -> None:
+        await inter.response.send_message(text)
+
+Here, you have two parameters in your command's function: ``inter``, an instance of :class:`disnake.ApplicationCommandInteraction`, and
+``text``, which is somewhat unusual: you annotate ``text`` as ``str``, but at the same time, assign a :class:`~ext.commands.ParamInfo` instance to it.
+That's the thing. When your editor type-checks your (any library's) code, it would normally complain if you tried to do the above, because
+you're trying to assign a ``ParamInfo`` to a ``str`` - however, since the library declares ``Param``'s return type as ``Any``, the type-checker accepts
+your code, because ``str`` (and any type) is a subtype of ``Any``.
+
+The same thing applies to :func:`~ext.commands.inject` and :func:`~ext.commands.injection`.

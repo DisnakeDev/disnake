@@ -1,1 +1,0 @@
-Add sidebar-navigable sub-sections to Event Reference section of API Reference documentation.

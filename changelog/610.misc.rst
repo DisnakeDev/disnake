@@ -1,1 +1,0 @@
-Replace all :class:`TypeVar` instances with ``typing_extensions.Self`` across the entire library where possible.
