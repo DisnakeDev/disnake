@@ -1,0 +1,1 @@
+Lessen the upper bound for the ``aiohttp`` dependency, allowing up to version 4 to be installed.
