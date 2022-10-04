@@ -119,8 +119,9 @@ jobs:
         no-comments: true  # only add comments for one platform (see above)
         warnings: true
 
-
-  checks:
+  # these don't need to be ran independently, so we have one check that runs all of them
+  # needs a better name than this, too
+  small-jobs:
     # We want to run on external PRs, but not on our own internal PRs as they'll be run
     # by the push to the branch. Without this if check, checks are duplicated since
     # internal PRs match both the push and pull_request events.
@@ -258,3 +259,24 @@ jobs:
         COVERALLS_SERVICE_NAME: github
       run: |
         python3 -m coveralls --finish
+
+  check:  # This job does nothing and is only used for the branch protection
+    if:
+      always() &&
+      github.event_name == 'push' || github.event.pull_request.head.repo.full_name !=
+      github.repository
+
+    needs:
+    - lint
+    - docs
+    - pyright
+    - small-jobs
+    - pytest
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Decide whether the needed jobs succeeded or failed
+      uses: re-actors/alls-green@release/v1
+      with:
+        jobs: ${{ toJSON(needs) }}
