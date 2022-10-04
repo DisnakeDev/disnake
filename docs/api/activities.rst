@@ -133,6 +133,6 @@ Status
 Events
 ------
 
-.. "!" at the end makes people happy!
+- :func:`disnake.on_presence_update(before, after)`
 
-Check out the :ref:`related events <related_events_activity>`!
+See all :ref:`related events <related_events_activity>`!

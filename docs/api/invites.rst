@@ -66,4 +66,7 @@ InviteTarget
 Events
 ------
 
-Check out the :ref:`related events <related_events_invite>`!
+- :func:`disnake.on_invite_create(invite)`
+- :func:`disnake.on_invite_delete(invite)`
+
+See all :ref:`related events <related_events_invite>`!

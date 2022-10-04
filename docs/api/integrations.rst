@@ -77,6 +77,9 @@ ExpireBehaviour
 Events
 ------
 
-- :func:`disnake.on_()`
+- :func:`disnake.on_guild_integrations_update(guild)`
+- :func:`disnake.on_integration_create(integration)`
+- :func:`disnake.on_integration_update(integration)`
+- :func:`disnake.on_raw_integration_delete(payload)`
 
 See all :ref:`related events <related_events_integration>`!

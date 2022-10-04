@@ -295,4 +295,23 @@ MessageType
 Events
 ------
 
-Check out the :ref:`related events <related_events_message>`!
+- :func:`disnake.on_message(message)`
+- :func:`disnake.on_message_delete()`
+- :func:`disnake.on_message_edit(before, after)`
+- :func:`disnake.on_bulk_message_delete(messages)`
+- :func:`disnake.on_raw_message_delete(payload)`
+- :func:`disnake.on_raw_message_edit(payload)`
+- :func:`disnake.on_raw_bulk_message_delete(payload)`
+- :func:`disnake.on_reaction_add(reaction, user)`
+- :func:`disnake.on_reaction_remove(reaction, user)`
+- :func:`disnake.on_reaction_clear(message, reactions)`
+- :func:`disnake.on_reaction_clear_emoji(reaction)`
+- :func:`disnake.on_raw_reaction_add(payload)`
+- :func:`disnake.on_raw_reaction_remove(payload)`
+- :func:`disnake.on_raw_reaction_clear(payload)`
+- :func:`disnake.on_raw_reaction_clear_emoji(payload)`
+- :func:`disnake.on_typing(channel, user, when)`
+- :func:`disnake.on_raw_typing(dat)`
+
+
+See all :ref:`related events <related_events_message>`!

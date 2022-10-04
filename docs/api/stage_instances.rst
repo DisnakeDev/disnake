@@ -51,4 +51,8 @@ StagePrivacyLevel
 Events
 ------
 
-Check out the :ref:`related events <related_events_stage_instance>`!
+- :func:`disnake.on_stage_instance_create(stage_instance)`
+- :func:`disnake.on_stage_instance_delete(stage_instance)`
+- :func:`disnake.on_stage_instance_update(before, after)`
+
+See all :ref:`related events <related_events_stage_instance>`!

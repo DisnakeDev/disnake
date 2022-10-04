@@ -114,4 +114,12 @@ GuildScheduledEventPrivacyLevel
 Events
 ------
 
+- :func:`disnake.on_guild_scheduled_event_create(event)`
+- :func:`disnake.on_guild_scheduled_event_delete(event)`
+- :func:`disnake.on_guild_scheduled_event_update(before, after)`
+- :func:`disnake.on_guild_scheduled_event_subscribe(event, user)`
+- :func:`disnake.on_guild_scheduled_event_unsubscribe(event, user)`
+- :func:`disnake.on_raw_guild_scheduled_event_subscribe(payload)`
+- :func:`disnake.on_raw_guild_scheduled_event_unsubscribe(payload)`
+
 Check out the :ref:`related events <related_events_guild_scheduled_event>`!

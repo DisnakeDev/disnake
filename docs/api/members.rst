@@ -48,4 +48,12 @@ RawGuildMemberRemoveEvent
 Events
 ------
 
-Check out the :ref:`related events <related_events_member>`!
+- :func:`disnake.on_member_join(member)`
+- :func:`disnake.on_member_remove(member)`
+- :func:`disnake.on_member_update(before, after)`
+- :func:`disnake.on_raw_member_update(member)`
+- :func:`disnake.on_member_ban(guild, user)`
+- :func:`disnake.on_member_unban(guild, user)`
+- :func:`disnake.on_()`
+
+See all :ref:`related events <related_events_member>`!

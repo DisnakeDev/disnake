@@ -147,6 +147,6 @@ DefaultAvatar
 Events
 ------
 
-
+- :func:`disnake.on_user_update(before, after)`
 
 See all :ref:`related events <related_events_user>`!
