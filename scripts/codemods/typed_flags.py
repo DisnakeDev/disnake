@@ -113,7 +113,9 @@ class FlagTypings(codemod.VisitorBasedCodemodCommand):
                             ...
                     """
                 )
-                if_block = cast("cst.If", cst.parse_statement(code))
+                if_block = cast(
+                    "cst.If", cst.parse_statement(code, config=self.module.config_for_parsing)
+                )
                 codevisitors.AddImportsVisitor.add_needed_import(
                     self.context, "typing", "TYPE_CHECKING"
                 )
