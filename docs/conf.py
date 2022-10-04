@@ -234,6 +234,14 @@ hoverxref_role_types = dict.fromkeys(
 hoverxref_tooltip_theme = ["tooltipster-custom"]
 hoverxref_tooltip_lazy = True
 
+# these have to match the keys on intersphinx_mapping, and those projects must be hosted on read the docs.
+hoverxref_intersphinx = [
+    "py",
+    "aio",
+    "req",
+]
+
+
 # use proxied API endpoint on rtd to avoid CORS issues
 if os.environ.get("READTHEDOCS"):
     hoverxref_api_host = "/_"
