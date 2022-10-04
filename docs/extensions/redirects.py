@@ -2,12 +2,11 @@
 
 import json
 import os
-from typing import Dict
 from pathlib import Path
+from typing import Dict
 
 from _types import SphinxExtensionMeta
 from sphinx.application import Sphinx
-
 
 api_redirect_source = """
 // SPDX-License-Identifier: MIT
@@ -58,7 +57,7 @@ function main() {
     }
 }
 
-const redirects_map = 
+const redirects_map =
 """
 
 
