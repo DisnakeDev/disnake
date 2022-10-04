@@ -357,7 +357,6 @@ html_js_files = [
     "copy.js",
     "sidebar.js",
     "touch.js",
-    "api_redirect.js",
     "scroll_sidebar.js",
 ]
 
