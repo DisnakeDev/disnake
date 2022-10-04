@@ -144,4 +144,6 @@ PartyType
 Events
 ------
 
-Check out the :ref:`related events <related_events_voice>`!
+- :func:`on_voice_state_update(member, before, after) <disnake.on_voice_state_update>`
+
+See all :ref:`related events <related_events_voice>`!

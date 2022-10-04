@@ -147,4 +147,6 @@ DefaultAvatar
 Events
 ------
 
-Check out the :ref:`related events <related_events_user>`!
+
+
+See all :ref:`related events <related_events_user>`!

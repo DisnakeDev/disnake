@@ -308,4 +308,21 @@ ThreadSortOrder
 Events
 ------
 
-Check out the :ref:`related events <related_events_channels_and_threads>`!
+- :func:`disnake.on_guild_channel_create(channel)`
+- :func:`disnake.on_guild_channel_delete(channel)`
+- :func:`disnake.on_guild_channel_update(before, after)`
+- :func:`disnake.on_guild_channel_pins_update(channel, last_pin)`
+- :func:`disnake.on_private_channel_update(before, after)`
+- :func:`disnake.on_private_channel_pins_update(channel, last_pin)`
+- :func:`disnake.on_thread_create(thread)`
+- :func:`disnake.on_thread_join(thread)`
+- :func:`disnake.on_thread_member_join(member)`
+- :func:`disnake.on_thread_member_remove(member)`
+- :func:`disnake.on_thread_remove(thread)`
+- :func:`disnake.on_thread_update(before, after)`
+- :func:`disnake.on_thread_delete(thread)`
+- :func:`disnake.on_raw_thread_member_remove(payload)`
+- :func:`disnake.on_raw_thread_update(after)`
+- :func:`disnake.on_raw_thread_delete(payload)`
+
+See all :ref:`related events <related_events_channels_and_threads>`!

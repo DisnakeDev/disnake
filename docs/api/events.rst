@@ -483,6 +483,8 @@ This section documents events related to Discord channels and threads.
     :param payload: The raw event payload data.
     :type payload: :class:`RawThreadDeleteEvent`
 
+.. _related_events_webhook:
+
 .. function:: on_webhooks_update(channel)
 
     Called whenever a webhook is created, modified, or removed from a guild channel.

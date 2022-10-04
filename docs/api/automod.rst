@@ -164,4 +164,9 @@ AutoModTriggerType
 Events
 ------
 
-Check out the :ref:`related events <related_events_automod>`!
+- :func:`disnake.on_automod_action_execution(execution)`
+- :func:`disnake.on_automod_rule_create(rule)`
+- :func:`disnake.on_automod_rule_update(rule)`
+- :func:`disnake.on_automod_rule_delete(rule)`
+
+See all :ref:`related events <related_events_automod>`!

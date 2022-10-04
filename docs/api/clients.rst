@@ -93,4 +93,18 @@ MemberCacheFlags
 Events
 ------
 
-Check out the :ref:`related events <related_events_client>`!
+- :func:`disnake.on_connect()`
+- :func:`disnake.on_disconnect()`
+- :func:`disnake.on_error(event, *args, **kwargs)`
+- :func:`disnake.on_ready()`
+- :func:`disnake.on_resumed()`
+- :func:`disnake.on_shard_connect(shard_id)`
+- :func:`disnake.on_shard_disconnect(shard_id)`
+- :func:`disnake.on_shard_ready(shard_id)`
+- :func:`disnake.on_shard_resumed(shard_id)`
+- :func:`disnake.on_socket_event_type(event_type)`
+- :func:`disnake.on_socket_raw_receive(msg)`
+- :func:`disnake.on_socket_raw_send(payload)`
+- :func:`disnake.on_gateway_error(event, data, shard_id, exc)`
+
+See all :ref:`related events <related_events_client>`!

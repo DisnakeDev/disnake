@@ -32,4 +32,6 @@ PartialEmoji
 Events
 ------
 
-Check out the :ref:`related events <related_events_emoji>`!
+- :func:`disnake.on_guild_emojis_update(guild, before, after)`
+
+See all :ref:`related events <related_events_emoji>`!

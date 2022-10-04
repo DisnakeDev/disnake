@@ -90,3 +90,10 @@ WebhookType
         Represents a webhook that is used for interactions or applications.
 
         .. versionadded:: 2.0
+
+Events
+------
+
+- :func:`disnake.on_webhooks_update(channel)`
+
+See all :ref:`related events <related_events_webhook>`!

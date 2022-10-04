@@ -279,4 +279,10 @@ NSFWLevel
 Events
 ------
 
-Check out the :ref:`related events <related_events_guild>`!
+- :func:`disnake.on_guild_join(guild)`
+- :func:`disnake.on_guild_remove(guild)`
+- :func:`disnake.on_guild_update(before, after)`
+- :func:`disnake.on_guild_available(guild)`
+- :func:`disnake.on_guild_unavailable(guild)`
+
+See all :ref:`related events <related_events_guild>`!
