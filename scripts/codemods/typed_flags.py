@@ -91,15 +91,11 @@ class FlagTypings(codemod.VisitorBasedCodemodCommand):
 
         if not init:
 
-            # find the existing one if one exists
             for b in body:
-                if m.matches(b, m.If(test=m.Name("TYPE_CHECKING"))):
-                    # iterate through the options to see if one of the body is __init__
-                    for line in b.body.body:  # type: ignore
-                        if m.matches(line, m.FunctionDef(m.Name("__init__"))):
-                            if_block = b  # type: ignore
-                            break
-                if if_block:
+                if m.matches(b, m.If(test=m.Name("TYPE_CHECKING"))) and m.findall(
+                    b, m.FunctionDef(m.Name("__init__"))
+                ):
+                    if_block = cast("cst.If", b)
                     break
             else:
 
