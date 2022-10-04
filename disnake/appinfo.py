@@ -242,23 +242,6 @@ class AppInfo:
         """
         return self._state._get_guild(self.guild_id)
 
-    @property
-    def summary(self) -> str:
-        """:class:`str`: If this application is a game sold on Discord,
-        this field will be the summary field for the store page of its primary SKU.
-
-        .. versionadded:: 1.3
-
-        .. deprecated:: 2.5
-
-            This field is deprecated by discord and is now always blank. Consider using :attr:`.description` instead.
-        """
-        utils.warn_deprecated(
-            "summary is deprecated and will be removed in a future version. Consider using description instead.",
-            stacklevel=2,
-        )
-        return self._summary
-
 
 class PartialAppInfo:
     """Represents a partial AppInfo given by :func:`~disnake.abc.GuildChannel.create_invite`.
@@ -318,18 +301,3 @@ class PartialAppInfo:
         if self._icon is None:
             return None
         return Asset._from_icon(self._state, self.id, self._icon, path="app")
-
-    @property
-    def summary(self) -> str:
-        """:class:`str`: If this application is a game sold on Discord,
-        this field will be the summary field for the store page of its primary SKU.
-
-        .. deprecated:: 2.5
-
-            This field is deprecated by discord and is now always blank. Consider using :attr:`.description` instead.
-        """
-        utils.warn_deprecated(
-            "summary is deprecated and will be removed in a future version. Consider using description instead.",
-            stacklevel=2,
-        )
-        return self._summary

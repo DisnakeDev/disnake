@@ -91,7 +91,6 @@ if TYPE_CHECKING:
     from .template import Template
     from .threads import AnyThreadArchiveDuration, ForumTag
     from .types.guild import Ban as BanPayload, Guild as GuildPayload, GuildFeature, MFALevel
-    from .types.integration import IntegrationType
     from .types.sticker import CreateGuildSticker as CreateStickerPayload
     from .types.threads import Thread as ThreadPayload, ThreadArchiveDurationLiteral
     from .types.voice import GuildVoiceState
@@ -2932,36 +2931,6 @@ class Guild(Hashable):
         data = await self._state.http.create_template(self.id, payload)
 
         return Template(state=self._state, data=data)
-
-    @utils.deprecated()
-    async def create_integration(self, *, type: IntegrationType, id: int) -> None:
-        """|coro|
-
-        .. deprecated:: 2.5
-            No longer supported, bots cannot use this endpoint anymore.
-
-        Attaches an integration to the guild.
-
-        You must have :attr:`~Permissions.manage_guild` permission to
-        use this.
-
-        .. versionadded:: 1.4
-
-        Parameters
-        ----------
-        type: :class:`str`
-            The integration type (e.g. Twitch).
-        id: :class:`int`
-            The integration ID.
-
-        Raises
-        ------
-        Forbidden
-            You do not have permission to create the integration.
-        HTTPException
-            The account could not be found.
-        """
-        await self._state.http.create_integration(self.id, type, id)
 
     async def integrations(self) -> List[Integration]:
         """|coro|
