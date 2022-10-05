@@ -40,6 +40,10 @@ def core(parser: argparse.ArgumentParser, args):
         parser.print_help()
 
 
+_interaction_bot_init = """super().__init__(**kwargs)"""
+_commands_bot_init = (
+    """super().__init__(command_prefix=commands.when_mentioned_or("{prefix}"), **kwargs)"""
+)
 _bot_template = """#!/usr/bin/env python3
 
 from disnake.ext import commands
@@ -49,7 +53,7 @@ import config
 
 class Bot(commands.{base}):
     def __init__(self, **kwargs):
-        super().__init__(command_prefix=commands.when_mentioned_or("{prefix}"), **kwargs)
+        {init}
         for cog in config.cogs:
             try:
                 self.load_extension(cog)
@@ -220,8 +224,19 @@ def newbot(parser, args):
 
     try:
         with open(str(new_directory / "bot.py"), "w", encoding="utf-8") as fp:
-            base = "Bot" if not args.sharded else "AutoShardedBot"
-            fp.write(_bot_template.format(base=base, prefix=args.prefix))
+            if args.interaction_client:
+                init = _interaction_bot_init
+                if args.sharded:
+                    base = "AutoShardedInteractionBot"
+                else:
+                    base = "InteractionBot"
+            else:
+                init = _commands_bot_init.format(prefix=args.prefix)
+                if args.sharded:
+                    base = "AutoShardedBot"
+                else:
+                    base = "Bot"
+            fp.write(_bot_template.format(base=base, init=init))
     except OSError as exc:
         parser.error(f"could not create bot file ({exc})")
 
@@ -277,10 +292,20 @@ def add_newbot_args(subparser):
     parser.add_argument(
         "directory", help="the directory to place it in (default: .)", nargs="?", default=Path.cwd()
     )
-    parser.add_argument(
+
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument(
         "--prefix", help="the bot prefix (default: $)", default="$", metavar="<prefix>"
     )
-    parser.add_argument("--sharded", help="whether to use AutoShardedBot", action="store_true")
+    group.add_argument(
+        "--app-commands-only",
+        help="whether to support prefix commands at all",
+        action="store_true",
+        dest="interaction_client",
+    )
+    parser.add_argument(
+        "--sharded", help="whether to use an automatically sharded bot", action="store_true"
+    )
     parser.add_argument(
         "--no-git", help="do not create a .gitignore file", action="store_true", dest="no_git"
     )
