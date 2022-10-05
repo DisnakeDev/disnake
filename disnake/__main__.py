@@ -230,16 +230,10 @@ def newbot(parser, args):
         with open(str(new_directory / "bot.py"), "w", encoding="utf-8") as fp:
             if args.interaction_client:
                 init = _interaction_bot_init
-                if args.sharded:
-                    base = "AutoShardedInteractionBot"
-                else:
-                    base = "InteractionBot"
+                base = "AutoShardedInteractionBot" if args.sharded else "InteractionBot"
             else:
                 init = _commands_bot_init.format(prefix=args.prefix)
-                if args.sharded:
-                    base = "AutoShardedBot"
-                else:
-                    base = "Bot"
+                base = "AutoShardedBot" if args.sharded else "Bot"
             fp.write(_bot_template.format(base=base, init=init))
     except OSError as exc:
         parser.error(f"could not create bot file ({exc})")
