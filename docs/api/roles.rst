@@ -33,8 +33,8 @@ RoleTags
 Events
 ------
 
-- :func:`disnake.on_guild_role_create(role)`
-- :func:`disnake.on_guild_role_delete(role)`
-- :func:`disnake.on_guild_role_update(before, after)`
+- :func:`on_guild_role_create(role) <disnake.on_guild_role_create>`
+- :func:`on_guild_role_delete(role) <disnake.on_guild_role_delete>`
+- :func:`on_guild_role_update(before, after) <disnake.on_guild_role_update>`
 
 See all :ref:`related events <related_events_role>`!

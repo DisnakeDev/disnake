@@ -105,6 +105,6 @@ StickerFormatType
 Events
 ------
 
-- :func:`disnake.on_guild_stickers_update(guild, before, after)`
+- :func:`on_guild_stickers_update(guild, before, after) <disnake.on_guild_stickers_update>`
 
 See all :ref:`related events <related_events_sticker>`!

@@ -250,12 +250,12 @@ InteractionResponseType
 Events
 ------
 
-- :func:`disnake.on_application_command(interaction)`
-- :func:`disnake.on_application_command_autocomplete(interaction)`
-- :func:`disnake.on_button_click(interaction)`
-- :func:`disnake.on_dropdown(interaction)`
-- :func:`disnake.on_interaction(interaction)`
-- :func:`disnake.on_message_interaction(interaction)`
-- :func:`disnake.on_modal_submit(interaction)`
+- :func:`on_application_command(interaction) <disnake.on_application_command>`
+- :func:`on_application_command_autocomplete(interaction) <disnake.on_application_command_autocomplete>`
+- :func:`on_button_click(interaction) <disnake.on_button_click>`
+- :func:`on_dropdown(interaction) <disnake.on_dropdown>`
+- :func:`on_interaction(interaction) <disnake.on_interaction>`
+- :func:`on_message_interaction(interaction) <disnake.on_message_interaction>`
+- :func:`on_modal_submit(interaction) <disnake.on_modal_submit>`
 
 See all :ref:`related events <related_events_interactions>`!

@@ -203,6 +203,6 @@ ApplicationCommandPermissionType
 Events
 ------
 
-- :func:`disnake.on_application_command_permissions_update(permissions)`
+- :func:`on_application_command_permissions_update(permissions) <disnake.on_application_command_permissions_update>`
 
 See all :ref:`related events <related_events_appcmds>`!

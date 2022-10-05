@@ -93,18 +93,18 @@ MemberCacheFlags
 Events
 ------
 
-- :func:`disnake.on_connect()`
-- :func:`disnake.on_disconnect()`
-- :func:`disnake.on_error(event, *args, **kwargs)`
-- :func:`disnake.on_ready()`
-- :func:`disnake.on_resumed()`
-- :func:`disnake.on_shard_connect(shard_id)`
-- :func:`disnake.on_shard_disconnect(shard_id)`
-- :func:`disnake.on_shard_ready(shard_id)`
-- :func:`disnake.on_shard_resumed(shard_id)`
-- :func:`disnake.on_socket_event_type(event_type)`
-- :func:`disnake.on_socket_raw_receive(msg)`
-- :func:`disnake.on_socket_raw_send(payload)`
-- :func:`disnake.on_gateway_error(event, data, shard_id, exc)`
+- :func:`on_connect() <disnake.on_connect>`
+- :func:`on_disconnect() <disnake.on_disconnect>`
+- :func:`on_error(event, *args, **kwargs) <disnake.on_error>`
+- :func:`on_ready() <disnake.on_ready>`
+- :func:`on_resumed() <disnake.on_resumed>`
+- :func:`on_shard_connect(shard_id) <disnake.on_shard_connect>`
+- :func:`on_shard_disconnect(shard_id) <disnake.on_shard_disconnect>`
+- :func:`on_shard_ready(shard_id) <disnake.on_shard_ready>`
+- :func:`on_shard_resumed(shard_id) <disnake.on_shard_resumed>`
+- :func:`on_socket_event_type(event_type) <disnake.on_socket_event_type>`
+- :func:`on_socket_raw_receive(msg) <disnake.on_socket_raw_receive>`
+- :func:`on_socket_raw_send(payload) <disnake.on_socket_raw_send>`
+- :func:`on_gateway_error(event, data, shard_id, exc) <disnake.on_gateway_error>`
 
 See all :ref:`related events <related_events_client>`!
