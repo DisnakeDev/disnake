@@ -89,27 +89,50 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Set up environment
-      uses: ./.github/actions/setup-env
-      id: set_env
+    # - name: Set up environment
+    #   uses: ./.github/actions/setup-env
+    #   id: set_env
+    #   with:
+    #     python-version: ${{ matrix.python-version }}
+    #     dependency-groups: "*"
+
+    - name: Set up python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4.2.0
       with:
         python-version: ${{ matrix.python-version }}
-        dependency-groups: "*"
+        cache: "pip"
+        cache-dependency-path: |
+          poetry.lock
+          pyproject.toml
 
     - run: |
-        which python
-        env
-        python -m pip list
-        ls $VIRTUAL_ENV $VIRTUAL_ENV/bin
+        pipx install poetry==1.2.0
 
+        venv_path=./.venv
+        python -m venv $venv_path
+
+        bin_dir="bin"
+        if [ -n "$MSYSTEM" ]; then
+          bin_dir="Scripts"
+        fi
+
+        echo "VIRTUAL_ENV=$venv_path" >> $GITHUB_ENV
+        echo "PATH=$venv_path/$bin_dir:$PATH" >> $GITHUB_ENV
+
+
+        poetry install --all-extras --sync
 
     - name: Dump env context
       run: echo '${{ toJSON(env) }}'
 
     - name: Set pyright version
       run: |
-        PYRIGHT_VERSION="$(python -c 'import pyright; print(pyright.__pyright_version__)')"
+        PYRIGHT_VERSION="$(poetry run python -c 'import pyright; print(pyright.__pyright_version__)')"
         echo "PYRIGHT_VERSION=$PYRIGHT_VERSION" >> $GITHUB_ENV
+
+    - name: Activate venv
+      run: |
+        echo "VIRTUAL_ENV=$VIRTUAL_ENV" >> $GITHUB_ENV
 
     - name: Run pyright (Linux)
       uses: jakebailey/pyright-action@v1.4.1
