@@ -128,14 +128,10 @@ class FlagTypings(codemod.VisitorBasedCodemodCommand):
                 node = node.with_deep_changes(node.body, body=body)
 
             # find the init
-            for b in if_block.body.body:
-                if m.matches(b, m.FunctionDef(m.Name("__init__"))) and isinstance(
-                    b, cst.FunctionDef
-                ):
-                    init = b
-                    break
-            else:
-                raise RuntimeError
+            init = cast(
+                "cst.FunctionDef",
+                m.findall(if_block, m.FunctionDef(m.Name("__init__")))[0],
+            )
             # add to the init the generated decorator
             old_init = init
             init = old_init.with_changes(
