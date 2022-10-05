@@ -114,12 +114,12 @@ GuildScheduledEventPrivacyLevel
 Events
 ------
 
-- :func:`disnake.on_guild_scheduled_event_create(event)`
-- :func:`disnake.on_guild_scheduled_event_delete(event)`
-- :func:`disnake.on_guild_scheduled_event_update(before, after)`
-- :func:`disnake.on_guild_scheduled_event_subscribe(event, user)`
-- :func:`disnake.on_guild_scheduled_event_unsubscribe(event, user)`
-- :func:`disnake.on_raw_guild_scheduled_event_subscribe(payload)`
-- :func:`disnake.on_raw_guild_scheduled_event_unsubscribe(payload)`
+- :func:`on_guild_scheduled_event_create(event) <disnake.on_guild_scheduled_event_create>`
+- :func:`on_guild_scheduled_event_delete(event) <disnake.on_guild_scheduled_event_delete>`
+- :func:`on_guild_scheduled_event_update(before, after) <disnake.on_guild_scheduled_event_update>`
+- :func:`on_guild_scheduled_event_subscribe(event, user) <disnake.on_guild_scheduled_event_subscribe>`
+- :func:`on_guild_scheduled_event_unsubscribe(event, user) <disnake.on_guild_scheduled_event_unsubscribe>`
+- :func:`on_raw_guild_scheduled_event_subscribe(payload) <disnake.on_raw_guild_scheduled_event_subscribe>`
+- :func:`on_raw_guild_scheduled_event_unsubscribe(payload) <disnake.on_raw_guild_scheduled_event_unsubscribe>`
 
 Check out the :ref:`related events <related_events_guild_scheduled_event>`!
