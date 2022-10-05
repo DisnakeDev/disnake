@@ -22,7 +22,11 @@ def show_version():
     entries.append(
         f"- disnake v{disnake_ver.major}.{disnake_ver.minor}.{disnake_ver.micro}-{disnake_ver.releaselevel}"
     )
-    if version := importlib.metadata.version("disnake"):
+    try:
+        version = importlib.metadata.version("disnake")
+    except importlib.metadata.PackageNotFoundError:
+        pass
+    else:
         entries.append(f"    - disnake importlib.metadata: v{version}")
 
     entries.append(f"- aiohttp v{aiohttp.__version__}")
