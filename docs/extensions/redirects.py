@@ -76,7 +76,7 @@ def main(app: Sphinx, exception: Exception) -> None:
     for _, _, _, document, html_node_id, _ in domain.get_objects():
         actual_redirects[html_node_id] = document + ".html#" + html_node_id
 
-    path = Path(os.path.join(app.outdir, "_static", "api_redirect.js"))
+    path = Path(app.outdir, "_static", "api_redirect.js")
 
     path.touch()
 
