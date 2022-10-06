@@ -83,30 +83,40 @@ def test_len(embed: Embed) -> None:
 
 
 def test_eq() -> None:
+    # basic test
     embed_1, embed_2 = Embed(), Embed()
     assert embed_1 == embed_2
 
-    # color=MISSING should not affect __eq__
+    embed_1.title, embed_2.title = None, ""
+    assert embed_1 == embed_2
+
+    # color tests
+    embed_1, embed_2 = Embed(), Embed()
     embed_1.color = Color(123456)
     assert not embed_1 == embed_2
 
     embed_1.color = MISSING
     assert embed_1 == embed_2
 
+    embed_1, embed_2 = Embed(color=None), Embed()
+    assert embed_1 == embed_2
+
+    try:
+        Embed.set_default_color(123456)
+        assert not embed_1 == embed_2
+    finally:
+        Embed.set_default_color(None)
+
+    # test fields
+    embed_1, embed_2 = Embed(), Embed()
     embed_1.add_field(name="This is a test field", value="69 test 69")
     embed_2.add_field(name="This is a test field", value="69 test 69", inline=False)
     assert not embed_1 == embed_2
 
     embed_1, embed_2 = Embed(), Embed()
-
-    embed_1.title, embed_2.title = None, ""
+    embed_1._fields = []
+    embed_2._fields = None
     assert embed_1 == embed_2
-
-    embed_1, embed_2 = Embed(color=None), Embed()
-    assert embed_1 == embed_2
-
-    embed_1.set_default_color(123456)
-    assert not embed_1 == embed_2
 
 
 def test_embed_proxy_eq() -> None:
