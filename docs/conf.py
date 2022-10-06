@@ -236,6 +236,12 @@ if os.environ.get("READTHEDOCS"):
     hoverxref_api_host = "/_"
 
 
+linkcheck_ignore = [
+    r"https?://github.com/.+?/.+?/(issues|pull)/\d+",
+    r"https?://support.discord.com/",
+]
+
+
 # -- Options for HTML output ----------------------------------------------
 
 html_experimental_html5_writer = True
