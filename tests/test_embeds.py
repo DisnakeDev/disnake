@@ -134,10 +134,11 @@ def test_color_zero() -> None:
     e = Embed()
     assert not e
 
-    # color=0 should be applied to bool and dict
+    # color=0 should be applied to to_dict, __bool__, and __eq__
     e.color = 0
     assert e
     assert e.to_dict() == {"color": 0, **_BASE}
+    assert e != Embed(color=None)
 
 
 def test_default_color() -> None:

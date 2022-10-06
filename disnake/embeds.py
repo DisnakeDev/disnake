@@ -310,8 +310,7 @@ class Embed:
                 self.title,
                 self.url,
                 self.description,
-                # not checking for falsy value as `0` is a valid color
-                self._colour not in (MISSING, None),
+                self._colour,
                 self._fields,
                 self._timestamp,
                 self._author,
