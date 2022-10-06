@@ -414,15 +414,47 @@ def test_copy(embed: Embed, file: File) -> None:
     copy = embed.copy()
     assert embed.to_dict() == copy.to_dict()
 
-    # shallow copy, but `_files` should be copied
+    # shallow copy, but `_files` and `_fields` should be copied
     assert embed._files == copy._files
     assert embed._files is not copy._files
+    assert embed._fields == copy._fields
+    assert embed._fields is not copy._fields
 
 
 def test_copy_empty() -> None:
     e = Embed.from_dict({})
     copy = e.copy()
     assert e.to_dict() == copy.to_dict() == {}
+
+    # shallow copy, but `_files` and `_fields` should be copied
+    assert e._files == copy._files
+    assert e._files is not copy._files
+    assert e._fields is None
+    assert copy._fields is None
+
+
+def test_copy_fields(embed: Embed) -> None:
+    embed.add_field("things", "stuff")
+    copy = embed.copy()
+    embed.clear_fields()
+    assert copy._fields
+
+    embed.insert_field_at(0, "w", "x")
+    copy = embed.copy()
+    embed.remove_field(0)
+    assert embed._fields == []
+    assert copy._fields == [{"name": "w", "value": "x", "inline": True}]
+
+    embed.insert_field_at(0, "w", "x")
+    copy = embed.copy()
+    embed.insert_field_at(1, "y", "z")
+    embed.set_field_at(0, "abc", "def", inline=False)
+
+    assert embed._fields == [
+        {"name": "abc", "value": "def", "inline": False},
+        {"name": "y", "value": "z", "inline": True},
+    ]
+    assert copy._fields == [{"name": "w", "value": "x", "inline": True}]
 
 
 # backwards compatibility
