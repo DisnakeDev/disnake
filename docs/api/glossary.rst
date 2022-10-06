@@ -78,4 +78,3 @@ from being stringly typed in case the strings change in the future.
 
 All enumerations are subclasses of an internal class which mimics the behaviour
 of :class:`enum.Enum`.
-
