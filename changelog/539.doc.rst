@@ -1,1 +1,0 @@
-Update the requests intersphinx url to the new url of the requests documentation.

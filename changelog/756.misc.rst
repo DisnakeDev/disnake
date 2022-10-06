@@ -1,1 +1,0 @@
-Adopt `SPDX License Headers <https://spdx.dev/ids>`_ across all project files.

@@ -1,1 +1,0 @@
-Clarify the targets of :func:`Permissions.is_strict_subset` and :func:`Permissions.is_strict_superset`.

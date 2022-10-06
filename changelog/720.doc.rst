@@ -1,1 +1,0 @@
-Change references to public guilds to reference the ``COMMUNITY`` feature instead.

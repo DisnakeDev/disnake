@@ -1,1 +1,0 @@
-Remove notes that global application command rollout takes up to an hour.

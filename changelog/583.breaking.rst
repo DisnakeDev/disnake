@@ -1,2 +1,0 @@
-Update :class:`ModalInteraction` typings.
-- ``ModalInteraction.walk_components`` is replaced by :meth:`ModalInteraction.walk_raw_components`.

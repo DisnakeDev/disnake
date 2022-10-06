@@ -1,1 +1,0 @@
-Add :attr:`Widget.presence_count`.
