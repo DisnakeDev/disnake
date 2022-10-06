@@ -9,6 +9,9 @@ Abstract Base Classes
 
 This section documents everything under ``disnake.abc.*``.
 
+Abstract Base Classes (commonly referred to as ABC) are classes that other classes can inherit to
+get or override specific behaviour. Read more about them `here <disnake_abc>`_.
+
 Classes
 -------
 
