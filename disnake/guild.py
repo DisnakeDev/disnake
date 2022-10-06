@@ -4480,7 +4480,7 @@ class Guild(Hashable):
         You must have :attr:`.Permissions.manage_guild` permission to do this.
 
         The maximum number of rules for each trigger type is limited, see the
-        `api docs <https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-limits-per-trigger-type>`__
+        :discord-docs:`api docs <resources/auto-moderation#auto-moderation-limits-per-trigger-type>`
         for more details.
 
         .. versionadded:: 2.6
