@@ -95,6 +95,7 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Set up environment
+      id: setup-env
       uses: ./.github/actions/setup-env
       with:
         python-version: ${{ matrix.python-version }}
@@ -109,7 +110,7 @@ jobs:
       uses: jakebailey/pyright-action@v1.0.3
       with:
         version: ${{ env.PYRIGHT_VERSION }}
-        python-version: ${{ matrix.python-version }}
+        python-version: ${{ steps.setup-env.outputs.python-version }}
         python-platform: "Linux"
         no-comments: ${{ matrix.python-version != '3.8' }}  # only add comments for one version
         warnings: true
@@ -119,7 +120,7 @@ jobs:
       if: ${{ success() || failure() }}  # run regardless of previous step's result
       with:
         version: ${{ env.PYRIGHT_VERSION }}
-        python-version: ${{ matrix.python-version }}
+        python-version: ${{ steps.setup-env.outputs.python-version }}
         python-platform: "Windows"
         no-comments: true  # only add comments for one platform (see above)
         warnings: true
@@ -206,6 +207,7 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Set up environment
+      id: setup-env
       uses: ./.github/actions/setup-env
       with:
         python-version: ${{ matrix.python-version }}
@@ -222,7 +224,7 @@ jobs:
         TZ: "America/New_York"
       run: |
         echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/Test Summary/" >> $GITHUB_STEP_SUMMARY
-        nox --force-python ${{ matrix.python-version }} -s test -- --color=no --cov-report= | tee -a $GITHUB_STEP_SUMMARY
+        nox --force-python ${{ steps.setup-env.outputs.python-version }} -s test -- --color=no --cov-report= | tee -a $GITHUB_STEP_SUMMARY
         echo "$GITHUB_STEP_SUMMARY_FOOTER" >> $GITHUB_STEP_SUMMARY
 
     - name: Print Coverage Output
