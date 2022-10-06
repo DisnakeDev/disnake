@@ -95,7 +95,7 @@ class VoiceProtocol:
         Parameters
         ----------
         data: :class:`dict`
-            The raw :discord-docs:`voice state payload <resources/voice#voice-state-object>`.
+            The raw :ddocs:`voice state payload <resources/voice#voice-state-object>`.
         """
         raise NotImplementedError
 
@@ -108,7 +108,7 @@ class VoiceProtocol:
         Parameters
         ----------
         data: :class:`dict`
-            The raw :discord-docs:`voice server update payload <topics/gateway-events#voice-server-update>`.
+            The raw :ddocs:`voice server update payload <topics/gateway-events#voice-server-update>`.
         """
         raise NotImplementedError
 

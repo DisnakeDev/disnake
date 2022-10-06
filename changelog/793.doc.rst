@@ -1,1 +1,1 @@
-Update broken Discord API Docs links, add ``:discord-docs:`` role for easily creating links to the documentation.
+Update broken Discord API Docs links, add ``:ddocs:`` role for easily creating links to the API documentation.
