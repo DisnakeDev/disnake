@@ -5,6 +5,8 @@ from __future__ import annotations
 import datetime
 from typing import List, Literal, Optional, TypedDict, Union
 
+from typing_extensions import NotRequired
+
 from .automod import (
     AutoModAction,
     AutoModEventType,
@@ -308,17 +310,14 @@ class AuditEntryInfo(TypedDict):
     auto_moderation_rule_trigger_type: str
 
 
-class _AuditLogEntryOptional(TypedDict, total=False):
-    changes: List[AuditLogChange]
-    options: AuditEntryInfo
-    reason: str
-
-
-class AuditLogEntry(_AuditLogEntryOptional):
+class AuditLogEntry(TypedDict):
     target_id: Optional[str]
+    changes: NotRequired[List[AuditLogChange]]
     user_id: Optional[Snowflake]
     id: Snowflake
     action_type: AuditLogEvent
+    options: NotRequired[AuditEntryInfo]
+    reason: NotRequired[str]
 
 
 class AuditLog(TypedDict):
