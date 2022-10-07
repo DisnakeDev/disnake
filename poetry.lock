@@ -1420,7 +1420,7 @@ voice = ["PyNaCl"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "7775de0eafc9412c45ee9dd556f89104beef2c31bc08721590e10af8ac42400b"
+content-hash = "24bd62f79b156e3c64ff1afe19af0540dcf6f3eef8929fc951ddd73bb36061f2"
 
 [metadata.files]
 aiodns = [

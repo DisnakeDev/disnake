@@ -41,7 +41,10 @@ exclude = [
 
 [tool.poetry.dependencies]
 python = "^3.8"
-aiohttp = ">=3.7.0,<4"
+aiohttp = [
+    {version = "^3.7.0", python = "<3.11"},
+    {version = "^3.8.2", python = ">=3.11"}
+]
 
 
 # speed
