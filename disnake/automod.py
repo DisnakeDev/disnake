@@ -224,7 +224,7 @@ class AutoModTriggerMetadata:
         for details about how keyword matching works.
 
     regex_patterns: Optional[Sequence[:class:`str`]]
-        The list of keywords to check for. Used with :attr:`AutoModTriggerType.keyword`.
+        The list of regular expressions to check for. Used with :attr:`AutoModTriggerType.keyword`.
 
         A maximum of 10 regexes can be added.
 
@@ -253,15 +253,15 @@ class AutoModTriggerMetadata:
     )
 
     @overload
-    def __init__(self, *, keyword_filter: Sequence[str]) -> None:
+    def __init__(
+        self, *, keyword_filter: Sequence[str], regex_patterns: Sequence[str] = ...
+    ) -> None:
         ...
 
     @overload
-    def __init__(self, *, regex_patterns: Sequence[str]):
-        ...
-
-    @overload
-    def __init__(self, *, keyword_filter: Sequence[str], regex_patterns: Sequence[str]):
+    def __init__(
+        self, *, keyword_filter: Sequence[str] = ..., regex_patterns: Sequence[str]
+    ) -> None:
         ...
 
     @overload
@@ -287,7 +287,7 @@ class AutoModTriggerMetadata:
         mention_total_limit: Optional[int] = None,
     ) -> None:
         self.keyword_filter: Optional[Sequence[str]] = keyword_filter
-        self.regex_patterns: Optional[Sequence[str]] = keyword_filter
+        self.regex_patterns: Optional[Sequence[str]] = regex_patterns
         self.presets: Optional[AutoModKeywordPresets] = presets
         self.allow_list: Optional[Sequence[str]] = allow_list
         self.mention_total_limit: Optional[int] = mention_total_limit
