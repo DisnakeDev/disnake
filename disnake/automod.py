@@ -218,7 +218,7 @@ class AutoModTriggerMetadata:
     Attributes
     ----------
     keyword_filter: Optional[Sequence[:class:`str`]]
-        The list of keywords to check for. Used with :attr:`AutoModTriggerType.keyword`.
+        The list of keywords to check for, up to 1000 keywords. Used with :attr:`AutoModTriggerType.keyword`.
 
         See `api docs <https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-keyword-matching-strategies>`__
         for details about how keyword matching works.
@@ -227,10 +227,10 @@ class AutoModTriggerMetadata:
         The keyword presets. Used with :attr:`AutoModTriggerType.keyword_preset`.
 
     allow_list: Optional[Sequence[:class:`str`]]
-        The keywords that should be exempt from a preset. Used with :attr:`AutoModTriggerType.keyword_preset`.
+        The keywords that should be exempt from a preset, up to 1000 keywords. Used with :attr:`AutoModTriggerType.keyword_preset`.
 
     mention_total_limit: Optional[:class:`int`]
-        The maximum number of mentions (members + roles) allowed. Used with :attr:`AutoModTriggerType.mention_spam`.
+        The maximum number of mentions (members + roles) allowed, between 1 and 50. Used with :attr:`AutoModTriggerType.mention_spam`.
     """
 
     __slots__ = (
