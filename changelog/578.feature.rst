@@ -1,1 +1,1 @@
-Add :class:`GuildBuilder` for full coverage of the guild creation endpoint.
+Add :class:`GuildBuilder` and :func:`Client.guild_builder` for full coverage of the guild creation endpoint.
