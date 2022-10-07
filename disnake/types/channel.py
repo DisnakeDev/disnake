@@ -167,20 +167,17 @@ class GuildDirectory(_BaseChannel):
     name: str
 
 
-class _CreateGuildChannelOptional(TypedDict, total=False):
-    type: Optional[ChannelType]
-    topic: Optional[str]
-    bitrate: Optional[int]
-    user_limit: Optional[int]
-    rate_limit_per_user: Optional[int]
-    position: Optional[int]
-    permission_overwrites: List[PermissionOverwrite]
-    parent_id: Optional[Snowflake]
-    nsfw: Optional[bool]
-    rtc_region: Optional[str]
-    video_quality_mode: Optional[VideoQualityMode]
-    default_auto_archive_duration: Optional[ThreadArchiveDurationLiteral]
-
-
-class CreateGuildChannel(_CreateGuildChannelOptional):
+class CreateGuildChannel(TypedDict):
     name: str
+    type: NotRequired[Optional[ChannelType]]
+    topic: NotRequired[Optional[str]]
+    bitrate: NotRequired[Optional[int]]
+    user_limit: NotRequired[Optional[int]]
+    rate_limit_per_user: NotRequired[Optional[int]]
+    position: NotRequired[Optional[int]]
+    permission_overwrites: NotRequired[List[PermissionOverwrite]]
+    parent_id: NotRequired[Optional[Snowflake]]
+    nsfw: NotRequired[Optional[bool]]
+    rtc_region: NotRequired[Optional[str]]
+    video_quality_mode: NotRequired[Optional[VideoQualityMode]]
+    default_auto_archive_duration: NotRequired[Optional[ThreadArchiveDurationLiteral]]

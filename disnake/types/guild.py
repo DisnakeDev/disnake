@@ -171,18 +171,15 @@ class CreateGuildPlaceholderChannel(CreateGuildChannel, total=False):
     id: Snowflake
 
 
-class _CreateGuildOptional(TypedDict, total=False):
-    icon: str
-    verification_level: VerificationLevel
-    default_message_notifications: DefaultMessageNotificationLevel
-    explicit_content_filter: ExplicitContentFilterLevel
-    roles: List[CreateGuildPlaceholderRole]
-    channels: List[CreateGuildPlaceholderChannel]
-    afk_channel_id: Snowflake
-    afk_timeout: int
-    system_channel_id: Snowflake
-    system_channel_flags: int
-
-
-class CreateGuild(_CreateGuildOptional):
+class CreateGuild(TypedDict):
     name: str
+    icon: NotRequired[str]
+    verification_level: NotRequired[VerificationLevel]
+    default_message_notifications: NotRequired[DefaultMessageNotificationLevel]
+    explicit_content_filter: NotRequired[ExplicitContentFilterLevel]
+    roles: NotRequired[List[CreateGuildPlaceholderRole]]
+    channels: NotRequired[List[CreateGuildPlaceholderChannel]]
+    afk_channel_id: NotRequired[Snowflake]
+    afk_timeout: NotRequired[int]
+    system_channel_id: NotRequired[Snowflake]
+    system_channel_flags: NotRequired[int]
