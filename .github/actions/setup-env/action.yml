@@ -56,4 +56,4 @@ runs:
       id: python-version
       shell: bash
       run: |
-        echo '::set-output name=python-version::' $(python -c 'import sys; print(".".join(map(str,sys.version_info[:2])))')
+        echo "::set-output name=python-version::$(python -c 'import sys; print(".".join(map(str,sys.version_info[:2])))')"
