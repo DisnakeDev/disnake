@@ -479,7 +479,7 @@ class AutoModRule:
 
             meta = rule.trigger_metadata
             await rule.edit(
-                trigger_metadata=meta.with_edits(
+                trigger_metadata=meta.with_changes(
                     keyword_filter=meta.keyword_filter + ["stuff"],
                 ),
             )
@@ -498,8 +498,8 @@ class AutoModRule:
         enabled: :class:`bool`
             Whether to enable the rule.
         exempt_roles: Optional[Iterable[:class:`abc.Snowflake`]]
-            The rule's new exempt roles, up to 20. If ``[]`` or ``None`` is
-            passed then all role exemptions are removed.
+            The rule's new exempt roles, up to 20.
+            If ``[]`` or ``None`` is passed then all role exemptions are removed.
         exempt_channels: Optional[Iterable[:class:`abc.Snowflake`]]
             The rule's new exempt channels, up to 50.
             Can also include categories, in which case all channels inside that category will be exempt.
