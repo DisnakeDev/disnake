@@ -1961,6 +1961,8 @@ class Client:
 
         Bot accounts in 10 or more guilds are not allowed to create guilds.
 
+        .. versionadded:: 2.7
+
         Parameters
         ----------
         name: :class:`str`
