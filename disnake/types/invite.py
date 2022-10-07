@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Literal, Optional, TypedDict
 
+from typing_extensions import NotRequired
+
 from .appinfo import PartialAppInfo
 from .channel import InviteChannel
 from .guild import InviteGuild
@@ -13,15 +15,9 @@ from .user import PartialUser
 InviteTargetType = Literal[1, 2]
 
 
-class _InviteOptional(TypedDict, total=False):
-    guild: InviteGuild
-    inviter: PartialUser
-    target_user: PartialUser
-    target_type: InviteTargetType
-    target_application: PartialAppInfo
-    approximate_member_count: int
-    approximate_presence_count: int
-    guild_scheduled_event: GuildScheduledEvent
+class VanityInvite(TypedDict):
+    code: Optional[str]
+    uses: NotRequired[int]
 
 
 class _InviteMetadata(TypedDict, total=False):
@@ -30,17 +26,17 @@ class _InviteMetadata(TypedDict, total=False):
     max_age: int
     temporary: bool
     created_at: str
-    expires_at: Optional[str]
 
 
-class VanityInvite(_InviteMetadata):
-    code: Optional[str]
-
-
-class IncompleteInvite(_InviteMetadata):
+class Invite(_InviteMetadata):
     code: str
+    guild: NotRequired[InviteGuild]
     channel: InviteChannel
-
-
-class Invite(IncompleteInvite, _InviteOptional):
-    ...
+    inviter: NotRequired[PartialUser]
+    target_type: NotRequired[InviteTargetType]
+    target_user: NotRequired[PartialUser]
+    target_application: NotRequired[PartialAppInfo]
+    approximate_presence_count: NotRequired[int]
+    approximate_member_count: NotRequired[int]
+    expires_at: NotRequired[Optional[str]]
+    guild_scheduled_event: NotRequired[GuildScheduledEvent]

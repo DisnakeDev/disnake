@@ -4,7 +4,19 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Type, Union, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    NoReturn,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+    overload,
+)
 
 import aiohttp
 
@@ -342,7 +354,7 @@ class AutoShardedClient(Client):
         ...
 
     @overload
-    def __init__(self):
+    def __init__(self: NoReturn):
         ...
 
     def __init__(self, *args: Any, shard_ids: Optional[List[int]] = None, **kwargs: Any) -> None:
