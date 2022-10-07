@@ -11,7 +11,7 @@ Classes
 -------
 
 GuildScheduledEvent
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
 
 .. attributetable:: GuildScheduledEvent
 

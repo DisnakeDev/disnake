@@ -12,7 +12,7 @@ Classes
 -------
 
 Interaction
-~~~~~~~~~~~~
+~~~~~~~~~~~
 
 .. attributetable:: Interaction
 
@@ -102,7 +102,7 @@ ModalInteraction
         An alias of :func:`delete_original_response`.
 
 InteractionResponse
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
 
 .. attributetable:: InteractionResponse
 
@@ -110,7 +110,7 @@ InteractionResponse
     :members:
 
 InteractionMessage
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 .. attributetable:: InteractionMessage
 

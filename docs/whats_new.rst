@@ -8,7 +8,7 @@
 .. _whats_new:
 
 Changelog
-============
+=========
 
 This page keeps a detailed human friendly rendering of what's new and changed
 in specific versions.
@@ -26,9 +26,9 @@ This release adds support for new forum channel features (like tags) as well as 
 
 Also note the breaking changes listed below, which may require additional code changes.
 
-
 Breaking Changes
 ~~~~~~~~~~~~~~~~
+
 - Update :class:`Client` classes such that their initialization kwargs are explicitly stated and typehinted. (:issue:`371`)
     - Replaced ``**kwargs`` / ``**options`` with explicit keyword arguments for the ``__init__`` methods of :class:`Client`, :class:`ext.commands.Bot`, :class:`ext.commands.InteractionBot`, all ``AutoSharded*`` variants, and all relevant parent classes.
 - Call new :func:`disnake.on_gateway_error` instead of letting exceptions propagate that occurred while deserializing a received gateway event. (:issue:`401`)
@@ -58,12 +58,14 @@ Breaking Changes
 
 Deprecations
 ~~~~~~~~~~~~
+
 - ``EmptyEmbed`` and ``Embed.Empty`` are deprecated in favor of ``None``, have been removed from the documentation, and will result in type-checking errors. (:issue:`435`, :issue:`768`)
 - The ``delete_message_days`` parameter of :func:`Guild.ban` and :func:`Member.ban` is deprecated in favour of ``clean_history_duration``. (:issue:`659`)
 - |commands| Using ``command_prefix=None`` with :class:`~disnake.ext.commands.Bot` is now deprecated in favour of :class:`~disnake.ext.commands.InteractionBot`. (:issue:`689`)
 
 New Features
 ~~~~~~~~~~~~
+
 - Add custom type support for :func:`disnake.ui.button` and :func:`disnake.ui.select` decorators using ``cls`` parameter. (:issue:`281`)
 - Add :func:`disnake.on_gateway_error`, :func:`Client.on_gateway_error` and ``enable_gateway_error_handler`` client parameter. (:issue:`401`)
 - Update channel edit method annotations. (:issue:`418`)
@@ -162,6 +164,7 @@ New Features
 
 Bug Fixes
 ~~~~~~~~~
+
 - Update incorrect channel edit method annotations. (:issue:`418`)
     - Fix ``sync_permissions`` parameter type.
     - Remove ``topic`` parameter from :func:`StageChannel.edit`, add ``bitrate``.
@@ -199,6 +202,7 @@ Bug Fixes
 
 Documentation
 ~~~~~~~~~~~~~
+
 - Add sidebar-navigable sub-sections to Event Reference section of API Reference documentation. (:issue:`460`)
 - Remove notes that global application command rollout takes up to an hour. (:issue:`518`)
 - Update sphinx from 4.4.0 to version 5.1, and take advantage of new options. (:issue:`522`, :issue:`565`)
@@ -227,6 +231,7 @@ Documentation
 
 Miscellaneous
 ~~~~~~~~~~~~~
+
 - Refactor the test bot to be easier to use for all users. (:issue:`247`)
 - Refactor channel edit overloads and internals, improving typing. (:issue:`418`)
 - Run pyright on examples and fix any typing issues uncovered by this change. (:issue:`519`)
@@ -263,7 +268,6 @@ Miscellaneous
 - Update typings to explicitly specify optional types for parameters with a ``None`` default. (:issue:`751`)
 - Adopt `SPDX License Headers <https://spdx.dev/ids>`_ across all project files. (:issue:`756`)
 
-
 .. _vp2p5p3:
 
 v2.5.3
@@ -282,7 +286,6 @@ Miscellaneous
 
 - Limit installation of ``cchardet`` in the ``[speed]`` extra to Python versions below 3.10 (see `aiohttp#6857 <https://github.com/aio-libs/aiohttp/pull/6857>`__). (:issue:`772`)
 
-
 .. _vp2p5p2:
 
 v2.5.2
@@ -291,7 +294,7 @@ v2.5.2
 This release is a bugfix release with backports from upto v2.6.0.
 
 Bug Fixes
-~~~~~~~~~~
+~~~~~~~~~
 
 - Warn the user that bools are not supported for ``default_member_permissions``. (:issue:`520`)
 - Update the Guild Iterator to not get stuck in an infinite loop. (:issue:`526`)
@@ -311,7 +314,7 @@ Bug Fixes
 - Improve channel/guild fallback in resolved interaction data, using :class:`PartialMessageable` for unhandled/unknown channels instead of using ``None``. (:issue:`646`)
 
 Documentation
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 - Remove notes that global application command rollout takes up to an hour. (:issue:`518`)
 - Update the requests intersphinx url to the new url of the requests documentation. (:issue:`539`)
@@ -328,11 +331,10 @@ Bug Fixes
 
 - |commands| Fix :func:`~ext.commands.InvokableSlashCommand.autocomplete` decorator in cogs (:issue:`521`)
 
-
 .. _vp2p5p0:
 
 v2.5.0
----------
+------
 
 This version adds support for **API v10** (which comes with a few breaking changes),
 **forum channels**, **localizations**, **permissions v2**, improves API coverage by adding support for previously
@@ -347,9 +349,8 @@ See `this page <https://guide.disnake.dev/popular-topics/intents#why-do-most-mes
 If you do not have access to the intent yet, you can temporarily continue using API v9 by calling ``disnake.http._workaround_set_api_version(9)`` before connecting,
 which will keep sending message content before the intent deadline, even with the intent disabled.
 
-
 Breaking Changes
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 - The :attr:`~Intents.message_content` intent is now required to receive message content and related fields, see above (:issue:`353`)
 - The new permissions v2 system revamped application command permissions, with the most notable changes being the
@@ -371,7 +372,7 @@ Breaking Changes
 
 
 Deprecations
-~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 - Public stages and stage discoverability are deprecated and no longer supported (:issue:`287`)
 - Voice regions on guild level are deprecated and no longer have any effect;
@@ -383,7 +384,7 @@ Deprecations
 
 
 New Features
-~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 - Support API v10 (:issue:`353`)
     - New intent: :attr:`Intents.message_content`
@@ -474,9 +475,8 @@ New Features
 - |commands| Add :attr:`~ext.commands.InvokableApplicationCommand.extras` to application commands (:issue:`483`)
 - |commands| Add ``slash_command_attrs``, ``user_command_attrs`` and ``message_command_attrs`` :class:`~ext.commands.Cog` parameters (:issue:`501`)
 
-
 Bug Fixes
-~~~~~~~~~~
+~~~~~~~~~
 
 - Improve components exception message (:issue:`352`)
 - Use proper HTTP method for joining threads, remove unused methods (:issue:`356`)
@@ -512,9 +512,8 @@ Bug Fixes
 - |commands| Fix unloading of listeners with custom names (:issue:`444`)
 - |commands| Fix parameter name conflicts in slash commands (:issue:`503`)
 
-
 Documentation
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 - Disable mathjax in documentation to improve loading times (:issue:`370`)
 - Update return type of :func:`Guild.create_template` (:issue:`372`)
@@ -530,9 +529,8 @@ Documentation
 - Update :func:`on_member_update` documentation to include new and future attributes (:issue:`510`)
 - Fix miscellaneous issues, improve formatting (:issue:`511`)
 
-
 Miscellaneous
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 - Fix remaining pyright issues, add pyright CI (:issue:`311`, :issue:`387`, :issue:`514`)
 - Update dev dependencies and CI (:issue:`345`, :issue:`386`, :issue:`451`)
@@ -549,7 +547,7 @@ v2.4.1
 This release is a bugfix release with backports from v2.5.0 up to v2.5.2.
 
 Bug Fixes
-~~~~~~~~~~
+~~~~~~~~~
 
 - Fix missing ``create_public_threads`` permission in :attr:`Permissions.private_channel` (:issue:`373`)
 - Fix :attr:`PartialInviteChannel.__str__ <PartialInviteChannel>` (:issue:`383`)
@@ -574,15 +572,13 @@ Bug Fixes
 - |commands| Fix unloading of listeners with custom names (:issue:`444`)
 - |commands| Handle :class:`.VoiceChannel` in :func:`commands.is_nsfw`. (:issue:`536`)
 
-
 Documentation
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 - Update the requests intersphinx url to the new url of the requests documentation. (:issue:`539`)
 
-
 Miscellaneous
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 - Update dev dependencies and CI (:issue:`451`)
 
@@ -596,23 +592,21 @@ and the ability to directly send message components without views,
 as well as several fixes and other general improvements.
 
 Breaking Changes
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 - The constructor of :class:`ApplicationCommand` and its subtypes no longer accepts ``**kwargs`` for setting internal values (:issue:`249`)
     - This shouldn't affect anyone, as ``**kwargs`` was only used for setting fields returned by the API and had no effect if the user set them
 - :attr:`Interaction.permissions` now returns proper permission values in DMs (:issue:`321`)
 - The ``reason`` parameter for sticker endpoints in :class:`HTTPClient` is now kwarg-only
 
-
 Deprecations
-~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 - :attr:`Thread.archiver_id` is not being provided by the API anymore and will be removed in a future version (:issue:`295`)
 - :attr:`Invite.revoked` is not being provided by the API anymore and will be removed in a future version (:issue:`309`)
 
-
 New Features
-~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 - Add :attr:`Interaction.locale` and :attr:`Interaction.guild_locale` properties to interactions (:issue:`225`)
 - Add :class:`ui.ActionRow` and ``components`` kwarg to send methods (:issue:`224`)
@@ -648,9 +642,8 @@ New Features
 - Add :meth:`Guild.get_or_fetch_members` with an alias :meth:`Guild.getch_members` (:issue:`322`).
 - Add :attr:`abc.GuildChannel.jump_url`, :attr:`DMChannel.jump_url` and :attr:`Thread.jump_url` (:issue:`319`)
 
-
 Bug Fixes
-~~~~~~~~~~
+~~~~~~~~~
 
 - Fix missing support for ``reason`` parameter in some methods (:issue:`266`)
 - Improve validation of slash command and option names (:issue:`267`)
@@ -661,17 +654,15 @@ Bug Fixes
 - Fix ``permissions`` annotation of :func:`abc.GuildChannel.set_permissions` (:issue:`349`)
 - Fix :func:`tasks.loop <disnake.ext.tasks.loop>` usage with fixed times (:issue:`337`)
 
-
 Documentation
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 - Show tooltips when hovering over links (:issue:`236`, :issue:`242`)
 - General content improvements/adjustments (:issue:`275`)
 - Slight redesign and general layout improvements (:issue:`278`)
 
-
 Miscellaneous
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 - Improve examples (:issue:`209`, :issue:`262`, :issue:`270`, :issue:`307`, :issue:`332`, :issue:`341`)
 - Improve typing/annotations of several parts of the library (:issue:`249`, :issue:`256`, :issue:`263`, :issue:`279`, :issue:`292`, :issue:`299`, :issue:`308`)
@@ -680,7 +671,6 @@ Miscellaneous
 - Improve member deserialization (:issue:`304`)
 - Split application command objects into separate types for data returned by the API (:issue:`299`)
 - Update README banner (:issue:`343`)
-
 
 .. _vp2p3p2:
 
@@ -691,7 +681,6 @@ Bug Fixes
 ~~~~~~~~~
 
 - Fix invalid default value for application command option descriptions (:issue:`338`)
-
 
 .. _vp2p3p1:
 
@@ -714,13 +703,11 @@ Bug Fixes
 - Fix type-checking of ``guild_ids`` / ``test_guilds`` parameters which could break application command caching (:issue:`300`, :issue:`325`)
 - Fix :func:`Guild.create_sticker` not working when no description was provided (:issue:`328`)
 
-
 Documentation
 ~~~~~~~~~~~~~
 
 - Fix :func:`~ext.commands.guild_permissions` documentation
 - Fix missing dropdown icon (:issue:`235`)
-
 
 Miscellaneous
 ~~~~~~~~~~~~~
@@ -728,11 +715,10 @@ Miscellaneous
 - Add ``isort`` and ``black`` pre-commit hooks, run isort (:issue:`169`, :issue:`173`, :issue:`233`)
 - Rename ``tests`` directory (:issue:`232`)
 
-
 .. _vp2p3p0:
 
 v2.3.0
--------
+------
 
 This version contains several new features and fixes,
 notably support for guild scheduled events, guild timeouts,
@@ -741,7 +727,7 @@ and a slash command rework with parameter injections, as well as several documen
 Note: the :ref:`version_guarantees` have been updated to more accurately reflect the versioning scheme this library is following.
 
 Breaking Changes
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 - The supported aiohttp version range changed from ``>=3.6.0,<3.8.0`` to ``>=3.7.0,<3.9.0``
 - Due to the upcoming text-in-voice feature (not yet released at the time of writing),
@@ -752,13 +738,13 @@ Breaking Changes
 - ``disnake.types.ThreadArchiveDuration`` is now ``ThreadArchiveDurationLiteral``, to avoid confusion with the new :class:`ThreadArchiveDuration` enum
 
 Deprecations
-~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 - The ``role_ids`` and ``user_ids`` parameters for :func:`guild_permissions <ext.commands.guild_permissions>` are now
   ``roles`` and ``users`` respectively; the old parameter names will be removed in a future version
 
 New Features
-~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 - Add guild scheduled events (:issue:`151`, :issue:`217`)
     - New intent: :attr:`Intents.guild_scheduled_events` (enabled by default)
@@ -849,9 +835,8 @@ New Features
     - :attr:`UserFlags.http_interactions_bot`, :attr:`PublicUserFlags.http_interactions_bot`
     - :attr:`UserFlags.spammer`, :attr:`PublicUserFlags.spammer`
 
-
 Bug Fixes
-~~~~~~~~~~
+~~~~~~~~~
 
 - Fix dispatch of typing events in DMs (:issue:`176`)
 - Try to retrieve objects in received interactions from cache first (fixing properties like :attr:`Member.status` on member parameters for commands) (:issue:`182`, :issue:`213`)
@@ -865,9 +850,8 @@ Bug Fixes
 - |commands| Fix unnecessary application command sync without changes
 - |commands| Fix incorrect detection of deprecated guild commands in sync algorithm while sync is in progress (:issue:`205`)
 
-
 Documentation
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 - Move documentation to https://docs.disnake.dev/
 - Update :ref:`version_guarantees` (:issue:`200`)
@@ -891,16 +875,14 @@ Documentation
 - Fix incorrect type for :attr:`Invite.channel` in documentation
 - Add additional information about application command sync algorithm and syncing commands in sharded bots (:issue:`205`)
 
-
 Miscellaneous
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 - Add Python 3.10 to package classifiers (:issue:`127`)
 - Change supported aiohttp version range from ``>=3.6.0,<3.8.0`` to ``>=3.7.0,<3.9.0`` (:issue:`119`, :issue:`164`)
 - Add guide for configuring inviting a bot through its profile (:issue:`153`)
 - Rewrite project README (:issue:`191`)
 - Improve examples (:issue:`143`)
-
 
 .. _vp2p2p3:
 
@@ -912,14 +894,13 @@ Bug Fixes
 
 - Fix invalid default value for application command option descriptions (:issue:`338`)
 
-
 .. _vp2p2p2:
 
 v2.2.2
--------
+------
 
 Bug Fixes
-~~~~~~~~~~
+~~~~~~~~~
 
 - Fix channel conversion in audit log entries
 - Fix improper error handling in context menu commands
@@ -930,7 +911,7 @@ Bug Fixes
 - Fix warning related to new option properties
 
 Documentation
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 - Update repository links to new organization
 - Fix duplicate entries in documentation
@@ -940,20 +921,20 @@ Documentation
 .. _vp2p2p1:
 
 v2.2.1
--------
+------
 
 Bug Fixes
-~~~~~~~~~~
+~~~~~~~~~
 
 - Fixed error related to guild member count
 
 .. _vp2p2p0:
 
 v2.2.0
--------
+------
 
 New Features
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 - Add :meth:`Interaction.send`
 - Add kwarg ``attachments`` to edit methods
@@ -969,10 +950,10 @@ New Features
 .. _vp2p1p5:
 
 v2.1.5
--------
+------
 
 New Features
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 - Add :class:`InteractionReference`
 - Add :class:`UnresolvedGuildApplicationCommandPermissions`
@@ -983,7 +964,7 @@ New Features
 - |commands| Add kwarg ``owner`` to :func:`guild_permissions <ext.commands.guild_permissions>`
 
 Bug Fixes
-~~~~~~~~~~
+~~~~~~~~~
 
 - Command deletions on reconnections
 - Pending sync tasks on loop termination
@@ -991,20 +972,20 @@ Bug Fixes
 .. _vp2p1p4:
 
 v2.1.4
--------
+------
 
 Bug Fixes
-~~~~~~~~~~
+~~~~~~~~~
 
 - Fixed some issues with application command permissions synchronisation
 
 .. _vp2p1p3:
 
 v2.1.3
--------
+------
 
 New Features
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 - Add :class:`GuildApplicationCommandPermissions`
 - Add :class:`PartialGuildApplicationCommandPermissions`
@@ -1018,7 +999,7 @@ New Features
 - |commands| Add kwargs ``sync_commands_on_cog_unload`` and ``sync_permissions`` to :class:`InteractionBotBase <ext.commands.InteractionBotBase>`
 
 Bug Fixes
-~~~~~~~~~~
+~~~~~~~~~
 
 - Music
 - ``default_permission`` kwarg in user / message commands
@@ -1027,12 +1008,12 @@ Bug Fixes
 .. _vp2p1p2:
 
 v2.1.2
--------
+------
 
 This is the first stable version of this discord.py 2.0 fork.
 
 New Features
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 - Add interaction hierarchy. :class:`Interaction` is now the base class for other interaction types, such as :class:`ApplicationCommandInteraction` and :class:`MessageInteraction`.
 - Add interaction data wrappers: :class:`ApplicationCommandInteractionData` and :class:`MessageInteractionData`.
@@ -1122,10 +1103,10 @@ New Features
 .. _vp1p7p3:
 
 v1.7.3
---------
+------
 
 Bug Fixes
-~~~~~~~~~~
+~~~~~~~~~
 
 - Fix a crash involving guild uploaded stickers
 - Fix :meth:`DMChannel.permissions_for` not having :attr:`Permissions.read_messages` set.
@@ -1133,10 +1114,10 @@ Bug Fixes
 .. _vp1p7p2:
 
 v1.7.2
--------
+------
 
 Bug Fixes
-~~~~~~~~~~~
+~~~~~~~~~
 
 - Fix ``fail_if_not_exists`` causing certain message references to not be usable within :meth:`abc.Messageable.send` and :meth:`Message.reply` (:issue-dpy:`6726`)
 - Fix :meth:`Guild.chunk` hanging when the user left the guild. (:issue-dpy:`6730`)
@@ -1145,17 +1126,17 @@ Bug Fixes
 .. _vp1p7p1:
 
 v1.7.1
--------
+------
 
 Bug Fixes
-~~~~~~~~~~~
+~~~~~~~~~
 
 - |commands| Fix :meth:`Cog.has_error_handler <ext.commands.Cog.has_error_handler>` not working as intended.
 
 .. _vp1p7p0:
 
 v1.7.0
---------
+------
 
 This version is mainly for improvements and bug fixes. This is more than likely the last major version in the 1.x series.
 Work after this will be spent on v2.0. As a result, **this is the last version to support Python 3.5**.
@@ -1164,7 +1145,7 @@ Likewise, **this is the last version to support user bots**.
 Development of v2.0 will have breaking changes and support for newer API features.
 
 New Features
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 - Add support for stage channels via :class:`StageChannel` (:issue-dpy:`6602`, :issue-dpy:`6608`)
 - Add support for :attr:`MessageReference.fail_if_not_exists` (:issue-dpy:`6484`)
@@ -1207,7 +1188,7 @@ New Features
 - |commands| Allow relative paths when loading extensions via a ``package`` keyword argument (:issue-dpy:`2465`, :issue-dpy:`6445`)
 
 Bug Fixes
-~~~~~~~~~~
+~~~~~~~~~
 
 - Fix mentions not working if ``mention_author`` is passed in :meth:`abc.Messageable.send` without :attr:`Client.allowed_mentions` set (:issue-dpy:`6192`, :issue-dpy:`6458`)
 - Fix user created instances of :class:`CustomActivity` triggering an error (:issue-dpy:`4049`)
@@ -1229,7 +1210,7 @@ Bug Fixes
 - |commands| Group signatures now properly show up in :attr:`Command.signature <ext.commands.Command.signature>` (:issue-dpy:`6529`, :issue-dpy:`6530`)
 
 Miscellaneous
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 - User endpoints and all userbot related functionality has been deprecated and will be removed in the next major version of the library.
 - :class:`Permission` class methods were updated to match the UI of the Discord client (:issue-dpy:`6476`)
@@ -1238,12 +1219,12 @@ Miscellaneous
 .. _vp1p6p0:
 
 v1.6.0
---------
+------
 
 This version comes with support for replies and stickers.
 
 New Features
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 - An entirely redesigned documentation. This was the cumulation of multiple months of effort.
     - There's now a dark theme, feel free to navigate to the cog on the screen to change your setting, though this should be automatic.
@@ -1278,9 +1259,8 @@ New Features
 - |commands| Add support for ``description`` keyword argument in :class:`commands.Cog <ext.commands.Cog>` (:issue-dpy:`6028`)
 - |tasks| Add support for calling the wrapped coroutine as a function via ``__call__``.
 
-
 Bug Fixes
-~~~~~~~~~~~
+~~~~~~~~~
 
 - Raise :exc:`DiscordServerError` when reaching 503s repeatedly (:issue-dpy:`6044`)
 - Fix :exc:`AttributeError` when :meth:`Client.fetch_template` is called (:issue-dpy:`5986`)
@@ -1296,7 +1276,7 @@ Bug Fixes
 - |commands| Properly cleanup lingering commands when a conflicting alias is found when adding commands (:issue-dpy:`6217`)
 
 Miscellaneous
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 - ``ffmpeg`` spawned processes no longer open a window in Windows (:issue-dpy:`6038`)
 - Update dependencies to allow the library to work on Python 3.9+ without requiring build tools. (:issue-dpy:`5984`, :issue-dpy:`5970`)
@@ -1310,10 +1290,10 @@ Miscellaneous
 .. _vp1p5p1:
 
 v1.5.1
--------
+------
 
 Bug Fixes
-~~~~~~~~~~~
+~~~~~~~~~
 
 - Fix :func:`utils.escape_markdown` not escaping quotes properly (:issue-dpy:`5897`)
 - Fix :class:`Message` not being hashable (:issue-dpy:`5901`, :issue-dpy:`5866`)
@@ -1325,7 +1305,7 @@ Bug Fixes
 - Ensure that the bot's own member is not evicted from the cache (:issue-dpy:`5949`)
 
 Miscellaneous
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 - Members are now loaded during ``GUILD_MEMBER_UPDATE`` events if :attr:`MemberCacheFlags.joined` is set. (:issue-dpy:`5930`)
 - |commands| :class:`MemberConverter <ext.commands.MemberConverter>` now properly lazily fetches members if not available from cache.
@@ -1335,18 +1315,18 @@ Miscellaneous
 .. _vp1p5p0:
 
 v1.5.0
---------
+------
 
 This version came with forced breaking changes that Discord is requiring all bots to go through on October 7th. It is highly recommended to read the documentation on intents, :ref:`intents_primer`.
 
 API Changes
-~~~~~~~~~~~~~
+~~~~~~~~~~~
 
 - Members and presences will no longer be retrieved due to an API change. See :ref:`privileged_intents` for more info.
 - As a consequence, fetching offline members is disabled if the members intent is not enabled.
 
 New Features
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 - Support for gateway intents, passed via ``intents`` in :class:`Client` using :class:`Intents`.
 - Add :attr:`VoiceRegion.south_korea` (:issue-dpy:`5233`)
@@ -1366,7 +1346,7 @@ New Features
 - |commands| Add support for ``require_var_positional`` for :class:`Command` (:issue-dpy:`5793`)
 
 Bug Fixes
-~~~~~~~~~~
+~~~~~~~~~
 
 - Fix issue with :meth:`Guild.by_category` not showing certain channels.
 - Fix :attr:`abc.GuildChannel.permissions_synced` always being ``False`` (:issue-dpy:`5772`)
@@ -1381,7 +1361,7 @@ Bug Fixes
 - |tasks| Fix tasks extending the next iteration on handled exceptions (:issue-dpy:`5762`, :issue-dpy:`5763`)
 
 Miscellaneous
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 - Webhook requests are now logged (:issue-dpy:`5798`)
 - Remove caching layer from :attr:`AutoShardedClient.shards`. This was causing issues if queried before launching shards.
@@ -1395,12 +1375,12 @@ Miscellaneous
 .. _vp1p4p2:
 
 v1.4.2
---------
+------
 
 This is a maintenance release with backports from :ref:`vp1p5p0`.
 
 Bug Fixes
-~~~~~~~~~~~
+~~~~~~~~~
 
 - Fix issue with :meth:`Guild.by_category` not showing certain channels.
 - Fix :attr:`abc.GuildChannel.permissions_synced` always being ``False`` (:issue-dpy:`5772`)
@@ -1415,7 +1395,7 @@ Bug Fixes
 - |tasks| Fix tasks extending the next iteration on handled exceptions (:issue-dpy:`5762`, :issue-dpy:`5763`)
 
 Miscellaneous
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 - Remove caching layer from :attr:`AutoShardedClient.shards`. This was causing issues if queried before launching shards.
 - |tasks| Lazily fetch the event loop to prevent surprises when changing event loop policy (:issue-dpy:`5808`)
@@ -1423,10 +1403,10 @@ Miscellaneous
 .. _vp1p4p1:
 
 v1.4.1
---------
+------
 
 Bug Fixes
-~~~~~~~~~~~
+~~~~~~~~~
 
 - Properly terminate the connection when :meth:`Client.close` is called (:issue-dpy:`5207`)
 - Fix error being raised when clearing embed author or image when it was already cleared (:issue-dpy:`5210`, :issue-dpy:`5212`)
@@ -1435,12 +1415,12 @@ Bug Fixes
 .. _vp1p4p0:
 
 v1.4.0
---------
+------
 
 Another version with a long development time. Features like Intents are slated to be released in a v1.5 release. Thank you for your patience!
 
 New Features
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 - Add support for :class:`AllowedMentions` to have more control over what gets mentioned.
     - This can be set globally through :attr:`Client.allowed_mentions`
@@ -1497,7 +1477,7 @@ New Features
 
 
 Bug Fixes
-~~~~~~~~~~~~
+~~~~~~~~~
 
 - Fix issue with :attr:`PartialEmoji.url` reads leading to a failure (:issue-dpy:`4015`, :issue-dpy:`4016`)
 - Allow :meth:`abc.Messageable.history` to take a limit of ``1`` even if ``around`` is passed (:issue-dpy:`4019`)
@@ -1525,7 +1505,7 @@ Bug Fixes
 
 
 Miscellaneous
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 - The :attr:`Member.roles` cache introduced in v1.3 was reverted due to issues caused (:issue-dpy:`4087`, :issue-dpy:`4157`)
 - :class:`Webhook` objects are now comparable and hashable (:issue-dpy:`4182`)
@@ -1545,20 +1525,20 @@ Miscellaneous
 .. _vp1p3p4:
 
 v1.3.4
---------
+------
 
 Bug Fixes
-~~~~~~~~~~~
+~~~~~~~~~
 
 - Fix an issue with channel overwrites causing multiple issues including crashes (:issue-dpy:`5109`)
 
 .. _vp1p3p3:
 
 v1.3.3
---------
+------
 
 Bug Fixes
-~~~~~~~~~~~~
+~~~~~~~~~
 
 - Change default WS close to 4000 instead of 1000.
     - The previous close code caused sessions to be invalidated at a higher frequency than desired.
@@ -1568,12 +1548,12 @@ Bug Fixes
 .. _vp1p3p2:
 
 v1.3.2
----------
+------
 
 Another minor bug fix release.
 
 Bug Fixes
-~~~~~~~~~~~
+~~~~~~~~~
 
 - Higher the wait time during the ``GUILD_CREATE`` stream before ``on_ready`` is fired for :class:`AutoShardedClient`.
 - :func:`on_voice_state_update` now uses the inner ``member`` payload which should make it more reliable.
@@ -1586,18 +1566,18 @@ Bug Fixes
 .. _vp1p3p1:
 
 v1.3.1
---------
+------
 
 Minor bug fix release.
 
 Bug Fixes
-~~~~~~~~~~~
+~~~~~~~~~
 
 - Fix fetching invites in guilds that the user is not in.
 - Fix the channel returned from :meth:`Client.fetch_channel` raising when sending messages. (:issue-dpy:`2531`)
 
 Miscellaneous
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 - Fix compatibility warnings when using the Python 3.9 alpha.
 - Change the unknown event logging from WARNING to DEBUG to reduce noise.
@@ -1605,12 +1585,12 @@ Miscellaneous
 .. _vp1p3p0:
 
 v1.3.0
---------
+------
 
 This version comes with a lot of bug fixes and new features. It's been in development for a lot longer than was anticipated!
 
 New Features
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 - Add :meth:`Guild.fetch_members` to fetch members from the HTTP API. (:issue-dpy:`2204`)
 - Add :meth:`Guild.fetch_roles` to fetch roles from the HTTP API. (:issue-dpy:`2208`)
@@ -1676,7 +1656,7 @@ New Features
 - |tasks| Add :attr:`Loop.next_iteration <.ext.tasks.Loop.next_iteration>` property. (:issue-dpy:`2305`)
 
 Bug Fixes
-~~~~~~~~~~
+~~~~~~~~~
 
 - Fix issue with permission resolution sometimes failing for guilds with no owner.
 - Tokens are now stripped upon use. (:issue-dpy:`2135`)
@@ -1700,7 +1680,7 @@ Bug Fixes
 - |commands| :meth:`Context.send_help <.ext.commands.Context.send_help>` now properly propagates to the :meth:`HelpCommand.on_help_command_error <.ext.commands.HelpCommand.on_help_command_error>` handler.
 
 Miscellaneous
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 - The library now fully supports Python 3.8 without warnings.
 - Bump the dependency of ``websockets`` to 8.0 for those who can use it. (:issue-dpy:`2453`)
@@ -1724,20 +1704,20 @@ Miscellaneous
 .. _vp1p2p5:
 
 v1.2.5
---------
+------
 
 Bug Fixes
-~~~~~~~~~~~
+~~~~~~~~~
 
 - Fix a bug that caused crashes due to missing ``animated`` field in Emoji structures in reactions.
 
 .. _vp1p2p4:
 
 v1.2.4
---------
+------
 
 Bug Fixes
-~~~~~~~~~~~
+~~~~~~~~~
 
 - Fix a regression when :attr:`Message.channel` would be ``None``.
 - Fix a regression where :attr:`Message.edited_at` would not update during edits.
@@ -1749,10 +1729,10 @@ Bug Fixes
 .. _vp1p2p3:
 
 v1.2.3
---------
+------
 
 Bug Fixes
-~~~~~~~~~~~
+~~~~~~~~~
 
 - Fix an AttributeError when accessing :attr:`Member.premium_since` in :func:`on_member_update`. (:issue-dpy:`2213`)
 - Handle :exc:`asyncio.CancelledError` in :meth:`abc.Messageable.typing` context manager. (:issue-dpy:`2218`)
@@ -1763,20 +1743,20 @@ Bug Fixes
 .. _vp1p2p2:
 
 v1.2.2
---------
+------
 
 Bug Fixes
-~~~~~~~~~~~
+~~~~~~~~~
 
 - Audit log related attribute access have been fixed to not error out when they shouldn't have.
 
 .. _vp1p2p1:
 
 v1.2.1
---------
+------
 
 Bug Fixes
-~~~~~~~~~~~
+~~~~~~~~~
 
 - :attr:`User.avatar_url` and related attributes no longer raise an error.
 - More compatibility shims with the ``enum.Enum`` code.
@@ -1784,12 +1764,12 @@ Bug Fixes
 .. _vp1p2p0:
 
 v1.2.0
---------
+------
 
 This update mainly brings performance improvements and various nitro boosting attributes (referred to in the API as "premium guilds").
 
 New Features
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 - Add :attr:`Guild.premium_tier` to query the guild's current nitro boost level.
 - Add :attr:`Guild.emoji_limit`, :attr:`Guild.bitrate_limit`, :attr:`Guild.filesize_limit` to query the new limits of a guild when taking into consideration boosting.
@@ -1812,7 +1792,7 @@ New Features
 - |tasks| Add :meth:`Loop.change_interval <.ext.tasks.Loop.change_interval>` to change the sleep interval at runtime (:issue-dpy:`2158`, :issue-dpy:`2162`)
 
 Bug Fixes
-~~~~~~~~~~~
+~~~~~~~~~
 
 - Fix internal error when using :meth:`Guild.prune_members`.
 - |commands| Fix :attr:`.Command.invoked_subcommand` being invalid in many cases.
@@ -1820,7 +1800,7 @@ Bug Fixes
 - |tasks| The decorator interface now works as expected when stacking (:issue-dpy:`2154`)
 
 Miscellaneous
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 - Improve performance of all Enum related code significantly.
     - This was done by replacing the ``enum.Enum`` code with an API compatible one.
@@ -1839,25 +1819,25 @@ Miscellaneous
 .. _vp1p1p1:
 
 v1.1.1
---------
+------
 
 Bug Fixes
-~~~~~~~~~~~~
+~~~~~~~~~
 
 - Webhooks do not overwrite data on retrying their HTTP requests (:issue-dpy:`2140`)
 
 Miscellaneous
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 - Add back signal handling to :meth:`Client.run` due to issues some users had with proper cleanup.
 
 .. _vp1p1p0:
 
 v1.1.0
----------
+------
 
 New Features
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 - **There is a new extension dedicated to making background tasks easier.**
     - You can check the documentation here: :ref:`ext_tasks_api`.
@@ -1873,7 +1853,7 @@ New Features
 - Add support for voice kicking by passing ``None`` to :meth:`Member.move_to`.
 
 ``disnake.ext.commands``
-++++++++++++++++++++++++++
+++++++++++++++++++++++++
 
 - Add new :func:`~.commands.dm_only` check.
 - Support callable converters in :data:`~.commands.Greedy`
@@ -1884,7 +1864,7 @@ New Features
 
 
 Bug Fixes
-~~~~~~~~~~~~
+~~~~~~~~~
 
 - Fix :exc:`AttributeError` when using ``__repr__`` on :class:`Widget`.
 - Fix issue with :attr:`abc.GuildChannel.overwrites` returning ``None`` for keys.
@@ -1894,7 +1874,7 @@ Bug Fixes
 - Tighten constraints of ``__eq__`` in :class:`Spotify` objects (:issue-dpy:`2113`, :issue-dpy:`2117`)
 
 ``disnake.ext.commands``
-++++++++++++++++++++++++++
+++++++++++++++++++++++++
 
 - Fix lambda converters in a non-module context (e.g. ``eval``).
 - Use message creation time for reference time when computing cooldowns.
@@ -1905,7 +1885,7 @@ Bug Fixes
 - Fix cog descriptions not showing in :class:`~.commands.MinimalHelpCommand` (:issue-dpy:`2139`)
 
 Miscellaneous
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 - Improve the performance of internal enum creation in the library by about 5x.
 - Make the output of ``python -m disnake --version`` a bit more useful.
@@ -1913,18 +1893,17 @@ Miscellaneous
 - The signal handling in :meth:`Client.run` has been removed.
 
 ``disnake.ext.commands``
-++++++++++++++++++++++++++
+++++++++++++++++++++++++
 
 - Custom exception classes are now used for all default checks in the library (:issue-dpy:`2101`)
-
 
 .. _vp1p0p1:
 
 v1.0.1
---------
+------
 
 Bug Fixes
-~~~~~~~~~~~
+~~~~~~~~~
 
 - Fix issue with speaking state being cast to ``int`` when it was invalid.
 - Fix some issues with loop cleanup that some users experienced on Linux machines.
@@ -1933,19 +1912,18 @@ Bug Fixes
 .. _vp1p0p0:
 
 v1.0.0
---------
+------
 
 The changeset for this version are too big to be listed here, for more information please
 see :ref:`the migrating page <migrating_1_0>`.
 
-
 .. _vp0p16p6:
 
 v0.16.6
---------
+-------
 
 Bug Fixes
-~~~~~~~~~~
+~~~~~~~~~
 
 - Fix issue with :meth:`Client.create_server` that made it stop working.
 - Fix main thread being blocked upon calling ``StreamPlayer.stop``.
@@ -1956,12 +1934,12 @@ Bug Fixes
 .. _vp0p16p1:
 
 v0.16.1
---------
+-------
 
 This release is just a bug fix release with some better rate limit implementation.
 
 Bug Fixes
-~~~~~~~~~~~
+~~~~~~~~~
 
 - Servers are now properly chunked for user bots.
 - The CDN URL is now used instead of the API URL for assets.
@@ -1972,16 +1950,16 @@ Bug Fixes
 .. _vp0p16p0:
 
 v0.16.0
----------
+-------
 
 New Features
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 - Add :attr:`Channel.overwrites` to get all the permission overwrites of a channel.
 - Add :attr:`Server.features` to get information about partnered servers.
 
 Bug Fixes
-~~~~~~~~~~
+~~~~~~~~~
 
 - Timeout when waiting for offline members while triggering :func:`on_ready`.
 
@@ -1997,17 +1975,17 @@ Bug Fixes
 .. _vp0p15p1:
 
 v0.15.1
----------
+-------
 
 - Fix crash on duplicate or out of order reactions.
 
 .. _vp0p15p0:
 
 v0.15.0
---------
+-------
 
 New Features
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 - Rich Embeds for messages are now supported.
 
@@ -2026,10 +2004,10 @@ For the command extension, the following changed:
 .. _vp0p14p3:
 
 v0.14.3
----------
+-------
 
 Bug Fixes
-~~~~~~~~~~~
+~~~~~~~~~
 
 - Fix crash when dealing with MESSAGE_REACTION_REMOVE
 - Fix incorrect buckets for reactions.
@@ -2037,26 +2015,26 @@ Bug Fixes
 .. _v0p14p2:
 
 v0.14.2
----------
+-------
 
 New Features
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 - :meth:`Client.wait_for_reaction` now returns a namedtuple with ``reaction`` and ``user`` attributes.
     - This is for better support in the case that ``None`` is returned since tuple unpacking can lead to issues.
 
 Bug Fixes
-~~~~~~~~~~
+~~~~~~~~~
 
 - Fix bug that disallowed ``None`` to be passed for ``emoji`` parameter in :meth:`Client.wait_for_reaction`.
 
 .. _v0p14p1:
 
 v0.14.1
----------
+-------
 
 Bug fixes
-~~~~~~~~~~
+~~~~~~~~~
 
 - Fix bug with `Reaction` not being visible at import.
     - This was also breaking the documentation.
@@ -2064,12 +2042,12 @@ Bug fixes
 .. _v0p14p0:
 
 v0.14.0
---------
+-------
 
 This update adds new API features and a couple of bug fixes.
 
 New Features
-~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 - Add support for Manage Webhooks permission under :attr:`Permissions.manage_webhooks`
 - Add support for ``around`` argument in 3.5+ :meth:`Client.logs_from`.
@@ -2083,7 +2061,7 @@ New Features
     - :meth:`Client.wait_for_reaction` to wait for a reaction from a user.
 
 Bug Fixes
-~~~~~~~~~~
+~~~~~~~~~
 
 - Fix bug with Paginator still allowing lines that are too long.
 - Fix the :attr:`Permissions.manage_emojis` bit being incorrect.
@@ -2091,12 +2069,12 @@ Bug Fixes
 .. _v0p13p0:
 
 v0.13.0
----------
+-------
 
 This is a backwards compatible update with new features.
 
 New Features
-~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 - Add the ability to manage emojis.
 
@@ -2119,7 +2097,7 @@ New Features
     - This is the only method that allows changing your status to invisible or do not disturb.
 
 Bug Fixes
-~~~~~~~~~~
+~~~~~~~~~
 
 - Paginator pages do not exceed their max_size anymore (:issue-dpy:`340`)
 - Do Not Disturb users no longer show up offline due to the new :class:`Status` changes.
@@ -2127,12 +2105,12 @@ Bug Fixes
 .. _v0p12p0:
 
 v0.12.0
----------
+-------
 
 This is a bug fix update that also comes with new features.
 
 New Features
-~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 - Add custom emoji support.
 
@@ -2171,7 +2149,7 @@ For the command extension, the following are new:
 - Add a method to reset command cooldown.
 
 Bug Fixes
-~~~~~~~~~~
+~~~~~~~~~
 
 - Fix bug that caused the library to not work with the latest ``websockets`` library.
 - Fix bug that leaked keep alive threads (:issue-dpy:`309`)
@@ -2182,17 +2160,17 @@ Bug Fixes
 .. _v0p11p0:
 
 v0.11.0
---------
+-------
 
 This is a minor bug fix update that comes with a gateway update (v5 -> v6).
 
 Breaking Changes
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 - ``Permissions.change_nicknames`` has been renamed to :attr:`Permissions.change_nickname` to match the UI.
 
 New Features
-~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 - Add the ability to prune members via :meth:`Client.prune_members`.
 - Switch the websocket gateway version to v6 from v5. This allows the library to work with group DMs and 1-on-1 calls.
@@ -2215,7 +2193,7 @@ For the command extension, the following are new:
 - ``UserInputError`` exception for the hierarchy for user input related errors.
 
 Bug Fixes
-~~~~~~~~~~
+~~~~~~~~~
 
 - :attr:`Client.email` is now saved when using a token for user accounts.
 - Fix issue when removing roles out of order.
@@ -2238,7 +2216,7 @@ v0.10.0
 For breaking changes, see :ref:`migrating-to-async`. The breaking changes listed there will not be enumerated below. Since this version is rather a big departure from v0.9.2, this change log will be non-exhaustive.
 
 New Features
-~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 - The library is now fully ``asyncio`` compatible, allowing you to write non-blocking code a lot more easily.
 - The library now fully handles 429s and unconditionally retries on 502s.
@@ -2271,7 +2249,7 @@ New Features
 - Add :func:`on_member_ban` and :func:`on_member_unban` events that trigger when a member is banned/unbanned.
 
 Performance Improvements
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 - All data classes now use ``__slots__`` which greatly reduce the memory usage of things kept in cache.
 - Due to the usage of ``asyncio``, the CPU usage of the library has gone down significantly.
@@ -2281,7 +2259,7 @@ Performance Improvements
 - While minor, change regex from ``\d+`` to ``[0-9]+`` to avoid unnecessary unicode character lookups.
 
 Bug Fixes
-~~~~~~~~~~
+~~~~~~~~~
 
 - Fix bug where guilds being updated did not edit the items in cache.
 - Fix bug where ``member.roles`` were empty upon joining instead of having the ``@everyone`` role.

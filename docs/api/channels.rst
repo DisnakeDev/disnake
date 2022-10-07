@@ -36,7 +36,7 @@ VoiceChannel
     :inherited-members:
 
 CategoryChannel
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
 
 .. attributetable:: CategoryChannel
 
@@ -69,7 +69,7 @@ ThreadMember
     :members:
 
 ForumTag
-~~~~~~~~~
+~~~~~~~~
 
 .. attributetable:: ForumTag
 
@@ -160,7 +160,7 @@ VoiceRegion
     :members:
 
 RawThreadDeleteEvent
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
 
 .. attributetable:: RawThreadDeleteEvent
 
@@ -168,7 +168,7 @@ RawThreadDeleteEvent
     :members:
 
 RawThreadMemberRemoveEvent
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. attributetable:: RawThreadMemberRemoveEvent
 

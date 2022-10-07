@@ -3,7 +3,7 @@
 .. _version_guarantees:
 
 Version Guarantees
-=====================
+==================
 
 This library does **not** quite follow the semantic versioning principle, the notable difference being that breaking changes may not only occur on major version increases, but also on minor version bumps (think Python's own versioning scheme).
 The primary reason for this is the lack of guarantees on the Discord API side when it comes to breaking changes, which along with the dynamic nature of the API results in breaking changes sometimes being required more frequently than desired.
@@ -24,14 +24,14 @@ This includes attributes that start with an underscore or functions without an u
     The examples below are non-exhaustive.
 
 Examples of Breaking Changes
-------------------------------
+----------------------------
 
 - Changing the default parameter value to something else.
 - Renaming a function without an alias to an old function.
 - Adding or removing parameters to an event.
 
 Examples of Non-Breaking Changes
-----------------------------------
+--------------------------------
 
 - Adding or removing private underscored attributes.
 - Adding an element into the ``__slots__`` of a data class.

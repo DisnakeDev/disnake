@@ -48,7 +48,7 @@ Data Classes
 ------------
 
 PartialWebhookGuild
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
 
 .. attributetable:: PartialWebhookGuild
 
@@ -56,7 +56,7 @@ PartialWebhookGuild
     :members:
 
 PartialWebhookChannel
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 .. attributetable:: PartialWebhookChannel
 

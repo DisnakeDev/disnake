@@ -46,7 +46,7 @@ dynamic attributes in mind.
 .. _discord_model:
 
 Discord Models
----------------
+--------------
 
 Models are classes that are received from Discord and are not meant to be created by
 the user of the library.

@@ -54,7 +54,7 @@ SelectMenu
     :inherited-members:
 
 SelectOption
-~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 .. attributetable:: SelectOption
 

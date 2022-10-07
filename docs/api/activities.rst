@@ -11,7 +11,7 @@ Data Classes
 ------------
 
 BaseActivity
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 .. attributetable:: BaseActivity
 
@@ -19,7 +19,7 @@ BaseActivity
     :members:
 
 Activity
-~~~~~~~~~
+~~~~~~~~
 
 .. attributetable:: Activity
 
@@ -27,7 +27,7 @@ Activity
     :members:
 
 Spotify
-~~~~~~~~
+~~~~~~~
 
 .. attributetable:: Spotify
 
@@ -35,7 +35,7 @@ Spotify
     :members:
 
 Game
-~~~~~
+~~~~
 
 .. attributetable:: Game
 
@@ -43,7 +43,7 @@ Game
     :members:
 
 Streaming
-~~~~~~~~~~~
+~~~~~~~~~
 
 .. attributetable:: Streaming
 
@@ -51,7 +51,7 @@ Streaming
     :members:
 
 CustomActivity
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~
 
 .. attributetable:: CustomActivity
 

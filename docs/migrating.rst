@@ -5,7 +5,7 @@
 .. _migrating_1_0:
 
 Migrating to v1.0
-======================
+=================
 
 v1.0 is one of the biggest breaking changes in the library due to a complete
 redesign.
@@ -17,19 +17,19 @@ Part of the redesign involves making things more easy to use and natural. Things
 :ref:`models <discord_model>` instead of requiring a :class:`Client` instance to do any work.
 
 Python Version Change
------------------------
+---------------------
 
 In order to make development easier and also to allow for our dependencies to upgrade to allow usage of 3.7 or higher,
 the library had to remove support for Python versions lower than 3.5.3, which essentially means that **support for Python 3.4
 is dropped**.
 
 Major Model Changes
----------------------
+-------------------
 
 Below are major model changes that have happened in v1.0
 
 Snowflakes are int
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 Before v1.0, all snowflakes (the ``id`` attribute) were strings. This has been changed to :class:`int`.
 
@@ -49,7 +49,7 @@ This change allows for fewer errors when using the Copy ID feature in the offici
 to wrap it in quotes and allows for optimisation opportunities by allowing ETF to be used instead of JSON internally.
 
 Server is now Guild
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
 
 The official API documentation calls the "Server" concept a "Guild" instead. In order to be more consistent with the
 API documentation when necessary, the model has been renamed to :class:`Guild` and all instances referring to it has
@@ -86,7 +86,7 @@ A list of changes is as follows:
 .. _migrating_1_0_model_state:
 
 Models are Stateful
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
 
 As mentioned earlier, a lot of functionality was moved out of :class:`Client` and
 put into their respective :ref:`model <discord_model>`.
@@ -212,7 +212,7 @@ A list of these changes is enumerated below.
 +---------------------------------------+------------------------------------------------------------------------------+
 
 Property Changes
-~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 In order to be a bit more consistent, certain things that were properties were changed to methods instead.
 
@@ -223,7 +223,7 @@ The following are now methods instead of properties (requires parentheses):
 - :meth:`Client.is_closed`
 
 Dict Value Change
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
 
 Prior to v1.0 some aggregating properties that retrieved models would return "dict view" objects.
 
@@ -242,7 +242,7 @@ The following views were changed to a list:
 - :attr:`Guild.members`
 
 Voice State Changes
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
 
 Earlier, in v0.11.0 a :class:`VoiceState` class was added to refer to voice states along with a
 :attr:`Member.voice` attribute to refer to it.
@@ -264,9 +264,8 @@ Quick example: ::
         member.voice.deaf
         member.voice.channel
 
-
 User and Member Type Split
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In v1.0 to save memory, :class:`User` and :class:`Member` are no longer inherited. Instead, they are "flattened"
 by having equivalent properties that map out to the functional underlying :class:`User`. Thus, there is no functional
@@ -279,7 +278,7 @@ of all :class:`User` your client can see with :attr:`Client.users`.
 .. _migrating_1_0_channel_split:
 
 Channel Type Split
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 Prior to v1.0, channels were two different types, ``Channel`` and ``PrivateChannel`` with a ``is_private``
 property to help differentiate between them.
@@ -312,9 +311,8 @@ Of course, if you're looking for only a specific type you can pass that too, e.g
 
 With this type split also came event changes, which are enumerated in :ref:`migrating_1_0_event_changes`.
 
-
 Miscellaneous Model Changes
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 There were lots of other things added or removed in the models in general.
 
@@ -417,7 +415,7 @@ They will be enumerated here.
 .. _migrating_1_0_sending_messages:
 
 Sending Messages
-------------------
+----------------
 
 One of the changes that were done was the merger of the previous ``Client.send_message`` and ``Client.send_file``
 functionality into a single method, :meth:`~abc.Messageable.send`.
@@ -456,7 +454,7 @@ This change was to facilitate multiple file uploads: ::
 .. _migrating_1_0_async_iter:
 
 Asynchronous Iterators
-------------------------
+----------------------
 
 Prior to v1.0, certain functions like ``Client.logs_from`` would return a different type if done in Python 3.4 or 3.5+.
 
@@ -497,7 +495,7 @@ The following return :class:`AsyncIterator`:
 .. _migrating_1_0_event_changes:
 
 Event Changes
---------------
+-------------
 
 A lot of events have gone through some changes.
 
@@ -589,7 +587,7 @@ updated (i.e. :class:`DMChannel` and :class:`GroupChannel`).
 .. _migrating_1_0_voice:
 
 Voice Changes
----------------
+-------------
 
 Voice sending has gone through a complete redesign.
 
@@ -652,11 +650,10 @@ An added benefit of the redesign is that it will be much more resilient towards 
 
   - This includes changing voice regions etc.
 
-
 .. _migrating_1_0_wait_for:
 
 Waiting For Events
---------------------
+------------------
 
 Prior to v1.0, the machinery for waiting for an event outside of the event itself was done through two different
 functions, ``Client.wait_for_message`` and ``Client.wait_for_reaction``. One problem with one such approach is that it did
@@ -701,7 +698,7 @@ when reached instead of setting the return to ``None``. For example:
         await channel.send('You said {0.content}, {0.author}.'.format(msg))
 
 Upgraded Dependencies
------------------------
+---------------------
 
 Following v1.0 of the library, we've updated our requirements to :doc:`aiohttp <aio:index>` v2.0 or higher.
 
@@ -730,7 +727,7 @@ Since it is better to not create a session for every request, you should store i
 ``session.close`` on it when it needs to be disposed.
 
 Sharding
-----------
+--------
 
 The library has received significant changes on how it handles sharding and now has sharding as a first-class citizen.
 
@@ -761,7 +758,7 @@ If you want more control over the sharding you can specify ``shard_count`` and `
 For users of the command extension, there is also :class:`~ext.commands.AutoShardedBot` which behaves similarly.
 
 Connection Improvements
--------------------------
+-----------------------
 
 In v1.0, the auto reconnection logic has been powered up significantly.
 
@@ -775,13 +772,13 @@ need to specify it unless turning it off.
 .. _migrating_1_0_commands:
 
 Command Extension Changes
---------------------------
+-------------------------
 
 Due to the :ref:`migrating_1_0_model_state` changes, some of the design of the extension module had to
 undergo some design changes as well.
 
 Context Changes
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
 
 In v1.0, the :class:`.Context` has received a lot of changes with how it's retrieved and used.
 
@@ -826,7 +823,7 @@ Since the :class:`~ext.commands.Context` is now passed by default, several short
     - This is useful if you want to show the user help if they misused a command.
 
 Subclassing Context
-++++++++++++++++++++
++++++++++++++++++++
 
 In v1.0, there is now the ability to subclass :class:`~ext.commands.Context` and use it instead of the default
 provided one.
@@ -861,7 +858,7 @@ Now inside your commands you will have access to your custom context:
 .. _migrating_1_0_removed_helpers:
 
 Removed Helpers
-+++++++++++++++++
++++++++++++++++
 
 With the new :class:`.Context` changes, a lot of message sending helpers have been removed.
 
@@ -882,7 +879,7 @@ For a full list of changes, see below:
 +-----------------+------------------------------------------------------------+
 
 Command Changes
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
 
 As mentioned earlier, the first command change is that ``pass_context=True`` no longer
 exists, so there is no need to pass this as a parameter.
@@ -906,7 +903,7 @@ For :class:`~ext.commands.Group` and :class:`~ext.commands.Bot` the following ch
     - Use :attr:`~.GroupMixin.all_commands` to get the old :class:`dict` with all commands.
 
 Check Changes
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 Prior to v1.0, :func:`~ext.commands.check`\s could only be synchronous. As of v1.0 checks can now be coroutines.
 
@@ -923,7 +920,7 @@ Along with this change, a couple new checks were added.
     - This is powered by the new :meth:`TextChannel.is_nsfw` method.
 
 Event Changes
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 All command extension events have changed.
 
@@ -949,7 +946,7 @@ have been re-ordered to use the :class:`~ext.commands.Context` as its first para
 and commands.
 
 HelpFormatter and Help Command Changes
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``HelpFormatter`` class has been removed. It has been replaced with a :class:`~.commands.HelpCommand` class. This class now stores all the command handling and processing of the help command.
 
@@ -1067,7 +1064,7 @@ An example cog with every special method registered and a custom name is as foll
 .. _migrating_1_0_before_after_hook:
 
 Before and After Invocation Hooks
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Commands have gained new before and after invocation hooks that allow you to do an action before and after a command is
 run.
@@ -1139,7 +1136,7 @@ The invocation order is as follows:
 7. Global after invocation hook
 
 Converter Changes
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
 
 Prior to v1.0, a converter was a type hint that could be a callable that could be invoked
 with a singular argument denoting the argument passed by the user as a string.

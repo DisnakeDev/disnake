@@ -16,7 +16,7 @@ Data Classes
 ------------
 
 AuditLogEntry
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 .. attributetable:: AuditLogEntry
 
@@ -24,7 +24,7 @@ AuditLogEntry
     :members:
 
 AuditLogChanges
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
 
 .. attributetable:: AuditLogChanges
 
@@ -73,7 +73,7 @@ AuditLogChanges
         +----------------------------------------+--------------------------------------------------+
 
 AuditLogDiff
-~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 .. attributetable:: AuditLogDiff
 

@@ -54,7 +54,7 @@ Data classes
 ------------
 
 ApplicationFlags
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 .. attributetable:: ApplicationFlags
 

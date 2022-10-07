@@ -14,7 +14,7 @@ Classes
 -------
 
 Client
-~~~~~~~
+~~~~~~
 
 .. attributetable:: Client
 
@@ -37,7 +37,7 @@ AutoShardedClient
     :members:
 
 ClientUser
-~~~~~~~~~~~~
+~~~~~~~~~~
 
 .. attributetable:: ClientUser
 
@@ -65,7 +65,7 @@ SessionStartLimit
     :members:
 
 GatewayParams
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 .. attributetable:: GatewayParams
 
@@ -74,7 +74,7 @@ GatewayParams
     :exclude-members: encoding, zlib
 
 Intents
-~~~~~~~~~~
+~~~~~~~
 
 .. attributetable:: Intents
 
@@ -82,7 +82,7 @@ Intents
     :members:
 
 MemberCacheFlags
-~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 .. attributetable:: MemberCacheFlags
 

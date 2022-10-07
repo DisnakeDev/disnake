@@ -19,7 +19,7 @@ Message
     :members:
 
 Reaction
-~~~~~~~~~
+~~~~~~~~
 
 .. attributetable:: Reaction
 
@@ -31,7 +31,7 @@ Reaction
         :async-for:
 
 Attachment
-~~~~~~~~~~~
+~~~~~~~~~~
 
 .. attributetable:: Attachment
 
@@ -39,7 +39,7 @@ Attachment
     :members:
 
 DeletedReferencedMessage
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. attributetable:: DeletedReferencedMessage
 
@@ -50,7 +50,7 @@ Data Classes
 ------------
 
 Embed
-~~~~~~
+~~~~~
 
 .. attributetable:: Embed
 
@@ -58,7 +58,7 @@ Embed
     :members:
 
 File
-~~~~~
+~~~~
 
 .. attributetable:: File
 
@@ -74,7 +74,7 @@ MessageFlags
     :members:
 
 AllowedMentions
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
 
 .. attributetable:: AllowedMentions
 
@@ -82,7 +82,7 @@ AllowedMentions
     :members:
 
 MessageReference
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 .. attributetable:: MessageReference
 
@@ -90,7 +90,7 @@ MessageReference
     :members:
 
 PartialMessage
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~
 
 .. attributetable:: PartialMessage
 
@@ -106,7 +106,7 @@ RawTypingEvent
     :members:
 
 RawMessageDeleteEvent
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 .. attributetable:: RawMessageDeleteEvent
 
@@ -114,7 +114,7 @@ RawMessageDeleteEvent
     :members:
 
 RawBulkMessageDeleteEvent
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. attributetable:: RawBulkMessageDeleteEvent
 
@@ -122,7 +122,7 @@ RawBulkMessageDeleteEvent
     :members:
 
 RawMessageUpdateEvent
-~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 .. attributetable:: RawMessageUpdateEvent
 
@@ -130,7 +130,7 @@ RawMessageUpdateEvent
     :members:
 
 RawReactionActionEvent
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
 
 .. attributetable:: RawReactionActionEvent
 
@@ -138,7 +138,7 @@ RawReactionActionEvent
     :members:
 
 RawReactionClearEvent
-~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 .. attributetable:: RawReactionClearEvent
 
@@ -146,7 +146,7 @@ RawReactionClearEvent
     :members:
 
 RawReactionClearEmojiEvent
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. attributetable:: RawReactionClearEmojiEvent
 

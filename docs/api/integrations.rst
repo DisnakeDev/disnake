@@ -13,7 +13,7 @@ Classes
 -------
 
 Integration
-~~~~~~~~~~~~
+~~~~~~~~~~~
 
 .. autoclass:: Integration()
     :members:
@@ -40,7 +40,7 @@ Data Classes
 ------------
 
 RawIntegrationDeleteEvent
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. attributetable:: RawIntegrationDeleteEvent
 

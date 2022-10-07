@@ -31,7 +31,7 @@ Data Classes
 ------------
 
 WidgetChannel
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 .. attributetable:: WidgetChannel
 
@@ -39,7 +39,7 @@ WidgetChannel
     :members:
 
 WidgetMember
-~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 .. attributetable:: WidgetMember
 

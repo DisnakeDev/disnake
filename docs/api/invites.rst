@@ -11,7 +11,7 @@ Classes
 -------
 
 Invite
-~~~~~~~
+~~~~~~
 
 .. attributetable:: Invite
 
@@ -22,7 +22,7 @@ Data Classes
 ------------
 
 PartialInviteGuild
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 .. attributetable:: PartialInviteGuild
 
@@ -30,7 +30,7 @@ PartialInviteGuild
     :members:
 
 PartialInviteChannel
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
 
 .. attributetable:: PartialInviteChannel
 

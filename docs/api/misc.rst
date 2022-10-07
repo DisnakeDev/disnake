@@ -20,7 +20,7 @@ Asset
     :inherited-members:
 
 AsyncIterator
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 .. class:: AsyncIterator
 
@@ -142,7 +142,7 @@ Data Classes
 ------------
 
 Object
-~~~~~~~
+~~~~~~
 
 .. attributetable:: Object
 

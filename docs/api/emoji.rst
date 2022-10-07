@@ -21,7 +21,7 @@ Emoji
     :inherited-members:
 
 PartialEmoji
-~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 .. attributetable:: PartialEmoji
 

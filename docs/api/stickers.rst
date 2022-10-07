@@ -20,7 +20,7 @@ Sticker
     :inherited-members:
 
 StandardSticker
-~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
 
 .. attributetable:: StandardSticker
 
@@ -29,7 +29,7 @@ StandardSticker
     :inherited-members:
 
 GuildSticker
-~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 .. attributetable:: GuildSticker
 
@@ -38,7 +38,7 @@ GuildSticker
     :inherited-members:
 
 StickerItem
-~~~~~~~~~~~~~
+~~~~~~~~~~~
 
 .. attributetable:: StickerItem
 
@@ -50,7 +50,7 @@ Data Classes
 ------------
 
 StickerPack
-~~~~~~~~~~~~~
+~~~~~~~~~~~
 
 .. attributetable:: StickerPack
 

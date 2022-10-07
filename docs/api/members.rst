@@ -27,7 +27,7 @@ Member
         :async-with:
 
 VoiceState
-~~~~~~~~~~~
+~~~~~~~~~~
 
 .. attributetable:: VoiceState
 

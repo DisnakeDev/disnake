@@ -11,7 +11,7 @@ Classes
 -------
 
 StageInstance
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 .. attributetable:: StageInstance
 

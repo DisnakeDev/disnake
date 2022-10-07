@@ -12,7 +12,7 @@ Classes
 -------
 
 AutoModRule
-~~~~~~~~~~~~
+~~~~~~~~~~~
 
 .. attributetable:: AutoModRule
 
@@ -23,7 +23,7 @@ Data Classes
 ------------
 
 AutoModActionExecution
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
 
 .. attributetable:: AutoModActionExecution
 
@@ -39,7 +39,7 @@ AutoModKeywordPresets
     :members:
 
 AutoModTriggerMetadata
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
 
 .. attributetable:: AutoModTriggerMetadata
 
@@ -47,7 +47,7 @@ AutoModTriggerMetadata
     :members:
 
 AutoModAction
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 .. attributetable:: AutoModAction
 
@@ -55,7 +55,7 @@ AutoModAction
     :members:
 
 AutoModBlockMessageAction
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. attributetable:: AutoModBlockMessageAction
 
@@ -63,7 +63,7 @@ AutoModBlockMessageAction
     :members:
 
 AutoModSendAlertAction
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
 
 .. attributetable:: AutoModSendAlertAction
 
@@ -71,7 +71,7 @@ AutoModSendAlertAction
     :members:
 
 AutoModTimeoutAction
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
 
 .. attributetable:: AutoModTimeoutAction
 

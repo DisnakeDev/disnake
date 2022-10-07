@@ -12,7 +12,7 @@ Data Classes
 ------------
 
 Permissions
-~~~~~~~~~~~~
+~~~~~~~~~~~
 
 .. attributetable:: Permissions
 
@@ -20,7 +20,7 @@ Permissions
     :members:
 
 PermissionOverwrite
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
 
 .. attributetable:: PermissionOverwrite
 

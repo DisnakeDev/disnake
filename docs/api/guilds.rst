@@ -13,7 +13,7 @@ Classes
 -------
 
 Guild
-~~~~~~
+~~~~~
 
 .. attributetable:: Guild
 
@@ -28,7 +28,7 @@ Guild
         :async-for:
 
 GuildPreview
-~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 .. attributetable:: GuildPreview
 
@@ -36,7 +36,7 @@ GuildPreview
     :members:
 
 Template
-~~~~~~~~~
+~~~~~~~~
 
 .. attributetable:: Template
 
@@ -44,7 +44,7 @@ Template
     :members:
 
 WelcomeScreen
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 .. attributetable:: WelcomeScreen
 
@@ -52,7 +52,7 @@ WelcomeScreen
     :members:
 
 WelcomeScreenChannel
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
 
 .. attributetable:: WelcomeScreenChannel
 
@@ -82,7 +82,7 @@ BanEntry
         :type: :class:`User`
 
 SystemChannelFlags
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 .. attributetable:: SystemChannelFlags
 
