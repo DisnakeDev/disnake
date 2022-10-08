@@ -2248,9 +2248,10 @@ class Guild(Hashable):
 
         Creates a :class:`GuildScheduledEvent`.
 
+        You must have :attr:`.Permissions.manage_events` permission to do this.
+
         Based on the channel/entity type, there are different restrictions regarding
         other parameter values, as shown in this table:
-
 
         .. csv-table::
             :widths: 30, 30, 20, 20
