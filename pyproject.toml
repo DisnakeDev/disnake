@@ -1,6 +1,11 @@
 # SPDX-License-Identifier: MIT
+
 [build-system]
-requires = ["poetry-core>=1.1.0"]
+requires = [
+    "poetry-core>=1.1.0",
+    "setuptools",
+    "packaging",
+]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
@@ -32,11 +37,11 @@ classifiers = [
 include = [
     "LICENSE",
     "disnake/bin/*",
-    "disnake/py.typed",
     ]
 exclude = [
     "*.py[cod]"
 ]
+build = "builder.py"
 
 
 [tool.poetry.dependencies]
