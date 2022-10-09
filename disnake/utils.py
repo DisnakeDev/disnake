@@ -1320,10 +1320,7 @@ def walk_modules(
         modules (where the callable returning ``True`` results in the module being ignored).
         Defaults to ``None``, i.e. no modules are ignored.
 
-        If it's an iterable, the elements must be module names. That is,
-        a module like ``cogs.admin.eval_cmd`` will be ignored if ``admin``, ``eval_cmd``,
-        or ``admin.eval_cmd`` is given, but not with ``admin.eval`` or ``cmd``, to name
-        a few examples.
+        If it's an iterable, module names that start with any of the given strings will be ignored.
 
     Raises
     ------
@@ -1341,9 +1338,8 @@ def walk_modules(
         raise TypeError("`ignore` must be an iterable of strings or a callable")
 
     if isinstance(ignore, Iterable):
-        ignore_parts = "|".join(re.escape(i) for i in ignore)
-        ignore_re = re.compile(rf"(^|\.)({ignore_parts})(\.|$)")
-        ignore = lambda path: ignore_re.search(path) is not None
+        ignore_tup = tuple(ignore)
+        ignore = lambda path: path.startswith(ignore_tup)
     # else, it's already a callable or None
 
     for _, name, ispkg in pkgutil.iter_modules(paths, prefix):
