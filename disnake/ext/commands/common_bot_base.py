@@ -687,7 +687,10 @@ class CommonBotBase(Generic[CogT]):
         if not (paths := spec.submodule_search_locations):
             raise errors.ExtensionNotFound(f"Module '{root_module}' is not a package")
 
-        for ext_name in disnake.utils.walk_extensions(paths, prefix=f"{spec.name}.", ignore=ignore):
+        # collect all extension names first, in case of discovery errors
+        exts = list(disnake.utils.walk_extensions(paths, prefix=f"{spec.name}.", ignore=ignore))
+
+        for ext_name in exts:
             try:
                 self.load_extension(ext_name)
             except Exception as e:
