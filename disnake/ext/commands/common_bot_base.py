@@ -627,9 +627,10 @@ class CommonBotBase(Generic[CogT]):
         ----------
         root_module: :class:`str`
             The module/package name to search in, for example `cogs.admin`.
+            Also supports paths in the current working directory.
         package: Optional[:class:`str`]
             The package name to resolve relative imports with.
-            This is required when ``root_module`` is relative, e.g ``.cogs.admin``.
+            This is required when ``root_module`` is a relative module name, e.g ``.cogs.admin``.
             Defaults to ``None``.
         ignore: Union[Iterable[:class:`str`], Callable[[:class:`str`], :class:`bool`]]
             An iterable of module names to ignore, or a callable that's used for ignoring
@@ -662,13 +663,6 @@ class CommonBotBase(Generic[CogT]):
             The module names or raised exceptions as they are being loaded (if ``return_exceptions=True``).
         """
         if "/" in root_module or "\\" in root_module:
-            # likely a path, try to be backwards compatible by converting to
-            # a relative path and using that as the module name
-            disnake.utils.warn_deprecated(
-                "Using a directory with `load_extensions` is deprecated. Use a module name (optionally with a package) instead.",
-                stacklevel=2,
-            )
-
             path = os.path.relpath(root_module)
             if ".." in path:
                 raise ValueError(
