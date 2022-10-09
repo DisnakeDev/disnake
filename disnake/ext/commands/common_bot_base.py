@@ -645,11 +645,9 @@ class CommonBotBase(Generic[CogT]):
 
         Raises
         ------
-        ExtensionNotFound
-            The given root module could not be found.
-            This is also raised if the name of the root module could not
-            be resolved using the provided ``package`` parameter.
         ExtensionError
+            The given root module could not be found,
+            or the name of the root module could not be resolved using the provided ``package`` parameter.
             If ``return_exceptions=False``, other extension-related errors may also be raised
             as this method calls :func:`load_extension` on all found extensions.
             See :func:`load_extension` for further details on raised exceptions.
@@ -679,12 +677,15 @@ class CommonBotBase(Generic[CogT]):
         root_module = self._resolve_name(root_module, package)
 
         if not (spec := importlib.util.find_spec(root_module)):
-            raise errors.ExtensionNotFound(
-                f"Unable to find root module '{root_module}' in package '{package or ''}'"
+            raise errors.ExtensionError(
+                f"Unable to find root module '{root_module}' in package '{package or ''}'",
+                name=root_module,
             )
 
         if not (paths := spec.submodule_search_locations):
-            raise errors.ExtensionNotFound(f"Module '{root_module}' is not a package")
+            raise errors.ExtensionError(
+                f"Module '{root_module}' is not a package", name=root_module
+            )
 
         # collect all extension names first, in case of discovery errors
         exts = list(disnake.utils.walk_modules(paths, prefix=f"{spec.name}.", ignore=ignore))
