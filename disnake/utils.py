@@ -1324,10 +1324,12 @@ def walk_modules(
 
     Raises
     ------
+    ValueError
+        The ``paths`` parameter is not an iterable.
     TypeError
         The ``ignore`` parameter is of an invalid type.
     ImportError
-        A package couldn't be imported.
+        A package (not module) couldn't be imported.
 
     Yields
     ------

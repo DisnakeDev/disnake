@@ -649,11 +649,16 @@ class CommonBotBase(Generic[CogT]):
             The given root module could not be found.
             This is also raised if the name of the root module could not
             be resolved using the provided ``package`` parameter.
-
         ExtensionError
             If ``return_exceptions=False``, other extension-related errors may also be raised
             as this method calls :func:`load_extension` on all found extensions.
             See :func:`load_extension` for further details on raised exceptions.
+        ValueError
+            ``root_module`` is a path and outside of the cwd.
+        TypeError
+            The ``ignore`` parameter is of an invalid type.
+        ImportError
+            A package (not module) couldn't be imported.
 
         Yields
         ------
