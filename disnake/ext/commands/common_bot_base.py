@@ -19,11 +19,13 @@ from typing import (
     Iterable,
     Iterator,
     List,
+    Literal,
     Mapping,
     Optional,
     Set,
     TypeVar,
     Union,
+    overload,
 )
 
 import disnake
@@ -576,13 +578,36 @@ class CommonBotBase(Generic[CogT]):
             sys.modules.update(modules)
             raise
 
+    @overload
     def load_extensions(
         self,
         root_module: str,
         *,
         package: Optional[str] = None,
         ignore: Optional[Union[Iterable[str], Callable[[str], bool]]] = None,
+        return_exceptions: Literal[False] = False,
     ) -> Iterator[str]:
+        ...
+
+    @overload
+    def load_extensions(
+        self,
+        root_module: str,
+        *,
+        package: Optional[str] = None,
+        ignore: Optional[Union[Iterable[str], Callable[[str], bool]]] = None,
+        return_exceptions: Literal[True],
+    ) -> Iterator[Union[str, errors.ExtensionError]]:
+        ...
+
+    def load_extensions(
+        self,
+        root_module: str,
+        *,
+        package: Optional[str] = None,
+        ignore: Optional[Union[Iterable[str], Callable[[str], bool]]] = None,
+        return_exceptions: bool = False,
+    ) -> Iterator[Union[str, errors.ExtensionError]]:
         """
         Loads all extensions in a given module, also traversing into sub-packages.
 
@@ -611,6 +636,11 @@ class CommonBotBase(Generic[CogT]):
             modules (where the callable returning ``True`` results in the module being ignored).
 
             See :func:`disnake.utils.walk_extensions` for details.
+        return_exceptions: :class:`bool`
+            If set to ``True``, exceptions raised by the internal :func:`load_extension` calls
+            are yielded/returned instead of immediately propagating the first exception to the caller
+            (similar to :func:`py:asyncio.gather`).
+            Defaults to ``False``.
 
         Raises
         ------
@@ -619,14 +649,17 @@ class CommonBotBase(Generic[CogT]):
             This is also raised if the name of the root module could not
             be resolved using the provided ``package`` parameter.
 
-            This, as well as other extension-related errors, may also be
-            raised as this method calls :func:`load_extension` on all found extensions.
+        ExtensionError
+            If ``return_exceptions=False``, other extension-related errors may also be raised
+            as this method calls :func:`load_extension` on all found extensions.
             See :func:`load_extension` for further details on raised exceptions.
 
         Yields
         ------
         :class:`str`
-            The module names as they are being loaded.
+            The module names as they are being loaded (if ``return_exceptions=False``, the default).
+        Union[:class:`str`, :class:`ExtensionError`]
+            The module names or raised exceptions as they are being loaded (if ``return_exceptions=True``).
         """
         if "/" in root_module or "\\" in root_module:
             # likely a path, try to be backwards compatible by converting to
@@ -648,15 +681,27 @@ class CommonBotBase(Generic[CogT]):
 
         if not (spec := importlib.util.find_spec(root_module)):
             raise errors.ExtensionNotFound(
-                f"Unable to find root module '{root_module}' in package '{package}'"
+                f"Unable to find root module '{root_module}' in package '{package or ''}'"
             )
 
         if not (paths := spec.submodule_search_locations):
             raise errors.ExtensionNotFound(f"Module '{root_module}' is not a package")
 
         for ext_name in disnake.utils.walk_extensions(paths, prefix=f"{spec.name}.", ignore=ignore):
-            self.load_extension(ext_name)
-            yield ext_name
+            try:
+                self.load_extension(ext_name)
+            except Exception as e:
+                # always wrap in `ExtensionError` if not already
+                # (this should never happen, but we're doing it just in case)
+                if not isinstance(e, errors.ExtensionError):
+                    e = errors.ExtensionFailed(ext_name, e)
+
+                if return_exceptions:
+                    yield e
+                else:
+                    raise e
+            else:
+                yield ext_name
 
     @property
     def extensions(self) -> Mapping[str, types.ModuleType]:
