@@ -1288,14 +1288,15 @@ def walk_modules(
     ignore: Optional[Union[Iterable[str], Callable[[str], bool]]] = None,
 ) -> Iterator[str]:
     """
-    Walk through the given package paths, and recursively yield modules.
+    Walks through the given package paths, and recursively yields modules.
 
     This is similar to :func:`py:pkgutil.walk_packages`, but supports ignoring
     modules/packages.
+    If a package has a ``setup`` function, this method will
+    yield its name and not traverse the package further.
 
     Namespace packages are not considered, meaning every package must have an
-    ``__init__.py`` file. If a package has a ``setup`` function, this method will
-    yield its name and not traverse the package further.
+    ``__init__.py`` file.
 
     Nonexistent paths are silently ignored.
 
