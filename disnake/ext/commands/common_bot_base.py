@@ -611,7 +611,7 @@ class CommonBotBase(Generic[CogT]):
         """
         Loads all extensions in a given module, also traversing into sub-packages.
 
-        See :func:`disnake.utils.walk_extensions` for details on how packages are found.
+        See :func:`disnake.utils.walk_modules` for details on how packages are found.
 
         This may raise any errors that :func:`load_extension` can raise, in addition to
         the ones documented below.
@@ -635,7 +635,7 @@ class CommonBotBase(Generic[CogT]):
             An iterable of module names to ignore, or a callable that's used for ignoring
             modules (where the callable returning ``True`` results in the module being ignored).
 
-            See :func:`disnake.utils.walk_extensions` for details.
+            See :func:`disnake.utils.walk_modules` for details.
         return_exceptions: :class:`bool`
             If set to ``True``, exceptions raised by the internal :func:`load_extension` calls
             are yielded/returned instead of immediately propagating the first exception to the caller
@@ -688,7 +688,7 @@ class CommonBotBase(Generic[CogT]):
             raise errors.ExtensionNotFound(f"Module '{root_module}' is not a package")
 
         # collect all extension names first, in case of discovery errors
-        exts = list(disnake.utils.walk_extensions(paths, prefix=f"{spec.name}.", ignore=ignore))
+        exts = list(disnake.utils.walk_modules(paths, prefix=f"{spec.name}.", ignore=ignore))
 
         for ext_name in exts:
             try:

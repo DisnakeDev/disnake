@@ -69,7 +69,7 @@ __all__ = (
     "escape_mentions",
     "as_chunks",
     "format_dt",
-    "walk_extensions",
+    "walk_modules",
     "as_valid_locale",
 )
 
@@ -1282,7 +1282,7 @@ def format_dt(dt: Union[datetime.datetime, float], /, style: TimestampStyle = "f
     return f"<t:{int(dt)}:{style}>"
 
 
-def walk_extensions(
+def walk_modules(
     paths: Iterable[str],
     prefix: str = "",
     ignore: Optional[Union[Iterable[str], Callable[[str], bool]]] = None,
@@ -1359,7 +1359,7 @@ def walk_extensions(
                 continue
 
             if sub_paths := mod.__path__:
-                yield from walk_extensions(sub_paths, prefix=f"{name}.", ignore=ignore)
+                yield from walk_modules(sub_paths, prefix=f"{name}.", ignore=ignore)
         else:
             yield name
 
