@@ -1342,6 +1342,8 @@ def walk_modules(
         ignore = lambda path: path.startswith(ignore_tup)
     # else, it's already a callable or None
 
+    seen: Set[str] = set()
+
     for _, name, ispkg in pkgutil.iter_modules(paths, prefix):
         if ignore and ignore(name):
             continue
@@ -1355,7 +1357,13 @@ def walk_modules(
                 yield name
                 continue
 
-            if sub_paths := mod.__path__:
+            sub_paths: List[str] = []
+            for p in mod.__path__ or []:
+                if p not in seen:
+                    seen.add(p)
+                    sub_paths.append(p)
+
+            if sub_paths:
                 yield from walk_modules(sub_paths, prefix=f"{name}.", ignore=ignore)
         else:
             yield name
