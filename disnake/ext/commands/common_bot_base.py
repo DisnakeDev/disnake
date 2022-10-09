@@ -607,7 +607,7 @@ class CommonBotBase(Generic[CogT]):
         package: Optional[str] = None,
         ignore: Optional[Union[Iterable[str], Callable[[str], bool]]] = None,
         return_exceptions: bool = False,
-    ) -> Iterator[Union[str, errors.ExtensionError]]:
+    ) -> Union[Iterator[str], Iterator[Union[str, errors.ExtensionError]]]:
         """
         Loads all extensions in a given module, also traversing into sub-packages.
 
