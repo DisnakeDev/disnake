@@ -827,7 +827,7 @@ def tmp_module_root(tmp_path_factory: pytest.TempPathFactory):
     _create_dirs(
         tmpdir,
         {
-            "toplevel": {
+            "a": {
                 "__init__.py": "",
                 "nosetup.py": "",
                 "withsetup.py": setup,
@@ -868,53 +868,42 @@ def tmp_module_root(tmp_path_factory: pytest.TempPathFactory):
         (
             None,
             [
-                "toplevel.nosetup",
-                "toplevel.withsetup",
-                "toplevel.a_module.abc",
-                "toplevel.cool_ext",
-                "toplevel.mod.ext",
-                "toplevel.mod.sub.sub1.abc",
-                "toplevel.mod.sub.sub1.def",
-                "toplevel.mod.sub.sub2",
+                "a.nosetup",
+                "a.withsetup",
+                "a.a_module.abc",
+                "a.cool_ext",
+                "a.mod.ext",
+                "a.mod.sub.sub1.abc",
+                "a.mod.sub.sub1.def",
+                "a.mod.sub.sub2",
             ],
         ),
         (
-            ["sub1.abc"],
+            ["a.nosetup", "a.mod.sub.sub1.abc", "a.mod.ext"],
             [
-                "toplevel.nosetup",
-                "toplevel.withsetup",
-                "toplevel.a_module.abc",
-                "toplevel.cool_ext",
-                "toplevel.mod.ext",
-                "toplevel.mod.sub.sub1.def",
-                "toplevel.mod.sub.sub2",
-            ],
-        ),
-        (
-            ["ext", "a_module.abc", "sub.sub1"],
-            [
-                "toplevel.nosetup",
-                "toplevel.withsetup",
-                "toplevel.cool_ext",
-                "toplevel.mod.sub.sub2",
+                "a.withsetup",
+                "a.a_module.abc",
+                "a.cool_ext",
+                "a.mod.sub.sub1.def",
+                "a.mod.sub.sub2",
             ],
         ),
         (
             lambda name: "ext" in name,  # pyright: ignore[reportUnknownLambdaType]
             [
-                "toplevel.nosetup",
-                "toplevel.withsetup",
-                "toplevel.a_module.abc",
-                "toplevel.mod.sub.sub1.abc",
-                "toplevel.mod.sub.sub1.def",
-                "toplevel.mod.sub.sub2",
+                "a.nosetup",
+                "a.withsetup",
+                "a.a_module.abc",
+                "a.mod.sub.sub1.abc",
+                "a.mod.sub.sub1.def",
+                "a.mod.sub.sub2",
             ],
         ),
     ],
 )
 def test_walk_modules(tmp_module_root: Path, ignore, expected):
-    path = str(tmp_module_root / "toplevel")
-    assert sorted(utils.walk_modules([path], "toplevel.", ignore)) == sorted(expected)
+    path = str(tmp_module_root / "a")
+    assert sorted(utils.walk_modules([path], "a.", ignore)) == sorted(expected)
 
 
 def test_walk_modules_nonexistent(tmp_module_root: Path):
