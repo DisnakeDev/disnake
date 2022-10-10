@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: MIT
 
+from __future__ import annotations
+
 import asyncio
 import contextlib
 import datetime
@@ -65,7 +67,7 @@ class freeze_time(ContextManager):
             return wrap_sync  # type: ignore
 
 
-def create_dirs(parent: Union[str, Path[str]], data: Dict[str, Any]) -> None:
+def create_dirs(parent: Union[str, Path], data: Dict[str, Any]) -> None:
     parent = Path(parent) if isinstance(parent, str) else parent
     for name, value in data.items():
         path = parent / name
@@ -77,7 +79,7 @@ def create_dirs(parent: Union[str, Path[str]], data: Dict[str, Any]) -> None:
 
 
 @contextlib.contextmanager
-def chdir_module(path: Union[str, Path[str]]) -> Iterator[None]:
+def chdir_module(path: Union[str, Path]) -> Iterator[None]:
     orig_cwd = os.getcwd()
     try:
         os.chdir(path)
