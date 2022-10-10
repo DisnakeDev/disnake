@@ -678,8 +678,7 @@ class CommonBotBase(Generic[CogT]):
 
         if not (spec := importlib.util.find_spec(root_module)):
             raise errors.ExtensionError(
-                f"Unable to find root module '{root_module}' in package '{package or ''}'",
-                name=root_module,
+                f"Unable to find root module '{root_module}'", name=root_module
             )
 
         if not (paths := spec.submodule_search_locations):
