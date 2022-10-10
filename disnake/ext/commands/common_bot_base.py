@@ -578,6 +578,75 @@ class CommonBotBase(Generic[CogT]):
             sys.modules.update(modules)
             raise
 
+    def find_extensions(
+        self,
+        root_module: str,
+        *,
+        package: Optional[str] = None,
+        ignore: Optional[Union[Iterable[str], Callable[[str], bool]]] = None,
+    ) -> List[str]:
+        """
+        Finds all extensions in a given module, also traversing into sub-packages.
+
+        See :func:`disnake.utils.walk_modules` for details on how packages are found.
+
+        .. versionadded:: 2.7
+
+        Parameters
+        ----------
+        root_module: :class:`str`
+            The module/package name to search in, for example ``cogs.admin``.
+            Also supports paths in the current working directory.
+        package: Optional[:class:`str`]
+            The package name to resolve relative imports with.
+            This is required when ``root_module`` is a relative module name, e.g ``.cogs.admin``.
+            Defaults to ``None``.
+        ignore: Optional[Union[Iterable[:class:`str`], Callable[[:class:`str`], :class:`bool`]]]
+            An iterable of module names to ignore, or a callable that's used for ignoring
+            modules (where the callable returning ``True`` results in the module being ignored).
+
+            See :func:`disnake.utils.walk_modules` for details.
+
+        Raises
+        ------
+        ExtensionError
+            The given root module could not be found,
+            or the name of the root module could not be resolved using the provided ``package`` parameter.
+        ValueError
+            ``root_module`` is a path and outside of the cwd.
+        TypeError
+            The ``ignore`` parameter is of an invalid type.
+        ImportError
+            A package couldn't be imported.
+
+        Returns
+        -------
+        List[:class:`str`]
+            The list of full extension names.
+        """
+        if "/" in root_module or "\\" in root_module:
+            path = os.path.relpath(root_module)
+            if ".." in path:
+                raise ValueError(
+                    "Paths outside the cwd are not supported. Try using the module name instead."
+                )
+            root_module = path.replace(os.sep, ".")
+
+        # `find_spec` already calls `resolve_name`, but we want our custom error handling here
+        root_module = self._resolve_name(root_module, package)
+
+        if not (spec := importlib.util.find_spec(root_module)):
+            raise errors.ExtensionError(
+                f"Unable to find root module '{root_module}'", name=root_module
+            )
+
+        if not (paths := spec.submodule_search_locations):
+            raise errors.ExtensionError(
+                f"Module '{root_module}' is not a package", name=root_module
+            )
+
+        return list(disnake.utils.walk_modules(paths, prefix=f"{spec.name}.", ignore=ignore))
+
     @overload
     def load_extensions(
         self,
@@ -618,31 +687,23 @@ class CommonBotBase(Generic[CogT]):
 
         See :func:`disnake.utils.walk_modules` for details on how packages are found.
 
-        This may raise any errors that :func:`load_extension` can raise, in addition to
-        the ones documented below.
-
         .. versionadded:: 2.4
 
-        .. versionchanged:: 2.6
+        .. versionchanged:: 2.7
             Now accepts a module name instead of a filesystem path.
             Improved package traversal, adding support for more complex extensions
             with ``__init__.py`` files.
-            Also added ``ignore``, ``load_callback`` and ``return_exceptions`` parameters.
+            Also added ``package``, ``ignore``, ``load_callback`` and ``return_exceptions`` parameters.
 
         Parameters
         ----------
         root_module: :class:`str`
-            The module/package name to search in, for example `cogs.admin`.
+            The module/package name to search in, for example ``cogs.admin``.
             Also supports paths in the current working directory.
         package: Optional[:class:`str`]
-            The package name to resolve relative imports with.
-            This is required when ``root_module`` is a relative module name, e.g ``.cogs.admin``.
-            Defaults to ``None``.
+            See :func:`find_extensions`.
         ignore: Optional[Union[Iterable[:class:`str`], Callable[[:class:`str`], :class:`bool`]]]
-            An iterable of module names to ignore, or a callable that's used for ignoring
-            modules (where the callable returning ``True`` results in the module being ignored).
-
-            See :func:`disnake.utils.walk_modules` for details.
+            See :func:`find_extensions`.
         load_callback: Optional[Union[Callable[[:class:`str`], None], Callable[[Union[:class:`str`, :class:`ExtensionError`]], None]]]
             A callback that gets invoked with the extension name when each extension gets loaded.
             If ``return_exceptions=True``, also receives raised exceptions that occured while trying to load extensions.
@@ -673,30 +734,6 @@ class CommonBotBase(Generic[CogT]):
             The list of module names that have been loaded
             (including :class:`ExtensionError`\\s if ``return_exceptions=True``).
         """
-        if "/" in root_module or "\\" in root_module:
-            path = os.path.relpath(root_module)
-            if ".." in path:
-                raise ValueError(
-                    "Paths outside the cwd are not supported. Try using the module name instead."
-                )
-            root_module = path.replace(os.sep, ".")
-
-        # `find_spec` already calls `resolve_name`, but we want our custom error handling here
-        root_module = self._resolve_name(root_module, package)
-
-        if not (spec := importlib.util.find_spec(root_module)):
-            raise errors.ExtensionError(
-                f"Unable to find root module '{root_module}'", name=root_module
-            )
-
-        if not (paths := spec.submodule_search_locations):
-            raise errors.ExtensionError(
-                f"Module '{root_module}' is not a package", name=root_module
-            )
-
-        # collect all extension names first, in case of discovery errors
-        exts = list(disnake.utils.walk_modules(paths, prefix=f"{spec.name}.", ignore=ignore))
-
         ret: List[Union[str, errors.ExtensionError]] = []
 
         def add_result(r: Union[str, errors.ExtensionError]) -> None:
@@ -704,7 +741,7 @@ class CommonBotBase(Generic[CogT]):
             if load_callback:
                 load_callback(r)  # type: ignore  # can't assert callable parameter type
 
-        for ext_name in exts:
+        for ext_name in self.find_extensions(root_module, package=package, ignore=ignore):
             try:
                 self.load_extension(ext_name)
             except Exception as e:
