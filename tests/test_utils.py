@@ -3,7 +3,6 @@
 import asyncio
 import datetime
 import inspect
-import os
 import sys
 import warnings
 from dataclasses import dataclass
@@ -809,22 +808,12 @@ def test_format_dt(dt, style, expected):
     assert utils.format_dt(dt, style) == expected
 
 
-def _create_dirs(parent: Path, data: Dict[str, Any]) -> None:
-    for name, value in data.items():
-        path = parent / name
-        if isinstance(value, dict):
-            path.mkdir()
-            _create_dirs(path, value)
-        elif isinstance(value, str):
-            path.write_text(value)
-
-
 @pytest.fixture(scope="session")
 def tmp_module_root(tmp_path_factory: pytest.TempPathFactory):
     tmpdir = tmp_path_factory.mktemp("module_root")
 
     setup = "def setup(bot): ..."
-    _create_dirs(
+    helpers.create_dirs(
         tmpdir,
         {
             "a": {
@@ -852,14 +841,8 @@ def tmp_module_root(tmp_path_factory: pytest.TempPathFactory):
         },
     )
 
-    orig_cwd = os.getcwd()
-    try:
-        os.chdir(tmpdir)
-        sys.path.insert(0, str(tmpdir))
+    with helpers.chdir_module(tmpdir):
         yield tmpdir
-    finally:
-        os.chdir(orig_cwd)
-        sys.path.remove(str(tmpdir))
 
 
 @pytest.mark.parametrize(
