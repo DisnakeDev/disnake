@@ -17,11 +17,11 @@ from typing import (
     Dict,
     Generic,
     Iterable,
-    Iterator,
     List,
     Literal,
     Mapping,
     Optional,
+    Sequence,
     Set,
     TypeVar,
     Union,
@@ -585,8 +585,9 @@ class CommonBotBase(Generic[CogT]):
         *,
         package: Optional[str] = None,
         ignore: Optional[Union[Iterable[str], Callable[[str], bool]]] = None,
+        load_callback: Optional[Callable[[str], None]] = None,
         return_exceptions: Literal[False] = False,
-    ) -> Iterator[str]:
+    ) -> Sequence[str]:
         ...
 
     @overload
@@ -596,8 +597,9 @@ class CommonBotBase(Generic[CogT]):
         *,
         package: Optional[str] = None,
         ignore: Optional[Union[Iterable[str], Callable[[str], bool]]] = None,
+        load_callback: Optional[Callable[[Union[str, errors.ExtensionError]], None]] = None,
         return_exceptions: Literal[True],
-    ) -> Iterator[Union[str, errors.ExtensionError]]:
+    ) -> Sequence[Union[str, errors.ExtensionError]]:
         ...
 
     def load_extensions(
@@ -606,8 +608,11 @@ class CommonBotBase(Generic[CogT]):
         *,
         package: Optional[str] = None,
         ignore: Optional[Union[Iterable[str], Callable[[str], bool]]] = None,
+        load_callback: Optional[
+            Union[Callable[[str], None], Callable[[Union[str, errors.ExtensionError]], None]]
+        ] = None,
         return_exceptions: bool = False,
-    ) -> Union[Iterator[str], Iterator[Union[str, errors.ExtensionError]]]:
+    ) -> Union[Sequence[str], Sequence[Union[str, errors.ExtensionError]]]:
         """
         Loads all extensions in a given module, also traversing into sub-packages.
 
@@ -620,8 +625,9 @@ class CommonBotBase(Generic[CogT]):
 
         .. versionchanged:: 2.6
             Now accepts a module name instead of a filesystem path.
-            Also improved package traversal, adding support for more complex extensions
-            with ``__init__.py`` files, and added ``ignore`` parameter.
+            Improved package traversal, adding support for more complex extensions
+            with ``__init__.py`` files.
+            Also added ``ignore``, ``load_callback`` and ``return_exceptions`` parameters.
 
         Parameters
         ----------
@@ -632,15 +638,18 @@ class CommonBotBase(Generic[CogT]):
             The package name to resolve relative imports with.
             This is required when ``root_module`` is a relative module name, e.g ``.cogs.admin``.
             Defaults to ``None``.
-        ignore: Union[Iterable[:class:`str`], Callable[[:class:`str`], :class:`bool`]]
+        ignore: Optional[Union[Iterable[:class:`str`], Callable[[:class:`str`], :class:`bool`]]]
             An iterable of module names to ignore, or a callable that's used for ignoring
             modules (where the callable returning ``True`` results in the module being ignored).
 
             See :func:`disnake.utils.walk_modules` for details.
+        load_callback: Optional[Union[Callable[[:class:`str`], None], Callable[[Union[:class:`str`, :class:`ExtensionError`]], None]]]
+            A callback that gets invoked with the extension name when each extension gets loaded.
+            If ``return_exceptions=True``, also receives raised exceptions that occured while trying to load extensions.
         return_exceptions: :class:`bool`
             If set to ``True``, exceptions raised by the internal :func:`load_extension` calls
-            are yielded/returned instead of immediately propagating the first exception to the caller
-            (similar to :func:`py:asyncio.gather`).
+            are not immediately propagated to the caller (similar to :func:`py:asyncio.gather`).
+            See ``load_callback`` and the ``Raises`` and ``Returns`` sections.
             Defaults to ``False``.
 
         Raises
@@ -658,12 +667,11 @@ class CommonBotBase(Generic[CogT]):
         ImportError
             A package (not module) couldn't be imported.
 
-        Yields
-        ------
-        :class:`str`
-            The module names as they are being loaded (if ``return_exceptions=False``, the default).
-        Union[:class:`str`, :class:`ExtensionError`]
-            The module names or raised exceptions as they are being loaded (if ``return_exceptions=True``).
+        Returns
+        -------
+        Union[Sequence[:class:`str`], Sequence[Union[:class:`str`, :class:`ExtensionError`]]]
+            The list of module names that have been loaded
+            (including :class:`ExtensionError`\\s if ``return_exceptions=True``).
         """
         if "/" in root_module or "\\" in root_module:
             path = os.path.relpath(root_module)
@@ -689,6 +697,13 @@ class CommonBotBase(Generic[CogT]):
         # collect all extension names first, in case of discovery errors
         exts = list(disnake.utils.walk_modules(paths, prefix=f"{spec.name}.", ignore=ignore))
 
+        ret: List[Union[str, errors.ExtensionError]] = []
+
+        def add_result(r: Union[str, errors.ExtensionError]) -> None:
+            ret.append(r)
+            if load_callback:
+                load_callback(r)  # type: ignore  # can't assert callable parameter type
+
         for ext_name in exts:
             try:
                 self.load_extension(ext_name)
@@ -699,11 +714,13 @@ class CommonBotBase(Generic[CogT]):
                     e = errors.ExtensionFailed(ext_name, e)
 
                 if return_exceptions:
-                    yield e
+                    add_result(e)
                 else:
                     raise e
             else:
-                yield ext_name
+                add_result(ext_name)
+
+        return ret
 
     @property
     def extensions(self) -> Mapping[str, types.ModuleType]:

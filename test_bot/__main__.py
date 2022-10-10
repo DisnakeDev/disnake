@@ -121,6 +121,9 @@ print(f"disnake: {disnake.__version__}\n")
 
 if __name__ == "__main__":
     bot = TestBot()
-    for e in bot.load_extensions(".cogs", package=__package__):
-        logger.info(f"Loaded extension {e}.")
+    bot.load_extensions(
+        ".cogs",
+        package=__package__,
+        load_callback=lambda e: logger.info(f"Loaded extension {e}."),
+    )
     bot.run(Config.token)
