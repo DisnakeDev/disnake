@@ -694,6 +694,15 @@ class CommonBotBase(Generic[CogT]):
             with ``__init__.py`` files.
             Also added ``package``, ``ignore``, ``load_callback`` and ``return_exceptions`` parameters.
 
+        .. note::
+            For further customization, you may use :func:`find_extensions`:
+
+            .. code-block:: python3
+
+                for extension_name in bot.find_extensions(...):
+                    ... # custom logic
+                    bot.load_extension(extension_name)
+
         Parameters
         ----------
         root_module: :class:`str`
