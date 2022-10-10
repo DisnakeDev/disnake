@@ -21,7 +21,6 @@ from typing import (
     Literal,
     Mapping,
     Optional,
-    Sequence,
     Set,
     TypeVar,
     Union,
@@ -656,7 +655,7 @@ class CommonBotBase(Generic[CogT]):
         ignore: Optional[Union[Iterable[str], Callable[[str], bool]]] = None,
         load_callback: Optional[Callable[[str], None]] = None,
         return_exceptions: Literal[False] = False,
-    ) -> Sequence[str]:
+    ) -> List[str]:
         ...
 
     @overload
@@ -668,7 +667,7 @@ class CommonBotBase(Generic[CogT]):
         ignore: Optional[Union[Iterable[str], Callable[[str], bool]]] = None,
         load_callback: Optional[Callable[[Union[str, errors.ExtensionError]], None]] = None,
         return_exceptions: Literal[True],
-    ) -> Sequence[Union[str, errors.ExtensionError]]:
+    ) -> List[Union[str, errors.ExtensionError]]:
         ...
 
     def load_extensions(
@@ -681,7 +680,7 @@ class CommonBotBase(Generic[CogT]):
             Union[Callable[[str], None], Callable[[Union[str, errors.ExtensionError]], None]]
         ] = None,
         return_exceptions: bool = False,
-    ) -> Union[Sequence[str], Sequence[Union[str, errors.ExtensionError]]]:
+    ) -> Union[List[str], List[Union[str, errors.ExtensionError]]]:
         """
         Loads all extensions in a given module, also traversing into sub-packages.
 
@@ -730,7 +729,7 @@ class CommonBotBase(Generic[CogT]):
 
         Returns
         -------
-        Union[Sequence[:class:`str`], Sequence[Union[:class:`str`, :class:`ExtensionError`]]]
+        Union[List[:class:`str`], List[Union[:class:`str`, :class:`ExtensionError`]]]
             The list of module names that have been loaded
             (including :class:`ExtensionError`\\s if ``return_exceptions=True``).
         """
