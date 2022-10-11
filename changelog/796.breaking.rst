@@ -1,1 +1,0 @@
-Remove :func:`disnake.utils.search_directory` in favor of :func:`disnake.ext.commands.Bot.find_extensions`.

@@ -1,0 +1,1 @@
+:func:`disnake.utils.search_directory` will be removed in a future version, in favor of :func:`disnake.ext.commands.Bot.find_extensions` which is the most common usecase and is more consistent.

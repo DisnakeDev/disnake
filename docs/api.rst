@@ -1560,6 +1560,8 @@ Utility Functions
 
 .. autofunction:: disnake.utils.as_chunks
 
+.. autofunction:: disnake.utils.search_directory
+
 .. autofunction:: disnake.utils.as_valid_locale
 
 .. _discord-api-enums:

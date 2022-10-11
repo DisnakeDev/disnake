@@ -8,6 +8,7 @@ import datetime
 import functools
 import importlib
 import json
+import os
 import pkgutil
 import re
 import sys
@@ -69,6 +70,7 @@ __all__ = (
     "escape_mentions",
     "as_chunks",
     "format_dt",
+    "search_directory",
     "as_valid_locale",
 )
 
@@ -1279,6 +1281,45 @@ def format_dt(dt: Union[datetime.datetime, float], /, style: TimestampStyle = "f
     if isinstance(dt, datetime.datetime):
         dt = dt.timestamp()
     return f"<t:{int(dt)}:{style}>"
+
+
+@deprecated("disnake.ext.commands.Bot.find_extensions")
+def search_directory(path: str) -> Iterator[str]:
+    """Walk through a directory and yield all modules.
+
+    .. deprecated:: 2.7
+
+    Parameters
+    ----------
+    path: :class:`str`
+        The path to search for modules
+
+    Yields
+    -------
+    :class:`str`
+        The name of the found module. (usable in load_extension)
+    """
+    relpath = os.path.relpath(path)  # relative and normalized
+    if ".." in relpath:
+        raise ValueError("Modules outside the cwd require a package to be specified")
+
+    abspath = os.path.abspath(path)
+    if not os.path.exists(relpath):
+        raise ValueError(f"Provided path '{abspath}' does not exist")
+    if not os.path.isdir(relpath):
+        raise ValueError(f"Provided path '{abspath}' is not a directory")
+
+    prefix = relpath.replace(os.sep, ".")
+    if prefix in ("", "."):
+        prefix = ""
+    else:
+        prefix += "."
+
+    for _, name, ispkg in pkgutil.iter_modules([path]):
+        if ispkg:
+            yield from search_directory(os.path.join(path, name))
+        else:
+            yield prefix + name
 
 
 # this is similar to pkgutil.walk_packages, but with a few modifications
