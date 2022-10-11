@@ -1,1 +1,1 @@
-Remove :func:`disnake.utils.search_directory` in favor of :func:`disnake.utils.walk_modules`.
+Remove :func:`disnake.utils.search_directory` in favor of :func:`disnake.ext.commands.Bot.find_extensions`.

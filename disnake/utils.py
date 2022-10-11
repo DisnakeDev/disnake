@@ -69,7 +69,6 @@ __all__ = (
     "escape_mentions",
     "as_chunks",
     "format_dt",
-    "walk_modules",
     "as_valid_locale",
 )
 
@@ -1282,60 +1281,12 @@ def format_dt(dt: Union[datetime.datetime, float], /, style: TimestampStyle = "f
     return f"<t:{int(dt)}:{style}>"
 
 
-def walk_modules(
+# this is similar to pkgutil.walk_packages, but with a few modifications
+def _walk_modules(
     paths: Iterable[str],
     prefix: str = "",
     ignore: Optional[Union[Iterable[str], Callable[[str], bool]]] = None,
 ) -> Iterator[str]:
-    """
-    Walks through the given package paths, and recursively yields modules.
-
-    This is similar to :func:`py:pkgutil.walk_packages`, but supports ignoring
-    modules/packages.
-    If a package has a ``setup`` function, this method will
-    yield its name and not traverse the package further.
-
-    Namespace packages are not considered, meaning every package must have an
-    ``__init__.py`` file.
-
-    Nonexistent paths are silently ignored.
-
-    .. note::
-        This imports all *packages* (not all modules) in the given path(s)
-        to access the ``__path__`` attribute for finding submodules,
-        unless they are filtered by the ``ignore`` parameter.
-
-    Parameters
-    ----------
-    paths: Iterable[:class:`str`]
-        The filesystem paths of packages to search in.
-    prefix: :class:`str`
-        The prefix to prepend to all module names. This should be set
-        accordingly to produce importable package names.
-
-        For example, if ``paths`` contains ``/bot/cogs/admin``, this should
-        be set to `cogs.admin.` assuming the current working directory is ``/bot``.
-    ignore: Optional[Union[Iterable[:class:`str`], Callable[[:class:`str`], :class:`bool`]]]
-        An iterable of module names to ignore, or a callable that's used for ignoring
-        modules (where the callable returning ``True`` results in the module being ignored).
-        Defaults to ``None``, i.e. no modules are ignored.
-
-        If it's an iterable, module names that start with any of the given strings will be ignored.
-
-    Raises
-    ------
-    ValueError
-        The ``paths`` parameter is not an iterable.
-    TypeError
-        The ``ignore`` parameter is of an invalid type.
-    ImportError
-        A package (not module) couldn't be imported.
-
-    Yields
-    ------
-    :class:`str`
-        The full module names in the given package paths.
-    """
     if isinstance(ignore, str):
         raise TypeError("`ignore` must be an iterable of strings or a callable")
 
@@ -1366,7 +1317,7 @@ def walk_modules(
                     sub_paths.append(p)
 
             if sub_paths:
-                yield from walk_modules(sub_paths, prefix=f"{name}.", ignore=ignore)
+                yield from _walk_modules(sub_paths, prefix=f"{name}.", ignore=ignore)
         else:
             yield name
 

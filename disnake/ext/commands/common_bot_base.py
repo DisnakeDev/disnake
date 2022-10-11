@@ -585,9 +585,14 @@ class CommonBotBase(Generic[CogT]):
         """
         Finds all extensions in a given module, also traversing into sub-packages.
 
-        See :func:`disnake.utils.walk_modules` for details on how packages are found.
+        See :ref:`ext_commands_extensions_load` for details on how packages are found.
 
         .. versionadded:: 2.7
+
+        .. note::
+            This imports all *packages* (not all modules) in the given path(s)
+            to access the ``__path__`` attribute for finding submodules,
+            unless they are filtered by the ``ignore`` parameter.
 
         Parameters
         ----------
@@ -601,8 +606,9 @@ class CommonBotBase(Generic[CogT]):
         ignore: Optional[Union[Iterable[:class:`str`], Callable[[:class:`str`], :class:`bool`]]]
             An iterable of module names to ignore, or a callable that's used for ignoring
             modules (where the callable returning ``True`` results in the module being ignored).
+            Defaults to ``None``, i.e. no modules are ignored.
 
-            See :func:`disnake.utils.walk_modules` for details.
+            If it's an iterable, module names that start with any of the given strings will be ignored.
 
         Raises
         ------
@@ -642,7 +648,7 @@ class CommonBotBase(Generic[CogT]):
                 f"Module '{root_module}' is not a package", name=root_module
             )
 
-        return list(disnake.utils.walk_modules(paths, prefix=f"{spec.name}.", ignore=ignore))
+        return list(disnake.utils._walk_modules(paths, prefix=f"{spec.name}.", ignore=ignore))
 
     def load_extensions(
         self,
@@ -655,7 +661,7 @@ class CommonBotBase(Generic[CogT]):
         """
         Loads all extensions in a given module, also traversing into sub-packages.
 
-        See :func:`disnake.utils.walk_modules` for details on how packages are found.
+        See :func:`find_extensions` for details.
 
         .. versionadded:: 2.4
 

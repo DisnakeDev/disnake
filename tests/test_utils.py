@@ -886,11 +886,11 @@ def tmp_module_root(tmp_path_factory: pytest.TempPathFactory):
 )
 def test_walk_modules(tmp_module_root: Path, ignore, expected):
     path = str(tmp_module_root / "a")
-    assert sorted(utils.walk_modules([path], "a.", ignore)) == sorted(expected)
+    assert sorted(utils._walk_modules([path], "a.", ignore)) == sorted(expected)
 
 
 def test_walk_modules_nonexistent(tmp_module_root: Path):
-    assert list(utils.walk_modules([str(tmp_module_root / "doesnotexist")], "doesnotexist.")) == []
+    assert list(utils._walk_modules([str(tmp_module_root / "doesnotexist")], "doesnotexist.")) == []
 
 
 @pytest.mark.parametrize(
