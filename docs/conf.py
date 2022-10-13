@@ -236,6 +236,8 @@ hoverxref_tooltip_theme = ["tooltipster-custom"]
 # use proxied API endpoint on rtd to avoid CORS issues
 if os.environ.get("READTHEDOCS"):
     hoverxref_api_host = "/_"
+else:
+    notfound_urls_prefix = ""
 
 
 linkcheck_ignore = [
