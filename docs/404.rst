@@ -1,0 +1,30 @@
+.. SPDX-License-Identifier: MIT
+
+:orphan:
+
+Page Not Found
+--------------
+
+
+We could not find what you were looking for.
+
+
+You might find what you're looking for in one of the below pages:
+
+.. toctree::
+    :maxdepth: 1
+    :titlesonly:
+
+    Index <index>
+    API Reference <api>
+    Search <search>
+    Changelog <whats_new>
+
+Extensions:
+
+.. toctree::
+    :maxdepth: 1
+    :titlesonly:
+
+    ext/commands/index.rst
+    ext/tasks/index.rst

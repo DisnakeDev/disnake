@@ -50,6 +50,7 @@ extensions = [
     "attributetable",
     "resourcelinks",
     "nitpick_file_ignorer",
+    "notfound.extension",
 ]
 
 autodoc_member_order = "bysource"
