@@ -2,9 +2,7 @@
 
 [build-system]
 requires = [
-    "poetry-core>=1.1.0",
     "setuptools",
-    "packaging",
 ]
 build-backend = "poetry.core.masonry.api"
 
@@ -39,16 +37,15 @@ include = [
     "disnake/bin/*",
     ]
 exclude = [
-    "*.py[cod]"
+    "*.py[cod]",
 ]
-build = "builder.py"
 
 
 [tool.poetry.dependencies]
 python = "^3.8"
 aiohttp = [
-    {version = "^3.7.0", python = "<3.11"},
-    {version = "^3.8.2", python = ">=3.11"}
+    {version = ">=3.7.0, <4", python = "<3.11"},
+    {version = ">=3.8.2, <4", python = ">=3.11"},
 ]
 
 
@@ -71,9 +68,22 @@ sphinxcontrib-towncrier = { version = "==0.3.0a0", optional = true }
 towncrier = { version = "==22.8.0", optional = true }
 
 [tool.poetry.extras]
-speed = ["orjson", "aiodns", "Brotli", "cchardet"]
+speed = [
+    "orjson",
+    "aiodns",
+    "Brotli",
+    "cchardet",
+]
 voice = ["PyNaCl"]
-docs = ["docutils", "sphinx", "sphinxcontrib-trio", "sphinx-hoverxref", "sphinx-autobuild", "sphinxcontrib-towncrier", "towncrier"]
+docs = [
+    "docutils",
+    "sphinx",
+    "sphinxcontrib-trio",
+    "sphinx-hoverxref",
+    "sphinx-autobuild",
+    "sphinxcontrib-towncrier",
+    "towncrier",
+]
 
 [tool.poetry.group.typing.dependencies]
 typing-extensions = ">=4.2.0,<4.3.0"
