@@ -25,7 +25,6 @@ from ..components import (
     ActionRow as ActionRowComponent,
     Button as ButtonComponent,
     MessageComponent,
-    NestedComponent,
     SelectMenu as SelectComponent,
     _component_factory,
 )
@@ -47,12 +46,12 @@ if TYPE_CHECKING:
 
 def _walk_all_components(
     components: List[ActionRowComponent[MessageComponent]],
-) -> Iterator[NestedComponent]:
+) -> Iterator[MessageComponent]:
     for item in components:
         yield from item.children
 
 
-def _component_to_item(component: NestedComponent) -> Item:
+def _component_to_item(component: MessageComponent) -> Item:
     if isinstance(component, ButtonComponent):
         from .button import Button
 
