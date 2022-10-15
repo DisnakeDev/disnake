@@ -400,7 +400,7 @@ class RoleSelectMenu(BaseSelectMenu):
 
 
 class MentionableSelectMenu(BaseSelectMenu):
-    """Represents a mentionable (user/role) select menu from the Discord Bot UI Kit.
+    """Represents a mentionable (user/member/role) select menu from the Discord Bot UI Kit.
 
     .. versionadded:: 2.7
 

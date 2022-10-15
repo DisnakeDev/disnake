@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 
     from ...member import Member
     from ...role import Role
+    from ...user import User
     from ..item import DecoratedItem, ItemCallbackType, Object
 
 
@@ -23,8 +24,8 @@ __all__ = (
 )
 
 
-class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[Member, Role]", V_co]):
-    """Represents a UI mentionable (user/role) select menu.
+class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, Role]", V_co]):
+    """Represents a UI mentionable (user/member/role) select menu.
 
     This is usually represented as a drop down menu.
 
@@ -56,8 +57,8 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[Member, Role]",
 
     Attributes
     ----------
-    values: List[Union[:class:`.Member`, :class:`.Role`]]
-        A list of members and/or roles that have been selected by the user.
+    values: List[Union[:class:`~disnake.User`, :class:`.Member`, :class:`.Role`]]
+        A list of users, members and/or roles that have been selected by the user.
     """
 
     @overload
@@ -147,7 +148,7 @@ def mentionable_select(
     /,
     **kwargs: Any,
 ) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
-    """A decorator that attaches a mentionable (user/role) select menu to a component.
+    """A decorator that attaches a mentionable (user/member/role) select menu to a component.
 
     The function being decorated should have three parameters, ``self`` representing
     the :class:`disnake.ui.View`, the :class:`disnake.ui.MentionableSelect` that was

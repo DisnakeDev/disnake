@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, Optional, Type, TypeVar, overload
+from typing import TYPE_CHECKING, Any, Callable, Optional, Type, TypeVar, Union, overload
 
 from ...components import UserSelectMenu
 from ...enums import ComponentType
@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from ...member import Member
+    from ...user import User
     from ..item import DecoratedItem, ItemCallbackType, Object
 
 
@@ -22,8 +23,7 @@ __all__ = (
 )
 
 
-# TODO: check if users can be sent as well
-class UserSelect(BaseSelect[UserSelectMenu, "Member", V_co]):
+class UserSelect(BaseSelect[UserSelectMenu, "Union[User, Member]", V_co]):
     """Represents a UI user select menu.
 
     This is usually represented as a drop down menu.
@@ -56,8 +56,8 @@ class UserSelect(BaseSelect[UserSelectMenu, "Member", V_co]):
 
     Attributes
     ----------
-    values: List[:class:`.Member`]
-        A list of members that have been selected by the user.
+    values: List[:class:`~disnake.User`, :class:`.Member`]
+        A list of users/members that have been selected by the user.
     """
 
     @overload

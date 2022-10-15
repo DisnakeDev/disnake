@@ -461,7 +461,7 @@ class ActionRow(Generic[UIComponentT]):
         max_values: int = 1,
         disabled: bool = False,
     ) -> SelectCompatibleActionRowT:
-        """Add a mentionable (user/role) select menu to the action row. Can only be used if the action
+        """Add a mentionable (user/member/role) select menu to the action row. Can only be used if the action
         row holds message components.
 
         To append a pre-existing :class:`~disnake.ui.MentionableSelect` use the
