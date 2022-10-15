@@ -57,7 +57,7 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[Member, Role]",
     Attributes
     ----------
     values: List[Union[:class:`.Member`, :class:`.Role`]]
-        A list of users and/or roles that have been selected by the user.
+        A list of members and/or roles that have been selected by the user.
     """
 
     @overload

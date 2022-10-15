@@ -12,7 +12,7 @@ from .base import BaseSelect, P, V_co, _create_decorator
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ...guild import GuildChannel
+    from ...interactions.base import InteractionChannel
     from ..item import DecoratedItem, ItemCallbackType, Object
 
 
@@ -22,8 +22,7 @@ __all__ = (
 )
 
 
-# TODO: threads, dms?
-class ChannelSelect(BaseSelect[ChannelSelectMenu, "GuildChannel", V_co]):
+class ChannelSelect(BaseSelect[ChannelSelectMenu, "InteractionChannel", V_co]):
     """Represents a UI channel select menu.
 
     This is usually represented as a drop down menu.
@@ -59,8 +58,8 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "GuildChannel", V_co]):
 
     Attributes
     ----------
-    values: List[:class:`.abc.GuildChannel`]
-        A list of roles that have been selected by the user.
+    values: List[Union[:class:`.abc.GuildChannel`, :class:`.Thread`, :class:`.PartialMessageable`]]
+        A list of channels that have been selected by the user.
     """
 
     __repr_attributes__: Tuple[str, ...] = BaseSelect.__repr_attributes__ + ("channel_types",)
