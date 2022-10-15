@@ -114,7 +114,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "GuildChannel", V_co]):
             disabled=disabled,
             row=row,
         )
-        self._underlying.channel_types = channel_types
+        self._underlying.channel_types = channel_types or None
 
     @classmethod
     def from_component(cls, component: ChannelSelectMenu) -> Self:

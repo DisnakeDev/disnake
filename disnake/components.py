@@ -458,15 +458,15 @@ class ChannelSelectMenu(BaseSelectMenu):
 
     def __init__(self, data: ChannelSelectMenuPayload):
         super().__init__(data)
-        # TODO: check api typing (missing/none/empty list)
+        # on the API side, an empty list is (currently) equivalent to no value
         channel_types = data.get("channel_types")
         self.channel_types: Optional[List[ChannelType]] = (
-            [try_enum(ChannelType, t) for t in channel_types] if channel_types is not None else None
+            [try_enum(ChannelType, t) for t in channel_types] if channel_types else None
         )
 
     def to_dict(self) -> ChannelSelectMenuPayload:
         payload = cast("ChannelSelectMenuPayload", super().to_dict())
-        if self.channel_types is not None:
+        if self.channel_types:
             payload["channel_types"] = [t.value for t in self.channel_types]
         return payload
 
