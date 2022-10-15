@@ -164,6 +164,17 @@ async def logging_coroutine(coroutine: Coroutine[Any, Any, T], *, info: str) -> 
         _log.exception("Exception occurred during %s", info)
 
 
+_SELECT_COMPONENT_TYPES = frozenset(
+    (
+        ComponentType.string_select,
+        ComponentType.user_select,
+        ComponentType.role_select,
+        ComponentType.mentionable_select,
+        ComponentType.channel_select,
+    )
+)
+
+
 class ConnectionState:
     if TYPE_CHECKING:
         _get_websocket: Callable[..., DiscordWebSocket]
@@ -952,14 +963,7 @@ class ConnectionState:
             self.dispatch("message_interaction", interaction)
             if interaction.data.component_type is ComponentType.button:
                 self.dispatch("button_click", interaction)
-            # TODO: move out of method
-            elif interaction.data.component_type in (
-                ComponentType.string_select,
-                ComponentType.user_select,
-                ComponentType.role_select,
-                ComponentType.mentionable_select,
-                ComponentType.channel_select,
-            ):
+            elif interaction.data.component_type in _SELECT_COMPONENT_TYPES:
                 self.dispatch("dropdown", interaction)
 
         elif data["type"] == 4:
