@@ -84,6 +84,11 @@ class Select(BaseSelect[SelectMenu, str, V_co]):
         like to control the relative positioning of the row then passing an index is advised.
         For example, row=1 will show up before row=2. Defaults to ``None``, which is automatic
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
+
+    Attributes
+    ----------
+    values: List[:class:`str`]
+        A list of values that have been selected by the user.
     """
 
     __repr_attributes__: Tuple[str, ...] = BaseSelect.__repr_attributes__ + ("options",)

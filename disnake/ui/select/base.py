@@ -48,8 +48,6 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
 
     This is usually represented as a drop down menu.
 
-    In order to get the selected items that the user has chosen, use :attr:`.values`.
-
     This isn't meant to be used directly, instead use one of the concrete select menu types:
 
     - :class:`disnake.ui.Select`
@@ -145,8 +143,6 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
 
     @property
     def values(self) -> List[SelectValueT]:
-        """List[:class:`str`]: A list of values that have been selected by the user."""
-        # TODO: docstring
         return self._selected_values
 
     @property
