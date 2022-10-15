@@ -40,6 +40,7 @@ if TYPE_CHECKING:
     from ..message import Message
     from ..partial_emoji import PartialEmoji
     from ..types.components import ActionRow as ActionRowPayload
+    from ..utils import assert_never
 
 __all__ = (
     "ActionRow",
@@ -549,8 +550,11 @@ class ActionRow(Generic[UIComponentT]):
                     current_row.append_item(Button.from_component(component))
                 elif isinstance(component, SelectComponent):
                     current_row.append_item(Select.from_component(component))
-                elif strict:
-                    raise TypeError(f"Encountered unknown component type: {component.type!r}.")
+                else:
+                    if TYPE_CHECKING:
+                        assert_never(component)
+                    if strict:
+                        raise TypeError(f"Encountered unknown component type: {component.type!r}.")
 
         return rows
 

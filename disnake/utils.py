@@ -108,7 +108,7 @@ class _cached_property:
 if TYPE_CHECKING:
     from functools import cached_property as cached_property
 
-    from typing_extensions import ParamSpec, Self
+    from typing_extensions import Never, ParamSpec, Self
 
     from .abc import Snowflake
     from .asset import AssetBytes
@@ -1369,3 +1369,9 @@ def _overload_with_permissions(func: T) -> T:
 # this is used as a marker for functions or classes that were created by codemodding
 def _generated(func: T) -> T:
     return func
+
+
+# Similar to typing.assert_never, but returns instead of raising.
+# This is only to avoid "unreachable code", which pyright doesn't type-check.
+def assert_never(arg: Never, /) -> None:
+    pass

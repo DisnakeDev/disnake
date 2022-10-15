@@ -34,6 +34,7 @@ if TYPE_CHECKING:
         SelectOption as SelectOptionPayload,
         TextInput as TextInputPayload,
     )
+    from .utils import assert_never
 
 __all__ = (
     "Component",
@@ -519,5 +520,7 @@ def _component_factory(data: ComponentPayload, *, type: Type[C] = Component) -> 
     elif component_type == 4:
         return TextInput(data)  # type: ignore
     else:
+        if TYPE_CHECKING:
+            assert_never(component_type)
         as_enum = try_enum(ComponentType, component_type)
         return Component._raw_construct(type=as_enum)  # type: ignore

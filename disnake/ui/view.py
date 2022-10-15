@@ -41,6 +41,7 @@ if TYPE_CHECKING:
     from ..message import Message
     from ..state import ConnectionState
     from ..types.components import ActionRow as ActionRowPayload, Component as ComponentPayload
+    from ..utils import assert_never
     from .item import ItemCallbackType
 
 
@@ -60,6 +61,8 @@ def _component_to_item(component: MessageComponent) -> Item:
         from .select import Select
 
         return Select.from_component(component)
+    if TYPE_CHECKING:
+        assert_never(component)
     return Item.from_component(component)
 
 
