@@ -11,18 +11,18 @@ The following is a set of guidelines for contributing to the repository. These a
 
 Generally speaking questions are better suited in our resources below.
 
-- The official support server: https://discord.gg/disnake
+- The official support [Server](https://discord.gg/disnake)
 - The [FAQ in the documentation](https://docs.disnake.dev/en/latest/faq.html)
 - The project's [discussions section](https://github.com/DisnakeDev/disnake/discussions)
 
-Please try your best not to create new issues in the issue tracker just to ask questions. Most of them don't belong there unless they provide value to a larger audience.
+Please try your best not to **create new issues** in the issue tracker just to ask questions. Most of them don't belong there unless they provide value to a larger audience.
 
 
 ## Good Bug Reports
 
 Please be aware of the following things when filing bug reports.
 
-1. Don't open duplicate issues. Please search your issue to see if it has been asked already. Duplicate issues will be closed.
+1. Don't open **duplicate** issues. Please search your issue to see if it has been asked already. Duplicate issues will be closed.
 2. When filing a bug about exceptions or tracebacks, please include the *complete* traceback. Without the complete traceback the issue might be **unsolvable** and you will be asked to provide more information.
 3. Make sure to provide enough information to make the issue workable. The issue template will generally walk you through the process but they are enumerated here as well:
     - A **summary** of your bug report. This is generally a quick sentence or two to describe the issue in human terms.
