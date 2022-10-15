@@ -128,6 +128,21 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "GuildChannel", V_co]):
             row=None,
         )
 
+    @property
+    def channel_types(self) -> Optional[List[ChannelType]]:
+        """Optional[List[:class:`disnake.ChannelType`]]: A list of channel types that can be selected in this select menu."""
+        return self._underlying.channel_types
+
+    @channel_types.setter
+    def channel_types(self, value: Optional[List[ChannelType]]):
+        if value is not None:
+            if not isinstance(value, list):
+                raise TypeError("channel_types must be a list of ChannelType")
+            if not all(isinstance(obj, ChannelType) for obj in value):
+                raise TypeError("all list items must be ChannelType")
+
+        self._underlying.channel_types = value
+
 
 S_co = TypeVar("S_co", bound="ChannelSelect", covariant=True)
 
