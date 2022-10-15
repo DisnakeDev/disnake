@@ -29,7 +29,7 @@ from ..components import (
     StringSelectMenu as StringSelectComponent,
     UserSelectMenu as UserSelectComponent,
 )
-from ..enums import ButtonStyle, ComponentType, TextInputStyle
+from ..enums import ButtonStyle, ChannelType, ComponentType, TextInputStyle
 from ..utils import MISSING, SequenceProxy, assert_never
 from .button import Button
 from .item import WrappedComponent
@@ -295,7 +295,6 @@ class ActionRow(Generic[UIComponentT]):
         )
         return self
 
-    # TODO: other select types
     def add_string_select(
         self: SelectCompatibleActionRowT,
         *,
@@ -347,6 +346,215 @@ class ActionRow(Generic[UIComponentT]):
                 max_values=max_values,
                 options=options,
                 disabled=disabled,
+            ),
+        )
+        return self
+
+    def add_user_select(
+        self: SelectCompatibleActionRowT,
+        *,
+        custom_id: str = MISSING,
+        placeholder: Optional[str] = None,
+        min_values: int = 1,
+        max_values: int = 1,
+        disabled: bool = False,
+    ) -> SelectCompatibleActionRowT:
+        """Add a user select menu to the action row. Can only be used if the action
+        row holds message components.
+
+        To append a pre-existing :class:`~disnake.ui.UserSelect` use the
+        :meth:`append_item` method instead.
+
+        This function returns the class instance to allow for fluent-style chaining.
+
+        .. versionadded:: 2.7
+
+        Parameters
+        ----------
+        custom_id: :class:`str`
+            The ID of the select menu that gets received during an interaction.
+            If not given then one is generated for you.
+        placeholder: Optional[:class:`str`]
+            The placeholder text that is shown if nothing is selected, if any.
+        min_values: :class:`int`
+            The minimum number of items that must be chosen for this select menu.
+            Defaults to 1 and must be between 1 and 25.
+        max_values: :class:`int`
+            The maximum number of items that must be chosen for this select menu.
+            Defaults to 1 and must be between 1 and 25.
+        disabled: :class:`bool`
+            Whether the select is disabled or not.
+
+        Raises
+        ------
+        ValueError
+            The width of the action row exceeds 5.
+        """
+        self.append_item(
+            UserSelect(
+                custom_id=custom_id,
+                placeholder=placeholder,
+                min_values=min_values,
+                max_values=max_values,
+                disabled=disabled,
+            ),
+        )
+        return self
+
+    def add_role_select(
+        self: SelectCompatibleActionRowT,
+        *,
+        custom_id: str = MISSING,
+        placeholder: Optional[str] = None,
+        min_values: int = 1,
+        max_values: int = 1,
+        disabled: bool = False,
+    ) -> SelectCompatibleActionRowT:
+        """Add a role select menu to the action row. Can only be used if the action
+        row holds message components.
+
+        To append a pre-existing :class:`~disnake.ui.RoleSelect` use the
+        :meth:`append_item` method instead.
+
+        This function returns the class instance to allow for fluent-style chaining.
+
+        .. versionadded:: 2.7
+
+        Parameters
+        ----------
+        custom_id: :class:`str`
+            The ID of the select menu that gets received during an interaction.
+            If not given then one is generated for you.
+        placeholder: Optional[:class:`str`]
+            The placeholder text that is shown if nothing is selected, if any.
+        min_values: :class:`int`
+            The minimum number of items that must be chosen for this select menu.
+            Defaults to 1 and must be between 1 and 25.
+        max_values: :class:`int`
+            The maximum number of items that must be chosen for this select menu.
+            Defaults to 1 and must be between 1 and 25.
+        disabled: :class:`bool`
+            Whether the select is disabled or not.
+
+        Raises
+        ------
+        ValueError
+            The width of the action row exceeds 5.
+        """
+        self.append_item(
+            RoleSelect(
+                custom_id=custom_id,
+                placeholder=placeholder,
+                min_values=min_values,
+                max_values=max_values,
+                disabled=disabled,
+            ),
+        )
+        return self
+
+    def add_mentionable_select(
+        self: SelectCompatibleActionRowT,
+        *,
+        custom_id: str = MISSING,
+        placeholder: Optional[str] = None,
+        min_values: int = 1,
+        max_values: int = 1,
+        disabled: bool = False,
+    ) -> SelectCompatibleActionRowT:
+        """Add a mentionable (user/role) select menu to the action row. Can only be used if the action
+        row holds message components.
+
+        To append a pre-existing :class:`~disnake.ui.MentionableSelect` use the
+        :meth:`append_item` method instead.
+
+        This function returns the class instance to allow for fluent-style chaining.
+
+        .. versionadded:: 2.7
+
+        Parameters
+        ----------
+        custom_id: :class:`str`
+            The ID of the select menu that gets received during an interaction.
+            If not given then one is generated for you.
+        placeholder: Optional[:class:`str`]
+            The placeholder text that is shown if nothing is selected, if any.
+        min_values: :class:`int`
+            The minimum number of items that must be chosen for this select menu.
+            Defaults to 1 and must be between 1 and 25.
+        max_values: :class:`int`
+            The maximum number of items that must be chosen for this select menu.
+            Defaults to 1 and must be between 1 and 25.
+        disabled: :class:`bool`
+            Whether the select is disabled or not.
+
+        Raises
+        ------
+        ValueError
+            The width of the action row exceeds 5.
+        """
+        self.append_item(
+            MentionableSelect(
+                custom_id=custom_id,
+                placeholder=placeholder,
+                min_values=min_values,
+                max_values=max_values,
+                disabled=disabled,
+            ),
+        )
+        return self
+
+    def add_channel_select(
+        self: SelectCompatibleActionRowT,
+        *,
+        custom_id: str = MISSING,
+        placeholder: Optional[str] = None,
+        min_values: int = 1,
+        max_values: int = 1,
+        disabled: bool = False,
+        channel_types: Optional[List[ChannelType]] = None,
+    ) -> SelectCompatibleActionRowT:
+        """Add a channel select menu to the action row. Can only be used if the action
+        row holds message components.
+
+        To append a pre-existing :class:`~disnake.ui.ChannelSelect` use the
+        :meth:`append_item` method instead.
+
+        This function returns the class instance to allow for fluent-style chaining.
+
+        .. versionadded:: 2.7
+
+        Parameters
+        ----------
+        custom_id: :class:`str`
+            The ID of the select menu that gets received during an interaction.
+            If not given then one is generated for you.
+        placeholder: Optional[:class:`str`]
+            The placeholder text that is shown if nothing is selected, if any.
+        min_values: :class:`int`
+            The minimum number of items that must be chosen for this select menu.
+            Defaults to 1 and must be between 1 and 25.
+        max_values: :class:`int`
+            The maximum number of items that must be chosen for this select menu.
+            Defaults to 1 and must be between 1 and 25.
+        disabled: :class:`bool`
+            Whether the select is disabled or not.
+        channel_types: Optional[List[:class:`.ChannelType`]]
+            The list of channel types that can be selected in this select menu.
+            Defaults to all types (i.e. ``None``).
+
+        Raises
+        ------
+        ValueError
+            The width of the action row exceeds 5.
+        """
+        self.append_item(
+            ChannelSelect(
+                custom_id=custom_id,
+                placeholder=placeholder,
+                min_values=min_values,
+                max_values=max_values,
+                disabled=disabled,
+                channel_types=channel_types,
             ),
         )
         return self
