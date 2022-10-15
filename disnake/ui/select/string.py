@@ -16,17 +16,17 @@ from typing import (
     overload,
 )
 
-from ..components import SelectMenu, SelectOption
-from ..enums import ComponentType
-from ..utils import MISSING
-from .select_base import BaseSelect, P, V_co, _create_decorator
+from ...components import SelectMenu, SelectOption
+from ...enums import ComponentType
+from ...utils import MISSING
+from .base import BaseSelect, P, V_co, _create_decorator
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ..emoji import Emoji
-    from ..partial_emoji import PartialEmoji
-    from .item import DecoratedItem, ItemCallbackType, Object
+    from ...emoji import Emoji
+    from ...partial_emoji import PartialEmoji
+    from ..item import DecoratedItem, ItemCallbackType, Object
 
 
 __all__ = (

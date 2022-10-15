@@ -29,7 +29,8 @@ from ..enums import ButtonStyle, ComponentType, TextInputStyle
 from ..utils import MISSING, SequenceProxy
 from .button import Button
 from .item import WrappedComponent
-from .select_string import Select, SelectOptionInput
+from .select import Select
+from .select.string import SelectOptionInput
 from .text_input import TextInput
 
 if TYPE_CHECKING:

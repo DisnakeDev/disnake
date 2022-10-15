@@ -14,7 +14,6 @@ from .action_row import *
 from .button import *
 from .item import *
 from .modal import *
-from .select_base import *
-from .select_string import *
+from .select import *
 from .text_input import *
 from .view import *

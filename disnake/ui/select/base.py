@@ -18,19 +18,19 @@ from typing import (
     get_origin,
 )
 
-from ..components import AnySelectMenu
-from ..enums import ComponentType
-from ..utils import MISSING
-from .item import DecoratedItem, Item, Object
+from ...components import AnySelectMenu
+from ...enums import ComponentType
+from ...utils import MISSING
+from ..item import DecoratedItem, Item, Object
 
 __all__ = ("BaseSelect",)
 
 if TYPE_CHECKING:
     from typing_extensions import ParamSpec, Self
 
-    from ..interactions import MessageInteraction
-    from .item import ItemCallbackType
-    from .view import View
+    from ...interactions import MessageInteraction
+    from ..item import ItemCallbackType
+    from ..view import View
 
 else:
     ParamSpec = TypeVar
