@@ -172,6 +172,11 @@ class _BaseComponentInteractionData(TypedDict):
     custom_id: str
 
 
+class _BaseSnowflakeComponentInteractionData(_BaseComponentInteractionData):
+    values: List[Snowflake]
+    resolved: NotRequired[InteractionDataResolved]
+
+
 ### Message interaction components
 
 
@@ -179,21 +184,41 @@ class MessageComponentInteractionButtonData(_BaseComponentInteractionData):
     component_type: Literal[2]
 
 
-class MessageComponentInteractionSelectData(_BaseComponentInteractionData):
+class MessageComponentInteractionStringSelectData(_BaseComponentInteractionData):
     component_type: Literal[3]
     values: List[str]
 
 
+class MessageComponentInteractionUserSelectData(_BaseSnowflakeComponentInteractionData):
+    component_type: Literal[5]
+
+
+class MessageComponentInteractionRoleSelectData(_BaseSnowflakeComponentInteractionData):
+    component_type: Literal[6]
+
+
+class MessageComponentInteractionMentionableSelectData(_BaseSnowflakeComponentInteractionData):
+    component_type: Literal[7]
+
+
+class MessageComponentInteractionChannelSelectData(_BaseSnowflakeComponentInteractionData):
+    component_type: Literal[8]
+
+
 MessageComponentInteractionData = Union[
     MessageComponentInteractionButtonData,
-    MessageComponentInteractionSelectData,
+    MessageComponentInteractionStringSelectData,
+    MessageComponentInteractionUserSelectData,
+    MessageComponentInteractionRoleSelectData,
+    MessageComponentInteractionMentionableSelectData,
+    MessageComponentInteractionChannelSelectData,
 ]
 
 
 ### Modal interaction components
 
-
-class ModalInteractionSelectData(_BaseComponentInteractionData):
+# TODO: add other select types
+class ModalInteractionStringSelectData(_BaseComponentInteractionData):
     type: Literal[3]
     values: List[str]
 
@@ -204,7 +229,7 @@ class ModalInteractionTextInputData(_BaseComponentInteractionData):
 
 
 ModalInteractionComponentData = Union[
-    ModalInteractionSelectData,
+    ModalInteractionStringSelectData,
     ModalInteractionTextInputData,
 ]
 

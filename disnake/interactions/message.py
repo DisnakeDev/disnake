@@ -114,7 +114,9 @@ class MessageInteractionData(Dict[str, Any]):
         super().__init__(data)
         self.custom_id: str = data["custom_id"]
         self.component_type: ComponentType = try_enum(ComponentType, data["component_type"])
-        self.values: Optional[List[str]] = data.get("values")
+        self.values: Optional[List[str]] = (
+            list(map(str, values)) if (values := data.get("values")) else None
+        )
 
     def __repr__(self):
         return (
