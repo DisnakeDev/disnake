@@ -220,7 +220,7 @@ class AutoModTriggerMetadata:
     keyword_filter: Optional[Sequence[:class:`str`]]
         The list of keywords to check for, up to 1000 keywords. Used with :attr:`AutoModTriggerType.keyword`.
 
-        See `api docs <https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-keyword-matching-strategies>`__
+        See :ddocs:`api docs <resources/auto-moderation#auto-moderation-rule-object-keyword-matching-strategies>`
         for details about how keyword matching works.
 
     presets: Optional[:class:`AutoModKeywordPresets`]
