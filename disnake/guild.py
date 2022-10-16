@@ -4500,7 +4500,7 @@ class Guild(Hashable):
         actions: Sequence[Union[:class:`AutoModBlockMessageAction`, :class:`AutoModSendAlertAction`, :class:`AutoModTimeoutAction`, :class:`AutoModAction`]]
             The list of actions that will execute if a matching event triggered this rule.
             Must contain at least one action.
-        trigger_metadata: :class:`AutoModTriggerMetadata`
+        trigger_metadata: Optional[:class:`AutoModTriggerMetadata`]
             Additional metadata associated with the trigger type.
         enabled: :class:`bool`
             Whether to enable the rule. Defaults to ``False``.
