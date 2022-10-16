@@ -152,7 +152,7 @@ class Embed:
     type: Optional[:class:`str`]
         The type of embed. Usually "rich".
         Possible strings for embed types can be found on Discord's
-        `api docs <https://discord.com/developers/docs/resources/channel#embed-object-embed-types>`__.
+        :ddocs:`api-docs <resources/channel#embed-object-embed-types>`.
     description: Optional[:class:`str`]
         The description of the embed.
     url: Optional[:class:`str`]
@@ -240,7 +240,7 @@ class Embed:
         format that Discord expects it to be in.
 
         You can find out about this format in the
-        `official Discord documentation <https://discord.com/developers/docs/resources/channel#embed-object>`__.
+        :ddocs:`official Discord documentation <resources/channel#embed-object>`.
 
         Parameters
         ----------
