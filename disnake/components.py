@@ -295,6 +295,7 @@ class BaseSelectMenu(Component):
         return payload
 
 
+# TODO: make all string-select-menu-related changes backwards-compatible
 class StringSelectMenu(BaseSelectMenu):
     """Represents a string select menu from the Discord Bot UI Kit.
 
