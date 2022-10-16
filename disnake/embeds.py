@@ -279,10 +279,15 @@ class Embed:
     def copy(self) -> Self:
         """Returns a shallow copy of the embed."""
         embed = type(self).from_dict(self.to_dict())
+
         # assign manually to keep behavior of default colors
         embed._colour = self._colour
-        # shallow copy of files
+
+        # copy files and fields collections
         embed._files = self._files.copy()
+        if self._fields is not None:
+            embed._fields = self._fields.copy()
+
         return embed
 
     def __len__(self) -> int:
@@ -305,8 +310,7 @@ class Embed:
                 self.title,
                 self.url,
                 self.description,
-                # not checking for falsy value as `0` is a valid color
-                self._colour not in (MISSING, None),
+                self._colour,
                 self._fields,
                 self._timestamp,
                 self._author,
@@ -717,13 +721,16 @@ class Embed:
         if not self._fields:
             raise IndexError("field index out of range")
         try:
-            field = self._fields[index]
+            self._fields[index]
         except IndexError:
             raise IndexError("field index out of range")
 
-        field["name"] = str(name)
-        field["value"] = str(value)
-        field["inline"] = inline
+        field: EmbedFieldPayload = {
+            "inline": inline,
+            "name": str(name),
+            "value": str(value),
+        }
+        self._fields[index] = field
         return self
 
     def to_dict(self) -> EmbedData:
