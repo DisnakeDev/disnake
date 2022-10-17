@@ -1,6 +1,6 @@
 .. SPDX-License-Identifier: MIT
 
-.. currentmodule:: disnake
+.. currentmodule:: disnake.ext.commands
 
 .. _ext_commands_slash_commands:
 
@@ -49,21 +49,28 @@ This is useful if you want to figure out some registration details:
 
     from disnake.ext import commands
 
+    command_sync = commands.ApplicationCommandSyncFlags.default()
+    command_sync.sync_commands_debug = True
+
     bot = commands.Bot(
         command_prefix='!',
         test_guilds=[123456789], # Optional
-        sync_commands_debug=True
+        command_sync=command_sync,
     )
 
-If you want to disable the automatic registration, set ``sync_commands`` to ``False``:
+If you want to disable the automatic registration, set :attr:`ApplicationCommandSyncFlags.sync_commands`
+to ``False``, or use the classmethod :meth:`none() <ApplicationCommandSyncFlags.none>`
 
 .. code-block:: python3
 
     from disnake.ext import commands
 
+    command_sync = commands.ApplicationCommandSyncFlags.none()
+    command_sync.sync_commands = False
+
     bot = commands.Bot(
         command_prefix='!',
-        sync_commands=False
+        command_sync=command_sync,
     )
 
 Basic Slash Command
