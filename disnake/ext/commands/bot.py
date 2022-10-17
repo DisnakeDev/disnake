@@ -52,6 +52,48 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
     This class also subclasses :class:`.GroupMixin` to provide the functionality
     to manage commands.
 
+    Parameters
+    ----------
+    sync_commands: :class:`bool`
+        Whether to enable automatic synchronization of application commands in your code.
+        Defaults to ``True``, which means that commands in API are automatically synced
+        with the commands in your code.
+
+        .. versionadded:: 2.1
+
+    sync_commands_on_cog_unload: :class:`bool`
+        Whether to sync the application commands on cog unload / reload. Defaults to ``True``.
+
+        .. versionadded:: 2.1
+
+    sync_commands_debug: :class:`bool`
+        Whether to always show sync debug logs (uses ``INFO`` log level if it's enabled, prints otherwise).
+        If disabled, uses the default ``DEBUG`` log level which isn't shown unless the log level is changed manually.
+        Useful for tracking the commands being registered in the API.
+        Defaults to ``False``.
+
+        .. versionadded:: 2.1
+
+        .. versionchanged:: 2.4
+            Changes the log level of corresponding messages from ``DEBUG`` to ``INFO`` or ``print``\\s them,
+            instead of controlling whether they are enabled at all.
+
+    localization_provider: :class:`.LocalizationProtocol`
+        An implementation of :class:`.LocalizationProtocol` to use for localization of
+        application commands.
+        If not provided, the default :class:`.LocalizationStore` implementation is used.
+
+        .. versionadded:: 2.5
+
+    strict_localization: :class:`bool`
+        Whether to raise an exception when localizations for a specific key couldn't be found.
+        This is mainly useful for testing/debugging, consider disabling this eventually
+        as missing localized names will automatically fall back to the default/base name without it.
+        Only applicable if the ``localization_provider`` parameter is not provided.
+        Defaults to ``False``.
+
+        .. versionadded:: 2.5
+
     Attributes
     ----------
     command_prefix
@@ -123,52 +165,18 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
         Defaults to ``None``, which means global registration of commands across
         all guilds.
 
-        .. versionadded:: 2.1
-
-    sync_commands: :class:`bool`
-        Whether to enable automatic synchronization of application commands in your code.
-        Defaults to ``True``, which means that commands in API are automatically synced
-        with the commands in your code.
+        This can be provided at instantation.
 
         .. versionadded:: 2.1
 
-    sync_commands_on_cog_unload: :class:`bool`
-        Whether to sync the application commands on cog unload / reload. Defaults to ``True``.
-
-        .. versionadded:: 2.1
-
-    sync_commands_debug: :class:`bool`
-        Whether to always show sync debug logs (uses ``INFO`` log level if it's enabled, prints otherwise).
-        If disabled, uses the default ``DEBUG`` log level which isn't shown unless the log level is changed manually.
-        Useful for tracking the commands being registered in the API.
-        Defaults to ``False``.
-
-        .. versionadded:: 2.1
-
-        .. versionchanged:: 2.4
-            Changes the log level of corresponding messages from ``DEBUG`` to ``INFO`` or ``print``\\s them,
-            instead of controlling whether they are enabled at all.
     reload: :class:`bool`
         Whether to enable automatic extension reloading on file modification for debugging.
         Whenever you save an extension with reloading enabled the file will be automatically
         reloaded for you so you do not have to reload the extension manually. Defaults to ``False``
 
+        This can be provided at instantation.
+
         .. versionadded:: 2.1
-    localization_provider: :class:`.LocalizationProtocol`
-        An implementation of :class:`.LocalizationProtocol` to use for localization of
-        application commands.
-        If not provided, the default :class:`.LocalizationStore` implementation is used.
-
-        .. versionadded:: 2.5
-
-    strict_localization: :class:`bool`
-        Whether to raise an exception when localizations for a specific key couldn't be found.
-        This is mainly useful for testing/debugging, consider disabling this eventually
-        as missing localized names will automatically fall back to the default/base name without it.
-        Only applicable if the ``localization_provider`` parameter is not provided.
-        Defaults to ``False``.
-
-        .. versionadded:: 2.5
 
     i18n: :class:`.LocalizationProtocol`
         An implementation of :class:`.LocalizationProtocol` used for localization of
@@ -284,25 +292,8 @@ class InteractionBot(InteractionBotBase, disnake.Client):
     This class also subclasses InteractionBotBase to provide the functionality
     to manage application commands.
 
-    Attributes
+    Parameters
     ----------
-    owner_id: Optional[:class:`int`]
-        The user ID that owns the bot. If this is not set and is then queried via
-        :meth:`.is_owner` then it is fetched automatically using
-        :meth:`~.Bot.application_info`.
-    owner_ids: Optional[Collection[:class:`int`]]
-        The user IDs that owns the bot. This is similar to :attr:`owner_id`.
-        If this is not set and the application is team based, then it is
-        fetched automatically using :meth:`~.Bot.application_info`.
-        For performance reasons it is recommended to use a :class:`set`
-        for the collection. You cannot set both ``owner_id`` and ``owner_ids``.
-    test_guilds: List[:class:`int`]
-        The list of IDs of the guilds where you're going to test your application commands.
-        Defaults to ``None``, which means global registration of commands across
-        all guilds.
-
-        .. versionadded:: 2.1
-
     sync_commands: :class:`bool`
         Whether to enable automatic synchronization of application commands in your code.
         Defaults to ``True``, which means that commands in API are automatically synced
@@ -326,12 +317,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
         .. versionchanged:: 2.4
             Changes the log level of corresponding messages from ``DEBUG`` to ``INFO`` or ``print``\\s them,
             instead of controlling whether they are enabled at all.
-    reload: :class:`bool`
-        Whether to enable automatic extension reloading on file modification for debugging.
-        Whenever you save an extension with reloading enabled the file will be automatically
-        reloaded for you so you do not have to reload the extension manually. Defaults to ``False``
 
-        .. versionadded:: 2.1
     localization_provider: :class:`.LocalizationProtocol`
         An implementation of :class:`.LocalizationProtocol` to use for localization of
         application commands.
@@ -347,6 +333,42 @@ class InteractionBot(InteractionBotBase, disnake.Client):
         Defaults to ``False``.
 
         .. versionadded:: 2.5
+
+    Attributes
+    ----------
+    owner_id: Optional[:class:`int`]
+        The user ID that owns the bot. If this is not set and is then queried via
+        :meth:`.is_owner` then it is fetched automatically using
+        :meth:`~.Bot.application_info`.
+
+        This can be provided as a parameter at creation.
+
+    owner_ids: Optional[Collection[:class:`int`]]
+        The user IDs that owns the bot. This is similar to :attr:`owner_id`.
+        If this is not set and the application is team based, then it is
+        fetched automatically using :meth:`~.Bot.application_info`.
+        For performance reasons it is recommended to use a :class:`set`
+        for the collection. You cannot set both ``owner_id`` and ``owner_ids``.
+
+        This can be provided as a parameter at creation.
+
+    test_guilds: List[:class:`int`]
+        The list of IDs of the guilds where you're going to test your application commands.
+        Defaults to ``None``, which means global registration of commands across
+        all guilds.
+
+        This can be provided at instantation.
+
+        .. versionadded:: 2.1
+
+    reload: :class:`bool`
+        Whether to enable automatic extension reloading on file modification for debugging.
+        Whenever you save an extension with reloading enabled the file will be automatically
+        reloaded for you so you do not have to reload the extension manually. Defaults to ``False``
+
+        This can be provided at instantation.
+
+        .. versionadded:: 2.1
 
     i18n: :class:`.LocalizationProtocol`
         An implementation of :class:`.LocalizationProtocol` used for localization of
