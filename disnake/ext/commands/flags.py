@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, NoReturn, overload
 
 from disnake.flags import BaseFlags, alias_flag_value, all_flags_value, flag_value
+from disnake.utils import _generated
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -87,6 +88,26 @@ class ApplicationCommandSyncFlags(BaseFlags):
     """
 
     __slots__ = ()
+
+    @overload
+    @_generated
+    def __init__(
+        self,
+        *,
+        allow_command_deletion: bool = ...,
+        on_cog_actions: bool = ...,
+        on_cog_unload: bool = ...,
+        sync_commands: bool = ...,
+        sync_commands_debug: bool = ...,
+        sync_global_commands: bool = ...,
+        sync_guild_commands: bool = ...,
+    ):
+        ...
+
+    @overload
+    @_generated
+    def __init__(self: NoReturn):
+        ...
 
     def __init__(self, **kwargs: bool):
         self.value = all_flags_value(self.VALID_FLAGS)
