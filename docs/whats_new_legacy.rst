@@ -12,6 +12,10 @@
 Legacy Changelog
 ===================
 
+These are the changelogs for version 0.x and 1.x.
+The most recent changelogs can be found on the :ref:`whats_new` page.
+
+
 .. _vp1p7p3:
 
 v1.7.3
