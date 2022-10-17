@@ -214,6 +214,16 @@ class InteractionBotBase(CommonBotBase):
 
         self._schedule_app_command_preparation()
 
+    @property
+    def command_sync(self) -> ApplicationCommandSyncFlags:
+        """:class:`~commands.ApplicationCommandSyncFlags`: The command sync configured for this connection.
+
+        .. versionadded:: 2.7
+
+        """
+
+        return ApplicationCommandSyncFlags._from_value(self._command_sync.value)
+
     def application_commands_iterator(self) -> Iterable[InvokableApplicationCommand]:
         return chain(
             self.all_slash_commands.values(),
