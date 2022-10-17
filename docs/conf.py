@@ -46,11 +46,11 @@ extensions = [
     "sphinxcontrib_trio",
     "sphinxcontrib.towncrier.ext",
     "hoverxref.extension",
+    "notfound.extension",
     "exception_hierarchy",
     "attributetable",
     "resourcelinks",
     "nitpick_file_ignorer",
-    "notfound.extension",
 ]
 
 autodoc_member_order = "bysource"
