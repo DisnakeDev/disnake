@@ -215,6 +215,9 @@ class Client:
         The :class:`asyncio.AbstractEventLoop` to use for asynchronous operations.
         Defaults to ``None``, in which case the default event loop is used via
         :func:`asyncio.get_event_loop()`.
+    asyncio_debug: :class:`bool`
+        Whether to enable asyncio debugging when the client starts.
+        Defaults to False.
     connector: Optional[:class:`aiohttp.BaseConnector`]
         The connector to use for connection pooling.
     proxy: Optional[:class:`str`]
@@ -334,9 +337,6 @@ class Client:
         The websocket gateway the client is currently connected to. Could be ``None``.
     loop: :class:`asyncio.AbstractEventLoop`
         The event loop that the client uses for asynchronous operations.
-    asyncio_debug: :class:`bool`
-        Whether to enable asyncio debugging when the client starts.
-        Defaults to False.
     session_start_limit: Optional[:class:`SessionStartLimit`]
         Information about the current session start limit.
         Only available after initiating the connection.
