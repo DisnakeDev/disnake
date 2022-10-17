@@ -4481,7 +4481,7 @@ class Guild(Hashable):
         You must have :attr:`.Permissions.manage_guild` permission to do this.
 
         The maximum number of rules for each trigger type is limited, see the
-        `api docs <https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-limits-per-trigger-type>`__
+        :ddocs:`api docs <resources/auto-moderation#auto-moderation-rule-object-trigger-types>`
         for more details.
 
         .. versionadded:: 2.6
@@ -4500,7 +4500,7 @@ class Guild(Hashable):
         actions: Sequence[Union[:class:`AutoModBlockMessageAction`, :class:`AutoModSendAlertAction`, :class:`AutoModTimeoutAction`, :class:`AutoModAction`]]
             The list of actions that will execute if a matching event triggered this rule.
             Must contain at least one action.
-        trigger_metadata: :class:`AutoModTriggerMetadata`
+        trigger_metadata: Optional[:class:`AutoModTriggerMetadata`]
             Additional metadata associated with the trigger type.
         enabled: :class:`bool`
             Whether to enable the rule. Defaults to ``False``.

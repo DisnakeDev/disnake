@@ -218,19 +218,19 @@ class AutoModTriggerMetadata:
     Attributes
     ----------
     keyword_filter: Optional[Sequence[:class:`str`]]
-        The list of keywords to check for. Used with :attr:`AutoModTriggerType.keyword`.
+        The list of keywords to check for, up to 1000 keywords. Used with :attr:`AutoModTriggerType.keyword`.
 
-        See `api docs <https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-keyword-matching-strategies>`__
+        See :ddocs:`api docs <resources/auto-moderation#auto-moderation-rule-object-keyword-matching-strategies>`
         for details about how keyword matching works.
 
     presets: Optional[:class:`AutoModKeywordPresets`]
         The keyword presets. Used with :attr:`AutoModTriggerType.keyword_preset`.
 
     allow_list: Optional[Sequence[:class:`str`]]
-        The keywords that should be exempt from a preset. Used with :attr:`AutoModTriggerType.keyword_preset`.
+        The keywords that should be exempt from a preset, up to 1000 keywords. Used with :attr:`AutoModTriggerType.keyword_preset`.
 
     mention_total_limit: Optional[:class:`int`]
-        The maximum number of mentions (members + roles) allowed. Used with :attr:`AutoModTriggerType.mention_spam`.
+        The maximum number of mentions (members + roles) allowed, between 1 and 50. Used with :attr:`AutoModTriggerType.mention_spam`.
     """
 
     __slots__ = (
@@ -479,7 +479,7 @@ class AutoModRule:
 
             meta = rule.trigger_metadata
             await rule.edit(
-                trigger_metadata=meta.with_edits(
+                trigger_metadata=meta.with_changes(
                     keyword_filter=meta.keyword_filter + ["stuff"],
                 ),
             )
@@ -498,8 +498,8 @@ class AutoModRule:
         enabled: :class:`bool`
             Whether to enable the rule.
         exempt_roles: Optional[Iterable[:class:`abc.Snowflake`]]
-            The rule's new exempt roles, up to 20. If ``[]`` or ``None`` is
-            passed then all role exemptions are removed.
+            The rule's new exempt roles, up to 20.
+            If ``[]`` or ``None`` is passed then all role exemptions are removed.
         exempt_channels: Optional[Iterable[:class:`abc.Snowflake`]]
             The rule's new exempt channels, up to 50.
             Can also include categories, in which case all channels inside that category will be exempt.
