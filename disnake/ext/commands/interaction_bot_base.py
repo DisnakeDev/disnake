@@ -165,6 +165,10 @@ class InteractionBotBase(CommonBotBase):
             raise TypeError(
                 "cannot set 'command_sync' and any of 'sync_commands', 'sync_commands_debug', 'sync_commands_on_cog_unload' at the same time."
             )
+
+        if command_sync is not None:
+            # this makes a copy so it cannot be changed after setting
+            command_sync = ApplicationCommandSyncFlags._from_value(command_sync.value)
         if command_sync is None:
             command_sync = ApplicationCommandSyncFlags.default()
 
