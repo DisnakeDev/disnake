@@ -26,10 +26,11 @@ from ..components import (
     SelectMenu as SelectComponent,
 )
 from ..enums import ButtonStyle, ComponentType, TextInputStyle
-from ..utils import MISSING, SequenceProxy
+from ..utils import MISSING, SequenceProxy, assert_never
 from .button import Button
 from .item import WrappedComponent
-from .select import Select, SelectOptionInput
+from .select import Select
+from .select.string import SelectOptionInput, V_co
 from .text_input import TextInput
 
 if TYPE_CHECKING:
@@ -49,9 +50,13 @@ __all__ = (
     "ModalActionRow",
 )
 
+if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
 
-MessageUIComponent = Union[Button[Any], Select[Any]]
-ModalUIComponent = TextInput  # Union[TextInput, Select[Any]]
+AnySelect: TypeAlias = "Select[V_co]"
+
+MessageUIComponent = Union[Button[Any], "AnySelect[Any]"]
+ModalUIComponent = TextInput  # Union[TextInput, "AnySelect[Any]"]
 UIComponentT = TypeVar("UIComponentT", bound=WrappedComponent)
 StrictUIComponentT = TypeVar("StrictUIComponentT", MessageUIComponent, ModalUIComponent)
 
@@ -293,7 +298,7 @@ class ActionRow(Generic[UIComponentT]):
         options: SelectOptionInput = MISSING,
         disabled: bool = False,
     ) -> SelectCompatibleActionRowT:
-        """Add a select menu to the action row. Can only be used if the action
+        """Add a string select menu to the action row. Can only be used if the action
         row holds message components.
 
         To append a pre-existing :class:`~disnake.ui.Select` use the
@@ -544,8 +549,10 @@ class ActionRow(Generic[UIComponentT]):
                     current_row.append_item(Button.from_component(component))
                 elif isinstance(component, SelectComponent):
                     current_row.append_item(Select.from_component(component))
-                elif strict:
-                    raise TypeError(f"Encountered unknown component type: {component.type!r}.")
+                else:
+                    assert_never(component)
+                    if strict:
+                        raise TypeError(f"Encountered unknown component type: {component.type!r}.")
 
         return rows
 

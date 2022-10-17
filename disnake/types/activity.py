@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import List, Literal, Optional, TypedDict
 
+from typing_extensions import NotRequired
+
 from .snowflake import Snowflake
 from .user import User
 
@@ -39,7 +41,7 @@ class ActivityParty(TypedDict, total=False):
 
 class ActivityAssets(TypedDict, total=False):
     # large_image/small_image may be a snowflake or prefixed media proxy ID, see:
-    # https://discord.com/developers/docs/topics/gateway#activity-object-activity-asset-image
+    # https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-asset-image
     large_image: str
     large_text: str
     small_image: str
@@ -52,29 +54,23 @@ class ActivitySecrets(TypedDict, total=False):
     match: str
 
 
-class _ActivityEmojiOptional(TypedDict, total=False):
-    id: Snowflake
-    animated: bool
-
-
-class ActivityEmoji(_ActivityEmojiOptional):
+class ActivityEmoji(TypedDict):
     name: str
-
-
-class _SendableActivityOptional(TypedDict, total=False):
-    url: Optional[str]
+    id: NotRequired[Snowflake]
+    animated: NotRequired[bool]
 
 
 ActivityType = Literal[0, 1, 2, 3, 4, 5]
 
 
-class SendableActivity(_SendableActivityOptional):
+class SendableActivity(TypedDict):
     name: str
     type: ActivityType
+    url: NotRequired[Optional[str]]
 
 
 class Activity(SendableActivity, total=False):
-    created_at: int  # required according to docs, but we treat it as optional for simplicity
+    created_at: int  # required according to docs, but we treat it as optional for easier serialization
     timestamps: ActivityTimestamps
     application_id: Snowflake
     details: Optional[str]
