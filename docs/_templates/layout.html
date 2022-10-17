@@ -8,7 +8,6 @@
   <title>{{ title|striptags|e }}{{ titlesuffix }}</title>
   {%- block extrahead %} {% endblock %}
   <!-- end extra head -->
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   {%- block css %}
   {%- for css in css_files %}
     {%- if css|attr("filename") %}
