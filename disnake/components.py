@@ -19,7 +19,7 @@ from typing import (
 
 from .enums import ButtonStyle, ComponentType, TextInputStyle, try_enum
 from .partial_emoji import PartialEmoji, _EmojiTag
-from .utils import MISSING, get_slots
+from .utils import MISSING, assert_never, get_slots
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -34,7 +34,6 @@ if TYPE_CHECKING:
         SelectOption as SelectOptionPayload,
         TextInput as TextInputPayload,
     )
-    from .utils import assert_never
 
 __all__ = (
     "Component",
@@ -520,7 +519,6 @@ def _component_factory(data: ComponentPayload, *, type: Type[C] = Component) -> 
     elif component_type == 4:
         return TextInput(data)  # type: ignore
     else:
-        if TYPE_CHECKING:
-            assert_never(component_type)
+        assert_never(component_type)
         as_enum = try_enum(ComponentType, component_type)
         return Component._raw_construct(type=as_enum)  # type: ignore

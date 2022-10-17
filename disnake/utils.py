@@ -1371,7 +1371,7 @@ def _generated(func: T) -> T:
     return func
 
 
-# Similar to typing.assert_never, but returns instead of raising.
+# Similar to typing.assert_never, but returns instead of raising (i.e. has no runtime effect).
 # This is only to avoid "unreachable code", which pyright doesn't type-check.
 def assert_never(arg: Never, /) -> None:
     pass
