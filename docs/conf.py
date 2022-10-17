@@ -191,6 +191,7 @@ nitpick_ignore_files = [
     "migrating_to_async",
     "migrating",
     "whats_new",
+    "whats_new_legacy",
 ]
 
 
