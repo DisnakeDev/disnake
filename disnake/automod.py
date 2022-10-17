@@ -643,6 +643,11 @@ class AutoModActionExecution:
 
     matched_keyword: Optional[:class:`str`]
         The keyword that matched.
+
+        .. note::
+
+            If this rule matched because of a regex, this will contain the matching regex.
+
     matched_content: Optional[:class:`str`]
         The substring of :attr:`.content` that matched the rule/keyword.
 
