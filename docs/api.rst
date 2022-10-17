@@ -4849,6 +4849,15 @@ Button
     :members:
     :inherited-members:
 
+BaseSelectMenu
+~~~~~~~~~~~~~~~
+
+.. attributetable:: BaseSelectMenu
+
+.. autoclass:: BaseSelectMenu()
+    :members:
+    :inherited-members:
+
 SelectMenu
 ~~~~~~~~~~~
 
@@ -5974,6 +5983,15 @@ Button
     :inherited-members:
 
 .. autofunction:: disnake.ui.button(cls=disnake.ui.Button, *, style=ButtonStyle.secondary, label=None, disabled=False, custom_id=..., url=None, emoji=None, row=None)
+
+BaseSelect
+~~~~~~~~~~~
+
+.. attributetable:: disnake.ui.BaseSelect
+
+.. autoclass:: disnake.ui.BaseSelect
+    :members:
+    :inherited-members:
 
 Select
 ~~~~~~~
