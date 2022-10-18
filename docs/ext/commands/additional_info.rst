@@ -19,20 +19,30 @@ understand how your commands show up in Discord. By default, the library registe
 Based on the application commands defined in your code the library automatically determines
 which commands should be registered, edited or deleted, but there're some edge cases you should keep in mind.
 
-Changing test guilds
-++++++++++++++++++++
+Unknown Commands
++++++++++++++++++
+
+Unlike global commands, per-guild application commands are synced in a lazy fashion. This is due to Discord ratelimits,
+as checking all guilds for application commands is infeasible past two or three guilds.
+This can lead to situations where a command no longer exists in the code but still exists in a server.
+
+To rectify this, just run the command. It will automatically be deleted.
+
+Changing Guild Commands
+++++++++++++++++++++++++
 
 If you remove some IDs from the ``test_guilds`` kwarg of :class:`Bot <ext.commands.Bot>` (or a similar class) or from the ``guild_ids`` kwarg of
 :func:`slash_command <ext.commands.slash_command>` (:func:`user_command <ext.commands.user_command>`, :func:`message_command <ext.commands.message_command>`)
-the commands in those guilds won't be deleted instantly. Instead, they'll be deleted as soon as one of the deprecated commands is invoked. Your bot will send a message
+the commands in those guilds won't be deleted instantly. As explained above, they'll be deleted as soon as one of the deprecated commands is invoked. Your bot will send a message
 like "This command has just been synced ...".
 
-Hosting the bot on multiple machines
+
+Command Sync with Multiple Clusters
 ++++++++++++++++++++++++++++++++++++
 
-If your bot requires shard distribution across several machines, you should set ``sync_commands`` kwarg to ``False`` everywhere except 1 machine.
+If your bot requires shard distribution across several clusters, you should disable command_sync on all clusters except one.
 This will prevent conflicts and race conditions. Discord API doesn't provide users with events related to application command updates,
-so it's impossible to keep the cache of multiple machines synced. Having only 1 machine with ``sync_commands`` set to ``True`` is enough
+so it's impossible to keep the cache of multiple machines synced. Having only 1 cluster with ``sync_commands`` set to ``True`` is enough
 because global registration of application commands doesn't depend on sharding.
 
 .. _why_params_and_injections_return_any:
