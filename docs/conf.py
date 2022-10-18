@@ -46,6 +46,7 @@ extensions = [
     "sphinxcontrib_trio",
     "sphinxcontrib.towncrier.ext",
     "hoverxref.extension",
+    "notfound.extension",
     "exception_hierarchy",
     "attributetable",
     "resourcelinks",
@@ -236,6 +237,10 @@ hoverxref_tooltip_theme = ["tooltipster-custom"]
 if os.environ.get("READTHEDOCS"):
     hoverxref_api_host = "/_"
 
+# when not on read the docs, assume no prefix for the 404 page.
+# this means that /404.html should properly render on local builds
+if not os.environ.get("READTHEDOCS"):
+    notfound_urls_prefix = "/"
 
 linkcheck_ignore = [
     r"https?://github.com/.+?/.+?/(issues|pull)/\d+",
