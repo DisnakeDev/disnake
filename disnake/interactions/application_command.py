@@ -5,15 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union, cast
 
 from .. import utils
-from ..channel import (
-    CategoryChannel,
-    ForumChannel,
-    PartialMessageable,
-    StageChannel,
-    TextChannel,
-    VoiceChannel,
-    _threaded_guild_channel_factory,
-)
+from ..channel import PartialMessageable, _threaded_guild_channel_factory
 from ..enums import ApplicationCommandType, ChannelType, Locale, OptionType, try_enum
 from ..guild import Guild
 from ..member import Member
@@ -46,6 +38,7 @@ MISSING = utils.MISSING
 if TYPE_CHECKING:
     from ..abc import MessageableChannel
     from ..ext.commands import InvokableApplicationCommand
+    from ..guild import GuildChannel
     from ..state import ConnectionState
     from ..threads import Thread
     from ..types.interactions import (
@@ -54,16 +47,7 @@ if TYPE_CHECKING:
         InteractionDataResolved as InteractionDataResolvedPayload,
     )
 
-    InteractionChannel = Union[
-        VoiceChannel,
-        StageChannel,
-        TextChannel,
-        CategoryChannel,
-        Thread,
-        PartialMessageable,
-        VoiceChannel,
-        ForumChannel,
-    ]
+    InteractionChannel = Union[GuildChannel, Thread, PartialMessageable]
 
 
 class ApplicationCommandInteraction(Interaction):
