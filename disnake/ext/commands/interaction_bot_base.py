@@ -220,7 +220,7 @@ class InteractionBotBase(CommonBotBase):
 
     @property
     def command_sync(self) -> ApplicationCommandSyncFlags:
-        """:class:`~commands.ApplicationCommandSyncFlags`: The command sync configured for this connection.
+        """:class:`~.ext.commands.ApplicationCommandSyncFlags`: The command sync configured for this connection.
 
         .. versionadded:: 2.7
 

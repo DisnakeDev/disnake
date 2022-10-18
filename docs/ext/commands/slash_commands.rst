@@ -1,6 +1,6 @@
 .. SPDX-License-Identifier: MIT
 
-.. currentmodule:: disnake.ext.commands
+.. currentmodule:: disnake
 
 .. _ext_commands_slash_commands:
 
@@ -40,9 +40,12 @@ This code sample shows how to set the registration to be local:
 
 For global registration, don't specify this parameter.
 
-Another useful parameter is ``sync_commands_debug``. If set to ``True``, you receive debug messages related to the
-app command registration by default, without having to change the log level of any loggers
-(see the documentation on :class:`Bot <ext.commands.Bot>` for more info).
+In order to configure specific properties about command sync, we have a configuration
+class which may be passed to the Bot, :class:`~.ext.commands.ApplicationCommandSyncFlags`.
+
+Setting :attr:`ApplicationCommandSyncFlags.sync_commands_debug <.ext.commands.ApplicationCommandSyncFlags.sync_commands_debug>` to ``True``, will print debug messages related to the
+app command registration to the console, without having to change the log level of any loggers.
+
 This is useful if you want to figure out some registration details:
 
 .. code-block:: python3
@@ -58,8 +61,8 @@ This is useful if you want to figure out some registration details:
         command_sync=command_sync,
     )
 
-If you want to disable the automatic registration, set :attr:`ApplicationCommandSyncFlags.sync_commands`
-to ``False``, or use the classmethod :meth:`none() <ApplicationCommandSyncFlags.none>`
+If you want to disable the automatic registration, set :attr:`ApplicationCommandSyncFlags.sync_commands <.ext.commands.ApplicationCommandSyncFlags.sync_commands>`
+to ``False``, or use the classmethod :meth:`none() <.ext.commands.ApplicationCommandSyncFlags.none>`
 
 .. code-block:: python3
 

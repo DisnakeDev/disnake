@@ -323,6 +323,13 @@ class InteractionBot(InteractionBotBase, disnake.Client):
 
         .. versionadded:: 2.1
 
+    command_sync: :class:`.ext.commands.ApplicationCommandSyncFlags`
+        The command sync flags that you want to enable for the session. This is a way of
+        controlling when and how application commands will be synced with the API.
+        If not given, automatic command synchronization is enabled by default.
+
+        .. versionadded:: 2.7
+
     sync_commands: :class:`bool`
         Whether to enable automatic synchronization of application commands in your code.
         Defaults to ``True``, which means that commands in API are automatically synced
