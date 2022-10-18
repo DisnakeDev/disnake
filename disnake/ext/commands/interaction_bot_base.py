@@ -15,10 +15,12 @@ from typing import (
     Dict,
     Iterable,
     List,
+    NamedTuple,
     Optional,
     Sequence,
     Set,
     Tuple,
+    TypedDict,
     TypeVar,
     Union,
 )
@@ -27,6 +29,7 @@ import disnake
 from disnake.app_commands import ApplicationCommand, Option
 from disnake.custom_warnings import SyncWarning
 from disnake.enums import ApplicationCommandType
+from disnake.utils import warn_deprecated
 
 from . import errors
 from .base_core import InvokableApplicationCommand
@@ -38,6 +41,7 @@ from .ctx_menus_core import (
     user_command,
 )
 from .errors import CommandRegistrationError
+from .flags import ApplicationCommandSyncFlags
 from .slash_core import InvokableSlashCommand, SubCommand, SubCommandGroup, slash_command
 
 if TYPE_CHECKING:
@@ -68,14 +72,27 @@ CFT = TypeVar("CFT", bound="CoroFunc")
 _log = logging.getLogger(__name__)
 
 
+class _Diff(TypedDict):
+    no_changes: List[ApplicationCommand]
+    upsert: List[ApplicationCommand]
+    edit: List[ApplicationCommand]
+    delete: List[ApplicationCommand]
+
+
+class AppCommandMetadata(NamedTuple):
+    name: str
+    guild_id: Optional[int]
+    type: ApplicationCommandType
+
+
 def _app_commands_diff(
     new_commands: Iterable[ApplicationCommand],
     old_commands: Iterable[ApplicationCommand],
-) -> Dict[str, List[ApplicationCommand]]:
+) -> _Diff:
     new_cmds = {(cmd.name, cmd.type): cmd for cmd in new_commands}
     old_cmds = {(cmd.name, cmd.type): cmd for cmd in old_commands}
 
-    diff = {
+    diff: _Diff = {
         "no_changes": [],
         "upsert": [],
         "edit": [],
@@ -109,7 +126,7 @@ _diff_map = {
 }
 
 
-def _format_diff(diff: Dict[str, List[ApplicationCommand]]) -> str:
+def _format_diff(diff: _Diff) -> str:
     lines: List[str] = []
     for key, label in _diff_map.items():
         lines.append(label)
@@ -125,9 +142,10 @@ class InteractionBotBase(CommonBotBase):
     def __init__(
         self,
         *,
-        sync_commands: bool = True,
-        sync_commands_debug: bool = False,
-        sync_commands_on_cog_unload: bool = True,
+        command_sync: Optional[ApplicationCommandSyncFlags] = None,
+        sync_commands: bool = MISSING,
+        sync_commands_debug: bool = MISSING,
+        sync_commands_on_cog_unload: bool = MISSING,
         test_guilds: Optional[Sequence[int]] = None,
         **options: Any,
     ):
@@ -138,9 +156,42 @@ class InteractionBotBase(CommonBotBase):
 
         test_guilds = None if test_guilds is None else tuple(test_guilds)
         self._test_guilds: Optional[Tuple[int, ...]] = test_guilds
-        self._sync_commands: bool = sync_commands
-        self._sync_commands_debug: bool = sync_commands_debug
-        self._sync_commands_on_cog_unload = sync_commands_on_cog_unload
+
+        if command_sync is not None and (
+            sync_commands is not MISSING
+            or sync_commands_debug is not MISSING
+            or sync_commands_on_cog_unload is not MISSING
+        ):
+            raise TypeError(
+                "cannot set 'command_sync' and any of 'sync_commands', 'sync_commands_debug', 'sync_commands_on_cog_unload' at the same time."
+            )
+        if command_sync is None:
+            command_sync = ApplicationCommandSyncFlags.default()
+
+            if sync_commands is not MISSING:
+                warn_deprecated(
+                    "sync_commands is deprecated and will be removed in version 2.8. "
+                    "Use `command_sync` with an `ApplicationCommandSyncFlags` instance as a replacement.",
+                    stacklevel=3,
+                )
+                command_sync.sync_commands = sync_commands
+            if sync_commands_debug is not MISSING:
+                warn_deprecated(
+                    "sync_commands_debug is deprecated and will be removed in version 2.8. "
+                    "Use `command_sync` with an `ApplicationCommandSyncFlags` instance as a replacement.",
+                    stacklevel=3,
+                )
+                command_sync.sync_commands_debug = sync_commands_debug
+
+            if sync_commands_on_cog_unload is not MISSING:
+                warn_deprecated(
+                    "sync_commands_on_cog_unload is deprecated and will be removed in version 2.8. "
+                    "Use `command_sync` with an `ApplicationCommandSyncFlags` instance as a replacement.",
+                    stacklevel=3,
+                )
+                command_sync.on_cog_unload = sync_commands_on_cog_unload
+
+        self._command_sync = command_sync
         self._sync_queued: bool = False
 
         self._slash_command_checks = []
@@ -698,65 +749,75 @@ class InteractionBotBase(CommonBotBase):
         if not isinstance(self, disnake.Client):
             raise NotImplementedError("This method is only usable in disnake.Client subclasses")
 
-        if not self._sync_commands or self._is_closed or self.loop.is_closed():
+        if not self._command_sync.sync_commands or self._is_closed or self.loop.is_closed():
             return
 
         # We assume that all commands are already cached.
         # Sort all invokable commands between guild IDs:
         global_cmds, guild_cmds = self._ordered_unsynced_commands(self._test_guilds)
-        if global_cmds is None:
-            return
 
-        # Update global commands first
-        diff = _app_commands_diff(
-            global_cmds, self._connection._global_application_commands.values()
-        )
-        update_required = bool(diff["upsert"]) or bool(diff["edit"]) or bool(diff["delete"])
+        if global_cmds is not None and self._command_sync.sync_global_commands:
+            # Update global commands first
+            diff = _app_commands_diff(
+                global_cmds, self._connection._global_application_commands.values()
+            )
+            if not self._command_sync.allow_command_deletion:
+                # because allow_command_deletion is disabled, we want to never delete a command, so we move the delete commands to no_changes
+                diff["no_changes"] += diff["delete"]
+                diff["delete"].clear()
+            update_required = bool(diff["upsert"]) or bool(diff["edit"]) or bool(diff["delete"])
 
-        # Show the difference
-        self._log_sync_debug(
-            "Application command synchronization:\n"
-            "GLOBAL COMMANDS\n"
-            "===============\n"
-            f"| Update is required: {update_required}\n{_format_diff(diff)}"
-        )
+            # Show the difference
+            self._log_sync_debug(
+                "Application command synchronization:\n"
+                "GLOBAL COMMANDS\n"
+                "===============\n"
+                f"| Update is required: {update_required}\n{_format_diff(diff)}"
+            )
 
-        if update_required:
-            # Notice that we don't do any API requests if there're no changes.
-            try:
-                to_send = diff["no_changes"] + diff["edit"] + diff["upsert"]
-                await self.bulk_overwrite_global_commands(to_send)
-            except Exception as e:
-                warnings.warn(f"Failed to overwrite global commands due to {e}", SyncWarning)
+            if update_required:
+                # Notice that we don't do any API requests if there're no changes.
+                try:
+                    to_send = diff["no_changes"] + diff["edit"] + diff["upsert"]
+                    await self.bulk_overwrite_global_commands(to_send)
+                except Exception as e:
+                    warnings.warn(f"Failed to overwrite global commands due to {e}", SyncWarning)
         # Same process but for each specified guild individually.
         # Notice that we're not doing this for every single guild for optimisation purposes.
         # See the note in :meth:`_cache_application_commands` about guild app commands.
-        for guild_id, cmds in guild_cmds.items():
-            current_guild_cmds = self._connection._guild_application_commands.get(guild_id, {})
-            diff = _app_commands_diff(cmds, current_guild_cmds.values())
-            update_required = bool(diff["upsert"]) or bool(diff["edit"]) or bool(diff["delete"])
-            # Show diff
-            self._log_sync_debug(
-                "Application command synchronization:\n"
-                f"COMMANDS IN {guild_id}\n"
-                "===============================\n"
-                f"| Update is required: {update_required}\n{_format_diff(diff)}"
-            )
-            # Do API requests and cache
-            if update_required:
-                try:
-                    to_send = diff["no_changes"] + diff["edit"] + diff["upsert"]
-                    await self.bulk_overwrite_guild_commands(guild_id, to_send)
-                except Exception as e:
-                    warnings.warn(
-                        f"Failed to overwrite commands in <Guild id={guild_id}> due to {e}",
-                        SyncWarning,
-                    )
+        if guild_cmds is not None and self._command_sync.sync_guild_commands:
+            for guild_id, cmds in guild_cmds.items():
+                current_guild_cmds = self._connection._guild_application_commands.get(guild_id, {})
+                diff = _app_commands_diff(cmds, current_guild_cmds.values())
+                if not self._command_sync.allow_command_deletion:
+                    # because allow_command_deletion is disabled, we want to never delete a command, so we move the delete commands to no_changes
+                    diff["no_changes"] += diff["delete"]
+                    diff["delete"].clear()
+                update_required = bool(diff["upsert"]) or bool(diff["edit"]) or bool(diff["delete"])
+
+                # Show diff
+                self._log_sync_debug(
+                    "Application command synchronization:\n"
+                    f"COMMANDS IN {guild_id}\n"
+                    "===============================\n"
+                    f"| Update is required: {update_required}\n{_format_diff(diff)}"
+                )
+
+                # Do API requests and cache
+                if update_required:
+                    try:
+                        to_send = diff["no_changes"] + diff["edit"] + diff["upsert"]
+                        await self.bulk_overwrite_guild_commands(guild_id, to_send)
+                    except Exception as e:
+                        warnings.warn(
+                            f"Failed to overwrite commands in <Guild id={guild_id}> due to {e}",
+                            SyncWarning,
+                        )
         # Last debug message
         self._log_sync_debug("Command synchronization task has finished")
 
     def _log_sync_debug(self, text: str) -> None:
-        if self._sync_commands_debug:
+        if self._command_sync.sync_commands_debug:
             # if sync debugging is enabled, *always* output logs
             if _log.isEnabledFor(logging.INFO):
                 # if the log level is `INFO` or higher, use that
@@ -783,7 +844,7 @@ class InteractionBotBase(CommonBotBase):
             raise NotImplementedError("This method is only usable in disnake.Client subclasses")
 
         if (
-            not self._sync_commands
+            not self._command_sync.sync_commands
             or self._sync_queued
             or not self.is_ready()
             or self._is_closed
@@ -1201,7 +1262,7 @@ class InteractionBotBase(CommonBotBase):
         interaction: :class:`disnake.ApplicationCommandInteraction`
             The interaction to process commands for.
         """
-        if self._sync_commands and not self._sync_queued:
+        if self._command_sync.sync_commands and not self._sync_queued:
             known_command = self.get_global_command(interaction.data.id)  # type: ignore
 
             if known_command is None:

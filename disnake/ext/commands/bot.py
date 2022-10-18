@@ -26,6 +26,7 @@ if TYPE_CHECKING:
 
     from ._types import MaybeCoro
     from .bot_base import PrefixType
+    from .flags import ApplicationCommandSyncFlags
     from .help import HelpCommand
 
 
@@ -68,10 +69,16 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
 
         .. versionadded:: 2.1
 
+        .. deprecated:: 2.7
+            Replaced with ``command_sync``.
+
     sync_commands_on_cog_unload: :class:`bool`
         Whether to sync the application commands on cog unload / reload. Defaults to ``True``.
 
         .. versionadded:: 2.1
+
+        .. deprecated:: 2.7
+            Replaced with ``command_sync``.
 
     sync_commands_debug: :class:`bool`
         Whether to always show sync debug logs (uses ``INFO`` log level if it's enabled, prints otherwise).
@@ -84,6 +91,9 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
         .. versionchanged:: 2.4
             Changes the log level of corresponding messages from ``DEBUG`` to ``INFO`` or ``print``\\s them,
             instead of controlling whether they are enabled at all.
+
+        .. deprecated:: 2.7
+            Replaced with ``command_sync``.
 
     localization_provider: :class:`.LocalizationProtocol`
         An implementation of :class:`.LocalizationProtocol` to use for localization of
@@ -216,9 +226,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
             owner_ids: Optional[Set[int]] = None,
             reload: bool = False,
             case_insensitive: bool = False,
-            sync_commands: bool = True,
-            sync_commands_debug: bool = False,
-            sync_commands_on_cog_unload: bool = True,
+            command_sync: ApplicationCommandSyncFlags = ...,
             test_guilds: Optional[Sequence[int]] = None,
             asyncio_debug: bool = False,
             loop: Optional[asyncio.AbstractEventLoop] = None,
@@ -267,9 +275,7 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
             owner_ids: Optional[Set[int]] = None,
             reload: bool = False,
             case_insensitive: bool = False,
-            sync_commands: bool = True,
-            sync_commands_debug: bool = False,
-            sync_commands_on_cog_unload: bool = True,
+            command_sync: ApplicationCommandSyncFlags = ...,
             test_guilds: Optional[Sequence[int]] = None,
             asyncio_debug: bool = False,
             loop: Optional[asyncio.AbstractEventLoop] = None,
@@ -324,10 +330,16 @@ class InteractionBot(InteractionBotBase, disnake.Client):
 
         .. versionadded:: 2.1
 
+        .. deprecated:: 2.7
+            Replaced with ``command_sync``.
+
     sync_commands_on_cog_unload: :class:`bool`
         Whether to sync the application commands on cog unload / reload. Defaults to ``True``.
 
         .. versionadded:: 2.1
+
+        .. deprecated:: 2.7
+            Replaced with ``command_sync``.
 
     sync_commands_debug: :class:`bool`
         Whether to always show sync debug logs (uses ``INFO`` log level if it's enabled, prints otherwise).
@@ -340,6 +352,9 @@ class InteractionBot(InteractionBotBase, disnake.Client):
         .. versionchanged:: 2.4
             Changes the log level of corresponding messages from ``DEBUG`` to ``INFO`` or ``print``\\s them,
             instead of controlling whether they are enabled at all.
+
+        .. deprecated:: 2.7
+            Replaced with ``command_sync``.
 
     localization_provider: :class:`.LocalizationProtocol`
         An implementation of :class:`.LocalizationProtocol` to use for localization of
@@ -399,9 +414,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
             owner_id: Optional[int] = None,
             owner_ids: Optional[Set[int]] = None,
             reload: bool = False,
-            sync_commands: bool = True,
-            sync_commands_debug: bool = False,
-            sync_commands_on_cog_unload: bool = True,
+            command_sync: ApplicationCommandSyncFlags = ...,
             test_guilds: Optional[Sequence[int]] = None,
             asyncio_debug: bool = False,
             loop: Optional[asyncio.AbstractEventLoop] = None,
@@ -443,9 +456,7 @@ class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
             owner_id: Optional[int] = None,
             owner_ids: Optional[Set[int]] = None,
             reload: bool = False,
-            sync_commands: bool = True,
-            sync_commands_debug: bool = False,
-            sync_commands_on_cog_unload: bool = True,
+            command_sync: ApplicationCommandSyncFlags = ...,
             test_guilds: Optional[Sequence[int]] = None,
             asyncio_debug: bool = False,
             loop: Optional[asyncio.AbstractEventLoop] = None,

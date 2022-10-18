@@ -153,6 +153,18 @@ AutoShardedInteractionBot
 .. autoclass:: disnake.ext.commands.AutoShardedInteractionBot
     :members:
 
+Command Sync
+-------------
+
+ApplicationCommandSyncFlags
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: disnake.ext.commands.ApplicationCommandSyncFlags
+
+.. autoclass:: disnake.ext.commands.ApplicationCommandSyncFlags()
+    :members:
+
+
 Prefix Helpers
 ----------------
 
