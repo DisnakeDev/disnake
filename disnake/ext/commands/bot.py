@@ -54,6 +54,13 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
 
     Parameters
     ----------
+    test_guilds: List[:class:`int`]
+        The list of IDs of the guilds where you're going to test your application commands.
+        Defaults to ``None``, which means global registration of commands across
+        all guilds.
+
+        .. versionadded:: 2.1
+
     sync_commands: :class:`bool`
         Whether to enable automatic synchronization of application commands in your code.
         Defaults to ``True``, which means that commands in API are automatically synced
@@ -121,6 +128,8 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
         using :class:`InteractionBot` or :class:`AutoShardedInteractionBot` instead,
         which are drop-in replacements, just without prefix command support.
 
+        This can be provided as a parameter at creation.
+
         .. note::
 
             When passing multiple prefixes be careful to not pass a prefix
@@ -134,22 +143,36 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
         Whether the commands should be case insensitive. Defaults to ``False``. This
         attribute does not carry over to groups. You must set it to every group if
         you require group commands to be case insensitive as well.
+
+        This can be provided as a parameter at creation.
+
     description: :class:`str`
         The content prefixed into the default help message.
+
+        This can be provided as a parameter at creation.
+
     help_command: Optional[:class:`.HelpCommand`]
         The help command implementation to use. This can be dynamically
         set at runtime. To remove the help command pass ``None``. For more
         information on implementing a help command, see :ref:`ext_commands_help_command`.
+
+        This can be provided as a parameter at creation.
+
     owner_id: Optional[:class:`int`]
         The user ID that owns the bot. If this is not set and is then queried via
         :meth:`.is_owner` then it is fetched automatically using
         :meth:`~.Bot.application_info`.
+
+        This can be provided as a parameter at creation.
+
     owner_ids: Optional[Collection[:class:`int`]]
         The user IDs that owns the bot. This is similar to :attr:`owner_id`.
         If this is not set and the application is team based, then it is
         fetched automatically using :meth:`~.Bot.application_info`.
         For performance reasons it is recommended to use a :class:`set`
         for the collection. You cannot set both ``owner_id`` and ``owner_ids``.
+
+        This can be provided as a parameter at creation.
 
         .. versionadded:: 1.3
 
@@ -158,23 +181,16 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
         prefix. This allows for ``!   hello`` and ``!hello`` to both work if
         the ``command_prefix`` is set to ``!``. Defaults to ``False``.
 
+        This can be provided as a parameter at creation.
+
         .. versionadded:: 1.7
-
-    test_guilds: List[:class:`int`]
-        The list of IDs of the guilds where you're going to test your application commands.
-        Defaults to ``None``, which means global registration of commands across
-        all guilds.
-
-        This can be provided at instantation.
-
-        .. versionadded:: 2.1
 
     reload: :class:`bool`
         Whether to enable automatic extension reloading on file modification for debugging.
         Whenever you save an extension with reloading enabled the file will be automatically
         reloaded for you so you do not have to reload the extension manually. Defaults to ``False``
 
-        This can be provided at instantation.
+        This can be provided as a parameter at creation.
 
         .. versionadded:: 2.1
 
@@ -294,6 +310,13 @@ class InteractionBot(InteractionBotBase, disnake.Client):
 
     Parameters
     ----------
+    test_guilds: List[:class:`int`]
+        The list of IDs of the guilds where you're going to test your application commands.
+        Defaults to ``None``, which means global registration of commands across
+        all guilds.
+
+        .. versionadded:: 2.1
+
     sync_commands: :class:`bool`
         Whether to enable automatic synchronization of application commands in your code.
         Defaults to ``True``, which means that commands in API are automatically synced
@@ -352,21 +375,12 @@ class InteractionBot(InteractionBotBase, disnake.Client):
 
         This can be provided as a parameter at creation.
 
-    test_guilds: List[:class:`int`]
-        The list of IDs of the guilds where you're going to test your application commands.
-        Defaults to ``None``, which means global registration of commands across
-        all guilds.
-
-        This can be provided at instantation.
-
-        .. versionadded:: 2.1
-
     reload: :class:`bool`
         Whether to enable automatic extension reloading on file modification for debugging.
         Whenever you save an extension with reloading enabled the file will be automatically
         reloaded for you so you do not have to reload the extension manually. Defaults to ``False``
 
-        This can be provided at instantation.
+        This can be provided as a parameter at creation.
 
         .. versionadded:: 2.1
 
