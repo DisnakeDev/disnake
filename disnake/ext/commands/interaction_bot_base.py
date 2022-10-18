@@ -131,6 +131,8 @@ _diff_map = {
 def _format_diff(diff: _Diff) -> str:
     lines: List[str] = []
     for key, label in _diff_map.items():
+        if key not in diff:
+            continue
         lines.append(label)
         if changes := diff[key]:
             lines.extend(f"    <{type(cmd).__name__} name={cmd.name!r}>" for cmd in changes)
