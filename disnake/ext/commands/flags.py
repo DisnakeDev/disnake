@@ -95,7 +95,6 @@ class ApplicationCommandSyncFlags(BaseFlags):
         self,
         *,
         allow_command_deletion: bool = ...,
-        on_cog_actions: bool = ...,
         on_cog_unload: bool = ...,
         sync_commands: bool = ...,
         sync_commands_debug: bool = ...,
@@ -146,11 +145,6 @@ class ApplicationCommandSyncFlags(BaseFlags):
     def sync_commands_debug(self):
         """:class:`bool`: Whether or not to show app command sync debug messages"""
         return 1 << 1
-
-    @alias_flag_value
-    def on_cog_actions(self):
-        """:class:`bool`: Whether or not to sync app commands on cog load, unload, or reload."""
-        return 1 << 2 | 1 << 4
 
     @flag_value
     def on_cog_unload(self):
