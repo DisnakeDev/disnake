@@ -19,7 +19,7 @@ from typing import (
 
 from .enums import ButtonStyle, ComponentType, TextInputStyle, try_enum
 from .partial_emoji import PartialEmoji, _EmojiTag
-from .utils import MISSING, get_slots
+from .utils import MISSING, assert_never, get_slots
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -145,7 +145,7 @@ class Button(Component):
 
     .. note::
 
-        The user constructible and usable type to create a button is :class:`disnake.ui.Button`
+        The user constructible and usable type to create a button is :class:`disnake.ui.Button`,
         not this one.
 
     .. versionadded:: 2.0
@@ -519,5 +519,6 @@ def _component_factory(data: ComponentPayload, *, type: Type[C] = Component) -> 
     elif component_type == 4:
         return TextInput(data)  # type: ignore
     else:
+        assert_never(component_type)
         as_enum = try_enum(ComponentType, component_type)
         return Component._raw_construct(type=as_enum)  # type: ignore

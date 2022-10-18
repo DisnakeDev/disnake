@@ -26,7 +26,7 @@ from ..components import (
     SelectMenu as SelectComponent,
 )
 from ..enums import ButtonStyle, ComponentType, TextInputStyle
-from ..utils import MISSING, SequenceProxy
+from ..utils import MISSING, SequenceProxy, assert_never
 from .button import Button
 from .item import WrappedComponent
 from .select import Select
@@ -549,8 +549,10 @@ class ActionRow(Generic[UIComponentT]):
                     current_row.append_item(Button.from_component(component))
                 elif isinstance(component, SelectComponent):
                     current_row.append_item(Select.from_component(component))
-                elif strict:
-                    raise TypeError(f"Encountered unknown component type: {component.type!r}.")
+                else:
+                    assert_never(component)
+                    if strict:
+                        raise TypeError(f"Encountered unknown component type: {component.type!r}.")
 
         return rows
 
