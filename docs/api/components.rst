@@ -8,7 +8,7 @@ Message Components
 ==================
 
 This section documents everything related to
-`message components <https://discord.com/developers/docs/interactions/message-components>`_ \
+:ddocs:`message components <interactions/message-components>` \
 - Discord feature which allows bot developers to create their own component-based UIs right inside Discord.
 
 .. note::
@@ -79,36 +79,36 @@ Button
 BaseSelect
 ~~~~~~~~~~
 
-.. attributetable:: BaseSelect
+.. attributetable:: disnake.ui.BaseSelect
 
-.. autoclass:: BaseSelect
+.. autoclass:: disnake.ui.BaseSelect
    :members:
    :inherited-members:
 
 Select
 ~~~~~~
 
-.. attributetable:: Select
+.. attributetable:: disnake.ui.Select
 
-.. autoclass:: Select
+.. autoclass:: disnake.ui.Select
    :members:
    :inherited-members:
 
 BaseSelectMenu
 ~~~~~~~~~~~~~~
 
-.. attributetable:: BaseSelectMenu
+.. attributetable:: disnake.BaseSelectMenu
 
-.. autoclass:: BaseSelectMenu
+.. autoclass:: disnake.BaseSelectMenu
     :members:
     :inherited-members:
 
 SelectMenu
 ~~~~~~~~~~
 
-.. attributetable:: SelectMenu
+.. attributetable:: disnake.SelectMenu
 
-.. autoclass:: SelectMenu()
+.. autoclass:: disnake.SelectMenu()
     :members:
     :inherited-members:
 
@@ -235,4 +235,3 @@ Functions
 .. autofunction:: disnake.ui.button(cls=disnake.ui.Button, *, style=ButtonStyle.secondary, label=None, disabled=False, custom_id=..., url=None, emoji=None, row=None)
 
 .. autofunction:: disnake.ui.select(cls=disnake.ui.Select, *, custom_id=..., placeholder=None, min_values=1, max_values=1, options=..., disabled=False, row=None)
-

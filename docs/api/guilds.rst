@@ -6,8 +6,8 @@ Guilds
 ======
 
 This section documents everything related to
-`Guilds <https://discord.com/developers/docs/resources/guild>`_ \
-- main hubs for communication in Discord, referred to as a Servers in the official UI.
+:ddocs:`Guilds <resources/guild>` - main hubs for communication in Discord,
+referred to as a Servers in the official UI.
 
 Classes
 -------

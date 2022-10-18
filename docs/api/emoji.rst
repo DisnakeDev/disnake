@@ -6,7 +6,7 @@ Emoji
 =====
 
 This section documents everything related to Discord
-`emoji <https://discord.com/developers/docs/resources/emoji>`_.
+:ddocs:`emoji <resources/emoji>`.
 
 Classes
 -------

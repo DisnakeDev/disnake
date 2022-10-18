@@ -2268,12 +2268,10 @@ Bug Fixes
 - Fix bug where a role being deleted would trigger a ``ValueError``.
 - Fix bug where :meth:`Permissions.kick_members` and :meth:`Permissions.ban_members` were flipped.
 - Mentions are now triggered normally. This was changed due to the way disnake handles it internally.
-- Fix issue when a :class:`Message` would attempt to upgrade a :attr:`Message.server` when the channel is
-  a :class:`Object`.
+- Fix issue when a :class:`Message` would attempt to upgrade a :attr:`Message.server` when the channel is a :class:`Object`.
 - Unavailable servers were not being added into cache, this has been corrected.
-=======
+
 Legacy Changelog
 ----------------
 
 Changelogs for older versions (``0.x``, ``1.x``) can be found on the :ref:`whats_new_legacy` page.
->>>>>>> 1e10e9828906058de091eb474eb20a6bb80258a9

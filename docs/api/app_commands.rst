@@ -6,7 +6,7 @@ Application Commands
 ====================
 
 This section documents everything related to Discord's
-`application commands <https://discord.com/developers/docs/interactions/application-commands>`_.
+:ddocs:`application commands <interactions/application-commands>`.
 
 Classes
 -------

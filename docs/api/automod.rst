@@ -5,8 +5,7 @@
 AutoMod
 =======
 
-This section documents everything related to Discord's
-`AutoMod features <https://discord.com/developers/docs/resources/auto-moderation>`_.
+This section documents everything related to Discord's :ddocs:`AutoMod features <resources/auto-moderation>`.
 
 Classes
 -------
