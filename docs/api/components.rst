@@ -19,6 +19,38 @@ This section documents everything related to
 Classes
 -------
 
+Modal
+~~~~~
+
+.. attributetable:: disnake.ui.Modal
+
+.. autoclass:: disnake.ui.Modal
+    :members:
+
+View
+~~~~
+
+.. attributetable:: disnake.ui.View
+
+.. autoclass:: disnake.ui.View
+    :members:
+
+Item
+~~~~
+
+.. attributetable:: disnake.ui.Item
+
+.. autoclass:: disnake.ui.Item
+    :members:
+
+WrappedComponent
+~~~~~~~~~~~~~~~~
+
+.. attributetable:: disnake.ui.WrappedComponent
+
+.. autoclass:: disnake.ui.WrappedComponent
+    :members:
+
 Component
 ~~~~~~~~~
 
@@ -41,6 +73,33 @@ Button
 .. attributetable:: Button
 
 .. autoclass:: Button()
+    :members:
+    :inherited-members:
+
+BaseSelect
+~~~~~~~~~~
+
+.. attributetable:: BaseSelect
+
+.. autoclass:: BaseSelect
+   :members:
+   :inherited-members:
+
+Select
+~~~~~~
+
+.. attributetable:: Select
+
+.. autoclass:: Select
+   :members:
+   :inherited-members:
+
+BaseSelectMenu
+~~~~~~~~~~~~~~
+
+.. attributetable:: BaseSelectMenu
+
+.. autoclass:: BaseSelectMenu
     :members:
     :inherited-members:
 
@@ -169,3 +228,11 @@ TextInputStyle
     .. attribute:: long
 
         An alias for :attr:`paragraph`.
+
+Functions
+---------
+
+.. autofunction:: disnake.ui.button(cls=disnake.ui.Button, *, style=ButtonStyle.secondary, label=None, disabled=False, custom_id=..., url=None, emoji=None, row=None)
+
+.. autofunction:: disnake.ui.select(cls=disnake.ui.Select, *, custom_id=..., placeholder=None, min_values=1, max_values=1, options=..., disabled=False, row=None)
+
