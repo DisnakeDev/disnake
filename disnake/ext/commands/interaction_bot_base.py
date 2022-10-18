@@ -45,7 +45,7 @@ from .flags import ApplicationCommandSyncFlags
 from .slash_core import InvokableSlashCommand, SubCommand, SubCommandGroup, slash_command
 
 if TYPE_CHECKING:
-    from typing_extensions import ParamSpec
+    from typing_extensions import NotRequired, ParamSpec
 
     from disnake.i18n import LocalizedOptional
     from disnake.interactions import (
@@ -77,6 +77,7 @@ class _Diff(TypedDict):
     upsert: List[ApplicationCommand]
     edit: List[ApplicationCommand]
     delete: List[ApplicationCommand]
+    delete_ignored: NotRequired[List[ApplicationCommand]]
 
 
 class AppCommandMetadata(NamedTuple):
@@ -123,6 +124,7 @@ _diff_map = {
     "edit": "To edit:",
     "delete": "To delete:",
     "no_changes": "No changes:",
+    "delete_ignored": "Ignored due to delete flags:",
 }
 
 
@@ -777,9 +779,9 @@ class InteractionBotBase(CommonBotBase):
             )
             if not self._command_sync.allow_command_deletion:
                 # because allow_command_deletion is disabled, we want to never delete a command, so we move the delete commands to no_changes
-                diff["no_changes"] += diff["delete"]
+                diff["delete_ignored"] = diff["delete"].copy()
                 diff["delete"].clear()
-            update_required = bool(diff["upsert"]) or bool(diff["edit"]) or bool(diff["delete"])
+            update_required = bool(diff["upsert"] or diff["edit"] or diff["delete"])
 
             # Show the difference
             self._log_sync_debug(
