@@ -51,7 +51,7 @@ if TYPE_CHECKING:
     from ..types.interactions import (
         ApplicationCommandInteraction as ApplicationCommandInteractionPayload,
         ApplicationCommandInteractionData as ApplicationCommandInteractionDataPayload,
-        ApplicationCommandInteractionDataResolved as ApplicationCommandInteractionDataResolvedPayload,
+        InteractionDataResolved as InteractionDataResolvedPayload,
     )
 
     InteractionChannel = Union[
@@ -372,7 +372,7 @@ class ApplicationCommandInteractionDataResolved(Dict[str, Any]):
     def __init__(
         self,
         *,
-        data: ApplicationCommandInteractionDataResolvedPayload,
+        data: InteractionDataResolvedPayload,
         state: ConnectionState,
         guild_id: Optional[int],
     ):
