@@ -1283,19 +1283,35 @@ class InteractionBotBase(CommonBotBase):
                 known_command = self.get_guild_command(interaction.guild_id, interaction.data.id)  # type: ignore
 
             if known_command is None:
+                # don't do anything if we aren't allowed to disable them
                 # This usually comes from the blind spots of the sync algorithm.
                 # Since not all guild commands are cached, it is possible to experience such issues.
                 # In this case, the blind spot is the interaction guild, let's fix it:
-                try:
-                    await self.bulk_overwrite_guild_commands(interaction.guild_id, [])  # type: ignore
-                except disnake.HTTPException:
-                    pass
+                if self._command_sync.allow_command_deletion:
+                    try:
+                        await self.bulk_overwrite_guild_commands(interaction.guild_id, [])  # type: ignore
+                    except disnake.HTTPException:
+                        message = (
+                            "This command does not exist locally. More information about this: "
+                            f"https://docs.disnake.dev/en/v{disnake.__version__}/ext/commands/additional_info.html"
+                            "#app-command-sync."
+                        )
+                    else:
+                        message = (
+                            "This command has just been synced. More information about this: "
+                            f"https://docs.disnake.dev/en/v{disnake.__version__}/ext/commands/additional_info.html"
+                            "#app-command-sync."
+                        )
+                else:
+                    message = (
+                        "This command does not exist locally. More information about this: "
+                        f"https://docs.disnake.dev/en/v{disnake.__version__}/ext/commands/additional_info.html"
+                        "#app-command-sync."
+                    )
                 try:
                     # This part is in a separate try-except because we still should respond to the interaction
                     await interaction.response.send_message(
-                        "This command has just been synced. More information about this: "
-                        "https://docs.disnake.dev/en/latest/ext/commands/additional_info.html"
-                        "#app-command-sync.",
+                        message,
                         ephemeral=True,
                     )
                 except disnake.HTTPException:
