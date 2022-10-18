@@ -84,7 +84,7 @@ class MessageInteraction(Interaction):
 
     @cached_slot_property("_cs_component")
     def component(self) -> MessageComponent:
-        """Union[:class:`Button`, :class:`SelectMenu`]: The component the user interacted with"""
+        """Union[:class:`Button`, :class:`BaseSelectMenu`]: The component the user interacted with"""
         for action_row in self.message.components:
             for component in action_row.children:
                 if component.custom_id == self.data.custom_id:

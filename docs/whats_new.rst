@@ -1100,8 +1100,8 @@ New Features
 - |commands| Add :meth:`Cog.bot_message_command_check <ext.commands.Cog.bot_message_command_check>`
 - |commands| Add :meth:`Cog.bot_message_command_check_once <ext.commands.Cog.bot_message_command_check_once>`
 
-.. _vp1p7p3:
 
+<<<<<<< HEAD
 v1.7.3
 ------
 
@@ -2271,3 +2271,9 @@ Bug Fixes
 - Fix issue when a :class:`Message` would attempt to upgrade a :attr:`Message.server` when the channel is
   a :class:`Object`.
 - Unavailable servers were not being added into cache, this has been corrected.
+=======
+Legacy Changelog
+----------------
+
+Changelogs for older versions (``0.x``, ``1.x``) can be found on the :ref:`whats_new_legacy` page.
+>>>>>>> 1e10e9828906058de091eb474eb20a6bb80258a9

@@ -217,6 +217,9 @@ class Client:
         The :class:`asyncio.AbstractEventLoop` to use for asynchronous operations.
         Defaults to ``None``, in which case the default event loop is used via
         :func:`asyncio.get_event_loop()`.
+    asyncio_debug: :class:`bool`
+        Whether to enable asyncio debugging when the client starts.
+        Defaults to False.
     connector: Optional[:class:`aiohttp.BaseConnector`]
         The connector to use for connection pooling.
     proxy: Optional[:class:`str`]
@@ -299,31 +302,6 @@ class Client:
 
         .. versionadded:: 2.6
 
-    test_guilds: List[:class:`int`]
-        The list of IDs of the guilds where you're going to test your application commands.
-        Defaults to ``None``, which means global registration of commands across
-        all guilds.
-
-        .. versionadded:: 2.1
-
-    sync_commands: :class:`bool`
-        Whether to enable automatic synchronization of application commands in your code.
-        Defaults to ``True``, which means that commands in API are automatically synced
-        with the commands specified in your code.
-
-        .. versionadded:: 2.1
-
-    sync_commands_debug: :class:`bool`
-        Whether to always show sync debug logs (uses ``INFO`` log level if it's enabled, prints otherwise).
-        If disabled, uses the default ``DEBUG`` log level which isn't shown unless the log level is changed manually.
-        Useful for tracking the commands being registered in the API.
-
-        .. versionadded:: 2.1
-
-        .. versionchanged:: 2.4
-            Changes the log level of corresponding messages from ``DEBUG`` to ``INFO`` or ``print``\\s them,
-            instead of controlling whether they are enabled at all.
-
     localization_provider: :class:`.LocalizationProtocol`
         An implementation of :class:`.LocalizationProtocol` to use for localization of
         application commands.
@@ -361,9 +339,6 @@ class Client:
         The websocket gateway the client is currently connected to. Could be ``None``.
     loop: :class:`asyncio.AbstractEventLoop`
         The event loop that the client uses for asynchronous operations.
-    asyncio_debug: :class:`bool`
-        Whether to enable asyncio debugging when the client starts.
-        Defaults to False.
     session_start_limit: Optional[:class:`SessionStartLimit`]
         Information about the current session start limit.
         Only available after initiating the connection.

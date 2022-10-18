@@ -1,0 +1,10 @@
+.. SPDX-License-Identifier: MIT
+
+:orphan:
+
+Page Not Found
+--------------
+
+Sorry, we couldn't find that page.
+
+Try using the search box or go to the homepage.

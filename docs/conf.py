@@ -48,6 +48,7 @@ extensions = [
     "redirects",
     "fulltoc",
     "hoverxref.extension",
+    "notfound.extension",
     "exception_hierarchy",
     "attributetable",
     "resourcelinks",
@@ -65,6 +66,7 @@ dpy_github_repo = "https://github.com/Rapptz/discord.py"
 extlinks = {
     "issue": (f"{github_repo}/issues/%s", "#%s"),
     "issue-dpy": (f"{dpy_github_repo}/issues/%s", "#%s"),
+    "ddocs": ("https://discord.com/developers/docs/%s", None),
 }
 
 extlinks_detect_hardcoded_links = True
@@ -197,6 +199,7 @@ nitpick_ignore_files = [
     "migrating_to_async",
     "migrating",
     "whats_new",
+    "whats_new_legacy",
 ]
 
 
@@ -240,6 +243,16 @@ hoverxref_tooltip_theme = ["tooltipster-custom"]
 # use proxied API endpoint on rtd to avoid CORS issues
 if os.environ.get("READTHEDOCS"):
     hoverxref_api_host = "/_"
+
+# when not on read the docs, assume no prefix for the 404 page.
+# this means that /404.html should properly render on local builds
+if not os.environ.get("READTHEDOCS"):
+    notfound_urls_prefix = "/"
+
+linkcheck_ignore = [
+    r"https?://github.com/.+?/.+?/(issues|pull)/\d+",
+    r"https?://support.discord.com/",
+]
 
 
 # -- Options for HTML output ----------------------------------------------
