@@ -45,7 +45,7 @@ ClientUser
     :members:
     :inherited-members:
 
-Data classes
+Data Classes
 ------------
 
 ShardInfo
