@@ -82,6 +82,18 @@ Opus Library
 
 .. autofunction:: disnake.opus.is_loaded
 
+Discord Models
+---------------
+
+VoiceRegion
+~~~~~~~~~~~
+
+.. attributetable:: VoiceRegion
+
+.. autoclass:: VoiceRegion()
+    :members:
+
+
 Enumerations
 ------------
 

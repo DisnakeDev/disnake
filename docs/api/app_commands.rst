@@ -8,8 +8,8 @@ Application Commands
 This section documents everything related to Discord's
 :ddocs:`application commands <interactions/application-commands>`.
 
-Classes
--------
+Discord Models
+---------------
 
 APISlashCommand
 ~~~~~~~~~~~~~~~

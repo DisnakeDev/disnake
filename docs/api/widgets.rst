@@ -8,8 +8,8 @@ Widgets
 This section documents everything related to widgets - Discord feature which allows to integrate a guild's "widget" - dynamically
 generated image which shows basic info about your server and invites to join it without having to authenticate - into any place supporting HTML.
 
-Classes
--------
+Discord Models
+---------------
 
 Widget
 ~~~~~~~
@@ -26,9 +26,6 @@ WidgetSettings
 
 .. autoclass:: WidgetSettings()
     :members:
-
-Data Classes
-------------
 
 WidgetChannel
 ~~~~~~~~~~~~~

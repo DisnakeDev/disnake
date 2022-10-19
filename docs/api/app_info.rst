@@ -5,10 +5,10 @@
 Application Info
 ================
 
-This section documents everything related to application's (either yours or someone's else) information.
+This section documents everything related to application information.
 
-Classes
--------
+Discord Models
+--------------
 
 AppInfo
 ~~~~~~~
@@ -42,15 +42,7 @@ TeamMember
 .. autoclass:: TeamMember()
     :members:
 
-InstallParams
-~~~~~~~~~~~~~
-
-.. attributetable:: InstallParams
-
-.. autoclass:: InstallParams()
-    :members:
-
-Data classes
+Data Classes
 ------------
 
 ApplicationFlags
@@ -59,6 +51,14 @@ ApplicationFlags
 .. attributetable:: ApplicationFlags
 
 .. autoclass:: ApplicationFlags
+    :members:
+
+InstallParams
+~~~~~~~~~~~~~
+
+.. attributetable:: InstallParams
+
+.. autoclass:: InstallParams()
     :members:
 
 Enumerations

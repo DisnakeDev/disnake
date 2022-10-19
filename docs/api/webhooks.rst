@@ -5,10 +5,10 @@
 Webhooks
 ========
 
-This section documents everything related to webhooks - Discord feature which allows to send message in channels without a user\/bot account.
+This section documents all objects related to webhooks - Discord feature which allows to send message in channels without a user\/bot account.
 
-Classes
--------
+Discord Models
+---------------
 
 Webhook
 ~~~~~~~
@@ -43,9 +43,6 @@ SyncWebhookMessage
 
 .. autoclass:: SyncWebhookMessage()
     :members:
-
-Data Classes
-------------
 
 PartialWebhookGuild
 ~~~~~~~~~~~~~~~~~~~

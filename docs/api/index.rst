@@ -92,13 +92,14 @@ Documents
 
     Abstract Base Classes <abc.rst>
     Activities <activities.rst>
-    Application Info <app_info.rst>
     Application Commands <app_commands.rst>
+    Application Info <app_info.rst>
     Audit Logs <audit_logs.rst>
     AutoMod <automod.rst>
     Bot UI Kit <ui.rst>
     Channels <channels.rst>
     Clients <clients.rst>
+    Components <components.rst>
     Emoji <emoji.rst>
     Events <events.rst>
     Exceptions and Warnings <exceptions.rst>
@@ -110,7 +111,6 @@ Documents
     Localization <localization.rst>
     Members <members.rst>
     Messages <messages.rst>
-    Message Components <components.rst>
     Miscellaneous <misc.rst>
     Permissions <permissions.rst>
     Roles <roles.rst>

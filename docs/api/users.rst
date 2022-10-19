@@ -7,8 +7,8 @@ Users
 
 This section documents everything related to users.
 
-Classes
--------
+Discord Models
+---------------
 
 User
 ~~~~

@@ -36,6 +36,9 @@ AutoShardedClient
 .. autoclass:: AutoShardedClient
     :members:
 
+Discord Models
+---------------
+
 ClientUser
 ~~~~~~~~~~
 

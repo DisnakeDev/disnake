@@ -7,8 +7,8 @@ AutoMod
 
 This section documents everything related to Discord's :ddocs:`AutoMod features <resources/auto-moderation>`.
 
-Classes
--------
+Discord Models
+---------------
 
 AutoModRule
 ~~~~~~~~~~~

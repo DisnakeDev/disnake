@@ -8,8 +8,8 @@ Emoji
 This section documents everything related to Discord
 :ddocs:`emoji <resources/emoji>`.
 
-Classes
--------
+Discord Models
+---------------
 
 Emoji
 ~~~~~
@@ -20,12 +20,15 @@ Emoji
     :members:
     :inherited-members:
 
+Data Classes
+-------------
+
 PartialEmoji
 ~~~~~~~~~~~~
 
 .. attributetable:: PartialEmoji
 
-.. autoclass:: PartialEmoji()
+.. autoclass:: PartialEmoji
     :members:
     :inherited-members:
 

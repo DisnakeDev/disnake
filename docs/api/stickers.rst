@@ -7,8 +7,8 @@ Stickers
 
 This section documents everything related to stickers.
 
-Classes
--------
+Discord Models
+---------------
 
 Sticker
 ~~~~~~~
@@ -45,9 +45,6 @@ StickerItem
 .. autoclass:: StickerItem()
     :members:
     :inherited-members:
-
-Data Classes
-------------
 
 StickerPack
 ~~~~~~~~~~~

@@ -7,8 +7,8 @@ Members
 
 This sections documents everything related to guild members.
 
-Classes
--------
+Discord Models
+---------------
 
 Member
 ~~~~~~

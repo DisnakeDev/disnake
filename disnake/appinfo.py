@@ -68,7 +68,7 @@ class InstallParams:
 
 
 class AppInfo:
-    """|data_class|
+    """|discord_model|
 
     Represents the application info for the bot provided by Discord.
 
@@ -265,7 +265,7 @@ class AppInfo:
 
 
 class PartialAppInfo:
-    """|data_class|
+    """|discord_model|
 
     Represents a partial AppInfo given by :func:`~disnake.abc.GuildChannel.create_invite`.
 

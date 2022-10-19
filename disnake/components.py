@@ -283,7 +283,9 @@ class BaseSelectMenu(Component):
 
 
 class SelectMenu(BaseSelectMenu):
-    """Represents a string select menu from the Discord Bot UI Kit.
+    """|discord_model|
+
+    Represents a string select menu from the Discord Bot UI Kit.
 
     .. note::
         The user constructible and usable type to create a

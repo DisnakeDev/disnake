@@ -7,8 +7,8 @@ Guild Scheduled Events
 
 This section documents everything related to Guild Scheduled Events.
 
-Classes
--------
+Discord Models
+---------------
 
 GuildScheduledEvent
 ~~~~~~~~~~~~~~~~~~~
@@ -26,7 +26,7 @@ GuildScheduledEventMetadata
 
 .. attributetable:: GuildScheduledEventMetadata
 
-.. autoclass:: GuildScheduledEventMetadata()
+.. autoclass:: GuildScheduledEventMetadata
     :members:
 
 RawGuildScheduledEventUserActionEvent

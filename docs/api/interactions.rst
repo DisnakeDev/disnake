@@ -8,8 +8,8 @@ Interactions
 This sections documents everything related to interactions - special type of webhooks used for communication between user and client.
 Currently the only things Discord sends interactions for are message components and application commands.
 
-Classes
--------
+Discord Models
+---------------
 
 Interaction
 ~~~~~~~~~~~
@@ -118,6 +118,14 @@ InteractionMessage
     :members:
     :inherited-members:
 
+InteractionReference
+~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: InteractionReference
+
+.. autoclass:: InteractionReference
+    :members:
+
 Data Classes
 ------------
 
@@ -159,14 +167,6 @@ ModalInteractionData
 .. attributetable:: ModalInteractionData
 
 .. autoclass:: ModalInteractionData()
-    :members:
-
-InteractionReference
-~~~~~~~~~~~~~~~~~~~~
-
-.. attributetable:: InteractionReference
-
-.. autoclass:: InteractionReference
     :members:
 
 Enumerations

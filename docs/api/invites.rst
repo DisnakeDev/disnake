@@ -7,8 +7,8 @@ Invites
 
 This section documents everything related to channel invites.
 
-Classes
--------
+Discord Models
+---------------
 
 Invite
 ~~~~~~
@@ -17,9 +17,6 @@ Invite
 
 .. autoclass:: Invite()
     :members:
-
-Data Classes
-------------
 
 PartialInviteGuild
 ~~~~~~~~~~~~~~~~~~

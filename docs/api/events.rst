@@ -2,8 +2,6 @@
 
 .. currentmodule:: disnake
 
-.. The message was deleted. - disnake users
-
 .. _discord_api_events:
 
 Events

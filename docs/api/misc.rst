@@ -10,8 +10,8 @@ This section documents everything that can't fit into any other section but is n
 Classes
 -------
 
-Asset
-~~~~~
+Discord Model
+~~~~~~~~~~~~~~
 
 .. attributetable:: Asset
 
@@ -157,13 +157,13 @@ Colour
 .. autoclass:: Colour
     :members:
 
-Data
-~~~~
-
 .. _version_related:
 
-Version Related Info
---------------------
+Module Attributes
+------------------
+
+Version Info
+~~~~~~~~~~~~~
 
 There are two main ways to query version information about the library. For guarantees, check :ref:`version_guarantees`.
 

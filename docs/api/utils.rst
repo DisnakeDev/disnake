@@ -7,7 +7,7 @@
 Utility Functions
 =================
 
-This section documents everything under ``disnake.utils.*``.
+This section documents all functions under ``disnake.utils.*`` that are part of the public API.
 
 Functions
 ---------

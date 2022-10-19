@@ -5,10 +5,10 @@
 Messages
 ========
 
-This section documents everything related to chat messages.
+This section documents everything related to discord messages.
 
-Classes
--------
+Discord Models
+---------------
 
 Message
 ~~~~~~~
@@ -96,6 +96,9 @@ PartialMessage
 
 .. autoclass:: PartialMessage
     :members:
+
+Raw Events
+-----------
 
 RawTypingEvent
 ~~~~~~~~~~~~~~

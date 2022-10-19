@@ -9,8 +9,8 @@ This section documents everything related to Integrations - special entities int
 Most common examples are Twitch/YouTube integrations and application commands bots (applications invited with ``applications.commands``
 :attr:`scope <InstallParams.scopes>`).
 
-Classes
--------
+Discord Models
+---------------
 
 Integration
 ~~~~~~~~~~~

@@ -7,8 +7,8 @@ Channels
 
 This section documents everything related to channels and threads.
 
-Classes
--------
+Discord Models
+---------------
 
 TextChannel
 ~~~~~~~~~~~
@@ -149,14 +149,6 @@ ChannelFlags
 .. attributetable:: ChannelFlags
 
 .. autoclass:: ChannelFlags
-    :members:
-
-VoiceRegion
-~~~~~~~~~~~
-
-.. attributetable:: VoiceRegion
-
-.. autoclass:: VoiceRegion()
     :members:
 
 RawThreadDeleteEvent

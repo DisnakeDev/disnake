@@ -633,7 +633,7 @@ class MessageReference:
 
 
 class InteractionReference:
-    """|data_class|
+    """|discord_model|
 
     Represents an interaction being referenced in a message.
 
