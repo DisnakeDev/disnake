@@ -122,6 +122,10 @@ def test_init_enum_preserve_privates_and_dunders():
         _c_ = "c"
         _d = "d"
 
+    # Ensure only "a" is treated as a member...
+    assert WhackEnum.__members__ == {"a": WhackEnum.a}
+
+    # ...and that the rest is kept as-is
     assert not isinstance(b := WhackEnum.__b__, base)
     assert b == "b"
 
@@ -183,6 +187,7 @@ def test_init_enum_duplicate_value():
         b = 1
 
     assert Enum.a == Enum.b == 1
+    assert Enum.b.name == "a"
 
 
 def test_call_enum_success():
