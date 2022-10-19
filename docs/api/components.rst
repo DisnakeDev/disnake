@@ -178,10 +178,3 @@ TextInputStyle
     .. attribute:: long
 
         An alias for :attr:`paragraph`.
-
-Functions
----------
-
-.. autofunction:: disnake.ui.button(cls=disnake.ui.Button, *, style=ButtonStyle.secondary, label=None, disabled=False, custom_id=..., url=None, emoji=None, row=None)
-
-.. autofunction:: disnake.ui.select(cls=disnake.ui.Select, *, custom_id=..., placeholder=None, min_values=1, max_values=1, options=..., disabled=False, row=None)
