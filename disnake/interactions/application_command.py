@@ -19,7 +19,6 @@ __all__ = (
     "MessageCommandInteraction",
     "ApplicationCommandInteractionData",
     "ApplicationCommandInteractionDataOption",
-    "ApplicationCommandInteractionDataResolved",
     # aliases (we're trying to find out which one catches on)
     "CommandInteraction",
     "CmdInteraction",
@@ -317,10 +316,6 @@ class ApplicationCommandInteractionDataOption(Dict[str, Any]):
                 return option._get_chain_and_kwargs(chain + (option.name,))
             return chain, {o.name: o.value for o in self.options}
         return chain, {}
-
-
-# backwards compatibility
-ApplicationCommandInteractionDataResolved = InteractionDataResolved
 
 
 # People asked about shorter aliases, let's see which one catches on the most
