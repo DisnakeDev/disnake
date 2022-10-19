@@ -90,34 +90,34 @@ Documents
 .. toctree::
     :maxdepth: 1
 
-    Abstract Base Classes <abc.rst>
-    Activities <activities.rst>
-    Application Commands <app_commands.rst>
-    Application Info <app_info.rst>
-    Audit Logs <audit_logs.rst>
-    AutoMod <automod.rst>
-    Bot UI Kit <ui.rst>
-    Channels <channels.rst>
-    Clients <clients.rst>
-    Components <components.rst>
-    Emoji <emoji.rst>
-    Events <events.rst>
-    Exceptions and Warnings <exceptions.rst>
-    Guilds <guilds.rst>
-    Guild Scheduled Events <guild_scheduled_events.rst>
-    Integrations <integrations.rst>
-    Interactions <interactions.rst>
-    Invites <invites.rst>
-    Localization <localization.rst>
-    Members <members.rst>
-    Messages <messages.rst>
-    Miscellaneous <misc.rst>
-    Permissions <permissions.rst>
-    Roles <roles.rst>
-    Stage Instances <stage_instances.rst>
-    Stickers <stickers.rst>
-    Users <users.rst>
-    Utility functions <utils.rst>
-    Voice Related <voice.rst>
-    Webhooks <webhooks.rst>
-    Widgets <widgets.rst>
+    abc
+    activities
+    app_commands
+    app_info
+    audit_logs
+    automod
+    ui
+    channels
+    clients
+    components
+    emoji
+    events
+    exceptions
+    guilds
+    guild_scheduled_events
+    integrations
+    interactions
+    invites
+    localization
+    members
+    messages
+    misc
+    permissions
+    roles
+    stage_instances
+    stickers
+    users
+    utilities
+    voice
+    webhooks
+    widgets

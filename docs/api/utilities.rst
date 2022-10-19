@@ -4,8 +4,8 @@
 
 .. _disnake_utils:
 
-Utility Functions
-=================
+Utilities
+==========
 
 This section documents all functions under ``disnake.utils.*`` that are part of the public API.
 

@@ -2,7 +2,7 @@
 
 .. currentmodule:: disnake
 
-Voice Related
+Voice
 =============
 
 This section documents everything related to interaction with Discord voice.

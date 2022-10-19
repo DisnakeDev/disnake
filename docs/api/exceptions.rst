@@ -2,8 +2,8 @@
 
 .. currentmodule:: disnake
 
-Exceptions and Warning
-======================
+Exceptions and Warnings
+=======================
 
 This section documents exceptions and warnings thrown by the library and their hierarchy.
 
