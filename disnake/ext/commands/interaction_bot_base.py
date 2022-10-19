@@ -767,14 +767,14 @@ class InteractionBotBase(CommonBotBase):
         if not isinstance(self, disnake.Client):
             raise NotImplementedError("This method is only usable in disnake.Client subclasses")
 
-        if not self._command_sync.sync_commands or self._is_closed or self.loop.is_closed():
+        if not self._command_sync._sync_enabled or self._is_closed or self.loop.is_closed():
             return
 
         # We assume that all commands are already cached.
         # Sort all invokable commands between guild IDs:
         global_cmds, guild_cmds = self._ordered_unsynced_commands(self._test_guilds)
 
-        if global_cmds is not None and self._command_sync.sync_global_commands:
+        if self._command_sync.sync_global_commands and global_cmds is not None:
             # Update global commands first
             diff = _app_commands_diff(
                 global_cmds, self._connection._global_application_commands.values()
@@ -803,7 +803,7 @@ class InteractionBotBase(CommonBotBase):
         # Same process but for each specified guild individually.
         # Notice that we're not doing this for every single guild for optimisation purposes.
         # See the note in :meth:`_cache_application_commands` about guild app commands.
-        if guild_cmds is not None and self._command_sync.sync_guild_commands:
+        if self._command_sync.sync_guild_commands and guild_cmds is not None:
             for guild_id, cmds in guild_cmds.items():
                 current_guild_cmds = self._connection._guild_application_commands.get(guild_id, {})
                 diff = _app_commands_diff(cmds, current_guild_cmds.values())
@@ -862,7 +862,7 @@ class InteractionBotBase(CommonBotBase):
             raise NotImplementedError("This method is only usable in disnake.Client subclasses")
 
         if (
-            not self._command_sync.sync_commands
+            not self._command_sync._sync_enabled
             or self._sync_queued
             or not self.is_ready()
             or self._is_closed
@@ -1280,7 +1280,7 @@ class InteractionBotBase(CommonBotBase):
         interaction: :class:`disnake.ApplicationCommandInteraction`
             The interaction to process commands for.
         """
-        if self._command_sync.sync_commands and not self._sync_queued:
+        if self._command_sync._sync_enabled and not self._sync_queued:
             known_command = self.get_global_command(interaction.data.id)  # type: ignore
 
             if known_command is None:

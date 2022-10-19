@@ -136,6 +136,10 @@ class ApplicationCommandSyncFlags(BaseFlags):
         instance.sync_commands_debug = False
         return instance
 
+    @property
+    def _sync_enabled(self):
+        return self.sync_global_commands or self.sync_guild_commands
+
     @alias_flag_value
     def sync_commands(self):
         """:class:`bool`: Whether to sync app commands at all."""
