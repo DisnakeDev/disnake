@@ -1642,7 +1642,7 @@ class InteractionDataResolved(Dict[str, Any]):
         A mapping of IDs to users.
     roles: Dict[:class:`int`, :class:`Role`]
         A mapping of IDs to roles.
-    channels: Dict[:class:`int`, Channel]
+    channels: Dict[:class:`int`, Union[:class:`abc.GuildChannel`, :class:`Thread`, :class:`PartialMessageable`]]
         A mapping of IDs to partial channels (only ``id``, ``name`` and ``permissions`` are included,
         threads also have ``thread_metadata`` and ``parent_id``).
     messages: Dict[:class:`int`, :class:`Message`]
