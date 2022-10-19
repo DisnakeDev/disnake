@@ -276,11 +276,11 @@ class ApplicationCommandInteractionDataOption(Dict[str, Any]):
         super().__init__(data)
         self.name: str = data["name"]
         self.type: OptionType = try_enum(OptionType, data["type"])
-        value = data.get("value")
-        if value is not None:
+
+        self.value: Any = None
+        if (value := data.get("value")) is not None:
             self.value: Any = resolved.get_with_type(value, self.type, value)
-        else:
-            self.value: Any = None
+
         self.options: List[ApplicationCommandInteractionDataOption] = [
             ApplicationCommandInteractionDataOption(data=d, resolved=resolved)
             for d in data.get("options", [])
