@@ -1738,20 +1738,18 @@ class InteractionDataResolved(Dict[str, Any]):
     def get_with_type(self, key: Any, option_type: OptionType, default: Any = None):
         if isinstance(option_type, int):
             option_type = try_enum(OptionType, option_type)
+
         if option_type is OptionType.mentionable:
             key = int(key)
-            result = self.members.get(key)
-            if result is not None:
+            if (result := self.members.get(key)) is not None:
                 return result
-            result = self.users.get(key)
-            if result is not None:
+            if (result := self.users.get(key)) is not None:
                 return result
             return self.roles.get(key, default)
 
         if option_type is OptionType.user:
             key = int(key)
-            member = self.members.get(key)
-            if member is not None:
+            if (member := self.members.get(key)) is not None:
                 return member
             return self.users.get(key, default)
 
@@ -1770,23 +1768,17 @@ class InteractionDataResolved(Dict[str, Any]):
         if key is None:
             return None
 
-        res = self.members.get(key)
-        if res is not None:
+        if (res := self.members.get(key)) is not None:
             return res
-        res = self.users.get(key)
-        if res is not None:
+        if (res := self.users.get(key)) is not None:
             return res
-        res = self.roles.get(key)
-        if res is not None:
+        if (res := self.roles.get(key)) is not None:
             return res
-        res = self.channels.get(key)
-        if res is not None:
+        if (res := self.channels.get(key)) is not None:
             return res
-        res = self.messages.get(key)
-        if res is not None:
+        if (res := self.messages.get(key)) is not None:
             return res
-        res = self.attachments.get(key)
-        if res is not None:
+        if (res := self.attachments.get(key)) is not None:
             return res
 
         return None
