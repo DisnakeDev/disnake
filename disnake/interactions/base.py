@@ -1627,7 +1627,7 @@ class InteractionMessage(Message):
 
 
 class InteractionDataResolved(Dict[str, Any]):
-    """Represents the resolved data related to an interaction with an application command.
+    """Represents the resolved data related to an interaction.
 
     .. versionadded:: 2.1
 
