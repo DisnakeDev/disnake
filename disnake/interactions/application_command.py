@@ -275,7 +275,7 @@ class ApplicationCommandInteractionDataOption(Dict[str, Any]):
         self.type: OptionType = try_enum(OptionType, data["type"])
         value = data.get("value")
         if value is not None:
-            self.value: Any = resolved.get_with_type(value, self.type.value, value)
+            self.value: Any = resolved.get_with_type(value, self.type, value)
         else:
             self.value: Any = None
         self.options: List[ApplicationCommandInteractionDataOption] = [

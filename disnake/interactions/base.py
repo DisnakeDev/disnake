@@ -1736,9 +1736,6 @@ class InteractionDataResolved(Dict[str, Any]):
         )
 
     def get_with_type(self, key: Any, option_type: OptionType, default: Any = None):
-        if isinstance(option_type, int):
-            option_type = try_enum(OptionType, option_type)
-
         if option_type is OptionType.mentionable:
             key = int(key)
             if (result := self.members.get(key)) is not None:
