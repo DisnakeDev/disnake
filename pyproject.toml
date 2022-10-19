@@ -2,20 +2,21 @@
 
 [build-system]
 requires = [
-    "setuptools",
+    "poetry-core>=1.2.0",
+    "poetry-dynamic-versioning",
 ]
-build-backend = "poetry.core.masonry.api"
+build-backend = "poetry_dynamic_versioning.backend"
 
 [tool.poetry]
 name = "disnake"
-version = "2.7.0a"
+version = "0.0.0"
 description = "A Python wrapper for the Discord API"
 authors = ["Rapptz, EQUENOS"]
 license = "MIT"
 readme = "README.md"
 homepage = "https://disnake.dev/"
 repository = "https://github.com/DisnakeDev/disnake"
-documentation = "https://docs.disnake.dev/en/latest"
+documentation = "https://docs.disnake.dev/en/stable"
 keywords = ["discord", "api","bots"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -47,7 +48,6 @@ aiohttp = [
     {version = ">=3.7.0, <4", python = "<3.11"},
     {version = ">=3.8.2, <4", python = ">=3.11"},
 ]
-
 
 # speed
 orjson = { version = "~=3.6", optional = true }
@@ -116,6 +116,24 @@ taskipy = ">=1.10.1,<1.11.0"
 build = "^0.8.0"
 twine = "^4.0.1"
 
+[tool.poetry-dynamic-versioning]
+enable = true
+vcs = "git"
+bump = true
+style = "pep440"
+format-jinja = """
+    {%- if distance == 0 -%}
+        {{ serialize_pep440(base, stage, revision) }}
+    {%- elif revision is not none -%}
+        {{ serialize_pep440(base, stage, revision + 1, dev=distance, metadata=[commit]) }}
+    {%- else -%}
+        {{ serialize_pep440(bump_version(base), stage, revision, dev=distance, metadata=[commit]) }}
+    {%- endif -%}
+"""
+format-jinja-imports = [
+    { module = "packaging.version" },
+    { module = "packaging.version", item = "Version" },
+]
 
 [tool.black]
 line-length = 100

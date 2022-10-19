@@ -15,9 +15,11 @@ __title__ = "disnake"
 __author__ = "Rapptz, EQUENOS"
 __license__ = "MIT"
 __copyright__ = "Copyright 2015-present Rapptz, 2021-present EQUENOS"
-__version__ = "2.7.0a"
+from ._version import __version__
 
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)
+
+# isort: split
 
 import logging
 from typing import Literal, NamedTuple
