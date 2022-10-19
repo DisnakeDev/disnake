@@ -52,72 +52,8 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
     This class also subclasses :class:`.GroupMixin` to provide the functionality
     to manage commands.
 
-    Attributes
+    Parameters
     ----------
-    command_prefix
-        The command prefix is what the message content must contain initially
-        to have a command invoked. This prefix could either be a string to
-        indicate what the prefix should be, or a callable that takes in the bot
-        as its first parameter and :class:`disnake.Message` as its second
-        parameter and returns the prefix. This is to facilitate "dynamic"
-        command prefixes. This callable can be either a regular function or
-        a coroutine.
-
-        An empty string as the prefix always matches, enabling prefix-less
-        command invocation. While this may be useful in DMs it should be avoided
-        in servers, as it's likely to cause performance issues and unintended
-        command invocations.
-
-        The command prefix could also be an iterable of strings indicating that
-        multiple checks for the prefix should be used and the first one to
-        match will be the invocation prefix. You can get this prefix via
-        :attr:`.Context.prefix`. To avoid confusion empty iterables are not
-        allowed.
-
-        If the prefix is ``None``, the bot won't listen to any prefixes, and prefix
-        commands will not be processed. If you don't need prefix commands, consider
-        using :class:`InteractionBot` or :class:`AutoShardedInteractionBot` instead,
-        which are drop-in replacements, just without prefix command support.
-
-        .. note::
-
-            When passing multiple prefixes be careful to not pass a prefix
-            that matches a longer prefix occurring later in the sequence.  For
-            example, if the command prefix is ``('!', '!?')``  the ``'!?'``
-            prefix will never be matched to any message as the previous one
-            matches messages starting with ``!?``. This is especially important
-            when passing an empty string, it should always be last as no prefix
-            after it will be matched.
-    case_insensitive: :class:`bool`
-        Whether the commands should be case insensitive. Defaults to ``False``. This
-        attribute does not carry over to groups. You must set it to every group if
-        you require group commands to be case insensitive as well.
-    description: :class:`str`
-        The content prefixed into the default help message.
-    help_command: Optional[:class:`.HelpCommand`]
-        The help command implementation to use. This can be dynamically
-        set at runtime. To remove the help command pass ``None``. For more
-        information on implementing a help command, see :ref:`ext_commands_help_commands`.
-    owner_id: Optional[:class:`int`]
-        The user ID that owns the bot. If this is not set and is then queried via
-        :meth:`.is_owner` then it is fetched automatically using
-        :meth:`~.Bot.application_info`.
-    owner_ids: Optional[Collection[:class:`int`]]
-        The user IDs that owns the bot. This is similar to :attr:`owner_id`.
-        If this is not set and the application is team based, then it is
-        fetched automatically using :meth:`~.Bot.application_info`.
-        For performance reasons it is recommended to use a :class:`set`
-        for the collection. You cannot set both ``owner_id`` and ``owner_ids``.
-
-        .. versionadded:: 1.3
-
-    strip_after_prefix: :class:`bool`
-        Whether to strip whitespace characters after encountering the command
-        prefix. This allows for ``!   hello`` and ``!hello`` to both work if
-        the ``command_prefix`` is set to ``!``. Defaults to ``False``.
-
-        .. versionadded:: 1.7
-
     test_guilds: List[:class:`int`]
         The list of IDs of the guilds where you're going to test your application commands.
         Defaults to ``None``, which means global registration of commands across
@@ -148,12 +84,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
         .. versionchanged:: 2.4
             Changes the log level of corresponding messages from ``DEBUG`` to ``INFO`` or ``print``\\s them,
             instead of controlling whether they are enabled at all.
-    reload: :class:`bool`
-        Whether to enable automatic extension reloading on file modification for debugging.
-        Whenever you save an extension with reloading enabled the file will be automatically
-        reloaded for you so you do not have to reload the extension manually. Defaults to ``False``
 
-        .. versionadded:: 2.1
     localization_provider: :class:`.LocalizationProtocol`
         An implementation of :class:`.LocalizationProtocol` to use for localization of
         application commands.
@@ -169,6 +100,99 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
         Defaults to ``False``.
 
         .. versionadded:: 2.5
+
+    Attributes
+    ----------
+    command_prefix
+        The command prefix is what the message content must contain initially
+        to have a command invoked. This prefix could either be a string to
+        indicate what the prefix should be, or a callable that takes in the bot
+        as its first parameter and :class:`disnake.Message` as its second
+        parameter and returns the prefix. This is to facilitate "dynamic"
+        command prefixes. This callable can be either a regular function or
+        a coroutine.
+
+        An empty string as the prefix always matches, enabling prefix-less
+        command invocation. While this may be useful in DMs it should be avoided
+        in servers, as it's likely to cause performance issues and unintended
+        command invocations.
+
+        The command prefix could also be an iterable of strings indicating that
+        multiple checks for the prefix should be used and the first one to
+        match will be the invocation prefix. You can get this prefix via
+        :attr:`.Context.prefix`. To avoid confusion empty iterables are not
+        allowed.
+
+        If the prefix is ``None``, the bot won't listen to any prefixes, and prefix
+        commands will not be processed. If you don't need prefix commands, consider
+        using :class:`InteractionBot` or :class:`AutoShardedInteractionBot` instead,
+        which are drop-in replacements, just without prefix command support.
+
+        This can be provided as a parameter at creation.
+
+        .. note::
+
+            When passing multiple prefixes be careful to not pass a prefix
+            that matches a longer prefix occurring later in the sequence.  For
+            example, if the command prefix is ``('!', '!?')``  the ``'!?'``
+            prefix will never be matched to any message as the previous one
+            matches messages starting with ``!?``. This is especially important
+            when passing an empty string, it should always be last as no prefix
+            after it will be matched.
+    case_insensitive: :class:`bool`
+        Whether the commands should be case insensitive. Defaults to ``False``. This
+        attribute does not carry over to groups. You must set it to every group if
+        you require group commands to be case insensitive as well.
+
+        This can be provided as a parameter at creation.
+
+    description: :class:`str`
+        The content prefixed into the default help message.
+
+        This can be provided as a parameter at creation.
+
+    help_command: Optional[:class:`.HelpCommand`]
+        The help command implementation to use. This can be dynamically
+        set at runtime. To remove the help command pass ``None``. For more
+        information on implementing a help command, see :ref:`ext_commands_help_commands`.
+
+        This can be provided as a parameter at creation.
+
+    owner_id: Optional[:class:`int`]
+        The user ID that owns the bot. If this is not set and is then queried via
+        :meth:`.is_owner` then it is fetched automatically using
+        :meth:`~.Bot.application_info`.
+
+        This can be provided as a parameter at creation.
+
+    owner_ids: Optional[Collection[:class:`int`]]
+        The user IDs that owns the bot. This is similar to :attr:`owner_id`.
+        If this is not set and the application is team based, then it is
+        fetched automatically using :meth:`~.Bot.application_info`.
+        For performance reasons it is recommended to use a :class:`set`
+        for the collection. You cannot set both ``owner_id`` and ``owner_ids``.
+
+        This can be provided as a parameter at creation.
+
+        .. versionadded:: 1.3
+
+    strip_after_prefix: :class:`bool`
+        Whether to strip whitespace characters after encountering the command
+        prefix. This allows for ``!   hello`` and ``!hello`` to both work if
+        the ``command_prefix`` is set to ``!``. Defaults to ``False``.
+
+        This can be provided as a parameter at creation.
+
+        .. versionadded:: 1.7
+
+    reload: :class:`bool`
+        Whether to enable automatic extension reloading on file modification for debugging.
+        Whenever you save an extension with reloading enabled the file will be automatically
+        reloaded for you so you do not have to reload the extension manually. Defaults to ``False``
+
+        This can be provided as a parameter at creation.
+
+        .. versionadded:: 2.1
 
     i18n: :class:`.LocalizationProtocol`
         An implementation of :class:`.LocalizationProtocol` used for localization of
@@ -284,18 +308,8 @@ class InteractionBot(InteractionBotBase, disnake.Client):
     This class also subclasses InteractionBotBase to provide the functionality
     to manage application commands.
 
-    Attributes
+    Parameters
     ----------
-    owner_id: Optional[:class:`int`]
-        The user ID that owns the bot. If this is not set and is then queried via
-        :meth:`.is_owner` then it is fetched automatically using
-        :meth:`~.Bot.application_info`.
-    owner_ids: Optional[Collection[:class:`int`]]
-        The user IDs that owns the bot. This is similar to :attr:`owner_id`.
-        If this is not set and the application is team based, then it is
-        fetched automatically using :meth:`~.Bot.application_info`.
-        For performance reasons it is recommended to use a :class:`set`
-        for the collection. You cannot set both ``owner_id`` and ``owner_ids``.
     test_guilds: List[:class:`int`]
         The list of IDs of the guilds where you're going to test your application commands.
         Defaults to ``None``, which means global registration of commands across
@@ -326,12 +340,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
         .. versionchanged:: 2.4
             Changes the log level of corresponding messages from ``DEBUG`` to ``INFO`` or ``print``\\s them,
             instead of controlling whether they are enabled at all.
-    reload: :class:`bool`
-        Whether to enable automatic extension reloading on file modification for debugging.
-        Whenever you save an extension with reloading enabled the file will be automatically
-        reloaded for you so you do not have to reload the extension manually. Defaults to ``False``
 
-        .. versionadded:: 2.1
     localization_provider: :class:`.LocalizationProtocol`
         An implementation of :class:`.LocalizationProtocol` to use for localization of
         application commands.
@@ -347,6 +356,33 @@ class InteractionBot(InteractionBotBase, disnake.Client):
         Defaults to ``False``.
 
         .. versionadded:: 2.5
+
+    Attributes
+    ----------
+    owner_id: Optional[:class:`int`]
+        The user ID that owns the bot. If this is not set and is then queried via
+        :meth:`.is_owner` then it is fetched automatically using
+        :meth:`~.Bot.application_info`.
+
+        This can be provided as a parameter at creation.
+
+    owner_ids: Optional[Collection[:class:`int`]]
+        The user IDs that owns the bot. This is similar to :attr:`owner_id`.
+        If this is not set and the application is team based, then it is
+        fetched automatically using :meth:`~.Bot.application_info`.
+        For performance reasons it is recommended to use a :class:`set`
+        for the collection. You cannot set both ``owner_id`` and ``owner_ids``.
+
+        This can be provided as a parameter at creation.
+
+    reload: :class:`bool`
+        Whether to enable automatic extension reloading on file modification for debugging.
+        Whenever you save an extension with reloading enabled the file will be automatically
+        reloaded for you so you do not have to reload the extension manually. Defaults to ``False``
+
+        This can be provided as a parameter at creation.
+
+        .. versionadded:: 2.1
 
     i18n: :class:`.LocalizationProtocol`
         An implementation of :class:`.LocalizationProtocol` used for localization of

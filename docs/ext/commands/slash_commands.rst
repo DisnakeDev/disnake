@@ -42,7 +42,7 @@ For global registration, don't specify this parameter.
 
 Another useful parameter is ``sync_commands_debug``. If set to ``True``, you receive debug messages related to the
 app command registration by default, without having to change the log level of any loggers
-(see :class:`Bot.sync_commands_debug <ext.commands.Bot.sync_commands_debug>` for more info).
+(see the documentation on :class:`Bot <ext.commands.Bot>` for more info).
 This is useful if you want to figure out some registration details:
 
 .. code-block:: python3
@@ -534,7 +534,7 @@ For currently supported locales, see :class:`Locale`.
 
 .. note::
     You can supply your own custom localization provider by implementing :class:`.LocalizationProtocol`
-    and using the client's/bot's :attr:`localization_provider <ext.commands.Bot.localization_provider>` parameter.
+    and using the client's/bot's ``localization_provider`` parameter to  :class:`~ext.commands.Bot`.
     The ``.json`` handling mentioned in this section, as well as the :ref:`localizations_strict` section below only
     apply to the default implementation, :class:`.LocalizationStore`.
 
@@ -592,7 +592,7 @@ Strict Localization
 
 By default, missing keys that couldn't be found are silently ignored.
 To instead raise an exception when a key is missing, pass the ``strict_localization=True`` parameter to the client/bot constructor
-(see :attr:`Bot.strict_localization <ext.commands.Bot.strict_localization>`).
+(see the docs for the ``strict_localization`` parameter to :class:`~.ext.commands.Bot`).
 
 
 Customization
