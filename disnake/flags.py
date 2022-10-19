@@ -1544,7 +1544,7 @@ class MemberCacheFlags(BaseFlags):
     to enable or disable.
     Arguments are applied in order, similar to :class:`Permissions`.
 
-    The default value is all flags enabled.
+    The default value is all flags enabled except for debug messages.
 
     .. versionadded:: 1.5
 
