@@ -4,7 +4,19 @@ from __future__ import annotations
 
 import asyncio
 from datetime import timedelta
-from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union, cast, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    Mapping,
+    Optional,
+    Tuple,
+    TypeVar,
+    Union,
+    cast,
+    overload,
+)
 
 from .. import utils
 from ..app_commands import OptionChoice
@@ -67,6 +79,7 @@ if TYPE_CHECKING:
         Interaction as InteractionPayload,
         InteractionDataResolved as InteractionDataResolvedPayload,
     )
+    from ..types.snowflake import Snowflake
     from ..ui.action_row import Components, MessageUIComponent, ModalUIComponent
     from ..ui.modal import Modal
     from ..ui.view import View
@@ -77,7 +90,10 @@ if TYPE_CHECKING:
 
     AnyBot = Union[Bot, AutoShardedBot]
 
+
 MISSING: Any = utils.MISSING
+
+T = TypeVar("T")
 
 
 class Interaction:
@@ -1735,7 +1751,9 @@ class InteractionDataResolved(Dict[str, Any]):
             f"roles={self.roles!r} channels={self.channels!r} messages={self.messages!r} attachments={self.attachments!r}>"
         )
 
-    def get_with_type(self, key: Any, option_type: OptionType, default: Any = None):
+    def get_with_type(
+        self, key: Snowflake, option_type: OptionType, default: T = None
+    ) -> Union[Member, User, Role, InteractionChannel, Message, Attachment, T]:
         if option_type is OptionType.mentionable:
             key = int(key)
             if (result := self.members.get(key)) is not None:
@@ -1761,7 +1779,9 @@ class InteractionDataResolved(Dict[str, Any]):
 
         return default
 
-    def get(self, key: int):
+    def get(
+        self, key: Optional[int]
+    ) -> Optional[Union[Member, User, Role, InteractionChannel, Message, Attachment]]:
         if key is None:
             return None
 

@@ -199,11 +199,14 @@ class ApplicationCommandInteractionData(Dict[str, Any]):
         self.id: int = int(data["id"])
         self.name: str = data["name"]
         self.type: ApplicationCommandType = try_enum(ApplicationCommandType, data["type"])
+
         self.resolved = InteractionDataResolved(
             data=data.get("resolved", {}), state=state, guild_id=guild_id
         )
         self.target_id: Optional[int] = utils._get_as_snowflake(data, "target_id")
-        self.target: Optional[Union[User, Member, Message]] = self.resolved.get(self.target_id)  # type: ignore
+        target = self.resolved.get(self.target_id)
+        self.target: Optional[Union[User, Member, Message]] = target  # type: ignore
+
         self.options: List[ApplicationCommandInteractionDataOption] = [
             ApplicationCommandInteractionDataOption(data=d, resolved=self.resolved)
             for d in data.get("options", [])
