@@ -53,7 +53,14 @@ Button
     :members:
     :inherited-members:
 
-.. autofunction:: button(cls=Button, *, style=ButtonStyle.secondary, label=None, disabled=False, custom_id=..., url=None, emoji=None, row=None)
+BaseSelect
+~~~~~~~~~~
+
+.. attributetable:: BaseSelect
+
+.. autoclass:: BaseSelect
+   :members:
+   :inherited-members:
 
 Select
 ~~~~~~
@@ -64,7 +71,6 @@ Select
     :members:
     :inherited-members:
 
-.. autofunction:: select(cls=Select, *, custom_id=..., placeholder=None, min_values=1, max_values=1, options=..., disabled=False, row=None)
 
 Modal
 ~~~~~
@@ -81,3 +87,10 @@ TextInput
 
 .. autoclass:: TextInput
     :members:
+
+Functions
+---------
+
+.. autofunction:: button(cls=Button, *, style=ButtonStyle.secondary, label=None, disabled=False, custom_id=..., url=None, emoji=None, row=None)
+
+.. autofunction:: select(cls=Select, *, custom_id=..., placeholder=None, min_values=1, max_values=1, options=..., disabled=False, row=None)

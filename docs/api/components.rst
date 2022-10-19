@@ -19,38 +19,6 @@ This section documents everything related to
 Classes
 -------
 
-Modal
-~~~~~
-
-.. attributetable:: disnake.ui.Modal
-
-.. autoclass:: disnake.ui.Modal
-    :members:
-
-View
-~~~~
-
-.. attributetable:: disnake.ui.View
-
-.. autoclass:: disnake.ui.View
-    :members:
-
-Item
-~~~~
-
-.. attributetable:: disnake.ui.Item
-
-.. autoclass:: disnake.ui.Item
-    :members:
-
-WrappedComponent
-~~~~~~~~~~~~~~~~
-
-.. attributetable:: disnake.ui.WrappedComponent
-
-.. autoclass:: disnake.ui.WrappedComponent
-    :members:
-
 Component
 ~~~~~~~~~
 
@@ -75,24 +43,6 @@ Button
 .. autoclass:: Button()
     :members:
     :inherited-members:
-
-BaseSelect
-~~~~~~~~~~
-
-.. attributetable:: disnake.ui.BaseSelect
-
-.. autoclass:: disnake.ui.BaseSelect
-   :members:
-   :inherited-members:
-
-Select
-~~~~~~
-
-.. attributetable:: disnake.ui.Select
-
-.. autoclass:: disnake.ui.Select
-   :members:
-   :inherited-members:
 
 BaseSelectMenu
 ~~~~~~~~~~~~~~
