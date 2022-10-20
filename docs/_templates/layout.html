@@ -9,6 +9,7 @@
   <!-- begin extra head -->
 
   <!-- end extra head -->
+  <link rel="stylesheet" href="{{ pathto('_static/icons.css', 1)|e }}" type="text/css" />
   {%- block css %}
   {%- for css in css_files %}
     {%- if css|attr("filename") %}
@@ -20,7 +21,6 @@
   {%- endblock %}
   <link rel="stylesheet" href="{{ pathto('_static/style.css', 1)|e }}" type="text/css" />
   <link rel="stylesheet" href="{{ pathto('_static/codeblocks.css', 1) }}" type="text/css" />
-  <link rel="stylesheet" href="{{ pathto('_static/icons.css', 1)|e }}" type="text/css" />
   {%- block scripts %}
   {% if pagename.endswith("api") %}
     <script type="text/javascript" src="{{ pathto('_static/api_redirect.js', 1) }}"></script>
