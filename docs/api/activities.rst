@@ -17,6 +17,7 @@ BaseActivity
 
 .. autoclass:: BaseActivity
     :members:
+    :inherited-members:
 
 Activity
 ~~~~~~~~
@@ -25,6 +26,7 @@ Activity
 
 .. autoclass:: Activity
     :members:
+    :inherited-members:
 
 Spotify
 ~~~~~~~
@@ -33,6 +35,7 @@ Spotify
 
 .. autoclass:: Spotify()
     :members:
+    :inherited-members:
 
 Game
 ~~~~
@@ -41,6 +44,7 @@ Game
 
 .. autoclass:: Game
     :members:
+    :inherited-members:
 
 Streaming
 ~~~~~~~~~
@@ -49,6 +53,7 @@ Streaming
 
 .. autoclass:: Streaming
     :members:
+    :inherited-members:
 
 CustomActivity
 ~~~~~~~~~~~~~~
@@ -57,6 +62,7 @@ CustomActivity
 
 .. autoclass:: CustomActivity
     :members:
+    :inherited-members:
 
 Enumerations
 ------------
