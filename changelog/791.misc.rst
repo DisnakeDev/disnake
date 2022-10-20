@@ -1,0 +1,1 @@
+Stop using deprecated ``pkg_resources`` in the cli for displaying the version.
