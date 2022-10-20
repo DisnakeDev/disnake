@@ -105,8 +105,8 @@ AutoModActionType
 
         .. note::
             This action type is only available for rules with trigger type
-            :attr:`~AutoModTriggerType.keyword`, and :attr:`~Permissions.moderate_members`
-            permissions are required to use it.
+            :attr:`~AutoModTriggerType.keyword` or :attr:`~AutoModTriggerType.mention_spam`,
+            and :attr:`~Permissions.moderate_members` permissions are required to use it.
 
 AutoModEventType
 ~~~~~~~~~~~~~~~~

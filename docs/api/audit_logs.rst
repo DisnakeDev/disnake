@@ -1639,7 +1639,27 @@ AuditLogAction
 
         - ``channel``: A :class:`~abc.GuildChannel`, :class:`Thread` or :class:`Object` with the channel ID where the message got blocked.
         - ``rule_name``: A :class:`str` with the name of the rule that matched.
-        - ``rule_trigger_type``: A :class:`AutoModTriggerType` value with the trigger type of the rule.
+        - ``rule_trigger_type``: An :class:`AutoModTriggerType` value with the trigger type of the rule.
+
+    .. attribute:: automod_send_alert_message
+
+        An alert message was sent by an auto moderation rule.
+
+        When this is the action, the type of :attr:`~AuditLogEntry.target` is
+        the :class:`Member` or :class:`User` who had their message flagged.
+
+        See :attr:`automod_block_message` for more information on how the
+        :attr:`~AuditLogEntry.extra` field is set.
+
+    .. attribute:: automod_timeout
+
+        A user was timed out by an auto moderation rule.
+
+        When this is the action, the type of :attr:`~AuditLogEntry.target` is
+        the :class:`Member` or :class:`User` who was timed out.
+
+        See :attr:`automod_block_message` for more information on how the
+        :attr:`~AuditLogEntry.extra` field is set.
 
 AuditLogActionCategory
 ~~~~~~~~~~~~~~~~~~~~~~
