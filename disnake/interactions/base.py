@@ -1726,6 +1726,7 @@ class InteractionDataResolved(Dict[str, Any]):
                     )
                 )
             else:
+                # TODO: guild_directory is not messageable
                 self.channels[channel_id] = PartialMessageable(
                     state=state, id=channel_id, type=try_enum(ChannelType, channel["type"])
                 )
