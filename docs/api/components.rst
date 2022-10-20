@@ -47,18 +47,18 @@ Button
 BaseSelectMenu
 ~~~~~~~~~~~~~~
 
-.. attributetable:: disnake.BaseSelectMenu
+.. attributetable:: BaseSelectMenu
 
-.. autoclass:: disnake.BaseSelectMenu
+.. autoclass:: BaseSelectMenu
     :members:
     :inherited-members:
 
 SelectMenu
 ~~~~~~~~~~
 
-.. attributetable:: disnake.SelectMenu
+.. attributetable:: SelectMenu
 
-.. autoclass:: disnake.SelectMenu()
+.. autoclass:: SelectMenu()
     :members:
     :inherited-members:
 
