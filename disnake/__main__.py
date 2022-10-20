@@ -46,7 +46,7 @@ def core(parser: argparse.ArgumentParser, args):
 
 _interaction_bot_init = """super().__init__(**kwargs)"""
 _commands_bot_init = (
-    """super().__init__(command_prefix=commands.when_mentioned_or("{prefix}"), **kwargs)"""
+    'super().__init__(command_prefix=commands.when_mentioned_or("{prefix}"), **kwargs)'
 )
 _bot_template = """#!/usr/bin/env python3
 
