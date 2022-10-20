@@ -1,1 +1,0 @@
-Explicitly type activity types with literal return values.

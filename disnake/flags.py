@@ -1,27 +1,4 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
@@ -36,6 +13,7 @@ from typing import (
     Generic,
     Iterator,
     List,
+    NoReturn,
     Optional,
     Sequence,
     Tuple,
@@ -46,7 +24,7 @@ from typing import (
 )
 
 from .enums import UserFlags
-from .utils import MISSING
+from .utils import MISSING, _generated
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -80,6 +58,10 @@ class flag_value(Generic[T]):
                     f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and flags of '{other.__class__.__name__}'"
                 )
             return other._from_value(self.flag | other.value)
+        if not isinstance(other, flag_value):
+            raise TypeError(
+                f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and {other.__class__}"
+            )
         if self._parent is not other._parent:
             raise TypeError(
                 f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and flags of '{other._parent.__name__}'"
@@ -199,7 +181,7 @@ class BaseFlags:
         if isinstance(other, flag_value):
             if self.__class__ is not other._parent:
                 raise TypeError(
-                    f"unsupported operand type(s) for |: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
+                    f"unsupported operand type(s) for |=: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
                 )
             self.value |= other.flag
             return self
@@ -214,7 +196,7 @@ class BaseFlags:
         if isinstance(other, flag_value):
             if self.__class__ is not other._parent:
                 raise TypeError(
-                    f"unsupported operand type(s) for |: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
+                    f"unsupported operand type(s) for ^: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
                 )
             return self._from_value(self.value ^ other.flag)
         if not isinstance(other, self.__class__):
@@ -227,7 +209,7 @@ class BaseFlags:
         if isinstance(other, flag_value):
             if self.__class__ is not other._parent:
                 raise TypeError(
-                    f"unsupported operand type(s) for |: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
+                    f"unsupported operand type(s) for ^=: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
                 )
             self.value ^= other.flag
             return self
@@ -344,6 +326,7 @@ class SystemChannelFlags(BaseFlags, inverted=True):
 
     To construct an object you can pass keyword arguments denoting the flags
     to enable or disable.
+    Arguments are applied in order, similar to :class:`Permissions`.
 
     .. container:: operations
 
@@ -424,6 +407,19 @@ class SystemChannelFlags(BaseFlags, inverted=True):
     """
 
     __slots__ = ()
+
+    if TYPE_CHECKING:
+
+        @_generated
+        def __init__(
+            self,
+            *,
+            guild_reminder_notifications: bool = ...,
+            join_notification_replies: bool = ...,
+            join_notifications: bool = ...,
+            premium_subscriptions: bool = ...,
+        ):
+            ...
 
     # For some reason the flags for system channels are "inverted"
     # ergo, if they're set then it means "suppress" (off in the GUI toggle)
@@ -559,6 +555,24 @@ class MessageFlags(BaseFlags):
     """
 
     __slots__ = ()
+
+    if TYPE_CHECKING:
+
+        @_generated
+        def __init__(
+            self,
+            *,
+            crossposted: bool = ...,
+            ephemeral: bool = ...,
+            failed_to_mention_roles_in_thread: bool = ...,
+            has_thread: bool = ...,
+            is_crossposted: bool = ...,
+            loading: bool = ...,
+            source_message_deleted: bool = ...,
+            suppress_embeds: bool = ...,
+            urgent: bool = ...,
+        ):
+            ...
 
     @flag_value
     def crossposted(self):
@@ -713,6 +727,32 @@ class PublicUserFlags(BaseFlags):
 
     __slots__ = ()
 
+    if TYPE_CHECKING:
+
+        @_generated
+        def __init__(
+            self,
+            *,
+            bug_hunter: bool = ...,
+            bug_hunter_level_2: bool = ...,
+            discord_certified_moderator: bool = ...,
+            early_supporter: bool = ...,
+            early_verified_bot_developer: bool = ...,
+            http_interactions_bot: bool = ...,
+            hypesquad: bool = ...,
+            hypesquad_balance: bool = ...,
+            hypesquad_bravery: bool = ...,
+            hypesquad_brilliance: bool = ...,
+            partner: bool = ...,
+            spammer: bool = ...,
+            staff: bool = ...,
+            system: bool = ...,
+            team_user: bool = ...,
+            verified_bot: bool = ...,
+            verified_bot_developer: bool = ...,
+        ):
+            ...
+
     @flag_value
     def staff(self):
         """:class:`bool`: Returns ``True`` if the user is a Discord Employee."""
@@ -825,6 +865,7 @@ class Intents(BaseFlags):
 
     To construct an object you can pass keyword arguments denoting the flags
     to enable or disable.
+    Arguments are applied in order, similar to :class:`Permissions`.
 
     This is used to disable certain gateway features that are unnecessary to
     run your bot. To make use of this, it is passed to the ``intents`` keyword
@@ -917,6 +958,44 @@ class Intents(BaseFlags):
     """
 
     __slots__ = ()
+
+    @overload
+    @_generated
+    def __init__(
+        self,
+        value: Optional[int] = None,
+        *,
+        automod: bool = ...,
+        automod_configuration: bool = ...,
+        automod_execution: bool = ...,
+        bans: bool = ...,
+        dm_messages: bool = ...,
+        dm_reactions: bool = ...,
+        dm_typing: bool = ...,
+        emojis: bool = ...,
+        emojis_and_stickers: bool = ...,
+        guild_messages: bool = ...,
+        guild_reactions: bool = ...,
+        guild_scheduled_events: bool = ...,
+        guild_typing: bool = ...,
+        guilds: bool = ...,
+        integrations: bool = ...,
+        invites: bool = ...,
+        members: bool = ...,
+        message_content: bool = ...,
+        messages: bool = ...,
+        presences: bool = ...,
+        reactions: bool = ...,
+        typing: bool = ...,
+        voice_states: bool = ...,
+        webhooks: bool = ...,
+    ):
+        ...
+
+    @overload
+    @_generated
+    def __init__(self: NoReturn):
+        ...
 
     def __init__(self, value: Optional[int] = None, **kwargs: bool):
         if value is not None:
@@ -1463,6 +1542,7 @@ class MemberCacheFlags(BaseFlags):
 
     To construct an object you can pass keyword arguments denoting the flags
     to enable or disable.
+    Arguments are applied in order, similar to :class:`Permissions`.
 
     The default value is all flags enabled.
 
@@ -1549,6 +1629,16 @@ class MemberCacheFlags(BaseFlags):
     """
 
     __slots__ = ()
+
+    @overload
+    @_generated
+    def __init__(self, *, joined: bool = ..., voice: bool = ...):
+        ...
+
+    @overload
+    @_generated
+    def __init__(self: NoReturn):
+        ...
 
     def __init__(self, **kwargs: bool):
         self.value = all_flags_value(self.VALID_FLAGS)
@@ -1720,6 +1810,24 @@ class ApplicationFlags(BaseFlags):
 
     __slots__ = ()
 
+    if TYPE_CHECKING:
+
+        @_generated
+        def __init__(
+            self,
+            *,
+            application_command_badge: bool = ...,
+            embedded: bool = ...,
+            gateway_guild_members: bool = ...,
+            gateway_guild_members_limited: bool = ...,
+            gateway_message_content: bool = ...,
+            gateway_message_content_limited: bool = ...,
+            gateway_presence: bool = ...,
+            gateway_presence_limited: bool = ...,
+            verification_pending_guild_limit: bool = ...,
+        ):
+            ...
+
     @flag_value
     def gateway_presence(self):
         """:class:`bool`: Returns ``True`` if the application is verified and is allowed to
@@ -1871,10 +1979,29 @@ class ChannelFlags(BaseFlags):
 
     __slots__ = ()
 
+    if TYPE_CHECKING:
+
+        @_generated
+        def __init__(self, *, pinned: bool = ..., require_tag: bool = ...):
+            ...
+
     @flag_value
     def pinned(self):
-        """:class:`bool`: Returns ``True`` if the thread is pinned."""
+        """:class:`bool`: Returns ``True`` if the thread is pinned.
+
+        This only applies to channels of type :class:`Thread`.
+        """
         return 1 << 1
+
+    @flag_value
+    def require_tag(self):
+        """:class:`bool`: Returns ``True`` if the channel requires all newly created threads to have a tag.
+
+        This only applies to channels of type :class:`ForumChannel`.
+
+        .. versionadded:: 2.6
+        """
+        return 1 << 4
 
 
 class AutoModKeywordPresets(ListBaseFlags):
@@ -1946,6 +2073,12 @@ class AutoModKeywordPresets(ListBaseFlags):
     """
 
     __slots__ = ()
+
+    if TYPE_CHECKING:
+
+        @_generated
+        def __init__(self, *, profanity: bool = ..., sexual_content: bool = ..., slurs: bool = ...):
+            ...
 
     @classmethod
     def all(cls: Type[AutoModKeywordPresets]) -> AutoModKeywordPresets:

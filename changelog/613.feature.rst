@@ -1,1 +1,0 @@
-Support passing raw integer value to :class:`Intents` constructor.

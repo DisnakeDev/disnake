@@ -1,10 +1,14 @@
+# SPDX-License-Identifier: MIT
+
+"""
+A simple paginator example using views and buttons.
+"""
+
 import os
 from typing import List
 
 import disnake
 from disnake.ext import commands
-
-bot = commands.Bot(command_prefix=commands.when_mentioned)
 
 
 # Defines a simple paginator of buttons for the embed.
@@ -12,70 +16,56 @@ class Menu(disnake.ui.View):
     def __init__(self, embeds: List[disnake.Embed]):
         super().__init__(timeout=None)
         self.embeds = embeds
-        self.embed_count = 0
-
-        self.first_page.disabled = True
-        self.prev_page.disabled = True
+        self.index = 0
 
         # Sets the footer of the embeds with their respective page numbers.
         for i, embed in enumerate(self.embeds):
             embed.set_footer(text=f"Page {i + 1} of {len(self.embeds)}")
 
-    @disnake.ui.button(emoji="⏪", style=disnake.ButtonStyle.blurple)
-    async def first_page(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
-        self.embed_count = 0
-        embed = self.embeds[self.embed_count]
-        embed.set_footer(text=f"Page 1 of {len(self.embeds)}")
+        self._update_state()
 
-        self.first_page.disabled = True
-        self.prev_page.disabled = True
-        self.next_page.disabled = False
-        self.last_page.disabled = False
-        await interaction.response.edit_message(embed=embed, view=self)
+    def _update_state(self) -> None:
+        self.first_page.disabled = self.prev_page.disabled = self.index == 0
+        self.last_page.disabled = self.next_page.disabled = self.index == len(self.embeds) - 1
+
+    @disnake.ui.button(emoji="⏪", style=disnake.ButtonStyle.blurple)
+    async def first_page(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
+        self.index = 0
+        self._update_state()
+
+        await inter.response.edit_message(embed=self.embeds[self.index], view=self)
 
     @disnake.ui.button(emoji="◀", style=disnake.ButtonStyle.secondary)
-    async def prev_page(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
-        self.embed_count -= 1
-        embed = self.embeds[self.embed_count]
+    async def prev_page(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
+        self.index -= 1
+        self._update_state()
 
-        self.next_page.disabled = False
-        self.last_page.disabled = False
-        if self.embed_count == 0:
-            self.first_page.disabled = True
-            self.prev_page.disabled = True
-        await interaction.response.edit_message(embed=embed, view=self)
+        await inter.response.edit_message(embed=self.embeds[self.index], view=self)
 
-    @disnake.ui.button(emoji="❌", style=disnake.ButtonStyle.red)
-    async def remove(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
-        await interaction.response.edit_message(view=None)
+    @disnake.ui.button(emoji="🗑️", style=disnake.ButtonStyle.red)
+    async def remove(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
+        await inter.response.edit_message(view=None)
 
     @disnake.ui.button(emoji="▶", style=disnake.ButtonStyle.secondary)
-    async def next_page(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
-        self.embed_count += 1
-        embed = self.embeds[self.embed_count]
+    async def next_page(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
+        self.index += 1
+        self._update_state()
 
-        self.first_page.disabled = False
-        self.prev_page.disabled = False
-        if self.embed_count == len(self.embeds) - 1:
-            self.next_page.disabled = True
-            self.last_page.disabled = True
-        await interaction.response.edit_message(embed=embed, view=self)
+        await inter.response.edit_message(embed=self.embeds[self.index], view=self)
 
     @disnake.ui.button(emoji="⏩", style=disnake.ButtonStyle.blurple)
-    async def last_page(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
-        self.embed_count = len(self.embeds) - 1
-        embed = self.embeds[self.embed_count]
+    async def last_page(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
+        self.index = len(self.embeds) - 1
+        self._update_state()
 
-        self.first_page.disabled = False
-        self.prev_page.disabled = False
-        self.next_page.disabled = True
-        self.last_page.disabled = True
-        await interaction.response.edit_message(embed=embed, view=self)
+        await inter.response.edit_message(embed=self.embeds[self.index], view=self)
+
+
+bot = commands.Bot(command_prefix=commands.when_mentioned)
 
 
 @bot.command()
 async def paginator(ctx: commands.Context):
-
     # Creates the embeds as a list.
     embeds = [
         disnake.Embed(
@@ -99,4 +89,10 @@ async def paginator(ctx: commands.Context):
     await ctx.send(embed=embeds[0], view=Menu(embeds))
 
 
-bot.run(os.getenv("BOT_TOKEN"))
+@bot.event
+async def on_ready():
+    print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------")
+
+
+if __name__ == "__main__":
+    bot.run(os.getenv("BOT_TOKEN"))

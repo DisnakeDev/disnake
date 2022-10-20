@@ -1,27 +1,4 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
@@ -65,7 +42,7 @@ from .channel import (
     _guild_channel_factory,
 )
 from .emoji import Emoji
-from .enums import ApplicationCommandType, ChannelType, ComponentType, Status, try_enum
+from .enums import ApplicationCommandType, ChannelType, ComponentType, MessageType, Status, try_enum
 from .flags import ApplicationFlags, Intents, MemberCacheFlags
 from .guild import Guild
 from .guild_scheduled_event import GuildScheduledEvent
@@ -201,11 +178,20 @@ class ConnectionState:
         hooks: Dict[str, Callable],
         http: HTTPClient,
         loop: asyncio.AbstractEventLoop,
-        **options: Any,
+        max_messages: Optional[int] = 1000,
+        application_id: Optional[int] = None,
+        heartbeat_timeout: float = 60.0,
+        guild_ready_timeout: float = 2.0,
+        allowed_mentions: Optional[AllowedMentions] = None,
+        activity: Optional[BaseActivity] = None,
+        status: Optional[Union[str, Status]] = None,
+        intents: Optional[Intents] = None,
+        chunk_guilds_at_startup: Optional[bool] = None,
+        member_cache_flags: Optional[MemberCacheFlags] = None,
     ) -> None:
         self.loop: asyncio.AbstractEventLoop = loop
         self.http: HTTPClient = http
-        self.max_messages: Optional[int] = options.get("max_messages", 1000)
+        self.max_messages: Optional[int] = max_messages
         if self.max_messages is not None and self.max_messages <= 0:
             self.max_messages = 1000
 
@@ -214,67 +200,65 @@ class ConnectionState:
         self.hooks: Dict[str, Callable] = hooks
         self.shard_count: Optional[int] = None
         self._ready_task: Optional[asyncio.Task] = None
-        self.application_id: Optional[int] = utils._get_as_snowflake(options, "application_id")
-        self.heartbeat_timeout: float = options.get("heartbeat_timeout", 60.0)
-        self.guild_ready_timeout: float = options.get("guild_ready_timeout", 2.0)
+        self.application_id: Optional[int] = None if application_id is None else int(application_id)
+        self.heartbeat_timeout: float = heartbeat_timeout
+        self.guild_ready_timeout: float = guild_ready_timeout
         if self.guild_ready_timeout < 0:
-            raise ValueError("guild_ready_timeout cannot be negative")
-
-        allowed_mentions = options.get("allowed_mentions")
+            raise ValueError("guild_ready_timeout cannot be negative.")
 
         if allowed_mentions is not None and not isinstance(allowed_mentions, AllowedMentions):
-            raise TypeError("allowed_mentions parameter must be AllowedMentions")
+            raise TypeError("allowed_mentions parameter must be AllowedMentions.")
 
         self.allowed_mentions: Optional[AllowedMentions] = allowed_mentions
         self._chunk_requests: Dict[Union[int, str], ChunkRequest] = {}
 
-        activity = options.get("activity", None)
         if activity:
             if not isinstance(activity, BaseActivity):
                 raise TypeError("activity parameter must derive from BaseActivity.")
 
-            activity = activity.to_dict()
+            self._activity: Optional[ActivityPayload] = activity.to_dict()
+        else:
+            self._activity: Optional[ActivityPayload] = None
 
-        status = options.get("status", None)
+        self._status: Optional[str] = None
         if status:
-            if status is Status.offline:
-                status = "invisible"
-            else:
-                status = str(status)
+            self._status = "invisible" if status is Status.offline else str(status)
 
-        intents = options.get("intents", None)
         if intents is not None:
             if not isinstance(intents, Intents):
-                raise TypeError(f"intents parameter must be Intent not {type(intents)!r}")
-        else:
-            intents = Intents.default()
+                raise TypeError(f"intents parameter must be Intents, not {type(intents)!r}.")
 
-        if not intents.guilds:
-            _log.warning("Guilds intent seems to be disabled. This may cause state related issues.")
-
-        self._chunk_guilds: bool = options.get("chunk_guilds_at_startup", intents.members)
-
-        # Ensure these two are set properly
-        if not intents.members and self._chunk_guilds:
-            raise ValueError("Intents.members must be enabled to chunk guilds at startup.")
-
-        cache_flags = options.get("member_cache_flags", None)
-        if cache_flags is None:
-            cache_flags = MemberCacheFlags.from_intents(intents)
-        else:
-            if not isinstance(cache_flags, MemberCacheFlags):
-                raise TypeError(
-                    f"member_cache_flags parameter must be MemberCacheFlags not {type(cache_flags)!r}"
+            if not intents.guilds:
+                _log.warning(
+                    "Guilds intent seems to be disabled. This may cause state related issues."
                 )
 
-            cache_flags._verify_intents(intents)
+            self._intents: Intents = intents
+        else:
+            self._intents: Intents = Intents.default()
 
-        self.member_cache_flags: MemberCacheFlags = cache_flags
-        self._activity: Optional[ActivityPayload] = activity
-        self._status: Optional[str] = status
-        self._intents: Intents = intents
+        self._chunk_guilds: bool = (
+            self._intents.members if chunk_guilds_at_startup is None else chunk_guilds_at_startup
+        )
 
-        if not intents.members or cache_flags._empty:
+        # Ensure these two are set properly
+        if not self._intents.members and self._chunk_guilds:
+            raise ValueError("Intents.members must be enabled to chunk guilds at startup.")
+
+        if member_cache_flags is None:
+            member_cache_flags = MemberCacheFlags.from_intents(self._intents)
+        else:
+            if not isinstance(member_cache_flags, MemberCacheFlags):
+                raise TypeError(
+                    "member_cache_flags parameter must be MemberCacheFlags, "
+                    f"not {type(member_cache_flags)!r}"
+                )
+
+            member_cache_flags._verify_intents(self._intents)
+
+        self.member_cache_flags: MemberCacheFlags = member_cache_flags
+
+        if not self._intents.members or member_cache_flags._empty:
             self.store_user = self.create_user
             self.deref_user = self.deref_user_no_intents
 
@@ -509,14 +493,14 @@ class ConnectionState:
         self._guild_application_commands.pop(guild_id, None)
 
     def _get_global_command_named(
-        self, name: str, cmd_type: ApplicationCommandType = None
+        self, name: str, cmd_type: Optional[ApplicationCommandType] = None
     ) -> Optional[APIApplicationCommand]:
         for cmd in self._global_application_commands.values():
             if cmd.name == name and (cmd_type is None or cmd.type is cmd_type):
                 return cmd
 
     def _get_guild_command_named(
-        self, guild_id: int, name: str, cmd_type: ApplicationCommandType = None
+        self, guild_id: int, name: str, cmd_type: Optional[ApplicationCommandType] = None
     ) -> Optional[APIApplicationCommand]:
         granula = self._guild_application_commands.get(guild_id, {})
         for cmd in granula.values():
@@ -606,7 +590,8 @@ class ConnectionState:
         )
 
     def _get_guild_channel(
-        self, data: Union[MessagePayload, gateway.TypingStartEvent]
+        self,
+        data: Union[MessagePayload, gateway.TypingStartEvent],
     ) -> Tuple[Union[PartialChannel, Thread], Optional[Guild]]:
         channel_id = int(data["channel_id"])
         try:
@@ -774,15 +759,38 @@ class ConnectionState:
         self.dispatch("message", message)
         if self._messages is not None:
             self._messages.append(message)
-        # we ensure that the channel is a type that implements last_message_id
-        if channel and channel.__class__ in (TextChannel, Thread, VoiceChannel):
-            channel.last_message_id = message.id  # type: ignore
+
+        if channel:
+            # we ensure that the channel is a type that implements last_message_id
+            if channel.__class__ in (TextChannel, Thread, VoiceChannel):
+                channel.last_message_id = message.id  # type: ignore
+            # Essentially, messages *don't* count towards message_count, if:
+            # - they're the thread starter message
+            # - or, they're the initial message of a forum channel thread (which uses MessageType.default)
+            # This mirrors the current client and API behavior.
+            if channel.__class__ is Thread and not (
+                message.type is MessageType.thread_starter_message
+                or (
+                    type(channel.parent) is ForumChannel  # type: ignore
+                    and channel.id == message.id
+                )
+            ):
+                channel.total_message_sent += 1  # type: ignore
+                channel.message_count += 1  # type: ignore
 
     def parse_message_delete(self, data: gateway.MessageDeleteEvent) -> None:
         raw = RawMessageDeleteEvent(data)
         found = self._get_message(raw.message_id)
         raw.cached_message = found
         self.dispatch("raw_message_delete", raw)
+
+        # the initial message isn't counted, and hence shouldn't be subtracted from the count either
+        if raw.message_id != raw.channel_id:
+            guild = self._get_guild(raw.guild_id)
+            thread = guild and guild.get_thread(raw.channel_id)
+            if thread:
+                thread.message_count = max(0, thread.message_count - 1)
+
         if self._messages is not None and found is not None:
             self.dispatch("message_delete", found)
             self._messages.remove(found)
@@ -797,6 +805,14 @@ class ConnectionState:
             found_messages = []
         raw.cached_messages = found_messages
         self.dispatch("raw_bulk_message_delete", raw)
+        guild = self._get_guild(raw.guild_id)
+        thread = guild and guild.get_thread(raw.channel_id)
+        if thread:
+            to_subtract = len(raw.message_ids)
+            # the initial message isn't counted, and hence shouldn't be subtracted from the count either
+            if raw.channel_id in raw.message_ids:
+                to_subtract -= 1
+            thread.message_count = max(0, thread.message_count - to_subtract)
         if found_messages:
             self.dispatch("bulk_message_delete", found_messages)
             for msg in found_messages:

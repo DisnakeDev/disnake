@@ -1,3 +1,5 @@
+.. SPDX-License-Identifier: MIT
+
 .. currentmodule:: disnake
 
 API Reference
@@ -256,6 +258,43 @@ This section documents events related to :class:`Client` and its connectivity to
         exception.
     :param kwargs: The keyword arguments for the event that raised the
         exception.
+
+.. function:: on_gateway_error(event, data, shard_id, exc)
+
+    When a (known) gateway event cannot be parsed, a traceback is printed to
+    stderr and the exception is ignored by default. This should generally
+    not happen and is usually either a library issue, or caused by a breaking API change.
+
+    To change this behaviour, for example to completely stop the bot, this event can be overridden.
+
+    This can also be disabled completely by passing ``enable_gateway_error_handler=False``
+    to the client on initialization, restoring the pre-v2.6 behavior.
+
+    .. versionadded:: 2.6
+
+    .. note::
+        ``on_gateway_error`` will only be dispatched to :meth:`Client.event`.
+
+        It will not be received by :meth:`Client.wait_for`, or, if used,
+        :ref:`ext_commands_api_bot` listeners such as
+        :meth:`~ext.commands.Bot.listen` or :meth:`~ext.commands.Cog.listener`.
+
+    .. note::
+        This will not be dispatched for exceptions that occur while parsing ``READY`` and
+        ``RESUMED`` event payloads, as exceptions in these events are considered fatal.
+
+    :param event: The name of the gateway event that was the cause of the exception,
+        for example ``MESSAGE_CREATE``.
+    :type event: :class:`str`
+
+    :param data: The raw event payload.
+    :type data: :class:`Any`
+
+    :param shard_id: The ID of the shard the exception occurred in, if applicable.
+    :type shard_id: Optional[:class:`int`]
+
+    :param exc: The exception that was raised.
+    :type exc: :class:`Exception`
 
 .. function:: on_ready()
 
@@ -1306,7 +1345,7 @@ This section documents events related to Discord chat messages.
     will return a :class:`Message` object that represents the message before the content was modified.
 
     Due to the inherently raw nature of this event, the data parameter coincides with
-    the raw data given by the `gateway <https://discord.com/developers/docs/topics/gateway#message-update>`_.
+    the raw data given by the :ddocs:`gateway <topics/gateway-events#message-update>`.
 
     Since the data payload can be partial, care must be taken when accessing stuff in the dictionary.
     One example of a common case of partial data is when the ``'content'`` key is inaccessible. This
@@ -2313,7 +2352,10 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.default_auto_archive_duration`
         - :attr:`~AuditLogDiff.user_limit`
         - :attr:`~AuditLogDiff.slowmode_delay`
+        - :attr:`~AuditLogDiff.default_thread_slowmode_delay`
         - :attr:`~AuditLogDiff.nsfw`
+        - :attr:`~AuditLogDiff.available_tags`
+        - :attr:`~AuditLogDiff.default_reaction`
 
     .. attribute:: channel_update
 
@@ -2341,7 +2383,10 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.default_auto_archive_duration`
         - :attr:`~AuditLogDiff.user_limit`
         - :attr:`~AuditLogDiff.slowmode_delay`
+        - :attr:`~AuditLogDiff.default_thread_slowmode_delay`
         - :attr:`~AuditLogDiff.nsfw`
+        - :attr:`~AuditLogDiff.available_tags`
+        - :attr:`~AuditLogDiff.default_reaction`
 
     .. attribute:: channel_delete
 
@@ -2365,7 +2410,10 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.default_auto_archive_duration`
         - :attr:`~AuditLogDiff.user_limit`
         - :attr:`~AuditLogDiff.slowmode_delay`
+        - :attr:`~AuditLogDiff.default_thread_slowmode_delay`
         - :attr:`~AuditLogDiff.nsfw`
+        - :attr:`~AuditLogDiff.available_tags`
+        - :attr:`~AuditLogDiff.default_reaction`
 
     .. attribute:: overwrite_create
 
@@ -3013,6 +3061,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.slowmode_delay`
         - :attr:`~AuditLogDiff.invitable`
         - :attr:`~AuditLogDiff.flags`
+        - :attr:`~AuditLogDiff.applied_tags`
 
         .. versionadded:: 2.0
 
@@ -3033,6 +3082,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.slowmode_delay`
         - :attr:`~AuditLogDiff.invitable`
         - :attr:`~AuditLogDiff.flags`
+        - :attr:`~AuditLogDiff.applied_tags`
 
         .. versionadded:: 2.0
 
@@ -3053,6 +3103,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.slowmode_delay`
         - :attr:`~AuditLogDiff.invitable`
         - :attr:`~AuditLogDiff.flags`
+        - :attr:`~AuditLogDiff.applied_tags`
 
         .. versionadded:: 2.0
 
@@ -3700,6 +3751,20 @@ of :class:`enum.Enum`.
 
         This trigger type requires additional :class:`metadata <AutoModTriggerMetadata>`.
 
+.. class:: ThreadSortOrder
+
+    Represents the sort order of threads in :class:`ForumChannel`\s.
+
+    .. versionadded:: 2.6
+
+    .. attribute:: latest_activity
+
+        Sort forum threads by activity.
+
+    .. attribute:: creation_date
+
+        Sort forum threads by creation date/time (from newest to oldest).
+
 Async Iterator
 ----------------
 
@@ -4291,6 +4356,15 @@ AuditLogDiff
 
         :type: :class:`int`
 
+    .. attribute:: default_thread_slowmode_delay
+
+        The default number of seconds members have to wait before
+        sending another message in new threads created in the channel.
+
+        See also :attr:`ForumChannel.default_thread_slowmode_delay`.
+
+        :type: :class:`int`
+
     .. attribute:: rtc_region
 
         The region for the voice or stage channel's voice communication.
@@ -4494,6 +4568,36 @@ AuditLogDiff
         If a channel is not found then it is an :class:`Object` with the ID being set.
 
         :type: List[Union[:class:`abc.GuildChannel`, :class:`Object`]]
+
+    .. attribute:: applied_tags
+
+        The tags applied to a thread in a forum channel being changed.
+
+        If a tag is not found, then it is an :class:`Object` with the ID
+        being set.
+
+        :type: List[Union[:class:`ForumTag`, :class:`Object`]]
+
+    .. attribute:: available_tags
+
+        The available tags for threads in a forum channel being changed.
+
+        :type: List[:class:`ForumTag`]
+
+    .. attribute:: default_reaction
+
+        The default emoji shown for reacting to threads in a forum channel being changed.
+
+        Due to a Discord limitation, this will have an empty
+        :attr:`~PartialEmoji.name` if it is a custom :class:`PartialEmoji`.
+
+        :type: Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]
+
+    .. attribute:: default_sort_order
+
+        The default sort order of threads in a forum channel being changed.
+
+        :type: Optional[:class:`ThreadSortOrder`]
 
 Webhook Support
 ------------------
@@ -4745,6 +4849,15 @@ Button
     :members:
     :inherited-members:
 
+BaseSelectMenu
+~~~~~~~~~~~~~~~
+
+.. attributetable:: BaseSelectMenu
+
+.. autoclass:: BaseSelectMenu()
+    :members:
+    :inherited-members:
+
 SelectMenu
 ~~~~~~~~~~~
 
@@ -4873,6 +4986,19 @@ Interaction
 .. autoclass:: Interaction()
     :members:
     :inherited-members:
+    :exclude-members: original_message, edit_original_message, delete_original_message
+
+    .. method:: original_message
+
+        An alias of :func:`original_response`.
+
+    .. method:: edit_original_message
+
+        An alias of :func:`edit_original_response`.
+
+    .. method:: delete_original_message
+
+        An alias of :func:`delete_original_response`.
 
 ApplicationCommandInteraction
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -4882,6 +5008,19 @@ ApplicationCommandInteraction
 .. autoclass:: ApplicationCommandInteraction()
     :members:
     :inherited-members:
+    :exclude-members: original_message, edit_original_message, delete_original_message
+
+    .. method:: original_message
+
+        An alias of :func:`original_response`.
+
+    .. method:: edit_original_message
+
+        An alias of :func:`edit_original_response`.
+
+    .. method:: delete_original_message
+
+        An alias of :func:`delete_original_response`.
 
 GuildCommandInteraction
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -4906,6 +5045,19 @@ MessageInteraction
 .. autoclass:: MessageInteraction()
     :members:
     :inherited-members:
+    :exclude-members: original_message, edit_original_message, delete_original_message
+
+    .. method:: original_message
+
+        An alias of :func:`original_response`.
+
+    .. method:: edit_original_message
+
+        An alias of :func:`edit_original_response`.
+
+    .. method:: delete_original_message
+
+        An alias of :func:`delete_original_response`.
 
 ModalInteraction
 ~~~~~~~~~~~~~~~~
@@ -4915,6 +5067,19 @@ ModalInteraction
 .. autoclass:: ModalInteraction()
     :members:
     :inherited-members:
+    :exclude-members: original_message, edit_original_message, delete_original_message
+
+    .. method:: original_message
+
+        An alias of :func:`original_response`.
+
+    .. method:: edit_original_message
+
+        An alias of :func:`edit_original_response`.
+
+    .. method:: delete_original_message
+
+        An alias of :func:`delete_original_response`.
 
 InteractionResponse
 ~~~~~~~~~~~~~~~~~~~~
@@ -5089,6 +5254,15 @@ ThreadMember
 .. autoclass:: ThreadMember()
     :members:
 
+ForumTag
+~~~~~~~~~
+
+.. attributetable:: ForumTag
+
+.. autoclass:: ForumTag()
+    :members:
+    :inherited-members:
+
 VoiceChannel
 ~~~~~~~~~~~~~
 
@@ -5217,6 +5391,7 @@ WidgetMember
 .. autoclass:: WidgetMember()
     :members:
     :inherited-members:
+    :exclude-members: public_flags, default_avatar, banner, accent_colour, accent_color, colour, color, mention, created_at, mentioned_in
 
 WidgetSettings
 ~~~~~~~~~~~~~~
@@ -5726,6 +5901,15 @@ SessionStartLimit
 .. autoclass:: SessionStartLimit()
     :members:
 
+GatewayParams
+~~~~~~~~~~~~~~
+
+.. attributetable:: GatewayParams
+
+.. autoclass:: GatewayParams()
+    :members:
+    :exclude-members: encoding, zlib
+
 SystemChannelFlags
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -5799,6 +5983,15 @@ Button
     :inherited-members:
 
 .. autofunction:: disnake.ui.button(cls=disnake.ui.Button, *, style=ButtonStyle.secondary, label=None, disabled=False, custom_id=..., url=None, emoji=None, row=None)
+
+BaseSelect
+~~~~~~~~~~~
+
+.. attributetable:: disnake.ui.BaseSelect
+
+.. autoclass:: disnake.ui.BaseSelect
+    :members:
+    :inherited-members:
 
 Select
 ~~~~~~~

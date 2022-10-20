@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 import re
 
 from setuptools import setup
@@ -54,6 +56,7 @@ packages = [
     "disnake.bin",
     "disnake.types",
     "disnake.ui",
+    "disnake.ui.select",
     "disnake.webhook",
     "disnake.interactions",
     "disnake.ext.commands",

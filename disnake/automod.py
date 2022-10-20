@@ -1,26 +1,4 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
@@ -240,19 +218,19 @@ class AutoModTriggerMetadata:
     Attributes
     ----------
     keyword_filter: Optional[Sequence[:class:`str`]]
-        The list of keywords to check for. Used with :attr:`AutoModTriggerType.keyword`.
+        The list of keywords to check for, up to 1000 keywords. Used with :attr:`AutoModTriggerType.keyword`.
 
-        See `api docs <https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-keyword-matching-strategies>`__
+        See :ddocs:`api docs <resources/auto-moderation#auto-moderation-rule-object-keyword-matching-strategies>`
         for details about how keyword matching works.
 
     presets: Optional[:class:`AutoModKeywordPresets`]
         The keyword presets. Used with :attr:`AutoModTriggerType.keyword_preset`.
 
     allow_list: Optional[Sequence[:class:`str`]]
-        The keywords that should be exempt from a preset. Used with :attr:`AutoModTriggerType.keyword_preset`.
+        The keywords that should be exempt from a preset, up to 1000 keywords. Used with :attr:`AutoModTriggerType.keyword_preset`.
 
     mention_total_limit: Optional[:class:`int`]
-        The maximum number of mentions (members + roles) allowed. Used with :attr:`AutoModTriggerType.mention_spam`.
+        The maximum number of mentions (members + roles) allowed, between 1 and 50. Used with :attr:`AutoModTriggerType.mention_spam`.
     """
 
     __slots__ = (
@@ -292,7 +270,7 @@ class AutoModTriggerMetadata:
         self.allow_list: Optional[Sequence[str]] = allow_list
         self.mention_total_limit: Optional[int] = mention_total_limit
 
-    def with_edits(
+    def with_changes(
         self,
         *,
         keyword_filter: Optional[Sequence[str]] = MISSING,
@@ -301,7 +279,7 @@ class AutoModTriggerMetadata:
         mention_total_limit: Optional[int] = MISSING,
     ) -> Self:
         """
-        Returns a new instance with the given edits applied.
+        Returns a new instance with the given changes applied.
         All other fields will be kept intact.
 
         Returns
@@ -501,7 +479,7 @@ class AutoModRule:
 
             meta = rule.trigger_metadata
             await rule.edit(
-                trigger_metadata=meta.with_edits(
+                trigger_metadata=meta.with_changes(
                     keyword_filter=meta.keyword_filter + ["stuff"],
                 ),
             )
@@ -520,8 +498,8 @@ class AutoModRule:
         enabled: :class:`bool`
             Whether to enable the rule.
         exempt_roles: Optional[Iterable[:class:`abc.Snowflake`]]
-            The rule's new exempt roles, up to 20. If ``[]`` or ``None`` is
-            passed then all role exemptions are removed.
+            The rule's new exempt roles, up to 20.
+            If ``[]`` or ``None`` is passed then all role exemptions are removed.
         exempt_channels: Optional[Iterable[:class:`abc.Snowflake`]]
             The rule's new exempt channels, up to 50.
             Can also include categories, in which case all channels inside that category will be exempt.

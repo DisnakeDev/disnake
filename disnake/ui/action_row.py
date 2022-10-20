@@ -1,26 +1,4 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
@@ -46,16 +24,18 @@ from ..components import (
     Button as ButtonComponent,
     NestedComponent,
     SelectMenu as SelectComponent,
-    SelectOption,
 )
 from ..enums import ButtonStyle, ComponentType, TextInputStyle
-from ..utils import MISSING, SequenceProxy
+from ..utils import MISSING, SequenceProxy, assert_never
 from .button import Button
 from .item import WrappedComponent
 from .select import Select
+from .select.string import SelectOptionInput, V_co
 from .text_input import TextInput
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from ..emoji import Emoji
     from ..message import Message
     from ..partial_emoji import PartialEmoji
@@ -70,9 +50,13 @@ __all__ = (
     "ModalActionRow",
 )
 
+if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
 
-MessageUIComponent = Union[Button[Any], Select[Any]]
-ModalUIComponent = TextInput  # Union[TextInput, Select[Any]]
+AnySelect: TypeAlias = "Select[V_co]"
+
+MessageUIComponent = Union[Button[Any], "AnySelect[Any]"]
+ModalUIComponent = TextInput  # Union[TextInput, "AnySelect[Any]"]
 UIComponentT = TypeVar("UIComponentT", bound=WrappedComponent)
 StrictUIComponentT = TypeVar("StrictUIComponentT", MessageUIComponent, ModalUIComponent)
 
@@ -81,6 +65,20 @@ Components = Union[
     UIComponentT,
     Sequence[Union["ActionRow[UIComponentT]", UIComponentT, Sequence[UIComponentT]]],
 ]
+
+# this is cursed
+ButtonCompatibleActionRowT = TypeVar(
+    "ButtonCompatibleActionRowT",
+    bound="Union[ActionRow[MessageUIComponent], ActionRow[WrappedComponent]]",
+)
+SelectCompatibleActionRowT = TypeVar(
+    "SelectCompatibleActionRowT",
+    bound="Union[ActionRow[MessageUIComponent], ActionRow[WrappedComponent]]",  # to add: ActionRow[ModalUIComponent]
+)
+TextInputCompatibleActionRowT = TypeVar(
+    "TextInputCompatibleActionRowT",
+    bound="Union[ActionRow[ModalUIComponent], ActionRow[WrappedComponent]]",
+)
 
 
 class ActionRow(Generic[UIComponentT]):
@@ -185,9 +183,11 @@ class ActionRow(Generic[UIComponentT]):
     def width(self) -> int:
         return sum(child.width for child in self._children)
 
-    def append_item(self, item: UIComponentT) -> None:
+    def append_item(self, item: UIComponentT) -> Self:
         """Append a component to the action row. The component's type must match that
         of the action row.
+
+        This function returns the class instance to allow for fluent-style chaining.
 
         Parameters
         ----------
@@ -200,10 +200,13 @@ class ActionRow(Generic[UIComponentT]):
             The width of the action row exceeds 5.
         """
         self.insert_item(len(self), item)
+        return self
 
-    def insert_item(self, index: int, item: UIComponentT) -> None:
+    def insert_item(self, index: int, item: UIComponentT) -> Self:
         """Insert a component to the action row at a given index. The component's
         type must match that of the action row.
+
+        This function returns the class instance to allow for fluent-style chaining.
 
         .. versionadded:: 2.6
 
@@ -223,9 +226,10 @@ class ActionRow(Generic[UIComponentT]):
             raise ValueError("Too many components in this row, can not append a new one.")
 
         self._children.insert(index, item)
+        return self
 
     def add_button(
-        self: Union[ActionRow[MessageUIComponent], ActionRow[WrappedComponent]],
+        self: ButtonCompatibleActionRowT,
         index: Optional[int] = None,
         *,
         style: ButtonStyle = ButtonStyle.secondary,
@@ -234,12 +238,14 @@ class ActionRow(Generic[UIComponentT]):
         custom_id: Optional[str] = None,
         url: Optional[str] = None,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
-    ) -> None:
+    ) -> ButtonCompatibleActionRowT:
         """Add a button to the action row. Can only be used if the action
         row holds message components.
 
         To append a pre-existing :class:`~disnake.ui.Button` use the
         :meth:`append_item` method instead.
+
+        This function returns the class instance to allow for fluent-style chaining.
 
         .. versionchanged:: 2.6
             Now allows for inserting at a given index. The default behaviour of
@@ -280,26 +286,25 @@ class ActionRow(Generic[UIComponentT]):
                 emoji=emoji,
             ),
         )
+        return self
 
     def add_select(
-        self: Union[
-            ActionRow[MessageUIComponent],
-            # ActionRow[ModalUIComponent],
-            ActionRow[WrappedComponent],
-        ],
+        self: SelectCompatibleActionRowT,
         *,
         custom_id: str = MISSING,
         placeholder: Optional[str] = None,
         min_values: int = 1,
         max_values: int = 1,
-        options: List[SelectOption] = MISSING,
+        options: SelectOptionInput = MISSING,
         disabled: bool = False,
-    ) -> None:
-        """Add a select menu to the action row. Can only be used if the action
+    ) -> SelectCompatibleActionRowT:
+        """Add a string select menu to the action row. Can only be used if the action
         row holds message components.
 
         To append a pre-existing :class:`~disnake.ui.Select` use the
         :meth:`append_item` method instead.
+
+        This function returns the class instance to allow for fluent-style chaining.
 
         Parameters
         ----------
@@ -314,8 +319,10 @@ class ActionRow(Generic[UIComponentT]):
         max_values: :class:`int`
             The maximum number of items that must be chosen for this select menu.
             Defaults to 1 and must be between 1 and 25.
-        options: List[:class:`~disnake.SelectOption`]
-            A list of options that can be selected in this menu.
+        options: Union[List[:class:`disnake.SelectOption`], List[:class:`str`], Dict[:class:`str`, :class:`str`]]
+            A list of options that can be selected in this menu. Use explicit :class:`.SelectOption`\\s
+            for fine-grained control over the options. Alternatively, a list of strings will be treated
+            as a list of labels, and a dict will be treated as a mapping of labels to values.
         disabled: :class:`bool`
             Whether the select is disabled or not.
 
@@ -334,9 +341,10 @@ class ActionRow(Generic[UIComponentT]):
                 disabled=disabled,
             ),
         )
+        return self
 
     def add_text_input(
-        self: Union[ActionRow[ModalUIComponent], ActionRow[WrappedComponent]],
+        self: TextInputCompatibleActionRowT,
         *,
         label: str,
         custom_id: str,
@@ -346,12 +354,14 @@ class ActionRow(Generic[UIComponentT]):
         required: bool = True,
         min_length: Optional[int] = None,
         max_length: Optional[int] = None,
-    ) -> None:
+    ) -> TextInputCompatibleActionRowT:
         """Add a text input to the action row. Can only be used if the action
         row holds modal components.
 
         To append a pre-existing :class:`~disnake.ui.TextInput` use the
         :meth:`append_item` method instead.
+
+        This function returns the class instance to allow for fluent-style chaining.
 
         .. versionadded:: 2.4
 
@@ -392,15 +402,22 @@ class ActionRow(Generic[UIComponentT]):
             ),
         )
 
-    def clear_items(self) -> None:
+        return self
+
+    def clear_items(self) -> Self:
         """Remove all components from the action row.
+
+        This function returns the class instance to allow for fluent-style chaining.
 
         .. versionadded:: 2.6
         """
         self._children.clear()
+        return self
 
-    def remove_item(self, item: UIComponentT) -> None:
+    def remove_item(self, item: UIComponentT) -> Self:
         """Remove a component from the action row.
+
+        This function returns the class instance to allow for fluent-style chaining.
 
         .. versionadded:: 2.6
 
@@ -415,6 +432,7 @@ class ActionRow(Generic[UIComponentT]):
             The component could not be found on the action row.
         """
         self._children.remove(item)
+        return self
 
     def pop(self, index: int) -> UIComponentT:
         """Pop the component at the provided index from the action row.
@@ -531,8 +549,10 @@ class ActionRow(Generic[UIComponentT]):
                     current_row.append_item(Button.from_component(component))
                 elif isinstance(component, SelectComponent):
                     current_row.append_item(Select.from_component(component))
-                elif strict:
-                    raise TypeError(f"Encountered unknown component type: {component.type!r}.")
+                else:
+                    assert_never(component)
+                    if strict:
+                        raise TypeError(f"Encountered unknown component type: {component.type!r}.")
 
         return rows
 

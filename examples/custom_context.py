@@ -1,3 +1,9 @@
+# SPDX-License-Identifier: MIT
+
+"""
+A simple example using custom a command context type.
+"""
+
 import os
 import random
 
@@ -6,12 +12,13 @@ from disnake.ext import commands
 
 
 class MyContext(commands.Context):
-    async def tick(self, value):
+    async def tick(self, value: bool):
         # reacts to the message with an emoji
         # depending on whether value is True or False
         # if its True, it'll add a green check mark
         # otherwise, it'll add a red cross mark
         emoji = "\N{WHITE HEAVY CHECK MARK}" if value else "\N{CROSS MARK}"
+
         try:
             # this will react to the command author's message
             await self.message.add_reaction(emoji)
@@ -29,15 +36,16 @@ class MyBot(commands.Bot):
         # use the new MyContext class
         return await super().get_context(message, cls=cls)
 
+    async def on_ready(self):
+        print(f"Logged in as {self.user} (ID: {self.user.id})\n------")
+
 
 bot = MyBot(command_prefix=commands.when_mentioned)
 
 
 @bot.command()
-async def guess(ctx, number: int):
+async def guess(ctx: MyContext, number: int):
     """Guess a random number from 1 to 6."""
-    # explained in a previous example, this gives you
-    # a random number from 1-6
     value = random.randint(1, 6)
     # with your new helper function, you can add a
     # green check mark if the guess was correct,
@@ -45,4 +53,5 @@ async def guess(ctx, number: int):
     await ctx.tick(number == value)
 
 
-bot.run(os.getenv("BOT_TOKEN"))
+if __name__ == "__main__":
+    bot.run(os.getenv("BOT_TOKEN"))

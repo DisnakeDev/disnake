@@ -1,1 +1,0 @@
-Run pyright on examples and fix any typing issues uncovered by this change.

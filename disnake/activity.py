@@ -1,27 +1,4 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
@@ -98,6 +75,7 @@ if TYPE_CHECKING:
         ActivityTimestamps,
     )
     from .types.emoji import PartialEmoji as PartialEmojiPayload
+    from .types.widget import WidgetActivity as WidgetActivityPayload
 
 
 class _BaseActivity:
@@ -246,14 +224,16 @@ class Activity(BaseActivity):
         "details",
         "party",
         "flags",
-        "sync_id",
-        "session_id",
         "type",
         "name",
         "url",
         "application_id",
         "emoji",
         "buttons",
+        "id",
+        "platform",
+        "sync_id",
+        "session_id",
     )
 
     def __init__(
@@ -267,10 +247,12 @@ class Activity(BaseActivity):
         party: Optional[ActivityParty] = None,
         application_id: Optional[Union[str, int]] = None,
         flags: Optional[int] = None,
-        sync_id: Optional[str] = None,
-        session_id: Optional[str] = None,
         buttons: Optional[List[str]] = None,
         emoji: Optional[Union[PartialEmojiPayload, ActivityEmojiPayload]] = None,
+        id: Optional[str] = None,
+        platform: Optional[str] = None,
+        sync_id: Optional[str] = None,
+        session_id: Optional[str] = None,
         **kwargs: Any,
     ):
         super().__init__(**kwargs)
@@ -283,9 +265,13 @@ class Activity(BaseActivity):
         self.name: Optional[str] = name
         self.url: Optional[str] = url
         self.flags: int = flags or 0
+        self.buttons: List[str] = buttons or []
+
+        # undocumented fields:
+        self.id: Optional[str] = id
+        self.platform: Optional[str] = platform
         self.sync_id: Optional[str] = sync_id
         self.session_id: Optional[str] = session_id
-        self.buttons: List[str] = buttons or []
 
         activity_type = type if type is not None else 0
         self.type: ActivityType = (
@@ -406,15 +392,20 @@ class Game(BaseActivity):
         A dictionary with the same structure as :attr:`Activity.assets`.
     """
 
-    __slots__ = ("name",)
+    __slots__ = ("name", "platform")
 
     def __init__(
         self,
         name: str,
+        *,
+        platform: Optional[str] = None,
         **kwargs: Any,
     ):
         super().__init__(**kwargs)
         self.name: str = name
+
+        # undocumented
+        self.platform: Optional[str] = platform
 
     @property
     def type(self) -> Literal[ActivityType.playing]:
@@ -848,7 +839,7 @@ ActivityTypes = Union[Activity, Game, CustomActivity, Streaming, Spotify]
 
 @overload
 def create_activity(
-    data: ActivityPayload, *, state: Optional[ConnectionState] = None
+    data: Union[ActivityPayload, WidgetActivityPayload], *, state: Optional[ConnectionState] = None
 ) -> ActivityTypes:
     ...
 
@@ -859,7 +850,9 @@ def create_activity(data: None, *, state: Optional[ConnectionState] = None) -> N
 
 
 def create_activity(
-    data: Optional[ActivityPayload], *, state: Optional[ConnectionState] = None
+    data: Optional[Union[ActivityPayload, WidgetActivityPayload]],
+    *,
+    state: Optional[ConnectionState] = None,
 ) -> Optional[ActivityTypes]:
     if not data:
         return None
@@ -867,9 +860,9 @@ def create_activity(
     activity: ActivityTypes
     game_type = try_enum(ActivityType, data.get("type", -1))
     if game_type is ActivityType.playing and not ("application_id" in data or "session_id" in data):
-        activity = Game(**data)
+        activity = Game(**data)  # type: ignore  # pyright bug(?)
     elif game_type is ActivityType.custom and "name" in data:
-        activity = CustomActivity(**data)
+        activity = CustomActivity(**data)  # type: ignore
     elif game_type is ActivityType.streaming and "url" in data:
         # url won't be None here
         activity = Streaming(**data)  # type: ignore

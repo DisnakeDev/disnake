@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 import asyncio
 import logging
 import os
@@ -34,6 +36,7 @@ class TestBot(commands.Bot):
             strict_localization=Config.strict_localization,
             test_guilds=Config.test_guilds,
             reload=Config.auto_reload,
+            enable_gateway_error_handler=Config.enable_gateway_error_handler,
         )
 
         self.i18n.load("test_bot/locale")
@@ -76,7 +79,7 @@ class TestBot(commands.Bot):
             description=fancy_traceback(error),
             color=disnake.Color.red(),
         )
-        if inter.response._responded:
+        if inter.response.is_done():
             send = inter.channel.send
         else:
             send = inter.response.send_message
@@ -94,7 +97,7 @@ class TestBot(commands.Bot):
             description=fancy_traceback(error),
             color=disnake.Color.red(),
         )
-        if inter.response._responded:
+        if inter.response.is_done():
             send = inter.channel.send
         else:
             send = inter.response.send_message
@@ -112,7 +115,7 @@ class TestBot(commands.Bot):
             description=fancy_traceback(error),
             color=disnake.Color.red(),
         )
-        if inter.response._responded:
+        if inter.response.is_done():
             send = inter.channel.send
         else:
             send = inter.response.send_message

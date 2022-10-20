@@ -1,29 +1,8 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from typing import List, Literal, Optional, TypedDict
+
+from typing_extensions import NotRequired
 
 from .activity import PartialPresenceUpdate
 from .channel import GuildChannel, StageInstance
@@ -44,37 +23,9 @@ class Ban(TypedDict):
     user: User
 
 
-class _UnavailableGuildOptional(TypedDict, total=False):
-    unavailable: bool
-
-
-class UnavailableGuild(_UnavailableGuildOptional):
+class UnavailableGuild(TypedDict):
     id: Snowflake
-
-
-class _GuildOptional(TypedDict, total=False):
-    icon_hash: Optional[str]
-    owner: bool
-    permissions: str
-    widget_enabled: bool
-    widget_channel_id: Optional[Snowflake]
-    joined_at: Optional[str]
-    large: bool
-    member_count: int
-    voice_states: List[GuildVoiceState]
-    members: List[Member]
-    channels: List[GuildChannel]
-    presences: List[PartialPresenceUpdate]
-    threads: List[Thread]
-    max_presences: Optional[int]
-    max_members: int
-    premium_subscription_count: int
-    max_video_channel_users: int
-    approximate_member_count: int
-    approximate_presence_count: int
-    stage_instances: List[StageInstance]
-    stickers: List[GuildSticker]
-    guild_scheduled_events: List[GuildScheduledEvent]
+    unavailable: NotRequired[bool]
 
 
 DefaultMessageNotificationLevel = Literal[0, 1]
@@ -97,6 +48,7 @@ GuildFeature = Literal[
     "HAS_DIRECTORY_ENTRY",
     "HUB",
     "INVITE_SPLASH",
+    "INVITES_DISABLED",
     "LINKED_TO_HUB",
     "MEMBER_PROFILES",  # not sure what this does, if anything
     "MEMBER_VERIFICATION_GATE_ENABLED",
@@ -140,27 +92,51 @@ class GuildPreview(_BaseGuildPreview):
     approximate_presence_count: int
 
 
-class Guild(_BaseGuildPreview, _GuildOptional):
+class Guild(_BaseGuildPreview):
+    icon_hash: NotRequired[Optional[str]]
+    owner: NotRequired[bool]
     owner_id: Snowflake
+    permissions: NotRequired[str]
     region: str
     afk_channel_id: Optional[Snowflake]
     afk_timeout: int
+    widget_enabled: NotRequired[bool]
+    widget_channel_id: NotRequired[Optional[Snowflake]]
     verification_level: VerificationLevel
     default_message_notifications: DefaultMessageNotificationLevel
     explicit_content_filter: ExplicitContentFilterLevel
     roles: List[Role]
     mfa_level: MFALevel
-    nsfw_level: NSFWLevel
     application_id: Optional[Snowflake]
     system_channel_id: Optional[Snowflake]
     system_channel_flags: int
     rules_channel_id: Optional[Snowflake]
+    max_presences: NotRequired[Optional[int]]
+    max_members: NotRequired[int]
     vanity_url_code: Optional[str]
     banner: Optional[str]
-    premium_progress_bar_enabled: bool
     premium_tier: PremiumTier
+    premium_subscription_count: NotRequired[int]
     preferred_locale: str
     public_updates_channel_id: Optional[Snowflake]
+    max_video_channel_users: NotRequired[int]
+    approximate_member_count: NotRequired[int]
+    approximate_presence_count: NotRequired[int]
+    nsfw_level: NSFWLevel
+    stickers: NotRequired[List[GuildSticker]]
+    premium_progress_bar_enabled: bool
+
+    # specific to GUILD_CREATE event
+    joined_at: NotRequired[Optional[str]]
+    large: NotRequired[bool]
+    member_count: NotRequired[int]
+    voice_states: NotRequired[List[GuildVoiceState]]
+    members: NotRequired[List[Member]]
+    channels: NotRequired[List[GuildChannel]]
+    threads: NotRequired[List[Thread]]
+    presences: NotRequired[List[PartialPresenceUpdate]]
+    stage_instances: NotRequired[List[StageInstance]]
+    guild_scheduled_events: NotRequired[List[GuildScheduledEvent]]
 
 
 class InviteGuild(Guild, total=False):
@@ -178,12 +154,9 @@ class ChannelPositionUpdate(TypedDict):
     parent_id: Optional[Snowflake]
 
 
-class _RolePositionRequired(TypedDict):
+class RolePositionUpdate(TypedDict):
     id: Snowflake
-
-
-class RolePositionUpdate(_RolePositionRequired, total=False):
-    position: Optional[Snowflake]
+    position: NotRequired[Optional[Snowflake]]
 
 
 class MFALevelUpdate(TypedDict):

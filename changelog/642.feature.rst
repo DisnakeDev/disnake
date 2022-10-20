@@ -1,1 +1,0 @@
-Add support for setting :class:`ChannelFlags` directly when editing a channel or thread.

@@ -1,1 +1,0 @@
-Fix opus function calls on arm64 macOS.

@@ -1,9 +1,11 @@
+# SPDX-License-Identifier: MIT
+
 import io
 from datetime import datetime, timedelta
 
 import pytest
 
-from disnake import Color, Embed, File
+from disnake import Color, Embed, File, embeds
 from disnake.utils import MISSING, utcnow
 
 _BASE = {"type": "rich"}
@@ -80,14 +82,63 @@ def test_len(embed: Embed) -> None:
     assert len(embed) == 69
 
 
+def test_eq() -> None:
+    # basic test
+    embed_1, embed_2 = Embed(), Embed()
+    assert embed_1 == embed_2
+
+    embed_1.title, embed_2.title = None, ""
+    assert embed_1 == embed_2
+
+    # color tests
+    embed_1, embed_2 = Embed(), Embed()
+    embed_1.color = Color(123456)
+    assert not embed_1 == embed_2
+
+    embed_1.color = MISSING
+    assert embed_1 == embed_2
+
+    embed_1, embed_2 = Embed(color=None), Embed()
+    assert embed_1 == embed_2
+
+    try:
+        Embed.set_default_color(123456)
+        assert not embed_1 == embed_2
+    finally:
+        Embed.set_default_color(None)
+
+    # test fields
+    embed_1, embed_2 = Embed(), Embed()
+    embed_1.add_field(name="This is a test field", value="69 test 69")
+    embed_2.add_field(name="This is a test field", value="69 test 69", inline=False)
+    assert not embed_1 == embed_2
+
+    embed_1, embed_2 = Embed(), Embed()
+    embed_1._fields = []
+    embed_2._fields = None
+    assert embed_1 == embed_2
+
+
+def test_embed_proxy_eq() -> None:
+    embed_1, embed_2 = Embed(), Embed()
+
+    embed_1.set_image("https://disnake.dev/assets/disnake-logo.png")
+    embed_2.set_image(None)
+    assert not embed_1.image == embed_2.image
+
+    embed_2.set_image("https://disnake.dev/assets/disnake-logo.png")
+    assert embed_1.image == embed_2.image
+
+
 def test_color_zero() -> None:
     e = Embed()
     assert not e
 
-    # color=0 should be applied to bool and dict
+    # color=0 should be applied to to_dict, __bool__, and __eq__
     e.color = 0
     assert e
     assert e.to_dict() == {"color": 0, **_BASE}
+    assert e != Embed(color=None)
 
 
 def test_default_color() -> None:
@@ -374,12 +425,58 @@ def test_copy(embed: Embed, file: File) -> None:
     copy = embed.copy()
     assert embed.to_dict() == copy.to_dict()
 
-    # shallow copy, but `_files` should be copied
+    # shallow copy, but `_files` and `_fields` should be copied
     assert embed._files == copy._files
     assert embed._files is not copy._files
+    assert embed._fields == copy._fields
+    assert embed._fields is not copy._fields
 
 
 def test_copy_empty() -> None:
     e = Embed.from_dict({})
     copy = e.copy()
     assert e.to_dict() == copy.to_dict() == {}
+
+    # shallow copy, but `_files` and `_fields` should be copied
+    assert e._files == copy._files
+    assert e._files is not copy._files
+    assert e._fields is None
+    assert copy._fields is None
+
+
+def test_copy_fields(embed: Embed) -> None:
+    embed.add_field("things", "stuff")
+    copy = embed.copy()
+    embed.clear_fields()
+    assert copy._fields
+
+    embed.insert_field_at(0, "w", "x")
+    copy = embed.copy()
+    embed.remove_field(0)
+    assert embed._fields == []
+    assert copy._fields == [{"name": "w", "value": "x", "inline": True}]
+
+    embed.insert_field_at(0, "w", "x")
+    copy = embed.copy()
+    embed.insert_field_at(1, "y", "z")
+    embed.set_field_at(0, "abc", "def", inline=False)
+
+    assert embed._fields == [
+        {"name": "abc", "value": "def", "inline": False},
+        {"name": "y", "value": "z", "inline": True},
+    ]
+    assert copy._fields == [{"name": "w", "value": "x", "inline": True}]
+
+
+# backwards compatibility
+def test_emptyembed() -> None:
+    with pytest.warns(DeprecationWarning):
+        assert embeds.EmptyEmbed is None  # type: ignore
+    with pytest.warns(DeprecationWarning):
+        assert Embed.Empty is None  # type: ignore
+    with pytest.warns(DeprecationWarning):
+        assert Embed().Empty is None  # type: ignore
+
+    # make sure unknown module attrs continue to raise
+    with pytest.raises(AttributeError):
+        embeds.this_does_not_exist  # type: ignore
