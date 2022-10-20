@@ -1779,7 +1779,7 @@ class InteractionDataResolved(Dict[str, Any]):
 
         return default
 
-    def get(
+    def get_by_id(
         self, key: Optional[int]
     ) -> Optional[Union[Member, User, Role, InteractionChannel, Message, Attachment]]:
         if key is None:
