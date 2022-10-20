@@ -297,7 +297,7 @@ def add_newbot_args(subparser):
     )
     group.add_argument(
         "--app-commands-only",
-        help="whether to support prefix commands at all",
+        help="whether to only process application commands",
         action="store_true",
         dest="interaction_client",
     )
