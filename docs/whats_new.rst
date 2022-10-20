@@ -17,6 +17,16 @@ in specific versions.
 
 .. towncrier release notes start
 
+v2.6.1
+------
+.. _vp2p6p1:
+
+Bug Fixes
+~~~~~~~~~
+- Ensure that embed fields are copied properly by :func:`Embed.copy` and that the copied embed is completely separate from the original one. (:issue:`792`)
+- Fix an issue with :meth:`Member.ban` erroring when the ``delete_message_days`` parameter was provided. (:issue:`810`)
+
+
 .. _vp2p6p0:
 
 v2.6.0
