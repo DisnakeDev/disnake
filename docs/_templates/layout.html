@@ -8,6 +8,7 @@
   <title>{{ title|striptags|e }}{{ titlesuffix }}</title>
   {%- block extrahead %} {% endblock %}
   <!-- end extra head -->
+  <link rel="stylesheet" href="{{ pathto('_static/icons.css', 1)|e }}" type="text/css" />
   {%- block css %}
   {%- for css in css_files %}
     {%- if css|attr("filename") %}
@@ -19,7 +20,6 @@
   {%- endblock %}
   <link rel="stylesheet" href="{{ pathto('_static/style.css', 1)|e }}" type="text/css" />
   <link rel="stylesheet" href="{{ pathto('_static/codeblocks.css', 1) }}" type="text/css" />
-  <link rel="stylesheet" href="{{ pathto('_static/icons.css', 1)|e }}" type="text/css" />
   {%- block scripts %}
   <script id="documentation_options" data-url_root="{{ pathto('', 1) }}" src="{{ pathto('_static/documentation_options.js', 1) }}"></script>
   {%- for js in script_files %}
