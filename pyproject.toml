@@ -118,7 +118,6 @@ twine = "^4.0.1"
 
 [tool.poetry-dynamic-versioning]
 enable = true
-vcs = "git"
 bump = true
 style = "pep440"
 format-jinja = """
