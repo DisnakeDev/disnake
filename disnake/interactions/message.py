@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Union
 
 from ..components import MessageComponent
 from ..enums import ComponentType, try_enum
@@ -16,12 +16,16 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
+    from ..member import Member
+    from ..role import Role
     from ..state import ConnectionState
     from ..types.interactions import (
         InteractionDataResolved as InteractionDataResolvedPayload,
         MessageComponentInteractionData as MessageComponentInteractionDataPayload,
         MessageInteraction as MessageInteractionPayload,
     )
+    from ..user import User
+    from .base import InteractionChannel
 
 
 class MessageInteraction(Interaction):
@@ -81,9 +85,26 @@ class MessageInteraction(Interaction):
         self.message = Message(state=self._state, channel=self.channel, data=data["message"])
 
     @property
-    def values(self) -> Optional[List[str]]:
-        """Optional[List[:class:`str`]]: The values the user selected."""
-        return self.data.values
+    def values(self) -> Optional[Sequence[Union[str, Member, User, Role, InteractionChannel]]]:
+        """Optional[Sequence[:class:`str`]]: The values the user selected.
+
+        .. versionchanged:: 2.7
+            Now supports other select menu types, e.g. channel select menus.
+        """
+        if self.data.values is None:
+            return None
+
+        component_type = self.data.component_type
+        # return values as-is if it's a string select
+        if component_type is ComponentType.string_select:
+            return self.data.values
+
+        values: List[Union[Member, User, Role, InteractionChannel]] = []
+        for key in self.data.values:
+            # force upcast to avoid typing issues; we expect the api to only provide valid values
+            value: Any = self.data.resolved.get_with_type(key, component_type, key)
+            values.append(value)
+        return values
 
     @cached_slot_property("_cs_component")
     def component(self) -> MessageComponent:
@@ -108,7 +129,8 @@ class MessageInteractionData(Dict[str, Any]):
     component_type: :class:`ComponentType`
         The type of the component.
     values: Optional[List[:class:`str`]]
-        The values the user has selected.
+        The values the user has selected in a select menu.
+        For non-string select menus, this contains snowflakes for use with :attr:`resolved`.
     resolved: :class:`InteractionDataResolved`
         All resolved objects related to this interaction.
 

@@ -23,6 +23,7 @@ from ..app_commands import OptionChoice
 from ..channel import PartialMessageable, _threaded_guild_channel_factory
 from ..enums import (
     ChannelType,
+    ComponentType,
     InteractionResponseType,
     InteractionType,
     Locale,
@@ -1762,9 +1763,9 @@ class InteractionDataResolved(Dict[str, Any]):
         )
 
     def get_with_type(
-        self, key: Snowflake, data_type: OptionType, default: T = None
+        self, key: Snowflake, data_type: Union[OptionType, ComponentType], default: T = None
     ) -> Union[Member, User, Role, InteractionChannel, Message, Attachment, T]:
-        if data_type is OptionType.mentionable:
+        if data_type is OptionType.mentionable or data_type is ComponentType.mentionable_select:
             key = int(key)
             if (result := self.members.get(key)) is not None:
                 return result
@@ -1772,16 +1773,16 @@ class InteractionDataResolved(Dict[str, Any]):
                 return result
             return self.roles.get(key, default)
 
-        if data_type is OptionType.user:
+        if data_type is OptionType.user or data_type is ComponentType.user_select:
             key = int(key)
             if (member := self.members.get(key)) is not None:
                 return member
             return self.users.get(key, default)
 
-        if data_type is OptionType.channel:
+        if data_type is OptionType.channel or data_type is ComponentType.channel_select:
             return self.channels.get(int(key), default)
 
-        if data_type is OptionType.role:
+        if data_type is OptionType.role or data_type is ComponentType.role_select:
             return self.roles.get(int(key), default)
 
         if data_type is OptionType.attachment:

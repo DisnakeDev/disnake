@@ -157,7 +157,6 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         self._underlying = component
 
     def refresh_state(self, interaction: MessageInteraction) -> None:
-        # TODO: change typing of `interaction.values`
         self._selected_values = interaction.values  # type: ignore
 
     @classmethod
