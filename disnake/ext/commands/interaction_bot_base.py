@@ -805,8 +805,8 @@ class InteractionBotBase(CommonBotBase):
                 if not self._command_sync.allow_command_deletion:
                     # because allow_command_deletion is disabled, we want to never automatically delete a command
                     # so we move the delete commands to delete_ignored
-                    diff["no_changes"] += diff["delete"]
-                    diff["delete"].clear()
+                    diff["delete_ignored"] = diff["delete"].copy()
+                    diff["delete"] = []
                 update_required = bool(diff["upsert"]) or bool(diff["edit"]) or bool(diff["delete"])
 
                 # Show diff
