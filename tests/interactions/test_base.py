@@ -200,5 +200,6 @@ class TestInteractionDataResolved:
         assert len(resolved.channels) == 1
 
         channel = next(iter(resolved.channels.values()))
-        # should be partial iff dm/group
+        # should be partial if and only if it's a dm/group
+        # TODO: currently includes directory channels (14), see `InteractionDataResolved.__init__`
         assert isinstance(channel, disnake.PartialMessageable) == (channel_type in (1, 3, 14))
