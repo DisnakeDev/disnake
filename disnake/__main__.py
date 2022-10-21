@@ -125,32 +125,57 @@ def setup(bot):
 # this is a concious choice because the order of these should make sense for the developer
 # and the order they are defined internally may not translate to the best order here
 _cog_extras = """
-    def bot_check(self, ctx):
-        ...
+    async def cog_load(self):
+        # async loading logic goes here
+        pass
 
-    def bot_check_once(self, ctx):
-        ...
+    def cog_unload(self):
+        # clean up logic goes here
+        pass
 
-    def bot_message_command_check(self, inter):
-        ...
+    async def cog_check(self, ctx):
+        # checks that apply to every command in here
+        return True
 
-    def bot_message_command_check_once(self, inter):
-        ...
+    async def bot_check(self, ctx):
+        # checks that apply to every command to the bot
+        return True
 
-    def bot_slash_command_check(self, inter):
-        ...
+    async def bot_check_once(self, ctx):
+        # check that apply to every command but is guaranteed to be called only once
+        return True
 
-    def bot_slash_command_check_once(self, inter):
-        ...
+    async def cog_command_error(self, ctx, error):
+        # error handling to every command in here
+        pass
 
-    def bot_user_command_check(self, inter):
-        ...
-
-    def bot_user_command_check_once(self, inter):
-        ...
+    async def cog_before_invoke(self, ctx):
+        # called before a command is called here
+        pass
 
     async def cog_after_invoke(self, ctx):
-        ...
+        # called after a command is called here
+        pass
+
+    # these checks run on all commands of their type over the entire bot
+    async def bot_slash_command_check(self, inter):
+        return True
+
+    async def bot_message_command_check(self, inter):
+        return True
+
+    async def bot_user_command_check(self, inter):
+        return True
+
+    # these checks are guaranteed to only run once for every command in the entire bot
+    async def bot_slash_command_check_once(self, inter):
+        return True
+
+    async def bot_message_command_check_once(self, inter):
+        return True
+
+    async def bot_user_command_check_once(self, inter):
+        return True
 
     async def cog_after_message_command_invoke(self, inter):
         ...
@@ -159,9 +184,6 @@ _cog_extras = """
         ...
 
     async def cog_after_user_command_invoke(self, inter):
-        ...
-
-    async def cog_before_invoke(self, ctx):
         ...
 
     async def cog_before_message_command_invoke(self, inter):
@@ -173,36 +195,24 @@ _cog_extras = """
     async def cog_before_user_command_invoke(self, inter):
         ...
 
-    def cog_check(self, ctx):
-        ...
-
-    async def cog_command_error(self, ctx, error):
-        ...
-
-    async def cog_load(self):
-        ...
-
-    def cog_message_command_check(self, inter):
-        ...
-
-    async def cog_message_command_error(self, inter, error):
-        ...
-
-    def cog_slash_command_check(self, inter):
-        ...
+    # these checks/error handlers run on all commands of their type in this cog
+    async def cog_slash_command_check(self, inter):
+        return True
 
     async def cog_slash_command_error(self, inter, error):
         ...
 
-    def cog_unload(self):
+    async def cog_message_command_check(self, inter):
+        return True
+
+    async def cog_message_command_error(self, inter, error):
         ...
 
-    def cog_user_command_check(self, inter):
-        ...
+    async def cog_user_command_check(self, inter):
+        return True
 
     async def cog_user_command_error(self, inter, error):
         ...
-
 """
 
 
