@@ -1,27 +1,4 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
@@ -65,7 +42,7 @@ class WrappedComponent(ABC):
     The following classes implement this ABC:
 
     - :class:`disnake.ui.Button`
-    - :class:`disnake.ui.Select`
+    - subtypes of :class:`disnake.ui.BaseSelect` (:class:`disnake.ui.Select`)
     - :class:`disnake.ui.TextInput`
 
     .. versionadded:: 2.4
@@ -104,7 +81,7 @@ class Item(WrappedComponent, Generic[V_co]):
     The current UI items supported are:
 
     - :class:`disnake.ui.Button`
-    - :class:`disnake.ui.Select`
+    - subtypes of :class:`disnake.ui.BaseSelect` (:class:`disnake.ui.Select`)
 
     .. versionadded:: 2.0
     """
@@ -120,7 +97,7 @@ class Item(WrappedComponent, Generic[V_co]):
         ...
 
     def __init__(self):
-        self._view: V_co = None
+        self._view: V_co = None  # type: ignore
         self._row: Optional[int] = None
         self._rendered_row: Optional[int] = None
         # This works mostly well but there is a gotcha with

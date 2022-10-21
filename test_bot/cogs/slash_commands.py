@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: MIT
+
+from typing import Optional
+
 import disnake
 from disnake.ext import commands
 
@@ -38,7 +42,9 @@ class SlashCommands(commands.Cog):
         await inter.send(mood)
 
     @commands.slash_command()
-    async def guild_only(self, inter: disnake.GuildCommandInteraction, option: str = None):
+    async def guild_only(
+        self, inter: disnake.GuildCommandInteraction, option: Optional[str] = None
+    ):
         await inter.send(f"guild: {inter.guild} | option: {option!r}")
 
     @commands.slash_command()
@@ -46,9 +52,9 @@ class SlashCommands(commands.Cog):
         self,
         inter: disnake.CommandInteraction,
         a: int = commands.Param(None, lt=0),
-        b: commands.Range[1, ...] = None,
-        c: commands.Range[0, 10] = None,
-        d: commands.Range[0, 10.0] = None,
+        b: Optional[commands.Range[1, ...]] = None,
+        c: Optional[commands.Range[0, 10]] = None,
+        d: Optional[commands.Range[0, 10.0]] = None,
     ):
         """limit slash command options to a range of values
 
@@ -93,4 +99,3 @@ class SlashCommands(commands.Cog):
 
 def setup(bot):
     bot.add_cog(SlashCommands(bot))
-    print(f"> Extension {__name__} is ready\n")

@@ -1,31 +1,10 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
 from typing import List, Literal, Optional, TypedDict, Union
+
+from typing_extensions import NotRequired
 
 from .channel import ChannelType
 from .components import Component
@@ -52,20 +31,17 @@ class Reaction(TypedDict):
     emoji: PartialEmoji
 
 
-class _AttachmentOptional(TypedDict, total=False):
-    height: Optional[int]
-    width: Optional[int]
-    content_type: str
-    ephemeral: bool
-    description: str
-
-
-class Attachment(_AttachmentOptional):
+class Attachment(TypedDict):
     id: Snowflake
     filename: str
+    description: NotRequired[str]
+    content_type: NotRequired[str]
     size: int
     url: str
     proxy_url: str
+    height: NotRequired[Optional[int]]
+    width: NotRequired[Optional[int]]
+    ephemeral: NotRequired[bool]
 
 
 MessageActivityType = Literal[1, 2, 3, 5]
@@ -76,15 +52,12 @@ class MessageActivity(TypedDict):
     party_id: str
 
 
-class _MessageApplicationOptional(TypedDict, total=False):
-    cover_image: str
-
-
-class MessageApplication(_MessageApplicationOptional):
+class MessageApplication(TypedDict):
     id: Snowflake
     description: str
     icon: Optional[str]
     name: str
+    cover_image: NotRequired[str]
 
 
 class MessageReference(TypedDict, total=False):
@@ -94,29 +67,10 @@ class MessageReference(TypedDict, total=False):
     fail_if_not_exists: bool
 
 
-class _MessageOptional(TypedDict, total=False):
-    guild_id: Snowflake
-    member: Member
-    mention_channels: List[ChannelMention]
-    reactions: List[Reaction]
-    nonce: Union[int, str]
-    webhook_id: Snowflake
-    activity: MessageActivity
-    application: MessageApplication
-    application_id: Snowflake
-    message_reference: MessageReference
-    flags: int
-    sticker_items: List[StickerItem]
-    referenced_message: Optional[Message]
-    interaction: InteractionMessageReference
-    components: List[Component]
-    thread: Thread
-
-
 MessageType = Literal[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 18, 19, 20, 21]
 
 
-class Message(_MessageOptional):
+class Message(TypedDict):
     id: Snowflake
     channel_id: Snowflake
     author: User
@@ -125,12 +79,32 @@ class Message(_MessageOptional):
     edited_timestamp: Optional[str]
     tts: bool
     mention_everyone: bool
-    mentions: List[UserWithMember]
+    # this only contains (partial) member data in gateway events
+    mentions: Union[List[User], List[UserWithMember]]
     mention_roles: SnowflakeList
+    mention_channels: NotRequired[List[ChannelMention]]
     attachments: List[Attachment]
     embeds: List[Embed]
+    reactions: NotRequired[List[Reaction]]
+    nonce: NotRequired[Union[int, str]]
     pinned: bool
+    webhook_id: NotRequired[Snowflake]
     type: MessageType
+    activity: NotRequired[MessageActivity]
+    application: NotRequired[MessageApplication]
+    application_id: NotRequired[Snowflake]
+    message_reference: NotRequired[MessageReference]
+    flags: NotRequired[int]
+    referenced_message: NotRequired[Optional[Message]]
+    interaction: NotRequired[InteractionMessageReference]
+    thread: NotRequired[Thread]
+    components: NotRequired[List[Component]]
+    sticker_items: NotRequired[List[StickerItem]]
+    position: NotRequired[int]
+
+    # specific to MESSAGE_CREATE/MESSAGE_UPDATE events
+    guild_id: NotRequired[Snowflake]
+    member: NotRequired[Member]
 
 
 AllowedMentionType = Literal["roles", "users", "everyone"]

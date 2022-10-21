@@ -1,27 +1,4 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
@@ -749,6 +726,13 @@ class Message(Hashable):
     channel: Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`Thread`, :class:`DMChannel`, :class:`GroupChannel`, :class:`PartialMessageable`]
         The channel that the message was sent from.
         Could be a :class:`DMChannel` or :class:`GroupChannel` if it's a private message.
+    position: Optional[:class:`int`]
+        A number that indicates the approximate position of a message in a :class:`Thread`.
+        This is a number that starts at 0. e.g. the first message is position 0.
+        This is `None` if the message was not sent in a :class:`Thread`, or if it was sent before July 1, 2022.
+
+        .. versionadded:: 2.6
+
     reference: Optional[:class:`~disnake.MessageReference`]
         The message that this message references. This is only applicable to messages of
         type :attr:`MessageType.pins_add`, crossposted messages created by a
@@ -849,6 +833,7 @@ class Message(Hashable):
         "tts",
         "content",
         "channel",
+        "position",
         "application_id",
         "webhook_id",
         "mention_everyone",
@@ -904,6 +889,7 @@ class Message(Hashable):
         # for user experience, on_message has no business getting partials
         # TODO: Subscripted message to include the channel
         self.channel: Union[GuildMessageable, DMChannel] = channel  # type: ignore
+        self.position: Optional[int] = data.get("position", None)
         self._edited_timestamp: Optional[datetime.datetime] = utils.parse_time(
             data["edited_timestamp"]
         )
@@ -935,7 +921,7 @@ class Message(Hashable):
             self.guild = state._get_guild(utils._get_as_snowflake(data, "guild_id"))
 
         if thread_data := data.get("thread"):
-            if not self.thread and self.guild:
+            if not self.thread and isinstance(self.guild, Guild):
                 self.guild._store_thread(thread_data)
 
         try:
@@ -1251,7 +1237,10 @@ class Message(Hashable):
 
         .. versionadded:: 2.4
         """
-        return self.guild and self.guild.get_thread(self.id)
+        if not isinstance(self.guild, Guild):
+            return None
+
+        return self.guild.get_thread(self.id)
 
     def is_system(self) -> bool:
         """Whether the message is a system message.
@@ -1272,16 +1261,18 @@ class Message(Hashable):
         )
 
     @utils.cached_slot_property("_cs_system_content")
-    def system_content(self):
+    def system_content(self) -> Optional[str]:
         """
-        :class:`str`: A property that returns the content that is rendered
+        Optional[:class:`str`]: A property that returns the content that is rendered
         regardless of the :attr:`Message.type`.
 
         In the case of :attr:`MessageType.default` and :attr:`MessageType.reply`\\,
         this just returns the regular :attr:`Message.content`. Otherwise this
         returns an English message denoting the contents of the system message.
+
+        If the message type is unrecognised this method will return ``None``.
         """
-        if self.type is MessageType.default:
+        if self.type in (MessageType.default, MessageType.reply):
             return self.content
 
         if self.type is MessageType.recipient_add:
@@ -1296,7 +1287,15 @@ class Message(Hashable):
             else:
                 return f"{self.author.name} removed {self.mentions[0].name} from the thread."
 
+        # MessageType.call cannot be read by bots.
+
         if self.type is MessageType.channel_name_change:
+            if (
+                self.channel.type is ChannelType.public_thread
+                and (parent := getattr(self.channel, "parent", None))
+                and parent.type is ChannelType.forum
+            ):
+                return f"{self.author.name} changed the post title: **{self.content}**"
             return f"{self.author.name} changed the channel name: **{self.content}**"
 
         if self.type is MessageType.channel_icon_change:
@@ -1350,11 +1349,11 @@ class Message(Hashable):
                 return f"{self.author.name} just boosted the server **{self.content}** times! {self.guild} has achieved **Level 3!**"
 
         if self.type is MessageType.channel_follow_add:
-            return f"{self.author.name} has added {self.content} to this channel"
+            return f"{self.author.name} has added {self.content} to this channel. Its most important updates will show up here."
 
         if self.type is MessageType.guild_stream:
             # the author will be a Member
-            return f"{self.author.name} is live! Now streaming {self.author.activity.name}"  # type: ignore
+            return f"{self.author.name} is live! Now streaming {self.author.activity.name}."  # type: ignore
 
         if self.type is MessageType.guild_discovery_disqualified:
             return "This server has been removed from Server Discovery because it no longer passes all the requirements. Check Server Settings for more details."
@@ -1369,9 +1368,11 @@ class Message(Hashable):
             return "This server has failed Discovery activity requirements for 3 weeks in a row. If this server fails for 1 more week, it will be removed from Discovery."
 
         if self.type is MessageType.thread_created:
-            return f"{self.author.name} started a thread: **{self.content}**. See all **threads**."
+            return f"{self.author.name} started a thread: **{self.content}**. See all threads."
 
-        if self.type is MessageType.reply:
+        # note: MessageType.reply is implemented at the top of this method, with MessageType.default
+
+        if self.type is MessageType.application_command:
             return self.content
 
         if self.type is MessageType.thread_starter_message:
@@ -1382,7 +1383,17 @@ class Message(Hashable):
             return self.reference.resolved.content  # type: ignore
 
         if self.type is MessageType.guild_invite_reminder:
+            # todo: determine if this should be the owner content or the user content
             return "Wondering who to invite?\nStart by inviting anyone who can help you build the server!"
+
+        if self.type is MessageType.context_menu_command:
+            return self.content
+
+        if self.type is MessageType.auto_moderation_action:
+            return self.content
+
+        # in the event of an unknown or unsupported message type, we return nothing
+        return None
 
     async def delete(self, *, delay: Optional[float] = None) -> None:
         """|coro|
@@ -1842,8 +1853,8 @@ class Message(Hashable):
         self,
         *,
         name: str,
-        auto_archive_duration: AnyThreadArchiveDuration = None,
-        slowmode_delay: int = None,
+        auto_archive_duration: Optional[AnyThreadArchiveDuration] = None,
+        slowmode_delay: Optional[int] = None,
         reason: Optional[str] = None,
     ) -> Thread:
         """|coro|

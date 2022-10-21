@@ -1,1 +1,0 @@
-Explicitly type channel types with literal return values.

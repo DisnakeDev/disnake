@@ -1,28 +1,30 @@
-# This example requires the 'members' privileged intents
+# SPDX-License-Identifier: MIT
+
+"""
+A role self-assign example, using reactions.
+"""
+
+import os
 
 import disnake
 
+ROLE_MESSAGE_ID = 1234567  # message ID goes here
+
+EMOJI_TO_ROLE = {
+    disnake.PartialEmoji(name="🔴"): 123,  # ID of the role associated with unicode emoji '🔴'.
+    disnake.PartialEmoji(name="🟡"): 456,  # ID of the role associated with unicode emoji '🟡'.
+    disnake.PartialEmoji(name="green"): 789,  # ID of the role associated with a partial emoji's ID.
+}
+
 
 class MyClient(disnake.Client):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.role_message_id = 0  # ID of the message that can be reacted to to add/remove a role.
-        self.emoji_to_role = {
-            disnake.PartialEmoji(name="🔴"): 0,  # ID of the role associated with unicode emoji '🔴'.
-            disnake.PartialEmoji(name="🟡"): 0,  # ID of the role associated with unicode emoji '🟡'.
-            disnake.PartialEmoji(
-                name="green", id=0
-            ): 0,  # ID of the role associated with a partial emoji's ID.
-        }
-
     async def on_raw_reaction_add(self, payload: disnake.RawReactionActionEvent):
         """Gives a role based on a reaction emoji."""
         if payload.guild_id is None or payload.member is None:
             return
 
         # Make sure that the message the user is reacting to is the one we care about.
-        if payload.message_id != self.role_message_id:
+        if payload.message_id != ROLE_MESSAGE_ID:
             return
 
         guild = self.get_guild(payload.guild_id)
@@ -31,7 +33,7 @@ class MyClient(disnake.Client):
             return
 
         try:
-            role_id = self.emoji_to_role[payload.emoji]
+            role_id = EMOJI_TO_ROLE[payload.emoji]
         except KeyError:
             # If the emoji isn't the one we care about then exit as well.
             return
@@ -52,8 +54,9 @@ class MyClient(disnake.Client):
         """Removes a role based on a reaction emoji."""
         if payload.guild_id is None:
             return
+
         # Make sure that the message the user is reacting to is the one we care about.
-        if payload.message_id != self.role_message_id:
+        if payload.message_id != ROLE_MESSAGE_ID:
             return
 
         guild = self.get_guild(payload.guild_id)
@@ -62,7 +65,7 @@ class MyClient(disnake.Client):
             return
 
         try:
-            role_id = self.emoji_to_role[payload.emoji]
+            role_id = EMOJI_TO_ROLE[payload.emoji]
         except KeyError:
             # If the emoji isn't the one we care about then exit as well.
             return
@@ -86,9 +89,13 @@ class MyClient(disnake.Client):
             # If we want to do something in case of errors we'd do it here.
             pass
 
+    async def on_ready(self):
+        print(f"Logged in as {self.user} (ID: {self.user.id})\n------")
+
 
 intents = disnake.Intents.default()
 intents.members = True
 
-client = MyClient(intents=intents)
-client.run("token")
+if __name__ == "__main__":
+    client = MyClient(intents=intents)
+    client.run(os.getenv("BOT_TOKEN"))

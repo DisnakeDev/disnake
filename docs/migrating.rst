@@ -1,3 +1,7 @@
+.. SPDX-License-Identifier: MIT
+
+:orphan:
+
 .. currentmodule:: disnake
 
 .. _migrating_1_0:

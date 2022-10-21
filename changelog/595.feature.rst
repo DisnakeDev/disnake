@@ -1,1 +1,0 @@
-|commands| Add support for Union[:class:`User`, :class:`Role`] and Union[:class:`User`, :class:`Member`, :class:`Role`] annotations in slash commands.

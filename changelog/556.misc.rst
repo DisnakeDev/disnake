@@ -1,1 +1,0 @@
-Update PyPI url and minor wording in the README.

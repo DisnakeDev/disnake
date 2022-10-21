@@ -1,1 +1,0 @@
-Rework internal typings for interaction payloads.

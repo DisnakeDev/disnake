@@ -1,27 +1,4 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
@@ -52,15 +29,23 @@ import disnake.abc
 from . import utils
 from .asset import Asset
 from .context_managers import Typing
-from .enums import ChannelType, StagePrivacyLevel, VideoQualityMode, try_enum, try_enum_to_int
+from .enums import (
+    ChannelType,
+    StagePrivacyLevel,
+    ThreadSortOrder,
+    VideoQualityMode,
+    try_enum,
+    try_enum_to_int,
+)
 from .errors import ClientException
 from .file import File
-from .flags import ChannelFlags, MessageFlags
+from .flags import ChannelFlags
 from .iterators import ArchivedThreadIterator
 from .mixins import Hashable
+from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite, Permissions
 from .stage_instance import StageInstance
-from .threads import Thread
+from .threads import ForumTag, Thread
 from .utils import MISSING
 
 __all__ = (
@@ -81,6 +66,7 @@ if TYPE_CHECKING:
     from .abc import Snowflake, SnowflakeTime
     from .asset import AssetBytes
     from .embeds import Embed
+    from .emoji import Emoji
     from .guild import Guild, GuildChannel as GuildChannelType
     from .member import Member, VoiceState
     from .message import AllowedMentions, Message, PartialMessage
@@ -153,8 +139,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
     slowmode_delay: :class:`int`
         The number of seconds a member must wait between sending messages
         in this channel. A value of `0` denotes that it is disabled.
-        Bots and users with :attr:`~Permissions.manage_channels` or
-        :attr:`~Permissions.manage_messages` permissions bypass slowmode.
+        Bots, and users with :attr:`~Permissions.manage_channels` or
+        :attr:`~Permissions.manage_messages` permissions, bypass slowmode.
     nsfw: :class:`bool`
         Whether the channel is marked as "not safe for work".
 
@@ -807,8 +793,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         *,
         name: str,
         message: Snowflake,
-        auto_archive_duration: AnyThreadArchiveDuration = None,
-        slowmode_delay: int = None,
+        auto_archive_duration: Optional[AnyThreadArchiveDuration] = None,
+        slowmode_delay: Optional[int] = None,
         reason: Optional[str] = None,
     ) -> Thread:
         ...
@@ -819,9 +805,9 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         *,
         name: str,
         type: ThreadType,
-        auto_archive_duration: AnyThreadArchiveDuration = None,
-        invitable: bool = None,
-        slowmode_delay: int = None,
+        auto_archive_duration: Optional[AnyThreadArchiveDuration] = None,
+        invitable: Optional[bool] = None,
+        slowmode_delay: Optional[int] = None,
         reason: Optional[str] = None,
     ) -> Thread:
         ...
@@ -831,10 +817,10 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         *,
         name: str,
         message: Optional[Snowflake] = None,
-        auto_archive_duration: AnyThreadArchiveDuration = None,
+        auto_archive_duration: Optional[AnyThreadArchiveDuration] = None,
         type: Optional[ThreadType] = None,
-        invitable: bool = None,
-        slowmode_delay: int = None,
+        invitable: Optional[bool] = None,
+        slowmode_delay: Optional[int] = None,
         reason: Optional[str] = None,
     ) -> Thread:
         """|coro|
@@ -920,7 +906,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
                 self.id,
                 name=name,
                 auto_archive_duration=auto_archive_duration or self.default_auto_archive_duration,
-                type=type.value,  # type:ignore
+                type=type.value,  # type: ignore
                 invitable=invitable if invitable is not None else True,
                 rate_limit_per_user=slowmode_delay or 0,
                 reason=reason,
@@ -1132,8 +1118,8 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
     slowmode_delay: :class:`int`
         The number of seconds a member must wait between sending messages
         in this channel. A value of `0` denotes that it is disabled.
-        Bots and users with :attr:`~Permissions.manage_channels` or
-        :attr:`~Permissions.manage_messages` bypass slowmode.
+        Bots, and users with :attr:`~Permissions.manage_channels` or
+        :attr:`~Permissions.manage_messages`, bypass slowmode.
 
         .. versionadded:: 2.3
 
@@ -2488,7 +2474,29 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         The default auto archive duration in minutes for threads created in this channel.
     slowmode_delay: :class:`int`
         The number of seconds a member must wait between creating threads
-        in this channel. A value of `0` denotes that it is disabled.
+        in this channel.
+
+        A value of ``0`` denotes that it is disabled.
+        Bots, and users with :attr:`~Permissions.manage_channels` or
+        :attr:`~Permissions.manage_messages`, bypass slowmode.
+
+        See also :attr:`default_thread_slowmode_delay`.
+
+    default_thread_slowmode_delay: :class:`int`
+        The default number of seconds a member must wait between sending messages
+        in newly created threads in this channel.
+
+        A value of ``0`` denotes that it is disabled.
+        Bots, and users with :attr:`~Permissions.manage_channels` or
+        :attr:`~Permissions.manage_messages`, bypass slowmode.
+
+        .. versionadded:: 2.6
+
+    default_sort_order: Optional[:class:`ThreadSortOrder`]
+        The default sort order of threads in this channel.
+        Members will still be able to change this locally.
+
+        .. versionadded:: 2.6
     """
 
     __slots__ = (
@@ -2503,6 +2511,11 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         "default_auto_archive_duration",
         "guild",
         "slowmode_delay",
+        "default_thread_slowmode_delay",
+        "default_sort_order",
+        "_available_tags",
+        "_default_reaction_emoji_id",
+        "_default_reaction_emoji_name",
         "_state",
         "_type",
         "_overwrites",
@@ -2541,7 +2554,28 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         self.default_auto_archive_duration: ThreadArchiveDurationLiteral = data.get(
             "default_auto_archive_duration", 1440
         )
-        self.slowmode_delay = data.get("rate_limit_per_user", 0)
+        self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
+        self.default_thread_slowmode_delay: int = data.get("default_thread_rate_limit_per_user", 0)
+
+        tags = [
+            ForumTag._from_data(data=tag, state=self._state)
+            for tag in data.get("available_tags", [])
+        ]
+        self._available_tags: Dict[int, ForumTag] = {tag.id: tag for tag in tags}
+
+        default_reaction_emoji = data.get("default_reaction_emoji") or {}
+        # emoji_id may be `0`, use `None` instead
+        self._default_reaction_emoji_id: Optional[int] = (
+            utils._get_as_snowflake(default_reaction_emoji, "emoji_id") or None
+        )
+        self._default_reaction_emoji_name: Optional[str] = default_reaction_emoji.get("emoji_name")
+
+        self.default_sort_order: Optional[ThreadSortOrder] = (
+            try_enum(ThreadSortOrder, order)
+            if (order := data.get("default_sort_order")) is not None
+            else None
+        )
+
         self._fill_overwrites(data)
 
     async def _get_channel(self) -> ForumChannel:
@@ -2591,6 +2625,31 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         """
         return self.nsfw
 
+    def requires_tag(self) -> bool:
+        """Whether all newly created threads in this channel are required to have a tag.
+
+        This is a shortcut to :attr:`self.flags.require_tag <ChannelFlags.require_tag>`.
+
+        .. versionadded:: 2.6
+
+        :return type: :class:`bool`
+        """
+        return self.flags.require_tag
+
+    @property
+    def default_reaction(self) -> Optional[Union[Emoji, PartialEmoji]]:
+        """Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]:
+        The default emoji shown for reacting to threads.
+
+        Due to a Discord limitation, this will have an empty
+        :attr:`~PartialEmoji.name` if it is a custom :class:`PartialEmoji`.
+
+        .. versionadded:: 2.6
+        """
+        return PartialEmoji._emoji_from_name_id(
+            self._default_reaction_emoji_name, self._default_reaction_emoji_id, state=self._state
+        )
+
     @property
     def last_thread(self) -> Optional[Thread]:
         """Gets the last created thread in this channel from the cache.
@@ -2610,6 +2669,16 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             The last created thread in this channel or ``None`` if not found.
         """
         return self._state.get_channel(self.last_thread_id) if self.last_thread_id else None  # type: ignore
+
+    @property
+    def available_tags(self) -> List[ForumTag]:
+        """List[:class:`ForumTag`]: The available tags for threads in this forum channel.
+
+        To create/edit/delete tags, use :func:`~ForumChannel.edit`.
+
+        .. versionadded:: 2.6
+        """
+        return list(self._available_tags.values())
 
     # both of these are re-implemented due to forum channels not being messageables
     async def trigger_typing(self) -> None:
@@ -2660,9 +2729,14 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         sync_permissions: bool = ...,
         category: Optional[Snowflake] = ...,
         slowmode_delay: Optional[int] = ...,
+        default_thread_slowmode_delay: Optional[int] = ...,
         default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = ...,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
         flags: ChannelFlags = ...,
+        require_tag: bool = ...,
+        available_tags: Sequence[ForumTag] = ...,
+        default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = ...,
+        default_sort_order: Optional[ThreadSortOrder] = ...,
         reason: Optional[str] = ...,
     ) -> ForumChannel:
         ...
@@ -2677,9 +2751,14 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         sync_permissions: bool = MISSING,
         category: Optional[Snowflake] = MISSING,
         slowmode_delay: Optional[int] = MISSING,
+        default_thread_slowmode_delay: Optional[int] = MISSING,
         default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
         flags: ChannelFlags = MISSING,
+        require_tag: bool = MISSING,
+        available_tags: Sequence[ForumTag] = MISSING,
+        default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
+        default_sort_order: Optional[ThreadSortOrder] = MISSING,
         reason: Optional[str] = None,
         **kwargs: Never,
     ) -> Optional[ForumChannel]:
@@ -2696,11 +2775,11 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         Parameters
         ----------
         name: :class:`str`
-            The new channel's name.
+            The channel's new name.
         topic: Optional[:class:`str`]
-            The new channel's topic.
+            The channel's new topic.
         position: :class:`int`
-            The new channel's position.
+            The channel's new position.
         nsfw: :class:`bool`
             Whether to mark the channel as NSFW.
         sync_permissions: :class:`bool`
@@ -2710,8 +2789,17 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             The new category for this channel. Can be ``None`` to remove the
             category.
         slowmode_delay: Optional[:class:`int`]
-            Specifies the slowmode rate limit for users in this channel, in seconds.
-            A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
+            Specifies the slowmode rate limit at which users can create
+            threads in this channel, in seconds.
+            A value of ``0`` or ``None`` disables slowmode. The maximum value possible is ``21600``.
+        default_thread_slowmode_delay: Optional[:class:`int`]
+            Specifies the slowmode rate limit at which users can send messages
+            in newly created threads in this channel, in seconds.
+            This does not apply retroactively to existing threads.
+            A value of ``0`` or ``None`` disables slowmode. The maximum value possible is ``21600``.
+
+            .. versionadded:: 2.6
+
         overwrites: :class:`Mapping`
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the channel.
@@ -2720,6 +2808,33 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
         flags: :class:`ChannelFlags`
             The new flags to set for this channel. This will overwrite any existing flags set on this channel.
+            If parameter ``require_tag`` is provided, that will override the setting of :attr:`ChannelFlags.require_tag`.
+
+            .. versionadded:: 2.6
+
+        require_tag: :class:`bool`
+            Whether all newly created threads are required to have a tag.
+
+            .. versionadded:: 2.6
+
+        available_tags: Sequence[:class:`ForumTag`]
+            The new :class:`ForumTag`\\s available for threads in this channel.
+            Can be used to create new tags and edit/reorder/delete existing tags.
+            Maximum of 20.
+
+            Note that this overwrites all tags, removing existing tags unless they're passed as well.
+
+            See :class:`ForumTag` for examples regarding creating/editing tags.
+
+            .. versionadded:: 2.6
+
+        default_reaction: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
+            The new default emoji shown for reacting to threads.
+
+            .. versionadded:: 2.6
+
+        default_sort_order: Optional[:class:`ThreadSortOrder`]
+            The new default sort order of threads in this channel.
 
             .. versionadded:: 2.6
 
@@ -2743,6 +2858,11 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             The newly edited forum channel. If the edit was only positional
             then ``None`` is returned instead.
         """
+        if require_tag is not MISSING:
+            # create base flags if flags are provided, otherwise use the internal flags.
+            flags = ChannelFlags._from_value(self._flags if flags is MISSING else flags.value)
+            flags.require_tag = require_tag
+
         payload = await self._edit(
             name=name,
             topic=topic,
@@ -2751,9 +2871,13 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             sync_permissions=sync_permissions,
             category=category,
             slowmode_delay=slowmode_delay,
+            default_thread_slowmode_delay=default_thread_slowmode_delay,
             default_auto_archive_duration=default_auto_archive_duration,
             overwrites=overwrites,
             flags=flags,
+            available_tags=available_tags,
+            default_reaction=default_reaction,
+            default_sort_order=default_sort_order,
             reason=reason,
             **kwargs,
         )
@@ -2798,7 +2922,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         name: str,
         auto_archive_duration: AnyThreadArchiveDuration = ...,
         slowmode_delay: int = ...,
-        content: str,
+        content: str = ...,
         embed: Embed = ...,
         file: File = ...,
         suppress_embeds: bool = ...,
@@ -2817,7 +2941,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         name: str,
         auto_archive_duration: AnyThreadArchiveDuration = ...,
         slowmode_delay: int = ...,
-        content: str,
+        content: str = ...,
         embed: Embed = ...,
         files: List[File] = ...,
         suppress_embeds: bool = ...,
@@ -2836,7 +2960,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         name: str,
         auto_archive_duration: AnyThreadArchiveDuration = ...,
         slowmode_delay: int = ...,
-        content: str,
+        content: str = ...,
         embeds: List[Embed] = ...,
         file: File = ...,
         suppress_embeds: bool = ...,
@@ -2855,7 +2979,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         name: str,
         auto_archive_duration: AnyThreadArchiveDuration = ...,
         slowmode_delay: int = ...,
-        content: str,
+        content: str = ...,
         embeds: List[Embed] = ...,
         files: List[File] = ...,
         suppress_embeds: bool = ...,
@@ -2873,7 +2997,8 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         name: str,
         auto_archive_duration: AnyThreadArchiveDuration = MISSING,
         slowmode_delay: int = MISSING,
-        content: str,
+        applied_tags: Sequence[Snowflake] = MISSING,
+        content: str = MISSING,
         embed: Embed = MISSING,
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
@@ -2891,8 +3016,14 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
         You must have the :attr:`~Permissions.create_forum_threads` permission to do this.
 
+        At least one of ``content``, ``embed``/``embeds``, ``file``/``files``,
+        ``stickers``, ``components``, or ``view`` must be provided.
+
         .. versionchanged:: 2.6
             Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
+
+        .. versionchanged:: 2.6
+            The ``content`` parameter is no longer required.
 
         Parameters
         ----------
@@ -2905,7 +3036,12 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         slowmode_delay: :class:`int`
             Specifies the slowmode rate limit for users in this thread, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
-            If not provided, slowmode is disabled.
+            If not provided, slowmode is inherited from the parent's :attr:`~ForumChannel.default_thread_slowmode_delay`.
+        applied_tags: Sequence[:class:`abc.Snowflake`]
+            The tags to apply to the new thread. Maximum of 5.
+
+            .. versionadded:: 2.6
+
         content: :class:`str`
             The content of the message to send.
         embed: :class:`.Embed`
@@ -2969,6 +3105,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             embeds=embeds,
             file=file,
             files=files,
+            suppress_embeds=suppress_embeds,
             view=view,
             components=components,
             allowed_mentions=allowed_mentions,
@@ -2980,25 +3117,27 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
                 "ThreadArchiveDurationLiteral", try_enum_to_int(auto_archive_duration)
             )
 
+        tag_ids = [t.id for t in applied_tags] if applied_tags else []
+
         if params.files and len(params.files) > 10:
             raise ValueError("files parameter must be a list of up to 10 elements")
         elif params.files and not all(isinstance(file, File) for file in params.files):
             raise TypeError("files parameter must be a list of File")
 
-        if suppress_embeds:
-            flags = MessageFlags.suppress_embeds.flag
-        else:
-            flags = 0
+        channel_data = {
+            "name": name,
+            "auto_archive_duration": auto_archive_duration or self.default_auto_archive_duration,
+            "applied_tags": tag_ids,
+        }
+
+        if slowmode_delay is not MISSING:
+            channel_data["rate_limit_per_user"] = slowmode_delay
 
         try:
             data = await self._state.http.start_thread_in_forum_channel(
                 self.id,
-                name=name,
-                auto_archive_duration=auto_archive_duration or self.default_auto_archive_duration,
-                rate_limit_per_user=slowmode_delay or 0,
-                type=ChannelType.public_thread.value,
+                **channel_data,
                 files=params.files,
-                flags=flags,
                 reason=reason,
                 **params.payload,
             )
@@ -3121,6 +3260,43 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             self.id, name=str(name), avatar=avatar_data, reason=reason
         )
         return Webhook.from_state(data, state=self._state)
+
+    def get_tag(self, tag_id: int, /) -> Optional[ForumTag]:
+        """Returns a thread tag with the given ID.
+
+        .. versionadded:: 2.6
+
+        Parameters
+        ----------
+        tag_id: :class:`int`
+            The ID to search for.
+
+        Returns
+        -------
+        Optional[:class:`ForumTag`]
+            The tag with the given ID, or ``None`` if not found.
+        """
+        return self._available_tags.get(tag_id)
+
+    def get_tag_by_name(self, name: str, /) -> Optional[ForumTag]:
+        """Returns a thread tag with the given name.
+
+        Tags can be uniquely identified based on the name, as tag names
+        in a forum channel must be unique.
+
+        .. versionadded:: 2.6
+
+        Parameters
+        ----------
+        name: :class:`str`
+            The name to search for.
+
+        Returns
+        -------
+        Optional[:class:`ForumTag`]
+            The tag with the given name, or ``None`` if not found.
+        """
+        return utils.get(self._available_tags.values(), name=name)
 
 
 class DMChannel(disnake.abc.Messageable, Hashable):

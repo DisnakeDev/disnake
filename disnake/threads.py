@@ -1,51 +1,33 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
 import asyncio
 import time
-from typing import TYPE_CHECKING, Callable, Dict, Iterable, List, Literal, Optional, Union
+from typing import TYPE_CHECKING, Callable, Dict, Iterable, List, Literal, Optional, Sequence, Union
 
 from .abc import Messageable
 from .enums import ChannelType, ThreadArchiveDuration, try_enum, try_enum_to_int
 from .errors import ClientException
 from .flags import ChannelFlags
 from .mixins import Hashable
-from .utils import MISSING, _get_as_snowflake, parse_time, snowflake_time
+from .partial_emoji import PartialEmoji, _EmojiTag
+from .utils import MISSING, _get_as_snowflake, _unique, parse_time, snowflake_time
 
 __all__ = (
     "Thread",
     "ThreadMember",
+    "ForumTag",
 )
 
 if TYPE_CHECKING:
     import datetime
 
+    from typing_extensions import Self
+
     from .abc import Snowflake, SnowflakeTime
     from .channel import CategoryChannel, ForumChannel, TextChannel
+    from .emoji import Emoji
     from .guild import Guild
     from .member import Member
     from .message import Message, PartialMessage
@@ -54,6 +36,8 @@ if TYPE_CHECKING:
     from .state import ConnectionState
     from .types.snowflake import SnowflakeList
     from .types.threads import (
+        ForumTag as ForumTagPayload,
+        PartialForumTag as PartialForumTagPayload,
         Thread as ThreadPayload,
         ThreadArchiveDurationLiteral,
         ThreadMember as ThreadMemberPayload,
@@ -108,12 +92,24 @@ class Thread(Messageable, Hashable):
     slowmode_delay: :class:`int`
         The number of seconds a member must wait between sending messages
         in this thread. A value of `0` denotes that it is disabled.
-        Bots and users with :attr:`~Permissions.manage_channels` or
-        :attr:`~Permissions.manage_messages` bypass slowmode.
+        Bots, and users with :attr:`~Permissions.manage_channels` or
+        :attr:`~Permissions.manage_messages`, bypass slowmode.
     message_count: Optional[:class:`int`]
-        An approximate number of messages in this thread. This caps at 50.
+        An approximate number of messages in this thread.
+
+        .. note::
+
+            If the thread was created before July 1, 2022, this could be inaccurate.
     member_count: Optional[:class:`int`]
         An approximate number of members in this thread. This caps at 50.
+    total_message_sent: Optional[:class:`int`]
+        The total number of messages sent in the thread, including deleted messages.
+
+        .. versionadded:: 2.6
+
+        .. note::
+
+            If the thread was created before July 1, 2022, this could be inaccurate.
     me: Optional[:class:`ThreadMember`]
         A thread member representing yourself, if you've joined the thread.
         This could not be available.
@@ -149,6 +145,7 @@ class Thread(Messageable, Hashable):
         "parent_id",
         "last_message_id",
         "message_count",
+        "total_message_sent",
         "member_count",
         "slowmode_delay",
         "me",
@@ -160,6 +157,7 @@ class Thread(Messageable, Hashable):
         "create_timestamp",
         "last_pin_timestamp",
         "_flags",
+        "_applied_tags",
         "_type",
         "_state",
         "_members",
@@ -178,7 +176,7 @@ class Thread(Messageable, Hashable):
         return (
             f"<Thread id={self.id!r} name={self.name!r} parent={self.parent!r} "
             f"owner_id={self.owner_id!r} locked={self.locked!r} archived={self.archived!r} "
-            f"flags={self.flags!r}>"
+            f"flags={self.flags!r} applied_tags={self.applied_tags!r}>"
         )
 
     def __str__(self) -> str:
@@ -192,12 +190,14 @@ class Thread(Messageable, Hashable):
         self._type: ThreadType = try_enum(ChannelType, data["type"])  # type: ignore
         self.last_message_id = _get_as_snowflake(data, "last_message_id")
         self.slowmode_delay = data.get("rate_limit_per_user", 0)
-        self.message_count = data.get("message_count")
+        self.message_count = data.get("message_count") or 0
+        self.total_message_sent = data.get("total_message_sent") or 0
         self.member_count = data.get("member_count")
         self.last_pin_timestamp: Optional[datetime.datetime] = parse_time(
             data.get("last_pin_timestamp")
         )
         self._flags: int = data.get("flags", 0)
+        self._applied_tags = list(map(int, data.get("applied_tags", [])))
         self._unroll_metadata(data["thread_metadata"])
 
         try:
@@ -223,6 +223,7 @@ class Thread(Messageable, Hashable):
 
         self.slowmode_delay = data.get("rate_limit_per_user", 0)
         self._flags = data.get("flags", 0)
+        self._applied_tags = list(map(int, data.get("applied_tags", [])))
 
         try:
             self._unroll_metadata(data["thread_metadata"])
@@ -388,11 +389,29 @@ class Thread(Messageable, Hashable):
 
         Pinned threads are not affected by the auto archive duration.
 
+        This is a shortcut to :attr:`self.flags.pinned <ChannelFlags.pinned>`.
+
         .. versionadded:: 2.5
 
         :return type: :class:`bool`
         """
         return self.flags.pinned
+
+    @property
+    def applied_tags(self) -> List[ForumTag]:
+        """List[:class:`ForumTag`]: The tags currently applied to this thread.
+        Only applicable to threads in :class:`ForumChannel`\\s.
+
+        .. versionadded:: 2.6
+        """
+        from .channel import ForumChannel  # cyclic import
+
+        parent = self.parent
+        if not isinstance(parent, ForumChannel):
+            return []
+
+        # threads may have tag IDs for tags that don't exist anymore
+        return list(filter(None, map(parent._available_tags.get, self._applied_tags)))
 
     def permissions_for(
         self,
@@ -627,6 +646,7 @@ class Thread(Messageable, Hashable):
         auto_archive_duration: AnyThreadArchiveDuration = MISSING,
         pinned: bool = MISSING,
         flags: ChannelFlags = MISSING,
+        applied_tags: Sequence[Snowflake] = MISSING,
         reason: Optional[str] = None,
     ) -> Thread:
         """|coro|
@@ -634,7 +654,7 @@ class Thread(Messageable, Hashable):
         Edits the thread.
 
         Editing the thread requires :attr:`.Permissions.manage_threads`. The thread
-        creator can also edit ``name``, ``archived`` or ``auto_archive_duration``.
+        creator can also edit ``name``, ``archived``, ``auto_archive_duration`` and ``applied_tags``.
         Note that if the thread is locked then only those with :attr:`.Permissions.manage_threads`
         can unarchive a thread.
 
@@ -665,6 +685,19 @@ class Thread(Messageable, Hashable):
         flags: :class:`ChannelFlags`
             The new channel flags to set for this thread. This will overwrite any existing flags set on this channel.
             If parameter ``pinned`` is provided, that will override the setting of :attr:`ChannelFlags.pinned`.
+
+            .. versionadded:: 2.6
+
+        applied_tags: Sequence[:class:`abc.Snowflake`]
+            The new tags of the thread. Maximum of 5.
+            Can also be used to reorder existing tags.
+
+            This is only available for threads in a :class:`ForumChannel`.
+
+            If :attr:`~ForumTag.moderated` tags are edited, :attr:`Permissions.manage_threads`
+            permissions are required.
+
+            See also :func:`add_tags` and :func:`remove_tags`.
 
             .. versionadded:: 2.6
 
@@ -708,6 +741,9 @@ class Thread(Messageable, Hashable):
             if not isinstance(flags, ChannelFlags):
                 raise TypeError("flags field must be of type ChannelFlags")
             payload["flags"] = flags.value
+
+        if applied_tags is not MISSING:
+            payload["applied_tags"] = [t.id for t in applied_tags]
 
         data = await self._state.http.edit_channel(self.id, **payload, reason=reason)
         # The data payload will always be a Thread payload
@@ -840,6 +876,8 @@ class Thread(Messageable, Hashable):
         Deletes this thread.
 
         You must have :attr:`~Permissions.manage_threads` to delete threads.
+        Alternatively, you may delete a thread if it's in a :class:`ForumChannel`,
+        you are the thread creator, and there are no messages other than the initial message.
 
         Parameters
         ----------
@@ -856,6 +894,81 @@ class Thread(Messageable, Hashable):
             Deleting the thread failed.
         """
         await self._state.http.delete_channel(self.id, reason=reason)
+
+    async def add_tags(self, *tags: Snowflake, reason: Optional[str] = None) -> None:
+        """|coro|
+
+        Adds the given tags to this thread, up to 5 in total.
+
+        The thread must be in a :class:`ForumChannel`.
+
+        Adding tags requires you to have :attr:`.Permissions.manage_threads` permissions,
+        or be the owner of the thread.
+        However, adding :attr:`~ForumTag.moderated` tags always requires :attr:`.Permissions.manage_threads` permissions.
+
+        .. versionadded:: 2.6
+
+        Parameters
+        ----------
+        *tags: :class:`abc.Snowflake`
+            An argument list of :class:`abc.Snowflake` representing the :class:`ForumTag`\\s
+            to add to the thread.
+        reason: Optional[:class:`str`]
+            The reason for editing this thread. Shows up on the audit log.
+
+        Raises
+        ------
+        Forbidden
+            You do not have permission to add these tags.
+        HTTPException
+            Editing the thread failed.
+        """
+
+        if not tags:
+            return
+
+        new_tags: List[int] = self._applied_tags.copy()
+        new_tags.extend(t.id for t in tags)
+        new_tags = _unique(new_tags)
+
+        await self._state.http.edit_channel(self.id, applied_tags=new_tags, reason=reason)
+
+    async def remove_tags(self, *tags: Snowflake, reason: Optional[str] = None) -> None:
+        """|coro|
+
+        Removes the given tags from this thread.
+
+        The thread must be in a :class:`ForumChannel`.
+
+        Removing tags requires you to have :attr:`.Permissions.manage_threads` permissions,
+        or be the owner of the thread.
+        However, removing :attr:`~ForumTag.moderated` tags always requires :attr:`.Permissions.manage_threads` permissions.
+
+        .. versionadded:: 2.6
+
+        Parameters
+        ----------
+        *tags: :class:`abc.Snowflake`
+            An argument list of :class:`abc.Snowflake` representing the :class:`ForumTag`\\s
+            to remove from the thread.
+        reason: Optional[:class:`str`]
+            The reason for editing this thread. Shows up on the audit log.
+
+        Raises
+        ------
+        Forbidden
+            You do not have permission to remove these tags.
+        HTTPException
+            Editing the thread failed.
+        """
+
+        if not tags:
+            return
+
+        to_remove = {t.id for t in tags}
+        new_tags: List[int] = [tag_id for tag_id in self._applied_tags if tag_id not in to_remove]
+
+        await self._state.http.edit_channel(self.id, applied_tags=new_tags, reason=reason)
 
     def get_partial_message(self, message_id: int, /) -> PartialMessage:
         """Creates a :class:`PartialMessage` from the message ID.
@@ -959,3 +1072,154 @@ class ThreadMember(Hashable):
     def thread(self) -> Thread:
         """:class:`Thread`: The thread this member belongs to."""
         return self.parent
+
+
+class ForumTag(Hashable):
+    """
+    Represents a tag for threads in forum channels.
+
+    .. container:: operations
+
+        .. describe:: x == y
+
+            Checks if two tags are equal.
+
+        .. describe:: x != y
+
+            Checks if two tags are not equal.
+
+        .. describe:: hash(x)
+
+            Returns the tag's hash.
+
+        .. describe:: str(x)
+
+            Returns the tag's name.
+
+    .. versionadded:: 2.6
+
+
+    Examples
+    --------
+
+    Creating a new tag:
+
+    .. code-block:: python3
+
+        tags = forum.available_tags
+        tags.append(ForumTag(name="cool new tag", moderated=True))
+        await forum.edit(available_tags=tags)
+
+    Editing an existing tag:
+
+    .. code-block:: python3
+
+        tags = []
+        for tag in forum.available_tags:
+            if tag.id == 1234:
+                tag = tag.with_changes(name="whoa new name")
+            tags.append(tag)
+        await forum.edit(available_tags=tags)
+
+
+    Attributes
+    ----------
+    id: :class:`int`
+        The tag's ID. Note that if this tag was manually constructed,
+        this will be ``0``.
+    name: :class:`str`
+        The tag's name.
+    moderated: :class:`bool`
+        Whether only moderators can add this tag to threads or remove it.
+        Defaults to ``False``.
+    emoji: Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]
+        The emoji associated with this tag, if any.
+        Due to a Discord limitation, this will have an empty
+        :attr:`~PartialEmoji.name` if it is a custom :class:`PartialEmoji`.
+    """
+
+    __slots__ = ("id", "name", "moderated", "emoji")
+
+    def __init__(
+        self,
+        *,
+        name: str,
+        emoji: Optional[Union[str, PartialEmoji, Emoji]] = None,
+        moderated: bool = False,
+    ):
+        self.id: int = 0
+        self.name: str = name
+        self.moderated: bool = moderated
+
+        self.emoji: Optional[Union[Emoji, PartialEmoji]] = None
+        if emoji is None:
+            self.emoji = None
+        elif isinstance(emoji, str):
+            self.emoji = PartialEmoji.from_str(emoji)
+        elif isinstance(emoji, _EmojiTag):
+            self.emoji = emoji
+        else:
+            raise TypeError("emoji must be None, a str, PartialEmoji, or Emoji instance.")
+
+    def __str__(self) -> str:
+        return self.name
+
+    def __repr__(self) -> str:
+        return (
+            f"<ForumTag id={self.id!r} name={self.name!r}"
+            f" moderated={self.moderated!r} emoji={self.emoji!r}>"
+        )
+
+    def to_dict(self) -> PartialForumTagPayload:
+        emoji_name, emoji_id = PartialEmoji._emoji_to_name_id(self.emoji)
+        data: PartialForumTagPayload = {
+            "name": self.name,
+            "emoji_id": emoji_id,
+            "emoji_name": emoji_name,
+            "moderated": self.moderated,
+        }
+
+        if self.id:
+            data["id"] = self.id
+
+        return data
+
+    @classmethod
+    def _from_data(cls, *, data: ForumTagPayload, state: ConnectionState) -> Self:
+        emoji_id = _get_as_snowflake(data, "emoji_id") or None
+        emoji_name = data.get("emoji_name")
+        emoji = PartialEmoji._emoji_from_name_id(emoji_name, emoji_id, state=state)
+
+        self = cls(
+            name=data["name"],
+            emoji=emoji,
+            moderated=data["moderated"],
+        )
+        self.id = int(data["id"])
+
+        return self
+
+    def with_changes(
+        self,
+        *,
+        name: str = MISSING,
+        emoji: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
+        moderated: bool = MISSING,
+    ) -> Self:
+        """
+        Returns a new instance with the given changes applied,
+        for easy use with :func:`ForumChannel.edit`.
+        All other fields will be kept intact.
+
+        Returns
+        -------
+        :class:`ForumTag`
+            The new tag instance.
+        """
+        new_self = self.__class__(
+            name=self.name if name is MISSING else name,
+            emoji=self.emoji if emoji is MISSING else emoji,
+            moderated=self.moderated if moderated is MISSING else moderated,
+        )
+        new_self.id = self.id
+        return new_self

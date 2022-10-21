@@ -1,27 +1,5 @@
-"""
-The MIT License (MIT)
+# SPDX-License-Identifier: MIT
 
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
 from __future__ import annotations
 
 import asyncio
@@ -49,6 +27,7 @@ from typing import (
 )
 
 import disnake
+from disnake.utils import _generated, _overload_with_permissions
 
 from ._types import _BaseCommand
 from .cog import Cog
@@ -393,7 +372,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         self.require_var_positional: bool = kwargs.get("require_var_positional", False)
         self.ignore_extra: bool = kwargs.get("ignore_extra", True)
         self.cooldown_after_parsing: bool = kwargs.get("cooldown_after_parsing", False)
-        self.cog: CogT = None
+        self.cog: CogT = None  # type: ignore
 
         # bandaid for the fact that sometimes parent can be the bot instance
         parent = kwargs.get("parent")
@@ -1186,8 +1165,7 @@ class GroupMixin(Generic[CogT]):
         Whether the commands should be case insensitive. Defaults to ``False``.
     """
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        case_insensitive = kwargs.get("case_insensitive", False)
+    def __init__(self, *args: Any, case_insensitive: bool = False, **kwargs: Any) -> None:
         self.all_commands: Dict[str, Command[CogT, Any, Any]] = (
             _CaseInsensitiveDict() if case_insensitive else {}
         )
@@ -2028,6 +2006,70 @@ def bot_has_any_role(*items: int) -> Callable[[T], T]:
     return check(predicate)
 
 
+@overload
+@_generated
+def has_permissions(
+    *,
+    add_reactions: bool = ...,
+    administrator: bool = ...,
+    attach_files: bool = ...,
+    ban_members: bool = ...,
+    change_nickname: bool = ...,
+    connect: bool = ...,
+    create_forum_threads: bool = ...,
+    create_instant_invite: bool = ...,
+    create_private_threads: bool = ...,
+    create_public_threads: bool = ...,
+    deafen_members: bool = ...,
+    embed_links: bool = ...,
+    external_emojis: bool = ...,
+    external_stickers: bool = ...,
+    kick_members: bool = ...,
+    manage_channels: bool = ...,
+    manage_emojis: bool = ...,
+    manage_emojis_and_stickers: bool = ...,
+    manage_events: bool = ...,
+    manage_guild: bool = ...,
+    manage_messages: bool = ...,
+    manage_nicknames: bool = ...,
+    manage_permissions: bool = ...,
+    manage_roles: bool = ...,
+    manage_threads: bool = ...,
+    manage_webhooks: bool = ...,
+    mention_everyone: bool = ...,
+    moderate_members: bool = ...,
+    move_members: bool = ...,
+    mute_members: bool = ...,
+    priority_speaker: bool = ...,
+    read_message_history: bool = ...,
+    read_messages: bool = ...,
+    request_to_speak: bool = ...,
+    send_messages: bool = ...,
+    send_messages_in_threads: bool = ...,
+    send_tts_messages: bool = ...,
+    speak: bool = ...,
+    start_embedded_activities: bool = ...,
+    stream: bool = ...,
+    use_application_commands: bool = ...,
+    use_embedded_activities: bool = ...,
+    use_external_emojis: bool = ...,
+    use_external_stickers: bool = ...,
+    use_slash_commands: bool = ...,
+    use_voice_activation: bool = ...,
+    view_audit_log: bool = ...,
+    view_channel: bool = ...,
+    view_guild_insights: bool = ...,
+) -> Callable[[T], T]:
+    ...
+
+
+@overload
+@_generated
+def has_permissions() -> Callable[[T], T]:
+    ...
+
+
+@_overload_with_permissions
 def has_permissions(**perms: bool) -> Callable[[T], T]:
     """A :func:`.check` that is added that checks if the member has all of
     the permissions necessary.
@@ -2040,6 +2082,9 @@ def has_permissions(**perms: bool) -> Callable[[T], T]:
 
     This check raises a special exception, :exc:`.MissingPermissions`
     that is inherited from :exc:`.CheckFailure`.
+
+    .. versionchanged:: 2.6
+        Considers if the author is timed out.
 
     Parameters
     ----------
@@ -2062,8 +2107,11 @@ def has_permissions(**perms: bool) -> Callable[[T], T]:
         raise TypeError(f"Invalid permission(s): {', '.join(invalid)}")
 
     def predicate(ctx: AnyContext) -> bool:
-        ch = ctx.channel
-        permissions = ch.permissions_for(ctx.author)  # type: ignore
+        if isinstance(ctx, disnake.Interaction):
+            permissions = ctx.permissions
+        else:
+            ch = ctx.channel
+            permissions = ch.permissions_for(ctx.author, ignore_timeout=False)  # type: ignore
 
         missing = [perm for perm, value in perms.items() if getattr(permissions, perm) != value]
 
@@ -2075,19 +2123,90 @@ def has_permissions(**perms: bool) -> Callable[[T], T]:
     return check(predicate)
 
 
+@overload
+@_generated
+def bot_has_permissions(
+    *,
+    add_reactions: bool = ...,
+    administrator: bool = ...,
+    attach_files: bool = ...,
+    ban_members: bool = ...,
+    change_nickname: bool = ...,
+    connect: bool = ...,
+    create_forum_threads: bool = ...,
+    create_instant_invite: bool = ...,
+    create_private_threads: bool = ...,
+    create_public_threads: bool = ...,
+    deafen_members: bool = ...,
+    embed_links: bool = ...,
+    external_emojis: bool = ...,
+    external_stickers: bool = ...,
+    kick_members: bool = ...,
+    manage_channels: bool = ...,
+    manage_emojis: bool = ...,
+    manage_emojis_and_stickers: bool = ...,
+    manage_events: bool = ...,
+    manage_guild: bool = ...,
+    manage_messages: bool = ...,
+    manage_nicknames: bool = ...,
+    manage_permissions: bool = ...,
+    manage_roles: bool = ...,
+    manage_threads: bool = ...,
+    manage_webhooks: bool = ...,
+    mention_everyone: bool = ...,
+    moderate_members: bool = ...,
+    move_members: bool = ...,
+    mute_members: bool = ...,
+    priority_speaker: bool = ...,
+    read_message_history: bool = ...,
+    read_messages: bool = ...,
+    request_to_speak: bool = ...,
+    send_messages: bool = ...,
+    send_messages_in_threads: bool = ...,
+    send_tts_messages: bool = ...,
+    speak: bool = ...,
+    start_embedded_activities: bool = ...,
+    stream: bool = ...,
+    use_application_commands: bool = ...,
+    use_embedded_activities: bool = ...,
+    use_external_emojis: bool = ...,
+    use_external_stickers: bool = ...,
+    use_slash_commands: bool = ...,
+    use_voice_activation: bool = ...,
+    view_audit_log: bool = ...,
+    view_channel: bool = ...,
+    view_guild_insights: bool = ...,
+) -> Callable[[T], T]:
+    ...
+
+
+@overload
+@_generated
+def bot_has_permissions() -> Callable[[T], T]:
+    ...
+
+
+@_overload_with_permissions
 def bot_has_permissions(**perms: bool) -> Callable[[T], T]:
     """Similar to :func:`.has_permissions` except checks if the bot itself has
     the permissions listed.
 
     This check raises a special exception, :exc:`.BotMissingPermissions`
     that is inherited from :exc:`.CheckFailure`.
+
+    .. versionchanged:: 2.6
+        Considers if the author is timed out.
     """
     invalid = set(perms) - set(disnake.Permissions.VALID_FLAGS)
     if invalid:
         raise TypeError(f"Invalid permission(s): {', '.join(invalid)}")
 
     def predicate(ctx: AnyContext) -> bool:
-        permissions = ctx.channel.permissions_for(ctx.me)  # type: ignore
+        if isinstance(ctx, disnake.Interaction):
+            permissions = ctx.app_permissions
+        else:
+            ch = ctx.channel
+            permissions = ch.permissions_for(ctx.me, ignore_timeout=False)  # type: ignore
 
         missing = [perm for perm, value in perms.items() if getattr(permissions, perm) != value]
 
@@ -2099,6 +2218,70 @@ def bot_has_permissions(**perms: bool) -> Callable[[T], T]:
     return check(predicate)
 
 
+@overload
+@_generated
+def has_guild_permissions(
+    *,
+    add_reactions: bool = ...,
+    administrator: bool = ...,
+    attach_files: bool = ...,
+    ban_members: bool = ...,
+    change_nickname: bool = ...,
+    connect: bool = ...,
+    create_forum_threads: bool = ...,
+    create_instant_invite: bool = ...,
+    create_private_threads: bool = ...,
+    create_public_threads: bool = ...,
+    deafen_members: bool = ...,
+    embed_links: bool = ...,
+    external_emojis: bool = ...,
+    external_stickers: bool = ...,
+    kick_members: bool = ...,
+    manage_channels: bool = ...,
+    manage_emojis: bool = ...,
+    manage_emojis_and_stickers: bool = ...,
+    manage_events: bool = ...,
+    manage_guild: bool = ...,
+    manage_messages: bool = ...,
+    manage_nicknames: bool = ...,
+    manage_permissions: bool = ...,
+    manage_roles: bool = ...,
+    manage_threads: bool = ...,
+    manage_webhooks: bool = ...,
+    mention_everyone: bool = ...,
+    moderate_members: bool = ...,
+    move_members: bool = ...,
+    mute_members: bool = ...,
+    priority_speaker: bool = ...,
+    read_message_history: bool = ...,
+    read_messages: bool = ...,
+    request_to_speak: bool = ...,
+    send_messages: bool = ...,
+    send_messages_in_threads: bool = ...,
+    send_tts_messages: bool = ...,
+    speak: bool = ...,
+    start_embedded_activities: bool = ...,
+    stream: bool = ...,
+    use_application_commands: bool = ...,
+    use_embedded_activities: bool = ...,
+    use_external_emojis: bool = ...,
+    use_external_stickers: bool = ...,
+    use_slash_commands: bool = ...,
+    use_voice_activation: bool = ...,
+    view_audit_log: bool = ...,
+    view_channel: bool = ...,
+    view_guild_insights: bool = ...,
+) -> Callable[[T], T]:
+    ...
+
+
+@overload
+@_generated
+def has_guild_permissions() -> Callable[[T], T]:
+    ...
+
+
+@_overload_with_permissions
 def has_guild_permissions(**perms: bool) -> Callable[[T], T]:
     """Similar to :func:`.has_permissions`, but operates on guild wide
     permissions instead of the current channel permissions.
@@ -2127,6 +2310,70 @@ def has_guild_permissions(**perms: bool) -> Callable[[T], T]:
     return check(predicate)
 
 
+@overload
+@_generated
+def bot_has_guild_permissions(
+    *,
+    add_reactions: bool = ...,
+    administrator: bool = ...,
+    attach_files: bool = ...,
+    ban_members: bool = ...,
+    change_nickname: bool = ...,
+    connect: bool = ...,
+    create_forum_threads: bool = ...,
+    create_instant_invite: bool = ...,
+    create_private_threads: bool = ...,
+    create_public_threads: bool = ...,
+    deafen_members: bool = ...,
+    embed_links: bool = ...,
+    external_emojis: bool = ...,
+    external_stickers: bool = ...,
+    kick_members: bool = ...,
+    manage_channels: bool = ...,
+    manage_emojis: bool = ...,
+    manage_emojis_and_stickers: bool = ...,
+    manage_events: bool = ...,
+    manage_guild: bool = ...,
+    manage_messages: bool = ...,
+    manage_nicknames: bool = ...,
+    manage_permissions: bool = ...,
+    manage_roles: bool = ...,
+    manage_threads: bool = ...,
+    manage_webhooks: bool = ...,
+    mention_everyone: bool = ...,
+    moderate_members: bool = ...,
+    move_members: bool = ...,
+    mute_members: bool = ...,
+    priority_speaker: bool = ...,
+    read_message_history: bool = ...,
+    read_messages: bool = ...,
+    request_to_speak: bool = ...,
+    send_messages: bool = ...,
+    send_messages_in_threads: bool = ...,
+    send_tts_messages: bool = ...,
+    speak: bool = ...,
+    start_embedded_activities: bool = ...,
+    stream: bool = ...,
+    use_application_commands: bool = ...,
+    use_embedded_activities: bool = ...,
+    use_external_emojis: bool = ...,
+    use_external_stickers: bool = ...,
+    use_slash_commands: bool = ...,
+    use_voice_activation: bool = ...,
+    view_audit_log: bool = ...,
+    view_channel: bool = ...,
+    view_guild_insights: bool = ...,
+) -> Callable[[T], T]:
+    ...
+
+
+@overload
+@_generated
+def bot_has_guild_permissions() -> Callable[[T], T]:
+    ...
+
+
+@_overload_with_permissions
 def bot_has_guild_permissions(**perms: bool) -> Callable[[T], T]:
     """Similar to :func:`.has_guild_permissions`, but checks the bot
     members guild permissions.

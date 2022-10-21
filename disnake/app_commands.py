@@ -1,24 +1,4 @@
-# The MIT License (MIT)
-
-# Copyright (c) 2021-present EQUENOS
-
-# Permission is hereby granted, free of charge, to any person obtaining a
-# copy of this software and associated documentation files (the "Software"),
-# to deal in the Software without restriction, including without limitation
-# the rights to use, copy, modify, merge, publish, distribute, sublicense,
-# and/or sell copies of the Software, and to permit persons to whom the
-# Software is furnished to do so, subject to the following conditions:
-
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-# DEALINGS IN THE SOFTWARE.
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
@@ -97,6 +77,11 @@ def application_command_factory(data: ApplicationCommandPayload) -> APIApplicati
 def _validate_name(name: str) -> None:
     # used for slash command names and option names
     # see https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-naming
+
+    if not isinstance(name, str):
+        raise TypeError(
+            f"Slash command name and option names must be an instance of class 'str', received '{name.__class__}'"
+        )
 
     if name != name.lower() or not re.fullmatch(r"[\w-]{1,32}", name):
         raise ValueError(
@@ -240,16 +225,16 @@ class Option:
         self,
         name: LocalizedRequired,
         description: LocalizedOptional = None,
-        type: Union[OptionType, int] = None,
+        type: Optional[Union[OptionType, int]] = None,
         required: bool = False,
-        choices: Choices = None,
-        options: list = None,
-        channel_types: List[ChannelType] = None,
+        choices: Optional[Choices] = None,
+        options: Optional[list] = None,
+        channel_types: Optional[List[ChannelType]] = None,
         autocomplete: bool = False,
-        min_value: float = None,
-        max_value: float = None,
-        min_length: int = None,
-        max_length: int = None,
+        min_value: Optional[float] = None,
+        max_value: Optional[float] = None,
+        min_length: Optional[int] = None,
+        max_length: Optional[int] = None,
     ):
         name_loc = Localized._cast(name, True)
         _validate_name(name_loc.string)
@@ -367,16 +352,16 @@ class Option:
         self,
         name: LocalizedRequired,
         description: LocalizedOptional = None,
-        type: OptionType = None,
+        type: Optional[OptionType] = None,
         required: bool = False,
-        choices: List[OptionChoice] = None,
-        options: list = None,
-        channel_types: List[ChannelType] = None,
+        choices: Optional[List[OptionChoice]] = None,
+        options: Optional[list] = None,
+        channel_types: Optional[List[ChannelType]] = None,
         autocomplete: bool = False,
-        min_value: float = None,
-        max_value: float = None,
-        min_length: int = None,
-        max_length: int = None,
+        min_value: Optional[float] = None,
+        max_value: Optional[float] = None,
+        min_length: Optional[int] = None,
+        max_length: Optional[int] = None,
     ) -> None:
         """Adds an option to the current list of options,
         parameters are the same as for :class:`Option`."""
@@ -468,12 +453,6 @@ class ApplicationCommand(ABC):
         Defaults to ``True``.
 
         .. versionadded:: 2.5
-
-    nsfw: :class:`bool`
-        Whether this command can only be used in NSFW channels.
-        Defaults to ``False``.
-
-        .. versionadded:: 2.6
     """
 
     __repr_info__: ClassVar[Tuple[str, ...]] = (
@@ -481,23 +460,20 @@ class ApplicationCommand(ABC):
         "name",
         "dm_permission",
         "default_member_permisions",
-        "nsfw",
     )
 
     def __init__(
         self,
         type: ApplicationCommandType,
         name: LocalizedRequired,
-        dm_permission: bool = None,
+        dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-        nsfw: bool = None,
     ):
         self.type: ApplicationCommandType = enum_if_int(ApplicationCommandType, type)
 
         name_loc = Localized._cast(name, True)
         self.name: str = name_loc.string
         self.name_localizations: LocalizationValue = name_loc.localizations
-        self.nsfw: bool = False if nsfw is None else nsfw
 
         self.dm_permission: bool = True if dm_permission is None else dm_permission
 
@@ -547,7 +523,6 @@ class ApplicationCommand(ABC):
             self.type == other.type
             and self.name == other.name
             and self.name_localizations == other.name_localizations
-            and self.nsfw == other.nsfw
             and self._default_member_permissions == other._default_member_permissions
             # ignore `dm_permission` if comparing guild commands
             and (
@@ -566,7 +541,6 @@ class ApplicationCommand(ABC):
             "name": self.name,
             "dm_permission": self.dm_permission,
             "default_permission": True,
-            "nsfw": self.nsfw,
         }
 
         if self._default_member_permissions is None:
@@ -612,12 +586,6 @@ class UserCommand(ApplicationCommand):
         Defaults to ``True``.
 
         .. versionadded:: 2.5
-
-    nsfw: :class:`bool`
-        Whether this command can only be used in NSFW channels.
-        Defaults to ``False``.
-
-        .. versionadded:: 2.6
     """
 
     __repr_info__ = ("name", "dm_permission", "default_member_permissions")
@@ -625,16 +593,14 @@ class UserCommand(ApplicationCommand):
     def __init__(
         self,
         name: LocalizedRequired,
-        dm_permission: bool = None,
+        dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-        nsfw: bool = None,
     ):
         super().__init__(
             type=ApplicationCommandType.user,
             name=name,
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
-            nsfw=nsfw,
         )
 
 
@@ -658,11 +624,6 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
 
         .. versionadded:: 2.5
 
-    nsfw: :class:`bool`
-        Whether this command can only be used in NSFW channels.
-
-        .. versionadded:: 2.6
-
     id: :class:`int`
         The user command's ID.
     application_id: :class:`int`
@@ -685,7 +646,6 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
             name=Localized(data["name"], data=data.get("name_localizations")),
             dm_permission=data.get("dm_permission") is not False,
             default_member_permissions=_get_as_snowflake(data, "default_member_permissions"),
-            nsfw=data.get("nsfw"),
         )
         self._update_common(data)
         return self
@@ -709,12 +669,6 @@ class MessageCommand(ApplicationCommand):
         Defaults to ``True``.
 
         .. versionadded:: 2.5
-
-    nsfw: :class:`bool`
-        Whether this command can only be used in NSFW channels.
-        Defaults to ``False``.
-
-        .. versionadded:: 2.6
     """
 
     __repr_info__ = ("name", "dm_permission", "default_member_permissions")
@@ -722,16 +676,14 @@ class MessageCommand(ApplicationCommand):
     def __init__(
         self,
         name: LocalizedRequired,
-        dm_permission: bool = None,
+        dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-        nsfw: bool = None,
     ):
         super().__init__(
             type=ApplicationCommandType.message,
             name=name,
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
-            nsfw=nsfw,
         )
 
 
@@ -755,11 +707,6 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
 
         .. versionadded:: 2.5
 
-    nsfw: :class:`bool`
-        Whether this command can only be used in NSFW channels.
-
-        .. versionadded:: 2.6
-
     id: :class:`int`
         The message command's ID.
     application_id: :class:`int`
@@ -782,7 +729,6 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
             name=Localized(data["name"], data=data.get("name_localizations")),
             dm_permission=data.get("dm_permission") is not False,
             default_member_permissions=_get_as_snowflake(data, "default_member_permissions"),
-            nsfw=data.get("nsfw"),
         )
         self._update_common(data)
         return self
@@ -814,12 +760,6 @@ class SlashCommand(ApplicationCommand):
 
         .. versionadded:: 2.5
 
-    nsfw: :class:`bool`
-        Whether this command can only be used in NSFW channels.
-        Defaults to ``False``.
-
-        .. versionadded:: 2.6
-
     options: List[:class:`Option`]
         The list of options the slash command has.
     """
@@ -836,17 +776,15 @@ class SlashCommand(ApplicationCommand):
         self,
         name: LocalizedRequired,
         description: LocalizedRequired,
-        options: List[Option] = None,
-        dm_permission: bool = None,
+        options: Optional[List[Option]] = None,
+        dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-        nsfw: bool = None,
     ):
         super().__init__(
             type=ApplicationCommandType.chat_input,
             name=name,
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
-            nsfw=nsfw,
         )
         _validate_name(self.name)
 
@@ -868,16 +806,16 @@ class SlashCommand(ApplicationCommand):
         self,
         name: LocalizedRequired,
         description: LocalizedOptional = None,
-        type: OptionType = None,
+        type: Optional[OptionType] = None,
         required: bool = False,
-        choices: List[OptionChoice] = None,
-        options: list = None,
-        channel_types: List[ChannelType] = None,
+        choices: Optional[List[OptionChoice]] = None,
+        options: Optional[list] = None,
+        channel_types: Optional[List[ChannelType]] = None,
         autocomplete: bool = False,
-        min_value: float = None,
-        max_value: float = None,
-        min_length: int = None,
-        max_length: int = None,
+        min_value: Optional[float] = None,
+        max_value: Optional[float] = None,
+        min_length: Optional[int] = None,
+        max_length: Optional[int] = None,
     ) -> None:
         """Adds an option to the current list of options,
         parameters are the same as for :class:`Option`
@@ -946,11 +884,6 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
 
         .. versionadded:: 2.5
 
-    nsfw: :class:`bool`
-        Whether this command can only be used in NSFW channels.
-
-        .. versionadded:: 2.6
-
     id: :class:`int`
         The slash command's ID.
     options: List[:class:`Option`]
@@ -979,7 +912,6 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
             ),
             dm_permission=data.get("dm_permission") is not False,
             default_member_permissions=_get_as_snowflake(data, "default_member_permissions"),
-            nsfw=data.get("nsfw"),
         )
         self._update_common(data)
         return self

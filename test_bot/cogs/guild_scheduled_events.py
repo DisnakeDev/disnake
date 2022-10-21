@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 from datetime import timedelta
 
 import disnake
@@ -25,7 +27,7 @@ class GuildScheduledEvents(commands.Cog):
             gse2 = await gse.edit(image=image.fp.read())
         else:
             gse2 = await gse.edit(image=None)
-        await inter.edit_original_message(content=str(gse2.image))
+        await inter.edit_original_response(content=str(gse2.image))
 
     @commands.slash_command()
     async def create_event(
@@ -45,4 +47,3 @@ class GuildScheduledEvents(commands.Cog):
 
 def setup(bot: commands.Bot):
     bot.add_cog(GuildScheduledEvents(bot))
-    print(f"> Extension {__name__} is ready\n")

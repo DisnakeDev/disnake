@@ -1,31 +1,10 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Dict, List, Literal, Optional, TypedDict, Union
+
+from typing_extensions import NotRequired
 
 from .channel import ChannelType
 from .components import Component, Modal
@@ -45,58 +24,48 @@ ApplicationCommandLocalizations = Dict[str, str]
 ApplicationCommandType = Literal[1, 2, 3]
 
 
-class _ApplicationCommandOptional(TypedDict, total=False):
-    type: ApplicationCommandType
-    guild_id: Snowflake
-    options: List[ApplicationCommandOption]
-    default_permission: bool  # deprecated
-    default_member_permissions: Optional[str]
-    dm_permission: Optional[bool]
-    name_localizations: Optional[ApplicationCommandLocalizations]
-    description_localizations: Optional[ApplicationCommandLocalizations]
-    nsfw: Optional[bool]
-
-
-class ApplicationCommand(_ApplicationCommandOptional):
+class ApplicationCommand(TypedDict):
     id: Snowflake
+    type: NotRequired[ApplicationCommandType]
     application_id: Snowflake
+    guild_id: NotRequired[Snowflake]
     name: str
+    name_localizations: NotRequired[Optional[ApplicationCommandLocalizations]]
     description: str
+    description_localizations: NotRequired[Optional[ApplicationCommandLocalizations]]
+    options: NotRequired[List[ApplicationCommandOption]]
+    default_member_permissions: NotRequired[Optional[str]]
+    dm_permission: NotRequired[Optional[bool]]
+    default_permission: NotRequired[bool]  # deprecated
     version: Snowflake
-
-
-class _ApplicationCommandOptionOptional(TypedDict, total=False):
-    required: bool
-    choices: List[ApplicationCommandOptionChoice]
-    options: List[ApplicationCommandOption]
-    channel_types: List[ChannelType]
-    min_value: float
-    max_value: float
-    min_length: int
-    max_length: int
-    autocomplete: bool
-    name_localizations: Optional[ApplicationCommandLocalizations]
-    description_localizations: Optional[ApplicationCommandLocalizations]
 
 
 ApplicationCommandOptionType = Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 
 
-class ApplicationCommandOption(_ApplicationCommandOptionOptional):
+class ApplicationCommandOption(TypedDict):
     type: ApplicationCommandOptionType
     name: str
+    name_localizations: NotRequired[Optional[ApplicationCommandLocalizations]]
     description: str
+    description_localizations: NotRequired[Optional[ApplicationCommandLocalizations]]
+    required: NotRequired[bool]
+    choices: NotRequired[List[ApplicationCommandOptionChoice]]
+    options: NotRequired[List[ApplicationCommandOption]]
+    channel_types: NotRequired[List[ChannelType]]
+    min_value: NotRequired[float]
+    max_value: NotRequired[float]
+    min_length: NotRequired[int]
+    max_length: NotRequired[int]
+    autocomplete: NotRequired[bool]
 
 
 ApplicationCommandOptionChoiceValue = Union[str, int, float]
 
 
-class _ApplicationCommandOptionChoiceOptional(TypedDict, total=False):
-    name_localizations: Optional[ApplicationCommandLocalizations]
-
-
-class ApplicationCommandOptionChoice(_ApplicationCommandOptionChoiceOptional):
+class ApplicationCommandOptionChoice(TypedDict):
     name: str
+    name_localizations: NotRequired[Optional[ApplicationCommandLocalizations]]
     value: ApplicationCommandOptionChoiceValue
 
 
@@ -179,16 +148,15 @@ class ApplicationCommandInteractionDataResolved(TypedDict, total=False):
     attachments: Dict[Snowflake, Attachment]
 
 
-class _ApplicationCommandInteractionDataOptional(TypedDict, total=False):
-    options: List[ApplicationCommandInteractionDataOption]
-    resolved: ApplicationCommandInteractionDataResolved
-    target_id: Snowflake
-
-
-class ApplicationCommandInteractionData(_ApplicationCommandInteractionDataOptional):
+class ApplicationCommandInteractionData(TypedDict):
     id: Snowflake
     name: str
     type: ApplicationCommandType
+    resolved: NotRequired[ApplicationCommandInteractionDataResolved]
+    options: NotRequired[List[ApplicationCommandInteractionDataOption]]
+    # this is the guild the command is registered to, not the guild the command was invoked in (see interaction.guild_id)
+    guild_id: NotRequired[Snowflake]
+    target_id: NotRequired[Snowflake]
 
 
 ## Interaction components
@@ -257,20 +225,17 @@ class _BaseInteraction(TypedDict):
 
 
 # common properties in non-ping interactions
-class _BaseUserInteractionOptional(TypedDict, total=False):
-    app_permissions: str
-    guild_id: Snowflake
-    guild_locale: str
-    # one of these two will always exist, according to docs
-    member: MemberWithUser
-    user: User
-
-
-class _BaseUserInteraction(_BaseInteraction, _BaseUserInteractionOptional):
+class _BaseUserInteraction(_BaseInteraction):
     # the docs specify `channel_id` as optional,
     # but it is assumed to always exist on non-ping interactions
     channel_id: Snowflake
     locale: str
+    app_permissions: NotRequired[str]
+    guild_id: NotRequired[Snowflake]
+    guild_locale: NotRequired[str]
+    # one of these two will always exist, according to docs
+    member: NotRequired[MemberWithUser]
+    user: NotRequired[User]
 
 
 class PingInteraction(_BaseInteraction):
@@ -288,13 +253,10 @@ class MessageInteraction(_BaseUserInteraction):
     message: Message
 
 
-class _ModalInteractionOptional(TypedDict, total=False):
-    message: Message
-
-
-class ModalInteraction(_BaseUserInteraction, _ModalInteractionOptional):
+class ModalInteraction(_BaseUserInteraction):
     type: Literal[5]
     data: ModalInteractionData
+    message: NotRequired[Message]
 
 
 Interaction = Union[
@@ -313,6 +275,7 @@ class InteractionApplicationCommandCallbackData(TypedDict, total=False):
     allowed_mentions: AllowedMentions
     flags: int
     components: List[Component]
+    # TODO: missing attachment field
 
 
 class InteractionAutocompleteCallbackData(TypedDict):
@@ -328,12 +291,9 @@ InteractionCallbackData = Union[
 ]
 
 
-class _InteractionResponseOptional(TypedDict, total=False):
-    data: InteractionCallbackData
-
-
-class InteractionResponse(_InteractionResponseOptional):
+class InteractionResponse(TypedDict):
     type: InteractionResponseType
+    data: NotRequired[InteractionCallbackData]
 
 
 class InteractionMessageReference(TypedDict):
@@ -343,17 +303,14 @@ class InteractionMessageReference(TypedDict):
     user: User
 
 
-class _EditApplicationCommandOptional(TypedDict, total=False):
-    description: str
-    options: Optional[List[ApplicationCommandOption]]
-    default_member_permissions: Optional[str]
-    dm_permission: bool
-    type: ApplicationCommandType
-    default_permission: bool  # deprecated
-    name_localizations: Optional[ApplicationCommandLocalizations]
-    description_localizations: Optional[ApplicationCommandLocalizations]
-    nsfw: Optional[bool]
-
-
-class EditApplicationCommand(_EditApplicationCommandOptional):
+class EditApplicationCommand(TypedDict):
     name: str
+    name_localizations: NotRequired[Optional[ApplicationCommandLocalizations]]
+    description: NotRequired[str]
+    description_localizations: NotRequired[Optional[ApplicationCommandLocalizations]]
+    options: NotRequired[Optional[List[ApplicationCommandOption]]]
+    default_member_permissions: NotRequired[Optional[str]]
+    dm_permission: NotRequired[bool]
+    default_permission: NotRequired[bool]  # deprecated
+    # TODO: remove, this cannot be changed
+    type: NotRequired[ApplicationCommandType]

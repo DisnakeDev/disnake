@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 from disnake.ext import commands
 
 
@@ -28,4 +30,3 @@ class EventListeners(commands.Cog):
 
 def setup(bot):
     bot.add_cog(EventListeners(bot))
-    print(f"> Extension {__name__} is ready\n")

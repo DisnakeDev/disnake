@@ -1,27 +1,4 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
@@ -50,6 +27,7 @@ if TYPE_CHECKING:
         ThreadDeleteEvent,
         TypingStartEvent,
     )
+    from .user import User
 
 
 __all__ = (
@@ -64,6 +42,7 @@ __all__ = (
     "RawThreadDeleteEvent",
     "RawThreadMemberRemoveEvent",
     "RawTypingEvent",
+    "RawGuildMemberRemoveEvent",
 )
 
 
@@ -147,7 +126,7 @@ class RawMessageUpdateEvent(_RawReprMixin):
         .. versionadded:: 1.7
 
     data: :class:`dict`
-        The raw data given by the `gateway <https://discord.com/developers/docs/topics/gateway#message-update>`_
+        The raw data given by the :ddocs:`gateway <topics/gateway-events#message-update>`.
     cached_message: Optional[:class:`Message`]
         The cached message, if found in the internal message cache. Represents the message before
         it is modified by the data in :attr:`RawMessageUpdateEvent.data`.
@@ -415,3 +394,26 @@ class RawTypingEvent(_RawReprMixin):
             self.guild_id: Optional[int] = int(data["guild_id"])
         except KeyError:
             self.guild_id: Optional[int] = None
+
+
+class RawGuildMemberRemoveEvent(_RawReprMixin):
+    """Represents the event payload for an :func:`on_raw_member_remove` event.
+
+    .. versionadded:: 2.6
+
+    Attributes
+    ----------
+    guild_id: :class:`int`
+        The ID of the guild where the member was removed from.
+    user: Union[:class:`User`, :class:`Member`]
+        The user object of the member that was removed.
+    """
+
+    __slots__ = (
+        "guild_id",
+        "user",
+    )
+
+    def __init__(self, user: Union[User, Member], guild_id: int):
+        self.user: Union[User, Member] = user
+        self.guild_id: int = guild_id

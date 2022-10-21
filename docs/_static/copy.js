@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 const COPY = "content_copy";
 const COPIED = "done";
 

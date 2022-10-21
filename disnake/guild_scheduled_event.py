@@ -1,26 +1,4 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
@@ -29,6 +7,7 @@ from typing import TYPE_CHECKING, Any, Dict, Literal, Optional, overload
 
 from .asset import Asset
 from .enums import (
+    ChannelType,
     GuildScheduledEventEntityType,
     GuildScheduledEventPrivacyLevel,
     GuildScheduledEventStatus,
@@ -276,6 +255,8 @@ class GuildScheduledEvent(Hashable):
 
         Deletes the guild scheduled event.
 
+        You must have :attr:`.Permissions.manage_events` permission to do this.
+
         Raises
         ------
         Forbidden
@@ -315,6 +296,7 @@ class GuildScheduledEvent(Hashable):
         self,
         *,
         entity_type: Literal[GuildScheduledEventEntityType.external],
+        channel: None = ...,
         name: str = ...,
         description: Optional[str] = ...,
         image: Optional[AssetBytes] = ...,
@@ -348,6 +330,41 @@ class GuildScheduledEvent(Hashable):
     ) -> GuildScheduledEvent:
         ...
 
+    # channel=None, no entity_type
+    @overload
+    async def edit(
+        self,
+        *,
+        channel: None,
+        name: str = ...,
+        description: Optional[str] = ...,
+        image: Optional[AssetBytes] = ...,
+        privacy_level: GuildScheduledEventPrivacyLevel = ...,
+        scheduled_start_time: datetime = ...,
+        scheduled_end_time: datetime = ...,
+        entity_metadata: GuildScheduledEventMetadata = ...,
+        status: GuildScheduledEventStatus = ...,
+        reason: Optional[str] = ...,
+    ) -> GuildScheduledEvent:
+        ...
+
+    # valid channel, no entity_type
+    @overload
+    async def edit(
+        self,
+        *,
+        channel: Snowflake,
+        name: str = ...,
+        description: Optional[str] = ...,
+        image: Optional[AssetBytes] = ...,
+        privacy_level: GuildScheduledEventPrivacyLevel = ...,
+        scheduled_start_time: datetime = ...,
+        scheduled_end_time: Optional[datetime] = ...,
+        status: GuildScheduledEventStatus = ...,
+        reason: Optional[str] = ...,
+    ) -> GuildScheduledEvent:
+        ...
+
     async def edit(
         self,
         *,
@@ -367,11 +384,10 @@ class GuildScheduledEvent(Hashable):
 
         Edits the guild scheduled event.
 
-        If updating ``entity_type`` to :attr:`GuildScheduledEventEntityType.external`:
+        You must have :attr:`.Permissions.manage_events` permission to do this.
 
-        - ``channel`` should not be set
-        - ``entity_metadata`` with a location field must be provided
-        - ``scheduled_end_time`` must be provided
+        .. versionchanged:: 2.6
+            Updates must follow requirements of :func:`Guild.create_scheduled_event`
 
         .. versionchanged:: 2.6
             Now raises :exc:`TypeError` instead of :exc:`ValueError` for
@@ -418,6 +434,8 @@ class GuildScheduledEvent(Hashable):
             The entity metadata of the guild scheduled event.
         status: :class:`GuildScheduledEventStatus`
             The status of the guild scheduled event.
+
+            See also :func:`start`, :func:`end`, and :func:`cancel`.
         reason: Optional[:class:`str`]
             The reason for editing the guild scheduled event. Shows up on the audit log.
 
@@ -431,8 +449,9 @@ class GuildScheduledEvent(Hashable):
             Editing the event failed.
         TypeError
             The ``image`` asset is a lottie sticker (see :func:`Sticker.read`),
-            or one of ``entity_type``, ``privacy_level``, ``entity_metadata`` or ``status``
-            is not of the correct type.
+            one of ``entity_type``, ``privacy_level``, ``entity_metadata`` or ``status``
+            is not of the correct type, or the provided channel's type is neither :class:`ChannelType.voice` nor
+            :class:`ChannelType.stage_voice`.
 
         Returns
         -------
@@ -440,6 +459,19 @@ class GuildScheduledEvent(Hashable):
             The newly updated guild scheduled event instance.
         """
         fields: Dict[str, Any] = {}
+
+        if entity_type is MISSING:
+            if channel is None:
+                entity_type = GuildScheduledEventEntityType.external
+            elif channel is not MISSING and isinstance(
+                channel_type := getattr(channel, "type", None), ChannelType
+            ):
+                if channel_type is ChannelType.voice:
+                    entity_type = GuildScheduledEventEntityType.voice
+                elif channel_type is ChannelType.stage_voice:
+                    entity_type = GuildScheduledEventEntityType.stage_instance
+                else:
+                    raise TypeError("channel type must be either 'voice' or 'stage_voice'")
 
         if privacy_level is not MISSING:
             if not isinstance(privacy_level, GuildScheduledEventPrivacyLevel):
@@ -496,6 +528,120 @@ class GuildScheduledEvent(Hashable):
 
         data = await self._state.http.edit_guild_scheduled_event(
             guild_id=self.guild_id, event_id=self.id, reason=reason, **fields
+        )
+        return GuildScheduledEvent(state=self._state, data=data)
+
+    async def start(self, *, reason: Optional[str] = None) -> GuildScheduledEvent:
+        """|coro|
+
+        Starts the guild scheduled event.
+
+        Changes the event status to :attr:`~GuildScheduledEventStatus.active`.
+
+        You must have :attr:`.Permissions.manage_events` permission to do this.
+
+        .. versionadded:: 2.7
+
+        Parameters
+        ----------
+        reason: Optional[:class:`str`]
+            The reason for starting the guild scheduled event. Shows up on the audit log.
+
+        Raises
+        ------
+        ValueError
+            The event has already started or ended, or was cancelled.
+        Forbidden
+            You do not have permissions to start the event.
+        HTTPException
+            Starting the event failed.
+
+        Returns
+        -------
+        :class:`GuildScheduledEvent`
+            The started guild scheduled event instance.
+        """
+        if self.status is not GuildScheduledEventStatus.scheduled:
+            raise ValueError("This event is not scheduled")
+        return await self._edit_status(GuildScheduledEventStatus.active, reason=reason)
+
+    async def end(self, *, reason: Optional[str] = None) -> GuildScheduledEvent:
+        """|coro|
+
+        Ends the guild scheduled event.
+
+        Changes the event status to :attr:`~GuildScheduledEventStatus.completed`.
+
+        You must have :attr:`.Permissions.manage_events` permission to do this.
+
+        .. versionadded:: 2.7
+
+        Parameters
+        ----------
+        reason: Optional[:class:`str`]
+            The reason for ending the guild scheduled event. Shows up on the audit log.
+
+        Raises
+        ------
+        ValueError
+            The event has not started yet, has already ended, or was cancelled.
+        Forbidden
+            You do not have permissions to end the event.
+        HTTPException
+            Ending the event failed.
+
+        Returns
+        -------
+        :class:`GuildScheduledEvent`
+            The ended guild scheduled event instance.
+        """
+        if self.status is not GuildScheduledEventStatus.active:
+            raise ValueError("This event is not active")
+        return await self._edit_status(GuildScheduledEventStatus.completed, reason=reason)
+
+    async def cancel(self, *, reason: Optional[str] = None) -> GuildScheduledEvent:
+        """|coro|
+
+        Cancels the guild scheduled event.
+
+        Changes the event status to :attr:`~GuildScheduledEventStatus.cancelled`.
+
+        You must have :attr:`.Permissions.manage_events` permission to do this.
+
+        .. versionadded:: 2.7
+
+        Parameters
+        ----------
+        reason: Optional[:class:`str`]
+            The reason for cancelling the guild scheduled event. Shows up on the audit log.
+
+        Raises
+        ------
+        ValueError
+            The event has already started or ended, or was already cancelled.
+        Forbidden
+            You do not have permissions to cancel the event.
+        HTTPException
+            Cancelling the event failed.
+
+        Returns
+        -------
+        :class:`GuildScheduledEvent`
+            The cancelled guild scheduled event instance.
+        """
+        if self.status is not GuildScheduledEventStatus.scheduled:
+            raise ValueError("This event is not scheduled")
+        return await self._edit_status(GuildScheduledEventStatus.cancelled, reason=reason)
+
+    # shortcut for editing just the event status, bypasses other edit logic
+    async def _edit_status(
+        self, status: GuildScheduledEventStatus, *, reason: Optional[str]
+    ) -> GuildScheduledEvent:
+        data = await self._state.http.edit_guild_scheduled_event(
+            guild_id=self.guild_id,
+            event_id=self.id,
+            reason=reason,
+            status=status.value,
         )
         return GuildScheduledEvent(state=self._state, data=data)
 

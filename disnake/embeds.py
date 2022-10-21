@@ -1,27 +1,4 @@
-"""
-The MIT License (MIT)
-
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
@@ -45,9 +22,22 @@ from typing import (
 from . import utils
 from .colour import Colour
 from .file import File
-from .utils import MISSING
+from .utils import MISSING, classproperty, warn_deprecated
 
 __all__ = ("Embed",)
+
+
+# backwards compatibility, hidden from type-checkers to have them show errors when accessed
+if not TYPE_CHECKING:
+
+    def __getattr__(name: str) -> None:
+        if name == "EmptyEmbed":
+            warn_deprecated(
+                "`EmptyEmbed` is deprecated and will be removed in a future version. Use `None` instead.",
+                stacklevel=2,
+            )
+            return None
+        raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
 
 
 class EmbedProxy:
@@ -64,6 +54,9 @@ class EmbedProxy:
 
     def __getattr__(self, attr: str) -> None:
         return None
+
+    def __eq__(self, other: Any) -> bool:
+        return isinstance(other, EmbedProxy) and self.__dict__ == other.__dict__
 
 
 if TYPE_CHECKING:
@@ -121,6 +114,18 @@ class Embed:
 
     .. container:: operations
 
+        .. describe:: x == y
+
+            Checks if two embeds are equal.
+
+            .. versionadded:: 2.6
+
+        .. describe:: x != y
+
+            Checks if two embeds are not equal.
+
+            .. versionadded:: 2.6
+
         .. describe:: len(x)
 
             Returns the total size of the embed.
@@ -147,7 +152,7 @@ class Embed:
     type: Optional[:class:`str`]
         The type of embed. Usually "rich".
         Possible strings for embed types can be found on Discord's
-        `api docs <https://discord.com/developers/docs/resources/channel#embed-object-embed-types>`__.
+        :ddocs:`api-docs <resources/channel#embed-object-embed-types>`.
     description: Optional[:class:`str`]
         The description of the embed.
     url: Optional[:class:`str`]
@@ -218,13 +223,24 @@ class Embed:
 
         self._files: Dict[_FileKey, File] = {}
 
+    # see `EmptyEmbed` above
+    if not TYPE_CHECKING:
+
+        @classproperty
+        def Empty(self) -> None:
+            warn_deprecated(
+                "`Embed.Empty` is deprecated and will be removed in a future version. Use `None` instead.",
+                stacklevel=3,
+            )
+            return None
+
     @classmethod
     def from_dict(cls, data: EmbedData) -> Self:
         """Converts a :class:`dict` to a :class:`Embed` provided it is in the
         format that Discord expects it to be in.
 
         You can find out about this format in the
-        `official Discord documentation <https://discord.com/developers/docs/resources/channel#embed-object>`__.
+        :ddocs:`official Discord documentation <resources/channel#embed-object>`.
 
         Parameters
         ----------
@@ -263,10 +279,15 @@ class Embed:
     def copy(self) -> Self:
         """Returns a shallow copy of the embed."""
         embed = type(self).from_dict(self.to_dict())
+
         # assign manually to keep behavior of default colors
         embed._colour = self._colour
-        # shallow copy of files
+
+        # copy files and fields collections
         embed._files = self._files.copy()
+        if self._fields is not None:
+            embed._fields = self._fields.copy()
+
         return embed
 
     def __len__(self) -> int:
@@ -289,8 +310,7 @@ class Embed:
                 self.title,
                 self.url,
                 self.description,
-                # not checking for falsy value as `0` is a valid color
-                self._colour not in (MISSING, None),
+                self._colour,
                 self._fields,
                 self._timestamp,
                 self._author,
@@ -301,6 +321,16 @@ class Embed:
                 self._video,
             )
         )
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, Embed):
+            return False
+        for slot in self.__slots__:
+            if slot == "_colour":
+                slot = "color"
+            if (getattr(self, slot) or None) != (getattr(other, slot) or None):
+                return False
+        return True
 
     @property
     def colour(self) -> Optional[Colour]:
@@ -691,13 +721,16 @@ class Embed:
         if not self._fields:
             raise IndexError("field index out of range")
         try:
-            field = self._fields[index]
+            self._fields[index]
         except IndexError:
             raise IndexError("field index out of range")
 
-        field["name"] = str(name)
-        field["value"] = str(value)
-        field["inline"] = inline
+        field: EmbedFieldPayload = {
+            "inline": inline,
+            "name": str(name),
+            "value": str(value),
+        }
+        self._fields[index] = field
         return self
 
     def to_dict(self) -> EmbedData:

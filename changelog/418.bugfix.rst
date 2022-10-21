@@ -1,3 +1,0 @@
-Update incorrect channel edit method annotations.
-- Fix ``sync_permissions`` parameter type.
-- Remove ``topic`` parameter from :func:`StageChannel.edit`, add ``bitrate``.

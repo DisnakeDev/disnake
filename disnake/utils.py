@@ -1,27 +1,5 @@
-"""
-The MIT License (MIT)
+# SPDX-License-Identifier: MIT
 
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
 from __future__ import annotations
 
 import array
@@ -130,7 +108,7 @@ class _cached_property:
 if TYPE_CHECKING:
     from functools import cached_property as cached_property
 
-    from typing_extensions import ParamSpec, Self
+    from typing_extensions import Never, ParamSpec, Self
 
     from .abc import Snowflake
     from .asset import AssetBytes
@@ -528,7 +506,17 @@ def _maybe_cast(value: V, converter: Callable[[V], T], default: T = None) -> Opt
     return converter(value)
 
 
-def _get_mime_type_for_image(data: bytes):
+# stdlib mimetypes doesn't know webp in <3.11, so we ship
+# our own map with the needed types
+_mime_type_extensions = {
+    "image/png": ".png",
+    "image/jpeg": ".jpg",
+    "image/gif": ".gif",
+    "image/webp": ".webp",
+}
+
+
+def _get_mime_type_for_image(data: bytes) -> str:
     if data[0:8] == b"\x89\x50\x4E\x47\x0D\x0A\x1A\x0A":
         return "image/png"
     elif data[0:3] == b"\xff\xd8\xff" or data[6:10] in (b"JFIF", b"Exif"):
@@ -546,6 +534,14 @@ def _bytes_to_base64_data(data: bytes) -> str:
     mime = _get_mime_type_for_image(data)
     b64 = b64encode(data).decode("ascii")
     return fmt.format(mime=mime, data=b64)
+
+
+def _get_extension_for_image(data: bytes) -> Optional[str]:
+    try:
+        mime_type = _get_mime_type_for_image(data)
+    except ValueError:
+        return None
+    return _mime_type_extensions.get(mime_type)
 
 
 @overload
@@ -1361,3 +1357,21 @@ def humanize_list(values: List[str], combine: str) -> str:
         return "<none>"
     else:
         return f" {combine} ".join(values)
+
+
+# Similar to typing.assert_never, but returns instead of raising (i.e. has no runtime effect).
+# This is only to avoid "unreachable code", which pyright doesn't type-check.
+def assert_never(arg: Never, /) -> None:
+    pass
+
+
+# n.b. This must be imported and used as @ _overload_with_permissions (without the space)
+# this is used by the libcst parser and has no runtime purpose
+# it is merely a marker not unlike pytest.mark
+def _overload_with_permissions(func: T) -> T:
+    return func
+
+
+# this is used as a marker for functions or classes that were created by codemodding
+def _generated(func: T) -> T:
+    return func

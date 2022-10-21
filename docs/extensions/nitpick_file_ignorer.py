@@ -1,5 +1,8 @@
+# SPDX-License-Identifier: MIT
+
 import logging
 
+from _types import SphinxExtensionMeta
 from sphinx.application import Sphinx
 from sphinx.util import logging as sphinx_logging
 
@@ -15,7 +18,12 @@ class NitpickFileIgnorer(logging.Filter):
         return True
 
 
-def setup(app: Sphinx):
+def setup(app: Sphinx) -> SphinxExtensionMeta:
     app.add_config_value("nitpick_ignore_files", [], "")
     f = NitpickFileIgnorer(app)
     sphinx_logging.getLogger("sphinx.transforms.post_transforms").logger.addFilter(f)
+
+    return {
+        "parallel_read_safe": True,
+        "parallel_write_safe": True,
+    }

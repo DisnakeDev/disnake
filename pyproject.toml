@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 [tool.black]
 line-length = 100
 target-version = ["py38", "py39", "py310"]
@@ -27,7 +29,7 @@ template = "changelog/_template.rst.jinja"
 package = "disnake"
 filename = "docs/whats_new.rst"
 directory = "changelog/"
-title_format = "v{version}"
+title_format = false
 underlines = "-~"
 issue_format = ":issue:`{issue}`"
 
@@ -111,7 +113,6 @@ reportUnknownArgumentType = false
 reportMissingParameterType = false
 reportUnknownVariableType = false
 reportMissingTypeArgument = false
-strictParameterNoneValue = false
 
 
 [tool.pytest.ini_options]
@@ -150,6 +151,7 @@ ignore = [
     ".flake8",
     ".pre-commit-config.yaml",
     ".readthedocs.yml",
+    ".libcst.codemod.yaml",
     "noxfile.py",
     # docs
     "CONTRIBUTING.md",
@@ -161,4 +163,5 @@ ignore = [
     "test_bot/**",
     "test_launcher.py",
     "tests/**",
+    "scripts/**",
 ]

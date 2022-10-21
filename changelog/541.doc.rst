@@ -1,1 +1,0 @@
-Build an htmlzip version of the documentation for downloading.
