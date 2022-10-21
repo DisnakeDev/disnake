@@ -780,7 +780,8 @@ class InteractionBotBase(CommonBotBase):
                 global_cmds, self._connection._global_application_commands.values()
             )
             if not self._command_sync.allow_command_deletion:
-                # because allow_command_deletion is disabled, we want to never delete a command, so we move the delete commands to no_changes
+                # because allow_command_deletion is disabled, we want to never automatically delete a command
+                # so we move the delete commands to delete_ignored
                 diff["delete_ignored"] = diff["delete"].copy()
                 diff["delete"].clear()
             update_required = bool(diff["upsert"] or diff["edit"] or diff["delete"])
@@ -808,7 +809,8 @@ class InteractionBotBase(CommonBotBase):
                 current_guild_cmds = self._connection._guild_application_commands.get(guild_id, {})
                 diff = _app_commands_diff(cmds, current_guild_cmds.values())
                 if not self._command_sync.allow_command_deletion:
-                    # because allow_command_deletion is disabled, we want to never delete a command, so we move the delete commands to no_changes
+                    # because allow_command_deletion is disabled, we want to never automatically delete a command
+                    # so we move the delete commands to delete_ignored
                     diff["no_changes"] += diff["delete"]
                     diff["delete"].clear()
                 update_required = bool(diff["upsert"]) or bool(diff["edit"]) or bool(diff["delete"])
