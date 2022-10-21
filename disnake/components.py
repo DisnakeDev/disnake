@@ -45,6 +45,7 @@ __all__ = (
     "Button",
     "BaseSelectMenu",
     "StringSelectMenu",
+    "SelectMenu",
     "UserSelectMenu",
     "RoleSelectMenu",
     "MentionableSelectMenu",
@@ -295,7 +296,6 @@ class BaseSelectMenu(Component):
         return payload
 
 
-# TODO: make all string-select-menu-related changes backwards-compatible
 class StringSelectMenu(BaseSelectMenu):
     """Represents a string select menu from the Discord Bot UI Kit.
 
@@ -340,6 +340,9 @@ class StringSelectMenu(BaseSelectMenu):
         payload = cast("StringSelectMenuPayload", super().to_dict())
         payload["options"] = [op.to_dict() for op in self.options]
         return payload
+
+
+SelectMenu = StringSelectMenu  # backwards compatibility
 
 
 class UserSelectMenu(BaseSelectMenu):

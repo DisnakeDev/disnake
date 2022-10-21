@@ -84,6 +84,7 @@ class MessageInteraction(Interaction):
         )
         self.message = Message(state=self._state, channel=self.channel, data=data["message"])
 
+    # TODO: perhaps keep `values` like before and add a `resolved_values` instead?
     @property
     def values(self) -> Optional[Sequence[Union[str, Member, User, Role, InteractionChannel]]]:
         """Optional[Sequence[:class:`str`]]: The values the user selected.

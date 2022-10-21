@@ -2023,6 +2023,9 @@ of :class:`enum.Enum`.
     .. attribute:: string_select
 
         Represents a string select component.
+    .. attribute:: select
+
+        An alias of :attr:`string_select`.
     .. attribute:: text_input
 
         Represents a text input component.
@@ -6004,6 +6007,11 @@ ActionRow
 
 .. autoclass:: disnake.ui.ActionRow
     :members:
+    :exclude-members: add_select
+
+    .. method:: add_select
+
+        Alias of :func:`~disnake.ui.ActionRow.add_string_select`.
 
 Item
 ~~~~~~~

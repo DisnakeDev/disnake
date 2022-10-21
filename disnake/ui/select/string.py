@@ -31,7 +31,9 @@ if TYPE_CHECKING:
 
 __all__ = (
     "StringSelect",
+    "Select",
     "string_select",
+    "select",
 )
 
 
@@ -238,6 +240,9 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         self._underlying.options.append(option)
 
 
+Select = StringSelect  # backwards compatibility
+
+
 S_co = TypeVar("S_co", bound="StringSelect", covariant=True)
 
 
@@ -318,3 +323,6 @@ def string_select(
         Whether the select is disabled. Defaults to ``False``.
     """
     return _create_decorator(cls, StringSelect, **kwargs)
+
+
+select = string_select  # backwards compatibility

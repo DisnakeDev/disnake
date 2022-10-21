@@ -350,6 +350,8 @@ class ActionRow(Generic[UIComponentT]):
         )
         return self
 
+    add_select = add_string_select  # backwards compatibility
+
     def add_user_select(
         self: SelectCompatibleActionRowT,
         *,

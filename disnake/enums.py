@@ -587,6 +587,7 @@ class ComponentType(Enum):
     action_row = 1
     button = 2
     string_select = 3
+    select = string_select  # backwards compatibility
     text_input = 4
     user_select = 5
     role_select = 6
