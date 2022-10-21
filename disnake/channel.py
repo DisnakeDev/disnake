@@ -871,10 +871,10 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
             .. versionadded:: 2.3
 
-        slowmode_delay: :class:`int`
+        slowmode_delay: Optional[:class:`int`]
             Specifies the slowmode rate limit for users in this thread, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
-            If not provided, slowmode is disabled.
+            If not provided or ``None``, slowmode is inherited from the parent channel.
 
             .. versionadded:: 2.3
 
@@ -908,7 +908,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
                 auto_archive_duration=auto_archive_duration or self.default_auto_archive_duration,
                 type=type.value,  # type: ignore
                 invitable=invitable if invitable is not None else True,
-                rate_limit_per_user=slowmode_delay or 0,
+                rate_limit_per_user=slowmode_delay,
                 reason=reason,
             )
         else:
@@ -917,7 +917,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
                 message.id,
                 name=name,
                 auto_archive_duration=auto_archive_duration or self.default_auto_archive_duration,
-                rate_limit_per_user=slowmode_delay or 0,
+                rate_limit_per_user=slowmode_delay,
                 reason=reason,
             )
 

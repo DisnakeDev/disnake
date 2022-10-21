@@ -1066,7 +1066,7 @@ class HTTPClient:
         *,
         name: str,
         auto_archive_duration: threads.ThreadArchiveDurationLiteral,
-        rate_limit_per_user: int = 0,
+        rate_limit_per_user: Optional[int] = None,
         reason: Optional[str] = None,
     ) -> Response[threads.Thread]:
         payload = {
@@ -1091,7 +1091,7 @@ class HTTPClient:
         auto_archive_duration: threads.ThreadArchiveDurationLiteral,
         type: threads.ThreadType,
         invitable: bool = True,
-        rate_limit_per_user: int = 0,
+        rate_limit_per_user: Optional[int] = None,
         reason: Optional[str] = None,
     ) -> Response[threads.Thread]:
         payload = {
