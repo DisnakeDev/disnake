@@ -1718,7 +1718,7 @@ class InteractionDataResolved(Dict[str, Any]):
                 channel["position"] = 0  # type: ignore
                 self.channels[channel_id] = (
                     guild
-                    and guild.get_channel(channel_id)
+                    and guild.get_channel_or_thread(channel_id)
                     or factory(
                         guild=guild_fallback,  # type: ignore
                         state=state,
