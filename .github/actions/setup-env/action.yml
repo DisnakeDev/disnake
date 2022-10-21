@@ -40,7 +40,7 @@ runs:
 
     - name: Update pip, wheel
       shell: bash
-      run: pip install -U pip wheel
+      run: pip install -U pip wheel setuptools
 
     - name: Install dependencies
       if: inputs.nox-setup || inputs.dependencies
