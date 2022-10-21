@@ -41,7 +41,6 @@ from .ctx_menus_core import (
     user_command,
 )
 from .errors import CommandRegistrationError
-from .flags import ApplicationCommandSyncFlags
 from .slash_core import InvokableSlashCommand, SubCommand, SubCommandGroup, slash_command
 
 if TYPE_CHECKING:
@@ -142,7 +141,9 @@ class InteractionBotBase(CommonBotBase):
     def __init__(
         self,
         *,
-        command_sync: Optional[ApplicationCommandSyncFlags] = None,
+        sync_commands: bool = True,
+        sync_commands_debug: bool = False,
+        sync_commands_on_cog_unload: bool = True,
         test_guilds: Optional[Sequence[int]] = None,
         **options: Any,
     ):
@@ -153,11 +154,10 @@ class InteractionBotBase(CommonBotBase):
 
         test_guilds = None if test_guilds is None else tuple(test_guilds)
         self._test_guilds: Optional[Tuple[int, ...]] = test_guilds
-        if command_sync is None:
-            command_sync = ApplicationCommandSyncFlags.default()
-
+        self._sync_commands: bool = sync_commands
+        self._sync_commands_debug: bool = sync_commands_debug
+        self._sync_commands_on_cog_unload = sync_commands_on_cog_unload
         self._sync_queued: bool = False
-        self._command_sync = command_sync
 
         self._slash_command_checks = []
         self._slash_command_check_once = []
@@ -853,7 +853,7 @@ class InteractionBotBase(CommonBotBase):
         if not isinstance(self, disnake.Client):
             raise NotImplementedError("This method is only usable in disnake.Client subclasses")
 
-        if not self._command_sync.sync_commands or self._is_closed or self.loop.is_closed():
+        if not self._sync_commands or self._is_closed or self.loop.is_closed():
             return
 
         # We assume that all commands are already cached.
@@ -921,7 +921,7 @@ class InteractionBotBase(CommonBotBase):
         self._log_sync_debug("Command synchronization task has finished")
 
     def _log_sync_debug(self, text: str) -> None:
-        if self._command_sync.sync_commands_debug:
+        if self._sync_commands_debug:
             # if sync debugging is enabled, *always* output logs
             if _log.isEnabledFor(logging.INFO):
                 # if the log level is `INFO` or higher, use that
@@ -978,7 +978,7 @@ class InteractionBotBase(CommonBotBase):
             raise NotImplementedError("This method is only usable in disnake.Client subclasses")
 
         if (
-            not self._command_sync.sync_commands
+            not self._sync_commands
             or self._sync_queued
             or not self.is_ready()
             or self._is_closed
@@ -1403,7 +1403,7 @@ class InteractionBotBase(CommonBotBase):
         interaction: :class:`disnake.ApplicationCommandInteraction`
             The interaction to process commands for.
         """
-        if self._command_sync.sync_commands and not self._sync_queued:
+        if self._sync_commands and not self._sync_queued:
             known_command = self.get_global_command(interaction.data.id)  # type: ignore
 
             if known_command is None:
