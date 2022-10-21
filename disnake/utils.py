@@ -109,7 +109,7 @@ class _cached_property:
 if TYPE_CHECKING:
     from functools import cached_property as cached_property
 
-    from typing_extensions import ParamSpec, Self
+    from typing_extensions import Never, ParamSpec, Self
 
     from .abc import Snowflake
     from .asset import AssetBytes
@@ -1402,6 +1402,12 @@ def humanize_list(values: List[str], combine: str) -> str:
         return "<none>"
     else:
         return f" {combine} ".join(values)
+
+
+# Similar to typing.assert_never, but returns instead of raising (i.e. has no runtime effect).
+# This is only to avoid "unreachable code", which pyright doesn't type-check.
+def assert_never(arg: Never, /) -> None:
+    pass
 
 
 # n.b. This must be imported and used as @ _overload_with_permissions (without the space)

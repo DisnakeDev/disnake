@@ -56,6 +56,7 @@ packages = [
     "disnake.bin",
     "disnake.types",
     "disnake.ui",
+    "disnake.ui.select",
     "disnake.webhook",
     "disnake.interactions",
     "disnake.ext.commands",

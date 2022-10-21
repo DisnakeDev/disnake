@@ -25,11 +25,11 @@ from ..components import (
     ActionRow as ActionRowComponent,
     Button as ButtonComponent,
     MessageComponent,
-    NestedComponent,
     SelectMenu as SelectComponent,
     _component_factory,
 )
 from ..enums import ComponentType, try_enum_to_int
+from ..utils import assert_never
 from .item import Item
 
 __all__ = ("View",)
@@ -47,12 +47,12 @@ if TYPE_CHECKING:
 
 def _walk_all_components(
     components: List[ActionRowComponent[MessageComponent]],
-) -> Iterator[NestedComponent]:
+) -> Iterator[MessageComponent]:
     for item in components:
         yield from item.children
 
 
-def _component_to_item(component: NestedComponent) -> Item:
+def _component_to_item(component: MessageComponent) -> Item:
     if isinstance(component, ButtonComponent):
         from .button import Button
 
@@ -61,6 +61,8 @@ def _component_to_item(component: NestedComponent) -> Item:
         from .select import Select
 
         return Select.from_component(component)
+
+    assert_never(component)
     return Item.from_component(component)
 
 
