@@ -1753,9 +1753,9 @@ class InteractionDataResolved(Dict[str, Any]):
         )
 
     def get_with_type(
-        self, key: Snowflake, option_type: OptionType, default: T = None
+        self, key: Snowflake, data_type: OptionType, default: T = None
     ) -> Union[Member, User, Role, InteractionChannel, Message, Attachment, T]:
-        if option_type is OptionType.mentionable:
+        if data_type is OptionType.mentionable:
             key = int(key)
             if (result := self.members.get(key)) is not None:
                 return result
@@ -1763,19 +1763,19 @@ class InteractionDataResolved(Dict[str, Any]):
                 return result
             return self.roles.get(key, default)
 
-        if option_type is OptionType.user:
+        if data_type is OptionType.user:
             key = int(key)
             if (member := self.members.get(key)) is not None:
                 return member
             return self.users.get(key, default)
 
-        if option_type is OptionType.channel:
+        if data_type is OptionType.channel:
             return self.channels.get(int(key), default)
 
-        if option_type is OptionType.role:
+        if data_type is OptionType.role:
             return self.roles.get(int(key), default)
 
-        if option_type is OptionType.attachment:
+        if data_type is OptionType.attachment:
             return self.attachments.get(int(key), default)
 
         return default
