@@ -149,49 +149,49 @@ _cog_extras = """
     def bot_user_command_check_once(self, inter):
         ...
 
-    def cog_after_invoke(self, ctx):
+    async def cog_after_invoke(self, ctx):
         ...
 
-    def cog_after_message_command_invoke(self, inter):
+    async def cog_after_message_command_invoke(self, inter):
         ...
 
-    def cog_after_slash_command_invoke(self, inter):
+    async def cog_after_slash_command_invoke(self, inter):
         ...
 
-    def cog_after_user_command_invoke(self, inter):
+    async def cog_after_user_command_invoke(self, inter):
         ...
 
-    def cog_before_invoke(self, ctx):
+    async def cog_before_invoke(self, ctx):
         ...
 
-    def cog_before_message_command_invoke(self, inter):
+    async def cog_before_message_command_invoke(self, inter):
         ...
 
-    def cog_before_slash_command_invoke(self, inter):
+    async def cog_before_slash_command_invoke(self, inter):
         ...
 
-    def cog_before_user_command_invoke(self, inter):
+    async def cog_before_user_command_invoke(self, inter):
         ...
 
     def cog_check(self, ctx):
         ...
 
-    def cog_command_error(self, ctx, error):
+    async def cog_command_error(self, ctx, error):
         ...
 
-    def cog_load(self):
+    async def cog_load(self):
         ...
 
     def cog_message_command_check(self, inter):
         ...
 
-    def cog_message_command_error(self, inter, error):
+    async def cog_message_command_error(self, inter, error):
         ...
 
     def cog_slash_command_check(self, inter):
         ...
 
-    def cog_slash_command_error(self, inter, error):
+    async def cog_slash_command_error(self, inter, error):
         ...
 
     def cog_unload(self):
@@ -200,7 +200,7 @@ _cog_extras = """
     def cog_user_command_check(self, inter):
         ...
 
-    def cog_user_command_error(self, inter, error):
+    async def cog_user_command_error(self, inter, error):
         ...
 
 """

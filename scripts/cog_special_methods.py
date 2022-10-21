@@ -37,9 +37,10 @@ def get_cog_special_methods() -> Dict[str, str]:
         if getattr(attr, "__cog_special_method__", _sentinel) is _sentinel:
             continue
 
+        async_ = "async " if inspect.iscoroutinefunction(attr) else ""
         sig = inspect.signature(attr)
         sig = remove_annotations_from_sig(sig)
-        result[name] = f"def {name}{str(sig)}:"
+        result[name] = f"{async_}def {name}{str(sig)}:"
 
     return result
 
@@ -55,9 +56,20 @@ def merge_methods(contents: str, methods: Dict[str, str]) -> str:
 
         if f"def {name}" in contents:
             # check that the signature is the same
-            if sig not in contents:
+            missing_async = False
+            if sig not in contents or (
+                missing_async := (not sig.startswith("async") and ("async " + sig) in contents)
+            ):
+                # find the current sig
+                missing_async = "async " if missing_async else ""
+
+                current_sig = re.search(rf"{missing_async}def {re.escape(name)}.+?\n", contents)
+                if current_sig:
+                    current_sig = current_sig.string[current_sig.start() : current_sig.end()]
                 raise RuntimeError(
-                    f"the signature for method '{name}' is different from what already exists."
+                    f"the signature for method '{name}' is different from what already exists.\n"
+                    f"Current sig: {current_sig}\n"
+                    f"Expected sig: {sig}"
                 )
             continue
 
