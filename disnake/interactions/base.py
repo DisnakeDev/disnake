@@ -882,9 +882,6 @@ class InteractionResponse:
             "tts": tts,
         }
 
-        if delete_after is not MISSING and ephemeral:
-            raise ValueError("ephemeral messages can not be deleted via endpoints")
-
         if embed is not MISSING and embeds is not MISSING:
             raise TypeError("cannot mix embed and embeds keyword arguments")
 

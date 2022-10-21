@@ -1622,9 +1622,6 @@ class Webhook(BaseWebhook):
         if ephemeral and not application_webhook:
             raise TypeError("ephemeral messages can only be sent from application webhooks")
 
-        if delete_after is not MISSING and ephemeral:
-            raise TypeError("ephemeral messages can not be deleted via endpoints")
-
         if application_webhook or delete_after is not MISSING:
             wait = True
 
