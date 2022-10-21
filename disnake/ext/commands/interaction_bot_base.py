@@ -80,12 +80,6 @@ class _Diff(TypedDict):
     delete_ignored: NotRequired[List[ApplicationCommand]]
 
 
-class AppCommandMetadata(NamedTuple):
-    name: str
-    guild_id: Optional[int]
-    type: ApplicationCommandType
-
-
 def _app_commands_diff(
     new_commands: Iterable[ApplicationCommand],
     old_commands: Iterable[ApplicationCommand],
