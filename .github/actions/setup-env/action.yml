@@ -38,7 +38,7 @@ runs:
         cache: "pip"
         cache-dependency-path: ${{ inputs.cache-dependency-path }}
 
-    - name: Update pip, wheel
+    - name: Update pip, wheel, setuptools
       shell: bash
       run: pip install -U pip wheel setuptools
 
