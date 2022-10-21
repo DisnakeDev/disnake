@@ -128,20 +128,6 @@ class TestInteractionResponse:
 
 
 class TestInteractionDataResolved:
-    member_payload: MemberPayload = {
-        "roles": [],
-        "joined_at": "2022-09-02T22:00:55.069000+00:00",
-        "deaf": False,
-        "mute": False,
-    }
-
-    user_payload: UserPayload = {
-        "id": "1234",
-        "discriminator": "1111",
-        "username": "h",
-        "avatar": None,
-    }
-
     # TODO: use proper mock models once we have state/guild mocks
     @pytest.fixture()
     def state(self):
@@ -150,9 +136,23 @@ class TestInteractionDataResolved:
         return s
 
     def test_init_member(self, state):
+        member_payload: MemberPayload = {
+            "roles": [],
+            "joined_at": "2022-09-02T22:00:55.069000+00:00",
+            "deaf": False,
+            "mute": False,
+        }
+
+        user_payload: UserPayload = {
+            "id": "1234",
+            "discriminator": "1111",
+            "username": "h",
+            "avatar": None,
+        }
+
         # user only, should deserialize user object
         resolved = disnake.InteractionDataResolved(
-            data={"users": {"1234": self.user_payload}},
+            data={"users": {"1234": user_payload}},
             state=state,
             guild_id=1234,
         )
@@ -161,7 +161,7 @@ class TestInteractionDataResolved:
 
         # member only, shouldn't deserialize anything
         resolved = disnake.InteractionDataResolved(
-            data={"members": {"1234": self.member_payload}},
+            data={"members": {"1234": member_payload}},
             state=state,
             guild_id=1234,
         )
@@ -170,7 +170,7 @@ class TestInteractionDataResolved:
 
         # user + member, should deserialize member object only
         resolved = disnake.InteractionDataResolved(
-            data={"users": {"1234": self.user_payload}, "members": {"1234": self.member_payload}},
+            data={"users": {"1234": user_payload}, "members": {"1234": member_payload}},
             state=state,
             guild_id=1234,
         )
