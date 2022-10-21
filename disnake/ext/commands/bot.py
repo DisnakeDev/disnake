@@ -26,7 +26,6 @@ if TYPE_CHECKING:
 
     from ._types import MaybeCoro
     from .bot_base import PrefixType
-    from .flags import ApplicationCommandSyncFlags
     from .help import HelpCommand
 
 
@@ -217,7 +216,6 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
             owner_ids: Optional[Set[int]] = None,
             reload: bool = False,
             case_insensitive: bool = False,
-            command_sync: ApplicationCommandSyncFlags = ...,
             test_guilds: Optional[Sequence[int]] = None,
             asyncio_debug: bool = False,
             loop: Optional[asyncio.AbstractEventLoop] = None,
@@ -266,7 +264,6 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
             owner_ids: Optional[Set[int]] = None,
             reload: bool = False,
             case_insensitive: bool = False,
-            command_sync: ApplicationCommandSyncFlags = ...,
             test_guilds: Optional[Sequence[int]] = None,
             asyncio_debug: bool = False,
             loop: Optional[asyncio.AbstractEventLoop] = None,
@@ -396,7 +393,6 @@ class InteractionBot(InteractionBotBase, disnake.Client):
             owner_id: Optional[int] = None,
             owner_ids: Optional[Set[int]] = None,
             reload: bool = False,
-            command_sync: ApplicationCommandSyncFlags = ...,
             test_guilds: Optional[Sequence[int]] = None,
             asyncio_debug: bool = False,
             loop: Optional[asyncio.AbstractEventLoop] = None,
@@ -438,7 +434,6 @@ class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
             owner_id: Optional[int] = None,
             owner_ids: Optional[Set[int]] = None,
             reload: bool = False,
-            command_sync: ApplicationCommandSyncFlags = ...,
             test_guilds: Optional[Sequence[int]] = None,
             asyncio_debug: bool = False,
             loop: Optional[asyncio.AbstractEventLoop] = None,

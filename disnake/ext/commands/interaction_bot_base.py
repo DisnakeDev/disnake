@@ -860,15 +860,11 @@ class InteractionBotBase(CommonBotBase):
         # Sort all invokable commands between guild IDs:
         global_cmds, guild_cmds = self._ordered_unsynced_commands(self._test_guilds)
 
-        if global_cmds is not None and self._command_sync.global_commands:
+        if global_cmds is not None:
             # Update global commands first
             diff = _app_commands_diff(
                 global_cmds, self._connection._global_application_commands.values()
             )
-            if not self._command_sync.allow_command_deletion:
-                # because allow_command_deletion is disabled, we want to never delete a command, so we move the delete commands to no_changes
-                diff["no_changes"] += diff["delete"]
-                diff["delete"].clear()
             update_required = bool(diff["upsert"]) or bool(diff["edit"]) or bool(diff["delete"])
 
             # Show the difference
@@ -889,14 +885,10 @@ class InteractionBotBase(CommonBotBase):
         # Same process but for each specified guild individually.
         # Notice that we're not doing this for every single guild for optimisation purposes.
         # See the note in :meth:`_cache_application_commands` about guild app commands.
-        if guild_cmds is not None and self._command_sync.guild_commands:
+        if guild_cmds is not None:
             for guild_id, cmds in guild_cmds.items():
                 current_guild_cmds = self._connection._guild_application_commands.get(guild_id, {})
                 diff = _app_commands_diff(cmds, current_guild_cmds.values())
-                if not self._command_sync.allow_command_deletion:
-                    # because allow_command_deletion is disabled, we want to never delete a command, so we move the delete commands to no_changes
-                    diff["no_changes"] += diff["delete"]
-                    diff["delete"].clear()
                 update_required = bool(diff["upsert"]) or bool(diff["edit"]) or bool(diff["delete"])
 
                 # Show diff

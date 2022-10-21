@@ -32,7 +32,7 @@ class TestBot(commands.Bot):
             command_prefix=Config.prefix,
             intents=disnake.Intents.all(),
             help_command=None,  # type: ignore
-            command_sync=commands.ApplicationCommandSyncFlags.all(),
+            sync_commands_debug=Config.sync_commands_debug,
             strict_localization=Config.strict_localization,
             test_guilds=Config.test_guilds,
             reload=Config.auto_reload,
