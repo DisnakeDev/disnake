@@ -40,6 +40,7 @@ GuildFeature = Literal[
     "AUTO_MODERATION",
     "BANNER",
     "COMMUNITY",
+    "DEVELOPER_SUPPORT_SERVER,
     "CREATOR_MONETIZABLE",  # not yet documented/finalised
     "DISCOVERABLE",
     "ENABLED_DISCOVERABLE_BEFORE",
