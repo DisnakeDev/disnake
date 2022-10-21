@@ -619,6 +619,9 @@ class Interaction:
             before deleting the message we just sent. If the deletion fails,
             then it is silently ignored.
 
+            .. versionchanged:: 2.7
+                Added support for ephemeral messages.
+
         Raises
         ------
         HTTPException
@@ -857,6 +860,9 @@ class InteractionResponse:
             If provided, the number of seconds to wait in the background
             before deleting the message we just sent. If the deletion fails,
             then it is silently ignored.
+
+            .. versionchanged:: 2.7
+                Added support for ephemeral messages.
 
         suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This hides

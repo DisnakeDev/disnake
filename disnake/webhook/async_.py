@@ -1579,6 +1579,9 @@ class Webhook(BaseWebhook):
 
             .. versionadded:: 2.1
 
+            .. versionchanged:: 2.7
+                Added support for ephemeral messages.
+
         suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This hides
             all embeds from the UI if set to ``True``.
