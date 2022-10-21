@@ -1580,7 +1580,7 @@ class Webhook(BaseWebhook):
             .. versionadded:: 2.1
 
             .. versionchanged:: 2.7
-                Added support for ephemeral messages.
+                Added support for ephemeral interaction responses.
 
         suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This hides

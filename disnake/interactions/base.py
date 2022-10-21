@@ -619,8 +619,11 @@ class Interaction:
             before deleting the message we just sent. If the deletion fails,
             then it is silently ignored.
 
+            Can be up to 15 minutes, after which the interaction token expires
+            (see also :attr:`expires_at`/:attr:`is_expired`).
+
             .. versionchanged:: 2.7
-                Added support for ephemeral messages.
+                Added support for ephemeral responses.
 
         Raises
         ------
@@ -861,8 +864,11 @@ class InteractionResponse:
             before deleting the message we just sent. If the deletion fails,
             then it is silently ignored.
 
+            Can be up to 15 minutes, after which the interaction token expires
+            (see also :attr:`Interaction.expires_at`/:attr:`~Interaction.is_expired`).
+
             .. versionchanged:: 2.7
-                Added support for ephemeral messages.
+                Added support for ephemeral responses.
 
         suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This hides
