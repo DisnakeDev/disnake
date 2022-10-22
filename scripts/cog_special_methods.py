@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: MIT
 
-
 """Add all special cog methods to the full list contained in disnake.__main__.
 
 This script does not run automatically and special methods that are removed from cogs
 must also be removed from the list manually.
 """
+
 from __future__ import annotations
 
 import inspect
