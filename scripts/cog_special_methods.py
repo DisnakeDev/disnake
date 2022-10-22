@@ -15,7 +15,7 @@ import sys
 import textwrap
 from typing import Dict, Union
 
-_RE = r""" = (?:"|'){3}\n(.+?)\n(?:'|"){3}"""
+_RE = r""" = ["']{3}\n(.+?)\n["']{3}"""
 
 
 def remove_annotations_from_sig(sig: inspect.Signature) -> inspect.Signature:
