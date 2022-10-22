@@ -41,7 +41,7 @@ from .ctx_menus_core import (
     user_command,
 )
 from .errors import CommandRegistrationError
-from .flags import ApplicationCommandSyncFlags
+from .flags import CommandSyncFlags
 from .slash_core import InvokableSlashCommand, SubCommand, SubCommandGroup, slash_command
 
 if TYPE_CHECKING:
@@ -140,7 +140,7 @@ class InteractionBotBase(CommonBotBase):
     def __init__(
         self,
         *,
-        command_sync: Optional[ApplicationCommandSyncFlags] = None,
+        command_sync: Optional[CommandSyncFlags] = None,
         sync_commands: bool = MISSING,
         sync_commands_debug: bool = MISSING,
         sync_commands_on_cog_unload: bool = MISSING,
@@ -166,21 +166,21 @@ class InteractionBotBase(CommonBotBase):
 
         if command_sync is not None:
             # this makes a copy so it cannot be changed after setting
-            command_sync = ApplicationCommandSyncFlags._from_value(command_sync.value)
+            command_sync = CommandSyncFlags._from_value(command_sync.value)
         if command_sync is None:
-            command_sync = ApplicationCommandSyncFlags.default()
+            command_sync = CommandSyncFlags.default()
 
             if sync_commands is not MISSING:
                 warn_deprecated(
                     "sync_commands is deprecated and will be removed in version 2.8. "
-                    "Use `command_sync` with an `ApplicationCommandSyncFlags` instance as a replacement.",
+                    "Use `command_sync` with an `CommandSyncFlags` instance as a replacement.",
                     stacklevel=3,
                 )
                 command_sync.sync_commands = sync_commands
             if sync_commands_debug is not MISSING:
                 warn_deprecated(
                     "sync_commands_debug is deprecated and will be removed in version 2.8. "
-                    "Use `command_sync` with an `ApplicationCommandSyncFlags` instance as a replacement.",
+                    "Use `command_sync` with an `CommandSyncFlags` instance as a replacement.",
                     stacklevel=3,
                 )
                 command_sync.sync_commands_debug = sync_commands_debug
@@ -188,7 +188,7 @@ class InteractionBotBase(CommonBotBase):
             if sync_commands_on_cog_unload is not MISSING:
                 warn_deprecated(
                     "sync_commands_on_cog_unload is deprecated and will be removed in version 2.8. "
-                    "Use `command_sync` with an `ApplicationCommandSyncFlags` instance as a replacement.",
+                    "Use `command_sync` with an `CommandSyncFlags` instance as a replacement.",
                     stacklevel=3,
                 )
                 command_sync.on_cog_unload = sync_commands_on_cog_unload
@@ -217,14 +217,14 @@ class InteractionBotBase(CommonBotBase):
         self._schedule_app_command_preparation()
 
     @property
-    def command_sync(self) -> ApplicationCommandSyncFlags:
-        """:class:`~.ext.commands.ApplicationCommandSyncFlags`: The command sync configured for this connection.
+    def command_sync(self) -> CommandSyncFlags:
+        """:class:`~.ext.commands.CommandSyncFlags`: The command sync configured for this connection.
 
         .. versionadded:: 2.7
 
         """
 
-        return ApplicationCommandSyncFlags._from_value(self._command_sync.value)
+        return CommandSyncFlags._from_value(self._command_sync.value)
 
     def application_commands_iterator(self) -> Iterable[InvokableApplicationCommand]:
         return chain(

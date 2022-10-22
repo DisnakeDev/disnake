@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
     from ._types import MaybeCoro
     from .bot_base import PrefixType
-    from .flags import ApplicationCommandSyncFlags
+    from .flags import CommandSyncFlags
     from .help import HelpCommand
 
 
@@ -62,7 +62,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
 
         .. versionadded:: 2.1
 
-    command_sync: :class:`.ext.commands.ApplicationCommandSyncFlags`
+    command_sync: :class:`.ext.commands.CommandSyncFlags`
         The command sync flags that you want to enable for the session. This is a way of
         controlling when and how application commands will be synced with the API.
         If not given, automatic command synchronization is enabled by default.
@@ -233,7 +233,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
             owner_ids: Optional[Set[int]] = None,
             reload: bool = False,
             case_insensitive: bool = False,
-            command_sync: ApplicationCommandSyncFlags = ...,
+            command_sync: CommandSyncFlags = ...,
             test_guilds: Optional[Sequence[int]] = None,
             asyncio_debug: bool = False,
             loop: Optional[asyncio.AbstractEventLoop] = None,
@@ -282,7 +282,7 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
             owner_ids: Optional[Set[int]] = None,
             reload: bool = False,
             case_insensitive: bool = False,
-            command_sync: ApplicationCommandSyncFlags = ...,
+            command_sync: CommandSyncFlags = ...,
             test_guilds: Optional[Sequence[int]] = None,
             asyncio_debug: bool = False,
             loop: Optional[asyncio.AbstractEventLoop] = None,
@@ -330,7 +330,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
 
         .. versionadded:: 2.1
 
-    command_sync: :class:`.ext.commands.ApplicationCommandSyncFlags`
+    command_sync: :class:`.ext.commands.CommandSyncFlags`
         The command sync flags that you want to enable for the session. This is a way of
         controlling when and how application commands will be synced with the API.
         If not given, automatic command synchronization is enabled by default.
@@ -428,7 +428,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
             owner_id: Optional[int] = None,
             owner_ids: Optional[Set[int]] = None,
             reload: bool = False,
-            command_sync: ApplicationCommandSyncFlags = ...,
+            command_sync: CommandSyncFlags = ...,
             test_guilds: Optional[Sequence[int]] = None,
             asyncio_debug: bool = False,
             loop: Optional[asyncio.AbstractEventLoop] = None,
@@ -470,7 +470,7 @@ class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
             owner_id: Optional[int] = None,
             owner_ids: Optional[Set[int]] = None,
             reload: bool = False,
-            command_sync: ApplicationCommandSyncFlags = ...,
+            command_sync: CommandSyncFlags = ...,
             test_guilds: Optional[Sequence[int]] = None,
             asyncio_debug: bool = False,
             loop: Optional[asyncio.AbstractEventLoop] = None,

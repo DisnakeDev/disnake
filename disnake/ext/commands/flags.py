@@ -10,10 +10,10 @@ from disnake.utils import _generated
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-__all__ = ("ApplicationCommandSyncFlags",)
+__all__ = ("CommandSyncFlags",)
 
 
-class ApplicationCommandSyncFlags(BaseFlags):
+class CommandSyncFlags(BaseFlags):
     """Controls the library's application command syncing policy.
 
     This allows for finer grained control over what commands are synced automatically and in what cases.
@@ -29,37 +29,37 @@ class ApplicationCommandSyncFlags(BaseFlags):
 
         .. describe:: x == y
 
-            Checks if two ApplicationCommandSyncFlags instances are equal.
+            Checks if two CommandSyncFlags instances are equal.
         .. describe:: x != y
 
-            Checks if two ApplicationCommandSyncFlags instances are not equal.
+            Checks if two CommandSyncFlags instances are not equal.
         .. describe:: x <= y
 
-            Checks if an ApplicationCommandSyncFlags instance is a subset of another ApplicationCommandSyncFlags instance.
+            Checks if an CommandSyncFlags instance is a subset of another CommandSyncFlags instance.
         .. describe:: x >= y
 
-            Checks if an ApplicationCommandSyncFlags instance is a superset of another ApplicationCommandSyncFlags instance.
+            Checks if an CommandSyncFlags instance is a superset of another CommandSyncFlags instance.
         .. describe:: x < y
 
-            Checks if an ApplicationCommandSyncFlags instance is a strict subset of another ApplicationCommandSyncFlags instance.
+            Checks if an CommandSyncFlags instance is a strict subset of another CommandSyncFlags instance.
         .. describe:: x > y
 
-            Checks if an ApplicationCommandSyncFlags instance is a strict superset of another ApplicationCommandSyncFlags instance.
+            Checks if an CommandSyncFlags instance is a strict superset of another CommandSyncFlags instance.
         .. describe:: x | y, x |= y
 
-            Returns a new ApplicationCommandSyncFlags instance with all enabled flags from both x and y.
+            Returns a new CommandSyncFlags instance with all enabled flags from both x and y.
             (Using ``|=`` will update in place).
         .. describe:: x & y, x &= y
 
-            Returns a new ApplicationCommandSyncFlags instance with only flags enabled on both x and y.
+            Returns a new CommandSyncFlags instance with only flags enabled on both x and y.
             (Using ``&=`` will update in place).
         .. describe:: x ^ y, x ^= y
 
-            Returns a new ApplicationCommandSyncFlags instance with only flags enabled on one of x or y, but not both.
+            Returns a new CommandSyncFlags instance with only flags enabled on one of x or y, but not both.
             (Using ``^=`` will update in place).
         .. describe:: ~x
 
-            Returns a new ApplicationCommandSyncFlags instance with all flags from x inverted.
+            Returns a new CommandSyncFlags instance with all flags from x inverted.
         .. describe:: hash(x)
 
             Return the flag's hash.
@@ -72,13 +72,13 @@ class ApplicationCommandSyncFlags(BaseFlags):
 
         Additionally supported are a few operations on class attributes.
 
-        .. describe:: ApplicationCommandSyncFlags.y | ApplicationCommandSyncFlags.z, ApplicationCommandSyncFlags(y=True) | ApplicationCommandSyncFlags.z
+        .. describe:: CommandSyncFlags.y | CommandSyncFlags.z, CommandSyncFlags(y=True) | CommandSyncFlags.z
 
-            Returns a ApplicationCommandSyncFlags instance with all provided flags enabled.
+            Returns a CommandSyncFlags instance with all provided flags enabled.
 
-        .. describe:: ~ApplicationCommandSyncFlags.y
+        .. describe:: ~CommandSyncFlags.y
 
-            Returns a ApplicationCommandSyncFlags instance with all flags except ``y`` inverted from their default value.
+            Returns a CommandSyncFlags instance with all flags except ``y`` inverted from their default value.
 
     Attributes
     ----------
@@ -117,21 +117,21 @@ class ApplicationCommandSyncFlags(BaseFlags):
 
     @classmethod
     def all(cls) -> Self:
-        """A factory method that creates a :class:`ApplicationCommandSyncFlags` with everything enabled."""
+        """A factory method that creates a :class:`CommandSyncFlags` with everything enabled."""
         self = cls.__new__(cls)
         self.value = all_flags_value(cls.VALID_FLAGS)
         return self
 
     @classmethod
     def none(cls) -> Self:
-        """A factory method that creates a :class:`ApplicationCommandSyncFlags` with everything disabled."""
+        """A factory method that creates a :class:`CommandSyncFlags` with everything disabled."""
         self = cls.__new__(cls)
         self.value = self.DEFAULT_VALUE
         return self
 
     @classmethod
     def default(cls) -> Self:
-        """A factory method that creates a :class:`ApplicationCommandSyncFlags` with the default settings."""
+        """A factory method that creates a :class:`CommandSyncFlags` with the default settings."""
         instance = cls.all()
         instance.sync_commands_debug = False
         return instance

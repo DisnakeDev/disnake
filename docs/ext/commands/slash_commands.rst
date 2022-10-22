@@ -41,9 +41,9 @@ This code sample shows how to set the registration to be local:
 For global registration, don't specify this parameter.
 
 In order to configure specific properties about command sync, we have a configuration
-class which may be passed to the Bot, :class:`~.ext.commands.ApplicationCommandSyncFlags`.
+class which may be passed to the Bot, :class:`~.ext.commands.CommandSyncFlags`.
 
-Setting :attr:`ApplicationCommandSyncFlags.sync_commands_debug <.ext.commands.ApplicationCommandSyncFlags.sync_commands_debug>` to ``True``, will print debug messages related to the
+Setting :attr:`CommandSyncFlags.sync_commands_debug <.ext.commands.CommandSyncFlags.sync_commands_debug>` to ``True``, will print debug messages related to the
 app command registration to the console, without having to change the log level of any loggers.
 
 This is useful if you want to figure out some registration details:
@@ -52,7 +52,7 @@ This is useful if you want to figure out some registration details:
 
     from disnake.ext import commands
 
-    command_sync = commands.ApplicationCommandSyncFlags.default()
+    command_sync = commands.CommandSyncFlags.default()
     command_sync.sync_commands_debug = True
 
     bot = commands.Bot(
@@ -61,14 +61,14 @@ This is useful if you want to figure out some registration details:
         command_sync=command_sync,
     )
 
-If you want to disable the automatic registration, set :attr:`ApplicationCommandSyncFlags.sync_commands <.ext.commands.ApplicationCommandSyncFlags.sync_commands>`
-to ``False``, or use the classmethod :meth:`none() <.ext.commands.ApplicationCommandSyncFlags.none>`
+If you want to disable the automatic registration, set :attr:`CommandSyncFlags.sync_commands <.ext.commands.CommandSyncFlags.sync_commands>`
+to ``False``, or use the classmethod :meth:`none() <.ext.commands.CommandSyncFlags.none>`
 
 .. code-block:: python3
 
     from disnake.ext import commands
 
-    command_sync = commands.ApplicationCommandSyncFlags.none()
+    command_sync = commands.CommandSyncFlags.none()
     command_sync.sync_commands = False
 
     bot = commands.Bot(
