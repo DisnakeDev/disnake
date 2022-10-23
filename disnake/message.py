@@ -1263,16 +1263,18 @@ class Message(Hashable):
         )
 
     @utils.cached_slot_property("_cs_system_content")
-    def system_content(self):
+    def system_content(self) -> Optional[str]:
         """
-        :class:`str`: A property that returns the content that is rendered
+        Optional[:class:`str`]: A property that returns the content that is rendered
         regardless of the :attr:`Message.type`.
 
         In the case of :attr:`MessageType.default` and :attr:`MessageType.reply`\\,
         this just returns the regular :attr:`Message.content`. Otherwise this
         returns an English message denoting the contents of the system message.
+
+        If the message type is unrecognised this method will return ``None``.
         """
-        if self.type is MessageType.default:
+        if self.type in (MessageType.default, MessageType.reply):
             return self.content
 
         if self.type is MessageType.recipient_add:
@@ -1287,7 +1289,15 @@ class Message(Hashable):
             else:
                 return f"{self.author.name} removed {self.mentions[0].name} from the thread."
 
+        # MessageType.call cannot be read by bots.
+
         if self.type is MessageType.channel_name_change:
+            if (
+                self.channel.type is ChannelType.public_thread
+                and (parent := getattr(self.channel, "parent", None))
+                and parent.type is ChannelType.forum
+            ):
+                return f"{self.author.name} changed the post title: **{self.content}**"
             return f"{self.author.name} changed the channel name: **{self.content}**"
 
         if self.type is MessageType.channel_icon_change:
@@ -1341,11 +1351,11 @@ class Message(Hashable):
                 return f"{self.author.name} just boosted the server **{self.content}** times! {self.guild} has achieved **Level 3!**"
 
         if self.type is MessageType.channel_follow_add:
-            return f"{self.author.name} has added {self.content} to this channel"
+            return f"{self.author.name} has added {self.content} to this channel. Its most important updates will show up here."
 
         if self.type is MessageType.guild_stream:
             # the author will be a Member
-            return f"{self.author.name} is live! Now streaming {self.author.activity.name}"  # type: ignore
+            return f"{self.author.name} is live! Now streaming {self.author.activity.name}."  # type: ignore
 
         if self.type is MessageType.guild_discovery_disqualified:
             return "This server has been removed from Server Discovery because it no longer passes all the requirements. Check Server Settings for more details."
@@ -1360,9 +1370,11 @@ class Message(Hashable):
             return "This server has failed Discovery activity requirements for 3 weeks in a row. If this server fails for 1 more week, it will be removed from Discovery."
 
         if self.type is MessageType.thread_created:
-            return f"{self.author.name} started a thread: **{self.content}**. See all **threads**."
+            return f"{self.author.name} started a thread: **{self.content}**. See all threads."
 
-        if self.type is MessageType.reply:
+        # note: MessageType.reply is implemented at the top of this method, with MessageType.default
+
+        if self.type is MessageType.application_command:
             return self.content
 
         if self.type is MessageType.thread_starter_message:
@@ -1373,7 +1385,17 @@ class Message(Hashable):
             return self.reference.resolved.content  # type: ignore
 
         if self.type is MessageType.guild_invite_reminder:
+            # todo: determine if this should be the owner content or the user content
             return "Wondering who to invite?\nStart by inviting anyone who can help you build the server!"
+
+        if self.type is MessageType.context_menu_command:
+            return self.content
+
+        if self.type is MessageType.auto_moderation_action:
+            return self.content
+
+        # in the event of an unknown or unsupported message type, we return nothing
+        return None
 
     async def delete(self, *, delay: Optional[float] = None) -> None:
         """|coro|

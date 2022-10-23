@@ -1355,7 +1355,7 @@ This section documents events related to Discord chat messages.
     will return a :class:`Message` object that represents the message before the content was modified.
 
     Due to the inherently raw nature of this event, the data parameter coincides with
-    the raw data given by the `gateway <https://discord.com/developers/docs/topics/gateway#message-update>`_.
+    the raw data given by the :ddocs:`gateway <topics/gateway-events#message-update>`.
 
     Since the data payload can be partial, care must be taken when accessing stuff in the dictionary.
     One example of a common case of partial data is when the ``'content'`` key is inaccessible. This
@@ -4859,6 +4859,15 @@ Button
     :members:
     :inherited-members:
 
+BaseSelectMenu
+~~~~~~~~~~~~~~~
+
+.. attributetable:: BaseSelectMenu
+
+.. autoclass:: BaseSelectMenu()
+    :members:
+    :inherited-members:
+
 SelectMenu
 ~~~~~~~~~~~
 
@@ -5985,6 +5994,15 @@ Button
     :inherited-members:
 
 .. autofunction:: disnake.ui.button(cls=disnake.ui.Button, *, style=ButtonStyle.secondary, label=None, disabled=False, custom_id=..., url=None, emoji=None, row=None)
+
+BaseSelect
+~~~~~~~~~~~
+
+.. attributetable:: disnake.ui.BaseSelect
+
+.. autoclass:: disnake.ui.BaseSelect
+    :members:
+    :inherited-members:
 
 Select
 ~~~~~~~

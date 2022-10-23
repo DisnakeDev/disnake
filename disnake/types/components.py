@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import List, Literal, TypedDict, Union
 
+from typing_extensions import NotRequired
+
 from .emoji import PartialEmoji
 
 ComponentType = Literal[1, 2, 3, 4]
@@ -11,7 +13,7 @@ ButtonStyle = Literal[1, 2, 3, 4, 5]
 TextInputStyle = Literal[1, 2]
 
 
-Component = Union["ActionRow", "ButtonComponent", "SelectMenu", "TextInput"]
+Component = Union["ActionRow", "ButtonComponent", "AnySelectMenu", "TextInput"]
 
 
 class ActionRow(TypedDict):
@@ -19,41 +21,42 @@ class ActionRow(TypedDict):
     components: List[Component]
 
 
-class _ButtonComponentOptional(TypedDict, total=False):
-    custom_id: str
-    url: str
-    disabled: bool
-    emoji: PartialEmoji
-    label: str
-
-
-class ButtonComponent(_ButtonComponentOptional):
+class ButtonComponent(TypedDict):
     type: Literal[2]
     style: ButtonStyle
+    label: NotRequired[str]
+    emoji: NotRequired[PartialEmoji]
+    custom_id: NotRequired[str]
+    url: NotRequired[str]
+    disabled: NotRequired[bool]
 
 
-class _SelectMenuOptional(TypedDict, total=False):
-    placeholder: str
-    min_values: int
-    max_values: int
-    disabled: bool
-
-
-class _SelectOptionsOptional(TypedDict, total=False):
-    description: str
-    emoji: PartialEmoji
-
-
-class SelectOption(_SelectOptionsOptional):
+class SelectOption(TypedDict):
     label: str
     value: str
-    default: bool
+    description: NotRequired[str]
+    emoji: NotRequired[PartialEmoji]
+    default: NotRequired[bool]
 
 
-class SelectMenu(_SelectMenuOptional):
-    type: Literal[3]
+class _SelectMenu(TypedDict):
     custom_id: str
+    placeholder: NotRequired[str]
+    min_values: NotRequired[int]
+    max_values: NotRequired[int]
+    disabled: NotRequired[bool]
+
+
+class BaseSelectMenu(_SelectMenu):
+    type: Literal[3]
+
+
+class SelectMenu(_SelectMenu):
+    type: Literal[3]
     options: List[SelectOption]
+
+
+AnySelectMenu = SelectMenu
 
 
 class Modal(TypedDict):
@@ -62,16 +65,13 @@ class Modal(TypedDict):
     components: List[ActionRow]
 
 
-class _TextInputOptional(TypedDict, total=False):
-    value: str
-    placeholder: str
-    min_length: int
-    max_length: int
-    required: bool
-
-
-class TextInput(_TextInputOptional):
+class TextInput(TypedDict):
     type: Literal[4]
     custom_id: str
     style: TextInputStyle
     label: str
+    min_length: NotRequired[int]
+    max_length: NotRequired[int]
+    required: NotRequired[bool]
+    value: NotRequired[str]
+    placeholder: NotRequired[str]

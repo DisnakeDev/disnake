@@ -194,6 +194,7 @@ class Guild(Hashable):
         - ``AUTO_MODERATION``: Guild has set up auto moderation rules.
         - ``BANNER``: Guild can upload and use a banner. (i.e. :attr:`.banner`)
         - ``COMMUNITY``: Guild is a community server.
+        - ``DEVELOPER_SUPPORT_SERVER``: Guild is set as a support server in the app directory.
         - ``DISCOVERABLE``: Guild shows up in Server Discovery.
         - ``ENABLED_DISCOVERABLE_BEFORE``: Guild had Server Discovery enabled at least once.
         - ``FEATURABLE``: Guild is able to be featured in Server Discovery.
@@ -2248,9 +2249,10 @@ class Guild(Hashable):
 
         Creates a :class:`GuildScheduledEvent`.
 
+        You must have :attr:`.Permissions.manage_events` permission to do this.
+
         Based on the channel/entity type, there are different restrictions regarding
         other parameter values, as shown in this table:
-
 
         .. csv-table::
             :widths: 30, 30, 20, 20
@@ -4480,7 +4482,7 @@ class Guild(Hashable):
         You must have :attr:`.Permissions.manage_guild` permission to do this.
 
         The maximum number of rules for each trigger type is limited, see the
-        `api docs <https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-limits-per-trigger-type>`__
+        :ddocs:`api docs <resources/auto-moderation#auto-moderation-rule-object-trigger-types>`
         for more details.
 
         .. versionadded:: 2.6
@@ -4499,7 +4501,7 @@ class Guild(Hashable):
         actions: Sequence[Union[:class:`AutoModBlockMessageAction`, :class:`AutoModSendAlertAction`, :class:`AutoModTimeoutAction`, :class:`AutoModAction`]]
             The list of actions that will execute if a matching event triggered this rule.
             Must contain at least one action.
-        trigger_metadata: :class:`AutoModTriggerMetadata`
+        trigger_metadata: Optional[:class:`AutoModTriggerMetadata`]
             Additional metadata associated with the trigger type.
         enabled: :class:`bool`
             Whether to enable the rule. Defaults to ``False``.

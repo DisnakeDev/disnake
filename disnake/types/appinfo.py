@@ -4,20 +4,19 @@ from __future__ import annotations
 
 from typing import List, Optional, TypedDict
 
+from typing_extensions import NotRequired
+
 from .snowflake import Snowflake
 from .team import Team
 from .user import User
 
 
-class _PartialAppInfoOptional(TypedDict, total=False):
-    cover_image: str
-
-
-class PartialAppInfo(_PartialAppInfoOptional):
+class PartialAppInfo(TypedDict):
     id: Snowflake
     name: str
     icon: Optional[str]
     description: str
+    cover_image: NotRequired[str]
 
 
 class InstallParams(TypedDict):
@@ -25,31 +24,25 @@ class InstallParams(TypedDict):
     permissions: str
 
 
-class _AppInfoOptional(PartialAppInfo, total=False):
-    rpc_origins: List[str]
-    terms_of_service_url: str
-    privacy_policy_url: str
-    bot_public: bool
-    bot_require_code_grant: bool
-    guild_id: Snowflake
-    primary_sku_id: Snowflake
-    slug: str
-    flags: int
-    tags: List[str]
-    install_params: InstallParams
-    custom_install_url: str
-
-
-class AppInfo(_AppInfoOptional):
+class AppInfo(PartialAppInfo):
     verify_key: str
+    rpc_origins: NotRequired[List[str]]
+    terms_of_service_url: NotRequired[str]
+    privacy_policy_url: NotRequired[str]
+    bot_public: NotRequired[bool]
+    bot_require_code_grant: NotRequired[bool]
+    guild_id: NotRequired[Snowflake]
+    primary_sku_id: NotRequired[Snowflake]
+    slug: NotRequired[str]
+    flags: NotRequired[int]
+    tags: NotRequired[List[str]]
+    install_params: NotRequired[InstallParams]
+    custom_install_url: NotRequired[str]
 
 
-class _BotAppInfoOptional(TypedDict, total=False):
-    team: Team
-
-
-class BotAppInfo(AppInfo, _BotAppInfoOptional):
+class BotAppInfo(AppInfo):
     owner: User
+    team: NotRequired[Team]
 
 
 class PartialGatewayAppInfo(TypedDict):

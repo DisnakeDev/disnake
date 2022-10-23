@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import asyncio
-import audioop
 import io
 import logging
 import re
@@ -13,6 +12,7 @@ import sys
 import threading
 import time
 import traceback
+import warnings
 from typing import IO, TYPE_CHECKING, Any, Callable, Generic, Optional, Tuple, TypeVar, Union
 
 from . import utils
@@ -25,6 +25,9 @@ if TYPE_CHECKING:
 
     from .voice_client import VoiceClient
 
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore", DeprecationWarning)
+    import audioop
 
 MISSING = utils.MISSING
 

@@ -22,16 +22,26 @@ inputs:
       Automatically installs nox as well.
       Use `*` to install all dependencies.
     required: false
+outputs:
+  python-version:
+    description: The python version that was installed.
+    value: ${{ steps.python-version.outputs.python-version }}
 
 runs:
   using: composite
   steps:
     - name: Set up python ${{ inputs.python-version }}
-      uses: actions/setup-python@v3
+      id: setup-python
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ inputs.python-version }}
         cache: "pip"
         cache-dependency-path: ${{ inputs.cache-dependency-path }}
+
+    - name: Update pip, wheel, setuptools
+      shell: bash
+      run: pip install -U pip wheel setuptools
+
     - name: Install dependencies
       if: inputs.nox-setup || inputs.dependencies
       env:
@@ -47,3 +57,9 @@ runs:
         elif [ -n "$NOX_SETUP" ]; then
           nox -s setup -- $NOX_SETUP
         fi
+
+    - name: Set python version
+      id: python-version
+      shell: bash
+      run: |
+        echo "python-version=$(python -c 'import sys; print(".".join(map(str,sys.version_info[:2])))')" >> $GITHUB_OUTPUT
