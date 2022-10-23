@@ -874,7 +874,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         slowmode_delay: Optional[:class:`int`]
             Specifies the slowmode rate limit for users in this thread, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
-            If not provided or ``None``, slowmode is inherited from the parent channel.
+            If set to ``None`` or not provided, slowmode is inherited from the parent channel.
 
             .. versionadded:: 2.3
 
