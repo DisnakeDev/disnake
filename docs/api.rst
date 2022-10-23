@@ -2023,6 +2023,8 @@ of :class:`enum.Enum`.
     .. attribute:: string_select
 
         Represents a string select component.
+
+        .. versionadded:: 2.7
     .. attribute:: select
 
         An alias of :attr:`string_select`.
@@ -2032,15 +2034,23 @@ of :class:`enum.Enum`.
     .. attribute:: user_select
 
         Represents a user select component.
+
+        .. versionadded:: 2.7
     .. attribute:: role_select
 
         Represents a role select component.
+
+        .. versionadded:: 2.7
     .. attribute:: mentionable_select
 
-        Represents a mentionable (user/role) select component.
+        Represents a mentionable (user/member/role) select component.
+
+        .. versionadded:: 2.7
     .. attribute:: channel_select
 
         Represents a channel select component.
+
+        .. versionadded:: 2.7
 
 .. class:: OptionType
 

@@ -313,6 +313,9 @@ class ActionRow(Generic[UIComponentT]):
 
         This function returns the class instance to allow for fluent-style chaining.
 
+        .. versionchanged:: 2.7
+            Renamed from ``add_select`` to ``add_string_select``.
+
         Parameters
         ----------
         custom_id: :class:`str`
