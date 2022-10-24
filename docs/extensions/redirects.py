@@ -6,58 +6,7 @@ from typing import Dict
 
 from _types import SphinxExtensionMeta
 from sphinx.application import Sphinx
-
-api_redirect_source = """
-// SPDX-License-Identifier: MIT
-
-"use strict";
-
-window.addEventListener("DOMContentLoaded", main)
-
-const api = "api.html";
-const ext_cmds_api = "ext/commands/api.html";
-
-function main() {
-    const url = new URL(document.location.href);
-
-    if (!url.pathname.endsWith('api.html')) return;
-
-    /*
-    * redirects_map is set by the redirects sphinx extension
-    * and actually exists here at the time of loading the page
-    */
-    let postfix = redirects_map[url.hash.slice(1)];
-
-    let fixed_postfix = false;
-
-    if (!postfix) {
-        if (url.pathname.endsWith(ext_cmds_api)) {
-            postfix = "ext/commands/api/index.html";
-        } else {
-            postfix = "api/index.html";
-        }
-        fixed_postfix = true;
-    }
-
-    if (!fixed_postfix) {
-        if (postfix.includes("disnake.ext.commands") && !url.pathname.endsWith(ext_cmds_api)) {
-            postfix = "api/index.html";
-        } else {
-            if ((!postfix.includes("disnake.ext.commands.") && url.pathname.endsWith(ext_cmds_api))) {
-                postfix = "ext/commands/api/index.html";
-            }
-        }
-    }
-
-    if (url.pathname.endsWith(ext_cmds_api)) {
-        window.location.href = url.origin + url.pathname.slice(0, -ext_cmds_api.length) + postfix;
-    } else {
-        window.location.href = url.origin + url.pathname.slice(0, -api.length) + postfix;
-    }
-}
-
-const redirects_map =
-"""
+from sphinx.util.fileutil import copy_asset_file
 
 
 def main(app: Sphinx, exception: Exception) -> None:
@@ -77,14 +26,16 @@ def main(app: Sphinx, exception: Exception) -> None:
 
     path = Path(app.outdir, "_static", "api_redirect.js")
 
-    path.touch()
+    path.touch(exist_ok=True)
 
-    with open(path, "w") as redirects_js:
-        redirect_data = json.dumps(actual_redirects)
+    context = {}
+    context["redirect_data"] = json.dumps(actual_redirects)
 
-        javascript = api_redirect_source + redirect_data + ";"
-
-        redirects_js.write(javascript)
+    copy_asset_file(
+        str(Path("_templates", "api_redirect.js_t")),
+        str(path),
+        context=context,
+    )
 
 
 def setup(app: Sphinx) -> SphinxExtensionMeta:
