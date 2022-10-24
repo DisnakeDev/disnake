@@ -135,9 +135,9 @@ class CommandSyncFlags(BaseFlags):
 
         The default is all flags enabled except for :attr:`sync_commands_debug`.
         """
-        instance = cls.all()
-        instance.sync_commands_debug = False
-        return instance
+        self = cls.all()
+        self.sync_commands_debug = False
+        return self
 
     @property
     def _sync_enabled(self):
