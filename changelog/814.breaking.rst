@@ -1,1 +1,1 @@
-Rename :class:`ApplicationCommandInteractionDataResolved` to :class:`InteractionDataResolved`, and :meth:`InteractionDataResolved.get` to :meth:`~InteractionDataResolved.get_by_id`.
+Rename :meth:`InteractionDataResolved.get` to :meth:`~InteractionDataResolved.get_by_id`.
