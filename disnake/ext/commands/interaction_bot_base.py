@@ -139,7 +139,7 @@ class InteractionBotBase(CommonBotBase):
     def __init__(
         self,
         *,
-        command_sync: Optional[CommandSyncFlags] = None,
+        command_sync_flags: Optional[CommandSyncFlags] = None,
         sync_commands: bool = MISSING,
         sync_commands_debug: bool = MISSING,
         sync_commands_on_cog_unload: bool = MISSING,
@@ -154,45 +154,45 @@ class InteractionBotBase(CommonBotBase):
         test_guilds = None if test_guilds is None else tuple(test_guilds)
         self._test_guilds: Optional[Tuple[int, ...]] = test_guilds
 
-        if command_sync is not None and (
+        if command_sync_flags is not None and (
             sync_commands is not MISSING
             or sync_commands_debug is not MISSING
             or sync_commands_on_cog_unload is not MISSING
         ):
             raise TypeError(
-                "cannot set 'command_sync' and any of 'sync_commands', 'sync_commands_debug', 'sync_commands_on_cog_unload' at the same time."
+                "cannot set 'command_sync_flags' and any of 'sync_commands', 'sync_commands_debug', 'sync_commands_on_cog_unload' at the same time."
             )
 
-        if command_sync is not None:
+        if command_sync_flags is not None:
             # this makes a copy so it cannot be changed after setting
-            command_sync = CommandSyncFlags._from_value(command_sync.value)
-        if command_sync is None:
-            command_sync = CommandSyncFlags.default()
+            command_sync_flags = CommandSyncFlags._from_value(command_sync_flags.value)
+        if command_sync_flags is None:
+            command_sync_flags = CommandSyncFlags.default()
 
             if sync_commands is not MISSING:
                 warn_deprecated(
                     "sync_commands is deprecated and will be removed in version 2.8. "
-                    "Use `command_sync` with an `CommandSyncFlags` instance as a replacement.",
+                    "Use `command_sync_flags` with an `CommandSyncFlags` instance as a replacement.",
                     stacklevel=3,
                 )
-                command_sync.sync_commands = sync_commands
+                command_sync_flags.sync_commands = sync_commands
             if sync_commands_debug is not MISSING:
                 warn_deprecated(
                     "sync_commands_debug is deprecated and will be removed in version 2.8. "
-                    "Use `command_sync` with an `CommandSyncFlags` instance as a replacement.",
+                    "Use `command_sync_flags` with an `CommandSyncFlags` instance as a replacement.",
                     stacklevel=3,
                 )
-                command_sync.sync_commands_debug = sync_commands_debug
+                command_sync_flags.sync_commands_debug = sync_commands_debug
 
             if sync_commands_on_cog_unload is not MISSING:
                 warn_deprecated(
                     "sync_commands_on_cog_unload is deprecated and will be removed in version 2.8. "
-                    "Use `command_sync` with an `CommandSyncFlags` instance as a replacement.",
+                    "Use `command_sync_flags` with an `CommandSyncFlags` instance as a replacement.",
                     stacklevel=3,
                 )
-                command_sync.on_cog_unload = sync_commands_on_cog_unload
+                command_sync_flags.on_cog_unload = sync_commands_on_cog_unload
 
-        self._command_sync = command_sync
+        self._command_sync = command_sync_flags
         self._sync_queued: bool = False
 
         self._slash_command_checks = []

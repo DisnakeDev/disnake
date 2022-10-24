@@ -52,13 +52,13 @@ This is useful if you want to figure out some registration details:
 
     from disnake.ext import commands
 
-    command_sync = commands.CommandSyncFlags.default()
-    command_sync.sync_commands_debug = True
+    command_sync_flags = commands.CommandSyncFlags.default()
+    command_sync_flags.sync_commands_debug = True
 
     bot = commands.Bot(
         command_prefix='!',
         test_guilds=[123456789], # Optional
-        command_sync=command_sync,
+        command_sync_flags=command_sync_flags,
     )
 
 If you want to disable the automatic registration, set :attr:`CommandSyncFlags.sync_commands <.ext.commands.CommandSyncFlags.sync_commands>`
@@ -68,12 +68,12 @@ to ``False``, or use :meth:`CommandSyncFlags.none() <.ext.commands.CommandSyncFl
 
     from disnake.ext import commands
 
-    command_sync = commands.CommandSyncFlags.none()
-    command_sync.sync_commands = False
+    command_sync_flags = commands.CommandSyncFlags.none()
+    command_sync_flags.sync_commands = False
 
     bot = commands.Bot(
         command_prefix='!',
-        command_sync=command_sync,
+        command_sync_flags=command_sync_flags,
     )
 
 Basic Slash Command
