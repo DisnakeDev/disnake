@@ -21,7 +21,7 @@ class CommandSyncFlags(BaseFlags):
     To construct an object you can pass keyword arguments denoting the flags
     to enable or disable.
 
-    If command sync is disabled (see :attr:`sync_commands`), other options will have no effect.
+    If command sync is disabled (see the docs of :attr:`sync_commands` for more info), other options will have no effect.
 
     .. versionadded:: 2.7
 
@@ -147,7 +147,10 @@ class CommandSyncFlags(BaseFlags):
     def sync_commands(self):
         """:class:`bool`: Whether to sync global and guild app commands.
 
-        This controls the :attr:`sync_global_commands` and :attr:`sync_guild_commands` attributes."""
+        This controls the :attr:`sync_global_commands` and :attr:`sync_guild_commands` attributes.
+
+        Note that it is possible for sync to be enabled for guild *or* global commands yet this will return ``False``.
+        """
         return 1 << 3 | 1 << 4
 
     @flag_value
