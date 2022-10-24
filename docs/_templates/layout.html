@@ -14,11 +14,11 @@
     {%- if css|attr("filename") %}
   {{ css_tag(css) }}
     {%- else %}
-  <link rel="stylesheet" href="{{ pathto(css, 1)|e }}?bust=1" type="text/css" />
+  <link rel="stylesheet" href="{{ pathto(css, 1)|e }}" type="text/css" />
     {%- endif %}
   {%- endfor %}
   {%- endblock %}
-  <link rel="stylesheet" href="{{ pathto('_static/style.css', 1)|e }}?bust=1" type="text/css" />
+  <link rel="stylesheet" href="{{ pathto('_static/style.css', 1)|e }}" type="text/css" />
   <link rel="stylesheet" href="{{ pathto('_static/codeblocks.css', 1) }}" type="text/css" />
   {%- block scripts %}
   <script id="documentation_options" data-url_root="{{ pathto('', 1) }}" src="{{ pathto('_static/documentation_options.js', 1) }}"></script>
