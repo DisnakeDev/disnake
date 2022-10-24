@@ -134,7 +134,6 @@ document.addEventListener('DOMContentLoaded', () => {
       continue;
     }
     for (const rule of sheet.cssRules) {
-      console.log(rule.constructor.name);
       // This is the standard way to do this
       if (rule.constructor.name === "CSSMediaRule") {
         if (rule.media.mediaText === "screen and (prefers-color-scheme: dark)") {
