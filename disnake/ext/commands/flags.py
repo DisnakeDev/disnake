@@ -21,7 +21,7 @@ class CommandSyncFlags(BaseFlags):
     To construct an object you can pass keyword arguments denoting the flags
     to enable or disable.
 
-    The default value is all flags enabled except for debug messages.
+    If command sync is disabled (see :attr:`sync_commands`), other options will have no effect.
 
     .. versionadded:: 2.7
 
@@ -131,7 +131,10 @@ class CommandSyncFlags(BaseFlags):
 
     @classmethod
     def default(cls) -> Self:
-        """A factory method that creates a :class:`CommandSyncFlags` with the default settings."""
+        """A factory method that creates a :class:`CommandSyncFlags` with the default settings.
+
+        The default is all flags enabled except for debug messages.
+        """
         instance = cls.all()
         instance.sync_commands_debug = False
         return instance
@@ -142,30 +145,32 @@ class CommandSyncFlags(BaseFlags):
 
     @alias_flag_value
     def sync_commands(self):
-        """:class:`bool`: Whether to sync app commands at all."""
-        return 1 << 5 | 1 << 6
+        """:class:`bool`: Whether to sync app commands at all.
+
+        This controls the :attr:`sync_global_commands` and :attr:`sync_guild_commands` attributes."""
+        return 1 << 3 | 1 << 4
 
     @flag_value
     def sync_commands_debug(self):
-        """:class:`bool`: Whether or not to show app command sync debug messages"""
-        return 1 << 1
+        """:class:`bool`: Whether or not to show app command sync debug messages."""
+        return 1 << 0
 
     @flag_value
     def on_cog_unload(self):
         """:class:`bool`: Whether or not to sync app commands on cog unload or reload."""
-        return 1 << 2
+        return 1 << 1
 
     @flag_value
     def allow_command_deletion(self):
         """:class:`bool`: Whether to allow commands to be deleted by automatic command sync."""
-        return 1 << 3
+        return 1 << 2
 
     @flag_value
     def sync_global_commands(self):
         """:class:`bool`: Whether to sync global commands."""
-        return 1 << 5
+        return 1 << 3
 
     @flag_value
     def sync_guild_commands(self):
         """:class:`bool`: Whether to sync per-guild commands."""
-        return 1 << 6
+        return 1 << 4
