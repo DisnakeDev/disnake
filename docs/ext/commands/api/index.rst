@@ -12,13 +12,13 @@ The following documents outlines the API of disnake's command extension module.
 .. toctree::
     :maxdepth: 1
 
-    Application Commands <app_commands.rst>
-    Bots <bots.rst>
-    Checks <checks.rst>
-    Context <context.rst>
-    Converters <converters.rst>
-    Events <events.rst>
-    Exceptions <exceptions.rst>
-    Help Commands <help_commands.rst>
-    Miscellaneous <misc.rst>
-    Prefix Commands <prefix_commands.rst>
+    app_commands
+    bots
+    checks
+    context
+    converters
+    events
+    exceptions
+    help_commands
+    misc
+    prefix_commands
