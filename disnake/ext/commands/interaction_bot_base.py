@@ -15,7 +15,6 @@ from typing import (
     Dict,
     Iterable,
     List,
-    NamedTuple,
     Optional,
     Sequence,
     Set,
