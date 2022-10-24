@@ -766,7 +766,7 @@ class InteractionBotBase(CommonBotBase):
         # Sort all invokable commands between guild IDs:
         global_cmds, guild_cmds = self._ordered_unsynced_commands(self._test_guilds)
 
-        if self._command_sync.sync_global_commands and global_cmds is not None:
+        if self._command_sync.sync_global_commands:
             # Update global commands first
             diff = _app_commands_diff(
                 global_cmds, self._connection._global_application_commands.values()
@@ -774,8 +774,8 @@ class InteractionBotBase(CommonBotBase):
             if not self._command_sync.allow_command_deletion:
                 # because allow_command_deletion is disabled, we want to never automatically delete a command
                 # so we move the delete commands to delete_ignored
-                diff["delete_ignored"] = diff["delete"].copy()
-                diff["delete"].clear()
+                diff["delete_ignored"] = diff["delete"]
+                diff["delete"] = []
             update_required = bool(diff["upsert"] or diff["edit"] or diff["delete"])
 
             # Show the difference
@@ -793,19 +793,20 @@ class InteractionBotBase(CommonBotBase):
                     await self.bulk_overwrite_global_commands(to_send)
                 except Exception as e:
                     warnings.warn(f"Failed to overwrite global commands due to {e}", SyncWarning)
+
         # Same process but for each specified guild individually.
         # Notice that we're not doing this for every single guild for optimisation purposes.
         # See the note in :meth:`_cache_application_commands` about guild app commands.
-        if self._command_sync.sync_guild_commands and guild_cmds is not None:
+        if self._command_sync.sync_guild_commands:
             for guild_id, cmds in guild_cmds.items():
                 current_guild_cmds = self._connection._guild_application_commands.get(guild_id, {})
                 diff = _app_commands_diff(cmds, current_guild_cmds.values())
                 if not self._command_sync.allow_command_deletion:
                     # because allow_command_deletion is disabled, we want to never automatically delete a command
                     # so we move the delete commands to delete_ignored
-                    diff["delete_ignored"] = diff["delete"].copy()
+                    diff["delete_ignored"] = diff["delete"]
                     diff["delete"] = []
-                update_required = bool(diff["upsert"]) or bool(diff["edit"]) or bool(diff["delete"])
+                update_required = bool(diff["upsert"] or diff["edit"] or diff["delete"])
 
                 # Show diff
                 self._log_sync_debug(
@@ -1290,20 +1291,20 @@ class InteractionBotBase(CommonBotBase):
                         await self.bulk_overwrite_guild_commands(interaction.guild_id, [])  # type: ignore
                     except disnake.HTTPException:
                         message = (
-                            "This command does not exist locally. More information about this: "
-                            f"https://docs.disnake.dev/en/v{disnake.__version__}/ext/commands/additional_info.html"
+                            "This command is not defined. More information about this: "
+                            "https://docs.disnake.dev/page/ext/commands/additional_info.html"
                             "#app-command-sync."
                         )
                     else:
                         message = (
                             "This command has just been synced. More information about this: "
-                            f"https://docs.disnake.dev/en/v{disnake.__version__}/ext/commands/additional_info.html"
+                            "https://docs.disnake.dev/page/ext/commands/additional_info.html"
                             "#app-command-sync."
                         )
                 else:
                     message = (
-                        "This command does not exist locally. More information about this: "
-                        f"https://docs.disnake.dev/en/v{disnake.__version__}/ext/commands/additional_info.html"
+                        "This command is not defined. More information about this: "
+                        "https://docs.disnake.dev/page/ext/commands/additional_info.html"
                         "#app-command-sync."
                     )
                 try:
