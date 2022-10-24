@@ -1,1 +1,1 @@
-Use cache for threads in interaction data instead of always creating a new instance.
+Try to get threads used in interactions (like threads in command arguments) from the cache first, before creating a new instance.
