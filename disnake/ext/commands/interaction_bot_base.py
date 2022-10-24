@@ -192,7 +192,7 @@ class InteractionBotBase(CommonBotBase):
                 )
                 command_sync_flags.sync_on_cog_unload = sync_commands_on_cog_unload
 
-        self._command_sync = command_sync_flags
+        self._command_sync_flags = command_sync_flags
         self._sync_queued: bool = False
 
         self._slash_command_checks = []
@@ -216,13 +216,13 @@ class InteractionBotBase(CommonBotBase):
         self._schedule_app_command_preparation()
 
     @property
-    def command_sync(self) -> CommandSyncFlags:
+    def command_sync_flags(self) -> CommandSyncFlags:
         """:class:`~.ext.commands.CommandSyncFlags`: The command sync flags configured for this bot.
 
         .. versionadded:: 2.7
         """
 
-        return CommandSyncFlags._from_value(self._command_sync.value)
+        return CommandSyncFlags._from_value(self._command_sync_flags.value)
 
     def application_commands_iterator(self) -> Iterable[InvokableApplicationCommand]:
         return chain(
@@ -759,19 +759,19 @@ class InteractionBotBase(CommonBotBase):
         if not isinstance(self, disnake.Client):
             raise NotImplementedError("This method is only usable in disnake.Client subclasses")
 
-        if not self._command_sync._sync_enabled or self._is_closed or self.loop.is_closed():
+        if not self._command_sync_flags._sync_enabled or self._is_closed or self.loop.is_closed():
             return
 
         # We assume that all commands are already cached.
         # Sort all invokable commands between guild IDs:
         global_cmds, guild_cmds = self._ordered_unsynced_commands(self._test_guilds)
 
-        if self._command_sync.sync_global_commands:
+        if self._command_sync_flags.sync_global_commands:
             # Update global commands first
             diff = _app_commands_diff(
                 global_cmds, self._connection._global_application_commands.values()
             )
-            if not self._command_sync.allow_command_deletion:
+            if not self._command_sync_flags.allow_command_deletion:
                 # because allow_command_deletion is disabled, we want to never automatically delete a command
                 # so we move the delete commands to delete_ignored
                 diff["delete_ignored"] = diff["delete"]
@@ -797,11 +797,11 @@ class InteractionBotBase(CommonBotBase):
         # Same process but for each specified guild individually.
         # Notice that we're not doing this for every single guild for optimisation purposes.
         # See the note in :meth:`_cache_application_commands` about guild app commands.
-        if self._command_sync.sync_guild_commands:
+        if self._command_sync_flags.sync_guild_commands:
             for guild_id, cmds in guild_cmds.items():
                 current_guild_cmds = self._connection._guild_application_commands.get(guild_id, {})
                 diff = _app_commands_diff(cmds, current_guild_cmds.values())
-                if not self._command_sync.allow_command_deletion:
+                if not self._command_sync_flags.allow_command_deletion:
                     # because allow_command_deletion is disabled, we want to never automatically delete a command
                     # so we move the delete commands to delete_ignored
                     diff["delete_ignored"] = diff["delete"]
@@ -830,7 +830,7 @@ class InteractionBotBase(CommonBotBase):
         self._log_sync_debug("Command synchronization task has finished")
 
     def _log_sync_debug(self, text: str) -> None:
-        if self._command_sync.sync_commands_debug:
+        if self._command_sync_flags.sync_commands_debug:
             # if sync debugging is enabled, *always* output logs
             if _log.isEnabledFor(logging.INFO):
                 # if the log level is `INFO` or higher, use that
@@ -857,7 +857,7 @@ class InteractionBotBase(CommonBotBase):
             raise NotImplementedError("This method is only usable in disnake.Client subclasses")
 
         if (
-            not self._command_sync._sync_enabled
+            not self._command_sync_flags._sync_enabled
             or self._sync_queued
             or not self.is_ready()
             or self._is_closed
@@ -1275,7 +1275,7 @@ class InteractionBotBase(CommonBotBase):
         interaction: :class:`disnake.ApplicationCommandInteraction`
             The interaction to process commands for.
         """
-        if self._command_sync._sync_enabled and not self._sync_queued:
+        if self._command_sync_flags._sync_enabled and not self._sync_queued:
             known_command = self.get_global_command(interaction.data.id)  # type: ignore
 
             if known_command is None:
@@ -1286,12 +1286,17 @@ class InteractionBotBase(CommonBotBase):
                 # This usually comes from the blind spots of the sync algorithm.
                 # Since not all guild commands are cached, it is possible to experience such issues.
                 # In this case, the blind spot is the interaction guild, let's fix it:
-                if self._command_sync.allow_command_deletion:
+                if self._command_sync_flags.allow_command_deletion:
                     try:
                         await self.bulk_overwrite_guild_commands(interaction.guild_id, [])  # type: ignore
                     except disnake.HTTPException:
+                        # for some reason we were unable to sync the command
+                        # either malformed API request, or some other error
+                        # in theory this will never error: if a command exists the bot has authorisation
+                        # in practice this is not the case, the API could change valid requests at any time
                         message = (
-                            "This command is not defined. More information about this: "
+                            "This comand could not be processed. Additionally, an error occured when trying to sync commands. "
+                            "More information about this: "
                             "https://docs.disnake.dev/page/ext/commands/additional_info.html"
                             "#unknown-commands."
                         )

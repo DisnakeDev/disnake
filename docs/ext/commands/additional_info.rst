@@ -36,7 +36,7 @@ This will also occur when IDs are removed from the ``test_guilds`` kwarg of :cla
 Command Sync with Multiple Clusters
 ++++++++++++++++++++++++++++++++++++
 
-If your bot requires shard distribution across several clusters, you should disable command_sync on all clusters except one.
+If your bot requires shard distribution across several clusters, you should disable command sync on all clusters except one.
 This will prevent conflicts and race conditions. Discord API doesn't provide users with events related to application command updates,
 so it's impossible to keep the cache of multiple machines synced. Having only 1 cluster with ``sync_commands`` set to ``True`` is enough
 because global registration of application commands doesn't depend on sharding.
