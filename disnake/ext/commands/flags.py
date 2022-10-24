@@ -95,11 +95,11 @@ class CommandSyncFlags(BaseFlags):
         self,
         *,
         allow_command_deletion: bool = ...,
-        on_cog_unload: bool = ...,
         sync_commands: bool = ...,
         sync_commands_debug: bool = ...,
         sync_global_commands: bool = ...,
         sync_guild_commands: bool = ...,
+        sync_on_cog_unload: bool = ...,
     ):
         ...
 
@@ -156,7 +156,7 @@ class CommandSyncFlags(BaseFlags):
         return 1 << 0
 
     @flag_value
-    def on_cog_unload(self):
+    def sync_on_cog_unload(self):
         """:class:`bool`: Whether or not to sync app commands on cog unload or reload."""
         return 1 << 1
 
