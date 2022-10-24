@@ -107,7 +107,7 @@ jobs:
         echo "PYRIGHT_VERSION=$PYRIGHT_VERSION" >> $GITHUB_ENV
 
     - name: Run pyright (Linux)
-      uses: jakebailey/pyright-action@v1.0.3
+      uses: jakebailey/pyright-action@v1.4.1
       with:
         version: ${{ env.PYRIGHT_VERSION }}
         python-version: ${{ steps.setup-env.outputs.python-version }}
@@ -116,7 +116,7 @@ jobs:
         warnings: true
 
     - name: Run pyright (Windows)
-      uses: jakebailey/pyright-action@v1.0.3
+      uses: jakebailey/pyright-action@v1.4.1
       if: ${{ success() || failure() }}  # run regardless of previous step's result
       with:
         version: ${{ env.PYRIGHT_VERSION }}
