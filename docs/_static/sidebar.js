@@ -127,3 +127,16 @@ document.addEventListener('DOMContentLoaded', () => {
     sidebar.setActiveLink(getCurrentSection());
   });
 });
+
+
+"use strict";
+
+window.addEventListener("DOMContentLoaded", scrollSidebarToContents);
+
+function scrollSidebarToContents() {
+  const currentSection = document.querySelector("#sidebar li.current");
+
+  if (currentSection) {
+    currentSection.scrollIntoView();
+  }
+}

@@ -374,7 +374,6 @@ html_js_files = [
     "copy.js",
     "sidebar.js",
     "touch.js",
-    "scroll_sidebar.js",
 ]
 
 # Output file base name for HTML help builder.
