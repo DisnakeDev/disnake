@@ -21,7 +21,7 @@ class CommandSyncFlags(BaseFlags):
     To construct an object you can pass keyword arguments denoting the flags
     to enable or disable.
 
-    The default value is all flags enabled.
+    The default value is all flags enabled except for debug messages.
 
     .. versionadded:: 2.7
 

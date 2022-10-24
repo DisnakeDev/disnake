@@ -40,11 +40,11 @@ This code sample shows how to set the registration to be local:
 
 For global registration, don't specify this parameter.
 
-In order to configure specific properties about command sync, we have a configuration
+In order to configure specific properties about command sync, there's a configuration
 class which may be passed to the Bot, :class:`~.ext.commands.CommandSyncFlags`.
 
 Setting :attr:`CommandSyncFlags.sync_commands_debug <.ext.commands.CommandSyncFlags.sync_commands_debug>` to ``True``, will print debug messages related to the
-app command registration to the console, without having to change the log level of any loggers.
+app command registration to the console (or logger if enabled).
 
 This is useful if you want to figure out some registration details:
 
@@ -62,7 +62,7 @@ This is useful if you want to figure out some registration details:
     )
 
 If you want to disable the automatic registration, set :attr:`CommandSyncFlags.sync_commands <.ext.commands.CommandSyncFlags.sync_commands>`
-to ``False``, or use the classmethod :meth:`none() <.ext.commands.CommandSyncFlags.none>`
+to ``False``, or use :meth:`CommandSyncFlags.none() <.ext.commands.CommandSyncFlags.none>`
 
 .. code-block:: python3
 

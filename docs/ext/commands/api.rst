@@ -157,7 +157,7 @@ Command Sync
 -------------
 
 CommandSyncFlags
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
 
 .. attributetable:: disnake.ext.commands.CommandSyncFlags
 

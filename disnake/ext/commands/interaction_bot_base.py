@@ -217,10 +217,9 @@ class InteractionBotBase(CommonBotBase):
 
     @property
     def command_sync(self) -> CommandSyncFlags:
-        """:class:`~.ext.commands.CommandSyncFlags`: The command sync configured for this connection.
+        """:class:`~.ext.commands.CommandSyncFlags`: The command sync flags configured for this bot.
 
         .. versionadded:: 2.7
-
         """
 
         return CommandSyncFlags._from_value(self._command_sync.value)
