@@ -1579,6 +1579,9 @@ class Webhook(BaseWebhook):
 
             .. versionadded:: 2.1
 
+            .. versionchanged:: 2.7
+                Added support for ephemeral interaction responses.
+
         suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This hides
             all embeds from the UI if set to ``True``.
@@ -1621,9 +1624,6 @@ class Webhook(BaseWebhook):
         application_webhook = self.type is WebhookType.application
         if ephemeral and not application_webhook:
             raise TypeError("ephemeral messages can only be sent from application webhooks")
-
-        if delete_after is not MISSING and ephemeral:
-            raise TypeError("ephemeral messages can not be deleted via endpoints")
 
         if application_webhook or delete_after is not MISSING:
             wait = True
