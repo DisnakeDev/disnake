@@ -133,7 +133,7 @@ class CommandSyncFlags(BaseFlags):
     def default(cls) -> Self:
         """A factory method that creates a :class:`CommandSyncFlags` with the default settings.
 
-        The default is all flags enabled except for debug messages.
+        The default is all flags enabled except for :attr:`sync_commands_debug`.
         """
         instance = cls.all()
         instance.sync_commands_debug = False
@@ -145,7 +145,7 @@ class CommandSyncFlags(BaseFlags):
 
     @alias_flag_value
     def sync_commands(self):
-        """:class:`bool`: Whether to sync app commands at all.
+        """:class:`bool`: Whether to sync global and guild app commands.
 
         This controls the :attr:`sync_global_commands` and :attr:`sync_guild_commands` attributes."""
         return 1 << 3 | 1 << 4
