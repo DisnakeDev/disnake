@@ -127,15 +127,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // dark mode toggle
 
-  var dark_mode_rule;
+  var dark_mode_rules = [];
   for (const sheet of document.styleSheets) {
-    if (sheet.href && !sheet.href.endsWith("style.css")) {
+    if ((new URL(sheet.href)).origin !== window.url.origin) {
+      // Don't attempt to edit non-shared-origin sheets
       continue;
     }
     for (const rule of sheet.cssRules) {
-      if (rule.type == CSSRule.MEDIA_RULE) {
-        if (rule.media.mediaText.includes("prefers-color-scheme: dark")) {
-           dark_mode_rule = rule;
+      // This is the standard way to do this
+      if (rule.constructor.name === "CSSMediaRule") {
+        if (rule.media.mediaText === "screen and (prefers-color-scheme: dark)") {
+           dark_mode_rules.push(rule);
         }
       }
     }
@@ -153,9 +155,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // edit media query to manually override prefers-color-scheme
     if (on) {
-      dark_mode_rule.media.mediaText = "screen";
+      for (let rule of dark_mode_rules) {
+        rule.media.mediaText = "screen";
+      }
     } else {
-      dark_mode_rule.media.mediaText = "screen and disabled";
+      for (let rule of dark_mode_rules) {
+        rule.media.mediaText = "screen and disabled";
+      }
     }
   }
 
