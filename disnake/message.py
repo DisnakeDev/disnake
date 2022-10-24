@@ -1857,10 +1857,10 @@ class Message(Hashable):
             The duration in minutes before a thread is automatically archived for inactivity.
             If not provided, the channel's default auto archive duration is used.
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
-        slowmode_delay: :class:`int`
+        slowmode_delay: Optional[:class:`int`]
             Specifies the slowmode rate limit for users in this thread, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
-            If not provided, slowmode is disabled.
+            If set to ``None`` or not provided, slowmode is inherited from the parent channel.
 
             .. versionadded:: 2.3
 
@@ -1899,7 +1899,7 @@ class Message(Hashable):
             self.id,
             name=name,
             auto_archive_duration=auto_archive_duration or default_auto_archive_duration,
-            rate_limit_per_user=slowmode_delay or 0,
+            rate_limit_per_user=slowmode_delay,
             reason=reason,
         )
         return Thread(guild=self.guild, state=self._state, data=data)
