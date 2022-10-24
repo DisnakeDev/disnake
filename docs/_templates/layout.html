@@ -6,9 +6,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ title|striptags|e }}{{ titlesuffix }}</title>
-  <!-- begin extra head -->
-
-  <!-- end extra head -->
+  {%- block extrahead %} {% endblock %}
   <link rel="stylesheet" href="{{ pathto('_static/icons.css', 1)|e }}" type="text/css" />
   {%- block css %}
   {%- for css in css_files %}
