@@ -171,14 +171,14 @@ class InteractionBotBase(CommonBotBase):
 
             if sync_commands is not MISSING:
                 warn_deprecated(
-                    "sync_commands is deprecated and will be removed in version 2.8. "
+                    "sync_commands is deprecated and will be removed in a future version. "
                     "Use `command_sync_flags` with an `CommandSyncFlags` instance as a replacement.",
                     stacklevel=3,
                 )
                 command_sync_flags.sync_commands = sync_commands
             if sync_commands_debug is not MISSING:
                 warn_deprecated(
-                    "sync_commands_debug is deprecated and will be removed in version 2.8. "
+                    "sync_commands_debug is deprecated and will be removed in a future version. "
                     "Use `command_sync_flags` with an `CommandSyncFlags` instance as a replacement.",
                     stacklevel=3,
                 )
@@ -186,7 +186,7 @@ class InteractionBotBase(CommonBotBase):
 
             if sync_commands_on_cog_unload is not MISSING:
                 warn_deprecated(
-                    "sync_commands_on_cog_unload is deprecated and will be removed in version 2.8. "
+                    "sync_commands_on_cog_unload is deprecated and will be removed in a future version. "
                     "Use `command_sync_flags` with an `CommandSyncFlags` instance as a replacement.",
                     stacklevel=3,
                 )
