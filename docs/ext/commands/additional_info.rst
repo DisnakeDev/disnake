@@ -28,14 +28,10 @@ This can lead to situations where a command no longer exists in the code but sti
 
 To rectify this, just run the command. It will automatically be deleted.
 
-Changing Guild Commands
-++++++++++++++++++++++++
+.. _changing-test-guilds:
 
-If you remove some IDs from the ``test_guilds`` kwarg of :class:`Bot <ext.commands.Bot>` (or a similar class) or from the ``guild_ids`` kwarg of
-:func:`slash_command <ext.commands.slash_command>` (:func:`user_command <ext.commands.user_command>`, :func:`message_command <ext.commands.message_command>`)
-the commands in those guilds won't be deleted instantly. As explained above, they'll be deleted as soon as one of the deprecated commands is invoked. Your bot will send a message
-like "This command has just been synced ...".
-
+This will also occur when IDs are removed from the ``test_guilds`` kwarg of :class:`Bot <ext.commands.Bot>` (or a similar class) or from the ``guild_ids`` kwarg of
+:func:`slash_command <ext.commands.slash_command>`, :func:`user_command <ext.commands.user_command>`, or :func:`message_command <ext.commands.message_command>`.
 
 Command Sync with Multiple Clusters
 ++++++++++++++++++++++++++++++++++++

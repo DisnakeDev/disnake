@@ -1293,19 +1293,19 @@ class InteractionBotBase(CommonBotBase):
                         message = (
                             "This command is not defined. More information about this: "
                             "https://docs.disnake.dev/page/ext/commands/additional_info.html"
-                            "#app-command-sync."
+                            "#unknown-commands."
                         )
                     else:
                         message = (
                             "This command has just been synced. More information about this: "
                             "https://docs.disnake.dev/page/ext/commands/additional_info.html"
-                            "#app-command-sync."
+                            "#unknown-commands."
                         )
                 else:
                     message = (
                         "This command is not defined. More information about this: "
                         "https://docs.disnake.dev/page/ext/commands/additional_info.html"
-                        "#app-command-sync."
+                        "#unknown-commands."
                     )
                 try:
                     # This part is in a separate try-except because we still should respond to the interaction
