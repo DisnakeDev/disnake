@@ -42,7 +42,6 @@ InviteTarget
 
 .. class:: InviteTarget
 
-    |discord_enum|
 
     Represents the invite type for voice channel invites.
 

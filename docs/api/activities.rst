@@ -72,7 +72,6 @@ ActivityType
 
 .. class:: ActivityType
 
-    |discord_enum|
 
     Specifies the type of :class:`Activity`. This is used to check how to
     interpret the activity itself.
@@ -106,7 +105,6 @@ Status
 
 .. class:: Status
 
-    |discord_enum|
 
     Specifies a :class:`Member` 's status.
 

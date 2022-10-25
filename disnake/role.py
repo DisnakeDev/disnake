@@ -30,8 +30,7 @@ if TYPE_CHECKING:
 
 
 class RoleTags:
-    """|discord_model|
-
+    """
     Represents tags on a role.
 
     A role tag is a piece of extra information attached to a managed role
@@ -94,8 +93,7 @@ class RoleTags:
 
 
 class Role(Hashable):
-    """|discord_model|
-
+    """
     Represents a Discord role in a :class:`Guild`.
 
     .. container:: operations

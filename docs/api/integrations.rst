@@ -56,7 +56,6 @@ ExpireBehaviour
 
 .. class:: ExpireBehaviour
 
-    |discord_enum|
 
     Represents the behaviour the :class:`Integration` should perform
     when a user's subscription has finished.

@@ -62,7 +62,6 @@ StickerType
 
 .. class:: StickerType
 
-    |discord_enum|
 
     Represents the type of sticker.
 
@@ -81,7 +80,6 @@ StickerFormatType
 
 .. class:: StickerFormatType
 
-    |discord_enum|
 
     Represents the type of sticker images.
 

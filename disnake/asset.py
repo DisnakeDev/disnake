@@ -158,8 +158,7 @@ class AssetMixin:
 
 
 class Asset(AssetMixin):
-    """|discord_model|
-
+    """
     Represents a CDN asset on Discord.
 
     .. container:: operations

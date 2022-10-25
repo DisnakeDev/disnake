@@ -69,7 +69,6 @@ TeamMembershipState
 
 .. class:: TeamMembershipState
 
-    |discord_enum|
 
     Represents the membership state of a team member retrieved through :func:`Client.application_info`.
 

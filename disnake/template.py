@@ -66,8 +66,7 @@ class _PartialTemplateState:
 
 
 class Template:
-    """|discord_model|
-
+    """
     Represents a Discord template.
 
     .. versionadded:: 1.4

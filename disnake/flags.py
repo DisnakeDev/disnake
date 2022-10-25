@@ -317,8 +317,7 @@ class ListBaseFlags(BaseFlags, no_fill_flags=True):
 
 
 class SystemChannelFlags(BaseFlags, inverted=True):
-    """|data_class|
-
+    """
     Wraps up a Discord system channel flag value.
 
     Similar to :class:`Permissions`\\, the properties provided are two way.
@@ -467,8 +466,7 @@ class SystemChannelFlags(BaseFlags, inverted=True):
 
 
 class MessageFlags(BaseFlags):
-    """|data_class|
-
+    """
     Wraps up a Discord Message flag value.
 
     See :class:`SystemChannelFlags`.
@@ -640,8 +638,7 @@ class MessageFlags(BaseFlags):
 
 
 class PublicUserFlags(BaseFlags):
-    """|data_class|
-
+    """
     Wraps up the Discord User Public flags.
 
     .. container:: operations
@@ -859,8 +856,7 @@ class PublicUserFlags(BaseFlags):
 
 
 class Intents(BaseFlags):
-    """|data_class|
-
+    """
     Wraps up a Discord gateway intent flag.
 
     Similar to :class:`Permissions`\\, the properties provided are two way.
@@ -1533,8 +1529,7 @@ class Intents(BaseFlags):
 
 
 class MemberCacheFlags(BaseFlags):
-    """|data_class|
-
+    """
     Controls the library's cache policy when it comes to members.
 
     This allows for finer grained control over what members are cached.
@@ -1728,8 +1723,7 @@ class MemberCacheFlags(BaseFlags):
 
 
 class ApplicationFlags(BaseFlags):
-    """|data_class|
-
+    """
     Wraps up the Discord Application flags.
 
     .. container:: operations
@@ -1899,8 +1893,7 @@ class ApplicationFlags(BaseFlags):
 
 
 class ChannelFlags(BaseFlags):
-    """|data_class|
-
+    """
     Wraps up the Discord Channel flags.
 
     .. container:: operations
@@ -2014,8 +2007,7 @@ class ChannelFlags(BaseFlags):
 
 
 class AutoModKeywordPresets(ListBaseFlags):
-    """|data_class|
-
+    """
     Wraps up the pre-defined auto moderation keyword lists, provided by Discord.
 
     .. container:: operations

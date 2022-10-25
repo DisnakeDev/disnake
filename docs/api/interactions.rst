@@ -190,7 +190,6 @@ InteractionType
 
 .. class:: InteractionType
 
-    |discord_enum|
 
     Specifies the type of :class:`Interaction`.
 
@@ -217,7 +216,6 @@ InteractionResponseType
 
 .. class:: InteractionResponseType
 
-    |discord_enum|
 
     Specifies the response type for the interaction.
 

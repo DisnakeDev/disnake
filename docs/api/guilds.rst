@@ -66,7 +66,6 @@ BanEntry
 
 .. class:: BanEntry
 
-    |data_class|
 
     A namedtuple which represents a ban returned from :meth:`~Guild.bans`.
 
@@ -97,7 +96,6 @@ VerificationLevel
 
 .. class:: VerificationLevel
 
-    |discord_enum|
 
     Specifies a :class:`Guild`\'s verification level, which is the criteria in
     which a member must meet before being able to send messages to the guild.
@@ -149,7 +147,6 @@ NotificationLevel
 
 .. class:: NotificationLevel
 
-    |discord_enum|
 
     Specifies whether a :class:`Guild` has notifications on for all messages or mentions only by default.
 
@@ -188,7 +185,6 @@ ContentFilter
 
 .. class:: ContentFilter
 
-    |discord_enum|
 
     Specifies a :class:`Guild`\'s explicit content filter, which is the machine
     learning algorithms that Discord uses to detect if an image contains
@@ -232,7 +228,6 @@ NSFWLevel
 
 .. class:: NSFWLevel
 
-    |discord_enum|
 
     Represents the NSFW level of a guild.
 

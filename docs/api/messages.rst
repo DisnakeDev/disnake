@@ -164,7 +164,6 @@ MessageType
 
 .. class:: MessageType
 
-    |discord_enum|
 
     Specifies the type of :class:`Message`. This is used to denote if a message
     is to be interpreted as a system message or a regular message.

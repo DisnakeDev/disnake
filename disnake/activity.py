@@ -138,8 +138,7 @@ class _BaseActivity:
 
 # tag type for user-settable activities
 class BaseActivity(_BaseActivity):
-    """|data_class|
-
+    """
     The base activity that all user-settable activities inherit from.
 
     A user-settable activity is one that can be used in :meth:`Client.change_presence`.
@@ -163,8 +162,7 @@ class BaseActivity(_BaseActivity):
 
 
 class Activity(BaseActivity):
-    """|data_class_constructible|
-
+    """
     Represents an activity in Discord.
 
     This could be an activity such as streaming, playing, listening
@@ -362,8 +360,7 @@ class Activity(BaseActivity):
 
 
 class Game(BaseActivity):
-    """|data_class_constructible|
-
+    """
     A slimmed down version of :class:`Activity` that represents a Discord game.
 
     This is typically displayed via **Playing** on the official Discord client.
@@ -447,8 +444,7 @@ class Game(BaseActivity):
 
 
 class Streaming(BaseActivity):
-    """|data_class_constructible|
-
+    """
     A slimmed down version of :class:`Activity` that represents a Discord streaming status.
 
     This is typically displayed via **Streaming** on the official Discord client.
@@ -561,8 +557,7 @@ class Streaming(BaseActivity):
 
 
 class Spotify(_BaseActivity):
-    """|discord_model|
-
+    """
     Represents a Spotify listening activity from Discord.
 
     .. container:: operations
@@ -734,8 +729,7 @@ class Spotify(_BaseActivity):
 
 
 class CustomActivity(BaseActivity):
-    """|data_class_constructible|
-
+    """
     Represents a Custom activity from Discord.
 
     .. container:: operations

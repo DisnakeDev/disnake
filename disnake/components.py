@@ -60,8 +60,7 @@ ComponentT = TypeVar("ComponentT", bound=NestedComponent)
 
 
 class Component:
-    """|discord_model|
-
+    """
     Represents a Discord Bot UI Kit Component.
 
     Currently, the only components supported by Discord are:
@@ -107,8 +106,7 @@ class Component:
 
 
 class ActionRow(Component, Generic[ComponentT]):
-    """|discord_model|
-
+    """
     Represents an action row.
 
     This is a component that holds up to 5 children components in a row.
@@ -143,8 +141,7 @@ class ActionRow(Component, Generic[ComponentT]):
 
 
 class Button(Component):
-    """|discord_model|
-
+    """
     Represents a button from the Discord Bot UI Kit.
 
     This inherits from :class:`Component`.
@@ -283,8 +280,7 @@ class BaseSelectMenu(Component):
 
 
 class SelectMenu(BaseSelectMenu):
-    """|discord_model|
-
+    """
     Represents a string select menu from the Discord Bot UI Kit.
 
     .. note::
@@ -434,8 +430,7 @@ class SelectOption:
 
 
 class TextInput(Component):
-    """|discord_model|
-
+    """
     Represents a text input from the Discord Bot UI Kit.
 
     .. versionadded:: 2.4

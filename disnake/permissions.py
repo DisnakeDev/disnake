@@ -58,8 +58,7 @@ def cached_creation(func):
 
 
 class Permissions(BaseFlags):
-    """|data_class|
-
+    """
     Wraps up the Discord permission value.
 
     The properties provided are two way. You can set and retrieve individual
@@ -955,8 +954,7 @@ def _augment_from_permissions(cls):
 
 @_augment_from_permissions
 class PermissionOverwrite:
-    """|data_class|
-
+    """
     A type that is used to represent a channel specific permission.
 
     Unlike a regular :class:`Permissions`\\, the default value of a

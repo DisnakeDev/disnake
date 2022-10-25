@@ -45,7 +45,6 @@ GuildScheduledEventEntityType
 
 .. class:: GuildScheduledEventEntityType
 
-    |discord_enum|
 
     Represents the type of a guild scheduled event entity.
 
@@ -68,7 +67,6 @@ GuildScheduledEventStatus
 
 .. class:: GuildScheduledEventStatus
 
-    |discord_enum|
 
     Represents the status of a guild scheduled event.
 
@@ -101,7 +99,6 @@ GuildScheduledEventPrivacyLevel
 
 .. class:: GuildScheduledEventPrivacyLevel
 
-    |discord_enum|
 
     Represents the privacy level of a guild scheduled event.
 

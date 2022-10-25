@@ -92,8 +92,7 @@ def _validate_name(name: str) -> None:
 
 
 class OptionChoice:
-    """|data_class|
-
+    """
     Represents an option choice.
 
     Parameters
@@ -161,8 +160,7 @@ class OptionChoice:
 
 
 class Option:
-    """|data_class|
-
+    """
     Represents a slash command option.
 
     Parameters
@@ -432,8 +430,7 @@ class Option:
 
 
 class ApplicationCommand(ABC):
-    """|discord_abc|
-
+    """
     The base class for application commands.
 
     The following classes implement this ABC:
@@ -574,8 +571,7 @@ class _APIApplicationCommandMixin:
 
 
 class UserCommand(ApplicationCommand):
-    """|data_class|
-
+    """
     A user context menu command.
 
     Attributes
@@ -611,8 +607,7 @@ class UserCommand(ApplicationCommand):
 
 
 class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
-    """|discord_model|
-
+    """
     A user context menu command returned by the API.
 
     .. versionadded:: 2.4
@@ -659,8 +654,7 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
 
 
 class MessageCommand(ApplicationCommand):
-    """|data_class|
-
+    """
     A message context menu command
 
     Attributes
@@ -696,8 +690,7 @@ class MessageCommand(ApplicationCommand):
 
 
 class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
-    """|discord_model|
-
+    """
     A message context menu command returned by the API.
 
     .. versionadded:: 2.4
@@ -744,8 +737,7 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
 
 
 class SlashCommand(ApplicationCommand):
-    """|data_class|
-
+    """
     The base class for building slash commands.
 
     Attributes
@@ -868,8 +860,7 @@ class SlashCommand(ApplicationCommand):
 
 
 class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
-    """|discord_model|
-
+    """
     A slash command returned by the API.
 
     .. versionadded:: 2.4
@@ -929,8 +920,7 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
 
 
 class ApplicationCommandPermissions:
-    """|data_class|
-
+    """
     Represents application command permissions for a role, user, or channel.
 
     Attributes
@@ -984,8 +974,7 @@ class ApplicationCommandPermissions:
 
 
 class GuildApplicationCommandPermissions:
-    """|data_class|
-
+    """
     Represents application command permissions in a guild.
 
     .. versionchanged:: 2.5

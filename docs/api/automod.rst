@@ -85,7 +85,6 @@ AutoModActionType
 
 .. class:: AutoModActionType
 
-    |discord_enum|
 
     Represents the type of action an auto moderation rule will take upon execution.
 
@@ -113,7 +112,6 @@ AutoModEventType
 
 .. class:: AutoModEventType
 
-    |discord_enum|
 
     Represents the type of event/context an auto moderation rule will be checked in.
 
@@ -128,7 +126,6 @@ AutoModTriggerType
 
 .. class:: AutoModTriggerType
 
-    |discord_enum|
 
     Represents the type of content that can trigger an auto moderation rule.
 

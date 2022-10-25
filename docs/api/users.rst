@@ -45,7 +45,6 @@ UserFlags
 
 .. class:: UserFlags
 
-    |discord_enum|
 
     Represents Discord User flags.
 
@@ -116,7 +115,6 @@ DefaultAvatar
 
 .. class:: DefaultAvatar
 
-    |discord_enum|
 
     Represents the default avatar of a Discord :class:`User`
 

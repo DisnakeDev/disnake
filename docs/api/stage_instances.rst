@@ -26,7 +26,6 @@ StagePrivacyLevel
 
 .. class:: StagePrivacyLevel
 
-    |discord_enum|
 
     Represents a stage instance's privacy level.
 

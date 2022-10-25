@@ -10,8 +10,7 @@ __all__ = ("File",)
 
 
 class File:
-    """|data_class|
-
+    """
     A parameter object used for sending file objects.
 
     .. note::

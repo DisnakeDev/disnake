@@ -12,8 +12,7 @@ __all__ = ("VoiceRegion",)
 
 
 class VoiceRegion:
-    """|discord_model|
-
+    """
     Represents a Discord voice region.
 
     .. versionadded:: 2.5

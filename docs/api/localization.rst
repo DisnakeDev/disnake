@@ -48,7 +48,6 @@ Locale
 
 .. class:: Locale
 
-    |discord_enum|
 
     Represents supported locales by Discord.
 

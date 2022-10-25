@@ -28,8 +28,7 @@ __all__ = (
 
 
 class InstallParams:
-    """|data_class|
-
+    """
     Represents the installation parameters for the application, provided by Discord.
 
     .. versionadded:: 2.5
@@ -68,8 +67,7 @@ class InstallParams:
 
 
 class AppInfo:
-    """|discord_model|
-
+    """
     Represents the application info for the bot provided by Discord.
 
     Attributes
@@ -265,8 +263,7 @@ class AppInfo:
 
 
 class PartialAppInfo:
-    """|discord_model|
-
+    """
     Represents a partial AppInfo given by :func:`~disnake.abc.GuildChannel.create_invite`.
 
     .. versionadded:: 2.0

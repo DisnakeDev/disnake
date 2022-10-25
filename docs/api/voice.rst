@@ -102,7 +102,6 @@ PartyType
 
 .. class:: PartyType
 
-    |discord_enum|
 
     Represents the type of a voice channel activity/application.
 

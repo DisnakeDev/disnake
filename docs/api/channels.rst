@@ -175,7 +175,6 @@ ChannelType
 
 .. class:: ChannelType
 
-    |discord_enum|
 
     Specifies the type of channel.
 
@@ -239,7 +238,6 @@ ThreadArchiveDuration
 
 .. class:: ThreadArchiveDuration
 
-    |discord_enum|
 
     Represents the automatic archive duration of a thread in minutes.
 
@@ -266,7 +264,6 @@ VideoQualityMode
 
 .. class:: VideoQualityMode
 
-    |discord_enum|
 
     Represents the camera video quality mode for voice channel participants.
 

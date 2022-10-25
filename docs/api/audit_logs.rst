@@ -719,7 +719,6 @@ AuditLogAction
 
 .. class:: AuditLogAction
 
-    |discord_enum|
 
     Represents the type of action being done for a :class:`AuditLogEntry`\,
     which is retrievable via :meth:`Guild.audit_logs`.
@@ -1666,7 +1665,6 @@ AuditLogActionCategory
 
 .. class:: AuditLogActionCategory
 
-    |discord_enum|
 
     Represents the category that the :class:`AuditLogAction` belongs to.
 

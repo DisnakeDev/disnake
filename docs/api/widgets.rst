@@ -53,7 +53,6 @@ WidgetStyle
 
 .. class:: WidgetStyle
 
-    |discord_enum|
 
     Represents the supported widget image styles.
 

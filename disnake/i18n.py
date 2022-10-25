@@ -63,8 +63,7 @@ StringT = TypeVar("StringT", str, Optional[str], covariant=True)
 
 
 class Localized(Generic[StringT]):
-    """|data_class_constructible|
-
+    """
     A container type used for localized parameters.
 
     Exactly one of ``key`` or ``data`` must be provided.
@@ -178,8 +177,7 @@ Localised = Localized
 
 
 class LocalizationValue:
-    """|data_class|
-
+    """
     Container type for (pending) localization data.
 
     .. versionadded:: 2.5
@@ -250,8 +248,7 @@ class LocalizationValue:
 
 
 class LocalizationProtocol(ABC):
-    """|discord_abc|
-
+    """
     Manages a key-value mapping of localizations.
 
     This is an abstract class, a concrete implementation is provided as :class:`LocalizationStore`.

@@ -60,8 +60,7 @@ __all__ = (
 
 
 class AutoModAction:
-    """|data_class|
-
+    """
     A base class for auto moderation actions.
 
     This class is not meant to be instantiated by the user.
@@ -112,8 +111,7 @@ class AutoModAction:
 
 
 class AutoModBlockMessageAction(AutoModAction):
-    """|data_class|
-
+    """
     Represents an auto moderation action that blocks content from being sent.
 
     .. versionadded:: 2.6
@@ -137,8 +135,7 @@ class AutoModBlockMessageAction(AutoModAction):
 
 
 class AutoModSendAlertAction(AutoModAction):
-    """|data_class|
-
+    """
     Represents an auto moderation action that sends an alert to a channel.
 
     .. versionadded:: 2.6
@@ -174,8 +171,7 @@ class AutoModSendAlertAction(AutoModAction):
 
 
 class AutoModTimeoutAction(AutoModAction):
-    """|data_class|
-
+    """
     Represents an auto moderation action that times out the user.
 
     .. versionadded:: 2.6
@@ -214,8 +210,7 @@ class AutoModTimeoutAction(AutoModAction):
 
 
 class AutoModTriggerMetadata:
-    """|data_class|
-
+    """
     Metadata for an auto moderation trigger.
 
     .. versionadded:: 2.6
@@ -341,8 +336,7 @@ class AutoModTriggerMetadata:
 
 
 class AutoModRule:
-    """|discord_model|
-
+    """
     Represents an auto moderation rule.
 
     .. versionadded:: 2.6
@@ -585,8 +579,7 @@ class AutoModRule:
 
 
 class AutoModActionExecution:
-    """|data_class|
-
+    """
     Represents the data for an :func:`on_automod_action_execution` event.
 
     .. versionadded:: 2.6

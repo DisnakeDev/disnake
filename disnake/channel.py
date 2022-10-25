@@ -98,8 +98,7 @@ async def _single_delete_strategy(messages: Iterable[Message]):
 
 
 class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
-    """|discord_model|
-
+    """
     Represents a Discord guild text channel.
 
     .. container:: operations
@@ -1060,8 +1059,7 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
 
 
 class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
-    """|discord_model|
-
+    """
     Represents a Discord guild voice channel.
 
     .. container:: operations
@@ -1650,8 +1648,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
 
 class StageChannel(VocalGuildChannel):
-    """|discord_model|
-
+    """
     Represents a Discord guild stage channel.
 
     .. versionadded:: 1.7
@@ -2046,8 +2043,7 @@ class StageChannel(VocalGuildChannel):
 
 
 class CategoryChannel(disnake.abc.GuildChannel, Hashable):
-    """|discord_model|
-
+    """
     Represents a Discord channel category.
 
     These are useful to group channels to logical compartments.
@@ -2432,8 +2428,7 @@ class ThreadWithMessage(NamedTuple):
 
 
 class ForumChannel(disnake.abc.GuildChannel, Hashable):
-    """|discord_model|
-
+    """
     Represents a Discord Forum channel.
 
     .. versionadded:: 2.5
@@ -3310,8 +3305,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
 
 class DMChannel(disnake.abc.Messageable, Hashable):
-    """|discord_model|
-
+    """
     Represents a Discord direct message channel.
 
     .. container:: operations
@@ -3475,8 +3469,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
 
 
 class GroupChannel(disnake.abc.Messageable, Hashable):
-    """|discord_model|
-
+    """
     Represents a Discord group channel.
 
     .. container:: operations
@@ -3627,8 +3620,7 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
 
 
 class PartialMessageable(disnake.abc.Messageable, Hashable):
-    """|discord_model|
-
+    """
     Represents a partial messageable to aid with working messageable channels when
     only a channel ID is present.
 

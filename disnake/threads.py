@@ -52,8 +52,7 @@ if TYPE_CHECKING:
 
 
 class Thread(Messageable, Hashable):
-    """|discord_model|
-
+    """
     Represents a Discord thread.
 
     .. container:: operations
@@ -1003,8 +1002,7 @@ class Thread(Messageable, Hashable):
 
 
 class ThreadMember(Hashable):
-    """|discord_model|
-
+    """
     Represents a Discord thread member.
 
     .. container:: operations

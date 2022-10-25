@@ -68,7 +68,6 @@ WebhookType
 
 .. class:: WebhookType
 
-    |discord_enum|
 
     Represents the type of webhook that can be received.
 

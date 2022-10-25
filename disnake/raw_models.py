@@ -55,8 +55,7 @@ class _RawReprMixin:
 
 
 class RawMessageDeleteEvent(_RawReprMixin):
-    """|data_class|
-
+    """
     Represents the event payload for an :func:`on_raw_message_delete` event.
 
     Attributes
@@ -84,8 +83,7 @@ class RawMessageDeleteEvent(_RawReprMixin):
 
 
 class RawBulkMessageDeleteEvent(_RawReprMixin):
-    """|data_class|
-
+    """
     Represents the event payload for an :func:`on_raw_bulk_message_delete` event.
 
     Attributes
@@ -113,8 +111,7 @@ class RawBulkMessageDeleteEvent(_RawReprMixin):
 
 
 class RawMessageUpdateEvent(_RawReprMixin):
-    """|data_class|
-
+    """
     Represents the event payload for an :func:`on_raw_message_edit` event.
 
     Attributes
@@ -155,8 +152,7 @@ ReactionEventType = Literal["REACTION_ADD", "REACTION_REMOVE"]
 
 
 class RawReactionActionEvent(_RawReprMixin):
-    """|data_class|
-
+    """
     Represents the event payload for :func:`on_raw_reaction_add` and
     :func:`on_raw_reaction_remove` events.
 
@@ -206,8 +202,7 @@ class RawReactionActionEvent(_RawReprMixin):
 
 
 class RawReactionClearEvent(_RawReprMixin):
-    """|data_class|
-
+    """
     Represents the event payload for an :func:`on_raw_reaction_clear` event.
 
     Attributes
@@ -232,8 +227,7 @@ class RawReactionClearEvent(_RawReprMixin):
 
 
 class RawReactionClearEmojiEvent(_RawReprMixin):
-    """|data_class|
-
+    """
     Represents the event payload for an :func:`on_raw_reaction_clear_emoji` event.
 
     .. versionadded:: 1.3
@@ -263,8 +257,7 @@ class RawReactionClearEmojiEvent(_RawReprMixin):
 
 
 class RawIntegrationDeleteEvent(_RawReprMixin):
-    """|data_class|
-
+    """
     Represents the event payload for an :func:`on_raw_integration_delete` event.
 
     .. versionadded:: 2.0
@@ -291,8 +284,7 @@ class RawIntegrationDeleteEvent(_RawReprMixin):
 
 
 class RawGuildScheduledEventUserActionEvent(_RawReprMixin):
-    """|data_class|
-
+    """
     Represents the event payload for an :func:`on_raw_guild_scheduled_event_subscribe`
     and :func:`on_raw_guild_scheduled_event_unsubscribe` events.
 
@@ -319,8 +311,7 @@ class RawGuildScheduledEventUserActionEvent(_RawReprMixin):
 
 
 class RawThreadDeleteEvent(_RawReprMixin):
-    """|data_class|
-
+    """
     Represents the payload for a :func:`on_raw_thread_delete` event.
 
     .. versionadded:: 2.5
@@ -356,8 +347,7 @@ class RawThreadDeleteEvent(_RawReprMixin):
 
 
 class RawThreadMemberRemoveEvent(_RawReprMixin):
-    """|data_class|
-
+    """
     Represents the event payload for an :func:`on_raw_thread_member_remove` event.
 
     .. versionadded:: 2.5
@@ -385,8 +375,7 @@ class RawThreadMemberRemoveEvent(_RawReprMixin):
 
 
 class RawTypingEvent(_RawReprMixin):
-    """|data_class|
-
+    """
     Represents the event payload for an :func:`on_raw_typing` event.
 
     .. versionadded:: 2.3

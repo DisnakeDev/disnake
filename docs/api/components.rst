@@ -87,7 +87,6 @@ ComponentType
 
 .. class:: ComponentType
 
-    |discord_enum|
 
     Represents the component type of a component.
 
@@ -111,7 +110,6 @@ ButtonStyle
 
 .. class:: ButtonStyle
 
-    |discord_enum|
 
     Represents the style of the button component.
 
@@ -157,7 +155,6 @@ TextInputStyle
 
 .. class:: TextInputStyle
 
-    |discord_enum|
 
     Represents a style of the text input component.
 

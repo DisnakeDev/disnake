@@ -116,7 +116,6 @@ OptionType
 
 .. class:: OptionType
 
-    |discord_enum|
 
     Represents the type of an option.
 
@@ -163,7 +162,6 @@ ApplicationCommandType
 
 .. class:: ApplicationCommandType
 
-    |discord_enum|
 
     Represents the type of an application command.
 
@@ -184,7 +182,6 @@ ApplicationCommandPermissionType
 
 .. class:: ApplicationCommandPermissionType
 
-    |discord_enum|
 
     Represents the type of a permission of an application command.
 
