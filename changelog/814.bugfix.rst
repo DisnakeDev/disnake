@@ -1,0 +1,1 @@
+Try to get threads used in interactions (like threads in command arguments) from the cache first, before creating a new instance.

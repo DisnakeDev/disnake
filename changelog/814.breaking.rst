@@ -1,0 +1,1 @@
+Rename :meth:`InteractionDataResolved.get` to :meth:`~InteractionDataResolved.get_by_id`.
