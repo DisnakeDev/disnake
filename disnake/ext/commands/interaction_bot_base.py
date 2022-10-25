@@ -1295,7 +1295,7 @@ class InteractionBotBase(CommonBotBase):
                         # in theory this will never error: if a command exists the bot has authorisation
                         # in practice this is not the case, the API could change valid requests at any time
                         message = (
-                            "This comand could not be processed. Additionally, an error occured when trying to sync commands. "
+                            "This command could not be processed. Additionally, an error occured when trying to sync commands. "
                             "More information about this: "
                             "https://docs.disnake.dev/page/ext/commands/additional_info.html"
                             "#unknown-commands."
