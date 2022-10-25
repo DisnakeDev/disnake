@@ -1359,6 +1359,12 @@ def humanize_list(values: List[str], combine: str) -> str:
         return f" {combine} ".join(values)
 
 
+def get_event_loop():
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", DeprecationWarning)
+        return asyncio.get_event_loop()
+
+
 # Similar to typing.assert_never, but returns instead of raising (i.e. has no runtime effect).
 # This is only to avoid "unreachable code", which pyright doesn't type-check.
 def assert_never(arg: Never, /) -> None:

@@ -378,7 +378,7 @@ class Client:
     ):
         # self.ws is set in the connect method
         self.ws: DiscordWebSocket = None  # type: ignore
-        self.loop: asyncio.AbstractEventLoop = asyncio.get_event_loop() if loop is None else loop
+        self.loop: asyncio.AbstractEventLoop = utils.get_event_loop() if loop is None else loop
         self.loop.set_debug(asyncio_debug)
         self._listeners: Dict[str, List[Tuple[asyncio.Future, Callable[..., bool]]]] = {}
         self.session_start_limit: Optional[SessionStartLimit] = None

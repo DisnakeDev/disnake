@@ -9,7 +9,7 @@ import traceback
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 
 from ..enums import TextInputStyle
-from ..utils import MISSING
+from ..utils import MISSING, get_event_loop
 from .action_row import ActionRow, components_to_rows
 from .text_input import TextInput
 
@@ -229,7 +229,7 @@ class ModalStore:
         self._modals: Dict[Tuple[int, str], Modal] = {}
 
     def add_modal(self, user_id: int, modal: Modal) -> None:
-        loop = asyncio.get_event_loop()
+        loop = get_event_loop()
         self._modals[(user_id, modal.custom_id)] = modal
         loop.create_task(self.handle_timeout(user_id, modal.custom_id, modal.timeout))
 

@@ -77,7 +77,7 @@ class CommonBotBase(Generic[CogT]):
 
         self.reload: bool = reload
 
-        loop = asyncio.get_event_loop()
+        loop = disnake.utils.get_event_loop()
         loop.create_task(self._fill_owners())
 
         if self.reload:

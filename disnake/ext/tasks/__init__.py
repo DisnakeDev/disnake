@@ -29,7 +29,7 @@ import aiohttp
 
 import disnake
 from disnake.backoff import ExponentialBackoff
-from disnake.utils import MISSING, utcnow
+from disnake.utils import MISSING, get_event_loop, utcnow
 
 if TYPE_CHECKING:
     from typing_extensions import Concatenate, ParamSpec, Self
@@ -327,7 +327,7 @@ class Loop(Generic[LF]):
             args = (self._injected, *args)
 
         if self.loop is MISSING:
-            self.loop = asyncio.get_event_loop()
+            self.loop = get_event_loop()
 
         self._task = self.loop.create_task(self._loop(*args, **kwargs))
         return self._task
