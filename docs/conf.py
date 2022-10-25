@@ -69,12 +69,6 @@ extlinks = {
 
 extlinks_detect_hardcoded_links = True
 
-# Links used for cross-referencing stuff in other documentation
-intersphinx_mapping = {
-    "py": ("https://docs.python.org/3", None),
-    "aio": ("https://docs.aiohttp.org/en/stable/", None),
-    "req": ("https://requests.readthedocs.io/en/latest/", None),
-}
 
 rst_prolog = """
 .. |coro| replace:: This function is a |coroutine_link|_.
@@ -240,6 +234,14 @@ hoverxref_intersphinx = [
     "aio",
     "req",
 ]
+
+# Links used for cross-referencing stuff in other documentation
+# when this is updated hoverxref_intersphinx also needs to be updated IF THE docs are hosted on readthedocs.
+intersphinx_mapping = {
+    "py": ("https://docs.python.org/3", None),
+    "aio": ("https://docs.aiohttp.org/en/stable/", None),
+    "req": ("https://requests.readthedocs.io/en/latest/", None),
+}
 
 
 # use proxied API endpoint on rtd to avoid CORS issues
