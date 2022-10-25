@@ -576,7 +576,10 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             try:
                 argument = view.get_quoted_word()
             except ArgumentParsingError as exc:
-                if self._is_typing_optional(param.annotation):
+                if (
+                    self._is_typing_optional(param.annotation)
+                    and not param.kind == param.VAR_POSITIONAL
+                ):
                     view.index = previous
                     return None
                 else:
