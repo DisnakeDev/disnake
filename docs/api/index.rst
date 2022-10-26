@@ -78,8 +78,8 @@ the user of the library.
 Enumerations
 ------------
 
-The API provides some enumerations for certain types of strings to avoid the API
-from being stringly typed in case the strings change in the future.
+The API provides some enumerations for certain types of values to avoid the API
+from being typed as literals in case the values change in the future.
 
 All enumerations are subclasses of an internal class which mimics the behaviour
 of :class:`enum.Enum`.
