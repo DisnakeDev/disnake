@@ -808,7 +808,7 @@ class Cog(metaclass=CogMeta):
             bot.add_listener(getattr(self, method_name), name)
 
         try:
-            if bot._command_sync_flags.sync_on_cog_unload:
+            if bot._command_sync_flags.sync_on_cog_actions:
                 bot._schedule_delayed_command_sync()
         except NotImplementedError:
             pass
@@ -874,7 +874,7 @@ class Cog(metaclass=CogMeta):
 
         finally:
             try:
-                if bot._command_sync_flags.sync_on_cog_unload:
+                if bot._command_sync_flags.sync_on_cog_actions:
                     bot._schedule_delayed_command_sync()
             except NotImplementedError:
                 pass

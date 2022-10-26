@@ -194,7 +194,7 @@ class InteractionBotBase(CommonBotBase):
                     "Use `command_sync_flags` with an `CommandSyncFlags` instance as a replacement.",
                     stacklevel=3,
                 )
-                command_sync_flags.sync_on_cog_unload = sync_commands_on_cog_unload
+                command_sync_flags.sync_on_cog_actions = sync_commands_on_cog_unload
 
         self._command_sync_flags = command_sync_flags
         self._sync_queued: bool = False
