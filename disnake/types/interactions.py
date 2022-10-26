@@ -12,6 +12,7 @@ from .embed import Embed
 from .member import Member, MemberWithUser
 from .role import Role
 from .snowflake import Snowflake
+from .threads import ThreadMetadata
 from .user import User
 
 if TYPE_CHECKING:
@@ -88,6 +89,27 @@ class GuildApplicationCommandPermissions(TypedDict):
 InteractionType = Literal[1, 2, 3, 4, 5]
 
 
+class ResolvedPartialChannel(TypedDict):
+    id: Snowflake
+    type: ChannelType
+    permissions: str
+    name: str
+
+    # only in threads
+    thread_metadata: NotRequired[ThreadMetadata]
+    parent_id: NotRequired[Snowflake]
+
+
+class InteractionDataResolved(TypedDict, total=False):
+    users: Dict[Snowflake, User]
+    members: Dict[Snowflake, Member]
+    roles: Dict[Snowflake, Role]
+    channels: Dict[Snowflake, ResolvedPartialChannel]
+    # only in application commands
+    messages: Dict[Snowflake, Message]
+    attachments: Dict[Snowflake, Attachment]
+
+
 class _ApplicationCommandInteractionDataOption(TypedDict):
     name: str
 
@@ -132,27 +154,11 @@ ApplicationCommandInteractionDataOption = Union[
 ]
 
 
-class ApplicationCommandResolvedPartialChannel(TypedDict):
-    id: Snowflake
-    type: ChannelType
-    permissions: str
-    name: str
-
-
-class ApplicationCommandInteractionDataResolved(TypedDict, total=False):
-    users: Dict[Snowflake, User]
-    members: Dict[Snowflake, Member]
-    roles: Dict[Snowflake, Role]
-    channels: Dict[Snowflake, ApplicationCommandResolvedPartialChannel]
-    messages: Dict[Snowflake, Message]
-    attachments: Dict[Snowflake, Attachment]
-
-
 class ApplicationCommandInteractionData(TypedDict):
     id: Snowflake
     name: str
     type: ApplicationCommandType
-    resolved: NotRequired[ApplicationCommandInteractionDataResolved]
+    resolved: NotRequired[InteractionDataResolved]
     options: NotRequired[List[ApplicationCommandInteractionDataOption]]
     # this is the guild the command is registered to, not the guild the command was invoked in (see interaction.guild_id)
     guild_id: NotRequired[Snowflake]

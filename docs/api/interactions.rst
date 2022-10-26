@@ -142,6 +142,14 @@ InteractionReference
 Data Classes
 ------------
 
+InteractionDataResolved
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: InteractionDataResolved
+
+.. autoclass:: InteractionDataResolved()
+    :members:
+
 ApplicationCommandInteractionData
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -156,14 +164,6 @@ ApplicationCommandInteractionDataOption
 .. attributetable:: ApplicationCommandInteractionDataOption
 
 .. autoclass:: ApplicationCommandInteractionDataOption()
-    :members:
-
-ApplicationCommandInteractionDataResolved
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. attributetable:: ApplicationCommandInteractionDataResolved
-
-.. autoclass:: ApplicationCommandInteractionDataResolved()
     :members:
 
 MessageInteractionData

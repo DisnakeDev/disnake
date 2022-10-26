@@ -2101,18 +2101,18 @@ class AutoModKeywordPresets(ListBaseFlags):
         """:class:`bool`: Returns ``True`` if the profanity preset is enabled
         (contains words that may be considered swearing or cursing).
         """
-        return 1 << 0
+        return 1 << 1
 
     @flag_value
     def sexual_content(self):
         """:class:`bool`: Returns ``True`` if the sexual content preset is enabled
         (contains sexually explicit words).
         """
-        return 1 << 1
+        return 1 << 2
 
     @flag_value
     def slurs(self):
         """:class:`bool`: Returns ``True`` if the slurs preset is enabled
         (contains insults or words that may be considered hate speech).
         """
-        return 1 << 2
+        return 1 << 3

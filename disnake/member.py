@@ -722,7 +722,7 @@ class Member(disnake.abc.Messageable, _UserTag):
     async def ban(
         self,
         *,
-        clean_history_duration: Union[int, datetime.timedelta] = 86400,
+        clean_history_duration: Union[int, datetime.timedelta] = MISSING,
         delete_message_days: Literal[0, 1, 2, 3, 4, 5, 6, 7] = MISSING,
         reason: Optional[str] = None,
     ) -> None:
