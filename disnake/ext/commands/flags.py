@@ -165,7 +165,11 @@ class CommandSyncFlags(BaseFlags):
 
     @flag_value
     def allow_command_deletion(self):
-        """:class:`bool`: Whether to allow commands to be deleted by automatic command sync."""
+        """:class:`bool`: Whether to allow commands to be deleted by automatic command sync.
+
+        Current implementation of commands sync of renamed commands means that a rename of a command *will* result
+        in the old one being deleted and a new command being created.
+        """
         return 1 << 2
 
     @flag_value
