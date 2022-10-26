@@ -1290,7 +1290,10 @@ class InteractionBotBase(CommonBotBase):
                 # This usually comes from the blind spots of the sync algorithm.
                 # Since not all guild commands are cached, it is possible to experience such issues.
                 # In this case, the blind spot is the interaction guild, let's fix it:
-                if self._command_sync_flags.allow_command_deletion:
+                if (
+                    self._command_sync_flags.sync_guild_commands
+                    and self._command_sync_flags.allow_command_deletion
+                ):
                     try:
                         await self.bulk_overwrite_guild_commands(interaction.guild_id, [])  # type: ignore
                     except disnake.HTTPException:
