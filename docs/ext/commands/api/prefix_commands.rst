@@ -7,7 +7,7 @@
 Prefix Commands
 ===============
 
-This section documents everything related to prefix commands (aka regular commands).
+This section documents everything related to prefix commands.
 
 Classes
 -------
