@@ -2,9 +2,9 @@
 
 :orphan:
 
-Legacy Page
-===========
+Redirecting ...
+===============
 
-Hi there! You're on a legacy page, which was deprecated in the previous disnake versions.
-You should be redirected to the new location soon, but if you aren't, please check that you
-have JavaScript enabled, or click :ref:`here <disnake_api_index>` to visit main page.
+Redirecting to the API Reference.
+
+If you aren't redirected automatically, click :doc:`here <api/index>`.
