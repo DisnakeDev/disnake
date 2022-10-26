@@ -1280,54 +1280,57 @@ class InteractionBotBase(CommonBotBase):
             The interaction to process commands for.
         """
         if self._command_sync_flags._sync_enabled and not self._sync_queued:
-            known_command = self.get_global_command(interaction.data.id)  # type: ignore
-
-            if known_command is None:
+            if guild_id := interaction.data.get(
+                "guild_id", None
+            ):  # this means that a guild command was invoked
                 known_command = self.get_guild_command(interaction.guild_id, interaction.data.id)  # type: ignore
+            else:
+                known_command = self.get_global_command(interaction.data.id)  # type: ignore
 
-            if known_command is None:
+            # this command is only a guild command if guild_id is truthy
+            if known_command is None and guild_id:
                 # don't do anything if we aren't allowed to disable them
                 # This usually comes from the blind spots of the sync algorithm.
                 # Since not all guild commands are cached, it is possible to experience such issues.
                 # In this case, the blind spot is the interaction guild, let's fix it:
-                if (
-                    self._command_sync_flags.sync_guild_commands
-                    and self._command_sync_flags.allow_command_deletion
-                ):
-                    try:
-                        await self.bulk_overwrite_guild_commands(interaction.guild_id, [])  # type: ignore
-                    except disnake.HTTPException:
-                        # for some reason we were unable to sync the command
-                        # either malformed API request, or some other error
-                        # in theory this will never error: if a command exists the bot has authorisation
-                        # in practice this is not the case, the API could change valid requests at any time
-                        message = (
-                            "This command could not be processed. Additionally, an error occured when trying to sync commands. "
-                            "More information about this: "
-                            "https://docs.disnake.dev/page/ext/commands/additional_info.html"
-                            "#unknown-commands."
-                        )
+                if self._command_sync_flags.sync_guild_commands:
+                    if self._command_sync_flags.allow_command_deletion:
+                        try:
+                            await self.bulk_overwrite_guild_commands(interaction.guild_id, [])  # type: ignore
+                        except disnake.HTTPException:
+                            # for some reason we were unable to sync the command
+                            # either malformed API request, or some other error
+                            # in theory this will never error: if a command exists the bot has authorisation
+                            # in practice this is not the case, the API could change valid requests at any time
+                            message = (
+                                "This command could not be processed. Additionally, an error occured when trying to sync commands. "
+                                "More information about this: "
+                                "https://docs.disnake.dev/page/ext/commands/additional_info.html"
+                                "#unknown-commands."
+                            )
+                        else:
+                            message = (
+                                "This command has just been synced. More information about this: "
+                                "https://docs.disnake.dev/page/ext/commands/additional_info.html"
+                                "#unknown-commands."
+                            )
                     else:
+                        # this block is responsible for responding to guild commands that we don't delete
+                        # this could be changed to not respond but that behavior is undecided
                         message = (
-                            "This command has just been synced. More information about this: "
+                            "This command could not be processed. More information about this: "
                             "https://docs.disnake.dev/page/ext/commands/additional_info.html"
                             "#unknown-commands."
                         )
-                else:
-                    message = (
-                        "This command is not defined. More information about this: "
-                        "https://docs.disnake.dev/page/ext/commands/additional_info.html"
-                        "#unknown-commands."
-                    )
-                try:
-                    # This part is in a separate try-except because we still should respond to the interaction
-                    await interaction.response.send_message(
-                        message,
-                        ephemeral=True,
-                    )
-                except disnake.HTTPException:
-                    pass
-                return
+                    try:
+                        # This part is in a separate try-except because we still should respond to the interaction
+                        await interaction.response.send_message(
+                            message,
+                            ephemeral=True,
+                        )
+                    except disnake.HTTPException:
+                        pass
+                    return
 
         command_type = interaction.data.type
         command_name = interaction.data.name
