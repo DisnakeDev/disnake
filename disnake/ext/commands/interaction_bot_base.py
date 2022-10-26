@@ -79,6 +79,10 @@ class _Diff(TypedDict):
     delete_ignored: NotRequired[List[ApplicationCommand]]
 
 
+def _get_to_send_from_diff(diff: _Diff):
+    return diff["no_changes"] + diff["upsert"] + diff["edit"] + diff.get("delete_ignored", [])
+
+
 def _app_commands_diff(
     new_commands: Iterable[ApplicationCommand],
     old_commands: Iterable[ApplicationCommand],
@@ -788,8 +792,8 @@ class InteractionBotBase(CommonBotBase):
 
             if update_required:
                 # Notice that we don't do any API requests if there're no changes.
+                to_send = _get_to_send_from_diff(diff)
                 try:
-                    to_send = diff["no_changes"] + diff["edit"] + diff["upsert"]
                     await self.bulk_overwrite_global_commands(to_send)
                 except Exception as e:
                     warnings.warn(f"Failed to overwrite global commands due to {e}", SyncWarning)
@@ -818,8 +822,8 @@ class InteractionBotBase(CommonBotBase):
 
                 # Do API requests and cache
                 if update_required:
+                    to_send = _get_to_send_from_diff(diff)
                     try:
-                        to_send = diff["no_changes"] + diff["edit"] + diff["upsert"]
                         await self.bulk_overwrite_guild_commands(guild_id, to_send)
                     except Exception as e:
                         warnings.warn(
