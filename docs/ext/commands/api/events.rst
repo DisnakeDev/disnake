@@ -50,7 +50,7 @@ Prefix Commands
 
 .. _related_events_ext_commands_appcmds:
 
-Application commands
+Application Commands
 --------------------
 
 .. function:: on_slash_command_error(inter, error)
