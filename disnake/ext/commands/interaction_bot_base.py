@@ -1328,7 +1328,7 @@ class InteractionBotBase(CommonBotBase):
                             message,
                             ephemeral=True,
                         )
-                    except disnake.HTTPException:
+                    except (disnake.HTTPException, disnake.InteractionTimedOut):
                         pass
                     return
 
