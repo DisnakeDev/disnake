@@ -1304,7 +1304,7 @@ class InteractionBotBase(CommonBotBase):
                     # in practice this is not the case, the API could change valid requests at any time
                     message = "This command could not be processed. Additionally, an error occured when trying to sync commands."
                 else:
-                    message = "This command has just been synced"
+                    message = "This command has just been synced."
             else:
                 # this block is responsible for responding to guild commands that we don't delete
                 # this could be changed to not respond but that behavior is undecided
