@@ -6,8 +6,7 @@ Integrations
 ============
 
 This section documents everything related to Integrations - special entities integrated into :class:`Guilds <Guild>`.
-Most common examples are Twitch/YouTube integrations and application commands bots (applications invited with ``applications.commands``
-:attr:`scope <InstallParams.scopes>`).
+Most common examples are bots and Twitch/YouTube integrations.
 
 Discord Models
 ---------------
