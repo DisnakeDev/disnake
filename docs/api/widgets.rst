@@ -53,8 +53,7 @@ WidgetStyle
 
 .. class:: WidgetStyle
 
-
-    Represents the supported widget image styles.
+        Represents the supported widget image styles.
 
     .. versionadded:: 2.5
 

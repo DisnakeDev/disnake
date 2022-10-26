@@ -32,8 +32,7 @@ __all__ = (
 
 
 class WidgetChannel:
-    """
-    Represents a "partial" widget channel.
+    """Represents a "partial" widget channel.
 
     .. container:: operations
 
@@ -88,8 +87,7 @@ class WidgetChannel:
 
 
 class WidgetMember(BaseUser):
-    """
-    Represents a "partial" member of the widget's guild.
+    """Represents a "partial" member of the widget's guild.
 
     .. container:: operations
 
@@ -184,8 +182,7 @@ class WidgetMember(BaseUser):
 
 
 class WidgetSettings:
-    """
-    Represents a :class:`Guild`'s widget settings.
+    """Represents a :class:`Guild`'s widget settings.
 
     .. versionadded:: 2.5
 
@@ -260,8 +257,7 @@ class WidgetSettings:
 
 
 class Widget:
-    """
-    Represents a :class:`Guild` widget.
+    """Represents a :class:`Guild` widget.
 
     .. container:: operations
 

@@ -68,8 +68,7 @@ WebhookType
 
 .. class:: WebhookType
 
-
-    Represents the type of webhook that can be received.
+        Represents the type of webhook that can be received.
 
     .. versionadded:: 1.3
 

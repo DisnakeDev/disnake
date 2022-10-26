@@ -719,8 +719,7 @@ AuditLogAction
 
 .. class:: AuditLogAction
 
-
-    Represents the type of action being done for a :class:`AuditLogEntry`\,
+        Represents the type of action being done for a :class:`AuditLogEntry`\,
     which is retrievable via :meth:`Guild.audit_logs`.
 
     .. attribute:: guild_update
@@ -1665,8 +1664,7 @@ AuditLogActionCategory
 
 .. class:: AuditLogActionCategory
 
-
-    Represents the category that the :class:`AuditLogAction` belongs to.
+        Represents the category that the :class:`AuditLogAction` belongs to.
 
     This can be retrieved via :attr:`AuditLogEntry.category`.
 

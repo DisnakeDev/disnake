@@ -102,8 +102,7 @@ PartyType
 
 .. class:: PartyType
 
-
-    Represents the type of a voice channel activity/application.
+        Represents the type of a voice channel activity/application.
 
     .. attribute:: poker
 

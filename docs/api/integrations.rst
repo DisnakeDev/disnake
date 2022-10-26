@@ -55,8 +55,7 @@ ExpireBehaviour
 
 .. class:: ExpireBehaviour
 
-
-    Represents the behaviour the :class:`Integration` should perform
+        Represents the behaviour the :class:`Integration` should perform
     when a user's subscription has finished.
 
     There is an alias for this called ``ExpireBehavior``.

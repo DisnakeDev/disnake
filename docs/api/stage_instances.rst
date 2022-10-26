@@ -26,8 +26,7 @@ StagePrivacyLevel
 
 .. class:: StagePrivacyLevel
 
-
-    Represents a stage instance's privacy level.
+        Represents a stage instance's privacy level.
 
     .. versionadded:: 2.0
 

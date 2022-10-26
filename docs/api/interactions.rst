@@ -190,8 +190,7 @@ InteractionType
 
 .. class:: InteractionType
 
-
-    Specifies the type of :class:`Interaction`.
+        Specifies the type of :class:`Interaction`.
 
     .. versionadded:: 2.0
 
@@ -216,8 +215,7 @@ InteractionResponseType
 
 .. class:: InteractionResponseType
 
-
-    Specifies the response type for the interaction.
+        Specifies the response type for the interaction.
 
     .. versionadded:: 2.0
 

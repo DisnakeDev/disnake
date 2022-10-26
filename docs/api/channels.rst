@@ -175,8 +175,7 @@ ChannelType
 
 .. class:: ChannelType
 
-
-    Specifies the type of channel.
+        Specifies the type of channel.
 
     .. attribute:: text
 
@@ -238,8 +237,7 @@ ThreadArchiveDuration
 
 .. class:: ThreadArchiveDuration
 
-
-    Represents the automatic archive duration of a thread in minutes.
+        Represents the automatic archive duration of a thread in minutes.
 
     .. versionadded:: 2.3
 
@@ -264,8 +262,7 @@ VideoQualityMode
 
 .. class:: VideoQualityMode
 
-
-    Represents the camera video quality mode for voice channel participants.
+        Represents the camera video quality mode for voice channel participants.
 
     .. versionadded:: 2.0
 

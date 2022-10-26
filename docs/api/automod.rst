@@ -85,8 +85,7 @@ AutoModActionType
 
 .. class:: AutoModActionType
 
-
-    Represents the type of action an auto moderation rule will take upon execution.
+        Represents the type of action an auto moderation rule will take upon execution.
 
     .. versionadded:: 2.6
 
@@ -112,8 +111,7 @@ AutoModEventType
 
 .. class:: AutoModEventType
 
-
-    Represents the type of event/context an auto moderation rule will be checked in.
+        Represents the type of event/context an auto moderation rule will be checked in.
 
     .. versionadded:: 2.6
 
@@ -126,8 +124,7 @@ AutoModTriggerType
 
 .. class:: AutoModTriggerType
 
-
-    Represents the type of content that can trigger an auto moderation rule.
+        Represents the type of content that can trigger an auto moderation rule.
 
     .. versionadded:: 2.6
 

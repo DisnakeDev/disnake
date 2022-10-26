@@ -62,8 +62,7 @@ StickerType
 
 .. class:: StickerType
 
-
-    Represents the type of sticker.
+        Represents the type of sticker.
 
     .. versionadded:: 2.0
 
@@ -80,8 +79,7 @@ StickerFormatType
 
 .. class:: StickerFormatType
 
-
-    Represents the type of sticker images.
+        Represents the type of sticker images.
 
     .. versionadded:: 1.6
 

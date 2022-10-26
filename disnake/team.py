@@ -20,8 +20,7 @@ __all__ = (
 
 
 class Team:
-    """
-    Represents an application team for a bot provided by Discord.
+    """Represents an application team for a bot provided by Discord.
 
     Attributes
     ----------
@@ -67,8 +66,7 @@ class Team:
 
 
 class TeamMember(BaseUser):
-    """
-    Represents a team member in a team.
+    """Represents a team member in a team.
 
     .. container:: operations
 

@@ -42,8 +42,7 @@ InviteTarget
 
 .. class:: InviteTarget
 
-
-    Represents the invite type for voice channel invites.
+        Represents the invite type for voice channel invites.
 
     .. versionadded:: 2.0
 

@@ -87,8 +87,7 @@ ComponentType
 
 .. class:: ComponentType
 
-
-    Represents the component type of a component.
+        Represents the component type of a component.
 
     .. versionadded:: 2.0
 
@@ -110,8 +109,7 @@ ButtonStyle
 
 .. class:: ButtonStyle
 
-
-    Represents the style of the button component.
+        Represents the style of the button component.
 
     .. versionadded:: 2.0
 
@@ -155,8 +153,7 @@ TextInputStyle
 
 .. class:: TextInputStyle
 
-
-    Represents a style of the text input component.
+        Represents a style of the text input component.
 
     .. versionadded:: 2.4
 

@@ -111,8 +111,7 @@ class _GuildLimit(NamedTuple):
 
 
 class Guild(Hashable):
-    """
-    Represents a Discord guild.
+    """Represents a Discord guild.
 
     This is referred to as a "server" in the official Discord UI.
 

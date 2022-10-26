@@ -45,8 +45,7 @@ GuildScheduledEventEntityType
 
 .. class:: GuildScheduledEventEntityType
 
-
-    Represents the type of a guild scheduled event entity.
+        Represents the type of a guild scheduled event entity.
 
     .. versionadded:: 2.3
 
@@ -67,8 +66,7 @@ GuildScheduledEventStatus
 
 .. class:: GuildScheduledEventStatus
 
-
-    Represents the status of a guild scheduled event.
+        Represents the status of a guild scheduled event.
 
     .. versionadded:: 2.3
 
@@ -99,8 +97,7 @@ GuildScheduledEventPrivacyLevel
 
 .. class:: GuildScheduledEventPrivacyLevel
 
-
-    Represents the privacy level of a guild scheduled event.
+        Represents the privacy level of a guild scheduled event.
 
     .. versionadded:: 2.3
 
