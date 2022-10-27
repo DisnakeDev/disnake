@@ -5,7 +5,7 @@
 Messages
 ========
 
-This section documents everything related to discord messages.
+This section documents everything related to Discord messages.
 
 Discord Models
 ---------------

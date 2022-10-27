@@ -7,7 +7,7 @@
 Help Commands
 =============
 
-This section documents help commands - special classes that aid in creating dynamically generated help messages.
+This section documents help commands, which aid in creating dynamically generated help messages.
 
 Classes
 -------

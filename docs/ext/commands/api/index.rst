@@ -7,7 +7,7 @@
 API Reference
 =============
 
-The following documents outlines the API of disnake's command extension module.
+The following documents list outlines the API of disnake's command extension module.
 
 .. toctree::
     :maxdepth: 1

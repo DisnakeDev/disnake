@@ -3,9 +3,9 @@
 .. currentmodule:: disnake
 
 Voice
-======
+=====
 
-This section documents everything related to interaction with Discord voice.
+This section documents everything related to voice connections.
 
 Classes
 -------

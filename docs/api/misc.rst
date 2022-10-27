@@ -5,7 +5,7 @@
 Miscellaneous
 =============
 
-This section documents everything that can't fit into any other section but is not big enough to make a separate section for it.
+This section documents everything that doesn't fit into any other section, but isn't big enough to have its own section.
 
 Classes
 -------

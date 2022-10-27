@@ -5,8 +5,8 @@
 Interactions
 ============
 
-This sections documents everything related to interactions - special type of webhooks used for communication between user and client.
-Currently the only things Discord sends interactions for are message components and application commands.
+This section documents everything related to interactions, which are used for communication between user and client.
+Common examples are message components and application commands.
 
 Discord Models
 ---------------

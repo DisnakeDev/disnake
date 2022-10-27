@@ -7,7 +7,7 @@
 Converters
 ==========
 
-This section documents converts - special classes inherited from :class:`Converter` that aid in converting various types to :ref:`discord_model`.
+This section documents converts - special classes that aid in converting various types to :ref:`discord_model`.
 
 Classes
 -------

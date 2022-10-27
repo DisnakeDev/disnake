@@ -5,7 +5,7 @@
 Miscellaneous
 =============
 
-This section documents other things related to commands extension but not fitting into any other category.
+This section documents everything in the commands extension that doesn't fit into any other section, but isn't big enough to have its own section.
 
 Classes
 -------

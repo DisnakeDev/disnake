@@ -7,7 +7,7 @@
 Bot UI Kit
 ==========
 
-This section documents everything related to Discord Bot UI Kit - a group of helper functions and classes that aid in making :ref:`component-based <disnake_components>` UIs.
+This section documents everything related to the Discord Bot UI Kit - a group of helper functions and classes that aid in making :ref:`component-based <disnake_components>` UIs.
 
 Classes
 -------

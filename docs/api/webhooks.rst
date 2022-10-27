@@ -5,7 +5,7 @@
 Webhooks
 ========
 
-This section documents all objects related to webhooks - Discord feature which allows to send message in channels without a user\/bot account.
+This section documents all objects related to webhooks, a low-effort way of sending messages in channels without a user\/bot account.
 
 Discord Models
 ---------------

@@ -8,13 +8,13 @@ Components
 ===========
 
 This section documents everything related to
-:ddocs:`message components <interactions/message-components>` \
-- Discord feature which allows bot developers to create their own component-based UIs right inside Discord.
+:ddocs:`message components <interactions/message-components>` — a Discord feature
+which allows bot developers to create their own component-based UIs right inside Discord.
 
 .. warning::
 
     Classes listed below are not meant to be created by user and are only recieved from the API.
-    For constructible version see :ref:`Bot UI Kit <disnake_ui_kit>`.
+    For constructible versions, see :ref:`Bot UI Kit <disnake_ui_kit>`.
 
 Discord Models
 ---------------

@@ -13,11 +13,10 @@ What are events?
 ----------------
 
 So, what are events anyway? Most of the :class:`Client` application cycle is based on *events* - special "notifications" usually sent by Discord
-to notify client about certain actions like message deletion, ``:mmlol:`` emoji creation, member nickname update, etc.
-This allows you to respond to certain actions by making another actions, about which Discord will notify other
-connected clients (i.e., other bots and users). This library provides two main ways to register an
-*event handler* - a special function which will *watch* to certain types of events and allow you to do anything you
-want in response to those events.
+to notify client about certain actions like message deletion, emoji creation, member nickname updates, etc.
+
+This library provides two main ways to register an
+*event handler* — a special function which will listen for to specific types of events — which allows you to take action based on certain events.
 
 The first way is through the use of the :meth:`Client.event` decorator: ::
 
@@ -46,33 +45,31 @@ overriding the specific events. For example: ::
             if message.content.startswith('$hello'):
                 await message.reply(f'Hello, {message.author}!')
 
-The above pieces of code are essentially equal, and both respond with "Hello, {message author's username here}!" message
-when a user sends "$hello" message.
+The above pieces of code are essentially equal, and both respond with ``Hello, {author's username here}!`` message
+when a user sends a ``$hello`` message.
 
 .. warning::
 
     Event handlers described here are a bit different from :class:`~ext.commands.Bot`'s *event listeners*.
-    :class:`Client`'s event handlers are *unique*: you can't have two :func:`on_message`, two
-    :func:`on_member_ban` etc. With :class:`~ext.commands.Bot` however, you can have as much *listeners*
+
+    :class:`Client`'s event handlers are unique, which means you can only have one of each type (i.e. only one `on_message`, one `on_member_ban`, etc.). With :class:`~ext.commands.Bot` however, you can have as many *listeners*
     of the same type as you want.
 
-    Please also note that using :meth:`Bot.event() <disnake.ext.commands.Bot.event>` decorator is the same as using :class:`Client`'s
+    Also note that :meth:`Bot.event() <disnake.ext.commands.Bot.event>` is the same as :class:`Client`'s
     :meth:`~Client.event` (since :class:`~ext.commands.Bot` subclasses :class:`Client`) and does not allow to listen/watch
-    for multiple events of the same type. Consider using :meth:`Bot.listen() <disnake.ext.commands.Bot.listen>` for that.
+    for multiple events of the same type. Consider using :meth:`Bot.listen() <disnake.ext.commands.Bot.listen>` instead.
 
 .. note::
 
-    Events can be sent not only by Discord. For instance, if you use :ref:`commands extension <disnake_ext_commands>`,
+    Events can be sent not only by Discord. For instance, if you use the :ref:`commands extension <disnake_ext_commands>`,
     you'll also receive various events related to your commands' execution process.
 
 If an event handler raises an exception, :func:`on_error` will be called
-to handle it, which defaults to print a traceback and ignoring the exception.
+to handle it, which defaults to printing a traceback and ignoring the exception.
 
 .. warning::
 
-    All the events must be a |coroutine_link|_. If they aren't, then you might get unexpected
-    errors. In order to turn a function into a coroutine they must be ``async def``
-    functions.
+    Every event handler/listener must be a |coroutine_link|_. In order to turn a function into a coroutine, they must be ``async def`` functions.
 
 Reference
 ---------

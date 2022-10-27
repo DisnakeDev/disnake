@@ -5,7 +5,7 @@
 Invites
 =======
 
-This section documents everything related to channel invites.
+This section documents everything related to invites.
 
 Discord Models
 ---------------

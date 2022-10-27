@@ -7,7 +7,7 @@ Guilds
 
 This section documents everything related to
 :ddocs:`Guilds <resources/guild>` - main hubs for communication in Discord,
-referred to as a Servers in the official UI.
+referred to as Servers in the official UI.
 
 Discord Models
 ---------------
