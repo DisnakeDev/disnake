@@ -2,7 +2,18 @@
 
 import types
 from functools import total_ordering
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, NamedTuple, Optional, Type, TypeVar
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    ClassVar,
+    Dict,
+    List,
+    NamedTuple,
+    NoReturn,
+    Optional,
+    Type,
+    TypeVar,
+)
 
 __all__ = (
     "Enum",
@@ -152,10 +163,10 @@ class EnumMeta(type):
     def __getitem__(cls, key):
         return cls._enum_member_map_[key]
 
-    def __setattr__(cls, name, value) -> None:
+    def __setattr__(cls, name, value) -> NoReturn:
         raise TypeError("Enums are immutable.")
 
-    def __delattr__(cls, attr) -> None:
+    def __delattr__(cls, attr) -> NoReturn:
         raise TypeError("Enums are immutable")
 
     def __instancecheck__(self, instance):

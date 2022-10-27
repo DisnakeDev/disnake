@@ -31,6 +31,7 @@ from typing import (
     List,
     Literal,
     Mapping,
+    NoReturn,
     Optional,
     Protocol,
     Sequence,
@@ -167,7 +168,7 @@ class classproperty(Generic[T_co]):
     def __get__(self, instance: Optional[Any], owner: Type[Any]) -> T_co:
         return self.fget(owner)
 
-    def __set__(self, instance, value) -> None:
+    def __set__(self, instance, value) -> NoReturn:
         raise AttributeError("cannot set attribute")
 
 

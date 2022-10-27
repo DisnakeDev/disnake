@@ -14,6 +14,7 @@ from typing import (
     List,
     Literal,
     NamedTuple,
+    NoReturn,
     Optional,
     Sequence,
     Tuple,
@@ -662,7 +663,7 @@ class PartialWebhookGuild(Hashable):
 class _FriendlyHttpAttributeErrorHelper:
     __slots__ = ()
 
-    def __getattr__(self, attr):
+    def __getattr__(self, attr) -> NoReturn:
         raise AttributeError("PartialWebhookState does not support http methods.")
 
 
