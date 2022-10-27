@@ -540,7 +540,7 @@ class FFmpegOpusAudio(FFmpegAudio):
             )
 
         codec = bitrate = None
-        loop = utils.get_event_loop()
+        loop = asyncio.get_running_loop()
         try:
             codec, bitrate = await loop.run_in_executor(None, lambda: probefunc(source, executable))
         except Exception:

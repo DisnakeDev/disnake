@@ -77,7 +77,9 @@ class CommonBotBase(Generic[CogT]):
 
         self.reload: bool = reload
 
-        loop = disnake.utils.get_event_loop()
+        # we're using a lambda here because we do not want to call
+        # the event loop method unless we actually need it
+        loop = kwargs.setdefault("loop", lambda: disnake.utils.get_event_loop())
         loop.create_task(self._fill_owners())
 
         if self.reload:
