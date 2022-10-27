@@ -10,6 +10,7 @@ import os
 import sys
 import time
 import types
+import warnings
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -79,7 +80,11 @@ class CommonBotBase(Generic[CogT]):
 
         # we're using a lambda here because we do not want to call
         # the event loop method unless we actually need it
-        loop = kwargs.setdefault("loop", lambda: disnake.utils.get_event_loop())
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+        loop = kwargs.setdefault("loop", lambda: asyncio.get_event_loop())
+
         loop.create_task(self._fill_owners())
 
         if self.reload:
