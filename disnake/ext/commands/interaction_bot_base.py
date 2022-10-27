@@ -217,7 +217,11 @@ class InteractionBotBase(CommonBotBase):
         self.all_user_commands: Dict[str, InvokableUserCommand] = {}
         self.all_message_commands: Dict[str, InvokableMessageCommand] = {}
 
+    @disnake.utils.copy_doc(disnake.Client.login)
+    async def login(self, token: str) -> None:
         self._schedule_app_command_preparation()
+
+        await super().login(token)
 
     @property
     def command_sync_flags(self) -> CommandSyncFlags:
