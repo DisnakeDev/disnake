@@ -25,6 +25,7 @@ from typing import (
 import disnake.abc
 import disnake.utils
 
+from .context import Context
 from .core import Command, Group
 from .errors import CommandError
 
@@ -34,10 +35,16 @@ if TYPE_CHECKING:
     from ._types import Check, FuncT
     from .bot import AutoShardedBot, Bot
     from .cog import Cog
-    from .context import BotT, Context
+    from .context import BotT
 
     # note: no InteractionBot
     AnyBot = Union[Bot, AutoShardedBot]
+
+else:
+    # this is to fix signature parsing of `HelpCommand.command_callback`
+    # TODO: skip `self` (if present) and `ctx` parameter when parsing prefix command signatures
+    BotT = Any
+
 
 __all__ = (
     "Paginator",
