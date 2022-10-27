@@ -55,6 +55,7 @@ if TYPE_CHECKING:
     from disnake.i18n import LocalizationValue, LocalizedOptional
     from disnake.types.interactions import ApplicationCommandOptionChoiceValue
 
+    from ._types import FuncT
     from .base_core import CogT
     from .cog import Cog
     from .slash_core import InvokableSlashCommand, SubCommand
@@ -88,7 +89,6 @@ else:
 
 T = TypeVar("T", bound=Any)
 TypeT = TypeVar("TypeT", bound=Type[Any])
-CallableT = TypeVar("CallableT", bound=Callable[..., Any])
 
 __all__ = (
     "Range",
@@ -246,7 +246,7 @@ class Injection(Generic[P, T_]):
         cls._registered[annotation] = self
         return self
 
-    def autocomplete(self, option_name: str) -> Callable[[CallableT], CallableT]:
+    def autocomplete(self, option_name: str) -> Callable[[FuncT], FuncT]:
         """A decorator that registers an autocomplete function for the specified option.
 
         .. versionadded:: 2.6
@@ -271,7 +271,7 @@ class Injection(Generic[P, T_]):
                 f"This injection already has an autocompleter set for option '{option_name}'"
             )
 
-        def decorator(func: CallableT) -> CallableT:
+        def decorator(func: FuncT) -> FuncT:
             classify_autocompleter(func)
             self.autocompleters[option_name] = func
             return func
@@ -573,7 +573,7 @@ class ParamInfo:
         return self
 
     @classmethod
-    def register_converter(cls, annotation: Any, converter: CallableT) -> CallableT:
+    def register_converter(cls, annotation: Any, converter: FuncT) -> FuncT:
         cls._registered_converters[annotation] = converter
         return converter
 
