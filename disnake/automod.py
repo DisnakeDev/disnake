@@ -87,7 +87,7 @@ class AutoModAction:
         self,
         *,
         type: AutoModActionType,
-    ):
+    ) -> None:
         self.type: AutoModActionType = enum_if_int(AutoModActionType, type)
         self._metadata: AutoModActionMetadata = {}
 
@@ -127,7 +127,7 @@ class AutoModBlockMessageAction(AutoModAction):
 
     _metadata: AutoModBlockMessageActionMetadata
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(type=AutoModActionType.block_message)
 
     def __repr__(self) -> str:
@@ -156,7 +156,7 @@ class AutoModSendAlertAction(AutoModAction):
 
     _metadata: AutoModSendAlertActionMetadata
 
-    def __init__(self, channel: Snowflake):
+    def __init__(self, channel: Snowflake) -> None:
         super().__init__(type=AutoModActionType.send_alert_message)
 
         self._metadata["channel_id"] = channel.id
@@ -192,7 +192,7 @@ class AutoModTimeoutAction(AutoModAction):
 
     _metadata: AutoModTimeoutActionMetadata
 
-    def __init__(self, duration: Union[int, timedelta]):
+    def __init__(self, duration: Union[int, timedelta]) -> None:
         super().__init__(type=AutoModActionType.timeout)
 
         if isinstance(duration, timedelta):
@@ -241,7 +241,7 @@ class AutoModTriggerMetadata:
     )
 
     @overload
-    def __init__(self, *, keyword_filter: Sequence[str]):
+    def __init__(self, *, keyword_filter: Sequence[str]) -> None:
         ...
 
     @overload
@@ -250,11 +250,11 @@ class AutoModTriggerMetadata:
         *,
         presets: AutoModKeywordPresets,
         allow_list: Optional[Sequence[str]] = None,
-    ):
+    ) -> None:
         ...
 
     @overload
-    def __init__(self, *, mention_total_limit: int):
+    def __init__(self, *, mention_total_limit: int) -> None:
         ...
 
     def __init__(
@@ -264,7 +264,7 @@ class AutoModTriggerMetadata:
         presets: Optional[AutoModKeywordPresets] = None,
         allow_list: Optional[Sequence[str]] = None,
         mention_total_limit: Optional[int] = None,
-    ):
+    ) -> None:
         self.keyword_filter: Optional[Sequence[str]] = keyword_filter
         self.presets: Optional[AutoModKeywordPresets] = presets
         self.allow_list: Optional[Sequence[str]] = allow_list
@@ -379,7 +379,7 @@ class AutoModRule:
         "exempt_channel_ids",
     )
 
-    def __init__(self, *, data: AutoModRulePayload, guild: Guild):
+    def __init__(self, *, data: AutoModRulePayload, guild: Guild) -> None:
         self.guild: Guild = guild
 
         self.id: int = int(data["id"])

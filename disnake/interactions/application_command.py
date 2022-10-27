@@ -92,7 +92,9 @@ class ApplicationCommandInteraction(Interaction):
         Whether the command failed to be checked or invoked.
     """
 
-    def __init__(self, *, data: ApplicationCommandInteractionPayload, state: ConnectionState):
+    def __init__(
+        self, *, data: ApplicationCommandInteractionPayload, state: ConnectionState
+    ) -> None:
         super().__init__(data=data, state=state)
         self.data: ApplicationCommandInteractionData = ApplicationCommandInteractionData(
             data=data["data"], state=state, guild_id=self.guild_id
@@ -194,7 +196,7 @@ class ApplicationCommandInteractionData(Dict[str, Any]):
         data: ApplicationCommandInteractionDataPayload,
         state: ConnectionState,
         guild_id: Optional[int],
-    ):
+    ) -> None:
         super().__init__(data)
         self.id: int = int(data["id"])
         self.name: str = data["name"]
@@ -272,7 +274,7 @@ class ApplicationCommandInteractionDataOption(Dict[str, Any]):
 
     __slots__ = ("name", "type", "value", "options", "focused")
 
-    def __init__(self, *, data: Mapping[str, Any], resolved: InteractionDataResolved):
+    def __init__(self, *, data: Mapping[str, Any], resolved: InteractionDataResolved) -> None:
         super().__init__(data)
         self.name: str = data["name"]
         self.type: OptionType = try_enum(OptionType, data["type"])

@@ -339,7 +339,7 @@ class IntegrationApplication:
         "user",
     )
 
-    def __init__(self, *, data: IntegrationApplicationPayload, state):
+    def __init__(self, *, data: IntegrationApplicationPayload, state) -> None:
         self.id: int = int(data["id"])
         self.name: str = data["name"]
         self.icon: Optional[str] = data["icon"]

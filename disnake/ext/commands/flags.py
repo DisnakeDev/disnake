@@ -100,12 +100,12 @@ class CommandSyncFlags(BaseFlags):
         sync_global_commands: bool = ...,
         sync_guild_commands: bool = ...,
         sync_on_cog_actions: bool = ...,
-    ):
+    ) -> None:
         ...
 
     @overload
     @_generated
-    def __init__(self: NoReturn):
+    def __init__(self: NoReturn) -> None:
         ...
 
     def __init__(self, **kwargs: bool):

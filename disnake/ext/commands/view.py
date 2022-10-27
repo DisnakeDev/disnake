@@ -26,7 +26,7 @@ _all_quotes = set(_quotes.keys()) | set(_quotes.values())
 
 
 class StringView:
-    def __init__(self, buffer: str):
+    def __init__(self, buffer: str) -> None:
         self.index = 0
         self.buffer = buffer
         self.end = len(buffer)

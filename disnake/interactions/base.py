@@ -170,7 +170,7 @@ class Interaction:
         "_cs_expires_at",
     )
 
-    def __init__(self, *, data: InteractionPayload, state: ConnectionState):
+    def __init__(self, *, data: InteractionPayload, state: ConnectionState) -> None:
         self.data: Mapping[str, Any] = data.get("data") or {}
         self._state: ConnectionState = state
         # TODO: Maybe use a unique session
@@ -698,7 +698,7 @@ class InteractionResponse:
         "_response_type",
     )
 
-    def __init__(self, parent: Interaction):
+    def __init__(self, parent: Interaction) -> None:
         self._parent: Interaction = parent
         self._response_type: Optional[InteractionResponseType] = None
 
@@ -1341,7 +1341,7 @@ class InteractionResponse:
 class _InteractionMessageState:
     __slots__ = ("_parent", "_interaction")
 
-    def __init__(self, interaction: Interaction, parent: ConnectionState):
+    def __init__(self, interaction: Interaction, parent: ConnectionState) -> None:
         self._interaction: Interaction = interaction
         self._parent: ConnectionState = parent
 
@@ -1696,7 +1696,7 @@ class InteractionDataResolved(Dict[str, Any]):
         data: InteractionDataResolvedPayload,
         state: ConnectionState,
         guild_id: Optional[int],
-    ):
+    ) -> None:
         data = data or {}
         super().__init__(data)
 

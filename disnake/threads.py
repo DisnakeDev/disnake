@@ -163,7 +163,7 @@ class Thread(Messageable, Hashable):
         "_members",
     )
 
-    def __init__(self, *, guild: Guild, state: ConnectionState, data: ThreadPayload):
+    def __init__(self, *, guild: Guild, state: ConnectionState, data: ThreadPayload) -> None:
         self._state: ConnectionState = state
         self.guild = guild
         self._members: Dict[int, ThreadMember] = {}
@@ -1042,7 +1042,7 @@ class ThreadMember(Hashable):
         "parent",
     )
 
-    def __init__(self, parent: Thread, data: ThreadMemberPayload):
+    def __init__(self, parent: Thread, data: ThreadMemberPayload) -> None:
         self.parent = parent
         self._state = parent._state
         self._from_data(data)

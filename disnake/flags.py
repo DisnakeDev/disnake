@@ -46,7 +46,7 @@ T = TypeVar("T", bound="BaseFlags")
 
 
 class flag_value(Generic[T]):
-    def __init__(self, func: Callable[[Any], int]):
+    def __init__(self, func: Callable[[Any], int]) -> None:
         self.flag = func(None)
         self.__doc__ = func.__doc__
         self._parent: Type[T] = MISSING
@@ -418,7 +418,7 @@ class SystemChannelFlags(BaseFlags, inverted=True):
             join_notification_replies: bool = ...,
             join_notifications: bool = ...,
             premium_subscriptions: bool = ...,
-        ):
+        ) -> None:
             ...
 
     # For some reason the flags for system channels are "inverted"
@@ -571,7 +571,7 @@ class MessageFlags(BaseFlags):
             source_message_deleted: bool = ...,
             suppress_embeds: bool = ...,
             urgent: bool = ...,
-        ):
+        ) -> None:
             ...
 
     @flag_value
@@ -750,7 +750,7 @@ class PublicUserFlags(BaseFlags):
             team_user: bool = ...,
             verified_bot: bool = ...,
             verified_bot_developer: bool = ...,
-        ):
+        ) -> None:
             ...
 
     @flag_value
@@ -989,12 +989,12 @@ class Intents(BaseFlags):
         typing: bool = ...,
         voice_states: bool = ...,
         webhooks: bool = ...,
-    ):
+    ) -> None:
         ...
 
     @overload
     @_generated
-    def __init__(self: NoReturn):
+    def __init__(self: NoReturn) -> None:
         ...
 
     def __init__(self, value: Optional[int] = None, **kwargs: bool):
@@ -1632,12 +1632,12 @@ class MemberCacheFlags(BaseFlags):
 
     @overload
     @_generated
-    def __init__(self, *, joined: bool = ..., voice: bool = ...):
+    def __init__(self, *, joined: bool = ..., voice: bool = ...) -> None:
         ...
 
     @overload
     @_generated
-    def __init__(self: NoReturn):
+    def __init__(self: NoReturn) -> None:
         ...
 
     def __init__(self, **kwargs: bool):
@@ -1825,7 +1825,7 @@ class ApplicationFlags(BaseFlags):
             gateway_presence: bool = ...,
             gateway_presence_limited: bool = ...,
             verification_pending_guild_limit: bool = ...,
-        ):
+        ) -> None:
             ...
 
     @flag_value
@@ -1982,7 +1982,7 @@ class ChannelFlags(BaseFlags):
     if TYPE_CHECKING:
 
         @_generated
-        def __init__(self, *, pinned: bool = ..., require_tag: bool = ...):
+        def __init__(self, *, pinned: bool = ..., require_tag: bool = ...) -> None:
             ...
 
     @flag_value
@@ -2077,7 +2077,9 @@ class AutoModKeywordPresets(ListBaseFlags):
     if TYPE_CHECKING:
 
         @_generated
-        def __init__(self, *, profanity: bool = ..., sexual_content: bool = ..., slurs: bool = ...):
+        def __init__(
+            self, *, profanity: bool = ..., sexual_content: bool = ..., slurs: bool = ...
+        ) -> None:
             ...
 
     @classmethod

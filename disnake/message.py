@@ -279,7 +279,7 @@ class Attachment(Hashable):
         "description",
     )
 
-    def __init__(self, *, data: AttachmentPayload, state: ConnectionState):
+    def __init__(self, *, data: AttachmentPayload, state: ConnectionState) -> None:
         self.id: int = int(data["id"])
         self.size: int = data["size"]
         self.height: Optional[int] = data.get("height")
@@ -480,7 +480,7 @@ class DeletedReferencedMessage:
 
     __slots__ = ("_parent",)
 
-    def __init__(self, parent: MessageReference):
+    def __init__(self, parent: MessageReference) -> None:
         self._parent: MessageReference = parent
 
     def __repr__(self) -> str:
@@ -546,7 +546,7 @@ class MessageReference:
         channel_id: int,
         guild_id: Optional[int] = None,
         fail_if_not_exists: bool = True,
-    ):
+    ) -> None:
         self._state: Optional[ConnectionState] = None
         self.resolved: Optional[Union[Message, DeletedReferencedMessage]] = None
         self.message_id: Optional[int] = message_id
@@ -655,7 +655,7 @@ class InteractionReference:
 
     __slots__ = ("id", "type", "name", "user", "_state")
 
-    def __init__(self, *, state: ConnectionState, data: InteractionMessageReferencePayload):
+    def __init__(self, *, state: ConnectionState, data: InteractionMessageReferencePayload) -> None:
         self._state: ConnectionState = state
         self.id: int = int(data["id"])
         self.type: InteractionType = try_enum(InteractionType, int(data["type"]))
@@ -872,7 +872,7 @@ class Message(Hashable):
         state: ConnectionState,
         channel: MessageableChannel,
         data: MessagePayload,
-    ):
+    ) -> None:
         self._state: ConnectionState = state
         self.id: int = int(data["id"])
         self.application_id: Optional[int] = utils._get_as_snowflake(data, "application_id")

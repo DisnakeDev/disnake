@@ -89,7 +89,7 @@ def _component_to_item(component: MessageComponent) -> Item:
 class _ViewWeights:
     __slots__ = ("weights",)
 
-    def __init__(self, children: List[Item]):
+    def __init__(self, children: List[Item]) -> None:
         self.weights: List[int] = [0, 0, 0, 0, 0]
 
         key: Callable[[Item[View]], int] = lambda i: sys.maxsize if i.row is None else i.row
@@ -167,7 +167,7 @@ class View:
 
         cls.__view_children_items__ = children
 
-    def __init__(self, *, timeout: Optional[float] = 180.0):
+    def __init__(self, *, timeout: Optional[float] = 180.0) -> None:
         self.timeout = timeout
         self.children: List[Item] = []
         for func in self.__view_children_items__:
@@ -500,7 +500,7 @@ class View:
 
 
 class ViewStore:
-    def __init__(self, state: ConnectionState):
+    def __init__(self, state: ConnectionState) -> None:
         # (component_type, message_id, custom_id): (View, Item)
         self._views: Dict[Tuple[int, Optional[int], str], Tuple[View, Item]] = {}
         # message_id: View

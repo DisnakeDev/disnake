@@ -77,7 +77,7 @@ class MessageInteraction(Interaction):
         The interaction client.
     """
 
-    def __init__(self, *, data: MessageInteractionPayload, state: ConnectionState):
+    def __init__(self, *, data: MessageInteractionPayload, state: ConnectionState) -> None:
         super().__init__(data=data, state=state)
         self.data: MessageInteractionData = MessageInteractionData(
             data=data["data"], state=state, guild_id=self.guild_id
@@ -163,7 +163,7 @@ class MessageInteractionData(Dict[str, Any]):
         data: MessageComponentInteractionDataPayload,
         state: ConnectionState,
         guild_id: Optional[int],
-    ):
+    ) -> None:
         super().__init__(data)
         self.custom_id: str = data["custom_id"]
         self.component_type: ComponentType = try_enum(ComponentType, data["component_type"])

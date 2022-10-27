@@ -120,7 +120,7 @@ class _AsyncIterator(AsyncIterator[T]):
 
 
 class _ChunkedAsyncIterator(_AsyncIterator[List[T]]):
-    def __init__(self, iterator, max_size):
+    def __init__(self, iterator, max_size) -> None:
         self.iterator = iterator
         self.max_size = max_size
 
@@ -141,7 +141,7 @@ class _ChunkedAsyncIterator(_AsyncIterator[List[T]]):
 
 
 class _MappedAsyncIterator(_AsyncIterator[OT]):
-    def __init__(self, iterator: _AsyncIterator[T], func: _Func[T, OT]):
+    def __init__(self, iterator: _AsyncIterator[T], func: _Func[T, OT]) -> None:
         self.iterator = iterator
         self.func = func
 
@@ -152,7 +152,7 @@ class _MappedAsyncIterator(_AsyncIterator[OT]):
 
 
 class _FilteredAsyncIterator(_AsyncIterator[T]):
-    def __init__(self, iterator: _AsyncIterator[T], predicate: _Func[T, bool]):
+    def __init__(self, iterator: _AsyncIterator[T], predicate: _Func[T, bool]) -> None:
         self.iterator = iterator
 
         if predicate is None:
@@ -172,7 +172,7 @@ class _FilteredAsyncIterator(_AsyncIterator[T]):
 
 
 class ReactionIterator(_AsyncIterator[Union["User", "Member"]]):
-    def __init__(self, message, emoji, limit=100, after=None):
+    def __init__(self, message, emoji, limit=100, after=None) -> None:
         self.message = message
         self.limit = limit
         self.after = after
@@ -417,7 +417,7 @@ class BanIterator(_AsyncIterator["BanEntry"]):
         limit: Optional[int] = None,
         before: Optional[Snowflake] = None,
         after: Optional[Snowflake] = None,
-    ):
+    ) -> None:
         self.guild = guild
         self.limit = limit
         self.before = before
@@ -496,7 +496,7 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
         after: Optional[Union[Snowflake, datetime.datetime]] = None,
         user_id: Optional[int] = None,
         action_type: Optional[AuditLogEvent] = None,
-    ):
+    ) -> None:
         if isinstance(before, datetime.datetime):
             before = Object(id=time_snowflake(before, high=False))
         if isinstance(after, datetime.datetime):
@@ -649,7 +649,7 @@ class GuildIterator(_AsyncIterator["Guild"]):
         Object after which all guilds must be.
     """
 
-    def __init__(self, bot, limit, before=None, after=None):
+    def __init__(self, bot, limit, before=None, after=None) -> None:
 
         if isinstance(before, datetime.datetime):
             before = Object(id=time_snowflake(before, high=False))
@@ -739,7 +739,7 @@ class GuildIterator(_AsyncIterator["Guild"]):
 
 
 class MemberIterator(_AsyncIterator["Member"]):
-    def __init__(self, guild, limit=1000, after=None):
+    def __init__(self, guild, limit=1000, after=None) -> None:
 
         if isinstance(after, datetime.datetime):
             after = Object(id=time_snowflake(after, high=True))
@@ -891,7 +891,7 @@ class GuildScheduledEventUserIterator(_AsyncIterator[Union["User", "Member"]]):
         with_members: bool,
         before: Optional[Snowflake],
         after: Optional[Snowflake],
-    ):
+    ) -> None:
         self.event: GuildScheduledEvent = event
         self.limit: Optional[int] = limit
         self.with_members: bool = with_members

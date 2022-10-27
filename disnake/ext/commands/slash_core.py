@@ -438,7 +438,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         connectors: Optional[Dict[str, str]] = None,
         auto_sync: Optional[bool] = None,
         **kwargs,
-    ):
+    ) -> None:
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
         self.parent = None

@@ -207,7 +207,7 @@ class Permissions(BaseFlags):
         view_audit_log: bool = ...,
         view_channel: bool = ...,
         view_guild_insights: bool = ...,
-    ):
+    ) -> None:
         ...
 
     @overload
@@ -215,7 +215,7 @@ class Permissions(BaseFlags):
     def __init__(
         self,
         permissions: int = 0,
-    ):
+    ) -> None:
         ...
 
     @_overload_with_permissions
@@ -1097,14 +1097,14 @@ class PermissionOverwrite:
         view_audit_log: Optional[bool] = ...,
         view_channel: Optional[bool] = ...,
         view_guild_insights: Optional[bool] = ...,
-    ):
+    ) -> None:
         ...
 
     @overload
     @_generated
     def __init__(
         self,
-    ):
+    ) -> None:
         ...
 
     @_overload_with_permissions

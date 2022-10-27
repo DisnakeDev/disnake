@@ -77,7 +77,7 @@ class PartialEmoji(_EmojiTag, AssetMixin):
     if TYPE_CHECKING:
         id: Optional[int]
 
-    def __init__(self, *, name: str, animated: bool = False, id: Optional[int] = None):
+    def __init__(self, *, name: str, animated: bool = False, id: Optional[int] = None) -> None:
         self.animated = animated
         self.name = name
         self.id = id

@@ -69,7 +69,7 @@ MISSING = utils.MISSING
 
 
 class AsyncDeferredLock:
-    def __init__(self, lock: asyncio.Lock):
+    def __init__(self, lock: asyncio.Lock) -> None:
         self.lock = lock
         self.delta: Optional[float] = None
 
@@ -80,14 +80,14 @@ class AsyncDeferredLock:
     def delay_by(self, delta: float) -> None:
         self.delta = delta
 
-    async def __aexit__(self, type, value, traceback):
+    async def __aexit__(self, type, value, traceback) -> None:
         if self.delta:
             await asyncio.sleep(self.delta)
         self.lock.release()
 
 
 class AsyncWebhookAdapter:
-    def __init__(self):
+    def __init__(self) -> None:
         self._locks: Dict[Any, asyncio.Lock] = {}
 
     async def request(
@@ -617,7 +617,7 @@ class PartialWebhookChannel(Hashable):
 
     __slots__ = ("id", "name")
 
-    def __init__(self, *, data):
+    def __init__(self, *, data) -> None:
         self.id = int(data["id"])
         self.name = data["name"]
 
@@ -642,7 +642,7 @@ class PartialWebhookGuild(Hashable):
 
     __slots__ = ("id", "name", "_icon", "_state")
 
-    def __init__(self, *, data, state):
+    def __init__(self, *, data, state) -> None:
         self._state = state
         self.id = int(data["id"])
         self.name = data["name"]
@@ -672,7 +672,9 @@ WebhookT = TypeVar("WebhookT", bound="BaseWebhook")
 class _WebhookState(Generic[WebhookT]):
     __slots__ = ("_parent", "_webhook")
 
-    def __init__(self, webhook: WebhookT, parent: Optional[Union[ConnectionState, _WebhookState]]):
+    def __init__(
+        self, webhook: WebhookT, parent: Optional[Union[ConnectionState, _WebhookState]]
+    ) -> None:
         self._webhook: WebhookT = webhook
 
         self._parent: Optional[ConnectionState]
@@ -896,7 +898,7 @@ class BaseWebhook(Hashable):
         data: WebhookPayload,
         token: Optional[str] = None,
         state: Optional[ConnectionState] = None,
-    ):
+    ) -> None:
         self.auth_token: Optional[str] = token
         self._state: Union[ConnectionState, _WebhookState] = state or _WebhookState(
             self, parent=state
@@ -1081,7 +1083,7 @@ class Webhook(BaseWebhook):
         session: aiohttp.ClientSession,
         token: Optional[str] = None,
         state=None,
-    ):
+    ) -> None:
         super().__init__(data, token, state)
         self.session = session
 

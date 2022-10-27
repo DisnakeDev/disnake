@@ -110,7 +110,7 @@ class OptionChoice:
         self,
         name: LocalizedRequired,
         value: ApplicationCommandOptionChoiceValue,
-    ):
+    ) -> None:
         name_loc = Localized._cast(name, True)
         self.name: str = name_loc.string
         self.name_localizations: LocalizationValue = name_loc.localizations
@@ -595,7 +595,7 @@ class UserCommand(ApplicationCommand):
         name: LocalizedRequired,
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-    ):
+    ) -> None:
         super().__init__(
             type=ApplicationCommandType.user,
             name=name,
@@ -678,7 +678,7 @@ class MessageCommand(ApplicationCommand):
         name: LocalizedRequired,
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-    ):
+    ) -> None:
         super().__init__(
             type=ApplicationCommandType.message,
             name=name,
@@ -779,7 +779,7 @@ class SlashCommand(ApplicationCommand):
         options: Optional[List[Option]] = None,
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-    ):
+    ) -> None:
         super().__init__(
             type=ApplicationCommandType.chat_input,
             name=name,
@@ -932,7 +932,7 @@ class ApplicationCommandPermissions:
 
     __slots__ = ("id", "type", "permission", "_guild_id")
 
-    def __init__(self, *, data: ApplicationCommandPermissionsPayload, guild_id: int):
+    def __init__(self, *, data: ApplicationCommandPermissionsPayload, guild_id: int) -> None:
         self.id: int = int(data["id"])
         self.type: ApplicationCommandPermissionType = try_enum(
             ApplicationCommandPermissionType, data["type"]
@@ -990,7 +990,9 @@ class GuildApplicationCommandPermissions:
 
     __slots__ = ("_state", "id", "application_id", "guild_id", "permissions")
 
-    def __init__(self, *, data: GuildApplicationCommandPermissionsPayload, state: ConnectionState):
+    def __init__(
+        self, *, data: GuildApplicationCommandPermissionsPayload, state: ConnectionState
+    ) -> None:
         self._state: ConnectionState = state
         self.id: int = int(data["id"])
         self.application_id: int = int(data["application_id"])

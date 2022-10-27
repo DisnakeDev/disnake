@@ -38,7 +38,7 @@ class VoiceRegion:
         "custom",
     )
 
-    def __init__(self, *, data: VoiceRegionPayload):
+    def __init__(self, *, data: VoiceRegionPayload) -> None:
         self.id: str = data["id"]
         self.name: str = data["name"]
         self.deprecated: bool = data.get("deprecated", False)

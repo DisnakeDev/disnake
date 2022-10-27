@@ -41,7 +41,7 @@ if not TYPE_CHECKING:
 
 
 class EmbedProxy:
-    def __init__(self, layer: Optional[Mapping[str, Any]]):
+    def __init__(self, layer: Optional[Mapping[str, Any]]) -> None:
         if layer is not None:
             self.__dict__.update(layer)
 
@@ -197,7 +197,7 @@ class Embed:
         timestamp: Optional[datetime.datetime] = None,
         colour: Optional[Union[int, Colour]] = MISSING,
         color: Optional[Union[int, Colour]] = MISSING,
-    ):
+    ) -> None:
         self.title: Optional[str] = str(title) if title is not None else None
         self.type: Optional[EmbedType] = type
         self.description: Optional[str] = str(description) if description is not None else None

@@ -94,7 +94,7 @@ class Button(Item[V_co]):
         url: Optional[str] = None,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
         row: Optional[int] = None,
-    ):
+    ) -> None:
         ...
 
     @overload
@@ -108,7 +108,7 @@ class Button(Item[V_co]):
         url: Optional[str] = None,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
         row: Optional[int] = None,
-    ):
+    ) -> None:
         ...
 
     def __init__(

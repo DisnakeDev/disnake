@@ -128,7 +128,7 @@ class WelcomeScreen:
         data: WelcomeScreenPayload,
         state: ConnectionState,
         guild: Union[Guild, PartialInviteGuild],
-    ):
+    ) -> None:
         self._state = state
         self._guild = guild
         self.description: Optional[str] = data.get("description")

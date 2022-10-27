@@ -128,7 +128,7 @@ class VoiceState:
         *,
         data: Union[VoiceStatePayload, GuildVoiceStatePayload],
         channel: Optional[VocalGuildChannel] = None,
-    ):
+    ) -> None:
         self.session_id: str = data["session_id"]
         self._update(data, channel)
 
@@ -296,7 +296,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         data: Union[MemberWithUserPayload, GuildMemberUpdateEvent],
         guild: Guild,
         state: ConnectionState,
-    ):
+    ) -> None:
         ...
 
     @overload
@@ -307,7 +307,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         guild: Guild,
         state: ConnectionState,
         user_data: UserPayload,
-    ):
+    ) -> None:
         ...
 
     def __init__(
@@ -317,7 +317,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         guild: Guild,
         state: ConnectionState,
         user_data: Optional[UserPayload] = None,
-    ):
+    ) -> None:
         self._state: ConnectionState = state
         if user_data is None:
             user_data = cast("MemberWithUserPayload", data)["user"]

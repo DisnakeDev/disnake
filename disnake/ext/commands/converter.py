@@ -1092,7 +1092,7 @@ class Greedy(List[T]):
 
     __slots__ = ("converter",)
 
-    def __init__(self, *, converter: T):
+    def __init__(self, *, converter: T) -> None:
         self.converter = converter
 
     def __repr__(self):

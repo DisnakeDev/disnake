@@ -162,7 +162,7 @@ class SessionStartLimit:
         "reset_time",
     )
 
-    def __init__(self, data: SessionStartLimitPayload):
+    def __init__(self, data: SessionStartLimitPayload) -> None:
         self.total: int = data["total"]
         self.remaining: int = data["remaining"]
         self.reset_after: int = data["reset_after"]

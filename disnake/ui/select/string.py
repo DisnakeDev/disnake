@@ -109,7 +109,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         options: SelectOptionInput = ...,
         disabled: bool = False,
         row: Optional[int] = None,
-    ):
+    ) -> None:
         ...
 
     @overload
@@ -123,7 +123,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         options: SelectOptionInput = ...,
         disabled: bool = False,
         row: Optional[int] = None,
-    ):
+    ) -> None:
         ...
 
     def __init__(
