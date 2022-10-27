@@ -9,7 +9,6 @@ from typing import TYPE_CHECKING, Any, Callable, Deque, Dict, Optional
 
 from disnake.abc import PrivateChannel
 from disnake.enums import Enum
-from disnake.utils import get_event_loop
 
 from .errors import MaxConcurrencyReached
 
