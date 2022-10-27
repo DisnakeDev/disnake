@@ -81,9 +81,12 @@ class CommonBotBase(Generic[CogT]):
         # we're using a lambda here because we do not want to call
         # the event loop method unless we actually need it
 
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", DeprecationWarning)
-        loop = kwargs.setdefault("loop", lambda: asyncio.get_event_loop())
+        if "loop" in kwargs:
+            loop = kwargs["loop"]
+        else:
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", DeprecationWarning)
+                loop = kwargs["loop"] = asyncio.get_event_loop()
 
         loop.create_task(self._fill_owners())
 
