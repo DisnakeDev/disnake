@@ -34,6 +34,7 @@ if TYPE_CHECKING:
 
     from ._types import Check, FuncT
     from .bot import AutoShardedBot, Bot
+    from .bot_base import BotBase
     from .cog import Cog
     from .context import BotT
 
@@ -359,12 +360,12 @@ class HelpCommand:
         obj._command_impl = self._command_impl
         return obj
 
-    def _add_to_bot(self, bot: AnyBot) -> None:
+    def _add_to_bot(self, bot: BotBase) -> None:
         command = _HelpCommandImpl(self, **self.command_attrs)
         bot.add_command(command)
         self._command_impl = command
 
-    def _remove_from_bot(self, bot: AnyBot) -> None:
+    def _remove_from_bot(self, bot: BotBase) -> None:
         bot.remove_command(self._command_impl.name)
         self._command_impl._eject_cog()
 
