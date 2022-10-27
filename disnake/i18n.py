@@ -120,7 +120,7 @@ class Localized(Generic[StringT]):
         *,
         key: str = MISSING,
         data: Union[Optional[LocalizationsDict], LocalizationValue] = MISSING,
-    ):
+    ) -> None:
         self.string: StringT = string
 
         if not (key is MISSING) ^ (data is MISSING):
@@ -185,7 +185,7 @@ class LocalizationValue:
 
     __slots__ = ("_key", "_data")
 
-    def __init__(self, localizations: Optional[Localizations]):
+    def __init__(self, localizations: Optional[Localizations]) -> None:
         self._key: Optional[str]
         self._data: Optional[Dict[str, str]]
 

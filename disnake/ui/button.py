@@ -121,7 +121,7 @@ class Button(Item[V_co]):
         url: Optional[str] = None,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
         row: Optional[int] = None,
-    ):
+    ) -> None:
         super().__init__()
         if custom_id is not None and url is not None:
             raise TypeError("cannot mix both url and custom_id with Button")
@@ -176,7 +176,7 @@ class Button(Item[V_co]):
         return self._underlying.custom_id
 
     @custom_id.setter
-    def custom_id(self, value: Optional[str]):
+    def custom_id(self, value: Optional[str]) -> None:
         if value is not None and not isinstance(value, str):
             raise TypeError("custom_id must be None or str")
 
@@ -188,7 +188,7 @@ class Button(Item[V_co]):
         return self._underlying.url
 
     @url.setter
-    def url(self, value: Optional[str]):
+    def url(self, value: Optional[str]) -> None:
         if value is not None and not isinstance(value, str):
             raise TypeError("url must be None or str")
         self._underlying.url = value
@@ -217,7 +217,7 @@ class Button(Item[V_co]):
         return self._underlying.emoji
 
     @emoji.setter
-    def emoji(self, value: Optional[Union[str, Emoji, PartialEmoji]]):
+    def emoji(self, value: Optional[Union[str, Emoji, PartialEmoji]]) -> None:
         if value is not None:
             if isinstance(value, str):
                 self._underlying.emoji = PartialEmoji.from_str(value)

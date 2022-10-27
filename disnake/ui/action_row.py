@@ -159,7 +159,7 @@ class ActionRow(Generic[UIComponentT]):
     def __init__(self: ActionRow[StrictUIComponentT], *components: StrictUIComponentT) -> None:
         ...
 
-    def __init__(self, *components: UIComponentT):
+    def __init__(self, *components: UIComponentT) -> None:
         self._children: List[UIComponentT] = []
 
         for component in components:

@@ -149,7 +149,7 @@ class InteractionBotBase(CommonBotBase):
         sync_commands_on_cog_unload: bool = MISSING,
         test_guilds: Optional[Sequence[int]] = None,
         **options: Any,
-    ):
+    ) -> None:
         if test_guilds and not all(isinstance(guild_id, int) for guild_id in test_guilds):
             raise ValueError("test_guilds must be a sequence of int.")
 

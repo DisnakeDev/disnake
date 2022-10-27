@@ -219,7 +219,7 @@ class Permissions(BaseFlags):
         ...
 
     @_overload_with_permissions
-    def __init__(self, permissions: int = 0, **kwargs: bool):
+    def __init__(self, permissions: int = 0, **kwargs: bool) -> None:
         if not isinstance(permissions, int):
             raise TypeError(
                 f"Expected int parameter, received {permissions.__class__.__name__} instead."
@@ -1108,7 +1108,7 @@ class PermissionOverwrite:
         ...
 
     @_overload_with_permissions
-    def __init__(self, **kwargs: Optional[bool]):
+    def __init__(self, **kwargs: Optional[bool]) -> None:
         self._values: Dict[str, Optional[bool]] = {}
 
         for key, value in kwargs.items():

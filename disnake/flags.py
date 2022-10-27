@@ -107,7 +107,7 @@ class BaseFlags:
 
     __slots__ = ("value",)
 
-    def __init__(self, **kwargs: bool):
+    def __init__(self, **kwargs: bool) -> None:
         self.value = self.DEFAULT_VALUE
         for key, value in kwargs.items():
             if key not in self.VALID_FLAGS:
@@ -997,7 +997,7 @@ class Intents(BaseFlags):
     def __init__(self: NoReturn) -> None:
         ...
 
-    def __init__(self, value: Optional[int] = None, **kwargs: bool):
+    def __init__(self, value: Optional[int] = None, **kwargs: bool) -> None:
         if value is not None:
             if not isinstance(value, int):
                 raise TypeError(
@@ -1640,7 +1640,7 @@ class MemberCacheFlags(BaseFlags):
     def __init__(self: NoReturn) -> None:
         ...
 
-    def __init__(self, **kwargs: bool):
+    def __init__(self, **kwargs: bool) -> None:
         self.value = all_flags_value(self.VALID_FLAGS)
         for key, value in kwargs.items():
             if key not in self.VALID_FLAGS:
@@ -1709,7 +1709,7 @@ class MemberCacheFlags(BaseFlags):
 
         return self
 
-    def _verify_intents(self, intents: Intents):
+    def _verify_intents(self, intents: Intents) -> None:
         if self.voice and not intents.voice_states:
             raise ValueError("MemberCacheFlags.voice requires Intents.voice_states")
 

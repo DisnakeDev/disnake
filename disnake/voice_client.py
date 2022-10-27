@@ -197,7 +197,7 @@ class VoiceClient(VoiceProtocol):
     ip: str
     port: int
 
-    def __init__(self, client: Client, channel: abc.Connectable):
+    def __init__(self, client: Client, channel: abc.Connectable) -> None:
         if not has_nacl:
             raise RuntimeError("PyNaCl library needed in order to use voice")
 

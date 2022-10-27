@@ -1052,7 +1052,7 @@ class ThreadMember(Hashable):
             f"<ThreadMember id={self.id} thread_id={self.thread_id} joined_at={self.joined_at!r}>"
         )
 
-    def _from_data(self, data: ThreadMemberPayload):
+    def _from_data(self, data: ThreadMemberPayload) -> None:
         try:
             self.id = int(data["user_id"])
         except KeyError:
@@ -1146,7 +1146,7 @@ class ForumTag(Hashable):
         name: str,
         emoji: Optional[Union[str, PartialEmoji, Emoji]] = None,
         moderated: bool = False,
-    ):
+    ) -> None:
         self.id: int = 0
         self.name: str = name
         self.moderated: bool = moderated

@@ -235,7 +235,7 @@ class Option:
         max_value: Optional[float] = None,
         min_length: Optional[int] = None,
         max_length: Optional[int] = None,
-    ):
+    ) -> None:
         name_loc = Localized._cast(name, True)
         _validate_name(name_loc.string)
         self.name: str = name_loc.string
@@ -468,7 +468,7 @@ class ApplicationCommand(ABC):
         name: LocalizedRequired,
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-    ):
+    ) -> None:
         self.type: ApplicationCommandType = enum_if_int(ApplicationCommandType, type)
 
         name_loc = Localized._cast(name, True)

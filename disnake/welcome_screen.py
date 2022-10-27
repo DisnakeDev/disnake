@@ -52,7 +52,7 @@ class WelcomeScreenChannel:
         id: int,
         description: str,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
-    ):
+    ) -> None:
         self.id: int = id
         self.description: str = description
         self.emoji: Optional[Union[Emoji, PartialEmoji]] = None

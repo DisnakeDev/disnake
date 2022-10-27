@@ -865,7 +865,9 @@ class GuildChannel(ABC):
     ) -> None:
         ...
 
-    async def set_permissions(self, target, *, overwrite=MISSING, reason=None, **permissions):
+    async def set_permissions(
+        self, target, *, overwrite=MISSING, reason=None, **permissions
+    ) -> None:
         """
         |coro|
 

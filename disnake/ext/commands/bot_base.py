@@ -127,7 +127,7 @@ class BotBase(CommonBotBase, GroupMixin):
         *,
         strip_after_prefix: bool = False,
         **options: Any,
-    ):
+    ) -> None:
         super().__init__(**options)
 
         if not isinstance(self, disnake.Client):

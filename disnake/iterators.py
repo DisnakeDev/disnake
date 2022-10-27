@@ -260,7 +260,7 @@ class HistoryIterator(_AsyncIterator["Message"]):
         after: Optional[Union[Snowflake, datetime.datetime]] = None,
         around: Optional[Union[Snowflake, datetime.datetime]] = None,
         oldest_first: Optional[bool] = None,
-    ):
+    ) -> None:
 
         if isinstance(before, datetime.datetime):
             before = Object(id=time_snowflake(before, high=False))
@@ -801,7 +801,7 @@ class ArchivedThreadIterator(_AsyncIterator["Thread"]):
         joined: bool,
         private: bool,
         before: Optional[Union[Snowflake, datetime.datetime]] = None,
-    ):
+    ) -> None:
         self.channel_id = channel_id
         self.guild = guild
         self.limit = limit

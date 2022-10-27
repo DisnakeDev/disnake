@@ -307,7 +307,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         self,
         func: CommandCallback[CogT, ContextT, P, T],
         **kwargs: Any,
-    ):
+    ) -> None:
         if not asyncio.iscoroutinefunction(func):
             raise TypeError("Callback must be a coroutine.")
 

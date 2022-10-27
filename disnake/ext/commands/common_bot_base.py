@@ -58,7 +58,7 @@ class CommonBotBase(Generic[CogT]):
         owner_ids: Optional[Set[int]] = None,
         reload: bool = False,
         **kwargs: Any,
-    ):
+    ) -> None:
         self.__cogs: Dict[str, Cog] = {}
         self.__extensions: Dict[str, types.ModuleType] = {}
         self.extra_events: Dict[str, List[CoroFunc]] = {}

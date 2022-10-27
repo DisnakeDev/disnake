@@ -762,7 +762,7 @@ class CustomActivity(BaseActivity):
         emoji: Optional[Union[ActivityEmojiPayload, str, PartialEmoji]] = None,
         state: Optional[str] = None,
         **kwargs: Any,
-    ):
+    ) -> None:
         super().__init__(**kwargs)
         self.name: Optional[str] = name
         self.state: Optional[str] = state

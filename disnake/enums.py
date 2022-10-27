@@ -152,10 +152,10 @@ class EnumMeta(type):
     def __getitem__(cls, key):
         return cls._enum_member_map_[key]
 
-    def __setattr__(cls, name, value):
+    def __setattr__(cls, name, value) -> None:
         raise TypeError("Enums are immutable.")
 
-    def __delattr__(cls, attr):
+    def __delattr__(cls, attr) -> None:
         raise TypeError("Enums are immutable")
 
     def __instancecheck__(self, instance):

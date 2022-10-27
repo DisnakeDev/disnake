@@ -100,7 +100,7 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         return self._underlying.custom_id
 
     @custom_id.setter
-    def custom_id(self, value: str):
+    def custom_id(self, value: str) -> None:
         if not isinstance(value, str):
             raise TypeError("custom_id must be None or str")
 
@@ -112,7 +112,7 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         return self._underlying.placeholder
 
     @placeholder.setter
-    def placeholder(self, value: Optional[str]):
+    def placeholder(self, value: Optional[str]) -> None:
         if value is not None and not isinstance(value, str):
             raise TypeError("placeholder must be None or str")
 

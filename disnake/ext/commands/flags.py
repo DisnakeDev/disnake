@@ -108,7 +108,7 @@ class CommandSyncFlags(BaseFlags):
     def __init__(self: NoReturn) -> None:
         ...
 
-    def __init__(self, **kwargs: bool):
+    def __init__(self, **kwargs: bool) -> None:
         self.value = all_flags_value(self.VALID_FLAGS)
         for key, value in kwargs.items():
             if key not in self.VALID_FLAGS:
