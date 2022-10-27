@@ -18,6 +18,7 @@ from typing import (
     Optional,
     Sequence,
     Tuple,
+    Type,
     TypeVar,
     Union,
     overload,
@@ -49,6 +50,7 @@ _log = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     import datetime
+    from types import TracebackType
 
     from ..abc import Snowflake
     from ..asset import AssetBytes
@@ -81,7 +83,12 @@ class AsyncDeferredLock:
     def delay_by(self, delta: float) -> None:
         self.delta = delta
 
-    async def __aexit__(self, type, value, traceback) -> None:
+    async def __aexit__(
+        self,
+        type: Optional[Type[BaseException]],
+        value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
         if self.delta:
             await asyncio.sleep(self.delta)
         self.lock.release()

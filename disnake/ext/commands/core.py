@@ -191,7 +191,7 @@ def hooked_wrapped_callback(command, ctx, coro):
 
 
 class _CaseInsensitiveDict(dict):
-    def __contains__(self, k):
+    def __contains__(self, k) -> bool:
         return super().__contains__(k.casefold())
 
     def __delitem__(self, k):

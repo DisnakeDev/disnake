@@ -12,7 +12,7 @@ import logging
 import re
 import threading
 import time
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union, overload
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Type, Union, overload
 from urllib.parse import quote as urlquote
 
 from .. import utils
@@ -30,6 +30,8 @@ __all__ = (
 _log = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
+    from types import TracebackType
+
     from ..abc import Snowflake
     from ..embeds import Embed
     from ..file import File
@@ -57,7 +59,12 @@ class DeferredLock:
     def delay_by(self, delta: float) -> None:
         self.delta = delta
 
-    def __exit__(self, type, value, traceback) -> None:
+    def __exit__(
+        self,
+        type: Optional[Type[BaseException]],
+        value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
         if self.delta:
             time.sleep(self.delta)
         self.lock.release()

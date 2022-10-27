@@ -45,7 +45,7 @@ class VoiceRegion:
         self.optimal: bool = data.get("optimal", False)
         self.custom: bool = data.get("custom", False)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.id
 
     def __repr__(self) -> str:
