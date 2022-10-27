@@ -10,7 +10,6 @@ import os
 import sys
 import time
 import types
-import warnings
 from typing import (
     TYPE_CHECKING,
     Any,
