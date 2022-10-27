@@ -201,7 +201,7 @@ def _not_overriden(f: FuncT) -> FuncT:
     return f
 
 
-class _HelpCommandImpl(Command[Optional["Cog"], ..., None]):
+class _HelpCommandImpl(Command[Optional["Cog"], Any, None]):
     def __init__(self, inject: HelpCommand, *args: Any, **kwargs: Any) -> None:
         super().__init__(inject.command_callback, *args, **kwargs)
         self._original: HelpCommand = inject
