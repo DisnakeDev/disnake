@@ -74,7 +74,7 @@ class _AsyncIterator(AsyncIterator[T]):
         raise NotImplementedError
 
     def get(self, **attrs: Any) -> Awaitable[Optional[T]]:
-        def predicate(elem: T):
+        def predicate(elem: T) -> bool:
             for attr, val in attrs.items():
                 nested = attr.split("__")
                 obj = elem

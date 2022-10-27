@@ -170,7 +170,7 @@ class SessionStartLimit:
 
         self.reset_time: datetime = utils.utcnow() + timedelta(milliseconds=self.reset_after)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"<SessionStartLimit total={self.total!r} remaining={self.remaining!r} "
             f"reset_after={self.reset_after!r} max_concurrency={self.max_concurrency!r} reset_time={self.reset_time!s}>"
@@ -1610,7 +1610,7 @@ class Client:
         future = self.loop.create_future()
         if check is None:
 
-            def _check(*args):
+            def _check(*args) -> bool:
                 return True
 
             check = _check

@@ -176,7 +176,7 @@ class MessageInteractionData(Dict[str, Any]):
             data=data.get("resolved", empty_resolved), state=state, guild_id=guild_id
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"<MessageInteractionData custom_id={self.custom_id!r} "
             f"component_type={self.component_type!r} values={self.values!r}>"

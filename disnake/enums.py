@@ -147,7 +147,7 @@ class EnumMeta(type):
     def __len__(cls):
         return len(cls._enum_member_names_)
 
-    def __repr__(cls):
+    def __repr__(cls) -> str:
         return f"<enum {cls.__name__}>"
 
     @property
@@ -169,7 +169,7 @@ class EnumMeta(type):
     def __delattr__(cls, attr) -> NoReturn:
         raise TypeError("Enums are immutable")
 
-    def __instancecheck__(self, instance):
+    def __instancecheck__(self, instance) -> bool:
         # isinstance(x, Y)
         # -> __instancecheck__(Y, x)
         try:

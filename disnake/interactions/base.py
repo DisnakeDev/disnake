@@ -1781,7 +1781,7 @@ class InteractionDataResolved(Dict[str, Any]):
         for str_id, attachment in attachments.items():
             self.attachments[int(str_id)] = Attachment(data=attachment, state=state)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"<InteractionDataResolved members={self.members!r} users={self.users!r} "
             f"roles={self.roles!r} channels={self.channels!r} messages={self.messages!r} attachments={self.attachments!r}>"

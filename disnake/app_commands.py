@@ -940,7 +940,7 @@ class ApplicationCommandPermissions:
         self.permission: bool = data["permission"]
         self._guild_id: int = guild_id
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<ApplicationCommandPermissions id={self.id!r} type={self.type!r} permission={self.permission!r}>"
 
     def __eq__(self, other):
@@ -1003,7 +1003,7 @@ class GuildApplicationCommandPermissions:
             for elem in data["permissions"]
         ]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"<GuildApplicationCommandPermissions id={self.id!r} application_id={self.application_id!r}"
             f" guild_id={self.guild_id!r} permissions={self.permissions!r}>"

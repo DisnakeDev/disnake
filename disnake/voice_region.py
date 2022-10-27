@@ -48,5 +48,5 @@ class VoiceRegion:
     def __str__(self):
         return self.id
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<VoiceRegion id={self.id!r} name={self.name!r} optimal={self.optimal!r}>"

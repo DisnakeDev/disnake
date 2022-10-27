@@ -51,7 +51,7 @@ class InstallParams:
         self.scopes = data["scopes"]
         self.permissions = Permissions(int(data["permissions"]))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<InstallParams scopes={self.scopes!r} permissions={self.permissions!r}>"
 
     def to_url(self) -> str:

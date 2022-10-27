@@ -109,7 +109,7 @@ def _is_submodule(parent: str, child: str) -> bool:
 
 
 class _DefaultRepr:
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<default-help-command>"
 
 

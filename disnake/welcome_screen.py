@@ -65,7 +65,7 @@ class WelcomeScreenChannel:
         else:
             raise TypeError("emoji must be None, a str, PartialEmoji, or Emoji instance.")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<WelcomeScreenChannel id={self.id!r} emoji={self.emoji!r} description={self.description!r}>"
 
     @classmethod

@@ -214,7 +214,7 @@ class ApplicationCommandInteractionData(Dict[str, Any]):
             for d in data.get("options", [])
         ]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"<ApplicationCommandInteractionData id={self.id!r} name={self.name!r} type={self.type!r} "
             f"target_id={self.target_id!r} target={self.target!r} resolved={self.resolved!r} options={self.options!r}>"
@@ -289,7 +289,7 @@ class ApplicationCommandInteractionDataOption(Dict[str, Any]):
         ]
         self.focused: bool = data.get("focused", False)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"<ApplicationCommandInteractionDataOption name={self.name!r} type={self.type!r}>"
             f"value={self.value!r} focused={self.focused!r} options={self.options!r}>"

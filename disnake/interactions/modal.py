@@ -138,5 +138,5 @@ class ModalInteractionData(Dict[str, Any]):
         # and relevant fields like a select's `values`.
         self.components: List[ModalInteractionActionRowPayload] = data["components"]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<ModalInteractionData custom_id={self.custom_id!r} components={self.components!r}>"
