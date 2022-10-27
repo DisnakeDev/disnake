@@ -552,7 +552,7 @@ class Interaction:
 
         if delay is not None:
 
-            async def delete(delay: float):
+            async def delete(delay: float) -> None:
                 await asyncio.sleep(delay)
                 try:
                     await deleter
@@ -1649,7 +1649,7 @@ class InteractionMessage(Message):
             return await super().delete(delay=delay)
         if delay is not None:
 
-            async def inner_call(delay: float = delay):
+            async def inner_call(delay: float = delay) -> None:
                 await asyncio.sleep(delay)
                 try:
                     await self._state._interaction.delete_original_response()

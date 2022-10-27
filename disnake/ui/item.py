@@ -142,7 +142,7 @@ class Item(WrappedComponent, Generic[V_co]):
         """Optional[:class:`View`]: The underlying view for this item."""
         return self._view
 
-    async def callback(self, interaction: MessageInteraction, /):
+    async def callback(self, interaction: MessageInteraction, /) -> None:
         """|coro|
 
         The callback associated with this UI item.

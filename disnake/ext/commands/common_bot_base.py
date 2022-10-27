@@ -594,7 +594,7 @@ class CommonBotBase(Generic[CogT]):
         """Mapping[:class:`str`, :class:`py:types.ModuleType`]: A read-only mapping of extension name to extension."""
         return types.MappingProxyType(self.__extensions)
 
-    async def _watchdog(self):
+    async def _watchdog(self) -> None:
         """|coro|
 
         Starts the bot watchdog which will watch currently loaded extensions

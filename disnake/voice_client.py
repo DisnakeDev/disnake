@@ -243,7 +243,7 @@ class VoiceClient(VoiceProtocol):
         """:class:`ClientUser`: The user connected to voice (i.e. ourselves)."""
         return self._state.user
 
-    def checked_add(self, attr, value, limit):
+    def checked_add(self, attr, value, limit) -> None:
         val = getattr(self, attr)
         if val + value > limit:
             setattr(self, attr, 0)

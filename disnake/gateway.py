@@ -932,7 +932,7 @@ class DiscordVoiceWebSocket:
         }
         await self.send_as_json(payload)
 
-    async def identify(self):
+    async def identify(self) -> None:
         state = self._connection
         payload: VoiceIdentifyCommand = {
             "op": self.IDENTIFY,

@@ -40,7 +40,7 @@ class StringView:
     def eof(self):
         return self.index >= self.end
 
-    def undo(self):
+    def undo(self) -> None:
         self.index = self.previous
 
     def skip_ws(self):

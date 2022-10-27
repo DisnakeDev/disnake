@@ -1357,8 +1357,10 @@ class InteractionBotBase(CommonBotBase):
         except errors.CommandError as exc:
             await app_command.dispatch_error(interaction, exc)
 
-    async def on_application_command(self, interaction: ApplicationCommandInteraction):
+    async def on_application_command(self, interaction: ApplicationCommandInteraction) -> None:
         await self.process_application_commands(interaction)
 
-    async def on_application_command_autocomplete(self, interaction: ApplicationCommandInteraction):
+    async def on_application_command_autocomplete(
+        self, interaction: ApplicationCommandInteraction
+    ) -> None:
         await self.process_app_command_autocompletion(interaction)

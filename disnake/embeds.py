@@ -349,7 +349,7 @@ class Embed:
             )
 
     @colour.deleter
-    def colour(self):
+    def colour(self) -> None:
         self._colour = MISSING
 
     color = colour

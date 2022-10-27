@@ -1125,7 +1125,7 @@ class Message(Hashable):
                 if role is not None:
                     self.role_mentions.append(role)
 
-    def _handle_components(self, components: List[ComponentPayload]):
+    def _handle_components(self, components: List[ComponentPayload]) -> None:
         self.components = [
             _component_factory(d, type=ActionRow[MessageComponent]) for d in components
         ]
@@ -1424,7 +1424,7 @@ class Message(Hashable):
         """
         if delay is not None:
 
-            async def delete(delay: float):
+            async def delete(delay: float) -> None:
                 await asyncio.sleep(delay)
                 try:
                     await self._state.http.delete_message(self.channel.id, self.id)

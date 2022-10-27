@@ -206,7 +206,7 @@ class _CaseInsensitiveDict(dict):
     def pop(self, k, default=None):
         return super().pop(k.casefold(), default)
 
-    def __setitem__(self, k, v):
+    def __setitem__(self, k, v) -> None:
         super().__setitem__(k.casefold(), v)
 
 

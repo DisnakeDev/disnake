@@ -91,7 +91,7 @@ class Emoji(_EmojiTag, AssetMixin):
         self._state: ConnectionState = state
         self._from_data(data)
 
-    def _from_data(self, emoji: EmojiPayload):
+    def _from_data(self, emoji: EmojiPayload) -> None:
         self.require_colons: bool = emoji.get("require_colons", False)
         self.managed: bool = emoji.get("managed", False)
         self.id: int = int(emoji["id"])  # type: ignore

@@ -183,7 +183,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         description: Optional[str] = None,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
         default: bool = False,
-    ):
+    ) -> None:
         """Adds an option to the select menu.
 
         To append a pre-existing :class:`.SelectOption` use the

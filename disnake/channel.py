@@ -92,7 +92,7 @@ if TYPE_CHECKING:
     from .webhook import Webhook
 
 
-async def _single_delete_strategy(messages: Iterable[Message]):
+async def _single_delete_strategy(messages: Iterable[Message]) -> None:
     for m in messages:
         await m.delete()
 
@@ -2282,9 +2282,9 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         ...
 
     @utils.copy_doc(disnake.abc.GuildChannel.move)
-    async def move(self, **kwargs):
+    async def move(self, **kwargs) -> None:
         kwargs.pop("category", None)
-        await super().move(**kwargs)
+        return await super().move(**kwargs)
 
     @property
     def channels(self) -> List[GuildChannelType]:

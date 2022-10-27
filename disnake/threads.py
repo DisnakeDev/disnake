@@ -182,7 +182,7 @@ class Thread(Messageable, Hashable):
     def __str__(self) -> str:
         return self.name
 
-    def _from_data(self, data: ThreadPayload):
+    def _from_data(self, data: ThreadPayload) -> None:
         self.id = int(data["id"])
         self.parent_id = int(data["parent_id"])
         self.owner_id = _get_as_snowflake(data, "owner_id")
@@ -207,7 +207,7 @@ class Thread(Messageable, Hashable):
         else:
             self.me = ThreadMember(self, member)
 
-    def _unroll_metadata(self, data: ThreadMetadata):
+    def _unroll_metadata(self, data: ThreadMetadata) -> None:
         self.archived = data["archived"]
         self.auto_archive_duration = data["auto_archive_duration"]
         self.archive_timestamp = parse_time(data["archive_timestamp"])
@@ -215,7 +215,7 @@ class Thread(Messageable, Hashable):
         self.invitable = data.get("invitable", True)
         self.create_timestamp = parse_time(data.get("create_timestamp"))
 
-    def _update(self, data):
+    def _update(self, data) -> None:
         try:
             self.name = data["name"]
         except KeyError:
@@ -594,7 +594,7 @@ class Thread(Messageable, Hashable):
 
         minimum_time = int((time.time() - 14 * 24 * 60 * 60) * 1000.0 - 1420070400000) << 22
 
-        async def _single_delete_strategy(messages: Iterable[Message]):
+        async def _single_delete_strategy(messages: Iterable[Message]) -> None:
             for m in messages:
                 await m.delete()
 
@@ -749,7 +749,7 @@ class Thread(Messageable, Hashable):
         # The data payload will always be a Thread payload
         return Thread(data=data, state=self._state, guild=self.guild)  # type: ignore
 
-    async def join(self):
+    async def join(self) -> None:
         """|coro|
 
         Joins this thread.
@@ -766,7 +766,7 @@ class Thread(Messageable, Hashable):
         """
         await self._state.http.join_thread(self.id)
 
-    async def leave(self):
+    async def leave(self) -> None:
         """|coro|
 
         Leaves this thread.
@@ -778,7 +778,7 @@ class Thread(Messageable, Hashable):
         """
         await self._state.http.leave_thread(self.id)
 
-    async def add_user(self, user: Snowflake):
+    async def add_user(self, user: Snowflake) -> None:
         """|coro|
 
         Adds a user to this thread.
@@ -802,7 +802,7 @@ class Thread(Messageable, Hashable):
         """
         await self._state.http.add_user_to_thread(self.id, user.id)
 
-    async def remove_user(self, user: Snowflake):
+    async def remove_user(self, user: Snowflake) -> None:
         """|coro|
 
         Removes a user from this thread.

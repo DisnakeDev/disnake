@@ -193,7 +193,7 @@ class ReactionIterator(_AsyncIterator[Union["User", "Member"]]):
         except asyncio.QueueEmpty:
             raise NoMoreItems()
 
-    async def fill_users(self):
+    async def fill_users(self) -> None:
         if self.limit > 0:
             retrieve = min(self.limit, 100)
 
@@ -329,7 +329,7 @@ class HistoryIterator(_AsyncIterator["Message"]):
         self.retrieve = retrieve
         return retrieve > 0
 
-    async def fill_messages(self):
+    async def fill_messages(self) -> None:
         if not hasattr(self, "channel"):
             # do the required set up
             channel = await self.messageable._get_channel()
@@ -449,7 +449,7 @@ class BanIterator(_AsyncIterator["BanEntry"]):
         self.retrieve = min(self.limit, 1000) if self.limit is not None else 1000
         return self.retrieve > 0
 
-    async def fill_bans(self):
+    async def fill_bans(self) -> None:
         if self._get_retrieve():
             data = await self._retrieve_bans(self.retrieve)
             if len(data) < 1000:
@@ -553,7 +553,7 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
         self.retrieve = retrieve
         return retrieve > 0
 
-    async def _fill(self):
+    async def _fill(self) -> None:
         if self._get_retrieve():
             log_data = await self._retrieve_data(self.retrieve)
             entries = log_data.get("audit_log_entries")
@@ -699,7 +699,7 @@ class GuildIterator(_AsyncIterator["Guild"]):
 
         return Guild(state=self.state, data=data)
 
-    async def fill_guilds(self):
+    async def fill_guilds(self) -> None:
         if self._get_retrieve():
             data = await self._retrieve_guilds(self.retrieve)
             if len(data) < 200:
@@ -770,7 +770,7 @@ class MemberIterator(_AsyncIterator["Member"]):
         self.retrieve = retrieve
         return retrieve > 0
 
-    async def fill_members(self):
+    async def fill_members(self) -> None:
         if self._get_retrieve():
             after = self.after.id if self.after else None
             data = await self.get_members(self.guild.id, self.retrieve, after)
