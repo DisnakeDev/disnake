@@ -348,6 +348,10 @@ SelectMenu = StringSelectMenu  # backwards compatibility
 class UserSelectMenu(BaseSelectMenu):
     """Represents a user select menu from the Discord Bot UI Kit.
 
+    .. note::
+        The user constructible and usable type to create a
+        user select menu is :class:`disnake.ui.UserSelect`.
+
     .. versionadded:: 2.7
 
     Attributes
@@ -376,6 +380,10 @@ class UserSelectMenu(BaseSelectMenu):
 
 class RoleSelectMenu(BaseSelectMenu):
     """Represents a role select menu from the Discord Bot UI Kit.
+
+    .. note::
+        The user constructible and usable type to create a
+        role select menu is :class:`disnake.ui.RoleSelect`.
 
     .. versionadded:: 2.7
 
@@ -406,6 +414,10 @@ class RoleSelectMenu(BaseSelectMenu):
 class MentionableSelectMenu(BaseSelectMenu):
     """Represents a mentionable (user/member/role) select menu from the Discord Bot UI Kit.
 
+    .. note::
+        The user constructible and usable type to create a
+        mentionable select menu is :class:`disnake.ui.MentionableSelect`.
+
     .. versionadded:: 2.7
 
     Attributes
@@ -434,6 +446,10 @@ class MentionableSelectMenu(BaseSelectMenu):
 
 class ChannelSelectMenu(BaseSelectMenu):
     """Represents a channel select menu from the Discord Bot UI Kit.
+
+    .. note::
+        The user constructible and usable type to create a
+        channel select menu is :class:`disnake.ui.ChannelSelect`.
 
     .. versionadded:: 2.7
 
