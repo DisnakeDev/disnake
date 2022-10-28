@@ -16,7 +16,8 @@ class File:
     .. note::
 
         File objects are single use and are not meant to be reused in
-        multiple :meth:`abc.Messageable.send`\\s.
+        multiple :meth:`abc.Messageable.send`\\s, :meth:`Message.edit`, :meth:`Interaction.send`,
+        :meth: `Interaction.edit_original_response`.
 
     Attributes
     ----------
