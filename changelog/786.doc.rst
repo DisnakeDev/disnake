@@ -1,0 +1,1 @@
+Add a note that mention that using a :class:`disnake.File` object as file kwarg makes an :class:`disnake.Embed` not reusable.
