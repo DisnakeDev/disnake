@@ -12,8 +12,8 @@ involved. The library attempts to make it easy to use and friendly. In order to 
 this goal, it makes use of a couple of data classes and enums that aid in this goal,
 listed below.
 
-Data Classes
-------------
+Discord Models
+---------------
 
 AuditLogEntry
 ~~~~~~~~~~~~~
@@ -22,6 +22,9 @@ AuditLogEntry
 
 .. autoclass:: AuditLogEntry
     :members:
+
+Data Classes
+------------
 
 AuditLogChanges
 ~~~~~~~~~~~~~~~

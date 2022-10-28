@@ -68,15 +68,6 @@ ThreadMember
 .. autoclass:: ThreadMember()
     :members:
 
-ForumTag
-~~~~~~~~
-
-.. attributetable:: ForumTag
-
-.. autoclass:: ForumTag()
-    :members:
-    :inherited-members:
-
 StageChannel
 ~~~~~~~~~~~~
 
@@ -150,6 +141,15 @@ ChannelFlags
 
 .. autoclass:: ChannelFlags
     :members:
+
+ForumTag
+~~~~~~~~
+
+.. attributetable:: ForumTag
+
+.. autoclass:: ForumTag()
+    :members:
+    :inherited-members:
 
 RawThreadDeleteEvent
 ~~~~~~~~~~~~~~~~~~~~

@@ -51,13 +51,6 @@ WelcomeScreen
 .. autoclass:: WelcomeScreen()
     :members:
 
-WelcomeScreenChannel
-~~~~~~~~~~~~~~~~~~~~
-
-.. attributetable:: WelcomeScreenChannel
-
-.. autoclass:: WelcomeScreenChannel()
-
 Data Classes
 ------------
 
@@ -86,6 +79,13 @@ SystemChannelFlags
 
 .. autoclass:: SystemChannelFlags()
     :members:
+
+WelcomeScreenChannel
+~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: WelcomeScreenChannel
+
+.. autoclass:: WelcomeScreenChannel()
 
 Enumerations
 ------------

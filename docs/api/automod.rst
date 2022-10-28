@@ -18,9 +18,6 @@ AutoModRule
 .. autoclass:: AutoModRule()
     :members:
 
-Data Classes
-------------
-
 AutoModActionExecution
 ~~~~~~~~~~~~~~~~~~~~~~
 
@@ -28,6 +25,9 @@ AutoModActionExecution
 
 .. autoclass:: AutoModActionExecution()
     :members:
+
+Data Classes
+------------
 
 AutoModKeywordPresets
 ~~~~~~~~~~~~~~~~~~~~~
