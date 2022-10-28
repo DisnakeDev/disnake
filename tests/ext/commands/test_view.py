@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: MIT
 
-
 import pytest
 
 from disnake.ext.commands.errors import (
@@ -36,6 +35,7 @@ class TestView:
         [
             ("hello", "hello"),
             ("how are you", "how"),
+            ('"some quotes" here', "some quotes"),
             ("  bugs are fun", " "),
             ("''", "''"),
         ],
@@ -54,6 +54,7 @@ class TestView:
             ('hone"stl"y, quotes.', UnexpectedQuoteError),
             ('"""', InvalidEndOfQuotedStringError),
             ('"hello', ExpectedClosingQuoteError),
+            ('"test\\', ExpectedClosingQuoteError),
         ],
     )
     def test_get_quoted_word_raises(self, text, exception):
