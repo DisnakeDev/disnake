@@ -10,7 +10,7 @@ from disnake.ext.commands.errors import (
 from disnake.ext.commands.view import StringView
 
 
-class TestView:
+class TestStringView:
     @pytest.mark.parametrize(
         ("text", "expected_word"),
         [
