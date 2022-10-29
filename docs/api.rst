@@ -6019,10 +6019,6 @@ ActionRow
     :members:
     :exclude-members: add_select
 
-    .. method:: add_select
-
-        Alias of :func:`~disnake.ui.ActionRow.add_string_select`.
-
 Item
 ~~~~~~~
 
