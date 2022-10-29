@@ -84,13 +84,29 @@ class MessageInteraction(Interaction):
         )
         self.message = Message(state=self._state, channel=self.channel, data=data["message"])
 
-    # TODO: perhaps keep `values` like before and add a `resolved_values` instead?
     @property
-    def values(self) -> Optional[Sequence[Union[str, Member, User, Role, InteractionChannel]]]:
-        """Optional[Sequence[:class:`str`]]: The values the user selected.
+    def values(self) -> Optional[List[str]]:
+        """Optional[List[:class:`str`]]: The values the user selected.
 
-        .. versionchanged:: 2.7
-            Now supports other select menu types, e.g. channel select menus.
+        For select menus of type :attr:`~ComponentType.string_select`,
+        these are just the string values the user selected.
+        For other select menu types, these are the IDs of the selected entities.
+
+        See also :attr:`resolved_values`.
+        """
+        return self.data.values
+
+    @cached_slot_property("_cs_resolved_values")
+    def resolved_values(
+        self,
+    ) -> Optional[Sequence[Union[str, Member, User, Role, InteractionChannel]]]:
+        """Optional[Sequence[:class:`str`, :class:`Member`, :class:`User`, :class:`Role`, Union[:class:`abc.GuildChannel`, :class:`Thread`, :class:`PartialMessageable`]]]: The (resolved) values the user selected.
+
+        For select menus of type :attr:`~ComponentType.string_select`,
+        this is equivalent to :attr:`values`.
+        For other select menu types, these are full objects corresponding to the selected entities.
+
+        .. versionadded:: 2.7
         """
         if self.data.values is None:
             return None
@@ -100,10 +116,11 @@ class MessageInteraction(Interaction):
         if component_type is ComponentType.string_select:
             return self.data.values
 
+        resolved = self.data.resolved
         values: List[Union[Member, User, Role, InteractionChannel]] = []
         for key in self.data.values:
             # force upcast to avoid typing issues; we expect the api to only provide valid values
-            value: Any = self.data.resolved.get_with_type(key, component_type, key)
+            value: Any = resolved.get_with_type(key, component_type, key)
             values.append(value)
         return values
 
@@ -131,7 +148,7 @@ class MessageInteractionData(Dict[str, Any]):
         The type of the component.
     values: Optional[List[:class:`str`]]
         The values the user has selected in a select menu.
-        For non-string select menus, this contains snowflakes for use with :attr:`resolved`.
+        For non-string select menus, this contains IDs for use with :attr:`resolved`.
     resolved: :class:`InteractionDataResolved`
         All resolved objects related to this interaction.
 
