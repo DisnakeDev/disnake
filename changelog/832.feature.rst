@@ -1,0 +1,1 @@
+Add ``suppress_embeds`` parameter to :func:`Interaction.edit_original_response`.
