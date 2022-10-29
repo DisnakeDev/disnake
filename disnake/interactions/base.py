@@ -381,6 +381,7 @@ class Interaction:
         attachments: Optional[List[Attachment]] = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[Components[MessageUIComponent]] = MISSING,
+        suppress_embeds: bool = MISSING,
         allowed_mentions: Optional[AllowedMentions] = None,
     ) -> InteractionMessage:
         """|coro|
@@ -446,6 +447,12 @@ class Interaction:
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
 
+        suppress_embeds: :class:`bool`
+            Whether to suppress embeds for the message. This hides
+            all embeds from the UI if set to ``True``.
+
+            .. versionadded:: 2.7
+
         Raises
         ------
         HTTPException
@@ -477,6 +484,7 @@ class Interaction:
             embeds=embeds,
             view=view,
             components=components,
+            suppress_embeds=suppress_embeds,
             allowed_mentions=allowed_mentions,
             previous_allowed_mentions=previous_mentions,
         )
