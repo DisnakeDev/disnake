@@ -1561,7 +1561,6 @@ class InteractionMessage(Message):
             Whether to suppress embeds for the message. This removes
             all the embeds if set to ``True``. If set to ``False``
             this brings the embeds back if they were suppressed.
-            Using this parameter requires :attr:`~.Permissions.manage_messages`.
 
             .. versionadded:: 2.7
 
