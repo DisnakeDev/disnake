@@ -1,1 +1,1 @@
-Silence deprecation warnings that appear when running on python 3.11.
+Update event loop handling to avoid warnings when running on Python 3.11.
