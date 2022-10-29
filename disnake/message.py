@@ -1576,10 +1576,10 @@ class Message(Hashable):
                 Supports passing ``None`` to clear attachments.
 
         suppress_embeds: :class:`bool`
-            Whether to suppress embeds for the message. This removes
-            all the embeds if set to ``True``. If set to ``False``
-            this brings the embeds back if they were suppressed.
-            Using this parameter requires :attr:`~.Permissions.manage_messages`.
+            Whether to suppress embeds for the message. This hides
+            all the embeds from the UI if set to ``True``. If set
+            to ``False``, this brings the embeds back if they were
+            suppressed.
         delete_after: Optional[:class:`float`]
             If provided, the number of seconds to wait in the background
             before deleting the message we just edited. If the deletion fails,
@@ -2264,10 +2264,10 @@ class PartialMessage(Hashable):
                 Supports passing ``None`` to clear attachments.
 
         suppress_embeds: :class:`bool`
-            Whether to suppress embeds for the message. This removes
-            all the embeds if set to ``True``. If set to ``False``
-            this brings the embeds back if they were suppressed.
-            Using this parameter requires :attr:`~.Permissions.manage_messages`.
+            Whether to suppress embeds for the message. This hides
+            all the embeds from the UI if set to ``True``. If set
+            to ``False``, this brings the embeds back if they were
+            suppressed.
         delete_after: Optional[:class:`float`]
             If provided, the number of seconds to wait in the background
             before deleting the message we just edited. If the deletion fails,

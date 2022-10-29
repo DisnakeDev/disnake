@@ -3053,7 +3053,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             This cannot be mixed with the ``embed`` parameter.
         suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This hides
-            all embeds from the UI if set to ``True``.
+            all the embeds from the UI if set to ``True``.
         file: :class:`.File`
             The file to upload. This cannot be mixed with the ``files`` parameter.
         files: List[:class:`.File`]

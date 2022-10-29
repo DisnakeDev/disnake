@@ -449,7 +449,9 @@ class Interaction:
 
         suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This hides
-            all embeds from the UI if set to ``True``.
+            all the embeds from the UI if set to ``True``. If set
+            to ``False``, this brings the embeds back if they were
+            suppressed.
 
             .. versionadded:: 2.7
 
@@ -638,7 +640,7 @@ class Interaction:
             is set to 15 minutes.
         suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This hides
-            all embeds from the UI if set to ``True``.
+            all the embeds from the UI if set to ``True``.
 
             .. versionadded:: 2.5
 
@@ -900,7 +902,7 @@ class InteractionResponse:
 
         suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This hides
-            all embeds from the UI if set to ``True``.
+            all the embeds from the UI if set to ``True``.
 
             .. versionadded:: 2.5
 
@@ -1558,9 +1560,10 @@ class InteractionMessage(Message):
             .. versionadded:: 2.4
 
         suppress_embeds: :class:`bool`
-            Whether to suppress embeds for the message. This removes
-            all the embeds if set to ``True``. If set to ``False``
-            this brings the embeds back if they were suppressed.
+            Whether to suppress embeds for the message. This hides
+            all the embeds from the UI if set to ``True``. If set
+            to ``False``, this brings the embeds back if they were
+            suppressed.
 
             .. versionadded:: 2.7
 
