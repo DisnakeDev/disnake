@@ -7,21 +7,15 @@ inputs:
     description: The python version to install
     required: true
   cache-dependency-path:
-    description: The path(s) to use for pip caching, defaults to requirements + setup
+    description: The path(s) to use for pip caching, defaults to setup + pdm
     required: false
     default: |
-      requirements/
-      requirements.txt
-      setup.py
       pyproject.toml
-  dependencies:
-    description: Other python dependencies to install
-    required: false
-  nox-setup:
+      pdm.lock
+      setup.py
+  pdm-command:
     description: |
-      The dependencies to install using `nox -s setup`.
-      Automatically installs nox as well.
-      Use `*` to install all dependencies.
+      The command to run to install dependencies.
     required: false
 outputs:
   python-version:
@@ -31,33 +25,32 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Set up python ${{ inputs.python-version }}
+    - name: Set up pdm with python ${{ inputs.python-version }}
       id: setup-python
-      uses: actions/setup-python@v4
+      uses: pdm-project/setup-pdm@v3
       with:
         python-version: ${{ inputs.python-version }}
-        cache: "pip"
+        cache: true
         cache-dependency-path: ${{ inputs.cache-dependency-path }}
+        enable-pep582: false # Enable PEP 582 package loading globally
+
+    - name: Ignore saved pythons
+      shell: bash
+      run: |
+        echo "PDM_IGNORE_SAVED_PYTHON=1" >> $GITHUB_ENV
 
     - name: Update pip, wheel, setuptools
       shell: bash
       run: pip install -U pip wheel setuptools
 
     - name: Install dependencies
-      if: inputs.nox-setup || inputs.dependencies
+      if: inputs.pdm-command
       env:
-        NOX_SETUP: ${{ inputs.nox-setup }}
-        DEPS: ${{ inputs.dependencies }}
+        PDM_COMMAND: ${{ inputs.pdm-command }}
       shell: bash
       run: |
-        [ -n "$NOX_SETUP" ] && DEPS="$DEPS nox"
-        python -m pip install $DEPS
-
-        if [ "*" == "$NOX_SETUP" ]; then
-          nox -s setup
-        elif [ -n "$NOX_SETUP" ]; then
-          nox -s setup -- $NOX_SETUP
-        fi
+        pip install nox
+        $PDM_COMMAND
 
     - name: Set python version
       id: python-version

@@ -150,7 +150,7 @@ def pyright(session: nox.Session):
 def test(session: nox.Session, extras: List[str]):
     """Run tests."""
     extras = [f"-G {extra}" for extra in extras]
-    session.run_always("pdm", "install", "-dG", "test", *extras, external=True)
+    session.run_always("pdm", "install", "-dG", "test", "-dG", "typing", *extras, external=True)
 
     pytest_args = ["--cov", "--cov-context=test"]
     global reset_coverage
