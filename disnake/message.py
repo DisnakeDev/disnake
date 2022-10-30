@@ -1530,8 +1530,8 @@ class Message(Hashable):
         .. warning::
 
             This method cannot be used on messages authored by others, with one exception.
-            The ``suppress_embeds`` parameter can be provided for messages authored by others.
-            Changing ``suppress_embeds`` requires :attr:`~.Permissions.manage_messages`.
+            The ``suppress_embeds`` parameter can be used to change the state of embeds on
+            other users' messages, requiring the :attr:`~.Permissions.manage_messages` permission.
 
         .. versionchanged:: 1.3
             The ``suppress`` keyword-only parameter was added.
@@ -2222,8 +2222,8 @@ class PartialMessage(Hashable):
         .. warning::
 
             This method cannot be used on messages authored by others, with one exception.
-            The ``suppress_embeds`` parameter can be provided for messages authored by others.
-            Changing ``suppress_embeds`` requires :attr:`~.Permissions.manage_messages`.
+            The ``suppress_embeds`` parameter can be used to change the state of embeds on
+            other users' messages, requiring the :attr:`~.Permissions.manage_messages` permission.
 
         .. versionchanged:: 2.1
             :class:`disnake.Message` is always returned.
