@@ -1527,6 +1527,12 @@ class Message(Hashable):
             those images will be removed if the message's attachments are edited in any way
             (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
 
+        .. warning::
+
+            This method cannot be used on messages authored by others, except for one exception.
+            The ``suppress_embeds`` parameter can be provided for messages authored by others.
+            Changing ``suppress_embeds`` requires :attr:`~.Permissions.manage_messages`.
+
         .. versionchanged:: 1.3
             The ``suppress`` keyword-only parameter was added.
 
@@ -2207,6 +2213,18 @@ class PartialMessage(Hashable):
 
         The content must be able to be transformed into a string via ``str(content)``.
 
+        .. note::
+            If the original message has embeds with images that were created from local files
+            (using the ``file`` parameter with :meth:`Embed.set_image` or :meth:`Embed.set_thumbnail`),
+            those images will be removed if the message's attachments are edited in any way
+            (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
+
+        .. warning::
+
+            This method cannot be used on messages authored by others, except for one exception.
+            The ``suppress_embeds`` parameter can be provided for messages authored by others.
+            Changing ``suppress_embeds`` requires :attr:`~.Permissions.manage_messages`.
+
         .. versionchanged:: 2.1
             :class:`disnake.Message` is always returned.
 
@@ -2216,12 +2234,6 @@ class PartialMessage(Hashable):
 
         .. versionchanged:: 2.6
             Raises :exc:`TypeError` instead of ``InvalidArgument``.
-
-        .. note::
-            If the original message has embeds with images that were created from local files
-            (using the ``file`` parameter with :meth:`Embed.set_image` or :meth:`Embed.set_thumbnail`),
-            those images will be removed if the message's attachments are edited in any way
-            (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
 
         Parameters
         ----------
