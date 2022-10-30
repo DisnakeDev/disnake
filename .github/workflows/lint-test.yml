@@ -248,7 +248,7 @@ jobs:
         COVERALLS_PARALLEL: true
         COVERALLS_SERVICE_NAME: github
       run: |
-        python -m pip install coveralls==3.3.1
+        python -m pip install coveralls==3.3.1 'coverage[toml]~=6.5'
         python -m coveralls
 
   coveralls-finish:
@@ -268,7 +268,6 @@ jobs:
         python-version: 3.8
         cache-dependency-path: |
           .github/workflows/lint-test.yml
-
 
     - name: Coveralls Finished
       continue-on-error: true
