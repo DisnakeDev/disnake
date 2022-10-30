@@ -1529,7 +1529,7 @@ class Message(Hashable):
 
         .. warning::
 
-            This method cannot be used on messages authored by others, except for one exception.
+            This method cannot be used on messages authored by others, with one exception.
             The ``suppress_embeds`` parameter can be provided for messages authored by others.
             Changing ``suppress_embeds`` requires :attr:`~.Permissions.manage_messages`.
 
@@ -2221,7 +2221,7 @@ class PartialMessage(Hashable):
 
         .. warning::
 
-            This method cannot be used on messages authored by others, except for one exception.
+            This method cannot be used on messages authored by others, with one exception.
             The ``suppress_embeds`` parameter can be provided for messages authored by others.
             Changing ``suppress_embeds`` requires :attr:`~.Permissions.manage_messages`.
 
