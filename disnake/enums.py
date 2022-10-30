@@ -586,8 +586,13 @@ class VideoQualityMode(Enum):
 class ComponentType(Enum):
     action_row = 1
     button = 2
-    select = 3
+    string_select = 3
+    select = string_select  # backwards compatibility
     text_input = 4
+    user_select = 5
+    role_select = 6
+    mentionable_select = 7
+    channel_select = 8
 
     def __int__(self):
         return self.value
