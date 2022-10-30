@@ -7,6 +7,18 @@ Activities
 
 This section documents everything related to :class:`User`'s and :class:`Member`'s activities.
 
+Discord Models
+--------------
+
+Spotify
+~~~~~~~
+
+.. attributetable:: Spotify
+
+.. autoclass:: Spotify()
+    :members:
+    :inherited-members:
+
 Data Classes
 ------------
 
@@ -25,15 +37,6 @@ Activity
 .. attributetable:: Activity
 
 .. autoclass:: Activity
-    :members:
-    :inherited-members:
-
-Spotify
-~~~~~~~
-
-.. attributetable:: Spotify
-
-.. autoclass:: Spotify()
     :members:
     :inherited-members:
 
