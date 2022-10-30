@@ -7,6 +7,7 @@ import datetime
 import inspect
 import sys
 import traceback
+import warnings
 from collections.abc import Sequence
 from typing import (
     TYPE_CHECKING,
@@ -327,7 +328,9 @@ class Loop(Generic[LF]):
             args = (self._injected, *args)
 
         if self.loop is MISSING:
-            self.loop = asyncio.get_event_loop()
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", DeprecationWarning)
+                self.loop = asyncio.get_event_loop()
 
         self._task = self.loop.create_task(self._loop(*args, **kwargs))
         return self._task
