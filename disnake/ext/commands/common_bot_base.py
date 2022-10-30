@@ -77,12 +77,6 @@ class CommonBotBase(Generic[CogT]):
 
         self.reload: bool = reload
 
-        loop = asyncio.get_event_loop()
-        loop.create_task(self._fill_owners())
-
-        if self.reload:
-            loop.create_task(self._watchdog())
-
         super().__init__(*args, **kwargs)
 
     def dispatch(self, event_name: str, *args: Any, **kwargs: Any) -> None:
@@ -124,6 +118,14 @@ class CommonBotBase(Generic[CogT]):
                 pass
 
         await super().close()  # type: ignore
+
+    @disnake.utils.copy_doc(disnake.Client.login)
+    async def login(self, token: str) -> None:
+        self.loop.create_task(self._fill_owners())  # type: ignore
+
+        if self.reload:
+            self.loop.create_task(self._watchdog())  # type: ignore
+        await super().login(token=token)  # type: ignore
 
     async def is_owner(self, user: Union[disnake.User, disnake.Member]) -> bool:
         """|coro|
