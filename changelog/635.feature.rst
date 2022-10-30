@@ -1,0 +1,27 @@
+Implement new cloned attributes on the :func:`clone` method of:
+
+    - :class:`TextChannel`:
+        The :meth:`TextChannel.clone` will now clone :attr:`TextChannel.topic`, :attr:`TextChannel.position`, :attr:`TextChannel.nsfw`,
+        :attr:`TextChannel.category`, :attr:`TextChannel.slowmode_delay`, :attr:`TextChannel.type`, :attr:`TextChannel.default_auto_archive_duration`,
+        :attr:`TextChannel.flags` into the newly-cloned TextChannel. In addition, :meth:`TextChannel.clone` now accepts the listed attributes as kwargs
+        to make an in-place edit of the newly-cloned channel.
+
+    - :class:`VoiceChannel`:
+        The :meth:`VoiceChannel.clone` will now clone :attr:`VoiceChannel.bitrate`, :attr:`VoiceChannel.user_limit`, :attr:`VoiceChannel.position`, :attr:`VoiceChannel.category`,
+        :attr:`VoiceChannel.rtc_region`, :attr:`VoiceChannel.video_quality_mode`, :attr:`VoiceChannel.nsfw`, :attr:`VoiceChannel.slowmode_delay`, :attr:`VoiceChannel.flags` into the newly-cloned VoiceChannel.
+        In addition, :meth:`VoiceChannel.clone` now accepts the listed attributes as kwargs to make in-place edit of the newly-cloned channel.
+
+    - :class:`CategoryChannel`:
+        The :meth:`CategoryChannel.clone` will now clone :attr:`CategoryChannel.position`, :attr:`CategoryChannel.nsfw`, :attr:`CategoryChannel.flags` into the newly-cloned CategoryChannel.
+        In addition, :meth:`CategoryChannel.clone` now accepts the listed attributes as kwargs to make in-place edit of the newly-cloned channel.
+
+    - :class:`StageChannel`:
+        The :meth:`StageChannel.clone` will now clone :attr:`StageChannel.position`, :attr:`StageChannel.category`, :attr:`StageChannel.rtc_region`, :attr:`StageChannel.video_quality_mode`,
+        :attr:`StageChannel.bitrate`, :attr:`StageChannel.flags` into the newly-cloned StageChannel. In addition, :meth:`StageChannel.clone` now accepts the listed attributes as kwargs to make
+        in-place edit of the newly-cloned channel.
+
+    - :class:`ForumChannel`:
+        The :meth:`ForumChannel.clone` will now clone :attr:`ForumChannel.topic`, :attr:`ForumChannel.position`, :attr:`ForumChannel.nsfw`, :attr:`ForumChannel.category`,
+        :attr:`ForumChannel.slowmode_delay`, :attr:`ForumChannel.default_auto_archive_duration`, :attr:`ForumChannel.default_thread_slowmode_delay`, :attr:`ForumChannel.flags`,
+        :attr:`ForumChannel.require_tag`, :attr:`ForumChannel.available_tags`, :attr:`ForumChannel.default_reaction`, :attr:`ForumChannel.default_sort_order` into the newly-cloned ForumChannel.
+        In addition, :meth:`ForumChannel.clone` now accepts the listed attributes as kwargs to make in-place edit of the newly-cloned channel.

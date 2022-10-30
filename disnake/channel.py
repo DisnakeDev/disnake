@@ -448,13 +448,80 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             # the payload will always be the proper channel payload
             return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
 
-    @utils.copy_doc(disnake.abc.GuildChannel.clone)
     async def clone(
-        self, *, name: Optional[str] = None, reason: Optional[str] = None
+        self,
+        *,
+        name: Optional[str] = None,
+        topic: Optional[str] = None,
+        position: Optional[int] = None,
+        nsfw: Optional[bool] = None,
+        category: Optional[Snowflake] = None,
+        slowmode_delay: Optional[int] = None,
+        type: Optional[ChannelType] = None,
+        default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = None,
+        flags: Optional[ChannelFlags] = None,
+        reason: Optional[str] = None,
     ) -> TextChannel:
+        """|coro|
+
+        Clones this channel. This creates a channel with the same properties
+        as this channel.
+
+        You must have :attr:`.Permissions.manage_channels` permission to
+        do this.
+
+        .. versionadded:: 1.1
+
+        .. versionchanged:: 2.7
+
+        Parameters
+        ----------
+        name: Optional[:class:`str`]
+            The name of the new channel. If not provided, defaults to this channel name.
+        topic: Optional[:class:`str`]
+            The topic of the new channel. If not provided, defaults to this channel topic.
+        position: Optional[:class:`int`]
+            The position of the new channel. If not provided, defaults to this channel position.
+        nsfw: Optional[:class:`bool`]
+            Wether the new channel should be nsfw or not. If not provided, defaults to this channel nsfw value.
+        category: Optional[:class:`abc.Snowflake`]
+            The category id where the new channel should be grouped. If not provided, defaults to this channel category.
+        slowmode_delay: Optional[:class:`int`]
+            The slowmode of the new channel. If not provided, defaults to this channel slowmode.
+        type: Optional[:class:`ChannelType`]
+            The type of the new channel. If not provided, defaults to this channel type.
+        default_auto_archive_duration: Optional[Union[:class:`int`, :class:`ThreadArchiveDuration`]]
+            The default auto archive duration of the new channel. If not provided, defaults to this channel default auto archive duration.
+        flags: Optional[:class:`ChannelFlags`]
+            The flags of the new channel. If not provided, defaults to this channel flags.
+        reason: Optional[:class:`str`]
+            The reason for cloning this channel. Shows up on the audit log.
+
+        Raises
+        ------
+        Forbidden
+            You do not have the proper permissions to create this channel.
+        HTTPException
+            Creating the channel failed.
+
+        Returns
+        -------
+        :class:`.abc.GuildChannel`
+            The channel that was created.
+        """
         return await self._clone_impl(
-            {"topic": self.topic, "nsfw": self.nsfw, "rate_limit_per_user": self.slowmode_delay},
+            {
+                "topic": topic or self.topic,
+                "position": position or self.position,
+                "nsfw": nsfw or self.nsfw,
+                "rate_limit_per_user": slowmode_delay or self.slowmode_delay,
+                "type": type or self.type,
+                "default_auto_archive_duration": default_auto_archive_duration
+                or self.default_auto_archive_duration,
+                "flags": flags.value if flags else self.flags.value,
+            },
             name=name,
+            category_id=category,
             reason=reason,
         )
 
@@ -1169,12 +1236,87 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         """
         return ChannelType.voice
 
-    @utils.copy_doc(disnake.abc.GuildChannel.clone)
     async def clone(
-        self, *, name: Optional[str] = None, reason: Optional[str] = None
+        self,
+        *,
+        name: Optional[str] = None,
+        bitrate: Optional[int] = None,
+        user_limit: Optional[int] = None,
+        position: Optional[int] = None,
+        category: Optional[Snowflake] = None,
+        rtc_region: Optional[Union[str, VoiceRegion]] = None,
+        video_quality_mode: Optional[VideoQualityMode] = None,
+        nsfw: Optional[bool] = None,
+        slowmode_delay: Optional[int] = None,
+        flags: Optional[ChannelFlags] = None,
+        reason: Optional[str] = None,
     ) -> VoiceChannel:
+        """|coro|
+
+        Clones this channel. This creates a channel with the same properties
+        as this channel.
+
+        You must have :attr:`.Permissions.manage_channels` permission to
+        do this.
+
+        .. versionadded:: 1.1
+
+        .. versionchanged:: 2.7
+
+        Parameters
+        ----------
+        name: Optional[:class:`str`]
+            The name of the new channel. If not provided, defaults to this channel name.
+        bitrate: Optional[:class:`int`]
+            The bitrate of the new channel. If not provided, defaults to this channel bitrate.
+        user_limit: Optional[:class:`int`]
+            The user limit of the new channel. If not provided, defaults to this channel user limit.
+        position: Optional[:class:`int`]
+            The position of the new channel. If not provided, defaults to this channel position.
+        category: Optional[:class:`abc.Snowflake`]
+            The category id where the new channel should be grouped. If not provided, defaults to this channel category.
+        rtc_region: Optional[Union[:class:`str`, :class:`VoiceRegion`]]
+            The rtc region of the new channel. If not provided, defaults to this channel rtc region.
+        video_quality_mode: Optional[:class:`VideoQualityMode`]
+            The video quality mode of the new channel. If not provided, defaults to this channel video quality mode.
+        nsfw: Optional[:class:`bool`]
+            Wether the new channel should be nsfw or not. If not provided, defaults to this channel nsfw value.
+        slowmode_delay: Optional[:class:`int`]
+            The slowmode of the new channel. If not provided, defaults to this channel slowmode.
+        flags: Optional[:class:`ChannelFlags`]
+            The flags of the new channel. If not provided, defaults to this channel flags.
+        reason: Optional[:class:`str`]
+            The reason for cloning this channel. Shows up on the audit log.
+
+        Raises
+        ------
+        Forbidden
+            You do not have the proper permissions to create this channel.
+        HTTPException
+            Creating the channel failed.
+
+        Returns
+        -------
+        :class:`.abc.GuildChannel`
+            The channel that was created.
+        """
+
         return await self._clone_impl(
-            {"bitrate": self.bitrate, "user_limit": self.user_limit}, name=name, reason=reason
+            {
+                "bitrate": bitrate or self.bitrate,
+                "user_limit": user_limit or self.user_limit,
+                "position": position or self.position,
+                "rtc_region": rtc_region or self.rtc_region,
+                "video_quality_mode": int(video_quality_mode)
+                if video_quality_mode
+                else int(self.video_quality_mode),
+                "nsfw": nsfw or self.nsfw,
+                "rate_limit_per_user": slowmode_delay or self.slowmode_delay,
+                "flags": flags.value if flags else self.flags.value,
+            },
+            name=name,
+            category_id=category,
+            reason=reason,
         )
 
     def is_nsfw(self) -> bool:
@@ -1774,11 +1916,75 @@ class StageChannel(VocalGuildChannel):
         """
         return ChannelType.stage_voice
 
-    @utils.copy_doc(disnake.abc.GuildChannel.clone)
     async def clone(
-        self, *, name: Optional[str] = None, reason: Optional[str] = None
+        self,
+        *,
+        name: Optional[str] = None,
+        position: Optional[int] = None,
+        category: Optional[Snowflake] = None,
+        rtc_region: Optional[Union[str, VoiceRegion]] = None,
+        video_quality_mode: Optional[VideoQualityMode] = None,
+        bitrate: Optional[int] = None,
+        flags: Optional[ChannelFlags] = None,
+        reason: Optional[str] = None,
     ) -> StageChannel:
-        return await self._clone_impl({}, name=name, reason=reason)
+        """|coro|
+
+        Clones this channel. This creates a channel with the same properties
+        as this channel.
+
+        You must have :attr:`.Permissions.manage_channels` permission to
+        do this.
+
+        .. versionadded:: 1.1
+
+        .. versionchanged:: 2.7
+
+        Parameters
+        ----------
+        name: Optional[:class:`str`]
+            The name of the new channel. If not provided, defaults to this channel name.
+        position: Optional[:class:`int`]
+            The position of the new channel. If not provided, defaults to this channel position.
+        category: Optional[:class:`abc.Snowflake`]
+            The category id where the new channel should be grouped. If not provided, defaults to this channel category.
+        rtc_region: Optional[Union[:class:`str`, :class:`VoiceRegion`]]
+            The rtc region of the new channel. If not provided, defaults to this channel rtc region.
+        video_quality_mode: Optional[:class:`VideoQualityMode`]
+            The video quality mode of the new channel. If not provided, defaults to this channel video quality mode.
+        bitrate: Optional[:class:`int`]
+            The bitrate of the new channel. If not provided, defaults to this channel bitrate.
+        flags: Optional[:class:`ChannelFlags`]
+            The flags of the new channel. If not provided, defaults to this channel flags.
+        reason: Optional[:class:`str`]
+            The reason for cloning this channel. Shows up on the audit log.
+
+        Raises
+        ------
+        Forbidden
+            You do not have the proper permissions to create this channel.
+        HTTPException
+            Creating the channel failed.
+
+        Returns
+        -------
+        :class:`.abc.GuildChannel`
+            The channel that was created.
+        """
+        return await self._clone_impl(
+            {
+                "position": position or self.position,
+                "rtc_region": rtc_region or self.rtc_region,
+                "video_quality_mode": int(video_quality_mode)
+                if video_quality_mode
+                else int(self.video_quality_mode),
+                "bitrate": bitrate or self.bitrate,
+                "flags": flags.value if flags else self.flags.value,
+            },
+            name=name,
+            category_id=category,
+            reason=reason,
+        )
 
     @property
     def instance(self) -> Optional[StageInstance]:
@@ -2130,11 +2336,61 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         """
         return self.nsfw
 
-    @utils.copy_doc(disnake.abc.GuildChannel.clone)
     async def clone(
-        self, *, name: Optional[str] = None, reason: Optional[str] = None
+        self,
+        *,
+        name: Optional[str] = None,
+        position: Optional[int] = None,
+        nsfw: Optional[bool] = None,
+        flags: Optional[ChannelFlags] = None,
+        reason: Optional[str] = None,
     ) -> CategoryChannel:
-        return await self._clone_impl({"nsfw": self.nsfw}, name=name, reason=reason)
+        """|coro|
+
+        Clones this channel. This creates a channel with the same properties
+        as this channel.
+
+        You must have :attr:`.Permissions.manage_channels` permission to
+        do this.
+
+        .. versionadded:: 1.1
+
+        .. versionchanged:: 2.7
+
+        Parameters
+        ----------
+        name: Optional[:class:`str`]
+            The name of the new channel. If not provided, defaults to this channel name.
+        position: Optional[:class:`int`]
+            The position of the new channel. If not provided, defaults to this channel position.
+        nsfw: Optional[:class:`bool`]
+            Wether the new channel should be nsfw or not. If not provided, defaults to this channel nsfw value.
+        flags: Optional[:class:`ChannelFlags`]
+            The flags of the new channel. If not provided, defaults to this channel flags.
+        reason: Optional[:class:`str`]
+            The reason for cloning this channel. Shows up on the audit log.
+
+        Raises
+        ------
+        Forbidden
+            You do not have the proper permissions to create this channel.
+        HTTPException
+            Creating the channel failed.
+
+        Returns
+        -------
+        :class:`.abc.GuildChannel`
+            The channel that was created.
+        """
+        return await self._clone_impl(
+            {
+                "position": position or self.position,
+                "nsfw": nsfw or self.nsfw,
+                "flags": flags.value if flags else self.flags.value,
+            },
+            name=name,
+            reason=reason,
+        )
 
     # if only these parameters are passed, `_move` is called and no channel will be returned
     @overload
@@ -2885,18 +3141,114 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             # the payload will always be the proper channel payload
             return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
 
-    @utils.copy_doc(disnake.abc.GuildChannel.clone)
     async def clone(
-        self, *, name: Optional[str] = None, reason: Optional[str] = None
+        self,
+        *,
+        name: Optional[str] = None,
+        topic: Optional[str] = None,
+        position: Optional[int] = None,
+        nsfw: Optional[bool] = None,
+        category: Optional[Snowflake] = None,
+        slowmode_delay: Optional[int] = None,
+        default_thread_slowmode_delay: Optional[int] = None,
+        default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = None,
+        flags: Optional[ChannelFlags] = None,
+        require_tag: Optional[bool] = None,
+        available_tags: Optional[Sequence[ForumTag]] = None,
+        default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        default_sort_order: Optional[ThreadSortOrder] = None,
+        reason: Optional[str] = None,
     ) -> ForumChannel:
+        """|coro|
+
+        Clones this channel. This creates a channel with the same properties
+        as this channel.
+
+        You must have :attr:`.Permissions.manage_channels` permission to
+        do this.
+
+        .. versionadded:: 1.1
+
+        .. versionchanged:: 2.7
+
+        Parameters
+        ----------
+        name: Optional[:class:`str`]
+            The name of the new channel. If not provided, defaults to this channel name.
+        topic: Optional[:class:`str`]
+            The topic of the new channel. If not provided, defaults to this channel topic.
+        position: Optional[:class:`int`]
+            The position of the new channel. If not provided, defaults to this channel position.
+        nsfw: Optional[:class:`bool`]
+            Wether the new channel should be nsfw or not. If not provided, defaults to this channel nsfw value.
+        category: Optional[:class:`abc.Snowflake`]
+            The category id where the new channel should be grouped. If not provided, defaults to this channel category.
+        slowmode_delay: Optional[:class:`int`]
+            The slowmode delay of the new channel. If not provided, defaults to this channel slowmode delay.
+        default_thread_slowmode_delay: Optional[:class:`int`]
+            The default thread slowmode delay of the new channel. If not provided, defaults to this channel default thread slowmode delay.
+        default_auto_archive_duration: Optional[Union[:class:`int`, :class:`ThreadArchiveDuration`]]
+            The default auto archive duration of the new channel. If not provided, defaults to this channel default auto archive duration.
+        flags: Optional[:class:`ChannelFlags`]
+            The flags of the new channel. If not provided, defaults to this channel flags.
+        require_tag: Optional[:class:`bool`]
+            Wether the new channel should require tag at threads creation. If not provided, defaults to this channel require tag value.
+        available_tags: Optional[Sequence[:class:`ForumTag`]]
+            The applicable tags of the new channel. If not provided, defaults to this channel available tags.
+        default_reaction: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
+            The default reaction of the new channel. If not provided, defaults to this channel default reaction.
+        default_sort_order: Optional[:class:`ThreadSortOrder`]
+            The default sort order of the new channel. If not provided, defaults to this channel default sort order.
+        reason: Optional[:class:`str`]
+            The reason for cloning this channel. Shows up on the audit log.
+
+        Raises
+        ------
+        Forbidden
+            You do not have the proper permissions to create this channel.
+        HTTPException
+            Creating the channel failed.
+
+        Returns
+        -------
+        :class:`.abc.GuildChannel`
+            The channel that was created.
+        """
+        if require_tag:
+            flags = ChannelFlags._from_value(self._flags if not flags else flags.value)
+            flags.require_tag = require_tag
+        if default_reaction:
+            emoji_name, emoji_id = PartialEmoji._emoji_to_name_id(default_reaction)
+            default_reaction_emoji_payload = {
+                "emoji_name": emoji_name,
+                "emoji_id": emoji_id,
+            }
+        else:
+            default_reaction_emoji_payload = None
+
+        default_sort_order_payload = (
+            try_enum_to_int(default_sort_order) if default_sort_order else None
+        )
+
         return await self._clone_impl(
             {
-                "topic": self.topic,
-                "nsfw": self.nsfw,
-                "rate_limit_per_user": self.slowmode_delay,
-                "default_auto_archive_duration": self.default_auto_archive_duration,
+                "topic": topic or self.topic,
+                "position": position or self.position,
+                "nsfw": nsfw or self.nsfw,
+                "rate_limit_per_user": slowmode_delay or self.slowmode_delay,
+                "default_thread_rate_limit_per_user": default_thread_slowmode_delay
+                or self.default_thread_slowmode_delay,
+                "default_auto_archive_duration": default_auto_archive_duration
+                or self.default_auto_archive_duration,
+                "flags": flags.value if flags else self.flags.value,
+                "available_tags": [tag.to_dict() for tag in available_tags]
+                if available_tags
+                else [tag.to_dict() for tag in self.available_tags],
+                "default_reaction_emoij": default_reaction_emoji_payload,
+                "default_sort_order": default_sort_order_payload,
             },
             name=name,
+            category_id=category,
             reason=reason,
         )
 
