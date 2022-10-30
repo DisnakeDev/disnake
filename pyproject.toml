@@ -33,10 +33,10 @@ classifiers = [
 dynamic = ["version", "dependencies", "optional-dependencies"]
 
 [project.urls]
+Changelog = "https://docs.disnake.dev/page/whats_new.html"
 Homepage = "https://github.com/DisnakeDev/disnake"
 Documentation = "https://docs.disnake.dev/"
-GitHub ="https://github.com/DisnakeDev/disnake"
-"Issue tracker" = "https://github.com/DisnakeDev/disnake/issues"
+Repository = "https://github.com/DisnakeDev/disnake"
 
 [tool.black]
 line-length = 100
