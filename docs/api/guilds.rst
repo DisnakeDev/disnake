@@ -59,7 +59,7 @@ BanEntry
 
 .. class:: BanEntry
 
-        A namedtuple which represents a ban returned from :meth:`~Guild.bans`.
+    A namedtuple which represents a ban returned from :meth:`~Guild.bans`.
 
     .. attribute:: reason
 
@@ -95,7 +95,7 @@ VerificationLevel
 
 .. class:: VerificationLevel
 
-        Specifies a :class:`Guild`\'s verification level, which is the criteria in
+    Specifies a :class:`Guild`\'s verification level, which is the criteria in
     which a member must meet before being able to send messages to the guild.
 
     .. container:: operations
@@ -145,7 +145,7 @@ NotificationLevel
 
 .. class:: NotificationLevel
 
-        Specifies whether a :class:`Guild` has notifications on for all messages or mentions only by default.
+    Specifies whether a :class:`Guild` has notifications on for all messages or mentions only by default.
 
     .. container:: operations
 
@@ -182,7 +182,7 @@ ContentFilter
 
 .. class:: ContentFilter
 
-        Specifies a :class:`Guild`\'s explicit content filter, which is the machine
+    Specifies a :class:`Guild`\'s explicit content filter, which is the machine
     learning algorithms that Discord uses to detect if an image contains
     pornography or otherwise explicit content.
 
@@ -224,7 +224,7 @@ NSFWLevel
 
 .. class:: NSFWLevel
 
-        Represents the NSFW level of a guild.
+    Represents the NSFW level of a guild.
 
     .. versionadded:: 2.0
 

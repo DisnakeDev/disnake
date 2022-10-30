@@ -48,7 +48,7 @@ Locale
 
 .. class:: Locale
 
-        Represents supported locales by Discord.
+    Represents supported locales by Discord.
 
     .. versionadded:: 2.5
 

@@ -45,7 +45,7 @@ UserFlags
 
 .. class:: UserFlags
 
-        Represents Discord User flags.
+    Represents Discord User flags.
 
     .. attribute:: staff
 
@@ -114,7 +114,7 @@ DefaultAvatar
 
 .. class:: DefaultAvatar
 
-        Represents the default avatar of a Discord :class:`User`
+    Represents the default avatar of a Discord :class:`User`
 
     .. attribute:: blurple
 

@@ -116,7 +116,7 @@ OptionType
 
 .. class:: OptionType
 
-        Represents the type of an option.
+    Represents the type of an option.
 
     .. versionadded:: 2.1
 
@@ -161,7 +161,7 @@ ApplicationCommandType
 
 .. class:: ApplicationCommandType
 
-        Represents the type of an application command.
+    Represents the type of an application command.
 
     .. versionadded:: 2.1
 
@@ -180,7 +180,7 @@ ApplicationCommandPermissionType
 
 .. class:: ApplicationCommandPermissionType
 
-        Represents the type of a permission of an application command.
+    Represents the type of a permission of an application command.
 
     .. versionadded:: 2.5
 

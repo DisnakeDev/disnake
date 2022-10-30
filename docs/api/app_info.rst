@@ -69,7 +69,7 @@ TeamMembershipState
 
 .. class:: TeamMembershipState
 
-        Represents the membership state of a team member retrieved through :func:`Client.application_info`.
+    Represents the membership state of a team member retrieved through :func:`Client.application_info`.
 
     .. versionadded:: 1.3
 

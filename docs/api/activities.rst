@@ -75,7 +75,7 @@ ActivityType
 
 .. class:: ActivityType
 
-        Specifies the type of :class:`Activity`. This is used to check how to
+    Specifies the type of :class:`Activity`. This is used to check how to
     interpret the activity itself.
 
     .. attribute:: unknown
@@ -107,7 +107,7 @@ Status
 
 .. class:: Status
 
-        Specifies a :class:`Member` 's status.
+    Specifies a :class:`Member` 's status.
 
     .. attribute:: online
 
