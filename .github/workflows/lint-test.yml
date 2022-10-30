@@ -112,6 +112,7 @@ jobs:
 
     - name: Run pyright (Linux)
       uses: jakebailey/pyright-action@v1.4.1
+      id: pyright-linux
       with:
         version: ${{ env.PYRIGHT_VERSION }}
         python-version: ${{ steps.setup-env.outputs.python-version }}
@@ -121,7 +122,7 @@ jobs:
 
     - name: Run pyright (Windows)
       uses: jakebailey/pyright-action@v1.4.1
-      if: ${{ success() || failure() }}  # run regardless of previous step's result
+      if: always() && (steps.pyright-linux.outcome == 'success' || steps.pyright-linux.outcome == 'failure')
       with:
         version: ${{ env.PYRIGHT_VERSION }}
         python-version: ${{ steps.setup-env.outputs.python-version }}
