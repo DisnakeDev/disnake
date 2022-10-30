@@ -30,5 +30,6 @@ venvs/
 .idea
 .coverage*
 coverage.xml
+.pdm.toml
 
 !test_bot/locale/*.json
