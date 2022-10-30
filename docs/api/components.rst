@@ -53,12 +53,48 @@ BaseSelectMenu
     :members:
     :inherited-members:
 
-SelectMenu
-~~~~~~~~~~
+ChannelSelectMenu
+~~~~~~~~~~~~~~~~~
 
-.. attributetable:: SelectMenu
+.. attributetable:: ChannelSelectMenu
 
-.. autoclass:: SelectMenu()
+.. autoclass:: ChannelSelectMenu()
+    :members:
+    :inherited-members:
+
+MentionableSelectMenu
+~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: MentionableSelectMenu
+
+.. autoclass:: MentionableSelectMenu()
+    :members:
+    :inherited-members:
+
+RoleSelectMenu
+~~~~~~~~~~~~~~
+
+.. attributetable:: RoleSelectMenu
+
+.. autoclass:: RoleSelectMenu()
+    :members:
+    :inherited-members:
+
+StringSelectMenu
+~~~~~~~~~~~~~~~~~
+
+.. attributetable:: StringSelectMenu
+
+.. autoclass:: StringSelectMenu()
+    :members:
+    :inherited-members:
+
+UserSelectMenu
+~~~~~~~~~~~~~~
+
+.. attributetable:: UserSelectMenu
+
+.. autoclass:: UserSelectMenu()
     :members:
     :inherited-members:
 
@@ -100,12 +136,38 @@ ComponentType
     .. attribute:: button
 
         Represents a button component.
+    .. attribute:: string_select
+
+        Represents a string select component.
+
+        .. versionadded:: 2.7
     .. attribute:: select
 
-        Represents a select component.
+        An alias of :attr:`string_select`.
+
     .. attribute:: text_input
 
         Represents a text input component.
+    .. attribute:: user_select
+
+        Represents a user select component.
+
+        .. versionadded:: 2.7
+    .. attribute:: role_select
+
+        Represents a role select component.
+
+        .. versionadded:: 2.7
+    .. attribute:: mentionable_select
+
+        Represents a mentionable (user/member/role) select component.
+
+        .. versionadded:: 2.7
+    .. attribute:: channel_select
+
+        Represents a channel select component.
+
+        .. versionadded:: 2.7
 
 ButtonStyle
 ~~~~~~~~~~~

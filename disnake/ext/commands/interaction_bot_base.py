@@ -197,7 +197,7 @@ class InteractionBotBase(CommonBotBase):
                 command_sync_flags.sync_on_cog_actions = sync_commands_on_cog_unload
 
         self._command_sync_flags = command_sync_flags
-        self._sync_queued: bool = False
+        self._sync_queued: asyncio.Lock = asyncio.Lock()
 
         self._slash_command_checks = []
         self._slash_command_check_once = []
@@ -217,7 +217,11 @@ class InteractionBotBase(CommonBotBase):
         self.all_user_commands: Dict[str, InvokableUserCommand] = {}
         self.all_message_commands: Dict[str, InvokableMessageCommand] = {}
 
+    @disnake.utils.copy_doc(disnake.Client.login)
+    async def login(self, token: str) -> None:
         self._schedule_app_command_preparation()
+
+        await super().login(token)
 
     @property
     def command_sync_flags(self) -> CommandSyncFlags:
@@ -850,11 +854,10 @@ class InteractionBotBase(CommonBotBase):
         if not isinstance(self, disnake.Client):
             raise NotImplementedError("Command sync is only possible in disnake.Client subclasses")
 
-        self._sync_queued = True
-        await self.wait_until_first_connect()
-        await self._cache_application_commands()
-        await self._sync_application_commands()
-        self._sync_queued = False
+        async with self._sync_queued:
+            await self.wait_until_first_connect()
+            await self._cache_application_commands()
+            await self._sync_application_commands()
 
     async def _delayed_command_sync(self) -> None:
         if not isinstance(self, disnake.Client):
@@ -862,7 +865,7 @@ class InteractionBotBase(CommonBotBase):
 
         if (
             not self._command_sync_flags._sync_enabled
-            or self._sync_queued
+            or self._sync_queued.locked()
             or not self.is_ready()
             or self._is_closed
             or self.loop.is_closed()
@@ -870,10 +873,9 @@ class InteractionBotBase(CommonBotBase):
             return
         # We don't do this task on login or in parallel with a similar task
         # Wait a little bit, maybe other cogs are loading
-        self._sync_queued = True
-        await asyncio.sleep(2)
-        await self._sync_application_commands()
-        self._sync_queued = False
+        async with self._sync_queued:
+            await asyncio.sleep(2)
+            await self._sync_application_commands()
 
     def _schedule_app_command_preparation(self) -> None:
         if not isinstance(self, disnake.Client):
@@ -1285,7 +1287,7 @@ class InteractionBotBase(CommonBotBase):
         # In this case, the blind spot is the interaction guild, let's fix it:
         if (
             # if we're not currently syncing,
-            not self._sync_queued
+            not self._sync_queued.locked()
             # and we're instructed to sync guild commands
             and self._command_sync_flags.sync_guild_commands
             # and the current command was registered to a guild
