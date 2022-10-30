@@ -55,11 +55,11 @@ __all__ = (
 )
 
 AnySelect = Union[
+    "ChannelSelect[V_co]",
+    "MentionableSelect[V_co]",
+    "RoleSelect[V_co]",
     "StringSelect[V_co]",
     "UserSelect[V_co]",
-    "RoleSelect[V_co]",
-    "MentionableSelect[V_co]",
-    "ChannelSelect[V_co]",
 ]
 
 MessageUIComponent = Union[Button[Any], "AnySelect[Any]"]

@@ -4883,6 +4883,33 @@ BaseSelectMenu
     :members:
     :inherited-members:
 
+ChannelSelectMenu
+~~~~~~~~~~~~~~~~~
+
+.. attributetable:: ChannelSelectMenu
+
+.. autoclass:: ChannelSelectMenu()
+    :members:
+    :inherited-members:
+
+MentionableSelectMenu
+~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: MentionableSelectMenu
+
+.. autoclass:: MentionableSelectMenu()
+    :members:
+    :inherited-members:
+
+RoleSelectMenu
+~~~~~~~~~~~~~~
+
+.. attributetable:: RoleSelectMenu
+
+.. autoclass:: RoleSelectMenu()
+    :members:
+    :inherited-members:
+
 StringSelectMenu
 ~~~~~~~~~~~~~~~~~
 
@@ -4898,33 +4925,6 @@ UserSelectMenu
 .. attributetable:: UserSelectMenu
 
 .. autoclass:: UserSelectMenu()
-    :members:
-    :inherited-members:
-
-RoleSelectMenu
-~~~~~~~~~~~~~~
-
-.. attributetable:: RoleSelectMenu
-
-.. autoclass:: RoleSelectMenu()
-    :members:
-    :inherited-members:
-
-MentionableSelectMenu
-~~~~~~~~~~~~~~~~~~~~~
-
-.. attributetable:: MentionableSelectMenu
-
-.. autoclass:: MentionableSelectMenu()
-    :members:
-    :inherited-members:
-
-ChannelSelectMenu
-~~~~~~~~~~~~~~~~~
-
-.. attributetable:: ChannelSelectMenu
-
-.. autoclass:: ChannelSelectMenu()
     :members:
     :inherited-members:
 
@@ -6055,6 +6055,39 @@ BaseSelect
     :members:
     :inherited-members:
 
+ChannelSelect
+~~~~~~~~~~~~~~
+
+.. attributetable:: disnake.ui.ChannelSelect
+
+.. autoclass:: disnake.ui.ChannelSelect
+    :members:
+    :inherited-members:
+
+.. autofunction:: disnake.ui.channel_select(cls=disnake.ui.ChannelSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, disabled=False, channel_types=None, row=None)
+
+MentionableSelect
+~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: disnake.ui.MentionableSelect
+
+.. autoclass:: disnake.ui.MentionableSelect
+    :members:
+    :inherited-members:
+
+.. autofunction:: disnake.ui.mentionable_select(cls=disnake.ui.MentionableSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, disabled=False, row=None)
+
+RoleSelect
+~~~~~~~~~~~
+
+.. attributetable:: disnake.ui.RoleSelect
+
+.. autoclass:: disnake.ui.RoleSelect
+    :members:
+    :inherited-members:
+
+.. autofunction:: disnake.ui.role_select(cls=disnake.ui.RoleSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, disabled=False, row=None)
+
 StringSelect
 ~~~~~~~~~~~~~
 
@@ -6076,39 +6109,6 @@ UserSelect
     :inherited-members:
 
 .. autofunction:: disnake.ui.user_select(cls=disnake.ui.UserSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, disabled=False, row=None)
-
-RoleSelect
-~~~~~~~~~~~
-
-.. attributetable:: disnake.ui.RoleSelect
-
-.. autoclass:: disnake.ui.RoleSelect
-    :members:
-    :inherited-members:
-
-.. autofunction:: disnake.ui.role_select(cls=disnake.ui.RoleSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, disabled=False, row=None)
-
-MentionableSelect
-~~~~~~~~~~~~~~~~~~
-
-.. attributetable:: disnake.ui.MentionableSelect
-
-.. autoclass:: disnake.ui.MentionableSelect
-    :members:
-    :inherited-members:
-
-.. autofunction:: disnake.ui.mentionable_select(cls=disnake.ui.MentionableSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, disabled=False, row=None)
-
-ChannelSelect
-~~~~~~~~~~~~~~
-
-.. attributetable:: disnake.ui.ChannelSelect
-
-.. autoclass:: disnake.ui.ChannelSelect
-    :members:
-    :inherited-members:
-
-.. autofunction:: disnake.ui.channel_select(cls=disnake.ui.ChannelSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, disabled=False, channel_types=None, row=None)
 
 Modal
 ~~~~~

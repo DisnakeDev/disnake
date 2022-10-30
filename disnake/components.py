@@ -82,7 +82,7 @@ class Component:
 
     - :class:`ActionRow`
     - :class:`Button`
-    - subtypes of :class:`BaseSelectMenu` (:class:`StringSelectMenu`, :class:`UserSelectMenu`, :class:`RoleSelectMenu`, :class:`MentionableSelectMenu`, :class:`ChannelSelectMenu`)
+    - subtypes of :class:`BaseSelectMenu` (:class:`ChannelSelectMenu`, :class:`MentionableSelectMenu`, :class:`RoleSelectMenu`, :class:`StringSelectMenu`, :class:`UserSelectMenu`)
     - :class:`TextInput`
 
     This class is abstract and cannot be instantiated.
