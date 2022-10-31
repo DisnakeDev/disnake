@@ -50,7 +50,11 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
 
     This isn't meant to be used directly, instead use one of the concrete select menu types:
 
-    - :class:`disnake.ui.Select`
+    - :class:`disnake.ui.StringSelect`
+    - :class:`disnake.ui.UserSelect`
+    - :class:`disnake.ui.RoleSelect`
+    - :class:`disnake.ui.MentionableSelect`
+    - :class:`disnake.ui.ChannelSelect`
 
     .. versionadded:: 2.7
     """
@@ -153,8 +157,7 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         self._underlying = component
 
     def refresh_state(self, interaction: MessageInteraction) -> None:
-        # TODO: change typing of `interaction.values`
-        self._selected_values = interaction.values  # type: ignore
+        self._selected_values = interaction.resolved_values  # type: ignore
 
     @classmethod
     @abstractmethod

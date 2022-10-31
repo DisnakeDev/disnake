@@ -7,6 +7,7 @@ import logging
 import signal
 import sys
 import traceback
+import warnings
 from datetime import datetime, timedelta
 from typing import (
     TYPE_CHECKING,
@@ -378,7 +379,14 @@ class Client:
     ):
         # self.ws is set in the connect method
         self.ws: DiscordWebSocket = None  # type: ignore
-        self.loop: asyncio.AbstractEventLoop = asyncio.get_event_loop() if loop is None else loop
+
+        if loop is None:
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", DeprecationWarning)
+                self.loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()
+        else:
+            self.loop: asyncio.AbstractEventLoop = loop
+
         self.loop.set_debug(asyncio_debug)
         self._listeners: Dict[str, List[Tuple[asyncio.Future, Callable[..., bool]]]] = {}
         self.session_start_limit: Optional[SessionStartLimit] = None
