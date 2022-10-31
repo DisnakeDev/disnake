@@ -85,11 +85,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
         experimental: [false]
-        include:
-          - python-version: '3.11.0-alpha - 3.11'
-            experimental: true
       fail-fast: false
     steps:
     - uses: actions/checkout@v3
