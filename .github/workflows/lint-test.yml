@@ -49,8 +49,8 @@ jobs:
       id: flake8
       if: always() && (steps.pre-commit.outcome == 'success' || steps.pre-commit.outcome == 'failure')
       run: "flake8 \
-      --format='::error file=%(path)s,line=%(row)d,col=%(col)d::\
-      [flake8] %(code)s: %(text)s'"
+        --format='::error file=%(path)s,line=%(row)d,col=%(col)d::\
+        [flake8] %(code)s: %(text)s'"
 
   docs:
     # We want to run on external PRs, but not on our own internal PRs as they'll be run
