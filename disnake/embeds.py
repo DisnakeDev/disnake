@@ -453,6 +453,10 @@ class Embed:
 
         Exactly one of ``url`` or ``file`` must be passed.
 
+        .. warning::
+            Passing a :class:`disnake.File` object will make the embed not
+            reusable.
+
         .. versionchanged:: 1.4
             Passing ``None`` removes the image.
 
@@ -499,6 +503,10 @@ class Embed:
         chaining.
 
         Exactly one of ``url`` or ``file`` must be passed.
+
+        .. warning::
+            Passing a :class:`disnake.File` object will make the embed not
+            reusable.
 
         .. versionchanged:: 1.4
             Passing ``None`` removes the thumbnail.
