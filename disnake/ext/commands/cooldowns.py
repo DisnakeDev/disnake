@@ -7,9 +7,9 @@ import time
 from collections import deque
 from typing import TYPE_CHECKING, Any, Callable, Deque, Dict, Optional
 
+from disnake.abc import PrivateChannel
 from disnake.enums import Enum
 
-from ...abc import PrivateChannel
 from .errors import MaxConcurrencyReached
 
 if TYPE_CHECKING:
@@ -283,7 +283,7 @@ class _Semaphore:
 
     def __init__(self, number: int) -> None:
         self.value: int = number
-        self.loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()
+        self.loop: asyncio.AbstractEventLoop = asyncio.get_running_loop()
         self._waiters: Deque[asyncio.Future] = deque()
 
     def __repr__(self) -> str:

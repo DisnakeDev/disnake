@@ -23,6 +23,7 @@ from ..app_commands import OptionChoice
 from ..channel import PartialMessageable, _threaded_guild_channel_factory
 from ..enums import (
     ChannelType,
+    ComponentType,
     InteractionResponseType,
     InteractionType,
     Locale,
@@ -381,6 +382,7 @@ class Interaction:
         attachments: Optional[List[Attachment]] = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[Components[MessageUIComponent]] = MISSING,
+        suppress_embeds: bool = MISSING,
         allowed_mentions: Optional[AllowedMentions] = None,
     ) -> InteractionMessage:
         """|coro|
@@ -446,6 +448,12 @@ class Interaction:
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
 
+        suppress_embeds: :class:`bool`
+            Whether to suppress embeds for the message. This hides
+            all embeds from the UI if set to ``True``.
+
+            .. versionadded:: 2.7
+
         Raises
         ------
         HTTPException
@@ -477,6 +485,7 @@ class Interaction:
             embeds=embeds,
             view=view,
             components=components,
+            suppress_embeds=suppress_embeds,
             allowed_mentions=allowed_mentions,
             previous_allowed_mentions=previous_mentions,
         )
@@ -1434,6 +1443,7 @@ class InteractionMessage(Message):
         embed: Optional[Embed] = ...,
         file: File = ...,
         attachments: Optional[List[Attachment]] = ...,
+        suppress_embeds: bool = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -1448,6 +1458,7 @@ class InteractionMessage(Message):
         embed: Optional[Embed] = ...,
         files: List[File] = ...,
         attachments: Optional[List[Attachment]] = ...,
+        suppress_embeds: bool = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -1462,6 +1473,7 @@ class InteractionMessage(Message):
         embeds: List[Embed] = ...,
         file: File = ...,
         attachments: Optional[List[Attachment]] = ...,
+        suppress_embeds: bool = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -1476,6 +1488,7 @@ class InteractionMessage(Message):
         embeds: List[Embed] = ...,
         files: List[File] = ...,
         attachments: Optional[List[Attachment]] = ...,
+        suppress_embeds: bool = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -1491,6 +1504,7 @@ class InteractionMessage(Message):
         file: File = MISSING,
         files: List[File] = MISSING,
         attachments: Optional[List[Attachment]] = MISSING,
+        suppress_embeds: bool = MISSING,
         allowed_mentions: Optional[AllowedMentions] = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[Components[MessageUIComponent]] = MISSING,
@@ -1544,6 +1558,13 @@ class InteractionMessage(Message):
 
             .. versionadded:: 2.4
 
+        suppress_embeds: :class:`bool`
+            Whether to suppress embeds for the message. This removes
+            all the embeds if set to ``True``. If set to ``False``
+            this brings the embeds back if they were suppressed.
+
+            .. versionadded:: 2.7
+
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
@@ -1575,6 +1596,7 @@ class InteractionMessage(Message):
                 embeds=embeds,
                 files=files,
                 attachments=attachments,
+                suppress_embeds=suppress_embeds,
                 allowed_mentions=allowed_mentions,
                 view=view,
                 components=components,
@@ -1594,6 +1616,7 @@ class InteractionMessage(Message):
             file=file,
             files=files,
             attachments=attachments,
+            suppress_embeds=suppress_embeds,
             allowed_mentions=allowed_mentions,
             view=view,
             components=components,
@@ -1762,9 +1785,9 @@ class InteractionDataResolved(Dict[str, Any]):
         )
 
     def get_with_type(
-        self, key: Snowflake, data_type: OptionType, default: T = None
+        self, key: Snowflake, data_type: Union[OptionType, ComponentType], default: T = None
     ) -> Union[Member, User, Role, InteractionChannel, Message, Attachment, T]:
-        if data_type is OptionType.mentionable:
+        if data_type is OptionType.mentionable or data_type is ComponentType.mentionable_select:
             key = int(key)
             if (result := self.members.get(key)) is not None:
                 return result
@@ -1772,16 +1795,16 @@ class InteractionDataResolved(Dict[str, Any]):
                 return result
             return self.roles.get(key, default)
 
-        if data_type is OptionType.user:
+        if data_type is OptionType.user or data_type is ComponentType.user_select:
             key = int(key)
             if (member := self.members.get(key)) is not None:
                 return member
             return self.users.get(key, default)
 
-        if data_type is OptionType.channel:
+        if data_type is OptionType.channel or data_type is ComponentType.channel_select:
             return self.channels.get(int(key), default)
 
-        if data_type is OptionType.role:
+        if data_type is OptionType.role or data_type is ComponentType.role_select:
             return self.roles.get(int(key), default)
 
         if data_type is OptionType.attachment:
