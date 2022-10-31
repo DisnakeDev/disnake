@@ -9,7 +9,7 @@ name = "disnake"
 description = "A Python wrapper for the Discord API"
 readme = "README.md"
 authors = [
-  {name = "Disnake Development" }
+  { name = "Disnake Development" }
 ]
 requires-python = ">=3.8"
 keywords = ["disnake", "discord", "discord api"]
