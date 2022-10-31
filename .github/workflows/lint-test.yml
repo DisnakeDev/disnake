@@ -104,6 +104,7 @@ jobs:
       run: |
         pdm export --pyproject --without-hashes -G:all -dG:all -o requirements.txt
         pip install -r requirements.txt
+        pip install .
 
     - name: Set pyright version
       run: |
