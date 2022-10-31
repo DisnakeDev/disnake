@@ -1527,7 +1527,7 @@ class Message(Hashable):
             those images will be removed if the message's attachments are edited in any way
             (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
 
-        .. warning::
+        .. note::
 
             This method cannot be used on messages authored by others, with one exception.
             The ``suppress_embeds`` parameter can be used to change the state of embeds on
@@ -2219,7 +2219,7 @@ class PartialMessage(Hashable):
             those images will be removed if the message's attachments are edited in any way
             (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
 
-        .. warning::
+        .. note::
 
             This method cannot be used on messages authored by others, with one exception.
             The ``suppress_embeds`` parameter can be used to change the state of embeds on
