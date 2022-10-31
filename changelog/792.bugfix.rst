@@ -1,1 +1,0 @@
-Ensure that embed fields are copied properly by :func:`Embed.copy` and that the copied embed is completely separate from the original one.
