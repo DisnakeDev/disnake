@@ -6,9 +6,10 @@ from typing import List, Literal, TypedDict, Union
 
 from typing_extensions import NotRequired
 
+from .channel import ChannelType
 from .emoji import PartialEmoji
 
-ComponentType = Literal[1, 2, 3, 4]
+ComponentType = Literal[1, 2, 3, 4, 5, 6, 7, 8]
 ButtonStyle = Literal[1, 2, 3, 4, 5]
 TextInputStyle = Literal[1, 2]
 
@@ -48,15 +49,38 @@ class _SelectMenu(TypedDict):
 
 
 class BaseSelectMenu(_SelectMenu):
-    type: Literal[3]
+    type: Literal[3, 5, 6, 7, 8]
 
 
-class SelectMenu(_SelectMenu):
+class StringSelectMenu(_SelectMenu):
     type: Literal[3]
     options: List[SelectOption]
 
 
-AnySelectMenu = SelectMenu
+class UserSelectMenu(_SelectMenu):
+    type: Literal[5]
+
+
+class RoleSelectMenu(_SelectMenu):
+    type: Literal[6]
+
+
+class MentionableSelectMenu(_SelectMenu):
+    type: Literal[7]
+
+
+class ChannelSelectMenu(_SelectMenu):
+    type: Literal[8]
+    channel_types: NotRequired[List[ChannelType]]
+
+
+AnySelectMenu = Union[
+    StringSelectMenu,
+    UserSelectMenu,
+    RoleSelectMenu,
+    MentionableSelectMenu,
+    ChannelSelectMenu,
+]
 
 
 class Modal(TypedDict):
