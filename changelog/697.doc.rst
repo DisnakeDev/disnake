@@ -1,1 +1,0 @@
-Remove reference to the v1.0 migration guide from the main index page, and move legacy changelogs to a separate page.

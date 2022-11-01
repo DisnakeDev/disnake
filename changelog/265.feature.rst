@@ -1,1 +1,0 @@
-|commands| Add :class:`~disnake.ext.commands.CommandSyncFlags` to provide sync configuration to :class:`~disnake.ext.commands.Bot` and :class:`~disnake.ext.commands.InteractionBot` (and their autosharded variants) as ``command_sync_flags``.
