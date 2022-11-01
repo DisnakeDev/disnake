@@ -17,9 +17,21 @@ in specific versions.
 
 .. towncrier release notes start
 
+.. _vp2p6p2:
+
+v2.6.2
+------
+
+Bug Fixes
+~~~~~~~~~
+- Fix creation of threads in text channels without :attr:`Permissions.manage_threads`. (:issue:`818`)
+- Fix off-by-one error in :class:`AutoModKeywordPresets` values. (:issue:`820`)
+- |commands| Fix a case where optional variadic arguments could have infinite loops in parsing depending on the user input. (:issue:`825`)
+
+.. _vp2p6p1:
+
 v2.6.1
 ------
-.. _vp2p6p1:
 
 Bug Fixes
 ~~~~~~~~~
