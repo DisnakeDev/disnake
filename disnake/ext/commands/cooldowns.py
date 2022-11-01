@@ -26,7 +26,7 @@ __all__ = (
 )
 
 
-class BucketType(Enum):
+class BucketType(int, Enum):
     default = 0
     user = 1
     guild = 2
@@ -36,6 +36,8 @@ class BucketType(Enum):
     role = 6
 
     def get_key(self, msg: Message) -> Any:
+        """Create a key with this bucket type for the provided message."""
+
         if self is BucketType.user:
             return msg.author.id
         elif self is BucketType.guild:

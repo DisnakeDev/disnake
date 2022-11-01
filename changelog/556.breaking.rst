@@ -1,0 +1,4 @@
+Rework :class:`disnake.enums.Enum` internals.
+- Adds support for typed enums, removes support for untyped enums.
+- Small performance increase by removing the need for ``.value``.
+- Closer to the vanilla python Enum api.
