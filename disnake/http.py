@@ -6,6 +6,7 @@ import asyncio
 import logging
 import re
 import sys
+import time
 import weakref
 from typing import (
     TYPE_CHECKING,
@@ -36,6 +37,7 @@ from .errors import (
     HTTPException,
     LoginFailure,
     NotFound,
+    RatelimitTooLong,
 )
 from .gateway import DiscordClientWebSocketResponse
 from .utils import MISSING
@@ -192,9 +194,15 @@ class Route:
         return f"{self.channel_id}:{self.guild_id}:{self.path}"
 
 
+class RatelimitLock(asyncio.Lock):
+    def __init__(self, reset_at: float):
+        self.reset_at = reset_at
+        super().__init__()
+
+
 class MaybeUnlock:
-    def __init__(self, lock: asyncio.Lock) -> None:
-        self.lock: asyncio.Lock = lock
+    def __init__(self, lock: RatelimitLock) -> None:
+        self.lock: RatelimitLock = lock
         self._unlock: bool = True
 
     def __enter__(self) -> Self:
@@ -229,15 +237,19 @@ class HTTPClient:
         proxy: Optional[str] = None,
         proxy_auth: Optional[aiohttp.BasicAuth] = None,
         unsync_clock: bool = True,
+        max_ratelimit_wait: Optional[float] = None,
     ) -> None:
         self.loop: asyncio.AbstractEventLoop = loop
         self.connector = connector
         self.__session: aiohttp.ClientSession = MISSING  # filled in static_login
-        self._locks: weakref.WeakValueDictionary[str, asyncio.Lock] = weakref.WeakValueDictionary()
+        self._locks: weakref.WeakValueDictionary[str, RatelimitLock] = weakref.WeakValueDictionary()
         self._global_over: asyncio.Event = asyncio.Event()
         self._global_over.set()
         self.token: Optional[str] = None
         self.bot_token: bool = False
+        self.max_ratelimit_wait: Optional[float] = (
+            max(0, max_ratelimit_wait) if max_ratelimit_wait is not None else None
+        )
         self.proxy: Optional[str] = proxy
         self.proxy_auth: Optional[aiohttp.BasicAuth] = proxy_auth
         self.use_clock: bool = not unsync_clock
@@ -280,7 +292,7 @@ class HTTPClient:
 
         lock = self._locks.get(bucket)
         if lock is None:
-            lock = asyncio.Lock()
+            lock = RatelimitLock(0)
             if bucket is not None:
                 self._locks[bucket] = lock
 
@@ -315,6 +327,12 @@ class HTTPClient:
         if not self._global_over.is_set():
             # wait until the global lock is complete
             await self._global_over.wait()
+
+        if self.max_ratelimit_wait is not None and lock.locked():
+            max_wait_time = self.max_ratelimit_wait + time.time()
+            if lock.reset_at > max_wait_time:
+                delta = lock.reset_at - max_wait_time
+                raise RatelimitTooLong(max_wait_time, delta, route)
 
         response: Optional[aiohttp.ClientResponse] = None
         data: Optional[Union[Dict[str, Any], str]] = None
@@ -364,6 +382,8 @@ class HTTPClient:
                                 delta,
                             )
                             maybe_lock.defer()
+                            if self.max_ratelimit_wait is not None:
+                                lock.reset_at = time.time() + delta
                             self.loop.call_later(delta, lock.release)
 
                         # the request was successful so just return the text/json
@@ -391,6 +411,13 @@ class HTTPClient:
                                     retry_after,
                                 )
                                 self._global_over.clear()
+                            else:
+                                # modify the lock
+                                if self.max_ratelimit_wait is not None:
+                                    reset_at = time.time() + retry_after
+                                    if retry_after >= self.max_ratelimit_wait:
+                                        raise RatelimitTooLong(reset_at, retry_after, route)
+                                    lock.reset_at = reset_at
 
                             await asyncio.sleep(retry_after)
                             _log.debug("Done sleeping for the rate limit. Retrying...")
