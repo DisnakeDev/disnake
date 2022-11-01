@@ -1,1 +1,0 @@
-Improve the cli, allowing the usage of :class:`.ext.commands.InteractionBot`, :class:`.ext.commands.AutoShardedInteractionBot`.

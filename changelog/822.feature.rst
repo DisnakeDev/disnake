@@ -1,1 +1,0 @@
-Allow ``slowmode_delay`` parameter of :meth:`ForumChannel.create_thread` to be optional.

@@ -1,1 +1,0 @@
-Add type hints to all flag constructors, now supporting type-checking for creating flag classes (e.g. ``Intents(members=True)``) which used to be untyped.

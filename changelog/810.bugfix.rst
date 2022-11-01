@@ -1,1 +1,0 @@
-Fix an issue with :meth:`Member.ban` erroring when the ``delete_message_days`` parameter was provided.

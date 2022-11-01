@@ -1527,6 +1527,12 @@ class Message(Hashable):
             those images will be removed if the message's attachments are edited in any way
             (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
 
+        .. note::
+
+            This method cannot be used on messages authored by others, with one exception.
+            The ``suppress_embeds`` parameter can be used to change the state of embeds on
+            other users' messages, requiring the :attr:`~.Permissions.manage_messages` permission.
+
         .. versionchanged:: 1.3
             The ``suppress`` keyword-only parameter was added.
 
@@ -1576,10 +1582,10 @@ class Message(Hashable):
                 Supports passing ``None`` to clear attachments.
 
         suppress_embeds: :class:`bool`
-            Whether to suppress embeds for the message. This removes
-            all the embeds if set to ``True``. If set to ``False``
-            this brings the embeds back if they were suppressed.
-            Using this parameter requires :attr:`~.Permissions.manage_messages`.
+            Whether to suppress embeds for the message. This hides
+            all the embeds from the UI if set to ``True``. If set
+            to ``False``, this brings the embeds back if they were
+            suppressed.
         delete_after: Optional[:class:`float`]
             If provided, the number of seconds to wait in the background
             before deleting the message we just edited. If the deletion fails,
@@ -2207,6 +2213,18 @@ class PartialMessage(Hashable):
 
         The content must be able to be transformed into a string via ``str(content)``.
 
+        .. note::
+            If the original message has embeds with images that were created from local files
+            (using the ``file`` parameter with :meth:`Embed.set_image` or :meth:`Embed.set_thumbnail`),
+            those images will be removed if the message's attachments are edited in any way
+            (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
+
+        .. note::
+
+            This method cannot be used on messages authored by others, with one exception.
+            The ``suppress_embeds`` parameter can be used to change the state of embeds on
+            other users' messages, requiring the :attr:`~.Permissions.manage_messages` permission.
+
         .. versionchanged:: 2.1
             :class:`disnake.Message` is always returned.
 
@@ -2216,12 +2234,6 @@ class PartialMessage(Hashable):
 
         .. versionchanged:: 2.6
             Raises :exc:`TypeError` instead of ``InvalidArgument``.
-
-        .. note::
-            If the original message has embeds with images that were created from local files
-            (using the ``file`` parameter with :meth:`Embed.set_image` or :meth:`Embed.set_thumbnail`),
-            those images will be removed if the message's attachments are edited in any way
-            (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
 
         Parameters
         ----------
@@ -2264,10 +2276,10 @@ class PartialMessage(Hashable):
                 Supports passing ``None`` to clear attachments.
 
         suppress_embeds: :class:`bool`
-            Whether to suppress embeds for the message. This removes
-            all the embeds if set to ``True``. If set to ``False``
-            this brings the embeds back if they were suppressed.
-            Using this parameter requires :attr:`~.Permissions.manage_messages`.
+            Whether to suppress embeds for the message. This hides
+            all the embeds from the UI if set to ``True``. If set
+            to ``False``, this brings the embeds back if they were
+            suppressed.
         delete_after: Optional[:class:`float`]
             If provided, the number of seconds to wait in the background
             before deleting the message we just edited. If the deletion fails,
