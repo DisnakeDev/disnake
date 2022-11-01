@@ -22,7 +22,7 @@ in specific versions.
 v2.7.0
 ------
 
-This release comes with support for :doc:`python 3.11 <py:whatsnew/3.11>` and :ddocs:`new selects <change-log#new-select-menu-components>`.
+This release comes with support for python 3.11 and new selects.
 
 Breaking Changes
 ~~~~~~~~~~~~~~~~
