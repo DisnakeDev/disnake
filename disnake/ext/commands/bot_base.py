@@ -434,7 +434,7 @@ class BotBase(CommonBotBase, GroupMixin):
     @help_command.setter
     def help_command(self, value: Optional[HelpCommand]) -> None:
         if value is not None and not isinstance(value, HelpCommand):
-            raise TypeError("help_command must be a subclass of HelpCommand")
+            raise TypeError("help_command must be a subclass of HelpCommand or None")
 
         if self._help_command is not None:
             self._help_command._remove_from_bot(self)
