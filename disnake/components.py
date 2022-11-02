@@ -330,7 +330,7 @@ class StringSelectMenu(BaseSelectMenu):
 
     __repr_info__: ClassVar[Tuple[str, ...]] = BaseSelectMenu.__repr_info__ + __slots__
 
-    def __init__(self, data: StringSelectMenuPayload):
+    def __init__(self, data: StringSelectMenuPayload) -> None:
         super().__init__(data)
         self.options: List[SelectOption] = [
             SelectOption.from_dict(option) for option in data.get("options", [])
@@ -476,7 +476,7 @@ class ChannelSelectMenu(BaseSelectMenu):
 
     __repr_info__: ClassVar[Tuple[str, ...]] = BaseSelectMenu.__repr_info__ + __slots__
 
-    def __init__(self, data: ChannelSelectMenuPayload):
+    def __init__(self, data: ChannelSelectMenuPayload) -> None:
         super().__init__(data)
         # on the API side, an empty list is (currently) equivalent to no value
         channel_types = data.get("channel_types")
