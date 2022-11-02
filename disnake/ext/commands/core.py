@@ -129,10 +129,24 @@ def get_signature_parameters(
     function: Callable[..., Any], globalns: Dict[str, Any]
 ) -> Dict[str, inspect.Parameter]:
     signature = inspect.signature(function)
-    params = {}
+    params: Dict[str, inspect.Parameter] = {}
     cache: Dict[str, Any] = {}
+
+    # skip `self` (if present) and `ctx` parameters,
+    # since their annotations are irrelevant
+    skip = 1
+    if disnake.utils.signature_has_self_param(function):
+        skip += 1
+
+    iterator = iter(signature.parameters.items())
+    for _ in range(skip):
+        try:
+            next(iterator)
+        except StopIteration:
+            raise ValueError(f"Expected command callback to have at least {skip} parameter(s)")
+
     eval_annotation = disnake.utils.evaluate_annotation
-    for name, parameter in signature.parameters.items():
+    for name, parameter in iterator:
         annotation = parameter.annotation
         if annotation is parameter.empty:
             params[name] = parameter
@@ -633,21 +647,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
         Useful for inspecting signature.
         """
-        result = self.params.copy()
-        if self.cog is not None:
-            # first parameter is self
-            try:
-                del result[next(iter(result))]
-            except StopIteration:
-                raise ValueError("missing 'self' parameter") from None
-
-        try:
-            # first/second parameter is context
-            del result[next(iter(result))]
-        except StopIteration:
-            raise ValueError("missing 'context' parameter") from None
-
-        return result
+        return self.params.copy()
 
     @property
     def full_parent_name(self) -> str:
@@ -720,27 +720,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         kwargs = ctx.kwargs
 
         view = ctx.view
-        iterator = iter(self.params.items())
-
-        if self.cog is not None:
-            # we have 'self' as the first parameter so just advance
-            # the iterator and resume parsing
-            try:
-                next(iterator)
-            except StopIteration:
-                raise disnake.ClientException(
-                    f'Callback for {self.name} command is missing "self" parameter.'
-                )
-
-        # next we have the 'ctx' as the next parameter
-        try:
-            next(iterator)
-        except StopIteration:
-            raise disnake.ClientException(
-                f'Callback for {self.name} command is missing "ctx" parameter.'
-            )
-
-        for name, param in iterator:
+        for name, param in self.params.items():
             ctx.current_parameter = param
             if param.kind in (param.POSITIONAL_OR_KEYWORD, param.POSITIONAL_ONLY):
                 transformed = await self.transform(ctx, param)

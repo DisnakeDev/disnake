@@ -892,3 +892,64 @@ def test_as_valid_locale(locale, expected):
 )
 def test_humanize_list(values, expected):
     assert utils.humanize_list(values, "plus") == expected
+
+
+# used for `test_signature_has_self_param`
+def _toplevel():
+    def inner():
+        ...
+
+    return inner
+
+
+# used for `test_signature_has_self_param`
+class _Clazz:
+    def func(self):
+        def inner():
+            ...
+
+        return inner
+
+    @classmethod
+    def cmethod(cls):
+        ...
+
+    @staticmethod
+    def smethod():
+        ...
+
+    class Nested:
+        def func(self):
+            def inner():
+                ...
+
+            return inner
+
+    rebind = _toplevel
+
+
+@pytest.mark.parametrize(
+    ("function", "expected"),
+    [
+        # top-level function
+        (_toplevel, False),
+        # methods in class
+        (_Clazz.func, True),
+        (_Clazz().func, False),
+        # unfortunately doesn't work
+        (_Clazz.rebind, False),
+        (_Clazz().rebind, False),
+        # classmethod/staticmethod isn't supported, but checked to ensure consistency
+        (_Clazz.cmethod, False),
+        (_Clazz.smethod, True),
+        # nested class methods
+        (_Clazz.Nested.func, True),
+        (_Clazz.Nested().func, False),
+        # inner methods
+        (_toplevel(), False),
+        (_Clazz().func(), False),
+        (_Clazz.Nested().func(), False),
+    ],
+)
+def test_signature_has_self_param(function, expected):
+    assert utils.signature_has_self_param(function) == expected
