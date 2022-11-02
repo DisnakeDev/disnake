@@ -324,7 +324,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         from .core import Command, Group, wrap_callback
         from .errors import CommandError
 
-        bot = self.bot
+        bot: Union[Bot, AutoShardedBot] = self.bot
         cmd = bot.help_command
 
         if cmd is None:

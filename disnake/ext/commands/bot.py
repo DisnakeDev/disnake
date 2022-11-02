@@ -225,7 +225,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
             command_prefix: Optional[
                 Union[PrefixType, Callable[[Self, Message], MaybeCoro[PrefixType]]]
             ] = None,
-            help_command: HelpCommand = ...,
+            help_command: Optional[HelpCommand] = ...,
             description: Optional[str] = None,
             *,
             strip_after_prefix: bool = False,
@@ -277,7 +277,7 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
             command_prefix: Optional[
                 Union[PrefixType, Callable[[Self, Message], MaybeCoro[PrefixType]]]
             ] = None,
-            help_command: HelpCommand = ...,
+            help_command: Optional[HelpCommand] = ...,
             description: Optional[str] = None,
             *,
             strip_after_prefix: bool = False,
