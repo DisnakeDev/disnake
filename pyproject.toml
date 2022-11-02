@@ -34,7 +34,6 @@ dynamic = ["version", "dependencies", "optional-dependencies"]
 
 [project.urls]
 Changelog = "https://docs.disnake.dev/page/whats_new.html"
-Homepage = "https://github.com/DisnakeDev/disnake"
 Documentation = "https://docs.disnake.dev/"
 Repository = "https://github.com/DisnakeDev/disnake"
 
