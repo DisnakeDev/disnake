@@ -7,19 +7,16 @@ on: [push, pull_request]
 permissions:
   read-all
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
 defaults:
   run:
     shell: bash
 
 jobs:
   lint:
-    # Thanks to black for this rule
-    # We want to run on external PRs, but not on our own internal PRs as they'll be run
-    # by the push to the branch. Without this if check, checks are duplicated since
-    # internal PRs match both the push and pull_request events.
-    if:
-      github.event_name == 'push' || github.event.pull_request.head.repo.full_name !=
-      github.repository
     runs-on: ubuntu-latest
 
     steps:
@@ -53,12 +50,6 @@ jobs:
         [flake8] %(code)s: %(text)s'"
 
   docs:
-    # We want to run on external PRs, but not on our own internal PRs as they'll be run
-    # by the push to the branch. Without this if check, checks are duplicated since
-    # internal PRs match both the push and pull_request events.
-    if:
-      github.event_name == 'push' || github.event.pull_request.head.repo.full_name !=
-      github.repository
     # unlike the other workflows, we are using version 20.04 here as
     # readthedocs uses 20.04 for building our docs, and we want to be explicit
     runs-on: ubuntu-20.04
@@ -75,19 +66,14 @@ jobs:
       run: nox -s docs -- --keep-going -W -w $GITHUB_STEP_SUMMARY
 
   pyright:
-    # We want to run on external PRs, but not on our own internal PRs as they'll be run
-    # by the push to the branch. Without this if check, checks are duplicated since
-    # internal PRs match both the push and pull_request events.
-    continue-on-error: ${{ matrix.experimental }}
-    if:
-      github.event_name == 'push' || github.event.pull_request.head.repo.full_name !=
-      github.repository
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11"]
         experimental: [false]
       fail-fast: false
+    continue-on-error: ${{ matrix.experimental }}
+
     steps:
     - uses: actions/checkout@v3
 
@@ -123,14 +109,7 @@ jobs:
         warnings: true
 
   misc:
-    # We want to run on external PRs, but not on our own internal PRs as they'll be run
-    # by the push to the branch. Without this if check, checks are duplicated since
-    # internal PRs match both the push and pull_request events.
-    if:
-      github.event_name == 'push' || github.event.pull_request.head.repo.full_name !=
-      github.repository
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
 
@@ -169,22 +148,14 @@ jobs:
         fi
 
   pytest:
-    # Thanks to black for this rule
-    # We want to run on external PRs, but not on our own internal PRs as they'll be run
-    # by the push to the branch. Without this if check, checks are duplicated since
-    # internal PRs match both the push and pull_request events.
-    continue-on-error: ${{ matrix.experimental }}
-    if:
-      github.event_name == 'push' || github.event.pull_request.head.repo.full_name !=
-      github.repository
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11"]
         os: ["windows-latest", "ubuntu-latest", "macos-latest"]
         experimental: [false]
       fail-fast: true
-
-    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.experimental }}
 
     env:
       GITHUB_STEP_SUMMARY_HEADER: "<details><summary>#name#</summary>\n<pre>"
@@ -266,11 +237,7 @@ jobs:
 
   # thanks to aiohttp for this part of the workflow
   check:  # This job does nothing and is only used for the branch protection
-    if:
-      always() &&
-      github.event_name == 'push' || github.event.pull_request.head.repo.full_name !=
-      github.repository
-
+    if: always()
     needs:
     - lint
     - docs
