@@ -642,11 +642,7 @@ class AutoModActionExecution:
         otherwise this field will be empty.
 
     matched_keyword: Optional[:class:`str`]
-        The keyword that matched.
-
-        .. note::
-
-            If this rule matched because of a regex, this will contain the matching regex.
+        The keyword or regex that matched.
 
     matched_content: Optional[:class:`str`]
         The substring of :attr:`.content` that matched the rule/keyword.
