@@ -2,7 +2,16 @@
 
 name: Lint & Test
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - 'master'
+      - 'v[0-9]+.[0-9]+.x'  # matches to backport branches, e.g. 3.6
+    tags: [ 'v*' ]
+  pull_request:
+    branches:
+      - 'master'
+      - 'v[0-9]+.[0-9]+.x'
 
 permissions:
   read-all
