@@ -92,7 +92,7 @@ if TYPE_CHECKING:
     from .webhook import Webhook
 
 
-async def _single_delete_strategy(messages: Iterable[Message]):
+async def _single_delete_strategy(messages: Iterable[Message]) -> None:
     for m in messages:
         await m.delete()
 
@@ -176,7 +176,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         "_type",
     )
 
-    def __init__(self, *, state: ConnectionState, guild: Guild, data: TextChannelPayload):
+    def __init__(self, *, state: ConnectionState, guild: Guild, data: TextChannelPayload) -> None:
         self._state: ConnectionState = state
         self.id: int = int(data["id"])
         self._type: Literal[0, 5] = data["type"]
@@ -991,7 +991,7 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
         state: ConnectionState,
         guild: Guild,
         data: Union[VoiceChannelPayload, StageChannelPayload],
-    ):
+    ) -> None:
         self._state: ConnectionState = state
         self.id: int = int(data["id"])
         self._update(guild, data)
@@ -2093,7 +2093,9 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         "_flags",
     )
 
-    def __init__(self, *, state: ConnectionState, guild: Guild, data: CategoryChannelPayload):
+    def __init__(
+        self, *, state: ConnectionState, guild: Guild, data: CategoryChannelPayload
+    ) -> None:
         self._state: ConnectionState = state
         self.id: int = int(data["id"])
         self._update(guild, data)
@@ -2280,9 +2282,9 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         ...
 
     @utils.copy_doc(disnake.abc.GuildChannel.move)
-    async def move(self, **kwargs):
+    async def move(self, **kwargs) -> None:
         kwargs.pop("category", None)
-        await super().move(**kwargs)
+        return await super().move(**kwargs)
 
     @property
     def channels(self) -> List[GuildChannelType]:
@@ -3346,7 +3348,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         "_flags",
     )
 
-    def __init__(self, *, me: ClientUser, state: ConnectionState, data: DMChannelPayload):
+    def __init__(self, *, me: ClientUser, state: ConnectionState, data: DMChannelPayload) -> None:
         self._state: ConnectionState = state
         self.recipient: Optional[User] = state.store_user(data["recipients"][0])  # type: ignore
         self.me: ClientUser = me
@@ -3505,7 +3507,9 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
 
     __slots__ = ("id", "recipients", "owner_id", "owner", "_icon", "name", "me", "_state")
 
-    def __init__(self, *, me: ClientUser, state: ConnectionState, data: GroupChannelPayload):
+    def __init__(
+        self, *, me: ClientUser, state: ConnectionState, data: GroupChannelPayload
+    ) -> None:
         self._state: ConnectionState = state
         self.id: int = int(data["id"])
         self.me: ClientUser = me
@@ -3645,7 +3649,7 @@ class PartialMessageable(disnake.abc.Messageable, Hashable):
         The channel type associated with this partial messageable, if given.
     """
 
-    def __init__(self, state: ConnectionState, id: int, type: Optional[ChannelType] = None):
+    def __init__(self, state: ConnectionState, id: int, type: Optional[ChannelType] = None) -> None:
         self._state: ConnectionState = state
         self.id: int = id
         self.type: Optional[ChannelType] = type

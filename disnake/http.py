@@ -84,7 +84,7 @@ if TYPE_CHECKING:
 _API_VERSION = 10
 
 
-def _workaround_set_api_version(version: Literal[9, 10]):
+def _workaround_set_api_version(version: Literal[9, 10]) -> None:
     """Stopgap measure for verified bots without message content intent while intent is not enforced on api v9.
 
 
