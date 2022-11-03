@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import io
 import os
+import sys
 from typing import TYPE_CHECKING, Optional, Union
 
 __all__ = ("File",)
@@ -95,6 +96,34 @@ class File:
         )
         self.description = description
 
+    def __eq__(self, other: File) -> bool:
+
+        checks = tuple(
+            getattr(self, i) == getattr(other, i)
+            for i in self.__slots__
+            if i not in ("fp", "_owner", "_closer", "_original_pos")
+        )
+
+        if self.fp.__class__ == other.fp.__class__:
+            if isinstance(self.fp, io.BytesIO):
+                checks = checks + (self.fp.getvalue() == other.fp.getvalue(),)
+                return all(checks)
+
+            elif issubclass(self.fp.__class__, io.IOBase):
+                checks = checks + (self.fp.name == other.fp.name,)
+                return all(checks)
+        else:
+            return False
+
+    def __len__(self) -> int:
+        self.reset()
+        byteslen = self.fp.seek(0, io.SEEK_END)
+        self.reset()
+        return byteslen
+
+    def __sizeof__(self) -> int:
+        return sys.getsizeof(self.fp)
+
     def reset(self, *, seek: Union[int, bool] = True) -> None:
         # The `seek` parameter is needed because
         # the retry-loop is iterated over multiple times
@@ -111,3 +140,8 @@ class File:
         self.fp.close = self._closer
         if self._owner:
             self._closer()
+
+    @property
+    def closed(self) -> bool:
+        """:class:`bool` Wheter a file or bytes object is closed."""
+        return self.fp.closed
