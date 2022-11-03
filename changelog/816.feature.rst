@@ -1,1 +1,0 @@
-Support ``delete_after`` parameter when sending ephemeral interaction responses.

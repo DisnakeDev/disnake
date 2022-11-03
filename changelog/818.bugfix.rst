@@ -1,1 +1,0 @@
-Fix creation of threads in text channels without :attr:`Permissions.manage_threads`.

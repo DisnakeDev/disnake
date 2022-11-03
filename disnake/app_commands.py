@@ -110,7 +110,7 @@ class OptionChoice:
         self,
         name: LocalizedRequired,
         value: ApplicationCommandOptionChoiceValue,
-    ):
+    ) -> None:
         name_loc = Localized._cast(name, True)
         self.name: str = name_loc.string
         self.name_localizations: LocalizationValue = name_loc.localizations
@@ -235,7 +235,7 @@ class Option:
         max_value: Optional[float] = None,
         min_length: Optional[int] = None,
         max_length: Optional[int] = None,
-    ):
+    ) -> None:
         name_loc = Localized._cast(name, True)
         _validate_name(name_loc.string)
         self.name: str = name_loc.string
@@ -468,7 +468,7 @@ class ApplicationCommand(ABC):
         name: LocalizedRequired,
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-    ):
+    ) -> None:
         self.type: ApplicationCommandType = enum_if_int(ApplicationCommandType, type)
 
         name_loc = Localized._cast(name, True)
@@ -595,7 +595,7 @@ class UserCommand(ApplicationCommand):
         name: LocalizedRequired,
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-    ):
+    ) -> None:
         super().__init__(
             type=ApplicationCommandType.user,
             name=name,
@@ -678,7 +678,7 @@ class MessageCommand(ApplicationCommand):
         name: LocalizedRequired,
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-    ):
+    ) -> None:
         super().__init__(
             type=ApplicationCommandType.message,
             name=name,
@@ -779,7 +779,7 @@ class SlashCommand(ApplicationCommand):
         options: Optional[List[Option]] = None,
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-    ):
+    ) -> None:
         super().__init__(
             type=ApplicationCommandType.chat_input,
             name=name,
@@ -932,7 +932,7 @@ class ApplicationCommandPermissions:
 
     __slots__ = ("id", "type", "permission", "_guild_id")
 
-    def __init__(self, *, data: ApplicationCommandPermissionsPayload, guild_id: int):
+    def __init__(self, *, data: ApplicationCommandPermissionsPayload, guild_id: int) -> None:
         self.id: int = int(data["id"])
         self.type: ApplicationCommandPermissionType = try_enum(
             ApplicationCommandPermissionType, data["type"]
@@ -940,7 +940,7 @@ class ApplicationCommandPermissions:
         self.permission: bool = data["permission"]
         self._guild_id: int = guild_id
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<ApplicationCommandPermissions id={self.id!r} type={self.type!r} permission={self.permission!r}>"
 
     def __eq__(self, other):
@@ -990,7 +990,9 @@ class GuildApplicationCommandPermissions:
 
     __slots__ = ("_state", "id", "application_id", "guild_id", "permissions")
 
-    def __init__(self, *, data: GuildApplicationCommandPermissionsPayload, state: ConnectionState):
+    def __init__(
+        self, *, data: GuildApplicationCommandPermissionsPayload, state: ConnectionState
+    ) -> None:
         self._state: ConnectionState = state
         self.id: int = int(data["id"])
         self.application_id: int = int(data["application_id"])
@@ -1001,7 +1003,7 @@ class GuildApplicationCommandPermissions:
             for elem in data["permissions"]
         ]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"<GuildApplicationCommandPermissions id={self.id!r} application_id={self.application_id!r}"
             f" guild_id={self.guild_id!r} permissions={self.permissions!r}>"
