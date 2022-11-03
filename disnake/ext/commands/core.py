@@ -191,7 +191,7 @@ def hooked_wrapped_callback(command, ctx, coro):
 
 
 class _CaseInsensitiveDict(dict):
-    def __contains__(self, k):
+    def __contains__(self, k) -> bool:
         return super().__contains__(k.casefold())
 
     def __delitem__(self, k):
@@ -206,7 +206,7 @@ class _CaseInsensitiveDict(dict):
     def pop(self, k, default=None):
         return super().pop(k.casefold(), default)
 
-    def __setitem__(self, k, v):
+    def __setitem__(self, k, v) -> None:
         super().__setitem__(k.casefold(), v)
 
 
@@ -307,7 +307,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         self,
         func: CommandCallback[CogT, ContextT, P, T],
         **kwargs: Any,
-    ):
+    ) -> None:
         if not asyncio.iscoroutinefunction(func):
             raise TypeError("Callback must be a coroutine.")
 
