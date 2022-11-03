@@ -112,8 +112,8 @@ class File:
             elif issubclass(self.fp.__class__, io.IOBase):
                 checks = checks + (self.fp.name == other.fp.name,)
                 return all(checks)
-        else:
-            return False
+
+        return False
 
     def __len__(self) -> int:
         self.reset()
