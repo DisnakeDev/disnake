@@ -222,11 +222,12 @@ class AutoModTriggerMetadata:
 
         See :ddocs:`api docs <resources/auto-moderation#auto-moderation-rule-object-keyword-matching-strategies>`
         for details about how keyword matching works.
+        Each keyword must be 30 characters or less.
 
     regex_patterns: Optional[Sequence[:class:`str`]]
         The list of regular expressions to check for. Used with :attr:`AutoModTriggerType.keyword`.
 
-        A maximum of 10 regexes can be added.
+        A maximum of 10 regexes can be added, each with up to 75 characters.
 
         .. note::
 
