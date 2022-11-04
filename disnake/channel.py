@@ -485,7 +485,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         nsfw: Optional[:class:`bool`]
             Whether the new channel should be nsfw or not. If not provided, defaults to this channel nsfw value.
         category: Optional[:class:`abc.Snowflake`]
-            The category id where the new channel should be grouped. If not provided, defaults to this channel category.
+            The category of the new channel. If not provided, defaults to this channel category.
         slowmode_delay: Optional[:class:`int`]
             The slowmode of the new channel. If not provided, defaults to this channel slowmode.
         type: Optional[:class:`ChannelType`]
