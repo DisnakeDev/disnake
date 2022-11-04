@@ -40,6 +40,7 @@ class AutoModAction(TypedDict):
 
 class AutoModTriggerMetadata(TypedDict, total=False):
     keyword_filter: List[str]
+    regex_patterns: List[str]
     presets: List[AutoModPresetType]
     allow_list: List[str]
     mention_total_limit: int
