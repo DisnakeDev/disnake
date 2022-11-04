@@ -3246,7 +3246,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
                 "available_tags": [tag.to_dict() for tag in available_tags]
                 if available_tags
                 else [tag.to_dict() for tag in self.available_tags],
-                "default_reaction_emoij": default_reaction_emoji_payload,
+                "default_reaction_emoji": default_reaction_emoji_payload,
                 "default_sort_order": default_sort_order_payload,
             },
             name=name,
