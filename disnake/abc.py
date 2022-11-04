@@ -177,7 +177,7 @@ class _Overwrites:
     ROLE = 0
     MEMBER = 1
 
-    def __init__(self, data: PermissionOverwritePayload):
+    def __init__(self, data: PermissionOverwritePayload) -> None:
         self.id: int = int(data["id"])
         self.allow: int = int(data.get("allow", 0))
         self.deny: int = int(data.get("deny", 0))
@@ -236,7 +236,9 @@ class GuildChannel(ABC):
 
     if TYPE_CHECKING:
 
-        def __init__(self, *, state: ConnectionState, guild: Guild, data: Mapping[str, Any]):
+        def __init__(
+            self, *, state: ConnectionState, guild: Guild, data: Mapping[str, Any]
+        ) -> None:
             ...
 
     def __str__(self) -> str:
@@ -863,7 +865,9 @@ class GuildChannel(ABC):
     ) -> None:
         ...
 
-    async def set_permissions(self, target, *, overwrite=MISSING, reason=None, **permissions):
+    async def set_permissions(
+        self, target, *, overwrite=MISSING, reason=None, **permissions
+    ) -> None:
         """
         |coro|
 

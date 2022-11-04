@@ -2,7 +2,18 @@
 
 import types
 from functools import total_ordering
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, NamedTuple, Optional, Type, TypeVar
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    ClassVar,
+    Dict,
+    List,
+    NamedTuple,
+    NoReturn,
+    Optional,
+    Type,
+    TypeVar,
+)
 
 __all__ = (
     "Enum",
@@ -133,10 +144,10 @@ class EnumMeta(type):
     def __reversed__(cls):
         return (cls._enum_member_map_[name] for name in reversed(cls._enum_member_names_))
 
-    def __len__(cls):
+    def __len__(cls) -> int:
         return len(cls._enum_member_names_)
 
-    def __repr__(cls):
+    def __repr__(cls) -> str:
         return f"<enum {cls.__name__}>"
 
     @property
@@ -152,13 +163,13 @@ class EnumMeta(type):
     def __getitem__(cls, key):
         return cls._enum_member_map_[key]
 
-    def __setattr__(cls, name, value):
+    def __setattr__(cls, name, value) -> NoReturn:
         raise TypeError("Enums are immutable.")
 
-    def __delattr__(cls, attr):
+    def __delattr__(cls, attr) -> NoReturn:
         raise TypeError("Enums are immutable")
 
-    def __instancecheck__(self, instance):
+    def __instancecheck__(self, instance) -> bool:
         # isinstance(x, Y)
         # -> __instancecheck__(Y, x)
         try:
@@ -194,7 +205,7 @@ class ChannelType(Enum):
     guild_directory = 14
     forum = 15
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
@@ -247,10 +258,10 @@ class SpeakingState(Enum):
     soundshare = 2
     priority = 4
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
-    def __int__(self):
+    def __int__(self) -> int:
         return self.value
 
 
@@ -261,7 +272,7 @@ class VerificationLevel(Enum, comparable=True):
     high = 3
     highest = 4
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
@@ -270,7 +281,7 @@ class ContentFilter(Enum, comparable=True):
     no_role = 1
     all_members = 2
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
@@ -283,7 +294,7 @@ class Status(Enum):
     invisible = "invisible"
     streaming = "streaming"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.value
 
 
@@ -295,7 +306,7 @@ class DefaultAvatar(Enum):
     orange = 3
     red = 4
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
@@ -506,7 +517,7 @@ class ActivityType(Enum):
     custom = 4
     competing = 5
 
-    def __int__(self):
+    def __int__(self) -> int:
         return self.value
 
 
@@ -579,7 +590,7 @@ class VideoQualityMode(Enum):
     auto = 1
     full = 2
 
-    def __int__(self):
+    def __int__(self) -> int:
         return self.value
 
 
@@ -594,7 +605,7 @@ class ComponentType(Enum):
     mentionable_select = 7
     channel_select = 8
 
-    def __int__(self):
+    def __int__(self) -> int:
         return self.value
 
 
@@ -613,7 +624,7 @@ class ButtonStyle(Enum):
     red = 4
     url = 5
 
-    def __int__(self):
+    def __int__(self) -> int:
         return self.value
 
 
@@ -640,7 +651,7 @@ class ApplicationCommandPermissionType(Enum):
     user = 2
     channel = 3
 
-    def __int__(self):
+    def __int__(self) -> int:
         return self.value
 
 
@@ -695,7 +706,7 @@ class ThreadArchiveDuration(Enum):
     three_days = 4320
     week = 10080
 
-    def __int__(self):
+    def __int__(self) -> int:
         return self.value
 
 
@@ -706,7 +717,7 @@ class WidgetStyle(Enum):
     banner3 = "banner3"
     banner4 = "banner4"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.value
 
 
@@ -773,7 +784,7 @@ class Locale(Enum):
     zh_TW = "zh-TW"
     "Chinese, Taiwan | 繁體中文"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.value
 
 

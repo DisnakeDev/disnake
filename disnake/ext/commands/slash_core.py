@@ -143,7 +143,7 @@ class SubCommandGroup(InvokableApplicationCommand):
         *,
         name: LocalizedOptional = None,
         **kwargs,
-    ):
+    ) -> None:
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
         self.parent: InvokableSlashCommand = parent
@@ -274,7 +274,7 @@ class SubCommand(InvokableApplicationCommand):
         options: Optional[list] = None,
         connectors: Optional[Dict[str, str]] = None,
         **kwargs,
-    ):
+    ) -> None:
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
         self.parent: Union[InvokableSlashCommand, SubCommandGroup] = parent
@@ -438,7 +438,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         connectors: Optional[Dict[str, str]] = None,
         auto_sync: Optional[bool] = None,
         **kwargs,
-    ):
+    ) -> None:
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
         self.parent = None
@@ -684,7 +684,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         if choices is not None:
             await inter.response.autocomplete(choices=choices)
 
-    async def invoke_children(self, inter: ApplicationCommandInteraction):
+    async def invoke_children(self, inter: ApplicationCommandInteraction) -> None:
         chain, kwargs = inter.data._get_chain_and_kwargs()
 
         if len(chain) == 0:
@@ -715,7 +715,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                 if not await subcmd._call_local_error_handler(inter, exc):
                     raise
 
-    async def invoke(self, inter: ApplicationCommandInteraction):
+    async def invoke(self, inter: ApplicationCommandInteraction) -> None:
         await self.prepare(inter)
 
         try:

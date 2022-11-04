@@ -149,7 +149,7 @@ class InteractionBotBase(CommonBotBase):
         sync_commands_on_cog_unload: bool = MISSING,
         test_guilds: Optional[Sequence[int]] = None,
         **options: Any,
-    ):
+    ) -> None:
         if test_guilds and not all(isinstance(guild_id, int) for guild_id in test_guilds):
             raise ValueError("test_guilds must be a sequence of int.")
 
@@ -1357,8 +1357,10 @@ class InteractionBotBase(CommonBotBase):
         except errors.CommandError as exc:
             await app_command.dispatch_error(interaction, exc)
 
-    async def on_application_command(self, interaction: ApplicationCommandInteraction):
+    async def on_application_command(self, interaction: ApplicationCommandInteraction) -> None:
         await self.process_application_commands(interaction)
 
-    async def on_application_command_autocomplete(self, interaction: ApplicationCommandInteraction):
+    async def on_application_command_autocomplete(
+        self, interaction: ApplicationCommandInteraction
+    ) -> None:
         await self.process_app_command_autocompletion(interaction)

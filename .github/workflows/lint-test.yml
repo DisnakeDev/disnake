@@ -179,19 +179,9 @@ jobs:
       github.repository
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
         os: ["windows-latest", "ubuntu-latest", "macos-latest"]
         experimental: [false]
-        include:
-          - python-version: '3.11.0-alpha - 3.11'
-            os: "ubuntu-latest"
-            experimental: true
-          - python-version: '3.11.0-alpha - 3.11'
-            os: "macos-latest"
-            experimental: true
-          - python-version: '3.11.0-alpha - 3.11'
-            os: "windows-latest"
-            experimental: true
       fail-fast: true
 
     runs-on: ${{ matrix.os }}
@@ -292,6 +282,6 @@ jobs:
 
     steps:
     - name: Decide whether the needed jobs succeeded or failed
-      uses: re-actors/alls-green@v1.2.1
+      uses: re-actors/alls-green@v1.2.2
       with:
         jobs: ${{ toJSON(needs) }}

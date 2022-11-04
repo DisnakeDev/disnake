@@ -13,6 +13,7 @@ inputs:
       requirements/
       requirements.txt
       setup.py
+      pyproject.toml
   dependencies:
     description: Other python dependencies to install
     required: false

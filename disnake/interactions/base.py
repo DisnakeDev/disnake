@@ -170,7 +170,7 @@ class Interaction:
         "_cs_expires_at",
     )
 
-    def __init__(self, *, data: InteractionPayload, state: ConnectionState):
+    def __init__(self, *, data: InteractionPayload, state: ConnectionState) -> None:
         self.data: Mapping[str, Any] = data.get("data") or {}
         self._state: ConnectionState = state
         # TODO: Maybe use a unique session
@@ -552,7 +552,7 @@ class Interaction:
 
         if delay is not None:
 
-            async def delete(delay: float):
+            async def delete(delay: float) -> None:
                 await asyncio.sleep(delay)
                 try:
                     await deleter
@@ -698,7 +698,7 @@ class InteractionResponse:
         "_response_type",
     )
 
-    def __init__(self, parent: Interaction):
+    def __init__(self, parent: Interaction) -> None:
         self._parent: Interaction = parent
         self._response_type: Optional[InteractionResponseType] = None
 
@@ -1341,7 +1341,7 @@ class InteractionResponse:
 class _InteractionMessageState:
     __slots__ = ("_parent", "_interaction")
 
-    def __init__(self, interaction: Interaction, parent: ConnectionState):
+    def __init__(self, interaction: Interaction, parent: ConnectionState) -> None:
         self._interaction: Interaction = interaction
         self._parent: ConnectionState = parent
 
@@ -1649,7 +1649,7 @@ class InteractionMessage(Message):
             return await super().delete(delay=delay)
         if delay is not None:
 
-            async def inner_call(delay: float = delay):
+            async def inner_call(delay: float = delay) -> None:
                 await asyncio.sleep(delay)
                 try:
                     await self._state._interaction.delete_original_response()
@@ -1696,7 +1696,7 @@ class InteractionDataResolved(Dict[str, Any]):
         data: InteractionDataResolvedPayload,
         state: ConnectionState,
         guild_id: Optional[int],
-    ):
+    ) -> None:
         data = data or {}
         super().__init__(data)
 
@@ -1781,7 +1781,7 @@ class InteractionDataResolved(Dict[str, Any]):
         for str_id, attachment in attachments.items():
             self.attachments[int(str_id)] = Attachment(data=attachment, state=state)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"<InteractionDataResolved members={self.members!r} users={self.users!r} "
             f"roles={self.roles!r} channels={self.channels!r} messages={self.messages!r} attachments={self.attachments!r}>"
