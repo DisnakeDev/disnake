@@ -76,6 +76,7 @@ if TYPE_CHECKING:
     from .threads import AnyThreadArchiveDuration, ThreadType
     from .types.channel import (
         CategoryChannel as CategoryChannelPayload,
+        DefaultReaction as DefaultReactionPayload,
         DMChannel as DMChannelPayload,
         ForumChannel as ForumChannelPayload,
         GroupDMChannel as GroupChannelPayload,
@@ -452,14 +453,14 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         self,
         *,
         name: Optional[str] = None,
-        topic: Optional[str] = None,
-        position: Optional[int] = None,
-        nsfw: Optional[bool] = None,
-        category: Optional[Snowflake] = None,
-        slowmode_delay: Optional[int] = None,
-        type: Optional[ChannelType] = None,
-        default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = None,
-        flags: Optional[ChannelFlags] = None,
+        topic: Optional[str] = MISSING,
+        position: Optional[int] = MISSING,
+        nsfw: Optional[bool] = MISSING,
+        category: Optional[Snowflake] = MISSING,
+        slowmode_delay: Optional[int] = MISSING,
+        type: Optional[ChannelType] = MISSING,
+        default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
+        flags: Optional[ChannelFlags] = MISSING,
         reason: Optional[str] = None,
     ) -> TextChannel:
         """|coro|
@@ -473,6 +474,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         .. versionadded:: 1.1
 
         .. versionchanged:: 2.7
+            Added ``topic``, ``position``, ``nsfw``, ``category``, ``slowmode_delay``,
+            ``type``, ``default_auto_archive_duration``, ``flags`` keyword-only parameters.
 
         Parameters
         ----------
@@ -506,19 +509,22 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         Returns
         -------
-        :class:`.abc.GuildChannel`
+        :class:`TextChannel`
             The channel that was created.
         """
         return await self._clone_impl(
             {
-                "topic": topic or self.topic,
-                "position": position or self.position,
-                "nsfw": nsfw or self.nsfw,
-                "rate_limit_per_user": slowmode_delay or self.slowmode_delay,
-                "type": type or self.type,
+                "topic": topic if topic is not MISSING else self.topic,
+                "position": position if position is not MISSING else self.position,
+                "nsfw": nsfw if nsfw is not MISSING else self.nsfw,
+                "rate_limit_per_user": slowmode_delay
+                if slowmode_delay is not MISSING
+                else self.slowmode_delay,
+                "type": type if type is not MISSING else self.type,
                 "default_auto_archive_duration": default_auto_archive_duration
-                or self.default_auto_archive_duration,
-                "flags": flags.value if flags else self.flags.value,
+                if default_auto_archive_duration is not MISSING
+                else self.default_auto_archive_duration,
+                "flags": flags.value if flags is not MISSING and flags else self.flags.value,
             },
             name=name,
             category_id=category,
@@ -1240,15 +1246,15 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         self,
         *,
         name: Optional[str] = None,
-        bitrate: Optional[int] = None,
-        user_limit: Optional[int] = None,
-        position: Optional[int] = None,
-        category: Optional[Snowflake] = None,
-        rtc_region: Optional[Union[str, VoiceRegion]] = None,
-        video_quality_mode: Optional[VideoQualityMode] = None,
-        nsfw: Optional[bool] = None,
-        slowmode_delay: Optional[int] = None,
-        flags: Optional[ChannelFlags] = None,
+        bitrate: int = MISSING,
+        user_limit: int = MISSING,
+        position: int = MISSING,
+        category: Optional[Snowflake] = MISSING,
+        rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
+        video_quality_mode: VideoQualityMode = MISSING,
+        nsfw: bool = MISSING,
+        slowmode_delay: Optional[int] = MISSING,
+        flags: ChannelFlags = MISSING,
         reason: Optional[str] = None,
     ) -> VoiceChannel:
         """|coro|
@@ -1262,28 +1268,31 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         .. versionadded:: 1.1
 
         .. versionchanged:: 2.7
+            Added ``bitrate``, ``user_limit``, ``position``, ``category``,
+            ``rtc_region``, ``video_quality_mode``, ``nsfw``, ``slowmode_delay``, ``flags``
+            keyword-only parameters.
 
         Parameters
         ----------
         name: Optional[:class:`str`]
             The name of the new channel. If not provided, defaults to this channel name.
-        bitrate: Optional[:class:`int`]
+        bitrate: :class:`int`
             The bitrate of the new channel. If not provided, defaults to this channel bitrate.
-        user_limit: Optional[:class:`int`]
+        user_limit: :class:`int`
             The user limit of the new channel. If not provided, defaults to this channel user limit.
-        position: Optional[:class:`int`]
+        position: :class:`int`
             The position of the new channel. If not provided, defaults to this channel position.
         category: Optional[:class:`abc.Snowflake`]
             The category id where the new channel should be grouped. If not provided, defaults to this channel category.
         rtc_region: Optional[Union[:class:`str`, :class:`VoiceRegion`]]
             The rtc region of the new channel. If not provided, defaults to this channel rtc region.
-        video_quality_mode: Optional[:class:`VideoQualityMode`]
+        video_quality_mode: :class:`VideoQualityMode`
             The video quality mode of the new channel. If not provided, defaults to this channel video quality mode.
-        nsfw: Optional[:class:`bool`]
+        nsfw: :class:`bool`
             Wether the new channel should be nsfw or not. If not provided, defaults to this channel nsfw value.
         slowmode_delay: Optional[:class:`int`]
             The slowmode of the new channel. If not provided, defaults to this channel slowmode.
-        flags: Optional[:class:`ChannelFlags`]
+        flags: :class:`ChannelFlags`
             The flags of the new channel. If not provided, defaults to this channel flags.
         reason: Optional[:class:`str`]
             The reason for cloning this channel. Shows up on the audit log.
@@ -1297,22 +1306,24 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         Returns
         -------
-        :class:`.abc.GuildChannel`
+        :class:`VoiceChannel`
             The channel that was created.
         """
 
         return await self._clone_impl(
             {
-                "bitrate": bitrate or self.bitrate,
-                "user_limit": user_limit or self.user_limit,
-                "position": position or self.position,
-                "rtc_region": rtc_region or self.rtc_region,
+                "bitrate": bitrate if bitrate is not MISSING else self.bitrate,
+                "user_limit": user_limit if user_limit is not MISSING else self.user_limit,
+                "position": position if position is not MISSING else self.position,
+                "rtc_region": rtc_region if rtc_region is not MISSING else self.rtc_region,
                 "video_quality_mode": int(video_quality_mode)
-                if video_quality_mode
+                if video_quality_mode is not MISSING and video_quality_mode
                 else int(self.video_quality_mode),
-                "nsfw": nsfw or self.nsfw,
-                "rate_limit_per_user": slowmode_delay or self.slowmode_delay,
-                "flags": flags.value if flags else self.flags.value,
+                "nsfw": nsfw if nsfw is not MISSING else self.nsfw,
+                "rate_limit_per_user": slowmode_delay
+                if slowmode_delay is not MISSING
+                else self.slowmode_delay,
+                "flags": flags.value if flags is not MISSING and flags else self.flags.value,
             },
             name=name,
             category_id=category,
@@ -1920,12 +1931,12 @@ class StageChannel(VocalGuildChannel):
         self,
         *,
         name: Optional[str] = None,
-        position: Optional[int] = None,
-        category: Optional[Snowflake] = None,
-        rtc_region: Optional[Union[str, VoiceRegion]] = None,
-        video_quality_mode: Optional[VideoQualityMode] = None,
-        bitrate: Optional[int] = None,
-        flags: Optional[ChannelFlags] = None,
+        position: int = MISSING,
+        category: Optional[Snowflake] = MISSING,
+        rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
+        video_quality_mode: VideoQualityMode = MISSING,
+        bitrate: int = MISSING,
+        flags: ChannelFlags = MISSING,
         reason: Optional[str] = None,
     ) -> StageChannel:
         """|coro|
@@ -1939,22 +1950,24 @@ class StageChannel(VocalGuildChannel):
         .. versionadded:: 1.1
 
         .. versionchanged:: 2.7
+            Added ``position``, ``category``, ``rtc_region``,
+            ``video_quality_mode``, ``bitrate``, ``flags`` keyword-only parameters.
 
         Parameters
         ----------
         name: Optional[:class:`str`]
             The name of the new channel. If not provided, defaults to this channel name.
-        position: Optional[:class:`int`]
+        position: :class:`int`
             The position of the new channel. If not provided, defaults to this channel position.
         category: Optional[:class:`abc.Snowflake`]
             The category id where the new channel should be grouped. If not provided, defaults to this channel category.
         rtc_region: Optional[Union[:class:`str`, :class:`VoiceRegion`]]
             The rtc region of the new channel. If not provided, defaults to this channel rtc region.
-        video_quality_mode: Optional[:class:`VideoQualityMode`]
+        video_quality_mode: :class:`VideoQualityMode`
             The video quality mode of the new channel. If not provided, defaults to this channel video quality mode.
-        bitrate: Optional[:class:`int`]
+        bitrate: :class:`int`
             The bitrate of the new channel. If not provided, defaults to this channel bitrate.
-        flags: Optional[:class:`ChannelFlags`]
+        flags: :class:`ChannelFlags`
             The flags of the new channel. If not provided, defaults to this channel flags.
         reason: Optional[:class:`str`]
             The reason for cloning this channel. Shows up on the audit log.
@@ -1968,18 +1981,18 @@ class StageChannel(VocalGuildChannel):
 
         Returns
         -------
-        :class:`.abc.GuildChannel`
+        :class:`StageChannel`
             The channel that was created.
         """
         return await self._clone_impl(
             {
-                "position": position or self.position,
-                "rtc_region": rtc_region or self.rtc_region,
+                "position": position if position is not MISSING else self.position,
+                "rtc_region": rtc_region if rtc_region is not MISSING else self.rtc_region,
                 "video_quality_mode": int(video_quality_mode)
-                if video_quality_mode
+                if video_quality_mode is not MISSING and video_quality_mode
                 else int(self.video_quality_mode),
-                "bitrate": bitrate or self.bitrate,
-                "flags": flags.value if flags else self.flags.value,
+                "bitrate": bitrate if bitrate is not MISSING else self.bitrate,
+                "flags": flags.value if flags is not MISSING and flags else self.flags.value,
             },
             name=name,
             category_id=category,
@@ -2342,9 +2355,9 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         self,
         *,
         name: Optional[str] = None,
-        position: Optional[int] = None,
-        nsfw: Optional[bool] = None,
-        flags: Optional[ChannelFlags] = None,
+        position: int = MISSING,
+        nsfw: bool = MISSING,
+        flags: ChannelFlags = MISSING,
         reason: Optional[str] = None,
     ) -> CategoryChannel:
         """|coro|
@@ -2358,16 +2371,17 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         .. versionadded:: 1.1
 
         .. versionchanged:: 2.7
+            Added``position``, ``nsfw``, ``flags`` keyword-only parameters.
 
         Parameters
         ----------
         name: Optional[:class:`str`]
             The name of the new channel. If not provided, defaults to this channel name.
-        position: Optional[:class:`int`]
+        position: :class:`int`
             The position of the new channel. If not provided, defaults to this channel position.
-        nsfw: Optional[:class:`bool`]
+        nsfw: :class:`bool`
             Wether the new channel should be nsfw or not. If not provided, defaults to this channel nsfw value.
-        flags: Optional[:class:`ChannelFlags`]
+        flags: :class:`ChannelFlags`
             The flags of the new channel. If not provided, defaults to this channel flags.
         reason: Optional[:class:`str`]
             The reason for cloning this channel. Shows up on the audit log.
@@ -2381,14 +2395,14 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
         Returns
         -------
-        :class:`.abc.GuildChannel`
+        :class:`CategoryChannel`
             The channel that was created.
         """
         return await self._clone_impl(
             {
-                "position": position or self.position,
-                "nsfw": nsfw or self.nsfw,
-                "flags": flags.value if flags else self.flags.value,
+                "position": position if position is not MISSING else self.position,
+                "nsfw": nsfw if nsfw is not MISSING else self.nsfw,
+                "flags": flags.value if flags is not MISSING and flags else self.flags.value,
             },
             name=name,
             reason=reason,
@@ -3147,18 +3161,18 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         self,
         *,
         name: Optional[str] = None,
-        topic: Optional[str] = None,
-        position: Optional[int] = None,
-        nsfw: Optional[bool] = None,
-        category: Optional[Snowflake] = None,
-        slowmode_delay: Optional[int] = None,
-        default_thread_slowmode_delay: Optional[int] = None,
-        default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = None,
-        flags: Optional[ChannelFlags] = None,
-        require_tag: Optional[bool] = None,
-        available_tags: Optional[Sequence[ForumTag]] = None,
-        default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = None,
-        default_sort_order: Optional[ThreadSortOrder] = None,
+        topic: Optional[str] = MISSING,
+        position: int = MISSING,
+        nsfw: bool = MISSING,
+        category: Optional[Snowflake] = MISSING,
+        slowmode_delay: Optional[int] = MISSING,
+        default_thread_slowmode_delay: Optional[int] = MISSING,
+        default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
+        flags: ChannelFlags = MISSING,
+        require_tag: bool = MISSING,
+        available_tags: Sequence[ForumTag] = MISSING,
+        default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
+        default_sort_order: Optional[ThreadSortOrder] = MISSING,
         reason: Optional[str] = None,
     ) -> ForumChannel:
         """|coro|
@@ -3172,6 +3186,10 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         .. versionadded:: 1.1
 
         .. versionchanged:: 2.7
+            Added new ``topic``, ``position``, ``nsfw``, ``category``, ``slowmode_delay``,
+            ``default_thread_slowmode_delay``, ``default_auto_archive_duration``, ``flags``,
+            ``require_tag``, ``available_tags``, ``default_reaction``, ``default_sort_order``
+            keyword-only paremters.
 
         Parameters
         ----------
@@ -3179,9 +3197,9 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             The name of the new channel. If not provided, defaults to this channel name.
         topic: Optional[:class:`str`]
             The topic of the new channel. If not provided, defaults to this channel topic.
-        position: Optional[:class:`int`]
+        position: :class:`int`
             The position of the new channel. If not provided, defaults to this channel position.
-        nsfw: Optional[:class:`bool`]
+        nsfw: :class:`bool`
             Wether the new channel should be nsfw or not. If not provided, defaults to this channel nsfw value.
         category: Optional[:class:`abc.Snowflake`]
             The category id where the new channel should be grouped. If not provided, defaults to this channel category.
@@ -3191,11 +3209,11 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             The default thread slowmode delay of the new channel. If not provided, defaults to this channel default thread slowmode delay.
         default_auto_archive_duration: Optional[Union[:class:`int`, :class:`ThreadArchiveDuration`]]
             The default auto archive duration of the new channel. If not provided, defaults to this channel default auto archive duration.
-        flags: Optional[:class:`ChannelFlags`]
+        flags: :class:`ChannelFlags`
             The flags of the new channel. If not provided, defaults to this channel flags.
-        require_tag: Optional[:class:`bool`]
+        require_tag: :class:`bool`
             Wether the new channel should require tag at threads creation. If not provided, defaults to this channel require tag value.
-        available_tags: Optional[Sequence[:class:`ForumTag`]]
+        available_tags: Sequence[:class:`ForumTag`]
             The applicable tags of the new channel. If not provided, defaults to this channel available tags.
         default_reaction: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
             The default reaction of the new channel. If not provided, defaults to this channel default reaction.
@@ -3213,38 +3231,57 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
         Returns
         -------
-        :class:`.abc.GuildChannel`
+        :class:`ForumChannel`
             The channel that was created.
         """
-        if require_tag:
-            flags = ChannelFlags._from_value(self._flags if not flags else flags.value)
+        if require_tag is not MISSING:
+            flags = ChannelFlags._from_value(
+                flags.value if flags is not MISSING and flags else self._flags
+            )
             flags.require_tag = require_tag
-        if default_reaction:
-            emoji_name, emoji_id = PartialEmoji._emoji_to_name_id(default_reaction)
-            default_reaction_emoji_payload = {
-                "emoji_name": emoji_name,
-                "emoji_id": emoji_id,
-            }
-        else:
-            default_reaction_emoji_payload = None
 
-        default_sort_order_payload = (
-            try_enum_to_int(default_sort_order) if default_sort_order else None
-        )
+        flags_payload: int
+        if flags is not MISSING:
+            if not isinstance(flags, ChannelFlags):
+                raise TypeError("flags field must be of type ChannelFlags")
+            flags_payload = flags.value
+        else:
+            flags_payload = MISSING
+
+        default_reaction_emoji_payload: Optional[DefaultReactionPayload] = MISSING
+        if default_reaction is not MISSING:
+            if default_reaction is not None:
+                emoji_name, emoji_id = PartialEmoji._emoji_to_name_id(default_reaction)
+                default_reaction_emoji_payload = {
+                    "emoji_name": emoji_name,
+                    "emoji_id": emoji_id,
+                }
+            else:
+                default_reaction_emoji_payload = None
+
+        default_sort_order_payload: Optional[int] = MISSING
+        if default_sort_order is not MISSING:
+            default_sort_order_payload = (
+                try_enum_to_int(default_sort_order) if default_sort_order is not None else None
+            )
 
         return await self._clone_impl(
             {
-                "topic": topic or self.topic,
-                "position": position or self.position,
-                "nsfw": nsfw or self.nsfw,
-                "rate_limit_per_user": slowmode_delay or self.slowmode_delay,
+                "topic": topic if topic is not MISSING else self.topic,
+                "position": position if position is not MISSING else self.position,
+                "nsfw": nsfw if nsfw is not MISSING else self.nsfw,
+                "rate_limit_per_user": slowmode_delay
+                if slowmode_delay is not MISSING
+                else self.slowmode_delay,
                 "default_thread_rate_limit_per_user": default_thread_slowmode_delay
-                or self.default_thread_slowmode_delay,
+                if default_thread_slowmode_delay is not MISSING
+                else self.default_thread_slowmode_delay,
                 "default_auto_archive_duration": default_auto_archive_duration
-                or self.default_auto_archive_duration,
-                "flags": flags.value if flags else self.flags.value,
+                if default_auto_archive_duration is not MISSING
+                else self.default_auto_archive_duration,
+                "flags": flags_payload,
                 "available_tags": [tag.to_dict() for tag in available_tags]
-                if available_tags
+                if available_tags is not MISSING and available_tags
                 else [tag.to_dict() for tag in self.available_tags],
                 "default_reaction_emoji": default_reaction_emoji_payload,
                 "default_sort_order": default_sort_order_payload,
