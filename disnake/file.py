@@ -113,6 +113,9 @@ class File:
         if self._owner:
             self._closer()
 
+    def __sizeof__(self) -> int:
+        return sys.getsizeof(self.fp)
+
     @property
     def closed(self) -> bool:
         """:class:`bool`: Wheter a file or bytes object is closed.
@@ -134,4 +137,4 @@ class File:
     @property
     def size(self) -> int:
         """:class:`int`: The size of the ``fp`` object."""
-        return sys.getsizeof(self.fp)
+        return self.__sizeof__()
