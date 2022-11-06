@@ -78,7 +78,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
         guild_ids: Optional[Sequence[int]] = None,
         auto_sync: Optional[bool] = None,
         **kwargs,
-    ):
+    ) -> None:
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
         self.guild_ids: Optional[Tuple[int, ...]] = None if guild_ids is None else tuple(guild_ids)
@@ -178,7 +178,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         guild_ids: Optional[Sequence[int]] = None,
         auto_sync: Optional[bool] = None,
         **kwargs,
-    ):
+    ) -> None:
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
         self.guild_ids: Optional[Tuple[int, ...]] = None if guild_ids is None else tuple(guild_ids)

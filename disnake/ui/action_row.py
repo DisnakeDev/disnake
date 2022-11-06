@@ -137,7 +137,7 @@ class ActionRow(Generic[UIComponentT]):
     # When unspecified and called empty, default to an ActionRow that takes any kind of component.
 
     @overload
-    def __init__(self: ActionRow[WrappedComponent]):
+    def __init__(self: ActionRow[WrappedComponent]) -> None:
         ...
 
     # Explicit definitions are needed to make
@@ -146,20 +146,20 @@ class ActionRow(Generic[UIComponentT]):
     # differentiate themselves properly.
 
     @overload
-    def __init__(self: ActionRow[MessageUIComponent], *components: MessageUIComponent):
+    def __init__(self: ActionRow[MessageUIComponent], *components: MessageUIComponent) -> None:
         ...
 
     @overload
-    def __init__(self: ActionRow[ModalUIComponent], *components: ModalUIComponent):
+    def __init__(self: ActionRow[ModalUIComponent], *components: ModalUIComponent) -> None:
         ...
 
     # Allow use of "ActionRow[StrictUIComponent]" externally.
 
     @overload
-    def __init__(self: ActionRow[StrictUIComponentT], *components: StrictUIComponentT):
+    def __init__(self: ActionRow[StrictUIComponentT], *components: StrictUIComponentT) -> None:
         ...
 
-    def __init__(self, *components: UIComponentT):
+    def __init__(self, *components: UIComponentT) -> None:
         self._children: List[UIComponentT] = []
 
         for component in components:

@@ -89,7 +89,7 @@ class PartialInviteChannel:
         "_state",
     )
 
-    def __init__(self, *, state: ConnectionState, data: InviteChannelPayload):
+    def __init__(self, *, state: ConnectionState, data: InviteChannelPayload) -> None:
         self._state = state
         self.id: int = int(data["id"])
         self.name: Optional[str] = data.get("name")
@@ -198,7 +198,7 @@ class PartialInviteGuild:
         "premium_subscription_count",
     )
 
-    def __init__(self, state: ConnectionState, data: InviteGuildPayload, id: int):
+    def __init__(self, state: ConnectionState, data: InviteGuildPayload, id: int) -> None:
         self._state: ConnectionState = state
         self.id: int = id
         self.name: str = data["name"]
@@ -392,7 +392,7 @@ class Invite(Hashable):
         data: Union[InvitePayload, GatewayInvitePayload],
         guild: Optional[Union[PartialInviteGuild, Guild]] = None,
         channel: Optional[Union[PartialInviteChannel, GuildChannel]] = None,
-    ):
+    ) -> None:
         self._state: ConnectionState = state
         self.max_age: Optional[int] = data.get("max_age")
         self.code: str = data["code"]
@@ -547,7 +547,7 @@ class Invite(Hashable):
             url += f"?event={self.guild_scheduled_event.id}"
         return url
 
-    async def delete(self, *, reason: Optional[str] = None):
+    async def delete(self, *, reason: Optional[str] = None) -> None:
         """|coro|
 
         Revokes the instant invite.

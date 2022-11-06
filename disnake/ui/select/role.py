@@ -69,7 +69,7 @@ class RoleSelect(BaseSelect[RoleSelectMenu, "Role", V_co]):
         max_values: int = 1,
         disabled: bool = False,
         row: Optional[int] = None,
-    ):
+    ) -> None:
         ...
 
     @overload
@@ -82,7 +82,7 @@ class RoleSelect(BaseSelect[RoleSelectMenu, "Role", V_co]):
         max_values: int = 1,
         disabled: bool = False,
         row: Optional[int] = None,
-    ):
+    ) -> None:
         ...
 
     def __init__(
