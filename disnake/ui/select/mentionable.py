@@ -71,7 +71,7 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
         max_values: int = 1,
         disabled: bool = False,
         row: Optional[int] = None,
-    ):
+    ) -> None:
         ...
 
     @overload
@@ -84,7 +84,7 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
         max_values: int = 1,
         disabled: bool = False,
         row: Optional[int] = None,
-    ):
+    ) -> None:
         ...
 
     def __init__(

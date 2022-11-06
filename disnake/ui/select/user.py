@@ -70,7 +70,7 @@ class UserSelect(BaseSelect[UserSelectMenu, "Union[User, Member]", V_co]):
         max_values: int = 1,
         disabled: bool = False,
         row: Optional[int] = None,
-    ):
+    ) -> None:
         ...
 
     @overload
@@ -83,7 +83,7 @@ class UserSelect(BaseSelect[UserSelectMenu, "Union[User, Member]", V_co]):
         max_values: int = 1,
         disabled: bool = False,
         row: Optional[int] = None,
-    ):
+    ) -> None:
         ...
 
     def __init__(
