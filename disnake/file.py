@@ -96,9 +96,6 @@ class File:
         )
         self.description = description
 
-    def __sizeof__(self) -> int:
-        return sys.getsizeof(self.fp)
-
     def reset(self, *, seek: Union[int, bool] = True) -> None:
         # The `seek` parameter is needed because
         # the retry-loop is iterated over multiple times
