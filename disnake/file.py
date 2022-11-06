@@ -96,31 +96,6 @@ class File:
         )
         self.description = description
 
-    def __eq__(self, other: File) -> bool:
-
-        checks = tuple(
-            getattr(self, i) == getattr(other, i)
-            for i in self.__slots__
-            if i not in ("fp", "_owner", "_closer", "_original_pos")
-        )
-
-        if self.fp.__class__ == other.fp.__class__:
-            if isinstance(self.fp, io.BytesIO):
-                checks = checks + (self.fp.getvalue() == other.fp.getvalue(),)
-                return all(checks)
-
-            elif issubclass(self.fp.__class__, io.IOBase):
-                checks = checks + (self.fp.name == other.fp.name,)
-                return all(checks)
-
-        return False
-
-    def __len__(self) -> int:
-        self.reset()
-        byteslen = self.fp.seek(0, io.SEEK_END)
-        self.reset()
-        return byteslen
-
     def __sizeof__(self) -> int:
         return sys.getsizeof(self.fp)
 
@@ -145,3 +120,18 @@ class File:
     def closed(self) -> bool:
         """:class:`bool` Wheter a file or bytes object is closed."""
         return self.fp.closed
+
+    @property
+    def bytes_lenght(self) -> int:
+        """:class:`int` The bytes lenght of the ``fp`` object."""
+        if self.fp.tell() != 0:
+            self.reset()
+
+        bytes_lenght = self.fp.seek(0, io.SEEK_END)
+        self.reset()
+        return bytes_lenght
+
+    @property
+    def size(self) -> int:
+        """:class:`int` The size of the ``fp`` object."""
+        return sys.getsizeof(self.fp)
