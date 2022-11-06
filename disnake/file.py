@@ -118,12 +118,15 @@ class File:
 
     @property
     def closed(self) -> bool:
-        """:class:`bool` Wheter a file or bytes object is closed."""
+        """:class:`bool`: Wheter a file or bytes object is closed.
+
+        This is a shorthand for ``File.fp.closed``.
+        """
         return self.fp.closed
 
     @property
     def bytes_lenght(self) -> int:
-        """:class:`int` The bytes lenght of the ``fp`` object."""
+        """:class:`int`: The bytes lenght of the ``fp`` object."""
         if self.fp.tell() != 0:
             self.reset()
 
@@ -133,5 +136,5 @@ class File:
 
     @property
     def size(self) -> int:
-        """:class:`int` The size of the ``fp`` object."""
+        """:class:`int`: The size of the ``fp`` object."""
         return sys.getsizeof(self.fp)
