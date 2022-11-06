@@ -122,8 +122,8 @@ class File:
         return self.fp.closed
 
     @property
-    def bytes_lenght(self) -> int:
-        """:class:`int`: The bytes lenght of the ``fp`` object."""
+    def bytes_length(self) -> int:
+        """:class:`int`: The bytes length of the ``fp`` object."""
         if self.fp.tell() != 0:
             self.reset()
 
