@@ -94,6 +94,7 @@ __all__ = (
     "Range",
     "String",
     "LargeInt",
+    "LargeFloat",
     "ParamInfo",
     "Param",
     "param",
@@ -414,6 +415,10 @@ class LargeInt(int):
     """Type for large integers in slash commands."""
 
 
+class LargeFloat(float):
+    """Type for large floating-point numbers in slash commands."""
+
+
 # option types that require additional handling in verify_type
 _VERIFY_TYPES: Final[FrozenSet[OptionType]] = frozenset((OptionType.user, OptionType.mentionable))
 
@@ -529,6 +534,7 @@ class ParamInfo:
         self.min_length = min_length
         self.max_length = max_length
         self.large = large
+        self._original_large_type = None
 
     @property
     def required(self) -> bool:
@@ -615,11 +621,25 @@ class ParamInfo:
 
     async def convert_argument(self, inter: ApplicationCommandInteraction, argument: Any) -> Any:
         """Convert a value if a converter is given"""
-        if self.large:
-            try:
-                argument = int(argument)
-            except ValueError:
-                raise errors.LargeIntConversionFailure(argument) from None
+        if self.large and self._original_large_type:
+            if self._original_large_type == int:
+                try:
+                    argument = int(argument)
+                except ValueError:
+                    raise errors.LargeIntConversionFailure(argument) from None
+            elif self._original_large_type == float:
+                try:
+                    argument = float(argument)
+                    print(argument)
+                except ValueError:
+                    raise errors.LargeFloatConversionFailure(argument) from None
+
+            if self.min_value is not None and self.max_value is not None and (argument < self.min_value or argument > self.max_value):
+                raise errors.BadArgument(f"Value for {self.name} must be in-between {self.min_value} and {self.max_value}!")
+            elif self.min_value is not None and argument < self.min_value:
+                raise errors.BadArgument(f"Value for {self.name} must be greater than {self.min_value}!")
+            elif self.max_value is not None and argument > self.max_value:
+                raise errors.BadArgument(f"Value for {self.name} must be less than {self.max_value}!")
 
         if self.converter is None:
             # TODO: Custom validators
@@ -680,6 +700,9 @@ class ParamInfo:
             self.min_value = annotation.min_value
             self.max_value = annotation.max_value
             annotation = annotation.underlying_type
+
+            if self.min_value < -2 ** 53 or self.max_value > 2 ** 53:
+                self.large = True
         if isinstance(annotation, String):
             self.min_length = annotation.min_length
             self.max_length = annotation.max_length
@@ -687,11 +710,15 @@ class ParamInfo:
         if issubclass_(annotation, LargeInt):
             self.large = True
             annotation = int
+        if issubclass_(annotation, LargeFloat):
+            self.large = True
+            annotation = float
 
         if self.large:
             self.type = str
-            if annotation is not int:
-                raise TypeError("Large integers must be annotated with int or LargeInt")
+            if annotation not in (int, float):
+                raise TypeError("Large integers or large floats must be annotated with int, LargeInt, float, LargeFloat, or Range!")
+            self._original_large_type = annotation
         elif annotation in self.TYPES:
             self.type = annotation
         elif (
