@@ -19,6 +19,7 @@ import re
 import subprocess  # noqa: S404
 import sys
 from typing import Any, Dict, Optional
+from urllib.parse import urljoin
 
 from sphinx.application import Sphinx
 
@@ -107,6 +108,9 @@ with open("../disnake/__init__.py") as f:
 
 # The full version, including alpha/beta/rc tags.
 release = version
+
+
+_is_readthedocs = bool(os.getenv("READTHEDOCS"))
 
 
 def git(*args: str) -> str:
@@ -245,12 +249,12 @@ intersphinx_mapping = {
 
 
 # use proxied API endpoint on rtd to avoid CORS issues
-if os.environ.get("READTHEDOCS"):
+if _is_readthedocs:
     hoverxref_api_host = "/_"
 
 # when not on read the docs, assume no prefix for the 404 page.
 # this means that /404.html should properly render on local builds
-if not os.environ.get("READTHEDOCS"):
+if not _is_readthedocs:
     notfound_urls_prefix = "/"
 
 linkcheck_ignore = [
@@ -464,6 +468,19 @@ def setup(app: Sphinx) -> None:
         app.config.intersphinx_mapping["py"] = ("https://docs.python.org/ja/3", None)
         app.config.html_context["discord_invite"] = "https://discord.gg/disnake"
         app.config.resource_links["disnake"] = "https://discord.gg/disnake"
+
+    # readthedocs appends additional stuff to conf.py,
+    # we can't access it above since it wouldn't have run yet
+    if _is_readthedocs:
+        # this is the "canonical" url, which always points to stable in our case
+        if not (base_url := globals().get("html_baseurl")):
+            raise RuntimeError("Expected `html_baseurl` to be set on readthedocs")
+
+        # special case for convenience: if latest, use that for opensearch
+        if os.environ["READTHEDOCS_VERSION"] == "latest":
+            base_url = urljoin(base_url, "../latest")
+
+        app.config["html_use_opensearch"] = base_url.rstrip("/")
 
     # HACK: avoid deprecation warnings caused by sphinx always iterating over all class attributes
     import disnake
