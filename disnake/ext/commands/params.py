@@ -634,12 +634,22 @@ class ParamInfo:
                 except ValueError:
                     raise errors.LargeFloatConversionFailure(argument) from None
 
-            if self.min_value is not None and self.max_value is not None and (argument < self.min_value or argument > self.max_value):
-                raise errors.BadArgument(f"Value for {self.name} must be in-between {self.min_value} and {self.max_value}!")
+            if (
+                self.min_value is not None
+                and self.max_value is not None
+                and (argument < self.min_value or argument > self.max_value)
+            ):
+                raise errors.BadArgument(
+                    f"Value for {self.name} must be in-between {self.min_value} and {self.max_value}!"
+                )
             elif self.min_value is not None and argument < self.min_value:
-                raise errors.BadArgument(f"Value for {self.name} must be greater than {self.min_value}!")
+                raise errors.BadArgument(
+                    f"Value for {self.name} must be greater than {self.min_value}!"
+                )
             elif self.max_value is not None and argument > self.max_value:
-                raise errors.BadArgument(f"Value for {self.name} must be less than {self.max_value}!")
+                raise errors.BadArgument(
+                    f"Value for {self.name} must be less than {self.max_value}!"
+                )
 
         if self.converter is None:
             # TODO: Custom validators
@@ -701,7 +711,7 @@ class ParamInfo:
             self.max_value = annotation.max_value
             annotation = annotation.underlying_type
 
-            if self.min_value < -2 ** 53 or self.max_value > 2 ** 53:
+            if self.min_value < -(2**53) or self.max_value > 2**53:
                 self.large = True
         if isinstance(annotation, String):
             self.min_length = annotation.min_length
@@ -717,7 +727,9 @@ class ParamInfo:
         if self.large:
             self.type = str
             if annotation not in (int, float):
-                raise TypeError("Large integers or large floats must be annotated with int, LargeInt, float, LargeFloat, or Range!")
+                raise TypeError(
+                    "Large integers or large floats must be annotated with int, LargeInt, float, LargeFloat, or Range!"
+                )
             self._original_large_type = annotation
         elif annotation in self.TYPES:
             self.type = annotation
