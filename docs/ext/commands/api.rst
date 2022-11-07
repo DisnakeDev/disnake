@@ -559,6 +559,13 @@ LargeInt
 
     This is a class which inherits from :class:`int` to allow large numbers in slash commands, meant to be used only for annotations.
 
+LargeFloat
+~~~~~~~~~~
+
+.. autoclass:: disnake.ext.commands.LargeFloat
+
+    This is a class which inherits from :class:`float` to allow large numbers in slash commands, meant to be used only for annotations.
+
 Range
 ~~~~~
 
@@ -966,6 +973,9 @@ Exceptions
     :members:
 
 .. autoexception:: disnake.ext.commands.LargeIntConversionFailure
+    :members:
+
+.. autoexception:: disnake.ext.commands.LargeFloatConversionFailure
     :members:
 
 .. autoexception:: disnake.ext.commands.MissingPermissions
