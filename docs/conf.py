@@ -110,7 +110,7 @@ with open("../disnake/__init__.py") as f:
 release = version
 
 
-_is_readthedocs = bool(os.getenv("READTHEDOCS"))
+_IS_READTHEDOCS = bool(os.getenv("READTHEDOCS"))
 
 
 def git(*args: str) -> str:
@@ -249,12 +249,12 @@ intersphinx_mapping = {
 
 
 # use proxied API endpoint on rtd to avoid CORS issues
-if _is_readthedocs:
+if _IS_READTHEDOCS:
     hoverxref_api_host = "/_"
 
 # when not on read the docs, assume no prefix for the 404 page.
 # this means that /404.html should properly render on local builds
-if not _is_readthedocs:
+if not _IS_READTHEDOCS:
     notfound_urls_prefix = "/"
 
 linkcheck_ignore = [
@@ -471,7 +471,7 @@ def setup(app: Sphinx) -> None:
 
     # readthedocs appends additional stuff to conf.py,
     # we can't access it above since it wouldn't have run yet
-    if _is_readthedocs:
+    if _IS_READTHEDOCS:
         # this is the "canonical" url, which always points to stable in our case
         if not (base_url := globals().get("html_baseurl")):
             raise RuntimeError("Expected `html_baseurl` to be set on readthedocs")
