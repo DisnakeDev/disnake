@@ -553,7 +553,7 @@ class LargeIntConversionFailure(BadArgument):
 
 
 class LargeFloatConversionFailure(BadArgument):
-    """Exception raised when a large float argument was not able to be converted.
+    """Exception raised when a large floating-point number argument was not able to be converted.
 
     This inherits from :exc:`BadArgument`
 
@@ -562,12 +562,12 @@ class LargeFloatConversionFailure(BadArgument):
     Attributes
     ----------
     argument: :class:`str`
-        The argument that could not be converted to an float.
+        The argument that could not be converted to a floating-point number.
     """
 
     def __init__(self, argument: str) -> None:
         self.argument: str = argument
-        super().__init__(f"{argument} is not able to be converted to an float")
+        super().__init__(f"{argument} is not able to be converted to a floating-point number")
 
 
 class DisabledCommand(CommandError):
