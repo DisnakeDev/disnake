@@ -232,7 +232,7 @@ hoverxref_role_types = dict.fromkeys(
 hoverxref_tooltip_theme = ["tooltipster-custom"]
 hoverxref_tooltip_lazy = True
 
-# these have to match the keys on intersphinx_mapping, and those projects must be hosted on read the docs.
+# these have to match the keys on intersphinx_mapping, and those projects must be hosted on readthedocs.
 hoverxref_intersphinx = [
     "py",
     "aio",
@@ -248,11 +248,11 @@ intersphinx_mapping = {
 }
 
 
-# use proxied API endpoint on rtd to avoid CORS issues
+# use proxied API endpoint on readthedocs to avoid CORS issues
 if _IS_READTHEDOCS:
     hoverxref_api_host = "/_"
 
-# when not on read the docs, assume no prefix for the 404 page.
+# when not on readthedocs, assume no prefix for the 404 page.
 # this means that /404.html should properly render on local builds
 if not _IS_READTHEDOCS:
     notfound_urls_prefix = "/"
