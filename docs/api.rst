@@ -1,5 +1,7 @@
 .. SPDX-License-Identifier: MIT
 
+:ogp_disable:
+
 .. currentmodule:: disnake
 
 API Reference
