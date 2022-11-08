@@ -261,9 +261,9 @@ linkcheck_ignore = [
 
 
 # ogp_site_url = ""  # automatically set on readthedocs
-ogp_description_length = 125
-ogp_site_name = "disnake"
+ogp_site_name = "disnake documentation"
 ogp_image = "https://disnake.dev/assets/disnake-logo-transparent.png"
+ogp_image_alt = "disnake icon"
 ogp_custom_meta_tags = [
     '<meta property="og:image:width" content="64" />',
     '<meta property="og:image:height" content="64" />',
