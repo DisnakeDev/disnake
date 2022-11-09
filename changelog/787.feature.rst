@@ -1,1 +1,1 @@
-Add large numbers support to :class:`commands.Range` and add :class:`commands.LargeFloat`.
+|commands| Add large numbers support to :class:`~ext.commands.Range` and add :class:`~ext.commands.LargeFloat`.
