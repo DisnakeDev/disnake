@@ -473,7 +473,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         .. versionadded:: 1.1
 
-        .. versionchanged:: 2.7
+        .. versionchanged:: 2.8
             Added ``topic``, ``position``, ``nsfw``, ``category``, ``slowmode_delay``,
             ``type``, ``default_auto_archive_duration``, ``flags`` keyword-only parameters.
 
@@ -1267,7 +1267,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         .. versionadded:: 1.1
 
-        .. versionchanged:: 2.7
+        .. versionchanged:: 2.8
             Added ``bitrate``, ``user_limit``, ``position``, ``category``,
             ``rtc_region``, ``video_quality_mode``, ``nsfw``, ``slowmode_delay``, ``flags``
             keyword-only parameters.
@@ -1949,7 +1949,7 @@ class StageChannel(VocalGuildChannel):
 
         .. versionadded:: 1.1
 
-        .. versionchanged:: 2.7
+        .. versionchanged:: 2.8
             Added ``position``, ``category``, ``rtc_region``,
             ``video_quality_mode``, ``bitrate``, ``flags`` keyword-only parameters.
 
@@ -2370,7 +2370,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
         .. versionadded:: 1.1
 
-        .. versionchanged:: 2.7
+        .. versionchanged:: 2.8
             Added``position``, ``nsfw``, ``flags`` keyword-only parameters.
 
         Parameters
@@ -3185,7 +3185,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
         .. versionadded:: 1.1
 
-        .. versionchanged:: 2.7
+        .. versionchanged:: 2.8
             Added new ``topic``, ``position``, ``nsfw``, ``category``, ``slowmode_delay``,
             ``default_thread_slowmode_delay``, ``default_auto_archive_duration``, ``flags``,
             ``require_tag``, ``available_tags``, ``default_reaction``, ``default_sort_order``
