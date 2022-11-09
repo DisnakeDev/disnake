@@ -534,7 +534,7 @@ class ParamInfo:
         self.min_length = min_length
         self.max_length = max_length
         self.large = large
-        self._original_large_type = None
+        self._original_large_type: Optional[Union[Type[int], Type[float]]] = None
 
     @property
     def required(self) -> bool:
