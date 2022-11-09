@@ -455,10 +455,10 @@ class ApplicationCommand(ABC):
         .. versionadded:: 2.5
 
     nsfw: :class:`bool`
-        Whether this command can only be used in NSFW channels.
+        Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
         Defaults to ``False``.
 
-        .. versionadded:: 2.6
+        .. versionadded:: 2.8
     """
 
     __repr_info__: ClassVar[Tuple[str, ...]] = (
@@ -599,10 +599,10 @@ class UserCommand(ApplicationCommand):
         .. versionadded:: 2.5
 
     nsfw: :class:`bool`
-        Whether this command can only be used in NSFW channels.
+        Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
         Defaults to ``False``.
 
-        .. versionadded:: 2.6
+        .. versionadded:: 2.8
     """
 
     __repr_info__ = ("name", "dm_permission", "default_member_permissions")
@@ -644,9 +644,9 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
         .. versionadded:: 2.5
 
     nsfw: :class:`bool`
-        Whether this command can only be used in NSFW channels.
+        Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
 
-        .. versionadded:: 2.6
+        .. versionadded:: 2.8
 
     id: :class:`int`
         The user command's ID.
@@ -696,10 +696,10 @@ class MessageCommand(ApplicationCommand):
         .. versionadded:: 2.5
 
     nsfw: :class:`bool`
-        Whether this command can only be used in NSFW channels.
+        Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
         Defaults to ``False``.
 
-        .. versionadded:: 2.6
+        .. versionadded:: 2.8
     """
 
     __repr_info__ = ("name", "dm_permission", "default_member_permissions")
@@ -741,9 +741,9 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
         .. versionadded:: 2.5
 
     nsfw: :class:`bool`
-        Whether this command can only be used in NSFW channels.
+        Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
 
-        .. versionadded:: 2.6
+        .. versionadded:: 2.8
 
     id: :class:`int`
         The message command's ID.
@@ -800,10 +800,10 @@ class SlashCommand(ApplicationCommand):
         .. versionadded:: 2.5
 
     nsfw: :class:`bool`
-        Whether this command can only be used in NSFW channels.
+        Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
         Defaults to ``False``.
 
-        .. versionadded:: 2.6
+        .. versionadded:: 2.8
 
     options: List[:class:`Option`]
         The list of options the slash command has.
@@ -932,9 +932,9 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
         .. versionadded:: 2.5
 
     nsfw: :class:`bool`
-        Whether this command can only be used in NSFW channels.
+        Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
 
-        .. versionadded:: 2.6
+        .. versionadded:: 2.8
 
     id: :class:`int`
         The slash command's ID.

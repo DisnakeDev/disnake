@@ -527,10 +527,10 @@ class InteractionBotBase(CommonBotBase):
             .. versionadded:: 2.5
 
         nsfw: :class:`bool`
-            Whether this command can only be used in NSFW channels.
+            Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
             Defaults to ``False``.
 
-            .. versionadded:: 2.6
+            .. versionadded:: 2.8
 
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
@@ -611,10 +611,10 @@ class InteractionBotBase(CommonBotBase):
             .. versionadded:: 2.5
 
         nsfw: :class:`bool`
-            Whether this command can only be used in NSFW channels.
+            Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
             Defaults to ``False``.
 
-            .. versionadded:: 2.6
+            .. versionadded:: 2.8
 
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``.
@@ -688,10 +688,10 @@ class InteractionBotBase(CommonBotBase):
             .. versionadded:: 2.5
 
         nsfw: :class:`bool`
-            Whether this command can only be used in NSFW channels.
+            Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
             Defaults to ``False``.
 
-            .. versionadded:: 2.6
+            .. versionadded:: 2.8
 
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``

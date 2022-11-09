@@ -779,10 +779,10 @@ def slash_command(
             Added support for localizations.
 
     nsfw: :class:`bool`
-        Whether this command can only be used in NSFW channels.
+        Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
         Defaults to ``False``.
 
-        .. versionadded:: 2.6
+        .. versionadded:: 2.8
 
     options: List[:class:`.Option`]
         The list of slash command options. The options will be visible in Discord.
