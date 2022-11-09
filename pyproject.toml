@@ -64,7 +64,7 @@ docs = [
 discord = ["discord-disnake"]
 
 [tool.pdm.dev-dependencies]
-tools =[
+tools = [
     "pre-commit~=2.19.0",
     "taskipy~=1.10.1",
     "slotscheck~=0.15.0",
@@ -89,7 +89,6 @@ lint = [
     "flake8-pytest-style~=1.6.0",
 ]
 typing = [
-    ## type checking
     "typing_extensions~=4.2.0",
     # this is not pyright itself, but the python wrapper
     "pyright==1.1.271",

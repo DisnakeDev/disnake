@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     NoxSessionFunc = Callable[Concatenate[nox.Session, P], T]
 
 
+# see https://pdm.fming.dev/latest/usage/advanced/#use-nox-as-the-runner
 os.environ.update({"PDM_IGNORE_SAVED_PYTHON": "1"})
 
 nox.options.error_on_external_run = True
