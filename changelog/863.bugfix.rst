@@ -1,0 +1,1 @@
+Prevent stray voice websocket heartbeat threads after reconnecting.
