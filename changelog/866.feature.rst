@@ -1,0 +1,1 @@
+Add the new ``ACTIVE_DEVELOPER`` user flag.
