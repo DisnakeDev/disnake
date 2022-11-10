@@ -1833,7 +1833,7 @@ of :class:`enum.Enum`.
 
     .. attribute:: active_application
 
-        The an app is considered active. This means that it has had any global command executed in the past 30 days.
+        The app is considered active. This means that it has had any global command executed in the past 30 days.
 
         .. versionadded:: 2.8
 
