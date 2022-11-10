@@ -1831,7 +1831,6 @@ of :class:`enum.Enum`.
 
         .. versionadded:: 2.3
 
-
 .. class:: ActivityType
 
     Specifies the type of :class:`Activity`. This is used to check how to
