@@ -471,8 +471,6 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         You must have :attr:`.Permissions.manage_channels` permission to
         do this.
 
-        .. versionadded:: 1.1
-
         .. versionchanged:: 2.8
             Added ``topic``, ``position``, ``nsfw``, ``category``, ``slowmode_delay``,
             ``type``, ``default_auto_archive_duration``, ``flags`` keyword-only parameters.
@@ -1265,8 +1263,6 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         You must have :attr:`.Permissions.manage_channels` permission to
         do this.
 
-        .. versionadded:: 1.1
-
         .. versionchanged:: 2.8
             Added ``bitrate``, ``user_limit``, ``position``, ``category``,
             ``rtc_region``, ``video_quality_mode``, ``nsfw``, ``slowmode_delay``, ``flags``
@@ -1947,8 +1943,6 @@ class StageChannel(VocalGuildChannel):
         You must have :attr:`.Permissions.manage_channels` permission to
         do this.
 
-        .. versionadded:: 1.1
-
         .. versionchanged:: 2.8
             Added ``position``, ``category``, ``rtc_region``,
             ``video_quality_mode``, ``bitrate``, ``flags`` keyword-only parameters.
@@ -2367,8 +2361,6 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
         You must have :attr:`.Permissions.manage_channels` permission to
         do this.
-
-        .. versionadded:: 1.1
 
         .. versionchanged:: 2.8
             Added``position``, ``nsfw``, ``flags`` keyword-only parameters.
@@ -3182,8 +3174,6 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
         You must have :attr:`.Permissions.manage_channels` permission to
         do this.
-
-        .. versionadded:: 1.1
 
         .. versionchanged:: 2.8
             Added new ``topic``, ``position``, ``nsfw``, ``category``, ``slowmode_delay``,
