@@ -1831,6 +1831,10 @@ of :class:`enum.Enum`.
 
         .. versionadded:: 2.3
 
+    .. attribute:: active_developer
+
+        The user is an active developer
+
 .. class:: ActivityType
 
     Specifies the type of :class:`Activity`. This is used to check how to

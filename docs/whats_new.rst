@@ -942,6 +942,7 @@ New Features
     - :attr:`MessageFlags.loading`
     - :attr:`UserFlags.http_interactions_bot`, :attr:`PublicUserFlags.http_interactions_bot`
     - :attr:`UserFlags.spammer`, :attr:`PublicUserFlags.spammer`
+    - :attr:`UserFlags.active_developer`, :attr:`PublicUserFlags.active_developer`
 
 
 Bug Fixes

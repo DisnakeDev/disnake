@@ -750,6 +750,7 @@ class PublicUserFlags(BaseFlags):
             team_user: bool = ...,
             verified_bot: bool = ...,
             verified_bot_developer: bool = ...,
+            active_developer: bool = ...,
         ) -> None:
             ...
 
@@ -841,6 +842,13 @@ class PublicUserFlags(BaseFlags):
         .. versionadded:: 2.3
         """
         return UserFlags.http_interactions_bot.value
+
+    @flag_value
+    def active_developer(self):
+        """:class:`bool`: Returns ``True`` if the user is an Active Developer.
+        .. versionadded:: 2.8
+        """
+        return UserFlags.active_developer.value
 
     @flag_value
     def spammer(self):
