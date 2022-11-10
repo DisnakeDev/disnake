@@ -943,6 +943,7 @@ New Features
     - :attr:`UserFlags.http_interactions_bot`, :attr:`PublicUserFlags.http_interactions_bot`
     - :attr:`UserFlags.spammer`, :attr:`PublicUserFlags.spammer`
 
+
 Bug Fixes
 ~~~~~~~~~~
 

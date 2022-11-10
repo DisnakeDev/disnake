@@ -505,7 +505,6 @@ class UserFlags(Enum):
     verified_bot_developer = 131072
     discord_certified_moderator = 262144
     http_interactions_bot = 524288
-    active_application = 16777216
     spammer = 1048576
 
 
