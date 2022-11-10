@@ -739,6 +739,7 @@ class PublicUserFlags(BaseFlags):
             early_supporter: bool = ...,
             early_verified_bot_developer: bool = ...,
             http_interactions_bot: bool = ...,
+            active_application: bool = ...,
             hypesquad: bool = ...,
             hypesquad_balance: bool = ...,
             hypesquad_bravery: bool = ...,
@@ -841,6 +842,14 @@ class PublicUserFlags(BaseFlags):
         .. versionadded:: 2.3
         """
         return UserFlags.http_interactions_bot.value
+
+    @flag_value
+    def active_application(self):
+        """:class:`bool`: Returns ``True`` if an app is considered active. This means that it has had any global command executed in the past 30 days.
+
+        .. versionadded:: 2.8
+        """
+        return UserFlags.active_application.value
 
     @flag_value
     def spammer(self):

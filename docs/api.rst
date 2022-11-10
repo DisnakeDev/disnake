@@ -1831,6 +1831,12 @@ of :class:`enum.Enum`.
 
         .. versionadded:: 2.3
 
+    .. attribute:: active_application
+
+        The an app is considered active. This means that it has had any global command executed in the past 30 days.
+
+        .. versionadded:: 2.8
+
 .. class:: ActivityType
 
     Specifies the type of :class:`Activity`. This is used to check how to
