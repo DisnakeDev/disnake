@@ -1,0 +1,2 @@
+Adds :class:`PartialWebhook` and :class:`PartialSyncWebhook` to represent partial webhook objects, in addition the :meth:`from_url`
+and :meth:`partial` methods will now returns a partial webhook object that could be either a :class:`PartialWebhook` or :class:`PartialSyncWebhook`.
