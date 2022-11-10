@@ -1,1 +1,1 @@
-Add :attr:`UserFlags.active_developer` and :attr:`PublicUserFlags.active_developer`.
+Add :attr:`.UserFlags.active_developer` and :attr:`PublicUserFlags.active_developer`.
