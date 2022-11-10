@@ -1,1 +1,1 @@
-Document ``TypeError`` raised on invalid session passed for :meth:`PartialSyncWebhook.from_url`.
+Documents ``TypeError`` raised on invalid session passed for :meth:`PartialSyncWebhook.from_url`.
