@@ -733,6 +733,7 @@ class PublicUserFlags(BaseFlags):
         def __init__(
             self,
             *,
+            active_developer: bool = ...,
             bug_hunter: bool = ...,
             bug_hunter_level_2: bool = ...,
             discord_certified_moderator: bool = ...,
@@ -849,6 +850,14 @@ class PublicUserFlags(BaseFlags):
         .. versionadded:: 2.3
         """
         return UserFlags.spammer.value
+
+    @flag_value
+    def active_developer(self):
+        """:class:`bool`: Returns ``True`` if the user is an Active Developer.
+
+        .. versionadded:: 2.8
+        """
+        return UserFlags.active_developer.value
 
     def all(self) -> List[UserFlags]:
         """List[:class:`UserFlags`]: Returns all public flags the user has."""
