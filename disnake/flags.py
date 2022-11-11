@@ -1825,9 +1825,9 @@ class ApplicationFlags(BaseFlags):
         def __init__(
             self,
             *,
+            active: bool = ...,
             application_command_badge: bool = ...,
             embedded: bool = ...,
-            active: bool = ...,
             gateway_guild_members: bool = ...,
             gateway_guild_members_limited: bool = ...,
             gateway_message_content: bool = ...,
