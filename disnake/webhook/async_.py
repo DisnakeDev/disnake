@@ -44,6 +44,7 @@ __all__ = (
     "WebhookMessage",
     "PartialWebhookChannel",
     "PartialWebhookGuild",
+    "PartialWebhook",
 )
 
 _log = logging.getLogger(__name__)
@@ -960,6 +961,14 @@ class BaseWebhook(Hashable):
         """
         return self.auth_token is not None
 
+    def __repr__(self) -> str:
+        return f"<Webhook id={self.id!r}>"
+
+    @property
+    def url(self) -> str:
+        """:class:`str` : Returns the webhook's url."""
+        return f"https://discord.com/api/webhooks/{self.id}/{self.token}"
+
     @property
     def guild(self) -> Optional[Guild]:
         """Optional[:class:`Guild`]: The guild this webhook belongs to.
@@ -1095,17 +1104,13 @@ class Webhook(BaseWebhook):
         super().__init__(data, token, state)
         self.session = session
 
-    def __repr__(self) -> str:
-        return f"<Webhook id={self.id!r}>"
-
-    @property
-    def url(self) -> str:
-        """:class:`str` : Returns the webhook's url."""
-        return f"https://discord.com/api/webhooks/{self.id}/{self.token}"
-
-    @staticmethod
     def partial(
-        id: int, token: str, *, session: aiohttp.ClientSession, bot_token: Optional[str] = None
+        self,
+        id: int,
+        token: str,
+        *,
+        session: aiohttp.ClientSession,
+        bot_token: Optional[str] = None,
     ) -> PartialWebhook:
         """Creates a :class:`PartialWebhook`.
 
@@ -1145,9 +1150,8 @@ class Webhook(BaseWebhook):
 
         return PartialWebhook(data, session, token=bot_token)
 
-    @staticmethod
     def from_url(
-        url: str, *, session: aiohttp.ClientSession, bot_token: Optional[str] = None
+        self, url: str, *, session: aiohttp.ClientSession, bot_token: Optional[str] = None
     ) -> PartialWebhook:
         """Creates a :class:`PartialWebhook` from a webhook URL.
 
@@ -1896,13 +1900,21 @@ class Webhook(BaseWebhook):
 
 
 class PartialWebhook(Webhook):
-    """Represents an asynchronous Discord partial webhook to aid with working webhooks when only an ID and a token is present.
+    """Represents an asynchronous Discord partial webhook to aid with working webhooks when only an ID and a token are present.
 
-    PartialWebhooks are Webhooks objects with an ID and a token.
+    PartialWebhooks are Webhook objects with an ID and a token.
 
-    The only way to construct this class is through :meth:`Webhook.from_url` and :meth`Webhook.partial`.
+    The only way to construct this class is through :meth:`Webhook.from_url` and :meth:`Webhook.partial`.
 
     Note that this class is trimmed down and has no rich attributes.
+
+    Attributes
+    ----------
+    id: :class:`int`
+        The webhook's ID
+    token: Optional[:class:`str`]
+        The authentication token of the webhook. If this is ``None``
+        then the webhook cannot be used to make requests.
     """
 
     def __init__(
@@ -1925,7 +1937,7 @@ class PartialWebhook(Webhook):
         .. note::
 
             When fetching with an unauthenticated webhook, i.e.
-            :meth:`is_authenticated` returns ``False``, then the
+            :meth:`Webhook.is_authenticated` returns ``False``, then the
             returned webhook does not contain any user information.
 
             Raises :exc:`WebhookTokenMissing` instead of ``InvalidArgument``.

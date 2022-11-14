@@ -4638,6 +4638,14 @@ Webhook
     :members:
     :inherited-members:
 
+PartialWebhook
+~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: PartialWebhook
+
+.. autoclass:: PartialWebhook()
+    :members:
+
 WebhookMessage
 ~~~~~~~~~~~~~~~~
 
@@ -4654,6 +4662,14 @@ SyncWebhook
 .. autoclass:: SyncWebhook()
     :members:
     :inherited-members:
+
+PartialSyncWebhook
+~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: PartialSyncWebhook
+
+.. autoclass:: PartialSyncWebhook()
+    :members:
 
 SyncWebhookMessage
 ~~~~~~~~~~~~~~~~~~~

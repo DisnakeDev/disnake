@@ -25,6 +25,7 @@ from .async_ import BaseWebhook, _WebhookState, handle_message_parameters
 __all__ = (
     "SyncWebhook",
     "SyncWebhookMessage",
+    "PartialSyncWebhook",
 )
 
 _log = logging.getLogger(__name__)
@@ -572,17 +573,8 @@ class SyncWebhook(BaseWebhook):
         super().__init__(data, token, state)
         self.session = session
 
-    def __repr__(self) -> str:
-        return f"<Webhook id={self.id!r}>"
-
-    @property
-    def url(self) -> str:
-        """:class:`str` : Returns the webhook's url."""
-        return f"https://discord.com/api/webhooks/{self.id}/{self.token}"
-
-    @staticmethod
     def partial(
-        id: int, token: str, *, session: Session = MISSING, bot_token: Optional[str] = None
+        self, id: int, token: str, *, session: Session = MISSING, bot_token: Optional[str] = None
     ) -> PartialSyncWebhook:
         """Creates a partial :class:`PartialSyncWebhook`.
 
@@ -621,9 +613,8 @@ class SyncWebhook(BaseWebhook):
             session = requests  # type: ignore
         return PartialSyncWebhook(data, session, token=bot_token)
 
-    @staticmethod
     def from_url(
-        url: str, *, session: Session = MISSING, bot_token: Optional[str] = None
+        self, url: str, *, session: Session = MISSING, bot_token: Optional[str] = None
     ) -> PartialSyncWebhook:
         """Creates a partial :class:`PartialSyncWebhook` from a webhook URL.
 
@@ -1200,6 +1191,23 @@ class SyncWebhook(BaseWebhook):
 
 
 class PartialSyncWebhook(SyncWebhook):
+    """Represents a synchronous Discord partial webhook to aid with working when only an ID and a token are present.
+
+    PartialSyncWebhook are SyncWebhook objects with an ID and a token.
+
+    The only way to construct this class is through :meth:`SyncWebhook.from_url` and :meth:`SyncWebhook.partial`.
+
+    Note that this class is trimmed down and has no rich attributes.
+
+    Attributes
+    ----------
+    id: :class:`int`
+        The webhook's ID
+    token: Optional[:class:`str`]
+        The authentication token of the webhook. If this is ``None``
+        then the webhook cannot be used to make requests.
+    """
+
     def __init__(
         self,
         data: WebhookPayload,
@@ -1218,7 +1226,7 @@ class PartialSyncWebhook(SyncWebhook):
         .. note::
 
             When fetching with an unauthenticated webhook, i.e.
-            :meth:`is_authenticated` returns ``False``, then the
+            :meth:`SyncWebhook.is_authenticated` returns ``False``, then the
             returned webhook does not contain any user information.
 
         .. versionchanged:: 2.6
