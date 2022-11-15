@@ -20,6 +20,7 @@ from typing import (
     List,
     Mapping,
     Optional,
+    Sequence,
     Set,
     TypeVar,
     Union,
@@ -583,7 +584,7 @@ class CommonBotBase(Generic[CogT]):
         *,
         package: Optional[str] = None,
         ignore: Optional[Union[Iterable[str], Callable[[str], bool]]] = None,
-    ) -> List[str]:
+    ) -> Sequence[str]:
         """
         Finds all extensions in a given module, also traversing into sub-packages.
 
@@ -626,7 +627,7 @@ class CommonBotBase(Generic[CogT]):
 
         Returns
         -------
-        List[:class:`str`]
+        Sequence[:class:`str`]
             The list of full extension names.
         """
         if "/" in root_module or "\\" in root_module:
@@ -650,7 +651,7 @@ class CommonBotBase(Generic[CogT]):
                 f"Module '{root_module}' is not a package", name=root_module
             )
 
-        return list(disnake.utils._walk_modules(paths, prefix=f"{spec.name}.", ignore=ignore))
+        return tuple(disnake.utils._walk_modules(paths, prefix=f"{spec.name}.", ignore=ignore))
 
     def load_extensions(
         self,
