@@ -1346,25 +1346,27 @@ def _walk_modules(
         if ignore and ignore(name):
             continue
 
-        if ispkg:
-            mod = importlib.import_module(name)
-
-            # if this module is a package but also has a `setup` function,
-            # yield it and don't look for other files in this module
-            if hasattr(mod, "setup"):
-                yield name
-                continue
-
-            sub_paths: List[str] = []
-            for p in mod.__path__ or []:
-                if p not in seen:
-                    seen.add(p)
-                    sub_paths.append(p)
-
-            if sub_paths:
-                yield from _walk_modules(sub_paths, prefix=f"{name}.", ignore=ignore)
-        else:
+        if not ispkg:
             yield name
+            continue
+
+        # it's a package here
+        mod = importlib.import_module(name)
+
+        # if this module is a package but also has a `setup` function,
+        # yield it and don't look for other files in this module
+        if hasattr(mod, "setup"):
+            yield name
+            continue
+
+        sub_paths: List[str] = []
+        for p in mod.__path__ or []:
+            if p not in seen:
+                seen.add(p)
+                sub_paths.append(p)
+
+        if sub_paths:
+            yield from _walk_modules(sub_paths, prefix=f"{name}.", ignore=ignore)
 
 
 def as_valid_locale(locale: str) -> Optional[str]:
