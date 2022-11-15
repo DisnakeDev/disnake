@@ -1,1 +1,0 @@
-Separate select menu types (:class:`SelectMenu`, :class:`ui.Select`) into base types (:class:`BaseSelectMenu`, :class:`ui.BaseSelect`).

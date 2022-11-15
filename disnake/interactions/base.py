@@ -4,12 +4,33 @@ from __future__ import annotations
 
 import asyncio
 from datetime import timedelta
-from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union, cast, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    Mapping,
+    Optional,
+    Tuple,
+    TypeVar,
+    Union,
+    cast,
+    overload,
+)
 
 from .. import utils
 from ..app_commands import OptionChoice
-from ..channel import ChannelType, PartialMessageable
-from ..enums import InteractionResponseType, InteractionType, Locale, WebhookType, try_enum
+from ..channel import PartialMessageable, _threaded_guild_channel_factory
+from ..enums import (
+    ChannelType,
+    ComponentType,
+    InteractionResponseType,
+    InteractionType,
+    Locale,
+    OptionType,
+    WebhookType,
+    try_enum,
+)
 from ..errors import (
     HTTPException,
     InteractionNotEditable,
@@ -26,6 +47,7 @@ from ..member import Member
 from ..message import Attachment, Message
 from ..object import Object
 from ..permissions import Permissions
+from ..role import Role
 from ..ui.action_row import components_to_dict
 from ..user import ClientUser, User
 from ..webhook.async_ import Webhook, async_context, handle_message_parameters
@@ -34,6 +56,7 @@ __all__ = (
     "Interaction",
     "InteractionMessage",
     "InteractionResponse",
+    "InteractionDataResolved",
 )
 
 if TYPE_CHECKING:
@@ -41,13 +64,13 @@ if TYPE_CHECKING:
 
     from aiohttp import ClientSession
 
+    from ..abc import MessageableChannel
     from ..app_commands import Choices
-    from ..channel import CategoryChannel, StageChannel, TextChannel, VoiceChannel
     from ..client import Client
     from ..embeds import Embed
     from ..ext.commands import AutoShardedBot, Bot
     from ..file import File
-    from ..guild import GuildMessageable
+    from ..guild import GuildChannel, GuildMessageable
     from ..mentions import AllowedMentions
     from ..state import ConnectionState
     from ..threads import Thread
@@ -55,25 +78,23 @@ if TYPE_CHECKING:
     from ..types.interactions import (
         ApplicationCommandOptionChoice as ApplicationCommandOptionChoicePayload,
         Interaction as InteractionPayload,
+        InteractionDataResolved as InteractionDataResolvedPayload,
     )
+    from ..types.snowflake import Snowflake
     from ..ui.action_row import Components, MessageUIComponent, ModalUIComponent
     from ..ui.modal import Modal
     from ..ui.view import View
     from .message import MessageInteraction
     from .modal import ModalInteraction
 
-    InteractionChannel = Union[
-        VoiceChannel,
-        StageChannel,
-        TextChannel,
-        CategoryChannel,
-        Thread,
-        PartialMessageable,
-    ]
+    InteractionChannel = Union[GuildChannel, Thread, PartialMessageable]
 
     AnyBot = Union[Bot, AutoShardedBot]
 
+
 MISSING: Any = utils.MISSING
+
+T = TypeVar("T")
 
 
 class Interaction:
@@ -149,7 +170,7 @@ class Interaction:
         "_cs_expires_at",
     )
 
-    def __init__(self, *, data: InteractionPayload, state: ConnectionState):
+    def __init__(self, *, data: InteractionPayload, state: ConnectionState) -> None:
         self.data: Mapping[str, Any] = data.get("data") or {}
         self._state: ConnectionState = state
         # TODO: Maybe use a unique session
@@ -361,6 +382,7 @@ class Interaction:
         attachments: Optional[List[Attachment]] = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[Components[MessageUIComponent]] = MISSING,
+        suppress_embeds: bool = MISSING,
         allowed_mentions: Optional[AllowedMentions] = None,
     ) -> InteractionMessage:
         """|coro|
@@ -426,6 +448,14 @@ class Interaction:
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
 
+        suppress_embeds: :class:`bool`
+            Whether to suppress embeds for the message. This hides
+            all the embeds from the UI if set to ``True``. If set
+            to ``False``, this brings the embeds back if they were
+            suppressed.
+
+            .. versionadded:: 2.7
+
         Raises
         ------
         HTTPException
@@ -457,6 +487,7 @@ class Interaction:
             embeds=embeds,
             view=view,
             components=components,
+            suppress_embeds=suppress_embeds,
             allowed_mentions=allowed_mentions,
             previous_allowed_mentions=previous_mentions,
         )
@@ -521,7 +552,7 @@ class Interaction:
 
         if delay is not None:
 
-            async def delete(delay: float):
+            async def delete(delay: float) -> None:
                 await asyncio.sleep(delay)
                 try:
                     await deleter
@@ -610,7 +641,7 @@ class Interaction:
             is set to 15 minutes.
         suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This hides
-            all embeds from the UI if set to ``True``.
+            all the embeds from the UI if set to ``True``.
 
             .. versionadded:: 2.5
 
@@ -618,6 +649,12 @@ class Interaction:
             If provided, the number of seconds to wait in the background
             before deleting the message we just sent. If the deletion fails,
             then it is silently ignored.
+
+            Can be up to 15 minutes after the interaction was created
+            (see also :attr:`expires_at`/:attr:`is_expired`).
+
+            .. versionchanged:: 2.7
+                Added support for ephemeral responses.
 
         Raises
         ------
@@ -661,7 +698,7 @@ class InteractionResponse:
         "_response_type",
     )
 
-    def __init__(self, parent: Interaction):
+    def __init__(self, parent: Interaction) -> None:
         self._parent: Interaction = parent
         self._response_type: Optional[InteractionResponseType] = None
 
@@ -858,9 +895,15 @@ class InteractionResponse:
             before deleting the message we just sent. If the deletion fails,
             then it is silently ignored.
 
+            Can be up to 15 minutes after the interaction was created
+            (see also :attr:`Interaction.expires_at`/:attr:`~Interaction.is_expired`).
+
+            .. versionchanged:: 2.7
+                Added support for ephemeral responses.
+
         suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This hides
-            all embeds from the UI if set to ``True``.
+            all the embeds from the UI if set to ``True``.
 
             .. versionadded:: 2.5
 
@@ -881,9 +924,6 @@ class InteractionResponse:
         payload: Dict[str, Any] = {
             "tts": tts,
         }
-
-        if delete_after is not MISSING and ephemeral:
-            raise ValueError("ephemeral messages can not be deleted via endpoints")
 
         if embed is not MISSING and embeds is not MISSING:
             raise TypeError("cannot mix embed and embeds keyword arguments")
@@ -1301,7 +1341,7 @@ class InteractionResponse:
 class _InteractionMessageState:
     __slots__ = ("_parent", "_interaction")
 
-    def __init__(self, interaction: Interaction, parent: ConnectionState):
+    def __init__(self, interaction: Interaction, parent: ConnectionState) -> None:
         self._interaction: Interaction = interaction
         self._parent: ConnectionState = parent
 
@@ -1405,6 +1445,7 @@ class InteractionMessage(Message):
         embed: Optional[Embed] = ...,
         file: File = ...,
         attachments: Optional[List[Attachment]] = ...,
+        suppress_embeds: bool = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -1419,6 +1460,7 @@ class InteractionMessage(Message):
         embed: Optional[Embed] = ...,
         files: List[File] = ...,
         attachments: Optional[List[Attachment]] = ...,
+        suppress_embeds: bool = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -1433,6 +1475,7 @@ class InteractionMessage(Message):
         embeds: List[Embed] = ...,
         file: File = ...,
         attachments: Optional[List[Attachment]] = ...,
+        suppress_embeds: bool = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -1447,6 +1490,7 @@ class InteractionMessage(Message):
         embeds: List[Embed] = ...,
         files: List[File] = ...,
         attachments: Optional[List[Attachment]] = ...,
+        suppress_embeds: bool = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -1462,6 +1506,7 @@ class InteractionMessage(Message):
         file: File = MISSING,
         files: List[File] = MISSING,
         attachments: Optional[List[Attachment]] = MISSING,
+        suppress_embeds: bool = MISSING,
         allowed_mentions: Optional[AllowedMentions] = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[Components[MessageUIComponent]] = MISSING,
@@ -1515,6 +1560,14 @@ class InteractionMessage(Message):
 
             .. versionadded:: 2.4
 
+        suppress_embeds: :class:`bool`
+            Whether to suppress embeds for the message. This hides
+            all the embeds from the UI if set to ``True``. If set
+            to ``False``, this brings the embeds back if they were
+            suppressed.
+
+            .. versionadded:: 2.7
+
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
@@ -1546,6 +1599,7 @@ class InteractionMessage(Message):
                 embeds=embeds,
                 files=files,
                 attachments=attachments,
+                suppress_embeds=suppress_embeds,
                 allowed_mentions=allowed_mentions,
                 view=view,
                 components=components,
@@ -1565,6 +1619,7 @@ class InteractionMessage(Message):
             file=file,
             files=files,
             attachments=attachments,
+            suppress_embeds=suppress_embeds,
             allowed_mentions=allowed_mentions,
             view=view,
             components=components,
@@ -1594,7 +1649,7 @@ class InteractionMessage(Message):
             return await super().delete(delay=delay)
         if delay is not None:
 
-            async def inner_call(delay: float = delay):
+            async def inner_call(delay: float = delay) -> None:
                 await asyncio.sleep(delay)
                 try:
                     await self._state._interaction.delete_original_response()
@@ -1604,3 +1659,179 @@ class InteractionMessage(Message):
             asyncio.create_task(inner_call())
         else:
             await self._state._interaction.delete_original_response()
+
+
+class InteractionDataResolved(Dict[str, Any]):
+    """Represents the resolved data related to an interaction.
+
+    .. versionadded:: 2.1
+
+    .. versionchanged:: 2.7
+        Renamed from ``ApplicationCommandInteractionDataResolved`` to ``InteractionDataResolved``.
+
+    Attributes
+    ----------
+    members: Dict[:class:`int`, :class:`Member`]
+        A mapping of IDs to partial members (``deaf`` and ``mute`` attributes are missing).
+    users: Dict[:class:`int`, :class:`User`]
+        A mapping of IDs to users.
+    roles: Dict[:class:`int`, :class:`Role`]
+        A mapping of IDs to roles.
+    channels: Dict[:class:`int`, Union[:class:`abc.GuildChannel`, :class:`Thread`, :class:`PartialMessageable`]]
+        A mapping of IDs to partial channels (only ``id``, ``name`` and ``permissions`` are included,
+        threads also have ``thread_metadata`` and ``parent_id``).
+    messages: Dict[:class:`int`, :class:`Message`]
+        A mapping of IDs to messages.
+    attachments: Dict[:class:`int`, :class:`Attachment`]
+        A mapping of IDs to attachments.
+
+        .. versionadded:: 2.4
+    """
+
+    __slots__ = ("members", "users", "roles", "channels", "messages", "attachments")
+
+    def __init__(
+        self,
+        *,
+        data: InteractionDataResolvedPayload,
+        state: ConnectionState,
+        guild_id: Optional[int],
+    ) -> None:
+        data = data or {}
+        super().__init__(data)
+
+        self.members: Dict[int, Member] = {}
+        self.users: Dict[int, User] = {}
+        self.roles: Dict[int, Role] = {}
+        self.channels: Dict[int, InteractionChannel] = {}
+        self.messages: Dict[int, Message] = {}
+        self.attachments: Dict[int, Attachment] = {}
+
+        users = data.get("users", {})
+        members = data.get("members", {})
+        roles = data.get("roles", {})
+        channels = data.get("channels", {})
+        messages = data.get("messages", {})
+        attachments = data.get("attachments", {})
+
+        guild: Optional[Guild] = None
+        # `guild_fallback` is only used in guild contexts, so this `MISSING` value should never be used.
+        # We need to define it anyway to satisfy the typechecker.
+        guild_fallback: Union[Guild, Object] = MISSING
+        if guild_id is not None:
+            guild = state._get_guild(guild_id)
+            guild_fallback = guild or Object(id=guild_id)
+
+        for str_id, user in users.items():
+            user_id = int(str_id)
+            member = members.get(str_id)
+            if member is not None:
+                self.members[user_id] = (
+                    guild
+                    and guild.get_member(user_id)
+                    or Member(
+                        data=member,
+                        user_data=user,
+                        guild=guild_fallback,  # type: ignore
+                        state=state,
+                    )
+                )
+            else:
+                self.users[user_id] = User(state=state, data=user)
+
+        for str_id, role in roles.items():
+            self.roles[int(str_id)] = Role(
+                guild=guild_fallback,  # type: ignore
+                state=state,
+                data=role,
+            )
+
+        for str_id, channel in channels.items():
+            channel_id = int(str_id)
+            factory, _ = _threaded_guild_channel_factory(channel["type"])
+            if factory:
+                channel["position"] = 0  # type: ignore
+                self.channels[channel_id] = (
+                    guild
+                    and guild.get_channel_or_thread(channel_id)
+                    or factory(
+                        guild=guild_fallback,  # type: ignore
+                        state=state,
+                        data=channel,  # type: ignore
+                    )
+                )
+            else:
+                # TODO: guild_directory is not messageable
+                self.channels[channel_id] = PartialMessageable(
+                    state=state, id=channel_id, type=try_enum(ChannelType, channel["type"])
+                )
+
+        for str_id, message in messages.items():
+            channel_id = int(message["channel_id"])
+            channel = cast(
+                "Optional[MessageableChannel]",
+                (guild and guild.get_channel(channel_id) or state.get_channel(channel_id)),
+            )
+            if channel is None:
+                # The channel is not part of `resolved.channels`,
+                # so we need to fall back to partials here.
+                channel = PartialMessageable(state=state, id=channel_id, type=None)
+            self.messages[int(str_id)] = Message(state=state, channel=channel, data=message)
+
+        for str_id, attachment in attachments.items():
+            self.attachments[int(str_id)] = Attachment(data=attachment, state=state)
+
+    def __repr__(self) -> str:
+        return (
+            f"<InteractionDataResolved members={self.members!r} users={self.users!r} "
+            f"roles={self.roles!r} channels={self.channels!r} messages={self.messages!r} attachments={self.attachments!r}>"
+        )
+
+    def get_with_type(
+        self, key: Snowflake, data_type: Union[OptionType, ComponentType], default: T = None
+    ) -> Union[Member, User, Role, InteractionChannel, Message, Attachment, T]:
+        if data_type is OptionType.mentionable or data_type is ComponentType.mentionable_select:
+            key = int(key)
+            if (result := self.members.get(key)) is not None:
+                return result
+            if (result := self.users.get(key)) is not None:
+                return result
+            return self.roles.get(key, default)
+
+        if data_type is OptionType.user or data_type is ComponentType.user_select:
+            key = int(key)
+            if (member := self.members.get(key)) is not None:
+                return member
+            return self.users.get(key, default)
+
+        if data_type is OptionType.channel or data_type is ComponentType.channel_select:
+            return self.channels.get(int(key), default)
+
+        if data_type is OptionType.role or data_type is ComponentType.role_select:
+            return self.roles.get(int(key), default)
+
+        if data_type is OptionType.attachment:
+            return self.attachments.get(int(key), default)
+
+        return default
+
+    def get_by_id(
+        self, key: Optional[int]
+    ) -> Optional[Union[Member, User, Role, InteractionChannel, Message, Attachment]]:
+        if key is None:
+            return None
+
+        if (res := self.members.get(key)) is not None:
+            return res
+        if (res := self.users.get(key)) is not None:
+            return res
+        if (res := self.roles.get(key)) is not None:
+            return res
+        if (res := self.channels.get(key)) is not None:
+            return res
+        if (res := self.messages.get(key)) is not None:
+            return res
+        if (res := self.attachments.get(key)) is not None:
+            return res
+
+        return None

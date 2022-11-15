@@ -92,7 +92,7 @@ if TYPE_CHECKING:
     from .webhook import Webhook
 
 
-async def _single_delete_strategy(messages: Iterable[Message]):
+async def _single_delete_strategy(messages: Iterable[Message]) -> None:
     for m in messages:
         await m.delete()
 
@@ -176,7 +176,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         "_type",
     )
 
-    def __init__(self, *, state: ConnectionState, guild: Guild, data: TextChannelPayload):
+    def __init__(self, *, state: ConnectionState, guild: Guild, data: TextChannelPayload) -> None:
         self._state: ConnectionState = state
         self.id: int = int(data["id"])
         self._type: Literal[0, 5] = data["type"]
@@ -871,10 +871,10 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
             .. versionadded:: 2.3
 
-        slowmode_delay: :class:`int`
+        slowmode_delay: Optional[:class:`int`]
             Specifies the slowmode rate limit for users in this thread, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
-            If not provided, slowmode is disabled.
+            If set to ``None`` or not provided, slowmode is inherited from the parent channel.
 
             .. versionadded:: 2.3
 
@@ -908,7 +908,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
                 auto_archive_duration=auto_archive_duration or self.default_auto_archive_duration,
                 type=type.value,  # type: ignore
                 invitable=invitable if invitable is not None else True,
-                rate_limit_per_user=slowmode_delay or 0,
+                rate_limit_per_user=slowmode_delay,
                 reason=reason,
             )
         else:
@@ -917,7 +917,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
                 message.id,
                 name=name,
                 auto_archive_duration=auto_archive_duration or self.default_auto_archive_duration,
-                rate_limit_per_user=slowmode_delay or 0,
+                rate_limit_per_user=slowmode_delay,
                 reason=reason,
             )
 
@@ -991,7 +991,7 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
         state: ConnectionState,
         guild: Guild,
         data: Union[VoiceChannelPayload, StageChannelPayload],
-    ):
+    ) -> None:
         self._state: ConnectionState = state
         self.id: int = int(data["id"])
         self._update(guild, data)
@@ -2093,7 +2093,9 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         "_flags",
     )
 
-    def __init__(self, *, state: ConnectionState, guild: Guild, data: CategoryChannelPayload):
+    def __init__(
+        self, *, state: ConnectionState, guild: Guild, data: CategoryChannelPayload
+    ) -> None:
         self._state: ConnectionState = state
         self.id: int = int(data["id"])
         self._update(guild, data)
@@ -2280,9 +2282,9 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         ...
 
     @utils.copy_doc(disnake.abc.GuildChannel.move)
-    async def move(self, **kwargs):
+    async def move(self, **kwargs) -> None:
         kwargs.pop("category", None)
-        await super().move(**kwargs)
+        return await super().move(**kwargs)
 
     @property
     def channels(self) -> List[GuildChannelType]:
@@ -2921,7 +2923,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         *,
         name: str,
         auto_archive_duration: AnyThreadArchiveDuration = ...,
-        slowmode_delay: int = ...,
+        slowmode_delay: Optional[int] = ...,
         content: str = ...,
         embed: Embed = ...,
         file: File = ...,
@@ -2940,7 +2942,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         *,
         name: str,
         auto_archive_duration: AnyThreadArchiveDuration = ...,
-        slowmode_delay: int = ...,
+        slowmode_delay: Optional[int] = ...,
         content: str = ...,
         embed: Embed = ...,
         files: List[File] = ...,
@@ -2959,7 +2961,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         *,
         name: str,
         auto_archive_duration: AnyThreadArchiveDuration = ...,
-        slowmode_delay: int = ...,
+        slowmode_delay: Optional[int] = ...,
         content: str = ...,
         embeds: List[Embed] = ...,
         file: File = ...,
@@ -2978,7 +2980,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         *,
         name: str,
         auto_archive_duration: AnyThreadArchiveDuration = ...,
-        slowmode_delay: int = ...,
+        slowmode_delay: Optional[int] = ...,
         content: str = ...,
         embeds: List[Embed] = ...,
         files: List[File] = ...,
@@ -2996,7 +2998,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         *,
         name: str,
         auto_archive_duration: AnyThreadArchiveDuration = MISSING,
-        slowmode_delay: int = MISSING,
+        slowmode_delay: Optional[int] = MISSING,
         applied_tags: Sequence[Snowflake] = MISSING,
         content: str = MISSING,
         embed: Embed = MISSING,
@@ -3033,10 +3035,11 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             The duration in minutes before the thread is automatically archived for inactivity.
             If not provided, the channel's default auto archive duration is used.
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
-        slowmode_delay: :class:`int`
+        slowmode_delay: Optional[:class:`int`]
             Specifies the slowmode rate limit for users in this thread, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
-            If not provided, slowmode is inherited from the parent's :attr:`~ForumChannel.default_thread_slowmode_delay`.
+            If set to ``None`` or not provided, slowmode is inherited from the parent's
+            :attr:`~ForumChannel.default_thread_slowmode_delay`.
         applied_tags: Sequence[:class:`abc.Snowflake`]
             The tags to apply to the new thread. Maximum of 5.
 
@@ -3052,7 +3055,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             This cannot be mixed with the ``embed`` parameter.
         suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This hides
-            all embeds from the UI if set to ``True``.
+            all the embeds from the UI if set to ``True``.
         file: :class:`.File`
             The file to upload. This cannot be mixed with the ``files`` parameter.
         files: List[:class:`.File`]
@@ -3130,7 +3133,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             "applied_tags": tag_ids,
         }
 
-        if slowmode_delay is not MISSING:
+        if slowmode_delay not in (MISSING, None):
             channel_data["rate_limit_per_user"] = slowmode_delay
 
         try:
@@ -3345,7 +3348,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         "_flags",
     )
 
-    def __init__(self, *, me: ClientUser, state: ConnectionState, data: DMChannelPayload):
+    def __init__(self, *, me: ClientUser, state: ConnectionState, data: DMChannelPayload) -> None:
         self._state: ConnectionState = state
         self.recipient: Optional[User] = state.store_user(data["recipients"][0])  # type: ignore
         self.me: ClientUser = me
@@ -3504,7 +3507,9 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
 
     __slots__ = ("id", "recipients", "owner_id", "owner", "_icon", "name", "me", "_state")
 
-    def __init__(self, *, me: ClientUser, state: ConnectionState, data: GroupChannelPayload):
+    def __init__(
+        self, *, me: ClientUser, state: ConnectionState, data: GroupChannelPayload
+    ) -> None:
         self._state: ConnectionState = state
         self.id: int = int(data["id"])
         self.me: ClientUser = me
@@ -3644,7 +3649,7 @@ class PartialMessageable(disnake.abc.Messageable, Hashable):
         The channel type associated with this partial messageable, if given.
     """
 
-    def __init__(self, state: ConnectionState, id: int, type: Optional[ChannelType] = None):
+    def __init__(self, state: ConnectionState, id: int, type: Optional[ChannelType] = None) -> None:
         self._state: ConnectionState = state
         self.id: int = id
         self.type: Optional[ChannelType] = type

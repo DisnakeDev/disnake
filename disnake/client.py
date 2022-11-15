@@ -7,6 +7,7 @@ import logging
 import signal
 import sys
 import traceback
+import warnings
 from datetime import datetime, timedelta
 from typing import (
     TYPE_CHECKING,
@@ -161,7 +162,7 @@ class SessionStartLimit:
         "reset_time",
     )
 
-    def __init__(self, data: SessionStartLimitPayload):
+    def __init__(self, data: SessionStartLimitPayload) -> None:
         self.total: int = data["total"]
         self.remaining: int = data["remaining"]
         self.reset_after: int = data["reset_after"]
@@ -169,7 +170,7 @@ class SessionStartLimit:
 
         self.reset_time: datetime = utils.utcnow() + timedelta(milliseconds=self.reset_after)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"<SessionStartLimit total={self.total!r} remaining={self.remaining!r} "
             f"reset_after={self.reset_after!r} max_concurrency={self.max_concurrency!r} reset_time={self.reset_time!s}>"
@@ -375,10 +376,17 @@ class Client:
         intents: Optional[Intents] = None,
         chunk_guilds_at_startup: Optional[bool] = None,
         member_cache_flags: Optional[MemberCacheFlags] = None,
-    ):
+    ) -> None:
         # self.ws is set in the connect method
         self.ws: DiscordWebSocket = None  # type: ignore
-        self.loop: asyncio.AbstractEventLoop = asyncio.get_event_loop() if loop is None else loop
+
+        if loop is None:
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", DeprecationWarning)
+                self.loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()
+        else:
+            self.loop: asyncio.AbstractEventLoop = loop
+
         self.loop.set_debug(asyncio_debug)
         self._listeners: Dict[str, List[Tuple[asyncio.Future, Callable[..., bool]]]] = {}
         self.session_start_limit: Optional[SessionStartLimit] = None
@@ -1089,14 +1097,14 @@ class Client:
         except NotImplementedError:
             pass
 
-        async def runner():
+        async def runner() -> None:
             try:
                 await self.start(*args, **kwargs)
             finally:
                 if not self.is_closed():
                     await self.close()
 
-        def stop_loop_on_completion(f):
+        def stop_loop_on_completion(f) -> None:
             loop.stop()
 
         future = asyncio.ensure_future(runner(), loop=loop)
@@ -1152,7 +1160,7 @@ class Client:
         return Status.online
 
     @status.setter
-    def status(self, value):
+    def status(self, value) -> None:
         if value is Status.offline:
             self._connection._status = "invisible"
         elif isinstance(value, Status):
@@ -1602,7 +1610,7 @@ class Client:
         future = self.loop.create_future()
         if check is None:
 
-            def _check(*args):
+            def _check(*args) -> bool:
                 return True
 
             check = _check
@@ -1652,7 +1660,7 @@ class Client:
         *,
         activity: Optional[BaseActivity] = None,
         status: Optional[Status] = None,
-    ):
+    ) -> None:
         """|coro|
 
         Changes the client's presence.

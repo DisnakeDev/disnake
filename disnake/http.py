@@ -84,7 +84,7 @@ if TYPE_CHECKING:
 _API_VERSION = 10
 
 
-def _workaround_set_api_version(version: Literal[9, 10]):
+def _workaround_set_api_version(version: Literal[9, 10]) -> None:
     """Stopgap measure for verified bots without message content intent while intent is not enforced on api v9.
 
 
@@ -225,12 +225,12 @@ class HTTPClient:
         self,
         connector: Optional[aiohttp.BaseConnector] = None,
         *,
+        loop: asyncio.AbstractEventLoop,
         proxy: Optional[str] = None,
         proxy_auth: Optional[aiohttp.BasicAuth] = None,
-        loop: Optional[asyncio.AbstractEventLoop] = None,
         unsync_clock: bool = True,
     ) -> None:
-        self.loop: asyncio.AbstractEventLoop = asyncio.get_event_loop() if loop is None else loop
+        self.loop: asyncio.AbstractEventLoop = loop
         self.connector = connector
         self.__session: aiohttp.ClientSession = MISSING  # filled in static_login
         self._locks: weakref.WeakValueDictionary[str, asyncio.Lock] = weakref.WeakValueDictionary()
@@ -1066,14 +1066,16 @@ class HTTPClient:
         *,
         name: str,
         auto_archive_duration: threads.ThreadArchiveDurationLiteral,
-        rate_limit_per_user: int = 0,
+        rate_limit_per_user: Optional[int] = None,
         reason: Optional[str] = None,
     ) -> Response[threads.Thread]:
         payload = {
             "name": name,
             "auto_archive_duration": auto_archive_duration,
-            "rate_limit_per_user": rate_limit_per_user,
         }
+
+        if rate_limit_per_user is not None:
+            payload["rate_limit_per_user"] = rate_limit_per_user
 
         route = Route(
             "POST",
@@ -1091,7 +1093,7 @@ class HTTPClient:
         auto_archive_duration: threads.ThreadArchiveDurationLiteral,
         type: threads.ThreadType,
         invitable: bool = True,
-        rate_limit_per_user: int = 0,
+        rate_limit_per_user: Optional[int] = None,
         reason: Optional[str] = None,
     ) -> Response[threads.Thread]:
         payload = {
@@ -1099,8 +1101,10 @@ class HTTPClient:
             "auto_archive_duration": auto_archive_duration,
             "type": type,
             "invitable": invitable,
-            "rate_limit_per_user": rate_limit_per_user,
         }
+
+        if rate_limit_per_user is not None:
+            payload["rate_limit_per_user"] = rate_limit_per_user
 
         route = Route("POST", "/channels/{channel_id}/threads", channel_id=channel_id)
         return self.request(route, json=payload, reason=reason)

@@ -1,1 +1,0 @@
-Add the missing attributes for :class:`PermissionOverwrite`: ``use_application_commands`` and ``use_embedded_activities``.

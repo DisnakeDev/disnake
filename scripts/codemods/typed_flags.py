@@ -14,7 +14,10 @@ from disnake import flags
 
 BASE_FLAG_CLASSES = (flags.BaseFlags, flags.ListBaseFlags)
 
-MODULES = ("disnake.flags",)
+MODULES = (
+    "disnake.flags",
+    "disnake.ext.commands.flags",
+)
 
 
 class FlagTypings(codemod.VisitorBasedCodemodCommand):
