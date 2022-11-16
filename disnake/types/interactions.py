@@ -38,7 +38,7 @@ class ApplicationCommand(TypedDict):
     default_member_permissions: NotRequired[Optional[str]]
     dm_permission: NotRequired[Optional[bool]]
     default_permission: NotRequired[bool]  # deprecated
-    nsfw: NotRequired[Optional[bool]]
+    nsfw: NotRequired[bool]
     version: Snowflake
 
 
@@ -344,6 +344,6 @@ class EditApplicationCommand(TypedDict):
     default_member_permissions: NotRequired[Optional[str]]
     dm_permission: NotRequired[bool]
     default_permission: NotRequired[bool]  # deprecated
-    nsfw: NotRequired[Optional[bool]]
+    nsfw: NotRequired[bool]
     # TODO: remove, this cannot be changed
     type: NotRequired[ApplicationCommandType]
