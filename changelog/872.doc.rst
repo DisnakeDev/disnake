@@ -1,0 +1,1 @@
+Update documentation surrounding private threads no longer requiring boosts.
