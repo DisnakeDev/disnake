@@ -1930,7 +1930,6 @@ class StageChannel(VocalGuildChannel):
         position: int = MISSING,
         category: Optional[Snowflake] = MISSING,
         rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
-        video_quality_mode: VideoQualityMode = MISSING,
         bitrate: int = MISSING,
         flags: ChannelFlags = MISSING,
         reason: Optional[str] = None,
@@ -1957,8 +1956,6 @@ class StageChannel(VocalGuildChannel):
             The category id where the new channel should be grouped. If not provided, defaults to this channel category.
         rtc_region: Optional[Union[:class:`str`, :class:`VoiceRegion`]]
             The rtc region of the new channel. If not provided, defaults to this channel rtc region.
-        video_quality_mode: :class:`VideoQualityMode`
-            The video quality mode of the new channel. If not provided, defaults to this channel video quality mode.
         bitrate: :class:`int`
             The bitrate of the new channel. If not provided, defaults to this channel bitrate.
         flags: :class:`ChannelFlags`
