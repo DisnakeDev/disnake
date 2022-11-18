@@ -2347,7 +2347,6 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         *,
         name: Optional[str] = None,
         position: int = MISSING,
-        nsfw: bool = MISSING,
         flags: ChannelFlags = MISSING,
         reason: Optional[str] = None,
     ) -> CategoryChannel:
@@ -2368,8 +2367,6 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             The name of the new channel. If not provided, defaults to this channel name.
         position: :class:`int`
             The position of the new channel. If not provided, defaults to this channel position.
-        nsfw: :class:`bool`
-            Wether the new channel should be nsfw or not. If not provided, defaults to this channel nsfw value.
         flags: :class:`ChannelFlags`
             The flags of the new channel. If not provided, defaults to this channel flags.
         reason: Optional[:class:`str`]
