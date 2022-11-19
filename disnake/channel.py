@@ -904,7 +904,6 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         To create a public thread, you must have :attr:`~disnake.Permissions.create_public_threads` permission.
         For a private thread, :attr:`~disnake.Permissions.create_private_threads` permission is needed instead.
-        Additionally, the guild must have ``PRIVATE_THREADS`` in :attr:`Guild.features` to create private threads.
 
         .. versionadded:: 2.0
 
