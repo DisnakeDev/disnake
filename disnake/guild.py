@@ -211,7 +211,7 @@ class Guild(Hashable):
         - ``NEW_THREAD_PERMISSIONS``: Guild is using the new thread permission system.
         - ``PARTNERED``: Guild is a partnered server.
         - ``PREVIEW_ENABLED``: Guild can be viewed before being accepted via Membership Screening.
-        - ``PRIVATE_THREADS``: Guild has access to create private threads.
+        - ``PRIVATE_THREADS``: Guild has access to create private threads (no longer has any effect).
         - ``ROLE_ICONS``: Guild has access to role icons.
         - ``SEVEN_DAY_THREAD_ARCHIVE``: Guild has access to the seven day archive time for threads (no longer has any effect).
         - ``TEXT_IN_VOICE_ENABLED``: Guild has text in voice channels enabled (no longer has any effect).
