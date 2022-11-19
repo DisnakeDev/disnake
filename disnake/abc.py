@@ -982,9 +982,11 @@ class GuildChannel(ABC):
         reason: Optional[str] = None,
     ) -> Self:
         base_attrs["permission_overwrites"] = [x._asdict() for x in self._overwrites]
-        base_attrs["parent_id"] = (
-            category.id if category is not MISSING and category else self.category_id
-        )
+        if category is not MISSING:
+            base_attrs["parent_id"] = category.id if category else None
+        else:
+            # if no category was given don't chhange the category
+            base_attrs["parent_id"] = self.category_id
         base_attrs["name"] = name or self.name
         guild_id = self.guild.id
         cls = self.__class__
