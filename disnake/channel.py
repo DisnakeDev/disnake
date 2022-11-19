@@ -1980,7 +1980,7 @@ class StageChannel(VocalGuildChannel):
                 "position": position if position is not MISSING else self.position,
                 "rtc_region": rtc_region if rtc_region is not MISSING else self.rtc_region,
                 "video_quality_mode": int(video_quality_mode)
-                if video_quality_mode is not MISSING and video_quality_mode
+                if video_quality_mode is not MISSING
                 else int(self.video_quality_mode),
                 "bitrate": bitrate if bitrate is not MISSING else self.bitrate,
                 "flags": flags.value if flags is not MISSING and flags else self.flags.value,
