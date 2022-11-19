@@ -124,6 +124,7 @@ class BotBase(CommonBotBase, GroupMixin):
         ] = None,
         help_command: HelpCommand = _default,
         description: Optional[str] = None,
+        heed_bots: bool = False
         *,
         strip_after_prefix: bool = False,
         **options: Any,
@@ -621,7 +622,7 @@ class BotBase(CommonBotBase, GroupMixin):
         message: :class:`disnake.Message`
             The message to process commands for.
         """
-        if message.author.bot:
+        if message.author.bot and not self.heed_bots:
             return
 
         ctx = await self.get_context(message)
