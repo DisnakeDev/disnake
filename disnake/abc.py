@@ -978,12 +978,12 @@ class GuildChannel(ABC):
         base_attrs: Dict[str, Any],
         *,
         name: Optional[str] = None,
-        category_id: Optional[Snowflake] = MISSING,
+        category: Optional[Snowflake] = MISSING,
         reason: Optional[str] = None,
     ) -> Self:
         base_attrs["permission_overwrites"] = [x._asdict() for x in self._overwrites]
         base_attrs["parent_id"] = (
-            category_id.id if category_id is not MISSING and category_id else self.category_id
+            category.id if category is not MISSING and category else self.category_id
         )
         base_attrs["name"] = name or self.name
         guild_id = self.guild.id

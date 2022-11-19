@@ -525,7 +525,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
                 "flags": flags.value if flags is not MISSING and flags else self.flags.value,
             },
             name=name,
-            category_id=category,
+            category=category,
             reason=reason,
         )
 
@@ -1313,7 +1313,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
                 "position": position if position is not MISSING else self.position,
                 "rtc_region": rtc_region if rtc_region is not MISSING else self.rtc_region,
                 "video_quality_mode": int(video_quality_mode)
-                if video_quality_mode is not MISSING and video_quality_mode
+                if video_quality_mode is not MISSING
                 else int(self.video_quality_mode),
                 "nsfw": nsfw if nsfw is not MISSING else self.nsfw,
                 "rate_limit_per_user": slowmode_delay
@@ -1322,7 +1322,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
                 "flags": flags.value if flags is not MISSING and flags else self.flags.value,
             },
             name=name,
-            category_id=category,
+            category=category,
             reason=reason,
         )
 
@@ -1979,14 +1979,11 @@ class StageChannel(VocalGuildChannel):
             {
                 "position": position if position is not MISSING else self.position,
                 "rtc_region": rtc_region if rtc_region is not MISSING else self.rtc_region,
-                "video_quality_mode": int(video_quality_mode)
-                if video_quality_mode is not MISSING and video_quality_mode
-                else int(self.video_quality_mode),
                 "bitrate": bitrate if bitrate is not MISSING else self.bitrate,
                 "flags": flags.value if flags is not MISSING and flags else self.flags.value,
             },
             name=name,
-            category_id=category,
+            category=category,
             reason=reason,
         )
 
@@ -2387,7 +2384,6 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         return await self._clone_impl(
             {
                 "position": position if position is not MISSING else self.position,
-                "nsfw": nsfw if nsfw is not MISSING else self.nsfw,
                 "flags": flags.value if flags is not MISSING and flags else self.flags.value,
             },
             name=name,
@@ -3271,7 +3267,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
                 "default_sort_order": default_sort_order_payload,
             },
             name=name,
-            category_id=category,
+            category=category,
             reason=reason,
         )
 
