@@ -1313,7 +1313,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
                 "position": position if position is not MISSING else self.position,
                 "rtc_region": rtc_region if rtc_region is not MISSING else self.rtc_region,
                 "video_quality_mode": int(video_quality_mode)
-                if video_quality_mode is not MISSING and video_quality_mode
+                if video_quality_mode is not MISSING
                 else int(self.video_quality_mode),
                 "nsfw": nsfw if nsfw is not MISSING else self.nsfw,
                 "rate_limit_per_user": slowmode_delay
