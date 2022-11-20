@@ -10,6 +10,10 @@ from unittest import mock
 CallableT = TypeVar("CallableT", bound=Callable)
 
 
+def reveal_type(*args, **kwargs) -> None:
+    raise RuntimeError
+
+
 class freeze_time(ContextManager):
     """
     Helper class that freezes time at the given datetime by patching `datetime.now`.
