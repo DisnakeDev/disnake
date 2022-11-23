@@ -6,6 +6,7 @@ import asyncio
 import logging
 import sys
 import traceback
+import re
 import warnings
 from itertools import chain
 from typing import (
@@ -800,7 +801,13 @@ class InteractionBotBase(CommonBotBase):
                 try:
                     await self.bulk_overwrite_global_commands(to_send)
                 except Exception as e:
-                    warnings.warn(f"Failed to overwrite global commands due to {e}", SyncWarning)
+                    sync_warnings = "\n".join(
+                        self._update_sync_warning(sync_warning, to_send)
+                        for sync_warning in str(e).split("\n")
+                    )
+                    warnings.warn(
+                        f"Failed to overwrite global commands due to {sync_warnings}", SyncWarning
+                    )
 
         # Same process but for each specified guild individually.
         # Notice that we're not doing this for every single guild for optimisation purposes.
@@ -830,8 +837,12 @@ class InteractionBotBase(CommonBotBase):
                     try:
                         await self.bulk_overwrite_guild_commands(guild_id, to_send)
                     except Exception as e:
+                        sync_warnings = "\n".join(
+                            self._update_sync_warning(sync_warning, to_send)
+                            for sync_warning in str(e).split("\n")
+                        )
                         warnings.warn(
-                            f"Failed to overwrite commands in <Guild id={guild_id}> due to {e}",
+                            f"Failed to overwrite commands in <Guild id={guild_id}> due to {sync_warnings}",
                             SyncWarning,
                         )
         # Last debug message
@@ -1364,3 +1375,29 @@ class InteractionBotBase(CommonBotBase):
         self, interaction: ApplicationCommandInteraction
     ) -> None:
         await self.process_app_command_autocompletion(interaction)
+
+    def _update_sync_warning(self, sync_warning: str, commands: List[InvokableSlashCommand]) -> str:
+        command_number_match = re.search("In (\d+)", sync_warning)
+        if not command_number_match:
+            return sync_warning
+        command_number = command_number_match.group(1)
+        command = commands[int(command_number)]
+        sync_warning = sync_warning.replace(command_number, command.name, 1)
+
+        option_number_match = re.search("options.(\d+)", sync_warning)
+        if not option_number_match:
+            return sync_warning
+        option_number = option_number_match.group(1)
+        option = command.options[int(option_number)]
+        sync_warning = sync_warning.replace(option_number, option.name, 1)
+
+        option_choices_number_match = re.search(
+            f"options.{option.name}.choices.(\d+)", sync_warning
+        )
+        if not option_choices_number_match:
+            return sync_warning
+        option_choices_number = option_choices_number_match.group(1)
+
+        return sync_warning.replace(
+            option_choices_number, option.choices[int(option_choices_number)].name, 1
+        )
