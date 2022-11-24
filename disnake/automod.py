@@ -239,7 +239,8 @@ class AutoModTriggerMetadata:
         The keyword presets. Used with :attr:`AutoModTriggerType.keyword_preset`.
 
     allow_list: Optional[Sequence[:class:`str`]]
-        The keywords that should be exempt from a preset, up to 1000 keywords. Used with :attr:`AutoModTriggerType.keyword_preset`.
+        The keywords that should be exempt from a preset, up to 1000 keywords.
+        Used with :attr:`AutoModTriggerType.keyword` and :attr:`AutoModTriggerType.keyword_preset`.
 
     mention_total_limit: Optional[:class:`int`]
         The maximum number of mentions (members + roles) allowed, between 1 and 50. Used with :attr:`AutoModTriggerType.mention_spam`.
@@ -259,6 +260,7 @@ class AutoModTriggerMetadata:
         *,
         keyword_filter: Optional[Sequence[str]],
         regex_patterns: Optional[Sequence[str]] = None,
+        allow_list: Optional[Sequence[str]] = None,
     ) -> None:
         ...
 
@@ -268,6 +270,7 @@ class AutoModTriggerMetadata:
         *,
         keyword_filter: Optional[Sequence[str]] = None,
         regex_patterns: Optional[Sequence[str]],
+        allow_list: Optional[Sequence[str]] = None,
     ) -> None:
         ...
 
