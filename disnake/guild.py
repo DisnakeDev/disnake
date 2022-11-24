@@ -209,6 +209,8 @@ class Guild(Hashable):
         - ``MORE_STICKERS``: Guild has increased custom sticker slots.
         - ``NEWS``: Guild can create news channels.
         - ``NEW_THREAD_PERMISSIONS``: Guild is using the new thread permission system.
+        - ``GUILD_ONBOARDING``: Guild has Community Onboarding.
+        - ``GUILD_ONBOARDING_EVER_ENABLED``: Guild has enabled Community Onboarding.
         - ``PARTNERED``: Guild is a partnered server.
         - ``PREVIEW_ENABLED``: Guild can be viewed before being accepted via Membership Screening.
         - ``PRIVATE_THREADS``: Guild has access to create private threads (no longer has any effect).
