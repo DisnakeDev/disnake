@@ -213,6 +213,16 @@ class AutoModTriggerMetadata:
     """
     Metadata for an auto moderation trigger.
 
+    Based on the trigger type, different fields can be used with various limits:
+
+    .. csv-table::
+        :header: "Trigger Type", ``keyword_filter``, ``regex_patterns``, ``presets``, ``allow_list``, ``mention_total_limit``
+
+        :attr:`~AutoModTriggerType.keyword`,        ✅ (x1000), ✅ (x10), ❌, ✅ (x100),  ❌
+        :attr:`~AutoModTriggerType.spam`,           ❌,         ❌,       ❌, ❌,         ❌
+        :attr:`~AutoModTriggerType.keyword_preset`, ❌,         ❌,       ✅, ✅ (x1000), ❌
+        :attr:`~AutoModTriggerType.mention_spam`,   ❌,         ❌,       ❌, ❌,         ✅
+
     .. versionadded:: 2.6
 
     Attributes
