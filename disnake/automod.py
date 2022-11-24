@@ -255,13 +255,19 @@ class AutoModTriggerMetadata:
 
     @overload
     def __init__(
-        self, *, keyword_filter: Sequence[str], regex_patterns: Sequence[str] = ...
+        self,
+        *,
+        keyword_filter: Optional[Sequence[str]],
+        regex_patterns: Optional[Sequence[str]] = None,
     ) -> None:
         ...
 
     @overload
     def __init__(
-        self, *, keyword_filter: Sequence[str] = ..., regex_patterns: Sequence[str]
+        self,
+        *,
+        keyword_filter: Optional[Sequence[str]] = None,
+        regex_patterns: Optional[Sequence[str]],
     ) -> None:
         ...
 
