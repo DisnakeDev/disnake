@@ -11,8 +11,8 @@ if TYPE_CHECKING:
     # NOTE: using undocumented `expected_text` parameter of pyright instead of `assert_type`,
     # as `assert_type` can't handle bound ParamSpecs
     reveal_type(
-        42,
-        expected_text="str",
+        42,  # type: ignore
+        expected_text="str",  # type: ignore
     )
 
 
@@ -35,13 +35,13 @@ class TestDecorators:
 
         for cd in (commands.command(), base.command()):
             reveal_type(
-                cd(f1),
+                cd(f1),  # type: ignore
                 expected_text="Command[None, (a: int, b: str), bool]",
             )
 
         for gd in (commands.group(), base.group()):
             reveal_type(
-                gd(f1),
+                gd(f1),  # type: ignore
                 expected_text="Group[None, (a: int, b: str), bool]",
             )
 
@@ -53,13 +53,13 @@ class TestDecorators:
 
         for cd in (commands.command(), base.command()):
             reveal_type(
-                cd(f2),
+                cd(f2),  # type: ignore
                 expected_text="Command[CustomCog, (a: int, b: str), bool]",
             )
 
         for gd in (commands.group(), base.group()):
             reveal_type(
-                gd(f2),
+                gd(f2),  # type: ignore
                 expected_text="Group[CustomCog, (a: int, b: str), bool]",
             )
 

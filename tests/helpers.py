@@ -4,14 +4,19 @@ import asyncio
 import datetime
 import functools
 import types
-from typing import Callable, ContextManager, Optional, Type, TypeVar
+from typing import TYPE_CHECKING, Callable, ContextManager, Optional, Type, TypeVar
 from unittest import mock
 
+if TYPE_CHECKING:
+    # for pyright
+    from typing_extensions import reveal_type as reveal_type
+else:
+    # to avoid flake8 noqas
+    def reveal_type(*args, **kwargs) -> None:
+        raise RuntimeError
+
+
 CallableT = TypeVar("CallableT", bound=Callable)
-
-
-def reveal_type(*args, **kwargs) -> None:
-    raise RuntimeError
 
 
 class freeze_time(ContextManager):
