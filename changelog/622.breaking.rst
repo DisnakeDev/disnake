@@ -1,0 +1,1 @@
+Migrate ``fetch`` methods of :class:`Webhook` and :class:`SyncWebhook` to :class:`PartialWebhook` and :class:`PartialSyncWebhook`.
