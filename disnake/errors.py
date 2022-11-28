@@ -246,7 +246,9 @@ class ConnectionClosed(ClientException):
         # aiohttp doesn't seem to consistently provide close reason
         self.reason: str = self.GATEWAY_CLOSE_EVENT_REASONS.get(self.code, "Unknown reason.")
         self.shard_id: Optional[int] = shard_id
-        super().__init__(f"Shard ID {self.shard_id} WebSocket closed with {self.code}: {self.reason}")
+        super().__init__(
+            f"Shard ID {self.shard_id} WebSocket closed with {self.code}: {self.reason}"
+        )
 
 
 class PrivilegedIntentsRequired(ClientException):
