@@ -55,6 +55,7 @@ __all__ = (
     "DMChannel",
     "CategoryChannel",
     "NewsChannel",
+    "ThreadWithMessage",
     "ForumChannel",
     "GroupChannel",
     "PartialMessageable",
