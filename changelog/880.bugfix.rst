@@ -1,0 +1,1 @@
+Add previously missing ``applied_tags`` to all :meth:`ForumChannel.create_thread` overloads.
