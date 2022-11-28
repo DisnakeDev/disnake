@@ -224,6 +224,15 @@ class ConnectionClosed(ClientException):
         The shard ID that got closed if applicable.
     """
 
+    GATEWAY_CLOSE_EVENT_REASONS: Dict[int, str] = {
+        4004: "Authentication failed",
+        4010: "Invalid Shard",
+        4011: "Shard required, you are required to shard your connection in order to connect.",
+        4012: "Invalid API version",
+        4013: "Invalid intents",
+        4014: "Disallowed intents, you may have tried to specify an intent that you have not enabled or are not approved for.",
+    }
+
     def __init__(
         self,
         socket: ClientWebSocketResponse,
@@ -235,9 +244,9 @@ class ConnectionClosed(ClientException):
         # reconfigured to subclass ClientException for users
         self.code: int = code or socket.close_code or -1
         # aiohttp doesn't seem to consistently provide close reason
-        self.reason: str = ""
+        self.reason: str = self.GATEWAY_CLOSE_EVENT_REASONS.get(self.code, "Unknown reason.")
         self.shard_id: Optional[int] = shard_id
-        super().__init__(f"Shard ID {self.shard_id} WebSocket closed with {self.code}")
+        super().__init__(f"Shard ID {self.shard_id} WebSocket closed with {self.code}: {self.reason}")
 
 
 class PrivilegedIntentsRequired(ClientException):
