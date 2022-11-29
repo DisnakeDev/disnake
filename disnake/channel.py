@@ -1840,7 +1840,7 @@ class StageChannel(VocalGuildChannel):
 
             .. versionadded:: 2.5
 
-        guild_scheduled_event: :class:`Snowflake`
+        guild_scheduled_event: :class:`abc.Snowflake`
             the guild scheduled event associated with the stage instance.
 
             .. versionadded:: 2.8
