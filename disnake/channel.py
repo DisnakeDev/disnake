@@ -1812,6 +1812,7 @@ class StageChannel(VocalGuildChannel):
         topic: str,
         privacy_level: StagePrivacyLevel = MISSING,
         notify_everyone: bool = False,
+        guild_scheduled_event: Snowflake = MISSING,
         reason: Optional[str] = None,
     ) -> StageInstance:
         """|coro|
@@ -1832,14 +1833,20 @@ class StageChannel(VocalGuildChannel):
             The stage instance's topic.
         privacy_level: :class:`StagePrivacyLevel`
             The stage instance's privacy level. Defaults to :attr:`StagePrivacyLevel.guild_only`.
-        reason: Optional[:class:`str`]
-            The reason the stage instance was created. Shows up on the audit log.
         notify_everyone: :class:`bool`
             Whether to notify ``@everyone`` that the stage instance has started.
             Requires the :attr:`~Permissions.mention_everyone` permission on the stage channel.
             Defaults to ``False``.
 
             .. versionadded:: 2.5
+
+        guild_scheduled_event: :class:`Snowflake`
+            the guild scheduled event associated with the stage instance.
+
+            .. versionadded:: 2.8
+
+        reason: Optional[:class:`str`]
+            The reason the stage instance was created. Shows up on the audit log.
 
         Raises
         ------
@@ -1871,6 +1878,9 @@ class StageChannel(VocalGuildChannel):
                 )
 
             payload["privacy_level"] = privacy_level.value
+
+        if guild_scheduled_event is not MISSING:
+            payload["guild_scheduled_event_id"] = guild_scheduled_event.id
 
         data = await self._state.http.create_stage_instance(**payload, reason=reason)
         return StageInstance(guild=self.guild, state=self._state, data=data)
