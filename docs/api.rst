@@ -1830,6 +1830,11 @@ of :class:`enum.Enum`.
         The user is marked as a spammer.
 
         .. versionadded:: 2.3
+    .. attribute:: active_developer
+
+        The user is an Active Developer.
+
+        .. versionadded:: 2.8
 
 .. class:: ActivityType
 
@@ -4386,7 +4391,8 @@ AuditLogDiff
         The default number of seconds members have to wait before
         sending another message in new threads created in the channel.
 
-        See also :attr:`ForumChannel.default_thread_slowmode_delay`.
+        See also :attr:`TextChannel.default_thread_slowmode_delay` or
+        :attr:`ForumChannel.default_thread_slowmode_delay`.
 
         :type: :class:`int`
 
