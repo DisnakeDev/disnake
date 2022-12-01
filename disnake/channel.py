@@ -1841,7 +1841,8 @@ class StageChannel(VocalGuildChannel):
             .. versionadded:: 2.5
 
         guild_scheduled_event: :class:`abc.Snowflake`
-            the guild scheduled event associated with the stage instance.
+            The guild scheduled event associated with the stage instance.
+            This will automatically start the scheduled event.
 
             .. versionadded:: 2.8
 
