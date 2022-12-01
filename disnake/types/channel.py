@@ -56,6 +56,7 @@ class _BaseTextChannel(_BaseGuildChannel, total=False):
     last_pin_timestamp: Optional[str]
     rate_limit_per_user: int
     default_auto_archive_duration: ThreadArchiveDurationLiteral
+    default_thread_rate_limit_per_user: NotRequired[int]
 
 
 class TextChannel(_BaseTextChannel):

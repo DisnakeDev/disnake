@@ -1,0 +1,1 @@
+Update :class:`AutoModTriggerMetadata` overloads to allow passing ``allow_list`` to keyword-based rules.
