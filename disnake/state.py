@@ -284,6 +284,10 @@ class ConnectionState:
         self, *, views: bool = True, application_commands: bool = True, modals: bool = True
     ) -> None:
         self.user: ClientUser = MISSING
+        # NOTE: without weakrefs, these user objects would otherwise be kept in memory indefinitely.
+        # However, using weakrefs here unfortunately has a few drawbacks:
+        # - the weakref slot + object in user objects likely results in a small increase in memory usage
+        # - accesses on `_users` are slower, e.g. `__getitem__` takes ~1us with weakrefs and ~0.2us without
         self._users: weakref.WeakValueDictionary[int, User] = weakref.WeakValueDictionary()
         self._emojis: Dict[int, Emoji] = {}
         self._stickers: Dict[int, GuildSticker] = {}
