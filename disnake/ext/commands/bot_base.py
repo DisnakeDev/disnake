@@ -109,7 +109,7 @@ def _is_submodule(parent: str, child: str) -> bool:
 
 
 class _DefaultRepr:
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<default-help-command>"
 
 
@@ -127,7 +127,7 @@ class BotBase(CommonBotBase, GroupMixin):
         *,
         strip_after_prefix: bool = False,
         **options: Any,
-    ):
+    ) -> None:
         super().__init__(**options)
 
         if not isinstance(self, disnake.Client):
@@ -625,5 +625,5 @@ class BotBase(CommonBotBase, GroupMixin):
         ctx = await self.get_context(message)
         await self.invoke(ctx)
 
-    async def on_message(self, message):
+    async def on_message(self, message) -> None:
         await self.process_commands(message)

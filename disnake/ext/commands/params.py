@@ -1291,7 +1291,7 @@ def option_enum(
 class ConverterMethod(classmethod):
     """A class to help register a method as a converter method."""
 
-    def __set_name__(self, owner: Any, name: str):
+    def __set_name__(self, owner: Any, name: str) -> None:
         # this feels wrong
         function = self.__get__(None, owner)
         ParamInfo._registered_converters[owner] = function

@@ -211,7 +211,7 @@ class Guild(Hashable):
         - ``NEW_THREAD_PERMISSIONS``: Guild is using the new thread permission system.
         - ``PARTNERED``: Guild is a partnered server.
         - ``PREVIEW_ENABLED``: Guild can be viewed before being accepted via Membership Screening.
-        - ``PRIVATE_THREADS``: Guild has access to create private threads.
+        - ``PRIVATE_THREADS``: Guild has access to create private threads (no longer has any effect).
         - ``ROLE_ICONS``: Guild has access to role icons.
         - ``SEVEN_DAY_THREAD_ARCHIVE``: Guild has access to the seven day archive time for threads (no longer has any effect).
         - ``TEXT_IN_VOICE_ENABLED``: Guild has text in voice channels enabled (no longer has any effect).
@@ -339,7 +339,7 @@ class Guild(Hashable):
         3: _GuildLimit(emoji=250, stickers=60, bitrate=384e3, filesize=104857600),
     }
 
-    def __init__(self, *, data: GuildPayload, state: ConnectionState):
+    def __init__(self, *, data: GuildPayload, state: ConnectionState) -> None:
         self._channels: Dict[int, GuildChannel] = {}
         self._members: Dict[int, Member] = {}
         self._voice_states: Dict[int, VoiceState] = {}
@@ -4266,7 +4266,7 @@ class Guild(Hashable):
 
     async def change_voice_state(
         self, *, channel: Optional[Snowflake], self_mute: bool = False, self_deaf: bool = False
-    ):
+    ) -> None:
         """|coro|
 
         Changes client's voice state in the guild.

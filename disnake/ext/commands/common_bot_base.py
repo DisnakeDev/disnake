@@ -59,7 +59,7 @@ class CommonBotBase(Generic[CogT]):
         owner_ids: Optional[Set[int]] = None,
         reload: bool = False,
         **kwargs: Any,
-    ):
+    ) -> None:
         self.__cogs: Dict[str, Cog] = {}
         self.__extensions: Dict[str, types.ModuleType] = {}
         self.extra_events: Dict[str, List[CoroFunc]] = {}
@@ -595,7 +595,7 @@ class CommonBotBase(Generic[CogT]):
         """Mapping[:class:`str`, :class:`py:types.ModuleType`]: A read-only mapping of extension name to extension."""
         return types.MappingProxyType(self.__extensions)
 
-    async def _watchdog(self):
+    async def _watchdog(self) -> None:
         """|coro|
 
         Starts the bot watchdog which will watch currently loaded extensions
