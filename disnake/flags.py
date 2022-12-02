@@ -736,7 +736,7 @@ class PublicUserFlags(BaseFlags):
             active_developer: bool = ...,
             bug_hunter: bool = ...,
             bug_hunter_level_2: bool = ...,
-            discord_certified_moderator: bool = ...,
+            moderator_programs_alumni: bool = ...,
             early_supporter: bool = ...,
             early_verified_bot_developer: bool = ...,
             http_interactions_bot: bool = ...,
@@ -828,12 +828,12 @@ class PublicUserFlags(BaseFlags):
         return UserFlags.verified_bot_developer.value
 
     @flag_value
-    def discord_certified_moderator(self):
-        """:class:`bool`: Returns ``True`` if the user is a Discord Certified Moderator.
+    def moderator_programs_alumni(self):
+        """:class:`bool`: Returns ``True`` if the user is a Moderator Programs Alumni.
 
         .. versionadded:: 2.0
         """
-        return UserFlags.discord_certified_moderator.value
+        return UserFlags.moderator_programs_alumni.value
 
     @flag_value
     def http_interactions_bot(self):

@@ -503,7 +503,7 @@ class UserFlags(Enum):
     bug_hunter_level_2 = 1 << 14
     verified_bot = 1 << 16
     verified_bot_developer = 1 << 17
-    discord_certified_moderator = 1 << 18
+    moderator_programs_alumni = 1 << 18
     http_interactions_bot = 1 << 19
     spammer = 1 << 20
     active_developer = 1 << 22
