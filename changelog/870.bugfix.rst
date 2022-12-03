@@ -1,0 +1,1 @@
+Fix :attr:`Message.author.public_flags <Member.public_flags>` always being ``0`` when the member cache is disabled.
