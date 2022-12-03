@@ -362,7 +362,6 @@ class AuditLogChanges:
         "available_tags":                     (None, _list_transformer(_transform_tag)),
         "default_reaction_emoji":             ("default_reaction", _transform_default_reaction),
         "default_sort_order":                 (None, _enum_transformer(enums.ThreadSortOrder)),
-        "default_forum_layout":               ("default_layout", _enum_transformer(enums.ThreadLayout)),
     }
     # fmt: on
 

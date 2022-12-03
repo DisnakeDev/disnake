@@ -1,1 +1,1 @@
-Add :attr:`ForumChannel.default_layout`, ``default_layout`` parameter to channel edit methods, and :attr:`AuditLogDiff.default_layout`.
+Add :attr:`ForumChannel.default_layout`, ``default_layout`` parameter to channel edit methods.

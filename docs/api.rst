@@ -4648,12 +4648,6 @@ AuditLogDiff
 
         :type: Optional[:class:`ThreadSortOrder`]
 
-    .. attribute:: default_layout
-
-        The default layout of threads in a forum channel being changed.
-
-        :type: Optional[:class:`ThreadLayout`]
-
 Webhook Support
 ------------------
 
