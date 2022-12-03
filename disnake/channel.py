@@ -139,9 +139,24 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         *not* point to an existing or valid message.
     slowmode_delay: :class:`int`
         The number of seconds a member must wait between sending messages
-        in this channel. A value of `0` denotes that it is disabled.
+        in this channel.
+
+        A value of `0` denotes that it is disabled.
         Bots, and users with :attr:`~Permissions.manage_channels` or
         :attr:`~Permissions.manage_messages` permissions, bypass slowmode.
+
+        See also :attr:`default_thread_slowmode_delay`.
+
+    default_thread_slowmode_delay: :class:`int`
+        The default number of seconds a member must wait between sending messages
+        in newly created threads in this channel.
+
+        A value of ``0`` denotes that it is disabled.
+        Bots, and users with :attr:`~Permissions.manage_channels` or
+        :attr:`~Permissions.manage_messages`, bypass slowmode.
+
+        .. versionadded:: 2.8
+
     nsfw: :class:`bool`
         Whether the channel is marked as "not safe for work".
 
@@ -169,6 +184,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         "category_id",
         "position",
         "slowmode_delay",
+        "default_thread_slowmode_delay",
         "last_message_id",
         "default_auto_archive_duration",
         "last_pin_timestamp",
@@ -208,6 +224,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         self.nsfw: bool = data.get("nsfw", False)
         # Does this need coercion into `int`? No idea yet.
         self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
+        self.default_thread_slowmode_delay: int = data.get("default_thread_rate_limit_per_user", 0)
         self.default_auto_archive_duration: ThreadArchiveDurationLiteral = data.get(
             "default_auto_archive_duration", 1440
         )
@@ -332,6 +349,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         sync_permissions: bool = ...,
         category: Optional[Snowflake] = ...,
         slowmode_delay: Optional[int] = ...,
+        default_thread_slowmode_delay: Optional[int] = ...,
         default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = ...,
         type: ChannelType = ...,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
@@ -350,6 +368,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         sync_permissions: bool = MISSING,
         category: Optional[Snowflake] = MISSING,
         slowmode_delay: Optional[int] = MISSING,
+        default_thread_slowmode_delay: Optional[int] = MISSING,
         default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
         type: ChannelType = MISSING,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
@@ -395,6 +414,13 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         slowmode_delay: Optional[:class:`int`]
             Specifies the slowmode rate limit for users in this channel, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
+        default_thread_slowmode_delay: Optional[:class:`int`]
+            Specifies the slowmode rate limit at which users can send messages
+            in newly created threads in this channel, in seconds.
+            This does not apply retroactively to existing threads.
+            A value of ``0`` or ``None`` disables slowmode. The maximum value possible is ``21600``.
+
+            .. versionadded:: 2.8
         type: :class:`ChannelType`
             The new type of this text channel. Currently, only conversion between
             :attr:`ChannelType.text` and :attr:`ChannelType.news` is supported. This
@@ -438,6 +464,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             sync_permissions=sync_permissions,
             category=category,
             slowmode_delay=slowmode_delay,
+            default_thread_slowmode_delay=default_thread_slowmode_delay,
             default_auto_archive_duration=default_auto_archive_duration,
             type=type,
             overwrites=overwrites,
@@ -874,7 +901,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         slowmode_delay: Optional[:class:`int`]
             Specifies the slowmode rate limit for users in this thread, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
-            If set to ``None`` or not provided, slowmode is inherited from the parent channel.
+            If set to ``None`` or not provided, slowmode is inherited from the parent's
+            :attr:`~TextChannel.default_thread_slowmode_delay`.
 
             .. versionadded:: 2.3
 
@@ -2924,6 +2952,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         name: str,
         auto_archive_duration: AnyThreadArchiveDuration = ...,
         slowmode_delay: Optional[int] = ...,
+        applied_tags: Sequence[Snowflake] = ...,
         content: str = ...,
         embed: Embed = ...,
         file: File = ...,
@@ -2943,6 +2972,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         name: str,
         auto_archive_duration: AnyThreadArchiveDuration = ...,
         slowmode_delay: Optional[int] = ...,
+        applied_tags: Sequence[Snowflake] = ...,
         content: str = ...,
         embed: Embed = ...,
         files: List[File] = ...,
@@ -2962,6 +2992,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         name: str,
         auto_archive_duration: AnyThreadArchiveDuration = ...,
         slowmode_delay: Optional[int] = ...,
+        applied_tags: Sequence[Snowflake] = ...,
         content: str = ...,
         embeds: List[Embed] = ...,
         file: File = ...,
@@ -2981,6 +3012,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         name: str,
         auto_archive_duration: AnyThreadArchiveDuration = ...,
         slowmode_delay: Optional[int] = ...,
+        applied_tags: Sequence[Snowflake] = ...,
         content: str = ...,
         embeds: List[Embed] = ...,
         files: List[File] = ...,
