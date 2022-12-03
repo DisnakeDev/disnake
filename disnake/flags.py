@@ -830,7 +830,10 @@ class PublicUserFlags(BaseFlags):
 
     @flag_value
     def discord_certified_moderator(self):
-        """:class:`bool`: Returns ``True`` if the user is a Discord Certified Moderator."""
+        """:class:`bool`: Returns ``True`` if the user is a Discord Certified Moderator.
+        
+        .. versionadded:: 2.0
+        """
         return UserFlags.discord_certified_moderator.value
 
     @alias_flag_value
