@@ -1888,7 +1888,8 @@ class Message(Hashable):
         slowmode_delay: Optional[:class:`int`]
             Specifies the slowmode rate limit for users in this thread, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
-            If set to ``None`` or not provided, slowmode is inherited from the parent channel.
+            If set to ``None`` or not provided, slowmode is inherited from the parent's
+            :attr:`~TextChannel.default_thread_slowmode_delay`.
 
             .. versionadded:: 2.3
 
