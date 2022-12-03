@@ -213,6 +213,16 @@ class AutoModTriggerMetadata:
     """
     Metadata for an auto moderation trigger.
 
+    Based on the trigger type, different fields can be used with various limits:
+
+    .. csv-table::
+        :header: "Trigger Type", ``keyword_filter``, ``regex_patterns``, ``presets``, ``allow_list``, ``mention_total_limit``
+
+        :attr:`~AutoModTriggerType.keyword`,        ✅ (x1000), ✅ (x10), ❌, ✅ (x100),  ❌
+        :attr:`~AutoModTriggerType.spam`,           ❌,         ❌,       ❌, ❌,         ❌
+        :attr:`~AutoModTriggerType.keyword_preset`, ❌,         ❌,       ✅, ✅ (x1000), ❌
+        :attr:`~AutoModTriggerType.mention_spam`,   ❌,         ❌,       ❌, ❌,         ✅
+
     .. versionadded:: 2.6
 
     Attributes
@@ -227,7 +237,7 @@ class AutoModTriggerMetadata:
     regex_patterns: Optional[Sequence[:class:`str`]]
         The list of regular expressions to check for. Used with :attr:`AutoModTriggerType.keyword`.
 
-        A maximum of 10 regexes can be added, each with up to 75 characters.
+        A maximum of 10 regexes can be added, each with up to 260 characters.
 
         .. note::
 
@@ -239,7 +249,10 @@ class AutoModTriggerMetadata:
         The keyword presets. Used with :attr:`AutoModTriggerType.keyword_preset`.
 
     allow_list: Optional[Sequence[:class:`str`]]
-        The keywords that should be exempt from a preset, up to 1000 keywords. Used with :attr:`AutoModTriggerType.keyword_preset`.
+        The keywords that should be exempt from a preset.
+        Used with :attr:`AutoModTriggerType.keyword` (up to 100 exemptions) and :attr:`AutoModTriggerType.keyword_preset` (up to 1000 exemptions).
+
+        Each keyword must be 30 characters or less.
 
     mention_total_limit: Optional[:class:`int`]
         The maximum number of mentions (members + roles) allowed, between 1 and 50. Used with :attr:`AutoModTriggerType.mention_spam`.
@@ -255,13 +268,21 @@ class AutoModTriggerMetadata:
 
     @overload
     def __init__(
-        self, *, keyword_filter: Sequence[str], regex_patterns: Sequence[str] = ...
+        self,
+        *,
+        keyword_filter: Optional[Sequence[str]],
+        regex_patterns: Optional[Sequence[str]] = None,
+        allow_list: Optional[Sequence[str]] = None,
     ) -> None:
         ...
 
     @overload
     def __init__(
-        self, *, keyword_filter: Sequence[str] = ..., regex_patterns: Sequence[str]
+        self,
+        *,
+        keyword_filter: Optional[Sequence[str]] = None,
+        regex_patterns: Optional[Sequence[str]],
+        allow_list: Optional[Sequence[str]] = None,
     ) -> None:
         ...
 
