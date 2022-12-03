@@ -3795,6 +3795,24 @@ of :class:`enum.Enum`.
 
         Sort forum threads by creation date/time (from newest to oldest).
 
+.. class:: ThreadLayout
+
+    Represents the layout of threads in :class:`ForumChannel`\s.
+
+    .. versionadded:: 2.8
+
+    .. attribute:: default
+
+        No preferred layout has been set.
+
+    .. attribute:: list
+
+        Display forum threads in a text-focused list.
+
+    .. attribute:: grid
+
+        Display forum threads in a media-focused gallery.
+
 Async Iterator
 ----------------
 
@@ -4629,6 +4647,12 @@ AuditLogDiff
         The default sort order of threads in a forum channel being changed.
 
         :type: Optional[:class:`ThreadSortOrder`]
+
+    .. attribute:: default_layout
+
+        The default layout of threads in a forum channel being changed.
+
+        :type: Optional[:class:`ThreadLayout`]
 
 Webhook Support
 ------------------

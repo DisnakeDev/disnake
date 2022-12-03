@@ -58,6 +58,7 @@ __all__ = (
     "AutoModEventType",
     "AutoModActionType",
     "ThreadSortOrder",
+    "ThreadLayout",
 )
 
 
@@ -810,6 +811,12 @@ class AutoModTriggerType(Enum):
 class ThreadSortOrder(Enum):
     latest_activity = 0
     creation_date = 1
+
+
+class ThreadLayout(Enum):
+    default = 0
+    list = 1
+    grid = 2
 
 
 T = TypeVar("T")
