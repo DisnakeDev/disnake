@@ -955,7 +955,7 @@ class Message(Hashable):
 
     def __repr__(self) -> str:
         name = self.__class__.__name__
-        return f"<{name} id={self.id} content={self.content} channel={self.channel!r} type={self.type!r} author={self.author!r} flags={self.flags!r}>"
+        return f"<{name} id={self.id} content={self.content!r} channel={self.channel!r} type={self.type!r} author={self.author!r} flags={self.flags!r}>"
 
     def _try_patch(self, data, key, transform=None) -> None:
         try:
