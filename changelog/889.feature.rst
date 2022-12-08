@@ -1,0 +1,2 @@
+Add support for avatar decorations.
+    - Add :attr:`User.avatar_decoration`
