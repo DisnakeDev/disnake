@@ -224,8 +224,17 @@ class ConnectionClosed(ClientException):
         The shard ID that got closed if applicable.
     """
 
+    # https://discord.com/developers/docs/topics/opcodes-and-status-codes#gateway-gateway-close-event-codes
     GATEWAY_CLOSE_EVENT_REASONS: Dict[int, str] = {
+        4000: "Unknown error",
+        4001: "Unknown opcode",
+        4002: "Decode error",
+        4003: "Not authenticated",
         4004: "Authentication failed",
+        4005: "Already authenticated",
+        4007: "Invalid sequence",
+        4008: "Rate limited",
+        4009: "Session timed out",
         4010: "Invalid Shard",
         4011: "Shard required, you are required to shard your connection in order to connect.",
         4012: "Invalid API version",
@@ -239,11 +248,25 @@ class ConnectionClosed(ClientException):
         *,
         shard_id: Optional[int],
         code: Optional[int] = None,
+        voice: Optional[bool] = False,
     ) -> None:
         # This exception is just the same exception except
         # reconfigured to subclass ClientException for users
         self.code: int = code or socket.close_code or -1
         # aiohttp doesn't seem to consistently provide close reason
+        if voice:
+            # https://discord.com/developers/docs/topics/opcodes-and-status-codes#voice-voice-close-event-codes
+            self.GATEWAY_CLOSE_EVENT_REASONS.update(
+                {
+                    4002: "Failed to decode payload",
+                    4006: "Session no longer valid",
+                    4011: "Server not found",
+                    4012: "Unknown protocol",
+                    4014: "Disconnected, channel was deleted, you were kicked, voice server changed, or the main gateway session was dropped.",
+                    4015: "Voice server crashed",
+                    4016: "Unknown encryption mode",
+                }
+            )
         self.reason: str = self.GATEWAY_CLOSE_EVENT_REASONS.get(self.code, "Unknown reason.")
         self.shard_id: Optional[int] = shard_id
         super().__init__(
