@@ -306,6 +306,15 @@ class Asset(AssetMixin):
             animated=False,
         )
 
+    @classmethod
+    def _from_avatar_decoration(cls, state, user_id: int, avatar_decoration: str) -> Asset:
+        return cls(
+            state,
+            url=f"{cls.BASE}/avatar-decorations/{user_id}/{avatar_decoration}.png?size=1024",
+            key=avatar_decoration,
+            animated=False,  # NOTE: Some avatar decorations are animated
+        )
+
     def __str__(self) -> str:
         return self._url
 

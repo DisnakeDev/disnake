@@ -42,11 +42,12 @@ class BaseUser(_UserTag):
         "name",
         "id",
         "discriminator",
-        "_avatar",
-        "_banner",
-        "_accent_colour",
         "bot",
         "system",
+        "_avatar",
+        "_banner",
+        "_avatar_decoration",
+        "_accent_colour",
         "_public_flags",
         "_state",
     )
@@ -60,6 +61,7 @@ class BaseUser(_UserTag):
         _state: ConnectionState
         _avatar: Optional[str]
         _banner: Optional[str]
+        _avatar_decoration: Optional[str]
         _accent_colour: Optional[str]
         _public_flags: int
 
@@ -93,6 +95,7 @@ class BaseUser(_UserTag):
         self.discriminator = data["discriminator"]
         self._avatar = data["avatar"]
         self._banner = data.get("banner", None)
+        self._avatar_decoration = data.get("avatar_decoration", None)
         self._accent_colour = data.get("accent_color", None)
         self._public_flags = data.get("public_flags", 0)
         self.bot = data.get("bot", False)
@@ -107,6 +110,7 @@ class BaseUser(_UserTag):
         self.discriminator = user.discriminator
         self._avatar = user._avatar
         self._banner = user._banner
+        self._avatar_decoration = user._avatar_decoration
         self._accent_colour = user._accent_colour
         self.bot = user.bot
         self._state = user._state
@@ -167,6 +171,16 @@ class BaseUser(_UserTag):
         if self._banner is None:
             return None
         return Asset._from_banner(self._state, self.id, self._banner)
+
+    @property
+    def avatar_decoration(self) -> Optional[Asset]:
+        """Optional[:class:`Asset`]: Returns the user's avatar decoration asset, if available.
+
+        .. versionadded:: 2.8
+        """
+        if self._avatar_decoration is None:
+            return None
+        return Asset._from_avatar_decoration(self._state, self.id, self._avatar_decoration)
 
     @property
     def accent_colour(self) -> Optional[Colour]:
