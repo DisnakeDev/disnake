@@ -1398,6 +1398,9 @@ class Message(Hashable):
         if self.type is MessageType.auto_moderation_action:
             return self.content
 
+        # TODO: `MessageType.role_subscription_purchase` requires `Message.role_subscription_data`,
+        #       which is currently undocumented
+
         # in the event of an unknown or unsupported message type, we return nothing
         return None
 

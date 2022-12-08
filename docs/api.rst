@@ -1764,6 +1764,11 @@ of :class:`enum.Enum`.
         The system message denoting that an auto moderation action was executed.
 
         .. versionadded:: 2.5
+    .. attribute:: role_subscription_purchase
+
+        The system message denoting that an auto moderation action was executed.
+
+        .. versionadded:: 2.8
 
 .. class:: UserFlags
 
