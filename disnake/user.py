@@ -166,6 +166,7 @@ class BaseUser(_UserTag):
         .. versionadded:: 2.0
 
         .. note::
+
             This information is only available via :meth:`Client.fetch_user`.
         """
         if self._banner is None:
@@ -178,7 +179,7 @@ class BaseUser(_UserTag):
 
         .. versionadded:: 2.8
 
-        . note::
+        .. note::
 
             This information is only available via :meth:`Client.fetch_user`.
         """
