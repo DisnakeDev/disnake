@@ -309,12 +309,9 @@ class Asset(AssetMixin):
     @classmethod
     def _from_avatar_decoration(cls, state, user_id: int, avatar_decoration: str) -> Asset:
         animated = avatar_decoration.startswith("a_")
-        format = (
-            "png" if animated else "png"
-        )  # NOTE: gif/apng format is not supported, probably a bug?
         return cls(
             state,
-            url=f"{cls.BASE}/avatar-decorations/{user_id}/{avatar_decoration}.{format}?size=1024",
+            url=f"{cls.BASE}/avatar-decorations/{user_id}/{avatar_decoration}.png?size=1024",
             key=avatar_decoration,
             animated=animated,
         )
