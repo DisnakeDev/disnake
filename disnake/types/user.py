@@ -19,9 +19,12 @@ class User(PartialUser, total=False):
     bot: bool
     system: bool
     mfa_enabled: bool
-    local: str
+    banner: Optional[str]
+    accent_color: Optional[int]
+    locale: str
     verified: bool
     email: Optional[str]
     flags: int
     premium_type: PremiumType
     public_flags: int
+    avatar_decoration: Optional[str]
