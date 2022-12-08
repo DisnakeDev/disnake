@@ -62,7 +62,7 @@ class BaseUser(_UserTag):
         _avatar: Optional[str]
         _banner: Optional[str]
         _avatar_decoration: Optional[str]
-        _accent_colour: Optional[str]
+        _accent_colour: Optional[int]
         _public_flags: int
 
     def __init__(
