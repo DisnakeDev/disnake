@@ -288,6 +288,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         banner: Optional[Asset]
         accent_color: Optional[Colour]
         accent_colour: Optional[Colour]
+        avatar_decoration: Optional[Asset]
 
     @overload
     def __init__(
