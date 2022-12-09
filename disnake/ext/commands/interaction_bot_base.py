@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import re
 import sys
 import traceback
-import re
 import warnings
 from itertools import chain
 from typing import (
@@ -1377,14 +1377,14 @@ class InteractionBotBase(CommonBotBase):
         await self.process_app_command_autocompletion(interaction)
 
     def _update_sync_warning(self, sync_warning: str, commands: List[InvokableSlashCommand]) -> str:
-        command_number_match = re.search("In (\d+)", sync_warning)
+        command_number_match = re.search("In (\\d+)", sync_warning)
         if not command_number_match:
             return sync_warning
         command_number = command_number_match.group(1)
         command = commands[int(command_number)]
         sync_warning = sync_warning.replace(command_number, command.name, 1)
 
-        option_number_match = re.search("options.(\d+)", sync_warning)
+        option_number_match = re.search("options.(\\d+)", sync_warning)
         if not option_number_match:
             return sync_warning
         option_number = option_number_match.group(1)
@@ -1392,7 +1392,7 @@ class InteractionBotBase(CommonBotBase):
         sync_warning = sync_warning.replace(option_number, option.name, 1)
 
         option_choices_number_match = re.search(
-            f"options.{option.name}.choices.(\d+)", sync_warning
+            f"options.{option.name}.choices.(\\d+)", sync_warning
         )
         if not option_choices_number_match:
             return sync_warning
