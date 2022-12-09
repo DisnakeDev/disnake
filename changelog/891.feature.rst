@@ -1,1 +1,1 @@
-Add ``with_counts`` parameter to :meth:`Client.fetch_guilds`.
+Guilds fetched with :meth:`Client.fetch_guilds` now have ``approximate_member_count`` and ``approximate_presence_count`` fields filled.
