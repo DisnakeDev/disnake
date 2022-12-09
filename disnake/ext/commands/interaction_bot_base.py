@@ -1376,7 +1376,7 @@ class InteractionBotBase(CommonBotBase):
     ) -> None:
         await self.process_app_command_autocompletion(interaction)
 
-    def _update_sync_warning(self, sync_warning: str, commands: List[InvokableSlashCommand]) -> str:
+    def _update_sync_warning(self, sync_warning: str, commands: List[ApplicationCommand]) -> str:
         command_number_match = re.search("In (\\d+)", sync_warning)
         if not command_number_match:
             return sync_warning
@@ -1384,11 +1384,15 @@ class InteractionBotBase(CommonBotBase):
         command = commands[int(command_number)]
         sync_warning = sync_warning.replace(command_number, command.name, 1)
 
+        options = getattr(command, "options", None)
+        if not options:
+            return sync_warning
+
         option_number_match = re.search("options.(\\d+)", sync_warning)
         if not option_number_match:
             return sync_warning
         option_number = option_number_match.group(1)
-        option = command.options[int(option_number)]
+        option = options[int(option_number)]
         sync_warning = sync_warning.replace(option_number, option.name, 1)
 
         option_choices_number_match = re.search(
