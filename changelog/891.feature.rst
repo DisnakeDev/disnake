@@ -1,0 +1,1 @@
+Add ``with_counts`` parameter to :meth:`Client.fetch_guilds`.
