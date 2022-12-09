@@ -647,13 +647,9 @@ class GuildIterator(_AsyncIterator["Guild"]):
         Object before which all guilds must be.
     after: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
         Object after which all guilds must be.
-    with_counts: :class:`bool`
-        Whether to include count information. This fills the
-        :attr:`.Guild.approximate_member_count` and :attr:`.Guild.approximate_presence_count`
-        fields. Defaults to ``False``.
     """
 
-    def __init__(self, bot, limit, before=None, after=None, with_counts=False) -> None:
+    def __init__(self, bot, limit, before=None, after=None) -> None:
 
         if isinstance(before, datetime.datetime):
             before = Object(id=time_snowflake(before, high=False))
@@ -664,7 +660,6 @@ class GuildIterator(_AsyncIterator["Guild"]):
         self.limit = limit
         self.before = before
         self.after = after
-        self.with_counts = with_counts
 
         self._filter = None
 
@@ -725,9 +720,7 @@ class GuildIterator(_AsyncIterator["Guild"]):
     async def _retrieve_guilds_before_strategy(self, retrieve):
         """Retrieve guilds using before parameter."""
         before = self.before.id if self.before else None
-        data: List[GuildPayload] = await self.get_guilds(
-            retrieve, before=before, with_counts=self.with_counts
-        )
+        data: List[GuildPayload] = await self.get_guilds(retrieve, before=before)
         if len(data):
             if self.limit is not None:
                 self.limit -= retrieve
@@ -737,9 +730,7 @@ class GuildIterator(_AsyncIterator["Guild"]):
     async def _retrieve_guilds_after_strategy(self, retrieve):
         """Retrieve guilds using after parameter."""
         after = self.after.id if self.after else None
-        data: List[GuildPayload] = await self.get_guilds(
-            retrieve, after=after, with_counts=self.with_counts
-        )
+        data: List[GuildPayload] = await self.get_guilds(retrieve, after=after)
         if len(data):
             if self.limit is not None:
                 self.limit -= retrieve

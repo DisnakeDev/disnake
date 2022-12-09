@@ -1723,7 +1723,6 @@ class Client:
         limit: Optional[int] = 100,
         before: Optional[SnowflakeTime] = None,
         after: Optional[SnowflakeTime] = None,
-        with_counts: bool = False,
     ) -> GuildIterator:
         """Retrieves an :class:`.AsyncIterator` that enables receiving your guilds.
 
@@ -1766,10 +1765,6 @@ class Client:
             Retrieve guilds after this date or object.
             If a datetime is provided, it is recommended to use a UTC aware datetime.
             If the datetime is naive, it is assumed to be local time.
-        with_counts: :class:`bool`
-            Whether to include count information. This fills the
-            :attr:`.Guild.approximate_member_count` and :attr:`.Guild.approximate_presence_count`
-            fields. Defaults to ``False``.
 
         Raises
         ------
@@ -1781,7 +1776,7 @@ class Client:
         :class:`.Guild`
             The guild with the guild data parsed.
         """
-        return GuildIterator(self, limit=limit, before=before, after=after, with_counts=with_counts)
+        return GuildIterator(self, limit=limit, before=before, after=after)
 
     async def fetch_template(self, code: Union[Template, str]) -> Template:
         """|coro|
