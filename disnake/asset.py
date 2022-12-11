@@ -34,7 +34,7 @@ MISSING = utils.MISSING
 
 class AssetMixin:
     url: str
-    _state: Optional[ConnectionState]
+    _state: Optional[AnyState]
 
     __slots__: Tuple[str, ...] = ("_state",)
 
