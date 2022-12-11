@@ -20,9 +20,9 @@ if TYPE_CHECKING:
 
     ValidStaticFormatTypes = Literal["webp", "jpeg", "jpg", "png"]
     ValidAssetFormatTypes = Literal["webp", "jpeg", "jpg", "png", "gif"]
+    AnyState = Union[ConnectionState, _WebhookState]
 
 AssetBytes = Union[bytes, "AssetMixin"]
-AnyState = Union[ConnectionState, _WebhookState]
 
 VALID_STATIC_FORMATS = frozenset({"jpeg", "jpg", "webp", "png"})
 VALID_ASSET_FORMATS = VALID_STATIC_FORMATS | {"gif"}
