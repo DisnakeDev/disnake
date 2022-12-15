@@ -3805,13 +3805,13 @@ of :class:`enum.Enum`.
 
         No preferred layout has been set.
 
-    .. attribute:: list_view
+    .. attribute:: list
 
         Display forum threads in a text-focused list.
 
-    .. attribute:: gallery_view
+    .. attribute:: gallery
 
-        Display forum threads in a media-focused gallery.
+        Display forum threads in a media-focused collection of tiles.
 
 Async Iterator
 ----------------
