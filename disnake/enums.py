@@ -814,9 +814,9 @@ class ThreadSortOrder(Enum):
 
 
 class ThreadLayout(Enum):
-    default = 0
-    list = 1
-    grid = 2
+    not_set = 0
+    list_view = 1
+    gallery_view = 2
 
 
 T = TypeVar("T")

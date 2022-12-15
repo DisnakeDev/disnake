@@ -2617,7 +2617,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         self.default_layout: ThreadLayout = (
             try_enum(ThreadLayout, layout)
             if (layout := data.get("default_forum_layout")) is not None
-            else ThreadLayout.default
+            else ThreadLayout.not_set
         )
 
         self._fill_overwrites(data)

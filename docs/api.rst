@@ -3801,15 +3801,15 @@ of :class:`enum.Enum`.
 
     .. versionadded:: 2.8
 
-    .. attribute:: default
+    .. attribute:: not_set
 
         No preferred layout has been set.
 
-    .. attribute:: list
+    .. attribute:: list_view
 
         Display forum threads in a text-focused list.
 
-    .. attribute:: grid
+    .. attribute:: gallery_view
 
         Display forum threads in a media-focused gallery.
 
