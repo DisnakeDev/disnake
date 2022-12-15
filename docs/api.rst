@@ -3652,6 +3652,8 @@ of :class:`enum.Enum`.
 
         The ``id`` (Indonesian) locale.
 
+        .. versionadded:: 2.8
+
     .. attribute:: it
 
         The ``it`` (Italian) locale.
