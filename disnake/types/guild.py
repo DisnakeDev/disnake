@@ -127,6 +127,7 @@ class Guild(_BaseGuildPreview):
     nsfw_level: NSFWLevel
     stickers: NotRequired[List[GuildSticker]]
     premium_progress_bar_enabled: bool
+    safety_alerts_channel_id: Optional[Snowflake]
 
     # specific to GUILD_CREATE event
     joined_at: NotRequired[Optional[str]]
