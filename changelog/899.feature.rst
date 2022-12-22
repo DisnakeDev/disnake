@@ -1,0 +1,3 @@
+Add support for raid alerts.
+    - Add :attr:`Guild.safety_alerts_channel`.
+    - Add ``raid_alerts_enabled`` and ``safety_alerts_channel`` paremeters in :meth:`Guild.edit`.
