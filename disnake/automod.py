@@ -258,7 +258,7 @@ class AutoModTriggerMetadata:
         The maximum number of mentions (members + roles) allowed, between 1 and 50. Used with :attr:`AutoModTriggerType.mention_spam`.
 
     mention_raid_protection_enabled: Optional[:class:`bool`]
-        TBD. Used with :attr:`AutoModTriggerType.mention_spam`.
+        Whether to automatically detect mention raids. Used with :attr:`AutoModTriggerType.mention_spam`.
 
         .. versionadded:: 2.8
     """
