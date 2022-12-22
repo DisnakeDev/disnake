@@ -1,1 +1,2 @@
 Implement new :attr:`AutoModTriggerMetadata.mention_raid_protection_enabled` parameter.
+Implement ``raid_alerts_enabled`` and ``safety_alerts_channel`` parameters in :meth:`Guild.edit`.
