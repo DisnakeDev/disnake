@@ -62,6 +62,7 @@ GuildFeature = Literal[
     "PREVIEW_ENABLED",
     "PRIVATE_THREADS",  # deprecated
     "RELAY_ENABLED",
+    "RAID_ALERTS_ENABLED",
     "ROLE_ICONS",
     "ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE",  # not yet documented/finalised
     "ROLE_SUBSCRIPTIONS_ENABLED",  # not yet documented/finalised
