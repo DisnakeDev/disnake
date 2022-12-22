@@ -32,6 +32,7 @@ from .context_managers import Typing
 from .enums import (
     ChannelType,
     StagePrivacyLevel,
+    ThreadLayout,
     ThreadSortOrder,
     VideoQualityMode,
     try_enum,
@@ -2771,6 +2772,12 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         Members will still be able to change this locally.
 
         .. versionadded:: 2.6
+
+    default_layout: :class:`ThreadLayout`
+        The default layout of threads in this channel.
+        Members will still be able to change this locally.
+
+        .. versionadded:: 2.8
     """
 
     __slots__ = (
@@ -2787,6 +2794,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         "slowmode_delay",
         "default_thread_slowmode_delay",
         "default_sort_order",
+        "default_layout",
         "_available_tags",
         "_default_reaction_emoji_id",
         "_default_reaction_emoji_name",
@@ -2848,6 +2856,12 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             try_enum(ThreadSortOrder, order)
             if (order := data.get("default_sort_order")) is not None
             else None
+        )
+
+        self.default_layout: ThreadLayout = (
+            try_enum(ThreadLayout, layout)
+            if (layout := data.get("default_forum_layout")) is not None
+            else ThreadLayout.not_set
         )
 
         self._fill_overwrites(data)
@@ -3011,6 +3025,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         available_tags: Sequence[ForumTag] = ...,
         default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = ...,
         default_sort_order: Optional[ThreadSortOrder] = ...,
+        default_layout: ThreadLayout = ...,
         reason: Optional[str] = ...,
     ) -> ForumChannel:
         ...
@@ -3033,6 +3048,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         available_tags: Sequence[ForumTag] = MISSING,
         default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
         default_sort_order: Optional[ThreadSortOrder] = MISSING,
+        default_layout: ThreadLayout = ...,
         reason: Optional[str] = None,
         **kwargs: Never,
     ) -> Optional[ForumChannel]:
@@ -3112,6 +3128,11 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
             .. versionadded:: 2.6
 
+        default_layout: :class:`ThreadLayout`
+            The new default layout of threads in this channel.
+
+            .. versionadded:: 2.8
+
         reason: Optional[:class:`str`]
             The reason for editing this channel. Shows up on the audit log.
 
@@ -3152,6 +3173,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             available_tags=available_tags,
             default_reaction=default_reaction,
             default_sort_order=default_sort_order,
+            default_layout=default_layout,
             reason=reason,
             **kwargs,
         )
