@@ -149,14 +149,6 @@ class InvokableApplicationCommand(ABC):
                 "See `default_member_permissions` and `dm_permission` instead."
             )
 
-        # n.b. this was supported previously, but reverted due to
-        # uncertainty about upcoming upstream changes
-        if "nsfw" in kwargs:
-            raise TypeError(
-                "The `nsfw` parameter is not supported. "
-                "If you set it before, use an earlier version to reset it to `False`."
-            )
-
         try:
             checks = func.__commands_checks__
             checks.reverse()
