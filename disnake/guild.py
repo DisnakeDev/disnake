@@ -814,7 +814,7 @@ class Guild(Hashable):
 
     @property
     def rules_channel(self) -> Optional[TextChannel]:
-        """Optional[:class:`TextChannel`]: Return's the guild's channel used for the rules.
+        """Optional[:class:`TextChannel`]: Returns the guild's channel used for the rules.
         The guild must be a Community guild.
 
         If no channel is set, then this returns ``None``.
@@ -826,7 +826,7 @@ class Guild(Hashable):
 
     @property
     def public_updates_channel(self) -> Optional[TextChannel]:
-        """Optional[:class:`TextChannel`]: Return's the guild's channel where admins and
+        """Optional[:class:`TextChannel`]: Returns the guild's channel where admins and
         moderators of the guild receive notices from Discord. The guild must be a
         Community guild.
 
@@ -839,7 +839,7 @@ class Guild(Hashable):
 
     @property
     def safety_alerts_channel(self) -> Optional[TextChannel]:
-        """Optional[:class:`TextChannel`]: Return's the guild's channel where admins and
+        """Optional[:class:`TextChannel`]: Returns the guild's channel where admins and
         moderators of the guild receive safety alerts from Discord. The guild must be a
         Community guild.
 
@@ -1970,7 +1970,7 @@ class Guild(Hashable):
             ``community`` was set without setting both ``rules_channel`` and ``public_updates_channel`` parameters,
             or if you are not the owner of the guild and request an ownership transfer,
             or the image format passed in to ``icon`` is invalid,
-            or both ``community`` and ``invites_disabled`` were provided.
+            or both ``community`` and ``invites_disabled` or ``raid_alerts_enabled`` were provided.
 
         Returns
         -------
