@@ -1,1 +1,1 @@
-Adds :attr:`File.closed`, :attr:`File.bytes_length`, :attr:`File.size` to the :class:`disnake.File` class.
+Add :attr:`File.closed`, :attr:`File.bytes_length` and :attr:`File.size` properties.
