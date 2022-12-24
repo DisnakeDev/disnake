@@ -128,7 +128,7 @@ class File:
 
     @property
     def bytes_length(self) -> int:
-        """:class:`int`: The bytes length of the ``fp`` object.
+        """:class:`int`: The bytes length of the :attr:`~File.fp` object.
 
         .. versionadded:: 2.8
         """
