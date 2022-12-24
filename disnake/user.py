@@ -126,6 +126,7 @@ class BaseUser(_UserTag):
             "discriminator": self.discriminator,
             "bot": self.bot,
             "public_flags": self._public_flags,
+            "avatar_decoration": self._avatar_decoration,
         }
 
     @property
