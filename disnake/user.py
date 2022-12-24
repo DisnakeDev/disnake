@@ -178,6 +178,16 @@ class BaseUser(_UserTag):
         """Optional[:class:`Asset`]: Returns the user's avatar decoration asset, if available.
 
         .. versionadded:: 2.8
+
+        .. note::
+
+            Since Discord always sends an animated PNG for animated avatar decorations,
+            the following methods will not work as expected:
+
+            - :meth:`Asset.replace`
+            - :meth:`Asset.with_size`
+            - :meth:`Asset.with_format`
+            - :meth:`Asset.with_static_format`
         """
         if self._avatar_decoration is None:
             return None
