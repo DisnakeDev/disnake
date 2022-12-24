@@ -178,10 +178,6 @@ class BaseUser(_UserTag):
         """Optional[:class:`Asset`]: Returns the user's avatar decoration asset, if available.
 
         .. versionadded:: 2.8
-
-        .. note::
-
-            This information is only available via :meth:`Client.fetch_user`.
         """
         if self._avatar_decoration is None:
             return None
