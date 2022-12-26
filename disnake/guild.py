@@ -4592,7 +4592,7 @@ class GuildBuilder:
     This allows for easier configuration of more complex guild setups,
     abstracting away some of the quirks of the guild creation endpoint.
 
-    .. versionadded:: 2.7
+    .. versionadded:: 2.8
 
     .. note::
         Many methods of this class return unspecified placeholder IDs
