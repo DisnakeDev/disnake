@@ -168,8 +168,8 @@ class CreateGuildPlaceholderRole(CreateRole):
     id: Snowflake
 
 
-class CreateGuildPlaceholderChannel(CreateGuildChannel, total=False):
-    id: Snowflake
+class CreateGuildPlaceholderChannel(CreateGuildChannel):
+    id: NotRequired[Snowflake]
 
 
 class CreateGuild(TypedDict):
