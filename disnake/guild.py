@@ -1271,7 +1271,7 @@ class Guild(Hashable):
             .. versionadded:: 2.5
 
         nsfw: :class:`bool`
-            Whether to mark the channel as NSFW or not.
+            Whether to mark the channel as NSFW.
         news: :class:`bool`
             Whether to make a news channel. News channels are text channels that can be followed.
             This is only available to guilds that contain ``NEWS`` in :attr:`Guild.features`.
@@ -1388,7 +1388,7 @@ class Guild(Hashable):
             .. versionadded:: 2.0
 
         nsfw: :class:`bool`
-            Whether to mark the channel as NSFW or not.
+            Whether to mark the channel as NSFW.
 
             .. versionadded:: 2.5
 
@@ -1606,7 +1606,7 @@ class Guild(Hashable):
             The default auto archive duration in minutes for threads created in this channel.
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
         nsfw: :class:`bool`
-            Whether to mark the channel as NSFW or not.
+            Whether to mark the channel as NSFW.
         overwrites: Dict[Union[:class:`Role`, :class:`Member`], :class:`PermissionOverwrite`]
             A :class:`dict` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply upon creation of a channel.
@@ -4946,7 +4946,7 @@ class GuildBuilder:
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
             If not provided, slowmode is disabled.
         nsfw: :class:`bool`
-            Whether to mark the channel as NSFW or not.
+            Whether to mark the channel as NSFW.
         default_auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
             The default auto archive duration in minutes for threads created in this channel.
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
@@ -5007,7 +5007,7 @@ class GuildBuilder:
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
             If not provided, slowmode is disabled.
         nsfw: :class:`bool`
-            Whether to mark the channel as NSFW or not.
+            Whether to mark the channel as NSFW.
         bitrate: :class:`int`
             The channel's preferred audio bitrate in bits per second.
         user_limit: :class:`int`
