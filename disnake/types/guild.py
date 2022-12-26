@@ -41,6 +41,7 @@ GuildFeature = Literal[
     "BANNER",
     "COMMUNITY",
     "CREATOR_MONETIZABLE",  # not yet documented/finalised
+    "DEVELOPER_SUPPORT_SERVER",
     "DISCOVERABLE",
     "ENABLED_DISCOVERABLE_BEFORE",
     "FEATURABLE",
@@ -59,7 +60,7 @@ GuildFeature = Literal[
     "NEW_THREAD_PERMISSIONS",  # deprecated
     "PARTNERED",
     "PREVIEW_ENABLED",
-    "PRIVATE_THREADS",
+    "PRIVATE_THREADS",  # deprecated
     "RELAY_ENABLED",
     "ROLE_ICONS",
     "ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE",  # not yet documented/finalised

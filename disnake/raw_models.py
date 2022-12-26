@@ -126,7 +126,7 @@ class RawMessageUpdateEvent(_RawReprMixin):
         .. versionadded:: 1.7
 
     data: :class:`dict`
-        The raw data given by the `gateway <https://discord.com/developers/docs/topics/gateway#message-update>`_
+        The raw data given by the :ddocs:`gateway <topics/gateway-events#message-update>`.
     cached_message: Optional[:class:`Message`]
         The cached message, if found in the internal message cache. Represents the message before
         it is modified by the data in :attr:`RawMessageUpdateEvent.data`.
@@ -296,7 +296,7 @@ class RawGuildScheduledEventUserActionEvent(_RawReprMixin):
 
     def __init__(
         self, data: Union[GuildScheduledEventUserAddEvent, GuildScheduledEventUserRemoveEvent]
-    ):
+    ) -> None:
         self.event_id: int = int(data["guild_scheduled_event_id"])
         self.user_id: int = int(data["user_id"])
         self.guild_id: int = int(data["guild_id"])
@@ -329,7 +329,7 @@ class RawThreadDeleteEvent(_RawReprMixin):
         "thread",
     )
 
-    def __init__(self, data: ThreadDeleteEvent):
+    def __init__(self, data: ThreadDeleteEvent) -> None:
         self.thread_id: int = int(data["id"])
         self.thread_type: ThreadType = cast("ThreadType", try_enum(ChannelType, data["type"]))
         self.guild_id: int = int(data["guild_id"])
@@ -358,7 +358,7 @@ class RawThreadMemberRemoveEvent(_RawReprMixin):
         "cached_member",
     )
 
-    def __init__(self, thread: Thread, member_id: int):
+    def __init__(self, thread: Thread, member_id: int) -> None:
         self.thread: Thread = thread
         self.member_id: int = member_id
         self.cached_member: Optional[ThreadMember] = None
@@ -414,6 +414,6 @@ class RawGuildMemberRemoveEvent(_RawReprMixin):
         "user",
     )
 
-    def __init__(self, user: Union[User, Member], guild_id: int):
+    def __init__(self, user: Union[User, Member], guild_id: int) -> None:
         self.user: Union[User, Member] = user
         self.guild_id: int = guild_id

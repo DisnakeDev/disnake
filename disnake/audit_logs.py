@@ -365,7 +365,7 @@ class AuditLogChanges:
     }
     # fmt: on
 
-    def __init__(self, entry: AuditLogEntry, data: List[AuditLogChangePayload]):
+    def __init__(self, entry: AuditLogEntry, data: List[AuditLogChangePayload]) -> None:
         self.before = AuditLogDiff()
         self.after = AuditLogDiff()
 
@@ -561,7 +561,7 @@ class AuditLogEntry(Hashable):
         threads: Dict[int, Thread],
         users: Dict[int, User],
         webhooks: Dict[int, Webhook],
-    ):
+    ) -> None:
         self._state = guild._state
         self.guild = guild
 

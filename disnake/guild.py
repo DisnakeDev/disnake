@@ -207,6 +207,7 @@ class Guild(Hashable):
         - ``AUTO_MODERATION``: Guild has set up auto moderation rules.
         - ``BANNER``: Guild can upload and use a banner. (i.e. :attr:`.banner`)
         - ``COMMUNITY``: Guild is a community server.
+        - ``DEVELOPER_SUPPORT_SERVER``: Guild is set as a support server in the app directory.
         - ``DISCOVERABLE``: Guild shows up in Server Discovery.
         - ``ENABLED_DISCOVERABLE_BEFORE``: Guild had Server Discovery enabled at least once.
         - ``FEATURABLE``: Guild is able to be featured in Server Discovery.
@@ -223,7 +224,7 @@ class Guild(Hashable):
         - ``NEW_THREAD_PERMISSIONS``: Guild is using the new thread permission system.
         - ``PARTNERED``: Guild is a partnered server.
         - ``PREVIEW_ENABLED``: Guild can be viewed before being accepted via Membership Screening.
-        - ``PRIVATE_THREADS``: Guild has access to create private threads.
+        - ``PRIVATE_THREADS``: Guild has access to create private threads (no longer has any effect).
         - ``ROLE_ICONS``: Guild has access to role icons.
         - ``SEVEN_DAY_THREAD_ARCHIVE``: Guild has access to the seven day archive time for threads (no longer has any effect).
         - ``TEXT_IN_VOICE_ENABLED``: Guild has text in voice channels enabled (no longer has any effect).
@@ -351,7 +352,7 @@ class Guild(Hashable):
         3: _GuildLimit(emoji=250, stickers=60, bitrate=384e3, filesize=104857600),
     }
 
-    def __init__(self, *, data: GuildPayload, state: ConnectionState):
+    def __init__(self, *, data: GuildPayload, state: ConnectionState) -> None:
         self._channels: Dict[int, GuildChannel] = {}
         self._members: Dict[int, Member] = {}
         self._voice_states: Dict[int, VoiceState] = {}
@@ -1187,6 +1188,7 @@ class Guild(Hashable):
         position: int = MISSING,
         topic: Optional[str] = MISSING,
         slowmode_delay: int = MISSING,
+        default_thread_slowmode_delay: int = MISSING,
         default_auto_archive_duration: AnyThreadArchiveDuration = MISSING,
         nsfw: bool = MISSING,
         news: bool = MISSING,
@@ -1254,6 +1256,14 @@ class Guild(Hashable):
             Specifies the slowmode rate limit for users in this channel, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
             If not provided, slowmode is disabled.
+        default_thread_slowmode_delay: :class:`int`
+            Specifies the slowmode rate limit at which users can send messages
+            in newly created threads in this channel, in seconds.
+            A value of ``0`` disables slowmode by default. The maximum value possible is ``21600``.
+            If not provided, slowmode is disabled.
+
+            .. versionadded:: 2.8
+
         default_auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
             The default auto archive duration in minutes for threads created in this channel.
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
@@ -1294,6 +1304,9 @@ class Guild(Hashable):
 
         if slowmode_delay is not MISSING:
             options["rate_limit_per_user"] = slowmode_delay
+
+        if default_thread_slowmode_delay is not MISSING:
+            options["default_thread_rate_limit_per_user"] = default_thread_slowmode_delay
 
         if nsfw is not MISSING:
             options["nsfw"] = nsfw
@@ -2261,9 +2274,10 @@ class Guild(Hashable):
 
         Creates a :class:`GuildScheduledEvent`.
 
+        You must have :attr:`.Permissions.manage_events` permission to do this.
+
         Based on the channel/entity type, there are different restrictions regarding
         other parameter values, as shown in this table:
-
 
         .. csv-table::
             :widths: 30, 30, 20, 20
@@ -4277,7 +4291,7 @@ class Guild(Hashable):
 
     async def change_voice_state(
         self, *, channel: Optional[Snowflake], self_mute: bool = False, self_deaf: bool = False
-    ):
+    ) -> None:
         """|coro|
 
         Changes client's voice state in the guild.
@@ -4493,7 +4507,7 @@ class Guild(Hashable):
         You must have :attr:`.Permissions.manage_guild` permission to do this.
 
         The maximum number of rules for each trigger type is limited, see the
-        `api docs <https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-limits-per-trigger-type>`__
+        :ddocs:`api docs <resources/auto-moderation#auto-moderation-rule-object-trigger-types>`
         for more details.
 
         .. versionadded:: 2.6
@@ -4512,7 +4526,7 @@ class Guild(Hashable):
         actions: Sequence[Union[:class:`AutoModBlockMessageAction`, :class:`AutoModSendAlertAction`, :class:`AutoModTimeoutAction`, :class:`AutoModAction`]]
             The list of actions that will execute if a matching event triggered this rule.
             Must contain at least one action.
-        trigger_metadata: :class:`AutoModTriggerMetadata`
+        trigger_metadata: Optional[:class:`AutoModTriggerMetadata`]
             Additional metadata associated with the trigger type.
         enabled: :class:`bool`
             Whether to enable the rule. Defaults to ``False``.

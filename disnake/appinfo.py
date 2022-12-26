@@ -46,12 +46,12 @@ class InstallParams:
         "permissions",
     )
 
-    def __init__(self, data: InstallParamsPayload, parent: AppInfo):
+    def __init__(self, data: InstallParamsPayload, parent: AppInfo) -> None:
         self._app_id = parent.id
         self.scopes = data["scopes"]
         self.permissions = Permissions(int(data["permissions"]))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<InstallParams scopes={self.scopes!r} permissions={self.permissions!r}>"
 
     def to_url(self) -> str:
@@ -93,7 +93,7 @@ class AppInfo:
         A list of RPC origin URLs, if RPC is enabled.
     verify_key: :class:`str`
         The hex encoded key for verification in interactions and the
-        GameSDK's `GetTicket <https://discord.com/developers/docs/game-sdk/applications#getticket>`_.
+        GameSDK's :ddocs:`GetTicket <game-sdk/applications#getticket>`.
 
         .. versionadded:: 1.3
 
@@ -172,7 +172,7 @@ class AppInfo:
         "custom_install_url",
     )
 
-    def __init__(self, state: ConnectionState, data: AppInfoPayload):
+    def __init__(self, state: ConnectionState, data: AppInfoPayload) -> None:
         from .team import Team
 
         self._state: ConnectionState = state
@@ -277,7 +277,7 @@ class PartialAppInfo:
         A list of RPC origin URLs, if RPC is enabled.
     verify_key: :class:`str`
         The hex encoded key for verification in interactions and the
-        GameSDK's `GetTicket <https://discord.com/developers/docs/game-sdk/applications#getticket>`_.
+        GameSDK's :ddocs:`GetTicket <game-sdk/applications#getticket>`.
     terms_of_service_url: Optional[:class:`str`]
         The application's terms of service URL, if set.
     privacy_policy_url: Optional[:class:`str`]
@@ -297,7 +297,7 @@ class PartialAppInfo:
         "_icon",
     )
 
-    def __init__(self, *, state: ConnectionState, data: PartialAppInfoPayload):
+    def __init__(self, *, state: ConnectionState, data: PartialAppInfoPayload) -> None:
         self._state: ConnectionState = state
         self.id: int = int(data["id"])
         self.name: str = data["name"]

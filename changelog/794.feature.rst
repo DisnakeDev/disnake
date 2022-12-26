@@ -1,0 +1,1 @@
+Support regex within automod using :attr:`AutoModTriggerMetadata.regex_patterns`.

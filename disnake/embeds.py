@@ -41,7 +41,7 @@ if not TYPE_CHECKING:
 
 
 class EmbedProxy:
-    def __init__(self, layer: Optional[Mapping[str, Any]]):
+    def __init__(self, layer: Optional[Mapping[str, Any]]) -> None:
         if layer is not None:
             self.__dict__.update(layer)
 
@@ -152,7 +152,7 @@ class Embed:
     type: Optional[:class:`str`]
         The type of embed. Usually "rich".
         Possible strings for embed types can be found on Discord's
-        `api docs <https://discord.com/developers/docs/resources/channel#embed-object-embed-types>`__.
+        :ddocs:`api-docs <resources/channel#embed-object-embed-types>`.
     description: Optional[:class:`str`]
         The description of the embed.
     url: Optional[:class:`str`]
@@ -197,7 +197,7 @@ class Embed:
         timestamp: Optional[datetime.datetime] = None,
         colour: Optional[Union[int, Colour]] = MISSING,
         color: Optional[Union[int, Colour]] = MISSING,
-    ):
+    ) -> None:
         self.title: Optional[str] = str(title) if title is not None else None
         self.type: Optional[EmbedType] = type
         self.description: Optional[str] = str(description) if description is not None else None
@@ -240,7 +240,7 @@ class Embed:
         format that Discord expects it to be in.
 
         You can find out about this format in the
-        `official Discord documentation <https://discord.com/developers/docs/resources/channel#embed-object>`__.
+        :ddocs:`official Discord documentation <resources/channel#embed-object>`.
 
         Parameters
         ----------
@@ -279,10 +279,15 @@ class Embed:
     def copy(self) -> Self:
         """Returns a shallow copy of the embed."""
         embed = type(self).from_dict(self.to_dict())
+
         # assign manually to keep behavior of default colors
         embed._colour = self._colour
-        # shallow copy of files
+
+        # copy files and fields collections
         embed._files = self._files.copy()
+        if self._fields is not None:
+            embed._fields = self._fields.copy()
+
         return embed
 
     def __len__(self) -> int:
@@ -305,8 +310,7 @@ class Embed:
                 self.title,
                 self.url,
                 self.description,
-                # not checking for falsy value as `0` is a valid color
-                self._colour not in (MISSING, None),
+                self._colour,
                 self._fields,
                 self._timestamp,
                 self._author,
@@ -334,7 +338,7 @@ class Embed:
         return col if col is not MISSING else type(self)._default_colour
 
     @colour.setter
-    def colour(self, value: Optional[Union[int, Colour]]):
+    def colour(self, value: Optional[Union[int, Colour]]) -> None:
         if isinstance(value, int):
             self._colour = Colour(value=value)
         elif value is MISSING or value is None or isinstance(value, Colour):
@@ -345,7 +349,7 @@ class Embed:
             )
 
     @colour.deleter
-    def colour(self):
+    def colour(self) -> None:
         self._colour = MISSING
 
     color = colour
@@ -355,7 +359,7 @@ class Embed:
         return self._timestamp
 
     @timestamp.setter
-    def timestamp(self, value: Optional[datetime.datetime]):
+    def timestamp(self, value: Optional[datetime.datetime]) -> None:
         if isinstance(value, datetime.datetime):
             if value.tzinfo is None:
                 value = value.astimezone()
@@ -449,6 +453,10 @@ class Embed:
 
         Exactly one of ``url`` or ``file`` must be passed.
 
+        .. warning::
+            Passing a :class:`disnake.File` object will make the embed not
+            reusable.
+
         .. versionchanged:: 1.4
             Passing ``None`` removes the image.
 
@@ -495,6 +503,10 @@ class Embed:
         chaining.
 
         Exactly one of ``url`` or ``file`` must be passed.
+
+        .. warning::
+            Passing a :class:`disnake.File` object will make the embed not
+            reusable.
 
         .. versionchanged:: 1.4
             Passing ``None`` removes the thumbnail.
@@ -717,13 +729,16 @@ class Embed:
         if not self._fields:
             raise IndexError("field index out of range")
         try:
-            field = self._fields[index]
+            self._fields[index]
         except IndexError:
             raise IndexError("field index out of range")
 
-        field["name"] = str(name)
-        field["value"] = str(value)
-        field["inline"] = inline
+        field: EmbedFieldPayload = {
+            "inline": inline,
+            "name": str(name),
+            "value": str(value),
+        }
+        self._fields[index] = field
         return self
 
     def to_dict(self) -> EmbedData:

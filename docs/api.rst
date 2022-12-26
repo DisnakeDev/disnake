@@ -1345,7 +1345,7 @@ This section documents events related to Discord chat messages.
     will return a :class:`Message` object that represents the message before the content was modified.
 
     Due to the inherently raw nature of this event, the data parameter coincides with
-    the raw data given by the `gateway <https://discord.com/developers/docs/topics/gateway#message-update>`_.
+    the raw data given by the :ddocs:`gateway <topics/gateway-events#message-update>`.
 
     Since the data payload can be partial, care must be taken when accessing stuff in the dictionary.
     One example of a common case of partial data is when the ``'content'`` key is inaccessible. This
@@ -1830,6 +1830,11 @@ of :class:`enum.Enum`.
         The user is marked as a spammer.
 
         .. versionadded:: 2.3
+    .. attribute:: active_developer
+
+        The user is an Active Developer.
+
+        .. versionadded:: 2.8
 
 .. class:: ActivityType
 
@@ -2020,12 +2025,37 @@ of :class:`enum.Enum`.
     .. attribute:: button
 
         Represents a button component.
+    .. attribute:: string_select
+
+        Represents a string select component.
+
+        .. versionadded:: 2.7
     .. attribute:: select
 
-        Represents a select component.
+        An alias of :attr:`string_select`.
     .. attribute:: text_input
 
         Represents a text input component.
+    .. attribute:: user_select
+
+        Represents a user select component.
+
+        .. versionadded:: 2.7
+    .. attribute:: role_select
+
+        Represents a role select component.
+
+        .. versionadded:: 2.7
+    .. attribute:: mentionable_select
+
+        Represents a mentionable (user/member/role) select component.
+
+        .. versionadded:: 2.7
+    .. attribute:: channel_select
+
+        Represents a channel select component.
+
+        .. versionadded:: 2.7
 
 .. class:: OptionType
 
@@ -3614,6 +3644,16 @@ of :class:`enum.Enum`.
 
         The ``hr`` (Croatian) locale.
 
+    .. attribute:: hu
+
+        The ``hu`` (Hungarian) locale.
+
+    .. attribute:: id
+
+        The ``id`` (Indonesian) locale.
+
+        .. versionadded:: 2.8
+
     .. attribute:: it
 
         The ``it`` (Italian) locale.
@@ -3629,10 +3669,6 @@ of :class:`enum.Enum`.
     .. attribute:: lt
 
         The ``lt`` (Lithuanian) locale.
-
-    .. attribute:: hu
-
-        The ``hu`` (Hungarian) locale.
 
     .. attribute:: nl
 
@@ -3764,6 +3800,24 @@ of :class:`enum.Enum`.
     .. attribute:: creation_date
 
         Sort forum threads by creation date/time (from newest to oldest).
+
+.. class:: ThreadLayout
+
+    Represents the layout of threads in :class:`ForumChannel`\s.
+
+    .. versionadded:: 2.8
+
+    .. attribute:: not_set
+
+        No preferred layout has been set.
+
+    .. attribute:: list_view
+
+        Display forum threads in a text-focused list.
+
+    .. attribute:: gallery_view
+
+        Display forum threads in a media-focused collection of tiles.
 
 Async Iterator
 ----------------
@@ -4361,7 +4415,8 @@ AuditLogDiff
         The default number of seconds members have to wait before
         sending another message in new threads created in the channel.
 
-        See also :attr:`ForumChannel.default_thread_slowmode_delay`.
+        See also :attr:`TextChannel.default_thread_slowmode_delay` or
+        :attr:`ForumChannel.default_thread_slowmode_delay`.
 
         :type: :class:`int`
 
@@ -4849,12 +4904,57 @@ Button
     :members:
     :inherited-members:
 
-SelectMenu
-~~~~~~~~~~~
+BaseSelectMenu
+~~~~~~~~~~~~~~~
 
-.. attributetable:: SelectMenu
+.. attributetable:: BaseSelectMenu
 
-.. autoclass:: SelectMenu()
+.. autoclass:: BaseSelectMenu()
+    :members:
+    :inherited-members:
+
+ChannelSelectMenu
+~~~~~~~~~~~~~~~~~
+
+.. attributetable:: ChannelSelectMenu
+
+.. autoclass:: ChannelSelectMenu()
+    :members:
+    :inherited-members:
+
+MentionableSelectMenu
+~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: MentionableSelectMenu
+
+.. autoclass:: MentionableSelectMenu()
+    :members:
+    :inherited-members:
+
+RoleSelectMenu
+~~~~~~~~~~~~~~
+
+.. attributetable:: RoleSelectMenu
+
+.. autoclass:: RoleSelectMenu()
+    :members:
+    :inherited-members:
+
+StringSelectMenu
+~~~~~~~~~~~~~~~~~
+
+.. attributetable:: StringSelectMenu
+
+.. autoclass:: StringSelectMenu()
+    :members:
+    :inherited-members:
+
+UserSelectMenu
+~~~~~~~~~~~~~~
+
+.. attributetable:: UserSelectMenu
+
+.. autoclass:: UserSelectMenu()
     :members:
     :inherited-members:
 
@@ -5098,6 +5198,14 @@ InteractionMessage
     :members:
     :inherited-members:
 
+InteractionDataResolved
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: InteractionDataResolved
+
+.. autoclass:: InteractionDataResolved()
+    :members:
+
 ApplicationCommandInteractionData
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -5112,14 +5220,6 @@ ApplicationCommandInteractionDataOption
 .. attributetable:: ApplicationCommandInteractionDataOption
 
 .. autoclass:: ApplicationCommandInteractionDataOption()
-    :members:
-
-ApplicationCommandInteractionDataResolved
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. attributetable:: ApplicationCommandInteractionDataResolved
-
-.. autoclass:: ApplicationCommandInteractionDataResolved()
     :members:
 
 MessageInteractionData
@@ -5956,6 +6056,7 @@ ActionRow
 
 .. autoclass:: disnake.ui.ActionRow
     :members:
+    :exclude-members: add_select
 
 Item
 ~~~~~~~
@@ -5984,16 +6085,69 @@ Button
 
 .. autofunction:: disnake.ui.button(cls=disnake.ui.Button, *, style=ButtonStyle.secondary, label=None, disabled=False, custom_id=..., url=None, emoji=None, row=None)
 
-Select
-~~~~~~~
+BaseSelect
+~~~~~~~~~~~
 
-.. attributetable:: disnake.ui.Select
+.. attributetable:: disnake.ui.BaseSelect
 
-.. autoclass:: disnake.ui.Select
+.. autoclass:: disnake.ui.BaseSelect
     :members:
     :inherited-members:
 
-.. autofunction:: disnake.ui.select(cls=disnake.ui.Select, *, custom_id=..., placeholder=None, min_values=1, max_values=1, options=..., disabled=False, row=None)
+ChannelSelect
+~~~~~~~~~~~~~~
+
+.. attributetable:: disnake.ui.ChannelSelect
+
+.. autoclass:: disnake.ui.ChannelSelect
+    :members:
+    :inherited-members:
+
+.. autofunction:: disnake.ui.channel_select(cls=disnake.ui.ChannelSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, disabled=False, channel_types=None, row=None)
+
+MentionableSelect
+~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: disnake.ui.MentionableSelect
+
+.. autoclass:: disnake.ui.MentionableSelect
+    :members:
+    :inherited-members:
+
+.. autofunction:: disnake.ui.mentionable_select(cls=disnake.ui.MentionableSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, disabled=False, row=None)
+
+RoleSelect
+~~~~~~~~~~~
+
+.. attributetable:: disnake.ui.RoleSelect
+
+.. autoclass:: disnake.ui.RoleSelect
+    :members:
+    :inherited-members:
+
+.. autofunction:: disnake.ui.role_select(cls=disnake.ui.RoleSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, disabled=False, row=None)
+
+StringSelect
+~~~~~~~~~~~~~
+
+.. attributetable:: disnake.ui.StringSelect
+
+.. autoclass:: disnake.ui.StringSelect
+    :members:
+    :inherited-members:
+
+.. autofunction:: disnake.ui.string_select(cls=disnake.ui.StringSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, options=..., disabled=False, row=None)
+
+UserSelect
+~~~~~~~~~~~
+
+.. attributetable:: disnake.ui.UserSelect
+
+.. autoclass:: disnake.ui.UserSelect
+    :members:
+    :inherited-members:
+
+.. autofunction:: disnake.ui.user_select(cls=disnake.ui.UserSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, disabled=False, row=None)
 
 Modal
 ~~~~~

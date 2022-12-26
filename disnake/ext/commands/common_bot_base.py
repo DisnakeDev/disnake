@@ -35,6 +35,7 @@ if TYPE_CHECKING:
 
     from ._types import CoroFunc
     from .bot import AutoShardedBot, AutoShardedInteractionBot, Bot, InteractionBot
+    from .help import HelpCommand
 
     AnyBot = Union[Bot, AutoShardedBot, InteractionBot, AutoShardedInteractionBot]
 
@@ -58,7 +59,7 @@ class CommonBotBase(Generic[CogT]):
         owner_ids: Optional[Set[int]] = None,
         reload: bool = False,
         **kwargs: Any,
-    ):
+    ) -> None:
         self.__cogs: Dict[str, Cog] = {}
         self.__extensions: Dict[str, types.ModuleType] = {}
         self.extra_events: Dict[str, List[CoroFunc]] = {}
@@ -76,12 +77,6 @@ class CommonBotBase(Generic[CogT]):
             raise TypeError(f"owner_ids must be a collection not {self.owner_ids.__class__!r}")
 
         self.reload: bool = reload
-
-        loop = asyncio.get_event_loop()
-        loop.create_task(self._fill_owners())
-
-        if self.reload:
-            loop.create_task(self._watchdog())
 
         super().__init__(*args, **kwargs)
 
@@ -124,6 +119,14 @@ class CommonBotBase(Generic[CogT]):
                 pass
 
         await super().close()  # type: ignore
+
+    @disnake.utils.copy_doc(disnake.Client.login)
+    async def login(self, token: str) -> None:
+        self.loop.create_task(self._fill_owners())  # type: ignore
+
+        if self.reload:
+            self.loop.create_task(self._watchdog())  # type: ignore
+        await super().login(token=token)  # type: ignore
 
     async def is_owner(self, user: Union[disnake.User, disnake.Member]) -> bool:
         """|coro|
@@ -343,7 +346,7 @@ class CommonBotBase(Generic[CogT]):
         if cog is None:
             return
 
-        help_command = getattr(self, "_help_command", None)
+        help_command: Optional[HelpCommand] = getattr(self, "_help_command", None)
         if help_command and help_command.cog is cog:
             help_command.cog = None
         # NOTE: Should be covariant
@@ -592,7 +595,7 @@ class CommonBotBase(Generic[CogT]):
         """Mapping[:class:`str`, :class:`py:types.ModuleType`]: A read-only mapping of extension name to extension."""
         return types.MappingProxyType(self.__extensions)
 
-    async def _watchdog(self):
+    async def _watchdog(self) -> None:
         """|coro|
 
         Starts the bot watchdog which will watch currently loaded extensions

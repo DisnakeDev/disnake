@@ -13,6 +13,7 @@ from typing import (
     Generic,
     Iterator,
     List,
+    NoReturn,
     Optional,
     Sequence,
     Tuple,
@@ -23,7 +24,7 @@ from typing import (
 )
 
 from .enums import UserFlags
-from .utils import MISSING
+from .utils import MISSING, _generated
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -45,7 +46,7 @@ T = TypeVar("T", bound="BaseFlags")
 
 
 class flag_value(Generic[T]):
-    def __init__(self, func: Callable[[Any], int]):
+    def __init__(self, func: Callable[[Any], int]) -> None:
         self.flag = func(None)
         self.__doc__ = func.__doc__
         self._parent: Type[T] = MISSING
@@ -86,7 +87,7 @@ class flag_value(Generic[T]):
     def __set__(self, instance: BaseFlags, value: bool) -> None:
         instance._set_flag(self.flag, value)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<flag_value flag={self.flag!r}>"
 
 
@@ -106,7 +107,7 @@ class BaseFlags:
 
     __slots__ = ("value",)
 
-    def __init__(self, **kwargs: bool):
+    def __init__(self, **kwargs: bool) -> None:
         self.value = self.DEFAULT_VALUE
         for key, value in kwargs.items():
             if key not in self.VALID_FLAGS:
@@ -407,6 +408,19 @@ class SystemChannelFlags(BaseFlags, inverted=True):
 
     __slots__ = ()
 
+    if TYPE_CHECKING:
+
+        @_generated
+        def __init__(
+            self,
+            *,
+            guild_reminder_notifications: bool = ...,
+            join_notification_replies: bool = ...,
+            join_notifications: bool = ...,
+            premium_subscriptions: bool = ...,
+        ) -> None:
+            ...
+
     # For some reason the flags for system channels are "inverted"
     # ergo, if they're set then it means "suppress" (off in the GUI toggle)
     # Since this is counter-intuitive from an API perspective and annoying
@@ -541,6 +555,24 @@ class MessageFlags(BaseFlags):
     """
 
     __slots__ = ()
+
+    if TYPE_CHECKING:
+
+        @_generated
+        def __init__(
+            self,
+            *,
+            crossposted: bool = ...,
+            ephemeral: bool = ...,
+            failed_to_mention_roles_in_thread: bool = ...,
+            has_thread: bool = ...,
+            is_crossposted: bool = ...,
+            loading: bool = ...,
+            source_message_deleted: bool = ...,
+            suppress_embeds: bool = ...,
+            urgent: bool = ...,
+        ) -> None:
+            ...
 
     @flag_value
     def crossposted(self):
@@ -695,6 +727,33 @@ class PublicUserFlags(BaseFlags):
 
     __slots__ = ()
 
+    if TYPE_CHECKING:
+
+        @_generated
+        def __init__(
+            self,
+            *,
+            active_developer: bool = ...,
+            bug_hunter: bool = ...,
+            bug_hunter_level_2: bool = ...,
+            discord_certified_moderator: bool = ...,
+            early_supporter: bool = ...,
+            early_verified_bot_developer: bool = ...,
+            http_interactions_bot: bool = ...,
+            hypesquad: bool = ...,
+            hypesquad_balance: bool = ...,
+            hypesquad_bravery: bool = ...,
+            hypesquad_brilliance: bool = ...,
+            partner: bool = ...,
+            spammer: bool = ...,
+            staff: bool = ...,
+            system: bool = ...,
+            team_user: bool = ...,
+            verified_bot: bool = ...,
+            verified_bot_developer: bool = ...,
+        ) -> None:
+            ...
+
     @flag_value
     def staff(self):
         """:class:`bool`: Returns ``True`` if the user is a Discord Employee."""
@@ -791,6 +850,14 @@ class PublicUserFlags(BaseFlags):
         .. versionadded:: 2.3
         """
         return UserFlags.spammer.value
+
+    @flag_value
+    def active_developer(self):
+        """:class:`bool`: Returns ``True`` if the user is an Active Developer.
+
+        .. versionadded:: 2.8
+        """
+        return UserFlags.active_developer.value
 
     def all(self) -> List[UserFlags]:
         """List[:class:`UserFlags`]: Returns all public flags the user has."""
@@ -901,7 +968,45 @@ class Intents(BaseFlags):
 
     __slots__ = ()
 
-    def __init__(self, value: Optional[int] = None, **kwargs: bool):
+    @overload
+    @_generated
+    def __init__(
+        self,
+        value: Optional[int] = None,
+        *,
+        automod: bool = ...,
+        automod_configuration: bool = ...,
+        automod_execution: bool = ...,
+        bans: bool = ...,
+        dm_messages: bool = ...,
+        dm_reactions: bool = ...,
+        dm_typing: bool = ...,
+        emojis: bool = ...,
+        emojis_and_stickers: bool = ...,
+        guild_messages: bool = ...,
+        guild_reactions: bool = ...,
+        guild_scheduled_events: bool = ...,
+        guild_typing: bool = ...,
+        guilds: bool = ...,
+        integrations: bool = ...,
+        invites: bool = ...,
+        members: bool = ...,
+        message_content: bool = ...,
+        messages: bool = ...,
+        presences: bool = ...,
+        reactions: bool = ...,
+        typing: bool = ...,
+        voice_states: bool = ...,
+        webhooks: bool = ...,
+    ) -> None:
+        ...
+
+    @overload
+    @_generated
+    def __init__(self: NoReturn) -> None:
+        ...
+
+    def __init__(self, value: Optional[int] = None, **kwargs: bool) -> None:
         if value is not None:
             if not isinstance(value, int):
                 raise TypeError(
@@ -1534,7 +1639,17 @@ class MemberCacheFlags(BaseFlags):
 
     __slots__ = ()
 
-    def __init__(self, **kwargs: bool):
+    @overload
+    @_generated
+    def __init__(self, *, joined: bool = ..., voice: bool = ...) -> None:
+        ...
+
+    @overload
+    @_generated
+    def __init__(self: NoReturn) -> None:
+        ...
+
+    def __init__(self, **kwargs: bool) -> None:
         self.value = all_flags_value(self.VALID_FLAGS)
         for key, value in kwargs.items():
             if key not in self.VALID_FLAGS:
@@ -1603,7 +1718,7 @@ class MemberCacheFlags(BaseFlags):
 
         return self
 
-    def _verify_intents(self, intents: Intents):
+    def _verify_intents(self, intents: Intents) -> None:
         if self.voice and not intents.voice_states:
             raise ValueError("MemberCacheFlags.voice requires Intents.voice_states")
 
@@ -1703,6 +1818,24 @@ class ApplicationFlags(BaseFlags):
     """
 
     __slots__ = ()
+
+    if TYPE_CHECKING:
+
+        @_generated
+        def __init__(
+            self,
+            *,
+            application_command_badge: bool = ...,
+            embedded: bool = ...,
+            gateway_guild_members: bool = ...,
+            gateway_guild_members_limited: bool = ...,
+            gateway_message_content: bool = ...,
+            gateway_message_content_limited: bool = ...,
+            gateway_presence: bool = ...,
+            gateway_presence_limited: bool = ...,
+            verification_pending_guild_limit: bool = ...,
+        ) -> None:
+            ...
 
     @flag_value
     def gateway_presence(self):
@@ -1855,6 +1988,12 @@ class ChannelFlags(BaseFlags):
 
     __slots__ = ()
 
+    if TYPE_CHECKING:
+
+        @_generated
+        def __init__(self, *, pinned: bool = ..., require_tag: bool = ...) -> None:
+            ...
+
     @flag_value
     def pinned(self):
         """:class:`bool`: Returns ``True`` if the thread is pinned.
@@ -1944,6 +2083,14 @@ class AutoModKeywordPresets(ListBaseFlags):
 
     __slots__ = ()
 
+    if TYPE_CHECKING:
+
+        @_generated
+        def __init__(
+            self, *, profanity: bool = ..., sexual_content: bool = ..., slurs: bool = ...
+        ) -> None:
+            ...
+
     @classmethod
     def all(cls: Type[AutoModKeywordPresets]) -> AutoModKeywordPresets:
         """A factory method that creates a :class:`AutoModKeywordPresets` with everything enabled."""
@@ -1963,18 +2110,18 @@ class AutoModKeywordPresets(ListBaseFlags):
         """:class:`bool`: Returns ``True`` if the profanity preset is enabled
         (contains words that may be considered swearing or cursing).
         """
-        return 1 << 0
+        return 1 << 1
 
     @flag_value
     def sexual_content(self):
         """:class:`bool`: Returns ``True`` if the sexual content preset is enabled
         (contains sexually explicit words).
         """
-        return 1 << 1
+        return 1 << 2
 
     @flag_value
     def slurs(self):
         """:class:`bool`: Returns ``True`` if the slurs preset is enabled
         (contains insults or words that may be considered hate speech).
         """
-        return 1 << 2
+        return 1 << 3

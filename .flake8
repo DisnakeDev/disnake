@@ -36,6 +36,8 @@ ignore =
     S110,
     # ignore multiple `##` starting a comment
     E266,
+    # ignore "unused import" errors, already handled by pyright
+    F401
 
 per-file-ignores =
     # unused imports, star imports

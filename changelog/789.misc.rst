@@ -1,1 +1,0 @@
-Increase the upper bound for the ``aiohttp`` dependency from ``<3.9`` to ``<4``.

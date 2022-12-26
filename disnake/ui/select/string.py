@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
-import os
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -15,37 +13,29 @@ from typing import (
     Type,
     TypeVar,
     Union,
-    get_origin,
     overload,
 )
 
-from ..components import SelectMenu, SelectOption
-from ..enums import ComponentType
-from ..partial_emoji import PartialEmoji
-from ..utils import MISSING
-from .item import DecoratedItem, Item, Object
+from ...components import SelectOption, StringSelectMenu
+from ...enums import ComponentType
+from ...utils import MISSING
+from .base import BaseSelect, P, V_co, _create_decorator
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
+
+    from ...emoji import Emoji
+    from ...partial_emoji import PartialEmoji
+    from ..item import DecoratedItem, ItemCallbackType, Object
+
 
 __all__ = (
+    "StringSelect",
     "Select",
+    "string_select",
     "select",
 )
 
-if TYPE_CHECKING:
-    from typing_extensions import ParamSpec, Self
-
-    from ..emoji import Emoji
-    from ..interactions import MessageInteraction
-    from .item import ItemCallbackType
-    from .view import View
-
-else:
-    ParamSpec = TypeVar
-
-
-S = TypeVar("S", bound="Select")
-S_co = TypeVar("S_co", bound="Select", covariant=True)
-V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
-P = ParamSpec("P")
 
 SelectOptionInput = Union[List[SelectOption], List[str], Dict[str, str]]
 
@@ -57,14 +47,17 @@ def _parse_select_options(options: SelectOptionInput) -> List[SelectOption]:
     return [opt if isinstance(opt, SelectOption) else SelectOption(label=opt) for opt in options]
 
 
-class Select(Item[V_co]):
-    """Represents a UI select menu.
+class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
+    """Represents a UI string select menu.
 
     This is usually represented as a drop down menu.
 
-    In order to get the selected items that the user has chosen, use :attr:`Select.values`.
+    In order to get the selected items that the user has chosen, use :attr:`.values`.
 
     .. versionadded:: 2.0
+
+    .. versionchanged:: 2.7
+        Renamed from ``Select`` to ``StringSelect``.
 
     Parameters
     ----------
@@ -96,21 +89,18 @@ class Select(Item[V_co]):
         like to control the relative positioning of the row then passing an index is advised.
         For example, row=1 will show up before row=2. Defaults to ``None``, which is automatic
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
+
+    Attributes
+    ----------
+    values: List[:class:`str`]
+        A list of values that have been selected by the user.
     """
 
-    __repr_attributes__: Tuple[str, ...] = (
-        "placeholder",
-        "min_values",
-        "max_values",
-        "options",
-        "disabled",
-    )
-    # We have to set this to MISSING in order to overwrite the abstract property from WrappedComponent
-    _underlying: SelectMenu = MISSING
+    __repr_attributes__: Tuple[str, ...] = BaseSelect.__repr_attributes__ + ("options",)
 
     @overload
     def __init__(
-        self: Select[None],
+        self: StringSelect[None],
         *,
         custom_id: str = ...,
         placeholder: Optional[str] = None,
@@ -119,12 +109,12 @@ class Select(Item[V_co]):
         options: SelectOptionInput = ...,
         disabled: bool = False,
         row: Optional[int] = None,
-    ):
+    ) -> None:
         ...
 
     @overload
     def __init__(
-        self: Select[V_co],
+        self: StringSelect[V_co],
         *,
         custom_id: str = ...,
         placeholder: Optional[str] = None,
@@ -133,7 +123,7 @@ class Select(Item[V_co]):
         options: SelectOptionInput = ...,
         disabled: bool = False,
         row: Optional[int] = None,
-    ):
+    ) -> None:
         ...
 
     def __init__(
@@ -147,63 +137,29 @@ class Select(Item[V_co]):
         disabled: bool = False,
         row: Optional[int] = None,
     ) -> None:
-        super().__init__()
-        self._selected_values: List[str] = []
-        self._provided_custom_id = custom_id is not MISSING
-        custom_id = os.urandom(16).hex() if custom_id is MISSING else custom_id
-        options = [] if options is MISSING else _parse_select_options(options)
-        self._underlying = SelectMenu._raw_construct(
+        super().__init__(
+            StringSelectMenu,
+            ComponentType.string_select,
             custom_id=custom_id,
-            type=ComponentType.select,
             placeholder=placeholder,
             min_values=min_values,
             max_values=max_values,
-            options=options,
             disabled=disabled,
+            row=row,
         )
-        self.row = row
+        self._underlying.options = [] if options is MISSING else _parse_select_options(options)
 
-    @property
-    def custom_id(self) -> str:
-        """:class:`str`: The ID of the select menu that gets received during an interaction."""
-        return self._underlying.custom_id
-
-    @custom_id.setter
-    def custom_id(self, value: str):
-        if not isinstance(value, str):
-            raise TypeError("custom_id must be None or str")
-
-        self._underlying.custom_id = value
-
-    @property
-    def placeholder(self) -> Optional[str]:
-        """Optional[:class:`str`]: The placeholder text that is shown if nothing is selected, if any."""
-        return self._underlying.placeholder
-
-    @placeholder.setter
-    def placeholder(self, value: Optional[str]):
-        if value is not None and not isinstance(value, str):
-            raise TypeError("placeholder must be None or str")
-
-        self._underlying.placeholder = value
-
-    @property
-    def min_values(self) -> int:
-        """:class:`int`: The minimum number of items that must be chosen for this select menu."""
-        return self._underlying.min_values
-
-    @min_values.setter
-    def min_values(self, value: int):
-        self._underlying.min_values = int(value)
-
-    @property
-    def max_values(self) -> int:
-        """:class:`int`: The maximum number of items that must be chosen for this select menu."""
-        return self._underlying.max_values
-
-    @max_values.setter
-    def max_values(self, value: int):
-        self._underlying.max_values = int(value)
+    @classmethod
+    def from_component(cls, component: StringSelectMenu) -> Self:
+        return cls(
+            custom_id=component.custom_id,
+            placeholder=component.placeholder,
+            min_values=component.min_values,
+            max_values=component.max_values,
+            options=component.options,
+            disabled=component.disabled,
+            row=None,
+        )
 
     @property
     def options(self) -> List[SelectOption]:
@@ -211,7 +167,7 @@ class Select(Item[V_co]):
         return self._underlying.options
 
     @options.setter
-    def options(self, value: List[SelectOption]):
+    def options(self, value: List[SelectOption]) -> None:
         if not isinstance(value, list):
             raise TypeError("options must be a list of SelectOption")
         if not all(isinstance(obj, SelectOption) for obj in value):
@@ -227,7 +183,7 @@ class Select(Item[V_co]):
         description: Optional[str] = None,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
         default: bool = False,
-    ):
+    ) -> None:
         """Adds an option to the select menu.
 
         To append a pre-existing :class:`.SelectOption` use the
@@ -265,7 +221,7 @@ class Select(Item[V_co]):
 
         self.append_option(option)
 
-    def append_option(self, option: SelectOption):
+    def append_option(self, option: SelectOption) -> None:
         """Appends an option to the select menu.
 
         Parameters
@@ -283,52 +239,15 @@ class Select(Item[V_co]):
 
         self._underlying.options.append(option)
 
-    @property
-    def disabled(self) -> bool:
-        """:class:`bool`: Whether the select menu is disabled."""
-        return self._underlying.disabled
 
-    @disabled.setter
-    def disabled(self, value: bool):
-        self._underlying.disabled = bool(value)
+Select = StringSelect  # backwards compatibility
 
-    @property
-    def values(self) -> List[str]:
-        """List[:class:`str`]: A list of values that have been selected by the user."""
-        return self._selected_values
 
-    @property
-    def width(self) -> int:
-        return 5
-
-    def refresh_component(self, component: SelectMenu) -> None:
-        self._underlying = component
-
-    def refresh_state(self, interaction: MessageInteraction) -> None:
-        self._selected_values = interaction.values  # type: ignore
-
-    @classmethod
-    def from_component(cls, component: SelectMenu) -> Self:
-        return cls(
-            custom_id=component.custom_id,
-            placeholder=component.placeholder,
-            min_values=component.min_values,
-            max_values=component.max_values,
-            options=component.options,
-            disabled=component.disabled,
-            row=None,
-        )
-
-    def is_dispatchable(self) -> bool:
-        """Whether the select menu is dispatchable. This will always return ``True``.
-
-        :return type: :class:`bool`
-        """
-        return True
+S_co = TypeVar("S_co", bound="StringSelect", covariant=True)
 
 
 @overload
-def select(
+def string_select(
     *,
     placeholder: Optional[str] = None,
     custom_id: str = ...,
@@ -337,33 +256,37 @@ def select(
     options: SelectOptionInput = ...,
     disabled: bool = False,
     row: Optional[int] = None,
-) -> Callable[[ItemCallbackType[Select[V_co]]], DecoratedItem[Select[V_co]]]:
+) -> Callable[[ItemCallbackType[StringSelect[V_co]]], DecoratedItem[StringSelect[V_co]]]:
     ...
 
 
 @overload
-def select(
+def string_select(
     cls: Type[Object[S_co, P]], *_: P.args, **kwargs: P.kwargs
 ) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
     ...
 
 
-def select(
-    cls: Type[Object[S_co, P]] = Select[Any],
+def string_select(
+    cls: Type[Object[S_co, P]] = StringSelect[Any],
+    /,
     **kwargs: Any,
 ) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
-    """A decorator that attaches a select menu to a component.
+    """A decorator that attaches a string select menu to a component.
 
     The function being decorated should have three parameters, ``self`` representing
-    the :class:`disnake.ui.View`, the :class:`disnake.ui.Select` being pressed and
-    the :class:`disnake.MessageInteraction` you receive.
+    the :class:`disnake.ui.View`, the :class:`disnake.ui.StringSelect` that was
+    interacted with, and the :class:`disnake.MessageInteraction`.
 
     In order to get the selected items that the user has chosen within the callback
-    use :attr:`Select.values`.
+    use :attr:`StringSelect.values`.
+
+    .. versionchanged:: 2.7
+        Renamed from ``select`` to ``string_select``.
 
     Parameters
     ----------
-    cls: Type[:class:`Select`]
+    cls: Type[:class:`StringSelect`]
         The select subclass to create an instance of. If provided, the following parameters
         described below do no apply. Instead, this decorator will accept the same keywords
         as the passed cls does.
@@ -399,19 +322,7 @@ def select(
     disabled: :class:`bool`
         Whether the select is disabled. Defaults to ``False``.
     """
+    return _create_decorator(cls, StringSelect, **kwargs)
 
-    if (origin := get_origin(cls)) is not None:
-        cls = origin
 
-    if not isinstance(cls, type) or not issubclass(cls, Select):
-        raise TypeError(f"cls argument must be a subclass of Select, got {cls!r}")
-
-    def decorator(func: ItemCallbackType[S_co]) -> DecoratedItem[S_co]:
-        if not asyncio.iscoroutinefunction(func):
-            raise TypeError("select function must be a coroutine function")
-
-        func.__discord_ui_model_type__ = cls
-        func.__discord_ui_model_kwargs__ = kwargs
-        return func  # type: ignore
-
-    return decorator
+select = string_select  # backwards compatibility
