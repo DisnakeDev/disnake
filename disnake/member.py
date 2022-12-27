@@ -444,17 +444,18 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     def _update_inner_user(self, user: UserPayload) -> Optional[Tuple[User, User]]:
         u = self._user
-        original = (u.name, u._avatar, u.discriminator, u._public_flags)
+        original = (u.name, u._avatar, u.discriminator, u._public_flags, u._avatar_decoration)
         # These keys seem to always be available
         modified = (
             user["username"],
             user["avatar"],
             user["discriminator"],
             user.get("public_flags", 0),
+            user.get("avatar_decoration", None),
         )
         if original != modified:
             to_return = User._copy(self._user)
-            u.name, u._avatar, u.discriminator, u._public_flags = modified
+            (u.name, u._avatar, u.discriminator, u._public_flags, u._avatar_decoration) = modified
             # Signal to dispatch on_user_update
             return to_return, u
 
