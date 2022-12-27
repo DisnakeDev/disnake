@@ -15,6 +15,8 @@ from .file import File
 __all__ = ("Asset",)
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from .state import ConnectionState
     from .webhook.async_ import _WebhookState
 
@@ -26,7 +28,6 @@ AssetBytes = Union[bytes, "AssetMixin"]
 
 VALID_STATIC_FORMATS = frozenset({"jpeg", "jpg", "webp", "png"})
 VALID_ASSET_FORMATS = VALID_STATIC_FORMATS | {"gif"}
-T = TypeVar("T", bound="Asset")
 
 
 MISSING = utils.MISSING
@@ -201,7 +202,7 @@ class Asset(AssetMixin):
         self._key: str = key
 
     @classmethod
-    def _from_default_avatar(cls: Type[T], state: AnyState, index: int) -> T:
+    def _from_default_avatar(cls, state: AnyState, index: int) -> Self:
         return cls(
             state,
             url=f"{cls.BASE}/embed/avatars/{index}.png",
@@ -210,7 +211,7 @@ class Asset(AssetMixin):
         )
 
     @classmethod
-    def _from_avatar(cls: Type[T], state: AnyState, user_id: int, avatar: str) -> T:
+    def _from_avatar(cls, state: AnyState, user_id: int, avatar: str) -> Self:
         animated = avatar.startswith("a_")
         format = "gif" if animated else "png"
         return cls(
@@ -222,8 +223,8 @@ class Asset(AssetMixin):
 
     @classmethod
     def _from_guild_avatar(
-        cls: Type[T], state: AnyState, guild_id: int, member_id: int, avatar: str
-    ) -> T:
+        cls, state: AnyState, guild_id: int, member_id: int, avatar: str
+    ) -> Self:
         animated = avatar.startswith("a_")
         format = "gif" if animated else "png"
         return cls(
@@ -234,7 +235,7 @@ class Asset(AssetMixin):
         )
 
     @classmethod
-    def _from_icon(cls: Type[T], state: AnyState, object_id: int, icon_hash: str, path: str) -> T:
+    def _from_icon(cls, state: AnyState, object_id: int, icon_hash: str, path: str) -> Self:
         return cls(
             state,
             url=f"{cls.BASE}/{path}-icons/{object_id}/{icon_hash}.png?size=1024",
@@ -243,9 +244,7 @@ class Asset(AssetMixin):
         )
 
     @classmethod
-    def _from_cover_image(
-        cls: Type[T], state: AnyState, object_id: int, cover_image_hash: str
-    ) -> T:
+    def _from_cover_image(cls, state: AnyState, object_id: int, cover_image_hash: str) -> Self:
         return cls(
             state,
             url=f"{cls.BASE}/app-assets/{object_id}/store/{cover_image_hash}.png?size=1024",
@@ -254,7 +253,7 @@ class Asset(AssetMixin):
         )
 
     @classmethod
-    def _from_guild_image(cls: Type[T], state: AnyState, guild_id: int, image: str, path: str) -> T:
+    def _from_guild_image(cls, state: AnyState, guild_id: int, image: str, path: str) -> Self:
         return cls(
             state,
             url=f"{cls.BASE}/{path}/{guild_id}/{image}.png?size=1024",
@@ -263,7 +262,7 @@ class Asset(AssetMixin):
         )
 
     @classmethod
-    def _from_guild_icon(cls: Type[T], state: AnyState, guild_id: int, icon_hash: str) -> T:
+    def _from_guild_icon(cls, state: AnyState, guild_id: int, icon_hash: str) -> Self:
         animated = icon_hash.startswith("a_")
         format = "gif" if animated else "png"
         return cls(
@@ -274,7 +273,7 @@ class Asset(AssetMixin):
         )
 
     @classmethod
-    def _from_sticker_banner(cls: Type[T], state: AnyState, banner: int) -> T:
+    def _from_sticker_banner(cls, state: AnyState, banner: int) -> Self:
         return cls(
             state,
             url=f"{cls.BASE}/app-assets/710982414301790216/store/{banner}.png",
@@ -283,7 +282,7 @@ class Asset(AssetMixin):
         )
 
     @classmethod
-    def _from_banner(cls: Type[T], state: AnyState, id: int, banner_hash: str) -> T:
+    def _from_banner(cls, state: AnyState, id: int, banner_hash: str) -> Self:
         animated = banner_hash.startswith("a_")
         format = "gif" if animated else "png"
         return cls(
@@ -294,7 +293,7 @@ class Asset(AssetMixin):
         )
 
     @classmethod
-    def _from_role_icon(cls: Type[T], state: AnyState, role_id: int, icon_hash: str) -> T:
+    def _from_role_icon(cls, state: AnyState, role_id: int, icon_hash: str) -> Self:
         animated = icon_hash.startswith("a_")
         format = "gif" if animated else "png"
         return cls(
@@ -306,8 +305,8 @@ class Asset(AssetMixin):
 
     @classmethod
     def _from_guild_scheduled_event_image(
-        cls: Type[T], state: AnyState, event_id: int, image_hash: str
-    ) -> T:
+        cls, state: AnyState, event_id: int, image_hash: str
+    ) -> Self:
         return cls(
             state,
             url=f"{cls.BASE}/guild-events/{event_id}/{image_hash}.png?size=2048",
