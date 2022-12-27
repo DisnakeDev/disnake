@@ -18,11 +18,11 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from .state import ConnectionState
-    from .webhook.async_ import _WebhookState
+    from .webhook.async_ import BaseWebhook, _WebhookState
 
     ValidStaticFormatTypes = Literal["webp", "jpeg", "jpg", "png"]
     ValidAssetFormatTypes = Literal["webp", "jpeg", "jpg", "png", "gif"]
-    AnyState = Union[ConnectionState, _WebhookState]
+    AnyState = Union[ConnectionState, _WebhookState[BaseWebhook]]
 
 AssetBytes = Union[bytes, "AssetMixin"]
 
@@ -211,7 +211,7 @@ class Asset(AssetMixin):
         )
 
     @classmethod
-    def _from_avatar(cls, state: AnyState, user_id: int, avatar: str):
+    def _from_avatar(cls, state: AnyState, user_id: int, avatar: str) -> Self:
         animated = avatar.startswith("a_")
         format = "gif" if animated else "png"
         return cls(
