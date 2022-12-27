@@ -58,6 +58,7 @@ __all__ = (
     "AutoModEventType",
     "AutoModActionType",
     "ThreadSortOrder",
+    "ThreadLayout",
 )
 
 
@@ -748,6 +749,10 @@ class Locale(Enum):
     "Hindi | हिन्दी"
     hr = "hr"
     "Croatian | Hrvatski"
+    hu = "hu"
+    "Hungarian | Magyar"
+    id = "id"
+    "Indonesian | Bahasa Indonesia"
     it = "it"
     "Italian | Italiano"
     ja = "ja"
@@ -756,8 +761,6 @@ class Locale(Enum):
     "Korean | 한국어"
     lt = "lt"
     "Lithuanian | Lietuviškai"
-    hu = "hu"
-    "Hungarian | Magyar"
     nl = "nl"
     "Dutch | Nederlands"
     no = "no"
@@ -810,6 +813,12 @@ class AutoModTriggerType(Enum):
 class ThreadSortOrder(Enum):
     latest_activity = 0
     creation_date = 1
+
+
+class ThreadLayout(Enum):
+    not_set = 0
+    list_view = 1
+    gallery_view = 2
 
 
 T = TypeVar("T")
