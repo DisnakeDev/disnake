@@ -310,9 +310,16 @@ class Invite(Hashable):
         The URL fragment used for the invite.
     guild: Optional[Union[:class:`Guild`, :class:`Object`, :class:`PartialInviteGuild`]]
         The guild the invite is for. Can be ``None`` if it's from a group direct message.
+
     max_age: Optional[:class:`int`]
         How long before the invite expires in seconds.
         A value of ``0`` indicates that it doesn't expire.
+
+        Optional according to the :ref:`table <invite_attr_table>` above.
+
+    max_uses: Optional[:class:`int`]
+        How many times the invite can be used.
+        A value of ``0`` indicates that it has unlimited uses.
 
         Optional according to the :ref:`table <invite_attr_table>` above.
 
@@ -332,14 +339,6 @@ class Invite(Hashable):
 
         Optional according to the :ref:`table <invite_attr_table>` above.
 
-    max_uses: Optional[:class:`int`]
-        How many times the invite can be used.
-        A value of ``0`` indicates that it has unlimited uses.
-
-        Optional according to the :ref:`table <invite_attr_table>` above.
-
-    inviter: Optional[:class:`User`]
-        The user who created the invite.
     approximate_member_count: Optional[:class:`int`]
         The approximate number of members in the guild.
 
@@ -357,6 +356,8 @@ class Invite(Hashable):
 
         .. versionadded:: 2.0
 
+    inviter: Optional[:class:`User`]
+        The user who created the invite.
     channel: Optional[Union[:class:`abc.GuildChannel`, :class:`Object`, :class:`PartialInviteChannel`]]
         The channel the invite is for.
     target_type: :class:`InviteTarget`
@@ -421,10 +422,10 @@ class Invite(Hashable):
         self.guild: Optional[InviteGuildType] = self._resolve_guild(data.get("guild"), guild)
 
         self.max_age: Optional[int] = data.get("max_age")
+        self.max_uses: Optional[int] = data.get("max_uses")
         self.created_at: Optional[datetime.datetime] = parse_time(data.get("created_at"))
         self.temporary: Optional[bool] = data.get("temporary")
         self.uses: Optional[int] = data.get("uses")
-        self.max_uses: Optional[int] = data.get("max_uses")
         self.approximate_presence_count: Optional[int] = data.get("approximate_presence_count")
         self.approximate_member_count: Optional[int] = data.get("approximate_member_count")
 
