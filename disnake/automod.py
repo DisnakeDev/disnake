@@ -260,6 +260,8 @@ class AutoModTriggerMetadata:
     mention_raid_protection_enabled: Optional[:class:`bool`]
         Whether to automatically detect mention raids. Used with :attr:`AutoModTriggerType.mention_spam`.
 
+        Defaults to ``False``.
+
         .. versionadded:: 2.8
     """
 
@@ -302,7 +304,9 @@ class AutoModTriggerMetadata:
         ...
 
     @overload
-    def __init__(self, *, mention_total_limit: int, mention_raid_protection_enabled: bool) -> None:
+    def __init__(
+        self, *, mention_total_limit: int, mention_raid_protection_enabled: bool = False
+    ) -> None:
         ...
 
     def __init__(
