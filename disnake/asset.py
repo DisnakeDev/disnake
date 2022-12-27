@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import io
 import os
-from typing import TYPE_CHECKING, Any, Literal, Optional, Tuple, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Literal, Optional, Tuple, Union
 
 import yarl
 
@@ -211,7 +211,7 @@ class Asset(AssetMixin):
         )
 
     @classmethod
-    def _from_avatar(cls, state: AnyState, user_id: int, avatar: str) -> Self:
+    def _from_avatar(cls, state: AnyState, user_id: int, avatar: str):
         animated = avatar.startswith("a_")
         format = "gif" if animated else "png"
         return cls(
