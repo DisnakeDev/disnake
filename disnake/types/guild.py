@@ -60,7 +60,7 @@ GuildFeature = Literal[
     "NEW_THREAD_PERMISSIONS",  # deprecated
     "PARTNERED",
     "PREVIEW_ENABLED",
-    "PRIVATE_THREADS",
+    "PRIVATE_THREADS",  # deprecated
     "RELAY_ENABLED",
     "ROLE_ICONS",
     "ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE",  # not yet documented/finalised
