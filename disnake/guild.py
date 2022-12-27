@@ -4695,6 +4695,54 @@ class GuildBuilder:
         self._current_id = (_id := self._current_id) + 1
         return PlaceholderID(_id)
 
+    def _add_channel(
+        self,
+        *,
+        type: ChannelType,
+        name: str,
+        overwrites: Dict[PlaceholderID, PermissionOverwrite] = MISSING,
+        category: PlaceholderID = MISSING,
+        topic: Optional[str] = MISSING,
+        slowmode_delay: int = MISSING,
+        nsfw: bool = MISSING,
+    ) -> Tuple[PlaceholderID, CreateGuildPlaceholderChannel]:
+        _id = self._next_id()
+        data: CreateGuildPlaceholderChannel = {
+            "id": _id,
+            "type": try_enum_to_int(type),
+            "name": name,
+        }
+
+        if overwrites is not MISSING:
+            overwrites_data: List[PermissionOverwritePayload] = []
+            for target, perm in overwrites.items():
+                allow, deny = perm.pair()
+                overwrites_data.append(
+                    {
+                        "allow": str(allow.value),
+                        "deny": str(deny.value),
+                        "id": target,
+                        # can only set overrides for roles here
+                        "type": abc._Overwrites.ROLE,
+                    }
+                )
+            data["permission_overwrites"] = overwrites_data
+
+        if category is not MISSING:
+            data["parent_id"] = category
+
+        if topic is not MISSING:
+            data["topic"] = topic
+
+        if slowmode_delay is not MISSING:
+            data["rate_limit_per_user"] = slowmode_delay
+
+        if nsfw is not MISSING:
+            data["nsfw"] = nsfw
+
+        self._channels.append(data)
+        return _id, data
+
     @property
     def everyone(self) -> PlaceholderID:
         """``PlaceholderID``: The placeholder ID used for the ``@everyone`` role."""
@@ -4835,54 +4883,6 @@ class GuildBuilder:
 
         self._roles.append(data)
         return _id
-
-    def _add_channel(
-        self,
-        *,
-        type: ChannelType,
-        name: str,
-        overwrites: Dict[PlaceholderID, PermissionOverwrite] = MISSING,
-        category: PlaceholderID = MISSING,
-        topic: Optional[str] = MISSING,
-        slowmode_delay: int = MISSING,
-        nsfw: bool = MISSING,
-    ) -> Tuple[PlaceholderID, CreateGuildPlaceholderChannel]:
-        _id = self._next_id()
-        data: CreateGuildPlaceholderChannel = {
-            "id": _id,
-            "type": try_enum_to_int(type),
-            "name": name,
-        }
-
-        if overwrites is not MISSING:
-            overwrites_data: List[PermissionOverwritePayload] = []
-            for target, perm in overwrites.items():
-                allow, deny = perm.pair()
-                overwrites_data.append(
-                    {
-                        "allow": str(allow.value),
-                        "deny": str(deny.value),
-                        "id": target,
-                        # can only set overrides for roles here
-                        "type": abc._Overwrites.ROLE,
-                    }
-                )
-            data["permission_overwrites"] = overwrites_data
-
-        if category is not MISSING:
-            data["parent_id"] = category
-
-        if topic is not MISSING:
-            data["topic"] = topic
-
-        if slowmode_delay is not MISSING:
-            data["rate_limit_per_user"] = slowmode_delay
-
-        if nsfw is not MISSING:
-            data["nsfw"] = nsfw
-
-        self._channels.append(data)
-        return _id, data
 
     def add_category(
         self,
