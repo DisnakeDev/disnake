@@ -306,13 +306,16 @@ class Invite(Hashable):
 
     Attributes
     ----------
-    max_age: :class:`int`
-        How long before the invite expires in seconds.
-        A value of ``0`` indicates that it doesn't expire.
     code: :class:`str`
         The URL fragment used for the invite.
     guild: Optional[Union[:class:`Guild`, :class:`Object`, :class:`PartialInviteGuild`]]
         The guild the invite is for. Can be ``None`` if it's from a group direct message.
+    max_age: Optional[:class:`int`]
+        How long before the invite expires in seconds.
+        A value of ``0`` indicates that it doesn't expire.
+
+        Optional according to the :ref:`table <invite_attr_table>` above.
+
     created_at: Optional[:class:`datetime.datetime`]
         An aware UTC datetime object denoting the time the invite was created.
 
@@ -414,9 +417,10 @@ class Invite(Hashable):
         channel: Optional[Union[PartialInviteChannel, GuildChannel]] = None,
     ) -> None:
         self._state: ConnectionState = state
-        self.max_age: Optional[int] = data.get("max_age")
         self.code: str = data["code"]
         self.guild: Optional[InviteGuildType] = self._resolve_guild(data.get("guild"), guild)
+
+        self.max_age: Optional[int] = data.get("max_age")
         self.created_at: Optional[datetime.datetime] = parse_time(data.get("created_at"))
         self.temporary: Optional[bool] = data.get("temporary")
         self.uses: Optional[int] = data.get("uses")
