@@ -105,7 +105,7 @@ class File:
         # unnecessary seek since it's the first request
         # done.
         if seek:
-            self.fp.seek(seek if isinstance(seek, int) else self._original_pos)
+            self.fp.seek(self._original_pos)
 
     def close(self) -> None:
         self.fp.close = self._closer
@@ -130,5 +130,5 @@ class File:
         """
         current_position = self.fp.tell()
         bytes_length = self.fp.seek(0, io.SEEK_END)
-        self.reset(seek=current_position)
+        self.fp.seek(current_position)
         return bytes_length - current_position
