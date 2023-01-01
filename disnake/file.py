@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import io
 import os
-import sys
 from typing import TYPE_CHECKING, Optional, Union
 
 __all__ = ("File",)
@@ -106,15 +105,12 @@ class File:
         # unnecessary seek since it's the first request
         # done.
         if seek:
-            self.fp.seek(self._original_pos)
+            self.fp.seek(seek if isinstance(seek, int) else self._original_pos)
 
     def close(self) -> None:
         self.fp.close = self._closer
         if self._owner:
             self._closer()
-
-    def __sizeof__(self) -> int:
-        return sys.getsizeof(self.fp)
 
     @property
     def closed(self) -> bool:
@@ -132,17 +128,7 @@ class File:
 
         .. versionadded:: 2.8
         """
-        if self.fp.tell() != 0:
-            self.reset()
-
+        current_position = self.fp.tell()
         bytes_length = self.fp.seek(0, io.SEEK_END)
-        self.reset()
-        return bytes_length
-
-    @property
-    def size(self) -> int:
-        """:class:`int`: The size of the ``fp`` object.
-
-        .. versionadded:: 2.8
-        """
-        return self.__sizeof__()
+        self.reset(seek=current_position)
+        return bytes_length - current_position
