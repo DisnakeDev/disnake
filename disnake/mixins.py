@@ -25,3 +25,7 @@ class Hashable(EqualityComparable):
 
     def __hash__(self) -> int:
         return self.id >> 22
+
+    @property
+    def snowflake(self) -> str:
+        return f"{self.id}"
