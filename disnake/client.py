@@ -79,10 +79,39 @@ if TYPE_CHECKING:
     from .app_commands import APIApplicationCommand
     from .asset import AssetBytes
     from .channel import DMChannel
+    from .enums import (
+        ApplicationCommandEvent,
+        AutoModEvent,
+        BotEvent,
+        ChannelEvent,
+        ClientEvent,
+        GuildEvent,
+        IntegrationEvent,
+        InteractionEvent,
+        MemberEvent,
+        MessageEvent,
+        StageInstanceEvent,
+        ThreadEvent,
+    )
     from .member import Member
     from .message import Message
     from .types.gateway import SessionStartLimit as SessionStartLimitPayload
     from .voice_client import VoiceProtocol
+
+    AnyEvent = Union[
+        ClientEvent,
+        BotEvent,
+        ChannelEvent,
+        ThreadEvent,
+        GuildEvent,
+        ApplicationCommandEvent,
+        AutoModEvent,
+        IntegrationEvent,
+        MemberEvent,
+        StageInstanceEvent,
+        InteractionEvent,
+        MessageEvent,
+    ]
 
 
 __all__ = (
@@ -92,7 +121,6 @@ __all__ = (
 )
 
 CoroT = TypeVar("CoroT", bound=Callable[..., Coroutine[Any, Any, Any]])
-
 
 _log = logging.getLogger(__name__)
 
@@ -1522,7 +1550,7 @@ class Client:
 
     def wait_for(
         self,
-        event: str,
+        event: Union[str, AnyEvent],
         *,
         check: Optional[Callable[..., bool]] = None,
         timeout: Optional[float] = None,

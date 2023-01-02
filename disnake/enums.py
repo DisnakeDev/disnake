@@ -59,6 +59,7 @@ __all__ = (
     "AutoModActionType",
     "ThreadSortOrder",
     "ThreadLayout",
+    "ClientEvent",
 )
 
 
@@ -819,6 +820,253 @@ class ThreadLayout(Enum):
     not_set = 0
     list_view = 1
     gallery_view = 2
+
+
+class ClientEvent(str, Enum):
+    connect = "connect"
+    """Called when the client has successfully connected to Discord."""
+    disconnect = "disconnect"
+    """Called when the client has disconnected from Discord, or a connection attempt to Discord has failed."""
+    error = "error"
+    """Called when an uncaught exception occurred."""
+    gateway_error = "gateway_error"
+    """Called when a known gateway event cannot be parsed."""
+    ready = "ready"
+    """Called when the client is done preparing the data received from Discord."""
+    resumed = "resumed"
+    """Called when the client has resumed a session."""
+    shard_connect = "shard_connect"
+    """Called when a shard has successfully connected to Discord."""
+    shard_disconnect = "shard_disconnect"
+    """Called when a shard has disconnected from Discord."""
+    shard_ready = "shard_ready"
+    """Called when a shard has become ready."""
+    shard_resumed = "shard_resumed"
+    """Called when a shard has resumed a session."""
+    socket_event_type = "socket_event_type"
+    """Called whenever a websocket event is received from the WebSocket."""
+    socket_raw_receive = "socket_raw_receive"
+    """Called whenever a message is completely received from the WebSocket, before it's processed and parsed."""
+    socket_raw_send = "socket_raw_send"
+    """Called whenever a send operation is done on the WebSocket before the message is sent."""
+
+
+class BotEvent(str, Enum):
+    command_error = "command_error"
+    """Called when an error is raised inside a command either through user input error, check failure, or an error in your own code."""
+    slash_command_error = "slash_command_error"
+    """Called when an error is raised inside a slash command either through user input error, check failure, or an error in your own code."""
+    user_command_error = "user_command_error"
+    """Called when an error is raised inside a user command either through check failure, or an error in your own code."""
+    message_command_error = "message_command_error"
+    """Called when an error is raised inside a message command either through check failure, or an error in your own code."""
+    command = "command"
+    """Called when a command is found and is about to be invoked."""
+    slash_command = "slash_command"
+    """Called when a slash command is found and is about to be invoked."""
+    user_command = "user_command"
+    """Called when a user command is found and is about to be invoked."""
+    message_command = "message_command"
+    """Called when a message command is found and is about to be invoked."""
+    command_completion = "command_completion"
+    """Called when a command has completed its invocation."""
+    slash_command_completion = "slash_command_completion"
+    """Called when a slash command has completed its invocation."""
+    user_command_completion = "user_command_completion"
+    """Called when a user command has completed its invocation."""
+    message_command_completion = "message_command_completion"
+    """Called when a message command has completed its invocation."""
+
+
+class ChannelEvent(str, Enum):
+    guild_channel_create = "guild_channel_create"
+    """Called whenever a guild channel is created."""
+    guild_channel_update = "guild_channel_update"
+    """Called whenever a guild channel is updated."""
+    guild_channel_delete = "guild_channel_delete"
+    """Called whenever a guild channel is deleted."""
+    guild_channel_pins_update = "guild_channel_pins_update"
+    """Called whenever a message is pinned or unpinned from a guild channel."""
+    private_channel_update = "private_channel_update"
+    """Called whenever a private group DM is updated."""
+    private_channel_pins_update = "private_channel_pins_update"
+    """Called whenever a message is pinned or unpinned from a private channel."""
+    webhooks_update = "webhooks_update"  # i think it's right place is here
+    """Called whenever a webhook is created, modified, or removed from a guild channel."""
+
+
+class ThreadEvent(str, Enum):
+    thread_create = "thread_create"
+    """Called whenever a thread is created."""
+    thread_update = "thread_update"
+    """Called when a thread is updated."""
+    thread_delete = "thread_delete"
+    """Called when a thread is deleted."""
+    thread_join = "thread_join"
+    """Called whenever the bot joins a thread or gets access to a thread."""
+    thread_remove = "thread_remove"
+    """Called whenever a thread is removed. This is different from a thread being deleted."""
+    thread_member_join = "thread_member_join"
+    """Called when a `ThreadMember` joins a `Thread`."""
+    thread_member_remove = "thread_member_remove"
+    """Called when a `ThreadMember` leaves a `Thread`."""
+    raw_thread_member_remove = "raw_thread_member_remove"
+    """Called when a `ThreadMember` leaves `Thread` regardless of the thread member cache.."""
+    raw_thread_update = "raw_thread_update"
+    """Called whenever a thread is updated regardless of the state of the internal thread cache."""
+    raw_thread_delete = "raw_thread_delete"
+    """Called whenever a thread is deleted regardless of the state of the internal thread cache."""
+
+
+class GuildEvent(str, Enum):
+    guild_join = "guild_join"
+    """Called when a `Guild` is either created by the `Client` or when the Client joins a guild."""
+    guild_remove = "guild_remove"
+    """Called when a `Guild` is removed from the `Client`."""
+    guild_update = "guild_update"
+    """Called when a `Guild` updates."""
+    guild_available = "guild_available"
+    """Called when a guild becomes available."""
+    guild_unavailable = "guild_unavailable"
+    """Called when a guild becomes unavailable."""
+    guild_role_create = "guild_role_create"
+    """Called when a `Guild` creates a new `Role`."""
+    guild_role_update = "guild_role_update"
+    """Called when a `Guild` updates a `Role`."""
+    guild_role_delete = "guild_role_delete"
+    """Called when a `Guild` deletes a `Role`."""  # there's a typo in the official docs here
+    guild_emojis_update = "guild_emojis_update"
+    """Called when a `Guild` adds or removes `Emoji`."""
+    guild_stickers_update = "guild_stickers_update"
+    """Called when a `Guild` updates its stickers."""
+    guild_integrations_update = "guild_integrations_update"
+    """Called whenever an integration is created, modified, or removed from a guild."""
+    guild_scheduled_event_create = "guild_scheduled_event_create"
+    """Called when a guild scheduled event is created."""
+    guild_scheduled_event_update = "guild_scheduled_event_update"
+    """Called when a guild scheduled event is updated."""
+    guild_scheduled_event_delete = "guild_scheduled_event_delete"
+    """Called when a guild scheduled event is deleted."""
+    guild_scheduled_event_subscribe = "guild_scheduled_event_subscribe"
+    """Called when a user subscribes from a guild scheduled event."""
+    guild_scheduled_event_unsubscribe = "guild_scheduled_event_unsubscribe"
+    """Called when a user unsubscribes from a guild scheduled event."""
+    raw_guild_scheduled_event_subscribe = "raw_guild_scheduled_event_subscribe"
+    """Called when a user subscribes from a guild scheduled event regardless of the guild scheduled event cache."""
+    raw_guild_scheduled_event_unsubscribe = "raw_guild_scheduled_event_unsubscribe"
+    """Called when a user subscribes to or unsubscribes from a guild scheduled event regardless of the guild scheduled event cache."""
+
+
+class ApplicationCommandEvent(str, Enum):
+    application_command_permissions_update = "application_command_permissions_update"
+    """Called when the permissions of an application command or the application-wide command permissions are updated."""
+
+
+# idk, this could go under the GuildEvent group
+class AutoModEvent(str, Enum):
+    automod_action_execution = "automod_action_execution"
+    """Called when an auto moderation action is executed due to a rule triggering for a particular event."""
+    automod_rule_create = "automod_rule_create"
+    """Called when an `AutoModRule` is created."""
+    automod_rule_update = "automod_rule_update"
+    """Called when an `AutoModRule` is updated."""
+    automod_rule_delete = "automod_rule_delete"
+    """Called when an `AutoModRule` is deleted."""
+
+
+class IntegrationEvent(str, Enum):
+    integration_create = "integration_create"
+    """Called when an integration is created."""
+    integration_update = "integration_update"
+    """Called when an integration is updated."""
+    raw_integration_delete = "raw_integration_delete"
+    """Called when an integration is deleted."""
+
+
+class MemberEvent(str, Enum):
+    member_join = "member_join"
+    """Called when a `Member` joins a `Guild`."""
+    member_update = "member_update"
+    """Called when a `Member` updates their profile."""
+    member_remove = "member_remove"
+    """Called when a `Member` leaves a `Guild`."""
+    raw_member_remove = "raw_member_remove"
+    """Called when a member leaves a `Guild` regardless of the member cache."""
+    raw_member_update = "raw_member_update"
+    """Called when a member updates their profile regardless of the member cache."""
+    member_ban = "member_ban"
+    """Called when user gets banned from a `Guild`."""
+    member_unban = "member_unban"
+    """Called when a `User` gets unbanned from a `Guild`."""
+    presence_update = "presence_update"
+    """Called when a `Member` updates their presence."""
+    user_update = "user_update"
+    """Called when a `User` is updated."""
+    voice_state_update = "voice_state_update"
+    """Called when a `Member` changes their `VoiceState`."""
+
+
+class StageInstanceEvent(str, Enum):
+    stage_instance_create = "stage_instance_create"
+    """Called when a `StageInstance` is created for a `StageChannel`."""
+    stage_instance_update = "stage_instance_update"
+    """Called when a `StageInstance` is updated."""
+    stage_instance_delete = "stage_instance_delete"
+    """Called when a `StageInstance` is deleted for a `StageChannel`."""
+
+
+class InteractionEvent(str, Enum):
+    application_command = "application_command"
+    """Called when an application command is invoked."""
+    application_command_autocomplete = "application_command_autocomplete"
+    """Called when an application command autocomplete is called."""
+    button_click = "button_click"
+    """Called when a button is clicked."""
+    dropdown = "dropdown"
+    """Called when a select menu is clicked."""
+    interaction = "interaction"
+    """Called when an interaction happened."""
+    message_interaction = "message_interaction"
+    """Called when a message interaction happened."""
+    modal_submit = "modal_submit"
+    """Called when a modal is submitted."""
+
+
+class MessageEvent(str, Enum):
+    message = "message"
+    """Called when a `Message` is created and sent."""
+    message_edit = "message_edit"
+    """Called when a `Message` receives an update event."""
+    message_delete = "message_delete"
+    """Called when a message is deleted."""
+    bulk_message_delete = "bulk_message_delete"
+    """Called when messages are bulk deleted."""
+    raw_message_delete = "raw_message_delete"
+    """Called when a message is deleted regardless of the message being in the internal message cache or not."""
+    raw_message_edit = "raw_message_edit"
+    """Called when a message is edited regardless of the state of the internal message cache."""
+    raw_bulk_message_delete = "raw_bulk_message_delete"
+    """Called when a bulk delete is triggered regardless of the messages being in the internal message cache or not."""
+    reaction_add = "reaction_add"
+    """Called when a message has a reaction added to it."""
+    reaction_remove = "reaction_remove"
+    """Called when a message has a reaction removed from it."""
+    reaction_clear = "reaction_clear"
+    """Called when a message has all its reactions removed from it."""
+    reaction_clear_emoji = "reaction_clear_emoji"
+    """Called when a message has a specific reaction removed from it."""
+    raw_reaction_add = "raw_reaction_add"
+    """Called when a message has a reaction added regardless of the state of the internal message cache."""
+    raw_reaction_remove = "raw_reaction_remove"
+    """Called when a message has a reaction removed regardless of the state of the internal message cache."""
+    raw_reaction_clear = "raw_reaction_clear"
+    """Called when a message has all its reactions removed regardless of the state of the internal message cache."""
+    raw_reaction_clear_emoji = "raw_reaction_clear_emoji"
+    """Called when a message has a specific reaction removed from it regardless of the state of the internal message cache."""
+    typing = "typing"
+    """Called when someone begins typing a message."""
+    raw_typing = "raw_typing"
+    """Called when someone begins typing a message regardless of whether `Intents.members` and `Intents.guilds` are enabled."""
 
 
 T = TypeVar("T")

@@ -33,11 +33,40 @@ from .cog import Cog
 if TYPE_CHECKING:
     import importlib.machinery
 
+    from disnake.enums import (
+        ApplicationCommandEvent,
+        AutoModEvent,
+        BotEvent,
+        ChannelEvent,
+        ClientEvent,
+        GuildEvent,
+        IntegrationEvent,
+        InteractionEvent,
+        MemberEvent,
+        MessageEvent,
+        StageInstanceEvent,
+        ThreadEvent,
+    )
+
     from ._types import CoroFunc
     from .bot import AutoShardedBot, AutoShardedInteractionBot, Bot, InteractionBot
     from .help import HelpCommand
 
     AnyBot = Union[Bot, AutoShardedBot, InteractionBot, AutoShardedInteractionBot]
+    AnyEvent = Union[
+        ClientEvent,
+        BotEvent,
+        ChannelEvent,
+        ThreadEvent,
+        GuildEvent,
+        ApplicationCommandEvent,
+        AutoModEvent,
+        IntegrationEvent,
+        MemberEvent,
+        StageInstanceEvent,
+        InteractionEvent,
+        MessageEvent,
+    ]
 
 __all__ = ("CommonBotBase",)
 
@@ -223,7 +252,7 @@ class CommonBotBase(Generic[CogT]):
             except ValueError:
                 pass
 
-    def listen(self, name: str = MISSING) -> Callable[[CFT], CFT]:
+    def listen(self, name: Union[str, AnyEvent] = MISSING) -> Callable[[CFT], CFT]:
         """A decorator that registers another function as an external
         event listener. Basically this allows you to listen to multiple
         events from different places e.g. such as :func:`.on_ready`
@@ -254,7 +283,7 @@ class CommonBotBase(Generic[CogT]):
         """
 
         def decorator(func: CFT) -> CFT:
-            self.add_listener(func, name)
+            self.add_listener(func, name if isinstance(name, str) else "on_" + name.value)
             return func
 
         return decorator
