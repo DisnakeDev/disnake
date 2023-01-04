@@ -1766,7 +1766,7 @@ of :class:`enum.Enum`.
         .. versionadded:: 2.5
     .. attribute:: role_subscription_purchase
 
-        The system message denoting that an auto moderation action was executed.
+        The system message denoting that a role subscription was purchased.
 
         .. versionadded:: 2.8
 
