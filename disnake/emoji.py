@@ -145,6 +145,9 @@ class Emoji(_EmojiTag, AssetMixin):
         """List[:class:`Role`]: A :class:`list` of roles that are allowed to use this emoji.
 
         If roles is empty, the emoji is unrestricted.
+
+        Emojis with :attr:`subscription roles <RoleTags.integration_id>` are considered premium emoji,
+        and count towards a separate limit of 25 emojis.
         """
         guild = self.guild
         if guild is None:

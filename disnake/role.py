@@ -46,6 +46,9 @@ class RoleTags:
         The bot's user ID that manages this role.
     integration_id: Optional[:class:`int`]
         The integration ID that manages the role.
+
+        Roles with this ID matching the guild's ``guild_subscription`` integration
+        are considered subscription roles.
     subscription_listing_id: Optional[:class:`int`]
         The ID of this role's subscription listing, if applicable.
 
@@ -95,7 +98,7 @@ class RoleTags:
         return self._premium_subscriber is None
 
     def is_available_for_purchase(self) -> bool:
-        """Whether the role is available for purchase as part of a role subscription.
+        """Whether the role is a subscription role and available for purchase.
 
         .. versionadded:: 2.8
 
@@ -304,7 +307,7 @@ class Role(Hashable):
         return self.tags is not None and self.tags.is_integration()
 
     def is_available_for_purchase(self) -> bool:
-        """Whether the role is available for purchase as part of a role subscription.
+        """Whether the role is a subscription role and available for purchase.
 
         .. versionadded:: 2.8
 

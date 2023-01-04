@@ -837,7 +837,11 @@ class Guild(Hashable):
 
     @property
     def emoji_limit(self) -> int:
-        """:class:`int`: The maximum number of emoji slots this guild has."""
+        """:class:`int`: The maximum number of emoji slots this guild has.
+
+        Premium emojis (those associated with subscription roles) count towards a
+        separate limit of 25.
+        """
         more_emoji = 200 if "MORE_EMOJI" in self.features else 50
         return max(more_emoji, self._PREMIUM_GUILD_LIMITS[self.premium_tier].emoji)
 
@@ -3229,6 +3233,9 @@ class Guild(Hashable):
             "1", "100"
             "2", "150"
             "3", "250"
+
+        Emojis with :attr:`subscription roles <RoleTags.integration_id>` are considered premium emoji,
+        and count towards a separate limit of 25 emojis.
 
         You must have :attr:`~Permissions.manage_emojis` permission to
         do this.
