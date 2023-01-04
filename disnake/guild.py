@@ -206,7 +206,6 @@ class Guild(Hashable):
         - ``INVITES_DISABLED``: Guild has paused invites, preventing new users from joining.
         - ``LINKED_TO_HUB``: Guild is linked to a student hub.
         - ``MEMBER_VERIFICATION_GATE_ENABLED``: Guild has Membership Screening enabled.
-        - ``MONETIZATION_ENABLED``: Guild has enabled monetization.
         - ``MORE_EMOJI``: Guild has increased custom emoji slots.
         - ``MORE_STICKERS``: Guild has increased custom sticker slots.
         - ``NEWS``: Guild can create news channels.

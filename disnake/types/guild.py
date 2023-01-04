@@ -55,7 +55,6 @@ GuildFeature = Literal[
     "LINKED_TO_HUB",
     "MEMBER_PROFILES",  # not sure what this does, if anything
     "MEMBER_VERIFICATION_GATE_ENABLED",
-    "MONETIZATION_ENABLED",
     "MORE_EMOJI",
     "MORE_STICKERS",
     "NEWS",
