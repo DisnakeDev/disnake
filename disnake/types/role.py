@@ -27,3 +27,4 @@ class RoleTags(TypedDict, total=False):
     bot_id: Snowflake
     integration_id: Snowflake
     premium_subscriber: None
+    guild_connections: None
