@@ -39,6 +39,7 @@ from .app_commands import (
     GuildApplicationCommandPermissions,
 )
 from .appinfo import AppInfo
+from .application_role_connection import ApplicationRoleConnectionMetadata
 from .backoff import ExponentialBackoff
 from .channel import PartialMessageable, _threaded_channel_factory
 from .emoji import Emoji
@@ -2687,3 +2688,47 @@ class Client:
             The permissions configured for the specified application command.
         """
         return await self._connection.fetch_command_permissions(guild_id, command_id)
+
+    async def fetch_role_connection_metadata(self) -> List[ApplicationRoleConnectionMetadata]:
+        """|coro|
+
+        Retrieves the :class:`.ApplicationRoleConnectionMetadata` records for the application.
+
+        .. versionadded:: 2.8
+
+        Returns
+        -------
+        List[:class:`.ApplicationRoleConnectionMetadata`]
+            The list of metadata records.
+        """
+        data = await self._connection.http.get_application_role_connection_metadata_records(
+            self.application_id
+        )
+        return [ApplicationRoleConnectionMetadata._from_data(record) for record in data]
+
+    async def edit_role_connection_metadata(
+        self, records: Sequence[ApplicationRoleConnectionMetadata]
+    ) -> List[ApplicationRoleConnectionMetadata]:
+        """|coro|
+
+        Edits the :class:`.ApplicationRoleConnectionMetadata` records for the application.
+
+        An application can have up to 5 metadata records.
+
+        .. versionadded:: 2.8
+
+        Parameters
+        ----------
+        records: Sequence[:class:`.ApplicationRoleConnectionMetadata`]
+            The new metadata records.
+
+        Returns
+        -------
+        List[:class:`.ApplicationRoleConnectionMetadata`]
+            The list of newly edited metadata records.
+        """
+        data = await self._connection.http.edit_application_role_connection_metadata_records(
+            self.application_id,
+            [record.to_dict() for record in records],
+        )
+        return [ApplicationRoleConnectionMetadata._from_data(record) for record in data]
