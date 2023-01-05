@@ -1764,6 +1764,42 @@ of :class:`enum.Enum`.
         The system message denoting that an auto moderation action was executed.
 
         .. versionadded:: 2.5
+    .. attribute:: interaction_premium_upsell
+
+        Unknown. TBD?
+
+        .. versionadded:: 2.8
+    .. attribute:: stage_start
+
+        The system message denoting that a stage instance has started.
+
+        .. versionadded:: 2.8
+    .. attribute:: stage_end
+
+        The system message denoting that a stage instance has ended.
+
+        .. versionadded:: 2.8
+    .. attribute:: stage_speaker
+
+        The system message denoting that a stage instance has a new speaker.
+
+        .. versionadded:: 2.8
+    .. attribute:: stage_raise_hand
+
+        The system message denoting that a stage instance has a new raised hand.
+
+        .. versionadded:: 2.8
+    .. attribute:: stage_topic
+
+        The system message denoting that a stage instance has a new topic.
+
+        .. versionadded:: 2.8
+    .. attribute:: guild_application_premium_subscription
+
+        Unknown. TBD?
+
+        .. versionadded:: 2.8
+
 
 .. class:: UserFlags
 

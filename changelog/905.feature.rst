@@ -1,0 +1,1 @@
+Add new :class:`Message` types.
