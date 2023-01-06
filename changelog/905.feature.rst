@@ -1,1 +1,1 @@
-Add new :class:`Message` types.
+Add new :attr:`MessageType.interaction_premium_upsell` and :attr:`MessageType.guild_application_premium_subscription` message types.
