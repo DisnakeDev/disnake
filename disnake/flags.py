@@ -39,6 +39,7 @@ __all__ = (
     "ApplicationFlags",
     "ChannelFlags",
     "AutoModKeywordPresets",
+    "MemberFlags",
 )
 
 BF = TypeVar("BF", bound="BaseFlags")
@@ -2125,3 +2126,89 @@ class AutoModKeywordPresets(ListBaseFlags):
         (contains insults or words that may be considered hate speech).
         """
         return 1 << 3
+
+
+class MemberFlags(BaseFlags):
+    """Wraps up Discord Member flags.
+
+    .. versionadded:: 2.8
+
+    .. container:: operations
+
+        .. describe:: x == y
+
+            Checks if two MemberFlags instances are equal.
+        .. describe:: x != y
+
+            Checks if two MemberFlags instances are not equal.
+        .. describe:: x <= y
+
+            Checks if an MemberFlags instance is a subset of another MemberFlags instance.
+        .. describe:: x >= y
+
+            Checks if an MemberFlags instance is a superset of another MemberFlags instance.
+        .. describe:: x < y
+
+            Checks if an MemberFlags instance is a strict subset of another MemberFlags instance.
+        .. describe:: x > y
+
+            Checks if an MemberFlags instance is a strict superset of another MemberFlags instance.
+        .. describe:: x | y, x |= y
+
+            Returns a new MemberFlags instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
+        .. describe:: x & y, x &= y
+
+            Returns a new MemberFlags instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new MemberFlags instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+        .. describe:: ~x
+
+            Returns a new MemberFlags instance with all flags from x inverted.
+        .. describe:: hash(x)
+
+            Return the flag's hash.
+        .. describe:: iter(x)
+
+            Returns an iterator of ``(name, value)`` pairs. This allows it
+            to be, for example, constructed as a dict or a list of pairs.
+            Note that aliases are not shown.
+
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: MemberFlags.y | MemberFlags.z, MemberFlags(y=True) | MemberFlags.z
+
+            Returns a MemberFlags instance with all provided flags enabled.
+
+        .. describe:: ~MemberFlags.y
+
+            Returns a MemberFlags instance with all flags except ``y`` inverted from their default value.
+
+    Attributes
+    ----------
+    values: :class:`int`
+        The raw values. You should query flags via the properties
+        rather than using these raw values.
+    """
+
+    __slots__ = ()
+
+    if TYPE_CHECKING:
+
+        @_generated
+        def __init__(self, *, completed_onboarding: bool, bypasses_verification: bool) -> None:
+            ...
+
+    @flag_value
+    def completed_onboarding(self):
+        """:class:`bool`: Returns ``True`` if the member has completed onboarding."""
+        return 1 << 1
+
+    @flag_value
+    def bypasses_verification(self):
+        """:class:`bool`: Returns ``True`` if the member is able to bypass verification."""
+        return 1 << 2
