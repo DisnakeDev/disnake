@@ -10,7 +10,7 @@ from .i18n import LocalizationValue, Localized
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from .i18n import LocalizedRequired
+    from .i18n import LocalizationProtocol, LocalizedRequired
     from .types.application_role_connection import (
         ApplicationRoleConnectionMetadata as ApplicationRoleConnectionMetadataPayload,
     )
@@ -106,3 +106,7 @@ class ApplicationRoleConnectionMetadata:
             data["description_localizations"] = loc
 
         return data
+
+    def _localize(self, store: LocalizationProtocol) -> None:
+        self.name_localizations._link(store)
+        self.description_localizations._link(store)

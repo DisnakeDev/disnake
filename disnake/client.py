@@ -82,6 +82,9 @@ if TYPE_CHECKING:
     from .channel import DMChannel
     from .member import Member
     from .message import Message
+    from .types.application_role_connection import (
+        ApplicationRoleConnectionMetadata as ApplicationRoleConnectionMetadataPayload,
+    )
     from .types.gateway import SessionStartLimit as SessionStartLimitPayload
     from .voice_client import VoiceProtocol
 
@@ -2701,9 +2704,7 @@ class Client:
         List[:class:`.ApplicationRoleConnectionMetadata`]
             The list of metadata records.
         """
-        data = await self._connection.http.get_application_role_connection_metadata_records(
-            self.application_id
-        )
+        data = await self.http.get_application_role_connection_metadata_records(self.application_id)
         return [ApplicationRoleConnectionMetadata._from_data(record) for record in data]
 
     async def edit_role_connection_metadata(
@@ -2727,8 +2728,12 @@ class Client:
         List[:class:`.ApplicationRoleConnectionMetadata`]
             The list of newly edited metadata records.
         """
-        data = await self._connection.http.edit_application_role_connection_metadata_records(
-            self.application_id,
-            [record.to_dict() for record in records],
+        payload: List[ApplicationRoleConnectionMetadataPayload] = []
+        for record in records:
+            record._localize(self.i18n)
+            payload.append(record.to_dict())
+
+        data = await self.http.edit_application_role_connection_metadata_records(
+            self.application_id, payload
         )
         return [ApplicationRoleConnectionMetadata._from_data(record) for record in data]
