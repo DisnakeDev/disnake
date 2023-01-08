@@ -822,7 +822,7 @@ class ThreadLayout(Enum):
     gallery_view = 2
 
 
-class ClientEvent(str, Enum):
+class ClientEvent(Enum):
     connect = "connect"
     """Called when the client has successfully connected to Discord."""
     disconnect = "disconnect"
@@ -851,7 +851,7 @@ class ClientEvent(str, Enum):
     """Called whenever a send operation is done on the WebSocket before the message is sent."""
 
 
-class BotEvent(str, Enum):
+class BotEvent(Enum):
     command_error = "command_error"
     """Called when an error is raised inside a command either through user input error, check failure, or an error in your own code."""
     slash_command_error = "slash_command_error"
@@ -878,7 +878,7 @@ class BotEvent(str, Enum):
     """Called when a message command has completed its invocation."""
 
 
-class ChannelEvent(str, Enum):
+class ChannelEvent(Enum):
     guild_channel_create = "guild_channel_create"
     """Called whenever a guild channel is created."""
     guild_channel_update = "guild_channel_update"
@@ -895,7 +895,7 @@ class ChannelEvent(str, Enum):
     """Called whenever a webhook is created, modified, or removed from a guild channel."""
 
 
-class ThreadEvent(str, Enum):
+class ThreadEvent(Enum):
     thread_create = "thread_create"
     """Called whenever a thread is created."""
     thread_update = "thread_update"
@@ -918,7 +918,7 @@ class ThreadEvent(str, Enum):
     """Called whenever a thread is deleted regardless of the state of the internal thread cache."""
 
 
-class GuildEvent(str, Enum):
+class GuildEvent(Enum):
     guild_join = "guild_join"
     """Called when a `Guild` is either created by the `Client` or when the Client joins a guild."""
     guild_remove = "guild_remove"
@@ -957,13 +957,13 @@ class GuildEvent(str, Enum):
     """Called when a user subscribes to or unsubscribes from a guild scheduled event regardless of the guild scheduled event cache."""
 
 
-class ApplicationCommandEvent(str, Enum):
+class ApplicationCommandEvent(Enum):
     application_command_permissions_update = "application_command_permissions_update"
     """Called when the permissions of an application command or the application-wide command permissions are updated."""
 
 
 # idk, this could go under the GuildEvent group
-class AutoModEvent(str, Enum):
+class AutoModEvent(Enum):
     automod_action_execution = "automod_action_execution"
     """Called when an auto moderation action is executed due to a rule triggering for a particular event."""
     automod_rule_create = "automod_rule_create"
@@ -974,7 +974,7 @@ class AutoModEvent(str, Enum):
     """Called when an `AutoModRule` is deleted."""
 
 
-class IntegrationEvent(str, Enum):
+class IntegrationEvent(Enum):
     integration_create = "integration_create"
     """Called when an integration is created."""
     integration_update = "integration_update"
@@ -983,7 +983,7 @@ class IntegrationEvent(str, Enum):
     """Called when an integration is deleted."""
 
 
-class MemberEvent(str, Enum):
+class MemberEvent(Enum):
     member_join = "member_join"
     """Called when a `Member` joins a `Guild`."""
     member_update = "member_update"
@@ -1006,7 +1006,7 @@ class MemberEvent(str, Enum):
     """Called when a `Member` changes their `VoiceState`."""
 
 
-class StageInstanceEvent(str, Enum):
+class StageInstanceEvent(Enum):
     stage_instance_create = "stage_instance_create"
     """Called when a `StageInstance` is created for a `StageChannel`."""
     stage_instance_update = "stage_instance_update"
@@ -1015,7 +1015,7 @@ class StageInstanceEvent(str, Enum):
     """Called when a `StageInstance` is deleted for a `StageChannel`."""
 
 
-class InteractionEvent(str, Enum):
+class InteractionEvent(Enum):
     application_command = "application_command"
     """Called when an application command is invoked."""
     application_command_autocomplete = "application_command_autocomplete"
@@ -1032,7 +1032,7 @@ class InteractionEvent(str, Enum):
     """Called when a modal is submitted."""
 
 
-class MessageEvent(str, Enum):
+class MessageEvent(Enum):
     message = "message"
     """Called when a `Message` is created and sent."""
     message_edit = "message_edit"

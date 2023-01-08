@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import enum
 import inspect
 from typing import (
     TYPE_CHECKING,
@@ -30,6 +31,20 @@ from .slash_core import InvokableSlashCommand
 if TYPE_CHECKING:
     from typing_extensions import Self
 
+    from disnake.enums import (
+        ApplicationCommandEvent,
+        AutoModEvent,
+        BotEvent,
+        ChannelEvent,
+        ClientEvent,
+        GuildEvent,
+        IntegrationEvent,
+        InteractionEvent,
+        MemberEvent,
+        MessageEvent,
+        StageInstanceEvent,
+        ThreadEvent,
+    )
     from disnake.interactions import ApplicationCommandInteraction
 
     from .bot import AutoShardedBot, AutoShardedInteractionBot, Bot, InteractionBot
@@ -37,6 +52,20 @@ if TYPE_CHECKING:
     from .core import Command
 
     AnyBot = Union[Bot, AutoShardedBot, InteractionBot, AutoShardedInteractionBot]
+    AnyEvent = Union[
+        ClientEvent,
+        BotEvent,
+        ChannelEvent,
+        ThreadEvent,
+        GuildEvent,
+        ApplicationCommandEvent,
+        AutoModEvent,
+        IntegrationEvent,
+        MemberEvent,
+        StageInstanceEvent,
+        InteractionEvent,
+        MessageEvent,
+    ]
 
 __all__ = (
     "CogMeta",
@@ -399,7 +428,7 @@ class Cog(metaclass=CogMeta):
         return getattr(method.__func__, "__cog_special_method__", method)
 
     @classmethod
-    def listener(cls, name: str = MISSING) -> Callable[[FuncT], FuncT]:
+    def listener(cls, name: Union[str, AnyEvent] = MISSING) -> Callable[[FuncT], FuncT]:
         """A decorator that marks a function as a listener.
 
         This is the cog equivalent of :meth:`.Bot.listen`.
@@ -416,9 +445,9 @@ class Cog(metaclass=CogMeta):
             The function is not a coroutine function or a string was not passed as
             the name.
         """
-        if name is not MISSING and not isinstance(name, str):
+        if name is not MISSING and not isinstance(name, (str, enum.Enum)):
             raise TypeError(
-                f"Cog.listener expected str but received {name.__class__.__name__!r} instead."
+                f"Cog.listener expected str or Enum but received {name.__class__.__name__!r} instead."
             )
 
         def decorator(func: FuncT) -> FuncT:
@@ -429,6 +458,8 @@ class Cog(metaclass=CogMeta):
                 raise TypeError("Listener function must be a coroutine function.")
             actual.__cog_listener__ = True
             to_assign = name or actual.__name__
+            if isinstance(name, enum.Enum):
+                to_assign = name.value
             try:
                 actual.__cog_listener_names__.append(to_assign)
             except AttributeError:

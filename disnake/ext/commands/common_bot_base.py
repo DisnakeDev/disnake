@@ -197,7 +197,7 @@ class CommonBotBase(Generic[CogT]):
 
     # listener registration
 
-    def add_listener(self, func: CoroFunc, name: str = MISSING) -> None:
+    def add_listener(self, func: CoroFunc, name: Union[str, AnyEvent] = MISSING) -> None:
         """The non decorator alternative to :meth:`.listen`.
 
         Parameters
@@ -223,7 +223,13 @@ class CommonBotBase(Generic[CogT]):
         TypeError
             The function is not a coroutine.
         """
-        name = func.__name__ if name is MISSING else name
+        name = (
+            func.__name__
+            if name is MISSING
+            else name
+            if isinstance(name, str)
+            else "on_" + name.value
+        )
 
         if not asyncio.iscoroutinefunction(func):
             raise TypeError("Listeners must be coroutines")
@@ -233,7 +239,7 @@ class CommonBotBase(Generic[CogT]):
         else:
             self.extra_events[name] = [func]
 
-    def remove_listener(self, func: CoroFunc, name: str = MISSING) -> None:
+    def remove_listener(self, func: CoroFunc, name: Union[str, AnyEvent] = MISSING) -> None:
         """Removes a listener from the pool of listeners.
 
         Parameters
@@ -244,7 +250,13 @@ class CommonBotBase(Generic[CogT]):
             The name of the event we want to remove. Defaults to
             ``func.__name__``.
         """
-        name = func.__name__ if name is MISSING else name
+        name = (
+            func.__name__
+            if name is MISSING
+            else name
+            if isinstance(name, str)
+            else "on_" + name.value
+        )
 
         if name in self.extra_events:
             try:
