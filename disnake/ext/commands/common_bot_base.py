@@ -223,7 +223,7 @@ class CommonBotBase(Generic[CogT]):
         TypeError
             The function is not a coroutine.
         """
-        name = (
+        name_ = (
             func.__name__
             if name is MISSING
             else name
@@ -235,9 +235,9 @@ class CommonBotBase(Generic[CogT]):
             raise TypeError("Listeners must be coroutines")
 
         if name in self.extra_events:
-            self.extra_events[name].append(func)
+            self.extra_events[name_].append(func)
         else:
-            self.extra_events[name] = [func]
+            self.extra_events[name_] = [func]
 
     def remove_listener(self, func: CoroFunc, name: Union[str, AnyEvent] = MISSING) -> None:
         """Removes a listener from the pool of listeners.
