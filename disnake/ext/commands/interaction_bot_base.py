@@ -31,6 +31,8 @@ from disnake.custom_warnings import SyncWarning
 from disnake.enums import ApplicationCommandType
 from disnake.utils import warn_deprecated
 
+from ... import HTTPException
+from ...errors import _flatten_error_dict
 from . import errors
 from .base_core import InvokableApplicationCommand
 from .common_bot_base import CommonBotBase
@@ -60,14 +62,12 @@ if TYPE_CHECKING:
 
     P = ParamSpec("P")
 
-
 __all__ = ("InteractionBotBase",)
 
 MISSING: Any = disnake.utils.MISSING
 
 T = TypeVar("T")
 CFT = TypeVar("CFT", bound="CoroFunc")
-
 
 _log = logging.getLogger(__name__)
 
@@ -801,12 +801,9 @@ class InteractionBotBase(CommonBotBase):
                 try:
                     await self.bulk_overwrite_global_commands(to_send)
                 except Exception as e:
-                    sync_warnings = "\n".join(
-                        self._update_sync_warning(sync_warning, to_send)
-                        for sync_warning in str(e).split("\n")
-                    )
+                    sync_warnings = self._parse_sync_warning(e, to_send)
                     warnings.warn(
-                        f"Failed to overwrite global commands due to {sync_warnings}", SyncWarning
+                        f"Failed to overwrite global commands due to \n{sync_warnings}", SyncWarning
                     )
 
         # Same process but for each specified guild individually.
@@ -837,12 +834,9 @@ class InteractionBotBase(CommonBotBase):
                     try:
                         await self.bulk_overwrite_guild_commands(guild_id, to_send)
                     except Exception as e:
-                        sync_warnings = "\n".join(
-                            self._update_sync_warning(sync_warning, to_send)
-                            for sync_warning in str(e).split("\n")
-                        )
+                        sync_warnings = self._parse_sync_warning(e, to_send)
                         warnings.warn(
-                            f"Failed to overwrite commands in <Guild id={guild_id}> due to {sync_warnings}",
+                            f"Failed to overwrite commands in <Guild id={guild_id}> due to \n{sync_warnings}",
                             SyncWarning,
                         )
         # Last debug message
@@ -1376,32 +1370,55 @@ class InteractionBotBase(CommonBotBase):
     ) -> None:
         await self.process_app_command_autocompletion(interaction)
 
-    def _update_sync_warning(self, sync_warning: str, commands: List[ApplicationCommand]) -> str:
-        command_number_match = re.search("In (\\d+)", sync_warning)
-        if not command_number_match:
-            return sync_warning
-        command_number = command_number_match.group(1)
-        command = commands[int(command_number)]
-        sync_warning = sync_warning.replace(command_number, command.name, 1)
+    def _parse_sync_warning(self, exception: Exception, commands: List[ApplicationCommand]) -> str:
+        if not isinstance(exception, HTTPException) or exception.status != 400:
+            return str(exception)
 
-        options = getattr(command, "options", None)
-        if not options:
-            return sync_warning
+        def _parse_options(
+            message: str, indent_level: int, options: List[Option], error_options: Dict[str, dict]
+        ) -> Tuple[str, int]:
+            for option_num, option_error in error_options.items():
+                option = options[int(option_num)]
+                message += f"{' ' * indent_level}{option.name} (Option {option_num}):\n"
 
-        option_number_match = re.search("options.(\\d+)", sync_warning)
-        if not option_number_match:
-            return sync_warning
-        option_number = option_number_match.group(1)
-        option = options[int(option_number)]
-        sync_warning = sync_warning.replace(option_number, option.name, 1)
+                indent_level += 2
+                if "description" in option_error:
+                    message += f"{' ' * indent_level}Description: {_flatten_error_dict(option_error)['description']}\n"
 
-        option_choices_number_match = re.search(
-            f"options.{option.name}.choices.(\\d+)", sync_warning
-        )
-        if not option_choices_number_match:
-            return sync_warning
-        option_choices_number = option_choices_number_match.group(1)
+                if "options" in option_error:
+                    message, indent_level = _parse_options(
+                        message, indent_level, option.options, option_error["options"]
+                    )
 
-        return sync_warning.replace(
-            option_choices_number, option.choices[int(option_choices_number)].name, 1
-        )
+                indent_level += 2
+                for choice_num, choice_error in option_error.get("choices", {}).items():
+                    choice = option.choices[int(choice_num)]
+                    message += f"{' ' * indent_level}{choice.name} (Choice {choice_num}):\n"
+                    flattened_choice_error = _flatten_error_dict(choice_error)
+                    for choice_issue, choice_error in flattened_choice_error.items():
+                        message += f"{' ' * (indent_level + 2)}{choice_issue}: {choice_error}\n"
+
+            return message, indent_level
+
+        try:
+            sync_warnings = []
+            for command_num, error in exception.errors.items():
+                command = commands[int(command_num)]
+
+                message = f"In {command.name}:\n"
+                indent_level = 2
+
+                if "description" in error:
+                    message += f"{' ' * indent_level}Description: {_flatten_error_dict(error)['description']}\n"
+
+                if "options" in error:
+                    message, _ = _parse_options(
+                        message, indent_level, getattr(command, "options"), error.get("options")
+                    )
+
+                sync_warnings.append(message)
+
+            return "\n".join(sync_warnings)
+        except Exception as e:
+            self._log_sync_debug(f"Exception parsing sync warnings: {e}")
+            return str(exception)
