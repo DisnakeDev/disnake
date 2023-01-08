@@ -1410,9 +1410,9 @@ class InteractionBotBase(CommonBotBase):
                 if "description" in error:
                     message += f"{' ' * indent_level}Description: {_flatten_error_dict(error)['description']}\n"
 
-                if "options" in error:
+                if "options" in error and (options := getattr(command, "options", None)):
                     message, _ = _parse_options(
-                        message, indent_level, getattr(command, "options"), error.get("options")
+                        message, indent_level, options, error.get("options")
                     )
 
                 sync_warnings.append(message)
