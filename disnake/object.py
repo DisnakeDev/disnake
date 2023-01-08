@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, SupportsInt, Union
+from typing import TYPE_CHECKING, Any, SupportsInt, Union
 
 from . import utils
 from .mixins import Hashable
@@ -49,7 +49,7 @@ class Object(Hashable):
         The ID of the object.
     """
 
-    def __init__(self, id: SupportsIntCast) -> None:
+    def __init__(self, id: SupportsIntCast, *, type: Any = None) -> None:
         try:
             id = int(id)
         except ValueError:
@@ -58,9 +58,10 @@ class Object(Hashable):
             ) from None
         else:
             self.id = id
+            self.type = type
 
     def __repr__(self) -> str:
-        return f"<Object id={self.id!r}>"
+        return f"<Object id={self.id!r} type={self.type!r}>"
 
     @property
     def created_at(self) -> datetime.datetime:
