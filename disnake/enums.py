@@ -60,6 +60,17 @@ __all__ = (
     "ThreadSortOrder",
     "ThreadLayout",
     "ClientEvent",
+    "BotEvent",
+    "ChannelEvent",
+    "ThreadEvent",
+    "GuildEvent",
+    "ApplicationCommandEvent",
+    "AutoModEvent",
+    "IntegrationEvent",
+    "MemberEvent",
+    "StageInstanceEvent",
+    "InteractionEvent",
+    "MessageEvent",
 )
 
 
