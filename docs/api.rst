@@ -3387,9 +3387,11 @@ of :class:`enum.Enum`.
 
         Represents a sticker with a lottie image.
 
-    .. attibute:: gif
+    .. attribute:: gif
 
         Represents a sticker with a gif image.
+
+        .. versionadded:: 2.8
 
 .. class:: InviteTarget
 
