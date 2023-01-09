@@ -554,12 +554,16 @@ class StickerFormatType(Enum):
 
     @property
     def file_extension(self) -> str:
-        lookup: Dict[StickerFormatType, str] = {
-            StickerFormatType.png: "png",
-            StickerFormatType.apng: "png",
-            StickerFormatType.lottie: "json",
-        }
-        return lookup[self]
+        # this default value isn't correct, but it's better than raising a KeyError if
+        # we encounter an unknown format
+        return STICKER_FORMAT_LOOKUP.get(self, "png")
+
+
+STICKER_FORMAT_LOOKUP: Dict[StickerFormatType, str] = {
+    StickerFormatType.png: "png",
+    StickerFormatType.apng: "png",
+    StickerFormatType.lottie: "json",
+}
 
 
 class InviteTarget(Enum):
