@@ -553,10 +553,8 @@ class StickerFormatType(Enum):
     lottie = 3
 
     @property
-    def file_extension(self) -> str:
-        # this default value isn't correct, but it's better than raising a KeyError if
-        # we encounter an unknown format
-        return STICKER_FORMAT_LOOKUP.get(self, "png")
+    def file_extension(self) -> Optional[str]:
+        return STICKER_FORMAT_LOOKUP[self]
 
 
 STICKER_FORMAT_LOOKUP: Dict[StickerFormatType, str] = {
