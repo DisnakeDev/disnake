@@ -1,1 +1,1 @@
-Add ``gif`` enumeration value to :class:`StickerFormatType`.
+Add :attr:`StickerFormatType.gif`.
