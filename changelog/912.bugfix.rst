@@ -1,0 +1,1 @@
+Make :attr:`StickerPack.cover_sticker_id`, :attr:`.cover_sticker <StickerPack.cover_sticker>` and :attr:`.banner <StickerPack.banner>` optional.
