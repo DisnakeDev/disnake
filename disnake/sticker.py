@@ -389,7 +389,8 @@ class GuildSticker(Sticker):
     guild_id: :class:`int`
         The ID of the guild that this sticker is from.
     user: Optional[:class:`User`]
-        The user that created this sticker. This can only be retrieved using :meth:`Guild.fetch_sticker` and
+        The user that created this sticker. This can only be retrieved using
+        :meth:`Guild.fetch_sticker`/:meth:`Guild.fetch_stickers` and
         having the :attr:`~Permissions.manage_emojis_and_stickers` permission.
     emoji: :class:`str`
         The name of a unicode emoji that represents this sticker.
