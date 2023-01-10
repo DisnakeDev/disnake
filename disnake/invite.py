@@ -349,7 +349,9 @@ class Invite(Hashable):
         .. versionadded:: 2.0
 
     inviter: Optional[:class:`User`]
-        The user who created the invite.
+        The user who created the invite, if any.
+
+        This is ``None`` in vanity invites, for example.
     channel: Optional[Union[:class:`abc.GuildChannel`, :class:`Object`, :class:`PartialInviteChannel`]]
         The channel the invite is for.
     target_type: :class:`InviteTarget`
