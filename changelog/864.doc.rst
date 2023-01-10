@@ -1,0 +1,1 @@
+Clarify types of optional :class:`Invite` attributes.
