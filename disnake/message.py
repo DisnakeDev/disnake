@@ -696,7 +696,7 @@ class RoleSubscriptionData:
     tier_name: :class:`str`
         The name of the tier the user subscribed to.
     total_months_subscribed: :class:`int`
-        The number of months the user has been subscribed for.
+        The cumulative number of months the user has been subscribed for.
     is_renewal: :class:`bool`
         Whether this message is for a subscription renewal instead of a new subscription.
     """
