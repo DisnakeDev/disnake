@@ -79,7 +79,7 @@ class ApplicationRoleConnectionMetadata:
 
     def __repr__(self) -> str:
         return (
-            f"<{self.__class__.__name__} name={self.name!r} key={self.key!r} "
+            f"<ApplicationRoleConnectionMetadata name={self.name!r} key={self.key!r} "
             f"description={self.description!r} type={self.type!r}>"
         )
 
