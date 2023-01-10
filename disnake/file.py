@@ -114,7 +114,7 @@ class File:
 
     @property
     def closed(self) -> bool:
-        """:class:`bool`: Wheter a file or bytes object is closed.
+        """:class:`bool`: Whether the file is closed.
 
         This is a shorthand for ``File.fp.closed``.
 
