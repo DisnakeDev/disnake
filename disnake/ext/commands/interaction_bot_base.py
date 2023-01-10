@@ -25,7 +25,7 @@ from typing import (
 )
 
 import disnake
-from disnake.app_commands import ApplicationCommand, Option
+from disnake.app_commands import ApplicationCommand
 from disnake.custom_warnings import SyncWarning
 from disnake.enums import ApplicationCommandType
 from disnake.utils import warn_deprecated
@@ -48,6 +48,7 @@ from .slash_core import InvokableSlashCommand, SubCommand, SubCommandGroup, slas
 if TYPE_CHECKING:
     from typing_extensions import NotRequired, ParamSpec
 
+    from disnake.app_commands import Option, OptionChoice
     from disnake.i18n import LocalizedOptional
     from disnake.interactions import (
         ApplicationCommandInteraction,
@@ -1374,30 +1375,41 @@ class InteractionBotBase(CommonBotBase):
             return str(exception)
 
         def _parse_options(
-            message: str, indent_level: int, options: List[Option], error_options: Dict[str, dict]
-        ) -> Tuple[str, int]:
-            for option_num, option_error in error_options.items():
-                option = options[int(option_num)]
-                message += f"{' ' * indent_level}{option.name} (Option {option_num}):\n"
+            message: str,
+            key: str,
+            value: dict,
+            options: List[Option | OptionChoice],
+            indent_level: int = 2,
+            metadata: str = "",
+        ):
 
-                indent_level += 2
-                if "description" in option_error:
-                    message += f"{' ' * indent_level}Description: {_flatten_error_dict(option_error)['description']}\n"
+            int_key = None
+            new_metadata = ""
+            try:
+                int_key = int(key)
+                key = options[int_key].name
+                new_metadata = f" ({metadata} {int_key})"
+            except ValueError:
+                pass
 
-                if "options" in option_error:
-                    message, indent_level = _parse_options(
-                        message, indent_level, option.options, option_error["options"]
-                    )
+            message += f"{' ' * indent_level}{key}{new_metadata}:\n"
+            indent_level += 2
 
-                indent_level += 2
-                for choice_num, choice_error in option_error.get("choices", {}).items():
-                    choice = option.choices[int(choice_num)]
-                    message += f"{' ' * indent_level}{choice.name} (Choice {choice_num}):\n"
-                    flattened_choice_error = _flatten_error_dict(choice_error)
-                    for choice_issue, choice_error in flattened_choice_error.items():
-                        message += f"{' ' * (indent_level + 2)}{choice_issue}: {choice_error}\n"
+            if "_errors" in value:
+                message += f"{' ' * indent_level}{_flatten_error_dict({key: value}).get(key)}\n"
+                return message
 
-            return message, indent_level
+            if int_key and getattr(options[int_key], "options", []):
+                metadata = "Option"
+                options = options[int_key].options
+            elif int_key and getattr(options[int_key], "choices", []):
+                metadata = "Choice"
+                options = options[int_key].choices
+
+            for k, v in value.items():
+                message = _parse_options(message, k, v, options, indent_level, metadata)
+
+            return message
 
         try:
             sync_warnings = []
@@ -1405,14 +1417,13 @@ class InteractionBotBase(CommonBotBase):
                 command = commands[int(command_num)]
 
                 message = f"In {command.name}:\n"
-                indent_level = 2
-
-                if "description" in error:
-                    message += f"{' ' * indent_level}Description: {_flatten_error_dict(error)['description']}\n"
-
-                if "options" in error and (options := getattr(command, "options", None)):
-                    message, _ = _parse_options(
-                        message, indent_level, options, error.get("options")
+                for key, value in error.items():
+                    message = _parse_options(
+                        message,
+                        key,
+                        value,
+                        getattr(command, "options", []),
+                        metadata="Option",
                     )
 
                 sync_warnings.append(message)
