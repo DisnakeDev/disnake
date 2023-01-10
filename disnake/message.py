@@ -1454,8 +1454,22 @@ class Message(Hashable):
         if self.type is MessageType.auto_moderation_action:
             return self.content
 
-        # TODO: `MessageType.role_subscription_purchase` requires `Message.role_subscription_data`,
-        #       which is currently undocumented
+        if self.type is MessageType.role_subscription_purchase:
+            if not (data := self.role_subscription_data):
+                return
+
+            guild_name = f"**{self.guild.name}**" if self.guild else None
+            if data.total_months_subscribed > 0:
+                action = "renewed" if data.is_renewal else "joined"
+                return (
+                    f"{self.author.name} {action} **{data.tier_name}** and has been a subscriber "
+                    f"of {guild_name} for {data.total_months_subscribed} "
+                    f"{'month' if data.total_months_subscribed == 1 else 'months'}!"
+                )
+            elif data.is_renewal:
+                return f"{self.author.name} renewed **{data.tier_name}** in their {guild_name} membership!"
+            else:
+                return f"{self.author.name} joined **{data.tier_name}** as a subscriber of {guild_name}!"
 
         if self.type is MessageType.interaction_premium_upsell:
             return self.content
