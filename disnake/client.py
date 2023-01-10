@@ -2475,7 +2475,7 @@ class Client:
         command_id: :class:`int`
             The ID of the application command to delete.
         """
-        return await self._connection.delete_global_command(command_id)
+        await self._connection.delete_global_command(command_id)
 
     async def bulk_overwrite_global_commands(
         self, application_commands: List[ApplicationCommand]
@@ -2617,7 +2617,7 @@ class Client:
         command_id: :class:`int`
             The ID of the application command to delete.
         """
-        return await self._connection.delete_guild_command(guild_id, command_id)
+        await self._connection.delete_guild_command(guild_id, command_id)
 
     async def bulk_overwrite_guild_commands(
         self, guild_id: int, application_commands: List[ApplicationCommand]
