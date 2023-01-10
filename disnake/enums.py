@@ -553,7 +553,7 @@ class StickerFormatType(Enum):
     lottie = 3
 
     @property
-    def file_extension(self) -> Optional[str]:
+    def file_extension(self) -> str:
         return STICKER_FORMAT_LOOKUP[self]
 
 
