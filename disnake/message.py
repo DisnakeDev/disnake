@@ -1403,7 +1403,9 @@ class Message(Hashable):
 
         if self.type is MessageType.guild_application_premium_subscription:
             application_name = (
-                self.application["name"] if self.application else "a deleted application"
+                self.application["name"]
+                if self.application and "name" in self.application
+                else "a deleted application"
             )
             return f"{self.author.name} upgraded {application_name} to premium for this server! 🎉"
 
