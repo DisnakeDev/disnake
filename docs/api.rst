@@ -1769,6 +1769,17 @@ of :class:`enum.Enum`.
         The system message denoting that a role subscription was purchased.
 
         .. versionadded:: 2.8
+    .. attribute:: interaction_premium_upsell
+
+        The system message for an application premium subscription upsell.
+
+        .. versionadded:: 2.8
+    .. attribute:: guild_application_premium_subscription
+
+        The system message denoting that a guild member has subscribed to an application.
+
+        .. versionadded:: 2.8
+
 
 .. class:: UserFlags
 

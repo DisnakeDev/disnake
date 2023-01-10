@@ -1401,6 +1401,17 @@ class Message(Hashable):
         # TODO: `MessageType.role_subscription_purchase` requires `Message.role_subscription_data`,
         #       which is currently undocumented
 
+        if self.type is MessageType.interaction_premium_upsell:
+            return self.content
+
+        if self.type is MessageType.guild_application_premium_subscription:
+            application_name = (
+                self.application["name"]
+                if self.application and "name" in self.application
+                else "a deleted application"
+            )
+            return f"{self.author.name} upgraded {application_name} to premium for this server! 🎉"
+
         # in the event of an unknown or unsupported message type, we return nothing
         return None
 
