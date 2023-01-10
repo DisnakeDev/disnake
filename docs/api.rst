@@ -5296,6 +5296,7 @@ InteractionMessage
 .. autoclass:: InteractionMessage()
     :members:
     :inherited-members:
+    :exclude-members: activity, role_subscription_data
 
 InteractionDataResolved
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -5858,6 +5859,14 @@ InteractionReference
 .. attributetable:: InteractionReference
 
 .. autoclass:: InteractionReference
+    :members:
+
+RoleSubscriptionData
+~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: RoleSubscriptionData
+
+.. autoclass:: RoleSubscriptionData
     :members:
 
 PartialMessage
