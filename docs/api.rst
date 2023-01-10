@@ -1766,12 +1766,12 @@ of :class:`enum.Enum`.
         .. versionadded:: 2.5
     .. attribute:: interaction_premium_upsell
 
-        Unknown. TBD?
+        The system message for an application premium subscription upsell.
 
         .. versionadded:: 2.8
     .. attribute:: guild_application_premium_subscription
 
-        Unknown. TBD?
+        The system message denoting that a guild member has subscribed to an application.
 
         .. versionadded:: 2.8
 
