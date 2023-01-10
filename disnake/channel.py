@@ -2804,7 +2804,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         available_tags: Sequence[ForumTag] = MISSING,
         default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
         default_sort_order: Optional[ThreadSortOrder] = MISSING,
-        default_layout: ThreadLayout = ...,
+        default_layout: ThreadLayout = MISSING,
         reason: Optional[str] = None,
         **kwargs: Never,
     ) -> Optional[ForumChannel]:
