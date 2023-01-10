@@ -1,1 +1,0 @@
-Improve ``asset.py`` typing.
