@@ -310,46 +310,38 @@ class Invite(Hashable):
         The URL fragment used for the invite.
     guild: Optional[Union[:class:`Guild`, :class:`Object`, :class:`PartialInviteGuild`]]
         The guild the invite is for. Can be ``None`` if it's from a group direct message.
-
     max_age: Optional[:class:`int`]
         How long before the invite expires in seconds.
         A value of ``0`` indicates that it doesn't expire.
 
         Optional according to the :ref:`table <invite_attr_table>` above.
-
     max_uses: Optional[:class:`int`]
         How many times the invite can be used.
         A value of ``0`` indicates that it has unlimited uses.
 
         Optional according to the :ref:`table <invite_attr_table>` above.
-
     created_at: Optional[:class:`datetime.datetime`]
         An aware UTC datetime object denoting the time the invite was created.
 
         Optional according to the :ref:`table <invite_attr_table>` above.
-
     temporary: Optional[:class:`bool`]
         Whether the invite grants temporary membership.
         If ``True``, members who joined via this invite will be kicked upon disconnect.
 
         Optional according to the :ref:`table <invite_attr_table>` above.
-
     uses: Optional[:class:`int`]
         How many times the invite has been used.
 
         Optional according to the :ref:`table <invite_attr_table>` above.
-
     approximate_member_count: Optional[:class:`int`]
         The approximate number of members in the guild.
 
         Optional according to the :ref:`table <invite_attr_table>` above.
-
     approximate_presence_count: Optional[:class:`int`]
         The approximate number of members currently active in the guild.
         This includes idle, dnd, online, and invisible members. Offline members are excluded.
 
         Optional according to the :ref:`table <invite_attr_table>` above.
-
     expires_at: Optional[:class:`datetime.datetime`]
         The expiration date of the invite. If the value is ``None`` when received through
         :meth:`Client.fetch_invite` with ``with_expiration`` enabled, the invite will never expire.
