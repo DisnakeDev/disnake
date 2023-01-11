@@ -2699,6 +2699,11 @@ class Client:
 
         .. versionadded:: 2.8
 
+        Raises
+        ------
+        HTTPException
+            Retrieving the metadata records failed.
+
         Returns
         -------
         List[:class:`.ApplicationRoleConnectionMetadata`]
@@ -2727,6 +2732,11 @@ class Client:
         ----------
         records: Sequence[:class:`.ApplicationRoleConnectionMetadata`]
             The new metadata records.
+
+        Raises
+        ------
+        HTTPException
+            Editing the metadata records failed.
 
         Returns
         -------
