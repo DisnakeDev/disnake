@@ -681,8 +681,7 @@ class InteractionReference:
 
 
 class RoleSubscriptionData:
-    """
-    Represents metadata of the role subscription purchase/renewal in a message
+    """Represents metadata of the role subscription purchase/renewal in a message
     of type :attr:`MessageType.role_subscription_purchase`.
 
     .. versionadded:: 2.8
@@ -1294,8 +1293,7 @@ class Message(Hashable):
 
     @property
     def role_subscription_data(self) -> Optional[RoleSubscriptionData]:
-        """
-        Optional[:class:`RoleSubscriptionData`]: The metadata of the role
+        """Optional[:class:`RoleSubscriptionData`]: The metadata of the role
         subscription purchase/renewal, if this message is a :attr:`MessageType.role_subscription_purchase`.
 
         .. versionadded:: 2.8
