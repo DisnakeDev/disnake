@@ -2716,6 +2716,11 @@ class Client:
 
         An application can have up to 5 metadata records.
 
+        .. warning::
+            This will overwrite all existing metadata records.
+            Consider :meth:`fetching <fetch_role_connection_metadata>` them first,
+            and constructing the new list of metadata records based off of the returned list.
+
         .. versionadded:: 2.8
 
         Parameters
