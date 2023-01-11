@@ -5066,7 +5066,6 @@ TextInput
     :members:
     :inherited-members:
 
-
 DeletedReferencedMessage
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -5075,6 +5074,21 @@ DeletedReferencedMessage
 .. autoclass:: DeletedReferencedMessage()
     :members:
 
+InteractionReference
+~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: InteractionReference
+
+.. autoclass:: InteractionReference
+    :members:
+
+RoleSubscriptionData
+~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: RoleSubscriptionData
+
+.. autoclass:: RoleSubscriptionData
+    :members:
 
 Reaction
 ~~~~~~~~~
@@ -5851,22 +5865,6 @@ MessageReference
 .. attributetable:: MessageReference
 
 .. autoclass:: MessageReference
-    :members:
-
-InteractionReference
-~~~~~~~~~~~~~~~~~~~~
-
-.. attributetable:: InteractionReference
-
-.. autoclass:: InteractionReference
-    :members:
-
-RoleSubscriptionData
-~~~~~~~~~~~~~~~~~~~~
-
-.. attributetable:: RoleSubscriptionData
-
-.. autoclass:: RoleSubscriptionData
     :members:
 
 PartialMessage
