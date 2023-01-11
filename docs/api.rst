@@ -3398,6 +3398,12 @@ of :class:`enum.Enum`.
 
         Represents a sticker with a lottie image.
 
+    .. attribute:: gif
+
+        Represents a sticker with a gif image.
+
+        .. versionadded:: 2.8
+
 .. class:: InviteTarget
 
     Represents the invite type for voice channel invites.
