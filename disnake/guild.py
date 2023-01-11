@@ -839,7 +839,7 @@ class Guild(Hashable):
     def emoji_limit(self) -> int:
         """:class:`int`: The maximum number of emoji slots this guild has.
 
-        Premium emojis (those associated with subscription roles) count towards a
+        Premium emojis (i.e. those associated with subscription roles) count towards a
         separate limit of 25.
         """
         more_emoji = 200 if "MORE_EMOJI" in self.features else 50
@@ -3234,7 +3234,7 @@ class Guild(Hashable):
             "2", "150"
             "3", "250"
 
-        Emojis with :attr:`subscription roles <RoleTags.integration_id>` are considered premium emoji,
+        Emojis with subscription roles (see ``roles`` below) are considered premium emoji,
         and count towards a separate limit of 25 emojis.
 
         You must have :attr:`~Permissions.manage_emojis` permission to
@@ -3252,7 +3252,12 @@ class Guild(Hashable):
                 Now accepts various resource types in addition to :class:`bytes`.
 
         roles: List[:class:`Role`]
-            A :class:`list` of :class:`Role`\\s that can use this emoji. Leave empty to make it available to everyone.
+            A list of roles that can use this emoji. Leave empty to make it available to everyone.
+
+            An emoji cannot have both subscription roles (see :attr:`RoleTags.integration_id`) and
+            non-subscription roles, and emojis can't be converted between premium and non-premium
+            after creation.
+
         reason: Optional[:class:`str`]
             The reason for creating this emoji. Shows up on the audit log.
 
