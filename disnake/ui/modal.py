@@ -36,7 +36,7 @@ class Modal:
     components: |components_type|
         The components to display in the modal. Up to 5 action rows.
     custom_id: :class:`str`
-        The custom ID of the modal.
+        The custom ID of the modal. This is usually not required.
         If not given, then a unique one is generated for you.
 
         .. note::
