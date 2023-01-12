@@ -2,7 +2,7 @@
 
 import functools
 import inspect
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional
 
 from _types import SphinxExtensionMeta
 from docutils import nodes
@@ -54,21 +54,41 @@ def patch_genindex(*args: Any) -> None:
     IndexEntries.create_index = new_create_index  # type: ignore
 
 
-def disable_mathjax(app: Sphinx, config: Config) -> None:
-    # prevent installation of mathjax script, which gets installed due to
-    # https://github.com/readthedocs/sphinx-hoverxref/commit/7c4655092c482bd414b1816bdb4f393da117062a
-    #
-    # inspired by https://github.com/readthedocs/sphinx-hoverxref/blob/003b84fee48262f1a969c8143e63c177bd98aa26/hoverxref/extension.py#L151
+def patch_ogp_callback(original: Callable[..., None]):
+    # Patches the given html-page-context callback to only be called if
+    # the page does not contain an `:ogp_disable:` meta field
+    def patched(
+        app: Sphinx,
+        pagename: str,
+        templatename: str,
+        context: Dict[str, Any],
+        doctree: Optional[nodes.document],
+    ):
+        fields = context.get("meta") or {}
+        if "ogp_disable" not in fields:
+            original(app, pagename, templatename, context, doctree)
 
-    for listener in app.events.listeners.get("html-page-context", []):
+    return patched
+
+
+def hook_html_page_context(app: Sphinx, config: Config) -> None:
+    for listener in list(app.events.listeners.get("html-page-context", [])):
         module_name = inspect.getmodule(listener.handler).__name__  # type: ignore
+
+        # prevent installation of mathjax script, which gets installed due to
+        # https://github.com/readthedocs/sphinx-hoverxref/commit/7c4655092c482bd414b1816bdb4f393da117062a
         if module_name == "sphinx.ext.mathjax":
             app.disconnect(listener.id)
+
+        # patch opengraph handler to add `:ogp_disable:` behavior
+        elif module_name == "sphinxext.opengraph":
+            app.disconnect(listener.id)
+            app.connect("html-page-context", patch_ogp_callback(listener.handler))
 
 
 def setup(app: Sphinx) -> SphinxExtensionMeta:
     app.connect("config-inited", patch_genindex)
-    app.connect("config-inited", disable_mathjax)
+    app.connect("config-inited", hook_html_page_context)
     app.connect("builder-inited", set_translator)
 
     return {
