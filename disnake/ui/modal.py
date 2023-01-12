@@ -6,7 +6,8 @@ import asyncio
 import os
 import sys
 import traceback
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
+from functools import partial
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Tuple, Union
 
 from ..enums import TextInputStyle
 from ..utils import MISSING
@@ -42,7 +43,14 @@ class Modal:
         Defaults to 600 seconds.
     """
 
-    __slots__ = ("title", "custom_id", "components", "timeout")
+    __slots__ = (
+        "title",
+        "custom_id",
+        "components",
+        "timeout",
+        "__remove_callback",
+        "__timeout_handle",
+    )
 
     def __init__(
         self,
@@ -63,6 +71,9 @@ class Modal:
         self.custom_id: str = os.urandom(16).hex() if custom_id is MISSING else custom_id
         self.components: List[ActionRow] = rows
         self.timeout: float = timeout
+
+        self.__remove_callback: Optional[Callable[[Modal], None]] = None
+        self.__timeout_handle: Optional[asyncio.TimerHandle] = None
 
     def __repr__(self) -> str:
         return (
@@ -211,10 +222,34 @@ class Modal:
         finally:
             # if the interaction was responded to (no matter if in the callback or error handler),
             # the modal closed for the user and therefore can be removed from the store
-            if interaction.response._response_type is not None:
-                interaction._state._modal_store.remove_modal(
-                    interaction.author.id, interaction.custom_id
-                )
+            if interaction.response._response_type is not None and self.__remove_callback:
+                self.__remove_callback(self)
+
+    def _dispatch_timeout(self) -> None:
+        self._stop_listening()
+        asyncio.create_task(self.on_timeout(), name=f"disnake-ui-modal-timeout-{self.custom_id}")
+
+    def _start_listening_from_store(self, remove_callback: Callable[[Modal], None]) -> None:
+        self.__remove_callback = remove_callback
+
+        loop = asyncio.get_running_loop()
+        if self.__timeout_handle is not None:
+            # shouldn't get here, but handled just in case
+            self.__timeout_handle.cancel()
+
+        # start timeout
+        self.__timeout_handle = loop.call_later(self.timeout, self._dispatch_timeout)
+
+    def _stop_listening(self) -> None:
+        # cancel timeout
+        if self.__timeout_handle is not None:
+            self.__timeout_handle.cancel()
+            self.__timeout_handle = None
+
+        # remove modal from store
+        if self.__remove_callback is not None:
+            self.__remove_callback(self)
+            self.__remove_callback = None
 
     def dispatch(self, interaction: ModalInteraction) -> None:
         asyncio.create_task(
@@ -229,25 +264,20 @@ class ModalStore:
         self._modals: Dict[Tuple[int, str], Modal] = {}
 
     def add_modal(self, user_id: int, modal: Modal) -> None:
-        loop = asyncio.get_running_loop()
-        self._modals[(user_id, modal.custom_id)] = modal
-        loop.create_task(self.handle_timeout(user_id, modal.custom_id, modal.timeout))
+        key = (user_id, modal.custom_id)
 
-    def remove_modal(self, user_id: int, modal_custom_id: str) -> Modal:
-        return self._modals.pop((user_id, modal_custom_id))
+        # if another modal with the same user+custom_id already exists,
+        # stop its timeout to avoid overlaps/collisions
+        if existing := self._modals.get(key):
+            existing._stop_listening()
 
-    async def handle_timeout(self, user_id: int, modal_custom_id: str, timeout: float) -> None:
-        # Waits for the timeout and then removes the modal from cache, this is done just in case
-        # the user closed the modal, as there isn't an event for that.
+        # start timeout, store modal
+        remove_callback = partial(self.remove_modal, user_id)
+        modal._start_listening_from_store(remove_callback)
+        self._modals[key] = modal
 
-        await asyncio.sleep(timeout)
-        try:
-            modal = self.remove_modal(user_id, modal_custom_id)
-        except KeyError:
-            # The modal has already been removed.
-            pass
-        else:
-            await modal.on_timeout()
+    def remove_modal(self, user_id: int, modal: Modal) -> None:
+        self._modals.pop((user_id, modal.custom_id), None)
 
     def dispatch(self, interaction: ModalInteraction) -> None:
         key = (interaction.author.id, interaction.custom_id)
