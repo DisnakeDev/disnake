@@ -37,6 +37,17 @@ class Modal:
         The components to display in the modal. Up to 5 action rows.
     custom_id: :class:`str`
         The custom ID of the modal.
+        If not given, then a unique one is generated for you.
+
+        .. note::
+            :class:`Modal`\\s are identified based on the user ID that triggered the
+            modal, and this ``custom_id``.
+            This can result in collisions when a user opens a modal with the same ``custom_id`` on
+            two separate devices, for example.
+
+            To avoid such issues, consider not specifying a ``custom_id`` to use an automatically generated one,
+            or include a unique value in the custom ID (e.g. the original interaction ID).
+
     timeout: :class:`float`
         The time to wait until the modal is removed from cache, if no interaction is made.
         Modals without timeouts are not supported, since there's no event for when a modal is closed.
