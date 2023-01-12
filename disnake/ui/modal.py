@@ -231,16 +231,15 @@ class Modal:
         except Exception as e:
             await self.on_error(e, interaction)
         finally:
-            # if the interaction was responded to (no matter if in the callback or error handler),
-            # the modal closed for the user and therefore can be removed from the store
-            if interaction.response._response_type is not None and self.__remove_callback:
-                self.__remove_callback(self)
+            if interaction.response._response_type is None:
+                # If the interaction was not responded to, the modal didn't close for the user.
+                # Since the timeout was already stopped at this point, restart it.
+                self._start_listening(self.__remove_callback)
+            else:
+                # Otherwise, the modal closed for the user; remove it from the store.
+                self._stop_listening()
 
-    def _dispatch_timeout(self) -> None:
-        self._stop_listening()
-        asyncio.create_task(self.on_timeout(), name=f"disnake-ui-modal-timeout-{self.custom_id}")
-
-    def _start_listening_from_store(self, remove_callback: Callable[[Modal], None]) -> None:
+    def _start_listening(self, remove_callback: Optional[Callable[[Modal], None]]) -> None:
         self.__remove_callback = remove_callback
 
         loop = asyncio.get_running_loop()
@@ -262,7 +261,15 @@ class Modal:
             self.__remove_callback(self)
             self.__remove_callback = None
 
+    def _dispatch_timeout(self) -> None:
+        self._stop_listening()
+        asyncio.create_task(self.on_timeout(), name=f"disnake-ui-modal-timeout-{self.custom_id}")
+
     def dispatch(self, interaction: ModalInteraction) -> None:
+        # stop the timeout, but don't remove the modal from the store yet in case it's not responded to
+        if self.__timeout_handle is not None:
+            self.__timeout_handle.cancel()
+
         asyncio.create_task(
             self._scheduled_task(interaction), name=f"disnake-ui-modal-dispatch-{self.custom_id}"
         )
@@ -284,7 +291,7 @@ class ModalStore:
 
         # start timeout, store modal
         remove_callback = partial(self.remove_modal, user_id)
-        modal._start_listening_from_store(remove_callback)
+        modal._start_listening(remove_callback)
         self._modals[key] = modal
 
     def remove_modal(self, user_id: int, modal: Modal) -> None:
