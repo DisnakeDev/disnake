@@ -829,18 +829,18 @@ class PublicUserFlags(BaseFlags):
         return UserFlags.verified_bot_developer.value
 
     @flag_value
-    def discord_certified_moderator(self):
-        """:class:`bool`: Returns ``True`` if the user is a Discord Certified Moderator.
+    def moderator_programs_alumni(self):
+        """:class:`bool`: Returns ``True`` if the user is a Discord Moderator Programs Alumni.
 
-        .. versionadded:: 2.0
+        .. versionadded:: 2.8
         """
         return UserFlags.discord_certified_moderator.value
 
     @alias_flag_value
-    def moderator_programs_alumni(self):
-        """:class:`bool`: An alias for :attr:`discord_certified_moderator`.
+    def discord_certified_moderator(self):
+        """:class:`bool`: An alias for :attr:`moderator_programs_alumni`.
 
-        .. versionadded:: 2.8
+        .. versionadded:: 2.0
         """
         return UserFlags.discord_certified_moderator.value
 
