@@ -43,7 +43,7 @@ class MyModal(disnake.ui.Modal):
                 max_length=1024,
             ),
         ]
-        super().__init__(title="Create Tag", custom_id="create_tag", components=components)
+        super().__init__(title="Create Tag", components=components)
 
     async def callback(self, inter: disnake.ModalInteraction) -> None:
         tag_name = inter.text_values["name"]
