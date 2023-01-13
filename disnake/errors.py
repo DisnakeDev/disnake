@@ -116,9 +116,9 @@ class HTTPException(DiscordException):
         if isinstance(message, dict):
             self.code = message.get("code", 0)
             base = message.get("message", "")
-            self.errors = message.get("errors")
-            if self.errors:
-                flattened_errors = _flatten_error_dict(self.errors)
+            self._errors = message.get("errors")
+            if self._errors:
+                flattened_errors = _flatten_error_dict(self._errors)
                 helpful = "\n".join(f"In {k}: {m}" for k, m in flattened_errors.items())
                 self.text = base + "\n" + helpful
             else:

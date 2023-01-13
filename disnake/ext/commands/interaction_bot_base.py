@@ -25,13 +25,12 @@ from typing import (
 )
 
 import disnake
-from disnake.app_commands import ApplicationCommand
+from disnake.app_commands import ApplicationCommand, Option, SlashCommand
 from disnake.custom_warnings import SyncWarning
 from disnake.enums import ApplicationCommandType
+from disnake.errors import HTTPException, _flatten_error_dict
 from disnake.utils import warn_deprecated
 
-from ... import HTTPException
-from ...errors import _flatten_error_dict
 from . import errors
 from .base_core import InvokableApplicationCommand
 from .common_bot_base import CommonBotBase
@@ -48,7 +47,7 @@ from .slash_core import InvokableSlashCommand, SubCommand, SubCommandGroup, slas
 if TYPE_CHECKING:
     from typing_extensions import NotRequired, ParamSpec
 
-    from disnake.app_commands import Option, OptionChoice
+    from disnake.app_commands import OptionChoice
     from disnake.i18n import LocalizedOptional
     from disnake.interactions import (
         ApplicationCommandInteraction,
@@ -138,6 +137,90 @@ def _format_diff(diff: _Diff) -> str:
             lines.append("    -")
 
     return "\n".join(f"| {line}" for line in lines)
+
+
+def _parse_sync_warning(exception: Exception, commands: List[ApplicationCommand]) -> str:
+    if (
+        not isinstance(exception, HTTPException)
+        or exception.status != 400
+        or not isinstance(exception._errors, dict)
+    ):
+        return str(exception)
+
+    try:
+        sync_warnings: List[str] = []
+        for command_num, error in exception._errors.items():
+            command = commands[int(command_num)]
+
+            message = f"In {command.name}:\n"
+            for key, value in error.items():
+                message = _parse_options(
+                    message,
+                    key,
+                    value,
+                    command.options if isinstance(command, SlashCommand) else [],
+                    2,
+                    "Option",
+                )
+
+            sync_warnings.append(message)
+
+        return "\n".join(sync_warnings)
+    except Exception:
+        return str(exception)
+
+
+def _parse_options(
+    message: str,
+    key: str,
+    value: Any,
+    options: Union[List[Option], List[OptionChoice]],
+    indent_level: int,
+    metadata: str,
+):
+
+    # When we are parsing an option or choice, the metadata param will tell us where the `options` came from
+    # This metadata is attached to the message to show if the key is an Option or Choice
+    # We use new_metadata for when we parse a non-decimal key, since we need to carry this metadata
+    # over to the next iteration.
+
+    # It is helpful to know the error dict looks something like
+    # {
+    #     "options": {
+    #         "0": {
+    #             "choices": {
+    #                 "0": {
+    #                     "name": {"_errors": ...}
+    #                 }
+    #             }
+    #         }
+    #     }
+    # }
+
+    new_metadata = ""
+    if key.isdecimal():
+        new_metadata = f" ({metadata} {key})"
+        option = options[int(key)]
+        key = option.name
+
+        if isinstance(option, Option):
+            if option.options:
+                metadata = "Option"
+                options = option.options
+            elif option.choices:
+                metadata = "Choice"
+                options = option.choices
+
+    message += f"{' ' * indent_level}{key}{new_metadata}:\n"
+    indent_level += 2
+
+    if "_errors" in value:
+        return message + f"{' ' * indent_level}{_flatten_error_dict({key: value}).get(key)}\n"
+
+    for k, v in value.items():
+        message = _parse_options(message, k, v, options, indent_level, metadata)
+
+    return message
 
 
 class InteractionBotBase(CommonBotBase):
@@ -801,7 +884,7 @@ class InteractionBotBase(CommonBotBase):
                 try:
                     await self.bulk_overwrite_global_commands(to_send)
                 except Exception as e:
-                    sync_warnings = self._parse_sync_warning(e, to_send)
+                    sync_warnings = _parse_sync_warning(e, to_send)
                     warnings.warn(
                         f"Failed to overwrite global commands due to \n{sync_warnings}", SyncWarning
                     )
@@ -834,7 +917,7 @@ class InteractionBotBase(CommonBotBase):
                     try:
                         await self.bulk_overwrite_guild_commands(guild_id, to_send)
                     except Exception as e:
-                        sync_warnings = self._parse_sync_warning(e, to_send)
+                        sync_warnings = _parse_sync_warning(e, to_send)
                         warnings.warn(
                             f"Failed to overwrite commands in <Guild id={guild_id}> due to \n{sync_warnings}",
                             SyncWarning,
@@ -1369,66 +1452,3 @@ class InteractionBotBase(CommonBotBase):
         self, interaction: ApplicationCommandInteraction
     ) -> None:
         await self.process_app_command_autocompletion(interaction)
-
-    def _parse_sync_warning(self, exception: Exception, commands: List[ApplicationCommand]) -> str:
-        if not isinstance(exception, HTTPException) or exception.status != 400:
-            return str(exception)
-
-        def _parse_options(
-            message: str,
-            key: str,
-            value: dict,
-            options: List[Option | OptionChoice],
-            indent_level: int = 2,
-            metadata: str = "",
-        ):
-
-            int_key = None
-            new_metadata = ""
-            try:
-                int_key = int(key)
-                key = options[int_key].name
-                new_metadata = f" ({metadata} {int_key})"
-            except ValueError:
-                pass
-
-            message += f"{' ' * indent_level}{key}{new_metadata}:\n"
-            indent_level += 2
-
-            if "_errors" in value:
-                message += f"{' ' * indent_level}{_flatten_error_dict({key: value}).get(key)}\n"
-                return message
-
-            if int_key and getattr(options[int_key], "options", []):
-                metadata = "Option"
-                options = options[int_key].options
-            elif int_key and getattr(options[int_key], "choices", []):
-                metadata = "Choice"
-                options = options[int_key].choices
-
-            for k, v in value.items():
-                message = _parse_options(message, k, v, options, indent_level, metadata)
-
-            return message
-
-        try:
-            sync_warnings = []
-            for command_num, error in exception.errors.items():
-                command = commands[int(command_num)]
-
-                message = f"In {command.name}:\n"
-                for key, value in error.items():
-                    message = _parse_options(
-                        message,
-                        key,
-                        value,
-                        getattr(command, "options", []),
-                        metadata="Option",
-                    )
-
-                sync_warnings.append(message)
-
-            return "\n".join(sync_warnings)
-        except Exception as e:
-            self._log_sync_debug(f"Exception parsing sync warnings: {e}")
-            return str(exception)
