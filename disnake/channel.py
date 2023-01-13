@@ -535,7 +535,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         Returns
         -------
         :class:`TextChannel`
-            The channel that was created.
+            The newly created text channel.
         """
         if news is not MISSING:
             # if news is True set the channel_type to News, otherwise if it's False set it to Text
