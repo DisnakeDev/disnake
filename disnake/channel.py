@@ -501,7 +501,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         .. versionchanged:: 2.8
             Added ``topic``, ``position``, ``nsfw``, ``category``, ``slowmode_delay``,
-            ``type``, ``default_auto_archive_duration``, ``flags`` keyword-only parameters.
+            ``default_auto_archive_duration`` and ``news`` keyword-only parameters.
 
         Parameters
         ----------
