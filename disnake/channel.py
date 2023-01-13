@@ -3208,7 +3208,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         .. versionchanged:: 2.8
             Added new ``topic``, ``position``, ``nsfw``, ``category``, ``slowmode_delay``,
             ``default_thread_slowmode_delay``, ``default_auto_archive_duration``,
-            ``require_tag``, ``available_tags``, ``default_reaction``, ``default_sort_order``
+            ``available_tags``, ``default_reaction`` and ``default_sort_order``
             keyword-only paremters.
 
         Parameters
