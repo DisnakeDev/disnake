@@ -2380,7 +2380,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         do this.
 
         .. versionchanged:: 2.8
-            Added``position``, ``nsfw``, ``flags`` keyword-only parameters.
+            Added ``position`` and ``nsfw`` keyword-only parameters.
 
         Parameters
         ----------
