@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import enum
 import inspect
 from typing import (
     TYPE_CHECKING,
@@ -39,6 +40,7 @@ if TYPE_CHECKING:
     from .core import Command
 
     AnyBot = Union[Bot, AutoShardedBot, InteractionBot, AutoShardedInteractionBot]
+
 
 __all__ = (
     "CogMeta",
@@ -422,6 +424,7 @@ class Cog(metaclass=CogMeta):
             issubclass(name.__class__, _EnumValueBase) or isinstance(name, str)
         ):
             raise TypeError(
+                f"Cog.listener expected str or Enum but received {name.__class__.__name__!r} instead."
                 f"Cog.listener expected str or Enum but received {name.__class__.__name__!r} instead."
             )
 

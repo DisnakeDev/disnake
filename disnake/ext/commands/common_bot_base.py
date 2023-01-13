@@ -207,15 +207,21 @@ class CommonBotBase(Generic[CogT]):
                 f"Bot.add_listener expected str or Enum but received {name.__class__.__name__!r} instead."
             )
 
-        _name = func.__name__ if name is MISSING else name if isinstance(name, str) else name.value
+        name_ = (
+            func.__name__
+            if name is MISSING
+            else name
+            if isinstance(name, str)
+            else "on_" + name.value
+        )
 
         if not asyncio.iscoroutinefunction(func):
             raise TypeError("Listeners must be coroutines")
 
-        if _name in self.extra_events:
-            self.extra_events[_name].append(func)
+        if name_ in self.extra_events:
+            self.extra_events[name_].append(func)
         else:
-            self.extra_events[_name] = [func]
+            self.extra_events[name_] = [func]
 
     def remove_listener(self, func: CoroFunc, name: Union[str, Event] = MISSING) -> None:
         """Removes a listener from the pool of listeners.
@@ -239,7 +245,13 @@ class CommonBotBase(Generic[CogT]):
             raise TypeError(
                 f"Bot.remove_listener expected str or Enum but received {name.__class__.__name__!r} instead."
             )
-        name = func.__name__ if name is MISSING else name if isinstance(name, str) else name.value
+        name = (
+            func.__name__
+            if name is MISSING
+            else name
+            if isinstance(name, str)
+            else "on_" + name.value
+        )
 
         if name in self.extra_events:
             try:

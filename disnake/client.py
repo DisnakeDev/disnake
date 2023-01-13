@@ -53,7 +53,7 @@ from .errors import (
 )
 from .flags import ApplicationFlags, Intents, MemberCacheFlags
 from .gateway import DiscordWebSocket, ReconnectWebSocket
-from .guild import Guild
+from .guild import Guild, GuildBuilder
 from .guild_preview import GuildPreview
 from .http import HTTPClient
 from .i18n import LocalizationProtocol, LocalizationStore
@@ -1883,7 +1883,9 @@ class Client:
 
         Creates a :class:`.Guild`.
 
-        Bot accounts in more than 10 guilds are not allowed to create guilds.
+        See :func:`guild_builder` for a more comprehensive alternative.
+
+        Bot accounts in 10 or more guilds are not allowed to create guilds.
 
         .. versionchanged:: 2.5
             Removed the ``region`` parameter.
@@ -1921,8 +1923,7 @@ class Client:
         Returns
         -------
         :class:`.Guild`
-            The created guild. This is not the same guild that is
-            added to cache.
+            The created guild. This is not the same guild that is added to cache.
         """
         if icon is not MISSING:
             icon_base64 = await utils._assetbytes_to_base64_data(icon)
@@ -1934,6 +1935,28 @@ class Client:
         else:
             data = await self.http.create_guild(name, icon_base64)
         return Guild(data=data, state=self._connection)
+
+    def guild_builder(self, name: str) -> GuildBuilder:
+        """Creates a builder object that can be used to create more complex guilds.
+
+        This is a more comprehensive alternative to :func:`create_guild`.
+        See :class:`.GuildBuilder` for details and examples.
+
+        Bot accounts in 10 or more guilds are not allowed to create guilds.
+
+        .. versionadded:: 2.8
+
+        Parameters
+        ----------
+        name: :class:`str`
+            The name of the guild.
+
+        Returns
+        -------
+        :class:`.GuildBuilder`
+            The guild builder object for configuring and creating a new guild.
+        """
+        return GuildBuilder(name=name, state=self._connection)
 
     async def fetch_stage_instance(self, channel_id: int, /) -> StageInstance:
         """|coro|
@@ -2475,7 +2498,7 @@ class Client:
         command_id: :class:`int`
             The ID of the application command to delete.
         """
-        return await self._connection.delete_global_command(command_id)
+        await self._connection.delete_global_command(command_id)
 
     async def bulk_overwrite_global_commands(
         self, application_commands: List[ApplicationCommand]
@@ -2617,7 +2640,7 @@ class Client:
         command_id: :class:`int`
             The ID of the application command to delete.
         """
-        await self.http.delete_guild_command(self.application_id, guild_id, command_id)
+        await self._connection.delete_guild_command(guild_id, command_id)
 
     async def bulk_overwrite_guild_commands(
         self, guild_id: int, application_commands: List[ApplicationCommand]
