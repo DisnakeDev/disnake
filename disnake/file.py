@@ -111,3 +111,24 @@ class File:
         self.fp.close = self._closer
         if self._owner:
             self._closer()
+
+    @property
+    def closed(self) -> bool:
+        """:class:`bool`: Whether the file is closed.
+
+        This is a shorthand for ``File.fp.closed``.
+
+        .. versionadded:: 2.8
+        """
+        return self.fp.closed
+
+    @property
+    def bytes_length(self) -> int:
+        """:class:`int`: The bytes length of the :attr:`~File.fp` object.
+
+        .. versionadded:: 2.8
+        """
+        current_position = self.fp.tell()
+        bytes_length = self.fp.seek(0, io.SEEK_END)
+        self.fp.seek(current_position)
+        return bytes_length - current_position

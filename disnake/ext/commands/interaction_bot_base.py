@@ -573,6 +573,7 @@ class InteractionBotBase(CommonBotBase):
         description: LocalizedOptional = None,
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
+        nsfw: Optional[bool] = None,
         options: Optional[List[Option]] = None,
         guild_ids: Optional[Sequence[int]] = None,
         connectors: Optional[Dict[str, str]] = None,
@@ -609,6 +610,12 @@ class InteractionBotBase(CommonBotBase):
 
             .. versionadded:: 2.5
 
+        nsfw: :class:`bool`
+            Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
+            Defaults to ``False``.
+
+            .. versionadded:: 2.8
+
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
         guild_ids: Sequence[:class:`int`]
@@ -641,6 +648,7 @@ class InteractionBotBase(CommonBotBase):
                 options=options,
                 dm_permission=dm_permission,
                 default_member_permissions=default_member_permissions,
+                nsfw=nsfw,
                 guild_ids=guild_ids,
                 connectors=connectors,
                 auto_sync=auto_sync,
@@ -658,6 +666,7 @@ class InteractionBotBase(CommonBotBase):
         name: LocalizedOptional = None,
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
+        nsfw: Optional[bool] = None,
         guild_ids: Optional[Sequence[int]] = None,
         auto_sync: Optional[bool] = None,
         extras: Optional[Dict[str, Any]] = None,
@@ -685,6 +694,12 @@ class InteractionBotBase(CommonBotBase):
 
             .. versionadded:: 2.5
 
+        nsfw: :class:`bool`
+            Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
+            Defaults to ``False``.
+
+            .. versionadded:: 2.8
+
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``.
         guild_ids: Sequence[:class:`int`]
@@ -711,6 +726,7 @@ class InteractionBotBase(CommonBotBase):
                 name=name,
                 dm_permission=dm_permission,
                 default_member_permissions=default_member_permissions,
+                nsfw=nsfw,
                 guild_ids=guild_ids,
                 auto_sync=auto_sync,
                 extras=extras,
@@ -727,6 +743,7 @@ class InteractionBotBase(CommonBotBase):
         name: LocalizedOptional = None,
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
+        nsfw: Optional[bool] = None,
         guild_ids: Optional[Sequence[int]] = None,
         auto_sync: Optional[bool] = None,
         extras: Optional[Dict[str, Any]] = None,
@@ -754,6 +771,12 @@ class InteractionBotBase(CommonBotBase):
 
             .. versionadded:: 2.5
 
+        nsfw: :class:`bool`
+            Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
+            Defaults to ``False``.
+
+            .. versionadded:: 2.8
+
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
         guild_ids: Sequence[:class:`int`]
@@ -780,6 +803,7 @@ class InteractionBotBase(CommonBotBase):
                 name=name,
                 dm_permission=dm_permission,
                 default_member_permissions=default_member_permissions,
+                nsfw=nsfw,
                 guild_ids=guild_ids,
                 auto_sync=auto_sync,
                 extras=extras,
