@@ -242,32 +242,34 @@ class ConnectionClosed(ClientException):
         4014: "Disallowed intents - you tried to specify an intent that you have not enabled or are not approved for.",
     }
 
+    # https://discord.com/developers/docs/topics/opcodes-and-status-codes#voice-voice-close-event-codes
+    GATEWAY_VOICE_CLOSE_EVENT_REASONS: Dict[int, str] = {
+        **GATEWAY_CLOSE_EVENT_REASONS,
+        4002: "Failed to decode payload",
+        4006: "Session no longer valid",
+        4011: "Server not found",
+        4012: "Unknown protocol",
+        4014: "Disconnected, channel was deleted, you were kicked, voice server changed, or the main gateway session was dropped.",
+        4015: "Voice server crashed",
+        4016: "Unknown encryption mode",
+    }
+
     def __init__(
         self,
         socket: ClientWebSocketResponse,
         *,
         shard_id: Optional[int],
         code: Optional[int] = None,
-        voice: Optional[bool] = False,
+        voice: bool = False,
     ) -> None:
         # This exception is just the same exception except
         # reconfigured to subclass ClientException for users
         self.code: int = code or socket.close_code or -1
         # aiohttp doesn't seem to consistently provide close reason
-        if voice:
-            # https://discord.com/developers/docs/topics/opcodes-and-status-codes#voice-voice-close-event-codes
-            self.GATEWAY_CLOSE_EVENT_REASONS.update(
-                {
-                    4002: "Failed to decode payload",
-                    4006: "Session no longer valid",
-                    4011: "Server not found",
-                    4012: "Unknown protocol",
-                    4014: "Disconnected, channel was deleted, you were kicked, voice server changed, or the main gateway session was dropped.",
-                    4015: "Voice server crashed",
-                    4016: "Unknown encryption mode",
-                }
-            )
         self.reason: str = self.GATEWAY_CLOSE_EVENT_REASONS.get(self.code, "Unknown reason")
+        if voice:
+            self.reason = self.GATEWAY_VOICE_CLOSE_EVENT_REASONS.get(self.code, "Unknown reason")
+
         self.shard_id: Optional[int] = shard_id
         super().__init__(
             f"Shard ID {self.shard_id} WebSocket closed with {self.code}: {self.reason}"
