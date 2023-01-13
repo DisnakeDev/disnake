@@ -1297,7 +1297,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         .. versionchanged:: 2.8
             Added ``bitrate``, ``user_limit``, ``position``, ``category``,
-            ``rtc_region``, ``video_quality_mode``, ``nsfw``, ``slowmode_delay``, ``flags``
+            ``rtc_region``, ``video_quality_mode``, ``nsfw`` and ``slowmode_delay``
             keyword-only parameters.
 
         Parameters
