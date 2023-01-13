@@ -512,7 +512,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         position: :class:`int`
             The position of the new channel. If not provided, defaults to this channel position.
         nsfw: :class:`bool`
-            Whether the new channel should be nsfw or not. If not provided, defaults to this channel nsfw value.
+            Whether the new channel should be marked as NSFW. If not provided, defaults to this channel nsfw value.
         category: Optional[:class:`abc.Snowflake`]
             The category of the new channel. If not provided, defaults to this channel category.
         slowmode_delay: :class:`int`
