@@ -1972,7 +1972,7 @@ class StageChannel(VocalGuildChannel):
 
         .. versionchanged:: 2.8
             Added ``position``, ``category``, ``rtc_region``,
-            ``video_quality_mode``, ``bitrate``, ``flags`` keyword-only parameters.
+            ``video_quality_mode`` and ``bitrate`` keyword-only parameters.
 
         Parameters
         ----------
