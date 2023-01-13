@@ -79,39 +79,11 @@ if TYPE_CHECKING:
     from .app_commands import APIApplicationCommand
     from .asset import AssetBytes
     from .channel import DMChannel
-    from .enums import (
-        ApplicationCommandEvent,
-        AutoModEvent,
-        BotEvent,
-        ChannelEvent,
-        ClientEvent,
-        GuildEvent,
-        IntegrationEvent,
-        InteractionEvent,
-        MemberEvent,
-        MessageEvent,
-        StageInstanceEvent,
-        ThreadEvent,
-    )
+    from .enums import Event
     from .member import Member
     from .message import Message
     from .types.gateway import SessionStartLimit as SessionStartLimitPayload
     from .voice_client import VoiceProtocol
-
-    AnyEvent = Union[
-        ClientEvent,
-        BotEvent,
-        ChannelEvent,
-        ThreadEvent,
-        GuildEvent,
-        ApplicationCommandEvent,
-        AutoModEvent,
-        IntegrationEvent,
-        MemberEvent,
-        StageInstanceEvent,
-        InteractionEvent,
-        MessageEvent,
-    ]
 
 
 __all__ = (
@@ -1550,7 +1522,7 @@ class Client:
 
     def wait_for(
         self,
-        event: Union[str, AnyEvent],
+        event: Union[str, Event],
         *,
         check: Optional[Callable[..., bool]] = None,
         timeout: Optional[float] = None,
@@ -1613,7 +1585,7 @@ class Client:
 
         Parameters
         ----------
-        event: :class:`str`
+        event: :class:Union[`str`, `Event`]
             The event name, similar to the :ref:`event reference <discord-api-events>`,
             but without the ``on_`` prefix, to wait for.
         check: Optional[Callable[..., :class:`bool`]]
@@ -1643,7 +1615,7 @@ class Client:
 
             check = _check
 
-        ev = event.lower()
+        ev = event.lower() if isinstance(event, str) else event.value
         try:
             listeners = self._listeners[ev]
         except KeyError:

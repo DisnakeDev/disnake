@@ -59,7 +59,7 @@ __all__ = (
     "AutoModActionType",
     "ThreadSortOrder",
     "ThreadLayout",
-    "ClientEvent",
+    "Event",
 )
 
 
@@ -822,7 +822,7 @@ class ThreadLayout(Enum):
     gallery_view = 2
 
 
-class ClientEvent(str, Enum):
+class Event(Enum):
     connect = "connect"
     """Called when the client has successfully connected to Discord."""
     disconnect = "disconnect"
@@ -849,9 +849,6 @@ class ClientEvent(str, Enum):
     """Called whenever a message is completely received from the WebSocket, before it's processed and parsed."""
     socket_raw_send = "socket_raw_send"
     """Called whenever a send operation is done on the WebSocket before the message is sent."""
-
-
-class BotEvent(str, Enum):
     command_error = "command_error"
     """Called when an error is raised inside a command either through user input error, check failure, or an error in your own code."""
     slash_command_error = "slash_command_error"
@@ -876,9 +873,6 @@ class BotEvent(str, Enum):
     """Called when a user command has completed its invocation."""
     message_command_completion = "message_command_completion"
     """Called when a message command has completed its invocation."""
-
-
-class ChannelEvent(str, Enum):
     guild_channel_create = "guild_channel_create"
     """Called whenever a guild channel is created."""
     guild_channel_update = "guild_channel_update"
@@ -893,9 +887,6 @@ class ChannelEvent(str, Enum):
     """Called whenever a message is pinned or unpinned from a private channel."""
     webhooks_update = "webhooks_update"  # i think it's right place is here
     """Called whenever a webhook is created, modified, or removed from a guild channel."""
-
-
-class ThreadEvent(str, Enum):
     thread_create = "thread_create"
     """Called whenever a thread is created."""
     thread_update = "thread_update"
@@ -916,9 +907,6 @@ class ThreadEvent(str, Enum):
     """Called whenever a thread is updated regardless of the state of the internal thread cache."""
     raw_thread_delete = "raw_thread_delete"
     """Called whenever a thread is deleted regardless of the state of the internal thread cache."""
-
-
-class GuildEvent(str, Enum):
     guild_join = "guild_join"
     """Called when a `Guild` is either created by the `Client` or when the Client joins a guild."""
     guild_remove = "guild_remove"
@@ -955,15 +943,8 @@ class GuildEvent(str, Enum):
     """Called when a user subscribes from a guild scheduled event regardless of the guild scheduled event cache."""
     raw_guild_scheduled_event_unsubscribe = "raw_guild_scheduled_event_unsubscribe"
     """Called when a user subscribes to or unsubscribes from a guild scheduled event regardless of the guild scheduled event cache."""
-
-
-class ApplicationCommandEvent(str, Enum):
     application_command_permissions_update = "application_command_permissions_update"
     """Called when the permissions of an application command or the application-wide command permissions are updated."""
-
-
-# idk, this could go under the GuildEvent group
-class AutoModEvent(str, Enum):
     automod_action_execution = "automod_action_execution"
     """Called when an auto moderation action is executed due to a rule triggering for a particular event."""
     automod_rule_create = "automod_rule_create"
@@ -972,18 +953,12 @@ class AutoModEvent(str, Enum):
     """Called when an `AutoModRule` is updated."""
     automod_rule_delete = "automod_rule_delete"
     """Called when an `AutoModRule` is deleted."""
-
-
-class IntegrationEvent(str, Enum):
     integration_create = "integration_create"
     """Called when an integration is created."""
     integration_update = "integration_update"
     """Called when an integration is updated."""
     raw_integration_delete = "raw_integration_delete"
     """Called when an integration is deleted."""
-
-
-class MemberEvent(str, Enum):
     member_join = "member_join"
     """Called when a `Member` joins a `Guild`."""
     member_update = "member_update"
@@ -1004,18 +979,12 @@ class MemberEvent(str, Enum):
     """Called when a `User` is updated."""
     voice_state_update = "voice_state_update"
     """Called when a `Member` changes their `VoiceState`."""
-
-
-class StageInstanceEvent(str, Enum):
     stage_instance_create = "stage_instance_create"
     """Called when a `StageInstance` is created for a `StageChannel`."""
     stage_instance_update = "stage_instance_update"
     """Called when a `StageInstance` is updated."""
     stage_instance_delete = "stage_instance_delete"
     """Called when a `StageInstance` is deleted for a `StageChannel`."""
-
-
-class InteractionEvent(str, Enum):
     application_command = "application_command"
     """Called when an application command is invoked."""
     application_command_autocomplete = "application_command_autocomplete"
@@ -1030,9 +999,6 @@ class InteractionEvent(str, Enum):
     """Called when a message interaction happened."""
     modal_submit = "modal_submit"
     """Called when a modal is submitted."""
-
-
-class MessageEvent(str, Enum):
     message = "message"
     """Called when a `Message` is created and sent."""
     message_edit = "message_edit"

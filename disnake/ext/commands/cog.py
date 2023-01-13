@@ -21,6 +21,7 @@ from typing import (
 
 import disnake
 import disnake.utils
+from disnake.enums import _EnumValueBase
 
 from ._types import _BaseCommand
 from .base_core import InvokableApplicationCommand
@@ -30,6 +31,7 @@ from .slash_core import InvokableSlashCommand
 if TYPE_CHECKING:
     from typing_extensions import Self
 
+    from disnake.enums import Event
     from disnake.interactions import ApplicationCommandInteraction
 
     from .bot import AutoShardedBot, AutoShardedInteractionBot, Bot, InteractionBot
@@ -399,14 +401,14 @@ class Cog(metaclass=CogMeta):
         return getattr(method.__func__, "__cog_special_method__", method)
 
     @classmethod
-    def listener(cls, name: str = MISSING) -> Callable[[FuncT], FuncT]:
+    def listener(cls, name: Union[str, Event] = MISSING) -> Callable[[FuncT], FuncT]:
         """A decorator that marks a function as a listener.
 
         This is the cog equivalent of :meth:`.Bot.listen`.
 
         Parameters
         ----------
-        name: :class:`str`
+        name: :class:Union[`str`, `Event`]
             The name of the event being listened to. If not provided, it
             defaults to the function's name.
 
@@ -416,9 +418,11 @@ class Cog(metaclass=CogMeta):
             The function is not a coroutine function or a string was not passed as
             the name.
         """
-        if name is not MISSING and not isinstance(name, str):
+        if name is not MISSING and not (
+            issubclass(name.__class__, _EnumValueBase) or isinstance(name, str)
+        ):
             raise TypeError(
-                f"Cog.listener expected str but received {name.__class__.__name__!r} instead."
+                f"Cog.listener expected str or Enum but received {name.__class__.__name__!r} instead."
             )
 
         def decorator(func: FuncT) -> FuncT:
@@ -428,7 +432,13 @@ class Cog(metaclass=CogMeta):
             if not asyncio.iscoroutinefunction(actual):
                 raise TypeError("Listener function must be a coroutine function.")
             actual.__cog_listener__ = True
-            to_assign = name or actual.__name__
+            to_assign = (
+                name
+                if isinstance(name, str)
+                else "on_" + name.value
+                if issubclass(name.__class__, _EnumValueBase)
+                else actual.__name__
+            )
             try:
                 actual.__cog_listener_names__.append(to_assign)
             except AttributeError:

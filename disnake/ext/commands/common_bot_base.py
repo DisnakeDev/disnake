@@ -26,6 +26,7 @@ from typing import (
 
 import disnake
 import disnake.utils
+from disnake.enums import _EnumValueBase
 
 from . import errors
 from .cog import Cog
@@ -33,40 +34,13 @@ from .cog import Cog
 if TYPE_CHECKING:
     import importlib.machinery
 
-    from disnake.enums import (
-        ApplicationCommandEvent,
-        AutoModEvent,
-        BotEvent,
-        ChannelEvent,
-        ClientEvent,
-        GuildEvent,
-        IntegrationEvent,
-        InteractionEvent,
-        MemberEvent,
-        MessageEvent,
-        StageInstanceEvent,
-        ThreadEvent,
-    )
+    from disnake.enums import Event
 
     from ._types import CoroFunc
     from .bot import AutoShardedBot, AutoShardedInteractionBot, Bot, InteractionBot
     from .help import HelpCommand
 
     AnyBot = Union[Bot, AutoShardedBot, InteractionBot, AutoShardedInteractionBot]
-    AnyEvent = Union[
-        ClientEvent,
-        BotEvent,
-        ChannelEvent,
-        ThreadEvent,
-        GuildEvent,
-        ApplicationCommandEvent,
-        AutoModEvent,
-        IntegrationEvent,
-        MemberEvent,
-        StageInstanceEvent,
-        InteractionEvent,
-        MessageEvent,
-    ]
 
 __all__ = ("CommonBotBase",)
 
@@ -197,14 +171,14 @@ class CommonBotBase(Generic[CogT]):
 
     # listener registration
 
-    def add_listener(self, func: CoroFunc, name: str = MISSING) -> None:
+    def add_listener(self, func: CoroFunc, name: Union[str, Event] = MISSING) -> None:
         """The non decorator alternative to :meth:`.listen`.
 
         Parameters
         ----------
         func: :ref:`coroutine <coroutine>`
             The function to call.
-        name: :class:`str`
+        name: :class:Union[`str`, `Event`]
             The name of the event to listen for. Defaults to ``func.__name__``.
 
         Example
@@ -214,37 +188,58 @@ class CommonBotBase(Generic[CogT]):
 
             async def on_ready(): pass
             async def my_message(message): pass
+            async def another_message(message): pass
 
             bot.add_listener(on_ready)
             bot.add_listener(my_message, 'on_message')
+            bot.add_listener(another_message, Event.message)
 
         Raises
         ------
         TypeError
-            The function is not a coroutine.
+            The function is not a coroutine or a string or an :class:`Event` was not passed
+            as the name.
         """
-        name = func.__name__ if name is MISSING else name
+        if name is not MISSING and not (
+            issubclass(name.__class__, _EnumValueBase) or isinstance(name, str)
+        ):
+            raise TypeError(
+                f"Bot.add_listener expected str or Enum but received {name.__class__.__name__!r} instead."
+            )
+
+        _name = func.__name__ if name is MISSING else name if isinstance(name, str) else name.value
 
         if not asyncio.iscoroutinefunction(func):
             raise TypeError("Listeners must be coroutines")
 
-        if name in self.extra_events:
-            self.extra_events[name].append(func)
+        if _name in self.extra_events:
+            self.extra_events[_name].append(func)
         else:
-            self.extra_events[name] = [func]
+            self.extra_events[_name] = [func]
 
-    def remove_listener(self, func: CoroFunc, name: str = MISSING) -> None:
+    def remove_listener(self, func: CoroFunc, name: Union[str, Event] = MISSING) -> None:
         """Removes a listener from the pool of listeners.
 
         Parameters
         ----------
         func
             The function that was used as a listener to remove.
-        name: :class:`str`
+        name: :class:Union[`str`, `Event`]
             The name of the event we want to remove. Defaults to
             ``func.__name__``.
+
+        Raises
+        ------
+        TypeError
+            The name passed was not a string or an :class:`Event`.
         """
-        name = func.__name__ if name is MISSING else name
+        if name is not MISSING and not (
+            issubclass(name.__class__, _EnumValueBase) or isinstance(name, str)
+        ):
+            raise TypeError(
+                f"Bot.remove_listener expected str or Enum but received {name.__class__.__name__!r} instead."
+            )
+        name = func.__name__ if name is MISSING else name if isinstance(name, str) else name.value
 
         if name in self.extra_events:
             try:
@@ -252,7 +247,7 @@ class CommonBotBase(Generic[CogT]):
             except ValueError:
                 pass
 
-    def listen(self, name: Union[str, AnyEvent] = MISSING) -> Callable[[CFT], CFT]:
+    def listen(self, name: Union[str, Event] = MISSING) -> Callable[[CFT], CFT]:
         """A decorator that registers another function as an external
         event listener. Basically this allows you to listen to multiple
         events from different places e.g. such as :func:`.on_ready`
@@ -274,13 +269,25 @@ class CommonBotBase(Generic[CogT]):
             async def my_message(message):
                 print('two')
 
-        Would print one and two in an unspecified order.
+            # in yet another file
+            @bot.listen(Event.message)
+            async def another_message(message):
+                print('three')
+
+        Would print one, two and three in an unspecified order.
 
         Raises
         ------
         TypeError
-            The function being listened to is not a coroutine.
+            The function being listened to is not a coroutine or a string or an :class:`Event` was not passed
+            as the name.
         """
+        if name is not MISSING and not (
+            issubclass(name.__class__, _EnumValueBase) or isinstance(name, str)
+        ):
+            raise TypeError(
+                f"Bot.listen expected str or Enum but received {name.__class__.__name__!r} instead."
+            )
 
         def decorator(func: CFT) -> CFT:
             self.add_listener(func, name if isinstance(name, str) else "on_" + name.value)
