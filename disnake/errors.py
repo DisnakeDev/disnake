@@ -236,7 +236,7 @@ class ConnectionClosed(ClientException):
         4008: "Rate limited",
         4009: "Session timed out",
         4010: "Invalid Shard",
-        4011: "Shard required, you are required to shard your connection in order to connect.",
+        4011: "Sharding required - you are required to shard your connection in order to connect.",
         4012: "Invalid API version",
         4013: "Invalid intents",
         4014: "Disallowed intents, you may have tried to specify an intent that you have not enabled or are not approved for.",
