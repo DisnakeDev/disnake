@@ -239,7 +239,7 @@ class ConnectionClosed(ClientException):
         4011: "Sharding required - you are required to shard your connection in order to connect.",
         4012: "Invalid API version",
         4013: "Invalid intents",
-        4014: "Disallowed intents, you may have tried to specify an intent that you have not enabled or are not approved for.",
+        4014: "Disallowed intents - you tried to specify an intent that you have not enabled or are not approved for.",
     }
 
     def __init__(
