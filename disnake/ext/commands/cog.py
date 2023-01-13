@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import asyncio
-import enum
 import inspect
 from typing import (
     TYPE_CHECKING,
