@@ -248,6 +248,8 @@ class MessageType(Enum):
     guild_invite_reminder = 22
     context_menu_command = 23
     auto_moderation_action = 24
+    interaction_premium_upsell = 26
+    guild_application_premium_subscription = 32
 
 
 class PartyType(Enum):
@@ -563,6 +565,7 @@ class StickerFormatType(Enum):
     png = 1
     apng = 2
     lottie = 3
+    gif = 4
 
     @property
     def file_extension(self) -> str:
@@ -570,6 +573,7 @@ class StickerFormatType(Enum):
             StickerFormatType.png: "png",
             StickerFormatType.apng: "png",
             StickerFormatType.lottie: "json",
+            StickerFormatType.gif: "gif",
         }
         return lookup[self]
 
