@@ -657,11 +657,11 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         in ``?one two three`` the parent name would be ``one two``.
         """
         entries = []
-        command = self
+        command: Command[Any, ..., Any] = self
         # command.parent is type-hinted as GroupMixin some attributes are resolved via MRO
-        while command.parent is not None:  # type: ignore
+        while command.parent is not None:
             command = command.parent  # type: ignore
-            entries.append(command.name)  # type: ignore
+            entries.append(command.name)
 
         return " ".join(reversed(entries))
 
@@ -676,8 +676,8 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         .. versionadded:: 1.1
         """
         entries = []
-        command = self
-        while command.parent is not None:  # type: ignore
+        command: Command[Any, ..., Any] = self
+        while command.parent is not None:
             command = command.parent  # type: ignore
             entries.append(command)
 

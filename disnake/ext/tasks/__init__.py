@@ -562,7 +562,7 @@ class Loop(Generic[LF]):
         if not asyncio.iscoroutinefunction(coro):
             raise TypeError(f"Expected coroutine function, received {coro.__class__.__name__!r}.")
 
-        self._error = coro
+        self._error = coro  # type: ignore
         return coro
 
     def _get_next_sleep_time(self) -> datetime.datetime:

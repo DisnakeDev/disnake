@@ -1176,7 +1176,7 @@ CONVERTER_MAPPING: Dict[Type[Any], Type[Converter]] = {
 
 async def _actual_conversion(
     ctx: Context,
-    converter: Union[Type[T], Converter[T], Callable[[str], T]],
+    converter: Union[Type[T], Type[Converter[T]], Converter[T], Callable[[str], T]],
     argument: str,
     param: inspect.Parameter,
 ) -> T:
