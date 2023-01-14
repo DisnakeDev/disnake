@@ -506,22 +506,22 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         Parameters
         ----------
         name: Optional[:class:`str`]
-            The name of the new channel. If not provided, defaults to this channel name.
+            The name of the new channel. If not provided, defaults to this channel's name.
         topic: Optional[:class:`str`]
-            The topic of the new channel. If not provided, defaults to this channel topic.
+            The topic of the new channel. If not provided, defaults to this channel's topic.
         position: :class:`int`
-            The position of the new channel. If not provided, defaults to this channel position.
+            The position of the new channel. If not provided, defaults to this channel's position.
         nsfw: :class:`bool`
-            Whether the new channel should be marked as NSFW. If not provided, defaults to this channel nsfw value.
+            Whether the new channel should be marked as NSFW. If not provided, defaults to this channel's NSFW value.
         category: Optional[:class:`abc.Snowflake`]
-            The category of the new channel. If not provided, defaults to this channel category.
+            The category where the new channel should be grouped. If not provided, defaults to this channel's category.
         slowmode_delay: :class:`int`
-            The slowmode of the new channel. If not provided, defaults to this channel slowmode.
+            The slowmode of the new channel. If not provided, defaults to this channel's slowmode.
         default_auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
-            The default auto archive duration of the new channel. If not provided, defaults to this channel default auto archive duration.
+            The default auto archive duration of the new channel. If not provided, defaults to this channel's default auto archive duration.
         news: :class:`bool`
             Whether the new channel should be a news channel. News channels are text channels that can be followed.
-            This is only available to guilds that contain ``NEWS`` in :attr:`Guild.features`.
+            This is only available to guilds that contain ``NEWS`` in :attr:`Guild.features`. If noy provided, defaults to this channel's default news value.
         reason: Optional[:class:`str`]
             The reason for cloning this channel. Shows up on the audit log.
 
@@ -1303,23 +1303,23 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         Parameters
         ----------
         name: Optional[:class:`str`]
-            The name of the new channel. If not provided, defaults to this channel name.
+            The name of the new channel. If not provided, defaults to this channel's name.
         bitrate: :class:`int`
-            The bitrate of the new channel. If not provided, defaults to this channel bitrate.
+            The bitrate of the new channel. If not provided, defaults to this channel's bitrate.
         user_limit: :class:`int`
-            The user limit of the new channel. If not provided, defaults to this channel user limit.
+            The user limit of the new channel. If not provided, defaults to this channel's user limit.
         position: :class:`int`
-            The position of the new channel. If not provided, defaults to this channel position.
+            The position of the new channel. If not provided, defaults to this channel's position.
         category: Optional[:class:`abc.Snowflake`]
-            The category id where the new channel should be grouped. If not provided, defaults to this channel category.
+            The category where the new channel should be grouped. If not provided, defaults to this channel's category.
         rtc_region: Optional[Union[:class:`str`, :class:`VoiceRegion`]]
-            The rtc region of the new channel. If not provided, defaults to this channel rtc region.
+            The rtc region of the new channel. If not provided, defaults to this channel's rtc region.
         video_quality_mode: :class:`VideoQualityMode`
-            The video quality mode of the new channel. If not provided, defaults to this channel video quality mode.
+            The video quality mode of the new channel. If not provided, defaults to this channel's video quality mode.
         nsfw: :class:`bool`
-            Wether the new channel should be nsfw or not. If not provided, defaults to this channel nsfw value.
+            Wether the new channel should be nsfw or not. If not provided, defaults to this channel's NSFW value.
         slowmode_delay: Optional[:class:`int`]
-            The slowmode of the new channel. If not provided, defaults to this channel slowmode.
+            The slowmode of the new channel. If not provided, defaults to this channel's slowmode.
         reason: Optional[:class:`str`]
             The reason for cloning this channel. Shows up on the audit log.
 
@@ -1977,15 +1977,15 @@ class StageChannel(VocalGuildChannel):
         Parameters
         ----------
         name: Optional[:class:`str`]
-            The name of the new channel. If not provided, defaults to this channel name.
+            The name of the new channel. If not provided, defaults to this channel's name.
         position: :class:`int`
-            The position of the new channel. If not provided, defaults to this channel position.
+            The position of the new channel. If not provided, defaults to this channel's position.
         category: Optional[:class:`abc.Snowflake`]
-            The category id where the new channel should be grouped. If not provided, defaults to this channel category.
+            The category where the new channel should be grouped. If not provided, defaults to this channel's category.
         rtc_region: Optional[Union[:class:`str`, :class:`VoiceRegion`]]
-            The rtc region of the new channel. If not provided, defaults to this channel rtc region.
+            The rtc region of the new channel. If not provided, defaults to this channel's rtc region.
         bitrate: :class:`int`
-            The bitrate of the new channel. If not provided, defaults to this channel bitrate.
+            The bitrate of the new channel. If not provided, defaults to this channel's bitrate.
         reason: Optional[:class:`str`]
             The reason for cloning this channel. Shows up on the audit log.
 
@@ -2385,9 +2385,9 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         Parameters
         ----------
         name: Optional[:class:`str`]
-            The name of the new channel. If not provided, defaults to this channel name.
+            The name of the new channel. If not provided, defaults to this channel's name.
         position: :class:`int`
-            The position of the new channel. If not provided, defaults to this channel position.
+            The position of the new channel. If not provided, defaults to this channel's position.
         reason: Optional[:class:`str`]
             The reason for cloning this channel. Shows up on the audit log.
 
@@ -3214,27 +3214,27 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         Parameters
         ----------
         name: Optional[:class:`str`]
-            The name of the new channel. If not provided, defaults to this channel name.
+            The name of the new channel. If not provided, defaults to this channel's name.
         topic: Optional[:class:`str`]
-            The topic of the new channel. If not provided, defaults to this channel topic.
+            The topic of the new channel. If not provided, defaults to this channel's topic.
         position: :class:`int`
-            The position of the new channel. If not provided, defaults to this channel position.
+            The position of the new channel. If not provided, defaults to this channel's position.
         nsfw: :class:`bool`
-            Wether the new channel should be nsfw or not. If not provided, defaults to this channel nsfw value.
+            Wether the new channel should be nsfw or not. If not provided, defaults to this channel's NSFW value.
         category: Optional[:class:`abc.Snowflake`]
-            The category id where the new channel should be grouped. If not provided, defaults to this channel category.
+            The category where the new channel should be grouped. If not provided, defaults to this channel's category.
         slowmode_delay: Optional[:class:`int`]
-            The slowmode delay of the new channel. If not provided, defaults to this channel slowmode delay.
+            The slowmode delay of the new channel. If not provided, defaults to this channel's slowmode delay.
         default_thread_slowmode_delay: Optional[:class:`int`]
-            The default thread slowmode delay of the new channel. If not provided, defaults to this channel default thread slowmode delay.
+            The default thread slowmode delay of the new channel. If not provided, defaults to this channel's default thread slowmode delay.
         default_auto_archive_duration: Optional[Union[:class:`int`, :class:`ThreadArchiveDuration`]]
-            The default auto archive duration of the new channel. If not provided, defaults to this channel default auto archive duration.
+            The default auto archive duration of the new channel. If not provided, defaults to this channel's default auto archive duration.
         available_tags: Sequence[:class:`ForumTag`]
-            The applicable tags of the new channel. If not provided, defaults to this channel available tags.
+            The applicable tags of the new channel. If not provided, defaults to this channel's available tags.
         default_reaction: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
-            The default reaction of the new channel. If not provided, defaults to this channel default reaction.
+            The default reaction of the new channel. If not provided, defaults to this channel's default reaction.
         default_sort_order: Optional[:class:`ThreadSortOrder`]
-            The default sort order of the new channel. If not provided, defaults to this channel default sort order.
+            The default sort order of the new channel. If not provided, defaults to this channel's default sort order.
         reason: Optional[:class:`str`]
             The reason for cloning this channel. Shows up on the audit log.
 
