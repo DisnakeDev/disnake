@@ -1126,7 +1126,7 @@ class Intents(BaseFlags):
 
     @alias_flag_value
     def bans(self):
-        """:class:`bool`: An alias for :attr:`.moderation`.
+        """:class:`bool`: Alias of :attr:`.moderation`.
 
         .. versionchanged:: 2.8
             Changed to an alias.
