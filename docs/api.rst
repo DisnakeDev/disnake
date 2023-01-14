@@ -2344,7 +2344,7 @@ of :class:`enum.Enum`.
 .. class:: AuditLogAction
 
     Represents the type of action being done for a :class:`AuditLogEntry`\,
-    which is retrievable via :meth:`Guild.audit_logs`.
+    which is retrievable via :meth:`Guild.audit_logs` or via :func:`on_audit_log_entry_create` event.
 
     .. attribute:: guild_update
 
@@ -3985,7 +3985,7 @@ Certain utilities make working with async iterators easier, detailed below.
 Audit Log Data
 ----------------
 
-Working with :meth:`Guild.audit_logs` is a complicated process with a lot of machinery
+Working with audit logs is a complicated process with a lot of machinery
 involved. The library attempts to make it easy to use and friendly. In order to accomplish
 this goal, it must make use of a couple of data classes that aid in this goal.
 

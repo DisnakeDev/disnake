@@ -335,8 +335,7 @@ Quick example: ::
 Is there an event for audit log entries being created?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Since Discord does not dispatch this information in the gateway, the library cannot provide this information.
-This is currently a Discord limitation.
+As of version 2.8, there's now an event for it, called :func:`on_audit_log_entry_create`.
 
 Commands Extension
 -------------------
