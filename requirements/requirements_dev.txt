@@ -3,7 +3,7 @@
 ## type checking
 typing_extensions~=4.2.0
 # this is not pyright itself, but the python wrapper
-pyright==1.1.271
+pyright==1.1.291
 
 ## test bot
 python-dotenv~=0.20.0
