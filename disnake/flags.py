@@ -744,6 +744,7 @@ class PublicUserFlags(BaseFlags):
             hypesquad_balance: bool = ...,
             hypesquad_bravery: bool = ...,
             hypesquad_brilliance: bool = ...,
+            moderator_programs_alumni: bool = ...,
             partner: bool = ...,
             spammer: bool = ...,
             staff: bool = ...,
@@ -828,8 +829,16 @@ class PublicUserFlags(BaseFlags):
         return UserFlags.verified_bot_developer.value
 
     @flag_value
+    def moderator_programs_alumni(self):
+        """:class:`bool`: Returns ``True`` if the user is a Discord Moderator Programs Alumni.
+
+        .. versionadded:: 2.8
+        """
+        return UserFlags.discord_certified_moderator.value
+
+    @alias_flag_value
     def discord_certified_moderator(self):
-        """:class:`bool`: Returns ``True`` if the user is a Discord Certified Moderator.
+        """:class:`bool`: An alias for :attr:`moderator_programs_alumni`.
 
         .. versionadded:: 2.0
         """
