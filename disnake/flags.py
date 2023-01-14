@@ -1118,7 +1118,7 @@ class Intents(BaseFlags):
 
         - :func:`on_member_ban`
         - :func:`on_member_unban`
-        - :func:`on_guild_audit_log_entry_create`
+        - :func:`on_audit_log_entry_create`
 
         This does not correspond to any attributes or classes in the library in terms of cache.
         """
