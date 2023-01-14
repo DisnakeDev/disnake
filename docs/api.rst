@@ -823,7 +823,7 @@ Audit Logs
 
 .. function:: on_audit_log_entry_create(entry)
 
-    Called when an audit log entry is created
+    Called when an audit log entry is created.
     You must have the :attr:`~Permissions.view_audit_log` permission to receive this.
 
     This requires :attr:`Intents.moderation` to be enabled.
