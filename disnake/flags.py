@@ -977,6 +977,7 @@ class Intents(BaseFlags):
         automod: bool = ...,
         automod_configuration: bool = ...,
         automod_execution: bool = ...,
+        moderation: bool = ...,
         bans: bool = ...,
         dm_messages: bool = ...,
         dm_reactions: bool = ...,
