@@ -2540,7 +2540,8 @@ of :class:`enum.Enum`.
         A member was kicked.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`User` who got kicked.
+        the :class:`User` who got kicked. If the user is not found then it is
+        a :class:`Object` with an ID.
 
         When this is the action, :attr:`~AuditLogEntry.changes` is empty.
 
@@ -2564,7 +2565,8 @@ of :class:`enum.Enum`.
         A member was banned.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`User` who got banned.
+        the :class:`User` who got banned. If the user is not found then it is
+        a :class:`Object` with an ID.
 
         When this is the action, :attr:`~AuditLogEntry.changes` is empty.
 
@@ -2573,7 +2575,8 @@ of :class:`enum.Enum`.
         A member was unbanned.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`User` who got unbanned.
+        the :class:`User` who got unbanned. If the user is not found then it is
+        a :class:`Object` with an ID.
 
         When this is the action, :attr:`~AuditLogEntry.changes` is empty.
 
@@ -2586,7 +2589,8 @@ of :class:`enum.Enum`.
         - They were timed out
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`Member` or :class:`User` who got updated.
+        the :class:`Member` or :class:`User` who got updated. If the user is not found then it is
+        a :class:`Object` with an ID.
 
         Possible attributes for :class:`AuditLogDiff`:
 
@@ -2601,7 +2605,8 @@ of :class:`enum.Enum`.
         either gains a role or loses a role.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`Member` or :class:`User` who got the role.
+        the :class:`Member` or :class:`User` who got the role. If the user is not found then it is
+        a :class:`Object` with an ID.
 
         Possible attributes for :class:`AuditLogDiff`:
 
@@ -2637,7 +2642,8 @@ of :class:`enum.Enum`.
         A bot was added to the guild.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`Member` or :class:`User` which was added to the guild.
+        the :class:`Member` or :class:`User` which was added to the guild. If the user is not found then it is
+        a :class:`Object` with an ID.
 
         .. versionadded:: 1.3
 
