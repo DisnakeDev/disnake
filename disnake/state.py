@@ -1883,9 +1883,6 @@ class ConnectionState:
 
     def parse_guild_audit_log_entry_create(self, data: gateway.AuditLogEntryCreate) -> None:
         guild = self._get_guild(int(data["guild_id"]))
-        user: Optional[User] = None
-        if user_id := data["user_id"]:
-            user = self.get_user(int(user_id))
         if guild is None:
             _log.debug(
                 "GUILD_AUDIT_LOG_ENTRY_CREATE referencing unknown guild ID: %s. Discarding.",
@@ -1898,10 +1895,10 @@ class ConnectionState:
             guild=guild,
             application_commands={},
             automod_rules={},
-            guild_scheduled_events={},
+            guild_scheduled_events=guild._scheduled_events,
             integrations={},
-            threads={},
-            users={user.id: user} if user else {},
+            threads=guild._threads,
+            users=dict(self._users),
             webhooks={},
         )
         self.dispatch("audit_log_entry_create", entry)
