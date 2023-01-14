@@ -1898,7 +1898,7 @@ class ConnectionState:
             guild_scheduled_events=guild._scheduled_events,
             integrations={},
             threads=guild._threads,
-            users=dict(self._users),
+            users=self._users,
             webhooks={},
         )
         self.dispatch("audit_log_entry_create", entry)
