@@ -1764,6 +1764,17 @@ of :class:`enum.Enum`.
         The system message denoting that an auto moderation action was executed.
 
         .. versionadded:: 2.5
+    .. attribute:: interaction_premium_upsell
+
+        The system message for an application premium subscription upsell.
+
+        .. versionadded:: 2.8
+    .. attribute:: guild_application_premium_subscription
+
+        The system message denoting that a guild member has subscribed to an application.
+
+        .. versionadded:: 2.8
+
 
 .. class:: UserFlags
 
@@ -3387,6 +3398,12 @@ of :class:`enum.Enum`.
 
         Represents a sticker with a lottie image.
 
+    .. attribute:: gif
+
+        Represents a sticker with a gif image.
+
+        .. versionadded:: 2.8
+
 .. class:: InviteTarget
 
     Represents the invite type for voice channel invites.
@@ -3800,6 +3817,24 @@ of :class:`enum.Enum`.
     .. attribute:: creation_date
 
         Sort forum threads by creation date/time (from newest to oldest).
+
+.. class:: ThreadLayout
+
+    Represents the layout of threads in :class:`ForumChannel`\s.
+
+    .. versionadded:: 2.8
+
+    .. attribute:: not_set
+
+        No preferred layout has been set.
+
+    .. attribute:: list_view
+
+        Display forum threads in a text-focused list.
+
+    .. attribute:: gallery_view
+
+        Display forum threads in a media-focused collection of tiles.
 
 Async Iterator
 ----------------
@@ -5000,6 +5035,15 @@ Guild
         The :class:`User` that was banned.
 
         :type: :class:`User`
+
+GuildBuilder
+~~~~~~~~~~~~~
+
+.. attributetable:: GuildBuilder
+
+.. autoclass:: GuildBuilder()
+    :members:
+    :exclude-members: add_category_channel
 
 GuildPreview
 ~~~~~~~~~~~~~
