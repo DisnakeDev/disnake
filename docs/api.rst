@@ -818,6 +818,21 @@ Integrations
     :param payload: The raw event payload data.
     :type payload: :class:`RawIntegrationDeleteEvent`
 
+Audit Logs
+++++++++++
+
+.. function:: on_audit_log_entry_create(entry)
+
+    Called when an audit log entry is created
+    You must have the :attr:`~Permissions.view_audit_log` permission to receive this.
+
+    This requires :attr:`Intents.moderation` to be enabled.
+
+    .. versionadded:: 2.8
+
+    :param entry: The audit log entry that was created.
+    :type entry: :class:`AuditLogEntry`
+
 Invites
 +++++++
 

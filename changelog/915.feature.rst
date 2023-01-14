@@ -1,0 +1,1 @@
+Add support for :func:`on_audit_log_entry_create` gateway event.

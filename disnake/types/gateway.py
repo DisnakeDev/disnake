@@ -8,6 +8,7 @@ from typing_extensions import NotRequired
 
 from .activity import PartialPresenceUpdate, PresenceData, SendableActivity
 from .appinfo import PartialAppInfo, PartialGatewayAppInfo
+from .audit_log import AuditLogEntry
 from .automod import AutoModAction, AutoModRule, AutoModTriggerType
 from .channel import Channel, GuildChannel, StageInstance
 from .emoji import Emoji, PartialEmoji
@@ -616,3 +617,7 @@ class AutoModerationActionExecutionEvent(TypedDict):
     content: NotRequired[str]
     matched_content: NotRequired[Optional[str]]
     matched_keyword: NotRequired[Optional[str]]
+
+
+class AuditLogEntryCreate(AuditLogEntry):
+    guild_id: Snowflake
