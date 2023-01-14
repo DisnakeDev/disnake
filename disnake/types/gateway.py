@@ -463,6 +463,11 @@ GuildUpdateEvent = Guild
 GuildDeleteEvent = UnavailableGuild
 
 
+# https://discord.com/developers/docs/topics/gateway-events#guild-audit-log-entry-create
+class AuditLogEntryCreate(AuditLogEntry):
+    guild_id: Snowflake
+
+
 class _GuildBanEvent(TypedDict):
     guild_id: Snowflake
     user: User
@@ -617,7 +622,3 @@ class AutoModerationActionExecutionEvent(TypedDict):
     content: NotRequired[str]
     matched_content: NotRequired[Optional[str]]
     matched_keyword: NotRequired[Optional[str]]
-
-
-class AuditLogEntryCreate(AuditLogEntry):
-    guild_id: Snowflake
