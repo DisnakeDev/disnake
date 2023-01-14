@@ -720,6 +720,9 @@ class AuditLogEntry(Hashable):
         Object,
         None,
     ]:
+        if self._target_id is None:
+            return None
+
         if self.action.target_type is None:
             return Object(id=self._target_id) if self._target_id else None
 
@@ -758,8 +761,8 @@ class AuditLogEntry(Hashable):
     def _convert_target_channel(self, target_id: int) -> Union[abc.GuildChannel, Object]:
         return self.guild.get_channel(target_id) or Object(id=target_id)
 
-    def _convert_target_user(self, target_id: int) -> Union[Member, User, Object, None]:
-        return self._get_member(target_id) or Object(id=target_id) if target_id else None
+    def _convert_target_user(self, target_id: int) -> Union[Member, User, Object]:
+        return self._get_member(target_id) or Object(id=target_id)
 
     def _convert_target_role(self, target_id: int) -> Union[Role, Object]:
         return self.guild.get_role(target_id) or Object(id=target_id)
