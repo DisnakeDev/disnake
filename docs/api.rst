@@ -3398,6 +3398,12 @@ of :class:`enum.Enum`.
 
         Represents a sticker with a lottie image.
 
+    .. attribute:: gif
+
+        Represents a sticker with a gif image.
+
+        .. versionadded:: 2.8
+
 .. class:: InviteTarget
 
     Represents the invite type for voice channel invites.
@@ -5062,6 +5068,15 @@ Guild
         The :class:`User` that was banned.
 
         :type: :class:`User`
+
+GuildBuilder
+~~~~~~~~~~~~~
+
+.. attributetable:: GuildBuilder
+
+.. autoclass:: GuildBuilder()
+    :members:
+    :exclude-members: add_category_channel
 
 GuildPreview
 ~~~~~~~~~~~~~
