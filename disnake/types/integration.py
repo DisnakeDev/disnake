@@ -17,6 +17,7 @@ class IntegrationApplication(TypedDict):
     description: str
     summary: str
     bot: NotRequired[User]
+    role_connections_verification_url: NotRequired[str]
 
 
 class IntegrationAccount(TypedDict):
@@ -41,11 +42,7 @@ IntegrationType = Literal["twitch", "youtube", "discord"]
 
 class BaseIntegration(PartialIntegration):
     enabled: bool
-    syncing: bool
-    synced_at: str
-    user: User
-    expire_behavior: IntegrationExpireBehavior
-    expire_grace_period: int
+    user: NotRequired[User]
 
 
 class StreamIntegration(BaseIntegration):
@@ -53,6 +50,10 @@ class StreamIntegration(BaseIntegration):
     enable_emoticons: bool
     subscriber_count: int
     revoked: bool
+    syncing: bool
+    synced_at: str
+    expire_behavior: IntegrationExpireBehavior
+    expire_grace_period: int
 
 
 class BotIntegration(BaseIntegration):
