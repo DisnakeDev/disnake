@@ -328,6 +328,14 @@ class IntegrationApplication:
         The application's description. Can be an empty string.
     user: Optional[:class:`User`]
         The bot user associated with this application.
+    role_connections_verification_url: Optional[:class:`str`]
+        The application's role connection verification entry point,
+        which when configured will render the app as a verification method
+        in the guild role verification configuration.
+
+        Only available through :meth:`Guild.integrations` with ``include_role_connections_metadata=True``.
+
+        .. versionadded:: 2.8
     """
 
     __slots__ = (
@@ -337,6 +345,7 @@ class IntegrationApplication:
         "description",
         "_summary",
         "user",
+        "role_connections_verification_url",
     )
 
     def __init__(self, *, data: IntegrationApplicationPayload, state) -> None:
@@ -347,6 +356,9 @@ class IntegrationApplication:
         self._summary: str = data.get("summary", "")
         user = data.get("bot")
         self.user: Optional[User] = User(state=state, data=user) if user else None
+        self.role_connections_verification_url: Optional[str] = data.get(
+            "role_connections_verification_url"
+        )
 
     @property
     def summary(self) -> str:
