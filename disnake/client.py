@@ -39,6 +39,7 @@ from .app_commands import (
     GuildApplicationCommandPermissions,
 )
 from .appinfo import AppInfo
+from .application_role_connection import ApplicationRoleConnectionMetadata
 from .backoff import ExponentialBackoff
 from .channel import PartialMessageable, _threaded_channel_factory
 from .emoji import Emoji
@@ -81,6 +82,9 @@ if TYPE_CHECKING:
     from .channel import DMChannel
     from .member import Member
     from .message import Message
+    from .types.application_role_connection import (
+        ApplicationRoleConnectionMetadata as ApplicationRoleConnectionMetadataPayload,
+    )
     from .types.gateway import SessionStartLimit as SessionStartLimitPayload
     from .voice_client import VoiceProtocol
 
@@ -2710,3 +2714,64 @@ class Client:
             The permissions configured for the specified application command.
         """
         return await self._connection.fetch_command_permissions(guild_id, command_id)
+
+    async def fetch_role_connection_metadata(self) -> List[ApplicationRoleConnectionMetadata]:
+        """|coro|
+
+        Retrieves the :class:`.ApplicationRoleConnectionMetadata` records for the application.
+
+        .. versionadded:: 2.8
+
+        Raises
+        ------
+        HTTPException
+            Retrieving the metadata records failed.
+
+        Returns
+        -------
+        List[:class:`.ApplicationRoleConnectionMetadata`]
+            The list of metadata records.
+        """
+        data = await self.http.get_application_role_connection_metadata_records(self.application_id)
+        return [ApplicationRoleConnectionMetadata._from_data(record) for record in data]
+
+    async def edit_role_connection_metadata(
+        self, records: Sequence[ApplicationRoleConnectionMetadata]
+    ) -> List[ApplicationRoleConnectionMetadata]:
+        """|coro|
+
+        Edits the :class:`.ApplicationRoleConnectionMetadata` records for the application.
+
+        An application can have up to 5 metadata records.
+
+        .. warning::
+            This will overwrite all existing metadata records.
+            Consider :meth:`fetching <fetch_role_connection_metadata>` them first,
+            and constructing the new list of metadata records based off of the returned list.
+
+        .. versionadded:: 2.8
+
+        Parameters
+        ----------
+        records: Sequence[:class:`.ApplicationRoleConnectionMetadata`]
+            The new metadata records.
+
+        Raises
+        ------
+        HTTPException
+            Editing the metadata records failed.
+
+        Returns
+        -------
+        List[:class:`.ApplicationRoleConnectionMetadata`]
+            The list of newly edited metadata records.
+        """
+        payload: List[ApplicationRoleConnectionMetadataPayload] = []
+        for record in records:
+            record._localize(self.i18n)
+            payload.append(record.to_dict())
+
+        data = await self.http.edit_application_role_connection_metadata_records(
+            self.application_id, payload
+        )
+        return [ApplicationRoleConnectionMetadata._from_data(record) for record in data]
