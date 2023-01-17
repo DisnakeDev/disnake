@@ -1,0 +1,1 @@
+Add ``has_commands`` and ``include_role_connections_metadata`` parameters to :meth:`Guild.integrations`.
