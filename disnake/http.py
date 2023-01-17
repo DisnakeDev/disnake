@@ -1691,10 +1691,23 @@ class HTTPClient:
         )
         return self.request(r, json=payload, reason=reason)
 
-    def get_all_integrations(self, guild_id: Snowflake) -> Response[List[integration.Integration]]:
-        r = Route("GET", "/guilds/{guild_id}/integrations", guild_id=guild_id)
+    def get_all_integrations(
+        self,
+        guild_id: Snowflake,
+        *,
+        has_commands: Optional[bool] = None,
+        include_role_connections_metadata: Optional[bool] = None,
+    ) -> Response[List[integration.Integration]]:
+        params: Dict[str, Any] = {}
+        if has_commands is not None:
+            params["has_commands"] = int(has_commands)
+        if include_role_connections_metadata is not None:
+            params["include_role_connections_metadata"] = int(include_role_connections_metadata)
 
-        return self.request(r)
+        return self.request(
+            Route("GET", "/guilds/{guild_id}/integrations", guild_id=guild_id),
+            params=params,
+        )
 
     def create_integration(
         self, guild_id: Snowflake, type: integration.IntegrationType, id: int

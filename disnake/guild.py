@@ -2990,7 +2990,9 @@ class Guild(Hashable):
         """
         await self._state.http.create_integration(self.id, type, id)
 
-    async def integrations(self) -> List[Integration]:
+    async def integrations(
+        self, *, has_commands: bool = False, include_role_connections_metadata: bool = False
+    ) -> List[Integration]:
         """|coro|
 
         Returns a list of all integrations attached to the guild.
@@ -2999,6 +3001,20 @@ class Guild(Hashable):
         use this.
 
         .. versionadded:: 1.4
+
+        Parameters
+        ----------
+        has_commands: :class:`bool`
+            Whether to only return integrations with registered application commands.
+            Defaults to ``False``.
+
+            .. versionadded:: 2.8
+        include_role_connections_metadata: :class:`bool`
+            Whether to include :attr:`~IntegrationApplication.role_connections_verification_url` in the
+            :attr:`BotIntegration.application` objects of returned integrations.
+            Defaults to ``False``.
+
+            .. versionadded:: 2.8
 
         Raises
         ------
@@ -3012,7 +3028,11 @@ class Guild(Hashable):
         List[:class:`Integration`]
             The list of integrations that are attached to the guild.
         """
-        data = await self._state.http.get_all_integrations(self.id)
+        data = await self._state.http.get_all_integrations(
+            self.id,
+            has_commands=has_commands,
+            include_role_connections_metadata=include_role_connections_metadata,
+        )
 
         def convert(d):
             factory, _ = _integration_factory(d["type"])
