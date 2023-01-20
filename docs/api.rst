@@ -2350,7 +2350,7 @@ of :class:`enum.Enum`.
 .. class:: AuditLogAction
 
     Represents the type of action being done for a :class:`AuditLogEntry`\,
-    which is retrievable via :meth:`Guild.audit_logs` or via :func:`on_audit_log_entry_create` event.
+    which is retrievable via :meth:`Guild.audit_logs` or via the :func:`on_audit_log_entry_create` event.
 
     .. attribute:: guild_update
 
