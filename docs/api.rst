@@ -2578,7 +2578,7 @@ of :class:`enum.Enum`.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`User` who got unbanned. If the user is not found then it is
-        a :class:`Object` with user's ID.
+        a :class:`Object` with the user's ID.
 
         When this is the action, :attr:`~AuditLogEntry.changes` is empty.
 
