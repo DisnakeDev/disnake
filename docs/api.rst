@@ -2543,7 +2543,7 @@ of :class:`enum.Enum`.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`User` who got kicked. If the user is not found then it is
-        a :class:`Object` with an ID.
+        a :class:`Object` with the user's ID.
 
         When this is the action, :attr:`~AuditLogEntry.changes` is empty.
 
@@ -2568,7 +2568,7 @@ of :class:`enum.Enum`.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`User` who got banned. If the user is not found then it is
-        a :class:`Object` with an ID.
+        a :class:`Object` with the user's ID.
 
         When this is the action, :attr:`~AuditLogEntry.changes` is empty.
 
@@ -2578,7 +2578,7 @@ of :class:`enum.Enum`.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`User` who got unbanned. If the user is not found then it is
-        a :class:`Object` with an ID.
+        a :class:`Object` with user's ID.
 
         When this is the action, :attr:`~AuditLogEntry.changes` is empty.
 
@@ -2592,7 +2592,7 @@ of :class:`enum.Enum`.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`Member` or :class:`User` who got updated. If the user is not found then it is
-        a :class:`Object` with an ID.
+        a :class:`Object` with the user's ID.
 
         Possible attributes for :class:`AuditLogDiff`:
 
@@ -2608,7 +2608,7 @@ of :class:`enum.Enum`.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`Member` or :class:`User` who got the role. If the user is not found then it is
-        a :class:`Object` with an ID.
+        a :class:`Object` with the user's ID.
 
         Possible attributes for :class:`AuditLogDiff`:
 
