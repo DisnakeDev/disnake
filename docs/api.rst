@@ -1764,6 +1764,17 @@ of :class:`enum.Enum`.
         The system message denoting that an auto moderation action was executed.
 
         .. versionadded:: 2.5
+    .. attribute:: interaction_premium_upsell
+
+        The system message for an application premium subscription upsell.
+
+        .. versionadded:: 2.8
+    .. attribute:: guild_application_premium_subscription
+
+        The system message denoting that a guild member has subscribed to an application.
+
+        .. versionadded:: 2.8
+
 
 .. class:: UserFlags
 
@@ -3387,6 +3398,12 @@ of :class:`enum.Enum`.
 
         Represents a sticker with a lottie image.
 
+    .. attribute:: gif
+
+        Represents a sticker with a gif image.
+
+        .. versionadded:: 2.8
+
 .. class:: InviteTarget
 
     Represents the invite type for voice channel invites.
@@ -3818,6 +3835,39 @@ of :class:`enum.Enum`.
     .. attribute:: gallery_view
 
         Display forum threads in a media-focused collection of tiles.
+
+.. class:: ApplicationRoleConnectionMetadataType
+
+    Represents the type of a role connection metadata value.
+
+    These offer comparison operations which allow guilds to configure role requirements
+    based on the metadata value for each user and a guild-specified configured value.
+
+    .. versionadded:: 2.8
+
+    .. attribute:: integer_less_than_or_equal
+        The metadata value (``integer``) is less than or equal to the guild's configured value.
+
+    .. attribute:: integer_greater_than_or_equal
+        The metadata value (``integer``) is greater than or equal to the guild's configured value.
+
+    .. attribute:: integer_equal
+        The metadata value (``integer``) is equal to the guild's configured value.
+
+    .. attribute:: integer_not_equal
+        The metadata value (``integer``) is not equal to the guild's configured value.
+
+    .. attribute:: datetime_less_than_or_equal
+        The metadata value (``ISO8601 string``) is less than or equal to the guild's configured value (``integer``; days before current date).
+
+    .. attribute:: datetime_greater_than_or_equal
+        The metadata value (``ISO8601 string``) is greater than or equal to the guild's configured value (``integer``; days before current date).
+
+    .. attribute:: boolean_equal
+        The metadata value (``integer``) is equal to the guild's configured value.
+
+    .. attribute:: boolean_not_equal
+        The metadata value (``integer``) is not equal to the guild's configured value.
 
 Async Iterator
 ----------------
@@ -5019,6 +5069,15 @@ Guild
 
         :type: :class:`User`
 
+GuildBuilder
+~~~~~~~~~~~~~
+
+.. attributetable:: GuildBuilder
+
+.. autoclass:: GuildBuilder()
+    :members:
+    :exclude-members: add_category_channel
+
 GuildPreview
 ~~~~~~~~~~~~~
 
@@ -5897,6 +5956,14 @@ AutoModTimeoutAction
 .. attributetable:: AutoModTimeoutAction
 
 .. autoclass:: AutoModTimeoutAction
+    :members:
+
+ApplicationRoleConnectionMetadata
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: ApplicationRoleConnectionMetadata
+
+.. autoclass:: ApplicationRoleConnectionMetadata
     :members:
 
 File
