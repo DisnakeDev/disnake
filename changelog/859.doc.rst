@@ -1,0 +1,1 @@
+Enable `OpenSearch <https://developer.mozilla.org/en-US/docs/Web/OpenSearch>`_, allowing easy integration of the search functionality into browsers.

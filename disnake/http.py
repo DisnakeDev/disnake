@@ -52,6 +52,7 @@ if TYPE_CHECKING:
     from .message import Attachment
     from .types import (
         appinfo,
+        application_role_connection,
         audit_log,
         automod,
         channel,
@@ -993,6 +994,7 @@ class HTTPClient:
             "applied_tags",
             "default_reaction_emoji",
             "default_sort_order",
+            "default_forum_layout",
         )
         payload = {k: v for k, v in options.items() if k in valid_keys}
         return self.request(r, reason=reason, json=payload)
@@ -1305,12 +1307,44 @@ class HTTPClient:
     def delete_guild(self, guild_id: Snowflake) -> Response[None]:
         return self.request(Route("DELETE", "/guilds/{guild_id}", guild_id=guild_id))
 
-    def create_guild(self, name: str, icon: Optional[str]) -> Response[guild.Guild]:
-        payload = {
+    def create_guild(
+        self,
+        name: str,
+        icon: Optional[str] = None,
+        *,
+        verification_level: Optional[guild.VerificationLevel] = None,
+        default_message_notifications: Optional[guild.DefaultMessageNotificationLevel] = None,
+        explicit_content_filter: Optional[guild.ExplicitContentFilterLevel] = None,
+        roles: Optional[List[guild.CreateGuildPlaceholderRole]] = None,
+        channels: Optional[List[guild.CreateGuildPlaceholderChannel]] = None,
+        afk_channel: Optional[Snowflake] = None,
+        afk_timeout: Optional[int] = None,
+        system_channel: Optional[Snowflake] = None,
+        system_channel_flags: Optional[int] = None,
+    ) -> Response[guild.Guild]:
+        payload: guild.CreateGuild = {
             "name": name,
         }
         if icon:
             payload["icon"] = icon
+        if verification_level is not None:
+            payload["verification_level"] = verification_level
+        if default_message_notifications is not None:
+            payload["default_message_notifications"] = default_message_notifications
+        if explicit_content_filter is not None:
+            payload["explicit_content_filter"] = explicit_content_filter
+        if roles is not None:
+            payload["roles"] = roles
+        if channels is not None:
+            payload["channels"] = channels
+        if afk_channel is not None:
+            payload["afk_channel_id"] = afk_channel
+        if afk_timeout is not None:
+            payload["afk_timeout"] = afk_timeout
+        if system_channel is not None:
+            payload["system_channel_id"] = system_channel
+        if system_channel_flags is not None:
+            payload["system_channel_flags"] = system_channel_flags
 
         return self.request(Route("POST", "/guilds"), json=payload)
 
@@ -2588,6 +2622,31 @@ class HTTPClient:
 
     def application_info(self) -> Response[appinfo.AppInfo]:
         return self.request(Route("GET", "/oauth2/applications/@me"))
+
+    def get_application_role_connection_metadata_records(
+        self, application_id: Snowflake
+    ) -> Response[List[application_role_connection.ApplicationRoleConnectionMetadata]]:
+        return self.request(
+            Route(
+                "GET",
+                "/applications/{application_id}/role-connections/metadata",
+                application_id=application_id,
+            )
+        )
+
+    def edit_application_role_connection_metadata_records(
+        self,
+        application_id: Snowflake,
+        records: Sequence[application_role_connection.ApplicationRoleConnectionMetadata],
+    ) -> Response[List[application_role_connection.ApplicationRoleConnectionMetadata]]:
+        return self.request(
+            Route(
+                "PUT",
+                "/applications/{application_id}/role-connections/metadata",
+                application_id=application_id,
+            ),
+            json=records,
+        )
 
     async def get_gateway(self, *, encoding: str = "json", zlib: bool = True) -> str:
         try:

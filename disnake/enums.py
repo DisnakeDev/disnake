@@ -58,6 +58,8 @@ __all__ = (
     "AutoModEventType",
     "AutoModActionType",
     "ThreadSortOrder",
+    "ThreadLayout",
+    "ApplicationRoleConnectionMetadataType",
 )
 
 
@@ -235,6 +237,8 @@ class MessageType(Enum):
     guild_invite_reminder = 22
     context_menu_command = 23
     auto_moderation_action = 24
+    interaction_premium_upsell = 26
+    guild_application_premium_subscription = 32
 
 
 class PartyType(Enum):
@@ -550,15 +554,19 @@ class StickerFormatType(Enum):
     png = 1
     apng = 2
     lottie = 3
+    gif = 4
 
     @property
     def file_extension(self) -> str:
-        lookup: Dict[StickerFormatType, str] = {
-            StickerFormatType.png: "png",
-            StickerFormatType.apng: "png",
-            StickerFormatType.lottie: "json",
-        }
-        return lookup[self]
+        return STICKER_FORMAT_LOOKUP[self]
+
+
+STICKER_FORMAT_LOOKUP: Dict[StickerFormatType, str] = {
+    StickerFormatType.png: "png",
+    StickerFormatType.apng: "png",
+    StickerFormatType.lottie: "json",
+    StickerFormatType.gif: "gif",
+}
 
 
 class InviteTarget(Enum):
@@ -748,6 +756,10 @@ class Locale(Enum):
     "Hindi | हिन्दी"
     hr = "hr"
     "Croatian | Hrvatski"
+    hu = "hu"
+    "Hungarian | Magyar"
+    id = "id"
+    "Indonesian | Bahasa Indonesia"
     it = "it"
     "Italian | Italiano"
     ja = "ja"
@@ -756,8 +768,6 @@ class Locale(Enum):
     "Korean | 한국어"
     lt = "lt"
     "Lithuanian | Lietuviškai"
-    hu = "hu"
-    "Hungarian | Magyar"
     nl = "nl"
     "Dutch | Nederlands"
     no = "no"
@@ -810,6 +820,23 @@ class AutoModTriggerType(Enum):
 class ThreadSortOrder(Enum):
     latest_activity = 0
     creation_date = 1
+
+
+class ThreadLayout(Enum):
+    not_set = 0
+    list_view = 1
+    gallery_view = 2
+
+
+class ApplicationRoleConnectionMetadataType(Enum):
+    integer_less_than_or_equal = 1
+    integer_greater_than_or_equal = 2
+    integer_equal = 3
+    integer_not_equal = 4
+    datetime_less_than_or_equal = 5
+    datetime_greater_than_or_equal = 6
+    boolean_equal = 7
+    boolean_not_equal = 8
 
 
 T = TypeVar("T")

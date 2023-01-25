@@ -10,8 +10,28 @@ import os
 import sys
 import types
 from pathlib import Path
-from typing import Any, Callable, ContextManager, Dict, Iterator, Optional, Type, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    ContextManager,
+    Dict,
+    Iterator,
+    Optional,
+    Type,
+    TypeVar,
+    Union,
+)
 from unittest import mock
+
+if TYPE_CHECKING:
+    # for pyright
+    from typing_extensions import reveal_type as reveal_type
+else:
+    # to avoid flake8 noqas
+    def reveal_type(*args, **kwargs) -> None:
+        raise RuntimeError
+
 
 CallableT = TypeVar("CallableT", bound=Callable)
 
