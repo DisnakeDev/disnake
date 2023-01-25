@@ -122,6 +122,11 @@ class _StickerTag(Hashable, AssetMixin):
     id: int
     format: StickerFormatType
 
+    @property
+    def url(self) -> str:
+        """:class:`str`: The url for the sticker's image."""
+        return f"{Asset.BASE}/stickers/{self.id}.{self.format.file_extension}"
+
     async def read(self) -> bytes:
         """|coro|
 
@@ -177,18 +182,15 @@ class StickerItem(_StickerTag):
         The ID of the sticker.
     format: :class:`StickerFormatType`
         The format for the sticker's image.
-    url: :class:`str`
-        The URL for the sticker's image.
     """
 
-    __slots__ = ("name", "id", "format", "url")
+    __slots__ = ("name", "id", "format")
 
     def __init__(self, *, state: ConnectionState, data: StickerItemPayload) -> None:
         self._state: ConnectionState = state
         self.name: str = data["name"]
         self.id: int = int(data["id"])
         self.format: StickerFormatType = try_enum(StickerFormatType, data["format_type"])
-        self.url: str = f"{Asset.BASE}/stickers/{self.id}.{self.format.file_extension}"
 
     def __repr__(self) -> str:
         return f"<StickerItem id={self.id} name={self.name!r} format={self.format}>"
@@ -247,11 +249,9 @@ class Sticker(_StickerTag):
         The ID of the sticker's pack.
     format: :class:`StickerFormatType`
         The format for the sticker's image.
-    url: :class:`str`
-        The URL for the sticker's image.
     """
 
-    __slots__ = ("id", "name", "description", "format", "url")
+    __slots__ = ("id", "name", "description", "format")
 
     def __init__(self, *, state: ConnectionState, data: StickerPayload) -> None:
         self._state: ConnectionState = state
@@ -262,7 +262,6 @@ class Sticker(_StickerTag):
         self.name: str = data["name"]
         self.description: str = data["description"]
         self.format: StickerFormatType = try_enum(StickerFormatType, data["format_type"])
-        self.url: str = f"{Asset.BASE}/stickers/{self.id}.{self.format.file_extension}"
 
     def __repr__(self) -> str:
         return f"<Sticker id={self.id} name={self.name!r}>"
