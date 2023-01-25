@@ -88,7 +88,7 @@ class _BaseActivity:
         timestamps: Optional[ActivityTimestamps] = None,
         assets: Optional[ActivityAssets] = None,
         **kwargs: Any,  # discarded
-    ):
+    ) -> None:
         self._created_at: Optional[float] = created_at
         self._timestamps: ActivityTimestamps = timestamps or {}
         self.assets: ActivityAssets = assets or {}
@@ -317,7 +317,7 @@ class Activity(BaseActivity):
         sync_id: Optional[str] = None,
         session_id: Optional[str] = None,
         **kwargs: Any,
-    ):
+    ) -> None:
         super().__init__(**kwargs)
         self.state: Optional[str] = state
         self.details: Optional[str] = details
@@ -439,7 +439,7 @@ class Game(BaseActivity):
         *,
         platform: Optional[str] = None,
         **kwargs: Any,
-    ):
+    ) -> None:
         super().__init__(**kwargs)
         self.name: str = name
 
@@ -533,7 +533,7 @@ class Streaming(BaseActivity):
         details: Optional[str] = None,
         state: Optional[str] = None,
         **kwargs: Any,
-    ):
+    ) -> None:
         super().__init__(**kwargs)
         self.platform: Optional[str] = name
         self.name: Optional[str] = details or name
@@ -629,7 +629,7 @@ class Spotify(_BaseActivity):
         sync_id: Optional[str] = None,
         session_id: Optional[str] = None,
         **kwargs: Any,
-    ):
+    ) -> None:
         super().__init__(**kwargs)
         self._state: str = state or ""
         self._details: str = details or ""
@@ -801,7 +801,7 @@ class CustomActivity(BaseActivity):
         emoji: Optional[Union[ActivityEmojiPayload, str, PartialEmoji]] = None,
         state: Optional[str] = None,
         **kwargs: Any,
-    ):
+    ) -> None:
         super().__init__(**kwargs)
         self.name: Optional[str] = name
         self.state: Optional[str] = state

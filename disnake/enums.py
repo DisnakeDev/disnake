@@ -2,7 +2,18 @@
 
 import types
 from functools import total_ordering
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, NamedTuple, Optional, Type, TypeVar
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    ClassVar,
+    Dict,
+    List,
+    NamedTuple,
+    NoReturn,
+    Optional,
+    Type,
+    TypeVar,
+)
 
 __all__ = (
     "Enum",
@@ -47,6 +58,8 @@ __all__ = (
     "AutoModEventType",
     "AutoModActionType",
     "ThreadSortOrder",
+    "ThreadLayout",
+    "ApplicationRoleConnectionMetadataType",
 )
 
 
@@ -133,10 +146,10 @@ class EnumMeta(type):
     def __reversed__(cls):
         return (cls._enum_member_map_[name] for name in reversed(cls._enum_member_names_))
 
-    def __len__(cls):
+    def __len__(cls) -> int:
         return len(cls._enum_member_names_)
 
-    def __repr__(cls):
+    def __repr__(cls) -> str:
         return f"<enum {cls.__name__}>"
 
     @property
@@ -152,13 +165,13 @@ class EnumMeta(type):
     def __getitem__(cls, key):
         return cls._enum_member_map_[key]
 
-    def __setattr__(cls, name, value):
+    def __setattr__(cls, name, value) -> NoReturn:
         raise TypeError("Enums are immutable.")
 
-    def __delattr__(cls, attr):
+    def __delattr__(cls, attr) -> NoReturn:
         raise TypeError("Enums are immutable")
 
-    def __instancecheck__(self, instance):
+    def __instancecheck__(self, instance) -> bool:
         # isinstance(x, Y)
         # -> __instancecheck__(Y, x)
         try:
@@ -194,7 +207,7 @@ class ChannelType(Enum):
     guild_directory = 14
     forum = 15
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
@@ -224,6 +237,8 @@ class MessageType(Enum):
     guild_invite_reminder = 22
     context_menu_command = 23
     auto_moderation_action = 24
+    interaction_premium_upsell = 26
+    guild_application_premium_subscription = 32
 
 
 class PartyType(Enum):
@@ -243,14 +258,14 @@ class PartyType(Enum):
 
 class SpeakingState(Enum):
     none = 0
-    voice = 1
-    soundshare = 2
-    priority = 4
+    voice = 1 << 0
+    soundshare = 1 << 1
+    priority = 1 << 2
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
-    def __int__(self):
+    def __int__(self) -> int:
         return self.value
 
 
@@ -261,7 +276,7 @@ class VerificationLevel(Enum, comparable=True):
     high = 3
     highest = 4
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
@@ -270,7 +285,7 @@ class ContentFilter(Enum, comparable=True):
     no_role = 1
     all_members = 2
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
@@ -283,7 +298,7 @@ class Status(Enum):
     invisible = "invisible"
     streaming = "streaming"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.value
 
 
@@ -295,7 +310,7 @@ class DefaultAvatar(Enum):
     orange = 3
     red = 4
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
@@ -476,25 +491,26 @@ class AuditLogAction(Enum):
 
 
 class UserFlags(Enum):
-    staff = 1
-    partner = 2
-    hypesquad = 4
-    bug_hunter = 8
-    mfa_sms = 16
-    premium_promo_dismissed = 32
-    hypesquad_bravery = 64
-    hypesquad_brilliance = 128
-    hypesquad_balance = 256
-    early_supporter = 512
-    team_user = 1024
-    system = 4096
-    has_unread_urgent_messages = 8192
-    bug_hunter_level_2 = 16384
-    verified_bot = 65536
-    verified_bot_developer = 131072
-    discord_certified_moderator = 262144
-    http_interactions_bot = 524288
-    spammer = 1048576
+    staff = 1 << 0
+    partner = 1 << 1
+    hypesquad = 1 << 2
+    bug_hunter = 1 << 3
+    mfa_sms = 1 << 4
+    premium_promo_dismissed = 1 << 5
+    hypesquad_bravery = 1 << 6
+    hypesquad_brilliance = 1 << 7
+    hypesquad_balance = 1 << 8
+    early_supporter = 1 << 9
+    team_user = 1 << 10
+    system = 1 << 12
+    has_unread_urgent_messages = 1 << 13
+    bug_hunter_level_2 = 1 << 14
+    verified_bot = 1 << 16
+    verified_bot_developer = 1 << 17
+    discord_certified_moderator = 1 << 18
+    http_interactions_bot = 1 << 19
+    spammer = 1 << 20
+    active_developer = 1 << 22
 
 
 class ActivityType(Enum):
@@ -506,7 +522,7 @@ class ActivityType(Enum):
     custom = 4
     competing = 5
 
-    def __int__(self):
+    def __int__(self) -> int:
         return self.value
 
 
@@ -538,15 +554,19 @@ class StickerFormatType(Enum):
     png = 1
     apng = 2
     lottie = 3
+    gif = 4
 
     @property
     def file_extension(self) -> str:
-        lookup: Dict[StickerFormatType, str] = {
-            StickerFormatType.png: "png",
-            StickerFormatType.apng: "png",
-            StickerFormatType.lottie: "json",
-        }
-        return lookup[self]
+        return STICKER_FORMAT_LOOKUP[self]
+
+
+STICKER_FORMAT_LOOKUP: Dict[StickerFormatType, str] = {
+    StickerFormatType.png: "png",
+    StickerFormatType.apng: "png",
+    StickerFormatType.lottie: "json",
+    StickerFormatType.gif: "gif",
+}
 
 
 class InviteTarget(Enum):
@@ -579,17 +599,22 @@ class VideoQualityMode(Enum):
     auto = 1
     full = 2
 
-    def __int__(self):
+    def __int__(self) -> int:
         return self.value
 
 
 class ComponentType(Enum):
     action_row = 1
     button = 2
-    select = 3
+    string_select = 3
+    select = string_select  # backwards compatibility
     text_input = 4
+    user_select = 5
+    role_select = 6
+    mentionable_select = 7
+    channel_select = 8
 
-    def __int__(self):
+    def __int__(self) -> int:
         return self.value
 
 
@@ -608,7 +633,7 @@ class ButtonStyle(Enum):
     red = 4
     url = 5
 
-    def __int__(self):
+    def __int__(self) -> int:
         return self.value
 
 
@@ -635,7 +660,7 @@ class ApplicationCommandPermissionType(Enum):
     user = 2
     channel = 3
 
-    def __int__(self):
+    def __int__(self) -> int:
         return self.value
 
 
@@ -690,7 +715,7 @@ class ThreadArchiveDuration(Enum):
     three_days = 4320
     week = 10080
 
-    def __int__(self):
+    def __int__(self) -> int:
         return self.value
 
 
@@ -701,7 +726,7 @@ class WidgetStyle(Enum):
     banner3 = "banner3"
     banner4 = "banner4"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.value
 
 
@@ -731,6 +756,10 @@ class Locale(Enum):
     "Hindi | हिन्दी"
     hr = "hr"
     "Croatian | Hrvatski"
+    hu = "hu"
+    "Hungarian | Magyar"
+    id = "id"
+    "Indonesian | Bahasa Indonesia"
     it = "it"
     "Italian | Italiano"
     ja = "ja"
@@ -739,8 +768,6 @@ class Locale(Enum):
     "Korean | 한국어"
     lt = "lt"
     "Lithuanian | Lietuviškai"
-    hu = "hu"
-    "Hungarian | Magyar"
     nl = "nl"
     "Dutch | Nederlands"
     no = "no"
@@ -768,7 +795,7 @@ class Locale(Enum):
     zh_TW = "zh-TW"
     "Chinese, Taiwan | 繁體中文"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.value
 
 
@@ -793,6 +820,23 @@ class AutoModTriggerType(Enum):
 class ThreadSortOrder(Enum):
     latest_activity = 0
     creation_date = 1
+
+
+class ThreadLayout(Enum):
+    not_set = 0
+    list_view = 1
+    gallery_view = 2
+
+
+class ApplicationRoleConnectionMetadataType(Enum):
+    integer_less_than_or_equal = 1
+    integer_greater_than_or_equal = 2
+    integer_equal = 3
+    integer_not_equal = 4
+    datetime_less_than_or_equal = 5
+    datetime_greater_than_or_equal = 6
+    boolean_equal = 7
+    boolean_not_equal = 8
 
 
 T = TypeVar("T")

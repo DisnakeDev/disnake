@@ -106,7 +106,9 @@ class HTTPException(DiscordException):
         The Discord specific error code for the failure.
     """
 
-    def __init__(self, response: _ResponseType, message: Optional[Union[str, Dict[str, Any]]]):
+    def __init__(
+        self, response: _ResponseType, message: Optional[Union[str, Dict[str, Any]]]
+    ) -> None:
         self.response: _ResponseType = response
         self.status: int = response.status  # type: ignore
         self.code: int
@@ -200,7 +202,7 @@ class SessionStartLimitReached(ClientException):
 
     """
 
-    def __init__(self, session_start_limit: SessionStartLimit, requested: int = 1):
+    def __init__(self, session_start_limit: SessionStartLimit, requested: int = 1) -> None:
         self.session_start_limit: SessionStartLimit = session_start_limit
         super().__init__(
             f"Daily session start limit has been reached, resets at {self.session_start_limit.reset_time} "
@@ -222,20 +224,56 @@ class ConnectionClosed(ClientException):
         The shard ID that got closed if applicable.
     """
 
+    # https://discord.com/developers/docs/topics/opcodes-and-status-codes#gateway-gateway-close-event-codes
+    GATEWAY_CLOSE_EVENT_REASONS: Dict[int, str] = {
+        4000: "Unknown error",
+        4001: "Unknown opcode",
+        4002: "Decode error",
+        4003: "Not authenticated",
+        4004: "Authentication failed",
+        4005: "Already authenticated",
+        4007: "Invalid sequence",
+        4008: "Rate limited",
+        4009: "Session timed out",
+        4010: "Invalid Shard",
+        4011: "Sharding required - you are required to shard your connection in order to connect.",
+        4012: "Invalid API version",
+        4013: "Invalid intents",
+        4014: "Disallowed intents - you tried to specify an intent that you have not enabled or are not approved for.",
+    }
+
+    # https://discord.com/developers/docs/topics/opcodes-and-status-codes#voice-voice-close-event-codes
+    GATEWAY_VOICE_CLOSE_EVENT_REASONS: Dict[int, str] = {
+        **GATEWAY_CLOSE_EVENT_REASONS,
+        4002: "Failed to decode payload",
+        4006: "Session no longer valid",
+        4011: "Server not found",
+        4012: "Unknown protocol",
+        4014: "Disconnected, channel was deleted, you were kicked, voice server changed, or the main gateway session was dropped.",
+        4015: "Voice server crashed",
+        4016: "Unknown encryption mode",
+    }
+
     def __init__(
         self,
         socket: ClientWebSocketResponse,
         *,
         shard_id: Optional[int],
         code: Optional[int] = None,
-    ):
+        voice: bool = False,
+    ) -> None:
         # This exception is just the same exception except
         # reconfigured to subclass ClientException for users
         self.code: int = code or socket.close_code or -1
         # aiohttp doesn't seem to consistently provide close reason
-        self.reason: str = ""
+        self.reason: str = self.GATEWAY_CLOSE_EVENT_REASONS.get(self.code, "Unknown reason")
+        if voice:
+            self.reason = self.GATEWAY_VOICE_CLOSE_EVENT_REASONS.get(self.code, "Unknown reason")
+
         self.shard_id: Optional[int] = shard_id
-        super().__init__(f"Shard ID {self.shard_id} WebSocket closed with {self.code}")
+        super().__init__(
+            f"Shard ID {self.shard_id} WebSocket closed with {self.code}: {self.reason}"
+        )
 
 
 class PrivilegedIntentsRequired(ClientException):
@@ -255,7 +293,7 @@ class PrivilegedIntentsRequired(ClientException):
         The shard ID that got closed if applicable.
     """
 
-    def __init__(self, shard_id: Optional[int]):
+    def __init__(self, shard_id: Optional[int]) -> None:
         self.shard_id: Optional[int] = shard_id
         msg = (
             f"Shard ID {shard_id} is requesting privileged intents that have not been explicitly enabled in the "
@@ -292,7 +330,7 @@ class InteractionTimedOut(InteractionException):
         The interaction that was responded to.
     """
 
-    def __init__(self, interaction: Interaction):
+    def __init__(self, interaction: Interaction) -> None:
         self.interaction: Interaction = interaction
 
         msg = (
@@ -321,7 +359,7 @@ class InteractionResponded(InteractionException):
         The interaction that's already been responded to.
     """
 
-    def __init__(self, interaction: Interaction):
+    def __init__(self, interaction: Interaction) -> None:
         self.interaction: Interaction = interaction
         super().__init__("This interaction has already been responded to before")
 
@@ -340,7 +378,7 @@ class InteractionNotResponded(InteractionException):
         The interaction that hasn't been responded to.
     """
 
-    def __init__(self, interaction: Interaction):
+    def __init__(self, interaction: Interaction) -> None:
         self.interaction: Interaction = interaction
         super().__init__("This interaction hasn't been responded to yet")
 
@@ -356,7 +394,7 @@ class ModalChainNotSupported(InteractionException):
         The interaction that was responded to.
     """
 
-    def __init__(self, interaction: ModalInteraction):
+    def __init__(self, interaction: ModalInteraction) -> None:
         self.interaction: ModalInteraction = interaction
         super().__init__("You cannot respond to a modal with another modal.")
 
@@ -373,7 +411,7 @@ class InteractionNotEditable(InteractionException):
         The interaction that was responded to.
     """
 
-    def __init__(self, interaction: Interaction):
+    def __init__(self, interaction: Interaction) -> None:
         self.interaction: Interaction = interaction
         super().__init__("This interaction does not have a message to edit.")
 
@@ -389,6 +427,6 @@ class LocalizationKeyError(DiscordException):
         The localization key that couldn't be found.
     """
 
-    def __init__(self, key: str):
+    def __init__(self, key: str) -> None:
         self.key: str = key
         super().__init__(f"No localizations were found for the key '{key}'.")

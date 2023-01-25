@@ -21,6 +21,7 @@ from .ctx_menus_core import *
 from .custom_warnings import *
 from .errors import *
 from .flag_converter import *
+from .flags import *
 from .help import *
 from .params import *
 from .slash_core import *

@@ -17,6 +17,100 @@ in specific versions.
 
 .. towncrier release notes start
 
+.. _vp2p7p0:
+
+v2.7.0
+------
+
+This release comes with support for python 3.11 and new selects.
+
+Breaking Changes
+~~~~~~~~~~~~~~~~
+- Properly document that :attr:`Message.system_content` may return ``None``. While this is documented as a breaking change, this function always could return ``None`` if the message type was not recognised. (:issue:`766`)
+- Rename :meth:`InteractionDataResolved.get` to :meth:`~InteractionDataResolved.get_by_id`. (:issue:`814`)
+
+Deprecations
+~~~~~~~~~~~~
+- Rename :class:`ApplicationCommandInteractionDataResolved` to :class:`InteractionDataResolved`. (:issue:`814`)
+- |commands| Deprecate the ``sync_commands``, ``sync_commands_debug``, and  ``sync_commands_on_cog_unload`` parameters of :class:`~disnake.ext.commands.Bot` and :class:`~disnake.ext.commands.InteractionBot`. These have been replaced with the ``command_sync_flags`` parameter which takes a :class:`~disnake.ext.commands.CommandSyncFlags` instance. (:issue:`806`)
+
+New Features
+~~~~~~~~~~~~
+- Update :attr:`Message.system_content` to be accurate to the client as of October 2022. (:issue:`766`)
+    - This also properly documents that it is possible to return ``None``.
+- Add type hints to all flag constructors, now supporting type-checking for creating flag classes (e.g. ``Intents(members=True)``) which used to be untyped. (:issue:`778`)
+- Add :func:`GuildScheduledEvent.start`, :func:`.end <GuildScheduledEvent.end>` and :func:`.cancel <GuildScheduledEvent.cancel>` shortcuts. (:issue:`781`)
+- Support Python 3.11. (:issue:`785`, :issue:`827`, :issue:`829`, :issue:`833`)
+- Improve the cli, allowing the usage of :class:`.ext.commands.InteractionBot`, :class:`.ext.commands.AutoShardedInteractionBot`. (:issue:`791`)
+- Add new select menu components. (:issue:`800`, :issue:`803`)
+    - Add new :class:`ComponentType` values.
+    - Add :class:`UserSelectMenu`, :class:`RoleSelectMenu`, :class:`MentionableSelectMenu`, :class:`ChannelSelectMenu` components.
+    - Add :class:`ui.UserSelect`, :class:`ui.RoleSelect`, :class:`ui.MentionableSelect`, :class:`ui.ChannelSelect` UI types.
+    - Add :func:`ui.user_select`, :func:`ui.role_select`, :func:`ui.mentionable_select`, :func:`ui.channel_select` decorators.
+    - Add :func:`ui.ActionRow.add_user_select`, :func:`add_role_select() <ui.ActionRow.add_role_select>`, :func:`add_mentionable_select() <ui.ActionRow.add_mentionable_select>`, :func:`add_channel_select() <ui.ActionRow.add_channel_select>`
+    - Renamed string select types for clarity (previous names will continue to work):
+        - :class:`SelectMenu` -> :class:`StringSelectMenu`
+        - :class:`ui.Select` -> :class:`ui.StringSelect`
+        - :func:`ui.select` -> :func:`ui.string_select`
+        - :func:`ui.ActionRow.add_select` -> :func:`ui.ActionRow.add_string_select`
+    - Add :attr:`MessageInteraction.resolved_values` and :attr:`MessageInteractionData.resolved`.
+- Support ``delete_after`` parameter when sending ephemeral interaction responses. (:issue:`816`)
+- Allow ``slowmode_delay`` parameter of :meth:`ForumChannel.create_thread` to be optional. (:issue:`822`)
+- Add ``suppress_embeds`` parameter to :meth:`Interaction.edit_original_response` and :meth:`InteractionMessage.edit`. (:issue:`832`)
+- |commands| Add :class:`~disnake.ext.commands.CommandSyncFlags` to provide sync configuration to :class:`~disnake.ext.commands.Bot` and :class:`~disnake.ext.commands.InteractionBot` (and their autosharded variants) as ``command_sync_flags``. (:issue:`265`, :issue:`433`, :issue:`468`, :issue:`806`)
+
+Bug Fixes
+~~~~~~~~~
+- Add the missing attributes for :class:`PermissionOverwrite`: ``use_application_commands`` and ``use_embedded_activities``. (:issue:`777`)
+- Ensure that embed fields are copied properly by :func:`Embed.copy` and that the copied embed is completely separate from the original one. (:issue:`792`)
+- Fix an issue with :meth:`Member.ban` erroring when the ``delete_message_days`` parameter was provided. (:issue:`810`)
+- Try to get threads used in interactions (like threads in command arguments) from the cache first, before creating a new instance. (:issue:`814`)
+- Fix creation of threads in text channels without :attr:`Permissions.manage_threads`. (:issue:`818`)
+- Fix off-by-one error in :class:`AutoModKeywordPresets` values. (:issue:`820`)
+- Update event loop handling to avoid warnings when running on Python 3.11. (:issue:`827`)
+- |commands| Fix a case where optional variadic arguments could have infinite loops in parsing depending on the user input. (:issue:`825`)
+
+Documentation
+~~~~~~~~~~~~~
+- Speed up page load by changing hoverxref tooltips to be lazily loaded. (:issue:`393`)
+- Remove reference to the v1.0 migration guide from the main index page, and move legacy changelogs to a separate page. (:issue:`697`)
+- Update sphinx from version 5.1 to 5.3. (:issue:`764`, :issue:`821`)
+- Add a note warning mentioning that using a :class:`disnake.File` object as file kwarg makes a :class:`disnake.Embed` not reusable. (:issue:`786`)
+- Update broken Discord API Docs links, add ``:ddocs:`` role for easily creating links to the API documentation. (:issue:`793`)
+- Add a custom 404 page for when the navigated page does not exist. (:issue:`797`)
+
+Miscellaneous
+~~~~~~~~~~~~~
+- Increase the upper bound for the ``aiohttp`` dependency from ``<3.9`` to ``<4``. (:issue:`789`)
+- Use ``importlib.metadata`` instead of the deprecated ``pkg_resources`` in the cli for displaying the version. (:issue:`791`)
+- |commands| Add missing ``py.typed`` marker. (:issue:`784`)
+- |tasks| Add missing ``py.typed`` marker. (:issue:`784`)
+
+.. _vp2p6p2:
+
+v2.6.2
+------
+
+This maintainence release contains backports from v2.7.0.
+
+Bug Fixes
+~~~~~~~~~
+- Fix creation of threads in text channels without :attr:`Permissions.manage_threads`. (:issue:`818`)
+- Fix off-by-one error in :class:`AutoModKeywordPresets` values. (:issue:`820`)
+- |commands| Fix a case where optional variadic arguments could have infinite loops in parsing depending on the user input. (:issue:`825`)
+
+.. _vp2p6p1:
+
+v2.6.1
+------
+
+This maintainence release contains backports from v2.7.0.
+
+Bug Fixes
+~~~~~~~~~
+- Ensure that embed fields are copied properly by :func:`Embed.copy` and that the copied embed is completely separate from the original one. (:issue:`792`)
+- Fix an issue with :meth:`Member.ban` erroring when the ``delete_message_days`` parameter was provided. (:issue:`810`)
+
 .. _vp2p6p0:
 
 v2.6.0

@@ -130,7 +130,7 @@ class InvokableApplicationCommand(ABC):
         self.__original_kwargs__ = {k: v for k, v in kwargs.items() if v is not None}
         return self
 
-    def __init__(self, func: CommandCallback, *, name: Optional[str] = None, **kwargs):
+    def __init__(self, func: CommandCallback, *, name: Optional[str] = None, **kwargs) -> None:
         self.__command_flag__ = None
         self._callback: CommandCallback = func
         self.name: str = name or func.__name__
@@ -147,14 +147,6 @@ class InvokableApplicationCommand(ABC):
             raise TypeError(
                 "`default_permission` is deprecated and will always be set to `True`. "
                 "See `default_member_permissions` and `dm_permission` instead."
-            )
-
-        # n.b. this was supported previously, but reverted due to
-        # uncertainty about upcoming upstream changes
-        if "nsfw" in kwargs:
-            raise TypeError(
-                "The `nsfw` parameter is not supported. "
-                "If you set it before, use an earlier version to reset it to `False`."
             )
 
         try:

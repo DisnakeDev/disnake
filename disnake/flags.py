@@ -46,7 +46,7 @@ T = TypeVar("T", bound="BaseFlags")
 
 
 class flag_value(Generic[T]):
-    def __init__(self, func: Callable[[Any], int]):
+    def __init__(self, func: Callable[[Any], int]) -> None:
         self.flag = func(None)
         self.__doc__ = func.__doc__
         self._parent: Type[T] = MISSING
@@ -87,7 +87,7 @@ class flag_value(Generic[T]):
     def __set__(self, instance: BaseFlags, value: bool) -> None:
         instance._set_flag(self.flag, value)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<flag_value flag={self.flag!r}>"
 
 
@@ -107,7 +107,7 @@ class BaseFlags:
 
     __slots__ = ("value",)
 
-    def __init__(self, **kwargs: bool):
+    def __init__(self, **kwargs: bool) -> None:
         self.value = self.DEFAULT_VALUE
         for key, value in kwargs.items():
             if key not in self.VALID_FLAGS:
@@ -418,7 +418,7 @@ class SystemChannelFlags(BaseFlags, inverted=True):
             join_notification_replies: bool = ...,
             join_notifications: bool = ...,
             premium_subscriptions: bool = ...,
-        ):
+        ) -> None:
             ...
 
     # For some reason the flags for system channels are "inverted"
@@ -571,7 +571,7 @@ class MessageFlags(BaseFlags):
             source_message_deleted: bool = ...,
             suppress_embeds: bool = ...,
             urgent: bool = ...,
-        ):
+        ) -> None:
             ...
 
     @flag_value
@@ -733,6 +733,7 @@ class PublicUserFlags(BaseFlags):
         def __init__(
             self,
             *,
+            active_developer: bool = ...,
             bug_hunter: bool = ...,
             bug_hunter_level_2: bool = ...,
             discord_certified_moderator: bool = ...,
@@ -743,6 +744,7 @@ class PublicUserFlags(BaseFlags):
             hypesquad_balance: bool = ...,
             hypesquad_bravery: bool = ...,
             hypesquad_brilliance: bool = ...,
+            moderator_programs_alumni: bool = ...,
             partner: bool = ...,
             spammer: bool = ...,
             staff: bool = ...,
@@ -750,7 +752,7 @@ class PublicUserFlags(BaseFlags):
             team_user: bool = ...,
             verified_bot: bool = ...,
             verified_bot_developer: bool = ...,
-        ):
+        ) -> None:
             ...
 
     @flag_value
@@ -827,8 +829,16 @@ class PublicUserFlags(BaseFlags):
         return UserFlags.verified_bot_developer.value
 
     @flag_value
+    def moderator_programs_alumni(self):
+        """:class:`bool`: Returns ``True`` if the user is a Discord Moderator Programs Alumni.
+
+        .. versionadded:: 2.8
+        """
+        return UserFlags.discord_certified_moderator.value
+
+    @alias_flag_value
     def discord_certified_moderator(self):
-        """:class:`bool`: Returns ``True`` if the user is a Discord Certified Moderator.
+        """:class:`bool`: An alias for :attr:`moderator_programs_alumni`.
 
         .. versionadded:: 2.0
         """
@@ -849,6 +859,14 @@ class PublicUserFlags(BaseFlags):
         .. versionadded:: 2.3
         """
         return UserFlags.spammer.value
+
+    @flag_value
+    def active_developer(self):
+        """:class:`bool`: Returns ``True`` if the user is an Active Developer.
+
+        .. versionadded:: 2.8
+        """
+        return UserFlags.active_developer.value
 
     def all(self) -> List[UserFlags]:
         """List[:class:`UserFlags`]: Returns all public flags the user has."""
@@ -989,15 +1007,15 @@ class Intents(BaseFlags):
         typing: bool = ...,
         voice_states: bool = ...,
         webhooks: bool = ...,
-    ):
+    ) -> None:
         ...
 
     @overload
     @_generated
-    def __init__(self: NoReturn):
+    def __init__(self: NoReturn) -> None:
         ...
 
-    def __init__(self, value: Optional[int] = None, **kwargs: bool):
+    def __init__(self, value: Optional[int] = None, **kwargs: bool) -> None:
         if value is not None:
             if not isinstance(value, int):
                 raise TypeError(
@@ -1632,15 +1650,15 @@ class MemberCacheFlags(BaseFlags):
 
     @overload
     @_generated
-    def __init__(self, *, joined: bool = ..., voice: bool = ...):
+    def __init__(self, *, joined: bool = ..., voice: bool = ...) -> None:
         ...
 
     @overload
     @_generated
-    def __init__(self: NoReturn):
+    def __init__(self: NoReturn) -> None:
         ...
 
-    def __init__(self, **kwargs: bool):
+    def __init__(self, **kwargs: bool) -> None:
         self.value = all_flags_value(self.VALID_FLAGS)
         for key, value in kwargs.items():
             if key not in self.VALID_FLAGS:
@@ -1709,7 +1727,7 @@ class MemberCacheFlags(BaseFlags):
 
         return self
 
-    def _verify_intents(self, intents: Intents):
+    def _verify_intents(self, intents: Intents) -> None:
         if self.voice and not intents.voice_states:
             raise ValueError("MemberCacheFlags.voice requires Intents.voice_states")
 
@@ -1825,7 +1843,7 @@ class ApplicationFlags(BaseFlags):
             gateway_presence: bool = ...,
             gateway_presence_limited: bool = ...,
             verification_pending_guild_limit: bool = ...,
-        ):
+        ) -> None:
             ...
 
     @flag_value
@@ -1982,7 +2000,7 @@ class ChannelFlags(BaseFlags):
     if TYPE_CHECKING:
 
         @_generated
-        def __init__(self, *, pinned: bool = ..., require_tag: bool = ...):
+        def __init__(self, *, pinned: bool = ..., require_tag: bool = ...) -> None:
             ...
 
     @flag_value
@@ -2077,7 +2095,9 @@ class AutoModKeywordPresets(ListBaseFlags):
     if TYPE_CHECKING:
 
         @_generated
-        def __init__(self, *, profanity: bool = ..., sexual_content: bool = ..., slurs: bool = ...):
+        def __init__(
+            self, *, profanity: bool = ..., sexual_content: bool = ..., slurs: bool = ...
+        ) -> None:
             ...
 
     @classmethod
@@ -2099,18 +2119,18 @@ class AutoModKeywordPresets(ListBaseFlags):
         """:class:`bool`: Returns ``True`` if the profanity preset is enabled
         (contains words that may be considered swearing or cursing).
         """
-        return 1 << 0
+        return 1 << 1
 
     @flag_value
     def sexual_content(self):
         """:class:`bool`: Returns ``True`` if the sexual content preset is enabled
         (contains sexually explicit words).
         """
-        return 1 << 1
+        return 1 << 2
 
     @flag_value
     def slurs(self):
         """:class:`bool`: Returns ``True`` if the slurs preset is enabled
         (contains insults or words that may be considered hate speech).
         """
-        return 1 << 2
+        return 1 << 3

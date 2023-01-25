@@ -31,6 +31,7 @@ from typing import (
     List,
     Literal,
     Mapping,
+    NoReturn,
     Optional,
     Protocol,
     Sequence,
@@ -77,13 +78,16 @@ DISCORD_EPOCH = 1420070400000
 
 
 class _MissingSentinel:
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         return False
 
-    def __bool__(self):
+    def __hash__(self) -> int:
+        return 0
+
+    def __bool__(self) -> bool:
         return False
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "..."
 
 
@@ -91,7 +95,7 @@ MISSING: Any = _MissingSentinel()
 
 
 class _cached_property:
-    def __init__(self, function):
+    def __init__(self, function) -> None:
         self.function = function
         self.__doc__: Optional[str] = function.__doc__
 
@@ -164,7 +168,7 @@ class classproperty(Generic[T_co]):
     def __get__(self, instance: Optional[Any], owner: Type[Any]) -> T_co:
         return self.fget(owner)
 
-    def __set__(self, instance, value) -> None:
+    def __set__(self, instance, value) -> NoReturn:
         raise AttributeError("cannot set attribute")
 
 
@@ -178,7 +182,7 @@ def cached_slot_property(name: str) -> Callable[[Callable[[T], T_co]], CachedSlo
 class SequenceProxy(Sequence[T_co]):
     """Read-only proxy of a Sequence."""
 
-    def __init__(self, proxied: Sequence[T_co]):
+    def __init__(self, proxied: Sequence[T_co]) -> None:
         self.__proxied = proxied
 
     def __getitem__(self, idx: int) -> T_co:
@@ -691,7 +695,7 @@ class SnowflakeList(array.array):
 
     if TYPE_CHECKING:
 
-        def __init__(self, data: Iterable[int], *, is_sorted: bool = False):
+        def __init__(self, data: Iterable[int], *, is_sorted: bool = False) -> None:
             ...
 
     def __new__(cls, data: Iterable[int], *, is_sorted: bool = False):

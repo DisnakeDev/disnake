@@ -40,30 +40,40 @@ This code sample shows how to set the registration to be local:
 
 For global registration, don't specify this parameter.
 
-Another useful parameter is ``sync_commands_debug``. If set to ``True``, you receive debug messages related to the
-app command registration by default, without having to change the log level of any loggers
-(see :class:`Bot.sync_commands_debug <ext.commands.Bot.sync_commands_debug>` for more info).
+In order to configure specific properties about command sync, there's a configuration
+class which may be passed to the Bot, :class:`~.ext.commands.CommandSyncFlags`.
+
+Setting :attr:`CommandSyncFlags.sync_commands_debug <.ext.commands.CommandSyncFlags.sync_commands_debug>` to ``True``, will print debug messages related to the
+app command registration to the console (or logger if enabled).
+
 This is useful if you want to figure out some registration details:
 
 .. code-block:: python3
 
     from disnake.ext import commands
 
+    command_sync_flags = commands.CommandSyncFlags.default()
+    command_sync_flags.sync_commands_debug = True
+
     bot = commands.Bot(
         command_prefix='!',
         test_guilds=[123456789], # Optional
-        sync_commands_debug=True
+        command_sync_flags=command_sync_flags,
     )
 
-If you want to disable the automatic registration, set ``sync_commands`` to ``False``:
+If you want to disable the automatic registration, set :attr:`CommandSyncFlags.sync_commands <.ext.commands.CommandSyncFlags.sync_commands>`
+to ``False``, or use :meth:`CommandSyncFlags.none() <.ext.commands.CommandSyncFlags.none>`
 
 .. code-block:: python3
 
     from disnake.ext import commands
 
+    command_sync_flags = commands.CommandSyncFlags.none()
+    command_sync_flags.sync_commands = False
+
     bot = commands.Bot(
         command_prefix='!',
-        sync_commands=False
+        command_sync_flags=command_sync_flags,
     )
 
 Basic Slash Command
@@ -534,7 +544,7 @@ For currently supported locales, see :class:`Locale`.
 
 .. note::
     You can supply your own custom localization provider by implementing :class:`.LocalizationProtocol`
-    and using the client's/bot's :attr:`localization_provider <ext.commands.Bot.localization_provider>` parameter.
+    and using the client's/bot's ``localization_provider`` parameter to  :class:`~ext.commands.Bot`.
     The ``.json`` handling mentioned in this section, as well as the :ref:`localizations_strict` section below only
     apply to the default implementation, :class:`.LocalizationStore`.
 
@@ -592,7 +602,7 @@ Strict Localization
 
 By default, missing keys that couldn't be found are silently ignored.
 To instead raise an exception when a key is missing, pass the ``strict_localization=True`` parameter to the client/bot constructor
-(see :attr:`Bot.strict_localization <ext.commands.Bot.strict_localization>`).
+(see the docs for the ``strict_localization`` parameter to :class:`~.ext.commands.Bot`).
 
 
 Customization
