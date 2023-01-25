@@ -6092,6 +6092,13 @@ PublicUserFlags
 .. autoclass:: PublicUserFlags()
     :members:
 
+MemberFlags
+
+.. attributetable:: MemberFlags
+
+.. autoclass:: MemberFlags()
+    :members:
+
 .. _discord_ui_kit:
 
 Bot UI Kit
