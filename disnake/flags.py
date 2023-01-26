@@ -2230,7 +2230,7 @@ class MemberFlags(BaseFlags):
 
     @flag_value
     def bypasses_verification(self):
-        """:class:`bool`: Returns ``True`` if the member is able to bypass verification."""
+        """:class:`bool`: Returns ``True`` if the member is able to bypass guild verification requirements."""
         return 1 << 2
 
     @flag_value
