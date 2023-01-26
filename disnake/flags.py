@@ -2198,9 +2198,9 @@ class MemberFlags(BaseFlags):
 
     Attributes
     ----------
-    values: :class:`int`
-        The raw values. You should query flags via the properties
-        rather than using these raw values.
+    value: :class:`int`
+        The raw value. You should query flags via the properties
+        rather than using this raw value.
     """
 
     __slots__ = ()
@@ -2230,7 +2230,7 @@ class MemberFlags(BaseFlags):
 
     @flag_value
     def bypasses_verification(self):
-        """:class:`bool`: Returns ``True`` if the member is able to bypass verification."""
+        """:class:`bool`: Returns ``True`` if the member is able to bypass guild verification requirements."""
         return 1 << 2
 
     @flag_value
