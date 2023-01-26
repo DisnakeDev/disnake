@@ -2198,9 +2198,9 @@ class MemberFlags(BaseFlags):
 
     Attributes
     ----------
-    values: :class:`int`
-        The raw values. You should query flags via the properties
-        rather than using these raw values.
+    value: :class:`int`
+        The raw value. You should query flags via the properties
+        rather than using this raw value.
     """
 
     __slots__ = ()
