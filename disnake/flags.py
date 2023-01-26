@@ -2211,9 +2211,9 @@ class MemberFlags(BaseFlags):
         def __init__(
             self,
             *,
-            did_rejoin: bool = ...,
-            completed_onboarding: bool = ...,
             bypasses_verification: bool = ...,
+            completed_onboarding: bool = ...,
+            did_rejoin: bool = ...,
             started_onboarding: bool = ...,
         ) -> None:
             ...
