@@ -840,7 +840,7 @@ class Member(disnake.abc.Messageable, _UserTag):
             The member's new flags. To know what flags are editable,
             see :ddocs:`the documentation <resources/guild#guild-member-object-guild-member-flags>`.
 
-            If parameter ``verified`` is provided, that will override the setting of :attr:`MemberFlags.bypasses_verification`.
+            If parameter ``bypasses_verification`` is provided, that will override the setting of :attr:`MemberFlags.bypasses_verification`.
 
             .. versionadded:: 2.8
 
