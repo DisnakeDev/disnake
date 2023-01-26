@@ -798,6 +798,8 @@ class Member(disnake.abc.Messageable, _UserTag):
         +------------------------------+-------------------------------------+
         | timeout                      | :attr:`Permissions.moderate_members`|
         +------------------------------+-------------------------------------+
+        | flags                        | :attr:`Permissions.moderate_members`|
+        +------------------------------+-------------------------------------+
         | bypasses_verification        | :attr:`Permissions.moderate_members`|
         +------------------------------+-------------------------------------+
 
