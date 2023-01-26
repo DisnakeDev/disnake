@@ -774,7 +774,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         voice_channel: Optional[VocalGuildChannel] = MISSING,
         timeout: Optional[Union[float, datetime.timedelta, datetime.datetime]] = MISSING,
         flags: MemberFlags = MISSING,
-        verified: bool = MISSING,
+        bypasses_verification: bool = MISSING,
         reason: Optional[str] = None,
     ) -> Optional[Member]:
         """|coro|
@@ -798,7 +798,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         +------------------------------+-------------------------------------+
         | timeout                      | :attr:`Permissions.moderate_members`|
         +------------------------------+-------------------------------------+
-        | verified                     | :attr:`Permissions.moderate_members`|
+        | bypasses_verification        | :attr:`Permissions.moderate_members`|
         +------------------------------+-------------------------------------+
 
         All parameters are optional.
@@ -842,7 +842,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
             .. versionadded:: 2.8
 
-        verified: :class:`bool`
+        bypasses_verification: :class:`bool`
             Whether the member bypasses guild verification requirements.
 
             .. versionadded:: 2.8
@@ -920,10 +920,10 @@ class Member(disnake.abc.Messageable, _UserTag):
             else:
                 payload["communication_disabled_until"] = None
 
-        if verified is not MISSING:
+        if bypasses_verification is not MISSING:
             # create base flags if flags are provided, otherwise use the internal flags.
             flags = MemberFlags._from_value(self._flags if flags is MISSING else flags.value)
-            flags.bypasses_verification = verified
+            flags.bypasses_verification = bypasses_verification
 
         if flags is not MISSING:
             payload["flags"] = flags.value
