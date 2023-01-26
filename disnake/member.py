@@ -835,7 +835,9 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         flags: :class:`MemberFlags`
             The member's new flags. To know what flags are editable,
-            see `the documentation <https://discord.com/developers/docs/resources/guild#guild-member-flags>`_.
+            see :ddocs:`the documentation <resources/guild#guild-member-object-guild-member-flags>`.
+
+            If parameter ``verified`` is provided, that will override the setting of :attr:`MemberFlags.bypasses_verification`.
 
             .. versionadded:: 2.8
 

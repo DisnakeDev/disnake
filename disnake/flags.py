@@ -2140,47 +2140,46 @@ class AutoModKeywordPresets(ListBaseFlags):
 class MemberFlags(BaseFlags):
     """Wraps up Discord Member flags.
 
-    .. versionadded:: 2.8
-
     .. container:: operations
 
         .. describe:: x == y
+
             Checks if two MemberFlags instances are equal.
-
         .. describe:: x != y
+
             Checks if two MemberFlags instances are not equal.
-
         .. describe:: x <= y
+
             Checks if an MemberFlags instance is a subset of another MemberFlags instance.
-
         .. describe:: x >= y
+
             Checks if an MemberFlags instance is a superset of another MemberFlags instance.
-
         .. describe:: x < y
+
             Checks if an MemberFlags instance is a strict subset of another MemberFlags instance.
-
         .. describe:: x > y
-            Checks if an MemberFlags instance is a strict superset of another MemberFlags instance.
 
+            Checks if an MemberFlags instance is a strict superset of another MemberFlags instance.
         .. describe:: x | y, x |= y
+
             Returns a new MemberFlags instance with all enabled flags from both x and y.
             (Using ``|=`` will update in place).
-
         .. describe:: x & y, x &= y
+
             Returns a new MemberFlags instance with only flags enabled on both x and y.
             (Using ``&=`` will update in place).
-
         .. describe:: x ^ y, x ^= y
+
             Returns a new MemberFlags instance with only flags enabled on one of x or y, but not both.
             (Using ``^=`` will update in place).
-
         .. describe:: ~x
+
             Returns a new MemberFlags instance with all flags from x inverted.
-
         .. describe:: hash(x)
-            Return the flag's hash.
 
+            Returns the flag's hash.
         .. describe:: iter(x)
+
             Returns an iterator of ``(name, value)`` pairs. This allows it
             to be, for example, constructed as a dict or a list of pairs.
             Note that aliases are not shown.
@@ -2188,10 +2187,14 @@ class MemberFlags(BaseFlags):
         Additionally supported are a few operations on class attributes.
 
         .. describe:: MemberFlags.y | MemberFlags.z, MemberFlags(y=True) | MemberFlags.z
+
             Returns a MemberFlags instance with all provided flags enabled.
 
         .. describe:: ~MemberFlags.y
+
             Returns a MemberFlags instance with all flags except ``y`` inverted from their default value.
+
+    .. versionadded:: 2.8
 
     Attributes
     ----------
