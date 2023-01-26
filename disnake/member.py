@@ -338,7 +338,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         self._avatar: Optional[str] = data.get("avatar")
         timeout_datetime = utils.parse_time(data.get("communication_disabled_until"))
         self._communication_disabled_until: Optional[datetime.datetime] = timeout_datetime
-        self._flags: int = data["flags"]
+        self._flags: int = data.get("flags", 0)
 
     def __str__(self) -> str:
         return str(self._user)
@@ -431,7 +431,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         self._avatar = data.get("avatar")
         timeout_datetime = utils.parse_time(data.get("communication_disabled_until"))
         self._communication_disabled_until = timeout_datetime
-        self._flags = data["flags"]
+        self._flags = data.get("flags", 0)
 
     def _presence_update(
         self, data: PresenceData, user: UserPayload
