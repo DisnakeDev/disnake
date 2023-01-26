@@ -374,6 +374,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         self._roles = utils.SnowflakeList(map(int, data["roles"]))
         self.nick = data.get("nick", None)
         self.pending = data.get("pending", False)
+        self._flags = data.get("flags", 0)
 
     @classmethod
     def _try_upgrade(
