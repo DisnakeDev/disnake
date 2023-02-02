@@ -829,7 +829,6 @@ class ThreadLayout(Enum):
     gallery_view = 2
 
 
-
 class Event(Enum):
     connect = "connect"
     """Called when the client has successfully connected to Discord."""
