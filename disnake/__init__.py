@@ -26,6 +26,7 @@ from . import abc as abc, opus as opus, ui as ui, utils as utils  # explicitly r
 from .activity import *
 from .app_commands import *
 from .appinfo import *
+from .application_role_connection import *
 from .asset import *
 from .audit_logs import *
 from .automod import *

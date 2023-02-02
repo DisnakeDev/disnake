@@ -60,6 +60,7 @@ class RoleTags:
         "integration_id",
         "subscription_listing_id",
         "_premium_subscriber",
+        "_guild_connections",
         "_available_for_purchase",
     )
 
@@ -74,6 +75,7 @@ class RoleTags:
         # If a field is missing, it corresponds to False.
         # This is different from other fields where "null" means "not there".
         self._premium_subscriber: Optional[Any] = data.get("premium_subscriber", MISSING)
+        self._guild_connections: Optional[Any] = data.get("guild_connections", MISSING)
         self._available_for_purchase: Optional[Any] = data.get("available_for_purchase", MISSING)
 
     def is_bot_managed(self) -> bool:
@@ -96,6 +98,15 @@ class RoleTags:
         :return type: :class:`bool`
         """
         return self._premium_subscriber is None
+
+    def is_linked_role(self) -> bool:
+        """Whether the role is a linked role for the guild.
+
+        .. versionadded:: 2.8
+
+        :return type: :class:`bool`
+        """
+        return self._guild_connections is None
 
     def is_available_for_purchase(self) -> bool:
         """Whether the role is a subscription role and available for purchase.
@@ -120,7 +131,8 @@ class RoleTags:
             f"<RoleTags bot_id={self.bot_id} integration_id={self.integration_id} "
             f"subscription_listing_id={self.subscription_listing_id} "
             f"premium_subscriber={self.is_premium_subscriber()} "
-            f"available_for_purchase={self.is_available_for_purchase()}>"
+            f"available_for_purchase={self.is_available_for_purchase()} "
+            f"linked_role={self.is_linked_role()}>"
         )
 
 
@@ -296,6 +308,15 @@ class Role(Hashable):
         :return type: :class:`bool`
         """
         return self.tags is not None and self.tags.is_premium_subscriber()
+
+    def is_linked_role(self) -> bool:
+        """Whether the role is a linked role for the guild.
+
+        .. versionadded:: 2.8
+
+        :return type: :class:`bool`
+        """
+        return self.tags is not None and self.tags.is_linked_role()
 
     def is_integration(self) -> bool:
         """Whether the role is managed by an integration.
