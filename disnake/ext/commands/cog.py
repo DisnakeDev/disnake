@@ -434,11 +434,9 @@ class Cog(metaclass=CogMeta):
                 raise TypeError("Listener function must be a coroutine function.")
             actual.__cog_listener__ = True
             to_assign = (
-                name
-                if isinstance(name, str)
-                else "on_" + name.value
-                if issubclass(name.__class__, _EnumValueBase)
-                else actual.__name__
+                actual.__name__
+                if name is MISSING
+                else (name if isinstance(name, str) else f"on_{name.value}")
             )
             try:
                 actual.__cog_listener_names__.append(to_assign)
