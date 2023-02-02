@@ -290,7 +290,7 @@ class CommonBotBase(Generic[CogT]):
             )
 
         def decorator(func: CFT) -> CFT:
-            self.add_listener(func, f"on_{name.value}" if isinstance(name, Event) else name)
+            self.add_listener(func, name)
             return func
 
         return decorator
