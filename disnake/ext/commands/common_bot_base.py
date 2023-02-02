@@ -230,7 +230,7 @@ class CommonBotBase(Generic[CogT]):
         ----------
         func
             The function that was used as a listener to remove.
-        name: :class:Union[`str`, `Event`]
+        name: Union[:class:`str`, :class:`Event`]
             The name of the event we want to remove. Defaults to
             ``func.__name__``.
 
