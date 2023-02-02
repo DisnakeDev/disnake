@@ -21,7 +21,6 @@ from typing import (
 
 import disnake
 import disnake.utils
-from disnake.enums import _EnumValueBase
 
 from ._types import _BaseCommand
 from .base_core import InvokableApplicationCommand
@@ -419,9 +418,7 @@ class Cog(metaclass=CogMeta):
             The function is not a coroutine function or a string was not passed as
             the name.
         """
-        if name is not MISSING and not (
-            issubclass(name.__class__, _EnumValueBase) or isinstance(name, str)
-        ):
+        if name is not MISSING and not isinstance(name, (str, Event)):
             raise TypeError(
                 f"Cog.listener expected str or Enum but received {name.__class__.__name__!r} instead."
             )

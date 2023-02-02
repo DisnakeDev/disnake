@@ -26,15 +26,13 @@ from typing import (
 
 import disnake
 import disnake.utils
-from disnake.enums import _EnumValueBase
+from disnake.enums import Event
 
 from . import errors
 from .cog import Cog
 
 if TYPE_CHECKING:
     import importlib.machinery
-
-    from disnake.enums import Event
 
     from ._types import CoroFunc
     from .bot import AutoShardedBot, AutoShardedInteractionBot, Bot, InteractionBot
@@ -200,9 +198,7 @@ class CommonBotBase(Generic[CogT]):
             The function is not a coroutine or a string or an :class:`Event` was not passed
             as the name.
         """
-        if name is not MISSING and not (
-            issubclass(name.__class__, _EnumValueBase) or isinstance(name, str)
-        ):
+        if name is not MISSING and not isinstance(name, (str, Event)):
             raise TypeError(
                 f"Bot.add_listener expected str or Enum but received {name.__class__.__name__!r} instead."
             )
@@ -210,9 +206,7 @@ class CommonBotBase(Generic[CogT]):
         name_ = (
             func.__name__
             if name is MISSING
-            else name
-            if isinstance(name, str)
-            else "on_" + name.value
+            else (name if isinstance(name, str) else f"on_{name.value}")
         )
 
         if not asyncio.iscoroutinefunction(func):
@@ -239,18 +233,14 @@ class CommonBotBase(Generic[CogT]):
         TypeError
             The name passed was not a string or an :class:`Event`.
         """
-        if name is not MISSING and not (
-            issubclass(name.__class__, _EnumValueBase) or isinstance(name, str)
-        ):
+        if name is not MISSING and not isinstance(name, (str, Event)):
             raise TypeError(
                 f"Bot.remove_listener expected str or Enum but received {name.__class__.__name__!r} instead."
             )
         name = (
             func.__name__
             if name is MISSING
-            else name
-            if isinstance(name, str)
-            else "on_" + name.value
+            else (name if isinstance(name, str) else f"on_{name.value}")
         )
 
         if name in self.extra_events:
@@ -294,15 +284,13 @@ class CommonBotBase(Generic[CogT]):
             The function being listened to is not a coroutine or a string or an :class:`Event` was not passed
             as the name.
         """
-        if name is not MISSING and not (
-            issubclass(name.__class__, _EnumValueBase) or isinstance(name, str)
-        ):
+        if name is not MISSING and not isinstance(name, (str, Event)):
             raise TypeError(
                 f"Bot.listen expected str or Enum but received {name.__class__.__name__!r} instead."
             )
 
         def decorator(func: CFT) -> CFT:
-            self.add_listener(func, name if isinstance(name, str) else "on_" + name.value)
+            self.add_listener(func, f"on_{name.value}" if isinstance(name, Event) else name)
             return func
 
         return decorator
