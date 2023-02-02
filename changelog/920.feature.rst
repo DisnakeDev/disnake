@@ -1,1 +1,1 @@
-Add :attr:`AuditLogEntry.user_id`
+Add fallback to :class:`Object` for :attr:`AuditLogEntry.user`
