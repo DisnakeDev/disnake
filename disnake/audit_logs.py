@@ -699,7 +699,7 @@ class AuditLogEntry(Hashable):
 
     @utils.cached_property
     def user(self) -> Union[Member, User, None]:
-        """:class:`abc.User`: The user who initiated this action. Usually a :class:`Member`\\, unless gone then it's a :class:`User`."""
+        """Optional[:class:`Member`, :class:`User`]: The user who initiated this action. Usually a :class:`Member`\\, unless gone then it's a :class:`User`."""
         return self._get_member(self.user_id)  # type: ignore
 
     @utils.cached_property
