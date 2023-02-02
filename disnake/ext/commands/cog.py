@@ -424,7 +424,6 @@ class Cog(metaclass=CogMeta):
         ):
             raise TypeError(
                 f"Cog.listener expected str or Enum but received {name.__class__.__name__!r} instead."
-                f"Cog.listener expected str or Enum but received {name.__class__.__name__!r} instead."
             )
 
         def decorator(func: FuncT) -> FuncT:
