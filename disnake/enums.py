@@ -60,6 +60,7 @@ __all__ = (
     "ThreadSortOrder",
     "ThreadLayout",
     "Event",
+    "ApplicationRoleConnectionMetadataType",
 )
 
 
@@ -558,13 +559,15 @@ class StickerFormatType(Enum):
 
     @property
     def file_extension(self) -> str:
-        lookup: Dict[StickerFormatType, str] = {
-            StickerFormatType.png: "png",
-            StickerFormatType.apng: "png",
-            StickerFormatType.lottie: "json",
-            StickerFormatType.gif: "gif",
-        }
-        return lookup[self]
+        return STICKER_FORMAT_LOOKUP[self]
+
+
+STICKER_FORMAT_LOOKUP: Dict[StickerFormatType, str] = {
+    StickerFormatType.png: "png",
+    StickerFormatType.apng: "png",
+    StickerFormatType.lottie: "json",
+    StickerFormatType.gif: "gif",
+}
 
 
 class InviteTarget(Enum):
@@ -826,6 +829,7 @@ class ThreadLayout(Enum):
     gallery_view = 2
 
 
+
 class Event(Enum):
     connect = "connect"
     """Called when the client has successfully connected to Discord."""
@@ -1037,6 +1041,17 @@ class Event(Enum):
     """Called when someone begins typing a message."""
     raw_typing = "raw_typing"
     """Called when someone begins typing a message regardless of whether `Intents.members` and `Intents.guilds` are enabled."""
+
+
+class ApplicationRoleConnectionMetadataType(Enum):
+    integer_less_than_or_equal = 1
+    integer_greater_than_or_equal = 2
+    integer_equal = 3
+    integer_not_equal = 4
+    datetime_less_than_or_equal = 5
+    datetime_greater_than_or_equal = 6
+    boolean_equal = 7
+    boolean_not_equal = 8
 
 
 T = TypeVar("T")
