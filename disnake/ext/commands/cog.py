@@ -409,7 +409,7 @@ class Cog(metaclass=CogMeta):
 
         Parameters
         ----------
-        name: :class:Union[`str`, `Event`]
+        name: Union[:class:`str`, :class:`Event`]
             The name of the event being listened to. If not provided, it
             defaults to the function's name.
 
