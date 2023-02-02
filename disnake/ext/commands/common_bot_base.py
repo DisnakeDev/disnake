@@ -178,7 +178,7 @@ class CommonBotBase(Generic[CogT]):
         ----------
         func: :ref:`coroutine <coroutine>`
             The function to call.
-        name: :class:Union[`str`, `Event`]
+        name: Union[:class:`str`, :class:`Event`]
             The name of the event to listen for. Defaults to ``func.__name__``.
 
         Example
