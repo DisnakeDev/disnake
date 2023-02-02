@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from errno import ECONNRESET
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -136,7 +137,7 @@ class Shard:
         if self._client.is_closed():
             return
 
-        if isinstance(e, OSError) and e.errno in (54, 10054):
+        if isinstance(e, OSError) and e.errno == ECONNRESET:
             # If we get Connection reset by peer then always try to RESUME the connection.
             exc = ReconnectWebSocket(self.id, resume=True)
             self._queue_put(EventItem(EventType.resume, self, exc))
