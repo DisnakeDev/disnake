@@ -102,7 +102,7 @@ def _transform_role(
 
 def _transform_member_id(
     entry: AuditLogEntry, data: Optional[Snowflake]
-) -> Union[Member, User, None]:
+) -> Union[Member, User, Object, None]:
     if data is None:
         return None
     return entry._get_member(int(data))
@@ -533,7 +533,7 @@ class AuditLogEntry(Hashable):
     action: :class:`AuditLogAction`
         The action that was done.
     user: Union[:class:`Member`, :class:`User`, :class:`Object`]
-        The user who initiated this action. Usually a :class:`Member`\\, unless gone
+        The user who initiated this action. Usually :class:`Member`\\, unless gone
         then it's a :class:`User`.
     id: :class:`int`
         The entry ID.
@@ -758,7 +758,7 @@ class AuditLogEntry(Hashable):
     def _convert_target_channel(self, target_id: int) -> Union[abc.GuildChannel, Object]:
         return self.guild.get_channel(target_id) or Object(id=target_id)
 
-    def _convert_target_user(self, target_id: int) -> Union[Member, User, None]:
+    def _convert_target_user(self, target_id: int) -> Union[Member, User, Object, None]:
         return self._get_member(target_id)
 
     def _convert_target_role(self, target_id: int) -> Union[Role, Object]:
@@ -790,7 +790,7 @@ class AuditLogEntry(Hashable):
     def _convert_target_emoji(self, target_id: int) -> Union[Emoji, Object]:
         return self._state.get_emoji(target_id) or Object(id=target_id)
 
-    def _convert_target_message(self, target_id: int) -> Union[Member, User, None]:
+    def _convert_target_message(self, target_id: int) -> Union[Member, User, Object, None]:
         return self._get_member(target_id)
 
     def _convert_target_integration(self, target_id: int) -> Union[PartialIntegration, Object]:
