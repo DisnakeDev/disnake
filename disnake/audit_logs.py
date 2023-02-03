@@ -103,7 +103,7 @@ def _transform_role(
 
 def _transform_member_id(
     entry: AuditLogEntry, data: Optional[Snowflake]
-) -> Union[Member, User, None]:
+) -> Union[Member, User, Object, None]:
     if data is None:
         return None
     return entry._get_member(int(data))
@@ -529,11 +529,14 @@ class AuditLogEntry(Hashable):
     .. versionchanged:: 1.7
         Audit log entries are now comparable and hashable.
 
+    .. versionchanged:: 2.8
+        :attr:`user` can return :class:`Object` if the user is not found.
+
     Attributes
     ----------
     action: :class:`AuditLogAction`
         The action that was done.
-    user: Optional[:class:`Member`, :class:`User`]
+    user: Optional[Union[:class:`Member`, :class:`User`, :class:`Object`]]
         The user who initiated this action. Usually :class:`Member`\\, unless gone
         then it's a :class:`User`.
     id: :class:`int`
@@ -674,11 +677,13 @@ class AuditLogEntry(Hashable):
         # into meaningful data when requested
         self._changes = data.get("changes", [])
 
-        self.user = self._get_member(utils._get_as_snowflake(data, "user_id"))  # type: ignore
+        self.user = self._get_member(utils._get_as_snowflake(data, "user_id"))
         self._target_id = utils._get_as_snowflake(data, "target_id")
 
-    def _get_member(self, user_id: int) -> Union[Member, User, None]:
-        return self.guild.get_member(user_id) or self._users.get(user_id)
+    def _get_member(self, user_id: Optional[int]) -> Union[Member, User, Object, None]:
+        if not user_id:
+            return None
+        return self.guild.get_member(user_id) or self._users.get(user_id) or Object(id=user_id)
 
     def _get_integration_by_application_id(
         self, application_id: int
@@ -759,8 +764,8 @@ class AuditLogEntry(Hashable):
     def _convert_target_channel(self, target_id: int) -> Union[abc.GuildChannel, Object]:
         return self.guild.get_channel(target_id) or Object(id=target_id)
 
-    def _convert_target_user(self, target_id: Optional[int]) -> Union[Member, User, Object, None]:
-        return self._get_member(target_id) or Object(id=target_id) if target_id else None
+    def _convert_target_user(self, target_id: int) -> Union[Member, User, Object, None]:
+        return self._get_member(target_id)
 
     def _convert_target_role(self, target_id: int) -> Union[Role, Object]:
         return self.guild.get_role(target_id) or Object(id=target_id)
@@ -791,8 +796,8 @@ class AuditLogEntry(Hashable):
     def _convert_target_emoji(self, target_id: int) -> Union[Emoji, Object]:
         return self._state.get_emoji(target_id) or Object(id=target_id)
 
-    def _convert_target_message(self, target_id: int) -> Union[Member, User, Object]:
-        return self._get_member(target_id) or Object(id=target_id)
+    def _convert_target_message(self, target_id: int) -> Union[Member, User, Object, None]:
+        return self._get_member(target_id)
 
     def _convert_target_integration(self, target_id: int) -> Union[PartialIntegration, Object]:
         return self._integrations.get(target_id) or Object(id=target_id)

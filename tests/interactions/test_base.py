@@ -141,6 +141,7 @@ class TestInteractionDataResolved:
             "joined_at": "2022-09-02T22:00:55.069000+00:00",
             "deaf": False,
             "mute": False,
+            "flags": 0,
         }
 
         user_payload: UserPayload = {
