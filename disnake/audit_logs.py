@@ -528,6 +528,9 @@ class AuditLogEntry(Hashable):
     .. versionchanged:: 1.7
         Audit log entries are now comparable and hashable.
 
+    .. versionchanged:: 2.8
+        :attr:`user` can return :class:`Object` if the user is not found.
+
     Attributes
     ----------
     action: :class:`AuditLogAction`
@@ -673,10 +676,12 @@ class AuditLogEntry(Hashable):
         # into meaningful data when requested
         self._changes = data.get("changes", [])
 
-        self.user = self._get_member(utils._get_as_snowflake(data, "user_id"))  # type: ignore
+        self.user = self._get_member(utils._get_as_snowflake(data, "user_id"))
         self._target_id = utils._get_as_snowflake(data, "target_id")
 
-    def _get_member(self, user_id: int) -> Union[Member, User, Object]:
+    def _get_member(self, user_id: Optional[int]) -> Union[Member, User, Object, None]:
+        if not user_id:
+            return None
         return self.guild.get_member(user_id) or self._users.get(user_id) or Object(id=user_id)
 
     def _get_integration_by_application_id(
