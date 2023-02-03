@@ -893,51 +893,51 @@ class Event(Enum):
     """
     command_error = "command_error"
     """Called when an error is raised inside a command either through user input error, check failure, or an error in your own code.
-    Represents the :func:`disnake.ext.commands.on_command_error` event.
+    Represents the :func:`.on_command_error` event.
     """
     slash_command_error = "slash_command_error"
     """Called when an error is raised inside a slash command either through user input error, check failure, or an error in your own code.
-    Represents the :func:`disnake.ext.commands.on_slash_command_error` event.
+    Represents the :func:`.on_slash_command_error` event.
     """
     user_command_error = "user_command_error"
     """Called when an error is raised inside a user command either through check failure, or an error in your own code.
-    Represents the :func:`disnake.ext.commands.on_user_command_error` event.
+    Represents the :func:`.on_user_command_error` event.
     """
     message_command_error = "message_command_error"
     """Called when an error is raised inside a message command either through check failure, or an error in your own code.
-    Represents the :func:`disnake.ext.commands.on_message_command_error` event.
+    Represents the :func:`.on_message_command_error` event.
     """
     command = "command"
     """Called when a command is found and is about to be invoked.
-    Represents the :func:`disnake.ext.commands.on_command` event.
+    Represents the :func:`.on_command` event.
     """
     slash_command = "slash_command"
     """Called when a slash command is found and is about to be invoked.
-    Represents the :func:`disnake.ext.commands.on_slash_command` event.
+    Represents the :func:`.on_slash_command` event.
     """
     user_command = "user_command"
     """Called when a user command is found and is about to be invoked.
-    Represents the :func:`disnake.ext.commands.on_user_command` event.
+    Represents the :func:`.on_user_command` event.
     """
     message_command = "message_command"
     """Called when a message command is found and is about to be invoked.
-    Represents the :func:`disnake.ext.commands.on_message_command` event.
+    Represents the :func:`.on_message_command` event.
     """
     command_completion = "command_completion"
     """Called when a command has completed its invocation.
-    Represents the :func:`disnake.ext.commands.on_command_completion` event.
+    Represents the :func:`.on_command_completion` event.
     """
     slash_command_completion = "slash_command_completion"
     """Called when a slash command has completed its invocation.
-    Represents the :func:`disnake.ext.commands.on_slash_command_completion` event.
+    Represents the :func:`.on_slash_command_completion` event.
     """
     user_command_completion = "user_command_completion"
     """Called when a user command has completed its invocation.
-    Represents the :func:`disnake.ext.commands.on_user_command_completion` event.
+    Represents the :func:`.on_user_command_completion` event.
     """
     message_command_completion = "message_command_completion"
     """Called when a message command has completed its invocation.
-    Represents the :func:`disnake.ext.commands.on_message_command_completion` event.
+    Represents the :func:`.on_message_command_completion` event.
     """
     guild_channel_create = "guild_channel_create"
     """Called whenever a guild channel is created.

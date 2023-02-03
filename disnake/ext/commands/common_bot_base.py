@@ -176,7 +176,7 @@ class CommonBotBase(Generic[CogT]):
         ----------
         func: :ref:`coroutine <coroutine>`
             The function to call.
-        name: Union[:class:`str`, :class:`Event`]
+        name: Union[:class:`str`, :class:`.Event`]
             The name of the event to listen for. Defaults to ``func.__name__``.
 
         Example
@@ -195,7 +195,7 @@ class CommonBotBase(Generic[CogT]):
         Raises
         ------
         TypeError
-            The function is not a coroutine or a string or an :class:`Event` was not passed
+            The function is not a coroutine or a string or an :class:`.Event` was not passed
             as the name.
         """
         if name is not MISSING and not isinstance(name, (str, Event)):
@@ -224,14 +224,14 @@ class CommonBotBase(Generic[CogT]):
         ----------
         func
             The function that was used as a listener to remove.
-        name: Union[:class:`str`, :class:`Event`]
+        name: Union[:class:`str`, :class:`.Event`]
             The name of the event we want to remove. Defaults to
             ``func.__name__``.
 
         Raises
         ------
         TypeError
-            The name passed was not a string or an :class:`Event`.
+            The name passed was not a string or an :class:`.Event`.
         """
         if name is not MISSING and not isinstance(name, (str, Event)):
             raise TypeError(
@@ -281,7 +281,7 @@ class CommonBotBase(Generic[CogT]):
         Raises
         ------
         TypeError
-            The function being listened to is not a coroutine or a string or an :class:`Event` was not passed
+            The function being listened to is not a coroutine or a string or an :class:`.Event` was not passed
             as the name.
         """
         if name is not MISSING and not isinstance(name, (str, Event)):

@@ -1568,6 +1568,19 @@ class Client:
                     msg = await client.wait_for('message', check=check)
                     await channel.send(f'Hello {msg.author}!')
 
+            # using events enums:
+            @client.event
+            async def on_message(message):
+                if message.content.startswith('$greet'):
+                    channel = message.channel
+                    await channel.send('Say hello!')
+
+                    def check(m):
+                        return m.content == 'hello' and m.channel == channel
+
+                    msg = await client.wait_for(Event.message, check=check)
+                    await channel.send(f'Hello {msg.author}!')
+
         Waiting for a thumbs up reaction from the message author: ::
 
             @client.event
@@ -1589,9 +1602,10 @@ class Client:
 
         Parameters
         ----------
-        event: Union[:class:`str`, :class:`Event`]
+        event: Union[:class:`str`, :class:`.Event`]
             The event name, similar to the :ref:`event reference <discord-api-events>`,
-            but without the ``on_`` prefix, to wait for.
+            but without the ``on_`` prefix, to wait for. It's recommended
+            to use :class:`.Event`.
         check: Optional[Callable[..., :class:`bool`]]
             A predicate to check what to wait for. The arguments must meet the
             parameters of the event being waited for.

@@ -408,14 +408,14 @@ class Cog(metaclass=CogMeta):
 
         Parameters
         ----------
-        name: Union[:class:`str`, :class:`Event`]
+        name: Union[:class:`str`, :class:`.Event`]
             The name of the event being listened to. If not provided, it
             defaults to the function's name.
 
         Raises
         ------
         TypeError
-            The function is not a coroutine function or a string was not passed as
+            The function is not a coroutine function or a string or an :class:`.Event` enum member was not passed as
             the name.
         """
         if name is not MISSING and not isinstance(name, (str, Event)):
