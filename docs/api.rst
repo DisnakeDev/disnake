@@ -1080,7 +1080,7 @@ Roles
 .. function:: on_guild_role_create(role)
               on_guild_role_delete(role)
 
-    Called when a :class:`Guild` creates or deletes a new :class:`Role`.
+    Called when a :class:`Guild` creates or deletes a :class:`Role`.
 
     To get the guild it belongs to, use :attr:`Role.guild`.
 
@@ -3876,6 +3876,9 @@ of :class:`enum.Enum`.
     .. attribute:: boolean_not_equal
 
         The metadata value (``integer``) is not equal to the guild's configured value.
+
+.. autoclass:: Event
+    :members:
 
 Async Iterator
 ----------------
