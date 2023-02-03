@@ -21,6 +21,7 @@ from typing import (
 
 import disnake
 import disnake.utils
+from disnake.enums import Event
 
 from ._types import _BaseCommand
 from .base_core import InvokableApplicationCommand
@@ -30,7 +31,6 @@ from .slash_core import InvokableSlashCommand
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from disnake.enums import Event
     from disnake.interactions import ApplicationCommandInteraction
 
     from .bot import AutoShardedBot, AutoShardedInteractionBot, Bot, InteractionBot

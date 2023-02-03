@@ -891,54 +891,6 @@ class Event(Enum):
     """Called whenever a send operation is done on the WebSocket before the message is sent.
     Represents the :func:`on_socket_raw_send` event.
     """
-    command_error = "command_error"
-    """Called when an error is raised inside a command either through user input error, check failure, or an error in your own code.
-    Represents the :func:`.on_command_error` event.
-    """
-    slash_command_error = "slash_command_error"
-    """Called when an error is raised inside a slash command either through user input error, check failure, or an error in your own code.
-    Represents the :func:`.on_slash_command_error` event.
-    """
-    user_command_error = "user_command_error"
-    """Called when an error is raised inside a user command either through check failure, or an error in your own code.
-    Represents the :func:`.on_user_command_error` event.
-    """
-    message_command_error = "message_command_error"
-    """Called when an error is raised inside a message command either through check failure, or an error in your own code.
-    Represents the :func:`.on_message_command_error` event.
-    """
-    command = "command"
-    """Called when a command is found and is about to be invoked.
-    Represents the :func:`.on_command` event.
-    """
-    slash_command = "slash_command"
-    """Called when a slash command is found and is about to be invoked.
-    Represents the :func:`.on_slash_command` event.
-    """
-    user_command = "user_command"
-    """Called when a user command is found and is about to be invoked.
-    Represents the :func:`.on_user_command` event.
-    """
-    message_command = "message_command"
-    """Called when a message command is found and is about to be invoked.
-    Represents the :func:`.on_message_command` event.
-    """
-    command_completion = "command_completion"
-    """Called when a command has completed its invocation.
-    Represents the :func:`.on_command_completion` event.
-    """
-    slash_command_completion = "slash_command_completion"
-    """Called when a slash command has completed its invocation.
-    Represents the :func:`.on_slash_command_completion` event.
-    """
-    user_command_completion = "user_command_completion"
-    """Called when a user command has completed its invocation.
-    Represents the :func:`.on_user_command_completion` event.
-    """
-    message_command_completion = "message_command_completion"
-    """Called when a message command has completed its invocation.
-    Represents the :func:`.on_message_command_completion` event.
-    """
     guild_channel_create = "guild_channel_create"
     """Called whenever a guild channel is created.
     Represents the :func:`on_guild_channel_create` event.
@@ -954,6 +906,14 @@ class Event(Enum):
     guild_channel_pins_update = "guild_channel_pins_update"
     """Called whenever a message is pinned or unpinned from a guild channel.
     Represents the :func:`on_guild_channel_pins_update` event.
+    """
+    invite_create = "invite_create"
+    """Called when an :class:`Invite` is created.
+    Represents the :func:`.on_invite_create` event.
+    """
+    invite_delete = "invite_delete"
+    """Called when an Invite is deleted.
+    Represents the :func:`.on_invite_delete` event.
     """
     private_channel_update = "private_channel_update"
     """Called whenever a private group DM is updated.
@@ -1258,6 +1218,55 @@ class Event(Enum):
     raw_typing = "raw_typing"
     """Called when someone begins typing a message regardless of whether `Intents.members` and `Intents.guilds` are enabled.
     Represents the :func:`on_raw_typing` event.
+    """
+    # ext.commands events
+    command = "command"
+    """Called when a command is found and is about to be invoked.
+    Represents the :func:`.on_command` event.
+    """
+    command_completion = "command_completion"
+    """Called when a command has completed its invocation.
+    Represents the :func:`.on_command_completion` event.
+    """
+    command_error = "command_error"
+    """Called when an error is raised inside a command either through user input error, check failure, or an error in your own code.
+    Represents the :func:`.on_command_error` event.
+    """
+    slash_command = "slash_command"
+    """Called when a slash command is found and is about to be invoked.
+    Represents the :func:`.on_slash_command` event.
+    """
+    slash_command_completion = "slash_command_completion"
+    """Called when a slash command has completed its invocation.
+    Represents the :func:`.on_slash_command_completion` event.
+    """
+    slash_command_error = "slash_command_error"
+    """Called when an error is raised inside a slash command either through user input error, check failure, or an error in your own code.
+    Represents the :func:`.on_slash_command_error` event.
+    """
+    user_command = "user_command"
+    """Called when a user command is found and is about to be invoked.
+    Represents the :func:`.on_user_command` event.
+    """
+    user_command_completion = "user_command_completion"
+    """Called when a user command has completed its invocation.
+    Represents the :func:`.on_user_command_completion` event.
+    """
+    user_command_error = "user_command_error"
+    """Called when an error is raised inside a user command either through check failure, or an error in your own code.
+    Represents the :func:`.on_user_command_error` event.
+    """
+    message_command = "message_command"
+    """Called when a message command is found and is about to be invoked.
+    Represents the :func:`.on_message_command` event.
+    """
+    message_command_completion = "message_command_completion"
+    """Called when a message command has completed its invocation.
+    Represents the :func:`.on_message_command_completion` event.
+    """
+    message_command_error = "message_command_error"
+    """Called when an error is raised inside a message command either through check failure, or an error in your own code.
+    Represents the :func:`.on_message_command_error` event.
     """
 
 
