@@ -3877,6 +3877,9 @@ of :class:`enum.Enum`.
 
         The metadata value (``integer``) is not equal to the guild's configured value.
 
+.. autoclass:: Event
+    :members:
+
 Async Iterator
 ----------------
 
