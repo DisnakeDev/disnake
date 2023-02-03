@@ -535,7 +535,7 @@ class AuditLogEntry(Hashable):
     ----------
     action: :class:`AuditLogAction`
         The action that was done.
-    user: Optional[Union[]:class:`Member`, :class:`User`, :class:`Object`]]
+    user: Optional[Union[:class:`Member`, :class:`User`, :class:`Object`]]
         The user who initiated this action. Usually :class:`Member`\\, unless gone
         then it's a :class:`User`.
     id: :class:`int`
