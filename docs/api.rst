@@ -831,8 +831,8 @@ Audit Logs
     .. warning::
         This scope of data in this gateway event is limited, which means it is much more
         reliant on the cache than :meth:`Guild.audit_logs`.
-        Because of this, :attr:`AuditLogEntry.target` will frequently
-        be of type :class:`Object` instead of the respective model.
+        Because of this, :attr:`AuditLogEntry.target` and :attr:`AuditLogEntry.user`
+        will frequently be of type :class:`Object` instead of the respective model.
 
     .. versionadded:: 2.8
 
