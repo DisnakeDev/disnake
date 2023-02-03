@@ -763,7 +763,7 @@ class AuditLogEntry(Hashable):
     def _convert_target_channel(self, target_id: int) -> Union[abc.GuildChannel, Object]:
         return self.guild.get_channel(target_id) or Object(id=target_id)
 
-    def _convert_target_user(self, target_id: int) -> Union[Member, User, Object]:
+    def _convert_target_user(self, target_id: int) -> Union[Member, User, Object, None]:
         return self._get_member(target_id)
 
     def _convert_target_role(self, target_id: int) -> Union[Role, Object]:
@@ -795,7 +795,7 @@ class AuditLogEntry(Hashable):
     def _convert_target_emoji(self, target_id: int) -> Union[Emoji, Object]:
         return self._state.get_emoji(target_id) or Object(id=target_id)
 
-    def _convert_target_message(self, target_id: int) -> Union[Member, User, Object]:
+    def _convert_target_message(self, target_id: int) -> Union[Member, User, Object, None]:
         return self._get_member(target_id)
 
     def _convert_target_integration(self, target_id: int) -> Union[PartialIntegration, Object]:
