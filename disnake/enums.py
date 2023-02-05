@@ -1091,6 +1091,10 @@ class Event(Enum):
     """Called when a member updates their profile regardless of the member cache.
     Represents the :func:`on_raw_member_update` event.
     """
+    audit_log_entry_create = "audit_log_entry_create"
+    """Called when an audit log entry is created.
+    Represents the :func:`on_audit_log_entry_create` event.
+    """
     member_ban = "member_ban"
     """Called when user gets banned from a `Guild`.
     Represents the :func:`on_member_ban` event.
