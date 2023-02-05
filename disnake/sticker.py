@@ -9,7 +9,7 @@ from .asset import Asset, AssetMixin
 from .enums import StickerFormatType, StickerType, try_enum
 from .errors import InvalidData
 from .mixins import Hashable
-from .utils import MISSING, cached_slot_property, find, get, snowflake_time
+from .utils import MISSING, _get_as_snowflake, cached_slot_property, find, get, snowflake_time
 
 __all__ = (
     "StickerPack",
@@ -41,6 +41,9 @@ class StickerPack(Hashable):
 
     .. versionadded:: 2.0
 
+    .. versionchanged:: 2.8
+        :attr:`cover_sticker_id`, :attr:`cover_sticker` and :attr:`banner` are now optional.
+
     .. container:: operations
 
         .. describe:: str(x)
@@ -67,10 +70,10 @@ class StickerPack(Hashable):
         The stickers of this sticker pack.
     sku_id: :class:`int`
         The SKU ID of the sticker pack.
-    cover_sticker_id: :class:`int`
-         The ID of the sticker used for the cover of the sticker pack.
-    cover_sticker: :class:`StandardSticker`
-        The sticker used for the cover of the sticker pack.
+    cover_sticker_id: Optional[:class:`int`]
+         The ID of the sticker used for the cover of the sticker pack, if any.
+    cover_sticker: Optional[:class:`StandardSticker`]
+        The sticker used for the cover of the sticker pack, if any.
     """
 
     __slots__ = (
@@ -97,14 +100,16 @@ class StickerPack(Hashable):
         ]
         self.name: str = data["name"]
         self.sku_id: int = int(data["sku_id"])
-        self.cover_sticker_id: int = int(data["cover_sticker_id"])
-        self.cover_sticker: StandardSticker = get(self.stickers, id=self.cover_sticker_id)  # type: ignore
+        self.cover_sticker_id: Optional[int] = _get_as_snowflake(data, "cover_sticker_id")
+        self.cover_sticker: Optional[StandardSticker] = get(self.stickers, id=self.cover_sticker_id)
         self.description: str = data["description"]
-        self._banner: int = int(data["banner_asset_id"])
+        self._banner: Optional[int] = _get_as_snowflake(data, "banner_asset_id")
 
     @property
-    def banner(self) -> Asset:
-        """:class:`Asset`: The banner asset of the sticker pack."""
+    def banner(self) -> Optional[Asset]:
+        """Optional[:class:`Asset`]: The banner asset of the sticker pack, if any."""
+        if not self._banner:
+            return None
         return Asset._from_sticker_banner(self._state, self._banner)
 
     def __repr__(self) -> str:
@@ -386,7 +391,8 @@ class GuildSticker(Sticker):
     guild_id: :class:`int`
         The ID of the guild that this sticker is from.
     user: Optional[:class:`User`]
-        The user that created this sticker. This can only be retrieved using :meth:`Guild.fetch_sticker` and
+        The user that created this sticker. This can only be retrieved using
+        :meth:`Guild.fetch_sticker`/:meth:`Guild.fetch_stickers` and
         having the :attr:`~Permissions.manage_emojis_and_stickers` permission.
     emoji: :class:`str`
         The name of a unicode emoji that represents this sticker.
