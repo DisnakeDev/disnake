@@ -9,6 +9,7 @@ import sys
 import traceback
 import warnings
 from datetime import datetime, timedelta
+from errno import ECONNRESET
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -974,7 +975,7 @@ class Client:
                     return
 
                 # If we get connection reset by peer then try to RESUME
-                if isinstance(exc, OSError) and exc.errno in (54, 10054):
+                if isinstance(exc, OSError) and exc.errno == ECONNRESET:
                     ws_params.update(
                         sequence=self.ws.sequence,
                         initial=False,

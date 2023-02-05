@@ -12,6 +12,7 @@ import logging
 import re
 import threading
 import time
+from errno import ECONNRESET
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Type, Union, overload
 from urllib.parse import quote as urlquote
 
@@ -186,7 +187,7 @@ class WebhookAdapter:
                             raise HTTPException(response, data)
 
                 except OSError as e:
-                    if attempt < 4 and e.errno in (54, 10054):
+                    if attempt < 4 and e.errno == ECONNRESET:
                         time.sleep(1 + attempt * 2)
                         continue
                     raise
