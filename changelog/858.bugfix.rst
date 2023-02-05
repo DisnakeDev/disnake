@@ -1,1 +1,0 @@
-Fix user cache memory leak where unused objects weren't being evicted (provided that :attr:`Intents.members` is enabled).

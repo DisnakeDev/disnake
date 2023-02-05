@@ -1,1 +1,0 @@
-Add :attr:`File.closed` and :attr:`File.bytes_length` properties.
