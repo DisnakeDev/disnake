@@ -17,6 +17,18 @@ in specific versions.
 
 .. towncrier release notes start
 
+.. _vp2p7p1:
+
+v2.7.1
+------
+
+Bug Fixes
+~~~~~~~~~
+- Fix :attr:`Message.author.public_flags <Member.public_flags>` always being ``0`` when the member cache is disabled. (:issue:`870`)
+- Export missing ``ThreadWithMessage`` class. (:issue:`879`)
+- Fix :meth:`Client.delete_guild_command` not updating the local command cache. (:issue:`907`)
+- Fix errors when trying to deserialize stickers with unknown formats. (:issue:`911`)
+
 .. _vp2p7p0:
 
 v2.7.0
@@ -85,6 +97,20 @@ Miscellaneous
 - Use ``importlib.metadata`` instead of the deprecated ``pkg_resources`` in the cli for displaying the version. (:issue:`791`)
 - |commands| Add missing ``py.typed`` marker. (:issue:`784`)
 - |tasks| Add missing ``py.typed`` marker. (:issue:`784`)
+
+.. _vp2p6p3:
+
+v2.6.3
+------
+
+This maintainence release contains backports from v2.8.0.
+
+Bug Fixes
+~~~~~~~~~
+- Fix :attr:`Message.author.public_flags <Member.public_flags>` always being ``0`` when the member cache is disabled. (:issue:`870`)
+- Export missing ``ThreadWithMessage`` class. (:issue:`879`)
+- Fix :meth:`Client.delete_guild_command` not updating the local command cache. (:issue:`907`)
+- Fix errors when trying to deserialize stickers with unknown formats. (:issue:`911`)
 
 .. _vp2p6p2:
 
