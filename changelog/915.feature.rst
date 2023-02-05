@@ -1,0 +1,1 @@
+Add support for the :func:`on_audit_log_entry_create` gateway event, and add :attr:`Intents.moderation` intent. :attr:`Intents.bans` is now an alias of :attr:`Intents.moderation`.
