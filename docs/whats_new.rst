@@ -17,6 +17,18 @@ in specific versions.
 
 .. towncrier release notes start
 
+.. _vp2p7p1:
+
+v2.7.1
+------
+
+Bug Fixes
+~~~~~~~~~
+- Fix :attr:`Message.author.public_flags <Member.public_flags>` always being ``0`` when the member cache is disabled. (:issue:`870`)
+- Export missing ``ThreadWithMessage`` class. (:issue:`879`)
+- Fix :meth:`Client.delete_guild_command` not updating the local command cache. (:issue:`907`)
+- Fix errors when trying to deserialize stickers with unknown formats. (:issue:`911`)
+
 .. _vp2p7p0:
 
 v2.7.0
