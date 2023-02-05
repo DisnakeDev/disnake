@@ -1,4 +1,0 @@
-Add application role connection features.
-- Add :class:`ApplicationRoleConnectionMetadata` and :class:`ApplicationRoleConnectionMetadataType` types.
-- Add :class:`Client.fetch_role_connection_metadata` and :class:`Client.edit_role_connection_metadata` methods.
-- Add :attr:`RoleTags.is_linked_role` and :attr:`AppInfo.role_connections_verification_url` attributes.

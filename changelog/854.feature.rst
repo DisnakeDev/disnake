@@ -1,1 +1,0 @@
-Add :attr:`TextChannel.default_thread_slowmode_delay`.

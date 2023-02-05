@@ -1,1 +1,0 @@
-Fix conversion of custom emoji strings (e.g. ``<:this:934852112221872198>``) in :meth:`Message.add_reaction` and similar methods to more strictly adhere to the API documentation.

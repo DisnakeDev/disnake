@@ -1,1 +1,0 @@
-Fix errors when trying to deserialize stickers with unknown formats.
