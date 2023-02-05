@@ -41,6 +41,9 @@ class StickerPack(Hashable):
 
     .. versionadded:: 2.0
 
+    .. versionchanged:: 2.8
+        :attr:`cover_sticker_id`, :attr:`cover_sticker` and :attr:`banner` are now optional.
+
     .. container:: operations
 
         .. describe:: str(x)
