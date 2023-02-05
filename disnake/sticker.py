@@ -68,9 +68,9 @@ class StickerPack(Hashable):
     sku_id: :class:`int`
         The SKU ID of the sticker pack.
     cover_sticker_id: Optional[:class:`int`]
-         The ID of the sticker used for the cover of the sticker pack.
+         The ID of the sticker used for the cover of the sticker pack, if any.
     cover_sticker: Optional[:class:`StandardSticker`]
-        The sticker used for the cover of the sticker pack.
+        The sticker used for the cover of the sticker pack, if any.
     """
 
     __slots__ = (
@@ -104,7 +104,7 @@ class StickerPack(Hashable):
 
     @property
     def banner(self) -> Optional[Asset]:
-        """Optional[:class:`Asset`]: The banner asset of the sticker pack."""
+        """Optional[:class:`Asset`]: The banner asset of the sticker pack, if any."""
         if not self._banner:
             return None
         return Asset._from_sticker_banner(self._state, self._banner)
