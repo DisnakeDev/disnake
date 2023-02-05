@@ -4169,7 +4169,7 @@ AuditLogDiff
 
         The guild's owner. See also :attr:`Guild.owner`
 
-        :type: Union[:class:`Member`, :class:`User`]
+        :type: Union[:class:`Member`, :class:`User`, :class:`Object`]
 
     .. attribute:: region
 
@@ -4439,7 +4439,7 @@ AuditLogDiff
 
         See also :attr:`Invite.inviter`.
 
-        :type: Optional[:class:`User`]
+        :type: Optional[:class:`User`, :class:`Object`]
 
     .. attribute:: max_uses
 
