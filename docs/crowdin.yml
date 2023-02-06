@@ -3,7 +3,7 @@
 # Your Crowdin credentials
 #
 project_id : "565993"
-api_token : "c0cc72ab33441de1815e5c71d885538c08e0a0c5bce1e2de332144ac745060f9e4b545f0efdcb6f0"
+api_token_env : CROWDIN_API_KEY
 
 #
 # Choose file structure in Crowdin
