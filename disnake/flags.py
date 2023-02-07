@@ -2151,6 +2151,8 @@ class AutoModKeywordPresets(ListBaseFlags):
 class MemberFlags(BaseFlags):
     """Wraps up Discord Member flags.
 
+    .. versionadded:: 2.8
+
     .. container:: operations
 
         .. describe:: x == y
@@ -2205,13 +2207,11 @@ class MemberFlags(BaseFlags):
 
             Returns a MemberFlags instance with all flags except ``y`` inverted from their default value.
 
-    .. versionadded:: 2.8
-
     Attributes
     ----------
-    value: :class:`int`
-        The raw value. You should query flags via the properties
-        rather than using this raw value.
+    values: :class:`int`
+        The raw values. You should query flags via the properties
+        rather than using these raw values.
     """
 
     __slots__ = ()

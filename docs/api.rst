@@ -3301,6 +3301,76 @@ of :class:`enum.Enum`.
         See :attr:`automod_block_message` for more information on how the
         :attr:`~AuditLogEntry.extra` field is set.
 
+    .. attribute:: onboarding_prompt_create
+
+        An onboarding prompt was created.
+
+        When this is the action, the type of :attr:`~AuditLogEntry.target` is
+        the :class:`Object` with the ID of the onboarding prompt which
+        was created.
+
+        Possible attributes for :class:`AuditLogDiff`:
+
+        - :attr:`~AuditLogDiff.id`
+        - :attr:`~AuditLogDiff.title`
+        - :attr:`~AuditLogDiff.options`
+        - :attr:`~AuditLogDiff.single_select`
+        - :attr:`~AuditLogDiff.required`
+        - :attr:`~AuditLogDiff.in_onboarding`
+
+    .. attribute:: onboarding_prompt_update
+
+        An onboarding prompt was updated.
+
+        When this is the action, the type of :attr:`~AuditLogEntry.target` is
+        the :class:`Object` with the ID of the onboarding prompt which
+        was updated.
+
+        Possible attributes for :class:`AuditLogDiff`:
+
+        - :attr:`~AuditLogDiff.title`
+        - :attr:`~AuditLogDiff.options`
+        - :attr:`~AuditLogDiff.single_select`
+        - :attr:`~AuditLogDiff.required`
+        - :attr:`~AuditLogDiff.in_onboarding`
+
+    .. attribute:: onboarding_prompt_delete
+
+        An onboarding prompt was deleted.
+
+        When this is the action, the type of :attr:`~AuditLogEntry.target` is
+        the :class:`Object` with the ID of the onboarding prompt which
+        was deleted.
+
+        Possible attributes for :class:`AuditLogDiff`:
+
+        TBD.
+
+    .. attribute:: onboarding_create
+
+        An onboarding was created.
+
+        When this is the action, the type of :attr:`~AuditLogEntry.target` is
+        ``None``.
+
+        Possible attributes for :class:`AuditLogDiff`:
+
+        - :attr:`~AuditLogDiff.default_channel_ids`
+        - :attr:`~AuditLogDiff.enable_default_channels`
+        - :attr:`~AuditLogDiff.enable_onboarding_prompts`
+        - :attr:`~AuditLogDiff.prompts`
+
+    .. attribute:: onboarding_update
+
+        An onboarding was updated.
+
+        When this is the action, the type of :attr:`~AuditLogEntry.target` is
+        ``None``.
+
+        Possible attributes for :class:`AuditLogDiff`:
+
+        TBD.
+
 .. class:: AuditLogActionCategory
 
     Represents the category that the :class:`AuditLogAction` belongs to.
@@ -4748,6 +4818,61 @@ AuditLogDiff
 
         :type: Optional[:class:`ThreadSortOrder`]
 
+    .. attribute:: title
+
+        The title of an onboarding prompt or an onboarding prompt option being changed.
+
+        :type: :class:`str`
+
+    .. attribute:: options
+
+        The list of options of an onboarding prompt being changed.
+
+        :type: List[:class:`OnboardingPromptOption`]
+
+    .. attribute:: single_select
+
+        The onboarding prompt is single select or not.
+
+        :type: :class:`bool`
+
+    .. attribute:: required
+
+        The onboarding prompt option is required or not.
+
+        :type: :class:`bool`
+
+    .. attribute:: in_onboarding
+
+        The onboarding prompt option is in onboarding or not.
+
+        :type: :class:`bool`
+
+    .. attribute:: default_channel
+
+        The list of default channels of an onboarding being changed.
+
+        :type: List[:class:`abc.GuildChannel`]
+
+    .. attribute:: enable_default_channels
+
+        The onboarding shows default channels or not.
+
+        :type: :class:`bool`
+
+    .. attribute:: enable_onboarding_prompts
+
+        The onboarding shows onboarding prompts or not.
+
+        :type: :class:`bool`
+
+    .. attribute:: prompts
+
+        The list of prompts of an onboarding being changed.
+
+        :type: List[:class:`OnboardingPrompt`]
+
+
 Webhook Support
 ------------------
 
@@ -5686,6 +5811,14 @@ AutoModActionExecution
 .. autoclass:: AutoModActionExecution()
     :members:
 
+Onboarding
+~~~~~~~~~~
+
+.. attributetable:: Onboarding
+
+.. autoclass:: Onboarding
+    :members:
+
 RawMessageDeleteEvent
 ~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -6008,6 +6141,20 @@ ApplicationRoleConnectionMetadata
 .. attributetable:: ApplicationRoleConnectionMetadata
 
 .. autoclass:: ApplicationRoleConnectionMetadata
+OnboardingPrompt
+~~~~~~~~~~~~~~~~
+
+.. attributetable:: OnboardingPrompt
+
+.. autoclass:: OnboardingPrompt
+    :members:
+
+OnboardingPromptOption
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: OnboardingPromptOption
+
+.. autoclass:: OnboardingPromptOption
     :members:
 
 File

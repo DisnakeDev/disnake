@@ -19,7 +19,7 @@ class BaseMember(TypedDict):
     pending: NotRequired[bool]
     permissions: NotRequired[str]
     communication_disabled_until: NotRequired[Optional[str]]
-    flags: int
+    flags: int  # TODO: Check if this is Optional/Nullable
 
 
 class Member(BaseMember, total=False):

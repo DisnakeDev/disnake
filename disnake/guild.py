@@ -59,13 +59,14 @@ from .enums import (
 )
 from .errors import ClientException, HTTPException, InvalidData
 from .file import File
-from .flags import SystemChannelFlags
+from .flags import MemberFlags, SystemChannelFlags
 from .guild_scheduled_event import GuildScheduledEvent, GuildScheduledEventMetadata
 from .integrations import Integration, _integration_factory
 from .invite import Invite
 from .iterators import AuditLogIterator, BanIterator, MemberIterator
 from .member import Member, VoiceState
 from .mixins import Hashable
+from .onboarding import Onboarding
 from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite
 from .role import Role
@@ -5045,3 +5046,79 @@ class GuildBuilder:
             data["video_quality_mode"] = try_enum_to_int(video_quality_mode)
 
         return _id
+
+    async def get_onboarding(self) -> Onboarding:
+        """|coro|
+
+        Retrieves the guild onboarding object.
+
+        You must have :attr:`.Permissions.manage_guild` and :attr:`.Permissions.manage_roles` permissions to do this.
+
+        .. versionadded:: 2.8
+
+        Raises
+        ------
+        Forbidden
+            You do not have proper permissions to retrieve the guild onboarding object.
+        HTTPException
+            Retrieving the guild onboarding object failed.
+
+        Returns
+        -------
+        :class:`Onboarding`
+            The guild onboarding object.
+        """
+        data = await self._state.http.get_guild_onboarding(self.id)
+        return Onboarding(data=data, guild=self, state=self._state)
+
+    """
+    async def verify_member(self, user: Snowflake, *, reason: Optional[str] = None) -> Member:
+        |coro|
+
+        Verifies the member.
+
+        TODO: Add more information about what this does.
+        NOTE: What permissions does this need?
+
+        .. versionadded:: 2.8
+
+        Raises
+        ------
+        Forbidden
+            You do not have proper permissions to verify the member.
+        HTTPException
+            Verifying the member failed.
+
+        data = await self._state.http.edit_member(
+            self.id,
+            user.id,
+            reason=reason,
+            flags=MemberFlags.bypasses_verification.flag,
+        )
+        return Member(data=data, guild=self, state=self._state)
+
+    async def unverify_member(self, user: Snowflake, *, reason: Optional[str] = None) -> Member:
+        |coro|
+
+        Unverifies the member.
+
+        TODO: Add more information about what this does.
+        NOTE: What permissions does this need?
+
+        .. versionadded:: 2.8
+
+        Raises
+        ------
+        Forbidden
+            You do not have proper permissions to unverify the member.
+        HTTPException
+            Unverifying the member failed.
+
+        data = await self._state.http.edit_member(
+            self.id,
+            user.id,
+            reason=reason,
+            flags=0,  # NOTE: I can't remove flags if I don't have the other flags
+        )
+        return Member(data=data, guild=self, state=self._state)
+    """
