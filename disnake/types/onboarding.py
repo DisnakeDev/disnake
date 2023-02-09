@@ -52,16 +52,5 @@ class PartialOnboardingPrompt(TypedDict):
 class Onboarding(TypedDict):
     guild_id: Snowflake
     prompts: List[OnboardingPrompt]
-    enable_onboarding_prompts: bool
-    enable_default_channels: bool
     default_channel_ids: SnowflakeList
-    # NOTE: client only?
-    responses: SnowflakeList
     enabled: bool
-
-
-class EditOnboarding(TypedDict):
-    prompts: List[PartialOnboardingPrompt]
-    enable_onboarding_prompts: bool
-    enable_default_channels: bool
-    default_channel_ids: SnowflakeList

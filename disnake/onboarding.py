@@ -29,16 +29,7 @@ __all__ = (
     "OnboardingPromptOption",
 )
 
-# NOTE: From the information I got, onboarding will be read-only for bots.
-
 # TODO: Audit log events
-# TODO: Gateway events? (it currently doesn't have any)
-# TODO: Guild methods
-# TODO: Member flags
-# TODO: Verify/Unverify member method
-# TODO: Add documentation
-# TODO: Check if any http methods need permissions
-# Manage Guild and Manage Roles are required to edit onboarding.
 
 
 class Onboarding:  # NOTE: or GuildOnboarding?
@@ -63,10 +54,7 @@ class Onboarding:  # NOTE: or GuildOnboarding?
         "prompts",
         "enabled",
         "_guild_id",
-        "_enable_default_channels",
-        "_enable_onboarding_prompts",
         "_default_channel_ids",
-        "_responses",
         "_state",
     )
 
@@ -76,38 +64,19 @@ class Onboarding:  # NOTE: or GuildOnboarding?
         self._from_data(data)
 
     def _from_data(self, data: OnboardingPayload):
-        # Is this even required if there are no gateway events?
-
-        # NOTE: I'm not sure if these are always available.
         self.prompts = [
             OnboardingPrompt._from_dict(data=prompt, state=self._state)
             for prompt in data["prompts"]
         ]
         self.enabled = data["enabled"]
         self._guild_id = int(data["guild_id"])  # NOTE: is this required?
-        self._enable_onboarding_prompts = data["enable_onboarding_prompts"]
-        self._enable_default_channels = data["enable_default_channels"]
         self._default_channel_ids = list(map(int, data["default_channel_ids"]))
-        self._responses = data["responses"]  # NOTE: client only?
 
     def __repr__(self) -> str:
         return (
             f"<Onboarding guild_id={self.guild.id!r} prompts={self.prompts!r}"
-            f" enable_onboarding_prompts={self._enable_onboarding_prompts!r} enable_default_channels={self._enable_default_channels!r}"
             f" default_channel_ids={self._default_channel_ids!r}>"
         )
-
-    @property
-    def onboarding_prompts_enabled(self) -> bool:
-        """:class:`bool`: Whether onboarding prompts are enabled."""
-        # TODO: Add more info about this
-        return self._enable_onboarding_prompts
-
-    @property
-    def default_channels_enabled(self) -> bool:
-        """:class:`bool`: Whether default channels are enabled."""
-        # TODO: Add more info about this
-        return self._enable_default_channels
 
     @property
     def default_channels(self) -> List[GuildChannel]:
@@ -217,8 +186,6 @@ class OnboardingPromptOption(Hashable):
         self.id = int(data["id"])
         return self
 
-    # TODO: with_changes
-
 
 class OnboardingPrompt(Hashable):
     """Represents an onboarding prompt.
@@ -304,5 +271,3 @@ class OnboardingPrompt(Hashable):
         )
         self.id = int(data["id"])
         return self
-
-    # TODO: with_changes
