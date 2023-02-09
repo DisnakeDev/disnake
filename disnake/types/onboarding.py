@@ -36,6 +36,7 @@ class OnboardingPrompt(TypedDict):
     single_select: bool
     required: bool
     in_onboarding: bool
+    type: int
 
 
 class PartialOnboardingPrompt(TypedDict):
@@ -45,6 +46,7 @@ class PartialOnboardingPrompt(TypedDict):
     single_select: bool
     required: bool
     in_onboarding: bool
+    type: int
 
 
 class Onboarding(TypedDict):
@@ -55,6 +57,7 @@ class Onboarding(TypedDict):
     default_channel_ids: SnowflakeList
     # NOTE: client only?
     responses: SnowflakeList
+    enabled: bool
 
 
 class EditOnboarding(TypedDict):

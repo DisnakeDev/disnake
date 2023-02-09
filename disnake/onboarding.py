@@ -4,9 +4,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, List, Optional, Sequence, Union
 
 from .emoji import Emoji, PartialEmoji, _EmojiTag
+from .enums import OnboardingPromptType, try_enum
 from .mixins import Hashable
 from .object import Object
-from .utils import MISSING, _get_as_snowflake
+from .utils import _get_as_snowflake
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -53,11 +54,14 @@ class Onboarding:  # NOTE: or GuildOnboarding?
         The guild this onboarding belongs to.
     prompts: List[:class:`OnboardingPrompt`]
         The prompts the onboarding has.
+    enabled: bool
+        Whether the onboarding is enabled.
     """
 
     __slots__ = (
         "guild",
         "prompts",
+        "enabled",
         "_guild_id",
         "_enable_default_channels",
         "_enable_onboarding_prompts",
@@ -79,6 +83,7 @@ class Onboarding:  # NOTE: or GuildOnboarding?
             OnboardingPrompt._from_dict(data=prompt, state=self._state)
             for prompt in data["prompts"]
         ]
+        self.enabled = data["enabled"]
         self._guild_id = int(data["guild_id"])  # NOTE: is this required?
         self._enable_onboarding_prompts = data["enable_onboarding_prompts"]
         self._enable_default_channels = data["enable_default_channels"]
@@ -235,9 +240,11 @@ class OnboardingPrompt(Hashable):
         Whether one option must be selected.
     in_onboarding: :class:`bool`
         Whether this prompt is in the onboarding.
+    type: :class:`OnboardingPromptType`
+        The onboarding prompt's type.
     """
 
-    __slots__ = ("id", "title", "options", "single_select", "required", "in_onboarding")
+    __slots__ = ("id", "title", "options", "single_select", "required", "in_onboarding", "type")
 
     def __init__(
         self,
@@ -247,6 +254,7 @@ class OnboardingPrompt(Hashable):
         single_select: bool,
         required: bool,
         in_onboarding: bool,
+        type: OnboardingPromptType,
     ):
         self.id = 0
         self.title = title
@@ -254,6 +262,7 @@ class OnboardingPrompt(Hashable):
         self.single_select = single_select
         self.required = required
         self.in_onboarding = in_onboarding
+        self.type = type
 
     def __str__(self) -> str:
         return self.title
@@ -262,7 +271,7 @@ class OnboardingPrompt(Hashable):
         return (
             f"<OnboardingPrompt id={self.id!r} title={self.title!r} options={self.options!r}"
             f" single_select={self.single_select!r} required={self.required!r}"
-            f" in_onboarding={self.in_onboarding!r}>"
+            f" in_onboarding={self.in_onboarding!r} type={self.type!r}>"
         )
 
     def _to_dict(self) -> PartialOnboardingPromptPayload:
@@ -272,6 +281,7 @@ class OnboardingPrompt(Hashable):
             "single_select": self.single_select,
             "required": self.required,
             "in_onboarding": self.in_onboarding,
+            "type": self.type.value,
         }
 
         if self.id:
@@ -290,6 +300,7 @@ class OnboardingPrompt(Hashable):
             single_select=data["single_select"],
             required=data["required"],
             in_onboarding=data["in_onboarding"],
+            type=try_enum(OnboardingPromptType, data["type"]),
         )
         self.id = int(data["id"])
         return self
