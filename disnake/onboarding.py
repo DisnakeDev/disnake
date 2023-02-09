@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, List, Optional, Sequence, Union
 from .emoji import Emoji, PartialEmoji, _EmojiTag
 from .mixins import Hashable
 from .object import Object
-from .utils import _get_as_snowflake
+from .utils import MISSING, _get_as_snowflake
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -111,10 +111,11 @@ class Onboarding:  # NOTE: or GuildOnboarding?
 
     async def edit(
         self,
-        prompts: List[OnboardingPrompt],
-        onboarding_prompts_enabled: bool,
-        default_channels_enabled: bool,
-        default_channel_ids: List[int],
+        *,
+        prompts: List[OnboardingPrompt] = MISSING,
+        onboarding_prompts_enabled: bool = MISSING,
+        default_channels_enabled: bool = MISSING,
+        default_channel_ids: List[int] = MISSING,
     ) -> Self:
         # See the first note of this file. I'll keep this here just in case it's supported by bots.
         """|coro|
