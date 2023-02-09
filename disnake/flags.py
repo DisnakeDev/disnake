@@ -2205,7 +2205,7 @@ class MemberFlags(BaseFlags):
 
             Returns a MemberFlags instance with all flags except ``y`` inverted from their default value.
 
-        .. versionadded:: 2.8
+    .. versionadded:: 2.8
 
     Attributes
     ----------

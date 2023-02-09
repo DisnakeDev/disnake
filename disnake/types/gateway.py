@@ -437,7 +437,7 @@ class GuildMemberUpdateEvent(TypedDict):
     mute: NotRequired[bool]
     pending: NotRequired[bool]
     communication_disabled_until: NotRequired[Optional[str]]
-    flags: int  # TODO: Check if it's Optional/Nullable
+    flags: int
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-emojis-update
