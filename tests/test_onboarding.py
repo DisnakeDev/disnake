@@ -46,7 +46,7 @@ def onboarding_prompt() -> OnboardingPrompt:
         "single_select": True,
         "required": True,
         "in_onboarding": True,
-        "type": OnboardingPromptType.multiple_choice,
+        "type": OnboardingPromptType.multiple_choice,  # type: ignore
     }
 
     return OnboardingPrompt(**onboarding_prompt_payload)

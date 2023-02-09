@@ -1,12 +1,14 @@
 # SPDX-License-Identifier: MIT
 
-from typing import List, Optional, TypedDict
+from typing import List, Literal, Optional, TypedDict
 
 from typing_extensions import NotRequired
 
 from .snowflake import Snowflake, SnowflakeList
 
 # NOTE: PartialOnboardingXX is very redundant, TBD
+
+OnboardingPromptType = Literal[0, 1]
 
 
 class OnboardingPromptOption(TypedDict):
@@ -36,7 +38,7 @@ class OnboardingPrompt(TypedDict):
     single_select: bool
     required: bool
     in_onboarding: bool
-    type: int
+    type: OnboardingPromptType
 
 
 class PartialOnboardingPrompt(TypedDict):
@@ -46,7 +48,7 @@ class PartialOnboardingPrompt(TypedDict):
     single_select: bool
     required: bool
     in_onboarding: bool
-    type: int
+    type: OnboardingPromptType
 
 
 class Onboarding(TypedDict):
