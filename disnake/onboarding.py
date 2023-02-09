@@ -109,51 +109,6 @@ class Onboarding:  # NOTE: or GuildOnboarding?
         """List[:class:`abc.GuildChannel`]: A list of channels that will display in Browse Channels."""
         return list(filter(None, map(self.guild._channels.get, self._default_channel_ids)))
 
-    async def edit(
-        self,
-        *,
-        prompts: List[OnboardingPrompt] = MISSING,
-        onboarding_prompts_enabled: bool = MISSING,
-        default_channels_enabled: bool = MISSING,
-        default_channel_ids: List[int] = MISSING,
-    ) -> Self:
-        # See the first note of this file. I'll keep this here just in case it's supported by bots.
-        """|coro|
-
-        Edits the onboarding.
-
-        Parameters
-        ----------
-        prompts: List[:class:`OnboardingPrompt`]
-            The new onboarding prompts.
-        onboarding_prompts_enabled: :class:`bool`
-            Whether onboarding prompts are enabled.
-        default_channels_enabled: :class:`bool`
-            Whether default channels are enabled.
-        default_channel_ids: List[:class:`int`]
-            The new default channel IDs.
-
-        Raises
-        ------
-        Forbidden
-            You do not have permissions to edit the onboarding.
-        HTTPException
-            Editing the onboarding failed.
-
-        Returns
-        -------
-        :class:`Onboarding`
-            The newly edited onboarding.
-        """
-        data = await self._state.http.edit_guild_onboarding(
-            self.guild.id,
-            prompts=[prompt._to_dict() for prompt in prompts],
-            enable_onboarding_prompts=onboarding_prompts_enabled,
-            enable_default_channels=default_channels_enabled,
-            default_channel_ids=default_channel_ids,
-        )
-        return Onboarding(state=self._state, guild=self.guild, data=data)
-
 
 class OnboardingPromptOption(Hashable):
     """Represents an onboarding prompt option.
