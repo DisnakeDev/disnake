@@ -35,7 +35,7 @@ __all__ = (
 class Onboarding:  # NOTE: or GuildOnboarding?
     """Represents a guild onboarding.
 
-    .. versionadded:: 2.8
+    .. versionadded:: 2.9
 
     TO BE DONE...
 
@@ -87,7 +87,7 @@ class Onboarding:  # NOTE: or GuildOnboarding?
 class OnboardingPromptOption(Hashable):
     """Represents an onboarding prompt option.
 
-    .. versionadded:: 2.8
+    .. versionadded:: 2.9
 
     Attributes
     ----------
@@ -190,7 +190,7 @@ class OnboardingPromptOption(Hashable):
 class OnboardingPrompt(Hashable):
     """Represents an onboarding prompt.
 
-    .. versionadded:: 2.8
+    .. versionadded:: 2.9
 
     Attributes
     ----------
