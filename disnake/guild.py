@@ -59,7 +59,7 @@ from .enums import (
 )
 from .errors import ClientException, HTTPException, InvalidData
 from .file import File
-from .flags import MemberFlags, SystemChannelFlags
+from .flags import SystemChannelFlags
 from .guild_scheduled_event import GuildScheduledEvent, GuildScheduledEventMetadata
 from .integrations import Integration, _integration_factory
 from .invite import Invite

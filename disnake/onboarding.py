@@ -75,7 +75,7 @@ class Onboarding:  # NOTE: or GuildOnboarding?
     def __repr__(self) -> str:
         return (
             f"<Onboarding guild_id={self.guild.id!r} prompts={self.prompts!r}"
-            f" default_channel_ids={self._default_channel_ids!r}>"
+            f" default_channel_ids={self._default_channel_ids!r} enabled={self.enabled!r}>"
         )
 
     @property

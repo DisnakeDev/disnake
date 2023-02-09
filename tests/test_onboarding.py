@@ -10,6 +10,7 @@ from disnake import (
     Onboarding,
     OnboardingPrompt,
     OnboardingPromptOption,
+    OnboardingPromptType,
     PartialEmoji,
 )
 from disnake.types import onboarding as onboarding_types
@@ -45,6 +46,7 @@ def onboarding_prompt() -> OnboardingPrompt:
         "single_select": True,
         "required": True,
         "in_onboarding": True,
+        "type": OnboardingPromptType.multiple_choice,
     }
 
     return OnboardingPrompt(**onboarding_prompt_payload)
@@ -56,10 +58,8 @@ def onboarding() -> Onboarding:
     onboarding_payload: onboarding_types.Onboarding = {
         "guild_id": "123",
         "prompts": [],
-        "enable_onboarding_prompts": True,
-        "enable_default_channels": True,
         "default_channel_ids": ["456", "789"],
-        "responses": [],
+        "enabled": True,
     }
 
     return Onboarding(
@@ -73,15 +73,12 @@ class TestOnboarding:
     def test_onboarding(self, onboarding: Onboarding) -> None:
         assert onboarding.guild.id == 123
         assert onboarding.prompts == []
-        assert onboarding.onboarding_prompts_enabled is True
-        assert onboarding.default_channels_enabled is True
         assert onboarding._default_channel_ids == [456, 789]
-        assert onboarding._responses == []
+        assert onboarding.enabled is True
 
     def test_onboarding_repr(self, onboarding: Onboarding) -> None:
         assert repr(onboarding) == (
-            "<Onboarding guild_id=123 prompts=[] enable_onboarding_prompts=True"
-            " enable_default_channels=True default_channel_ids=[456, 789]>"
+            "<Onboarding guild_id=123 prompts=[] default_channel_ids=[456, 789] enabled=True>"
         )
 
 
@@ -92,6 +89,7 @@ class TestOnboardingPrompt:
         assert onboarding_prompt.single_select is True
         assert onboarding_prompt.required is True
         assert onboarding_prompt.in_onboarding is True
+        assert onboarding_prompt.type == OnboardingPromptType.multiple_choice
 
     def test_onboarding_prompt_str(self, onboarding_prompt: OnboardingPrompt) -> None:
         assert str(onboarding_prompt) == "test"
@@ -99,7 +97,7 @@ class TestOnboardingPrompt:
     def test_onboarding_prompt_repr(self, onboarding_prompt: OnboardingPrompt) -> None:
         assert repr(onboarding_prompt) == (
             "<OnboardingPrompt id=0 title='test' options=[] single_select=True required=True"
-            " in_onboarding=True>"
+            " in_onboarding=True type=<OnboardingPromptType.multiple_choice: 0>>"
         )
 
 
