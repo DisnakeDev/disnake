@@ -479,8 +479,9 @@ def handle_message_parameters_dict(
     username: str = MISSING,
     avatar_url: Any = MISSING,
     tts: bool = False,
-    ephemeral: Optional[bool] = None,
-    suppress_embeds: Optional[bool] = None,
+    ephemeral: Optional[bool] = MISSING,
+    suppress_embeds: Optional[bool] = MISSING,
+    flags: MessageFlags = MISSING,
     file: File = MISSING,
     files: List[File] = MISSING,
     attachments: Optional[List[Attachment]] = MISSING,
@@ -531,12 +532,14 @@ def handle_message_parameters_dict(
     if username:
         payload["username"] = username
 
-    if ephemeral is not None or suppress_embeds is not None:
-        payload["flags"] = 0
-        if suppress_embeds:
-            payload["flags"] |= MessageFlags.suppress_embeds.flag
-        if ephemeral:
-            payload["flags"] |= MessageFlags.ephemeral.flag
+    if ephemeral not in (None, MISSING) or suppress_embeds not in (None, MISSING):
+        flags = MessageFlags._from_value(0 if flags is MISSING else flags.value)
+        if suppress_embeds not in (None, MISSING):
+            flags.suppress_embeds = suppress_embeds
+        if ephemeral not in (None, MISSING):
+            flags.ephemeral = ephemeral
+    if flags is not MISSING:
+        payload["flags"] = flags.value
 
     if allowed_mentions:
         if previous_allowed_mentions is not None:
@@ -563,8 +566,9 @@ def handle_message_parameters(
     username: str = MISSING,
     avatar_url: Any = MISSING,
     tts: bool = False,
-    ephemeral: Optional[bool] = None,
-    suppress_embeds: Optional[bool] = None,
+    ephemeral: Optional[bool] = MISSING,
+    suppress_embeds: Optional[bool] = MISSING,
+    flags: MessageFlags = MISSING,
     file: File = MISSING,
     files: List[File] = MISSING,
     attachments: Optional[List[Attachment]] = MISSING,
@@ -584,6 +588,7 @@ def handle_message_parameters(
         tts=tts,
         ephemeral=ephemeral,
         suppress_embeds=suppress_embeds,
+        flags=flags,
         file=file,
         files=files,
         attachments=attachments,
@@ -1434,6 +1439,7 @@ class Webhook(BaseWebhook):
         tts: bool = ...,
         ephemeral: bool = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         file: File = ...,
         files: List[File] = ...,
         embed: Embed = ...,
@@ -1458,6 +1464,7 @@ class Webhook(BaseWebhook):
         tts: bool = ...,
         ephemeral: bool = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         file: File = ...,
         files: List[File] = ...,
         embed: Embed = ...,
@@ -1479,8 +1486,9 @@ class Webhook(BaseWebhook):
         username: str = MISSING,
         avatar_url: Any = MISSING,
         tts: bool = False,
-        ephemeral: bool = False,
-        suppress_embeds: bool = False,
+        ephemeral: bool = MISSING,
+        suppress_embeds: bool = MISSING,
+        flags: MessageFlags = MISSING,
         file: File = MISSING,
         files: List[File] = MISSING,
         embed: Embed = MISSING,
@@ -1599,6 +1607,16 @@ class Webhook(BaseWebhook):
 
             .. versionadded:: 2.5
 
+        flags: :class:`MessageFlags`
+            The flags to set for this message.
+            Only :attr:`~MessageFlags.suppress_embeds`, :attr:`~MessageFlags.ephemeral`
+            and :attr:`~MessageFlags.suppress_notifications` are supported.
+
+            If parameters ``suppress_embeds`` or ``ephemeral`` are provided,
+            they will override the corresponding setting of this ``flags`` parameter.
+
+            .. versionadded:: 2.9
+
         Raises
         ------
         HTTPException
@@ -1662,6 +1680,7 @@ class Webhook(BaseWebhook):
             embeds=embeds,
             ephemeral=ephemeral,
             suppress_embeds=suppress_embeds,
+            flags=flags,
             view=view,
             components=components,
             thread_name=thread_name,

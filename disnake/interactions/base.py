@@ -587,8 +587,9 @@ class Interaction:
         view: View = MISSING,
         components: Components[MessageUIComponent] = MISSING,
         tts: bool = False,
-        ephemeral: bool = False,
-        suppress_embeds: bool = False,
+        ephemeral: bool = MISSING,
+        suppress_embeds: bool = MISSING,
+        flags: MessageFlags = MISSING,
         delete_after: float = MISSING,
     ) -> None:
         """|coro|
@@ -645,6 +646,16 @@ class Interaction:
 
             .. versionadded:: 2.5
 
+        flags: :class:`MessageFlags`
+            The flags to set for this message.
+            Only :attr:`~MessageFlags.suppress_embeds`, :attr:`~MessageFlags.ephemeral`
+            and :attr:`~MessageFlags.suppress_notifications` are supported.
+
+            If parameters ``suppress_embeds`` or ``ephemeral`` are provided,
+            they will override the corresponding setting of this ``flags`` parameter.
+
+            .. versionadded:: 2.9
+
         delete_after: :class:`float`
             If provided, the number of seconds to wait in the background
             before deleting the message we just sent. If the deletion fails,
@@ -681,6 +692,7 @@ class Interaction:
             tts=tts,
             ephemeral=ephemeral,
             suppress_embeds=suppress_embeds,
+            flags=flags,
             delete_after=delete_after,
         )
 
@@ -852,8 +864,9 @@ class InteractionResponse:
         view: View = MISSING,
         components: Components[MessageUIComponent] = MISSING,
         tts: bool = False,
-        ephemeral: bool = False,
-        suppress_embeds: bool = False,
+        ephemeral: bool = MISSING,
+        suppress_embeds: bool = MISSING,
+        flags: MessageFlags = MISSING,
         delete_after: float = MISSING,
     ) -> None:
         """|coro|
@@ -906,6 +919,16 @@ class InteractionResponse:
             all the embeds from the UI if set to ``True``.
 
             .. versionadded:: 2.5
+
+        flags: :class:`MessageFlags`
+            The flags to set for this message.
+            Only :attr:`~MessageFlags.suppress_embeds`, :attr:`~MessageFlags.ephemeral`
+            and :attr:`~MessageFlags.suppress_notifications` are supported.
+
+            If parameters ``suppress_embeds`` or ``ephemeral`` are provided,
+            they will override the corresponding setting of this ``flags`` parameter.
+
+            .. versionadded:: 2.9
 
         Raises
         ------
@@ -966,11 +989,14 @@ class InteractionResponse:
         if content is not None:
             payload["content"] = str(content)
 
-        payload["flags"] = 0
-        if suppress_embeds:
-            payload["flags"] |= MessageFlags.suppress_embeds.flag
-        if ephemeral:
-            payload["flags"] |= MessageFlags.ephemeral.flag
+        if suppress_embeds is not MISSING or ephemeral is not MISSING:
+            flags = MessageFlags._from_value(0 if flags is MISSING else flags.value)
+            if suppress_embeds is not MISSING:
+                flags.suppress_embeds = suppress_embeds
+            if ephemeral is not MISSING:
+                flags.ephemeral = ephemeral
+        if flags is not MISSING:
+            payload["flags"] = flags.value
 
         if view is not MISSING:
             payload["components"] = view.to_components()
