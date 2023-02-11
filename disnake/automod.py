@@ -232,7 +232,7 @@ class AutoModTriggerMetadata:
 
         See :ddocs:`api docs <resources/auto-moderation#auto-moderation-rule-object-keyword-matching-strategies>`
         for details about how keyword matching works.
-        Each keyword must be 30 characters or less.
+        Each keyword must be 60 characters or less.
 
     regex_patterns: Optional[Sequence[:class:`str`]]
         The list of regular expressions to check for. Used with :attr:`AutoModTriggerType.keyword`.
@@ -252,7 +252,7 @@ class AutoModTriggerMetadata:
         The keywords that should be exempt from a preset.
         Used with :attr:`AutoModTriggerType.keyword` (up to 100 exemptions) and :attr:`AutoModTriggerType.keyword_preset` (up to 1000 exemptions).
 
-        Each keyword must be 30 characters or less.
+        Each keyword must be 60 characters or less.
 
     mention_total_limit: Optional[:class:`int`]
         The maximum number of mentions (members + roles) allowed, between 1 and 50. Used with :attr:`AutoModTriggerType.mention_spam`.
