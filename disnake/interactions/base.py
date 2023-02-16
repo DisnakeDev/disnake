@@ -383,6 +383,7 @@ class Interaction:
         view: Optional[View] = MISSING,
         components: Optional[Components[MessageUIComponent]] = MISSING,
         suppress_embeds: bool = MISSING,
+        flags: MessageFlags = MISSING,
         allowed_mentions: Optional[AllowedMentions] = None,
     ) -> InteractionMessage:
         """|coro|
@@ -456,6 +457,15 @@ class Interaction:
 
             .. versionadded:: 2.7
 
+        flags: :class:`MessageFlags`
+            The new flags to set for this message. Overrides existing flags.
+            Only :attr:`~MessageFlags.suppress_embeds` is supported.
+
+            If parameter ``suppress_embeds`` is provided,
+            that will override the setting of :attr:`.MessageFlags.suppress_embeds`.
+
+            .. versionadded:: 2.9
+
         Raises
         ------
         HTTPException
@@ -488,6 +498,7 @@ class Interaction:
             view=view,
             components=components,
             suppress_embeds=suppress_embeds,
+            flags=flags,
             allowed_mentions=allowed_mentions,
             previous_allowed_mentions=previous_mentions,
         )
@@ -1472,6 +1483,7 @@ class InteractionMessage(Message):
         file: File = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -1487,6 +1499,7 @@ class InteractionMessage(Message):
         files: List[File] = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -1502,6 +1515,7 @@ class InteractionMessage(Message):
         file: File = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -1517,6 +1531,7 @@ class InteractionMessage(Message):
         files: List[File] = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -1533,6 +1548,7 @@ class InteractionMessage(Message):
         files: List[File] = MISSING,
         attachments: Optional[List[Attachment]] = MISSING,
         suppress_embeds: bool = MISSING,
+        flags: MessageFlags = MISSING,
         allowed_mentions: Optional[AllowedMentions] = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[Components[MessageUIComponent]] = MISSING,
@@ -1594,6 +1610,15 @@ class InteractionMessage(Message):
 
             .. versionadded:: 2.7
 
+        flags: :class:`MessageFlags`
+            The new flags to set for this message. Overrides existing flags.
+            Only :attr:`~MessageFlags.suppress_embeds` is supported.
+
+            If parameter ``suppress_embeds`` is provided,
+            that will override the setting of :attr:`.MessageFlags.suppress_embeds`.
+
+            .. versionadded:: 2.9
+
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
@@ -1626,6 +1651,7 @@ class InteractionMessage(Message):
                 files=files,
                 attachments=attachments,
                 suppress_embeds=suppress_embeds,
+                flags=flags,
                 allowed_mentions=allowed_mentions,
                 view=view,
                 components=components,
@@ -1646,6 +1672,7 @@ class InteractionMessage(Message):
             files=files,
             attachments=attachments,
             suppress_embeds=suppress_embeds,
+            flags=flags,
             allowed_mentions=allowed_mentions,
             view=view,
             components=components,
