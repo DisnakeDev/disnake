@@ -2,6 +2,7 @@
 # Credit to sphinx.ext.extlinks for being a good starter
 # Copyright 2007-2020 by the Sphinx team
 # Licensed under BSD.
+from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
