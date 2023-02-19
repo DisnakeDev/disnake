@@ -119,7 +119,7 @@ flake8 = { cmd = "flake8", help = "Run flake8"}
 isort = { cmd = "task lint isort", help = "Run isort" }
 lint = { cmd = "nox -Rs lint --", help = "Check all files for linting errors" }
 pyright = { cmd = "nox -Rs pyright --", help = "Run pyright" }
-setup_env = {cmd = 'nox -s setup --', help = 'Setup the local environment and set up all dependencies'}
+setup_env = {cmd = 'pdm install -G:all', help = 'Setup the local environment and set up all dependencies'}
 test = { cmd = "nox -Rs test --", help = "Run pytest" }
 
 
