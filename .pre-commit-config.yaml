@@ -55,12 +55,8 @@ repos:
       - id: black
         name: "run black in all files"
 
-  - repo: local
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.0.247
     hooks:
-      - id: flake8
-        name: flake8
-        description: "Lint all of our code"
-        entry: flake8
-        language: system
-        types: [python]
-        require_serial: true
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]

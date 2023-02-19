@@ -9,7 +9,7 @@ from disnake.abc import GuildChannel
 from disnake.utils import MISSING
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 class TestGuildChannelEdit:
     # TODO: use proper mock models once we have state/guild mocks
     @pytest.fixture()

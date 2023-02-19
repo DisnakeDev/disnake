@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from disnake.types.user import User as UserPayload
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 class TestInteractionResponse:
     @pytest.fixture()
     def response(self):

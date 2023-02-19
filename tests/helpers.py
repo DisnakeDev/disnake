@@ -60,11 +60,10 @@ class freeze_time(ContextManager):
                     return await func(*args, **kwargs)
 
             return wrap_async  # type: ignore
-        else:
 
-            @functools.wraps(func)
-            def wrap_sync(*args, **kwargs):
-                with self:
-                    return func(*args, **kwargs)
+        @functools.wraps(func)
+        def wrap_sync(*args, **kwargs):
+            with self:
+                return func(*args, **kwargs)
 
-            return wrap_sync  # type: ignore
+        return wrap_sync  # type: ignore

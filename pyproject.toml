@@ -49,6 +49,72 @@ line_length = 100
 combine_as_imports = true
 filter_files = true
 
+[tool.ruff]
+line-length = 100
+target-version = "py38"
+select = [
+    "F", # pyflakes
+    "E","W", # pycodestyle
+    # "D", # pydocstyle
+    # "ANN", # flake8-annotations
+    "S", # flake8-bandit
+    "B", # flake8-bugbear
+    "C", # flake8-comprehensions
+    # "EM", # flake8-errmsg
+    "G", # flake8-logging-format
+    # "RET", # flake8-return
+    # "SIM", # flake8-simplify
+    # "RUF", # ruff specific exceptions
+    "PT", # flake8-pytest-style
+    "Q", # flake8-quotes
+    "T201", "T203" # flake8-print
+]
+ignore = [
+    # Missing Docstrings
+    "D100","D101","D104","D105","D106","D107",
+    # Docstring Whitespace
+    "D203","D212","D214","D215",
+    # Docstring Content
+    "D400","D402","D404","D405","D406","D407","D408","D409","D410","D411","D412","D413","D414","D416","D417",
+
+    # star imports
+    "F401","F403",
+
+    # ignore imperative mood for now
+    "D401",
+    # Type Annotations
+    "ANN002","ANN003","ANN101","ANN102","ANN204","ANN206","ANN401",
+
+    # unknown if this is actually an issue
+    "RUF006",
+
+    # assigning lambdas to variables
+    "E731",
+
+    # ignore try-except-pass. Bare excepts are caught with E722
+    "S110",
+
+    # temporarily disabled
+    "B904", # within an except clause raise from error or from none
+    "B026", # backwards star-arg unpacking
+    "E501", # line too long
+    "S101", # Use of `assert` detected
+    # "S110", # try-except-pass
+    "T201", # print statements
+
+]
+
+[tool.ruff.per-file-ignores]
+"disnake/__main__.py" = ["T201"]
+"disnake/i18n.py" = ["B027"] # lib bug
+"disnake/**" = ["PT"]
+"examples/*" = ["B008", "T201", "PT"]
+"examples/basic_voice.py" = ["S104"]
+"examples/views/tic_tac_toe.py" = ["E741", "RET505"]
+"test_bot/*" = ["B008", "T201", "PT"]
+
+[tool.ruff.mccabe]
+max-complexity = 20
 
 [tool.taskipy.tasks]
 black = { cmd = "task lint black", help = "Run black" }

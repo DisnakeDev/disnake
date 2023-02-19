@@ -32,7 +32,7 @@ class TestParamInfo:
             (disnake.abc.Snowflake, OptionType.mentionable, [User, Member, Role]),
         ],
     )
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_verify_type(self, annotation, expected_type, arg_types) -> None:
         # tests that the Discord option type is determined correctly,
         # and that valid argument types are accepted
@@ -53,7 +53,7 @@ class TestParamInfo:
             (Union[Member, Role], [User]),
         ],
     )
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio()
     async def test_verify_type__invalid_member(self, annotation, arg_types) -> None:
         # tests that invalid argument types result in `verify_type` raising an exception
         info = commands.ParamInfo()
