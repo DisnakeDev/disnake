@@ -30,7 +30,7 @@ runs:
       uses: pdm-project/setup-pdm@v3
       with:
         python-version: ${{ inputs.python-version }}
-        version: "2.2"
+        version: "2.4"
         cache: true
         cache-dependency-path: ${{ inputs.cache-dependency-path }}
         enable-pep582: false # Enable PEP 582 package loading globally
