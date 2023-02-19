@@ -72,8 +72,6 @@ tools = [
     "towncrier==22.8.0",
     # checks MANIFEST.in + sdist
     "check-manifest==0.48",
-    "twine>=4.0.1",
-    "build>=0.9.0",
 ]
 codemod = [
     # run codemods on the respository (mostly automated typing)
