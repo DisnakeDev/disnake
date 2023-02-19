@@ -1,1 +1,0 @@
-Adds reasons/descriptions to :exc:`ConnectionClosed` errors.

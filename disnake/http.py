@@ -7,6 +7,7 @@ import logging
 import re
 import sys
 import weakref
+from errno import ECONNRESET
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -52,6 +53,7 @@ if TYPE_CHECKING:
     from .message import Attachment
     from .types import (
         appinfo,
+        application_role_connection,
         audit_log,
         automod,
         channel,
@@ -421,7 +423,7 @@ class HTTPClient:
                 # This is handling exceptions from the request
                 except OSError as e:
                     # Connection reset by peer
-                    if tries < 4 and e.errno in (54, 10054):
+                    if tries < 4 and e.errno == ECONNRESET:
                         await asyncio.sleep(1 + tries * 2)
                         continue
                     raise
@@ -2621,6 +2623,31 @@ class HTTPClient:
 
     def application_info(self) -> Response[appinfo.AppInfo]:
         return self.request(Route("GET", "/oauth2/applications/@me"))
+
+    def get_application_role_connection_metadata_records(
+        self, application_id: Snowflake
+    ) -> Response[List[application_role_connection.ApplicationRoleConnectionMetadata]]:
+        return self.request(
+            Route(
+                "GET",
+                "/applications/{application_id}/role-connections/metadata",
+                application_id=application_id,
+            )
+        )
+
+    def edit_application_role_connection_metadata_records(
+        self,
+        application_id: Snowflake,
+        records: Sequence[application_role_connection.ApplicationRoleConnectionMetadata],
+    ) -> Response[List[application_role_connection.ApplicationRoleConnectionMetadata]]:
+        return self.request(
+            Route(
+                "PUT",
+                "/applications/{application_id}/role-connections/metadata",
+                application_id=application_id,
+            ),
+            json=records,
+        )
 
     async def get_gateway(self, *, encoding: str = "json", zlib: bool = True) -> str:
         try:

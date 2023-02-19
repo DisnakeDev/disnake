@@ -6,6 +6,7 @@ import asyncio
 import logging
 import re
 from contextvars import ContextVar
+from errno import ECONNRESET
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -209,7 +210,7 @@ class AsyncWebhookAdapter:
                             raise HTTPException(response, data)
 
                 except OSError as e:
-                    if attempt < 4 and e.errno in (54, 10054):
+                    if attempt < 4 and e.errno == ECONNRESET:
                         await asyncio.sleep(1 + attempt * 2)
                         continue
                     raise

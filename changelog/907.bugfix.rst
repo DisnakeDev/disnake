@@ -1,1 +1,0 @@
-Fix :meth:`Client.delete_guild_command` not updating the local command cache.
