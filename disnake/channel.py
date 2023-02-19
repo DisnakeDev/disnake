@@ -499,7 +499,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         You must have :attr:`.Permissions.manage_channels` permission to
         do this.
 
-        .. versionchanged:: 2.8
+        .. versionchanged:: 2.9
             Added ``topic``, ``position``, ``nsfw``, ``category``, ``slowmode_delay``,
             ``default_auto_archive_duration`` and ``news`` keyword-only parameters.
 
@@ -1295,7 +1295,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         You must have :attr:`.Permissions.manage_channels` permission to
         do this.
 
-        .. versionchanged:: 2.8
+        .. versionchanged:: 2.9
             Added ``bitrate``, ``user_limit``, ``position``, ``category``,
             ``rtc_region``, ``video_quality_mode``, ``nsfw`` and ``slowmode_delay``
             keyword-only parameters.
@@ -1970,7 +1970,7 @@ class StageChannel(VocalGuildChannel):
         You must have :attr:`.Permissions.manage_channels` permission to
         do this.
 
-        .. versionchanged:: 2.8
+        .. versionchanged:: 2.9
             Added ``position``, ``category``, ``rtc_region``,
             ``video_quality_mode`` and ``bitrate`` keyword-only parameters.
 
@@ -2379,7 +2379,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         You must have :attr:`.Permissions.manage_channels` permission to
         do this.
 
-        .. versionchanged:: 2.8
+        .. versionchanged:: 2.9
             Added ``position`` and ``nsfw`` keyword-only parameters.
 
         Parameters
@@ -3205,7 +3205,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         You must have :attr:`.Permissions.manage_channels` permission to
         do this.
 
-        .. versionchanged:: 2.8
+        .. versionchanged:: 2.9
             Added new ``topic``, ``position``, ``nsfw``, ``category``, ``slowmode_delay``,
             ``default_thread_slowmode_delay``, ``default_auto_archive_duration``,
             ``available_tags``, ``default_reaction`` and ``default_sort_order``
