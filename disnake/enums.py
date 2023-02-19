@@ -691,7 +691,10 @@ class NSFWLevel(Enum, comparable=True):
     safe = 2
     age_restricted = 3
 
-
+class MFALevel(Enum, comparable=True):
+    disabled = 0
+    require_2fa = 1
+    
 class GuildScheduledEventEntityType(Enum):
     stage_instance = 1
     voice = 2
