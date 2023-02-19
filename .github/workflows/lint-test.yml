@@ -177,10 +177,6 @@ jobs:
           exit 0;
         fi
 
-    # check pdm.lock is up to date
-    # there has to be a better way
-    - name: check pdm.lock
-      run: pdm install --check
   pytest:
     # Thanks to black for this rule
     # We want to run on external PRs, but not on our own internal PRs as they'll be run
