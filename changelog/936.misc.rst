@@ -1,0 +1,1 @@
+Update Sphinx to v6.0.1.
