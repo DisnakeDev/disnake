@@ -18,14 +18,14 @@ if TYPE_CHECKING:
     from disnake.types.user import User as UserPayload
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 class TestInteractionResponse:
-    @pytest.fixture()
+    @pytest.fixture
     def response(self):
         inter = mock.Mock(disnake.Interaction)
         return disnake.InteractionResponse(inter)
 
-    @pytest.fixture()
+    @pytest.fixture
     def adapter(self):
         adapter = mock.AsyncMock()
         disnake.interactions.base.async_context.set(adapter)
@@ -129,7 +129,7 @@ class TestInteractionResponse:
 
 class TestInteractionDataResolved:
     # TODO: use proper mock models once we have state/guild mocks
-    @pytest.fixture()
+    @pytest.fixture
     def state(self):
         s = mock.Mock(spec_set=ConnectionState)
         s._get_guild.return_value = None

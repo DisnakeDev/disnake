@@ -627,8 +627,8 @@ class InvokableApplicationCommand(ABC):
             if not predicates:
                 # since we have no checks, then we just return True.
                 return True
-
-            return await async_all(predicate(inter) for predicate in predicates)  # type: ignore
+            else:
+                return await async_all(predicate(inter) for predicate in predicates)  # type: ignore
         finally:
             inter.application_command = original
 

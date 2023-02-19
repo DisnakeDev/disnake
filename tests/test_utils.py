@@ -283,7 +283,7 @@ def test_mime_type_invalid(data):
     assert utils._get_extension_for_image(data) is None
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_assetbytes_base64():
     assert await utils._assetbytes_to_base64_data(None) is None
 
@@ -330,7 +330,7 @@ def test_parse_ratelimit_header(after, use_clock, expected):
         mock.AsyncMock(),
     ],
 )
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_maybe_coroutine(func: mock.Mock):
     assert await utils.maybe_coroutine(func, 42, arg="uwu") is func.return_value
     func.assert_called_once_with(42, arg="uwu")
@@ -347,13 +347,13 @@ async def test_maybe_coroutine(func: mock.Mock):
         ([True, False, True], False),
     ],
 )
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_async_all(mock_type, gen, expected):
     assert await utils.async_all(mock_type(return_value=x)() for x in gen) is expected
 
 
-@pytest.mark.looptime()
-@pytest.mark.asyncio()
+@pytest.mark.looptime
+@pytest.mark.asyncio
 async def test_sane_wait_for(looptime):
     times = [10, 50, 25]
 
@@ -414,8 +414,8 @@ def test_compute_timedelta(tz, delta, expected):
 
 
 @pytest.mark.parametrize(("delta", "expected"), [(0, 0), (42, 42), (-100, 0)])
-@pytest.mark.looptime()
-@pytest.mark.asyncio()
+@pytest.mark.looptime
+@pytest.mark.asyncio
 @helpers.freeze_time()
 async def test_sleep_until(looptime, delta, expected):
     o = object()
@@ -707,7 +707,7 @@ def test_parse_docstring_localizations():
     ],
 )
 @pytest.mark.parametrize("sync", [False, True])
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_as_chunks(sync, it, max_size, expected):
     if sync:
         assert list(utils.as_chunks(it, max_size)) == expected

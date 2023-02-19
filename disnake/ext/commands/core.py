@@ -1149,8 +1149,8 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             if not predicates:
                 # since we have no checks, then we just return True.
                 return True
-
-            return await disnake.utils.async_all(predicate(ctx) for predicate in predicates)  # type: ignore
+            else:
+                return await disnake.utils.async_all(predicate(ctx) for predicate in predicates)  # type: ignore
         finally:
             ctx.command = original
 

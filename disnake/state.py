@@ -652,7 +652,7 @@ class ConnectionState:
                 presences=presences,
                 nonce=request.nonce,
             )
-            return await asyncio.wait_for(request.wait(), timeout=30.0)
+            return await asyncio.wait_for(request.wait(), timeout=30.0)  # noqa: TRY300
         except asyncio.TimeoutError:
             _log.warning(
                 "Timed out waiting for chunks with query %r and limit %d for guild_id %d",

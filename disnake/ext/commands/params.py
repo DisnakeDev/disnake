@@ -151,13 +151,13 @@ def signature(func: Callable) -> inspect.Signature:
     for name, param in signature.parameters.items():
         if isinstance(param.annotation, str):
             param = param.replace(annotation=typehints.get(name, inspect.Parameter.empty))
-        if param.annotation is type(None):  # noqa: E721
+        if param.annotation is type(None):
             param = param.replace(annotation=None)
 
         parameters.append(param)
 
     return_annotation = typehints.get("return", inspect.Parameter.empty)
-    if return_annotation is type(None):  # noqa: E721
+    if return_annotation is type(None):
         return_annotation = None
 
     return signature.replace(parameters=parameters, return_annotation=return_annotation)
@@ -629,8 +629,8 @@ class ParamInfo:
             argument = self.converter(inter, argument)
             if inspect.isawaitable(argument):
                 return await argument
-
-            return argument
+            else:
+                return argument
         except errors.CommandError:
             raise
         except Exception as e:
