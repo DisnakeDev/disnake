@@ -41,14 +41,15 @@ Creating a pull request is fairly simple, just make sure it focuses on a single 
 
 We would greatly appreciate the code submitted to be of a consistent style with other code in disnake. This project follows PEP-8 guidelines (mostly) with a column limit of 100 characters.
 
-We use [`nox`](https://nox.thea.codes/en/stable/) for automating development tasks. Run these commands to
-install `nox` and `taskipy` as well as the required dependencies in your environment,
-and to set up [`pre-commit`](https://pre-commit.com/#quick-start) hooks.  
-Make sure you have a virtualenv activated if you don't want it to install the packages globally!
+
+
+Run these commands to install `nox`, `pdm`, and `taskipy` as well as the required dependencies in your environment, and to set up [`pre-commit`](https://pre-commit.com/#quick-start) hooks.  
 ```
-pip install nox taskipy
+pip install nox pdm taskipy
 task setup_env
 ```
+
+> If you have pipx installed on your system, we recommend installing the above tools with pipx instead.
 
 The installed `pre-commit` hooks will automatically run before every commit, which will format/lint the code
 to match the project's style. Note that you will have to stage and commit again if anything was updated!
