@@ -52,6 +52,7 @@ class RoleTags:
         "bot_id",
         "integration_id",
         "_premium_subscriber",
+        "_guild_connections",
     )
 
     def __init__(self, data: RoleTagPayload) -> None:
@@ -62,6 +63,7 @@ class RoleTags:
         # So in this case, a value of None is the same as True.
         # Which means we would need a different sentinel.
         self._premium_subscriber: Optional[Any] = data.get("premium_subscriber", MISSING)
+        self._guild_connections: Optional[Any] = data.get("guild_connections", MISSING)
 
     def is_bot_managed(self) -> bool:
         """Whether the role is associated with a bot.
@@ -77,6 +79,15 @@ class RoleTags:
         """
         return self._premium_subscriber is None
 
+    def is_linked_role(self) -> bool:
+        """Whether the role is a linked role for the guild.
+
+        .. versionadded:: 2.8
+
+        :return type: :class:`bool`
+        """
+        return self._guild_connections is None
+
     def is_integration(self) -> bool:
         """Whether the role is managed by an integration.
 
@@ -87,7 +98,8 @@ class RoleTags:
     def __repr__(self) -> str:
         return (
             f"<RoleTags bot_id={self.bot_id} integration_id={self.integration_id} "
-            f"premium_subscriber={self.is_premium_subscriber()}>"
+            f"premium_subscriber={self.is_premium_subscriber()} "
+            f"linked_role={self.is_linked_role()}>"
         )
 
 
@@ -263,6 +275,15 @@ class Role(Hashable):
         :return type: :class:`bool`
         """
         return self.tags is not None and self.tags.is_premium_subscriber()
+
+    def is_linked_role(self) -> bool:
+        """Whether the role is a linked role for the guild.
+
+        .. versionadded:: 2.8
+
+        :return type: :class:`bool`
+        """
+        return self.tags is not None and self.tags.is_linked_role()
 
     def is_integration(self) -> bool:
         """Whether the role is managed by an integration.

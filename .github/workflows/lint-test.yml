@@ -33,7 +33,7 @@ jobs:
 
     - name: Run pre-commit
       id: pre-commit
-      uses: pre-commit/action@v2.0.3
+      uses: pre-commit/action@v3.0.0
       env:
         SKIP: 'flake8'
 
@@ -161,7 +161,7 @@ jobs:
     # This only runs if the previous steps were successful, no point in running it otherwise
     - name: Build package
       run: |
-        pip install -U build
+        python -m pip install -U build
         python -m build
 
     # run the libcst parsers and check for changes

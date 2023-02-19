@@ -78,7 +78,7 @@ tools = [
 codemod = [
     # run codemods on the respository (mostly automated typing)
     "libcst~=0.4.7",
-    "black==22.6.0",
+    "black==23.1.0",
 ]
 lint = [
     "flake8~=4.0.1",
@@ -91,12 +91,12 @@ lint = [
 typing = [
     "typing_extensions~=4.2.0",
     # this is not pyright itself, but the python wrapper
-    "pyright==1.1.271",
+    "pyright==1.1.291",
 ]
 test = [
-    "pytest~=7.1.2",
+    "pytest~=7.2.0",
     "pytest-cov~=4.0.0",
-    "pytest-asyncio~=0.19.0",
+    "pytest-asyncio~=0.20.3",
     "looptime~=0.2",
     "coverage[toml]~=6.5.0",
 ]

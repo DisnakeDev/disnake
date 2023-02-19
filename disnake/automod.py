@@ -213,6 +213,16 @@ class AutoModTriggerMetadata:
     """
     Metadata for an auto moderation trigger.
 
+    Based on the trigger type, different fields can be used with various limits:
+
+    .. csv-table::
+        :header: "Trigger Type", ``keyword_filter``, ``regex_patterns``, ``presets``, ``allow_list``, ``mention_total_limit``
+
+        :attr:`~AutoModTriggerType.keyword`,        ✅ (x1000), ✅ (x10), ❌, ✅ (x100),  ❌
+        :attr:`~AutoModTriggerType.spam`,           ❌,         ❌,       ❌, ❌,         ❌
+        :attr:`~AutoModTriggerType.keyword_preset`, ❌,         ❌,       ✅, ✅ (x1000), ❌
+        :attr:`~AutoModTriggerType.mention_spam`,   ❌,         ❌,       ❌, ❌,         ✅
+
     .. versionadded:: 2.6
 
     Attributes
@@ -222,12 +232,27 @@ class AutoModTriggerMetadata:
 
         See :ddocs:`api docs <resources/auto-moderation#auto-moderation-rule-object-keyword-matching-strategies>`
         for details about how keyword matching works.
+        Each keyword must be 60 characters or less.
+
+    regex_patterns: Optional[Sequence[:class:`str`]]
+        The list of regular expressions to check for. Used with :attr:`AutoModTriggerType.keyword`.
+
+        A maximum of 10 regexes can be added, each with up to 260 characters.
+
+        .. note::
+
+            Only Rust flavored regex is currently supported, which can be tested in online editors such as `Rustexp <https://rustexp.lpil.uk/>`__.
+
+        .. versionadded:: 2.7
 
     presets: Optional[:class:`AutoModKeywordPresets`]
         The keyword presets. Used with :attr:`AutoModTriggerType.keyword_preset`.
 
     allow_list: Optional[Sequence[:class:`str`]]
-        The keywords that should be exempt from a preset, up to 1000 keywords. Used with :attr:`AutoModTriggerType.keyword_preset`.
+        The keywords that should be exempt from a preset.
+        Used with :attr:`AutoModTriggerType.keyword` (up to 100 exemptions) and :attr:`AutoModTriggerType.keyword_preset` (up to 1000 exemptions).
+
+        Each keyword must be 60 characters or less.
 
     mention_total_limit: Optional[:class:`int`]
         The maximum number of mentions (members + roles) allowed, between 1 and 50. Used with :attr:`AutoModTriggerType.mention_spam`.
@@ -235,13 +260,30 @@ class AutoModTriggerMetadata:
 
     __slots__ = (
         "keyword_filter",
+        "regex_patterns",
         "presets",
         "allow_list",
         "mention_total_limit",
     )
 
     @overload
-    def __init__(self, *, keyword_filter: Sequence[str]) -> None:
+    def __init__(
+        self,
+        *,
+        keyword_filter: Optional[Sequence[str]],
+        regex_patterns: Optional[Sequence[str]] = None,
+        allow_list: Optional[Sequence[str]] = None,
+    ) -> None:
+        ...
+
+    @overload
+    def __init__(
+        self,
+        *,
+        keyword_filter: Optional[Sequence[str]] = None,
+        regex_patterns: Optional[Sequence[str]],
+        allow_list: Optional[Sequence[str]] = None,
+    ) -> None:
         ...
 
     @overload
@@ -261,11 +303,13 @@ class AutoModTriggerMetadata:
         self,
         *,
         keyword_filter: Optional[Sequence[str]] = None,
+        regex_patterns: Optional[Sequence[str]] = None,
         presets: Optional[AutoModKeywordPresets] = None,
         allow_list: Optional[Sequence[str]] = None,
         mention_total_limit: Optional[int] = None,
     ) -> None:
         self.keyword_filter: Optional[Sequence[str]] = keyword_filter
+        self.regex_patterns: Optional[Sequence[str]] = regex_patterns
         self.presets: Optional[AutoModKeywordPresets] = presets
         self.allow_list: Optional[Sequence[str]] = allow_list
         self.mention_total_limit: Optional[int] = mention_total_limit
@@ -274,6 +318,7 @@ class AutoModTriggerMetadata:
         self,
         *,
         keyword_filter: Optional[Sequence[str]] = MISSING,
+        regex_patterns: Optional[Sequence[str]] = MISSING,
         presets: Optional[AutoModKeywordPresets] = MISSING,
         allow_list: Optional[Sequence[str]] = MISSING,
         mention_total_limit: Optional[int] = MISSING,
@@ -289,6 +334,7 @@ class AutoModTriggerMetadata:
         """
         return self.__class__(  # type: ignore  # call doesn't match any overloads
             keyword_filter=self.keyword_filter if keyword_filter is MISSING else keyword_filter,
+            regex_patterns=self.regex_patterns if regex_patterns is MISSING else regex_patterns,
             presets=self.presets if presets is MISSING else presets,
             allow_list=self.allow_list if allow_list is MISSING else allow_list,
             mention_total_limit=(
@@ -305,6 +351,7 @@ class AutoModTriggerMetadata:
 
         return cls(  # type: ignore  # call doesn't match any overloads
             keyword_filter=data.get("keyword_filter"),
+            regex_patterns=data.get("regex_patterns"),
             presets=presets,
             allow_list=data.get("allow_list"),
             mention_total_limit=data.get("mention_total_limit"),
@@ -314,6 +361,8 @@ class AutoModTriggerMetadata:
         data: AutoModTriggerMetadataPayload = {}
         if self.keyword_filter is not None:
             data["keyword_filter"] = list(self.keyword_filter)
+        if self.regex_patterns is not None:
+            data["regex_patterns"] = list(self.regex_patterns)
         if self.presets is not None:
             data["presets"] = self.presets.values  # type: ignore  # `values` contains ints instead of preset literal values
         if self.allow_list is not None:
@@ -326,6 +375,8 @@ class AutoModTriggerMetadata:
         s = f"<{type(self).__name__}"
         if self.keyword_filter is not None:
             s += f" keyword_filter={self.keyword_filter!r}"
+        if self.regex_patterns is not None:
+            s += f" regex_patterns={self.regex_patterns!r}"
         if self.presets is not None:
             s += f" presets={self.presets!r}"
         if self.allow_list is not None:
@@ -613,7 +664,8 @@ class AutoModActionExecution:
         otherwise this field will be empty.
 
     matched_keyword: Optional[:class:`str`]
-        The keyword that matched.
+        The keyword or regex that matched.
+
     matched_content: Optional[:class:`str`]
         The substring of :attr:`.content` that matched the rule/keyword.
 

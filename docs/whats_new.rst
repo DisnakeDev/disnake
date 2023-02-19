@@ -17,6 +17,82 @@ in specific versions.
 
 .. towncrier release notes start
 
+.. _vp2p8p0:
+
+v2.8.0
+------
+
+This release comes with support for NSFW application commands,
+the :func:`on_audit_log_entry_create` event,
+and a new :class:`Event` enum for use with methods like :func:`Client.wait_for`.
+
+Breaking Changes
+~~~~~~~~~~~~~~~~
+- :attr:`StickerPack.cover_sticker_id`, :attr:`.cover_sticker <StickerPack.cover_sticker>` and :attr:`.banner <StickerPack.banner>` are now optional and may return ``None``. (:issue:`912`)
+- :attr:`AuditLogEntry.user` may now be an :class:`Object` if the user cannot be found, particularly in entries from the :func:`on_audit_log_entry_create` event. (:issue:`920`)
+
+New Features
+~~~~~~~~~~~~
+- Add :class:`GuildBuilder` and :func:`Client.guild_builder` for full coverage of the guild creation endpoint. (:issue:`578`)
+- Support regex within automod using :attr:`AutoModTriggerMetadata.regex_patterns`. (:issue:`794`)
+- Add :attr:`File.closed` and :attr:`File.bytes_length` properties. (:issue:`839`)
+- Add :attr:`TextChannel.default_thread_slowmode_delay`. (:issue:`854`)
+- Add support for NSFW application commands. (:issue:`865`)
+    - Add :attr:`ApplicationCommand.nsfw`.
+    - Add ``nsfw`` parameter to command constructors and decorators.
+- Add :attr:`.UserFlags.active_developer` and :attr:`PublicUserFlags.active_developer`. (:issue:`866`)
+- Adds reasons/descriptions to :exc:`ConnectionClosed` errors. (:issue:`873`)
+- Update :class:`AutoModTriggerMetadata` overloads to allow passing ``allow_list`` to keyword-based rules. (:issue:`877`)
+- The :attr:`PublicUserFlags.discord_certified_moderator` is now an alias of :attr:`PublicUserFlags.moderator_programs_alumni`. (:issue:`883`)
+- Add :attr:`ForumChannel.default_layout`, and ``default_layout`` parameter to channel edit methods. (:issue:`885`, :issue:`903`)
+- Add :attr:`Locale.id` (Indonesian) locale. (:issue:`890`)
+- Adds :class:`Event` enumeration to use in :meth:`Client.wait_for`, :meth:`disnake.ext.commands.Bot.wait_for` and in :func:`disnake.ext.commands.Bot.listen` decorator. (:issue:`895`)
+- Add new :attr:`MessageType.interaction_premium_upsell` and :attr:`MessageType.guild_application_premium_subscription` message types. (:issue:`905`)
+- Add application role connection features. (:issue:`906`)
+    - Add :class:`ApplicationRoleConnectionMetadata` and :class:`ApplicationRoleConnectionMetadataType` types.
+    - Add :class:`Client.fetch_role_connection_metadata` and :class:`Client.edit_role_connection_metadata` methods.
+    - Add :attr:`RoleTags.is_linked_role` and :attr:`AppInfo.role_connections_verification_url` attributes.
+- Add :attr:`StickerFormatType.gif`. (:issue:`910`)
+- Add support for the :func:`on_audit_log_entry_create` gateway event, and add :attr:`Intents.moderation` intent. :attr:`Intents.bans` is now an alias of :attr:`Intents.moderation`. (:issue:`915`)
+- Add :attr:`~Member.flags` property to :class:`Member`. (:issue:`918`)
+- Add fallback to :class:`Object` for :attr:`AuditLogEntry.user` (:issue:`920`)
+
+Bug Fixes
+~~~~~~~~~
+- |commands| Fix ``help_command`` parameter annotations to allow ``None`` value. (:issue:`849`)
+- Fix user cache memory leak where unused objects weren't being evicted (provided that :attr:`Intents.members` is enabled). (:issue:`858`)
+- Fix :attr:`Message.author.public_flags <Member.public_flags>` always being ``0`` when the member cache is disabled. (:issue:`870`)
+- Export missing ``ThreadWithMessage`` class. (:issue:`879`)
+- Add previously missing ``applied_tags`` parameter to all :meth:`ForumChannel.create_thread` overloads. (:issue:`880`)
+- Fix conversion of custom emoji strings (e.g. ``<:this:934852112221872198>``) in :meth:`Message.add_reaction` and similar methods to more strictly adhere to the API documentation. (:issue:`887`)
+- Fix :meth:`Client.delete_guild_command` not updating the local command cache. (:issue:`907`)
+- Fix errors when trying to deserialize stickers with unknown formats. (:issue:`911`)
+- Make :attr:`StickerPack.cover_sticker_id`, :attr:`.cover_sticker <StickerPack.cover_sticker>` and :attr:`.banner <StickerPack.banner>` optional. (:issue:`912`)
+- Fix handling of ``ECONNRESET`` errors on Linux. (:issue:`921`)
+
+Documentation
+~~~~~~~~~~~~~
+- Enable `OpenSearch <https://developer.mozilla.org/en-US/docs/Web/OpenSearch>`_, allowing easy integration of the search functionality into browsers. (:issue:`859`)
+- Clarify types of optional :class:`Invite` attributes. (:issue:`864`)
+- Remove documentation regarding private threads requiring boosts. (:issue:`872`)
+- Update :class:`AutoModTriggerMetadata` field limits. (:issue:`877`)
+
+Miscellaneous
+~~~~~~~~~~~~~
+- Declare a :pep:`517` build backend in pyproject.toml, and use :pep:`621` to define most package metadata. (:issue:`830`)
+
+.. _vp2p7p1:
+
+v2.7.1
+------
+
+Bug Fixes
+~~~~~~~~~
+- Fix :attr:`Message.author.public_flags <Member.public_flags>` always being ``0`` when the member cache is disabled. (:issue:`870`)
+- Export missing ``ThreadWithMessage`` class. (:issue:`879`)
+- Fix :meth:`Client.delete_guild_command` not updating the local command cache. (:issue:`907`)
+- Fix errors when trying to deserialize stickers with unknown formats. (:issue:`911`)
+
 .. _vp2p7p0:
 
 v2.7.0
@@ -85,6 +161,20 @@ Miscellaneous
 - Use ``importlib.metadata`` instead of the deprecated ``pkg_resources`` in the cli for displaying the version. (:issue:`791`)
 - |commands| Add missing ``py.typed`` marker. (:issue:`784`)
 - |tasks| Add missing ``py.typed`` marker. (:issue:`784`)
+
+.. _vp2p6p3:
+
+v2.6.3
+------
+
+This maintainence release contains backports from v2.8.0.
+
+Bug Fixes
+~~~~~~~~~
+- Fix :attr:`Message.author.public_flags <Member.public_flags>` always being ``0`` when the member cache is disabled. (:issue:`870`)
+- Export missing ``ThreadWithMessage`` class. (:issue:`879`)
+- Fix :meth:`Client.delete_guild_command` not updating the local command cache. (:issue:`907`)
+- Fix errors when trying to deserialize stickers with unknown formats. (:issue:`911`)
 
 .. _vp2p6p2:
 

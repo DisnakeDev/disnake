@@ -42,7 +42,7 @@ runs:
 
     - name: Update pip, wheel, setuptools
       shell: bash
-      run: pip install -U pip wheel setuptools
+      run: python -m pip install -U pip wheel setuptools
 
     - name: Install dependencies
       if: inputs.pdm-command

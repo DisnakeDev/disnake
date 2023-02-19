@@ -38,7 +38,7 @@ from .sticker import StickerItem
 from .threads import Thread
 from .ui.action_row import components_to_dict
 from .user import User
-from .utils import MISSING, escape_mentions
+from .utils import MISSING, assert_never, escape_mentions
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -86,7 +86,7 @@ __all__ = (
 )
 
 
-def convert_emoji_reaction(emoji):
+def convert_emoji_reaction(emoji: Union[EmojiInputType, Reaction]) -> str:
     if isinstance(emoji, Reaction):
         emoji = emoji.emoji
 
@@ -95,12 +95,18 @@ def convert_emoji_reaction(emoji):
     if isinstance(emoji, PartialEmoji):
         return emoji._as_reaction()
     if isinstance(emoji, str):
-        # Reactions can be in :name:id format, but not <:name:id>.
-        # No existing emojis have <> in them, so this should be okay.
-        return emoji.strip("<>")
+        # Reactions must be in name:id format, not <:name:id> and/or with the `a:` prefix.
+        # No existing emojis start/end with `<>` or `:`, so this should be okay.
 
+        s = emoji.strip("<>:")
+        # `str.removeprefix` is py 3.9 only
+        if s.startswith("a:"):
+            s = s[2:]
+        return s
+
+    assert_never(emoji)
     raise TypeError(
-        f"emoji argument must be str, Emoji, or Reaction not {emoji.__class__.__name__}."
+        f"emoji argument must be str, Emoji, PartialEmoji, or Reaction, not {emoji.__class__.__name__}."
     )
 
 
@@ -1392,6 +1398,17 @@ class Message(Hashable):
         if self.type is MessageType.auto_moderation_action:
             return self.content
 
+        if self.type is MessageType.interaction_premium_upsell:
+            return self.content
+
+        if self.type is MessageType.guild_application_premium_subscription:
+            application_name = (
+                self.application["name"]
+                if self.application and "name" in self.application
+                else "a deleted application"
+            )
+            return f"{self.author.name} upgraded {application_name} to premium for this server! 🎉"
+
         # in the event of an unknown or unsupported message type, we return nothing
         return None
 
@@ -1888,7 +1905,8 @@ class Message(Hashable):
         slowmode_delay: Optional[:class:`int`]
             Specifies the slowmode rate limit for users in this thread, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
-            If set to ``None`` or not provided, slowmode is inherited from the parent channel.
+            If set to ``None`` or not provided, slowmode is inherited from the parent's
+            :attr:`~TextChannel.default_thread_slowmode_delay`.
 
             .. versionadded:: 2.3
 

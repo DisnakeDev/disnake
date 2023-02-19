@@ -122,7 +122,7 @@ class BotBase(CommonBotBase, GroupMixin):
         command_prefix: Optional[
             Union[PrefixType, Callable[[Self, Message], MaybeCoro[PrefixType]]]
         ] = None,
-        help_command: HelpCommand = _default,
+        help_command: Optional[HelpCommand] = _default,
         description: Optional[str] = None,
         *,
         strip_after_prefix: bool = False,
@@ -169,7 +169,7 @@ class BotBase(CommonBotBase, GroupMixin):
         self._before_invoke: Optional[CoroFunc] = None
         self._after_invoke: Optional[CoroFunc] = None
 
-        self._help_command = None
+        self._help_command: Optional[HelpCommand] = None
         self.description: str = inspect.cleandoc(description) if description else ""
         self.strip_after_prefix: bool = strip_after_prefix
 
@@ -433,18 +433,16 @@ class BotBase(CommonBotBase, GroupMixin):
 
     @help_command.setter
     def help_command(self, value: Optional[HelpCommand]) -> None:
-        if value is not None:
-            if not isinstance(value, HelpCommand):
-                raise TypeError("help_command must be a subclass of HelpCommand")
-            if self._help_command is not None:
-                self._help_command._remove_from_bot(self)
-            self._help_command = value
-            value._add_to_bot(self)
-        elif self._help_command is not None:
+        if value is not None and not isinstance(value, HelpCommand):
+            raise TypeError("help_command must be a subclass of HelpCommand or None")
+
+        if self._help_command is not None:
             self._help_command._remove_from_bot(self)
-            self._help_command = None
-        else:
-            self._help_command = None
+
+        self._help_command = value
+
+        if value is not None:
+            value._add_to_bot(self)
 
     # command processing
 

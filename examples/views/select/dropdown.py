@@ -1,5 +1,9 @@
 # SPDX-License-Identifier: MIT
 
+"""
+An example showing how to use a dropdown menu using views.
+"""
+
 import os
 
 import disnake

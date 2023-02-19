@@ -25,7 +25,14 @@ from typing import (
 
 from . import utils
 from .context_managers import Typing
-from .enums import ChannelType, PartyType, ThreadSortOrder, VideoQualityMode, try_enum_to_int
+from .enums import (
+    ChannelType,
+    PartyType,
+    ThreadLayout,
+    ThreadSortOrder,
+    VideoQualityMode,
+    try_enum_to_int,
+)
 from .errors import ClientException
 from .file import File
 from .flags import ChannelFlags, MessageFlags
@@ -313,6 +320,7 @@ class GuildChannel(ABC):
         available_tags: Sequence[ForumTag] = MISSING,
         default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
         default_sort_order: Optional[ThreadSortOrder] = MISSING,
+        default_layout: ThreadLayout = MISSING,
         reason: Optional[str] = None,
     ) -> Optional[ChannelPayload]:
         parent_id: Optional[int]
@@ -417,6 +425,10 @@ class GuildChannel(ABC):
                 try_enum_to_int(default_sort_order) if default_sort_order is not None else None
             )
 
+        default_layout_payload: int = MISSING
+        if default_layout is not MISSING:
+            default_layout_payload = try_enum_to_int(default_layout)
+
         options: Dict[str, Any] = {
             "name": name,
             "parent_id": parent_id,
@@ -436,6 +448,7 @@ class GuildChannel(ABC):
             "available_tags": available_tags_payload,
             "default_reaction_emoji": default_reaction_emoji_payload,
             "default_sort_order": default_sort_order_payload,
+            "default_forum_layout": default_layout_payload,
         }
         options = {k: v for k, v in options.items() if v is not MISSING}
 

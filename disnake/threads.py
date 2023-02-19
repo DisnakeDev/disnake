@@ -357,7 +357,7 @@ class Thread(Messageable, Hashable):
         """Whether the thread is a private thread.
 
         A private thread is only viewable by those that have been explicitly
-        invited or have :attr:`~.Permissions.manage_threads`.
+        invited or have :attr:`~.Permissions.manage_threads` permissions.
 
         :return type: :class:`bool`
         """
