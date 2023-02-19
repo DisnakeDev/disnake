@@ -23,7 +23,6 @@ class TestStringView:
         ],
     )
     def test_get_word(self, text, expected_word):
-
         view = StringView(text)
 
         word = view.get_word()
@@ -41,7 +40,6 @@ class TestStringView:
         ],
     )
     def test_get_quoted_word(self, text, expected_word):
-
         view = StringView(text)
 
         word = view.get_quoted_word()
@@ -58,7 +56,6 @@ class TestStringView:
         ],
     )
     def test_get_quoted_word_raises(self, text, exception):
-
         view = StringView(text)
 
         with pytest.raises(exception):

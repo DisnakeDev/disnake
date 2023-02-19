@@ -1347,7 +1347,6 @@ class InteractionResponse:
         if modal is not None:
             modal_data = modal.to_components()
         elif title and components and custom_id:
-
             rows = components_to_dict(components)
             if len(rows) > 5:
                 raise ValueError("Maximum number of components exceeded.")
@@ -1840,9 +1839,21 @@ class InteractionDataResolved(Dict[str, Any]):
             f"roles={self.roles!r} channels={self.channels!r} messages={self.messages!r} attachments={self.attachments!r}>"
         )
 
+    @overload
+    def get_with_type(
+        self, key: Snowflake, data_type: Union[OptionType, ComponentType]
+    ) -> Union[Member, User, Role, InteractionChannel, Message, Attachment, None]:
+        ...
+
+    @overload
+    def get_with_type(
+        self, key: Snowflake, data_type: Union[OptionType, ComponentType], default: T
+    ) -> Union[Member, User, Role, InteractionChannel, Message, Attachment, T]:
+        ...
+
     def get_with_type(
         self, key: Snowflake, data_type: Union[OptionType, ComponentType], default: T = None
-    ) -> Union[Member, User, Role, InteractionChannel, Message, Attachment, T]:
+    ) -> Union[Member, User, Role, InteractionChannel, Message, Attachment, T, None]:
         if data_type is OptionType.mentionable or data_type is ComponentType.mentionable_select:
             key = int(key)
             if (result := self.members.get(key)) is not None:

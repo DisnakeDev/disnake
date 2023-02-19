@@ -3573,7 +3573,6 @@ class Guild(Hashable):
 
         role_positions: List[Any] = []
         for role, position in positions.items():
-
             payload = {"id": role.id, "position": position}
 
             role_positions.append(payload)
