@@ -170,7 +170,7 @@ class Interaction:
         "_cs_expires_at",
     )
 
-    def __init__(self, *, data: InteractionPayload, state: ConnectionState):
+    def __init__(self, *, data: InteractionPayload, state: ConnectionState) -> None:
         self.data: Mapping[str, Any] = data.get("data") or {}
         self._state: ConnectionState = state
         # TODO: Maybe use a unique session
@@ -450,7 +450,9 @@ class Interaction:
 
         suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This hides
-            all embeds from the UI if set to ``True``.
+            all the embeds from the UI if set to ``True``. If set
+            to ``False``, this brings the embeds back if they were
+            suppressed.
 
             .. versionadded:: 2.7
 
@@ -550,7 +552,7 @@ class Interaction:
 
         if delay is not None:
 
-            async def delete(delay: float):
+            async def delete(delay: float) -> None:
                 await asyncio.sleep(delay)
                 try:
                     await deleter
@@ -639,7 +641,7 @@ class Interaction:
             is set to 15 minutes.
         suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This hides
-            all embeds from the UI if set to ``True``.
+            all the embeds from the UI if set to ``True``.
 
             .. versionadded:: 2.5
 
@@ -696,7 +698,7 @@ class InteractionResponse:
         "_response_type",
     )
 
-    def __init__(self, parent: Interaction):
+    def __init__(self, parent: Interaction) -> None:
         self._parent: Interaction = parent
         self._response_type: Optional[InteractionResponseType] = None
 
@@ -901,7 +903,7 @@ class InteractionResponse:
 
         suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This hides
-            all embeds from the UI if set to ``True``.
+            all the embeds from the UI if set to ``True``.
 
             .. versionadded:: 2.5
 
@@ -1308,7 +1310,6 @@ class InteractionResponse:
         if modal is not None:
             modal_data = modal.to_components()
         elif title and components and custom_id:
-
             rows = components_to_dict(components)
             if len(rows) > 5:
                 raise ValueError("Maximum number of components exceeded.")
@@ -1339,7 +1340,7 @@ class InteractionResponse:
 class _InteractionMessageState:
     __slots__ = ("_parent", "_interaction")
 
-    def __init__(self, interaction: Interaction, parent: ConnectionState):
+    def __init__(self, interaction: Interaction, parent: ConnectionState) -> None:
         self._interaction: Interaction = interaction
         self._parent: ConnectionState = parent
 
@@ -1559,9 +1560,10 @@ class InteractionMessage(Message):
             .. versionadded:: 2.4
 
         suppress_embeds: :class:`bool`
-            Whether to suppress embeds for the message. This removes
-            all the embeds if set to ``True``. If set to ``False``
-            this brings the embeds back if they were suppressed.
+            Whether to suppress embeds for the message. This hides
+            all the embeds from the UI if set to ``True``. If set
+            to ``False``, this brings the embeds back if they were
+            suppressed.
 
             .. versionadded:: 2.7
 
@@ -1646,7 +1648,7 @@ class InteractionMessage(Message):
             return await super().delete(delay=delay)
         if delay is not None:
 
-            async def inner_call(delay: float = delay):
+            async def inner_call(delay: float = delay) -> None:
                 await asyncio.sleep(delay)
                 try:
                     await self._state._interaction.delete_original_response()
@@ -1693,7 +1695,7 @@ class InteractionDataResolved(Dict[str, Any]):
         data: InteractionDataResolvedPayload,
         state: ConnectionState,
         guild_id: Optional[int],
-    ):
+    ) -> None:
         data = data or {}
         super().__init__(data)
 
@@ -1778,15 +1780,27 @@ class InteractionDataResolved(Dict[str, Any]):
         for str_id, attachment in attachments.items():
             self.attachments[int(str_id)] = Attachment(data=attachment, state=state)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"<InteractionDataResolved members={self.members!r} users={self.users!r} "
             f"roles={self.roles!r} channels={self.channels!r} messages={self.messages!r} attachments={self.attachments!r}>"
         )
 
+    @overload
+    def get_with_type(
+        self, key: Snowflake, data_type: Union[OptionType, ComponentType]
+    ) -> Union[Member, User, Role, InteractionChannel, Message, Attachment, None]:
+        ...
+
+    @overload
+    def get_with_type(
+        self, key: Snowflake, data_type: Union[OptionType, ComponentType], default: T
+    ) -> Union[Member, User, Role, InteractionChannel, Message, Attachment, T]:
+        ...
+
     def get_with_type(
         self, key: Snowflake, data_type: Union[OptionType, ComponentType], default: T = None
-    ) -> Union[Member, User, Role, InteractionChannel, Message, Attachment, T]:
+    ) -> Union[Member, User, Role, InteractionChannel, Message, Attachment, T, None]:
         if data_type is OptionType.mentionable or data_type is ComponentType.mentionable_select:
             key = int(key)
             if (result := self.members.get(key)) is not None:

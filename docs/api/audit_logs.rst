@@ -7,7 +7,7 @@
 Audit Logs
 ==========
 
-Working with :meth:`Guild.audit_logs` is a complicated process with a lot of machinery
+Working with audit logs is a complicated process with a lot of machinery
 involved. The library attempts to make it easy to use and friendly. In order to accomplish
 this goal, it makes use of a couple of data classes and enums that aid in this goal,
 listed below.
@@ -136,7 +136,7 @@ AuditLogDiff
 
         The guild's owner. See also :attr:`Guild.owner`
 
-        :type: Union[:class:`Member`, :class:`User`]
+        :type: Union[:class:`Member`, :class:`User`, :class:`Object`]
 
     .. attribute:: region
 
@@ -406,7 +406,7 @@ AuditLogDiff
 
         See also :attr:`Invite.inviter`.
 
-        :type: Optional[:class:`User`]
+        :type: Optional[:class:`User`, :class:`Object`]
 
     .. attribute:: max_uses
 
@@ -476,7 +476,8 @@ AuditLogDiff
         The default number of seconds members have to wait before
         sending another message in new threads created in the channel.
 
-        See also :attr:`ForumChannel.default_thread_slowmode_delay`.
+        See also :attr:`TextChannel.default_thread_slowmode_delay` or
+        :attr:`ForumChannel.default_thread_slowmode_delay`.
 
         :type: :class:`int`
 
@@ -723,7 +724,7 @@ AuditLogAction
 .. class:: AuditLogAction
 
     Represents the type of action being done for a :class:`AuditLogEntry`\,
-    which is retrievable via :meth:`Guild.audit_logs`.
+    which is retrievable via :meth:`Guild.audit_logs` or via the :func:`on_audit_log_entry_create` event.
 
     .. attribute:: guild_update
 
@@ -915,7 +916,8 @@ AuditLogAction
         A member was kicked.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`User` who got kicked.
+        the :class:`User` who got kicked. If the user is not found then it is
+        a :class:`Object` with the user's ID.
 
         When this is the action, :attr:`~AuditLogEntry.changes` is empty.
 
@@ -939,7 +941,8 @@ AuditLogAction
         A member was banned.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`User` who got banned.
+        the :class:`User` who got banned. If the user is not found then it is
+        a :class:`Object` with the user's ID.
 
         When this is the action, :attr:`~AuditLogEntry.changes` is empty.
 
@@ -948,7 +951,8 @@ AuditLogAction
         A member was unbanned.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`User` who got unbanned.
+        the :class:`User` who got unbanned. If the user is not found then it is
+        a :class:`Object` with the user's ID.
 
         When this is the action, :attr:`~AuditLogEntry.changes` is empty.
 
@@ -961,7 +965,8 @@ AuditLogAction
         - They were timed out
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`Member` or :class:`User` who got updated.
+        the :class:`Member` or :class:`User` who got updated. If the user is not found then it is
+        a :class:`Object` with the user's ID.
 
         Possible attributes for :class:`AuditLogDiff`:
 
@@ -976,7 +981,8 @@ AuditLogAction
         either gains a role or loses a role.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`Member` or :class:`User` who got the role.
+        the :class:`Member` or :class:`User` who got the role. If the user is not found then it is
+        a :class:`Object` with the user's ID.
 
         Possible attributes for :class:`AuditLogDiff`:
 
@@ -1012,7 +1018,8 @@ AuditLogAction
         A bot was added to the guild.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`Member` or :class:`User` which was added to the guild.
+        the :class:`Member` or :class:`User` which was added to the guild. If the user is not found then it is
+        a :class:`Object` with an ID.
 
         .. versionadded:: 1.3
 
@@ -1217,6 +1224,7 @@ AuditLogAction
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`Member` or :class:`User` who had their message deleted.
+        If the user is not found then it is a :class:`Object` with the user's ID.
 
         When this is the action, the type of :attr:`~AuditLogEntry.extra` is
         set to an unspecified proxy object with two attributes:
@@ -1244,6 +1252,7 @@ AuditLogAction
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`Member` or :class:`User` who had their message pinned.
+        If the user is not found then it is a :class:`Object` with the user's ID.
 
         When this is the action, the type of :attr:`~AuditLogEntry.extra` is
         set to an unspecified proxy object with two attributes:
@@ -1259,6 +1268,7 @@ AuditLogAction
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`Member` or :class:`User` who had their message unpinned.
+        If the user is not found then it is a :class:`Object` with the user's ID.
 
         When this is the action, the type of :attr:`~AuditLogEntry.extra` is
         set to an unspecified proxy object with two attributes:
@@ -1634,6 +1644,7 @@ AuditLogAction
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`Member` or :class:`User` who had their message blocked.
+        If the user is not found then it is a :class:`Object` with the user's ID.
 
         When this is the action, the type of :attr:`~AuditLogEntry.extra` is
         set to an unspecified proxy object with these attributes:
@@ -1648,6 +1659,7 @@ AuditLogAction
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`Member` or :class:`User` who had their message flagged.
+        If the user is not found then it is a :class:`Object` with the user's ID.
 
         See :attr:`automod_block_message` for more information on how the
         :attr:`~AuditLogEntry.extra` field is set.
@@ -1658,6 +1670,7 @@ AuditLogAction
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`Member` or :class:`User` who was timed out.
+        If the user is not found then it is a :class:`Object` with the user's ID.
 
         See :attr:`automod_block_message` for more information on how the
         :attr:`~AuditLogEntry.extra` field is set.

@@ -100,6 +100,16 @@ Locale
 
         The ``hr`` (Croatian) locale.
 
+    .. attribute:: hu
+
+        The ``hu`` (Hungarian) locale.
+
+    .. attribute:: id
+
+        The ``id`` (Indonesian) locale.
+
+        .. versionadded:: 2.8
+
     .. attribute:: it
 
         The ``it`` (Italian) locale.
@@ -115,10 +125,6 @@ Locale
     .. attribute:: lt
 
         The ``lt`` (Lithuanian) locale.
-
-    .. attribute:: hu
-
-        The ``hu`` (Hungarian) locale.
 
     .. attribute:: nl
 

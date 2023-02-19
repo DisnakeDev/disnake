@@ -12,7 +12,8 @@ import logging
 import re
 import threading
 import time
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union, overload
+from errno import ECONNRESET
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Type, Union, overload
 from urllib.parse import quote as urlquote
 
 from .. import utils
@@ -30,6 +31,8 @@ __all__ = (
 _log = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
+    from types import TracebackType
+
     from ..abc import Snowflake
     from ..embeds import Embed
     from ..file import File
@@ -46,7 +49,7 @@ MISSING = utils.MISSING
 
 
 class DeferredLock:
-    def __init__(self, lock: threading.Lock):
+    def __init__(self, lock: threading.Lock) -> None:
         self.lock = lock
         self.delta: Optional[float] = None
 
@@ -57,14 +60,19 @@ class DeferredLock:
     def delay_by(self, delta: float) -> None:
         self.delta = delta
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(
+        self,
+        type: Optional[Type[BaseException]],
+        value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
         if self.delta:
             time.sleep(self.delta)
         self.lock.release()
 
 
 class WebhookAdapter:
-    def __init__(self):
+    def __init__(self) -> None:
         self._locks: Dict[Any, threading.Lock] = {}
 
     def request(
@@ -179,7 +187,7 @@ class WebhookAdapter:
                             raise HTTPException(response, data)
 
                 except OSError as e:
-                    if attempt < 4 and e.errno in (54, 10054):
+                    if attempt < 4 and e.errno == ECONNRESET:
                         time.sleep(1 + attempt * 2)
                         continue
                     raise
@@ -561,11 +569,11 @@ class SyncWebhook(BaseWebhook):
 
     def __init__(
         self, data: WebhookPayload, session: Session, token: Optional[str] = None, state=None
-    ):
+    ) -> None:
         super().__init__(data, token, state)
         self.session = session
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Webhook id={self.id!r}>"
 
     @property
@@ -958,7 +966,7 @@ class SyncWebhook(BaseWebhook):
 
         suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This hides
-            all embeds from the UI if set to ``True``.
+            all the embeds from the UI if set to ``True``.
 
             .. versionadded:: 2.5
 

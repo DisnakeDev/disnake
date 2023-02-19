@@ -109,7 +109,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         options: SelectOptionInput = ...,
         disabled: bool = False,
         row: Optional[int] = None,
-    ):
+    ) -> None:
         ...
 
     @overload
@@ -123,7 +123,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         options: SelectOptionInput = ...,
         disabled: bool = False,
         row: Optional[int] = None,
-    ):
+    ) -> None:
         ...
 
     def __init__(
@@ -167,7 +167,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         return self._underlying.options
 
     @options.setter
-    def options(self, value: List[SelectOption]):
+    def options(self, value: List[SelectOption]) -> None:
         if not isinstance(value, list):
             raise TypeError("options must be a list of SelectOption")
         if not all(isinstance(obj, SelectOption) for obj in value):
@@ -183,7 +183,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         description: Optional[str] = None,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
         default: bool = False,
-    ):
+    ) -> None:
         """Adds an option to the select menu.
 
         To append a pre-existing :class:`.SelectOption` use the
@@ -221,7 +221,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
 
         self.append_option(option)
 
-    def append_option(self, option: SelectOption):
+    def append_option(self, option: SelectOption) -> None:
         """Appends an option to the select menu.
 
         Parameters

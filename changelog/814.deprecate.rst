@@ -1,1 +1,0 @@
-Rename :class:`ApplicationCommandInteractionDataResolved` to :class:`InteractionDataResolved`.

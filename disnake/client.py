@@ -9,6 +9,7 @@ import sys
 import traceback
 import warnings
 from datetime import datetime, timedelta
+from errno import ECONNRESET
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -39,6 +40,7 @@ from .app_commands import (
     GuildApplicationCommandPermissions,
 )
 from .appinfo import AppInfo
+from .application_role_connection import ApplicationRoleConnectionMetadata
 from .backoff import ExponentialBackoff
 from .channel import PartialMessageable, _threaded_channel_factory
 from .emoji import Emoji
@@ -53,7 +55,7 @@ from .errors import (
 )
 from .flags import ApplicationFlags, Intents, MemberCacheFlags
 from .gateway import DiscordWebSocket, ReconnectWebSocket
-from .guild import Guild
+from .guild import Guild, GuildBuilder
 from .guild_preview import GuildPreview
 from .http import HTTPClient
 from .i18n import LocalizationProtocol, LocalizationStore
@@ -79,8 +81,12 @@ if TYPE_CHECKING:
     from .app_commands import APIApplicationCommand
     from .asset import AssetBytes
     from .channel import DMChannel
+    from .enums import Event
     from .member import Member
     from .message import Message
+    from .types.application_role_connection import (
+        ApplicationRoleConnectionMetadata as ApplicationRoleConnectionMetadataPayload,
+    )
     from .types.gateway import SessionStartLimit as SessionStartLimitPayload
     from .voice_client import VoiceProtocol
 
@@ -92,7 +98,6 @@ __all__ = (
 )
 
 CoroT = TypeVar("CoroT", bound=Callable[..., Coroutine[Any, Any, Any]])
-
 
 _log = logging.getLogger(__name__)
 
@@ -162,7 +167,7 @@ class SessionStartLimit:
         "reset_time",
     )
 
-    def __init__(self, data: SessionStartLimitPayload):
+    def __init__(self, data: SessionStartLimitPayload) -> None:
         self.total: int = data["total"]
         self.remaining: int = data["remaining"]
         self.reset_after: int = data["reset_after"]
@@ -170,7 +175,7 @@ class SessionStartLimit:
 
         self.reset_time: datetime = utils.utcnow() + timedelta(milliseconds=self.reset_after)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"<SessionStartLimit total={self.total!r} remaining={self.remaining!r} "
             f"reset_after={self.reset_after!r} max_concurrency={self.max_concurrency!r} reset_time={self.reset_time!s}>"
@@ -376,7 +381,7 @@ class Client:
         intents: Optional[Intents] = None,
         chunk_guilds_at_startup: Optional[bool] = None,
         member_cache_flags: Optional[MemberCacheFlags] = None,
-    ):
+    ) -> None:
         # self.ws is set in the connect method
         self.ws: DiscordWebSocket = None  # type: ignore
 
@@ -970,7 +975,7 @@ class Client:
                     return
 
                 # If we get connection reset by peer then try to RESUME
-                if isinstance(exc, OSError) and exc.errno in (54, 10054):
+                if isinstance(exc, OSError) and exc.errno == ECONNRESET:
                     ws_params.update(
                         sequence=self.ws.sequence,
                         initial=False,
@@ -1097,14 +1102,14 @@ class Client:
         except NotImplementedError:
             pass
 
-        async def runner():
+        async def runner() -> None:
             try:
                 await self.start(*args, **kwargs)
             finally:
                 if not self.is_closed():
                     await self.close()
 
-        def stop_loop_on_completion(f):
+        def stop_loop_on_completion(f) -> None:
             loop.stop()
 
         future = asyncio.ensure_future(runner(), loop=loop)
@@ -1160,7 +1165,7 @@ class Client:
         return Status.online
 
     @status.setter
-    def status(self, value):
+    def status(self, value) -> None:
         if value is Status.offline:
             self._connection._status = "invisible"
         elif isinstance(value, Status):
@@ -1522,7 +1527,7 @@ class Client:
 
     def wait_for(
         self,
-        event: str,
+        event: Union[str, Event],
         *,
         check: Optional[Callable[..., bool]] = None,
         timeout: Optional[float] = None,
@@ -1564,6 +1569,19 @@ class Client:
                     msg = await client.wait_for('message', check=check)
                     await channel.send(f'Hello {msg.author}!')
 
+            # using events enums:
+            @client.event
+            async def on_message(message):
+                if message.content.startswith('$greet'):
+                    channel = message.channel
+                    await channel.send('Say hello!')
+
+                    def check(m):
+                        return m.content == 'hello' and m.channel == channel
+
+                    msg = await client.wait_for(Event.message, check=check)
+                    await channel.send(f'Hello {msg.author}!')
+
         Waiting for a thumbs up reaction from the message author: ::
 
             @client.event
@@ -1585,9 +1603,10 @@ class Client:
 
         Parameters
         ----------
-        event: :class:`str`
-            The event name, similar to the :ref:`events <discord_api_events>`,
-            but without the ``on_`` prefix, to wait for.
+        event: Union[:class:`str`, :class:`.Event`]
+            The event name, similar to the :ref:`event reference <discord-api-events>`,
+            but without the ``on_`` prefix, to wait for. It's recommended
+            to use :class:`.Event`.
         check: Optional[Callable[..., :class:`bool`]]
             A predicate to check what to wait for. The arguments must meet the
             parameters of the event being waited for.
@@ -1610,12 +1629,12 @@ class Client:
         future = self.loop.create_future()
         if check is None:
 
-            def _check(*args):
+            def _check(*args) -> bool:
                 return True
 
             check = _check
 
-        ev = event.lower()
+        ev = event.lower() if isinstance(event, str) else event.value
         try:
             listeners = self._listeners[ev]
         except KeyError:
@@ -1660,7 +1679,7 @@ class Client:
         *,
         activity: Optional[BaseActivity] = None,
         status: Optional[Status] = None,
-    ):
+    ) -> None:
         """|coro|
         Changes the client's presence.
 
@@ -1882,7 +1901,9 @@ class Client:
 
         Creates a :class:`.Guild`.
 
-        Bot accounts in more than 10 guilds are not allowed to create guilds.
+        See :func:`guild_builder` for a more comprehensive alternative.
+
+        Bot accounts in 10 or more guilds are not allowed to create guilds.
 
         .. versionchanged:: 2.5
             Removed the ``region`` parameter.
@@ -1920,8 +1941,7 @@ class Client:
         Returns
         -------
         :class:`.Guild`
-            The created guild. This is not the same guild that is
-            added to cache.
+            The created guild. This is not the same guild that is added to cache.
         """
         if icon is not MISSING:
             icon_base64 = await utils._assetbytes_to_base64_data(icon)
@@ -1933,6 +1953,28 @@ class Client:
         else:
             data = await self.http.create_guild(name, icon_base64)
         return Guild(data=data, state=self._connection)
+
+    def guild_builder(self, name: str) -> GuildBuilder:
+        """Creates a builder object that can be used to create more complex guilds.
+
+        This is a more comprehensive alternative to :func:`create_guild`.
+        See :class:`.GuildBuilder` for details and examples.
+
+        Bot accounts in 10 or more guilds are not allowed to create guilds.
+
+        .. versionadded:: 2.8
+
+        Parameters
+        ----------
+        name: :class:`str`
+            The name of the guild.
+
+        Returns
+        -------
+        :class:`.GuildBuilder`
+            The guild builder object for configuring and creating a new guild.
+        """
+        return GuildBuilder(name=name, state=self._connection)
 
     async def fetch_stage_instance(self, channel_id: int, /) -> StageInstance:
         """|coro|
@@ -2474,7 +2516,7 @@ class Client:
         command_id: :class:`int`
             The ID of the application command to delete.
         """
-        return await self._connection.delete_global_command(command_id)
+        await self._connection.delete_global_command(command_id)
 
     async def bulk_overwrite_global_commands(
         self, application_commands: List[ApplicationCommand]
@@ -2616,7 +2658,7 @@ class Client:
         command_id: :class:`int`
             The ID of the application command to delete.
         """
-        await self.http.delete_guild_command(self.application_id, guild_id, command_id)
+        await self._connection.delete_guild_command(guild_id, command_id)
 
     async def bulk_overwrite_guild_commands(
         self, guild_id: int, application_commands: List[ApplicationCommand]
@@ -2686,3 +2728,64 @@ class Client:
             The permissions configured for the specified application command.
         """
         return await self._connection.fetch_command_permissions(guild_id, command_id)
+
+    async def fetch_role_connection_metadata(self) -> List[ApplicationRoleConnectionMetadata]:
+        """|coro|
+
+        Retrieves the :class:`.ApplicationRoleConnectionMetadata` records for the application.
+
+        .. versionadded:: 2.8
+
+        Raises
+        ------
+        HTTPException
+            Retrieving the metadata records failed.
+
+        Returns
+        -------
+        List[:class:`.ApplicationRoleConnectionMetadata`]
+            The list of metadata records.
+        """
+        data = await self.http.get_application_role_connection_metadata_records(self.application_id)
+        return [ApplicationRoleConnectionMetadata._from_data(record) for record in data]
+
+    async def edit_role_connection_metadata(
+        self, records: Sequence[ApplicationRoleConnectionMetadata]
+    ) -> List[ApplicationRoleConnectionMetadata]:
+        """|coro|
+
+        Edits the :class:`.ApplicationRoleConnectionMetadata` records for the application.
+
+        An application can have up to 5 metadata records.
+
+        .. warning::
+            This will overwrite all existing metadata records.
+            Consider :meth:`fetching <fetch_role_connection_metadata>` them first,
+            and constructing the new list of metadata records based off of the returned list.
+
+        .. versionadded:: 2.8
+
+        Parameters
+        ----------
+        records: Sequence[:class:`.ApplicationRoleConnectionMetadata`]
+            The new metadata records.
+
+        Raises
+        ------
+        HTTPException
+            Editing the metadata records failed.
+
+        Returns
+        -------
+        List[:class:`.ApplicationRoleConnectionMetadata`]
+            The list of newly edited metadata records.
+        """
+        payload: List[ApplicationRoleConnectionMetadataPayload] = []
+        for record in records:
+            record._localize(self.i18n)
+            payload.append(record.to_dict())
+
+        data = await self.http.edit_application_role_connection_metadata_records(
+            self.application_id, payload
+        )
+        return [ApplicationRoleConnectionMetadata._from_data(record) for record in data]

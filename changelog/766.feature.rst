@@ -1,2 +1,0 @@
-Update :attr:`Message.system_content` to be accurate to the client as of October 2022.
-- This also properly documents that it is possible to return ``None``.

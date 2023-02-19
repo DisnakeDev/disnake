@@ -100,15 +100,15 @@ class CommandSyncFlags(BaseFlags):
         sync_global_commands: bool = ...,
         sync_guild_commands: bool = ...,
         sync_on_cog_actions: bool = ...,
-    ):
+    ) -> None:
         ...
 
     @overload
     @_generated
-    def __init__(self: NoReturn):
+    def __init__(self: NoReturn) -> None:
         ...
 
-    def __init__(self, **kwargs: bool):
+    def __init__(self, **kwargs: bool) -> None:
         self.value = all_flags_value(self.VALID_FLAGS)
         for key, value in kwargs.items():
             if key not in self.VALID_FLAGS:

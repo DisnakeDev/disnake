@@ -110,7 +110,7 @@ class OptionChoice:
         self,
         name: LocalizedRequired,
         value: ApplicationCommandOptionChoiceValue,
-    ):
+    ) -> None:
         name_loc = Localized._cast(name, True)
         self.name: str = name_loc.string
         self.name_localizations: LocalizationValue = name_loc.localizations
@@ -235,7 +235,7 @@ class Option:
         max_value: Optional[float] = None,
         min_length: Optional[int] = None,
         max_length: Optional[int] = None,
-    ):
+    ) -> None:
         name_loc = Localized._cast(name, True)
         _validate_name(name_loc.string)
         self.name: str = name_loc.string
@@ -452,6 +452,12 @@ class ApplicationCommand(ABC):
         Defaults to ``True``.
 
         .. versionadded:: 2.5
+
+    nsfw: :class:`bool`
+        Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
+        Defaults to ``False``.
+
+        .. versionadded:: 2.8
     """
 
     __repr_info__: ClassVar[Tuple[str, ...]] = (
@@ -459,6 +465,7 @@ class ApplicationCommand(ABC):
         "name",
         "dm_permission",
         "default_member_permisions",
+        "nsfw",
     )
 
     def __init__(
@@ -467,12 +474,14 @@ class ApplicationCommand(ABC):
         name: LocalizedRequired,
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-    ):
+        nsfw: Optional[bool] = None,
+    ) -> None:
         self.type: ApplicationCommandType = enum_if_int(ApplicationCommandType, type)
 
         name_loc = Localized._cast(name, True)
         self.name: str = name_loc.string
         self.name_localizations: LocalizationValue = name_loc.localizations
+        self.nsfw: bool = False if nsfw is None else nsfw
 
         self.dm_permission: bool = True if dm_permission is None else dm_permission
 
@@ -522,6 +531,7 @@ class ApplicationCommand(ABC):
             self.type == other.type
             and self.name == other.name
             and self.name_localizations == other.name_localizations
+            and self.nsfw == other.nsfw
             and self._default_member_permissions == other._default_member_permissions
             # ignore `dm_permission` if comparing guild commands
             and (
@@ -540,6 +550,7 @@ class ApplicationCommand(ABC):
             "name": self.name,
             "dm_permission": self.dm_permission,
             "default_permission": True,
+            "nsfw": self.nsfw,
         }
 
         if self._default_member_permissions is None:
@@ -584,6 +595,12 @@ class UserCommand(ApplicationCommand):
         Defaults to ``True``.
 
         .. versionadded:: 2.5
+
+    nsfw: :class:`bool`
+        Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
+        Defaults to ``False``.
+
+        .. versionadded:: 2.8
     """
 
     __repr_info__ = ("name", "dm_permission", "default_member_permissions")
@@ -593,12 +610,14 @@ class UserCommand(ApplicationCommand):
         name: LocalizedRequired,
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-    ):
+        nsfw: Optional[bool] = None,
+    ) -> None:
         super().__init__(
             type=ApplicationCommandType.user,
             name=name,
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
+            nsfw=nsfw,
         )
 
 
@@ -620,6 +639,11 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
         Whether this command can be used in DMs.
 
         .. versionadded:: 2.5
+
+    nsfw: :class:`bool`
+        Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
+
+        .. versionadded:: 2.8
 
     id: :class:`int`
         The user command's ID.
@@ -643,6 +667,7 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
             name=Localized(data["name"], data=data.get("name_localizations")),
             dm_permission=data.get("dm_permission") is not False,
             default_member_permissions=_get_as_snowflake(data, "default_member_permissions"),
+            nsfw=data.get("nsfw"),
         )
         self._update_common(data)
         return self
@@ -665,6 +690,12 @@ class MessageCommand(ApplicationCommand):
         Defaults to ``True``.
 
         .. versionadded:: 2.5
+
+    nsfw: :class:`bool`
+        Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
+        Defaults to ``False``.
+
+        .. versionadded:: 2.8
     """
 
     __repr_info__ = ("name", "dm_permission", "default_member_permissions")
@@ -674,12 +705,14 @@ class MessageCommand(ApplicationCommand):
         name: LocalizedRequired,
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-    ):
+        nsfw: Optional[bool] = None,
+    ) -> None:
         super().__init__(
             type=ApplicationCommandType.message,
             name=name,
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
+            nsfw=nsfw,
         )
 
 
@@ -701,6 +734,11 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
         Whether this command can be used in DMs.
 
         .. versionadded:: 2.5
+
+    nsfw: :class:`bool`
+        Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
+
+        .. versionadded:: 2.8
 
     id: :class:`int`
         The message command's ID.
@@ -724,6 +762,7 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
             name=Localized(data["name"], data=data.get("name_localizations")),
             dm_permission=data.get("dm_permission") is not False,
             default_member_permissions=_get_as_snowflake(data, "default_member_permissions"),
+            nsfw=data.get("nsfw"),
         )
         self._update_common(data)
         return self
@@ -754,6 +793,12 @@ class SlashCommand(ApplicationCommand):
 
         .. versionadded:: 2.5
 
+    nsfw: :class:`bool`
+        Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
+        Defaults to ``False``.
+
+        .. versionadded:: 2.8
+
     options: List[:class:`Option`]
         The list of options the slash command has.
     """
@@ -773,12 +818,14 @@ class SlashCommand(ApplicationCommand):
         options: Optional[List[Option]] = None,
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-    ):
+        nsfw: Optional[bool] = None,
+    ) -> None:
         super().__init__(
             type=ApplicationCommandType.chat_input,
             name=name,
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
+            nsfw=nsfw,
         )
         _validate_name(self.name)
 
@@ -877,6 +924,11 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
 
         .. versionadded:: 2.5
 
+    nsfw: :class:`bool`
+        Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
+
+        .. versionadded:: 2.8
+
     id: :class:`int`
         The slash command's ID.
     options: List[:class:`Option`]
@@ -905,6 +957,7 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
             ),
             dm_permission=data.get("dm_permission") is not False,
             default_member_permissions=_get_as_snowflake(data, "default_member_permissions"),
+            nsfw=data.get("nsfw"),
         )
         self._update_common(data)
         return self
@@ -925,7 +978,7 @@ class ApplicationCommandPermissions:
 
     __slots__ = ("id", "type", "permission", "_guild_id")
 
-    def __init__(self, *, data: ApplicationCommandPermissionsPayload, guild_id: int):
+    def __init__(self, *, data: ApplicationCommandPermissionsPayload, guild_id: int) -> None:
         self.id: int = int(data["id"])
         self.type: ApplicationCommandPermissionType = try_enum(
             ApplicationCommandPermissionType, data["type"]
@@ -933,7 +986,7 @@ class ApplicationCommandPermissions:
         self.permission: bool = data["permission"]
         self._guild_id: int = guild_id
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<ApplicationCommandPermissions id={self.id!r} type={self.type!r} permission={self.permission!r}>"
 
     def __eq__(self, other):
@@ -983,7 +1036,9 @@ class GuildApplicationCommandPermissions:
 
     __slots__ = ("_state", "id", "application_id", "guild_id", "permissions")
 
-    def __init__(self, *, data: GuildApplicationCommandPermissionsPayload, state: ConnectionState):
+    def __init__(
+        self, *, data: GuildApplicationCommandPermissionsPayload, state: ConnectionState
+    ) -> None:
         self._state: ConnectionState = state
         self.id: int = int(data["id"])
         self.application_id: int = int(data["application_id"])
@@ -994,7 +1049,7 @@ class GuildApplicationCommandPermissions:
             for elem in data["permissions"]
         ]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"<GuildApplicationCommandPermissions id={self.id!r} application_id={self.application_id!r}"
             f" guild_id={self.guild_id!r} permissions={self.permissions!r}>"

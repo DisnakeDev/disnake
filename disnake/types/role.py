@@ -27,3 +27,14 @@ class RoleTags(TypedDict, total=False):
     bot_id: Snowflake
     integration_id: Snowflake
     premium_subscriber: None
+    guild_connections: None
+
+
+class CreateRole(TypedDict, total=False):
+    name: str
+    permissions: str
+    color: int
+    hoist: bool
+    icon: Optional[str]
+    unicode_emoji: Optional[str]
+    mentionable: bool

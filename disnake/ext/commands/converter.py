@@ -1092,10 +1092,10 @@ class Greedy(List[T]):
 
     __slots__ = ("converter",)
 
-    def __init__(self, *, converter: T):
+    def __init__(self, *, converter: T) -> None:
         self.converter = converter
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         converter = getattr(self.converter, "__name__", repr(self.converter))
         return f"Greedy[{converter}]"
 
@@ -1176,7 +1176,7 @@ CONVERTER_MAPPING: Dict[Type[Any], Type[Converter]] = {
 
 async def _actual_conversion(
     ctx: Context,
-    converter: Union[Type[T], Converter[T], Callable[[str], T]],
+    converter: Union[Type[T], Type[Converter[T]], Converter[T], Callable[[str], T]],
     argument: str,
     param: inspect.Parameter,
 ) -> T:

@@ -31,6 +31,11 @@
   {%- if pageurl %}
   <link rel="canonical" href="{{ pageurl|e }}" />
   {%- endif %}
+  {%- if use_opensearch %}
+  <link rel="search" type="application/opensearchdescription+xml"
+        title="{% trans docstitle=docstitle|e %}Search within {{ docstitle }}{% endtrans %}"
+        href="{{ pathto('_static/opensearch.xml', 1) }}"/>
+  {%- endif %}
   {%- if favicon %}
   <link rel="shortcut icon" href="{{ pathto('_static/' + favicon, 1)|e }}"/>
   {%- endif %}

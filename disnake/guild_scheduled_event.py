@@ -54,7 +54,7 @@ class GuildScheduledEventMetadata:
 
     __slots__ = ("location",)
 
-    def __init__(self, *, location: Optional[str] = None):
+    def __init__(self, *, location: Optional[str] = None) -> None:
         self.location: Optional[str] = location
 
     def __repr__(self) -> str:
@@ -151,7 +151,7 @@ class GuildScheduledEvent(Hashable):
         "_cs_channel",
     )
 
-    def __init__(self, *, state: ConnectionState, data: GuildScheduledEventPayload):
+    def __init__(self, *, state: ConnectionState, data: GuildScheduledEventPayload) -> None:
         self._state: ConnectionState = state
         self._update(data)
 

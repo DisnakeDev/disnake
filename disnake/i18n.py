@@ -87,11 +87,11 @@ class Localized(Generic[StringT]):
     __slots__ = ("string", "localizations")
 
     @overload
-    def __init__(self: Localized[StringT], string: StringT, *, key: str):
+    def __init__(self: Localized[StringT], string: StringT, *, key: str) -> None:
         ...
 
     @overload
-    def __init__(self: Localized[Optional[str]], *, key: str):
+    def __init__(self: Localized[Optional[str]], *, key: str) -> None:
         ...
 
     @overload
@@ -100,7 +100,7 @@ class Localized(Generic[StringT]):
         string: StringT,
         *,
         data: Union[Optional[LocalizationsDict], LocalizationValue],
-    ):
+    ) -> None:
         ...
 
     @overload
@@ -108,7 +108,7 @@ class Localized(Generic[StringT]):
         self: Localized[Optional[str]],
         *,
         data: Union[Optional[LocalizationsDict], LocalizationValue],
-    ):
+    ) -> None:
         ...
 
     # note: `data` accepting `LocalizationValue` is intentionally undocumented,
@@ -119,7 +119,7 @@ class Localized(Generic[StringT]):
         *,
         key: str = MISSING,
         data: Union[Optional[LocalizationsDict], LocalizationValue] = MISSING,
-    ):
+    ) -> None:
         self.string: StringT = string
 
         if not (key is MISSING) ^ (data is MISSING):
@@ -183,7 +183,7 @@ class LocalizationValue:
 
     __slots__ = ("_key", "_data")
 
-    def __init__(self, localizations: Optional[Localizations]):
+    def __init__(self, localizations: Optional[Localizations]) -> None:
         self._key: Optional[str]
         self._data: Optional[Dict[str, str]]
 
@@ -315,7 +315,7 @@ class LocalizationStore(LocalizationProtocol):
         Specifies whether :meth:`.get` raises an exception if localizations for a provided key couldn't be found.
     """
 
-    def __init__(self, *, strict: bool):
+    def __init__(self, *, strict: bool) -> None:
         self.strict = strict
 
         self._loc: DefaultDict[str, Dict[str, str]] = defaultdict(dict)

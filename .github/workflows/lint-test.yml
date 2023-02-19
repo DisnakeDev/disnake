@@ -33,7 +33,7 @@ jobs:
 
     - name: Run pre-commit
       id: pre-commit
-      uses: pre-commit/action@v2.0.3
+      uses: pre-commit/action@v3.0.0
       env:
         SKIP: 'flake8'
 
@@ -49,8 +49,8 @@ jobs:
       id: flake8
       if: always() && (steps.pre-commit.outcome == 'success' || steps.pre-commit.outcome == 'failure')
       run: "flake8 \
-      --format='::error file=%(path)s,line=%(row)d,col=%(col)d::\
-      [flake8] %(code)s: %(text)s'"
+        --format='::error file=%(path)s,line=%(row)d,col=%(col)d::\
+        [flake8] %(code)s: %(text)s'"
 
   docs:
     # We want to run on external PRs, but not on our own internal PRs as they'll be run
@@ -85,11 +85,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
         experimental: [false]
-        include:
-          - python-version: '3.11.0-alpha - 3.11'
-            experimental: true
       fail-fast: false
     steps:
     - uses: actions/checkout@v3
@@ -155,7 +152,7 @@ jobs:
     # This only runs if the previous steps were successful, no point in running it otherwise
     - name: Build package
       run: |
-        pip install -U build
+        python -m pip install -U build
         python -m build
 
     # run the libcst parsers and check for changes
@@ -182,19 +179,9 @@ jobs:
       github.repository
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
         os: ["windows-latest", "ubuntu-latest", "macos-latest"]
         experimental: [false]
-        include:
-          - python-version: '3.11.0-alpha - 3.11'
-            os: "ubuntu-latest"
-            experimental: true
-          - python-version: '3.11.0-alpha - 3.11'
-            os: "macos-latest"
-            experimental: true
-          - python-version: '3.11.0-alpha - 3.11'
-            os: "windows-latest"
-            experimental: true
       fail-fast: true
 
     runs-on: ${{ matrix.os }}
@@ -295,6 +282,6 @@ jobs:
 
     steps:
     - name: Decide whether the needed jobs succeeded or failed
-      uses: re-actors/alls-green@v1.2.1
+      uses: re-actors/alls-green@v1.2.2
       with:
         jobs: ${{ toJSON(needs) }}

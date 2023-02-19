@@ -1,1 +1,0 @@
-Update event loop handling to avoid warnings when running on Python 3.11.

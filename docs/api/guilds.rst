@@ -27,6 +27,15 @@ Guild
     .. automethod:: audit_logs
         :async-for:
 
+GuildBuilder
+~~~~~~~~~~~~~
+
+.. attributetable:: GuildBuilder
+
+.. autoclass:: GuildBuilder()
+    :members:
+    :exclude-members: add_category_channel
+
 GuildPreview
 ~~~~~~~~~~~~
 

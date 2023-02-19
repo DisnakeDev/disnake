@@ -141,7 +141,7 @@ class ActionRow(Component, Generic[ComponentT]):
 
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
 
-    def __init__(self, data: ActionRowPayload):
+    def __init__(self, data: ActionRowPayload) -> None:
         self.type: ComponentType = try_enum(ComponentType, data["type"])
         self.children: List[ComponentT] = [
             _component_factory(d) for d in data.get("components", [])
@@ -149,9 +149,9 @@ class ActionRow(Component, Generic[ComponentT]):
 
     def to_dict(self) -> ActionRowPayload:
         return {
-            "type": int(self.type),
+            "type": self.type.value,
             "components": [child.to_dict() for child in self.children],
-        }  # type: ignore
+        }
 
 
 class Button(Component):
@@ -194,7 +194,7 @@ class Button(Component):
 
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
 
-    def __init__(self, data: ButtonComponentPayload):
+    def __init__(self, data: ButtonComponentPayload) -> None:
         self.type: ComponentType = try_enum(ComponentType, data["type"])
         self.style: ButtonStyle = try_enum(ButtonStyle, data["style"])
         self.custom_id: Optional[str] = data.get("custom_id")
@@ -273,7 +273,7 @@ class BaseSelectMenu(Component):
 
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
 
-    def __init__(self, data: BaseSelectMenuPayload):
+    def __init__(self, data: BaseSelectMenuPayload) -> None:
         self.type: ComponentType = try_enum(ComponentType, data["type"])
         self.custom_id: str = data["custom_id"]
         self.placeholder: Optional[str] = data.get("placeholder")
@@ -330,7 +330,7 @@ class StringSelectMenu(BaseSelectMenu):
 
     __repr_info__: ClassVar[Tuple[str, ...]] = BaseSelectMenu.__repr_info__ + __slots__
 
-    def __init__(self, data: StringSelectMenuPayload):
+    def __init__(self, data: StringSelectMenuPayload) -> None:
         super().__init__(data)
         self.options: List[SelectOption] = [
             SelectOption.from_dict(option) for option in data.get("options", [])
@@ -476,7 +476,7 @@ class ChannelSelectMenu(BaseSelectMenu):
 
     __repr_info__: ClassVar[Tuple[str, ...]] = BaseSelectMenu.__repr_info__ + __slots__
 
-    def __init__(self, data: ChannelSelectMenuPayload):
+    def __init__(self, data: ChannelSelectMenuPayload) -> None:
         super().__init__(data)
         # on the API side, an empty list is (currently) equivalent to no value
         channel_types = data.get("channel_types")

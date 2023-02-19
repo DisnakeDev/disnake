@@ -19,6 +19,7 @@ import re
 import subprocess  # noqa: S404
 import sys
 from typing import Any, Dict, Optional
+from urllib.parse import urljoin
 
 from sphinx.application import Sphinx
 
@@ -109,6 +110,9 @@ with open("../disnake/__init__.py") as f:
 
 # The full version, including alpha/beta/rc tags.
 release = version
+
+
+_IS_READTHEDOCS = bool(os.getenv("READTHEDOCS"))
 
 
 def git(*args: str) -> str:
@@ -230,7 +234,7 @@ hoverxref_role_types = dict.fromkeys(
 hoverxref_tooltip_theme = ["tooltipster-custom"]
 hoverxref_tooltip_lazy = True
 
-# these have to match the keys on intersphinx_mapping, and those projects must be hosted on read the docs.
+# these have to match the keys on intersphinx_mapping, and those projects must be hosted on readthedocs.
 hoverxref_intersphinx = [
     "py",
     "aio",
@@ -246,13 +250,13 @@ intersphinx_mapping = {
 }
 
 
-# use proxied API endpoint on rtd to avoid CORS issues
-if os.environ.get("READTHEDOCS"):
+# use proxied API endpoint on readthedocs to avoid CORS issues
+if _IS_READTHEDOCS:
     hoverxref_api_host = "/_"
 
-# when not on read the docs, assume no prefix for the 404 page.
+# when not on readthedocs, assume no prefix for the 404 page.
 # this means that /404.html should properly render on local builds
-if not os.environ.get("READTHEDOCS"):
+if not _IS_READTHEDOCS:
     notfound_urls_prefix = "/"
 
 linkcheck_ignore = [
@@ -471,6 +475,19 @@ def setup(app: Sphinx) -> None:
         app.config.intersphinx_mapping["py"] = ("https://docs.python.org/ja/3", None)
         app.config.html_context["discord_invite"] = "https://discord.gg/disnake"
         app.config.resource_links["disnake"] = "https://discord.gg/disnake"
+
+    # readthedocs appends additional stuff to conf.py,
+    # we can't access it above since it wouldn't have run yet
+    if _IS_READTHEDOCS:
+        # this is the "canonical" url, which always points to stable in our case
+        if not (base_url := globals().get("html_baseurl")):
+            raise RuntimeError("Expected `html_baseurl` to be set on readthedocs")
+
+        # special case for convenience: if latest, use that for opensearch
+        if os.environ["READTHEDOCS_VERSION"] == "latest":
+            base_url = urljoin(base_url, "../latest")
+
+        app.config["html_use_opensearch"] = base_url.rstrip("/")
 
     # HACK: avoid deprecation warnings caused by sphinx always iterating over all class attributes
     import disnake

@@ -1,1 +1,0 @@
-Use ``importlib.metadata`` instead of the deprecated ``pkg_resources`` in the cli for displaying the version.

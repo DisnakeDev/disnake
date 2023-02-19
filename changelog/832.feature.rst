@@ -1,1 +1,0 @@
-Add ``suppress_embeds`` parameter to :meth:`Interaction.edit_original_response` and :meth:`InteractionMessage.edit`.

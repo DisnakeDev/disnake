@@ -95,6 +95,12 @@ StickerFormatType
 
         Represents a sticker with a lottie image.
 
+    .. attribute:: gif
+
+        Represents a sticker with a gif image.
+
+        .. versionadded:: 2.8
+
 Events
 ------
 

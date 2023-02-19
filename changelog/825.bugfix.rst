@@ -1,1 +1,0 @@
-|commands| Fix a case where optional variadic arguments could have infinite loops in parsing depending on the user input.

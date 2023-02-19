@@ -701,6 +701,27 @@ Integrations
     :param payload: The raw event payload data.
     :type payload: :class:`RawIntegrationDeleteEvent`
 
+Audit Logs
+++++++++++
+
+.. function:: on_audit_log_entry_create(entry)
+
+    Called when an audit log entry is created.
+    You must have the :attr:`~Permissions.view_audit_log` permission to receive this.
+
+    This requires :attr:`Intents.moderation` to be enabled.
+
+    .. warning::
+        This scope of data in this gateway event is limited, which means it is much more
+        reliant on the cache than :meth:`Guild.audit_logs`.
+        Because of this, :attr:`AuditLogEntry.target` and :attr:`AuditLogEntry.user`
+        will frequently be of type :class:`Object` instead of the respective model.
+
+    .. versionadded:: 2.8
+
+    :param entry: The audit log entry that was created.
+    :type entry: :class:`AuditLogEntry`
+
 .. _related_events_invite:
 
 Invites
@@ -804,7 +825,7 @@ Members
 
     Called when user gets banned from a :class:`Guild`.
 
-    This requires :attr:`Intents.bans` to be enabled.
+    This requires :attr:`Intents.moderation` to be enabled.
 
     :param guild: The guild the user got banned from.
     :type guild: :class:`Guild`
@@ -817,7 +838,7 @@ Members
 
     Called when a :class:`User` gets unbanned from a :class:`Guild`.
 
-    This requires :attr:`Intents.bans` to be enabled.
+    This requires :attr:`Intents.moderation` to be enabled.
 
     :param guild: The guild the user got unbanned from.
     :type guild: :class:`Guild`
@@ -978,7 +999,7 @@ Roles
 .. function:: on_guild_role_create(role)
               on_guild_role_delete(role)
 
-    Called when a :class:`Guild` creates or deletes a new :class:`Role`.
+    Called when a :class:`Guild` creates or deletes a :class:`Role`.
 
     To get the guild it belongs to, use :attr:`Role.guild`.
 

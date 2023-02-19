@@ -75,7 +75,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "InteractionChannel", V_co]):
         disabled: bool = False,
         channel_types: Optional[List[ChannelType]] = None,
         row: Optional[int] = None,
-    ):
+    ) -> None:
         ...
 
     @overload
@@ -89,7 +89,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "InteractionChannel", V_co]):
         disabled: bool = False,
         channel_types: Optional[List[ChannelType]] = None,
         row: Optional[int] = None,
-    ):
+    ) -> None:
         ...
 
     def __init__(

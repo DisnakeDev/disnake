@@ -77,6 +77,14 @@ AutoModTimeoutAction
 .. autoclass:: AutoModTimeoutAction
     :members:
 
+ApplicationRoleConnectionMetadata
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: ApplicationRoleConnectionMetadata
+
+.. autoclass:: ApplicationRoleConnectionMetadata
+    :members:
+
 Enumerations
 ------------
 

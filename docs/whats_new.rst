@@ -17,10 +17,184 @@ in specific versions.
 
 .. towncrier release notes start
 
+.. _vp2p8p0:
+
+v2.8.0
+------
+
+This release comes with support for NSFW application commands,
+the :func:`on_audit_log_entry_create` event,
+and a new :class:`Event` enum for use with methods like :func:`Client.wait_for`.
+
+Breaking Changes
+~~~~~~~~~~~~~~~~
+- :attr:`StickerPack.cover_sticker_id`, :attr:`.cover_sticker <StickerPack.cover_sticker>` and :attr:`.banner <StickerPack.banner>` are now optional and may return ``None``. (:issue:`912`)
+- :attr:`AuditLogEntry.user` may now be an :class:`Object` if the user cannot be found, particularly in entries from the :func:`on_audit_log_entry_create` event. (:issue:`920`)
+
+New Features
+~~~~~~~~~~~~
+- Add :class:`GuildBuilder` and :func:`Client.guild_builder` for full coverage of the guild creation endpoint. (:issue:`578`)
+- Support regex within automod using :attr:`AutoModTriggerMetadata.regex_patterns`. (:issue:`794`)
+- Add :attr:`File.closed` and :attr:`File.bytes_length` properties. (:issue:`839`)
+- Add :attr:`TextChannel.default_thread_slowmode_delay`. (:issue:`854`)
+- Add support for NSFW application commands. (:issue:`865`)
+    - Add :attr:`ApplicationCommand.nsfw`.
+    - Add ``nsfw`` parameter to command constructors and decorators.
+- Add :attr:`.UserFlags.active_developer` and :attr:`PublicUserFlags.active_developer`. (:issue:`866`)
+- Adds reasons/descriptions to :exc:`ConnectionClosed` errors. (:issue:`873`)
+- Update :class:`AutoModTriggerMetadata` overloads to allow passing ``allow_list`` to keyword-based rules. (:issue:`877`)
+- The :attr:`PublicUserFlags.discord_certified_moderator` is now an alias of :attr:`PublicUserFlags.moderator_programs_alumni`. (:issue:`883`)
+- Add :attr:`ForumChannel.default_layout`, and ``default_layout`` parameter to channel edit methods. (:issue:`885`, :issue:`903`)
+- Add :attr:`Locale.id` (Indonesian) locale. (:issue:`890`)
+- Adds :class:`Event` enumeration to use in :meth:`Client.wait_for`, :meth:`disnake.ext.commands.Bot.wait_for` and in :func:`disnake.ext.commands.Bot.listen` decorator. (:issue:`895`)
+- Add new :attr:`MessageType.interaction_premium_upsell` and :attr:`MessageType.guild_application_premium_subscription` message types. (:issue:`905`)
+- Add application role connection features. (:issue:`906`)
+    - Add :class:`ApplicationRoleConnectionMetadata` and :class:`ApplicationRoleConnectionMetadataType` types.
+    - Add :class:`Client.fetch_role_connection_metadata` and :class:`Client.edit_role_connection_metadata` methods.
+    - Add :attr:`RoleTags.is_linked_role` and :attr:`AppInfo.role_connections_verification_url` attributes.
+- Add :attr:`StickerFormatType.gif`. (:issue:`910`)
+- Add support for the :func:`on_audit_log_entry_create` gateway event, and add :attr:`Intents.moderation` intent. :attr:`Intents.bans` is now an alias of :attr:`Intents.moderation`. (:issue:`915`)
+- Add :attr:`~Member.flags` property to :class:`Member`. (:issue:`918`)
+- Add fallback to :class:`Object` for :attr:`AuditLogEntry.user` (:issue:`920`)
+
+Bug Fixes
+~~~~~~~~~
+- |commands| Fix ``help_command`` parameter annotations to allow ``None`` value. (:issue:`849`)
+- Fix user cache memory leak where unused objects weren't being evicted (provided that :attr:`Intents.members` is enabled). (:issue:`858`)
+- Fix :attr:`Message.author.public_flags <Member.public_flags>` always being ``0`` when the member cache is disabled. (:issue:`870`)
+- Export missing ``ThreadWithMessage`` class. (:issue:`879`)
+- Add previously missing ``applied_tags`` parameter to all :meth:`ForumChannel.create_thread` overloads. (:issue:`880`)
+- Fix conversion of custom emoji strings (e.g. ``<:this:934852112221872198>``) in :meth:`Message.add_reaction` and similar methods to more strictly adhere to the API documentation. (:issue:`887`)
+- Fix :meth:`Client.delete_guild_command` not updating the local command cache. (:issue:`907`)
+- Fix errors when trying to deserialize stickers with unknown formats. (:issue:`911`)
+- Make :attr:`StickerPack.cover_sticker_id`, :attr:`.cover_sticker <StickerPack.cover_sticker>` and :attr:`.banner <StickerPack.banner>` optional. (:issue:`912`)
+- Fix handling of ``ECONNRESET`` errors on Linux. (:issue:`921`)
+
+Documentation
+~~~~~~~~~~~~~
+- Enable `OpenSearch <https://developer.mozilla.org/en-US/docs/Web/OpenSearch>`_, allowing easy integration of the search functionality into browsers. (:issue:`859`)
+- Clarify types of optional :class:`Invite` attributes. (:issue:`864`)
+- Remove documentation regarding private threads requiring boosts. (:issue:`872`)
+- Update :class:`AutoModTriggerMetadata` field limits. (:issue:`877`)
+
+Miscellaneous
+~~~~~~~~~~~~~
+- Declare a :pep:`517` build backend in pyproject.toml, and use :pep:`621` to define most package metadata. (:issue:`830`)
+
+.. _vp2p7p1:
+
+v2.7.1
+------
+
+Bug Fixes
+~~~~~~~~~
+- Fix :attr:`Message.author.public_flags <Member.public_flags>` always being ``0`` when the member cache is disabled. (:issue:`870`)
+- Export missing ``ThreadWithMessage`` class. (:issue:`879`)
+- Fix :meth:`Client.delete_guild_command` not updating the local command cache. (:issue:`907`)
+- Fix errors when trying to deserialize stickers with unknown formats. (:issue:`911`)
+
+.. _vp2p7p0:
+
+v2.7.0
+------
+
+This release comes with support for python 3.11 and new selects.
+
+Breaking Changes
+~~~~~~~~~~~~~~~~
+- Properly document that :attr:`Message.system_content` may return ``None``. While this is documented as a breaking change, this function always could return ``None`` if the message type was not recognised. (:issue:`766`)
+- Rename :meth:`InteractionDataResolved.get` to :meth:`~InteractionDataResolved.get_by_id`. (:issue:`814`)
+
+Deprecations
+~~~~~~~~~~~~
+- Rename :class:`ApplicationCommandInteractionDataResolved` to :class:`InteractionDataResolved`. (:issue:`814`)
+- |commands| Deprecate the ``sync_commands``, ``sync_commands_debug``, and  ``sync_commands_on_cog_unload`` parameters of :class:`~disnake.ext.commands.Bot` and :class:`~disnake.ext.commands.InteractionBot`. These have been replaced with the ``command_sync_flags`` parameter which takes a :class:`~disnake.ext.commands.CommandSyncFlags` instance. (:issue:`806`)
+
+New Features
+~~~~~~~~~~~~
+- Update :attr:`Message.system_content` to be accurate to the client as of October 2022. (:issue:`766`)
+    - This also properly documents that it is possible to return ``None``.
+- Add type hints to all flag constructors, now supporting type-checking for creating flag classes (e.g. ``Intents(members=True)``) which used to be untyped. (:issue:`778`)
+- Add :func:`GuildScheduledEvent.start`, :func:`.end <GuildScheduledEvent.end>` and :func:`.cancel <GuildScheduledEvent.cancel>` shortcuts. (:issue:`781`)
+- Support Python 3.11. (:issue:`785`, :issue:`827`, :issue:`829`, :issue:`833`)
+- Improve the cli, allowing the usage of :class:`.ext.commands.InteractionBot`, :class:`.ext.commands.AutoShardedInteractionBot`. (:issue:`791`)
+- Add new select menu components. (:issue:`800`, :issue:`803`)
+    - Add new :class:`ComponentType` values.
+    - Add :class:`UserSelectMenu`, :class:`RoleSelectMenu`, :class:`MentionableSelectMenu`, :class:`ChannelSelectMenu` components.
+    - Add :class:`ui.UserSelect`, :class:`ui.RoleSelect`, :class:`ui.MentionableSelect`, :class:`ui.ChannelSelect` UI types.
+    - Add :func:`ui.user_select`, :func:`ui.role_select`, :func:`ui.mentionable_select`, :func:`ui.channel_select` decorators.
+    - Add :func:`ui.ActionRow.add_user_select`, :func:`add_role_select() <ui.ActionRow.add_role_select>`, :func:`add_mentionable_select() <ui.ActionRow.add_mentionable_select>`, :func:`add_channel_select() <ui.ActionRow.add_channel_select>`
+    - Renamed string select types for clarity (previous names will continue to work):
+        - :class:`SelectMenu` -> :class:`StringSelectMenu`
+        - :class:`ui.Select` -> :class:`ui.StringSelect`
+        - :func:`ui.select` -> :func:`ui.string_select`
+        - :func:`ui.ActionRow.add_select` -> :func:`ui.ActionRow.add_string_select`
+    - Add :attr:`MessageInteraction.resolved_values` and :attr:`MessageInteractionData.resolved`.
+- Support ``delete_after`` parameter when sending ephemeral interaction responses. (:issue:`816`)
+- Allow ``slowmode_delay`` parameter of :meth:`ForumChannel.create_thread` to be optional. (:issue:`822`)
+- Add ``suppress_embeds`` parameter to :meth:`Interaction.edit_original_response` and :meth:`InteractionMessage.edit`. (:issue:`832`)
+- |commands| Add :class:`~disnake.ext.commands.CommandSyncFlags` to provide sync configuration to :class:`~disnake.ext.commands.Bot` and :class:`~disnake.ext.commands.InteractionBot` (and their autosharded variants) as ``command_sync_flags``. (:issue:`265`, :issue:`433`, :issue:`468`, :issue:`806`)
+
+Bug Fixes
+~~~~~~~~~
+- Add the missing attributes for :class:`PermissionOverwrite`: ``use_application_commands`` and ``use_embedded_activities``. (:issue:`777`)
+- Ensure that embed fields are copied properly by :func:`Embed.copy` and that the copied embed is completely separate from the original one. (:issue:`792`)
+- Fix an issue with :meth:`Member.ban` erroring when the ``delete_message_days`` parameter was provided. (:issue:`810`)
+- Try to get threads used in interactions (like threads in command arguments) from the cache first, before creating a new instance. (:issue:`814`)
+- Fix creation of threads in text channels without :attr:`Permissions.manage_threads`. (:issue:`818`)
+- Fix off-by-one error in :class:`AutoModKeywordPresets` values. (:issue:`820`)
+- Update event loop handling to avoid warnings when running on Python 3.11. (:issue:`827`)
+- |commands| Fix a case where optional variadic arguments could have infinite loops in parsing depending on the user input. (:issue:`825`)
+
+Documentation
+~~~~~~~~~~~~~
+- Speed up page load by changing hoverxref tooltips to be lazily loaded. (:issue:`393`)
+- Remove reference to the v1.0 migration guide from the main index page, and move legacy changelogs to a separate page. (:issue:`697`)
+- Update sphinx from version 5.1 to 5.3. (:issue:`764`, :issue:`821`)
+- Add a note warning mentioning that using a :class:`disnake.File` object as file kwarg makes a :class:`disnake.Embed` not reusable. (:issue:`786`)
+- Update broken Discord API Docs links, add ``:ddocs:`` role for easily creating links to the API documentation. (:issue:`793`)
+- Add a custom 404 page for when the navigated page does not exist. (:issue:`797`)
+
+Miscellaneous
+~~~~~~~~~~~~~
+- Increase the upper bound for the ``aiohttp`` dependency from ``<3.9`` to ``<4``. (:issue:`789`)
+- Use ``importlib.metadata`` instead of the deprecated ``pkg_resources`` in the cli for displaying the version. (:issue:`791`)
+- |commands| Add missing ``py.typed`` marker. (:issue:`784`)
+- |tasks| Add missing ``py.typed`` marker. (:issue:`784`)
+
+.. _vp2p6p3:
+
+v2.6.3
+------
+
+This maintainence release contains backports from v2.8.0.
+
+Bug Fixes
+~~~~~~~~~
+- Fix :attr:`Message.author.public_flags <Member.public_flags>` always being ``0`` when the member cache is disabled. (:issue:`870`)
+- Export missing ``ThreadWithMessage`` class. (:issue:`879`)
+- Fix :meth:`Client.delete_guild_command` not updating the local command cache. (:issue:`907`)
+- Fix errors when trying to deserialize stickers with unknown formats. (:issue:`911`)
+
+.. _vp2p6p2:
+
+v2.6.2
+------
+
+This maintainence release contains backports from v2.7.0.
+
+Bug Fixes
+~~~~~~~~~
+- Fix creation of threads in text channels without :attr:`Permissions.manage_threads`. (:issue:`818`)
+- Fix off-by-one error in :class:`AutoModKeywordPresets` values. (:issue:`820`)
+- |commands| Fix a case where optional variadic arguments could have infinite loops in parsing depending on the user input. (:issue:`825`)
+
 .. _vp2p6p1:
 
 v2.6.1
 ------
+
+This maintainence release contains backports from v2.7.0.
 
 Bug Fixes
 ~~~~~~~~~

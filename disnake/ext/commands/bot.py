@@ -10,7 +10,6 @@ from .bot_base import BotBase, when_mentioned, when_mentioned_or
 from .interaction_bot_base import InteractionBotBase
 
 if TYPE_CHECKING:
-
     import asyncio
 
     import aiohttp
@@ -225,7 +224,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
             command_prefix: Optional[
                 Union[PrefixType, Callable[[Self, Message], MaybeCoro[PrefixType]]]
             ] = None,
-            help_command: HelpCommand = ...,
+            help_command: Optional[HelpCommand] = ...,
             description: Optional[str] = None,
             *,
             strip_after_prefix: bool = False,
@@ -261,7 +260,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
             member_cache_flags: Optional[MemberCacheFlags] = None,
             localization_provider: Optional[LocalizationProtocol] = None,
             strict_localization: bool = False,
-        ):
+        ) -> None:
             ...
 
 
@@ -277,7 +276,7 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
             command_prefix: Optional[
                 Union[PrefixType, Callable[[Self, Message], MaybeCoro[PrefixType]]]
             ] = None,
-            help_command: HelpCommand = ...,
+            help_command: Optional[HelpCommand] = ...,
             description: Optional[str] = None,
             *,
             strip_after_prefix: bool = False,
@@ -313,7 +312,7 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
             member_cache_flags: Optional[MemberCacheFlags] = None,
             localization_provider: Optional[LocalizationProtocol] = None,
             strict_localization: bool = False,
-        ):
+        ) -> None:
             ...
 
 
@@ -462,7 +461,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
             member_cache_flags: Optional[MemberCacheFlags] = None,
             localization_provider: Optional[LocalizationProtocol] = None,
             strict_localization: bool = False,
-        ):
+        ) -> None:
             ...
 
 
@@ -507,5 +506,5 @@ class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
             member_cache_flags: Optional[MemberCacheFlags] = None,
             localization_provider: Optional[LocalizationProtocol] = None,
             strict_localization: bool = False,
-        ):
+        ) -> None:
             ...
