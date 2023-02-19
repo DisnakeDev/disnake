@@ -1,1 +1,1 @@
-Update Sphinx to 6.3.1.
+Update Sphinx to v6.0.1.
