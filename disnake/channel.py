@@ -521,7 +521,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             The default auto archive duration of the new channel. If not provided, defaults to this channel's default auto archive duration.
         news: :class:`bool`
             Whether the new channel should be a news channel. News channels are text channels that can be followed.
-            This is only available to guilds that contain ``COMMUNITY`` in :attr:`Guild.features`. If not provided, defaults to the current type of this channel.
+            This is only available to guilds that contain ``NEWS`` in :attr:`Guild.features`. If not provided, defaults to the current type of this channel.
         reason: Optional[:class:`str`]
             The reason for cloning this channel. Shows up on the audit log.
 
