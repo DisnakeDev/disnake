@@ -639,20 +639,20 @@ summary = "This package provides 29 stemmers for 28 languages generated from Sno
 
 [[package]]
 name = "sphinx"
-version = "5.3.0"
-requires_python = ">=3.6"
+version = "6.0.1"
+requires_python = ">=3.8"
 summary = "Python documentation generator"
 dependencies = [
     "Jinja2>=3.0",
-    "Pygments>=2.12",
+    "Pygments>=2.13",
     "alabaster<0.8,>=0.7",
     "babel>=2.9",
     "colorama>=0.4.5; sys_platform == \"win32\"",
-    "docutils<0.20,>=0.14",
+    "docutils<0.20,>=0.18",
     "imagesize>=1.3",
     "importlib-metadata>=4.8; python_version < \"3.10\"",
     "packaging>=21.0",
-    "requests>=2.5.0",
+    "requests>=2.25.0",
     "snowballstemmer>=2.0",
     "sphinxcontrib-applehelp",
     "sphinxcontrib-devhelp",
@@ -737,7 +737,7 @@ summary = "sphinxcontrib-serializinghtml is a sphinx extension which outputs \"s
 
 [[package]]
 name = "sphinxcontrib-towncrier"
-version = "0.3.0a0"
+version = "0.3.2a0"
 requires_python = ">=3.6"
 summary = "An RST directive for injecting a Towncrier-generated changelog draft containing fragments for the unreleased (next) project version"
 dependencies = [
@@ -794,7 +794,7 @@ summary = "Tornado is a Python web framework and asynchronous networking library
 
 [[package]]
 name = "towncrier"
-version = "22.8.0"
+version = "22.12.0"
 requires_python = ">=3.7"
 summary = "Building newsfiles for your project."
 dependencies = [
@@ -803,7 +803,7 @@ dependencies = [
     "incremental",
     "jinja2",
     "setuptools",
-    "tomli",
+    "tomli; python_version < \"3.11\"",
 ]
 
 [[package]]
@@ -856,7 +856,7 @@ summary = "Backport of pathlib-compatible object wrapper for zip files"
 
 [metadata]
 lock_version = "4.1"
-content_hash = "sha256:376bbd0a5b692d8941c9cf4990f853f21608e20618493ffcf5d5546237fb00c6"
+content_hash = "sha256:3a59b3d7d31c2215c545652ec88845e7d2967d33eeeab6da45e0ea202bc1518c"
 
 [metadata.files]
 "aiodns 3.0.0" = [
@@ -1869,9 +1869,9 @@ content_hash = "sha256:376bbd0a5b692d8941c9cf4990f853f21608e20618493ffcf5d554623
     {url = "https://files.pythonhosted.org/packages/44/7b/af302bebf22c749c56c9c3e8ae13190b5b5db37a33d9068652e8f73b7089/snowballstemmer-2.2.0.tar.gz", hash = "sha256:09b16deb8547d3412ad7b590689584cd0fe25ec8db3be37788be3810cbf19cb1"},
     {url = "https://files.pythonhosted.org/packages/ed/dc/c02e01294f7265e63a7315fe086dd1df7dacb9f840a804da846b96d01b96/snowballstemmer-2.2.0-py2.py3-none-any.whl", hash = "sha256:c8e1716e83cc398ae16824e5572ae04e0d9fc2c6b985fb0f900f5f0c96ecba1a"},
 ]
-"sphinx 5.3.0" = [
-    {url = "https://files.pythonhosted.org/packages/67/a7/01dd6fd9653c056258d65032aa09a615b5d7b07dd840845a9f41a8860fbc/sphinx-5.3.0-py3-none-any.whl", hash = "sha256:060ca5c9f7ba57a08a1219e547b269fadf125ae25b06b9fa7f66768efb652d6d"},
-    {url = "https://files.pythonhosted.org/packages/af/b2/02a43597980903483fe5eb081ee8e0ba2bb62ea43a70499484343795f3bf/Sphinx-5.3.0.tar.gz", hash = "sha256:51026de0a9ff9fc13c05d74913ad66047e104f56a129ff73e174eb5c3ee794b5"},
+"sphinx 6.0.1" = [
+    {url = "https://files.pythonhosted.org/packages/1d/a7/45135386be5609225fee4c58a92a8cd891ecc67c4314b6c7a883bf0cda85/sphinx-6.0.1-py3-none-any.whl", hash = "sha256:4ad5caa630835a794ee4f6f4772300f407b7d6ac05b418abfb5c7c38f9b24d18"},
+    {url = "https://files.pythonhosted.org/packages/a3/33/18ce396733d4debc754c62e3beff9e411d29dc88be462b7868617ed6e2f4/Sphinx-6.0.1.tar.gz", hash = "sha256:6217d768c3c865769c1561ea31c2f27d3bea413c9b0e1fd4722811ea148a4a46"},
 ]
 "sphinx-autobuild 2021.3.14" = [
     {url = "https://files.pythonhosted.org/packages/7e/7d/8fb7557b6c9298d2bcda57f4d070de443c6355dfb475582378e2aa16a02c/sphinx_autobuild-2021.3.14-py3-none-any.whl", hash = "sha256:8fe8cbfdb75db04475232f05187c776f46f6e9e04cacf1e49ce81bdac649ccac"},
@@ -1913,9 +1913,9 @@ content_hash = "sha256:376bbd0a5b692d8941c9cf4990f853f21608e20618493ffcf5d554623
     {url = "https://files.pythonhosted.org/packages/b5/72/835d6fadb9e5d02304cf39b18f93d227cd93abd3c41ebf58e6853eeb1455/sphinxcontrib-serializinghtml-1.1.5.tar.gz", hash = "sha256:aa5f6de5dfdf809ef505c4895e51ef5c9eac17d0f287933eb49ec495280b6952"},
     {url = "https://files.pythonhosted.org/packages/c6/77/5464ec50dd0f1c1037e3c93249b040c8fc8078fdda97530eeb02424b6eea/sphinxcontrib_serializinghtml-1.1.5-py2.py3-none-any.whl", hash = "sha256:352a9a00ae864471d3a7ead8d7d79f5fc0b57e8b3f95e9867eb9eb28999b92fd"},
 ]
-"sphinxcontrib-towncrier 0.3.0a0" = [
-    {url = "https://files.pythonhosted.org/packages/24/ba/bcbc69bd7757abc571ba843a190b3edcdcb7301e33e9f639dfc3c9fe8acd/sphinxcontrib_towncrier-0.3.0a0-py3-none-any.whl", hash = "sha256:0ab468f1a0d74aed693b84fba663c509df959c08c1d0153716023bcccbca0990"},
-    {url = "https://files.pythonhosted.org/packages/3a/3d/2fbeacb9810916cb4c7b6eb0e83775a8b87d0ae20372300416b33a142f10/sphinxcontrib-towncrier-0.3.0a0.tar.gz", hash = "sha256:2b3323aa4025b06f06c3384eadb537b58fbb5074c9a1a2cae46e5aeef8cd0cfd"},
+"sphinxcontrib-towncrier 0.3.2a0" = [
+    {url = "https://files.pythonhosted.org/packages/42/cb/ddc3f45ba4d883f186693053919d627fc9d115c9a81780fc4aaf04d1a82f/sphinxcontrib_towncrier-0.3.2a0-py3-none-any.whl", hash = "sha256:74fc27a24231b56f1e4820a5dcb121a8c69aa6b6a0d2367c61144b9673ebf73a"},
+    {url = "https://files.pythonhosted.org/packages/8f/bc/66fd79cc6a9b515dd41c97722b0b85e9fe87ad924423e8ae44da9dc635a0/sphinxcontrib-towncrier-0.3.2a0.tar.gz", hash = "sha256:7cf18ac9c13533fffdb794dab278c6ad845f8c85bfa56942eba077d543885fa6"},
 ]
 "sphinxcontrib-trio 1.1.2" = [
     {url = "https://files.pythonhosted.org/packages/a7/4d/6e1598531046c272730501337d5303ce3958387a4fde1da8875580f5c41b/sphinxcontrib_trio-1.1.2-py3-none-any.whl", hash = "sha256:1b849be08a147ef4113e35c191a51c5792613a9a54697b497cd91656d906a232"},
@@ -1950,9 +1950,9 @@ content_hash = "sha256:376bbd0a5b692d8941c9cf4990f853f21608e20618493ffcf5d554623
     {url = "https://files.pythonhosted.org/packages/f9/51/6f63a166d9a3077be100cbb13dcbce434e5654daaaa7003b0a045b9f6edf/tornado-6.2-cp37-abi3-musllinux_1_1_x86_64.whl", hash = "sha256:1d54d13ab8414ed44de07efecb97d4ef7c39f7438cf5e976ccd356bebb1b5fca"},
     {url = "https://files.pythonhosted.org/packages/fb/bd/074254a55bfc82d7a1886abbd803600ef01cbd76ee66bc30307b2724130b/tornado-6.2-cp37-abi3-macosx_10_9_universal2.whl", hash = "sha256:20f638fd8cc85f3cbae3c732326e96addff0a15e22d80f049e00121651e82e72"},
 ]
-"towncrier 22.8.0" = [
-    {url = "https://files.pythonhosted.org/packages/79/da/45e2efb28d08b564fe8967dd1e62e27dd54234e6f4f07d5e6687e056a83f/towncrier-22.8.0-py2.py3-none-any.whl", hash = "sha256:3b780c3d966e1b26414830aec3d15000654b31e64e024f3e5fd128b4c6eb8f47"},
-    {url = "https://files.pythonhosted.org/packages/f1/ab/b01e83747f0eaca79e1d0fe2d6b88b130041a78f350f0fd9bd8572b15604/towncrier-22.8.0.tar.gz", hash = "sha256:7d3839b033859b45fb55df82b74cfd702431933c0cc9f287a5a7ea3e05d042cb"},
+"towncrier 22.12.0" = [
+    {url = "https://files.pythonhosted.org/packages/d8/67/43de8ec69e486f031b20c234864497a4047faccb7bb68b953ee1dbf2e251/towncrier-22.12.0.tar.gz", hash = "sha256:9c49d7e75f646a9aea02ae904c0bc1639c8fd14a01292d2b123b8d307564034d"},
+    {url = "https://files.pythonhosted.org/packages/df/57/a725a385f93360186d4aa112a250d70579604f1c4ac9c407707459f3a837/towncrier-22.12.0-py3-none-any.whl", hash = "sha256:9767a899a4d6856950f3598acd9e8f08da2663c49fdcda5ea0f9e6ba2afc8eea"},
 ]
 "typing-extensions 4.2.0" = [
     {url = "https://files.pythonhosted.org/packages/75/e1/932e06004039dd670c9d5e1df0cd606bf46e29a28e65d5bb28e894ea29c9/typing_extensions-4.2.0-py3-none-any.whl", hash = "sha256:6657594ee297170d19f67d55c05852a874e7eb634f4f753dbd667855e07c1708"},
