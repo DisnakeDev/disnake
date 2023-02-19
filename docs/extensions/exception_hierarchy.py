@@ -1,10 +1,13 @@
 # SPDX-License-Identifier: MIT
+from typing import TYPE_CHECKING
 
-from _types import SphinxExtensionMeta
 from docutils import nodes
 from docutils.parsers.rst import Directive
-from sphinx.application import Sphinx
-from sphinx.writers.html import HTMLTranslator
+
+if TYPE_CHECKING:
+    from _types import SphinxExtensionMeta
+    from sphinx.application import Sphinx
+    from sphinx.writers.html import HTMLTranslator
 
 
 class exception_hierarchy(nodes.General, nodes.Element):

@@ -5,16 +5,18 @@ import importlib
 import inspect
 import re
 from collections import defaultdict
-from typing import DefaultDict, Dict, List, NamedTuple, Optional, Tuple
+from typing import TYPE_CHECKING, DefaultDict, Dict, List, NamedTuple, Optional, Tuple
 
-from _types import SphinxExtensionMeta
 from docutils import nodes
 from sphinx import addnodes
-from sphinx.application import Sphinx
-from sphinx.environment import BuildEnvironment
 from sphinx.locale import _
 from sphinx.util.docutils import SphinxDirective
-from sphinx.writers.html import HTMLTranslator
+
+if TYPE_CHECKING:
+    from _types import SphinxExtensionMeta
+    from sphinx.application import Sphinx
+    from sphinx.environment import BuildEnvironment
+    from sphinx.writers.html import HTMLTranslator
 
 
 class attributetable(nodes.General, nodes.Element):

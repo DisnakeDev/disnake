@@ -1,10 +1,13 @@
 # SPDX-License-Identifier: MIT
 
 import logging
+from typing import TYPE_CHECKING
 
-from _types import SphinxExtensionMeta
-from sphinx.application import Sphinx
 from sphinx.util import logging as sphinx_logging
+
+if TYPE_CHECKING:
+    from _types import SphinxExtensionMeta
+    from sphinx.application import Sphinx
 
 
 class NitpickFileIgnorer(logging.Filter):
