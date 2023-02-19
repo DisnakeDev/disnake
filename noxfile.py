@@ -39,7 +39,7 @@ nox.needs_version = ">=2022.1.7"
 reset_coverage = True
 
 
-@nox.session()
+@nox.session(python="3.8")
 def docs(session: nox.Session):
     """Build and generate the documentation.
 
@@ -72,12 +72,16 @@ def docs(session: nox.Session):
             )
 
 
-@nox.session(python=False)
+@nox.session(python="3.8")
 def lint(session: nox.Session):
     """Check all files for linting errors"""
-    session.run_always("pdm", "install", "-dG", "lint", external=True)
+    session.run_always("pdm", "install", "-dG", "lint", "-G", "tools", external=True)
 
-    session.run("pre-commit", "run", "--all-files", *session.posargs)
+    # the lock takes a bit of time and isn't necessary except when actually committing
+    env = {}
+    if "pdm-lock-check" not in session.posargs:
+        env["SKIP"] = "pdm-lock-check"
+    session.run("pre-commit", "run", "--all-files", env=env, *session.posargs)
 
 
 @nox.session(name="check-manifest")
