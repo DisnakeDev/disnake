@@ -38,23 +38,6 @@ jobs:
     - name: Run pre-commit
       id: pre-commit
       uses: pre-commit/action@v3.0.0
-      env:
-        SKIP: 'flake8'
-
-    # Run flake8 and have it format the linting errors in the format of
-    # the GitHub Workflow command to register error annotations. This
-    # means that our flake8 output is automatically added as an error
-    # annotation to both the run result and in the "Files" tab of a
-    # pull request.
-    #
-    # Format used:
-    # ::error file={filename},line={line},col={col}::{message}
-    - name: Run flake8
-      id: flake8
-      if: always() && (steps.pre-commit.outcome == 'success' || steps.pre-commit.outcome == 'failure')
-      run: "flake8 \
-        --format='::error file=%(path)s,line=%(row)d,col=%(col)d::\
-        [flake8] %(code)s: %(text)s'"
 
   docs:
     # unlike the other workflows, we are using version 20.04 here as
