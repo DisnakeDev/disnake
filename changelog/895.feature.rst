@@ -1,1 +1,0 @@
-Adds :class:`Event` enumeration to use in :meth:`Client.wait_for`, :meth:`disnake.ext.commands.Bot.wait_for` and in :func:`disnake.ext.commands.Bot.listen` decorator.

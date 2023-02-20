@@ -1191,7 +1191,6 @@ class InteractionBotBase(CommonBotBase):
     async def application_command_can_run(
         self, inter: ApplicationCommandInteraction, *, call_once: bool = False
     ) -> bool:
-
         if inter.data.type is ApplicationCommandType.chat_input:
             checks = self._slash_command_check_once if call_once else self._slash_command_checks
 

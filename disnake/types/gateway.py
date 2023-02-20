@@ -8,6 +8,7 @@ from typing_extensions import NotRequired
 
 from .activity import PartialPresenceUpdate, PresenceData, SendableActivity
 from .appinfo import PartialAppInfo, PartialGatewayAppInfo
+from .audit_log import AuditLogEntry
 from .automod import AutoModAction, AutoModRule, AutoModTriggerType
 from .channel import Channel, GuildChannel, StageInstance
 from .emoji import Emoji, PartialEmoji
@@ -243,6 +244,7 @@ class VoiceResumeCommand(TypedDict):
 # Gateway events
 #####
 
+
 # https://discord.com/developers/docs/topics/gateway-events#ready
 class ReadyEvent(TypedDict):
     v: int
@@ -461,6 +463,11 @@ GuildUpdateEvent = Guild
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-delete
 GuildDeleteEvent = UnavailableGuild
+
+
+# https://discord.com/developers/docs/topics/gateway-events#guild-audit-log-entry-create
+class AuditLogEntryCreate(AuditLogEntry):
+    guild_id: Snowflake
 
 
 class _GuildBanEvent(TypedDict):

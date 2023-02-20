@@ -10,7 +10,6 @@ from .bot_base import BotBase, when_mentioned, when_mentioned_or
 from .interaction_bot_base import InteractionBotBase
 
 if TYPE_CHECKING:
-
     import asyncio
 
     import aiohttp

@@ -1,1 +1,0 @@
-The :attr:`PublicUserFlags.discord_certified_moderator` is now an alias of :attr:`PublicUserFlags.moderator_programs_alumni`.

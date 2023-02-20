@@ -1,1 +1,0 @@
-Add :attr:`~Member.flags` property to :class:`Member`.

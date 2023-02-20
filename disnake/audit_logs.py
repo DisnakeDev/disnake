@@ -10,6 +10,7 @@ from typing import (
     Dict,
     Generator,
     List,
+    Mapping,
     Optional,
     Tuple,
     Type,
@@ -557,13 +558,13 @@ class AuditLogEntry(Hashable):
         *,
         data: AuditLogEntryPayload,
         guild: Guild,
-        application_commands: Dict[int, APIApplicationCommand],
-        automod_rules: Dict[int, AutoModRule],
-        guild_scheduled_events: Dict[int, GuildScheduledEvent],
-        integrations: Dict[int, PartialIntegration],
-        threads: Dict[int, Thread],
-        users: Dict[int, User],
-        webhooks: Dict[int, Webhook],
+        application_commands: Mapping[int, APIApplicationCommand],
+        automod_rules: Mapping[int, AutoModRule],
+        guild_scheduled_events: Mapping[int, GuildScheduledEvent],
+        integrations: Mapping[int, PartialIntegration],
+        threads: Mapping[int, Thread],
+        users: Mapping[int, User],
+        webhooks: Mapping[int, Webhook],
     ) -> None:
         self._state = guild._state
         self.guild = guild
