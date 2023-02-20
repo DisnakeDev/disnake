@@ -2123,9 +2123,10 @@ class PartialMessage(Hashable):
             ChannelType.public_thread,
             ChannelType.private_thread,
             ChannelType.voice,
+            ChannelType.stage_voice,
         ):
             raise TypeError(
-                f"Expected TextChannel, DMChannel, VoiceChannel, Thread, or PartialMessageable "
+                f"Expected TextChannel, VoiceChannel, DMChannel, StageChannel, Thread, or PartialMessageable "
                 f"with a valid type, not {type(channel)!r} (type: {channel.type!r})"
             )
 
