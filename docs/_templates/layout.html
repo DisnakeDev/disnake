@@ -35,7 +35,7 @@
         href="{{ pathto('_static/opensearch.xml', 1) }}"/>
   {%- endif %}
   {%- if favicon_url %}
-  <link rel="icon" href="{{ pathto('_static/' + favicon_url, 1)|e }}"/>
+  <link rel="icon" href="{{ pathto( favicon_url, 1)|e }}"/>
   {%- endif %}
   {%- block linktags %}
   {%- if hasdoc('about') %}
