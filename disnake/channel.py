@@ -1843,6 +1843,60 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
     ) -> StageChannel:
         return await self._clone_impl({}, name=name, reason=reason)
 
+    def is_nsfw(self) -> bool:
+        """Whether the channel is marked as NSFW.
+
+        .. versionadded:: 2.9
+
+        :return type: :class:`bool`
+        """
+        return self.nsfw
+
+    @property
+    def last_message(self) -> Optional[Message]:
+        """Gets the last message in this channel from the cache.
+
+        The message might not be valid or point to an existing message.
+
+        .. admonition:: Reliable Fetching
+            :class: helpful
+
+            For a slightly more reliable method of fetching the
+            last message, consider using either :meth:`history`
+            or :meth:`fetch_message` with the :attr:`last_message_id`
+            attribute.
+
+        .. versionadded:: 2.9
+
+        Returns
+        -------
+        Optional[:class:`Message`]
+            The last message in this channel or ``None`` if not found.
+        """
+        return self._state._get_message(self.last_message_id) if self.last_message_id else None
+
+    def get_partial_message(self, message_id: int, /) -> PartialMessage:
+        """Creates a :class:`PartialMessage` from the given message ID.
+
+        This is useful if you want to work with a message and only have its ID without
+        doing an unnecessary API call.
+
+        .. versionadded:: 2.9
+
+        Parameters
+        ----------
+        message_id: :class:`int`
+            The message ID to create a partial message for.
+
+        Returns
+        -------
+        :class:`PartialMessage`
+            The partial message object.
+        """
+        from .message import PartialMessage
+
+        return PartialMessage(channel=self, id=message_id)
+
     @property
     def instance(self) -> Optional[StageInstance]:
         """Optional[:class:`StageInstance`]: The running stage instance of the stage channel.
