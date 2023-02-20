@@ -7,6 +7,7 @@ import logging
 import re
 import sys
 import weakref
+from errno import ECONNRESET
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -422,7 +423,7 @@ class HTTPClient:
                 # This is handling exceptions from the request
                 except OSError as e:
                     # Connection reset by peer
-                    if tries < 4 and e.errno in (54, 10054):
+                    if tries < 4 and e.errno == ECONNRESET:
                         await asyncio.sleep(1 + tries * 2)
                         continue
                     raise

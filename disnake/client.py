@@ -9,6 +9,7 @@ import sys
 import traceback
 import warnings
 from datetime import datetime, timedelta
+from errno import ECONNRESET
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -80,6 +81,7 @@ if TYPE_CHECKING:
     from .app_commands import APIApplicationCommand
     from .asset import AssetBytes
     from .channel import DMChannel
+    from .enums import Event
     from .member import Member
     from .message import Message
     from .types.application_role_connection import (
@@ -96,7 +98,6 @@ __all__ = (
 )
 
 CoroT = TypeVar("CoroT", bound=Callable[..., Coroutine[Any, Any, Any]])
-
 
 _log = logging.getLogger(__name__)
 
@@ -974,7 +975,7 @@ class Client:
                     return
 
                 # If we get connection reset by peer then try to RESUME
-                if isinstance(exc, OSError) and exc.errno in (54, 10054):
+                if isinstance(exc, OSError) and exc.errno == ECONNRESET:
                     ws_params.update(
                         sequence=self.ws.sequence,
                         initial=False,
@@ -1526,7 +1527,7 @@ class Client:
 
     def wait_for(
         self,
-        event: str,
+        event: Union[str, Event],
         *,
         check: Optional[Callable[..., bool]] = None,
         timeout: Optional[float] = None,
@@ -1568,6 +1569,19 @@ class Client:
                     msg = await client.wait_for('message', check=check)
                     await channel.send(f'Hello {msg.author}!')
 
+            # using events enums:
+            @client.event
+            async def on_message(message):
+                if message.content.startswith('$greet'):
+                    channel = message.channel
+                    await channel.send('Say hello!')
+
+                    def check(m):
+                        return m.content == 'hello' and m.channel == channel
+
+                    msg = await client.wait_for(Event.message, check=check)
+                    await channel.send(f'Hello {msg.author}!')
+
         Waiting for a thumbs up reaction from the message author: ::
 
             @client.event
@@ -1589,9 +1603,10 @@ class Client:
 
         Parameters
         ----------
-        event: :class:`str`
+        event: Union[:class:`str`, :class:`.Event`]
             The event name, similar to the :ref:`event reference <discord-api-events>`,
-            but without the ``on_`` prefix, to wait for.
+            but without the ``on_`` prefix, to wait for. It's recommended
+            to use :class:`.Event`.
         check: Optional[Callable[..., :class:`bool`]]
             A predicate to check what to wait for. The arguments must meet the
             parameters of the event being waited for.
@@ -1619,7 +1634,7 @@ class Client:
 
             check = _check
 
-        ev = event.lower()
+        ev = event.lower() if isinstance(event, str) else event.value
         try:
             listeners = self._listeners[ev]
         except KeyError:
