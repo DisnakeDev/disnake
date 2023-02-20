@@ -629,8 +629,8 @@ class ParamInfo:
             argument = self.converter(inter, argument)
             if inspect.isawaitable(argument):
                 return await argument
-            else:
-                return argument
+
+            return argument
         except errors.CommandError:
             raise
         except Exception as e:

@@ -29,8 +29,7 @@ async def guess(ctx: commands.Context):
     try:
         guess = await ctx.bot.wait_for("message", check=is_guess_message, timeout=10)
     except asyncio.TimeoutError:
-        await ctx.send(f"Sorry, you took too long. The answer was {answer}.")
-        return
+        return await ctx.send(f"Sorry, you took too long. The answer was {answer}.")
 
     if int(guess.content) == answer:
         await ctx.send("You guessed correctly!")

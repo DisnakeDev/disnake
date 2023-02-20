@@ -125,7 +125,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
         self, interaction: ApplicationCommandInteraction, target: Any = None, *args, **kwargs
     ) -> None:
         # the target may just not be passed in
-        args = (target or interaction.target,) + args
+        args = (target or interaction.target, *args)
         if self.cog is not None:
             await safe_call(self.callback, self.cog, interaction, *args, **kwargs)
         else:
@@ -221,7 +221,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         self, interaction: ApplicationCommandInteraction, target: Any = None, *args, **kwargs
     ) -> None:
         # the target may just not be passed in
-        args = (target or interaction.target,) + args
+        args = (target or interaction.target, *args)
         if self.cog is not None:
             await safe_call(self.callback, self.cog, interaction, *args, **kwargs)
         else:

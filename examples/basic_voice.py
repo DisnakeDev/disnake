@@ -73,8 +73,7 @@ class Music(commands.Cog):
         """Joins a voice channel"""
 
         if ctx.voice_client is not None:
-            await ctx.voice_client.move_to(channel)
-            return
+            return await ctx.voice_client.move_to(channel)
 
         await channel.connect()
 
@@ -112,8 +111,7 @@ class Music(commands.Cog):
         """Changes the player's volume"""
 
         if ctx.voice_client is None:
-            await ctx.send("Not connected to a voice channel.")
-            return
+            return await ctx.send("Not connected to a voice channel.")
 
         ctx.voice_client.source.volume = volume / 100
         await ctx.send(f"Changed volume to {volume}%")

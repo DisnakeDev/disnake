@@ -62,7 +62,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "InteractionChannel", V_co]):
         A list of channels that have been selected by the user.
     """
 
-    __repr_attributes__: Tuple[str, ...] = BaseSelect.__repr_attributes__ + ("channel_types",)
+    __repr_attributes__: Tuple[str, ...] = (*BaseSelect.__repr_attributes__, "channel_types")
 
     @overload
     def __init__(

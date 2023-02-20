@@ -41,8 +41,7 @@ async def userinfo_error(ctx: commands.Context, error: commands.CommandError):
     # If the conversion above fails for any reason, it will raise `commands.UserNotFound`
     # so we handle this in this error handler:
     if isinstance(error, commands.UserNotFound):
-        await ctx.send("Couldn't find that user.")
-        return
+        return await ctx.send("Couldn't find that user.")
 
 
 @bot.command()
@@ -71,8 +70,7 @@ async def multiply(ctx: commands.Context, number: int, maybe: bool):
     # See: https://docs.disnake.dev/en/stable/ext/commands/commands.html#bool
 
     if maybe is True:
-        await ctx.send(str(number * 2))
-        return
+        return await ctx.send(str(number * 2))
 
     await ctx.send(str(number * 5))
 

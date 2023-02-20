@@ -96,7 +96,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         A list of values that have been selected by the user.
     """
 
-    __repr_attributes__: Tuple[str, ...] = BaseSelect.__repr_attributes__ + ("options",)
+    __repr_attributes__: Tuple[str, ...] = (*BaseSelect.__repr_attributes__, "options")
 
     @overload
     def __init__(

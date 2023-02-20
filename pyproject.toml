@@ -69,13 +69,12 @@ select = [
     # "SIM", # flake8-simplify
     "TID251", # flake8-tidy-imports, replaces S404
     # "TCH", # flake8-type-checking
-    # "RUF", # ruff specific exceptions
-    "RUF100", # unused noqa directive
+    "RUF", # ruff specific exceptions
     "PT", # flake8-pytest-style
     "Q", # flake8-quotes
     "T20", # flake8-print
     "PGH", # pygrep-hooks
-    "TRY002", "TRY004","TRY300", # tryceratops
+    "TRY002", "TRY004", # tryceratops
 ]
 ignore = [
     # star imports
@@ -95,13 +94,13 @@ ignore = [
     "B026", # backwards star-arg unpacking
     "E501", # line too long
     "E731", # assigning lambdas to variables
+    "RUF004", # keyword args must be supplied after starred arguments
     "T201", # print statements
 ]
 
 [tool.ruff.per-file-ignores]
 "disnake/__main__.py" = ["T201"]
 "disnake/i18n.py" = ["B027"] # lib bug
-"disnake/types/**.py" = ["TCH"]
 "disnake/**.py" = ["PT"]
 "examples/*.py" = ["B008", "T201", "PT"]
 "examples/basic_voice.py" = ["S104"]
@@ -113,7 +112,6 @@ ignore = [
 fixture-parentheses = false
 mark-parentheses = false
 
-[tool.ruff.flake8-tidy-imports]
 [tool.ruff.flake8-tidy-imports.banned-api]
 "subprocess".msg = "Consider possible security implications associated with the subprocess module." # replaces S404
 
