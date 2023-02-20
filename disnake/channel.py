@@ -1782,6 +1782,9 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
         self.last_message_id: Optional[int] = utils._get_as_snowflake(data, "last_message_id")
 
+    async def _get_channel(self):
+        return self
+
     @property
     def requesting_to_speak(self) -> List[Member]:
         """List[:class:`Member`]: A list of members who are requesting to speak in the stage channel."""
