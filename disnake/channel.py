@@ -1919,6 +1919,8 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         # It also implicitly denies all other voice perms
         if not base.connect:
             denied = Permissions.voice()
+            # stage channels also deny all text related permissions
+            denied.value |= Permissions.text().value
             denied.update(manage_channels=True, manage_roles=True)
             base.value &= ~denied.value
         return base
