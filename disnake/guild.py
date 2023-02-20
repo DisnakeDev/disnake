@@ -3853,6 +3853,8 @@ class Guild(Hashable):
         oldest_first: :class:`bool`
             If set to ``True``, return entries in oldest->newest order. Defaults to ``False``.
 
+            .. versionadded:: 2.9
+
         Raises
         ------
         Forbidden
