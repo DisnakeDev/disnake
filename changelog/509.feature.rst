@@ -1,0 +1,1 @@
+Add a new type of parameter for Slash Command. `Private` type allow developpers to tell disnake to not publish a specific parameter from a Slash Command

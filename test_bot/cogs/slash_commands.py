@@ -71,6 +71,31 @@ class SlashCommands(commands.Cog):
     async def largenumber(self, inter: disnake.CommandInteraction, largenum: commands.LargeInt):
         await inter.send(f"Is int: {isinstance(largenum, int)}")
 
+    @commands.slash_command()
+    async def privateparam(
+        self, inter: disnake.CommandInteraction, number: int, _letter: str = "autofill"
+    ):
+        await inter.send(
+            f"Is int: {isinstance(number, int)}\n"
+            f"Is str: {isinstance(_letter, str)}\n"
+            f"Value of `number`: {number}\n"
+            f"Value of `_letter`: {_letter}"
+        )
+
+    @commands.slash_command()
+    async def privateparam_type(
+        self,
+        inter: disnake.CommandInteraction,
+        number: commands.Private[int],
+        letter: commands.Private[str] = "autofill",
+    ):
+        await inter.send(
+            f"Is int: {isinstance(number, int)}\n"
+            f"Is str: {isinstance(letter, str)}\n"
+            f"Value of `number`: {number}\n"
+            f"Value of `letter`: {letter}"
+        )
+
 
 def setup(bot):
     bot.add_cog(SlashCommands(bot))

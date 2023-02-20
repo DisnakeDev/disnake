@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import asyncio
 import collections.abc
+import enum
 import inspect
 import itertools
 import math
@@ -28,6 +29,7 @@ from typing import (
     Type,
     TypeVar,
     Union,
+    cast,
     get_args,
     get_origin,
     get_type_hints,
@@ -49,7 +51,7 @@ from .converter import CONVERTER_MAPPING
 T_ = TypeVar("T_")
 
 if TYPE_CHECKING:
-    from typing_extensions import Concatenate, ParamSpec, Self, TypeGuard
+    from typing_extensions import Annotated, Concatenate, ParamSpec, Self, TypeGuard
 
     from disnake.app_commands import Choices
     from disnake.i18n import LocalizationValue, LocalizedOptional
@@ -96,6 +98,7 @@ __all__ = (
     "LargeInt",
     "ParamInfo",
     "Param",
+    "Private",
     "param",
     "inject",
     "injection",
@@ -416,6 +419,23 @@ class LargeInt(int):
 
 # option types that require additional handling in verify_type
 _VERIFY_TYPES: Final[FrozenSet[OptionType]] = frozenset((OptionType.user, OptionType.mentionable))
+
+
+class _PrivateEnum(enum.Enum):
+    # An enum to generate sentinel values for Annotated
+    PRIVATE = enum.auto()
+
+
+if TYPE_CHECKING:
+    Private = Annotated[T, _PrivateEnum.PRIVATE]
+else:
+
+    class Private:
+        def __init__(self, tp: Any) -> None:
+            self.tp = tp
+
+        def __class_getitem__(self, tp: T) -> Any:
+            return cast(T, Private(tp))
 
 
 class ParamInfo:
@@ -840,7 +860,8 @@ def safe_call(function: Callable[..., T], /, *possible_args: Any, **possible_kwa
 def isolate_self(
     function: Callable,
 ) -> Tuple[Tuple[Optional[inspect.Parameter], ...], Dict[str, inspect.Parameter]]:
-    """Create parameters without self and the first interaction"""
+    """Create parameters without self and the first interaction.
+    Also, remove all the private parameters"""
     sig = signature(function)
 
     parameters = dict(sig.parameters)
@@ -859,6 +880,12 @@ def isolate_self(
         annot = parametersl[0].annotation
         if issubclass_(annot, ApplicationCommandInteraction) or annot is inspect.Parameter.empty:
             inter_param = parameters.pop(parametersl[0].name)
+        # we remove all the private parameters.
+        # private parameters are annotated with Private type
+        for param in parametersl:
+            tpe = param.annotation
+            if isinstance(tpe, Private):
+                parameters.pop(param.name)
 
     return (cog_param, inter_param), parameters
 
