@@ -33,7 +33,10 @@ jobs:
       uses: ./.github/actions/setup-env
       with:
         python-version: 3.8
-        pdm-command: "pdm install -dG tools -dG lint"
+
+    # TODO: remove when moving to ruff
+    - name: Install dependencies
+      run: pdm install -dG lint
 
     - name: Run pre-commit
       id: pre-commit
@@ -67,7 +70,6 @@ jobs:
       uses: ./.github/actions/setup-env
       with:
         python-version: 3.8
-        pdm-command: "pdm install -G docs"
 
     - name: Run sphinx-build
       run: nox -s docs -- --keep-going -W -w $GITHUB_STEP_SUMMARY
@@ -134,7 +136,6 @@ jobs:
       uses: ./.github/actions/setup-env
       with:
         python-version: 3.8
-        pdm-command: "pdm install -dG tools -dG codemod"
 
     - name: Run slotscheck
       if: (success() || failure()) && steps.setup.outcome == 'success'
@@ -185,7 +186,9 @@ jobs:
       uses: ./.github/actions/setup-env
       with:
         python-version: ${{ matrix.python-version }}
-        pdm-command: 'pdm install -dG test -dG typing'
+
+    - name: Install dependencies
+      run: pdm install -dG test  # needed for coverage
 
     - name: Test package install
       run: |

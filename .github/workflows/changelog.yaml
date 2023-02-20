@@ -31,8 +31,9 @@ jobs:
         uses: ./.github/actions/setup-env
         with:
           python-version: '3.9'
-          pdm-command: "pdm install -dG tools"
 
+      - name: Install dependencies
+        run: pdm install -dG tools
 
       - name: Check for presence of a Change Log fragment (only pull requests)
         # NOTE: The pull request' base branch needs to be fetched so towncrier
