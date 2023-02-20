@@ -1276,7 +1276,13 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             denied = Permissions.voice()
             # voice channels also deny all text related permissions
             denied.value |= Permissions.text().value
-            denied.update(manage_channels=True, manage_roles=True)
+
+            denied.update(
+                manage_channels=True,
+                manage_roles=True,
+                manage_events=True,
+                manage_webhooks=True,
+            )
             base.value &= ~denied.value
         return base
 
@@ -1916,12 +1922,17 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         base = super().permissions_for(obj, ignore_timeout=ignore_timeout)
 
         # voice channels cannot be edited by people who can't connect to them
-        # It also implicitly denies all other voice perms
+        # It also implicitly denies all other channel permissions.
         if not base.connect:
             denied = Permissions.voice()
-            # stage channels also deny all text related permissions
             denied.value |= Permissions.text().value
-            denied.update(manage_channels=True, manage_roles=True)
+            denied.update(
+                manage_channels=True,
+                manage_roles=True,
+                manage_events=True,
+                request_to_speak=True,
+                manage_webhooks=True,
+            )
             base.value &= ~denied.value
         return base
 
