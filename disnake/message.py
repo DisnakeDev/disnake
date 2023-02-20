@@ -1406,6 +1406,18 @@ class Message(Hashable):
         if self.type is MessageType.interaction_premium_upsell:
             return self.content
 
+        if self.type is MessageType.stage_start:
+            return f"{self.author.name} started {self.content}"
+
+        if self.type is MessageType.stage_end:
+            return f"{self.author.name} ended {self.content}"
+
+        if self.type is MessageType.stage_speaker:
+            return f"{self.author.name} is now a speaker."
+
+        if self.type is MessageType.stage_topic:
+            return f"{self.author.name} changed the Stage topic: {self.content}"
+
         if self.type is MessageType.guild_application_premium_subscription:
             application_name = (
                 self.application["name"]
