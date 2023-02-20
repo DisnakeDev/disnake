@@ -1355,7 +1355,7 @@ class Messageable:
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
         suppress_embeds: bool = ...,
-        flags: Optional[MessageFlags] = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: AllowedMentions = ...,
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
@@ -1376,7 +1376,7 @@ class Messageable:
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
         suppress_embeds: bool = ...,
-        flags: Optional[MessageFlags] = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: AllowedMentions = ...,
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
@@ -1397,7 +1397,7 @@ class Messageable:
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
         suppress_embeds: bool = ...,
-        flags: Optional[MessageFlags] = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: AllowedMentions = ...,
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
@@ -1418,7 +1418,7 @@ class Messageable:
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
         suppress_embeds: bool = ...,
-        flags: Optional[MessageFlags] = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: AllowedMentions = ...,
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
@@ -1540,7 +1540,7 @@ class Messageable:
 
             .. versionadded:: 2.5
 
-        flags: Optional[:class:`.MessageFlags`]
+        flags: :class:`.MessageFlags`
             The flags to set for this message.
             Only :attr:`~.MessageFlags.suppress_embeds` and :attr:`~.MessageFlags.suppress_notifications`
             are supported.
