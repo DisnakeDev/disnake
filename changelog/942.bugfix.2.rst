@@ -1,0 +1,1 @@
+Fix :meth:`.VoiceChannel.permissions_for` not disabling :attr:`Permissions.manage_webhooks` when the user cannot connect to the channel.
