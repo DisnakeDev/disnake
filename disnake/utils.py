@@ -1171,7 +1171,9 @@ def evaluate_annotation(
     if implicit_str and isinstance(tp, str):
         if tp in cache:
             return cache[tp]
-        evaluated = eval(tp, globals, locals)  # noqa: PGH001
+        evaluated = eval(  # noqa: PGH001 # this is how annotations are supposed to be unstringifed
+            tp, globals, locals
+        )
         cache[tp] = evaluated
         return evaluate_annotation(evaluated, globals, locals, cache)
 
