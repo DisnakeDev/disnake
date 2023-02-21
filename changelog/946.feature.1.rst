@@ -1,0 +1,1 @@
+Add :meth:`ParamInfo.copy`

@@ -1,0 +1,1 @@
+Allow referencing the same `ParamInfo` instance in multiple signatures.
