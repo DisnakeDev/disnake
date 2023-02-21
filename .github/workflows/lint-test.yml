@@ -97,7 +97,7 @@ jobs:
 
     - name: Install dependencies out of venv
       run: |
-        pdm export --pyproject --without-hashes -G:all -dG:all -o requirements.txt
+        pdm export --pyproject --without-hashes -d -G speed -G docs -G voice -o requirements.txt
         pip install -r requirements.txt
         pip install .
 
