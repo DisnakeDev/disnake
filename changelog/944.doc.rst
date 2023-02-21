@@ -1,0 +1,1 @@
+|commands| Fix commands extension events being duplicated in search results.
