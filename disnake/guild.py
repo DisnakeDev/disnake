@@ -4592,14 +4592,10 @@ class Guild(Hashable):
 
         Retrieves the guild onboarding object.
 
-        You must have :attr:`.Permissions.manage_guild` and :attr:`.Permissions.manage_roles` permissions to do this.
-
         .. versionadded:: 2.9
 
         Raises
         ------
-        Forbidden
-            You do not have proper permissions to retrieve the guild onboarding object.
         HTTPException
             Retrieving the guild onboarding object failed.
 
