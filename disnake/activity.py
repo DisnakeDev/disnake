@@ -148,7 +148,7 @@ class _BaseActivity:
     def large_image_url(self) -> Optional[str]:
         """Optional[:class:`str`]: Returns a URL pointing to the large image asset of this activity, if applicable.
 
-        .. versionchanged:: 2.7
+        .. versionchanged:: 2.9
             Moved from :class:`Activity` to base type, making this available to all activity types.
         """
         try:
@@ -162,7 +162,7 @@ class _BaseActivity:
     def small_image_url(self) -> Optional[str]:
         """Optional[:class:`str`]: Returns a URL pointing to the small image asset of this activity, if applicable.
 
-        .. versionchanged:: 2.7
+        .. versionchanged:: 2.9
             Moved from :class:`Activity` to base type, making this available to all activity types.
         """
         try:
@@ -176,7 +176,7 @@ class _BaseActivity:
     def large_image_text(self) -> Optional[str]:
         """Optional[:class:`str`]: Returns the large image asset hover text of this activity, if applicable.
 
-        .. versionchanged:: 2.7
+        .. versionchanged:: 2.9
             Moved from :class:`Activity` to base type, making this available to all activity types.
         """
         return self.assets.get("large_text", None)
@@ -185,7 +185,7 @@ class _BaseActivity:
     def small_image_text(self) -> Optional[str]:
         """Optional[:class:`str`]: Returns the small image asset hover text of this activity, if applicable.
 
-        .. versionchanged:: 2.7
+        .. versionchanged:: 2.9
             Moved from :class:`Activity` to base type, making this available to all activity types.
         """
         return self.assets.get("small_text", None)
