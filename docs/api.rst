@@ -3355,7 +3355,7 @@ of :class:`enum.Enum`.
 
         Possible attributes for :class:`AuditLogDiff`:
 
-        - :attr:`~AuditLogDiff.default_channel_ids`
+        - :attr:`~AuditLogDiff.default_channels`
         - :attr:`~AuditLogDiff.enable_default_channels`
         - :attr:`~AuditLogDiff.enable_onboarding_prompts`
         - :attr:`~AuditLogDiff.prompts`
@@ -4886,6 +4886,12 @@ AuditLogDiff
 
         :type: List[:class:`OnboardingPrompt`]
 
+    .. attribute:: default_channels
+
+        The list of default channels of an onboarding being changed.
+
+        :type: List[:class:`~.abc.GuildChannel`]
+
 
 Webhook Support
 ------------------
@@ -6155,6 +6161,7 @@ ApplicationRoleConnectionMetadata
 .. attributetable:: ApplicationRoleConnectionMetadata
 
 .. autoclass:: ApplicationRoleConnectionMetadata
+
 OnboardingPrompt
 ~~~~~~~~~~~~~~~~
 
