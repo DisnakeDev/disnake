@@ -18,8 +18,7 @@ from disnake.types import onboarding as onboarding_types
 onboarding_prompt_option_payload: onboarding_types.PartialOnboardingPromptOption = {
     "title": "test",
     "description": "test",
-    "emoji_id": "123",
-    "emoji_name": None,
+    "emoji": {"id": "123", "name": "", "animated": False},
     "role_ids": ["456", "789"],
     "channel_ids": ["123", "456"],
 }
@@ -31,7 +30,7 @@ def onboarding_prompt_option() -> OnboardingPromptOption:
     return OnboardingPromptOption(
         title="test",
         description="test",
-        emoji=PartialEmoji(name="", id=123),
+        emoji=PartialEmoji(name="", id=123, animated=False),
         roles=[Object(id="456"), Object(id="789")],
         channels=[Object(id="123"), Object(id="456")],
     )
@@ -107,7 +106,7 @@ class TestOnboardingPromptOption:
     ) -> None:
         assert onboarding_prompt_option.title == "test"
         assert onboarding_prompt_option.description == "test"
-        assert onboarding_prompt_option.emoji == PartialEmoji(name="", id=123)
+        assert onboarding_prompt_option.emoji == PartialEmoji(name="", id=123, animated=False)
         assert onboarding_prompt_option.roles == [Object(id="456"), Object(id="789")]
         assert onboarding_prompt_option.channels == [Object(id="123"), Object(id="456")]
 

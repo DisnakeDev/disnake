@@ -1,9 +1,10 @@
 # SPDX-License-Identifier: MIT
 
-from typing import List, Literal, Optional, TypedDict
+from typing import List, Literal, TypedDict
 
 from typing_extensions import NotRequired
 
+from .emoji import Emoji
 from .snowflake import Snowflake, SnowflakeList
 
 # NOTE: PartialOnboardingXX is very redundant, TBD
@@ -15,8 +16,7 @@ class OnboardingPromptOption(TypedDict):
     id: Snowflake
     title: str
     description: str
-    emoji_id: Optional[Snowflake]
-    emoji_name: Optional[str]
+    emoji: Emoji
     role_ids: SnowflakeList
     channel_ids: SnowflakeList
 
@@ -25,8 +25,7 @@ class PartialOnboardingPromptOption(TypedDict):
     id: NotRequired[Snowflake]
     title: str
     description: str
-    emoji_id: Optional[Snowflake]
-    emoji_name: Optional[str]
+    emoji: Emoji
     role_ids: SnowflakeList
     channel_ids: SnowflakeList
 

@@ -7,7 +7,6 @@ from .emoji import Emoji, PartialEmoji, _EmojiTag
 from .enums import OnboardingPromptType, try_enum
 from .mixins import Hashable
 from .object import Object
-from .utils import _get_as_snowflake
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -36,8 +35,6 @@ class Onboarding:  # NOTE: or GuildOnboarding?
     """Represents a guild onboarding.
 
     .. versionadded:: 2.9
-
-    TO BE DONE...
 
     Attributes
     ----------
@@ -113,7 +110,7 @@ class OnboardingPromptOption(Hashable):
         *,
         title: str,
         description: str,
-        emoji: Optional[Union[str, PartialEmoji, Emoji]],
+        emoji: Union[str, PartialEmoji, Emoji],
         roles: Sequence[Snowflake],
         channels: Sequence[Snowflake],
     ):
@@ -128,17 +125,13 @@ class OnboardingPromptOption(Hashable):
         self.roles = roles
         self.channels = channels
 
-        self.emoji: Optional[
-            Union[str, PartialEmoji, Emoji]
-        ] = None  # NOTE: not sure if this is nullable
-        if emoji is None:
-            self.emoji = None
-        elif isinstance(emoji, str):
+        self.emoji: Union[PartialEmoji, Emoji]
+        if isinstance(emoji, str):
             self.emoji = PartialEmoji.from_str(emoji)
         elif isinstance(emoji, _EmojiTag):
             self.emoji = emoji
         else:
-            raise TypeError("emoji must be None, a str, PartialEmoji, or Emoji instance")
+            raise TypeError("emoji must be a str, PartialEmoji, or Emoji instance")
 
     def __str__(self) -> str:
         return self.title
@@ -151,12 +144,10 @@ class OnboardingPromptOption(Hashable):
         )
 
     def _to_dict(self) -> PartialOnboardingPromptOptionPayload:
-        emoji_name, emoji_id = PartialEmoji._emoji_to_name_id(self.emoji)
         payload: PartialOnboardingPromptOptionPayload = {
             "title": self.title,
             "description": self.description,
-            "emoji_name": emoji_name,
-            "emoji_id": emoji_id,
+            "emoji": self.emoji.to_dict(),
             "role_ids": [role.id for role in self.roles],
             "channel_ids": [channel.id for channel in self.channels],
         }
@@ -168,9 +159,7 @@ class OnboardingPromptOption(Hashable):
 
     @classmethod
     def _from_dict(cls, *, data: OnboardingPromptOptionPayload, state: ConnectionState) -> Self:
-        emoji_id = _get_as_snowflake(data, "emoji_id")
-        emoji_name = data.get("emoji_name")
-        emoji = PartialEmoji._emoji_from_name_id(emoji_name, emoji_id, state=state)
+        emoji = PartialEmoji.from_dict(data["emoji"])
 
         self = cls(
             title=data["title"],
