@@ -84,8 +84,8 @@ def lint(session: nox.Session):
 @nox.session(name="check-manifest")
 def check_manifest(session: nox.Session):
     """Run check-manifest."""
-    session.run_always("pdm", "install", "-dG", "tools", external=True)
-    session.run("check-manifest", "-v", "--no-build-isolation")
+    session.run_always("pdm", "install", "--no-self", "-dG", "tools", external=True)
+    session.run("check-manifest", "-v")
 
 
 @nox.session()
