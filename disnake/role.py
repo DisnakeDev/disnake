@@ -52,7 +52,7 @@ class RoleTags:
     subscription_listing_id: Optional[:class:`int`]
         The ID of this role's subscription listing, if applicable.
 
-        .. versionadded:: 2.8
+        .. versionadded:: 2.9
     """
 
     __slots__ = (
@@ -111,7 +111,7 @@ class RoleTags:
     def is_available_for_purchase(self) -> bool:
         """Whether the role is a subscription role and available for purchase.
 
-        .. versionadded:: 2.8
+        .. versionadded:: 2.9
 
         :return type: :class:`bool`
         """
@@ -120,7 +120,7 @@ class RoleTags:
     def is_subscription(self) -> bool:
         """Whether the role is associated with a role subscription.
 
-        .. versionadded:: 2.8
+        .. versionadded:: 2.9
 
         :return type: :class:`bool`
         """
@@ -330,7 +330,7 @@ class Role(Hashable):
     def is_available_for_purchase(self) -> bool:
         """Whether the role is a subscription role and available for purchase.
 
-        .. versionadded:: 2.8
+        .. versionadded:: 2.9
 
         :return type: :class:`bool`
         """
@@ -339,7 +339,7 @@ class Role(Hashable):
     def is_subscription(self) -> bool:
         """Whether the role is associated with a role subscription.
 
-        .. versionadded:: 2.8
+        .. versionadded:: 2.9
 
         :return type: :class:`bool`
         """
