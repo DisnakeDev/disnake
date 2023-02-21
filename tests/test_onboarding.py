@@ -26,7 +26,6 @@ onboarding_prompt_option_payload: onboarding_types.PartialOnboardingPromptOption
 
 @pytest.fixture()
 def onboarding_prompt_option() -> OnboardingPromptOption:
-
     return OnboardingPromptOption(
         title="test",
         description="test",
@@ -38,7 +37,6 @@ def onboarding_prompt_option() -> OnboardingPromptOption:
 
 @pytest.fixture()
 def onboarding_prompt() -> OnboardingPrompt:
-
     onboarding_prompt_payload: onboarding_types.PartialOnboardingPrompt = {
         "title": "test",
         "options": [],
@@ -48,12 +46,11 @@ def onboarding_prompt() -> OnboardingPrompt:
         "type": OnboardingPromptType.multiple_choice,  # type: ignore
     }
 
-    return OnboardingPrompt(**onboarding_prompt_payload)
+    return OnboardingPrompt(**onboarding_prompt_payload)  # type: ignore
 
 
 @pytest.fixture()
 def onboarding() -> Onboarding:
-
     onboarding_payload: onboarding_types.Onboarding = {
         "guild_id": "123",
         "prompts": [],

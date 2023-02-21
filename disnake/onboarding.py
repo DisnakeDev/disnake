@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional, Sequence, Union
+from typing import TYPE_CHECKING, List, Sequence, Union
 
 from .emoji import Emoji, PartialEmoji, _EmojiTag
 from .enums import OnboardingPromptType, try_enum

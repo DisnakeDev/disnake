@@ -3980,6 +3980,20 @@ of :class:`enum.Enum`.
 
         The metadata value (``integer``) is not equal to the guild's configured value.
 
+.. class:: OnboardingPromptType
+
+    Represents the type of onboarding prompt.
+
+    .. versionadded:: 2.9
+
+    .. attribute:: multiple_choice
+
+        The prompt is a multiple choice prompt.
+
+    .. attribute:: dropdown
+
+        The prompt is a dropdown prompt.
+
 .. autoclass:: Event
     :members:
 
