@@ -76,7 +76,7 @@ def lint(session: nox.Session):
 
     # the lock takes a bit of time and isn't necessary except when actually committing
     env = {}
-    if "pdm-lock-check" not in session.posargs:
+    if "pdm-lock-check" not in session.posargs and session.interactive:
         env["SKIP"] = "pdm-lock-check"
     session.run("pre-commit", "run", "--all-files", env=env, *session.posargs)
 
