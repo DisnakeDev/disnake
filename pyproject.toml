@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: MIT
 
 [build-system]
-requires = ["setuptools>=77.0.3"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "disnake"
@@ -84,7 +84,6 @@ ruff = [
 tools = [
     "prek>=0.2.0",
     "slotscheck==0.19.1",
-    "check-manifest==0.50",
     { include-group = "ruff" },
 ]
 changelog = [
@@ -114,12 +113,17 @@ build = [
     "twine>=6.1.0",
 ]
 
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["disnake*"]
-
 [tool.uv]
 required-version = ">=0.9.2"
+
+[tool.hatch.build.targets.sdist]
+only-include = [
+    "disnake",
+]
+
+[tool.hatch.version]
+path = "disnake/__init__.py"
+pattern = '__version__ = "(?P<version>.+)"'
 
 [tool.ruff]
 line-length = 100
@@ -414,24 +418,4 @@ exclude_lines = [
     "^\\s*if TYPE_CHECKING",
     "^\\s*raise NotImplementedError$",
     "^\\s*\\.\\.\\.$",
-]
-
-
-[tool.check-manifest]
-ignore = [
-    # CI
-    ".pre-commit-config.yaml",
-    ".readthedocs.yml",
-    ".libcst.codemod.yaml",
-    "noxfile.py",
-    # docs
-    "CONTRIBUTING.md",
-    "RELEASE.md",
-    "assets/**",
-    "changelog/**",
-    "docs/**",
-    "examples/**",
-    # tests
-    "tests/**",
-    "scripts/**",
 ]

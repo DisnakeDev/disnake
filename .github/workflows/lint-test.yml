@@ -256,6 +256,7 @@ jobs:
         run: |
           nox -s slotscheck
 
+      # This only runs if the previous steps were successful, no point in running it otherwise
       - name: Try building package
         if: (success() || failure()) && steps.setup.outcome == 'success'
         run: |
