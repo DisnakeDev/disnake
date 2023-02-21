@@ -3588,7 +3588,6 @@ class Guild(Hashable):
 
         role_positions: List[Any] = []
         for role, position in positions.items():
-
             payload = {"id": role.id, "position": position}
 
             role_positions.append(payload)
@@ -3823,13 +3822,14 @@ class Guild(Hashable):
         after: Optional[SnowflakeTime] = None,
         user: Optional[Snowflake] = None,
         action: Optional[AuditLogAction] = None,
+        oldest_first: bool = False,
     ) -> AuditLogIterator:
         """Returns an :class:`AsyncIterator` that enables receiving the guild's audit logs.
 
         You must have :attr:`~Permissions.view_audit_log` permission to use this.
 
-        Entries are always returned in order from newest to oldest, regardless of the
-        ``before`` and ``after`` parameters.
+        Entries are returned in order from newest to oldest by default;
+        pass ``oldest_first=True`` to reverse the iteration order.
 
         Examples
         --------
@@ -3853,18 +3853,22 @@ class Guild(Hashable):
         ----------
         limit: Optional[:class:`int`]
             The number of entries to retrieve. If ``None`` retrieve all entries.
-        before: Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]
+        before: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
             Retrieve entries before this date or entry.
             If a datetime is provided, it is recommended to use a UTC aware datetime.
             If the datetime is naive, it is assumed to be local time.
-        after: Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]
+        after: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
             Retrieve entries after this date or entry.
             If a datetime is provided, it is recommended to use a UTC aware datetime.
             If the datetime is naive, it is assumed to be local time.
-        user: :class:`abc.Snowflake`
+        user: Optional[:class:`abc.Snowflake`]
             The moderator to filter entries from.
-        action: :class:`AuditLogAction`
+        action: Optional[:class:`AuditLogAction`]
             The action to filter with.
+        oldest_first: :class:`bool`
+            If set to ``True``, return entries in oldest->newest order. Defaults to ``False``.
+
+            .. versionadded:: 2.9
 
         Raises
         ------
@@ -3890,6 +3894,7 @@ class Guild(Hashable):
             limit=limit,
             user_id=user_id,
             action_type=action.value if action is not None else None,
+            oldest_first=oldest_first,
         )
 
     async def widget(self) -> Widget:
