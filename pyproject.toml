@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: MIT
 
 [build-system]
-requires = ["setuptools>=61"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
 
 [project]
 name = "disnake"
@@ -104,10 +104,6 @@ build = [
     "twine~=6.1",
 ]
 
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["disnake*"]
-
 [tool.nox]
 script-venv-backend = "uv|virtualenv"
 
@@ -123,6 +119,15 @@ lint = { cmd = "nox -Rs lint --", help = "Check all files for linting errors" }
 pyright = { cmd = "nox -Rs pyright --", help = "Run pyright" }
 setup_env = { cmd = "{pdm} run noxfile.py -s dev", help = "Set up the local environment and all dependencies" }
 test = { cmd = "nox -Rs test --", help = "Run pytest" }
+
+[tool.hatch.build]
+include = [
+    "disnake/",
+]
+
+[tool.hatch.version]
+source = "vcs"
+fallback-version = "0.0.0"
 
 [tool.ruff]
 line-length = 100
