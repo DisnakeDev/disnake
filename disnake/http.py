@@ -7,6 +7,7 @@ import logging
 import re
 import sys
 import weakref
+from errno import ECONNRESET
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -422,7 +423,7 @@ class HTTPClient:
                 # This is handling exceptions from the request
                 except OSError as e:
                     # Connection reset by peer
-                    if tries < 4 and e.errno in (54, 10054):
+                    if tries < 4 and e.errno == ECONNRESET:
                         await asyncio.sleep(1 + tries * 2)
                         continue
                     raise
@@ -1745,13 +1746,17 @@ class HTTPClient:
         self,
         guild_id: Snowflake,
         limit: int = 100,
+        # only one of these two may be specified, otherwise `after` gets ignored
         before: Optional[Snowflake] = None,
+        after: Optional[Snowflake] = None,
         user_id: Optional[Snowflake] = None,
         action_type: Optional[audit_log.AuditLogEvent] = None,
     ) -> Response[audit_log.AuditLog]:
         params: Dict[str, Any] = {"limit": limit}
-        if before:
+        if before is not None:
             params["before"] = before
+        if after is not None:
+            params["after"] = after
         if user_id:
             params["user_id"] = user_id
         if action_type:

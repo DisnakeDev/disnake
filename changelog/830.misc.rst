@@ -1,1 +1,0 @@
-Declare a :pep:`517` build backend in pyproject.toml, and use :pep:`621` to define most package metadata.

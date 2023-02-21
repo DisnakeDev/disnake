@@ -383,6 +383,7 @@ class Interaction:
         view: Optional[View] = MISSING,
         components: Optional[Components[MessageUIComponent]] = MISSING,
         suppress_embeds: bool = MISSING,
+        flags: MessageFlags = MISSING,
         allowed_mentions: Optional[AllowedMentions] = None,
     ) -> InteractionMessage:
         """|coro|
@@ -456,6 +457,15 @@ class Interaction:
 
             .. versionadded:: 2.7
 
+        flags: :class:`MessageFlags`
+            The new flags to set for this message. Overrides existing flags.
+            Only :attr:`~MessageFlags.suppress_embeds` is supported.
+
+            If parameter ``suppress_embeds`` is provided,
+            that will override the setting of :attr:`.MessageFlags.suppress_embeds`.
+
+            .. versionadded:: 2.9
+
         Raises
         ------
         HTTPException
@@ -488,6 +498,7 @@ class Interaction:
             view=view,
             components=components,
             suppress_embeds=suppress_embeds,
+            flags=flags,
             allowed_mentions=allowed_mentions,
             previous_allowed_mentions=previous_mentions,
         )
@@ -587,8 +598,9 @@ class Interaction:
         view: View = MISSING,
         components: Components[MessageUIComponent] = MISSING,
         tts: bool = False,
-        ephemeral: bool = False,
-        suppress_embeds: bool = False,
+        ephemeral: bool = MISSING,
+        suppress_embeds: bool = MISSING,
+        flags: MessageFlags = MISSING,
         delete_after: float = MISSING,
     ) -> None:
         """|coro|
@@ -645,6 +657,16 @@ class Interaction:
 
             .. versionadded:: 2.5
 
+        flags: :class:`MessageFlags`
+            The flags to set for this message.
+            Only :attr:`~MessageFlags.suppress_embeds`, :attr:`~MessageFlags.ephemeral`
+            and :attr:`~MessageFlags.suppress_notifications` are supported.
+
+            If parameters ``suppress_embeds`` or ``ephemeral`` are provided,
+            they will override the corresponding setting of this ``flags`` parameter.
+
+            .. versionadded:: 2.9
+
         delete_after: :class:`float`
             If provided, the number of seconds to wait in the background
             before deleting the message we just sent. If the deletion fails,
@@ -681,6 +703,7 @@ class Interaction:
             tts=tts,
             ephemeral=ephemeral,
             suppress_embeds=suppress_embeds,
+            flags=flags,
             delete_after=delete_after,
         )
 
@@ -852,8 +875,9 @@ class InteractionResponse:
         view: View = MISSING,
         components: Components[MessageUIComponent] = MISSING,
         tts: bool = False,
-        ephemeral: bool = False,
-        suppress_embeds: bool = False,
+        ephemeral: bool = MISSING,
+        suppress_embeds: bool = MISSING,
+        flags: MessageFlags = MISSING,
         delete_after: float = MISSING,
     ) -> None:
         """|coro|
@@ -906,6 +930,16 @@ class InteractionResponse:
             all the embeds from the UI if set to ``True``.
 
             .. versionadded:: 2.5
+
+        flags: :class:`MessageFlags`
+            The flags to set for this message.
+            Only :attr:`~MessageFlags.suppress_embeds`, :attr:`~MessageFlags.ephemeral`
+            and :attr:`~MessageFlags.suppress_notifications` are supported.
+
+            If parameters ``suppress_embeds`` or ``ephemeral`` are provided,
+            they will override the corresponding setting of this ``flags`` parameter.
+
+            .. versionadded:: 2.9
 
         Raises
         ------
@@ -966,11 +1000,14 @@ class InteractionResponse:
         if content is not None:
             payload["content"] = str(content)
 
-        payload["flags"] = 0
-        if suppress_embeds:
-            payload["flags"] |= MessageFlags.suppress_embeds.flag
-        if ephemeral:
-            payload["flags"] |= MessageFlags.ephemeral.flag
+        if suppress_embeds is not MISSING or ephemeral is not MISSING:
+            flags = MessageFlags._from_value(0 if flags is MISSING else flags.value)
+            if suppress_embeds is not MISSING:
+                flags.suppress_embeds = suppress_embeds
+            if ephemeral is not MISSING:
+                flags.ephemeral = ephemeral
+        if flags is not MISSING:
+            payload["flags"] = flags.value
 
         if view is not MISSING:
             payload["components"] = view.to_components()
@@ -1310,7 +1347,6 @@ class InteractionResponse:
         if modal is not None:
             modal_data = modal.to_components()
         elif title and components and custom_id:
-
             rows = components_to_dict(components)
             if len(rows) > 5:
                 raise ValueError("Maximum number of components exceeded.")
@@ -1446,6 +1482,7 @@ class InteractionMessage(Message):
         file: File = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -1461,6 +1498,7 @@ class InteractionMessage(Message):
         files: List[File] = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -1476,6 +1514,7 @@ class InteractionMessage(Message):
         file: File = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -1491,6 +1530,7 @@ class InteractionMessage(Message):
         files: List[File] = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -1507,6 +1547,7 @@ class InteractionMessage(Message):
         files: List[File] = MISSING,
         attachments: Optional[List[Attachment]] = MISSING,
         suppress_embeds: bool = MISSING,
+        flags: MessageFlags = MISSING,
         allowed_mentions: Optional[AllowedMentions] = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[Components[MessageUIComponent]] = MISSING,
@@ -1568,6 +1609,15 @@ class InteractionMessage(Message):
 
             .. versionadded:: 2.7
 
+        flags: :class:`MessageFlags`
+            The new flags to set for this message. Overrides existing flags.
+            Only :attr:`~MessageFlags.suppress_embeds` is supported.
+
+            If parameter ``suppress_embeds`` is provided,
+            that will override the setting of :attr:`.MessageFlags.suppress_embeds`.
+
+            .. versionadded:: 2.9
+
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
@@ -1600,6 +1650,7 @@ class InteractionMessage(Message):
                 files=files,
                 attachments=attachments,
                 suppress_embeds=suppress_embeds,
+                flags=flags,
                 allowed_mentions=allowed_mentions,
                 view=view,
                 components=components,
@@ -1620,6 +1671,7 @@ class InteractionMessage(Message):
             files=files,
             attachments=attachments,
             suppress_embeds=suppress_embeds,
+            flags=flags,
             allowed_mentions=allowed_mentions,
             view=view,
             components=components,
@@ -1787,9 +1839,21 @@ class InteractionDataResolved(Dict[str, Any]):
             f"roles={self.roles!r} channels={self.channels!r} messages={self.messages!r} attachments={self.attachments!r}>"
         )
 
+    @overload
+    def get_with_type(
+        self, key: Snowflake, data_type: Union[OptionType, ComponentType]
+    ) -> Union[Member, User, Role, InteractionChannel, Message, Attachment, None]:
+        ...
+
+    @overload
+    def get_with_type(
+        self, key: Snowflake, data_type: Union[OptionType, ComponentType], default: T
+    ) -> Union[Member, User, Role, InteractionChannel, Message, Attachment, T]:
+        ...
+
     def get_with_type(
         self, key: Snowflake, data_type: Union[OptionType, ComponentType], default: T = None
-    ) -> Union[Member, User, Role, InteractionChannel, Message, Attachment, T]:
+    ) -> Union[Member, User, Role, InteractionChannel, Message, Attachment, T, None]:
         if data_type is OptionType.mentionable or data_type is ComponentType.mentionable_select:
             key = int(key)
             if (result := self.members.get(key)) is not None:
