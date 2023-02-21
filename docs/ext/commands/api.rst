@@ -1,6 +1,6 @@
 .. SPDX-License-Identifier: MIT
 
-.. currentmodule:: disnake
+.. currentmodule:: disnake.ext.commands
 
 API Reference
 ===============
