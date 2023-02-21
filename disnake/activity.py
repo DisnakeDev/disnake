@@ -387,7 +387,7 @@ class Activity(BaseActivity):
         if url := super()._create_image_url(asset):
             return url
 
-        # if it's not a `<prefix:id>` asset and we have an application ID, create url
+        # if it's not a `<prefix>:<id>` asset and we have an application ID, create url
         if ":" not in asset and self.application_id:
             return f"{Asset.BASE}/app-assets/{self.application_id}/{asset}.png"
 
