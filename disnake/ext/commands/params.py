@@ -530,6 +530,30 @@ class ParamInfo:
         self.max_length = max_length
         self.large = large
 
+    def copy(self) -> ParamInfo:
+        cls = self.__class__
+        new = cls.__new__(cls)
+
+        new.name = self.name
+        new.name_localizations = self.name_localizations._copy()
+        new.description = self.description
+        new.description_localizations = self.description_localizations._copy()
+        new.default = self.default
+        new.param_name = self.param_name
+        new.converter = self.converter
+        new.convert_default = self.convert_default
+        new.autocomplete = self.autocomplete
+        new.choices = self.choices.copy()
+        new.type = self.type
+        new.channel_types = self.channel_types.copy()
+        new.max_value = self.max_value
+        new.min_value = self.min_value
+        new.min_length = self.min_length
+        new.max_length = self.max_length
+        new.large = self.large
+
+        return new
+
     @property
     def required(self) -> bool:
         return self.default is Ellipsis
@@ -559,7 +583,8 @@ class ParamInfo:
         parsed_docstring = parsed_docstring or {}
 
         if isinstance(param.default, cls):
-            self = param.default
+            # we copy this ParamInfo instance because it can be used in multiple signatures
+            self = param.default.copy()
         else:
             default = param.default if param.default is not inspect.Parameter.empty else ...
             self = cls(default)

@@ -227,6 +227,13 @@ class LocalizationValue:
         if self._key is not None:
             self._data = store.get(self._key)
 
+    def _copy(self) -> LocalizationValue:
+        cls = self.__class__
+        new = cls.__new__(cls)
+        new._key = self._key
+        new._data = None if self._data is None else self._data.copy()
+        return new
+
     @property
     def data(self) -> Optional[Dict[str, str]]:
         """Optional[Dict[:class:`str`, :class:`str`]]: A dict with a locale -> localization mapping, if available."""
