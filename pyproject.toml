@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: MIT
 
 [build-system]
-requires = ["setuptools>=61"]
-build-backend = "setuptools.build_meta"
+requires = ["pdm-backend>=2.0"]
+build-backend = "pdm.backend"
 
 [project]
 name = "disnake"
@@ -60,7 +60,6 @@ docs = [
     "towncrier==22.12.0",
     "sphinx-notfound-page==0.8.3",
 ]
-discord = ["discord-disnake"]
 
 [tool.pdm.dev-dependencies]
 nox = [
@@ -117,6 +116,15 @@ test = { cmd = "test", help = "Run pytest" }
 
 [tool.taskipy.settings]
 runner = "pdm run"
+
+[tool.pdm.build]
+includes = [
+    "disnake/",
+]
+
+[tool.pdm.version]
+source = "file"
+path = "disnake/__init__.py"
 
 [tool.black]
 line-length = 100
