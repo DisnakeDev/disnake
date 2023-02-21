@@ -1746,13 +1746,17 @@ class HTTPClient:
         self,
         guild_id: Snowflake,
         limit: int = 100,
+        # only one of these two may be specified, otherwise `after` gets ignored
         before: Optional[Snowflake] = None,
+        after: Optional[Snowflake] = None,
         user_id: Optional[Snowflake] = None,
         action_type: Optional[audit_log.AuditLogEvent] = None,
     ) -> Response[audit_log.AuditLog]:
         params: Dict[str, Any] = {"limit": limit}
-        if before:
+        if before is not None:
             params["before"] = before
+        if after is not None:
+            params["after"] = after
         if user_id:
             params["user_id"] = user_id
         if action_type:
