@@ -372,7 +372,7 @@ class Range(type, metaclass=RangeMeta):
 
 class LargeRange(Range):
     """Type depicting a range that can handle large numbers.
-    
+
     See :ref:`param_ranges` for more information.
 
     .. versionadded:: 2.9
@@ -718,7 +718,11 @@ class ParamInfo:
             self.min_value = annotation.min_value
             self.max_value = annotation.max_value
 
-            if isinstance(annotation, LargeRange) and self.min_value < -(2**53) or self.max_value > 2**53:
+            if (
+                isinstance(annotation, LargeRange)
+                and self.min_value < -(2**53)
+                or self.max_value > 2**53
+            ):
                 self.large = True
 
             annotation = annotation.underlying_type
