@@ -235,7 +235,8 @@ class HTTPClient:
         self.loop: asyncio.AbstractEventLoop = loop
         self.connector = connector
         self.__session: aiohttp.ClientSession = MISSING  # filled in static_login
-        self._locks: weakref.WeakValueDictionary[str, asyncio.Lock] = weakref.WeakValueDictionary()
+        # (route bucket, discord bucket) -> asyncio lock
+        self._locks: weakref.WeakValueDictionary[tuple[str, Optional[str]], asyncio.Lock] = weakref.WeakValueDictionary()
         self._global_over: asyncio.Event = asyncio.Event()
         self._global_over.set()
         self.token: Optional[str] = None
@@ -268,6 +269,16 @@ class HTTPClient:
 
         return await self.__session.ws_connect(url, **kwargs)
 
+    def _get_bucket(self, route_bucket: str, discord_bucket: Optional[str]) -> asyncio.Lock:
+        key = (route_bucket, discord_bucket)
+        lock = self._locks.get(key)
+
+        if lock is None:
+            lock = asyncio.Lock()
+            self._locks[key] = lock
+
+        return lock
+
     async def request(
         self,
         route: Route,
@@ -279,12 +290,9 @@ class HTTPClient:
         bucket = route.bucket
         method = route.method
         url = route.url
+        discord_bucket: Optional[str] = None
 
-        lock = self._locks.get(bucket)
-        if lock is None:
-            lock = asyncio.Lock()
-            if bucket is not None:
-                self._locks[bucket] = lock
+        lock = self._get_bucket(bucket, discord_bucket)
 
         # header creation
         headers: Dict[str, str] = {
@@ -349,6 +357,10 @@ class HTTPClient:
                             kwargs.get("data"),
                             response.status,
                         )
+
+                        discord_bucket = response.headers.get("X-RateLimit-Bucket")
+                        lock = self._get_bucket(bucket, discord_bucket)
+                        maybe_lock.lock = lock
 
                         # even errors have text involved in them so this is safe to call
                         data = await json_or_text(response)
