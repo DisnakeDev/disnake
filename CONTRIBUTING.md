@@ -50,7 +50,7 @@ We would greatly appreciate the code submitted to be of a consistent style with 
 Run these commands to install [`nox`](https://nox.thea.codes/) and [`pdm`](https://pdm.fming.dev/), as well as the required dependencies in your environment, and to set up [`pre-commit`](https://pre-commit.com/#quick-start) hooks.
 ```
 pip install nox pdm
-pdm setup_env
+pdm run setup_env
 ```
 
 > If you have [pipx](https://pypa.github.io/pipx/) installed on your system, we recommend installing the above tools with pipx instead.
