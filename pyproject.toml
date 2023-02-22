@@ -52,7 +52,6 @@ filter_files = true
 [tool.ruff]
 line-length = 100
 target-version = "py38"
-src = ["disnake"]
 select = [
     # commented out codes are intended to be enabled in future prs
     "F", # pyflakes
