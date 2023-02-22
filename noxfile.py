@@ -36,7 +36,7 @@ nox.needs_version = ">=2022.1.7"
 reset_coverage = True
 
 
-@nox.session(python="3.8")
+@nox.session
 def docs(session: nox.Session):
     """Build and generate the documentation.
 
@@ -69,7 +69,7 @@ def docs(session: nox.Session):
             )
 
 
-@nox.session(python="3.8")
+@nox.session
 def lint(session: nox.Session):
     """Check all files for linting errors"""
     session.run_always("pdm", "install", "-dG", "lint", "-G", "tools", external=True)
