@@ -172,3 +172,19 @@ class StageInstance(TypedDict):
 class GuildDirectory(_BaseChannel):
     type: Literal[14]
     name: str
+
+
+class CreateGuildChannel(TypedDict):
+    name: str
+    type: NotRequired[Optional[ChannelType]]
+    topic: NotRequired[Optional[str]]
+    bitrate: NotRequired[Optional[int]]
+    user_limit: NotRequired[Optional[int]]
+    rate_limit_per_user: NotRequired[Optional[int]]
+    position: NotRequired[Optional[int]]
+    permission_overwrites: NotRequired[List[PermissionOverwrite]]
+    parent_id: NotRequired[Optional[Snowflake]]
+    nsfw: NotRequired[Optional[bool]]
+    rtc_region: NotRequired[Optional[str]]
+    video_quality_mode: NotRequired[Optional[VideoQualityMode]]
+    default_auto_archive_duration: NotRequired[Optional[ThreadArchiveDurationLiteral]]
