@@ -72,9 +72,9 @@ To run all important checks and tests, use `nox`:
 nox -R
 ```
 
-You can also choose to only run a single task; run `pdm run --list` to view all available tasks and use `pdm run <name>` to run them.
+You can also choose to only run a single task; run `pdm run --list` to view all available scripts and use `pdm run <name>` to run them.
 
-Some notes (all of the mentioned tasks are automatically run by `nox -R`, see above):
+Some notes (all of the mentioned scripts are automatically run by `nox -R`, see above):
 - If `pre-commit` hooks aren't installed, run `pdm run lint` manually to check and fix the formatting in all files.  
   **Note**: If the code is formatted incorrectly, `pre-commit` will apply fixes and exit without committing the changes - just stage and commit again.
 - For type-checking, run `pdm run pyright`. You can use `pdm run pyright -w` to automatically re-check on every file change.  
