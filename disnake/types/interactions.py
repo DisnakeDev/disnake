@@ -216,6 +216,7 @@ MessageComponentInteractionData = Union[
 
 ### Modal interaction components
 
+
 # TODO: add other select types
 class ModalInteractionStringSelectData(_BaseComponentInteractionData):
     type: Literal[3]

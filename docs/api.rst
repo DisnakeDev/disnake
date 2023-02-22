@@ -818,6 +818,27 @@ Integrations
     :param payload: The raw event payload data.
     :type payload: :class:`RawIntegrationDeleteEvent`
 
+Audit Logs
+++++++++++
+
+.. function:: on_audit_log_entry_create(entry)
+
+    Called when an audit log entry is created.
+    You must have the :attr:`~Permissions.view_audit_log` permission to receive this.
+
+    This requires :attr:`Intents.moderation` to be enabled.
+
+    .. warning::
+        This scope of data in this gateway event is limited, which means it is much more
+        reliant on the cache than :meth:`Guild.audit_logs`.
+        Because of this, :attr:`AuditLogEntry.target` and :attr:`AuditLogEntry.user`
+        will frequently be of type :class:`Object` instead of the respective model.
+
+    .. versionadded:: 2.8
+
+    :param entry: The audit log entry that was created.
+    :type entry: :class:`AuditLogEntry`
+
 Invites
 +++++++
 
@@ -917,7 +938,7 @@ Members
 
     Called when user gets banned from a :class:`Guild`.
 
-    This requires :attr:`Intents.bans` to be enabled.
+    This requires :attr:`Intents.moderation` to be enabled.
 
     :param guild: The guild the user got banned from.
     :type guild: :class:`Guild`
@@ -930,7 +951,7 @@ Members
 
     Called when a :class:`User` gets unbanned from a :class:`Guild`.
 
-    This requires :attr:`Intents.bans` to be enabled.
+    This requires :attr:`Intents.moderation` to be enabled.
 
     :param guild: The guild the user got unbanned from.
     :type guild: :class:`Guild`
@@ -1080,7 +1101,7 @@ Roles
 .. function:: on_guild_role_create(role)
               on_guild_role_delete(role)
 
-    Called when a :class:`Guild` creates or deletes a new :class:`Role`.
+    Called when a :class:`Guild` creates or deletes a :class:`Role`.
 
     To get the guild it belongs to, use :attr:`Role.guild`.
 
@@ -1764,6 +1785,11 @@ of :class:`enum.Enum`.
         The system message denoting that an auto moderation action was executed.
 
         .. versionadded:: 2.5
+    .. attribute:: role_subscription_purchase
+
+        The system message denoting that a role subscription was purchased.
+
+        .. versionadded:: 2.9
     .. attribute:: interaction_premium_upsell
 
         The system message for an application premium subscription upsell.
@@ -2329,7 +2355,7 @@ of :class:`enum.Enum`.
 .. class:: AuditLogAction
 
     Represents the type of action being done for a :class:`AuditLogEntry`\,
-    which is retrievable via :meth:`Guild.audit_logs`.
+    which is retrievable via :meth:`Guild.audit_logs` or via the :func:`on_audit_log_entry_create` event.
 
     .. attribute:: guild_update
 
@@ -2521,7 +2547,8 @@ of :class:`enum.Enum`.
         A member was kicked.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`User` who got kicked.
+        the :class:`User` who got kicked. If the user is not found then it is
+        a :class:`Object` with the user's ID.
 
         When this is the action, :attr:`~AuditLogEntry.changes` is empty.
 
@@ -2545,7 +2572,8 @@ of :class:`enum.Enum`.
         A member was banned.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`User` who got banned.
+        the :class:`User` who got banned. If the user is not found then it is
+        a :class:`Object` with the user's ID.
 
         When this is the action, :attr:`~AuditLogEntry.changes` is empty.
 
@@ -2554,7 +2582,8 @@ of :class:`enum.Enum`.
         A member was unbanned.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`User` who got unbanned.
+        the :class:`User` who got unbanned. If the user is not found then it is
+        a :class:`Object` with the user's ID.
 
         When this is the action, :attr:`~AuditLogEntry.changes` is empty.
 
@@ -2567,7 +2596,8 @@ of :class:`enum.Enum`.
         - They were timed out
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`Member` or :class:`User` who got updated.
+        the :class:`Member` or :class:`User` who got updated. If the user is not found then it is
+        a :class:`Object` with the user's ID.
 
         Possible attributes for :class:`AuditLogDiff`:
 
@@ -2582,7 +2612,8 @@ of :class:`enum.Enum`.
         either gains a role or loses a role.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`Member` or :class:`User` who got the role.
+        the :class:`Member` or :class:`User` who got the role. If the user is not found then it is
+        a :class:`Object` with the user's ID.
 
         Possible attributes for :class:`AuditLogDiff`:
 
@@ -2618,7 +2649,8 @@ of :class:`enum.Enum`.
         A bot was added to the guild.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`Member` or :class:`User` which was added to the guild.
+        the :class:`Member` or :class:`User` which was added to the guild. If the user is not found then it is
+        a :class:`Object` with an ID.
 
         .. versionadded:: 1.3
 
@@ -2823,6 +2855,7 @@ of :class:`enum.Enum`.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`Member` or :class:`User` who had their message deleted.
+        If the user is not found then it is a :class:`Object` with the user's ID.
 
         When this is the action, the type of :attr:`~AuditLogEntry.extra` is
         set to an unspecified proxy object with two attributes:
@@ -2850,6 +2883,7 @@ of :class:`enum.Enum`.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`Member` or :class:`User` who had their message pinned.
+        If the user is not found then it is a :class:`Object` with the user's ID.
 
         When this is the action, the type of :attr:`~AuditLogEntry.extra` is
         set to an unspecified proxy object with two attributes:
@@ -2865,6 +2899,7 @@ of :class:`enum.Enum`.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`Member` or :class:`User` who had their message unpinned.
+        If the user is not found then it is a :class:`Object` with the user's ID.
 
         When this is the action, the type of :attr:`~AuditLogEntry.extra` is
         set to an unspecified proxy object with two attributes:
@@ -3240,6 +3275,7 @@ of :class:`enum.Enum`.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`Member` or :class:`User` who had their message blocked.
+        If the user is not found then it is a :class:`Object` with the user's ID.
 
         When this is the action, the type of :attr:`~AuditLogEntry.extra` is
         set to an unspecified proxy object with these attributes:
@@ -3254,6 +3290,7 @@ of :class:`enum.Enum`.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`Member` or :class:`User` who had their message flagged.
+        If the user is not found then it is a :class:`Object` with the user's ID.
 
         See :attr:`automod_block_message` for more information on how the
         :attr:`~AuditLogEntry.extra` field is set.
@@ -3264,6 +3301,7 @@ of :class:`enum.Enum`.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`Member` or :class:`User` who was timed out.
+        If the user is not found then it is a :class:`Object` with the user's ID.
 
         See :attr:`automod_block_message` for more information on how the
         :attr:`~AuditLogEntry.extra` field is set.
@@ -3840,34 +3878,45 @@ of :class:`enum.Enum`.
 
     Represents the type of a role connection metadata value.
 
-    These offer comparison operations which allow guilds to configure role requirements
+    These offer comparison operations, which allow guilds to configure role requirements
     based on the metadata value for each user and a guild-specified configured value.
 
     .. versionadded:: 2.8
 
     .. attribute:: integer_less_than_or_equal
+
         The metadata value (``integer``) is less than or equal to the guild's configured value.
 
     .. attribute:: integer_greater_than_or_equal
+
         The metadata value (``integer``) is greater than or equal to the guild's configured value.
 
     .. attribute:: integer_equal
+
         The metadata value (``integer``) is equal to the guild's configured value.
 
     .. attribute:: integer_not_equal
+
         The metadata value (``integer``) is not equal to the guild's configured value.
 
     .. attribute:: datetime_less_than_or_equal
+
         The metadata value (``ISO8601 string``) is less than or equal to the guild's configured value (``integer``; days before current date).
 
     .. attribute:: datetime_greater_than_or_equal
+
         The metadata value (``ISO8601 string``) is greater than or equal to the guild's configured value (``integer``; days before current date).
 
     .. attribute:: boolean_equal
+
         The metadata value (``integer``) is equal to the guild's configured value.
 
     .. attribute:: boolean_not_equal
+
         The metadata value (``integer``) is not equal to the guild's configured value.
+
+.. autoclass:: Event
+    :members:
 
 Async Iterator
 ----------------
@@ -4003,7 +4052,7 @@ Certain utilities make working with async iterators easier, detailed below.
 Audit Log Data
 ----------------
 
-Working with :meth:`Guild.audit_logs` is a complicated process with a lot of machinery
+Working with audit logs is a complicated process with a lot of machinery
 involved. The library attempts to make it easy to use and friendly. In order to accomplish
 this goal, it must make use of a couple of data classes that aid in this goal.
 
@@ -4125,7 +4174,7 @@ AuditLogDiff
 
         The guild's owner. See also :attr:`Guild.owner`
 
-        :type: Union[:class:`Member`, :class:`User`]
+        :type: Union[:class:`Member`, :class:`User`, :class:`Object`]
 
     .. attribute:: region
 
@@ -4395,7 +4444,7 @@ AuditLogDiff
 
         See also :attr:`Invite.inviter`.
 
-        :type: Optional[:class:`User`]
+        :type: Optional[:class:`User`, :class:`Object`]
 
     .. attribute:: max_uses
 
@@ -6090,6 +6139,14 @@ PublicUserFlags
 .. attributetable:: PublicUserFlags
 
 .. autoclass:: PublicUserFlags()
+    :members:
+
+MemberFlags
+~~~~~~~~~~~
+
+.. attributetable:: MemberFlags
+
+.. autoclass:: MemberFlags()
     :members:
 
 .. _discord_ui_kit:

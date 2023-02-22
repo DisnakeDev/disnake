@@ -69,7 +69,7 @@ class PartialIntegration:
     guild: :class:`Guild`
         The guild of the integration.
     type: :class:`str`
-        The integration type (i.e. Twitch).
+        The integration type (i.e. ``twitch``).
     account: :class:`IntegrationAccount`
         The account linked to this integration.
     application_id: Optional[:class:`int`]
@@ -119,7 +119,7 @@ class Integration(PartialIntegration):
         Whether the integration is currently enabled.
     account: :class:`IntegrationAccount`
         The account linked to this integration.
-    user: :class:`User`
+    user: Optional[:class:`User`]
         The user that added this integration.
     """
 

@@ -145,6 +145,9 @@ class Emoji(_EmojiTag, AssetMixin):
         """List[:class:`Role`]: A :class:`list` of roles that are allowed to use this emoji.
 
         If roles is empty, the emoji is unrestricted.
+
+        Emojis with :attr:`subscription roles <RoleTags.integration_id>` are considered premium emojis,
+        and count towards a separate limit of 25 emojis.
         """
         guild = self.guild
         if guild is None:
@@ -214,6 +217,10 @@ class Emoji(_EmojiTag, AssetMixin):
             The new emoji name.
         roles: Optional[List[:class:`~disnake.abc.Snowflake`]]
             A list of roles that can use this emoji. An empty list can be passed to make it available to everyone.
+
+            An emoji cannot have both subscription roles (see :attr:`RoleTags.integration_id`) and
+            non-subscription roles, and emojis can't be converted between premium and non-premium
+            after creation.
         reason: Optional[:class:`str`]
             The reason for editing this emoji. Shows up on the audit log.
 
