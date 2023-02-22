@@ -1103,4 +1103,4 @@ Warning Hierarchy
 .. exception_hierarchy::
 
     - :class:`~.DiscordWarning`
-        - :class:`~.commands.MessageContentPrefixWarning`
+        - :class:`~.MessageContentPrefixWarning`
