@@ -231,7 +231,7 @@ class ApplicationCommandInteractionData(Dict[str, Any]):
         for option in self.options:
             if option.value is None:
                 # Extend the chain and collect kwargs in the nesting
-                return option._get_chain_and_kwargs((*chain, option.name))
+                return option._get_chain_and_kwargs(chain + (option.name,))
             return chain, {o.name: o.value for o in self.options}
         return chain, {}
 
@@ -316,7 +316,7 @@ class ApplicationCommandInteractionDataOption(Dict[str, Any]):
         for option in self.options:
             if option.value is None:
                 # Extend the chain and collect kwargs in the nesting
-                return option._get_chain_and_kwargs((*chain, option.name))
+                return option._get_chain_and_kwargs(chain + (option.name,))
             return chain, {o.name: o.value for o in self.options}
         return chain, {}
 

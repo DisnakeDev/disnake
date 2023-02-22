@@ -81,7 +81,8 @@ ignore = [
     "F403",
 
     # unknown if this is actually an issue
-    "RUF006",
+    "RUF005", # might not be actually faster
+    "RUF006", # might not be an issue/very extreme cases
 
     # ignore try-except-pass. Bare excepts are caught with E722
     "S110",
