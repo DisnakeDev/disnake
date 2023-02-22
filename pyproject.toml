@@ -259,7 +259,6 @@ ignore = [
     "examples/**",
     # tests
     "test_bot/**",
-    "test_launcher.py",
     "tests/**",
     "scripts/**",
 ]
