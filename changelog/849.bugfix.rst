@@ -1,1 +1,0 @@
-|commands| Fix ``help_command`` parameter annotations to allow ``None`` value.

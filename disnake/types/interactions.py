@@ -9,6 +9,7 @@ from typing_extensions import NotRequired
 from .channel import ChannelType
 from .components import Component, Modal
 from .embed import Embed
+from .i18n import LocalizationDict
 from .member import Member, MemberWithUser
 from .role import Role
 from .snowflake import Snowflake
@@ -17,9 +18,6 @@ from .user import User
 
 if TYPE_CHECKING:
     from .message import AllowedMentions, Attachment, Message
-
-
-ApplicationCommandLocalizations = Dict[str, str]
 
 
 ApplicationCommandType = Literal[1, 2, 3]
@@ -31,9 +29,9 @@ class ApplicationCommand(TypedDict):
     application_id: Snowflake
     guild_id: NotRequired[Snowflake]
     name: str
-    name_localizations: NotRequired[Optional[ApplicationCommandLocalizations]]
+    name_localizations: NotRequired[Optional[LocalizationDict]]
     description: str
-    description_localizations: NotRequired[Optional[ApplicationCommandLocalizations]]
+    description_localizations: NotRequired[Optional[LocalizationDict]]
     options: NotRequired[List[ApplicationCommandOption]]
     default_member_permissions: NotRequired[Optional[str]]
     dm_permission: NotRequired[Optional[bool]]
@@ -48,9 +46,9 @@ ApplicationCommandOptionType = Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 class ApplicationCommandOption(TypedDict):
     type: ApplicationCommandOptionType
     name: str
-    name_localizations: NotRequired[Optional[ApplicationCommandLocalizations]]
+    name_localizations: NotRequired[Optional[LocalizationDict]]
     description: str
-    description_localizations: NotRequired[Optional[ApplicationCommandLocalizations]]
+    description_localizations: NotRequired[Optional[LocalizationDict]]
     required: NotRequired[bool]
     choices: NotRequired[List[ApplicationCommandOptionChoice]]
     options: NotRequired[List[ApplicationCommandOption]]
@@ -67,7 +65,7 @@ ApplicationCommandOptionChoiceValue = Union[str, int, float]
 
 class ApplicationCommandOptionChoice(TypedDict):
     name: str
-    name_localizations: NotRequired[Optional[ApplicationCommandLocalizations]]
+    name_localizations: NotRequired[Optional[LocalizationDict]]
     value: ApplicationCommandOptionChoiceValue
 
 
@@ -218,6 +216,7 @@ MessageComponentInteractionData = Union[
 
 ### Modal interaction components
 
+
 # TODO: add other select types
 class ModalInteractionStringSelectData(_BaseComponentInteractionData):
     type: Literal[3]
@@ -337,9 +336,9 @@ class InteractionMessageReference(TypedDict):
 
 class EditApplicationCommand(TypedDict):
     name: str
-    name_localizations: NotRequired[Optional[ApplicationCommandLocalizations]]
+    name_localizations: NotRequired[Optional[LocalizationDict]]
     description: NotRequired[str]
-    description_localizations: NotRequired[Optional[ApplicationCommandLocalizations]]
+    description_localizations: NotRequired[Optional[LocalizationDict]]
     options: NotRequired[Optional[List[ApplicationCommandOption]]]
     default_member_permissions: NotRequired[Optional[str]]
     dm_permission: NotRequired[bool]
