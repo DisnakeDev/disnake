@@ -92,9 +92,9 @@ CallableT = TypeVar("CallableT", bound=Callable[..., Any])
 
 __all__ = (
     "Range",
+    "LargeRange",
     "String",
     "LargeInt",
-    "LargeFloat",
     "ParamInfo",
     "Param",
     "param",
@@ -370,6 +370,16 @@ class Range(type, metaclass=RangeMeta):
         return f"{type(self).__name__}[{a}, {b}]"
 
 
+class LargeRange(Range):
+    """Type depicting a range that can handle large numbers.
+    
+    See :ref:`param_ranges` for more information.
+
+    .. versionadded:: 2.9
+
+    """
+
+
 class StringMeta(type):
     """Custom Generic implementation for String."""
 
@@ -413,10 +423,6 @@ class String(type, metaclass=StringMeta):
 
 class LargeInt(int):
     """Type for large integers in slash commands."""
-
-
-class LargeFloat(float):
-    """Type for large floating-point numbers in slash commands."""
 
 
 # option types that require additional handling in verify_type
@@ -633,6 +639,8 @@ class ParamInfo:
                     print(argument)
                 except ValueError:
                     raise errors.LargeFloatConversionFailure(argument) from None
+            else:
+                raise TypeError(f"Invalid large number type {self._original_large_type!r}!")
 
             if (
                 self.min_value is not None
@@ -709,10 +717,11 @@ class ParamInfo:
         if isinstance(annotation, Range):
             self.min_value = annotation.min_value
             self.max_value = annotation.max_value
-            annotation = annotation.underlying_type
 
-            if self.min_value < -(2**53) or self.max_value > 2**53:
+            if isinstance(annotation, LargeRange) and self.min_value < -(2**53) or self.max_value > 2**53:
                 self.large = True
+
+            annotation = annotation.underlying_type
         if isinstance(annotation, String):
             self.min_length = annotation.min_length
             self.max_length = annotation.max_length
@@ -720,15 +729,12 @@ class ParamInfo:
         if issubclass_(annotation, LargeInt):
             self.large = True
             annotation = int
-        if issubclass_(annotation, LargeFloat):
-            self.large = True
-            annotation = float
 
         if self.large:
             self.type = str
             if annotation not in (int, float):
                 raise TypeError(
-                    "Large integers or large floats must be annotated with int, LargeInt, float, LargeFloat, or Range!"
+                    "Large integers or large floats must be annotated with int, LargeInt, float, or LargeRange!"
                 )
             self._original_large_type = annotation
         elif annotation in self.TYPES:

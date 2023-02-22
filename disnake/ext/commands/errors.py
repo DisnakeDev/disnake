@@ -557,7 +557,7 @@ class LargeFloatConversionFailure(BadArgument):
 
     This inherits from :exc:`BadArgument`
 
-    .. versionadded:: 2.8
+    .. versionadded:: 2.9
 
     Attributes
     ----------

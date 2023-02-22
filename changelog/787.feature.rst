@@ -1,1 +1,1 @@
-|commands| Add large numbers support to :class:`~ext.commands.Range` and add :class:`~ext.commands.LargeFloat`.
+|commands| Add :class:`~ext.commands.LargeRange`, which is a version of :class:`~ext.commands.Range` that supports large numbers.

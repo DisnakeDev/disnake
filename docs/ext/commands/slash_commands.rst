@@ -204,6 +204,9 @@ The type of the option is determined by the range bounds, with the option being 
     ):
         ...
 
+
+If you want to explicitly enable large numbers with range, then you can use a :class:`~ext.commands.LargeRange` annotation.
+
 .. _type_checker_mypy_plugin:
 
 .. note::
