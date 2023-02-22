@@ -1,0 +1,1 @@
+Fix KeepAlive logging un-intentionally attempting to interpolate stack trace logger calls

@@ -207,6 +207,8 @@ class Guild(Hashable):
         - ``AUTO_MODERATION``: Guild has set up auto moderation rules.
         - ``BANNER``: Guild can upload and use a banner. (i.e. :attr:`.banner`)
         - ``COMMUNITY``: Guild is a community server.
+        - ``CREATOR_MONETIZABLE_PROVISIONAL``: Guild has enabled monetization.
+        - ``CREATOR_STORE_PAGE``: Guild has enabled the role subscription promo page.
         - ``DEVELOPER_SUPPORT_SERVER``: Guild is set as a support server in the app directory.
         - ``DISCOVERABLE``: Guild shows up in Server Discovery.
         - ``ENABLED_DISCOVERABLE_BEFORE``: Guild had Server Discovery enabled at least once.
@@ -217,7 +219,6 @@ class Guild(Hashable):
         - ``INVITES_DISABLED``: Guild has paused invites, preventing new users from joining.
         - ``LINKED_TO_HUB``: Guild is linked to a student hub.
         - ``MEMBER_VERIFICATION_GATE_ENABLED``: Guild has Membership Screening enabled.
-        - ``MONETIZATION_ENABLED``: Guild has enabled monetization.
         - ``MORE_EMOJI``: Guild has increased custom emoji slots.
         - ``MORE_STICKERS``: Guild has increased custom sticker slots.
         - ``NEWS``: Guild can create news channels.
@@ -226,6 +227,8 @@ class Guild(Hashable):
         - ``PREVIEW_ENABLED``: Guild can be viewed before being accepted via Membership Screening.
         - ``PRIVATE_THREADS``: Guild has access to create private threads (no longer has any effect).
         - ``ROLE_ICONS``: Guild has access to role icons.
+        - ``ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE``: Guild has role subscriptions that can be purchased.
+        - ``ROLE_SUBSCRIPTIONS_ENABLED``: Guild has enabled role subscriptions.
         - ``SEVEN_DAY_THREAD_ARCHIVE``: Guild has access to the seven day archive time for threads (no longer has any effect).
         - ``TEXT_IN_VOICE_ENABLED``: Guild has text in voice channels enabled (no longer has any effect).
         - ``THREE_DAY_THREAD_ARCHIVE``: Guild has access to the three day archive time for threads (no longer has any effect).
@@ -847,7 +850,11 @@ class Guild(Hashable):
 
     @property
     def emoji_limit(self) -> int:
-        """:class:`int`: The maximum number of emoji slots this guild has."""
+        """:class:`int`: The maximum number of emoji slots this guild has.
+
+        Premium emojis (i.e. those associated with subscription roles) count towards a
+        separate limit of 25.
+        """
         more_emoji = 200 if "MORE_EMOJI" in self.features else 50
         return max(more_emoji, self._PREMIUM_GUILD_LIMITS[self.premium_tier].emoji)
 
@@ -3240,6 +3247,9 @@ class Guild(Hashable):
             "2", "150"
             "3", "250"
 
+        Emojis with subscription roles (see ``roles`` below) are considered premium emoji,
+        and count towards a separate limit of 25 emojis.
+
         You must have :attr:`~Permissions.manage_emojis` permission to
         do this.
 
@@ -3255,7 +3265,12 @@ class Guild(Hashable):
                 Now accepts various resource types in addition to :class:`bytes`.
 
         roles: List[:class:`Role`]
-            A :class:`list` of :class:`Role`\\s that can use this emoji. Leave empty to make it available to everyone.
+            A list of roles that can use this emoji. Leave empty to make it available to everyone.
+
+            An emoji cannot have both subscription roles (see :attr:`RoleTags.integration_id`) and
+            non-subscription roles, and emojis can't be converted between premium and non-premium
+            after creation.
+
         reason: Optional[:class:`str`]
             The reason for creating this emoji. Shows up on the audit log.
 
