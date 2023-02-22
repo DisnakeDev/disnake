@@ -98,14 +98,14 @@ test = [
 ]
 
 [tool.pdm.scripts]
-black = { cmd = "task lint black", help = "Run black" }
+black = { composite = ["lint black"], help = "Run black" }
 docs = { cmd = "nox -Rs docs --", help = "Build the documentation for development" }
 flake8 = { cmd = "flake8", help = "Run flake8" }
-isort = { cmd = "task lint isort", help = "Run isort" }
+isort = { composite = ["lint isort"], help = "Run isort" }
 lint = { cmd = "nox -Rs lint --", help = "Check all files for linting errors" }
 pyright = { cmd = "nox -Rs pyright --", help = "Run pyright" }
 setup_env = { cmd = "pdm install -d -G speed -G docs -G voice", help = "Setup the local environment and set up all dependencies" }
-post_setup_env = "pdm run pre-commit install --install-hooks"
+post_setup_env = "pre-commit install --install-hooks"
 test = { cmd = "nox -Rs test --", help = "Run pytest" }
 
 # legacy tasks for those who still type `task`
