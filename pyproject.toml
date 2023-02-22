@@ -264,7 +264,6 @@ exclude_lines = [
 [tool.check-manifest]
 ignore = [
     # CI
-    ".flake8",
     ".pre-commit-config.yaml",
     ".readthedocs.yml",
     ".libcst.codemod.yaml",
