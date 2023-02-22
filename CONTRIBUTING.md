@@ -47,10 +47,10 @@ Creating a pull request is fairly simple, just make sure it focuses on a single 
 
 We would greatly appreciate the code submitted to be of a consistent style with other code in disnake. This project follows PEP-8 guidelines (mostly) with a column limit of 100 characters.
 
-Run these commands to install [`nox`](https://nox.thea.codes/), [`pdm`](https://pdm.fming.dev/), and [`taskipy`](https://github.com/illBeRoy/taskipy) as well as the required dependencies in your environment, and to set up [`pre-commit`](https://pre-commit.com/#quick-start) hooks.
+Run these commands to install [`nox`](https://nox.thea.codes/) and [`pdm`](https://pdm.fming.dev/), as well as the required dependencies in your environment, and to set up [`pre-commit`](https://pre-commit.com/#quick-start) hooks.
 ```
-pip install nox pdm taskipy
-task setup_env
+pip install nox pdm
+pdm setup_env
 ```
 
 > If you have [pipx](https://pypa.github.io/pipx/) installed on your system, we recommend installing the above tools with pipx instead.
@@ -65,23 +65,23 @@ are not text files, in which case exceptions can be made. These headers must exi
 documented at [https://spdx.dev/ids/](https://spdx.dev/ids/).
 
 
-### Tasks
+### Scripts
 
 To run all important checks and tests, use `nox`:
 ```sh
 nox -R
 ```
 
-You can also choose to only run a single task; run `task --list` to view all available tasks and use `task <name>` to run them.
+You can also choose to only run a single task; run `pdm run --list` to view all available tasks and use `pdm run <name>` to run them.
 
 Some notes (all of the mentioned tasks are automatically run by `nox -R`, see above):
-- If `pre-commit` hooks aren't installed, run `task lint` manually to check and fix the formatting in all files.  
+- If `pre-commit` hooks aren't installed, run `pdm run lint` manually to check and fix the formatting in all files.  
   **Note**: If the code is formatted incorrectly, `pre-commit` will apply fixes and exit without committing the changes - just stage and commit again.
-- For type-checking, run `task pyright`. You can use `task pyright -w` to automatically re-check on every file change.  
+- For type-checking, run `pdm run pyright`. You can use `pdm run pyright -w` to automatically re-check on every file change.  
   **Note**: If you're using VSCode and pylance, it will use the same type-checking settings, which generally means that you don't necessarily have to run `pyright` separately. However, there can be version differences which may lead to different results when later run in CI on GitHub.
-- Tests can be run using `task test`. If you changed some functionality, you may have to adjust a few tests - if you added new features, it would be great if you added new tests for them as well.
+- Tests can be run using `pdm run test`. If you changed some functionality, you may have to adjust a few tests - if you added new features, it would be great if you added new tests for them as well.
 
-A PR cannot be merged as long as there are any failing tasks.
+A PR cannot be merged as long as there are any failing checks.
 
 ### Changelogs
 
