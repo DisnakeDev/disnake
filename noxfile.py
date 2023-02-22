@@ -43,7 +43,7 @@ def docs(session: nox.Session):
     If running locally, will build automatic reloading docs.
     If running in CI, will build a production version of the documentation.
     """
-    session.run_always("pdm", "install", "-G", "docs", external=True)
+    session.run_always("pdm", "install", "--prod", "-G", "docs", external=True)
     with session.chdir("docs"):
         args = ["-b", "html", "-n", ".", "_build/html", *session.posargs]
         if session.interactive:
@@ -152,8 +152,7 @@ def pyright(session: nox.Session):
 def test(session: nox.Session, extras: List[str]):
     """Run tests."""
     # shell splitting is not done by nox
-    if extras:
-        extras = chain(*(["-G", extra] for extra in extras))
+    extras = chain(*(["-G", extra] for extra in extras))
 
     session.run_always("pdm", "install", "-dG", "test", "-dG", "typing", *extras, external=True)
 

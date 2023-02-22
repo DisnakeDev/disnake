@@ -29,7 +29,7 @@ runs:
         version: "2.4"
         cache: true
         cache-dependency-path: ${{ inputs.cache-dependency-path }}
-        enable-pep582: false # Enable PEP 582 package loading globally
+        enable-pep582: false  # Disable PEP 582 package loading globally
 
     - name: Ignore saved pythons
       shell: bash
