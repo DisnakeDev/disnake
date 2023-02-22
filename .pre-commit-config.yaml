@@ -35,12 +35,7 @@ repos:
         args: [--negate]
         types: [text]
         exclude_types: [json, pofile]
-        exclude: 'changelog/|py.typed|disnake/bin/COPYING|.github/PULL_REQUEST_TEMPLATE.md|LICENSE|MANIFEST.in|pdm.lock'
-
-  - repo: https://github.com/pdm-project/pdm
-    rev: 2.4.5
-    hooks:
-      - id: pdm-lock-check
+        exclude: 'changelog/|py.typed|disnake/bin/COPYING|.github/PULL_REQUEST_TEMPLATE.md|LICENSE|MANIFEST.in'
 
   - repo: https://github.com/pycqa/isort
     rev: 5.12.0

@@ -74,11 +74,7 @@ def lint(session: nox.Session):
     """Check all files for linting errors"""
     session.run_always("pdm", "install", "-dG", "lint", "-G", "tools", external=True)
 
-    # the lock takes a bit of time and isn't necessary except when actually committing
-    env = {}
-    if "pdm-lock-check" not in session.posargs and session.interactive:
-        env["SKIP"] = "pdm-lock-check"
-    session.run("pre-commit", "run", "--all-files", env=env, *session.posargs)
+    session.run("pre-commit", "run", "--all-files", *session.posargs)
 
 
 @nox.session(name="check-manifest")
