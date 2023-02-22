@@ -634,7 +634,6 @@ Enums
 ------
 
 .. class:: BucketType
-    :module: disnake.ext.commands
 
     Specifies a type of bucket for, e.g. a cooldown.
 
