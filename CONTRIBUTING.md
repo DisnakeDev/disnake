@@ -2,6 +2,9 @@
 
 # Contributing to disnake
 
+- [Bug Reports](#good-bug-reports)
+- [Creating Pull Requests](#creating-a-pull-request)
+
 First off, thanks for taking the time to contribute. It makes the library substantially better. :+1:
 
 The following is a set of guidelines for contributing to the repository. These are mostly guidelines, not hard rules.
@@ -17,6 +20,7 @@ Generally speaking questions are better suited in our resources below.
 
 Please try your best not to create new issues in the issue tracker just to ask questions. Most of them don't belong there unless they provide value to a larger audience.
 
+---
 
 ## Good Bug Reports
 
@@ -33,6 +37,8 @@ Please be aware of the following things when filing bug reports.
 
 If the bug report is missing this information then it'll take us longer to fix the issue. We will probably ask for clarification, and barring that if no response was given then the issue will be closed.
 
+---
+
 ## Creating a Pull Request
 
 Creating a pull request is fairly simple, just make sure it focuses on a single aspect and doesn't manage to have scope creep and it's probably good to go.
@@ -41,15 +47,13 @@ Creating a pull request is fairly simple, just make sure it focuses on a single 
 
 We would greatly appreciate the code submitted to be of a consistent style with other code in disnake. This project follows PEP-8 guidelines (mostly) with a column limit of 100 characters.
 
-
-
-Run these commands to install `nox`, `pdm`, and `taskipy` as well as the required dependencies in your environment, and to set up [`pre-commit`](https://pre-commit.com/#quick-start) hooks.  
+Run these commands to install [`nox`](https://nox.thea.codes/), [`pdm`](https://pdm.fming.dev/), and [`taskipy`](https://github.com/illBeRoy/taskipy) as well as the required dependencies in your environment, and to set up [`pre-commit`](https://pre-commit.com/#quick-start) hooks.
 ```
 pip install nox pdm taskipy
 task setup_env
 ```
 
-> If you have pipx installed on your system, we recommend installing the above tools with pipx instead.
+> If you have [pipx](https://pypa.github.io/pipx/) installed on your system, we recommend installing the above tools with pipx instead.
 
 The installed `pre-commit` hooks will automatically run before every commit, which will format/lint the code
 to match the project's style. Note that you will have to stage and commit again if anything was updated!
@@ -91,6 +95,7 @@ We use [towncrier](https://github.com/twisted/towncrier) for managing our change
 
 If you do not meet any of these guidelines, don't fret. Chances are they will be fixed upon rebasing but please do try to meet them to remove some of the workload.
 
+---
 
 ## How do I add a new feature?
 
