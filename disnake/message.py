@@ -684,7 +684,7 @@ class RoleSubscriptionData:
     """Represents metadata of the role subscription purchase/renewal in a message
     of type :attr:`MessageType.role_subscription_purchase`.
 
-    .. versionadded:: 2.8
+    .. versionadded:: 2.9
 
     Attributes
     ----------
@@ -1296,7 +1296,7 @@ class Message(Hashable):
         """Optional[:class:`RoleSubscriptionData`]: The metadata of the role
         subscription purchase/renewal, if this message is a :attr:`MessageType.role_subscription_purchase`.
 
-        .. versionadded:: 2.8
+        .. versionadded:: 2.9
         """
         if not self._role_subscription_data:
             return None

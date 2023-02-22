@@ -472,7 +472,7 @@ class SystemChannelFlags(BaseFlags, inverted=True):
         """:class:`bool`: Returns ``True`` if the system channel shows role
         subscription purchase/renewal notifications.
 
-        .. versionadded:: 2.8
+        .. versionadded:: 2.9
         """
         return 1 << 4
 
@@ -481,7 +481,7 @@ class SystemChannelFlags(BaseFlags, inverted=True):
         """:class:`bool`: Returns ``True`` if the system channel shows sticker reply
         buttons for role subscription purchase/renewal notifications.
 
-        .. versionadded:: 2.8
+        .. versionadded:: 2.9
         """
         return 1 << 5
 
