@@ -39,6 +39,7 @@ __all__ = (
     "ApplicationFlags",
     "ChannelFlags",
     "AutoModKeywordPresets",
+    "MemberFlags",
 )
 
 BF = TypeVar("BF", bound="BaseFlags")
@@ -570,6 +571,7 @@ class MessageFlags(BaseFlags):
             loading: bool = ...,
             source_message_deleted: bool = ...,
             suppress_embeds: bool = ...,
+            suppress_notifications: bool = ...,
             urgent: bool = ...,
         ) -> None:
             ...
@@ -635,6 +637,15 @@ class MessageFlags(BaseFlags):
         .. versionadded:: 2.4
         """
         return 1 << 8
+
+    @flag_value
+    def suppress_notifications(self):
+        """:class:`bool`: Returns ``True`` if the source message does not
+        trigger push and desktop notifications.
+
+        .. versionadded:: 2.9
+        """
+        return 1 << 12
 
 
 class PublicUserFlags(BaseFlags):
@@ -744,6 +755,7 @@ class PublicUserFlags(BaseFlags):
             hypesquad_balance: bool = ...,
             hypesquad_bravery: bool = ...,
             hypesquad_brilliance: bool = ...,
+            moderator_programs_alumni: bool = ...,
             partner: bool = ...,
             spammer: bool = ...,
             staff: bool = ...,
@@ -828,8 +840,16 @@ class PublicUserFlags(BaseFlags):
         return UserFlags.verified_bot_developer.value
 
     @flag_value
+    def moderator_programs_alumni(self):
+        """:class:`bool`: Returns ``True`` if the user is a Discord Moderator Programs Alumni.
+
+        .. versionadded:: 2.8
+        """
+        return UserFlags.discord_certified_moderator.value
+
+    @alias_flag_value
     def discord_certified_moderator(self):
-        """:class:`bool`: Returns ``True`` if the user is a Discord Certified Moderator.
+        """:class:`bool`: An alias for :attr:`moderator_programs_alumni`.
 
         .. versionadded:: 2.0
         """
@@ -993,6 +1013,7 @@ class Intents(BaseFlags):
         members: bool = ...,
         message_content: bool = ...,
         messages: bool = ...,
+        moderation: bool = ...,
         presences: bool = ...,
         reactions: bool = ...,
         typing: bool = ...,
@@ -1111,15 +1132,25 @@ class Intents(BaseFlags):
         return 1 << 1
 
     @flag_value
-    def bans(self):
-        """:class:`bool`: Whether guild ban related events are enabled.
+    def moderation(self):
+        """:class:`bool`: Whether guild moderation related events are enabled.
 
         This corresponds to the following events:
 
         - :func:`on_member_ban`
         - :func:`on_member_unban`
+        - :func:`on_audit_log_entry_create`
 
         This does not correspond to any attributes or classes in the library in terms of cache.
+        """
+        return 1 << 2
+
+    @alias_flag_value
+    def bans(self):
+        """:class:`bool`: Alias of :attr:`.moderation`.
+
+        .. versionchanged:: 2.8
+            Changed to an alias.
         """
         return 1 << 2
 
@@ -2124,4 +2155,106 @@ class AutoModKeywordPresets(ListBaseFlags):
         """:class:`bool`: Returns ``True`` if the slurs preset is enabled
         (contains insults or words that may be considered hate speech).
         """
+        return 1 << 3
+
+
+class MemberFlags(BaseFlags):
+    """Wraps up Discord Member flags.
+
+    .. container:: operations
+
+        .. describe:: x == y
+
+            Checks if two MemberFlags instances are equal.
+        .. describe:: x != y
+
+            Checks if two MemberFlags instances are not equal.
+        .. describe:: x <= y
+
+            Checks if an MemberFlags instance is a subset of another MemberFlags instance.
+        .. describe:: x >= y
+
+            Checks if an MemberFlags instance is a superset of another MemberFlags instance.
+        .. describe:: x < y
+
+            Checks if an MemberFlags instance is a strict subset of another MemberFlags instance.
+        .. describe:: x > y
+
+            Checks if an MemberFlags instance is a strict superset of another MemberFlags instance.
+        .. describe:: x | y, x |= y
+
+            Returns a new MemberFlags instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
+        .. describe:: x & y, x &= y
+
+            Returns a new MemberFlags instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new MemberFlags instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+        .. describe:: ~x
+
+            Returns a new MemberFlags instance with all flags from x inverted.
+        .. describe:: hash(x)
+
+            Returns the flag's hash.
+        .. describe:: iter(x)
+
+            Returns an iterator of ``(name, value)`` pairs. This allows it
+            to be, for example, constructed as a dict or a list of pairs.
+            Note that aliases are not shown.
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: MemberFlags.y | MemberFlags.z, MemberFlags(y=True) | MemberFlags.z
+
+            Returns a MemberFlags instance with all provided flags enabled.
+
+        .. describe:: ~MemberFlags.y
+
+            Returns a MemberFlags instance with all flags except ``y`` inverted from their default value.
+
+    .. versionadded:: 2.8
+
+    Attributes
+    ----------
+    value: :class:`int`
+        The raw value. You should query flags via the properties
+        rather than using this raw value.
+    """
+
+    __slots__ = ()
+
+    if TYPE_CHECKING:
+
+        @_generated
+        def __init__(
+            self,
+            *,
+            bypasses_verification: bool = ...,
+            completed_onboarding: bool = ...,
+            did_rejoin: bool = ...,
+            started_onboarding: bool = ...,
+        ) -> None:
+            ...
+
+    @flag_value
+    def did_rejoin(self):
+        """:class:`bool`: Returns ``True`` if the member has left and rejoined the guild."""
+        return 1 << 0
+
+    @flag_value
+    def completed_onboarding(self):
+        """:class:`bool`: Returns ``True`` if the member has completed onboarding."""
+        return 1 << 1
+
+    @flag_value
+    def bypasses_verification(self):
+        """:class:`bool`: Returns ``True`` if the member is able to bypass guild verification requirements."""
+        return 1 << 2
+
+    @flag_value
+    def started_onboarding(self):
+        """:class:`bool`: Returns ``True`` if the member has started onboarding."""
         return 1 << 3

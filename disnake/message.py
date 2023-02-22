@@ -126,6 +126,7 @@ async def _edit_handler(
     attachments: Optional[List[Attachment]],
     suppress: bool,  # deprecated
     suppress_embeds: bool,
+    flags: MessageFlags,
     allowed_mentions: Optional[AllowedMentions],
     view: Optional[View],
     components: Optional[Components[MessageUIComponent]],
@@ -166,8 +167,9 @@ async def _edit_handler(
                 files.extend(embed._files.values())
 
     if suppress_embeds is not MISSING:
-        flags = MessageFlags._from_value(default_flags)
+        flags = MessageFlags._from_value(default_flags if flags is MISSING else flags.value)
         flags.suppress_embeds = suppress_embeds
+    if flags is not MISSING:
         payload["flags"] = flags.value
 
     if allowed_mentions is MISSING:
@@ -1398,6 +1400,9 @@ class Message(Hashable):
         if self.type is MessageType.auto_moderation_action:
             return self.content
 
+        # TODO: `MessageType.role_subscription_purchase` requires `Message.role_subscription_data`,
+        #       which is currently undocumented
+
         if self.type is MessageType.interaction_premium_upsell:
             return self.content
 
@@ -1461,6 +1466,7 @@ class Message(Hashable):
         file: File = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -1477,6 +1483,7 @@ class Message(Hashable):
         files: List[File] = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -1493,6 +1500,7 @@ class Message(Hashable):
         file: File = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -1509,6 +1517,7 @@ class Message(Hashable):
         files: List[File] = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -1527,6 +1536,7 @@ class Message(Hashable):
         attachments: Optional[List[Attachment]] = MISSING,
         suppress: bool = MISSING,  # deprecated
         suppress_embeds: bool = MISSING,
+        flags: MessageFlags = MISSING,
         allowed_mentions: Optional[AllowedMentions] = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[Components[MessageUIComponent]] = MISSING,
@@ -1603,6 +1613,15 @@ class Message(Hashable):
             all the embeds from the UI if set to ``True``. If set
             to ``False``, this brings the embeds back if they were
             suppressed.
+        flags: :class:`MessageFlags`
+            The new flags to set for this message. Overrides existing flags.
+            Only :attr:`~MessageFlags.suppress_embeds` is supported.
+
+            If parameter ``suppress_embeds`` is provided,
+            that will override the setting of :attr:`.MessageFlags.suppress_embeds`.
+
+            .. versionadded:: 2.9
+
         delete_after: Optional[:class:`float`]
             If provided, the number of seconds to wait in the background
             before deleting the message we just edited. If the deletion fails,
@@ -1667,6 +1686,7 @@ class Message(Hashable):
             attachments=attachments,
             suppress=suppress,
             suppress_embeds=suppress_embeds,
+            flags=flags,
             allowed_mentions=allowed_mentions,
             view=view,
             components=components,
@@ -2154,6 +2174,7 @@ class PartialMessage(Hashable):
         file: File = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -2170,6 +2191,7 @@ class PartialMessage(Hashable):
         files: List[File] = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -2186,6 +2208,7 @@ class PartialMessage(Hashable):
         file: File = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -2202,6 +2225,7 @@ class PartialMessage(Hashable):
         files: List[File] = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -2220,6 +2244,7 @@ class PartialMessage(Hashable):
         attachments: Optional[List[Attachment]] = MISSING,
         suppress: bool = MISSING,  # deprecated
         suppress_embeds: bool = MISSING,
+        flags: MessageFlags = MISSING,
         allowed_mentions: Optional[AllowedMentions] = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[Components[MessageUIComponent]] = MISSING,
@@ -2298,6 +2323,15 @@ class PartialMessage(Hashable):
             all the embeds from the UI if set to ``True``. If set
             to ``False``, this brings the embeds back if they were
             suppressed.
+        flags: :class:`MessageFlags`
+            The new flags to set for this message. Overrides existing flags.
+            Only :attr:`~MessageFlags.suppress_embeds` is supported.
+
+            If parameter ``suppress_embeds`` is provided,
+            that will override the setting of :attr:`.MessageFlags.suppress_embeds`.
+
+            .. versionadded:: 2.9
+
         delete_after: Optional[:class:`float`]
             If provided, the number of seconds to wait in the background
             before deleting the message we just edited. If the deletion fails,
@@ -2357,6 +2391,7 @@ class PartialMessage(Hashable):
             attachments=attachments,
             suppress=suppress,
             suppress_embeds=suppress_embeds,
+            flags=flags,
             allowed_mentions=allowed_mentions,
             view=view,
             components=components,
