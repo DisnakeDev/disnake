@@ -84,6 +84,7 @@ def lint(session: nox.Session):
 @nox.session(name="check-manifest")
 def check_manifest(session: nox.Session):
     """Run check-manifest."""
+    # --no-self is provided here because check-manifest builds disnake. There's no reason to build twice, so we don't.
     session.run_always("pdm", "install", "--no-self", "-dG", "tools", external=True)
     session.run("check-manifest", "-v")
 
