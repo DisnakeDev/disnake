@@ -4251,7 +4251,7 @@ msgid "Called when user gets banned from a :class:`Guild`."
 msgstr "ユーザーが :class:`Guild` からBANされたとき呼び出されます。"
 
 #: ../../api.rst:744 ../../api.rst:757
-msgid "This requires :attr:`Intents.bans` to be enabled."
+msgid "This requires :attr:`Intents.moderation` to be enabled."
 msgstr ""
 
 #: ../../api.rst:746
