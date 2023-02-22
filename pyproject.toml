@@ -15,7 +15,7 @@ requires-python = ">=3.8"
 keywords = ["disnake", "discord", "discord api"]
 license = { text = "MIT" }
 dependencies = [
-    'aiohttp>=3.7.0,<4.0',
+    "aiohttp>=3.7.0,<4.0",
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -112,12 +112,12 @@ filter_files = true
 
 [tool.taskipy.tasks]
 black = { cmd = "task lint black", help = "Run black" }
-docs = { cmd = "nox -Rs docs --", help = "Build the documentation for development"}
-flake8 = { cmd = "flake8", help = "Run flake8"}
+docs = { cmd = "nox -Rs docs --", help = "Build the documentation for development" }
+flake8 = { cmd = "flake8", help = "Run flake8" }
 isort = { cmd = "task lint isort", help = "Run isort" }
 lint = { cmd = "nox -Rs lint --", help = "Check all files for linting errors" }
 pyright = { cmd = "nox -Rs pyright --", help = "Run pyright" }
-setup_env = {cmd = "pdm install -d -G speed -G docs -G voice", help = 'Setup the local environment and set up all dependencies'}
+setup_env = { cmd = "pdm install -d -G speed -G docs -G voice", help = "Setup the local environment and set up all dependencies" }
 post_setup_env = "pdm run pre-commit install --install-hooks"
 test = { cmd = "nox -Rs test --", help = "Run pytest" }
 
