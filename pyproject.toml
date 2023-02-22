@@ -97,19 +97,6 @@ test = [
     "coverage[toml]~=6.5.0",
 ]
 
-[tool.black]
-line-length = 100
-target-version = ["py38", "py39", "py310"]
-
-
-[tool.isort]
-profile = "black"
-py_version = 38
-line_length = 100
-combine_as_imports = true
-filter_files = true
-
-
 [tool.taskipy.tasks]
 black = { cmd = "task lint black", help = "Run black" }
 docs = { cmd = "nox -Rs docs --", help = "Build the documentation for development" }
@@ -121,6 +108,16 @@ setup_env = { cmd = "pdm install -d -G speed -G docs -G voice", help = "Setup th
 post_setup_env = "pdm run pre-commit install --install-hooks"
 test = { cmd = "nox -Rs test --", help = "Run pytest" }
 
+[tool.black]
+line-length = 100
+target-version = ["py38", "py39", "py310"]
+
+[tool.isort]
+profile = "black"
+py_version = 38
+line_length = 100
+combine_as_imports = true
+filter_files = true
 
 [tool.towncrier]
 template = "changelog/_template.rst.jinja"
