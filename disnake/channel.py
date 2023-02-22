@@ -40,7 +40,7 @@ from .enums import (
 )
 from .errors import ClientException
 from .file import File
-from .flags import ChannelFlags
+from .flags import ChannelFlags, MessageFlags
 from .iterators import ArchivedThreadIterator
 from .mixins import Hashable
 from .partial_emoji import PartialEmoji
@@ -2815,7 +2815,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         available_tags: Sequence[ForumTag] = MISSING,
         default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
         default_sort_order: Optional[ThreadSortOrder] = MISSING,
-        default_layout: ThreadLayout = ...,
+        default_layout: ThreadLayout = MISSING,
         reason: Optional[str] = None,
         **kwargs: Never,
     ) -> Optional[ForumChannel]:
@@ -2990,6 +2990,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         embed: Embed = ...,
         file: File = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
@@ -3010,6 +3011,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         embed: Embed = ...,
         files: List[File] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
@@ -3030,6 +3032,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         embeds: List[Embed] = ...,
         file: File = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
@@ -3050,6 +3053,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         embeds: List[Embed] = ...,
         files: List[File] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
@@ -3071,6 +3075,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         file: File = MISSING,
         files: List[File] = MISSING,
         suppress_embeds: bool = MISSING,
+        flags: MessageFlags = MISSING,
         stickers: Sequence[Union[GuildSticker, StickerItem]] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
@@ -3121,6 +3126,15 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This hides
             all the embeds from the UI if set to ``True``.
+        flags: :class:`MessageFlags`
+            The flags to set for this message.
+            Only :attr:`~MessageFlags.suppress_embeds` is supported.
+
+            If parameter ``suppress_embeds`` is provided,
+            that will override the setting of :attr:`MessageFlags.suppress_embeds`.
+
+            .. versionadded:: 2.9
+
         file: :class:`.File`
             The file to upload. This cannot be mixed with the ``files`` parameter.
         files: List[:class:`.File`]
@@ -3174,6 +3188,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             file=file,
             files=files,
             suppress_embeds=suppress_embeds,
+            flags=flags,
             view=view,
             components=components,
             allowed_mentions=allowed_mentions,
