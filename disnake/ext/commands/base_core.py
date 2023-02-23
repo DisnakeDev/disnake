@@ -71,7 +71,7 @@ def wrap_callback(coro):
         except CommandError:
             raise
         except asyncio.CancelledError:
-            return
+            return None
         except Exception as exc:
             raise CommandInvokeError(exc) from exc
         return ret
@@ -430,7 +430,7 @@ class InvokableApplicationCommand(ABC):
         self, inter: ApplicationCommandInteraction, error: CommandError
     ) -> Any:
         if not self.has_error_handler():
-            return
+            return None
 
         injected = wrap_callback(self.on_error)
         if self.cog is not None:

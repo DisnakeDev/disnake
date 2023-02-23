@@ -158,7 +158,7 @@ def wrap_callback(coro):
         except CommandError:
             raise
         except asyncio.CancelledError:
-            return
+            return None
         except Exception as exc:
             raise CommandInvokeError(exc) from exc
         return ret
@@ -176,7 +176,7 @@ def hooked_wrapped_callback(command, ctx, coro):
             raise
         except asyncio.CancelledError:
             ctx.command_failed = True
-            return
+            return None
         except Exception as exc:
             ctx.command_failed = True
             raise CommandInvokeError(exc) from exc

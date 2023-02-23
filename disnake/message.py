@@ -1064,7 +1064,7 @@ class Message(Hashable):
                 break
         else:
             # didn't find anything so just return
-            return
+            return None
 
         del self.reactions[index]
         return reaction
@@ -1451,7 +1451,7 @@ class Message(Hashable):
 
         if self.type is MessageType.role_subscription_purchase:
             if not (data := self.role_subscription_data):
-                return
+                return None
 
             guild_name = f"**{self.guild.name}**" if self.guild else None
             if data.total_months_subscribed > 0:
