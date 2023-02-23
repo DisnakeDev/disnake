@@ -167,6 +167,9 @@ ignore = [
     # provide specific codes on type: ignore
     "PGH003",
 
+    # import aliases are fixed by isort
+    "PLC0414",
+
     # temporary disables, to fix later
     "B904",   # within an except clause raise from error or from none
     "B026",   # backwards star-arg unpacking
