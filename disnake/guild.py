@@ -4111,6 +4111,7 @@ class Guild(Hashable):
 
         if not self._state.is_guild_evicted(self):
             return await self._state.chunk_guild(self, cache=cache)
+        return None
 
     async def query_members(
         self,

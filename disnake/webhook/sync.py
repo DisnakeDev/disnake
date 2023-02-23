@@ -1061,6 +1061,7 @@ class SyncWebhook(BaseWebhook):
                     f.close()
         if wait:
             return self._create_message(data)
+        return None
 
     def fetch_message(self, id: int, /) -> SyncWebhookMessage:
         """Retrieves a single :class:`SyncWebhookMessage` owned by this webhook.
