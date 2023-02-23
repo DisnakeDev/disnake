@@ -146,7 +146,7 @@ select = [
     "DTZ", # flake8-datetimez
     # "EM", # flake8-errmsg
     "G", # flake8-logging-format
-    # "RET", # flake8-return
+    "RET", # flake8-return
     # "SIM", # flake8-simplify
     "TID251", # flake8-tidy-imports, replaces S404
     # "TCH", # flake8-type-checking
@@ -180,6 +180,9 @@ ignore = [
     # ignore try-except-pass. Bare excepts are caught with E722
     "S110",
 
+    # we do explicitly return None even when its the only possible value as we are not fully typehinted
+    "RET501",
+
     # provide specific codes on type: ignore
     "PGH003",
 
@@ -189,7 +192,7 @@ ignore = [
 
     # outer loop variables are overwritten by inner assignment target, these are mostly intentional
     "PLW2901",
-
+    
     # temporary disables, to fix later
     "D205",   # blank line required between summary and description
     "D401",   # first line of docstring should be in imperative mood
