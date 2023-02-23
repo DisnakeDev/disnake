@@ -1317,7 +1317,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         video_quality_mode: :class:`VideoQualityMode`
             The video quality mode of the new channel. If not provided, defaults to this channel's video quality mode.
         nsfw: :class:`bool`
-            Wether the new channel should be nsfw or not. If not provided, defaults to this channel's NSFW value.
+            Whether the new channel should be nsfw or not. If not provided, defaults to this channel's NSFW value.
         slowmode_delay: Optional[:class:`int`]
             The slowmode of the new channel. If not provided, defaults to this channel's slowmode.
         reason: Optional[:class:`str`]
