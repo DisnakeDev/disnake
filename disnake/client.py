@@ -39,7 +39,7 @@ from .app_commands import (
     ApplicationCommand,
     GuildApplicationCommandPermissions,
 )
-from .appinfo import AppInfo, BotAppInfo
+from .appinfo import BotAppInfo
 from .application_role_connection import ApplicationRoleConnectionMetadata
 from .backoff import ExponentialBackoff
 from .channel import PartialMessageable, _threaded_channel_factory

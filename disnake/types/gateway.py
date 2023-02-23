@@ -7,7 +7,7 @@ from typing import Any, List, Literal, Optional, Sequence, Tuple, TypedDict, Uni
 from typing_extensions import NotRequired
 
 from .activity import PartialPresenceUpdate, PresenceData, SendableActivity
-from .appinfo import AppInfo, PartialAppInfo, PartialGatewayAppInfo
+from .appinfo import AppInfo, PartialGatewayAppInfo
 from .audit_log import AuditLogEntry
 from .automod import AutoModAction, AutoModRule, AutoModTriggerType
 from .channel import Channel, GuildChannel, StageInstance

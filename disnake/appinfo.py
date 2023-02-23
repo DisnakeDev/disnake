@@ -310,6 +310,10 @@ class BotAppInfo(AppInfo):
         The installation parameters for this application.
     custom_install_url: Optional[:class:`str`]
         The custom installation url for this application.
+    role_connections_verification_url: Optional[:class:`str`]
+        The application's role connection verification entry point,
+        which when configured will render the app as a verification method
+        in the guild role verification configuration.
     owner: :class:`User`
         The application's owner.
     team: Optional[:class:`Team`]
