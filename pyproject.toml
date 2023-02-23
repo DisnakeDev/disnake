@@ -104,8 +104,8 @@ flake8 = { cmd = "flake8", help = "Run flake8" }
 isort = { composite = ["lint isort"], help = "Run isort" }
 lint = { cmd = "nox -Rs lint --", help = "Check all files for linting errors" }
 pyright = { cmd = "nox -Rs pyright --", help = "Run pyright" }
-setup_env = { cmd = "pdm install -d -G speed -G docs -G voice", help = "Setup the local environment and set up all dependencies" }
-post_setup_env = "pre-commit install --install-hooks"
+setup_env = { cmd = "pdm install -d -G speed -G docs -G voice", help = "Set up the local environment and all dependencies" }
+post_setup_env = { composite = ["python -m ensurepip --default-pip", "pre-commit install --install-hooks"] }
 test = { cmd = "nox -Rs test --", help = "Run pytest" }
 
 # legacy tasks for those who still type `task`
