@@ -290,7 +290,7 @@ class HistoryIterator(_AsyncIterator["Message"]):
                 raise ValueError("history does not support around with limit=None")
             if self.limit > 101:
                 raise ValueError("history max limit 101 when specifying around parameter")
-            elif self.limit == 101:
+            if self.limit == 101:
                 self.limit = 100  # Thanks Discord
 
             self._retrieve_messages = self._retrieve_messages_around_strategy

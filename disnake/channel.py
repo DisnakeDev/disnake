@@ -3564,7 +3564,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
         if params.files and len(params.files) > 10:
             raise ValueError("files parameter must be a list of up to 10 elements")
-        elif params.files and not all(isinstance(file, File) for file in params.files):
+        if params.files and not all(isinstance(file, File) for file in params.files):
             raise TypeError("files parameter must be a list of File")
 
         channel_data = {

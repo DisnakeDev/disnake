@@ -367,7 +367,7 @@ class AutoShardedClient(Client):
                 raise ClientException(
                     "When passing manual shard_ids, you must provide a shard_count."
                 )
-            elif not isinstance(self.shard_ids, (list, tuple)):
+            if not isinstance(self.shard_ids, (list, tuple)):
                 raise ClientException("shard_ids parameter must be a list or a tuple.")
 
         # instead of a single websocket, we have multiple

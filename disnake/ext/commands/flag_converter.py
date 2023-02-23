@@ -224,8 +224,7 @@ def get_flags(
         name = flag.name.casefold() if case_insensitive else flag.name
         if name in names:
             raise TypeError(f"{flag.name!r} flag conflicts with previous flag or alias.")
-        else:
-            names.add(name)
+        names.add(name)
 
         for alias in flag.aliases:
             # Validate alias is unique
@@ -234,8 +233,7 @@ def get_flags(
                 raise TypeError(
                     f"{flag.name!r} flag alias {alias!r} conflicts with previous flag or alias."
                 )
-            else:
-                names.add(alias)
+            names.add(alias)
 
         flags[flag.name] = flag
 
@@ -579,13 +577,12 @@ class FlagConverter(metaclass=FlagsMeta):
             except KeyError:
                 if flag.required:
                     raise MissingRequiredFlag(flag) from None
+                if callable(flag.default):
+                    default = await maybe_coroutine(flag.default, ctx)
+                    setattr(self, flag.attribute, default)
                 else:
-                    if callable(flag.default):
-                        default = await maybe_coroutine(flag.default, ctx)
-                        setattr(self, flag.attribute, default)
-                    else:
-                        setattr(self, flag.attribute, flag.default)
-                    continue
+                    setattr(self, flag.attribute, flag.default)
+                continue
 
             if flag.max_args > 0 and len(values) > flag.max_args:
                 if flag.override:

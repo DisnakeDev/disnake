@@ -406,12 +406,11 @@ class HTTPClient:
                         # the usual error cases
                         if response.status == 403:
                             raise Forbidden(response, data)
-                        elif response.status == 404:
+                        if response.status == 404:
                             raise NotFound(response, data)
-                        elif response.status >= 500:
+                        if response.status >= 500:
                             raise DiscordServerError(response, data)
-                        else:
-                            raise HTTPException(response, data)
+                        raise HTTPException(response, data)
 
                 # This is handling exceptions from the request
                 except OSError as e:

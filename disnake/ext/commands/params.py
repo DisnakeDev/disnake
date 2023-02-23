@@ -995,7 +995,7 @@ def format_kwargs(
         raise TypeError(
             "When calling a slash command only self and the interaction should be positional"
         )
-    elif first and not isinstance(first, commands.Cog):
+    if first and not isinstance(first, commands.Cog):
         raise TypeError("Method slash commands may be created only in cog subclasses")
 
     cog: Optional[commands.Cog] = first
