@@ -70,19 +70,12 @@ tools = [
     "python-dotenv~=0.20.0",
     "towncrier==22.12.0",
     "check-manifest==0.48",
+    "ruff==0.0.252",
 ]
 codemod = [
     # run codemods on the respository (mostly automated typing)
     "libcst~=0.4.7",
     "black==23.1.0",
-]
-lint = [
-    "flake8~=4.0.1",
-    "flake8-bandit~=3.0.0",
-    "flake8-bugbear==22.7.1",
-    "flake8-comprehensions~=3.10.0",
-    "flake8-noqa~=1.2.5",
-    "flake8-pytest-style~=1.6.0",
 ]
 typing = [
     "typing-extensions~=4.2.0",
@@ -100,7 +93,6 @@ test = [
 [tool.pdm.scripts]
 black = { composite = ["lint black"], help = "Run black" }
 docs = { cmd = "nox -Rs docs --", help = "Build the documentation for development" }
-flake8 = { cmd = "flake8", help = "Run flake8" }
 isort = { composite = ["lint isort"], help = "Run isort" }
 lint = { cmd = "nox -Rs lint --", help = "Check all files for linting errors" }
 pyright = { cmd = "nox -Rs pyright --", help = "Run pyright" }
@@ -112,7 +104,6 @@ test = { cmd = "nox -Rs test --", help = "Run pytest" }
 [tool.taskipy.tasks]
 black = { cmd = "black", help = "Run black" }
 docs = { cmd = "docs", help = "Build the documentation for development" }
-flake8 = { cmd = "flake8", help = "Run flake8" }
 isort = { cmd = "isort", help = "Run isort" }
 lint = { cmd = "lint", help = "Check all files for linting errors" }
 pyright = { cmd = "pyright", help = "Run pyright" }
@@ -132,6 +123,86 @@ py_version = 38
 line_length = 100
 combine_as_imports = true
 filter_files = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py38"
+select = [
+    # commented out codes are intended to be enabled in future prs
+    "F", # pyflakes
+    "E", "W", # pycodestyle
+    # "D", # pydocstyle
+    # "ANN", # flake8-annotations
+    "S", # flake8-bandit
+    "B", # flake8-bugbear
+    "C", # flake8-comprehensions
+    # "DTZ", # flake8-datetimez
+    # "EM", # flake8-errmsg
+    "G", # flake8-logging-format
+    # "RET", # flake8-return
+    # "SIM", # flake8-simplify
+    "TID251", # flake8-tidy-imports, replaces S404
+    # "TCH", # flake8-type-checking
+    "RUF",    # ruff specific exceptions
+    "PT",     # flake8-pytest-style
+    "Q",      # flake8-quotes
+    "T20",    # flake8-print
+    "PGH",    # pygrep-hooks
+    "TRY002", "TRY004", # tryceratops
+]
+ignore = [
+    # star imports
+    "F403",
+
+    # unknown if this is actually an issue
+    "RUF005", # might not be actually faster
+    "RUF006", # might not be an issue/very extreme cases
+
+    # ignore try-except-pass. Bare excepts are caught with E722
+    "S110",
+
+    # provide specific codes on type: ignore
+    "PGH003",
+
+    # temporary disables, to fix later
+    "B904",   # within an except clause raise from error or from none
+    "B026",   # backwards star-arg unpacking
+    "E501",   # line too long
+    "E731",   # assigning lambdas to variables
+    "RUF004", # keyword args must be supplied after starred arguments
+    "T201",   # print statements
+]
+
+[tool.ruff.per-file-ignores]
+"disnake/__main__.py" = ["T201"] # print statements are okay in our simple cli
+"disnake/i18n.py" = [
+    "B027", # lib bug. Excluded here because ruff does not have a --disable-noqa flag yet
+]
+"disnake/ui/select/*.py" = [
+    "F401", # unused imports. Excluded because there is a bug with ruff.
+]
+"disnake/**.py" = ["PT"] # this is not a module of pytest tests
+"test_bot/*.py" = [
+    "B008", # do not perform function calls in argument defaults
+    "T201", # print found, printing is currently accepted in the test bot
+    "PT",   # this is not a module of pytest tests
+]
+"tests/*.py" = ["S101"] # use of assert is okay in test files
+# we are not using noqa in the example files themselves
+"examples/*.py" = [
+    "B008", # do not perform function calls in argument defaults, this is how most commands work
+    "T201", # print found, printing is okay in examples
+    "PT",   # this is not a module of pytest tests
+]
+"examples/basic_voice.py" = ["S104"] # possible binding to all interfaces
+"examples/views/tic_tac_toe.py" = ["E741"] # ambigious variable name: `O`
+
+[tool.ruff.flake8-pytest-style]
+fixture-parentheses = false
+mark-parentheses = false
+
+[tool.ruff.flake8-tidy-imports.banned-api]
+"subprocess".msg = "Consider possible security implications associated with the subprocess module." # replaces S404
 
 [tool.towncrier]
 template = "changelog/_template.rst.jinja"
@@ -257,7 +328,6 @@ exclude_lines = [
 [tool.check-manifest]
 ignore = [
     # CI
-    ".flake8",
     ".pre-commit-config.yaml",
     ".readthedocs.yml",
     ".libcst.codemod.yaml",

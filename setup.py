@@ -14,15 +14,15 @@ if not version:
 if version.endswith(("a", "b", "rc")):
     # append version identifier based on commit count
     try:
-        import subprocess  # noqa: S404
+        import subprocess  # noqa: TID251
 
-        p = subprocess.Popen(  # noqa: S603,S607
+        p = subprocess.Popen(
             ["git", "rev-list", "--count", "HEAD"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
         out, err = p.communicate()
         if out:
             version += out.decode("utf-8").strip()
-        p = subprocess.Popen(  # noqa: S603,S607
+        p = subprocess.Popen(
             ["git", "rev-parse", "--short", "HEAD"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
         out, err = p.communicate()
