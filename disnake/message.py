@@ -809,7 +809,7 @@ class Message(Hashable):
     application: Optional[:class:`PartialAppInfo`]
         The rich presence enabled application associated with this message.
 
-        .. versionchanged:: 2.7
+        .. versionchanged:: 2.9
             This is now a :class:`PartialAppInfo` object instead of a plain :class:`dict`.
 
     stickers: List[:class:`StickerItem`]

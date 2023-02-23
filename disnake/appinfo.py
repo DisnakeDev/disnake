@@ -73,7 +73,7 @@ class PartialAppInfo:
 
     .. versionadded:: 2.0
 
-    .. versionchanged:: 2.7
+    .. versionchanged:: 2.9
         Moved ``rpc_origins``, ``verify_key``, ``terms_of_service_url``,
         and ``privacy_policy_url`` attributes to the :class:`AppInfo` class instead.
         Added :attr:`cover_image`, and removed deprecated ``summary`` attribute.
@@ -132,7 +132,7 @@ class AppInfo(PartialAppInfo):
 
     .. versionadded:: 2.0
 
-    .. versionchanged:: 2.7
+    .. versionchanged:: 2.9
         Removed deprecated ``summary`` attribute.
 
     Attributes
@@ -267,7 +267,7 @@ class BotAppInfo(AppInfo):
     Equivalent to :class:`AppInfo`, but with additional :attr:`owner`
     and :attr:`team` attributes.
 
-    .. versionadded:: 2.7
+    .. versionadded:: 2.9
 
     Attributes
     ----------

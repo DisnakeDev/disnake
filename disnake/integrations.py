@@ -318,7 +318,7 @@ class IntegrationApplication(PartialAppInfo):
 
     .. versionadded:: 2.0
 
-    .. versionchanged:: 2.7
+    .. versionchanged:: 2.9
         Now inherits from :class:`PartialAppInfo`, :attr:`icon` type
         changed to :class:`Asset`.
 
