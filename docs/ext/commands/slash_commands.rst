@@ -40,30 +40,40 @@ This code sample shows how to set the registration to be local:
 
 For global registration, don't specify this parameter.
 
-Another useful parameter is ``sync_commands_debug``. If set to ``True``, you receive debug messages related to the
-app command registration by default, without having to change the log level of any loggers
-(see the documentation on :class:`Bot <ext.commands.Bot>` for more info).
+In order to configure specific properties about command sync, there's a configuration
+class which may be passed to the Bot, :class:`~.ext.commands.CommandSyncFlags`.
+
+Setting :attr:`CommandSyncFlags.sync_commands_debug <.ext.commands.CommandSyncFlags.sync_commands_debug>` to ``True``, will print debug messages related to the
+app command registration to the console (or logger if enabled).
+
 This is useful if you want to figure out some registration details:
 
 .. code-block:: python3
 
     from disnake.ext import commands
 
+    command_sync_flags = commands.CommandSyncFlags.default()
+    command_sync_flags.sync_commands_debug = True
+
     bot = commands.Bot(
         command_prefix='!',
         test_guilds=[123456789], # Optional
-        sync_commands_debug=True
+        command_sync_flags=command_sync_flags,
     )
 
-If you want to disable the automatic registration, set ``sync_commands`` to ``False``:
+If you want to disable the automatic registration, set :attr:`CommandSyncFlags.sync_commands <.ext.commands.CommandSyncFlags.sync_commands>`
+to ``False``, or use :meth:`CommandSyncFlags.none() <.ext.commands.CommandSyncFlags.none>`
 
 .. code-block:: python3
 
     from disnake.ext import commands
 
+    command_sync_flags = commands.CommandSyncFlags.none()
+    command_sync_flags.sync_commands = False
+
     bot = commands.Bot(
         command_prefix='!',
-        sync_commands=False
+        command_sync_flags=command_sync_flags,
     )
 
 Basic Slash Command

@@ -828,6 +828,27 @@ Integrations
     :param payload: The raw event payload data.
     :type payload: :class:`RawIntegrationDeleteEvent`
 
+Audit Logs
+++++++++++
+
+.. function:: on_audit_log_entry_create(entry)
+
+    Called when an audit log entry is created.
+    You must have the :attr:`~Permissions.view_audit_log` permission to receive this.
+
+    This requires :attr:`Intents.moderation` to be enabled.
+
+    .. warning::
+        This scope of data in this gateway event is limited, which means it is much more
+        reliant on the cache than :meth:`Guild.audit_logs`.
+        Because of this, :attr:`AuditLogEntry.target` and :attr:`AuditLogEntry.user`
+        will frequently be of type :class:`Object` instead of the respective model.
+
+    .. versionadded:: 2.8
+
+    :param entry: The audit log entry that was created.
+    :type entry: :class:`AuditLogEntry`
+
 Invites
 +++++++
 
@@ -927,7 +948,7 @@ Members
 
     Called when user gets banned from a :class:`Guild`.
 
-    This requires :attr:`Intents.bans` to be enabled.
+    This requires :attr:`Intents.moderation` to be enabled.
 
     :param guild: The guild the user got banned from.
     :type guild: :class:`Guild`
@@ -940,7 +961,7 @@ Members
 
     Called when a :class:`User` gets unbanned from a :class:`Guild`.
 
-    This requires :attr:`Intents.bans` to be enabled.
+    This requires :attr:`Intents.moderation` to be enabled.
 
     :param guild: The guild the user got unbanned from.
     :type guild: :class:`Guild`
@@ -1090,7 +1111,7 @@ Roles
 .. function:: on_guild_role_create(role)
               on_guild_role_delete(role)
 
-    Called when a :class:`Guild` creates or deletes a new :class:`Role`.
+    Called when a :class:`Guild` creates or deletes a :class:`Role`.
 
     To get the guild it belongs to, use :attr:`Role.guild`.
 
@@ -1774,6 +1795,22 @@ of :class:`enum.Enum`.
         The system message denoting that an auto moderation action was executed.
 
         .. versionadded:: 2.5
+    .. attribute:: role_subscription_purchase
+
+        The system message denoting that a role subscription was purchased.
+
+        .. versionadded:: 2.9
+    .. attribute:: interaction_premium_upsell
+
+        The system message for an application premium subscription upsell.
+
+        .. versionadded:: 2.8
+    .. attribute:: guild_application_premium_subscription
+
+        The system message denoting that a guild member has subscribed to an application.
+
+        .. versionadded:: 2.8
+
 
 .. class:: UserFlags
 
@@ -1840,6 +1877,11 @@ of :class:`enum.Enum`.
         The user is marked as a spammer.
 
         .. versionadded:: 2.3
+    .. attribute:: active_developer
+
+        The user is an Active Developer.
+
+        .. versionadded:: 2.8
 
 .. class:: ActivityType
 
@@ -2030,12 +2072,37 @@ of :class:`enum.Enum`.
     .. attribute:: button
 
         Represents a button component.
+    .. attribute:: string_select
+
+        Represents a string select component.
+
+        .. versionadded:: 2.7
     .. attribute:: select
 
-        Represents a select component.
+        An alias of :attr:`string_select`.
     .. attribute:: text_input
 
         Represents a text input component.
+    .. attribute:: user_select
+
+        Represents a user select component.
+
+        .. versionadded:: 2.7
+    .. attribute:: role_select
+
+        Represents a role select component.
+
+        .. versionadded:: 2.7
+    .. attribute:: mentionable_select
+
+        Represents a mentionable (user/member/role) select component.
+
+        .. versionadded:: 2.7
+    .. attribute:: channel_select
+
+        Represents a channel select component.
+
+        .. versionadded:: 2.7
 
 .. class:: OptionType
 
@@ -2298,7 +2365,7 @@ of :class:`enum.Enum`.
 .. class:: AuditLogAction
 
     Represents the type of action being done for a :class:`AuditLogEntry`\,
-    which is retrievable via :meth:`Guild.audit_logs`.
+    which is retrievable via :meth:`Guild.audit_logs` or via the :func:`on_audit_log_entry_create` event.
 
     .. attribute:: guild_update
 
@@ -2490,7 +2557,8 @@ of :class:`enum.Enum`.
         A member was kicked.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`User` who got kicked.
+        the :class:`User` who got kicked. If the user is not found then it is
+        a :class:`Object` with the user's ID.
 
         When this is the action, :attr:`~AuditLogEntry.changes` is empty.
 
@@ -2514,7 +2582,8 @@ of :class:`enum.Enum`.
         A member was banned.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`User` who got banned.
+        the :class:`User` who got banned. If the user is not found then it is
+        a :class:`Object` with the user's ID.
 
         When this is the action, :attr:`~AuditLogEntry.changes` is empty.
 
@@ -2523,7 +2592,8 @@ of :class:`enum.Enum`.
         A member was unbanned.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`User` who got unbanned.
+        the :class:`User` who got unbanned. If the user is not found then it is
+        a :class:`Object` with the user's ID.
 
         When this is the action, :attr:`~AuditLogEntry.changes` is empty.
 
@@ -2536,7 +2606,8 @@ of :class:`enum.Enum`.
         - They were timed out
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`Member` or :class:`User` who got updated.
+        the :class:`Member` or :class:`User` who got updated. If the user is not found then it is
+        a :class:`Object` with the user's ID.
 
         Possible attributes for :class:`AuditLogDiff`:
 
@@ -2551,7 +2622,8 @@ of :class:`enum.Enum`.
         either gains a role or loses a role.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`Member` or :class:`User` who got the role.
+        the :class:`Member` or :class:`User` who got the role. If the user is not found then it is
+        a :class:`Object` with the user's ID.
 
         Possible attributes for :class:`AuditLogDiff`:
 
@@ -2587,7 +2659,8 @@ of :class:`enum.Enum`.
         A bot was added to the guild.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`Member` or :class:`User` which was added to the guild.
+        the :class:`Member` or :class:`User` which was added to the guild. If the user is not found then it is
+        a :class:`Object` with an ID.
 
         .. versionadded:: 1.3
 
@@ -2792,6 +2865,7 @@ of :class:`enum.Enum`.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`Member` or :class:`User` who had their message deleted.
+        If the user is not found then it is a :class:`Object` with the user's ID.
 
         When this is the action, the type of :attr:`~AuditLogEntry.extra` is
         set to an unspecified proxy object with two attributes:
@@ -2819,6 +2893,7 @@ of :class:`enum.Enum`.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`Member` or :class:`User` who had their message pinned.
+        If the user is not found then it is a :class:`Object` with the user's ID.
 
         When this is the action, the type of :attr:`~AuditLogEntry.extra` is
         set to an unspecified proxy object with two attributes:
@@ -2834,6 +2909,7 @@ of :class:`enum.Enum`.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`Member` or :class:`User` who had their message unpinned.
+        If the user is not found then it is a :class:`Object` with the user's ID.
 
         When this is the action, the type of :attr:`~AuditLogEntry.extra` is
         set to an unspecified proxy object with two attributes:
@@ -3209,6 +3285,7 @@ of :class:`enum.Enum`.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`Member` or :class:`User` who had their message blocked.
+        If the user is not found then it is a :class:`Object` with the user's ID.
 
         When this is the action, the type of :attr:`~AuditLogEntry.extra` is
         set to an unspecified proxy object with these attributes:
@@ -3223,6 +3300,7 @@ of :class:`enum.Enum`.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`Member` or :class:`User` who had their message flagged.
+        If the user is not found then it is a :class:`Object` with the user's ID.
 
         See :attr:`automod_block_message` for more information on how the
         :attr:`~AuditLogEntry.extra` field is set.
@@ -3233,6 +3311,7 @@ of :class:`enum.Enum`.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`Member` or :class:`User` who was timed out.
+        If the user is not found then it is a :class:`Object` with the user's ID.
 
         See :attr:`automod_block_message` for more information on how the
         :attr:`~AuditLogEntry.extra` field is set.
@@ -3366,6 +3445,12 @@ of :class:`enum.Enum`.
     .. attribute:: lottie
 
         Represents a sticker with a lottie image.
+
+    .. attribute:: gif
+
+        Represents a sticker with a gif image.
+
+        .. versionadded:: 2.8
 
 .. class:: InviteTarget
 
@@ -3624,6 +3709,16 @@ of :class:`enum.Enum`.
 
         The ``hr`` (Croatian) locale.
 
+    .. attribute:: hu
+
+        The ``hu`` (Hungarian) locale.
+
+    .. attribute:: id
+
+        The ``id`` (Indonesian) locale.
+
+        .. versionadded:: 2.8
+
     .. attribute:: it
 
         The ``it`` (Italian) locale.
@@ -3639,10 +3734,6 @@ of :class:`enum.Enum`.
     .. attribute:: lt
 
         The ``lt`` (Lithuanian) locale.
-
-    .. attribute:: hu
-
-        The ``hu`` (Hungarian) locale.
 
     .. attribute:: nl
 
@@ -3774,6 +3865,68 @@ of :class:`enum.Enum`.
     .. attribute:: creation_date
 
         Sort forum threads by creation date/time (from newest to oldest).
+
+.. class:: ThreadLayout
+
+    Represents the layout of threads in :class:`ForumChannel`\s.
+
+    .. versionadded:: 2.8
+
+    .. attribute:: not_set
+
+        No preferred layout has been set.
+
+    .. attribute:: list_view
+
+        Display forum threads in a text-focused list.
+
+    .. attribute:: gallery_view
+
+        Display forum threads in a media-focused collection of tiles.
+
+.. class:: ApplicationRoleConnectionMetadataType
+
+    Represents the type of a role connection metadata value.
+
+    These offer comparison operations, which allow guilds to configure role requirements
+    based on the metadata value for each user and a guild-specified configured value.
+
+    .. versionadded:: 2.8
+
+    .. attribute:: integer_less_than_or_equal
+
+        The metadata value (``integer``) is less than or equal to the guild's configured value.
+
+    .. attribute:: integer_greater_than_or_equal
+
+        The metadata value (``integer``) is greater than or equal to the guild's configured value.
+
+    .. attribute:: integer_equal
+
+        The metadata value (``integer``) is equal to the guild's configured value.
+
+    .. attribute:: integer_not_equal
+
+        The metadata value (``integer``) is not equal to the guild's configured value.
+
+    .. attribute:: datetime_less_than_or_equal
+
+        The metadata value (``ISO8601 string``) is less than or equal to the guild's configured value (``integer``; days before current date).
+
+    .. attribute:: datetime_greater_than_or_equal
+
+        The metadata value (``ISO8601 string``) is greater than or equal to the guild's configured value (``integer``; days before current date).
+
+    .. attribute:: boolean_equal
+
+        The metadata value (``integer``) is equal to the guild's configured value.
+
+    .. attribute:: boolean_not_equal
+
+        The metadata value (``integer``) is not equal to the guild's configured value.
+
+.. autoclass:: Event
+    :members:
 
 Async Iterator
 ----------------
@@ -3909,7 +4062,7 @@ Certain utilities make working with async iterators easier, detailed below.
 Audit Log Data
 ----------------
 
-Working with :meth:`Guild.audit_logs` is a complicated process with a lot of machinery
+Working with audit logs is a complicated process with a lot of machinery
 involved. The library attempts to make it easy to use and friendly. In order to accomplish
 this goal, it must make use of a couple of data classes that aid in this goal.
 
@@ -4031,7 +4184,7 @@ AuditLogDiff
 
         The guild's owner. See also :attr:`Guild.owner`
 
-        :type: Union[:class:`Member`, :class:`User`]
+        :type: Union[:class:`Member`, :class:`User`, :class:`Object`]
 
     .. attribute:: region
 
@@ -4301,7 +4454,7 @@ AuditLogDiff
 
         See also :attr:`Invite.inviter`.
 
-        :type: Optional[:class:`User`]
+        :type: Optional[:class:`User`, :class:`Object`]
 
     .. attribute:: max_uses
 
@@ -4371,7 +4524,8 @@ AuditLogDiff
         The default number of seconds members have to wait before
         sending another message in new threads created in the channel.
 
-        See also :attr:`ForumChannel.default_thread_slowmode_delay`.
+        See also :attr:`TextChannel.default_thread_slowmode_delay` or
+        :attr:`ForumChannel.default_thread_slowmode_delay`.
 
         :type: :class:`int`
 
@@ -4868,12 +5022,48 @@ BaseSelectMenu
     :members:
     :inherited-members:
 
-SelectMenu
-~~~~~~~~~~~
+ChannelSelectMenu
+~~~~~~~~~~~~~~~~~
 
-.. attributetable:: SelectMenu
+.. attributetable:: ChannelSelectMenu
 
-.. autoclass:: SelectMenu()
+.. autoclass:: ChannelSelectMenu()
+    :members:
+    :inherited-members:
+
+MentionableSelectMenu
+~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: MentionableSelectMenu
+
+.. autoclass:: MentionableSelectMenu()
+    :members:
+    :inherited-members:
+
+RoleSelectMenu
+~~~~~~~~~~~~~~
+
+.. attributetable:: RoleSelectMenu
+
+.. autoclass:: RoleSelectMenu()
+    :members:
+    :inherited-members:
+
+StringSelectMenu
+~~~~~~~~~~~~~~~~~
+
+.. attributetable:: StringSelectMenu
+
+.. autoclass:: StringSelectMenu()
+    :members:
+    :inherited-members:
+
+UserSelectMenu
+~~~~~~~~~~~~~~
+
+.. attributetable:: UserSelectMenu
+
+.. autoclass:: UserSelectMenu()
     :members:
     :inherited-members:
 
@@ -4937,6 +5127,15 @@ Guild
         The :class:`User` that was banned.
 
         :type: :class:`User`
+
+GuildBuilder
+~~~~~~~~~~~~~
+
+.. attributetable:: GuildBuilder
+
+.. autoclass:: GuildBuilder()
+    :members:
+    :exclude-members: add_category_channel
 
 GuildPreview
 ~~~~~~~~~~~~~
@@ -5109,6 +5308,14 @@ InteractionMessage
     :members:
     :inherited-members:
 
+InteractionDataResolved
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: InteractionDataResolved
+
+.. autoclass:: InteractionDataResolved()
+    :members:
+
 ApplicationCommandInteractionData
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -5123,14 +5330,6 @@ ApplicationCommandInteractionDataOption
 .. attributetable:: ApplicationCommandInteractionDataOption
 
 .. autoclass:: ApplicationCommandInteractionDataOption()
-    :members:
-
-ApplicationCommandInteractionDataResolved
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. attributetable:: ApplicationCommandInteractionDataResolved
-
-.. autoclass:: ApplicationCommandInteractionDataResolved()
     :members:
 
 MessageInteractionData
@@ -5819,6 +6018,14 @@ AutoModTimeoutAction
 .. autoclass:: AutoModTimeoutAction
     :members:
 
+ApplicationRoleConnectionMetadata
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: ApplicationRoleConnectionMetadata
+
+.. autoclass:: ApplicationRoleConnectionMetadata
+    :members:
+
 File
 ~~~~~
 
@@ -5945,6 +6152,14 @@ PublicUserFlags
 .. autoclass:: PublicUserFlags()
     :members:
 
+MemberFlags
+~~~~~~~~~~~
+
+.. attributetable:: MemberFlags
+
+.. autoclass:: MemberFlags()
+    :members:
+
 .. _discord_ui_kit:
 
 Bot UI Kit
@@ -5967,6 +6182,7 @@ ActionRow
 
 .. autoclass:: disnake.ui.ActionRow
     :members:
+    :exclude-members: add_select
 
 Item
 ~~~~~~~
@@ -6004,16 +6220,60 @@ BaseSelect
     :members:
     :inherited-members:
 
-Select
-~~~~~~~
+ChannelSelect
+~~~~~~~~~~~~~~
 
-.. attributetable:: disnake.ui.Select
+.. attributetable:: disnake.ui.ChannelSelect
 
-.. autoclass:: disnake.ui.Select
+.. autoclass:: disnake.ui.ChannelSelect
     :members:
     :inherited-members:
 
-.. autofunction:: disnake.ui.select(cls=disnake.ui.Select, *, custom_id=..., placeholder=None, min_values=1, max_values=1, options=..., disabled=False, row=None)
+.. autofunction:: disnake.ui.channel_select(cls=disnake.ui.ChannelSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, disabled=False, channel_types=None, row=None)
+
+MentionableSelect
+~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: disnake.ui.MentionableSelect
+
+.. autoclass:: disnake.ui.MentionableSelect
+    :members:
+    :inherited-members:
+
+.. autofunction:: disnake.ui.mentionable_select(cls=disnake.ui.MentionableSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, disabled=False, row=None)
+
+RoleSelect
+~~~~~~~~~~~
+
+.. attributetable:: disnake.ui.RoleSelect
+
+.. autoclass:: disnake.ui.RoleSelect
+    :members:
+    :inherited-members:
+
+.. autofunction:: disnake.ui.role_select(cls=disnake.ui.RoleSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, disabled=False, row=None)
+
+StringSelect
+~~~~~~~~~~~~~
+
+.. attributetable:: disnake.ui.StringSelect
+
+.. autoclass:: disnake.ui.StringSelect
+    :members:
+    :inherited-members:
+
+.. autofunction:: disnake.ui.string_select(cls=disnake.ui.StringSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, options=..., disabled=False, row=None)
+
+UserSelect
+~~~~~~~~~~~
+
+.. attributetable:: disnake.ui.UserSelect
+
+.. autoclass:: disnake.ui.UserSelect
+    :members:
+    :inherited-members:
+
+.. autofunction:: disnake.ui.user_select(cls=disnake.ui.UserSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, disabled=False, row=None)
 
 Modal
 ~~~~~

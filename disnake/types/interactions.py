@@ -9,16 +9,15 @@ from typing_extensions import NotRequired
 from .channel import ChannelType
 from .components import Component, Modal
 from .embed import Embed
+from .i18n import LocalizationDict
 from .member import Member, MemberWithUser
 from .role import Role
 from .snowflake import Snowflake
+from .threads import ThreadMetadata
 from .user import User
 
 if TYPE_CHECKING:
     from .message import AllowedMentions, Attachment, Message
-
-
-ApplicationCommandLocalizations = Dict[str, str]
 
 
 ApplicationCommandType = Literal[1, 2, 3]
@@ -30,13 +29,14 @@ class ApplicationCommand(TypedDict):
     application_id: Snowflake
     guild_id: NotRequired[Snowflake]
     name: str
-    name_localizations: NotRequired[Optional[ApplicationCommandLocalizations]]
+    name_localizations: NotRequired[Optional[LocalizationDict]]
     description: str
-    description_localizations: NotRequired[Optional[ApplicationCommandLocalizations]]
+    description_localizations: NotRequired[Optional[LocalizationDict]]
     options: NotRequired[List[ApplicationCommandOption]]
     default_member_permissions: NotRequired[Optional[str]]
     dm_permission: NotRequired[Optional[bool]]
     default_permission: NotRequired[bool]  # deprecated
+    nsfw: NotRequired[bool]
     version: Snowflake
 
 
@@ -46,9 +46,9 @@ ApplicationCommandOptionType = Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 class ApplicationCommandOption(TypedDict):
     type: ApplicationCommandOptionType
     name: str
-    name_localizations: NotRequired[Optional[ApplicationCommandLocalizations]]
+    name_localizations: NotRequired[Optional[LocalizationDict]]
     description: str
-    description_localizations: NotRequired[Optional[ApplicationCommandLocalizations]]
+    description_localizations: NotRequired[Optional[LocalizationDict]]
     required: NotRequired[bool]
     choices: NotRequired[List[ApplicationCommandOptionChoice]]
     options: NotRequired[List[ApplicationCommandOption]]
@@ -65,7 +65,7 @@ ApplicationCommandOptionChoiceValue = Union[str, int, float]
 
 class ApplicationCommandOptionChoice(TypedDict):
     name: str
-    name_localizations: NotRequired[Optional[ApplicationCommandLocalizations]]
+    name_localizations: NotRequired[Optional[LocalizationDict]]
     value: ApplicationCommandOptionChoiceValue
 
 
@@ -86,6 +86,27 @@ class GuildApplicationCommandPermissions(TypedDict):
 
 
 InteractionType = Literal[1, 2, 3, 4, 5]
+
+
+class ResolvedPartialChannel(TypedDict):
+    id: Snowflake
+    type: ChannelType
+    permissions: str
+    name: str
+
+    # only in threads
+    thread_metadata: NotRequired[ThreadMetadata]
+    parent_id: NotRequired[Snowflake]
+
+
+class InteractionDataResolved(TypedDict, total=False):
+    users: Dict[Snowflake, User]
+    members: Dict[Snowflake, Member]
+    roles: Dict[Snowflake, Role]
+    channels: Dict[Snowflake, ResolvedPartialChannel]
+    # only in application commands
+    messages: Dict[Snowflake, Message]
+    attachments: Dict[Snowflake, Attachment]
 
 
 class _ApplicationCommandInteractionDataOption(TypedDict):
@@ -132,27 +153,11 @@ ApplicationCommandInteractionDataOption = Union[
 ]
 
 
-class ApplicationCommandResolvedPartialChannel(TypedDict):
-    id: Snowflake
-    type: ChannelType
-    permissions: str
-    name: str
-
-
-class ApplicationCommandInteractionDataResolved(TypedDict, total=False):
-    users: Dict[Snowflake, User]
-    members: Dict[Snowflake, Member]
-    roles: Dict[Snowflake, Role]
-    channels: Dict[Snowflake, ApplicationCommandResolvedPartialChannel]
-    messages: Dict[Snowflake, Message]
-    attachments: Dict[Snowflake, Attachment]
-
-
 class ApplicationCommandInteractionData(TypedDict):
     id: Snowflake
     name: str
     type: ApplicationCommandType
-    resolved: NotRequired[ApplicationCommandInteractionDataResolved]
+    resolved: NotRequired[InteractionDataResolved]
     options: NotRequired[List[ApplicationCommandInteractionDataOption]]
     # this is the guild the command is registered to, not the guild the command was invoked in (see interaction.guild_id)
     guild_id: NotRequired[Snowflake]
@@ -166,6 +171,11 @@ class _BaseComponentInteractionData(TypedDict):
     custom_id: str
 
 
+class _BaseSnowflakeComponentInteractionData(_BaseComponentInteractionData):
+    values: List[Snowflake]
+    resolved: NotRequired[InteractionDataResolved]
+
+
 ### Message interaction components
 
 
@@ -173,21 +183,42 @@ class MessageComponentInteractionButtonData(_BaseComponentInteractionData):
     component_type: Literal[2]
 
 
-class MessageComponentInteractionSelectData(_BaseComponentInteractionData):
+class MessageComponentInteractionStringSelectData(_BaseComponentInteractionData):
     component_type: Literal[3]
     values: List[str]
 
 
+class MessageComponentInteractionUserSelectData(_BaseSnowflakeComponentInteractionData):
+    component_type: Literal[5]
+
+
+class MessageComponentInteractionRoleSelectData(_BaseSnowflakeComponentInteractionData):
+    component_type: Literal[6]
+
+
+class MessageComponentInteractionMentionableSelectData(_BaseSnowflakeComponentInteractionData):
+    component_type: Literal[7]
+
+
+class MessageComponentInteractionChannelSelectData(_BaseSnowflakeComponentInteractionData):
+    component_type: Literal[8]
+
+
 MessageComponentInteractionData = Union[
     MessageComponentInteractionButtonData,
-    MessageComponentInteractionSelectData,
+    MessageComponentInteractionStringSelectData,
+    MessageComponentInteractionUserSelectData,
+    MessageComponentInteractionRoleSelectData,
+    MessageComponentInteractionMentionableSelectData,
+    MessageComponentInteractionChannelSelectData,
 ]
 
 
 ### Modal interaction components
 
 
-class ModalInteractionSelectData(_BaseComponentInteractionData):
+# TODO: add other select types
+class ModalInteractionStringSelectData(_BaseComponentInteractionData):
     type: Literal[3]
     values: List[str]
 
@@ -198,7 +229,7 @@ class ModalInteractionTextInputData(_BaseComponentInteractionData):
 
 
 ModalInteractionComponentData = Union[
-    ModalInteractionSelectData,
+    ModalInteractionStringSelectData,
     ModalInteractionTextInputData,
 ]
 
@@ -305,12 +336,13 @@ class InteractionMessageReference(TypedDict):
 
 class EditApplicationCommand(TypedDict):
     name: str
-    name_localizations: NotRequired[Optional[ApplicationCommandLocalizations]]
+    name_localizations: NotRequired[Optional[LocalizationDict]]
     description: NotRequired[str]
-    description_localizations: NotRequired[Optional[ApplicationCommandLocalizations]]
+    description_localizations: NotRequired[Optional[LocalizationDict]]
     options: NotRequired[Optional[List[ApplicationCommandOption]]]
     default_member_permissions: NotRequired[Optional[str]]
     dm_permission: NotRequired[bool]
     default_permission: NotRequired[bool]  # deprecated
+    nsfw: NotRequired[bool]
     # TODO: remove, this cannot be changed
     type: NotRequired[ApplicationCommandType]

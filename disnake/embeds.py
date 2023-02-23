@@ -41,7 +41,7 @@ if not TYPE_CHECKING:
 
 
 class EmbedProxy:
-    def __init__(self, layer: Optional[Mapping[str, Any]]):
+    def __init__(self, layer: Optional[Mapping[str, Any]]) -> None:
         if layer is not None:
             self.__dict__.update(layer)
 
@@ -197,7 +197,7 @@ class Embed:
         timestamp: Optional[datetime.datetime] = None,
         colour: Optional[Union[int, Colour]] = MISSING,
         color: Optional[Union[int, Colour]] = MISSING,
-    ):
+    ) -> None:
         self.title: Optional[str] = str(title) if title is not None else None
         self.type: Optional[EmbedType] = type
         self.description: Optional[str] = str(description) if description is not None else None
@@ -338,7 +338,7 @@ class Embed:
         return col if col is not MISSING else type(self)._default_colour
 
     @colour.setter
-    def colour(self, value: Optional[Union[int, Colour]]):
+    def colour(self, value: Optional[Union[int, Colour]]) -> None:
         if isinstance(value, int):
             self._colour = Colour(value=value)
         elif value is MISSING or value is None or isinstance(value, Colour):
@@ -349,7 +349,7 @@ class Embed:
             )
 
     @colour.deleter
-    def colour(self):
+    def colour(self) -> None:
         self._colour = MISSING
 
     color = colour
@@ -359,7 +359,7 @@ class Embed:
         return self._timestamp
 
     @timestamp.setter
-    def timestamp(self, value: Optional[datetime.datetime]):
+    def timestamp(self, value: Optional[datetime.datetime]) -> None:
         if isinstance(value, datetime.datetime):
             if value.tzinfo is None:
                 value = value.astimezone()
@@ -453,6 +453,10 @@ class Embed:
 
         Exactly one of ``url`` or ``file`` must be passed.
 
+        .. warning::
+            Passing a :class:`disnake.File` object will make the embed not
+            reusable.
+
         .. versionchanged:: 1.4
             Passing ``None`` removes the image.
 
@@ -499,6 +503,10 @@ class Embed:
         chaining.
 
         Exactly one of ``url`` or ``file`` must be passed.
+
+        .. warning::
+            Passing a :class:`disnake.File` object will make the embed not
+            reusable.
 
         .. versionchanged:: 1.4
             Passing ``None`` removes the thumbnail.

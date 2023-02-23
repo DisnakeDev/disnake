@@ -2,10 +2,23 @@
 
 name: Lint & Test
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - 'master'
+      - 'v[0-9]+.[0-9]+.x'  # matches to backport branches, e.g. 3.6
+      - 'run-ci/*'
+    tags:
+  pull_request:
+  merge_group:
+    types: [checks_requested]
 
 permissions:
   read-all
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
 
 defaults:
   run:
@@ -13,13 +26,6 @@ defaults:
 
 jobs:
   lint:
-    # Thanks to black for this rule
-    # We want to run on external PRs, but not on our own internal PRs as they'll be run
-    # by the push to the branch. Without this if check, checks are duplicated since
-    # internal PRs match both the push and pull_request events.
-    if:
-      github.event_name == 'push' || github.event.pull_request.head.repo.full_name !=
-      github.repository
     runs-on: ubuntu-latest
 
     steps:
@@ -33,7 +39,7 @@ jobs:
 
     - name: Run pre-commit
       id: pre-commit
-      uses: pre-commit/action@v2.0.3
+      uses: pre-commit/action@v3.0.0
       env:
         SKIP: 'flake8'
 
@@ -49,16 +55,10 @@ jobs:
       id: flake8
       if: always() && (steps.pre-commit.outcome == 'success' || steps.pre-commit.outcome == 'failure')
       run: "flake8 \
-      --format='::error file=%(path)s,line=%(row)d,col=%(col)d::\
-      [flake8] %(code)s: %(text)s'"
+        --format='::error file=%(path)s,line=%(row)d,col=%(col)d::\
+        [flake8] %(code)s: %(text)s'"
 
   docs:
-    # We want to run on external PRs, but not on our own internal PRs as they'll be run
-    # by the push to the branch. Without this if check, checks are duplicated since
-    # internal PRs match both the push and pull_request events.
-    if:
-      github.event_name == 'push' || github.event.pull_request.head.repo.full_name !=
-      github.repository
     # unlike the other workflows, we are using version 20.04 here as
     # readthedocs uses 20.04 for building our docs, and we want to be explicit
     runs-on: ubuntu-20.04
@@ -75,22 +75,14 @@ jobs:
       run: nox -s docs -- --keep-going -W -w $GITHUB_STEP_SUMMARY
 
   pyright:
-    # We want to run on external PRs, but not on our own internal PRs as they'll be run
-    # by the push to the branch. Without this if check, checks are duplicated since
-    # internal PRs match both the push and pull_request events.
-    continue-on-error: ${{ matrix.experimental }}
-    if:
-      github.event_name == 'push' || github.event.pull_request.head.repo.full_name !=
-      github.repository
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
         experimental: [false]
-        include:
-          - python-version: '3.11.0-alpha - 3.11'
-            experimental: true
       fail-fast: false
+    continue-on-error: ${{ matrix.experimental }}
+
     steps:
     - uses: actions/checkout@v3
 
@@ -126,14 +118,7 @@ jobs:
         warnings: true
 
   misc:
-    # We want to run on external PRs, but not on our own internal PRs as they'll be run
-    # by the push to the branch. Without this if check, checks are duplicated since
-    # internal PRs match both the push and pull_request events.
-    if:
-      github.event_name == 'push' || github.event.pull_request.head.repo.full_name !=
-      github.repository
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
 
@@ -155,7 +140,7 @@ jobs:
     # This only runs if the previous steps were successful, no point in running it otherwise
     - name: Build package
       run: |
-        pip install -U build
+        python -m pip install -U build
         python -m build
 
     # run the libcst parsers and check for changes
@@ -172,32 +157,14 @@ jobs:
         fi
 
   pytest:
-    # Thanks to black for this rule
-    # We want to run on external PRs, but not on our own internal PRs as they'll be run
-    # by the push to the branch. Without this if check, checks are duplicated since
-    # internal PRs match both the push and pull_request events.
-    continue-on-error: ${{ matrix.experimental }}
-    if:
-      github.event_name == 'push' || github.event.pull_request.head.repo.full_name !=
-      github.repository
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
         os: ["windows-latest", "ubuntu-latest", "macos-latest"]
         experimental: [false]
-        include:
-          - python-version: '3.11.0-alpha - 3.11'
-            os: "ubuntu-latest"
-            experimental: true
-          - python-version: '3.11.0-alpha - 3.11'
-            os: "macos-latest"
-            experimental: true
-          - python-version: '3.11.0-alpha - 3.11'
-            os: "windows-latest"
-            experimental: true
       fail-fast: true
-
-    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.experimental }}
 
     env:
       GITHUB_STEP_SUMMARY_HEADER: "<details><summary>#name#</summary>\n<pre>"
@@ -279,11 +246,7 @@ jobs:
 
   # thanks to aiohttp for this part of the workflow
   check:  # This job does nothing and is only used for the branch protection
-    if:
-      always() &&
-      github.event_name == 'push' || github.event.pull_request.head.repo.full_name !=
-      github.repository
-
+    if: always()
     needs:
     - lint
     - docs
@@ -295,6 +258,6 @@ jobs:
 
     steps:
     - name: Decide whether the needed jobs succeeded or failed
-      uses: re-actors/alls-green@v1.2.1
+      uses: re-actors/alls-green@v1.2.2
       with:
         jobs: ${{ toJSON(needs) }}

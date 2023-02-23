@@ -55,8 +55,8 @@ instead. Similar to this example: ::
     # good
     await asyncio.sleep(10)
 
-Another common source of blocking for too long is using HTTP requests with the famous module :doc:`req:index`.
-While :doc:`req:index` is an amazing module for non-asynchronous programming, it is not a good choice for
+Another common source of blocking for too long is using HTTP requests with the famous module :doc:`requests <req:index>`.
+While :doc:`requests <req:index>` is an amazing module for non-asynchronous programming, it is not a good choice for
 :mod:`asyncio` because certain requests can block the event loop too long. Instead, use the :doc:`aiohttp <aio:index>` library which
 is installed on the side with this library.
 
@@ -335,8 +335,7 @@ Quick example: ::
 Is there an event for audit log entries being created?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Since Discord does not dispatch this information in the gateway, the library cannot provide this information.
-This is currently a Discord limitation.
+As of version 2.8, there's now an event for it, called :func:`on_audit_log_entry_create`.
 
 Commands Extension
 -------------------

@@ -39,7 +39,7 @@ from .sticker import StickerItem
 from .threads import Thread
 from .ui.action_row import components_to_dict
 from .user import User
-from .utils import MISSING, escape_mentions
+from .utils import MISSING, assert_never, escape_mentions
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -87,7 +87,7 @@ __all__ = (
 )
 
 
-def convert_emoji_reaction(emoji):
+def convert_emoji_reaction(emoji: Union[EmojiInputType, Reaction]) -> str:
     if isinstance(emoji, Reaction):
         emoji = emoji.emoji
 
@@ -96,12 +96,18 @@ def convert_emoji_reaction(emoji):
     if isinstance(emoji, PartialEmoji):
         return emoji._as_reaction()
     if isinstance(emoji, str):
-        # Reactions can be in :name:id format, but not <:name:id>.
-        # No existing emojis have <> in them, so this should be okay.
-        return emoji.strip("<>")
+        # Reactions must be in name:id format, not <:name:id> and/or with the `a:` prefix.
+        # No existing emojis start/end with `<>` or `:`, so this should be okay.
 
+        s = emoji.strip("<>:")
+        # `str.removeprefix` is py 3.9 only
+        if s.startswith("a:"):
+            s = s[2:]
+        return s
+
+    assert_never(emoji)
     raise TypeError(
-        f"emoji argument must be str, Emoji, or Reaction not {emoji.__class__.__name__}."
+        f"emoji argument must be str, Emoji, PartialEmoji, or Reaction, not {emoji.__class__.__name__}."
     )
 
 
@@ -121,6 +127,7 @@ async def _edit_handler(
     attachments: Optional[List[Attachment]],
     suppress: bool,  # deprecated
     suppress_embeds: bool,
+    flags: MessageFlags,
     allowed_mentions: Optional[AllowedMentions],
     view: Optional[View],
     components: Optional[Components[MessageUIComponent]],
@@ -161,8 +168,9 @@ async def _edit_handler(
                 files.extend(embed._files.values())
 
     if suppress_embeds is not MISSING:
-        flags = MessageFlags._from_value(default_flags)
+        flags = MessageFlags._from_value(default_flags if flags is MISSING else flags.value)
         flags.suppress_embeds = suppress_embeds
+    if flags is not MISSING:
         payload["flags"] = flags.value
 
     if allowed_mentions is MISSING:
@@ -280,7 +288,7 @@ class Attachment(Hashable):
         "description",
     )
 
-    def __init__(self, *, data: AttachmentPayload, state: ConnectionState):
+    def __init__(self, *, data: AttachmentPayload, state: ConnectionState) -> None:
         self.id: int = int(data["id"])
         self.size: int = data["size"]
         self.height: Optional[int] = data.get("height")
@@ -481,7 +489,7 @@ class DeletedReferencedMessage:
 
     __slots__ = ("_parent",)
 
-    def __init__(self, parent: MessageReference):
+    def __init__(self, parent: MessageReference) -> None:
         self._parent: MessageReference = parent
 
     def __repr__(self) -> str:
@@ -547,7 +555,7 @@ class MessageReference:
         channel_id: int,
         guild_id: Optional[int] = None,
         fail_if_not_exists: bool = True,
-    ):
+    ) -> None:
         self._state: Optional[ConnectionState] = None
         self.resolved: Optional[Union[Message, DeletedReferencedMessage]] = None
         self.message_id: Optional[int] = message_id
@@ -656,7 +664,7 @@ class InteractionReference:
 
     __slots__ = ("id", "type", "name", "user", "_state")
 
-    def __init__(self, *, state: ConnectionState, data: InteractionMessageReferencePayload):
+    def __init__(self, *, state: ConnectionState, data: InteractionMessageReferencePayload) -> None:
         self._state: ConnectionState = state
         self.id: int = int(data["id"])
         self.type: InteractionType = try_enum(InteractionType, int(data["type"]))
@@ -869,7 +877,7 @@ class Message(Hashable):
         state: ConnectionState,
         channel: MessageableChannel,
         data: MessagePayload,
-    ):
+    ) -> None:
         self._state: ConnectionState = state
         self.id: int = int(data["id"])
         self.application_id: Optional[int] = utils._get_as_snowflake(data, "application_id")
@@ -1127,7 +1135,7 @@ class Message(Hashable):
                 if role is not None:
                     self.role_mentions.append(role)
 
-    def _handle_components(self, components: List[ComponentPayload]):
+    def _handle_components(self, components: List[ComponentPayload]) -> None:
         self.components = [
             _component_factory(d, type=ActionRow[MessageComponent]) for d in components
         ]
@@ -1394,6 +1402,20 @@ class Message(Hashable):
         if self.type is MessageType.auto_moderation_action:
             return self.content
 
+        # TODO: `MessageType.role_subscription_purchase` requires `Message.role_subscription_data`,
+        #       which is currently undocumented
+
+        if self.type is MessageType.interaction_premium_upsell:
+            return self.content
+
+        if self.type is MessageType.guild_application_premium_subscription:
+            application_name = (
+                self.application["name"]
+                if self.application and "name" in self.application
+                else "a deleted application"
+            )
+            return f"{self.author.name} upgraded {application_name} to premium for this server! 🎉"
+
         # in the event of an unknown or unsupported message type, we return nothing
         return None
 
@@ -1426,7 +1448,7 @@ class Message(Hashable):
         """
         if delay is not None:
 
-            async def delete(delay: float):
+            async def delete(delay: float) -> None:
                 await asyncio.sleep(delay)
                 try:
                     await self._state.http.delete_message(self.channel.id, self.id)
@@ -1446,6 +1468,7 @@ class Message(Hashable):
         file: File = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -1462,6 +1485,7 @@ class Message(Hashable):
         files: List[File] = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -1478,6 +1502,7 @@ class Message(Hashable):
         file: File = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -1494,6 +1519,7 @@ class Message(Hashable):
         files: List[File] = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -1512,6 +1538,7 @@ class Message(Hashable):
         attachments: Optional[List[Attachment]] = MISSING,
         suppress: bool = MISSING,  # deprecated
         suppress_embeds: bool = MISSING,
+        flags: MessageFlags = MISSING,
         allowed_mentions: Optional[AllowedMentions] = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[Components[MessageUIComponent]] = MISSING,
@@ -1528,6 +1555,12 @@ class Message(Hashable):
             (using the ``file`` parameter with :meth:`Embed.set_image` or :meth:`Embed.set_thumbnail`),
             those images will be removed if the message's attachments are edited in any way
             (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
+
+        .. note::
+
+            This method cannot be used on messages authored by others, with one exception.
+            The ``suppress_embeds`` parameter can be used to change the state of embeds on
+            other users' messages, requiring the :attr:`~.Permissions.manage_messages` permission.
 
         .. versionchanged:: 1.3
             The ``suppress`` keyword-only parameter was added.
@@ -1578,10 +1611,19 @@ class Message(Hashable):
                 Supports passing ``None`` to clear attachments.
 
         suppress_embeds: :class:`bool`
-            Whether to suppress embeds for the message. This removes
-            all the embeds if set to ``True``. If set to ``False``
-            this brings the embeds back if they were suppressed.
-            Using this parameter requires :attr:`~.Permissions.manage_messages`.
+            Whether to suppress embeds for the message. This hides
+            all the embeds from the UI if set to ``True``. If set
+            to ``False``, this brings the embeds back if they were
+            suppressed.
+        flags: :class:`MessageFlags`
+            The new flags to set for this message. Overrides existing flags.
+            Only :attr:`~MessageFlags.suppress_embeds` is supported.
+
+            If parameter ``suppress_embeds`` is provided,
+            that will override the setting of :attr:`.MessageFlags.suppress_embeds`.
+
+            .. versionadded:: 2.9
+
         delete_after: Optional[:class:`float`]
             If provided, the number of seconds to wait in the background
             before deleting the message we just edited. If the deletion fails,
@@ -1646,6 +1688,7 @@ class Message(Hashable):
             attachments=attachments,
             suppress=suppress,
             suppress_embeds=suppress_embeds,
+            flags=flags,
             allowed_mentions=allowed_mentions,
             view=view,
             components=components,
@@ -1881,10 +1924,11 @@ class Message(Hashable):
             The duration in minutes before a thread is automatically archived for inactivity.
             If not provided, the channel's default auto archive duration is used.
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
-        slowmode_delay: :class:`int`
+        slowmode_delay: Optional[:class:`int`]
             Specifies the slowmode rate limit for users in this thread, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
-            If not provided, slowmode is disabled.
+            If set to ``None`` or not provided, slowmode is inherited from the parent's
+            :attr:`~TextChannel.default_thread_slowmode_delay`.
 
             .. versionadded:: 2.3
 
@@ -1923,7 +1967,7 @@ class Message(Hashable):
             self.id,
             name=name,
             auto_archive_duration=auto_archive_duration or default_auto_archive_duration,
-            rate_limit_per_user=slowmode_delay or 0,
+            rate_limit_per_user=slowmode_delay,
             reason=reason,
         )
         return Thread(guild=self.guild, state=self._state, data=data)
@@ -2060,7 +2104,7 @@ class PartialMessage(Hashable):
     to_reference = Message.to_reference
     to_message_reference_dict = Message.to_message_reference_dict
 
-    def __init__(self, *, channel: MessageableChannel, id: int):
+    def __init__(self, *, channel: MessageableChannel, id: int) -> None:
         if channel.type not in (
             ChannelType.text,
             ChannelType.news,
@@ -2132,6 +2176,7 @@ class PartialMessage(Hashable):
         file: File = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -2148,6 +2193,7 @@ class PartialMessage(Hashable):
         files: List[File] = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -2164,6 +2210,7 @@ class PartialMessage(Hashable):
         file: File = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -2180,6 +2227,7 @@ class PartialMessage(Hashable):
         files: List[File] = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -2198,6 +2246,7 @@ class PartialMessage(Hashable):
         attachments: Optional[List[Attachment]] = MISSING,
         suppress: bool = MISSING,  # deprecated
         suppress_embeds: bool = MISSING,
+        flags: MessageFlags = MISSING,
         allowed_mentions: Optional[AllowedMentions] = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[Components[MessageUIComponent]] = MISSING,
@@ -2209,6 +2258,18 @@ class PartialMessage(Hashable):
 
         The content must be able to be transformed into a string via ``str(content)``.
 
+        .. note::
+            If the original message has embeds with images that were created from local files
+            (using the ``file`` parameter with :meth:`Embed.set_image` or :meth:`Embed.set_thumbnail`),
+            those images will be removed if the message's attachments are edited in any way
+            (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
+
+        .. note::
+
+            This method cannot be used on messages authored by others, with one exception.
+            The ``suppress_embeds`` parameter can be used to change the state of embeds on
+            other users' messages, requiring the :attr:`~.Permissions.manage_messages` permission.
+
         .. versionchanged:: 2.1
             :class:`disnake.Message` is always returned.
 
@@ -2218,12 +2279,6 @@ class PartialMessage(Hashable):
 
         .. versionchanged:: 2.6
             Raises :exc:`TypeError` instead of ``InvalidArgument``.
-
-        .. note::
-            If the original message has embeds with images that were created from local files
-            (using the ``file`` parameter with :meth:`Embed.set_image` or :meth:`Embed.set_thumbnail`),
-            those images will be removed if the message's attachments are edited in any way
-            (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
 
         Parameters
         ----------
@@ -2266,10 +2321,19 @@ class PartialMessage(Hashable):
                 Supports passing ``None`` to clear attachments.
 
         suppress_embeds: :class:`bool`
-            Whether to suppress embeds for the message. This removes
-            all the embeds if set to ``True``. If set to ``False``
-            this brings the embeds back if they were suppressed.
-            Using this parameter requires :attr:`~.Permissions.manage_messages`.
+            Whether to suppress embeds for the message. This hides
+            all the embeds from the UI if set to ``True``. If set
+            to ``False``, this brings the embeds back if they were
+            suppressed.
+        flags: :class:`MessageFlags`
+            The new flags to set for this message. Overrides existing flags.
+            Only :attr:`~MessageFlags.suppress_embeds` is supported.
+
+            If parameter ``suppress_embeds`` is provided,
+            that will override the setting of :attr:`.MessageFlags.suppress_embeds`.
+
+            .. versionadded:: 2.9
+
         delete_after: Optional[:class:`float`]
             If provided, the number of seconds to wait in the background
             before deleting the message we just edited. If the deletion fails,
@@ -2329,6 +2393,7 @@ class PartialMessage(Hashable):
             attachments=attachments,
             suppress=suppress,
             suppress_embeds=suppress_embeds,
+            flags=flags,
             allowed_mentions=allowed_mentions,
             view=view,
             components=components,

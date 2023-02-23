@@ -207,7 +207,7 @@ class Permissions(BaseFlags):
         view_audit_log: bool = ...,
         view_channel: bool = ...,
         view_guild_insights: bool = ...,
-    ):
+    ) -> None:
         ...
 
     @overload
@@ -215,11 +215,11 @@ class Permissions(BaseFlags):
     def __init__(
         self,
         permissions: int = 0,
-    ):
+    ) -> None:
         ...
 
     @_overload_with_permissions
-    def __init__(self, permissions: int = 0, **kwargs: bool):
+    def __init__(self, permissions: int = 0, **kwargs: bool) -> None:
         if not isinstance(permissions, int):
             raise TypeError(
                 f"Expected int parameter, received {permissions.__class__.__name__} instead."
@@ -916,7 +916,8 @@ class Permissions(BaseFlags):
 
     @flag_value
     def moderate_members(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can perform limited moderation actions (timeout).
+        """:class:`bool`: Returns ``True`` if a user can perform limited moderation actions,
+        such as timeouts or editing members' flags.
 
         .. versionadded:: 2.3
         """
@@ -941,7 +942,7 @@ def _augment_from_permissions(cls):
         def getter(self, x=key):
             return self._values.get(x)
 
-        def setter(self, value, x=key):
+        def setter(self, value, x=key) -> None:
             self._set(x, value)
 
         prop = property(getter, setter)
@@ -1097,18 +1098,18 @@ class PermissionOverwrite:
         view_audit_log: Optional[bool] = ...,
         view_channel: Optional[bool] = ...,
         view_guild_insights: Optional[bool] = ...,
-    ):
+    ) -> None:
         ...
 
     @overload
     @_generated
     def __init__(
         self,
-    ):
+    ) -> None:
         ...
 
     @_overload_with_permissions
-    def __init__(self, **kwargs: Optional[bool]):
+    def __init__(self, **kwargs: Optional[bool]) -> None:
         self._values: Dict[str, Optional[bool]] = {}
 
         for key, value in kwargs.items():

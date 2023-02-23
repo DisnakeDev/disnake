@@ -21,6 +21,7 @@ from typing import (
 
 import disnake
 import disnake.utils
+from disnake.enums import Event
 
 from ._types import _BaseCommand
 from .base_core import InvokableApplicationCommand
@@ -37,6 +38,7 @@ if TYPE_CHECKING:
     from .core import Command
 
     AnyBot = Union[Bot, AutoShardedBot, InteractionBot, AutoShardedInteractionBot]
+
 
 __all__ = (
     "CogMeta",
@@ -399,26 +401,26 @@ class Cog(metaclass=CogMeta):
         return getattr(method.__func__, "__cog_special_method__", method)
 
     @classmethod
-    def listener(cls, name: str = MISSING) -> Callable[[FuncT], FuncT]:
+    def listener(cls, name: Union[str, Event] = MISSING) -> Callable[[FuncT], FuncT]:
         """A decorator that marks a function as a listener.
 
         This is the cog equivalent of :meth:`.Bot.listen`.
 
         Parameters
         ----------
-        name: :class:`str`
+        name: Union[:class:`str`, :class:`.Event`]
             The name of the event being listened to. If not provided, it
             defaults to the function's name.
 
         Raises
         ------
         TypeError
-            The function is not a coroutine function or a string was not passed as
+            The function is not a coroutine function or a string or an :class:`.Event` enum member was not passed as
             the name.
         """
-        if name is not MISSING and not isinstance(name, str):
+        if name is not MISSING and not isinstance(name, (str, Event)):
             raise TypeError(
-                f"Cog.listener expected str but received {name.__class__.__name__!r} instead."
+                f"Cog.listener expected str or Enum but received {name.__class__.__name__!r} instead."
             )
 
         def decorator(func: FuncT) -> FuncT:
@@ -428,7 +430,11 @@ class Cog(metaclass=CogMeta):
             if not asyncio.iscoroutinefunction(actual):
                 raise TypeError("Listener function must be a coroutine function.")
             actual.__cog_listener__ = True
-            to_assign = name or actual.__name__
+            to_assign = (
+                actual.__name__
+                if name is MISSING
+                else (name if isinstance(name, str) else f"on_{name.value}")
+            )
             try:
                 actual.__cog_listener_names__.append(to_assign)
             except AttributeError:
@@ -808,7 +814,7 @@ class Cog(metaclass=CogMeta):
             bot.add_listener(getattr(self, method_name), name)
 
         try:
-            if bot._sync_commands_on_cog_unload:
+            if bot._command_sync_flags.sync_on_cog_actions:
                 bot._schedule_delayed_command_sync()
         except NotImplementedError:
             pass
@@ -874,7 +880,7 @@ class Cog(metaclass=CogMeta):
 
         finally:
             try:
-                if bot._sync_commands_on_cog_unload:
+                if bot._command_sync_flags.sync_on_cog_actions:
                     bot._schedule_delayed_command_sync()
             except NotImplementedError:
                 pass

@@ -1,5 +1,42 @@
 # SPDX-License-Identifier: MIT
 
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "disnake"
+description = "A Python wrapper for the Discord API"
+readme = "README.md"
+authors = [
+  { name = "Disnake Development" }
+]
+requires-python = ">=3.8"
+keywords = ["disnake", "discord", "discord api"]
+license = { text = "MIT" }
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "License :: OSI Approved :: MIT License",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Internet",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Utilities",
+    "Typing :: Typed",
+]
+dynamic = ["version", "dependencies", "optional-dependencies"]
+
+[project.urls]
+Changelog = "https://docs.disnake.dev/page/whats_new.html"
+Documentation = "https://docs.disnake.dev/"
+Repository = "https://github.com/DisnakeDev/disnake"
+
 [tool.black]
 line-length = 100
 target-version = ["py38", "py39", "py310"]

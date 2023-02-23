@@ -2,26 +2,15 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union
 
 from .. import utils
-from ..channel import (
-    CategoryChannel,
-    ForumChannel,
-    PartialMessageable,
-    StageChannel,
-    TextChannel,
-    VoiceChannel,
-    _threaded_guild_channel_factory,
-)
-from ..enums import ApplicationCommandType, ChannelType, Locale, OptionType, try_enum
+from ..enums import ApplicationCommandType, Locale, OptionType, try_enum
 from ..guild import Guild
 from ..member import Member
-from ..message import Attachment, Message
-from ..object import Object
-from ..role import Role
+from ..message import Message
 from ..user import User
-from .base import Interaction
+from .base import Interaction, InteractionDataResolved
 
 __all__ = (
     "ApplicationCommandInteraction",
@@ -44,26 +33,12 @@ __all__ = (
 MISSING = utils.MISSING
 
 if TYPE_CHECKING:
-    from ..abc import MessageableChannel
     from ..ext.commands import InvokableApplicationCommand
     from ..state import ConnectionState
-    from ..threads import Thread
     from ..types.interactions import (
         ApplicationCommandInteraction as ApplicationCommandInteractionPayload,
         ApplicationCommandInteractionData as ApplicationCommandInteractionDataPayload,
-        ApplicationCommandInteractionDataResolved as ApplicationCommandInteractionDataResolvedPayload,
     )
-
-    InteractionChannel = Union[
-        VoiceChannel,
-        StageChannel,
-        TextChannel,
-        CategoryChannel,
-        Thread,
-        PartialMessageable,
-        VoiceChannel,
-        ForumChannel,
-    ]
 
 
 class ApplicationCommandInteraction(Interaction):
@@ -117,7 +92,9 @@ class ApplicationCommandInteraction(Interaction):
         Whether the command failed to be checked or invoked.
     """
 
-    def __init__(self, *, data: ApplicationCommandInteractionPayload, state: ConnectionState):
+    def __init__(
+        self, *, data: ApplicationCommandInteractionPayload, state: ConnectionState
+    ) -> None:
         super().__init__(data=data, state=state)
         self.data: ApplicationCommandInteractionData = ApplicationCommandInteractionData(
             data=data["data"], state=state, guild_id=self.guild_id
@@ -193,7 +170,7 @@ class ApplicationCommandInteractionData(Dict[str, Any]):
         The application command name.
     type: :class:`ApplicationCommandType`
         The application command type.
-    resolved: :class:`ApplicationCommandInteractionDataResolved`
+    resolved: :class:`InteractionDataResolved`
         All resolved objects related to this interaction.
     options: List[:class:`ApplicationCommandInteractionDataOption`]
         A list of options from the API.
@@ -219,22 +196,25 @@ class ApplicationCommandInteractionData(Dict[str, Any]):
         data: ApplicationCommandInteractionDataPayload,
         state: ConnectionState,
         guild_id: Optional[int],
-    ):
+    ) -> None:
         super().__init__(data)
         self.id: int = int(data["id"])
         self.name: str = data["name"]
         self.type: ApplicationCommandType = try_enum(ApplicationCommandType, data["type"])
-        self.resolved = ApplicationCommandInteractionDataResolved(
+
+        self.resolved = InteractionDataResolved(
             data=data.get("resolved", {}), state=state, guild_id=guild_id
         )
         self.target_id: Optional[int] = utils._get_as_snowflake(data, "target_id")
-        self.target: Optional[Union[User, Member, Message]] = self.resolved.get(self.target_id)  # type: ignore
+        target = self.resolved.get_by_id(self.target_id)
+        self.target: Optional[Union[User, Member, Message]] = target  # type: ignore
+
         self.options: List[ApplicationCommandInteractionDataOption] = [
             ApplicationCommandInteractionDataOption(data=d, resolved=self.resolved)
             for d in data.get("options", [])
         ]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"<ApplicationCommandInteractionData id={self.id!r} name={self.name!r} type={self.type!r} "
             f"target_id={self.target_id!r} target={self.target!r} resolved={self.resolved!r} options={self.options!r}>"
@@ -294,24 +274,22 @@ class ApplicationCommandInteractionDataOption(Dict[str, Any]):
 
     __slots__ = ("name", "type", "value", "options", "focused")
 
-    def __init__(
-        self, *, data: Mapping[str, Any], resolved: ApplicationCommandInteractionDataResolved
-    ):
+    def __init__(self, *, data: Mapping[str, Any], resolved: InteractionDataResolved) -> None:
         super().__init__(data)
         self.name: str = data["name"]
         self.type: OptionType = try_enum(OptionType, data["type"])
-        value = data.get("value")
-        if value is not None:
-            self.value: Any = resolved.get_with_type(value, self.type.value, value)
-        else:
-            self.value: Any = None
+
+        self.value: Any = None
+        if (value := data.get("value")) is not None:
+            self.value: Any = resolved.get_with_type(value, self.type, value)
+
         self.options: List[ApplicationCommandInteractionDataOption] = [
             ApplicationCommandInteractionDataOption(data=d, resolved=resolved)
             for d in data.get("options", [])
         ]
         self.focused: bool = data.get("focused", False)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"<ApplicationCommandInteractionDataOption name={self.name!r} type={self.type!r}>"
             f"value={self.value!r} focused={self.focused!r} options={self.options!r}>"
@@ -343,183 +321,8 @@ class ApplicationCommandInteractionDataOption(Dict[str, Any]):
         return chain, {}
 
 
-class ApplicationCommandInteractionDataResolved(Dict[str, Any]):
-    """Represents the resolved data related to an interaction with an application command.
-
-    .. versionadded:: 2.1
-
-    Attributes
-    ----------
-    members: Dict[:class:`int`, :class:`Member`]
-        A mapping of IDs to partial members (``deaf`` and ``mute`` attributes are missing).
-    users: Dict[:class:`int`, :class:`User`]
-        A mapping of IDs to users.
-    roles: Dict[:class:`int`, :class:`Role`]
-        A mapping of IDs to roles.
-    channels: Dict[:class:`int`, Channel]
-        A mapping of IDs to partial channels (only ``id``, ``name`` and ``permissions`` are included,
-        threads also have ``thread_metadata`` and ``parent_id``).
-    messages: Dict[:class:`int`, :class:`Message`]
-        A mapping of IDs to messages.
-    attachments: Dict[:class:`int`, :class:`Attachment`]
-        A mapping of IDs to attachments.
-
-        .. versionadded:: 2.4
-    """
-
-    __slots__ = ("members", "users", "roles", "channels", "messages", "attachments")
-
-    def __init__(
-        self,
-        *,
-        data: ApplicationCommandInteractionDataResolvedPayload,
-        state: ConnectionState,
-        guild_id: Optional[int],
-    ):
-        data = data or {}
-        super().__init__(data)
-
-        self.members: Dict[int, Member] = {}
-        self.users: Dict[int, User] = {}
-        self.roles: Dict[int, Role] = {}
-        self.channels: Dict[int, InteractionChannel] = {}
-        self.messages: Dict[int, Message] = {}
-        self.attachments: Dict[int, Attachment] = {}
-
-        users = data.get("users", {})
-        members = data.get("members", {})
-        roles = data.get("roles", {})
-        channels = data.get("channels", {})
-        messages = data.get("messages", {})
-        attachments = data.get("attachments", {})
-
-        guild: Optional[Guild] = None
-        # `guild_fallback` is only used in guild contexts, so this `MISSING` value should never be used.
-        # We need to define it anyway to satisfy the typechecker.
-        guild_fallback: Union[Guild, Object] = MISSING
-        if guild_id is not None:
-            guild = state._get_guild(guild_id)
-            guild_fallback = guild or Object(id=guild_id)
-
-        for str_id, user in users.items():
-            user_id = int(str_id)
-            member = members.get(str_id)
-            if member is not None:
-                self.members[user_id] = (
-                    guild
-                    and guild.get_member(user_id)
-                    or Member(
-                        data=member,
-                        user_data=user,
-                        guild=guild_fallback,  # type: ignore
-                        state=state,
-                    )
-                )
-            else:
-                self.users[user_id] = User(state=state, data=user)
-
-        for str_id, role in roles.items():
-            self.roles[int(str_id)] = Role(
-                guild=guild_fallback,  # type: ignore
-                state=state,
-                data=role,
-            )
-
-        for str_id, channel in channels.items():
-            channel_id = int(str_id)
-            factory, _ = _threaded_guild_channel_factory(channel["type"])
-            if factory:
-                channel["position"] = 0  # type: ignore
-                self.channels[channel_id] = (
-                    guild
-                    and guild.get_channel(channel_id)
-                    or factory(
-                        guild=guild_fallback,  # type: ignore
-                        state=state,
-                        data=channel,  # type: ignore
-                    )
-                )
-            else:
-                self.channels[channel_id] = PartialMessageable(
-                    state=state, id=channel_id, type=try_enum(ChannelType, channel["type"])
-                )
-
-        for str_id, message in messages.items():
-            channel_id = int(message["channel_id"])
-            channel = cast(
-                "Optional[MessageableChannel]",
-                (guild and guild.get_channel(channel_id) or state.get_channel(channel_id)),
-            )
-            if channel is None:
-                # The channel is not part of `resolved.channels`,
-                # so we need to fall back to partials here.
-                channel = PartialMessageable(state=state, id=channel_id, type=None)
-            self.messages[int(str_id)] = Message(state=state, channel=channel, data=message)
-
-        for str_id, attachment in attachments.items():
-            self.attachments[int(str_id)] = Attachment(data=attachment, state=state)
-
-    def __repr__(self):
-        return (
-            f"<ApplicationCommandInteractionDataResolved members={self.members!r} users={self.users!r} "
-            f"roles={self.roles!r} channels={self.channels!r} messages={self.messages!r} attachments={self.attachments!r}>"
-        )
-
-    def get_with_type(self, key: Any, option_type: OptionType, default: Any = None):
-        if isinstance(option_type, int):
-            option_type = try_enum(OptionType, option_type)
-        if option_type is OptionType.mentionable:
-            key = int(key)
-            result = self.members.get(key)
-            if result is not None:
-                return result
-            result = self.users.get(key)
-            if result is not None:
-                return result
-            return self.roles.get(key, default)
-
-        if option_type is OptionType.user:
-            key = int(key)
-            member = self.members.get(key)
-            if member is not None:
-                return member
-            return self.users.get(key, default)
-
-        if option_type is OptionType.channel:
-            return self.channels.get(int(key), default)
-
-        if option_type is OptionType.role:
-            return self.roles.get(int(key), default)
-
-        if option_type is OptionType.attachment:
-            return self.attachments.get(int(key), default)
-
-        return default
-
-    def get(self, key: int):
-        if key is None:
-            return None
-
-        res = self.members.get(key)
-        if res is not None:
-            return res
-        res = self.users.get(key)
-        if res is not None:
-            return res
-        res = self.roles.get(key)
-        if res is not None:
-            return res
-        res = self.channels.get(key)
-        if res is not None:
-            return res
-        res = self.messages.get(key)
-        if res is not None:
-            return res
-        res = self.attachments.get(key)
-        if res is not None:
-            return res
-
-        return None
+# backwards compatibility
+ApplicationCommandInteractionDataResolved = InteractionDataResolved
 
 
 # People asked about shorter aliases, let's see which one catches on the most

@@ -14,7 +14,10 @@ from disnake import flags
 
 BASE_FLAG_CLASSES = (flags.BaseFlags, flags.ListBaseFlags)
 
-MODULES = ("disnake.flags",)
+MODULES = (
+    "disnake.flags",
+    "disnake.ext.commands.flags",
+)
 
 
 class FlagTypings(codemod.VisitorBasedCodemodCommand):
@@ -90,7 +93,6 @@ class FlagTypings(codemod.VisitorBasedCodemodCommand):
                 break
 
         if not init:
-
             for b in body:
                 if m.matches(b, m.If(test=m.Name("TYPE_CHECKING"))) and m.findall(
                     b, m.FunctionDef(m.Name("__init__"))
@@ -98,7 +100,6 @@ class FlagTypings(codemod.VisitorBasedCodemodCommand):
                     if_block = cast("cst.If", b)
                     break
             else:
-
                 # one doesn't currently exist, great.
                 # so we have two options here... we could make a typechecking block from scratch or... we could cheat
                 code = textwrap.dedent(

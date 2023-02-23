@@ -38,15 +38,15 @@ class VoiceRegion:
         "custom",
     )
 
-    def __init__(self, *, data: VoiceRegionPayload):
+    def __init__(self, *, data: VoiceRegionPayload) -> None:
         self.id: str = data["id"]
         self.name: str = data["name"]
         self.deprecated: bool = data.get("deprecated", False)
         self.optimal: bool = data.get("optimal", False)
         self.custom: bool = data.get("custom", False)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.id
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<VoiceRegion id={self.id!r} name={self.name!r} optimal={self.optimal!r}>"

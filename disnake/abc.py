@@ -25,7 +25,14 @@ from typing import (
 
 from . import utils
 from .context_managers import Typing
-from .enums import ChannelType, PartyType, ThreadSortOrder, VideoQualityMode, try_enum_to_int
+from .enums import (
+    ChannelType,
+    PartyType,
+    ThreadLayout,
+    ThreadSortOrder,
+    VideoQualityMode,
+    try_enum_to_int,
+)
 from .errors import ClientException
 from .file import File
 from .flags import ChannelFlags, MessageFlags
@@ -177,7 +184,7 @@ class _Overwrites:
     ROLE = 0
     MEMBER = 1
 
-    def __init__(self, data: PermissionOverwritePayload):
+    def __init__(self, data: PermissionOverwritePayload) -> None:
         self.id: int = int(data["id"])
         self.allow: int = int(data.get("allow", 0))
         self.deny: int = int(data.get("deny", 0))
@@ -236,7 +243,9 @@ class GuildChannel(ABC):
 
     if TYPE_CHECKING:
 
-        def __init__(self, *, state: ConnectionState, guild: Guild, data: Mapping[str, Any]):
+        def __init__(
+            self, *, state: ConnectionState, guild: Guild, data: Mapping[str, Any]
+        ) -> None:
             ...
 
     def __str__(self) -> str:
@@ -311,6 +320,7 @@ class GuildChannel(ABC):
         available_tags: Sequence[ForumTag] = MISSING,
         default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
         default_sort_order: Optional[ThreadSortOrder] = MISSING,
+        default_layout: ThreadLayout = MISSING,
         reason: Optional[str] = None,
     ) -> Optional[ChannelPayload]:
         parent_id: Optional[int]
@@ -415,6 +425,10 @@ class GuildChannel(ABC):
                 try_enum_to_int(default_sort_order) if default_sort_order is not None else None
             )
 
+        default_layout_payload: int = MISSING
+        if default_layout is not MISSING:
+            default_layout_payload = try_enum_to_int(default_layout)
+
         options: Dict[str, Any] = {
             "name": name,
             "parent_id": parent_id,
@@ -434,6 +448,7 @@ class GuildChannel(ABC):
             "available_tags": available_tags_payload,
             "default_reaction_emoji": default_reaction_emoji_payload,
             "default_sort_order": default_sort_order_payload,
+            "default_forum_layout": default_layout_payload,
         }
         options = {k: v for k, v in options.items() if v is not MISSING}
 
@@ -863,7 +878,9 @@ class GuildChannel(ABC):
     ) -> None:
         ...
 
-    async def set_permissions(self, target, *, overwrite=MISSING, reason=None, **permissions):
+    async def set_permissions(
+        self, target, *, overwrite=MISSING, reason=None, **permissions
+    ) -> None:
         """
         |coro|
 
@@ -1338,6 +1355,7 @@ class Messageable:
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: AllowedMentions = ...,
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
@@ -1358,6 +1376,7 @@ class Messageable:
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: AllowedMentions = ...,
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
@@ -1378,6 +1397,7 @@ class Messageable:
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: AllowedMentions = ...,
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
@@ -1398,6 +1418,7 @@ class Messageable:
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: AllowedMentions = ...,
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
@@ -1418,7 +1439,8 @@ class Messageable:
         stickers: Optional[Sequence[Union[GuildSticker, StickerItem]]] = None,
         delete_after: Optional[float] = None,
         nonce: Optional[Union[str, int]] = None,
-        suppress_embeds: bool = False,
+        suppress_embeds: Optional[bool] = None,
+        flags: Optional[MessageFlags] = None,
         allowed_mentions: Optional[AllowedMentions] = None,
         reference: Optional[Union[Message, MessageReference, PartialMessage]] = None,
         mention_author: Optional[bool] = None,
@@ -1514,9 +1536,19 @@ class Messageable:
 
         suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This hides
-            all embeds from the UI if set to ``True``.
+            all the embeds from the UI if set to ``True``.
 
             .. versionadded:: 2.5
+
+        flags: :class:`.MessageFlags`
+            The flags to set for this message.
+            Only :attr:`~.MessageFlags.suppress_embeds` and :attr:`~.MessageFlags.suppress_notifications`
+            are supported.
+
+            If parameter ``suppress_embeds`` is provided,
+            that will override the setting of :attr:`.MessageFlags.suppress_embeds`.
+
+            .. versionadded:: 2.9
 
         Raises
         ------
@@ -1606,10 +1638,12 @@ class Messageable:
         else:
             components_payload = None
 
-        if suppress_embeds:
-            flags = MessageFlags.suppress_embeds.flag
-        else:
-            flags = 0
+        flags_payload = None
+        if suppress_embeds is not None:
+            flags = MessageFlags._from_value(0 if flags is None else flags.value)
+            flags.suppress_embeds = suppress_embeds
+        if flags is not None:
+            flags_payload = flags.value
 
         if files is not None:
             if len(files) > 10:
@@ -1629,7 +1663,7 @@ class Messageable:
                     message_reference=reference_payload,
                     stickers=stickers_payload,
                     components=components_payload,
-                    flags=flags,
+                    flags=flags_payload,
                 )
             finally:
                 for f in files:
@@ -1645,7 +1679,7 @@ class Messageable:
                 message_reference=reference_payload,
                 stickers=stickers_payload,
                 components=components_payload,
-                flags=flags,
+                flags=flags_payload,
             )
 
         ret = state.create_message(channel=channel, data=data)

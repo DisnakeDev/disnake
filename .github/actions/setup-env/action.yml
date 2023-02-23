@@ -13,6 +13,7 @@ inputs:
       requirements/
       requirements.txt
       setup.py
+      pyproject.toml
   dependencies:
     description: Other python dependencies to install
     required: false
@@ -40,7 +41,7 @@ runs:
 
     - name: Update pip, wheel, setuptools
       shell: bash
-      run: pip install -U pip wheel setuptools
+      run: python -m pip install -U pip wheel setuptools
 
     - name: Install dependencies
       if: inputs.nox-setup || inputs.dependencies

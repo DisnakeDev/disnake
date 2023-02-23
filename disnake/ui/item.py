@@ -42,7 +42,7 @@ class WrappedComponent(ABC):
     The following classes implement this ABC:
 
     - :class:`disnake.ui.Button`
-    - subtypes of :class:`disnake.ui.BaseSelect` (:class:`disnake.ui.Select`)
+    - subtypes of :class:`disnake.ui.BaseSelect` (:class:`disnake.ui.ChannelSelect`, :class:`disnake.ui.MentionableSelect`, :class:`disnake.ui.RoleSelect`, :class:`disnake.ui.StringSelect`, :class:`disnake.ui.UserSelect`)
     - :class:`disnake.ui.TextInput`
 
     .. versionadded:: 2.4
@@ -81,7 +81,7 @@ class Item(WrappedComponent, Generic[V_co]):
     The current UI items supported are:
 
     - :class:`disnake.ui.Button`
-    - subtypes of :class:`disnake.ui.BaseSelect` (:class:`disnake.ui.Select`)
+    - subtypes of :class:`disnake.ui.BaseSelect` (:class:`disnake.ui.ChannelSelect`, :class:`disnake.ui.MentionableSelect`, :class:`disnake.ui.RoleSelect`, :class:`disnake.ui.StringSelect`, :class:`disnake.ui.UserSelect`)
 
     .. versionadded:: 2.0
     """
@@ -89,14 +89,14 @@ class Item(WrappedComponent, Generic[V_co]):
     __repr_attributes__: Tuple[str, ...] = ("row",)
 
     @overload
-    def __init__(self: Item[None]):
+    def __init__(self: Item[None]) -> None:
         ...
 
     @overload
-    def __init__(self: Item[V_co]):
+    def __init__(self: Item[V_co]) -> None:
         ...
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._view: V_co = None  # type: ignore
         self._row: Optional[int] = None
         self._rendered_row: Optional[int] = None
@@ -129,7 +129,7 @@ class Item(WrappedComponent, Generic[V_co]):
         return self._row
 
     @row.setter
-    def row(self, value: Optional[int]):
+    def row(self, value: Optional[int]) -> None:
         if value is None:
             self._row = None
         elif 5 > value >= 0:
@@ -142,7 +142,7 @@ class Item(WrappedComponent, Generic[V_co]):
         """Optional[:class:`View`]: The underlying view for this item."""
         return self._view
 
-    async def callback(self, interaction: MessageInteraction, /):
+    async def callback(self, interaction: MessageInteraction, /) -> None:
         """|coro|
 
         The callback associated with this UI item.

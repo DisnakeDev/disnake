@@ -135,7 +135,7 @@ class FFmpegAudio(AudioSource):
         executable: str = "ffmpeg",
         args: Any,
         **subprocess_kwargs: Any,
-    ):
+    ) -> None:
         piping = subprocess_kwargs.get("stdin") == subprocess.PIPE
         if piping and isinstance(source, str):
             raise TypeError(
@@ -371,7 +371,6 @@ class FFmpegOpusAudio(FFmpegAudio):
         before_options=None,
         options=None,
     ) -> None:
-
         args = []
         subprocess_kwargs = {
             "stdin": subprocess.PIPE if pipe else subprocess.DEVNULL,
@@ -540,7 +539,7 @@ class FFmpegOpusAudio(FFmpegAudio):
             )
 
         codec = bitrate = None
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         try:
             codec, bitrate = await loop.run_in_executor(None, lambda: probefunc(source, executable))
         except Exception:
@@ -642,7 +641,7 @@ class PCMVolumeTransformer(AudioSource, Generic[AT]):
         The audio source is opus encoded.
     """
 
-    def __init__(self, original: AT, volume: float = 1.0):
+    def __init__(self, original: AT, volume: float = 1.0) -> None:
         if not isinstance(original, AudioSource):
             raise TypeError(f"expected AudioSource not {original.__class__.__name__}.")
 
@@ -672,7 +671,7 @@ class PCMVolumeTransformer(AudioSource, Generic[AT]):
 class AudioPlayer(threading.Thread):
     DELAY: float = OpusEncoder.FRAME_LENGTH / 1000.0
 
-    def __init__(self, source: AudioSource, client: VoiceClient, *, after=None):
+    def __init__(self, source: AudioSource, client: VoiceClient, *, after=None) -> None:
         threading.Thread.__init__(self)
         self.daemon: bool = True
         self.source: AudioSource = source

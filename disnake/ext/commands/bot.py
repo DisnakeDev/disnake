@@ -10,7 +10,6 @@ from .bot_base import BotBase, when_mentioned, when_mentioned_or
 from .interaction_bot_base import InteractionBotBase
 
 if TYPE_CHECKING:
-
     import asyncio
 
     import aiohttp
@@ -26,6 +25,7 @@ if TYPE_CHECKING:
 
     from ._types import MaybeCoro
     from .bot_base import PrefixType
+    from .flags import CommandSyncFlags
     from .help import HelpCommand
 
 
@@ -61,6 +61,13 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
 
         .. versionadded:: 2.1
 
+    command_sync_flags: :class:`.ext.commands.CommandSyncFlags`
+        The command sync flags for the session. This is a way of
+        controlling when and how application commands will be synced with the Discord API.
+        If not given, defaults to :func:`CommandSyncFlags.default`.
+
+        .. versionadded:: 2.7
+
     sync_commands: :class:`bool`
         Whether to enable automatic synchronization of application commands in your code.
         Defaults to ``True``, which means that commands in API are automatically synced
@@ -68,10 +75,16 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
 
         .. versionadded:: 2.1
 
+        .. deprecated:: 2.7
+            Replaced with ``command_sync_flags``.
+
     sync_commands_on_cog_unload: :class:`bool`
         Whether to sync the application commands on cog unload / reload. Defaults to ``True``.
 
         .. versionadded:: 2.1
+
+        .. deprecated:: 2.7
+            Replaced with ``command_sync_flags``.
 
     sync_commands_debug: :class:`bool`
         Whether to always show sync debug logs (uses ``INFO`` log level if it's enabled, prints otherwise).
@@ -84,6 +97,9 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
         .. versionchanged:: 2.4
             Changes the log level of corresponding messages from ``DEBUG`` to ``INFO`` or ``print``\\s them,
             instead of controlling whether they are enabled at all.
+
+        .. deprecated:: 2.7
+            Replaced with ``command_sync_flags``.
 
     localization_provider: :class:`.LocalizationProtocol`
         An implementation of :class:`.LocalizationProtocol` to use for localization of
@@ -208,7 +224,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
             command_prefix: Optional[
                 Union[PrefixType, Callable[[Self, Message], MaybeCoro[PrefixType]]]
             ] = None,
-            help_command: HelpCommand = ...,
+            help_command: Optional[HelpCommand] = ...,
             description: Optional[str] = None,
             *,
             strip_after_prefix: bool = False,
@@ -216,10 +232,11 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
             owner_ids: Optional[Set[int]] = None,
             reload: bool = False,
             case_insensitive: bool = False,
-            sync_commands: bool = True,
-            sync_commands_debug: bool = False,
-            sync_commands_on_cog_unload: bool = True,
+            command_sync_flags: CommandSyncFlags = ...,
             test_guilds: Optional[Sequence[int]] = None,
+            sync_commands: bool = ...,
+            sync_commands_debug: bool = ...,
+            sync_commands_on_cog_unload: bool = ...,
             asyncio_debug: bool = False,
             loop: Optional[asyncio.AbstractEventLoop] = None,
             shard_id: Optional[int] = None,
@@ -243,7 +260,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
             member_cache_flags: Optional[MemberCacheFlags] = None,
             localization_provider: Optional[LocalizationProtocol] = None,
             strict_localization: bool = False,
-        ):
+        ) -> None:
             ...
 
 
@@ -259,7 +276,7 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
             command_prefix: Optional[
                 Union[PrefixType, Callable[[Self, Message], MaybeCoro[PrefixType]]]
             ] = None,
-            help_command: HelpCommand = ...,
+            help_command: Optional[HelpCommand] = ...,
             description: Optional[str] = None,
             *,
             strip_after_prefix: bool = False,
@@ -267,10 +284,11 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
             owner_ids: Optional[Set[int]] = None,
             reload: bool = False,
             case_insensitive: bool = False,
-            sync_commands: bool = True,
-            sync_commands_debug: bool = False,
-            sync_commands_on_cog_unload: bool = True,
+            command_sync_flags: CommandSyncFlags = ...,
             test_guilds: Optional[Sequence[int]] = None,
+            sync_commands: bool = ...,
+            sync_commands_debug: bool = ...,
+            sync_commands_on_cog_unload: bool = ...,
             asyncio_debug: bool = False,
             loop: Optional[asyncio.AbstractEventLoop] = None,
             shard_ids: Optional[List[int]] = None,  # instead of shard_id
@@ -294,7 +312,7 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
             member_cache_flags: Optional[MemberCacheFlags] = None,
             localization_provider: Optional[LocalizationProtocol] = None,
             strict_localization: bool = False,
-        ):
+        ) -> None:
             ...
 
 
@@ -317,6 +335,13 @@ class InteractionBot(InteractionBotBase, disnake.Client):
 
         .. versionadded:: 2.1
 
+    command_sync_flags: :class:`.ext.commands.CommandSyncFlags`
+        The command sync flags for the session. This is a way of
+        controlling when and how application commands will be synced with the Discord API.
+        If not given, defaults to :func:`CommandSyncFlags.default`.
+
+        .. versionadded:: 2.7
+
     sync_commands: :class:`bool`
         Whether to enable automatic synchronization of application commands in your code.
         Defaults to ``True``, which means that commands in API are automatically synced
@@ -324,10 +349,16 @@ class InteractionBot(InteractionBotBase, disnake.Client):
 
         .. versionadded:: 2.1
 
+        .. deprecated:: 2.7
+            Replaced with ``command_sync_flags``.
+
     sync_commands_on_cog_unload: :class:`bool`
         Whether to sync the application commands on cog unload / reload. Defaults to ``True``.
 
         .. versionadded:: 2.1
+
+        .. deprecated:: 2.7
+            Replaced with ``command_sync_flags``.
 
     sync_commands_debug: :class:`bool`
         Whether to always show sync debug logs (uses ``INFO`` log level if it's enabled, prints otherwise).
@@ -340,6 +371,9 @@ class InteractionBot(InteractionBotBase, disnake.Client):
         .. versionchanged:: 2.4
             Changes the log level of corresponding messages from ``DEBUG`` to ``INFO`` or ``print``\\s them,
             instead of controlling whether they are enabled at all.
+
+        .. deprecated:: 2.7
+            Replaced with ``command_sync_flags``.
 
     localization_provider: :class:`.LocalizationProtocol`
         An implementation of :class:`.LocalizationProtocol` to use for localization of
@@ -399,10 +433,11 @@ class InteractionBot(InteractionBotBase, disnake.Client):
             owner_id: Optional[int] = None,
             owner_ids: Optional[Set[int]] = None,
             reload: bool = False,
-            sync_commands: bool = True,
-            sync_commands_debug: bool = False,
-            sync_commands_on_cog_unload: bool = True,
+            command_sync_flags: CommandSyncFlags = ...,
             test_guilds: Optional[Sequence[int]] = None,
+            sync_commands: bool = ...,
+            sync_commands_debug: bool = ...,
+            sync_commands_on_cog_unload: bool = ...,
             asyncio_debug: bool = False,
             loop: Optional[asyncio.AbstractEventLoop] = None,
             shard_id: Optional[int] = None,
@@ -426,7 +461,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
             member_cache_flags: Optional[MemberCacheFlags] = None,
             localization_provider: Optional[LocalizationProtocol] = None,
             strict_localization: bool = False,
-        ):
+        ) -> None:
             ...
 
 
@@ -443,10 +478,11 @@ class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
             owner_id: Optional[int] = None,
             owner_ids: Optional[Set[int]] = None,
             reload: bool = False,
-            sync_commands: bool = True,
-            sync_commands_debug: bool = False,
-            sync_commands_on_cog_unload: bool = True,
+            command_sync_flags: CommandSyncFlags = ...,
             test_guilds: Optional[Sequence[int]] = None,
+            sync_commands: bool = ...,
+            sync_commands_debug: bool = ...,
+            sync_commands_on_cog_unload: bool = ...,
             asyncio_debug: bool = False,
             loop: Optional[asyncio.AbstractEventLoop] = None,
             shard_ids: Optional[List[int]] = None,  # instead of shard_id
@@ -470,5 +506,5 @@ class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
             member_cache_flags: Optional[MemberCacheFlags] = None,
             localization_provider: Optional[LocalizationProtocol] = None,
             strict_localization: bool = False,
-        ):
+        ) -> None:
             ...

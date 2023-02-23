@@ -31,8 +31,8 @@ class TestBot(commands.Bot):
         super().__init__(
             command_prefix=Config.prefix,
             intents=disnake.Intents.all(),
-            help_command=None,  # type: ignore
-            sync_commands_debug=Config.sync_commands_debug,
+            help_command=None,
+            command_sync_flags=commands.CommandSyncFlags.all(),
             strict_localization=Config.strict_localization,
             test_guilds=Config.test_guilds,
             reload=Config.auto_reload,

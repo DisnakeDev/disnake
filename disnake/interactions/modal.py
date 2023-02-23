@@ -71,7 +71,7 @@ class ModalInteraction(Interaction):
 
     __slots__ = ("message", "_cs_text_values")
 
-    def __init__(self, *, data: ModalInteractionPayload, state: ConnectionState):
+    def __init__(self, *, data: ModalInteractionPayload, state: ConnectionState) -> None:
         super().__init__(data=data, state=state)
         self.data: ModalInteractionData = ModalInteractionData(data=data["data"])
 
@@ -130,7 +130,7 @@ class ModalInteractionData(Dict[str, Any]):
 
     __slots__ = ("custom_id", "components")
 
-    def __init__(self, *, data: ModalInteractionDataPayload):
+    def __init__(self, *, data: ModalInteractionDataPayload) -> None:
         super().__init__(data)
         self.custom_id: str = data["custom_id"]
         # This uses a stripped-down action row TypedDict, as we only receive
@@ -138,5 +138,5 @@ class ModalInteractionData(Dict[str, Any]):
         # and relevant fields like a select's `values`.
         self.components: List[ModalInteractionActionRowPayload] = data["components"]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<ModalInteractionData custom_id={self.custom_id!r} components={self.components!r}>"
