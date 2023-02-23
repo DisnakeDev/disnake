@@ -63,6 +63,8 @@ def docs(session: nox.Session) -> None:
                 "../disnake",
                 "--watch",
                 "../changelog",
+                "--watch",
+                "../CONTRIBUTING.md",
                 "--port",
                 "8009",
                 "-j",

@@ -14,7 +14,7 @@ The following is a set of guidelines for contributing to the repository. These a
 
 Generally speaking questions are better suited in our resources below.
 
-- The official support server: https://discord.gg/disnake
+- The official support server: <https://discord.gg/disnake>
 - The [FAQ in the documentation](https://docs.disnake.dev/en/latest/faq.html)
 - The project's [discussions section](https://github.com/DisnakeDev/disnake/discussions)
 

@@ -38,6 +38,7 @@ sys.path.append(os.path.abspath("extensions"))
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    "myst_parser",
     "builder",
     "sphinx.ext.autodoc",
     "sphinx.ext.extlinks",
@@ -86,7 +87,10 @@ rst_prolog = """
 templates_path = ["_templates"]
 
 # The suffix of source filenames.
-source_suffix = ".rst"
+source_suffix = {
+    ".rst": "restructuredtext",
+    ".md": "markdown",
+}
 
 # The encoding of source files.
 # source_encoding = 'utf-8-sig'
