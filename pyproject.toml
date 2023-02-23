@@ -183,6 +183,9 @@ ignore = [
     # we do explicitly return None even when its the only possible value as we are not fully typehinted
     "RET501",
 
+    # ruff bug, too many false positives
+    "RET504", # unnecessary variaible assignment before return statement
+
     # provide specific codes on type: ignore
     "PGH003",
 
@@ -192,7 +195,7 @@ ignore = [
 
     # outer loop variables are overwritten by inner assignment target, these are mostly intentional
     "PLW2901",
-    
+
     # temporary disables, to fix later
     "D205",   # blank line required between summary and description
     "D401",   # first line of docstring should be in imperative mood
