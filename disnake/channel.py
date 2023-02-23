@@ -3283,7 +3283,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
                 if default_auto_archive_duration is not MISSING
                 else self.default_auto_archive_duration,
                 "available_tags": [tag.to_dict() for tag in available_tags]
-                if available_tags is not MISSING and available_tags
+                if available_tags is not MISSING
                 else [tag.to_dict() for tag in self.available_tags],
                 "default_reaction_emoji": default_reaction_emoji_payload,
                 "default_sort_order": default_sort_order_payload,
