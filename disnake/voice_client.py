@@ -444,8 +444,7 @@ class VoiceClient(VoiceProtocol):
                             )
                             await self.disconnect()
                             break
-                        else:
-                            continue
+                        continue
 
                 if not reconnect:
                     await self.disconnect()
