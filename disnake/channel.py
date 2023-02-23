@@ -3220,7 +3220,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         position: :class:`int`
             The position of the new channel. If not provided, defaults to this channel's position.
         nsfw: :class:`bool`
-            Wether the new channel should be nsfw or not. If not provided, defaults to this channel's NSFW value.
+            Whether the new channel should be nsfw or not. If not provided, defaults to this channel's NSFW value.
         category: Optional[:class:`abc.Snowflake`]
             The category where the new channel should be grouped. If not provided, defaults to this channel's category.
         slowmode_delay: Optional[:class:`int`]
