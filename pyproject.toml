@@ -147,6 +147,10 @@ select = [
     "Q",      # flake8-quotes
     "T20",    # flake8-print
     "PGH",    # pygrep-hooks
+    "PLC",    # pylint convention
+    "PLE",    # pylint error
+    # "PLR",    # pylint refactor
+    "PLW",    # pylint warnings
     "TRY002", "TRY004", # tryceratops
 ]
 ignore = [
