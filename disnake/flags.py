@@ -571,6 +571,7 @@ class MessageFlags(BaseFlags):
             loading: bool = ...,
             source_message_deleted: bool = ...,
             suppress_embeds: bool = ...,
+            suppress_notifications: bool = ...,
             urgent: bool = ...,
         ) -> None:
             ...
@@ -636,6 +637,15 @@ class MessageFlags(BaseFlags):
         .. versionadded:: 2.4
         """
         return 1 << 8
+
+    @flag_value
+    def suppress_notifications(self):
+        """:class:`bool`: Returns ``True`` if the source message does not
+        trigger push and desktop notifications.
+
+        .. versionadded:: 2.9
+        """
+        return 1 << 12
 
 
 class PublicUserFlags(BaseFlags):

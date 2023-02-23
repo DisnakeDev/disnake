@@ -10,6 +10,8 @@ on:
       - 'run-ci/*'
     tags:
   pull_request:
+  merge_group:
+    types: [checks_requested]
 
 permissions:
   read-all
@@ -29,12 +31,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Set up environment
-      uses: ./.github/actions/setup-env
-      with:
-        python-version: 3.8
-        nox-setup: "dev tools"
-
     - name: Run pre-commit
       id: pre-commit
       uses: pre-commit/action@v3.0.0
@@ -50,7 +46,6 @@ jobs:
       uses: ./.github/actions/setup-env
       with:
         python-version: 3.8
-        nox-setup: "docs"
 
     - name: Run sphinx-build
       run: nox -s docs -- --keep-going -W -w $GITHUB_STEP_SUMMARY
@@ -70,9 +65,17 @@ jobs:
     - name: Set up environment
       id: setup-env
       uses: ./.github/actions/setup-env
+      env:
+        PDM_USE_VENV: true
+        PDM_VENV_IN_PROJECT: true
       with:
         python-version: ${{ matrix.python-version }}
-        nox-setup: "*"
+
+    - name: Install dependencies out of venv
+      run: |
+        pdm export --pyproject --without-hashes -d -G speed -G docs -G voice -o requirements.txt
+        pip install -r requirements.txt
+        pip install .
 
     - name: Set pyright version
       run: |
@@ -81,6 +84,7 @@ jobs:
 
     - name: Run pyright (Linux)
       uses: jakebailey/pyright-action@v1.4.1
+      id: pyright-linux
       with:
         version: ${{ env.PYRIGHT_VERSION }}
         python-version: ${{ steps.setup-env.outputs.python-version }}
@@ -90,7 +94,7 @@ jobs:
 
     - name: Run pyright (Windows)
       uses: jakebailey/pyright-action@v1.4.1
-      if: ${{ success() || failure() }}  # run regardless of previous step's result
+      if: always() && (steps.pyright-linux.outcome == 'success' || steps.pyright-linux.outcome == 'failure')
       with:
         version: ${{ env.PYRIGHT_VERSION }}
         python-version: ${{ steps.setup-env.outputs.python-version }}
@@ -108,7 +112,6 @@ jobs:
       uses: ./.github/actions/setup-env
       with:
         python-version: 3.8
-        nox-setup: tools
 
     - name: Run slotscheck
       if: (success() || failure()) && steps.setup.outcome == 'success'
@@ -159,7 +162,9 @@ jobs:
       uses: ./.github/actions/setup-env
       with:
         python-version: ${{ matrix.python-version }}
-        dependencies: nox coveralls==3.3.1 coverage[toml]~=6.3.2
+
+    - name: Install dependencies
+      run: pdm install -dG test  # needed for coverage
 
     - name: Test package install
       run: |
@@ -179,7 +184,7 @@ jobs:
       if: always() && (steps.run_tests.outcome == 'success' || steps.run_tests.outcome == 'failure')
       run: |
         echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/Coverage Summary/" >> $GITHUB_STEP_SUMMARY
-        python -m coverage report | tee -a $GITHUB_STEP_SUMMARY
+        pdm run coverage report | tee -a $GITHUB_STEP_SUMMARY
         echo "$GITHUB_STEP_SUMMARY_FOOTER" >> $GITHUB_STEP_SUMMARY
 
 
@@ -196,7 +201,9 @@ jobs:
         COVERALLS_FLAG_NAME: coverage-${{ runner.os }}-python-${{ matrix.python-version }}
         COVERALLS_PARALLEL: true
         COVERALLS_SERVICE_NAME: github
-      run: python -m coveralls
+      run: |
+        python -m pip install coveralls==3.3.1 'coverage[toml]~=6.5'
+        python -m coveralls
 
   coveralls-finish:
     name: Indicate completion to coveralls.io
@@ -215,7 +222,6 @@ jobs:
         python-version: 3.8
         cache-dependency-path: |
           .github/workflows/lint-test.yml
-        dependencies: coveralls==3.3.1
 
     - name: Coveralls Finished
       continue-on-error: true
@@ -223,7 +229,8 @@ jobs:
         COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         COVERALLS_SERVICE_NAME: github
       run: |
-        python3 -m coveralls --finish
+        python -m pip install coveralls==3.3.1
+        python -m coveralls --finish
 
   # thanks to aiohttp for this part of the workflow
   check:  # This job does nothing and is only used for the branch protection

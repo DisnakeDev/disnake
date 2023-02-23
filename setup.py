@@ -4,15 +4,6 @@ import re
 
 from setuptools import setup
 
-
-def read_requirements(path: str):
-    with open(path, "r", encoding="utf-8") as f:
-        lines = (x.strip() for x in f.read().splitlines())
-        return [x for x in lines if x and not x.startswith("#")]
-
-
-requirements = read_requirements("requirements.txt")
-
 version = ""
 with open("disnake/__init__.py", encoding="utf-8") as f:
     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)  # type: ignore
@@ -40,13 +31,6 @@ if version.endswith(("a", "b", "rc")):
     except Exception:
         pass
 
-extras_require = {
-    "voice": read_requirements("requirements/requirements_voice.txt"),
-    "docs": read_requirements("requirements/requirements_docs.txt"),
-    "speed": read_requirements("requirements/requirements_speed.txt"),
-    "discord": ["discord-disnake"],
-}
-
 packages = [
     "disnake",
     "disnake.bin",
@@ -64,6 +48,4 @@ setup(
     version=version,
     packages=packages,
     include_package_data=True,
-    install_requires=requirements,
-    extras_require=extras_require,
 )
