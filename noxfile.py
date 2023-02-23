@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
-import functools
-import re
-import sys
-from pathlib import Path
+import os
+from itertools import chain
 from typing import TYPE_CHECKING, Callable, List, TypeVar
 
 import nox
@@ -18,6 +16,9 @@ if TYPE_CHECKING:
 
     NoxSessionFunc = Callable[Concatenate[nox.Session, P], T]
 
+
+# see https://pdm.fming.dev/latest/usage/advanced/#use-nox-as-the-runner
+os.environ.update({"PDM_IGNORE_SAVED_PYTHON": "1"})
 
 nox.options.error_on_external_run = True
 nox.options.reuse_existing_virtualenvs = True
@@ -35,90 +36,14 @@ nox.needs_version = ">=2022.1.7"
 reset_coverage = True
 
 
-REQUIREMENTS = {
-    ".": "requirements.txt",
-}
-for path in Path("requirements").iterdir():
-    if match := re.fullmatch("requirements_(.+).txt", path.name):
-        REQUIREMENTS[match.group(1)] = str(path)
-
-
-def depends(
-    *deps: str,
-    install_cwd: bool = False,
-    update: bool = True,
-) -> Callable[[NoxSessionFunc[P, T]], NoxSessionFunc[P, T]]:
-    """A session decorator that invokes :func:`.install` with the given parameters before running the session."""
-
-    def decorator(f: NoxSessionFunc[P, T]) -> NoxSessionFunc[P, T]:
-        @functools.wraps(f)
-        def wrapper(session: nox.Session, *args: P.args, **kwargs: P.kwargs) -> T:
-            install(session, *deps, update=update, install_cwd=install_cwd)
-            return f(session, *args, **kwargs)
-
-        return wrapper
-
-    return decorator
-
-
-def install(
-    session: nox.Session,
-    *deps: str,
-    run: bool = False,
-    install_cwd: bool = False,
-    update: bool = True,
-) -> None:
-    """
-    Installs dependencies in a session.
-    Dependencies from the main ``requirements.txt`` will always be installed.
-
-    Parameters
-    ----------
-    *deps: :class:`str`
-        Dependency group names, e.g. ``dev`` for ``requirements_dev.txt``.
-    run: :class:`bool`
-        Whether to use :func:`nox.Session.run` instead of :func:`nox.Session.install`,
-        useful to avoid warnings when running in the global python environment.
-    install_cwd: :class:`bool`
-        Whether the main package should be installed (in editable mode, i.e. ``-e .``).
-    update: :class:`bool`
-        Whether packages should be updated (i.e. ``-U``). Defaults to ``True``.
-    """
-
-    install_args = []
-
-    if update:
-        install_args.append("-U")
-    if install_cwd:
-        install_args.extend(["-e", "."])
-
-    for d in dict.fromkeys((".", *deps)):  # deduplicate
-        install_args.extend(["-r", REQUIREMENTS[d]])
-
-    if run:
-        session.run("python", "-m", "pip", "install", *install_args)
-    else:
-        session.install(*install_args)
-
-
-def is_venv() -> bool:
-    # https://stackoverflow.com/a/42580137/5080607
-    return (
-        # virtualenv < v20
-        hasattr(sys, "real_prefix")
-        # virtualenv >= v20, others
-        or sys.base_prefix != sys.prefix
-    )
-
-
-@nox.session()
-@depends("docs")
+@nox.session
 def docs(session: nox.Session):
     """Build and generate the documentation.
 
     If running locally, will build automatic reloading docs.
     If running in CI, will build a production version of the documentation.
     """
+    session.run_always("pdm", "install", "--prod", "-G", "docs", external=True)
     with session.chdir("docs"):
         args = ["-b", "html", "-n", ".", "_build/html", *session.posargs]
         if session.interactive:
@@ -144,30 +69,33 @@ def docs(session: nox.Session):
             )
 
 
-@nox.session(python=False)
+@nox.session
 def lint(session: nox.Session):
     """Check all files for linting errors"""
+    session.run_always("pdm", "install", "-dG", "lint", "-G", "tools", external=True)
+
     session.run("pre-commit", "run", "--all-files", *session.posargs)
 
 
 @nox.session(name="check-manifest")
-@depends("tools")
 def check_manifest(session: nox.Session):
     """Run check-manifest."""
-    session.run("check-manifest", "-v", "--no-build-isolation")
+    # --no-self is provided here because check-manifest builds disnake. There's no reason to build twice, so we don't.
+    session.run_always("pdm", "install", "--no-self", "-dG", "tools", external=True)
+    session.run("check-manifest", "-v")
 
 
 @nox.session()
-@depends("dev")
 def slotscheck(session: nox.Session):
     """Run slotscheck."""
+    session.run_always("pdm", "install", "-dG", "tools", external=True)
     session.run("python", "-m", "slotscheck", "--verbose", "-m", "disnake")
 
 
 @nox.session(name="codemod")
-@depends("tools")
 def codemod(session: nox.Session):
     """Run libcst codemods."""
+    session.run_always("pdm", "install", "-dG", "codemod", external=True)
     if session.posargs and session.posargs[0] == "run-all" or not session.interactive:
         # run all of the transformers on disnake
         session.log("Running all transformers.")
@@ -196,9 +124,9 @@ def codemod(session: nox.Session):
 
 
 @nox.session()
-@depends("dev", "docs", "speed", "voice", install_cwd=True)
 def pyright(session: nox.Session):
     """Run pyright."""
+    session.run_always("pdm", "install", "-d", "-Gspeed", "-Gdocs", "-Gvoice", external=True)
     env = {
         "PYRIGHT_PYTHON_IGNORE_WARNINGS": "1",
     }
@@ -220,7 +148,10 @@ def pyright(session: nox.Session):
 )
 def test(session: nox.Session, extras: List[str]):
     """Run tests."""
-    install(session, "dev", *extras)
+    # shell splitting is not done by nox
+    extras = chain(*(["-G", extra] for extra in extras))
+
+    session.run_always("pdm", "install", "-dG", "test", "-dG", "typing", *extras, external=True)
 
     pytest_args = ["--cov", "--cov-context=test"]
     global reset_coverage
@@ -240,9 +171,9 @@ def test(session: nox.Session, extras: List[str]):
 
 
 @nox.session()
-@depends("dev")
 def coverage(session: nox.Session):
     """Display coverage information from the tests."""
+    session.run_always("pdm", "install", "-dG", "test", external=True)
     if "html" in session.posargs or "serve" in session.posargs:
         session.run("coverage", "html", "--show-contexts")
     if "serve" in session.posargs:
@@ -251,31 +182,3 @@ def coverage(session: nox.Session):
         )
     if "erase" in session.posargs:
         session.run("coverage", "erase")
-
-
-@nox.session(python=False)
-def setup(session: nox.Session):
-    """Set up the external environment."""
-    if session.interactive and not is_venv():
-        confirm = input(
-            "It looks like you are about to install the dependencies into your *global* python environment."
-            " This may overwrite other versions of the dependencies that you already have installed, including disnake itself."
-            " Consider using a virtual environment (virtualenv/venv) instead. Continue anyway? [y/N]"
-        )
-        if confirm.lower() != "y":
-            session.error("Cancelled")
-
-    session.log("Installing dependencies to the external environment.")
-
-    if session.posargs:
-        deps = list(session.posargs)
-    else:
-        deps = list(REQUIREMENTS.keys())
-
-    if "." not in deps:
-        deps.insert(0, ".")  # index doesn't really matter
-
-    install(session, *deps, run=True, install_cwd=True)
-
-    if session.interactive and "dev" in deps:
-        session.run("pre-commit", "install", "--install-hooks")

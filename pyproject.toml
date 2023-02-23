@@ -14,6 +14,9 @@ authors = [
 requires-python = ">=3.8"
 keywords = ["disnake", "discord", "discord api"]
 license = { text = "MIT" }
+dependencies = [
+    "aiohttp>=3.7.0,<4.0",
+]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "License :: OSI Approved :: MIT License",
@@ -30,17 +33,98 @@ classifiers = [
     "Topic :: Utilities",
     "Typing :: Typed",
 ]
-dynamic = ["version", "dependencies", "optional-dependencies"]
+dynamic = ["version"]
 
 [project.urls]
 Changelog = "https://docs.disnake.dev/page/whats_new.html"
 Documentation = "https://docs.disnake.dev/"
 Repository = "https://github.com/DisnakeDev/disnake"
 
+[project.optional-dependencies]
+speed = [
+    "orjson~=3.6",
+    # taken from aiohttp[speedups]
+    "aiodns>=1.1",
+    "Brotli",
+    'cchardet; python_version < "3.10"',
+]
+voice = [
+    "PyNaCl>=1.3.0,<1.5",
+]
+docs = [
+    "sphinx==6.0.1",
+    "sphinxcontrib-trio~=1.1.2",
+    "sphinx-hoverxref==1.3.0",
+    "sphinx-autobuild~=2021.3",
+    "sphinxcontrib-towncrier==0.3.2a0",
+    "towncrier==22.12.0",
+    "sphinx-notfound-page==0.8.3",
+]
+discord = ["discord-disnake"]
+
+[tool.pdm.dev-dependencies]
+tools = [
+    "pre-commit~=2.19.0",
+    "taskipy~=1.10.1",
+    "slotscheck~=0.15.0",
+    "python-dotenv~=0.20.0",
+    "towncrier==22.12.0",
+    "check-manifest==0.48",
+]
+codemod = [
+    # run codemods on the respository (mostly automated typing)
+    "libcst~=0.4.7",
+    "black==23.1.0",
+]
+lint = [
+    "flake8~=4.0.1",
+    "flake8-bandit~=3.0.0",
+    "flake8-bugbear==22.7.1",
+    "flake8-comprehensions~=3.10.0",
+    "flake8-noqa~=1.2.5",
+    "flake8-pytest-style~=1.6.0",
+]
+typing = [
+    "typing-extensions~=4.2.0",
+    # this is not pyright itself, but the python wrapper
+    "pyright==1.1.291",
+]
+test = [
+    "pytest~=7.2.0",
+    "pytest-cov~=4.0.0",
+    "pytest-asyncio~=0.20.3",
+    "looptime~=0.2",
+    "coverage[toml]~=6.5.0",
+]
+
+[tool.pdm.scripts]
+black = { composite = ["lint black"], help = "Run black" }
+docs = { cmd = "nox -Rs docs --", help = "Build the documentation for development" }
+flake8 = { cmd = "flake8", help = "Run flake8" }
+isort = { composite = ["lint isort"], help = "Run isort" }
+lint = { cmd = "nox -Rs lint --", help = "Check all files for linting errors" }
+pyright = { cmd = "nox -Rs pyright --", help = "Run pyright" }
+setup_env = { cmd = "pdm install -d -G speed -G docs -G voice", help = "Set up the local environment and all dependencies" }
+post_setup_env = { composite = ["python -m ensurepip --default-pip", "pre-commit install --install-hooks"] }
+test = { cmd = "nox -Rs test --", help = "Run pytest" }
+
+# legacy tasks for those who still type `task`
+[tool.taskipy.tasks]
+black = { cmd = "black", help = "Run black" }
+docs = { cmd = "docs", help = "Build the documentation for development" }
+flake8 = { cmd = "flake8", help = "Run flake8" }
+isort = { cmd = "isort", help = "Run isort" }
+lint = { cmd = "lint", help = "Check all files for linting errors" }
+pyright = { cmd = "pyright", help = "Run pyright" }
+setup_env = { cmd = "setup_env", help = "Setup the local environment and set up all dependencies" }
+test = { cmd = "test", help = "Run pytest" }
+
+[tool.taskipy.settings]
+runner = "pdm run"
+
 [tool.black]
 line-length = 100
 target-version = ["py38", "py39", "py310"]
-
 
 [tool.isort]
 profile = "black"
@@ -48,18 +132,6 @@ py_version = 38
 line_length = 100
 combine_as_imports = true
 filter_files = true
-
-
-[tool.taskipy.tasks]
-black = { cmd = "task lint black", help = "Run black" }
-docs = { cmd = "nox -Rs docs --", help = "Build the documentation for development"}
-flake8 = { cmd = "flake8", help = "Run flake8"}
-isort = { cmd = "task lint isort", help = "Run isort" }
-lint = { cmd = "nox -Rs lint --", help = "Check all files for linting errors" }
-pyright = { cmd = "nox -Rs pyright --", help = "Run pyright" }
-setup_env = {cmd = 'nox -s setup --', help = 'Setup the local environment and set up all dependencies'}
-test = { cmd = "nox -Rs test --", help = "Run pytest" }
-
 
 [tool.towncrier]
 template = "changelog/_template.rst.jinja"
@@ -198,7 +270,6 @@ ignore = [
     "examples/**",
     # tests
     "test_bot/**",
-    "test_launcher.py",
     "tests/**",
     "scripts/**",
 ]
