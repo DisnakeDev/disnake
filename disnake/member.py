@@ -1157,5 +1157,4 @@ class Member(disnake.abc.Messageable, _UserTag):
         """
         if duration is not MISSING:
             return await self.guild.timeout(self, duration=duration, reason=reason)
-        else:
-            return await self.guild.timeout(self, until=until, reason=reason)
+        return await self.guild.timeout(self, until=until, reason=reason)

@@ -154,18 +154,16 @@ class CommonBotBase(Generic[CogT]):
         """
         if self.owner_id:
             return user.id == self.owner_id
-        elif self.owner_ids:
+        if self.owner_ids:
             return user.id in self.owner_ids
-        else:
-            app = await self.application_info()  # type: ignore
-            if app.team:
-                self.owners = set(app.team.members)
-                self.owner_ids = ids = {m.id for m in app.team.members}
-                return user.id in ids
-            else:
-                self.owner = app.owner
-                self.owner_id = owner_id = app.owner.id
-                return user.id == owner_id
+        app = await self.application_info()  # type: ignore
+        if app.team:
+            self.owners = set(app.team.members)
+            self.owner_ids = ids = {m.id for m in app.team.members}
+            return user.id in ids
+        self.owner = app.owner
+        self.owner_id = owner_id = app.owner.id
+        return user.id == owner_id
 
     # listener registration
 

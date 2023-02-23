@@ -944,7 +944,7 @@ class ConnectionState:
             # PING interaction should never be received
             return
 
-        elif data["type"] == 2:
+        if data["type"] == 2:
             interaction = ApplicationCommandInteraction(data=data, state=self)
             self.dispatch("application_command", interaction)
 

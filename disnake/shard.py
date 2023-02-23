@@ -493,7 +493,10 @@ class AutoShardedClient(Client):
                     if item.error.code != 1000:
                         raise item.error
                 return
-            elif item.type in (EventType.identify, EventType.resume):
+            elif item.type in (  # noqa: RET505 # needs to be refactored
+                EventType.identify,
+                EventType.resume,
+            ):
                 await item.shard.reidentify(item.error)
             elif item.type == EventType.reconnect:
                 await item.shard.reconnect()

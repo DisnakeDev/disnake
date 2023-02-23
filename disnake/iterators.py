@@ -964,8 +964,7 @@ class GuildScheduledEventUserIterator(_AsyncIterator[Union["User", "Member"]]):
             return guild.get_member(int(user_data["id"])) or Member(
                 data=member_data, user_data=user_data, guild=guild, state=self.state
             )
-        else:
-            return self.state.store_user(data["user"])
+        return self.state.store_user(data["user"])
 
     async def fill_users(self) -> None:
         if not self._get_retrieve():

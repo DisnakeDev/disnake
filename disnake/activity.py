@@ -831,8 +831,7 @@ class CustomActivity(BaseActivity):
             if self.name:
                 return f"{self.emoji} {self.name}"
             return str(self.emoji)
-        else:
-            return str(self.name)
+        return str(self.name)
 
     def __repr__(self) -> str:
         return f"<CustomActivity name={self.name!r} emoji={self.emoji!r}>"

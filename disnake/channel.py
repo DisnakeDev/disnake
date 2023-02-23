@@ -4122,28 +4122,26 @@ def _guild_channel_factory(channel_type: int):
     value = try_enum(ChannelType, channel_type)
     if value is ChannelType.text:
         return TextChannel, value
-    elif value is ChannelType.voice:
+    if value is ChannelType.voice:
         return VoiceChannel, value
-    elif value is ChannelType.category:
+    if value is ChannelType.category:
         return CategoryChannel, value
-    elif value is ChannelType.news:
+    if value is ChannelType.news:
         return TextChannel, value
-    elif value is ChannelType.stage_voice:
+    if value is ChannelType.stage_voice:
         return StageChannel, value
-    elif value is ChannelType.forum:
+    if value is ChannelType.forum:
         return ForumChannel, value
-    else:
-        return None, value
+    return None, value
 
 
 def _channel_factory(channel_type: int):
     cls, value = _guild_channel_factory(channel_type)
     if value is ChannelType.private:
         return DMChannel, value
-    elif value is ChannelType.group:
+    if value is ChannelType.group:
         return GroupChannel, value
-    else:
-        return cls, value
+    return cls, value
 
 
 def _threaded_channel_factory(channel_type: int):
