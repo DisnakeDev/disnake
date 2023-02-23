@@ -72,7 +72,7 @@ def docs(session: nox.Session):
 @nox.session
 def lint(session: nox.Session):
     """Check all files for linting errors"""
-    session.run_always("pdm", "install", "-dG", "lint", "-G", "tools", external=True)
+    session.run_always("pdm", "install", "-G", "tools", external=True)
 
     session.run("pre-commit", "run", "--all-files", *session.posargs)
 
