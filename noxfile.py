@@ -99,7 +99,7 @@ def codemod(session: nox.Session):
     if session.posargs and session.posargs[0] == "run-all" or not session.interactive:
         # run all of the transformers on disnake
         session.log("Running all transformers.")
-        res: str = session.run("python", "-m", "libcst.tool", "list", silent=True)
+        res: str = session.run("python", "-m", "libcst.tool", "list", silent=True)  # type: ignore
         transformers = [line.split("-")[0].strip() for line in res.splitlines()]
         session.log("Transformers: " + ", ".join(transformers))
 
@@ -126,7 +126,9 @@ def codemod(session: nox.Session):
 @nox.session()
 def pyright(session: nox.Session):
     """Run pyright."""
-    session.run_always("pdm", "install", "-d", "-Gspeed", "-Gdocs", "-Gvoice", external=True)
+    session.run_always(
+        "pdm", "install", "-d", "-Gspeed", "-Gdocs", "-Gvoice", "-Gnox", external=True
+    )
     env = {
         "PYRIGHT_PYTHON_IGNORE_WARNINGS": "1",
     }
@@ -149,7 +151,7 @@ def pyright(session: nox.Session):
 def test(session: nox.Session, extras: List[str]):
     """Run tests."""
     # shell splitting is not done by nox
-    extras = chain(*(["-G", extra] for extra in extras))
+    extras = list(chain(*(["-G", extra] for extra in extras)))
 
     session.run_always("pdm", "install", "-dG", "test", "-dG", "typing", *extras, external=True)
 
