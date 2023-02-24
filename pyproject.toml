@@ -64,7 +64,7 @@ discord = ["discord-disnake"]
 
 [tool.pdm.dev-dependencies]
 nox = [
-    "nox>=2022.11.21",
+    "nox==2022.11.21",
 ]
 tools = [
     "pre-commit~=2.19.0",
