@@ -559,7 +559,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
         if view.eof:
             if param.kind == param.VAR_POSITIONAL:
-                raise RuntimeError()  # break the loop
+                raise RuntimeError  # break the loop
             if required:
                 if self._is_typing_optional(param.annotation):
                     return None
@@ -621,7 +621,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             value = await run_converters(ctx, converter, argument, param)  # type: ignore
         except (CommandError, ArgumentParsingError):
             view.index = previous
-            raise RuntimeError() from None  # break loop
+            raise RuntimeError from None  # break loop
         else:
             return value
 
@@ -1881,7 +1881,7 @@ def has_role(item: Union[int, str]) -> Callable[[T], T]:
 
     def predicate(ctx: AnyContext) -> bool:
         if ctx.guild is None:
-            raise NoPrivateMessage()
+            raise NoPrivateMessage
 
         # ctx.guild is None doesn't narrow ctx.author to Member
         if isinstance(item, int):
@@ -1929,7 +1929,7 @@ def has_any_role(*items: Union[int, str]) -> Callable[[T], T]:
 
     def predicate(ctx: AnyContext) -> bool:
         if ctx.guild is None:
-            raise NoPrivateMessage()
+            raise NoPrivateMessage
 
         # ctx.guild is None doesn't narrow ctx.author to Member
         getter = functools.partial(disnake.utils.get, ctx.author.roles)  # type: ignore
@@ -1960,7 +1960,7 @@ def bot_has_role(item: int) -> Callable[[T], T]:
 
     def predicate(ctx: AnyContext) -> bool:
         if ctx.guild is None:
-            raise NoPrivateMessage()
+            raise NoPrivateMessage
 
         me = cast(disnake.Member, ctx.me)
         if isinstance(item, int):
@@ -1990,7 +1990,7 @@ def bot_has_any_role(*items: int) -> Callable[[T], T]:
 
     def predicate(ctx: AnyContext) -> bool:
         if ctx.guild is None:
-            raise NoPrivateMessage()
+            raise NoPrivateMessage
 
         me = cast(disnake.Member, ctx.me)
         getter = functools.partial(disnake.utils.get, me.roles)
@@ -2410,7 +2410,7 @@ def dm_only() -> Callable[[T], T]:
 
     def predicate(ctx: AnyContext) -> bool:
         if ctx.guild is not None:
-            raise PrivateMessageOnly()
+            raise PrivateMessageOnly
         return True
 
     return check(predicate)
@@ -2427,7 +2427,7 @@ def guild_only() -> Callable[[T], T]:
 
     def predicate(ctx: AnyContext) -> bool:
         if ctx.guild is None:
-            raise NoPrivateMessage()
+            raise NoPrivateMessage
         return True
 
     return check(predicate)

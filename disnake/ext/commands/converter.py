@@ -738,7 +738,7 @@ class RoleConverter(IDConverter[disnake.Role]):
     async def convert(self, ctx: AnyContext, argument: str) -> disnake.Role:
         guild = ctx.guild
         if not guild:
-            raise NoPrivateMessage()
+            raise NoPrivateMessage
 
         match = self._get_id_match(argument) or re.match(r"<@&([0-9]{17,19})>$", argument)
         if match:

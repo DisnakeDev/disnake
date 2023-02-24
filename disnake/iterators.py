@@ -116,7 +116,7 @@ class _AsyncIterator(AsyncIterator[T]):
         try:
             return await self.next()
         except NoMoreItems:
-            raise StopAsyncIteration()
+            raise StopAsyncIteration
 
 
 class _ChunkedAsyncIterator(_AsyncIterator[List[T]]):
@@ -191,7 +191,7 @@ class ReactionIterator(_AsyncIterator[Union["User", "Member"]]):
         try:
             return self.users.get_nowait()
         except asyncio.QueueEmpty:
-            raise NoMoreItems()
+            raise NoMoreItems
 
     async def fill_users(self) -> None:
         if self.limit > 0:
@@ -317,7 +317,7 @@ class HistoryIterator(_AsyncIterator["Message"]):
         try:
             return self.messages.get_nowait()
         except asyncio.QueueEmpty:
-            raise NoMoreItems()
+            raise NoMoreItems
 
     def _get_retrieve(self):
         limit = self.limit
@@ -442,7 +442,7 @@ class BanIterator(_AsyncIterator["BanEntry"]):
         try:
             return self.bans.get_nowait()
         except asyncio.QueueEmpty:
-            raise NoMoreItems()
+            raise NoMoreItems
 
     def _get_retrieve(self) -> bool:
         self.retrieve = min(self.limit, 1000) if self.limit is not None else 1000
@@ -567,7 +567,7 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
         try:
             return self.entries.get_nowait()
         except asyncio.QueueEmpty:
-            raise NoMoreItems()
+            raise NoMoreItems
 
     def _get_retrieve(self):
         limit = self.limit
@@ -707,7 +707,7 @@ class GuildIterator(_AsyncIterator["Guild"]):
         try:
             return self.guilds.get_nowait()
         except asyncio.QueueEmpty:
-            raise NoMoreItems()
+            raise NoMoreItems
 
     def _get_retrieve(self):
         limit = self.limit
@@ -782,7 +782,7 @@ class MemberIterator(_AsyncIterator["Member"]):
         try:
             return self.members.get_nowait()
         except asyncio.QueueEmpty:
-            raise NoMoreItems()
+            raise NoMoreItems
 
     def _get_retrieve(self):
         limit = self.limit
@@ -869,7 +869,7 @@ class ArchivedThreadIterator(_AsyncIterator["Thread"]):
         try:
             return self.queue.get_nowait()
         except asyncio.QueueEmpty:
-            raise NoMoreItems()
+            raise NoMoreItems
 
     @staticmethod
     def get_archive_timestamp(data: ThreadPayload) -> str:
@@ -881,7 +881,7 @@ class ArchivedThreadIterator(_AsyncIterator["Thread"]):
 
     async def fill_queue(self) -> None:
         if not self.has_more:
-            raise NoMoreItems()
+            raise NoMoreItems
 
         limit = 50 if self.limit is None else max(self.limit, 50)
         data = await self.endpoint(self.channel_id, before=self.before, limit=limit)
@@ -944,7 +944,7 @@ class GuildScheduledEventUserIterator(_AsyncIterator[Union["User", "Member"]]):
         try:
             return self.users.get_nowait()
         except asyncio.QueueEmpty:
-            raise NoMoreItems()
+            raise NoMoreItems
 
     def _get_retrieve(self) -> bool:
         limit = self.limit
