@@ -2139,7 +2139,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         video_quality_mode: :class:`VideoQualityMode`
             The camera video quality for the stage channel's participants.
 
-            .. versionadded:: 2.0
+            .. versionadded:: 2.9
 
         nsfw: :class:`bool`
             Whether to mark the channel as NSFW.
