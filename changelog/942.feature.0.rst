@@ -4,6 +4,6 @@ Messages can now be sent within :class:`StageChannel` instances.
     :attr:`.nsfw <StageChannel.nsfw>`, :attr:`.slowmode_delay <StageChannel.slowmode_delay>`, :attr:`.last_message_id <StageChannel.last_message_id>`, :attr:`.last_message <StageChannel.last_message>`
 - New :class:`StageChannel` methods:
     :func:`.is_nsfw <StageChannel.is_nsfw>`, :func:`.get_partial_message <StageChannel.get_partial_message>`, :func:`.delete_messages <StageChannel.delete_messages>`, :func:`.purge <StageChannel.purge>`, :func:`.webhooks <StageChannel.webhooks>`, :func:`.create_webhook <StageChannel.create_webhook>`
-- ``nsfw`` and ``slowmode_delay`` parameters for :func:`Guild.create_stage_channel` and :func:`CategoryChannel.create_stage_channel`
-- ``nsfw`` and ``slowmode_delay`` parameters for :func:`StageChannel.edit`
+- Add ``nsfw`` and ``slowmode_delay`` parameters to :func:`Guild.create_stage_channel` and :func:`CategoryChannel.create_stage_channel`
+- Add ``nsfw`` and ``slowmode_delay`` parameters to :func:`StageChannel.edit`
 - Add text related permission support to :func:`StageChannel.permissions_for`.
