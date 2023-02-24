@@ -47,12 +47,13 @@ Creating a pull request is fairly simple, just make sure it focuses on a single 
 
 We would greatly appreciate the code submitted to be of a consistent style with other code in disnake. This project follows PEP-8 guidelines (mostly) with a column limit of 100 characters.
 
-Run these commands to install [`nox`](https://nox.thea.codes/) and [`pdm`](https://pdm.fming.dev/), as well as the required dependencies in your environment, and to set up [`pre-commit`](https://pre-commit.com/#quick-start) hooks.
+Run these commands to install [`PDM`](https://pdm.fming.dev/), as well as the required dependencies in your environment, and to set up [`pre-commit`](https://pre-commit.com/#quick-start) hooks.
 ```
-pip install nox pdm
+pip install pdm
 pdm run setup_env
 ```
 
+> PDM should be globally installed, if possible. There may be issues with putting PDM in the same environment as the rest of the dependencies for disnake.
 > If you have [pipx](https://pypa.github.io/pipx/) installed on your system, we recommend installing the above tools with pipx instead.
 
 The installed `pre-commit` hooks will automatically run before every commit, which will format/lint the code
@@ -67,9 +68,9 @@ documented at [https://spdx.dev/ids/](https://spdx.dev/ids/).
 
 ### Scripts
 
-To run all important checks and tests, use `nox`:
+To run all important checks and tests, use `pdm run nox`:
 ```sh
-nox -R
+pdm run nox -R
 ```
 
 You can also choose to only run a single task; run `pdm run --list` to view all available scripts and use `pdm run <name>` to run them.
