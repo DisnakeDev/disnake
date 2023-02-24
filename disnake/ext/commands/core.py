@@ -728,7 +728,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             except StopIteration:
                 raise disnake.ClientException(
                     f'Callback for {self.name} command is missing "self" parameter.'
-                )
+                ) from None
 
         # next we have the 'ctx' as the next parameter
         try:
@@ -736,7 +736,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         except StopIteration:
             raise disnake.ClientException(
                 f'Callback for {self.name} command is missing "ctx" parameter.'
-            )
+            ) from None
 
         for name, param in iterator:
             ctx.current_parameter = param
