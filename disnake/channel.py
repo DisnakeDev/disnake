@@ -82,6 +82,7 @@ if TYPE_CHECKING:
         DMChannel as DMChannelPayload,
         ForumChannel as ForumChannelPayload,
         GroupDMChannel as GroupChannelPayload,
+        PermissionOverwrite as PermissionOverwritePayload,
         StageChannel as StageChannelPayload,
         TextChannel as TextChannelPayload,
         VoiceChannel as VoiceChannelPayload,
@@ -488,6 +489,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         category: Optional[Snowflake] = MISSING,
         slowmode_delay: int = MISSING,
         default_auto_archive_duration: AnyThreadArchiveDuration = MISSING,
+        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
         news: bool = MISSING,
         reason: Optional[str] = None,
     ) -> TextChannel:
@@ -513,12 +515,19 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             The position of the new channel. If not provided, defaults to this channel's position.
         nsfw: :class:`bool`
             Whether the new channel should be marked as NSFW. If not provided, defaults to this channel's NSFW value.
+
+            .. note::
+                If the Guild doesn't have the ``COMMUNITY`` feature enabled this will defaults to this :attr:`TextChannel.type`.
+
         category: Optional[:class:`abc.Snowflake`]
             The category where the new channel should be grouped. If not provided, defaults to this channel's category.
         slowmode_delay: :class:`int`
             The slowmode of the new channel. If not provided, defaults to this channel's slowmode.
         default_auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
             The default auto archive duration of the new channel. If not provided, defaults to this channel's default auto archive duration.
+        overwrites: :class:`Mapping`
+            A :class:`Mapping` of target (either a role or a member) to :class:`PermissionOverwrite`
+            to apply to the channel. If not provided, defaults to this channel's overwrites.
         news: :class:`bool`
             Whether the new channel should be a news channel. News channels are text channels that can be followed.
             This is only available to guilds that contain ``NEWS`` in :attr:`Guild.features`. If not provided, defaults to the current type of this channel.
@@ -537,25 +546,50 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         :class:`TextChannel`
             The newly created text channel.
         """
-        if news is not MISSING:
+        if news is not MISSING and "COMMUNITY" in self.guild.features:
             # if news is True set the channel_type to News, otherwise if it's False set it to Text
             channel_type = ChannelType.news if news else ChannelType.text
         else:
             # if news is not given falls back to the original TextChannel type
             channel_type = self.type
 
+        overwrites_payload: List[PermissionOverwritePayload] = MISSING
+        if overwrites is not MISSING and overwrites is not None:
+            overwrites_payload = []
+            for target, perm in overwrites.items():
+                if not isinstance(perm, PermissionOverwrite):
+                    raise TypeError(
+                        f"Expected PermissionOverwrite, received {perm.__class__.__name__}"
+                    )
+
+                allow, deny = perm.pair()
+                payload: PermissionOverwritePayload = {
+                    "allow": str(allow.value),
+                    "deny": str(deny.value),
+                    "id": target.id,
+                    "type": (
+                        disnake.abc._Overwrites.ROLE
+                        if isinstance(target, Role)
+                        else disnake.abc._Overwrites.MEMBER
+                    ),
+                }
+                overwrites_payload.append(payload)
+
         return await self._clone_impl(
             {
                 "topic": topic if topic is not MISSING else self.topic,
                 "position": position if position is not MISSING else self.position,
                 "nsfw": nsfw if nsfw is not MISSING else self.nsfw,
-                "rate_limit_per_user": slowmode_delay
-                if slowmode_delay is not MISSING
-                else self.slowmode_delay,
                 "type": channel_type.value,
-                "default_auto_archive_duration": default_auto_archive_duration
-                if default_auto_archive_duration is not MISSING
-                else self.default_auto_archive_duration,
+                "rate_limit_per_user": (
+                    slowmode_delay if slowmode_delay is not MISSING else self.slowmode_delay
+                ),
+                "default_auto_archive_duration": (
+                    try_enum_to_int(default_auto_archive_duration)
+                    if default_auto_archive_duration is not MISSING
+                    else self.default_auto_archive_duration
+                ),
+                "permission_overwrites": overwrites_payload,
             },
             name=name,
             category=category,
@@ -1284,6 +1318,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
         nsfw: bool = MISSING,
+        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
         slowmode_delay: Optional[int] = MISSING,
         reason: Optional[str] = None,
     ) -> VoiceChannel:
@@ -1318,6 +1353,9 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             The video quality mode of the new channel. If not provided, defaults to this channel's video quality mode.
         nsfw: :class:`bool`
             Whether the new channel should be nsfw or not. If not provided, defaults to this channel's NSFW value.
+        overwrites: :class:`Mapping`
+            A :class:`Mapping` of target (either a role or a member) to :class:`PermissionOverwrite` to apply
+            to the channel. If not provided, defaults to this channel's overwrites.
         slowmode_delay: Optional[:class:`int`]
             The slowmode of the new channel. If not provided, defaults to this channel's slowmode.
         reason: Optional[:class:`str`]
@@ -1335,20 +1373,44 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         :class:`VoiceChannel`
             The channel that was created.
         """
+        overwrites_payload: List[PermissionOverwritePayload] = MISSING
+        if overwrites is not MISSING and overwrites is not None:
+            overwrites_payload = []
+            for target, perm in overwrites.items():
+                if not isinstance(perm, PermissionOverwrite):
+                    raise TypeError(
+                        f"Expected PermissionOverwrite, received {perm.__class__.__name__}"
+                    )
+
+                allow, deny = perm.pair()
+                payload: PermissionOverwritePayload = {
+                    "allow": str(allow.value),
+                    "deny": str(deny.value),
+                    "id": target.id,
+                    "type": (
+                        disnake.abc._Overwrites.ROLE
+                        if isinstance(target, Role)
+                        else disnake.abc._Overwrites.MEMBER
+                    ),
+                }
+                overwrites_payload.append(payload)
 
         return await self._clone_impl(
             {
                 "bitrate": bitrate if bitrate is not MISSING else self.bitrate,
                 "user_limit": user_limit if user_limit is not MISSING else self.user_limit,
                 "position": position if position is not MISSING else self.position,
-                "rtc_region": rtc_region if rtc_region is not MISSING else self.rtc_region,
-                "video_quality_mode": int(video_quality_mode)
-                if video_quality_mode is not MISSING
-                else int(self.video_quality_mode),
+                "rtc_region": (str(rtc_region) if rtc_region is not MISSING else self.rtc_region),
+                "video_quality_mode": (
+                    int(video_quality_mode)
+                    if video_quality_mode is not MISSING
+                    else int(self.video_quality_mode)
+                ),
                 "nsfw": nsfw if nsfw is not MISSING else self.nsfw,
-                "rate_limit_per_user": slowmode_delay
-                if slowmode_delay is not MISSING
-                else self.slowmode_delay,
+                "rate_limit_per_user": (
+                    slowmode_delay if slowmode_delay is not MISSING else self.slowmode_delay
+                ),
+                "permission_overwrites": overwrites_payload,
             },
             name=name,
             category=category,
@@ -1959,6 +2021,7 @@ class StageChannel(VocalGuildChannel):
         position: int = MISSING,
         category: Optional[Snowflake] = MISSING,
         rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
+        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
         bitrate: int = MISSING,
         reason: Optional[str] = None,
     ) -> StageChannel:
@@ -1984,6 +2047,9 @@ class StageChannel(VocalGuildChannel):
             The category where the new channel should be grouped. If not provided, defaults to this channel's category.
         rtc_region: Optional[Union[:class:`str`, :class:`VoiceRegion`]]
             The rtc region of the new channel. If not provided, defaults to this channel's rtc region.
+        overwrites: :class:`Mapping`
+            A :class:`Mapping` of target (either a role or a member) to :class:`PermissionOverwrite`
+            to apply to the channel. If not provided, defaults to this channel's overwrites.
         bitrate: :class:`int`
             The bitrate of the new channel. If not provided, defaults to this channel's bitrate.
         reason: Optional[:class:`str`]
@@ -2001,11 +2067,34 @@ class StageChannel(VocalGuildChannel):
         :class:`StageChannel`
             The channel that was created.
         """
+        overwrites_payload: List[PermissionOverwritePayload] = MISSING
+        if overwrites is not MISSING and overwrites is not None:
+            overwrites_payload = []
+            for target, perm in overwrites.items():
+                if not isinstance(perm, PermissionOverwrite):
+                    raise TypeError(
+                        f"Expected PermissionOverwrite, received {perm.__class__.__name__}"
+                    )
+
+                allow, deny = perm.pair()
+                payload: PermissionOverwritePayload = {
+                    "allow": str(allow.value),
+                    "deny": str(deny.value),
+                    "id": target.id,
+                    "type": (
+                        disnake.abc._Overwrites.ROLE
+                        if isinstance(target, Role)
+                        else disnake.abc._Overwrites.MEMBER
+                    ),
+                }
+                overwrites_payload.append(payload)
+
         return await self._clone_impl(
             {
                 "position": position if position is not MISSING else self.position,
-                "rtc_region": rtc_region if rtc_region is not MISSING else self.rtc_region,
+                "rtc_region": (str(rtc_region) if rtc_region is not MISSING else self.rtc_region),
                 "bitrate": bitrate if bitrate is not MISSING else self.bitrate,
+                "permission_overwrites": overwrites_payload,
             },
             name=name,
             category=category,
@@ -2369,6 +2458,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         *,
         name: Optional[str] = None,
         position: int = MISSING,
+        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
         reason: Optional[str] = None,
     ) -> CategoryChannel:
         """|coro|
@@ -2388,6 +2478,9 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             The name of the new channel. If not provided, defaults to this channel's name.
         position: :class:`int`
             The position of the new channel. If not provided, defaults to this channel's position.
+        overwrites: :class:`Mapping`
+            A :class:`Mapping` of target (either a role or a member) to :class:`PermissionOverwrite`
+            to apply to the channel. If not provided, defaults to this channel's overwrites.
         reason: Optional[:class:`str`]
             The reason for cloning this channel. Shows up on the audit log.
 
@@ -2403,9 +2496,32 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         :class:`CategoryChannel`
             The channel that was created.
         """
+        overwrites_payload: List[PermissionOverwritePayload] = MISSING
+        if overwrites is not MISSING and overwrites is not None:
+            overwrites_payload = []
+            for target, perm in overwrites.items():
+                if not isinstance(perm, PermissionOverwrite):
+                    raise TypeError(
+                        f"Expected PermissionOverwrite, received {perm.__class__.__name__}"
+                    )
+
+                allow, deny = perm.pair()
+                payload: PermissionOverwritePayload = {
+                    "allow": str(allow.value),
+                    "deny": str(deny.value),
+                    "id": target.id,
+                    "type": (
+                        disnake.abc._Overwrites.ROLE
+                        if isinstance(target, Role)
+                        else disnake.abc._Overwrites.MEMBER
+                    ),
+                }
+                overwrites_payload.append(payload)
+
         return await self._clone_impl(
             {
                 "position": position if position is not MISSING else self.position,
+                "permission_overwrites": overwrites_payload,
             },
             name=name,
             reason=reason,
@@ -3195,6 +3311,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         available_tags: Sequence[ForumTag] = MISSING,
         default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
         default_sort_order: Optional[ThreadSortOrder] = MISSING,
+        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
         reason: Optional[str] = None,
     ) -> ForumChannel:
         """|coro|
@@ -3235,6 +3352,9 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             The default reaction of the new channel. If not provided, defaults to this channel's default reaction.
         default_sort_order: Optional[:class:`ThreadSortOrder`]
             The default sort order of the new channel. If not provided, defaults to this channel's default sort order.
+        overwrites: :class:`Mapping`
+            A :class:`Mapping` of target (either a role or a member) to :class:`PermissionOverwrite`
+            to apply to the channel. If not provided, defaults to this channel's overwrites.
         reason: Optional[:class:`str`]
             The reason for cloning this channel. Shows up on the audit log.
 
@@ -3250,43 +3370,75 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         :class:`ForumChannel`
             The channel that was created.
         """
+        overwrites_payload: List[PermissionOverwritePayload] = MISSING
+        if overwrites is not MISSING and overwrites is not None:
+            overwrites_payload = []
+            for target, perm in overwrites.items():
+                if not isinstance(perm, PermissionOverwrite):
+                    raise TypeError(
+                        f"Expected PermissionOverwrite, received {perm.__class__.__name__}"
+                    )
+
+                allow, deny = perm.pair()
+                payload: PermissionOverwritePayload = {
+                    "allow": str(allow.value),
+                    "deny": str(deny.value),
+                    "id": target.id,
+                    "type": (
+                        disnake.abc._Overwrites.ROLE
+                        if isinstance(target, Role)
+                        else disnake.abc._Overwrites.MEMBER
+                    ),
+                }
+                overwrites_payload.append(payload)
 
         default_reaction_emoji_payload: Optional[DefaultReactionPayload] = MISSING
-        if default_reaction is not MISSING:
-            if default_reaction is not None:
-                emoji_name, emoji_id = PartialEmoji._emoji_to_name_id(default_reaction)
-                default_reaction_emoji_payload = {
-                    "emoji_name": emoji_name,
-                    "emoji_id": emoji_id,
-                }
-            else:
-                default_reaction_emoji_payload = None
+        if default_reaction is MISSING:
+            default_reaction = self.default_reaction
+
+        if default_reaction is not None:
+            emoji_name, emoji_id = PartialEmoji._emoji_to_name_id(default_reaction)
+            default_reaction_emoji_payload = {
+                "emoji_name": emoji_name,
+                "emoji_id": emoji_id,
+            }
+        else:
+            default_reaction_emoji_payload = None
 
         default_sort_order_payload: Optional[int] = MISSING
-        if default_sort_order is not MISSING:
-            default_sort_order_payload = (
-                try_enum_to_int(default_sort_order) if default_sort_order is not None else None
-            )
+        if default_sort_order is MISSING:
+            default_sort_order = self.default_sort_order
+
+        default_sort_order_payload = (
+            try_enum_to_int(default_sort_order) if default_sort_order is not None else None
+        )
 
         return await self._clone_impl(
             {
                 "topic": topic if topic is not MISSING else self.topic,
                 "position": position if position is not MISSING else self.position,
                 "nsfw": nsfw if nsfw is not MISSING else self.nsfw,
-                "rate_limit_per_user": slowmode_delay
-                if slowmode_delay is not MISSING
-                else self.slowmode_delay,
-                "default_thread_rate_limit_per_user": default_thread_slowmode_delay
-                if default_thread_slowmode_delay is not MISSING
-                else self.default_thread_slowmode_delay,
-                "default_auto_archive_duration": default_auto_archive_duration
-                if default_auto_archive_duration is not MISSING
-                else self.default_auto_archive_duration,
-                "available_tags": [tag.to_dict() for tag in available_tags]
-                if available_tags is not MISSING
-                else [tag.to_dict() for tag in self.available_tags],
+                "rate_limit_per_user": (
+                    slowmode_delay if slowmode_delay is not MISSING else self.slowmode_delay
+                ),
+                "default_thread_rate_limit_per_user": (
+                    default_thread_slowmode_delay
+                    if default_thread_slowmode_delay is not MISSING
+                    else self.default_thread_slowmode_delay
+                ),
+                "default_auto_archive_duration": (
+                    try_enum_to_int(default_auto_archive_duration)
+                    if default_auto_archive_duration is not MISSING
+                    else self.default_auto_archive_duration
+                ),
+                "available_tags": (
+                    [tag.to_dict() for tag in available_tags]
+                    if available_tags is not MISSING
+                    else [tag.to_dict() for tag in self.available_tags]
+                ),
                 "default_reaction_emoji": default_reaction_emoji_payload,
                 "default_sort_order": default_sort_order_payload,
+                "permission_overwrites": overwrites_payload,
             },
             name=name,
             category=category,

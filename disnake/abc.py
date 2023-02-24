@@ -994,17 +994,21 @@ class GuildChannel(ABC):
         category: Optional[Snowflake] = MISSING,
         reason: Optional[str] = None,
     ) -> Self:
-        base_attrs["permission_overwrites"] = [x._asdict() for x in self._overwrites]
+        # if the overwrites are MISSING defaults to the
+        # original permissions of the channel
+        if not base_attrs["permission_overwrites"]:
+            base_attrs["permission_overwrites"] = [x._asdict() for x in self._overwrites]
         if category is not MISSING:
             base_attrs["parent_id"] = category.id if category else None
         else:
             # if no category was given don't chhange the category
             base_attrs["parent_id"] = self.category_id
         base_attrs["name"] = name or self.name
+        channel_type = base_attrs["type"]
         guild_id = self.guild.id
         cls = self.__class__
         data = await self._state.http.create_channel(
-            guild_id, self.type.value, reason=reason, **base_attrs
+            guild_id, channel_type, reason=reason, **base_attrs
         )
         obj = cls(state=self._state, guild=self.guild, data=data)
 
