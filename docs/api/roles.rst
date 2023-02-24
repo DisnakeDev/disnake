@@ -5,8 +5,7 @@
 Roles
 =====
 
-This section documents everything related to roles - a way of granting (or limiting) access to certain information/actions
-for a group of users.
+This section documents everything related to roles - a way of granting (or limiting) access to certain information/actions for a group of users.
 
 Discord Models
 ---------------
