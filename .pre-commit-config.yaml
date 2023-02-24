@@ -35,7 +35,7 @@ repos:
         args: [--negate]
         types: [text]
         exclude_types: [json, pofile]
-        exclude: 'changelog/|py.typed|disnake/bin/COPYING|.github/PULL_REQUEST_TEMPLATE.md|LICENSE|MANIFEST.in|requirements/|requirements.txt'
+        exclude: 'changelog/|py.typed|disnake/bin/COPYING|.github/PULL_REQUEST_TEMPLATE.md|LICENSE|MANIFEST.in'
 
   - repo: https://github.com/pycqa/isort
     rev: 5.12.0
@@ -55,12 +55,7 @@ repos:
       - id: black
         name: "run black in all files"
 
-  - repo: local
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.0.252
     hooks:
-      - id: flake8
-        name: flake8
-        description: "Lint all of our code"
-        entry: flake8
-        language: system
-        types: [python]
-        require_serial: true
+      - id: ruff

@@ -131,7 +131,7 @@ class BotBase(CommonBotBase, GroupMixin):
         super().__init__(**options)
 
         if not isinstance(self, disnake.Client):
-            raise RuntimeError("BotBase mixin must be used with disnake.Client")
+            raise RuntimeError("BotBase mixin must be used with disnake.Client")  # noqa: TRY004
 
         alternative = (
             "AutoShardedInteractionBot"

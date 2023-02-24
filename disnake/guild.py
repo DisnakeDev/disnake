@@ -207,6 +207,8 @@ class Guild(Hashable):
         - ``AUTO_MODERATION``: Guild has set up auto moderation rules.
         - ``BANNER``: Guild can upload and use a banner. (i.e. :attr:`.banner`)
         - ``COMMUNITY``: Guild is a community server.
+        - ``CREATOR_MONETIZABLE_PROVISIONAL``: Guild has enabled monetization.
+        - ``CREATOR_STORE_PAGE``: Guild has enabled the role subscription promo page.
         - ``DEVELOPER_SUPPORT_SERVER``: Guild is set as a support server in the app directory.
         - ``DISCOVERABLE``: Guild shows up in Server Discovery.
         - ``ENABLED_DISCOVERABLE_BEFORE``: Guild had Server Discovery enabled at least once.
@@ -217,7 +219,6 @@ class Guild(Hashable):
         - ``INVITES_DISABLED``: Guild has paused invites, preventing new users from joining.
         - ``LINKED_TO_HUB``: Guild is linked to a student hub.
         - ``MEMBER_VERIFICATION_GATE_ENABLED``: Guild has Membership Screening enabled.
-        - ``MONETIZATION_ENABLED``: Guild has enabled monetization.
         - ``MORE_EMOJI``: Guild has increased custom emoji slots.
         - ``MORE_STICKERS``: Guild has increased custom sticker slots.
         - ``NEWS``: Guild can create news channels.
@@ -226,6 +227,8 @@ class Guild(Hashable):
         - ``PREVIEW_ENABLED``: Guild can be viewed before being accepted via Membership Screening.
         - ``PRIVATE_THREADS``: Guild has access to create private threads (no longer has any effect).
         - ``ROLE_ICONS``: Guild has access to role icons.
+        - ``ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE``: Guild has role subscriptions that can be purchased.
+        - ``ROLE_SUBSCRIPTIONS_ENABLED``: Guild has enabled role subscriptions.
         - ``SEVEN_DAY_THREAD_ARCHIVE``: Guild has access to the seven day archive time for threads (no longer has any effect).
         - ``TEXT_IN_VOICE_ENABLED``: Guild has text in voice channels enabled (no longer has any effect).
         - ``THREE_DAY_THREAD_ARCHIVE``: Guild has access to the three day archive time for threads (no longer has any effect).
@@ -847,7 +850,11 @@ class Guild(Hashable):
 
     @property
     def emoji_limit(self) -> int:
-        """:class:`int`: The maximum number of emoji slots this guild has."""
+        """:class:`int`: The maximum number of emoji slots this guild has.
+
+        Premium emojis (i.e. those associated with subscription roles) count towards a
+        separate limit of 25.
+        """
         more_emoji = 200 if "MORE_EMOJI" in self.features else 50
         return max(more_emoji, self._PREMIUM_GUILD_LIMITS[self.premium_tier].emoji)
 
@@ -3240,6 +3247,9 @@ class Guild(Hashable):
             "2", "150"
             "3", "250"
 
+        Emojis with subscription roles (see ``roles`` below) are considered premium emoji,
+        and count towards a separate limit of 25 emojis.
+
         You must have :attr:`~Permissions.manage_emojis` permission to
         do this.
 
@@ -3255,7 +3265,12 @@ class Guild(Hashable):
                 Now accepts various resource types in addition to :class:`bytes`.
 
         roles: List[:class:`Role`]
-            A :class:`list` of :class:`Role`\\s that can use this emoji. Leave empty to make it available to everyone.
+            A list of roles that can use this emoji. Leave empty to make it available to everyone.
+
+            An emoji cannot have both subscription roles (see :attr:`RoleTags.integration_id`) and
+            non-subscription roles, and emojis can't be converted between premium and non-premium
+            after creation.
+
         reason: Optional[:class:`str`]
             The reason for creating this emoji. Shows up on the audit log.
 
@@ -3807,13 +3822,14 @@ class Guild(Hashable):
         after: Optional[SnowflakeTime] = None,
         user: Optional[Snowflake] = None,
         action: Optional[AuditLogAction] = None,
+        oldest_first: bool = False,
     ) -> AuditLogIterator:
         """Returns an :class:`AsyncIterator` that enables receiving the guild's audit logs.
 
         You must have :attr:`~Permissions.view_audit_log` permission to use this.
 
-        Entries are always returned in order from newest to oldest, regardless of the
-        ``before`` and ``after`` parameters.
+        Entries are returned in order from newest to oldest by default;
+        pass ``oldest_first=True`` to reverse the iteration order.
 
         Examples
         --------
@@ -3837,18 +3853,22 @@ class Guild(Hashable):
         ----------
         limit: Optional[:class:`int`]
             The number of entries to retrieve. If ``None`` retrieve all entries.
-        before: Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]
+        before: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
             Retrieve entries before this date or entry.
             If a datetime is provided, it is recommended to use a UTC aware datetime.
             If the datetime is naive, it is assumed to be local time.
-        after: Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]
+        after: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
             Retrieve entries after this date or entry.
             If a datetime is provided, it is recommended to use a UTC aware datetime.
             If the datetime is naive, it is assumed to be local time.
-        user: :class:`abc.Snowflake`
+        user: Optional[:class:`abc.Snowflake`]
             The moderator to filter entries from.
-        action: :class:`AuditLogAction`
+        action: Optional[:class:`AuditLogAction`]
             The action to filter with.
+        oldest_first: :class:`bool`
+            If set to ``True``, return entries in oldest->newest order. Defaults to ``False``.
+
+            .. versionadded:: 2.9
 
         Raises
         ------
@@ -3874,6 +3894,7 @@ class Guild(Hashable):
             limit=limit,
             user_id=user_id,
             action_type=action.value if action is not None else None,
+            oldest_first=oldest_first,
         )
 
     async def widget(self) -> Widget:
