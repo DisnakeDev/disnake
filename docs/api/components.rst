@@ -126,7 +126,7 @@ ComponentType
 
 .. class:: ComponentType
 
-    Represents the component type of a component.
+    Represents the type of component.
 
     .. versionadded:: 2.0
 

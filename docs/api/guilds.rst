@@ -193,7 +193,7 @@ ContentFilter
 
     Specifies a :class:`Guild`\'s explicit content filter, which is the machine
     learning algorithms that Discord uses to detect if an image contains
-    pornography or otherwise explicit content.
+    NSFW content.
 
     .. container:: operations
 

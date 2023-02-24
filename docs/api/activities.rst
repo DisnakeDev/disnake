@@ -131,7 +131,7 @@ Status
         user's presence this will be :attr:`offline` instead.
     .. attribute:: streaming
 
-        The member is live streaming to Twitch.
+        The member is live streaming to Twitch or YouTube.
 
         .. versionadded:: 2.3
 
