@@ -1,0 +1,3 @@
+Add features related to role subscriptions.
+- :attr:`MessageType.role_subscription_purchase`
+- :attr:`RoleTags.subscription_listing_id`, :attr:`RoleTags.is_available_for_purchase`, and :attr:`RoleTags.is_subscription`

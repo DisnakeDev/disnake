@@ -1400,6 +1400,9 @@ class Message(Hashable):
         if self.type is MessageType.auto_moderation_action:
             return self.content
 
+        # TODO: `MessageType.role_subscription_purchase` requires `Message.role_subscription_data`,
+        #       which is currently undocumented
+
         if self.type is MessageType.interaction_premium_upsell:
             return self.content
 
