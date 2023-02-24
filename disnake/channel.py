@@ -1926,11 +1926,11 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         if not base.connect:
             denied = Permissions.voice()
             denied.value |= Permissions.text().value
+            denied.value |= Permissions.stage().value
             denied.update(
                 manage_channels=True,
                 manage_roles=True,
                 manage_events=True,
-                request_to_speak=True,
                 manage_webhooks=True,
             )
             base.value &= ~denied.value
