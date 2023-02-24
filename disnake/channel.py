@@ -488,6 +488,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         nsfw: bool = MISSING,
         category: Optional[Snowflake] = MISSING,
         slowmode_delay: int = MISSING,
+        default_thread_slowmode_delay: Optional[int] = MISSING,
         default_auto_archive_duration: AnyThreadArchiveDuration = MISSING,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
         news: bool = MISSING,
@@ -523,6 +524,12 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             The category where the new channel should be grouped. If not provided, defaults to this channel's category.
         slowmode_delay: :class:`int`
             The slowmode of the new channel. If not provided, defaults to this channel's slowmode.
+        default_thread_slowmode_delay: Optional[:class:`int`]
+            Specifies the slowmode rate limit at which users can send messages
+            in newly created threads in this channel, in seconds.
+            This does not apply retroactively to existing threads.
+            A value of ``0`` or ``None`` disables slowmode. The maximum value possible is ``21600``. If not provided, defaults
+            to this channel's default thread slowmode delay.
         default_auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
             The default auto archive duration of the new channel. If not provided, defaults to this channel's default auto archive duration.
         overwrites: :class:`Mapping`
@@ -583,6 +590,11 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
                 "type": channel_type.value,
                 "rate_limit_per_user": (
                     slowmode_delay if slowmode_delay is not MISSING else self.slowmode_delay
+                ),
+                "default_thread_slowmode_delay": (
+                    default_thread_slowmode_delay
+                    if default_thread_slowmode_delay is not MISSING
+                    else self.default_thread_slowmode_delay
                 ),
                 "default_auto_archive_duration": (
                     try_enum_to_int(default_auto_archive_duration)
