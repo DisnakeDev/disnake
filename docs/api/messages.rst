@@ -292,6 +292,11 @@ MessageType
         The system message denoting that an auto moderation action was executed.
 
         .. versionadded:: 2.5
+    .. attribute:: role_subscription_purchase
+
+        The system message denoting that a role subscription was purchased.
+
+        .. versionadded:: 2.9
     .. attribute:: interaction_premium_upsell
 
         The system message for an application premium subscription upsell.

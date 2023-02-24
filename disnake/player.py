@@ -7,7 +7,7 @@ import io
 import logging
 import re
 import shlex
-import subprocess
+import subprocess  # noqa: TID251
 import sys
 import threading
 import time

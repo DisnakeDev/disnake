@@ -60,6 +60,7 @@ class freeze_time(ContextManager):
                     return await func(*args, **kwargs)
 
             return wrap_async  # type: ignore
+
         else:
 
             @functools.wraps(func)

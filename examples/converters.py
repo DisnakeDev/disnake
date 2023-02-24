@@ -71,6 +71,7 @@ async def multiply(ctx: commands.Context, number: int, maybe: bool):
 
     if maybe is True:
         return await ctx.send(str(number * 2))
+
     await ctx.send(str(number * 5))
 
 
