@@ -574,7 +574,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         else:
             try:
                 argument = view.get_quoted_word()
-            except ArgumentParsingError as exc:
+            except ArgumentParsingError:
                 if (
                     self._is_typing_optional(param.annotation)
                     and not param.kind == param.VAR_POSITIONAL
@@ -582,7 +582,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
                     view.index = previous
                     return None
                 else:
-                    raise exc
+                    raise
         view.previous = previous
 
         # type-checker fails to narrow argument

@@ -188,7 +188,7 @@ class Loop(Generic[LF]):
         except Exception as exc:
             self._has_failed = True
             await self._call_loop_function("error", exc)
-            raise exc
+            raise
         finally:
             await self._call_loop_function("after_loop")
             self._handle.cancel()
