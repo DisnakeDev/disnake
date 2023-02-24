@@ -244,6 +244,7 @@ class VoiceResumeCommand(TypedDict):
 # Gateway events
 #####
 
+
 # https://discord.com/developers/docs/topics/gateway-events#ready
 class ReadyEvent(TypedDict):
     v: int

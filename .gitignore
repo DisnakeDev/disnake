@@ -30,5 +30,8 @@ venvs/
 .idea
 .coverage*
 coverage.xml
+__pypackages__/
+.pdm.toml
+pdm.lock
 
 !test_bot/locale/*.json

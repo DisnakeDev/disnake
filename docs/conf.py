@@ -16,7 +16,7 @@ import importlib.util
 import inspect
 import os
 import re
-import subprocess  # noqa: S404
+import subprocess  # noqa: TID251
 import sys
 from typing import Any, Dict, Optional
 from urllib.parse import urljoin
@@ -114,7 +114,7 @@ _IS_READTHEDOCS = bool(os.getenv("READTHEDOCS"))
 
 
 def git(*args: str) -> str:
-    return subprocess.check_output(["git", *args]).strip().decode()  # noqa: S603,S607
+    return subprocess.check_output(["git", *args]).strip().decode()
 
 
 # Current git reference. Uses branch/tag name if found, otherwise uses commit hash
