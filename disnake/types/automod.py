@@ -15,7 +15,7 @@ AutoModPresetType = Literal[1, 2, 3]
 
 
 class AutoModBlockMessageActionMetadata(TypedDict):
-    ...
+    custom_message: str
 
 
 class AutoModSendAlertActionMetadata(TypedDict):
