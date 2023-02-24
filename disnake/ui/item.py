@@ -24,10 +24,11 @@ V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
 if TYPE_CHECKING:
     from typing_extensions import ParamSpec, Self
 
-    from ..components import NestedComponent
-    from ..enums import ComponentType
-    from ..interactions import MessageInteraction
-    from ..types.components import Component as ComponentPayload
+    from disnake.components import NestedComponent
+    from disnake.enums import ComponentType
+    from disnake.interactions import MessageInteraction
+    from disnake.types.components import Component as ComponentPayload
+
     from .view import View
 
     ItemCallbackType = Callable[[Any, ItemT, MessageInteraction], Coroutine[Any, Any, Any]]

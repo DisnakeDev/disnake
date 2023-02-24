@@ -4,12 +4,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union
 
-from .. import utils
-from ..enums import ApplicationCommandType, Locale, OptionType, try_enum
-from ..guild import Guild
-from ..member import Member
-from ..message import Message
-from ..user import User
+from disnake import utils
+from disnake.enums import ApplicationCommandType, Locale, OptionType, try_enum
+from disnake.guild import Guild
+from disnake.member import Member
+from disnake.message import Message
+from disnake.user import User
+
 from .base import Interaction, InteractionDataResolved
 
 __all__ = (
@@ -33,9 +34,9 @@ __all__ = (
 MISSING = utils.MISSING
 
 if TYPE_CHECKING:
-    from ..ext.commands import InvokableApplicationCommand
-    from ..state import ConnectionState
-    from ..types.interactions import (
+    from disnake.ext.commands import InvokableApplicationCommand
+    from disnake.state import ConnectionState
+    from disnake.types.interactions import (
         ApplicationCommandInteraction as ApplicationCommandInteractionPayload,
         ApplicationCommandInteractionData as ApplicationCommandInteractionDataPayload,
     )

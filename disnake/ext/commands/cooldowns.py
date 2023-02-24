@@ -15,7 +15,7 @@ from .errors import MaxConcurrencyReached
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ...message import Message
+    from disnake.message import Message
 
 __all__ = (
     "BucketType",

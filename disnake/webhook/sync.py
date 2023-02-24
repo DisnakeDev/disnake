@@ -16,12 +16,19 @@ from errno import ECONNRESET
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Type, Union, overload
 from urllib.parse import quote as urlquote
 
-from .. import utils
-from ..channel import PartialMessageable
-from ..errors import DiscordServerError, Forbidden, HTTPException, NotFound, WebhookTokenMissing
-from ..flags import MessageFlags
-from ..http import Route
-from ..message import Message
+from disnake import utils
+from disnake.channel import PartialMessageable
+from disnake.errors import (
+    DiscordServerError,
+    Forbidden,
+    HTTPException,
+    NotFound,
+    WebhookTokenMissing,
+)
+from disnake.flags import MessageFlags
+from disnake.http import Route
+from disnake.message import Message
+
 from .async_ import BaseWebhook, _WebhookState, handle_message_parameters
 
 __all__ = (
@@ -34,12 +41,12 @@ _log = logging.getLogger(__name__)
 if TYPE_CHECKING:
     from types import TracebackType
 
-    from ..abc import Snowflake
-    from ..embeds import Embed
-    from ..file import File
-    from ..mentions import AllowedMentions
-    from ..message import Attachment
-    from ..types.webhook import Webhook as WebhookPayload
+    from disnake.abc import Snowflake
+    from disnake.embeds import Embed
+    from disnake.file import File
+    from disnake.mentions import AllowedMentions
+    from disnake.message import Attachment
+    from disnake.types.webhook import Webhook as WebhookPayload
 
     try:
         from requests import Response, Session

@@ -18,10 +18,10 @@ from typing import (
     overload,
 )
 
-from .. import utils
-from ..app_commands import OptionChoice
-from ..channel import PartialMessageable, _threaded_guild_channel_factory
-from ..enums import (
+from disnake import utils
+from disnake.app_commands import OptionChoice
+from disnake.channel import PartialMessageable, _threaded_guild_channel_factory
+from disnake.enums import (
     ChannelType,
     ComponentType,
     InteractionResponseType,
@@ -31,7 +31,7 @@ from ..enums import (
     WebhookType,
     try_enum,
 )
-from ..errors import (
+from disnake.errors import (
     HTTPException,
     InteractionNotEditable,
     InteractionNotResponded,
@@ -40,17 +40,17 @@ from ..errors import (
     ModalChainNotSupported,
     NotFound,
 )
-from ..flags import MessageFlags
-from ..guild import Guild
-from ..i18n import Localized
-from ..member import Member
-from ..message import Attachment, Message
-from ..object import Object
-from ..permissions import Permissions
-from ..role import Role
-from ..ui.action_row import components_to_dict
-from ..user import ClientUser, User
-from ..webhook.async_ import Webhook, async_context, handle_message_parameters
+from disnake.flags import MessageFlags
+from disnake.guild import Guild
+from disnake.i18n import Localized
+from disnake.member import Member
+from disnake.message import Attachment, Message
+from disnake.object import Object
+from disnake.permissions import Permissions
+from disnake.role import Role
+from disnake.ui.action_row import components_to_dict
+from disnake.user import ClientUser, User
+from disnake.webhook.async_ import Webhook, async_context, handle_message_parameters
 
 __all__ = (
     "Interaction",
@@ -64,26 +64,27 @@ if TYPE_CHECKING:
 
     from aiohttp import ClientSession
 
-    from ..abc import MessageableChannel
-    from ..app_commands import Choices
-    from ..client import Client
-    from ..embeds import Embed
-    from ..ext.commands import AutoShardedBot, Bot
-    from ..file import File
-    from ..guild import GuildChannel, GuildMessageable
-    from ..mentions import AllowedMentions
-    from ..state import ConnectionState
-    from ..threads import Thread
-    from ..types.components import Modal as ModalPayload
-    from ..types.interactions import (
+    from disnake.abc import MessageableChannel
+    from disnake.app_commands import Choices
+    from disnake.client import Client
+    from disnake.embeds import Embed
+    from disnake.ext.commands import AutoShardedBot, Bot
+    from disnake.file import File
+    from disnake.guild import GuildChannel, GuildMessageable
+    from disnake.mentions import AllowedMentions
+    from disnake.state import ConnectionState
+    from disnake.threads import Thread
+    from disnake.types.components import Modal as ModalPayload
+    from disnake.types.interactions import (
         ApplicationCommandOptionChoice as ApplicationCommandOptionChoicePayload,
         Interaction as InteractionPayload,
         InteractionDataResolved as InteractionDataResolvedPayload,
     )
-    from ..types.snowflake import Snowflake
-    from ..ui.action_row import Components, MessageUIComponent, ModalUIComponent
-    from ..ui.modal import Modal
-    from ..ui.view import View
+    from disnake.types.snowflake import Snowflake
+    from disnake.ui.action_row import Components, MessageUIComponent, ModalUIComponent
+    from disnake.ui.modal import Modal
+    from disnake.ui.view import View
+
     from .message import MessageInteraction
     from .modal import ModalInteraction
 

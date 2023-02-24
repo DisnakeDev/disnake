@@ -19,7 +19,7 @@ from typing import (
     overload,
 )
 
-from ..components import (
+from disnake.components import (
     ActionRow as ActionRowComponent,
     Button as ButtonComponent,
     ChannelSelectMenu as ChannelSelectComponent,
@@ -29,8 +29,9 @@ from ..components import (
     StringSelectMenu as StringSelectComponent,
     UserSelectMenu as UserSelectComponent,
 )
-from ..enums import ButtonStyle, ChannelType, ComponentType, TextInputStyle
-from ..utils import MISSING, SequenceProxy, assert_never
+from disnake.enums import ButtonStyle, ChannelType, ComponentType, TextInputStyle
+from disnake.utils import MISSING, SequenceProxy, assert_never
+
 from .button import Button
 from .item import WrappedComponent
 from .select import ChannelSelect, MentionableSelect, RoleSelect, StringSelect, UserSelect
@@ -40,10 +41,10 @@ from .text_input import TextInput
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ..emoji import Emoji
-    from ..message import Message
-    from ..partial_emoji import PartialEmoji
-    from ..types.components import ActionRow as ActionRowPayload
+    from disnake.emoji import Emoji
+    from disnake.message import Message
+    from disnake.partial_emoji import PartialEmoji
+    from disnake.types.components import ActionRow as ActionRowPayload
 
 __all__ = (
     "ActionRow",

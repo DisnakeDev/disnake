@@ -16,17 +16,18 @@ from typing import (
     overload,
 )
 
-from ...components import SelectOption, StringSelectMenu
-from ...enums import ComponentType
-from ...utils import MISSING
+from disnake.components import SelectOption, StringSelectMenu
+from disnake.enums import ComponentType
+from disnake.utils import MISSING
+
 from .base import BaseSelect, P, V_co, _create_decorator
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ...emoji import Emoji
-    from ...partial_emoji import PartialEmoji
-    from ..item import DecoratedItem, ItemCallbackType, Object
+    from disnake.emoji import Emoji
+    from disnake.partial_emoji import PartialEmoji
+    from disnake.ui.item import DecoratedItem, ItemCallbackType, Object
 
 
 __all__ = (

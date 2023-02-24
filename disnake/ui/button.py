@@ -17,10 +17,11 @@ from typing import (
     overload,
 )
 
-from ..components import Button as ButtonComponent
-from ..enums import ButtonStyle, ComponentType
-from ..partial_emoji import PartialEmoji, _EmojiTag
-from ..utils import MISSING
+from disnake.components import Button as ButtonComponent
+from disnake.enums import ButtonStyle, ComponentType
+from disnake.partial_emoji import PartialEmoji, _EmojiTag
+from disnake.utils import MISSING
+
 from .item import DecoratedItem, Item, Object
 
 __all__ = (
@@ -31,7 +32,8 @@ __all__ = (
 if TYPE_CHECKING:
     from typing_extensions import ParamSpec, Self
 
-    from ..emoji import Emoji
+    from disnake.emoji import Emoji
+
     from .item import ItemCallbackType
     from .view import View
 

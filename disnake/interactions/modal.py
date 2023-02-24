@@ -4,14 +4,15 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional
 
-from ..enums import ComponentType
-from ..message import Message
-from ..utils import cached_slot_property
+from disnake.enums import ComponentType
+from disnake.message import Message
+from disnake.utils import cached_slot_property
+
 from .base import Interaction
 
 if TYPE_CHECKING:
-    from ..state import ConnectionState
-    from ..types.interactions import (
+    from disnake.state import ConnectionState
+    from disnake.types.interactions import (
         ModalInteraction as ModalInteractionPayload,
         ModalInteractionActionRow as ModalInteractionActionRowPayload,
         ModalInteractionComponentData as ModalInteractionComponentDataPayload,

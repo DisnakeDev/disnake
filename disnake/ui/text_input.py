@@ -4,9 +4,10 @@ from __future__ import annotations
 
 from typing import Optional, Tuple
 
-from ..components import TextInput as TextInputComponent
-from ..enums import ComponentType, TextInputStyle
-from ..utils import MISSING
+from disnake.components import TextInput as TextInputComponent
+from disnake.enums import ComponentType, TextInputStyle
+from disnake.utils import MISSING
+
 from .item import WrappedComponent
 
 __all__ = ("TextInput",)

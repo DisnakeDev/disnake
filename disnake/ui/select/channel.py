@@ -4,16 +4,17 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Callable, List, Optional, Tuple, Type, TypeVar, overload
 
-from ...components import ChannelSelectMenu
-from ...enums import ChannelType, ComponentType
-from ...utils import MISSING
+from disnake.components import ChannelSelectMenu
+from disnake.enums import ChannelType, ComponentType
+from disnake.utils import MISSING
+
 from .base import BaseSelect, P, V_co, _create_decorator
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ...interactions.base import InteractionChannel
-    from ..item import DecoratedItem, ItemCallbackType, Object
+    from disnake.interactions.base import InteractionChannel
+    from disnake.ui.item import DecoratedItem, ItemCallbackType, Object
 
 
 __all__ = (

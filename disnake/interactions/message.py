@@ -4,10 +4,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Union
 
-from ..components import MessageComponent
-from ..enums import ComponentType, try_enum
-from ..message import Message
-from ..utils import cached_slot_property
+from disnake.components import MessageComponent
+from disnake.enums import ComponentType, try_enum
+from disnake.message import Message
+from disnake.utils import cached_slot_property
+
 from .base import Interaction, InteractionDataResolved
 
 __all__ = (
@@ -16,15 +17,16 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
-    from ..member import Member
-    from ..role import Role
-    from ..state import ConnectionState
-    from ..types.interactions import (
+    from disnake.member import Member
+    from disnake.role import Role
+    from disnake.state import ConnectionState
+    from disnake.types.interactions import (
         InteractionDataResolved as InteractionDataResolvedPayload,
         MessageComponentInteractionData as MessageComponentInteractionDataPayload,
         MessageInteraction as MessageInteractionPayload,
     )
-    from ..user import User
+    from disnake.user import User
+
     from .base import InteractionChannel
 
 

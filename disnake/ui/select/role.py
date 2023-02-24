@@ -4,16 +4,17 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Callable, Optional, Type, TypeVar, overload
 
-from ...components import RoleSelectMenu
-from ...enums import ComponentType
-from ...utils import MISSING
+from disnake.components import RoleSelectMenu
+from disnake.enums import ComponentType
+from disnake.utils import MISSING
+
 from .base import BaseSelect, P, V_co, _create_decorator
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ...role import Role
-    from ..item import DecoratedItem, ItemCallbackType, Object
+    from disnake.role import Role
+    from disnake.ui.item import DecoratedItem, ItemCallbackType, Object
 
 
 __all__ = (

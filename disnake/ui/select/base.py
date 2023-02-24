@@ -18,19 +18,19 @@ from typing import (
     get_origin,
 )
 
-from ...components import AnySelectMenu
-from ...enums import ComponentType
-from ...utils import MISSING
-from ..item import DecoratedItem, Item, Object
+from disnake.components import AnySelectMenu
+from disnake.enums import ComponentType
+from disnake.ui.item import DecoratedItem, Item, Object
+from disnake.utils import MISSING
 
 __all__ = ("BaseSelect",)
 
 if TYPE_CHECKING:
     from typing_extensions import ParamSpec, Self
 
-    from ...interactions import MessageInteraction
-    from ..item import ItemCallbackType
-    from ..view import View
+    from disnake.interactions import MessageInteraction
+    from disnake.ui.item import ItemCallbackType
+    from disnake.ui.view import View
 
 else:
     ParamSpec = TypeVar

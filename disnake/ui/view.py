@@ -21,7 +21,7 @@ from typing import (
     Tuple,
 )
 
-from ..components import (
+from disnake.components import (
     ActionRow as ActionRowComponent,
     Button as ButtonComponent,
     ChannelSelectMenu as ChannelSelectComponent,
@@ -32,8 +32,9 @@ from ..components import (
     UserSelectMenu as UserSelectComponent,
     _component_factory,
 )
-from ..enums import ComponentType, try_enum_to_int
-from ..utils import assert_never
+from disnake.enums import ComponentType, try_enum_to_int
+from disnake.utils import assert_never
+
 from .item import Item
 
 __all__ = ("View",)
@@ -42,10 +43,14 @@ __all__ = ("View",)
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ..interactions import MessageInteraction
-    from ..message import Message
-    from ..state import ConnectionState
-    from ..types.components import ActionRow as ActionRowPayload, Component as ComponentPayload
+    from disnake.interactions import MessageInteraction
+    from disnake.message import Message
+    from disnake.state import ConnectionState
+    from disnake.types.components import (
+        ActionRow as ActionRowPayload,
+        Component as ComponentPayload,
+    )
+
     from .item import ItemCallbackType
 
 
