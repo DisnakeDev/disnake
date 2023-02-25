@@ -52,7 +52,7 @@ class TestBot(commands.Bot):
         # fmt: on
 
     def add_cog(self, cog: commands.Cog, *, override: bool = False) -> None:
-        logger.info(f"Loading cog {cog.qualified_name}.")
+        logger.info("Loading cog %s", cog.qualified_name)
         return super().add_cog(cog, override=override)
 
     async def on_command_error(self, ctx: commands.Context, error: commands.CommandError) -> None:
