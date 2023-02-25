@@ -46,24 +46,37 @@ class RoleTags:
         The bot's user ID that manages this role.
     integration_id: Optional[:class:`int`]
         The integration ID that manages the role.
+
+        Roles with this ID matching the guild's ``guild_subscription`` integration
+        are considered subscription roles.
+    subscription_listing_id: Optional[:class:`int`]
+        The ID of this role's subscription listing, if applicable.
+
+        .. versionadded:: 2.9
     """
 
     __slots__ = (
         "bot_id",
         "integration_id",
+        "subscription_listing_id",
         "_premium_subscriber",
         "_guild_connections",
+        "_available_for_purchase",
     )
 
     def __init__(self, data: RoleTagPayload) -> None:
         self.bot_id: Optional[int] = _get_as_snowflake(data, "bot_id")
         self.integration_id: Optional[int] = _get_as_snowflake(data, "integration_id")
-        # NOTE: The API returns "null" for this if it's valid, which corresponds to None.
+        self.subscription_listing_id: Optional[int] = _get_as_snowflake(
+            data, "subscription_listing_id"
+        )
+
+        # NOTE: A value of null/None for this corresponds to True.
+        # If a field is missing, it corresponds to False.
         # This is different from other fields where "null" means "not there".
-        # So in this case, a value of None is the same as True.
-        # Which means we would need a different sentinel.
         self._premium_subscriber: Optional[Any] = data.get("premium_subscriber", MISSING)
         self._guild_connections: Optional[Any] = data.get("guild_connections", MISSING)
+        self._available_for_purchase: Optional[Any] = data.get("available_for_purchase", MISSING)
 
     def is_bot_managed(self) -> bool:
         """Whether the role is associated with a bot.
@@ -71,6 +84,13 @@ class RoleTags:
         :return type: :class:`bool`
         """
         return self.bot_id is not None
+
+    def is_integration(self) -> bool:
+        """Whether the role is managed by an integration.
+
+        :return type: :class:`bool`
+        """
+        return self.integration_id is not None
 
     def is_premium_subscriber(self) -> bool:
         """Whether the role is the premium subscriber, AKA "boost", role for the guild.
@@ -88,17 +108,30 @@ class RoleTags:
         """
         return self._guild_connections is None
 
-    def is_integration(self) -> bool:
-        """Whether the role is managed by an integration.
+    def is_available_for_purchase(self) -> bool:
+        """Whether the role is a subscription role and available for purchase.
+
+        .. versionadded:: 2.9
 
         :return type: :class:`bool`
         """
-        return self.integration_id is not None
+        return self._available_for_purchase is None
+
+    def is_subscription(self) -> bool:
+        """Whether the role is associated with a role subscription.
+
+        .. versionadded:: 2.9
+
+        :return type: :class:`bool`
+        """
+        return self.subscription_listing_id is not None
 
     def __repr__(self) -> str:
         return (
             f"<RoleTags bot_id={self.bot_id} integration_id={self.integration_id} "
+            f"subscription_listing_id={self.subscription_listing_id} "
             f"premium_subscriber={self.is_premium_subscriber()} "
+            f"available_for_purchase={self.is_available_for_purchase()} "
             f"linked_role={self.is_linked_role()}>"
         )
 
@@ -293,6 +326,24 @@ class Role(Hashable):
         :return type: :class:`bool`
         """
         return self.tags is not None and self.tags.is_integration()
+
+    def is_available_for_purchase(self) -> bool:
+        """Whether the role is a subscription role and available for purchase.
+
+        .. versionadded:: 2.9
+
+        :return type: :class:`bool`
+        """
+        return self.tags is not None and self.tags.is_available_for_purchase()
+
+    def is_subscription(self) -> bool:
+        """Whether the role is associated with a role subscription.
+
+        .. versionadded:: 2.9
+
+        :return type: :class:`bool`
+        """
+        return self.tags is not None and self.tags.is_subscription()
 
     def is_assignable(self) -> bool:
         """Whether the role is able to be assigned or removed by the bot.
