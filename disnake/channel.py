@@ -553,7 +553,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         :class:`TextChannel`
             The newly created text channel.
         """
-        if news is not MISSING and "COMMUNITY" in self.guild.features:
+        if news is not MISSING:
             # if news is True set the channel_type to News, otherwise if it's False set it to Text
             channel_type = ChannelType.news if news else ChannelType.text
         else:
