@@ -518,7 +518,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             Whether the new channel should be marked as NSFW. If not provided, defaults to this channel's NSFW value.
 
             .. note::
-                If the Guild doesn't have the ``COMMUNITY`` feature enabled this will defaults to this :attr:`TextChannel.type`.
+                If the guild does not have the ``NEWS`` feature enabled this will default to this :attr:`TextChannel.type`.
 
         category: Optional[:class:`abc.Snowflake`]
             The category where the new channel should be grouped. If not provided, defaults to this channel's category.
