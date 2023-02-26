@@ -1004,7 +1004,7 @@ class GuildChannel(ABC):
             # if no category was given don't change the category
             base_attrs["parent_id"] = self.category_id
         base_attrs["name"] = name or self.name
-        channel_type = base_attrs["type"]
+        channel_type = base_attrs.get("type") or self.type.value
         guild_id = self.guild.id
         cls = self.__class__
         data = await self._state.http.create_channel(
