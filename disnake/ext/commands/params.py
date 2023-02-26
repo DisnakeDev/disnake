@@ -152,13 +152,13 @@ def signature(func: Callable) -> inspect.Signature:
     for name, param in signature.parameters.items():
         if isinstance(param.annotation, str):
             param = param.replace(annotation=typehints.get(name, inspect.Parameter.empty))
-        if param.annotation is type(None):  # noqa: E721
+        if param.annotation is type(None):
             param = param.replace(annotation=None)
 
         parameters.append(param)
 
     return_annotation = typehints.get("return", inspect.Parameter.empty)
-    if return_annotation is type(None):  # noqa: E721
+    if return_annotation is type(None):
         return_annotation = None
 
     return signature.replace(parameters=parameters, return_annotation=return_annotation)
@@ -1370,7 +1370,7 @@ def register_injection(
     .. versionadded:: 2.3
 
     .. versionchanged:: 2.6
-        Now returns :class:`disnake.ext.commands.Injection`.
+        Now returns :class:`.Injection`.
 
     .. versionchanged:: 2.6
         Added ``autocompleters`` keyword-only argument.

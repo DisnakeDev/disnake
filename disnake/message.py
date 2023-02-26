@@ -731,7 +731,7 @@ class Message(Hashable):
         This is not stored long term within Discord's servers and is only used ephemerally.
     embeds: List[:class:`Embed`]
         A list of embeds the message has.
-    channel: Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`Thread`, :class:`DMChannel`, :class:`GroupChannel`, :class:`PartialMessageable`]
+    channel: Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`StageChannel`, :class:`Thread`, :class:`DMChannel`, :class:`GroupChannel`, :class:`PartialMessageable`]
         The channel that the message was sent from.
         Could be a :class:`DMChannel` or :class:`GroupChannel` if it's a private message.
     position: Optional[:class:`int`]
@@ -1406,6 +1406,18 @@ class Message(Hashable):
         if self.type is MessageType.interaction_premium_upsell:
             return self.content
 
+        if self.type is MessageType.stage_start:
+            return f"{self.author.name} started {self.content}"
+
+        if self.type is MessageType.stage_end:
+            return f"{self.author.name} ended {self.content}"
+
+        if self.type is MessageType.stage_speaker:
+            return f"{self.author.name} is now a speaker."
+
+        if self.type is MessageType.stage_topic:
+            return f"{self.author.name} changed the Stage topic: {self.content}"
+
         if self.type is MessageType.guild_application_premium_subscription:
             application_name = (
                 self.application["name"]
@@ -2057,6 +2069,7 @@ class PartialMessage(Hashable):
 
     - :meth:`TextChannel.get_partial_message`
     - :meth:`VoiceChannel.get_partial_message`
+    - :meth:`StageChannel.get_partial_message`
     - :meth:`Thread.get_partial_message`
     - :meth:`DMChannel.get_partial_message`
     - :meth:`PartialMessageable.get_partial_message`
@@ -2081,7 +2094,7 @@ class PartialMessage(Hashable):
 
     Attributes
     ----------
-    channel: Union[:class:`TextChannel`, :class:`Thread`, :class:`DMChannel`, :class:`VoiceChannel`, :class:`PartialMessageable`]
+    channel: Union[:class:`TextChannel`, :class:`Thread`, :class:`DMChannel`, :class:`VoiceChannel`, :class:`StageChannel`, :class:`PartialMessageable`]
         The channel associated with this partial message.
     id: :class:`int`
         The message ID.
@@ -2111,9 +2124,10 @@ class PartialMessage(Hashable):
             ChannelType.public_thread,
             ChannelType.private_thread,
             ChannelType.voice,
+            ChannelType.stage_voice,
         ):
             raise TypeError(
-                f"Expected TextChannel, DMChannel, VoiceChannel, Thread, or PartialMessageable "
+                f"Expected TextChannel, VoiceChannel, DMChannel, StageChannel, Thread, or PartialMessageable "
                 f"with a valid type, not {type(channel)!r} (type: {channel.type!r})"
             )
 

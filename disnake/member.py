@@ -885,7 +885,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         if suppress is not MISSING:
             if self.voice is None or self.voice.channel is None:
-                raise Exception("Cannot suppress a member which isn't in a vc")
+                raise Exception("Cannot suppress a member which isn't in a vc")  # noqa: TRY002
 
             voice_state_payload: Dict[str, Any] = {
                 "channel_id": self.voice.channel.id,
@@ -899,9 +899,7 @@ class Member(disnake.abc.Messageable, _UserTag):
                 await http.edit_my_voice_state(guild_id, voice_state_payload)
             else:
                 if not suppress:
-                    voice_state_payload[
-                        "request_to_speak_timestamp"
-                    ] = datetime.datetime.utcnow().isoformat()
+                    voice_state_payload["request_to_speak_timestamp"] = utils.utcnow().isoformat()
                 await http.edit_voice_state(guild_id, self.id, voice_state_payload)
 
         if voice_channel is not MISSING:
@@ -956,11 +954,11 @@ class Member(disnake.abc.Messageable, _UserTag):
             The operation failed.
         """
         if self.voice is None or self.voice.channel is None:
-            raise Exception("Cannot request to speak when not in a vc")
+            raise Exception("Cannot request to speak when not in a vc")  # noqa: TRY002
 
         payload = {
             "channel_id": self.voice.channel.id,
-            "request_to_speak_timestamp": datetime.datetime.utcnow().isoformat(),
+            "request_to_speak_timestamp": utils.utcnow().isoformat(),
         }
 
         if self._state.self_id != self.id:
