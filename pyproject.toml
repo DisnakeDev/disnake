@@ -63,6 +63,9 @@ docs = [
 discord = ["discord-disnake"]
 
 [tool.pdm.dev-dependencies]
+nox = [
+    "nox==2022.11.21",
+]
 tools = [
     "pre-commit~=2.19.0",
     "slotscheck~=0.15.0",
@@ -147,6 +150,10 @@ select = [
     "Q",      # flake8-quotes
     "T20",    # flake8-print
     "PGH",    # pygrep-hooks
+    "PLC",    # pylint convention
+    "PLE",    # pylint error
+    # "PLR",    # pylint refactor
+    "PLW",    # pylint warnings
     "TRY002", "TRY004", # tryceratops
 ]
 ignore = [
@@ -162,6 +169,12 @@ ignore = [
 
     # provide specific codes on type: ignore
     "PGH003",
+
+    # import aliases are fixed by isort
+    "PLC0414",
+
+    # outer loop variables are overwritten by inner assignment target, these are mostly intentional
+    "PLW2901",
 
     # temporary disables, to fix later
     "B904",   # within an except clause raise from error or from none
@@ -266,7 +279,6 @@ include = [
 ]
 ignore = [
     "disnake/ext/mypy_plugin",
-    "noxfile.py",  # this is ignored because nox is not installed in the environment when running pyright
 ]
 
 # this is one of the diagnostics that aren't enabled by default, even in strict mode
