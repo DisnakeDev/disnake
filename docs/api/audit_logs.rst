@@ -467,7 +467,8 @@ AuditLogDiff
         sending another message or creating another thread in the channel.
 
         See also :attr:`TextChannel.slowmode_delay`, :attr:`VoiceChannel.slowmode_delay`,
-        :attr:`ForumChannel.slowmode_delay` or :attr:`Thread.slowmode_delay`.
+        :attr:`StageChannel.slowmode_delay`, :attr:`ForumChannel.slowmode_delay`,
+        or :attr:`Thread.slowmode_delay`.
 
         :type: :class:`int`
 
@@ -502,7 +503,7 @@ AuditLogDiff
 
         The voice channel's user limit.
 
-        See also :attr:`VoiceChannel.user_limit`.
+        See also :attr:`VoiceChannel.user_limit`, or :attr:`StageChannel.user_limit`.
 
         :type: :class:`int`
 
@@ -510,7 +511,7 @@ AuditLogDiff
 
         Whether the channel is marked as "not safe for work".
 
-        See also :attr:`TextChannel.nsfw`, :attr:`VoiceChannel.nsfw` or :attr:`ForumChannel.nsfw`.
+        See also :attr:`TextChannel.nsfw`, :attr:`VoiceChannel.nsfw`, :attr:`StageChannel.nsfw`, or :attr:`ForumChannel.nsfw`.
 
         :type: :class:`bool`
 

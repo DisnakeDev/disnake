@@ -1413,13 +1413,16 @@ This section documents events related to Discord chat messages.
     Called when someone begins typing a message.
 
     The ``channel`` parameter can be a :class:`abc.Messageable` instance, or a :class:`ForumChannel`.
-    If channel is an :class:`abc.Messageable` instance, it could be a :class:`TextChannel`, :class:`VoiceChannel`, :class:`GroupChannel`,
-    or :class:`DMChannel`.
+    If channel is an :class:`abc.Messageable` instance, it could be a :class:`TextChannel`,
+    :class:`VoiceChannel`, :class:`StageChannel`, :class:`GroupChannel`, or :class:`DMChannel`.
 
     .. versionchanged:: 2.5
         ``channel`` may be a type :class:`ForumChannel`
 
-    If the ``channel`` is a :class:`TextChannel`, :class:`ForumChannel`, or :class:`VoiceChannel` then the
+    .. versionchanged:: 2.9
+        ``channel`` may be a type :class:`StageChannel`
+
+    If the ``channel`` is a :class:`TextChannel`, :class:`ForumChannel`, :class:`VoiceChannel`, or :class:`StageChannel` then the
     ``user`` parameter is a :class:`Member`, otherwise it is a :class:`User`.
 
     If the ``channel`` is a :class:`DMChannel` and the user is not found in the internal user/member cache,

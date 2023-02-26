@@ -302,6 +302,26 @@ MessageType
         The system message for an application premium subscription upsell.
 
         .. versionadded:: 2.8
+    .. attribute:: stage_start
+
+        The system message denoting the stage has been started.
+
+        .. versionadded:: 2.9
+    .. attribute:: stage_end
+
+        The system message denoting the stage has ended.
+
+        .. versionadded:: 2.9
+    .. attribute:: stage_speaker
+
+        The system message denoting a user has become a speaker.
+
+        .. versionadded:: 2.9
+    .. attribute:: stage_topic
+
+        The system message denoting the stage topic has been changed.
+
+        .. versionadded:: 2.9
     .. attribute:: guild_application_premium_subscription
 
         The system message denoting that a guild member has subscribed to an application.

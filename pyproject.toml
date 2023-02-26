@@ -138,7 +138,7 @@ select = [
     "S", # flake8-bandit
     "B", # flake8-bugbear
     "C", # flake8-comprehensions
-    # "DTZ", # flake8-datetimez
+    "DTZ", # flake8-datetimez
     # "EM", # flake8-errmsg
     "G", # flake8-logging-format
     # "RET", # flake8-return
