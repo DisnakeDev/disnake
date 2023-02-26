@@ -63,6 +63,9 @@ docs = [
 discord = ["discord-disnake"]
 
 [tool.pdm.dev-dependencies]
+nox = [
+    "nox==2022.11.21",
+]
 tools = [
     "pre-commit~=2.19.0",
     "slotscheck~=0.15.0",
@@ -266,7 +269,6 @@ include = [
 ]
 ignore = [
     "disnake/ext/mypy_plugin",
-    "noxfile.py",  # this is ignored because nox is not installed in the environment when running pyright
 ]
 
 # this is one of the diagnostics that aren't enabled by default, even in strict mode
