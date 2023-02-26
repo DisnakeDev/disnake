@@ -268,7 +268,8 @@ class Permissions(BaseFlags):
     @cached_creation
     def none(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with all
-        permissions set to ``False``."""
+        permissions set to ``False``.
+        """
         return cls(0)
 
     @classmethod
@@ -624,7 +625,8 @@ class Permissions(BaseFlags):
     def manage_channels(self) -> int:
         """:class:`bool`: Returns ``True`` if a user can edit, delete, or create channels in the guild.
 
-        This also corresponds to the "Manage Channel" channel-specific override."""
+        This also corresponds to the "Manage Channel" channel-specific override.
+        """
         return 1 << 4
 
     @flag_value
@@ -671,7 +673,8 @@ class Permissions(BaseFlags):
     @flag_value
     def send_messages(self) -> int:
         """:class:`bool`: Returns ``True`` if a user can send messages from all or specific text channels
-        and create threads in forum channels."""
+        and create threads in forum channels.
+        """
         return 1 << 11
 
     @make_permission_alias("send_messages")

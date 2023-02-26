@@ -1209,7 +1209,8 @@ class InteractionBotBase(CommonBotBase):
 
     def before_slash_command_invoke(self, coro: CFT) -> CFT:
         """Similar to :meth:`Bot.before_invoke` but for slash commands,
-        and it takes an :class:`.ApplicationCommandInteraction` as its only parameter."""
+        and it takes an :class:`.ApplicationCommandInteraction` as its only parameter.
+        """
         if not asyncio.iscoroutinefunction(coro):
             raise TypeError("The pre-invoke hook must be a coroutine.")
 
@@ -1218,7 +1219,8 @@ class InteractionBotBase(CommonBotBase):
 
     def after_slash_command_invoke(self, coro: CFT) -> CFT:
         """Similar to :meth:`Bot.after_invoke` but for slash commands,
-        and it takes an :class:`.ApplicationCommandInteraction` as its only parameter."""
+        and it takes an :class:`.ApplicationCommandInteraction` as its only parameter.
+        """
         if not asyncio.iscoroutinefunction(coro):
             raise TypeError("The post-invoke hook must be a coroutine.")
 

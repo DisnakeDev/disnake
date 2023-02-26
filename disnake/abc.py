@@ -487,7 +487,8 @@ class GuildChannel(ABC):
     @property
     def changed_roles(self) -> List[Role]:
         """List[:class:`.Role`]: Returns a list of roles that have been overridden from
-        their default values in the :attr:`.Guild.roles` attribute."""
+        their default values in the :attr:`.Guild.roles` attribute.
+        """
         ret = []
         g = self.guild
         for overwrite in filter(lambda o: o.is_role(), self._overwrites):

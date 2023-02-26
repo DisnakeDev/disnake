@@ -225,7 +225,8 @@ class AutoModTimeoutAction(AutoModAction):
     @property
     def duration(self) -> int:
         """:class:`int`: The duration (in seconds) for which to timeout
-        the user when the rule is triggered."""
+        the user when the rule is triggered.
+        """
         return self._metadata["duration_seconds"]
 
     def __repr__(self) -> str:
@@ -484,7 +485,8 @@ class AutoModRule:
     @property
     def actions(self) -> List[AutoModAction]:
         """List[Union[:class:`AutoModBlockMessageAction`, :class:`AutoModSendAlertAction`, :class:`AutoModTimeoutAction`, :class:`AutoModAction`]]:
-        The list of actions that will execute if a matching event triggered this rule."""
+        The list of actions that will execute if a matching event triggered this rule.
+        """
         return list(self._actions)  # return a copy
 
     @property
@@ -754,14 +756,16 @@ class AutoModActionExecution:
     def message(self) -> Optional[Message]:
         """Optional[:class:`Message`]: The message that matched, if any.
         Not available if the message was blocked, if the content was not part of a message,
-        or if the message was not found in the message cache."""
+        or if the message was not found in the message cache.
+        """
         return self.guild._state._get_message(self.message_id)
 
     @property
     def alert_message(self) -> Optional[Message]:
         """Optional[:class:`Message`]: The alert message sent as a result of this action, if any.
         Only available if :attr:`action.type <AutoModAction.type>` is :attr:`~AutoModActionType.send_alert_message`
-        and the message was found in the message cache."""
+        and the message was found in the message cache.
+        """
         return self.guild._state._get_message(self.alert_message_id)
 
 

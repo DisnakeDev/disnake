@@ -1176,7 +1176,8 @@ class Message(Hashable):
     @utils.cached_slot_property("_cs_channel_mentions")
     def channel_mentions(self) -> List[GuildChannel]:
         """List[:class:`abc.GuildChannel`]: A list of :class:`abc.GuildChannel` that were mentioned. If the message is in a private message
-        then the list is always empty."""
+        then the list is always empty.
+        """
         if self.guild is None:
             return []
         it = filter(None, map(self.guild.get_channel, self.raw_channel_mentions))

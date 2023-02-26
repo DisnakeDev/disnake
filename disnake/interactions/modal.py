@@ -99,7 +99,8 @@ class ModalInteraction(Interaction):
     @cached_slot_property("_cs_text_values")
     def text_values(self) -> Dict[str, str]:
         """Dict[:class:`str`, :class:`str`]: Returns the text values the user has entered in the modal.
-        This is a dict of the form ``{custom_id: value}``."""
+        This is a dict of the form ``{custom_id: value}``.
+        """
         text_input_type = ComponentType.text_input.value
         return {
             component["custom_id"]: component.get("value") or ""
