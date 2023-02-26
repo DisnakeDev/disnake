@@ -87,8 +87,8 @@ Functions
 Events
 ------
 
-- :func:`on_command_error(ctx, error) <disnake.ext.commands.on_command_error>`
-- :func:`on_command(ctx) <disnake.ext.commands.on_command>`
-- :func:`on_command_completion(ctx) <disnake.ext.commands.on_command_completion>`
+- :func:`on_command_error(ctx, error) <.on_command_error>`
+- :func:`on_command(ctx) <.on_command>`
+- :func:`on_command_completion(ctx) <.on_command_completion>`
 
 Check out the :ref:`related events <related_events_ext_commands_prefixcmds>`!

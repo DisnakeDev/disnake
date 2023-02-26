@@ -15,25 +15,25 @@ Classes
 HelpCommand
 ~~~~~~~~~~~
 
-.. attributetable:: disnake.ext.commands.HelpCommand
+.. attributetable:: HelpCommand
 
-.. autoclass:: disnake.ext.commands.HelpCommand
+.. autoclass:: HelpCommand
     :members:
 
 DefaultHelpCommand
 ~~~~~~~~~~~~~~~~~~
 
-.. attributetable:: disnake.ext.commands.DefaultHelpCommand
+.. attributetable:: DefaultHelpCommand
 
-.. autoclass:: disnake.ext.commands.DefaultHelpCommand
+.. autoclass:: DefaultHelpCommand
     :members:
     :exclude-members: send_bot_help, send_cog_help, send_group_help, send_command_help, prepare_help_command
 
 MinimalHelpCommand
 ~~~~~~~~~~~~~~~~~~
 
-.. attributetable:: disnake.ext.commands.MinimalHelpCommand
+.. attributetable:: MinimalHelpCommand
 
-.. autoclass:: disnake.ext.commands.MinimalHelpCommand
+.. autoclass:: MinimalHelpCommand
     :members:
     :exclude-members: send_bot_help, send_cog_help, send_group_help, send_command_help, prepare_help_command

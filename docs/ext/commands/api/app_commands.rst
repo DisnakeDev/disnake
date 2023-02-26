@@ -189,14 +189,14 @@ Functions
 Events
 ------
 
-- :func:`on_slash_command_error(inter, error) <disnake.ext.commands.on_slash_command_error>`
-- :func:`on_slash_command(inter) <disnake.ext.commands.on_slash_command>`
-- :func:`on_slash_command_completion(inter) <disnake.ext.commands.on_slash_command_completion>`
-- :func:`on_user_command_error(inter, error) <disnake.ext.commands.on_user_command_error>`
-- :func:`on_user_command(inter) <disnake.ext.commands.on_user_command>`
-- :func:`on_user_command_completion(inter) <disnake.ext.commands.on_user_command_completion>`
-- :func:`on_message_command_error(inter, error) <disnake.ext.commands.on_message_command_error>`
-- :func:`on_message_command(inter) <disnake.ext.commands.on_message_command>`
-- :func:`on_message_command_completion(inter) <disnake.ext.commands.on_message_command_completion>`
+- :func:`on_slash_command_error(inter, error) <.on_slash_command_error>`
+- :func:`on_slash_command(inter) <.on_slash_command>`
+- :func:`on_slash_command_completion(inter) <.on_slash_command_completion>`
+- :func:`on_user_command_error(inter, error) <.on_user_command_error>`
+- :func:`on_user_command(inter) <.on_user_command>`
+- :func:`on_user_command_completion(inter) <.on_user_command_completion>`
+- :func:`on_message_command_error(inter, error) <.on_message_command_error>`
+- :func:`on_message_command(inter) <.on_message_command>`
+- :func:`on_message_command_completion(inter) <.on_message_command_completion>`
 
 See all :ref:`related events <related_events_ext_commands_appcmds>`!

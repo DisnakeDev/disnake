@@ -97,7 +97,7 @@ Functions
 
 .. autofunction:: run_converters
 
-.. autofunction:: disnake.ext.commands.converter_method
+.. autofunction:: converter_method
     :decorator:
 
 .. autofunction:: flag

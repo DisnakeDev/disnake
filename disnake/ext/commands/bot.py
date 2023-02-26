@@ -61,7 +61,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
 
         .. versionadded:: 2.1
 
-    command_sync_flags: :class:`.ext.commands.CommandSyncFlags`
+    command_sync_flags: :class:`.CommandSyncFlags`
         The command sync flags for the session. This is a way of
         controlling when and how application commands will be synced with the Discord API.
         If not given, defaults to :func:`CommandSyncFlags.default`.
@@ -335,7 +335,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
 
         .. versionadded:: 2.1
 
-    command_sync_flags: :class:`.ext.commands.CommandSyncFlags`
+    command_sync_flags: :class:`.CommandSyncFlags`
         The command sync flags for the session. This is a way of
         controlling when and how application commands will be synced with the Discord API.
         If not given, defaults to :func:`CommandSyncFlags.default`.

@@ -13,31 +13,31 @@ Classes
 Cog
 ~~~
 
-.. attributetable:: disnake.ext.commands.Cog
+.. attributetable:: Cog
 
-.. autoclass:: disnake.ext.commands.Cog
+.. autoclass:: Cog
     :members:
 
 CogMeta
 ~~~~~~~
 
-.. attributetable:: disnake.ext.commands.CogMeta
+.. attributetable:: CogMeta
 
-.. autoclass:: disnake.ext.commands.CogMeta
+.. autoclass:: CogMeta
     :members:
 
 Paginator
 ~~~~~~~~~
 
-.. attributetable:: disnake.ext.commands.Paginator
+.. attributetable:: Paginator
 
-.. autoclass:: disnake.ext.commands.Paginator
+.. autoclass:: Paginator
     :members:
 
 CommandSyncFlags
 ~~~~~~~~~~~~~~~~~
 
-.. attributetable:: disnake.ext.commands.CommandSyncFlags
+.. attributetable:: CommandSyncFlags
 
-.. autoclass:: disnake.ext.commands.CommandSyncFlags()
+.. autoclass:: CommandSyncFlags()
     :members:

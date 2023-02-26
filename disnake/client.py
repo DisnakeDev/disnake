@@ -1604,7 +1604,7 @@ class Client:
         Parameters
         ----------
         event: Union[:class:`str`, :class:`.Event`]
-            The event name, similar to the :ref:`event reference <discord-api-events>`,
+            The event name, similar to the :ref:`event reference <discord_api_events>`,
             but without the ``on_`` prefix, to wait for. It's recommended
             to use :class:`.Event`.
         check: Optional[Callable[..., :class:`bool`]]
