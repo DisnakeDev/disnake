@@ -2075,11 +2075,14 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         self,
         *,
         name: Optional[str] = None,
+        bitrate: int = MISSING,
+        user_limit: int = MISSING,
         position: int = MISSING,
         category: Optional[Snowflake] = MISSING,
         rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
+        video_quality_mode: VideoQualityMode = MISSING,
+        nsfw: bool = MISSING,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
-        bitrate: int = MISSING,
         reason: Optional[str] = None,
     ) -> StageChannel:
         """|coro|
@@ -2102,17 +2105,23 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         ----------
         name: Optional[:class:`str`]
             The name of the new channel. If not provided, defaults to this channel's name.
+        bitrate: :class:`int`
+            The bitrate of the new channel. If not provided, defaults to this channel's bitrate.
+        user_limit: :class:`int`
+            The user limit of the new channel. If not provided, defaults to this channel's user limit.
         position: :class:`int`
             The position of the new channel. If not provided, defaults to this channel's position.
         category: Optional[:class:`abc.Snowflake`]
             The category where the new channel should be grouped. If not provided, defaults to this channel's category.
         rtc_region: Optional[Union[:class:`str`, :class:`VoiceRegion`]]
             The rtc region of the new channel. If not provided, defaults to this channel's rtc region.
+        video_quality_mode: :class:`VideoQualityMode`
+            The video quality mode of the new channel. If not provided, defaults to this channel's video quality mode.
+        nsfw: :class:`bool`
+            Whether the new channel should be nsfw or not. If not provided, defaults to this channel's NSFW value.
         overwrites: :class:`Mapping`
             A :class:`Mapping` of target (either a role or a member) to :class:`PermissionOverwrite`
             to apply to the channel. If not provided, defaults to this channel's overwrites.
-        bitrate: :class:`int`
-            The bitrate of the new channel. If not provided, defaults to this channel's bitrate.
         reason: Optional[:class:`str`]
             The reason for cloning this channel. Shows up on the audit log.
 
@@ -2152,9 +2161,16 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         return await self._clone_impl(
             {
+                "bitrate": bitrate if bitrate is not MISSING else self.bitrate,
+                "user_limit": user_limit if user_limit is not MISSING else self.user_limit,
                 "position": position if position is not MISSING else self.position,
                 "rtc_region": (str(rtc_region) if rtc_region is not MISSING else self.rtc_region),
-                "bitrate": bitrate if bitrate is not MISSING else self.bitrate,
+                "video_quality_mode": (
+                    int(video_quality_mode)
+                    if video_quality_mode is not MISSING
+                    else int(self.video_quality_mode)
+                ),
+                "nsfw": nsfw if nsfw is not MISSING else self.nsfw,
                 "permission_overwrites": overwrites_payload,
             },
             name=name,
