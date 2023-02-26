@@ -181,7 +181,6 @@ def _xt_to_xe(xe: Optional[float], xt: Optional[float], direction: float = 1) ->
 
 
 class Injection(Generic[P, T_]):
-
     """Represents a slash command injection.
 
     .. versionadded:: 2.3
@@ -281,7 +280,6 @@ class Injection(Generic[P, T_]):
 
 
 class RangeMeta(type):
-
     """Custom Generic implementation for Range"""
 
     @overload
@@ -302,7 +300,6 @@ class RangeMeta(type):
 
 
 class Range(type, metaclass=RangeMeta):
-
     """Type depicting a limited range of allowed values.
 
     See :ref:`param_ranges` for more information.
@@ -373,7 +370,6 @@ class Range(type, metaclass=RangeMeta):
 
 
 class StringMeta(type):
-
     """Custom Generic implementation for String."""
 
     def __getitem__(
@@ -384,7 +380,6 @@ class StringMeta(type):
 
 
 class String(type, metaclass=StringMeta):
-
     """Type depicting a string option with limited length.
 
     See :ref:`string_lengths` for more information.
@@ -416,7 +411,6 @@ class String(type, metaclass=StringMeta):
 
 
 class LargeInt(int):
-
     """Type for large integers in slash commands."""
 
 
@@ -425,7 +419,6 @@ _VERIFY_TYPES: Final[FrozenSet[OptionType]] = frozenset((OptionType.user, Option
 
 
 class ParamInfo:
-
     """A class that basically connects function params with slash command options.
     The instances of this class are not created manually, but via the functional interface instead.
     See :func:`Param`.
@@ -1295,7 +1288,6 @@ def option_enum(
 
 
 class ConverterMethod(classmethod):
-
     """A class to help register a method as a converter method."""
 
     def __set_name__(self, owner: Any, name: str) -> None:

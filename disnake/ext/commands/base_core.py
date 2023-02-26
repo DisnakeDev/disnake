@@ -80,7 +80,6 @@ def wrap_callback(coro):
 
 
 class InvokableApplicationCommand(ABC):
-
     """A base class that implements the protocol for a bot application command.
 
     These are not created manually, instead they are created via the

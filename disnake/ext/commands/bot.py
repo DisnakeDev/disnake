@@ -43,7 +43,6 @@ MISSING: Any = disnake.utils.MISSING
 
 
 class Bot(BotBase, InteractionBotBase, disnake.Client):
-
     """Represents a discord bot.
 
     This class is a subclass of :class:`disnake.Client` and as a result
@@ -266,7 +265,6 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
 
 
 class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
-
     """This is similar to :class:`.Bot` except that it is inherited from
     :class:`disnake.AutoShardedClient` instead.
     """
@@ -319,7 +317,6 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
 
 
 class InteractionBot(InteractionBotBase, disnake.Client):
-
     """Represents a discord bot for application commands only.
 
     This class is a subclass of :class:`disnake.Client` and as a result
@@ -469,7 +466,6 @@ class InteractionBot(InteractionBotBase, disnake.Client):
 
 
 class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
-
     """This is similar to :class:`.InteractionBot` except that it is inherited from
     :class:`disnake.AutoShardedClient` instead.
     """

@@ -42,7 +42,6 @@ if TYPE_CHECKING:
 
 
 class PartialInviteChannel:
-
     """Represents a "partial" invite channel.
 
     This model will be given when the user is not part of the
@@ -133,7 +132,6 @@ class PartialInviteChannel:
 
 
 class PartialInviteGuild:
-
     """Represents a "partial" invite guild.
 
     This model will be given when the user is not part of the
@@ -253,7 +251,6 @@ class PartialInviteGuild:
 
 
 class Invite(Hashable):
-
     """
     Represents a Discord :class:`Guild` or :class:`abc.GuildChannel` invite.
 

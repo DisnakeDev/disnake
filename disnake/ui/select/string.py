@@ -48,7 +48,6 @@ def _parse_select_options(options: SelectOptionInput) -> List[SelectOption]:
 
 
 class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
-
     """Represents a UI string select menu.
 
     This is usually represented as a drop down menu.

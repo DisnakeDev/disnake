@@ -212,7 +212,6 @@ class _CaseInsensitiveDict(dict):
 
 # TODO: ideally, `ContextT` should be bound on the class here as well
 class Command(_BaseCommand, Generic[CogT, P, T]):
-
     """
     A class that implements the protocol for a bot text command.
 
@@ -1156,7 +1155,6 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
 
 class GroupMixin(Generic[CogT]):
-
     """A mixin that implements common functionality for classes that behave
     similar to :class:`.Group` and are allowed to register commands.
 
@@ -1426,7 +1424,6 @@ class GroupMixin(Generic[CogT]):
 
 
 class Group(GroupMixin[CogT], Command[CogT, P, T]):
-
     """A class that implements a grouping protocol for commands to be
     executed as subcommands.
 

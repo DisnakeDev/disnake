@@ -44,7 +44,6 @@ __all__ = (
 
 
 class Paginator:
-
     """A class that aids in paginating code blocks for Discord messages.
 
     .. container:: operations
@@ -245,7 +244,6 @@ class _HelpCommandImpl(Command):
 
 
 class HelpCommand:
-
     """
     The base implementation for help command formatting.
 
@@ -862,7 +860,6 @@ class HelpCommand:
 
 
 class DefaultHelpCommand(HelpCommand):
-
     """The implementation of the default help command.
 
     This inherits from :class:`HelpCommand`.
@@ -1073,7 +1070,6 @@ class DefaultHelpCommand(HelpCommand):
 
 
 class MinimalHelpCommand(HelpCommand):
-
     """An implementation of a help command with minimal output.
 
     This inherits from :class:`HelpCommand`.

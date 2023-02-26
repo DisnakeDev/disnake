@@ -25,7 +25,6 @@ __all__ = (
 
 
 class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, Role]", V_co]):
-
     """Represents a UI mentionable (user/member/role) select menu.
 
     This is usually represented as a drop down menu.

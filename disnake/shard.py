@@ -215,7 +215,6 @@ class Shard:
 
 
 class ShardInfo:
-
     """A class that gives information and control over a specific shard.
 
     You can retrieve this object via :meth:`AutoShardedClient.get_shard`
@@ -296,7 +295,6 @@ class ShardInfo:
 
 
 class AutoShardedClient(Client):
-
     """A client similar to :class:`Client` except it handles the complications
     of sharding for the user into a more manageable and transparent single
     process bot.

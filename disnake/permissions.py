@@ -58,7 +58,6 @@ def cached_creation(func):
 
 
 class Permissions(BaseFlags):
-
     """Wraps up the Discord permission value.
 
     The properties provided are two way. You can set and retrieve individual
@@ -958,7 +957,6 @@ def _augment_from_permissions(cls):
 
 @_augment_from_permissions
 class PermissionOverwrite:
-
     """
     A type that is used to represent a channel specific permission.
 

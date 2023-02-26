@@ -300,7 +300,6 @@ def is_loaded() -> bool:
 
 
 class OpusError(DiscordException):
-
     """An exception that is thrown for libopus related errors.
 
     Attributes
@@ -317,7 +316,6 @@ class OpusError(DiscordException):
 
 
 class OpusNotLoaded(DiscordException):
-
     """An exception that is thrown for when libopus is not loaded."""
 
     pass

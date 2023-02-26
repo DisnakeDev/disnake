@@ -124,7 +124,6 @@ class _GuildLimit(NamedTuple):
 
 
 class Guild(Hashable):
-
     """Represents a Discord guild.
 
     This is referred to as a "server" in the official Discord UI.
@@ -4633,7 +4632,6 @@ PlaceholderID = NewType("PlaceholderID", int)
 
 
 class GuildBuilder:
-
     """
     A guild builder object, created by :func:`Client.guild_builder`.
 

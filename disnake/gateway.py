@@ -92,7 +92,6 @@ __all__ = (
 
 
 class ReconnectWebSocket(Exception):
-
     """Signals to safely reconnect the websocket."""
 
     def __init__(self, shard_id: Optional[int], *, resume: bool = True) -> None:
@@ -102,7 +101,6 @@ class ReconnectWebSocket(Exception):
 
 
 class WebSocketClosure(Exception):
-
     """An exception to make up for the fact that aiohttp doesn't signal closure."""
 
 
@@ -293,7 +291,6 @@ class HeartbeatWebSocket(Protocol):
 
 
 class DiscordWebSocket:
-
     """Implements a WebSocket for Discord's gateway v10.
 
     Attributes
@@ -849,7 +846,6 @@ class DiscordWebSocket:
 
 
 class DiscordVoiceWebSocket:
-
     """Implements the websocket protocol for handling voice connections.
 
     Attributes

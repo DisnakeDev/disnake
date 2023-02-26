@@ -75,7 +75,6 @@ class SleepHandle:
 
 
 class Loop(Generic[LF]):
-
     """A background task helper that abstracts the loop and reconnection logic for you.
 
     The main interface to create this is through :func:`loop`.

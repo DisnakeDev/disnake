@@ -16,7 +16,6 @@ __all__ = ("Object",)
 
 
 class Object(Hashable):
-
     """Represents a generic Discord object.
 
     The purpose of this class is to allow you to create 'miniature'

@@ -20,7 +20,6 @@ __all__ = ("ApplicationRoleConnectionMetadata",)
 
 
 class ApplicationRoleConnectionMetadata:
-
     """Represents the role connection metadata of an application.
 
     See the :ddocs:`API documentation <resources/application-role-connection-metadata#application-role-connection-metadata-object>`

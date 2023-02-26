@@ -24,7 +24,6 @@ __all__ = ("Modal",)
 
 
 class Modal:
-
     """Represents a UI Modal.
 
     .. versionadded:: 2.4

@@ -615,7 +615,6 @@ async_context: ContextVar[AsyncWebhookAdapter] = ContextVar(
 
 
 class PartialWebhookChannel(Hashable):
-
     """Represents a partial channel for webhooks.
 
     These are typically given for channel follower webhooks.
@@ -641,7 +640,6 @@ class PartialWebhookChannel(Hashable):
 
 
 class PartialWebhookGuild(Hashable):
-
     """Represents a partial guild for webhooks.
 
     These are typically given for channel follower webhooks.
@@ -731,7 +729,6 @@ class _WebhookState(Generic[WebhookT]):
 
 
 class WebhookMessage(Message):
-
     """Represents a message sent from your webhook.
 
     This allows you to edit or delete a message sent by your
@@ -1009,7 +1006,6 @@ class BaseWebhook(Hashable):
 
 
 class Webhook(BaseWebhook):
-
     """Represents an asynchronous Discord webhook.
 
     Webhooks are a form to send messages to channels in Discord without a

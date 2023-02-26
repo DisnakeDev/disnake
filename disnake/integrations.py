@@ -33,7 +33,6 @@ if TYPE_CHECKING:
 
 
 class IntegrationAccount:
-
     """Represents an integration account.
 
     .. versionadded:: 1.4
@@ -57,7 +56,6 @@ class IntegrationAccount:
 
 
 class PartialIntegration:
-
     """Represents a partial guild integration.
 
     .. versionadded:: 2.6
@@ -103,7 +101,6 @@ class PartialIntegration:
 
 
 class Integration(PartialIntegration):
-
     """Represents a guild integration.
 
     .. versionadded:: 1.4
@@ -171,7 +168,6 @@ class Integration(PartialIntegration):
 
 
 class StreamIntegration(Integration):
-
     """Represents a stream integration for Twitch or YouTube.
 
     .. versionadded:: 2.0
@@ -316,7 +312,6 @@ class StreamIntegration(Integration):
 
 
 class IntegrationApplication:
-
     """Represents an application for a bot integration.
 
     .. versionadded:: 2.0
@@ -369,7 +364,6 @@ class IntegrationApplication:
 
 
 class BotIntegration(Integration):
-
     """Represents a bot integration on Discord.
 
     .. versionadded:: 2.0

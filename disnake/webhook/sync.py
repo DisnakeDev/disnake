@@ -375,7 +375,6 @@ def _get_webhook_adapter() -> WebhookAdapter:
 
 
 class SyncWebhookMessage(Message):
-
     """Represents a message sent from your webhook.
 
     This allows you to edit or delete a message sent by your
@@ -507,7 +506,6 @@ class SyncWebhookMessage(Message):
 
 
 class SyncWebhook(BaseWebhook):
-
     """Represents a synchronous Discord webhook.
 
     For an asynchronous counterpart, see :class:`Webhook`.

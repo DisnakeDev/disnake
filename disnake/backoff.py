@@ -12,7 +12,6 @@ __all__ = ("ExponentialBackoff",)
 
 
 class ExponentialBackoff(Generic[T]):
-
     """An implementation of the exponential backoff algorithm
 
     Provides a convenient interface to implement an exponential backoff

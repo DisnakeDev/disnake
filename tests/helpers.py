@@ -20,7 +20,6 @@ CallableT = TypeVar("CallableT", bound=Callable)
 
 
 class freeze_time(ContextManager):
-
     """
     Helper class that freezes time at the given datetime by patching `datetime.now`.
     If no datetime is provided, defaults to the current time.

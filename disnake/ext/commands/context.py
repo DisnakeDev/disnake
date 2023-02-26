@@ -42,7 +42,6 @@ else:
 
 
 class Context(disnake.abc.Messageable, Generic[BotT]):
-
     """
     Represents the context in which a command is being invoked under.
 
@@ -379,7 +378,6 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
 
 
 class GuildContext(Context):
-
     """A Context subclass meant for annotation
 
     No runtime behavior is changed but annotations are modified

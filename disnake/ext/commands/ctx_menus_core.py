@@ -31,7 +31,6 @@ __all__ = ("InvokableUserCommand", "InvokableMessageCommand", "user_command", "m
 
 
 class InvokableUserCommand(InvokableApplicationCommand):
-
     """A class that implements the protocol for a bot user command (context menu).
 
     These are not created manually, instead they are created via the
@@ -134,7 +133,6 @@ class InvokableUserCommand(InvokableApplicationCommand):
 
 
 class InvokableMessageCommand(InvokableApplicationCommand):
-
     """A class that implements the protocol for a bot message command (context menu).
 
     These are not created manually, instead they are created via the

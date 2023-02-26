@@ -215,7 +215,6 @@ async def _edit_handler(
 
 
 class Attachment(Hashable):
-
     """Represents an attachment from Discord.
 
     .. container:: operations
@@ -478,7 +477,6 @@ class Attachment(Hashable):
 
 
 class DeletedReferencedMessage:
-
     """A special sentinel type that denotes whether the
     resolved message referenced message had since been deleted.
 
@@ -514,7 +512,6 @@ class DeletedReferencedMessage:
 
 
 class MessageReference:
-
     """Represents a reference to a :class:`~disnake.Message`.
 
     .. versionadded:: 1.5
@@ -638,7 +635,6 @@ class MessageReference:
 
 
 class InteractionReference:
-
     """
     Represents an interaction being referenced in a message.
 
@@ -699,7 +695,6 @@ def flatten_handlers(cls):
 
 @flatten_handlers
 class Message(Hashable):
-
     """
     Represents a message from Discord.
 
@@ -2067,7 +2062,6 @@ class Message(Hashable):
 
 
 class PartialMessage(Hashable):
-
     """Represents a partial message to aid with working messages when only
     a message and channel ID are present.
 

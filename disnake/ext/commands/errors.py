@@ -83,7 +83,6 @@ __all__ = (
 
 
 class CommandError(DiscordException):
-
     """
     The base exception type for all command related errors.
 
@@ -104,7 +103,6 @@ class CommandError(DiscordException):
 
 
 class ConversionError(CommandError):
-
     """Exception raised when a Converter class raises non-CommandError.
 
     This inherits from :exc:`CommandError`.
@@ -124,7 +122,6 @@ class ConversionError(CommandError):
 
 
 class UserInputError(CommandError):
-
     """The base exception type for errors that involve errors
     regarding user input.
 
@@ -135,7 +132,6 @@ class UserInputError(CommandError):
 
 
 class CommandNotFound(CommandError):
-
     """Exception raised when a command is attempted to be invoked
     but no command under that name is found.
 
@@ -149,7 +145,6 @@ class CommandNotFound(CommandError):
 
 
 class MissingRequiredArgument(UserInputError):
-
     """Exception raised when parsing a command and a parameter
     that is required is not encountered.
 
@@ -167,7 +162,6 @@ class MissingRequiredArgument(UserInputError):
 
 
 class TooManyArguments(UserInputError):
-
     """Exception raised when the command was passed too many arguments and its
     :attr:`.Command.ignore_extra` attribute was not set to ``True``.
 
@@ -178,7 +172,6 @@ class TooManyArguments(UserInputError):
 
 
 class BadArgument(UserInputError):
-
     """Exception raised when a parsing or conversion failure is encountered
     on an argument to pass into a command.
 
@@ -189,7 +182,6 @@ class BadArgument(UserInputError):
 
 
 class CheckFailure(CommandError):
-
     """Exception raised when the predicates in :attr:`.Command.checks` have failed.
 
     This inherits from :exc:`CommandError`
@@ -199,7 +191,6 @@ class CheckFailure(CommandError):
 
 
 class CheckAnyFailure(CheckFailure):
-
     """Exception raised when all predicates in :func:`check_any` fail.
 
     This inherits from :exc:`CheckFailure`.
@@ -221,7 +212,6 @@ class CheckAnyFailure(CheckFailure):
 
 
 class PrivateMessageOnly(CheckFailure):
-
     """Exception raised when an operation does not work outside of private
     message contexts.
 
@@ -233,7 +223,6 @@ class PrivateMessageOnly(CheckFailure):
 
 
 class NoPrivateMessage(CheckFailure):
-
     """Exception raised when an operation does not work in private message
     contexts.
 
@@ -245,7 +234,6 @@ class NoPrivateMessage(CheckFailure):
 
 
 class NotOwner(CheckFailure):
-
     """Exception raised when the message author is not the owner of the bot.
 
     This inherits from :exc:`CheckFailure`
@@ -255,7 +243,6 @@ class NotOwner(CheckFailure):
 
 
 class ObjectNotFound(BadArgument):
-
     """Exception raised when the argument provided did not match the format
     of an ID or a mention.
 
@@ -275,7 +262,6 @@ class ObjectNotFound(BadArgument):
 
 
 class MemberNotFound(BadArgument):
-
     """Exception raised when the member provided was not found in the bot's
     cache.
 
@@ -295,7 +281,6 @@ class MemberNotFound(BadArgument):
 
 
 class GuildNotFound(BadArgument):
-
     """Exception raised when the guild provided was not found in the bot's cache.
 
     This inherits from :exc:`BadArgument`
@@ -314,7 +299,6 @@ class GuildNotFound(BadArgument):
 
 
 class UserNotFound(BadArgument):
-
     """Exception raised when the user provided was not found in the bot's
     cache.
 
@@ -334,7 +318,6 @@ class UserNotFound(BadArgument):
 
 
 class MessageNotFound(BadArgument):
-
     """Exception raised when the message provided was not found in the channel.
 
     This inherits from :exc:`BadArgument`
@@ -353,7 +336,6 @@ class MessageNotFound(BadArgument):
 
 
 class ChannelNotReadable(BadArgument):
-
     """Exception raised when the bot does not have permission to read messages
     in the channel.
 
@@ -373,7 +355,6 @@ class ChannelNotReadable(BadArgument):
 
 
 class ChannelNotFound(BadArgument):
-
     """Exception raised when the bot can not find the channel.
 
     This inherits from :exc:`BadArgument`
@@ -392,7 +373,6 @@ class ChannelNotFound(BadArgument):
 
 
 class ThreadNotFound(BadArgument):
-
     """Exception raised when the bot can not find the thread.
 
     This inherits from :exc:`BadArgument`
@@ -411,7 +391,6 @@ class ThreadNotFound(BadArgument):
 
 
 class BadColourArgument(BadArgument):
-
     """Exception raised when the colour is not valid.
 
     This inherits from :exc:`BadArgument`
@@ -433,7 +412,6 @@ BadColorArgument = BadColourArgument
 
 
 class RoleNotFound(BadArgument):
-
     """Exception raised when the bot can not find the role.
 
     This inherits from :exc:`BadArgument`
@@ -452,7 +430,6 @@ class RoleNotFound(BadArgument):
 
 
 class BadInviteArgument(BadArgument):
-
     """Exception raised when the invite is invalid or expired.
 
     This inherits from :exc:`BadArgument`
@@ -466,7 +443,6 @@ class BadInviteArgument(BadArgument):
 
 
 class EmojiNotFound(BadArgument):
-
     """Exception raised when the bot can not find the emoji.
 
     This inherits from :exc:`BadArgument`
@@ -485,7 +461,6 @@ class EmojiNotFound(BadArgument):
 
 
 class PartialEmojiConversionFailure(BadArgument):
-
     """Exception raised when the emoji provided does not match the correct
     format.
 
@@ -505,7 +480,6 @@ class PartialEmojiConversionFailure(BadArgument):
 
 
 class GuildStickerNotFound(BadArgument):
-
     """Exception raised when the bot can not find the sticker.
 
     This inherits from :exc:`BadArgument`
@@ -524,7 +498,6 @@ class GuildStickerNotFound(BadArgument):
 
 
 class GuildScheduledEventNotFound(BadArgument):
-
     """Exception raised when the bot cannot find the scheduled event.
 
     This inherits from :exc:`BadArgument`
@@ -543,7 +516,6 @@ class GuildScheduledEventNotFound(BadArgument):
 
 
 class BadBoolArgument(BadArgument):
-
     """Exception raised when a boolean argument was not convertable.
 
     This inherits from :exc:`BadArgument`
@@ -562,7 +534,6 @@ class BadBoolArgument(BadArgument):
 
 
 class LargeIntConversionFailure(BadArgument):
-
     """Exception raised when a large integer argument was not able to be converted.
 
     This inherits from :exc:`BadArgument`
@@ -581,7 +552,6 @@ class LargeIntConversionFailure(BadArgument):
 
 
 class DisabledCommand(CommandError):
-
     """Exception raised when the command being invoked is disabled.
 
     This inherits from :exc:`CommandError`
@@ -591,7 +561,6 @@ class DisabledCommand(CommandError):
 
 
 class CommandInvokeError(CommandError):
-
     """Exception raised when the command being invoked raised an exception.
 
     This inherits from :exc:`CommandError`
@@ -609,7 +578,6 @@ class CommandInvokeError(CommandError):
 
 
 class CommandOnCooldown(CommandError):
-
     """Exception raised when the command being invoked is on cooldown.
 
     This inherits from :exc:`CommandError`
@@ -633,7 +601,6 @@ class CommandOnCooldown(CommandError):
 
 
 class MaxConcurrencyReached(CommandError):
-
     """Exception raised when the command being invoked has reached its maximum concurrency.
 
     This inherits from :exc:`CommandError`.
@@ -658,7 +625,6 @@ class MaxConcurrencyReached(CommandError):
 
 
 class MissingRole(CheckFailure):
-
     """Exception raised when the command invoker lacks a role to run a command.
 
     This inherits from :exc:`CheckFailure`
@@ -679,7 +645,6 @@ class MissingRole(CheckFailure):
 
 
 class BotMissingRole(CheckFailure):
-
     """Exception raised when the bot's member lacks a role to run a command.
 
     This inherits from :exc:`CheckFailure`
@@ -700,7 +665,6 @@ class BotMissingRole(CheckFailure):
 
 
 class MissingAnyRole(CheckFailure):
-
     """Exception raised when the command invoker lacks any of
     the roles specified to run a command.
 
@@ -726,7 +690,6 @@ class MissingAnyRole(CheckFailure):
 
 
 class BotMissingAnyRole(CheckFailure):
-
     """Exception raised when the bot's member lacks any of
     the roles specified to run a command.
 
@@ -753,7 +716,6 @@ class BotMissingAnyRole(CheckFailure):
 
 
 class NSFWChannelRequired(CheckFailure):
-
     """Exception raised when a channel does not have the required NSFW setting.
 
     This inherits from :exc:`CheckFailure`.
@@ -772,7 +734,6 @@ class NSFWChannelRequired(CheckFailure):
 
 
 class MissingPermissions(CheckFailure):
-
     """Exception raised when the command invoker lacks permissions to run a
     command.
 
@@ -798,7 +759,6 @@ class MissingPermissions(CheckFailure):
 
 
 class BotMissingPermissions(CheckFailure):
-
     """Exception raised when the bot's member lacks permissions to run a
     command.
 
@@ -824,7 +784,6 @@ class BotMissingPermissions(CheckFailure):
 
 
 class BadUnionArgument(UserInputError):
-
     """Exception raised when a :data:`typing.Union` converter fails for all
     its associated types.
 
@@ -862,7 +821,6 @@ class BadUnionArgument(UserInputError):
 
 
 class BadLiteralArgument(UserInputError):
-
     """Exception raised when a :data:`typing.Literal` converter fails for all
     its associated values.
 
@@ -894,7 +852,6 @@ class BadLiteralArgument(UserInputError):
 
 
 class ArgumentParsingError(UserInputError):
-
     """An exception raised when the parser fails to parse a user's input.
 
     This inherits from :exc:`UserInputError`.
@@ -907,7 +864,6 @@ class ArgumentParsingError(UserInputError):
 
 
 class UnexpectedQuoteError(ArgumentParsingError):
-
     """An exception raised when the parser encounters a quote mark inside a non-quoted string.
 
     This inherits from :exc:`ArgumentParsingError`.
@@ -924,7 +880,6 @@ class UnexpectedQuoteError(ArgumentParsingError):
 
 
 class InvalidEndOfQuotedStringError(ArgumentParsingError):
-
     """An exception raised when a space is expected after the closing quote in a string
     but a different character is found.
 
@@ -942,7 +897,6 @@ class InvalidEndOfQuotedStringError(ArgumentParsingError):
 
 
 class ExpectedClosingQuoteError(ArgumentParsingError):
-
     """An exception raised when a quote character is expected but not found.
 
     This inherits from :exc:`ArgumentParsingError`.
@@ -959,7 +913,6 @@ class ExpectedClosingQuoteError(ArgumentParsingError):
 
 
 class ExtensionError(DiscordException):
-
     """Base exception for extension related errors.
 
     This inherits from :exc:`~disnake.DiscordException`.
@@ -979,7 +932,6 @@ class ExtensionError(DiscordException):
 
 
 class ExtensionAlreadyLoaded(ExtensionError):
-
     """An exception raised when an extension has already been loaded.
 
     This inherits from :exc:`ExtensionError`
@@ -990,7 +942,6 @@ class ExtensionAlreadyLoaded(ExtensionError):
 
 
 class ExtensionNotLoaded(ExtensionError):
-
     """An exception raised when an extension was not loaded.
 
     This inherits from :exc:`ExtensionError`
@@ -1001,7 +952,6 @@ class ExtensionNotLoaded(ExtensionError):
 
 
 class NoEntryPointError(ExtensionError):
-
     """An exception raised when an extension does not have a ``setup`` entry point function.
 
     This inherits from :exc:`ExtensionError`
@@ -1012,7 +962,6 @@ class NoEntryPointError(ExtensionError):
 
 
 class ExtensionFailed(ExtensionError):
-
     """An exception raised when an extension failed to load during execution of the module or ``setup`` entry point.
 
     This inherits from :exc:`ExtensionError`
@@ -1033,7 +982,6 @@ class ExtensionFailed(ExtensionError):
 
 
 class ExtensionNotFound(ExtensionError):
-
     """An exception raised when an extension is not found.
 
     This inherits from :exc:`ExtensionError`
@@ -1053,7 +1001,6 @@ class ExtensionNotFound(ExtensionError):
 
 
 class CommandRegistrationError(ClientException):
-
     """An exception raised when the command can't be added
     because the name is already taken by a different command.
 
@@ -1077,7 +1024,6 @@ class CommandRegistrationError(ClientException):
 
 
 class FlagError(BadArgument):
-
     """The base exception type for all flag parsing related errors.
 
     This inherits from :exc:`BadArgument`.
@@ -1089,7 +1035,6 @@ class FlagError(BadArgument):
 
 
 class TooManyFlags(FlagError):
-
     """An exception raised when a flag has received too many values.
 
     This inherits from :exc:`FlagError`.
@@ -1113,7 +1058,6 @@ class TooManyFlags(FlagError):
 
 
 class BadFlagArgument(FlagError):
-
     """An exception raised when a flag failed to convert a value.
 
     This inherits from :exc:`FlagError`
@@ -1137,7 +1081,6 @@ class BadFlagArgument(FlagError):
 
 
 class MissingRequiredFlag(FlagError):
-
     """An exception raised when a required flag was not given.
 
     This inherits from :exc:`FlagError`
@@ -1156,7 +1099,6 @@ class MissingRequiredFlag(FlagError):
 
 
 class MissingFlagArgument(FlagError):
-
     """An exception raised when a flag did not get a value.
 
     This inherits from :exc:`FlagError`

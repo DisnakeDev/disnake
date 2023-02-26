@@ -44,7 +44,6 @@ P = ParamSpec("P")
 
 
 class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
-
     """Represents an abstract UI select menu.
 
     This is usually represented as a drop down menu.

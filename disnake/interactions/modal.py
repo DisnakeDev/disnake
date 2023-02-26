@@ -22,7 +22,6 @@ __all__ = ("ModalInteraction", "ModalInteractionData")
 
 
 class ModalInteraction(Interaction):
-
     """Represents an interaction with a modal.
 
     .. versionadded:: 2.4
@@ -115,7 +114,6 @@ class ModalInteraction(Interaction):
 
 
 class ModalInteractionData(Dict[str, Any]):
-
     """Represents the data of an interaction with a modal.
 
     .. versionadded:: 2.4

@@ -37,7 +37,6 @@ if TYPE_CHECKING:
 
 
 class StickerPack(Hashable):
-
     """Represents a sticker pack.
 
     .. versionadded:: 2.0
@@ -160,7 +159,6 @@ class _StickerTag(Hashable, AssetMixin):
 
 
 class StickerItem(_StickerTag):
-
     """Represents a sticker item.
 
     .. versionadded:: 2.0
@@ -224,7 +222,6 @@ class StickerItem(_StickerTag):
 
 
 class Sticker(_StickerTag):
-
     """Represents a sticker.
 
     .. versionadded:: 1.6
@@ -282,7 +279,6 @@ class Sticker(_StickerTag):
 
 
 class StandardSticker(Sticker):
-
     """Represents a sticker that is found in a standard sticker pack.
 
     .. versionadded:: 2.0
@@ -362,7 +358,6 @@ class StandardSticker(Sticker):
 
 
 class GuildSticker(Sticker):
-
     """Represents a sticker that belongs to a guild.
 
     .. versionadded:: 2.0

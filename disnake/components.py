@@ -76,7 +76,6 @@ ComponentT = TypeVar("ComponentT", bound=NestedComponent)
 
 
 class Component:
-
     """Represents a Discord Bot UI Kit Component.
 
     Currently, the only components supported by Discord are:
@@ -122,7 +121,6 @@ class Component:
 
 
 class ActionRow(Component, Generic[ComponentT]):
-
     """Represents an action row.
 
     This is a component that holds up to 5 children components in a row.
@@ -157,7 +155,6 @@ class ActionRow(Component, Generic[ComponentT]):
 
 
 class Button(Component):
-
     """Represents a button from the Discord Bot UI Kit.
 
     This inherits from :class:`Component`.
@@ -233,7 +230,6 @@ class Button(Component):
 
 
 class BaseSelectMenu(Component):
-
     """Represents an abstract select menu from the Discord Bot UI Kit.
 
     A select menu is functionally the same as a dropdown, however
@@ -301,7 +297,6 @@ class BaseSelectMenu(Component):
 
 
 class StringSelectMenu(BaseSelectMenu):
-
     """Represents a string select menu from the Discord Bot UI Kit.
 
     .. note::
@@ -351,7 +346,6 @@ SelectMenu = StringSelectMenu  # backwards compatibility
 
 
 class UserSelectMenu(BaseSelectMenu):
-
     """Represents a user select menu from the Discord Bot UI Kit.
 
     .. note::
@@ -385,7 +379,6 @@ class UserSelectMenu(BaseSelectMenu):
 
 
 class RoleSelectMenu(BaseSelectMenu):
-
     """Represents a role select menu from the Discord Bot UI Kit.
 
     .. note::
@@ -419,7 +412,6 @@ class RoleSelectMenu(BaseSelectMenu):
 
 
 class MentionableSelectMenu(BaseSelectMenu):
-
     """Represents a mentionable (user/member/role) select menu from the Discord Bot UI Kit.
 
     .. note::
@@ -453,7 +445,6 @@ class MentionableSelectMenu(BaseSelectMenu):
 
 
 class ChannelSelectMenu(BaseSelectMenu):
-
     """Represents a channel select menu from the Discord Bot UI Kit.
 
     .. note::
@@ -501,7 +492,6 @@ class ChannelSelectMenu(BaseSelectMenu):
 
 
 class SelectOption:
-
     """Represents a string select menu's option.
 
     These can be created by users.
@@ -608,7 +598,6 @@ class SelectOption:
 
 
 class TextInput(Component):
-
     """Represents a text input from the Discord Bot UI Kit.
 
     .. versionadded:: 2.4

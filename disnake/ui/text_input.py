@@ -13,7 +13,6 @@ __all__ = ("TextInput",)
 
 
 class TextInput(WrappedComponent):
-
     """Represents a UI text input.
 
     This can only be used in a :class:`~.ui.Modal`.

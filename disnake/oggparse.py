@@ -15,7 +15,6 @@ __all__ = (
 
 
 class OggError(DiscordException):
-
     """An exception that is thrown for Ogg stream parsing errors."""
 
     pass

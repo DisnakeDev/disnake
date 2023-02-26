@@ -835,7 +835,6 @@ class ThreadLayout(Enum):
 
 
 class Event(Enum):
-
     """
     Represents all the events of the library.
 

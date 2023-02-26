@@ -180,7 +180,6 @@ def cached_slot_property(name: str) -> Callable[[Callable[[T], T_co]], CachedSlo
 
 
 class SequenceProxy(Sequence[T_co]):
-
     """Read-only proxy of a Sequence."""
 
     def __init__(self, proxied: Sequence[T_co]) -> None:
@@ -679,7 +678,6 @@ def valid_icon_size(size: int) -> bool:
 
 
 class SnowflakeList(array.array):
-
     """Internal data storage class to efficiently store a list of snowflakes.
 
     This should have the following characteristics:

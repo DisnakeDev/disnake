@@ -138,7 +138,6 @@ def _cleanup_loop(loop: asyncio.AbstractEventLoop) -> None:
 
 
 class SessionStartLimit:
-
     """A class that contains information about the current session start limit,
     at the time when the client connected for the first time.
 
@@ -184,7 +183,6 @@ class SessionStartLimit:
 
 
 class GatewayParams(NamedTuple):
-
     """
     Container type for configuring gateway connections.
 
@@ -205,7 +203,6 @@ class GatewayParams(NamedTuple):
 
 
 class Client:
-
     """
     Represents a client connection that connects to Discord.
     This class is used to interact with the Discord WebSocket and API.

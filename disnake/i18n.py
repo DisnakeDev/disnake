@@ -63,7 +63,6 @@ StringT = TypeVar("StringT", str, Optional[str], covariant=True)
 
 
 class Localized(Generic[StringT]):
-
     """
     A container type used for localized parameters.
 
@@ -178,7 +177,6 @@ Localised = Localized
 
 
 class LocalizationValue:
-
     """
     Container type for (pending) localization data.
 
@@ -250,7 +248,6 @@ class LocalizationValue:
 
 
 class LocalizationProtocol(ABC):
-
     """
     Manages a key-value mapping of localizations.
 
@@ -310,7 +307,6 @@ class LocalizationProtocol(ABC):
 
 
 class LocalizationStore(LocalizationProtocol):
-
     """
     Manages a key-value mapping of localizations using ``.json`` files.
 

@@ -29,7 +29,6 @@ if TYPE_CHECKING:
 
 
 class MessageInteraction(Interaction):
-
     """Represents an interaction with a message component.
 
     Current examples are buttons and dropdowns.
@@ -137,7 +136,6 @@ class MessageInteraction(Interaction):
 
 
 class MessageInteractionData(Dict[str, Any]):
-
     """Represents the data of an interaction with a message component.
 
     .. versionadded:: 2.1

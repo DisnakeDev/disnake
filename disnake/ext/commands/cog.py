@@ -56,7 +56,6 @@ def _cog_special_method(func: FuncT) -> FuncT:
 
 
 class CogMeta(type):
-
     """A metaclass for defining a cog.
 
     Note that you should probably not use this directly. It is exposed
@@ -225,7 +224,6 @@ class CogMeta(type):
 
 
 class Cog(metaclass=CogMeta):
-
     """The base class that all cogs must inherit from.
 
     A cog is a collection of commands, listeners, and optional state to

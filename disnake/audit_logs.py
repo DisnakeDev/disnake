@@ -507,7 +507,6 @@ class _AuditLogProxyAutoModBlockMessage:
 
 
 class AuditLogEntry(Hashable):
-
     """
     Represents an Audit Log entry.
 

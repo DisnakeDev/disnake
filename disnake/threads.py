@@ -52,7 +52,6 @@ if TYPE_CHECKING:
 
 
 class Thread(Messageable, Hashable):
-
     """Represents a Discord thread.
 
     .. container:: operations
@@ -995,7 +994,6 @@ class Thread(Messageable, Hashable):
 
 
 class ThreadMember(Hashable):
-
     """Represents a Discord thread member.
 
     .. container:: operations
@@ -1070,7 +1068,6 @@ class ThreadMember(Hashable):
 
 
 class ForumTag(Hashable):
-
     """
     Represents a tag for threads in forum channels.
 
