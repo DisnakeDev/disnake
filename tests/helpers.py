@@ -29,7 +29,7 @@ class freeze_time(ContextManager):
     # i know `freezegun` exists, but it's rather complex and does much more than
     # we really need here, and I'm unsure if it would interfere with `looptime`
 
-    def __init__(self, dt: Optional[datetime.datetime] = None):
+    def __init__(self, dt: Optional[datetime.datetime] = None) -> None:
         dt = dt or datetime.datetime.now(datetime.timezone.utc)
         assert dt.tzinfo
 

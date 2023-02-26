@@ -4719,7 +4719,7 @@ class GuildBuilder:
         The settings to use with the system channel.
     """
 
-    def __init__(self, *, state: ConnectionState, name: str):
+    def __init__(self, *, state: ConnectionState, name: str) -> None:
         self._state = state
         self.name: str = name
 

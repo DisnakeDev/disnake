@@ -8,7 +8,7 @@ from disnake.ext import commands
 
 
 class Misc(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot) -> None:
         self.bot: commands.Bot = bot
 
     def _get_file(self, description: str) -> disnake.File:
@@ -48,5 +48,5 @@ class Misc(commands.Cog):
         await inter.response.send_message(".", view=view)
 
 
-def setup(bot):
+def setup(bot) -> None:
     bot.add_cog(Misc(bot))

@@ -14,7 +14,7 @@ logging.basicConfig(
 )
 
 
-def _log_to_file():
+def _log_to_file() -> None:
     log_format = logging.Formatter(_LOG_FORMAT)
 
     # Set up file logging

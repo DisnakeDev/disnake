@@ -10,7 +10,7 @@ from disnake.ext import commands
 
 
 class Localizations(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot) -> None:
         self.bot: commands.Bot = bot
 
     @commands.slash_command()
@@ -80,5 +80,5 @@ class Localizations(commands.Cog):
         await inter.response.send_message(msg.content[::-1])
 
 
-def setup(bot):
+def setup(bot) -> None:
     bot.add_cog(Localizations(bot))
