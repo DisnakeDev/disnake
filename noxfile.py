@@ -105,13 +105,7 @@ def autotyping(session: nox.Session):
     base_command = ["python", "-m", "libcst.tool", "codemod", "autotyping.AutotypeCommand"]
     commands = {
         "disnake": [
-            "--safe",
-            "--bool-param",
-            "--int-param",
-            "--float-param",
-            "--str-param",
-            "--bytes-param",
-            "--annotate-imprecise-magics",
+            "--aggressive",
         ],
         "examples": [
             "--scalar-return",

@@ -120,7 +120,7 @@ class _AsyncIterator(AsyncIterator[T]):
 
 
 class _ChunkedAsyncIterator(_AsyncIterator[List[T]]):
-    def __init__(self, iterator, max_size: int) -> None:
+    def __init__(self, iterator: _AsyncIterator[T], max_size: int) -> None:
         self.iterator = iterator
         self.max_size = max_size
 
