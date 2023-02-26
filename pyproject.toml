@@ -65,7 +65,6 @@ discord = ["discord-disnake"]
 [tool.pdm.dev-dependencies]
 tools = [
     "pre-commit~=2.19.0",
-    "taskipy~=1.10.1",
     "slotscheck~=0.15.0",
     "python-dotenv~=0.20.0",
     "towncrier==22.12.0",
