@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""An example using subcommand groups and subcommands.
-"""
+"""An example using subcommand groups and subcommands."""
 
 import os
 

@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""Shhhh! It's a secret.
-"""
+"""Shhhh! It's a secret."""
 
 import os
 from typing import Union

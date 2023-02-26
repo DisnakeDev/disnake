@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""An example on how to set up localized application commands.
-"""
+"""An example on how to set up localized application commands."""
 
 import os
 from typing import Any
