@@ -2,20 +2,21 @@ Implement new cloned attributes on the :func:`clone` method and adds these attri
 
     - :class:`TextChannel`:
         The :meth:`TextChannel.clone` will now clone :attr:`TextChannel.name`, :attr:`TextChannel.topic`, :attr:`TextChannel.position`, :attr:`TextChannel.nsfw`,
-        :attr:`TextChannel.category`, :attr:`TextChannel.slowmode_delay`, :attr:`TextChannel.type`, :attr:`TextChannel.default_auto_archive_duration` into the newly-cloned TextChannel.
+        :attr:`TextChannel.category`, :attr:`TextChannel.slowmode_delay`, :attr:`TextChannel.type`, :attr:`TextChannel.default_auto_archive_duration`,
+        :attr:`TextChannel.default_thread_slowmode_delay`, :attr:`TextChannel.overwrites` into the newly-cloned TextChannel.
 
     - :class:`VoiceChannel`:
         The :meth:`VoiceChannel.clone` will now clone :attr:`VoiceChannel.name`, :attr:`VoiceChannel.bitrate`, :attr:`VoiceChannel.user_limit`, :attr:`VoiceChannel.position`, :attr:`VoiceChannel.category`,
-        :attr:`VoiceChannel.rtc_region`, :attr:`VoiceChannel.video_quality_mode`, :attr:`VoiceChannel.nsfw`, :attr:`VoiceChannel.slowmode_delay` into the newly-cloned VoiceChannel.
+        :attr:`VoiceChannel.rtc_region`, :attr:`VoiceChannel.video_quality_mode`, :attr:`VoiceChannel.nsfw`, :attr:`VoiceChannel.slowmode_delay`, :attr:`VoiceChannel.overwrites` into the newly-cloned VoiceChannel.
 
     - :class:`CategoryChannel`:
-        The :meth:`CategoryChannel.clone` will now clone :attr:`CategoryChannel.name`, :attr:`CategoryChannel.position` into the newly-cloned CategoryChannel.
+        The :meth:`CategoryChannel.clone` will now clone :attr:`CategoryChannel.name`, :attr:`CategoryChannel.position`, :attr:`CategoryChannel.overwrites` into the newly-cloned CategoryChannel.
 
     - :class:`StageChannel`:
         The :meth:`StageChannel.clone` will now clone :attr:`StageChannel.name`, :attr:`StageChannel.position`, :attr:`StageChannel.category`, :attr:`StageChannel.rtc_region`,
-        :attr:`StageChannel.bitrate` into the newly-cloned StageChannel.
+        :attr:`StageChannel.bitrate`, :attr:`StageChannel.overwrites` into the newly-cloned StageChannel.
 
     - :class:`ForumChannel`:
         The :meth:`ForumChannel.clone` will now clone :attr:`ForumChannel.name`, :attr:`ForumChannel.topic`, :attr:`ForumChannel.position`, :attr:`ForumChannel.nsfw`, :attr:`ForumChannel.category`,
         :attr:`ForumChannel.slowmode_delay`, :attr:`ForumChannel.default_auto_archive_duration`, :attr:`ForumChannel.default_thread_slowmode_delay`, :attr:`ForumChannel.available_tags`,
-        :attr:`ForumChannel.default_reaction`, :attr:`ForumChannel.default_sort_order` into the newly-cloned ForumChannel.
+        :attr:`ForumChannel.default_reaction`, :attr:`ForumChannel.default_sort_order`, :attr:`ForumChannel.overwrites` into the newly-cloned ForumChannel.
