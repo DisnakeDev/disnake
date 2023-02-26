@@ -1001,7 +1001,7 @@ class GuildChannel(ABC):
         if category is not MISSING:
             base_attrs["parent_id"] = category.id if category else None
         else:
-            # if no category was given don't chhange the category
+            # if no category was given don't change the category
             base_attrs["parent_id"] = self.category_id
         base_attrs["name"] = name or self.name
         channel_type = base_attrs["type"]
