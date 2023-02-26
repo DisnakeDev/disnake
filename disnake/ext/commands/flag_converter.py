@@ -51,7 +51,7 @@ if TYPE_CHECKING:
 class Flag:
     """Represents a flag parameter for :class:`FlagConverter`.
 
-    The :func:`~disnake.ext.commands.flag` function helps
+    The :func:`.flag` function helps
     create these flag objects, but it is not necessary to
     do so. These cannot be constructed manually.
 

@@ -559,7 +559,7 @@ class Cog(metaclass=CogMeta):
 
     @_cog_special_method
     def cog_check(self, ctx: Context) -> bool:
-        """A special method that registers as a :func:`~.ext.commands.check`
+        """A special method that registers as a :func:`~.check`
         for every text command and subcommand in this cog.
 
         This is for text commands only, and doesn't apply to application commands.
@@ -571,7 +571,7 @@ class Cog(metaclass=CogMeta):
 
     @_cog_special_method
     def cog_slash_command_check(self, inter: ApplicationCommandInteraction) -> bool:
-        """A special method that registers as a :func:`~.ext.commands.check`
+        """A special method that registers as a :func:`~.check`
         for every slash command and subcommand in this cog.
 
         This function **can** be a coroutine and must take a sole parameter,
