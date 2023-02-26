@@ -407,7 +407,7 @@ def test_get_slots():
 @pytest.mark.parametrize(("delta", "expected"), [(7, 7), (-100, 0)])
 @helpers.freeze_time()
 def test_compute_timedelta(tz, delta, expected):
-    dt = datetime.datetime.now()
+    dt = datetime.datetime.now()  # noqa: DTZ005
     if tz is not utils.MISSING:
         dt = dt.astimezone(tz)
     assert utils.compute_timedelta(dt + timedelta(seconds=delta)) == expected
@@ -793,7 +793,7 @@ def test_resolve_annotation_literal():
     with pytest.raises(
         TypeError, match=r"Literal arguments must be of type str, int, bool, or NoneType."
     ):
-        utils.resolve_annotation(Literal[datetime.datetime.now(), 3], globals(), locals(), {})  # type: ignore
+        utils.resolve_annotation(Literal[timezone.utc, 3], globals(), locals(), {})  # type: ignore
 
 
 @pytest.mark.parametrize(

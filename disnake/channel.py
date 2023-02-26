@@ -1504,7 +1504,13 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             denied = Permissions.voice()
             # voice channels also deny all text related permissions
             denied.value |= Permissions.text().value
-            denied.update(manage_channels=True, manage_roles=True)
+
+            denied.update(
+                manage_channels=True,
+                manage_roles=True,
+                manage_events=True,
+                manage_webhooks=True,
+            )
             base.value &= ~denied.value
         return base
 
@@ -1588,13 +1594,13 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         Parameters
         ----------
         name: :class:`str`
-            The new channel's name.
+            The channel's new name.
         bitrate: :class:`int`
-            The new channel's bitrate.
+            The channel's new bitrate.
         user_limit: :class:`int`
-            The new channel's user limit.
+            The channel's new user limit.
         position: :class:`int`
-            The new channel's position.
+            The channel's new position.
         sync_permissions: :class:`bool`
             Whether to sync permissions with the channel's new or pre-existing
             category. Defaults to ``False``.
@@ -1902,7 +1908,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         return Webhook.from_state(data, state=self._state)
 
 
-class StageChannel(VocalGuildChannel):
+class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
     """Represents a Discord guild stage channel.
 
     .. versionadded:: 1.7
@@ -1955,9 +1961,36 @@ class StageChannel(VocalGuildChannel):
         The camera video quality for the stage channel's participants.
 
         .. versionadded:: 2.0
+    nsfw: :class:`bool`
+        Whether the channel is marked as "not safe for work".
+
+        .. note::
+
+            To check if the channel or the guild of that channel are marked as NSFW, consider :meth:`is_nsfw` instead.
+
+        .. versionadded:: 2.9
+
+    slowmode_delay: :class:`int`
+        The number of seconds a member must wait between sending messages
+        in this channel. A value of `0` denotes that it is disabled.
+        Bots, and users with :attr:`~Permissions.manage_channels` or
+        :attr:`~Permissions.manage_messages`, bypass slowmode.
+
+        .. versionadded:: 2.9
+
+    last_message_id: Optional[:class:`int`]
+        The last message ID of the message sent to this channel. It may
+        *not* point to an existing or valid message.
+
+        .. versionadded:: 2.9
     """
 
-    __slots__ = ("topic",)
+    __slots__ = (
+        "topic",
+        "nsfw",
+        "slowmode_delay",
+        "last_message_id",
+    )
 
     def __repr__(self) -> str:
         attrs = (
@@ -1970,6 +2003,7 @@ class StageChannel(VocalGuildChannel):
             ("video_quality_mode", self.video_quality_mode),
             ("user_limit", self.user_limit),
             ("category_id", self.category_id),
+            ("nsfw", self.nsfw),
             ("flags", self.flags),
         )
         joined = " ".join(f"{k!s}={v!r}" for k, v in attrs)
@@ -1978,6 +2012,12 @@ class StageChannel(VocalGuildChannel):
     def _update(self, guild: Guild, data: StageChannelPayload) -> None:
         super()._update(guild, data)
         self.topic: Optional[str] = data.get("topic")
+        self.nsfw: bool = data.get("nsfw", False)
+        self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
+        self.last_message_id: Optional[int] = utils._get_as_snowflake(data, "last_message_id")
+
+    async def _get_channel(self):
+        return self
 
     @property
     def requesting_to_speak(self) -> List[Member]:
@@ -2122,6 +2162,60 @@ class StageChannel(VocalGuildChannel):
             reason=reason,
         )
 
+    def is_nsfw(self) -> bool:
+        """Whether the channel is marked as NSFW.
+
+        .. versionadded:: 2.9
+
+        :return type: :class:`bool`
+        """
+        return self.nsfw
+
+    @property
+    def last_message(self) -> Optional[Message]:
+        """Gets the last message in this channel from the cache.
+
+        The message might not be valid or point to an existing message.
+
+        .. admonition:: Reliable Fetching
+            :class: helpful
+
+            For a slightly more reliable method of fetching the
+            last message, consider using either :meth:`history`
+            or :meth:`fetch_message` with the :attr:`last_message_id`
+            attribute.
+
+        .. versionadded:: 2.9
+
+        Returns
+        -------
+        Optional[:class:`Message`]
+            The last message in this channel or ``None`` if not found.
+        """
+        return self._state._get_message(self.last_message_id) if self.last_message_id else None
+
+    def get_partial_message(self, message_id: int, /) -> PartialMessage:
+        """Creates a :class:`PartialMessage` from the given message ID.
+
+        This is useful if you want to work with a message and only have its ID without
+        doing an unnecessary API call.
+
+        .. versionadded:: 2.9
+
+        Parameters
+        ----------
+        message_id: :class:`int`
+            The message ID to create a partial message for.
+
+        Returns
+        -------
+        :class:`PartialMessage`
+            The partial message object.
+        """
+        from .message import PartialMessage
+
+        return PartialMessage(channel=self, id=message_id)
+
     @property
     def instance(self) -> Optional[StageInstance]:
         """Optional[:class:`StageInstance`]: The running stage instance of the stage channel.
@@ -2141,10 +2235,17 @@ class StageChannel(VocalGuildChannel):
         base = super().permissions_for(obj, ignore_timeout=ignore_timeout)
 
         # voice channels cannot be edited by people who can't connect to them
-        # It also implicitly denies all other voice perms
+        # It also implicitly denies all other channel permissions.
         if not base.connect:
             denied = Permissions.voice()
-            denied.update(manage_channels=True, manage_roles=True)
+            denied.value |= Permissions.text().value
+            denied.value |= Permissions.stage().value
+            denied.update(
+                manage_channels=True,
+                manage_roles=True,
+                manage_events=True,
+                manage_webhooks=True,
+            )
             base.value &= ~denied.value
         return base
 
@@ -2267,13 +2368,16 @@ class StageChannel(VocalGuildChannel):
         self,
         *,
         name: str = ...,
+        bitrate: int = ...,
+        user_limit: int = ...,
         position: int = ...,
         sync_permissions: bool = ...,
         category: Optional[Snowflake] = ...,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
         rtc_region: Optional[Union[str, VoiceRegion]] = ...,
         video_quality_mode: VideoQualityMode = ...,
-        bitrate: int = ...,
+        nsfw: bool = ...,
+        slowmode_delay: Optional[int] = ...,
         flags: ChannelFlags = ...,
         reason: Optional[str] = ...,
     ) -> StageChannel:
@@ -2283,13 +2387,16 @@ class StageChannel(VocalGuildChannel):
         self,
         *,
         name: str = MISSING,
+        bitrate: int = MISSING,
+        user_limit: int = MISSING,
         position: int = MISSING,
         sync_permissions: bool = MISSING,
         category: Optional[Snowflake] = MISSING,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
         rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
-        bitrate: int = MISSING,
+        nsfw: bool = MISSING,
+        slowmode_delay: Optional[int] = MISSING,
         flags: ChannelFlags = MISSING,
         reason: Optional[str] = None,
         **kwargs: Never,
@@ -2310,12 +2417,26 @@ class StageChannel(VocalGuildChannel):
         .. versionchanged:: 2.6
             Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
 
+        .. versionchanged:: 2.9
+            The ``user_limit``, ``nsfw``, and ``slowmode_delay``
+            keyword-only parameters were added.
+
         Parameters
         ----------
         name: :class:`str`
-            The new channel's name.
+            The channel's new name.
+        bitrate: :class:`int`
+            The channel's new bitrate.
+
+            .. versionadded:: 2.6
+
+        user_limit: :class:`int`
+            The channel's new user limit.
+
+            .. versionadded:: 2.9
+
         position: :class:`int`
-            The new channel's position.
+            The channel's new position.
         sync_permissions: :class:`bool`
             Whether to sync permissions with the channel's new or pre-existing
             category. Defaults to ``False``.
@@ -2331,12 +2452,18 @@ class StageChannel(VocalGuildChannel):
         video_quality_mode: :class:`VideoQualityMode`
             The camera video quality for the stage channel's participants.
 
-            .. versionadded:: 2.0
+            .. versionadded:: 2.9
 
-        bitrate: :class:`int`
-            The new channel's bitrate.
+        nsfw: :class:`bool`
+            Whether to mark the channel as NSFW.
 
-            .. versionadded:: 2.6
+            .. versionadded:: 2.9
+
+        slowmode_delay: Optional[:class:`int`]
+            Specifies the slowmode rate limit for users in this channel, in seconds.
+            A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
+
+            .. versionadded:: 2.9
 
         flags: :class:`ChannelFlags`
             The new flags to set for this channel. This will overwrite any existing flags set on this channel.
@@ -2365,20 +2492,254 @@ class StageChannel(VocalGuildChannel):
         """
         payload = await self._edit(
             name=name,
+            bitrate=bitrate,
             position=position,
+            user_limit=user_limit,
             sync_permissions=sync_permissions,
             category=category,
             overwrites=overwrites,
             rtc_region=rtc_region,
             video_quality_mode=video_quality_mode,
-            bitrate=bitrate,
+            nsfw=nsfw,
             flags=flags,
+            slowmode_delay=slowmode_delay,
             reason=reason,
             **kwargs,
         )
         if payload is not None:
             # the payload will always be the proper channel payload
             return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
+
+    async def delete_messages(self, messages: Iterable[Snowflake]) -> None:
+        """|coro|
+
+        Deletes a list of messages. This is similar to :meth:`Message.delete`
+        except it bulk deletes multiple messages.
+
+        As a special case, if the number of messages is 0, then nothing
+        is done. If the number of messages is 1 then single message
+        delete is done. If it's more than two, then bulk delete is used.
+
+        You cannot bulk delete more than 100 messages or messages that
+        are older than 14 days.
+
+        You must have :attr:`~Permissions.manage_messages` permission to
+        do this.
+
+        .. versionadded:: 2.9
+
+        Parameters
+        ----------
+        messages: Iterable[:class:`abc.Snowflake`]
+            An iterable of messages denoting which ones to bulk delete.
+
+        Raises
+        ------
+        ClientException
+            The number of messages to delete was more than 100.
+        Forbidden
+            You do not have proper permissions to delete the messages.
+        NotFound
+            If single delete, then the message was already deleted.
+        HTTPException
+            Deleting the messages failed.
+        """
+        if not isinstance(messages, (list, tuple)):
+            messages = list(messages)
+
+        if len(messages) == 0:
+            return  # do nothing
+
+        if len(messages) == 1:
+            message_id: int = messages[0].id
+            await self._state.http.delete_message(self.id, message_id)
+            return
+
+        if len(messages) > 100:
+            raise ClientException("Can only bulk delete messages up to 100 messages")
+
+        message_ids: SnowflakeList = [m.id for m in messages]
+        await self._state.http.delete_messages(self.id, message_ids)
+
+    async def purge(
+        self,
+        *,
+        limit: Optional[int] = 100,
+        check: Callable[[Message], bool] = MISSING,
+        before: Optional[SnowflakeTime] = None,
+        after: Optional[SnowflakeTime] = None,
+        around: Optional[SnowflakeTime] = None,
+        oldest_first: Optional[bool] = False,
+        bulk: bool = True,
+    ) -> List[Message]:
+        """|coro|
+
+        Purges a list of messages that meet the criteria given by the predicate
+        ``check``. If a ``check`` is not provided then all messages are deleted
+        without discrimination.
+
+        You must have :attr:`~Permissions.manage_messages` permission to
+        delete messages even if they are your own.
+        :attr:`~Permissions.read_message_history` permission is
+        also needed to retrieve message history.
+
+        .. versionadded:: 2.9
+
+        .. note::
+
+            See :meth:`TextChannel.purge` for examples.
+
+        Parameters
+        ----------
+        limit: Optional[:class:`int`]
+            The number of messages to search through. This is not the number
+            of messages that will be deleted, though it can be.
+        check: Callable[[:class:`Message`], :class:`bool`]
+            The function used to check if a message should be deleted.
+            It must take a :class:`Message` as its sole parameter.
+        before: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+            Same as ``before`` in :meth:`history`.
+        after: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+            Same as ``after`` in :meth:`history`.
+        around: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+            Same as ``around`` in :meth:`history`.
+        oldest_first: Optional[:class:`bool`]
+            Same as ``oldest_first`` in :meth:`history`.
+        bulk: :class:`bool`
+            If ``True``, use bulk delete. Setting this to ``False`` is useful for mass-deleting
+            a bot's own messages without :attr:`Permissions.manage_messages`. When ``True``, will
+            fall back to single delete if messages are older than two weeks.
+
+        Raises
+        ------
+        Forbidden
+            You do not have proper permissions to do the actions required.
+        HTTPException
+            Purging the messages failed.
+
+        Returns
+        -------
+        List[:class:`.Message`]
+            A list of messages that were deleted.
+        """
+        if check is MISSING:
+            check = lambda m: True
+
+        iterator = self.history(
+            limit=limit, before=before, after=after, oldest_first=oldest_first, around=around
+        )
+        ret: List[Message] = []
+        count = 0
+
+        minimum_time = int((time.time() - 14 * 24 * 60 * 60) * 1000.0 - 1420070400000) << 22
+        strategy = self.delete_messages if bulk else _single_delete_strategy
+
+        async for message in iterator:
+            if count == 100:
+                to_delete = ret[-100:]
+                await strategy(to_delete)
+                count = 0
+                await asyncio.sleep(1)
+
+            if not check(message):
+                continue
+
+            if message.id < minimum_time:
+                # older than 14 days old
+                if count == 1:
+                    await ret[-1].delete()
+                elif count >= 2:
+                    to_delete = ret[-count:]
+                    await strategy(to_delete)
+
+                count = 0
+                strategy = _single_delete_strategy
+
+            count += 1
+            ret.append(message)
+
+        # SOme messages remaining to poll
+        if count >= 2:
+            # more than 2 messages -> bulk delete
+            to_delete = ret[-count:]
+            await strategy(to_delete)
+        elif count == 1:
+            # delete a single message
+            await ret[-1].delete()
+
+        return ret
+
+    async def webhooks(self) -> List[Webhook]:
+        """|coro|
+
+        Retrieves the list of webhooks this channel has.
+
+        You must have :attr:`~.Permissions.manage_webhooks` permission to
+        use this.
+
+        .. versionadded:: 2.9
+
+        Raises
+        ------
+        Forbidden
+            You don't have permissions to get the webhooks.
+
+        Returns
+        -------
+        List[:class:`Webhook`]
+            The list of webhooks this channel has.
+        """
+        from .webhook import Webhook
+
+        data = await self._state.http.channel_webhooks(self.id)
+        return [Webhook.from_state(d, state=self._state) for d in data]
+
+    async def create_webhook(
+        self, *, name: str, avatar: Optional[bytes] = None, reason: Optional[str] = None
+    ) -> Webhook:
+        """|coro|
+
+        Creates a webhook for this channel.
+
+        You must have :attr:`~.Permissions.manage_webhooks` permission to
+        do this.
+
+        .. versionadded:: 2.9
+
+        Parameters
+        ----------
+        name: :class:`str`
+            The webhook's name.
+        avatar: Optional[:class:`bytes`]
+            The webhook's default avatar.
+            This operates similarly to :meth:`~ClientUser.edit`.
+        reason: Optional[:class:`str`]
+            The reason for creating this webhook. Shows up in the audit logs.
+
+        Raises
+        ------
+        NotFound
+            The ``avatar`` asset couldn't be found.
+        Forbidden
+            You do not have permissions to create a webhook.
+        HTTPException
+            Creating the webhook failed.
+        TypeError
+            The ``avatar`` asset is a lottie sticker (see :func:`Sticker.read`).
+
+        Returns
+        -------
+        :class:`Webhook`
+            The newly created webhook.
+        """
+        from .webhook import Webhook
+
+        avatar_data = await utils._assetbytes_to_base64_data(avatar)
+
+        data = await self._state.http.create_webhook(
+            self.id, name=str(name), avatar=avatar_data, reason=reason
+        )
+        return Webhook.from_state(data, state=self._state)
 
 
 class CategoryChannel(disnake.abc.GuildChannel, Hashable):

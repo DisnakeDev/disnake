@@ -111,7 +111,7 @@ if TYPE_CHECKING:
     from .voice_client import VoiceProtocol
     from .webhook import Webhook
 
-    GuildMessageable = Union[TextChannel, Thread, VoiceChannel]
+    GuildMessageable = Union[TextChannel, Thread, VoiceChannel, StageChannel]
     GuildChannel = Union[VoiceChannel, StageChannel, TextChannel, CategoryChannel, ForumChannel]
     ByCategoryItem = Tuple[Optional[CategoryChannel], List[GuildChannel]]
 
@@ -1346,7 +1346,6 @@ class Guild(Hashable):
         self,
         name: str,
         *,
-        reason: Optional[str] = None,
         category: Optional[CategoryChannel] = None,
         position: int = MISSING,
         bitrate: int = MISSING,
@@ -1356,6 +1355,7 @@ class Guild(Hashable):
         nsfw: bool = MISSING,
         slowmode_delay: int = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
+        reason: Optional[str] = None,
     ) -> VoiceChannel:
         """|coro|
 
@@ -1466,9 +1466,13 @@ class Guild(Hashable):
         topic: Optional[str] = MISSING,
         position: int = MISSING,
         bitrate: int = MISSING,
+        user_limit: int = MISSING,
+        rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
+        video_quality_mode: VideoQualityMode = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
         category: Optional[CategoryChannel] = None,
-        rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
+        nsfw: bool = MISSING,
+        slowmode_delay: int = MISSING,
         reason: Optional[str] = None,
     ) -> StageChannel:
         """|coro|
@@ -1512,6 +1516,19 @@ class Guild(Hashable):
 
             .. versionadded:: 2.5
 
+        nsfw: :class:`bool`
+            Whether to mark the channel as NSFW.
+
+            .. versionadded:: 2.9
+
+        slowmode_delay: :class:`int`
+            Specifies the slowmode rate limit for users in this channel, in seconds.
+            A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
+            If not provided, slowmode is disabled.
+
+            .. versionadded:: 2.9
+
+
         reason: Optional[:class:`str`]
             The reason for creating this channel. Shows up on the audit log.
 
@@ -1537,11 +1554,23 @@ class Guild(Hashable):
         if bitrate is not MISSING:
             options["bitrate"] = bitrate
 
+        if user_limit is not MISSING:
+            options["user_limit"] = user_limit
+
         if position is not MISSING:
             options["position"] = position
 
         if rtc_region is not MISSING:
             options["rtc_region"] = None if rtc_region is None else str(rtc_region)
+
+        if video_quality_mode is not MISSING:
+            options["video_quality_mode"] = video_quality_mode.value
+
+        if nsfw is not MISSING:
+            options["nsfw"] = nsfw
+
+        if slowmode_delay is not MISSING:
+            options["rate_limit_per_user"] = slowmode_delay
 
         data = await self._create_channel(
             name,

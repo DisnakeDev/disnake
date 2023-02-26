@@ -47,13 +47,14 @@ Creating a pull request is fairly simple, just make sure it focuses on a single 
 
 We would greatly appreciate the code submitted to be of a consistent style with other code in disnake. This project follows PEP-8 guidelines (mostly) with a column limit of 100 characters.
 
-Run these commands to install [`nox`](https://nox.thea.codes/) and [`pdm`](https://pdm.fming.dev/), as well as the required dependencies in your environment, and to set up [`pre-commit`](https://pre-commit.com/#quick-start) hooks.
+
+We use [`PDM`](https://pdm.fming.dev/) for development. If PDM is not already installed on your system, you can follow their [installation steps here](https://pdm.fming.dev/latest/#installation) to get started.
+
+Once PDM is installed and avaliable, use the following command to initialise a virtual environment, install the necessary development dependencies, and install the [`pre-commit`](https://pre-commit.com/#quick-start) hooks.
+.
 ```
-pip install nox pdm
 pdm run setup_env
 ```
-
-> If you have [pipx](https://pypa.github.io/pipx/) installed on your system, we recommend installing the above tools with pipx instead.
 
 The installed `pre-commit` hooks will automatically run before every commit, which will format/lint the code
 to match the project's style. Note that you will have to stage and commit again if anything was updated!
@@ -67,14 +68,14 @@ documented at [https://spdx.dev/ids/](https://spdx.dev/ids/).
 
 ### Scripts
 
-To run all important checks and tests, use `nox`:
+To run all important checks and tests, use `pdm run nox`:
 ```sh
-nox -R
+pdm run nox -R
 ```
 
 You can also choose to only run a single task; run `pdm run --list` to view all available scripts and use `pdm run <name>` to run them.
 
-Some notes (all of the mentioned scripts are automatically run by `nox -R`, see above):
+Some notes (all of the mentioned scripts are automatically run by `pdm run nox -R`, see above):
 - If `pre-commit` hooks aren't installed, run `pdm run lint` manually to check and fix the formatting in all files.  
   **Note**: If the code is formatted incorrectly, `pre-commit` will apply fixes and exit without committing the changes - just stage and commit again.
 - For type-checking, run `pdm run pyright`. You can use `pdm run pyright -w` to automatically re-check on every file change.  

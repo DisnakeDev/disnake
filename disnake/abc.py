@@ -1340,9 +1340,10 @@ class Messageable:
     - :class:`~disnake.GroupChannel`
     - :class:`~disnake.User`
     - :class:`~disnake.Member`
-    - :class:`~disnake.ext.commands.Context`
     - :class:`~disnake.Thread`
     - :class:`~disnake.VoiceChannel`
+    - :class:`~disnake.StageChannel`
+    - :class:`~disnake.ext.commands.Context`
     - :class:`~disnake.PartialMessageable`
     """
 
