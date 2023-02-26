@@ -64,7 +64,7 @@ def test_type_default() -> None:
 
 
 def test_timestamp_naive(embed: Embed) -> None:
-    embed.timestamp = datetime.now()
+    embed.timestamp = datetime.now()  # noqa: DTZ005  # the point of this is to test naive dts
     assert embed.timestamp.tzinfo is not None
 
 
