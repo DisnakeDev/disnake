@@ -170,6 +170,9 @@ ignore = [
     # import aliases are fixed by isort
     "PLC0414",
 
+    # outer loop variables are overwritten by inner assignment target, these are mostly intentional
+    "PLW2901",
+
     # temporary disables, to fix later
     "B904",   # within an except clause raise from error or from none
     "B026",   # backwards star-arg unpacking
