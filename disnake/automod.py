@@ -138,7 +138,8 @@ class AutoModBlockMessageAction(AutoModAction):
     def __init__(self, custom_message: Optional[str] = None) -> None:
         super().__init__(type=AutoModActionType.block_message)
 
-        self._metadata["custom_message"] = custom_message or ""
+        if custom_message is not None:
+            self._metadata["custom_message"] = custom_message
 
     @property
     def custom_message(self) -> Optional[str]:
