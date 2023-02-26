@@ -784,8 +784,7 @@ class Embed:
 
     @classmethod
     def set_default_colour(cls, value: Optional[Union[int, Colour]]):
-        """
-        Set the default colour of all new embeds.
+        """Set the default colour of all new embeds.
 
         .. versionadded:: 2.4
 
@@ -808,8 +807,7 @@ class Embed:
 
     @classmethod
     def get_default_colour(cls) -> Optional[Colour]:
-        """
-        Get the default colour of all new embeds.
+        """Get the default colour of all new embeds.
 
         .. versionadded:: 2.4
 
@@ -837,8 +835,7 @@ class Embed:
             return str(url) if url is not None else None
 
     def check_limits(self) -> None:
-        """
-        Checks if this embed fits within the limits dictated by Discord.
+        """Checks if this embed fits within the limits dictated by Discord.
         There is also a 6000 character limit across all embeds in a message.
 
         Returns nothing on success, raises :exc:`ValueError` if an attribute exceeds the limits.

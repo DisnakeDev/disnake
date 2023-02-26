@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""
-An example showcasing different builtin converter types.
+"""An example showcasing different builtin converter types.
 """
 
 # A list of all available converter types can be found at

@@ -635,8 +635,7 @@ class MessageReference:
 
 
 class InteractionReference:
-    """
-    Represents an interaction being referenced in a message.
+    """Represents an interaction being referenced in a message.
 
     This means responses to message components do not include this property,
     instead including a message reference object as components always exist on preexisting messages.
@@ -695,8 +694,7 @@ def flatten_handlers(cls):
 
 @flatten_handlers
 class Message(Hashable):
-    """
-    Represents a message from Discord.
+    """Represents a message from Discord.
 
     .. container:: operations
 
@@ -1241,8 +1239,7 @@ class Message(Hashable):
 
     @property
     def thread(self) -> Optional[Thread]:
-        """
-        Optional[:class:`Thread`]: The thread started from this message. ``None`` if no thread has been started.
+        """Optional[:class:`Thread`]: The thread started from this message. ``None`` if no thread has been started.
 
         .. versionadded:: 2.4
         """
@@ -1271,8 +1268,7 @@ class Message(Hashable):
 
     @utils.cached_slot_property("_cs_system_content")
     def system_content(self) -> Optional[str]:
-        """
-        Optional[:class:`str`]: A property that returns the content that is rendered
+        """Optional[:class:`str`]: A property that returns the content that is rendered
         regardless of the :attr:`Message.type`.
 
         In the case of :attr:`MessageType.default` and :attr:`MessageType.reply`\\,

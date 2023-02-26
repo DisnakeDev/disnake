@@ -60,8 +60,7 @@ __all__ = (
 
 
 class AutoModAction:
-    """
-    A base class for auto moderation actions.
+    """A base class for auto moderation actions.
 
     This class is not meant to be instantiated by the user.
     The user-constructible subclasses are:
@@ -111,8 +110,7 @@ class AutoModAction:
 
 
 class AutoModBlockMessageAction(AutoModAction):
-    """
-    Represents an auto moderation action that blocks content from being sent.
+    """Represents an auto moderation action that blocks content from being sent.
 
     .. versionadded:: 2.6
 
@@ -154,8 +152,7 @@ class AutoModBlockMessageAction(AutoModAction):
 
 
 class AutoModSendAlertAction(AutoModAction):
-    """
-    Represents an auto moderation action that sends an alert to a channel.
+    """Represents an auto moderation action that sends an alert to a channel.
 
     .. versionadded:: 2.6
 
@@ -190,8 +187,7 @@ class AutoModSendAlertAction(AutoModAction):
 
 
 class AutoModTimeoutAction(AutoModAction):
-    """
-    Represents an auto moderation action that times out the user.
+    """Represents an auto moderation action that times out the user.
 
     .. versionadded:: 2.6
 
@@ -230,8 +226,7 @@ class AutoModTimeoutAction(AutoModAction):
 
 
 class AutoModTriggerMetadata:
-    """
-    Metadata for an auto moderation trigger.
+    """Metadata for an auto moderation trigger.
 
     Based on the trigger type, different fields can be used with various limits:
 
@@ -343,8 +338,7 @@ class AutoModTriggerMetadata:
         allow_list: Optional[Sequence[str]] = MISSING,
         mention_total_limit: Optional[int] = MISSING,
     ) -> Self:
-        """
-        Returns a new instance with the given changes applied.
+        """Returns a new instance with the given changes applied.
         All other fields will be kept intact.
 
         Returns
@@ -407,8 +401,7 @@ class AutoModTriggerMetadata:
 
 
 class AutoModRule:
-    """
-    Represents an auto moderation rule.
+    """Represents an auto moderation rule.
 
     .. versionadded:: 2.6
 

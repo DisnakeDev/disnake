@@ -1132,8 +1132,7 @@ class InteractionBotBase(CommonBotBase):
         [Callable[[ApplicationCommandInteraction], Any]],
         Callable[[ApplicationCommandInteraction], Any],
     ]:
-        """
-        A decorator that adds a global application command check to the bot.
+        """A decorator that adds a global application command check to the bot.
 
         A global check is similar to a :func:`check` that is applied
         on a per command basis except it is run before any application command checks

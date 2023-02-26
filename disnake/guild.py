@@ -1848,8 +1848,7 @@ class Guild(Hashable):
         public_updates_channel: Optional[TextChannel] = MISSING,
         premium_progress_bar_enabled: bool = MISSING,
     ) -> Guild:
-        """
-        |coro|
+        """|coro|
 
         Edits the guild.
 
@@ -2767,8 +2766,7 @@ class Guild(Hashable):
         roles: List[Snowflake] = MISSING,
         reason: Optional[str] = None,
     ) -> Optional[int]:
-        """
-        |coro|
+        """|coro|
 
         Prunes the guild from its inactive members.
 
@@ -3259,8 +3257,7 @@ class Guild(Hashable):
         roles: Sequence[Role] = MISSING,
         reason: Optional[str] = None,
     ) -> Emoji:
-        """
-        |coro|
+        """|coro|
 
         Creates a custom :class:`Emoji` for the guild.
 
@@ -4632,8 +4629,7 @@ PlaceholderID = NewType("PlaceholderID", int)
 
 
 class GuildBuilder:
-    """
-    A guild builder object, created by :func:`Client.guild_builder`.
+    """A guild builder object, created by :func:`Client.guild_builder`.
 
     This allows for easier configuration of more complex guild setups,
     abstracting away some of the quirks of the guild creation endpoint.
@@ -4840,8 +4836,7 @@ class GuildBuilder:
         return Guild(data=data, state=self._state)
 
     def update_everyone_role(self, *, permissions: Permissions = MISSING) -> PlaceholderID:
-        """
-        Updates attributes of the ``@everyone`` role.
+        """Updates attributes of the ``@everyone`` role.
 
         Parameters
         ----------
@@ -4873,8 +4868,7 @@ class GuildBuilder:
         hoist: bool = MISSING,
         mentionable: bool = MISSING,
     ) -> PlaceholderID:
-        """
-        Adds a role to the guild builder.
+        """Adds a role to the guild builder.
 
         The default (``@everyone``) role can be referenced using :attr:`everyone`
         and configured through :func:`update_everyone_role`.
@@ -4936,8 +4930,7 @@ class GuildBuilder:
         *,
         overwrites: Dict[PlaceholderID, PermissionOverwrite] = MISSING,
     ) -> PlaceholderID:
-        """
-        Adds a category channel to the guild builder.
+        """Adds a category channel to the guild builder.
 
         There is an alias for this named ``add_category_channel``.
 
@@ -4969,8 +4962,7 @@ class GuildBuilder:
         nsfw: bool = MISSING,
         default_auto_archive_duration: AnyThreadArchiveDuration = MISSING,
     ) -> PlaceholderID:
-        """
-        Adds a text channel to the guild builder.
+        """Adds a text channel to the guild builder.
 
         Parameters
         ----------
@@ -5032,8 +5024,7 @@ class GuildBuilder:
         rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
     ) -> PlaceholderID:
-        """
-        Adds a voice channel to the guild builder.
+        """Adds a voice channel to the guild builder.
 
         Parameters
         ----------

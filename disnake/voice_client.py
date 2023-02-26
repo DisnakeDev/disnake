@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""
-Some documentation to refer to:
+"""Some documentation to refer to:
 
 - Our main web socket (mWS) sends opcode 4 with a guild ID and channel ID.
 - The mWS receives VOICE_STATE_UPDATE and VOICE_SERVER_UPDATE.

@@ -381,9 +381,7 @@ class InvokableApplicationCommand(ABC):
         return 0.0
 
     async def invoke(self, inter: ApplicationCommandInteraction, *args, **kwargs) -> None:
-        """
-        This method isn't really usable in this class, but it's usable in subclasses.
-        """
+        """This method isn't really usable in this class, but it's usable in subclasses."""
         await self.prepare(inter)
 
         try:
@@ -425,9 +423,7 @@ class InvokableApplicationCommand(ABC):
         return coro
 
     def has_error_handler(self) -> bool:
-        """
-        Checks whether the application command has an error handler registered.
-        """
+        """Checks whether the application command has an error handler registered."""
         return hasattr(self, "on_error")
 
     async def _call_local_error_handler(
@@ -697,8 +693,7 @@ def default_member_permissions(
 
 @_overload_with_permissions
 def default_member_permissions(value: int = 0, **permissions: bool) -> Callable[[T], T]:
-    """
-    A decorator that sets default required member permissions for the command.
+    """A decorator that sets default required member permissions for the command.
     Unlike :func:`~.has_permissions`, this decorator does not add any checks.
     Instead, it prevents the command from being run by members without *all* required permissions,
     if not overridden by moderators on a guild-specific basis.

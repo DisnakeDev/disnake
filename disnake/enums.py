@@ -835,8 +835,7 @@ class ThreadLayout(Enum):
 
 
 class Event(Enum):
-    """
-    Represents all the events of the library.
+    """Represents all the events of the library.
 
     These offer to register listeners/events in a more pythonic way; additionally autocompletion and documentation are both supported.
 

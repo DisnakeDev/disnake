@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""
-Some examples showing how to customize slash command options.
+"""Some examples showing how to customize slash command options.
 """
 
 import os
@@ -51,8 +50,7 @@ async def description(
     user: disnake.User,
     channel: disnake.TextChannel,
 ):
-    """
-    A random command
+    """A random command
 
     Parameters
     ----------

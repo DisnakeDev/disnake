@@ -82,8 +82,7 @@ class ModalInteraction(Interaction):
         self.message: Optional[Message] = message
 
     def walk_raw_components(self) -> Generator[ModalInteractionComponentDataPayload, None, None]:
-        """
-        Returns a generator that yields raw component data from action rows one by one, as provided by Discord.
+        """Returns a generator that yields raw component data from action rows one by one, as provided by Discord.
         This does not contain all fields of the components due to API limitations.
 
         .. versionadded:: 2.6

@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""
-An example using link buttons in views.
+"""An example using link buttons in views.
 """
 
 # Note: this example mostly exists for completeness.

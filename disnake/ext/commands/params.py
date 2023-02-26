@@ -1265,8 +1265,7 @@ def injection(
 def option_enum(
     choices: Union[Dict[str, TChoice], List[TChoice]], **kwargs: TChoice
 ) -> Type[TChoice]:
-    """
-    A utility function to create an enum type.
+    """A utility function to create an enum type.
     Returns a new :class:`~enum.Enum` based on the provided parameters.
 
     .. versionadded:: 2.1

@@ -604,8 +604,7 @@ class GuildChannel(ABC):
 
     @property
     def jump_url(self) -> str:
-        """
-        A URL that can be used to jump to this channel.
+        """A URL that can be used to jump to this channel.
 
         .. versionadded:: 2.4
 
@@ -882,8 +881,7 @@ class GuildChannel(ABC):
     async def set_permissions(
         self, target, *, overwrite=MISSING, reason=None, **permissions
     ) -> None:
-        """
-        |coro|
+        """|coro|
 
         Sets the channel specific permission overwrites for a target in the
         channel.

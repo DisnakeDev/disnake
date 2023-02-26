@@ -327,8 +327,7 @@ class Thread(Messageable, Hashable):
 
     @property
     def created_at(self) -> datetime.datetime:
-        """
-        :class:`datetime.datetime`: Returns the thread's creation time in UTC.
+        """:class:`datetime.datetime`: Returns the thread's creation time in UTC.
 
         .. versionchanged:: 2.4
             If create_timestamp is provided by discord, that will be used instead of the time in the ID.
@@ -345,8 +344,7 @@ class Thread(Messageable, Hashable):
 
     @property
     def jump_url(self) -> str:
-        """
-        A URL that can be used to jump to this thread.
+        """A URL that can be used to jump to this thread.
 
         .. versionadded:: 2.4
         """
@@ -1068,8 +1066,7 @@ class ThreadMember(Hashable):
 
 
 class ForumTag(Hashable):
-    """
-    Represents a tag for threads in forum channels.
+    """Represents a tag for threads in forum channels.
 
     .. container:: operations
 
@@ -1199,8 +1196,7 @@ class ForumTag(Hashable):
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
         moderated: bool = MISSING,
     ) -> Self:
-        """
-        Returns a new instance with the given changes applied,
+        """Returns a new instance with the given changes applied,
         for easy use with :func:`ForumChannel.edit`.
         All other fields will be kept intact.
 

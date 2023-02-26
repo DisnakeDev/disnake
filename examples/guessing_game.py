@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""
-A simple number guessing game, using `bot.wait_for`.
+"""A simple number guessing game, using `bot.wait_for`.
 """
 
 import asyncio
