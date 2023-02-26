@@ -126,9 +126,7 @@ def codemod(session: nox.Session):
 @nox.session()
 def pyright(session: nox.Session):
     """Run pyright."""
-    session.run_always(
-        "pdm", "install", "-d", "-Gspeed", "-Gdocs", "-Gvoice", "-Gnox", external=True
-    )
+    session.run_always("pdm", "install", "-d", "-Gspeed", "-Gdocs", "-Gvoice", external=True)
     env = {
         "PYRIGHT_PYTHON_IGNORE_WARNINGS": "1",
     }
