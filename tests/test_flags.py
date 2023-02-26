@@ -10,6 +10,7 @@ from disnake import flags
 
 
 class TestFlags(flags.BaseFlags):
+
     """A test class for flag testing."""
 
     __test__ = False
@@ -36,6 +37,7 @@ class TestFlags(flags.BaseFlags):
 
 
 class OtherTestFlags(flags.BaseFlags):
+
     """Another test class for flag testing."""
 
     @flags.flag_value

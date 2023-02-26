@@ -14,6 +14,7 @@ __all__ = ("CommandSyncFlags",)
 
 
 class CommandSyncFlags(BaseFlags):
+
     """Controls the library's application command syncing policy.
 
     This allows for finer grained control over what commands are synced automatically and in what cases.

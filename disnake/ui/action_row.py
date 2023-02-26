@@ -89,6 +89,7 @@ TextInputCompatibleActionRowT = TypeVar(
 
 
 class ActionRow(Generic[UIComponentT]):
+
     """Represents a UI action row. Useful for lower level component manipulation.
 
     .. container:: operations

@@ -283,6 +283,7 @@ class BaseFlags:
 
 
 class ListBaseFlags(BaseFlags, no_fill_flags=True):
+
     """
     A base class for flags that aren't powers of 2.
     Instead, values are used as exponents to map to powers of 2 to avoid collisions,
@@ -318,6 +319,7 @@ class ListBaseFlags(BaseFlags, no_fill_flags=True):
 
 
 class SystemChannelFlags(BaseFlags, inverted=True):
+
     """
     Wraps up a Discord system channel flag value.
 
@@ -467,6 +469,7 @@ class SystemChannelFlags(BaseFlags, inverted=True):
 
 
 class MessageFlags(BaseFlags):
+
     """
     Wraps up a Discord Message flag value.
 
@@ -649,6 +652,7 @@ class MessageFlags(BaseFlags):
 
 
 class PublicUserFlags(BaseFlags):
+
     """
     Wraps up the Discord User Public flags.
 
@@ -885,6 +889,7 @@ class PublicUserFlags(BaseFlags):
 
 
 class Intents(BaseFlags):
+
     """
     Wraps up a Discord gateway intent flag.
 
@@ -1569,6 +1574,7 @@ class Intents(BaseFlags):
 
 
 class MemberCacheFlags(BaseFlags):
+
     """Controls the library's cache policy when it comes to members.
 
     This allows for finer grained control over what members are cached.
@@ -1762,6 +1768,7 @@ class MemberCacheFlags(BaseFlags):
 
 
 class ApplicationFlags(BaseFlags):
+
     """
     Wraps up the Discord Application flags.
 
@@ -1932,6 +1939,7 @@ class ApplicationFlags(BaseFlags):
 
 
 class ChannelFlags(BaseFlags):
+
     """Wraps up the Discord Channel flags.
 
     .. container:: operations
@@ -2045,6 +2053,7 @@ class ChannelFlags(BaseFlags):
 
 
 class AutoModKeywordPresets(ListBaseFlags):
+
     """
     Wraps up the pre-defined auto moderation keyword lists, provided by Discord.
 
@@ -2159,6 +2168,7 @@ class AutoModKeywordPresets(ListBaseFlags):
 
 
 class MemberFlags(BaseFlags):
+
     """Wraps up Discord Member flags.
 
     .. container:: operations

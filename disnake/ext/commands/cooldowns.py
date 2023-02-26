@@ -58,6 +58,7 @@ class BucketType(Enum):
 
 
 class Cooldown:
+
     """Represents a cooldown for a command.
 
     Attributes
@@ -267,6 +268,7 @@ class DynamicCooldownMapping(CooldownMapping):
 
 
 class _Semaphore:
+
     """This class is a version of a semaphore.
 
     If you're wondering why asyncio.Semaphore isn't being used,

@@ -127,6 +127,7 @@ class _ViewWeights:
 
 
 class View:
+
     """Represents a UI view.
 
     This object must be inherited to create a UI within Discord.

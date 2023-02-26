@@ -45,6 +45,7 @@ P = ParamSpec("P")
 
 
 class Button(Item[V_co]):
+
     """Represents a UI button.
 
     .. versionadded:: 2.0

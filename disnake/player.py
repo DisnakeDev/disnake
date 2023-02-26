@@ -54,6 +54,7 @@ else:
 
 
 class AudioSource:
+
     """Represents an audio stream.
 
     The audio stream can be Opus encoded or not, however if the audio stream
@@ -101,6 +102,7 @@ class AudioSource:
 
 
 class PCMAudio(AudioSource):
+
     """Represents raw 16-bit 48KHz stereo PCM audio source.
 
     Attributes
@@ -120,6 +122,7 @@ class PCMAudio(AudioSource):
 
 
 class FFmpegAudio(AudioSource):
+
     """Represents an FFmpeg (or AVConv) based AudioSource.
 
     User created AudioSources using FFmpeg differently from how :class:`FFmpegPCMAudio` and
@@ -223,6 +226,7 @@ class FFmpegAudio(AudioSource):
 
 
 class FFmpegPCMAudio(FFmpegAudio):
+
     """An audio source from FFmpeg (or AVConv).
 
     This launches a sub-process to a specific input file given.
@@ -299,6 +303,7 @@ class FFmpegPCMAudio(FFmpegAudio):
 
 
 class FFmpegOpusAudio(FFmpegAudio):
+
     """An audio source from FFmpeg (or AVConv).
 
     This launches a sub-process to a specific input file given.  However, rather than
@@ -618,6 +623,7 @@ class FFmpegOpusAudio(FFmpegAudio):
 
 
 class PCMVolumeTransformer(AudioSource, Generic[AT]):
+
     """Transforms a previous :class:`AudioSource` to have volume controls.
 
     This does not work on audio sources that have :meth:`AudioSource.is_opus`

@@ -23,6 +23,7 @@ __all__ = (
 
 
 class ChannelSelect(BaseSelect[ChannelSelectMenu, "InteractionChannel", V_co]):
+
     """Represents a UI channel select menu.
 
     This is usually represented as a drop down menu.

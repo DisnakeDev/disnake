@@ -60,6 +60,7 @@ __all__ = (
 
 
 class AutoModAction:
+
     """
     A base class for auto moderation actions.
 
@@ -111,6 +112,7 @@ class AutoModAction:
 
 
 class AutoModBlockMessageAction(AutoModAction):
+
     """
     Represents an auto moderation action that blocks content from being sent.
 
@@ -154,6 +156,7 @@ class AutoModBlockMessageAction(AutoModAction):
 
 
 class AutoModSendAlertAction(AutoModAction):
+
     """
     Represents an auto moderation action that sends an alert to a channel.
 
@@ -190,6 +193,7 @@ class AutoModSendAlertAction(AutoModAction):
 
 
 class AutoModTimeoutAction(AutoModAction):
+
     """
     Represents an auto moderation action that times out the user.
 
@@ -229,6 +233,7 @@ class AutoModTimeoutAction(AutoModAction):
 
 
 class AutoModTriggerMetadata:
+
     """
     Metadata for an auto moderation trigger.
 
@@ -406,6 +411,7 @@ class AutoModTriggerMetadata:
 
 
 class AutoModRule:
+
     """
     Represents an auto moderation rule.
 
@@ -648,6 +654,7 @@ class AutoModRule:
 
 
 class AutoModActionExecution:
+
     """Represents the data for an :func:`on_automod_action_execution` event.
 
     .. versionadded:: 2.6

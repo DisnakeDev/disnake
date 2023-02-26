@@ -23,6 +23,7 @@ if TYPE_CHECKING:
 
 
 class Emoji(_EmojiTag, AssetMixin):
+
     """Represents a custom emoji.
 
     Depending on the way this object was created, some of the attributes can

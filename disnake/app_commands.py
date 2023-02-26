@@ -92,6 +92,7 @@ def _validate_name(name: str) -> None:
 
 
 class OptionChoice:
+
     """Represents an option choice.
 
     Parameters
@@ -159,6 +160,7 @@ class OptionChoice:
 
 
 class Option:
+
     """Represents a slash command option.
 
     Parameters
@@ -428,6 +430,7 @@ class Option:
 
 
 class ApplicationCommand(ABC):
+
     """
     The base class for application commands.
 
@@ -580,6 +583,7 @@ class _APIApplicationCommandMixin:
 
 
 class UserCommand(ApplicationCommand):
+
     """
     A user context menu command.
 
@@ -624,6 +628,7 @@ class UserCommand(ApplicationCommand):
 
 
 class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
+
     """
     A user context menu command returned by the API.
 
@@ -677,6 +682,7 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
 
 
 class MessageCommand(ApplicationCommand):
+
     """
     A message context menu command
 
@@ -721,6 +727,7 @@ class MessageCommand(ApplicationCommand):
 
 
 class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
+
     """
     A message context menu command returned by the API.
 
@@ -774,6 +781,7 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
 
 
 class SlashCommand(ApplicationCommand):
+
     """
     The base class for building slash commands.
 
@@ -905,6 +913,7 @@ class SlashCommand(ApplicationCommand):
 
 
 class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
+
     """
     A slash command returned by the API.
 
@@ -971,6 +980,7 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
 
 
 class ApplicationCommandPermissions:
+
     """Represents application command permissions for a role, user, or channel.
 
     Attributes
@@ -1024,6 +1034,7 @@ class ApplicationCommandPermissions:
 
 
 class GuildApplicationCommandPermissions:
+
     """Represents application command permissions in a guild.
 
     .. versionchanged:: 2.5

@@ -37,6 +37,7 @@ else:
 
 
 class WrappedComponent(ABC):
+
     """Represents the base UI component that all UI components inherit from.
 
     The following classes implement this ABC:
@@ -73,6 +74,7 @@ class WrappedComponent(ABC):
 
 
 class Item(WrappedComponent, Generic[V_co]):
+
     """Represents the base UI item that all UI items inherit from.
 
     This class adds more functionality on top of the :class:`WrappedComponent` base class.

@@ -107,6 +107,7 @@ def _get_from_guilds(
 
 @runtime_checkable
 class Converter(Protocol[T_co]):
+
     """The base class of custom converters that require the :class:`.Context`
     or :class:`.ApplicationCommandInteraction` to be passed to be useful.
 
@@ -153,6 +154,7 @@ class IDConverter(Converter[T_co]):
 
 
 class ObjectConverter(IDConverter[disnake.Object]):
+
     """Converts to a :class:`~disnake.Object`.
 
     The argument must follow the valid ID or mention formats (e.g. `<@80088516616269824>`).
@@ -179,6 +181,7 @@ class ObjectConverter(IDConverter[disnake.Object]):
 
 
 class MemberConverter(IDConverter[disnake.Member]):
+
     """Converts to a :class:`~disnake.Member`.
 
     All lookups are via the local guild. If in a DM context, then the lookup
@@ -278,6 +281,7 @@ class MemberConverter(IDConverter[disnake.Member]):
 
 
 class UserConverter(IDConverter[disnake.User]):
+
     """Converts to a :class:`~disnake.User`.
 
     All lookups are via the global user cache.
@@ -349,6 +353,7 @@ class UserConverter(IDConverter[disnake.User]):
 
 
 class PartialMessageConverter(Converter[disnake.PartialMessage]):
+
     """Converts to a :class:`~disnake.PartialMessage`.
 
     .. versionadded:: 1.7
@@ -405,6 +410,7 @@ class PartialMessageConverter(Converter[disnake.PartialMessage]):
 
 
 class MessageConverter(IDConverter[disnake.Message]):
+
     """Converts to a :class:`~disnake.Message`.
 
     .. versionadded:: 1.1
@@ -437,6 +443,7 @@ class MessageConverter(IDConverter[disnake.Message]):
 
 
 class GuildChannelConverter(IDConverter[disnake.abc.GuildChannel]):
+
     """Converts to a :class:`.abc.GuildChannel`.
 
     All lookups are via the local guild. If in a DM context, then the lookup
@@ -506,6 +513,7 @@ class GuildChannelConverter(IDConverter[disnake.abc.GuildChannel]):
 
 
 class TextChannelConverter(IDConverter[disnake.TextChannel]):
+
     """Converts to a :class:`~disnake.TextChannel`.
 
     All lookups are via the local guild. If in a DM context, then the lookup
@@ -528,6 +536,7 @@ class TextChannelConverter(IDConverter[disnake.TextChannel]):
 
 
 class VoiceChannelConverter(IDConverter[disnake.VoiceChannel]):
+
     """Converts to a :class:`~disnake.VoiceChannel`.
 
     All lookups are via the local guild. If in a DM context, then the lookup
@@ -550,6 +559,7 @@ class VoiceChannelConverter(IDConverter[disnake.VoiceChannel]):
 
 
 class StageChannelConverter(IDConverter[disnake.StageChannel]):
+
     """Converts to a :class:`~disnake.StageChannel`.
 
     .. versionadded:: 1.7
@@ -571,6 +581,7 @@ class StageChannelConverter(IDConverter[disnake.StageChannel]):
 
 
 class CategoryChannelConverter(IDConverter[disnake.CategoryChannel]):
+
     """Converts to a :class:`~disnake.CategoryChannel`.
 
     All lookups are via the local guild. If in a DM context, then the lookup
@@ -593,6 +604,7 @@ class CategoryChannelConverter(IDConverter[disnake.CategoryChannel]):
 
 
 class ForumChannelConverter(IDConverter[disnake.ForumChannel]):
+
     """Converts to a :class:`~disnake.ForumChannel`.
 
     .. versionadded:: 2.5
@@ -614,6 +626,7 @@ class ForumChannelConverter(IDConverter[disnake.ForumChannel]):
 
 
 class ThreadConverter(IDConverter[disnake.Thread]):
+
     """Coverts to a :class:`~disnake.Thread`.
 
     All lookups are via the local guild.
@@ -632,6 +645,7 @@ class ThreadConverter(IDConverter[disnake.Thread]):
 
 
 class ColourConverter(Converter[disnake.Colour]):
+
     """Converts to a :class:`~disnake.Colour`.
 
     .. versionchanged:: 1.5
@@ -720,6 +734,7 @@ ColorConverter = ColourConverter
 
 
 class RoleConverter(IDConverter[disnake.Role]):
+
     """Converts to a :class:`~disnake.Role`.
 
     All lookups are via the local guild. If in a DM context, the converter raises
@@ -752,6 +767,7 @@ class RoleConverter(IDConverter[disnake.Role]):
 
 
 class GameConverter(Converter[disnake.Game]):
+
     """Converts to :class:`~disnake.Game`."""
 
     async def convert(self, ctx: AnyContext, argument: str) -> disnake.Game:
@@ -759,6 +775,7 @@ class GameConverter(Converter[disnake.Game]):
 
 
 class InviteConverter(Converter[disnake.Invite]):
+
     """Converts to a :class:`~disnake.Invite`.
 
     This is done via an HTTP request using :meth:`.Bot.fetch_invite`.
@@ -775,6 +792,7 @@ class InviteConverter(Converter[disnake.Invite]):
 
 
 class GuildConverter(IDConverter[disnake.Guild]):
+
     """Converts to a :class:`~disnake.Guild`.
 
     The lookup strategy is as follows (in order):
@@ -803,6 +821,7 @@ class GuildConverter(IDConverter[disnake.Guild]):
 
 
 class EmojiConverter(IDConverter[disnake.Emoji]):
+
     """Converts to a :class:`~disnake.Emoji`.
 
     All lookups are done for the local guild first, if available. If that lookup
@@ -844,6 +863,7 @@ class EmojiConverter(IDConverter[disnake.Emoji]):
 
 
 class PartialEmojiConverter(Converter[disnake.PartialEmoji]):
+
     """Converts to a :class:`~disnake.PartialEmoji`.
 
     This is done by extracting the animated flag, name and ID from the emoji.
@@ -868,6 +888,7 @@ class PartialEmojiConverter(Converter[disnake.PartialEmoji]):
 
 
 class GuildStickerConverter(IDConverter[disnake.GuildSticker]):
+
     """Converts to a :class:`~disnake.GuildSticker`.
 
     All lookups are done for the local guild first, if available. If that lookup
@@ -905,6 +926,7 @@ class GuildStickerConverter(IDConverter[disnake.GuildSticker]):
 
 
 class PermissionsConverter(Converter[disnake.Permissions]):
+
     """Converts to a :class:`~disnake.Permissions`.
 
     Accepts an integer or a string of space-separated permission names (or just a single one) as input.
@@ -950,6 +972,7 @@ class PermissionsConverter(Converter[disnake.Permissions]):
 
 
 class GuildScheduledEventConverter(IDConverter[disnake.GuildScheduledEvent]):
+
     """Converts to a :class:`~disnake.GuildScheduledEvent`.
 
     The lookup strategy is as follows (in order):
@@ -990,6 +1013,7 @@ class GuildScheduledEventConverter(IDConverter[disnake.GuildScheduledEvent]):
 
 
 class clean_content(Converter[str]):
+
     """Converts the argument to mention scrubbed version of
     said content.
 
@@ -1068,6 +1092,7 @@ class clean_content(Converter[str]):
 
 
 class Greedy(List[T]):
+
     """
     A special converter that greedily consumes arguments until it can't.
     As a consequence of this behaviour, most input errors are silently discarded,

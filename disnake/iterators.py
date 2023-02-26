@@ -219,6 +219,7 @@ class ReactionIterator(_AsyncIterator[Union["User", "Member"]]):
 
 
 class HistoryIterator(_AsyncIterator["Message"]):
+
     """Iterator for receiving a channel's message history.
 
     The messages endpoint has two behaviours we care about here:
@@ -385,6 +386,7 @@ class HistoryIterator(_AsyncIterator["Message"]):
 
 
 class BanIterator(_AsyncIterator["BanEntry"]):
+
     """Iterator for receiving a guild's bans.
 
     The bans endpoint has two behaviours we care about here:
@@ -646,6 +648,7 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
 
 
 class GuildIterator(_AsyncIterator["Guild"]):
+
     """Iterator for receiving the client's guilds.
 
     The guilds endpoint has the same two behaviours as described

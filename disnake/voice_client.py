@@ -62,6 +62,7 @@ _log = logging.getLogger(__name__)
 
 
 class VoiceProtocol:
+
     """A class that represents the Discord voice protocol.
 
     This is an abstract class. The library provides a concrete implementation
@@ -164,6 +165,7 @@ class VoiceProtocol:
 
 
 class VoiceClient(VoiceProtocol):
+
     """Represents a Discord voice connection.
 
     You do not create these, you typically get them from

@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 
 
 class StageInstance(Hashable):
+
     """Represents a stage instance of a stage channel in a guild.
 
     .. versionadded:: 2.0

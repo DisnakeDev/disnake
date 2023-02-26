@@ -98,6 +98,7 @@ async def _call_autocompleter(
 
 
 class SubCommandGroup(InvokableApplicationCommand):
+
     """A class that implements the protocol for a bot slash command group.
 
     These are not created manually, instead they are created via the
@@ -224,6 +225,7 @@ class SubCommandGroup(InvokableApplicationCommand):
 
 
 class SubCommand(InvokableApplicationCommand):
+
     """A class that implements the protocol for a bot slash subcommand.
 
     These are not created manually, instead they are created via the
@@ -380,6 +382,7 @@ class SubCommand(InvokableApplicationCommand):
 
 
 class InvokableSlashCommand(InvokableApplicationCommand):
+
     """A class that implements the protocol for a bot slash command.
 
     These are not created manually, instead they are created via the

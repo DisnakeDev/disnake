@@ -39,6 +39,7 @@ __all__ = (
 
 
 class DiscordException(Exception):
+
     """Base exception class for disnake.
 
     Ideally speaking, this could be caught to handle any exceptions raised from this library.
@@ -48,6 +49,7 @@ class DiscordException(Exception):
 
 
 class ClientException(DiscordException):
+
     """Exception that's raised when an operation in the :class:`Client` fails.
 
     These are usually for exceptions that happened due to user input.
@@ -57,12 +59,14 @@ class ClientException(DiscordException):
 
 
 class NoMoreItems(DiscordException):
+
     """Exception that is raised when an async iteration operation has no more items."""
 
     pass
 
 
 class GatewayNotFound(DiscordException):
+
     """An exception that is raised when the gateway for Discord could not be found"""
 
     def __init__(self) -> None:
@@ -89,6 +93,7 @@ def _flatten_error_dict(d: Dict[str, Any], key: str = "") -> Dict[str, str]:
 
 
 class HTTPException(DiscordException):
+
     """Exception that's raised when an HTTP request operation fails.
 
     Attributes
@@ -135,6 +140,7 @@ class HTTPException(DiscordException):
 
 
 class Forbidden(HTTPException):
+
     """Exception that's raised for when status code 403 occurs.
 
     Subclass of :exc:`HTTPException`.
@@ -144,6 +150,7 @@ class Forbidden(HTTPException):
 
 
 class NotFound(HTTPException):
+
     """Exception that's raised for when status code 404 occurs.
 
     Subclass of :exc:`HTTPException`.
@@ -153,6 +160,7 @@ class NotFound(HTTPException):
 
 
 class DiscordServerError(HTTPException):
+
     """Exception that's raised for when a 500 range status code occurs.
 
     Subclass of :exc:`HTTPException`.
@@ -164,6 +172,7 @@ class DiscordServerError(HTTPException):
 
 
 class InvalidData(ClientException):
+
     """Exception that's raised when the library encounters unknown
     or invalid data from Discord.
     """
@@ -172,6 +181,7 @@ class InvalidData(ClientException):
 
 
 class WebhookTokenMissing(DiscordException):
+
     """Exception that's raised when a :class:`Webhook` or :class:`SyncWebhook` is missing a token to make requests with.
 
     .. versionadded:: 2.6
@@ -181,6 +191,7 @@ class WebhookTokenMissing(DiscordException):
 
 
 class LoginFailure(ClientException):
+
     """Exception that's raised when the :meth:`Client.login` function
     fails to log you in from improper credentials or some other misc.
     failure.
@@ -190,6 +201,7 @@ class LoginFailure(ClientException):
 
 
 class SessionStartLimitReached(ClientException):
+
     """Exception that's raised when :meth:`Client.connect` function
     fails to connect to Discord due to the session start limit being reached.
 
@@ -211,6 +223,7 @@ class SessionStartLimitReached(ClientException):
 
 
 class ConnectionClosed(ClientException):
+
     """Exception that's raised when the gateway connection is
     closed for reasons that could not be handled internally.
 
@@ -277,6 +290,7 @@ class ConnectionClosed(ClientException):
 
 
 class PrivilegedIntentsRequired(ClientException):
+
     """Exception that's raised when the gateway is requesting privileged intents
     but they're not ticked in the developer page yet.
 
@@ -305,6 +319,7 @@ class PrivilegedIntentsRequired(ClientException):
 
 
 class InteractionException(ClientException):
+
     """Exception that's raised when an interaction operation fails
 
     .. versionadded:: 2.0
@@ -319,6 +334,7 @@ class InteractionException(ClientException):
 
 
 class InteractionTimedOut(InteractionException):
+
     """Exception that's raised when an interaction takes more than 3 seconds
     to respond but is not deferred.
 
@@ -346,6 +362,7 @@ class InteractionTimedOut(InteractionException):
 
 
 class InteractionResponded(InteractionException):
+
     """Exception that's raised when sending another interaction response using
     :class:`InteractionResponse` when one has already been done before.
 
@@ -365,6 +382,7 @@ class InteractionResponded(InteractionException):
 
 
 class InteractionNotResponded(InteractionException):
+
     """Exception that's raised when editing an interaction response without
     sending a response message first.
 
@@ -384,6 +402,7 @@ class InteractionNotResponded(InteractionException):
 
 
 class ModalChainNotSupported(InteractionException):
+
     """Exception that's raised when responding to a modal with another modal.
 
     .. versionadded:: 2.4
@@ -400,6 +419,7 @@ class ModalChainNotSupported(InteractionException):
 
 
 class InteractionNotEditable(InteractionException):
+
     """Exception that's raised when trying to use :func:`InteractionResponse.edit_message`
     on an interaction without an associated message (which is thus non-editable).
 
@@ -417,6 +437,7 @@ class InteractionNotEditable(InteractionException):
 
 
 class LocalizationKeyError(DiscordException):
+
     """Exception that's raised when a localization key lookup fails.
 
     .. versionadded:: 2.5

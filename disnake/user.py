@@ -259,6 +259,7 @@ class BaseUser(_UserTag):
 
 
 class ClientUser(BaseUser):
+
     """Represents your Discord user.
 
     .. container:: operations
@@ -390,6 +391,7 @@ class ClientUser(BaseUser):
 
 
 class User(BaseUser, disnake.abc.Messageable):
+
     """Represents a Discord user.
 
     .. container:: operations

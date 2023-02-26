@@ -49,6 +49,7 @@ if TYPE_CHECKING:
 
 @dataclass
 class Flag:
+
     """Represents a flag parameter for :class:`FlagConverter`.
 
     The :func:`.flag` function helps
@@ -428,6 +429,7 @@ async def convert_flag(ctx: Context, argument: str, flag: Flag, annotation: Any 
 
 
 class FlagConverter(metaclass=FlagsMeta):
+
     """A converter that allows for a user-friendly flag syntax.
 
     The flags are defined using :pep:`526` type annotations similar

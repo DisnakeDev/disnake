@@ -31,6 +31,7 @@ class _EmojiTag:
 
 
 class PartialEmoji(_EmojiTag, AssetMixin):
+
     """Represents a "partial" emoji.
 
     This model will be given in two scenarios:

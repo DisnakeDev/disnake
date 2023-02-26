@@ -98,6 +98,7 @@ T = TypeVar("T")
 
 
 class Interaction:
+
     """A base class representing a user-initiated Discord interaction.
 
     An interaction happens when a user performs an action that the client needs to
@@ -709,6 +710,7 @@ class Interaction:
 
 
 class InteractionResponse:
+
     """Represents a Discord interaction response.
 
     This type can be accessed through :attr:`Interaction.response`.
@@ -1399,6 +1401,7 @@ class _InteractionMessageState:
 
 
 class InteractionMessage(Message):
+
     """Represents the original interaction response message.
 
     This allows you to edit or delete the message associated with
@@ -1714,6 +1717,7 @@ class InteractionMessage(Message):
 
 
 class InteractionDataResolved(Dict[str, Any]):
+
     """Represents the resolved data related to an interaction.
 
     .. versionadded:: 2.1

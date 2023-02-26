@@ -26,6 +26,7 @@ MISSING = utils.MISSING
 
 
 class WelcomeScreenChannel:
+
     """Represents a Discord welcome screen channel.
 
     .. versionadded:: 2.5
@@ -102,6 +103,7 @@ class WelcomeScreenChannel:
 
 
 class WelcomeScreen:
+
     """Represents a Discord welcome screen for a :class:`Guild`.
 
     .. versionadded:: 2.5

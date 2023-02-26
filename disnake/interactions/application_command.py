@@ -42,6 +42,7 @@ if TYPE_CHECKING:
 
 
 class ApplicationCommandInteraction(Interaction):
+
     """Represents an interaction with an application command.
 
     Current examples are slash commands, user commands and message commands.
@@ -120,6 +121,7 @@ class ApplicationCommandInteraction(Interaction):
 
 
 class GuildCommandInteraction(ApplicationCommandInteraction):
+
     """An :class:`ApplicationCommandInteraction` subclass, primarily meant for annotations.
 
     This prevents the command from being invoked in DMs by automatically setting
@@ -138,6 +140,7 @@ class GuildCommandInteraction(ApplicationCommandInteraction):
 
 
 class UserCommandInteraction(ApplicationCommandInteraction):
+
     """An :class:`ApplicationCommandInteraction` subclass meant for annotations.
 
     No runtime behavior is changed but annotations are modified
@@ -148,6 +151,7 @@ class UserCommandInteraction(ApplicationCommandInteraction):
 
 
 class MessageCommandInteraction(ApplicationCommandInteraction):
+
     """An :class:`ApplicationCommandInteraction` subclass meant for annotations.
 
     No runtime behavior is changed but annotations are modified
@@ -158,6 +162,7 @@ class MessageCommandInteraction(ApplicationCommandInteraction):
 
 
 class ApplicationCommandInteractionData(Dict[str, Any]):
+
     """Represents the data of an interaction with an application command.
 
     .. versionadded:: 2.1
@@ -255,6 +260,7 @@ class ApplicationCommandInteractionData(Dict[str, Any]):
 
 
 class ApplicationCommandInteractionDataOption(Dict[str, Any]):
+
     """This class represents the structure of an interaction data option from the API.
 
     Attributes
