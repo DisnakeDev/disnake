@@ -48,7 +48,7 @@ Creating a pull request is fairly simple, just make sure it focuses on a single 
 We would greatly appreciate the code submitted to be of a consistent style with other code in disnake. This project follows PEP-8 guidelines (mostly) with a column limit of 100 characters.
 
 
-We require [`PDM`](https://pdm.fming.dev/) for development. If PDM is not already installed on your system, you can follow their [installation steps here](https://github.com/pdm-project/pdm#installation) to get started.
+We use [`PDM`](https://pdm.fming.dev/) for development. If PDM is not already installed on your system, you can follow their [installation steps here](https://pdm.fming.dev/latest/#installation) to get started.
 
 Once PDM is installed and avaliable, use the following command to initialise a virtual environment, install the necessary development dependencies, and install the [`pre-commit`](https://pre-commit.com/#quick-start) hooks.
 .
