@@ -92,6 +92,73 @@ def slotscheck(session: nox.Session):
     session.run("python", "-m", "slotscheck", "--verbose", "-m", "disnake")
 
 
+@nox.session
+def autotyping(session: nox.Session):
+    """Run autotyping.
+
+    Because of the nature of changes that autotyping makes, and the goal design of examples,
+    this runs on each folder in the repository with specific settings.
+    """
+    session.run_always("pdm", "install", "-dG", "codemod", external=True)
+
+    env = {"LIBCST_PARSER_TYPE": "native"}
+    base_command = ["python", "-m", "libcst.tool", "codemod", "autotyping.AutotypeCommand"]
+    commands = {
+        "disnake": [
+            "--safe",
+            "--bool-param",
+            "--int-param",
+            "--float-param",
+            "--str-param",
+            "--bytes-param",
+            "--annotate-imprecise-magics",
+        ],
+        "examples": [
+            "--scalar-return",
+            "--bool-param",
+            "--bool-param",
+            "--int-param",
+            "--float-param",
+            "--str-param",
+            "--bytes-param",
+        ],
+        "scripts": [
+            "--aggressive",
+        ],
+        "tests": [
+            "--aggressive",
+        ],
+        "test_bot": [
+            "--aggressive",
+        ],
+    }
+
+    if session.posargs:
+        # short circuit with the provided arguments
+        # if there's just one file argument, give it the defaults that we normally use
+        posargs = session.posargs
+        if len(posargs) == 1 and not posargs[0].startswith("--"):
+            module = posargs[0].split("/")[0]
+            try:
+                posargs += commands[module]
+            except KeyError:
+                pass
+        session.run(*base_command, *posargs, env=env)
+        return
+
+    # run the custom fixers
+    any_change_made = False
+    for module, options in commands.items():
+        try:
+            session.run(*base_command, module, *options, env=env)
+        except Exception as e:
+            session.log(e)
+            any_change_made = True
+
+    if any_change_made:
+        session.error("Typings were added")
+
+
 @nox.session(name="codemod")
 def codemod(session: nox.Session):
     """Run libcst codemods."""
@@ -104,6 +171,10 @@ def codemod(session: nox.Session):
         session.log("Transformers: " + ", ".join(transformers))
 
         for trans in transformers:
+            # remove autotyping transformers
+            if trans.startswith("autotyping"):
+                session.log("Skipping autotyping transformer.")
+                continue
             session.run(
                 "python", "-m", "libcst.tool", "codemod", trans, "disnake", "--hide-progress"
             )
@@ -121,6 +192,8 @@ def codemod(session: nox.Session):
             )
         else:
             session.run("python", "-m", "libcst.tool", "list")
+    if not session.interactive:
+        session.notify("autotyping")
 
 
 @nox.session()
