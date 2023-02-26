@@ -504,7 +504,12 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         .. versionchanged:: 2.9
             Added ``topic``, ``position``, ``nsfw``, ``category``, ``slowmode_delay``,
-            ``default_auto_archive_duration`` and ``news`` keyword-only parameters.
+            ``default_thread_slowmode_delay``, ``default_auto_archive_duration``, ``news``
+            and ``overwrites`` keyword-only parameters.
+
+        .. note::
+            The current :attr:`TextChannel.flags` value won't be cloned.
+            This is a discord limitation.
 
         Parameters
         ----------
@@ -516,10 +521,6 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             The position of the new channel. If not provided, defaults to this channel's position.
         nsfw: :class:`bool`
             Whether the new channel should be marked as NSFW. If not provided, defaults to this channel's NSFW value.
-
-            .. note::
-                If the guild does not have the ``NEWS`` feature enabled this will default to this :attr:`TextChannel.type`.
-
         category: Optional[:class:`abc.Snowflake`]
             The category where the new channel should be grouped. If not provided, defaults to this channel's category.
         slowmode_delay: :class:`int`
@@ -1344,8 +1345,12 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         .. versionchanged:: 2.9
             Added ``bitrate``, ``user_limit``, ``position``, ``category``,
-            ``rtc_region``, ``video_quality_mode``, ``nsfw`` and ``slowmode_delay``
-            keyword-only parameters.
+            ``rtc_region``, ``video_quality_mode``, ``nsfw``, ``slowmode_delay``
+            and ``overwrites`` keyword-only parameters.
+
+        .. note::
+            The current :attr:`VoiceChannel.flags` value won't be cloned.
+            This is a discord limitation.
 
         Parameters
         ----------
@@ -2047,7 +2052,11 @@ class StageChannel(VocalGuildChannel):
 
         .. versionchanged:: 2.9
             Added ``position``, ``category``, ``rtc_region``,
-            ``video_quality_mode`` and ``bitrate`` keyword-only parameters.
+            ``video_quality_mode``, ``bitrate`` and ``overwrites`` keyword-only parameters.
+
+        .. note::
+            The current :attr:`StageChannel.flags` value won't be cloned.
+            This is a discord limitation.
 
         Parameters
         ----------
@@ -2482,7 +2491,11 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         do this.
 
         .. versionchanged:: 2.9
-            Added ``position`` and ``nsfw`` keyword-only parameters.
+            Added ``position``, ``nsfw`` and ``overwrites`` keyword-only parameters.
+
+        .. note::
+            The current :attr:`CategoryChannel.flags` value won't be cloned.
+            This is a discord limitation.
 
         Parameters
         ----------
@@ -3337,8 +3350,12 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         .. versionchanged:: 2.9
             Added new ``topic``, ``position``, ``nsfw``, ``category``, ``slowmode_delay``,
             ``default_thread_slowmode_delay``, ``default_auto_archive_duration``,
-            ``available_tags``, ``default_reaction`` and ``default_sort_order``
-            keyword-only paremters.
+            ``available_tags``, ``default_reaction``, ``default_sort_order``
+            and ``overwrites`` keyword-only paremters.
+
+        .. note::
+            The current :attr:`ForumChannel.flags` value won't be cloned.
+            This is a discord limitation.
 
         Parameters
         ----------
