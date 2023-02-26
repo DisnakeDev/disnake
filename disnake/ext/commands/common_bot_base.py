@@ -462,8 +462,8 @@ class CommonBotBase(Generic[CogT]):
     def _resolve_name(self, name: str, package: Optional[str]) -> str:
         try:
             return importlib.util.resolve_name(name, package)
-        except ImportError:
-            raise errors.ExtensionNotFound(name) from None
+        except ImportError as e:
+            raise errors.ExtensionNotFound(name) from e
 
     def load_extension(self, name: str, *, package: Optional[str] = None) -> None:
         """Loads an extension.
