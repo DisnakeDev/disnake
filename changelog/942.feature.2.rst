@@ -1,0 +1,1 @@
+Add edit support for ``user_limit`` to :meth:`StageChannel.edit`.
