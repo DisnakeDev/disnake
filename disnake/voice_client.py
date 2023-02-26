@@ -567,7 +567,6 @@ class VoiceClient(VoiceProtocol):
         OpusNotLoaded
             Source is not opus encoded and opus is not loaded.
         """
-
         if not self.is_connected():
             raise ClientException("Not connected to voice.")
 
@@ -644,7 +643,6 @@ class VoiceClient(VoiceProtocol):
         opus.OpusError
             Encoding the data failed.
         """
-
         self.checked_add("sequence", 1, 65535)
         if encode:
             encoded_data = self.encoder.encode(data, self.encoder.SAMPLES_PER_FRAME)

@@ -229,7 +229,6 @@ class InteractionBotBase(CommonBotBase):
 
         .. versionadded:: 2.7
         """
-
         return CommandSyncFlags._from_value(self._command_sync_flags.value)
 
     def application_commands_iterator(self) -> Iterable[InvokableApplicationCommand]:
@@ -1304,7 +1303,6 @@ class InteractionBotBase(CommonBotBase):
         interaction: :class:`disnake.ApplicationCommandInteraction`
             The interaction to process commands for.
         """
-
         # This usually comes from the blind spots of the sync algorithm.
         # Since not all guild commands are cached, it is possible to experience such issues.
         # In this case, the blind spot is the interaction guild, let's fix it:

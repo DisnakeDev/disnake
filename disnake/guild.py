@@ -2393,7 +2393,6 @@ class Guild(Hashable):
         :class:`GuildScheduledEvent`
             The newly created guild scheduled event.
         """
-
         if entity_type is MISSING:
             if channel is None:
                 entity_type = GuildScheduledEventEntityType.external
@@ -2757,7 +2756,6 @@ class Guild(Hashable):
         :class:`~disnake.BanEntry`
             The ban with the ban data parsed.
         """
-
         return BanIterator(self, limit=limit, before=before, after=after)
 
     async def prune_members(
@@ -4462,7 +4460,6 @@ class Guild(Hashable):
         :class:`Member`
             The newly updated member.
         """
-
         if not (duration is MISSING) ^ (until is MISSING):
             raise ValueError("Exactly one of `duration` and `until` must be provided")
 
@@ -4602,7 +4599,6 @@ class Guild(Hashable):
         :class:`AutoModRule`
             The newly created auto moderation rule.
         """
-
         trigger_type_int = try_enum_to_int(trigger_type)
         if not trigger_metadata and trigger_type_int in (
             AutoModTriggerType.keyword.value,

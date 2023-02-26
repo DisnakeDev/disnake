@@ -119,7 +119,6 @@ def set_attachments(payload: Dict[str, Any], files: Sequence[File]) -> None:
 
     note: this method modifies the provided ``payload`` and ``payload["attachments"]`` collections
     """
-
     attachments = payload.get("attachments", [])
     for index, file in enumerate(files):
         attachments.append(
@@ -140,7 +139,6 @@ def to_multipart(payload: Dict[str, Any], files: Sequence[File]) -> List[Dict[st
     Converts the payload and list of files to a multipart payload,
     as specified by https://discord.com/developers/docs/reference#uploading-files
     """
-
     multipart: List[Dict[str, Any]] = []
     for index, file in enumerate(files):
         multipart.append(
@@ -164,7 +162,6 @@ def to_multipart_with_attachments(
 
     Shorthand for ``set_attachments`` + ``to_multipart``
     """
-
     set_attachments(payload, files)
     return to_multipart(payload, files)
 

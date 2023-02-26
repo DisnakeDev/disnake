@@ -1304,7 +1304,6 @@ def try_enum(cls: Type[T], val: Any) -> T:
 
     If it fails it returns a proxy invalid value instead.
     """
-
     try:
         return cls._enum_value_map_[val]  # type: ignore
     except (KeyError, TypeError, AttributeError):

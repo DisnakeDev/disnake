@@ -743,7 +743,6 @@ class Embed:
 
     def to_dict(self) -> EmbedData:
         """Converts this embed object into a dict."""
-
         # add in the raw data into the dict
         result: EmbedData = {}
         if self._footer is not None:
@@ -869,7 +868,6 @@ class Embed:
         ValueError
             One or more of the embed attributes are too long.
         """
-
         if self.title and len(self.title.strip()) > 256:
             raise ValueError("Embed title cannot be longer than 256 characters")
 

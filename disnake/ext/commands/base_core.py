@@ -263,7 +263,6 @@ class InvokableApplicationCommand(ABC):
         func
             The function that will be used as a check.
         """
-
         self.checks.append(func)
 
     def remove_check(self, func: Check) -> None:
@@ -277,7 +276,6 @@ class InvokableApplicationCommand(ABC):
         func
             The function to remove from the checks.
         """
-
         try:
             self.checks.remove(func)
         except ValueError:
@@ -420,7 +418,6 @@ class InvokableApplicationCommand(ABC):
         TypeError
             The coroutine passed is not actually a coroutine.
         """
-
         if not asyncio.iscoroutinefunction(coro):
             raise TypeError("The error handler must be a coroutine.")
 
@@ -595,7 +592,6 @@ class InvokableApplicationCommand(ABC):
         :class:`bool`
             A boolean indicating if the application command can be invoked.
         """
-
         original = inter.application_command
         inter.application_command = self
 

@@ -593,7 +593,6 @@ class AutoModRule:
         :class:`AutoModRule`
             The newly updated auto moderation rule.
         """
-
         payload: EditAutoModRulePayload = {}
 
         if name is not MISSING:

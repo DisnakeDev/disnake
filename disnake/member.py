@@ -695,7 +695,6 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         .. versionadded:: 2.3
         """
-
         if self._communication_disabled_until is None:
             return None
 

@@ -519,7 +519,6 @@ class BotBase(CommonBotBase, GroupMixin):
             The invocation context. The type of this can change via the
             ``cls`` parameter.
         """
-
         view = StringView(message.content)
         ctx = cast("CXT", cls(prefix=None, view=view, bot=self, message=message))
 

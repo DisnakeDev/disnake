@@ -795,7 +795,6 @@ def loop(
         an invalid value for the ``time`` parameter was passed,
         or ``time`` parameter was passed in conjunction with relative time parameters.
     """
-
     if (origin := get_origin(cls)) is not None:
         cls = origin
 

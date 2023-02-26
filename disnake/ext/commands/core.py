@@ -703,7 +703,6 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         For example, in ``?one two three`` the qualified name would be
         ``one two three``.
         """
-
         parent = self.full_parent_name
         if parent:
             return f"{parent} {self.name}"

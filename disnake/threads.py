@@ -320,7 +320,6 @@ class Thread(Messageable, Hashable):
         Optional[:class:`int`]
             The parent channel's category ID.
         """
-
         parent = self.parent
         if parent is None:
             raise ClientException("Parent channel not found")
@@ -458,7 +457,6 @@ class Thread(Messageable, Hashable):
         :class:`~disnake.Permissions`
             The resolved permissions for the member or role.
         """
-
         parent = self.parent
         if parent is None:
             raise ClientException("Parent channel not found")
@@ -582,7 +580,6 @@ class Thread(Messageable, Hashable):
         List[:class:`.Message`]
             The list of messages that were deleted.
         """
-
         if check is MISSING:
             check = lambda m: True
 
@@ -866,7 +863,6 @@ class Thread(Messageable, Hashable):
         List[:class:`ThreadMember`]
             All thread members in the thread.
         """
-
         members = await self._state.http.get_thread_members(self.id)
         return [ThreadMember(parent=self, data=data) for data in members]
 
@@ -923,7 +919,6 @@ class Thread(Messageable, Hashable):
         HTTPException
             Editing the thread failed.
         """
-
         if not tags:
             return
 
@@ -961,7 +956,6 @@ class Thread(Messageable, Hashable):
         HTTPException
             Editing the thread failed.
         """
-
         if not tags:
             return
 
@@ -988,7 +982,6 @@ class Thread(Messageable, Hashable):
         :class:`PartialMessage`
             The partial message.
         """
-
         from .message import PartialMessage
 
         return PartialMessage(channel=self, id=message_id)

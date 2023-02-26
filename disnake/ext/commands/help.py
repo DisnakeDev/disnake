@@ -540,7 +540,6 @@ class HelpCommand:
         List[:class:`Command`]
             A list of commands that passed the filter.
         """
-
         # set `key` iff `sort` is true
         if not sort:
             key = None

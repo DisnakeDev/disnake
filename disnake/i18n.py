@@ -345,7 +345,6 @@ class LocalizationStore(LocalizationProtocol):
             The localizations for the provided key.
             Returns ``None`` if no localizations could be found and :attr:`strict` is disabled.
         """
-
         data = self._loc.get(key)
         if data is None and self.strict:
             raise LocalizationKeyError(key)
@@ -367,7 +366,6 @@ class LocalizationStore(LocalizationProtocol):
         RuntimeError
             The provided path is invalid or couldn't be loaded
         """
-
         path = Path(path)
 
         if path.is_file():
@@ -388,7 +386,6 @@ class LocalizationStore(LocalizationProtocol):
         If an exception occurs, the previous data gets restored and the exception is re-raised.
         See :func:`~LocalizationStore.load` for possible raised exceptions.
         """
-
         old = self._loc
         try:
             self._loc = defaultdict(dict)

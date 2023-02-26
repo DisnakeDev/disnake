@@ -252,7 +252,6 @@ class WidgetSettings:
         :class:`WidgetSettings`
             The new widget settings.
         """
-
         return await self.guild.edit_widget(enabled=enabled, channel=channel, reason=reason)
 
 
