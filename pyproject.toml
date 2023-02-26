@@ -98,7 +98,7 @@ docs = { cmd = "nox -Rs docs --", help = "Build the documentation for developmen
 isort = { composite = ["lint isort"], help = "Run isort" }
 lint = { cmd = "nox -Rs lint --", help = "Check all files for linting errors" }
 pyright = { cmd = "nox -Rs pyright --", help = "Run pyright" }
-setup_env = { cmd = "pdm install -d -G speed -G docs -G voice -G nox", help = "Set up the local environment and all dependencies" }
+setup_env = { cmd = "pdm install -d -G speed -G docs -G voice", help = "Set up the local environment and all dependencies" }
 post_setup_env = { composite = ["python -m ensurepip --default-pip", "pre-commit install --install-hooks"] }
 test = { cmd = "nox -Rs test --", help = "Run pytest" }
 
