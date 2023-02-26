@@ -381,6 +381,9 @@ class RawTypingEvent(_RawReprMixin):
         The member object of the user who started typing or ``None`` if it was in a DM.
     timestamp: :class:`datetime.datetime`
         The UTC datetime when the user started typing.
+
+        .. versionchanged:: 2.9
+            Changed from naive to aware datetime.
     """
 
     __slots__ = ("user_id", "channel_id", "guild_id", "member", "timestamp")
