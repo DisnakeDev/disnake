@@ -118,7 +118,7 @@ class AutoModBlockMessageAction(AutoModAction):
 
     Parameters
     ----------
-    custom_message: :class:`str`
+    custom_message: Optional[:class:`str`]
         The custom message to show to the user when the rule is triggered.
         Maximum length is 150 characters.
 
@@ -135,10 +135,10 @@ class AutoModBlockMessageAction(AutoModAction):
 
     _metadata: AutoModBlockMessageActionMetadata
 
-    def __init__(self, custom_message: str) -> None:
+    def __init__(self, custom_message: Optional[str] = None) -> None:
         super().__init__(type=AutoModActionType.block_message)
 
-        self._metadata["custom_message"] = custom_message
+        self._metadata["custom_message"] = custom_message or ""
 
     @property
     def custom_message(self) -> Optional[str]:
