@@ -364,7 +364,8 @@ class Option:
         max_length: Optional[int] = None,
     ) -> None:
         """Adds an option to the current list of options,
-        parameters are the same as for :class:`Option`."""
+        parameters are the same as for :class:`Option`.
+        """
         type = type or OptionType.string
         self.options.append(
             Option(

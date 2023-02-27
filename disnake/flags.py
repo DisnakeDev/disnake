@@ -283,8 +283,7 @@ class BaseFlags:
 
 
 class ListBaseFlags(BaseFlags, no_fill_flags=True):
-    """
-    A base class for flags that aren't powers of 2.
+    """A base class for flags that aren't powers of 2.
     Instead, values are used as exponents to map to powers of 2 to avoid collisions,
     and only the combined value is stored, which allows all bitwise operations to work as expected.
     """

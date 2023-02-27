@@ -83,8 +83,7 @@ __all__ = (
 
 
 class CommandError(DiscordException):
-    """
-    The base exception type for all command related errors.
+    """The base exception type for all command related errors.
 
     This inherits from :exc:`disnake.DiscordException`.
 

@@ -835,8 +835,7 @@ class ThreadLayout(Enum):
 
 
 class Event(Enum):
-    """
-    Represents all the events of the library.
+    """Represents all the events of the library.
 
     These offer to register listeners/events in a more pythonic way; additionally autocompletion and documentation are both supported.
 
@@ -1304,7 +1303,6 @@ def try_enum(cls: Type[T], val: Any) -> T:
 
     If it fails it returns a proxy invalid value instead.
     """
-
     try:
         return cls._enum_value_map_[val]  # type: ignore
     except (KeyError, TypeError, AttributeError):

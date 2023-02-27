@@ -3825,8 +3825,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
 
     @property
     def jump_url(self) -> str:
-        """
-        A URL that can be used to jump to this channel.
+        """A URL that can be used to jump to this channel.
 
         .. versionadded:: 2.4
         """
