@@ -531,7 +531,7 @@ class ParamInfo:
         self.large = large
 
     def copy(self) -> ParamInfo:
-        # n. b. this method needs to be manually updated with a new attribute is added.
+        # n. b. this method needs to be manually updated when a new attribute is added.
         cls = self.__class__
         ins = cls.__new__(cls)
 
