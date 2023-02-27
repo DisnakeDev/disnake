@@ -41,8 +41,7 @@ __all__ = ("GuildScheduledEventMetadata", "GuildScheduledEvent")
 
 
 class GuildScheduledEventMetadata:
-    """
-    Represents a guild scheduled event entity metadata.
+    """Represents a guild scheduled event entity metadata.
 
     .. versionadded:: 2.3
 
@@ -74,8 +73,7 @@ class GuildScheduledEventMetadata:
 
 
 class GuildScheduledEvent(Hashable):
-    """
-    Represents a guild scheduled event.
+    """Represents a guild scheduled event.
 
     .. versionadded:: 2.3
 

@@ -225,11 +225,10 @@ class InteractionBotBase(CommonBotBase):
 
     @property
     def command_sync_flags(self) -> CommandSyncFlags:
-        """:class:`~.ext.commands.CommandSyncFlags`: The command sync flags configured for this bot.
+        """:class:`~.CommandSyncFlags`: The command sync flags configured for this bot.
 
         .. versionadded:: 2.7
         """
-
         return CommandSyncFlags._from_value(self._command_sync_flags.value)
 
     def application_commands_iterator(self) -> Iterable[InvokableApplicationCommand]:
@@ -950,7 +949,7 @@ class InteractionBotBase(CommonBotBase):
     ) -> None:
         """|coro|
 
-        Similar to :meth:`on_slash_command_error` but for user commands.
+        Similar to :meth:`on_slash_command_error() <Bot.on_slash_command_error>` but for user commands.
         """
         if self.extra_events.get("on_user_command_error", None):
             return
@@ -970,7 +969,7 @@ class InteractionBotBase(CommonBotBase):
     ) -> None:
         """|coro|
 
-        Similar to :meth:`on_slash_command_error` but for message commands.
+        Similar to :meth:`on_slash_command_error() <Bot.on_slash_command_error>` but for message commands.
         """
         if self.extra_events.get("on_message_command_error", None):
             return
@@ -1133,8 +1132,7 @@ class InteractionBotBase(CommonBotBase):
         [Callable[[ApplicationCommandInteraction], Any]],
         Callable[[ApplicationCommandInteraction], Any],
     ]:
-        """
-        A decorator that adds a global application command check to the bot.
+        """A decorator that adds a global application command check to the bot.
 
         A global check is similar to a :func:`check` that is applied
         on a per command basis except it is run before any application command checks
@@ -1210,7 +1208,8 @@ class InteractionBotBase(CommonBotBase):
 
     def before_slash_command_invoke(self, coro: CFT) -> CFT:
         """Similar to :meth:`Bot.before_invoke` but for slash commands,
-        and it takes an :class:`.ApplicationCommandInteraction` as its only parameter."""
+        and it takes an :class:`.ApplicationCommandInteraction` as its only parameter.
+        """
         if not asyncio.iscoroutinefunction(coro):
             raise TypeError("The pre-invoke hook must be a coroutine.")
 
@@ -1219,7 +1218,8 @@ class InteractionBotBase(CommonBotBase):
 
     def after_slash_command_invoke(self, coro: CFT) -> CFT:
         """Similar to :meth:`Bot.after_invoke` but for slash commands,
-        and it takes an :class:`.ApplicationCommandInteraction` as its only parameter."""
+        and it takes an :class:`.ApplicationCommandInteraction` as its only parameter.
+        """
         if not asyncio.iscoroutinefunction(coro):
             raise TypeError("The post-invoke hook must be a coroutine.")
 
@@ -1304,7 +1304,6 @@ class InteractionBotBase(CommonBotBase):
         interaction: :class:`disnake.ApplicationCommandInteraction`
             The interaction to process commands for.
         """
-
         # This usually comes from the blind spots of the sync algorithm.
         # Since not all guild commands are cached, it is possible to experience such issues.
         # In this case, the blind spot is the interaction guild, let's fix it:

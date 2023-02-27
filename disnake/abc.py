@@ -483,7 +483,8 @@ class GuildChannel(ABC):
     @property
     def changed_roles(self) -> List[Role]:
         """List[:class:`.Role`]: Returns a list of roles that have been overridden from
-        their default values in the :attr:`.Guild.roles` attribute."""
+        their default values in the :attr:`.Guild.roles` attribute.
+        """
         ret = []
         g = self.guild
         for overwrite in filter(lambda o: o.is_role(), self._overwrites):
@@ -603,8 +604,7 @@ class GuildChannel(ABC):
 
     @property
     def jump_url(self) -> str:
-        """
-        A URL that can be used to jump to this channel.
+        """A URL that can be used to jump to this channel.
 
         .. versionadded:: 2.4
 
@@ -881,8 +881,7 @@ class GuildChannel(ABC):
     async def set_permissions(
         self, target, *, overwrite=MISSING, reason=None, **permissions
     ) -> None:
-        """
-        |coro|
+        """|coro|
 
         Sets the channel specific permission overwrites for a target in the
         channel.
@@ -1331,9 +1330,10 @@ class Messageable:
     - :class:`~disnake.GroupChannel`
     - :class:`~disnake.User`
     - :class:`~disnake.Member`
-    - :class:`~disnake.ext.commands.Context`
     - :class:`~disnake.Thread`
     - :class:`~disnake.VoiceChannel`
+    - :class:`~disnake.StageChannel`
+    - :class:`~disnake.ext.commands.Context`
     - :class:`~disnake.PartialMessageable`
     """
 
@@ -1355,6 +1355,7 @@ class Messageable:
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: AllowedMentions = ...,
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
@@ -1375,6 +1376,7 @@ class Messageable:
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: AllowedMentions = ...,
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
@@ -1395,6 +1397,7 @@ class Messageable:
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: AllowedMentions = ...,
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
@@ -1415,6 +1418,7 @@ class Messageable:
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: AllowedMentions = ...,
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
@@ -1435,7 +1439,8 @@ class Messageable:
         stickers: Optional[Sequence[Union[GuildSticker, StickerItem]]] = None,
         delete_after: Optional[float] = None,
         nonce: Optional[Union[str, int]] = None,
-        suppress_embeds: bool = False,
+        suppress_embeds: Optional[bool] = None,
+        flags: Optional[MessageFlags] = None,
         allowed_mentions: Optional[AllowedMentions] = None,
         reference: Optional[Union[Message, MessageReference, PartialMessage]] = None,
         mention_author: Optional[bool] = None,
@@ -1535,6 +1540,16 @@ class Messageable:
 
             .. versionadded:: 2.5
 
+        flags: :class:`.MessageFlags`
+            The flags to set for this message.
+            Only :attr:`~.MessageFlags.suppress_embeds` and :attr:`~.MessageFlags.suppress_notifications`
+            are supported.
+
+            If parameter ``suppress_embeds`` is provided,
+            that will override the setting of :attr:`.MessageFlags.suppress_embeds`.
+
+            .. versionadded:: 2.9
+
         Raises
         ------
         HTTPException
@@ -1623,10 +1638,12 @@ class Messageable:
         else:
             components_payload = None
 
-        if suppress_embeds:
-            flags = MessageFlags.suppress_embeds.flag
-        else:
-            flags = 0
+        flags_payload = None
+        if suppress_embeds is not None:
+            flags = MessageFlags._from_value(0 if flags is None else flags.value)
+            flags.suppress_embeds = suppress_embeds
+        if flags is not None:
+            flags_payload = flags.value
 
         if files is not None:
             if len(files) > 10:
@@ -1646,7 +1663,7 @@ class Messageable:
                     message_reference=reference_payload,
                     stickers=stickers_payload,
                     components=components_payload,
-                    flags=flags,
+                    flags=flags_payload,
                 )
             finally:
                 for f in files:
@@ -1662,7 +1679,7 @@ class Messageable:
                 message_reference=reference_payload,
                 stickers=stickers_payload,
                 components=components_payload,
-                flags=flags,
+                flags=flags_payload,
             )
 
         ret = state.create_message(channel=channel, data=data)

@@ -89,7 +89,6 @@ _API_VERSION = 10
 def _workaround_set_api_version(version: Literal[9, 10]) -> None:
     """Stopgap measure for verified bots without message content intent while intent is not enforced on api v9.
 
-
     .. note::
         This must be ran **before** connecting to the gateway.
     """
@@ -114,12 +113,10 @@ async def json_or_text(response: aiohttp.ClientResponse) -> Union[Dict[str, Any]
 
 
 def set_attachments(payload: Dict[str, Any], files: Sequence[File]) -> None:
-    """
-    Updates the payload's attachments list based on the provided files
+    """Updates the payload's attachments list based on the provided files
 
     note: this method modifies the provided ``payload`` and ``payload["attachments"]`` collections
     """
-
     attachments = payload.get("attachments", [])
     for index, file in enumerate(files):
         attachments.append(
@@ -136,11 +133,9 @@ def set_attachments(payload: Dict[str, Any], files: Sequence[File]) -> None:
 
 
 def to_multipart(payload: Dict[str, Any], files: Sequence[File]) -> List[Dict[str, Any]]:
-    """
-    Converts the payload and list of files to a multipart payload,
+    """Converts the payload and list of files to a multipart payload,
     as specified by https://discord.com/developers/docs/reference#uploading-files
     """
-
     multipart: List[Dict[str, Any]] = []
     for index, file in enumerate(files):
         multipart.append(
@@ -159,12 +154,10 @@ def to_multipart(payload: Dict[str, Any], files: Sequence[File]) -> List[Dict[st
 def to_multipart_with_attachments(
     payload: Dict[str, Any], files: Sequence[File]
 ) -> List[Dict[str, Any]]:
-    """
-    Updates the payload's attachments and converts it to a multipart payload
+    """Updates the payload's attachments and converts it to a multipart payload
 
     Shorthand for ``set_attachments`` + ``to_multipart``
     """
-
     set_attachments(payload, files)
     return to_multipart(payload, files)
 
@@ -1746,13 +1739,17 @@ class HTTPClient:
         self,
         guild_id: Snowflake,
         limit: int = 100,
+        # only one of these two may be specified, otherwise `after` gets ignored
         before: Optional[Snowflake] = None,
+        after: Optional[Snowflake] = None,
         user_id: Optional[Snowflake] = None,
         action_type: Optional[audit_log.AuditLogEvent] = None,
     ) -> Response[audit_log.AuditLog]:
         params: Dict[str, Any] = {"limit": limit}
-        if before:
+        if before is not None:
             params["before"] = before
+        if after is not None:
+            params["after"] = after
         if user_id:
             params["user_id"] = user_id
         if action_type:

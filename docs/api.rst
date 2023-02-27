@@ -1511,13 +1511,13 @@ This section documents events related to Discord chat messages.
     Called when someone begins typing a message.
 
     The ``channel`` parameter can be a :class:`abc.Messageable` instance, or a :class:`ForumChannel`.
-    If channel is an :class:`abc.Messageable` instance, it could be a :class:`TextChannel`, :class:`VoiceChannel`, :class:`GroupChannel`,
+    If channel is an :class:`abc.Messageable` instance, it could be a :class:`TextChannel`, :class:`VoiceChannel`, :class:`StageChannel`, :class:`GroupChannel`,
     or :class:`DMChannel`.
 
     .. versionchanged:: 2.5
         ``channel`` may be a type :class:`ForumChannel`
 
-    If the ``channel`` is a :class:`TextChannel`, :class:`ForumChannel`, or :class:`VoiceChannel` then the
+    If the ``channel`` is a :class:`TextChannel`, :class:`ForumChannel`, :class:`VoiceChannel`, or :class:`StageChannel` then the
     ``user`` parameter is a :class:`Member`, otherwise it is a :class:`User`.
 
     If the ``channel`` is a :class:`DMChannel` and the user is not found in the internal user/member cache,
@@ -1785,11 +1785,36 @@ of :class:`enum.Enum`.
         The system message denoting that an auto moderation action was executed.
 
         .. versionadded:: 2.5
+    .. attribute:: role_subscription_purchase
+
+        The system message denoting that a role subscription was purchased.
+
+        .. versionadded:: 2.9
     .. attribute:: interaction_premium_upsell
 
         The system message for an application premium subscription upsell.
 
         .. versionadded:: 2.8
+    .. attribute:: stage_start
+
+        The system message denoting the stage has been started.
+
+        .. versionadded:: 2.9
+    .. attribute:: stage_end
+
+        The system message denoting the stage has ended.
+
+        .. versionadded:: 2.9
+    .. attribute:: stage_speaker
+
+        The system message denoting a user has become a speaker.
+
+        .. versionadded:: 2.9
+    .. attribute:: stage_topic
+
+        The system message denoting the stage topic has been changed.
+
+        .. versionadded:: 2.9
     .. attribute:: guild_application_premium_subscription
 
         The system message denoting that a guild member has subscribed to an application.
@@ -4500,7 +4525,8 @@ AuditLogDiff
         sending another message or creating another thread in the channel.
 
         See also :attr:`TextChannel.slowmode_delay`, :attr:`VoiceChannel.slowmode_delay`,
-        :attr:`ForumChannel.slowmode_delay` or :attr:`Thread.slowmode_delay`.
+        :attr:`StageChannel.slowmode_delay`, :attr:`ForumChannel.slowmode_delay`,
+        or :attr:`Thread.slowmode_delay`.
 
         :type: :class:`int`
 
@@ -4535,7 +4561,7 @@ AuditLogDiff
 
         The voice channel's user limit.
 
-        See also :attr:`VoiceChannel.user_limit`.
+        See also :attr:`VoiceChannel.user_limit`, or :attr:`StageChannel.user_limit`.
 
         :type: :class:`int`
 
@@ -4543,7 +4569,7 @@ AuditLogDiff
 
         Whether the channel is marked as "not safe for work".
 
-        See also :attr:`TextChannel.nsfw`, :attr:`VoiceChannel.nsfw` or :attr:`ForumChannel.nsfw`.
+        See also :attr:`TextChannel.nsfw`, :attr:`VoiceChannel.nsfw`, :attr:`StageChannel.nsfw`, or :attr:`ForumChannel.nsfw`.
 
         :type: :class:`bool`
 

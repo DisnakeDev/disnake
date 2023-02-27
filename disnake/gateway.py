@@ -224,10 +224,11 @@ class KeepAliveHandler(threading.Thread):
                             frame = sys._current_frames()[self._main_thread_id]
                         except KeyError:
                             msg = self.block_msg
+                            _log.warning(msg, self.shard_id, total)
                         else:
                             stack = "".join(traceback.format_stack(frame))
-                            msg = f"{self.block_msg}\nLoop thread traceback (most recent call last):\n{stack}"
-                        _log.warning(msg, self.shard_id, total)
+                            msg = f"{self.block_msg}\nLoop thread traceback (most recent call last):\n%s"
+                            _log.warning(msg, self.shard_id, total, stack)
 
             except Exception:
                 self.stop()
@@ -482,7 +483,6 @@ class DiscordWebSocket:
         asyncio.Future
             A future to wait for.
         """
-
         future = self.loop.create_future()
         entry = EventListener(event=event, predicate=predicate, result=result, future=future)
         self._dispatch_listeners.append(entry)
@@ -490,7 +490,6 @@ class DiscordWebSocket:
 
     async def identify(self) -> None:
         """Sends the IDENTIFY packet."""
-
         state = self._connection
 
         payload: IdentifyCommand = {

@@ -238,7 +238,12 @@ class MessageType(Enum):
     guild_invite_reminder = 22
     context_menu_command = 23
     auto_moderation_action = 24
+    role_subscription_purchase = 25
     interaction_premium_upsell = 26
+    stage_start = 27
+    stage_end = 28
+    stage_speaker = 29
+    stage_topic = 31
     guild_application_premium_subscription = 32
 
 
@@ -734,7 +739,7 @@ class WidgetStyle(Enum):
 # reference: https://discord.com/developers/docs/reference#locales
 class Locale(Enum):
     bg = "bg"
-    "Bulgarian | български"
+    "Bulgarian | български"  # noqa: RUF001
     cs = "cs"
     "Czech | Čeština"
     da = "da"
@@ -742,7 +747,7 @@ class Locale(Enum):
     de = "de"
     "German | Deutsch"
     el = "el"
-    "Greek | Ελληνικά"
+    "Greek | Ελληνικά"  # noqa: RUF001
     en_GB = "en-GB"
     "English, UK | English, UK"
     en_US = "en-US"
@@ -780,7 +785,7 @@ class Locale(Enum):
     ro = "ro"
     "Romanian, Romania | Română"
     ru = "ru"
-    "Russian | Pусский"
+    "Russian | Pусский"  # noqa: RUF001
     sv_SE = "sv-SE"
     "Swedish | Svenska"
     th = "th"
@@ -788,7 +793,7 @@ class Locale(Enum):
     tr = "tr"
     "Turkish | Türkçe"
     uk = "uk"
-    "Ukrainian | Українська"
+    "Ukrainian | Українська"  # noqa: RUF001
     vi = "vi"
     "Vietnamese | Tiếng Việt"
     zh_CN = "zh-CN"
@@ -830,8 +835,7 @@ class ThreadLayout(Enum):
 
 
 class Event(Enum):
-    """
-    Represents all the events of the library.
+    """Represents all the events of the library.
 
     These offer to register listeners/events in a more pythonic way; additionally autocompletion and documentation are both supported.
 
@@ -1299,7 +1303,6 @@ def try_enum(cls: Type[T], val: Any) -> T:
 
     If it fails it returns a proxy invalid value instead.
     """
-
     try:
         return cls._enum_value_map_[val]  # type: ignore
     except (KeyError, TypeError, AttributeError):

@@ -320,7 +320,6 @@ class Thread(Messageable, Hashable):
         Optional[:class:`int`]
             The parent channel's category ID.
         """
-
         parent = self.parent
         if parent is None:
             raise ClientException("Parent channel not found")
@@ -328,8 +327,7 @@ class Thread(Messageable, Hashable):
 
     @property
     def created_at(self) -> datetime.datetime:
-        """
-        :class:`datetime.datetime`: Returns the thread's creation time in UTC.
+        """:class:`datetime.datetime`: Returns the thread's creation time in UTC.
 
         .. versionchanged:: 2.4
             If create_timestamp is provided by discord, that will be used instead of the time in the ID.
@@ -346,8 +344,7 @@ class Thread(Messageable, Hashable):
 
     @property
     def jump_url(self) -> str:
-        """
-        A URL that can be used to jump to this thread.
+        """A URL that can be used to jump to this thread.
 
         .. versionadded:: 2.4
         """
@@ -458,7 +455,6 @@ class Thread(Messageable, Hashable):
         :class:`~disnake.Permissions`
             The resolved permissions for the member or role.
         """
-
         parent = self.parent
         if parent is None:
             raise ClientException("Parent channel not found")
@@ -582,7 +578,6 @@ class Thread(Messageable, Hashable):
         List[:class:`.Message`]
             The list of messages that were deleted.
         """
-
         if check is MISSING:
             check = lambda m: True
 
@@ -866,7 +861,6 @@ class Thread(Messageable, Hashable):
         List[:class:`ThreadMember`]
             All thread members in the thread.
         """
-
         members = await self._state.http.get_thread_members(self.id)
         return [ThreadMember(parent=self, data=data) for data in members]
 
@@ -923,7 +917,6 @@ class Thread(Messageable, Hashable):
         HTTPException
             Editing the thread failed.
         """
-
         if not tags:
             return
 
@@ -961,7 +954,6 @@ class Thread(Messageable, Hashable):
         HTTPException
             Editing the thread failed.
         """
-
         if not tags:
             return
 
@@ -988,7 +980,6 @@ class Thread(Messageable, Hashable):
         :class:`PartialMessage`
             The partial message.
         """
-
         from .message import PartialMessage
 
         return PartialMessage(channel=self, id=message_id)
@@ -1075,8 +1066,7 @@ class ThreadMember(Hashable):
 
 
 class ForumTag(Hashable):
-    """
-    Represents a tag for threads in forum channels.
+    """Represents a tag for threads in forum channels.
 
     .. container:: operations
 
@@ -1206,8 +1196,7 @@ class ForumTag(Hashable):
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
         moderated: bool = MISSING,
     ) -> Self:
-        """
-        Returns a new instance with the given changes applied,
+        """Returns a new instance with the given changes applied,
         for easy use with :func:`ForumChannel.edit`.
         All other fields will be kept intact.
 

@@ -1,6 +1,6 @@
 .. SPDX-License-Identifier: MIT
 
-.. currentmodule:: disnake
+.. currentmodule:: disnake.ext.commands
 
 API Reference
 ===============
@@ -15,9 +15,9 @@ Bots
 Bot
 ~~~~
 
-.. attributetable:: disnake.ext.commands.Bot
+.. attributetable:: Bot
 
-.. autoclass:: disnake.ext.commands.Bot
+.. autoclass:: Bot
     :members:
     :inherited-members:
     :exclude-members: after_invoke, before_invoke, check, check_once, command, event, group, listen, slash_command, user_command, message_command, after_slash_command_invoke, after_user_command_invoke, after_message_command_invoke, before_slash_command_invoke, before_user_command_invoke, before_message_command_invoke
@@ -76,17 +76,17 @@ Bot
 AutoShardedBot
 ~~~~~~~~~~~~~~~~
 
-.. attributetable:: disnake.ext.commands.AutoShardedBot
+.. attributetable:: AutoShardedBot
 
-.. autoclass:: disnake.ext.commands.AutoShardedBot
+.. autoclass:: AutoShardedBot
     :members:
 
 InteractionBot
 ~~~~~~~~~~~~~~~~
 
-.. attributetable:: disnake.ext.commands.InteractionBot
+.. attributetable:: InteractionBot
 
-.. autoclass:: disnake.ext.commands.InteractionBot
+.. autoclass:: InteractionBot
     :members:
     :inherited-members:
     :exclude-members: after_slash_command_invoke, after_user_command_invoke, after_message_command_invoke, before_slash_command_invoke, before_user_command_invoke, before_message_command_invoke, application_command_check, slash_command_check, user_command_check, message_command_check, slash_command_check_once, user_command_check_once, message_command_check_once, event, listen, slash_command, user_command, message_command
@@ -148,9 +148,9 @@ InteractionBot
 AutoShardedInteractionBot
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. attributetable:: disnake.ext.commands.AutoShardedInteractionBot
+.. attributetable:: AutoShardedInteractionBot
 
-.. autoclass:: disnake.ext.commands.AutoShardedInteractionBot
+.. autoclass:: AutoShardedInteractionBot
     :members:
 
 Command Sync
@@ -159,18 +159,18 @@ Command Sync
 CommandSyncFlags
 ~~~~~~~~~~~~~~~~~
 
-.. attributetable:: disnake.ext.commands.CommandSyncFlags
+.. attributetable:: CommandSyncFlags
 
-.. autoclass:: disnake.ext.commands.CommandSyncFlags()
+.. autoclass:: CommandSyncFlags()
     :members:
 
 
 Prefix Helpers
 ----------------
 
-.. autofunction:: disnake.ext.commands.when_mentioned
+.. autofunction:: when_mentioned
 
-.. autofunction:: disnake.ext.commands.when_mentioned_or
+.. autofunction:: when_mentioned_or
 
 .. _ext_commands_api_events:
 
@@ -180,7 +180,7 @@ Event Reference
 These events function similar to :ref:`the regular events <discord-api-events>`, except they
 are custom to the command extension module.
 
-.. function:: disnake.ext.commands.on_command_error(ctx, error)
+.. function:: on_command_error(ctx, error)
 
     An error handler that is called when an error is raised
     inside a command either through user input error, check
@@ -193,7 +193,7 @@ are custom to the command extension module.
     :param error: The error that was raised.
     :type error: :class:`.CommandError` derived
 
-.. function:: disnake.ext.commands.on_slash_command_error(inter, error)
+.. function:: on_slash_command_error(inter, error)
 
     An error handler that is called when an error is raised
     inside a slash command either through user input error, check
@@ -206,7 +206,7 @@ are custom to the command extension module.
     :param error: The error that was raised.
     :type error: :class:`.CommandError` derived
 
-.. function:: disnake.ext.commands.on_user_command_error(inter, error)
+.. function:: on_user_command_error(inter, error)
 
     An error handler that is called when an error is raised
     inside a user command either through check
@@ -219,7 +219,7 @@ are custom to the command extension module.
     :param error: The error that was raised.
     :type error: :class:`.CommandError` derived
 
-.. function:: disnake.ext.commands.on_message_command_error(inter, error)
+.. function:: on_message_command_error(inter, error)
 
     An error handler that is called when an error is raised
     inside a message command either through check
@@ -232,7 +232,7 @@ are custom to the command extension module.
     :param error: The error that was raised.
     :type error: :class:`.CommandError` derived
 
-.. function:: disnake.ext.commands.on_command(ctx)
+.. function:: on_command(ctx)
 
     An event that is called when a command is found and is about to be invoked.
 
@@ -242,7 +242,7 @@ are custom to the command extension module.
     :param ctx: The invocation context.
     :type ctx: :class:`.Context`
 
-.. function:: disnake.ext.commands.on_slash_command(inter)
+.. function:: on_slash_command(inter)
 
     An event that is called when a slash command is found and is about to be invoked.
 
@@ -252,7 +252,7 @@ are custom to the command extension module.
     :param inter: The interaction that invoked this slash command.
     :type inter: :class:`.ApplicationCommandInteraction`
 
-.. function:: disnake.ext.commands.on_user_command(inter)
+.. function:: on_user_command(inter)
 
     An event that is called when a user command is found and is about to be invoked.
 
@@ -262,7 +262,7 @@ are custom to the command extension module.
     :param inter: The interaction that invoked this user command.
     :type inter: :class:`.ApplicationCommandInteraction`
 
-.. function:: disnake.ext.commands.on_message_command(inter)
+.. function:: on_message_command(inter)
 
     An event that is called when a message command is found and is about to be invoked.
 
@@ -272,7 +272,7 @@ are custom to the command extension module.
     :param inter: The interaction that invoked this message command.
     :type inter: :class:`.ApplicationCommandInteraction`
 
-.. function:: disnake.ext.commands.on_command_completion(ctx)
+.. function:: on_command_completion(ctx)
 
     An event that is called when a command has completed its invocation.
 
@@ -282,7 +282,7 @@ are custom to the command extension module.
     :param ctx: The invocation context.
     :type ctx: :class:`.Context`
 
-.. function:: disnake.ext.commands.on_slash_command_completion(inter)
+.. function:: on_slash_command_completion(inter)
 
     An event that is called when a slash command has completed its invocation.
 
@@ -292,7 +292,7 @@ are custom to the command extension module.
     :param inter: The interaction that invoked this slash command.
     :type inter: :class:`.ApplicationCommandInteraction`
 
-.. function:: disnake.ext.commands.on_user_command_completion(inter)
+.. function:: on_user_command_completion(inter)
 
     An event that is called when a user command has completed its invocation.
 
@@ -302,7 +302,7 @@ are custom to the command extension module.
     :param inter: The interaction that invoked this user command.
     :type inter: :class:`.ApplicationCommandInteraction`
 
-.. function:: disnake.ext.commands.on_message_command_completion(inter)
+.. function:: on_message_command_completion(inter)
 
     An event that is called when a message command has completed its invocation.
 
@@ -320,37 +320,37 @@ Commands
 Decorators
 ~~~~~~~~~~~~
 
-.. autofunction:: disnake.ext.commands.command
+.. autofunction:: command
     :decorator:
 
-.. autofunction:: disnake.ext.commands.slash_command
+.. autofunction:: slash_command
     :decorator:
 
-.. autofunction:: disnake.ext.commands.user_command
+.. autofunction:: user_command
     :decorator:
 
-.. autofunction:: disnake.ext.commands.message_command
+.. autofunction:: message_command
     :decorator:
 
-.. autofunction:: disnake.ext.commands.group
+.. autofunction:: group
     :decorator:
 
 Helper Functions
 ~~~~~~~~~~~~~~~~
 
-.. autofunction:: disnake.ext.commands.Param
+.. autofunction:: Param
 
-.. autofunction:: disnake.ext.commands.option_enum
+.. autofunction:: option_enum
 
-.. autofunction:: disnake.ext.commands.converter_method
+.. autofunction:: converter_method
     :decorator:
 
 Application Command
 ~~~~~~~~~~~~~~~~~~~
 
-.. attributetable:: disnake.ext.commands.InvokableApplicationCommand
+.. attributetable:: InvokableApplicationCommand
 
-.. autoclass:: disnake.ext.commands.InvokableApplicationCommand
+.. autoclass:: InvokableApplicationCommand
     :members:
     :exclude-members: before_invoke, after_invoke, error
 
@@ -366,9 +366,9 @@ Application Command
 Slash Command
 ~~~~~~~~~~~~~
 
-.. attributetable:: disnake.ext.commands.InvokableSlashCommand
+.. attributetable:: InvokableSlashCommand
 
-.. autoclass:: disnake.ext.commands.InvokableSlashCommand
+.. autoclass:: InvokableSlashCommand
     :members:
     :special-members: __call__
     :exclude-members: sub_command, sub_command_group, after_invoke, before_invoke, error
@@ -391,9 +391,9 @@ Slash Command
 Slash Subcommand
 ~~~~~~~~~~~~~~~~
 
-.. attributetable:: disnake.ext.commands.SubCommand
+.. attributetable:: SubCommand
 
-.. autoclass:: disnake.ext.commands.SubCommand
+.. autoclass:: SubCommand
     :members:
     :exclude-members: after_invoke, before_invoke, error
 
@@ -409,9 +409,9 @@ Slash Subcommand
 Slash Subcommand Group
 ~~~~~~~~~~~~~~~~~~~~~~
 
-.. attributetable:: disnake.ext.commands.SubCommandGroup
+.. attributetable:: SubCommandGroup
 
-.. autoclass:: disnake.ext.commands.SubCommandGroup
+.. autoclass:: SubCommandGroup
     :members:
     :exclude-members: sub_command, after_invoke, before_invoke, error
 
@@ -430,16 +430,16 @@ Slash Subcommand Group
 ParamInfo
 ~~~~~~~~~
 
-.. attributetable:: disnake.ext.commands.ParamInfo
+.. attributetable:: ParamInfo
 
-.. autoclass:: disnake.ext.commands.ParamInfo
+.. autoclass:: ParamInfo
 
 Injections
 ~~~~~~~~~~
 
-.. attributetable:: disnake.ext.commands.Injection
+.. attributetable:: Injection
 
-.. autoclass:: disnake.ext.commands.Injection
+.. autoclass:: Injection
     :members:
     :special-members: __call__
     :exclude-members: autocomplete
@@ -447,20 +447,20 @@ Injections
     .. automethod:: Injection.autocomplete
         :decorator:
 
-.. autofunction:: disnake.ext.commands.inject
+.. autofunction:: inject
 
-.. autofunction:: disnake.ext.commands.register_injection
+.. autofunction:: register_injection
     :decorator:
 
-.. autofunction:: disnake.ext.commands.injection
+.. autofunction:: injection
     :decorator:
 
 User Command
 ~~~~~~~~~~~~
 
-.. attributetable:: disnake.ext.commands.InvokableUserCommand
+.. attributetable:: InvokableUserCommand
 
-.. autoclass:: disnake.ext.commands.InvokableUserCommand
+.. autoclass:: InvokableUserCommand
     :members:
     :special-members: __call__
     :exclude-members: after_invoke, before_invoke, error
@@ -477,9 +477,9 @@ User Command
 Message Command
 ~~~~~~~~~~~~~~~
 
-.. attributetable:: disnake.ext.commands.InvokableMessageCommand
+.. attributetable:: InvokableMessageCommand
 
-.. autoclass:: disnake.ext.commands.InvokableMessageCommand
+.. autoclass:: InvokableMessageCommand
     :members:
     :special-members: __call__
     :exclude-members: after_invoke, before_invoke, error
@@ -496,9 +496,9 @@ Message Command
 Command
 ~~~~~~~~~
 
-.. attributetable:: disnake.ext.commands.Command
+.. attributetable:: Command
 
-.. autoclass:: disnake.ext.commands.Command
+.. autoclass:: Command
     :members:
     :special-members: __call__
     :exclude-members: after_invoke, before_invoke, error
@@ -515,9 +515,9 @@ Command
 Group
 ~~~~~~
 
-.. attributetable:: disnake.ext.commands.Group
+.. attributetable:: Group
 
-.. autoclass:: disnake.ext.commands.Group
+.. autoclass:: Group
     :members:
     :inherited-members:
     :exclude-members: after_invoke, before_invoke, command, error, group
@@ -540,9 +540,9 @@ Group
 GroupMixin
 ~~~~~~~~~~~
 
-.. attributetable:: disnake.ext.commands.GroupMixin
+.. attributetable:: GroupMixin
 
-.. autoclass:: disnake.ext.commands.GroupMixin
+.. autoclass:: GroupMixin
     :members:
     :exclude-members: command, group
 
@@ -555,19 +555,19 @@ GroupMixin
 LargeInt
 ~~~~~~~~
 
-.. autoclass:: disnake.ext.commands.LargeInt
+.. autoclass:: LargeInt
 
     This is a class which inherits from :class:`int` to allow large numbers in slash commands, meant to be used only for annotations.
 
 Range
 ~~~~~
 
-.. autoclass:: disnake.ext.commands.Range
+.. autoclass:: Range
 
 String
 ~~~~~~
 
-.. autoclass:: disnake.ext.commands.String
+.. autoclass:: String
 
 
 .. _ext_commands_api_cogs:
@@ -578,17 +578,17 @@ Cogs
 Cog
 ~~~~
 
-.. attributetable:: disnake.ext.commands.Cog
+.. attributetable:: Cog
 
-.. autoclass:: disnake.ext.commands.Cog
+.. autoclass:: Cog
     :members:
 
 CogMeta
 ~~~~~~~~
 
-.. attributetable:: disnake.ext.commands.CogMeta
+.. attributetable:: CogMeta
 
-.. autoclass:: disnake.ext.commands.CogMeta
+.. autoclass:: CogMeta
     :members:
 
 .. _ext_commands_help_command:
@@ -599,42 +599,41 @@ Help Commands
 HelpCommand
 ~~~~~~~~~~~~
 
-.. attributetable:: disnake.ext.commands.HelpCommand
+.. attributetable:: HelpCommand
 
-.. autoclass:: disnake.ext.commands.HelpCommand
+.. autoclass:: HelpCommand
     :members:
 
 DefaultHelpCommand
 ~~~~~~~~~~~~~~~~~~~
 
-.. attributetable:: disnake.ext.commands.DefaultHelpCommand
+.. attributetable:: DefaultHelpCommand
 
-.. autoclass:: disnake.ext.commands.DefaultHelpCommand
+.. autoclass:: DefaultHelpCommand
     :members:
     :exclude-members: send_bot_help, send_cog_help, send_group_help, send_command_help, prepare_help_command
 
 MinimalHelpCommand
 ~~~~~~~~~~~~~~~~~~~
 
-.. attributetable:: disnake.ext.commands.MinimalHelpCommand
+.. attributetable:: MinimalHelpCommand
 
-.. autoclass:: disnake.ext.commands.MinimalHelpCommand
+.. autoclass:: MinimalHelpCommand
     :members:
     :exclude-members: send_bot_help, send_cog_help, send_group_help, send_command_help, prepare_help_command
 
 Paginator
 ~~~~~~~~~~
 
-.. attributetable:: disnake.ext.commands.Paginator
+.. attributetable:: Paginator
 
-.. autoclass:: disnake.ext.commands.Paginator
+.. autoclass:: Paginator
     :members:
 
 Enums
 ------
 
 .. class:: BucketType
-    :module: disnake.ext.commands
 
     Specifies a type of bucket for, e.g. a cooldown.
 
@@ -668,64 +667,64 @@ Enums
 Checks
 -------
 
-.. autofunction:: disnake.ext.commands.check(predicate)
+.. autofunction:: check(predicate)
     :decorator:
 
-.. autofunction:: disnake.ext.commands.check_any(*checks)
+.. autofunction:: check_any(*checks)
     :decorator:
 
-.. autofunction:: disnake.ext.commands.has_role(item)
+.. autofunction:: has_role(item)
     :decorator:
 
-.. autofunction:: disnake.ext.commands.has_permissions(**perms)
+.. autofunction:: has_permissions(**perms)
     :decorator:
 
-.. autofunction:: disnake.ext.commands.has_guild_permissions(**perms)
+.. autofunction:: has_guild_permissions(**perms)
     :decorator:
 
-.. autofunction:: disnake.ext.commands.has_any_role(*items)
+.. autofunction:: has_any_role(*items)
     :decorator:
 
-.. autofunction:: disnake.ext.commands.bot_has_role(item)
+.. autofunction:: bot_has_role(item)
     :decorator:
 
-.. autofunction:: disnake.ext.commands.bot_has_permissions(**perms)
+.. autofunction:: bot_has_permissions(**perms)
     :decorator:
 
-.. autofunction:: disnake.ext.commands.bot_has_guild_permissions(**perms)
+.. autofunction:: bot_has_guild_permissions(**perms)
     :decorator:
 
-.. autofunction:: disnake.ext.commands.bot_has_any_role(*items)
+.. autofunction:: bot_has_any_role(*items)
     :decorator:
 
-.. autofunction:: disnake.ext.commands.cooldown(rate, per, type=disnake.ext.commands.BucketType.default)
+.. autofunction:: cooldown(rate, per, type=BucketType.default)
     :decorator:
 
-.. autofunction:: disnake.ext.commands.dynamic_cooldown(cooldown, type=BucketType.default)
+.. autofunction:: dynamic_cooldown(cooldown, type=BucketType.default)
     :decorator:
 
-.. autofunction:: disnake.ext.commands.max_concurrency(number, per=disnake.ext.commands.BucketType.default, *, wait=False)
+.. autofunction:: max_concurrency(number, per=BucketType.default, *, wait=False)
     :decorator:
 
-.. autofunction:: disnake.ext.commands.before_invoke(coro)
+.. autofunction:: before_invoke(coro)
     :decorator:
 
-.. autofunction:: disnake.ext.commands.after_invoke(coro)
+.. autofunction:: after_invoke(coro)
     :decorator:
 
-.. autofunction:: disnake.ext.commands.guild_only(,)
+.. autofunction:: guild_only(,)
     :decorator:
 
-.. autofunction:: disnake.ext.commands.dm_only(,)
+.. autofunction:: dm_only(,)
     :decorator:
 
-.. autofunction:: disnake.ext.commands.is_owner(,)
+.. autofunction:: is_owner(,)
     :decorator:
 
-.. autofunction:: disnake.ext.commands.is_nsfw(,)
+.. autofunction:: is_nsfw(,)
     :decorator:
 
-.. autofunction:: disnake.ext.commands.default_member_permissions
+.. autofunction:: default_member_permissions
     :decorator:
 
 .. _ext_commands_api_context:
@@ -733,25 +732,25 @@ Checks
 Cooldown
 ---------
 
-.. attributetable:: disnake.ext.commands.Cooldown
+.. attributetable:: Cooldown
 
-.. autoclass:: disnake.ext.commands.Cooldown
+.. autoclass:: Cooldown
     :members:
 
 Context
 --------
 
-.. attributetable:: disnake.ext.commands.Context
+.. attributetable:: Context
 
-.. autoclass:: disnake.ext.commands.Context
+.. autoclass:: Context
     :members:
     :inherited-members:
     :exclude-members: history, typing
 
-    .. automethod:: disnake.ext.commands.Context.history
+    .. automethod:: Context.history
         :async-for:
 
-    .. automethod:: disnake.ext.commands.Context.typing
+    .. automethod:: Context.typing
         :async-with:
 
 .. _ext_commands_api_converters:
@@ -759,270 +758,270 @@ Context
 Converters
 ------------
 
-.. autoclass:: disnake.ext.commands.Converter
+.. autoclass:: Converter
     :members:
 
-.. autoclass:: disnake.ext.commands.ObjectConverter
+.. autoclass:: ObjectConverter
     :members:
 
-.. autoclass:: disnake.ext.commands.MemberConverter
+.. autoclass:: MemberConverter
     :members:
 
-.. autoclass:: disnake.ext.commands.UserConverter
+.. autoclass:: UserConverter
     :members:
 
-.. autoclass:: disnake.ext.commands.MessageConverter
+.. autoclass:: MessageConverter
     :members:
 
-.. autoclass:: disnake.ext.commands.PartialMessageConverter
+.. autoclass:: PartialMessageConverter
     :members:
 
-.. autoclass:: disnake.ext.commands.GuildChannelConverter
+.. autoclass:: GuildChannelConverter
     :members:
 
-.. autoclass:: disnake.ext.commands.TextChannelConverter
+.. autoclass:: TextChannelConverter
     :members:
 
-.. autoclass:: disnake.ext.commands.VoiceChannelConverter
+.. autoclass:: VoiceChannelConverter
     :members:
 
-.. autoclass:: disnake.ext.commands.StageChannelConverter
+.. autoclass:: StageChannelConverter
     :members:
 
-.. autoclass:: disnake.ext.commands.CategoryChannelConverter
+.. autoclass:: CategoryChannelConverter
     :members:
 
-.. autoclass:: disnake.ext.commands.ForumChannelConverter
+.. autoclass:: ForumChannelConverter
     :members:
 
-.. autoclass:: disnake.ext.commands.ThreadConverter
+.. autoclass:: ThreadConverter
     :members:
 
-.. autoclass:: disnake.ext.commands.ColourConverter
+.. autoclass:: ColourConverter
     :members:
 
-.. autoclass:: disnake.ext.commands.RoleConverter
+.. autoclass:: RoleConverter
     :members:
 
-.. autoclass:: disnake.ext.commands.GameConverter
+.. autoclass:: GameConverter
     :members:
 
-.. autoclass:: disnake.ext.commands.InviteConverter
+.. autoclass:: InviteConverter
     :members:
 
-.. autoclass:: disnake.ext.commands.GuildConverter
+.. autoclass:: GuildConverter
     :members:
 
-.. autoclass:: disnake.ext.commands.EmojiConverter
+.. autoclass:: EmojiConverter
     :members:
 
-.. autoclass:: disnake.ext.commands.PartialEmojiConverter
+.. autoclass:: PartialEmojiConverter
     :members:
 
-.. autoclass:: disnake.ext.commands.GuildStickerConverter
+.. autoclass:: GuildStickerConverter
     :members:
 
-.. autoclass:: disnake.ext.commands.PermissionsConverter
+.. autoclass:: PermissionsConverter
     :members:
 
-.. autoclass:: disnake.ext.commands.GuildScheduledEventConverter
+.. autoclass:: GuildScheduledEventConverter
     :members:
 
-.. autoclass:: disnake.ext.commands.clean_content
+.. autoclass:: clean_content
     :members:
 
-.. autoclass:: disnake.ext.commands.Greedy()
+.. autoclass:: Greedy()
 
-.. autofunction:: disnake.ext.commands.run_converters
+.. autofunction:: run_converters
 
 Flag Converter
 ~~~~~~~~~~~~~~~
 
-.. autoclass:: disnake.ext.commands.FlagConverter
+.. autoclass:: FlagConverter
     :members:
 
-.. autoclass:: disnake.ext.commands.Flag()
+.. autoclass:: Flag()
     :members:
 
-.. autofunction:: disnake.ext.commands.flag
+.. autofunction:: flag
 
 .. _ext_commands_api_errors:
 
 Exceptions
 -----------
 
-.. autoexception:: disnake.ext.commands.CommandError
+.. autoexception:: CommandError
     :members:
 
-.. autoexception:: disnake.ext.commands.ConversionError
+.. autoexception:: ConversionError
     :members:
 
-.. autoexception:: disnake.ext.commands.MissingRequiredArgument
+.. autoexception:: MissingRequiredArgument
     :members:
 
-.. autoexception:: disnake.ext.commands.ArgumentParsingError
+.. autoexception:: ArgumentParsingError
     :members:
 
-.. autoexception:: disnake.ext.commands.UnexpectedQuoteError
+.. autoexception:: UnexpectedQuoteError
     :members:
 
-.. autoexception:: disnake.ext.commands.InvalidEndOfQuotedStringError
+.. autoexception:: InvalidEndOfQuotedStringError
     :members:
 
-.. autoexception:: disnake.ext.commands.ExpectedClosingQuoteError
+.. autoexception:: ExpectedClosingQuoteError
     :members:
 
-.. autoexception:: disnake.ext.commands.BadArgument
+.. autoexception:: BadArgument
     :members:
 
-.. autoexception:: disnake.ext.commands.BadUnionArgument
+.. autoexception:: BadUnionArgument
     :members:
 
-.. autoexception:: disnake.ext.commands.BadLiteralArgument
+.. autoexception:: BadLiteralArgument
     :members:
 
-.. autoexception:: disnake.ext.commands.PrivateMessageOnly
+.. autoexception:: PrivateMessageOnly
     :members:
 
-.. autoexception:: disnake.ext.commands.NoPrivateMessage
+.. autoexception:: NoPrivateMessage
     :members:
 
-.. autoexception:: disnake.ext.commands.CheckFailure
+.. autoexception:: CheckFailure
     :members:
 
-.. autoexception:: disnake.ext.commands.CheckAnyFailure
+.. autoexception:: CheckAnyFailure
     :members:
 
-.. autoexception:: disnake.ext.commands.CommandNotFound
+.. autoexception:: CommandNotFound
     :members:
 
-.. autoexception:: disnake.ext.commands.DisabledCommand
+.. autoexception:: DisabledCommand
     :members:
 
-.. autoexception:: disnake.ext.commands.CommandInvokeError
+.. autoexception:: CommandInvokeError
     :members:
 
-.. autoexception:: disnake.ext.commands.TooManyArguments
+.. autoexception:: TooManyArguments
     :members:
 
-.. autoexception:: disnake.ext.commands.UserInputError
+.. autoexception:: UserInputError
     :members:
 
-.. autoexception:: disnake.ext.commands.CommandOnCooldown
+.. autoexception:: CommandOnCooldown
     :members:
 
-.. autoexception:: disnake.ext.commands.MaxConcurrencyReached
+.. autoexception:: MaxConcurrencyReached
     :members:
 
-.. autoexception:: disnake.ext.commands.NotOwner
+.. autoexception:: NotOwner
     :members:
 
-.. autoexception:: disnake.ext.commands.ObjectNotFound
+.. autoexception:: ObjectNotFound
     :members:
 
-.. autoexception:: disnake.ext.commands.MessageNotFound
+.. autoexception:: MessageNotFound
     :members:
 
-.. autoexception:: disnake.ext.commands.MemberNotFound
+.. autoexception:: MemberNotFound
     :members:
 
-.. autoexception:: disnake.ext.commands.GuildNotFound
+.. autoexception:: GuildNotFound
     :members:
 
-.. autoexception:: disnake.ext.commands.UserNotFound
+.. autoexception:: UserNotFound
     :members:
 
-.. autoexception:: disnake.ext.commands.ChannelNotFound
+.. autoexception:: ChannelNotFound
     :members:
 
-.. autoexception:: disnake.ext.commands.ChannelNotReadable
+.. autoexception:: ChannelNotReadable
     :members:
 
-.. autoexception:: disnake.ext.commands.ThreadNotFound
+.. autoexception:: ThreadNotFound
     :members:
 
-.. autoexception:: disnake.ext.commands.BadColourArgument
+.. autoexception:: BadColourArgument
     :members:
 
-.. autoexception:: disnake.ext.commands.RoleNotFound
+.. autoexception:: RoleNotFound
     :members:
 
-.. autoexception:: disnake.ext.commands.BadInviteArgument
+.. autoexception:: BadInviteArgument
     :members:
 
-.. autoexception:: disnake.ext.commands.EmojiNotFound
+.. autoexception:: EmojiNotFound
     :members:
 
-.. autoexception:: disnake.ext.commands.PartialEmojiConversionFailure
+.. autoexception:: PartialEmojiConversionFailure
     :members:
 
-.. autoexception:: disnake.ext.commands.GuildStickerNotFound
+.. autoexception:: GuildStickerNotFound
     :members:
 
-.. autoexception:: disnake.ext.commands.GuildScheduledEventNotFound
+.. autoexception:: GuildScheduledEventNotFound
     :members:
 
-.. autoexception:: disnake.ext.commands.BadBoolArgument
+.. autoexception:: BadBoolArgument
     :members:
 
-.. autoexception:: disnake.ext.commands.LargeIntConversionFailure
+.. autoexception:: LargeIntConversionFailure
     :members:
 
-.. autoexception:: disnake.ext.commands.MissingPermissions
+.. autoexception:: MissingPermissions
     :members:
 
-.. autoexception:: disnake.ext.commands.BotMissingPermissions
+.. autoexception:: BotMissingPermissions
     :members:
 
-.. autoexception:: disnake.ext.commands.MissingRole
+.. autoexception:: MissingRole
     :members:
 
-.. autoexception:: disnake.ext.commands.BotMissingRole
+.. autoexception:: BotMissingRole
     :members:
 
-.. autoexception:: disnake.ext.commands.MissingAnyRole
+.. autoexception:: MissingAnyRole
     :members:
 
-.. autoexception:: disnake.ext.commands.BotMissingAnyRole
+.. autoexception:: BotMissingAnyRole
     :members:
 
-.. autoexception:: disnake.ext.commands.NSFWChannelRequired
+.. autoexception:: NSFWChannelRequired
     :members:
 
-.. autoexception:: disnake.ext.commands.FlagError
+.. autoexception:: FlagError
     :members:
 
-.. autoexception:: disnake.ext.commands.BadFlagArgument
+.. autoexception:: BadFlagArgument
     :members:
 
-.. autoexception:: disnake.ext.commands.MissingFlagArgument
+.. autoexception:: MissingFlagArgument
     :members:
 
-.. autoexception:: disnake.ext.commands.TooManyFlags
+.. autoexception:: TooManyFlags
     :members:
 
-.. autoexception:: disnake.ext.commands.MissingRequiredFlag
+.. autoexception:: MissingRequiredFlag
     :members:
 
-.. autoexception:: disnake.ext.commands.ExtensionError
+.. autoexception:: ExtensionError
     :members:
 
-.. autoexception:: disnake.ext.commands.ExtensionAlreadyLoaded
+.. autoexception:: ExtensionAlreadyLoaded
     :members:
 
-.. autoexception:: disnake.ext.commands.ExtensionNotLoaded
+.. autoexception:: ExtensionNotLoaded
     :members:
 
-.. autoexception:: disnake.ext.commands.NoEntryPointError
+.. autoexception:: NoEntryPointError
     :members:
 
-.. autoexception:: disnake.ext.commands.ExtensionFailed
+.. autoexception:: ExtensionFailed
     :members:
 
-.. autoexception:: disnake.ext.commands.ExtensionNotFound
+.. autoexception:: ExtensionNotFound
     :members:
 
-.. autoexception:: disnake.ext.commands.CommandRegistrationError
+.. autoexception:: CommandRegistrationError
     :members:
 
 
@@ -1032,75 +1031,75 @@ Exception Hierarchy
 .. exception_hierarchy::
 
     - :exc:`~.DiscordException`
-        - :exc:`~.commands.CommandError`
-            - :exc:`~.commands.ConversionError`
-            - :exc:`~.commands.UserInputError`
-                - :exc:`~.commands.MissingRequiredArgument`
-                - :exc:`~.commands.TooManyArguments`
-                - :exc:`~.commands.BadArgument`
-                    - :exc:`~.commands.ObjectNotFound`
-                    - :exc:`~.commands.MemberNotFound`
-                    - :exc:`~.commands.GuildNotFound`
-                    - :exc:`~.commands.UserNotFound`
-                    - :exc:`~.commands.MessageNotFound`
-                    - :exc:`~.commands.ChannelNotReadable`
-                    - :exc:`~.commands.ChannelNotFound`
-                    - :exc:`~.commands.ThreadNotFound`
-                    - :exc:`~.commands.BadColourArgument`
-                    - :exc:`~.commands.RoleNotFound`
-                    - :exc:`~.commands.BadInviteArgument`
-                    - :exc:`~.commands.EmojiNotFound`
-                    - :exc:`~.commands.PartialEmojiConversionFailure`
-                    - :exc:`~.commands.GuildStickerNotFound`
-                    - :exc:`~.commands.GuildScheduledEventNotFound`
-                    - :exc:`~.commands.BadBoolArgument`
-                    - :exc:`~.commands.LargeIntConversionFailure`
-                    - :exc:`~.commands.FlagError`
-                        - :exc:`~.commands.BadFlagArgument`
-                        - :exc:`~.commands.MissingFlagArgument`
-                        - :exc:`~.commands.TooManyFlags`
-                        - :exc:`~.commands.MissingRequiredFlag`
-                - :exc:`~.commands.BadUnionArgument`
-                - :exc:`~.commands.BadLiteralArgument`
-                - :exc:`~.commands.ArgumentParsingError`
-                    - :exc:`~.commands.UnexpectedQuoteError`
-                    - :exc:`~.commands.InvalidEndOfQuotedStringError`
-                    - :exc:`~.commands.ExpectedClosingQuoteError`
-            - :exc:`~.commands.CommandNotFound`
-            - :exc:`~.commands.CheckFailure`
-                - :exc:`~.commands.CheckAnyFailure`
-                - :exc:`~.commands.PrivateMessageOnly`
-                - :exc:`~.commands.NoPrivateMessage`
-                - :exc:`~.commands.NotOwner`
-                - :exc:`~.commands.MissingPermissions`
-                - :exc:`~.commands.BotMissingPermissions`
-                - :exc:`~.commands.MissingRole`
-                - :exc:`~.commands.BotMissingRole`
-                - :exc:`~.commands.MissingAnyRole`
-                - :exc:`~.commands.BotMissingAnyRole`
-                - :exc:`~.commands.NSFWChannelRequired`
-            - :exc:`~.commands.DisabledCommand`
-            - :exc:`~.commands.CommandInvokeError`
-            - :exc:`~.commands.CommandOnCooldown`
-            - :exc:`~.commands.MaxConcurrencyReached`
-        - :exc:`~.commands.ExtensionError`
-            - :exc:`~.commands.ExtensionAlreadyLoaded`
-            - :exc:`~.commands.ExtensionNotLoaded`
-            - :exc:`~.commands.NoEntryPointError`
-            - :exc:`~.commands.ExtensionFailed`
-            - :exc:`~.commands.ExtensionNotFound`
+        - :exc:`~.CommandError`
+            - :exc:`~.ConversionError`
+            - :exc:`~.UserInputError`
+                - :exc:`~.MissingRequiredArgument`
+                - :exc:`~.TooManyArguments`
+                - :exc:`~.BadArgument`
+                    - :exc:`~.ObjectNotFound`
+                    - :exc:`~.MemberNotFound`
+                    - :exc:`~.GuildNotFound`
+                    - :exc:`~.UserNotFound`
+                    - :exc:`~.MessageNotFound`
+                    - :exc:`~.ChannelNotReadable`
+                    - :exc:`~.ChannelNotFound`
+                    - :exc:`~.ThreadNotFound`
+                    - :exc:`~.BadColourArgument`
+                    - :exc:`~.RoleNotFound`
+                    - :exc:`~.BadInviteArgument`
+                    - :exc:`~.EmojiNotFound`
+                    - :exc:`~.PartialEmojiConversionFailure`
+                    - :exc:`~.GuildStickerNotFound`
+                    - :exc:`~.GuildScheduledEventNotFound`
+                    - :exc:`~.BadBoolArgument`
+                    - :exc:`~.LargeIntConversionFailure`
+                    - :exc:`~.FlagError`
+                        - :exc:`~.BadFlagArgument`
+                        - :exc:`~.MissingFlagArgument`
+                        - :exc:`~.TooManyFlags`
+                        - :exc:`~.MissingRequiredFlag`
+                - :exc:`~.BadUnionArgument`
+                - :exc:`~.BadLiteralArgument`
+                - :exc:`~.ArgumentParsingError`
+                    - :exc:`~.UnexpectedQuoteError`
+                    - :exc:`~.InvalidEndOfQuotedStringError`
+                    - :exc:`~.ExpectedClosingQuoteError`
+            - :exc:`~.CommandNotFound`
+            - :exc:`~.CheckFailure`
+                - :exc:`~.CheckAnyFailure`
+                - :exc:`~.PrivateMessageOnly`
+                - :exc:`~.NoPrivateMessage`
+                - :exc:`~.NotOwner`
+                - :exc:`~.MissingPermissions`
+                - :exc:`~.BotMissingPermissions`
+                - :exc:`~.MissingRole`
+                - :exc:`~.BotMissingRole`
+                - :exc:`~.MissingAnyRole`
+                - :exc:`~.BotMissingAnyRole`
+                - :exc:`~.NSFWChannelRequired`
+            - :exc:`~.DisabledCommand`
+            - :exc:`~.CommandInvokeError`
+            - :exc:`~.CommandOnCooldown`
+            - :exc:`~.MaxConcurrencyReached`
+        - :exc:`~.ExtensionError`
+            - :exc:`~.ExtensionAlreadyLoaded`
+            - :exc:`~.ExtensionNotLoaded`
+            - :exc:`~.NoEntryPointError`
+            - :exc:`~.ExtensionFailed`
+            - :exc:`~.ExtensionNotFound`
     - :exc:`~.ClientException`
-        - :exc:`~.commands.CommandRegistrationError`
+        - :exc:`~.CommandRegistrationError`
 
 Warnings
 ----------
 
-.. autoclass:: disnake.ext.commands.MessageContentPrefixWarning
+.. autoclass:: MessageContentPrefixWarning
 
 Warning Hierarchy
 ~~~~~~~~~~~~~~~~~~~
 
 .. exception_hierarchy::
 
-    - :class:`DiscordWarning`
-        - :class:`~.commands.MessageContentPrefixWarning`
+    - :class:`~.DiscordWarning`
+        - :class:`~.MessageContentPrefixWarning`

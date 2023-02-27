@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""
-An example that uses webhooks to "impersonate" a specified user.
-"""
+"""An example that uses webhooks to "impersonate" a specified user."""
 
 import os
 
