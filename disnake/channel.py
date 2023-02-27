@@ -989,7 +989,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             The request to get the archived threads failed.
 
         Yields
-        -------
+        ------
         :class:`Thread`
             The archived threads.
         """
@@ -3614,7 +3614,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             The request to get the archived threads failed.
 
         Yields
-        -------
+        ------
         :class:`Thread`
             The archived threads.
         """

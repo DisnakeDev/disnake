@@ -2612,7 +2612,7 @@ def before_invoke(coro) -> Callable[[T], T]:
     .. versionadded:: 1.4
 
     Example
-    ---------
+    -------
 
     .. code-block:: python3
 

@@ -1285,7 +1285,7 @@ def search_directory(path: str) -> Iterator[str]:
         The path to search for modules
 
     Yields
-    -------
+    ------
     :class:`str`
         The name of the found module. (usable in load_extension)
     """

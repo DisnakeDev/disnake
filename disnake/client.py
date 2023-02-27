@@ -1782,7 +1782,7 @@ class Client:
             Retrieving the guilds failed.
 
         Yields
-        --------
+        ------
         :class:`.Guild`
             The guild with the guild data parsed.
         """

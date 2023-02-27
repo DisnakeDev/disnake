@@ -92,7 +92,7 @@ def when_mentioned_or(*prefixes: str) -> Callable[[BotBase, Message], List[str]]
 
 
     See Also
-    ----------
+    --------
     :func:`.when_mentioned`
     """
 
@@ -280,7 +280,7 @@ class BotBase(CommonBotBase, GroupMixin):
         :exc:`.CommandError`.
 
         Example
-        ---------
+        -------
 
         .. code-block:: python3
 
@@ -321,7 +321,7 @@ class BotBase(CommonBotBase, GroupMixin):
         :exc:`.CommandError`.
 
         Example
-        ---------
+        -------
 
         .. code-block:: python3
 

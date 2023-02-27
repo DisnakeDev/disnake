@@ -1837,7 +1837,7 @@ class Messageable:
             The request to get message history failed.
 
         Yields
-        -------
+        ------
         :class:`.Message`
             The message with the message data parsed.
         """
