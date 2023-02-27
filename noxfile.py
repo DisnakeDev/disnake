@@ -37,7 +37,7 @@ reset_coverage = True
 
 
 @nox.session
-def docs(session: nox.Session):
+def docs(session: nox.Session) -> None:
     """Build and generate the documentation.
 
     If running locally, will build automatic reloading docs.
@@ -70,7 +70,7 @@ def docs(session: nox.Session):
 
 
 @nox.session
-def lint(session: nox.Session):
+def lint(session: nox.Session) -> None:
     """Check all files for linting errors"""
     session.run_always("pdm", "install", "-G", "tools", external=True)
 
@@ -78,7 +78,7 @@ def lint(session: nox.Session):
 
 
 @nox.session(name="check-manifest")
-def check_manifest(session: nox.Session):
+def check_manifest(session: nox.Session) -> None:
     """Run check-manifest."""
     # --no-self is provided here because check-manifest builds disnake. There's no reason to build twice, so we don't.
     session.run_always("pdm", "install", "--no-self", "-dG", "tools", external=True)
@@ -86,14 +86,14 @@ def check_manifest(session: nox.Session):
 
 
 @nox.session()
-def slotscheck(session: nox.Session):
+def slotscheck(session: nox.Session) -> None:
     """Run slotscheck."""
     session.run_always("pdm", "install", "-dG", "tools", external=True)
     session.run("python", "-m", "slotscheck", "--verbose", "-m", "disnake")
 
 
 @nox.session
-def autotyping(session: nox.Session):
+def autotyping(session: nox.Session) -> None:
     """Run autotyping.
 
     Because of the nature of changes that autotyping makes, and the goal design of examples,
@@ -125,6 +125,10 @@ def autotyping(session: nox.Session):
         "test_bot": [
             "--aggressive",
         ],
+        # also autotype this file
+        "noxfile.py": [
+            "--aggressive",
+        ],
     }
 
     if session.posargs:
@@ -154,7 +158,7 @@ def autotyping(session: nox.Session):
 
 
 @nox.session(name="codemod")
-def codemod(session: nox.Session):
+def codemod(session: nox.Session) -> None:
     """Run libcst codemods."""
     session.run_always("pdm", "install", "-dG", "codemod", external=True)
     if session.posargs and session.posargs[0] == "run-all" or not session.interactive:
@@ -191,7 +195,7 @@ def codemod(session: nox.Session):
 
 
 @nox.session()
-def pyright(session: nox.Session):
+def pyright(session: nox.Session) -> None:
     """Run pyright."""
     session.run_always("pdm", "install", "-d", "-Gspeed", "-Gdocs", "-Gvoice", external=True)
     env = {
@@ -213,7 +217,7 @@ def pyright(session: nox.Session):
         # ["voice"],
     ],
 )
-def test(session: nox.Session, extras: List[str]):
+def test(session: nox.Session, extras: List[str]) -> None:
     """Run tests."""
     # shell splitting is not done by nox
     extras = list(chain(*(["-G", extra] for extra in extras)))
@@ -238,7 +242,7 @@ def test(session: nox.Session, extras: List[str]):
 
 
 @nox.session()
-def coverage(session: nox.Session):
+def coverage(session: nox.Session) -> None:
     """Display coverage information from the tests."""
     session.run_always("pdm", "install", "-dG", "test", external=True)
     if "html" in session.posargs or "serve" in session.posargs:
