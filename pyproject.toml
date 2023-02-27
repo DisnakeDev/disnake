@@ -135,6 +135,7 @@ select = [
     "E", "W", # pycodestyle
     # "D", # pydocstyle
     "D2",  # pydocstyle, docstring formatting
+    "D4",  # pydocstyle, docstring structure/content
     # "ANN", # flake8-annotations
     "S", # flake8-bandit
     "B", # flake8-bugbear
@@ -164,6 +165,9 @@ ignore = [
     # pydocstyle
     "D203", # incompat with D211
     "D213", # multiline docstring should start on second line, incompatiable with D212
+    "D400", # first line ends in period, does not work with `|coro|` etc.
+    "D415", # same thing but punctuation in general
+    "D416", # section name should end with a colon, incompatible with D406
 
     # unknown if this is actually an issue
     "RUF005", # might not be actually faster
@@ -182,7 +186,9 @@ ignore = [
     "PLW2901",
 
     # temporary disables, to fix later
-    "D205",   # blank line required between summary and description. Requires a docstring rewrite.
+    "D205",   # blank line required between summary and description
+    "D401",   # first line of docstring should be in imperative mood
+    "D417",   # missing argument description in docstring
     "B904",   # within an except clause raise from error or from none
     "B026",   # backwards star-arg unpacking
     "E501",   # line too long
