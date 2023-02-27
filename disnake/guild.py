@@ -1225,7 +1225,6 @@ class Guild(Hashable):
 
         Examples
         --------
-
         Creating a basic channel:
 
         .. code-block:: python3
@@ -2581,7 +2580,6 @@ class Guild(Hashable):
 
         Examples
         --------
-
         Usage ::
 
             async for member in guild.fetch_members(limit=150):
@@ -2717,7 +2715,6 @@ class Guild(Hashable):
 
         Examples
         --------
-
         Usage ::
 
             counter = 0
@@ -3858,7 +3855,6 @@ class Guild(Hashable):
 
         Examples
         --------
-
         Getting the first 100 entries: ::
 
             async for entry in guild.audit_logs(limit=100):
@@ -4644,7 +4640,6 @@ class GuildBuilder:
 
     Examples
     --------
-
     Basic usage:
 
     .. code-block:: python3

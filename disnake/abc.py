@@ -909,7 +909,6 @@ class GuildChannel(ABC):
 
         Examples
         --------
-
         Setting allow and deny: ::
 
             await message.channel.set_permissions(message.author, view_channel=True,
@@ -1790,7 +1789,6 @@ class Messageable:
 
         Examples
         --------
-
         Usage ::
 
             counter = 0

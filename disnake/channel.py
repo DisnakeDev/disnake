@@ -560,7 +560,6 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         Examples
         --------
-
         Deleting bot's messages ::
 
             def is_me(m):

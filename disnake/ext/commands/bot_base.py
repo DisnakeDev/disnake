@@ -281,7 +281,6 @@ class BotBase(CommonBotBase, GroupMixin):
 
         Example
         -------
-
         .. code-block:: python3
 
             @bot.check
@@ -322,7 +321,6 @@ class BotBase(CommonBotBase, GroupMixin):
 
         Example
         -------
-
         .. code-block:: python3
 
             @bot.check_once

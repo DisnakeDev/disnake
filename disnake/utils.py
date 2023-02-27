@@ -438,7 +438,6 @@ def get(iterable: Iterable[T], **attrs: Any) -> Optional[T]:
 
     Examples
     --------
-
     Basic usage:
 
     .. code-block:: python3
