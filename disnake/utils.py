@@ -333,8 +333,6 @@ def oauth_url(
 def parse_token(token: str) -> Tuple[int, datetime.datetime, bytes]:
     """Parse a token into its parts
 
-    Returns
-
     Parameters
     ----------
     token: :class:`str`
