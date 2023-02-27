@@ -134,7 +134,7 @@ def autotyping(session: nox.Session) -> None:
     if session.posargs:
         # short circuit with the provided arguments
         # if there's just one file argument, give it the defaults that we normally use
-        posargs = session.posargs
+        posargs = session.posargs.copy()
         if len(posargs) == 1 and not posargs[0].startswith("--"):
             module = posargs[0].split("/")[0]
             try:
