@@ -14,6 +14,7 @@ from typing import (
     ClassVar,
     Coroutine,
     Dict,
+    Final,
     Iterable,
     List,
     Literal,
@@ -99,6 +100,16 @@ def _workaround_set_api_version(version: Literal[9, 10]) -> None:
     global _API_VERSION  # noqa: PLW0603
     _API_VERSION = version
     Route.BASE = f"https://discord.com/api/v{_API_VERSION}"
+
+
+def get_user_agent() -> str:
+    user_agent = (
+        "DiscordBot (https://github.com/DisnakeDev/disnake {0}) Python/{1[0]}.{1[1]} aiohttp/{2}"
+    )
+    return user_agent.format(__version__, sys.version_info, aiohttp.__version__)
+
+
+USER_AGENT: Final[str] = get_user_agent()
 
 
 async def json_or_text(response: aiohttp.ClientResponse) -> Union[Dict[str, Any], str]:
@@ -238,8 +249,7 @@ class HTTPClient:
         self.proxy_auth: Optional[aiohttp.BasicAuth] = proxy_auth
         self.use_clock: bool = not unsync_clock
 
-        user_agent = "DiscordBot (https://github.com/DisnakeDev/disnake {0}) Python/{1[0]}.{1[1]} aiohttp/{2}"
-        self.user_agent: str = user_agent.format(__version__, sys.version_info, aiohttp.__version__)
+        self.user_agent: str = get_user_agent()
 
     def recreate(self) -> None:
         if self.__session.closed:
