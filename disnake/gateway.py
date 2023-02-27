@@ -483,7 +483,6 @@ class DiscordWebSocket:
         asyncio.Future
             A future to wait for.
         """
-
         future = self.loop.create_future()
         entry = EventListener(event=event, predicate=predicate, result=result, future=future)
         self._dispatch_listeners.append(entry)
@@ -491,7 +490,6 @@ class DiscordWebSocket:
 
     async def identify(self) -> None:
         """Sends the IDENTIFY packet."""
-
         state = self._connection
 
         payload: IdentifyCommand = {

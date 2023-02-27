@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""
-A Tic Tac Toe game, implemented using views.
-"""
+"""A Tic Tac Toe game, implemented using views."""
 
 import os
 from enum import IntEnum

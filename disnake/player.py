@@ -476,7 +476,6 @@ class FFmpegOpusAudio(FFmpegAudio):
         :class:`FFmpegOpusAudio`
             An instance of this class.
         """
-
         executable = kwargs.get("executable")
         codec, bitrate = await cls.probe(source, method=method, executable=executable)
         return cls(source, bitrate=bitrate, codec=codec, **kwargs)  # type: ignore
@@ -516,7 +515,6 @@ class FFmpegOpusAudio(FFmpegAudio):
         Optional[Tuple[Optional[:class:`str`], Optional[:class:`int`]]]
             A 2-tuple with the codec and bitrate of the input source.
         """
-
         method = method or "native"
         executable = executable or "ffmpeg"
         probefunc = fallback = None

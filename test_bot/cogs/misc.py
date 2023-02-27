@@ -20,8 +20,7 @@ class Misc(commands.Cog):
 
     @commands.slash_command()
     async def attachment_desc(self, inter: disnake.AppCmdInter, desc: str = "test") -> None:
-        """
-        Send an attachment with the given description (or the default)
+        """Send an attachment with the given description (or the default)
 
         Parameters
         ----------
@@ -31,8 +30,7 @@ class Misc(commands.Cog):
 
     @commands.slash_command()
     async def attachment_desc_edit(self, inter: disnake.AppCmdInter, desc: str = "test") -> None:
-        """
-        Send a message with a button, which sends an attachment with the given description (or the default)
+        """Send a message with a button, which sends an attachment with the given description (or the default)
 
         Parameters
         ----------
