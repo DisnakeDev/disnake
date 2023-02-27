@@ -992,10 +992,30 @@ class GuildChannel(ABC):
         *,
         name: Optional[str] = None,
         category: Optional[Snowflake] = MISSING,
+        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
         reason: Optional[str] = None,
     ) -> Self:
         # if the overwrites are MISSING defaults to the
         # original permissions of the channel
+        overwrites_payload: List[PermissionOverwritePayload] = MISSING
+        if overwrites is not MISSING and overwrites is not None:
+            overwrites_payload = []
+            for target, perm in overwrites.items():
+                if not isinstance(perm, PermissionOverwrite):
+                    raise TypeError(
+                        f"Expected PermissionOverwrite, received {perm.__class__.__name__}"
+                    )
+
+                allow, deny = perm.pair()
+                payload: PermissionOverwritePayload = {
+                    "allow": str(allow.value),
+                    "deny": str(deny.value),
+                    "id": target.id,
+                    "type": (_Overwrites.ROLE if isinstance(target, Role) else _Overwrites.MEMBER),
+                }
+                overwrites_payload.append(payload)
+        base_attrs["permission_overwrites"] = overwrites_payload
+
         if not base_attrs["permission_overwrites"]:
             base_attrs["permission_overwrites"] = [x._asdict() for x in self._overwrites]
         if category is not MISSING:

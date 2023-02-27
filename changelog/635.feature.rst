@@ -13,8 +13,8 @@ Implement new cloned attributes on the :func:`clone` method and adds these attri
         The :meth:`CategoryChannel.clone` will now clone :attr:`CategoryChannel.name`, :attr:`CategoryChannel.position`, :attr:`CategoryChannel.overwrites` into the newly-cloned CategoryChannel.
 
     - :class:`StageChannel`:
-        The :meth:`StageChannel.clone` will now clone :attr:`StageChannel.name`, :attr:`StageChannel.position`, :attr:`StageChannel.category`, :attr:`StageChannel.rtc_region`,
-        :attr:`StageChannel.bitrate`, :attr:`StageChannel.overwrites` into the newly-cloned StageChannel.
+        The :meth:`StageChannel.clone` will now clone :attr:`StageChannel.name`, :attr:`StageChannel.position`, :attr:`StageChannel.category`, :attr:`StageChannel.rtc_region`, :attr:`StageChannel.bitrate`,
+        :attr:`StageChannel.nsfw`, :attr:`StageChannel.slowmode_delay`, :attr:`StageChannel.video_quality_mode` and :attr:`StageChannel.overwrites` into the newly-cloned StageChannel.
 
     - :class:`ForumChannel`:
         The :meth:`ForumChannel.clone` will now clone :attr:`ForumChannel.name`, :attr:`ForumChannel.topic`, :attr:`ForumChannel.position`, :attr:`ForumChannel.nsfw`, :attr:`ForumChannel.category`,

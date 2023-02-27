@@ -82,7 +82,6 @@ if TYPE_CHECKING:
         DMChannel as DMChannelPayload,
         ForumChannel as ForumChannelPayload,
         GroupDMChannel as GroupChannelPayload,
-        PermissionOverwrite as PermissionOverwritePayload,
         StageChannel as StageChannelPayload,
         TextChannel as TextChannelPayload,
         VoiceChannel as VoiceChannelPayload,
@@ -561,28 +560,6 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             # if news is not given falls back to the original TextChannel type
             channel_type = self.type
 
-        overwrites_payload: List[PermissionOverwritePayload] = MISSING
-        if overwrites is not MISSING and overwrites is not None:
-            overwrites_payload = []
-            for target, perm in overwrites.items():
-                if not isinstance(perm, PermissionOverwrite):
-                    raise TypeError(
-                        f"Expected PermissionOverwrite, received {perm.__class__.__name__}"
-                    )
-
-                allow, deny = perm.pair()
-                payload: PermissionOverwritePayload = {
-                    "allow": str(allow.value),
-                    "deny": str(deny.value),
-                    "id": target.id,
-                    "type": (
-                        disnake.abc._Overwrites.ROLE
-                        if isinstance(target, Role)
-                        else disnake.abc._Overwrites.MEMBER
-                    ),
-                }
-                overwrites_payload.append(payload)
-
         return await self._clone_impl(
             {
                 "topic": topic if topic is not MISSING else self.topic,
@@ -602,11 +579,11 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
                     if default_auto_archive_duration is not MISSING
                     else self.default_auto_archive_duration
                 ),
-                "permission_overwrites": overwrites_payload,
             },
             name=name,
             category=category,
             reason=reason,
+            overwrites=overwrites,
         )
 
     async def delete_messages(self, messages: Iterable[Snowflake]) -> None:
@@ -1390,28 +1367,6 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         :class:`VoiceChannel`
             The channel that was created.
         """
-        overwrites_payload: List[PermissionOverwritePayload] = MISSING
-        if overwrites is not MISSING and overwrites is not None:
-            overwrites_payload = []
-            for target, perm in overwrites.items():
-                if not isinstance(perm, PermissionOverwrite):
-                    raise TypeError(
-                        f"Expected PermissionOverwrite, received {perm.__class__.__name__}"
-                    )
-
-                allow, deny = perm.pair()
-                payload: PermissionOverwritePayload = {
-                    "allow": str(allow.value),
-                    "deny": str(deny.value),
-                    "id": target.id,
-                    "type": (
-                        disnake.abc._Overwrites.ROLE
-                        if isinstance(target, Role)
-                        else disnake.abc._Overwrites.MEMBER
-                    ),
-                }
-                overwrites_payload.append(payload)
-
         return await self._clone_impl(
             {
                 "bitrate": bitrate if bitrate is not MISSING else self.bitrate,
@@ -1427,11 +1382,11 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
                 "rate_limit_per_user": (
                     slowmode_delay if slowmode_delay is not MISSING else self.slowmode_delay
                 ),
-                "permission_overwrites": overwrites_payload,
             },
             name=name,
             category=category,
             reason=reason,
+            overwrites=overwrites,
         )
 
     def is_nsfw(self) -> bool:
@@ -2079,6 +2034,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         user_limit: int = MISSING,
         position: int = MISSING,
         category: Optional[Snowflake] = MISSING,
+        slowmode_delay: int = MISSING,
         rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
         nsfw: bool = MISSING,
@@ -2095,7 +2051,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         .. versionchanged:: 2.9
             Added ``position``, ``category``, ``rtc_region``,
-            ``video_quality_mode``, ``bitrate`` and ``overwrites`` keyword-only parameters.
+            ``video_quality_mode``, ``bitrate``, ``nsfw``, ``slowmode_delay`` and ``overwrites`` keyword-only parameters.
 
         .. note::
             The current :attr:`StageChannel.flags` value won't be cloned.
@@ -2113,6 +2069,8 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
             The position of the new channel. If not provided, defaults to this channel's position.
         category: Optional[:class:`abc.Snowflake`]
             The category where the new channel should be grouped. If not provided, defaults to this channel's category.
+        slowmode_delay: :class:`int`
+            The slowmode of the new channel. If not provided, defaults to this channel's slowmode.
         rtc_region: Optional[Union[:class:`str`, :class:`VoiceRegion`]]
             The rtc region of the new channel. If not provided, defaults to this channel's rtc region.
         video_quality_mode: :class:`VideoQualityMode`
@@ -2137,30 +2095,11 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         :class:`StageChannel`
             The channel that was created.
         """
-        overwrites_payload: List[PermissionOverwritePayload] = MISSING
-        if overwrites is not MISSING and overwrites is not None:
-            overwrites_payload = []
-            for target, perm in overwrites.items():
-                if not isinstance(perm, PermissionOverwrite):
-                    raise TypeError(
-                        f"Expected PermissionOverwrite, received {perm.__class__.__name__}"
-                    )
-
-                allow, deny = perm.pair()
-                payload: PermissionOverwritePayload = {
-                    "allow": str(allow.value),
-                    "deny": str(deny.value),
-                    "id": target.id,
-                    "type": (
-                        disnake.abc._Overwrites.ROLE
-                        if isinstance(target, Role)
-                        else disnake.abc._Overwrites.MEMBER
-                    ),
-                }
-                overwrites_payload.append(payload)
-
         return await self._clone_impl(
             {
+                "rate_limit_per_user": (
+                    slowmode_delay if slowmode_delay is not MISSING else self.slowmode_delay
+                ),
                 "bitrate": bitrate if bitrate is not MISSING else self.bitrate,
                 "user_limit": user_limit if user_limit is not MISSING else self.user_limit,
                 "position": position if position is not MISSING else self.position,
@@ -2171,11 +2110,11 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
                     else int(self.video_quality_mode)
                 ),
                 "nsfw": nsfw if nsfw is not MISSING else self.nsfw,
-                "permission_overwrites": overwrites_payload,
             },
             name=name,
             category=category,
             reason=reason,
+            overwrites=overwrites,
         )
 
     def is_nsfw(self) -> bool:
@@ -2898,35 +2837,13 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         :class:`CategoryChannel`
             The channel that was created.
         """
-        overwrites_payload: List[PermissionOverwritePayload] = MISSING
-        if overwrites is not MISSING and overwrites is not None:
-            overwrites_payload = []
-            for target, perm in overwrites.items():
-                if not isinstance(perm, PermissionOverwrite):
-                    raise TypeError(
-                        f"Expected PermissionOverwrite, received {perm.__class__.__name__}"
-                    )
-
-                allow, deny = perm.pair()
-                payload: PermissionOverwritePayload = {
-                    "allow": str(allow.value),
-                    "deny": str(deny.value),
-                    "id": target.id,
-                    "type": (
-                        disnake.abc._Overwrites.ROLE
-                        if isinstance(target, Role)
-                        else disnake.abc._Overwrites.MEMBER
-                    ),
-                }
-                overwrites_payload.append(payload)
-
         return await self._clone_impl(
             {
                 "position": position if position is not MISSING else self.position,
-                "permission_overwrites": overwrites_payload,
             },
             name=name,
             reason=reason,
+            overwrites=overwrites,
         )
 
     # if only these parameters are passed, `_move` is called and no channel will be returned
@@ -3776,28 +3693,6 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         :class:`ForumChannel`
             The channel that was created.
         """
-        overwrites_payload: List[PermissionOverwritePayload] = MISSING
-        if overwrites is not MISSING and overwrites is not None:
-            overwrites_payload = []
-            for target, perm in overwrites.items():
-                if not isinstance(perm, PermissionOverwrite):
-                    raise TypeError(
-                        f"Expected PermissionOverwrite, received {perm.__class__.__name__}"
-                    )
-
-                allow, deny = perm.pair()
-                payload: PermissionOverwritePayload = {
-                    "allow": str(allow.value),
-                    "deny": str(deny.value),
-                    "id": target.id,
-                    "type": (
-                        disnake.abc._Overwrites.ROLE
-                        if isinstance(target, Role)
-                        else disnake.abc._Overwrites.MEMBER
-                    ),
-                }
-                overwrites_payload.append(payload)
-
         default_reaction_emoji_payload: Optional[DefaultReactionPayload] = MISSING
         if default_reaction is MISSING:
             default_reaction = self.default_reaction
@@ -3811,13 +3706,8 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         else:
             default_reaction_emoji_payload = None
 
-        default_sort_order_payload: Optional[int] = MISSING
         if default_sort_order is MISSING:
             default_sort_order = self.default_sort_order
-
-        default_sort_order_payload = (
-            try_enum_to_int(default_sort_order) if default_sort_order is not None else None
-        )
 
         return await self._clone_impl(
             {
@@ -3843,12 +3733,14 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
                     else [tag.to_dict() for tag in self.available_tags]
                 ),
                 "default_reaction_emoji": default_reaction_emoji_payload,
-                "default_sort_order": default_sort_order_payload,
-                "permission_overwrites": overwrites_payload,
+                "default_sort_order": (
+                    try_enum_to_int(default_sort_order) if default_sort_order is not None else None
+                ),
             },
             name=name,
             category=category,
             reason=reason,
+            overwrites=overwrites,
         )
 
     def get_thread(self, thread_id: int, /) -> Optional[Thread]:
