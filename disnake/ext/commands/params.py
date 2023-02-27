@@ -531,28 +531,29 @@ class ParamInfo:
         self.large = large
 
     def copy(self) -> ParamInfo:
+        # n. b. this method needs to be manually updated with a new attribute is added.
         cls = self.__class__
-        new = cls.__new__(cls)
+        ins = cls.__new__(cls)
 
-        new.name = self.name
-        new.name_localizations = self.name_localizations._copy()
-        new.description = self.description
-        new.description_localizations = self.description_localizations._copy()
-        new.default = self.default
-        new.param_name = self.param_name
-        new.converter = self.converter
-        new.convert_default = self.convert_default
-        new.autocomplete = self.autocomplete
-        new.choices = self.choices.copy()
-        new.type = self.type
-        new.channel_types = self.channel_types.copy()
-        new.max_value = self.max_value
-        new.min_value = self.min_value
-        new.min_length = self.min_length
-        new.max_length = self.max_length
-        new.large = self.large
+        ins.name = self.name
+        ins.name_localizations = self.name_localizations._copy()
+        ins.description = self.description
+        ins.description_localizations = self.description_localizations._copy()
+        ins.default = self.default
+        ins.param_name = self.param_name
+        ins.converter = self.converter
+        ins.convert_default = self.convert_default
+        ins.autocomplete = self.autocomplete
+        ins.choices = self.choices.copy()
+        ins.type = self.type
+        ins.channel_types = self.channel_types.copy()
+        ins.max_value = self.max_value
+        ins.min_value = self.min_value
+        ins.min_length = self.min_length
+        ins.max_length = self.max_length
+        ins.large = self.large
 
-        return new
+        return ins
 
     @property
     def required(self) -> bool:
