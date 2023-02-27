@@ -137,10 +137,7 @@ def autotyping(session: nox.Session) -> None:
         posargs = session.posargs.copy()
         if len(posargs) == 1 and not posargs[0].startswith("--"):
             module = posargs[0].split("/")[0]
-            try:
-                posargs += commands[module]
-            except KeyError:
-                pass
+            posargs += commands.get(module, [])
         session.run(*base_command, *posargs, env=env)
         return
 
