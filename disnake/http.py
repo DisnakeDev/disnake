@@ -249,6 +249,8 @@ class HTTPClient:
         self.proxy_auth: Optional[aiohttp.BasicAuth] = proxy_auth
         self.use_clock: bool = not unsync_clock
 
+        # n.b. if this is changed after the ClientSession is created,
+        # the new user agent will not be used until the session is recreated
         self.user_agent: str = get_user_agent()
 
     def recreate(self) -> None:
