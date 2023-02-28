@@ -669,6 +669,31 @@ aside .material-icons {
   align-items: baseline;
 }
 
+/* sidebar search box stuff */
+
+.sidebar-search-wrapper {
+  display: flex;
+  align-items: stretch;
+}
+.sidebar-search-wrapper {
+  border: 2px solid var(--search-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.sidebar-search-wrapper:focus-within {
+  border-color: var(--search-focus);
+}
+
+#sidebar-search-box {
+  background-color: var(--sub-header-background);
+  border: none;
+  color: var(--search-text);
+  padding: 0.25em 0.25em;
+  flex: 9;
+}
+
+
 aside::-webkit-scrollbar {
   width: 0.5em;
   overflow-y: overlay;

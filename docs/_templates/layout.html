@@ -123,7 +123,9 @@
   </div>
   <div id="sidebar">
     {% if pagename == 'api' or '/api' in pagename %}
-    <input type="text" id="sidebar-search-box" onkeyup="sidebarSearch()" placeholder="Search API Reference.." autocomplete=off>
+    <div class="sidebar-search-wrapper">
+      <input type="text" id="sidebar-search-box" onkeyup="sidebarSearch()" placeholder="Search API Reference.." autocomplete=off>
+    </div>
     {% endif %}
     {%- include "localtoc.html" %}
   </div>
