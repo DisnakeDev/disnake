@@ -1,2 +1,1 @@
-
 Add a sidebar searchbox for searching within the sidebar on the API Reference pages.
