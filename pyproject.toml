@@ -80,9 +80,11 @@ codemod = [
     "black==23.1.0",
 ]
 typing = [
-    "typing-extensions~=4.2.0",
     # this is not pyright itself, but the python wrapper
     "pyright==1.1.291",
+    "typing-extensions~=4.2.0",
+    # only used for type-checking, version does not matter
+    "pytz",
 ]
 test = [
     "pytest~=7.2.0",
