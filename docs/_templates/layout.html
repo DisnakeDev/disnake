@@ -122,7 +122,7 @@
     {%- endfor %}
   </div>
   <div id="sidebar">
-    {% if pagename == 'api' or '/api' in pagename %}
+    {% if 'api' in pagename.split('/') %}
     <div class="sidebar-search-wrapper">
       <input type="text" id="sidebar-search-box" onkeyup="sidebarSearch()" placeholder="Filter..." autocomplete=off>
     </div>
