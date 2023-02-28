@@ -567,10 +567,6 @@ header form.search {
   #hamburger-toggle {
     left: 8px;
   }
-
-  .sidebar-search-wrapper {
-    width: fit-content;
-  }
 }
 
 @media screen and (max-width: 365px) {
@@ -694,7 +690,6 @@ aside .material-icons {
   background-color: var(--sub-header-background);
   border: none;
   color: var(--search-text);
-  width: 40;
   padding: 0.4em 1em;
   flex: 10;
 }
