@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 import pathlib
 from itertools import chain
-from typing import TYPE_CHECKING, Callable, List, TypeVar
+from typing import TYPE_CHECKING, Callable, Dict, List, Tuple, TypeVar
 
 import nox
 
@@ -104,11 +104,15 @@ def autotyping(session: nox.Session) -> None:
 
     env = {"LIBCST_PARSER_TYPE": "native"}
     base_command = ["python", "-m", "libcst.tool", "codemod", "autotyping.AutotypeCommand"]
-    commands = {
-        "disnake": [
-            "--aggressive",
-        ],
-        "examples": [
+    dir_options: Dict[Tuple[str, ...], Tuple[str, ...]] = {
+        (
+            "disnake",
+            "scripts",
+            "tests",
+            "test_bot",
+            "noxfile.py",
+        ): ("--aggressive",),
+        ("examples",): (
             "--scalar-return",
             "--bool-param",
             "--bool-param",
@@ -116,20 +120,7 @@ def autotyping(session: nox.Session) -> None:
             "--float-param",
             "--str-param",
             "--bytes-param",
-        ],
-        "scripts": [
-            "--aggressive",
-        ],
-        "tests": [
-            "--aggressive",
-        ],
-        "test_bot": [
-            "--aggressive",
-        ],
-        # also autotype this file
-        "noxfile.py": [
-            "--aggressive",
-        ],
+        ),
     }
 
     if session.posargs:
@@ -144,15 +135,19 @@ def autotyping(session: nox.Session) -> None:
                 pass
             else:
                 module = path.parts[0]
-                posargs += commands.get(module, [])
+                for modules, options in dir_options.items():
+                    if module in modules:
+                        posargs += options
+                        break
+
         session.run(*base_command, *posargs, env=env)
         return
 
     # run the custom fixers
     any_change_made = False
-    for module, options in commands.items():
+    for module, options in dir_options.items():
         try:
-            session.run(*base_command, module, *options, env=env)
+            session.run(*base_command, *module, *options, env=env)
         except Exception as e:
             session.log(e)
             any_change_made = True
