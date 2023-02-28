@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import pathlib
 from itertools import chain
 from typing import TYPE_CHECKING, Callable, List, TypeVar
 
@@ -135,9 +136,15 @@ def autotyping(session: nox.Session) -> None:
         # short circuit with the provided arguments
         # if there's just one file argument, give it the defaults that we normally use
         posargs = session.posargs.copy()
-        if len(posargs) == 1 and not posargs[0].startswith("--"):
-            module = posargs[0].split("/")[0]
-            posargs += commands.get(module, [])
+        if len(posargs) == 1 and not (path := posargs[0]).startswith("--"):
+            path = pathlib.Path(path).absolute()
+            try:
+                path = path.relative_to(pathlib.Path.cwd())
+            except ValueError:
+                pass
+            else:
+                module = path.parts[0]
+                posargs += commands.get(module, [])
         session.run(*base_command, *posargs, env=env)
         return
 
