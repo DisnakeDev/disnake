@@ -123,27 +123,22 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function sidebarSearch() {
-  // Declare variables
-  var input, filter, ul, li, a, i, txtValue;
-  input = document.getElementById('sidebar-search-box');
-  filter = input.value.toUpperCase();
-  ul = document.getElementById("sidebar");
-  li = ul.querySelectorAll('li');
+  const filter = document.getElementById('sidebar-search-box').value.toUpperCase();
+  const items = document.querySelectorAll('#sidebar li')
 
   // Loop through all list items, and hide those who don't match the search query
-  for (i = 0; i < li.length; i++) {
-    a = li[i].getElementsByTagName("a")[0];
-    txtValue = a.textContent || a.innerText;
-    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+  for (const item of items) {
+    const a = item.querySelector("a");
+    const itemText = a.textContent || a.innerText;
+    if (itemText.toUpperCase().indexOf(filter) > -1) {
       // we need to convert all of the parents back into visible mode
-      let el = li[i]
+      let el = item;
       while (el) {
         el.style.display = "";
-
         el = el.parentNode.closest("#sidebar li");
       }
     } else {
-      li[i].style.display = "none";
+      item.style.display = "none";
     }
   }
 }
