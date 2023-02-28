@@ -121,3 +121,29 @@ document.addEventListener('DOMContentLoaded', () => {
     sidebar.setActiveLink(getCurrentSection());
   });
 });
+
+function sidebarSearch() {
+  // Declare variables
+  var input, filter, ul, li, a, i, txtValue;
+  input = document.getElementById('sidebar-search-box');
+  filter = input.value.toUpperCase();
+  ul = document.getElementById("sidebar");
+  li = ul.querySelectorAll('li');
+
+  // Loop through all list items, and hide those who don't match the search query
+  for (i = 0; i < li.length; i++) {
+    a = li[i].getElementsByTagName("a")[0];
+    txtValue = a.textContent || a.innerText;
+    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+      // we need to convert all of the parents back into visible mode
+      let el = li[i]
+      while (el) {
+        el.style.display = "";
+
+        el = el.parentNode.closest("#sidebar li");
+      }
+    } else {
+      li[i].style.display = "none";
+    }
+  }
+}
