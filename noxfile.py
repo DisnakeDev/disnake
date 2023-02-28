@@ -169,11 +169,17 @@ def codemod(session: nox.Session) -> None:
 
         for trans in transformers:
             # remove autotyping transformers
-            if trans.startswith("autotyping"):
+            if trans.startswith("autotyping."):
                 session.log("Skipping autotyping transformer.")
                 continue
             session.run(
-                "python", "-m", "libcst.tool", "codemod", trans, "disnake", "--hide-progress"
+                "python",
+                "-m",
+                "libcst.tool",
+                "codemod",
+                trans,
+                "disnake",
+                "--hide-progress",
             )
         session.log("Finished running all transformers.")
     else:
