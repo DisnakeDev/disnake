@@ -20,8 +20,7 @@ class SlashCommands(commands.Cog):
 
     @commands.slash_command()
     async def auto(self, inter: disnake.CommandInteraction, mood: str) -> None:
-        """
-        Has an autocomplete option.
+        """Has an autocomplete option.
 
         Parameters
         ----------

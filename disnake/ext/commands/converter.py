@@ -1068,8 +1068,7 @@ class clean_content(Converter[str]):
 
 
 class Greedy(List[T]):
-    """
-    A special converter that greedily consumes arguments until it can't.
+    """A special converter that greedily consumes arguments until it can't.
     As a consequence of this behaviour, most input errors are silently discarded,
     since it is used as an indicator of when to stop parsing.
 

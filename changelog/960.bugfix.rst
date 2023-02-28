@@ -1,0 +1,1 @@
+Fix attribute error when attempting to access :class:`DMChannel.flags` under certain circumstances.

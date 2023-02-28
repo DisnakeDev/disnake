@@ -33,8 +33,7 @@ class Localizations(commands.Cog):
             description=Localized(data={Locale.en_GB: "insert bri'ish description here"}),
         ),
     ) -> None:
-        """
-        {{ MY_LOC_CMD }} Does absolutely nothing
+        """{{ MY_LOC_CMD }} Does absolutely nothing
 
         Parameters
         ----------

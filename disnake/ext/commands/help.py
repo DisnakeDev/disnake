@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: MIT
+from __future__ import annotations
 
 import copy
 import functools
@@ -245,8 +246,7 @@ class _HelpCommandImpl(Command):
 
 
 class HelpCommand:
-    """
-    The base implementation for help command formatting.
+    """The base implementation for help command formatting.
 
     .. note::
 
@@ -328,8 +328,7 @@ class HelpCommand:
         self._command_impl._eject_cog()
 
     def add_check(self, func) -> None:
-        """
-        Adds a check to the help command.
+        """Adds a check to the help command.
 
         .. versionadded:: 1.4
 
@@ -341,8 +340,7 @@ class HelpCommand:
         self._command_impl.add_check(func)
 
     def remove_check(self, func) -> None:
-        """
-        Removes a check from the help command.
+        """Removes a check from the help command.
 
         This function is idempotent and will not raise an exception if
         the function is not in the command's checks.
@@ -541,7 +539,6 @@ class HelpCommand:
         List[:class:`Command`]
             A list of commands that passed the filter.
         """
-
         # set `key` iff `sort` is true
         if not sort:
             key = None

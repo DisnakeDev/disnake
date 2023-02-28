@@ -664,8 +664,7 @@ def test_parse_docstring_param(docstring: str, expected) -> None:
 
 def test_parse_docstring_localizations() -> None:
     def f() -> None:
-        """
-        Does stuff. {{cool_key}}
+        """Does stuff. {{cool_key}}
 
         Parameters
         ----------

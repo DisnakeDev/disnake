@@ -283,8 +283,7 @@ class BaseFlags:
 
 
 class ListBaseFlags(BaseFlags, no_fill_flags=True):
-    """
-    A base class for flags that aren't powers of 2.
+    """A base class for flags that aren't powers of 2.
     Instead, values are used as exponents to map to powers of 2 to avoid collisions,
     and only the combined value is stored, which allows all bitwise operations to work as expected.
     """
@@ -318,8 +317,7 @@ class ListBaseFlags(BaseFlags, no_fill_flags=True):
 
 
 class SystemChannelFlags(BaseFlags, inverted=True):
-    """
-    Wraps up a Discord system channel flag value.
+    """Wraps up a Discord system channel flag value.
 
     Similar to :class:`Permissions`\\, the properties provided are two way.
     You can set and retrieve individual bits using the properties as if they
@@ -467,8 +465,7 @@ class SystemChannelFlags(BaseFlags, inverted=True):
 
 
 class MessageFlags(BaseFlags):
-    """
-    Wraps up a Discord Message flag value.
+    """Wraps up a Discord Message flag value.
 
     See :class:`SystemChannelFlags`.
 
@@ -649,8 +646,7 @@ class MessageFlags(BaseFlags):
 
 
 class PublicUserFlags(BaseFlags):
-    """
-    Wraps up the Discord User Public flags.
+    """Wraps up the Discord User Public flags.
 
     .. container:: operations
 
@@ -885,8 +881,7 @@ class PublicUserFlags(BaseFlags):
 
 
 class Intents(BaseFlags):
-    """
-    Wraps up a Discord gateway intent flag.
+    """Wraps up a Discord gateway intent flag.
 
     Similar to :class:`Permissions`\\, the properties provided are two way.
     You can set and retrieve individual bits using the properties as if they
@@ -1762,8 +1757,7 @@ class MemberCacheFlags(BaseFlags):
 
 
 class ApplicationFlags(BaseFlags):
-    """
-    Wraps up the Discord Application flags.
+    """Wraps up the Discord Application flags.
 
     .. container:: operations
 
@@ -2045,8 +2039,7 @@ class ChannelFlags(BaseFlags):
 
 
 class AutoModKeywordPresets(ListBaseFlags):
-    """
-    Wraps up the pre-defined auto moderation keyword lists, provided by Discord.
+    """Wraps up the pre-defined auto moderation keyword lists, provided by Discord.
 
     .. container:: operations
 
