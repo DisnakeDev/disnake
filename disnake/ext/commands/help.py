@@ -12,6 +12,7 @@ from .core import Command, Group
 from .errors import CommandError
 
 if TYPE_CHECKING:
+    from ._types import MaybeCoro
     from .context import Context
 
 __all__ = (
@@ -459,7 +460,7 @@ class HelpCommand:
         if cog is not None:
             self._command_impl._inject_into_cog(cog)
 
-    def command_not_found(self, string: str) -> str:
+    def command_not_found(self, string: str) -> MaybeCoro[str]:
         """|maybecoro|
 
         A method called when a command is not found in the help command.
@@ -480,7 +481,7 @@ class HelpCommand:
         """
         return f'No command called "{string}" found.'
 
-    def subcommand_not_found(self, command, string: str) -> str:
+    def subcommand_not_found(self, command, string: str) -> MaybeCoro[str]:
         """|maybecoro|
 
         A method called when a command did not have a subcommand requested in the help command.
@@ -917,7 +918,7 @@ class DefaultHelpCommand(HelpCommand):
             return text[: self.width - 3].rstrip() + "..."
         return text
 
-    def get_ending_note(self) -> str:
+    def get_ending_note(self) -> Optional[str]:
         """Returns help command's ending note. This is mainly useful to override for i18n purposes.
 
         :return type: :class:`str`
@@ -1119,7 +1120,7 @@ class MinimalHelpCommand(HelpCommand):
         for page in self.paginator.pages:
             await destination.send(page)
 
-    def get_opening_note(self) -> str:
+    def get_opening_note(self) -> Optional[str]:
         """Returns help command's opening note. This is mainly useful to override for i18n purposes.
 
         The default implementation returns ::
@@ -1141,7 +1142,7 @@ class MinimalHelpCommand(HelpCommand):
     def get_command_signature(self, command) -> str:
         return f"{self.context.clean_prefix}{command.qualified_name} {command.signature}"
 
-    def get_ending_note(self):
+    def get_ending_note(self) -> Optional[str]:
         """Return the help command's ending note. This is mainly useful to override for i18n purposes.
 
         The default implementation does nothing.

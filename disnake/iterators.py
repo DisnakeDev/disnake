@@ -763,7 +763,7 @@ class GuildIterator(_AsyncIterator["Guild"]):
 
 
 class MemberIterator(_AsyncIterator["Member"]):
-    def __init__(self, guild, limit: int = 1000, after=None) -> None:
+    def __init__(self, guild, limit: Optional[int] = 1000, after=None) -> None:
         if isinstance(after, datetime.datetime):
             after = Object(id=time_snowflake(after, high=True))
 

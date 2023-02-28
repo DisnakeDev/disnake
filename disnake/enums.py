@@ -16,6 +16,9 @@ from typing import (
     TypeVar,
 )
 
+if TYPE_CHECKING:
+    from typing_extensions import Self
+
 __all__ = (
     "Enum",
     "ChannelType",
@@ -142,10 +145,10 @@ class EnumMeta(type):
         value_cls._actual_enum_cls_ = actual_cls  # type: ignore
         return actual_cls
 
-    def __iter__(cls) -> Iterator:
+    def __iter__(cls) -> Iterator[Self]:
         return (cls._enum_member_map_[name] for name in cls._enum_member_names_)
 
-    def __reversed__(cls) -> Iterator:
+    def __reversed__(cls) -> Iterator[Self]:
         return (cls._enum_member_map_[name] for name in reversed(cls._enum_member_names_))
 
     def __len__(cls) -> int:

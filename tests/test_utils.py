@@ -590,7 +590,7 @@ def test_escape_mentions(text: str, expected) -> None:
         ),
     ],
 )
-def test_parse_docstring_desc(docstring: str, expected) -> None:
+def test_parse_docstring_desc(docstring: Optional[str], expected) -> None:
     def f() -> None:
         ...
 
