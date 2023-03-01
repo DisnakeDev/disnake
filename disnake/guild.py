@@ -1225,7 +1225,6 @@ class Guild(Hashable):
 
         Examples
         --------
-
         Creating a basic channel:
 
         .. code-block:: python3
@@ -2581,7 +2580,6 @@ class Guild(Hashable):
 
         Examples
         --------
-
         Usage ::
 
             async for member in guild.fetch_members(limit=150):
@@ -2716,8 +2714,7 @@ class Guild(Hashable):
             Due to a breaking change in Discord's API, this now returns an :class:`~disnake.AsyncIterator` instead of a :class:`list`.
 
         Examples
-        ---------
-
+        --------
         Usage ::
 
             counter = 0
@@ -2752,7 +2749,7 @@ class Guild(Hashable):
             An error occurred while fetching the bans.
 
         Yields
-        -------
+        ------
         :class:`~disnake.BanEntry`
             The ban with the ban data parsed.
         """
@@ -3858,7 +3855,6 @@ class Guild(Hashable):
 
         Examples
         --------
-
         Getting the first 100 entries: ::
 
             async for entry in guild.audit_logs(limit=100):
@@ -3903,7 +3899,7 @@ class Guild(Hashable):
             An error occurred while fetching the audit logs.
 
         Yields
-        --------
+        ------
         :class:`AuditLogEntry`
             The audit log entry.
         """
@@ -4097,7 +4093,7 @@ class Guild(Hashable):
             The members intent is not enabled.
 
         Returns
-        --------
+        -------
         Optional[List[:class:`Member`]]
              Returns a list of all the members within the guild.
         """
@@ -4203,7 +4199,7 @@ class Guild(Hashable):
         .. versionadded:: 2.5
 
         Parameters
-        -----------
+        ----------
         query: :class:`str`
             The string that the usernames or nicknames start with.
         limit: :class:`int`
@@ -4214,12 +4210,12 @@ class Guild(Hashable):
             such as :meth:`get_member` work for those that matched.
 
         Raises
-        -------
+        ------
         ValueError
             Invalid parameters were passed to the function
 
         Returns
-        --------
+        -------
         List[:class:`Member`]
             The list of members that have matched the query.
         """
@@ -4257,7 +4253,7 @@ class Guild(Hashable):
         .. versionadded:: 2.4
 
         Parameters
-        -----------
+        ----------
         user_ids: List[:class:`int`]
             List of user IDs to search for. If the user ID is not in the guild then it won't be returned.
         presences: :class:`bool`
@@ -4268,14 +4264,14 @@ class Guild(Hashable):
             It also speeds up this method on repeated calls. Defaults to ``True``.
 
         Raises
-        -------
+        ------
         asyncio.TimeoutError
             The query timed out waiting for the members.
         ClientException
             The presences intent is not enabled.
 
         Returns
-        --------
+        -------
         List[:class:`Member`]
             The list of members with the given IDs, if they exist.
         """
@@ -4644,7 +4640,6 @@ class GuildBuilder:
 
     Examples
     --------
-
     Basic usage:
 
     .. code-block:: python3

@@ -267,7 +267,7 @@ class DynamicCooldownMapping(CooldownMapping):
 
 
 class _Semaphore:
-    """This class is a version of a semaphore.
+    """A custom version of a semaphore.
 
     If you're wondering why asyncio.Semaphore isn't being used,
     it's because it doesn't expose the internal value. This internal

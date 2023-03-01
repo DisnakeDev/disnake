@@ -29,12 +29,12 @@ def test_cached_property() -> None:
     class Test:
         @utils.cached_property
         def prop(self) -> object:
-            """stuff"""
+            """Does things"""
             return object()
 
     inst = Test()
     assert inst.prop is inst.prop
-    assert Test.prop.__doc__ == "stuff"
+    assert Test.prop.__doc__ == "Does things"
     assert isinstance(Test.prop, utils.cached_property)
 
 
@@ -44,12 +44,12 @@ def test_cached_slot_property() -> None:
 
         @utils.cached_slot_property("_cs_prop")
         def prop(self) -> object:
-            """stuff"""
+            """Does things"""
             return object()
 
     inst = Test()
     assert inst.prop is inst.prop
-    assert Test.prop.__doc__ == "stuff"
+    assert Test.prop.__doc__ == "Does things"
     assert isinstance(Test.prop, utils.CachedSlotProperty)
 
 
@@ -62,7 +62,7 @@ def test_parse_time() -> None:
 
 def test_copy_doc() -> None:
     def func(num: int, *, arg: str) -> float:
-        """returns the best number"""
+        """Returns the best number"""
         ...
 
     @utils.copy_doc(func)

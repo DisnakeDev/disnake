@@ -914,7 +914,6 @@ class GuildChannel(ABC):
 
         Examples
         --------
-
         Setting allow and deny: ::
 
             await message.channel.set_permissions(message.author, view_channel=True,
@@ -1795,7 +1794,6 @@ class Messageable:
 
         Examples
         --------
-
         Usage ::
 
             counter = 0
@@ -1842,7 +1840,7 @@ class Messageable:
             The request to get message history failed.
 
         Yields
-        -------
+        ------
         :class:`.Message`
             The message with the message data parsed.
         """

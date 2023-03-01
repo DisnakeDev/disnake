@@ -429,7 +429,6 @@ class FFmpegOpusAudio(FFmpegAudio):
 
         Examples
         --------
-
         Use this function to create an :class:`FFmpegOpusAudio` instance instead of the constructor: ::
 
             source = await disnake.FFmpegOpusAudio.from_probe("song.webm")

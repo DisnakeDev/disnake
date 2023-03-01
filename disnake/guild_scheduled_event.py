@@ -688,7 +688,6 @@ class GuildScheduledEvent(Hashable):
 
         Examples
         --------
-
         Usage ::
 
             async for user in event.fetch_users(limit=500):

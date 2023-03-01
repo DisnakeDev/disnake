@@ -399,7 +399,7 @@ class BanIterator(_AsyncIterator["BanEntry"]):
     bans endpoint.
 
     Parameters
-    -----------
+    ----------
     guild: :class:`~disnake.Guild`
         The guild to get bans from.
     limit: Optional[:class:`int`]
