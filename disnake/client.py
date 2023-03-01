@@ -1545,7 +1545,6 @@ class Client:
 
         Examples
         --------
-
         Waiting for a user reply: ::
 
             @client.event
@@ -1746,7 +1745,6 @@ class Client:
 
         Examples
         --------
-
         Usage ::
 
             async for guild in client.fetch_guilds(limit=150):
@@ -1781,7 +1779,7 @@ class Client:
             Retrieving the guilds failed.
 
         Yields
-        --------
+        ------
         :class:`.Guild`
             The guild with the guild data parsed.
         """

@@ -55,7 +55,7 @@ class SlashCommands(commands.Cog):
         c: Optional[commands.Range[0, 10]] = None,
         d: Optional[commands.Range[0, 10.0]] = None,
     ):
-        """limit slash command options to a range of values
+        """Limit slash command options to a range of values
 
         Parameters
         ----------
