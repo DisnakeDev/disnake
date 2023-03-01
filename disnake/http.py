@@ -102,14 +102,14 @@ def _workaround_set_api_version(version: Literal[9, 10]) -> None:
     Route.BASE = f"https://discord.com/api/v{_API_VERSION}"
 
 
-def get_user_agent() -> str:
+def _get_user_agent() -> str:
     return (
         f"DiscordBot (https://github.com/DisnakeDev/disnake {__version__})"
         f" Python/{sys.version_info[0]}.{sys.version_info[1]} aiohttp/{aiohttp.__version__}"
     )
 
 
-USER_AGENT: Final[str] = get_user_agent()
+USER_AGENT: Final[str] = _get_user_agent()
 
 
 async def json_or_text(response: aiohttp.ClientResponse) -> Union[Dict[str, Any], str]:
@@ -251,7 +251,7 @@ class HTTPClient:
 
         # n.b. if this is changed after the ClientSession is created,
         # the new user agent will not be used until the session is recreated
-        self.user_agent: str = get_user_agent()
+        self.user_agent: str = _get_user_agent()
 
     def recreate(self) -> None:
         if self.__session.closed:
