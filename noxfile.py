@@ -144,16 +144,8 @@ def autotyping(session: nox.Session) -> None:
         return
 
     # run the custom fixers
-    any_change_made = False
     for module, options in dir_options.items():
-        try:
-            session.run(*base_command, *module, *options, env=env)
-        except Exception as e:
-            session.log(e)
-            any_change_made = True
-
-    if any_change_made:
-        session.error("Typings were added")
+        session.run(*base_command, *module, *options, env=env)
 
 
 @nox.session(name="codemod")
