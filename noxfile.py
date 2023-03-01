@@ -102,7 +102,6 @@ def autotyping(session: nox.Session) -> None:
     """
     session.run_always("pdm", "install", "-dG", "codemod", external=True)
 
-    env = {"LIBCST_PARSER_TYPE": "native"}
     base_command = ["python", "-m", "libcst.tool", "codemod", "autotyping.AutotypeCommand"]
     dir_options: Dict[Tuple[str, ...], Tuple[str, ...]] = {
         (
@@ -140,12 +139,12 @@ def autotyping(session: nox.Session) -> None:
                         posargs += options
                         break
 
-        session.run(*base_command, *posargs, env=env)
+        session.run(*base_command, *posargs)
         return
 
     # run the custom fixers
     for module, options in dir_options.items():
-        session.run(*base_command, *module, *options, env=env)
+        session.run(*base_command, *module, *options)
 
 
 @nox.session(name="codemod")
