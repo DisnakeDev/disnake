@@ -523,7 +523,6 @@ class AutoModRule:
 
         Examples
         --------
-
         Edit name and enable rule:
 
         .. code-block:: python3
