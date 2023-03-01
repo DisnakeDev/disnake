@@ -998,7 +998,10 @@ class GuildChannel(ABC):
         # if the overwrites are MISSING defaults to the
         # original permissions of the channel
         overwrites_payload: List[PermissionOverwritePayload] = MISSING
-        if overwrites is not MISSING and overwrites is not None:
+        if overwrites is not MISSING:
+            if not isinstance(overwrites, dict):
+                raise TypeError("overwrites parameter expects a dict.")
+
             overwrites_payload = []
             for target, perm in overwrites.items():
                 if not isinstance(perm, PermissionOverwrite):
