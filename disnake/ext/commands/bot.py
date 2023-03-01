@@ -265,7 +265,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
 
 
 class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
-    """This is similar to :class:`.Bot` except that it is inherited from
+    """Similar to :class:`.Bot`, except that it is inherited from
     :class:`disnake.AutoShardedClient` instead.
     """
 
@@ -466,7 +466,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
 
 
 class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
-    """This is similar to :class:`.InteractionBot` except that it is inherited from
+    """Similar to :class:`.InteractionBot`, except that it is inherited from
     :class:`disnake.AutoShardedClient` instead.
     """
 
