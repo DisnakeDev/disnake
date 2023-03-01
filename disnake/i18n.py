@@ -306,7 +306,7 @@ class LocalizationStore(LocalizationProtocol):
     .. versionadded:: 2.5
 
     Attributes
-    ------------
+    ----------
     strict: :class:`bool`
         Specifies whether :meth:`.get` raises an exception if localizations for a provided key couldn't be found.
     """

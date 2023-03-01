@@ -536,7 +536,6 @@ class Thread(Messageable, Hashable):
 
         Examples
         --------
-
         Deleting bot's messages ::
 
             def is_me(m):
@@ -1091,7 +1090,6 @@ class ForumTag(Hashable):
 
     Examples
     --------
-
     Creating a new tag:
 
     .. code-block:: python3

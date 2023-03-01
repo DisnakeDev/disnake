@@ -12,7 +12,7 @@ from disnake.ext import commands
 
 
 def injected(user: disnake.User, channel: disnake.TextChannel):
-    """This description should not be shown
+    """An injection callback. This description should not be shown.
 
     Parameters
     ----------
@@ -62,7 +62,7 @@ async def perhaps_this_is_it(
     disc_channel: disnake.TextChannel = commands.Param(lambda i: i.channel),
     large: int = commands.Param(0, large=True),
 ) -> PerhapsThis:
-    """This description should not be shown
+    """A registered injection callback. This description should not be shown.
 
     Parameters
     ----------
@@ -78,7 +78,7 @@ class InjectionSlashCommands(commands.Cog):
         self.exponent = 2
 
     async def injected_method(self, number: int = 3):
-        """This should not be shown
+        """An instance injection callback. This description should not be shown.
 
         Parameters
         ----------
