@@ -995,9 +995,9 @@ class GuildChannel(ABC):
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
         reason: Optional[str] = None,
     ) -> Self:
-        # if the overwrites are MISSING defaults to the
+        # if the overwrites are MISSING, defaults to the
         # original permissions of the channel
-        overwrites_payload: List[PermissionOverwritePayload] = MISSING
+        overwrites_payload: List[PermissionOverwritePayload]
         if overwrites is not MISSING:
             if not isinstance(overwrites, dict):
                 raise TypeError("overwrites parameter expects a dict.")
