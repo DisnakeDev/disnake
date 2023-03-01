@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""
-An example demonstrating two methods of sending modals and handling modal responses.
-"""
+"""An example demonstrating two methods of sending modals and handling modal responses."""
 
 import asyncio
 import os

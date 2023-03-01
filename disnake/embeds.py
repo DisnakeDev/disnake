@@ -41,7 +41,7 @@ if not TYPE_CHECKING:
 
 
 class EmbedProxy:
-    def __init__(self, layer: Optional[Mapping[str, Any]]):
+    def __init__(self, layer: Optional[Mapping[str, Any]]) -> None:
         if layer is not None:
             self.__dict__.update(layer)
 
@@ -197,7 +197,7 @@ class Embed:
         timestamp: Optional[datetime.datetime] = None,
         colour: Optional[Union[int, Colour]] = MISSING,
         color: Optional[Union[int, Colour]] = MISSING,
-    ):
+    ) -> None:
         self.title: Optional[str] = str(title) if title is not None else None
         self.type: Optional[EmbedType] = type
         self.description: Optional[str] = str(description) if description is not None else None
@@ -338,7 +338,7 @@ class Embed:
         return col if col is not MISSING else type(self)._default_colour
 
     @colour.setter
-    def colour(self, value: Optional[Union[int, Colour]]):
+    def colour(self, value: Optional[Union[int, Colour]]) -> None:
         if isinstance(value, int):
             self._colour = Colour(value=value)
         elif value is MISSING or value is None or isinstance(value, Colour):
@@ -349,7 +349,7 @@ class Embed:
             )
 
     @colour.deleter
-    def colour(self):
+    def colour(self) -> None:
         self._colour = MISSING
 
     color = colour
@@ -359,7 +359,7 @@ class Embed:
         return self._timestamp
 
     @timestamp.setter
-    def timestamp(self, value: Optional[datetime.datetime]):
+    def timestamp(self, value: Optional[datetime.datetime]) -> None:
         if isinstance(value, datetime.datetime):
             if value.tzinfo is None:
                 value = value.astimezone()
@@ -743,7 +743,6 @@ class Embed:
 
     def to_dict(self) -> EmbedData:
         """Converts this embed object into a dict."""
-
         # add in the raw data into the dict
         result: EmbedData = {}
         if self._footer is not None:
@@ -785,8 +784,7 @@ class Embed:
 
     @classmethod
     def set_default_colour(cls, value: Optional[Union[int, Colour]]):
-        """
-        Set the default colour of all new embeds.
+        """Set the default colour of all new embeds.
 
         .. versionadded:: 2.4
 
@@ -809,8 +807,7 @@ class Embed:
 
     @classmethod
     def get_default_colour(cls) -> Optional[Colour]:
-        """
-        Get the default colour of all new embeds.
+        """Get the default colour of all new embeds.
 
         .. versionadded:: 2.4
 
@@ -838,8 +835,7 @@ class Embed:
             return str(url) if url is not None else None
 
     def check_limits(self) -> None:
-        """
-        Checks if this embed fits within the limits dictated by Discord.
+        """Checks if this embed fits within the limits dictated by Discord.
         There is also a 6000 character limit across all embeds in a message.
 
         Returns nothing on success, raises :exc:`ValueError` if an attribute exceeds the limits.
@@ -869,7 +865,6 @@ class Embed:
         ValueError
             One or more of the embed attributes are too long.
         """
-
         if self.title and len(self.title.strip()) > 256:
             raise ValueError("Embed title cannot be longer than 256 characters")
 

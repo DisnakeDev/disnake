@@ -6,6 +6,7 @@ import asyncio
 import logging
 import re
 from contextvars import ContextVar
+from errno import ECONNRESET
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -14,9 +15,11 @@ from typing import (
     List,
     Literal,
     NamedTuple,
+    NoReturn,
     Optional,
     Sequence,
     Tuple,
+    Type,
     TypeVar,
     Union,
     overload,
@@ -48,10 +51,11 @@ _log = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     import datetime
+    from types import TracebackType
 
     from ..abc import Snowflake
     from ..asset import AssetBytes
-    from ..channel import ForumChannel, TextChannel, VoiceChannel
+    from ..channel import ForumChannel, StageChannel, TextChannel, VoiceChannel
     from ..embeds import Embed
     from ..file import File
     from ..guild import Guild
@@ -69,7 +73,7 @@ MISSING = utils.MISSING
 
 
 class AsyncDeferredLock:
-    def __init__(self, lock: asyncio.Lock):
+    def __init__(self, lock: asyncio.Lock) -> None:
         self.lock = lock
         self.delta: Optional[float] = None
 
@@ -80,14 +84,19 @@ class AsyncDeferredLock:
     def delay_by(self, delta: float) -> None:
         self.delta = delta
 
-    async def __aexit__(self, type, value, traceback):
+    async def __aexit__(
+        self,
+        type: Optional[Type[BaseException]],
+        value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
         if self.delta:
             await asyncio.sleep(self.delta)
         self.lock.release()
 
 
 class AsyncWebhookAdapter:
-    def __init__(self):
+    def __init__(self) -> None:
         self._locks: Dict[Any, asyncio.Lock] = {}
 
     async def request(
@@ -201,7 +210,7 @@ class AsyncWebhookAdapter:
                             raise HTTPException(response, data)
 
                 except OSError as e:
-                    if attempt < 4 and e.errno in (54, 10054):
+                    if attempt < 4 and e.errno == ECONNRESET:
                         await asyncio.sleep(1 + attempt * 2)
                         continue
                     raise
@@ -470,8 +479,9 @@ def handle_message_parameters_dict(
     username: str = MISSING,
     avatar_url: Any = MISSING,
     tts: bool = False,
-    ephemeral: Optional[bool] = None,
-    suppress_embeds: Optional[bool] = None,
+    ephemeral: Optional[bool] = MISSING,
+    suppress_embeds: Optional[bool] = MISSING,
+    flags: MessageFlags = MISSING,
     file: File = MISSING,
     files: List[File] = MISSING,
     attachments: Optional[List[Attachment]] = MISSING,
@@ -522,12 +532,14 @@ def handle_message_parameters_dict(
     if username:
         payload["username"] = username
 
-    if ephemeral is not None or suppress_embeds is not None:
-        payload["flags"] = 0
-        if suppress_embeds:
-            payload["flags"] |= MessageFlags.suppress_embeds.flag
-        if ephemeral:
-            payload["flags"] |= MessageFlags.ephemeral.flag
+    if ephemeral not in (None, MISSING) or suppress_embeds not in (None, MISSING):
+        flags = MessageFlags._from_value(0 if flags is MISSING else flags.value)
+        if suppress_embeds not in (None, MISSING):
+            flags.suppress_embeds = suppress_embeds
+        if ephemeral not in (None, MISSING):
+            flags.ephemeral = ephemeral
+    if flags is not MISSING:
+        payload["flags"] = flags.value
 
     if allowed_mentions:
         if previous_allowed_mentions is not None:
@@ -554,8 +566,9 @@ def handle_message_parameters(
     username: str = MISSING,
     avatar_url: Any = MISSING,
     tts: bool = False,
-    ephemeral: Optional[bool] = None,
-    suppress_embeds: Optional[bool] = None,
+    ephemeral: Optional[bool] = MISSING,
+    suppress_embeds: Optional[bool] = MISSING,
+    flags: MessageFlags = MISSING,
     file: File = MISSING,
     files: List[File] = MISSING,
     attachments: Optional[List[Attachment]] = MISSING,
@@ -575,6 +588,7 @@ def handle_message_parameters(
         tts=tts,
         ephemeral=ephemeral,
         suppress_embeds=suppress_embeds,
+        flags=flags,
         file=file,
         files=files,
         attachments=attachments,
@@ -617,11 +631,11 @@ class PartialWebhookChannel(Hashable):
 
     __slots__ = ("id", "name")
 
-    def __init__(self, *, data):
+    def __init__(self, *, data) -> None:
         self.id = int(data["id"])
         self.name = data["name"]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<PartialWebhookChannel name={self.name!r} id={self.id}>"
 
 
@@ -642,13 +656,13 @@ class PartialWebhookGuild(Hashable):
 
     __slots__ = ("id", "name", "_icon", "_state")
 
-    def __init__(self, *, data, state):
+    def __init__(self, *, data, state) -> None:
         self._state = state
         self.id = int(data["id"])
         self.name = data["name"]
         self._icon = data["icon"]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<PartialWebhookGuild name={self.name!r} id={self.id}>"
 
     @property
@@ -662,7 +676,7 @@ class PartialWebhookGuild(Hashable):
 class _FriendlyHttpAttributeErrorHelper:
     __slots__ = ()
 
-    def __getattr__(self, attr):
+    def __getattr__(self, attr) -> NoReturn:
         raise AttributeError("PartialWebhookState does not support http methods.")
 
 
@@ -672,7 +686,9 @@ WebhookT = TypeVar("WebhookT", bound="BaseWebhook")
 class _WebhookState(Generic[WebhookT]):
     __slots__ = ("_parent", "_webhook")
 
-    def __init__(self, webhook: WebhookT, parent: Optional[Union[ConnectionState, _WebhookState]]):
+    def __init__(
+        self, webhook: WebhookT, parent: Optional[Union[ConnectionState, _WebhookState]]
+    ) -> None:
         self._webhook: WebhookT = webhook
 
         self._parent: Optional[ConnectionState]
@@ -862,7 +878,7 @@ class WebhookMessage(Message):
         """
         if delay is not None:
 
-            async def inner_call(delay: float = delay):
+            async def inner_call(delay: float = delay) -> None:
                 await asyncio.sleep(delay)
                 try:
                     await self._state._webhook.delete_message(self.id)
@@ -896,14 +912,14 @@ class BaseWebhook(Hashable):
         data: WebhookPayload,
         token: Optional[str] = None,
         state: Optional[ConnectionState] = None,
-    ):
+    ) -> None:
         self.auth_token: Optional[str] = token
         self._state: Union[ConnectionState, _WebhookState] = state or _WebhookState(
             self, parent=state
         )
         self._update(data)
 
-    def _update(self, data: WebhookPayload):
+    def _update(self, data: WebhookPayload) -> None:
         self.id = int(data["id"])
         self.type = try_enum(WebhookType, int(data["type"]))
         self.channel_id = utils._get_as_snowflake(data, "channel_id")
@@ -959,8 +975,8 @@ class BaseWebhook(Hashable):
         return self._state and self._state._get_guild(self.guild_id)
 
     @property
-    def channel(self) -> Optional[Union[TextChannel, VoiceChannel, ForumChannel]]:
-        """Optional[Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`ForumChannel`]]: The channel this webhook belongs to.
+    def channel(self) -> Optional[Union[TextChannel, VoiceChannel, ForumChannel, StageChannel]]:
+        """Optional[Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`ForumChannel`, :class:`StageChannel`]]: The channel this webhook belongs to.
 
         If this is a partial webhook, then this will always return ``None``.
 
@@ -997,7 +1013,8 @@ class Webhook(BaseWebhook):
 
     There are two main ways to use Webhooks. The first is through the ones
     received by the library such as :meth:`.Guild.webhooks`, :meth:`.TextChannel.webhooks`,
-    and :meth:`.VoiceChannel.webhooks`. The ones received by the library will
+    :meth:`.ForumChannel.webhooks`, :meth:`.VoiceChannel.webhooks`,
+    and :meth:`.StageChannel.webhooks`. The ones received by the library will
     automatically be bound using the library's internal HTTP session.
 
     The second form involves creating a webhook object manually using the
@@ -1081,11 +1098,11 @@ class Webhook(BaseWebhook):
         session: aiohttp.ClientSession,
         token: Optional[str] = None,
         state=None,
-    ):
+    ) -> None:
         super().__init__(data, token, state)
         self.session = session
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Webhook id={self.id!r}>"
 
     @property
@@ -1255,7 +1272,7 @@ class Webhook(BaseWebhook):
 
         return Webhook(data, self.session, token=self.auth_token, state=self._state)
 
-    async def delete(self, *, reason: Optional[str] = None, prefer_auth: bool = True):
+    async def delete(self, *, reason: Optional[str] = None, prefer_auth: bool = True) -> None:
         """|coro|
 
         Deletes this Webhook.
@@ -1423,6 +1440,7 @@ class Webhook(BaseWebhook):
         tts: bool = ...,
         ephemeral: bool = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         file: File = ...,
         files: List[File] = ...,
         embed: Embed = ...,
@@ -1447,6 +1465,7 @@ class Webhook(BaseWebhook):
         tts: bool = ...,
         ephemeral: bool = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         file: File = ...,
         files: List[File] = ...,
         embed: Embed = ...,
@@ -1468,8 +1487,9 @@ class Webhook(BaseWebhook):
         username: str = MISSING,
         avatar_url: Any = MISSING,
         tts: bool = False,
-        ephemeral: bool = False,
-        suppress_embeds: bool = False,
+        ephemeral: bool = MISSING,
+        suppress_embeds: bool = MISSING,
+        flags: MessageFlags = MISSING,
         file: File = MISSING,
         files: List[File] = MISSING,
         embed: Embed = MISSING,
@@ -1588,6 +1608,16 @@ class Webhook(BaseWebhook):
 
             .. versionadded:: 2.5
 
+        flags: :class:`MessageFlags`
+            The flags to set for this message.
+            Only :attr:`~MessageFlags.suppress_embeds`, :attr:`~MessageFlags.ephemeral`
+            and :attr:`~MessageFlags.suppress_notifications` are supported.
+
+            If parameters ``suppress_embeds`` or ``ephemeral`` are provided,
+            they will override the corresponding setting of this ``flags`` parameter.
+
+            .. versionadded:: 2.9
+
         Raises
         ------
         HTTPException
@@ -1651,6 +1681,7 @@ class Webhook(BaseWebhook):
             embeds=embeds,
             ephemeral=ephemeral,
             suppress_embeds=suppress_embeds,
+            flags=flags,
             view=view,
             components=components,
             thread_name=thread_name,

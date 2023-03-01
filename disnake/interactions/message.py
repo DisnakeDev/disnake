@@ -77,7 +77,7 @@ class MessageInteraction(Interaction):
         The interaction client.
     """
 
-    def __init__(self, *, data: MessageInteractionPayload, state: ConnectionState):
+    def __init__(self, *, data: MessageInteractionPayload, state: ConnectionState) -> None:
         super().__init__(data=data, state=state)
         self.data: MessageInteractionData = MessageInteractionData(
             data=data["data"], state=state, guild_id=self.guild_id
@@ -132,7 +132,7 @@ class MessageInteraction(Interaction):
                 if component.custom_id == self.data.custom_id:
                     return component
 
-        raise Exception("MessageInteraction is malformed - no component found")
+        raise Exception("MessageInteraction is malformed - no component found")  # noqa: TRY002
 
 
 class MessageInteractionData(Dict[str, Any]):
@@ -163,7 +163,7 @@ class MessageInteractionData(Dict[str, Any]):
         data: MessageComponentInteractionDataPayload,
         state: ConnectionState,
         guild_id: Optional[int],
-    ):
+    ) -> None:
         super().__init__(data)
         self.custom_id: str = data["custom_id"]
         self.component_type: ComponentType = try_enum(ComponentType, data["component_type"])
@@ -176,7 +176,7 @@ class MessageInteractionData(Dict[str, Any]):
             data=data.get("resolved", empty_resolved), state=state, guild_id=guild_id
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"<MessageInteractionData custom_id={self.custom_id!r} "
             f"component_type={self.component_type!r} values={self.values!r}>"

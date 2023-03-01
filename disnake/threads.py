@@ -163,7 +163,7 @@ class Thread(Messageable, Hashable):
         "_members",
     )
 
-    def __init__(self, *, guild: Guild, state: ConnectionState, data: ThreadPayload):
+    def __init__(self, *, guild: Guild, state: ConnectionState, data: ThreadPayload) -> None:
         self._state: ConnectionState = state
         self.guild = guild
         self._members: Dict[int, ThreadMember] = {}
@@ -182,7 +182,7 @@ class Thread(Messageable, Hashable):
     def __str__(self) -> str:
         return self.name
 
-    def _from_data(self, data: ThreadPayload):
+    def _from_data(self, data: ThreadPayload) -> None:
         self.id = int(data["id"])
         self.parent_id = int(data["parent_id"])
         self.owner_id = _get_as_snowflake(data, "owner_id")
@@ -207,7 +207,7 @@ class Thread(Messageable, Hashable):
         else:
             self.me = ThreadMember(self, member)
 
-    def _unroll_metadata(self, data: ThreadMetadata):
+    def _unroll_metadata(self, data: ThreadMetadata) -> None:
         self.archived = data["archived"]
         self.auto_archive_duration = data["auto_archive_duration"]
         self.archive_timestamp = parse_time(data["archive_timestamp"])
@@ -215,7 +215,7 @@ class Thread(Messageable, Hashable):
         self.invitable = data.get("invitable", True)
         self.create_timestamp = parse_time(data.get("create_timestamp"))
 
-    def _update(self, data):
+    def _update(self, data) -> None:
         try:
             self.name = data["name"]
         except KeyError:
@@ -320,7 +320,6 @@ class Thread(Messageable, Hashable):
         Optional[:class:`int`]
             The parent channel's category ID.
         """
-
         parent = self.parent
         if parent is None:
             raise ClientException("Parent channel not found")
@@ -328,8 +327,7 @@ class Thread(Messageable, Hashable):
 
     @property
     def created_at(self) -> datetime.datetime:
-        """
-        :class:`datetime.datetime`: Returns the thread's creation time in UTC.
+        """:class:`datetime.datetime`: Returns the thread's creation time in UTC.
 
         .. versionchanged:: 2.4
             If create_timestamp is provided by discord, that will be used instead of the time in the ID.
@@ -346,8 +344,7 @@ class Thread(Messageable, Hashable):
 
     @property
     def jump_url(self) -> str:
-        """
-        A URL that can be used to jump to this thread.
+        """A URL that can be used to jump to this thread.
 
         .. versionadded:: 2.4
         """
@@ -357,7 +354,7 @@ class Thread(Messageable, Hashable):
         """Whether the thread is a private thread.
 
         A private thread is only viewable by those that have been explicitly
-        invited or have :attr:`~.Permissions.manage_threads`.
+        invited or have :attr:`~.Permissions.manage_threads` permissions.
 
         :return type: :class:`bool`
         """
@@ -458,7 +455,6 @@ class Thread(Messageable, Hashable):
         :class:`~disnake.Permissions`
             The resolved permissions for the member or role.
         """
-
         parent = self.parent
         if parent is None:
             raise ClientException("Parent channel not found")
@@ -540,7 +536,6 @@ class Thread(Messageable, Hashable):
 
         Examples
         --------
-
         Deleting bot's messages ::
 
             def is_me(m):
@@ -582,7 +577,6 @@ class Thread(Messageable, Hashable):
         List[:class:`.Message`]
             The list of messages that were deleted.
         """
-
         if check is MISSING:
             check = lambda m: True
 
@@ -594,7 +588,7 @@ class Thread(Messageable, Hashable):
 
         minimum_time = int((time.time() - 14 * 24 * 60 * 60) * 1000.0 - 1420070400000) << 22
 
-        async def _single_delete_strategy(messages: Iterable[Message]):
+        async def _single_delete_strategy(messages: Iterable[Message]) -> None:
             for m in messages:
                 await m.delete()
 
@@ -749,7 +743,7 @@ class Thread(Messageable, Hashable):
         # The data payload will always be a Thread payload
         return Thread(data=data, state=self._state, guild=self.guild)  # type: ignore
 
-    async def join(self):
+    async def join(self) -> None:
         """|coro|
 
         Joins this thread.
@@ -766,7 +760,7 @@ class Thread(Messageable, Hashable):
         """
         await self._state.http.join_thread(self.id)
 
-    async def leave(self):
+    async def leave(self) -> None:
         """|coro|
 
         Leaves this thread.
@@ -778,7 +772,7 @@ class Thread(Messageable, Hashable):
         """
         await self._state.http.leave_thread(self.id)
 
-    async def add_user(self, user: Snowflake):
+    async def add_user(self, user: Snowflake) -> None:
         """|coro|
 
         Adds a user to this thread.
@@ -802,7 +796,7 @@ class Thread(Messageable, Hashable):
         """
         await self._state.http.add_user_to_thread(self.id, user.id)
 
-    async def remove_user(self, user: Snowflake):
+    async def remove_user(self, user: Snowflake) -> None:
         """|coro|
 
         Removes a user from this thread.
@@ -866,7 +860,6 @@ class Thread(Messageable, Hashable):
         List[:class:`ThreadMember`]
             All thread members in the thread.
         """
-
         members = await self._state.http.get_thread_members(self.id)
         return [ThreadMember(parent=self, data=data) for data in members]
 
@@ -923,7 +916,6 @@ class Thread(Messageable, Hashable):
         HTTPException
             Editing the thread failed.
         """
-
         if not tags:
             return
 
@@ -961,7 +953,6 @@ class Thread(Messageable, Hashable):
         HTTPException
             Editing the thread failed.
         """
-
         if not tags:
             return
 
@@ -988,7 +979,6 @@ class Thread(Messageable, Hashable):
         :class:`PartialMessage`
             The partial message.
         """
-
         from .message import PartialMessage
 
         return PartialMessage(channel=self, id=message_id)
@@ -1042,7 +1032,7 @@ class ThreadMember(Hashable):
         "parent",
     )
 
-    def __init__(self, parent: Thread, data: ThreadMemberPayload):
+    def __init__(self, parent: Thread, data: ThreadMemberPayload) -> None:
         self.parent = parent
         self._state = parent._state
         self._from_data(data)
@@ -1052,7 +1042,7 @@ class ThreadMember(Hashable):
             f"<ThreadMember id={self.id} thread_id={self.thread_id} joined_at={self.joined_at!r}>"
         )
 
-    def _from_data(self, data: ThreadMemberPayload):
+    def _from_data(self, data: ThreadMemberPayload) -> None:
         try:
             self.id = int(data["user_id"])
         except KeyError:
@@ -1075,8 +1065,7 @@ class ThreadMember(Hashable):
 
 
 class ForumTag(Hashable):
-    """
-    Represents a tag for threads in forum channels.
+    """Represents a tag for threads in forum channels.
 
     .. container:: operations
 
@@ -1101,7 +1090,6 @@ class ForumTag(Hashable):
 
     Examples
     --------
-
     Creating a new tag:
 
     .. code-block:: python3
@@ -1146,7 +1134,7 @@ class ForumTag(Hashable):
         name: str,
         emoji: Optional[Union[str, PartialEmoji, Emoji]] = None,
         moderated: bool = False,
-    ):
+    ) -> None:
         self.id: int = 0
         self.name: str = name
         self.moderated: bool = moderated
@@ -1206,8 +1194,7 @@ class ForumTag(Hashable):
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
         moderated: bool = MISSING,
     ) -> Self:
-        """
-        Returns a new instance with the given changes applied,
+        """Returns a new instance with the given changes applied,
         for easy use with :func:`ForumChannel.edit`.
         All other fields will be kept intact.
 

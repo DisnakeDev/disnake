@@ -28,6 +28,7 @@ from .activity import ActivityTypes, create_activity
 from .asset import Asset
 from .colour import Colour
 from .enums import Status, try_enum
+from .flags import MemberFlags
 from .object import Object
 from .permissions import Permissions
 from .user import BaseUser, User, _UserTag
@@ -128,7 +129,7 @@ class VoiceState:
         *,
         data: Union[VoiceStatePayload, GuildVoiceStatePayload],
         channel: Optional[VocalGuildChannel] = None,
-    ):
+    ) -> None:
         self.session_id: str = data["session_id"]
         self._update(data, channel)
 
@@ -136,7 +137,7 @@ class VoiceState:
         self,
         data: Union[VoiceStatePayload, GuildVoiceStatePayload],
         channel: Optional[VocalGuildChannel],
-    ):
+    ) -> None:
         self.self_mute: bool = data.get("self_mute", False)
         self.self_deaf: bool = data.get("self_deaf", False)
         self.self_stream: bool = data.get("self_stream", False)
@@ -271,6 +272,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         "_state",
         "_avatar",
         "_communication_disabled_until",
+        "_flags",
     )
 
     if TYPE_CHECKING:
@@ -296,7 +298,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         data: Union[MemberWithUserPayload, GuildMemberUpdateEvent],
         guild: Guild,
         state: ConnectionState,
-    ):
+    ) -> None:
         ...
 
     @overload
@@ -307,7 +309,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         guild: Guild,
         state: ConnectionState,
         user_data: UserPayload,
-    ):
+    ) -> None:
         ...
 
     def __init__(
@@ -317,7 +319,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         guild: Guild,
         state: ConnectionState,
         user_data: Optional[UserPayload] = None,
-    ):
+    ) -> None:
         self._state: ConnectionState = state
         if user_data is None:
             user_data = cast("MemberWithUserPayload", data)["user"]
@@ -336,6 +338,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         self._avatar: Optional[str] = data.get("avatar")
         timeout_datetime = utils.parse_time(data.get("communication_disabled_until"))
         self._communication_disabled_until: Optional[datetime.datetime] = timeout_datetime
+        self._flags: int = data.get("flags", 0)
 
     def __str__(self) -> str:
         return str(self._user)
@@ -371,6 +374,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         self._roles = utils.SnowflakeList(map(int, data["roles"]))
         self.nick = data.get("nick", None)
         self.pending = data.get("pending", False)
+        self._flags = data.get("flags", 0)
 
     @classmethod
     def _try_upgrade(
@@ -399,6 +403,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         self._state = member._state
         self._avatar = member._avatar
         self._communication_disabled_until = member.current_timeout
+        self._flags = member._flags
 
         # Reference will not be copied unless necessary by PRESENCE_UPDATE
         # See below
@@ -427,6 +432,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         self._avatar = data.get("avatar")
         timeout_datetime = utils.parse_time(data.get("communication_disabled_until"))
         self._communication_disabled_until = timeout_datetime
+        self._flags = data.get("flags", 0)
 
     def _presence_update(
         self, data: PresenceData, user: UserPayload
@@ -689,7 +695,6 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         .. versionadded:: 2.3
         """
-
         if self._communication_disabled_until is None:
             return None
 
@@ -698,6 +703,14 @@ class Member(disnake.abc.Messageable, _UserTag):
             return None
 
         return self._communication_disabled_until
+
+    @property
+    def flags(self) -> MemberFlags:
+        """:class:`MemberFlags`: Returns the member's flags.
+
+        .. versionadded:: 2.8
+        """
+        return MemberFlags._from_value(self._flags)
 
     @overload
     async def ban(
@@ -759,6 +772,8 @@ class Member(disnake.abc.Messageable, _UserTag):
         roles: Sequence[disnake.abc.Snowflake] = MISSING,
         voice_channel: Optional[VocalGuildChannel] = MISSING,
         timeout: Optional[Union[float, datetime.timedelta, datetime.datetime]] = MISSING,
+        flags: MemberFlags = MISSING,
+        bypasses_verification: bool = MISSING,
         reason: Optional[str] = None,
     ) -> Optional[Member]:
         """|coro|
@@ -781,6 +796,10 @@ class Member(disnake.abc.Messageable, _UserTag):
         | voice_channel                | :attr:`Permissions.move_members`    |
         +------------------------------+-------------------------------------+
         | timeout                      | :attr:`Permissions.moderate_members`|
+        +------------------------------+-------------------------------------+
+        | flags                        | :attr:`Permissions.moderate_members`|
+        +------------------------------+-------------------------------------+
+        | bypasses_verification        | :attr:`Permissions.moderate_members`|
         +------------------------------+-------------------------------------+
 
         All parameters are optional.
@@ -815,6 +834,19 @@ class Member(disnake.abc.Messageable, _UserTag):
             Set to ``None`` to remove the timeout. Supports up to 28 days in the future.
 
             .. versionadded:: 2.3
+
+        flags: :class:`MemberFlags`
+            The member's new flags. To know what flags are editable,
+            see :ddocs:`the documentation <resources/guild#guild-member-object-guild-member-flags>`.
+
+            If parameter ``bypasses_verification`` is provided, that will override the setting of :attr:`MemberFlags.bypasses_verification`.
+
+            .. versionadded:: 2.8
+
+        bypasses_verification: :class:`bool`
+            Whether the member bypasses guild verification requirements.
+
+            .. versionadded:: 2.8
 
         reason: Optional[:class:`str`]
             The reason for editing this member. Shows up on the audit log.
@@ -852,7 +884,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         if suppress is not MISSING:
             if self.voice is None or self.voice.channel is None:
-                raise Exception("Cannot suppress a member which isn't in a vc")
+                raise Exception("Cannot suppress a member which isn't in a vc")  # noqa: TRY002
 
             voice_state_payload: Dict[str, Any] = {
                 "channel_id": self.voice.channel.id,
@@ -866,9 +898,7 @@ class Member(disnake.abc.Messageable, _UserTag):
                 await http.edit_my_voice_state(guild_id, voice_state_payload)
             else:
                 if not suppress:
-                    voice_state_payload[
-                        "request_to_speak_timestamp"
-                    ] = datetime.datetime.utcnow().isoformat()
+                    voice_state_payload["request_to_speak_timestamp"] = utils.utcnow().isoformat()
                 await http.edit_voice_state(guild_id, self.id, voice_state_payload)
 
         if voice_channel is not MISSING:
@@ -888,6 +918,14 @@ class Member(disnake.abc.Messageable, _UserTag):
                 payload["communication_disabled_until"] = dt.isoformat()
             else:
                 payload["communication_disabled_until"] = None
+
+        if bypasses_verification is not MISSING:
+            # create base flags if flags are provided, otherwise use the internal flags.
+            flags = MemberFlags._from_value(self._flags if flags is MISSING else flags.value)
+            flags.bypasses_verification = bypasses_verification
+
+        if flags is not MISSING:
+            payload["flags"] = flags.value
 
         if payload:
             data = await http.edit_member(guild_id, self.id, reason=reason, **payload)
@@ -915,11 +953,11 @@ class Member(disnake.abc.Messageable, _UserTag):
             The operation failed.
         """
         if self.voice is None or self.voice.channel is None:
-            raise Exception("Cannot request to speak when not in a vc")
+            raise Exception("Cannot request to speak when not in a vc")  # noqa: TRY002
 
         payload = {
             "channel_id": self.voice.channel.id,
-            "request_to_speak_timestamp": datetime.datetime.utcnow().isoformat(),
+            "request_to_speak_timestamp": utils.utcnow().isoformat(),
         }
 
         if self._state.self_id != self.id:
@@ -954,8 +992,7 @@ class Member(disnake.abc.Messageable, _UserTag):
     async def add_roles(
         self, *roles: Snowflake, reason: Optional[str] = None, atomic: bool = True
     ) -> None:
-        """
-        |coro|
+        """|coro|
 
         Gives the member a number of :class:`Role`\\s.
 
@@ -995,8 +1032,7 @@ class Member(disnake.abc.Messageable, _UserTag):
     async def remove_roles(
         self, *roles: Snowflake, reason: Optional[str] = None, atomic: bool = True
     ) -> None:
-        """
-        |coro|
+        """|coro|
 
         Removes :class:`Role`\\s from this member.
 

@@ -12,7 +12,7 @@ from disnake.utils import MISSING
 @pytest.mark.asyncio
 class TestGuildChannelEdit:
     # TODO: use proper mock models once we have state/guild mocks
-    @pytest.fixture()
+    @pytest.fixture
     def channel(self):
         ch = mock.Mock(GuildChannel, id=123, category_id=456)
         ch._state = mock.Mock(http=mock.AsyncMock())
@@ -59,6 +59,7 @@ class TestGuildChannelEdit:
             available_tags=[disnake.ForumTag(name="tag", emoji="woo")],
             default_reaction=disnake.PartialEmoji(name="woo", id=9876),
             default_sort_order=disnake.ThreadSortOrder.creation_date,
+            default_layout=disnake.ThreadLayout.gallery_view,
             reason="stuff",
         )
         assert res is channel._state.http.edit_channel.return_value
@@ -89,6 +90,7 @@ class TestGuildChannelEdit:
             ],
             default_reaction_emoji={"emoji_name": None, "emoji_id": 9876},
             default_sort_order=1,
+            default_forum_layout=2,
             reason="stuff",
         )
 

@@ -1,8 +1,24 @@
 # SPDX-License-Identifier: MIT
+from __future__ import annotations
 
 import types
 from functools import total_ordering
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, NamedTuple, Optional, Type, TypeVar
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    ClassVar,
+    Dict,
+    Iterator,
+    List,
+    NamedTuple,
+    NoReturn,
+    Optional,
+    Type,
+    TypeVar,
+)
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
 __all__ = (
     "Enum",
@@ -47,6 +63,9 @@ __all__ = (
     "AutoModEventType",
     "AutoModActionType",
     "ThreadSortOrder",
+    "ThreadLayout",
+    "Event",
+    "ApplicationRoleConnectionMetadataType",
 )
 
 
@@ -89,7 +108,7 @@ class EnumMeta(type):
         _enum_member_map_: ClassVar[Dict[str, Any]]
         _enum_value_map_: ClassVar[Dict[Any, Any]]
 
-    def __new__(cls, name, bases, attrs, *, comparable: bool = False):
+    def __new__(cls, name: str, bases, attrs, *, comparable: bool = False):
         value_mapping = {}
         member_mapping = {}
         member_names = []
@@ -127,16 +146,16 @@ class EnumMeta(type):
         value_cls._actual_enum_cls_ = actual_cls  # type: ignore
         return actual_cls
 
-    def __iter__(cls):
+    def __iter__(cls) -> Iterator[Self]:
         return (cls._enum_member_map_[name] for name in cls._enum_member_names_)
 
-    def __reversed__(cls):
+    def __reversed__(cls) -> Iterator[Self]:
         return (cls._enum_member_map_[name] for name in reversed(cls._enum_member_names_))
 
-    def __len__(cls):
+    def __len__(cls) -> int:
         return len(cls._enum_member_names_)
 
-    def __repr__(cls):
+    def __repr__(cls) -> str:
         return f"<enum {cls.__name__}>"
 
     @property
@@ -152,13 +171,13 @@ class EnumMeta(type):
     def __getitem__(cls, key):
         return cls._enum_member_map_[key]
 
-    def __setattr__(cls, name, value):
+    def __setattr__(cls, name: str, value) -> NoReturn:
         raise TypeError("Enums are immutable.")
 
-    def __delattr__(cls, attr):
+    def __delattr__(cls, attr) -> NoReturn:
         raise TypeError("Enums are immutable")
 
-    def __instancecheck__(self, instance):
+    def __instancecheck__(self, instance) -> bool:
         # isinstance(x, Y)
         # -> __instancecheck__(Y, x)
         try:
@@ -194,7 +213,7 @@ class ChannelType(Enum):
     guild_directory = 14
     forum = 15
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
@@ -224,6 +243,13 @@ class MessageType(Enum):
     guild_invite_reminder = 22
     context_menu_command = 23
     auto_moderation_action = 24
+    role_subscription_purchase = 25
+    interaction_premium_upsell = 26
+    stage_start = 27
+    stage_end = 28
+    stage_speaker = 29
+    stage_topic = 31
+    guild_application_premium_subscription = 32
 
 
 class PartyType(Enum):
@@ -243,14 +269,14 @@ class PartyType(Enum):
 
 class SpeakingState(Enum):
     none = 0
-    voice = 1
-    soundshare = 2
-    priority = 4
+    voice = 1 << 0
+    soundshare = 1 << 1
+    priority = 1 << 2
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
-    def __int__(self):
+    def __int__(self) -> int:
         return self.value
 
 
@@ -261,7 +287,7 @@ class VerificationLevel(Enum, comparable=True):
     high = 3
     highest = 4
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
@@ -270,7 +296,7 @@ class ContentFilter(Enum, comparable=True):
     no_role = 1
     all_members = 2
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
@@ -283,7 +309,7 @@ class Status(Enum):
     invisible = "invisible"
     streaming = "streaming"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.value
 
 
@@ -295,7 +321,7 @@ class DefaultAvatar(Enum):
     orange = 3
     red = 4
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
@@ -476,25 +502,26 @@ class AuditLogAction(Enum):
 
 
 class UserFlags(Enum):
-    staff = 1
-    partner = 2
-    hypesquad = 4
-    bug_hunter = 8
-    mfa_sms = 16
-    premium_promo_dismissed = 32
-    hypesquad_bravery = 64
-    hypesquad_brilliance = 128
-    hypesquad_balance = 256
-    early_supporter = 512
-    team_user = 1024
-    system = 4096
-    has_unread_urgent_messages = 8192
-    bug_hunter_level_2 = 16384
-    verified_bot = 65536
-    verified_bot_developer = 131072
-    discord_certified_moderator = 262144
-    http_interactions_bot = 524288
-    spammer = 1048576
+    staff = 1 << 0
+    partner = 1 << 1
+    hypesquad = 1 << 2
+    bug_hunter = 1 << 3
+    mfa_sms = 1 << 4
+    premium_promo_dismissed = 1 << 5
+    hypesquad_bravery = 1 << 6
+    hypesquad_brilliance = 1 << 7
+    hypesquad_balance = 1 << 8
+    early_supporter = 1 << 9
+    team_user = 1 << 10
+    system = 1 << 12
+    has_unread_urgent_messages = 1 << 13
+    bug_hunter_level_2 = 1 << 14
+    verified_bot = 1 << 16
+    verified_bot_developer = 1 << 17
+    discord_certified_moderator = 1 << 18
+    http_interactions_bot = 1 << 19
+    spammer = 1 << 20
+    active_developer = 1 << 22
 
 
 class ActivityType(Enum):
@@ -506,7 +533,7 @@ class ActivityType(Enum):
     custom = 4
     competing = 5
 
-    def __int__(self):
+    def __int__(self) -> int:
         return self.value
 
 
@@ -538,15 +565,19 @@ class StickerFormatType(Enum):
     png = 1
     apng = 2
     lottie = 3
+    gif = 4
 
     @property
     def file_extension(self) -> str:
-        lookup: Dict[StickerFormatType, str] = {
-            StickerFormatType.png: "png",
-            StickerFormatType.apng: "png",
-            StickerFormatType.lottie: "json",
-        }
-        return lookup[self]
+        return STICKER_FORMAT_LOOKUP[self]
+
+
+STICKER_FORMAT_LOOKUP: Dict[StickerFormatType, str] = {
+    StickerFormatType.png: "png",
+    StickerFormatType.apng: "png",
+    StickerFormatType.lottie: "json",
+    StickerFormatType.gif: "gif",
+}
 
 
 class InviteTarget(Enum):
@@ -579,7 +610,7 @@ class VideoQualityMode(Enum):
     auto = 1
     full = 2
 
-    def __int__(self):
+    def __int__(self) -> int:
         return self.value
 
 
@@ -594,7 +625,7 @@ class ComponentType(Enum):
     mentionable_select = 7
     channel_select = 8
 
-    def __int__(self):
+    def __int__(self) -> int:
         return self.value
 
 
@@ -613,7 +644,7 @@ class ButtonStyle(Enum):
     red = 4
     url = 5
 
-    def __int__(self):
+    def __int__(self) -> int:
         return self.value
 
 
@@ -640,7 +671,7 @@ class ApplicationCommandPermissionType(Enum):
     user = 2
     channel = 3
 
-    def __int__(self):
+    def __int__(self) -> int:
         return self.value
 
 
@@ -695,7 +726,7 @@ class ThreadArchiveDuration(Enum):
     three_days = 4320
     week = 10080
 
-    def __int__(self):
+    def __int__(self) -> int:
         return self.value
 
 
@@ -706,14 +737,14 @@ class WidgetStyle(Enum):
     banner3 = "banner3"
     banner4 = "banner4"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.value
 
 
 # reference: https://discord.com/developers/docs/reference#locales
 class Locale(Enum):
     bg = "bg"
-    "Bulgarian | български"
+    "Bulgarian | български"  # noqa: RUF001
     cs = "cs"
     "Czech | Čeština"
     da = "da"
@@ -721,7 +752,7 @@ class Locale(Enum):
     de = "de"
     "German | Deutsch"
     el = "el"
-    "Greek | Ελληνικά"
+    "Greek | Ελληνικά"  # noqa: RUF001
     en_GB = "en-GB"
     "English, UK | English, UK"
     en_US = "en-US"
@@ -736,6 +767,10 @@ class Locale(Enum):
     "Hindi | हिन्दी"
     hr = "hr"
     "Croatian | Hrvatski"
+    hu = "hu"
+    "Hungarian | Magyar"
+    id = "id"
+    "Indonesian | Bahasa Indonesia"
     it = "it"
     "Italian | Italiano"
     ja = "ja"
@@ -744,8 +779,6 @@ class Locale(Enum):
     "Korean | 한국어"
     lt = "lt"
     "Lithuanian | Lietuviškai"
-    hu = "hu"
-    "Hungarian | Magyar"
     nl = "nl"
     "Dutch | Nederlands"
     no = "no"
@@ -757,7 +790,7 @@ class Locale(Enum):
     ro = "ro"
     "Romanian, Romania | Română"
     ru = "ru"
-    "Russian | Pусский"
+    "Russian | Pусский"  # noqa: RUF001
     sv_SE = "sv-SE"
     "Swedish | Svenska"
     th = "th"
@@ -765,7 +798,7 @@ class Locale(Enum):
     tr = "tr"
     "Turkish | Türkçe"
     uk = "uk"
-    "Ukrainian | Українська"
+    "Ukrainian | Українська"  # noqa: RUF001
     vi = "vi"
     "Vietnamese | Tiếng Việt"
     zh_CN = "zh-CN"
@@ -773,7 +806,7 @@ class Locale(Enum):
     zh_TW = "zh-TW"
     "Chinese, Taiwan | 繁體中文"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.value
 
 
@@ -800,6 +833,467 @@ class ThreadSortOrder(Enum):
     creation_date = 1
 
 
+class ThreadLayout(Enum):
+    not_set = 0
+    list_view = 1
+    gallery_view = 2
+
+
+class Event(Enum):
+    """Represents all the events of the library.
+
+    These offer to register listeners/events in a more pythonic way; additionally autocompletion and documentation are both supported.
+
+    .. versionadded:: 2.8
+
+    """
+
+    connect = "connect"
+    """Called when the client has successfully connected to Discord.
+    Represents the :func:`on_connect` event.
+    """
+    disconnect = "disconnect"
+    """Called when the client has disconnected from Discord, or a connection attempt to Discord has failed.
+    Represents the :func:`on_disconnect` event.
+    """
+    error = "error"
+    """Called when an uncaught exception occurred.
+    Represents the :func:`on_error` event.
+    """
+    gateway_error = "gateway_error"
+    """Called when a known gateway event cannot be parsed.
+    Represents the :func:`on_gateway_error` event.
+    """
+    ready = "ready"
+    """Called when the client is done preparing the data received from Discord.
+    Represents the :func:`on_ready` event.
+    """
+    resumed = "resumed"
+    """Called when the client has resumed a session.
+    Represents the :func:`on_resumed` event.
+    """
+    shard_connect = "shard_connect"
+    """Called when a shard has successfully connected to Discord.
+    Represents the :func:`on_shard_connect` event.
+    """
+    shard_disconnect = "shard_disconnect"
+    """Called when a shard has disconnected from Discord.
+    Represents the :func:`on_shard_disconnect` event.
+    """
+    shard_ready = "shard_ready"
+    """Called when a shard has become ready.
+    Represents the :func:`on_shard_ready` event.
+    """
+    shard_resumed = "shard_resumed"
+    """Called when a shard has resumed a session.
+    Represents the :func:`on_shard_resumed` event.
+    """
+    socket_event_type = "socket_event_type"
+    """Called whenever a websocket event is received from the WebSocket.
+    Represents the :func:`on_socket_event_type` event.
+    """
+    socket_raw_receive = "socket_raw_receive"
+    """Called whenever a message is completely received from the WebSocket, before it's processed and parsed.
+    Represents the :func:`on_socket_raw_receive` event.
+    """
+    socket_raw_send = "socket_raw_send"
+    """Called whenever a send operation is done on the WebSocket before the message is sent.
+    Represents the :func:`on_socket_raw_send` event.
+    """
+    guild_channel_create = "guild_channel_create"
+    """Called whenever a guild channel is created.
+    Represents the :func:`on_guild_channel_create` event.
+    """
+    guild_channel_update = "guild_channel_update"
+    """Called whenever a guild channel is updated.
+    Represents the :func:`on_guild_channel_update` event.
+    """
+    guild_channel_delete = "guild_channel_delete"
+    """Called whenever a guild channel is deleted.
+    Represents the :func:`on_guild_channel_delete` event.
+    """
+    guild_channel_pins_update = "guild_channel_pins_update"
+    """Called whenever a message is pinned or unpinned from a guild channel.
+    Represents the :func:`on_guild_channel_pins_update` event.
+    """
+    invite_create = "invite_create"
+    """Called when an :class:`Invite` is created.
+    Represents the :func:`.on_invite_create` event.
+    """
+    invite_delete = "invite_delete"
+    """Called when an Invite is deleted.
+    Represents the :func:`.on_invite_delete` event.
+    """
+    private_channel_update = "private_channel_update"
+    """Called whenever a private group DM is updated.
+    Represents the :func:`on_private_channel_update` event.
+    """
+    private_channel_pins_update = "private_channel_pins_update"
+    """Called whenever a message is pinned or unpinned from a private channel.
+    Represents the :func:`on_private_channel_pins_update` event.
+    """
+    webhooks_update = "webhooks_update"
+    """Called whenever a webhook is created, modified, or removed from a guild channel.
+    Represents the :func:`on_webhooks_update` event.
+    """
+    thread_create = "thread_create"
+    """Called whenever a thread is created.
+    Represents the :func:`on_thread_create` event.
+    """
+    thread_update = "thread_update"
+    """Called when a thread is updated.
+    Represents the :func:`on_thread_update` event.
+    """
+    thread_delete = "thread_delete"
+    """Called when a thread is deleted.
+    Represents the :func:`on_thread_delete` event.
+    """
+    thread_join = "thread_join"
+    """Called whenever the bot joins a thread or gets access to a thread.
+    Represents the :func:`on_thread_join` event.
+    """
+    thread_remove = "thread_remove"
+    """Called whenever a thread is removed. This is different from a thread being deleted.
+    Represents the :func:`on_thread_remove` event.
+    """
+    thread_member_join = "thread_member_join"
+    """Called when a `ThreadMember` joins a `Thread`.
+    Represents the :func:`on_thread_member_join` event.
+    """
+    thread_member_remove = "thread_member_remove"
+    """Called when a `ThreadMember` leaves a `Thread`.
+    Represents the :func:`on_thread_member_remove` event.
+    """
+    raw_thread_member_remove = "raw_thread_member_remove"
+    """Called when a `ThreadMember` leaves `Thread` regardless of the thread member cache.
+    Represents the :func:`on_raw_thread_member_remove` event.
+    """
+    raw_thread_update = "raw_thread_update"
+    """Called whenever a thread is updated regardless of the state of the internal thread cache.
+    Represents the :func:`on_raw_thread_update` event.
+    """
+    raw_thread_delete = "raw_thread_delete"
+    """Called whenever a thread is deleted regardless of the state of the internal thread cache.
+    Represents the :func:`on_raw_thread_delete` event.
+    """
+    guild_join = "guild_join"
+    """Called when a `Guild` is either created by the `Client` or when the Client joins a guild.
+    Represents the :func:`on_guild_join` event.
+    """
+    guild_remove = "guild_remove"
+    """Called when a `Guild` is removed from the :class:`Client`.
+    Represents the :func:`on_guild_remove` event.
+    """
+    guild_update = "guild_update"
+    """Called when a `Guild` updates.
+    Represents the :func:`on_guild_update` event.
+    """
+    guild_available = "guild_available"
+    """Called when a guild becomes available.
+    Represents the :func:`on_guild_available` event.
+    """
+    guild_unavailable = "guild_unavailable"
+    """Called when a guild becomes unavailable.
+    Represents the :func:`on_guild_unavailable` event.
+    """
+    guild_role_create = "guild_role_create"
+    """Called when a `Guild` creates a new `Role`.
+    Represents the :func:`on_guild_role_create` event.
+    """
+    guild_role_update = "guild_role_update"
+    """Called when a `Guild` updates a `Role`.
+    Represents the :func:`on_guild_role_update` event.
+    """
+    guild_role_delete = "guild_role_delete"
+    """Called when a `Guild` deletes a `Role`.
+    Represents the :func:`on_guild_role_delete` event.
+    """
+    guild_emojis_update = "guild_emojis_update"
+    """Called when a `Guild` adds or removes `Emoji`.
+    Represents the :func:`on_guild_emojis_update` event.
+    """
+    guild_stickers_update = "guild_stickers_update"
+    """Called when a `Guild` updates its stickers.
+    Represents the :func:`on_guild_stickers_update` event.
+    """
+    guild_integrations_update = "guild_integrations_update"
+    """Called whenever an integration is created, modified, or removed from a guild.
+    Represents the :func:`on_guild_integrations_update` event.
+    """
+    guild_scheduled_event_create = "guild_scheduled_event_create"
+    """Called when a guild scheduled event is created.
+    Represents the :func:`on_guild_scheduled_event_create` event.
+    """
+    guild_scheduled_event_update = "guild_scheduled_event_update"
+    """Called when a guild scheduled event is updated.
+    Represents the :func:`on_guild_scheduled_event_update` event.
+    """
+    guild_scheduled_event_delete = "guild_scheduled_event_delete"
+    """Called when a guild scheduled event is deleted.
+    Represents the :func:`on_guild_scheduled_event_delete` event.
+    """
+    guild_scheduled_event_subscribe = "guild_scheduled_event_subscribe"
+    """Called when a user subscribes from a guild scheduled event.
+    Represents the :func:`on_guild_scheduled_event_subscribe` event.
+    """
+    guild_scheduled_event_unsubscribe = "guild_scheduled_event_unsubscribe"
+    """Called when a user unsubscribes from a guild scheduled event.
+    Represents the :func:`on_guild_scheduled_event_unsubscribe` event.
+    """
+    raw_guild_scheduled_event_subscribe = "raw_guild_scheduled_event_subscribe"
+    """Called when a user subscribes from a guild scheduled event regardless of the guild scheduled event cache.
+    Represents the :func:`on_raw_guild_scheduled_event_subscribe` event.
+    """
+    raw_guild_scheduled_event_unsubscribe = "raw_guild_scheduled_event_unsubscribe"
+    """Called when a user subscribes to or unsubscribes from a guild scheduled event regardless of the guild scheduled event cache.
+    Represents the :func:`on_raw_guild_scheduled_event_unsubscribe` event.
+    """
+    application_command_permissions_update = "application_command_permissions_update"
+    """Called when the permissions of an application command or the application-wide command permissions are updated.
+    Represents the :func:`on_application_command_permissions_update` event.
+    """
+    automod_action_execution = "automod_action_execution"
+    """Called when an auto moderation action is executed due to a rule triggering for a particular event.
+    Represents the :func:`on_automod_action_execution` event.
+    """
+    automod_rule_create = "automod_rule_create"
+    """Called when an `AutoModRule` is created.
+    Represents the :func:`on_automod_rule_create` event.
+    """
+    automod_rule_update = "automod_rule_update"
+    """Called when an `AutoModRule` is updated.
+    Represents the :func:`on_automod_rule_update` event.
+    """
+    automod_rule_delete = "automod_rule_delete"
+    """Called when an `AutoModRule` is deleted.
+    Represents the :func:`on_automod_rule_delete` event.
+    """
+    integration_create = "integration_create"
+    """Called when an integration is created.
+    Represents the :func:`on_integration_create` event.
+    """
+    integration_update = "integration_update"
+    """Called when an integration is updated.
+    Represents the :func:`on_integration_update` event.
+    """
+    raw_integration_delete = "raw_integration_delete"
+    """Called when an integration is deleted.
+    Represents the :func:`on_raw_integration_delete` event.
+    """
+    member_join = "member_join"
+    """Called when a `Member` joins a `Guild`.
+    Represents the :func:`on_member_join` event.
+    """
+    member_update = "member_update"
+    """Called when a `Member` updates their profile.
+    Represents the :func:`on_member_update` event.
+    """
+    member_remove = "member_remove"
+    """Called when a `Member` leaves a `Guild`.
+    Represents the :func:`on_member_remove` event.
+    """
+    raw_member_remove = "raw_member_remove"
+    """Called when a member leaves a `Guild` regardless of the member cache.
+    Represents the :func:`on_raw_member_remove` event.
+    """
+    raw_member_update = "raw_member_update"
+    """Called when a member updates their profile regardless of the member cache.
+    Represents the :func:`on_raw_member_update` event.
+    """
+    audit_log_entry_create = "audit_log_entry_create"
+    """Called when an audit log entry is created.
+    Represents the :func:`on_audit_log_entry_create` event.
+    """
+    member_ban = "member_ban"
+    """Called when user gets banned from a `Guild`.
+    Represents the :func:`on_member_ban` event.
+    """
+    member_unban = "member_unban"
+    """Called when a `User` gets unbanned from a `Guild`.
+    Represents the :func:`on_member_unban` event.
+    """
+    presence_update = "presence_update"
+    """Called when a `Member` updates their presence.
+    Represents the :func:`on_presence_update` event.
+    """
+    user_update = "user_update"
+    """Called when a `User` is updated.
+    Represents the :func:`on_user_update` event.
+    """
+    voice_state_update = "voice_state_update"
+    """Called when a `Member` changes their `VoiceState`.
+    Represents the :func:`on_voice_state_update` event.
+    """
+    stage_instance_create = "stage_instance_create"
+    """Called when a `StageInstance` is created for a `StageChannel`.
+    Represents the :func:`on_stage_instance_create` event.
+    """
+    stage_instance_update = "stage_instance_update"
+    """Called when a `StageInstance` is updated.
+    Represents the :func:`on_stage_instance_update` event.
+    """
+    stage_instance_delete = "stage_instance_delete"
+    """Called when a `StageInstance` is deleted for a `StageChannel`.
+    Represents the :func:`on_stage_instance_delete` event.
+    """
+    application_command = "application_command"
+    """Called when an application command is invoked.
+    Represents the :func:`on_application_command` event.
+    """
+    application_command_autocomplete = "application_command_autocomplete"
+    """Called when an application command autocomplete is called.
+    Represents the :func:`on_application_command_autocomplete` event.
+    """
+    button_click = "button_click"
+    """Called when a button is clicked.
+    Represents the :func:`on_button_click` event.
+    """
+    dropdown = "dropdown"
+    """Called when a select menu is clicked.
+    Represents the :func:`on_dropdown` event.
+    """
+    interaction = "interaction"
+    """Called when an interaction happened.
+    Represents the :func:`on_interaction` event.
+    """
+    message_interaction = "message_interaction"
+    """Called when a message interaction happened.
+    Represents the :func:`on_message_interaction` event.
+    """
+    modal_submit = "modal_submit"
+    """Called when a modal is submitted.
+    Represents the :func:`on_modal_submit` event.
+    """
+    message = "message"
+    """Called when a `Message` is created and sent.
+    Represents the :func:`on_message` event.
+    """
+    message_edit = "message_edit"
+    """Called when a `Message` receives an update event.
+    Represents the :func:`on_message_edit` event.
+    """
+    message_delete = "message_delete"
+    """Called when a message is deleted.
+    Represents the :func:`on_message_delete` event.
+    """
+    bulk_message_delete = "bulk_message_delete"
+    """Called when messages are bulk deleted.
+    Represents the :func:`on_bulk_message_delete` event.
+    """
+    raw_message_delete = "raw_message_delete"
+    """Called when a message is deleted regardless of the message being in the internal message cache or not.
+    Represents the :func:`on_raw_message_delete` event.
+    """
+    raw_message_edit = "raw_message_edit"
+    """Called when a message is edited regardless of the state of the internal message cache.
+    Represents the :func:`on_raw_message_edit` event.
+    """
+    raw_bulk_message_delete = "raw_bulk_message_delete"
+    """Called when a bulk delete is triggered regardless of the messages being in the internal message cache or not.
+    Represents the :func:`on_raw_bulk_message_delete` event.
+    """
+    reaction_add = "reaction_add"
+    """Called when a message has a reaction added to it.
+    Represents the :func:`on_reaction_add` event.
+    """
+    reaction_remove = "reaction_remove"
+    """Called when a message has a reaction removed from it.
+    Represents the :func:`on_reaction_remove` event.
+    """
+    reaction_clear = "reaction_clear"
+    """Called when a message has all its reactions removed from it.
+    Represents the :func:`on_reaction_clear` event.
+    """
+    reaction_clear_emoji = "reaction_clear_emoji"
+    """Called when a message has a specific reaction removed from it.
+    Represents the :func:`on_reaction_clear_emoji` event.
+    """
+    raw_reaction_add = "raw_reaction_add"
+    """Called when a message has a reaction added regardless of the state of the internal message cache.
+    Represents the :func:`on_raw_reaction_add` event.
+    """
+    raw_reaction_remove = "raw_reaction_remove"
+    """Called when a message has a reaction removed regardless of the state of the internal message cache.
+    Represents the :func:`on_raw_reaction_remove` event.
+    """
+    raw_reaction_clear = "raw_reaction_clear"
+    """Called when a message has all its reactions removed regardless of the state of the internal message cache.
+    Represents the :func:`on_raw_reaction_clear` event.
+    """
+    raw_reaction_clear_emoji = "raw_reaction_clear_emoji"
+    """Called when a message has a specific reaction removed from it regardless of the state of the internal message cache.
+    Represents the :func:`on_raw_reaction_clear_emoji` event.
+    """
+    typing = "typing"
+    """Called when someone begins typing a message.
+    Represents the :func:`on_typing` event.
+    """
+    raw_typing = "raw_typing"
+    """Called when someone begins typing a message regardless of whether `Intents.members` and `Intents.guilds` are enabled.
+    Represents the :func:`on_raw_typing` event.
+    """
+    # ext.commands events
+    command = "command"
+    """Called when a command is found and is about to be invoked.
+    Represents the :func:`.on_command` event.
+    """
+    command_completion = "command_completion"
+    """Called when a command has completed its invocation.
+    Represents the :func:`.on_command_completion` event.
+    """
+    command_error = "command_error"
+    """Called when an error is raised inside a command either through user input error, check failure, or an error in your own code.
+    Represents the :func:`.on_command_error` event.
+    """
+    slash_command = "slash_command"
+    """Called when a slash command is found and is about to be invoked.
+    Represents the :func:`.on_slash_command` event.
+    """
+    slash_command_completion = "slash_command_completion"
+    """Called when a slash command has completed its invocation.
+    Represents the :func:`.on_slash_command_completion` event.
+    """
+    slash_command_error = "slash_command_error"
+    """Called when an error is raised inside a slash command either through user input error, check failure, or an error in your own code.
+    Represents the :func:`.on_slash_command_error` event.
+    """
+    user_command = "user_command"
+    """Called when a user command is found and is about to be invoked.
+    Represents the :func:`.on_user_command` event.
+    """
+    user_command_completion = "user_command_completion"
+    """Called when a user command has completed its invocation.
+    Represents the :func:`.on_user_command_completion` event.
+    """
+    user_command_error = "user_command_error"
+    """Called when an error is raised inside a user command either through check failure, or an error in your own code.
+    Represents the :func:`.on_user_command_error` event.
+    """
+    message_command = "message_command"
+    """Called when a message command is found and is about to be invoked.
+    Represents the :func:`.on_message_command` event.
+    """
+    message_command_completion = "message_command_completion"
+    """Called when a message command has completed its invocation.
+    Represents the :func:`.on_message_command_completion` event.
+    """
+    message_command_error = "message_command_error"
+    """Called when an error is raised inside a message command either through check failure, or an error in your own code.
+    Represents the :func:`.on_message_command_error` event.
+    """
+
+
+class ApplicationRoleConnectionMetadataType(Enum):
+    integer_less_than_or_equal = 1
+    integer_greater_than_or_equal = 2
+    integer_equal = 3
+    integer_not_equal = 4
+    datetime_less_than_or_equal = 5
+    datetime_greater_than_or_equal = 6
+    boolean_equal = 7
+    boolean_not_equal = 8
+
+
 T = TypeVar("T")
 
 
@@ -814,7 +1308,6 @@ def try_enum(cls: Type[T], val: Any) -> T:
 
     If it fails it returns a proxy invalid value instead.
     """
-
     try:
         return cls._enum_value_map_[val]  # type: ignore
     except (KeyError, TypeError, AttributeError):

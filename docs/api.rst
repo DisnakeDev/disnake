@@ -818,6 +818,27 @@ Integrations
     :param payload: The raw event payload data.
     :type payload: :class:`RawIntegrationDeleteEvent`
 
+Audit Logs
+++++++++++
+
+.. function:: on_audit_log_entry_create(entry)
+
+    Called when an audit log entry is created.
+    You must have the :attr:`~Permissions.view_audit_log` permission to receive this.
+
+    This requires :attr:`Intents.moderation` to be enabled.
+
+    .. warning::
+        This scope of data in this gateway event is limited, which means it is much more
+        reliant on the cache than :meth:`Guild.audit_logs`.
+        Because of this, :attr:`AuditLogEntry.target` and :attr:`AuditLogEntry.user`
+        will frequently be of type :class:`Object` instead of the respective model.
+
+    .. versionadded:: 2.8
+
+    :param entry: The audit log entry that was created.
+    :type entry: :class:`AuditLogEntry`
+
 Invites
 +++++++
 
@@ -917,7 +938,7 @@ Members
 
     Called when user gets banned from a :class:`Guild`.
 
-    This requires :attr:`Intents.bans` to be enabled.
+    This requires :attr:`Intents.moderation` to be enabled.
 
     :param guild: The guild the user got banned from.
     :type guild: :class:`Guild`
@@ -930,7 +951,7 @@ Members
 
     Called when a :class:`User` gets unbanned from a :class:`Guild`.
 
-    This requires :attr:`Intents.bans` to be enabled.
+    This requires :attr:`Intents.moderation` to be enabled.
 
     :param guild: The guild the user got unbanned from.
     :type guild: :class:`Guild`
@@ -1080,7 +1101,7 @@ Roles
 .. function:: on_guild_role_create(role)
               on_guild_role_delete(role)
 
-    Called when a :class:`Guild` creates or deletes a new :class:`Role`.
+    Called when a :class:`Guild` creates or deletes a :class:`Role`.
 
     To get the guild it belongs to, use :attr:`Role.guild`.
 
@@ -1490,13 +1511,13 @@ This section documents events related to Discord chat messages.
     Called when someone begins typing a message.
 
     The ``channel`` parameter can be a :class:`abc.Messageable` instance, or a :class:`ForumChannel`.
-    If channel is an :class:`abc.Messageable` instance, it could be a :class:`TextChannel`, :class:`VoiceChannel`, :class:`GroupChannel`,
+    If channel is an :class:`abc.Messageable` instance, it could be a :class:`TextChannel`, :class:`VoiceChannel`, :class:`StageChannel`, :class:`GroupChannel`,
     or :class:`DMChannel`.
 
     .. versionchanged:: 2.5
         ``channel`` may be a type :class:`ForumChannel`
 
-    If the ``channel`` is a :class:`TextChannel`, :class:`ForumChannel`, or :class:`VoiceChannel` then the
+    If the ``channel`` is a :class:`TextChannel`, :class:`ForumChannel`, :class:`VoiceChannel`, or :class:`StageChannel` then the
     ``user`` parameter is a :class:`Member`, otherwise it is a :class:`User`.
 
     If the ``channel`` is a :class:`DMChannel` and the user is not found in the internal user/member cache,
@@ -1764,6 +1785,42 @@ of :class:`enum.Enum`.
         The system message denoting that an auto moderation action was executed.
 
         .. versionadded:: 2.5
+    .. attribute:: role_subscription_purchase
+
+        The system message denoting that a role subscription was purchased.
+
+        .. versionadded:: 2.9
+    .. attribute:: interaction_premium_upsell
+
+        The system message for an application premium subscription upsell.
+
+        .. versionadded:: 2.8
+    .. attribute:: stage_start
+
+        The system message denoting the stage has been started.
+
+        .. versionadded:: 2.9
+    .. attribute:: stage_end
+
+        The system message denoting the stage has ended.
+
+        .. versionadded:: 2.9
+    .. attribute:: stage_speaker
+
+        The system message denoting a user has become a speaker.
+
+        .. versionadded:: 2.9
+    .. attribute:: stage_topic
+
+        The system message denoting the stage topic has been changed.
+
+        .. versionadded:: 2.9
+    .. attribute:: guild_application_premium_subscription
+
+        The system message denoting that a guild member has subscribed to an application.
+
+        .. versionadded:: 2.8
+
 
 .. class:: UserFlags
 
@@ -1830,6 +1887,11 @@ of :class:`enum.Enum`.
         The user is marked as a spammer.
 
         .. versionadded:: 2.3
+    .. attribute:: active_developer
+
+        The user is an Active Developer.
+
+        .. versionadded:: 2.8
 
 .. class:: ActivityType
 
@@ -2313,7 +2375,7 @@ of :class:`enum.Enum`.
 .. class:: AuditLogAction
 
     Represents the type of action being done for a :class:`AuditLogEntry`\,
-    which is retrievable via :meth:`Guild.audit_logs`.
+    which is retrievable via :meth:`Guild.audit_logs` or via the :func:`on_audit_log_entry_create` event.
 
     .. attribute:: guild_update
 
@@ -2505,7 +2567,8 @@ of :class:`enum.Enum`.
         A member was kicked.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`User` who got kicked.
+        the :class:`User` who got kicked. If the user is not found then it is
+        a :class:`Object` with the user's ID.
 
         When this is the action, :attr:`~AuditLogEntry.changes` is empty.
 
@@ -2529,7 +2592,8 @@ of :class:`enum.Enum`.
         A member was banned.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`User` who got banned.
+        the :class:`User` who got banned. If the user is not found then it is
+        a :class:`Object` with the user's ID.
 
         When this is the action, :attr:`~AuditLogEntry.changes` is empty.
 
@@ -2538,7 +2602,8 @@ of :class:`enum.Enum`.
         A member was unbanned.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`User` who got unbanned.
+        the :class:`User` who got unbanned. If the user is not found then it is
+        a :class:`Object` with the user's ID.
 
         When this is the action, :attr:`~AuditLogEntry.changes` is empty.
 
@@ -2551,7 +2616,8 @@ of :class:`enum.Enum`.
         - They were timed out
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`Member` or :class:`User` who got updated.
+        the :class:`Member` or :class:`User` who got updated. If the user is not found then it is
+        a :class:`Object` with the user's ID.
 
         Possible attributes for :class:`AuditLogDiff`:
 
@@ -2566,7 +2632,8 @@ of :class:`enum.Enum`.
         either gains a role or loses a role.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`Member` or :class:`User` who got the role.
+        the :class:`Member` or :class:`User` who got the role. If the user is not found then it is
+        a :class:`Object` with the user's ID.
 
         Possible attributes for :class:`AuditLogDiff`:
 
@@ -2602,7 +2669,8 @@ of :class:`enum.Enum`.
         A bot was added to the guild.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`Member` or :class:`User` which was added to the guild.
+        the :class:`Member` or :class:`User` which was added to the guild. If the user is not found then it is
+        a :class:`Object` with an ID.
 
         .. versionadded:: 1.3
 
@@ -2807,6 +2875,7 @@ of :class:`enum.Enum`.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`Member` or :class:`User` who had their message deleted.
+        If the user is not found then it is a :class:`Object` with the user's ID.
 
         When this is the action, the type of :attr:`~AuditLogEntry.extra` is
         set to an unspecified proxy object with two attributes:
@@ -2834,6 +2903,7 @@ of :class:`enum.Enum`.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`Member` or :class:`User` who had their message pinned.
+        If the user is not found then it is a :class:`Object` with the user's ID.
 
         When this is the action, the type of :attr:`~AuditLogEntry.extra` is
         set to an unspecified proxy object with two attributes:
@@ -2849,6 +2919,7 @@ of :class:`enum.Enum`.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`Member` or :class:`User` who had their message unpinned.
+        If the user is not found then it is a :class:`Object` with the user's ID.
 
         When this is the action, the type of :attr:`~AuditLogEntry.extra` is
         set to an unspecified proxy object with two attributes:
@@ -3224,6 +3295,7 @@ of :class:`enum.Enum`.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`Member` or :class:`User` who had their message blocked.
+        If the user is not found then it is a :class:`Object` with the user's ID.
 
         When this is the action, the type of :attr:`~AuditLogEntry.extra` is
         set to an unspecified proxy object with these attributes:
@@ -3238,6 +3310,7 @@ of :class:`enum.Enum`.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`Member` or :class:`User` who had their message flagged.
+        If the user is not found then it is a :class:`Object` with the user's ID.
 
         See :attr:`automod_block_message` for more information on how the
         :attr:`~AuditLogEntry.extra` field is set.
@@ -3248,6 +3321,7 @@ of :class:`enum.Enum`.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`Member` or :class:`User` who was timed out.
+        If the user is not found then it is a :class:`Object` with the user's ID.
 
         See :attr:`automod_block_message` for more information on how the
         :attr:`~AuditLogEntry.extra` field is set.
@@ -3381,6 +3455,12 @@ of :class:`enum.Enum`.
     .. attribute:: lottie
 
         Represents a sticker with a lottie image.
+
+    .. attribute:: gif
+
+        Represents a sticker with a gif image.
+
+        .. versionadded:: 2.8
 
 .. class:: InviteTarget
 
@@ -3639,6 +3719,16 @@ of :class:`enum.Enum`.
 
         The ``hr`` (Croatian) locale.
 
+    .. attribute:: hu
+
+        The ``hu`` (Hungarian) locale.
+
+    .. attribute:: id
+
+        The ``id`` (Indonesian) locale.
+
+        .. versionadded:: 2.8
+
     .. attribute:: it
 
         The ``it`` (Italian) locale.
@@ -3654,10 +3744,6 @@ of :class:`enum.Enum`.
     .. attribute:: lt
 
         The ``lt`` (Lithuanian) locale.
-
-    .. attribute:: hu
-
-        The ``hu`` (Hungarian) locale.
 
     .. attribute:: nl
 
@@ -3789,6 +3875,68 @@ of :class:`enum.Enum`.
     .. attribute:: creation_date
 
         Sort forum threads by creation date/time (from newest to oldest).
+
+.. class:: ThreadLayout
+
+    Represents the layout of threads in :class:`ForumChannel`\s.
+
+    .. versionadded:: 2.8
+
+    .. attribute:: not_set
+
+        No preferred layout has been set.
+
+    .. attribute:: list_view
+
+        Display forum threads in a text-focused list.
+
+    .. attribute:: gallery_view
+
+        Display forum threads in a media-focused collection of tiles.
+
+.. class:: ApplicationRoleConnectionMetadataType
+
+    Represents the type of a role connection metadata value.
+
+    These offer comparison operations, which allow guilds to configure role requirements
+    based on the metadata value for each user and a guild-specified configured value.
+
+    .. versionadded:: 2.8
+
+    .. attribute:: integer_less_than_or_equal
+
+        The metadata value (``integer``) is less than or equal to the guild's configured value.
+
+    .. attribute:: integer_greater_than_or_equal
+
+        The metadata value (``integer``) is greater than or equal to the guild's configured value.
+
+    .. attribute:: integer_equal
+
+        The metadata value (``integer``) is equal to the guild's configured value.
+
+    .. attribute:: integer_not_equal
+
+        The metadata value (``integer``) is not equal to the guild's configured value.
+
+    .. attribute:: datetime_less_than_or_equal
+
+        The metadata value (``ISO8601 string``) is less than or equal to the guild's configured value (``integer``; days before current date).
+
+    .. attribute:: datetime_greater_than_or_equal
+
+        The metadata value (``ISO8601 string``) is greater than or equal to the guild's configured value (``integer``; days before current date).
+
+    .. attribute:: boolean_equal
+
+        The metadata value (``integer``) is equal to the guild's configured value.
+
+    .. attribute:: boolean_not_equal
+
+        The metadata value (``integer``) is not equal to the guild's configured value.
+
+.. autoclass:: Event
+    :members:
 
 Async Iterator
 ----------------
@@ -3924,7 +4072,7 @@ Certain utilities make working with async iterators easier, detailed below.
 Audit Log Data
 ----------------
 
-Working with :meth:`Guild.audit_logs` is a complicated process with a lot of machinery
+Working with audit logs is a complicated process with a lot of machinery
 involved. The library attempts to make it easy to use and friendly. In order to accomplish
 this goal, it must make use of a couple of data classes that aid in this goal.
 
@@ -4046,7 +4194,7 @@ AuditLogDiff
 
         The guild's owner. See also :attr:`Guild.owner`
 
-        :type: Union[:class:`Member`, :class:`User`]
+        :type: Union[:class:`Member`, :class:`User`, :class:`Object`]
 
     .. attribute:: region
 
@@ -4316,7 +4464,7 @@ AuditLogDiff
 
         See also :attr:`Invite.inviter`.
 
-        :type: Optional[:class:`User`]
+        :type: Optional[:class:`User`, :class:`Object`]
 
     .. attribute:: max_uses
 
@@ -4377,7 +4525,8 @@ AuditLogDiff
         sending another message or creating another thread in the channel.
 
         See also :attr:`TextChannel.slowmode_delay`, :attr:`VoiceChannel.slowmode_delay`,
-        :attr:`ForumChannel.slowmode_delay` or :attr:`Thread.slowmode_delay`.
+        :attr:`StageChannel.slowmode_delay`, :attr:`ForumChannel.slowmode_delay`,
+        or :attr:`Thread.slowmode_delay`.
 
         :type: :class:`int`
 
@@ -4386,7 +4535,8 @@ AuditLogDiff
         The default number of seconds members have to wait before
         sending another message in new threads created in the channel.
 
-        See also :attr:`ForumChannel.default_thread_slowmode_delay`.
+        See also :attr:`TextChannel.default_thread_slowmode_delay` or
+        :attr:`ForumChannel.default_thread_slowmode_delay`.
 
         :type: :class:`int`
 
@@ -4411,7 +4561,7 @@ AuditLogDiff
 
         The voice channel's user limit.
 
-        See also :attr:`VoiceChannel.user_limit`.
+        See also :attr:`VoiceChannel.user_limit`, or :attr:`StageChannel.user_limit`.
 
         :type: :class:`int`
 
@@ -4419,7 +4569,7 @@ AuditLogDiff
 
         Whether the channel is marked as "not safe for work".
 
-        See also :attr:`TextChannel.nsfw`, :attr:`VoiceChannel.nsfw` or :attr:`ForumChannel.nsfw`.
+        See also :attr:`TextChannel.nsfw`, :attr:`VoiceChannel.nsfw`, :attr:`StageChannel.nsfw`, or :attr:`ForumChannel.nsfw`.
 
         :type: :class:`bool`
 
@@ -4988,6 +5138,15 @@ Guild
         The :class:`User` that was banned.
 
         :type: :class:`User`
+
+GuildBuilder
+~~~~~~~~~~~~~
+
+.. attributetable:: GuildBuilder
+
+.. autoclass:: GuildBuilder()
+    :members:
+    :exclude-members: add_category_channel
 
 GuildPreview
 ~~~~~~~~~~~~~
@@ -5869,6 +6028,14 @@ AutoModTimeoutAction
 .. autoclass:: AutoModTimeoutAction
     :members:
 
+ApplicationRoleConnectionMetadata
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: ApplicationRoleConnectionMetadata
+
+.. autoclass:: ApplicationRoleConnectionMetadata
+    :members:
+
 File
 ~~~~~
 
@@ -5993,6 +6160,14 @@ PublicUserFlags
 .. attributetable:: PublicUserFlags
 
 .. autoclass:: PublicUserFlags()
+    :members:
+
+MemberFlags
+~~~~~~~~~~~
+
+.. attributetable:: MemberFlags
+
+.. autoclass:: MemberFlags()
     :members:
 
 .. _discord_ui_kit:

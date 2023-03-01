@@ -92,7 +92,9 @@ class ApplicationCommandInteraction(Interaction):
         Whether the command failed to be checked or invoked.
     """
 
-    def __init__(self, *, data: ApplicationCommandInteractionPayload, state: ConnectionState):
+    def __init__(
+        self, *, data: ApplicationCommandInteractionPayload, state: ConnectionState
+    ) -> None:
         super().__init__(data=data, state=state)
         self.data: ApplicationCommandInteractionData = ApplicationCommandInteractionData(
             data=data["data"], state=state, guild_id=self.guild_id
@@ -194,7 +196,7 @@ class ApplicationCommandInteractionData(Dict[str, Any]):
         data: ApplicationCommandInteractionDataPayload,
         state: ConnectionState,
         guild_id: Optional[int],
-    ):
+    ) -> None:
         super().__init__(data)
         self.id: int = int(data["id"])
         self.name: str = data["name"]
@@ -212,7 +214,7 @@ class ApplicationCommandInteractionData(Dict[str, Any]):
             for d in data.get("options", [])
         ]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"<ApplicationCommandInteractionData id={self.id!r} name={self.name!r} type={self.type!r} "
             f"target_id={self.target_id!r} target={self.target!r} resolved={self.resolved!r} options={self.options!r}>"
@@ -221,9 +223,7 @@ class ApplicationCommandInteractionData(Dict[str, Any]):
     def _get_chain_and_kwargs(
         self, chain: Optional[Tuple[str, ...]] = None
     ) -> Tuple[Tuple[str, ...], Dict[str, Any]]:
-        """
-        Returns a chain of sub-command names and a dict of filled options.
-        """
+        """Returns a chain of sub-command names and a dict of filled options."""
         if chain is None:
             chain = ()
         for option in self.options:
@@ -253,7 +253,7 @@ class ApplicationCommandInteractionData(Dict[str, Any]):
 
 
 class ApplicationCommandInteractionDataOption(Dict[str, Any]):
-    """This class represents the structure of an interaction data option from the API.
+    """Represents the structure of an interaction data option from the API.
 
     Attributes
     ----------
@@ -272,7 +272,7 @@ class ApplicationCommandInteractionDataOption(Dict[str, Any]):
 
     __slots__ = ("name", "type", "value", "options", "focused")
 
-    def __init__(self, *, data: Mapping[str, Any], resolved: InteractionDataResolved):
+    def __init__(self, *, data: Mapping[str, Any], resolved: InteractionDataResolved) -> None:
         super().__init__(data)
         self.name: str = data["name"]
         self.type: OptionType = try_enum(OptionType, data["type"])
@@ -287,7 +287,7 @@ class ApplicationCommandInteractionDataOption(Dict[str, Any]):
         ]
         self.focused: bool = data.get("focused", False)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"<ApplicationCommandInteractionDataOption name={self.name!r} type={self.type!r}>"
             f"value={self.value!r} focused={self.focused!r} options={self.options!r}>"

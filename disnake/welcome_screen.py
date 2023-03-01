@@ -52,7 +52,7 @@ class WelcomeScreenChannel:
         id: int,
         description: str,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
-    ):
+    ) -> None:
         self.id: int = id
         self.description: str = description
         self.emoji: Optional[Union[Emoji, PartialEmoji]] = None
@@ -65,7 +65,7 @@ class WelcomeScreenChannel:
         else:
             raise TypeError("emoji must be None, a str, PartialEmoji, or Emoji instance.")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<WelcomeScreenChannel id={self.id!r} emoji={self.emoji!r} description={self.description!r}>"
 
     @classmethod
@@ -89,7 +89,6 @@ class WelcomeScreenChannel:
         return cls(id=int(data["channel_id"]), description=data["description"], emoji=emoji)
 
     def to_dict(self) -> WelcomeScreenChannelPayload:
-
         result: WelcomeScreenChannelPayload = {}  # type: ignore
         result["channel_id"] = self.id
         result["description"] = self.description
@@ -128,7 +127,7 @@ class WelcomeScreen:
         data: WelcomeScreenPayload,
         state: ConnectionState,
         guild: Union[Guild, PartialInviteGuild],
-    ):
+    ) -> None:
         self._state = state
         self._guild = guild
         self.description: Optional[str] = data.get("description")

@@ -296,7 +296,6 @@ def is_loaded() -> bool:
     :class:`bool`
         Indicates if the opus library has been loaded.
     """
-    global _lib
     return _lib is not MISSING
 
 
@@ -309,7 +308,7 @@ class OpusError(DiscordException):
         The error code returned.
     """
 
-    def __init__(self, code: int):
+    def __init__(self, code: int) -> None:
         self.code: int = code
         msg = _lib.opus_strerror(self.code).decode("utf-8")
         _log.info('"%s" has happened', msg)
@@ -340,7 +339,7 @@ class _OpusStruct:
 
 
 class Encoder(_OpusStruct):
-    def __init__(self, application: int = APPLICATION_AUDIO):
+    def __init__(self, application: int = APPLICATION_AUDIO) -> None:
         _OpusStruct.get_opus_version()
 
         self.application: int = application
@@ -405,7 +404,7 @@ class Encoder(_OpusStruct):
 
 
 class Decoder(_OpusStruct):
-    def __init__(self):
+    def __init__(self) -> None:
         _OpusStruct.get_opus_version()
 
         self._state: DecoderStruct = self._create_state()
@@ -449,7 +448,6 @@ class Decoder(_OpusStruct):
 
     def set_gain(self, dB: float) -> int:
         """Sets the decoder gain in dB, from -128 to 128."""
-
         dB_Q8 = max(-32768, min(32767, round(dB * 256)))  # dB * 2^n where n is 8 (Q8)
         return self._set_gain(dB_Q8)
 
@@ -459,7 +457,6 @@ class Decoder(_OpusStruct):
 
     def _get_last_packet_duration(self) -> int:
         """Gets the duration (in samples) of the last packet successfully decoded or concealed."""
-
         ret = ctypes.c_int32()
         _lib.opus_decoder_ctl(self._state, CTL_LAST_PACKET_DURATION, ctypes.byref(ret))
         return ret.value

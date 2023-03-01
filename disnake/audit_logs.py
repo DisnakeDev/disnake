@@ -10,6 +10,7 @@ from typing import (
     Dict,
     Generator,
     List,
+    Mapping,
     Optional,
     Tuple,
     Type,
@@ -102,7 +103,7 @@ def _transform_role(
 
 def _transform_member_id(
     entry: AuditLogEntry, data: Optional[Snowflake]
-) -> Union[Member, User, None]:
+) -> Union[Member, User, Object, None]:
     if data is None:
         return None
     return entry._get_member(int(data))
@@ -365,7 +366,7 @@ class AuditLogChanges:
     }
     # fmt: on
 
-    def __init__(self, entry: AuditLogEntry, data: List[AuditLogChangePayload]):
+    def __init__(self, entry: AuditLogEntry, data: List[AuditLogChangePayload]) -> None:
         self.before = AuditLogDiff()
         self.after = AuditLogDiff()
 
@@ -506,8 +507,7 @@ class _AuditLogProxyAutoModBlockMessage:
 
 
 class AuditLogEntry(Hashable):
-    """
-    Represents an Audit Log entry.
+    """Represents an Audit Log entry.
 
     You retrieve these via :meth:`Guild.audit_logs`.
 
@@ -528,12 +528,15 @@ class AuditLogEntry(Hashable):
     .. versionchanged:: 1.7
         Audit log entries are now comparable and hashable.
 
+    .. versionchanged:: 2.8
+        :attr:`user` can return :class:`Object` if the user is not found.
+
     Attributes
     ----------
     action: :class:`AuditLogAction`
         The action that was done.
-    user: :class:`abc.User`
-        The user who initiated this action. Usually a :class:`Member`\\, unless gone
+    user: Optional[Union[:class:`Member`, :class:`User`, :class:`Object`]]
+        The user who initiated this action. Usually :class:`Member`\\, unless gone
         then it's a :class:`User`.
     id: :class:`int`
         The entry ID.
@@ -554,14 +557,14 @@ class AuditLogEntry(Hashable):
         *,
         data: AuditLogEntryPayload,
         guild: Guild,
-        application_commands: Dict[int, APIApplicationCommand],
-        automod_rules: Dict[int, AutoModRule],
-        guild_scheduled_events: Dict[int, GuildScheduledEvent],
-        integrations: Dict[int, PartialIntegration],
-        threads: Dict[int, Thread],
-        users: Dict[int, User],
-        webhooks: Dict[int, Webhook],
-    ):
+        application_commands: Mapping[int, APIApplicationCommand],
+        automod_rules: Mapping[int, AutoModRule],
+        guild_scheduled_events: Mapping[int, GuildScheduledEvent],
+        integrations: Mapping[int, PartialIntegration],
+        threads: Mapping[int, Thread],
+        users: Mapping[int, User],
+        webhooks: Mapping[int, Webhook],
+    ) -> None:
         self._state = guild._state
         self.guild = guild
 
@@ -673,11 +676,13 @@ class AuditLogEntry(Hashable):
         # into meaningful data when requested
         self._changes = data.get("changes", [])
 
-        self.user = self._get_member(utils._get_as_snowflake(data, "user_id"))  # type: ignore
+        self.user = self._get_member(utils._get_as_snowflake(data, "user_id"))
         self._target_id = utils._get_as_snowflake(data, "target_id")
 
-    def _get_member(self, user_id: int) -> Union[Member, User, None]:
-        return self.guild.get_member(user_id) or self._users.get(user_id)
+    def _get_member(self, user_id: Optional[int]) -> Union[Member, User, Object, None]:
+        if not user_id:
+            return None
+        return self.guild.get_member(user_id) or self._users.get(user_id) or Object(id=user_id)
 
     def _get_integration_by_application_id(
         self, application_id: int
@@ -758,7 +763,7 @@ class AuditLogEntry(Hashable):
     def _convert_target_channel(self, target_id: int) -> Union[abc.GuildChannel, Object]:
         return self.guild.get_channel(target_id) or Object(id=target_id)
 
-    def _convert_target_user(self, target_id: int) -> Union[Member, User, None]:
+    def _convert_target_user(self, target_id: int) -> Union[Member, User, Object, None]:
         return self._get_member(target_id)
 
     def _convert_target_role(self, target_id: int) -> Union[Role, Object]:
@@ -790,7 +795,7 @@ class AuditLogEntry(Hashable):
     def _convert_target_emoji(self, target_id: int) -> Union[Emoji, Object]:
         return self._state.get_emoji(target_id) or Object(id=target_id)
 
-    def _convert_target_message(self, target_id: int) -> Union[Member, User, None]:
+    def _convert_target_message(self, target_id: int) -> Union[Member, User, Object, None]:
         return self._get_member(target_id)
 
     def _convert_target_integration(self, target_id: int) -> Union[PartialIntegration, Object]:

@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""
-Discord API Wrapper
+"""Discord API Wrapper
 ~~~~~~~~~~~~~~~~~~~
 
 A basic wrapper for the Discord API.
@@ -15,7 +14,7 @@ __title__ = "disnake"
 __author__ = "Rapptz, EQUENOS"
 __license__ = "MIT"
 __copyright__ = "Copyright 2015-present Rapptz, 2021-present EQUENOS"
-__version__ = "2.8.0a"
+__version__ = "2.9.0a"
 
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
@@ -26,6 +25,7 @@ from . import abc as abc, opus as opus, ui as ui, utils as utils  # explicitly r
 from .activity import *
 from .app_commands import *
 from .appinfo import *
+from .application_role_connection import *
 from .asset import *
 from .audit_logs import *
 from .automod import *
@@ -80,6 +80,6 @@ class VersionInfo(NamedTuple):
     serial: int
 
 
-version_info: VersionInfo = VersionInfo(major=2, minor=8, micro=0, releaselevel="alpha", serial=0)
+version_info: VersionInfo = VersionInfo(major=2, minor=9, micro=0, releaselevel="alpha", serial=0)
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())

@@ -9,6 +9,7 @@ import inspect
 import itertools
 import logging
 import os
+import weakref
 from collections import OrderedDict, deque
 from typing import (
     TYPE_CHECKING,
@@ -31,12 +32,14 @@ from typing import (
 from . import utils
 from .activity import BaseActivity
 from .app_commands import GuildApplicationCommandPermissions, application_command_factory
+from .audit_logs import AuditLogEntry
 from .automod import AutoModActionExecution, AutoModRule
 from .channel import (
     DMChannel,
     ForumChannel,
     GroupChannel,
     PartialMessageable,
+    StageChannel,
     TextChannel,
     VoiceChannel,
     _guild_channel_factory,
@@ -271,7 +274,6 @@ class ConnectionState:
 
         if not self._intents.members or member_cache_flags._empty:
             self.store_user = self.create_user
-            self.deref_user = self.deref_user_no_intents
 
         self.parsers = parsers = {}
         for attr, func in inspect.getmembers(self):
@@ -284,19 +286,11 @@ class ConnectionState:
         self, *, views: bool = True, application_commands: bool = True, modals: bool = True
     ) -> None:
         self.user: ClientUser = MISSING
-        # Originally, this code used WeakValueDictionary to maintain references to the
-        # global user mapping.
-
-        # However, profiling showed that this came with two cons:
-
-        # 1. The __weakref__ slot caused a non-trivial increase in memory
-        # 2. The performance of the mapping caused store_user to be a bottleneck.
-
-        # Since this is undesirable, a mapping is now used instead with stored
-        # references now using a regular dictionary with eviction being done
-        # using __del__. Testing this for memory leaks led to no discernable leaks,
-        # though more testing will have to be done.
-        self._users: Dict[int, User] = {}
+        # NOTE: without weakrefs, these user objects would otherwise be kept in memory indefinitely.
+        # However, using weakrefs here unfortunately has a few drawbacks:
+        # - the weakref slot + object in user objects likely results in a small increase in memory usage
+        # - accesses on `_users` are slower, e.g. `__getitem__` takes ~1us with weakrefs and ~0.2us without
+        self._users: weakref.WeakValueDictionary[int, User] = weakref.WeakValueDictionary()
         self._emojis: Dict[int, Emoji] = {}
         self._stickers: Dict[int, GuildSticker] = {}
         self._guilds: Dict[int, Guild] = {}
@@ -389,17 +383,10 @@ class ConnectionState:
             user = User(state=self, data=data)
             if user.discriminator != "0000":
                 self._users[user_id] = user
-                user._stored = True
             return user
-
-    def deref_user(self, user_id: int) -> None:
-        self._users.pop(user_id, None)
 
     def create_user(self, data: UserPayload) -> User:
         return User(state=self, data=data)
-
-    def deref_user_no_intents(self, user_id: int) -> None:
-        return
 
     def get_user(self, id: Optional[int]) -> Optional[User]:
         # the keys of self._users are ints
@@ -735,7 +722,8 @@ class ConnectionState:
         self._ready_state: asyncio.Queue[Guild] = asyncio.Queue()
         self.clear(views=False, application_commands=False, modals=False)
         self.user = ClientUser(state=self, data=data["user"])
-        self.store_user(data["user"])
+        # self._users is a list of Users, we're setting a ClientUser
+        self._users[self.user.id] = self.user  # type: ignore
 
         if self.application_id is None:
             try:
@@ -773,7 +761,7 @@ class ConnectionState:
 
         if channel:
             # we ensure that the channel is a type that implements last_message_id
-            if channel.__class__ in (TextChannel, Thread, VoiceChannel):
+            if channel.__class__ in (TextChannel, Thread, VoiceChannel, StageChannel):
                 channel.last_message_id = message.id  # type: ignore
             # Essentially, messages *don't* count towards message_count, if:
             # - they're the thread starter message
@@ -1004,11 +992,8 @@ class ConnectionState:
         self.dispatch("presence_update", old_member, member)
 
     def parse_user_update(self, data: gateway.UserUpdateEvent) -> None:
-        user: ClientUser = self.user
-        user._update(data)
-        ref = self._users.get(user.id)
-        if ref:
-            ref._update(data)
+        if user := self.user:
+            user._update(data)
 
     def parse_invite_create(self, data: gateway.InviteCreateEvent) -> None:
         invite = Invite.from_gateway(state=self, data=data)
@@ -1415,7 +1400,7 @@ class ConnectionState:
             return await request.wait()
         return request.get_future()
 
-    async def _chunk_and_dispatch(self, guild, unavailable):
+    async def _chunk_and_dispatch(self, guild, unavailable) -> None:
         try:
             await asyncio.wait_for(self.chunk_guild(guild), timeout=60.0)
         except asyncio.TimeoutError:
@@ -1897,10 +1882,32 @@ class ConnectionState:
         event = AutoModActionExecution(data=data, guild=guild)
         self.dispatch("automod_action_execution", event)
 
+    def parse_guild_audit_log_entry_create(self, data: gateway.AuditLogEntryCreate) -> None:
+        guild = self._get_guild(int(data["guild_id"]))
+        if guild is None:
+            _log.debug(
+                "GUILD_AUDIT_LOG_ENTRY_CREATE referencing unknown guild ID: %s. Discarding.",
+                data["guild_id"],
+            )
+            return
+
+        entry = AuditLogEntry(
+            data=data,
+            guild=guild,
+            application_commands={},
+            automod_rules={},
+            guild_scheduled_events=guild._scheduled_events,
+            integrations={},
+            threads=guild._threads,
+            users=self._users,
+            webhooks={},
+        )
+        self.dispatch("audit_log_entry_create", entry)
+
     def _get_reaction_user(
         self, channel: MessageableChannel, user_id: int
     ) -> Optional[Union[User, Member]]:
-        if isinstance(channel, (TextChannel, VoiceChannel, Thread)):
+        if isinstance(channel, (TextChannel, VoiceChannel, Thread, StageChannel)):
             return channel.guild.get_member(user_id)
         return self.get_user(user_id)
 
@@ -2087,7 +2094,7 @@ class AutoShardedConnectionState(ConnectionState):
             if new_guild is not None and new_guild is not msg.guild:
                 channel_id = msg.channel.id
                 channel = new_guild._resolve_channel(channel_id) or Object(id=channel_id)
-                # channel will either be a TextChannel, VoiceChannel, Thread or Object
+                # channel will either be a TextChannel, VoiceChannel, Thread, StageChannel, or Object
                 msg._rebind_cached_references(new_guild, channel)  # type: ignore
 
         # these generally get deallocated once the voice reconnect times out

@@ -143,7 +143,7 @@ class SubCommandGroup(InvokableApplicationCommand):
         *,
         name: LocalizedOptional = None,
         **kwargs,
-    ):
+    ) -> None:
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
         self.parent: InvokableSlashCommand = parent
@@ -195,8 +195,7 @@ class SubCommandGroup(InvokableApplicationCommand):
         extras: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> Callable[[CommandCallback], SubCommand]:
-        """
-        A decorator that creates a subcommand in the subcommand group.
+        """A decorator that creates a subcommand in the subcommand group.
         Parameters are the same as in :class:`InvokableSlashCommand.sub_command`
 
         Returns
@@ -274,7 +273,7 @@ class SubCommand(InvokableApplicationCommand):
         options: Optional[list] = None,
         connectors: Optional[Dict[str, str]] = None,
         **kwargs,
-    ):
+    ) -> None:
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
         self.parent: Union[InvokableSlashCommand, SubCommandGroup] = parent
@@ -434,11 +433,12 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         options: Optional[List[Option]] = None,
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
+        nsfw: Optional[bool] = None,
         guild_ids: Optional[Sequence[int]] = None,
         connectors: Optional[Dict[str, str]] = None,
         auto_sync: Optional[bool] = None,
         **kwargs,
-    ):
+    ) -> None:
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
         self.parent = None
@@ -469,6 +469,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             options=options or [],
             dm_permission=dm_permission and not self._guild_only,
             default_member_permissions=default_member_permissions,
+            nsfw=nsfw,
         )
 
     @property
@@ -522,8 +523,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         extras: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> Callable[[CommandCallback], SubCommand]:
-        """
-        A decorator that creates a subcommand under the base command.
+        """A decorator that creates a subcommand under the base command.
 
         Parameters
         ----------
@@ -585,8 +585,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         extras: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> Callable[[CommandCallback], SubCommandGroup]:
-        """
-        A decorator that creates a subcommand group under the base command.
+        """A decorator that creates a subcommand group under the base command.
 
         Parameters
         ----------
@@ -626,8 +625,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         return decorator
 
     def autocomplete(self, option_name: str) -> Callable[[Callable], Callable]:
-        """
-        A decorator that registers an autocomplete function for the specified option.
+        """A decorator that registers an autocomplete function for the specified option.
 
         Parameters
         ----------
@@ -684,7 +682,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         if choices is not None:
             await inter.response.autocomplete(choices=choices)
 
-    async def invoke_children(self, inter: ApplicationCommandInteraction):
+    async def invoke_children(self, inter: ApplicationCommandInteraction) -> None:
         chain, kwargs = inter.data._get_chain_and_kwargs()
 
         if len(chain) == 0:
@@ -715,7 +713,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                 if not await subcmd._call_local_error_handler(inter, exc):
                     raise
 
-    async def invoke(self, inter: ApplicationCommandInteraction):
+    async def invoke(self, inter: ApplicationCommandInteraction) -> None:
         await self.prepare(inter)
 
         try:
@@ -750,6 +748,7 @@ def slash_command(
     description: LocalizedOptional = None,
     dm_permission: Optional[bool] = None,
     default_member_permissions: Optional[Union[Permissions, int]] = None,
+    nsfw: Optional[bool] = None,
     options: Optional[List[Option]] = None,
     guild_ids: Optional[Sequence[int]] = None,
     connectors: Optional[Dict[str, str]] = None,
@@ -774,6 +773,12 @@ def slash_command(
 
         .. versionchanged:: 2.5
             Added support for localizations.
+
+    nsfw: :class:`bool`
+        Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
+        Defaults to ``False``.
+
+        .. versionadded:: 2.8
 
     options: List[:class:`.Option`]
         The list of slash command options. The options will be visible in Discord.
@@ -824,6 +829,7 @@ def slash_command(
             options=options,
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
+            nsfw=nsfw,
             guild_ids=guild_ids,
             connectors=connectors,
             auto_sync=auto_sync,

@@ -1,0 +1,1 @@
+:attr:`RawTypingEvent.timestamp` is now a timezone-aware :class:`~datetime.datetime` instead of a naive one.

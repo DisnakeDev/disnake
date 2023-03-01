@@ -26,6 +26,7 @@ from typing import (
 
 import disnake
 import disnake.utils
+from disnake.enums import Event
 
 from . import errors
 from .cog import Cog
@@ -35,6 +36,7 @@ if TYPE_CHECKING:
 
     from ._types import CoroFunc
     from .bot import AutoShardedBot, AutoShardedInteractionBot, Bot, InteractionBot
+    from .help import HelpCommand
 
     AnyBot = Union[Bot, AutoShardedBot, InteractionBot, AutoShardedInteractionBot]
 
@@ -58,7 +60,7 @@ class CommonBotBase(Generic[CogT]):
         owner_ids: Optional[Set[int]] = None,
         reload: bool = False,
         **kwargs: Any,
-    ):
+    ) -> None:
         self.__cogs: Dict[str, Cog] = {}
         self.__extensions: Dict[str, types.ModuleType] = {}
         self.extra_events: Dict[str, List[CoroFunc]] = {}
@@ -167,14 +169,14 @@ class CommonBotBase(Generic[CogT]):
 
     # listener registration
 
-    def add_listener(self, func: CoroFunc, name: str = MISSING) -> None:
+    def add_listener(self, func: CoroFunc, name: Union[str, Event] = MISSING) -> None:
         """The non decorator alternative to :meth:`.listen`.
 
         Parameters
         ----------
         func: :ref:`coroutine <coroutine>`
             The function to call.
-        name: :class:`str`
+        name: Union[:class:`str`, :class:`.Event`]
             The name of the event to listen for. Defaults to ``func.__name__``.
 
         Example
@@ -184,37 +186,62 @@ class CommonBotBase(Generic[CogT]):
 
             async def on_ready(): pass
             async def my_message(message): pass
+            async def another_message(message): pass
 
             bot.add_listener(on_ready)
             bot.add_listener(my_message, 'on_message')
+            bot.add_listener(another_message, Event.message)
 
         Raises
         ------
         TypeError
-            The function is not a coroutine.
+            The function is not a coroutine or a string or an :class:`.Event` was not passed
+            as the name.
         """
-        name = func.__name__ if name is MISSING else name
+        if name is not MISSING and not isinstance(name, (str, Event)):
+            raise TypeError(
+                f"Bot.add_listener expected str or Enum but received {name.__class__.__name__!r} instead."
+            )
+
+        name_ = (
+            func.__name__
+            if name is MISSING
+            else (name if isinstance(name, str) else f"on_{name.value}")
+        )
 
         if not asyncio.iscoroutinefunction(func):
             raise TypeError("Listeners must be coroutines")
 
-        if name in self.extra_events:
-            self.extra_events[name].append(func)
+        if name_ in self.extra_events:
+            self.extra_events[name_].append(func)
         else:
-            self.extra_events[name] = [func]
+            self.extra_events[name_] = [func]
 
-    def remove_listener(self, func: CoroFunc, name: str = MISSING) -> None:
+    def remove_listener(self, func: CoroFunc, name: Union[str, Event] = MISSING) -> None:
         """Removes a listener from the pool of listeners.
 
         Parameters
         ----------
         func
             The function that was used as a listener to remove.
-        name: :class:`str`
+        name: Union[:class:`str`, :class:`.Event`]
             The name of the event we want to remove. Defaults to
             ``func.__name__``.
+
+        Raises
+        ------
+        TypeError
+            The name passed was not a string or an :class:`.Event`.
         """
-        name = func.__name__ if name is MISSING else name
+        if name is not MISSING and not isinstance(name, (str, Event)):
+            raise TypeError(
+                f"Bot.remove_listener expected str or Enum but received {name.__class__.__name__!r} instead."
+            )
+        name = (
+            func.__name__
+            if name is MISSING
+            else (name if isinstance(name, str) else f"on_{name.value}")
+        )
 
         if name in self.extra_events:
             try:
@@ -222,7 +249,7 @@ class CommonBotBase(Generic[CogT]):
             except ValueError:
                 pass
 
-    def listen(self, name: str = MISSING) -> Callable[[CFT], CFT]:
+    def listen(self, name: Union[str, Event] = MISSING) -> Callable[[CFT], CFT]:
         """A decorator that registers another function as an external
         event listener. Basically this allows you to listen to multiple
         events from different places e.g. such as :func:`.on_ready`
@@ -244,13 +271,23 @@ class CommonBotBase(Generic[CogT]):
             async def my_message(message):
                 print('two')
 
-        Would print one and two in an unspecified order.
+            # in yet another file
+            @bot.listen(Event.message)
+            async def another_message(message):
+                print('three')
+
+        Would print one, two and three in an unspecified order.
 
         Raises
         ------
         TypeError
-            The function being listened to is not a coroutine.
+            The function being listened to is not a coroutine or a string or an :class:`.Event` was not passed
+            as the name.
         """
+        if name is not MISSING and not isinstance(name, (str, Event)):
+            raise TypeError(
+                f"Bot.listen expected str or Enum but received {name.__class__.__name__!r} instead."
+            )
 
         def decorator(func: CFT) -> CFT:
             self.add_listener(func, name)
@@ -345,7 +382,7 @@ class CommonBotBase(Generic[CogT]):
         if cog is None:
             return
 
-        help_command = getattr(self, "_help_command", None)
+        help_command: Optional[HelpCommand] = getattr(self, "_help_command", None)
         if help_command and help_command.cog is cog:
             help_command.cog = None
         # NOTE: Should be covariant
@@ -594,7 +631,7 @@ class CommonBotBase(Generic[CogT]):
         """Mapping[:class:`str`, :class:`py:types.ModuleType`]: A read-only mapping of extension name to extension."""
         return types.MappingProxyType(self.__extensions)
 
-    async def _watchdog(self):
+    async def _watchdog(self) -> None:
         """|coro|
 
         Starts the bot watchdog which will watch currently loaded extensions

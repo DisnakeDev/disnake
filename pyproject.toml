@@ -1,9 +1,126 @@
 # SPDX-License-Identifier: MIT
 
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "disnake"
+description = "A Python wrapper for the Discord API"
+readme = "README.md"
+authors = [
+  { name = "Disnake Development" }
+]
+requires-python = ">=3.8"
+keywords = ["disnake", "discord", "discord api"]
+license = { text = "MIT" }
+dependencies = [
+    "aiohttp>=3.7.0,<4.0",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "License :: OSI Approved :: MIT License",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Internet",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Utilities",
+    "Typing :: Typed",
+]
+dynamic = ["version"]
+
+[project.urls]
+Changelog = "https://docs.disnake.dev/page/whats_new.html"
+Documentation = "https://docs.disnake.dev/"
+Repository = "https://github.com/DisnakeDev/disnake"
+
+[project.optional-dependencies]
+speed = [
+    "orjson~=3.6",
+    # taken from aiohttp[speedups]
+    "aiodns>=1.1",
+    "Brotli",
+    'cchardet; python_version < "3.10"',
+]
+voice = [
+    "PyNaCl>=1.3.0,<1.6",
+]
+docs = [
+    "sphinx==6.0.1",
+    "sphinxcontrib-trio~=1.1.2",
+    "sphinx-hoverxref==1.3.0",
+    "sphinx-autobuild~=2021.3",
+    "sphinxcontrib-towncrier==0.3.2a0",
+    "towncrier==22.12.0",
+    "sphinx-notfound-page==0.8.3",
+]
+discord = ["discord-disnake"]
+
+[tool.pdm.dev-dependencies]
+nox = [
+    "nox==2022.11.21",
+]
+tools = [
+    "pre-commit~=3.0",
+    "slotscheck~=0.16.4",
+    "python-dotenv~=1.0.0",
+    "towncrier==22.12.0",
+    "check-manifest==0.49",
+    "ruff==0.0.252",
+]
+codemod = [
+    # run codemods on the respository (mostly automated typing)
+    "libcst~=0.4.9",
+    "black==23.1.0",
+    "autotyping==23.2.0",
+]
+typing = [
+    # this is not pyright itself, but the python wrapper
+    "pyright==1.1.291",
+    "typing-extensions~=4.5.0",
+    # only used for type-checking, version does not matter
+    "pytz",
+]
+test = [
+    "pytest~=7.2.1",
+    "pytest-cov~=4.0.0",
+    "pytest-asyncio~=0.20.3",
+    "looptime~=0.2",
+    "coverage[toml]~=6.5.0",
+]
+
+[tool.pdm.scripts]
+black = { composite = ["lint black"], help = "Run black" }
+docs = { cmd = "nox -Rs docs --", help = "Build the documentation for development" }
+isort = { composite = ["lint isort"], help = "Run isort" }
+lint = { cmd = "nox -Rs lint --", help = "Check all files for linting errors" }
+pyright = { cmd = "nox -Rs pyright --", help = "Run pyright" }
+setup_env = { cmd = "pdm install -d -G speed -G docs -G voice", help = "Set up the local environment and all dependencies" }
+post_setup_env = { composite = ["python -m ensurepip --default-pip", "pre-commit install --install-hooks"] }
+test = { cmd = "nox -Rs test --", help = "Run pytest" }
+
+# legacy tasks for those who still type `task`
+[tool.taskipy.tasks]
+black = { cmd = "black", help = "Run black" }
+docs = { cmd = "docs", help = "Build the documentation for development" }
+isort = { cmd = "isort", help = "Run isort" }
+lint = { cmd = "lint", help = "Check all files for linting errors" }
+pyright = { cmd = "pyright", help = "Run pyright" }
+setup_env = { cmd = "setup_env", help = "Setup the local environment and set up all dependencies" }
+test = { cmd = "test", help = "Run pytest" }
+
+[tool.taskipy.settings]
+runner = "pdm run"
+
 [tool.black]
 line-length = 100
-target-version = ["py38", "py39", "py310"]
-
+target-version = ["py38", "py39", "py310", "py311"]
 
 [tool.isort]
 profile = "black"
@@ -12,17 +129,107 @@ line_length = 100
 combine_as_imports = true
 filter_files = true
 
+[tool.ruff]
+line-length = 100
+target-version = "py38"
+select = [
+    # commented out codes are intended to be enabled in future prs
+    "F", # pyflakes
+    "E", "W", # pycodestyle
+    # "D", # pydocstyle
+    "D2",  # pydocstyle, docstring formatting
+    "D4",  # pydocstyle, docstring structure/content
+    # "ANN", # flake8-annotations
+    "S", # flake8-bandit
+    "B", # flake8-bugbear
+    "C", # flake8-comprehensions
+    "DTZ", # flake8-datetimez
+    # "EM", # flake8-errmsg
+    "G", # flake8-logging-format
+    # "RET", # flake8-return
+    # "SIM", # flake8-simplify
+    "TID251", # flake8-tidy-imports, replaces S404
+    # "TCH", # flake8-type-checking
+    "RUF",    # ruff specific exceptions
+    "PT",     # flake8-pytest-style
+    "Q",      # flake8-quotes
+    "T20",    # flake8-print
+    "PGH",    # pygrep-hooks
+    "PLC",    # pylint convention
+    "PLE",    # pylint error
+    # "PLR",    # pylint refactor
+    "PLW",    # pylint warnings
+    "TRY002", "TRY004", # tryceratops
+]
+ignore = [
+    # star imports
+    "F403",
 
-[tool.taskipy.tasks]
-black = { cmd = "task lint black", help = "Run black" }
-docs = { cmd = "nox -Rs docs --", help = "Build the documentation for development"}
-flake8 = { cmd = "flake8", help = "Run flake8"}
-isort = { cmd = "task lint isort", help = "Run isort" }
-lint = { cmd = "nox -Rs lint --", help = "Check all files for linting errors" }
-pyright = { cmd = "nox -Rs pyright --", help = "Run pyright" }
-setup_env = {cmd = 'nox -s setup --', help = 'Setup the local environment and set up all dependencies'}
-test = { cmd = "nox -Rs test --", help = "Run pytest" }
+    # pydocstyle
+    "D203", # incompat with D211
+    "D213", # multiline docstring should start on second line, incompatiable with D212
+    "D400", # first line ends in period, does not work with `|coro|` etc.
+    "D415", # same thing but punctuation in general
+    "D416", # section name should end with a colon, incompatible with D406
 
+    # unknown if this is actually an issue
+    "RUF005", # might not be actually faster
+    "RUF006", # might not be an issue/very extreme cases
+
+    # ignore try-except-pass. Bare excepts are caught with E722
+    "S110",
+
+    # provide specific codes on type: ignore
+    "PGH003",
+
+    # import aliases are fixed by isort
+    "PLC0414",
+
+    # outer loop variables are overwritten by inner assignment target, these are mostly intentional
+    "PLW2901",
+
+    # temporary disables, to fix later
+    "D205",   # blank line required between summary and description
+    "D401",   # first line of docstring should be in imperative mood
+    "D417",   # missing argument description in docstring
+    "B904",   # within an except clause raise from error or from none
+    "B026",   # backwards star-arg unpacking
+    "E501",   # line too long
+    "E731",   # assigning lambdas to variables
+    "RUF004", # keyword args must be supplied after starred arguments
+    "T201",   # print statements
+]
+
+[tool.ruff.per-file-ignores]
+"disnake/__main__.py" = ["T201"] # print statements are okay in our simple cli
+"disnake/i18n.py" = [
+    "B027", # lib bug. Excluded here because ruff does not have a --disable-noqa flag yet
+]
+"disnake/ui/select/*.py" = [
+    "F401", # unused imports. Excluded because there is a bug with ruff.
+]
+"disnake/**.py" = ["PT"] # this is not a module of pytest tests
+"test_bot/*.py" = [
+    "B008", # do not perform function calls in argument defaults
+    "T201", # print found, printing is currently accepted in the test bot
+    "PT",   # this is not a module of pytest tests
+]
+"tests/*.py" = ["S101"] # use of assert is okay in test files
+# we are not using noqa in the example files themselves
+"examples/*.py" = [
+    "B008", # do not perform function calls in argument defaults, this is how most commands work
+    "T201", # print found, printing is okay in examples
+    "PT",   # this is not a module of pytest tests
+]
+"examples/basic_voice.py" = ["S104"] # possible binding to all interfaces
+"examples/views/tic_tac_toe.py" = ["E741"] # ambigious variable name: `O`
+
+[tool.ruff.flake8-pytest-style]
+fixture-parentheses = false
+mark-parentheses = false
+
+[tool.ruff.flake8-tidy-imports.banned-api]
+"subprocess".msg = "Consider possible security implications associated with the subprocess module." # replaces S404
 
 [tool.towncrier]
 template = "changelog/_template.rst.jinja"
@@ -87,7 +294,6 @@ include = [
 ]
 ignore = [
     "disnake/ext/mypy_plugin",
-    "noxfile.py",  # this is ignored because nox is not installed in the environment when running pyright
 ]
 
 # this is one of the diagnostics that aren't enabled by default, even in strict mode
@@ -148,7 +354,6 @@ exclude_lines = [
 [tool.check-manifest]
 ignore = [
     # CI
-    ".flake8",
     ".pre-commit-config.yaml",
     ".readthedocs.yml",
     ".libcst.codemod.yaml",
@@ -161,7 +366,6 @@ ignore = [
     "examples/**",
     # tests
     "test_bot/**",
-    "test_launcher.py",
     "tests/**",
     "scripts/**",
 ]

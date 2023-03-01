@@ -7,6 +7,7 @@ import logging
 import re
 import sys
 import weakref
+from errno import ECONNRESET
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -52,6 +53,7 @@ if TYPE_CHECKING:
     from .message import Attachment
     from .types import (
         appinfo,
+        application_role_connection,
         audit_log,
         automod,
         channel,
@@ -84,9 +86,8 @@ if TYPE_CHECKING:
 _API_VERSION = 10
 
 
-def _workaround_set_api_version(version: Literal[9, 10]):
+def _workaround_set_api_version(version: Literal[9, 10]) -> None:
     """Stopgap measure for verified bots without message content intent while intent is not enforced on api v9.
-
 
     .. note::
         This must be ran **before** connecting to the gateway.
@@ -112,12 +113,10 @@ async def json_or_text(response: aiohttp.ClientResponse) -> Union[Dict[str, Any]
 
 
 def set_attachments(payload: Dict[str, Any], files: Sequence[File]) -> None:
-    """
-    Updates the payload's attachments list based on the provided files
+    """Updates the payload's attachments list based on the provided files
 
     note: this method modifies the provided ``payload`` and ``payload["attachments"]`` collections
     """
-
     attachments = payload.get("attachments", [])
     for index, file in enumerate(files):
         attachments.append(
@@ -134,11 +133,9 @@ def set_attachments(payload: Dict[str, Any], files: Sequence[File]) -> None:
 
 
 def to_multipart(payload: Dict[str, Any], files: Sequence[File]) -> List[Dict[str, Any]]:
-    """
-    Converts the payload and list of files to a multipart payload,
+    """Converts the payload and list of files to a multipart payload,
     as specified by https://discord.com/developers/docs/reference#uploading-files
     """
-
     multipart: List[Dict[str, Any]] = []
     for index, file in enumerate(files):
         multipart.append(
@@ -157,12 +154,10 @@ def to_multipart(payload: Dict[str, Any], files: Sequence[File]) -> List[Dict[st
 def to_multipart_with_attachments(
     payload: Dict[str, Any], files: Sequence[File]
 ) -> List[Dict[str, Any]]:
-    """
-    Updates the payload's attachments and converts it to a multipart payload
+    """Updates the payload's attachments and converts it to a multipart payload
 
     Shorthand for ``set_attachments`` + ``to_multipart``
     """
-
     set_attachments(payload, files)
     return to_multipart(payload, files)
 
@@ -421,7 +416,7 @@ class HTTPClient:
                 # This is handling exceptions from the request
                 except OSError as e:
                     # Connection reset by peer
-                    if tries < 4 and e.errno in (54, 10054):
+                    if tries < 4 and e.errno == ECONNRESET:
                         await asyncio.sleep(1 + tries * 2)
                         continue
                     raise
@@ -993,6 +988,7 @@ class HTTPClient:
             "applied_tags",
             "default_reaction_emoji",
             "default_sort_order",
+            "default_forum_layout",
         )
         payload = {k: v for k, v in options.items() if k in valid_keys}
         return self.request(r, reason=reason, json=payload)
@@ -1305,12 +1301,44 @@ class HTTPClient:
     def delete_guild(self, guild_id: Snowflake) -> Response[None]:
         return self.request(Route("DELETE", "/guilds/{guild_id}", guild_id=guild_id))
 
-    def create_guild(self, name: str, icon: Optional[str]) -> Response[guild.Guild]:
-        payload = {
+    def create_guild(
+        self,
+        name: str,
+        icon: Optional[str] = None,
+        *,
+        verification_level: Optional[guild.VerificationLevel] = None,
+        default_message_notifications: Optional[guild.DefaultMessageNotificationLevel] = None,
+        explicit_content_filter: Optional[guild.ExplicitContentFilterLevel] = None,
+        roles: Optional[List[guild.CreateGuildPlaceholderRole]] = None,
+        channels: Optional[List[guild.CreateGuildPlaceholderChannel]] = None,
+        afk_channel: Optional[Snowflake] = None,
+        afk_timeout: Optional[int] = None,
+        system_channel: Optional[Snowflake] = None,
+        system_channel_flags: Optional[int] = None,
+    ) -> Response[guild.Guild]:
+        payload: guild.CreateGuild = {
             "name": name,
         }
         if icon:
             payload["icon"] = icon
+        if verification_level is not None:
+            payload["verification_level"] = verification_level
+        if default_message_notifications is not None:
+            payload["default_message_notifications"] = default_message_notifications
+        if explicit_content_filter is not None:
+            payload["explicit_content_filter"] = explicit_content_filter
+        if roles is not None:
+            payload["roles"] = roles
+        if channels is not None:
+            payload["channels"] = channels
+        if afk_channel is not None:
+            payload["afk_channel_id"] = afk_channel
+        if afk_timeout is not None:
+            payload["afk_timeout"] = afk_timeout
+        if system_channel is not None:
+            payload["system_channel_id"] = system_channel
+        if system_channel_flags is not None:
+            payload["system_channel_flags"] = system_channel_flags
 
         return self.request(Route("POST", "/guilds"), json=payload)
 
@@ -1711,13 +1739,17 @@ class HTTPClient:
         self,
         guild_id: Snowflake,
         limit: int = 100,
+        # only one of these two may be specified, otherwise `after` gets ignored
         before: Optional[Snowflake] = None,
+        after: Optional[Snowflake] = None,
         user_id: Optional[Snowflake] = None,
         action_type: Optional[audit_log.AuditLogEvent] = None,
     ) -> Response[audit_log.AuditLog]:
         params: Dict[str, Any] = {"limit": limit}
-        if before:
+        if before is not None:
             params["before"] = before
+        if after is not None:
+            params["after"] = after
         if user_id:
             params["user_id"] = user_id
         if action_type:
@@ -2588,6 +2620,31 @@ class HTTPClient:
 
     def application_info(self) -> Response[appinfo.AppInfo]:
         return self.request(Route("GET", "/oauth2/applications/@me"))
+
+    def get_application_role_connection_metadata_records(
+        self, application_id: Snowflake
+    ) -> Response[List[application_role_connection.ApplicationRoleConnectionMetadata]]:
+        return self.request(
+            Route(
+                "GET",
+                "/applications/{application_id}/role-connections/metadata",
+                application_id=application_id,
+            )
+        )
+
+    def edit_application_role_connection_metadata_records(
+        self,
+        application_id: Snowflake,
+        records: Sequence[application_role_connection.ApplicationRoleConnectionMetadata],
+    ) -> Response[List[application_role_connection.ApplicationRoleConnectionMetadata]]:
+        return self.request(
+            Route(
+                "PUT",
+                "/applications/{application_id}/role-connections/metadata",
+                application_id=application_id,
+            ),
+            json=records,
+        )
 
     async def get_gateway(self, *, encoding: str = "json", zlib: bool = True) -> str:
         try:

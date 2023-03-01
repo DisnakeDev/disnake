@@ -10,8 +10,7 @@ __all__ = ("File",)
 
 
 class File:
-    """
-    A parameter object used for sending file objects.
+    """A parameter object used for sending file objects.
 
     .. note::
 
@@ -60,7 +59,7 @@ class File:
         *,
         spoiler: bool = False,
         description: Optional[str] = None,
-    ):
+    ) -> None:
         if isinstance(fp, io.IOBase):
             if not (fp.seekable() and fp.readable()):
                 raise ValueError(f"File buffer {fp!r} must be seekable and readable")
@@ -111,3 +110,24 @@ class File:
         self.fp.close = self._closer
         if self._owner:
             self._closer()
+
+    @property
+    def closed(self) -> bool:
+        """:class:`bool`: Whether the file is closed.
+
+        This is a shorthand for ``File.fp.closed``.
+
+        .. versionadded:: 2.8
+        """
+        return self.fp.closed
+
+    @property
+    def bytes_length(self) -> int:
+        """:class:`int`: The bytes length of the :attr:`~File.fp` object.
+
+        .. versionadded:: 2.8
+        """
+        current_position = self.fp.tell()
+        bytes_length = self.fp.seek(0, io.SEEK_END)
+        self.fp.seek(current_position)
+        return bytes_length - current_position

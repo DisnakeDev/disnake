@@ -62,7 +62,7 @@ class Reaction:
         message: Message,
         data: ReactionPayload,
         emoji: Optional[Union[PartialEmoji, Emoji, str]] = None,
-    ):
+    ) -> None:
         self.message: Message = message
         self.emoji: Union[PartialEmoji, Emoji, str] = emoji or message._state.get_reaction_emoji(
             data["emoji"]
@@ -185,7 +185,7 @@ class Reaction:
             Getting the users for the reaction failed.
 
         Yields
-        --------
+        ------
         Union[:class:`User`, :class:`Member`]
             The member (if retrievable) or the user that has reacted
             to this message. The case where it can be a :class:`Member` is

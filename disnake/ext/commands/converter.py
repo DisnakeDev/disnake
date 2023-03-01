@@ -127,7 +127,7 @@ class Converter(Protocol[T_co]):
         properly propagate to the error handlers.
 
         Parameters
-        -----------
+        ----------
         ctx: Union[:class:`.Context`, :class:`.ApplicationCommandInteraction`]
             The invocation context that the argument is being used in.
         argument: :class:`str`
@@ -1068,8 +1068,7 @@ class clean_content(Converter[str]):
 
 
 class Greedy(List[T]):
-    """
-    A special converter that greedily consumes arguments until it can't.
+    """A special converter that greedily consumes arguments until it can't.
     As a consequence of this behaviour, most input errors are silently discarded,
     since it is used as an indicator of when to stop parsing.
 
@@ -1092,10 +1091,10 @@ class Greedy(List[T]):
 
     __slots__ = ("converter",)
 
-    def __init__(self, *, converter: T):
+    def __init__(self, *, converter: T) -> None:
         self.converter = converter
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         converter = getattr(self.converter, "__name__", repr(self.converter))
         return f"Greedy[{converter}]"
 
@@ -1176,7 +1175,7 @@ CONVERTER_MAPPING: Dict[Type[Any], Type[Converter]] = {
 
 async def _actual_conversion(
     ctx: Context,
-    converter: Union[Type[T], Converter[T], Callable[[str], T]],
+    converter: Union[Type[T], Type[Converter[T]], Converter[T], Callable[[str], T]],
     argument: str,
     param: inspect.Parameter,
 ) -> T:

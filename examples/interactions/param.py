@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""
-Some examples showing how to customize slash command options.
-"""
+"""Some examples showing how to customize slash command options."""
 
 import os
 from typing import Union
@@ -51,8 +49,7 @@ async def description(
     user: disnake.User,
     channel: disnake.TextChannel,
 ):
-    """
-    A random command
+    """A random command
 
     Parameters
     ----------
@@ -76,6 +73,7 @@ async def defaults(
 # You may limit numbers to a certain range using `commands.Range`.
 # "..." is impicitly infinity. Range[0, ...] therefore means any integer from 0 to infinity,
 # and Range[..., 0] means anything from -inf to 0.
+
 
 # The 1.0 in the `fraction` parameter below is important - the usage of a float specifies
 # that the argument may be a float in that range, not just an integer.

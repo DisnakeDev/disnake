@@ -29,8 +29,13 @@
   {%- if pageurl %}
   <link rel="canonical" href="{{ pageurl|e }}" />
   {%- endif %}
-  {%- if favicon %}
-  <link rel="shortcut icon" href="{{ pathto('_static/' + favicon, 1)|e }}"/>
+  {%- if use_opensearch %}
+  <link rel="search" type="application/opensearchdescription+xml"
+        title="{% trans docstitle=docstitle|e %}Search within {{ docstitle }}{% endtrans %}"
+        href="{{ pathto('_static/opensearch.xml', 1) }}"/>
+  {%- endif %}
+  {%- if favicon_url %}
+  <link rel="icon" href="{{ favicon_url|e }}"/>
   {%- endif %}
   {%- block linktags %}
   {%- if hasdoc('about') %}
@@ -117,6 +122,11 @@
     {%- endfor %}
   </div>
   <div id="sidebar">
+    {% if 'api' in pagename.split('/') %}
+    <div class="sidebar-search-wrapper">
+      <input type="text" id="sidebar-search-box" onkeyup="sidebarSearch()" placeholder="Filter..." autocomplete=off>
+    </div>
+    {% endif %}
     {%- include "localtoc.html" %}
   </div>
 </aside>

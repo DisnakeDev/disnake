@@ -9,7 +9,7 @@ from typing_extensions import NotRequired
 from .snowflake import Snowflake
 from .user import User
 
-StickerFormatType = Literal[1, 2, 3]
+StickerFormatType = Literal[1, 2, 3, 4]
 
 
 class StickerItem(TypedDict):
@@ -47,9 +47,9 @@ class StickerPack(TypedDict):
     stickers: List[StandardSticker]
     name: str
     sku_id: Snowflake
-    cover_sticker_id: Snowflake
+    cover_sticker_id: NotRequired[Snowflake]
     description: str
-    banner_asset_id: Snowflake
+    banner_asset_id: NotRequired[Snowflake]
 
 
 class CreateGuildSticker(TypedDict):
