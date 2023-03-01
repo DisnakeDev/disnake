@@ -1,1 +1,1 @@
-Fix a bug with the :func:`clone` method of :class:`abc.GuildChannel` not properly copying the ``default_auto_archive_duration`` attribute into the newly-cloned channel.
+Fix a bug with :meth:`ForumChannel.clone` not properly copying the ``default_auto_archive_duration`` attribute into the newly-cloned channel.
