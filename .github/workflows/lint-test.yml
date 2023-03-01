@@ -133,7 +133,7 @@ jobs:
         LIBCST_PARSER_TYPE: "native"
       run: |
         nox -s codemod -- run-all
-        if [ -n "$(git status --porcelain disnake/)" ]; then
+        if [ -n "$(git status --porcelain)" ]; then
           echo "::error::Please run 'nox -s codemod -- run-all' locally and commit the changes." >&2;
           exit 1;
         else

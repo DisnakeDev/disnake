@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import os
+import pathlib
 from itertools import chain
-from typing import TYPE_CHECKING, Callable, List, TypeVar
+from typing import TYPE_CHECKING, Callable, Dict, List, Tuple, TypeVar
 
 import nox
 
@@ -37,7 +38,7 @@ reset_coverage = True
 
 
 @nox.session
-def docs(session: nox.Session):
+def docs(session: nox.Session) -> None:
     """Build and generate the documentation.
 
     If running locally, will build automatic reloading docs.
@@ -70,7 +71,7 @@ def docs(session: nox.Session):
 
 
 @nox.session
-def lint(session: nox.Session):
+def lint(session: nox.Session) -> None:
     """Check all files for linting errors"""
     session.run_always("pdm", "install", "-G", "tools", external=True)
 
@@ -78,7 +79,7 @@ def lint(session: nox.Session):
 
 
 @nox.session(name="check-manifest")
-def check_manifest(session: nox.Session):
+def check_manifest(session: nox.Session) -> None:
     """Run check-manifest."""
     # --no-self is provided here because check-manifest builds disnake. There's no reason to build twice, so we don't.
     session.run_always("pdm", "install", "--no-self", "-dG", "tools", external=True)
@@ -86,14 +87,68 @@ def check_manifest(session: nox.Session):
 
 
 @nox.session()
-def slotscheck(session: nox.Session):
+def slotscheck(session: nox.Session) -> None:
     """Run slotscheck."""
     session.run_always("pdm", "install", "-dG", "tools", external=True)
     session.run("python", "-m", "slotscheck", "--verbose", "-m", "disnake")
 
 
+@nox.session
+def autotyping(session: nox.Session) -> None:
+    """Run autotyping.
+
+    Because of the nature of changes that autotyping makes, and the goal design of examples,
+    this runs on each folder in the repository with specific settings.
+    """
+    session.run_always("pdm", "install", "-dG", "codemod", external=True)
+
+    base_command = ["python", "-m", "libcst.tool", "codemod", "autotyping.AutotypeCommand"]
+    dir_options: Dict[Tuple[str, ...], Tuple[str, ...]] = {
+        (
+            "disnake",
+            "scripts",
+            "tests",
+            "test_bot",
+            "noxfile.py",
+        ): ("--aggressive",),
+        ("examples",): (
+            "--scalar-return",
+            "--bool-param",
+            "--bool-param",
+            "--int-param",
+            "--float-param",
+            "--str-param",
+            "--bytes-param",
+        ),
+    }
+
+    if session.posargs:
+        # short circuit with the provided arguments
+        # if there's just one file argument, give it the defaults that we normally use
+        posargs = session.posargs.copy()
+        if len(posargs) == 1 and not (path := posargs[0]).startswith("--"):
+            path = pathlib.Path(path).absolute()
+            try:
+                path = path.relative_to(pathlib.Path.cwd())
+            except ValueError:
+                pass
+            else:
+                module = path.parts[0]
+                for modules, options in dir_options.items():
+                    if module in modules:
+                        posargs += options
+                        break
+
+        session.run(*base_command, *posargs)
+        return
+
+    # run the custom fixers
+    for module, options in dir_options.items():
+        session.run(*base_command, *module, *options)
+
+
 @nox.session(name="codemod")
-def codemod(session: nox.Session):
+def codemod(session: nox.Session) -> None:
     """Run libcst codemods."""
     session.run_always("pdm", "install", "-dG", "codemod", external=True)
     if session.posargs and session.posargs[0] == "run-all" or not session.interactive:
@@ -104,8 +159,18 @@ def codemod(session: nox.Session):
         session.log("Transformers: " + ", ".join(transformers))
 
         for trans in transformers:
+            # remove autotyping transformers
+            if trans.startswith("autotyping."):
+                session.log("Skipping autotyping transformer.")
+                continue
             session.run(
-                "python", "-m", "libcst.tool", "codemod", trans, "disnake", "--hide-progress"
+                "python",
+                "-m",
+                "libcst.tool",
+                "codemod",
+                trans,
+                "disnake",
+                "--hide-progress",
             )
         session.log("Finished running all transformers.")
     else:
@@ -121,10 +186,12 @@ def codemod(session: nox.Session):
             )
         else:
             session.run("python", "-m", "libcst.tool", "list")
+    if not session.interactive:
+        session.notify("autotyping", posargs=[])
 
 
 @nox.session()
-def pyright(session: nox.Session):
+def pyright(session: nox.Session) -> None:
     """Run pyright."""
     session.run_always("pdm", "install", "-d", "-Gspeed", "-Gdocs", "-Gvoice", external=True)
     env = {
@@ -146,7 +213,7 @@ def pyright(session: nox.Session):
         # ["voice"],
     ],
 )
-def test(session: nox.Session, extras: List[str]):
+def test(session: nox.Session, extras: List[str]) -> None:
     """Run tests."""
     # shell splitting is not done by nox
     extras = list(chain(*(["-G", extra] for extra in extras)))
@@ -171,7 +238,7 @@ def test(session: nox.Session, extras: List[str]):
 
 
 @nox.session()
-def coverage(session: nox.Session):
+def coverage(session: nox.Session) -> None:
     """Display coverage information from the tests."""
     session.run_always("pdm", "install", "-dG", "test", external=True)
     if "html" in session.posargs or "serve" in session.posargs:

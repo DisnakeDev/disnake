@@ -2543,7 +2543,7 @@ class Guild(Hashable):
 
     # TODO: Remove Optional typing here when async iterators are refactored
     def fetch_members(
-        self, *, limit: int = 1000, after: Optional[SnowflakeTime] = None
+        self, *, limit: Optional[int] = 1000, after: Optional[SnowflakeTime] = None
     ) -> MemberIterator:
         """Retrieves an :class:`.AsyncIterator` that enables receiving the guild's members. In order to use this,
         :meth:`Intents.members` must be enabled.
@@ -4707,7 +4707,7 @@ class GuildBuilder:
         The settings to use with the system channel.
     """
 
-    def __init__(self, *, state: ConnectionState, name: str):
+    def __init__(self, *, state: ConnectionState, name: str) -> None:
         self._state = state
         self.name: str = name
 
