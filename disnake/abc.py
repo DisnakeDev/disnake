@@ -1017,10 +1017,9 @@ class GuildChannel(ABC):
                     "type": (_Overwrites.ROLE if isinstance(target, Role) else _Overwrites.MEMBER),
                 }
                 overwrites_payload.append(payload)
+        else:
+            overwrites_payload = [x._asdict() for x in self._overwrites]
         base_attrs["permission_overwrites"] = overwrites_payload
-
-        if not base_attrs["permission_overwrites"]:
-            base_attrs["permission_overwrites"] = [x._asdict() for x in self._overwrites]
         if category is not MISSING:
             base_attrs["parent_id"] = category.id if category else None
         else:
