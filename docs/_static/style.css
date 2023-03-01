@@ -673,13 +673,16 @@ aside .material-icons {
 
 .sidebar-search-wrapper {
   display: flex;
-  align-items: stretch;
-}
-.sidebar-search-wrapper {
-  width: 200px;
   border: 2px solid var(--search-border);
   border-radius: 8px;
   overflow: hidden;
+}
+
+/* Make toc search bar take up entire screen width only on smaller screens */
+@media screen and (min-width: 425px) {
+  .sidebar-search-wrapper {
+    width: 200px;
+  }
 }
 
 .sidebar-search-wrapper:focus-within {
