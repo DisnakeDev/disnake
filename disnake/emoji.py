@@ -200,8 +200,7 @@ class Emoji(_EmojiTag, AssetMixin):
     async def edit(
         self, *, name: str = MISSING, roles: List[Snowflake] = MISSING, reason: Optional[str] = None
     ) -> Emoji:
-        """
-        |coro|
+        """|coro|
 
         Edits the custom emoji.
 

@@ -483,7 +483,8 @@ class GuildChannel(ABC):
     @property
     def changed_roles(self) -> List[Role]:
         """List[:class:`.Role`]: Returns a list of roles that have been overridden from
-        their default values in the :attr:`.Guild.roles` attribute."""
+        their default values in the :attr:`.Guild.roles` attribute.
+        """
         ret = []
         g = self.guild
         for overwrite in filter(lambda o: o.is_role(), self._overwrites):
@@ -603,8 +604,7 @@ class GuildChannel(ABC):
 
     @property
     def jump_url(self) -> str:
-        """
-        A URL that can be used to jump to this channel.
+        """A URL that can be used to jump to this channel.
 
         .. versionadded:: 2.4
 
@@ -881,8 +881,7 @@ class GuildChannel(ABC):
     async def set_permissions(
         self, target, *, overwrite=MISSING, reason=None, **permissions
     ) -> None:
-        """
-        |coro|
+        """|coro|
 
         Sets the channel specific permission overwrites for a target in the
         channel.

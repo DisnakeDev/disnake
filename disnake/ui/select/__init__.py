@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""
-disnake.ui.select
+"""disnake.ui.select
 ~~~~~~~~~~~~~~~~~~
 
 Select Menu UI Kit Types

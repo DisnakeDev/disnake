@@ -263,8 +263,7 @@ class BotBase(CommonBotBase, GroupMixin):
             pass
 
     def check(self, func: T) -> T:
-        """
-        A decorator that adds a global check to the bot.
+        """A decorator that adds a global check to the bot.
 
         This is for text commands only, and doesn't apply to application commands.
 
@@ -295,8 +294,7 @@ class BotBase(CommonBotBase, GroupMixin):
         return func
 
     def check_once(self, func: CFT) -> CFT:
-        """
-        A decorator that adds a "call once" global check to the bot.
+        """A decorator that adds a "call once" global check to the bot.
 
         This is for text commands only, and doesn't apply to application commands.
 
@@ -379,8 +377,7 @@ class BotBase(CommonBotBase, GroupMixin):
         return coro
 
     def after_invoke(self, coro: CFT) -> CFT:
-        """
-        A decorator that registers a coroutine as a post-invoke hook.
+        """A decorator that registers a coroutine as a post-invoke hook.
 
         This is for text commands only, and doesn't apply to application commands.
 
@@ -490,8 +487,7 @@ class BotBase(CommonBotBase, GroupMixin):
         return ret
 
     async def get_context(self, message: Message, *, cls: Type[CXT] = Context) -> CXT:
-        """
-        |coro|
+        """|coro|
 
         Returns the invocation context from the message.
 
@@ -519,7 +515,6 @@ class BotBase(CommonBotBase, GroupMixin):
             The invocation context. The type of this can change via the
             ``cls`` parameter.
         """
-
         view = StringView(message.content)
         ctx = cast("CXT", cls(prefix=None, view=view, bot=self, message=message))
 

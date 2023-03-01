@@ -4238,6 +4238,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         self.me = state.user
         self.recipient = state.get_user(user_id) if user_id != self.me.id else None
         self.last_pin_timestamp = None
+        self._flags = 0
         return self
 
     @property
@@ -4255,8 +4256,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
 
     @property
     def jump_url(self) -> str:
-        """
-        A URL that can be used to jump to this channel.
+        """A URL that can be used to jump to this channel.
 
         .. versionadded:: 2.4
         """

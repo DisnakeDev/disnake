@@ -80,9 +80,11 @@ codemod = [
     "black==23.1.0",
 ]
 typing = [
-    "typing-extensions~=4.2.0",
     # this is not pyright itself, but the python wrapper
     "pyright==1.1.291",
+    "typing-extensions~=4.2.0",
+    # only used for type-checking, version does not matter
+    "pytz",
 ]
 test = [
     "pytest~=7.2.0",
@@ -117,7 +119,7 @@ runner = "pdm run"
 
 [tool.black]
 line-length = 100
-target-version = ["py38", "py39", "py310"]
+target-version = ["py38", "py39", "py310", "py311"]
 
 [tool.isort]
 profile = "black"
@@ -134,6 +136,7 @@ select = [
     "F", # pyflakes
     "E", "W", # pycodestyle
     # "D", # pydocstyle
+    "D2",  # pydocstyle, docstring formatting
     # "ANN", # flake8-annotations
     "S", # flake8-bandit
     "B", # flake8-bugbear
@@ -160,6 +163,10 @@ ignore = [
     # star imports
     "F403",
 
+    # pydocstyle
+    "D203", # incompat with D211
+    "D213", # multiline docstring should start on second line, incompatiable with D212
+
     # unknown if this is actually an issue
     "RUF005", # might not be actually faster
     "RUF006", # might not be an issue/very extreme cases
@@ -177,6 +184,7 @@ ignore = [
     "PLW2901",
 
     # temporary disables, to fix later
+    "D205",   # blank line required between summary and description. Requires a docstring rewrite.
     "B904",   # within an except clause raise from error or from none
     "B026",   # backwards star-arg unpacking
     "E501",   # line too long

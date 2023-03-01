@@ -1225,7 +1225,6 @@ def inject(
             extension works, but at runtime this is always an :class:`Injection` instance.
             You can find more in-depth explanation :ref:`here <why_params_and_injections_return_any>`.
     """
-
     return Injection(function, autocompleters=autocompleters)
 
 
@@ -1266,8 +1265,7 @@ def injection(
 def option_enum(
     choices: Union[Dict[str, TChoice], List[TChoice]], **kwargs: TChoice
 ) -> Type[TChoice]:
-    """
-    A utility function to create an enum type.
+    """A utility function to create an enum type.
     Returns a new :class:`~enum.Enum` based on the provided parameters.
 
     .. versionadded:: 2.1

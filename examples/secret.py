@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""
-Shhhh! It's a secret.
-"""
+"""Shhhh! It's a secret."""
 
 import os
 from typing import Union
@@ -32,7 +30,6 @@ def create_overwrites(ctx: commands.GuildContext, *objects: Union[disnake.Role, 
     from being viewed by whoever does not meet the criteria, thus creating a
     secret channel.
     """
-
     # a dict comprehension is being utilised here to set the same permission overwrites
     # for each `disnake.Role` or `disnake.Member`.
     overwrites = {obj: disnake.PermissionOverwrite(view_channel=True) for obj in objects}
@@ -57,7 +54,6 @@ async def text(
     """This makes a text channel with a specified name
     that is only visible to roles or members that are specified.
     """
-
     overwrites = create_overwrites(ctx, *objects)
 
     await ctx.guild.create_text_channel(
@@ -76,7 +72,6 @@ async def voice(
     """This does the same thing as the `text` subcommand
     but instead creates a voice channel.
     """
-
     overwrites = create_overwrites(ctx, *objects)
 
     await ctx.guild.create_voice_channel(
@@ -88,7 +83,6 @@ async def voice(
 @commands.guild_only()
 async def emoji(ctx: commands.GuildContext, emoji: disnake.PartialEmoji, *roles: disnake.Role):
     """This clones a specified emoji that only specified roles are allowed to use."""
-
     # fetch the emoji asset and read it as bytes.
     emoji_bytes = await emoji.read()
 
