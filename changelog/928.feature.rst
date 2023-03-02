@@ -1,8 +1,4 @@
 Implement Onboarding.
     - Add :class:`Onboarding`, :class:`OnboardingPrompt` and :class:`OnboardingPromptOption`.
     - Add :meth:`Guild.get_onboarding`.
-    - Add new member flags.
-        - Add :class:`MemberFlags`.
-        - Add :attr:`Member.flags`.
-        - Add ``flags`` and ``verified`` parameters to :meth:`Member.edit`.
     - Add relevant :class:`AuditLogDiff` information.
