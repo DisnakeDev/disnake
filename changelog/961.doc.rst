@@ -1,0 +1,1 @@
+Remove incorrect documentation for :meth:`InvokableApplicationCommand.invoke`.

@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""
-disnake.webhook
+"""disnake.webhook
 ~~~~~~~~~~~~~~
 
 Webhook support

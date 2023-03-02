@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""
-An example with multiple rows of buttons in a view.
-"""
+"""An example with multiple rows of buttons in a view."""
 
 # The end result would look like this: https://i.imgur.com/ZYdX1Jw.png
 
