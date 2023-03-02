@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
     from .abc import Snowflake
     from .guild import Guild, GuildChannel
-    from .state import ConnectionState
+    from .role import Role
     from .types.onboarding import (
         Onboarding as OnboardingPayload,
         OnboardingPrompt as OnboardingPromptPayload,
@@ -58,8 +58,7 @@ class Onboarding:
 
     def _from_data(self, data: OnboardingPayload):
         self.prompts = [
-            OnboardingPrompt._from_dict(data=prompt, state=self.guild._state)
-            for prompt in data["prompts"]
+            OnboardingPrompt._from_dict(data=prompt, guild=self.guild) for prompt in data["prompts"]
         ]
         self.enabled = data["enabled"]
         self._default_channel_ids = list(map(int, data["default_channel_ids"]))
@@ -98,7 +97,7 @@ class OnboardingPromptOption(Hashable):
         The channels that the user will see when they select this option.
     """
 
-    __slots__ = ("id", "title", "description", "emoji", "roles", "channels")
+    __slots__ = ("id", "title", "description", "emoji", "guild", "_roles_ids", "_channels_ids")
 
     def __init__(
         self,
@@ -108,6 +107,7 @@ class OnboardingPromptOption(Hashable):
         emoji: Union[str, PartialEmoji, Emoji],
         roles: Sequence[Snowflake],
         channels: Sequence[Snowflake],
+        guild: Guild,
     ):
         # NOTE: (a very very important note), the ID may sometimes be a UNIX timestamp since
         # Onboarding changes are saved locally until you send the API request (that's how it works in client)
@@ -117,8 +117,9 @@ class OnboardingPromptOption(Hashable):
         self.id = 0
         self.title = title
         self.description = description
-        self.roles = roles
-        self.channels = channels
+        self.guild = guild
+        self._roles_ids = [role.id for role in roles]
+        self._channels_ids = [channel.id for channel in channels]
 
         self.emoji: Union[PartialEmoji, Emoji]
         if isinstance(emoji, str):
@@ -143,8 +144,8 @@ class OnboardingPromptOption(Hashable):
             "title": self.title,
             "description": self.description,
             "emoji": self.emoji._to_partial().to_dict(),
-            "role_ids": [role.id for role in self.roles],
-            "channel_ids": [channel.id for channel in self.channels],
+            "role_ids": self._roles_ids,
+            "channel_ids": self._channels_ids,
         }
 
         if self.id:
@@ -153,22 +154,29 @@ class OnboardingPromptOption(Hashable):
         return payload
 
     @classmethod
-    def _from_dict(cls, *, data: OnboardingPromptOptionPayload, state: ConnectionState) -> Self:
+    def _from_dict(cls, *, data: OnboardingPromptOptionPayload, guild: Guild) -> Self:
         emoji = PartialEmoji.from_dict(data["emoji"])
 
         self = cls(
             title=data["title"],
             description=data["description"],
             emoji=emoji,
-            roles=[
-                Object(id=role_id) for role_id in data["role_ids"]
-            ],  # NOTE: should I get the Role here?
-            channels=[
-                Object(id=channel_id) for channel_id in data["channel_ids"]
-            ],  # NOTE: should I get the channel here?
+            roles=[Object(id=role_id) for role_id in data["role_ids"]],
+            channels=[Object(id=channel_id) for channel_id in data["channel_ids"]],
+            guild=guild,
         )
         self.id = int(data["id"])
         return self
+
+    @property
+    def roles(self) -> List[Role]:
+        """List[:class:`Role`]: A list of roles that will be added to the user when they select this option."""
+        return list(filter(None, map(self.guild.get_role, self._roles_ids)))
+
+    @property
+    def channels(self) -> List[GuildChannel]:
+        """List[:class:`abc.GuildChannel`]: A list of channels that the user will see when they select this option."""
+        return list(filter(None, map(self.guild.get_channel, self._channels_ids)))
 
 
 class OnboardingPrompt(Hashable):
@@ -241,11 +249,11 @@ class OnboardingPrompt(Hashable):
         return payload
 
     @classmethod
-    def _from_dict(cls, *, data: OnboardingPromptPayload, state: ConnectionState) -> Self:
+    def _from_dict(cls, *, data: OnboardingPromptPayload, guild: Guild) -> Self:
         self = cls(
             title=data["title"],
             options=[
-                OnboardingPromptOption._from_dict(data=option, state=state)
+                OnboardingPromptOption._from_dict(data=option, guild=guild)
                 for option in data["options"]
             ],
             single_select=data["single_select"],
