@@ -299,7 +299,7 @@ def _transform_onboarding_prompt_option(
     if data is None:
         return None
 
-    return OnboardingPromptOption._from_dict(data=data, state=entry._state)
+    return OnboardingPromptOption._from_dict(data=data, guild=entry.guild)
 
 
 def _transform_onboarding_prompt(
@@ -308,7 +308,7 @@ def _transform_onboarding_prompt(
     if data is None:
         return None
 
-    return OnboardingPrompt._from_dict(data=data, state=entry._state)
+    return OnboardingPrompt._from_dict(data=data, guild=entry.guild)
 
 
 class AuditLogDiff:

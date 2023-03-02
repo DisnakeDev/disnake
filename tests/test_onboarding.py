@@ -32,6 +32,7 @@ def onboarding_prompt_option() -> OnboardingPromptOption:
         emoji=PartialEmoji(name="", id=123, animated=False),
         roles=[Object(id="456"), Object(id="789")],
         channels=[Object(id="123"), Object(id="456")],
+        guild=mock.Mock(Guild, id=123),
     )
 
 
@@ -62,7 +63,6 @@ def onboarding() -> Onboarding:
     }
 
     return Onboarding(
-        state=mock.Mock(http=mock.AsyncMock()),
         guild=mock.Mock(Guild, id=123),
         data=onboarding_payload,
     )
