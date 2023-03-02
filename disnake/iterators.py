@@ -120,7 +120,7 @@ class _AsyncIterator(AsyncIterator[T]):
 
 
 class _ChunkedAsyncIterator(_AsyncIterator[List[T]]):
-    def __init__(self, iterator, max_size) -> None:
+    def __init__(self, iterator: _AsyncIterator[T], max_size: int) -> None:
         self.iterator = iterator
         self.max_size = max_size
 
@@ -172,7 +172,7 @@ class _FilteredAsyncIterator(_AsyncIterator[T]):
 
 
 class ReactionIterator(_AsyncIterator[Union["User", "Member"]]):
-    def __init__(self, message, emoji, limit=100, after=None) -> None:
+    def __init__(self, message, emoji, limit: int = 100, after=None) -> None:
         self.message = message
         self.limit = limit
         self.after = after
@@ -261,7 +261,6 @@ class HistoryIterator(_AsyncIterator["Message"]):
         around: Optional[Union[Snowflake, datetime.datetime]] = None,
         oldest_first: Optional[bool] = None,
     ) -> None:
-
         if isinstance(before, datetime.datetime):
             before = Object(id=time_snowflake(before, high=False))
         if isinstance(after, datetime.datetime):
@@ -400,7 +399,7 @@ class BanIterator(_AsyncIterator["BanEntry"]):
     bans endpoint.
 
     Parameters
-    -----------
+    ----------
     guild: :class:`~disnake.Guild`
         The guild to get bans from.
     limit: Optional[:class:`int`]
@@ -496,6 +495,7 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
         after: Optional[Union[Snowflake, datetime.datetime]] = None,
         user_id: Optional[int] = None,
         action_type: Optional[AuditLogEvent] = None,
+        oldest_first: bool = False,
     ) -> None:
         if isinstance(before, datetime.datetime):
             before = Object(id=time_snowflake(before, high=False))
@@ -515,10 +515,16 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
         self.entries: asyncio.Queue[AuditLogEntry] = asyncio.Queue()
 
         self._filter: Optional[Callable[[AuditLogEntryPayload], bool]] = None
-        if self.after and self.after != OLDEST_OBJECT:
-            self._filter = lambda e: int(e["id"]) > self.after.id
+        if oldest_first:
+            self._strategy = self._after_strategy
+            if self.before:
+                self._filter = lambda m: int(m["id"]) < self.before.id  # type: ignore
+        else:
+            self._strategy = self._before_strategy
+            if self.after and self.after != OLDEST_OBJECT:
+                self._filter = lambda m: int(m["id"]) > self.after.id
 
-    async def _retrieve_data(self, retrieve: int) -> AuditLogPayload:
+    async def _before_strategy(self, retrieve: int) -> AuditLogPayload:
         before = self.before.id if self.before else None
         data: AuditLogPayload = await self.request(
             self.guild.id,
@@ -533,6 +539,25 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
             if self.limit is not None:
                 self.limit -= retrieve
             self.before = Object(id=int(entries[-1]["id"]))
+        return data
+
+    async def _after_strategy(self, retrieve: int) -> AuditLogPayload:
+        after = self.after.id
+        data: AuditLogPayload = await self.request(
+            self.guild.id,
+            limit=retrieve,
+            user_id=self.user_id,
+            action_type=self.action_type,
+            after=after,
+        )
+
+        entries = data.get("audit_log_entries", [])
+        if entries:
+            if self.limit is not None:
+                self.limit -= retrieve
+            # note: unlike other paginated endpoints, this one returns entries in ascending
+            # order when using `after`; hence `-1` (instead of `0`) is correct here.
+            self.after = Object(id=int(entries[-1]["id"]))
         return data
 
     async def next(self) -> AuditLogEntry:
@@ -555,7 +580,7 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
 
     async def _fill(self) -> None:
         if self._get_retrieve():
-            log_data = await self._retrieve_data(self.retrieve)
+            log_data = await self._strategy(self.retrieve)
             entries = log_data.get("audit_log_entries")
             if len(entries) < 100:
                 self.limit = 0  # terminate the infinite loop
@@ -649,8 +674,7 @@ class GuildIterator(_AsyncIterator["Guild"]):
         Object after which all guilds must be.
     """
 
-    def __init__(self, bot, limit, before=None, after=None) -> None:
-
+    def __init__(self, bot, limit: Optional[int], before=None, after=None) -> None:
         if isinstance(before, datetime.datetime):
             before = Object(id=time_snowflake(before, high=False))
         if isinstance(after, datetime.datetime):
@@ -739,8 +763,7 @@ class GuildIterator(_AsyncIterator["Guild"]):
 
 
 class MemberIterator(_AsyncIterator["Member"]):
-    def __init__(self, guild, limit=1000, after=None) -> None:
-
+    def __init__(self, guild, limit: Optional[int] = 1000, after=None) -> None:
         if isinstance(after, datetime.datetime):
             after = Object(id=time_snowflake(after, high=True))
 

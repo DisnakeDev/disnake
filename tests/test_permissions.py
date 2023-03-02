@@ -168,7 +168,7 @@ class TestPermissions:
         perms.handle_overwrite(allow, deny)
         assert perms.value == expected
 
-    def test_none_is_none(self):
+    def test_none_is_none(self) -> None:
         perms = Permissions.none()
         assert perms.value == 0
 
@@ -189,7 +189,7 @@ class TestPermissions:
             "private_channel",
         ],
     )
-    def test_classmethods(self, method_name: str):
+    def test_classmethods(self, method_name: str) -> None:
         method = getattr(Permissions, method_name)
 
         perms: Permissions = method()

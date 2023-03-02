@@ -121,6 +121,7 @@ class BaseUser(_UserTag):
             "avatar": self._avatar,
             "discriminator": self.discriminator,
             "bot": self.bot,
+            "public_flags": self._public_flags,
         }
 
     @property
@@ -251,7 +252,6 @@ class BaseUser(_UserTag):
         :class:`bool`
             Indicates if the user is mentioned in the message.
         """
-
         if message.mention_everyone:
             return True
 
@@ -424,29 +424,10 @@ class User(BaseUser, disnake.abc.Messageable):
         Specifies if the user is a system user (i.e. represents Discord officially).
     """
 
-    __slots__ = ("_stored",)
-
-    def __init__(
-        self, *, state: ConnectionState, data: Union[UserPayload, PartialUserPayload]
-    ) -> None:
-        super().__init__(state=state, data=data)
-        self._stored: bool = False
+    __slots__ = ("__weakref__",)
 
     def __repr__(self) -> str:
         return f"<User id={self.id} name={self.name!r} discriminator={self.discriminator!r} bot={self.bot}>"
-
-    def __del__(self) -> None:
-        try:
-            if self._stored:
-                self._state.deref_user(self.id)
-        except KeyError:
-            pass
-
-    @classmethod
-    def _copy(cls, user: User) -> Self:
-        self = super()._copy(user)
-        self._stored = False
-        return self
 
     async def _get_channel(self) -> DMChannel:
         ch = await self.create_dm()

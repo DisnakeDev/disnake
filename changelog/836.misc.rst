@@ -1,0 +1,2 @@
+Change dependency and environment management to use `pdm <https://pdm.fming.dev/>`__.
+Please check `CONTRIBUTING.md <https://github.com/DisnakeDev/disnake/tree/master/CONTRIBUTING.md>`__ for more details.

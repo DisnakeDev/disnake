@@ -7,7 +7,7 @@ import io
 import logging
 import re
 import shlex
-import subprocess
+import subprocess  # noqa: TID251
 import sys
 import threading
 import time
@@ -366,12 +366,11 @@ class FFmpegOpusAudio(FFmpegAudio):
         bitrate: int = 128,
         codec: Optional[str] = None,
         executable: str = "ffmpeg",
-        pipe=False,
+        pipe: bool = False,
         stderr=None,
         before_options=None,
         options=None,
     ) -> None:
-
         args = []
         subprocess_kwargs = {
             "stdin": subprocess.PIPE if pipe else subprocess.DEVNULL,
@@ -430,7 +429,6 @@ class FFmpegOpusAudio(FFmpegAudio):
 
         Examples
         --------
-
         Use this function to create an :class:`FFmpegOpusAudio` instance instead of the constructor: ::
 
             source = await disnake.FFmpegOpusAudio.from_probe("song.webm")
@@ -477,7 +475,6 @@ class FFmpegOpusAudio(FFmpegAudio):
         :class:`FFmpegOpusAudio`
             An instance of this class.
         """
-
         executable = kwargs.get("executable")
         codec, bitrate = await cls.probe(source, method=method, executable=executable)
         return cls(source, bitrate=bitrate, codec=codec, **kwargs)  # type: ignore
@@ -517,7 +514,6 @@ class FFmpegOpusAudio(FFmpegAudio):
         Optional[Tuple[Optional[:class:`str`], Optional[:class:`int`]]]
             A 2-tuple with the codec and bitrate of the input source.
         """
-
         method = method or "native"
         executable = executable or "ffmpeg"
         probefunc = fallback = None
