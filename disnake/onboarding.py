@@ -147,7 +147,7 @@ class OnboardingPromptOption(Hashable):
         payload: PartialOnboardingPromptOptionPayload = {
             "title": self.title,
             "description": self.description,
-            "emoji": self.emoji.to_dict(),
+            "emoji": self.emoji._to_partial().to_dict(),
             "role_ids": [role.id for role in self.roles],
             "channel_ids": [channel.id for channel in self.channels],
         }

@@ -105,9 +105,6 @@ class Emoji(_EmojiTag, AssetMixin):
     def _to_partial(self) -> PartialEmoji:
         return PartialEmoji(name=self.name, animated=self.animated, id=self.id)
 
-    def to_dict(self) -> EmojiPayload:
-        return self._to_partial().to_dict()
-
     def __iter__(self) -> Iterator[Tuple[str, Any]]:
         for attr in self.__slots__:
             if attr[0] != "_":
