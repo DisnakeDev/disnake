@@ -17,6 +17,19 @@ in specific versions.
 
 .. towncrier release notes start
 
+.. _vp2p7p2:
+
+v2.7.2
+------
+
+Bug Fixes
+~~~~~~~~~
+- Fix :class:`VoiceClient` not continuing to play audio when moving between channels. (:issue:`845`)
+- Fix KeepAlive logging un-intentionally attempting to interpolate stack trace logger calls (:issue:`940`)
+- Fix attribute error when attempting to access :class:`DMChannel.flags` under certain circumstances. (:issue:`960`)
+- Fix voice connection discovery using incorrect packet sizes. (:issue:`967`)
+
+
 .. _vp2p7p1:
 
 v2.7.1
