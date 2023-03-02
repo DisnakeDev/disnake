@@ -112,7 +112,7 @@ if TYPE_CHECKING:
     from .voice_client import VoiceProtocol
     from .webhook import Webhook
 
-    GuildMessageable = Union[TextChannel, Thread, VoiceChannel]
+    GuildMessageable = Union[TextChannel, Thread, VoiceChannel, StageChannel]
     GuildChannel = Union[VoiceChannel, StageChannel, TextChannel, CategoryChannel, ForumChannel]
     ByCategoryItem = Tuple[Optional[CategoryChannel], List[GuildChannel]]
 
@@ -208,6 +208,8 @@ class Guild(Hashable):
         - ``AUTO_MODERATION``: Guild has set up auto moderation rules.
         - ``BANNER``: Guild can upload and use a banner. (i.e. :attr:`.banner`)
         - ``COMMUNITY``: Guild is a community server.
+        - ``CREATOR_MONETIZABLE_PROVISIONAL``: Guild has enabled monetization.
+        - ``CREATOR_STORE_PAGE``: Guild has enabled the role subscription promo page.
         - ``DEVELOPER_SUPPORT_SERVER``: Guild is set as a support server in the app directory.
         - ``DISCOVERABLE``: Guild shows up in Server Discovery.
         - ``ENABLED_DISCOVERABLE_BEFORE``: Guild had Server Discovery enabled at least once.
@@ -218,7 +220,6 @@ class Guild(Hashable):
         - ``INVITES_DISABLED``: Guild has paused invites, preventing new users from joining.
         - ``LINKED_TO_HUB``: Guild is linked to a student hub.
         - ``MEMBER_VERIFICATION_GATE_ENABLED``: Guild has Membership Screening enabled.
-        - ``MONETIZATION_ENABLED``: Guild has enabled monetization.
         - ``MORE_EMOJI``: Guild has increased custom emoji slots.
         - ``MORE_STICKERS``: Guild has increased custom sticker slots.
         - ``NEWS``: Guild can create news channels.
@@ -227,6 +228,8 @@ class Guild(Hashable):
         - ``PREVIEW_ENABLED``: Guild can be viewed before being accepted via Membership Screening.
         - ``PRIVATE_THREADS``: Guild has access to create private threads (no longer has any effect).
         - ``ROLE_ICONS``: Guild has access to role icons.
+        - ``ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE``: Guild has role subscriptions that can be purchased.
+        - ``ROLE_SUBSCRIPTIONS_ENABLED``: Guild has enabled role subscriptions.
         - ``SEVEN_DAY_THREAD_ARCHIVE``: Guild has access to the seven day archive time for threads (no longer has any effect).
         - ``TEXT_IN_VOICE_ENABLED``: Guild has text in voice channels enabled (no longer has any effect).
         - ``THREE_DAY_THREAD_ARCHIVE``: Guild has access to the three day archive time for threads (no longer has any effect).
@@ -848,7 +851,11 @@ class Guild(Hashable):
 
     @property
     def emoji_limit(self) -> int:
-        """:class:`int`: The maximum number of emoji slots this guild has."""
+        """:class:`int`: The maximum number of emoji slots this guild has.
+
+        Premium emojis (i.e. those associated with subscription roles) count towards a
+        separate limit of 25.
+        """
         more_emoji = 200 if "MORE_EMOJI" in self.features else 50
         return max(more_emoji, self._PREMIUM_GUILD_LIMITS[self.premium_tier].emoji)
 
@@ -864,7 +871,8 @@ class Guild(Hashable):
     @property
     def bitrate_limit(self) -> float:
         """:class:`float`: The maximum bitrate for voice channels this guild can have.
-        For stage channels, the maximum bitrate is 64000."""
+        For stage channels, the maximum bitrate is 64000.
+        """
         vip_guild = self._PREMIUM_GUILD_LIMITS[3].bitrate if "VIP_REGIONS" in self.features else 0
         return max(vip_guild, self._PREMIUM_GUILD_LIMITS[self.premium_tier].bitrate)
 
@@ -1218,7 +1226,6 @@ class Guild(Hashable):
 
         Examples
         --------
-
         Creating a basic channel:
 
         .. code-block:: python3
@@ -1340,7 +1347,6 @@ class Guild(Hashable):
         self,
         name: str,
         *,
-        reason: Optional[str] = None,
         category: Optional[CategoryChannel] = None,
         position: int = MISSING,
         bitrate: int = MISSING,
@@ -1350,6 +1356,7 @@ class Guild(Hashable):
         nsfw: bool = MISSING,
         slowmode_delay: int = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
+        reason: Optional[str] = None,
     ) -> VoiceChannel:
         """|coro|
 
@@ -1460,9 +1467,13 @@ class Guild(Hashable):
         topic: Optional[str] = MISSING,
         position: int = MISSING,
         bitrate: int = MISSING,
+        user_limit: int = MISSING,
+        rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
+        video_quality_mode: VideoQualityMode = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
         category: Optional[CategoryChannel] = None,
-        rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
+        nsfw: bool = MISSING,
+        slowmode_delay: int = MISSING,
         reason: Optional[str] = None,
     ) -> StageChannel:
         """|coro|
@@ -1506,6 +1517,19 @@ class Guild(Hashable):
 
             .. versionadded:: 2.5
 
+        nsfw: :class:`bool`
+            Whether to mark the channel as NSFW.
+
+            .. versionadded:: 2.9
+
+        slowmode_delay: :class:`int`
+            Specifies the slowmode rate limit for users in this channel, in seconds.
+            A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
+            If not provided, slowmode is disabled.
+
+            .. versionadded:: 2.9
+
+
         reason: Optional[:class:`str`]
             The reason for creating this channel. Shows up on the audit log.
 
@@ -1531,11 +1555,23 @@ class Guild(Hashable):
         if bitrate is not MISSING:
             options["bitrate"] = bitrate
 
+        if user_limit is not MISSING:
+            options["user_limit"] = user_limit
+
         if position is not MISSING:
             options["position"] = position
 
         if rtc_region is not MISSING:
             options["rtc_region"] = None if rtc_region is None else str(rtc_region)
+
+        if video_quality_mode is not MISSING:
+            options["video_quality_mode"] = video_quality_mode.value
+
+        if nsfw is not MISSING:
+            options["nsfw"] = nsfw
+
+        if slowmode_delay is not MISSING:
+            options["rate_limit_per_user"] = slowmode_delay
 
         data = await self._create_channel(
             name,
@@ -1812,8 +1848,7 @@ class Guild(Hashable):
         public_updates_channel: Optional[TextChannel] = MISSING,
         premium_progress_bar_enabled: bool = MISSING,
     ) -> Guild:
-        """
-        |coro|
+        """|coro|
 
         Edits the guild.
 
@@ -2358,7 +2393,6 @@ class Guild(Hashable):
         :class:`GuildScheduledEvent`
             The newly created guild scheduled event.
         """
-
         if entity_type is MISSING:
             if channel is None:
                 entity_type = GuildScheduledEventEntityType.external
@@ -2510,7 +2544,7 @@ class Guild(Hashable):
 
     # TODO: Remove Optional typing here when async iterators are refactored
     def fetch_members(
-        self, *, limit: int = 1000, after: Optional[SnowflakeTime] = None
+        self, *, limit: Optional[int] = 1000, after: Optional[SnowflakeTime] = None
     ) -> MemberIterator:
         """Retrieves an :class:`.AsyncIterator` that enables receiving the guild's members. In order to use this,
         :meth:`Intents.members` must be enabled.
@@ -2547,7 +2581,6 @@ class Guild(Hashable):
 
         Examples
         --------
-
         Usage ::
 
             async for member in guild.fetch_members(limit=150):
@@ -2682,8 +2715,7 @@ class Guild(Hashable):
             Due to a breaking change in Discord's API, this now returns an :class:`~disnake.AsyncIterator` instead of a :class:`list`.
 
         Examples
-        ---------
-
+        --------
         Usage ::
 
             counter = 0
@@ -2718,11 +2750,10 @@ class Guild(Hashable):
             An error occurred while fetching the bans.
 
         Yields
-        -------
+        ------
         :class:`~disnake.BanEntry`
             The ban with the ban data parsed.
         """
-
         return BanIterator(self, limit=limit, before=before, after=after)
 
     async def prune_members(
@@ -2733,8 +2764,7 @@ class Guild(Hashable):
         roles: List[Snowflake] = MISSING,
         reason: Optional[str] = None,
     ) -> Optional[int]:
-        """
-        |coro|
+        """|coro|
 
         Prunes the guild from its inactive members.
 
@@ -3225,8 +3255,7 @@ class Guild(Hashable):
         roles: Sequence[Role] = MISSING,
         reason: Optional[str] = None,
     ) -> Emoji:
-        """
-        |coro|
+        """|coro|
 
         Creates a custom :class:`Emoji` for the guild.
 
@@ -3240,6 +3269,9 @@ class Guild(Hashable):
             "1", "100"
             "2", "150"
             "3", "250"
+
+        Emojis with subscription roles (see ``roles`` below) are considered premium emoji,
+        and count towards a separate limit of 25 emojis.
 
         You must have :attr:`~Permissions.manage_emojis` permission to
         do this.
@@ -3256,7 +3288,12 @@ class Guild(Hashable):
                 Now accepts various resource types in addition to :class:`bytes`.
 
         roles: List[:class:`Role`]
-            A :class:`list` of :class:`Role`\\s that can use this emoji. Leave empty to make it available to everyone.
+            A list of roles that can use this emoji. Leave empty to make it available to everyone.
+
+            An emoji cannot have both subscription roles (see :attr:`RoleTags.integration_id`) and
+            non-subscription roles, and emojis can't be converted between premium and non-premium
+            after creation.
+
         reason: Optional[:class:`str`]
             The reason for creating this emoji. Shows up on the audit log.
 
@@ -3819,7 +3856,6 @@ class Guild(Hashable):
 
         Examples
         --------
-
         Getting the first 100 entries: ::
 
             async for entry in guild.audit_logs(limit=100):
@@ -3864,7 +3900,7 @@ class Guild(Hashable):
             An error occurred while fetching the audit logs.
 
         Yields
-        --------
+        ------
         :class:`AuditLogEntry`
             The audit log entry.
         """
@@ -4058,7 +4094,7 @@ class Guild(Hashable):
             The members intent is not enabled.
 
         Returns
-        --------
+        -------
         Optional[List[:class:`Member`]]
              Returns a list of all the members within the guild.
         """
@@ -4164,7 +4200,7 @@ class Guild(Hashable):
         .. versionadded:: 2.5
 
         Parameters
-        -----------
+        ----------
         query: :class:`str`
             The string that the usernames or nicknames start with.
         limit: :class:`int`
@@ -4175,12 +4211,12 @@ class Guild(Hashable):
             such as :meth:`get_member` work for those that matched.
 
         Raises
-        -------
+        ------
         ValueError
             Invalid parameters were passed to the function
 
         Returns
-        --------
+        -------
         List[:class:`Member`]
             The list of members that have matched the query.
         """
@@ -4218,7 +4254,7 @@ class Guild(Hashable):
         .. versionadded:: 2.4
 
         Parameters
-        -----------
+        ----------
         user_ids: List[:class:`int`]
             List of user IDs to search for. If the user ID is not in the guild then it won't be returned.
         presences: :class:`bool`
@@ -4229,14 +4265,14 @@ class Guild(Hashable):
             It also speeds up this method on repeated calls. Defaults to ``True``.
 
         Raises
-        -------
+        ------
         asyncio.TimeoutError
             The query timed out waiting for the members.
         ClientException
             The presences intent is not enabled.
 
         Returns
-        --------
+        -------
         List[:class:`Member`]
             The list of members with the given IDs, if they exist.
         """
@@ -4419,7 +4455,6 @@ class Guild(Hashable):
         :class:`Member`
             The newly updated member.
         """
-
         if not (duration is MISSING) ^ (until is MISSING):
             raise ValueError("Exactly one of `duration` and `until` must be provided")
 
@@ -4559,7 +4594,6 @@ class Guild(Hashable):
         :class:`AutoModRule`
             The newly created auto moderation rule.
         """
-
         trigger_type_int = try_enum_to_int(trigger_type)
         if not trigger_metadata and trigger_type_int in (
             AutoModTriggerType.keyword.value,
@@ -4612,8 +4646,7 @@ PlaceholderID = NewType("PlaceholderID", int)
 
 
 class GuildBuilder:
-    """
-    A guild builder object, created by :func:`Client.guild_builder`.
+    """A guild builder object, created by :func:`Client.guild_builder`.
 
     This allows for easier configuration of more complex guild setups,
     abstracting away some of the quirks of the guild creation endpoint.
@@ -4628,7 +4661,6 @@ class GuildBuilder:
 
     Examples
     --------
-
     Basic usage:
 
     .. code-block:: python3
@@ -4696,7 +4728,7 @@ class GuildBuilder:
         The settings to use with the system channel.
     """
 
-    def __init__(self, *, state: ConnectionState, name: str):
+    def __init__(self, *, state: ConnectionState, name: str) -> None:
         self._state = state
         self.name: str = name
 
@@ -4820,8 +4852,7 @@ class GuildBuilder:
         return Guild(data=data, state=self._state)
 
     def update_everyone_role(self, *, permissions: Permissions = MISSING) -> PlaceholderID:
-        """
-        Updates attributes of the ``@everyone`` role.
+        """Updates attributes of the ``@everyone`` role.
 
         Parameters
         ----------
@@ -4853,8 +4884,7 @@ class GuildBuilder:
         hoist: bool = MISSING,
         mentionable: bool = MISSING,
     ) -> PlaceholderID:
-        """
-        Adds a role to the guild builder.
+        """Adds a role to the guild builder.
 
         The default (``@everyone``) role can be referenced using :attr:`everyone`
         and configured through :func:`update_everyone_role`.
@@ -4916,8 +4946,7 @@ class GuildBuilder:
         *,
         overwrites: Dict[PlaceholderID, PermissionOverwrite] = MISSING,
     ) -> PlaceholderID:
-        """
-        Adds a category channel to the guild builder.
+        """Adds a category channel to the guild builder.
 
         There is an alias for this named ``add_category_channel``.
 
@@ -4949,8 +4978,7 @@ class GuildBuilder:
         nsfw: bool = MISSING,
         default_auto_archive_duration: AnyThreadArchiveDuration = MISSING,
     ) -> PlaceholderID:
-        """
-        Adds a text channel to the guild builder.
+        """Adds a text channel to the guild builder.
 
         Parameters
         ----------
@@ -5012,8 +5040,7 @@ class GuildBuilder:
         rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
     ) -> PlaceholderID:
-        """
-        Adds a voice channel to the guild builder.
+        """Adds a voice channel to the guild builder.
 
         Parameters
         ----------

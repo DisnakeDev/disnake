@@ -284,8 +284,7 @@ class Cog(metaclass=CogMeta):
         return self
 
     def get_commands(self) -> List[Command]:
-        """
-        Returns a list of commands the cog has.
+        """Returns a list of commands the cog has.
 
         Returns
         -------
@@ -300,8 +299,7 @@ class Cog(metaclass=CogMeta):
         return [c for c in self.__cog_commands__ if c.parent is None]
 
     def get_application_commands(self) -> List[InvokableApplicationCommand]:
-        """
-        Returns a list of application commands the cog has.
+        """Returns a list of application commands the cog has.
 
         Returns
         -------
@@ -316,8 +314,7 @@ class Cog(metaclass=CogMeta):
         return list(self.__cog_app_commands__)
 
     def get_slash_commands(self) -> List[InvokableSlashCommand]:
-        """
-        Returns a list of slash commands the cog has.
+        """Returns a list of slash commands the cog has.
 
         Returns
         -------
@@ -332,8 +329,7 @@ class Cog(metaclass=CogMeta):
         return [c for c in self.__cog_app_commands__ if isinstance(c, InvokableSlashCommand)]
 
     def get_user_commands(self) -> List[InvokableUserCommand]:
-        """
-        Returns a list of user commands the cog has.
+        """Returns a list of user commands the cog has.
 
         Returns
         -------
@@ -344,8 +340,7 @@ class Cog(metaclass=CogMeta):
         return [c for c in self.__cog_app_commands__ if isinstance(c, InvokableUserCommand)]
 
     def get_message_commands(self) -> List[InvokableMessageCommand]:
-        """
-        Returns a list of message commands the cog has.
+        """Returns a list of message commands the cog has.
 
         Returns
         -------
@@ -559,7 +554,7 @@ class Cog(metaclass=CogMeta):
 
     @_cog_special_method
     def cog_check(self, ctx: Context) -> bool:
-        """A special method that registers as a :func:`~.ext.commands.check`
+        """A special method that registers as a :func:`~.check`
         for every text command and subcommand in this cog.
 
         This is for text commands only, and doesn't apply to application commands.
@@ -571,7 +566,7 @@ class Cog(metaclass=CogMeta):
 
     @_cog_special_method
     def cog_slash_command_check(self, inter: ApplicationCommandInteraction) -> bool:
-        """A special method that registers as a :func:`~.ext.commands.check`
+        """A special method that registers as a :func:`~.check`
         for every slash command and subcommand in this cog.
 
         This function **can** be a coroutine and must take a sole parameter,

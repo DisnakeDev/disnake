@@ -364,7 +364,8 @@ class Option:
         max_length: Optional[int] = None,
     ) -> None:
         """Adds an option to the current list of options,
-        parameters are the same as for :class:`Option`."""
+        parameters are the same as for :class:`Option`.
+        """
         type = type or OptionType.string
         self.options.append(
             Option(
@@ -428,8 +429,7 @@ class Option:
 
 
 class ApplicationCommand(ABC):
-    """
-    The base class for application commands.
+    """The base class for application commands.
 
     The following classes implement this ABC:
 
@@ -580,8 +580,7 @@ class _APIApplicationCommandMixin:
 
 
 class UserCommand(ApplicationCommand):
-    """
-    A user context menu command.
+    """A user context menu command.
 
     Attributes
     ----------
@@ -624,8 +623,7 @@ class UserCommand(ApplicationCommand):
 
 
 class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
-    """
-    A user context menu command returned by the API.
+    """A user context menu command returned by the API.
 
     .. versionadded:: 2.4
 
@@ -677,8 +675,7 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
 
 
 class MessageCommand(ApplicationCommand):
-    """
-    A message context menu command
+    """A message context menu command
 
     Attributes
     ----------
@@ -721,8 +718,7 @@ class MessageCommand(ApplicationCommand):
 
 
 class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
-    """
-    A message context menu command returned by the API.
+    """A message context menu command returned by the API.
 
     .. versionadded:: 2.4
 
@@ -774,8 +770,7 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
 
 
 class SlashCommand(ApplicationCommand):
-    """
-    The base class for building slash commands.
+    """The base class for building slash commands.
 
     Attributes
     ----------
@@ -905,8 +900,7 @@ class SlashCommand(ApplicationCommand):
 
 
 class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
-    """
-    A slash command returned by the API.
+    """A slash command returned by the API.
 
     .. versionadded:: 2.4
 

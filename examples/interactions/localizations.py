@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""
-An example on how to set up localized application commands.
-"""
+"""An example on how to set up localized application commands."""
 
 import os
 from typing import Any
@@ -56,8 +54,7 @@ async def highscore(
         ]
     ),
 ):
-    """
-    Shows the highscore of the selected user within the specified interval.
+    """Shows the highscore of the selected user within the specified interval.
     {{ HIGHSCORE_COMMAND }}
 
     Parameters

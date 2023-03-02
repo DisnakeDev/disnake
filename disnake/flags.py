@@ -283,8 +283,7 @@ class BaseFlags:
 
 
 class ListBaseFlags(BaseFlags, no_fill_flags=True):
-    """
-    A base class for flags that aren't powers of 2.
+    """A base class for flags that aren't powers of 2.
     Instead, values are used as exponents to map to powers of 2 to avoid collisions,
     and only the combined value is stored, which allows all bitwise operations to work as expected.
     """
@@ -318,8 +317,7 @@ class ListBaseFlags(BaseFlags, no_fill_flags=True):
 
 
 class SystemChannelFlags(BaseFlags, inverted=True):
-    """
-    Wraps up a Discord system channel flag value.
+    """Wraps up a Discord system channel flag value.
 
     Similar to :class:`Permissions`\\, the properties provided are two way.
     You can set and retrieve individual bits using the properties as if they
@@ -439,17 +437,17 @@ class SystemChannelFlags(BaseFlags, inverted=True):
             raise TypeError("Value to set for SystemChannelFlags must be a bool.")
 
     @flag_value
-    def join_notifications(self):
+    def join_notifications(self) -> int:
         """:class:`bool`: Returns ``True`` if the system channel is used for member join notifications."""
         return 1
 
     @flag_value
-    def premium_subscriptions(self):
+    def premium_subscriptions(self) -> int:
         """:class:`bool`: Returns ``True`` if the system channel is used for "Nitro boosting" notifications."""
         return 2
 
     @flag_value
-    def guild_reminder_notifications(self):
+    def guild_reminder_notifications(self) -> int:
         """:class:`bool`: Returns ``True`` if the system channel is used for server setup helpful tips notifications.
 
         .. versionadded:: 2.0
@@ -457,7 +455,7 @@ class SystemChannelFlags(BaseFlags, inverted=True):
         return 4
 
     @flag_value
-    def join_notification_replies(self):
+    def join_notification_replies(self) -> int:
         """:class:`bool`: Returns ``True`` if the system channel shows sticker reply
         buttons for member join notifications.
 
@@ -467,8 +465,7 @@ class SystemChannelFlags(BaseFlags, inverted=True):
 
 
 class MessageFlags(BaseFlags):
-    """
-    Wraps up a Discord Message flag value.
+    """Wraps up a Discord Message flag value.
 
     See :class:`SystemChannelFlags`.
 
@@ -649,8 +646,7 @@ class MessageFlags(BaseFlags):
 
 
 class PublicUserFlags(BaseFlags):
-    """
-    Wraps up the Discord User Public flags.
+    """Wraps up the Discord User Public flags.
 
     .. container:: operations
 
@@ -885,8 +881,7 @@ class PublicUserFlags(BaseFlags):
 
 
 class Intents(BaseFlags):
-    """
-    Wraps up a Discord gateway intent flag.
+    """Wraps up a Discord gateway intent flag.
 
     Similar to :class:`Permissions`\\, the properties provided are two way.
     You can set and retrieve individual bits using the properties as if they
@@ -1706,7 +1701,7 @@ class MemberCacheFlags(BaseFlags):
         return self.value == self.DEFAULT_VALUE
 
     @flag_value
-    def voice(self):
+    def voice(self) -> int:
         """:class:`bool`: Whether to cache members that are in voice.
 
         This requires :attr:`Intents.voice_states`.
@@ -1716,7 +1711,7 @@ class MemberCacheFlags(BaseFlags):
         return 1
 
     @flag_value
-    def joined(self):
+    def joined(self) -> int:
         """:class:`bool`: Whether to cache members that joined the guild
         or are chunked as part of the initial log in flow.
 
@@ -1762,8 +1757,7 @@ class MemberCacheFlags(BaseFlags):
 
 
 class ApplicationFlags(BaseFlags):
-    """
-    Wraps up the Discord Application flags.
+    """Wraps up the Discord Application flags.
 
     .. container:: operations
 
@@ -2045,8 +2039,7 @@ class ChannelFlags(BaseFlags):
 
 
 class AutoModKeywordPresets(ListBaseFlags):
-    """
-    Wraps up the pre-defined auto moderation keyword lists, provided by Discord.
+    """Wraps up the pre-defined auto moderation keyword lists, provided by Discord.
 
     .. container:: operations
 

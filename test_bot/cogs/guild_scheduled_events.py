@@ -8,18 +8,20 @@ from disnake.ext import commands
 
 
 class GuildScheduledEvents(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
     @commands.slash_command()
-    async def fetch_event(self, inter: disnake.GuildCommandInteraction, id: commands.LargeInt):
+    async def fetch_event(
+        self, inter: disnake.GuildCommandInteraction, id: commands.LargeInt
+    ) -> None:
         gse = await inter.guild.fetch_scheduled_event(id)
         await inter.response.send_message(str(gse.image))
 
     @commands.slash_command()
     async def edit_event(
         self, inter: disnake.GuildCommandInteraction, id: commands.LargeInt, new_image: bool
-    ):
+    ) -> None:
         await inter.response.defer()
         gse = await inter.guild.fetch_scheduled_event(id)
         image = disnake.File("./assets/banner.png")
@@ -32,7 +34,7 @@ class GuildScheduledEvents(commands.Cog):
     @commands.slash_command()
     async def create_event(
         self, inter: disnake.GuildCommandInteraction, name: str, channel: disnake.VoiceChannel
-    ):
+    ) -> None:
         image = disnake.File("./assets/banner.png")
         gse = await inter.guild.create_scheduled_event(
             name=name,
@@ -45,5 +47,5 @@ class GuildScheduledEvents(commands.Cog):
         await inter.response.send_message(str(gse.image))
 
 
-def setup(bot: commands.Bot):
+def setup(bot: commands.Bot) -> None:
     bot.add_cog(GuildScheduledEvents(bot))

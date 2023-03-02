@@ -533,8 +533,7 @@ class _AuditLogProxyAutoModBlockMessage:
 
 
 class AuditLogEntry(Hashable):
-    """
-    Represents an Audit Log entry.
+    """Represents an Audit Log entry.
 
     You retrieve these via :meth:`Guild.audit_logs`.
 

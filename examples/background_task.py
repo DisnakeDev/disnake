@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""
-An example showing how to regularly run a task in the background.
-"""
+"""An example showing how to regularly run a task in the background."""
 
 import os
 
@@ -34,7 +32,7 @@ class MyClient(disnake.Client):
 
         channel = self.get_channel(CHANNEL_ID)
         if not isinstance(channel, disnake.TextChannel):
-            raise ValueError("Invalid channel")
+            raise TypeError("Invalid channel")
 
         self.channel = channel
 

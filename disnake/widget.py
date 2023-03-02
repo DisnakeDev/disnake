@@ -166,8 +166,7 @@ class WidgetMember(BaseUser):
     # and instead a separate `avatar_url` field with a full url
     @property
     def avatar(self) -> Optional[Asset]:
-        """
-        Optional[:class:`Asset`]: The user's avatar.
+        """Optional[:class:`Asset`]: The user's avatar.
         The size can be chosen using :func:`Asset.with_size`, however the format is always
         static and cannot be changed through :func:`Asset.with_format` or similar methods.
         """
@@ -252,7 +251,6 @@ class WidgetSettings:
         :class:`WidgetSettings`
             The new widget settings.
         """
-
         return await self.guild.edit_widget(enabled=enabled, channel=channel, reason=reason)
 
 

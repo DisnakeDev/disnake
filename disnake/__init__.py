@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""
-Discord API Wrapper
+"""Discord API Wrapper
 ~~~~~~~~~~~~~~~~~~~
 
 A basic wrapper for the Discord API.
