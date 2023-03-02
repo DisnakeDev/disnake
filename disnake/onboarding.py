@@ -73,7 +73,7 @@ class Onboarding:
     @property
     def default_channels(self) -> List[GuildChannel]:
         """List[:class:`abc.GuildChannel`]: A list of channels that will display in Browse Channels."""
-        return list(filter(None, map(self.guild._channels.get, self._default_channel_ids)))
+        return list(filter(None, map(self.guild.get_channel, self._default_channel_ids)))
 
 
 class OnboardingPromptOption(Hashable):
