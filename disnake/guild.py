@@ -4624,19 +4624,19 @@ class Guild(Hashable):
     async def fetch_onboarding(self) -> Onboarding:
         """|coro|
 
-        Retrieves the guild onboarding object.
+        Retrieves the guild onboarding data.
 
         .. versionadded:: 2.9
 
         Raises
         ------
         HTTPException
-            Retrieving the guild onboarding object failed.
+            Retrieving the guild onboarding data failed.
 
         Returns
         -------
         :class:`Onboarding`
-            The guild onboarding object.
+            The guild onboarding data.
         """
         data = await self._state.http.get_guild_onboarding(self.id)
         return Onboarding(data=data, guild=self)

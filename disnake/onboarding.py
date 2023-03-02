@@ -37,11 +37,11 @@ class Onboarding:
     Attributes
     ----------
     guild: :class:`Guild`
-        The guild this onboarding belongs to.
+        The guild this onboarding is part of.
     prompts: List[:class:`OnboardingPrompt`]
-        The prompts the onboarding has.
+        The onboarding prompts.
     enabled: bool
-        Whether the onboarding is enabled.
+        Whether onboarding is enabled.
     """
 
     __slots__ = (
@@ -71,7 +71,7 @@ class Onboarding:
 
     @property
     def default_channels(self) -> List[GuildChannel]:
-        """List[:class:`abc.GuildChannel`]: A list of channels that will display in Browse Channels."""
+        """List[:class:`abc.GuildChannel`]: The list of channels that will be shown to new members by default."""
         return list(filter(None, map(self.guild.get_channel, self._default_channel_ids)))
 
 
@@ -89,12 +89,12 @@ class OnboardingPromptOption(Hashable):
         The option's title.
     description: :class:`str`
         The option's description.
-    emoji: Optional[Union[:class:`str`, :class:`PartialEmoji`, :class:`Emoji`]]
+    emoji: Optional[Union[:class:`PartialEmoji`, :class:`Emoji`]]
         The option's emoji.
     roles: List[:class:`abc.Snowflake`]
-        The roles that will be added to the user when they select this option.
+        The roles that will be assigned to the user when they select this option.
     channels: List[:class:`abc.Snowflake`]
-        The channels that the user will see when they select this option.
+        The channels that the user will be opted into when they select this option.
     """
 
     __slots__ = ("id", "title", "description", "emoji", "guild", "_roles_ids", "_channels_ids")
@@ -196,9 +196,9 @@ class OnboardingPrompt(Hashable):
     single_select: :class:`bool`
         Whether only one option can be selected.
     required: :class:`bool`
-        Whether one option must be selected.
+        Whether at least one option must be selected.
     in_onboarding: :class:`bool`
-        Whether this prompt is in the onboarding.
+        Whether this prompt is in the initial onboarding flow.
     type: :class:`OnboardingPromptType`
         The onboarding prompt's type.
     """
