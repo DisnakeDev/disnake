@@ -1065,7 +1065,7 @@ class DiscordVoiceWebSocket:
     async def load_secret_key(self, data: VoiceSessionDescriptionPayload) -> None:
         _log.info("received secret key for voice connection")
         self.secret_key = self._connection.secret_key = data["secret_key"]
-        await self.speak()
+        # need to send this at least once to set the ssrc
         await self.speak(False)
 
     async def poll_event(self) -> None:
