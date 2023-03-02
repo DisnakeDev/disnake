@@ -50,17 +50,15 @@ class Onboarding:
         "enabled",
         "_guild_id",
         "_default_channel_ids",
-        "_state",
     )
 
-    def __init__(self, *, state: ConnectionState, guild: Guild, data: OnboardingPayload):
-        self._state = state
+    def __init__(self, *, guild: Guild, data: OnboardingPayload):
         self.guild = guild
         self._from_data(data)
 
     def _from_data(self, data: OnboardingPayload):
         self.prompts = [
-            OnboardingPrompt._from_dict(data=prompt, state=self._state)
+            OnboardingPrompt._from_dict(data=prompt, state=self.guild._state)
             for prompt in data["prompts"]
         ]
         self.enabled = data["enabled"]
