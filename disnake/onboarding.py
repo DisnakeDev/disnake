@@ -64,7 +64,6 @@ class Onboarding:
             for prompt in data["prompts"]
         ]
         self.enabled = data["enabled"]
-        self._guild_id = int(data["guild_id"])  # NOTE: is this required?
         self._default_channel_ids = list(map(int, data["default_channel_ids"]))
 
     def __repr__(self) -> str:
