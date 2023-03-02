@@ -4639,7 +4639,7 @@ class Guild(Hashable):
             The guild onboarding object.
         """
         data = await self._state.http.get_guild_onboarding(self.id)
-        return Onboarding(data=data, guild=self, state=self._state)
+        return Onboarding(data=data, guild=self)
 
 
 PlaceholderID = NewType("PlaceholderID", int)
