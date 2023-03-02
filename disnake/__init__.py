@@ -15,7 +15,7 @@ __title__ = "disnake"
 __author__ = "Rapptz, EQUENOS"
 __license__ = "MIT"
 __copyright__ = "Copyright 2015-present Rapptz, 2021-present EQUENOS"
-__version__ = "2.8.0"
+__version__ = "2.8.1"
 
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
@@ -81,6 +81,6 @@ class VersionInfo(NamedTuple):
     serial: int
 
 
-version_info: VersionInfo = VersionInfo(major=2, minor=8, micro=0, releaselevel="final", serial=0)
+version_info: VersionInfo = VersionInfo(major=2, minor=8, micro=1, releaselevel="final", serial=0)
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
