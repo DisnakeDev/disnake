@@ -28,10 +28,8 @@ __all__ = (
     "OnboardingPromptOption",
 )
 
-# TODO: Audit log events
 
-
-class Onboarding:  # NOTE: or GuildOnboarding?
+class Onboarding:
     """Represents a guild onboarding.
 
     .. versionadded:: 2.9
