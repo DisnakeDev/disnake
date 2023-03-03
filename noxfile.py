@@ -189,8 +189,7 @@ def codemod(session: nox.Session) -> None:
     else:
         session.run("python", "-m", "libcst.tool", "list")
 
-    if not session.interactive:
-        session.notify("autotyping", posargs=[])
+    session.notify("autotyping", posargs=[])
 
 
 @nox.session()
