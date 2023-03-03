@@ -151,18 +151,21 @@ def autotyping(session: nox.Session) -> None:
 def codemod(session: nox.Session) -> None:
     """Run libcst codemods."""
     session.run_always("pdm", "install", "-dG", "codemod", external=True)
-    if session.posargs and session.posargs[0] == "run-all" or not session.interactive:
+
+    if (session.posargs and session.posargs[0] == "run-all") or not session.interactive:
         # run all of the transformers on disnake
         session.log("Running all transformers.")
+
         res: str = session.run("python", "-m", "libcst.tool", "list", silent=True)  # type: ignore
         transformers = [line.split("-")[0].strip() for line in res.splitlines()]
         session.log("Transformers: " + ", ".join(transformers))
 
         for trans in transformers:
-            # remove autotyping transformers
+            # remove autotyping transformers, since we run them with custom parameters later
             if trans.startswith("autotyping."):
                 session.log("Skipping autotyping transformer.")
                 continue
+
             session.run(
                 "python",
                 "-m",
@@ -172,20 +175,20 @@ def codemod(session: nox.Session) -> None:
                 "disnake",
                 "--hide-progress",
             )
-        session.log("Finished running all transformers.")
+    elif session.posargs:
+        if len(session.posargs) < 2:
+            session.posargs.append("disnake")
+
+        session.run(
+            "python",
+            "-m",
+            "libcst.tool",
+            "codemod",
+            *session.posargs,
+        )
     else:
-        if session.posargs:
-            if len(session.posargs) < 2:
-                session.posargs.append("disnake")
-            session.run(
-                "python",
-                "-m",
-                "libcst.tool",
-                "codemod",
-                *session.posargs,
-            )
-        else:
-            session.run("python", "-m", "libcst.tool", "list")
+        session.run("python", "-m", "libcst.tool", "list")
+
     if not session.interactive:
         session.notify("autotyping", posargs=[])
 
