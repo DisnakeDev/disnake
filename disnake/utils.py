@@ -1360,18 +1360,20 @@ def assert_never(arg: Never, /) -> None:
 
 def signature_has_self_param(function: Callable[..., Any]) -> bool:
     # If a function was defined in a class and is not bound (i.e. is not types.MethodType),
-    # it should have a `self` parameter (bound methods technically also have a `self` parameter,
-    # but this is used in conjunction with `inspect.signature`, which drops that parameter).
+    # it should have a `self` parameter.
+    # Bound methods technically also have a `self` parameter, but this is
+    # used in conjunction with `inspect.signature`, which drops that parameter.
     #
     # There isn't really any way to reliably detect whether a function
-    # was defined in a class, other than `__qualname__`, thanks to PEP 3155
-    # (it should be portable across all implementations; we're mostly worried about CPython).
+    # was defined in a class, other than `__qualname__`, thanks to PEP 3155.
     # As noted in the PEP, this doesn't work with rebinding, but that should be a pretty rare edge case.
     #
-    # (1) For unbound (~ top-level) functions, `__qualname__ == __name__`.
-    # (2) The preceding component for methods in classes will be the class name, resulting in `Clazz.func`.
-    # (3) A somewhat special case are nested functions, which use `containing_func.<locals>.func`.
-    # => For the purposes of this method, we want to detect the second case only.
+    #
+    # There are a few possible situations here - for the purposes of this method,
+    # we want to detect the second case only:
+    # (1) For *unbound* (~ top-level) functions, `__qualname__ == __name__`.
+    # (2) The preceding component for *methods in classes* will be the class name, resulting in `Clazz.func`.
+    # (3) A somewhat special case are *nested functions*, which use `containing_func.<locals>.func`.
     #
     # Working solely based on this string is certainly not ideal,
     # but the compiler does a bunch of processing just for that attribute,
