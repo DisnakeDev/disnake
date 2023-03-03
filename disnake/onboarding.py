@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Sequence, Union
+from typing import TYPE_CHECKING, List, Optional, Sequence, Union
 
 from .emoji import Emoji, PartialEmoji, _EmojiTag
 from .enums import OnboardingPromptType, try_enum
@@ -104,7 +104,7 @@ class OnboardingPromptOption(Hashable):
         *,
         title: str,
         description: str,
-        emoji: Union[str, PartialEmoji, Emoji],
+        emoji: Optional[Union[str, PartialEmoji, Emoji]],
         roles: Sequence[Snowflake],
         channels: Sequence[Snowflake],
         guild: Guild,
@@ -121,8 +121,10 @@ class OnboardingPromptOption(Hashable):
         self._roles_ids = [role.id for role in roles]
         self._channels_ids = [channel.id for channel in channels]
 
-        self.emoji: Union[PartialEmoji, Emoji]
-        if isinstance(emoji, str):
+        self.emoji: Optional[Union[PartialEmoji, Emoji]] = None
+        if emoji is None:
+            self.emoji = None
+        elif isinstance(emoji, str):
             self.emoji = PartialEmoji.from_str(emoji)
         elif isinstance(emoji, _EmojiTag):
             self.emoji = emoji
@@ -143,7 +145,7 @@ class OnboardingPromptOption(Hashable):
         payload: PartialOnboardingPromptOptionPayload = {
             "title": self.title,
             "description": self.description,
-            "emoji": self.emoji._to_partial().to_dict(),
+            "emoji": self.emoji._to_partial().to_dict() if self.emoji else {"name": "", "id": None},
             "role_ids": self._roles_ids,
             "channel_ids": self._channels_ids,
         }
@@ -155,7 +157,15 @@ class OnboardingPromptOption(Hashable):
 
     @classmethod
     def _from_dict(cls, *, data: OnboardingPromptOptionPayload, guild: Guild) -> Self:
-        emoji = PartialEmoji.from_dict(data["emoji"])
+        name = data["emoji"]["name"]
+        id = data["emoji"]["id"]
+        animated = data["emoji"]["animated"] if "animated" in data["emoji"] else False
+        emoji = PartialEmoji._emoji_from_name_id(
+            name=name,
+            id=int(id) if id else None,
+            animated=animated,
+            state=guild._state,
+        )
 
         self = cls(
             title=data["title"],
