@@ -895,7 +895,7 @@ def test_humanize_list(values, expected) -> None:
 
 # used for `test_signature_has_self_param`
 def _toplevel():
-    def inner():
+    def inner() -> None:
         ...
 
     return inner
@@ -904,22 +904,22 @@ def _toplevel():
 # used for `test_signature_has_self_param`
 class _Clazz:
     def func(self):
-        def inner():
+        def inner() -> None:
             ...
 
         return inner
 
     @classmethod
-    def cmethod(cls):
+    def cmethod(cls) -> None:
         ...
 
     @staticmethod
-    def smethod():
+    def smethod() -> None:
         ...
 
     class Nested:
         def func(self):
-            def inner():
+            def inner() -> None:
                 ...
 
             return inner
@@ -950,5 +950,5 @@ class _Clazz:
         (_Clazz.Nested().func(), False),
     ],
 )
-def test_signature_has_self_param(function, expected):
+def test_signature_has_self_param(function, expected) -> None:
     assert utils.signature_has_self_param(function) == expected
