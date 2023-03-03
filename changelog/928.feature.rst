@@ -1,4 +1,4 @@
 Implement Onboarding.
     - Add :class:`Onboarding`, :class:`OnboardingPrompt` and :class:`OnboardingPromptOption`.
-    - Add :meth:`Guild.get_onboarding`.
+    - Add :meth:`Guild.fetch_onboarding`.
     - Add relevant :class:`AuditLogDiff` information.
