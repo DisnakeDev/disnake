@@ -143,7 +143,9 @@ def get_signature_parameters(
         try:
             next(iterator)
         except StopIteration:
-            raise ValueError(f"Expected command callback to have at least {skip} parameter(s)")
+            raise ValueError(
+                f"Expected command callback to have at least {skip} parameter(s)"
+            ) from None
 
     eval_annotation = disnake.utils.evaluate_annotation
     for name, parameter in iterator:
