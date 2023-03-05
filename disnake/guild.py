@@ -4233,13 +4233,36 @@ class Guild(Hashable):
             resp.append(member)
         return resp
 
+    @overload
+    async def get_or_fetch_members(
+        self,
+        user_ids: List[int],
+        *,
+        presences: bool = ...,
+        cache: bool = ...,
+        as_dict: Literal[False] = ...,
+    ) -> List[Member]:
+        ...
+
+    @overload
+    async def get_or_fetch_members(
+        self,
+        user_ids: List[int],
+        *,
+        presences: bool = ...,
+        cache: bool = ...,
+        as_dict: Literal[True] = ...,
+    ) -> Dict[int, Member]:
+        ...
+
     async def get_or_fetch_members(
         self,
         user_ids: List[int],
         *,
         presences: bool = False,
         cache: bool = True,
-    ) -> List[Member]:
+        as_dict: bool = False,
+    ) -> Union[Dict[int, Member], List[Member]]:
         """|coro|
 
         Tries to get the guild members matching the provided IDs from cache.
@@ -4262,6 +4285,11 @@ class Guild(Hashable):
             Whether to cache the missing members internally. This makes operations
             such as :meth:`get_member` work for those that matched.
             It also speeds up this method on repeated calls. Defaults to ``True``.
+        as_dict: :class:`bool`
+            If ``True`` return the result as a dict of IDs to members. Return a list of members otherwise.
+            Defaults to ``False``.
+
+            .. versionadded:: 2.9
 
         Raises
         ------
@@ -4272,8 +4300,8 @@ class Guild(Hashable):
 
         Returns
         -------
-        List[:class:`Member`]
-            The list of members with the given IDs, if they exist.
+        Union[Dict[:class:`int`, :class:`Member`], List[:class:`Member`]]
+            The list (or dict) of members with the given IDs, if they exist.
         """
         if presences and not self._state._intents.presences:
             raise ClientException("Intents.presences must be enabled to use this.")
@@ -4314,7 +4342,7 @@ class Guild(Hashable):
                     cache=cache,
                 )
 
-        return members
+        return {m.id: m for m in members} if as_dict else members
 
     getch_members = get_or_fetch_members
 
