@@ -4294,7 +4294,9 @@ class Guild(Hashable):
         if len(unresolved_ids) == 1:
             # fetch_member is cheaper than query_members
             try:
-                members.append(await self.fetch_member(unresolved_ids[0]))
+                member = await self.get_or_fetch_member(unresolved_ids[0])
+                if member is not None:
+                    members.append(member)
             except HTTPException:
                 pass
         else:
