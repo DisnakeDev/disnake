@@ -1,0 +1,1 @@
+Add parameter ``as_dict`` to :meth:`Guild.get_or_fetch_members`
