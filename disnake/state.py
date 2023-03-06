@@ -1917,26 +1917,25 @@ class ConnectionState:
         self, data: PartialEmojiPayload
     ) -> Optional[Union[str, Emoji, PartialEmoji]]:
         """Convert partial emoji data to proper emoji.
-        If both `id` and `name` are `None`, returns `None`.
+        Returns unicode emojis as strings.
 
         Primarily used to handle reaction emojis.
         """
         emoji_id = utils._get_as_snowflake(data, "id")
-
         if not emoji_id:
             return data["name"]
 
-        try:
-            return self._emojis[emoji_id]
-        except KeyError:
-            return PartialEmoji.with_state(
-                self,
-                animated=data.get("animated", False),
-                id=emoji_id,
-                # This may be `None` when custom emoji data in reactions isn't available.
-                # Should generally be fine, since we have an id at this point.
-                name=data["name"],  # type: ignore
-            )
+        if (emoji := self._emojis.get(emoji_id)) is not None:
+            return emoji
+
+        return PartialEmoji.with_state(
+            self,
+            # This may be `None` when custom emoji data in reactions isn't available.
+            # Should generally be fine, since we have an id at this point.
+            name=data["name"],  # type: ignore
+            id=emoji_id,
+            animated=data.get("animated", False),
+        )
 
     # deprecated
     get_reaction_emoji = _get_emoji_from_data
@@ -1951,26 +1950,27 @@ class ConnectionState:
         """Convert partial emoji fields to proper emoji, if possible.
         If both `id` and `name` are nullish, returns `None`.
 
-        Primarily used for structures with top-level `emoji_name` and `emoji_id` fields,
+        Unlike _get_emoji_from_data, this returns `PartialEmoji`s instead of strings
+        for unicode emojis, and falls back to "" for the emoji name.
+
+        Primarily used for structures with nonstandard top-level `emoji_name` and `emoji_id` fields,
         like forum channels/tags or welcome screens.
         """
         if not (name or id):
             return None
 
-        emoji: Optional[Union[Emoji, PartialEmoji]] = None
-        if id:
-            emoji = self._emojis.get(id)
-        if not emoji:
-            emoji = PartialEmoji.with_state(
-                state=self,
-                # Note: this does not render correctly if it's a custom emoji, there's just no name information here sometimes.
-                # This may change in a future API version, but for now we'll just have to accept it.
-                name=name or "",
-                # Coerce `0` to `None`, api inconsistency
-                id=id or None,
-                animated=animated or False,
-            )
-        return emoji
+        if id and (emoji := self._emojis.get(id)) is not None:
+            return emoji
+
+        return PartialEmoji.with_state(
+            self,
+            # Note: this does not render correctly if it's a custom emoji, there's just no name information here sometimes.
+            # This may change in a future API version, but for now we'll just have to accept it.
+            name=name or "",
+            # Coerce `0` to `None`, occasional API inconsistency
+            id=id or None,
+            animated=animated or False,
+        )
 
     def _upgrade_partial_emoji(self, emoji: PartialEmoji) -> Union[Emoji, PartialEmoji, str]:
         emoji_id = emoji.id
