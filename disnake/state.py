@@ -1911,7 +1911,7 @@ class ConnectionState:
             return channel.guild.get_member(user_id)
         return self.get_user(user_id)
 
-    def get_reaction_emoji(self, data: PartialEmojiPayload) -> Union[str, Emoji, PartialEmoji]:
+    def _get_emoji_from_data(self, data: PartialEmojiPayload) -> Union[str, Emoji, PartialEmoji]:
         emoji_id = utils._get_as_snowflake(data, "id")
 
         if not emoji_id:
@@ -1929,6 +1929,9 @@ class ConnectionState:
                 # Should generally be fine, since we have an id at this point.
                 name=data["name"],  # type: ignore
             )
+
+    # deprecated
+    get_reaction_emoji = _get_emoji_from_data
 
     def _upgrade_partial_emoji(self, emoji: PartialEmoji) -> Union[Emoji, PartialEmoji, str]:
         emoji_id = emoji.id
