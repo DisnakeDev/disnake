@@ -1911,12 +1911,20 @@ class ConnectionState:
             return channel.guild.get_member(user_id)
         return self.get_user(user_id)
 
-    def _get_emoji_from_data(self, data: PartialEmojiPayload) -> Union[str, Emoji, PartialEmoji]:
+    # methods to handle all sorts of different emoji formats
+
+    def _get_emoji_from_data(
+        self, data: PartialEmojiPayload
+    ) -> Optional[Union[str, Emoji, PartialEmoji]]:
+        """Convert partial emoji data to proper emoji.
+        If both `id` and `name` are `None`, returns `None`.
+
+        Primarily used to handle reaction emojis.
+        """
         emoji_id = utils._get_as_snowflake(data, "id")
 
         if not emoji_id:
-            # name will be a str if there's no id
-            return data["name"]  # type: ignore
+            return data["name"]
 
         try:
             return self._emojis[emoji_id]
@@ -1932,6 +1940,37 @@ class ConnectionState:
 
     # deprecated
     get_reaction_emoji = _get_emoji_from_data
+
+    def _get_emoji_from_fields(
+        self,
+        *,
+        name: Optional[str],
+        id: Optional[int],
+        animated: Optional[bool] = False,
+    ) -> Optional[Union[Emoji, PartialEmoji]]:
+        """Convert partial emoji fields to proper emoji, if possible.
+        If both `id` and `name` are nullish, returns `None`.
+
+        Primarily used for structures with top-level `emoji_name` and `emoji_id` fields,
+        like forum channels/tags or welcome screens.
+        """
+        if not (name or id):
+            return None
+
+        emoji: Optional[Union[Emoji, PartialEmoji]] = None
+        if id:
+            emoji = self._emojis.get(id)
+        if not emoji:
+            emoji = PartialEmoji.with_state(
+                state=self,
+                # Note: this does not render correctly if it's a custom emoji, there's just no name information here sometimes.
+                # This may change in a future API version, but for now we'll just have to accept it.
+                name=name or "",
+                # Coerce `0` to `None`, api inconsistency
+                id=id or None,
+                animated=animated or False,
+            )
+        return emoji
 
     def _upgrade_partial_emoji(self, emoji: PartialEmoji) -> Union[Emoji, PartialEmoji, str]:
         emoji_id = emoji.id

@@ -64,7 +64,8 @@ class Reaction:
         emoji: Optional[Union[PartialEmoji, Emoji, str]] = None,
     ) -> None:
         self.message: Message = message
-        self.emoji: Union[PartialEmoji, Emoji, str] = emoji or message._state._get_emoji_from_data(
+        # _get_emoji_from_data won't return None
+        self.emoji: Union[PartialEmoji, Emoji, str] = emoji or message._state._get_emoji_from_data(  # type: ignore
             data["emoji"]
         )
         self.count: int = data.get("count", 1)
