@@ -4238,9 +4238,9 @@ class Guild(Hashable):
         self,
         user_ids: List[int],
         *,
-        presences: bool = ...,
-        cache: bool = ...,
-        as_dict: Literal[False] = ...,
+        presences: bool = False,
+        cache: bool = True,
+        as_dict: Literal[False] = False,
     ) -> List[Member]:
         ...
 
@@ -4249,9 +4249,9 @@ class Guild(Hashable):
         self,
         user_ids: List[int],
         *,
-        presences: bool = ...,
-        cache: bool = ...,
-        as_dict: Literal[True] = ...,
+        presences: bool = False,
+        cache: bool = True,
+        as_dict: Literal[True],
     ) -> Dict[int, Member]:
         ...
 
@@ -4286,7 +4286,7 @@ class Guild(Hashable):
             such as :meth:`get_member` work for those that matched.
             It also speeds up this method on repeated calls. Defaults to ``True``.
         as_dict: :class:`bool`
-            If ``True`` return the result as a dict of IDs to members. Return a list of members otherwise.
+            If ``True``, return the result as a dict of IDs to members. Return a list of members otherwise.
             Defaults to ``False``.
 
             .. versionadded:: 2.9
@@ -4301,12 +4301,12 @@ class Guild(Hashable):
         Returns
         -------
         Union[Dict[:class:`int`, :class:`Member`], List[:class:`Member`]]
-            The list (or dict) of members with the given IDs, if they exist.
+            The list (or dict, depending on the ``as_dict`` parameter) of members with the given IDs, if they exist.
         """
         if presences and not self._state._intents.presences:
             raise ClientException("Intents.presences must be enabled to use this.")
 
-        members: List[Member] = []
+        members: Dict[int, Member] = {}
         unresolved_ids: List[int] = []
 
         for user_id in user_ids:
@@ -4314,16 +4314,16 @@ class Guild(Hashable):
             if member is None:
                 unresolved_ids.append(user_id)
             else:
-                members.append(member)
+                members[member.id] = member
 
         if not unresolved_ids:
-            return members
+            return members if as_dict else list(members.values())
 
         if len(unresolved_ids) == 1:
             # fetch_member is cheaper than query_members
             try:
                 member = await self.fetch_member(unresolved_ids[0])
-                members.append(member)
+                members[member.id] = member
                 if cache:
                     self._add_member(member)
             except HTTPException:
@@ -4333,16 +4333,17 @@ class Guild(Hashable):
             # because the limit is 100 members per request.
             for i in range(0, len(unresolved_ids), 100):
                 limit = min(100, len(unresolved_ids) - i)
-                members += await self._state.query_members(
+                for member in await self._state.query_members(
                     self,
                     query=None,
                     limit=limit,
                     user_ids=unresolved_ids[i : i + 100],
                     presences=presences,
                     cache=cache,
-                )
+                ):
+                    members[member.id] = member
 
-        return {m.id: m for m in members} if as_dict else members
+        return members if as_dict else list(members.values())
 
     getch_members = get_or_fetch_members
 
