@@ -395,9 +395,12 @@ class CommonBotBase(Generic[CogT]):
         """Mapping[:class:`str`, :class:`Cog`]: A read-only mapping of cog name to cog."""
         return types.MappingProxyType(self.__cogs)
 
-    @property
-    def listeners(self) -> Mapping[str, List[CoroFunc]]:
-        """Mapping[:class:`str`, List[Callable]]: A read-only mapping of event name to listeners.
+    def get_listeners(self) -> Mapping[str, List[CoroFunc]]:
+        """Mapping[:class:`str`, List[Callable]]: A read-only mapping of event names to listeners.
+
+        .. note::
+            To add or remove a listener you should use :meth:`.add_listener` and
+            :meth:`.remove_listener`.
 
         .. versionadded:: 2.9
         """

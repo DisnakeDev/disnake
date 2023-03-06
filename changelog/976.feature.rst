@@ -1,1 +1,1 @@
-Add :attr:`.commands.Bot.listeners`, :attr:`.commands.AutoShardedBot.listeners`, :attr:`.commands.InteractionBot.listeners` and :attr:`.commands.AutoShardedInteractionBot.listeners` properties.
+Add a ``get_listeners`` method to all the ``Bot``(s) classes.
