@@ -395,6 +395,11 @@ class CommonBotBase(Generic[CogT]):
         """Mapping[:class:`str`, :class:`Cog`]: A read-only mapping of cog name to cog."""
         return types.MappingProxyType(self.__cogs)
 
+    @property
+    def listeners(self) -> Mapping[str, List[CoroFunc]]:
+        """Mapping[:class:`str`, List[Callable]]: A read-only mapping of event name to listeners."""
+        return types.MappingProxyType(self.extra_events)
+
     # extensions
 
     def _remove_module_references(self, name: str) -> None:
