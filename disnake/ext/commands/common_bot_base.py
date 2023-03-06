@@ -397,7 +397,10 @@ class CommonBotBase(Generic[CogT]):
 
     @property
     def listeners(self) -> Mapping[str, List[CoroFunc]]:
-        """Mapping[:class:`str`, List[Callable]]: A read-only mapping of event name to listeners."""
+        """Mapping[:class:`str`, List[Callable]]: A read-only mapping of event name to listeners.
+
+        .. versionadded 2.9
+        """
         return types.MappingProxyType(self.extra_events)
 
     # extensions
