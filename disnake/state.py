@@ -96,7 +96,7 @@ if TYPE_CHECKING:
     from .types import gateway
     from .types.activity import Activity as ActivityPayload
     from .types.channel import DMChannel as DMChannelPayload
-    from .types.emoji import Emoji as EmojiPayload
+    from .types.emoji import Emoji as EmojiPayload, PartialEmoji as PartialEmojiPayload
     from .types.guild import Guild as GuildPayload, UnavailableGuild as UnavailableGuildPayload
     from .types.message import Message as MessagePayload
     from .types.sticker import GuildSticker as GuildStickerPayload
@@ -1911,17 +1911,23 @@ class ConnectionState:
             return channel.guild.get_member(user_id)
         return self.get_user(user_id)
 
-    def get_reaction_emoji(self, data) -> Union[Emoji, PartialEmoji]:
+    def get_reaction_emoji(self, data: PartialEmojiPayload) -> Union[str, Emoji, PartialEmoji]:
         emoji_id = utils._get_as_snowflake(data, "id")
 
         if not emoji_id:
-            return data["name"]
+            # name will be a str if there's no id
+            return data["name"]  # type: ignore
 
         try:
             return self._emojis[emoji_id]
         except KeyError:
             return PartialEmoji.with_state(
-                self, animated=data.get("animated", False), id=emoji_id, name=data["name"]
+                self,
+                animated=data.get("animated", False),
+                id=emoji_id,
+                # This may be `None` when custom emoji data in reactions isn't available.
+                # Should generally be fine, since we have an id at this point.
+                name=data["name"],  # type: ignore
             )
 
     def _upgrade_partial_emoji(self, emoji: PartialEmoji) -> Union[Emoji, PartialEmoji, str]:
