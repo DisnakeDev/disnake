@@ -1,1 +1,1 @@
-Add a ``get_listeners`` method to all the ``Bot``(s) classes.
+|commands| Add :meth:`Bot.get_listeners() <disnake.ext.commands.Bot.get_listeners>`.
