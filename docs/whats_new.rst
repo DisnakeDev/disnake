@@ -17,6 +17,22 @@ in specific versions.
 
 .. towncrier release notes start
 
+.. _vp2p8p1:
+
+v2.8.1
+------
+
+Bug Fixes
+~~~~~~~~~
+- Fix :class:`VoiceClient` not continuing to play audio when moving between channels. (:issue:`845`)
+- Fix KeepAlive logging un-intentionally attempting to interpolate stack trace logger calls (:issue:`940`)
+- Fix attribute error when attempting to access :class:`DMChannel.flags` under certain circumstances. (:issue:`960`)
+- Fix voice connection discovery using incorrect packet sizes. (:issue:`967`)
+
+Documentation
+~~~~~~~~~~~~~
+- Update automod rule limits. (:issue:`931`)
+
 .. _vp2p8p0:
 
 v2.8.0
@@ -80,6 +96,18 @@ Documentation
 Miscellaneous
 ~~~~~~~~~~~~~
 - Declare a :pep:`517` build backend in pyproject.toml, and use :pep:`621` to define most package metadata. (:issue:`830`)
+
+.. _vp2p7p2:
+
+v2.7.2
+------
+
+Bug Fixes
+~~~~~~~~~
+- Fix :class:`VoiceClient` not continuing to play audio when moving between channels. (:issue:`845`)
+- Fix KeepAlive logging un-intentionally attempting to interpolate stack trace logger calls (:issue:`940`)
+- Fix attribute error when attempting to access :class:`DMChannel.flags` under certain circumstances. (:issue:`960`)
+- Fix voice connection discovery using incorrect packet sizes. (:issue:`967`)
 
 .. _vp2p7p1:
 
