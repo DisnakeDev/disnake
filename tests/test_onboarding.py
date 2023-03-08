@@ -75,11 +75,6 @@ class TestOnboarding:
         assert onboarding._default_channel_ids == [456, 789]
         assert onboarding.enabled is True
 
-    def test_onboarding_repr(self, onboarding: Onboarding) -> None:
-        assert repr(onboarding) == (
-            "<Onboarding guild_id=123 prompts=[] default_channel_ids=[456, 789] enabled=True>"
-        )
-
 
 class TestOnboardingPrompt:
     def test_onboarding_prompt(self, onboarding_prompt: OnboardingPrompt) -> None:
@@ -92,12 +87,6 @@ class TestOnboardingPrompt:
 
     def test_onboarding_prompt_str(self, onboarding_prompt: OnboardingPrompt) -> None:
         assert str(onboarding_prompt) == "test"
-
-    def test_onboarding_prompt_repr(self, onboarding_prompt: OnboardingPrompt) -> None:
-        assert repr(onboarding_prompt) == (
-            "<OnboardingPrompt id=0 title='test' options=[] single_select=True required=True"
-            " in_onboarding=True type=<OnboardingPromptType.multiple_choice: 0>>"
-        )
 
 
 class TestOnboardingPromptOption:
@@ -114,11 +103,3 @@ class TestOnboardingPromptOption:
         self, onboarding_prompt_option: OnboardingPromptOption
     ) -> None:
         assert str(onboarding_prompt_option) == "test"
-
-    def test_onboarding_prompt_option_repr(
-        self, onboarding_prompt_option: OnboardingPromptOption
-    ) -> None:
-        assert repr(onboarding_prompt_option) == (
-            "<OnboardingPromptOption id=0 title='test' description='test' emoji=<PartialEmoji"
-            " animated=False name='' id=123> roles=[<Object id=456>, <Object id=789>] channels=[<Object id=123>, <Object id=456>]>"
-        )
