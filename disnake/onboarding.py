@@ -91,10 +91,6 @@ class OnboardingPromptOption(Hashable):
         The option's description.
     emoji: Optional[Union[:class:`PartialEmoji`, :class:`Emoji`]]
         The option's emoji.
-    roles: List[:class:`abc.Snowflake`]
-        The roles that will be assigned to the user when they select this option.
-    channels: List[:class:`abc.Snowflake`]
-        The channels that the user will be opted into when they select this option.
     """
 
     __slots__ = ("id", "title", "description", "emoji", "guild", "_roles_ids", "_channels_ids")
