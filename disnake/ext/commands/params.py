@@ -929,10 +929,6 @@ def collect_params(
 
     Returns: (`cog parameter`, `interaction parameter`, `param infos`, `injections`)
     """
-    # any information we collect here does not change over time so we can cache it
-    if hasattr(function, "__collect_params_cache__"):
-        return function.__collect_params_cache__
-
     (cog_param, inter_param), parameters = isolate_self(function)
     doc = disnake.utils.parse_docstring(function)["params"]
 
@@ -968,13 +964,12 @@ def collect_params(
             paraminfo = ParamInfo.from_param(parameter, {}, doc)
             paraminfos.append(paraminfo)
 
-    function.__collect_params_cache__ = (
+    return (
         cog_param.name if cog_param else None,
         inter_param.name if inter_param else None,
         paraminfos,
         injections,
     )
-    return function.__collect_params_cache__
 
 
 def collect_nested_params(function: Callable) -> List[ParamInfo]:
@@ -1036,8 +1031,6 @@ async def call_param_func(
     function: Callable, interaction: ApplicationCommandInteraction, /, *args: Any, **kwargs: Any
 ) -> Any:
     """Call a function utilizing ParamInfo"""
-    # Unlike collect_params, this function depends on interactions because it handles conversion,
-    # therefore the result of this function can not be cached and reused.
     cog_param, inter_param, paraminfos, injections = collect_params(function)
     formatted_kwargs = format_kwargs(interaction, cog_param, inter_param, *args, **kwargs)
     formatted_kwargs.update(await run_injections(injections, interaction, *args, **kwargs))
