@@ -579,7 +579,7 @@ class FlagConverter(metaclass=FlagsMeta):
                 values = arguments[name]
             except KeyError:
                 if flag.required:
-                    raise MissingRequiredFlag(flag)
+                    raise MissingRequiredFlag(flag) from None
                 else:
                     if callable(flag.default):
                         default = await maybe_coroutine(flag.default, ctx)

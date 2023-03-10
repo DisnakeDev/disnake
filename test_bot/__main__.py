@@ -27,7 +27,7 @@ def fancy_traceback(exc: Exception) -> str:
 
 
 class TestBot(commands.Bot):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             command_prefix=Config.prefix,
             intents=disnake.Intents.all(),
@@ -41,7 +41,7 @@ class TestBot(commands.Bot):
 
         self.i18n.load("test_bot/locale")
 
-    async def on_ready(self):
+    async def on_ready(self) -> None:
         # fmt: off
         print(
             f"\n"

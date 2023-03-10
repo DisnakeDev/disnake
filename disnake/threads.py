@@ -536,7 +536,6 @@ class Thread(Messageable, Hashable):
 
         Examples
         --------
-
         Deleting bot's messages ::
 
             def is_me(m):
@@ -1046,9 +1045,9 @@ class ThreadMember(Hashable):
     def _from_data(self, data: ThreadMemberPayload) -> None:
         try:
             self.id = int(data["user_id"])
-        except KeyError:
+        except KeyError as err:
             if (self_id := self._state.self_id) is None:
-                raise AssertionError("self_id is None when updating our own ThreadMember.")
+                raise AssertionError("self_id is None when updating our own ThreadMember.") from err
             self.id = self_id
 
         try:
@@ -1091,7 +1090,6 @@ class ForumTag(Hashable):
 
     Examples
     --------
-
     Creating a new tag:
 
     .. code-block:: python3

@@ -121,7 +121,7 @@ def issubclass_(obj: Any, tp: Union[TypeT, Tuple[TypeT, ...]]) -> TypeGuard[Type
 
 
 def remove_optionals(annotation: Any) -> Any:
-    """remove unwanted optionals from an annotation"""
+    """Remove unwanted optionals from an annotation"""
     if get_origin(annotation) in (Union, UnionType):
         args = tuple(i for i in annotation.__args__ if i not in (None, type(None)))
         if len(args) == 1:

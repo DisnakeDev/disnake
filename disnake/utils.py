@@ -333,8 +333,6 @@ def oauth_url(
 def parse_token(token: str) -> Tuple[int, datetime.datetime, bytes]:
     """Parse a token into its parts
 
-    Returns
-
     Parameters
     ----------
     token: :class:`str`
@@ -440,7 +438,6 @@ def get(iterable: Iterable[T], **attrs: Any) -> Optional[T]:
 
     Examples
     --------
-
     Basic usage:
 
     .. code-block:: python3
@@ -612,7 +609,7 @@ async def sane_wait_for(futures: Iterable[Awaitable[T]], *, timeout: float) -> S
     done, pending = await asyncio.wait(ensured, timeout=timeout, return_when=asyncio.ALL_COMPLETED)
 
     if len(pending) != 0:
-        raise asyncio.TimeoutError()
+        raise asyncio.TimeoutError
 
     return done
 
@@ -1287,7 +1284,7 @@ def search_directory(path: str) -> Iterator[str]:
         The path to search for modules
 
     Yields
-    -------
+    ------
     :class:`str`
         The name of the found module. (usable in load_extension)
     """

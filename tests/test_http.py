@@ -43,5 +43,5 @@ from disnake.http import HTTPClient
         ),
     ],
 )
-def test_format_gateway_url(url: str, encoding: str, zlib: bool, expected: str):
+def test_format_gateway_url(url: str, encoding: str, zlib: bool, expected: str) -> None:
     assert HTTPClient._format_gateway_url(url, encoding=encoding, zlib=zlib) == expected

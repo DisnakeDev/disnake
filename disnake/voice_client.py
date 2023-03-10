@@ -149,7 +149,9 @@ class VoiceProtocol:
         raise NotImplementedError
 
     def cleanup(self) -> None:
-        """This method *must* be called to ensure proper clean-up during a disconnect.
+        """Cleans up the internal state.
+
+        **This method *must* be called to ensure proper clean-up during a disconnect.**
 
         It is advisable to call this from within :meth:`disconnect` when you are
         completely done with the voice protocol instance.
@@ -242,7 +244,7 @@ class VoiceClient(VoiceProtocol):
         """:class:`ClientUser`: The user connected to voice (i.e. ourselves)."""
         return self._state.user
 
-    def checked_add(self, attr, value, limit) -> None:
+    def checked_add(self, attr: str, value: int, limit: int) -> None:
         val = getattr(self, attr)
         if val + value > limit:
             setattr(self, attr, 0)
