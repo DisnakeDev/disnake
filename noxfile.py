@@ -247,7 +247,7 @@ def test(session: nox.Session, extras: List[str]) -> None:
     session.run_always("pdm", "install", "-dG", "test", "-dG", "typing", *extras, external=True)
 
     pytest_args = ["--cov", "--cov-context=test"]
-    global reset_coverage
+    global reset_coverage  # noqa: PLW0603
     if reset_coverage:
         # don't use `--cov-append` for first run
         reset_coverage = False
