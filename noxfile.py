@@ -24,18 +24,8 @@ os.environ.update(
         "PDM_IGNORE_SAVED_PYTHON": "1",
     },
 )
-
-
-# load specific variables from the dotenv file if it exists
-def load_env_var(var: str, *, default: str, override: bool = False):
-    try:
-        import dotenv
-    except ImportError:
-        return default
-
-    result = dotenv.get_key(dotenv.find_dotenv(), var) or default
-    if var not in os.environ or override:
-        os.environ[var] = result
+# support the python parser in case the native parser isn't available
+os.environ.setdefault("LIBCST_PARSER_TYPE", "native")
 
 
 nox.options.error_on_external_run = True
@@ -119,7 +109,6 @@ def autotyping(session: nox.Session) -> None:
     """
     session.run_always("pdm", "install", "-dG", "codemod", external=True)
 
-    load_env_var("LIBCST_PARSER_TYPE", default="native")
     base_command = ["python", "-m", "libcst.tool", "codemod", "autotyping.AutotypeCommand"]
     dir_options: Dict[Tuple[str, ...], Tuple[str, ...]] = {
         (
@@ -177,7 +166,6 @@ def codemod(session: nox.Session) -> None:
     """Run libcst codemods."""
     session.run_always("pdm", "install", "-dG", "codemod", external=True)
 
-    load_env_var("LIBCST_PARSER_TYPE", default="native")
     if session.posargs and session.posargs[0] == "run-all" or not session.interactive:
         # run all of the transformers on disnake
         session.log("Running all transformers.")
