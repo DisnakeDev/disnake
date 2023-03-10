@@ -380,8 +380,8 @@ class InvokableApplicationCommand(ABC):
 
         return 0.0
 
+    # This method isn't really usable in this class, but it's usable in subclasses.
     async def invoke(self, inter: ApplicationCommandInteraction, *args, **kwargs) -> None:
-        """This method isn't really usable in this class, but it's usable in subclasses."""
         await self.prepare(inter)
 
         try:

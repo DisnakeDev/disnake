@@ -1727,7 +1727,6 @@ def check(predicate: Check) -> Callable[[T], T]:
 
     Examples
     --------
-
     Creating a basic check to see if the command invoker is you.
 
     .. code-block:: python3
@@ -1811,7 +1810,6 @@ def check_any(*checks: Check) -> Callable[[T], T]:
 
     Examples
     --------
-
     Creating a basic check to see if it's the bot owner or
     the server owner:
 
@@ -2612,8 +2610,7 @@ def before_invoke(coro) -> Callable[[T], T]:
     .. versionadded:: 1.4
 
     Example
-    ---------
-
+    -------
     .. code-block:: python3
 
         async def record_usage(ctx):

@@ -127,7 +127,7 @@ class Converter(Protocol[T_co]):
         properly propagate to the error handlers.
 
         Parameters
-        -----------
+        ----------
         ctx: Union[:class:`.Context`, :class:`.ApplicationCommandInteraction`]
             The invocation context that the argument is being used in.
         argument: :class:`str`

@@ -122,7 +122,7 @@ class AssetMixin:
             Raises :exc:`TypeError` instead of ``InvalidArgument``.
 
         Parameters
-        -----------
+        ----------
         spoiler: :class:`bool`
             Whether the file is a spoiler.
         filename: Optional[:class:`str`]
