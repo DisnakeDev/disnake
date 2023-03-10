@@ -229,7 +229,7 @@ class LocalizationValue:
         cls = self.__class__
         ins = cls.__new__(cls)
         ins._key = self._key
-        ins._data = self._data.copy() if isinstance(self._data, dict) else self._data
+        ins._data = self._data
         return ins
 
     @property
