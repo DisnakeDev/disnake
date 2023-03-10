@@ -19,7 +19,24 @@ if TYPE_CHECKING:
 
 
 # see https://pdm.fming.dev/latest/usage/advanced/#use-nox-as-the-runner
-os.environ.update({"PDM_IGNORE_SAVED_PYTHON": "1"})
+os.environ.update(
+    {
+        "PDM_IGNORE_SAVED_PYTHON": "1",
+    },
+)
+
+
+# load specific variables from the dotenv file if it exists
+def load_env_var(var: str, *, default: str, override: bool = False):
+    try:
+        import dotenv
+    except ImportError:
+        return default
+
+    result = dotenv.get_key(dotenv.find_dotenv(), var) or default
+    if var not in os.environ or override:
+        os.environ[var] = result
+
 
 nox.options.error_on_external_run = True
 nox.options.reuse_existing_virtualenvs = True
@@ -102,9 +119,7 @@ def autotyping(session: nox.Session) -> None:
     """
     session.run_always("pdm", "install", "-dG", "codemod", external=True)
 
-    env = {
-        "LIBCST_PARSER_TYPE": "native",
-    }
+    load_env_var("LIBCST_PARSER_TYPE", default="native")
     base_command = ["python", "-m", "libcst.tool", "codemod", "autotyping.AutotypeCommand"]
     dir_options: Dict[Tuple[str, ...], Tuple[str, ...]] = {
         (
@@ -145,7 +160,6 @@ def autotyping(session: nox.Session) -> None:
         session.run(
             *base_command,
             *posargs,
-            env=env,
         )
         return
 
@@ -155,7 +169,6 @@ def autotyping(session: nox.Session) -> None:
             *base_command,
             *module,
             *options,
-            env=env,
         )
 
 
@@ -164,9 +177,7 @@ def codemod(session: nox.Session) -> None:
     """Run libcst codemods."""
     session.run_always("pdm", "install", "-dG", "codemod", external=True)
 
-    env = {
-        "LIBCST_PARSER_TYPE": "native",
-    }
+    load_env_var("LIBCST_PARSER_TYPE", default="native")
     if session.posargs and session.posargs[0] == "run-all" or not session.interactive:
         # run all of the transformers on disnake
         session.log("Running all transformers.")
@@ -176,7 +187,6 @@ def codemod(session: nox.Session) -> None:
             "libcst.tool",
             "list",
             silent=True,
-            env=env,
         )  # type: ignore
         transformers = [line.split("-")[0].strip() for line in res.splitlines()]
         session.log("Transformers: " + ", ".join(transformers))
@@ -194,7 +204,6 @@ def codemod(session: nox.Session) -> None:
                 trans,
                 "disnake",
                 "--hide-progress",
-                env=env,
             )
         session.log("Finished running all transformers.")
     else:
@@ -207,7 +216,6 @@ def codemod(session: nox.Session) -> None:
                 "libcst.tool",
                 "codemod",
                 *session.posargs,
-                env=env,
             )
         else:
             session.run(
@@ -215,7 +223,6 @@ def codemod(session: nox.Session) -> None:
                 "-m",
                 "libcst.tool",
                 "list",
-                env=env,
             )
     if not session.interactive:
         session.notify("autotyping", posargs=[])
