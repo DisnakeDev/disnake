@@ -477,7 +477,7 @@ class BotBase(CommonBotBase, GroupMixin):
                 raise TypeError(
                     "command_prefix must be plain string, iterable of strings, or callable "
                     f"returning either of these, not {ret.__class__.__name__}"
-                )
+                ) from None
 
             if not ret:
                 raise ValueError("Iterable command_prefix must contain at least one prefix")
@@ -541,7 +541,7 @@ class BotBase(CommonBotBase, GroupMixin):
                     raise TypeError(
                         "get_prefix must return either a string or a list of string, "
                         f"not {prefix.__class__.__name__}"
-                    )
+                    ) from None
 
                 # It's possible a bad command_prefix got us here.
                 for value in prefix:
@@ -549,7 +549,7 @@ class BotBase(CommonBotBase, GroupMixin):
                         raise TypeError(
                             "Iterable command_prefix or list returned from get_prefix must "
                             f"contain only strings, not {value.__class__.__name__}"
-                        )
+                        ) from None
 
                 # Getting here shouldn't happen
                 raise

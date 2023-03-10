@@ -153,13 +153,14 @@ select = [
     "RUF",    # ruff specific exceptions
     "PT",     # flake8-pytest-style
     "Q",      # flake8-quotes
+    "RSE",    # flake8-raise
     "T20",    # flake8-print
     "PGH",    # pygrep-hooks
     "PLC",    # pylint convention
     "PLE",    # pylint error
     # "PLR",    # pylint refactor
     "PLW",    # pylint warnings
-    "TRY002", "TRY004", # tryceratops
+    "TRY002", "TRY004", "TRY201", # tryceratops
 ]
 ignore = [
     # star imports
