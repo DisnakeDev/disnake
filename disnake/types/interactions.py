@@ -6,18 +6,18 @@ from typing import TYPE_CHECKING, Dict, List, Literal, Optional, TypedDict, Unio
 
 from typing_extensions import NotRequired
 
-from .channel import ChannelType
-from .components import Component, Modal
-from .embed import Embed
-from .i18n import LocalizationDict
-from .member import Member, MemberWithUser
-from .role import Role
-from .snowflake import Snowflake
-from .threads import ThreadMetadata
-from .user import User
+from disnake.types.channel import ChannelType
+from disnake.types.components import Component, Modal
+from disnake.types.embed import Embed
+from disnake.types.i18n import LocalizationDict
+from disnake.types.member import Member, MemberWithUser
+from disnake.types.role import Role
+from disnake.types.snowflake import Snowflake
+from disnake.types.threads import ThreadMetadata
+from disnake.types.user import User
 
 if TYPE_CHECKING:
-    from .message import AllowedMentions, Attachment, Message
+    from disnake.types.message import AllowedMentions, Attachment, Message
 
 
 ApplicationCommandType = Literal[1, 2, 3]

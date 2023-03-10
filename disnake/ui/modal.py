@@ -9,17 +9,15 @@ import traceback
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 
 from disnake.enums import TextInputStyle
+from disnake.ui.action_row import ActionRow, components_to_rows
+from disnake.ui.text_input import TextInput
 from disnake.utils import MISSING
-
-from .action_row import ActionRow, components_to_rows
-from .text_input import TextInput
 
 if TYPE_CHECKING:
     from disnake.interactions.modal import ModalInteraction
     from disnake.state import ConnectionState
     from disnake.types.components import Modal as ModalPayload
-
-    from .action_row import Components, ModalUIComponent
+    from disnake.ui.action_row import Components, ModalUIComponent
 
 
 __all__ = ("Modal",)

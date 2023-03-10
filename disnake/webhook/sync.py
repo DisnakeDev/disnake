@@ -28,8 +28,7 @@ from disnake.errors import (
 from disnake.flags import MessageFlags
 from disnake.http import Route
 from disnake.message import Message
-
-from .async_ import BaseWebhook, _WebhookState, handle_message_parameters
+from disnake.webhook.async_ import BaseWebhook, _WebhookState, handle_message_parameters
 
 __all__ = (
     "SyncWebhook",

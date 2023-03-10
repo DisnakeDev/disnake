@@ -10,8 +10,8 @@ if TYPE_CHECKING:
 
     from typing_extensions import Self
 
-    from .abc import Messageable
-    from .channel import ForumChannel
+    from disnake.abc import Messageable
+    from disnake.channel import ForumChannel
 
 __all__ = ("Typing",)
 

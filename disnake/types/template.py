@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from typing import Optional, TypedDict
 
-from .guild import Guild
-from .snowflake import Snowflake
-from .user import User
+from disnake.types.guild import Guild
+from disnake.types.snowflake import Snowflake
+from disnake.types.user import User
 
 
 class CreateTemplate(TypedDict):

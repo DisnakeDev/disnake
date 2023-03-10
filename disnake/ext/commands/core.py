@@ -27,14 +27,18 @@ from typing import (
 )
 
 import disnake
-from disnake.utils import _generated, _overload_with_permissions
-
-from ._types import _BaseCommand
-from .cog import Cog
-from .context import AnyContext, Context
-from .converter import Greedy, get_converter, run_converters
-from .cooldowns import BucketType, Cooldown, CooldownMapping, DynamicCooldownMapping, MaxConcurrency
-from .errors import (
+from disnake.ext.commands._types import _BaseCommand
+from disnake.ext.commands.cog import Cog
+from disnake.ext.commands.context import AnyContext, Context
+from disnake.ext.commands.converter import Greedy, get_converter, run_converters
+from disnake.ext.commands.cooldowns import (
+    BucketType,
+    Cooldown,
+    CooldownMapping,
+    DynamicCooldownMapping,
+    MaxConcurrency,
+)
+from disnake.ext.commands.errors import (
     ArgumentParsingError,
     BotMissingAnyRole,
     BotMissingPermissions,
@@ -56,13 +60,13 @@ from .errors import (
     PrivateMessageOnly,
     TooManyArguments,
 )
+from disnake.utils import _generated, _overload_with_permissions
 
 if TYPE_CHECKING:
     from typing_extensions import Concatenate, ParamSpec, Self, TypeGuard
 
+    from disnake.ext.commands._types import Check, Coro, CoroFunc, Error, Hook
     from disnake.message import Message
-
-    from ._types import Check, Coro, CoroFunc, Error, Hook
 
 
 __all__ = (

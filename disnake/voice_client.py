@@ -23,22 +23,22 @@ import struct
 import threading
 from typing import TYPE_CHECKING, Any, Callable, List, Optional, Tuple
 
-from . import opus, utils
-from .backoff import ExponentialBackoff
-from .errors import ClientException, ConnectionClosed
-from .gateway import DiscordVoiceWebSocket
-from .player import AudioPlayer, AudioSource
-from .utils import MISSING
+from disnake import opus, utils
+from disnake.backoff import ExponentialBackoff
+from disnake.errors import ClientException, ConnectionClosed
+from disnake.gateway import DiscordVoiceWebSocket
+from disnake.player import AudioPlayer, AudioSource
+from disnake.utils import MISSING
 
 if TYPE_CHECKING:
-    from . import abc
-    from .client import Client
-    from .guild import Guild
-    from .opus import Encoder
-    from .state import ConnectionState
-    from .types.gateway import VoiceServerUpdateEvent
-    from .types.voice import GuildVoiceState as GuildVoiceStatePayload, SupportedModes
-    from .user import ClientUser
+    from disnake import abc
+    from disnake.client import Client
+    from disnake.guild import Guild
+    from disnake.opus import Encoder
+    from disnake.state import ConnectionState
+    from disnake.types.gateway import VoiceServerUpdateEvent
+    from disnake.types.voice import GuildVoiceState as GuildVoiceStatePayload, SupportedModes
+    from disnake.user import ClientUser
 
 
 has_nacl: bool

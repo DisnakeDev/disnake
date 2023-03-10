@@ -16,7 +16,7 @@ from typing import (
     overload,
 )
 
-from .enums import (
+from disnake.enums import (
     AutoModActionType,
     AutoModEventType,
     AutoModTriggerType,
@@ -24,19 +24,19 @@ from .enums import (
     try_enum,
     try_enum_to_int,
 )
-from .flags import AutoModKeywordPresets
-from .utils import MISSING, _get_as_snowflake
+from disnake.flags import AutoModKeywordPresets
+from disnake.utils import MISSING, _get_as_snowflake
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from .abc import Snowflake
-    from .guild import Guild, GuildChannel
-    from .member import Member
-    from .message import Message
-    from .role import Role
-    from .threads import Thread
-    from .types.automod import (
+    from disnake.abc import Snowflake
+    from disnake.guild import Guild, GuildChannel
+    from disnake.member import Member
+    from disnake.message import Message
+    from disnake.role import Role
+    from disnake.threads import Thread
+    from disnake.types.automod import (
         AutoModAction as AutoModActionPayload,
         AutoModActionMetadata,
         AutoModBlockMessageActionMetadata,
@@ -46,7 +46,7 @@ if TYPE_CHECKING:
         AutoModTriggerMetadata as AutoModTriggerMetadataPayload,
         EditAutoModRule as EditAutoModRulePayload,
     )
-    from .types.gateway import AutoModerationActionExecutionEvent
+    from disnake.types.gateway import AutoModerationActionExecutionEvent
 
 __all__ = (
     "AutoModAction",

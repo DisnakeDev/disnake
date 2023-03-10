@@ -6,8 +6,8 @@ from typing import List, Literal, TypedDict, Union
 
 from typing_extensions import NotRequired
 
-from .channel import ChannelType
-from .emoji import PartialEmoji
+from disnake.types.channel import ChannelType
+from disnake.types.emoji import PartialEmoji
 
 ComponentType = Literal[1, 2, 3, 4, 5, 6, 7, 8]
 ButtonStyle = Literal[1, 2, 3, 4, 5]

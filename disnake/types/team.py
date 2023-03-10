@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import List, Literal, Optional, TypedDict
 
-from .snowflake import Snowflake
-from .user import PartialUser
+from disnake.types.snowflake import Snowflake
+from disnake.types.user import PartialUser
 
 TeamMembershipState = Literal[1, 2]
 

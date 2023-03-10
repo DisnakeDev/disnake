@@ -28,24 +28,30 @@ import disnake
 from disnake.app_commands import ApplicationCommand, Option
 from disnake.custom_warnings import SyncWarning
 from disnake.enums import ApplicationCommandType
-from disnake.utils import warn_deprecated
-
-from . import errors
-from .base_core import InvokableApplicationCommand
-from .common_bot_base import CommonBotBase
-from .ctx_menus_core import (
+from disnake.ext.commands import errors
+from disnake.ext.commands.base_core import InvokableApplicationCommand
+from disnake.ext.commands.common_bot_base import CommonBotBase
+from disnake.ext.commands.ctx_menus_core import (
     InvokableMessageCommand,
     InvokableUserCommand,
     message_command,
     user_command,
 )
-from .errors import CommandRegistrationError
-from .flags import CommandSyncFlags
-from .slash_core import InvokableSlashCommand, SubCommand, SubCommandGroup, slash_command
+from disnake.ext.commands.errors import CommandRegistrationError
+from disnake.ext.commands.flags import CommandSyncFlags
+from disnake.ext.commands.slash_core import (
+    InvokableSlashCommand,
+    SubCommand,
+    SubCommandGroup,
+    slash_command,
+)
+from disnake.utils import warn_deprecated
 
 if TYPE_CHECKING:
     from typing_extensions import NotRequired, ParamSpec
 
+    from disnake.ext.commands._types import Check, CoroFunc
+    from disnake.ext.commands.base_core import CogT, CommandCallback, InteractionCommandCallback
     from disnake.i18n import LocalizedOptional
     from disnake.interactions import (
         ApplicationCommandInteraction,
@@ -53,9 +59,6 @@ if TYPE_CHECKING:
         UserCommandInteraction,
     )
     from disnake.permissions import Permissions
-
-    from ._types import Check, CoroFunc
-    from .base_core import CogT, CommandCallback, InteractionCommandCallback
 
     P = ParamSpec("P")
 

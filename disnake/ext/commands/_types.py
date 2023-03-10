@@ -3,9 +3,9 @@
 from typing import TYPE_CHECKING, Any, Callable, Coroutine, TypeVar, Union
 
 if TYPE_CHECKING:
-    from .cog import Cog
-    from .context import Context
-    from .errors import CommandError
+    from disnake.ext.commands.cog import Cog
+    from disnake.ext.commands.context import Context
+    from disnake.ext.commands.errors import CommandError
 
 T = TypeVar("T")
 

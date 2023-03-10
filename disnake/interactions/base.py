@@ -71,6 +71,8 @@ if TYPE_CHECKING:
     from disnake.ext.commands import AutoShardedBot, Bot
     from disnake.file import File
     from disnake.guild import GuildChannel, GuildMessageable
+    from disnake.interactions.message import MessageInteraction
+    from disnake.interactions.modal import ModalInteraction
     from disnake.mentions import AllowedMentions
     from disnake.state import ConnectionState
     from disnake.threads import Thread
@@ -84,9 +86,6 @@ if TYPE_CHECKING:
     from disnake.ui.action_row import Components, MessageUIComponent, ModalUIComponent
     from disnake.ui.modal import Modal
     from disnake.ui.view import View
-
-    from .message import MessageInteraction
-    from .modal import ModalInteraction
 
     InteractionChannel = Union[GuildChannel, Thread, PartialMessageable]
 

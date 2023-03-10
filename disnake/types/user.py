@@ -2,7 +2,7 @@
 
 from typing import Literal, Optional, TypedDict
 
-from .snowflake import Snowflake
+from disnake.types.snowflake import Snowflake
 
 
 class PartialUser(TypedDict):

@@ -6,11 +6,11 @@ from typing import Literal, Optional, TypedDict
 
 from typing_extensions import NotRequired
 
-from .appinfo import PartialAppInfo
-from .channel import InviteChannel
-from .guild import InviteGuild
-from .guild_scheduled_event import GuildScheduledEvent
-from .user import PartialUser
+from disnake.types.appinfo import PartialAppInfo
+from disnake.types.channel import InviteChannel
+from disnake.types.guild import InviteGuild
+from disnake.types.guild_scheduled_event import GuildScheduledEvent
+from disnake.types.user import PartialUser
 
 InviteTargetType = Literal[1, 2]
 

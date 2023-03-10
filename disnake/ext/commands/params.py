@@ -39,12 +39,11 @@ from disnake.app_commands import Option, OptionChoice
 from disnake.channel import _channel_type_factory
 from disnake.enums import ChannelType, OptionType, try_enum_to_int
 from disnake.ext import commands
+from disnake.ext.commands import errors
+from disnake.ext.commands.converter import CONVERTER_MAPPING
 from disnake.i18n import Localized
 from disnake.interactions import ApplicationCommandInteraction
 from disnake.utils import maybe_coroutine
-
-from . import errors
-from .converter import CONVERTER_MAPPING
 
 T_ = TypeVar("T_")
 
@@ -52,12 +51,11 @@ if TYPE_CHECKING:
     from typing_extensions import Concatenate, ParamSpec, Self, TypeGuard
 
     from disnake.app_commands import Choices
+    from disnake.ext.commands.base_core import CogT
+    from disnake.ext.commands.cog import Cog
+    from disnake.ext.commands.slash_core import InvokableSlashCommand, SubCommand
     from disnake.i18n import LocalizationValue, LocalizedOptional
     from disnake.types.interactions import ApplicationCommandOptionChoiceValue
-
-    from .base_core import CogT
-    from .cog import Cog
-    from .slash_core import InvokableSlashCommand, SubCommand
 
     AnySlashCommand = Union[InvokableSlashCommand, SubCommand]
 

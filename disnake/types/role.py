@@ -6,7 +6,7 @@ from typing import Optional, TypedDict
 
 from typing_extensions import NotRequired
 
-from .snowflake import Snowflake
+from disnake.types.snowflake import Snowflake
 
 
 class Role(TypedDict):

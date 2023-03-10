@@ -4,12 +4,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
-from .asset import Asset
-from .colour import Colour
-from .mixins import Hashable
-from .partial_emoji import PartialEmoji
-from .permissions import Permissions
-from .utils import MISSING, _assetbytes_to_base64_data, _get_as_snowflake, snowflake_time
+from disnake.asset import Asset
+from disnake.colour import Colour
+from disnake.mixins import Hashable
+from disnake.partial_emoji import PartialEmoji
+from disnake.permissions import Permissions
+from disnake.utils import MISSING, _assetbytes_to_base64_data, _get_as_snowflake, snowflake_time
 
 __all__ = (
     "RoleTags",
@@ -21,12 +21,12 @@ if TYPE_CHECKING:
 
     from typing_extensions import Self
 
-    from .asset import AssetBytes
-    from .guild import Guild
-    from .member import Member
-    from .state import ConnectionState
-    from .types.guild import RolePositionUpdate
-    from .types.role import Role as RolePayload, RoleTags as RoleTagPayload
+    from disnake.asset import AssetBytes
+    from disnake.guild import Guild
+    from disnake.member import Member
+    from disnake.state import ConnectionState
+    from disnake.types.guild import RolePositionUpdate
+    from disnake.types.role import Role as RolePayload, RoleTags as RoleTagPayload
 
 
 class RoleTags:

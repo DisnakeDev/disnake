@@ -22,19 +22,22 @@ from typing import (
 
 from disnake.app_commands import ApplicationCommand
 from disnake.enums import ApplicationCommandType
+from disnake.ext.commands.cooldowns import BucketType, CooldownMapping, MaxConcurrency
+from disnake.ext.commands.errors import (
+    CheckFailure,
+    CommandError,
+    CommandInvokeError,
+    CommandOnCooldown,
+)
 from disnake.permissions import Permissions
 from disnake.utils import _generated, _overload_with_permissions, async_all, maybe_coroutine
-
-from .cooldowns import BucketType, CooldownMapping, MaxConcurrency
-from .errors import CheckFailure, CommandError, CommandInvokeError, CommandOnCooldown
 
 if TYPE_CHECKING:
     from typing_extensions import Concatenate, ParamSpec, Self
 
+    from disnake.ext.commands._types import Check, Coro, Error, Hook
+    from disnake.ext.commands.cog import Cog
     from disnake.interactions import ApplicationCommandInteraction
-
-    from ._types import Check, Coro, Error, Hook
-    from .cog import Cog
 
     ApplicationCommandInteractionT = TypeVar(
         "ApplicationCommandInteractionT", bound=ApplicationCommandInteraction, covariant=True
@@ -736,7 +739,7 @@ def default_member_permissions(value: int = 0, **permissions: bool) -> Callable[
     perms_value = Permissions(value, **permissions).value
 
     def decorator(func: T) -> T:
-        from .slash_core import SubCommand, SubCommandGroup
+        from disnake.ext.commands.slash_core import SubCommand, SubCommandGroup
 
         if isinstance(func, InvokableApplicationCommand):
             if isinstance(func, (SubCommand, SubCommandGroup)):

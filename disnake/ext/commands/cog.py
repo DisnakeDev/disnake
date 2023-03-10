@@ -22,20 +22,23 @@ from typing import (
 import disnake
 import disnake.utils
 from disnake.enums import Event
-
-from ._types import _BaseCommand
-from .base_core import InvokableApplicationCommand
-from .ctx_menus_core import InvokableMessageCommand, InvokableUserCommand
-from .slash_core import InvokableSlashCommand
+from disnake.ext.commands._types import _BaseCommand
+from disnake.ext.commands.base_core import InvokableApplicationCommand
+from disnake.ext.commands.ctx_menus_core import InvokableMessageCommand, InvokableUserCommand
+from disnake.ext.commands.slash_core import InvokableSlashCommand
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
+    from disnake.ext.commands.bot import (
+        AutoShardedBot,
+        AutoShardedInteractionBot,
+        Bot,
+        InteractionBot,
+    )
+    from disnake.ext.commands.context import Context
+    from disnake.ext.commands.core import Command
     from disnake.interactions import ApplicationCommandInteraction
-
-    from .bot import AutoShardedBot, AutoShardedInteractionBot, Bot, InteractionBot
-    from .context import Context
-    from .core import Command
 
     AnyBot = Union[Bot, AutoShardedBot, InteractionBot, AutoShardedInteractionBot]
 
@@ -372,7 +375,7 @@ class Cog(metaclass=CogMeta):
         Union[:class:`.Command`, :class:`.Group`]
             A command or group from the cog.
         """
-        from .core import GroupMixin
+        from disnake.ext.commands.core import GroupMixin
 
         for command in self.__cog_commands__:
             if command.parent is None:

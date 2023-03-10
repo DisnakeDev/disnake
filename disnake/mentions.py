@@ -4,16 +4,16 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, List, Union
 
-from .enums import MessageType
+from disnake.enums import MessageType
 
 __all__ = ("AllowedMentions",)
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from .abc import Snowflake
-    from .message import Message
-    from .types.message import AllowedMentions as AllowedMentionsPayload
+    from disnake.abc import Snowflake
+    from disnake.message import Message
+    from disnake.types.message import AllowedMentions as AllowedMentionsPayload
 
 
 class _FakeBool:
@@ -101,7 +101,7 @@ class AllowedMentions:
         .. versionadded:: 2.6
         """
         # circular import
-        from .message import Message
+        from disnake.message import Message
 
         return cls(
             everyone=message.mention_everyone,

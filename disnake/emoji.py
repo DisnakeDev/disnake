@@ -4,22 +4,22 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Iterator, List, Optional, Tuple, Union
 
-from .asset import Asset, AssetMixin
-from .partial_emoji import PartialEmoji, _EmojiTag
-from .user import User
-from .utils import MISSING, SnowflakeList, snowflake_time
+from disnake.asset import Asset, AssetMixin
+from disnake.partial_emoji import PartialEmoji, _EmojiTag
+from disnake.user import User
+from disnake.utils import MISSING, SnowflakeList, snowflake_time
 
 __all__ = ("Emoji",)
 
 if TYPE_CHECKING:
     from datetime import datetime
 
-    from .abc import Snowflake
-    from .guild import Guild
-    from .guild_preview import GuildPreview
-    from .role import Role
-    from .state import ConnectionState
-    from .types.emoji import Emoji as EmojiPayload
+    from disnake.abc import Snowflake
+    from disnake.guild import Guild
+    from disnake.guild_preview import GuildPreview
+    from disnake.role import Role
+    from disnake.state import ConnectionState
+    from disnake.types.emoji import Emoji as EmojiPayload
 
 
 class Emoji(_EmojiTag, AssetMixin):

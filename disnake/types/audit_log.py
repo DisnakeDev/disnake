@@ -7,28 +7,28 @@ from typing import List, Literal, Optional, TypedDict, Union
 
 from typing_extensions import NotRequired
 
-from .automod import (
+from disnake.types.automod import (
     AutoModAction,
     AutoModEventType,
     AutoModRule,
     AutoModTriggerMetadata,
     AutoModTriggerType,
 )
-from .channel import ChannelType, PermissionOverwrite, VideoQualityMode
-from .guild import (
+from disnake.types.channel import ChannelType, PermissionOverwrite, VideoQualityMode
+from disnake.types.guild import (
     DefaultMessageNotificationLevel,
     ExplicitContentFilterLevel,
     MFALevel,
     VerificationLevel,
 )
-from .guild_scheduled_event import GuildScheduledEvent
-from .integration import IntegrationExpireBehavior, PartialIntegration
-from .interactions import ApplicationCommand, ApplicationCommandPermissions
-from .role import Role
-from .snowflake import Snowflake
-from .threads import Thread
-from .user import User
-from .webhook import Webhook
+from disnake.types.guild_scheduled_event import GuildScheduledEvent
+from disnake.types.integration import IntegrationExpireBehavior, PartialIntegration
+from disnake.types.interactions import ApplicationCommand, ApplicationCommandPermissions
+from disnake.types.role import Role
+from disnake.types.snowflake import Snowflake
+from disnake.types.threads import Thread
+from disnake.types.user import User
+from disnake.types.webhook import Webhook
 
 AuditLogEvent = Literal[
     1,

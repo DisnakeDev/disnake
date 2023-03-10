@@ -4,8 +4,8 @@ from typing import List, Literal, Optional, TypedDict
 
 from typing_extensions import NotRequired
 
-from .member import MemberWithUser
-from .snowflake import Snowflake
+from disnake.types.member import MemberWithUser
+from disnake.types.snowflake import Snowflake
 
 SupportedModes = Literal["xsalsa20_poly1305_lite", "xsalsa20_poly1305_suffix", "xsalsa20_poly1305"]
 

@@ -27,16 +27,20 @@ from typing import (
 import disnake
 import disnake.utils
 from disnake.enums import Event
-
-from . import errors
-from .cog import Cog
+from disnake.ext.commands import errors
+from disnake.ext.commands.cog import Cog
 
 if TYPE_CHECKING:
     import importlib.machinery
 
-    from ._types import CoroFunc
-    from .bot import AutoShardedBot, AutoShardedInteractionBot, Bot, InteractionBot
-    from .help import HelpCommand
+    from disnake.ext.commands._types import CoroFunc
+    from disnake.ext.commands.bot import (
+        AutoShardedBot,
+        AutoShardedInteractionBot,
+        Bot,
+        InteractionBot,
+    )
+    from disnake.ext.commands.help import HelpCommand
 
     AnyBot = Union[Bot, AutoShardedBot, InteractionBot, AutoShardedInteractionBot]
 

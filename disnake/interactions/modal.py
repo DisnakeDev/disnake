@@ -5,10 +5,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional
 
 from disnake.enums import ComponentType
+from disnake.interactions.base import Interaction
 from disnake.message import Message
 from disnake.utils import cached_slot_property
-
-from .base import Interaction
 
 if TYPE_CHECKING:
     from disnake.state import ConnectionState

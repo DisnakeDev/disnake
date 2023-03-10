@@ -6,9 +6,9 @@ from typing import List, Optional, TypedDict
 
 from typing_extensions import NotRequired
 
-from .snowflake import Snowflake
-from .team import Team
-from .user import User
+from disnake.types.snowflake import Snowflake
+from disnake.types.team import Team
+from disnake.types.user import User
 
 
 class BaseAppInfo(TypedDict):

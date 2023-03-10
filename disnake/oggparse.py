@@ -5,7 +5,7 @@ from __future__ import annotations
 import struct
 from typing import IO, TYPE_CHECKING, ClassVar, Generator, Optional, Tuple
 
-from .errors import DiscordException
+from disnake.errors import DiscordException
 
 __all__ = (
     "OggError",

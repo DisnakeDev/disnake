@@ -5,15 +5,15 @@ from __future__ import annotations
 import datetime
 from typing import TYPE_CHECKING, List, Literal, Optional, Set, Union, cast
 
-from .enums import ChannelType, try_enum
-from .utils import get_slots
+from disnake.enums import ChannelType, try_enum
+from disnake.utils import get_slots
 
 if TYPE_CHECKING:
-    from .member import Member
-    from .message import Message
-    from .partial_emoji import PartialEmoji
-    from .threads import Thread, ThreadMember, ThreadType
-    from .types.gateway import (
+    from disnake.member import Member
+    from disnake.message import Message
+    from disnake.partial_emoji import PartialEmoji
+    from disnake.threads import Thread, ThreadMember, ThreadType
+    from disnake.types.gateway import (
         GuildScheduledEventUserAddEvent,
         GuildScheduledEventUserRemoveEvent,
         IntegrationDeleteEvent,
@@ -27,7 +27,7 @@ if TYPE_CHECKING:
         ThreadDeleteEvent,
         TypingStartEvent,
     )
-    from .user import User
+    from disnake.user import User
 
 
 __all__ = (

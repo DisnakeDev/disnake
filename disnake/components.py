@@ -17,15 +17,15 @@ from typing import (
     cast,
 )
 
-from .enums import ButtonStyle, ChannelType, ComponentType, TextInputStyle, try_enum
-from .partial_emoji import PartialEmoji, _EmojiTag
-from .utils import MISSING, assert_never, get_slots
+from disnake.enums import ButtonStyle, ChannelType, ComponentType, TextInputStyle, try_enum
+from disnake.partial_emoji import PartialEmoji, _EmojiTag
+from disnake.utils import MISSING, assert_never, get_slots
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from .emoji import Emoji
-    from .types.components import (
+    from disnake.emoji import Emoji
+    from disnake.types.components import (
         ActionRow as ActionRowPayload,
         BaseSelectMenu as BaseSelectMenuPayload,
         ButtonComponent as ButtonComponentPayload,

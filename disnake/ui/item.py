@@ -28,8 +28,7 @@ if TYPE_CHECKING:
     from disnake.enums import ComponentType
     from disnake.interactions import MessageInteraction
     from disnake.types.components import Component as ComponentPayload
-
-    from .view import View
+    from disnake.ui.view import View
 
     ItemCallbackType = Callable[[Any, ItemT, MessageInteraction], Coroutine[Any, Any, Any]]
 

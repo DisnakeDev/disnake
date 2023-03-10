@@ -5,9 +5,9 @@ from __future__ import annotations
 import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type
 
-from .enums import ExpireBehaviour, try_enum
-from .user import User
-from .utils import MISSING, _get_as_snowflake, deprecated, parse_time, warn_deprecated
+from disnake.enums import ExpireBehaviour, try_enum
+from disnake.user import User
+from disnake.utils import MISSING, _get_as_snowflake, deprecated, parse_time, warn_deprecated
 
 __all__ = (
     "IntegrationAccount",
@@ -19,9 +19,9 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
-    from .guild import Guild
-    from .role import Role
-    from .types.integration import (
+    from disnake.guild import Guild
+    from disnake.role import Role
+    from disnake.types.integration import (
         BotIntegration as BotIntegrationPayload,
         Integration as IntegrationPayload,
         IntegrationAccount as IntegrationAccountPayload,

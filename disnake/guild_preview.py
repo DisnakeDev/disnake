@@ -4,13 +4,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional, Tuple
 
-from .asset import Asset
-from .emoji import Emoji
-from .sticker import GuildSticker
+from disnake.asset import Asset
+from disnake.emoji import Emoji
+from disnake.sticker import GuildSticker
 
 if TYPE_CHECKING:
-    from .state import ConnectionState
-    from .types.guild import GuildPreview as GuildPreviewPayload
+    from disnake.state import ConnectionState
+    from disnake.types.guild import GuildPreview as GuildPreviewPayload
 
 __all__ = ("GuildPreview",)
 

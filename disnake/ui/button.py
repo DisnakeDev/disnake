@@ -20,9 +20,8 @@ from typing import (
 from disnake.components import Button as ButtonComponent
 from disnake.enums import ButtonStyle, ComponentType
 from disnake.partial_emoji import PartialEmoji, _EmojiTag
+from disnake.ui.item import DecoratedItem, Item, Object
 from disnake.utils import MISSING
-
-from .item import DecoratedItem, Item, Object
 
 __all__ = (
     "Button",
@@ -33,9 +32,8 @@ if TYPE_CHECKING:
     from typing_extensions import ParamSpec, Self
 
     from disnake.emoji import Emoji
-
-    from .item import ItemCallbackType
-    from .view import View
+    from disnake.ui.item import ItemCallbackType
+    from disnake.ui.view import View
 
 else:
     ParamSpec = TypeVar

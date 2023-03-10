@@ -29,8 +29,8 @@ from urllib.parse import quote as _uriquote
 import aiohttp
 import yarl
 
-from . import __version__, utils
-from .errors import (
+from disnake import __version__, utils
+from disnake.errors import (
     DiscordServerError,
     Forbidden,
     GatewayNotFound,
@@ -38,8 +38,8 @@ from .errors import (
     LoginFailure,
     NotFound,
 )
-from .gateway import DiscordClientWebSocketResponse
-from .utils import MISSING
+from disnake.gateway import DiscordClientWebSocketResponse
+from disnake.utils import MISSING
 
 _log = logging.getLogger(__name__)
 
@@ -48,10 +48,10 @@ if TYPE_CHECKING:
 
     from typing_extensions import Self
 
-    from .enums import InteractionResponseType
-    from .file import File
-    from .message import Attachment
-    from .types import (
+    from disnake.enums import InteractionResponseType
+    from disnake.file import File
+    from disnake.message import Attachment
+    from disnake.types import (
         appinfo,
         application_role_connection,
         audit_log,
@@ -78,7 +78,7 @@ if TYPE_CHECKING:
         welcome_screen,
         widget,
     )
-    from .types.snowflake import Snowflake, SnowflakeList
+    from disnake.types.snowflake import Snowflake, SnowflakeList
 
     T = TypeVar("T")
     Response = Coroutine[Any, Any, T]

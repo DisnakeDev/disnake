@@ -30,13 +30,12 @@ from disnake.components import (
     UserSelectMenu as UserSelectComponent,
 )
 from disnake.enums import ButtonStyle, ChannelType, ComponentType, TextInputStyle
+from disnake.ui.button import Button
+from disnake.ui.item import WrappedComponent
+from disnake.ui.select import ChannelSelect, MentionableSelect, RoleSelect, StringSelect, UserSelect
+from disnake.ui.select.string import SelectOptionInput, V_co
+from disnake.ui.text_input import TextInput
 from disnake.utils import MISSING, SequenceProxy, assert_never
-
-from .button import Button
-from .item import WrappedComponent
-from .select import ChannelSelect, MentionableSelect, RoleSelect, StringSelect, UserSelect
-from .select.string import SelectOptionInput, V_co
-from .text_input import TextInput
 
 if TYPE_CHECKING:
     from typing_extensions import Self

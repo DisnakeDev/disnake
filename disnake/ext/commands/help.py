@@ -8,13 +8,12 @@ import re
 from typing import TYPE_CHECKING, Any, Callable, Iterable, Optional
 
 import disnake.utils
-
-from .core import Command, Group
-from .errors import CommandError
+from disnake.ext.commands.core import Command, Group
+from disnake.ext.commands.errors import CommandError
 
 if TYPE_CHECKING:
-    from ._types import MaybeCoro
-    from .context import Context
+    from disnake.ext.commands._types import MaybeCoro
+    from disnake.ext.commands.context import Context
 
 __all__ = (
     "Paginator",

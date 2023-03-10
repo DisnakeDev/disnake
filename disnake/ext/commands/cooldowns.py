@@ -9,8 +9,7 @@ from typing import TYPE_CHECKING, Any, Callable, Deque, Dict, Optional
 
 from disnake.abc import PrivateChannel
 from disnake.enums import Enum
-
-from .errors import MaxConcurrencyReached
+from disnake.ext.commands.errors import MaxConcurrencyReached
 
 if TYPE_CHECKING:
     from typing_extensions import Self

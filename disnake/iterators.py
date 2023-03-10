@@ -18,16 +18,16 @@ from typing import (
     cast,
 )
 
-from .app_commands import application_command_factory
-from .audit_logs import AuditLogEntry
-from .automod import AutoModRule
-from .bans import BanEntry
-from .errors import NoMoreItems
-from .guild_scheduled_event import GuildScheduledEvent
-from .integrations import PartialIntegration
-from .object import Object
-from .threads import Thread
-from .utils import maybe_coroutine, snowflake_time, time_snowflake
+from disnake.app_commands import application_command_factory
+from disnake.audit_logs import AuditLogEntry
+from disnake.automod import AutoModRule
+from disnake.bans import BanEntry
+from disnake.errors import NoMoreItems
+from disnake.guild_scheduled_event import GuildScheduledEvent
+from disnake.integrations import PartialIntegration
+from disnake.object import Object
+from disnake.threads import Thread
+from disnake.utils import maybe_coroutine, snowflake_time, time_snowflake
 
 __all__ = (
     "ReactionIterator",
@@ -40,25 +40,25 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
-    from .abc import Messageable, Snowflake
-    from .app_commands import APIApplicationCommand
-    from .guild import Guild
-    from .member import Member
-    from .message import Message
-    from .state import ConnectionState
-    from .types.audit_log import (
+    from disnake.abc import Messageable, Snowflake
+    from disnake.app_commands import APIApplicationCommand
+    from disnake.guild import Guild
+    from disnake.member import Member
+    from disnake.message import Message
+    from disnake.state import ConnectionState
+    from disnake.types.audit_log import (
         AuditLog as AuditLogPayload,
         AuditLogEntry as AuditLogEntryPayload,
         AuditLogEvent,
     )
-    from .types.guild import Ban as BanPayload, Guild as GuildPayload
-    from .types.guild_scheduled_event import (
+    from disnake.types.guild import Ban as BanPayload, Guild as GuildPayload
+    from disnake.types.guild_scheduled_event import (
         GuildScheduledEventUser as GuildScheduledEventUserPayload,
     )
-    from .types.message import Message as MessagePayload
-    from .types.threads import Thread as ThreadPayload
-    from .types.user import PartialUser as PartialUserPayload
-    from .user import User
+    from disnake.types.message import Message as MessagePayload
+    from disnake.types.threads import Thread as ThreadPayload
+    from disnake.types.user import PartialUser as PartialUserPayload
+    from disnake.user import User
 
 T = TypeVar("T")
 OT = TypeVar("OT")
@@ -719,7 +719,7 @@ class GuildIterator(_AsyncIterator["Guild"]):
         return retrieve > 0
 
     def create_guild(self, data):
-        from .guild import Guild
+        from disnake.guild import Guild
 
         return Guild(state=self.state, data=data)
 
@@ -810,7 +810,7 @@ class MemberIterator(_AsyncIterator["Member"]):
                 await self.members.put(self.create_member(element))
 
     def create_member(self, data):
-        from .member import Member
+        from disnake.member import Member
 
         return Member(data=data, guild=self.guild, state=self.state)
 
@@ -901,7 +901,7 @@ class ArchivedThreadIterator(_AsyncIterator["Thread"]):
             self.before = self.update_before(threads[-1])
 
     def create_thread(self, data: ThreadPayload) -> Thread:
-        from .threads import Thread
+        from disnake.threads import Thread
 
         return Thread(guild=self.guild, state=self.guild._state, data=data)
 
@@ -956,7 +956,7 @@ class GuildScheduledEventUserIterator(_AsyncIterator[Union["User", "Member"]]):
         return retrieve > 0
 
     def create_user(self, data: GuildScheduledEventUserPayload) -> Union[User, Member]:
-        from .member import Member
+        from disnake.member import Member
 
         user_data = data["user"]
         member_data = data.get("member")

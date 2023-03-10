@@ -4,20 +4,20 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
-from .activity import BaseActivity, Spotify, create_activity
-from .asset import Asset
-from .enums import Status, WidgetStyle, try_enum
-from .invite import Invite
-from .user import BaseUser
-from .utils import MISSING, _get_as_snowflake, resolve_invite, snowflake_time
+from disnake.activity import BaseActivity, Spotify, create_activity
+from disnake.asset import Asset
+from disnake.enums import Status, WidgetStyle, try_enum
+from disnake.invite import Invite
+from disnake.user import BaseUser
+from disnake.utils import MISSING, _get_as_snowflake, resolve_invite, snowflake_time
 
 if TYPE_CHECKING:
     import datetime
 
-    from .abc import GuildChannel, Snowflake
-    from .guild import Guild
-    from .state import ConnectionState
-    from .types.widget import (
+    from disnake.abc import GuildChannel, Snowflake
+    from disnake.guild import Guild
+    from disnake.state import ConnectionState
+    from disnake.types.widget import (
         Widget as WidgetPayload,
         WidgetMember as WidgetMemberPayload,
         WidgetSettings as WidgetSettingsPayload,

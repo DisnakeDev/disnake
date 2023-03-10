@@ -33,9 +33,8 @@ from disnake.components import (
     _component_factory,
 )
 from disnake.enums import ComponentType, try_enum_to_int
+from disnake.ui.item import Item
 from disnake.utils import assert_never
-
-from .item import Item
 
 __all__ = ("View",)
 
@@ -50,8 +49,7 @@ if TYPE_CHECKING:
         ActionRow as ActionRowPayload,
         Component as ComponentPayload,
     )
-
-    from .item import ItemCallbackType
+    from disnake.ui.item import ItemCallbackType
 
 
 def _walk_all_components(
@@ -63,27 +61,27 @@ def _walk_all_components(
 
 def _component_to_item(component: MessageComponent) -> Item:
     if isinstance(component, ButtonComponent):
-        from .button import Button
+        from disnake.ui.button import Button
 
         return Button.from_component(component)
     if isinstance(component, StringSelectComponent):
-        from .select import StringSelect
+        from disnake.ui.select import StringSelect
 
         return StringSelect.from_component(component)
     if isinstance(component, UserSelectComponent):
-        from .select import UserSelect
+        from disnake.ui.select import UserSelect
 
         return UserSelect.from_component(component)
     if isinstance(component, RoleSelectComponent):
-        from .select import RoleSelect
+        from disnake.ui.select import RoleSelect
 
         return RoleSelect.from_component(component)
     if isinstance(component, MentionableSelectComponent):
-        from .select import MentionableSelect
+        from disnake.ui.select import MentionableSelect
 
         return MentionableSelect.from_component(component)
     if isinstance(component, ChannelSelectComponent):
-        from .select import ChannelSelect
+        from disnake.ui.select import ChannelSelect
 
         return ChannelSelect.from_component(component)
 

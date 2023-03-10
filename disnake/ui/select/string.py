@@ -18,9 +18,8 @@ from typing import (
 
 from disnake.components import SelectOption, StringSelectMenu
 from disnake.enums import ComponentType
+from disnake.ui.select.base import BaseSelect, P, V_co, _create_decorator
 from disnake.utils import MISSING
-
-from .base import BaseSelect, P, V_co, _create_decorator
 
 if TYPE_CHECKING:
     from typing_extensions import Self

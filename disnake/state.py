@@ -29,12 +29,12 @@ from typing import (
     overload,
 )
 
-from . import utils
-from .activity import BaseActivity
-from .app_commands import GuildApplicationCommandPermissions, application_command_factory
-from .audit_logs import AuditLogEntry
-from .automod import AutoModActionExecution, AutoModRule
-from .channel import (
+from disnake import utils
+from disnake.activity import BaseActivity
+from disnake.app_commands import GuildApplicationCommandPermissions, application_command_factory
+from disnake.audit_logs import AuditLogEntry
+from disnake.automod import AutoModActionExecution, AutoModRule
+from disnake.channel import (
     DMChannel,
     ForumChannel,
     GroupChannel,
@@ -44,25 +44,32 @@ from .channel import (
     VoiceChannel,
     _guild_channel_factory,
 )
-from .emoji import Emoji
-from .enums import ApplicationCommandType, ChannelType, ComponentType, MessageType, Status, try_enum
-from .flags import ApplicationFlags, Intents, MemberCacheFlags
-from .guild import Guild
-from .guild_scheduled_event import GuildScheduledEvent
-from .integrations import _integration_factory
-from .interactions import (
+from disnake.emoji import Emoji
+from disnake.enums import (
+    ApplicationCommandType,
+    ChannelType,
+    ComponentType,
+    MessageType,
+    Status,
+    try_enum,
+)
+from disnake.flags import ApplicationFlags, Intents, MemberCacheFlags
+from disnake.guild import Guild
+from disnake.guild_scheduled_event import GuildScheduledEvent
+from disnake.integrations import _integration_factory
+from disnake.interactions import (
     ApplicationCommandInteraction,
     Interaction,
     MessageInteraction,
     ModalInteraction,
 )
-from .invite import Invite
-from .member import Member
-from .mentions import AllowedMentions
-from .message import Message
-from .object import Object
-from .partial_emoji import PartialEmoji
-from .raw_models import (
+from disnake.invite import Invite
+from disnake.member import Member
+from disnake.mentions import AllowedMentions
+from disnake.message import Message
+from disnake.object import Object
+from disnake.partial_emoji import PartialEmoji
+from disnake.raw_models import (
     RawBulkMessageDeleteEvent,
     RawGuildMemberRemoveEvent,
     RawGuildScheduledEventUserActionEvent,
@@ -76,33 +83,36 @@ from .raw_models import (
     RawThreadMemberRemoveEvent,
     RawTypingEvent,
 )
-from .role import Role
-from .stage_instance import StageInstance
-from .sticker import GuildSticker
-from .threads import Thread, ThreadMember
-from .ui.modal import Modal, ModalStore
-from .ui.view import View, ViewStore
-from .user import ClientUser, User
-from .utils import MISSING
-from .webhook import Webhook
+from disnake.role import Role
+from disnake.stage_instance import StageInstance
+from disnake.sticker import GuildSticker
+from disnake.threads import Thread, ThreadMember
+from disnake.ui.modal import Modal, ModalStore
+from disnake.ui.view import View, ViewStore
+from disnake.user import ClientUser, User
+from disnake.utils import MISSING
+from disnake.webhook import Webhook
 
 if TYPE_CHECKING:
-    from .abc import MessageableChannel, PrivateChannel
-    from .app_commands import APIApplicationCommand, ApplicationCommand
-    from .client import Client
-    from .gateway import DiscordWebSocket
-    from .guild import GuildChannel, VocalGuildChannel
-    from .http import HTTPClient
-    from .types import gateway
-    from .types.activity import Activity as ActivityPayload
-    from .types.channel import DMChannel as DMChannelPayload
-    from .types.emoji import Emoji as EmojiPayload
-    from .types.guild import Guild as GuildPayload, UnavailableGuild as UnavailableGuildPayload
-    from .types.message import Message as MessagePayload
-    from .types.sticker import GuildSticker as GuildStickerPayload
-    from .types.user import User as UserPayload
-    from .types.webhook import Webhook as WebhookPayload
-    from .voice_client import VoiceProtocol
+    from disnake.abc import MessageableChannel, PrivateChannel
+    from disnake.app_commands import APIApplicationCommand, ApplicationCommand
+    from disnake.client import Client
+    from disnake.gateway import DiscordWebSocket
+    from disnake.guild import GuildChannel, VocalGuildChannel
+    from disnake.http import HTTPClient
+    from disnake.types import gateway
+    from disnake.types.activity import Activity as ActivityPayload
+    from disnake.types.channel import DMChannel as DMChannelPayload
+    from disnake.types.emoji import Emoji as EmojiPayload
+    from disnake.types.guild import (
+        Guild as GuildPayload,
+        UnavailableGuild as UnavailableGuildPayload,
+    )
+    from disnake.types.message import Message as MessagePayload
+    from disnake.types.sticker import GuildSticker as GuildStickerPayload
+    from disnake.types.user import User as UserPayload
+    from disnake.types.webhook import Webhook as WebhookPayload
+    from disnake.voice_client import VoiceProtocol
 
     T = TypeVar("T")
     Channel = Union[GuildChannel, VocalGuildChannel, PrivateChannel]

@@ -19,10 +19,10 @@ from typing import (
     overload,
 )
 
-from . import utils
-from .colour import Colour
-from .file import File
-from .utils import MISSING, classproperty, warn_deprecated
+from disnake import utils
+from disnake.colour import Colour
+from disnake.file import File
+from disnake.utils import MISSING, classproperty, warn_deprecated
 
 __all__ = ("Embed",)
 

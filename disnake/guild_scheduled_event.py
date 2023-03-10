@@ -5,16 +5,16 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, Literal, Optional, overload
 
-from .asset import Asset
-from .enums import (
+from disnake.asset import Asset
+from disnake.enums import (
     ChannelType,
     GuildScheduledEventEntityType,
     GuildScheduledEventPrivacyLevel,
     GuildScheduledEventStatus,
     try_enum,
 )
-from .mixins import Hashable
-from .utils import (
+from disnake.mixins import Hashable
+from disnake.utils import (
     MISSING,
     _assetbytes_to_base64_data,
     _get_as_snowflake,
@@ -25,16 +25,16 @@ from .utils import (
 )
 
 if TYPE_CHECKING:
-    from .abc import GuildChannel, Snowflake
-    from .asset import AssetBytes
-    from .guild import Guild
-    from .iterators import GuildScheduledEventUserIterator
-    from .state import ConnectionState
-    from .types.guild_scheduled_event import (
+    from disnake.abc import GuildChannel, Snowflake
+    from disnake.asset import AssetBytes
+    from disnake.guild import Guild
+    from disnake.iterators import GuildScheduledEventUserIterator
+    from disnake.state import ConnectionState
+    from disnake.types.guild_scheduled_event import (
         GuildScheduledEvent as GuildScheduledEventPayload,
         GuildScheduledEventEntityMetadata as GuildScheduledEventEntityMetadataPayload,
     )
-    from .user import User
+    from disnake.user import User
 
 
 __all__ = ("GuildScheduledEventMetadata", "GuildScheduledEvent")
@@ -697,7 +697,7 @@ class GuildScheduledEvent(Hashable):
 
             users = await event.fetch_users(limit=250).flatten()
         """
-        from .iterators import GuildScheduledEventUserIterator  # cyclic import
+        from disnake.iterators import GuildScheduledEventUserIterator  # cyclic import
 
         return GuildScheduledEventUserIterator(
             self,

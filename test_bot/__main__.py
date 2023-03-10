@@ -12,7 +12,7 @@ from disnake.ext import commands
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
-from .config import Config
+from test_bot.config import Config
 
 logger = logging.getLogger(__name__)
 

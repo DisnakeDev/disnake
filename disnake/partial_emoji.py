@@ -5,8 +5,8 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
 
-from . import utils
-from .asset import Asset, AssetMixin
+from disnake import utils
+from disnake.asset import Asset, AssetMixin
 
 __all__ = ("PartialEmoji",)
 
@@ -15,10 +15,10 @@ if TYPE_CHECKING:
 
     from typing_extensions import Self
 
-    from .emoji import Emoji
-    from .state import ConnectionState
-    from .types.activity import ActivityEmoji as ActivityEmojiPayload
-    from .types.emoji import Emoji as EmojiPayload, PartialEmoji as PartialEmojiPayload
+    from disnake.emoji import Emoji
+    from disnake.state import ConnectionState
+    from disnake.types.activity import ActivityEmoji as ActivityEmojiPayload
+    from disnake.types.emoji import Emoji as EmojiPayload, PartialEmoji as PartialEmojiPayload
 
 
 class _EmojiTag:

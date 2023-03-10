@@ -15,16 +15,15 @@ if TYPE_CHECKING:
     from typing_extensions import ParamSpec
 
     from disnake.channel import DMChannel
+    from disnake.ext.commands.bot import AutoShardedBot, Bot
+    from disnake.ext.commands.cog import Cog
+    from disnake.ext.commands.core import Command
+    from disnake.ext.commands.view import StringView
     from disnake.guild import Guild, GuildMessageable
     from disnake.member import Member
     from disnake.state import ConnectionState
     from disnake.user import ClientUser, User
     from disnake.voice_client import VoiceProtocol
-
-    from .bot import AutoShardedBot, Bot
-    from .cog import Cog
-    from .core import Command
-    from .view import StringView
 
 __all__ = ("Context", "GuildContext")
 
@@ -319,8 +318,8 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         Any
             The result of the help command, if any.
         """
-        from .core import Command, Group, wrap_callback
-        from .errors import CommandError
+        from disnake.ext.commands.core import Command, Group, wrap_callback
+        from disnake.ext.commands.errors import CommandError
 
         bot = self.bot
         cmd = bot.help_command

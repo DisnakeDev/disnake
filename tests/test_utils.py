@@ -16,8 +16,7 @@ import yarl
 
 import disnake
 from disnake import utils
-
-from . import helpers
+from tests import helpers
 
 
 def test_missing() -> None:

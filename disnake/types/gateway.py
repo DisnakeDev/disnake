@@ -6,25 +6,25 @@ from typing import Any, List, Literal, Optional, Sequence, Tuple, TypedDict, Uni
 
 from typing_extensions import NotRequired
 
-from .activity import PartialPresenceUpdate, PresenceData, SendableActivity
-from .appinfo import PartialAppInfo, PartialGatewayAppInfo
-from .audit_log import AuditLogEntry
-from .automod import AutoModAction, AutoModRule, AutoModTriggerType
-from .channel import Channel, GuildChannel, StageInstance
-from .emoji import Emoji, PartialEmoji
-from .guild import Guild, UnavailableGuild
-from .guild_scheduled_event import GuildScheduledEvent
-from .integration import BaseIntegration
-from .interactions import BaseInteraction, GuildApplicationCommandPermissions
-from .invite import InviteTargetType
-from .member import MemberWithUser
-from .message import Message
-from .role import Role
-from .snowflake import Snowflake, SnowflakeList
-from .sticker import GuildSticker
-from .threads import Thread, ThreadMember, ThreadMemberWithPresence, ThreadType
-from .user import User
-from .voice import GuildVoiceState, SupportedModes
+from disnake.types.activity import PartialPresenceUpdate, PresenceData, SendableActivity
+from disnake.types.appinfo import PartialAppInfo, PartialGatewayAppInfo
+from disnake.types.audit_log import AuditLogEntry
+from disnake.types.automod import AutoModAction, AutoModRule, AutoModTriggerType
+from disnake.types.channel import Channel, GuildChannel, StageInstance
+from disnake.types.emoji import Emoji, PartialEmoji
+from disnake.types.guild import Guild, UnavailableGuild
+from disnake.types.guild_scheduled_event import GuildScheduledEvent
+from disnake.types.integration import BaseIntegration
+from disnake.types.interactions import BaseInteraction, GuildApplicationCommandPermissions
+from disnake.types.invite import InviteTargetType
+from disnake.types.member import MemberWithUser
+from disnake.types.message import Message
+from disnake.types.role import Role
+from disnake.types.snowflake import Snowflake, SnowflakeList
+from disnake.types.sticker import GuildSticker
+from disnake.types.threads import Thread, ThreadMember, ThreadMemberWithPresence, ThreadType
+from disnake.types.user import User
+from disnake.types.voice import GuildVoiceState, SupportedModes
 
 
 class SessionStartLimit(TypedDict):

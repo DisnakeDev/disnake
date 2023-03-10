@@ -4,9 +4,14 @@ from typing import List, Literal, Optional, TypedDict, Union
 
 from typing_extensions import NotRequired
 
-from .snowflake import Snowflake
-from .threads import ForumTag, ThreadArchiveDurationLiteral, ThreadMember, ThreadMetadata
-from .user import PartialUser
+from disnake.types.snowflake import Snowflake
+from disnake.types.threads import (
+    ForumTag,
+    ThreadArchiveDurationLiteral,
+    ThreadMember,
+    ThreadMetadata,
+)
+from disnake.types.user import PartialUser
 
 OverwriteType = Literal[0, 1]
 

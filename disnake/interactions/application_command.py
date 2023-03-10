@@ -7,11 +7,10 @@ from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Uni
 from disnake import utils
 from disnake.enums import ApplicationCommandType, Locale, OptionType, try_enum
 from disnake.guild import Guild
+from disnake.interactions.base import Interaction, InteractionDataResolved
 from disnake.member import Member
 from disnake.message import Message
 from disnake.user import User
-
-from .base import Interaction, InteractionDataResolved
 
 __all__ = (
     "ApplicationCommandInteraction",

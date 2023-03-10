@@ -4,7 +4,7 @@ import logging
 import logging.handlers
 import pathlib
 
-from .config import Config
+from test_bot.config import Config
 
 _LOG_FORMAT = "%(asctime)s: [%(levelname)s] (%(threadName)s) %(name)s: %(message)s"
 

@@ -4,18 +4,18 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional
 
-from .enums import StagePrivacyLevel, try_enum
-from .mixins import Hashable
-from .utils import MISSING, _get_as_snowflake, cached_slot_property, warn_deprecated
+from disnake.enums import StagePrivacyLevel, try_enum
+from disnake.mixins import Hashable
+from disnake.utils import MISSING, _get_as_snowflake, cached_slot_property, warn_deprecated
 
 __all__ = ("StageInstance",)
 
 if TYPE_CHECKING:
-    from .channel import StageChannel
-    from .guild import Guild
-    from .guild_scheduled_event import GuildScheduledEvent
-    from .state import ConnectionState
-    from .types.channel import StageInstance as StageInstancePayload
+    from disnake.channel import StageChannel
+    from disnake.guild import Guild
+    from disnake.guild_scheduled_event import GuildScheduledEvent
+    from disnake.state import ConnectionState
+    from disnake.types.channel import StageInstance as StageInstancePayload
 
 
 class StageInstance(Hashable):

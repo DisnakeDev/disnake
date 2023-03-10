@@ -6,24 +6,22 @@ import asyncio
 from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Sequence, Tuple, Union
 
 from disnake.app_commands import MessageCommand, UserCommand
+from disnake.ext.commands.base_core import InvokableApplicationCommand, _get_overridden_method
+from disnake.ext.commands.errors import CommandError
+from disnake.ext.commands.params import safe_call
 from disnake.i18n import Localized
 from disnake.permissions import Permissions
-
-from .base_core import InvokableApplicationCommand, _get_overridden_method
-from .errors import CommandError
-from .params import safe_call
 
 if TYPE_CHECKING:
     from typing_extensions import ParamSpec
 
+    from disnake.ext.commands.base_core import CogT, InteractionCommandCallback
     from disnake.i18n import LocalizedOptional
     from disnake.interactions import (
         ApplicationCommandInteraction,
         MessageCommandInteraction,
         UserCommandInteraction,
     )
-
-    from .base_core import CogT, InteractionCommandCallback
 
     P = ParamSpec("P")
 

@@ -1,6 +1,10 @@
 # SPDX-License-Identifier: MIT
 
-from .errors import ExpectedClosingQuoteError, InvalidEndOfQuotedStringError, UnexpectedQuoteError
+from disnake.ext.commands.errors import (
+    ExpectedClosingQuoteError,
+    InvalidEndOfQuotedStringError,
+    UnexpectedQuoteError,
+)
 
 # map from opening quotes to closing quotes
 _quotes = {

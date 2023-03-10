@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, NamedTuple, Optional
 __all__ = ("BanEntry",)
 
 if TYPE_CHECKING:
-    from .user import User
+    from disnake.user import User
 
 
 class BanEntry(NamedTuple):

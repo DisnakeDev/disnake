@@ -4,18 +4,18 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, NoReturn, Optional
 
-from .guild import Guild
-from .utils import MISSING, _assetbytes_to_base64_data, parse_time
+from disnake.guild import Guild
+from disnake.utils import MISSING, _assetbytes_to_base64_data, parse_time
 
 __all__ = ("Template",)
 
 if TYPE_CHECKING:
     import datetime
 
-    from .asset import AssetBytes
-    from .state import ConnectionState
-    from .types.template import Template as TemplatePayload
-    from .user import User
+    from disnake.asset import AssetBytes
+    from disnake.state import ConnectionState
+    from disnake.types.template import Template as TemplatePayload
+    from disnake.user import User
 
 
 class _FriendlyHttpAttributeErrorHelper:

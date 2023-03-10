@@ -6,10 +6,9 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Union
 
 from disnake.components import MessageComponent
 from disnake.enums import ComponentType, try_enum
+from disnake.interactions.base import Interaction, InteractionDataResolved
 from disnake.message import Message
 from disnake.utils import cached_slot_property
-
-from .base import Interaction, InteractionDataResolved
 
 __all__ = (
     "MessageInteraction",
@@ -17,6 +16,7 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
+    from disnake.interactions.base import InteractionChannel
     from disnake.member import Member
     from disnake.role import Role
     from disnake.state import ConnectionState
@@ -26,8 +26,6 @@ if TYPE_CHECKING:
         MessageInteraction as MessageInteractionPayload,
     )
     from disnake.user import User
-
-    from .base import InteractionChannel
 
 
 class MessageInteraction(Interaction):

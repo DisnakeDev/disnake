@@ -6,10 +6,10 @@ from typing import List, Literal, Optional, TypedDict
 
 from typing_extensions import NotRequired
 
-from .activity import PresenceData
-from .member import Member
-from .message import Message
-from .snowflake import Snowflake, SnowflakeList
+from disnake.types.activity import PresenceData
+from disnake.types.member import Member
+from disnake.types.message import Message
+from disnake.types.snowflake import Snowflake, SnowflakeList
 
 ThreadType = Literal[10, 11, 12]
 ThreadArchiveDurationLiteral = Literal[60, 1440, 4320, 10080]

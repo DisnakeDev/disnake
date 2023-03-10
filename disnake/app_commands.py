@@ -7,7 +7,7 @@ import re
 from abc import ABC
 from typing import TYPE_CHECKING, ClassVar, Dict, List, Mapping, Optional, Tuple, Union
 
-from .enums import (
+from disnake.enums import (
     ApplicationCommandPermissionType,
     ApplicationCommandType,
     ChannelType,
@@ -17,16 +17,21 @@ from .enums import (
     try_enum,
     try_enum_to_int,
 )
-from .i18n import Localized
-from .permissions import Permissions
-from .utils import MISSING, _get_as_snowflake, _maybe_cast
+from disnake.i18n import Localized
+from disnake.permissions import Permissions
+from disnake.utils import MISSING, _get_as_snowflake, _maybe_cast
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from .i18n import LocalizationProtocol, LocalizationValue, LocalizedOptional, LocalizedRequired
-    from .state import ConnectionState
-    from .types.interactions import (
+    from disnake.i18n import (
+        LocalizationProtocol,
+        LocalizationValue,
+        LocalizedOptional,
+        LocalizedRequired,
+    )
+    from disnake.state import ConnectionState
+    from disnake.types.interactions import (
         ApplicationCommand as ApplicationCommandPayload,
         ApplicationCommandOption as ApplicationCommandOptionPayload,
         ApplicationCommandOptionChoice as ApplicationCommandOptionChoicePayload,

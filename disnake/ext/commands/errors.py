@@ -11,12 +11,11 @@ if TYPE_CHECKING:
     from inspect import Parameter
 
     from disnake.abc import GuildChannel
+    from disnake.ext.commands.context import Context
+    from disnake.ext.commands.cooldowns import BucketType, Cooldown
+    from disnake.ext.commands.flag_converter import Flag
     from disnake.threads import Thread
     from disnake.types.snowflake import Snowflake, SnowflakeList
-
-    from .context import Context
-    from .cooldowns import BucketType, Cooldown
-    from .flag_converter import Flag
 
 
 __all__ = (

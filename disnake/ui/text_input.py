@@ -6,9 +6,8 @@ from typing import Optional, Tuple
 
 from disnake.components import TextInput as TextInputComponent
 from disnake.enums import ComponentType, TextInputStyle
+from disnake.ui.item import WrappedComponent
 from disnake.utils import MISSING
-
-from .item import WrappedComponent
 
 __all__ = ("TextInput",)
 
