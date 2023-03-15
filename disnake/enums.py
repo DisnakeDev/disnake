@@ -265,6 +265,7 @@ class PartyType(Enum):
     watch_together = 880218394199220334
     sketch_heads = 902271654783242291
     ocho = 832025144389533716
+    gartic_phone = 1007373802981822582
 
 
 class SpeakingState(Enum):
