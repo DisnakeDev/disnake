@@ -458,7 +458,7 @@ class CommonBotBase(Generic[CogT]):
             setup = lib.setup
         except AttributeError:
             del sys.modules[key]
-            raise errors.NoEntryPointError(key)
+            raise errors.NoEntryPointError(key) from None
 
         try:
             setup(self)
@@ -473,8 +473,8 @@ class CommonBotBase(Generic[CogT]):
     def _resolve_name(self, name: str, package: Optional[str]) -> str:
         try:
             return importlib.util.resolve_name(name, package)
-        except ImportError:
-            raise errors.ExtensionNotFound(name)
+        except ImportError as e:
+            raise errors.ExtensionNotFound(name) from e
 
     def load_extension(self, name: str, *, package: Optional[str] = None) -> None:
         """Loads an extension.
