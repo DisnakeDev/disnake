@@ -395,6 +395,17 @@ class CommonBotBase(Generic[CogT]):
         """Mapping[:class:`str`, :class:`Cog`]: A read-only mapping of cog name to cog."""
         return types.MappingProxyType(self.__cogs)
 
+    def get_listeners(self) -> Mapping[str, List[CoroFunc]]:
+        """Mapping[:class:`str`, List[Callable]]: A read-only mapping of event names to listeners.
+
+        .. note::
+            To add or remove a listener you should use :meth:`.add_listener` and
+            :meth:`.remove_listener`.
+
+        .. versionadded:: 2.9
+        """
+        return types.MappingProxyType(self.extra_events)
+
     # extensions
 
     def _remove_module_references(self, name: str) -> None:
@@ -447,7 +458,7 @@ class CommonBotBase(Generic[CogT]):
             setup = lib.setup
         except AttributeError:
             del sys.modules[key]
-            raise errors.NoEntryPointError(key)
+            raise errors.NoEntryPointError(key) from None
 
         try:
             setup(self)
@@ -462,8 +473,8 @@ class CommonBotBase(Generic[CogT]):
     def _resolve_name(self, name: str, package: Optional[str]) -> str:
         try:
             return importlib.util.resolve_name(name, package)
-        except ImportError:
-            raise errors.ExtensionNotFound(name)
+        except ImportError as e:
+            raise errors.ExtensionNotFound(name) from e
 
     def load_extension(self, name: str, *, package: Optional[str] = None) -> None:
         """Loads an extension.

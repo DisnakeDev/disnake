@@ -731,7 +731,7 @@ class Embed:
         try:
             self._fields[index]
         except IndexError:
-            raise IndexError("field index out of range")
+            raise IndexError("field index out of range") from None
 
         field: EmbedFieldPayload = {
             "inline": inline,
