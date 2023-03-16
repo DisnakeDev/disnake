@@ -176,6 +176,7 @@ ignore = [
     # unknown if this is actually an issue
     "RUF005", # might not be actually faster
     "RUF006", # might not be an issue/very extreme cases
+    "PLC1901", # somewhat buggy, false positives, incorrect suggestions, and whatnot
 
     # ignore try-except-pass. Bare excepts are caught with E722
     "S110",
@@ -185,6 +186,7 @@ ignore = [
 
     # import aliases are fixed by isort
     "PLC0414",
+
 
     # outer loop variables are overwritten by inner assignment target, these are mostly intentional
     "PLW2901",
