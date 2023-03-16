@@ -2650,7 +2650,7 @@ class HTTPClient:
         try:
             data: gateway.Gateway = await self.request(Route("GET", "/gateway"))
         except HTTPException as exc:
-            raise GatewayNotFound() from exc
+            raise GatewayNotFound from exc
 
         return self._format_gateway_url(data["url"], encoding=encoding, zlib=zlib)
 
@@ -2660,7 +2660,7 @@ class HTTPClient:
         try:
             data: gateway.GatewayBot = await self.request(Route("GET", "/gateway/bot"))
         except HTTPException as exc:
-            raise GatewayNotFound() from exc
+            raise GatewayNotFound from exc
 
         return (
             data["shards"],
