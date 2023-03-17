@@ -13,19 +13,6 @@ are custom to the command extension module.
 Prefix Commands
 ---------------
 
-.. function:: on_command_error(ctx, error)
-
-    An error handler that is called when an error is raised
-    inside a command either through user input error, check
-    failure, or an error in your own code.
-
-    A default one is provided (:meth:`.Bot.on_command_error`).
-
-    :param ctx: The invocation context.
-    :type ctx: :class:`.Context`
-    :param error: The error that was raised.
-    :type error: :class:`.CommandError` derived
-
 .. function:: on_command(ctx)
 
     An event that is called when a command is found and is about to be invoked.
@@ -46,21 +33,21 @@ Prefix Commands
     :param ctx: The invocation context.
     :type ctx: :class:`.Context`
 
-Application Commands
---------------------
-
-.. function:: on_slash_command_error(inter, error)
+.. function:: on_command_error(ctx, error)
 
     An error handler that is called when an error is raised
-    inside a slash command either through user input error, check
+    inside a command either through user input error, check
     failure, or an error in your own code.
 
-    A default one is provided (:meth:`.Bot.on_slash_command_error`).
+    A default one is provided (:meth:`.Bot.on_command_error`).
 
-    :param inter: The interaction that invoked this slash command.
-    :type inter: :class:`.ApplicationCommandInteraction`
+    :param ctx: The invocation context.
+    :type ctx: :class:`.Context`
     :param error: The error that was raised.
     :type error: :class:`.CommandError` derived
+
+Application Commands
+--------------------
 
 .. function:: on_slash_command(inter)
 
@@ -82,15 +69,15 @@ Application Commands
     :param inter: The interaction that invoked this slash command.
     :type inter: :class:`.ApplicationCommandInteraction`
 
-.. function:: on_user_command_error(inter, error)
+.. function:: on_slash_command_error(inter, error)
 
     An error handler that is called when an error is raised
-    inside a user command either through check
+    inside a slash command either through user input error, check
     failure, or an error in your own code.
 
-    A default one is provided (:meth:`.Bot.on_user_command_error`).
+    A default one is provided (:meth:`.Bot.on_slash_command_error`).
 
-    :param inter: The interaction that invoked this user command.
+    :param inter: The interaction that invoked this slash command.
     :type inter: :class:`.ApplicationCommandInteraction`
     :param error: The error that was raised.
     :type error: :class:`.CommandError` derived
@@ -115,15 +102,15 @@ Application Commands
     :param inter: The interaction that invoked this user command.
     :type inter: :class:`.ApplicationCommandInteraction`
 
-.. function:: on_message_command_error(inter, error)
+.. function:: on_user_command_error(inter, error)
 
     An error handler that is called when an error is raised
-    inside a message command either through check
+    inside a user command either through check
     failure, or an error in your own code.
 
-    A default one is provided (:meth:`.Bot.on_message_command_error`).
+    A default one is provided (:meth:`.Bot.on_user_command_error`).
 
-    :param inter: The interaction that invoked this message command.
+    :param inter: The interaction that invoked this user command.
     :type inter: :class:`.ApplicationCommandInteraction`
     :param error: The error that was raised.
     :type error: :class:`.CommandError` derived
@@ -147,3 +134,16 @@ Application Commands
 
     :param inter: The interaction that invoked this message command.
     :type inter: :class:`.ApplicationCommandInteraction`
+
+.. function:: on_message_command_error(inter, error)
+
+    An error handler that is called when an error is raised
+    inside a message command either through check
+    failure, or an error in your own code.
+
+    A default one is provided (:meth:`.Bot.on_message_command_error`).
+
+    :param inter: The interaction that invoked this message command.
+    :type inter: :class:`.ApplicationCommandInteraction`
+    :param error: The error that was raised.
+    :type error: :class:`.CommandError` derived
