@@ -119,6 +119,7 @@ function getCurrentSection() {
   return currentSection;
 }
 
+// create interactive sidebar
 document.addEventListener('DOMContentLoaded', () => {
   sidebar = new Sidebar(document.getElementById('sidebar'));
   sidebar.createCollapsableSections();
@@ -149,15 +150,10 @@ function sidebarSearch() {
   }
 }
 
-
-"use strict";
-
-window.addEventListener("DOMContentLoaded", scrollSidebarToContents);
-
-function scrollSidebarToContents() {
+// scroll sidebar to selected entry
+window.addEventListener("DOMContentLoaded", () => {
   const currentSection = document.querySelector("#sidebar li.current");
-
   if (currentSection) {
     currentSection.scrollIntoView();
   }
-}
+});
