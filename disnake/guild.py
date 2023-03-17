@@ -4166,7 +4166,7 @@ class Guild(Hashable):
             if user_ids is None:
                 raise ValueError("Must pass either query or user_ids")
 
-        elif query == "":
+        elif not query:
             raise ValueError("Cannot pass empty query string.")
 
         elif user_ids is not None:
@@ -4219,7 +4219,7 @@ class Guild(Hashable):
         List[:class:`Member`]
             The list of members that have matched the query.
         """
-        if query == "":
+        if not query:
             raise ValueError("Cannot pass empty query string.")
         if limit < 1:
             raise ValueError("limit must be at least 1")
