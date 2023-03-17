@@ -139,9 +139,6 @@ InteractionReference
 .. autoclass:: InteractionReference
     :members:
 
-Data Classes
-------------
-
 InteractionDataResolved
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

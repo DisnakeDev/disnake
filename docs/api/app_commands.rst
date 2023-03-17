@@ -38,6 +38,22 @@ APIMessageCommand
     :members:
     :inherited-members:
 
+ApplicationCommandPermissions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: ApplicationCommandPermissions
+
+.. autoclass:: ApplicationCommandPermissions()
+    :members:
+
+GuildApplicationCommandPermissions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: GuildApplicationCommandPermissions
+
+.. autoclass:: GuildApplicationCommandPermissions()
+    :members:
+
 Data Classes
 ------------
 
@@ -90,22 +106,6 @@ OptionChoice
 .. attributetable:: OptionChoice
 
 .. autoclass:: OptionChoice()
-    :members:
-
-ApplicationCommandPermissions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. attributetable:: ApplicationCommandPermissions
-
-.. autoclass:: ApplicationCommandPermissions()
-    :members:
-
-GuildApplicationCommandPermissions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. attributetable:: GuildApplicationCommandPermissions
-
-.. autoclass:: GuildApplicationCommandPermissions()
     :members:
 
 Enumerations

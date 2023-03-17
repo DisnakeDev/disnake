@@ -122,6 +122,9 @@ GroupChannel
     .. automethod:: typing
         :async-with:
 
+Data Classes
+------------
+
 PartialMessageable
 ~~~~~~~~~~~~~~~~~~
 
@@ -130,9 +133,6 @@ PartialMessageable
 .. autoclass:: PartialMessageable()
     :members:
     :inherited-members:
-
-Data Classes
-------------
 
 ChannelFlags
 ~~~~~~~~~~~~
