@@ -7,7 +7,8 @@
 Bots
 ====
 
-This section documents everything related to bots - specialized :class:`disnake.Client`\s whose purpose is to make (application) commands easier to develop.
+This section documents everything related to bots - specialized :class:`disnake.Client`\s
+whose purpose is to streamline and simplify development of (application) commands.
 
 Classes
 -------

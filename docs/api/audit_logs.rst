@@ -8,9 +8,8 @@ Audit Logs
 ==========
 
 Working with audit logs is a complicated process with a lot of machinery
-involved. The library attempts to make it easy to use and friendly. In order to accomplish
-this goal, it makes use of a couple of data classes and enums that aid in this goal,
-listed below.
+involved. The library attempts to make this user-friendly by
+making use of a couple of data classes and enums, listed below.
 
 Discord Models
 ---------------

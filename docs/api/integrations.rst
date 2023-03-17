@@ -5,7 +5,7 @@
 Integrations
 ============
 
-This section documents everything related to Integrations - special entities integrated into :class:`Guilds <Guild>`.
+This section documents everything related to Integrations - special entities integrated into :class:`Guild`\s.
 Most common examples are bots and Twitch/YouTube integrations.
 
 Discord Models

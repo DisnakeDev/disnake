@@ -5,7 +5,7 @@
 Events
 ======
 
-This section documents events related to the commands extention.
+This section documents events related to the commands extension.
 
 These events function similar to :ref:`the regular events <discord_api_events>`, except they
 are custom to the command extension module.

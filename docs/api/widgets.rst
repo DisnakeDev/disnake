@@ -6,7 +6,8 @@ Widgets
 =======
 
 This section documents everything related to widgets — dynamically
-generated elements which show basic info about your server and invites to join it easily — into any place supporting HTML.
+generated elements which show basic info about your server and invites to join it easily,
+which can be displayed on websites.
 
 Discord Models
 ---------------

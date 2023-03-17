@@ -5,7 +5,8 @@
 Stage Instances
 ===============
 
-This section documents everything related to stage instances - TODO: understand what stage instances are
+This section documents everything related to :ddocs:`stage instances <resources/stage-instance>`,
+which contain information about currently live stages.
 
 Discord Models
 ---------------
