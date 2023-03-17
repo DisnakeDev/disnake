@@ -97,9 +97,6 @@ PartialMessage
 .. autoclass:: PartialMessage
     :members:
 
-Raw Events
------------
-
 RawTypingEvent
 ~~~~~~~~~~~~~~
 
