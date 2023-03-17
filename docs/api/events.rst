@@ -15,14 +15,12 @@ What are events?
 So, what are events anyway? Most of the :class:`Client` application cycle is based on *events* - special "notifications" usually sent by Discord
 to notify client about certain actions like message deletion, emoji creation, member nickname updates, etc.
 
-This library provides two main ways to register an
-*event handler* — a special function which will listen for to specific types of events — which allows you to take action based on certain events.
+This library provides a few ways to register an
+*event handler* — a special function which will listen for specific types of events — which allows you to take action based on certain events.
 
 The first way is through the use of the :meth:`Client.event` decorator: ::
 
-    import disnake
-
-    client = disnake.Client()
+    client = disnake.Client(...)
 
     @client.event
     async def on_message(message):
@@ -35,8 +33,6 @@ The first way is through the use of the :meth:`Client.event` decorator: ::
 The second way is through subclassing :class:`Client` and
 overriding the specific events. For example: ::
 
-    import disnake
-
     class MyClient(disnake.Client):
         async def on_message(self, message):
             if message.author.bot:
@@ -44,6 +40,22 @@ overriding the specific events. For example: ::
 
             if message.content.startswith('$hello'):
                 await message.reply(f'Hello, {message.author}!')
+
+Another way is to use :meth:`Client.wait_for`, which is a single-use event handler to wait for
+something to happen in more specific scenarios: ::
+
+    @client.event
+    async def on_message(message):
+        if message.content.startswith('$greet'):
+            channel = message.channel
+            await channel.send('Say hello!')
+
+            def check(m):
+                return m.content == 'hello' and m.channel == channel
+
+            # wait for a message that passes the check
+            msg = await client.wait_for('message', check=check)
+            await channel.send(f'Hello {msg.author}!')
 
 The above pieces of code are essentially equal, and both respond with ``Hello, {author's username here}!`` message
 when a user sends a ``$hello`` message.
