@@ -15,6 +15,7 @@ The following list outlines the API of disnake's command extension module.
     app_commands
     bots
     checks
+    cogs
     context
     converters
     events

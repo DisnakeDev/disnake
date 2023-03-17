@@ -10,22 +10,6 @@ This section documents everything in the commands extension that doesn't fit int
 Classes
 -------
 
-Cog
-~~~
-
-.. attributetable:: Cog
-
-.. autoclass:: Cog
-    :members:
-
-CogMeta
-~~~~~~~
-
-.. attributetable:: CogMeta
-
-.. autoclass:: CogMeta
-    :members:
-
 Paginator
 ~~~~~~~~~
 
