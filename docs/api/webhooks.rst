@@ -91,5 +91,3 @@ Events
 ------
 
 - :func:`on_webhooks_update(channel) <disnake.on_webhooks_update>`
-
-See all :ref:`related events <related_events_webhook>`!

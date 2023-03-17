@@ -115,5 +115,3 @@ Events
 - :func:`on_guild_scheduled_event_unsubscribe(event, user) <disnake.on_guild_scheduled_event_unsubscribe>`
 - :func:`on_raw_guild_scheduled_event_subscribe(payload) <disnake.on_raw_guild_scheduled_event_subscribe>`
 - :func:`on_raw_guild_scheduled_event_unsubscribe(payload) <disnake.on_raw_guild_scheduled_event_unsubscribe>`
-
-Check out the :ref:`related events <related_events_guild_scheduled_event>`!

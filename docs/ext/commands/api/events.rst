@@ -10,8 +10,6 @@ This section documents events related to the commands extension.
 These events function similar to :ref:`the regular events <discord_api_events>`, except they
 are custom to the command extension module.
 
-.. _related_events_ext_commands_prefixcmds:
-
 Prefix Commands
 ---------------
 
@@ -47,8 +45,6 @@ Prefix Commands
 
     :param ctx: The invocation context.
     :type ctx: :class:`.Context`
-
-.. _related_events_ext_commands_appcmds:
 
 Application Commands
 --------------------

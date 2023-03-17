@@ -36,5 +36,3 @@ Events
 ------
 
 - :func:`on_guild_emojis_update(guild, before, after) <disnake.on_guild_emojis_update>`
-
-See all :ref:`related events <related_events_emoji>`!

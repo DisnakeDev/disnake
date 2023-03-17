@@ -283,5 +283,3 @@ Events
 - :func:`on_guild_update(before, after) <disnake.on_guild_update>`
 - :func:`on_guild_available(guild) <disnake.on_guild_available>`
 - :func:`on_guild_unavailable(guild) <disnake.on_guild_unavailable>`
-
-See all :ref:`related events <related_events_guild>`!

@@ -263,5 +263,3 @@ Events
 - :func:`on_interaction(interaction) <disnake.on_interaction>`
 - :func:`on_message_interaction(interaction) <disnake.on_message_interaction>`
 - :func:`on_modal_submit(interaction) <disnake.on_modal_submit>`
-
-See all :ref:`related events <related_events_interactions>`!

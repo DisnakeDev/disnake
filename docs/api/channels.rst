@@ -372,5 +372,3 @@ Events
 - :func:`on_raw_thread_member_remove(payload) <disnake.on_raw_thread_member_remove>`
 - :func:`on_raw_thread_update(after) <disnake.on_raw_thread_update>`
 - :func:`on_raw_thread_delete(payload) <disnake.on_raw_thread_delete>`
-
-See all :ref:`related events <related_events_channels_and_threads>`!

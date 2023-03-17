@@ -78,5 +78,3 @@ Events
 - :func:`on_integration_create(integration) <disnake.on_integration_create>`
 - :func:`on_integration_update(integration) <disnake.on_integration_update>`
 - :func:`on_raw_integration_delete(payload) <disnake.on_raw_integration_delete>`
-
-See all :ref:`related events <related_events_integration>`!

@@ -56,5 +56,3 @@ Events
 - :func:`on_member_unban(guild, user) <disnake.on_member_unban>`
 - :func:`on_presence_update(before, after) <disnake.on_presence_update>`
 - :func:`on_user_update(before, after) <disnake.on_user_update>`
-
-See all :ref:`related events <related_events_member>`!

@@ -109,5 +109,3 @@ Events
 - :func:`on_socket_raw_receive(msg) <disnake.on_socket_raw_receive>`
 - :func:`on_socket_raw_send(payload) <disnake.on_socket_raw_send>`
 - :func:`on_gateway_error(event, data, shard_id, exc) <disnake.on_gateway_error>`
-
-See all :ref:`related events <related_events_client>`!

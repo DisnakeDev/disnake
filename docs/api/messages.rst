@@ -352,6 +352,3 @@ Events
 
 - :func:`on_typing(channel, user, when) <disnake.on_typing>`
 - :func:`on_raw_typing(data) <disnake.on_raw_typing>`
-
-
-See all :ref:`related events <related_events_message>`!

@@ -157,5 +157,3 @@ Events
 ------
 
 - :func:`on_user_update(before, after) <disnake.on_user_update>`
-
-See all :ref:`related events <related_events_user>`!

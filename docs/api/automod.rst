@@ -169,5 +169,3 @@ Events
 - :func:`on_automod_rule_create(rule) <disnake.on_automod_rule_create>`
 - :func:`on_automod_rule_update(rule) <disnake.on_automod_rule_update>`
 - :func:`on_automod_rule_delete(rule) <disnake.on_automod_rule_delete>`
-
-See all :ref:`related events <related_events_automod>`!

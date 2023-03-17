@@ -74,8 +74,6 @@ to handle it, which defaults to printing a traceback and ignoring the exception.
 Reference
 ---------
 
-.. _related_events_client:
-
 Client
 ~~~~~~
 
@@ -269,8 +267,6 @@ This section documents events related to :class:`Client` and its connectivity to
 
     :param exc: The exception that was raised.
     :type exc: :class:`Exception`
-
-.. _related_events_channels_and_threads:
 
 Channels/Threads
 ~~~~~~~~~~~~~~~~
@@ -478,8 +474,6 @@ This section documents events related to Discord channels and threads.
     :param payload: The raw event payload data.
     :type payload: :class:`RawThreadDeleteEvent`
 
-.. _related_events_webhook:
-
 .. function:: on_webhooks_update(channel)
 
     Called whenever a webhook is created, modified, or removed from a guild channel.
@@ -493,8 +487,6 @@ Guilds
 ~~~~~~
 
 This section documents events related to Discord guilds.
-
-.. _related_events_guild:
 
 General
 +++++++
@@ -554,8 +546,6 @@ General
 
     :param guild: The :class:`Guild` that has changed availability.
 
-.. _related_events_appcmds:
-
 Application Commands
 ++++++++++++++++++++
 
@@ -571,8 +561,6 @@ Application Commands
 
     :param permissions: The updated permission object.
     :type permissions: :class:`GuildApplicationCommandPermissions`
-
-.. _related_events_automod:
 
 AutoMod
 +++++++
@@ -634,8 +622,6 @@ AutoMod
     :param rule: The auto moderation rule that was deleted.
     :type rule: :class:`AutoModRule`
 
-.. _related_events_emoji:
-
 Emojis
 ++++++
 
@@ -651,8 +637,6 @@ Emojis
     :type before: Sequence[:class:`Emoji`]
     :param after: A list of emojis after the update.
     :type after: Sequence[:class:`Emoji`]
-
-.. _related_events_integration:
 
 Integrations
 ++++++++++++
@@ -722,8 +706,6 @@ Audit Logs
     :param entry: The audit log entry that was created.
     :type entry: :class:`AuditLogEntry`
 
-.. _related_events_invite:
-
 Invites
 +++++++
 
@@ -763,8 +745,6 @@ Invites
 
     :param invite: The invite that was deleted.
     :type invite: :class:`Invite`
-
-.. _related_events_member:
 
 Members
 +++++++
@@ -845,8 +825,6 @@ Members
     :param user: The user that got unbanned.
     :type user: :class:`User`
 
-.. _related_events_activity:
-
 .. function:: on_presence_update(before, after)
 
     Called when a :class:`Member` updates their presence.
@@ -865,8 +843,6 @@ Members
     :param after: The updated member's updated info.
     :type after: :class:`Member`
 
-.. _related_events_user:
-
 .. function:: on_user_update(before, after)
 
     Called when a :class:`User` is updated.
@@ -884,8 +860,6 @@ Members
     :type before: :class:`User`
     :param after: The user's updated info.
     :type after: :class:`User`
-
-.. _related_events_guild_scheduled_event:
 
 Scheduled Events
 ++++++++++++++++
@@ -940,8 +914,6 @@ Scheduled Events
     :param payload: The raw event payload data.
     :type payload: :class:`RawGuildScheduledEventUserActionEvent`
 
-.. _related_events_stage_instance:
-
 Stage Instances
 +++++++++++++++
 
@@ -971,8 +943,6 @@ Stage Instances
     :param after: The stage instance after the update.
     :type after: :class:`StageInstance`
 
-.. _related_events_sticker:
-
 Stickers
 ++++++++
 
@@ -990,8 +960,6 @@ Stickers
     :type before: Sequence[:class:`GuildSticker`]
     :param after: A list of stickers after the update.
     :type after: Sequence[:class:`GuildSticker`]
-
-.. _related_events_role:
 
 Roles
 +++++
@@ -1019,8 +987,6 @@ Roles
     :param after: The updated role's updated info.
     :type after: :class:`Role`
 
-.. _related_events_voice:
-
 Voice
 +++++
 
@@ -1043,8 +1009,6 @@ Voice
     :type before: :class:`VoiceState`
     :param after: The voice state after the changes.
     :type after: :class:`VoiceState`
-
-.. _related_events_interactions:
 
 Interactions
 ~~~~~~~~~~~~
@@ -1142,8 +1106,6 @@ This section documents events related to application commands and other interact
 
     :param interaction: The interaction object.
     :type interaction: :class:`ModalInteraction`
-
-.. _related_events_message:
 
 Messages
 ~~~~~~~~

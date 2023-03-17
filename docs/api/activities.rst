@@ -139,5 +139,3 @@ Events
 ------
 
 - :func:`on_presence_update(before, after) <disnake.on_presence_update>`
-
-See all :ref:`related events <related_events_activity>`!
