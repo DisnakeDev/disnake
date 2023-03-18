@@ -2,7 +2,9 @@
 
 "use strict";
 
-window.addEventListener("DOMContentLoaded", () => {
+const redirects_map = {{ redirect_data }};
+
+(() => {
     let url = new URL(document.location.href);
 
     if (!url.pathname.endsWith("/api.html")) return;
@@ -36,6 +38,4 @@ window.addEventListener("DOMContentLoaded", () => {
 
     console.log(`Redirecting to ${newUrl.href}`);
     window.location.replace(newUrl);
-});
-
-const redirects_map = {{ redirect_data }};
+})();

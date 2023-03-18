@@ -20,10 +20,10 @@
   <link rel="stylesheet" href="{{ pathto('_static/style.css', 1)|e }}" type="text/css" />
   <link rel="stylesheet" href="{{ pathto('_static/codeblocks.css', 1) }}" type="text/css" />
   {%- block scripts %}
+  <script id="documentation_options" data-url_root="{{ pathto('', 1) }}" src="{{ pathto('_static/documentation_options.js', 1) }}"></script>
   {% if pagename.endswith("api") %}
     <script type="text/javascript" src="{{ pathto('_static/api_redirect.js', 1) }}"></script>
   {% endif %}
-  <script id="documentation_options" data-url_root="{{ pathto('', 1) }}" src="{{ pathto('_static/documentation_options.js', 1) }}"></script>
   {%- for js in script_files %}
   {{ js_tag(js) }}
   {%- endfor %}
