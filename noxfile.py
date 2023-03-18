@@ -110,6 +110,9 @@ def autotyping(session: nox.Session) -> None:
     session.run_always("pdm", "install", "-dG", "codemod", external=True)
 
     base_command = ["python", "-m", "libcst.tool", "codemod", "autotyping.AutotypeCommand"]
+    if not session.interactive:
+        base_command += ["--hide-progress"]
+
     dir_options: Dict[Tuple[str, ...], Tuple[str, ...]] = {
         (
             "disnake",
@@ -166,54 +169,36 @@ def codemod(session: nox.Session) -> None:
     """Run libcst codemods."""
     session.run_always("pdm", "install", "-dG", "codemod", external=True)
 
-    if session.posargs and session.posargs[0] == "run-all" or not session.interactive:
+    base_command = ["python", "-m", "libcst.tool"]
+    base_command_codemod = base_command + ["codemod"]
+    if not session.interactive:
+        base_command_codemod += ["--hide-progress"]
+
+    if (session.posargs and session.posargs[0] == "run-all") or not session.interactive:
         # run all of the transformers on disnake
         session.log("Running all transformers.")
-        res: str = session.run(
-            "python",
-            "-m",
-            "libcst.tool",
-            "list",
-            silent=True,
-        )  # type: ignore
+
+        res: str = session.run(*base_command, "list", silent=True)  # type: ignore
         transformers = [line.split("-")[0].strip() for line in res.splitlines()]
         session.log("Transformers: " + ", ".join(transformers))
 
         for trans in transformers:
-            # remove autotyping transformers
+            # remove autotyping transformers, since we run them with custom parameters later
             if trans.startswith("autotyping."):
                 session.log("Skipping autotyping transformer.")
                 continue
-            session.run(
-                "python",
-                "-m",
-                "libcst.tool",
-                "codemod",
-                trans,
-                "disnake",
-                "--hide-progress",
-            )
-        session.log("Finished running all transformers.")
+
+            session.run(*base_command_codemod, trans, "disnake")
+    elif session.posargs:
+        if len(session.posargs) < 2:
+            session.posargs.append("disnake")
+
+        session.run(*base_command_codemod, *session.posargs)
     else:
-        if session.posargs:
-            if len(session.posargs) < 2:
-                session.posargs.append("disnake")
-            session.run(
-                "python",
-                "-m",
-                "libcst.tool",
-                "codemod",
-                *session.posargs,
-            )
-        else:
-            session.run(
-                "python",
-                "-m",
-                "libcst.tool",
-                "list",
-            )
-    if not session.interactive:
-        session.notify("autotyping", posargs=[])
+        session.run(*base_command, "list")
+        return  # don't run autotyping in this case
+
+    session.notify("autotyping", posargs=[])
 
 
 @nox.session()
