@@ -95,7 +95,7 @@ def _workaround_set_api_version(version: Literal[9, 10]) -> None:
     if version not in (9, 10):
         raise TypeError("version must be either 9 or 10")
 
-    global _API_VERSION
+    global _API_VERSION  # noqa: PLW0603
     _API_VERSION = version
     Route.BASE = f"https://discord.com/api/v{_API_VERSION}"
 

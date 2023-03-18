@@ -257,8 +257,7 @@ class CommonBotBase(Generic[CogT]):
         The functions being listened to must be a :ref:`coroutine <coroutine>`.
 
         Example
-        --------
-
+        -------
         .. code-block:: python3
 
             @bot.listen()

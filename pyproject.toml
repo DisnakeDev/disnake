@@ -72,7 +72,7 @@ tools = [
     "python-dotenv~=1.0.0",
     "towncrier==22.12.0",
     "check-manifest==0.49",
-    "ruff==0.0.252",
+    "ruff==0.0.257",
 ]
 codemod = [
     # run codemods on the respository (mostly automated typing)
@@ -142,7 +142,7 @@ select = [
     # "ANN", # flake8-annotations
     "S", # flake8-bandit
     "B", # flake8-bugbear
-    "C", # flake8-comprehensions
+    "C4", # flake8-comprehensions
     "DTZ", # flake8-datetimez
     # "EM", # flake8-errmsg
     "G", # flake8-logging-format
@@ -186,6 +186,7 @@ ignore = [
     # import aliases are fixed by isort
     "PLC0414",
 
+
     # outer loop variables are overwritten by inner assignment target, these are mostly intentional
     "PLW2901",
 
@@ -197,7 +198,6 @@ ignore = [
     "B026",   # backwards star-arg unpacking
     "E501",   # line too long
     "E731",   # assigning lambdas to variables
-    "RUF004", # keyword args must be supplied after starred arguments
     "T201",   # print statements
 ]
 
