@@ -8,32 +8,30 @@ from _types import SphinxExtensionMeta
 from sphinx.application import Sphinx
 from sphinx.util.fileutil import copy_asset_file
 
+SCRIPT_PATH = "_templates/api_redirect.js_t"
+
 
 def main(app: Sphinx, exception: Exception) -> None:
-    if exception:
+    if app.builder.format != "html" or exception:
         return
 
-    # mapping of html node id (i.e., thing after "#" in URLs) to the same but
-    # prefixed with the right doc name
-    # e.g, api.html#disnake.Thread => api/channels.html#disnake.Thread
+    # mapping of html node id (i.e., thing after "#" in URLs) to the correct page name
+    # e.g, api.html#disnake.Thread => api/channels.html
     actual_redirects: Dict[str, str] = {}
 
-    domain = app.env.domains["py"]
-
     # see https://www.sphinx-doc.org/en/master/extdev/domainapi.html#sphinx.domains.Domain.get_objects
+    domain = app.env.domains["py"]
     for _, _, _, document, html_node_id, _ in domain.get_objects():
         actual_redirects[html_node_id] = document + ".html"
 
-    path = Path(app.outdir, "_static", "api_redirect.js")
+    context = {"redirect_data": json.dumps(actual_redirects)}
 
-    path.touch(exist_ok=True)
-
-    context = {}
-    context["redirect_data"] = json.dumps(actual_redirects)
+    # sanity check
+    assert Path(SCRIPT_PATH).exists()  # noqa: S101
 
     copy_asset_file(
-        str(Path("_templates", "api_redirect.js_t")),
-        str(path),
+        SCRIPT_PATH,
+        str(Path(app.outdir, "_static", "api_redirect.js")),
         context=context,
     )
 
