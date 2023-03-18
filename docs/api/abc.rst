@@ -2,7 +2,7 @@
 
 .. currentmodule:: disnake.abc
 
-.. _disnake_abcs_ref:
+.. _disnake_api_abc:
 
 Abstract Base Classes
 =====================

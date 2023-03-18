@@ -157,8 +157,6 @@ Colour
 .. autoclass:: Colour
     :members:
 
-.. _version_related:
-
 Module Attributes
 ------------------
 

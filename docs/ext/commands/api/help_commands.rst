@@ -2,7 +2,7 @@
 
 .. currentmodule:: disnake.ext.commands
 
-.. _ext_commands_help_commands:
+.. _ext_commands_api_help_commands:
 
 Help Commands
 =============

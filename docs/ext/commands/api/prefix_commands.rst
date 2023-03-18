@@ -2,7 +2,7 @@
 
 .. currentmodule:: disnake.ext.commands
 
-.. _prefix_commands:
+.. _ext_commands_api_prefix_commands:
 
 Prefix Commands
 ===============

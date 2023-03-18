@@ -2,7 +2,7 @@
 
 .. currentmodule:: disnake.ext.commands
 
-.. _ext_commands_bots:
+.. _ext_commands_api_bots:
 
 Bots
 ====

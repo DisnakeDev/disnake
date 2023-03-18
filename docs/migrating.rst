@@ -1003,7 +1003,7 @@ For example, to implement a :class:`~.commands.HelpCommand` in a cog, the follow
         def cog_unload(self):
             self.bot.help_command = self._original_help_command
 
-For more information, check out the relevant :ref:`documentation <ext_commands_help_commands>`.
+For more information, check out the relevant :ref:`documentation <ext_commands_api_help_commands>`.
 
 Cog Changes
 ~~~~~~~~~~~

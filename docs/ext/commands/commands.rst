@@ -186,7 +186,7 @@ Converters
 
 Adding bot arguments with function parameters is only the first step in defining your bot's command interface. To actually
 make use of the arguments, we usually want to convert the data into a target type. We call these
-:ref:`ext_commands_converters`.
+:ref:`ext_commands_api_converters`.
 
 Converters come in a few flavours:
 
@@ -778,7 +778,7 @@ When our commands fail to parse we will, by default, receive a noisy error in ``
 that an error has happened and has been silently ignored.
 
 In order to handle our errors, we must use something called an error handler. There is a global error handler, called
-:func:`.on_command_error` which works like any other :ref:`event <discord_api_events>`. This global error handler is
+:func:`.on_command_error` which works like any other :ref:`event <disnake_api_events>`. This global error handler is
 called for every error reached.
 
 Most of the time however, we want to handle an error local to the command itself. Luckily, commands come with local error
@@ -798,14 +798,14 @@ handlers that allow us to do just that. First we decorate an error handler funct
             await ctx.send('I could not find that member...')
 
 The first parameter of the error handler is the :class:`.Context` while the second one is an exception that is derived from
-:exc:`~ext.commands.CommandError`. A list of errors is found in the :ref:`ext_commands_exceptions` page of the documentation.
+:exc:`~ext.commands.CommandError`. A list of errors is found in the :ref:`ext_commands_api_exceptions` page of the documentation.
 
 Checks
 ------
 
 There are cases when we don't want a user to use our commands. They don't have permissions to do so or maybe we blocked
 them from using our bot earlier. The commands extension comes with full support for these things in a concept called a
-:ref:`ext_commands_checks`.
+:ref:`ext_commands_api_checks`.
 
 A check is a basic predicate that can take in a :class:`.Context` as its sole parameter. Within it, you have the following
 options:

@@ -5,7 +5,7 @@
 Context
 =======
 
-This section documents command context for :ref:`prefix_commands`.
+This section documents command context for :ref:`ext_commands_api_prefix_commands`.
 
 Classes
 -------

@@ -2,12 +2,12 @@
 
 .. currentmodule:: disnake.ui
 
-.. _disnake_ui_kit:
+.. _disnake_api_ui:
 
 Bot UI Kit
 ==========
 
-This section documents everything related to the Discord Bot UI Kit - a group of helper functions and classes that aid in making :ref:`component-based <disnake_components>` UIs.
+This section documents everything related to the Discord Bot UI Kit - a group of helper functions and classes that aid in making :ref:`component-based <disnake_api_components>` UIs.
 
 Classes
 -------

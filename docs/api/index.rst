@@ -30,7 +30,7 @@ to get their behaviour. **Abstract base classes should not be instantiated**.
 They are mainly there for usage with :func:`isinstance` and :func:`issubclass`\.
 
 This library has a module related to abstract base classes, in which all the ABCs are subclasses of
-:class:`typing.Protocol` - :ref:`disnake_abcs_ref`.
+:class:`typing.Protocol` - :ref:`disnake_api_abc`.
 
 .. _discord_model:
 
@@ -50,7 +50,7 @@ the user of the library.
 
     If you want to get one of these model classes instances they'd have to be through
     the cache, and a common way of doing so is through the :func:`utils.find` function
-    or attributes of model classes that you receive from the :ref:`Events <discord_api_events>`.
+    or attributes of model classes that you receive from the :ref:`Events <disnake_api_events>`.
 
 .. note::
 

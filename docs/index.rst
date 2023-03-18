@@ -22,7 +22,7 @@ for Discord.
 - Easy to use with an object oriented design
 - Optimised for both speed and memory
 
-.. _disnake_getting_started:
+.. _getting_started:
 
 Getting started
 ---------------

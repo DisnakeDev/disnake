@@ -2,7 +2,7 @@
 
 .. currentmodule:: disnake
 
-.. _discord_api_events:
+.. _disnake_api_events:
 
 Events
 ======
@@ -127,7 +127,7 @@ This section documents events related to :class:`Client` and its connectivity to
         ``on_error`` will only be dispatched to :meth:`Client.event`.
 
         It will not be received by :meth:`Client.wait_for`, or, if used,
-        :ref:`ext_commands_bots` listeners such as
+        :ref:`ext_commands_api_bots` listeners such as
         :meth:`~ext.commands.Bot.listen` or :meth:`~ext.commands.Cog.listener`.
 
     :param event: The name of the event that raised the exception.
@@ -260,7 +260,7 @@ This section documents events related to :class:`Client` and its connectivity to
         ``on_gateway_error`` will only be dispatched to :meth:`Client.event`.
 
         It will not be received by :meth:`Client.wait_for`, or, if used,
-        :ref:`ext_commands_bots` listeners such as
+        :ref:`ext_commands_api_bots` listeners such as
         :meth:`~ext.commands.Bot.listen` or :meth:`~ext.commands.Cog.listener`.
 
     .. note::

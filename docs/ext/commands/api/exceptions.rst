@@ -2,7 +2,7 @@
 
 .. currentmodule:: disnake.ext.commands
 
-.. _ext_commands_exceptions:
+.. _ext_commands_api_exceptions:
 
 Exceptions and Warnings
 =======================

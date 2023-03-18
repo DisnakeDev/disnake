@@ -2,7 +2,7 @@
 
 .. currentmodule:: disnake.utils
 
-.. _disnake_utils:
+.. _disnake_api_utils:
 
 Utilities
 ==========

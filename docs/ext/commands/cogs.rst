@@ -25,7 +25,7 @@ It should be noted that cogs are typically used alongside with :ref:`ext_command
 Quick Example
 -------------
 
-This example cog defines a ``Greetings`` category for your commands, with a single :ref:`command <ext_commands_commands>` named ``hello`` as well as a listener to listen to an :ref:`Event <discord_api_events>`.
+This example cog defines a ``Greetings`` category for your commands, with a single :ref:`command <ext_commands_commands>` named ``hello`` as well as a listener to listen to an :ref:`Event <disnake_api_events>`.
 
 .. code-block:: python3
 

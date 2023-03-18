@@ -8,7 +8,7 @@ Clients
 This section documents everything related to :class:`Client` and it's connectivity to Discord.
 
 If this is your first time working with disnake, it is highly recommended to read
-:ref:`Getting Started <disnake_getting_started>` articles first.
+:ref:`Getting Started <getting_started>` articles first.
 
 Classes
 -------

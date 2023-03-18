@@ -2,7 +2,7 @@
 
 .. currentmodule:: disnake.ext.commands
 
-.. _ext_commands_converters:
+.. _ext_commands_api_converters:
 
 Converters
 ==========
