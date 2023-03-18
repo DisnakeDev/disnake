@@ -823,7 +823,9 @@ class InteractionBotBase(CommonBotBase):
                 try:
                     await self.bulk_overwrite_global_commands(to_send)
                 except Exception as e:
-                    warnings.warn(f"Failed to overwrite global commands due to {e}", SyncWarning)
+                    warnings.warn(
+                        f"Failed to overwrite global commands due to {e}", SyncWarning, stacklevel=1
+                    )
 
         # Same process but for each specified guild individually.
         # Notice that we're not doing this for every single guild for optimisation purposes.
@@ -856,6 +858,7 @@ class InteractionBotBase(CommonBotBase):
                         warnings.warn(
                             f"Failed to overwrite commands in <Guild id={guild_id}> due to {e}",
                             SyncWarning,
+                            stacklevel=1,
                         )
         # Last debug message
         self._log_sync_debug("Command synchronization task has finished")
