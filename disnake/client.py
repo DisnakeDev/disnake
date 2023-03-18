@@ -1639,7 +1639,7 @@ class Client:
     def event(self, coro: CoroT) -> CoroT:
         """A decorator that registers an event to listen to.
 
-        You can find more info about the events in the :ref:`documentation <disnake_api_index>`.
+        You can find more info about the events in the :ref:`documentation <disnake_api_events>`.
 
         The events must be a :ref:`coroutine <coroutine>`, if not, :exc:`TypeError` is raised.
 
@@ -1671,6 +1671,7 @@ class Client:
         status: Optional[Status] = None,
     ) -> None:
         """|coro|
+
         Changes the client's presence.
 
         .. versionchanged:: 2.6
