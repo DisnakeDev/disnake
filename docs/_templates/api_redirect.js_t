@@ -2,48 +2,40 @@
 
 "use strict";
 
-window.addEventListener("DOMContentLoaded", main)
+window.addEventListener("DOMContentLoaded", () => {
+    let url = new URL(document.location.href);
 
-const api = "api.html";
-const ext_cmds_api = "ext/commands/api.html";
+    if (!url.pathname.endsWith("/api.html")) return;
 
-function main() {
-    const url = new URL(document.location.href);
+    // URL_ROOT is relative to `url`, and points to e.g. `<host>/en/latest/`
+    const root = new URL(DOCUMENTATION_OPTIONS.URL_ROOT, url);
+    if (!root.pathname.endsWith("/")) root.pathname += "/";
 
-    if (!url.pathname.endsWith('api.html')) return;
+    const targetPath = redirects_map[url.hash.slice(1)];
 
-    /*
-    * redirects_map is set by the redirects sphinx extension
-    * and actually exists here at the time of loading the page
-    */
-    let postfix = redirects_map[url.hash.slice(1)];
+    let newUrl = null;
+    if (targetPath) {
+        // Get current path relative to documentation root
+        // `/en/latest/xyz/api.html` => `xyz/api/`
+        let expectedPrefix = url.pathname.slice(root.pathname.length).replace(/\.html$/, "/");
 
-    let fixed_postfix = false;
-
-    if (!postfix) {
-        if (url.pathname.endsWith(ext_cmds_api)) {
-            postfix = "ext/commands/api/index.html";
-        } else {
-            postfix = "api/index.html";
-        }
-        fixed_postfix = true;
-    }
-
-    if (!fixed_postfix) {
-        if (postfix.includes("disnake.ext.commands") && !url.pathname.endsWith(ext_cmds_api)) {
-            postfix = "api/index.html";
-        } else {
-            if ((!postfix.includes("disnake.ext.commands.") && url.pathname.endsWith(ext_cmds_api))) {
-                postfix = "ext/commands/api/index.html";
-            }
+        // The target path (`xyz/api/events.html`) should start with `xyz/api/`
+        if (targetPath.startsWith(expectedPrefix)) {
+            newUrl = new URL(targetPath, root);
+            newUrl.hash = url.hash;
         }
     }
 
-    if (url.pathname.endsWith(ext_cmds_api)) {
-        window.location.href = url.origin + url.pathname.slice(0, -ext_cmds_api.length) + postfix;
-    } else {
-        window.location.href = url.origin + url.pathname.slice(0, -api.length) + postfix;
+    // If it's still unset, the #hash is unknown or the target doesn't match the current section;
+    // in that case, just redirect to the relevant index page.
+    if (newUrl === null) {
+        newUrl = new URL(url);
+        newUrl.pathname = newUrl.pathname.replace(/\/api.html$/, "/api/index.html");
+        newUrl.hash = "";
     }
-}
+
+    console.log(`Redirecting to ${newUrl.href}`);
+    window.location.replace(newUrl);
+});
 
 const redirects_map = {{ redirect_data }};

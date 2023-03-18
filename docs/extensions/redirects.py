@@ -22,7 +22,7 @@ def main(app: Sphinx, exception: Exception) -> None:
 
     # see https://www.sphinx-doc.org/en/master/extdev/domainapi.html#sphinx.domains.Domain.get_objects
     for _, _, _, document, html_node_id, _ in domain.get_objects():
-        actual_redirects[html_node_id] = document + ".html#" + html_node_id
+        actual_redirects[html_node_id] = document + ".html"
 
     path = Path(app.outdir, "_static", "api_redirect.js")
 
