@@ -236,7 +236,9 @@ class HTTPClient:
         self.connector = connector
         self.__session: aiohttp.ClientSession = MISSING  # filled in static_login
         # (route bucket, discord bucket) -> asyncio lock
-        self._locks: weakref.WeakValueDictionary[tuple[str, Optional[str]], asyncio.Lock] = weakref.WeakValueDictionary()
+        self._locks: weakref.WeakValueDictionary[
+            tuple[str, Optional[str]], asyncio.Lock
+        ] = weakref.WeakValueDictionary()
         self._global_over: asyncio.Event = asyncio.Event()
         self._global_over.set()
         self.token: Optional[str] = None
