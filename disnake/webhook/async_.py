@@ -45,6 +45,7 @@ __all__ = (
     "WebhookMessage",
     "PartialWebhookChannel",
     "PartialWebhookGuild",
+    "PartialWebhook",
 )
 
 _log = logging.getLogger(__name__)
@@ -966,6 +967,14 @@ class BaseWebhook(Hashable):
         """
         return self.auth_token is not None
 
+    def __repr__(self) -> str:
+        return f"<Webhook id={self.id!r}>"
+
+    @property
+    def url(self) -> str:
+        """:class:`str` : Returns the webhook's url."""
+        return f"https://discord.com/api/webhooks/{self.id}/{self.token}"
+
     @property
     def guild(self) -> Optional[Guild]:
         """Optional[:class:`Guild`]: The guild this webhook belongs to.
@@ -1102,19 +1111,18 @@ class Webhook(BaseWebhook):
         super().__init__(data, token, state)
         self.session = session
 
-    def __repr__(self) -> str:
-        return f"<Webhook id={self.id!r}>"
-
-    @property
-    def url(self) -> str:
-        """:class:`str` : Returns the webhook's url."""
-        return f"https://discord.com/api/webhooks/{self.id}/{self.token}"
-
-    @classmethod
     def partial(
-        cls, id: int, token: str, *, session: aiohttp.ClientSession, bot_token: Optional[str] = None
-    ) -> Webhook:
-        """Creates a partial :class:`Webhook`.
+        self,
+        id: int,
+        token: str,
+        *,
+        session: aiohttp.ClientSession,
+        bot_token: Optional[str] = None,
+    ) -> PartialWebhook:
+        """Creates a :class:`PartialWebhook`.
+
+        .. versionchanged:: 2.8
+            Returns a :class:`PartialWebhook` instead of a `Webhook`.
 
         Parameters
         ----------
@@ -1137,7 +1145,7 @@ class Webhook(BaseWebhook):
 
         Returns
         -------
-        :class:`Webhook`
+        :class:`PartialWebhook`
             A partial :class:`Webhook`.
             A partial webhook is just a webhook object with an ID and a token.
         """
@@ -1147,16 +1155,18 @@ class Webhook(BaseWebhook):
             "token": token,
         }
 
-        return cls(data, session, token=bot_token)
+        return PartialWebhook(data, session, token=bot_token)
 
-    @classmethod
     def from_url(
-        cls, url: str, *, session: aiohttp.ClientSession, bot_token: Optional[str] = None
-    ) -> Webhook:
-        """Creates a partial :class:`Webhook` from a webhook URL.
+        self, url: str, *, session: aiohttp.ClientSession, bot_token: Optional[str] = None
+    ) -> PartialWebhook:
+        """Creates a :class:`PartialWebhook` from a webhook URL.
 
         .. versionchanged:: 2.6
             Raises :exc:`ValueError` instead of ``InvalidArgument``.
+
+        .. versionchanged:: 2.8
+            Returns a :class:`PartialWebhook` instead of a :class:`Webhook`.
 
         Parameters
         ----------
@@ -1182,7 +1192,7 @@ class Webhook(BaseWebhook):
 
         Returns
         -------
-        :class:`Webhook`
+        :class:`PartialWebhook`
             A partial :class:`Webhook`.
             A partial webhook is just a webhook object with an ID and a token.
         """
@@ -1195,7 +1205,7 @@ class Webhook(BaseWebhook):
 
         data: Dict[str, Any] = m.groupdict()
         data["type"] = 1
-        return cls(data, session, token=bot_token)  # type: ignore
+        return PartialWebhook(data, session, token=bot_token)  # type: ignore
 
     @classmethod
     def _as_follower(cls, data, *, channel, user) -> Webhook:
@@ -1222,55 +1232,6 @@ class Webhook(BaseWebhook):
     def from_state(cls, data, state) -> Webhook:
         session = state.http._HTTPClient__session
         return cls(data, session=session, state=state, token=state.http.token)
-
-    async def fetch(self, *, prefer_auth: bool = True) -> Webhook:
-        """|coro|
-
-        Fetches the current webhook.
-
-        This could be used to get a full webhook from a partial webhook.
-
-        .. versionadded:: 2.0
-
-        .. note::
-
-            When fetching with an unauthenticated webhook, i.e.
-            :meth:`is_authenticated` returns ``False``, then the
-            returned webhook does not contain any user information.
-
-        .. versionchanged:: 2.6
-            Raises :exc:`WebhookTokenMissing` instead of ``InvalidArgument``.
-
-        Parameters
-        ----------
-        prefer_auth: :class:`bool`
-            Whether to use the bot token over the webhook token,
-            if available. Defaults to ``True``.
-
-        Raises
-        ------
-        HTTPException
-            Could not fetch the webhook
-        NotFound
-            Could not find the webhook by this ID
-        WebhookTokenMissing
-            This webhook does not have a token associated with it.
-
-        Returns
-        -------
-        :class:`Webhook`
-            The fetched webhook.
-        """
-        adapter = async_context.get()
-
-        if prefer_auth and self.auth_token:
-            data = await adapter.fetch_webhook(self.id, self.auth_token, session=self.session)
-        elif self.token:
-            data = await adapter.fetch_webhook_with_token(self.id, self.token, session=self.session)
-        else:
-            raise WebhookTokenMissing("This webhook does not have a token associated with it")
-
-        return Webhook(data, self.session, token=self.auth_token, state=self._state)
 
     async def delete(self, *, reason: Optional[str] = None, prefer_auth: bool = True) -> None:
         """|coro|
@@ -1957,3 +1918,78 @@ class Webhook(BaseWebhook):
             message_id,
             session=self.session,
         )
+
+
+class PartialWebhook(Webhook):
+    """Represents an asynchronous Discord partial webhook to aid with working webhooks when only an ID and a token are present.
+
+    PartialWebhooks are Webhook objects with an ID and a token.
+
+    The only way to construct this class is through :meth:`Webhook.from_url` and :meth:`Webhook.partial`.
+
+    Note that this class is trimmed down and has no rich attributes.
+
+    Attributes
+    ----------
+    id: :class:`int`
+        The webhook's ID
+    token: Optional[:class:`str`]
+        The authentication token of the webhook. If this is ``None``
+        then the webhook cannot be used to make requests.
+    """
+
+    def __init__(
+        self,
+        data: WebhookPayload,
+        session: aiohttp.ClientSession,
+        token: Optional[str] = None,
+    ) -> None:
+        super().__init__(data, session=session, token=token)
+
+    async def fetch(self, *, prefer_auth: bool = True) -> Webhook:
+        """|coro|
+
+        Fetches the current PartialWebhook to get a full Webhook.
+
+        This could be used to get a full webhook from a partial webhook.
+
+        .. versionadded:: 2.8
+
+        .. note::
+
+            When fetching with an unauthenticated webhook, i.e.
+            :meth:`Webhook.is_authenticated` returns ``False``, then the
+            returned webhook does not contain any user information.
+
+            Raises :exc:`WebhookTokenMissing` instead of ``InvalidArgument``.
+
+        Parameters
+        ----------
+        prefer_auth: :class:`bool`
+            Whether to use the bot token over the webhook token,
+            if available. Defaults to ``True``.
+
+        Raises
+        ------
+        HTTPException
+            Could not fetch the webhook
+        NotFound
+            Could not find the webhook by this ID
+        WebhookTokenMissing
+            This webhook does not have a token associated with it.
+
+        Returns
+        -------
+        :class:`Webhook`
+            The fetched webhook.
+        """
+        adapter = async_context.get()
+
+        if prefer_auth and self.auth_token:
+            data = await adapter.fetch_webhook(self.id, self.auth_token, session=self.session)
+        elif self.token:
+            data = await adapter.fetch_webhook_with_token(self.id, self.token, session=self.session)
+        else:
+            raise WebhookTokenMissing("This webhook does not have a token associated with it")
+
+        return Webhook(data, self.session, token=self.auth_token, state=self._state)
