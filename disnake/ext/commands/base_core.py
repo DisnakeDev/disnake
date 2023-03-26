@@ -676,9 +676,11 @@ def default_member_permissions(
     use_external_emojis: bool = ...,
     use_external_stickers: bool = ...,
     use_slash_commands: bool = ...,
+    use_soundboard: bool = ...,
     use_voice_activation: bool = ...,
     view_audit_log: bool = ...,
     view_channel: bool = ...,
+    view_creator_monetization_analytics: bool = ...,
     view_guild_insights: bool = ...,
 ) -> Callable[[T], T]:
     ...

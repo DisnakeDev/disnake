@@ -872,9 +872,11 @@ class GuildChannel(ABC):
         use_external_emojis: Optional[bool] = ...,
         use_external_stickers: Optional[bool] = ...,
         use_slash_commands: Optional[bool] = ...,
+        use_soundboard: Optional[bool] = ...,
         use_voice_activation: Optional[bool] = ...,
         view_audit_log: Optional[bool] = ...,
         view_channel: Optional[bool] = ...,
+        view_creator_monetization_analytics: Optional[bool] = ...,
         view_guild_insights: Optional[bool] = ...,
     ) -> None:
         ...
