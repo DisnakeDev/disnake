@@ -31,13 +31,15 @@ jobs:
         uses: ./.github/actions/setup-env
         with:
           python-version: '3.9'
-          nox-setup: "tools"
+
+      - name: Install dependencies
+        run: pdm install -dG tools
 
       - name: Check for presence of a Change Log fragment (only pull requests)
         # NOTE: The pull request' base branch needs to be fetched so towncrier
         # is able to compare the current branch with the base branch.
         run: |
-          if ! towncrier check --compare-with origin/${BASE_BRANCH}; then
+          if ! pdm run towncrier check --compare-with origin/${BASE_BRANCH}; then
             echo "::error::Please see https://github.com/DisnakeDev/disnake/blob/master/changelog/README.rst for details on how to create a changelog entry." >&2
             exit 1
           fi

@@ -1,15 +1,18 @@
 # SPDX-License-Identifier: MIT
+from __future__ import annotations
 
 import functools
 import inspect
 from typing import TYPE_CHECKING, Any
 
-from _types import SphinxExtensionMeta
-from docutils import nodes
-from sphinx.application import Sphinx
-from sphinx.config import Config
 from sphinx.environment.adapters.indexentries import IndexEntries
-from sphinx.writers.html5 import HTML5Translator
+
+if TYPE_CHECKING:
+    from _types import SphinxExtensionMeta
+    from docutils import nodes
+    from sphinx.application import Sphinx
+    from sphinx.config import Config
+    from sphinx.writers.html5 import HTML5Translator
 
 if TYPE_CHECKING:
     translator_base = HTML5Translator

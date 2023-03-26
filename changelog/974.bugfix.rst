@@ -1,0 +1,1 @@
+Fix :meth:`Guild.get_or_fetch_members` not caching anything in the case of 1 unresolved ID.

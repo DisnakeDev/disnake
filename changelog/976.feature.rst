@@ -1,0 +1,1 @@
+|commands| Add :meth:`Bot.get_listeners() <disnake.ext.commands.Bot.get_listeners>`.

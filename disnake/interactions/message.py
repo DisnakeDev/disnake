@@ -132,7 +132,7 @@ class MessageInteraction(Interaction):
                 if component.custom_id == self.data.custom_id:
                     return component
 
-        raise Exception("MessageInteraction is malformed - no component found")
+        raise Exception("MessageInteraction is malformed - no component found")  # noqa: TRY002
 
 
 class MessageInteractionData(Dict[str, Any]):

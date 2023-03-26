@@ -1,0 +1,1 @@
+Add :attr:`MessageFlags.suppress_notifications`.

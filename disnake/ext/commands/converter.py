@@ -127,7 +127,7 @@ class Converter(Protocol[T_co]):
         properly propagate to the error handlers.
 
         Parameters
-        -----------
+        ----------
         ctx: Union[:class:`.Context`, :class:`.ApplicationCommandInteraction`]
             The invocation context that the argument is being used in.
         argument: :class:`str`
@@ -431,9 +431,9 @@ class MessageConverter(IDConverter[disnake.Message]):
         try:
             return await channel.fetch_message(message_id)
         except disnake.NotFound:
-            raise MessageNotFound(argument)
+            raise MessageNotFound(argument) from None
         except disnake.Forbidden:
-            raise ChannelNotReadable(channel)  # type: ignore
+            raise ChannelNotReadable(channel) from None  # type: ignore
 
 
 class GuildChannelConverter(IDConverter[disnake.abc.GuildChannel]):
@@ -668,7 +668,7 @@ class ColourConverter(Converter[disnake.Colour]):
             if not (0 <= value <= 0xFFFFFF):
                 raise BadColourArgument(argument)
         except ValueError:
-            raise BadColourArgument(argument)
+            raise BadColourArgument(argument) from None
         else:
             return disnake.Color(value=value)
 
@@ -738,7 +738,7 @@ class RoleConverter(IDConverter[disnake.Role]):
     async def convert(self, ctx: AnyContext, argument: str) -> disnake.Role:
         guild = ctx.guild
         if not guild:
-            raise NoPrivateMessage()
+            raise NoPrivateMessage
 
         match = self._get_id_match(argument) or re.match(r"<@&([0-9]{17,19})>$", argument)
         if match:
@@ -1068,8 +1068,7 @@ class clean_content(Converter[str]):
 
 
 class Greedy(List[T]):
-    """
-    A special converter that greedily consumes arguments until it can't.
+    """A special converter that greedily consumes arguments until it can't.
     As a consequence of this behaviour, most input errors are silently discarded,
     since it is used as an indicator of when to stop parsing.
 
@@ -1176,7 +1175,7 @@ CONVERTER_MAPPING: Dict[Type[Any], Type[Converter]] = {
 
 async def _actual_conversion(
     ctx: Context,
-    converter: Union[Type[T], Converter[T], Callable[[str], T]],
+    converter: Union[Type[T], Type[Converter[T]], Converter[T], Callable[[str], T]],
     argument: str,
     param: inspect.Parameter,
 ) -> T:
