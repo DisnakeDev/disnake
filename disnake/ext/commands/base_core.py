@@ -650,6 +650,7 @@ def default_member_permissions(
     manage_emojis_and_stickers: bool = ...,
     manage_events: bool = ...,
     manage_guild: bool = ...,
+    manage_guild_expressions: bool = ...,
     manage_messages: bool = ...,
     manage_nicknames: bool = ...,
     manage_permissions: bool = ...,

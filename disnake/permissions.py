@@ -178,6 +178,7 @@ class Permissions(BaseFlags):
         manage_emojis_and_stickers: bool = ...,
         manage_events: bool = ...,
         manage_guild: bool = ...,
+        manage_guild_expressions: bool = ...,
         manage_messages: bool = ...,
         manage_nicknames: bool = ...,
         manage_permissions: bool = ...,
@@ -339,7 +340,7 @@ class Permissions(BaseFlags):
             view_channel=True,
             manage_channels=True,
             manage_roles=True,
-            manage_emojis_and_stickers=True,
+            manage_guild_expressions=True,
             view_audit_log=True,
             view_guild_insights=True,
             manage_webhooks=True,
@@ -523,6 +524,7 @@ class Permissions(BaseFlags):
         manage_emojis_and_stickers: bool = ...,
         manage_events: bool = ...,
         manage_guild: bool = ...,
+        manage_guild_expressions: bool = ...,
         manage_messages: bool = ...,
         manage_nicknames: bool = ...,
         manage_permissions: bool = ...,
@@ -800,16 +802,25 @@ class Permissions(BaseFlags):
         """:class:`bool`: Returns ``True`` if a user can create, edit, or delete webhooks."""
         return 1 << 29
 
-    @flag_value
+    @make_permission_alias("manage_guild_expressions")
     def manage_emojis(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can create, edit, or delete emojis."""
+        """:class:`bool`: An alias for :attr:`manage_guild_expressions`."""
         return 1 << 30
 
-    @make_permission_alias("manage_emojis")
+    @make_permission_alias("manage_guild_expressions")
     def manage_emojis_and_stickers(self) -> int:
-        """:class:`bool`: An alias for :attr:`manage_emojis`.
+        """:class:`bool`: An alias for :attr:`manage_guild_expressions`.
 
         .. versionadded:: 2.0
+        """
+        return 1 << 30
+
+    @flag_value
+    def manage_guild_expressions(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can create, edit, or delete
+        emojis, stickers, and soundboard sounds.
+
+        .. versionadded:: 2.9
         """
         return 1 << 30
 
@@ -1011,6 +1022,7 @@ class PermissionOverwrite:
         manage_emojis_and_stickers: Optional[bool]
         manage_events: Optional[bool]
         manage_guild: Optional[bool]
+        manage_guild_expressions: Optional[bool]
         manage_messages: Optional[bool]
         manage_nicknames: Optional[bool]
         manage_permissions: Optional[bool]
@@ -1070,6 +1082,7 @@ class PermissionOverwrite:
         manage_emojis_and_stickers: Optional[bool] = ...,
         manage_events: Optional[bool] = ...,
         manage_guild: Optional[bool] = ...,
+        manage_guild_expressions: Optional[bool] = ...,
         manage_messages: Optional[bool] = ...,
         manage_nicknames: Optional[bool] = ...,
         manage_permissions: Optional[bool] = ...,
@@ -1196,6 +1209,7 @@ class PermissionOverwrite:
         manage_emojis_and_stickers: Optional[bool] = ...,
         manage_events: Optional[bool] = ...,
         manage_guild: Optional[bool] = ...,
+        manage_guild_expressions: Optional[bool] = ...,
         manage_messages: Optional[bool] = ...,
         manage_nicknames: Optional[bool] = ...,
         manage_permissions: Optional[bool] = ...,

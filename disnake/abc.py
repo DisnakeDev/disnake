@@ -846,6 +846,7 @@ class GuildChannel(ABC):
         manage_emojis_and_stickers: Optional[bool] = ...,
         manage_events: Optional[bool] = ...,
         manage_guild: Optional[bool] = ...,
+        manage_guild_expressions: Optional[bool] = ...,
         manage_messages: Optional[bool] = ...,
         manage_nicknames: Optional[bool] = ...,
         manage_permissions: Optional[bool] = ...,

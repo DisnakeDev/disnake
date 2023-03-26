@@ -3123,7 +3123,7 @@ class Guild(Hashable):
 
         Creates a :class:`Sticker` for the guild.
 
-        You must have :attr:`~Permissions.manage_emojis_and_stickers` permission to
+        You must have :attr:`~Permissions.manage_guild_expressions` permission to
         do this.
 
         .. versionadded:: 2.0
@@ -3173,7 +3173,7 @@ class Guild(Hashable):
 
         Deletes the custom :class:`Sticker` from the guild.
 
-        You must have :attr:`~Permissions.manage_emojis_and_stickers` permission to
+        You must have :attr:`~Permissions.manage_guild_expressions` permission to
         do this.
 
         .. versionadded:: 2.0
