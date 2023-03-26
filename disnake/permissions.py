@@ -287,7 +287,7 @@ class Permissions(BaseFlags):
         ``True`` and the guild-specific ones set to ``False``. The guild-specific
         permissions are currently:
 
-        - :attr:`manage_emojis`
+        - :attr:`manage_guild_expressions`
         - :attr:`view_audit_log`
         - :attr:`view_guild_insights`
         - :attr:`manage_guild`
@@ -313,7 +313,7 @@ class Permissions(BaseFlags):
             "ban_members",
             "change_nickname",
             "kick_members",
-            "manage_emojis",
+            "manage_guild_expressions",
             "manage_guild",
             "manage_nicknames",
             "moderate_members",

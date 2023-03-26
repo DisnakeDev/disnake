@@ -433,6 +433,9 @@ class GuildSticker(Sticker):
 
         Edits a :class:`GuildSticker` for the guild.
 
+        You must have :attr:`~Permissions.manage_guild_expressions` permission to
+        do this.
+
         Parameters
         ----------
         name: :class:`str`
