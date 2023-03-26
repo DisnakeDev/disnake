@@ -1825,6 +1825,7 @@ class ApplicationFlags(BaseFlags):
         def __init__(
             self,
             *,
+            application_auto_moderation_rule_create_badge: bool = ...,
             application_command_badge: bool = ...,
             embedded: bool = ...,
             gateway_guild_members: bool = ...,
@@ -1836,6 +1837,11 @@ class ApplicationFlags(BaseFlags):
             verification_pending_guild_limit: bool = ...,
         ) -> None:
             ...
+
+    @flag_value
+    def application_auto_moderation_rule_create_badge(self):
+        """:class:`bool`: Returns ``True`` if the application uses the Auto Moderation API."""
+        return 1 << 6
 
     @flag_value
     def gateway_presence(self):
