@@ -32,7 +32,7 @@ class ButtonComponentPayload(TypedDict):
     disabled: NotRequired[bool]
 
 
-class SelectOption(TypedDict):
+class SelectOptionPayload(TypedDict):
     label: str
     value: str
     description: NotRequired[str]
@@ -54,7 +54,7 @@ class BaseSelectMenuPayload(_SelectMenu):
 
 class StringSelectMenu(_SelectMenu):
     type: Literal[3]
-    options: List[SelectOption]
+    options: List[SelectOptionPayload]
 
 
 class UserSelectMenu(_SelectMenu):

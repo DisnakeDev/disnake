@@ -33,7 +33,7 @@ if TYPE_CHECKING:
         ComponentPayload,
         MentionableSelectMenuPayload,
         RoleSelectMenuPayload,
-        SelectOption as SelectOptionPayload,
+        SelectOptionPayload,
         StringSelectMenu as StringSelectMenuPayload,
         TextInput as TextInputPayload,
         UserSelectMenu as UserSelectMenuPayload,
