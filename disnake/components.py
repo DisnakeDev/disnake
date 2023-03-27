@@ -36,7 +36,7 @@ if TYPE_CHECKING:
         SelectOptionPayload,
         StringSelectMenuPayload,
         TextInputPayload,
-        UserSelectMenu as UserSelectMenuPayload,
+        UserSelectMenuPayload,
     )
 
 __all__ = (
