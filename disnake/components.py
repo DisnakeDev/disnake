@@ -30,7 +30,7 @@ if TYPE_CHECKING:
         BaseSelectMenuPayload,
         ButtonComponentPayload,
         ChannelSelectMenuPayload,
-        Component as ComponentPayload,
+        ComponentPayload,
         MentionableSelectMenu as MentionableSelectMenuPayload,
         RoleSelectMenu as RoleSelectMenuPayload,
         SelectOption as SelectOptionPayload,

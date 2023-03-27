@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from ..components import NestedComponent
     from ..enums import ComponentType
     from ..interactions import MessageInteraction
-    from ..types.components import Component as ComponentPayload
+    from ..types.components import ComponentPayload
     from .view import View
 
     ItemCallbackType = Callable[[Any, ItemT, MessageInteraction], Coroutine[Any, Any, Any]]
