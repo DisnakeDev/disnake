@@ -34,7 +34,7 @@ if TYPE_CHECKING:
         MentionableSelectMenuPayload,
         RoleSelectMenuPayload,
         SelectOptionPayload,
-        StringSelectMenu as StringSelectMenuPayload,
+        StringSelectMenuPayload,
         TextInput as TextInputPayload,
         UserSelectMenu as UserSelectMenuPayload,
     )

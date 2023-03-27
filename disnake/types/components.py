@@ -52,7 +52,7 @@ class BaseSelectMenuPayload(_SelectMenu):
     type: Literal[3, 5, 6, 7, 8]
 
 
-class StringSelectMenu(_SelectMenu):
+class StringSelectMenuPayload(_SelectMenu):
     type: Literal[3]
     options: List[SelectOptionPayload]
 
@@ -75,7 +75,7 @@ class ChannelSelectMenuPayload(_SelectMenu):
 
 
 AnySelectMenu = Union[
-    StringSelectMenu,
+    StringSelectMenuPayload,
     UserSelectMenu,
     RoleSelectMenuPayload,
     MentionableSelectMenuPayload,
