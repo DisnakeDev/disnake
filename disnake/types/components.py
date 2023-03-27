@@ -61,7 +61,7 @@ class UserSelectMenu(_SelectMenu):
     type: Literal[5]
 
 
-class RoleSelectMenu(_SelectMenu):
+class RoleSelectMenuPayload(_SelectMenu):
     type: Literal[6]
 
 
@@ -77,7 +77,7 @@ class ChannelSelectMenuPayload(_SelectMenu):
 AnySelectMenu = Union[
     StringSelectMenu,
     UserSelectMenu,
-    RoleSelectMenu,
+    RoleSelectMenuPayload,
     MentionableSelectMenuPayload,
     ChannelSelectMenuPayload,
 ]

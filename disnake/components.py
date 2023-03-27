@@ -32,7 +32,7 @@ if TYPE_CHECKING:
         ChannelSelectMenuPayload,
         ComponentPayload,
         MentionableSelectMenuPayload,
-        RoleSelectMenu as RoleSelectMenuPayload,
+        RoleSelectMenuPayload,
         SelectOption as SelectOptionPayload,
         StringSelectMenu as StringSelectMenuPayload,
         TextInput as TextInputPayload,
