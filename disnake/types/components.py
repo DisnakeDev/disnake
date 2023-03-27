@@ -69,7 +69,7 @@ class MentionableSelectMenu(_SelectMenu):
     type: Literal[7]
 
 
-class ChannelSelectMenu(_SelectMenu):
+class ChannelSelectMenuPayload(_SelectMenu):
     type: Literal[8]
     channel_types: NotRequired[List[ChannelType]]
 
@@ -79,7 +79,7 @@ AnySelectMenu = Union[
     UserSelectMenu,
     RoleSelectMenu,
     MentionableSelectMenu,
-    ChannelSelectMenu,
+    ChannelSelectMenuPayload,
 ]
 
 

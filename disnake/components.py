@@ -29,7 +29,7 @@ if TYPE_CHECKING:
         ActionRowPayload,
         BaseSelectMenuPayload,
         ButtonComponentPayload,
-        ChannelSelectMenu as ChannelSelectMenuPayload,
+        ChannelSelectMenuPayload,
         Component as ComponentPayload,
         MentionableSelectMenu as MentionableSelectMenuPayload,
         RoleSelectMenu as RoleSelectMenuPayload,
