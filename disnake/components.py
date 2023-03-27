@@ -31,7 +31,7 @@ if TYPE_CHECKING:
         ButtonComponentPayload,
         ChannelSelectMenuPayload,
         ComponentPayload,
-        MentionableSelectMenu as MentionableSelectMenuPayload,
+        MentionableSelectMenuPayload,
         RoleSelectMenu as RoleSelectMenuPayload,
         SelectOption as SelectOptionPayload,
         StringSelectMenu as StringSelectMenuPayload,
