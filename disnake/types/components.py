@@ -14,7 +14,7 @@ ButtonStyle = Literal[1, 2, 3, 4, 5]
 TextInputStyle = Literal[1, 2]
 
 
-Component = Union["ActionRowPayload", "ButtonComponent", "AnySelectMenu", "TextInput"]
+Component = Union["ActionRowPayload", "ButtonComponentPayload", "AnySelectMenu", "TextInput"]
 
 
 class ActionRowPayload(TypedDict):
@@ -22,7 +22,7 @@ class ActionRowPayload(TypedDict):
     components: List[Component]
 
 
-class ButtonComponent(TypedDict):
+class ButtonComponentPayload(TypedDict):
     type: Literal[2]
     style: ButtonStyle
     label: NotRequired[str]

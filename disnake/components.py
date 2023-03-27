@@ -28,7 +28,7 @@ if TYPE_CHECKING:
     from .types.components import (
         ActionRowPayload,
         BaseSelectMenu as BaseSelectMenuPayload,
-        ButtonComponent as ButtonComponentPayload,
+        ButtonComponentPayload,
         ChannelSelectMenu as ChannelSelectMenuPayload,
         Component as ComponentPayload,
         MentionableSelectMenu as MentionableSelectMenuPayload,
