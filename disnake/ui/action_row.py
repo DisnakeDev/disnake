@@ -43,7 +43,7 @@ if TYPE_CHECKING:
     from ..emoji import Emoji
     from ..message import Message
     from ..partial_emoji import PartialEmoji
-    from ..types.components import ActionRow as ActionRowPayload
+    from ..types.components import ActionRowPayload
 
 __all__ = (
     "ActionRow",

@@ -14,10 +14,10 @@ ButtonStyle = Literal[1, 2, 3, 4, 5]
 TextInputStyle = Literal[1, 2]
 
 
-Component = Union["ActionRow", "ButtonComponent", "AnySelectMenu", "TextInput"]
+Component = Union["ActionRowPayload", "ButtonComponent", "AnySelectMenu", "TextInput"]
 
 
-class ActionRow(TypedDict):
+class ActionRowPayload(TypedDict):
     type: Literal[1]
     components: List[Component]
 
@@ -86,7 +86,7 @@ AnySelectMenu = Union[
 class Modal(TypedDict):
     title: str
     custom_id: str
-    components: List[ActionRow]
+    components: List[ActionRowPayload]
 
 
 class TextInput(TypedDict):

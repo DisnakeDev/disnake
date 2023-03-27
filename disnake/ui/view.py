@@ -45,7 +45,10 @@ if TYPE_CHECKING:
     from ..interactions import MessageInteraction
     from ..message import Message
     from ..state import ConnectionState
-    from ..types.components import ActionRow as ActionRowPayload, Component as ComponentPayload
+    from ..types.components import (
+        ActionRowPayload,
+        Component as ComponentPayload,
+    )
     from .item import ItemCallbackType
 
 
