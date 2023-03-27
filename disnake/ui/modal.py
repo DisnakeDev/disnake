@@ -16,7 +16,7 @@ from .text_input import TextInput
 if TYPE_CHECKING:
     from ..interactions.modal import ModalInteraction
     from ..state import ConnectionState
-    from ..types.components import Modal as ModalPayload
+    from ..types.components import ModalPayload
     from .action_row import Components, ModalUIComponent
 
 

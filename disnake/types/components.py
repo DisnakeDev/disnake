@@ -83,7 +83,7 @@ AnySelectMenu = Union[
 ]
 
 
-class Modal(TypedDict):
+class ModalPayload(TypedDict):
     title: str
     custom_id: str
     components: List[ActionRowPayload]
