@@ -48,7 +48,7 @@ class _SelectMenu(TypedDict):
     disabled: NotRequired[bool]
 
 
-class BaseSelectMenu(_SelectMenu):
+class BaseSelectMenuPayload(_SelectMenu):
     type: Literal[3, 5, 6, 7, 8]
 
 

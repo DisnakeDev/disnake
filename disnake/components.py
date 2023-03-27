@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from .emoji import Emoji
     from .types.components import (
         ActionRowPayload,
-        BaseSelectMenu as BaseSelectMenuPayload,
+        BaseSelectMenuPayload,
         ButtonComponentPayload,
         ChannelSelectMenu as ChannelSelectMenuPayload,
         Component as ComponentPayload,
