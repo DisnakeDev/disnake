@@ -69,7 +69,7 @@ class TestParamInfo:
 
 # this uses `Range` for testing `_BaseRange`, `String` should work equally
 class TestBaseRange:
-    @pytest.mark.parametrize("args", [int, (int,), (int, 10), (int, 1, 2, 3)])
+    @pytest.mark.parametrize("args", [int, (int,), (int, 1, 2, 3)])
     def test_param_count(self, args):
         with pytest.raises(TypeError, match=r"`Range` expects 3 type arguments"):
             commands.Range[args]  # type: ignore
@@ -105,6 +105,20 @@ class TestBaseRange:
         assert x.min_value is None
         assert x.max_value == -10
         assert repr(x) == "Range[float, ..., -10]"
+
+    @pytest.mark.parametrize(
+        ("create", "expected"),
+        [
+            (lambda: commands.Range[1, 2], (int, 1, 2)),  # type: ignore
+            (lambda: commands.Range[0, 10.0], (float, 0, 10.0)),  # type: ignore
+            (lambda: commands.Range[..., 10.0], (float, None, 10.0)),
+            (lambda: commands.String[5, 10], (str, 5, 10)),  # type: ignore
+        ],
+    )
+    def test_backwards_compatible(self, create, expected):
+        with pytest.warns(DeprecationWarning, match=r"without an explicit type argument"):
+            value = create()
+            assert (value.underlying_type, value.min_value, value.max_value) == expected
 
 
 class TestRange:

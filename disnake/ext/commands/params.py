@@ -10,6 +10,7 @@ import inspect
 import itertools
 import math
 import sys
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum, EnumMeta
 from typing import (
@@ -281,7 +282,7 @@ class Injection(Generic[P, T_]):
 
 
 @dataclass(frozen=True)
-class _BaseRange:
+class _BaseRange(ABC):
     """Internal base type for supporting ``Range[...]`` and ``String[...]``."""
 
     _allowed_types: ClassVar[Tuple[Type[Any], ...]]
@@ -296,6 +297,17 @@ class _BaseRange:
             params = (params,)
 
         name = cls.__name__
+
+        if len(params) == 2:
+            # backwards compatibility for `Range[1, 2]`
+            disnake.utils.warn_deprecated(
+                f"Using `{name}` without an explicit type argument is deprecated, "
+                "as this form does not work well with modern type-checkers. "
+                f"Use `{name}[<type>, {params[0]!r}, {params[1]!r}]` instead.",
+                stacklevel=2,
+            )
+            # infer type from min/max values
+            params = (cls._infer_type(params),) + params
 
         if len(params) != 3:
             raise TypeError(
@@ -344,6 +356,11 @@ class _BaseRange:
         b = "..." if self.max_value is None else self.max_value
         return f"{type(self).__name__}[{self.underlying_type.__name__}, {a}, {b}]"
 
+    @classmethod
+    @abstractmethod
+    def _infer_type(cls, params: Tuple[Any, ...]) -> Type[Any]:
+        raise NotImplementedError
+
     # hack to get `typing._type_check` to pass, e.g. when using `Range` as a generic parameter
     def __call__(self) -> NoReturn:
         raise NotImplementedError
@@ -383,6 +400,12 @@ else:
                 if self.underlying_type is int and not isinstance(value, int):
                     raise TypeError("Range[int, ...] bounds must be int, not float")
 
+        @classmethod
+        def _infer_type(cls, params: Tuple[Any, ...]) -> Type[Any]:
+            if any(isinstance(p, float) for p in params):
+                return float
+            return int
+
     @dataclass(frozen=True, repr=False)
     class String(_BaseRange):
         """Type representing a string option with a limited length.
@@ -407,6 +430,10 @@ else:
                     raise TypeError("String bounds must be int, not float")
                 if value < 0:
                     raise ValueError("String bounds may not be negative")
+
+        @classmethod
+        def _infer_type(cls, params: Tuple[Any, ...]) -> Type[Any]:
+            return str
 
 
 class LargeInt(int):
