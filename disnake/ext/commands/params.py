@@ -282,6 +282,8 @@ class Injection(Generic[P, T_]):
 
 @dataclass(frozen=True)
 class _BaseRange:
+    """Internal base type for supporting ``Range[...]`` and ``String[...]``."""
+
     _allowed_types: ClassVar[Tuple[Type[Any], ...]]
 
     underlying_type: Type[Any]
@@ -358,6 +360,17 @@ else:
 
     @dataclass(frozen=True, repr=False)
     class Range(_BaseRange):
+        """Type representing a number with a limited range of allowed values.
+
+        See :ref:`param_ranges` for more information.
+
+        .. versionadded:: 2.4
+
+        .. versionchanged:: 2.9
+            Syntax changed from ``Range[5, 10]`` to ``Range[int, 5, 10]``;
+            the type (:class:`int` or :class:`float`) must now be specified explicitly.
+        """
+
         _allowed_types = (int, float)
 
         def __post_init__(self):
@@ -370,6 +383,17 @@ else:
 
     @dataclass(frozen=True, repr=False)
     class String(_BaseRange):
+        """Type representing a string option with a limited length.
+
+        See :ref:`string_lengths` for more information.
+
+        .. versionadded:: 2.6
+
+        .. versionchanged:: 2.9
+            Syntax changed from ``String[5, 10]`` to ``String[str, 5, 10]``;
+            the type (:class:`str`) must now be specified explicitly.
+        """
+
         _allowed_types = (str,)
 
         def __post_init__(self):
