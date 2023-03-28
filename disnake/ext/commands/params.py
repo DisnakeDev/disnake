@@ -333,6 +333,8 @@ class _BaseRange:
         if value is None or isinstance(value, EllipsisType):
             return None
         elif isinstance(value, (int, float)):
+            if not math.isfinite(value):
+                raise ValueError(f"{name} value may not be NaN, inf, or -inf")
             return value
         else:
             raise TypeError(f"{name} value must be int, float, None, or `...`, not `{type(value)}`")

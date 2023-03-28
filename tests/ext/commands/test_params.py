@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: MIT
 
+import math
 import sys
 from typing import Any, Optional, Union
 from unittest import mock
@@ -117,6 +118,11 @@ class TestRange:
 
         with pytest.raises(TypeError, match=r"Range.* bounds must be int, not float"):
             commands.Range[int, 1, 10.0]
+
+    @pytest.mark.parametrize("value", [math.nan, math.inf, -math.inf])
+    def test_nan(self, value):
+        with pytest.raises(ValueError, match=r"min value may not be NaN, inf, or -inf"):
+            commands.Range[float, value, 100]
 
     def test_valid(self):
         x: Any = commands.Range[int, -1, 2]
