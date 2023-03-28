@@ -10,6 +10,7 @@ import inspect
 import itertools
 import math
 import sys
+from dataclasses import dataclass
 from enum import Enum, EnumMeta
 from typing import (
     TYPE_CHECKING,
@@ -22,6 +23,7 @@ from typing import (
     Generic,
     List,
     Literal,
+    NoReturn,
     Optional,
     Sequence,
     Tuple,
@@ -31,7 +33,6 @@ from typing import (
     get_args,
     get_origin,
     get_type_hints,
-    overload,
 )
 
 import disnake
@@ -49,7 +50,7 @@ from .converter import CONVERTER_MAPPING
 T_ = TypeVar("T_")
 
 if TYPE_CHECKING:
-    from typing_extensions import Concatenate, ParamSpec, Self, TypeGuard
+    from typing_extensions import Annotated, Concatenate, ParamSpec, Self, TypeGuard
 
     from disnake.app_commands import Choices
     from disnake.i18n import LocalizationValue, LocalizedOptional
@@ -279,135 +280,107 @@ class Injection(Generic[P, T_]):
         return decorator
 
 
-class RangeMeta(type):
-    """Custom Generic implementation for Range"""
+@dataclass(frozen=True)
+class _BaseRange:
+    _allowed_types: ClassVar[Tuple[Type[Any], ...]]
 
-    @overload
-    def __getitem__(
-        self, args: Tuple[Union[int, EllipsisType], Union[int, EllipsisType]]
-    ) -> Type[int]:
-        ...
+    underlying_type: Type[Any]
+    min_value: Optional[Union[int, float]]
+    max_value: Optional[Union[int, float]]
 
-    @overload
-    def __getitem__(
-        self, args: Tuple[Union[float, EllipsisType], Union[float, EllipsisType]]
-    ) -> Type[float]:
-        ...
+    def __class_getitem__(cls, params: Tuple[Any, ...]) -> Self:
+        # deconstruct type arguments
+        if not isinstance(params, tuple):
+            params = (params,)
 
-    def __getitem__(self, args: Tuple[Any, ...]) -> Any:
-        a, b = [None if isinstance(x, type(Ellipsis)) else x for x in args]
-        return Range.create(min_value=a, max_value=b)
+        name = cls.__name__
 
+        if len(params) != 3:
+            raise TypeError(
+                f"`{name}` expects 3 type arguments ({name}[<type>, <min>, <max>]), got {len(params)}"
+            )
 
-class Range(type, metaclass=RangeMeta):
-    """Type depicting a limited range of allowed values.
+        underlying_type, min_value, max_value = params
 
-    See :ref:`param_ranges` for more information.
+        # validate type (argument 1)
+        if not isinstance(underlying_type, type):
+            raise TypeError(f"First `{name}` argument must be a type, not `{underlying_type!r}`")
 
-    .. versionadded:: 2.4
+        if not issubclass(underlying_type, cls._allowed_types):
+            allowed = "/".join(t.__name__ for t in cls._allowed_types)
+            raise TypeError(f"First `{name}` argument must be {allowed}, not `{underlying_type!r}`")
 
-    """
+        # validate min/max (arguments 2/3)
+        min_value = cls._coerce_bound(min_value, "min")
+        max_value = cls._coerce_bound(max_value, "max")
 
-    min_value: Optional[float]
-    max_value: Optional[float]
+        if min_value is None and max_value is None:
+            raise ValueError(f"`{name}` bounds cannot both be empty")
 
-    @overload
-    @classmethod
-    def create(
-        cls,
-        min_value: Optional[int] = None,
-        max_value: Optional[int] = None,
-        *,
-        le: Optional[int] = None,
-        lt: Optional[int] = None,
-        ge: Optional[int] = None,
-        gt: Optional[int] = None,
-    ) -> Type[int]:
-        ...
+        # n.b. this allows bounds to be equal, which doesn't really serve a purpose with numbers,
+        # but is still accepted by the api
+        if min_value is not None and max_value is not None and min_value > max_value:
+            raise ValueError(
+                f"`{name}` minimum ({min_value}) must be less than or equal to maximum ({max_value})"
+            )
 
-    @overload
-    @classmethod
-    def create(
-        cls,
-        min_value: Optional[float] = None,
-        max_value: Optional[float] = None,
-        *,
-        le: Optional[float] = None,
-        lt: Optional[float] = None,
-        ge: Optional[float] = None,
-        gt: Optional[float] = None,
-    ) -> Type[float]:
-        ...
+        return cls(underlying_type=underlying_type, min_value=min_value, max_value=max_value)
 
-    @classmethod
-    def create(
-        cls,
-        min_value: Optional[float] = None,
-        max_value: Optional[float] = None,
-        *,
-        le: Optional[float] = None,
-        lt: Optional[float] = None,
-        ge: Optional[float] = None,
-        gt: Optional[float] = None,
-    ) -> Any:
-        """Construct a new range with any possible constraints"""
-        self = cls(cls.__name__, (), {})
-        self.min_value = min_value if min_value is not None else _xt_to_xe(le, lt, -1)
-        self.max_value = max_value if max_value is not None else _xt_to_xe(ge, gt, 1)
-        return self
-
-    @property
-    def underlying_type(self) -> Union[Type[int], Type[float]]:
-        if isinstance(self.min_value, float) or isinstance(self.max_value, float):
-            return float
-
-        return int
+    @staticmethod
+    def _coerce_bound(value: Any, name: str) -> Optional[Union[int, float]]:
+        if value is None or isinstance(value, EllipsisType):
+            return None
+        elif isinstance(value, (int, float)):
+            return value
+        else:
+            raise TypeError(f"{name} value must be int, float, None, or `...`, not `{type(value)}`")
 
     def __repr__(self) -> str:
         a = "..." if self.min_value is None else self.min_value
         b = "..." if self.max_value is None else self.max_value
-        return f"{type(self).__name__}[{a}, {b}]"
+        return f"{type(self).__name__}[{self.underlying_type.__name__}, {a}, {b}]"
+
+    # hack to get `typing._type_check` to pass, e.g. when using `Range` as a generic parameter
+    def __call__(self) -> NoReturn:
+        raise NotImplementedError
+
+    # support new union syntax for `Range[int, 1, 2] | None`
+    if sys.version_info >= (3, 10):
+
+        def __or__(self, other):
+            return Union[self, other]  # type: ignore
 
 
-class StringMeta(type):
-    """Custom Generic implementation for String."""
+if TYPE_CHECKING:
+    Range = Annotated
+    String = Annotated
+else:
 
-    def __getitem__(
-        self, args: Tuple[Union[int, EllipsisType], Union[int, EllipsisType]]
-    ) -> Type[str]:
-        a, b = [None if isinstance(x, EllipsisType) else x for x in args]
-        return String.create(min_length=a, max_length=b)
+    @dataclass(frozen=True, repr=False)
+    class Range(_BaseRange):
+        _allowed_types = (int, float)
 
+        def __post_init__(self):
+            for value in (self.min_value, self.max_value):
+                if value is None:
+                    continue
 
-class String(type, metaclass=StringMeta):
-    """Type depicting a string option with limited length.
+                if self.underlying_type is int and not isinstance(value, int):
+                    raise TypeError("Range[int, ...] bounds must be int, not float")
 
-    See :ref:`string_lengths` for more information.
+    @dataclass(frozen=True, repr=False)
+    class String(_BaseRange):
+        _allowed_types = (str,)
 
-    .. versionadded:: 2.6
+        def __post_init__(self):
+            for value in (self.min_value, self.max_value):
+                if value is None:
+                    continue
 
-    """
-
-    min_length: Optional[int]
-    max_length: Optional[int]
-    underlying_type: Final[Type[str]] = str
-
-    @classmethod
-    def create(
-        cls,
-        min_length: Optional[int] = None,
-        max_length: Optional[int] = None,
-    ) -> Any:
-        """Construct a new String with constraints."""
-        self = cls(cls.__name__, (), {})
-        self.min_length = min_length
-        self.max_length = max_length
-        return self
-
-    def __repr__(self) -> str:
-        a = "..." if self.min_length is None else self.min_length
-        b = "..." if self.max_length is None else self.max_length
-        return f"{type(self).__name__}[{a}, {b}]"
+                if not isinstance(value, int):
+                    raise TypeError("String bounds must be int, not float")
+                if value < 0:
+                    raise ValueError("String bounds may not be negative")
 
 
 class LargeInt(int):
@@ -701,14 +674,14 @@ class ParamInfo:
         if annotation is inspect.Parameter.empty or annotation is Any:
             return False
 
-        # resolve type aliases
+        # resolve type aliases and special types
         if isinstance(annotation, Range):
             self.min_value = annotation.min_value
             self.max_value = annotation.max_value
             annotation = annotation.underlying_type
         if isinstance(annotation, String):
-            self.min_length = annotation.min_length
-            self.max_length = annotation.max_length
+            self.min_length = annotation.min_value
+            self.max_length = annotation.max_value
             annotation = annotation.underlying_type
         if issubclass_(annotation, LargeInt):
             self.large = True
