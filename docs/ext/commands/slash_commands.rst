@@ -203,26 +203,6 @@ The type of the option is specified by the first type argument, which can be eit
     ):
         ...
 
-.. _type_checker_mypy_plugin:
-
-.. note::
-
-    Type checker support for :class:`~ext.commands.Range` and :class:`~ext.commands.String` (:ref:`see below <string_lengths>`) is limited.
-    Pylance/Pyright seem to handle it correctly; MyPy currently needs a plugin for it to understand :class:`~ext.commands.Range`
-    and :class:`~ext.commands.String` semantics, which can be added in the configuration file (``setup.cfg``, ``mypy.ini``):
-
-    .. code-block:: ini
-
-        [mypy]
-        plugins = disnake.ext.mypy_plugin
-
-    For ``pyproject.toml`` configs, use this instead:
-
-    .. code-block:: toml
-
-        [tool.mypy]
-        plugins = "disnake.ext.mypy_plugin"
-
 .. _string_lengths:
 
 String Lengths
@@ -270,10 +250,6 @@ The first type argument should always be :class:`str`.
 .. note::
 
     There is a max length of 6000 characters, which is enforced by Discord.
-
-.. note::
-
-    For mypy type checking support, please see the above note about the :ref:`mypy plugin <type_checker_mypy_plugin>`.
 
 .. _docstrings:
 
