@@ -51,7 +51,7 @@ from .converter import CONVERTER_MAPPING
 T_ = TypeVar("T_")
 
 if TYPE_CHECKING:
-    from typing_extensions import Annotated, Concatenate, ParamSpec, Self, TypeGuard
+    from typing_extensions import Concatenate, ParamSpec, Self, TypeGuard
 
     from disnake.app_commands import Choices
     from disnake.i18n import LocalizationValue, LocalizedOptional
@@ -373,8 +373,8 @@ class _BaseRange(ABC):
 
 
 if TYPE_CHECKING:
-    Range = Annotated
-    String = Annotated
+    # aliased import since mypy doesn't understand `Range = Annotated`
+    from typing_extensions import Annotated as Range, Annotated as String
 else:
 
     @dataclass(frozen=True, repr=False)
