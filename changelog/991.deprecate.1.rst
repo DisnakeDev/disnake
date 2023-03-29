@@ -1,0 +1,1 @@
+|commands| The mypy plugin is now deprecated and a no-op.
