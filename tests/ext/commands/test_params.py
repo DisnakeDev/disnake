@@ -70,24 +70,24 @@ class TestParamInfo:
 # this uses `Range` for testing `_BaseRange`, `String` should work equally
 class TestBaseRange:
     @pytest.mark.parametrize("args", [int, (int,), (int, 1, 2, 3)])
-    def test_param_count(self, args):
+    def test_param_count(self, args) -> None:
         with pytest.raises(TypeError, match=r"`Range` expects 3 type arguments"):
             commands.Range[args]  # type: ignore
 
     @pytest.mark.parametrize("value", ["int", 42, Optional[int], Union[int, float]])
-    def test_invalid_type(self, value):
+    def test_invalid_type(self, value) -> None:
         with pytest.raises(TypeError, match=r"First `Range` argument must be a type"):
             commands.Range[value, 1, 10]
 
     @pytest.mark.parametrize("value", ["42", int])
-    def test_invalid_bound(self, value):
+    def test_invalid_bound(self, value) -> None:
         with pytest.raises(TypeError, match=r"min value must be int, float"):
             commands.Range[int, value, 1]
 
         with pytest.raises(TypeError, match=r"max value must be int, float"):
             commands.Range[int, 1, value]
 
-    def test_invalid_min_max(self):
+    def test_invalid_min_max(self) -> None:
         with pytest.raises(ValueError, match=r"`Range` bounds cannot both be empty"):
             commands.Range[int, None, ...]
 
@@ -95,7 +95,7 @@ class TestBaseRange:
             commands.Range[int, 100, 99]
 
     @pytest.mark.parametrize("empty", [None, ...])
-    def test_ellipsis(self, empty):
+    def test_ellipsis(self, empty) -> None:
         x: Any = commands.Range[int, 1, empty]
         assert x.min_value == 1
         assert x.max_value is None
@@ -115,18 +115,18 @@ class TestBaseRange:
             (lambda: commands.String[5, 10], (str, 5, 10)),  # type: ignore
         ],
     )
-    def test_backwards_compatible(self, create, expected):
+    def test_backwards_compatible(self, create: Any, expected) -> None:
         with pytest.warns(DeprecationWarning, match=r"without an explicit type argument"):
             value = create()
             assert (value.underlying_type, value.min_value, value.max_value) == expected
 
 
 class TestRange:
-    def test_disallowed_type(self):
+    def test_disallowed_type(self) -> None:
         with pytest.raises(TypeError, match=r"First `Range` argument must be int/float, not"):
             commands.Range[str, 1, 10]
 
-    def test_int_float_bounds(self):
+    def test_int_float_bounds(self) -> None:
         with pytest.raises(TypeError, match=r"Range.* bounds must be int, not float"):
             commands.Range[int, 1.0, 10]
 
@@ -134,11 +134,11 @@ class TestRange:
             commands.Range[int, 1, 10.0]
 
     @pytest.mark.parametrize("value", [math.nan, math.inf, -math.inf])
-    def test_nan(self, value):
+    def test_nan(self, value) -> None:
         with pytest.raises(ValueError, match=r"min value may not be NaN, inf, or -inf"):
             commands.Range[float, value, 100]
 
-    def test_valid(self):
+    def test_valid(self) -> None:
         x: Any = commands.Range[int, -1, 2]
         assert x.underlying_type == int
 
@@ -147,19 +147,19 @@ class TestRange:
 
 
 class TestString:
-    def test_disallowed_type(self):
+    def test_disallowed_type(self) -> None:
         with pytest.raises(TypeError, match=r"First `String` argument must be str, not"):
             commands.String[int, 1, 10]
 
-    def test_float_bound(self):
+    def test_float_bound(self) -> None:
         with pytest.raises(TypeError, match=r"String bounds must be int, not float"):
             commands.String[str, 1.0, ...]
 
-    def test_negative_bound(self):
+    def test_negative_bound(self) -> None:
         with pytest.raises(ValueError, match=r"String bounds may not be negative"):
             commands.String[str, -5, 10]
 
-    def test_valid(self):
+    def test_valid(self) -> None:
         commands.String[str, 10, 10]
         commands.String[str, 100, 1234]
         commands.String[str, 100, ...]
@@ -177,7 +177,7 @@ class TestRangeStringParam:
         assert info.max_value == annotation.max_value
         assert info.type == annotation.underlying_type
 
-    def test_string(self):
+    def test_string(self) -> None:
         annotation: Any = commands.String[str, 4, 10]
 
         info = commands.ParamInfo()

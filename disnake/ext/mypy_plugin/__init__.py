@@ -9,7 +9,7 @@ from mypy.plugin import Plugin
 class DisnakePlugin(Plugin):
     """Deprecated mypy plugin."""
 
-    def __init__(self, *args: t.Any, **kwargs: t.Any):
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
         super().__init__(*args, **kwargs)
 
         # show deprecation warning when run
