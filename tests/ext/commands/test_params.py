@@ -191,24 +191,25 @@ class TestRangeStringParam:
 
     # uses lambdas since new union syntax isn't supported on all versions
     @pytest.mark.parametrize(
-        "get_annotation",
+        "annotation_str",
         [
-            lambda: Optional[commands.Range[int, 1, 2]],
+            "Optional[commands.Range[int, 1, 2]]",
             # 3.10 union syntax
             pytest.param(
-                lambda: commands.Range[float, 1.2, 3.4] | None,
+                "commands.Range[int, 1, 2] | None",
                 marks=pytest.mark.skipif(
                     sys.version_info < (3, 10), reason="syntax requires py3.10"
                 ),
             ),
         ],
     )
-    def test_optional(self, get_annotation) -> None:
-        annotation = get_annotation()
+    def test_optional(self, annotation_str) -> None:
+        annotation = disnake.utils.resolve_annotation(annotation_str, globals(), None, None)
+        assert type(None) in annotation.__args__
+
         info = commands.ParamInfo()
         info.parse_annotation(annotation)
 
-        range = annotation.__args__[0]
-        assert info.min_value == range.min_value
-        assert info.max_value == range.max_value
-        assert info.type == range.underlying_type
+        assert info.min_value == 1
+        assert info.max_value == 2
+        assert info.type == int
