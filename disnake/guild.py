@@ -94,7 +94,7 @@ if TYPE_CHECKING:
     from .state import ConnectionState
     from .template import Template
     from .threads import AnyThreadArchiveDuration, ForumTag
-    from .types.channel import PermissionOverwrite as PermissionOverwritePayload
+    from .types.channel import PermissionOverwritePayload
     from .types.guild import (
         Ban as BanPayload,
         CreateGuildPlaceholderChannel,

@@ -11,14 +11,14 @@ from .user import PartialUser
 OverwriteType = Literal[0, 1]
 
 
-class PermissionOverwrite(TypedDict):
+class PermissionOverwritePayload(TypedDict):
     id: Snowflake
     type: OverwriteType
     allow: str
     deny: str
 
 
-ChannelType = Literal[0, 1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 15]
+LiteralChannelType = Literal[0, 1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 15]
 
 
 class _BaseChannelPayload(TypedDict):
@@ -28,7 +28,7 @@ class _BaseChannelPayload(TypedDict):
 class _BaseGuildChannelPayload(_BaseChannelPayload):
     guild_id: Snowflake
     position: int
-    permission_overwrites: List[PermissionOverwrite]
+    permission_overwrites: List[PermissionOverwritePayload]
     # In theory, this will never be None and will always be present. In practice...
     name: NotRequired[Optional[str]]
     nsfw: bool
@@ -37,7 +37,7 @@ class _BaseGuildChannelPayload(_BaseChannelPayload):
 
 
 class PartialChannelPayload(_BaseChannelPayload):
-    type: ChannelType
+    type: LiteralChannelType
 
 
 class GroupInviteRecipient(TypedDict):
@@ -50,7 +50,7 @@ class InviteChannel(PartialChannelPayload, total=False):
     icon: Optional[str]
 
 
-class _BaseTextChannel(_BaseGuildChannelPayload, total=False):
+class _BaseTextChannelPayload(_BaseGuildChannelPayload, total=False):
     topic: Optional[str]
     last_message_id: Optional[Snowflake]
     last_pin_timestamp: Optional[str]
@@ -59,24 +59,24 @@ class _BaseTextChannel(_BaseGuildChannelPayload, total=False):
     default_thread_rate_limit_per_user: NotRequired[int]
 
 
-class TextChannelPayload(_BaseTextChannel):
+class TextChannelPayload(_BaseTextChannelPayload):
     type: Literal[0]
 
 
-class NewsChannelPayload(_BaseTextChannel):
+class NewsChannelPayload(_BaseTextChannelPayload):
     type: Literal[5]
 
 
 VideoQualityMode = Literal[1, 2]
 
 
-class _BaseVocalGuildChannel(_BaseGuildChannelPayload):
+class _BaseVocalGuildChannelPayload(_BaseGuildChannelPayload):
     bitrate: int
     user_limit: int
     rtc_region: NotRequired[Optional[str]]
 
 
-class VoiceChannelPayload(_BaseVocalGuildChannel):
+class VoiceChannelPayload(_BaseVocalGuildChannelPayload):
     type: Literal[2]
     last_message_id: NotRequired[Optional[Snowflake]]
     rate_limit_per_user: NotRequired[int]
@@ -87,7 +87,7 @@ class CategoryChannelPayload(_BaseGuildChannelPayload):
     type: Literal[4]
 
 
-class StageChannelPayload(_BaseVocalGuildChannel):
+class StageChannelPayload(_BaseVocalGuildChannelPayload):
     type: Literal[13]
     topic: NotRequired[Optional[str]]
 
@@ -109,7 +109,7 @@ class ThreadChannelPayload(_BaseChannelPayload):
     total_message_sent: NotRequired[int]
 
 
-class DefaultReaction(TypedDict):
+class DefaultReactionPayload(TypedDict):
     emoji_id: Optional[Snowflake]
     emoji_name: Optional[str]
 
@@ -124,7 +124,7 @@ class ForumChannelPayload(_BaseGuildChannelPayload):
     last_message_id: NotRequired[Optional[Snowflake]]
     default_auto_archive_duration: NotRequired[ThreadArchiveDurationLiteral]
     available_tags: NotRequired[List[ForumTag]]
-    default_reaction_emoji: NotRequired[Optional[DefaultReaction]]
+    default_reaction_emoji: NotRequired[Optional[DefaultReactionPayload]]
     default_thread_rate_limit_per_user: NotRequired[int]
     default_sort_order: NotRequired[Optional[ThreadSortOrder]]
     default_forum_layout: NotRequired[ThreadLayout]
@@ -176,13 +176,13 @@ class GuildDirectoryPayload(_BaseChannelPayload):
 
 class CreateGuildChannel(TypedDict):
     name: str
-    type: NotRequired[Optional[ChannelType]]
+    type: NotRequired[Optional[LiteralChannelType]]
     topic: NotRequired[Optional[str]]
     bitrate: NotRequired[Optional[int]]
     user_limit: NotRequired[Optional[int]]
     rate_limit_per_user: NotRequired[Optional[int]]
     position: NotRequired[Optional[int]]
-    permission_overwrites: NotRequired[List[PermissionOverwrite]]
+    permission_overwrites: NotRequired[List[PermissionOverwritePayload]]
     parent_id: NotRequired[Optional[Snowflake]]
     nsfw: NotRequired[Optional[bool]]
     rtc_region: NotRequired[Optional[str]]

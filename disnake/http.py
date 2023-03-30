@@ -1006,7 +1006,7 @@ class HTTPClient:
     def create_channel(
         self,
         guild_id: Snowflake,
-        channel_type: channel.ChannelType,
+        channel_type: channel.LiteralChannelType,
         *,
         reason: Optional[str] = None,
         **options: Any,

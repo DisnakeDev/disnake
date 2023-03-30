@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Dict, List, Literal, Optional, TypedDict, Unio
 
 from typing_extensions import NotRequired
 
-from .channel import ChannelType
+from .channel import LiteralChannelType
 from .components import ComponentPayload, ModalPayload
 from .embed import Embed
 from .i18n import LocalizationDict
@@ -52,7 +52,7 @@ class ApplicationCommandOption(TypedDict):
     required: NotRequired[bool]
     choices: NotRequired[List[ApplicationCommandOptionChoice]]
     options: NotRequired[List[ApplicationCommandOption]]
-    channel_types: NotRequired[List[ChannelType]]
+    channel_types: NotRequired[List[LiteralChannelType]]
     min_value: NotRequired[float]
     max_value: NotRequired[float]
     min_length: NotRequired[int]
@@ -90,7 +90,7 @@ InteractionType = Literal[1, 2, 3, 4, 5]
 
 class ResolvedPartialChannel(TypedDict):
     id: Snowflake
-    type: ChannelType
+    type: LiteralChannelType
     permissions: str
     name: str
 

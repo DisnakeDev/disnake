@@ -14,7 +14,7 @@ from .automod import (
     AutoModTriggerMetadata,
     AutoModTriggerType,
 )
-from .channel import ChannelType, PermissionOverwrite, VideoQualityMode
+from .channel import LiteralChannelType, PermissionOverwritePayload, VideoQualityMode
 from .guild import (
     DefaultMessageNotificationLevel,
     ExplicitContentFilterLevel,
@@ -213,8 +213,8 @@ class _AuditLogChange_DefaultMessageNotificationLevel(TypedDict):
 
 class _AuditLogChange_ChannelType(TypedDict):
     key: Literal["type"]
-    new_value: ChannelType
-    old_value: ChannelType
+    new_value: LiteralChannelType
+    old_value: LiteralChannelType
 
 
 class _AuditLogChange_IntegrationExpireBehaviour(TypedDict):
@@ -231,8 +231,8 @@ class _AuditLogChange_VideoQualityMode(TypedDict):
 
 class _AuditLogChange_Overwrites(TypedDict):
     key: Literal["permission_overwrites"]
-    new_value: List[PermissionOverwrite]
-    old_value: List[PermissionOverwrite]
+    new_value: List[PermissionOverwritePayload]
+    old_value: List[PermissionOverwritePayload]
 
 
 class _AuditLogChange_Datetime(TypedDict):

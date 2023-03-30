@@ -6,7 +6,7 @@ from typing import List, Literal, Optional, TypedDict, Union
 
 from typing_extensions import NotRequired
 
-from .channel import ChannelType
+from .channel import LiteralChannelType
 from .components import ComponentPayload
 from .embed import Embed
 from .emoji import PartialEmoji
@@ -21,7 +21,7 @@ from .user import User
 class ChannelMention(TypedDict):
     id: Snowflake
     guild_id: Snowflake
-    type: ChannelType
+    type: LiteralChannelType
     name: str
 
 

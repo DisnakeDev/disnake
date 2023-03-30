@@ -60,10 +60,7 @@ if TYPE_CHECKING:
         AutoModAction as AutoModActionPayload,
         AutoModTriggerMetadata as AutoModTriggerMetadataPayload,
     )
-    from .types.channel import (
-        DefaultReaction as DefaultReactionPayload,
-        PermissionOverwrite as PermissionOverwritePayload,
-    )
+    from .types.channel import DefaultReactionPayload, PermissionOverwritePayload
     from .types.role import Role as RolePayload
     from .types.snowflake import Snowflake
     from .types.threads import ForumTag as ForumTagPayload

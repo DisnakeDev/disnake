@@ -6,7 +6,7 @@ from typing import List, Literal, TypedDict, Union
 
 from typing_extensions import NotRequired
 
-from .channel import ChannelType
+from .channel import LiteralChannelType
 from .emoji import PartialEmoji
 
 LiteralComponentType = Literal[1, 2, 3, 4, 5, 6, 7, 8]
@@ -73,7 +73,7 @@ class MentionableSelectMenuPayload(_SelectMenu):
 
 class ChannelSelectMenuPayload(_SelectMenu):
     type: Literal[8]
-    channel_types: NotRequired[List[ChannelType]]
+    channel_types: NotRequired[List[LiteralChannelType]]
 
 
 AnySelectMenuPayload = Union[

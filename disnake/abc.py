@@ -77,10 +77,10 @@ if TYPE_CHECKING:
     from .threads import AnyThreadArchiveDuration, ForumTag
     from .types.channel import (
         ChannelPayload,
-        DefaultReaction as DefaultReactionPayload,
+        DefaultReactionPayload,
         GuildChannelPayload,
         OverwriteType,
-        PermissionOverwrite as PermissionOverwritePayload,
+        PermissionOverwritePayload,
     )
     from .types.threads import PartialForumTag as PartialForumTagPayload
     from .ui.action_row import Components, MessageUIComponent
