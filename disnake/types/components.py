@@ -14,7 +14,9 @@ LiteralButtonStyle = Literal[1, 2, 3, 4, 5]
 LiteralTextInputStyle = Literal[1, 2]
 
 
-ComponentPayload = Union["ActionRowPayload", "ButtonComponentPayload", "AnySelectMenuPayload", "TextInputPayload"]
+ComponentPayload = Union[
+    "ActionRowPayload", "ButtonComponentPayload", "AnySelectMenuPayload", "TextInputPayload"
+]
 
 
 class ActionRowPayload(TypedDict):
