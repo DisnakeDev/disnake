@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from .guild import Guild
     from .guild_scheduled_event import GuildScheduledEvent
     from .state import ConnectionState
-    from .types.channel import StageInstance as StageInstancePayload
+    from .types.channel import StageInstancePayload
 
 
 class StageInstance(Hashable):

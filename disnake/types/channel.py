@@ -21,11 +21,11 @@ class PermissionOverwrite(TypedDict):
 ChannelType = Literal[0, 1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 15]
 
 
-class _BaseChannel(TypedDict):
+class _BaseChannelPayload(TypedDict):
     id: Snowflake
 
 
-class _BaseGuildChannel(_BaseChannel):
+class _BaseGuildChannelPayload(_BaseChannelPayload):
     guild_id: Snowflake
     position: int
     permission_overwrites: List[PermissionOverwrite]
@@ -36,7 +36,7 @@ class _BaseGuildChannel(_BaseChannel):
     flags: NotRequired[int]
 
 
-class PartialChannel(_BaseChannel):
+class PartialChannelPayload(_BaseChannelPayload):
     type: ChannelType
 
 
@@ -44,13 +44,13 @@ class GroupInviteRecipient(TypedDict):
     username: str
 
 
-class InviteChannel(PartialChannel, total=False):
+class InviteChannel(PartialChannelPayload, total=False):
     name: Optional[str]
     recipients: List[GroupInviteRecipient]
     icon: Optional[str]
 
 
-class _BaseTextChannel(_BaseGuildChannel, total=False):
+class _BaseTextChannel(_BaseGuildChannelPayload, total=False):
     topic: Optional[str]
     last_message_id: Optional[Snowflake]
     last_pin_timestamp: Optional[str]
@@ -59,40 +59,40 @@ class _BaseTextChannel(_BaseGuildChannel, total=False):
     default_thread_rate_limit_per_user: NotRequired[int]
 
 
-class TextChannel(_BaseTextChannel):
+class TextChannelPayload(_BaseTextChannel):
     type: Literal[0]
 
 
-class NewsChannel(_BaseTextChannel):
+class NewsChannelPayload(_BaseTextChannel):
     type: Literal[5]
 
 
 VideoQualityMode = Literal[1, 2]
 
 
-class _BaseVocalGuildChannel(_BaseGuildChannel):
+class _BaseVocalGuildChannel(_BaseGuildChannelPayload):
     bitrate: int
     user_limit: int
     rtc_region: NotRequired[Optional[str]]
 
 
-class VoiceChannel(_BaseVocalGuildChannel):
+class VoiceChannelPayload(_BaseVocalGuildChannel):
     type: Literal[2]
     last_message_id: NotRequired[Optional[Snowflake]]
     rate_limit_per_user: NotRequired[int]
     video_quality_mode: NotRequired[VideoQualityMode]
 
 
-class CategoryChannel(_BaseGuildChannel):
+class CategoryChannelPayload(_BaseGuildChannelPayload):
     type: Literal[4]
 
 
-class StageChannel(_BaseVocalGuildChannel):
+class StageChannelPayload(_BaseVocalGuildChannel):
     type: Literal[13]
     topic: NotRequired[Optional[str]]
 
 
-class ThreadChannel(_BaseChannel):
+class ThreadChannelPayload(_BaseChannelPayload):
     type: Literal[10, 11, 12]
     guild_id: Snowflake
     name: str
@@ -118,7 +118,7 @@ ThreadSortOrder = Literal[0, 1]
 ThreadLayout = Literal[0, 1, 2]
 
 
-class ForumChannel(_BaseGuildChannel):
+class ForumChannelPayload(_BaseGuildChannelPayload):
     type: Literal[15]
     topic: NotRequired[Optional[str]]
     last_message_id: NotRequired[Optional[Snowflake]]
@@ -130,36 +130,36 @@ class ForumChannel(_BaseGuildChannel):
     default_forum_layout: NotRequired[ThreadLayout]
 
 
-GuildChannel = Union[
-    TextChannel,
-    NewsChannel,
-    VoiceChannel,
-    CategoryChannel,
-    StageChannel,
-    ThreadChannel,
-    ForumChannel,
+GuildChannelPayload = Union[
+    TextChannelPayload,
+    NewsChannelPayload,
+    VoiceChannelPayload,
+    CategoryChannelPayload,
+    StageChannelPayload,
+    ThreadChannelPayload,
+    ForumChannelPayload,
 ]
 
 
-class DMChannel(_BaseChannel):
+class DMChannelPayload(_BaseChannelPayload):
     type: Literal[1]
     last_message_id: Optional[Snowflake]
     recipients: List[PartialUser]
 
 
-class GroupDMChannel(_BaseChannel):
+class GroupDMChannelPayload(_BaseChannelPayload):
     name: Optional[str]
     type: Literal[3]
     icon: Optional[str]
     owner_id: Snowflake
 
 
-ChannelPayload = Union[GuildChannel, DMChannel, GroupDMChannel]
+ChannelPayload = Union[GuildChannelPayload, DMChannelPayload, GroupDMChannelPayload]
 
 PrivacyLevel = Literal[1, 2]
 
 
-class StageInstance(TypedDict):
+class StageInstancePayload(TypedDict):
     id: Snowflake
     guild_id: Snowflake
     channel_id: Snowflake
@@ -169,7 +169,7 @@ class StageInstance(TypedDict):
     guild_scheduled_event_id: Optional[Snowflake]
 
 
-class GuildDirectory(_BaseChannel):
+class GuildDirectoryPayload(_BaseChannelPayload):
     type: Literal[14]
     name: str
 

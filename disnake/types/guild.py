@@ -5,7 +5,7 @@ from typing import List, Literal, Optional, TypedDict
 from typing_extensions import NotRequired
 
 from .activity import PartialPresenceUpdate
-from .channel import CreateGuildChannel, GuildChannel, StageInstance
+from .channel import CreateGuildChannel, GuildChannelPayload, StageInstancePayload
 from .emoji import Emoji
 from .guild_scheduled_event import GuildScheduledEvent
 from .member import Member
@@ -134,10 +134,10 @@ class Guild(_BaseGuildPreview):
     member_count: NotRequired[int]
     voice_states: NotRequired[List[GuildVoiceState]]
     members: NotRequired[List[Member]]
-    channels: NotRequired[List[GuildChannel]]
+    channels: NotRequired[List[GuildChannelPayload]]
     threads: NotRequired[List[Thread]]
     presences: NotRequired[List[PartialPresenceUpdate]]
-    stage_instances: NotRequired[List[StageInstance]]
+    stage_instances: NotRequired[List[StageInstancePayload]]
     guild_scheduled_events: NotRequired[List[GuildScheduledEvent]]
 
 

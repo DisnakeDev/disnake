@@ -6,7 +6,7 @@ from typing import Literal, Optional, TypedDict
 
 from typing_extensions import NotRequired
 
-from .channel import PartialChannel
+from .channel import PartialChannelPayload
 from .snowflake import Snowflake
 from .user import User
 
@@ -23,7 +23,7 @@ WebhookType = Literal[1, 2, 3]
 class FollowerWebhook(TypedDict):
     channel_id: Snowflake
     webhook_id: Snowflake
-    source_channel: NotRequired[PartialChannel]
+    source_channel: NotRequired[PartialChannelPayload]
     source_guild: NotRequired[SourceGuild]
 
 

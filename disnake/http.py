@@ -494,7 +494,7 @@ class HTTPClient:
 
     def start_group(
         self, user_id: Snowflake, recipients: List[int]
-    ) -> Response[channel.GroupDMChannel]:
+    ) -> Response[channel.GroupDMChannelPayload]:
         payload = {
             "recipients": recipients,
         }
@@ -508,7 +508,7 @@ class HTTPClient:
 
     # Message management
 
-    def start_private_message(self, user_id: Snowflake) -> Response[channel.DMChannel]:
+    def start_private_message(self, user_id: Snowflake) -> Response[channel.DMChannelPayload]:
         payload = {
             "recipient_id": user_id,
         }
@@ -1010,7 +1010,7 @@ class HTTPClient:
         *,
         reason: Optional[str] = None,
         **options: Any,
-    ) -> Response[channel.GuildChannel]:
+    ) -> Response[channel.GuildChannelPayload]:
         payload = {
             "type": channel_type,
         }
@@ -1470,7 +1470,9 @@ class HTTPClient:
             reason=reason,
         )
 
-    def get_all_guild_channels(self, guild_id: Snowflake) -> Response[List[guild.GuildChannel]]:
+    def get_all_guild_channels(
+        self, guild_id: Snowflake
+    ) -> Response[List[channel.GuildChannelPayload]]:
         return self.request(Route("GET", "/guilds/{guild_id}/channels", guild_id=guild_id))
 
     def get_members(
@@ -1984,12 +1986,12 @@ class HTTPClient:
 
     # Stage instance management
 
-    def get_stage_instance(self, channel_id: Snowflake) -> Response[channel.StageInstance]:
+    def get_stage_instance(self, channel_id: Snowflake) -> Response[channel.StageInstancePayload]:
         return self.request(Route("GET", "/stage-instances/{channel_id}", channel_id=channel_id))
 
     def create_stage_instance(
         self, *, reason: Optional[str] = None, **payload: Any
-    ) -> Response[channel.StageInstance]:
+    ) -> Response[channel.StageInstancePayload]:
         valid_keys = (
             "channel_id",
             "topic",

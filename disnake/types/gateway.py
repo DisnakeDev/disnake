@@ -10,7 +10,7 @@ from .activity import PartialPresenceUpdate, PresenceData, SendableActivity
 from .appinfo import PartialAppInfo, PartialGatewayAppInfo
 from .audit_log import AuditLogEntry
 from .automod import AutoModAction, AutoModRule, AutoModTriggerType
-from .channel import ChannelPayload, GuildChannel, StageInstance
+from .channel import ChannelPayload, GuildChannelPayload, StageInstancePayload
 from .emoji import Emoji, PartialEmoji
 from .guild import Guild, UnavailableGuild
 from .guild_scheduled_event import GuildScheduledEvent
@@ -357,7 +357,7 @@ class InviteDeleteEvent(TypedDict):
 
 
 # https://discord.com/developers/docs/topics/gateway-events#channel-create
-ChannelCreateEvent = GuildChannel
+ChannelCreateEvent = GuildChannelPayload
 
 
 # https://discord.com/developers/docs/topics/gateway-events#channel-update
@@ -567,15 +567,15 @@ class WebhooksUpdateEvent(TypedDict):
 
 
 # https://discord.com/developers/docs/topics/gateway-events#stage-instance-create
-StageInstanceCreateEvent = StageInstance
+StageInstanceCreateEvent = StageInstancePayload
 
 
 # https://discord.com/developers/docs/topics/gateway-events#stage-instance-update
-StageInstanceUpdateEvent = StageInstance
+StageInstanceUpdateEvent = StageInstancePayload
 
 
 # https://discord.com/developers/docs/topics/gateway-events#stage-instance-delete
-StageInstanceDeleteEvent = StageInstance
+StageInstanceDeleteEvent = StageInstancePayload
 
 
 # https://discord.com/developers/docs/topics/gateway-events#voice-state-update

@@ -78,7 +78,7 @@ if TYPE_CHECKING:
     from .types.channel import (
         ChannelPayload,
         DefaultReaction as DefaultReactionPayload,
-        GuildChannel as GuildChannelPayload,
+        GuildChannelPayload,
         OverwriteType,
         PermissionOverwrite as PermissionOverwritePayload,
     )

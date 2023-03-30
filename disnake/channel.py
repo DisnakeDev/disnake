@@ -77,13 +77,13 @@ if TYPE_CHECKING:
     from .sticker import GuildSticker, StickerItem
     from .threads import AnyThreadArchiveDuration, ThreadType
     from .types.channel import (
-        CategoryChannel as CategoryChannelPayload,
-        DMChannel as DMChannelPayload,
-        ForumChannel as ForumChannelPayload,
-        GroupDMChannel as GroupChannelPayload,
-        StageChannel as StageChannelPayload,
-        TextChannel as TextChannelPayload,
-        VoiceChannel as VoiceChannelPayload,
+        CategoryChannelPayload,
+        DMChannelPayload,
+        ForumChannelPayload,
+        GroupDMChannelPayload,
+        StageChannelPayload,
+        TextChannelPayload,
+        VoiceChannelPayload,
     )
     from .types.snowflake import SnowflakeList
     from .types.threads import ThreadArchiveDurationLiteral
@@ -3937,14 +3937,14 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
     __slots__ = ("id", "recipients", "owner_id", "owner", "_icon", "name", "me", "_state")
 
     def __init__(
-        self, *, me: ClientUser, state: ConnectionState, data: GroupChannelPayload
+        self, *, me: ClientUser, state: ConnectionState, data: GroupDMChannelPayload
     ) -> None:
         self._state: ConnectionState = state
         self.id: int = int(data["id"])
         self.me: ClientUser = me
         self._update_group(data)
 
-    def _update_group(self, data: GroupChannelPayload) -> None:
+    def _update_group(self, data: GroupDMChannelPayload) -> None:
         self.owner_id: Optional[int] = utils._get_as_snowflake(data, "owner_id")
         self._icon: Optional[str] = data.get("icon")
         self.name: Optional[str] = data.get("name")

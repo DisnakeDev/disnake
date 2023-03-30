@@ -95,7 +95,7 @@ if TYPE_CHECKING:
     from .http import HTTPClient
     from .types import gateway
     from .types.activity import Activity as ActivityPayload
-    from .types.channel import DMChannel as DMChannelPayload
+    from .types.channel import DMChannelPayload
     from .types.emoji import Emoji as EmojiPayload
     from .types.guild import Guild as GuildPayload, UnavailableGuild as UnavailableGuildPayload
     from .types.message import Message as MessagePayload
