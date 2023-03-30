@@ -1144,6 +1144,33 @@ Voice
     :param after: The voice state after the changes.
     :type after: :class:`VoiceState`
 
+.. function:: on_voice_channel_effect(channel, member, effect)
+
+    Called when a :class:`Member` sends an effect in a voice channel the bot is connected to.
+
+    This requires :attr:`Intents.voice_states` and :attr:`Intents.members` to be enabled.
+
+    .. versionadded:: 2.9
+
+    :param channel: The voice channel where the effect was sent.
+    :type channel: :class:`abc.GuildChannel`
+    :param member: The member that sent the effect.
+    :type member: :class:`Member`
+    :param effect: The effect that was sent.
+    :type effect: :class:`VoiceChannelEffect`
+
+.. function:: on_raw_voice_channel_effect(payload)
+
+    Called when a :class:`Member` sends an effect in a voice channel the bot is connected to.
+    Unlike :func:`on_voice_channel_effect`, this is called regardless of the member cache.
+
+    This requires :attr:`Intents.voice_states` to be enabled.
+
+    .. versionadded:: 2.9
+
+    :param payload: The raw event payload data.
+    :type payload: :class:`RawVoiceChannelEffectEvent`
+
 .. _discord-api-utils:
 
 Interactions
@@ -3935,6 +3962,20 @@ of :class:`enum.Enum`.
 
         The metadata value (``integer``) is not equal to the guild's configured value.
 
+.. class:: VoiceChannelEffectAnimationType
+
+    The type of an emoji reaction effect animation in a voice channel.
+
+    .. versionadded:: 2.9
+
+    .. attribute:: premium
+
+        A fun animation, sent by a Nitro subscriber.
+
+    .. attribute:: basic
+
+        A standard animation.
+
 .. autoclass:: Event
     :members:
 
@@ -5806,6 +5847,22 @@ RawGuildMemberRemoveEvent
 .. attributetable:: RawGuildMemberRemoveEvent
 
 .. autoclass:: RawGuildMemberRemoveEvent()
+    :members:
+
+RawVoiceChannelEffectEvent
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: RawVoiceChannelEffectEvent
+
+.. autoclass:: RawVoiceChannelEffectEvent()
+    :members:
+
+VoiceChannelEffect
+~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: VoiceChannelEffect
+
+.. autoclass:: VoiceChannelEffect()
     :members:
 
 PartialWebhookGuild

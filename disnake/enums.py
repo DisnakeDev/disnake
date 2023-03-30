@@ -1125,6 +1125,19 @@ class Event(Enum):
     """Called when a `Member` changes their `VoiceState`.
     Represents the :func:`on_voice_state_update` event.
     """
+    voice_channel_effect = "voice_channel_effect"
+    """Called when a `Member` sends an effect in a voice channel the bot is connected to.
+    Represents the :func:`on_voice_channel_effect` event.
+
+    .. versionadded:: 2.9
+    """
+    raw_voice_channel_effect = "raw_voice_channel_effect"
+    """Called when a `Member` sends an effect in a voice channel the bot is connected to,
+    regardless of the member cache.
+    Represents the :func:`on_raw_voice_channel_effect` event.
+
+    .. versionadded:: 2.9
+    """
     stage_instance_create = "stage_instance_create"
     """Called when a `StageInstance` is created for a `StageChannel`.
     Represents the :func:`on_stage_instance_create` event.

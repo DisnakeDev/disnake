@@ -429,6 +429,22 @@ class RawGuildMemberRemoveEvent(_RawReprMixin):
 
 
 class VoiceChannelEffect(_RawReprMixin):
+    """An effect sent by a member in a voice channel.
+
+    Different sets of attributes will be present, depending on the type of effect.
+
+    .. versionadded:: 2.9
+
+    Attributes
+    ----------
+    emoji: Optional[:class:`PartialEmoji`]
+        The emoji, if this is an emoji reaction effect.
+    animation_type: Optional[:class:`VoiceChannelEffectAnimationType`]
+        The animation type, if this is an emoji reaction effect.
+    animation_id: Optional[:class:`int`]
+        The animation ID, if this is an emoji reaction effect.
+    """
+
     __slots__ = (
         "emoji",
         "animation_type",
@@ -449,6 +465,24 @@ class VoiceChannelEffect(_RawReprMixin):
 
 
 class RawVoiceChannelEffectEvent(_RawReprMixin):
+    """Represents the event payload for an :func:`on_raw_voice_channel_effect` event.
+
+    .. versionadded:: 2.9
+
+    Attributes
+    ----------
+    channel_id: :class:`int`
+        The ID of the channel where the effect was sent.
+    guild_id: :class:`int`
+        The ID of the guild where the effect was sent.
+    user_id: :class:`int`
+        The ID of the user who sent the effect.
+    effect: :class:`VoiceChannelEffect`
+        The effect that was sent.
+    member: Optional[:class:`Member`]
+        The member who sent the effect, if they could be found in the internal cache.
+    """
+
     __slots__ = (
         "channel_id",
         "guild_id",
