@@ -154,7 +154,7 @@ class GroupDMChannel(_BaseChannel):
     owner_id: Snowflake
 
 
-Channel = Union[GuildChannel, DMChannel, GroupDMChannel]
+ChannelPayload = Union[GuildChannel, DMChannel, GroupDMChannel]
 
 PrivacyLevel = Literal[1, 2]
 

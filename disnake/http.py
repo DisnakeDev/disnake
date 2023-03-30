@@ -773,7 +773,7 @@ class HTTPClient:
         )
         return self.request(r)
 
-    def get_channel(self, channel_id: Snowflake) -> Response[channel.Channel]:
+    def get_channel(self, channel_id: Snowflake) -> Response[channel.ChannelPayload]:
         r = Route("GET", "/channels/{channel_id}", channel_id=channel_id)
         return self.request(r)
 
@@ -962,7 +962,7 @@ class HTTPClient:
         *,
         reason: Optional[str] = None,
         **options: Any,
-    ) -> Response[channel.Channel]:
+    ) -> Response[channel.ChannelPayload]:
         r = Route("PATCH", "/channels/{channel_id}", channel_id=channel_id)
         valid_keys = (
             "name",

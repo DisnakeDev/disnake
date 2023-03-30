@@ -10,7 +10,7 @@ from .activity import PartialPresenceUpdate, PresenceData, SendableActivity
 from .appinfo import PartialAppInfo, PartialGatewayAppInfo
 from .audit_log import AuditLogEntry
 from .automod import AutoModAction, AutoModRule, AutoModTriggerType
-from .channel import Channel, GuildChannel, StageInstance
+from .channel import ChannelPayload, GuildChannel, StageInstance
 from .emoji import Emoji, PartialEmoji
 from .guild import Guild, UnavailableGuild
 from .guild_scheduled_event import GuildScheduledEvent
@@ -361,11 +361,11 @@ ChannelCreateEvent = GuildChannel
 
 
 # https://discord.com/developers/docs/topics/gateway-events#channel-update
-ChannelUpdateEvent = Channel
+ChannelUpdateEvent = ChannelPayload
 
 
 # https://discord.com/developers/docs/topics/gateway-events#channel-delete
-ChannelDeleteEvent = Channel
+ChannelDeleteEvent = ChannelPayload
 
 
 # https://discord.com/developers/docs/topics/gateway-events#channel-pins-update

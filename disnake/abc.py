@@ -76,7 +76,7 @@ if TYPE_CHECKING:
     from .state import ConnectionState
     from .threads import AnyThreadArchiveDuration, ForumTag
     from .types.channel import (
-        Channel as ChannelPayload,
+        ChannelPayload,
         DefaultReaction as DefaultReactionPayload,
         GuildChannel as GuildChannelPayload,
         OverwriteType,
