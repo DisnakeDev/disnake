@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Dict, List, Literal, Optional, TypedDict, Unio
 from typing_extensions import NotRequired
 
 from .channel import ChannelType
-from .components import ComponentPayload, Modal
+from .components import ComponentPayload, ModalPayload
 from .embed import Embed
 from .i18n import LocalizationDict
 from .member import Member, MemberWithUser
@@ -318,7 +318,7 @@ InteractionResponseType = Literal[1, 4, 5, 6, 7]
 InteractionCallbackData = Union[
     InteractionApplicationCommandCallbackData,
     InteractionAutocompleteCallbackData,
-    Modal,
+    ModalPayload,
 ]
 
 
