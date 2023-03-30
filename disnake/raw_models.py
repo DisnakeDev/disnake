@@ -452,6 +452,8 @@ class VoiceChannelEffect(_RawReprMixin):
     )
 
     def __init__(self, data: VoiceChannelEffectPayload, emoji: Optional[PartialEmoji]) -> None:
+        # TODO: store raw payload as well?
+
         self.emoji: Optional[PartialEmoji] = emoji
         self.animation_type = (
             try_enum(VoiceChannelEffectAnimationType, value)
