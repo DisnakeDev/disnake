@@ -5,7 +5,7 @@ from __future__ import annotations
 import datetime
 from typing import TYPE_CHECKING, List, Literal, Optional, Set, Union, cast
 
-from .enums import ChannelType, try_enum
+from .enums import ChannelType, VoiceChannelEffectAnimationType, try_enum
 from .utils import get_slots
 
 if TYPE_CHECKING:
@@ -26,7 +26,9 @@ if TYPE_CHECKING:
         MessageUpdateEvent,
         ThreadDeleteEvent,
         TypingStartEvent,
+        VoiceChannelEffectSendEvent,
     )
+    from .types.voice import VoiceChannelEffect as VoiceChannelEffectPayload
     from .user import User
 
 
@@ -43,6 +45,8 @@ __all__ = (
     "RawThreadMemberRemoveEvent",
     "RawTypingEvent",
     "RawGuildMemberRemoveEvent",
+    "VoiceChannelEffect",
+    "RawVoiceChannelEffectEvent",
 )
 
 
@@ -422,3 +426,40 @@ class RawGuildMemberRemoveEvent(_RawReprMixin):
     def __init__(self, user: Union[User, Member], guild_id: int) -> None:
         self.user: Union[User, Member] = user
         self.guild_id: int = guild_id
+
+
+class VoiceChannelEffect(_RawReprMixin):
+    __slots__ = (
+        "emoji",
+        "animation_type",
+        "animation_id",
+    )
+
+    def __init__(self, data: VoiceChannelEffectPayload, emoji: Optional[PartialEmoji]):
+        self.emoji: Optional[PartialEmoji] = emoji
+        self.animation_type = (
+            try_enum(VoiceChannelEffectAnimationType, value)
+            if (value := data.get("animation_type")) is not None
+            else None
+        )
+        try:
+            self.animation_id: Optional[int] = int(data["animation_id"])
+        except KeyError:
+            self.animation_id: Optional[int] = None
+
+
+class RawVoiceChannelEffectEvent(_RawReprMixin):
+    __slots__ = (
+        "channel_id",
+        "guild_id",
+        "user_id",
+        "effect",
+    )
+
+    # TODO: add cached fields
+
+    def __init__(self, data: VoiceChannelEffectSendEvent, emoji: Optional[PartialEmoji]):
+        self.channel_id: int = int(data["channel_id"])
+        self.guild_id: int = int(data["guild_id"])
+        self.user_id: int = int(data["user_id"])
+        self.effect: VoiceChannelEffect = VoiceChannelEffect(data, emoji)

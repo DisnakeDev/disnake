@@ -75,6 +75,7 @@ from .raw_models import (
     RawThreadDeleteEvent,
     RawThreadMemberRemoveEvent,
     RawTypingEvent,
+    RawVoiceChannelEffectEvent,
 )
 from .role import Role
 from .stage_instance import StageInstance
@@ -1773,7 +1774,6 @@ class ConnectionState:
                 if flags.voice:
                     if channel_id is None and flags._voice_only and member.id != self_id:
                         # Only remove from cache if we only have the voice flag enabled
-                        # Member doesn't meet the Snowflake protocol currently
                         guild._remove_member(member)
                     elif channel_id is not None:
                         guild._add_member(member)
@@ -1794,6 +1794,35 @@ class ConnectionState:
             asyncio.create_task(
                 logging_coroutine(coro, info="Voice Protocol voice server update handler")
             )
+
+    def parse_voice_channel_effect_send(self, data: gateway.VoiceChannelEffectSendEvent) -> None:
+        guild = self._get_guild(int(data["guild_id"]))
+        if guild is None:
+            _log.debug(
+                "VOICE_CHANNEL_EFFECT_SEND referencing an unknown guild ID: %s. Discarding.",
+                data["guild_id"],
+            )
+            return
+
+        # FIXME: use methods added in #980
+        emoji: Optional[PartialEmoji] = None
+        if emoji_data := data.get("emoji"):
+            emoji = PartialEmoji.with_state(
+                self,
+                animated=emoji_data.get("animated", False),
+                id=utils._get_as_snowflake(emoji_data, "id"),
+                name=emoji_data.get("name") or "",
+            )
+
+        raw = RawVoiceChannelEffectEvent(data, emoji)
+        self.dispatch("raw_voice_channel_effect", raw)
+
+        channel = guild.get_channel(raw.channel_id)
+        member = guild.get_member(raw.user_id)
+
+        if channel and member:
+            # TODO: upgrade `PartialEmoji` to `Emoji` here?
+            self.dispatch("voice_channel_effect", channel, member, raw.effect)
 
     def parse_typing_start(self, data: gateway.TypingStartEvent) -> None:
         channel, guild = self._get_guild_channel(data)

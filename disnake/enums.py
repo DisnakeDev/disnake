@@ -66,6 +66,7 @@ __all__ = (
     "ThreadLayout",
     "Event",
     "ApplicationRoleConnectionMetadataType",
+    "VoiceChannelEffectAnimationType",
 )
 
 
@@ -1292,6 +1293,11 @@ class ApplicationRoleConnectionMetadataType(Enum):
     datetime_greater_than_or_equal = 6
     boolean_equal = 7
     boolean_not_equal = 8
+
+
+class VoiceChannelEffectAnimationType(Enum):
+    premium = 0
+    basic = 1
 
 
 T = TypeVar("T")
