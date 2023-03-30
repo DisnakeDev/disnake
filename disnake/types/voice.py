@@ -59,7 +59,7 @@ class VoiceReady(TypedDict):
     heartbeat_interval: int
 
 
-class VoiceChannelEffect(TypedDict):
-    emoji: NotRequired[Optional[PartialEmoji]]
-    animation_type: NotRequired[VoiceChannelEffectAnimationType]
-    animation_id: NotRequired[int]
+class VoiceChannelEffect(TypedDict, total=False):
+    emoji: Optional[PartialEmoji]
+    animation_type: VoiceChannelEffectAnimationType
+    animation_id: int
