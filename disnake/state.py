@@ -1815,10 +1815,11 @@ class ConnectionState:
             )
 
         raw = RawVoiceChannelEffectEvent(data, emoji)
-        self.dispatch("raw_voice_channel_effect", raw)
 
+        # TODO: narrow channel type to VoiceChannel?
         channel = guild.get_channel(raw.channel_id)
-        member = guild.get_member(raw.user_id)
+        raw.member = member = guild.get_member(raw.user_id)
+        self.dispatch("raw_voice_channel_effect", raw)
 
         if channel and member:
             # TODO: upgrade `PartialEmoji` to `Emoji` here?

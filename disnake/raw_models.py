@@ -454,12 +454,13 @@ class RawVoiceChannelEffectEvent(_RawReprMixin):
         "guild_id",
         "user_id",
         "effect",
+        "member",
     )
-
-    # TODO: add cached fields
 
     def __init__(self, data: VoiceChannelEffectSendEvent, emoji: Optional[PartialEmoji]):
         self.channel_id: int = int(data["channel_id"])
         self.guild_id: int = int(data["guild_id"])
         self.user_id: int = int(data["user_id"])
         self.effect: VoiceChannelEffect = VoiceChannelEffect(data, emoji)
+
+        self.member: Optional[Member] = None
