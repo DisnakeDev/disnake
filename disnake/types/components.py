@@ -9,9 +9,9 @@ from typing_extensions import NotRequired
 from .channel import ChannelType
 from .emoji import PartialEmoji
 
-ComponentType = Literal[1, 2, 3, 4, 5, 6, 7, 8]
-ButtonStyle = Literal[1, 2, 3, 4, 5]
-TextInputStyle = Literal[1, 2]
+LiteralComponentType = Literal[1, 2, 3, 4, 5, 6, 7, 8]
+LiteralButtonStyle = Literal[1, 2, 3, 4, 5]
+LiteralTextInputStyle = Literal[1, 2]
 
 
 ComponentPayload = Union["ActionRowPayload", "ButtonComponentPayload", "AnySelectMenuPayload", "TextInputPayload"]
@@ -24,7 +24,7 @@ class ActionRowPayload(TypedDict):
 
 class ButtonComponentPayload(TypedDict):
     type: Literal[2]
-    style: ButtonStyle
+    style: LiteralButtonStyle
     label: NotRequired[str]
     emoji: NotRequired[PartialEmoji]
     custom_id: NotRequired[str]
@@ -92,7 +92,7 @@ class ModalPayload(TypedDict):
 class TextInputPayload(TypedDict):
     type: Literal[4]
     custom_id: str
-    style: TextInputStyle
+    style: LiteralTextInputStyle
     label: str
     min_length: NotRequired[int]
     max_length: NotRequired[int]
