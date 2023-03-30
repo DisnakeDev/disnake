@@ -451,7 +451,7 @@ class VoiceChannelEffect(_RawReprMixin):
         "animation_id",
     )
 
-    def __init__(self, data: VoiceChannelEffectPayload, emoji: Optional[PartialEmoji]):
+    def __init__(self, data: VoiceChannelEffectPayload, emoji: Optional[PartialEmoji]) -> None:
         self.emoji: Optional[PartialEmoji] = emoji
         self.animation_type = (
             try_enum(VoiceChannelEffectAnimationType, value)
@@ -491,7 +491,7 @@ class RawVoiceChannelEffectEvent(_RawReprMixin):
         "member",
     )
 
-    def __init__(self, data: VoiceChannelEffectSendEvent, emoji: Optional[PartialEmoji]):
+    def __init__(self, data: VoiceChannelEffectSendEvent, emoji: Optional[PartialEmoji]) -> None:
         self.channel_id: int = int(data["channel_id"])
         self.guild_id: int = int(data["guild_id"])
         self.user_id: int = int(data["user_id"])
