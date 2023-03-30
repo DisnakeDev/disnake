@@ -14,7 +14,7 @@ ButtonStyle = Literal[1, 2, 3, 4, 5]
 TextInputStyle = Literal[1, 2]
 
 
-ComponentPayload = Union["ActionRowPayload", "ButtonComponentPayload", "AnySelectMenu", "TextInputPayload"]
+ComponentPayload = Union["ActionRowPayload", "ButtonComponentPayload", "AnySelectMenuPayload", "TextInputPayload"]
 
 
 class ActionRowPayload(TypedDict):
@@ -74,7 +74,7 @@ class ChannelSelectMenuPayload(_SelectMenu):
     channel_types: NotRequired[List[ChannelType]]
 
 
-AnySelectMenu = Union[
+AnySelectMenuPayload = Union[
     StringSelectMenuPayload,
     UserSelectMenuPayload,
     RoleSelectMenuPayload,
