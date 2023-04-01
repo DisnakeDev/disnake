@@ -820,6 +820,15 @@ class Permissions(BaseFlags):
         """:class:`bool`: Returns ``True`` if a user can create, edit, or delete webhooks."""
         return 1 << 29
 
+    @flag_value
+    def manage_guild_expressions(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can create, edit, or delete
+        emojis, stickers, and soundboard sounds.
+
+        .. versionadded:: 2.9
+        """
+        return 1 << 30
+
     @make_permission_alias("manage_guild_expressions")
     def manage_emojis(self) -> int:
         """:class:`bool`: An alias for :attr:`manage_guild_expressions`."""
@@ -830,15 +839,6 @@ class Permissions(BaseFlags):
         """:class:`bool`: An alias for :attr:`manage_guild_expressions`.
 
         .. versionadded:: 2.0
-        """
-        return 1 << 30
-
-    @flag_value
-    def manage_guild_expressions(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can create, edit, or delete
-        emojis, stickers, and soundboard sounds.
-
-        .. versionadded:: 2.9
         """
         return 1 << 30
 
