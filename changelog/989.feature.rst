@@ -1,0 +1,4 @@
+Add new permission fields.
+- :attr:`Permissions.manage_guild_expressions` (which :attr:`~Permissions.manage_emojis` and :attr:`~Permissions.manage_emojis_and_stickers` are now aliased to)
+- :attr:`Permissions.view_creator_monetization_analytics`
+- :attr:`Permissions.use_soundboard`

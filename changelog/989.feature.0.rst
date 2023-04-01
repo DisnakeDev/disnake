@@ -1,1 +1,0 @@
-Add :attr:`Permissions.view_creator_monetization_analytics` and :attr:`Permissions.use_soundboard`.
