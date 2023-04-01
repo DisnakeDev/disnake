@@ -15,7 +15,8 @@ from disnake import (
 )
 from disnake.types import onboarding as onboarding_types
 
-onboarding_prompt_option_payload: onboarding_types.PartialOnboardingPromptOption = {
+onboarding_prompt_option_payload: onboarding_types.OnboardingPromptOption = {
+    "id": "0",
     "title": "test",
     "description": "test",
     "emoji": {"id": "123", "name": "", "animated": False},
