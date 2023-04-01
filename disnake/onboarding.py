@@ -77,6 +77,77 @@ class Onboarding:
         return list(filter(None, map(self.guild.get_channel, self.default_channel_ids)))
 
 
+class OnboardingPrompt(Hashable):
+    """Represents an onboarding prompt.
+
+    .. versionadded:: 2.9
+
+    Attributes
+    ----------
+    id: :class:`int`
+        The onboarding prompt's ID.
+    type: :class:`OnboardingPromptType`
+        The onboarding prompt's type.
+    options: List[:class:`OnboardingPromptOption`]
+        The onboarding prompt's options.
+    title: :class:`str`
+        The onboarding prompt's title.
+    single_select: :class:`bool`
+        Whether users are limited to selecting one option for the prompt.
+    required: :class:`bool`
+        Whether the prompt is required before a user completes the onboarding flow.
+    in_onboarding: :class:`bool`
+        Whether the prompt is present in the onboarding flow.
+        If ``False``, the prompt will only appear in community customization.
+    """
+
+    __slots__ = ("id", "title", "options", "single_select", "required", "in_onboarding", "type")
+
+    def __init__(
+        self,
+        *,
+        title: str,
+        options: List[OnboardingPromptOption],
+        single_select: bool,
+        required: bool,
+        in_onboarding: bool,
+        type: OnboardingPromptType,
+    ):
+        self.id = 0
+        self.title = title
+        self.options = options
+        self.single_select = single_select
+        self.required = required
+        self.in_onboarding = in_onboarding
+        self.type = type
+
+    def __str__(self) -> str:
+        return self.title
+
+    def __repr__(self) -> str:
+        return (
+            f"<OnboardingPrompt id={self.id!r} title={self.title!r} options={self.options!r}"
+            f" single_select={self.single_select!r} required={self.required!r}"
+            f" in_onboarding={self.in_onboarding!r} type={self.type!r}>"
+        )
+
+    @classmethod
+    def _from_dict(cls, *, data: OnboardingPromptPayload, guild: Guild) -> Self:
+        self = cls(
+            title=data["title"],
+            options=[
+                OnboardingPromptOption._from_dict(data=option, guild=guild)
+                for option in data["options"]
+            ],
+            single_select=data["single_select"],
+            required=data["required"],
+            in_onboarding=data["in_onboarding"],
+            type=try_enum(OnboardingPromptType, data["type"]),
+        )
+        self.id = int(data["id"])
+        return self
+
+
 class OnboardingPromptOption(Hashable):
     """Represents an onboarding prompt option.
 
@@ -176,74 +247,3 @@ class OnboardingPromptOption(Hashable):
     def channels(self) -> List[GuildChannel]:
         """List[:class:`abc.GuildChannel`]: A list of channels that the user will see when they select this option."""
         return list(filter(None, map(self.guild.get_channel, self.channels_ids)))
-
-
-class OnboardingPrompt(Hashable):
-    """Represents an onboarding prompt.
-
-    .. versionadded:: 2.9
-
-    Attributes
-    ----------
-    id: :class:`int`
-        The onboarding prompt's ID.
-    type: :class:`OnboardingPromptType`
-        The onboarding prompt's type.
-    options: List[:class:`OnboardingPromptOption`]
-        The onboarding prompt's options.
-    title: :class:`str`
-        The onboarding prompt's title.
-    single_select: :class:`bool`
-        Whether users are limited to selecting one option for the prompt.
-    required: :class:`bool`
-        Whether the prompt is required before a user completes the onboarding flow.
-    in_onboarding: :class:`bool`
-        Whether the prompt is present in the onboarding flow.
-        If ``False``, the prompt will only appear in community customization.
-    """
-
-    __slots__ = ("id", "title", "options", "single_select", "required", "in_onboarding", "type")
-
-    def __init__(
-        self,
-        *,
-        title: str,
-        options: List[OnboardingPromptOption],
-        single_select: bool,
-        required: bool,
-        in_onboarding: bool,
-        type: OnboardingPromptType,
-    ):
-        self.id = 0
-        self.title = title
-        self.options = options
-        self.single_select = single_select
-        self.required = required
-        self.in_onboarding = in_onboarding
-        self.type = type
-
-    def __str__(self) -> str:
-        return self.title
-
-    def __repr__(self) -> str:
-        return (
-            f"<OnboardingPrompt id={self.id!r} title={self.title!r} options={self.options!r}"
-            f" single_select={self.single_select!r} required={self.required!r}"
-            f" in_onboarding={self.in_onboarding!r} type={self.type!r}>"
-        )
-
-    @classmethod
-    def _from_dict(cls, *, data: OnboardingPromptPayload, guild: Guild) -> Self:
-        self = cls(
-            title=data["title"],
-            options=[
-                OnboardingPromptOption._from_dict(data=option, guild=guild)
-                for option in data["options"]
-            ],
-            single_select=data["single_select"],
-            required=data["required"],
-            in_onboarding=data["in_onboarding"],
-            type=try_enum(OnboardingPromptType, data["type"]),
-        )
-        self.id = int(data["id"])
-        return self
