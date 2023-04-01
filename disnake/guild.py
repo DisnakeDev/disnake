@@ -185,6 +185,11 @@ class Guild(Hashable):
 
         .. versionadded:: 1.4
 
+    max_stage_video_channel_users: Optional[:class:`int`]
+        The maximum amount of users in a stage video channel.
+
+        .. versionadded: 2.9
+
     description: Optional[:class:`str`]
         The guild's description.
     mfa_level: :class:`int`
@@ -317,6 +322,7 @@ class Guild(Hashable):
         "max_presences",
         "max_members",
         "max_video_channel_users",
+        "max_stage_video_channel_users",
         "premium_progress_bar_enabled",
         "premium_tier",
         "premium_subscription_count",
@@ -547,6 +553,9 @@ class Guild(Hashable):
         self.max_presences: Optional[int] = guild.get("max_presences")
         self.max_members: Optional[int] = guild.get("max_members")
         self.max_video_channel_users: Optional[int] = guild.get("max_video_channel_users")
+        self.max_stage_video_channel_users: Optional[int] = guild.get(
+            "max_stage_video_channel_users"
+        )
         self.premium_tier: int = guild.get("premium_tier", 0)
         self.premium_subscription_count: int = guild.get("premium_subscription_count") or 0
         self._system_channel_flags: int = guild.get("system_channel_flags", 0)
@@ -4167,7 +4176,7 @@ class Guild(Hashable):
             if user_ids is None:
                 raise ValueError("Must pass either query or user_ids")
 
-        elif query == "":
+        elif not query:
             raise ValueError("Cannot pass empty query string.")
 
         elif user_ids is not None:
@@ -4220,7 +4229,7 @@ class Guild(Hashable):
         List[:class:`Member`]
             The list of members that have matched the query.
         """
-        if query == "":
+        if not query:
             raise ValueError("Cannot pass empty query string.")
         if limit < 1:
             raise ValueError("limit must be at least 1")

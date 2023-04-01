@@ -1,0 +1,2 @@
+Cleanup general error raising to be less confusing.
+- Overall, most errors about incorrect types no longer include the internal error in their traceback.

@@ -530,6 +530,31 @@ class ParamInfo:
         self.max_length = max_length
         self.large = large
 
+    def copy(self) -> ParamInfo:
+        # n. b. this method needs to be manually updated when a new attribute is added.
+        cls = self.__class__
+        ins = cls.__new__(cls)
+
+        ins.name = self.name
+        ins.name_localizations = self.name_localizations._copy()
+        ins.description = self.description
+        ins.description_localizations = self.description_localizations._copy()
+        ins.default = self.default
+        ins.param_name = self.param_name
+        ins.converter = self.converter
+        ins.convert_default = self.convert_default
+        ins.autocomplete = self.autocomplete
+        ins.choices = self.choices.copy()
+        ins.type = self.type
+        ins.channel_types = self.channel_types.copy()
+        ins.max_value = self.max_value
+        ins.min_value = self.min_value
+        ins.min_length = self.min_length
+        ins.max_length = self.max_length
+        ins.large = self.large
+
+        return ins
+
     @property
     def required(self) -> bool:
         return self.default is Ellipsis
@@ -559,7 +584,8 @@ class ParamInfo:
         parsed_docstring = parsed_docstring or {}
 
         if isinstance(param.default, cls):
-            self = param.default
+            # we copy this ParamInfo instance because it can be used in multiple signatures
+            self = param.default.copy()
         else:
             default = param.default if param.default is not inspect.Parameter.empty else ...
             self = cls(default)
@@ -949,7 +975,6 @@ def collect_params(
 def collect_nested_params(function: Callable) -> List[ParamInfo]:
     """Collect all options from a function"""
     # TODO: Have these be actually sorted properly and not have injections always at the end
-
     _, _, paraminfos, injections = collect_params(function)
 
     for injection in injections.values():

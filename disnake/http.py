@@ -96,7 +96,7 @@ def _workaround_set_api_version(version: Literal[9, 10]) -> None:
     if version not in (9, 10):
         raise TypeError("version must be either 9 or 10")
 
-    global _API_VERSION
+    global _API_VERSION  # noqa: PLW0603
     _API_VERSION = version
     Route.BASE = f"https://discord.com/api/v{_API_VERSION}"
 
@@ -2658,7 +2658,7 @@ class HTTPClient:
         try:
             data: gateway.Gateway = await self.request(Route("GET", "/gateway"))
         except HTTPException as exc:
-            raise GatewayNotFound() from exc
+            raise GatewayNotFound from exc
 
         return self._format_gateway_url(data["url"], encoding=encoding, zlib=zlib)
 
@@ -2668,7 +2668,7 @@ class HTTPClient:
         try:
             data: gateway.GatewayBot = await self.request(Route("GET", "/gateway/bot"))
         except HTTPException as exc:
-            raise GatewayNotFound() from exc
+            raise GatewayNotFound from exc
 
         return (
             data["shards"],
