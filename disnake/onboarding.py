@@ -146,31 +146,26 @@ class OnboardingPromptOption(Hashable):
         The prompt option's title.
     description: Optional[:class:`str`]
         The prompt option's description.
-    roles_ids: FrozenSet[:class:`int`]
+    role_ids: FrozenSet[:class:`int`]
         The IDs of the roles that will be added to the user when they select this option.
-    channels_ids: FrozenSet[:class:`int`]
+    channel_ids: FrozenSet[:class:`int`]
         The IDs of the channels that will be shown to the user when they select this option.
     """
 
-    __slots__ = ("id", "title", "description", "emoji", "guild", "roles_ids", "channels_ids")
+    __slots__ = ("id", "title", "description", "emoji", "guild", "role_ids", "channel_ids")
 
     def __init__(self, *, guild: Guild, data: OnboardingPromptOptionPayload):
-        # NOTE: The ID may sometimes be a UNIX timestamp since
-        # Onboarding changes are saved locally until you send the API request (that's how it works in client)
-        # so the API needs the timestamp to know what ID it needs to create, should we just add a note about it
-        # or "try" to create the ID ourselves?
-        # I'm not sure if this also happens for OnboardingPrompt
         self.guild = guild
 
         self.id = int(data["id"])
         self.title = data["title"]
         self.description = data["description"]
-        self.roles_ids = (
-            frozenset(map(int, roles_ids)) if (roles_ids := data.get("role_ids")) else frozenset()
+        self.role_ids = (
+            frozenset(map(int, role_ids)) if (role_ids := data.get("role_ids")) else frozenset()
         )
-        self.channels_ids = (
-            frozenset(map(int, channels_ids))
-            if (channels_ids := data.get("channel_ids"))
+        self.channel_ids = (
+            frozenset(map(int, channel_ids))
+            if (channel_ids := data.get("channel_ids"))
             else frozenset()
         )
 
@@ -191,9 +186,9 @@ class OnboardingPromptOption(Hashable):
     @property
     def roles(self) -> List[Role]:
         """List[:class:`Role`]: A list of roles that will be added to the user when they select this option."""
-        return list(filter(None, map(self.guild.get_role, self.roles_ids)))
+        return list(filter(None, map(self.guild.get_role, self.role_ids)))
 
     @property
     def channels(self) -> List[GuildChannel]:
         """List[:class:`abc.GuildChannel`]: A list of channels that the user will see when they select this option."""
-        return list(filter(None, map(self.guild.get_channel, self.channels_ids)))
+        return list(filter(None, map(self.guild.get_channel, self.channel_ids)))
