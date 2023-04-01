@@ -110,7 +110,7 @@ class OnboardingPrompt(Hashable):
     def __init__(self, *, guild: Guild, data: OnboardingPromptPayload):
         self.guild = guild
 
-        self.id = 0
+        self.id = int(data["id"])
         self.title = data["title"]
         self.options = [
             OnboardingPromptOption(data=option, guild=guild) for option in data["options"]
@@ -144,7 +144,7 @@ class OnboardingPromptOption(Hashable):
         The prompt option's emoji.
     title: :class:`str`
         The prompt option's title.
-    description: :class:`str`
+    description: Optional[:class:`str`]
         The prompt option's description.
     roles_ids: FrozenSet[:class:`int`]
         The IDs of the roles that will be added to the user when they select this option.
@@ -162,7 +162,7 @@ class OnboardingPromptOption(Hashable):
         # I'm not sure if this also happens for OnboardingPrompt
         self.guild = guild
 
-        self.id = 0
+        self.id = int(data["id"])
         self.title = data["title"]
         self.description = data["description"]
         self.roles_ids = (
