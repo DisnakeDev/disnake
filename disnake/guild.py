@@ -4175,7 +4175,7 @@ class Guild(Hashable):
             if user_ids is None:
                 raise ValueError("Must pass either query or user_ids")
 
-        elif query == "":
+        elif not query:
             raise ValueError("Cannot pass empty query string.")
 
         elif user_ids is not None:
@@ -4228,7 +4228,7 @@ class Guild(Hashable):
         List[:class:`Member`]
             The list of members that have matched the query.
         """
-        if query == "":
+        if not query:
             raise ValueError("Cannot pass empty query string.")
         if limit < 1:
             raise ValueError("limit must be at least 1")
@@ -4303,7 +4303,10 @@ class Guild(Hashable):
         if len(unresolved_ids) == 1:
             # fetch_member is cheaper than query_members
             try:
-                members.append(await self.fetch_member(unresolved_ids[0]))
+                member = await self.fetch_member(unresolved_ids[0])
+                members.append(member)
+                if cache:
+                    self._add_member(member)
             except HTTPException:
                 pass
         else:
