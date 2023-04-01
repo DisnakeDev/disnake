@@ -6057,6 +6057,7 @@ ApplicationRoleConnectionMetadata
 .. attributetable:: ApplicationRoleConnectionMetadata
 
 .. autoclass:: ApplicationRoleConnectionMetadata
+    :members:
 
 OnboardingPrompt
 ~~~~~~~~~~~~~~~~

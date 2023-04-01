@@ -28,7 +28,7 @@ __all__ = (
 
 
 class Onboarding:
-    """Represents a guild onboarding.
+    """Represents a guild onboarding object.
 
     .. versionadded:: 2.9
 
@@ -37,7 +37,7 @@ class Onboarding:
     guild: :class:`Guild`
         The guild this onboarding is part of.
     prompts: List[:class:`OnboardingPrompt`]
-        The onboarding prompts.
+        The prompts shown during onboarding and in community customization.
     enabled: :class:`bool`
         Whether onboarding is enabled.
     """
@@ -46,7 +46,6 @@ class Onboarding:
         "guild",
         "prompts",
         "enabled",
-        "_guild_id",
         "_default_channel_ids",
     )
 
@@ -189,7 +188,7 @@ class OnboardingPrompt(Hashable):
         Whether the prompt is required before a user completes the onboarding flow.
     in_onboarding: :class:`bool`
         Whether the prompt is present in the onboarding flow.
-        If `false`, the prompt will only appear in the Channels & Roles tab
+        If ``False``, the prompt will only appear in community customization.
     """
 
     __slots__ = ("id", "title", "options", "single_select", "required", "in_onboarding", "type")
