@@ -49,9 +49,7 @@ def onboarding_prompt() -> OnboardingPrompt:
         "type": OnboardingPromptType.multiple_choice.value,
     }
 
-    return OnboardingPrompt._from_dict(
-        data=onboarding_prompt_payload, guild=mock.Mock(Guild, id=123)
-    )
+    return OnboardingPrompt(data=onboarding_prompt_payload, guild=mock.Mock(Guild, id=123))
 
 
 @pytest.fixture
