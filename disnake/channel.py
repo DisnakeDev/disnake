@@ -134,6 +134,12 @@ class VoiceChannelEffect:
         except KeyError:
             self.animation_id: Optional[int] = None
 
+    def __repr__(self) -> str:
+        return (
+            f"<VoiceChannelEffect emoji={self.emoji!r} animation_type={self.animation_type!r}"
+            f" animation_id={self.animation_id!r}>"
+        )
+
 
 async def _single_delete_strategy(messages: Iterable[Message]) -> None:
     for m in messages:
