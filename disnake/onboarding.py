@@ -18,8 +18,6 @@ if TYPE_CHECKING:
         Onboarding as OnboardingPayload,
         OnboardingPrompt as OnboardingPromptPayload,
         OnboardingPromptOption as OnboardingPromptOptionPayload,
-        PartialOnboardingPrompt as PartialOnboardingPromptPayload,
-        PartialOnboardingPromptOption as PartialOnboardingPromptOptionPayload,
     )
 
 __all__ = (
@@ -40,7 +38,7 @@ class Onboarding:
         The guild this onboarding is part of.
     prompts: List[:class:`OnboardingPrompt`]
         The onboarding prompts.
-    enabled: bool
+    enabled: :class:`bool`
         Whether onboarding is enabled.
     """
 
@@ -83,14 +81,13 @@ class OnboardingPromptOption(Hashable):
     Attributes
     ----------
     id: :class:`int`
-        The option's ID. Note that if this option was manually constructed,
-        this will be ``0``.
-    title: :class:`str`
-        The option's title.
-    description: :class:`str`
-        The option's description.
+        The prompt option's ID.
     emoji: Optional[Union[:class:`PartialEmoji`, :class:`Emoji`]]
-        The option's emoji.
+        The prompt option's emoji.
+    title: :class:`str`
+        The prompt option's title.
+    description: :class:`str`
+        The prompt option's description.
     """
 
     __slots__ = ("id", "title", "description", "emoji", "guild", "_roles_ids", "_channels_ids")
@@ -105,7 +102,7 @@ class OnboardingPromptOption(Hashable):
         channels: Sequence[Snowflake],
         guild: Guild,
     ):
-        # NOTE: (a very very important note), the ID may sometimes be a UNIX timestamp since
+        # NOTE: The ID may sometimes be a UNIX timestamp since
         # Onboarding changes are saved locally until you send the API request (that's how it works in client)
         # so the API needs the timestamp to know what ID it needs to create, should we just add a note about it
         # or "try" to create the ID ourselves?
@@ -136,20 +133,6 @@ class OnboardingPromptOption(Hashable):
             f"description={self.description!r} emoji={self.emoji!r} "
             f"roles={self.roles!r} channels={self.channels!r}>"
         )
-
-    def _to_dict(self) -> PartialOnboardingPromptOptionPayload:
-        payload: PartialOnboardingPromptOptionPayload = {
-            "title": self.title,
-            "description": self.description,
-            "emoji": self.emoji._to_partial().to_dict() if self.emoji else {"name": "", "id": None},
-            "role_ids": self._roles_ids,
-            "channel_ids": self._channels_ids,
-        }
-
-        if self.id:
-            payload["id"] = self.id
-
-        return payload
 
     @classmethod
     def _from_dict(cls, *, data: OnboardingPromptOptionPayload, guild: Guild) -> Self:
@@ -193,20 +176,20 @@ class OnboardingPrompt(Hashable):
     Attributes
     ----------
     id: :class:`int`
-        The onboarding prompt's ID. Note that if this prompt was manually constructed,
-        this will be ``0``.
-    title: :class:`str`
-        The onboarding prompt's title.
-    options: List[:class:`OnboardingPromptOption`]
-        The onboarding prompt's options.
-    single_select: :class:`bool`
-        Whether only one option can be selected.
-    required: :class:`bool`
-        Whether at least one option must be selected.
-    in_onboarding: :class:`bool`
-        Whether this prompt is in the initial onboarding flow.
+        The onboarding prompt's ID.
     type: :class:`OnboardingPromptType`
         The onboarding prompt's type.
+    options: List[:class:`OnboardingPromptOption`]
+        The onboarding prompt's options.
+    title: :class:`str`
+        The onboarding prompt's title.
+    single_select: :class:`bool`
+        Whether users are limited to selecting one option for the prompt.
+    required: :class:`bool`
+        Whether the prompt is required before a user completes the onboarding flow.
+    in_onboarding: :class:`bool`
+        Whether the prompt is present in the onboarding flow.
+        If `false`, the prompt will only appear in the Channels & Roles tab
     """
 
     __slots__ = ("id", "title", "options", "single_select", "required", "in_onboarding", "type")
@@ -238,21 +221,6 @@ class OnboardingPrompt(Hashable):
             f" single_select={self.single_select!r} required={self.required!r}"
             f" in_onboarding={self.in_onboarding!r} type={self.type!r}>"
         )
-
-    def _to_dict(self) -> PartialOnboardingPromptPayload:
-        payload: PartialOnboardingPromptPayload = {
-            "title": self.title,
-            "options": [option._to_dict() for option in self.options],
-            "single_select": self.single_select,
-            "required": self.required,
-            "in_onboarding": self.in_onboarding,
-            "type": self.type.value,
-        }
-
-        if self.id:
-            payload["id"] = self.id
-
-        return payload
 
     @classmethod
     def _from_dict(cls, *, data: OnboardingPromptPayload, guild: Guild) -> Self:
