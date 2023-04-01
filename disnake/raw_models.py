@@ -5,7 +5,8 @@ from __future__ import annotations
 import datetime
 from typing import TYPE_CHECKING, List, Literal, Optional, Set, Union, cast
 
-from .enums import ChannelType, VoiceChannelEffectAnimationType, try_enum
+from .channel import VoiceChannelEffect
+from .enums import ChannelType, try_enum
 from .utils import get_slots
 
 if TYPE_CHECKING:
@@ -28,7 +29,6 @@ if TYPE_CHECKING:
         TypingStartEvent,
         VoiceChannelEffectSendEvent,
     )
-    from .types.voice import VoiceChannelEffect as VoiceChannelEffectPayload
     from .user import User
 
 
@@ -45,7 +45,6 @@ __all__ = (
     "RawThreadMemberRemoveEvent",
     "RawTypingEvent",
     "RawGuildMemberRemoveEvent",
-    "VoiceChannelEffect",
     "RawVoiceChannelEffectEvent",
 )
 
@@ -426,44 +425,6 @@ class RawGuildMemberRemoveEvent(_RawReprMixin):
     def __init__(self, user: Union[User, Member], guild_id: int) -> None:
         self.user: Union[User, Member] = user
         self.guild_id: int = guild_id
-
-
-class VoiceChannelEffect(_RawReprMixin):
-    """An effect sent by a member in a voice channel.
-
-    Different sets of attributes will be present, depending on the type of effect.
-
-    .. versionadded:: 2.9
-
-    Attributes
-    ----------
-    emoji: Optional[:class:`PartialEmoji`]
-        The emoji, if this is an emoji reaction effect.
-    animation_type: Optional[:class:`VoiceChannelEffectAnimationType`]
-        The animation type, if this is an emoji reaction effect.
-    animation_id: Optional[:class:`int`]
-        The animation ID, if this is an emoji reaction effect.
-    """
-
-    __slots__ = (
-        "emoji",
-        "animation_type",
-        "animation_id",
-    )
-
-    def __init__(self, data: VoiceChannelEffectPayload, emoji: Optional[PartialEmoji]) -> None:
-        # TODO: store raw payload as well?
-
-        self.emoji: Optional[PartialEmoji] = emoji
-        self.animation_type = (
-            try_enum(VoiceChannelEffectAnimationType, value)
-            if (value := data.get("animation_type")) is not None
-            else None
-        )
-        try:
-            self.animation_id: Optional[int] = int(data["animation_id"])
-        except KeyError:
-            self.animation_id: Optional[int] = None
 
 
 class RawVoiceChannelEffectEvent(_RawReprMixin):
