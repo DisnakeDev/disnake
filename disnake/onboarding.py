@@ -40,13 +40,15 @@ class Onboarding:
         The prompts shown during onboarding and in community customization.
     enabled: :class:`bool`
         Whether onboarding is enabled.
+    default_channel_ids: FrozenSet[:class:`int`]
+        The IDs of the channels that will automatically be shown to new members.
     """
 
     __slots__ = (
         "guild",
         "prompts",
         "enabled",
-        "_default_channel_ids",
+        "default_channel_ids",
     )
 
     def __init__(self, *, guild: Guild, data: OnboardingPayload):
@@ -58,18 +60,21 @@ class Onboarding:
             OnboardingPrompt._from_dict(data=prompt, guild=self.guild) for prompt in data["prompts"]
         ]
         self.enabled = data["enabled"]
-        self._default_channel_ids = list(map(int, data["default_channel_ids"]))
+        self.default_channel_ids = (
+            frozenset(map(int, exempt_channels))
+            if (exempt_channels := data["default_channel_ids"])
+            else frozenset()
+        )
 
     def __repr__(self) -> str:
         return (
-            f"<Onboarding guild_id={self.guild.id!r} prompts={self.prompts!r}"
-            f" default_channel_ids={self._default_channel_ids!r} enabled={self.enabled!r}>"
+            f"<Onboarding guild={self.guild!r} prompts={self.prompts!r} enabled={self.enabled!r}>"
         )
 
     @property
     def default_channels(self) -> List[GuildChannel]:
         """List[:class:`abc.GuildChannel`]: The list of channels that will be shown to new members by default."""
-        return list(filter(None, map(self.guild.get_channel, self._default_channel_ids)))
+        return list(filter(None, map(self.guild.get_channel, self.default_channel_ids)))
 
 
 class OnboardingPromptOption(Hashable):
@@ -87,9 +92,13 @@ class OnboardingPromptOption(Hashable):
         The prompt option's title.
     description: :class:`str`
         The prompt option's description.
+    roles_ids: FrozenSet[:class:`int`]
+        The IDs of the roles that will be added to the user when they select this option.
+    channels_ids: FrozenSet[:class:`int`]
+        The IDs of the channels that will be shown to the user when they select this option.
     """
 
-    __slots__ = ("id", "title", "description", "emoji", "guild", "_roles_ids", "_channels_ids")
+    __slots__ = ("id", "title", "description", "emoji", "guild", "roles_ids", "channels_ids")
 
     def __init__(
         self,
@@ -110,8 +119,16 @@ class OnboardingPromptOption(Hashable):
         self.title = title
         self.description = description
         self.guild = guild
-        self._roles_ids = [role.id for role in roles]
-        self._channels_ids = [channel.id for channel in channels]
+        self.roles_ids = (
+            frozenset(map(int, roles_ids))
+            if (roles_ids := [role.id for role in roles])
+            else frozenset()
+        )
+        self.channels_ids = (
+            frozenset(map(int, channels_ids))
+            if (channels_ids := [channel.id for channel in channels])
+            else frozenset()
+        )
 
         self.emoji: Optional[Union[PartialEmoji, Emoji]] = None
         if emoji is None:
@@ -129,8 +146,7 @@ class OnboardingPromptOption(Hashable):
     def __repr__(self) -> str:
         return (
             f"<OnboardingPromptOption id={self.id!r} title={self.title!r} "
-            f"description={self.description!r} emoji={self.emoji!r} "
-            f"roles={self.roles!r} channels={self.channels!r}>"
+            f"description={self.description!r} emoji={self.emoji!r}>"
         )
 
     @classmethod
@@ -159,12 +175,12 @@ class OnboardingPromptOption(Hashable):
     @property
     def roles(self) -> List[Role]:
         """List[:class:`Role`]: A list of roles that will be added to the user when they select this option."""
-        return list(filter(None, map(self.guild.get_role, self._roles_ids)))
+        return list(filter(None, map(self.guild.get_role, self.roles_ids)))
 
     @property
     def channels(self) -> List[GuildChannel]:
         """List[:class:`abc.GuildChannel`]: A list of channels that the user will see when they select this option."""
-        return list(filter(None, map(self.guild.get_channel, self._channels_ids)))
+        return list(filter(None, map(self.guild.get_channel, self.channels_ids)))
 
 
 class OnboardingPrompt(Hashable):
