@@ -1,17 +1,12 @@
 # SPDX-License-Identifier: MIT
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional, Sequence, Union
+from typing import TYPE_CHECKING, List
 
-from .emoji import Emoji, PartialEmoji, _EmojiTag
 from .enums import OnboardingPromptType, try_enum
 from .mixins import Hashable
-from .object import Object
 
 if TYPE_CHECKING:
-    from typing_extensions import Self
-
-    from .abc import Snowflake
     from .guild import Guild, GuildChannel
     from .role import Role
     from .types.onboarding import (
@@ -57,7 +52,7 @@ class Onboarding:
 
     def _from_data(self, data: OnboardingPayload):
         self.prompts = [
-            OnboardingPrompt._from_dict(data=prompt, guild=self.guild) for prompt in data["prompts"]
+            OnboardingPrompt(data=prompt, guild=self.guild) for prompt in data["prompts"]
         ]
         self.enabled = data["enabled"]
         self.default_channel_ids = (
@@ -101,25 +96,29 @@ class OnboardingPrompt(Hashable):
         If ``False``, the prompt will only appear in community customization.
     """
 
-    __slots__ = ("id", "title", "options", "single_select", "required", "in_onboarding", "type")
+    __slots__ = (
+        "guild",
+        "id",
+        "title",
+        "options",
+        "single_select",
+        "required",
+        "in_onboarding",
+        "type",
+    )
 
-    def __init__(
-        self,
-        *,
-        title: str,
-        options: List[OnboardingPromptOption],
-        single_select: bool,
-        required: bool,
-        in_onboarding: bool,
-        type: OnboardingPromptType,
-    ):
+    def __init__(self, *, guild: Guild, data: OnboardingPromptPayload):
+        self.guild = guild
+
         self.id = 0
-        self.title = title
-        self.options = options
-        self.single_select = single_select
-        self.required = required
-        self.in_onboarding = in_onboarding
-        self.type = type
+        self.title = data["title"]
+        self.options = [
+            OnboardingPromptOption(data=option, guild=guild) for option in data["options"]
+        ]
+        self.single_select = data["single_select"]
+        self.required = data["required"]
+        self.in_onboarding = data["in_onboarding"]
+        self.type = try_enum(OnboardingPromptType, data["type"])
 
     def __str__(self) -> str:
         return self.title
@@ -130,22 +129,6 @@ class OnboardingPrompt(Hashable):
             f" single_select={self.single_select!r} required={self.required!r}"
             f" in_onboarding={self.in_onboarding!r} type={self.type!r}>"
         )
-
-    @classmethod
-    def _from_dict(cls, *, data: OnboardingPromptPayload, guild: Guild) -> Self:
-        self = cls(
-            title=data["title"],
-            options=[
-                OnboardingPromptOption._from_dict(data=option, guild=guild)
-                for option in data["options"]
-            ],
-            single_select=data["single_select"],
-            required=data["required"],
-            in_onboarding=data["in_onboarding"],
-            type=try_enum(OnboardingPromptType, data["type"]),
-        )
-        self.id = int(data["id"])
-        return self
 
 
 class OnboardingPromptOption(Hashable):
@@ -171,45 +154,30 @@ class OnboardingPromptOption(Hashable):
 
     __slots__ = ("id", "title", "description", "emoji", "guild", "roles_ids", "channels_ids")
 
-    def __init__(
-        self,
-        *,
-        title: str,
-        description: str,
-        emoji: Optional[Union[str, PartialEmoji, Emoji]],
-        roles: Sequence[Snowflake],
-        channels: Sequence[Snowflake],
-        guild: Guild,
-    ):
+    def __init__(self, *, guild: Guild, data: OnboardingPromptOptionPayload):
         # NOTE: The ID may sometimes be a UNIX timestamp since
         # Onboarding changes are saved locally until you send the API request (that's how it works in client)
         # so the API needs the timestamp to know what ID it needs to create, should we just add a note about it
         # or "try" to create the ID ourselves?
         # I'm not sure if this also happens for OnboardingPrompt
-        self.id = 0
-        self.title = title
-        self.description = description
         self.guild = guild
+
+        self.id = 0
+        self.title = data["title"]
+        self.description = data["description"]
         self.roles_ids = (
-            frozenset(map(int, roles_ids))
-            if (roles_ids := [role.id for role in roles])
-            else frozenset()
+            frozenset(map(int, roles_ids)) if (roles_ids := data.get("role_ids")) else frozenset()
         )
         self.channels_ids = (
             frozenset(map(int, channels_ids))
-            if (channels_ids := [channel.id for channel in channels])
+            if (channels_ids := data.get("channel_ids"))
             else frozenset()
         )
 
-        self.emoji: Optional[Union[PartialEmoji, Emoji]] = None
-        if emoji is None:
-            self.emoji = None
-        elif isinstance(emoji, str):
-            self.emoji = PartialEmoji.from_str(emoji)
-        elif isinstance(emoji, _EmojiTag):
-            self.emoji = emoji
+        if emoji_data := data.get("emoji"):
+            self.emoji = guild._state.get_reaction_emoji(emoji_data)
         else:
-            raise TypeError("emoji must be a str, PartialEmoji, or Emoji instance")
+            self.emoji = None
 
     def __str__(self) -> str:
         return self.title
@@ -219,24 +187,6 @@ class OnboardingPromptOption(Hashable):
             f"<OnboardingPromptOption id={self.id!r} title={self.title!r} "
             f"description={self.description!r} emoji={self.emoji!r}>"
         )
-
-    @classmethod
-    def _from_dict(cls, *, data: OnboardingPromptOptionPayload, guild: Guild) -> Self:
-        if emoji_data := data.get("emoji"):
-            emoji = guild._state.get_reaction_emoji(emoji_data)
-        else:
-            emoji = None
-
-        self = cls(
-            title=data["title"],
-            description=data.get("description") or "",
-            emoji=emoji,
-            roles=[Object(id=role_id) for role_id in data["role_ids"]],
-            channels=[Object(id=channel_id) for channel_id in data["channel_ids"]],
-            guild=guild,
-        )
-        self.id = int(data["id"])
-        return self
 
     @property
     def roles(self) -> List[Role]:
