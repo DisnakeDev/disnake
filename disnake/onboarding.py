@@ -158,7 +158,7 @@ class OnboardingPromptOption(Hashable):
 
         self = cls(
             title=data["title"],
-            description=data["description"],
+            description=data.get("description") or "",
             emoji=emoji,
             roles=[Object(id=role_id) for role_id in data["role_ids"]],
             channels=[Object(id=channel_id) for channel_id in data["channel_ids"]],
