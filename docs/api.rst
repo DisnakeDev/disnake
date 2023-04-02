@@ -5735,6 +5735,22 @@ Onboarding
 .. autoclass:: Onboarding
     :members:
 
+OnboardingPrompt
+~~~~~~~~~~~~~~~~
+
+.. attributetable:: OnboardingPrompt
+
+.. autoclass:: OnboardingPrompt
+    :members:
+
+OnboardingPromptOption
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: OnboardingPromptOption
+
+.. autoclass:: OnboardingPromptOption
+    :members:
+
 RawMessageDeleteEvent
 ~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -6057,22 +6073,6 @@ ApplicationRoleConnectionMetadata
 .. attributetable:: ApplicationRoleConnectionMetadata
 
 .. autoclass:: ApplicationRoleConnectionMetadata
-    :members:
-
-OnboardingPrompt
-~~~~~~~~~~~~~~~~
-
-.. attributetable:: OnboardingPrompt
-
-.. autoclass:: OnboardingPrompt
-    :members:
-
-OnboardingPromptOption
-~~~~~~~~~~~~~~~~~~~~~~
-
-.. attributetable:: OnboardingPromptOption
-
-.. autoclass:: OnboardingPromptOption
     :members:
 
 File
