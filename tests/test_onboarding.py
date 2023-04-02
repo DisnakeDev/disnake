@@ -6,12 +6,10 @@ import pytest
 
 from disnake import (
     Guild,
-    Object,
     Onboarding,
     OnboardingPrompt,
     OnboardingPromptOption,
     OnboardingPromptType,
-    PartialEmoji,
 )
 from disnake.types import onboarding as onboarding_types
 
@@ -28,12 +26,15 @@ onboarding_prompt_option_payload: onboarding_types.OnboardingPromptOption = {
 @pytest.fixture
 def onboarding_prompt_option() -> OnboardingPromptOption:
     return OnboardingPromptOption(
-        title="test",
-        description="test",
-        emoji=PartialEmoji(name="", id=123, animated=False),
-        roles=[Object(id="456"), Object(id="789")],
-        channels=[Object(id="123"), Object(id="456")],
         guild=mock.Mock(Guild, id=123),
+        data=onboarding_types.OnboardingPromptOption(
+            id="0",
+            title="test",
+            description="test",
+            emoji={"name": "", "id": 123, "animated": False},
+            role_ids=["456", "789"],
+            channel_ids=["123", "456"],
+        ),
     )
 
 
@@ -71,7 +72,7 @@ class TestOnboarding:
     def test_onboarding(self, onboarding: Onboarding) -> None:
         assert onboarding.guild.id == 123
         assert onboarding.prompts == []
-        assert onboarding._default_channel_ids == [456, 789]
+        assert onboarding.default_channel_ids == frozenset([456, 789])
         assert onboarding.enabled is True
 
 
@@ -94,9 +95,6 @@ class TestOnboardingPromptOption:
     ) -> None:
         assert onboarding_prompt_option.title == "test"
         assert onboarding_prompt_option.description == "test"
-        assert onboarding_prompt_option.emoji == PartialEmoji(name="", id=123, animated=False)
-        assert onboarding_prompt_option.roles == [Object(id="456"), Object(id="789")]
-        assert onboarding_prompt_option.channels == [Object(id="123"), Object(id="456")]
 
     def test_onboarding_prompt_option_str(
         self, onboarding_prompt_option: OnboardingPromptOption
