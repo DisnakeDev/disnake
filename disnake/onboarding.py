@@ -47,11 +47,11 @@ class Onboarding:
         "default_channel_ids",
     )
 
-    def __init__(self, *, guild: Guild, data: OnboardingPayload):
+    def __init__(self, *, guild: Guild, data: OnboardingPayload) -> None:
         self.guild: Guild = guild
         self._from_data(data)
 
-    def _from_data(self, data: OnboardingPayload):
+    def _from_data(self, data: OnboardingPayload) -> None:
         self.prompts: List[OnboardingPrompt] = [
             OnboardingPrompt(data=prompt, guild=self.guild) for prompt in data["prompts"]
         ]
@@ -108,7 +108,7 @@ class OnboardingPrompt(Hashable):
         "type",
     )
 
-    def __init__(self, *, guild: Guild, data: OnboardingPromptPayload):
+    def __init__(self, *, guild: Guild, data: OnboardingPromptPayload) -> None:
         self.guild = guild
 
         self.id: int = int(data["id"])
@@ -155,7 +155,7 @@ class OnboardingPromptOption(Hashable):
 
     __slots__ = ("id", "title", "description", "emoji", "guild", "role_ids", "channel_ids")
 
-    def __init__(self, *, guild: Guild, data: OnboardingPromptOptionPayload):
+    def __init__(self, *, guild: Guild, data: OnboardingPromptOptionPayload) -> None:
         # NOTE: The ID may sometimes be a UNIX timestamp since
         # Onboarding changes are saved locally until you send the API request (that's how it works in client)
         # so the API needs the timestamp to know what ID it needs to create, should we just add a note about it
