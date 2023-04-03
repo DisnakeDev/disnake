@@ -1,5 +1,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
+"""A sphinx extension to display specific pages' table of contents in the context
+of a parent page.
+"""
+
 # Original copyright notice as follows
 
 # Copyright © 2012 New Dream Network, LLC (DreamHost)
@@ -18,7 +22,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-# changes made:
+# Changes made:
 # - added typehinting
 # - formatted with black
 # - refactored generated toc to suit project documentation structure
@@ -36,15 +40,24 @@ if TYPE_CHECKING:
     from sphinx.builders.html import StandaloneHTMLBuilder
     from sphinx.environment import BuildEnvironment
 
+# {prefix: index_doc} mapping
+# Any document that matches `prefix` will use `index_doc`'s toctree instead.
 GROUPED_SECTIONS = {"api/": "api/index", "ext/commands/api/": "ext/commands/api/index"}
 
 
 def html_page_context(app: Sphinx, pagename: str, templatename, context, doctree):
     """Event handler for the html-page-context signal.
-    Modifies the context directly.
-     - Replaces the `toc` value created by the HTML builder with one
-       that shows all document titles and the local table of contents.
-     - Sets `display_toc` to True so the table of contents is always displayed.
+
+    Modifies the context directly, if `docname` matches one of the items in `GROUPED_SECTIONS`.
+
+    - Replaces the default `toc` created by the builder with one
+      that shows all document titles and the local TOC.
+    - Sets `display_toc` to True so the TOC is always displayed.
+    - Sets `parent_index` (used in custom `localtoc.html`) such that the "Table of Contents"
+      link on top of the TOC points to the index page, not the current page.
+
+    Note that this doesn't replace the `toctree` callback in the context, since
+    we're currently not using it in any templates.
     """
     # only work on grouped folders
     index = next(
@@ -57,7 +70,10 @@ def html_page_context(app: Sphinx, pagename: str, templatename, context, doctree
         app.builder,  # type: ignore
         pagename,
         index,
+        # don't prune tree at a certain depth; always include all entries
         prune=False,
+        # don't collapse sibling entries; this will be done through javascript later,
+        # collapsing here would remove the elements from the output entirely
         collapse=False,
     )
 
@@ -84,6 +100,10 @@ def get_rendered_toctree(builder: StandaloneHTMLBuilder, docname: str, index: st
 def build_full_toctree(builder: StandaloneHTMLBuilder, docname: str, index: str, **kwargs):
     """Return a single toctree starting from docname containing all
     sub-document doctrees.
+
+    This is similar to `sphinx.environment.adapters.TocTree.get_toctree_for`,
+    but instead of generating a toctree for `docname` in the context of the root doc,
+    this generates one for `docname` in the context of `index`.
     """
     env: BuildEnvironment = builder.env
     doctree = env.get_doctree(index)
