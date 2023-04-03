@@ -85,6 +85,14 @@ Opus Library
 Discord Models
 ---------------
 
+VoiceState
+~~~~~~~~~~
+
+.. attributetable:: VoiceState
+
+.. autoclass:: VoiceState()
+    :members:
+
 VoiceRegion
 ~~~~~~~~~~~
 

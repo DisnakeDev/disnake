@@ -26,14 +26,6 @@ Member
     .. automethod:: typing
         :async-with:
 
-VoiceState
-~~~~~~~~~~
-
-.. attributetable:: VoiceState
-
-.. autoclass:: VoiceState()
-    :members:
-
 Data Classes
 ------------
 
