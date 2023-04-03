@@ -59,63 +59,53 @@ BaseSelect
 .. attributetable:: BaseSelect
 
 .. autoclass:: BaseSelect
-   :members:
-   :inherited-members:
+    :members:
+    :inherited-members:
 
 ChannelSelect
-~~~~~~~~~~~~~~
-
-.. attributetable:: disnake.ui.ChannelSelect
-
-.. autoclass:: disnake.ui.ChannelSelect
-    :members:
-    :inherited-members:
-
-.. autofunction:: disnake.ui.channel_select(cls=disnake.ui.ChannelSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, disabled=False, channel_types=None, row=None)
-
-MentionableSelect
-~~~~~~~~~~~~~~~~~~
-
-.. attributetable:: disnake.ui.MentionableSelect
-
-.. autoclass:: disnake.ui.MentionableSelect
-    :members:
-    :inherited-members:
-
-.. autofunction:: disnake.ui.mentionable_select(cls=disnake.ui.MentionableSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, disabled=False, row=None)
-
-RoleSelect
-~~~~~~~~~~~
-
-.. attributetable:: disnake.ui.RoleSelect
-
-.. autoclass:: disnake.ui.RoleSelect
-    :members:
-    :inherited-members:
-
-.. autofunction:: disnake.ui.role_select(cls=disnake.ui.RoleSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, disabled=False, row=None)
-
-StringSelect
 ~~~~~~~~~~~~~
 
-.. attributetable:: disnake.ui.StringSelect
+.. attributetable:: ChannelSelect
 
-.. autoclass:: disnake.ui.StringSelect
+.. autoclass:: ChannelSelect
     :members:
     :inherited-members:
 
-.. autofunction:: disnake.ui.string_select(cls=disnake.ui.StringSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, options=..., disabled=False, row=None)
+MentionableSelect
+~~~~~~~~~~~~~~~~~
+
+.. attributetable:: MentionableSelect
+
+.. autoclass:: MentionableSelect
+    :members:
+    :inherited-members:
+
+RoleSelect
+~~~~~~~~~~
+
+.. attributetable:: RoleSelect
+
+.. autoclass:: RoleSelect
+    :members:
+    :inherited-members:
+
+StringSelect
+~~~~~~~~~~~~
+
+.. attributetable:: StringSelect
+
+.. autoclass:: StringSelect
+    :members:
+    :inherited-members:
 
 UserSelect
-~~~~~~~~~~~
+~~~~~~~~~~
 
-.. attributetable:: disnake.ui.UserSelect
+.. attributetable:: UserSelect
 
-.. autoclass:: disnake.ui.UserSelect
+.. autoclass:: UserSelect
     :members:
     :inherited-members:
-
-.. autofunction:: disnake.ui.user_select(cls=disnake.ui.UserSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, disabled=False, row=None)
 
 Modal
 ~~~~~
@@ -133,9 +123,18 @@ TextInput
 .. autoclass:: TextInput
     :members:
 
+
 Functions
 ---------
 
 .. autofunction:: button(cls=Button, *, style=ButtonStyle.secondary, label=None, disabled=False, custom_id=..., url=None, emoji=None, row=None)
 
-.. autofunction:: select(cls=Select, *, custom_id=..., placeholder=None, min_values=1, max_values=1, options=..., disabled=False, row=None)
+.. autofunction:: channel_select(cls=ChannelSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, disabled=False, channel_types=None, row=None)
+
+.. autofunction:: mentionable_select(cls=MentionableSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, disabled=False, row=None)
+
+.. autofunction:: role_select(cls=RoleSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, disabled=False, row=None)
+
+.. autofunction:: string_select(cls=StringSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, options=..., disabled=False, row=None)
+
+.. autofunction:: user_select(cls=UserSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, disabled=False, row=None)
