@@ -45,7 +45,7 @@ if TYPE_CHECKING:
 GROUPED_SECTIONS = {"api/": "api/index", "ext/commands/api/": "ext/commands/api/index"}
 
 
-def html_page_context(app: Sphinx, pagename: str, templatename, context, doctree):
+def html_page_context(app: Sphinx, docname: str, templatename, context, doctree):
     """Event handler for the html-page-context signal.
 
     Modifies the context directly, if `docname` matches one of the items in `GROUPED_SECTIONS`.
@@ -61,14 +61,14 @@ def html_page_context(app: Sphinx, pagename: str, templatename, context, doctree
     """
     # only work on grouped folders
     index = next(
-        (index for name, index in GROUPED_SECTIONS.items() if pagename.startswith(name)), None
+        (index for name, index in GROUPED_SECTIONS.items() if docname.startswith(name)), None
     )
     if index is None:
         return
 
     rendered_toc = get_rendered_toctree(
         app.builder,  # type: ignore
-        pagename,
+        docname,
         index,
         # don't prune tree at a certain depth; always include all entries
         prune=False,
