@@ -363,12 +363,12 @@ Events
 - :func:`on_private_channel_update(before, after) <disnake.on_private_channel_update>`
 - :func:`on_private_channel_pins_update(channel, last_pin) <disnake.on_private_channel_pins_update>`
 - :func:`on_thread_create(thread) <disnake.on_thread_create>`
-- :func:`on_thread_join(thread) <disnake.on_thread_join>`
-- :func:`on_thread_member_join(member) <disnake.on_thread_member_join>`
-- :func:`on_thread_member_remove(member) <disnake.on_thread_member_remove>`
-- :func:`on_thread_remove(thread) <disnake.on_thread_remove>`
 - :func:`on_thread_update(before, after) <disnake.on_thread_update>`
 - :func:`on_thread_delete(thread) <disnake.on_thread_delete>`
+- :func:`on_thread_join(thread) <disnake.on_thread_join>`
+- :func:`on_thread_remove(thread) <disnake.on_thread_remove>`
+- :func:`on_thread_member_join(member) <disnake.on_thread_member_join>`
+- :func:`on_thread_member_remove(member) <disnake.on_thread_member_remove>`
 - :func:`on_raw_thread_member_remove(payload) <disnake.on_raw_thread_member_remove>`
 - :func:`on_raw_thread_update(after) <disnake.on_raw_thread_update>`
 - :func:`on_raw_thread_delete(payload) <disnake.on_raw_thread_delete>`

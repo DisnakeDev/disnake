@@ -138,6 +138,43 @@ This section documents events related to :class:`Client` and its connectivity to
     :param kwargs: The keyword arguments for the event that raised the
         exception.
 
+.. function:: on_gateway_error(event, data, shard_id, exc)
+
+    When a (known) gateway event cannot be parsed, a traceback is printed to
+    stderr and the exception is ignored by default. This should generally
+    not happen and is usually either a library issue, or caused by a breaking API change.
+
+    To change this behaviour, for example to completely stop the bot, this event can be overridden.
+
+    This can also be disabled completely by passing ``enable_gateway_error_handler=False``
+    to the client on initialization, restoring the pre-v2.6 behavior.
+
+    .. versionadded:: 2.6
+
+    .. note::
+        ``on_gateway_error`` will only be dispatched to :meth:`Client.event`.
+
+        It will not be received by :meth:`Client.wait_for`, or, if used,
+        :ref:`ext_commands_api_bots` listeners such as
+        :meth:`~ext.commands.Bot.listen` or :meth:`~ext.commands.Cog.listener`.
+
+    .. note::
+        This will not be dispatched for exceptions that occur while parsing ``READY`` and
+        ``RESUMED`` event payloads, as exceptions in these events are considered fatal.
+
+    :param event: The name of the gateway event that was the cause of the exception,
+        for example ``MESSAGE_CREATE``.
+    :type event: :class:`str`
+
+    :param data: The raw event payload.
+    :type data: :class:`Any`
+
+    :param shard_id: The ID of the shard the exception occurred in, if applicable.
+    :type shard_id: Optional[:class:`int`]
+
+    :param exc: The exception that was raised.
+    :type exc: :class:`Exception`
+
 .. function:: on_ready()
 
     Called when the client is done preparing the data received from Discord. Usually after login is successful
@@ -243,43 +280,6 @@ This section documents events related to :class:`Client` and its connectivity to
                     WebSocket library. It can be :class:`bytes` to denote a binary
                     message or :class:`str` to denote a regular text message.
 
-.. function:: on_gateway_error(event, data, shard_id, exc)
-
-    When a (known) gateway event cannot be parsed, a traceback is printed to
-    stderr and the exception is ignored by default. This should generally
-    not happen and is usually either a library issue, or caused by a breaking API change.
-
-    To change this behaviour, for example to completely stop the bot, this event can be overridden.
-
-    This can also be disabled completely by passing ``enable_gateway_error_handler=False``
-    to the client on initialization, restoring the pre-v2.6 behavior.
-
-    .. versionadded:: 2.6
-
-    .. note::
-        ``on_gateway_error`` will only be dispatched to :meth:`Client.event`.
-
-        It will not be received by :meth:`Client.wait_for`, or, if used,
-        :ref:`ext_commands_api_bots` listeners such as
-        :meth:`~ext.commands.Bot.listen` or :meth:`~ext.commands.Cog.listener`.
-
-    .. note::
-        This will not be dispatched for exceptions that occur while parsing ``READY`` and
-        ``RESUMED`` event payloads, as exceptions in these events are considered fatal.
-
-    :param event: The name of the gateway event that was the cause of the exception,
-        for example ``MESSAGE_CREATE``.
-    :type event: :class:`str`
-
-    :param data: The raw event payload.
-    :type data: :class:`Any`
-
-    :param shard_id: The ID of the shard the exception occurred in, if applicable.
-    :type shard_id: Optional[:class:`int`]
-
-    :param exc: The exception that was raised.
-    :type exc: :class:`Exception`
-
 Channels/Threads
 ~~~~~~~~~~~~~~~~
 
@@ -356,64 +356,6 @@ This section documents events related to Discord channels and threads.
     :param thread: The thread that got created.
     :type thread: :class:`Thread`
 
-.. function:: on_thread_join(thread)
-
-    Called whenever the bot joins a thread or gets access to a thread
-    (for example, by gaining access to the parent channel).
-
-    Note that you can get the guild from :attr:`Thread.guild`.
-
-    This requires :attr:`Intents.guilds` to be enabled.
-
-    .. note::
-        This event will not be called for threads created by the bot or
-        threads created on one of the bot's messages.
-
-    .. versionadded:: 2.0
-
-    .. versionchanged:: 2.5
-        This is no longer being called when a thread is created, see :func:`on_thread_create` instead.
-
-    :param thread: The thread that got joined.
-    :type thread: :class:`Thread`
-
-.. function:: on_thread_member_join(member)
-              on_thread_member_remove(member)
-
-    Called when a :class:`ThreadMember` leaves or joins a :class:`Thread`.
-
-    You can get the thread a member belongs in by accessing :attr:`ThreadMember.thread`.
-
-    On removal events, if the member being removed is not found in the internal cache,
-    then this event will not be called. Consider using :func:`on_raw_thread_member_remove` instead.
-
-    This requires :attr:`Intents.members` to be enabled.
-
-    .. versionadded:: 2.0
-
-    :param member: The member who joined or left.
-    :type member: :class:`ThreadMember`
-
-.. function:: on_thread_remove(thread)
-
-    Called whenever a thread is removed. This is different from a thread being deleted.
-
-    Note that you can get the guild from :attr:`Thread.guild`.
-
-    This requires :attr:`Intents.guilds` to be enabled.
-
-    .. warning::
-
-        Due to technical limitations, this event might not be called
-        as soon as one expects. Since the library tracks thread membership
-        locally, the API only sends updated thread membership status upon being
-        synced by joining a thread.
-
-    .. versionadded:: 2.0
-
-    :param thread: The thread that got removed.
-    :type thread: :class:`Thread`
-
 .. function:: on_thread_update(before, after)
 
     Called when a thread is updated. If the thread is not found
@@ -443,6 +385,64 @@ This section documents events related to Discord channels and threads.
 
     :param thread: The thread that got deleted.
     :type thread: :class:`Thread`
+
+.. function:: on_thread_join(thread)
+
+    Called whenever the bot joins a thread or gets access to a thread
+    (for example, by gaining access to the parent channel).
+
+    Note that you can get the guild from :attr:`Thread.guild`.
+
+    This requires :attr:`Intents.guilds` to be enabled.
+
+    .. note::
+        This event will not be called for threads created by the bot or
+        threads created on one of the bot's messages.
+
+    .. versionadded:: 2.0
+
+    .. versionchanged:: 2.5
+        This is no longer being called when a thread is created, see :func:`on_thread_create` instead.
+
+    :param thread: The thread that got joined.
+    :type thread: :class:`Thread`
+
+.. function:: on_thread_remove(thread)
+
+    Called whenever a thread is removed. This is different from a thread being deleted.
+
+    Note that you can get the guild from :attr:`Thread.guild`.
+
+    This requires :attr:`Intents.guilds` to be enabled.
+
+    .. warning::
+
+        Due to technical limitations, this event might not be called
+        as soon as one expects. Since the library tracks thread membership
+        locally, the API only sends updated thread membership status upon being
+        synced by joining a thread.
+
+    .. versionadded:: 2.0
+
+    :param thread: The thread that got removed.
+    :type thread: :class:`Thread`
+
+.. function:: on_thread_member_join(member)
+              on_thread_member_remove(member)
+
+    Called when a :class:`ThreadMember` leaves or joins a :class:`Thread`.
+
+    You can get the thread a member belongs in by accessing :attr:`ThreadMember.thread`.
+
+    On removal events, if the member being removed is not found in the internal cache,
+    then this event will not be called. Consider using :func:`on_raw_thread_member_remove` instead.
+
+    This requires :attr:`Intents.members` to be enabled.
+
+    .. versionadded:: 2.0
+
+    :param member: The member who joined or left.
+    :type member: :class:`ThreadMember`
 
 .. function:: on_raw_thread_member_remove(payload)
 
@@ -1146,27 +1146,6 @@ This section documents events related to Discord chat messages.
     :param message: The current message.
     :type message: :class:`Message`
 
-.. function:: on_message_delete(message)
-
-    Called when a message is deleted. If the message is not found in the
-    internal message cache, then this event will not be called.
-    Messages might not be in cache if the message is too old
-    or the client is participating in high traffic guilds.
-
-    If this occurs increase the :class:`max_messages <Client>` parameter
-    or use the :func:`on_raw_message_delete` event instead.
-
-    This requires :attr:`Intents.messages` to be enabled.
-
-    .. note::
-
-        Not all messages will have ``content``. This is a Discord limitation.
-        See the docs of :attr:`Intents.message_content` for more information.
-
-
-    :param message: The deleted message.
-    :type message: :class:`Message`
-
 .. function:: on_message_edit(before, after)
 
     Called when a :class:`Message` receives an update event. If the message is not found
@@ -1200,6 +1179,27 @@ This section documents events related to Discord chat messages.
     :param after: The current version of the message.
     :type after: :class:`Message`
 
+.. function:: on_message_delete(message)
+
+    Called when a message is deleted. If the message is not found in the
+    internal message cache, then this event will not be called.
+    Messages might not be in cache if the message is too old
+    or the client is participating in high traffic guilds.
+
+    If this occurs increase the :class:`max_messages <Client>` parameter
+    or use the :func:`on_raw_message_delete` event instead.
+
+    This requires :attr:`Intents.messages` to be enabled.
+
+    .. note::
+
+        Not all messages will have ``content``. This is a Discord limitation.
+        See the docs of :attr:`Intents.message_content` for more information.
+
+
+    :param message: The deleted message.
+    :type message: :class:`Message`
+
 .. function:: on_bulk_message_delete(messages)
 
     Called when messages are bulk deleted. If none of the messages deleted
@@ -1216,19 +1216,6 @@ This section documents events related to Discord chat messages.
 
     :param messages: The messages that have been deleted.
     :type messages: List[:class:`Message`]
-
-.. function:: on_raw_message_delete(payload)
-
-    Called when a message is deleted. Unlike :func:`on_message_delete`, this is
-    called regardless of the message being in the internal message cache or not.
-
-    If the message is found in the message cache,
-    it can be accessed via :attr:`RawMessageDeleteEvent.cached_message`
-
-    This requires :attr:`Intents.messages` to be enabled.
-
-    :param payload: The raw event payload data.
-    :type payload: :class:`RawMessageDeleteEvent`
 
 .. function:: on_raw_message_edit(payload)
 
@@ -1253,6 +1240,19 @@ This section documents events related to Discord chat messages.
 
     :param payload: The raw event payload data.
     :type payload: :class:`RawMessageUpdateEvent`
+
+.. function:: on_raw_message_delete(payload)
+
+    Called when a message is deleted. Unlike :func:`on_message_delete`, this is
+    called regardless of the message being in the internal message cache or not.
+
+    If the message is found in the message cache,
+    it can be accessed via :attr:`RawMessageDeleteEvent.cached_message`
+
+    This requires :attr:`Intents.messages` to be enabled.
+
+    :param payload: The raw event payload data.
+    :type payload: :class:`RawMessageDeleteEvent`
 
 .. function:: on_raw_bulk_message_delete(payload)
 

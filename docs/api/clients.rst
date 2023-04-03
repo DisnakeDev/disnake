@@ -99,6 +99,7 @@ Events
 - :func:`on_connect() <disnake.on_connect>`
 - :func:`on_disconnect() <disnake.on_disconnect>`
 - :func:`on_error(event, *args, **kwargs) <disnake.on_error>`
+- :func:`on_gateway_error(event, data, shard_id, exc) <disnake.on_gateway_error>`
 - :func:`on_ready() <disnake.on_ready>`
 - :func:`on_resumed() <disnake.on_resumed>`
 - :func:`on_shard_connect(shard_id) <disnake.on_shard_connect>`
@@ -108,4 +109,3 @@ Events
 - :func:`on_socket_event_type(event_type) <disnake.on_socket_event_type>`
 - :func:`on_socket_raw_receive(msg) <disnake.on_socket_raw_receive>`
 - :func:`on_socket_raw_send(payload) <disnake.on_socket_raw_send>`
-- :func:`on_gateway_error(event, data, shard_id, exc) <disnake.on_gateway_error>`
