@@ -75,6 +75,8 @@ def html_page_context(app: Sphinx, docname: str, templatename, context, doctree)
         # don't collapse sibling entries; this will be done through javascript later,
         # collapsing here would remove the elements from the output entirely
         collapse=False,
+        # include :hidden: toctrees
+        includehidden=True,
     )
 
     context["toc"] = rendered_toc
@@ -113,7 +115,6 @@ def build_full_toctree(builder: StandaloneHTMLBuilder, docname: str, index: str,
             docname,
             builder,
             toctreenode,
-            includehidden=True,
             **kwargs,
         )
         if toctree is not None:
