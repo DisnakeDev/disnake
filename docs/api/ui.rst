@@ -62,6 +62,15 @@ BaseSelect
     :members:
     :inherited-members:
 
+StringSelect
+~~~~~~~~~~~~
+
+.. attributetable:: StringSelect
+
+.. autoclass:: StringSelect
+    :members:
+    :inherited-members:
+
 ChannelSelect
 ~~~~~~~~~~~~~
 
@@ -86,15 +95,6 @@ RoleSelect
 .. attributetable:: RoleSelect
 
 .. autoclass:: RoleSelect
-    :members:
-    :inherited-members:
-
-StringSelect
-~~~~~~~~~~~~
-
-.. attributetable:: StringSelect
-
-.. autoclass:: StringSelect
     :members:
     :inherited-members:
 
@@ -130,6 +130,9 @@ Functions
 .. autofunction:: button(cls=Button, *, style=ButtonStyle.secondary, label=None, disabled=False, custom_id=..., url=None, emoji=None, row=None)
     :decorator:
 
+.. autofunction:: string_select(cls=StringSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, options=..., disabled=False, row=None)
+    :decorator:
+
 .. autofunction:: channel_select(cls=ChannelSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, disabled=False, channel_types=None, row=None)
     :decorator:
 
@@ -137,9 +140,6 @@ Functions
     :decorator:
 
 .. autofunction:: role_select(cls=RoleSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, disabled=False, row=None)
-    :decorator:
-
-.. autofunction:: string_select(cls=StringSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, options=..., disabled=False, row=None)
     :decorator:
 
 .. autofunction:: user_select(cls=UserSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, disabled=False, row=None)
