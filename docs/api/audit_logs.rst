@@ -1695,3 +1695,8 @@ AuditLogActionCategory
     .. attribute:: update
 
         The action is the update of something.
+
+Events
+------
+
+- :func:`on_audit_log_entry_create(entry) <disnake.on_audit_log_entry_create>`

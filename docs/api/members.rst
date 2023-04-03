@@ -51,6 +51,7 @@ Events
 - :func:`on_member_join(member) <disnake.on_member_join>`
 - :func:`on_member_remove(member) <disnake.on_member_remove>`
 - :func:`on_member_update(before, after) <disnake.on_member_update>`
+- :func:`on_raw_member_remove(member) <disnake.on_raw_member_remove>`
 - :func:`on_raw_member_update(member) <disnake.on_raw_member_update>`
 - :func:`on_member_ban(guild, user) <disnake.on_member_ban>`
 - :func:`on_member_unban(guild, user) <disnake.on_member_unban>`
