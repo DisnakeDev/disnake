@@ -173,10 +173,13 @@ Functions
 .. autofunction:: Param
 
 .. autofunction:: slash_command
+    :decorator:
 
 .. autofunction:: message_command
+    :decorator:
 
 .. autofunction:: user_command
+    :decorator:
 
 .. autofunction:: inject
 

@@ -154,3 +154,4 @@ API Reference
         :decorator:
 
 .. autofunction:: disnake.ext.tasks.loop
+    :decorator:
