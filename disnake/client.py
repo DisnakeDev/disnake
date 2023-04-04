@@ -183,8 +183,7 @@ class SessionStartLimit:
 
 
 class GatewayParams(NamedTuple):
-    """
-    Container type for configuring gateway connections.
+    """Container type for configuring gateway connections.
 
     .. versionadded:: 2.6
 
@@ -203,8 +202,7 @@ class GatewayParams(NamedTuple):
 
 
 class Client:
-    """
-    Represents a client connection that connects to Discord.
+    """Represents a client connection that connects to Discord.
     This class is used to interact with the Discord WebSocket and API.
 
     A number of options can be passed to the :class:`Client`.
@@ -1383,8 +1381,7 @@ class Client:
         return list(data.values())
 
     def get_guild_slash_commands(self, guild_id: int) -> List[APISlashCommand]:
-        """
-        Returns a list of all slash commands in the guild with the given ID.
+        """Returns a list of all slash commands in the guild with the given ID.
 
         Parameters
         ----------
@@ -1400,8 +1397,7 @@ class Client:
         return [cmd for cmd in data.values() if isinstance(cmd, APISlashCommand)]
 
     def get_guild_user_commands(self, guild_id: int) -> List[APIUserCommand]:
-        """
-        Returns a list of all user commands in the guild with the given ID.
+        """Returns a list of all user commands in the guild with the given ID.
 
         Parameters
         ----------
@@ -1417,8 +1413,7 @@ class Client:
         return [cmd for cmd in data.values() if isinstance(cmd, APIUserCommand)]
 
     def get_guild_message_commands(self, guild_id: int) -> List[APIMessageCommand]:
-        """
-        Returns a list of all message commands in the guild with the given ID.
+        """Returns a list of all message commands in the guild with the given ID.
 
         Parameters
         ----------
@@ -1434,8 +1429,7 @@ class Client:
         return [cmd for cmd in data.values() if isinstance(cmd, APIMessageCommand)]
 
     def get_global_command(self, id: int) -> Optional[APIApplicationCommand]:
-        """
-        Returns a global application command with the given ID.
+        """Returns a global application command with the given ID.
 
         Parameters
         ----------
@@ -1450,8 +1444,7 @@ class Client:
         return self._connection._get_global_application_command(id)
 
     def get_guild_command(self, guild_id: int, id: int) -> Optional[APIApplicationCommand]:
-        """
-        Returns a guild application command with the given guild ID and application command ID.
+        """Returns a guild application command with the given guild ID and application command ID.
 
         Parameters
         ----------
@@ -1470,8 +1463,7 @@ class Client:
     def get_global_command_named(
         self, name: str, cmd_type: Optional[ApplicationCommandType] = None
     ) -> Optional[APIApplicationCommand]:
-        """
-        Returns a global application command matching the given name.
+        """Returns a global application command matching the given name.
 
         Parameters
         ----------
@@ -1490,8 +1482,7 @@ class Client:
     def get_guild_command_named(
         self, guild_id: int, name: str, cmd_type: Optional[ApplicationCommandType] = None
     ) -> Optional[APIApplicationCommand]:
-        """
-        Returns a guild application command matching the given name.
+        """Returns a guild application command matching the given name.
 
         Parameters
         ----------
@@ -1554,7 +1545,6 @@ class Client:
 
         Examples
         --------
-
         Waiting for a user reply: ::
 
             @client.event
@@ -1654,8 +1644,7 @@ class Client:
         The events must be a :ref:`coroutine <coroutine>`, if not, :exc:`TypeError` is raised.
 
         Example
-        ---------
-
+        -------
         .. code-block:: python3
 
             @client.event
@@ -1756,7 +1745,6 @@ class Client:
 
         Examples
         --------
-
         Usage ::
 
             async for guild in client.fetch_guilds(limit=150):
@@ -1791,7 +1779,7 @@ class Client:
             Retrieving the guilds failed.
 
         Yields
-        --------
+        ------
         :class:`.Guild`
             The guild with the guild data parsed.
         """

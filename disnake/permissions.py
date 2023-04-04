@@ -267,7 +267,8 @@ class Permissions(BaseFlags):
     @cached_creation
     def none(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with all
-        permissions set to ``False``."""
+        permissions set to ``False``.
+        """
         return cls(0)
 
     @classmethod
@@ -563,8 +564,7 @@ class Permissions(BaseFlags):
 
     @_overload_with_permissions
     def update(self, **kwargs: bool) -> None:
-        """
-        Bulk updates this permission object.
+        """Bulk updates this permission object.
 
         Allows you to set multiple attributes by using keyword
         arguments. The names must be equivalent to the properties
@@ -623,7 +623,8 @@ class Permissions(BaseFlags):
     def manage_channels(self) -> int:
         """:class:`bool`: Returns ``True`` if a user can edit, delete, or create channels in the guild.
 
-        This also corresponds to the "Manage Channel" channel-specific override."""
+        This also corresponds to the "Manage Channel" channel-specific override.
+        """
         return 1 << 4
 
     @flag_value
@@ -670,7 +671,8 @@ class Permissions(BaseFlags):
     @flag_value
     def send_messages(self) -> int:
         """:class:`bool`: Returns ``True`` if a user can send messages from all or specific text channels
-        and create threads in forum channels."""
+        and create threads in forum channels.
+        """
         return 1 << 11
 
     @make_permission_alias("send_messages")
@@ -954,8 +956,7 @@ def _augment_from_permissions(cls):
 
 @_augment_from_permissions
 class PermissionOverwrite:
-    """
-    A type that is used to represent a channel specific permission.
+    """A type that is used to represent a channel specific permission.
 
     Unlike a regular :class:`Permissions`\\, the default value of a
     permission is equivalent to ``None`` and not ``False``. Setting
@@ -1132,7 +1133,6 @@ class PermissionOverwrite:
 
     def pair(self) -> Tuple[Permissions, Permissions]:
         """Tuple[:class:`Permissions`, :class:`Permissions`]: Returns the (allow, deny) pair from this overwrite."""
-
         allow = Permissions.none()
         deny = Permissions.none()
 
@@ -1237,8 +1237,7 @@ class PermissionOverwrite:
 
     @_overload_with_permissions
     def update(self, **kwargs: Optional[bool]) -> None:
-        """
-        Bulk updates this permission overwrite object.
+        """Bulk updates this permission overwrite object.
 
         Allows you to set multiple attributes by using keyword
         arguments. The names must be equivalent to the properties

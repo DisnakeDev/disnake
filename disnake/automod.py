@@ -60,8 +60,7 @@ __all__ = (
 
 
 class AutoModAction:
-    """
-    A base class for auto moderation actions.
+    """A base class for auto moderation actions.
 
     This class is not meant to be instantiated by the user.
     The user-constructible subclasses are:
@@ -111,10 +110,17 @@ class AutoModAction:
 
 
 class AutoModBlockMessageAction(AutoModAction):
-    """
-    Represents an auto moderation action that blocks content from being sent.
+    """Represents an auto moderation action that blocks content from being sent.
 
     .. versionadded:: 2.6
+
+    Parameters
+    ----------
+    custom_message: Optional[:class:`str`]
+        The custom message to show to the user when the rule is triggered.
+        Maximum length is 150 characters.
+
+        .. versionadded:: 2.9
 
     Attributes
     ----------
@@ -127,16 +133,26 @@ class AutoModBlockMessageAction(AutoModAction):
 
     _metadata: AutoModBlockMessageActionMetadata
 
-    def __init__(self) -> None:
+    def __init__(self, custom_message: Optional[str] = None) -> None:
         super().__init__(type=AutoModActionType.block_message)
 
+        if custom_message is not None:
+            self._metadata["custom_message"] = custom_message
+
+    @property
+    def custom_message(self) -> Optional[str]:
+        """Optional[:class:`str`]: The custom message to show to the user when the rule is triggered.
+
+        .. versionadded:: 2.9
+        """
+        return self._metadata.get("custom_message")
+
     def __repr__(self) -> str:
-        return f"<{type(self).__name__}>"
+        return f"<{type(self).__name__} custom_message={self.custom_message!r}>"
 
 
 class AutoModSendAlertAction(AutoModAction):
-    """
-    Represents an auto moderation action that sends an alert to a channel.
+    """Represents an auto moderation action that sends an alert to a channel.
 
     .. versionadded:: 2.6
 
@@ -171,8 +187,7 @@ class AutoModSendAlertAction(AutoModAction):
 
 
 class AutoModTimeoutAction(AutoModAction):
-    """
-    Represents an auto moderation action that times out the user.
+    """Represents an auto moderation action that times out the user.
 
     .. versionadded:: 2.6
 
@@ -202,7 +217,8 @@ class AutoModTimeoutAction(AutoModAction):
     @property
     def duration(self) -> int:
         """:class:`int`: The duration (in seconds) for which to timeout
-        the user when the rule is triggered."""
+        the user when the rule is triggered.
+        """
         return self._metadata["duration_seconds"]
 
     def __repr__(self) -> str:
@@ -210,8 +226,7 @@ class AutoModTimeoutAction(AutoModAction):
 
 
 class AutoModTriggerMetadata:
-    """
-    Metadata for an auto moderation trigger.
+    """Metadata for an auto moderation trigger.
 
     Based on the trigger type, different fields can be used with various limits:
 
@@ -323,8 +338,7 @@ class AutoModTriggerMetadata:
         allow_list: Optional[Sequence[str]] = MISSING,
         mention_total_limit: Optional[int] = MISSING,
     ) -> Self:
-        """
-        Returns a new instance with the given changes applied.
+        """Returns a new instance with the given changes applied.
         All other fields will be kept intact.
 
         Returns
@@ -387,8 +401,7 @@ class AutoModTriggerMetadata:
 
 
 class AutoModRule:
-    """
-    Represents an auto moderation rule.
+    """Represents an auto moderation rule.
 
     .. versionadded:: 2.6
 
@@ -459,7 +472,8 @@ class AutoModRule:
     @property
     def actions(self) -> List[AutoModAction]:
         """List[Union[:class:`AutoModBlockMessageAction`, :class:`AutoModSendAlertAction`, :class:`AutoModTimeoutAction`, :class:`AutoModAction`]]:
-        The list of actions that will execute if a matching event triggered this rule."""
+        The list of actions that will execute if a matching event triggered this rule.
+        """
         return list(self._actions)  # return a copy
 
     @property
@@ -509,7 +523,6 @@ class AutoModRule:
 
         Examples
         --------
-
         Edit name and enable rule:
 
         .. code-block:: python3
@@ -574,7 +587,6 @@ class AutoModRule:
         :class:`AutoModRule`
             The newly updated auto moderation rule.
         """
-
         payload: EditAutoModRulePayload = {}
 
         if name is not MISSING:
@@ -729,14 +741,16 @@ class AutoModActionExecution:
     def message(self) -> Optional[Message]:
         """Optional[:class:`Message`]: The message that matched, if any.
         Not available if the message was blocked, if the content was not part of a message,
-        or if the message was not found in the message cache."""
+        or if the message was not found in the message cache.
+        """
         return self.guild._state._get_message(self.message_id)
 
     @property
     def alert_message(self) -> Optional[Message]:
         """Optional[:class:`Message`]: The alert message sent as a result of this action, if any.
         Only available if :attr:`action.type <AutoModAction.type>` is :attr:`~AutoModActionType.send_alert_message`
-        and the message was found in the message cache."""
+        and the message was found in the message cache.
+        """
         return self.guild._state._get_message(self.alert_message_id)
 
 

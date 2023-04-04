@@ -121,3 +121,24 @@ document.addEventListener('DOMContentLoaded', () => {
     sidebar.setActiveLink(getCurrentSection());
   });
 });
+
+function sidebarSearch() {
+  const filter = document.getElementById('sidebar-search-box').value.toUpperCase();
+  const items = document.querySelectorAll('#sidebar li')
+
+  // Loop through all list items, and hide those who don't match the search query
+  for (const item of items) {
+    const a = item.querySelector("a");
+    const itemText = a.textContent || a.innerText;
+    if (itemText.toUpperCase().indexOf(filter) > -1) {
+      // we need to convert all of the parents back into visible mode
+      let el = item;
+      while (el) {
+        el.style.display = "";
+        el = el.parentNode.closest("#sidebar li");
+      }
+    } else {
+      item.style.display = "none";
+    }
+  }
+}

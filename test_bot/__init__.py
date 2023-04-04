@@ -14,7 +14,7 @@ logging.basicConfig(
 )
 
 
-def _log_to_file():
+def _log_to_file() -> None:
     log_format = logging.Formatter(_LOG_FORMAT)
 
     # Set up file logging
@@ -32,8 +32,7 @@ def _log_to_file():
 
 
 def _set_trace_loggers() -> None:
-    """
-    Set loggers to the debug level according to the value from the DEBUG_LOGGERS env var.
+    """Set loggers to the debug level according to the value from the DEBUG_LOGGERS env var.
 
     When the env var is a list of logger names delimited by a comma,
     each of the listed loggers will be set to the debug level.

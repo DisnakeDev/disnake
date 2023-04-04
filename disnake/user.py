@@ -252,7 +252,6 @@ class BaseUser(_UserTag):
         :class:`bool`
             Indicates if the user is mentioned in the message.
         """
-
         if message.mention_everyone:
             return True
 

@@ -227,19 +227,19 @@ def libopus_loader(name: str) -> Any:
 
 
 def _load_default() -> bool:
-    global _lib
+    global _lib  # noqa: PLW0603
     try:
         if sys.platform == "win32":
             _basedir = os.path.dirname(os.path.abspath(__file__))
             _bitness = struct.calcsize("P") * 8
             _target = "x64" if _bitness > 32 else "x86"
             _filename = os.path.join(_basedir, "bin", f"libopus-0.{_target}.dll")
-            _lib = libopus_loader(_filename)
+            _lib = libopus_loader(_filename)  # noqa: PLW0603
         else:
             path = ctypes.util.find_library("opus")
             if not path:
                 raise AssertionError("could not find the opus library")
-            _lib = libopus_loader(path)
+            _lib = libopus_loader(path)  # noqa: PLW0603
     except Exception:
         _lib = MISSING
 
@@ -281,7 +281,7 @@ def load_opus(name: str) -> None:
     name: :class:`str`
         The filename of the shared library.
     """
-    global _lib
+    global _lib  # noqa: PLW0603
     _lib = libopus_loader(name)
 
 
@@ -296,7 +296,6 @@ def is_loaded() -> bool:
     :class:`bool`
         Indicates if the opus library has been loaded.
     """
-    global _lib
     return _lib is not MISSING
 
 
@@ -334,7 +333,7 @@ class _OpusStruct:
     @staticmethod
     def get_opus_version() -> str:
         if not is_loaded() and not _load_default():
-            raise OpusNotLoaded()
+            raise OpusNotLoaded
 
         return _lib.opus_get_version_string().decode("utf-8")
 
@@ -449,7 +448,6 @@ class Decoder(_OpusStruct):
 
     def set_gain(self, dB: float) -> int:
         """Sets the decoder gain in dB, from -128 to 128."""
-
         dB_Q8 = max(-32768, min(32767, round(dB * 256)))  # dB * 2^n where n is 8 (Q8)
         return self._set_gain(dB_Q8)
 
@@ -459,7 +457,6 @@ class Decoder(_OpusStruct):
 
     def _get_last_packet_duration(self) -> int:
         """Gets the duration (in samples) of the last packet successfully decoded or concealed."""
-
         ret = ctypes.c_int32()
         _lib.opus_decoder_ctl(self._state, CTL_LAST_PACKET_DURATION, ctypes.byref(ret))
         return ret.value
