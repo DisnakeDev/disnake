@@ -7,20 +7,20 @@ from disnake.ext import commands
 
 
 class TestDefaultPermissions:
-    def test_decorator(self):
+    def test_decorator(self) -> None:
         class Cog(commands.Cog):
             @commands.slash_command(default_member_permissions=64)
-            async def cmd(self, _):
+            async def cmd(self, _) -> None:
                 ...
 
             @commands.default_member_permissions(64)
             @commands.slash_command()
-            async def above(self, _):
+            async def above(self, _) -> None:
                 ...
 
             @commands.slash_command()
             @commands.default_member_permissions(64)
-            async def below(self, _):
+            async def below(self, _) -> None:
                 ...
 
         for c in (Cog, Cog()):
@@ -28,14 +28,14 @@ class TestDefaultPermissions:
             assert c.above.default_member_permissions == Permissions(64)
             assert c.below.default_member_permissions == Permissions(64)
 
-    def test_decorator_overwrite(self):
+    def test_decorator_overwrite(self) -> None:
         # putting the decorator above should fail
         with pytest.raises(ValueError, match="Cannot set `default_member_permissions`"):
 
             class Cog(commands.Cog):
                 @commands.default_member_permissions(32)
                 @commands.slash_command(default_member_permissions=64)
-                async def above(self, _):
+                async def above(self, _) -> None:
                     ...
 
         # putting the decorator below shouldn't fail
@@ -45,30 +45,30 @@ class TestDefaultPermissions:
         class Cog2(commands.Cog):
             @commands.slash_command(default_member_permissions=64)
             @commands.default_member_permissions(32)
-            async def below(self, _):
+            async def below(self, _) -> None:
                 ...
 
         for c in (Cog2, Cog2()):
             assert c.below.default_member_permissions == Permissions(32)
 
-    def test_attrs(self):
+    def test_attrs(self) -> None:
         class Cog(commands.Cog, slash_command_attrs={"default_member_permissions": 32}):
             @commands.slash_command()
-            async def no_overwrite(self, _):
+            async def no_overwrite(self, _) -> None:
                 ...
 
             @commands.slash_command(default_member_permissions=64)
-            async def overwrite(self, _):
+            async def overwrite(self, _) -> None:
                 ...
 
             @commands.default_member_permissions(64)
             @commands.slash_command()
-            async def overwrite_decorator_above(self, _):
+            async def overwrite_decorator_above(self, _) -> None:
                 ...
 
             @commands.slash_command()
             @commands.default_member_permissions(64)
-            async def overwrite_decorator_below(self, _):
+            async def overwrite_decorator_below(self, _) -> None:
                 ...
 
         assert Cog.no_overwrite.default_member_permissions is None

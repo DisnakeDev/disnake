@@ -171,7 +171,7 @@ class VoiceClient(VoiceProtocol):
     e.g. :meth:`VoiceChannel.connect`.
 
     Warning
-    --------
+    -------
     In order to use PCM based AudioSources, you must have the opus library
     installed on your system and loaded through :func:`opus.load_opus`.
     Otherwise, your AudioSources must be opus encoded (e.g. using :class:`FFmpegOpusAudio`)
@@ -244,7 +244,7 @@ class VoiceClient(VoiceProtocol):
         """:class:`ClientUser`: The user connected to voice (i.e. ourselves)."""
         return self._state.user
 
-    def checked_add(self, attr, value, limit) -> None:
+    def checked_add(self, attr: str, value: int, limit: int) -> None:
         val = getattr(self, attr)
         if val + value > limit:
             setattr(self, attr, 0)

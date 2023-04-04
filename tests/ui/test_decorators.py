@@ -14,7 +14,7 @@ T = TypeVar("T", bound=ui.Item)
 
 @contextlib.contextmanager
 def create_callback(item_type: Type[T]) -> Iterator["ui.item.ItemCallbackType[T]"]:
-    async def callback(self, item, inter):
+    async def callback(self, item, inter) -> None:
         pytest.fail("callback should not be invoked")
 
     yield callback
@@ -24,7 +24,7 @@ def create_callback(item_type: Type[T]) -> Iterator["ui.item.ItemCallbackType[T]
 
 
 class _CustomButton(ui.Button[V_co]):
-    def __init__(self, *, param: float = 42.0):
+    def __init__(self, *, param: float = 42.0) -> None:
         pass
 
 

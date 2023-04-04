@@ -431,9 +431,9 @@ class MessageConverter(IDConverter[disnake.Message]):
         try:
             return await channel.fetch_message(message_id)
         except disnake.NotFound:
-            raise MessageNotFound(argument)
+            raise MessageNotFound(argument) from None
         except disnake.Forbidden:
-            raise ChannelNotReadable(channel)  # type: ignore
+            raise ChannelNotReadable(channel) from None  # type: ignore
 
 
 class GuildChannelConverter(IDConverter[disnake.abc.GuildChannel]):
@@ -668,7 +668,7 @@ class ColourConverter(Converter[disnake.Colour]):
             if not (0 <= value <= 0xFFFFFF):
                 raise BadColourArgument(argument)
         except ValueError:
-            raise BadColourArgument(argument)
+            raise BadColourArgument(argument) from None
         else:
             return disnake.Color(value=value)
 
@@ -738,7 +738,7 @@ class RoleConverter(IDConverter[disnake.Role]):
     async def convert(self, ctx: AnyContext, argument: str) -> disnake.Role:
         guild = ctx.guild
         if not guild:
-            raise NoPrivateMessage()
+            raise NoPrivateMessage
 
         match = self._get_id_match(argument) or re.match(r"<@&([0-9]{17,19})>$", argument)
         if match:
