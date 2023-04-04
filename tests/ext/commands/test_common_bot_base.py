@@ -14,12 +14,12 @@ from ... import helpers
 
 
 class TestExtensions:
-    @pytest.fixture()
+    @pytest.fixture
     def module_root(self, tmpdir: Path) -> Iterator[str]:
         with helpers.chdir_module(tmpdir):
             yield str(tmpdir)
 
-    @pytest.fixture()
+    @pytest.fixture
     def bot(self):
         with mock.patch.object(asyncio, "get_event_loop", mock.Mock()), mock.patch.object(
             CommonBotBase, "_fill_owners", mock.Mock()
@@ -27,11 +27,11 @@ class TestExtensions:
             bot = CommonBotBase()
         return bot
 
-    def test_find_path_invalid(self, bot: CommonBotBase):
+    def test_find_path_invalid(self, bot: CommonBotBase) -> None:
         with pytest.raises(ValueError, match=r"Paths outside the cwd are not supported"):
             bot.find_extensions("../../etc/passwd")
 
-    def test_find(self, bot: CommonBotBase, module_root: str):
+    def test_find(self, bot: CommonBotBase, module_root: str) -> None:
         helpers.create_dirs(module_root, {"test_cogs": {"__init__.py": "", "admin.py": ""}})
 
         assert bot.find_extensions("test_cogs")

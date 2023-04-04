@@ -632,8 +632,7 @@ class CommonBotBase(Generic[CogT]):
         package: Optional[str] = None,
         ignore: Optional[Union[Iterable[str], Callable[[str], bool]]] = None,
     ) -> Sequence[str]:
-        """
-        Finds all extensions in a given module, also traversing into sub-packages.
+        """Finds all extensions in a given module, also traversing into sub-packages.
 
         See :ref:`ext_commands_extensions_load` for details on how packages are found.
 
@@ -708,8 +707,7 @@ class CommonBotBase(Generic[CogT]):
         ignore: Optional[Union[Iterable[str], Callable[[str], bool]]] = None,
         load_callback: Optional[Callable[[str], None]] = None,
     ) -> Union[List[str], List[Union[str, errors.ExtensionError]]]:
-        """
-        Loads all extensions in a given module, also traversing into sub-packages.
+        """Loads all extensions in a given module, also traversing into sub-packages.
 
         See :func:`find_extensions` for details.
 

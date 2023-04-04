@@ -124,6 +124,6 @@ if __name__ == "__main__":
     bot.load_extensions(
         ".cogs",
         package=__package__,
-        load_callback=lambda e: logger.info(f"Loaded extension {e}."),
+        load_callback=lambda e: logger.info("Loaded extension %s.", e),
     )
     bot.run(Config.token)
