@@ -103,6 +103,13 @@ class Sidebar {
     }
   }
 
+  scrollToCurrent() {
+    const currentSection = this.element.querySelector("li.current");
+    if (currentSection) {
+      // setTimeout(..., 0) to avoid layout race condition
+      setTimeout(() => currentSection.scrollIntoView({block: "center"}), 0);
+    }
+  }
 }
 
 function getCurrentSection() {
@@ -130,6 +137,7 @@ function getCurrentSection() {
 document.addEventListener('DOMContentLoaded', () => {
   sidebar = new Sidebar(document.getElementById('sidebar'));
   sidebar.createCollapsableSections();
+  sidebar.scrollToCurrent();
 
   window.addEventListener('scroll', () => {
     sidebar.setActiveLink(getCurrentSection());
@@ -156,12 +164,3 @@ function sidebarSearch() {
     }
   }
 }
-
-// scroll sidebar to selected entry
-document.addEventListener("DOMContentLoaded", () => {
-  const currentSection = document.querySelector("#sidebar li.current");
-  if (currentSection) {
-    // setTimeout(..., 0) to avoid layout race condition
-    setTimeout(() => currentSection.scrollIntoView({block: "center"}), 0);
-  }
-});
