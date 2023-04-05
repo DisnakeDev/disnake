@@ -35,7 +35,6 @@ class Sidebar {
       let next = ref.nextElementSibling;
 
       if (next && next.tagName === "UL") {
-
         let icon = document.createElement('span');
         icon.className = 'material-icons collapsible-arrow expanded';
         icon.innerText = 'expand_more';
@@ -55,29 +54,35 @@ class Sidebar {
         ref.classList.add('ref-internal-padding')
         ref.parentNode.insertBefore(icon, ref);
 
-        // collapse all top-level toc entries
+        // collapse all top-level toc entries, except the current page's
+        // (i.e. all entries that don't contain a `#`)
         const refUrl = new URL(ref.href);
         if (!refUrl.hash) {
-          this.collapseSection(icon);
+          // `false` to update immediately
+          this.collapseSection(icon, false);
         }
       }
     }
   }
 
-  collapseSection(icon) {
+  collapseSection(icon, defer = true) {
     icon.classList.remove('expanded');
     icon.classList.add('collapsed');
     let children = icon.nextElementSibling.nextElementSibling;
     // <arrow><heading>
     // --> <square><children>
-    setTimeout(() => children.style.display = "none", 75)
+    const update = () => children.style.display = "none";
+    if (defer) setTimeout(update, 75);
+    else update();
   }
 
-  expandSection(icon) {
+  expandSection(icon, defer = true) {
     icon.classList.remove('collapse');
     icon.classList.add('expanded');
     let children = icon.nextElementSibling.nextElementSibling;
-    setTimeout(() => children.style.display = "block", 75)
+    const update = () => children.style.display = "block";
+    if (defer) setTimeout(update, 75);
+    else update();
   }
 
   setActiveLink(section) {
@@ -107,10 +112,12 @@ function getCurrentSection() {
   }
   else {
     if (sections) {
+      const headerOffset = document.querySelector("main").offsetTop;  // height of header
       sections.forEach(section => {
-        let rect = section.getBoundingClientRect();
-        // offset to give space for the sticky header
-        if (rect.top - 90 + document.body.offsetTop < 1) {
+        const rect = section.getBoundingClientRect();
+        // plus offset for more leniency
+        // (section doesn't have to be scrolled all the way to the top to be considered active)
+        if (rect.top < headerOffset + 50) {
           currentSection = section;
         }
       });
@@ -151,9 +158,10 @@ function sidebarSearch() {
 }
 
 // scroll sidebar to selected entry
-window.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
   const currentSection = document.querySelector("#sidebar li.current");
   if (currentSection) {
-    currentSection.scrollIntoView();
+    // setTimeout(..., 0) to avoid layout race condition
+    setTimeout(() => currentSection.scrollIntoView({block: "center"}), 0);
   }
 });
