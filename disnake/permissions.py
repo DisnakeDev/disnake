@@ -315,21 +315,20 @@ class Permissions(BaseFlags):
         .. versionchanged:: 2.9
             Added :attr:`use_soundboard` permission.
         """
-        guild_specific_perms = {
-            "administrator",
-            "ban_members",
-            "change_nickname",
-            "kick_members",
-            "manage_guild_expressions",
-            "manage_guild",
-            "manage_nicknames",
-            "moderate_members",
-            "view_audit_log",
-            "view_guild_insights",
-            "view_creator_monetization_analytics",
-        }
         instance = cls.all()
-        instance.update(**dict.fromkeys(guild_specific_perms, False))
+        instance.update(
+            administrator=False,
+            ban_members=False,
+            change_nickname=False,
+            kick_members=False,
+            manage_guild=False,
+            manage_guild_expressions=False,
+            manage_nicknames=False,
+            moderate_members=False,
+            view_audit_log=False,
+            view_guild_insights=False,
+            view_creator_monetization_analytics=False,
+        )
         return instance
 
     @classmethod
