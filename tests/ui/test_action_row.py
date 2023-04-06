@@ -72,10 +72,10 @@ class TestActionRow:
             assert list(r.children) == [button1, new_button, button2]
 
         if TYPE_CHECKING:
-            ActionRow().add_button  # noqa: B018
-            ActionRow.with_message_components().add_button  # noqa: B018
+            _ = ActionRow().add_button
+            _ = ActionRow.with_message_components().add_button
             # should not work
-            ActionRow.with_modal_components().add_button  # type: ignore  # noqa: B018
+            _ = ActionRow.with_modal_components().add_button  # type: ignore
 
     def test_add_select(self) -> None:
         r = ActionRow.with_message_components()
@@ -86,10 +86,10 @@ class TestActionRow:
         assert c.custom_id == "asdf"
 
         if TYPE_CHECKING:
-            ActionRow().add_string_select  # noqa: B018
-            ActionRow.with_message_components().add_string_select  # noqa: B018
+            _ = ActionRow().add_string_select
+            _ = ActionRow.with_message_components().add_string_select
             # should not work  # TODO: revert when modal select support is added.
-            ActionRow.with_modal_components().add_select  # type: ignore  # noqa: B018
+            _ = ActionRow.with_modal_components().add_select  # type: ignore
 
     def test_add_text_input(self) -> None:
         r = ActionRow.with_modal_components()
@@ -100,10 +100,10 @@ class TestActionRow:
         assert c.custom_id == "asdf"
 
         if TYPE_CHECKING:
-            ActionRow().add_text_input  # noqa: B018
-            ActionRow.with_modal_components().add_text_input  # noqa: B018
+            _ = ActionRow().add_text_input
+            _ = ActionRow.with_modal_components().add_text_input
             # should not work
-            ActionRow.with_message_components().add_text_input  # type: ignore  # noqa: B018
+            _ = ActionRow.with_message_components().add_text_input  # type: ignore
 
     def test_clear_items(self) -> None:
         r = ActionRow(button1, button2)
