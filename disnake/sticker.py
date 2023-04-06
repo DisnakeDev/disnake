@@ -263,7 +263,7 @@ class Sticker(_StickerTag):
     def _from_data(self, data: StickerPayload) -> None:
         self.id: int = int(data["id"])
         self.name: str = data["name"]
-        self.description: str = data["description"]
+        self.description: str = data.get("description") or ""
         self.format: StickerFormatType = try_enum(StickerFormatType, data["format_type"])
 
     def __repr__(self) -> str:
@@ -402,7 +402,7 @@ class GuildSticker(Sticker):
 
     def _from_data(self, data: GuildStickerPayload) -> None:
         super()._from_data(data)
-        self.available: bool = data["available"]
+        self.available: bool = data.get("available", True)
         self.guild_id: int = int(data["guild_id"])
         user = data.get("user")
         self.user: Optional[User] = self._state.store_user(user) if user else None
@@ -425,7 +425,7 @@ class GuildSticker(Sticker):
         self,
         *,
         name: str = MISSING,
-        description: str = MISSING,
+        description: Optional[str] = MISSING,
         emoji: str = MISSING,
         reason: Optional[str] = None,
     ) -> GuildSticker:

@@ -49,7 +49,7 @@ MessageActivityType = Literal[1, 2, 3, 5]
 
 class MessageActivity(TypedDict):
     type: MessageActivityType
-    party_id: str
+    party_id: NotRequired[str]
 
 
 class MessageApplication(TypedDict):
