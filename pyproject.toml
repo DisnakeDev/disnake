@@ -77,7 +77,7 @@ tools = [
 codemod = [
     # run codemods on the respository (mostly automated typing)
     "libcst~=0.4.9",
-    "black==23.1.0",
+    "black==23.3.0",
     "autotyping==23.2.0",
 ]
 typing = [
