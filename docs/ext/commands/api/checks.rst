@@ -23,6 +23,9 @@ Cooldown
 Enumerations
 ------------
 
+BucketType
+~~~~~~~~~~
+
 .. class:: BucketType
 
     Specifies a type of bucket for, e.g. a cooldown.

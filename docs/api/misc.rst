@@ -132,6 +132,9 @@ AsyncIterator
 Discord Models
 --------------
 
+Asset
+~~~~~
+
 .. attributetable:: Asset
 
 .. autoclass:: Asset()

@@ -89,6 +89,9 @@ TeamMembershipState
 
         Represents a member currently in the team.
 
+ApplicationRoleConnectionMetadataType
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 .. class:: ApplicationRoleConnectionMetadataType
 
     Represents the type of a role connection metadata value.

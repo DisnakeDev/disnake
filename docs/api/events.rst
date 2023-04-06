@@ -1435,5 +1435,8 @@ This section documents events related to Discord chat messages.
 Enumerations
 ------------
 
+Event
+~~~~~
+
 .. autoclass:: Event
     :members:

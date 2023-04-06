@@ -291,6 +291,9 @@ ThreadSortOrder
 
         Sort forum threads by creation date/time (from newest to oldest).
 
+ThreadLayout
+~~~~~~~~~~~~
+
 .. class:: ThreadLayout
 
     Represents the layout of threads in :class:`ForumChannel`\s.

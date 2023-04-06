@@ -18,19 +18,34 @@ Integration
     :members:
     :inherited-members:
 
+IntegrationAccount
+~~~~~~~~~~~~~~~~~~
+
 .. autoclass:: IntegrationAccount()
     :members:
+
+BotIntegration
+~~~~~~~~~~~~~~
 
 .. autoclass:: BotIntegration()
     :members:
     :inherited-members:
 
+IntegrationApplication
+~~~~~~~~~~~~~~~~~~~~~~
+
 .. autoclass:: IntegrationApplication()
     :members:
+
+StreamIntegration
+~~~~~~~~~~~~~~~~~
 
 .. autoclass:: StreamIntegration()
     :members:
     :inherited-members:
+
+PartialIntegration
+~~~~~~~~~~~~~~~~~~
 
 .. autoclass:: PartialIntegration()
     :members:
