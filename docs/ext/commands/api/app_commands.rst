@@ -189,6 +189,8 @@ Functions
 .. autofunction:: injection
     :decorator:
 
+.. autofunction:: option_enum
+
 Events
 ------
 

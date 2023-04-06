@@ -27,6 +27,7 @@ ActionRow
 
 .. autoclass:: ActionRow
     :members:
+    :exclude-members: add_select
 
 Item
 ~~~~
