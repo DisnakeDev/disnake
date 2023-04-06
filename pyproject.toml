@@ -72,7 +72,7 @@ tools = [
     "python-dotenv~=1.0.0",
     "towncrier==22.12.0",
     "check-manifest==0.49",
-    "ruff==0.0.257",
+    "ruff==0.0.261",
 ]
 codemod = [
     # run codemods on the respository (mostly automated typing)
