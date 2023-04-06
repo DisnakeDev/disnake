@@ -3836,15 +3836,14 @@ of :class:`enum.Enum`.
 
     .. versionadded:: 2.6
 
+    .. versionchanged:: 2.9
+        Removed obsolete ``harmful_link`` type.
+
     .. attribute:: keyword
 
         The rule will filter messages based on a custom keyword list.
 
         This trigger type requires additional :class:`metadata <AutoModTriggerMetadata>`.
-
-    .. attribute:: harmful_link
-
-        The rule will filter messages containing malicious links.
 
     .. attribute:: spam
 
