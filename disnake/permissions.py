@@ -421,7 +421,7 @@ class Permissions(BaseFlags):
             Added :attr:`use_embedded_activities` permission.
 
         .. versionchanged:: 2.9
-            Added :attr:`use_soundboard` permission.
+            Added :attr:`use_soundboard` and :attr:`use_external_sounds` permissions.
         """
         return cls(
             connect=True,
@@ -429,6 +429,7 @@ class Permissions(BaseFlags):
             stream=True,
             use_embedded_activities=True,
             use_soundboard=True,
+            use_external_sounds=True,
             use_voice_activation=True,
             priority_speaker=True,
             mute_members=True,
