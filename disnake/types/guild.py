@@ -122,6 +122,7 @@ class Guild(_BaseGuildPreview):
     preferred_locale: str
     public_updates_channel_id: Optional[Snowflake]
     max_video_channel_users: NotRequired[int]
+    max_stage_video_channel_users: NotRequired[int]
     approximate_member_count: NotRequired[int]
     approximate_presence_count: NotRequired[int]
     nsfw_level: NSFWLevel
