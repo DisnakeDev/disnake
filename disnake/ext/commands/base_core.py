@@ -674,6 +674,7 @@ def default_member_permissions(
     use_application_commands: bool = ...,
     use_embedded_activities: bool = ...,
     use_external_emojis: bool = ...,
+    use_external_sounds: bool = ...,
     use_external_stickers: bool = ...,
     use_slash_commands: bool = ...,
     use_soundboard: bool = ...,
