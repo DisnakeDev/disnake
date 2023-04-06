@@ -160,7 +160,10 @@ class Paginator:
         return self._pages
 
     def __repr__(self) -> str:
-        fmt = "<Paginator prefix: {0.prefix!r} suffix: {0.suffix!r} linesep: {0.linesep!r} max_size: {0.max_size} count: {0._count}>"
+        fmt = (
+            "<Paginator prefix: {0.prefix!r} suffix: {0.suffix!r} linesep: {0.linesep!r} max_size:"
+            " {0.max_size} count: {0._count}>"
+        )
         return fmt.format(self)
 
 
@@ -922,8 +925,9 @@ class DefaultHelpCommand(HelpCommand):
         """
         command_name = self.invoked_with
         return (
-            f"Type {self.context.clean_prefix}{command_name} command for more info on a command.\n"
-            f"You can also type {self.context.clean_prefix}{command_name} category for more info on a category."
+            f"Type {self.context.clean_prefix}{command_name} command for more info on a"
+            f" command.\nYou can also type {self.context.clean_prefix}{command_name} category for"
+            " more info on a category."
         )
 
     def add_indented_commands(self, commands, *, heading, max_size: Optional[int] = None) -> None:
@@ -1132,8 +1136,9 @@ class MinimalHelpCommand(HelpCommand):
         """
         command_name = self.invoked_with
         return (
-            f"Use `{self.context.clean_prefix}{command_name} [command]` for more info on a command.\n"
-            f"You can also use `{self.context.clean_prefix}{command_name} [category]` for more info on a category."
+            f"Use `{self.context.clean_prefix}{command_name} [command]` for more info on a"
+            f" command.\nYou can also use `{self.context.clean_prefix}{command_name} [category]`"
+            " for more info on a category."
         )
 
     def get_command_signature(self, command) -> str:

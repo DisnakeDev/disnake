@@ -102,14 +102,12 @@ class FlagTypings(codemod.VisitorBasedCodemodCommand):
             else:
                 # one doesn't currently exist, great.
                 # so we have two options here... we could make a typechecking block from scratch or... we could cheat
-                code = textwrap.dedent(
-                    """
+                code = textwrap.dedent("""
                     if TYPE_CHECKING:
                         @_generated
                         def __init__(self):
                             ...
-                    """
-                )
+                    """)
                 if_block = cast(
                     "cst.If", cst.parse_statement(code, config=self.module.config_for_parsing)
                 )

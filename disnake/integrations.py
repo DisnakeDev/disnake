@@ -357,7 +357,10 @@ class IntegrationApplication:
             This field is deprecated by discord and is now always blank. Consider using :attr:`.description` instead.
         """
         warn_deprecated(
-            "summary is deprecated and will be removed in a future version. Consider using description instead.",
+            (
+                "summary is deprecated and will be removed in a future version. Consider using"
+                " description instead."
+            ),
             stacklevel=2,
         )
         return self._summary
@@ -402,10 +405,7 @@ class BotIntegration(Integration):
         self.scopes: List[str] = data.get("scopes") or []
 
     def __repr__(self) -> str:
-        return (
-            f"<{self.__class__.__name__} id={self.id}"
-            f" name={self.name!r} scopes={self.scopes!r}>"
-        )
+        return f"<{self.__class__.__name__} id={self.id} name={self.name!r} scopes={self.scopes!r}>"
 
 
 def _integration_factory(value: str) -> Tuple[Type[Integration], str]:

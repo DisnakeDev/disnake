@@ -82,7 +82,10 @@ class StageInstance(Hashable):
         )
 
     def __repr__(self) -> str:
-        return f"<StageInstance id={self.id} guild={self.guild!r} channel_id={self.channel_id} topic={self.topic!r}>"
+        return (
+            "<StageInstance"
+            f" id={self.id} guild={self.guild!r} channel_id={self.channel_id} topic={self.topic!r}>"
+        )
 
     @cached_slot_property("_cs_channel")
     def channel(self) -> Optional[StageChannel]:
@@ -99,7 +102,10 @@ class StageInstance(Hashable):
             Stages can no longer be discoverable.
         """
         warn_deprecated(
-            "StageInstance.discoverable_disabled is deprecated and will be removed in a future version",
+            (
+                "StageInstance.discoverable_disabled is deprecated and will be removed in a future"
+                " version"
+            ),
             stacklevel=2,
         )
         return self._discoverable_disabled
@@ -176,7 +182,10 @@ class StageInstance(Hashable):
                 raise TypeError("privacy_level field must be of type PrivacyLevel")
             if privacy_level is StagePrivacyLevel.public:
                 warn_deprecated(
-                    "Setting privacy_level to public is deprecated and will be removed in a future version.",
+                    (
+                        "Setting privacy_level to public is deprecated and will be removed in a"
+                        " future version."
+                    ),
                     stacklevel=2,
                 )
 

@@ -165,7 +165,8 @@ class ActionRow(Generic[UIComponentT]):
         for component in components:
             if not isinstance(component, WrappedComponent):
                 raise TypeError(
-                    f"components should be of type WrappedComponent, got {type(component).__name__}."
+                    "components should be of type WrappedComponent, got"
+                    f" {type(component).__name__}."
                 )
             self.append_item(component)
 

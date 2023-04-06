@@ -68,7 +68,8 @@ class PermissionTypings(codemod.VisitorBasedCodemodCommand):
     def transform_module(self, tree: cst.Module) -> cst.Module:
         if "@_overload_with_permissions" not in tree.code:
             raise codemod.SkipFile(
-                "this module does not contain the required decorator: `@_overload_with_permissions`."
+                "this module does not contain the required decorator:"
+                " `@_overload_with_permissions`."
             )
         return super().transform_module(tree)
 
@@ -137,7 +138,8 @@ class PermissionTypings(codemod.VisitorBasedCodemodCommand):
 
         if not node.params.star_kwarg and not is_overload:
             raise RuntimeError(
-                'a function cannot be decorated with "_overload_with_permissions" and not take any kwargs unless it is an overload.'
+                'a function cannot be decorated with "_overload_with_permissions" and not take any'
+                " kwargs unless it is an overload."
             )
         # always true if this isn't an overload
         elif node.params.star_kwarg:

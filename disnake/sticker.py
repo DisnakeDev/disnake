@@ -410,7 +410,10 @@ class GuildSticker(Sticker):
         self.type: StickerType = StickerType.guild
 
     def __repr__(self) -> str:
-        return f"<GuildSticker name={self.name!r} id={self.id} guild_id={self.guild_id} user={self.user!r}>"
+        return (
+            "<GuildSticker"
+            f" name={self.name!r} id={self.id} guild_id={self.guild_id} user={self.user!r}>"
+        )
 
     @cached_slot_property("_cs_guild")
     def guild(self) -> Optional[Guild]:

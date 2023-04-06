@@ -552,7 +552,8 @@ class SelectOption:
 
     def __repr__(self) -> str:
         return (
-            f"<SelectOption label={self.label!r} value={self.value!r} description={self.description!r} "
+            "<SelectOption"
+            f" label={self.label!r} value={self.value!r} description={self.description!r} "
             f"emoji={self.emoji!r} default={self.default!r}>"
         )
 

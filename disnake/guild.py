@@ -2087,7 +2087,8 @@ class Guild(Hashable):
             # To enable or disable a feature, we will need to provide all of the existing features in advance.
             if self.unavailable:
                 raise RuntimeError(
-                    "cannot modify features of an unavailable guild due to potentially destructive results."
+                    "cannot modify features of an unavailable guild due to potentially destructive"
+                    " results."
                 )
             features = set(self.features)
             if community is not MISSING:
@@ -2098,7 +2099,8 @@ class Guild(Hashable):
                         features.add("COMMUNITY")
                     else:
                         raise ValueError(
-                            "community field requires both rules_channel and public_updates_channel fields to be provided"
+                            "community field requires both rules_channel and public_updates_channel"
+                            " fields to be provided"
                         )
                 else:
                     features.discard("COMMUNITY")
@@ -2106,8 +2108,8 @@ class Guild(Hashable):
             if invites_disabled is not MISSING:
                 if community is not MISSING:
                     raise ValueError(
-                        "cannot modify both the COMMUNITY feature and INVITES_DISABLED feature at the "
-                        "same time due to a discord limitation."
+                        "cannot modify both the COMMUNITY feature and INVITES_DISABLED feature at"
+                        " the same time due to a discord limitation."
                     )
                 if not isinstance(invites_disabled, bool):
                     raise TypeError("invites_disabled must be a bool")
@@ -3741,7 +3743,10 @@ class Guild(Hashable):
 
         if delete_message_days is not MISSING:
             utils.warn_deprecated(
-                "`delete_message_days` is deprecated and will be removed in a future version. Consider using `clean_history_duration` instead.",
+                (
+                    "`delete_message_days` is deprecated and will be removed in a future version."
+                    " Consider using `clean_history_duration` instead."
+                ),
                 stacklevel=2,
             )
             delete_message_seconds = delete_message_days * 86400

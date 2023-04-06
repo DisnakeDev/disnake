@@ -816,7 +816,8 @@ class InteractionResponse:
                 defer_type = InteractionResponseType.deferred_message_update
         else:
             raise TypeError(
-                "This interaction must be of type 'application_command', 'modal_submit', or 'component' in order to defer."
+                "This interaction must be of type 'application_command', 'modal_submit', or"
+                " 'component' in order to defer."
             )
 
         if defer_type is InteractionResponseType.deferred_channel_message:

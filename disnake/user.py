@@ -427,7 +427,10 @@ class User(BaseUser, disnake.abc.Messageable):
     __slots__ = ("__weakref__",)
 
     def __repr__(self) -> str:
-        return f"<User id={self.id} name={self.name!r} discriminator={self.discriminator!r} bot={self.bot}>"
+        return (
+            "<User"
+            f" id={self.id} name={self.name!r} discriminator={self.discriminator!r} bot={self.bot}>"
+        )
 
     async def _get_channel(self) -> DMChannel:
         ch = await self.create_dm()

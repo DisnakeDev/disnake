@@ -56,16 +56,19 @@ class flag_value(Generic[T]):
         if isinstance(other, BaseFlags):
             if self._parent is not other.__class__:
                 raise TypeError(
-                    f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and flags of '{other.__class__.__name__}'"
+                    f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and"
+                    f" flags of '{other.__class__.__name__}'"
                 )
             return other._from_value(self.flag | other.value)
         if not isinstance(other, flag_value):
             raise TypeError(
-                f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and {other.__class__}"
+                f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and"
+                f" {other.__class__}"
             )
         if self._parent is not other._parent:
             raise TypeError(
-                f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and flags of '{other._parent.__name__}'"
+                f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and flags"
+                f" of '{other._parent.__name__}'"
             )
         return self._parent._from_value(self.flag | other.flag)
 
@@ -131,7 +134,8 @@ class BaseFlags:
 
         if not cls.VALID_FLAGS:
             raise RuntimeError(
-                "At least one flag must be defined in a BaseFlags subclass, or 'no_fill_flags' must be set to True"
+                "At least one flag must be defined in a BaseFlags subclass, or 'no_fill_flags' must"
+                " be set to True"
             )
 
         cls.DEFAULT_VALUE = all_flags_value(cls.VALID_FLAGS) if inverted else 0
@@ -153,14 +157,16 @@ class BaseFlags:
     def __and__(self, other: Self) -> Self:
         if not isinstance(other, self.__class__):
             raise TypeError(
-                f"unsupported operand type(s) for &: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+                f"unsupported operand type(s) for &: '{self.__class__.__name__}' and"
+                f" '{other.__class__.__name__}'"
             )
         return self._from_value(self.value & other.value)
 
     def __iand__(self, other: Self) -> Self:
         if not isinstance(other, self.__class__):
             raise TypeError(
-                f"unsupported operand type(s) for &=: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+                f"unsupported operand type(s) for &=: '{self.__class__.__name__}' and"
+                f" '{other.__class__.__name__}'"
             )
         self.value &= other.value
         return self
@@ -169,12 +175,14 @@ class BaseFlags:
         if isinstance(other, flag_value):
             if self.__class__ is not other._parent:
                 raise TypeError(
-                    f"unsupported operand type(s) for |: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
+                    f"unsupported operand type(s) for |: flags of '{self.__class__.__name__}' and"
+                    f" flags of '{other._parent.__name__}'"
                 )
             return self._from_value(self.value | other.flag)
         if not isinstance(other, self.__class__):
             raise TypeError(
-                f"unsupported operand type(s) for |: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+                f"unsupported operand type(s) for |: '{self.__class__.__name__}' and"
+                f" '{other.__class__.__name__}'"
             )
         return self._from_value(self.value | other.value)
 
@@ -182,13 +190,15 @@ class BaseFlags:
         if isinstance(other, flag_value):
             if self.__class__ is not other._parent:
                 raise TypeError(
-                    f"unsupported operand type(s) for |=: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
+                    f"unsupported operand type(s) for |=: flags of '{self.__class__.__name__}' and"
+                    f" flags of '{other._parent.__name__}'"
                 )
             self.value |= other.flag
             return self
         if not isinstance(other, self.__class__):
             raise TypeError(
-                f"unsupported operand type(s) for |=: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+                f"unsupported operand type(s) for |=: '{self.__class__.__name__}' and"
+                f" '{other.__class__.__name__}'"
             )
         self.value |= other.value
         return self
@@ -197,12 +207,14 @@ class BaseFlags:
         if isinstance(other, flag_value):
             if self.__class__ is not other._parent:
                 raise TypeError(
-                    f"unsupported operand type(s) for ^: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
+                    f"unsupported operand type(s) for ^: flags of '{self.__class__.__name__}' and"
+                    f" flags of '{other._parent.__name__}'"
                 )
             return self._from_value(self.value ^ other.flag)
         if not isinstance(other, self.__class__):
             raise TypeError(
-                f"unsupported operand type(s) for ^: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+                f"unsupported operand type(s) for ^: '{self.__class__.__name__}' and"
+                f" '{other.__class__.__name__}'"
             )
         return self._from_value(self.value ^ other.value)
 
@@ -210,13 +222,15 @@ class BaseFlags:
         if isinstance(other, flag_value):
             if self.__class__ is not other._parent:
                 raise TypeError(
-                    f"unsupported operand type(s) for ^=: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
+                    f"unsupported operand type(s) for ^=: flags of '{self.__class__.__name__}' and"
+                    f" flags of '{other._parent.__name__}'"
                 )
             self.value ^= other.flag
             return self
         if not isinstance(other, self.__class__):
             raise TypeError(
-                f"unsupported operand type(s) for ^=: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+                f"unsupported operand type(s) for ^=: '{self.__class__.__name__}' and"
+                f" '{other.__class__.__name__}'"
             )
         self.value ^= other.value
         return self
@@ -224,28 +238,32 @@ class BaseFlags:
     def __le__(self, other: Self) -> bool:
         if not isinstance(other, self.__class__):
             raise TypeError(
-                f"'<=' not supported between instances of '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+                f"'<=' not supported between instances of '{self.__class__.__name__}' and"
+                f" '{other.__class__.__name__}'"
             )
         return (self.value & other.value) == self.value
 
     def __ge__(self, other: Self) -> bool:
         if not isinstance(other, self.__class__):
             raise TypeError(
-                f"'>=' not supported between instances of '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+                f"'>=' not supported between instances of '{self.__class__.__name__}' and"
+                f" '{other.__class__.__name__}'"
             )
         return (self.value | other.value) == self.value
 
     def __lt__(self, other: Self) -> bool:
         if not isinstance(other, self.__class__):
             raise TypeError(
-                f"'<' not supported between instances of '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+                f"'<' not supported between instances of '{self.__class__.__name__}' and"
+                f" '{other.__class__.__name__}'"
             )
         return (self.value & other.value) == self.value and self.value != other.value
 
     def __gt__(self, other: Self) -> bool:
         if not isinstance(other, self.__class__):
             raise TypeError(
-                f"'>' not supported between instances of '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+                f"'>' not supported between instances of '{self.__class__.__name__}' and"
+                f" '{other.__class__.__name__}'"
             )
         return (self.value | other.value) == self.value and self.value != other.value
 

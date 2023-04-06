@@ -191,7 +191,8 @@ class CogMeta(type):
                 elif isinstance(value, InvokableApplicationCommand):
                     if is_static_method:
                         raise TypeError(
-                            f"Application command in method {base}.{elem!r} must not be staticmethod."
+                            f"Application command in method {base}.{elem!r} must not be"
+                            " staticmethod."
                         )
                     if elem.startswith(("cog_", "bot_")):
                         raise TypeError(no_bot_cog.format(base, elem))
@@ -415,7 +416,8 @@ class Cog(metaclass=CogMeta):
         """
         if name is not MISSING and not isinstance(name, (str, Event)):
             raise TypeError(
-                f"Cog.listener expected str or Enum but received {name.__class__.__name__!r} instead."
+                "Cog.listener expected str or Enum but received"
+                f" {name.__class__.__name__!r} instead."
             )
 
         def decorator(func: FuncT) -> FuncT:

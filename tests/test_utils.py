@@ -235,10 +235,10 @@ def test_maybe_cast() -> None:
 @pytest.mark.parametrize(
     ("data", "expected_mime", "expected_ext"),
     [
-        (b"\x89\x50\x4E\x47\x0D\x0A\x1A\x0A", "image/png", ".png"),
-        (b"\xFF\xD8\xFFxxxJFIF", "image/jpeg", ".jpg"),
-        (b"\xFF\xD8\xFFxxxExif", "image/jpeg", ".jpg"),
-        (b"\xFF\xD8\xFFxxxxxxxxxxxx", "image/jpeg", ".jpg"),
+        (b"\x89\x50\x4e\x47\x0d\x0a\x1a\x0a", "image/png", ".png"),
+        (b"\xff\xd8\xffxxxJFIF", "image/jpeg", ".jpg"),
+        (b"\xff\xd8\xffxxxExif", "image/jpeg", ".jpg"),
+        (b"\xff\xd8\xffxxxxxxxxxxxx", "image/jpeg", ".jpg"),
         (b"xxxxxxJFIF", "image/jpeg", ".jpg"),
         (b"\x47\x49\x46\x38\x37\x61", "image/gif", ".gif"),
         (b"\x47\x49\x46\x38\x39\x61", "image/gif", ".gif"),
@@ -246,11 +246,11 @@ def test_maybe_cast() -> None:
     ],
 )
 def test_mime_type_valid(data, expected_mime, expected_ext) -> None:
-    for d in (data, data + b"\xFF"):
+    for d in (data, data + b"\xff"):
         assert utils._get_mime_type_for_image(d) == expected_mime
         assert utils._get_extension_for_image(d) == expected_ext
 
-    prefixed = b"\xFF" + data
+    prefixed = b"\xff" + data
     with pytest.raises(ValueError, match=r"Unsupported image type given"):
         utils._get_mime_type_for_image(prefixed)
     assert utils._get_extension_for_image(prefixed) is None
@@ -259,7 +259,7 @@ def test_mime_type_valid(data, expected_mime, expected_ext) -> None:
 @pytest.mark.parametrize(
     "data",
     [
-        b"\x89\x50\x4E\x47\x0D\x0A\x1A\xFF",  # invalid png end
+        b"\x89\x50\x4e\x47\x0d\x0a\x1a\xff",  # invalid png end
         b"\x47\x49\x46\x38\x38\x61",  # invalid gif version
         b"RIFFxxxxAAAA",
         b"AAAAxxxxWEBP",

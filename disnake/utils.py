@@ -488,7 +488,7 @@ _mime_type_extensions = {
 
 
 def _get_mime_type_for_image(data: bytes) -> str:
-    if data[0:8] == b"\x89\x50\x4E\x47\x0D\x0A\x1A\x0A":
+    if data[0:8] == b"\x89\x50\x4e\x47\x0d\x0a\x1a\x0a":
         return "image/png"
     elif data[0:3] == b"\xff\xd8\xff" or data[6:10] in (b"JFIF", b"Exif"):
         return "image/jpeg"

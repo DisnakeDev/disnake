@@ -216,7 +216,8 @@ class ApplicationCommandInteractionData(Dict[str, Any]):
 
     def __repr__(self) -> str:
         return (
-            f"<ApplicationCommandInteractionData id={self.id!r} name={self.name!r} type={self.type!r} "
+            "<ApplicationCommandInteractionData"
+            f" id={self.id!r} name={self.name!r} type={self.type!r} "
             f"target_id={self.target_id!r} target={self.target!r} resolved={self.resolved!r} options={self.options!r}>"
         )
 

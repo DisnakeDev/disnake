@@ -33,7 +33,10 @@ if not TYPE_CHECKING:
     def __getattr__(name: str) -> None:
         if name == "EmptyEmbed":
             warn_deprecated(
-                "`EmptyEmbed` is deprecated and will be removed in a future version. Use `None` instead.",
+                (
+                    "`EmptyEmbed` is deprecated and will be removed in a future version. Use `None`"
+                    " instead."
+                ),
                 stacklevel=2,
             )
             return None
@@ -229,7 +232,10 @@ class Embed:
         @classproperty
         def Empty(self) -> None:
             warn_deprecated(
-                "`Embed.Empty` is deprecated and will be removed in a future version. Use `None` instead.",
+                (
+                    "`Embed.Empty` is deprecated and will be removed in a future version. Use"
+                    " `None` instead."
+                ),
                 stacklevel=3,
             )
             return None
@@ -345,7 +351,8 @@ class Embed:
             self._colour = value
         else:
             raise TypeError(
-                f"Expected disnake.Colour, int, or None but received {type(value).__name__} instead."
+                "Expected disnake.Colour, int, or None but received"
+                f" {type(value).__name__} instead."
             )
 
     @colour.deleter
@@ -799,7 +806,8 @@ class Embed:
             cls._default_colour = Colour(value=value)
         else:
             raise TypeError(
-                f"Expected disnake.Colour, int, or None but received {type(value).__name__} instead."
+                "Expected disnake.Colour, int, or None but received"
+                f" {type(value).__name__} instead."
             )
         return cls._default_colour
 

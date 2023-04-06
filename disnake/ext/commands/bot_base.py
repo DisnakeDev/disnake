@@ -139,9 +139,11 @@ class BotBase(CommonBotBase, GroupMixin):
         )
         if command_prefix is None:
             disnake.utils.warn_deprecated(
-                "Using `command_prefix=None` is deprecated and will result in "
-                "an error in future versions. "
-                f"If you don't need any prefix functionality, consider using {alternative}.",
+                (
+                    "Using `command_prefix=None` is deprecated and will result in "
+                    "an error in future versions. "
+                    f"If you don't need any prefix functionality, consider using {alternative}."
+                ),
                 stacklevel=2,
             )
         elif (
@@ -151,11 +153,14 @@ class BotBase(CommonBotBase, GroupMixin):
             and not self.intents.message_content
         ):
             warnings.warn(
-                "Message Content intent is not enabled and a prefix is configured. "
-                "This may cause limited functionality for prefix commands. "
-                "If you want prefix commands, pass an intents object with message_content set to True. "
-                f"If you don't need any prefix functionality, consider using {alternative}. "
-                "Alternatively, set prefix to disnake.ext.commands.when_mentioned to silence this warning.",
+                (
+                    "Message Content intent is not enabled and a prefix is configured. This may"
+                    " cause limited functionality for prefix commands. If you want prefix"
+                    " commands, pass an intents object with message_content set to True. If you"
+                    f" don't need any prefix functionality, consider using {alternative}."
+                    " Alternatively, set prefix to disnake.ext.commands.when_mentioned to silence"
+                    " this warning."
+                ),
                 MessageContentPrefixWarning,
                 stacklevel=2,
             )

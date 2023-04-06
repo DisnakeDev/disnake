@@ -164,7 +164,8 @@ class InteractionBotBase(CommonBotBase):
             or sync_commands_on_cog_unload is not MISSING
         ):
             raise TypeError(
-                "cannot set 'command_sync_flags' and any of 'sync_commands', 'sync_commands_debug', 'sync_commands_on_cog_unload' at the same time."
+                "cannot set 'command_sync_flags' and any of 'sync_commands', 'sync_commands_debug',"
+                " 'sync_commands_on_cog_unload' at the same time."
             )
 
         if command_sync_flags is not None:
@@ -175,23 +176,32 @@ class InteractionBotBase(CommonBotBase):
 
             if sync_commands is not MISSING:
                 warn_deprecated(
-                    "sync_commands is deprecated and will be removed in a future version. "
-                    "Use `command_sync_flags` with an `CommandSyncFlags` instance as a replacement.",
+                    (
+                        "sync_commands is deprecated and will be removed in a future version. Use"
+                        " `command_sync_flags` with an `CommandSyncFlags` instance as a"
+                        " replacement."
+                    ),
                     stacklevel=3,
                 )
                 command_sync_flags.sync_commands = sync_commands
             if sync_commands_debug is not MISSING:
                 warn_deprecated(
-                    "sync_commands_debug is deprecated and will be removed in a future version. "
-                    "Use `command_sync_flags` with an `CommandSyncFlags` instance as a replacement.",
+                    (
+                        "sync_commands_debug is deprecated and will be removed in a future version."
+                        " Use `command_sync_flags` with an `CommandSyncFlags` instance as a"
+                        " replacement."
+                    ),
                     stacklevel=3,
                 )
                 command_sync_flags.sync_commands_debug = sync_commands_debug
 
             if sync_commands_on_cog_unload is not MISSING:
                 warn_deprecated(
-                    "sync_commands_on_cog_unload is deprecated and will be removed in a future version. "
-                    "Use `command_sync_flags` with an `CommandSyncFlags` instance as a replacement.",
+                    (
+                        "sync_commands_on_cog_unload is deprecated and will be removed in a future"
+                        " version. Use `command_sync_flags` with an `CommandSyncFlags` instance as"
+                        " a replacement."
+                    ),
                     stacklevel=3,
                 )
                 command_sync_flags.sync_on_cog_actions = sync_commands_on_cog_unload
@@ -1329,7 +1339,10 @@ class InteractionBotBase(CommonBotBase):
                     # either malformed API request, or some other error
                     # in theory this will never error: if a command exists the bot has authorisation
                     # in practice this is not the case, the API could change valid requests at any time
-                    message = "This command could not be processed. Additionally, an error occured when trying to sync commands."
+                    message = (
+                        "This command could not be processed. Additionally, an error occured when"
+                        " trying to sync commands."
+                    )
                 else:
                     message = "This command has just been synced."
             else:

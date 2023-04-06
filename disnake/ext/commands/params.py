@@ -733,13 +733,15 @@ class ParamInfo:
                 self._parse_guild_channel(*args)
             else:
                 raise TypeError(
-                    "Unions for anything else other than channels or a mentionable are not supported"
+                    "Unions for anything else other than channels or a mentionable are not"
+                    " supported"
                 )
         elif issubclass_(annotation, (disnake.abc.GuildChannel, disnake.Thread)):
             self._parse_guild_channel(annotation)
         elif issubclass_(get_origin(annotation), collections.abc.Sequence):
             raise TypeError(
-                f"List arguments have not been implemented yet and therefore {annotation!r} is invalid"
+                f"List arguments have not been implemented yet and therefore {annotation!r} is"
+                " invalid"
             )
 
         elif annotation in CONVERTER_MAPPING:
@@ -778,7 +780,8 @@ class ParamInfo:
             return
 
         raise TypeError(
-            f"Both the converter annotation {annotation!r} and the option annotation {fallback_annotation!r} are invalid"
+            f"Both the converter annotation {annotation!r} and the option annotation"
+            f" {fallback_annotation!r} are invalid"
         )
 
     def parse_parameter(self, param: inspect.Parameter) -> None:
@@ -951,14 +954,16 @@ def collect_params(
                 inter_param = parameter
             else:
                 raise TypeError(
-                    f"Found two candidates for the interaction parameter in {function!r}: {inter_param.name} and {parameter.name}"
+                    f"Found two candidates for the interaction parameter in {function!r}:"
+                    f" {inter_param.name} and {parameter.name}"
                 )
         elif issubclass_(parameter.annotation, commands.Cog):
             if cog_param is None:
                 cog_param = parameter
             else:
                 raise TypeError(
-                    f"Found two candidates for the cog parameter in {function!r}: {cog_param.name} and {parameter.name}"
+                    f"Found two candidates for the cog parameter in {function!r}:"
+                    f" {cog_param.name} and {parameter.name}"
                 )
         else:
             paraminfo = ParamInfo.from_param(parameter, {}, doc)
