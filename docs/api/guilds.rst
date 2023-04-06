@@ -27,15 +27,6 @@ Guild
     .. automethod:: audit_logs
         :async-for:
 
-GuildBuilder
-~~~~~~~~~~~~~
-
-.. attributetable:: GuildBuilder
-
-.. autoclass:: GuildBuilder()
-    :members:
-    :exclude-members: add_category_channel
-
 GuildPreview
 ~~~~~~~~~~~~
 
@@ -60,9 +51,6 @@ WelcomeScreen
 .. autoclass:: WelcomeScreen()
     :members:
 
-Data Classes
-------------
-
 BanEntry
 ~~~~~~~~
 
@@ -81,6 +69,9 @@ BanEntry
 
         :type: :class:`User`
 
+Data Classes
+------------
+
 SystemChannelFlags
 ~~~~~~~~~~~~~~~~~~
 
@@ -95,6 +86,15 @@ WelcomeScreenChannel
 .. attributetable:: WelcomeScreenChannel
 
 .. autoclass:: WelcomeScreenChannel()
+
+GuildBuilder
+~~~~~~~~~~~~~
+
+.. attributetable:: GuildBuilder
+
+.. autoclass:: GuildBuilder()
+    :members:
+    :exclude-members: add_category_channel
 
 Enumerations
 ------------

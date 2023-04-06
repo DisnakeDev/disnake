@@ -48,6 +48,14 @@ ClientUser
     :members:
     :inherited-members:
 
+SessionStartLimit
+~~~~~~~~~~~~~~~~~
+
+.. attributetable:: SessionStartLimit
+
+.. autoclass:: SessionStartLimit()
+    :members:
+
 Data Classes
 ------------
 
@@ -57,14 +65,6 @@ ShardInfo
 .. attributetable:: ShardInfo
 
 .. autoclass:: ShardInfo()
-    :members:
-
-SessionStartLimit
-~~~~~~~~~~~~~~~~~
-
-.. attributetable:: SessionStartLimit
-
-.. autoclass:: SessionStartLimit()
     :members:
 
 GatewayParams

@@ -23,9 +23,6 @@ LocalizationStore
     :members:
     :inherited-members:
 
-Data Classes
-------------
-
 Localized
 ~~~~~~~~~
 

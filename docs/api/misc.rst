@@ -10,15 +10,6 @@ This section documents everything that doesn't fit into any other section, but i
 Classes
 -------
 
-Discord Model
-~~~~~~~~~~~~~~
-
-.. attributetable:: Asset
-
-.. autoclass:: Asset()
-    :members:
-    :inherited-members:
-
 AsyncIterator
 ~~~~~~~~~~~~~
 
@@ -137,6 +128,15 @@ AsyncIterator
 
         :param predicate: The predicate to call on every element. Could be a |coroutine_link|_.
         :rtype: :class:`AsyncIterator`
+
+Discord Models
+--------------
+
+.. attributetable:: Asset
+
+.. autoclass:: Asset()
+    :members:
+    :inherited-members:
 
 Data Classes
 ------------

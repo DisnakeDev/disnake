@@ -18,6 +18,14 @@ GuildScheduledEvent
 .. autoclass:: GuildScheduledEvent()
     :members:
 
+RawGuildScheduledEventUserActionEvent
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: RawGuildScheduledEventUserActionEvent
+
+.. autoclass:: RawGuildScheduledEventUserActionEvent()
+    :members:
+
 Data Classes
 ------------
 
@@ -27,14 +35,6 @@ GuildScheduledEventMetadata
 .. attributetable:: GuildScheduledEventMetadata
 
 .. autoclass:: GuildScheduledEventMetadata
-    :members:
-
-RawGuildScheduledEventUserActionEvent
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. attributetable:: RawGuildScheduledEventUserActionEvent
-
-.. autoclass:: RawGuildScheduledEventUserActionEvent()
     :members:
 
 Enumerations

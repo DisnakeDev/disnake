@@ -46,57 +46,6 @@ DeletedReferencedMessage
 .. autoclass:: DeletedReferencedMessage()
     :members:
 
-Data Classes
-------------
-
-Embed
-~~~~~
-
-.. attributetable:: Embed
-
-.. autoclass:: Embed
-    :members:
-
-File
-~~~~
-
-.. attributetable:: File
-
-.. autoclass:: File
-    :members:
-
-MessageFlags
-~~~~~~~~~~~~
-
-.. attributetable:: MessageFlags
-
-.. autoclass:: MessageFlags()
-    :members:
-
-AllowedMentions
-~~~~~~~~~~~~~~~
-
-.. attributetable:: AllowedMentions
-
-.. autoclass:: AllowedMentions
-    :members:
-
-MessageReference
-~~~~~~~~~~~~~~~~
-
-.. attributetable:: MessageReference
-
-.. autoclass:: MessageReference
-    :members:
-
-PartialMessage
-~~~~~~~~~~~~~~
-
-.. attributetable:: PartialMessage
-
-.. autoclass:: PartialMessage
-    :members:
-
 RawTypingEvent
 ~~~~~~~~~~~~~~
 
@@ -151,6 +100,57 @@ RawReactionClearEmojiEvent
 .. attributetable:: RawReactionClearEmojiEvent
 
 .. autoclass:: RawReactionClearEmojiEvent()
+    :members:
+
+Data Classes
+------------
+
+Embed
+~~~~~
+
+.. attributetable:: Embed
+
+.. autoclass:: Embed
+    :members:
+
+File
+~~~~
+
+.. attributetable:: File
+
+.. autoclass:: File
+    :members:
+
+MessageFlags
+~~~~~~~~~~~~
+
+.. attributetable:: MessageFlags
+
+.. autoclass:: MessageFlags()
+    :members:
+
+AllowedMentions
+~~~~~~~~~~~~~~~
+
+.. attributetable:: AllowedMentions
+
+.. autoclass:: AllowedMentions
+    :members:
+
+MessageReference
+~~~~~~~~~~~~~~~~
+
+.. attributetable:: MessageReference
+
+.. autoclass:: MessageReference
+    :members:
+
+PartialMessage
+~~~~~~~~~~~~~~
+
+.. attributetable:: PartialMessage
+
+.. autoclass:: PartialMessage
     :members:
 
 Enumerations

@@ -122,6 +122,22 @@ GroupChannel
     .. automethod:: typing
         :async-with:
 
+RawThreadDeleteEvent
+~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: RawThreadDeleteEvent
+
+.. autoclass:: RawThreadDeleteEvent()
+    :members:
+
+RawThreadMemberRemoveEvent
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: RawThreadMemberRemoveEvent
+
+.. autoclass:: RawThreadMemberRemoveEvent()
+    :members:
+
 Data Classes
 ------------
 
@@ -150,22 +166,6 @@ ForumTag
 .. autoclass:: ForumTag()
     :members:
     :inherited-members:
-
-RawThreadDeleteEvent
-~~~~~~~~~~~~~~~~~~~~
-
-.. attributetable:: RawThreadDeleteEvent
-
-.. autoclass:: RawThreadDeleteEvent()
-    :members:
-
-RawThreadMemberRemoveEvent
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. attributetable:: RawThreadMemberRemoveEvent
-
-.. autoclass:: RawThreadMemberRemoveEvent()
-    :members:
 
 Enumerations
 ------------

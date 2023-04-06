@@ -26,6 +26,14 @@ PartialAppInfo
 .. autoclass:: PartialAppInfo()
     :members:
 
+InstallParams
+~~~~~~~~~~~~~
+
+.. attributetable:: InstallParams
+
+.. autoclass:: InstallParams()
+    :members:
+
 Team
 ~~~~
 
@@ -51,14 +59,6 @@ ApplicationFlags
 .. attributetable:: ApplicationFlags
 
 .. autoclass:: ApplicationFlags
-    :members:
-
-InstallParams
-~~~~~~~~~~~~~
-
-.. attributetable:: InstallParams
-
-.. autoclass:: InstallParams()
     :members:
 
 Enumerations

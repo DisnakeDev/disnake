@@ -26,9 +26,6 @@ Member
     .. automethod:: typing
         :async-with:
 
-Data Classes
-------------
-
 RawGuildMemberRemoveEvent
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
