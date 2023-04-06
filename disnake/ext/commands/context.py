@@ -348,7 +348,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
             return None
 
         try:
-            entity.qualified_name
+            entity.qualified_name  # noqa: B018
         except AttributeError:
             # if we're here then it's not a cog, group, or command.
             return None
