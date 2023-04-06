@@ -49,7 +49,7 @@ BaseSelectMenu
 
 .. attributetable:: BaseSelectMenu
 
-.. autoclass:: BaseSelectMenu
+.. autoclass:: BaseSelectMenu()
     :members:
     :inherited-members:
 
