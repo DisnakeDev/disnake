@@ -21,7 +21,8 @@
   <link rel="stylesheet" href="{{ pathto('_static/codeblocks.css', 1) }}" type="text/css" />
   {%- block scripts %}
   <script id="documentation_options" data-url_root="{{ pathto('', 1) }}" src="{{ pathto('_static/documentation_options.js', 1) }}"></script>
-  {% if pagename.endswith("api") %}
+  {% if ("/" + pagename).endswith("/api") %}
+    <meta name="robots" content="noindex" />
     <script type="text/javascript" src="{{ pathto('_static/api_redirect.js', 1) }}"></script>
   {% endif %}
   {%- for js in script_files %}
