@@ -121,7 +121,8 @@ class AsyncWebhookAdapter:
         except KeyError:
             self._locks[bucket] = lock = asyncio.Lock()
 
-        headers["User-Agent"] = USER_AGENT
+        if "User-Agent" not in session.headers:
+            headers["User-Agent"] = USER_AGENT
 
         if payload is not None:
             headers["Content-Type"] = "application/json"

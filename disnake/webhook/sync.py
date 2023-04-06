@@ -24,6 +24,13 @@ from ..http import USER_AGENT, Route
 from ..message import Message
 from .async_ import BaseWebhook, _WebhookState, handle_message_parameters
 
+try:
+    from requests.utils import default_user_agent
+except ImportError:
+    DEFAULT_USER_AGENT = ""
+else:
+    DEFAULT_USER_AGENT = default_user_agent()
+
 __all__ = (
     "SyncWebhook",
     "SyncWebhookMessage",
@@ -98,7 +105,8 @@ class WebhookAdapter:
         except KeyError:
             self._locks[bucket] = lock = threading.Lock()
 
-        headers["User-Agent"] = USER_AGENT
+        if session.headers.get("User-Agent") == DEFAULT_USER_AGENT:
+            headers["User-Agent"] = USER_AGENT
 
         if payload is not None:
             headers["Content-Type"] = "application/json"
