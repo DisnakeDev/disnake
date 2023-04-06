@@ -297,6 +297,7 @@ class HTTPClient:
                 self._locks[bucket] = lock
 
         # header creation
+        # User-Agent is set on the session itself
         headers: Dict[str, str] = {}
 
         if self.token is not None:
