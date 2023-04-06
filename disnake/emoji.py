@@ -68,8 +68,9 @@ class Emoji(_EmojiTag, AssetMixin):
     available: :class:`bool`
         Whether the emoji is available for use.
     user: Optional[:class:`User`]
-        The user that created the emoji. This can only be retrieved using :meth:`Guild.fetch_emoji` and
-        having :attr:`~Permissions.manage_emojis` permission.
+        The user that created this emoji. This can only be retrieved using
+        :meth:`Guild.fetch_emoji`/:meth:`Guild.fetch_emojis` while
+        having the :attr:`~Permissions.manage_guild_expressions` permission.
     """
 
     __slots__: Tuple[str, ...] = (
@@ -180,7 +181,7 @@ class Emoji(_EmojiTag, AssetMixin):
 
         Deletes the custom emoji.
 
-        You must have :attr:`~Permissions.manage_emojis` permission to
+        You must have :attr:`~Permissions.manage_guild_expressions` permission to
         do this.
 
         Parameters
@@ -204,7 +205,7 @@ class Emoji(_EmojiTag, AssetMixin):
 
         Edits the custom emoji.
 
-        You must have :attr:`~Permissions.manage_emojis` permission to
+        You must have :attr:`~Permissions.manage_guild_expressions` permission to
         do this.
 
         .. versionchanged:: 2.0
