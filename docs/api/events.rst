@@ -1430,3 +1430,10 @@ This section documents events related to Discord chat messages.
 
     :param data: The raw event payload data.
     :type data: :class:`RawTypingEvent`
+
+
+Enumerations
+------------
+
+.. autoclass:: Event
+    :members:

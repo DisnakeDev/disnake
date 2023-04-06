@@ -46,6 +46,14 @@ DeletedReferencedMessage
 .. autoclass:: DeletedReferencedMessage()
     :members:
 
+InteractionReference
+~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: InteractionReference
+
+.. autoclass:: InteractionReference
+    :members:
+
 RawTypingEvent
 ~~~~~~~~~~~~~~
 

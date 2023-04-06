@@ -130,6 +130,14 @@ Message Command
     .. automethod:: InvokableMessageCommand.error()
         :decorator:
 
+CommandSyncFlags
+~~~~~~~~~~~~~~~~~
+
+.. attributetable:: CommandSyncFlags
+
+.. autoclass:: CommandSyncFlags()
+    :members:
+
 Injection
 ~~~~~~~~~
 

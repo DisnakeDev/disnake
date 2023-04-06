@@ -17,11 +17,3 @@ Paginator
 
 .. autoclass:: Paginator
     :members:
-
-CommandSyncFlags
-~~~~~~~~~~~~~~~~~
-
-.. attributetable:: CommandSyncFlags
-
-.. autoclass:: CommandSyncFlags()
-    :members:

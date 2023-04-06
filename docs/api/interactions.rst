@@ -131,14 +131,6 @@ InteractionMessage
     :members:
     :inherited-members:
 
-InteractionReference
-~~~~~~~~~~~~~~~~~~~~
-
-.. attributetable:: InteractionReference
-
-.. autoclass:: InteractionReference
-    :members:
-
 InteractionDataResolved
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
