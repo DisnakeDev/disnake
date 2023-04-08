@@ -66,6 +66,7 @@ __all__ = (
     "ThreadLayout",
     "Event",
     "ApplicationRoleConnectionMetadataType",
+    "OnboardingPromptType",
 )
 
 
@@ -1293,6 +1294,11 @@ class ApplicationRoleConnectionMetadataType(Enum):
     datetime_greater_than_or_equal = 6
     boolean_equal = 7
     boolean_not_equal = 8
+
+
+class OnboardingPromptType(Enum):
+    multiple_choice = 0
+    dropdown = 1
 
 
 T = TypeVar("T")
