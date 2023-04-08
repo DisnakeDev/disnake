@@ -14,7 +14,7 @@ This section contains explanations of some library mechanics which may be useful
 App command sync
 ----------------
 
-If you're using :ref:`discord_ext_commands` for application commands (slash commands, context menus) you should
+If you're using :ref:`disnake_ext_commands` for application commands (slash commands, context menus) you should
 understand how your commands show up in Discord. By default, the library registers / updates all commands automatically.
 Based on the application commands defined in your code the library automatically determines
 which commands should be registered, edited or deleted, but there're some edge cases you should keep in mind.
