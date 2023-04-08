@@ -3326,7 +3326,7 @@ of :class:`enum.Enum`.
         See :attr:`automod_block_message` for more information on how the
         :attr:`~AuditLogEntry.extra` field is set.
 
-    .. attribute:: onboarding_prompt_create
+    .. attribute:: onboarding_question_create
 
         An onboarding prompt was created.
 
@@ -3336,14 +3336,9 @@ of :class:`enum.Enum`.
 
         Possible attributes for :class:`AuditLogDiff`:
 
-        - :attr:`~AuditLogDiff.id`
-        - :attr:`~AuditLogDiff.title`
         - :attr:`~AuditLogDiff.options`
-        - :attr:`~AuditLogDiff.single_select`
-        - :attr:`~AuditLogDiff.required`
-        - :attr:`~AuditLogDiff.in_onboarding`
 
-    .. attribute:: onboarding_prompt_update
+    .. attribute:: onboarding_question_update
 
         An onboarding prompt was updated.
 
@@ -3353,37 +3348,7 @@ of :class:`enum.Enum`.
 
         Possible attributes for :class:`AuditLogDiff`:
 
-        - :attr:`~AuditLogDiff.title`
         - :attr:`~AuditLogDiff.options`
-        - :attr:`~AuditLogDiff.single_select`
-        - :attr:`~AuditLogDiff.required`
-        - :attr:`~AuditLogDiff.in_onboarding`
-
-    .. attribute:: onboarding_prompt_delete
-
-        An onboarding prompt was deleted.
-
-        When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`Object` with the ID of the onboarding prompt which
-        was deleted.
-
-        Possible attributes for :class:`AuditLogDiff`:
-
-        TBD.
-
-    .. attribute:: onboarding_create
-
-        An onboarding was created.
-
-        When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        ``None``.
-
-        Possible attributes for :class:`AuditLogDiff`:
-
-        - :attr:`~AuditLogDiff.default_channels`
-        - :attr:`~AuditLogDiff.enable_default_channels`
-        - :attr:`~AuditLogDiff.enable_onboarding_prompts`
-        - :attr:`~AuditLogDiff.prompts`
 
     .. attribute:: onboarding_update
 
@@ -3394,7 +3359,9 @@ of :class:`enum.Enum`.
 
         Possible attributes for :class:`AuditLogDiff`:
 
-        TBD.
+        - :attr:`~AuditLogDiff.prompts`
+        - :attr:`~AuditLogDiff.default_channels`
+        - :attr:`~AuditLogDiff.enabled`
 
 .. class:: AuditLogActionCategory
 
@@ -4418,9 +4385,10 @@ AuditLogDiff
 
     .. attribute:: type
 
-        The type of channel/thread, sticker, webhook, integration (:class:`str`), or permission overwrite (:class:`int`).
+        The type of channel/thread, sticker, webhook, integration (:class:`str`), permission overwrite (:class:`int`)
+        or onboarding prompt.
 
-        :type: Union[:class:`ChannelType`, :class:`StickerType`, :class:`WebhookType`, :class:`str`, :class:`int`]
+        :type: Union[:class:`ChannelType`, :class:`StickerType`, :class:`WebhookType`, :class:`OnboardingPromptType`, :class:`str`, :class:`int`]
 
     .. attribute:: topic
 
@@ -4857,47 +4825,11 @@ AuditLogDiff
 
         :type: Optional[:class:`ThreadSortOrder`]
 
-    .. attribute:: title
-
-        The title of an onboarding prompt or an onboarding prompt option being changed.
-
-        :type: :class:`str`
-
     .. attribute:: options
 
         The list of options of an onboarding prompt being changed.
 
         :type: List[:class:`OnboardingPromptOption`]
-
-    .. attribute:: single_select
-
-        The onboarding prompt is single select or not.
-
-        :type: :class:`bool`
-
-    .. attribute:: required
-
-        The onboarding prompt option is required or not.
-
-        :type: :class:`bool`
-
-    .. attribute:: in_onboarding
-
-        The onboarding prompt option is in onboarding or not.
-
-        :type: :class:`bool`
-
-    .. attribute:: enable_default_channels
-
-        The onboarding shows default channels or not.
-
-        :type: :class:`bool`
-
-    .. attribute:: enable_onboarding_prompts
-
-        The onboarding shows onboarding prompts or not.
-
-        :type: :class:`bool`
 
     .. attribute:: prompts
 
