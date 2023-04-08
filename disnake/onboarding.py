@@ -37,7 +37,7 @@ class Onboarding:
     enabled: :class:`bool`
         Whether onboarding is enabled.
     default_channel_ids: FrozenSet[:class:`int`]
-        The IDs of the channels that will automatically be shown to new members.
+        The list of channels that will be shown to new members by default.
     """
 
     __slots__ = (
