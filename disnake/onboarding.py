@@ -37,7 +37,7 @@ class Onboarding:
     enabled: :class:`bool`
         Whether onboarding is enabled.
     default_channel_ids: FrozenSet[:class:`int`]
-        The list of channels that will be shown to new members by default.
+        The IDs of the channels that will be shown to new members by default.
     """
 
     __slots__ = (
@@ -150,7 +150,7 @@ class OnboardingPromptOption(Hashable):
     role_ids: FrozenSet[:class:`int`]
         The IDs of the roles that will be added to the user when they select this option.
     channel_ids: FrozenSet[:class:`int`]
-        The IDs of the channels that will be shown to the user when they select this option.
+        The IDs of the channels that the user will see when they select this option.
     """
 
     __slots__ = ("id", "title", "description", "emoji", "guild", "role_ids", "channel_ids")

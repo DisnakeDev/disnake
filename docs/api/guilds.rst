@@ -74,7 +74,7 @@ Onboarding
 
 .. attributetable:: Onboarding
 
-.. autoclass:: Onboarding
+.. autoclass:: Onboarding()
     :members:
 
 OnboardingPrompt
@@ -82,7 +82,7 @@ OnboardingPrompt
 
 .. attributetable:: OnboardingPrompt
 
-.. autoclass:: OnboardingPrompt
+.. autoclass:: OnboardingPrompt()
     :members:
 
 OnboardingPromptOption
@@ -90,7 +90,7 @@ OnboardingPromptOption
 
 .. attributetable:: OnboardingPromptOption
 
-.. autoclass:: OnboardingPromptOption
+.. autoclass:: OnboardingPromptOption()
     :members:
 
 Data Classes
@@ -297,6 +297,10 @@ NSFWLevel
     .. attribute:: age_restricted
 
         The guild may contain NSFW content.
+
+
+OnboardingPromptType
+~~~~~~~~~~~~~~~~~~~~
 
 .. class:: OnboardingPromptType
 
