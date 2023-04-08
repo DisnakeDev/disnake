@@ -1,6 +1,5 @@
-Split up documentation into multiple files.
-- Main ``disnake`` API reference is now under ``api/``.
-- ``disnake.ext.commands`` API reference is now under ``ext/commands/api/``.
-- ``disnake.ext.tasks`` is considered small enough to leave it as-is, and is not changed.
-- Legacy ``api.html`` and ``ext/commands/api.html`` pages are deprecated and exist only to serve as redirects.
-- - Links with pre-existing anchors will be redirected to their appropriate page.
+Split the monolithic API Reference pages into multiple sub-references.
+- Main ``disnake`` API reference can now be found at :doc:`api/index <api/>`
+- ``disnake.ext.commands`` API reference is now under :doc:`ext/commands/api/index <ext/commands/api/>`.
+- Legacy ``api.html`` and ``ext/commands/api.html`` pages are deprecated.
+- - Links with pre-existing references (eg ``/api.html#disnake.AppInfo``) will be redirected to their appropriate page.
