@@ -479,4 +479,4 @@ def test_emptyembed() -> None:
 
     # make sure unknown module attrs continue to raise
     with pytest.raises(AttributeError):
-        embeds.this_does_not_exist  # type: ignore
+        _ = embeds.this_does_not_exist  # type: ignore
