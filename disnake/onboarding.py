@@ -141,7 +141,7 @@ class OnboardingPromptOption(Hashable):
     ----------
     id: :class:`int`
         The prompt option's ID.
-    emoji: Optional[Union[:class:`PartialEmoji`, :class:`Emoji`]]
+    emoji: Optional[Union[:class:`PartialEmoji`, :class:`Emoji`, :class:`str`]]
         The prompt option's emoji.
     title: :class:`str`
         The prompt option's title.
@@ -156,11 +156,6 @@ class OnboardingPromptOption(Hashable):
     __slots__ = ("id", "title", "description", "emoji", "guild", "role_ids", "channel_ids")
 
     def __init__(self, *, guild: Guild, data: OnboardingPromptOptionPayload) -> None:
-        # NOTE: The ID may sometimes be a UNIX timestamp since
-        # Onboarding changes are saved locally until you send the API request (that's how it works in client)
-        # so the API needs the timestamp to know what ID it needs to create, should we just add a note about it
-        # or "try" to create the ID ourselves?
-        # I'm not sure if this also happens for OnboardingPrompt
         self.guild: Guild = guild
 
         self.id: int = int(data["id"])
@@ -175,7 +170,7 @@ class OnboardingPromptOption(Hashable):
             else frozenset()
         )
 
-        self.emoji: Optional[Union[Emoji, PartialEmoji]]
+        self.emoji: Optional[Union[Emoji, PartialEmoji, str]]
         if emoji_data := data.get("emoji"):
             self.emoji = guild._state.get_reaction_emoji(emoji_data)
         else:
