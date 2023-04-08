@@ -232,7 +232,9 @@ def _list_transformer(
 
 def _transform_type(
     entry: AuditLogEntry, data: Any
-) -> Union[enums.ChannelType, enums.StickerType, enums.WebhookType, str, int]:
+) -> Union[
+    enums.ChannelType, enums.StickerType, enums.WebhookType, enums.OnboardingPromptType, str, int
+]:
     action_name = entry.action.name
     if action_name.startswith("sticker_"):
         return enums.try_enum(enums.StickerType, data)
@@ -241,6 +243,8 @@ def _transform_type(
     elif action_name.startswith("integration_") or action_name.startswith("overwrite_"):
         # integration: str, overwrite: int
         return data
+    elif action_name.startswith("onboarding_question_"):
+        return enums.try_enum(enums.OnboardingPromptType, data)
     else:
         return enums.try_enum(enums.ChannelType, data)
 
@@ -870,9 +874,4 @@ class AuditLogEntry(Hashable):
         return self._automod_rules.get(target_id) or Object(id=target_id)
 
     def _convert_target_onboarding_prompt(self, target_id: int) -> Object:
-        # Here we have two options:
-        # 1. Fecth the onboarding and get the prompt (unnecessary)
-        # 2. Store Onboarding\s when they're fetched (since there are no gateway events for it yet?)
-        # in ConnectionState and get it here.
-        # For now I'll return Object.
         return Object(id=target_id)
