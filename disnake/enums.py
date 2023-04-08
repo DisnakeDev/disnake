@@ -823,7 +823,8 @@ class AutoModEventType(Enum):
 
 class AutoModTriggerType(Enum):
     keyword = 1
-    harmful_link = 2
+    if not TYPE_CHECKING:
+        harmful_link = 2  # obsolete/deprecated
     spam = 3
     keyword_preset = 4
     mention_spam = 5
@@ -1001,13 +1002,13 @@ class Event(Enum):
     """Called when a `Guild` creates a new `Role`.
     Represents the :func:`on_guild_role_create` event.
     """
-    guild_role_update = "guild_role_update"
-    """Called when a `Guild` updates a `Role`.
-    Represents the :func:`on_guild_role_update` event.
-    """
     guild_role_delete = "guild_role_delete"
     """Called when a `Guild` deletes a `Role`.
     Represents the :func:`on_guild_role_delete` event.
+    """
+    guild_role_update = "guild_role_update"
+    """Called when a `Guild` updates a `Role`.
+    Represents the :func:`on_guild_role_update` event.
     """
     guild_emojis_update = "guild_emojis_update"
     """Called when a `Guild` adds or removes `Emoji`.
@@ -1069,6 +1070,10 @@ class Event(Enum):
     """Called when an `AutoModRule` is deleted.
     Represents the :func:`on_automod_rule_delete` event.
     """
+    audit_log_entry_create = "audit_log_entry_create"
+    """Called when an audit log entry is created.
+    Represents the :func:`on_audit_log_entry_create` event.
+    """
     integration_create = "integration_create"
     """Called when an integration is created.
     Represents the :func:`on_integration_create` event.
@@ -1085,13 +1090,13 @@ class Event(Enum):
     """Called when a `Member` joins a `Guild`.
     Represents the :func:`on_member_join` event.
     """
-    member_update = "member_update"
-    """Called when a `Member` updates their profile.
-    Represents the :func:`on_member_update` event.
-    """
     member_remove = "member_remove"
     """Called when a `Member` leaves a `Guild`.
     Represents the :func:`on_member_remove` event.
+    """
+    member_update = "member_update"
+    """Called when a `Member` updates their profile.
+    Represents the :func:`on_member_update` event.
     """
     raw_member_remove = "raw_member_remove"
     """Called when a member leaves a `Guild` regardless of the member cache.
@@ -1100,10 +1105,6 @@ class Event(Enum):
     raw_member_update = "raw_member_update"
     """Called when a member updates their profile regardless of the member cache.
     Represents the :func:`on_raw_member_update` event.
-    """
-    audit_log_entry_create = "audit_log_entry_create"
-    """Called when an audit log entry is created.
-    Represents the :func:`on_audit_log_entry_create` event.
     """
     member_ban = "member_ban"
     """Called when user gets banned from a `Guild`.
@@ -1129,13 +1130,13 @@ class Event(Enum):
     """Called when a `StageInstance` is created for a `StageChannel`.
     Represents the :func:`on_stage_instance_create` event.
     """
-    stage_instance_update = "stage_instance_update"
-    """Called when a `StageInstance` is updated.
-    Represents the :func:`on_stage_instance_update` event.
-    """
     stage_instance_delete = "stage_instance_delete"
     """Called when a `StageInstance` is deleted for a `StageChannel`.
     Represents the :func:`on_stage_instance_delete` event.
+    """
+    stage_instance_update = "stage_instance_update"
+    """Called when a `StageInstance` is updated.
+    Represents the :func:`on_stage_instance_update` event.
     """
     application_command = "application_command"
     """Called when an application command is invoked.
@@ -1181,13 +1182,13 @@ class Event(Enum):
     """Called when messages are bulk deleted.
     Represents the :func:`on_bulk_message_delete` event.
     """
-    raw_message_delete = "raw_message_delete"
-    """Called when a message is deleted regardless of the message being in the internal message cache or not.
-    Represents the :func:`on_raw_message_delete` event.
-    """
     raw_message_edit = "raw_message_edit"
     """Called when a message is edited regardless of the state of the internal message cache.
     Represents the :func:`on_raw_message_edit` event.
+    """
+    raw_message_delete = "raw_message_delete"
+    """Called when a message is deleted regardless of the message being in the internal message cache or not.
+    Represents the :func:`on_raw_message_delete` event.
     """
     raw_bulk_message_delete = "raw_bulk_message_delete"
     """Called when a bulk delete is triggered regardless of the messages being in the internal message cache or not.

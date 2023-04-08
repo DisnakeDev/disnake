@@ -263,7 +263,7 @@ class Sticker(_StickerTag):
     def _from_data(self, data: StickerPayload) -> None:
         self.id: int = int(data["id"])
         self.name: str = data["name"]
-        self.description: str = data["description"]
+        self.description: str = data.get("description") or ""
         self.format: StickerFormatType = try_enum(StickerFormatType, data["format_type"])
 
     def __repr__(self) -> str:
@@ -392,8 +392,8 @@ class GuildSticker(Sticker):
         The ID of the guild that this sticker is from.
     user: Optional[:class:`User`]
         The user that created this sticker. This can only be retrieved using
-        :meth:`Guild.fetch_sticker`/:meth:`Guild.fetch_stickers` and
-        having the :attr:`~Permissions.manage_emojis_and_stickers` permission.
+        :meth:`Guild.fetch_sticker`/:meth:`Guild.fetch_stickers` while
+        having the :attr:`~Permissions.manage_guild_expressions` permission.
     emoji: :class:`str`
         The name of a unicode emoji that represents this sticker.
     """
@@ -402,7 +402,7 @@ class GuildSticker(Sticker):
 
     def _from_data(self, data: GuildStickerPayload) -> None:
         super()._from_data(data)
-        self.available: bool = data["available"]
+        self.available: bool = data.get("available", True)
         self.guild_id: int = int(data["guild_id"])
         user = data.get("user")
         self.user: Optional[User] = self._state.store_user(user) if user else None
@@ -425,13 +425,16 @@ class GuildSticker(Sticker):
         self,
         *,
         name: str = MISSING,
-        description: str = MISSING,
+        description: Optional[str] = MISSING,
         emoji: str = MISSING,
         reason: Optional[str] = None,
     ) -> GuildSticker:
         """|coro|
 
         Edits a :class:`GuildSticker` for the guild.
+
+        You must have :attr:`~Permissions.manage_guild_expressions` permission to
+        do this.
 
         Parameters
         ----------
@@ -484,7 +487,7 @@ class GuildSticker(Sticker):
 
         Deletes the custom :class:`Sticker` from the guild.
 
-        You must have :attr:`~Permissions.manage_emojis_and_stickers` permission to
+        You must have :attr:`~Permissions.manage_guild_expressions` permission to
         do this.
 
         Parameters

@@ -3133,7 +3133,7 @@ class Guild(Hashable):
 
         Creates a :class:`Sticker` for the guild.
 
-        You must have :attr:`~Permissions.manage_emojis_and_stickers` permission to
+        You must have :attr:`~Permissions.manage_guild_expressions` permission to
         do this.
 
         .. versionadded:: 2.0
@@ -3183,7 +3183,7 @@ class Guild(Hashable):
 
         Deletes the custom :class:`Sticker` from the guild.
 
-        You must have :attr:`~Permissions.manage_emojis_and_stickers` permission to
+        You must have :attr:`~Permissions.manage_guild_expressions` permission to
         do this.
 
         .. versionadded:: 2.0
@@ -3282,7 +3282,7 @@ class Guild(Hashable):
         Emojis with subscription roles (see ``roles`` below) are considered premium emoji,
         and count towards a separate limit of 25 emojis.
 
-        You must have :attr:`~Permissions.manage_emojis` permission to
+        You must have :attr:`~Permissions.manage_guild_expressions` permission to
         do this.
 
         Parameters
@@ -3340,7 +3340,7 @@ class Guild(Hashable):
 
         Deletes the custom :class:`Emoji` from the guild.
 
-        You must have :attr:`~Permissions.manage_emojis` permission to
+        You must have :attr:`~Permissions.manage_guild_expressions` permission to
         do this.
 
         Parameters
