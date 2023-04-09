@@ -5108,6 +5108,18 @@ Reaction
     .. automethod:: users
         :async-for:
 
+BurstReaction
+~~~~~~~~~~~~~~
+
+.. attributetable:: BurstReaction
+
+.. autoclass:: BurstReaction()
+    :members:
+    :exclude-members: users
+
+    .. automethod:: users
+        :async-for:
+
 Guild
 ~~~~~~
 
