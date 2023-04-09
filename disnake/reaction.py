@@ -247,6 +247,10 @@ class BurstReaction(Reaction):
         The message this Super reaction belongs to.
     burst_colors: List[:class:`Colour`]
         The list of :class:`Colour` used for super reaction.
+
+        .. note::
+
+            This information is only available via :meth:`abc.Messageable.fetch_message`.
     """
 
     __slots__ = "burst_colors"
