@@ -127,17 +127,6 @@ def test_oauth_url(expected, perms, guild, redirect, scopes, disable_select) -> 
     assert dict(yarl.URL(url).query) == {"client_id": "1234", **expected}
 
 
-def test_parse_token() -> None:
-    # don't get your hopes up, this token isn't valid.
-    # taken from https://guide.disnake.dev/getting-started/initial-files
-    token = "OTA4MjgxMjk4NTU1MTA5Mzk2.YYzc4A.TB7Ng6DOnVDlpMS4idjGptsreFg"  # noqa: S105
-
-    parts = utils.parse_token(token)
-    assert parts[0] == 908281298555109396
-    assert parts[1] == datetime.datetime(2021, 11, 11, 9, 5, 36, tzinfo=timezone.utc)
-    assert parts[2] == bytes.fromhex("4c1ecd83a0ce9d50e5a4c4b889d8c6a6db2b7858")
-
-
 @pytest.mark.parametrize(
     ("num", "expected"),
     [

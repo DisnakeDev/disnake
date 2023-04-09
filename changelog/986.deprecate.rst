@@ -1,0 +1,1 @@
+:attr:`AutoModTriggerType.harmful_link` is obsolete, it is now enabled Discord-wide.

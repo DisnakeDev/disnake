@@ -71,15 +71,15 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Install dependencies out of venv
-      run: |
-        pdm export --pyproject --without-hashes -d -G speed -G docs -G voice -o requirements.txt
-        pip install -r requirements.txt
-        pip install .
+    - name: Install dependencies
+      run: pdm install -d -Gspeed -Gdocs -Gvoice
+
+    - name: Add .venv/bin to PATH
+      run: dirname "$(pdm info --python)" >> $GITHUB_PATH
 
     - name: Set pyright version
       run: |
-        PYRIGHT_VERSION="$(python -c 'import pyright; print(pyright.__pyright_version__)')"
+        PYRIGHT_VERSION="$(pdm run python -c 'import pyright; print(pyright.__pyright_version__)')"
         echo "PYRIGHT_VERSION=$PYRIGHT_VERSION" >> $GITHUB_ENV
 
     - name: Run pyright (Linux)

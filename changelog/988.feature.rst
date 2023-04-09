@@ -1,0 +1,1 @@
+Add :attr:`ApplicationFlags.application_auto_moderation_rule_create_badge`

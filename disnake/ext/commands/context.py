@@ -347,9 +347,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         if entity is None:
             return None
 
-        try:
-            entity.qualified_name
-        except AttributeError:
+        if not hasattr(entity, "qualified_name"):
             # if we're here then it's not a cog, group, or command.
             return None
 

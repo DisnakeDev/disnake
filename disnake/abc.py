@@ -98,7 +98,7 @@ MISSING = utils.MISSING
 class Snowflake(Protocol):
     """An ABC that details the common operations on a Discord model.
 
-    Almost all :ref:`Discord models <discord_api_models>` meet this
+    Almost all :ref:`Discord models <discord_model>` meet this
     abstract base class.
 
     If you want to create a snowflake on your own, consider using
@@ -846,6 +846,7 @@ class GuildChannel(ABC):
         manage_emojis_and_stickers: Optional[bool] = ...,
         manage_events: Optional[bool] = ...,
         manage_guild: Optional[bool] = ...,
+        manage_guild_expressions: Optional[bool] = ...,
         manage_messages: Optional[bool] = ...,
         manage_nicknames: Optional[bool] = ...,
         manage_permissions: Optional[bool] = ...,
@@ -871,9 +872,11 @@ class GuildChannel(ABC):
         use_external_emojis: Optional[bool] = ...,
         use_external_stickers: Optional[bool] = ...,
         use_slash_commands: Optional[bool] = ...,
+        use_soundboard: Optional[bool] = ...,
         use_voice_activation: Optional[bool] = ...,
         view_audit_log: Optional[bool] = ...,
         view_channel: Optional[bool] = ...,
+        view_creator_monetization_analytics: Optional[bool] = ...,
         view_guild_insights: Optional[bool] = ...,
     ) -> None:
         ...
@@ -971,8 +974,8 @@ class GuildChannel(ABC):
                 raise TypeError("No overwrite provided.")
             try:
                 overwrite = PermissionOverwrite(**permissions)
-            except (ValueError, TypeError):
-                raise TypeError("Invalid permissions given to keyword arguments.")
+            except (ValueError, TypeError) as e:
+                raise TypeError("Invalid permissions given to keyword arguments.") from e
         else:
             if len(permissions) > 0:
                 raise TypeError("Cannot mix overwrite and keyword arguments.")
