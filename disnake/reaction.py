@@ -212,6 +212,8 @@ class BurstReaction(Reaction):
 
     .. versionadded:: 2.9
 
+    This class is a subclass of :class:`.Reaction`.
+
     Depending on the way this object was created, some of the attributes can
     have a value of ``None``.
 

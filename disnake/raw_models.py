@@ -177,7 +177,7 @@ class RawReactionActionEvent(_RawReprMixin):
         .. versionadded:: 1.3
 
     burst: :class:`bool`
-        The reaction is Super reaction.
+        Whether the reaction is Super reaction.
 
         .. versionadded:: 2.9
     """
@@ -253,7 +253,7 @@ class RawReactionClearEmojiEvent(_RawReprMixin):
         The custom or unicode emoji being removed.
 
     burst: :class:`bool`
-        The reaction is Super reaction.
+        Whether the reaction is Super reaction.
 
         .. versionadded:: 2.9
     """
