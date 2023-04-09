@@ -1,0 +1,5 @@
+Split the monolithic API Reference pages into multiple sub-references.
+- Main ``disnake`` API reference can now be found at :doc:`API Reference <api/index>`.
+- ``disnake.ext.commands`` API reference is now under :doc:`Commands API Reference <ext/commands/api/index>`.
+- Legacy ``api.html`` and ``ext/commands/api.html`` pages are deprecated.
+- - Links with pre-existing references (eg ``/api.html#disnake.AppInfo``) will be redirected to their appropriate page.

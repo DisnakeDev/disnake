@@ -7,7 +7,7 @@
 .. _migrating-to-async:
 
 Migrating to v0.10.0
-======================
+====================
 
 v0.10.0 is one of the biggest breaking changes in the library due to massive
 fundamental changes in how the library operates.
@@ -20,7 +20,7 @@ Python 3.4.2. This was made to support :mod:`asyncio`, in which more detail can 
 Below are all the other major changes from v0.9.0 to v0.10.0.
 
 Event Registration
---------------------
+------------------
 
 All events before were registered using :meth:`Client.event`. While this is still
 possible, the events must be decorated with ``@asyncio.coroutine``.
@@ -64,7 +64,7 @@ Be aware however, that this is still a coroutine and your other functions that a
 be decorated with ``@asyncio.coroutine`` or be ``async def``.
 
 Event Changes
---------------
+-------------
 
 Some events in v0.9.0 were considered pretty useless due to having no separate states. The main
 events that were changed were the ``_update`` events since previously they had no context on what
@@ -93,11 +93,11 @@ After:
     def on_socket_raw_send(payload): pass
 
 Note that ``on_status`` was removed. If you want its functionality, use :func:`on_member_update`.
-See :ref:`discord-api-events` for more information. Other removed events include ``on_socket_closed``, ``on_socket_receive``, and ``on_socket_opened``.
+See :ref:`disnake_api_events` for more information. Other removed events include ``on_socket_closed``, ``on_socket_receive``, and ``on_socket_opened``.
 
 
 Coroutines
------------
+----------
 
 The biggest change that the library went through is that almost every function in :class:`Client`
 was changed to be a :doc:`coroutine <py:library/asyncio-task>`. Functions
@@ -123,7 +123,7 @@ In order for you to ``yield from`` or ``await`` a coroutine then your function m
 with ``@asyncio.coroutine`` or ``async def``.
 
 Iterables
-----------
+---------
 
 For performance reasons, many of the internal data structures were changed into a dictionary to support faster
 lookup. As a consequence, this meant that some lists that were exposed via the API have changed into iterables
@@ -182,10 +182,10 @@ After:
     channel.type == disnake.ChannelType.text
 
 The main reason for this change was to reduce the use of finicky strings in the API as this
-could give users a false sense of power. More information can be found in the :ref:`discord-api-enums` page.
+could give users a false sense of power. More information can be found in the :ref:`discord_enum` page.
 
 Properties
------------
+----------
 
 A lot of function calls that returned constant values were changed into Python properties for ease of use
 in format strings.
@@ -217,7 +217,7 @@ The following functions were changed into properties:
 +----------------------------------------+--------------------------------------+
 
 Member Management
--------------------
+-----------------
 
 Functions that involved banning and kicking were changed.
 
@@ -232,7 +232,7 @@ Functions that involved banning and kicking were changed.
 .. migrating-renames:
 
 Renamed Functions
--------------------
+-----------------
 
 Functions have been renamed.
 
@@ -246,7 +246,7 @@ All the :class:`Permissions` related attributes have been renamed and the `can_`
 dropped. So for example, ``can_manage_messages`` has become ``manage_messages``.
 
 Forced Keyword Arguments
--------------------------
+------------------------
 
 Since 3.0+ of Python, we can now force questions to take in forced keyword arguments. A keyword argument is when you
 explicitly specify the name of the variable and assign to it, for example: ``foo(name='test')``. Due to this support,
@@ -270,7 +270,7 @@ in the function signature.
 .. _migrating-running:
 
 Running the Client
---------------------
+------------------
 
 In earlier versions of disnake, ``client.run()`` was a blocking call to the main thread
 that called it. In v0.10.0 it is still a blocking call but it handles the event loop for you.
