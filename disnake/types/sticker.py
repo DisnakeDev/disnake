@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-from typing import List, Literal, TypedDict, Union
+from typing import List, Literal, Optional, TypedDict, Union
 
 from typing_extensions import NotRequired
 
 from .snowflake import Snowflake
 from .user import User
 
-StickerFormatType = Literal[1, 2, 3]
+StickerFormatType = Literal[1, 2, 3, 4]
 
 
 class StickerItem(TypedDict):
@@ -21,7 +21,7 @@ class StickerItem(TypedDict):
 class BaseSticker(TypedDict):
     id: Snowflake
     name: str
-    description: str
+    description: Optional[str]
     tags: str
     format_type: StickerFormatType
 
@@ -34,7 +34,7 @@ class StandardSticker(BaseSticker):
 
 class GuildSticker(BaseSticker):
     type: Literal[2]
-    available: bool
+    available: NotRequired[bool]
     guild_id: Snowflake
     user: NotRequired[User]
 
@@ -47,9 +47,9 @@ class StickerPack(TypedDict):
     stickers: List[StandardSticker]
     name: str
     sku_id: Snowflake
-    cover_sticker_id: Snowflake
+    cover_sticker_id: NotRequired[Snowflake]
     description: str
-    banner_asset_id: Snowflake
+    banner_asset_id: NotRequired[Snowflake]
 
 
 class CreateGuildSticker(TypedDict):
@@ -61,7 +61,7 @@ class CreateGuildSticker(TypedDict):
 class EditGuildSticker(TypedDict, total=False):
     name: str
     tags: str
-    description: str
+    description: Optional[str]
 
 
 class ListPremiumStickerPacks(TypedDict):

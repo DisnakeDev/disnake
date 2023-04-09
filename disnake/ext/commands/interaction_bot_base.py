@@ -225,11 +225,10 @@ class InteractionBotBase(CommonBotBase):
 
     @property
     def command_sync_flags(self) -> CommandSyncFlags:
-        """:class:`~.ext.commands.CommandSyncFlags`: The command sync flags configured for this bot.
+        """:class:`~.CommandSyncFlags`: The command sync flags configured for this bot.
 
         .. versionadded:: 2.7
         """
-
         return CommandSyncFlags._from_value(self._command_sync_flags.value)
 
     def application_commands_iterator(self) -> Iterable[InvokableApplicationCommand]:
@@ -497,7 +496,7 @@ class InteractionBotBase(CommonBotBase):
         extras: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> Callable[[CommandCallback], InvokableSlashCommand]:
-        """A shortcut decorator that invokes :func:`.slash_command` and adds it to
+        """A shortcut decorator that invokes :func:`~disnake.ext.commands.slash_command` and adds it to
         the internal command list.
 
         Parameters
@@ -590,7 +589,7 @@ class InteractionBotBase(CommonBotBase):
     ) -> Callable[
         [InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand
     ]:
-        """A shortcut decorator that invokes :func:`.user_command` and adds it to
+        """A shortcut decorator that invokes :func:`~disnake.ext.commands.user_command` and adds it to
         the internal command list.
 
         Parameters
@@ -667,7 +666,7 @@ class InteractionBotBase(CommonBotBase):
     ) -> Callable[
         [InteractionCommandCallback[CogT, MessageCommandInteraction, P]], InvokableMessageCommand
     ]:
-        """A shortcut decorator that invokes :func:`.message_command` and adds it to
+        """A shortcut decorator that invokes :func:`~disnake.ext.commands.message_command` and adds it to
         the internal command list.
 
         Parameters
@@ -824,7 +823,9 @@ class InteractionBotBase(CommonBotBase):
                 try:
                     await self.bulk_overwrite_global_commands(to_send)
                 except Exception as e:
-                    warnings.warn(f"Failed to overwrite global commands due to {e}", SyncWarning)
+                    warnings.warn(
+                        f"Failed to overwrite global commands due to {e}", SyncWarning, stacklevel=1
+                    )
 
         # Same process but for each specified guild individually.
         # Notice that we're not doing this for every single guild for optimisation purposes.
@@ -857,6 +858,7 @@ class InteractionBotBase(CommonBotBase):
                         warnings.warn(
                             f"Failed to overwrite commands in <Guild id={guild_id}> due to {e}",
                             SyncWarning,
+                            stacklevel=1,
                         )
         # Last debug message
         self._log_sync_debug("Command synchronization task has finished")
@@ -950,7 +952,7 @@ class InteractionBotBase(CommonBotBase):
     ) -> None:
         """|coro|
 
-        Similar to :meth:`on_slash_command_error` but for user commands.
+        Similar to :meth:`on_slash_command_error() <Bot.on_slash_command_error>` but for user commands.
         """
         if self.extra_events.get("on_user_command_error", None):
             return
@@ -970,7 +972,7 @@ class InteractionBotBase(CommonBotBase):
     ) -> None:
         """|coro|
 
-        Similar to :meth:`on_slash_command_error` but for message commands.
+        Similar to :meth:`on_slash_command_error() <Bot.on_slash_command_error>` but for message commands.
         """
         if self.extra_events.get("on_message_command_error", None):
             return
@@ -1009,7 +1011,7 @@ class InteractionBotBase(CommonBotBase):
         func
             The function that will be used as a global check.
         call_once: :class:`bool`
-            Whether the function should only be called once per :meth:`.InvokableApplicationCommand.invoke` call.
+            Whether the function should only be called once per invoke call.
         slash_commands: :class:`bool`
             Whether this check is for slash commands.
         user_commands: :class:`bool`
@@ -1133,8 +1135,7 @@ class InteractionBotBase(CommonBotBase):
         [Callable[[ApplicationCommandInteraction], Any]],
         Callable[[ApplicationCommandInteraction], Any],
     ]:
-        """
-        A decorator that adds a global application command check to the bot.
+        """A decorator that adds a global application command check to the bot.
 
         A global check is similar to a :func:`check` that is applied
         on a per command basis except it is run before any application command checks
@@ -1160,7 +1161,7 @@ class InteractionBotBase(CommonBotBase):
         Parameters
         ----------
         call_once: :class:`bool`
-            Whether the function should only be called once per :meth:`.InvokableApplicationCommand.invoke` call.
+            Whether the function should only be called once per invoke call.
         slash_commands: :class:`bool`
             Whether this check is for slash commands.
         user_commands: :class:`bool`
@@ -1191,7 +1192,6 @@ class InteractionBotBase(CommonBotBase):
     async def application_command_can_run(
         self, inter: ApplicationCommandInteraction, *, call_once: bool = False
     ) -> bool:
-
         if inter.data.type is ApplicationCommandType.chat_input:
             checks = self._slash_command_check_once if call_once else self._slash_command_checks
 
@@ -1211,7 +1211,8 @@ class InteractionBotBase(CommonBotBase):
 
     def before_slash_command_invoke(self, coro: CFT) -> CFT:
         """Similar to :meth:`Bot.before_invoke` but for slash commands,
-        and it takes an :class:`.ApplicationCommandInteraction` as its only parameter."""
+        and it takes an :class:`.ApplicationCommandInteraction` as its only parameter.
+        """
         if not asyncio.iscoroutinefunction(coro):
             raise TypeError("The pre-invoke hook must be a coroutine.")
 
@@ -1220,7 +1221,8 @@ class InteractionBotBase(CommonBotBase):
 
     def after_slash_command_invoke(self, coro: CFT) -> CFT:
         """Similar to :meth:`Bot.after_invoke` but for slash commands,
-        and it takes an :class:`.ApplicationCommandInteraction` as its only parameter."""
+        and it takes an :class:`.ApplicationCommandInteraction` as its only parameter.
+        """
         if not asyncio.iscoroutinefunction(coro):
             raise TypeError("The post-invoke hook must be a coroutine.")
 
@@ -1305,7 +1307,6 @@ class InteractionBotBase(CommonBotBase):
         interaction: :class:`disnake.ApplicationCommandInteraction`
             The interaction to process commands for.
         """
-
         # This usually comes from the blind spots of the sync algorithm.
         # Since not all guild commands are cached, it is possible to experience such issues.
         # In this case, the blind spot is the interaction guild, let's fix it:

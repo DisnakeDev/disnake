@@ -98,7 +98,7 @@ MISSING = utils.MISSING
 class Snowflake(Protocol):
     """An ABC that details the common operations on a Discord model.
 
-    Almost all :ref:`Discord models <discord_api_models>` meet this
+    Almost all :ref:`Discord models <discord_model>` meet this
     abstract base class.
 
     If you want to create a snowflake on your own, consider using
@@ -483,7 +483,8 @@ class GuildChannel(ABC):
     @property
     def changed_roles(self) -> List[Role]:
         """List[:class:`.Role`]: Returns a list of roles that have been overridden from
-        their default values in the :attr:`.Guild.roles` attribute."""
+        their default values in the :attr:`.Guild.roles` attribute.
+        """
         ret = []
         g = self.guild
         for overwrite in filter(lambda o: o.is_role(), self._overwrites):
@@ -603,8 +604,7 @@ class GuildChannel(ABC):
 
     @property
     def jump_url(self) -> str:
-        """
-        A URL that can be used to jump to this channel.
+        """A URL that can be used to jump to this channel.
 
         .. versionadded:: 2.4
 
@@ -846,6 +846,7 @@ class GuildChannel(ABC):
         manage_emojis_and_stickers: Optional[bool] = ...,
         manage_events: Optional[bool] = ...,
         manage_guild: Optional[bool] = ...,
+        manage_guild_expressions: Optional[bool] = ...,
         manage_messages: Optional[bool] = ...,
         manage_nicknames: Optional[bool] = ...,
         manage_permissions: Optional[bool] = ...,
@@ -871,18 +872,24 @@ class GuildChannel(ABC):
         use_external_emojis: Optional[bool] = ...,
         use_external_stickers: Optional[bool] = ...,
         use_slash_commands: Optional[bool] = ...,
+        use_soundboard: Optional[bool] = ...,
         use_voice_activation: Optional[bool] = ...,
         view_audit_log: Optional[bool] = ...,
         view_channel: Optional[bool] = ...,
+        view_creator_monetization_analytics: Optional[bool] = ...,
         view_guild_insights: Optional[bool] = ...,
     ) -> None:
         ...
 
     async def set_permissions(
-        self, target, *, overwrite=MISSING, reason=None, **permissions
+        self,
+        target,
+        *,
+        overwrite: Optional[PermissionOverwrite] = MISSING,
+        reason: Optional[str] = None,
+        **permissions,
     ) -> None:
-        """
-        |coro|
+        """|coro|
 
         Sets the channel specific permission overwrites for a target in the
         channel.
@@ -910,7 +917,6 @@ class GuildChannel(ABC):
 
         Examples
         --------
-
         Setting allow and deny: ::
 
             await message.channel.set_permissions(message.author, view_channel=True,
@@ -968,8 +974,8 @@ class GuildChannel(ABC):
                 raise TypeError("No overwrite provided.")
             try:
                 overwrite = PermissionOverwrite(**permissions)
-            except (ValueError, TypeError):
-                raise TypeError("Invalid permissions given to keyword arguments.")
+            except (ValueError, TypeError) as e:
+                raise TypeError("Invalid permissions given to keyword arguments.") from e
         else:
             if len(permissions) > 0:
                 raise TypeError("Cannot mix overwrite and keyword arguments.")
@@ -1331,9 +1337,10 @@ class Messageable:
     - :class:`~disnake.GroupChannel`
     - :class:`~disnake.User`
     - :class:`~disnake.Member`
-    - :class:`~disnake.ext.commands.Context`
     - :class:`~disnake.Thread`
     - :class:`~disnake.VoiceChannel`
+    - :class:`~disnake.StageChannel`
+    - :class:`~disnake.ext.commands.Context`
     - :class:`~disnake.PartialMessageable`
     """
 
@@ -1355,6 +1362,7 @@ class Messageable:
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: AllowedMentions = ...,
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
@@ -1375,6 +1383,7 @@ class Messageable:
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: AllowedMentions = ...,
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
@@ -1395,6 +1404,7 @@ class Messageable:
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: AllowedMentions = ...,
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
@@ -1415,6 +1425,7 @@ class Messageable:
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: AllowedMentions = ...,
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
@@ -1435,7 +1446,8 @@ class Messageable:
         stickers: Optional[Sequence[Union[GuildSticker, StickerItem]]] = None,
         delete_after: Optional[float] = None,
         nonce: Optional[Union[str, int]] = None,
-        suppress_embeds: bool = False,
+        suppress_embeds: Optional[bool] = None,
+        flags: Optional[MessageFlags] = None,
         allowed_mentions: Optional[AllowedMentions] = None,
         reference: Optional[Union[Message, MessageReference, PartialMessage]] = None,
         mention_author: Optional[bool] = None,
@@ -1535,6 +1547,16 @@ class Messageable:
 
             .. versionadded:: 2.5
 
+        flags: :class:`.MessageFlags`
+            The flags to set for this message.
+            Only :attr:`~.MessageFlags.suppress_embeds` and :attr:`~.MessageFlags.suppress_notifications`
+            are supported.
+
+            If parameter ``suppress_embeds`` is provided,
+            that will override the setting of :attr:`.MessageFlags.suppress_embeds`.
+
+            .. versionadded:: 2.9
+
         Raises
         ------
         HTTPException
@@ -1623,10 +1645,12 @@ class Messageable:
         else:
             components_payload = None
 
-        if suppress_embeds:
-            flags = MessageFlags.suppress_embeds.flag
-        else:
-            flags = 0
+        flags_payload = None
+        if suppress_embeds is not None:
+            flags = MessageFlags._from_value(0 if flags is None else flags.value)
+            flags.suppress_embeds = suppress_embeds
+        if flags is not None:
+            flags_payload = flags.value
 
         if files is not None:
             if len(files) > 10:
@@ -1646,7 +1670,7 @@ class Messageable:
                     message_reference=reference_payload,
                     stickers=stickers_payload,
                     components=components_payload,
-                    flags=flags,
+                    flags=flags_payload,
                 )
             finally:
                 for f in files:
@@ -1662,7 +1686,7 @@ class Messageable:
                 message_reference=reference_payload,
                 stickers=stickers_payload,
                 components=components_payload,
-                flags=flags,
+                flags=flags_payload,
             )
 
         ret = state.create_message(channel=channel, data=data)
@@ -1773,7 +1797,6 @@ class Messageable:
 
         Examples
         --------
-
         Usage ::
 
             counter = 0
@@ -1820,7 +1843,7 @@ class Messageable:
             The request to get message history failed.
 
         Yields
-        -------
+        ------
         :class:`.Message`
             The message with the message data parsed.
         """

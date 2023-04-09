@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""
-Some documentation to refer to:
+"""Some documentation to refer to:
 
 - Our main web socket (mWS) sends opcode 4 with a guild ID and channel ID.
 - The mWS receives VOICE_STATE_UPDATE and VOICE_SERVER_UPDATE.
@@ -150,7 +149,9 @@ class VoiceProtocol:
         raise NotImplementedError
 
     def cleanup(self) -> None:
-        """This method *must* be called to ensure proper clean-up during a disconnect.
+        """Cleans up the internal state.
+
+        **This method *must* be called to ensure proper clean-up during a disconnect.**
 
         It is advisable to call this from within :meth:`disconnect` when you are
         completely done with the voice protocol instance.
@@ -170,7 +171,7 @@ class VoiceClient(VoiceProtocol):
     e.g. :meth:`VoiceChannel.connect`.
 
     Warning
-    --------
+    -------
     In order to use PCM based AudioSources, you must have the opus library
     installed on your system and loaded through :func:`opus.load_opus`.
     Otherwise, your AudioSources must be opus encoded (e.g. using :class:`FFmpegOpusAudio`)
@@ -243,7 +244,7 @@ class VoiceClient(VoiceProtocol):
         """:class:`ClientUser`: The user connected to voice (i.e. ourselves)."""
         return self._state.user
 
-    def checked_add(self, attr, value, limit) -> None:
+    def checked_add(self, attr: str, value: int, limit: int) -> None:
         val = getattr(self, attr)
         if val + value > limit:
             setattr(self, attr, 0)
@@ -567,7 +568,6 @@ class VoiceClient(VoiceProtocol):
         OpusNotLoaded
             Source is not opus encoded and opus is not loaded.
         """
-
         if not self.is_connected():
             raise ClientException("Not connected to voice.")
 
@@ -644,7 +644,6 @@ class VoiceClient(VoiceProtocol):
         opus.OpusError
             Encoding the data failed.
         """
-
         self.checked_add("sequence", 1, 65535)
         if encode:
             encoded_data = self.encoder.encode(data, self.encoder.SAMPLES_PER_FRAME)

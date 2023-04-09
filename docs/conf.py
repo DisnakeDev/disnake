@@ -16,7 +16,7 @@ import importlib.util
 import inspect
 import os
 import re
-import subprocess  # noqa: S404
+import subprocess  # noqa: TID251
 import sys
 from typing import Any, Dict, Optional
 from urllib.parse import urljoin
@@ -49,6 +49,8 @@ extensions = [
     "hoverxref.extension",
     "notfound.extension",
     "sphinxext.opengraph",
+    "redirects",
+    "fulltoc",
     "exception_hierarchy",
     "attributetable",
     "resourcelinks",
@@ -90,8 +92,8 @@ source_suffix = ".rst"
 # The encoding of source files.
 # source_encoding = 'utf-8-sig'
 
-# The master toctree document.
-master_doc = "index"
+# The root toctree document.
+root_doc = "index"
 
 # General information about the project.
 project = "disnake"
@@ -115,7 +117,7 @@ _IS_READTHEDOCS = bool(os.getenv("READTHEDOCS"))
 
 
 def git(*args: str) -> str:
-    return subprocess.check_output(["git", *args]).strip().decode()  # noqa: S603,S607
+    return subprocess.check_output(["git", *args]).strip().decode()
 
 
 # Current git reference. Uses branch/tag name if found, otherwise uses commit hash
@@ -388,7 +390,12 @@ html_static_path = ["_static"]
 # implements a search results scorer. If empty, the default will be used.
 html_search_scorer = "_static/scorer.js"
 
-html_js_files = ["custom.js", "copy.js", "sidebar.js", "touch.js"]
+html_js_files = [
+    "custom.js",
+    "copy.js",
+    "sidebar.js",
+    "touch.js",
+]
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = "disnake.pydoc"

@@ -21,6 +21,7 @@ from typing import (
 
 import disnake
 import disnake.utils
+from disnake.enums import Event
 
 from ._types import _BaseCommand
 from .base_core import InvokableApplicationCommand
@@ -37,6 +38,7 @@ if TYPE_CHECKING:
     from .core import Command
 
     AnyBot = Union[Bot, AutoShardedBot, InteractionBot, AutoShardedInteractionBot]
+
 
 __all__ = (
     "CogMeta",
@@ -282,8 +284,7 @@ class Cog(metaclass=CogMeta):
         return self
 
     def get_commands(self) -> List[Command]:
-        """
-        Returns a list of commands the cog has.
+        """Returns a list of commands the cog has.
 
         Returns
         -------
@@ -298,8 +299,7 @@ class Cog(metaclass=CogMeta):
         return [c for c in self.__cog_commands__ if c.parent is None]
 
     def get_application_commands(self) -> List[InvokableApplicationCommand]:
-        """
-        Returns a list of application commands the cog has.
+        """Returns a list of application commands the cog has.
 
         Returns
         -------
@@ -314,8 +314,7 @@ class Cog(metaclass=CogMeta):
         return list(self.__cog_app_commands__)
 
     def get_slash_commands(self) -> List[InvokableSlashCommand]:
-        """
-        Returns a list of slash commands the cog has.
+        """Returns a list of slash commands the cog has.
 
         Returns
         -------
@@ -330,8 +329,7 @@ class Cog(metaclass=CogMeta):
         return [c for c in self.__cog_app_commands__ if isinstance(c, InvokableSlashCommand)]
 
     def get_user_commands(self) -> List[InvokableUserCommand]:
-        """
-        Returns a list of user commands the cog has.
+        """Returns a list of user commands the cog has.
 
         Returns
         -------
@@ -342,8 +340,7 @@ class Cog(metaclass=CogMeta):
         return [c for c in self.__cog_app_commands__ if isinstance(c, InvokableUserCommand)]
 
     def get_message_commands(self) -> List[InvokableMessageCommand]:
-        """
-        Returns a list of message commands the cog has.
+        """Returns a list of message commands the cog has.
 
         Returns
         -------
@@ -399,26 +396,26 @@ class Cog(metaclass=CogMeta):
         return getattr(method.__func__, "__cog_special_method__", method)
 
     @classmethod
-    def listener(cls, name: str = MISSING) -> Callable[[FuncT], FuncT]:
+    def listener(cls, name: Union[str, Event] = MISSING) -> Callable[[FuncT], FuncT]:
         """A decorator that marks a function as a listener.
 
         This is the cog equivalent of :meth:`.Bot.listen`.
 
         Parameters
         ----------
-        name: :class:`str`
+        name: Union[:class:`str`, :class:`.Event`]
             The name of the event being listened to. If not provided, it
             defaults to the function's name.
 
         Raises
         ------
         TypeError
-            The function is not a coroutine function or a string was not passed as
+            The function is not a coroutine function or a string or an :class:`.Event` enum member was not passed as
             the name.
         """
-        if name is not MISSING and not isinstance(name, str):
+        if name is not MISSING and not isinstance(name, (str, Event)):
             raise TypeError(
-                f"Cog.listener expected str but received {name.__class__.__name__!r} instead."
+                f"Cog.listener expected str or Enum but received {name.__class__.__name__!r} instead."
             )
 
         def decorator(func: FuncT) -> FuncT:
@@ -428,7 +425,11 @@ class Cog(metaclass=CogMeta):
             if not asyncio.iscoroutinefunction(actual):
                 raise TypeError("Listener function must be a coroutine function.")
             actual.__cog_listener__ = True
-            to_assign = name or actual.__name__
+            to_assign = (
+                actual.__name__
+                if name is MISSING
+                else (name if isinstance(name, str) else f"on_{name.value}")
+            )
             try:
                 actual.__cog_listener_names__.append(to_assign)
             except AttributeError:
@@ -553,7 +554,7 @@ class Cog(metaclass=CogMeta):
 
     @_cog_special_method
     def cog_check(self, ctx: Context) -> bool:
-        """A special method that registers as a :func:`~.ext.commands.check`
+        """A special method that registers as a :func:`~.check`
         for every text command and subcommand in this cog.
 
         This is for text commands only, and doesn't apply to application commands.
@@ -565,7 +566,7 @@ class Cog(metaclass=CogMeta):
 
     @_cog_special_method
     def cog_slash_command_check(self, inter: ApplicationCommandInteraction) -> bool:
-        """A special method that registers as a :func:`~.ext.commands.check`
+        """A special method that registers as a :func:`~.check`
         for every slash command and subcommand in this cog.
 
         This function **can** be a coroutine and must take a sole parameter,
@@ -733,12 +734,12 @@ class Cog(metaclass=CogMeta):
             if command.parent is None:
                 try:
                     bot.add_command(command)  # type: ignore
-                except Exception as e:
+                except Exception:
                     # undo our additions
                     for to_undo in self.__cog_commands__[:index]:
                         if to_undo.parent is None:
                             bot.remove_command(to_undo.name)  # type: ignore
-                    raise e
+                    raise
 
         for index, command in enumerate(self.__cog_app_commands__):
             command.cog = self
@@ -749,7 +750,7 @@ class Cog(metaclass=CogMeta):
                     bot.add_user_command(command)
                 elif isinstance(command, InvokableMessageCommand):
                     bot.add_message_command(command)
-            except Exception as e:
+            except Exception:
                 # undo our additions
                 for to_undo in self.__cog_app_commands__[:index]:
                     if isinstance(to_undo, InvokableSlashCommand):
@@ -758,7 +759,7 @@ class Cog(metaclass=CogMeta):
                         bot.remove_user_command(to_undo.name)
                     elif isinstance(to_undo, InvokableMessageCommand):
                         bot.remove_message_command(to_undo.name)
-                raise e
+                raise
 
         if not hasattr(self.cog_load.__func__, "__cog_special_method__"):
             bot.loop.create_task(disnake.utils.maybe_coroutine(self.cog_load))

@@ -9,6 +9,7 @@ import sys
 import traceback
 import warnings
 from datetime import datetime, timedelta
+from errno import ECONNRESET
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -39,6 +40,7 @@ from .app_commands import (
     GuildApplicationCommandPermissions,
 )
 from .appinfo import AppInfo
+from .application_role_connection import ApplicationRoleConnectionMetadata
 from .backoff import ExponentialBackoff
 from .channel import PartialMessageable, _threaded_channel_factory
 from .emoji import Emoji
@@ -53,7 +55,7 @@ from .errors import (
 )
 from .flags import ApplicationFlags, Intents, MemberCacheFlags
 from .gateway import DiscordWebSocket, ReconnectWebSocket
-from .guild import Guild
+from .guild import Guild, GuildBuilder
 from .guild_preview import GuildPreview
 from .http import HTTPClient
 from .i18n import LocalizationProtocol, LocalizationStore
@@ -79,8 +81,12 @@ if TYPE_CHECKING:
     from .app_commands import APIApplicationCommand
     from .asset import AssetBytes
     from .channel import DMChannel
+    from .enums import Event
     from .member import Member
     from .message import Message
+    from .types.application_role_connection import (
+        ApplicationRoleConnectionMetadata as ApplicationRoleConnectionMetadataPayload,
+    )
     from .types.gateway import SessionStartLimit as SessionStartLimitPayload
     from .voice_client import VoiceProtocol
 
@@ -92,7 +98,6 @@ __all__ = (
 )
 
 CoroT = TypeVar("CoroT", bound=Callable[..., Coroutine[Any, Any, Any]])
-
 
 _log = logging.getLogger(__name__)
 
@@ -178,8 +183,7 @@ class SessionStartLimit:
 
 
 class GatewayParams(NamedTuple):
-    """
-    Container type for configuring gateway connections.
+    """Container type for configuring gateway connections.
 
     .. versionadded:: 2.6
 
@@ -198,8 +202,7 @@ class GatewayParams(NamedTuple):
 
 
 class Client:
-    """
-    Represents a client connection that connects to Discord.
+    """Represents a client connection that connects to Discord.
     This class is used to interact with the Discord WebSocket and API.
 
     A number of options can be passed to the :class:`Client`.
@@ -970,7 +973,7 @@ class Client:
                     return
 
                 # If we get connection reset by peer then try to RESUME
-                if isinstance(exc, OSError) and exc.errno in (54, 10054):
+                if isinstance(exc, OSError) and exc.errno == ECONNRESET:
                     ws_params.update(
                         sequence=self.ws.sequence,
                         initial=False,
@@ -1378,8 +1381,7 @@ class Client:
         return list(data.values())
 
     def get_guild_slash_commands(self, guild_id: int) -> List[APISlashCommand]:
-        """
-        Returns a list of all slash commands in the guild with the given ID.
+        """Returns a list of all slash commands in the guild with the given ID.
 
         Parameters
         ----------
@@ -1395,8 +1397,7 @@ class Client:
         return [cmd for cmd in data.values() if isinstance(cmd, APISlashCommand)]
 
     def get_guild_user_commands(self, guild_id: int) -> List[APIUserCommand]:
-        """
-        Returns a list of all user commands in the guild with the given ID.
+        """Returns a list of all user commands in the guild with the given ID.
 
         Parameters
         ----------
@@ -1412,8 +1413,7 @@ class Client:
         return [cmd for cmd in data.values() if isinstance(cmd, APIUserCommand)]
 
     def get_guild_message_commands(self, guild_id: int) -> List[APIMessageCommand]:
-        """
-        Returns a list of all message commands in the guild with the given ID.
+        """Returns a list of all message commands in the guild with the given ID.
 
         Parameters
         ----------
@@ -1429,8 +1429,7 @@ class Client:
         return [cmd for cmd in data.values() if isinstance(cmd, APIMessageCommand)]
 
     def get_global_command(self, id: int) -> Optional[APIApplicationCommand]:
-        """
-        Returns a global application command with the given ID.
+        """Returns a global application command with the given ID.
 
         Parameters
         ----------
@@ -1445,8 +1444,7 @@ class Client:
         return self._connection._get_global_application_command(id)
 
     def get_guild_command(self, guild_id: int, id: int) -> Optional[APIApplicationCommand]:
-        """
-        Returns a guild application command with the given guild ID and application command ID.
+        """Returns a guild application command with the given guild ID and application command ID.
 
         Parameters
         ----------
@@ -1465,8 +1463,7 @@ class Client:
     def get_global_command_named(
         self, name: str, cmd_type: Optional[ApplicationCommandType] = None
     ) -> Optional[APIApplicationCommand]:
-        """
-        Returns a global application command matching the given name.
+        """Returns a global application command matching the given name.
 
         Parameters
         ----------
@@ -1485,8 +1482,7 @@ class Client:
     def get_guild_command_named(
         self, guild_id: int, name: str, cmd_type: Optional[ApplicationCommandType] = None
     ) -> Optional[APIApplicationCommand]:
-        """
-        Returns a guild application command matching the given name.
+        """Returns a guild application command matching the given name.
 
         Parameters
         ----------
@@ -1522,7 +1518,7 @@ class Client:
 
     def wait_for(
         self,
-        event: str,
+        event: Union[str, Event],
         *,
         check: Optional[Callable[..., bool]] = None,
         timeout: Optional[float] = None,
@@ -1542,14 +1538,13 @@ class Client:
 
         In case the event returns multiple arguments, a :class:`tuple` containing those
         arguments is returned instead. Please check the
-        :ref:`documentation <discord-api-events>` for a list of events and their
+        :ref:`documentation <disnake_api_events>` for a list of events and their
         parameters.
 
         This function returns the **first event that meets the requirements**.
 
         Examples
         --------
-
         Waiting for a user reply: ::
 
             @client.event
@@ -1562,6 +1557,19 @@ class Client:
                         return m.content == 'hello' and m.channel == channel
 
                     msg = await client.wait_for('message', check=check)
+                    await channel.send(f'Hello {msg.author}!')
+
+            # using events enums:
+            @client.event
+            async def on_message(message):
+                if message.content.startswith('$greet'):
+                    channel = message.channel
+                    await channel.send('Say hello!')
+
+                    def check(m):
+                        return m.content == 'hello' and m.channel == channel
+
+                    msg = await client.wait_for(Event.message, check=check)
                     await channel.send(f'Hello {msg.author}!')
 
         Waiting for a thumbs up reaction from the message author: ::
@@ -1585,9 +1593,10 @@ class Client:
 
         Parameters
         ----------
-        event: :class:`str`
-            The event name, similar to the :ref:`event reference <discord-api-events>`,
-            but without the ``on_`` prefix, to wait for.
+        event: Union[:class:`str`, :class:`.Event`]
+            The event name, similar to the :ref:`event reference <disnake_api_events>`,
+            but without the ``on_`` prefix, to wait for. It's recommended
+            to use :class:`.Event`.
         check: Optional[Callable[..., :class:`bool`]]
             A predicate to check what to wait for. The arguments must meet the
             parameters of the event being waited for.
@@ -1605,7 +1614,7 @@ class Client:
         Any
             Returns no arguments, a single argument, or a :class:`tuple` of multiple
             arguments that mirrors the parameters passed in the
-            :ref:`event reference <discord-api-events>`.
+            :ref:`event <disnake_api_events>`.
         """
         future = self.loop.create_future()
         if check is None:
@@ -1615,7 +1624,7 @@ class Client:
 
             check = _check
 
-        ev = event.lower()
+        ev = event.lower() if isinstance(event, str) else event.value
         try:
             listeners = self._listeners[ev]
         except KeyError:
@@ -1630,13 +1639,12 @@ class Client:
     def event(self, coro: CoroT) -> CoroT:
         """A decorator that registers an event to listen to.
 
-        You can find more info about the events on the :ref:`documentation below <discord-api-events>`.
+        You can find more info about the events in the :ref:`documentation <disnake_api_events>`.
 
         The events must be a :ref:`coroutine <coroutine>`, if not, :exc:`TypeError` is raised.
 
         Example
-        ---------
-
+        -------
         .. code-block:: python3
 
             @client.event
@@ -1737,7 +1745,6 @@ class Client:
 
         Examples
         --------
-
         Usage ::
 
             async for guild in client.fetch_guilds(limit=150):
@@ -1772,7 +1779,7 @@ class Client:
             Retrieving the guilds failed.
 
         Yields
-        --------
+        ------
         :class:`.Guild`
             The guild with the guild data parsed.
         """
@@ -1883,7 +1890,9 @@ class Client:
 
         Creates a :class:`.Guild`.
 
-        Bot accounts in more than 10 guilds are not allowed to create guilds.
+        See :func:`guild_builder` for a more comprehensive alternative.
+
+        Bot accounts in 10 or more guilds are not allowed to create guilds.
 
         .. versionchanged:: 2.5
             Removed the ``region`` parameter.
@@ -1921,8 +1930,7 @@ class Client:
         Returns
         -------
         :class:`.Guild`
-            The created guild. This is not the same guild that is
-            added to cache.
+            The created guild. This is not the same guild that is added to cache.
         """
         if icon is not MISSING:
             icon_base64 = await utils._assetbytes_to_base64_data(icon)
@@ -1934,6 +1942,28 @@ class Client:
         else:
             data = await self.http.create_guild(name, icon_base64)
         return Guild(data=data, state=self._connection)
+
+    def guild_builder(self, name: str) -> GuildBuilder:
+        """Creates a builder object that can be used to create more complex guilds.
+
+        This is a more comprehensive alternative to :func:`create_guild`.
+        See :class:`.GuildBuilder` for details and examples.
+
+        Bot accounts in 10 or more guilds are not allowed to create guilds.
+
+        .. versionadded:: 2.8
+
+        Parameters
+        ----------
+        name: :class:`str`
+            The name of the guild.
+
+        Returns
+        -------
+        :class:`.GuildBuilder`
+            The guild builder object for configuring and creating a new guild.
+        """
+        return GuildBuilder(name=name, state=self._connection)
 
     async def fetch_stage_instance(self, channel_id: int, /) -> StageInstance:
         """|coro|
@@ -2687,3 +2717,64 @@ class Client:
             The permissions configured for the specified application command.
         """
         return await self._connection.fetch_command_permissions(guild_id, command_id)
+
+    async def fetch_role_connection_metadata(self) -> List[ApplicationRoleConnectionMetadata]:
+        """|coro|
+
+        Retrieves the :class:`.ApplicationRoleConnectionMetadata` records for the application.
+
+        .. versionadded:: 2.8
+
+        Raises
+        ------
+        HTTPException
+            Retrieving the metadata records failed.
+
+        Returns
+        -------
+        List[:class:`.ApplicationRoleConnectionMetadata`]
+            The list of metadata records.
+        """
+        data = await self.http.get_application_role_connection_metadata_records(self.application_id)
+        return [ApplicationRoleConnectionMetadata._from_data(record) for record in data]
+
+    async def edit_role_connection_metadata(
+        self, records: Sequence[ApplicationRoleConnectionMetadata]
+    ) -> List[ApplicationRoleConnectionMetadata]:
+        """|coro|
+
+        Edits the :class:`.ApplicationRoleConnectionMetadata` records for the application.
+
+        An application can have up to 5 metadata records.
+
+        .. warning::
+            This will overwrite all existing metadata records.
+            Consider :meth:`fetching <fetch_role_connection_metadata>` them first,
+            and constructing the new list of metadata records based off of the returned list.
+
+        .. versionadded:: 2.8
+
+        Parameters
+        ----------
+        records: Sequence[:class:`.ApplicationRoleConnectionMetadata`]
+            The new metadata records.
+
+        Raises
+        ------
+        HTTPException
+            Editing the metadata records failed.
+
+        Returns
+        -------
+        List[:class:`.ApplicationRoleConnectionMetadata`]
+            The list of newly edited metadata records.
+        """
+        payload: List[ApplicationRoleConnectionMetadataPayload] = []
+        for record in records:
+            record._localize(self.i18n)
+            payload.append(record.to_dict())
+
+        data = await self.http.edit_application_role_connection_metadata_records(
+            self.application_id, payload
+        )
+        return [ApplicationRoleConnectionMetadata._from_data(record) for record in data]

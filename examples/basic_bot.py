@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""
-An example to showcase the disnake.ext.commands extension module.
+"""An example to showcase the disnake.ext.commands extension module.
 
 There are a number of utility commands being showcased here.
 """

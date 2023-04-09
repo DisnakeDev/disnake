@@ -10,7 +10,7 @@ from disnake.ext.tasks import LF, Loop, loop
 
 
 class TestLoops:
-    def test_decorator(self):
+    def test_decorator(self) -> None:
         class Cog(commands.Cog):
             @loop(seconds=30, minutes=0, hours=0)
             async def task(self) -> None:
@@ -25,8 +25,8 @@ class TestLoops:
             def task() -> None:
                 ...
 
-    def test_mixing_time(self):
-        async def callback():
+    def test_mixing_time(self) -> None:
+        async def callback() -> None:
             pass
 
         with pytest.raises(TypeError):
@@ -38,7 +38,7 @@ class TestLoops:
             async def task() -> None:
                 ...
 
-    def test_inheritance(self):
+    def test_inheritance(self) -> None:
         class HyperLoop(Loop[LF]):
             def __init__(self, coro: LF, time_tup: Tuple[float, float, float]) -> None:
                 s, m, h = time_tup
@@ -60,7 +60,7 @@ class TestLoops:
             def __init__(self, coro: Any) -> None:
                 ...
 
-        async def callback():
+        async def callback() -> None:
             pass
 
         HyperLoop(callback, (1, 2, 3))

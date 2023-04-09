@@ -32,12 +32,14 @@ from typing import (
 from . import utils
 from .activity import BaseActivity
 from .app_commands import GuildApplicationCommandPermissions, application_command_factory
+from .audit_logs import AuditLogEntry
 from .automod import AutoModActionExecution, AutoModRule
 from .channel import (
     DMChannel,
     ForumChannel,
     GroupChannel,
     PartialMessageable,
+    StageChannel,
     TextChannel,
     VoiceChannel,
     _guild_channel_factory,
@@ -759,7 +761,7 @@ class ConnectionState:
 
         if channel:
             # we ensure that the channel is a type that implements last_message_id
-            if channel.__class__ in (TextChannel, Thread, VoiceChannel):
+            if channel.__class__ in (TextChannel, Thread, VoiceChannel, StageChannel):
                 channel.last_message_id = message.id  # type: ignore
             # Essentially, messages *don't* count towards message_count, if:
             # - they're the thread starter message
@@ -1880,10 +1882,32 @@ class ConnectionState:
         event = AutoModActionExecution(data=data, guild=guild)
         self.dispatch("automod_action_execution", event)
 
+    def parse_guild_audit_log_entry_create(self, data: gateway.AuditLogEntryCreate) -> None:
+        guild = self._get_guild(int(data["guild_id"]))
+        if guild is None:
+            _log.debug(
+                "GUILD_AUDIT_LOG_ENTRY_CREATE referencing unknown guild ID: %s. Discarding.",
+                data["guild_id"],
+            )
+            return
+
+        entry = AuditLogEntry(
+            data=data,
+            guild=guild,
+            application_commands={},
+            automod_rules={},
+            guild_scheduled_events=guild._scheduled_events,
+            integrations={},
+            threads=guild._threads,
+            users=self._users,
+            webhooks={},
+        )
+        self.dispatch("audit_log_entry_create", entry)
+
     def _get_reaction_user(
         self, channel: MessageableChannel, user_id: int
     ) -> Optional[Union[User, Member]]:
-        if isinstance(channel, (TextChannel, VoiceChannel, Thread)):
+        if isinstance(channel, (TextChannel, VoiceChannel, Thread, StageChannel)):
             return channel.guild.get_member(user_id)
         return self.get_user(user_id)
 
@@ -2070,7 +2094,7 @@ class AutoShardedConnectionState(ConnectionState):
             if new_guild is not None and new_guild is not msg.guild:
                 channel_id = msg.channel.id
                 channel = new_guild._resolve_channel(channel_id) or Object(id=channel_id)
-                # channel will either be a TextChannel, VoiceChannel, Thread or Object
+                # channel will either be a TextChannel, VoiceChannel, Thread, StageChannel, or Object
                 msg._rebind_cached_references(new_guild, channel)  # type: ignore
 
         # these generally get deallocated once the voice reconnect times out

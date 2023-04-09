@@ -212,8 +212,7 @@ class _CaseInsensitiveDict(dict):
 
 # TODO: ideally, `ContextT` should be bound on the class here as well
 class Command(_BaseCommand, Generic[CogT, P, T]):
-    """
-    A class that implements the protocol for a bot text command.
+    """A class that implements the protocol for a bot text command.
 
     These are not created manually, instead they are created via the
     decorator or functional interface.
@@ -560,7 +559,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
         if view.eof:
             if param.kind == param.VAR_POSITIONAL:
-                raise RuntimeError()  # break the loop
+                raise RuntimeError  # break the loop
             if required:
                 if self._is_typing_optional(param.annotation):
                     return None
@@ -575,7 +574,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         else:
             try:
                 argument = view.get_quoted_word()
-            except ArgumentParsingError as exc:
+            except ArgumentParsingError:
                 if (
                     self._is_typing_optional(param.annotation)
                     and not param.kind == param.VAR_POSITIONAL
@@ -583,7 +582,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
                     view.index = previous
                     return None
                 else:
-                    raise exc
+                    raise
         view.previous = previous
 
         # type-checker fails to narrow argument
@@ -622,7 +621,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             value = await run_converters(ctx, converter, argument, param)  # type: ignore
         except (CommandError, ArgumentParsingError):
             view.index = previous
-            raise RuntimeError() from None  # break loop
+            raise RuntimeError from None  # break loop
         else:
             return value
 
@@ -657,11 +656,11 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         in ``?one two three`` the parent name would be ``one two``.
         """
         entries = []
-        command = self
+        command: Command[Any, ..., Any] = self
         # command.parent is type-hinted as GroupMixin some attributes are resolved via MRO
-        while command.parent is not None:  # type: ignore
+        while command.parent is not None:
             command = command.parent  # type: ignore
-            entries.append(command.name)  # type: ignore
+            entries.append(command.name)
 
         return " ".join(reversed(entries))
 
@@ -676,8 +675,8 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         .. versionadded:: 1.1
         """
         entries = []
-        command = self
-        while command.parent is not None:  # type: ignore
+        command: Command[Any, ..., Any] = self
+        while command.parent is not None:
             command = command.parent  # type: ignore
             entries.append(command)
 
@@ -703,7 +702,6 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         For example, in ``?one two three`` the qualified name would be
         ``one two three``.
         """
-
         parent = self.full_parent_name
         if parent:
             return f"{parent} {self.name}"
@@ -730,7 +728,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             except StopIteration:
                 raise disnake.ClientException(
                     f'Callback for {self.name} command is missing "self" parameter.'
-                )
+                ) from None
 
         # next we have the 'ctx' as the next parameter
         try:
@@ -738,7 +736,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         except StopIteration:
             raise disnake.ClientException(
                 f'Callback for {self.name} command is missing "ctx" parameter.'
-            )
+            ) from None
 
         for name, param in iterator:
             ctx.current_parameter = param
@@ -906,7 +904,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         await self.prepare(ctx)
 
         # terminate the invoked_subcommand chain.
-        # since we're in a regular command (and not a group) then
+        # since we're in a regular prefix command (and not a group) then
         # the invoked subcommand is None.
         ctx.invoked_subcommand = None
         ctx.subcommand_passed = None
@@ -1692,8 +1690,7 @@ def group(
 
 
 def check(predicate: Check) -> Callable[[T], T]:
-    """
-    A decorator that adds a check to the :class:`.Command` or its
+    """A decorator that adds a check to the :class:`.Command` or its
     subclasses. These checks could be accessed via :attr:`.Command.checks`.
 
     These checks should be predicates that take in a single parameter taking
@@ -1730,7 +1727,6 @@ def check(predicate: Check) -> Callable[[T], T]:
 
     Examples
     --------
-
     Creating a basic check to see if the command invoker is you.
 
     .. code-block:: python3
@@ -1788,8 +1784,7 @@ def check(predicate: Check) -> Callable[[T], T]:
 
 
 def check_any(*checks: Check) -> Callable[[T], T]:
-    """
-    A :func:`check` that is added that checks if any of the checks passed
+    """A :func:`check` that is added that checks if any of the checks passed
     will pass, i.e. using logical OR.
 
     If all checks fail then :exc:`.CheckAnyFailure` is raised to signal the failure.
@@ -1815,7 +1810,6 @@ def check_any(*checks: Check) -> Callable[[T], T]:
 
     Examples
     --------
-
     Creating a basic check to see if it's the bot owner or
     the server owner:
 
@@ -1885,7 +1879,7 @@ def has_role(item: Union[int, str]) -> Callable[[T], T]:
 
     def predicate(ctx: AnyContext) -> bool:
         if ctx.guild is None:
-            raise NoPrivateMessage()
+            raise NoPrivateMessage
 
         # ctx.guild is None doesn't narrow ctx.author to Member
         if isinstance(item, int):
@@ -1900,8 +1894,7 @@ def has_role(item: Union[int, str]) -> Callable[[T], T]:
 
 
 def has_any_role(*items: Union[int, str]) -> Callable[[T], T]:
-    """
-    A :func:`.check` that is added that checks if the member invoking the
+    """A :func:`.check` that is added that checks if the member invoking the
     command has **any** of the roles specified. This means that if they have
     one out of the three roles specified, then this check will return `True`.
 
@@ -1934,7 +1927,7 @@ def has_any_role(*items: Union[int, str]) -> Callable[[T], T]:
 
     def predicate(ctx: AnyContext) -> bool:
         if ctx.guild is None:
-            raise NoPrivateMessage()
+            raise NoPrivateMessage
 
         # ctx.guild is None doesn't narrow ctx.author to Member
         getter = functools.partial(disnake.utils.get, ctx.author.roles)  # type: ignore
@@ -1965,7 +1958,7 @@ def bot_has_role(item: int) -> Callable[[T], T]:
 
     def predicate(ctx: AnyContext) -> bool:
         if ctx.guild is None:
-            raise NoPrivateMessage()
+            raise NoPrivateMessage
 
         me = cast(disnake.Member, ctx.me)
         if isinstance(item, int):
@@ -1995,7 +1988,7 @@ def bot_has_any_role(*items: int) -> Callable[[T], T]:
 
     def predicate(ctx: AnyContext) -> bool:
         if ctx.guild is None:
-            raise NoPrivateMessage()
+            raise NoPrivateMessage
 
         me = cast(disnake.Member, ctx.me)
         getter = functools.partial(disnake.utils.get, me.roles)
@@ -2033,6 +2026,7 @@ def has_permissions(
     manage_emojis_and_stickers: bool = ...,
     manage_events: bool = ...,
     manage_guild: bool = ...,
+    manage_guild_expressions: bool = ...,
     manage_messages: bool = ...,
     manage_nicknames: bool = ...,
     manage_permissions: bool = ...,
@@ -2058,9 +2052,11 @@ def has_permissions(
     use_external_emojis: bool = ...,
     use_external_stickers: bool = ...,
     use_slash_commands: bool = ...,
+    use_soundboard: bool = ...,
     use_voice_activation: bool = ...,
     view_audit_log: bool = ...,
     view_channel: bool = ...,
+    view_creator_monetization_analytics: bool = ...,
     view_guild_insights: bool = ...,
 ) -> Callable[[T], T]:
     ...
@@ -2150,6 +2146,7 @@ def bot_has_permissions(
     manage_emojis_and_stickers: bool = ...,
     manage_events: bool = ...,
     manage_guild: bool = ...,
+    manage_guild_expressions: bool = ...,
     manage_messages: bool = ...,
     manage_nicknames: bool = ...,
     manage_permissions: bool = ...,
@@ -2175,9 +2172,11 @@ def bot_has_permissions(
     use_external_emojis: bool = ...,
     use_external_stickers: bool = ...,
     use_slash_commands: bool = ...,
+    use_soundboard: bool = ...,
     use_voice_activation: bool = ...,
     view_audit_log: bool = ...,
     view_channel: bool = ...,
+    view_creator_monetization_analytics: bool = ...,
     view_guild_insights: bool = ...,
 ) -> Callable[[T], T]:
     ...
@@ -2245,6 +2244,7 @@ def has_guild_permissions(
     manage_emojis_and_stickers: bool = ...,
     manage_events: bool = ...,
     manage_guild: bool = ...,
+    manage_guild_expressions: bool = ...,
     manage_messages: bool = ...,
     manage_nicknames: bool = ...,
     manage_permissions: bool = ...,
@@ -2270,9 +2270,11 @@ def has_guild_permissions(
     use_external_emojis: bool = ...,
     use_external_stickers: bool = ...,
     use_slash_commands: bool = ...,
+    use_soundboard: bool = ...,
     use_voice_activation: bool = ...,
     view_audit_log: bool = ...,
     view_channel: bool = ...,
+    view_creator_monetization_analytics: bool = ...,
     view_guild_insights: bool = ...,
 ) -> Callable[[T], T]:
     ...
@@ -2337,6 +2339,7 @@ def bot_has_guild_permissions(
     manage_emojis_and_stickers: bool = ...,
     manage_events: bool = ...,
     manage_guild: bool = ...,
+    manage_guild_expressions: bool = ...,
     manage_messages: bool = ...,
     manage_nicknames: bool = ...,
     manage_permissions: bool = ...,
@@ -2362,9 +2365,11 @@ def bot_has_guild_permissions(
     use_external_emojis: bool = ...,
     use_external_stickers: bool = ...,
     use_slash_commands: bool = ...,
+    use_soundboard: bool = ...,
     use_voice_activation: bool = ...,
     view_audit_log: bool = ...,
     view_channel: bool = ...,
+    view_creator_monetization_analytics: bool = ...,
     view_guild_insights: bool = ...,
 ) -> Callable[[T], T]:
     ...
@@ -2415,7 +2420,7 @@ def dm_only() -> Callable[[T], T]:
 
     def predicate(ctx: AnyContext) -> bool:
         if ctx.guild is not None:
-            raise PrivateMessageOnly()
+            raise PrivateMessageOnly
         return True
 
     return check(predicate)
@@ -2432,7 +2437,7 @@ def guild_only() -> Callable[[T], T]:
 
     def predicate(ctx: AnyContext) -> bool:
         if ctx.guild is None:
-            raise NoPrivateMessage()
+            raise NoPrivateMessage
         return True
 
     return check(predicate)
@@ -2471,7 +2476,15 @@ def is_nsfw() -> Callable[[T], T]:
     def pred(ctx: AnyContext) -> bool:
         ch = ctx.channel
         if ctx.guild is None or (
-            isinstance(ch, (disnake.TextChannel, disnake.VoiceChannel, disnake.Thread))
+            isinstance(
+                ch,
+                (
+                    disnake.TextChannel,
+                    disnake.VoiceChannel,
+                    disnake.Thread,
+                    disnake.StageChannel,
+                ),
+            )
             and ch.is_nsfw()
         ):
             return True
@@ -2609,8 +2622,7 @@ def before_invoke(coro) -> Callable[[T], T]:
     .. versionadded:: 1.4
 
     Example
-    ---------
-
+    -------
     .. code-block:: python3
 
         async def record_usage(ctx):
