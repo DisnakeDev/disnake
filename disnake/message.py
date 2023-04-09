@@ -22,6 +22,7 @@ from typing import (
 )
 
 from . import utils
+from .colour import Colour
 from .components import ActionRow, MessageComponent, _component_factory
 from .embeds import Embed
 from .emoji import Emoji
@@ -33,7 +34,7 @@ from .guild import Guild
 from .member import Member
 from .mixins import Hashable
 from .partial_emoji import PartialEmoji
-from .reaction import Reaction
+from .reaction import BurstReaction, Reaction
 from .sticker import StickerItem
 from .threads import Thread
 from .ui.action_row import components_to_dict
@@ -883,8 +884,15 @@ class Message(Hashable):
         self.id: int = int(data["id"])
         self.application_id: Optional[int] = utils._get_as_snowflake(data, "application_id")
         self.webhook_id: Optional[int] = utils._get_as_snowflake(data, "webhook_id")
-        self.reactions: List[Reaction] = [
-            Reaction(message=self, data=d) for d in data.get("reactions", [])
+        self.reactions: List[Union[Reaction, BurstReaction]] = [
+            BurstReaction(
+                message=self,
+                data=d,
+                colors=[Colour(int(color.lstrip("#"), base=16)) for color in d["burst_colors"]],
+            )
+            if d["count_details"]["burst"] > 0
+            else Reaction(message=self, data=d)
+            for d in data.get("reactions", [])
         ]
         self.attachments: List[Attachment] = [
             Attachment(data=a, state=self._state) for a in data["attachments"]
@@ -985,8 +993,16 @@ class Message(Hashable):
                 "count": 1,
                 "me": is_me,
                 "emoji": data["emoji"],
+                "count_details": {
+                    "normal": 1 if not data["burst"] else 0,
+                    "burst": 1 if data["burst"] else 0,
+                },
+                "burst_colors": [],
             }
-            reaction = Reaction(message=self, data=reaction_data, emoji=emoji)
+            if data["burst"]:
+                reaction = BurstReaction(message=self, data=reaction_data, emoji=emoji, colors=[])
+            else:
+                reaction = Reaction(message=self, data=reaction_data, emoji=emoji)
             self.reactions.append(reaction)
         else:
             reaction.count += 1

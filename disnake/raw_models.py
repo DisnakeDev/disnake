@@ -175,9 +175,23 @@ class RawReactionActionEvent(_RawReprMixin):
         ``REACTION_REMOVE`` for reaction removal.
 
         .. versionadded:: 1.3
+
+    burst: :class:`bool`
+        The reaction is Super reaction.
+
+        .. versionadded:: 2.9
     """
 
-    __slots__ = ("message_id", "user_id", "channel_id", "guild_id", "emoji", "event_type", "member")
+    __slots__ = (
+        "message_id",
+        "user_id",
+        "channel_id",
+        "guild_id",
+        "emoji",
+        "event_type",
+        "member",
+        "burst",
+    )
 
     def __init__(
         self,
@@ -191,6 +205,7 @@ class RawReactionActionEvent(_RawReprMixin):
         self.emoji: PartialEmoji = emoji
         self.event_type: ReactionEventType = event_type
         self.member: Optional[Member] = None
+        self.burst: bool = data["burst"]
         try:
             self.guild_id: Optional[int] = int(data["guild_id"])
         except KeyError:
@@ -236,14 +251,20 @@ class RawReactionClearEmojiEvent(_RawReprMixin):
         The guild ID where the reaction clear took place, if applicable.
     emoji: :class:`PartialEmoji`
         The custom or unicode emoji being removed.
+
+    burst: :class:`bool`
+        The reaction is Super reaction.
+
+        .. versionadded:: 2.9
     """
 
-    __slots__ = ("message_id", "channel_id", "guild_id", "emoji")
+    __slots__ = ("message_id", "channel_id", "guild_id", "emoji", "burst")
 
     def __init__(self, data: MessageReactionRemoveEmojiEvent, emoji: PartialEmoji) -> None:
         self.emoji: PartialEmoji = emoji
         self.message_id: int = int(data["message_id"])
         self.channel_id: int = int(data["channel_id"])
+        self.burst: bool = data["burst"]
         try:
             self.guild_id: Optional[int] = int(data["guild_id"])
         except KeyError:
