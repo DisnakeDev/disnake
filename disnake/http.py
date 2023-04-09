@@ -724,13 +724,15 @@ class HTTPClient:
         emoji: str,
         limit: int,
         after: Optional[Snowflake] = None,
+        type: int = 0,
     ) -> Response[List[user.User]]:
         r = Route(
             "GET",
-            "/channels/{channel_id}/messages/{message_id}/reactions/{emoji}",
+            "/channels/{channel_id}/messages/{message_id}/reactions/{emoji}?type={type}",
             channel_id=channel_id,
             message_id=message_id,
             emoji=emoji,
+            type=type,
         )
 
         params: Dict[str, Any] = {

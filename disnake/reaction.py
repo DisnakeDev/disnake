@@ -204,7 +204,7 @@ class Reaction:
         if limit is None:
             limit = self.count
 
-        return ReactionIterator(self.message, emoji, limit, after)
+        return ReactionIterator(self.message, emoji, limit, after, type=0)
 
 
 class BurstReaction(Reaction):
@@ -270,3 +270,58 @@ class BurstReaction(Reaction):
 
     def __repr__(self) -> str:
         return f"<BurstReaction emoji={self.emoji!r} me={self.me} count={self.count}>"
+
+    def users(
+        self, *, limit: Optional[int] = None, after: Optional[Snowflake] = None
+    ) -> ReactionIterator:
+        """Returns an :class:`AsyncIterator` representing the users that have Super reacted to the message.
+
+        The ``after`` parameter must represent a member
+        and meet the :class:`abc.Snowflake` abc.
+
+        Examples
+        --------
+        Usage ::
+
+            # We do not actually recommend doing this.
+            async for user in reaction.users():
+                await channel.send(f'{user} has Super reacted with {reaction.emoji}!')
+
+        Flattening into a list: ::
+
+            users = await reaction.users().flatten()
+            # users is now a list of User...
+            winner = random.choice(users)
+            await channel.send(f'{winner} has won the raffle.')
+
+        Parameters
+        ----------
+        limit: Optional[:class:`int`]
+            The maximum number of results to return.
+            If not provided, returns all the users who
+            Super reacted to the message.
+        after: Optional[:class:`abc.Snowflake`]
+            For pagination, Super reactions are sorted by member.
+
+        Raises
+        ------
+        HTTPException
+            Getting the users for the Super reaction failed.
+
+        Yields
+        ------
+        Union[:class:`User`, :class:`Member`]
+            The member (if retrievable) or the user that has reacted
+            to this message. The case where it can be a :class:`Member` is
+            in a guild message context. Sometimes it can be a :class:`User`
+            if the member has left the guild.
+        """
+        if not isinstance(self.emoji, str):
+            emoji = f"{self.emoji.name}:{self.emoji.id}"
+        else:
+            emoji = self.emoji
+
+        if limit is None:
+            limit = self.count
+
+        return ReactionIterator(self.message, emoji, limit, after, type=1)
