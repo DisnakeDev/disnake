@@ -12,7 +12,7 @@ from disnake.utils import MISSING
 @pytest.mark.asyncio
 class TestGuildChannelEdit:
     # TODO: use proper mock models once we have state/guild mocks
-    @pytest.fixture()
+    @pytest.fixture
     def channel(self):
         ch = mock.Mock(GuildChannel, id=123, category_id=456)
         ch._state = mock.Mock(http=mock.AsyncMock())

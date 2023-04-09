@@ -27,7 +27,7 @@ def fancy_traceback(exc: Exception) -> str:
 
 
 class TestBot(commands.Bot):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             command_prefix=Config.prefix,
             intents=disnake.Intents.all(),
@@ -41,7 +41,7 @@ class TestBot(commands.Bot):
 
         self.i18n.load("test_bot/locale")
 
-    async def on_ready(self):
+    async def on_ready(self) -> None:
         # fmt: off
         print(
             f"\n"
@@ -52,7 +52,7 @@ class TestBot(commands.Bot):
         # fmt: on
 
     def add_cog(self, cog: commands.Cog, *, override: bool = False) -> None:
-        logger.info(f"Loading cog {cog.qualified_name}.")
+        logger.info("Loading cog %s", cog.qualified_name)
         return super().add_cog(cog, override=override)
 
     async def on_command_error(self, ctx: commands.Context, error: commands.CommandError) -> None:

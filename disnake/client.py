@@ -183,8 +183,7 @@ class SessionStartLimit:
 
 
 class GatewayParams(NamedTuple):
-    """
-    Container type for configuring gateway connections.
+    """Container type for configuring gateway connections.
 
     .. versionadded:: 2.6
 
@@ -203,8 +202,7 @@ class GatewayParams(NamedTuple):
 
 
 class Client:
-    """
-    Represents a client connection that connects to Discord.
+    """Represents a client connection that connects to Discord.
     This class is used to interact with the Discord WebSocket and API.
 
     A number of options can be passed to the :class:`Client`.
@@ -1383,8 +1381,7 @@ class Client:
         return list(data.values())
 
     def get_guild_slash_commands(self, guild_id: int) -> List[APISlashCommand]:
-        """
-        Returns a list of all slash commands in the guild with the given ID.
+        """Returns a list of all slash commands in the guild with the given ID.
 
         Parameters
         ----------
@@ -1400,8 +1397,7 @@ class Client:
         return [cmd for cmd in data.values() if isinstance(cmd, APISlashCommand)]
 
     def get_guild_user_commands(self, guild_id: int) -> List[APIUserCommand]:
-        """
-        Returns a list of all user commands in the guild with the given ID.
+        """Returns a list of all user commands in the guild with the given ID.
 
         Parameters
         ----------
@@ -1417,8 +1413,7 @@ class Client:
         return [cmd for cmd in data.values() if isinstance(cmd, APIUserCommand)]
 
     def get_guild_message_commands(self, guild_id: int) -> List[APIMessageCommand]:
-        """
-        Returns a list of all message commands in the guild with the given ID.
+        """Returns a list of all message commands in the guild with the given ID.
 
         Parameters
         ----------
@@ -1434,8 +1429,7 @@ class Client:
         return [cmd for cmd in data.values() if isinstance(cmd, APIMessageCommand)]
 
     def get_global_command(self, id: int) -> Optional[APIApplicationCommand]:
-        """
-        Returns a global application command with the given ID.
+        """Returns a global application command with the given ID.
 
         Parameters
         ----------
@@ -1450,8 +1444,7 @@ class Client:
         return self._connection._get_global_application_command(id)
 
     def get_guild_command(self, guild_id: int, id: int) -> Optional[APIApplicationCommand]:
-        """
-        Returns a guild application command with the given guild ID and application command ID.
+        """Returns a guild application command with the given guild ID and application command ID.
 
         Parameters
         ----------
@@ -1470,8 +1463,7 @@ class Client:
     def get_global_command_named(
         self, name: str, cmd_type: Optional[ApplicationCommandType] = None
     ) -> Optional[APIApplicationCommand]:
-        """
-        Returns a global application command matching the given name.
+        """Returns a global application command matching the given name.
 
         Parameters
         ----------
@@ -1490,8 +1482,7 @@ class Client:
     def get_guild_command_named(
         self, guild_id: int, name: str, cmd_type: Optional[ApplicationCommandType] = None
     ) -> Optional[APIApplicationCommand]:
-        """
-        Returns a guild application command matching the given name.
+        """Returns a guild application command matching the given name.
 
         Parameters
         ----------
@@ -1547,14 +1538,13 @@ class Client:
 
         In case the event returns multiple arguments, a :class:`tuple` containing those
         arguments is returned instead. Please check the
-        :ref:`documentation <discord-api-events>` for a list of events and their
+        :ref:`documentation <disnake_api_events>` for a list of events and their
         parameters.
 
         This function returns the **first event that meets the requirements**.
 
         Examples
         --------
-
         Waiting for a user reply: ::
 
             @client.event
@@ -1604,7 +1594,7 @@ class Client:
         Parameters
         ----------
         event: Union[:class:`str`, :class:`.Event`]
-            The event name, similar to the :ref:`event reference <discord-api-events>`,
+            The event name, similar to the :ref:`event reference <disnake_api_events>`,
             but without the ``on_`` prefix, to wait for. It's recommended
             to use :class:`.Event`.
         check: Optional[Callable[..., :class:`bool`]]
@@ -1624,7 +1614,7 @@ class Client:
         Any
             Returns no arguments, a single argument, or a :class:`tuple` of multiple
             arguments that mirrors the parameters passed in the
-            :ref:`event reference <discord-api-events>`.
+            :ref:`event <disnake_api_events>`.
         """
         future = self.loop.create_future()
         if check is None:
@@ -1649,13 +1639,12 @@ class Client:
     def event(self, coro: CoroT) -> CoroT:
         """A decorator that registers an event to listen to.
 
-        You can find more info about the events on the :ref:`documentation below <discord-api-events>`.
+        You can find more info about the events in the :ref:`documentation <disnake_api_events>`.
 
         The events must be a :ref:`coroutine <coroutine>`, if not, :exc:`TypeError` is raised.
 
         Example
-        ---------
-
+        -------
         .. code-block:: python3
 
             @client.event
@@ -1756,7 +1745,6 @@ class Client:
 
         Examples
         --------
-
         Usage ::
 
             async for guild in client.fetch_guilds(limit=150):
@@ -1791,7 +1779,7 @@ class Client:
             Retrieving the guilds failed.
 
         Yields
-        --------
+        ------
         :class:`.Guild`
             The guild with the guild data parsed.
         """

@@ -381,6 +381,9 @@ class RawTypingEvent(_RawReprMixin):
         The member object of the user who started typing or ``None`` if it was in a DM.
     timestamp: :class:`datetime.datetime`
         The UTC datetime when the user started typing.
+
+        .. versionchanged:: 2.9
+            Changed from naive to aware datetime.
     """
 
     __slots__ = ("user_id", "channel_id", "guild_id", "member", "timestamp")
@@ -389,7 +392,9 @@ class RawTypingEvent(_RawReprMixin):
         self.user_id: int = int(data["user_id"])
         self.channel_id: int = int(data["channel_id"])
         self.member: Optional[Member] = None
-        self.timestamp: datetime.datetime = datetime.datetime.utcfromtimestamp(data["timestamp"])
+        self.timestamp: datetime.datetime = datetime.datetime.fromtimestamp(
+            data["timestamp"], tz=datetime.timezone.utc
+        )
         try:
             self.guild_id: Optional[int] = int(data["guild_id"])
         except KeyError:
