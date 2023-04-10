@@ -3,13 +3,14 @@ from __future__ import annotations
 
 import functools
 import inspect
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional
+from typing import TYPE_CHECKING, Any
 
+from docutils import nodes
 from sphinx.environment.adapters.indexentries import IndexEntries
+from sphinxext.opengraph.descriptionparser import DescriptionParser
 
 if TYPE_CHECKING:
     from _types import SphinxExtensionMeta
-    from docutils import nodes
     from sphinx.application import Sphinx
     from sphinx.config import Config
     from sphinx.writers.html5 import HTML5Translator
@@ -57,21 +58,20 @@ def patch_genindex(*args: Any) -> None:
     IndexEntries.create_index = new_create_index  # type: ignore
 
 
-def patch_ogp_callback(original: Callable[..., None]):
-    # Patches the given html-page-context callback to only be called if
-    # the page does not contain an `:ogp_disable:` meta field
-    def patched(
-        app: Sphinx,
-        pagename: str,
-        templatename: str,
-        context: Dict[str, Any],
-        doctree: Optional[nodes.document],
-    ):
-        fields = context.get("meta") or {}
-        if "ogp_disable" not in fields:
-            original(app, pagename, templatename, context, doctree)
+def patch_opengraph(*args: Any) -> None:
+    # Patch sphinxext-opengraph's description parser to only take the first section
+    # into account, resulting in cleaner descriptions.
+    orig = DescriptionParser.dispatch_visit
 
-    return patched
+    def patched_dispatch_visit(self, node: nodes.Element) -> None:
+        if isinstance(node, nodes.section):
+            if getattr(self, "section_found", False):
+                # stop when encountering nested section
+                raise nodes.StopTraversal
+            self.section_found = True
+        return orig(self, node)
+
+    DescriptionParser.dispatch_visit = patched_dispatch_visit
 
 
 def hook_html_page_context(app: Sphinx, config: Config) -> None:
@@ -83,14 +83,10 @@ def hook_html_page_context(app: Sphinx, config: Config) -> None:
         if module_name == "sphinx.ext.mathjax":
             app.disconnect(listener.id)
 
-        # patch opengraph handler to add `:ogp_disable:` behavior
-        elif module_name == "sphinxext.opengraph":
-            app.disconnect(listener.id)
-            app.connect("html-page-context", patch_ogp_callback(listener.handler))
-
 
 def setup(app: Sphinx) -> SphinxExtensionMeta:
     app.connect("config-inited", patch_genindex)
+    app.connect("config-inited", patch_opengraph)
     app.connect("config-inited", hook_html_page_context)
     app.connect("builder-inited", set_translator)
 
