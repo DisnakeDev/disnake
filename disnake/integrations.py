@@ -336,7 +336,7 @@ class IntegrationApplication(PartialAppInfo):
 
     __slots__ = ("user",)
 
-    def __init__(self, *, state: ConnectionState, data: IntegrationApplicationPayload):
+    def __init__(self, *, state: ConnectionState, data: IntegrationApplicationPayload) -> None:
         super().__init__(state=state, data=data)
 
         user = data.get("bot")

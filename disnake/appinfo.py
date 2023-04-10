@@ -97,7 +97,7 @@ class PartialAppInfo:
         "_cover_image",
     )
 
-    def __init__(self, *, state: ConnectionState, data: PartialAppInfoPayload):
+    def __init__(self, *, state: ConnectionState, data: PartialAppInfoPayload) -> None:
         self._state: ConnectionState = state
 
         self.id: int = int(data["id"])
