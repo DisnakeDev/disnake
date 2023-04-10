@@ -41,8 +41,7 @@ __all__ = ("GuildScheduledEventMetadata", "GuildScheduledEvent")
 
 
 class GuildScheduledEventMetadata:
-    """
-    Represents a guild scheduled event entity metadata.
+    """Represents a guild scheduled event entity metadata.
 
     .. versionadded:: 2.3
 
@@ -74,8 +73,7 @@ class GuildScheduledEventMetadata:
 
 
 class GuildScheduledEvent(Hashable):
-    """
-    Represents a guild scheduled event.
+    """Represents a guild scheduled event.
 
     .. versionadded:: 2.3
 
@@ -690,7 +688,6 @@ class GuildScheduledEvent(Hashable):
 
         Examples
         --------
-
         Usage ::
 
             async for user in event.fetch_users(limit=500):

@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""
-A confirm/cancel button example using views.
-"""
+"""A confirm/cancel button example using views."""
 
 import os
 from typing import Optional

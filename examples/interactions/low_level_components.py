@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""
-An example on how to send and process components without using views.
-"""
+"""An example on how to send and process components without using views."""
 
 import os
 

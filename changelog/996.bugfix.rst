@@ -1,0 +1,1 @@
+Improve :class:`GuildSticker` deserialization, fix :meth:`GuildSticker.edit` parameter types to match documentation.

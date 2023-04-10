@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from .types.voice import VoiceRegion as VoiceRegionPayload
@@ -13,6 +13,24 @@ __all__ = ("VoiceRegion",)
 
 class VoiceRegion:
     """Represents a Discord voice region.
+
+    .. container:: operations
+
+        .. describe:: x == y
+
+            Checks if two :class:`VoiceRegion`\\s are equal.
+
+            .. versionadded:: 2.9
+
+        .. describe:: x != y
+
+            Checks if two :class:`VoiceRegion`\\s are not equal.
+
+            .. versionadded:: 2.9
+
+        .. describe:: str(x)
+
+            Returns the voice region's ID.
 
     .. versionadded:: 2.5
 
@@ -27,7 +45,7 @@ class VoiceRegion:
     deprecated: :class:`bool`
         Whether this is a deprecated voice region (avoid switching to these).
     custom: :class:`bool`
-        Whether this is a custom voice region (used for events/etc)
+        Whether this is a custom voice region (used for events/etc).
     """
 
     __slots__ = (
@@ -50,3 +68,6 @@ class VoiceRegion:
 
     def __repr__(self) -> str:
         return f"<VoiceRegion id={self.id!r} name={self.name!r} optimal={self.optimal!r}>"
+
+    def __eq__(self, other: Any) -> bool:
+        return isinstance(other, VoiceRegion) and self.id == other.id

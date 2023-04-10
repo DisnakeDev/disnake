@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""
-An example showing how to use a dropdown menu using views.
-"""
+"""An example showing how to use a dropdown menu using views."""
 
 import os
 
@@ -59,7 +57,6 @@ bot = commands.Bot(command_prefix=commands.when_mentioned)
 @bot.command()
 async def colour(ctx):
     """Sends a message with our dropdown containing colours"""
-
     # Create the view containing our dropdown
     view = DropdownView()
 

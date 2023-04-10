@@ -251,8 +251,7 @@ class PartialInviteGuild:
 
 
 class Invite(Hashable):
-    """
-    Represents a Discord :class:`Guild` or :class:`abc.GuildChannel` invite.
+    """Represents a Discord :class:`Guild` or :class:`abc.GuildChannel` invite.
 
     Depending on the way this object was created, some of the attributes can
     have a value of ``None`` (see table below).
