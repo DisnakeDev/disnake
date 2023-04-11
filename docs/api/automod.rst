@@ -77,6 +77,14 @@ AutoModTimeoutAction
 .. autoclass:: AutoModTimeoutAction
     :members:
 
+AutoModBlockInteractionAction
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: AutoModBlockInteractionAction
+
+.. autoclass:: AutoModBlockInteractionAction
+    :members:
+
 Enumerations
 ------------
 
@@ -93,6 +101,10 @@ AutoModActionType
 
         The rule will prevent matching messages from being posted.
 
+        .. note::
+            This action type is *not* available for rules with trigger type
+            :attr:`~AutoModTriggerType.member_profile`.
+
     .. attribute:: send_alert_message
 
         The rule will send an alert to a specified channel.
@@ -106,6 +118,16 @@ AutoModActionType
             :attr:`~AutoModTriggerType.keyword` or :attr:`~AutoModTriggerType.mention_spam`,
             and :attr:`~Permissions.moderate_members` permissions are required to use it.
 
+    .. attribute:: block_member_interaction
+
+        The rule will prevent the user from interacting through text, voice, etc.
+
+        .. versionadded:: 2.9
+
+        .. note::
+            This action type is only available for rules with trigger type
+            :attr:`~AutoModTriggerType.member_profile`.
+
 AutoModEventType
 ~~~~~~~~~~~~~~~~
 
@@ -118,6 +140,12 @@ AutoModEventType
     .. attribute:: message_send
 
         The rule will apply when a member sends or edits a message in the guild.
+
+    .. attribute:: member_update
+
+        The rule will apply when a member edits their profile.
+
+        .. versionadded:: 2.9
 
 AutoModTriggerType
 ~~~~~~~~~~~~~~~~~~
@@ -150,6 +178,12 @@ AutoModTriggerType
     .. attribute:: mention_spam
 
         The rule will filter messages based on the number of member/role mentions they contain.
+
+        This trigger type requires additional :class:`metadata <AutoModTriggerMetadata>`.
+
+    .. attribute:: member_profile
+
+        The rule will filter member profiles based on a custom keyword list.
 
         This trigger type requires additional :class:`metadata <AutoModTriggerMetadata>`.
 

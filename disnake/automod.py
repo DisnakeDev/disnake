@@ -39,6 +39,7 @@ if TYPE_CHECKING:
     from .types.automod import (
         AutoModAction as AutoModActionPayload,
         AutoModActionMetadata,
+        AutoModBlockInteractionActionMetadata,
         AutoModBlockMessageActionMetadata,
         AutoModRule as AutoModRulePayload,
         AutoModSendAlertActionMetadata,
@@ -53,6 +54,7 @@ __all__ = (
     "AutoModBlockMessageAction",
     "AutoModSendAlertAction",
     "AutoModTimeoutAction",
+    "AutoModBlockInteractionAction",
     "AutoModTriggerMetadata",
     "AutoModRule",
     "AutoModActionExecution",
@@ -68,6 +70,7 @@ class AutoModAction:
     - :class:`AutoModBlockMessageAction`
     - :class:`AutoModSendAlertAction`
     - :class:`AutoModTimeoutAction`
+    - :class:`AutoModBlockInteractionAction`
 
     Actions received from the API may be of this type
     (and not one of the subtypes above) if the action type is not implemented yet.
@@ -225,6 +228,30 @@ class AutoModTimeoutAction(AutoModAction):
         return f"<{type(self).__name__} duration={self.duration!r}>"
 
 
+class AutoModBlockInteractionAction(AutoModAction):
+    """Represents an auto moderation action that prevents the user
+    from interacting through text, voice, etc.
+
+    .. versionadded:: 2.9
+
+    Attributes
+    ----------
+    type: :class:`AutoModActionType`
+        The action type.
+        Always set to :attr:`~AutoModActionType.block_member_interaction`.
+    """
+
+    __slots__ = ()
+
+    _metadata: AutoModBlockInteractionActionMetadata
+
+    def __init__(self) -> None:
+        super().__init__(type=AutoModActionType.block_member_interaction)
+
+    def __repr__(self) -> str:
+        return f"<{type(self).__name__}>"
+
+
 class AutoModTriggerMetadata:
     """Metadata for an auto moderation trigger.
 
@@ -237,20 +264,21 @@ class AutoModTriggerMetadata:
         :attr:`~AutoModTriggerType.spam`,           ❌,         ❌,       ❌, ❌,         ❌
         :attr:`~AutoModTriggerType.keyword_preset`, ❌,         ❌,       ✅, ✅ (x1000), ❌
         :attr:`~AutoModTriggerType.mention_spam`,   ❌,         ❌,       ❌, ❌,         ✅
+        :attr:`~AutoModTriggerType.member_profile`, ✅ (x1000), ✅ (x10), ❌, ✅ (x100),  ❌
 
     .. versionadded:: 2.6
 
     Attributes
     ----------
     keyword_filter: Optional[Sequence[:class:`str`]]
-        The list of keywords to check for, up to 1000 keywords. Used with :attr:`AutoModTriggerType.keyword`.
+        The list of keywords to check for, up to 1000 keywords. Used with :attr:`AutoModTriggerType.keyword` and :attr:`AutoModTriggerType.member_profile`.
 
         See :ddocs:`api docs <resources/auto-moderation#auto-moderation-rule-object-keyword-matching-strategies>`
         for details about how keyword matching works.
         Each keyword must be 60 characters or less.
 
     regex_patterns: Optional[Sequence[:class:`str`]]
-        The list of regular expressions to check for. Used with :attr:`AutoModTriggerType.keyword`.
+        The list of regular expressions to check for. Used with :attr:`AutoModTriggerType.keyword` and :attr:`AutoModTriggerType.member_profile`.
 
         A maximum of 10 regexes can be added, each with up to 260 characters.
 
@@ -265,7 +293,7 @@ class AutoModTriggerMetadata:
 
     allow_list: Optional[Sequence[:class:`str`]]
         The keywords that should be exempt from a preset.
-        Used with :attr:`AutoModTriggerType.keyword` (up to 100 exemptions) and :attr:`AutoModTriggerType.keyword_preset` (up to 1000 exemptions).
+        Used with :attr:`AutoModTriggerType.keyword`, :attr:`AutoModTriggerType.member_profile` (up to 100 exemptions) and :attr:`AutoModTriggerType.keyword_preset` (up to 1000 exemptions).
 
         Each keyword must be 60 characters or less.
 
@@ -471,7 +499,7 @@ class AutoModRule:
 
     @property
     def actions(self) -> List[AutoModAction]:
-        """List[Union[:class:`AutoModBlockMessageAction`, :class:`AutoModSendAlertAction`, :class:`AutoModTimeoutAction`, :class:`AutoModAction`]]:
+        """List[Union[:class:`AutoModBlockMessageAction`, :class:`AutoModSendAlertAction`, :class:`AutoModTimeoutAction`, :class:`AutoModBlockInteractionAction`, :class:`AutoModAction`]]:
         The list of actions that will execute if a matching event triggered this rule.
         """
         return list(self._actions)  # return a copy
@@ -556,7 +584,7 @@ class AutoModRule:
             The rule's new event type.
         trigger_metadata: :class:`AutoModTriggerMetadata`
             The rule's new associated trigger metadata.
-        actions: Sequence[Union[:class:`AutoModBlockMessageAction`, :class:`AutoModSendAlertAction`, :class:`AutoModTimeoutAction`, :class:`AutoModAction`]]
+        actions: Sequence[Union[:class:`AutoModBlockMessageAction`, :class:`AutoModSendAlertAction`, :class:`AutoModTimeoutAction`, :class:`AutoModBlockInteractionAction`, :class:`AutoModAction`]]
             The rule's new actions.
             If provided, must contain at least one action.
         enabled: :class:`bool`
@@ -648,7 +676,7 @@ class AutoModActionExecution:
 
     Attributes
     ----------
-    action: Union[:class:`AutoModBlockMessageAction`, :class:`AutoModSendAlertAction`, :class:`AutoModTimeoutAction`, :class:`AutoModAction`]
+    action: Union[:class:`AutoModBlockMessageAction`, :class:`AutoModSendAlertAction`, :class:`AutoModTimeoutAction`, :class:`AutoModBlockInteractionAction`, :class:`AutoModAction`]
         The action that was executed.
     guild: :class:`Guild`
         The guild this action was executed in.
@@ -758,6 +786,7 @@ _action_map: Dict[int, Type[AutoModAction]] = {
     AutoModActionType.block_message.value: AutoModBlockMessageAction,
     AutoModActionType.send_alert_message.value: AutoModSendAlertAction,
     AutoModActionType.timeout.value: AutoModTimeoutAction,
+    AutoModActionType.block_member_interaction.value: AutoModBlockInteractionAction,
 }
 
 

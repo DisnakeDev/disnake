@@ -4573,9 +4573,10 @@ class Guild(Hashable):
         trigger_type: :class:`AutoModTriggerType`
             The type of trigger that determines whether this rule's actions should run for a specific event.
             If set to :attr:`~AutoModTriggerType.keyword`, :attr:`~AutoModTriggerType.keyword_preset`,
-            or :attr:`~AutoModTriggerType.mention_spam`, ``trigger_metadata`` must be set accordingly.
+            :attr:`~AutoModTriggerType.mention_spam`, or :attr:`~AutoModTriggerType.member_profile`,
+            ``trigger_metadata`` must be set accordingly.
             This cannot be changed after creation.
-        actions: Sequence[Union[:class:`AutoModBlockMessageAction`, :class:`AutoModSendAlertAction`, :class:`AutoModTimeoutAction`, :class:`AutoModAction`]]
+        actions: Sequence[Union[:class:`AutoModBlockMessageAction`, :class:`AutoModSendAlertAction`, :class:`AutoModTimeoutAction`, :class:`AutoModBlockInteractionAction`, :class:`AutoModAction`]]
             The list of actions that will execute if a matching event triggered this rule.
             Must contain at least one action.
         trigger_metadata: Optional[:class:`AutoModTriggerMetadata`]
@@ -4610,6 +4611,7 @@ class Guild(Hashable):
             AutoModTriggerType.keyword.value,
             AutoModTriggerType.keyword_preset.value,
             AutoModTriggerType.mention_spam.value,
+            AutoModTriggerType.member_profile.value,
         ):
             raise ValueError("Specified trigger type requires `trigger_metadata` to not be empty")
 
