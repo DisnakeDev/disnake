@@ -120,7 +120,7 @@ AutoModActionType
 
     .. attribute:: block_member_interaction
 
-        The rule will prevent the user from interacting through text, voice, etc.
+        The rule will prevent the user from using text, voice, or other interactions.
 
         .. versionadded:: 2.9
 

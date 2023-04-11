@@ -230,7 +230,7 @@ class AutoModTimeoutAction(AutoModAction):
 
 class AutoModBlockInteractionAction(AutoModAction):
     """Represents an auto moderation action that prevents the user
-    from interacting through text, voice, etc.
+    from using text, voice, or other interactions.
 
     .. versionadded:: 2.9
 
