@@ -143,7 +143,7 @@ AutoModEventType
 
     .. attribute:: member_update
 
-        The rule will apply when a member edits their profile.
+        The rule will apply when a member joins or edits their profile.
 
         .. versionadded:: 2.9
 
