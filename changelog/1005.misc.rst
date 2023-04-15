@@ -1,0 +1,1 @@
+Update base :attr:`Guild.filesize_limit` to 25MB, matching recent API bump.
