@@ -4557,6 +4557,7 @@ class Guild(Hashable):
         Creates a new :class:`AutoModRule` for the guild.
 
         You must have :attr:`.Permissions.manage_guild` permission to do this.
+        Specific ``actions`` may require additional permissions.
 
         The maximum number of rules for each trigger type is limited, see the
         :ddocs:`api docs <resources/auto-moderation#auto-moderation-rule-object-trigger-types>`
@@ -4569,12 +4570,17 @@ class Guild(Hashable):
         name: :class:`str`
             The rule name.
         event_type: :class:`AutoModEventType`
-            The type of events that this rule will be applied to.
+            The type of event that this rule will be applied to.
+
+            Refer to :ref:`this table <automod_trigger_event_table>` to see how event types can be used.
         trigger_type: :class:`AutoModTriggerType`
             The type of trigger that determines whether this rule's actions should run for a specific event.
+            Must be compatible with the given ``event_type``.
+
             If set to :attr:`~AutoModTriggerType.keyword`, :attr:`~AutoModTriggerType.keyword_preset`,
             :attr:`~AutoModTriggerType.mention_spam`, or :attr:`~AutoModTriggerType.member_profile`,
             ``trigger_metadata`` must be set accordingly.
+
             This cannot be changed after creation.
         actions: Sequence[Union[:class:`AutoModBlockMessageAction`, :class:`AutoModSendAlertAction`, :class:`AutoModTimeoutAction`, :class:`AutoModBlockInteractionAction`, :class:`AutoModAction`]]
             The list of actions that will execute if a matching event triggered this rule.

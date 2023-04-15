@@ -75,6 +75,9 @@ class AutoModAction:
     Actions received from the API may be of this type
     (and not one of the subtypes above) if the action type is not implemented yet.
 
+    To see which actions can be used with specific trigger types,
+    refer to :ref:`this table <automod_trigger_action_table>`.
+
     .. versionadded:: 2.6
 
     Attributes
@@ -114,6 +117,9 @@ class AutoModAction:
 
 class AutoModBlockMessageAction(AutoModAction):
     """Represents an auto moderation action that blocks content from being sent.
+
+    To see which trigger types this can be used with,
+    refer to :ref:`this table <automod_trigger_action_table>`.
 
     .. versionadded:: 2.6
 
@@ -157,6 +163,9 @@ class AutoModBlockMessageAction(AutoModAction):
 class AutoModSendAlertAction(AutoModAction):
     """Represents an auto moderation action that sends an alert to a channel.
 
+    To see which trigger types this can be used with,
+    refer to :ref:`this table <automod_trigger_action_table>`.
+
     .. versionadded:: 2.6
 
     Parameters
@@ -191,6 +200,9 @@ class AutoModSendAlertAction(AutoModAction):
 
 class AutoModTimeoutAction(AutoModAction):
     """Represents an auto moderation action that times out the user.
+
+    To see which trigger types this can be used with,
+    refer to :ref:`this table <automod_trigger_action_table>`.
 
     .. versionadded:: 2.6
 
@@ -232,6 +244,9 @@ class AutoModBlockInteractionAction(AutoModAction):
     """Represents an auto moderation action that prevents the user
     from using text, voice, or other interactions.
 
+    To see which trigger types this can be used with,
+    refer to :ref:`this table <automod_trigger_action_table>`.
+
     .. versionadded:: 2.9
 
     Attributes
@@ -271,14 +286,14 @@ class AutoModTriggerMetadata:
     Attributes
     ----------
     keyword_filter: Optional[Sequence[:class:`str`]]
-        The list of keywords to check for, up to 1000 keywords. Used with :attr:`AutoModTriggerType.keyword` and :attr:`AutoModTriggerType.member_profile`.
+        The list of keywords to check for, up to 1000 keywords.
 
         See :ddocs:`api docs <resources/auto-moderation#auto-moderation-rule-object-keyword-matching-strategies>`
         for details about how keyword matching works.
         Each keyword must be 60 characters or less.
 
     regex_patterns: Optional[Sequence[:class:`str`]]
-        The list of regular expressions to check for. Used with :attr:`AutoModTriggerType.keyword` and :attr:`AutoModTriggerType.member_profile`.
+        The list of regular expressions to check for.
 
         A maximum of 10 regexes can be added, each with up to 260 characters.
 
@@ -289,16 +304,16 @@ class AutoModTriggerMetadata:
         .. versionadded:: 2.7
 
     presets: Optional[:class:`AutoModKeywordPresets`]
-        The keyword presets. Used with :attr:`AutoModTriggerType.keyword_preset`.
+        The keyword presets (pre-defined wordsets defined by Discord).
 
     allow_list: Optional[Sequence[:class:`str`]]
-        The keywords that should be exempt from a preset.
-        Used with :attr:`AutoModTriggerType.keyword`, :attr:`AutoModTriggerType.member_profile` (up to 100 exemptions) and :attr:`AutoModTriggerType.keyword_preset` (up to 1000 exemptions).
+        The keywords that should be exempt from a preset,
+        up to 100 or 1000 depending on the used trigger type - see the table above.
 
         Each keyword must be 60 characters or less.
 
     mention_total_limit: Optional[:class:`int`]
-        The maximum number of mentions (members + roles) allowed, between 1 and 50. Used with :attr:`AutoModTriggerType.mention_spam`.
+        The maximum number of mentions (members + roles) allowed, between 1 and 50.
     """
 
     __slots__ = (
@@ -582,6 +597,8 @@ class AutoModRule:
             The rule's new name.
         event_type: :class:`AutoModEventType`
             The rule's new event type.
+
+            Refer to :ref:`this table <automod_trigger_event_table>` to see how event types can be used.
         trigger_metadata: :class:`AutoModTriggerMetadata`
             The rule's new associated trigger metadata.
         actions: Sequence[Union[:class:`AutoModBlockMessageAction`, :class:`AutoModSendAlertAction`, :class:`AutoModTimeoutAction`, :class:`AutoModBlockInteractionAction`, :class:`AutoModAction`]]
