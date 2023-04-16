@@ -9,13 +9,13 @@ Select Menu UI Kit Types
 :license: MIT, see LICENSE for more details.
 
 """
-from disnake.ui.select import base, channel, mentionable, role, string, user
-from disnake.ui.select.base import *
-from disnake.ui.select.channel import *
-from disnake.ui.select.mentionable import *
-from disnake.ui.select.role import *
-from disnake.ui.select.string import *
-from disnake.ui.select.user import *
+from . import base, channel, mentionable, role, string, user
+from .base import *
+from .channel import *
+from .mentionable import *
+from .role import *
+from .string import *
+from .user import *
 
 __all__ = []
 __all__.extend(base.__all__)

@@ -9,9 +9,9 @@ Webhook support
 :license: MIT, see LICENSE for more details.
 
 """
-from disnake.webhook import async_, sync
-from disnake.webhook.async_ import *
-from disnake.webhook.sync import *
+from . import async_, sync
+from .async_ import *
+from .sync import *
 
 __all__ = []
 __all__.extend(async_.__all__)

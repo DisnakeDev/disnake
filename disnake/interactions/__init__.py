@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: MIT
 
-from disnake.interactions import application_command, base, message, modal
-from disnake.interactions.application_command import *
-from disnake.interactions.base import *
-from disnake.interactions.message import *
-from disnake.interactions.modal import *
+from . import application_command, base, message, modal
+from .application_command import *
+from .base import *
+from .message import *
+from .modal import *
 
 __all__ = []
 __all__.extend(application_command.__all__)
