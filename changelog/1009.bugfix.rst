@@ -1,0 +1,1 @@
+Fix threads not being returned in :attr:`AuditLogEntry.extra` in some cases.
