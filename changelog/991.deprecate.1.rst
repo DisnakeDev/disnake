@@ -1,1 +1,1 @@
-|commands| The mypy plugin is now deprecated and a no-op.
+|commands| The mypy plugin is now a no-op. It was previously used for supporting ``Range[]`` and ``String[]`` annotations.
