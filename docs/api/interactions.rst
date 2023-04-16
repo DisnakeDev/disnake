@@ -130,6 +130,7 @@ InteractionMessage
 .. autoclass:: InteractionMessage()
     :members:
     :inherited-members:
+    :exclude-members: activity, role_subscription_data
 
 InteractionDataResolved
 ~~~~~~~~~~~~~~~~~~~~~~~~
