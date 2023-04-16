@@ -196,6 +196,7 @@ class Permissions(BaseFlags):
         send_messages: bool = ...,
         send_messages_in_threads: bool = ...,
         send_tts_messages: bool = ...,
+        send_voice_messages: bool = ...,
         speak: bool = ...,
         start_embedded_activities: bool = ...,
         stream: bool = ...,
@@ -408,6 +409,7 @@ class Permissions(BaseFlags):
             read_message_history=True,
             send_tts_messages=True,
             use_slash_commands=True,
+            send_voice_messages=True,
         )
 
     @classmethod
@@ -557,6 +559,7 @@ class Permissions(BaseFlags):
         send_messages: bool = ...,
         send_messages_in_threads: bool = ...,
         send_tts_messages: bool = ...,
+        send_voice_messages: bool = ...,
         speak: bool = ...,
         start_embedded_activities: bool = ...,
         stream: bool = ...,
@@ -969,6 +972,14 @@ class Permissions(BaseFlags):
         """
         return 1 << 42
 
+    @flag_value
+    def send_voice_messages(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can send voice messages.
+
+        .. versionadded:: 2.9
+        """
+        return 1 << 46
+
 
 def _augment_from_permissions(cls):
     cls.VALID_NAMES = set(Permissions.VALID_FLAGS)
@@ -1073,6 +1084,7 @@ class PermissionOverwrite:
         send_messages: Optional[bool]
         send_messages_in_threads: Optional[bool]
         send_tts_messages: Optional[bool]
+        send_voice_messages: Optional[bool]
         speak: Optional[bool]
         start_embedded_activities: Optional[bool]
         stream: Optional[bool]
@@ -1135,6 +1147,7 @@ class PermissionOverwrite:
         send_messages: Optional[bool] = ...,
         send_messages_in_threads: Optional[bool] = ...,
         send_tts_messages: Optional[bool] = ...,
+        send_voice_messages: Optional[bool] = ...,
         speak: Optional[bool] = ...,
         start_embedded_activities: Optional[bool] = ...,
         stream: Optional[bool] = ...,
@@ -1264,6 +1277,7 @@ class PermissionOverwrite:
         send_messages: Optional[bool] = ...,
         send_messages_in_threads: Optional[bool] = ...,
         send_tts_messages: Optional[bool] = ...,
+        send_voice_messages: Optional[bool] = ...,
         speak: Optional[bool] = ...,
         start_embedded_activities: Optional[bool] = ...,
         stream: Optional[bool] = ...,
