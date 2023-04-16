@@ -974,7 +974,7 @@ class Permissions(BaseFlags):
 
     @flag_value
     def use_external_sounds(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can use custom soundboard sounds from other servers.
+        """:class:`bool`: Returns ``True`` if a user can use custom soundboard sounds from other guilds.
 
         .. versionadded:: 2.9
         """
