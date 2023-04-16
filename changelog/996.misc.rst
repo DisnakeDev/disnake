@@ -1,0 +1,1 @@
+Update typings of :attr:`Message.activity` and internal :class:`Team` payloads to match API documentation.

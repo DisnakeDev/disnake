@@ -72,7 +72,7 @@ tools = [
     "python-dotenv~=1.0.0",
     "towncrier==22.12.0",
     "check-manifest==0.49",
-    "ruff==0.0.257",
+    "ruff==0.0.261",
 ]
 codemod = [
     # run codemods on the respository (mostly automated typing)
@@ -219,8 +219,9 @@ ignore = [
 # we are not using noqa in the example files themselves
 "examples/*.py" = [
     "B008", # do not perform function calls in argument defaults, this is how most commands work
-    "T201", # print found, printing is okay in examples
     "PT",   # this is not a module of pytest tests
+    "S311", # pseudo-random generators aren't suitable for cryptographic purposes
+    "T201", # print found, printing is okay in examples
 ]
 "examples/basic_voice.py" = ["S104"] # possible binding to all interfaces
 "examples/views/tic_tac_toe.py" = ["E741"] # ambigious variable name: `O`

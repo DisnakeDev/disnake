@@ -49,7 +49,7 @@ MessageActivityType = Literal[1, 2, 3, 5]
 
 class MessageActivity(TypedDict):
     type: MessageActivityType
-    party_id: str
+    party_id: NotRequired[str]
 
 
 class MessageApplication(TypedDict):
@@ -65,6 +65,13 @@ class MessageReference(TypedDict, total=False):
     channel_id: Snowflake
     guild_id: Snowflake
     fail_if_not_exists: bool
+
+
+class RoleSubscriptionData(TypedDict):
+    role_subscription_listing_id: Snowflake
+    tier_name: str
+    total_months_subscribed: int
+    is_renewal: bool
 
 
 # fmt: off
@@ -103,6 +110,7 @@ class Message(TypedDict):
     components: NotRequired[List[Component]]
     sticker_items: NotRequired[List[StickerItem]]
     position: NotRequired[int]
+    role_subscription_data: NotRequired[RoleSubscriptionData]
 
     # specific to MESSAGE_CREATE/MESSAGE_UPDATE events
     guild_id: NotRequired[Snowflake]
