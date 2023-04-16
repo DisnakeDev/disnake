@@ -590,9 +590,11 @@ class AuditLogEntry(Hashable):
         if isinstance(self.action, enums.AuditLogAction) and extra:
             if self.action is enums.AuditLogAction.member_prune:
                 # member prune has two keys with useful information
-                self.extra = type(
-                    "_AuditLogProxy", (), {k: int(v) for k, v in extra.items()}  # type: ignore
-                )()
+                elems = {
+                    "delete_member_days": utils._get_as_snowflake(extra, "delete_member_days"),
+                    "members_removed": utils._get_as_snowflake(extra, "members_removed"),
+                }
+                self.extra = type("_AuditLogProxy", (), elems)()
             elif (
                 self.action is enums.AuditLogAction.member_move
                 or self.action is enums.AuditLogAction.message_delete
