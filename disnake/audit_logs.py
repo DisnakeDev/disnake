@@ -284,7 +284,8 @@ def _transform_default_reaction(
     if data is None:
         return None
     return entry._state._get_emoji_from_fields(
-        name=data.get("emoji_name"), id=utils._get_as_snowflake(data, "emoji_id")
+        name=data.get("emoji_name"),
+        id=utils._get_as_snowflake(data, "emoji_id"),
     )
 
 

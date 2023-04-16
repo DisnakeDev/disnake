@@ -3051,7 +3051,8 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         .. versionadded:: 2.6
         """
         return self._state._get_emoji_from_fields(
-            name=self._default_reaction_emoji_name, id=self._default_reaction_emoji_id
+            name=self._default_reaction_emoji_name,
+            id=self._default_reaction_emoji_id,
         )
 
     @property

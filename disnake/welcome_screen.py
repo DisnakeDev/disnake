@@ -75,9 +75,10 @@ class WelcomeScreenChannel:
         data: WelcomeScreenChannelPayload,
         state: ConnectionState,
     ) -> WelcomeScreenChannel:
-        emoji_id = utils._get_as_snowflake(data, "emoji_id")
-        emoji_name = data.get("emoji_name")
-        emoji = state._get_emoji_from_fields(name=emoji_name, id=emoji_id)
+        emoji = state._get_emoji_from_fields(
+            name=data.get("emoji_name"),
+            id=utils._get_as_snowflake(data, "emoji_id"),
+        )
 
         return cls(id=int(data["channel_id"]), description=data["description"], emoji=emoji)
 

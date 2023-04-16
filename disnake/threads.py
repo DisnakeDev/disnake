@@ -1175,7 +1175,8 @@ class ForumTag(Hashable):
     @classmethod
     def _from_data(cls, *, data: ForumTagPayload, state: ConnectionState) -> Self:
         emoji = state._get_emoji_from_fields(
-            name=data.get("emoji_name"), id=_get_as_snowflake(data, "emoji_id")
+            name=data.get("emoji_name"),
+            id=_get_as_snowflake(data, "emoji_id"),
         )
 
         self = cls(
