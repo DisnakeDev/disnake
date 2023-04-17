@@ -67,6 +67,13 @@ class MessageReference(TypedDict, total=False):
     fail_if_not_exists: bool
 
 
+class RoleSubscriptionData(TypedDict):
+    role_subscription_listing_id: Snowflake
+    tier_name: str
+    total_months_subscribed: int
+    is_renewal: bool
+
+
 # fmt: off
 MessageType = Literal[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32]
 # fmt: on
@@ -103,6 +110,7 @@ class Message(TypedDict):
     components: NotRequired[List[Component]]
     sticker_items: NotRequired[List[StickerItem]]
     position: NotRequired[int]
+    role_subscription_data: NotRequired[RoleSubscriptionData]
 
     # specific to MESSAGE_CREATE/MESSAGE_UPDATE events
     guild_id: NotRequired[Snowflake]
