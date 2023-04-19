@@ -1,0 +1,1 @@
+Add a new reaction subclass for Super reactions: :class:`BurstReaction`
