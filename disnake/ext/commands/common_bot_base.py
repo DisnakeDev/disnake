@@ -41,6 +41,7 @@ if TYPE_CHECKING:
     AnyBot = Union[Bot, AutoShardedBot, InteractionBot, AutoShardedInteractionBot]
 
 __all__ = ("CommonBotBase",)
+_log = logging.getLogger(__name__)
 
 CogT = TypeVar("CogT", bound="Cog")
 CFT = TypeVar("CFT", bound="CoroFunc")
@@ -109,15 +110,13 @@ class CommonBotBase(Generic[CogT]):
             try:
                 self.unload_extension(extension)
             except Exception:
-                # TODO: consider logging exception
-                pass
+                _log.exception("Failed to unload extension %s", extension)
 
         for cog in tuple(self.__cogs):
             try:
                 self.remove_cog(cog)
             except Exception:
-                # TODO: consider logging exception
-                pass
+                _log.exception("Failed to remove cog %s", cog)
 
         await super().close()  # type: ignore
 
@@ -433,8 +432,7 @@ class CommonBotBase(Generic[CogT]):
             try:
                 func(self)
             except Exception:
-                # TODO: consider logging exception
-                pass
+                _log.exception("Exception in extension finalizer %r", key)
         finally:
             self.__extensions.pop(key, None)
             sys.modules.pop(key, None)
