@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 
     from .abc import Snowflake
     from .guild import Guild, GuildChannel
+    from .types.emoji import Emoji as EmojiPayload
     from .types.onboarding import (
         Onboarding as OnboardingPayload,
         OnboardingPrompt as OnboardingPromptPayload,
@@ -233,7 +234,7 @@ class OnboardingPromptOption(Hashable):
         return self
 
     def to_dict(self) -> OnboardingPromptOptionPayload:
-        emoji = {}
+        emoji: EmojiPayload = {}  # type: ignore
 
         if isinstance(self.emoji, (Emoji, PartialEmoji)):
             emoji["id"] = self.emoji.id

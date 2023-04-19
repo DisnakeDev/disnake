@@ -25,7 +25,7 @@ onboarding_prompt_option_payload: onboarding_types.OnboardingPromptOption = {
 
 @pytest.fixture
 def onboarding_prompt_option() -> OnboardingPromptOption:
-    return OnboardingPromptOption(
+    return OnboardingPromptOption._from_dict(
         guild=mock.Mock(Guild, id=123),
         data=onboarding_types.OnboardingPromptOption(
             id="0",
@@ -50,7 +50,9 @@ def onboarding_prompt() -> OnboardingPrompt:
         "type": OnboardingPromptType.multiple_choice.value,
     }
 
-    return OnboardingPrompt(data=onboarding_prompt_payload, guild=mock.Mock(Guild, id=123))
+    return OnboardingPrompt._from_dict(
+        data=onboarding_prompt_payload, guild=mock.Mock(Guild, id=123)
+    )
 
 
 @pytest.fixture
@@ -60,6 +62,7 @@ def onboarding() -> Onboarding:
         "prompts": [],
         "default_channel_ids": ["456", "789"],
         "enabled": True,
+        "mode": 0,
     }
 
     return Onboarding(
