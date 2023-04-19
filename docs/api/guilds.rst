@@ -316,6 +316,23 @@ OnboardingPromptType
 
         The prompt is a dropdown prompt.
 
+OnboardingMode
+~~~~~~~~~~~~~~
+
+.. class:: OnboardingMode
+
+    Represents the mode of onboarding.
+
+    .. versionadded:: 2.9
+
+    .. attribute:: onboarding_default
+
+        Counts only Default Channels towards constraints.
+
+    .. attribute:: onboarding_advanced
+
+        Counts Default Channels and Questions towards constraints.
+
 
 Events
 ------

@@ -4670,6 +4670,19 @@ class Guild(Hashable):
 
         .. versionadded:: 2.9
 
+        Parameters
+        ----------
+        prompts: List[:class:`OnboardingPrompt`]
+            The onboarding's new prompts.
+        default_channels: Iterable[:class:`abc.Snowflake`]
+            The onboarding's new default channels.
+        enabled: :class:`bool`
+            Whether the onboarding is enabled.
+        mode: :class:`OnboardingMode`
+            The onboarding's new mode.
+        reason: Optional[:class:`str`]
+            The reason for editing the guild onboarding. Shows up on the audit log.
+
         Raises
         ------
         HTTPException

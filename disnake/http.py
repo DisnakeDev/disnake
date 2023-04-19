@@ -2272,7 +2272,7 @@ class HTTPClient:
         default_channel_ids: SnowflakeList,
         enabled: bool,
         mode: onboarding.OnboardingMode,
-        reason: Optional[str] = None,  # TODO: test this
+        reason: Optional[str] = None,
     ) -> Response[onboarding.Onboarding]:
         payload: onboarding.EditOnboarding = {
             "prompts": prompts,
