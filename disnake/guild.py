@@ -10,6 +10,7 @@ from typing import (
     Any,
     ClassVar,
     Dict,
+    Iterable,
     List,
     Literal,
     NamedTuple,
@@ -50,6 +51,7 @@ from .enums import (
     Locale,
     NotificationLevel,
     NSFWLevel,
+    OnboardingMode,
     ThreadSortOrder,
     VerificationLevel,
     VideoQualityMode,
@@ -91,6 +93,7 @@ if TYPE_CHECKING:
     from .app_commands import APIApplicationCommand
     from .asset import AssetBytes
     from .automod import AutoModAction, AutoModTriggerMetadata
+    from .onboarding import OnboardingPrompt
     from .permissions import Permissions
     from .state import ConnectionState
     from .template import Template
@@ -4651,6 +4654,40 @@ class Guild(Hashable):
             The guild onboarding data.
         """
         data = await self._state.http.get_guild_onboarding(self.id)
+        return Onboarding(data=data, guild=self)
+
+    async def edit_guild_onboarding(
+        self,
+        prompts: List[OnboardingPrompt],
+        default_channels: Iterable[Snowflake],
+        enabled: bool,
+        mode: OnboardingMode,
+        reason: Optional[str] = None,
+    ) -> Onboarding:
+        """|coro|
+
+        Edits the guild onboarding.
+
+        .. versionadded:: 2.9
+
+        Raises
+        ------
+        HTTPException
+            Editing the guild onboarding failed.
+
+        Returns
+        -------
+        :class:`Onboarding`
+            The newly edited guild onboarding.
+        """
+        data = await self._state.http.edit_guild_onboarding(
+            self.id,
+            prompts=[p.to_dict() for p in prompts],
+            default_channel_ids=[c.id for c in default_channels],
+            enabled=enabled,
+            mode=mode.value,
+            reason=reason,
+        )
         return Onboarding(data=data, guild=self)
 
 

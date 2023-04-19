@@ -67,6 +67,7 @@ __all__ = (
     "Event",
     "ApplicationRoleConnectionMetadataType",
     "OnboardingPromptType",
+    "OnboardingMode",
 )
 
 
@@ -1299,6 +1300,11 @@ class ApplicationRoleConnectionMetadataType(Enum):
 class OnboardingPromptType(Enum):
     multiple_choice = 0
     dropdown = 1
+
+
+class OnboardingMode(Enum):
+    onboarding_default = 0
+    onboarding_advanced = 1
 
 
 T = TypeVar("T")

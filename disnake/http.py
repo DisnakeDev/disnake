@@ -2264,6 +2264,29 @@ class HTTPClient:
     def get_guild_onboarding(self, guild_id: Snowflake) -> Response[onboarding.Onboarding]:
         return self.request(Route("GET", "/guilds/{guild_id}/onboarding", guild_id=guild_id))
 
+    def edit_guild_onboarding(
+        self,
+        guild_id: Snowflake,
+        *,
+        prompts: List[onboarding.OnboardingPrompt],
+        default_channel_ids: SnowflakeList,
+        enabled: bool,
+        mode: onboarding.OnboardingMode,
+        reason: Optional[str] = None,  # TODO: test this
+    ) -> Response[onboarding.Onboarding]:
+        payload: onboarding.EditOnboarding = {
+            "prompts": prompts,
+            "default_channel_ids": default_channel_ids,
+            "enabled": enabled,
+            "mode": mode,
+        }
+
+        return self.request(
+            Route("PUT", "/guilds/{guild_id}/onboarding", guild_id=guild_id),
+            json=payload,
+            reason=reason,
+        )
+
     # Application commands (global)
 
     def get_global_commands(

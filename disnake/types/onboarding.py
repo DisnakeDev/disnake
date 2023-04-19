@@ -6,6 +6,7 @@ from .emoji import Emoji
 from .snowflake import Snowflake, SnowflakeList
 
 OnboardingPromptType = Literal[0, 1]
+OnboardingMode = Literal[0, 1]
 
 
 class OnboardingPromptOption(TypedDict):
@@ -32,3 +33,11 @@ class Onboarding(TypedDict):
     prompts: List[OnboardingPrompt]
     default_channel_ids: SnowflakeList
     enabled: bool
+    mode: OnboardingMode
+
+
+class EditOnboarding(TypedDict):
+    prompts: List[OnboardingPrompt]
+    default_channel_ids: SnowflakeList
+    enabled: bool
+    mode: OnboardingMode
