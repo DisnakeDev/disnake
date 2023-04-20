@@ -4679,7 +4679,8 @@ class Guild(Hashable):
         enabled: :class:`bool`
             Whether the onboarding is enabled.
         mode: :class:`OnboardingMode`
-            The onboarding's new mode.
+            The onboarding's new mode. This defines the criteria used to satisfy Onboarding
+            constraints that are required for enabling it.
         reason: Optional[:class:`str`]
             The reason for editing the guild onboarding. Shows up on the audit log.
 

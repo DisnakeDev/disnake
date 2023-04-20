@@ -321,7 +321,7 @@ OnboardingMode
 
 .. class:: OnboardingMode
 
-    Represents the mode of onboarding.
+    Represents the criteria used to satisfy onboarding constraints that are required for enabling it.
 
     .. versionadded:: 2.9
 
