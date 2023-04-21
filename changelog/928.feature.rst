@@ -1,0 +1,3 @@
+Implement Onboarding.
+    - Add :class:`Onboarding`, :class:`OnboardingPrompt` and :class:`OnboardingPromptOption`.
+    - Add :meth:`Guild.onboarding`.
