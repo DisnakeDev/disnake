@@ -4633,7 +4633,7 @@ class Guild(Hashable):
         )
         return AutoModRule(data=data, guild=self)
 
-    async def fetch_onboarding(self) -> Onboarding:
+    async def onboarding(self) -> Onboarding:
         """|coro|
 
         Retrieves the guild onboarding data.
