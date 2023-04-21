@@ -66,6 +66,7 @@ from .invite import Invite
 from .iterators import AuditLogIterator, BanIterator, MemberIterator
 from .member import Member, VoiceState
 from .mixins import Hashable
+from .onboarding import Onboarding
 from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite
 from .role import Role
@@ -4631,6 +4632,26 @@ class Guild(Hashable):
             reason=reason,
         )
         return AutoModRule(data=data, guild=self)
+
+    async def onboarding(self) -> Onboarding:
+        """|coro|
+
+        Retrieves the guild onboarding data.
+
+        .. versionadded:: 2.9
+
+        Raises
+        ------
+        HTTPException
+            Retrieving the guild onboarding data failed.
+
+        Returns
+        -------
+        :class:`Onboarding`
+            The guild onboarding data.
+        """
+        data = await self._state.http.get_guild_onboarding(self.id)
+        return Onboarding(data=data, guild=self)
 
 
 PlaceholderID = NewType("PlaceholderID", int)
