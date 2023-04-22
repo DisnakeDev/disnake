@@ -4656,7 +4656,7 @@ class Guild(Hashable):
         data = await self._state.http.get_guild_onboarding(self.id)
         return Onboarding(data=data, guild=self)
 
-    async def edit_guild_onboarding(
+    async def edit_onboarding(
         self,
         prompts: List[OnboardingPrompt],
         default_channels: Iterable[Snowflake],
