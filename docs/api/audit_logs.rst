@@ -278,7 +278,7 @@ AuditLogDiff
 
         The type of channel/thread, sticker, webhook, integration (:class:`str`), or permission overwrite (:class:`int`).
 
-        :type: Union[:class:`ChannelType`, :class:`StickerType`, :class:`WebhookType`, :class:`str`, :class:`int`]
+        :type: Union[:class:`ChannelType`, :class:`StickerType`, :class:`WebhookType`, :class:`OnboardingPromptType`, :class:`str`, :class:`int`]
 
     .. attribute:: topic
 
@@ -714,6 +714,24 @@ AuditLogDiff
         The default sort order of threads in a forum channel being changed.
 
         :type: Optional[:class:`ThreadSortOrder`]
+
+    .. attribute:: options
+
+        The list of options of an onboarding prompt being changed.
+
+        :type: List[:class:`OnboardingPromptOption`]
+
+    .. attribute:: prompts
+
+        The list of prompts of an onboarding being changed.
+
+        :type: List[:class:`OnboardingPrompt`]
+
+    .. attribute:: default_channels
+
+        The list of default channels of an onboarding being changed.
+
+        :type: List[:class:`~.abc.GuildChannel`]
 
 Enumerations
 ------------
@@ -1674,6 +1692,43 @@ AuditLogAction
 
         See :attr:`automod_block_message` for more information on how the
         :attr:`~AuditLogEntry.extra` field is set.
+
+    .. attribute:: onboarding_question_create
+
+        An onboarding prompt was created.
+
+        When this is the action, the type of :attr:`~AuditLogEntry.target` is
+        the :class:`Object` with the ID of the onboarding prompt which
+        was created.
+
+        Possible attributes for :class:`AuditLogDiff`:
+
+        - :attr:`~AuditLogDiff.options`
+
+    .. attribute:: onboarding_question_update
+
+        An onboarding prompt was updated.
+
+        When this is the action, the type of :attr:`~AuditLogEntry.target` is
+        the :class:`Object` with the ID of the onboarding prompt which
+        was updated.
+
+        Possible attributes for :class:`AuditLogDiff`:
+
+        - :attr:`~AuditLogDiff.options`
+
+    .. attribute:: onboarding_update
+
+        An onboarding was updated.
+
+        When this is the action, the type of :attr:`~AuditLogEntry.target` is
+        ``None``.
+
+        Possible attributes for :class:`AuditLogDiff`:
+
+        - :attr:`~AuditLogDiff.prompts`
+        - :attr:`~AuditLogDiff.default_channels`
+        - :attr:`~AuditLogDiff.enabled`
 
 AuditLogActionCategory
 ~~~~~~~~~~~~~~~~~~~~~~
