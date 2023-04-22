@@ -139,6 +139,7 @@ class _BaseActivity:
 # tag type for user-settable activities
 class BaseActivity(_BaseActivity):
     """The base activity that all user-settable activities inherit from.
+
     A user-settable activity is one that can be used in :meth:`Client.change_presence`.
 
     The following types currently count as user-settable:

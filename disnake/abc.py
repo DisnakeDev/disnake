@@ -98,7 +98,7 @@ MISSING = utils.MISSING
 class Snowflake(Protocol):
     """An ABC that details the common operations on a Discord model.
 
-    Almost all :ref:`Discord models <discord_api_models>` meet this
+    Almost all :ref:`Discord models <discord_model>` meet this
     abstract base class.
 
     If you want to create a snowflake on your own, consider using

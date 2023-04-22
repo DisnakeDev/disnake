@@ -292,8 +292,9 @@ def _transform_default_reaction(
 ) -> Optional[Union[Emoji, PartialEmoji]]:
     if data is None:
         return None
-    return PartialEmoji._emoji_from_name_id(
-        data.get("emoji_name"), utils._get_as_snowflake(data, "emoji_id"), state=entry._state
+    return entry._state._get_emoji_from_fields(
+        name=data.get("emoji_name"),
+        id=utils._get_as_snowflake(data, "emoji_id"),
     )
 
 
