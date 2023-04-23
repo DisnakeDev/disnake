@@ -197,12 +197,11 @@ class TestInteractionDataResolved:
                 "locked": False,
             }
 
-        resolved = disnake.InteractionDataResolved(
-            data={"channels": {"42": channel_data}}, state=state, guild_id=1234
+        # this should not raise
+        channel = ConnectionState._get_partial_interaction_channel(
+            state, channel_data, disnake.Object(1234)
         )
-        assert len(resolved.channels) == 1
 
-        channel = next(iter(resolved.channels.values()))
         # should be partial if and only if it's a dm/group
-        # TODO: currently includes directory channels (14), see `InteractionDataResolved.__init__`
+        # TODO: currently includes directory channels (14), see `_get_partial_interaction_channel`
         assert isinstance(channel, disnake.PartialMessageable) == (channel_type in (1, 3, 14))
