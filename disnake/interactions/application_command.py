@@ -97,7 +97,7 @@ class ApplicationCommandInteraction(Interaction):
     ) -> None:
         super().__init__(data=data, state=state)
         self.data: ApplicationCommandInteractionData = ApplicationCommandInteractionData(
-            data=data["data"], state=state, guild_id=self.guild_id
+            data=data["data"], parent=self
         )
         self.application_command: InvokableApplicationCommand = MISSING
         self.command_failed: bool = False
@@ -194,17 +194,14 @@ class ApplicationCommandInteractionData(Dict[str, Any]):
         self,
         *,
         data: ApplicationCommandInteractionDataPayload,
-        state: ConnectionState,
-        guild_id: Optional[int],
+        parent: ApplicationCommandInteraction,
     ) -> None:
         super().__init__(data)
         self.id: int = int(data["id"])
         self.name: str = data["name"]
         self.type: ApplicationCommandType = try_enum(ApplicationCommandType, data["type"])
 
-        self.resolved = InteractionDataResolved(
-            data=data.get("resolved", {}), state=state, guild_id=guild_id
-        )
+        self.resolved = InteractionDataResolved(data=data.get("resolved", {}), parent=parent)
         self.target_id: Optional[int] = utils._get_as_snowflake(data, "target_id")
         target = self.resolved.get_by_id(self.target_id)
         self.target: Optional[Union[User, Member, Message]] = target  # type: ignore

@@ -8,7 +8,7 @@ from unittest import mock
 import pytest
 
 import disnake
-from disnake import InteractionResponseType as ResponseType  # shortcut
+from disnake import Interaction, InteractionResponseType as ResponseType  # shortcut
 from disnake.state import ConnectionState
 from disnake.utils import MISSING
 
@@ -137,7 +137,14 @@ class TestInteractionDataResolved:
         s._get_guild.return_value = None
         return s
 
-    def test_init_member(self, state) -> None:
+    @pytest.fixture
+    def interaction(self, state):
+        i = mock.Mock(spec_set=Interaction)
+        i._state = state
+        i.guild_id = 1234
+        return i
+
+    def test_init_member(self, interaction) -> None:
         member_payload: MemberPayload = {
             "roles": [],
             "joined_at": "2022-09-02T22:00:55.069000+00:00",
@@ -156,8 +163,7 @@ class TestInteractionDataResolved:
         # user only, should deserialize user object
         resolved = disnake.InteractionDataResolved(
             data={"users": {"1234": user_payload}},
-            state=state,
-            guild_id=1234,
+            parent=interaction,
         )
         assert len(resolved.members) == 0
         assert len(resolved.users) == 1
@@ -165,8 +171,7 @@ class TestInteractionDataResolved:
         # member only, shouldn't deserialize anything
         resolved = disnake.InteractionDataResolved(
             data={"members": {"1234": member_payload}},
-            state=state,
-            guild_id=1234,
+            parent=interaction,
         )
         assert len(resolved.members) == 0
         assert len(resolved.users) == 0
@@ -174,8 +179,7 @@ class TestInteractionDataResolved:
         # user + member, should deserialize member object only
         resolved = disnake.InteractionDataResolved(
             data={"users": {"1234": user_payload}, "members": {"1234": member_payload}},
-            state=state,
-            guild_id=1234,
+            parent=interaction,
         )
         assert len(resolved.members) == 1
         assert len(resolved.users) == 0

@@ -1983,6 +1983,7 @@ class ConnectionState:
         except KeyError:
             return emoji
 
+    # note: this resolves private channels (and unknown types) to `PartialMessageable`
     def _get_partial_interaction_channel(
         self, data: ResolvedPartialChannelPayload, guild: Optional[Union[Guild, Object]]
     ) -> Union[GuildMessageable, PartialMessageable]:
@@ -1991,7 +1992,6 @@ class ConnectionState:
 
         factory, _ = _threaded_guild_channel_factory(channel_type)
         if not factory:
-            # FIXME: guild_directory is not messageable
             return PartialMessageable(
                 state=self,
                 id=channel_id,

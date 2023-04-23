@@ -1759,8 +1759,7 @@ class InteractionDataResolved(Dict[str, Any]):
         self,
         *,
         data: InteractionDataResolvedPayload,
-        state: ConnectionState,
-        guild_id: Optional[int],
+        parent: Interaction,
     ) -> None:
         data = data or {}
         super().__init__(data)
@@ -1778,6 +1777,9 @@ class InteractionDataResolved(Dict[str, Any]):
         channels = data.get("channels", {})
         messages = data.get("messages", {})
         attachments = data.get("attachments", {})
+
+        state = parent._state
+        guild_id = parent.guild_id
 
         guild: Optional[Guild] = None
         # `guild_fallback` is only used in guild contexts, so this `MISSING` value should never be used.
@@ -1821,11 +1823,15 @@ class InteractionDataResolved(Dict[str, Any]):
                 "Optional[MessageableChannel]",
                 (guild and guild.get_channel(channel_id) or state.get_channel(channel_id)),
             )
+
+            if channel is None and channel_id == parent.channel.id:
+                # take parent interaction's `channel` into account
+                channel = parent.channel
             if channel is None:
-                # TODO: take parent interaction's `channel` into account
-                # The channel is not part of `resolved.channels`,
+                # n.b. the channel is not part of `resolved.channels`,
                 # so we need to fall back to partials here.
                 channel = PartialMessageable(state=state, id=channel_id, type=None)
+
             self.messages[int(str_id)] = Message(state=state, channel=channel, data=message)
 
         for str_id, attachment in attachments.items():
