@@ -174,9 +174,9 @@ class OnboardingPromptOption(Hashable):
         The prompt option's description.
     emoji: Optional[Union[:class:`PartialEmoji`, :class:`Emoji`, :class:`str`]]
         The prompt option's emoji.
-    roles: FrozenSet[:class:`int`]
+    roles: Optional[Iterable[:class:`abc.Snowflake`]]
         The IDs of the roles that will be added to the user when they select this option.
-    channels: FrozenSet[:class:`int`]
+    channels: Optional[Iterable[:class:`abc.Snowflake`]]
         The IDs of the channels that the user will see when they select this option.
     """
 
