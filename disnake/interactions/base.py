@@ -126,10 +126,6 @@ class Interaction:
         .. versionchanged:: 2.5
             Changed to :class:`Locale` instead of :class:`str`.
 
-    channel_id: :class:`int`
-        The channel ID the interaction was sent from.
-
-        See also :attr:`channel`.
     channel: Union[:class:`abc.GuildChannel`, :class:`Thread`, :class:`PartialMessageable`]
         The channel the interaction was sent from.
 
@@ -166,7 +162,6 @@ class Interaction:
         "id",
         "type",
         "guild_id",
-        "channel_id",
         "channel",
         "application_id",
         "author",
@@ -201,8 +196,6 @@ class Interaction:
         self.application_id: int = int(data["application_id"])
         self._app_permissions: int = int(data.get("app_permissions", 0))
 
-        # TODO: use `self.channel.id`
-        self.channel_id: int = int(data["channel_id"])
         self.guild_id: Optional[int] = utils._get_as_snowflake(data, "guild_id")
 
         self.locale: Locale = try_enum(Locale, data["locale"])
@@ -271,6 +264,14 @@ class Interaction:
         if self.guild is None:
             return None if self.bot is None else self.bot.user  # type: ignore
         return self.guild.me
+
+    @property
+    def channel_id(self) -> int:
+        """The channel ID the interaction was sent from.
+
+        See also :attr:`channel`.
+        """
+        return self.channel.id
 
     @property
     def permissions(self) -> Permissions:
