@@ -88,6 +88,7 @@ class GuildApplicationCommandPermissions(TypedDict):
 InteractionType = Literal[1, 2, 3, 4, 5]
 
 
+# TODO: rename
 class ResolvedPartialChannel(TypedDict):
     id: Snowflake
     type: ChannelType
@@ -257,9 +258,10 @@ class _BaseInteraction(TypedDict):
 
 # common properties in non-ping interactions
 class _BaseUserInteraction(_BaseInteraction):
-    # the docs specify `channel_id` as optional,
-    # but it is assumed to always exist on non-ping interactions
+    # the docs specify `channel_id` and 'channel` as optional,
+    # but they're assumed to always exist on non-ping interactions
     channel_id: Snowflake
+    channel: ResolvedPartialChannel
     locale: str
     app_permissions: NotRequired[str]
     guild_id: NotRequired[Snowflake]
