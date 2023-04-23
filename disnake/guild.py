@@ -4658,6 +4658,7 @@ class Guild(Hashable):
 
     async def edit_onboarding(
         self,
+        *,
         prompts: List[OnboardingPrompt],
         default_channels: Iterable[Snowflake],
         enabled: bool,
