@@ -99,7 +99,7 @@ if TYPE_CHECKING:
     from .types.channel import DMChannel as DMChannelPayload
     from .types.emoji import Emoji as EmojiPayload, PartialEmoji as PartialEmojiPayload
     from .types.guild import Guild as GuildPayload, UnavailableGuild as UnavailableGuildPayload
-    from .types.interactions import ResolvedPartialChannel as ResolvedPartialChannelPayload
+    from .types.interactions import InteractionChannel as InteractionChannelPayload
     from .types.message import Message as MessagePayload
     from .types.sticker import GuildSticker as GuildStickerPayload
     from .types.user import User as UserPayload
@@ -1985,7 +1985,7 @@ class ConnectionState:
 
     # note: this resolves private channels (and unknown types) to `PartialMessageable`
     def _get_partial_interaction_channel(
-        self, data: ResolvedPartialChannelPayload, guild: Optional[Union[Guild, Object]]
+        self, data: InteractionChannelPayload, guild: Optional[Union[Guild, Object]]
     ) -> Union[GuildMessageable, PartialMessageable]:
         channel_id = int(data["id"])
         channel_type = data["type"]

@@ -88,8 +88,7 @@ class GuildApplicationCommandPermissions(TypedDict):
 InteractionType = Literal[1, 2, 3, 4, 5]
 
 
-# TODO: rename
-class ResolvedPartialChannel(TypedDict):
+class InteractionChannel(TypedDict):
     id: Snowflake
     type: ChannelType
     permissions: str
@@ -104,7 +103,7 @@ class InteractionDataResolved(TypedDict, total=False):
     users: Dict[Snowflake, User]
     members: Dict[Snowflake, Member]
     roles: Dict[Snowflake, Role]
-    channels: Dict[Snowflake, ResolvedPartialChannel]
+    channels: Dict[Snowflake, InteractionChannel]
     # only in application commands
     messages: Dict[Snowflake, Message]
     attachments: Dict[Snowflake, Attachment]
@@ -261,7 +260,7 @@ class _BaseUserInteraction(_BaseInteraction):
     # the docs specify `channel_id` and 'channel` as optional,
     # but they're assumed to always exist on non-ping interactions
     channel_id: Snowflake
-    channel: ResolvedPartialChannel
+    channel: InteractionChannel
     locale: str
     app_permissions: NotRequired[str]
     guild_id: NotRequired[Snowflake]

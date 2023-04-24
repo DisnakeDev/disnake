@@ -13,7 +13,7 @@ from disnake.state import ConnectionState
 from disnake.utils import MISSING
 
 if TYPE_CHECKING:
-    from disnake.types.interactions import ResolvedPartialChannel as ResolvedPartialChannelPayload
+    from disnake.types.interactions import InteractionChannel as InteractionChannelPayload
     from disnake.types.member import Member as MemberPayload
     from disnake.types.user import User as UserPayload
 
@@ -186,7 +186,7 @@ class TestInteractionDataResolved:
 
     @pytest.mark.parametrize("channel_type", [t.value for t in disnake.ChannelType])
     def test_channel(self, state, channel_type) -> None:
-        channel_data: ResolvedPartialChannelPayload = {
+        channel_data: InteractionChannelPayload = {
             "id": "42",
             "type": channel_type,
             "permissions": "7",
