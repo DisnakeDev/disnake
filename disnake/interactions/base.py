@@ -134,8 +134,8 @@ class Interaction:
         These are :class:`PartialMessageable` instead.
 
         .. versionchanged:: 2.9
-            If the interaction was sent from a thread, this is now a proper
-            :class:`Thread` object, even when then bot cannot normally access the thread.
+            If the interaction was sent from a thread and bot cannot normally access the thread,
+            this is now a proper :class:`Thread` object.
 
         .. note::
             If you want to compute the interaction author's or bot's permissions in the channel,
