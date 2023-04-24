@@ -25,11 +25,12 @@ from ..message import Message
 from .async_ import BaseWebhook, _WebhookState, handle_message_parameters
 
 try:
-    from requests.utils import default_user_agent
-except ImportError:
-    DEFAULT_USER_AGENT = ""
-else:
-    DEFAULT_USER_AGENT = default_user_agent()
+    from requests import Session
+
+    DEFAULT_USER_AGENT = Session().headers.get("User-Agent")
+except Exception:
+    DEFAULT_USER_AGENT = None
+
 
 __all__ = (
     "SyncWebhook",
