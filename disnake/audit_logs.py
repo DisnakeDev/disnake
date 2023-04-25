@@ -243,7 +243,7 @@ def _transform_type(
     elif action_name.startswith("integration_") or action_name.startswith("overwrite_"):
         # integration: str, overwrite: int
         return data
-    elif action_name.startswith("onboarding_question_"):
+    elif action_name.startswith("onboarding_prompt_"):
         return enums.try_enum(enums.OnboardingPromptType, data)
     else:
         return enums.try_enum(enums.ChannelType, data)

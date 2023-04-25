@@ -393,8 +393,8 @@ class AuditLogAction(Enum):
     automod_block_message                 = 143
     automod_send_alert_message            = 144
     automod_timeout                       = 145
-    onboarding_question_create            = 163
-    onboarding_question_update            = 164
+    onboarding_prompt_create              = 163
+    onboarding_prompt_update              = 164
     onboarding_update                     = 167
     # fmt: on
 
