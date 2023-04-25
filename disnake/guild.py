@@ -2555,8 +2555,10 @@ class Guild(Hashable):
     def fetch_members(
         self, *, limit: Optional[int] = 1000, after: Optional[SnowflakeTime] = None
     ) -> MemberIterator:
-        """Retrieves an :class:`.AsyncIterator` that enables receiving the guild's members. In order to use this,
-        :meth:`Intents.members` must be enabled.
+        """Retrieves an :class:`.AsyncIterator` that enables receiving the guild's members.
+
+        In order to use this, the :attr:`~Intents.members` intent must be
+        enabled in the developer portal.
 
         .. note::
 
@@ -2600,8 +2602,11 @@ class Guild(Hashable):
             members = await guild.fetch_members(limit=150).flatten()
             # members is now a list of Member...
         """
-        if not self._state._intents.members:
-            raise ClientException("Intents.members must be enabled to use this.")
+        # `hasattr` check to avoid issues with uninitialized state
+        if hasattr(self._state, "application_flags"):
+            flags = self._state.application_flags
+            if not (flags.gateway_guild_members_limited or flags.gateway_guild_members):
+                raise ClientException("The `members` intent must be enabled to use this.")
 
         return MemberIterator(self, limit=limit, after=after)
 
