@@ -80,7 +80,7 @@ class OnboardingPrompt(Hashable):
 
     .. versionadded:: 2.9
 
-    Parameters
+    Attributes
     ----------
     title: :class:`str`
         The onboarding prompt's title.
@@ -161,7 +161,7 @@ class OnboardingPromptOption(Hashable):
 
     .. versionadded:: 2.9
 
-    Parameters
+    Attributes
     ----------
     title: :class:`str`
         The prompt option's title.
@@ -169,9 +169,9 @@ class OnboardingPromptOption(Hashable):
         The prompt option's description.
     emoji: Optional[Union[:class:`PartialEmoji`, :class:`Emoji`, :class:`str`]]
         The prompt option's emoji.
-    roles: Optional[Iterable[:class:`abc.Snowflake`]]
+    roles: Optional[FrozenSet[:class:`abc.Snowflake`]]
         The IDs of the roles that will be added to the user when they select this option.
-    channels: Optional[Iterable[:class:`abc.Snowflake`]]
+    channels: Optional[FrozenSet[:class:`abc.Snowflake`]]
         The IDs of the channels that the user will see when they select this option.
     """
 
