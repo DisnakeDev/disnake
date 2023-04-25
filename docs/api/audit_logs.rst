@@ -276,7 +276,7 @@ AuditLogDiff
 
     .. attribute:: type
 
-        The type of channel/thread, sticker, webhook, integration (:class:`str`), or permission overwrite (:class:`int`).
+        The type of channel/thread, sticker, webhook, onboarding prompt, integration (:class:`str`), or permission overwrite (:class:`int`).
 
         :type: Union[:class:`ChannelType`, :class:`StickerType`, :class:`WebhookType`, :class:`OnboardingPromptType`, :class:`str`, :class:`int`]
 
@@ -732,6 +732,34 @@ AuditLogDiff
         The list of default channels of an onboarding being changed.
 
         :type: List[:class:`~.abc.GuildChannel`]
+
+    .. attribute:: title
+
+        The title of an onboarding prompt being changed.
+
+        :type: :class:`str`
+
+    .. attribute:: single_select
+
+        Whether users are limited to selecting one option for the onboarding prompt.
+
+        :type: :class:`bool`
+
+    .. attribute:: required
+
+        Whether an onboarding prompt is required.
+
+        :type: :class:`bool`
+
+    .. attribute:: in_onboarding
+
+        Whether an onboarding prompt is required before a user completes the onboarding flow.
+
+        :type: :class:`bool`
+
+
+
+
 
 Enumerations
 ------------
@@ -1693,7 +1721,7 @@ AuditLogAction
         See :attr:`automod_block_message` for more information on how the
         :attr:`~AuditLogEntry.extra` field is set.
 
-    .. attribute:: onboarding_question_create
+    .. attribute:: onboarding_prompt_create
 
         An onboarding prompt was created.
 
@@ -1703,9 +1731,14 @@ AuditLogAction
 
         Possible attributes for :class:`AuditLogDiff`:
 
+        - :attr:`~AuditLogDiff.title`
         - :attr:`~AuditLogDiff.options`
+        - :attr:`~AuditLogDiff.single_select`
+        - :attr:`~AuditLogDiff.required`
+        - :attr:`~AuditLogDiff.in_onboarding`
+        - :attr:`~AuditLogDiff.type`
 
-    .. attribute:: onboarding_question_update
+    .. attribute:: onboarding_prompt_update
 
         An onboarding prompt was updated.
 
@@ -1715,7 +1748,12 @@ AuditLogAction
 
         Possible attributes for :class:`AuditLogDiff`:
 
+        - :attr:`~AuditLogDiff.title`
         - :attr:`~AuditLogDiff.options`
+        - :attr:`~AuditLogDiff.single_select`
+        - :attr:`~AuditLogDiff.required`
+        - :attr:`~AuditLogDiff.in_onboarding`
+        - :attr:`~AuditLogDiff.type`
 
     .. attribute:: onboarding_update
 
