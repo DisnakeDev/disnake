@@ -97,7 +97,7 @@ class OnboardingPrompt(Hashable):
         If ``False``, the prompt will only appear in community customization.
     """
 
-    __slots__ = ("title", "options", "single_select", "required", "in_onboarding", "type", "_id")
+    __slots__ = ("id", "title", "options", "single_select", "required", "in_onboarding", "type")
 
     def __init__(
         self,
@@ -109,7 +109,7 @@ class OnboardingPrompt(Hashable):
         required: bool,
         in_onboarding: bool,
     ) -> None:
-        self._id: int = 0
+        self.id: int = 0
         self.title: str = title
         self.options: List[OnboardingPromptOption] = options
         self.single_select: bool = single_select
@@ -127,11 +127,6 @@ class OnboardingPrompt(Hashable):
             f" in_onboarding={self.in_onboarding!r} type={self.type!r}>"
         )
 
-    @property
-    def id(self) -> int:
-        """:class:`int`: The onboarding prompt's ID."""
-        return self._id
-
     @classmethod
     def _from_dict(cls, *, data: OnboardingPromptPayload, guild: Guild) -> Self:
         self = cls(
@@ -146,7 +141,7 @@ class OnboardingPrompt(Hashable):
             type=try_enum(OnboardingPromptType, data["type"]),
         )
         if "id" in data:
-            self._id = int(data["id"])
+            self.id = int(data["id"])
         return self
 
     def to_dict(self) -> OnboardingPromptPayload:
