@@ -43,7 +43,7 @@ class Onboarding:
     default_channel_ids: FrozenSet[:class:`int`]
         The IDs of the channels that will be shown to new members by default.
     mode: :class:`OnboardingMode`
-        Current mode of the onboarding.
+        The onboarding mode, defining criteria for enabling onboarding.
     """
 
     __slots__ = ("guild", "prompts", "enabled", "default_channel_ids", "mode")
