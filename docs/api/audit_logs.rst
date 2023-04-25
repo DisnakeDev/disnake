@@ -758,9 +758,6 @@ AuditLogDiff
         :type: :class:`bool`
 
 
-
-
-
 Enumerations
 ------------
 
