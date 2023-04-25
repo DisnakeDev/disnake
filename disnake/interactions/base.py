@@ -386,6 +386,7 @@ class Interaction:
         suppress_embeds: bool = MISSING,
         flags: MessageFlags = MISSING,
         allowed_mentions: Optional[AllowedMentions] = None,
+        delete_after: float = MISSING,
     ) -> InteractionMessage:
         """|coro|
 
@@ -467,6 +468,16 @@ class Interaction:
 
             .. versionadded:: 2.9
 
+        delete_after: :class:`float`
+            If provided, the number of seconds to wait in the background
+            before deleting the message we just edited. If the deletion fails,
+            then it is silently ignored.
+
+            Can be up to 15 minutes after the interaction was created
+            (see also :attr:`Interaction.expires_at`/:attr:`~Interaction.is_expired`).
+
+            .. versionadded:: 2.9
+
         Raises
         ------
         HTTPException
@@ -525,8 +536,13 @@ class Interaction:
         # The message channel types should always match
         state = _InteractionMessageState(self, self._state)
         message = InteractionMessage(state=state, channel=self.channel, data=data)  # type: ignore
+
         if view and not view.is_finished():
             self._state.store_view(view, message.id)
+
+        if delete_after is not MISSING:
+            await self.delete_original_response(delay=delete_after)
+
         return message
 
     async def delete_original_response(self, *, delay: Optional[float] = None) -> None:
@@ -1060,6 +1076,7 @@ class InteractionResponse:
         allowed_mentions: AllowedMentions = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[Components[MessageUIComponent]] = MISSING,
+        delete_after: float = MISSING,
     ) -> None:
         """|coro|
 
@@ -1121,6 +1138,16 @@ class InteractionResponse:
             If ``None`` is passed then the components are removed.
 
             .. versionadded:: 2.4
+
+        delete_after: :class:`float`
+            If provided, the number of seconds to wait in the background
+            before deleting the message we just edited. If the deletion fails,
+            then it is silently ignored.
+
+            Can be up to 15 minutes after the interaction was created
+            (see also :attr:`Interaction.expires_at`/:attr:`~Interaction.is_expired`).
+
+            .. versionadded:: 2.9
 
         Raises
         ------
@@ -1220,6 +1247,9 @@ class InteractionResponse:
             state.store_view(view, message.id)
 
         self._response_type = response_type
+
+        if delete_after is not MISSING:
+            await self._parent.delete_original_response(delay=delete_after)
 
     async def autocomplete(self, *, choices: Choices) -> None:
         """|coro|
@@ -1552,6 +1582,7 @@ class InteractionMessage(Message):
         allowed_mentions: Optional[AllowedMentions] = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[Components[MessageUIComponent]] = MISSING,
+        delete_after: float = MISSING,
     ) -> Message:
         """|coro|
 
@@ -1622,6 +1653,15 @@ class InteractionMessage(Message):
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
+        delete_after: :class:`float`
+            If provided, the number of seconds to wait in the background
+            before deleting the message we just edited. If the deletion fails,
+            then it is silently ignored.
+
+            Can be up to 15 minutes after the interaction was created
+            (see also :attr:`Interaction.expires_at`/:attr:`~Interaction.is_expired`).
+
+            .. versionadded:: 2.9
 
         Raises
         ------
@@ -1655,6 +1695,7 @@ class InteractionMessage(Message):
                 allowed_mentions=allowed_mentions,
                 view=view,
                 components=components,
+                delete_after=delete_after,
                 **params,
             )
 
@@ -1676,6 +1717,7 @@ class InteractionMessage(Message):
             allowed_mentions=allowed_mentions,
             view=view,
             components=components,
+            delete_after=delete_after,
         )
 
     async def delete(self, *, delay: Optional[float] = None) -> None:
