@@ -456,8 +456,8 @@ class AuditLogAction(Enum):
             AuditLogAction.automod_block_message:                 None,
             AuditLogAction.automod_send_alert_message:            None,
             AuditLogAction.automod_timeout:                       None,
-            AuditLogAction.onboarding_question_create:            AuditLogActionCategory.create,
-            AuditLogAction.onboarding_question_update:            AuditLogActionCategory.update,
+            AuditLogAction.onboarding_prompt_create:            AuditLogActionCategory.create,
+            AuditLogAction.onboarding_prompt_update:            AuditLogActionCategory.update,
             AuditLogAction.onboarding_update:                     AuditLogActionCategory.update,
         }
         # fmt: on
