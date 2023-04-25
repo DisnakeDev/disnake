@@ -232,9 +232,7 @@ class OnboardingPromptOption(Hashable):
         emoji: EmojiPayload = {}  # type: ignore
 
         if isinstance(self.emoji, (Emoji, PartialEmoji)):
-            emoji["id"] = self.emoji.id
-            emoji["name"] = self.emoji.name
-            emoji["animated"] = self.emoji.animated
+            emoji = self.emoji.to_dict()
         elif isinstance(self.emoji, str):
             emoji["name"] = self.emoji
 
