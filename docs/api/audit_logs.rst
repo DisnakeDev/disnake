@@ -723,13 +723,13 @@ AuditLogDiff
 
     .. attribute:: prompts
 
-        The list of prompts of an onboarding being changed.
+        The list of prompts of an onboarding configuration being changed.
 
         :type: List[:class:`OnboardingPrompt`]
 
     .. attribute:: default_channels
 
-        The list of default channels of an onboarding being changed.
+        The list of default channels of an onboarding configuration being changed.
 
         :type: List[:class:`~.abc.GuildChannel`]
 
@@ -1754,7 +1754,7 @@ AuditLogAction
 
     .. attribute:: onboarding_update
 
-        An onboarding was updated.
+        An onboarding configuration was updated.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         ``None``.
