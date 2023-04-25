@@ -2268,18 +2268,11 @@ class HTTPClient:
         self,
         guild_id: Snowflake,
         *,
-        prompts: List[onboarding.OnboardingPrompt],
-        default_channel_ids: SnowflakeList,
-        enabled: bool,
-        mode: onboarding.OnboardingMode,
         reason: Optional[str] = None,
+        **fields: Any,
     ) -> Response[onboarding.Onboarding]:
-        payload: onboarding.EditOnboarding = {
-            "prompts": prompts,
-            "default_channel_ids": default_channel_ids,
-            "enabled": enabled,
-            "mode": mode,
-        }
+        valid_keys = ("prompts", "default_channels_ids", "enabled", "mode")
+        payload = {k: v for k, v in fields.items() if k in valid_keys}
 
         return self.request(
             Route("PUT", "/guilds/{guild_id}/onboarding", guild_id=guild_id),

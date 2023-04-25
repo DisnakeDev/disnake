@@ -108,6 +108,7 @@ if TYPE_CHECKING:
         MFALevel,
     )
     from .types.integration import IntegrationType
+    from .types.onboarding import EditOnboarding as EditOnboardingPayload
     from .types.role import CreateRole as CreateRolePayload
     from .types.sticker import CreateGuildSticker as CreateStickerPayload
     from .types.threads import Thread as ThreadPayload, ThreadArchiveDurationLiteral
@@ -4659,10 +4660,10 @@ class Guild(Hashable):
     async def edit_onboarding(
         self,
         *,
-        prompts: List[OnboardingPrompt],
-        default_channels: Iterable[Snowflake],
-        enabled: bool,
-        mode: OnboardingMode,
+        prompts: List[OnboardingPrompt] = MISSING,
+        default_channels: Iterable[Snowflake] = MISSING,
+        enabled: bool = MISSING,
+        mode: OnboardingMode = MISSING,
         reason: Optional[str] = None,
     ) -> Onboarding:
         """|coro|
@@ -4695,12 +4696,23 @@ class Guild(Hashable):
         :class:`Onboarding`
             The newly edited guild onboarding.
         """
+        edit_payload: EditOnboardingPayload = {}
+
+        if prompts is not MISSING:
+            edit_payload["prompts"] = [p.to_dict() for p in prompts]
+
+        if default_channels is not MISSING:
+            edit_payload["default_channel_ids"] = [c.id for c in default_channels]
+
+        if enabled is not MISSING:
+            edit_payload["enabled"] = enabled
+
+        if mode is not MISSING:
+            edit_payload["mode"] = mode.value
+
         data = await self._state.http.edit_guild_onboarding(
             self.id,
-            prompts=[p.to_dict() for p in prompts],
-            default_channel_ids=[c.id for c in default_channels],
-            enabled=enabled,
-            mode=mode.value,
+            **edit_payload,
             reason=reason,
         )
         return Onboarding(data=data, guild=self)
