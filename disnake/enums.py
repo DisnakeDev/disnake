@@ -1303,8 +1303,8 @@ class OnboardingPromptType(Enum):
 
 
 class OnboardingMode(Enum):
-    onboarding_default = 0
-    onboarding_advanced = 1
+    default = 0
+    advanced = 1
 
 
 T = TypeVar("T")

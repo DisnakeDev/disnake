@@ -325,11 +325,11 @@ OnboardingMode
 
     .. versionadded:: 2.9
 
-    .. attribute:: onboarding_default
+    .. attribute:: default
 
         Counts only Default Channels towards constraints.
 
-    .. attribute:: onboarding_advanced
+    .. attribute:: advanced
 
         Counts Default Channels and Questions towards constraints.
 
