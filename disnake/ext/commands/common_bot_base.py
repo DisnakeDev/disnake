@@ -111,14 +111,14 @@ class CommonBotBase(Generic[CogT]):
                 self.unload_extension(extension)
             except Exception as error:
                 error.__suppress_context__ = True
-                _log.error("Failed to unload extension %s", exc_info=error)
+                _log.error("Failed to unload extension %s", extension, exc_info=error)
 
         for cog in tuple(self.__cogs):
             try:
                 self.remove_cog(cog)
             except Exception as error:
                 error.__suppress_context__ = True
-                _log.exception("Failed to remove cog %s", exc_info=error)
+                _log.exception("Failed to remove cog %s", cog, exc_info=error)
 
         await super().close()  # type: ignore
 

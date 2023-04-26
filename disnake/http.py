@@ -277,7 +277,7 @@ class HTTPClient:
         lock = self._locks.get(bucket)
         if lock is None:
             lock = asyncio.Lock()
-            if bucket:  # `is not None:` -> Unnecessary Comparison according to pyright
+            if bucket is not None:
                 self._locks[bucket] = lock
 
         # header creation

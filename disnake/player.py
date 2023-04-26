@@ -196,7 +196,7 @@ class FFmpegAudio(AudioSource):
             )
 
     def _pipe_writer(self, source: io.BufferedIOBase) -> None:
-        assert self._stdin
+        assert self._stdin  # noqa: S101 # TODO: remove this ignore (didn't want to touch this)
         while self._process:
             # arbitrarily large read size
             data = source.read(8192)
