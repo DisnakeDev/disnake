@@ -626,10 +626,6 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
             }
 
             for element in entries:
-                # TODO: remove this if statement later
-                if element["action_type"] is None:
-                    continue
-
                 await self.entries.put(
                     AuditLogEntry(
                         data=element,
