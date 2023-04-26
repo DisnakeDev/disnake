@@ -216,6 +216,7 @@ ignore = [
     "PT",   # this is not a module of pytest tests
 ]
 "tests/*.py" = ["S101"] # use of assert is okay in test files
+"scripts/*.py" = ["S101"] # use of assert is okay in codemods
 # we are not using noqa in the example files themselves
 "examples/*.py" = [
     "B008", # do not perform function calls in argument defaults, this is how most commands work
