@@ -109,14 +109,16 @@ class CommonBotBase(Generic[CogT]):
         for extension in tuple(self.__extensions):
             try:
                 self.unload_extension(extension)
-            except Exception:
-                _log.exception("Failed to unload extension %s", extension)
+            except Exception as error:
+                error.__suppress_context__ = True
+                _log.error("Failed to unload extension %s", exc_info=error)
 
         for cog in tuple(self.__cogs):
             try:
                 self.remove_cog(cog)
-            except Exception:
-                _log.exception("Failed to remove cog %s", cog)
+            except Exception as error:
+                error.__suppress_context__ = True
+                _log.exception("Failed to remove cog %s", exc_info=error)
 
         await super().close()  # type: ignore
 
@@ -417,7 +419,7 @@ class CommonBotBase(Generic[CogT]):
             remove = [
                 index
                 for index, event in enumerate(event_list)
-                if event.__module__ is not None and _is_submodule(name, event.__module__)
+                if event.__module__ and _is_submodule(name, event.__module__)
             ]
 
             for index in reversed(remove):
@@ -431,8 +433,9 @@ class CommonBotBase(Generic[CogT]):
         else:
             try:
                 func(self)
-            except Exception:
-                _log.exception("Exception in extension finalizer %r", key)
+            except Exception as error:
+                error.__suppress_context__ = True
+                _log.error("Exception in extension finalizer %r", key, exc_info=error)
         finally:
             self.__extensions.pop(key, None)
             sys.modules.pop(key, None)
