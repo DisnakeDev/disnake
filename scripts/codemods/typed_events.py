@@ -101,6 +101,13 @@ class EventTypings(codemod.VisitorBasedCodemodCommand):
             )
             new_overload = new_overload.with_changes(returns=cst.Annotation(new_annotation))
 
+            # set `self` annotation as a workaround for overloads in subclasses
+            if event_data.bot:
+                new_overload = new_overload.with_deep_changes(
+                    get_param(new_overload, "self"),
+                    annotation=cst.Annotation(cst.Name("AnyBot")),
+                )
+
             new_overloads.append(new_overload)
 
         return cst.FlattenSentinel([*new_overloads, node])
