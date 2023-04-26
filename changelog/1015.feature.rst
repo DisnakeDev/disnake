@@ -1,0 +1,1 @@
+Add :attr:`attachment` to :class:`InteractionApplicationCommandCallbackData`
