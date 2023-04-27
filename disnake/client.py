@@ -2737,7 +2737,19 @@ class Client:
     ) -> Coroutine[Any, Any, Tuple[ApplicationCommandInteraction, commands.CommandError]]:
         ...
 
+    # fallback for custom events
+
+    @overload
     @_overload_with_events
+    def wait_for(
+        self,
+        event: str,
+        *,
+        check: Optional[Callable[..., bool]] = None,
+        timeout: Optional[float] = None,
+    ) -> Coroutine[Any, Any, Any]:
+        ...
+
     def wait_for(
         self,
         event: Union[str, Event],

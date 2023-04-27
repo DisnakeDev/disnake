@@ -54,7 +54,7 @@ class EventTypings(codemod.VisitorBasedCodemodCommand):
 
         # if we're here, we found a @_overload_with_events decorator
         new_overloads: List[cst.FunctionDef] = []
-        for event in EVENT_DATA.keys():
+        for event in Event:
             event_data = EVENT_DATA[event]
             if event_data.event_only:
                 continue
@@ -66,6 +66,7 @@ class EventTypings(codemod.VisitorBasedCodemodCommand):
                     cst.Decorator(cst.Name("overload")),
                     cst.Decorator(cst.Name("_generated")),
                 ],
+                leading_lines=(),
             )
 
             # set `event` annotation
