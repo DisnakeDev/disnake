@@ -74,12 +74,14 @@ def patch_opengraph(*args: Any) -> None:
     DescriptionParser.dispatch_visit = patched_dispatch_visit
 
 
-def hook_html_page_context(app: Sphinx, config: Config) -> None:
-    for listener in list(app.events.listeners.get("html-page-context", [])):
-        module_name = inspect.getmodule(listener.handler).__name__  # type: ignore
+def disable_mathjax(app: Sphinx, config: Config) -> None:
+    # prevent installation of mathjax script, which gets installed due to
+    # https://github.com/readthedocs/sphinx-hoverxref/commit/7c4655092c482bd414b1816bdb4f393da117062a
+    #
+    # inspired by https://github.com/readthedocs/sphinx-hoverxref/blob/003b84fee48262f1a969c8143e63c177bd98aa26/hoverxref/extension.py#L151
 
-        # prevent installation of mathjax script, which gets installed due to
-        # https://github.com/readthedocs/sphinx-hoverxref/commit/7c4655092c482bd414b1816bdb4f393da117062a
+    for listener in app.events.listeners.get("html-page-context", []):
+        module_name = inspect.getmodule(listener.handler).__name__  # type: ignore
         if module_name == "sphinx.ext.mathjax":
             app.disconnect(listener.id)
 
@@ -87,7 +89,7 @@ def hook_html_page_context(app: Sphinx, config: Config) -> None:
 def setup(app: Sphinx) -> SphinxExtensionMeta:
     app.connect("config-inited", patch_genindex)
     app.connect("config-inited", patch_opengraph)
-    app.connect("config-inited", hook_html_page_context)
+    app.connect("config-inited", disable_mathjax)
     app.connect("builder-inited", set_translator)
 
     return {
