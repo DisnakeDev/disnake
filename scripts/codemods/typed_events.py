@@ -59,7 +59,8 @@ class EventTypings(codemod.VisitorBasedCodemodCommand):
         # if we're here, we found a @_overload_with_events decorator
         new_overloads: List[cst.FunctionDef] = []
         for event in Event:
-            event_data = EVENT_DATA[event]
+            if not (event_data := EVENT_DATA.get(event)):
+                raise RuntimeError(f"{event} is missing an EVENT_DATA definition")
             if event_data.event_only:
                 continue
             new_overloads.append(generator(node, event, event_data))
