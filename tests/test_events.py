@@ -4,8 +4,14 @@ from typing import Any
 
 import pytest
 
+import disnake
 from disnake import Event
 from disnake.ext import commands
+
+
+@pytest.fixture
+def client():
+    return disnake.Client()
 
 
 @pytest.fixture
@@ -14,6 +20,19 @@ def bot():
 
 
 # @Client.event
+
+
+def test_client_event(client: disnake.Client) -> None:
+    assert not hasattr(client, "on_message_edit")
+
+    @client.event
+    async def on_message_edit(self, *args: Any) -> None:
+        ...
+
+    assert client.on_message_edit is on_message_edit  # type: ignore
+
+
+# Bot.wait_for
 
 
 @pytest.mark.parametrize("event", ["message_edit", Event.message_edit])
