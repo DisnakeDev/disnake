@@ -1,7 +1,6 @@
 .. SPDX-License-Identifier: MIT
 
 :orphan:
-:ogp_disable:
 
 Redirecting ...
 ===============
