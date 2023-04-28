@@ -16,7 +16,10 @@ def client():
 
 @pytest.fixture
 def bot():
-    return commands.Bot(command_prefix=commands.when_mentioned)
+    return commands.Bot(
+        command_prefix=commands.when_mentioned,
+        command_sync_flags=commands.CommandSyncFlags.none(),
+    )
 
 
 # @Client.event
