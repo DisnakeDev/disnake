@@ -1649,7 +1649,7 @@ AuditLogAction
         When this is the action, the type of :attr:`~AuditLogEntry.extra` is
         set to an unspecified proxy object with these attributes:
 
-        - ``channel``: A :class:`~abc.GuildChannel`, :class:`Thread` or :class:`Object` with the channel ID where the message got blocked.
+        - ``channel``: A :class:`~abc.GuildChannel`, :class:`Thread` or :class:`Object` with the channel ID where the message got blocked. May also be ``None``.
         - ``rule_name``: A :class:`str` with the name of the rule that matched.
         - ``rule_trigger_type``: An :class:`AutoModTriggerType` value with the trigger type of the rule.
 
