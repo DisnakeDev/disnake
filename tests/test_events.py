@@ -48,9 +48,8 @@ def test_wait_for(bot: commands.Bot, event) -> None:
     coro.close()  # close coroutine to avoid warning
 
 
-def _test_typing_wait_for() -> None:
+def _test_typing_wait_for(client: disnake.Client, bot: commands.Bot) -> None:
     expected_type = Coroutine[Any, Any, disnake.Guild]
-    client = disnake.Client()
 
     # valid enum event
     _ = assert_type(client.wait_for(Event.guild_join), expected_type)
@@ -66,8 +65,7 @@ def _test_typing_wait_for() -> None:
     _ = assert_type(client.wait_for("guild_join", check=lambda: True), Coroutine[Any, Any, Any])
 
     # bot-specific events
-    bot = commands.Bot(command_prefix=commands.when_mentioned)
-    _ = client.wait_for(Event.slash_command_error)  # type: ignore
+    _ = client.wait_for(Event.slash_command_error)  # type: ignore  # this should error
     _ = assert_type(
         bot.wait_for(Event.slash_command),
         Coroutine[Any, Any, disnake.ApplicationCommandInteraction],
