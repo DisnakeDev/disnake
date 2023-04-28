@@ -118,7 +118,7 @@ class CommonBotBase(Generic[CogT]):
                 self.remove_cog(cog)
             except Exception as error:
                 error.__suppress_context__ = True
-                _log.exception("Failed to remove cog %s", cog, exc_info=error)
+                _log.exception("Failed to remove cog %r", cog, exc_info=error)
 
         await super().close()  # type: ignore
 
