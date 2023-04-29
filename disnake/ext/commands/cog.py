@@ -728,7 +728,7 @@ class Cog(metaclass=CogMeta):
         cls = self.__class__
 
         if (
-            issubclass(bot.__class__, (InteractionBot, AutoShardedInteractionBot))
+            isinstance(bot, (InteractionBot, AutoShardedInteractionBot))
             and len(self.__cog_commands__) > 0
         ):
             raise TypeError("@commands.command is not supported for interaction bots.")
@@ -774,16 +774,16 @@ class Cog(metaclass=CogMeta):
 
         # check if we're overriding the default
         if cls.bot_check is not Cog.bot_check:
-            if issubclass(bot.__class__, (InteractionBot, AutoShardedInteractionBot)):
+            if isinstance(bot, (InteractionBot, AutoShardedInteractionBot)):
                 raise TypeError("Cog.bot_check is not supported for interaction bots.")
 
-            bot.add_check(self.bot_check)  # type: ignore
+            bot.add_check(self.bot_check)
 
         if cls.bot_check_once is not Cog.bot_check_once:
-            if issubclass(bot.__class__, (InteractionBot, AutoShardedInteractionBot)):
+            if isinstance(bot, (InteractionBot, AutoShardedInteractionBot)):
                 raise TypeError("Cog.bot_check_once is not supported for interaction bots.")
 
-            bot.add_check(self.bot_check_once, call_once=True)  # type: ignore
+            bot.add_check(self.bot_check_once, call_once=True)
 
         # Add application command checks
         if cls.bot_slash_command_check is not Cog.bot_slash_command_check:
