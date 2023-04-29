@@ -723,7 +723,15 @@ class Cog(metaclass=CogMeta):
         pass
 
     def _inject(self, bot: AnyBot) -> Self:
+        from .bot import AutoShardedInteractionBot, InteractionBot
+
         cls = self.__class__
+
+        if (
+            issubclass(bot.__class__, (InteractionBot, AutoShardedInteractionBot))
+            and len(self.__cog_commands__) > 0
+        ):
+            raise TypeError("@commands.command is not supported for interaction bots.")
 
         # realistically, the only thing that can cause loading errors
         # is essentially just the command loading, which raises if there are
@@ -764,11 +772,16 @@ class Cog(metaclass=CogMeta):
         if not hasattr(self.cog_load.__func__, "__cog_special_method__"):
             bot.loop.create_task(disnake.utils.maybe_coroutine(self.cog_load))
 
-        # check if we're overriding the default
         if cls.bot_check is not Cog.bot_check:
+            if issubclass(bot.__class__, (InteractionBot, AutoShardedInteractionBot)):
+                raise TypeError("Cog.bot_check is not supported for interaction bots.")
+
             bot.add_check(self.bot_check)  # type: ignore
 
         if cls.bot_check_once is not Cog.bot_check_once:
+            if issubclass(bot.__class__, (InteractionBot, AutoShardedInteractionBot)):
+                raise TypeError("Cog.bot_check_once is not supported for interaction bots.")
+
             bot.add_check(self.bot_check_once, call_once=True)  # type: ignore
 
         # Add application command checks
