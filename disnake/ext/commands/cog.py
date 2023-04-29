@@ -772,6 +772,7 @@ class Cog(metaclass=CogMeta):
         if not hasattr(self.cog_load.__func__, "__cog_special_method__"):
             bot.loop.create_task(disnake.utils.maybe_coroutine(self.cog_load))
 
+        # check if we're overriding the default
         if cls.bot_check is not Cog.bot_check:
             if issubclass(bot.__class__, (InteractionBot, AutoShardedInteractionBot)):
                 raise TypeError("Cog.bot_check is not supported for interaction bots.")
