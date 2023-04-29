@@ -175,7 +175,7 @@ class OnboardingPromptOption(Hashable):
         The IDs of the channels that the user will see when they select this option.
     """
 
-    __slots__ = ("title", "description", "emoji", "guild", "roles", "channels", "_id")
+    __slots__ = ("id", "title", "description", "emoji", "guild", "roles", "channels")
 
     def __init__(
         self,
@@ -189,7 +189,7 @@ class OnboardingPromptOption(Hashable):
         if roles is None and channels is None:
             raise TypeError("Either roles or channels must be provided.")
 
-        self._id: int = 0
+        self.id: int = 0
         self.title: str = title
         self.description: Optional[str] = description
         self.roles: FrozenSet[Snowflake] = frozenset(roles) if roles else frozenset()
@@ -204,11 +204,6 @@ class OnboardingPromptOption(Hashable):
             f"<OnboardingPromptOption id={self.id!r} title={self.title!r} "
             f"description={self.description!r} emoji={self.emoji!r}>"
         )
-
-    @property
-    def id(self) -> int:
-        """:class:`int`: The prompt option's ID."""
-        return self._id
 
     @classmethod
     def _from_dict(cls, *, data: OnboardingPromptOptionPayload, guild: Guild) -> Self:
@@ -225,7 +220,7 @@ class OnboardingPromptOption(Hashable):
             channels=[Object(id=channel_id) for channel_id in data["channel_ids"]],
         )
         if "id" in data:
-            self._id = int(data["id"])
+            self.id = int(data["id"])
         return self
 
     def to_dict(self) -> OnboardingPromptOptionPayload:
