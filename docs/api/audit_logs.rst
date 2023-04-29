@@ -731,7 +731,7 @@ AuditLogDiff
 
         The list of default channels of an onboarding configuration being changed.
 
-        :type: List[:class:`~.abc.GuildChannel`]
+        :type: List[Union[:class:`abc.GuildChannel`, :class:`Object`]]
 
     .. attribute:: title
 
@@ -753,7 +753,7 @@ AuditLogDiff
 
     .. attribute:: in_onboarding
 
-        Whether an onboarding prompt is required before a user completes the onboarding flow.
+        Whether an onboarding prompt is present in the initial onboarding flow.
 
         :type: :class:`bool`
 
@@ -1756,8 +1756,7 @@ AuditLogAction
 
         An onboarding configuration was updated.
 
-        When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        ``None``.
+        When this is the action, :attr:`~AuditLogEntry.target` is ``None``.
 
         Possible attributes for :class:`AuditLogDiff`:
 
