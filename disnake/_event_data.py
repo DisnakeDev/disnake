@@ -8,15 +8,6 @@ from .enums import Event
 
 
 class EventData:
-    type_args: Tuple[str, ...]
-    """Type names of event arguments, e.g. `("Guild", "User")`"""
-
-    bot: bool
-    """Whether the event is specific to ext.commands"""
-
-    event_only: bool
-    """Whether the event can only be used through `@event` and not other listeners"""
-
     def __init__(
         self,
         *,
@@ -24,9 +15,14 @@ class EventData:
         bot: bool = False,
         event_only: bool = False,
     ) -> None:
-        self.type_args = tuple(type_args)
-        self.bot = bot
-        self.event_only = event_only
+        self.type_args: Tuple[str, ...] = tuple(type_args)
+        """Type names of event arguments, e.g. `("Guild", "User")`"""
+
+        self.bot: bool = bot
+        """Whether the event is specific to ext.commands"""
+
+        self.event_only: bool = event_only
+        """Whether the event can only be used through `@event` and not other listeners"""
 
 
 EVENT_DATA: Dict[Event, EventData] = {
