@@ -574,6 +574,27 @@ Application Commands
     :param permissions: The updated permission object.
     :type permissions: :class:`GuildApplicationCommandPermissions`
 
+Audit Logs
+++++++++++
+
+.. function:: on_audit_log_entry_create(entry)
+
+    Called when an audit log entry is created.
+    You must have the :attr:`~Permissions.view_audit_log` permission to receive this.
+
+    This requires :attr:`Intents.moderation` to be enabled.
+
+    .. warning::
+        This scope of data in this gateway event is limited, which means it is much more
+        reliant on the cache than :meth:`Guild.audit_logs`.
+        Because of this, :attr:`AuditLogEntry.target` and :attr:`AuditLogEntry.user`
+        will frequently be of type :class:`Object` instead of the respective model.
+
+    .. versionadded:: 2.8
+
+    :param entry: The audit log entry that was created.
+    :type entry: :class:`AuditLogEntry`
+
 AutoMod
 +++++++
 
@@ -696,27 +717,6 @@ Integrations
 
     :param payload: The raw event payload data.
     :type payload: :class:`RawIntegrationDeleteEvent`
-
-Audit Logs
-++++++++++
-
-.. function:: on_audit_log_entry_create(entry)
-
-    Called when an audit log entry is created.
-    You must have the :attr:`~Permissions.view_audit_log` permission to receive this.
-
-    This requires :attr:`Intents.moderation` to be enabled.
-
-    .. warning::
-        This scope of data in this gateway event is limited, which means it is much more
-        reliant on the cache than :meth:`Guild.audit_logs`.
-        Because of this, :attr:`AuditLogEntry.target` and :attr:`AuditLogEntry.user`
-        will frequently be of type :class:`Object` instead of the respective model.
-
-    .. versionadded:: 2.8
-
-    :param entry: The audit log entry that was created.
-    :type entry: :class:`AuditLogEntry`
 
 Invites
 +++++++
@@ -873,6 +873,32 @@ Members
     :param after: The user's updated info.
     :type after: :class:`User`
 
+Roles
++++++
+
+.. function:: on_guild_role_create(role)
+              on_guild_role_delete(role)
+
+    Called when a :class:`Guild` creates or deletes a :class:`Role`.
+
+    To get the guild it belongs to, use :attr:`Role.guild`.
+
+    This requires :attr:`Intents.guilds` to be enabled.
+
+    :param role: The role that was created or deleted.
+    :type role: :class:`Role`
+
+.. function:: on_guild_role_update(before, after)
+
+    Called when a :class:`Role` is changed guild-wide.
+
+    This requires :attr:`Intents.guilds` to be enabled.
+
+    :param before: The updated role's old info.
+    :type before: :class:`Role`
+    :param after: The updated role's updated info.
+    :type after: :class:`Role`
+
 Scheduled Events
 ++++++++++++++++
 
@@ -972,32 +998,6 @@ Stickers
     :type before: Sequence[:class:`GuildSticker`]
     :param after: A list of stickers after the update.
     :type after: Sequence[:class:`GuildSticker`]
-
-Roles
-+++++
-
-.. function:: on_guild_role_create(role)
-              on_guild_role_delete(role)
-
-    Called when a :class:`Guild` creates or deletes a :class:`Role`.
-
-    To get the guild it belongs to, use :attr:`Role.guild`.
-
-    This requires :attr:`Intents.guilds` to be enabled.
-
-    :param role: The role that was created or deleted.
-    :type role: :class:`Role`
-
-.. function:: on_guild_role_update(before, after)
-
-    Called when a :class:`Role` is changed guild-wide.
-
-    This requires :attr:`Intents.guilds` to be enabled.
-
-    :param before: The updated role's old info.
-    :type before: :class:`Role`
-    :param after: The updated role's updated info.
-    :type after: :class:`Role`
 
 Voice
 +++++
