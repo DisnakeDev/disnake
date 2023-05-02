@@ -1,1 +1,1 @@
-Only require :attr:`~Intents.members` intent to be enabled in developer portal for :meth:`Guild.fetch_members`, not in gateway connection.
+:meth:`Guild.fetch_members` now only requires :attr:`~Intents.members` intent to be enabled in developer portal, not in gateway connection.
