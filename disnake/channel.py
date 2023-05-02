@@ -3097,8 +3097,9 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
         .. versionadded:: 2.6
         """
-        return PartialEmoji._emoji_from_name_id(
-            self._default_reaction_emoji_name, self._default_reaction_emoji_id, state=self._state
+        return self._state._get_emoji_from_fields(
+            name=self._default_reaction_emoji_name,
+            id=self._default_reaction_emoji_id,
         )
 
     @property

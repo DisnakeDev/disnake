@@ -66,6 +66,7 @@ from .invite import Invite
 from .iterators import AuditLogIterator, BanIterator, MemberIterator
 from .member import Member, VoiceState
 from .mixins import Hashable
+from .onboarding import Onboarding
 from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite
 from .role import Role
@@ -354,9 +355,9 @@ class Guild(Hashable):
     )
 
     _PREMIUM_GUILD_LIMITS: ClassVar[Dict[Optional[int], _GuildLimit]] = {
-        None: _GuildLimit(emoji=50, stickers=5, bitrate=96e3, filesize=8388608),
-        0: _GuildLimit(emoji=50, stickers=5, bitrate=96e3, filesize=8388608),
-        1: _GuildLimit(emoji=100, stickers=15, bitrate=128e3, filesize=8388608),
+        None: _GuildLimit(emoji=50, stickers=5, bitrate=96e3, filesize=26214400),
+        0: _GuildLimit(emoji=50, stickers=5, bitrate=96e3, filesize=26214400),
+        1: _GuildLimit(emoji=100, stickers=15, bitrate=128e3, filesize=26214400),
         2: _GuildLimit(emoji=150, stickers=30, bitrate=256e3, filesize=52428800),
         3: _GuildLimit(emoji=250, stickers=60, bitrate=384e3, filesize=104857600),
     }
@@ -4631,6 +4632,26 @@ class Guild(Hashable):
             reason=reason,
         )
         return AutoModRule(data=data, guild=self)
+
+    async def onboarding(self) -> Onboarding:
+        """|coro|
+
+        Retrieves the guild onboarding data.
+
+        .. versionadded:: 2.9
+
+        Raises
+        ------
+        HTTPException
+            Retrieving the guild onboarding data failed.
+
+        Returns
+        -------
+        :class:`Onboarding`
+            The guild onboarding data.
+        """
+        data = await self._state.http.get_guild_onboarding(self.id)
+        return Onboarding(data=data, guild=self)
 
 
 PlaceholderID = NewType("PlaceholderID", int)
