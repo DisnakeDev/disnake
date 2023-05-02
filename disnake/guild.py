@@ -2606,7 +2606,7 @@ class Guild(Hashable):
         if hasattr(self._state, "application_flags"):
             flags = self._state.application_flags
             if not (flags.gateway_guild_members_limited or flags.gateway_guild_members):
-                raise ClientException("The `members` intent must be enabled to use this.")
+                raise ClientException("The `members` intent must be enabled in the Developer Portal to be able to use this method.")
 
         return MemberIterator(self, limit=limit, after=after)
 
