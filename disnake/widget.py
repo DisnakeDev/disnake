@@ -115,6 +115,11 @@ class WidgetMember(BaseUser):
         The member's nickname (if set in the guild) or username.
     discriminator: :class:`str`
         The member's anonymized discriminator.
+
+        .. deprecated:: 2.9
+            This is being phased out by Discord; the username system is moving away from ``username#discriminator``
+            to users having a globally unique ``@username``.
+            See the :ddocs:`changelog <change-log#unique-usernames-on-discord>` for details.
     status: :class:`Status`
         The member's status.
     activity: Optional[Union[:class:`BaseActivity`, :class:`Spotify`]]

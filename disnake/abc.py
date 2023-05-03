@@ -132,6 +132,12 @@ class User(Snowflake, Protocol):
         The user's username.
     discriminator: :class:`str`
         The user's discriminator.
+
+        .. deprecated:: 2.9
+            This is being phased out by Discord; the username system is moving away from ``username#discriminator``
+            to users having a globally unique ``@username``.
+            The value of a single zero (``"0"``) indicates that the user has been migrated to the new system.
+            See the :ddocs:`changelog <change-log#unique-usernames-on-discord>` for details.
     avatar: :class:`~disnake.Asset`
         The avatar asset the user has.
     bot: :class:`bool`

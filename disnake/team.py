@@ -96,6 +96,12 @@ class TeamMember(BaseUser):
         The team member's unique ID.
     discriminator: :class:`str`
         The team member's discriminator. This is given when the username has conflicts.
+
+        .. deprecated:: 2.9
+            This is being phased out by Discord; the username system is moving away from ``username#discriminator``
+            to users having a globally unique ``@username``.
+            The value of a single zero (``"0"``) indicates that the user has been migrated to the new system.
+            See the :ddocs:`changelog <change-log#unique-usernames-on-discord>` for details.
     avatar: Optional[:class:`str`]
         The avatar hash the team member has. Could be None.
     bot: :class:`bool`
