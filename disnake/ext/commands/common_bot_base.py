@@ -257,8 +257,7 @@ class CommonBotBase(Generic[CogT]):
         The functions being listened to must be a :ref:`coroutine <coroutine>`.
 
         Example
-        --------
-
+        -------
         .. code-block:: python3
 
             @bot.listen()
@@ -394,6 +393,17 @@ class CommonBotBase(Generic[CogT]):
     def cogs(self) -> Mapping[str, Cog]:
         """Mapping[:class:`str`, :class:`Cog`]: A read-only mapping of cog name to cog."""
         return types.MappingProxyType(self.__cogs)
+
+    def get_listeners(self) -> Mapping[str, List[CoroFunc]]:
+        """Mapping[:class:`str`, List[Callable]]: A read-only mapping of event names to listeners.
+
+        .. note::
+            To add or remove a listener you should use :meth:`.add_listener` and
+            :meth:`.remove_listener`.
+
+        .. versionadded:: 2.9
+        """
+        return types.MappingProxyType(self.extra_events)
 
     # extensions
 

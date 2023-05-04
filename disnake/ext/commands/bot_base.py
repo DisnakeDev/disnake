@@ -72,8 +72,7 @@ def when_mentioned_or(*prefixes: str) -> Callable[[BotBase, Message], List[str]]
     These are meant to be passed into the :attr:`.Bot.command_prefix` attribute.
 
     Example
-    --------
-
+    -------
     .. code-block:: python3
 
         bot = commands.Bot(command_prefix=commands.when_mentioned_or('!'))

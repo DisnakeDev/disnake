@@ -417,6 +417,8 @@ class SystemChannelFlags(BaseFlags, inverted=True):
             join_notification_replies: bool = ...,
             join_notifications: bool = ...,
             premium_subscriptions: bool = ...,
+            role_subscription_purchase_notification_replies: bool = ...,
+            role_subscription_purchase_notifications: bool = ...,
         ) -> None:
             ...
 
@@ -439,12 +441,12 @@ class SystemChannelFlags(BaseFlags, inverted=True):
     @flag_value
     def join_notifications(self) -> int:
         """:class:`bool`: Returns ``True`` if the system channel is used for member join notifications."""
-        return 1
+        return 1 << 0
 
     @flag_value
     def premium_subscriptions(self) -> int:
         """:class:`bool`: Returns ``True`` if the system channel is used for "Nitro boosting" notifications."""
-        return 2
+        return 1 << 1
 
     @flag_value
     def guild_reminder_notifications(self) -> int:
@@ -452,7 +454,7 @@ class SystemChannelFlags(BaseFlags, inverted=True):
 
         .. versionadded:: 2.0
         """
-        return 4
+        return 1 << 2
 
     @flag_value
     def join_notification_replies(self) -> int:
@@ -461,7 +463,25 @@ class SystemChannelFlags(BaseFlags, inverted=True):
 
         .. versionadded:: 2.3
         """
-        return 8
+        return 1 << 3
+
+    @flag_value
+    def role_subscription_purchase_notifications(self):
+        """:class:`bool`: Returns ``True`` if the system channel shows role
+        subscription purchase/renewal notifications.
+
+        .. versionadded:: 2.9
+        """
+        return 1 << 4
+
+    @flag_value
+    def role_subscription_purchase_notification_replies(self):
+        """:class:`bool`: Returns ``True`` if the system channel shows sticker reply
+        buttons for role subscription purchase/renewal notifications.
+
+        .. versionadded:: 2.9
+        """
+        return 1 << 5
 
 
 class MessageFlags(BaseFlags):
@@ -1850,6 +1870,7 @@ class ApplicationFlags(BaseFlags):
         def __init__(
             self,
             *,
+            application_auto_moderation_rule_create_badge: bool = ...,
             application_command_badge: bool = ...,
             embedded: bool = ...,
             gateway_guild_members: bool = ...,
@@ -1861,6 +1882,11 @@ class ApplicationFlags(BaseFlags):
             verification_pending_guild_limit: bool = ...,
         ) -> None:
             ...
+
+    @flag_value
+    def application_auto_moderation_rule_create_badge(self):
+        """:class:`bool`: Returns ``True`` if the application uses the Auto Moderation API."""
+        return 1 << 6
 
     @flag_value
     def gateway_presence(self):

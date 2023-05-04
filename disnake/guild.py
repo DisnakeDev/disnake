@@ -66,6 +66,7 @@ from .invite import Invite
 from .iterators import AuditLogIterator, BanIterator, MemberIterator
 from .member import Member, VoiceState
 from .mixins import Hashable
+from .onboarding import Onboarding
 from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite
 from .role import Role
@@ -183,6 +184,11 @@ class Guild(Hashable):
         The maximum amount of users in a video channel.
 
         .. versionadded:: 1.4
+
+    max_stage_video_channel_users: Optional[:class:`int`]
+        The maximum amount of users in a stage video channel.
+
+        .. versionadded: 2.9
 
     description: Optional[:class:`str`]
         The guild's description.
@@ -316,6 +322,7 @@ class Guild(Hashable):
         "max_presences",
         "max_members",
         "max_video_channel_users",
+        "max_stage_video_channel_users",
         "premium_progress_bar_enabled",
         "premium_tier",
         "premium_subscription_count",
@@ -348,9 +355,9 @@ class Guild(Hashable):
     )
 
     _PREMIUM_GUILD_LIMITS: ClassVar[Dict[Optional[int], _GuildLimit]] = {
-        None: _GuildLimit(emoji=50, stickers=5, bitrate=96e3, filesize=8388608),
-        0: _GuildLimit(emoji=50, stickers=5, bitrate=96e3, filesize=8388608),
-        1: _GuildLimit(emoji=100, stickers=15, bitrate=128e3, filesize=8388608),
+        None: _GuildLimit(emoji=50, stickers=5, bitrate=96e3, filesize=26214400),
+        0: _GuildLimit(emoji=50, stickers=5, bitrate=96e3, filesize=26214400),
+        1: _GuildLimit(emoji=100, stickers=15, bitrate=128e3, filesize=26214400),
         2: _GuildLimit(emoji=150, stickers=30, bitrate=256e3, filesize=52428800),
         3: _GuildLimit(emoji=250, stickers=60, bitrate=384e3, filesize=104857600),
     }
@@ -546,6 +553,9 @@ class Guild(Hashable):
         self.max_presences: Optional[int] = guild.get("max_presences")
         self.max_members: Optional[int] = guild.get("max_members")
         self.max_video_channel_users: Optional[int] = guild.get("max_video_channel_users")
+        self.max_stage_video_channel_users: Optional[int] = guild.get(
+            "max_stage_video_channel_users"
+        )
         self.premium_tier: int = guild.get("premium_tier", 0)
         self.premium_subscription_count: int = guild.get("premium_subscription_count") or 0
         self._system_channel_flags: int = guild.get("system_channel_flags", 0)
@@ -3123,7 +3133,7 @@ class Guild(Hashable):
 
         Creates a :class:`Sticker` for the guild.
 
-        You must have :attr:`~Permissions.manage_emojis_and_stickers` permission to
+        You must have :attr:`~Permissions.manage_guild_expressions` permission to
         do this.
 
         .. versionadded:: 2.0
@@ -3173,7 +3183,7 @@ class Guild(Hashable):
 
         Deletes the custom :class:`Sticker` from the guild.
 
-        You must have :attr:`~Permissions.manage_emojis_and_stickers` permission to
+        You must have :attr:`~Permissions.manage_guild_expressions` permission to
         do this.
 
         .. versionadded:: 2.0
@@ -3272,7 +3282,7 @@ class Guild(Hashable):
         Emojis with subscription roles (see ``roles`` below) are considered premium emoji,
         and count towards a separate limit of 25 emojis.
 
-        You must have :attr:`~Permissions.manage_emojis` permission to
+        You must have :attr:`~Permissions.manage_guild_expressions` permission to
         do this.
 
         Parameters
@@ -3330,7 +3340,7 @@ class Guild(Hashable):
 
         Deletes the custom :class:`Emoji` from the guild.
 
-        You must have :attr:`~Permissions.manage_emojis` permission to
+        You must have :attr:`~Permissions.manage_guild_expressions` permission to
         do this.
 
         Parameters
@@ -4166,7 +4176,7 @@ class Guild(Hashable):
             if user_ids is None:
                 raise ValueError("Must pass either query or user_ids")
 
-        elif query == "":
+        elif not query:
             raise ValueError("Cannot pass empty query string.")
 
         elif user_ids is not None:
@@ -4219,7 +4229,7 @@ class Guild(Hashable):
         List[:class:`Member`]
             The list of members that have matched the query.
         """
-        if query == "":
+        if not query:
             raise ValueError("Cannot pass empty query string.")
         if limit < 1:
             raise ValueError("limit must be at least 1")
@@ -4622,6 +4632,26 @@ class Guild(Hashable):
             reason=reason,
         )
         return AutoModRule(data=data, guild=self)
+
+    async def onboarding(self) -> Onboarding:
+        """|coro|
+
+        Retrieves the guild onboarding data.
+
+        .. versionadded:: 2.9
+
+        Raises
+        ------
+        HTTPException
+            Retrieving the guild onboarding data failed.
+
+        Returns
+        -------
+        :class:`Onboarding`
+            The guild onboarding data.
+        """
+        data = await self._state.http.get_guild_onboarding(self.id)
+        return Onboarding(data=data, guild=self)
 
 
 PlaceholderID = NewType("PlaceholderID", int)
