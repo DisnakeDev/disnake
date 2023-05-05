@@ -253,7 +253,7 @@ class ApplicationCommandInteractionData(Dict[str, Any]):
 
 
 class ApplicationCommandInteractionDataOption(Dict[str, Any]):
-    """This class represents the structure of an interaction data option from the API.
+    """Represents the structure of an interaction data option from the API.
 
     Attributes
     ----------

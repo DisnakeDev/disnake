@@ -198,7 +198,7 @@ class CooldownMapping:
         return self._type
 
     @classmethod
-    def from_cooldown(cls, rate, per, type) -> Self:
+    def from_cooldown(cls, rate: float, per: float, type) -> Self:
         return cls(Cooldown(rate, per), type)
 
     def _bucket_key(self, msg: Message) -> Any:
@@ -267,7 +267,7 @@ class DynamicCooldownMapping(CooldownMapping):
 
 
 class _Semaphore:
-    """This class is a version of a semaphore.
+    """A custom version of a semaphore.
 
     If you're wondering why asyncio.Semaphore isn't being used,
     it's because it doesn't expose the internal value. This internal

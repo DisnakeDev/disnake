@@ -659,7 +659,6 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         Examples
         --------
-
         Deleting bot's messages ::
 
             def is_me(m):
@@ -1088,7 +1087,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             The request to get the archived threads failed.
 
         Yields
-        -------
+        ------
         :class:`Thread`
             The archived threads.
         """
@@ -3369,8 +3368,9 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
         .. versionadded:: 2.6
         """
-        return PartialEmoji._emoji_from_name_id(
-            self._default_reaction_emoji_name, self._default_reaction_emoji_id, state=self._state
+        return self._state._get_emoji_from_fields(
+            name=self._default_reaction_emoji_name,
+            id=self._default_reaction_emoji_id,
         )
 
     @property
@@ -4044,7 +4044,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             The request to get the archived threads failed.
 
         Yields
-        -------
+        ------
         :class:`Thread`
             The archived threads.
         """

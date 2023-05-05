@@ -496,7 +496,7 @@ class InteractionBotBase(CommonBotBase):
         extras: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> Callable[[CommandCallback], InvokableSlashCommand]:
-        """A shortcut decorator that invokes :func:`.slash_command` and adds it to
+        """A shortcut decorator that invokes :func:`~disnake.ext.commands.slash_command` and adds it to
         the internal command list.
 
         Parameters
@@ -589,7 +589,7 @@ class InteractionBotBase(CommonBotBase):
     ) -> Callable[
         [InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand
     ]:
-        """A shortcut decorator that invokes :func:`.user_command` and adds it to
+        """A shortcut decorator that invokes :func:`~disnake.ext.commands.user_command` and adds it to
         the internal command list.
 
         Parameters
@@ -666,7 +666,7 @@ class InteractionBotBase(CommonBotBase):
     ) -> Callable[
         [InteractionCommandCallback[CogT, MessageCommandInteraction, P]], InvokableMessageCommand
     ]:
-        """A shortcut decorator that invokes :func:`.message_command` and adds it to
+        """A shortcut decorator that invokes :func:`~disnake.ext.commands.message_command` and adds it to
         the internal command list.
 
         Parameters
@@ -823,7 +823,9 @@ class InteractionBotBase(CommonBotBase):
                 try:
                     await self.bulk_overwrite_global_commands(to_send)
                 except Exception as e:
-                    warnings.warn(f"Failed to overwrite global commands due to {e}", SyncWarning)
+                    warnings.warn(
+                        f"Failed to overwrite global commands due to {e}", SyncWarning, stacklevel=1
+                    )
 
         # Same process but for each specified guild individually.
         # Notice that we're not doing this for every single guild for optimisation purposes.
@@ -856,6 +858,7 @@ class InteractionBotBase(CommonBotBase):
                         warnings.warn(
                             f"Failed to overwrite commands in <Guild id={guild_id}> due to {e}",
                             SyncWarning,
+                            stacklevel=1,
                         )
         # Last debug message
         self._log_sync_debug("Command synchronization task has finished")
@@ -1008,7 +1011,7 @@ class InteractionBotBase(CommonBotBase):
         func
             The function that will be used as a global check.
         call_once: :class:`bool`
-            Whether the function should only be called once per :meth:`.InvokableApplicationCommand.invoke` call.
+            Whether the function should only be called once per invoke call.
         slash_commands: :class:`bool`
             Whether this check is for slash commands.
         user_commands: :class:`bool`
@@ -1158,7 +1161,7 @@ class InteractionBotBase(CommonBotBase):
         Parameters
         ----------
         call_once: :class:`bool`
-            Whether the function should only be called once per :meth:`.InvokableApplicationCommand.invoke` call.
+            Whether the function should only be called once per invoke call.
         slash_commands: :class:`bool`
             Whether this check is for slash commands.
         user_commands: :class:`bool`

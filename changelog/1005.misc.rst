@@ -1,0 +1,1 @@
+Increase the default :attr:`Guild.filesize_limit` from 8MB to 25MB, matching the recent increase by Discord.
