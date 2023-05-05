@@ -2030,7 +2030,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         *,
         name: Optional[str] = None,
         bitrate: int = MISSING,
-        user_limit: int = MISSING,
+        # user_limit: int = MISSING,
         position: int = MISSING,
         category: Optional[Snowflake] = MISSING,
         slowmode_delay: int = MISSING,
@@ -2056,14 +2056,17 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
             The current :attr:`StageChannel.flags` value won't be cloned.
             This is a discord limitation.
 
+        .. warning::
+            Currently the ``user_limit`` attribute is not cloned due to a discord's
+            side bug. You can direclty edit the channel after its creation to set
+            a `user_limit`.
+
         Parameters
         ----------
         name: Optional[:class:`str`]
             The name of the new channel. If not provided, defaults to this channel's name.
         bitrate: :class:`int`
             The bitrate of the new channel. If not provided, defaults to this channel's bitrate.
-        user_limit: :class:`int`
-            The user limit of the new channel. If not provided, defaults to this channel's user limit.
         position: :class:`int`
             The position of the new channel. If not provided, defaults to this channel's position.
         category: Optional[:class:`abc.Snowflake`]
@@ -2094,13 +2097,15 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         :class:`StageChannel`
             The channel that was created.
         """
+        # TODO
+        # - check if discord-api-docs#5962 is solved and clone the user_limit attribute
         return await self._clone_impl(
             {
                 "rate_limit_per_user": (
                     slowmode_delay if slowmode_delay is not MISSING else self.slowmode_delay
                 ),
                 "bitrate": bitrate if bitrate is not MISSING else self.bitrate,
-                "user_limit": user_limit if user_limit is not MISSING else self.user_limit,
+                # "user_limit": user_limit if user_limit is not MISSING else self.user_limit,
                 "position": position if position is not MISSING else self.position,
                 "rtc_region": (str(rtc_region) if rtc_region is not MISSING else self.rtc_region),
                 "video_quality_mode": (
