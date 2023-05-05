@@ -20,8 +20,7 @@ CallableT = TypeVar("CallableT", bound=Callable)
 
 
 class freeze_time(ContextManager):
-    """
-    Helper class that freezes time at the given datetime by patching `datetime.now`.
+    """Helper class that freezes time at the given datetime by patching `datetime.now`.
     If no datetime is provided, defaults to the current time.
     Can be used as a sync context manager or decorator for sync/async functions.
     """
@@ -29,7 +28,7 @@ class freeze_time(ContextManager):
     # i know `freezegun` exists, but it's rather complex and does much more than
     # we really need here, and I'm unsure if it would interfere with `looptime`
 
-    def __init__(self, dt: Optional[datetime.datetime] = None):
+    def __init__(self, dt: Optional[datetime.datetime] = None) -> None:
         dt = dt or datetime.datetime.now(datetime.timezone.utc)
         assert dt.tzinfo
 
@@ -60,6 +59,7 @@ class freeze_time(ContextManager):
                     return await func(*args, **kwargs)
 
             return wrap_async  # type: ignore
+
         else:
 
             @functools.wraps(func)

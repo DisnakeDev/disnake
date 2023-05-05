@@ -32,10 +32,10 @@ class TestActionRow:
             ([select], 5),
         ],
     )
-    def test_width(self, value, expected):
+    def test_width(self, value, expected) -> None:
         assert ActionRow(*value).width == expected
 
-    def test_append_item(self):
+    def test_append_item(self) -> None:
         r = ActionRow()
         r.append_item(button1)
         r.append_item(button2)
@@ -45,7 +45,7 @@ class TestActionRow:
 
         assert list(r.children) == [button1, button2]
 
-    def test_insert_item(self):
+    def test_insert_item(self) -> None:
         r = ActionRow()
         r.insert_item(0, button1)
         r.insert_item(0, button2)
@@ -57,7 +57,7 @@ class TestActionRow:
         assert list(r.children) == [button2, button1, button3, button1]
 
     @pytest.mark.parametrize("index", [None, 1])
-    def test_add_button(self, index):
+    def test_add_button(self, index) -> None:
         r = ActionRow(button1, button2)
         r.add_button(
             **({"index": index} if index is not None else {}),
@@ -72,12 +72,12 @@ class TestActionRow:
             assert list(r.children) == [button1, new_button, button2]
 
         if TYPE_CHECKING:
-            ActionRow().add_button
-            ActionRow.with_message_components().add_button
+            _ = ActionRow().add_button
+            _ = ActionRow.with_message_components().add_button
             # should not work
-            ActionRow.with_modal_components().add_button  # type: ignore
+            _ = ActionRow.with_modal_components().add_button  # type: ignore
 
-    def test_add_select(self):
+    def test_add_select(self) -> None:
         r = ActionRow.with_message_components()
         r.add_string_select(custom_id="asdf")
 
@@ -86,12 +86,12 @@ class TestActionRow:
         assert c.custom_id == "asdf"
 
         if TYPE_CHECKING:
-            ActionRow().add_string_select
-            ActionRow.with_message_components().add_string_select
+            _ = ActionRow().add_string_select
+            _ = ActionRow.with_message_components().add_string_select
             # should not work  # TODO: revert when modal select support is added.
-            ActionRow.with_modal_components().add_select  # type: ignore
+            _ = ActionRow.with_modal_components().add_select  # type: ignore
 
-    def test_add_text_input(self):
+    def test_add_text_input(self) -> None:
         r = ActionRow.with_modal_components()
         r.add_text_input(label="a", custom_id="asdf")
 
@@ -100,34 +100,34 @@ class TestActionRow:
         assert c.custom_id == "asdf"
 
         if TYPE_CHECKING:
-            ActionRow().add_text_input
-            ActionRow.with_modal_components().add_text_input
+            _ = ActionRow().add_text_input
+            _ = ActionRow.with_modal_components().add_text_input
             # should not work
-            ActionRow.with_message_components().add_text_input  # type: ignore
+            _ = ActionRow.with_message_components().add_text_input  # type: ignore
 
-    def test_clear_items(self):
+    def test_clear_items(self) -> None:
         r = ActionRow(button1, button2)
         r.clear_items()
         assert list(r.children) == []
 
-    def test_remove_item(self):
+    def test_remove_item(self) -> None:
         r = ActionRow(button1, button2)
         r.remove_item(button1)
         assert list(r.children) == [button2]
 
-    def test_pop(self):
+    def test_pop(self) -> None:
         r = ActionRow(button1, button2)
         assert r.pop(0) is button1
         assert list(r.children) == [button2]
 
-    def test_dunder(self):
+    def test_dunder(self) -> None:
         r = ActionRow(button1, button2)
         assert r[1] is button2
 
         del r[0]
         assert list(r.children) == [button2]
 
-    def test_with_components(self):
+    def test_with_components(self) -> None:
         row_modal = ActionRow.with_modal_components()
         assert list(row_modal.children) == []
         row_msg = ActionRow.with_message_components()
@@ -137,7 +137,7 @@ class TestActionRow:
             assert_type(row_modal, ActionRow[ModalUIComponent])
             assert_type(row_msg, ActionRow[MessageUIComponent])
 
-    def test_rows_from_message(self):
+    def test_rows_from_message(self) -> None:
         rows = [
             ActionRow(button1, button2),
             ActionRow(select),
@@ -156,7 +156,7 @@ class TestActionRow:
                 (type(c), c.custom_id) for c in expected
             ]
 
-    def test_rows_from_message__invalid(self):
+    def test_rows_from_message__invalid(self) -> None:
         message = mock.Mock(disnake.Message)
         message.components = [ActionRow(text_input)._underlying]
 
@@ -169,7 +169,7 @@ class TestActionRow:
         with pytest.raises(TypeError, match=r"Encountered unknown component type: .*text_input"):
             ActionRow.rows_from_message(message)
 
-    def test_walk_components(self):
+    def test_walk_components(self) -> None:
         rows = [
             ActionRow(button1, button2),
             ActionRow(select),
@@ -195,7 +195,7 @@ class TestActionRow:
             assert act_cmp is exp_cmp
 
     # theis method is mainly for pyright to check, the asserts wouldn't do anything at runtime
-    def _test_typing_init(self):  # pragma: no cover
+    def _test_typing_init(self) -> None:  # pragma: no cover
         assert_type(ActionRow(), ActionRow[WrappedComponent])
 
         assert_type(ActionRow(button1), ActionRow[MessageUIComponent])
@@ -238,13 +238,13 @@ class TestActionRow:
         ([select, button1, button2], [[select], [button1, button2]]),
     ],
 )
-def test_components_to_rows(value, expected):
+def test_components_to_rows(value, expected) -> None:
     rows = components_to_rows(value)
     assert all(isinstance(row, ActionRow) for row in rows)
     assert [list(row.children) for row in rows] == expected
 
 
-def test_components_to_rows__invalid():
+def test_components_to_rows__invalid() -> None:
     for value in (42, [42], [ActionRow(), 42], iter([button1])):
         with pytest.raises(TypeError, match=r"`components` must be a"):
             components_to_rows(value)  # type: ignore
@@ -253,7 +253,7 @@ def test_components_to_rows__invalid():
             components_to_rows(value)  # type: ignore
 
 
-def test_components_to_dict():
+def test_components_to_dict() -> None:
     result = components_to_dict([button1, button2, select, ActionRow(button3)])
     assert result == [
         {

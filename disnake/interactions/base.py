@@ -224,7 +224,8 @@ class Interaction:
     @property
     def user(self) -> Union[User, Member]:
         """Union[:class:`.User`, :class:`.Member`]: The user or member that sent the interaction.
-        There is an alias for this named :attr:`author`."""
+        There is an alias for this named :attr:`author`.
+        """
         return self.author
 
     @property
@@ -1420,7 +1421,7 @@ class InteractionMessage(Message):
         The actual contents of the message.
     embeds: List[:class:`Embed`]
         A list of embeds the message has.
-    channel: Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`Thread`, :class:`DMChannel`, :class:`GroupChannel`, :class:`PartialMessageable`]
+    channel: Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`StageChannel`, :class:`Thread`, :class:`DMChannel`, :class:`GroupChannel`, :class:`PartialMessageable`]
         The channel that the message was sent from.
         Could be a :class:`DMChannel` or :class:`GroupChannel` if it's a private message.
     reference: Optional[:class:`~disnake.MessageReference`]

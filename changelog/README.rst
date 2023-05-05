@@ -34,7 +34,7 @@ If you are not sure what issue type to use, don't hesitate to ask in your PR.
 ``towncrier`` preserves multiple paragraphs and formatting (code blocks, lists, and so on), but for entries
 other than ``features`` it is usually better to stick to a single paragraph to keep it concise.
 
-You can also run ``nox -s docs`` to build the documentation
+You can also run ``pdm run docs`` to build the documentation
 with the draft changelog (http://127.0.0.1:8009/whats_new.html) if you want to get a preview of how your change will look in the final release notes.
 
 

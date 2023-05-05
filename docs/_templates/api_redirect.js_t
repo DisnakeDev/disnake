@@ -1,0 +1,41 @@
+// SPDX-License-Identifier: MIT
+
+"use strict";
+
+const redirects_map = {{ redirect_data }};
+
+(() => {
+    let url = new URL(document.location.href);
+
+    if (!url.pathname.endsWith("/api.html")) return;
+
+    // URL_ROOT is relative to `url`, and points to e.g. `<host>/en/latest/`
+    const root = new URL(DOCUMENTATION_OPTIONS.URL_ROOT, url);
+    if (!root.pathname.endsWith("/")) root.pathname += "/";
+
+    const targetPath = redirects_map[url.hash.slice(1)];
+
+    let newUrl = null;
+    if (targetPath) {
+        // Get current path relative to documentation root
+        // `/en/latest/xyz/api.html` => `xyz/api/`
+        let expectedPrefix = url.pathname.slice(root.pathname.length).replace(/\.html$/, "/");
+
+        // The target path (`xyz/api/events.html`) should start with `xyz/api/`
+        if (targetPath.startsWith(expectedPrefix)) {
+            newUrl = new URL(targetPath, root);
+            newUrl.hash = url.hash;
+        }
+    }
+
+    // If it's still unset, the #hash is unknown or the target doesn't match the current section;
+    // in that case, just redirect to the relevant index page.
+    if (newUrl === null) {
+        newUrl = new URL(url);
+        newUrl.pathname = newUrl.pathname.replace(/\/api.html$/, "/api/index.html");
+        newUrl.hash = "";
+    }
+
+    console.log(`Redirecting to ${newUrl.href}`);
+    window.location.replace(newUrl);
+})();
