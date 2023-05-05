@@ -232,7 +232,7 @@ class Guild(Hashable):
         - ``PARTNERED``: Guild is a partnered server.
         - ``PREVIEW_ENABLED``: Guild can be viewed before being accepted via Membership Screening.
         - ``PRIVATE_THREADS``: Guild has access to create private threads (no longer has any effect).
-        - ``RAID_ALERTS_ENABLED``: Guild has enabled alerts for join raids in the configured safety alerts channel.
+        - ``RAID_ALERTS_DISABLED``: Guild has disabled alerts for join raids in the configured safety alerts channel.
         - ``ROLE_ICONS``: Guild has access to role icons.
         - ``ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE``: Guild has role subscriptions that can be purchased.
         - ``ROLE_SUBSCRIPTIONS_ENABLED``: Guild has enabled role subscriptions.
@@ -1861,7 +1861,7 @@ class Guild(Hashable):
         discovery_splash: Optional[AssetBytes] = MISSING,
         community: bool = MISSING,
         invites_disabled: bool = MISSING,
-        raid_alerts_enabled: bool = MISSING,
+        raid_alerts_disabled: bool = MISSING,
         afk_channel: Optional[VoiceChannel] = MISSING,
         owner: Snowflake = MISSING,
         afk_timeout: int = MISSING,
@@ -1955,8 +1955,8 @@ class Guild(Hashable):
 
             .. versionadded:: 2.6
 
-        raid_alerts_enabled: :class:`bool`
-            Whether the guild has enabled join raid alerts.
+        raid_alerts_disabled: :class:`bool`
+            Whether the guild has disabled join raid alerts.
 
             This is only available to guilds that contain ``COMMUNITY``
             in :attr:`Guild.features`.
@@ -2028,7 +2028,7 @@ class Guild(Hashable):
             ``community`` was set without setting both ``rules_channel`` and ``public_updates_channel`` parameters,
             or if you are not the owner of the guild and request an ownership transfer,
             or the image format passed in to ``icon`` is invalid,
-            or both ``community`` and ``invites_disabled` or ``raid_alerts_enabled`` were provided.
+            or both ``community`` and ``invites_disabled` or ``raid_alerts_disabled`` were provided.
 
         Returns
         -------
@@ -2128,7 +2128,7 @@ class Guild(Hashable):
         if (
             community is not MISSING
             or invites_disabled is not MISSING
-            or raid_alerts_enabled is not MISSING
+            or raid_alerts_disabled is not MISSING
         ):
             # If we don't have complete feature information for the guild,
             # it is possible to disable or enable other features that we didn't intend to touch.
@@ -2164,18 +2164,18 @@ class Guild(Hashable):
                 else:
                     features.discard("INVITES_DISABLED")
 
-            if raid_alerts_enabled is not MISSING:
+            if raid_alerts_disabled is not MISSING:
                 if community is not MISSING:
                     raise ValueError(
-                        "cannot modify both the COMMUNITY feature and RAID_ALERTS_ENABLED feature at the "
+                        "cannot modify both the COMMUNITY feature and RAID_ALERTS_DISABLED feature at the "
                         "same time due to a discord limitation."
                     )
-                if not isinstance(raid_alerts_enabled, bool):
-                    raise TypeError("raid_alerts_enabled must be a bool")
-                if raid_alerts_enabled:
-                    features.add("RAID_ALERTS_ENABLED")
+                if not isinstance(raid_alerts_disabled, bool):
+                    raise TypeError("raid_alerts_disabled must be a bool")
+                if raid_alerts_disabled:
+                    features.add("RAID_ALERTS_DISABLED")
                 else:
-                    features.discard("RAID_ALERTS_ENABLED")
+                    features.discard("RAID_ALERTS_DISABLED")
 
             fields["features"] = list(features)
 
