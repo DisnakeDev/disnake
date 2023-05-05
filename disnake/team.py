@@ -84,7 +84,7 @@ class TeamMember(BaseUser):
 
         .. describe:: str(x)
 
-            Returns the team member's name with discriminator.
+            Returns the team member's name (with discriminator, if not migrated to new system yet).
 
     .. versionadded:: 1.3
 

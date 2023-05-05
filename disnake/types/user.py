@@ -8,7 +8,7 @@ from .snowflake import Snowflake
 class PartialUser(TypedDict):
     id: Snowflake
     username: str
-    discriminator: str
+    discriminator: str  # may be removed in future API versions
     avatar: Optional[str]
 
 

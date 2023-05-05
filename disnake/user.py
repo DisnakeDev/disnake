@@ -76,7 +76,12 @@ class BaseUser(_UserTag):
         )
 
     def __str__(self) -> str:
-        return f"{self.name}#{self.discriminator}"
+        discriminator = self.discriminator
+        if discriminator == "0":
+            # TODO: add "@" prefix?
+            return self.name
+        # legacy behavior
+        return f"{self.name}#{discriminator}"
 
     def __eq__(self, other: Any) -> bool:
         return isinstance(other, _UserTag) and other.id == self.id
@@ -277,7 +282,7 @@ class ClientUser(BaseUser):
 
         .. describe:: str(x)
 
-            Returns the user's name with discriminator.
+            Returns the user's name (with discriminator, if not migrated to new system yet).
 
     Attributes
     ----------
@@ -414,7 +419,7 @@ class User(BaseUser, disnake.abc.Messageable):
 
         .. describe:: str(x)
 
-            Returns the user's name with discriminator.
+            Returns the user's name (with discriminator, if not migrated to new system yet).
 
     Attributes
     ----------
