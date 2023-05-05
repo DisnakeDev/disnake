@@ -277,7 +277,7 @@ class AutoModTriggerMetadata:
 
         Defaults to ``False``.
 
-        .. versionadded:: 2.8
+        .. versionadded:: 2.9
     """
 
     __slots__ = (
