@@ -871,7 +871,7 @@ class Guild(Hashable):
 
         If no channel is set, then this returns ``None``.
 
-        .. versionadded:: 2.8
+        .. versionadded:: 2.9
         """
         channel_id = self._safety_alerts_channel_id
         return channel_id and self._channels.get(channel_id)  # type: ignore
@@ -1963,7 +1963,7 @@ class Guild(Hashable):
 
             This cannot be changed at the same time as the ``community`` feature due a Discord API limitation.
 
-            .. versionadded:: 2.8
+            .. versionadded:: 2.9
 
         afk_channel: Optional[:class:`VoiceChannel`]
             The new channel that is the AFK channel. Could be ``None`` for no AFK channel.
@@ -2004,7 +2004,7 @@ class Guild(Hashable):
             guilds that contain ``COMMUNITY`` in :attr:`Guild.features`. Could be ``None`` for no
             safety alerts channel.
 
-            .. versionadded:: 2.8
+            .. versionadded:: 2.9
 
         premium_progress_bar_enabled: :class:`bool`
             Whether the server boost progress bar is enabled.
