@@ -46,7 +46,15 @@ reset_coverage = True
 
 def lock_deps(session: nox.Session):
     args = ["pdm", "lock", "-G:all", "-dG:all"]
-    if not session.run_always(*args, "--check", external=True, success_codes=[0]):
+    output = session.run_always(
+        *args,
+        "--check",
+        external=True,
+        success_codes=list(range(0, 128)),
+        silent=True,
+    )
+    if output:
+        print(output)
         session.run_always(*args, external=True)
 
 
