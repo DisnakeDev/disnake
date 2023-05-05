@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""
-A simple paginator example using views and buttons.
-"""
+"""A simple paginator example using views and buttons."""
 
 import os
 from typing import List

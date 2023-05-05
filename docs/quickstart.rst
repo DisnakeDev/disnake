@@ -7,13 +7,13 @@
 .. currentmodule:: disnake
 
 Quickstart
-============
+==========
 
 This page gives a brief introduction to the library. It assumes you have the library installed,
 if you don't check the :ref:`installing` portion.
 
 A Minimal Bot
----------------
+-------------
 
 Let's make a bot that responds to a specific message and walk you through it.
 
@@ -60,7 +60,7 @@ There's a lot going on here, so let's walk you through it step by step.
    then we send a message in the channel it was used in with ``'Hello!'``. This is a basic way of
    handling commands, which can be later automated with the :doc:`./ext/commands/index` framework.
 6. Finally, we run the bot with our login token. If you need help getting your token or creating a bot,
-   look in the :ref:`discord-intro` section.
+   look in the :ref:`discord_intro` section.
 
 
 Now that we've made a bot, we have to *run* the bot. Luckily, this is simple since this is just a

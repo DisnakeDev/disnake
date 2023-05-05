@@ -195,8 +195,7 @@ class SubCommandGroup(InvokableApplicationCommand):
         extras: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> Callable[[CommandCallback], SubCommand]:
-        """
-        A decorator that creates a subcommand in the subcommand group.
+        """A decorator that creates a subcommand in the subcommand group.
         Parameters are the same as in :class:`InvokableSlashCommand.sub_command`
 
         Returns
@@ -524,8 +523,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         extras: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> Callable[[CommandCallback], SubCommand]:
-        """
-        A decorator that creates a subcommand under the base command.
+        """A decorator that creates a subcommand under the base command.
 
         Parameters
         ----------
@@ -587,8 +585,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         extras: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> Callable[[CommandCallback], SubCommandGroup]:
-        """
-        A decorator that creates a subcommand group under the base command.
+        """A decorator that creates a subcommand group under the base command.
 
         Parameters
         ----------
@@ -628,8 +625,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         return decorator
 
     def autocomplete(self, option_name: str) -> Callable[[Callable], Callable]:
-        """
-        A decorator that registers an autocomplete function for the specified option.
+        """A decorator that registers an autocomplete function for the specified option.
 
         Parameters
         ----------

@@ -121,7 +121,7 @@ def issubclass_(obj: Any, tp: Union[TypeT, Tuple[TypeT, ...]]) -> TypeGuard[Type
 
 
 def remove_optionals(annotation: Any) -> Any:
-    """remove unwanted optionals from an annotation"""
+    """Remove unwanted optionals from an annotation"""
     if get_origin(annotation) in (Union, UnionType):
         args = tuple(i for i in annotation.__args__ if i not in (None, type(None)))
         if len(args) == 1:
@@ -151,13 +151,13 @@ def signature(func: Callable) -> inspect.Signature:
     for name, param in signature.parameters.items():
         if isinstance(param.annotation, str):
             param = param.replace(annotation=typehints.get(name, inspect.Parameter.empty))
-        if param.annotation is type(None):  # noqa: E721
+        if param.annotation is type(None):
             param = param.replace(annotation=None)
 
         parameters.append(param)
 
     return_annotation = typehints.get("return", inspect.Parameter.empty)
-    if return_annotation is type(None):  # noqa: E721
+    if return_annotation is type(None):
         return_annotation = None
 
     return signature.replace(parameters=parameters, return_annotation=return_annotation)
@@ -530,6 +530,31 @@ class ParamInfo:
         self.max_length = max_length
         self.large = large
 
+    def copy(self) -> ParamInfo:
+        # n. b. this method needs to be manually updated when a new attribute is added.
+        cls = self.__class__
+        ins = cls.__new__(cls)
+
+        ins.name = self.name
+        ins.name_localizations = self.name_localizations._copy()
+        ins.description = self.description
+        ins.description_localizations = self.description_localizations._copy()
+        ins.default = self.default
+        ins.param_name = self.param_name
+        ins.converter = self.converter
+        ins.convert_default = self.convert_default
+        ins.autocomplete = self.autocomplete
+        ins.choices = self.choices.copy()
+        ins.type = self.type
+        ins.channel_types = self.channel_types.copy()
+        ins.max_value = self.max_value
+        ins.min_value = self.min_value
+        ins.min_length = self.min_length
+        ins.max_length = self.max_length
+        ins.large = self.large
+
+        return ins
+
     @property
     def required(self) -> bool:
         return self.default is Ellipsis
@@ -559,7 +584,8 @@ class ParamInfo:
         parsed_docstring = parsed_docstring or {}
 
         if isinstance(param.default, cls):
-            self = param.default
+            # we copy this ParamInfo instance because it can be used in multiple signatures
+            self = param.default.copy()
         else:
             default = param.default if param.default is not inspect.Parameter.empty else ...
             self = cls(default)
@@ -949,7 +975,6 @@ def collect_params(
 def collect_nested_params(function: Callable) -> List[ParamInfo]:
     """Collect all options from a function"""
     # TODO: Have these be actually sorted properly and not have injections always at the end
-
     _, _, paraminfos, injections = collect_params(function)
 
     for injection in injections.values():
@@ -1225,7 +1250,6 @@ def inject(
             extension works, but at runtime this is always an :class:`Injection` instance.
             You can find more in-depth explanation :ref:`here <why_params_and_injections_return_any>`.
     """
-
     return Injection(function, autocompleters=autocompleters)
 
 
@@ -1266,8 +1290,7 @@ def injection(
 def option_enum(
     choices: Union[Dict[str, TChoice], List[TChoice]], **kwargs: TChoice
 ) -> Type[TChoice]:
-    """
-    A utility function to create an enum type.
+    """A utility function to create an enum type.
     Returns a new :class:`~enum.Enum` based on the provided parameters.
 
     .. versionadded:: 2.1
@@ -1321,7 +1344,7 @@ def register_injection(
     .. versionadded:: 2.3
 
     .. versionchanged:: 2.6
-        Now returns :class:`disnake.ext.commands.Injection`.
+        Now returns :class:`.Injection`.
 
     .. versionchanged:: 2.6
         Added ``autocompleters`` keyword-only argument.
