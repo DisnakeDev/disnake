@@ -230,7 +230,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         .. describe:: str(x)
 
-            Returns the member's name (with discriminator, if not migrated to new system yet).
+            Returns the member's username (with discriminator, if not migrated to new system yet), or global name if set.
 
     Attributes
     ----------
@@ -249,6 +249,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         The guild that the member belongs to.
     nick: Optional[:class:`str`]
         The guild specific nickname of the user.
+        This takes precedence over :attr:`.global_name` and :attr:`.name` when shown.
     pending: :class:`bool`
         Whether the member is pending member verification.
 

@@ -291,7 +291,7 @@ class ClientUser(BaseUser):
 
         .. describe:: str(x)
 
-            Returns the user's name (with discriminator, if not migrated to new system yet).
+            Returns the user's username (with discriminator, if not migrated to new system yet), or global name if set.
 
     Attributes
     ----------
@@ -300,7 +300,7 @@ class ClientUser(BaseUser):
     id: :class:`int`
         The user's unique ID.
     discriminator: :class:`str`
-        The user's discriminator. This is given when the username has conflicts.
+        The user's discriminator.
 
         .. deprecated:: 2.9
             This is being phased out by Discord; the username system is moving away from ``username#discriminator``
@@ -309,6 +309,8 @@ class ClientUser(BaseUser):
             See the :ddocs:`changelog <change-log#unique-usernames-on-discord>` for details.
     global_name: Optional[:class:`str`]
         The user's global display name, if set.
+        This takes precedence over :attr:`.name` when shown.
+
         For bots, this is the application name.
 
         .. versionadded:: 2.9
@@ -433,7 +435,7 @@ class User(BaseUser, disnake.abc.Messageable):
 
         .. describe:: str(x)
 
-            Returns the user's name (with discriminator, if not migrated to new system yet).
+            Returns the user's username (with discriminator, if not migrated to new system yet), or global name if set.
 
     Attributes
     ----------
@@ -442,7 +444,7 @@ class User(BaseUser, disnake.abc.Messageable):
     id: :class:`int`
         The user's unique ID.
     discriminator: :class:`str`
-        The user's discriminator. This is given when the username has conflicts.
+        The user's discriminator.
 
         .. deprecated:: 2.9
             This is being phased out by Discord; the username system is moving away from ``username#discriminator``
@@ -451,6 +453,8 @@ class User(BaseUser, disnake.abc.Messageable):
             See the :ddocs:`changelog <change-log#unique-usernames-on-discord>` for details.
     global_name: Optional[:class:`str`]
         The user's global display name, if set.
+        This takes precedence over :attr:`.name` when shown.
+
         For bots, this is the application name.
 
         .. versionadded:: 2.9

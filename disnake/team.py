@@ -84,7 +84,7 @@ class TeamMember(BaseUser):
 
         .. describe:: str(x)
 
-            Returns the team member's name (with discriminator, if not migrated to new system yet).
+            Returns the team member's username (with discriminator, if not migrated to new system yet), or global name if set.
 
     .. versionadded:: 1.3
 
@@ -95,7 +95,7 @@ class TeamMember(BaseUser):
     id: :class:`int`
         The team member's unique ID.
     discriminator: :class:`str`
-        The team member's discriminator. This is given when the username has conflicts.
+        The team member's discriminator.
 
         .. deprecated:: 2.9
             This is being phased out by Discord; the username system is moving away from ``username#discriminator``

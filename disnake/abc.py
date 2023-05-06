@@ -140,6 +140,8 @@ class User(Snowflake, Protocol):
             See the :ddocs:`changelog <change-log#unique-usernames-on-discord>` for details.
     global_name: Optional[:class:`str`]
         The user's global display name, if set.
+        This takes precedence over :attr:`.name` when shown.
+
         For bots, this is the application name.
 
         .. versionadded:: 2.9

@@ -1136,7 +1136,7 @@ class Guild(Hashable):
         Parameters
         ----------
         name: :class:`str`
-            The name of the member to lookup with an optional discriminator.
+            The name of the member to lookup (with an optional discriminator).
 
         Returns
         -------
