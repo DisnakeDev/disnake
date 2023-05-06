@@ -152,8 +152,13 @@ class BaseUser(_UserTag):
 
     @property
     def default_avatar(self) -> Asset:
-        """:class:`Asset`: Returns the default avatar for a given user. This is calculated by the user's discriminator."""
-        return Asset._from_default_avatar(self._state, int(self.discriminator) % len(DefaultAvatar))
+        """:class:`Asset`: Returns the default avatar for a given user."""
+        if self.discriminator == "0":
+            num = self.id >> 22
+        else:
+            # legacy behavior
+            num = int(self.discriminator)
+        return Asset._from_default_avatar(self._state, num % len(DefaultAvatar))
 
     @property
     def display_avatar(self) -> Asset:
