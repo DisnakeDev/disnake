@@ -102,6 +102,11 @@ class TeamMember(BaseUser):
             to users having a globally unique ``@username``.
             The value of a single zero (``"0"``) indicates that the user has been migrated to the new system.
             See the :ddocs:`changelog <change-log#unique-usernames-on-discord>` for details.
+    global_name: Optional[:class:`str`]
+        The team members's global display name, if set.
+        This takes precedence over :attr:`.name` when shown.
+
+        .. versionadded:: 2.9
     avatar: Optional[:class:`str`]
         The avatar hash the team member has. Could be None.
     bot: :class:`bool`
@@ -124,6 +129,6 @@ class TeamMember(BaseUser):
 
     def __repr__(self) -> str:
         return (
-            f"<{self.__class__.__name__} id={self.id} name={self.name!r} "
-            f"discriminator={self.discriminator!r} membership_state={self.membership_state!r}>"
+            f"<{self.__class__.__name__} id={self.id} name={self.name!r} global_name={self.global_name!r}"
+            f" discriminator={self.discriminator!r} membership_state={self.membership_state!r}>"
         )
