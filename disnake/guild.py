@@ -1117,17 +1117,21 @@ class Guild(Hashable):
     def get_member_named(self, name: str, /) -> Optional[Member]:
         """Returns the first member found that matches the name provided.
 
-        The name can have an optional discriminator argument, e.g. "Jake#0001"
-        or "Jake" will both do the lookup. However the former will give a more
-        precise result. Note that the discriminator must have all 4 digits
-        for this to work.
+        The lookup strategy is as follows (in order):
 
-        If a nickname is passed, then it is looked up via the nickname. Note
-        however, that a nickname + discriminator combo will not lookup the nickname
-        but rather the username + discriminator combo due to nickname + discriminator
-        not being unique.
+        1. Lookup by nickname.
+        2. Lookup by global name.
+        3. Lookup by name.
+
+        While the migration away from discriminators is still ongoing,
+        the name can have an optional discriminator argument, e.g. "Jake#0001",
+        in which case it will be treated as a username + discriminator combo
+        (note: this only works with usernames, not nicknames).
 
         If no member is found, ``None`` is returned.
+
+        .. versionchanged:: 2.9
+            Now takes :attr:`User.global_name` into account.
 
         Parameters
         ----------
@@ -1140,8 +1144,9 @@ class Guild(Hashable):
             The member in this guild with the associated name. If not found
             then ``None`` is returned.
         """
-        result = None
         members = self.members
+
+        # legacy behavior for non-migrated users
         if len(name) > 5 and name[-5] == "#":
             # The 5 length is checking to see if #0000 is in the string,
             # as a#0000 has a length of 6, the minimum for a potential
@@ -1155,7 +1160,7 @@ class Guild(Hashable):
                 return result
 
         def pred(m: Member) -> bool:
-            return m.nick == name or m.name == name
+            return m.nick == name or m.global_name == name or m.name == name
 
         return utils.find(pred, members)
 

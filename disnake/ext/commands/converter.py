@@ -188,9 +188,12 @@ class MemberConverter(IDConverter[disnake.Member]):
 
     1. Lookup by ID.
     2. Lookup by mention.
-    3. Lookup by name#discrim
-    4. Lookup by name
-    5. Lookup by nickname
+    3. Lookup by name#discrim.
+    4. Lookup by nickname.
+    5. Lookup by global name.
+    6. Lookup by name.
+
+    The name resolution order matches the one used by :meth:`.Guild.get_member_named`.
 
     .. versionchanged:: 1.5
         Raise :exc:`.MemberNotFound` instead of generic :exc:`.BadArgument`
@@ -198,6 +201,10 @@ class MemberConverter(IDConverter[disnake.Member]):
     .. versionchanged:: 1.5.1
         This converter now lazily fetches members from the gateway and HTTP APIs,
         optionally caching the result if :attr:`.MemberCacheFlags.joined` is enabled.
+
+    .. versionchanged:: 2.9
+        Name resolution order changed from ``name > nick`` to ``nick > global_name > name``
+        to account for the username migration.
     """
 
     async def query_member_named(
@@ -205,12 +212,16 @@ class MemberConverter(IDConverter[disnake.Member]):
     ) -> Optional[disnake.Member]:
         cache = guild._state.member_cache_flags.joined
         if len(argument) > 5 and argument[-5] == "#":
+            # legacy behavior for non-migrated users
             username, _, discriminator = argument.rpartition("#")
             members = await guild.query_members(username, limit=100, cache=cache)
             return _utils_get(members, name=username, discriminator=discriminator)
         else:
             members = await guild.query_members(argument, limit=100, cache=cache)
-            return disnake.utils.find(lambda m: m.name == argument or m.nick == argument, members)
+            return disnake.utils.find(
+                lambda m: m.nick == argument or m.global_name == argument or m.name == argument,
+                members,
+            )
 
     async def query_member_by_id(
         self, bot: disnake.Client, guild: disnake.Guild, user_id: int
@@ -286,8 +297,9 @@ class UserConverter(IDConverter[disnake.User]):
 
     1. Lookup by ID.
     2. Lookup by mention.
-    3. Lookup by name#discrim
-    4. Lookup by name
+    3. Lookup by name#discrim.
+    4. Lookup by global name.
+    5. Lookup by name.
 
     .. versionchanged:: 1.5
         Raise :exc:`.UserNotFound` instead of generic :exc:`.BadArgument`
@@ -295,6 +307,9 @@ class UserConverter(IDConverter[disnake.User]):
     .. versionchanged:: 1.6
         This converter now lazily fetches users from the HTTP APIs if an ID is passed
         and it's not available in cache.
+
+    .. versionchanged:: 2.9
+        Now takes :attr:`.User.global_name` into account.
     """
 
     async def convert(self, ctx: AnyContext, argument: str) -> disnake.User:
@@ -332,6 +347,7 @@ class UserConverter(IDConverter[disnake.User]):
 
         # check for discriminator if it exists,
         if len(arg) > 5 and arg[-5] == "#":
+            # legacy behavior for non-migrated users
             discrim = arg[-4:]
             name = arg[:-5]
             result = disnake.utils.find(
@@ -340,7 +356,10 @@ class UserConverter(IDConverter[disnake.User]):
             if result is not None:
                 return result
 
-        result = disnake.utils.find(lambda u: u.name == arg, state._users.values())
+        result = disnake.utils.find(
+            lambda u: u.global_name == arg or u.name == arg,
+            state._users.values(),
+        )
 
         if result is None:
             raise UserNotFound(argument)
