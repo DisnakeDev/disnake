@@ -183,7 +183,7 @@ class WidgetMember(BaseUser):
     @property
     def display_name(self) -> str:
         """:class:`str`: Returns the member's name."""
-        return self.global_name or self.name
+        return self.name
 
 
 class WidgetSettings:
