@@ -278,6 +278,7 @@ class Member(disnake.abc.Messageable, _UserTag):
     if TYPE_CHECKING:
         name: str
         id: int
+        global_name: Optional[str]
         bot: bool
         system: bool
         created_at: datetime.datetime
@@ -345,7 +346,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     def __repr__(self) -> str:
         return (
-            f"<Member id={self._user.id} name={self._user.name!r} discriminator={self._user.discriminator!r}"
+            f"<Member id={self._user.id} name={self._user.name!r} global_name={self._user.global_name!r} discriminator={self._user.discriminator!r}"
             f" bot={self._user.bot} nick={self.nick!r} guild={self.guild!r}>"
         )
 
@@ -449,17 +450,18 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     def _update_inner_user(self, user: UserPayload) -> Optional[Tuple[User, User]]:
         u = self._user
-        original = (u.name, u._avatar, u.discriminator, u._public_flags)
+        original = (u.name, u._avatar, u.discriminator, u.global_name, u._public_flags)
         # These keys seem to always be available
         modified = (
             user["username"],
             user["avatar"],
             user["discriminator"],
+            user.get("global_name"),
             user.get("public_flags", 0),
         )
         if original != modified:
             to_return = User._copy(self._user)
-            u.name, u._avatar, u.discriminator, u._public_flags = modified
+            u.name, u._avatar, u.discriminator, u.global_name, u._public_flags = modified
             # Signal to dispatch on_user_update
             return to_return, u
 

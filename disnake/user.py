@@ -42,6 +42,7 @@ class BaseUser(_UserTag):
         "name",
         "id",
         "discriminator",
+        "global_name",
         "_avatar",
         "_banner",
         "_accent_colour",
@@ -55,6 +56,7 @@ class BaseUser(_UserTag):
         name: str
         id: int
         discriminator: str
+        global_name: Optional[str]
         bot: bool
         system: bool
         _state: ConnectionState
@@ -71,8 +73,8 @@ class BaseUser(_UserTag):
 
     def __repr__(self) -> str:
         return (
-            f"<BaseUser id={self.id} name={self.name!r} discriminator={self.discriminator!r}"
-            f" bot={self.bot} system={self.system}>"
+            f"<BaseUser id={self.id} name={self.name!r} global_name={self.global_name!r}"
+            f" discriminator={self.discriminator!r} bot={self.bot} system={self.system}>"
         )
 
     def __str__(self) -> str:
@@ -96,6 +98,7 @@ class BaseUser(_UserTag):
         self.name = data["username"]
         self.id = int(data["id"])
         self.discriminator = data["discriminator"]
+        self.global_name = data.get("global_name")
         self._avatar = data["avatar"]
         self._banner = data.get("banner", None)
         self._accent_colour = data.get("accent_color", None)
@@ -110,6 +113,7 @@ class BaseUser(_UserTag):
         self.name = user.name
         self.id = user.id
         self.discriminator = user.discriminator
+        self.global_name = user.global_name
         self._avatar = user._avatar
         self._banner = user._banner
         self._accent_colour = user._accent_colour
@@ -125,6 +129,7 @@ class BaseUser(_UserTag):
             "id": self.id,
             "avatar": self._avatar,
             "discriminator": self.discriminator,
+            "global_name": self.global_name,
             "bot": self.bot,
             "public_flags": self._public_flags,
         }
@@ -298,6 +303,11 @@ class ClientUser(BaseUser):
             to users having a globally unique ``@username``.
             The value of a single zero (``"0"``) indicates that the user has been migrated to the new system.
             See the :ddocs:`changelog <change-log#unique-usernames-on-discord>` for details.
+    global_name: Optional[:class:`str`]
+        The user's global display name, if set.
+        For bots, this is the application name.
+
+        .. versionadded:: 2.9
     bot: :class:`bool`
         Specifies if the user is a bot account.
     system: :class:`bool`
@@ -330,7 +340,7 @@ class ClientUser(BaseUser):
 
     def __repr__(self) -> str:
         return (
-            f"<ClientUser id={self.id} name={self.name!r} discriminator={self.discriminator!r}"
+            f"<ClientUser id={self.id} name={self.name!r} global_name={self.global_name!r} discriminator={self.discriminator!r}"
             f" bot={self.bot} verified={self.verified} mfa_enabled={self.mfa_enabled}>"
         )
 
@@ -435,6 +445,11 @@ class User(BaseUser, disnake.abc.Messageable):
             to users having a globally unique ``@username``.
             The value of a single zero (``"0"``) indicates that the user has been migrated to the new system.
             See the :ddocs:`changelog <change-log#unique-usernames-on-discord>` for details.
+    global_name: Optional[:class:`str`]
+        The user's global display name, if set.
+        For bots, this is the application name.
+
+        .. versionadded:: 2.9
     bot: :class:`bool`
         Specifies if the user is a bot account.
     system: :class:`bool`
@@ -444,7 +459,10 @@ class User(BaseUser, disnake.abc.Messageable):
     __slots__ = ("__weakref__",)
 
     def __repr__(self) -> str:
-        return f"<User id={self.id} name={self.name!r} discriminator={self.discriminator!r} bot={self.bot}>"
+        return (
+            f"<User id={self.id} name={self.name!r} global_name={self.global_name!r}"
+            f" discriminator={self.discriminator!r} bot={self.bot}>"
+        )
 
     async def _get_channel(self) -> DMChannel:
         ch = await self.create_dm()
