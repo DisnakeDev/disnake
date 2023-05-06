@@ -1000,7 +1000,8 @@ class clean_content(Converter[str]):
     fix_channel_mentions: :class:`bool`
         Whether to clean channel mentions.
     use_nicknames: :class:`bool`
-        Whether to use nicknames when transforming mentions.
+        Whether to use :attr:`nicknames <.Member.nick>` and
+        :attr:`global names <.Member.global_name>` when transforming mentions.
     escape_markdown: :class:`bool`
         Whether to also escape special markdown characters.
     remove_markdown: :class:`bool`
@@ -1030,6 +1031,7 @@ class clean_content(Converter[str]):
             m = (msg and _utils_get(msg.mentions, id=id)) or bot.get_user(id)
             if m is None and ctx.guild:
                 m = ctx.guild.get_member(id)
+            # TODO: add a separate option for `global_name`s?
             return f"@{m.display_name if self.use_nicknames else m.name}" if m else "@deleted-user"
 
         def resolve_role(id: int) -> str:

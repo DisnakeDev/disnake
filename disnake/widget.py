@@ -179,10 +179,11 @@ class WidgetMember(BaseUser):
             return Asset(self._state, url=url, key=url, animated=False)
         return None
 
+    # TODO: it's not yet known if widget members include global_name or if it's already handled through `name`
     @property
     def display_name(self) -> str:
         """:class:`str`: Returns the member's name."""
-        return self.name
+        return self.global_name or self.name
 
 
 class WidgetSettings:

@@ -581,11 +581,11 @@ class Member(disnake.abc.Messageable, _UserTag):
     def display_name(self) -> str:
         """:class:`str`: Returns the user's display name.
 
-        For regular users this is just their username, but
-        if they have a guild specific nickname then that
-        is returned instead.
+        If they have a guild-specific :attr:`nickname <.nick>`, then
+        that is returned. If not, this is their :attr:`global name <.global_name>`
+        if set, or their :attr:`username <.name>` otherwise.
         """
-        return self.nick or self.name
+        return self.nick or self.global_name or self.name
 
     @property
     def display_avatar(self) -> Asset:
