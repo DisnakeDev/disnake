@@ -774,7 +774,8 @@ Members
 
 .. function:: on_member_update(before, after)
 
-    Called when a :class:`Member` updates their profile.
+    Called when a :class:`Member` is updated in a :class:`Guild`. This will also be called
+    when a :class:`User` object linked to a guild :class:`Member` changes.
     Consider using :func:`on_raw_member_update` which will be called regardless of the cache.
 
     This is called when one or more of the following things change, but is not limited to:
