@@ -47,15 +47,9 @@ reset_coverage = True
 def lock_deps(session: nox.Session):
     """Lock all dependency groups into pdm.lock, instead of only specific ones which could result in issues."""
     args = ["pdm", "lock", "-G:all"]
-    output = session.run_always(
-        *args,
-        "--check",
-        external=True,
-        success_codes=list(range(0, 128)),
-        silent=True,
-    )
-    if output:
-        print(output)
+    try:
+        session.run_always(*args, "--check", external=True)
+    except Exception:
         session.run_always(*args, external=True)
 
 
