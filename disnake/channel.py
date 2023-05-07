@@ -569,7 +569,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
                 "rate_limit_per_user": (
                     slowmode_delay if slowmode_delay is not MISSING else self.slowmode_delay
                 ),
-                "default_thread_slowmode_delay": (
+                "default_thread_rate_limit_per_user": (
                     default_thread_slowmode_delay
                     if default_thread_slowmode_delay is not MISSING
                     else self.default_thread_slowmode_delay
