@@ -1,0 +1,1 @@
+Add a new voice channel activity, :attr:`PartyType.gartic_phone`.

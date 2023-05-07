@@ -231,12 +231,12 @@ class AutoModTriggerMetadata:
     Based on the trigger type, different fields can be used with various limits:
 
     .. csv-table::
-        :header: "Trigger Type", ``keyword_filter``, ``regex_patterns``, ``presets``, ``allow_list``, ``mention_total_limit``
+        :header: "Trigger Type", ``keyword_filter``, ``regex_patterns``, ``presets``, ``allow_list``, ``mention_total_limit``, ``mention_raid_protection_enabled``
 
-        :attr:`~AutoModTriggerType.keyword`,        ✅ (x1000), ✅ (x10), ❌, ✅ (x100),  ❌
-        :attr:`~AutoModTriggerType.spam`,           ❌,         ❌,       ❌, ❌,         ❌
-        :attr:`~AutoModTriggerType.keyword_preset`, ❌,         ❌,       ✅, ✅ (x1000), ❌
-        :attr:`~AutoModTriggerType.mention_spam`,   ❌,         ❌,       ❌, ❌,         ✅
+        :attr:`~AutoModTriggerType.keyword`,        ✅ (x1000), ✅ (x10), ❌, ✅ (x100),  ❌, ❌
+        :attr:`~AutoModTriggerType.spam`,           ❌,         ❌,       ❌, ❌,         ❌, ❌
+        :attr:`~AutoModTriggerType.keyword_preset`, ❌,         ❌,       ✅, ✅ (x1000), ❌, ❌
+        :attr:`~AutoModTriggerType.mention_spam`,   ❌,         ❌,       ❌, ❌,         ✅, ✅
 
     .. versionadded:: 2.6
 
@@ -271,6 +271,13 @@ class AutoModTriggerMetadata:
 
     mention_total_limit: Optional[:class:`int`]
         The maximum number of mentions (members + roles) allowed, between 1 and 50. Used with :attr:`AutoModTriggerType.mention_spam`.
+
+    mention_raid_protection_enabled: Optional[:class:`bool`]
+        Whether to automatically detect mention raids. Used with :attr:`AutoModTriggerType.mention_spam`.
+
+        Defaults to ``False``.
+
+        .. versionadded:: 2.9
     """
 
     __slots__ = (
@@ -279,6 +286,7 @@ class AutoModTriggerMetadata:
         "presets",
         "allow_list",
         "mention_total_limit",
+        "mention_raid_protection_enabled",
     )
 
     @overload
@@ -311,7 +319,9 @@ class AutoModTriggerMetadata:
         ...
 
     @overload
-    def __init__(self, *, mention_total_limit: int) -> None:
+    def __init__(
+        self, *, mention_total_limit: int, mention_raid_protection_enabled: bool = False
+    ) -> None:
         ...
 
     def __init__(
@@ -322,12 +332,14 @@ class AutoModTriggerMetadata:
         presets: Optional[AutoModKeywordPresets] = None,
         allow_list: Optional[Sequence[str]] = None,
         mention_total_limit: Optional[int] = None,
+        mention_raid_protection_enabled: Optional[bool] = None,
     ) -> None:
         self.keyword_filter: Optional[Sequence[str]] = keyword_filter
         self.regex_patterns: Optional[Sequence[str]] = regex_patterns
         self.presets: Optional[AutoModKeywordPresets] = presets
         self.allow_list: Optional[Sequence[str]] = allow_list
         self.mention_total_limit: Optional[int] = mention_total_limit
+        self.mention_raid_protection_enabled: Optional[bool] = mention_raid_protection_enabled
 
     def with_changes(
         self,
@@ -337,6 +349,7 @@ class AutoModTriggerMetadata:
         presets: Optional[AutoModKeywordPresets] = MISSING,
         allow_list: Optional[Sequence[str]] = MISSING,
         mention_total_limit: Optional[int] = MISSING,
+        mention_raid_protection_enabled: Optional[bool] = MISSING,
     ) -> Self:
         """Returns a new instance with the given changes applied.
         All other fields will be kept intact.
@@ -354,6 +367,11 @@ class AutoModTriggerMetadata:
             mention_total_limit=(
                 self.mention_total_limit if mention_total_limit is MISSING else mention_total_limit
             ),
+            mention_raid_protection_enabled=(
+                self.mention_raid_protection_enabled
+                if mention_raid_protection_enabled is MISSING
+                else mention_raid_protection_enabled
+            ),
         )
 
     @classmethod
@@ -369,6 +387,7 @@ class AutoModTriggerMetadata:
             presets=presets,
             allow_list=data.get("allow_list"),
             mention_total_limit=data.get("mention_total_limit"),
+            mention_raid_protection_enabled=data.get("mention_raid_protection_enabled"),
         )
 
     def to_dict(self) -> AutoModTriggerMetadataPayload:
@@ -383,6 +402,8 @@ class AutoModTriggerMetadata:
             data["allow_list"] = list(self.allow_list)
         if self.mention_total_limit is not None:
             data["mention_total_limit"] = self.mention_total_limit
+        if self.mention_raid_protection_enabled is not None:
+            data["mention_raid_protection_enabled"] = self.mention_raid_protection_enabled
         return data
 
     def __repr__(self) -> str:
@@ -397,6 +418,8 @@ class AutoModTriggerMetadata:
             s += f" allow_list={self.allow_list!r}"
         if self.mention_total_limit is not None:
             s += f" mention_total_limit={self.mention_total_limit!r}"
+        if self.mention_raid_protection_enabled is not None:
+            s += f" mention_raid_protection_enabled={self.mention_raid_protection_enabled!r}"
         return f"{s}>"
 
 
