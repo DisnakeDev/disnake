@@ -1,0 +1,1 @@
+|commands| Raise ``TypeError`` if :class:`~.ext.commands.InteractionBot` or :class:`~.ext.commands.AutoShardedInteractionBot` has prefix commands related things in a :class:`~.ext.commands.Cog`
