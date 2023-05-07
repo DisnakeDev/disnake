@@ -309,7 +309,7 @@ class UserConverter(IDConverter[disnake.User]):
         and it's not available in cache.
 
     .. versionchanged:: 2.9
-        Now takes :attr:`.User.global_name` into account.
+        Now takes :attr:`~disnake.User.global_name` into account.
     """
 
     async def convert(self, ctx: AnyContext, argument: str) -> disnake.User:
