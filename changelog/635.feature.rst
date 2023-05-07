@@ -1,4 +1,4 @@
-Implement new cloned attributes on the :func:`clone` method and adds these attributes (differents for every channel type) as keyword-only parameters to the :func:`clone` method on every :class:`abc.GuildChannel` subclass to make in-place edit, specifically the following channel type implements:
+Clone more attributes in channel ``clone`` methods, and add them as keyword-only parameters to the the respective ``clone`` method on every :class:`abc.GuildChannel` subclass to make in-place edits. The clone methods now support the following fields:
 
     - :class:`TextChannel`:
         The :meth:`TextChannel.clone` will now clone :attr:`TextChannel.name`, :attr:`TextChannel.topic`, :attr:`TextChannel.position`, :attr:`TextChannel.nsfw`,
