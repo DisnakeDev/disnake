@@ -2581,7 +2581,7 @@ class Guild(Hashable):
         Raises
         ------
         ClientException
-            The members intent is not enabled.
+            The members intent is not enabled in the developer portal.
         HTTPException
             Retrieving the members failed.
 
