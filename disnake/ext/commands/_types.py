@@ -2,21 +2,20 @@
 
 from typing import TYPE_CHECKING, Any, Callable, Coroutine, TypeVar, Union
 
-from .cog import Cog
-
 if TYPE_CHECKING:
+    from .cog import Cog
     from .context import Context
     from .errors import CommandError
 
 T = TypeVar("T")
+test = TypeVar("test", bound=Cog)
 
 Coro = Coroutine[Any, Any, T]
 MaybeCoro = Union[T, Coro[T]]
 CoroFunc = Callable[..., Coro[Any]]
 
 Check = Union[
-    Callable[["Cog"], Cog],
-    Callable[["Cog", "Context[Any]"], MaybeCoro[bool]],
+    Callable[["Cog"], test],
     Callable[["Context[Any]"], MaybeCoro[bool]],
 ]
 Hook = Union[Callable[["Cog", "Context[Any]"], Coro[Any]], Callable[["Context[Any]"], Coro[Any]]]
