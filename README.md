@@ -4,7 +4,11 @@
 
 disnake
 =======
-
+<p align="center">
+    <img src="https://github.com/DisnakeDev/disnake/actions/workflows/changelog.yaml/badge.svg"></img>
+    <img src="https://github.com/DisnakeDev/disnake/actions/workflows/lint-test.yml/badge.svg"></img>
+    <img src="https://github.com/DisnakeDev/disnake/actions/workflows/check-pull-labels.yaml/badge.svg"></img>
+</p>
 <p align="center">
     <a href="https://discord.gg/disnake"><img src="https://img.shields.io/discord/808030843078836254?style=flat-square&color=5865f2&logo=discord&logoColor=ffffff&label=discord" alt="Discord server invite" /></a>
     <a href="https://pypi.org/project/disnake/"><img src="https://img.shields.io/pypi/v/disnake.svg?style=flat-square" alt="PyPI version info" /></a>
