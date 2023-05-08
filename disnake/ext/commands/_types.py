@@ -8,14 +8,14 @@ if TYPE_CHECKING:
     from .errors import CommandError
 
 T = TypeVar("T")
-test = TypeVar("test", bound=Cog)
 
 Coro = Coroutine[Any, Any, T]
 MaybeCoro = Union[T, Coro[T]]
 CoroFunc = Callable[..., Coro[Any]]
 
 Check = Union[
-    Callable[["Cog"], test],
+    Callable[["Cog"], Any],
+    Callable[["Cog", "Context[Any]"], MaybeCoro[bool]],
     Callable[["Context[Any]"], MaybeCoro[bool]],
 ]
 Hook = Union[Callable[["Cog", "Context[Any]"], Coro[Any]], Callable[["Context[Any]"], Coro[Any]]]
