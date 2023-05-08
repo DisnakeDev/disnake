@@ -1774,7 +1774,7 @@ def check(predicate: Check) -> Callable[[T], T]:
         decorator.predicate = predicate
     else:
 
-        @functools.wraps(predicate)  # type: ignore
+        @functools.wraps(predicate)
         async def wrapper(ctx):
             return predicate(ctx)  # type: ignore
 
