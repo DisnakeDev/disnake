@@ -26,7 +26,7 @@ from typing import (
 from . import abc, utils
 from .app_commands import GuildApplicationCommandPermissions
 from .asset import Asset
-from .automod import AutoModAction, AutoModRule, AutoModTriggerMetadata
+from .automod import AutoModAction, AutoModRule
 from .bans import BanEntry
 from .channel import (
     CategoryChannel,
@@ -90,6 +90,7 @@ if TYPE_CHECKING:
     from .abc import Snowflake, SnowflakeTime
     from .app_commands import APIApplicationCommand
     from .asset import AssetBytes
+    from .automod import AutoModTriggerMetadata
     from .permissions import Permissions
     from .state import ConnectionState
     from .template import Template
