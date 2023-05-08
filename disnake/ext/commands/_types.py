@@ -2,8 +2,9 @@
 
 from typing import TYPE_CHECKING, Any, Callable, Coroutine, TypeVar, Union
 
+from .cog import Cog
+
 if TYPE_CHECKING:
-    from .cog import Cog
     from .context import Context
     from .errors import CommandError
 
