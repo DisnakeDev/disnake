@@ -152,7 +152,11 @@ class BaseUser(_UserTag):
 
     @property
     def default_avatar(self) -> Asset:
-        """:class:`Asset`: Returns the default avatar for a given user."""
+        """:class:`Asset`: Returns the default avatar for a given user.
+
+        .. versionchanged:: 2.9
+            Added handling for users migrated to the new username system without discriminators.
+        """
         if self.discriminator == "0":
             num = self.id >> 22
         else:
@@ -250,6 +254,9 @@ class BaseUser(_UserTag):
 
         This is their :attr:`global name <.global_name>` if set,
         or their :attr:`username <.name>` otherwise.
+
+        .. versionchanged:: 2.9
+            Added :attr:`.global_name`.
         """
         return self.global_name or self.name
 
