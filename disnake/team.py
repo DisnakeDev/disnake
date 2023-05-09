@@ -84,7 +84,7 @@ class TeamMember(BaseUser):
 
         .. describe:: str(x)
 
-            Returns the team member's username (with discriminator, if not migrated to new system yet), or global name if set.
+            Returns the team member's username (with discriminator, if not migrated to new system yet).
 
     .. versionadded:: 1.3
 

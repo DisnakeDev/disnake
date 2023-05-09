@@ -230,7 +230,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         .. describe:: str(x)
 
-            Returns the member's username (with discriminator, if not migrated to new system yet), or global name if set.
+            Returns the member's username (with discriminator, if not migrated to new system yet).
 
     Attributes
     ----------

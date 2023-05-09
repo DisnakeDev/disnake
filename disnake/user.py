@@ -291,7 +291,7 @@ class ClientUser(BaseUser):
 
         .. describe:: str(x)
 
-            Returns the user's username (with discriminator, if not migrated to new system yet), or global name if set.
+            Returns the user's username (with discriminator, if not migrated to new system yet).
 
     Attributes
     ----------
@@ -435,7 +435,7 @@ class User(BaseUser, disnake.abc.Messageable):
 
         .. describe:: str(x)
 
-            Returns the user's username (with discriminator, if not migrated to new system yet), or global name if set.
+            Returns the user's username (with discriminator, if not migrated to new system yet).
 
     Attributes
     ----------
