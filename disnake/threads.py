@@ -219,13 +219,13 @@ class Thread(Messageable, Hashable):
 
     def _update(self, data: ThreadPayload) -> None:
         try:
-            self.name: str = data["name"]
+            self.name = data["name"]
         except KeyError:
             pass
 
-        self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
-        self._flags: int = data.get("flags", 0)
-        self._applied_tags: List[int] = list(map(int, data.get("applied_tags", [])))
+        self.slowmode_delay = data.get("rate_limit_per_user", 0)
+        self._flags = data.get("flags", 0)
+        self._applied_tags = list(map(int, data.get("applied_tags", [])))
 
         try:
             self._unroll_metadata(data["thread_metadata"])
