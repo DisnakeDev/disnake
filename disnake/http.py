@@ -68,6 +68,7 @@ if TYPE_CHECKING:
         invite,
         member,
         message,
+        onboarding,
         role,
         sticker,
         template,
@@ -89,14 +90,13 @@ _API_VERSION = 10
 def _workaround_set_api_version(version: Literal[9, 10]) -> None:
     """Stopgap measure for verified bots without message content intent while intent is not enforced on api v9.
 
-
     .. note::
         This must be ran **before** connecting to the gateway.
     """
     if version not in (9, 10):
         raise TypeError("version must be either 9 or 10")
 
-    global _API_VERSION
+    global _API_VERSION  # noqa: PLW0603
     _API_VERSION = version
     Route.BASE = f"https://discord.com/api/v{_API_VERSION}"
 
@@ -114,12 +114,10 @@ async def json_or_text(response: aiohttp.ClientResponse) -> Union[Dict[str, Any]
 
 
 def set_attachments(payload: Dict[str, Any], files: Sequence[File]) -> None:
-    """
-    Updates the payload's attachments list based on the provided files
+    """Updates the payload's attachments list based on the provided files
 
     note: this method modifies the provided ``payload`` and ``payload["attachments"]`` collections
     """
-
     attachments = payload.get("attachments", [])
     for index, file in enumerate(files):
         attachments.append(
@@ -136,11 +134,9 @@ def set_attachments(payload: Dict[str, Any], files: Sequence[File]) -> None:
 
 
 def to_multipart(payload: Dict[str, Any], files: Sequence[File]) -> List[Dict[str, Any]]:
-    """
-    Converts the payload and list of files to a multipart payload,
+    """Converts the payload and list of files to a multipart payload,
     as specified by https://discord.com/developers/docs/reference#uploading-files
     """
-
     multipart: List[Dict[str, Any]] = []
     for index, file in enumerate(files):
         multipart.append(
@@ -159,12 +155,10 @@ def to_multipart(payload: Dict[str, Any], files: Sequence[File]) -> List[Dict[st
 def to_multipart_with_attachments(
     payload: Dict[str, Any], files: Sequence[File]
 ) -> List[Dict[str, Any]]:
-    """
-    Updates the payload's attachments and converts it to a multipart payload
+    """Updates the payload's attachments and converts it to a multipart payload
 
     Shorthand for ``set_attachments`` + ``to_multipart``
     """
-
     set_attachments(payload, files)
     return to_multipart(payload, files)
 
@@ -2174,6 +2168,8 @@ class HTTPClient:
         r = Route("PATCH", "/guilds/{guild_id}/welcome-screen", guild_id=guild_id)
         return self.request(r, json=payload, reason=reason)
 
+    # Auto moderation
+
     def get_auto_moderation_rules(self, guild_id: Snowflake) -> Response[List[automod.AutoModRule]]:
         return self.request(
             Route("GET", "/guilds/{guild_id}/auto-moderation/rules", guild_id=guild_id)
@@ -2262,6 +2258,11 @@ class HTTPClient:
             ),
             reason=reason,
         )
+
+    # Guild Onboarding
+
+    def get_guild_onboarding(self, guild_id: Snowflake) -> Response[onboarding.Onboarding]:
+        return self.request(Route("GET", "/guilds/{guild_id}/onboarding", guild_id=guild_id))
 
     # Application commands (global)
 
@@ -2657,7 +2658,7 @@ class HTTPClient:
         try:
             data: gateway.Gateway = await self.request(Route("GET", "/gateway"))
         except HTTPException as exc:
-            raise GatewayNotFound() from exc
+            raise GatewayNotFound from exc
 
         return self._format_gateway_url(data["url"], encoding=encoding, zlib=zlib)
 
@@ -2667,7 +2668,7 @@ class HTTPClient:
         try:
             data: gateway.GatewayBot = await self.request(Route("GET", "/gateway/bot"))
         except HTTPException as exc:
-            raise GatewayNotFound() from exc
+            raise GatewayNotFound from exc
 
         return (
             data["shards"],

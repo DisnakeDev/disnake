@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""
-An example using converters with slash commands.
-"""
+"""An example using converters with slash commands."""
 
 import os
 

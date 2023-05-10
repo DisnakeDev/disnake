@@ -39,6 +39,7 @@ from .channel import (
     ForumChannel,
     GroupChannel,
     PartialMessageable,
+    StageChannel,
     TextChannel,
     VoiceChannel,
     _guild_channel_factory,
@@ -95,7 +96,7 @@ if TYPE_CHECKING:
     from .types import gateway
     from .types.activity import Activity as ActivityPayload
     from .types.channel import DMChannel as DMChannelPayload
-    from .types.emoji import Emoji as EmojiPayload
+    from .types.emoji import Emoji as EmojiPayload, PartialEmoji as PartialEmojiPayload
     from .types.guild import Guild as GuildPayload, UnavailableGuild as UnavailableGuildPayload
     from .types.message import Message as MessagePayload
     from .types.sticker import GuildSticker as GuildStickerPayload
@@ -760,7 +761,7 @@ class ConnectionState:
 
         if channel:
             # we ensure that the channel is a type that implements last_message_id
-            if channel.__class__ in (TextChannel, Thread, VoiceChannel):
+            if channel.__class__ in (TextChannel, Thread, VoiceChannel, StageChannel):
                 channel.last_message_id = message.id  # type: ignore
             # Essentially, messages *don't* count towards message_count, if:
             # - they're the thread starter message
@@ -1906,22 +1907,70 @@ class ConnectionState:
     def _get_reaction_user(
         self, channel: MessageableChannel, user_id: int
     ) -> Optional[Union[User, Member]]:
-        if isinstance(channel, (TextChannel, VoiceChannel, Thread)):
+        if isinstance(channel, (TextChannel, VoiceChannel, Thread, StageChannel)):
             return channel.guild.get_member(user_id)
         return self.get_user(user_id)
 
-    def get_reaction_emoji(self, data) -> Union[Emoji, PartialEmoji]:
-        emoji_id = utils._get_as_snowflake(data, "id")
+    # methods to handle all sorts of different emoji formats
 
+    def _get_emoji_from_data(
+        self, data: PartialEmojiPayload
+    ) -> Optional[Union[str, Emoji, PartialEmoji]]:
+        """Convert partial emoji data to proper emoji.
+        Returns unicode emojis as strings.
+
+        Primarily used to handle reaction emojis.
+        """
+        emoji_id = utils._get_as_snowflake(data, "id")
         if not emoji_id:
             return data["name"]
 
-        try:
-            return self._emojis[emoji_id]
-        except KeyError:
-            return PartialEmoji.with_state(
-                self, animated=data.get("animated", False), id=emoji_id, name=data["name"]
-            )
+        if (emoji := self._emojis.get(emoji_id)) is not None:
+            return emoji
+
+        return PartialEmoji.with_state(
+            self,
+            # This may be `None` when custom emoji data in reactions isn't available.
+            # Should generally be fine, since we have an id at this point.
+            name=data["name"],  # type: ignore
+            id=emoji_id,
+            animated=data.get("animated", False),
+        )
+
+    # deprecated
+    get_reaction_emoji = _get_emoji_from_data
+
+    def _get_emoji_from_fields(
+        self,
+        *,
+        name: Optional[str],
+        id: Optional[int],
+        animated: Optional[bool] = False,
+    ) -> Optional[Union[Emoji, PartialEmoji]]:
+        """Convert partial emoji fields to proper emoji, if possible.
+        If both `id` and `name` are nullish, returns `None`.
+
+        Unlike _get_emoji_from_data, this returns `PartialEmoji`s instead of strings
+        for unicode emojis, and falls back to "" for the emoji name.
+
+        Primarily used for structures with nonstandard top-level `emoji_name` and `emoji_id` fields,
+        like forum channels/tags or welcome screens.
+        """
+        if not (name or id):
+            return None
+
+        if id and (emoji := self._emojis.get(id)) is not None:
+            return emoji
+
+        return PartialEmoji.with_state(
+            self,
+            # Note: this does not render correctly if it's a custom emoji, there's just no name information here sometimes.
+            # This may change in a future API version, but for now we'll just have to accept it.
+            name=name or "",
+            # Coerce `0` to `None`, occasional API inconsistency
+            id=id or None,
+            animated=animated or False,
+        )
 
     def _upgrade_partial_emoji(self, emoji: PartialEmoji) -> Union[Emoji, PartialEmoji, str]:
         emoji_id = emoji.id
@@ -2093,7 +2142,7 @@ class AutoShardedConnectionState(ConnectionState):
             if new_guild is not None and new_guild is not msg.guild:
                 channel_id = msg.channel.id
                 channel = new_guild._resolve_channel(channel_id) or Object(id=channel_id)
-                # channel will either be a TextChannel, VoiceChannel, Thread or Object
+                # channel will either be a TextChannel, VoiceChannel, Thread, StageChannel, or Object
                 msg._rebind_cached_references(new_guild, channel)  # type: ignore
 
         # these generally get deallocated once the voice reconnect times out

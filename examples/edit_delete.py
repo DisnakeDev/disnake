@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""
-An example using the `on_message_edit` and `on_message_delete` events.
-"""
+"""An example using the `on_message_edit` and `on_message_delete` events."""
 
 import asyncio
 import os

@@ -83,8 +83,7 @@ __all__ = (
 
 
 class CommandError(DiscordException):
-    """
-    The base exception type for all command related errors.
+    """The base exception type for all command related errors.
 
     This inherits from :exc:`disnake.DiscordException`.
 
@@ -109,7 +108,7 @@ class ConversionError(CommandError):
 
     Attributes
     ----------
-    converter: :class:`disnake.ext.commands.Converter`
+    converter: :class:`.Converter`
         The converter that failed.
     original: :exc:`Exception`
         The original exception that was raised. You can also get this via
@@ -1043,7 +1042,7 @@ class TooManyFlags(FlagError):
 
     Attributes
     ----------
-    flag: :class:`~disnake.ext.commands.Flag`
+    flag: :class:`.Flag`
         The flag that received too many values.
     values: List[:class:`str`]
         The values that were passed.
@@ -1066,7 +1065,7 @@ class BadFlagArgument(FlagError):
 
     Attributes
     ----------
-    flag: :class:`~disnake.ext.commands.Flag`
+    flag: :class:`.Flag`
         The flag that failed to convert.
     """
 
@@ -1089,7 +1088,7 @@ class MissingRequiredFlag(FlagError):
 
     Attributes
     ----------
-    flag: :class:`~disnake.ext.commands.Flag`
+    flag: :class:`.Flag`
         The required flag that was not found.
     """
 
@@ -1107,7 +1106,7 @@ class MissingFlagArgument(FlagError):
 
     Attributes
     ----------
-    flag: :class:`~disnake.ext.commands.Flag`
+    flag: :class:`.Flag`
         The flag that did not get a value.
     """
 

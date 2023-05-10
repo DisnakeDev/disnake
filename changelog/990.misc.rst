@@ -1,0 +1,1 @@
+Remove :func:`disnake.utils.parse_token` (never documented), which has been broken for newer tokens for some time, and was based on unofficial information about the token structure.
