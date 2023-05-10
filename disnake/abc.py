@@ -1287,6 +1287,11 @@ class GuildChannel(ABC):
         :class:`.Invite`
             The newly created invite.
         """
+        if isinstance(target_application, PartyType):
+            utils.warn_deprecated(
+                "target_application parameter is deprecated and will be removed in future version",
+                stacklevel=2,
+            )
         data = await self._state.http.create_invite(
             self.id,
             reason=reason,
