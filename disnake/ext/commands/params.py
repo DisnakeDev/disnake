@@ -883,7 +883,12 @@ def isolate_self(
         parametersl.pop(0)
     if parametersl:
         annot = parametersl[0].annotation
-        if issubclass_(annot, ApplicationCommandInteraction) or annot is inspect.Parameter.empty:
+        if (
+            issubclass_(annot, ApplicationCommandInteraction)
+            or annot is inspect.Parameter.empty
+            or annot.__class__.__name__ == "_GenericAlias"
+        ):
+            print(parametersl[0])
             inter_param = parameters.pop(parametersl[0].name)
 
     return (cog_param, inter_param), parameters

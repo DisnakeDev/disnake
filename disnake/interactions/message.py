@@ -85,7 +85,7 @@ class MessageInteraction(Interaction[BotT]):
         self.data: MessageInteractionData = MessageInteractionData(
             data=data["data"], state=state, guild_id=self.guild_id
         )
-        self.message = Message(state=self._state, channel=self.channel, data=data["message"])  # type: ignore
+        self.message = Message(state=self._state, channel=self.channel, data=data["message"])  # type: ignore # pyright bug
 
     @property
     def values(self) -> Optional[List[str]]:

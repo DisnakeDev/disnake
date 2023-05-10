@@ -106,9 +106,10 @@ if TYPE_CHECKING:
     from .voice_client import VoiceProtocol
 
     T = TypeVar("T")
-    BotT = TypeVar("BotT", bound="Client")
     Channel = Union[GuildChannel, VocalGuildChannel, PrivateChannel]
     PartialChannel = Union[Channel, PartialMessageable]
+
+BotT = TypeVar("BotT", bound="Client")
 
 
 class ChunkRequest:
@@ -185,6 +186,50 @@ class ConnectionState(Generic[BotT]):
         _get_websocket: Callable[..., DiscordWebSocket]
         _get_client: Callable[..., BotT]
         _parsers: Dict[str, Callable[[Dict[str, Any]], None]]
+
+    @overload
+    def __init__(
+        self: ConnectionState[Client],
+        *,
+        dispatch: Callable,
+        handlers: Dict[str, Callable],
+        hooks: Dict[str, Callable],
+        http: HTTPClient,
+        loop: asyncio.AbstractEventLoop,
+        max_messages: Optional[int] = 1000,
+        application_id: Optional[int] = None,
+        heartbeat_timeout: float = 60.0,
+        guild_ready_timeout: float = 2.0,
+        allowed_mentions: Optional[AllowedMentions] = None,
+        activity: Optional[BaseActivity] = None,
+        status: Optional[Union[str, Status]] = None,
+        intents: Optional[Intents] = None,
+        chunk_guilds_at_startup: Optional[bool] = None,
+        member_cache_flags: Optional[MemberCacheFlags] = None,
+    ) -> None:
+        ...
+
+    @overload
+    def __init__(
+        self: ConnectionState[BotT],
+        *,
+        dispatch: Callable,
+        handlers: Dict[str, Callable],
+        hooks: Dict[str, Callable],
+        http: HTTPClient,
+        loop: asyncio.AbstractEventLoop,
+        max_messages: Optional[int] = 1000,
+        application_id: Optional[int] = None,
+        heartbeat_timeout: float = 60.0,
+        guild_ready_timeout: float = 2.0,
+        allowed_mentions: Optional[AllowedMentions] = None,
+        activity: Optional[BaseActivity] = None,
+        status: Optional[Union[str, Status]] = None,
+        intents: Optional[Intents] = None,
+        chunk_guilds_at_startup: Optional[bool] = None,
+        member_cache_flags: Optional[MemberCacheFlags] = None,
+    ) -> None:
+        ...
 
     def __init__(
         self,
