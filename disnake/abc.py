@@ -1255,7 +1255,7 @@ class GuildChannel(ABC):
 
             .. versionadded:: 2.0
 
-        target_application: Optional[:class:`.PartyType`]
+        target_application:
             The ID of the embedded application for the invite, required if `target_type` is `TargetType.embedded_application`.
 
             .. versionadded:: 2.0
