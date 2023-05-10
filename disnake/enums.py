@@ -52,7 +52,6 @@ __all__ = (
     "OptionType",
     "ApplicationCommandType",
     "ApplicationCommandPermissionType",
-    "PartyType",
     "GuildScheduledEventEntityType",
     "GuildScheduledEventStatus",
     "GuildScheduledEventPrivacyLevel",
@@ -252,23 +251,6 @@ class MessageType(Enum):
     stage_topic = 31
     guild_application_premium_subscription = 32
 
-
-class PartyType(Enum):
-    poker = 755827207812677713
-    betrayal = 773336526917861400
-    fishing = 814288819477020702
-    chess = 832012774040141894
-    letter_tile = 879863686565621790
-    word_snack = 879863976006127627
-    doodle_crew = 878067389634314250
-    checkers = 832013003968348200
-    spellcast = 852509694341283871
-    watch_together = 880218394199220334
-    sketch_heads = 902271654783242291
-    ocho = 832025144389533716
-    gartic_phone = 1007373802981822582
-
-
 class SpeakingState(Enum):
     none = 0
     voice = 1 << 0
@@ -280,7 +262,6 @@ class SpeakingState(Enum):
 
     def __int__(self) -> int:
         return self.value
-
 
 class VerificationLevel(Enum, comparable=True):
     none = 0
