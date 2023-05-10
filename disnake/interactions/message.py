@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, TypeVar, Union
 
 from ..components import MessageComponent
 from ..enums import ComponentType, try_enum
@@ -16,6 +16,7 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
+    from ..client import Client
     from ..member import Member
     from ..role import Role
     from ..state import ConnectionState
@@ -27,8 +28,10 @@ if TYPE_CHECKING:
     from ..user import User
     from .base import InteractionChannel
 
+BotT = TypeVar("BotT", bound="Client")
 
-class MessageInteraction(Interaction):
+
+class MessageInteraction(Interaction[BotT]):
     """Represents an interaction with a message component.
 
     Current examples are buttons and dropdowns.
@@ -77,12 +80,12 @@ class MessageInteraction(Interaction):
         The interaction client.
     """
 
-    def __init__(self, *, data: MessageInteractionPayload, state: ConnectionState) -> None:
+    def __init__(self, *, data: MessageInteractionPayload, state: ConnectionState[BotT]) -> None:
         super().__init__(data=data, state=state)
         self.data: MessageInteractionData = MessageInteractionData(
             data=data["data"], state=state, guild_id=self.guild_id
         )
-        self.message = Message(state=self._state, channel=self.channel, data=data["message"])
+        self.message = Message(state=self._state, channel=self.channel, data=data["message"])  # type: ignore
 
     @property
     def values(self) -> Optional[List[str]]:

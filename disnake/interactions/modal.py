@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, TypeVar
 
 from ..enums import ComponentType
 from ..message import Message
@@ -10,6 +10,7 @@ from ..utils import cached_slot_property
 from .base import Interaction
 
 if TYPE_CHECKING:
+    from ..client import Client
     from ..state import ConnectionState
     from ..types.interactions import (
         ModalInteraction as ModalInteractionPayload,
@@ -20,8 +21,10 @@ if TYPE_CHECKING:
 
 __all__ = ("ModalInteraction", "ModalInteractionData")
 
+BotT = TypeVar("BotT", bound="Client")
 
-class ModalInteraction(Interaction):
+
+class ModalInteraction(Interaction[BotT]):
     """Represents an interaction with a modal.
 
     .. versionadded:: 2.4
@@ -71,12 +74,12 @@ class ModalInteraction(Interaction):
 
     __slots__ = ("message", "_cs_text_values")
 
-    def __init__(self, *, data: ModalInteractionPayload, state: ConnectionState) -> None:
+    def __init__(self, *, data: ModalInteractionPayload, state: ConnectionState[BotT]) -> None:
         super().__init__(data=data, state=state)
         self.data: ModalInteractionData = ModalInteractionData(data=data["data"])
 
         if message_data := data.get("message"):
-            message = Message(state=self._state, channel=self.channel, data=message_data)
+            message = Message(state=self._state, channel=self.channel, data=message_data)  # type: ignore
         else:
             message = None
         self.message: Optional[Message] = message

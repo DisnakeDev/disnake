@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, TypeVar, Union
 
 from .. import utils
 from ..enums import ApplicationCommandType, Locale, OptionType, try_enum
@@ -33,6 +33,7 @@ __all__ = (
 MISSING = utils.MISSING
 
 if TYPE_CHECKING:
+    from ..client import Client
     from ..ext.commands import InvokableApplicationCommand
     from ..state import ConnectionState
     from ..types.interactions import (
@@ -40,8 +41,10 @@ if TYPE_CHECKING:
         ApplicationCommandInteractionData as ApplicationCommandInteractionDataPayload,
     )
 
+BotT = TypeVar("BotT", bound="Client")
 
-class ApplicationCommandInteraction(Interaction):
+
+class ApplicationCommandInteraction(Interaction[BotT]):
     """Represents an interaction with an application command.
 
     Current examples are slash commands, user commands and message commands.
@@ -93,7 +96,7 @@ class ApplicationCommandInteraction(Interaction):
     """
 
     def __init__(
-        self, *, data: ApplicationCommandInteractionPayload, state: ConnectionState
+        self, *, data: ApplicationCommandInteractionPayload, state: ConnectionState[BotT]
     ) -> None:
         super().__init__(data=data, state=state)
         self.data: ApplicationCommandInteractionData = ApplicationCommandInteractionData(
@@ -119,7 +122,7 @@ class ApplicationCommandInteraction(Interaction):
         return kwargs
 
 
-class GuildCommandInteraction(ApplicationCommandInteraction):
+class GuildCommandInteraction(ApplicationCommandInteraction[BotT]):
     """An :class:`ApplicationCommandInteraction` subclass, primarily meant for annotations.
 
     This prevents the command from being invoked in DMs by automatically setting
@@ -137,7 +140,7 @@ class GuildCommandInteraction(ApplicationCommandInteraction):
     me: Member
 
 
-class UserCommandInteraction(ApplicationCommandInteraction):
+class UserCommandInteraction(ApplicationCommandInteraction[BotT]):
     """An :class:`ApplicationCommandInteraction` subclass meant for annotations.
 
     No runtime behavior is changed but annotations are modified
@@ -147,7 +150,7 @@ class UserCommandInteraction(ApplicationCommandInteraction):
     target: Union[User, Member]
 
 
-class MessageCommandInteraction(ApplicationCommandInteraction):
+class MessageCommandInteraction(ApplicationCommandInteraction[BotT]):
     """An :class:`ApplicationCommandInteraction` subclass meant for annotations.
 
     No runtime behavior is changed but annotations are modified

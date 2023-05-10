@@ -18,6 +18,7 @@ from typing import (
     Coroutine,
     Deque,
     Dict,
+    Generic,
     List,
     Literal,
     Optional,
@@ -105,6 +106,7 @@ if TYPE_CHECKING:
     from .voice_client import VoiceProtocol
 
     T = TypeVar("T")
+    BotT = TypeVar("BotT", bound="Client")
     Channel = Union[GuildChannel, VocalGuildChannel, PrivateChannel]
     PartialChannel = Union[Channel, PartialMessageable]
 
@@ -178,10 +180,10 @@ _SELECT_COMPONENT_TYPES = frozenset(
 )
 
 
-class ConnectionState:
+class ConnectionState(Generic[BotT]):
     if TYPE_CHECKING:
         _get_websocket: Callable[..., DiscordWebSocket]
-        _get_client: Callable[..., Client]
+        _get_client: Callable[..., BotT]
         _parsers: Dict[str, Callable[[Dict[str, Any]], None]]
 
     def __init__(
