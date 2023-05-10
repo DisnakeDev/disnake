@@ -251,6 +251,7 @@ class MessageType(Enum):
     stage_topic = 31
     guild_application_premium_subscription = 32
 
+
 class SpeakingState(Enum):
     none = 0
     voice = 1 << 0
@@ -262,6 +263,7 @@ class SpeakingState(Enum):
 
     def __int__(self) -> int:
         return self.value
+
 
 class VerificationLevel(Enum, comparable=True):
     none = 0

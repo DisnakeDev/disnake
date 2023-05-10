@@ -25,14 +25,7 @@ from typing import (
 
 from . import utils
 from .context_managers import Typing
-from .enums import (
-    ChannelType,
-    PartyType,
-    ThreadLayout,
-    ThreadSortOrder,
-    VideoQualityMode,
-    try_enum_to_int,
-)
+from .enums import ChannelType, ThreadLayout, ThreadSortOrder, VideoQualityMode, try_enum_to_int
 from .errors import ClientException
 from .file import File
 from .flags import ChannelFlags, MessageFlags
@@ -1226,7 +1219,7 @@ class GuildChannel(ABC):
         unique: bool = True,
         target_type: Optional[InviteTarget] = None,
         target_user: Optional[User] = None,
-        target_application: Optional[PartyType] = None,
+        target_application=None,
         guild_scheduled_event: Optional[GuildScheduledEvent] = None,
     ) -> Invite:
         """|coro|
