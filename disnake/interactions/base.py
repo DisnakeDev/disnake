@@ -174,22 +174,22 @@ class Interaction(Generic[BotT]):
 
     @overload
     def __init__(
-        self: Interaction[Client], *, data: InteractionPayload, state: ConnectionState[Client]
+        self: Interaction[Client], *, data: InteractionPayload, state: ConnectionState
     ) -> None:
         ...
 
     @overload
     def __init__(
-        self: Interaction[BotT], *, data: InteractionPayload, state: ConnectionState[BotT]
+        self: Interaction[BotT], *, data: InteractionPayload, state: ConnectionState
     ) -> None:
         ...
 
-    def __init__(self, *, data: InteractionPayload, state: ConnectionState[BotT]) -> None:
+    def __init__(self, *, data: InteractionPayload, state: ConnectionState) -> None:
         self.data: Mapping[str, Any] = data.get("data") or {}
         self._state: ConnectionState = state
         # TODO: Maybe use a unique session
         self._session: ClientSession = state.http._HTTPClient__session  # type: ignore
-        self.client: BotT = state._get_client()
+        self.client: BotT = cast(BotT, state._get_client())
         self._original_response: Optional[InteractionMessage] = None
 
         self.id: int = int(data["id"])

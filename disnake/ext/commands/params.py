@@ -888,7 +888,6 @@ def isolate_self(
             or annot is inspect.Parameter.empty
             or annot.__class__.__name__ == "_GenericAlias"
         ):
-            print(parametersl[0])
             inter_param = parameters.pop(parametersl[0].name)
 
     return (cog_param, inter_param), parameters
