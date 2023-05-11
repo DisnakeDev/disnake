@@ -35,3 +35,4 @@ __pypackages__/
 pdm.lock
 
 !test_bot/locale/*.json
+.
