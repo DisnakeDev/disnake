@@ -314,8 +314,7 @@ class Permissions(BaseFlags):
             Added :attr:`use_embedded_activities` permission.
 
         .. versionchanged:: 2.9
-            Added :attr:`use_soundboard` permission.
-            Added :att:`send_voice_messages` permission.
+            Added :attr:`use_soundboard` and :attr:`send_voice_messages` permissions.
         """
         instance = cls.all()
         instance.update(
