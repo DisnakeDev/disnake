@@ -1,1 +1,6 @@
-:attr:`enum.PartyType` is obsolete, it is now enabled Discord-wide.
+:attr:`enum.PartyType` is obsolete.
+
+The PartyType enum contains IDs of voice activities, which aren't documented in any official capacity. New activities get added/removed constantly, so keeping up with maintaining that list is rather difficult.
+
+Since the introduction of this enum, activities have been released officially.
+If anything, providing activities should really be more of a bot's responsibility, not the library's, so we should consider deprecating and removing this enum.
