@@ -395,7 +395,7 @@ class Permissions(BaseFlags):
            :attr:`send_messages_in_threads` and :attr:`use_external_stickers` permissions.
 
         .. versionchanged:: 2.9
-            Added :att:`send_voice_messages` permission.
+            Added :attr:`send_voice_messages` permission.
         """
         return cls(
             send_messages=True,
