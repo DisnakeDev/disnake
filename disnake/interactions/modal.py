@@ -74,7 +74,7 @@ class ModalInteraction(Interaction[BotT]):
 
     __slots__ = ("message", "_cs_text_values")
 
-    def __init__(self, *, data: ModalInteractionPayload, state: ConnectionState[BotT]) -> None:
+    def __init__(self, *, data: ModalInteractionPayload, state: ConnectionState) -> None:
         super().__init__(data=data, state=state)
         self.data: ModalInteractionData = ModalInteractionData(data=data["data"])
 

@@ -96,7 +96,7 @@ class ApplicationCommandInteraction(Interaction[BotT]):
     """
 
     def __init__(
-        self, *, data: ApplicationCommandInteractionPayload, state: ConnectionState[BotT]
+        self, *, data: ApplicationCommandInteractionPayload, state: ConnectionState
     ) -> None:
         super().__init__(data=data, state=state)
         self.data: ApplicationCommandInteractionData = ApplicationCommandInteractionData(

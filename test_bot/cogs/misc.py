@@ -29,7 +29,9 @@ class Misc(commands.Cog):
         await inter.response.send_message(file=self._get_file(desc))
 
     @commands.slash_command()
-    async def attachment_desc_edit(self, inter: disnake.AppCmdInter, desc: str = "test") -> None:
+    async def attachment_desc_edit(
+        self, inter: disnake.AppCmdInter[commands.Bot], desc: str = "test"
+    ) -> None:
         """Send a message with a button, which sends an attachment with the given description (or the default)
 
         Parameters
@@ -37,7 +39,7 @@ class Misc(commands.Cog):
         desc: The attachment description
         """
         button = disnake.ui.Button(label="edit")
-        button.callback = lambda interaction: interaction.response.edit_message(
+        button.callback = lambda interaction: interaction.response.edit_message(  # type: ignore
             file=self._get_file(desc)
         )
 

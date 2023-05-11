@@ -63,9 +63,9 @@ async def description(
 # by using `Param` and passing a callable.
 @bot.slash_command()
 async def defaults(
-    inter: disnake.CommandInteraction,
+    inter: disnake.CommandInteraction[commands.Bot],
     string: str = "this is a default value",
-    user: disnake.User = commands.Param(lambda inter: inter.author),
+    user: disnake.User = commands.Param(lambda inter: inter.author),  # type: ignore
 ):
     ...
 

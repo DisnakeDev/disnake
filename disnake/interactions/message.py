@@ -80,7 +80,7 @@ class MessageInteraction(Interaction[BotT]):
         The interaction client.
     """
 
-    def __init__(self, *, data: MessageInteractionPayload, state: ConnectionState[BotT]) -> None:
+    def __init__(self, *, data: MessageInteractionPayload, state: ConnectionState) -> None:
         super().__init__(data=data, state=state)
         self.data: MessageInteractionData = MessageInteractionData(
             data=data["data"], state=state, guild_id=self.guild_id

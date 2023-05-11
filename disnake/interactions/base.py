@@ -172,18 +172,6 @@ class Interaction(Generic[BotT]):
         "_cs_expires_at",
     )
 
-    @overload
-    def __init__(
-        self: Interaction[Client], *, data: InteractionPayload, state: ConnectionState
-    ) -> None:
-        ...
-
-    @overload
-    def __init__(
-        self: Interaction[BotT], *, data: InteractionPayload, state: ConnectionState
-    ) -> None:
-        ...
-
     def __init__(self, *, data: InteractionPayload, state: ConnectionState) -> None:
         self.data: Mapping[str, Any] = data.get("data") or {}
         self._state: ConnectionState = state
