@@ -1289,7 +1289,7 @@ class GuildChannel(ABC):
         """
         if isinstance(target_application, PartyType):
             utils.warn_deprecated(
-                "target_application parameter is deprecated and will be removed in future version",
+                "PartyType is deprecated and will be removed in future version",
                 stacklevel=2,
             )
         data = await self._state.http.create_invite(
