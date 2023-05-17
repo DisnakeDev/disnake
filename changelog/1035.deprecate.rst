@@ -1,1 +1,1 @@
-The :class:`PartyType`:deprecated::2.9 enum is deprecated, as voice activity IDs are not officially documented and the enum regularly becomes outdated.
+The :class:`PartyType` enum is deprecated, as voice activity IDs are not officially documented and the enum regularly becomes outdated.
