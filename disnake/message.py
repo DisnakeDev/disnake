@@ -1795,6 +1795,8 @@ class Message(Hashable):
         You must have the :attr:`~Permissions.manage_messages` permission to do
         this in a non-private channel context.
 
+        This does not work with messages sent in a :class:`VoiceChannel` or :class:`StageChannel`.
+
         Parameters
         ----------
         reason: Optional[:class:`str`]
@@ -1810,7 +1812,7 @@ class Message(Hashable):
             The message or channel was not found or deleted.
         HTTPException
             Pinning the message failed, probably due to the channel
-            having more than 50 pinned messages.
+            having more than 50 pinned messages or the channel not supporting pins.
         """
         await self._state.http.pin_message(self.channel.id, self.id, reason=reason)
         self.pinned = True
