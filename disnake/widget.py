@@ -116,7 +116,7 @@ class WidgetMember(BaseUser):
     discriminator: :class:`str`
         The member's anonymized discriminator.
 
-        .. deprecated:: 2.9
+        .. note::
             This is being phased out by Discord; the username system is moving away from ``username#discriminator``
             to users having a globally unique ``@username``.
             See the `help article <https://dis.gd/app-usernames>`__ for details.
