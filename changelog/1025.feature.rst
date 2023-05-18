@@ -1,4 +1,4 @@
-Add support for new username system - see the official :ddocs:`changelog <change-log#unique-usernames-on-discord>` for details. Existing functionality is kept backwards-compatible while the migration is still ongoing.
+Add support for new username system - see the official `help article <https://dis.gd/app-usernames>`__ for details. Existing functionality is kept backwards-compatible while the migration is still ongoing.
 - Add :attr:`User.global_name`, and update attributes/methods to account for it:
     - :attr:`User.display_name` and :attr:`Member.display_name`
     - :meth:`Guild.get_member_named`
