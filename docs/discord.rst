@@ -27,13 +27,16 @@ Creating a Bot account is a pretty straightforward process.
 
 6. Make sure that **Public Bot** is ticked if you want others to invite your bot.
 
-    - You should also make sure that **Require OAuth2 Code Grant** is unchecked unless you
-      are developing a service that needs it. If you're unsure, then **leave it unchecked**.
-
     .. image:: /images/discord_bot_user_options.png
         :alt: How the Bot User options should look like for most people.
 
+    - You should also make sure that **Require OAuth2 Code Grant** is unchecked unless you
+      are developing a service that needs it. If you're unsure, then **leave it unchecked**.
+
 7. Copy the token by clicking "Reset Token" and then using the "Copy" button.
+
+    .. image:: /images/discord_bot_acquire_token.png
+        :alt: How the page should look like after resetting token.
 
     - Click "Yes, do it!" when asked.
 
