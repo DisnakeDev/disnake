@@ -1,0 +1,1 @@
+- Update "Creating a Bot Account" page according to latest changes made by Discord.
