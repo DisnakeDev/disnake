@@ -23,7 +23,7 @@ Creating a Bot account is a pretty straightforward process.
     .. image:: /images/discord_create_app_form.png
         :alt: The new application form filled in.
 
-5. Navigate to the "Bot" tab. Bot account is added automatically when the application is created.
+5. Navigate to the "Bot" tab. A bot account is added automatically when the application is created.
 
 6. Make sure that **Public Bot** is ticked if you want others to invite your bot.
 
