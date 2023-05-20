@@ -213,8 +213,10 @@ class MemberConverter(IDConverter[disnake.Member]):
     ) -> Optional[disnake.Member]:
         cache = guild._state.member_cache_flags.joined
 
-        username, _, discriminator = argument.rpartition("#")
-        if discriminator == "0" or (len(discriminator) == 4 and discriminator.isdecimal()):
+        username, sep, discriminator = argument.rpartition("#")
+        if sep and (
+            discriminator == "0" or (len(discriminator) == 4 and discriminator.isdecimal())
+        ):
             # legacy behavior
             members = await guild.query_members(username, limit=100, cache=cache)
             return _utils_get(members, name=username, discriminator=discriminator)
@@ -342,10 +344,12 @@ class UserConverter(IDConverter[disnake.User]):
                 return result._user
             return result
 
-        username, _, discriminator = argument.rpartition("#")
+        username, sep, discriminator = argument.rpartition("#")
         # n.b. there's no builtin method that only matches arabic digits, `isdecimal` is the closest one.
         # it really doesn't matter much, worst case is unnecessary computations
-        if discriminator == "0" or (len(discriminator) == 4 and discriminator.isdecimal()):
+        if sep and (
+            discriminator == "0" or (len(discriminator) == 4 and discriminator.isdecimal())
+        ):
             # legacy behavior
             result = _utils_get(state._users.values(), name=username, discriminator=discriminator)
             if result is not None:

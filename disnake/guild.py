@@ -1144,8 +1144,10 @@ class Guild(Hashable):
             The member in this guild with the associated name. If not found
             then ``None`` is returned.
         """
-        username, _, discriminator = name.rpartition("#")
-        if discriminator == "0" or (len(discriminator) == 4 and discriminator.isdecimal()):
+        username, sep, discriminator = name.rpartition("#")
+        if sep and (
+            discriminator == "0" or (len(discriminator) == 4 and discriminator.isdecimal())
+        ):
             # legacy behavior
             result = utils.get(self._members.values(), name=username, discriminator=discriminator)
             if result is not None:
