@@ -186,12 +186,13 @@ class MemberConverter(IDConverter[disnake.Member]):
 
     The lookup strategy is as follows (in order):
 
-    1. Lookup by ID.
-    2. Lookup by mention.
-    3. Lookup by name#discrim.
-    4. Lookup by nickname.
-    5. Lookup by global name.
-    6. Lookup by name.
+    1. Lookup by ID
+    2. Lookup by mention
+    3. Lookup by username#discrim
+    4. Lookup by username#0
+    5. Lookup by nickname
+    6. Lookup by global name
+    7. Lookup by username
 
     The name resolution order matches the one used by :meth:`.Guild.get_member_named`.
 
@@ -203,17 +204,18 @@ class MemberConverter(IDConverter[disnake.Member]):
         optionally caching the result if :attr:`.MemberCacheFlags.joined` is enabled.
 
     .. versionchanged:: 2.9
-        Name resolution order changed from ``name > nick`` to ``nick > global_name > name``
-        to account for the username migration.
+        Name resolution order changed from ``username > nick`` to
+        ``nick > global_name > username`` to account for the username migration.
     """
 
     async def query_member_named(
         self, guild: disnake.Guild, argument: str
     ) -> Optional[disnake.Member]:
         cache = guild._state.member_cache_flags.joined
-        if len(argument) > 5 and argument[-5] == "#":
-            # legacy behavior for non-migrated users
-            username, _, discriminator = argument.rpartition("#")
+
+        username, _, discriminator = argument.rpartition("#")
+        if discriminator == "0" or (len(discriminator) == 4 and discriminator.isdecimal()):
+            # legacy behavior
             members = await guild.query_members(username, limit=100, cache=cache)
             return _utils_get(members, name=username, discriminator=discriminator)
         else:
@@ -295,11 +297,12 @@ class UserConverter(IDConverter[disnake.User]):
 
     The lookup strategy is as follows (in order):
 
-    1. Lookup by ID.
-    2. Lookup by mention.
-    3. Lookup by name#discrim.
-    4. Lookup by global name.
-    5. Lookup by name.
+    1. Lookup by ID
+    2. Lookup by mention
+    3. Lookup by username#discrim
+    4. Lookup by username#0
+    5. Lookup by global name
+    6. Lookup by username
 
     .. versionchanged:: 1.5
         Raise :exc:`.UserNotFound` instead of generic :exc:`.BadArgument`
@@ -310,6 +313,7 @@ class UserConverter(IDConverter[disnake.User]):
 
     .. versionchanged:: 2.9
         Now takes :attr:`~disnake.User.global_name` into account.
+        No longer automatically removes ``"@"`` prefix from arguments.
     """
 
     async def convert(self, ctx: AnyContext, argument: str) -> disnake.User:
@@ -338,26 +342,17 @@ class UserConverter(IDConverter[disnake.User]):
                 return result._user
             return result
 
-        arg = argument
-
-        # Remove the '@' character if this is the first character from the argument
-        if arg[0] == "@":
-            # Remove first character
-            arg = arg[1:]
-
-        # check for discriminator if it exists,
-        if len(arg) > 5 and arg[-5] == "#":
-            # legacy behavior for non-migrated users
-            discrim = arg[-4:]
-            name = arg[:-5]
-            result = disnake.utils.find(
-                lambda u: u.name == name and u.discriminator == discrim, state._users.values()
-            )
+        username, _, discriminator = argument.rpartition("#")
+        # n.b. there's no builtin method that only matches arabic digits, `isdecimal` is the closest one.
+        # it really doesn't matter much, worst case is unnecessary computations
+        if discriminator == "0" or (len(discriminator) == 4 and discriminator.isdecimal()):
+            # legacy behavior
+            result = _utils_get(state._users.values(), name=username, discriminator=discriminator)
             if result is not None:
                 return result
 
         result = disnake.utils.find(
-            lambda u: u.global_name == arg or u.name == arg,
+            lambda u: u.global_name == argument or u.name == argument,
             state._users.values(),
         )
 

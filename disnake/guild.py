@@ -1121,7 +1121,7 @@ class Guild(Hashable):
 
         1. Lookup by nickname.
         2. Lookup by global name.
-        3. Lookup by name.
+        3. Lookup by username.
 
         While the migration away from discriminators is still ongoing,
         the name can have an optional discriminator argument, e.g. "Jake#0001",
@@ -1144,25 +1144,17 @@ class Guild(Hashable):
             The member in this guild with the associated name. If not found
             then ``None`` is returned.
         """
-        members = self.members
-
-        # legacy behavior for non-migrated users
-        if len(name) > 5 and name[-5] == "#":
-            # The 5 length is checking to see if #0000 is in the string,
-            # as a#0000 has a length of 6, the minimum for a potential
-            # discriminator lookup.
-            potential_discriminator = name[-4:]
-
-            # do the actual lookup and return if found
-            # if it isn't found then we'll do a full name lookup below.
-            result = utils.get(members, name=name[:-5], discriminator=potential_discriminator)
+        username, _, discriminator = name.rpartition("#")
+        if discriminator == "0" or (len(discriminator) == 4 and discriminator.isdecimal()):
+            # legacy behavior
+            result = utils.get(self._members.values(), name=username, discriminator=discriminator)
             if result is not None:
                 return result
 
         def pred(m: Member) -> bool:
             return m.nick == name or m.global_name == name or m.name == name
 
-        return utils.find(pred, members)
+        return utils.find(pred, self._members.values())
 
     def _create_channel(
         self,
