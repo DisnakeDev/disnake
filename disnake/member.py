@@ -495,7 +495,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         .. note::
             This is being phased out by Discord; the username system is moving away from ``username#discriminator``
-            to users having a globally unique ``@username``.
+            to users having a globally unique username.
             The value of a single zero (``"0"``) indicates that the user has been migrated to the new system.
             See the `help article <https://dis.gd/app-usernames>`__ for details.
         """
