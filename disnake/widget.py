@@ -112,7 +112,7 @@ class WidgetMember(BaseUser):
     id: :class:`int`
         The member's anonymized ID.
     name: :class:`str`
-        The member's nickname (if set in the guild), global name (if set) or username.
+        The member's name.
     discriminator: :class:`str`
         The member's anonymized discriminator.
 
@@ -179,7 +179,6 @@ class WidgetMember(BaseUser):
             return Asset(self._state, url=url, key=url, animated=False)
         return None
 
-    # TODO: it's not yet known if widget members include global_name or if it's already handled through `name`
     @property
     def display_name(self) -> str:
         """:class:`str`: Returns the member's name."""
