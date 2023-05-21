@@ -1049,7 +1049,6 @@ class clean_content(Converter[str]):
             m = (msg and _utils_get(msg.mentions, id=id)) or bot.get_user(id)
             if m is None and ctx.guild:
                 m = ctx.guild.get_member(id)
-            # TODO: add a separate option for `global_name`s?
             return f"@{m.display_name if self.use_nicknames else m.name}" if m else "@deleted-user"
 
         def resolve_role(id: int) -> str:
