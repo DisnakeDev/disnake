@@ -165,7 +165,7 @@ class Thread(Messageable, Hashable):
 
     def __init__(self, *, guild: Guild, state: ConnectionState, data: ThreadPayload) -> None:
         self._state: ConnectionState = state
-        self.guild = guild
+        self.guild: Guild = guild
         self._members: Dict[int, ThreadMember] = {}
         self._from_data(data)
 
@@ -183,21 +183,21 @@ class Thread(Messageable, Hashable):
         return self.name
 
     def _from_data(self, data: ThreadPayload) -> None:
-        self.id = int(data["id"])
-        self.parent_id = int(data["parent_id"])
-        self.owner_id = _get_as_snowflake(data, "owner_id")
-        self.name = data["name"]
+        self.id: int = int(data["id"])
+        self.parent_id: int = int(data["parent_id"])
+        self.owner_id: Optional[int] = _get_as_snowflake(data, "owner_id")
+        self.name: str = data["name"]
         self._type: ThreadType = try_enum(ChannelType, data["type"])  # type: ignore
-        self.last_message_id = _get_as_snowflake(data, "last_message_id")
-        self.slowmode_delay = data.get("rate_limit_per_user", 0)
-        self.message_count = data.get("message_count") or 0
-        self.total_message_sent = data.get("total_message_sent") or 0
-        self.member_count = data.get("member_count")
+        self.last_message_id: Optional[int] = _get_as_snowflake(data, "last_message_id")
+        self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
+        self.message_count: int = data.get("message_count") or 0
+        self.total_message_sent: int = data.get("total_message_sent") or 0
+        self.member_count: Optional[int] = data.get("member_count")
         self.last_pin_timestamp: Optional[datetime.datetime] = parse_time(
             data.get("last_pin_timestamp")
         )
         self._flags: int = data.get("flags", 0)
-        self._applied_tags = list(map(int, data.get("applied_tags", [])))
+        self._applied_tags: List[int] = list(map(int, data.get("applied_tags", [])))
         self._unroll_metadata(data["thread_metadata"])
 
         try:
@@ -208,14 +208,16 @@ class Thread(Messageable, Hashable):
             self.me = ThreadMember(self, member)
 
     def _unroll_metadata(self, data: ThreadMetadata) -> None:
-        self.archived = data["archived"]
-        self.auto_archive_duration = data["auto_archive_duration"]
-        self.archive_timestamp = parse_time(data["archive_timestamp"])
-        self.locked = data.get("locked", False)
-        self.invitable = data.get("invitable", True)
-        self.create_timestamp = parse_time(data.get("create_timestamp"))
+        self.archived: bool = data["archived"]
+        self.auto_archive_duration: ThreadArchiveDurationLiteral = data["auto_archive_duration"]
+        self.archive_timestamp: datetime.datetime = parse_time(data["archive_timestamp"])
+        self.locked: bool = data.get("locked", False)
+        self.invitable: bool = data.get("invitable", True)
+        self.create_timestamp: Optional[datetime.datetime] = parse_time(
+            data.get("create_timestamp")
+        )
 
-    def _update(self, data) -> None:
+    def _update(self, data: ThreadPayload) -> None:
         try:
             self.name = data["name"]
         except KeyError:
