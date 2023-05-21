@@ -1370,6 +1370,7 @@ class HTTPClient:
             "public_updates_channel_id",
             "preferred_locale",
             "premium_progress_bar_enabled",
+            "safety_alerts_channel_id",
         )
 
         payload = {k: v for k, v in fields.items() if k in valid_keys}
