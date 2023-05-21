@@ -1144,8 +1144,8 @@ class Guild(Hashable):
             The member in this guild with the associated name. If not found
             then ``None`` is returned.
         """
-        username, sep, discriminator = name.rpartition("#")
-        if sep and (
+        username, _, discriminator = name.rpartition("#")
+        if username and (
             discriminator == "0" or (len(discriminator) == 4 and discriminator.isdecimal())
         ):
             # legacy behavior
