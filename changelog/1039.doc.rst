@@ -1,1 +1,1 @@
-- Update "Creating a Bot Account" page with newer images and syncronise info according to latest changes made by Discord.
+Update "Creating a Bot Account" page with newer images and synchronise info according to latest changes made by Discord.
