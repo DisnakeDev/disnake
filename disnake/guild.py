@@ -26,7 +26,7 @@ from typing import (
 from . import abc, utils
 from .app_commands import GuildApplicationCommandPermissions
 from .asset import Asset
-from .automod import AutoModRule
+from .automod import AutoModAction, AutoModRule
 from .bans import BanEntry
 from .channel import (
     CategoryChannel,
@@ -90,7 +90,7 @@ if TYPE_CHECKING:
     from .abc import Snowflake, SnowflakeTime
     from .app_commands import APIApplicationCommand
     from .asset import AssetBytes
-    from .automod import AutoModAction, AutoModTriggerMetadata
+    from .automod import AutoModTriggerMetadata
     from .permissions import Permissions
     from .state import ConnectionState
     from .template import Template
@@ -4625,6 +4625,9 @@ class Guild(Hashable):
 
         .. versionadded:: 2.6
 
+        .. versionchanged:: 2.9
+            Now raises a :exc:`TypeError` if given ``actions`` have an invalid type.
+
         Parameters
         ----------
         name: :class:`str`
@@ -4654,8 +4657,10 @@ class Guild(Hashable):
         Raises
         ------
         ValueError
-            The specified trigger type requires `trigger_metadata` to be set,
+            The specified trigger type requires ``trigger_metadata`` to be set,
             or no actions have been provided.
+        TypeError
+            The specified ``actions`` are of an invalid type.
         Forbidden
             You do not have proper permissions to create auto moderation rules.
         HTTPException
@@ -4674,8 +4679,13 @@ class Guild(Hashable):
         ):
             raise ValueError("Specified trigger type requires `trigger_metadata` to not be empty")
 
-        if len(actions) == 0:
+        if not actions:
             raise ValueError("At least one action must be provided.")
+        for action in actions:
+            if not isinstance(action, AutoModAction):
+                raise TypeError(
+                    f"actions must be of type `AutoModAction` (or subtype), not {type(action)!r}"
+                )
 
         data = await self._state.http.create_auto_moderation_rule(
             self.id,
