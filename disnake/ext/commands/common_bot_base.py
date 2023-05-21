@@ -41,6 +41,7 @@ if TYPE_CHECKING:
     AnyBot = Union[Bot, AutoShardedBot, InteractionBot, AutoShardedInteractionBot]
 
 __all__ = ("CommonBotBase",)
+_log = logging.getLogger(__name__)
 
 CogT = TypeVar("CogT", bound="Cog")
 CFT = TypeVar("CFT", bound="CoroFunc")
@@ -108,16 +109,16 @@ class CommonBotBase(Generic[CogT]):
         for extension in tuple(self.__extensions):
             try:
                 self.unload_extension(extension)
-            except Exception:
-                # TODO: consider logging exception
-                pass
+            except Exception as error:
+                error.__suppress_context__ = True
+                _log.error("Failed to unload extension %r", extension, exc_info=error)
 
         for cog in tuple(self.__cogs):
             try:
                 self.remove_cog(cog)
-            except Exception:
-                # TODO: consider logging exception
-                pass
+            except Exception as error:
+                error.__suppress_context__ = True
+                _log.exception("Failed to remove cog %r", cog, exc_info=error)
 
         await super().close()  # type: ignore
 
@@ -418,7 +419,7 @@ class CommonBotBase(Generic[CogT]):
             remove = [
                 index
                 for index, event in enumerate(event_list)
-                if event.__module__ is not None and _is_submodule(name, event.__module__)
+                if event.__module__ and _is_submodule(name, event.__module__)
             ]
 
             for index in reversed(remove):
@@ -432,9 +433,9 @@ class CommonBotBase(Generic[CogT]):
         else:
             try:
                 func(self)
-            except Exception:
-                # TODO: consider logging exception
-                pass
+            except Exception as error:
+                error.__suppress_context__ = True
+                _log.error("Exception in extension finalizer %r", key, exc_info=error)
         finally:
             self.__extensions.pop(key, None)
             sys.modules.pop(key, None)

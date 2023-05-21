@@ -66,6 +66,7 @@ __all__ = (
     "ThreadLayout",
     "Event",
     "ApplicationRoleConnectionMetadataType",
+    "OnboardingPromptType",
 )
 
 
@@ -265,6 +266,7 @@ class PartyType(Enum):
     watch_together = 880218394199220334
     sketch_heads = 902271654783242291
     ocho = 832025144389533716
+    gartic_phone = 1007373802981822582
 
 
 class SpeakingState(Enum):
@@ -1094,7 +1096,7 @@ class Event(Enum):
     Represents the :func:`on_member_remove` event.
     """
     member_update = "member_update"
-    """Called when a `Member` updates their profile.
+    """Called when a `Member` is updated in a `Guild`.
     Represents the :func:`on_member_update` event.
     """
     raw_member_remove = "raw_member_remove"
@@ -1102,7 +1104,7 @@ class Event(Enum):
     Represents the :func:`on_raw_member_remove` event.
     """
     raw_member_update = "raw_member_update"
-    """Called when a member updates their profile regardless of the member cache.
+    """Called when a `Member` is updated in a `Guild` regardless of the member cache.
     Represents the :func:`on_raw_member_update` event.
     """
     member_ban = "member_ban"
@@ -1293,6 +1295,11 @@ class ApplicationRoleConnectionMetadataType(Enum):
     datetime_greater_than_or_equal = 6
     boolean_equal = 7
     boolean_not_equal = 8
+
+
+class OnboardingPromptType(Enum):
+    multiple_choice = 0
+    dropdown = 1
 
 
 T = TypeVar("T")

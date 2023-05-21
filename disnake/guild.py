@@ -26,7 +26,7 @@ from typing import (
 from . import abc, utils
 from .app_commands import GuildApplicationCommandPermissions
 from .asset import Asset
-from .automod import AutoModRule
+from .automod import AutoModAction, AutoModRule
 from .bans import BanEntry
 from .channel import (
     CategoryChannel,
@@ -66,6 +66,7 @@ from .invite import Invite
 from .iterators import AuditLogIterator, BanIterator, MemberIterator
 from .member import Member, VoiceState
 from .mixins import Hashable
+from .onboarding import Onboarding
 from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite
 from .role import Role
@@ -89,7 +90,7 @@ if TYPE_CHECKING:
     from .abc import Snowflake, SnowflakeTime
     from .app_commands import APIApplicationCommand
     from .asset import AssetBytes
-    from .automod import AutoModAction, AutoModTriggerMetadata
+    from .automod import AutoModTriggerMetadata
     from .permissions import Permissions
     from .state import ConnectionState
     from .template import Template
@@ -354,9 +355,9 @@ class Guild(Hashable):
     )
 
     _PREMIUM_GUILD_LIMITS: ClassVar[Dict[Optional[int], _GuildLimit]] = {
-        None: _GuildLimit(emoji=50, stickers=5, bitrate=96e3, filesize=8388608),
-        0: _GuildLimit(emoji=50, stickers=5, bitrate=96e3, filesize=8388608),
-        1: _GuildLimit(emoji=100, stickers=15, bitrate=128e3, filesize=8388608),
+        None: _GuildLimit(emoji=50, stickers=5, bitrate=96e3, filesize=26214400),
+        0: _GuildLimit(emoji=50, stickers=5, bitrate=96e3, filesize=26214400),
+        1: _GuildLimit(emoji=100, stickers=15, bitrate=128e3, filesize=26214400),
         2: _GuildLimit(emoji=150, stickers=30, bitrate=256e3, filesize=52428800),
         3: _GuildLimit(emoji=250, stickers=60, bitrate=384e3, filesize=104857600),
     }
@@ -4564,6 +4565,9 @@ class Guild(Hashable):
 
         .. versionadded:: 2.6
 
+        .. versionchanged:: 2.9
+            Now raises a :exc:`TypeError` if given ``actions`` have an invalid type.
+
         Parameters
         ----------
         name: :class:`str`
@@ -4593,8 +4597,10 @@ class Guild(Hashable):
         Raises
         ------
         ValueError
-            The specified trigger type requires `trigger_metadata` to be set,
+            The specified trigger type requires ``trigger_metadata`` to be set,
             or no actions have been provided.
+        TypeError
+            The specified ``actions`` are of an invalid type.
         Forbidden
             You do not have proper permissions to create auto moderation rules.
         HTTPException
@@ -4613,8 +4619,13 @@ class Guild(Hashable):
         ):
             raise ValueError("Specified trigger type requires `trigger_metadata` to not be empty")
 
-        if len(actions) == 0:
+        if not actions:
             raise ValueError("At least one action must be provided.")
+        for action in actions:
+            if not isinstance(action, AutoModAction):
+                raise TypeError(
+                    f"actions must be of type `AutoModAction` (or subtype), not {type(action)!r}"
+                )
 
         data = await self._state.http.create_auto_moderation_rule(
             self.id,
@@ -4631,6 +4642,26 @@ class Guild(Hashable):
             reason=reason,
         )
         return AutoModRule(data=data, guild=self)
+
+    async def onboarding(self) -> Onboarding:
+        """|coro|
+
+        Retrieves the guild onboarding data.
+
+        .. versionadded:: 2.9
+
+        Raises
+        ------
+        HTTPException
+            Retrieving the guild onboarding data failed.
+
+        Returns
+        -------
+        :class:`Onboarding`
+            The guild onboarding data.
+        """
+        data = await self._state.http.get_guild_onboarding(self.id)
+        return Onboarding(data=data, guild=self)
 
 
 PlaceholderID = NewType("PlaceholderID", int)
