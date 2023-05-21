@@ -544,6 +544,9 @@ class AutoModRule:
 
         All fields are optional.
 
+        .. versionchanged:: 2.9
+            Now raises a :exc:`TypeError` if given ``actions`` have an invalid type.
+
         Examples
         --------
         Edit name and enable rule:
@@ -598,6 +601,8 @@ class AutoModRule:
         ------
         ValueError
             When editing the list of actions, at least one action must be provided.
+        TypeError
+            The specified ``actions`` are of an invalid type.
         Forbidden
             You do not have proper permissions to edit the rule.
         NotFound
@@ -619,8 +624,13 @@ class AutoModRule:
         if trigger_metadata is not MISSING:
             payload["trigger_metadata"] = trigger_metadata.to_dict()
         if actions is not MISSING:
-            if len(actions) == 0:
+            if not actions:
                 raise ValueError("At least one action must be provided.")
+            for action in actions:
+                if not isinstance(action, AutoModAction):
+                    raise TypeError(
+                        f"actions must be of type `AutoModAction` (or subtype), not {type(action)!r}"
+                    )
             payload["actions"] = [a.to_dict() for a in actions]
         if enabled is not MISSING:
             payload["enabled"] = enabled
