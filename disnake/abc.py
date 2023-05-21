@@ -138,6 +138,7 @@ class User(Snowflake, Protocol):
             to users having a globally unique username.
             The value of a single zero (``"0"``) indicates that the user has been migrated to the new system.
             See the `help article <https://dis.gd/app-usernames>`__ for details.
+
     global_name: Optional[:class:`str`]
         The user's global display name, if set.
         This takes precedence over :attr:`.name` when shown.
@@ -145,6 +146,7 @@ class User(Snowflake, Protocol):
         For bots, this is the application name.
 
         .. versionadded:: 2.9
+
     avatar: :class:`~disnake.Asset`
         The avatar asset the user has.
     bot: :class:`bool`

@@ -313,6 +313,7 @@ class ClientUser(BaseUser):
             to users having a globally unique username.
             The value of a single zero (``"0"``) indicates that the user has been migrated to the new system.
             See the `help article <https://dis.gd/app-usernames>`__ for details.
+
     global_name: Optional[:class:`str`]
         The user's global display name, if set.
         This takes precedence over :attr:`.name` when shown.
@@ -320,6 +321,7 @@ class ClientUser(BaseUser):
         For bots, this is the application name.
 
         .. versionadded:: 2.9
+
     bot: :class:`bool`
         Specifies if the user is a bot account.
     system: :class:`bool`
@@ -457,6 +459,7 @@ class User(BaseUser, disnake.abc.Messageable):
             to users having a globally unique username.
             The value of a single zero (``"0"``) indicates that the user has been migrated to the new system.
             See the `help article <https://dis.gd/app-usernames>`__ for details.
+
     global_name: Optional[:class:`str`]
         The user's global display name, if set.
         This takes precedence over :attr:`.name` when shown.
@@ -464,6 +467,7 @@ class User(BaseUser, disnake.abc.Messageable):
         For bots, this is the application name.
 
         .. versionadded:: 2.9
+
     bot: :class:`bool`
         Specifies if the user is a bot account.
     system: :class:`bool`

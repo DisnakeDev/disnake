@@ -102,11 +102,13 @@ class TeamMember(BaseUser):
             to users having a globally unique username.
             The value of a single zero (``"0"``) indicates that the user has been migrated to the new system.
             See the `help article <https://dis.gd/app-usernames>`__ for details.
+
     global_name: Optional[:class:`str`]
         The team members's global display name, if set.
         This takes precedence over :attr:`.name` when shown.
 
         .. versionadded:: 2.9
+
     avatar: Optional[:class:`str`]
         The avatar hash the team member has. Could be None.
     bot: :class:`bool`
