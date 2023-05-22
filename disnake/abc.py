@@ -870,6 +870,7 @@ class GuildChannel(ABC):
         use_application_commands: Optional[bool] = ...,
         use_embedded_activities: Optional[bool] = ...,
         use_external_emojis: Optional[bool] = ...,
+        use_external_sounds: Optional[bool] = ...,
         use_external_stickers: Optional[bool] = ...,
         use_slash_commands: Optional[bool] = ...,
         use_soundboard: Optional[bool] = ...,
