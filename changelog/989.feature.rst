@@ -3,3 +3,4 @@ Add new permission fields.
 - :attr:`Permissions.view_creator_monetization_analytics`
 - :attr:`Permissions.use_soundboard`
 - :attr:`Permissions.send_voice_messages`
+- :attr:`Permissions.use_external_sounds`

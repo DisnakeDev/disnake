@@ -203,6 +203,7 @@ class Permissions(BaseFlags):
         use_application_commands: bool = ...,
         use_embedded_activities: bool = ...,
         use_external_emojis: bool = ...,
+        use_external_sounds: bool = ...,
         use_external_stickers: bool = ...,
         use_slash_commands: bool = ...,
         use_soundboard: bool = ...,
@@ -425,7 +426,7 @@ class Permissions(BaseFlags):
             Added :attr:`use_embedded_activities` permission.
 
         .. versionchanged:: 2.9
-            Added :attr:`use_soundboard` permission.
+            Added :attr:`use_soundboard` and :attr:`use_external_sounds` permissions.
         """
         return cls(
             connect=True,
@@ -433,6 +434,7 @@ class Permissions(BaseFlags):
             stream=True,
             use_embedded_activities=True,
             use_soundboard=True,
+            use_external_sounds=True,
             use_voice_activation=True,
             priority_speaker=True,
             mute_members=True,
@@ -569,6 +571,7 @@ class Permissions(BaseFlags):
         use_application_commands: bool = ...,
         use_embedded_activities: bool = ...,
         use_external_emojis: bool = ...,
+        use_external_sounds: bool = ...,
         use_external_stickers: bool = ...,
         use_slash_commands: bool = ...,
         use_soundboard: bool = ...,
@@ -976,6 +979,14 @@ class Permissions(BaseFlags):
         return 1 << 42
 
     @flag_value
+    def use_external_sounds(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can use custom soundboard sounds from other guilds.
+
+        .. versionadded:: 2.9
+        """
+        return 1 << 45
+
+    @flag_value
     def send_voice_messages(self) -> int:
         """:class:`bool`: Returns ``True`` if a user can send voice messages.
 
@@ -1094,6 +1105,7 @@ class PermissionOverwrite:
         use_application_commands: Optional[bool]
         use_embedded_activities: Optional[bool]
         use_external_emojis: Optional[bool]
+        use_external_sounds: Optional[bool]
         use_external_stickers: Optional[bool]
         use_slash_commands: Optional[bool]
         use_soundboard: Optional[bool]
@@ -1157,6 +1169,7 @@ class PermissionOverwrite:
         use_application_commands: Optional[bool] = ...,
         use_embedded_activities: Optional[bool] = ...,
         use_external_emojis: Optional[bool] = ...,
+        use_external_sounds: Optional[bool] = ...,
         use_external_stickers: Optional[bool] = ...,
         use_slash_commands: Optional[bool] = ...,
         use_soundboard: Optional[bool] = ...,
@@ -1287,6 +1300,7 @@ class PermissionOverwrite:
         use_application_commands: Optional[bool] = ...,
         use_embedded_activities: Optional[bool] = ...,
         use_external_emojis: Optional[bool] = ...,
+        use_external_sounds: Optional[bool] = ...,
         use_external_stickers: Optional[bool] = ...,
         use_slash_commands: Optional[bool] = ...,
         use_soundboard: Optional[bool] = ...,
