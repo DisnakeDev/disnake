@@ -44,6 +44,7 @@ class AutoModTriggerMetadata(TypedDict, total=False):
     presets: List[AutoModPresetType]
     allow_list: List[str]
     mention_total_limit: int
+    mention_raid_protection_enabled: bool
 
 
 class AutoModRule(TypedDict):
