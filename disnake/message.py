@@ -276,12 +276,14 @@ class Attachment(Hashable):
         .. versionadded:: 2.3
 
     duration_secs: Optional[:class:`float`]
-        The duration of the audio attachment, if this is attached to a voice message.
+        The duration of the audio attachment, if this is attached to a voice message
+        (see :attr:`MessageFlags.is_voice_message`).
 
         .. versionadded:: 2.9
 
     waveform: Optional[:class:`bytes`]
-        The byte array representing a sampled waveform, if this is attached to a voice message.
+        The byte array representing a sampled waveform, if this is attached to a voice message
+        (see :attr:`MessageFlags.is_voice_message`).
 
         .. versionadded:: 2.9
     """
