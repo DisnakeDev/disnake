@@ -196,6 +196,7 @@ class Permissions(BaseFlags):
         send_messages: bool = ...,
         send_messages_in_threads: bool = ...,
         send_tts_messages: bool = ...,
+        send_voice_messages: bool = ...,
         speak: bool = ...,
         start_embedded_activities: bool = ...,
         stream: bool = ...,
@@ -314,7 +315,7 @@ class Permissions(BaseFlags):
             Added :attr:`use_embedded_activities` permission.
 
         .. versionchanged:: 2.9
-            Added :attr:`use_soundboard` permission.
+            Added :attr:`use_soundboard` and :attr:`send_voice_messages` permissions.
         """
         instance = cls.all()
         instance.update(
@@ -392,6 +393,9 @@ class Permissions(BaseFlags):
         .. versionchanged:: 2.0
            Added :attr:`create_public_threads`, :attr:`create_private_threads`, :attr:`manage_threads`,
            :attr:`send_messages_in_threads` and :attr:`use_external_stickers` permissions.
+
+        .. versionchanged:: 2.9
+            Added :attr:`send_voice_messages` permission.
         """
         return cls(
             send_messages=True,
@@ -409,6 +413,7 @@ class Permissions(BaseFlags):
             read_message_history=True,
             send_tts_messages=True,
             use_slash_commands=True,
+            send_voice_messages=True,
         )
 
     @classmethod
@@ -559,6 +564,7 @@ class Permissions(BaseFlags):
         send_messages: bool = ...,
         send_messages_in_threads: bool = ...,
         send_tts_messages: bool = ...,
+        send_voice_messages: bool = ...,
         speak: bool = ...,
         start_embedded_activities: bool = ...,
         stream: bool = ...,
@@ -980,6 +986,14 @@ class Permissions(BaseFlags):
         """
         return 1 << 45
 
+    @flag_value
+    def send_voice_messages(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can send voice messages.
+
+        .. versionadded:: 2.9
+        """
+        return 1 << 46
+
 
 def _augment_from_permissions(cls):
     cls.VALID_NAMES = set(Permissions.VALID_FLAGS)
@@ -1084,6 +1098,7 @@ class PermissionOverwrite:
         send_messages: Optional[bool]
         send_messages_in_threads: Optional[bool]
         send_tts_messages: Optional[bool]
+        send_voice_messages: Optional[bool]
         speak: Optional[bool]
         start_embedded_activities: Optional[bool]
         stream: Optional[bool]
@@ -1147,6 +1162,7 @@ class PermissionOverwrite:
         send_messages: Optional[bool] = ...,
         send_messages_in_threads: Optional[bool] = ...,
         send_tts_messages: Optional[bool] = ...,
+        send_voice_messages: Optional[bool] = ...,
         speak: Optional[bool] = ...,
         start_embedded_activities: Optional[bool] = ...,
         stream: Optional[bool] = ...,
@@ -1277,6 +1293,7 @@ class PermissionOverwrite:
         send_messages: Optional[bool] = ...,
         send_messages_in_threads: Optional[bool] = ...,
         send_tts_messages: Optional[bool] = ...,
+        send_voice_messages: Optional[bool] = ...,
         speak: Optional[bool] = ...,
         start_embedded_activities: Optional[bool] = ...,
         stream: Optional[bool] = ...,

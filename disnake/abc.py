@@ -769,6 +769,7 @@ class GuildChannel(ABC):
         # permissions as well
         if not base.send_messages:
             base.send_tts_messages = False
+            base.send_voice_messages = False
             base.mention_everyone = False
             base.embed_links = False
             base.attach_files = False
@@ -864,6 +865,7 @@ class GuildChannel(ABC):
         send_messages: Optional[bool] = ...,
         send_messages_in_threads: Optional[bool] = ...,
         send_tts_messages: Optional[bool] = ...,
+        send_voice_messages: Optional[bool] = ...,
         speak: Optional[bool] = ...,
         start_embedded_activities: Optional[bool] = ...,
         stream: Optional[bool] = ...,
