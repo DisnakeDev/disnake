@@ -275,8 +275,8 @@ class Attachment(Hashable):
 
         .. versionadded:: 2.3
 
-    duration_secs: Optional[:class:`float`]
-        The duration of the audio attachment, if this is attached to a voice message
+    duration: Optional[:class:`float`]
+        The duration of the audio attachment in seconds, if this is attached to a voice message
         (see :attr:`MessageFlags.is_voice_message`).
 
         .. versionadded:: 2.9
@@ -300,7 +300,7 @@ class Attachment(Hashable):
         "content_type",
         "ephemeral",
         "description",
-        "duration_secs",
+        "duration",
         "waveform",
     )
 
@@ -316,8 +316,7 @@ class Attachment(Hashable):
         self.content_type: Optional[str] = data.get("content_type")
         self.ephemeral: bool = data.get("ephemeral", False)
         self.description: Optional[str] = data.get("description")
-        self.duration_secs: Optional[float] = data.get("duration_secs")
-        # TODO: should this even be decoded in the first place?
+        self.duration: Optional[float] = data.get("duration_secs")
         self.waveform: Optional[bytes] = (
             b64decode(waveform_data) if (waveform_data := data.get("waveform")) else None
         )
@@ -495,8 +494,8 @@ class Attachment(Hashable):
             result["content_type"] = self.content_type
         if self.description:
             result["description"] = self.description
-        if self.duration_secs is not None:
-            result["duration_secs"] = self.duration_secs
+        if self.duration is not None:
+            result["duration_secs"] = self.duration
         if self.waveform is not None:
             result["waveform"] = b64encode(self.waveform).decode("ascii")
         return result
