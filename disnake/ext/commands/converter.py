@@ -1046,9 +1046,11 @@ class clean_content(Converter[str]):
         bot: disnake.Client = ctx.bot
 
         def resolve_user(id: int) -> str:
-            m = (msg and _utils_get(msg.mentions, id=id)) or bot.get_user(id)
-            if m is None and ctx.guild:
-                m = ctx.guild.get_member(id)
+            m = (
+                (msg and _utils_get(msg.mentions, id=id))
+                or (ctx.guild and ctx.guild.get_member(id))
+                or bot.get_user(id)
+            )
             return f"@{m.display_name if self.use_nicknames else m.name}" if m else "@deleted-user"
 
         def resolve_role(id: int) -> str:
