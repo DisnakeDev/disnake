@@ -1135,22 +1135,26 @@ class Guild(Hashable):
     def get_member_named(self, name: str, /) -> Optional[Member]:
         """Returns the first member found that matches the name provided.
 
-        The name can have an optional discriminator argument, e.g. "Jake#0001"
-        or "Jake" will both do the lookup. However the former will give a more
-        precise result. Note that the discriminator must have all 4 digits
-        for this to work.
+        The lookup strategy is as follows (in order):
 
-        If a nickname is passed, then it is looked up via the nickname. Note
-        however, that a nickname + discriminator combo will not lookup the nickname
-        but rather the username + discriminator combo due to nickname + discriminator
-        not being unique.
+        1. Lookup by nickname.
+        2. Lookup by global name.
+        3. Lookup by username.
+
+        While the migration away from discriminators is still ongoing,
+        the name can have an optional discriminator argument, e.g. "Jake#0001",
+        in which case it will be treated as a username + discriminator combo
+        (note: this only works with usernames, not nicknames).
 
         If no member is found, ``None`` is returned.
+
+        .. versionchanged:: 2.9
+            Now takes :attr:`User.global_name` into account.
 
         Parameters
         ----------
         name: :class:`str`
-            The name of the member to lookup with an optional discriminator.
+            The name of the member to lookup (with an optional discriminator).
 
         Returns
         -------
@@ -1158,24 +1162,19 @@ class Guild(Hashable):
             The member in this guild with the associated name. If not found
             then ``None`` is returned.
         """
-        result = None
-        members = self.members
-        if len(name) > 5 and name[-5] == "#":
-            # The 5 length is checking to see if #0000 is in the string,
-            # as a#0000 has a length of 6, the minimum for a potential
-            # discriminator lookup.
-            potential_discriminator = name[-4:]
-
-            # do the actual lookup and return if found
-            # if it isn't found then we'll do a full name lookup below.
-            result = utils.get(members, name=name[:-5], discriminator=potential_discriminator)
+        username, _, discriminator = name.rpartition("#")
+        if username and (
+            discriminator == "0" or (len(discriminator) == 4 and discriminator.isdecimal())
+        ):
+            # legacy behavior
+            result = utils.get(self._members.values(), name=username, discriminator=discriminator)
             if result is not None:
                 return result
 
         def pred(m: Member) -> bool:
-            return m.nick == name or m.name == name
+            return m.nick == name or m.global_name == name or m.name == name
 
-        return utils.find(pred, members)
+        return utils.find(pred, self._members.values())
 
     def _create_channel(
         self,
@@ -4184,7 +4183,7 @@ class Guild(Hashable):
     ) -> List[Member]:
         """|coro|
 
-        Request members that belong to this guild whose username starts with
+        Request members that belong to this guild whose name starts with
         the query given.
 
         This is a websocket operation and can be slow.
@@ -4196,7 +4195,7 @@ class Guild(Hashable):
         Parameters
         ----------
         query: Optional[:class:`str`]
-            The string that the username's start with.
+            The string that the names start with.
         limit: :class:`int`
             The maximum number of members to send back. This must be
             a number between 5 and 100.
@@ -4259,7 +4258,7 @@ class Guild(Hashable):
     ):
         """|coro|
 
-        Retrieves members that belong to this guild whose username or nickname starts with
+        Retrieves members that belong to this guild whose name starts with
         the query given.
 
         Note that unlike :func:`query_members`, this is not a websocket operation, but an HTTP operation.
@@ -4271,7 +4270,7 @@ class Guild(Hashable):
         Parameters
         ----------
         query: :class:`str`
-            The string that the usernames or nicknames start with.
+            The string that the names start with.
         limit: :class:`int`
             The maximum number of members to send back. This must be
             a number between 1 and 1000.
