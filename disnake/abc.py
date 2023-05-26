@@ -132,6 +132,21 @@ class User(Snowflake, Protocol):
         The user's username.
     discriminator: :class:`str`
         The user's discriminator.
+
+        .. note::
+            This is being phased out by Discord; the username system is moving away from ``username#discriminator``
+            to users having a globally unique username.
+            The value of a single zero (``"0"``) indicates that the user has been migrated to the new system.
+            See the `help article <https://dis.gd/app-usernames>`__ for details.
+
+    global_name: Optional[:class:`str`]
+        The user's global display name, if set.
+        This takes precedence over :attr:`.name` when shown.
+
+        For bots, this is the application name.
+
+        .. versionadded:: 2.9
+
     avatar: :class:`~disnake.Asset`
         The avatar asset the user has.
     bot: :class:`bool`
@@ -142,6 +157,7 @@ class User(Snowflake, Protocol):
 
     name: str
     discriminator: str
+    global_name: Optional[str]
     avatar: Asset
     bot: bool
 
@@ -769,6 +785,7 @@ class GuildChannel(ABC):
         # permissions as well
         if not base.send_messages:
             base.send_tts_messages = False
+            base.send_voice_messages = False
             base.mention_everyone = False
             base.embed_links = False
             base.attach_files = False
@@ -864,12 +881,14 @@ class GuildChannel(ABC):
         send_messages: Optional[bool] = ...,
         send_messages_in_threads: Optional[bool] = ...,
         send_tts_messages: Optional[bool] = ...,
+        send_voice_messages: Optional[bool] = ...,
         speak: Optional[bool] = ...,
         start_embedded_activities: Optional[bool] = ...,
         stream: Optional[bool] = ...,
         use_application_commands: Optional[bool] = ...,
         use_embedded_activities: Optional[bool] = ...,
         use_external_emojis: Optional[bool] = ...,
+        use_external_sounds: Optional[bool] = ...,
         use_external_stickers: Optional[bool] = ...,
         use_slash_commands: Optional[bool] = ...,
         use_soundboard: Optional[bool] = ...,
