@@ -2566,6 +2566,9 @@ class Guild(Hashable):
 
         .. versionadded:: 1.3
 
+        .. versionchanged:: 2.9
+            No longer requires the intent to be enabled on the websocket connection.
+
         All parameters are optional.
 
         Parameters
