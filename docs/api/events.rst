@@ -866,6 +866,7 @@ Members
     - avatar
     - discriminator
     - name
+    - global_name
     - public_flags
 
     This requires :attr:`Intents.members` to be enabled.
