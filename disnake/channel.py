@@ -2057,7 +2057,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
             This is a discord limitation.
 
         .. warning::
-            Currently the ``user_limit`` attribute is not cloned due to a Discord limitation. 
+            Currently the ``user_limit`` attribute is not cloned due to a Discord limitation.
             You can directly edit the channel after its creation to set
             a `user_limit`.
 
