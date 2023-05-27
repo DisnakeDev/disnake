@@ -161,6 +161,7 @@ class Interaction:
         "_app_permissions",
         "_permissions",
         "_state",
+        "_payload",
         "_session",
         "_original_response",
         "_cs_response",
@@ -173,6 +174,7 @@ class Interaction:
     def __init__(self, *, data: InteractionPayload, state: ConnectionState) -> None:
         self.data: Mapping[str, Any] = data.get("data") or {}
         self._state: ConnectionState = state
+        self._payload: InteractionPayload = data
         # TODO: Maybe use a unique session
         self._session: ClientSession = state.http._HTTPClient__session  # type: ignore
         self.client: Client = state._get_client()
@@ -286,6 +288,11 @@ class Interaction:
         if self.guild_id:
             return Permissions(self._app_permissions)
         return Permissions.private_channel()
+
+    @property
+    def payload(self) -> InteractionPayload:
+        """:class:`InteractionPayload`: Returns the payload dictionary that created the interaction."""
+        return self._payload
 
     @utils.cached_slot_property("_cs_response")
     def response(self) -> InteractionResponse:
