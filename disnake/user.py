@@ -318,8 +318,6 @@ class ClientUser(BaseUser):
         The user's global display name, if set.
         This takes precedence over :attr:`.name` when shown.
 
-        For bots, this is the application name.
-
         .. versionadded:: 2.9
 
     bot: :class:`bool`
@@ -463,8 +461,6 @@ class User(BaseUser, disnake.abc.Messageable):
     global_name: Optional[:class:`str`]
         The user's global display name, if set.
         This takes precedence over :attr:`.name` when shown.
-
-        For bots, this is the application name.
 
         .. versionadded:: 2.9
 
