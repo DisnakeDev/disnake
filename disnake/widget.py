@@ -117,7 +117,7 @@ class WidgetMember(BaseUser):
         The member's anonymized discriminator.
 
         .. note::
-            This is being phased out by Discord; the username system is moving away from ``username#discriminator``
+            This is being phased out by Discord for non-bot users; the username system is moving away from ``username#discriminator``
             to users having a globally unique username.
             See the `help article <https://dis.gd/app-usernames>`__ for details.
     status: :class:`Status`

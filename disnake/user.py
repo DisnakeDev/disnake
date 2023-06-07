@@ -297,7 +297,7 @@ class ClientUser(BaseUser):
 
         .. describe:: str(x)
 
-            Returns the user's username (with discriminator, if not migrated to new system yet).
+            Returns the user's username (with discriminator).
 
     Attributes
     ----------
@@ -307,12 +307,6 @@ class ClientUser(BaseUser):
         The user's unique ID.
     discriminator: :class:`str`
         The user's discriminator.
-
-        .. note::
-            This is being phased out by Discord; the username system is moving away from ``username#discriminator``
-            to users having a globally unique username.
-            The value of a single zero (``"0"``) indicates that the user has been migrated to the new system.
-            See the `help article <https://dis.gd/app-usernames>`__ for details.
 
     global_name: Optional[:class:`str`]
         The user's global display name, if set.
@@ -453,7 +447,7 @@ class User(BaseUser, disnake.abc.Messageable):
         The user's discriminator.
 
         .. note::
-            This is being phased out by Discord; the username system is moving away from ``username#discriminator``
+            This is being phased out by Discord for non-bot users; the username system is moving away from ``username#discriminator``
             to users having a globally unique username.
             The value of a single zero (``"0"``) indicates that the user has been migrated to the new system.
             See the `help article <https://dis.gd/app-usernames>`__ for details.
