@@ -157,11 +157,11 @@ class BaseUser(_UserTag):
             Added handling for users migrated to the new username system without discriminators.
         """
         if self.discriminator == "0":
-            num = self.id >> 22
+            index = (self.id >> 22) % len(DefaultAvatar)
         else:
             # legacy behavior
-            num = int(self.discriminator)
-        return Asset._from_default_avatar(self._state, num % len(DefaultAvatar))
+            index = int(self.discriminator) % 5
+        return Asset._from_default_avatar(self._state, index)
 
     @property
     def display_avatar(self) -> Asset:
