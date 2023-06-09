@@ -26,7 +26,7 @@ from typing import (
 from . import abc, utils
 from .app_commands import GuildApplicationCommandPermissions
 from .asset import Asset
-from .automod import AutoModRule
+from .automod import AutoModAction, AutoModRule
 from .bans import BanEntry
 from .channel import (
     CategoryChannel,
@@ -90,7 +90,7 @@ if TYPE_CHECKING:
     from .abc import Snowflake, SnowflakeTime
     from .app_commands import APIApplicationCommand
     from .asset import AssetBytes
-    from .automod import AutoModAction, AutoModTriggerMetadata
+    from .automod import AutoModTriggerMetadata
     from .permissions import Permissions
     from .state import ConnectionState
     from .template import Template
@@ -232,6 +232,7 @@ class Guild(Hashable):
         - ``PARTNERED``: Guild is a partnered server.
         - ``PREVIEW_ENABLED``: Guild can be viewed before being accepted via Membership Screening.
         - ``PRIVATE_THREADS``: Guild has access to create private threads (no longer has any effect).
+        - ``RAID_ALERTS_DISABLED``: Guild has disabled alerts for join raids in the configured safety alerts channel.
         - ``ROLE_ICONS``: Guild has access to role icons.
         - ``ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE``: Guild has role subscriptions that can be purchased.
         - ``ROLE_SUBSCRIPTIONS_ENABLED``: Guild has enabled role subscriptions.
@@ -352,6 +353,7 @@ class Guild(Hashable):
         "_scheduled_events",
         "_threads",
         "_region",
+        "_safety_alerts_channel_id",
     )
 
     _PREMIUM_GUILD_LIMITS: ClassVar[Dict[Optional[int], _GuildLimit]] = {
@@ -572,6 +574,9 @@ class Guild(Hashable):
         self.widget_enabled: Optional[bool] = guild.get("widget_enabled")
         self.widget_channel_id: Optional[int] = utils._get_as_snowflake(guild, "widget_channel_id")
         self.vanity_url_code: Optional[str] = guild.get("vanity_url_code")
+        self._safety_alerts_channel_id: Optional[int] = utils._get_as_snowflake(
+            guild, "safety_alerts_channel_id"
+        )
 
         stage_instances = guild.get("stage_instances")
         if stage_instances is not None:
@@ -835,7 +840,7 @@ class Guild(Hashable):
 
     @property
     def rules_channel(self) -> Optional[TextChannel]:
-        """Optional[:class:`TextChannel`]: Return's the guild's channel used for the rules.
+        """Optional[:class:`TextChannel`]: Returns the guild's channel used for the rules.
         The guild must be a Community guild.
 
         If no channel is set, then this returns ``None``.
@@ -847,7 +852,7 @@ class Guild(Hashable):
 
     @property
     def public_updates_channel(self) -> Optional[TextChannel]:
-        """Optional[:class:`TextChannel`]: Return's the guild's channel where admins and
+        """Optional[:class:`TextChannel`]: Returns the guild's channel where admins and
         moderators of the guild receive notices from Discord. The guild must be a
         Community guild.
 
@@ -856,6 +861,19 @@ class Guild(Hashable):
         .. versionadded:: 1.4
         """
         channel_id = self._public_updates_channel_id
+        return channel_id and self._channels.get(channel_id)  # type: ignore
+
+    @property
+    def safety_alerts_channel(self) -> Optional[TextChannel]:
+        """Optional[:class:`TextChannel`]: Returns the guild's channel where admins and
+        moderators of the guild receive safety alerts from Discord. The guild must be a
+        Community guild.
+
+        If no channel is set, then this returns ``None``.
+
+        .. versionadded:: 2.9
+        """
+        channel_id = self._safety_alerts_channel_id
         return channel_id and self._channels.get(channel_id)  # type: ignore
 
     @property
@@ -1117,22 +1135,26 @@ class Guild(Hashable):
     def get_member_named(self, name: str, /) -> Optional[Member]:
         """Returns the first member found that matches the name provided.
 
-        The name can have an optional discriminator argument, e.g. "Jake#0001"
-        or "Jake" will both do the lookup. However the former will give a more
-        precise result. Note that the discriminator must have all 4 digits
-        for this to work.
+        The lookup strategy is as follows (in order):
 
-        If a nickname is passed, then it is looked up via the nickname. Note
-        however, that a nickname + discriminator combo will not lookup the nickname
-        but rather the username + discriminator combo due to nickname + discriminator
-        not being unique.
+        1. Lookup by nickname.
+        2. Lookup by global name.
+        3. Lookup by username.
+
+        While the migration away from discriminators is still ongoing,
+        the name can have an optional discriminator argument, e.g. "Jake#0001",
+        in which case it will be treated as a username + discriminator combo
+        (note: this only works with usernames, not nicknames).
 
         If no member is found, ``None`` is returned.
+
+        .. versionchanged:: 2.9
+            Now takes :attr:`User.global_name` into account.
 
         Parameters
         ----------
         name: :class:`str`
-            The name of the member to lookup with an optional discriminator.
+            The name of the member to lookup (with an optional discriminator).
 
         Returns
         -------
@@ -1140,24 +1162,19 @@ class Guild(Hashable):
             The member in this guild with the associated name. If not found
             then ``None`` is returned.
         """
-        result = None
-        members = self.members
-        if len(name) > 5 and name[-5] == "#":
-            # The 5 length is checking to see if #0000 is in the string,
-            # as a#0000 has a length of 6, the minimum for a potential
-            # discriminator lookup.
-            potential_discriminator = name[-4:]
-
-            # do the actual lookup and return if found
-            # if it isn't found then we'll do a full name lookup below.
-            result = utils.get(members, name=name[:-5], discriminator=potential_discriminator)
+        username, _, discriminator = name.rpartition("#")
+        if username and (
+            discriminator == "0" or (len(discriminator) == 4 and discriminator.isdecimal())
+        ):
+            # legacy behavior
+            result = utils.get(self._members.values(), name=username, discriminator=discriminator)
             if result is not None:
                 return result
 
         def pred(m: Member) -> bool:
-            return m.nick == name or m.name == name
+            return m.nick == name or m.global_name == name or m.name == name
 
-        return utils.find(pred, members)
+        return utils.find(pred, self._members.values())
 
     def _create_channel(
         self,
@@ -1843,6 +1860,7 @@ class Guild(Hashable):
         discovery_splash: Optional[AssetBytes] = MISSING,
         community: bool = MISSING,
         invites_disabled: bool = MISSING,
+        raid_alerts_disabled: bool = MISSING,
         afk_channel: Optional[VoiceChannel] = MISSING,
         owner: Snowflake = MISSING,
         afk_timeout: int = MISSING,
@@ -1855,6 +1873,7 @@ class Guild(Hashable):
         preferred_locale: Locale = MISSING,
         rules_channel: Optional[TextChannel] = MISSING,
         public_updates_channel: Optional[TextChannel] = MISSING,
+        safety_alerts_channel: Optional[TextChannel] = MISSING,
         premium_progress_bar_enabled: bool = MISSING,
     ) -> Guild:
         """|coro|
@@ -1935,6 +1954,16 @@ class Guild(Hashable):
 
             .. versionadded:: 2.6
 
+        raid_alerts_disabled: :class:`bool`
+            Whether the guild has disabled join raid alerts.
+
+            This is only available to guilds that contain ``COMMUNITY``
+            in :attr:`Guild.features`.
+
+            This cannot be changed at the same time as the ``community`` feature due a Discord API limitation.
+
+            .. versionadded:: 2.9
+
         afk_channel: Optional[:class:`VoiceChannel`]
             The new channel that is the AFK channel. Could be ``None`` for no AFK channel.
         afk_timeout: :class:`int`
@@ -1969,6 +1998,13 @@ class Guild(Hashable):
             The new channel that is used for public updates from Discord. This is only available to
             guilds that contain ``COMMUNITY`` in :attr:`Guild.features`. Could be ``None`` for no
             public updates channel.
+        safety_alerts_channel: Optional[:class:`TextChannel`]
+            The new channel that is used for safety alerts. This is only available to
+            guilds that contain ``COMMUNITY`` in :attr:`Guild.features`. Could be ``None`` for no
+            safety alerts channel.
+
+            .. versionadded:: 2.9
+
         premium_progress_bar_enabled: :class:`bool`
             Whether the server boost progress bar is enabled.
         reason: Optional[:class:`str`]
@@ -1991,7 +2027,7 @@ class Guild(Hashable):
             ``community`` was set without setting both ``rules_channel`` and ``public_updates_channel`` parameters,
             or if you are not the owner of the guild and request an ownership transfer,
             or the image format passed in to ``icon`` is invalid,
-            or both ``community`` and ``invites_disabled`` were provided.
+            or both ``community`` and ``invites_disabled` or ``raid_alerts_disabled`` were provided.
 
         Returns
         -------
@@ -2058,6 +2094,12 @@ class Guild(Hashable):
             else:
                 fields["public_updates_channel_id"] = public_updates_channel.id
 
+        if safety_alerts_channel is not MISSING:
+            if safety_alerts_channel is None:
+                fields["safety_alerts_channel_id"] = safety_alerts_channel
+            else:
+                fields["safety_alerts_channel_id"] = safety_alerts_channel.id
+
         if owner is not MISSING:
             if self.owner_id != self._state.self_id:
                 raise ValueError("To transfer ownership you must be the owner of the guild.")
@@ -2082,7 +2124,11 @@ class Guild(Hashable):
 
             fields["system_channel_flags"] = system_channel_flags.value
 
-        if community is not MISSING or invites_disabled is not MISSING:
+        if (
+            community is not MISSING
+            or invites_disabled is not MISSING
+            or raid_alerts_disabled is not MISSING
+        ):
             # If we don't have complete feature information for the guild,
             # it is possible to disable or enable other features that we didn't intend to touch.
             # To enable or disable a feature, we will need to provide all of the existing features in advance.
@@ -2116,6 +2162,19 @@ class Guild(Hashable):
                     features.add("INVITES_DISABLED")
                 else:
                     features.discard("INVITES_DISABLED")
+
+            if raid_alerts_disabled is not MISSING:
+                if community is not MISSING:
+                    raise ValueError(
+                        "cannot modify both the COMMUNITY feature and RAID_ALERTS_DISABLED feature at the "
+                        "same time due to a discord limitation."
+                    )
+                if not isinstance(raid_alerts_disabled, bool):
+                    raise TypeError("raid_alerts_disabled must be a bool")
+                if raid_alerts_disabled:
+                    features.add("RAID_ALERTS_DISABLED")
+                else:
+                    features.discard("RAID_ALERTS_DISABLED")
 
             fields["features"] = list(features)
 
@@ -2555,14 +2614,19 @@ class Guild(Hashable):
     def fetch_members(
         self, *, limit: Optional[int] = 1000, after: Optional[SnowflakeTime] = None
     ) -> MemberIterator:
-        """Retrieves an :class:`.AsyncIterator` that enables receiving the guild's members. In order to use this,
-        :meth:`Intents.members` must be enabled.
+        """Retrieves an :class:`.AsyncIterator` that enables receiving the guild's members.
+
+        In order to use this, the :attr:`~Intents.members` intent must be
+        enabled in the developer portal.
 
         .. note::
 
             This method is an API call. For general usage, consider :attr:`members` instead.
 
         .. versionadded:: 1.3
+
+        .. versionchanged:: 2.9
+            No longer requires the intent to be enabled on the websocket connection.
 
         All parameters are optional.
 
@@ -2579,7 +2643,7 @@ class Guild(Hashable):
         Raises
         ------
         ClientException
-            The members intent is not enabled.
+            The members intent is not enabled in the developer portal.
         HTTPException
             Retrieving the members failed.
 
@@ -2600,8 +2664,13 @@ class Guild(Hashable):
             members = await guild.fetch_members(limit=150).flatten()
             # members is now a list of Member...
         """
-        if not self._state._intents.members:
-            raise ClientException("Intents.members must be enabled to use this.")
+        # `hasattr` check to avoid issues with uninitialized state
+        if hasattr(self._state, "application_flags"):
+            flags = self._state.application_flags
+            if not (flags.gateway_guild_members_limited or flags.gateway_guild_members):
+                raise ClientException(
+                    "The `members` intent must be enabled in the Developer Portal to be able to use this method."
+                )
 
         return MemberIterator(self, limit=limit, after=after)
 
@@ -4124,7 +4193,7 @@ class Guild(Hashable):
     ) -> List[Member]:
         """|coro|
 
-        Request members that belong to this guild whose username starts with
+        Request members that belong to this guild whose name starts with
         the query given.
 
         This is a websocket operation and can be slow.
@@ -4136,7 +4205,7 @@ class Guild(Hashable):
         Parameters
         ----------
         query: Optional[:class:`str`]
-            The string that the username's start with.
+            The string that the names start with.
         limit: :class:`int`
             The maximum number of members to send back. This must be
             a number between 5 and 100.
@@ -4199,7 +4268,7 @@ class Guild(Hashable):
     ):
         """|coro|
 
-        Retrieves members that belong to this guild whose username or nickname starts with
+        Retrieves members that belong to this guild whose name starts with
         the query given.
 
         Note that unlike :func:`query_members`, this is not a websocket operation, but an HTTP operation.
@@ -4211,7 +4280,7 @@ class Guild(Hashable):
         Parameters
         ----------
         query: :class:`str`
-            The string that the usernames or nicknames start with.
+            The string that the names start with.
         limit: :class:`int`
             The maximum number of members to send back. This must be
             a number between 1 and 1000.
@@ -4565,6 +4634,9 @@ class Guild(Hashable):
 
         .. versionadded:: 2.6
 
+        .. versionchanged:: 2.9
+            Now raises a :exc:`TypeError` if given ``actions`` have an invalid type.
+
         Parameters
         ----------
         name: :class:`str`
@@ -4594,8 +4666,10 @@ class Guild(Hashable):
         Raises
         ------
         ValueError
-            The specified trigger type requires `trigger_metadata` to be set,
+            The specified trigger type requires ``trigger_metadata`` to be set,
             or no actions have been provided.
+        TypeError
+            The specified ``actions`` are of an invalid type.
         Forbidden
             You do not have proper permissions to create auto moderation rules.
         HTTPException
@@ -4614,8 +4688,13 @@ class Guild(Hashable):
         ):
             raise ValueError("Specified trigger type requires `trigger_metadata` to not be empty")
 
-        if len(actions) == 0:
+        if not actions:
             raise ValueError("At least one action must be provided.")
+        for action in actions:
+            if not isinstance(action, AutoModAction):
+                raise TypeError(
+                    f"actions must be of type `AutoModAction` (or subtype), not {type(action)!r}"
+                )
 
         data = await self._state.http.create_auto_moderation_rule(
             self.id,
