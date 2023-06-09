@@ -885,6 +885,7 @@ class ConnectionState:
         emoji = PartialEmoji.with_state(
             self,
             id=emoji_id,
+            animated=emoji.get("animated", False),
             # may be `None` in gateway events if custom emoji data isn't available anymore
             # https://discord.com/developers/docs/resources/emoji#emoji-object-custom-emoji-examples
             name=emoji["name"],  # type: ignore
@@ -912,6 +913,7 @@ class ConnectionState:
         emoji = PartialEmoji.with_state(
             self,
             id=emoji_id,
+            animated=emoji.get("animated", False),
             # may be `None` in gateway events if custom emoji data isn't available anymore
             # https://discord.com/developers/docs/resources/emoji#emoji-object-custom-emoji-examples
             name=emoji["name"],  # type: ignore
