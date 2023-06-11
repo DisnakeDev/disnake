@@ -4251,7 +4251,7 @@ msgid "Called when user gets banned from a :class:`Guild`."
 msgstr "ユーザーが :class:`Guild` からBANされたとき呼び出されます。"
 
 #: ../../api.rst:744 ../../api.rst:757
-msgid "This requires :attr:`Intents.bans` to be enabled."
+msgid "This requires :attr:`Intents.moderation` to be enabled."
 msgstr ""
 
 #: ../../api.rst:746
@@ -10504,13 +10504,13 @@ msgstr ":class:`bytes`"
 
 #: disnake.Guild.rules_channel:1 of
 msgid ""
-"Return's the guild's channel used for the rules. Must be a discoverable "
+"Returns the guild's channel used for the rules. Must be a discoverable "
 "guild."
 msgstr ""
 
 #: disnake.Guild.public_updates_channel:1 of
 msgid ""
-"Return's the guild's channel where admins and moderators of the guilds "
+"Returns the guild's channel where admins and moderators of the guilds "
 "receive notices from Discord. This is only available to guilds that "
 "contain ``PUBLIC`` in :attr:`Guild.features`."
 msgstr ""

@@ -38,7 +38,7 @@ from .sticker import StickerItem
 from .threads import Thread
 from .ui.action_row import components_to_dict
 from .user import User
-from .utils import MISSING, escape_mentions
+from .utils import MISSING, assert_never, escape_mentions
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -68,6 +68,7 @@ if TYPE_CHECKING:
         MessageApplication as MessageApplicationPayload,
         MessageReference as MessageReferencePayload,
         Reaction as ReactionPayload,
+        RoleSubscriptionData as RoleSubscriptionDataPayload,
     )
     from .types.threads import ThreadArchiveDurationLiteral
     from .types.user import User as UserPayload
@@ -83,10 +84,11 @@ __all__ = (
     "MessageReference",
     "InteractionReference",
     "DeletedReferencedMessage",
+    "RoleSubscriptionData",
 )
 
 
-def convert_emoji_reaction(emoji):
+def convert_emoji_reaction(emoji: Union[EmojiInputType, Reaction]) -> str:
     if isinstance(emoji, Reaction):
         emoji = emoji.emoji
 
@@ -95,12 +97,18 @@ def convert_emoji_reaction(emoji):
     if isinstance(emoji, PartialEmoji):
         return emoji._as_reaction()
     if isinstance(emoji, str):
-        # Reactions can be in :name:id format, but not <:name:id>.
-        # No existing emojis have <> in them, so this should be okay.
-        return emoji.strip("<>")
+        # Reactions must be in name:id format, not <:name:id> and/or with the `a:` prefix.
+        # No existing emojis start/end with `<>` or `:`, so this should be okay.
 
+        s = emoji.strip("<>:")
+        # `str.removeprefix` is py 3.9 only
+        if s.startswith("a:"):
+            s = s[2:]
+        return s
+
+    assert_never(emoji)
     raise TypeError(
-        f"emoji argument must be str, Emoji, or Reaction not {emoji.__class__.__name__}."
+        f"emoji argument must be str, Emoji, PartialEmoji, or Reaction, not {emoji.__class__.__name__}."
     )
 
 
@@ -120,6 +128,7 @@ async def _edit_handler(
     attachments: Optional[List[Attachment]],
     suppress: bool,  # deprecated
     suppress_embeds: bool,
+    flags: MessageFlags,
     allowed_mentions: Optional[AllowedMentions],
     view: Optional[View],
     components: Optional[Components[MessageUIComponent]],
@@ -160,8 +169,9 @@ async def _edit_handler(
                 files.extend(embed._files.values())
 
     if suppress_embeds is not MISSING:
-        flags = MessageFlags._from_value(default_flags)
+        flags = MessageFlags._from_value(default_flags if flags is MISSING else flags.value)
         flags.suppress_embeds = suppress_embeds
+    if flags is not MISSING:
         payload["flags"] = flags.value
 
     if allowed_mentions is MISSING:
@@ -627,8 +637,7 @@ class MessageReference:
 
 
 class InteractionReference:
-    """
-    Represents an interaction being referenced in a message.
+    """Represents an interaction being referenced in a message.
 
     This means responses to message components do not include this property,
     instead including a message reference object as components always exist on preexisting messages.
@@ -670,6 +679,40 @@ class InteractionReference:
         return self.user
 
 
+class RoleSubscriptionData:
+    """Represents metadata of the role subscription purchase/renewal in a message
+    of type :attr:`MessageType.role_subscription_purchase`.
+
+    .. versionadded:: 2.9
+
+    Attributes
+    ----------
+    role_subscription_listing_id: :class:`int`
+        The ID of the subscription listing the user subscribed to.
+
+        See also :attr:`RoleTags.subscription_listing_id`.
+    tier_name: :class:`str`
+        The name of the tier the user subscribed to.
+    total_months_subscribed: :class:`int`
+        The cumulative number of months the user has been subscribed for.
+    is_renewal: :class:`bool`
+        Whether this message is for a subscription renewal instead of a new subscription.
+    """
+
+    __slots__ = (
+        "role_subscription_listing_id",
+        "tier_name",
+        "total_months_subscribed",
+        "is_renewal",
+    )
+
+    def __init__(self, data: RoleSubscriptionDataPayload) -> None:
+        self.role_subscription_listing_id: int = int(data["role_subscription_listing_id"])
+        self.tier_name: str = data["tier_name"]
+        self.total_months_subscribed: int = data["total_months_subscribed"]
+        self.is_renewal: bool = data["is_renewal"]
+
+
 def flatten_handlers(cls):
     prefix = len("_handle_")
     handlers = [
@@ -687,8 +730,7 @@ def flatten_handlers(cls):
 
 @flatten_handlers
 class Message(Hashable):
-    """
-    Represents a message from Discord.
+    """Represents a message from Discord.
 
     .. container:: operations
 
@@ -723,7 +765,7 @@ class Message(Hashable):
         This is not stored long term within Discord's servers and is only used ephemerally.
     embeds: List[:class:`Embed`]
         A list of embeds the message has.
-    channel: Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`Thread`, :class:`DMChannel`, :class:`GroupChannel`, :class:`PartialMessageable`]
+    channel: Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`StageChannel`, :class:`Thread`, :class:`DMChannel`, :class:`GroupChannel`, :class:`PartialMessageable`]
         The channel that the message was sent from.
         Could be a :class:`DMChannel` or :class:`GroupChannel` if it's a private message.
     position: Optional[:class:`int`]
@@ -823,7 +865,6 @@ class Message(Hashable):
 
     __slots__ = (
         "_state",
-        "_edited_timestamp",
         "_cs_channel_mentions",
         "_cs_raw_mentions",
         "_cs_clean_content",
@@ -855,6 +896,8 @@ class Message(Hashable):
         "stickers",
         "components",
         "guild",
+        "_edited_timestamp",
+        "_role_subscription_data",
     )
 
     if TYPE_CHECKING:
@@ -923,6 +966,10 @@ class Message(Hashable):
         if thread_data := data.get("thread"):
             if not self.thread and isinstance(self.guild, Guild):
                 self.guild._store_thread(thread_data)
+
+        self._role_subscription_data: Optional[RoleSubscriptionDataPayload] = data.get(
+            "role_subscription_data"
+        )
 
         try:
             ref = data["message_reference"]
@@ -1164,7 +1211,8 @@ class Message(Hashable):
     @utils.cached_slot_property("_cs_channel_mentions")
     def channel_mentions(self) -> List[GuildChannel]:
         """List[:class:`abc.GuildChannel`]: A list of :class:`abc.GuildChannel` that were mentioned. If the message is in a private message
-        then the list is always empty."""
+        then the list is always empty.
+        """
         if self.guild is None:
             return []
         it = filter(None, map(self.guild.get_channel, self.raw_channel_mentions))
@@ -1233,8 +1281,7 @@ class Message(Hashable):
 
     @property
     def thread(self) -> Optional[Thread]:
-        """
-        Optional[:class:`Thread`]: The thread started from this message. ``None`` if no thread has been started.
+        """Optional[:class:`Thread`]: The thread started from this message. ``None`` if no thread has been started.
 
         .. versionadded:: 2.4
         """
@@ -1242,6 +1289,17 @@ class Message(Hashable):
             return None
 
         return self.guild.get_thread(self.id)
+
+    @property
+    def role_subscription_data(self) -> Optional[RoleSubscriptionData]:
+        """Optional[:class:`RoleSubscriptionData`]: The metadata of the role
+        subscription purchase/renewal, if this message is a :attr:`MessageType.role_subscription_purchase`.
+
+        .. versionadded:: 2.9
+        """
+        if not self._role_subscription_data:
+            return None
+        return RoleSubscriptionData(self._role_subscription_data)
 
     def is_system(self) -> bool:
         """Whether the message is a system message.
@@ -1263,8 +1321,7 @@ class Message(Hashable):
 
     @utils.cached_slot_property("_cs_system_content")
     def system_content(self) -> Optional[str]:
-        """
-        Optional[:class:`str`]: A property that returns the content that is rendered
+        """Optional[:class:`str`]: A property that returns the content that is rendered
         regardless of the :attr:`Message.type`.
 
         In the case of :attr:`MessageType.default` and :attr:`MessageType.reply`\\,
@@ -1393,6 +1450,46 @@ class Message(Hashable):
         if self.type is MessageType.auto_moderation_action:
             return self.content
 
+        if self.type is MessageType.role_subscription_purchase:
+            if not (data := self.role_subscription_data):
+                return
+
+            guild_name = f"**{self.guild.name}**" if self.guild else None
+            if data.total_months_subscribed > 0:
+                action = "renewed" if data.is_renewal else "joined"
+                return (
+                    f"{self.author.name} {action} **{data.tier_name}** and has been a subscriber "
+                    f"of {guild_name} for {data.total_months_subscribed} "
+                    f"{'month' if data.total_months_subscribed == 1 else 'months'}!"
+                )
+            elif data.is_renewal:
+                return f"{self.author.name} renewed **{data.tier_name}** in their {guild_name} membership!"
+            else:
+                return f"{self.author.name} joined **{data.tier_name}** as a subscriber of {guild_name}!"
+
+        if self.type is MessageType.interaction_premium_upsell:
+            return self.content
+
+        if self.type is MessageType.stage_start:
+            return f"{self.author.name} started {self.content}"
+
+        if self.type is MessageType.stage_end:
+            return f"{self.author.name} ended {self.content}"
+
+        if self.type is MessageType.stage_speaker:
+            return f"{self.author.name} is now a speaker."
+
+        if self.type is MessageType.stage_topic:
+            return f"{self.author.name} changed the Stage topic: {self.content}"
+
+        if self.type is MessageType.guild_application_premium_subscription:
+            application_name = (
+                self.application["name"]
+                if self.application and "name" in self.application
+                else "a deleted application"
+            )
+            return f"{self.author.name} upgraded {application_name} to premium for this server! 🎉"
+
         # in the event of an unknown or unsupported message type, we return nothing
         return None
 
@@ -1445,6 +1542,7 @@ class Message(Hashable):
         file: File = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -1461,6 +1559,7 @@ class Message(Hashable):
         files: List[File] = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -1477,6 +1576,7 @@ class Message(Hashable):
         file: File = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -1493,6 +1593,7 @@ class Message(Hashable):
         files: List[File] = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -1511,6 +1612,7 @@ class Message(Hashable):
         attachments: Optional[List[Attachment]] = MISSING,
         suppress: bool = MISSING,  # deprecated
         suppress_embeds: bool = MISSING,
+        flags: MessageFlags = MISSING,
         allowed_mentions: Optional[AllowedMentions] = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[Components[MessageUIComponent]] = MISSING,
@@ -1587,6 +1689,15 @@ class Message(Hashable):
             all the embeds from the UI if set to ``True``. If set
             to ``False``, this brings the embeds back if they were
             suppressed.
+        flags: :class:`MessageFlags`
+            The new flags to set for this message. Overrides existing flags.
+            Only :attr:`~MessageFlags.suppress_embeds` is supported.
+
+            If parameter ``suppress_embeds`` is provided,
+            that will override the setting of :attr:`.MessageFlags.suppress_embeds`.
+
+            .. versionadded:: 2.9
+
         delete_after: Optional[:class:`float`]
             If provided, the number of seconds to wait in the background
             before deleting the message we just edited. If the deletion fails,
@@ -1651,6 +1762,7 @@ class Message(Hashable):
             attachments=attachments,
             suppress=suppress,
             suppress_embeds=suppress_embeds,
+            flags=flags,
             allowed_mentions=allowed_mentions,
             view=view,
             components=components,
@@ -1684,6 +1796,8 @@ class Message(Hashable):
         You must have the :attr:`~Permissions.manage_messages` permission to do
         this in a non-private channel context.
 
+        This does not work with messages sent in a :class:`VoiceChannel` or :class:`StageChannel`.
+
         Parameters
         ----------
         reason: Optional[:class:`str`]
@@ -1699,7 +1813,7 @@ class Message(Hashable):
             The message or channel was not found or deleted.
         HTTPException
             Pinning the message failed, probably due to the channel
-            having more than 50 pinned messages.
+            having more than 50 pinned messages or the channel not supporting pins.
         """
         await self._state.http.pin_message(self.channel.id, self.id, reason=reason)
         self.pinned = True
@@ -2021,6 +2135,7 @@ class PartialMessage(Hashable):
 
     - :meth:`TextChannel.get_partial_message`
     - :meth:`VoiceChannel.get_partial_message`
+    - :meth:`StageChannel.get_partial_message`
     - :meth:`Thread.get_partial_message`
     - :meth:`DMChannel.get_partial_message`
     - :meth:`PartialMessageable.get_partial_message`
@@ -2045,7 +2160,7 @@ class PartialMessage(Hashable):
 
     Attributes
     ----------
-    channel: Union[:class:`TextChannel`, :class:`Thread`, :class:`DMChannel`, :class:`VoiceChannel`, :class:`PartialMessageable`]
+    channel: Union[:class:`TextChannel`, :class:`Thread`, :class:`DMChannel`, :class:`VoiceChannel`, :class:`StageChannel`, :class:`PartialMessageable`]
         The channel associated with this partial message.
     id: :class:`int`
         The message ID.
@@ -2075,9 +2190,10 @@ class PartialMessage(Hashable):
             ChannelType.public_thread,
             ChannelType.private_thread,
             ChannelType.voice,
+            ChannelType.stage_voice,
         ):
             raise TypeError(
-                f"Expected TextChannel, DMChannel, VoiceChannel, Thread, or PartialMessageable "
+                f"Expected TextChannel, VoiceChannel, DMChannel, StageChannel, Thread, or PartialMessageable "
                 f"with a valid type, not {type(channel)!r} (type: {channel.type!r})"
             )
 
@@ -2138,6 +2254,7 @@ class PartialMessage(Hashable):
         file: File = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -2154,6 +2271,7 @@ class PartialMessage(Hashable):
         files: List[File] = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -2170,6 +2288,7 @@ class PartialMessage(Hashable):
         file: File = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -2186,6 +2305,7 @@ class PartialMessage(Hashable):
         files: List[File] = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
@@ -2204,6 +2324,7 @@ class PartialMessage(Hashable):
         attachments: Optional[List[Attachment]] = MISSING,
         suppress: bool = MISSING,  # deprecated
         suppress_embeds: bool = MISSING,
+        flags: MessageFlags = MISSING,
         allowed_mentions: Optional[AllowedMentions] = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[Components[MessageUIComponent]] = MISSING,
@@ -2282,6 +2403,15 @@ class PartialMessage(Hashable):
             all the embeds from the UI if set to ``True``. If set
             to ``False``, this brings the embeds back if they were
             suppressed.
+        flags: :class:`MessageFlags`
+            The new flags to set for this message. Overrides existing flags.
+            Only :attr:`~MessageFlags.suppress_embeds` is supported.
+
+            If parameter ``suppress_embeds`` is provided,
+            that will override the setting of :attr:`.MessageFlags.suppress_embeds`.
+
+            .. versionadded:: 2.9
+
         delete_after: Optional[:class:`float`]
             If provided, the number of seconds to wait in the background
             before deleting the message we just edited. If the deletion fails,
@@ -2341,6 +2471,7 @@ class PartialMessage(Hashable):
             attachments=attachments,
             suppress=suppress,
             suppress_embeds=suppress_embeds,
+            flags=flags,
             allowed_mentions=allowed_mentions,
             view=view,
             components=components,

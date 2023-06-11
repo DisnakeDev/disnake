@@ -2,13 +2,16 @@
 
 from typing import Literal, Optional, TypedDict
 
+from typing_extensions import NotRequired
+
 from .snowflake import Snowflake
 
 
 class PartialUser(TypedDict):
     id: Snowflake
     username: str
-    discriminator: str
+    discriminator: str  # may be removed in future API versions
+    global_name: NotRequired[Optional[str]]
     avatar: Optional[str]
 
 

@@ -11,7 +11,7 @@ from disnake.utils import MISSING, utcnow
 _BASE = {"type": "rich"}
 
 
-@pytest.fixture()
+@pytest.fixture
 def embed() -> Embed:
     time = utcnow() + timedelta(days=42)
     return Embed(
@@ -24,7 +24,7 @@ def embed() -> Embed:
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def file() -> File:
     return File(io.BytesIO(b"abcd"), filename="data.txt")
 
@@ -64,7 +64,7 @@ def test_type_default() -> None:
 
 
 def test_timestamp_naive(embed: Embed) -> None:
-    embed.timestamp = datetime.now()
+    embed.timestamp = datetime.now()  # noqa: DTZ005  # the point of this is to test naive dts
     assert embed.timestamp.tzinfo is not None
 
 
@@ -479,4 +479,4 @@ def test_emptyembed() -> None:
 
     # make sure unknown module attrs continue to raise
     with pytest.raises(AttributeError):
-        embeds.this_does_not_exist  # type: ignore
+        _ = embeds.this_does_not_exist  # type: ignore

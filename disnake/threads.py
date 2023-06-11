@@ -165,7 +165,7 @@ class Thread(Messageable, Hashable):
 
     def __init__(self, *, guild: Guild, state: ConnectionState, data: ThreadPayload) -> None:
         self._state: ConnectionState = state
-        self.guild = guild
+        self.guild: Guild = guild
         self._members: Dict[int, ThreadMember] = {}
         self._from_data(data)
 
@@ -183,21 +183,21 @@ class Thread(Messageable, Hashable):
         return self.name
 
     def _from_data(self, data: ThreadPayload) -> None:
-        self.id = int(data["id"])
-        self.parent_id = int(data["parent_id"])
-        self.owner_id = _get_as_snowflake(data, "owner_id")
-        self.name = data["name"]
+        self.id: int = int(data["id"])
+        self.parent_id: int = int(data["parent_id"])
+        self.owner_id: Optional[int] = _get_as_snowflake(data, "owner_id")
+        self.name: str = data["name"]
         self._type: ThreadType = try_enum(ChannelType, data["type"])  # type: ignore
-        self.last_message_id = _get_as_snowflake(data, "last_message_id")
-        self.slowmode_delay = data.get("rate_limit_per_user", 0)
-        self.message_count = data.get("message_count") or 0
-        self.total_message_sent = data.get("total_message_sent") or 0
-        self.member_count = data.get("member_count")
+        self.last_message_id: Optional[int] = _get_as_snowflake(data, "last_message_id")
+        self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
+        self.message_count: int = data.get("message_count") or 0
+        self.total_message_sent: int = data.get("total_message_sent") or 0
+        self.member_count: Optional[int] = data.get("member_count")
         self.last_pin_timestamp: Optional[datetime.datetime] = parse_time(
             data.get("last_pin_timestamp")
         )
         self._flags: int = data.get("flags", 0)
-        self._applied_tags = list(map(int, data.get("applied_tags", [])))
+        self._applied_tags: List[int] = list(map(int, data.get("applied_tags", [])))
         self._unroll_metadata(data["thread_metadata"])
 
         try:
@@ -208,14 +208,16 @@ class Thread(Messageable, Hashable):
             self.me = ThreadMember(self, member)
 
     def _unroll_metadata(self, data: ThreadMetadata) -> None:
-        self.archived = data["archived"]
-        self.auto_archive_duration = data["auto_archive_duration"]
-        self.archive_timestamp = parse_time(data["archive_timestamp"])
-        self.locked = data.get("locked", False)
-        self.invitable = data.get("invitable", True)
-        self.create_timestamp = parse_time(data.get("create_timestamp"))
+        self.archived: bool = data["archived"]
+        self.auto_archive_duration: ThreadArchiveDurationLiteral = data["auto_archive_duration"]
+        self.archive_timestamp: datetime.datetime = parse_time(data["archive_timestamp"])
+        self.locked: bool = data.get("locked", False)
+        self.invitable: bool = data.get("invitable", True)
+        self.create_timestamp: Optional[datetime.datetime] = parse_time(
+            data.get("create_timestamp")
+        )
 
-    def _update(self, data) -> None:
+    def _update(self, data: ThreadPayload) -> None:
         try:
             self.name = data["name"]
         except KeyError:
@@ -320,7 +322,6 @@ class Thread(Messageable, Hashable):
         Optional[:class:`int`]
             The parent channel's category ID.
         """
-
         parent = self.parent
         if parent is None:
             raise ClientException("Parent channel not found")
@@ -328,8 +329,7 @@ class Thread(Messageable, Hashable):
 
     @property
     def created_at(self) -> datetime.datetime:
-        """
-        :class:`datetime.datetime`: Returns the thread's creation time in UTC.
+        """:class:`datetime.datetime`: Returns the thread's creation time in UTC.
 
         .. versionchanged:: 2.4
             If create_timestamp is provided by discord, that will be used instead of the time in the ID.
@@ -346,8 +346,7 @@ class Thread(Messageable, Hashable):
 
     @property
     def jump_url(self) -> str:
-        """
-        A URL that can be used to jump to this thread.
+        """A URL that can be used to jump to this thread.
 
         .. versionadded:: 2.4
         """
@@ -458,7 +457,6 @@ class Thread(Messageable, Hashable):
         :class:`~disnake.Permissions`
             The resolved permissions for the member or role.
         """
-
         parent = self.parent
         if parent is None:
             raise ClientException("Parent channel not found")
@@ -540,7 +538,6 @@ class Thread(Messageable, Hashable):
 
         Examples
         --------
-
         Deleting bot's messages ::
 
             def is_me(m):
@@ -582,7 +579,6 @@ class Thread(Messageable, Hashable):
         List[:class:`.Message`]
             The list of messages that were deleted.
         """
-
         if check is MISSING:
             check = lambda m: True
 
@@ -866,7 +862,6 @@ class Thread(Messageable, Hashable):
         List[:class:`ThreadMember`]
             All thread members in the thread.
         """
-
         members = await self._state.http.get_thread_members(self.id)
         return [ThreadMember(parent=self, data=data) for data in members]
 
@@ -923,7 +918,6 @@ class Thread(Messageable, Hashable):
         HTTPException
             Editing the thread failed.
         """
-
         if not tags:
             return
 
@@ -961,7 +955,6 @@ class Thread(Messageable, Hashable):
         HTTPException
             Editing the thread failed.
         """
-
         if not tags:
             return
 
@@ -988,7 +981,6 @@ class Thread(Messageable, Hashable):
         :class:`PartialMessage`
             The partial message.
         """
-
         from .message import PartialMessage
 
         return PartialMessage(channel=self, id=message_id)
@@ -1055,9 +1047,9 @@ class ThreadMember(Hashable):
     def _from_data(self, data: ThreadMemberPayload) -> None:
         try:
             self.id = int(data["user_id"])
-        except KeyError:
+        except KeyError as err:
             if (self_id := self._state.self_id) is None:
-                raise AssertionError("self_id is None when updating our own ThreadMember.")
+                raise AssertionError("self_id is None when updating our own ThreadMember.") from err
             self.id = self_id
 
         try:
@@ -1075,8 +1067,7 @@ class ThreadMember(Hashable):
 
 
 class ForumTag(Hashable):
-    """
-    Represents a tag for threads in forum channels.
+    """Represents a tag for threads in forum channels.
 
     .. container:: operations
 
@@ -1101,7 +1092,6 @@ class ForumTag(Hashable):
 
     Examples
     --------
-
     Creating a new tag:
 
     .. code-block:: python3
@@ -1186,9 +1176,10 @@ class ForumTag(Hashable):
 
     @classmethod
     def _from_data(cls, *, data: ForumTagPayload, state: ConnectionState) -> Self:
-        emoji_id = _get_as_snowflake(data, "emoji_id") or None
-        emoji_name = data.get("emoji_name")
-        emoji = PartialEmoji._emoji_from_name_id(emoji_name, emoji_id, state=state)
+        emoji = state._get_emoji_from_fields(
+            name=data.get("emoji_name"),
+            id=_get_as_snowflake(data, "emoji_id"),
+        )
 
         self = cls(
             name=data["name"],
@@ -1206,8 +1197,7 @@ class ForumTag(Hashable):
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
         moderated: bool = MISSING,
     ) -> Self:
-        """
-        Returns a new instance with the given changes applied,
+        """Returns a new instance with the given changes applied,
         for easy use with :func:`ForumChannel.edit`.
         All other fields will be kept intact.
 

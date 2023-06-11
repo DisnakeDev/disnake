@@ -7,7 +7,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ title|striptags|e }}{{ titlesuffix }}</title>
   {%- block extrahead %} {% endblock %}
-  <!-- end extra head -->
   <link rel="stylesheet" href="{{ pathto('_static/icons.css', 1)|e }}" type="text/css" />
   {%- block css %}
   {%- for css in css_files %}
@@ -22,6 +21,10 @@
   <link rel="stylesheet" href="{{ pathto('_static/codeblocks.css', 1) }}" type="text/css" />
   {%- block scripts %}
   <script id="documentation_options" data-url_root="{{ pathto('', 1) }}" src="{{ pathto('_static/documentation_options.js', 1) }}"></script>
+  {% if ("/" + pagename).endswith("/api") %}
+    <meta name="robots" content="noindex" />
+    <script type="text/javascript" src="{{ pathto('_static/api_redirect.js', 1) }}"></script>
+  {% endif %}
   {%- for js in script_files %}
   {{ js_tag(js) }}
   {%- endfor %}
@@ -34,8 +37,8 @@
         title="{% trans docstitle=docstitle|e %}Search within {{ docstitle }}{% endtrans %}"
         href="{{ pathto('_static/opensearch.xml', 1) }}"/>
   {%- endif %}
-  {%- if favicon %}
-  <link rel="shortcut icon" href="{{ pathto('_static/' + favicon, 1)|e }}"/>
+  {%- if favicon_url %}
+  <link rel="icon" href="{{ favicon_url|e }}"/>
   {%- endif %}
   {%- block linktags %}
   {%- if hasdoc('about') %}
@@ -66,7 +69,7 @@
     <header class="top-header mobile">
       <nav>
           <div class="header-breakpoint">
-        <a href="{{ pathto('api')|e }}" class="extension-nav">API Reference</a>
+        <a href="{{ pathto('api/index')|e }}" class="extension-nav">API Reference</a>
         {%- for ext, p in discord_extensions %}
           {% set ext_name = ext.split('.') %}
         <a href="{{ pathto(p + '/index')|e }}" class="extension-nav {% if pagename.startswith(p) %}current-page{% endif %}">{{ ext_name[-1] }}</a>
@@ -76,11 +79,11 @@
     </header>
     <header class="sticky-header">
       <nav>
-        <a href="{{ pathto(master_doc)|e }}" class="main-heading desktop">
+        <a href="{{ pathto(root_doc)|e }}" class="main-heading desktop">
           <img class="disnake-main-logo" src="{{ pathto('_static/disnake.svg', 1)|e }}" alt="disnake">
         </a>
         <div class="header-breakpoint desktop extension-breakpoint desktop">
-          <a href="{{ pathto('api')|e }}" class="extension-nav">{{ _('API Reference') }}</a>
+          <a href="{{ pathto('api/index')|e }}" class="extension-nav">{{ _('API Reference') }}</a>
           {%- for ext, p in discord_extensions %}
           {% set ext_name = ext.split('.') %}
           <a href="{{ pathto(p + '/index')|e }}" class="extension-nav {% if pagename.startswith(p) %}current-page{% endif %}">{{ ext_name[-1] }}</a>
@@ -111,17 +114,22 @@
     </header>
     {#- The sidebar component #}
 <aside>
-  <a href="{{ pathto(master_doc)|e }}" class="mobile-heading">
+  <a href="{{ pathto(root_doc)|e }}" class="mobile-heading">
     <img class="disnake-mobile-logo" src="{{ pathto('_static/disnake.svg', 1)|e }}" alt="disnake">
   </a>
   <div class="sidebar-extension-list mobile-heading">
-    <a href="{{ pathto('api')|e }}" class="extension-nav">API Reference</a>
+    <a href="{{ pathto('api/index')|e }}" class="extension-nav">API Reference</a>
     {%- for ext, p in discord_extensions %}
     {% set ext_name = ext.split('.') %}
     <a href="{{ pathto(p + '/index')|e }}" class="extension-nav {% if pagename.startswith(p) %}current-page{% endif %}">{{ ext_name[-1] }}</a>
     {%- endfor %}
   </div>
   <div id="sidebar">
+    {% if 'api' in pagename.split('/') %}
+    <div class="sidebar-search-wrapper">
+      <input type="text" id="sidebar-search-box" onkeyup="sidebarSearch()" placeholder="Filter..." autocomplete=off>
+    </div>
+    {% endif %}
     {%- include "localtoc.html" %}
   </div>
 </aside>

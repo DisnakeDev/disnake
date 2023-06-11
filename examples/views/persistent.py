@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""
-An advanced example on how to persist views between bot restarts.
-"""
+"""An advanced example on how to persist views between bot restarts."""
 
 import os
 

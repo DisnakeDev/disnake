@@ -1,0 +1,2 @@
+New message types that are sent within :class:`StageChannel` instances:
+- :attr:`MessageType.stage_start`, :attr:`MessageType.stage_end`, :attr:`MessageType.stage_speaker`, and :attr:`MessageType.stage_topic`.

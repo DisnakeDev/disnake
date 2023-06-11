@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""
-An example sending welcome messages for newly joined members.
-"""
+"""An example sending welcome messages for newly joined members."""
 
 import os
 

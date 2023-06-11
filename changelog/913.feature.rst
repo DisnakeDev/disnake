@@ -1,0 +1,5 @@
+Add features related to role subscriptions.
+- New message type: :attr:`~MessageType.role_subscription_purchase`.
+- New role tags: :attr:`RoleTags.subscription_listing_id`, :attr:`RoleTags.is_available_for_purchase`, and :attr:`RoleTags.is_subscription`.
+- New type :class:`RoleSubscriptionData` and attribute :attr:`Message.role_subscription_data`.
+- New system channel flags: :attr:`~SystemChannelFlags.role_subscription_purchase_notifications` and :attr:`~SystemChannelFlags.role_subscription_purchase_notification_replies`.

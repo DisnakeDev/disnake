@@ -5,6 +5,7 @@ import importlib.metadata
 import platform
 import sys
 from pathlib import Path
+from typing import Union
 
 import aiohttp
 
@@ -163,7 +164,7 @@ _base_table = {**_ascii_table, **_byte_table}
 _translation_table = str.maketrans(_base_table)
 
 
-def to_path(parser, name, *, replace_spaces=False):
+def to_path(parser, name: Union[str, Path], *, replace_spaces: bool = False):
     if isinstance(name, Path):
         return name
 

@@ -2,10 +2,10 @@
 
 :orphan:
 
-.. _discord-intro:
+.. _discord_intro:
 
 Creating a Bot Account
-========================
+======================
 
 In order to work with the library and the Discord API in general, we must first create a Discord Bot account.
 
@@ -23,21 +23,22 @@ Creating a Bot account is a pretty straightforward process.
     .. image:: /images/discord_create_app_form.png
         :alt: The new application form filled in.
 
-5. Create a Bot User by navigating to the "Bot" tab and clicking "Add Bot".
+5. Navigate to the "Bot" tab. A bot account is added automatically when the application is created.
 
-    - Click "Yes, do it!" to continue.
-
-    .. image:: /images/discord_create_bot_user.png
-        :alt: The Add Bot button.
 6. Make sure that **Public Bot** is ticked if you want others to invite your bot.
-
-    - You should also make sure that **Require OAuth2 Code Grant** is unchecked unless you
-      are developing a service that needs it. If you're unsure, then **leave it unchecked**.
 
     .. image:: /images/discord_bot_user_options.png
         :alt: How the Bot User options should look like for most people.
 
-7. Copy the token using the "Copy" button.
+    - You should also make sure that **Require OAuth2 Code Grant** is unchecked unless you
+      are developing a service that needs it. If you're unsure, then **leave it unchecked**.
+
+7. Copy the token by clicking "Reset Token" and then using the "Copy" button.
+
+    .. image:: /images/discord_bot_acquire_token.png
+        :alt: How the page should look like after resetting token.
+
+    - Click "Yes, do it!" when asked.
 
     - **This is not the Client Secret at the OAuth2 page.**
 
@@ -56,10 +57,8 @@ Creating a Bot account is a pretty straightforward process.
 
 And that's it. You now have a bot account and you can login with that token.
 
-.. _discord_invite_bot:
-
 Inviting Your Bot
--------------------
+-----------------
 
 So you've made a Bot User but it's not actually in any server.
 
@@ -136,7 +135,6 @@ Here is a guide on how to do this:
 
     .. image:: /images/discord_add_to_server.png
         :alt: The Add to Server button.
-
 
 .. note::
 
