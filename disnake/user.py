@@ -8,7 +8,7 @@ import disnake.abc
 
 from .asset import Asset
 from .colour import Colour
-from .enums import DefaultAvatar, Locale, try_enum
+from .enums import Locale, try_enum
 from .flags import PublicUserFlags
 from .utils import MISSING, _assetbytes_to_base64_data, snowflake_time
 
@@ -157,7 +157,7 @@ class BaseUser(_UserTag):
             Added handling for users migrated to the new username system without discriminators.
         """
         if self.discriminator == "0":
-            index = (self.id >> 22) % len(DefaultAvatar)
+            index = (self.id >> 22) % 6
         else:
             # legacy behavior
             index = int(self.discriminator) % 5
