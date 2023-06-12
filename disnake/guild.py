@@ -4670,6 +4670,9 @@ class Guild(Hashable):
 
         Edits the guild onboarding.
 
+        You must have :attr:`.Permissions.manage_guild` and :attr:`.Permissions.manage_roles`
+        permissions to do this.
+
         .. versionadded:: 2.9
 
         Parameters
