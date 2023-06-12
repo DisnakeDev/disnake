@@ -297,7 +297,7 @@ class ClientUser(BaseUser):
 
         .. describe:: str(x)
 
-            Returns the user's username (with discriminator).
+            Returns the user's username (with discriminator, if not migrated to new system yet).
 
     Attributes
     ----------
