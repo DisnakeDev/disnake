@@ -1,0 +1,1 @@
+Fix permission resolution for :meth:`.Thread.permissions_for` when :attr:`Permissions.send_messages` is ``False``, but :attr:`Permissions.send_messages_in_threads` is ``True``.
