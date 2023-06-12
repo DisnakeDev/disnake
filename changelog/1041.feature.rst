@@ -1,3 +1,3 @@
-Implement voice messages.
+Implement receiving voice messages.
 - New flag: :class:`MessageFlags.is_voice_message`
 - New :class:`Attachment` fields: :attr:`~Attachment.duration`, :attr:`~Attachment.waveform`
