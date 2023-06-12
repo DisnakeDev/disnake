@@ -143,8 +143,6 @@ class User(Snowflake, Protocol):
         The user's global display name, if set.
         This takes precedence over :attr:`.name` when shown.
 
-        For bots, this is the application name.
-
         .. versionadded:: 2.9
 
     avatar: :class:`~disnake.Asset`
