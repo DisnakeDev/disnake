@@ -85,14 +85,14 @@ class EventTypings(codemod.VisitorBasedCodemodCommand):
 
     def create_args_list(self, event_data: EventData) -> cst.BaseExpression:
         return cst.parse_expression(
-            f'[{",".join(event_data.type_args)}]',
+            f'[{",".join(event_data.arg_types)}]',
             config=self.module.config_for_parsing,
         )
 
     def generate_wait_for_overload(
         self, func: cst.FunctionDef, event: Event, event_data: EventData
     ) -> cst.FunctionDef:
-        args = event_data.type_args
+        args = event_data.arg_types
 
         new_overload = self.create_empty_overload(func)
 
