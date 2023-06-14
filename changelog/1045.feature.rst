@@ -1,0 +1,1 @@
+|commands| Implement :func:`~disnake.ext.commands.app_check` decorator and :func:`~disnake.ext.commands.app_check_any` function.

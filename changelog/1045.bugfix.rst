@@ -1,0 +1,1 @@
+|commands| Fix incorrect typings of :meth:`~disnake.ext.commands.InvokableApplicationCommand.add_check`, :meth:`~disnake.ext.commands.InvokableApplicationCommand.remove_check`, :meth:`~disnake.ext.commands.InteractionBotBase.add_app_command_check` and :meth:`~disnake.ext.commands.InteractionBotBase.remove_app_command_check`.
