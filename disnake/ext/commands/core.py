@@ -62,7 +62,8 @@ if TYPE_CHECKING:
 
     from disnake.message import Message
 
-    from ._types import Check, Coro, CoroFunc, Error, Hook
+    from ._types import AppCheck, Check, Coro, CoroFunc, Error, Hook
+    from .base_core import InvokableApplicationCommand
 
 
 __all__ = (
@@ -76,6 +77,8 @@ __all__ = (
     "has_any_role",
     "check",
     "check_any",
+    "app_check",
+    "app_check_any",
     "before_invoke",
     "after_invoke",
     "bot_has_role",
@@ -1824,6 +1827,168 @@ def check_any(*checks: Check) -> Callable[[T], T]:
         @commands.check_any(commands.is_owner(), is_guild_owner())
         async def only_for_owners(ctx):
             await ctx.send('Hello mister owner!')
+    """
+    unwrapped = []
+    for wrapped in checks:
+        try:
+            pred = wrapped.predicate
+        except AttributeError:
+            raise TypeError(f"{wrapped!r} must be wrapped by commands.check decorator") from None
+        else:
+            unwrapped.append(pred)
+
+    async def predicate(ctx: AnyContext) -> bool:
+        errors = []
+        for func in unwrapped:
+            try:
+                value = await func(ctx)
+            except CheckFailure as e:
+                errors.append(e)
+            else:
+                if value:
+                    return True
+        # if we're here, all checks failed
+        raise CheckAnyFailure(unwrapped, errors)
+
+    return check(predicate)
+
+
+def app_check(predicate: AppCheck) -> Callable[[T], T]:
+    """A decorator that adds a check to the :class:`disnake.ext.commands.InvokableApplicationCommand` or its
+    subclasses. These checks could be accessed via :attr:`.Command.checks`.
+
+    These checks should be predicates that take in a single parameter taking
+    a :class:`disnake.ApplicationCommandInteraction`. If the check returns a
+    ``False``-like value then during invocation a :exc:`.CheckFailure`
+    exception is raised and sent to the event corresponding to your application
+    command's type.
+
+    If an exception should be thrown in the predicate then it should be a
+    subclass of :exc:`.CommandError`. Any exception not subclassed from it
+    will be propagated while those subclassed will be sent to
+    the event corresponding to your application command's type.
+
+    A special attribute named ``predicate`` is bound to the value
+    returned by this decorator to retrieve the predicate passed to the
+    decorator. This allows the following introspection and chaining to be done:
+
+    .. code-block:: python3
+
+        def owner_or_permissions(**perms):
+            original = commands.has_permissions(**perms).predicate
+            async def extended_check(inter):
+                if inter.guild is None:
+                    return False
+                return inter.guild.owner_id == inter.author.id or await original(ctx)
+            return commands.check(extended_check)
+
+    .. note::
+
+        The function returned by ``predicate`` is **always** a coroutine,
+        even if the original function was not a coroutine.
+
+    .. versionadded:: 2.10
+
+    Examples
+    --------
+    Creating a basic check to see if the command invoker is you.
+
+    .. code-block:: python3
+
+        def check_if_it_is_me(inter):
+            return ctx.message.author.id == 85309593344815104
+
+        @bot.slash_command()
+        @commands.app_check(check_if_it_is_me)
+        async def only_for_me(inter):
+            await inter.send('I know you!')
+
+    Transforming common checks into its own decorator:
+
+    .. code-block:: python3
+
+        def is_me():
+            def predicate(inter):
+                return ctx.message.author.id == 85309593344815104
+            return commands.check(predicate)
+
+        @bot.slash_command()
+        @is_me()
+        async def only_me(inter):
+            await inter.send('Only you!')
+
+    Parameters
+    ----------
+    predicate: Callable[[:class:`disnake.ApplicationCommandInteraction`], :class:`bool`]
+        The predicate to check if the command should be invoked.
+    """
+
+    def decorator(func: Union[InvokableApplicationCommand, CoroFunc]) -> Union[Command, CoroFunc]:
+        if hasattr(func, "__command_flag__"):
+            func.checks.append(predicate)
+        else:
+            if not hasattr(func, "__commands_checks__"):
+                func.__commands_checks__ = []  # type: ignore
+
+            func.__commands_checks__.append(predicate)  # type: ignore
+
+        return func
+
+    if asyncio.iscoroutinefunction(predicate):
+        decorator.predicate = predicate
+    else:
+
+        @functools.wraps(predicate)
+        async def wrapper(ctx):
+            return predicate(ctx)  # type: ignore
+
+        decorator.predicate = wrapper
+
+    return decorator  # type: ignore
+
+
+def app_check_any(*checks: AppCheck) -> Callable[[T], T]:
+    """A :func:`check` that is added that checks if any of the checks passed
+    will pass, i.e. using logical OR.
+
+    If all checks fail then :exc:`.CheckAnyFailure` is raised to signal the failure.
+    It inherits from :exc:`.CheckFailure`.
+
+    .. note::
+
+        The ``predicate`` attribute for this function **is** a coroutine.
+
+    .. versionadded:: 2.10
+
+    Parameters
+    ----------
+    *checks: Callable[[:class:`disnake.ApplicationCommandInteraction
+    `], :class:`bool`]
+        An argument list of checks that have been decorated with
+        the :func:`check` decorator.
+
+    Raises
+    ------
+    TypeError
+        A check passed has not been decorated with the :func:`check`
+        decorator.
+
+    Examples
+    --------
+    Creating a basic check to see if it's the bot owner or
+    the server owner:
+
+    .. code-block:: python3
+
+        def is_guild_owner():
+            def predicate(inter):
+                return inter.guild is not None and inter.guild.owner_id == inter.author.id
+            return commands.check(predicate)
+
+        @bot.slash_command()
+        @commands.check_any(commands.is_owner(), is_guild_owner())
+        async def only_for_owners(inter):
+            await inter.send('Hello mister owner!')
     """
     unwrapped = []
     for wrapped in checks:

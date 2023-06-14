@@ -54,7 +54,7 @@ if TYPE_CHECKING:
     )
     from disnake.permissions import Permissions
 
-    from ._types import Check, CoroFunc
+    from ._types import AppCheck, CoroFunc
     from .base_core import CogT, CommandCallback, InteractionCommandCallback
 
     P = ParamSpec("P")
@@ -991,7 +991,7 @@ class InteractionBotBase(CommonBotBase):
 
     def add_app_command_check(
         self,
-        func: Check,
+        func: AppCheck,
         *,
         call_once: bool = False,
         slash_commands: bool = False,
@@ -1039,7 +1039,7 @@ class InteractionBotBase(CommonBotBase):
 
     def remove_app_command_check(
         self,
-        func: Check,
+        func: AppCheck,
         *,
         call_once: bool = False,
         slash_commands: bool = False,
@@ -1179,7 +1179,7 @@ class InteractionBotBase(CommonBotBase):
         ) -> Callable[[ApplicationCommandInteraction], Any]:
             # T was used instead of Check to ensure the type matches on return
             self.add_app_command_check(
-                func,  # type: ignore
+                func,
                 call_once=call_once,
                 slash_commands=slash_commands,
                 user_commands=user_commands,
