@@ -55,7 +55,7 @@ if TYPE_CHECKING:
 
     from ..abc import Snowflake
     from ..asset import AssetBytes
-    from ..channel import ForumChannel, StageChannel, TextChannel, VoiceChannel
+    from ..channel import ForumChannel, MediaChannel, StageChannel, TextChannel, VoiceChannel
     from ..embeds import Embed
     from ..file import File
     from ..guild import Guild
@@ -975,13 +975,15 @@ class BaseWebhook(Hashable):
         return self._state and self._state._get_guild(self.guild_id)
 
     @property
-    def channel(self) -> Optional[Union[TextChannel, VoiceChannel, ForumChannel, StageChannel]]:
-        """Optional[Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`ForumChannel`, :class:`StageChannel`]]: The channel this webhook belongs to.
+    def channel(
+        self,
+    ) -> Optional[Union[TextChannel, VoiceChannel, StageChannel, ForumChannel, MediaChannel]]:
+        """Optional[Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`StageChannel`, :class:`ForumChannel`, :class:`MediaChannel`]]: The channel this webhook belongs to.
 
         If this is a partial webhook, then this will always return ``None``.
 
-        Webhooks in :class:`ForumChannel`\\s can not send messages directly,
-        they can only create new threads (see ``thread_name`` for :attr:`Webhook.send`)
+        Webhooks in channels of types :class:`ForumChannel' or :class:`MediaChannel` can not send messages directly.
+        They can only create new threads (see ``thread_name`` for :attr:`Webhook.send`)
         and interact with existing threads.
         """
         guild = self.guild
@@ -1013,7 +1015,7 @@ class Webhook(BaseWebhook):
 
     There are two main ways to use Webhooks. The first is through the ones
     received by the library such as :meth:`.Guild.webhooks`, :meth:`.TextChannel.webhooks`,
-    :meth:`.ForumChannel.webhooks`, :meth:`.VoiceChannel.webhooks`,
+    :meth:`.ForumChannel.webhooks`, :meth:`.VoiceChannel.webhooks`, :meth:`MediaChannel.webhooks`
     and :meth:`.StageChannel.webhooks`. The ones received by the library will
     automatically be bound using the library's internal HTTP session.
 

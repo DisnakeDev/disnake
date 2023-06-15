@@ -131,7 +131,7 @@ class ForumChannel(_BaseGuildChannel):
 
 
 class MediaChannel(_BaseGuildChannel):
-    type: Literal[15]
+    type: Literal[16]
     topic: NotRequired[Optional[str]]
     last_message_id: NotRequired[Optional[Snowflake]]
     default_auto_archive_duration: NotRequired[ThreadArchiveDurationLiteral]

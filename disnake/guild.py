@@ -700,6 +700,18 @@ class Guild(Hashable):
         return r
 
     @property
+    def media_channels(self) -> List[MediaChannel]:
+        """List[:class:`MediaChannel`]: A list of forum channels that belong to this guild.
+
+        This is sorted by the position and are in UI order from top to bottom.
+
+        .. versionadded:: 2.9
+        """
+        r = [ch for ch in self._channels.values() if isinstance(ch, MediaChannel)]
+        r.sort(key=lambda c: (c.position, c.id))
+        return r
+
+    @property
     def me(self) -> Member:
         """:class:`Member`: Similar to :attr:`Client.user` except an instance of :class:`Member`.
         This is essentially used to get the member version of yourself.
@@ -1751,6 +1763,132 @@ class Guild(Hashable):
             **options,
         )
         channel = ForumChannel(state=self._state, guild=self, data=data)
+
+        # temporarily add to the cache
+        self._channels[channel.id] = channel
+        return channel
+
+    async def create_media_channel(
+        self,
+        name: str,
+        *,
+        topic: Optional[str] = None,
+        category: Optional[CategoryChannel] = None,
+        position: int = MISSING,
+        slowmode_delay: int = MISSING,
+        default_thread_slowmode_delay: int = MISSING,
+        default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = None,
+        nsfw: bool = MISSING,
+        overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
+        available_tags: Optional[Sequence[ForumTag]] = None,
+        default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        default_sort_order: Optional[ThreadSortOrder] = None,
+        reason: Optional[str] = None,
+    ) -> MediaChannel:
+        """|coro|
+
+        This is similar to :meth:`create_text_channel` except makes a :class:`MediaChannel` instead.
+
+        .. versionadded:: 2.9
+
+        Parameters
+        ----------
+        name: :class:`str`
+            The channel's name.
+        topic: Optional[:class:`str`]
+            The channel's topic.
+        category: Optional[:class:`CategoryChannel`]
+            The category to place the newly created channel under.
+            The permissions will be automatically synced to category if no
+            overwrites are provided.
+        position: :class:`int`
+            The position in the channel list. This is a number that starts
+            at 0. e.g. the top channel is position 0.
+        slowmode_delay: :class:`int`
+            Specifies the slowmode rate limit at which users can create
+            threads in this channel, in seconds.
+            A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
+            If not provided, slowmode is disabled.
+        default_thread_slowmode_delay: :class:`int`
+            Specifies the slowmode rate limit at which users can send messages
+            in newly created threads in this channel, in seconds.
+            A value of ``0`` disables slowmode by default. The maximum value possible is ``21600``.
+            If not provided, slowmode is disabled.
+        default_auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
+            The default auto archive duration in minutes for threads created in this channel.
+            Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
+        nsfw: :class:`bool`
+            Whether to mark the channel as NSFW.
+        overwrites: Dict[Union[:class:`Role`, :class:`Member`], :class:`PermissionOverwrite`]
+            A :class:`dict` of target (either a role or a member) to
+            :class:`PermissionOverwrite` to apply upon creation of a channel.
+            Useful for creating secret channels.
+        available_tags: Optional[Sequence[:class:`ForumTag`]]
+            The tags available for threads in this channel.
+        default_reaction: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
+            The default emoji shown for reacting to threads.
+        default_sort_order: Optional[:class:`ThreadSortOrder`]
+            The default sort order of threads in this channel.
+        reason: Optional[:class:`str`]
+            The reason for creating this channel. Shows up on the audit log.
+
+        Raises
+        ------
+        Forbidden
+            You do not have the proper permissions to create this channel.
+        HTTPException
+            Creating the channel failed.
+        TypeError
+            The permission overwrite information is not in proper form.
+
+        Returns
+        -------
+        :class:`MediaChannel`
+            The channel that was just created.
+        """
+        options = {}
+        if position is not MISSING:
+            options["position"] = position
+
+        if topic is not MISSING:
+            options["topic"] = topic
+
+        if slowmode_delay is not MISSING:
+            options["rate_limit_per_user"] = slowmode_delay
+
+        if default_thread_slowmode_delay is not MISSING:
+            options["default_thread_rate_limit_per_user"] = default_thread_slowmode_delay
+
+        if nsfw is not MISSING:
+            options["nsfw"] = nsfw
+
+        if default_auto_archive_duration is not None:
+            options["default_auto_archive_duration"] = cast(
+                "ThreadArchiveDurationLiteral", try_enum_to_int(default_auto_archive_duration)
+            )
+
+        if available_tags is not None:
+            options["available_tags"] = [tag.to_dict() for tag in available_tags]
+
+        if default_reaction is not None:
+            emoji_name, emoji_id = PartialEmoji._emoji_to_name_id(default_reaction)
+            options["default_reaction_emoji"] = {
+                "emoji_name": emoji_name,
+                "emoji_id": emoji_id,
+            }
+
+        if default_sort_order is not None:
+            options["default_sort_order"] = try_enum_to_int(default_sort_order)
+
+        data = await self._create_channel(
+            name,
+            overwrites=overwrites,
+            channel_type=ChannelType.media,
+            category=category,
+            reason=reason,
+            **options,
+        )
+        channel = MediaChannel(state=self._state, guild=self, data=data)
 
         # temporarily add to the cache
         self._channels[channel.id] = channel

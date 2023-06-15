@@ -38,6 +38,7 @@ from .channel import (
     DMChannel,
     ForumChannel,
     GroupChannel,
+    MediaChannel,
     PartialMessageable,
     StageChannel,
     TextChannel,
@@ -769,7 +770,7 @@ class ConnectionState:
             if channel.__class__ is Thread and not (
                 message.type is MessageType.thread_starter_message
                 or (
-                    type(channel.parent) is ForumChannel  # type: ignore
+                    type(channel.parent) in (ForumChannel, MediaChannel)  # type: ignore
                     and channel.id == message.id
                 )
             ):
@@ -1114,7 +1115,7 @@ class ConnectionState:
         guild._add_thread(thread)
         if not has_thread:
             if data.get("newly_created"):
-                if isinstance(thread.parent, ForumChannel):
+                if isinstance(thread.parent, (ForumChannel, MediaChannel)):
                     thread.parent.last_thread_id = thread.id
 
                 self.dispatch("thread_create", thread)
