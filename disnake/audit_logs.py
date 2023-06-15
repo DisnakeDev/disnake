@@ -176,13 +176,13 @@ def _transform_tag_id(
         return None
 
     # cyclic imports
-    from .channel import ForumChannel
+    from .channel import ForumChannel, MediaChannel
 
     tag: Optional[ForumTag] = None
     tag_id = int(data)
     thread = entry.target
     # try thread parent first
-    if isinstance(thread, Thread) and isinstance(thread.parent, ForumChannel):
+    if isinstance(thread, Thread) and isinstance(thread.parent, (ForumChannel, MediaChannel)):
         tag = thread.parent.get_tag(tag_id)
     else:
         # if not found (possibly deleted thread), search all forum channels

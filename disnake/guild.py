@@ -31,6 +31,7 @@ from .bans import BanEntry
 from .channel import (
     CategoryChannel,
     ForumChannel,
+    MediaChannel,
     StageChannel,
     TextChannel,
     VoiceChannel,
@@ -113,7 +114,9 @@ if TYPE_CHECKING:
     from .webhook import Webhook
 
     GuildMessageable = Union[TextChannel, Thread, VoiceChannel, StageChannel]
-    GuildChannel = Union[VoiceChannel, StageChannel, TextChannel, CategoryChannel, ForumChannel]
+    GuildChannel = Union[
+        VoiceChannel, StageChannel, TextChannel, CategoryChannel, ForumChannel, MediaChannel
+    ]
     ByCategoryItem = Tuple[Optional[CategoryChannel], List[GuildChannel]]
 
 

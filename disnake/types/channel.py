@@ -18,7 +18,7 @@ class PermissionOverwrite(TypedDict):
     deny: str
 
 
-ChannelType = Literal[0, 1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 15]
+ChannelType = Literal[0, 1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 15, 16]
 
 
 class _BaseChannel(TypedDict):
@@ -130,6 +130,17 @@ class ForumChannel(_BaseGuildChannel):
     default_forum_layout: NotRequired[ThreadLayout]
 
 
+class MediaChannel(_BaseGuildChannel):
+    type: Literal[15]
+    topic: NotRequired[Optional[str]]
+    last_message_id: NotRequired[Optional[Snowflake]]
+    default_auto_archive_duration: NotRequired[ThreadArchiveDurationLiteral]
+    available_tags: NotRequired[List[ForumTag]]
+    default_reaction_emoji: NotRequired[Optional[DefaultReaction]]
+    default_thread_rate_limit_per_user: NotRequired[int]
+    default_sort_order: NotRequired[Optional[ThreadSortOrder]]
+
+
 GuildChannel = Union[
     TextChannel,
     NewsChannel,
@@ -138,6 +149,7 @@ GuildChannel = Union[
     StageChannel,
     ThreadChannel,
     ForumChannel,
+    MediaChannel,
 ]
 
 

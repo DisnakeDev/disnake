@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from .abc import Messageable
-    from .channel import ForumChannel
+    from .channel import ForumChannel, MediaChannel
 
 __all__ = ("Typing",)
 
@@ -25,9 +25,9 @@ def _typing_done_callback(fut: asyncio.Future) -> None:
 
 
 class Typing:
-    def __init__(self, messageable: Union[Messageable, ForumChannel]) -> None:
+    def __init__(self, messageable: Union[Messageable, ForumChannel, MediaChannel]) -> None:
         self.loop: asyncio.AbstractEventLoop = messageable._state.loop
-        self.messageable: Union[Messageable, ForumChannel] = messageable
+        self.messageable: Union[Messageable, ForumChannel, MediaChannel] = messageable
 
     async def do_typing(self) -> None:
         try:
