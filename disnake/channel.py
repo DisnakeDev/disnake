@@ -3000,7 +3000,7 @@ class ThreadWithMessage(NamedTuple):
     message: Message
 
 
-class ForumBaseGuildChannel(disnake.abc.GuildChannel, Hashable):
+class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
     __slots__ = (
         "id",
         "name",
@@ -3183,331 +3183,6 @@ class ForumBaseGuildChannel(disnake.abc.GuildChannel, Hashable):
         """
         channel = await self._get_channel()
         await self._state.http.send_typing(channel.id)
-
-    # if only these parameters are passed, `_move` is called and no channel will be returned
-    @overload
-    async def edit(
-        self,
-        *,
-        position: int,
-        category: Optional[Snowflake] = ...,
-        sync_permissions: bool = ...,
-        reason: Optional[str] = ...,
-    ) -> None:
-        ...
-
-    # only passing `sync_permissions` may or may not return a channel,
-    # depending on whether the channel is in a category
-    @overload
-    async def edit(
-        self,
-        *,
-        sync_permissions: bool,
-        reason: Optional[str] = ...,
-    ) -> Optional[ForumChannel]:
-        ...
-
-    @overload
-    async def edit(
-        self,
-        *,
-        name: str = ...,
-        topic: Optional[str] = ...,
-        position: int = ...,
-        nsfw: bool = ...,
-        sync_permissions: bool = ...,
-        category: Optional[Snowflake] = ...,
-        slowmode_delay: Optional[int] = ...,
-        default_thread_slowmode_delay: Optional[int] = ...,
-        default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = ...,
-        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
-        flags: ChannelFlags = ...,
-        require_tag: bool = ...,
-        available_tags: Sequence[ForumTag] = ...,
-        default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = ...,
-        default_sort_order: Optional[ThreadSortOrder] = ...,
-        default_layout: ThreadLayout = ...,
-        reason: Optional[str] = ...,
-    ) -> ForumChannel:
-        ...
-
-    async def edit(
-        self,
-        *,
-        name: str = MISSING,
-        topic: Optional[str] = MISSING,
-        position: int = MISSING,
-        nsfw: bool = MISSING,
-        sync_permissions: bool = MISSING,
-        category: Optional[Snowflake] = MISSING,
-        slowmode_delay: Optional[int] = MISSING,
-        default_thread_slowmode_delay: Optional[int] = MISSING,
-        default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
-        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
-        flags: ChannelFlags = MISSING,
-        require_tag: bool = MISSING,
-        available_tags: Sequence[ForumTag] = MISSING,
-        default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
-        default_sort_order: Optional[ThreadSortOrder] = MISSING,
-        default_layout: ThreadLayout = MISSING,
-        reason: Optional[str] = None,
-        **kwargs: Never,
-    ) -> Optional[ForumChannel]:
-        """|coro|
-
-        Edits the channel.
-
-        You must have :attr:`~Permissions.manage_channels` permission to
-        do this.
-
-        .. versionchanged:: 2.6
-            Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
-
-        Parameters
-        ----------
-        name: :class:`str`
-            The channel's new name.
-        topic: Optional[:class:`str`]
-            The channel's new topic.
-        position: :class:`int`
-            The channel's new position.
-        nsfw: :class:`bool`
-            Whether to mark the channel as NSFW.
-        sync_permissions: :class:`bool`
-            Whether to sync permissions with the channel's new or pre-existing
-            category. Defaults to ``False``.
-        category: Optional[:class:`abc.Snowflake`]
-            The new category for this channel. Can be ``None`` to remove the
-            category.
-        slowmode_delay: Optional[:class:`int`]
-            Specifies the slowmode rate limit at which users can create
-            threads in this channel, in seconds.
-            A value of ``0`` or ``None`` disables slowmode. The maximum value possible is ``21600``.
-        default_thread_slowmode_delay: Optional[:class:`int`]
-            Specifies the slowmode rate limit at which users can send messages
-            in newly created threads in this channel, in seconds.
-            This does not apply retroactively to existing threads.
-            A value of ``0`` or ``None`` disables slowmode. The maximum value possible is ``21600``.
-
-            .. versionadded:: 2.6
-
-        overwrites: :class:`Mapping`
-            A :class:`Mapping` of target (either a role or a member) to
-            :class:`PermissionOverwrite` to apply to the channel.
-        default_auto_archive_duration: Optional[Union[:class:`int`, :class:`ThreadArchiveDuration`]]
-            The new default auto archive duration in minutes for threads created in this channel.
-            Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
-        flags: :class:`ChannelFlags`
-            The new flags to set for this channel. This will overwrite any existing flags set on this channel.
-            If parameter ``require_tag`` is provided, that will override the setting of :attr:`ChannelFlags.require_tag`.
-
-            .. versionadded:: 2.6
-
-        require_tag: :class:`bool`
-            Whether all newly created threads are required to have a tag.
-
-            .. versionadded:: 2.6
-
-        available_tags: Sequence[:class:`ForumTag`]
-            The new :class:`ForumTag`\\s available for threads in this channel.
-            Can be used to create new tags and edit/reorder/delete existing tags.
-            Maximum of 20.
-
-            Note that this overwrites all tags, removing existing tags unless they're passed as well.
-
-            See :class:`ForumTag` for examples regarding creating/editing tags.
-
-            .. versionadded:: 2.6
-
-        default_reaction: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
-            The new default emoji shown for reacting to threads.
-
-            .. versionadded:: 2.6
-
-        default_sort_order: Optional[:class:`ThreadSortOrder`]
-            The new default sort order of threads in this channel.
-
-            .. versionadded:: 2.6
-
-        default_layout: :class:`ThreadLayout`
-            The new default layout of threads in this channel.
-
-            .. versionadded:: 2.8
-
-        reason: Optional[:class:`str`]
-            The reason for editing this channel. Shows up on the audit log.
-
-        Raises
-        ------
-        Forbidden
-            You do not have permissions to edit the channel.
-        HTTPException
-            Editing the channel failed.
-        TypeError
-            The permission overwrite information is not in proper form.
-        ValueError
-            The position is less than 0.
-
-        Returns
-        -------
-        Optional[:class:`ForumChannel`]
-            The newly edited forum channel. If the edit was only positional
-            then ``None`` is returned instead.
-        """
-        if require_tag is not MISSING:
-            # create base flags if flags are provided, otherwise use the internal flags.
-            flags = ChannelFlags._from_value(self._flags if flags is MISSING else flags.value)
-            flags.require_tag = require_tag
-
-        payload = await self._edit(
-            name=name,
-            topic=topic,
-            position=position,
-            nsfw=nsfw,
-            sync_permissions=sync_permissions,
-            category=category,
-            slowmode_delay=slowmode_delay,
-            default_thread_slowmode_delay=default_thread_slowmode_delay,
-            default_auto_archive_duration=default_auto_archive_duration,
-            overwrites=overwrites,
-            flags=flags,
-            available_tags=available_tags,
-            default_reaction=default_reaction,
-            default_sort_order=default_sort_order,
-            default_layout=default_layout,
-            reason=reason,
-            **kwargs,
-        )
-        if payload is not None:
-            # the payload will always be the proper channel payload
-            return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
-
-    async def clone(
-        self,
-        *,
-        name: Optional[str] = None,
-        topic: Optional[str] = MISSING,
-        position: int = MISSING,
-        nsfw: bool = MISSING,
-        category: Optional[Snowflake] = MISSING,
-        slowmode_delay: Optional[int] = MISSING,
-        default_thread_slowmode_delay: Optional[int] = MISSING,
-        default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
-        available_tags: Sequence[ForumTag] = MISSING,
-        default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
-        default_sort_order: Optional[ThreadSortOrder] = MISSING,
-        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
-        reason: Optional[str] = None,
-    ) -> ForumChannel:
-        """|coro|
-
-        Clones this channel. This creates a channel with the same properties
-        as this channel.
-
-        You must have :attr:`.Permissions.manage_channels` permission to
-        do this.
-
-        .. versionchanged:: 2.9
-            Added new ``topic``, ``position``, ``nsfw``, ``category``, ``slowmode_delay``,
-            ``default_thread_slowmode_delay``, ``default_auto_archive_duration``,
-            ``available_tags``, ``default_reaction``, ``default_sort_order``
-            and ``overwrites`` keyword-only paremters.
-
-        .. note::
-            The current :attr:`ForumChannel.flags` value won't be cloned.
-            This is a discord limitation.
-
-        Parameters
-        ----------
-        name: Optional[:class:`str`]
-            The name of the new channel. If not provided, defaults to this channel's name.
-        topic: Optional[:class:`str`]
-            The topic of the new channel. If not provided, defaults to this channel's topic.
-        position: :class:`int`
-            The position of the new channel. If not provided, defaults to this channel's position.
-        nsfw: :class:`bool`
-            Whether the new channel should be nsfw or not. If not provided, defaults to this channel's NSFW value.
-        category: Optional[:class:`abc.Snowflake`]
-            The category where the new channel should be grouped. If not provided, defaults to this channel's category.
-        slowmode_delay: Optional[:class:`int`]
-            The slowmode delay of the new channel. If not provided, defaults to this channel's slowmode delay.
-        default_thread_slowmode_delay: Optional[:class:`int`]
-            The default thread slowmode delay of the new channel. If not provided, defaults to this channel's default thread slowmode delay.
-        default_auto_archive_duration: Optional[Union[:class:`int`, :class:`ThreadArchiveDuration`]]
-            The default auto archive duration of the new channel. If not provided, defaults to this channel's default auto archive duration.
-        available_tags: Sequence[:class:`ForumTag`]
-            The applicable tags of the new channel. If not provided, defaults to this channel's available tags.
-        default_reaction: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
-            The default reaction of the new channel. If not provided, defaults to this channel's default reaction.
-        default_sort_order: Optional[:class:`ThreadSortOrder`]
-            The default sort order of the new channel. If not provided, defaults to this channel's default sort order.
-        overwrites: :class:`Mapping`
-            A :class:`Mapping` of target (either a role or a member) to :class:`PermissionOverwrite`
-            to apply to the channel. If not provided, defaults to this channel's overwrites.
-        reason: Optional[:class:`str`]
-            The reason for cloning this channel. Shows up on the audit log.
-
-        Raises
-        ------
-        Forbidden
-            You do not have the proper permissions to create this channel.
-        HTTPException
-            Creating the channel failed.
-
-        Returns
-        -------
-        :class:`ForumChannel`
-            The channel that was created.
-        """
-        default_reaction_emoji_payload: Optional[DefaultReactionPayload] = MISSING
-        if default_reaction is MISSING:
-            default_reaction = self.default_reaction
-
-        if default_reaction is not None:
-            emoji_name, emoji_id = PartialEmoji._emoji_to_name_id(default_reaction)
-            default_reaction_emoji_payload = {
-                "emoji_name": emoji_name,
-                "emoji_id": emoji_id,
-            }
-        else:
-            default_reaction_emoji_payload = None
-
-        if default_sort_order is MISSING:
-            default_sort_order = self.default_sort_order
-
-        return await self._clone_impl(
-            {
-                "topic": topic if topic is not MISSING else self.topic,
-                "position": position if position is not MISSING else self.position,
-                "nsfw": nsfw if nsfw is not MISSING else self.nsfw,
-                "rate_limit_per_user": (
-                    slowmode_delay if slowmode_delay is not MISSING else self.slowmode_delay
-                ),
-                "default_thread_rate_limit_per_user": (
-                    default_thread_slowmode_delay
-                    if default_thread_slowmode_delay is not MISSING
-                    else self.default_thread_slowmode_delay
-                ),
-                "default_auto_archive_duration": (
-                    try_enum_to_int(default_auto_archive_duration)
-                    if default_auto_archive_duration is not MISSING
-                    else self.default_auto_archive_duration
-                ),
-                "available_tags": (
-                    [tag.to_dict() for tag in available_tags]
-                    if available_tags is not MISSING
-                    else [tag.to_dict() for tag in self.available_tags]
-                ),
-                "default_reaction_emoji": default_reaction_emoji_payload,
-                "default_sort_order": (
-                    try_enum_to_int(default_sort_order) if default_sort_order is not None else None
-                ),
-            },
-            name=name,
-            category=category,
-            reason=reason,
-            overwrites=overwrites,
-        )
 
     def get_thread(self, thread_id: int, /) -> Optional[Thread]:
         """Returns a thread with the given ID.
@@ -3856,7 +3531,7 @@ class ForumBaseGuildChannel(disnake.abc.GuildChannel, Hashable):
         return utils.get(self._available_tags.values(), name=name)
 
 
-class ForumChannel(ForumBaseGuildChannel, WebhookableChannel):
+class ForumChannel(ThreadOnlyGuildChannel, WebhookableChannel):
     """Represents a Discord Forum channel.
 
     .. versionadded:: 2.5
@@ -4508,7 +4183,7 @@ class ForumChannel(ForumBaseGuildChannel, WebhookableChannel):
         return ThreadWithMessage(thread, message)
 
 
-class MediaChannel(ForumBaseGuildChannel, WebhookableChannel):
+class MediaChannel(ThreadOnlyGuildChannel, WebhookableChannel):
     """Represents a Discord Media channel.
 
     .. versionadded:: 2.9
@@ -4596,6 +4271,331 @@ class MediaChannel(ForumBaseGuildChannel, WebhookableChannel):
     @utils.copy_doc(disnake.abc.Messageable.typing)
     def typing(self) -> Typing:
         return Typing(self)
+
+    # if only these parameters are passed, `_move` is called and no channel will be returned
+    @overload
+    async def edit(
+        self,
+        *,
+        position: int,
+        category: Optional[Snowflake] = ...,
+        sync_permissions: bool = ...,
+        reason: Optional[str] = ...,
+    ) -> None:
+        ...
+
+    # only passing `sync_permissions` may or may not return a channel,
+    # depending on whether the channel is in a category
+    @overload
+    async def edit(
+        self,
+        *,
+        sync_permissions: bool,
+        reason: Optional[str] = ...,
+    ) -> Optional[ForumChannel]:
+        ...
+
+    @overload
+    async def edit(
+        self,
+        *,
+        name: str = ...,
+        topic: Optional[str] = ...,
+        position: int = ...,
+        nsfw: bool = ...,
+        sync_permissions: bool = ...,
+        category: Optional[Snowflake] = ...,
+        slowmode_delay: Optional[int] = ...,
+        default_thread_slowmode_delay: Optional[int] = ...,
+        default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = ...,
+        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
+        flags: ChannelFlags = ...,
+        require_tag: bool = ...,
+        available_tags: Sequence[ForumTag] = ...,
+        default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = ...,
+        default_sort_order: Optional[ThreadSortOrder] = ...,
+        default_layout: ThreadLayout = ...,
+        reason: Optional[str] = ...,
+    ) -> ForumChannel:
+        ...
+
+    async def edit(
+        self,
+        *,
+        name: str = MISSING,
+        topic: Optional[str] = MISSING,
+        position: int = MISSING,
+        nsfw: bool = MISSING,
+        sync_permissions: bool = MISSING,
+        category: Optional[Snowflake] = MISSING,
+        slowmode_delay: Optional[int] = MISSING,
+        default_thread_slowmode_delay: Optional[int] = MISSING,
+        default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
+        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
+        flags: ChannelFlags = MISSING,
+        require_tag: bool = MISSING,
+        available_tags: Sequence[ForumTag] = MISSING,
+        default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
+        default_sort_order: Optional[ThreadSortOrder] = MISSING,
+        default_layout: ThreadLayout = MISSING,
+        reason: Optional[str] = None,
+        **kwargs: Never,
+    ) -> Optional[ForumChannel]:
+        """|coro|
+
+        Edits the channel.
+
+        You must have :attr:`~Permissions.manage_channels` permission to
+        do this.
+
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
+
+        Parameters
+        ----------
+        name: :class:`str`
+            The channel's new name.
+        topic: Optional[:class:`str`]
+            The channel's new topic.
+        position: :class:`int`
+            The channel's new position.
+        nsfw: :class:`bool`
+            Whether to mark the channel as NSFW.
+        sync_permissions: :class:`bool`
+            Whether to sync permissions with the channel's new or pre-existing
+            category. Defaults to ``False``.
+        category: Optional[:class:`abc.Snowflake`]
+            The new category for this channel. Can be ``None`` to remove the
+            category.
+        slowmode_delay: Optional[:class:`int`]
+            Specifies the slowmode rate limit at which users can create
+            threads in this channel, in seconds.
+            A value of ``0`` or ``None`` disables slowmode. The maximum value possible is ``21600``.
+        default_thread_slowmode_delay: Optional[:class:`int`]
+            Specifies the slowmode rate limit at which users can send messages
+            in newly created threads in this channel, in seconds.
+            This does not apply retroactively to existing threads.
+            A value of ``0`` or ``None`` disables slowmode. The maximum value possible is ``21600``.
+
+            .. versionadded:: 2.6
+
+        overwrites: :class:`Mapping`
+            A :class:`Mapping` of target (either a role or a member) to
+            :class:`PermissionOverwrite` to apply to the channel.
+        default_auto_archive_duration: Optional[Union[:class:`int`, :class:`ThreadArchiveDuration`]]
+            The new default auto archive duration in minutes for threads created in this channel.
+            Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
+        flags: :class:`ChannelFlags`
+            The new flags to set for this channel. This will overwrite any existing flags set on this channel.
+            If parameter ``require_tag`` is provided, that will override the setting of :attr:`ChannelFlags.require_tag`.
+
+            .. versionadded:: 2.6
+
+        require_tag: :class:`bool`
+            Whether all newly created threads are required to have a tag.
+
+            .. versionadded:: 2.6
+
+        available_tags: Sequence[:class:`ForumTag`]
+            The new :class:`ForumTag`\\s available for threads in this channel.
+            Can be used to create new tags and edit/reorder/delete existing tags.
+            Maximum of 20.
+
+            Note that this overwrites all tags, removing existing tags unless they're passed as well.
+
+            See :class:`ForumTag` for examples regarding creating/editing tags.
+
+            .. versionadded:: 2.6
+
+        default_reaction: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
+            The new default emoji shown for reacting to threads.
+
+            .. versionadded:: 2.6
+
+        default_sort_order: Optional[:class:`ThreadSortOrder`]
+            The new default sort order of threads in this channel.
+
+            .. versionadded:: 2.6
+
+        default_layout: :class:`ThreadLayout`
+            The new default layout of threads in this channel.
+
+            .. versionadded:: 2.8
+
+        reason: Optional[:class:`str`]
+            The reason for editing this channel. Shows up on the audit log.
+
+        Raises
+        ------
+        Forbidden
+            You do not have permissions to edit the channel.
+        HTTPException
+            Editing the channel failed.
+        TypeError
+            The permission overwrite information is not in proper form.
+        ValueError
+            The position is less than 0.
+
+        Returns
+        -------
+        Optional[:class:`ForumChannel`]
+            The newly edited forum channel. If the edit was only positional
+            then ``None`` is returned instead.
+        """
+        if require_tag is not MISSING:
+            # create base flags if flags are provided, otherwise use the internal flags.
+            flags = ChannelFlags._from_value(self._flags if flags is MISSING else flags.value)
+            flags.require_tag = require_tag
+
+        payload = await self._edit(
+            name=name,
+            topic=topic,
+            position=position,
+            nsfw=nsfw,
+            sync_permissions=sync_permissions,
+            category=category,
+            slowmode_delay=slowmode_delay,
+            default_thread_slowmode_delay=default_thread_slowmode_delay,
+            default_auto_archive_duration=default_auto_archive_duration,
+            overwrites=overwrites,
+            flags=flags,
+            available_tags=available_tags,
+            default_reaction=default_reaction,
+            default_sort_order=default_sort_order,
+            default_layout=default_layout,
+            reason=reason,
+            **kwargs,
+        )
+        if payload is not None:
+            # the payload will always be the proper channel payload
+            return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
+
+    async def clone(
+        self,
+        *,
+        name: Optional[str] = None,
+        topic: Optional[str] = MISSING,
+        position: int = MISSING,
+        nsfw: bool = MISSING,
+        category: Optional[Snowflake] = MISSING,
+        slowmode_delay: Optional[int] = MISSING,
+        default_thread_slowmode_delay: Optional[int] = MISSING,
+        default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
+        available_tags: Sequence[ForumTag] = MISSING,
+        default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
+        default_sort_order: Optional[ThreadSortOrder] = MISSING,
+        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
+        reason: Optional[str] = None,
+    ) -> MediaChannel:
+        """|coro|
+
+        Clones this channel. This creates a channel with the same properties
+        as this channel.
+
+        You must have :attr:`.Permissions.manage_channels` permission to
+        do this.
+
+        .. versionchanged:: 2.9
+            Added new ``topic``, ``position``, ``nsfw``, ``category``, ``slowmode_delay``,
+            ``default_thread_slowmode_delay``, ``default_auto_archive_duration``,
+            ``available_tags``, ``default_reaction``, ``default_sort_order``
+            and ``overwrites`` keyword-only paremters.
+
+        .. note::
+            The current :attr:`ForumChannel.flags` value won't be cloned.
+            This is a discord limitation.
+
+        Parameters
+        ----------
+        name: Optional[:class:`str`]
+            The name of the new channel. If not provided, defaults to this channel's name.
+        topic: Optional[:class:`str`]
+            The topic of the new channel. If not provided, defaults to this channel's topic.
+        position: :class:`int`
+            The position of the new channel. If not provided, defaults to this channel's position.
+        nsfw: :class:`bool`
+            Whether the new channel should be nsfw or not. If not provided, defaults to this channel's NSFW value.
+        category: Optional[:class:`abc.Snowflake`]
+            The category where the new channel should be grouped. If not provided, defaults to this channel's category.
+        slowmode_delay: Optional[:class:`int`]
+            The slowmode delay of the new channel. If not provided, defaults to this channel's slowmode delay.
+        default_thread_slowmode_delay: Optional[:class:`int`]
+            The default thread slowmode delay of the new channel. If not provided, defaults to this channel's default thread slowmode delay.
+        default_auto_archive_duration: Optional[Union[:class:`int`, :class:`ThreadArchiveDuration`]]
+            The default auto archive duration of the new channel. If not provided, defaults to this channel's default auto archive duration.
+        available_tags: Sequence[:class:`ForumTag`]
+            The applicable tags of the new channel. If not provided, defaults to this channel's available tags.
+        default_reaction: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
+            The default reaction of the new channel. If not provided, defaults to this channel's default reaction.
+        default_sort_order: Optional[:class:`ThreadSortOrder`]
+            The default sort order of the new channel. If not provided, defaults to this channel's default sort order.
+        overwrites: :class:`Mapping`
+            A :class:`Mapping` of target (either a role or a member) to :class:`PermissionOverwrite`
+            to apply to the channel. If not provided, defaults to this channel's overwrites.
+        reason: Optional[:class:`str`]
+            The reason for cloning this channel. Shows up on the audit log.
+
+        Raises
+        ------
+        Forbidden
+            You do not have the proper permissions to create this channel.
+        HTTPException
+            Creating the channel failed.
+
+        Returns
+        -------
+        :class:`ForumChannel`
+            The channel that was created.
+        """
+        default_reaction_emoji_payload: Optional[DefaultReactionPayload] = MISSING
+        if default_reaction is MISSING:
+            default_reaction = self.default_reaction
+
+        if default_reaction is not None:
+            emoji_name, emoji_id = PartialEmoji._emoji_to_name_id(default_reaction)
+            default_reaction_emoji_payload = {
+                "emoji_name": emoji_name,
+                "emoji_id": emoji_id,
+            }
+        else:
+            default_reaction_emoji_payload = None
+
+        if default_sort_order is MISSING:
+            default_sort_order = self.default_sort_order
+
+        return await self._clone_impl(
+            {
+                "topic": topic if topic is not MISSING else self.topic,
+                "position": position if position is not MISSING else self.position,
+                "nsfw": nsfw if nsfw is not MISSING else self.nsfw,
+                "rate_limit_per_user": (
+                    slowmode_delay if slowmode_delay is not MISSING else self.slowmode_delay
+                ),
+                "default_thread_rate_limit_per_user": (
+                    default_thread_slowmode_delay
+                    if default_thread_slowmode_delay is not MISSING
+                    else self.default_thread_slowmode_delay
+                ),
+                "default_auto_archive_duration": (
+                    try_enum_to_int(default_auto_archive_duration)
+                    if default_auto_archive_duration is not MISSING
+                    else self.default_auto_archive_duration
+                ),
+                "available_tags": (
+                    [tag.to_dict() for tag in available_tags]
+                    if available_tags is not MISSING
+                    else [tag.to_dict() for tag in self.available_tags]
+                ),
+                "default_reaction_emoji": default_reaction_emoji_payload,
+                "default_sort_order": (
+                    try_enum_to_int(default_sort_order) if default_sort_order is not None else None
+                ),
+            },
+            name=name,
+            category=category,
+            reason=reason,
+            overwrites=overwrites,
+        )
 
     @overload
     async def create_thread(
