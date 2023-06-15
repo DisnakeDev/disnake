@@ -460,6 +460,7 @@ class Thread(Messageable, Hashable):
         parent = self.parent
         if parent is None:
             raise ClientException("Parent channel not found")
+        # n.b. GuildChannel is used here so implicit overrides are not applied based on send_messages
         base = GuildChannel.permissions_for(parent, obj, ignore_timeout=ignore_timeout)
 
         # if you can't send a message in a channel then you can't have certain
