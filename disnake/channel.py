@@ -4703,7 +4703,7 @@ class MediaChannel(ThreadOnlyGuildChannel, WebhookableChannel):
     ) -> ThreadWithMessage:
         """|coro|
 
-        Creates a thread in this forum channel.
+        Creates a thread in this media channel.
 
         You must have the :attr:`~Permissions.create_forum_threads` permission to do this.
 
@@ -5236,7 +5236,7 @@ def _guild_channel_factory(channel_type: int):
     elif value is ChannelType.forum:
         return ForumChannel, value
     elif value is ChannelType.media:
-        return ChannelType.media, value
+        return MediaChannel, value
     else:
         return None, value
 
