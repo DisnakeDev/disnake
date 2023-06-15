@@ -118,8 +118,7 @@ ThreadSortOrder = Literal[0, 1]
 ThreadLayout = Literal[0, 1, 2]
 
 
-class ForumChannel(_BaseGuildChannel):
-    type: Literal[15]
+class _BaseForumGuildChannel(_BaseGuildChannel):
     topic: NotRequired[Optional[str]]
     last_message_id: NotRequired[Optional[Snowflake]]
     default_auto_archive_duration: NotRequired[ThreadArchiveDurationLiteral]
@@ -127,18 +126,15 @@ class ForumChannel(_BaseGuildChannel):
     default_reaction_emoji: NotRequired[Optional[DefaultReaction]]
     default_thread_rate_limit_per_user: NotRequired[int]
     default_sort_order: NotRequired[Optional[ThreadSortOrder]]
+
+
+class ForumChannel(_BaseForumGuildChannel):
+    type: Literal[15]
     default_forum_layout: NotRequired[ThreadLayout]
 
 
-class MediaChannel(_BaseGuildChannel):
+class MediaChannel(_BaseForumGuildChannel):
     type: Literal[16]
-    topic: NotRequired[Optional[str]]
-    last_message_id: NotRequired[Optional[Snowflake]]
-    default_auto_archive_duration: NotRequired[ThreadArchiveDurationLiteral]
-    available_tags: NotRequired[List[ForumTag]]
-    default_reaction_emoji: NotRequired[Optional[DefaultReaction]]
-    default_thread_rate_limit_per_user: NotRequired[int]
-    default_sort_order: NotRequired[Optional[ThreadSortOrder]]
 
 
 GuildChannel = Union[
