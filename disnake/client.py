@@ -1735,10 +1735,12 @@ class Client:
         """Retrieves an :class:`.AsyncIterator` that enables receiving your guilds.
 
         .. note::
+
             Using this, you will only receive :attr:`.Guild.owner`, :attr:`.Guild.icon`,
             :attr:`.Guild.id`, and :attr:`.Guild.name` per :class:`.Guild`.
 
         .. note::
+
             This method is an API call. For general usage, consider :attr:`guilds` instead.
 
         Examples
@@ -1815,6 +1817,7 @@ class Client:
         Retrieves a :class:`.Guild` from the given ID.
 
         .. note::
+
             Using this, you will **not** receive :attr:`.Guild.channels`, :attr:`.Guild.members`,
             :attr:`.Member.activity` and :attr:`.Member.voice` per :class:`.Member`.
 
@@ -1892,6 +1895,7 @@ class Client:
         Bot accounts in 10 or more guilds are not allowed to create guilds.
 
         .. note::
+
             Using this, you will **not** receive :attr:`.Guild.channels`, :attr:`.Guild.members`,
             :attr:`.Member.activity` and :attr:`.Member.voice` per :class:`.Member`.
 
@@ -1953,6 +1957,7 @@ class Client:
         Bot accounts in 10 or more guilds are not allowed to create guilds.
 
         .. note::
+
             Using this, you will **not** receive :attr:`.Guild.channels`, :attr:`.Guild.members`,
             :attr:`.Member.activity` and :attr:`.Member.voice` per :class:`.Member`.
 
