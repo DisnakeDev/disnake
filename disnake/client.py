@@ -1673,6 +1673,9 @@ class Client:
 
         Changes the client's presence.
 
+        .. versionchanged:: 2.0
+            Removed the ``afk`` keyword-only parameter.
+
         .. versionchanged:: 2.6
             Raises :exc:`TypeError` instead of ``InvalidArgument``.
 
@@ -1683,9 +1686,6 @@ class Client:
 
             game = disnake.Game("with the API")
             await client.change_presence(status=disnake.Status.idle, activity=game)
-
-        .. versionchanged:: 2.0
-            Removed the ``afk`` keyword-only parameter.
 
         Parameters
         ----------
