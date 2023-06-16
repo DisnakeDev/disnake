@@ -10,6 +10,8 @@ from libcst import codemod
 
 from disnake import Permissions
 
+from .base import BaseCodemodCommand
+
 ALL_PERMISSIONS = sorted(Permissions.VALID_FLAGS.keys())
 
 PERMISSION_MATCHERS = m.OneOf(*map(m.Name, ALL_PERMISSIONS))
@@ -62,7 +64,7 @@ def remove_existing_permissions(params: cst.Parameters, *, is_overload: bool) ->
     )
 
 
-class PermissionTypings(codemod.VisitorBasedCodemodCommand):
+class PermissionTypings(BaseCodemodCommand):
     DESCRIPTION: str = "Adds overloads for all permissions."
 
     def transform_module(self, tree: cst.Module) -> cst.Module:
