@@ -508,7 +508,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         .. note::
             The current :attr:`TextChannel.flags` value won't be cloned.
-            This is a discord limitation.
+            This is a Discord limitation.
 
         Parameters
         ----------
@@ -1326,7 +1326,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         .. note::
             The current :attr:`VoiceChannel.flags` value won't be cloned.
-            This is a discord limitation.
+            This is a Discord limitation.
 
         Parameters
         ----------
@@ -2054,7 +2054,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         .. note::
             The current :attr:`StageChannel.flags` value won't be cloned.
-            This is a discord limitation.
+            This is a Discord limitation.
 
         .. warning::
             Currently the ``user_limit`` attribute is not cloned due to a Discord limitation.
@@ -2815,7 +2815,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
         .. note::
             The current :attr:`CategoryChannel.flags` value won't be cloned.
-            This is a discord limitation.
+            This is a Discord limitation.
 
         Parameters
         ----------
@@ -3654,7 +3654,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
         .. note::
             The current :attr:`ForumChannel.flags` value won't be cloned.
-            This is a discord limitation.
+            This is a Discord limitation.
 
         Parameters
         ----------
