@@ -22,8 +22,7 @@ class TestStringView:
             ('hone"stl"y, quotes.', 'hone"stl"y,'),
         ],
     )
-    def test_get_word(self, text, expected_word):
-
+    def test_get_word(self, text: str, expected_word) -> None:
         view = StringView(text)
 
         word = view.get_word()
@@ -40,8 +39,7 @@ class TestStringView:
             ("''", "''"),
         ],
     )
-    def test_get_quoted_word(self, text, expected_word):
-
+    def test_get_quoted_word(self, text: str, expected_word) -> None:
         view = StringView(text)
 
         word = view.get_quoted_word()
@@ -57,8 +55,7 @@ class TestStringView:
             ('"test\\', ExpectedClosingQuoteError),
         ],
     )
-    def test_get_quoted_word_raises(self, text, exception):
-
+    def test_get_quoted_word_raises(self, text: str, exception) -> None:
         view = StringView(text)
 
         with pytest.raises(exception):

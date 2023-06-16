@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""
-An example showing how to reply to received messages.
-"""
+"""An example showing how to reply to received messages."""
 
 import os
 

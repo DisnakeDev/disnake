@@ -1,0 +1,1 @@
+Add support for setting ``user_limit`` and ``video_quality_mode`` when creating a :class:`StageChannel` with :func:`Guild.create_stage_channel`.

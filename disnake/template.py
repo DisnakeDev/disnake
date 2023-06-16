@@ -220,7 +220,6 @@ class Template:
         :class:`Template`
             The newly edited template.
         """
-
         data = await self._state.http.sync_template(self.source_guild.id, self.code)
         return Template(state=self._state, data=data)
 

@@ -1,0 +1,1 @@
+|commands| Fix member nickname not being used by :class:`~ext.commands.clean_content` converter when user wasn't found in mentions.
