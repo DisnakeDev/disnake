@@ -158,7 +158,7 @@ class TestUserProtocol:
     def handle_abc_user(self, user: disnake.abc.User) -> None:
         ...
 
-    def _test_typing_assignable(self):
+    def _test_typing_assignable(self) -> None:
         # All of these should match the abc.User protocol and thus type-check correctly
         # (they could just inherit from the protocol to ensure correct implementation,
         # but we really only want structural (i.e. implicit) subtyping)
