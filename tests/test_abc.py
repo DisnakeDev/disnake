@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: MIT
 
+from typing import cast
 from unittest import mock
 
 import pytest
@@ -151,3 +152,16 @@ class TestGuildChannelEdit:
         channel._state.http.edit_channel.assert_awaited_once_with(
             channel.id, permission_overwrites=[], reason=None
         )
+
+
+class TestUserProtocol:
+    def handle_abc_user(self, user: disnake.abc.User) -> None:
+        ...
+
+    def _test_typing_assignable(self):
+        # All of these should match the abc.User protocol and thus type-check correctly
+        # (they could just inherit from the protocol to ensure correct implementation,
+        # but we really only want structural (i.e. implicit) subtyping)
+        self.handle_abc_user(cast(disnake.User, ...))
+        self.handle_abc_user(cast(disnake.ClientUser, ...))
+        self.handle_abc_user(cast(disnake.Member, ...))
