@@ -2084,7 +2084,7 @@ class ChannelFlags(BaseFlags):
 
     @flag_value
     def hide_media_download_options(self):
-        """:class:`bool`: Returns ``True`` if the channel requires all newly created threads to have a tag.
+        """:class:`bool`: Returns ``True`` if the channel hides the embedded media download options.
 
         This only applies to channels of type :class:`MediaChannel`.
 
