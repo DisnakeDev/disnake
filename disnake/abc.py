@@ -1294,8 +1294,7 @@ class GuildChannel(ABC):
             .. warning::
 
                 If the guild is not a Community guild (has ``COMMUNITY`` in :attr:`.Guild.features`),
-                this must be set to a time between ``0`` and ``2_592_000`` seconds.
-
+                this must be set to a time between ``0`` and ``2,592,000`` seconds.
         max_uses: :class:`int`
             How many uses the invite could be used for. If it's 0 then there
             are unlimited uses. Defaults to ``0``.
