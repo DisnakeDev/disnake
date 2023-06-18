@@ -1298,7 +1298,6 @@ class GuildChannel(ABC):
         max_uses: :class:`int`
             How many uses the invite could be used for. If it's 0 then there
             are unlimited uses. Defaults to ``0``.
-
         temporary: :class:`bool`
             Whether the invite grants temporary membership
             (i.e. they get kicked after they disconnect). Defaults to ``False``.
