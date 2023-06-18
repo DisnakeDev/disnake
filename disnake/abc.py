@@ -38,6 +38,7 @@ from .file import File
 from .flags import ChannelFlags, MessageFlags
 from .invite import Invite
 from .mentions import AllowedMentions
+from .object import Object
 from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite, Permissions
 from .role import Role
@@ -142,8 +143,6 @@ class User(Snowflake, Protocol):
     global_name: Optional[:class:`str`]
         The user's global display name, if set.
         This takes precedence over :attr:`.name` when shown.
-
-        For bots, this is the application name.
 
         .. versionadded:: 2.9
 
@@ -799,8 +798,8 @@ class GuildChannel(ABC):
         # if you have a timeout then you can't have any permissions
         # except read messages and read message history
         if not ignore_timeout and obj.current_timeout:
-            denied = Permissions(view_channel=True, read_message_history=True)
-            base.value &= denied.value
+            allowed = Permissions(view_channel=True, read_message_history=True)
+            base.value &= allowed.value
 
         return base
 
@@ -1277,7 +1276,7 @@ class GuildChannel(ABC):
         unique: bool = True,
         target_type: Optional[InviteTarget] = None,
         target_user: Optional[User] = None,
-        target_application: Optional[PartyType] = None,
+        target_application: Optional[Union[Snowflake, PartyType]] = None,
         guild_scheduled_event: Optional[GuildScheduledEvent] = None,
     ) -> Invite:
         """|coro|
@@ -1292,6 +1291,12 @@ class GuildChannel(ABC):
         max_age: :class:`int`
             How long the invite should last in seconds. If it's 0 then the invite
             doesn't expire. Defaults to ``0``.
+
+            .. warning::
+
+                If the guild is not a Community guild (has ``COMMUNITY`` in :attr:`.Guild.features`),
+                this must be set to a time between ``1`` and ``2592000`` seconds.
+
         max_uses: :class:`int`
             How many uses the invite could be used for. If it's 0 then there
             are unlimited uses. Defaults to ``0``.
@@ -1313,10 +1318,13 @@ class GuildChannel(ABC):
 
             .. versionadded:: 2.0
 
-        target_application: Optional[:class:`.PartyType`]
+        target_application: Optional[:class:`.Snowflake`]
             The ID of the embedded application for the invite, required if `target_type` is `TargetType.embedded_application`.
 
             .. versionadded:: 2.0
+
+            .. versionchanged:: 2.9
+                ``PartyType`` is deprecated, and :class:`.Snowflake` should be used instead.
 
         guild_scheduled_event: Optional[:class:`.GuildScheduledEvent`]
             The guild scheduled event to include with the invite.
@@ -1338,6 +1346,12 @@ class GuildChannel(ABC):
         :class:`.Invite`
             The newly created invite.
         """
+        if isinstance(target_application, PartyType):
+            utils.warn_deprecated(
+                "PartyType is deprecated and will be removed in future version",
+                stacklevel=2,
+            )
+            target_application = Object(target_application.value)
         data = await self._state.http.create_invite(
             self.id,
             reason=reason,
@@ -1347,7 +1361,7 @@ class GuildChannel(ABC):
             unique=unique,
             target_type=try_enum_to_int(target_type),
             target_user_id=target_user.id if target_user else None,
-            target_application_id=try_enum_to_int(target_application),
+            target_application_id=target_application.id if target_application else None,
         )
         invite = Invite.from_incomplete(data=data, state=self._state)
         invite.guild_scheduled_event = guild_scheduled_event

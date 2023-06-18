@@ -1141,8 +1141,7 @@ class Guild(Hashable):
         2. Lookup by global name.
         3. Lookup by username.
 
-        While the migration away from discriminators is still ongoing,
-        the name can have an optional discriminator argument, e.g. "Jake#0001",
+        The name can have an optional discriminator argument, e.g. "Jake#0001",
         in which case it will be treated as a username + discriminator combo
         (note: this only works with usernames, not nicknames).
 

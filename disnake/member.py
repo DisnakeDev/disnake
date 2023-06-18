@@ -491,7 +491,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     @property
     def discriminator(self) -> str:
-        """:class:`str`:The user's discriminator.
+        """:class:`str`: The user's discriminator.
 
         .. note::
             This is being phased out by Discord; the username system is moving away from ``username#discriminator``

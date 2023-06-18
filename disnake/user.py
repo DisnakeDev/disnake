@@ -8,7 +8,7 @@ import disnake.abc
 
 from .asset import Asset
 from .colour import Colour
-from .enums import DefaultAvatar, Locale, try_enum
+from .enums import Locale, try_enum
 from .flags import PublicUserFlags
 from .utils import MISSING, _assetbytes_to_base64_data, snowflake_time
 
@@ -157,11 +157,11 @@ class BaseUser(_UserTag):
             Added handling for users migrated to the new username system without discriminators.
         """
         if self.discriminator == "0":
-            num = self.id >> 22
+            index = (self.id >> 22) % 6
         else:
             # legacy behavior
-            num = int(self.discriminator)
-        return Asset._from_default_avatar(self._state, num % len(DefaultAvatar))
+            index = int(self.discriminator) % 5
+        return Asset._from_default_avatar(self._state, index)
 
     @property
     def display_avatar(self) -> Asset:
@@ -308,17 +308,9 @@ class ClientUser(BaseUser):
     discriminator: :class:`str`
         The user's discriminator.
 
-        .. note::
-            This is being phased out by Discord; the username system is moving away from ``username#discriminator``
-            to users having a globally unique username.
-            The value of a single zero (``"0"``) indicates that the user has been migrated to the new system.
-            See the `help article <https://dis.gd/app-usernames>`__ for details.
-
     global_name: Optional[:class:`str`]
         The user's global display name, if set.
         This takes precedence over :attr:`.name` when shown.
-
-        For bots, this is the application name.
 
         .. versionadded:: 2.9
 
@@ -463,8 +455,6 @@ class User(BaseUser, disnake.abc.Messageable):
     global_name: Optional[:class:`str`]
         The user's global display name, if set.
         This takes precedence over :attr:`.name` when shown.
-
-        For bots, this is the application name.
 
         .. versionadded:: 2.9
 

@@ -6,6 +6,7 @@ import asyncio
 import datetime
 import io
 import re
+from base64 import b64decode, b64encode
 from os import PathLike
 from typing import (
     TYPE_CHECKING,
@@ -260,7 +261,7 @@ class Attachment(Hashable):
         case of images. When the message is deleted, this URL might be valid for a few
         minutes or not valid at all.
     content_type: Optional[:class:`str`]
-        The attachment's `media type <https://en.wikipedia.org/wiki/Media_type>`_
+        The attachment's `media type <https://en.wikipedia.org/wiki/Media_type>`_.
 
         .. versionadded:: 1.7
 
@@ -270,9 +271,21 @@ class Attachment(Hashable):
         .. versionadded:: 2.1
 
     description: :class:`str`
-        The attachment's description
+        The attachment's description.
 
         .. versionadded:: 2.3
+
+    duration: Optional[:class:`float`]
+        The duration of the audio attachment in seconds, if this is attached to a voice message
+        (see :attr:`MessageFlags.is_voice_message`).
+
+        .. versionadded:: 2.9
+
+    waveform: Optional[:class:`bytes`]
+        The byte array representing a sampled waveform, if this is attached to a voice message
+        (see :attr:`MessageFlags.is_voice_message`).
+
+        .. versionadded:: 2.9
     """
 
     __slots__ = (
@@ -287,6 +300,8 @@ class Attachment(Hashable):
         "content_type",
         "ephemeral",
         "description",
+        "duration",
+        "waveform",
     )
 
     def __init__(self, *, data: AttachmentPayload, state: ConnectionState) -> None:
@@ -301,6 +316,10 @@ class Attachment(Hashable):
         self.content_type: Optional[str] = data.get("content_type")
         self.ephemeral: bool = data.get("ephemeral", False)
         self.description: Optional[str] = data.get("description")
+        self.duration: Optional[float] = data.get("duration_secs")
+        self.waveform: Optional[bytes] = (
+            b64decode(waveform_data) if (waveform_data := data.get("waveform")) else None
+        )
 
     def is_spoiler(self) -> bool:
         """Whether this attachment contains a spoiler.
@@ -475,6 +494,10 @@ class Attachment(Hashable):
             result["content_type"] = self.content_type
         if self.description:
             result["description"] = self.description
+        if self.duration is not None:
+            result["duration_secs"] = self.duration
+        if self.waveform is not None:
+            result["waveform"] = b64encode(self.waveform).decode("ascii")
         return result
 
 

@@ -42,6 +42,8 @@ class Attachment(TypedDict):
     height: NotRequired[Optional[int]]
     width: NotRequired[Optional[int]]
     ephemeral: NotRequired[bool]
+    duration_secs: NotRequired[float]
+    waveform: NotRequired[str]
 
 
 MessageActivityType = Literal[1, 2, 3, 5]
