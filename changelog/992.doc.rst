@@ -1,0 +1,1 @@
+Clarify docs about the :func:`.on_member_update` and :func:`.on_raw_member_update` events.

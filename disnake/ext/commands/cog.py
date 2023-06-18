@@ -723,7 +723,15 @@ class Cog(metaclass=CogMeta):
         pass
 
     def _inject(self, bot: AnyBot) -> Self:
+        from .bot import AutoShardedInteractionBot, InteractionBot
+
         cls = self.__class__
+
+        if (
+            isinstance(bot, (InteractionBot, AutoShardedInteractionBot))
+            and len(self.__cog_commands__) > 0
+        ):
+            raise TypeError("@commands.command is not supported for interaction bots.")
 
         # realistically, the only thing that can cause loading errors
         # is essentially just the command loading, which raises if there are
@@ -766,10 +774,16 @@ class Cog(metaclass=CogMeta):
 
         # check if we're overriding the default
         if cls.bot_check is not Cog.bot_check:
-            bot.add_check(self.bot_check)  # type: ignore
+            if isinstance(bot, (InteractionBot, AutoShardedInteractionBot)):
+                raise TypeError("Cog.bot_check is not supported for interaction bots.")
+
+            bot.add_check(self.bot_check)
 
         if cls.bot_check_once is not Cog.bot_check_once:
-            bot.add_check(self.bot_check_once, call_once=True)  # type: ignore
+            if isinstance(bot, (InteractionBot, AutoShardedInteractionBot)):
+                raise TypeError("Cog.bot_check_once is not supported for interaction bots.")
+
+            bot.add_check(self.bot_check_once, call_once=True)
 
         # Add application command checks
         if cls.bot_slash_command_check is not Cog.bot_slash_command_check:
