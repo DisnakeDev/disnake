@@ -630,7 +630,7 @@ class GuildChannel(ABC):
         """
         return f"https://discord.com/channels/{self.guild.id}/{self.id}"
 
-    def _apply_implict_permissions(self, base: Permissions) -> Permissions:
+    def _apply_implict_permissions(self, base: Permissions) -> None:
         # if you can't send a message in a channel then you can't have certain
         # permissions as well
         if not base.send_messages:
@@ -644,8 +644,6 @@ class GuildChannel(ABC):
         if not base.view_channel:
             denied = Permissions.all_channel()
             base.value &= ~denied.value
-
-        return base
 
     def permissions_for(
         self,
