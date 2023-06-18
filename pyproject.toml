@@ -52,7 +52,7 @@ voice = [
     "PyNaCl>=1.3.0,<1.6",
 ]
 docs = [
-    "sphinx==7.0.0",
+    "sphinx==7.0.1",
     "sphinxcontrib-trio~=1.1.2",
     "sphinx-hoverxref==1.3.0",
     "sphinx-autobuild~=2021.3",
