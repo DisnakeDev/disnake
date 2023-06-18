@@ -1,0 +1,1 @@
+Fix :meth:`ForumChannel.create_thread` usage with files only (and no other content), and fix file descriptions not being sent on thread creation.

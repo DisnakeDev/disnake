@@ -19,7 +19,6 @@ import re
 import subprocess  # noqa: TID251
 import sys
 from typing import Any, Dict, Optional
-from urllib.parse import urljoin
 
 from sphinx.application import Sphinx
 
@@ -48,6 +47,8 @@ extensions = [
     "sphinxcontrib.towncrier.ext",
     "hoverxref.extension",
     "notfound.extension",
+    "redirects",
+    "fulltoc",
     "exception_hierarchy",
     "attributetable",
     "resourcelinks",
@@ -89,8 +90,8 @@ source_suffix = ".rst"
 # The encoding of source files.
 # source_encoding = 'utf-8-sig'
 
-# The master toctree document.
-master_doc = "index"
+# The root toctree document.
+root_doc = "index"
 
 # General information about the project.
 project = "disnake"
@@ -257,10 +258,22 @@ if _IS_READTHEDOCS:
 if not _IS_READTHEDOCS:
     notfound_urls_prefix = "/"
 
+# ignore common link types that we don't particularly care about or are unable to check
 linkcheck_ignore = [
     r"https?://github.com/.+?/.+?/(issues|pull)/\d+",
     r"https?://support.discord.com/",
 ]
+
+if _IS_READTHEDOCS:
+    # set html_baseurl based on readthedocs-provided env variable
+    # https://github.com/readthedocs/readthedocs.org/pull/10224
+    # https://docs.readthedocs.io/en/stable/reference/environment-variables.html#envvar-READTHEDOCS_CANONICAL_URL
+    html_baseurl = os.environ.get("READTHEDOCS_CANONICAL_URL")
+    if not html_baseurl:
+        raise RuntimeError("Expected `READTHEDOCS_CANONICAL_URL` to be set on readthedocs")
+
+    # enable opensearch (see description somewhere below)
+    html_use_opensearch = html_baseurl.rstrip("/")
 
 
 # -- Options for HTML output ----------------------------------------------
@@ -358,7 +371,7 @@ html_static_path = ["_static"]
 # If true, an OpenSearch description file will be output, and all pages will
 # contain a <link> tag referring to it.  The value of this option must be the
 # base URL from which the finished HTML is served.
-# html_use_opensearch = ''
+# html_use_opensearch = ''  # NOTE: this is being set above
 
 # This is the file name suffix for HTML files (e.g. ".xhtml").
 # html_file_suffix = None
@@ -377,7 +390,12 @@ html_static_path = ["_static"]
 # implements a search results scorer. If empty, the default will be used.
 html_search_scorer = "_static/scorer.js"
 
-html_js_files = ["custom.js", "copy.js", "sidebar.js", "touch.js"]
+html_js_files = [
+    "custom.js",
+    "copy.js",
+    "sidebar.js",
+    "touch.js",
+]
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = "disnake.pydoc"
@@ -468,19 +486,6 @@ def setup(app: Sphinx) -> None:
         app.config.intersphinx_mapping["py"] = ("https://docs.python.org/ja/3", None)
         app.config.html_context["discord_invite"] = "https://discord.gg/disnake"
         app.config.resource_links["disnake"] = "https://discord.gg/disnake"
-
-    # readthedocs appends additional stuff to conf.py,
-    # we can't access it above since it wouldn't have run yet
-    if _IS_READTHEDOCS:
-        # this is the "canonical" url, which always points to stable in our case
-        if not (base_url := globals().get("html_baseurl")):
-            raise RuntimeError("Expected `html_baseurl` to be set on readthedocs")
-
-        # special case for convenience: if latest, use that for opensearch
-        if os.environ["READTHEDOCS_VERSION"] == "latest":
-            base_url = urljoin(base_url, "../latest")
-
-        app.config["html_use_opensearch"] = base_url.rstrip("/")
 
     # HACK: avoid deprecation warnings caused by sphinx always iterating over all class attributes
     import disnake

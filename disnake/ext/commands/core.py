@@ -559,7 +559,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
         if view.eof:
             if param.kind == param.VAR_POSITIONAL:
-                raise RuntimeError()  # break the loop
+                raise RuntimeError  # break the loop
             if required:
                 if self._is_typing_optional(param.annotation):
                     return None
@@ -574,7 +574,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         else:
             try:
                 argument = view.get_quoted_word()
-            except ArgumentParsingError as exc:
+            except ArgumentParsingError:
                 if (
                     self._is_typing_optional(param.annotation)
                     and not param.kind == param.VAR_POSITIONAL
@@ -582,7 +582,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
                     view.index = previous
                     return None
                 else:
-                    raise exc
+                    raise
         view.previous = previous
 
         # type-checker fails to narrow argument
@@ -621,7 +621,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             value = await run_converters(ctx, converter, argument, param)  # type: ignore
         except (CommandError, ArgumentParsingError):
             view.index = previous
-            raise RuntimeError() from None  # break loop
+            raise RuntimeError from None  # break loop
         else:
             return value
 
@@ -728,7 +728,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             except StopIteration:
                 raise disnake.ClientException(
                     f'Callback for {self.name} command is missing "self" parameter.'
-                )
+                ) from None
 
         # next we have the 'ctx' as the next parameter
         try:
@@ -736,7 +736,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         except StopIteration:
             raise disnake.ClientException(
                 f'Callback for {self.name} command is missing "ctx" parameter.'
-            )
+            ) from None
 
         for name, param in iterator:
             ctx.current_parameter = param
@@ -904,7 +904,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         await self.prepare(ctx)
 
         # terminate the invoked_subcommand chain.
-        # since we're in a regular command (and not a group) then
+        # since we're in a regular prefix command (and not a group) then
         # the invoked subcommand is None.
         ctx.invoked_subcommand = None
         ctx.subcommand_passed = None
@@ -1879,7 +1879,7 @@ def has_role(item: Union[int, str]) -> Callable[[T], T]:
 
     def predicate(ctx: AnyContext) -> bool:
         if ctx.guild is None:
-            raise NoPrivateMessage()
+            raise NoPrivateMessage
 
         # ctx.guild is None doesn't narrow ctx.author to Member
         if isinstance(item, int):
@@ -1927,7 +1927,7 @@ def has_any_role(*items: Union[int, str]) -> Callable[[T], T]:
 
     def predicate(ctx: AnyContext) -> bool:
         if ctx.guild is None:
-            raise NoPrivateMessage()
+            raise NoPrivateMessage
 
         # ctx.guild is None doesn't narrow ctx.author to Member
         getter = functools.partial(disnake.utils.get, ctx.author.roles)  # type: ignore
@@ -1958,7 +1958,7 @@ def bot_has_role(item: int) -> Callable[[T], T]:
 
     def predicate(ctx: AnyContext) -> bool:
         if ctx.guild is None:
-            raise NoPrivateMessage()
+            raise NoPrivateMessage
 
         me = cast(disnake.Member, ctx.me)
         if isinstance(item, int):
@@ -1988,7 +1988,7 @@ def bot_has_any_role(*items: int) -> Callable[[T], T]:
 
     def predicate(ctx: AnyContext) -> bool:
         if ctx.guild is None:
-            raise NoPrivateMessage()
+            raise NoPrivateMessage
 
         me = cast(disnake.Member, ctx.me)
         getter = functools.partial(disnake.utils.get, me.roles)
@@ -2026,6 +2026,7 @@ def has_permissions(
     manage_emojis_and_stickers: bool = ...,
     manage_events: bool = ...,
     manage_guild: bool = ...,
+    manage_guild_expressions: bool = ...,
     manage_messages: bool = ...,
     manage_nicknames: bool = ...,
     manage_permissions: bool = ...,
@@ -2043,17 +2044,21 @@ def has_permissions(
     send_messages: bool = ...,
     send_messages_in_threads: bool = ...,
     send_tts_messages: bool = ...,
+    send_voice_messages: bool = ...,
     speak: bool = ...,
     start_embedded_activities: bool = ...,
     stream: bool = ...,
     use_application_commands: bool = ...,
     use_embedded_activities: bool = ...,
     use_external_emojis: bool = ...,
+    use_external_sounds: bool = ...,
     use_external_stickers: bool = ...,
     use_slash_commands: bool = ...,
+    use_soundboard: bool = ...,
     use_voice_activation: bool = ...,
     view_audit_log: bool = ...,
     view_channel: bool = ...,
+    view_creator_monetization_analytics: bool = ...,
     view_guild_insights: bool = ...,
 ) -> Callable[[T], T]:
     ...
@@ -2143,6 +2148,7 @@ def bot_has_permissions(
     manage_emojis_and_stickers: bool = ...,
     manage_events: bool = ...,
     manage_guild: bool = ...,
+    manage_guild_expressions: bool = ...,
     manage_messages: bool = ...,
     manage_nicknames: bool = ...,
     manage_permissions: bool = ...,
@@ -2160,17 +2166,21 @@ def bot_has_permissions(
     send_messages: bool = ...,
     send_messages_in_threads: bool = ...,
     send_tts_messages: bool = ...,
+    send_voice_messages: bool = ...,
     speak: bool = ...,
     start_embedded_activities: bool = ...,
     stream: bool = ...,
     use_application_commands: bool = ...,
     use_embedded_activities: bool = ...,
     use_external_emojis: bool = ...,
+    use_external_sounds: bool = ...,
     use_external_stickers: bool = ...,
     use_slash_commands: bool = ...,
+    use_soundboard: bool = ...,
     use_voice_activation: bool = ...,
     view_audit_log: bool = ...,
     view_channel: bool = ...,
+    view_creator_monetization_analytics: bool = ...,
     view_guild_insights: bool = ...,
 ) -> Callable[[T], T]:
     ...
@@ -2238,6 +2248,7 @@ def has_guild_permissions(
     manage_emojis_and_stickers: bool = ...,
     manage_events: bool = ...,
     manage_guild: bool = ...,
+    manage_guild_expressions: bool = ...,
     manage_messages: bool = ...,
     manage_nicknames: bool = ...,
     manage_permissions: bool = ...,
@@ -2255,17 +2266,21 @@ def has_guild_permissions(
     send_messages: bool = ...,
     send_messages_in_threads: bool = ...,
     send_tts_messages: bool = ...,
+    send_voice_messages: bool = ...,
     speak: bool = ...,
     start_embedded_activities: bool = ...,
     stream: bool = ...,
     use_application_commands: bool = ...,
     use_embedded_activities: bool = ...,
     use_external_emojis: bool = ...,
+    use_external_sounds: bool = ...,
     use_external_stickers: bool = ...,
     use_slash_commands: bool = ...,
+    use_soundboard: bool = ...,
     use_voice_activation: bool = ...,
     view_audit_log: bool = ...,
     view_channel: bool = ...,
+    view_creator_monetization_analytics: bool = ...,
     view_guild_insights: bool = ...,
 ) -> Callable[[T], T]:
     ...
@@ -2330,6 +2345,7 @@ def bot_has_guild_permissions(
     manage_emojis_and_stickers: bool = ...,
     manage_events: bool = ...,
     manage_guild: bool = ...,
+    manage_guild_expressions: bool = ...,
     manage_messages: bool = ...,
     manage_nicknames: bool = ...,
     manage_permissions: bool = ...,
@@ -2347,17 +2363,21 @@ def bot_has_guild_permissions(
     send_messages: bool = ...,
     send_messages_in_threads: bool = ...,
     send_tts_messages: bool = ...,
+    send_voice_messages: bool = ...,
     speak: bool = ...,
     start_embedded_activities: bool = ...,
     stream: bool = ...,
     use_application_commands: bool = ...,
     use_embedded_activities: bool = ...,
     use_external_emojis: bool = ...,
+    use_external_sounds: bool = ...,
     use_external_stickers: bool = ...,
     use_slash_commands: bool = ...,
+    use_soundboard: bool = ...,
     use_voice_activation: bool = ...,
     view_audit_log: bool = ...,
     view_channel: bool = ...,
+    view_creator_monetization_analytics: bool = ...,
     view_guild_insights: bool = ...,
 ) -> Callable[[T], T]:
     ...
@@ -2408,7 +2428,7 @@ def dm_only() -> Callable[[T], T]:
 
     def predicate(ctx: AnyContext) -> bool:
         if ctx.guild is not None:
-            raise PrivateMessageOnly()
+            raise PrivateMessageOnly
         return True
 
     return check(predicate)
@@ -2425,7 +2445,7 @@ def guild_only() -> Callable[[T], T]:
 
     def predicate(ctx: AnyContext) -> bool:
         if ctx.guild is None:
-            raise NoPrivateMessage()
+            raise NoPrivateMessage
         return True
 
     return check(predicate)

@@ -52,7 +52,7 @@ voice = [
     "PyNaCl>=1.3.0,<1.6",
 ]
 docs = [
-    "sphinx==6.0.1",
+    "sphinx==7.0.1",
     "sphinxcontrib-trio~=1.1.2",
     "sphinx-hoverxref==1.3.0",
     "sphinx-autobuild~=2021.3",
@@ -72,7 +72,7 @@ tools = [
     "python-dotenv~=1.0.0",
     "towncrier==22.12.0",
     "check-manifest==0.49",
-    "ruff==0.0.252",
+    "ruff==0.0.261",
 ]
 codemod = [
     # run codemods on the respository (mostly automated typing)
@@ -142,7 +142,7 @@ select = [
     # "ANN", # flake8-annotations
     "S", # flake8-bandit
     "B", # flake8-bugbear
-    "C", # flake8-comprehensions
+    "C4", # flake8-comprehensions
     "DTZ", # flake8-datetimez
     # "EM", # flake8-errmsg
     "G", # flake8-logging-format
@@ -153,13 +153,14 @@ select = [
     "RUF",    # ruff specific exceptions
     "PT",     # flake8-pytest-style
     "Q",      # flake8-quotes
+    "RSE",    # flake8-raise
     "T20",    # flake8-print
     "PGH",    # pygrep-hooks
     "PLC",    # pylint convention
     "PLE",    # pylint error
     # "PLR",    # pylint refactor
     "PLW",    # pylint warnings
-    "TRY002", "TRY004", # tryceratops
+    "TRY002", "TRY004", "TRY201", # tryceratops
 ]
 ignore = [
     # star imports
@@ -185,6 +186,7 @@ ignore = [
     # import aliases are fixed by isort
     "PLC0414",
 
+
     # outer loop variables are overwritten by inner assignment target, these are mostly intentional
     "PLW2901",
 
@@ -196,7 +198,6 @@ ignore = [
     "B026",   # backwards star-arg unpacking
     "E501",   # line too long
     "E731",   # assigning lambdas to variables
-    "RUF004", # keyword args must be supplied after starred arguments
     "T201",   # print statements
 ]
 
@@ -218,8 +219,9 @@ ignore = [
 # we are not using noqa in the example files themselves
 "examples/*.py" = [
     "B008", # do not perform function calls in argument defaults, this is how most commands work
-    "T201", # print found, printing is okay in examples
     "PT",   # this is not a module of pytest tests
+    "S311", # pseudo-random generators aren't suitable for cryptographic purposes
+    "T201", # print found, printing is okay in examples
 ]
 "examples/basic_voice.py" = ["S104"] # possible binding to all interfaces
 "examples/views/tic_tac_toe.py" = ["E741"] # ambigious variable name: `O`

@@ -13,7 +13,7 @@ import re
 import sys
 import unicodedata
 import warnings
-from base64 import b64encode, urlsafe_b64decode as b64decode
+from base64 import b64encode
 from bisect import bisect_left
 from inspect import getdoc as _getdoc, isawaitable as _isawaitable, signature as _signature
 from operator import attrgetter
@@ -58,7 +58,6 @@ else:
 
 __all__ = (
     "oauth_url",
-    "parse_token",
     "snowflake_time",
     "time_snowflake",
     "find",
@@ -330,31 +329,6 @@ def oauth_url(
     return url
 
 
-def parse_token(token: str) -> Tuple[int, datetime.datetime, bytes]:
-    """Parse a token into its parts
-
-    Parameters
-    ----------
-    token: :class:`str`
-        The bot token
-
-    Returns
-    -------
-    Tuple[:class:`int`, :class:`datetime.datetime`, :class:`bytes`]
-        The bot's ID, the time when the token was generated and the hmac.
-    """
-    parts = token.split(".")
-
-    user_id = int(b64decode(parts[0]))
-
-    timestamp = int.from_bytes(b64decode(parts[1] + "=="), "big")
-    created_at = datetime.datetime.fromtimestamp(timestamp, datetime.timezone.utc)
-
-    hmac = b64decode(parts[2] + "==")
-
-    return user_id, created_at, hmac
-
-
 def snowflake_time(id: int) -> datetime.datetime:
     """Parameters
     ----------
@@ -609,7 +583,7 @@ async def sane_wait_for(futures: Iterable[Awaitable[T]], *, timeout: float) -> S
     done, pending = await asyncio.wait(ensured, timeout=timeout, return_when=asyncio.ALL_COMPLETED)
 
     if len(pending) != 0:
-        raise asyncio.TimeoutError()
+        raise asyncio.TimeoutError
 
     return done
 
