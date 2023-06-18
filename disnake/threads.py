@@ -422,10 +422,14 @@ class Thread(Messageable, Hashable):
         """Handles permission resolution for the :class:`~disnake.Member`
         or :class:`~disnake.Role`.
 
-        Since threads do not have their own permissions, they inherit them
-        from the parent channel. This is a convenience method for
-        calling :meth:`~disnake.TextChannel.permissions_for` on the
-        parent channel.
+        While threads cannot have permissions set on them directly,
+        the permission context is different than an full fledged channel,
+        and so this method has different behavior than calling
+        the parent's :attr:`GuildChannel.permissions_for <.abc.GuildChannel.permissions_for>` method directly.
+
+        .. versionchanged:: 2.9
+            Properly takes :attr:`Permissions.send_messages_in_threads`
+            into consideration.
 
         Parameters
         ----------
