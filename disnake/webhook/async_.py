@@ -1213,6 +1213,7 @@ class Webhook(BaseWebhook):
                 "username": user.name,
                 "discriminator": user.discriminator,
                 "id": user.id,
+                "global_name": user.global_name,
                 "avatar": user._avatar,
             },
         }

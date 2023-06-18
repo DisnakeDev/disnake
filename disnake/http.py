@@ -1237,11 +1237,15 @@ class HTTPClient:
         )
         payload = {k: v for k, v in fields.items() if k in valid_thread_keys}
         payload["message"] = {k: v for k, v in fields.items() if k in valid_message_keys}
+
         route = Route("POST", "/channels/{channel_id}/threads", channel_id=channel_id)
         query_params = {"use_nested_fields": 1}
 
         if files:
-            multipart = to_multipart_with_attachments(payload, files)
+            # This cannot directly call `to_multipart_with_attachments`,
+            # since attachment data needs to be added to the nested `message` object
+            set_attachments(payload["message"], files)
+            multipart = to_multipart(payload, files)
 
             return self.request(
                 route, form=multipart, params=query_params, files=files, reason=reason
@@ -1385,6 +1389,7 @@ class HTTPClient:
             "public_updates_channel_id",
             "preferred_locale",
             "premium_progress_bar_enabled",
+            "safety_alerts_channel_id",
         )
 
         payload = {k: v for k, v in fields.items() if k in valid_keys}
