@@ -247,6 +247,12 @@ ChannelType
 
         .. versionadded:: 2.5
 
+    .. attribute:: media
+
+        A channel of only threads but for media, similar to forum channels.
+
+        .. versionadded:: 2.9
+
 ThreadArchiveDuration
 ~~~~~~~~~~~~~~~~~~~~~
 
