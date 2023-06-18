@@ -982,7 +982,7 @@ class BaseWebhook(Hashable):
 
         If this is a partial webhook, then this will always return ``None``.
 
-        Webhooks in channels of types :class:`ForumChannel' or :class:`MediaChannel` can not send messages directly.
+        Webhooks in channels of types :class:`ForumChannel` or :class:`MediaChannel` can not send messages directly.
         They can only create new threads (see ``thread_name`` for :attr:`Webhook.send`)
         and interact with existing threads.
         """
