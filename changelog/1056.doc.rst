@@ -1,0 +1,1 @@
+Add note to :attr:`GuildChannel.create_invite <.abc.GuildChannel.create_invite>` and all subclasses about the new 30 day expiration limit imposed for non-community guilds.
