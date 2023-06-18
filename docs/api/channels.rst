@@ -92,6 +92,19 @@ ForumChannel
     .. automethod:: typing
         :async-with:
 
+MediaChannel
+~~~~~~~~~~~~
+
+.. attributetable:: MediaChannel
+
+.. autoclass:: MediaChannel()
+    :members:
+    :inherited-members:
+    :exclude-members: typing
+
+    .. automethod:: typing
+        :async-with:
+
 DMChannel
 ~~~~~~~~~
 
