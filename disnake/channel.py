@@ -103,8 +103,11 @@ async def _single_delete_strategy(messages: Iterable[Message]) -> None:
 
 
 class WebhookableChannel:
-    id: int
-    _state: ConnectionState
+    __slots__ = ()
+
+    if TYPE_CHECKING:
+        id: int
+        _state: ConnectionState
 
     async def webhooks(self) -> List[Webhook]:
         """|coro|
@@ -3613,7 +3616,7 @@ class ForumChannel(ThreadOnlyGuildChannel, WebhookableChannel):
         .. versionadded:: 2.8
     """
 
-    __slots__ = ()
+    __slots__ = ("default_layout",)
 
     def _update(self, guild: Guild, data: ForumChannelPayload):
         super()._update(guild=guild, data=data)
