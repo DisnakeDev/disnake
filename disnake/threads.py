@@ -424,8 +424,8 @@ class Thread(Messageable, Hashable):
 
         Since threads do not have their own permissions, they inherit them
         from the parent channel.
-        However, the permission context is different than an full fledged channel,
-        and so this method has different behavior than calling the parent's
+        However, the permission context is different compared to a normal channel,
+        so this method has different behavior than calling the parent's
         :attr:`GuildChannel.permissions_for <.abc.GuildChannel.permissions_for>`
         method directly.
 
