@@ -633,6 +633,21 @@ class GuildChannel(ABC):
         """
         return f"https://discord.com/channels/{self.guild.id}/{self.id}"
 
+    def _apply_implict_permissions(self, base: Permissions) -> None:
+        # if you can't send a message in a channel then you can't have certain
+        # permissions as well
+        if not base.send_messages:
+            base.send_tts_messages = False
+            base.send_voice_messages = False
+            base.mention_everyone = False
+            base.embed_links = False
+            base.attach_files = False
+
+        # if you can't view a channel then you have no permissions there
+        if not base.view_channel:
+            denied = Permissions.all_channel()
+            base.value &= ~denied.value
+
     def permissions_for(
         self,
         obj: Union[Member, Role],
@@ -784,25 +799,11 @@ class GuildChannel(ABC):
                 base.handle_overwrite(allow=overwrite.allow, deny=overwrite.deny)
                 break
 
-        # if you can't send a message in a channel then you can't have certain
-        # permissions as well
-        if not base.send_messages:
-            base.send_tts_messages = False
-            base.send_voice_messages = False
-            base.mention_everyone = False
-            base.embed_links = False
-            base.attach_files = False
-
-        # if you can't view a channel then you have no permissions there
-        if not base.view_channel:
-            denied = Permissions.all_channel()
-            base.value &= ~denied.value
-
         # if you have a timeout then you can't have any permissions
         # except read messages and read message history
         if not ignore_timeout and obj.current_timeout:
-            denied = Permissions(view_channel=True, read_message_history=True)
-            base.value &= denied.value
+            allowed = Permissions(view_channel=True, read_message_history=True)
+            base.value &= allowed.value
 
         return base
 
