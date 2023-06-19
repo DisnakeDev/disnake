@@ -146,8 +146,6 @@ class User(Snowflake, Protocol):
 
         .. versionadded:: 2.9
 
-    avatar: :class:`~disnake.Asset`
-        The avatar asset the user has.
     bot: :class:`bool`
         Whether the user is a bot account.
     """
@@ -157,7 +155,6 @@ class User(Snowflake, Protocol):
     name: str
     discriminator: str
     global_name: Optional[str]
-    avatar: Asset
     bot: bool
 
     @property
@@ -168,6 +165,13 @@ class User(Snowflake, Protocol):
     @property
     def mention(self) -> str:
         """:class:`str`: Returns a string that allows you to mention the given user."""
+        raise NotImplementedError
+
+    @property
+    def avatar(self) -> Optional[Asset]:
+        """Optional[:class:`~disnake.Asset`]: Returns an :class:`~disnake.Asset` for
+        the avatar the user has.
+        """
         raise NotImplementedError
 
 
