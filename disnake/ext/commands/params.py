@@ -303,7 +303,7 @@ class _BaseRange(ABC):
             disnake.utils.warn_deprecated(
                 f"Using `{name}` without an explicit type argument is deprecated, "
                 "as this form does not work well with modern type-checkers. "
-                f"Use `{name}[<type>, {params[0]!r}, {params[1]!r}]` instead.",
+                f"Use `{name}[<type>, <min>, <max>]` instead.",
                 stacklevel=2,
             )
             # infer type from min/max values
