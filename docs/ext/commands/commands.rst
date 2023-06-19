@@ -371,8 +371,8 @@ For example, to receive a :class:`Member` you can just pass it as a converter:
         await ctx.send(f'{member} joined on {member.joined_at}')
 
 When this command is executed, it attempts to convert the string given into a :class:`Member` and then passes it as a
-parameter for the function. This works by checking if the string is a mention, an ID, a nickname, a username + discriminator,
-or just a regular username. The default set of converters have been written to be as easy to use as possible.
+parameter for the function. This works by checking if the string is a mention, an ID, a username + discriminator,
+a nickname, a global name, or just a regular username. The default set of converters have been written to be as easy to use as possible.
 
 A lot of Discord models work out of the gate as a parameter:
 
