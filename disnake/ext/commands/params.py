@@ -1059,7 +1059,8 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
     Returns the created options
     """
     sig = signature(command.callback)
-    # pass `sig` down to avoid having to call `signature(func)` another time
+    # pass `sig` down to avoid having to call `signature(func)` another time,
+    # which may cause side effects with deferred annotations and warnings
     _, inter_param, params, injections = collect_params(command.callback, sig)
 
     if inter_param is None:
