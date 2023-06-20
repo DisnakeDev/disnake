@@ -22,6 +22,11 @@ in specific versions. Please see :ref:`version_guarantees` for more information.
 v2.9.0
 ------
 
+This release comes with support for the new username system, text in stage, role subscriptions, silent messages, and onboarding.
+We've also done a refactor of the documentation to remove the monolithic API Reference page.
+
+See below for a complete list of changes.
+
 Deprecations
 ~~~~~~~~~~~~
 - :attr:`AutoModTriggerType.harmful_link` is obsolete, it is now enabled Discord-wide. (:issue:`986`)
