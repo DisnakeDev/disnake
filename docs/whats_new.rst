@@ -25,13 +25,13 @@ v2.9.0
 Deprecations
 ~~~~~~~~~~~~
 - :attr:`AutoModTriggerType.harmful_link` is obsolete, it is now enabled Discord-wide. (:issue:`986`)
+- The :class:`PartyType` enum is deprecated, as voice activity IDs are not officially documented and the enum regularly becomes outdated. (:issue:`1035`)
 - |commands| :class:`~disnake.ext.commands.Range` and :class:`~disnake.ext.commands.String` now require a type argument (i.e. ``Range[int, 1, 5]`` instead of ``Range[1, 5]``, similarly with ``String[str, 2, 4]``). The old form is deprecated. (:issue:`991`)
 - |commands| The mypy plugin is now a no-op. It was previously used for supporting ``Range[]`` and ``String[]`` annotations. (:issue:`991`)
-- The :class:`PartyType` enum is deprecated, as voice activity IDs are not officially documented and the enum regularly becomes outdated. (:issue:`1035`)
 
 New Features
 ~~~~~~~~~~~~
-- Clone more attributes in :meth:`TextChannel.clone`, :meth:`VoiceChannel.clone`, :meth:`StageChannel.clone`, :meth:`CategoryChannel.clone`, and :meth:`ForumChannel.clone`, and add them as keyword-only parameters to make in-place edits. See the specific ``clone`` method's documentation for details. (:issue:`635`)
+- Clone most attributes in :meth:`TextChannel.clone`, :meth:`VoiceChannel.clone`, :meth:`StageChannel.clone`, :meth:`CategoryChannel.clone`, and :meth:`ForumChannel.clone`, and add them as keyword-only parameters to make in-place edits. See the specific ``clone`` method's documentation for details. (:issue:`635`)
 - Add :attr:`Guild.max_stage_video_channel_users`. (:issue:`741`)
 - Implement new :attr:`AutoModTriggerMetadata.mention_raid_protection_enabled` parameter. (:issue:`898`)
 - Add support for raid alerts. (:issue:`899`)
@@ -65,7 +65,6 @@ New Features
     - Overall, most errors about incorrect types no longer include the internal error in their traceback.
 - Add support for :attr:`AutoModBlockMessageAction.custom_message` (:issue:`954`)
 - Support comparison of :class:`VoiceRegion` objects. (:issue:`962`)
-- |commands| Add :meth:`Bot.get_listeners() <disnake.ext.commands.Bot.get_listeners>`. (:issue:`976`)
 - Add a new voice channel activity, :attr:`PartyType.gartic_phone`. (:issue:`984`)
 - Add :attr:`ApplicationFlags.application_auto_moderation_rule_create_badge` (:issue:`988`)
 - Add new permission fields. (:issue:`989`, :issue:`997`, :issue:`1006`)
@@ -78,13 +77,14 @@ New Features
     - Add :attr:`User.global_name`, and update attributes/methods to account for it:
         - :attr:`User.display_name` and :attr:`Member.display_name`
         - :meth:`Guild.get_member_named`
-        - |commands| :class:`~ext.commands.UserConverter` and :class:`~ext.commands.MemberConverter`, now largely matching the behavior of :meth:`Guild.get_member_named`
     - Update ``str(user)`` and ``str(member)`` to not include ``#0`` discriminator of migrated users.
     - Adjust :attr:`User.default_avatar` to account for new default avatar handling, also adding :attr:`DefaultAvatar.fuchsia`.
 - Support ``animated`` emoji field in reaction removal events (e.g. :func:`on_raw_reaction_remove`). (:issue:`1040`)
 - Implement receiving voice messages. (:issue:`1041`)
     - New flag: :class:`MessageFlags.is_voice_message`
     - New :class:`Attachment` fields: :attr:`~Attachment.duration`, :attr:`~Attachment.waveform`
+- |commands| Add :meth:`Bot.get_listeners() <disnake.ext.commands.Bot.get_listeners>`. (:issue:`976`)
+- |commands| :class:`~ext.commands.UserConverter` and :class:`~ext.commands.MemberConverter`, now mostly match the behavior of :meth:`Guild.get_member_named`
 
 Bug Fixes
 ~~~~~~~~~
@@ -94,22 +94,22 @@ Bug Fixes
 - Fix KeepAlive logging un-intentionally attempting to interpolate stack trace logger calls (:issue:`940`)
 - Fix :meth:`.VoiceChannel.permissions_for` not disabling :attr:`Permissions.manage_webhooks` when the user cannot connect to the channel. (:issue:`942`)
 - :attr:`RawTypingEvent.timestamp` is now a timezone-aware :class:`~datetime.datetime` instead of a naive one. (:issue:`945`)
-- |commands| Allow referencing the same `ParamInfo` instance in multiple signatures. (:issue:`946`)
 - Fix attribute error when attempting to access :class:`DMChannel.flags` under certain circumstances. (:issue:`960`)
 - Fix voice connection discovery using incorrect packet sizes. (:issue:`967`)
 - Fix :meth:`Guild.get_or_fetch_members` not caching anything in the case of 1 unresolved ID. (:issue:`974`)
-- |commands| Fix type-checker support for :class:`~disnake.ext.commands.Range` and :class:`~disnake.ext.commands.String` by requiring type argument (i.e. ``Range[int, 1, 5]`` instead of ``Range[1, 5]``). (:issue:`991`)
 - Fix audit log parsing issue with new user profile automod actions. (:issue:`995`)
 - Improve :class:`GuildSticker` deserialization, fix :meth:`GuildSticker.edit` parameter types to match documentation. (:issue:`996`)
 - Fix :meth:`ForumChannel.create_thread` usage with files only (and no other content), and fix file descriptions not being sent on thread creation. (:issue:`1008`)
 - Fix some instances where threads were not being returned in :attr:`AuditLogEntry.extra`. (:issue:`1009`)
 - :meth:`Guild.fetch_members` no longer requires the :attr:`~Intents.members` intent to be enabled when connecting to the gateway, now it solely depends on the intent being enabled in the developer portal. (:issue:`1013`)
-- |commands| Raise ``TypeError`` if :class:`~.ext.commands.InteractionBot` or :class:`~.ext.commands.AutoShardedInteractionBot` has prefix commands related things in a :class:`~.ext.commands.Cog` (:issue:`1018`)
 - Fix error when trying to access :attr:`Client.application_flags` if an ``application_id`` was passed to the constructor. (:issue:`1027`)
-- |commands| Fix member nickname not being used by :class:`~ext.commands.clean_content` converter when user wasn't found in mentions. (:issue:`1029`)
 - Raise :exc:`TypeError` in :meth:`Guild.create_automod_rule` and :meth:`AutoModRule.edit` when an action has an invalid type, instead of a rather cryptic error. (:issue:`1030`)
 - Fix permission resolution for :class:`Thread`\s to use :attr:`Permissions.send_messages_in_threads` instead of :attr:`Permissions.send_messages` for calculating implicit permissions. (:issue:`1047`)
 - Fix typing issue with :class:`abc.User` protocol requirements, which previously resulted in :class:`User` and :class:`Member` not conforming to the protocol. (:issue:`1051`)
+- |commands| Allow referencing the same `ParamInfo` instance in multiple signatures. (:issue:`946`)
+- |commands| Fix type-checker support for :class:`~disnake.ext.commands.Range` and :class:`~disnake.ext.commands.String` by requiring type argument (i.e. ``Range[int, 1, 5]`` instead of ``Range[1, 5]``). (:issue:`991`)
+- |commands| Raise ``TypeError`` if :class:`~.ext.commands.InteractionBot` or :class:`~.ext.commands.AutoShardedInteractionBot` has prefix commands related things in a :class:`~.ext.commands.Cog` (:issue:`1018`)
+- |commands| Fix member nickname not being used by :class:`~ext.commands.clean_content` converter when user wasn't found in mentions. (:issue:`1029`)
 
 Documentation
 ~~~~~~~~~~~~~
@@ -119,20 +119,20 @@ Documentation
     - Legacy ``api.html`` and ``ext/commands/api.html`` pages are deprecated.
     - - Links with pre-existing references (eg ``/api.html#disnake.AppInfo``) will be redirected to their appropriate page.
 - Update automod rule limits. (:issue:`931`)
-- |commands| Fix commands extension events being duplicated in search results. (:issue:`944`)
 - Remove incorrect documentation for :meth:`InvokableApplicationCommand.invoke`. (:issue:`961`)
 - Add a searchbox for filtering the sidebar on the API Reference pages. (:issue:`963`)
 - Clarify docs about the :func:`.on_member_update` and :func:`.on_raw_member_update` events. (:issue:`992`)
 - Remove ``pins()`` method from unsupported channel types. (:issue:`1033`)
 - Update "Creating a Bot Account" page with newer images and synchronise info according to latest changes made by Discord. (:issue:`1039`)
 - Add note to :attr:`GuildChannel.create_invite <.abc.GuildChannel.create_invite>` and all subclasses about the new 30 day expiration limit imposed for non-community guilds. (:issue:`1056`)
+- |commands| Fix commands extension events being duplicated in search results. (:issue:`944`)
 
 Miscellaneous
 ~~~~~~~~~~~~~
 - Change dependency and environment management to use `pdm <https://pdm.fming.dev/>`__. (:issue:`836`, :issue:`953`)
     Please check `CONTRIBUTING.md <https://github.com/DisnakeDev/disnake/tree/master/CONTRIBUTING.md>`__ for more details.
 - Change the main linter to ``ruff`` instead of ``flake8``. (:issue:`935`)
-- Update Sphinx to v7.0.0. (:issue:`936`, :issue:`1020`)
+- Update Sphinx to v7.0.1. (:issue:`936`, :issue:`1020`)
 - Support PyNaCl v1.5. (:issue:`968`)
 - Remove :func:`disnake.utils.parse_token` (never documented), which has been broken for newer tokens for some time, and was based on unofficial information about the token structure. (:issue:`990`)
 - Update typings of :attr:`Message.activity` and internal :class:`Team` payloads to match API documentation. (:issue:`996`)
