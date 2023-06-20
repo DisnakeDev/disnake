@@ -756,7 +756,7 @@ class ParamInfo:
         return True
 
     def parse_converter_annotation(self, converter: Callable, fallback_annotation: Any) -> None:
-        _, parameters = isolate_self(converter)
+        _, parameters = isolate_self(signature(converter))
 
         if len(parameters) != 1:
             raise TypeError(
@@ -864,11 +864,9 @@ def safe_call(function: Callable[..., T], /, *possible_args: Any, **possible_kwa
 
 
 def isolate_self(
-    function: Callable,
+    sig: inspect.Signature,
 ) -> Tuple[Tuple[Optional[inspect.Parameter], ...], Dict[str, inspect.Parameter]]:
     """Create parameters without self and the first interaction"""
-    sig = signature(function)
-
     parameters = dict(sig.parameters)
     parametersl = list(sig.parameters.values())
 
@@ -924,12 +922,20 @@ def classify_autocompleter(autocompleter: AnyAutocompleter) -> None:
 
 def collect_params(
     function: Callable,
+    sig: Optional[inspect.Signature] = None,
 ) -> Tuple[Optional[str], Optional[str], List[ParamInfo], Dict[str, Injection]]:
-    """Collect all parameters in a function
+    """Collect all parameters in a function.
+
+    Optionally accepts an `inspect.Signature` object (as an optimization),
+    calls `signature(function)` if not provided.
 
     Returns: (`cog parameter`, `interaction parameter`, `param infos`, `injections`)
     """
-    (cog_param, inter_param), parameters = isolate_self(function)
+    if sig is None:
+        sig = signature(function)
+
+    (cog_param, inter_param), parameters = isolate_self(sig)
+
     doc = disnake.utils.parse_docstring(function)["params"]
 
     paraminfos: List[ParamInfo] = []
@@ -1053,7 +1059,9 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
     Returns the created options
     """
     sig = signature(command.callback)
-    _, inter_param, params, injections = collect_params(command.callback)
+    # pass `sig` down to avoid having to call `signature(func)` another time,
+    # which may cause side effects with deferred annotations and warnings
+    _, inter_param, params, injections = collect_params(command.callback, sig)
 
     if inter_param is None:
         raise TypeError(f"Couldn't find an interaction parameter in {command.callback}")
