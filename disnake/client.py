@@ -1673,6 +1673,9 @@ class Client:
 
         Changes the client's presence.
 
+        .. versionchanged:: 2.0
+            Removed the ``afk`` keyword-only parameter.
+
         .. versionchanged:: 2.6
             Raises :exc:`TypeError` instead of ``InvalidArgument``.
 
@@ -1683,9 +1686,6 @@ class Client:
 
             game = disnake.Game("with the API")
             await client.change_presence(status=disnake.Status.idle, activity=game)
-
-        .. versionchanged:: 2.0
-            Removed the ``afk`` keyword-only parameter.
 
         Parameters
         ----------
@@ -1894,6 +1894,11 @@ class Client:
 
         Bot accounts in 10 or more guilds are not allowed to create guilds.
 
+        .. note::
+
+            Using this, you will **not** receive :attr:`.Guild.channels`, :attr:`.Guild.members`,
+            :attr:`.Member.activity` and :attr:`.Member.voice` per :class:`.Member`.
+
         .. versionchanged:: 2.5
             Removed the ``region`` parameter.
 
@@ -1950,6 +1955,11 @@ class Client:
         See :class:`.GuildBuilder` for details and examples.
 
         Bot accounts in 10 or more guilds are not allowed to create guilds.
+
+        .. note::
+
+            Using this, you will **not** receive :attr:`.Guild.channels`, :attr:`.Guild.members`,
+            :attr:`.Member.activity` and :attr:`.Member.voice` per :class:`.Member`.
 
         .. versionadded:: 2.8
 

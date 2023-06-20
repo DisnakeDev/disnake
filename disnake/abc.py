@@ -1293,13 +1293,13 @@ class GuildChannel(ABC):
         Parameters
         ----------
         max_age: :class:`int`
-            How long the invite should last in seconds. If it's 0 then the invite
+            How long the invite should last in seconds. If set to ``0``, then the invite
             doesn't expire. Defaults to ``0``.
 
             .. warning::
 
                 If the guild is not a Community guild (has ``COMMUNITY`` in :attr:`.Guild.features`),
-                this must be set to a time between ``1`` and ``2592000`` seconds.
+                this must be set to a number between ``1`` and ``2592000`` seconds.
 
         max_uses: :class:`int`
             How many uses the invite could be used for. If it's 0 then there
@@ -1317,13 +1317,13 @@ class GuildChannel(ABC):
             .. versionadded:: 2.0
 
         target_user: Optional[:class:`User`]
-            The user whose stream to display for this invite, required if `target_type` is `TargetType.stream`.
+            The user whose stream to display for this invite, required if ``target_type`` is :attr:`.InviteTarget.stream`.
             The user must be streaming in the channel.
 
             .. versionadded:: 2.0
 
         target_application: Optional[:class:`.Snowflake`]
-            The ID of the embedded application for the invite, required if `target_type` is `TargetType.embedded_application`.
+            The ID of the embedded application for the invite, required if ``target_type`` is :attr:`.InviteTarget.embedded_application`.
 
             .. versionadded:: 2.0
 
