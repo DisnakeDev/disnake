@@ -144,6 +144,25 @@ Miscellaneous
 - Increase the default :attr:`Guild.filesize_limit` from 8MB to 25MB, matching the recent increase by Discord. (:issue:`1005`)
 
 
+.. _vp2p8p2:
+
+v2.8.2
+------
+
+This maintainence release contains backports from v2.9.0.
+
+Bug Fixes
+~~~~~~~~~
+- Fix audit log parsing issue with new user profile automod actions. (:issue:`995`)
+- Improve :class:`GuildSticker` deserialization, fix :meth:`GuildSticker.edit` parameter types to match documentation. (:issue:`996`)
+- Fix :meth:`ForumChannel.create_thread` usage with files only (and no other content), and fix file descriptions not being sent on thread creation. (:issue:`1008`)
+
+Miscellaneous
+~~~~~~~~~~~~~
+- Update typings of :attr:`Message.activity` and internal :class:`Team` payloads to match API documentation. (:issue:`996`)
+- Increase the default :attr:`Guild.filesize_limit` from 8MB to 25MB, matching the recent increase by Discord. (:issue:`1005`)
+
+
 .. _vp2p8p1:
 
 v2.8.1
