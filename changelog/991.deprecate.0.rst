@@ -1,1 +1,0 @@
-|commands| :class:`~disnake.ext.commands.Range` and :class:`~disnake.ext.commands.String` now require a type argument (i.e. ``Range[int, 1, 5]`` instead of ``Range[1, 5]``, similarly with ``String[str, 2, 4]``). The old form is deprecated.

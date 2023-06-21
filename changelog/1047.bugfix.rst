@@ -1,1 +1,0 @@
-Fix permission resolution for :class:`Thread`\s to use :attr:`Permissions.send_messages_in_threads` instead of :attr:`Permissions.send_messages` for calculating implicit permissions.

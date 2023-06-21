@@ -1,1 +1,0 @@
-Clone more attributes in :meth:`TextChannel.clone`, :meth:`VoiceChannel.clone`, :meth:`StageChannel.clone`, :meth:`CategoryChannel.clone`, and :meth:`ForumChannel.clone`, and add them as keyword-only parameters to make in-place edits. See the specific ``clone`` method's documentation for details.

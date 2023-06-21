@@ -1,1 +1,0 @@
-Raise :exc:`TypeError` in :meth:`Guild.create_automod_rule` and :meth:`AutoModRule.edit` when an action has an invalid type, instead of a rather cryptic error.
