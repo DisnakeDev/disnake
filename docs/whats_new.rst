@@ -23,7 +23,7 @@ v2.9.0
 ------
 
 This release comes with support for the new username system, text in stage, role subscriptions, silent messages, and onboarding.
-We've also done a refactor of the documentation to remove the monolithic API Reference page.
+The documentation has been updated, splitting the monolithic API Reference page into smaller :doc:`pages <api/index>`.
 
 See below for a complete list of changes.
 
