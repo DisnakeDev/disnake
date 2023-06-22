@@ -2374,11 +2374,7 @@ class InviteFlags(BaseFlags):
     if TYPE_CHECKING:
 
         @_generated
-        def __init__(
-            self,
-            *,
-            guest: bool = ...,
-        ) -> None:
+        def __init__(self, *, guest: bool = ...) -> None:
             ...
 
     @flag_value
