@@ -559,7 +559,7 @@ class Interaction:
 
         Parameters
         ----------
-        delay: :class:`float`
+        delay: Optional[:class:`float`]
             If provided, the number of seconds to wait in the background
             before deleting the original response message. If the deletion fails,
             then it is silently ignored.
