@@ -386,7 +386,7 @@ class Interaction:
         suppress_embeds: bool = MISSING,
         flags: MessageFlags = MISSING,
         allowed_mentions: Optional[AllowedMentions] = None,
-        delete_after: float = MISSING,
+        delete_after: Optional[float] = None,
     ) -> InteractionMessage:
         """|coro|
 
@@ -468,7 +468,7 @@ class Interaction:
 
             .. versionadded:: 2.9
 
-        delete_after: :class:`float`
+        delete_after: Optional[:class:`float`]
             If provided, the number of seconds to wait in the background
             before deleting the message we just edited. If the deletion fails,
             then it is silently ignored.
@@ -540,7 +540,7 @@ class Interaction:
         if view and not view.is_finished():
             self._state.store_view(view, message.id)
 
-        if delete_after is not MISSING:
+        if delete_after is not None:
             await self.delete_original_response(delay=delete_after)
 
         return message
@@ -1076,7 +1076,7 @@ class InteractionResponse:
         allowed_mentions: AllowedMentions = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[Components[MessageUIComponent]] = MISSING,
-        delete_after: float = MISSING,
+        delete_after: Optional[float] = None,
     ) -> None:
         """|coro|
 
@@ -1139,7 +1139,7 @@ class InteractionResponse:
 
             .. versionadded:: 2.4
 
-        delete_after: :class:`float`
+        delete_after: Optional[:class:`float`]
             If provided, the number of seconds to wait in the background
             before deleting the message we just edited. If the deletion fails,
             then it is silently ignored.
@@ -1248,7 +1248,7 @@ class InteractionResponse:
 
         self._response_type = response_type
 
-        if delete_after is not MISSING:
+        if delete_after is not None:
             await self._parent.delete_original_response(delay=delete_after)
 
     async def autocomplete(self, *, choices: Choices) -> None:
@@ -1517,7 +1517,7 @@ class InteractionMessage(Message):
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
-        delete_after: float = ...,
+        delete_after: Optional[float] = ...,
     ) -> InteractionMessage:
         ...
 
@@ -1534,7 +1534,7 @@ class InteractionMessage(Message):
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
-        delete_after: float = ...,
+        delete_after: Optional[float] = ...,
     ) -> InteractionMessage:
         ...
 
@@ -1551,7 +1551,7 @@ class InteractionMessage(Message):
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
-        delete_after: float = ...,
+        delete_after: Optional[float] = ...,
     ) -> InteractionMessage:
         ...
 
@@ -1568,7 +1568,7 @@ class InteractionMessage(Message):
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
-        delete_after: float = ...,
+        delete_after: Optional[float] = ...,
     ) -> InteractionMessage:
         ...
 
@@ -1586,7 +1586,7 @@ class InteractionMessage(Message):
         allowed_mentions: Optional[AllowedMentions] = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[Components[MessageUIComponent]] = MISSING,
-        delete_after: float = MISSING,
+        delete_after: Optional[float] = None,
     ) -> Message:
         """|coro|
 
@@ -1657,7 +1657,7 @@ class InteractionMessage(Message):
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
-        delete_after: :class:`float`
+        delete_after: Optional[:class:`float`]
             If provided, the number of seconds to wait in the background
             before deleting the message we just edited. If the deletion fails,
             then it is silently ignored.
