@@ -224,10 +224,11 @@ class KeepAliveHandler(threading.Thread):
                             frame = sys._current_frames()[self._main_thread_id]
                         except KeyError:
                             msg = self.block_msg
+                            _log.warning(msg, self.shard_id, total)
                         else:
                             stack = "".join(traceback.format_stack(frame))
-                            msg = f"{self.block_msg}\nLoop thread traceback (most recent call last):\n{stack}"
-                        _log.warning(msg, self.shard_id, total)
+                            msg = f"{self.block_msg}\nLoop thread traceback (most recent call last):\n%s"
+                            _log.warning(msg, self.shard_id, total, stack)
 
             except Exception:
                 self.stop()
@@ -482,7 +483,6 @@ class DiscordWebSocket:
         asyncio.Future
             A future to wait for.
         """
-
         future = self.loop.create_future()
         entry = EventListener(event=event, predicate=predicate, result=result, future=future)
         self._dispatch_listeners.append(entry)
@@ -490,7 +490,6 @@ class DiscordWebSocket:
 
     async def identify(self) -> None:
         """Sends the IDENTIFY packet."""
-
         state = self._connection
 
         payload: IdentifyCommand = {
@@ -1022,16 +1021,16 @@ class DiscordVoiceWebSocket:
         state.voice_port = data["port"]
         state.endpoint_ip = data["ip"]
 
-        packet = bytearray(70)
+        packet = bytearray(74)
         struct.pack_into(">H", packet, 0, 1)  # 1 = Send
         struct.pack_into(">H", packet, 2, 70)  # 70 = Length
         struct.pack_into(">I", packet, 4, state.ssrc)
         state.socket.sendto(packet, (state.endpoint_ip, state.voice_port))
-        recv = await self.loop.sock_recv(state.socket, 70)
+        recv = await self.loop.sock_recv(state.socket, 74)
         _log.debug("received packet in initial_connection: %s", recv)
 
-        # the ip is ascii starting at the 4th byte and ending at the first null
-        ip_start = 4
+        # the ip is ascii starting at the 8th byte and ending at the first null
+        ip_start = 8
         ip_end = recv.index(0, ip_start)
         state.ip = recv[ip_start:ip_end].decode("ascii")
 
@@ -1066,7 +1065,7 @@ class DiscordVoiceWebSocket:
     async def load_secret_key(self, data: VoiceSessionDescriptionPayload) -> None:
         _log.info("received secret key for voice connection")
         self.secret_key = self._connection.secret_key = data["secret_key"]
-        await self.speak()
+        # need to send this at least once to set the ssrc
         await self.speak(False)
 
     async def poll_event(self) -> None:

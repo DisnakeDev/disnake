@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: MIT
 
+from typing import cast
 from unittest import mock
 
 import pytest
@@ -12,7 +13,7 @@ from disnake.utils import MISSING
 @pytest.mark.asyncio
 class TestGuildChannelEdit:
     # TODO: use proper mock models once we have state/guild mocks
-    @pytest.fixture()
+    @pytest.fixture
     def channel(self):
         ch = mock.Mock(GuildChannel, id=123, category_id=456)
         ch._state = mock.Mock(http=mock.AsyncMock())
@@ -151,3 +152,16 @@ class TestGuildChannelEdit:
         channel._state.http.edit_channel.assert_awaited_once_with(
             channel.id, permission_overwrites=[], reason=None
         )
+
+
+class TestUserProtocol:
+    def _test_typing_assignable(self) -> None:
+        def handle_abc_user(user: disnake.abc.User) -> None:
+            ...
+
+        # All of these should match the abc.User protocol and thus type-check correctly
+        # (they could just inherit from the protocol to ensure correct implementation,
+        # but we really only want structural (i.e. implicit) subtyping)
+        handle_abc_user(cast(disnake.User, ...))
+        handle_abc_user(cast(disnake.ClientUser, ...))
+        handle_abc_user(cast(disnake.Member, ...))

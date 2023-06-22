@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""
-A role self-assign example, using reactions.
-"""
+"""A role self-assign example, using reactions."""
 
 import os
 

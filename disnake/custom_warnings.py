@@ -11,8 +11,7 @@ __all__ = (
 
 
 class DiscordWarning(Warning):
-    """
-    Base warning class for disnake.
+    """Base warning class for disnake.
 
     .. versionadded:: 2.3
     """
@@ -21,8 +20,7 @@ class DiscordWarning(Warning):
 
 
 class ConfigWarning(DiscordWarning):
-    """
-    Warning class related to configuration issues.
+    """Warning class related to configuration issues.
 
     .. versionadded:: 2.3
     """
@@ -31,8 +29,7 @@ class ConfigWarning(DiscordWarning):
 
 
 class SyncWarning(DiscordWarning):
-    """
-    Warning class for application command synchronization issues.
+    """Warning class for application command synchronization issues.
 
     .. versionadded:: 2.3
     """
@@ -41,8 +38,7 @@ class SyncWarning(DiscordWarning):
 
 
 class LocalizationWarning(DiscordWarning):
-    """
-    Warning class for localization issues.
+    """Warning class for localization issues.
 
     .. versionadded:: 2.5
     """

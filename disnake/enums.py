@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: MIT
+from __future__ import annotations
 
 import types
 from functools import total_ordering
@@ -7,6 +8,7 @@ from typing import (
     Any,
     ClassVar,
     Dict,
+    Iterator,
     List,
     NamedTuple,
     NoReturn,
@@ -14,6 +16,9 @@ from typing import (
     Type,
     TypeVar,
 )
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
 __all__ = (
     "Enum",
@@ -61,6 +66,7 @@ __all__ = (
     "ThreadLayout",
     "Event",
     "ApplicationRoleConnectionMetadataType",
+    "OnboardingPromptType",
 )
 
 
@@ -103,7 +109,7 @@ class EnumMeta(type):
         _enum_member_map_: ClassVar[Dict[str, Any]]
         _enum_value_map_: ClassVar[Dict[Any, Any]]
 
-    def __new__(cls, name, bases, attrs, *, comparable: bool = False):
+    def __new__(cls, name: str, bases, attrs, *, comparable: bool = False):
         value_mapping = {}
         member_mapping = {}
         member_names = []
@@ -141,10 +147,10 @@ class EnumMeta(type):
         value_cls._actual_enum_cls_ = actual_cls  # type: ignore
         return actual_cls
 
-    def __iter__(cls):
+    def __iter__(cls) -> Iterator[Self]:
         return (cls._enum_member_map_[name] for name in cls._enum_member_names_)
 
-    def __reversed__(cls):
+    def __reversed__(cls) -> Iterator[Self]:
         return (cls._enum_member_map_[name] for name in reversed(cls._enum_member_names_))
 
     def __len__(cls) -> int:
@@ -161,12 +167,12 @@ class EnumMeta(type):
         try:
             return cls._enum_value_map_[value]
         except (KeyError, TypeError):
-            raise ValueError(f"{value!r} is not a valid {cls.__name__}")
+            raise ValueError(f"{value!r} is not a valid {cls.__name__}") from None
 
     def __getitem__(cls, key):
         return cls._enum_member_map_[key]
 
-    def __setattr__(cls, name, value) -> NoReturn:
+    def __setattr__(cls, name: str, value) -> NoReturn:
         raise TypeError("Enums are immutable.")
 
     def __delattr__(cls, attr) -> NoReturn:
@@ -238,7 +244,12 @@ class MessageType(Enum):
     guild_invite_reminder = 22
     context_menu_command = 23
     auto_moderation_action = 24
+    role_subscription_purchase = 25
     interaction_premium_upsell = 26
+    stage_start = 27
+    stage_end = 28
+    stage_speaker = 29
+    stage_topic = 31
     guild_application_premium_subscription = 32
 
 
@@ -255,6 +266,7 @@ class PartyType(Enum):
     watch_together = 880218394199220334
     sketch_heads = 902271654783242291
     ocho = 832025144389533716
+    gartic_phone = 1007373802981822582
 
 
 class SpeakingState(Enum):
@@ -310,6 +322,7 @@ class DefaultAvatar(Enum):
     green = 2
     orange = 3
     red = 4
+    fuchsia = 5
 
     def __str__(self) -> str:
         return self.name
@@ -734,7 +747,7 @@ class WidgetStyle(Enum):
 # reference: https://discord.com/developers/docs/reference#locales
 class Locale(Enum):
     bg = "bg"
-    "Bulgarian | български"
+    "Bulgarian | български"  # noqa: RUF001
     cs = "cs"
     "Czech | Čeština"
     da = "da"
@@ -742,7 +755,7 @@ class Locale(Enum):
     de = "de"
     "German | Deutsch"
     el = "el"
-    "Greek | Ελληνικά"
+    "Greek | Ελληνικά"  # noqa: RUF001
     en_GB = "en-GB"
     "English, UK | English, UK"
     en_US = "en-US"
@@ -780,7 +793,7 @@ class Locale(Enum):
     ro = "ro"
     "Romanian, Romania | Română"
     ru = "ru"
-    "Russian | Pусский"
+    "Russian | Pусский"  # noqa: RUF001
     sv_SE = "sv-SE"
     "Swedish | Svenska"
     th = "th"
@@ -788,7 +801,7 @@ class Locale(Enum):
     tr = "tr"
     "Turkish | Türkçe"
     uk = "uk"
-    "Ukrainian | Українська"
+    "Ukrainian | Українська"  # noqa: RUF001
     vi = "vi"
     "Vietnamese | Tiếng Việt"
     zh_CN = "zh-CN"
@@ -812,7 +825,8 @@ class AutoModEventType(Enum):
 
 class AutoModTriggerType(Enum):
     keyword = 1
-    harmful_link = 2
+    if not TYPE_CHECKING:
+        harmful_link = 2  # obsolete/deprecated
     spam = 3
     keyword_preset = 4
     mention_spam = 5
@@ -830,8 +844,7 @@ class ThreadLayout(Enum):
 
 
 class Event(Enum):
-    """
-    Represents all the events of the library.
+    """Represents all the events of the library.
 
     These offer to register listeners/events in a more pythonic way; additionally autocompletion and documentation are both supported.
 
@@ -991,13 +1004,13 @@ class Event(Enum):
     """Called when a `Guild` creates a new `Role`.
     Represents the :func:`on_guild_role_create` event.
     """
-    guild_role_update = "guild_role_update"
-    """Called when a `Guild` updates a `Role`.
-    Represents the :func:`on_guild_role_update` event.
-    """
     guild_role_delete = "guild_role_delete"
     """Called when a `Guild` deletes a `Role`.
     Represents the :func:`on_guild_role_delete` event.
+    """
+    guild_role_update = "guild_role_update"
+    """Called when a `Guild` updates a `Role`.
+    Represents the :func:`on_guild_role_update` event.
     """
     guild_emojis_update = "guild_emojis_update"
     """Called when a `Guild` adds or removes `Emoji`.
@@ -1059,6 +1072,10 @@ class Event(Enum):
     """Called when an `AutoModRule` is deleted.
     Represents the :func:`on_automod_rule_delete` event.
     """
+    audit_log_entry_create = "audit_log_entry_create"
+    """Called when an audit log entry is created.
+    Represents the :func:`on_audit_log_entry_create` event.
+    """
     integration_create = "integration_create"
     """Called when an integration is created.
     Represents the :func:`on_integration_create` event.
@@ -1075,25 +1092,21 @@ class Event(Enum):
     """Called when a `Member` joins a `Guild`.
     Represents the :func:`on_member_join` event.
     """
-    member_update = "member_update"
-    """Called when a `Member` updates their profile.
-    Represents the :func:`on_member_update` event.
-    """
     member_remove = "member_remove"
     """Called when a `Member` leaves a `Guild`.
     Represents the :func:`on_member_remove` event.
+    """
+    member_update = "member_update"
+    """Called when a `Member` is updated in a `Guild`.
+    Represents the :func:`on_member_update` event.
     """
     raw_member_remove = "raw_member_remove"
     """Called when a member leaves a `Guild` regardless of the member cache.
     Represents the :func:`on_raw_member_remove` event.
     """
     raw_member_update = "raw_member_update"
-    """Called when a member updates their profile regardless of the member cache.
+    """Called when a `Member` is updated in a `Guild` regardless of the member cache.
     Represents the :func:`on_raw_member_update` event.
-    """
-    audit_log_entry_create = "audit_log_entry_create"
-    """Called when an audit log entry is created.
-    Represents the :func:`on_audit_log_entry_create` event.
     """
     member_ban = "member_ban"
     """Called when user gets banned from a `Guild`.
@@ -1119,13 +1132,13 @@ class Event(Enum):
     """Called when a `StageInstance` is created for a `StageChannel`.
     Represents the :func:`on_stage_instance_create` event.
     """
-    stage_instance_update = "stage_instance_update"
-    """Called when a `StageInstance` is updated.
-    Represents the :func:`on_stage_instance_update` event.
-    """
     stage_instance_delete = "stage_instance_delete"
     """Called when a `StageInstance` is deleted for a `StageChannel`.
     Represents the :func:`on_stage_instance_delete` event.
+    """
+    stage_instance_update = "stage_instance_update"
+    """Called when a `StageInstance` is updated.
+    Represents the :func:`on_stage_instance_update` event.
     """
     application_command = "application_command"
     """Called when an application command is invoked.
@@ -1171,13 +1184,13 @@ class Event(Enum):
     """Called when messages are bulk deleted.
     Represents the :func:`on_bulk_message_delete` event.
     """
-    raw_message_delete = "raw_message_delete"
-    """Called when a message is deleted regardless of the message being in the internal message cache or not.
-    Represents the :func:`on_raw_message_delete` event.
-    """
     raw_message_edit = "raw_message_edit"
     """Called when a message is edited regardless of the state of the internal message cache.
     Represents the :func:`on_raw_message_edit` event.
+    """
+    raw_message_delete = "raw_message_delete"
+    """Called when a message is deleted regardless of the message being in the internal message cache or not.
+    Represents the :func:`on_raw_message_delete` event.
     """
     raw_bulk_message_delete = "raw_bulk_message_delete"
     """Called when a bulk delete is triggered regardless of the messages being in the internal message cache or not.
@@ -1285,6 +1298,11 @@ class ApplicationRoleConnectionMetadataType(Enum):
     boolean_not_equal = 8
 
 
+class OnboardingPromptType(Enum):
+    multiple_choice = 0
+    dropdown = 1
+
+
 T = TypeVar("T")
 
 
@@ -1299,7 +1317,6 @@ def try_enum(cls: Type[T], val: Any) -> T:
 
     If it fails it returns a proxy invalid value instead.
     """
-
     try:
         return cls._enum_value_map_[val]  # type: ignore
     except (KeyError, TypeError, AttributeError):

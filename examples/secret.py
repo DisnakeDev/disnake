@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""
-Shhhh! It's a secret.
-"""
+"""Shhhh! It's a secret."""
 
 import os
 from typing import Union
@@ -22,8 +20,7 @@ async def secret(ctx: commands.Context):
 
 
 def create_overwrites(ctx: commands.GuildContext, *objects: Union[disnake.Role, disnake.Member]):
-    """This is just a helper function that creates the overwrites for the
-    voice/text channels.
+    """A helper function that creates the overwrites for the voice/text channels.
 
     A `disnake.PermissionOverwrite` allows you to determine the permissions
     of an object, whether it be a `disnake.Role` or a `disnake.Member`.
@@ -32,7 +29,6 @@ def create_overwrites(ctx: commands.GuildContext, *objects: Union[disnake.Role, 
     from being viewed by whoever does not meet the criteria, thus creating a
     secret channel.
     """
-
     # a dict comprehension is being utilised here to set the same permission overwrites
     # for each `disnake.Role` or `disnake.Member`.
     overwrites = {obj: disnake.PermissionOverwrite(view_channel=True) for obj in objects}
@@ -54,10 +50,9 @@ def create_overwrites(ctx: commands.GuildContext, *objects: Union[disnake.Role, 
 async def text(
     ctx: commands.GuildContext, name: str, *objects: Union[disnake.Role, disnake.Member]
 ):
-    """This makes a text channel with a specified name
-    that is only visible to roles or members that are specified.
+    """Creates a text channel with the specified name
+    that is only visible to the specified roles and/or members.
     """
-
     overwrites = create_overwrites(ctx, *objects)
 
     await ctx.guild.create_text_channel(
@@ -73,10 +68,7 @@ async def text(
 async def voice(
     ctx: commands.GuildContext, name: str, *objects: Union[disnake.Role, disnake.Member]
 ):
-    """This does the same thing as the `text` subcommand
-    but instead creates a voice channel.
-    """
-
+    """Does the same thing as the `text` subcommand but instead creates a voice channel."""
     overwrites = create_overwrites(ctx, *objects)
 
     await ctx.guild.create_voice_channel(
@@ -87,8 +79,7 @@ async def voice(
 @secret.command()
 @commands.guild_only()
 async def emoji(ctx: commands.GuildContext, emoji: disnake.PartialEmoji, *roles: disnake.Role):
-    """This clones a specified emoji that only specified roles are allowed to use."""
-
+    """Clones a specified emoji that only specified roles are allowed to use."""
     # fetch the emoji asset and read it as bytes.
     emoji_bytes = await emoji.read()
 

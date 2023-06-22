@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""
-An example showing how to edit view components, use timeouts, and disable views.
-"""
+"""An example showing how to edit view components, use timeouts, and disable views."""
 
 import os
 
