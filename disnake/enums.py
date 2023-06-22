@@ -322,6 +322,7 @@ class DefaultAvatar(Enum):
     green = 2
     orange = 3
     red = 4
+    fuchsia = 5
 
     def __str__(self) -> str:
         return self.name
@@ -1096,7 +1097,7 @@ class Event(Enum):
     Represents the :func:`on_member_remove` event.
     """
     member_update = "member_update"
-    """Called when a `Member` updates their profile.
+    """Called when a `Member` is updated in a `Guild`.
     Represents the :func:`on_member_update` event.
     """
     raw_member_remove = "raw_member_remove"
@@ -1104,7 +1105,7 @@ class Event(Enum):
     Represents the :func:`on_raw_member_remove` event.
     """
     raw_member_update = "raw_member_update"
-    """Called when a member updates their profile regardless of the member cache.
+    """Called when a `Member` is updated in a `Guild` regardless of the member cache.
     Represents the :func:`on_raw_member_update` event.
     """
     member_ban = "member_ban"
