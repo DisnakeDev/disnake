@@ -476,7 +476,7 @@ class Interaction:
             Can be up to 15 minutes after the interaction was created
             (see also :attr:`Interaction.expires_at`/:attr:`~Interaction.is_expired`).
 
-            .. versionadded:: 2.9
+            .. versionadded:: 2.10
 
         Raises
         ------
@@ -1147,7 +1147,7 @@ class InteractionResponse:
             Can be up to 15 minutes after the interaction was created
             (see also :attr:`Interaction.expires_at`/:attr:`~Interaction.is_expired`).
 
-            .. versionadded:: 2.9
+            .. versionadded:: 2.10
 
         Raises
         ------
@@ -1661,7 +1661,7 @@ class InteractionMessage(Message):
             Can be up to 15 minutes after the interaction was created
             (see also :attr:`Interaction.expires_at`/:attr:`~Interaction.is_expired`).
 
-            .. versionadded:: 2.9
+            .. versionadded:: 2.10
 
         Raises
         ------
