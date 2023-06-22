@@ -1517,6 +1517,7 @@ class InteractionMessage(Message):
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
+        delete_after: float = ...,
     ) -> InteractionMessage:
         ...
 
@@ -1533,6 +1534,7 @@ class InteractionMessage(Message):
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
+        delete_after: float = ...,
     ) -> InteractionMessage:
         ...
 
@@ -1549,6 +1551,7 @@ class InteractionMessage(Message):
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
+        delete_after: float = ...,
     ) -> InteractionMessage:
         ...
 
@@ -1565,6 +1568,7 @@ class InteractionMessage(Message):
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
+        delete_after: float = ...,
     ) -> InteractionMessage:
         ...
 
