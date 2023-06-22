@@ -10,27 +10,27 @@ if TYPE_CHECKING:
     from disnake.types.activity import ActivityAssets
 
 
-@pytest.fixture()
+@pytest.fixture
 def activity():
     return _activity.Activity()
 
 
-@pytest.fixture()
+@pytest.fixture
 def game():
     return _activity.Game(name="Celeste")
 
 
-@pytest.fixture()
+@pytest.fixture
 def custom_activity():
     return _activity.CustomActivity(name="custom")
 
 
-@pytest.fixture()
+@pytest.fixture
 def streaming():
     return _activity.Streaming(name="me", url="https://disnake.dev")
 
 
-@pytest.fixture()
+@pytest.fixture
 def spotify():
     return _activity.Spotify()
 
@@ -41,13 +41,13 @@ def any_activity(request):
 
 
 class TestAssets:
-    def test_none(self, any_activity: _activity.ActivityTypes):
+    def test_none(self, any_activity: _activity.ActivityTypes) -> None:
         assert any_activity.large_image_url is None
         assert any_activity.small_image_url is None
         assert any_activity.large_image_text is None
         assert any_activity.small_image_text is None
 
-    def test_text(self, any_activity: _activity.ActivityTypes):
+    def test_text(self, any_activity: _activity.ActivityTypes) -> None:
         assets: ActivityAssets = {"large_text": "hi", "small_text": "hello"}
         any_activity.assets = assets
 
@@ -56,7 +56,7 @@ class TestAssets:
         assert any_activity.large_image_text == "hi"
         assert any_activity.small_image_text == "hello"
 
-    def test_mp(self, any_activity: _activity.ActivityTypes):
+    def test_mp(self, any_activity: _activity.ActivityTypes) -> None:
         assets: ActivityAssets = {
             "large_image": "mp:external/stuff/large",
             "small_image": "mp:external/stuff/small",
@@ -66,14 +66,14 @@ class TestAssets:
         assert any_activity.large_image_url == "https://media.discordapp.net/external/stuff/large"
         assert any_activity.small_image_url == "https://media.discordapp.net/external/stuff/small"
 
-    def test_unknown_prefix(self, any_activity: _activity.ActivityTypes):
+    def test_unknown_prefix(self, any_activity: _activity.ActivityTypes) -> None:
         assets: ActivityAssets = {"large_image": "unknown:a", "small_image": "unknown:b"}
         any_activity.assets = assets
 
         assert any_activity.large_image_url is None
         assert any_activity.small_image_url is None
 
-    def test_asset_id(self, any_activity: _activity.ActivityTypes):
+    def test_asset_id(self, any_activity: _activity.ActivityTypes) -> None:
         assets: ActivityAssets = {"large_image": "1234", "small_image": "5678"}
         any_activity.assets = assets
 
@@ -82,7 +82,7 @@ class TestAssets:
 
     # test `Activity` with application_id separately;
     # without application_id, it should behave like the other types (see previous test)
-    def test_asset_id_activity(self, activity: _activity.Activity):
+    def test_asset_id_activity(self, activity: _activity.Activity) -> None:
         activity.application_id = 1010
 
         assets: ActivityAssets = {"large_image": "1234", "small_image": "5678"}
