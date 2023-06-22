@@ -484,7 +484,7 @@ class _AuditLogProxyMemberPrune:
 
 
 class _AuditLogProxyMemberMoveOrMessageDelete:
-    channel: abc.GuildChannel
+    channel: Union[abc.GuildChannel, Thread]
     count: int
 
 
@@ -493,7 +493,7 @@ class _AuditLogProxyMemberDisconnect:
 
 
 class _AuditLogProxyPinAction:
-    channel: abc.GuildChannel
+    channel: Union[abc.GuildChannel, Thread]
     message_id: int
 
 
@@ -501,8 +501,8 @@ class _AuditLogProxyStageInstanceAction:
     channel: abc.GuildChannel
 
 
-class _AuditLogProxyAutoModBlockMessage:
-    channel: abc.GuildChannel
+class _AuditLogProxyAutoModAction:
+    channel: Optional[Union[abc.GuildChannel, Thread]]
     rule_name: str
     rule_trigger_type: enums.AutoModTriggerType
 
@@ -590,17 +590,20 @@ class AuditLogEntry(Hashable):
         if isinstance(self.action, enums.AuditLogAction) and extra:
             if self.action is enums.AuditLogAction.member_prune:
                 # member prune has two keys with useful information
-                self.extra = type(
-                    "_AuditLogProxy", (), {k: int(v) for k, v in extra.items()}  # type: ignore
-                )()
+                elems = {
+                    "delete_member_days": utils._get_as_snowflake(extra, "delete_member_days"),
+                    "members_removed": utils._get_as_snowflake(extra, "members_removed"),
+                }
+                self.extra = type("_AuditLogProxy", (), elems)()
             elif (
                 self.action is enums.AuditLogAction.member_move
                 or self.action is enums.AuditLogAction.message_delete
             ):
-                channel_id = int(extra["channel_id"])
                 elems = {
                     "count": int(extra["count"]),
-                    "channel": self.guild.get_channel(channel_id) or Object(id=channel_id),
+                    "channel": self._get_channel_or_thread(
+                        utils._get_as_snowflake(extra, "channel_id")
+                    ),
                 }
                 self.extra = type("_AuditLogProxy", (), elems)()
             elif self.action is enums.AuditLogAction.member_disconnect:
@@ -611,9 +614,10 @@ class AuditLogEntry(Hashable):
                 self.extra = type("_AuditLogProxy", (), elems)()
             elif self.action.name.endswith("pin"):
                 # the pin actions have a dict with some information
-                channel_id = int(extra["channel_id"])
                 elems = {
-                    "channel": self.guild.get_channel(channel_id) or Object(id=channel_id),
+                    "channel": self._get_channel_or_thread(
+                        utils._get_as_snowflake(extra, "channel_id")
+                    ),
                     "message_id": int(extra["message_id"]),
                 }
                 self.extra = type("_AuditLogProxy", (), elems)()
@@ -630,8 +634,11 @@ class AuditLogEntry(Hashable):
                         role.name = extra.get("role_name")  # type: ignore
                     self.extra = role
             elif self.action.name.startswith("stage_instance"):
-                channel_id = int(extra["channel_id"])
-                elems = {"channel": self.guild.get_channel(channel_id) or Object(id=channel_id)}
+                elems = {
+                    "channel": self._get_channel_or_thread(
+                        utils._get_as_snowflake(extra, "channel_id")
+                    )
+                }
                 self.extra = type("_AuditLogProxy", (), elems)()
             elif self.action is enums.AuditLogAction.application_command_permission_update:
                 app_id = int(extra["application_id"])
@@ -644,10 +651,9 @@ class AuditLogEntry(Hashable):
                 enums.AuditLogAction.automod_send_alert_message,
                 enums.AuditLogAction.automod_timeout,
             ):
-                channel_id = int(extra["channel_id"])
                 elems = {
                     "channel": (
-                        self.guild.get_channel_or_thread(channel_id) or Object(id=channel_id)
+                        self._get_channel_or_thread(utils._get_as_snowflake(extra, "channel_id"))
                     ),
                     "rule_name": extra["auto_moderation_rule_name"],
                     "rule_trigger_type": enums.try_enum(
@@ -665,7 +671,7 @@ class AuditLogEntry(Hashable):
         #     _AuditLogProxyMemberDisconnect,
         #     _AuditLogProxyPinAction,
         #     _AuditLogProxyStageInstanceAction,
-        #     _AuditLogProxyAutoModBlockMessage,
+        #     _AuditLogProxyAutoModAction,
         #     Member, User, None,
         #     Role,
         # ]
@@ -684,6 +690,13 @@ class AuditLogEntry(Hashable):
         if not user_id:
             return None
         return self.guild.get_member(user_id) or self._users.get(user_id) or Object(id=user_id)
+
+    def _get_channel_or_thread(
+        self, channel_id: Optional[int]
+    ) -> Union[abc.GuildChannel, Thread, Object, None]:
+        if not channel_id:
+            return None
+        return self.guild.get_channel_or_thread(channel_id) or Object(channel_id)
 
     def _get_integration_by_application_id(
         self, application_id: int
