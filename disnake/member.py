@@ -279,6 +279,7 @@ class Member(disnake.abc.Messageable, _UserTag):
     if TYPE_CHECKING:
         name: str
         id: int
+        discriminator: str
         global_name: Optional[str]
         bot: bool
         system: bool
@@ -487,19 +488,7 @@ class Member(disnake.abc.Messageable, _UserTag):
     @property
     def tag(self) -> str:
         """:class:`str`: An alias of :attr:`.discriminator`."""
-        return self._user.discriminator
-
-    @property
-    def discriminator(self) -> str:
-        """:class:`str`: The user's discriminator.
-
-        .. note::
-            This is being phased out by Discord; the username system is moving away from ``username#discriminator``
-            to users having a globally unique username.
-            The value of a single zero (``"0"``) indicates that the user has been migrated to the new system.
-            See the `help article <https://dis.gd/app-usernames>`__ for details.
-        """
-        return self._user.discriminator
+        return self.discriminator
 
     @property
     def mobile_status(self) -> Status:

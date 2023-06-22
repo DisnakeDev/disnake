@@ -146,8 +146,6 @@ class User(Snowflake, Protocol):
 
         .. versionadded:: 2.9
 
-    avatar: :class:`~disnake.Asset`
-        The avatar asset the user has.
     bot: :class:`bool`
         Whether the user is a bot account.
     """
@@ -157,7 +155,6 @@ class User(Snowflake, Protocol):
     name: str
     discriminator: str
     global_name: Optional[str]
-    avatar: Asset
     bot: bool
 
     @property
@@ -168,6 +165,13 @@ class User(Snowflake, Protocol):
     @property
     def mention(self) -> str:
         """:class:`str`: Returns a string that allows you to mention the given user."""
+        raise NotImplementedError
+
+    @property
+    def avatar(self) -> Optional[Asset]:
+        """Optional[:class:`~disnake.Asset`]: Returns an :class:`~disnake.Asset` for
+        the avatar the user has.
+        """
         raise NotImplementedError
 
 
@@ -629,6 +633,21 @@ class GuildChannel(ABC):
         """
         return f"https://discord.com/channels/{self.guild.id}/{self.id}"
 
+    def _apply_implict_permissions(self, base: Permissions) -> None:
+        # if you can't send a message in a channel then you can't have certain
+        # permissions as well
+        if not base.send_messages:
+            base.send_tts_messages = False
+            base.send_voice_messages = False
+            base.mention_everyone = False
+            base.embed_links = False
+            base.attach_files = False
+
+        # if you can't view a channel then you have no permissions there
+        if not base.view_channel:
+            denied = Permissions.all_channel()
+            base.value &= ~denied.value
+
     def permissions_for(
         self,
         obj: Union[Member, Role],
@@ -780,25 +799,11 @@ class GuildChannel(ABC):
                 base.handle_overwrite(allow=overwrite.allow, deny=overwrite.deny)
                 break
 
-        # if you can't send a message in a channel then you can't have certain
-        # permissions as well
-        if not base.send_messages:
-            base.send_tts_messages = False
-            base.send_voice_messages = False
-            base.mention_everyone = False
-            base.embed_links = False
-            base.attach_files = False
-
-        # if you can't view a channel then you have no permissions there
-        if not base.view_channel:
-            denied = Permissions.all_channel()
-            base.value &= ~denied.value
-
         # if you have a timeout then you can't have any permissions
         # except read messages and read message history
         if not ignore_timeout and obj.current_timeout:
-            denied = Permissions(view_channel=True, read_message_history=True)
-            base.value &= denied.value
+            allowed = Permissions(view_channel=True, read_message_history=True)
+            base.value &= allowed.value
 
         return base
 
@@ -1288,8 +1293,14 @@ class GuildChannel(ABC):
         Parameters
         ----------
         max_age: :class:`int`
-            How long the invite should last in seconds. If it's 0 then the invite
+            How long the invite should last in seconds. If set to ``0``, then the invite
             doesn't expire. Defaults to ``0``.
+
+            .. warning::
+
+                If the guild is not a Community guild (has ``COMMUNITY`` in :attr:`.Guild.features`),
+                this must be set to a number between ``1`` and ``2592000`` seconds.
+
         max_uses: :class:`int`
             How many uses the invite could be used for. If it's 0 then there
             are unlimited uses. Defaults to ``0``.
@@ -1306,13 +1317,13 @@ class GuildChannel(ABC):
             .. versionadded:: 2.0
 
         target_user: Optional[:class:`User`]
-            The user whose stream to display for this invite, required if `target_type` is `TargetType.stream`.
+            The user whose stream to display for this invite, required if ``target_type`` is :attr:`.InviteTarget.stream`.
             The user must be streaming in the channel.
 
             .. versionadded:: 2.0
 
         target_application: Optional[:class:`.Snowflake`]
-            The ID of the embedded application for the invite, required if `target_type` is `TargetType.embedded_application`.
+            The ID of the embedded application for the invite, required if ``target_type`` is :attr:`.InviteTarget.embedded_application`.
 
             .. versionadded:: 2.0
 

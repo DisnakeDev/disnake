@@ -764,7 +764,7 @@ Members
 .. function:: on_member_join(member)
               on_member_remove(member)
 
-    Called when a :class:`Member` leaves or joins a :class:`Guild`.
+    Called when a :class:`Member` joins or leaves a :class:`Guild` (this includes getting kicked/banned).
     If :func:`on_member_remove` is being used then consider using :func:`on_raw_member_remove` which will be called regardless of the cache.
 
     This requires :attr:`Intents.members` to be enabled.
@@ -796,7 +796,7 @@ Members
 
 .. function:: on_raw_member_remove(payload)
 
-    Called when a member leaves a :class:`Guild`.
+    Called when a member leaves a :class:`Guild` (this includes getting kicked/banned).
     Unlike :func:`on_member_remove`, this is called regardless of the member cache.
 
     .. versionadded:: 2.6
