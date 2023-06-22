@@ -33,5 +33,6 @@ coverage.xml
 __pypackages__/
 .pdm.toml
 pdm.lock
+/.vscode
 
 !test_bot/locale/*.json

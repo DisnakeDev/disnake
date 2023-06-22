@@ -139,6 +139,8 @@ class InvokableApplicationCommand(ABC):
         # We will use this attribute later in order to set the dm_permission.
         self._guild_only: bool = kwargs.get("guild_only", False)
         self.extras: Dict[str, Any] = kwargs.get("extras") or {}
+        self.auto_deferred: Optional[bool] = kwargs.get("auto_deferred")
+        self.auto_deferred_ephemeral: bool = kwargs.get("auto_deferred_ephemeral", False)
 
         if not isinstance(self.name, str):
             raise TypeError("Name of a command must be a string.")

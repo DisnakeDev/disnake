@@ -391,6 +391,12 @@ class InteractionBot(InteractionBotBase, disnake.Client):
 
         .. versionadded:: 2.5
 
+    auto_deferred_interactions: :class:`bool`
+        TODO
+        Defaults to ``False``.
+
+        .. versionadded:: TODO
+
     Attributes
     ----------
     owner_id: Optional[:class:`int`]
@@ -461,6 +467,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
             member_cache_flags: Optional[MemberCacheFlags] = None,
             localization_provider: Optional[LocalizationProtocol] = None,
             strict_localization: bool = False,
+            auto_deferred_interactions: bool = False,
         ) -> None:
             ...
 
@@ -506,5 +513,6 @@ class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
             member_cache_flags: Optional[MemberCacheFlags] = None,
             localization_provider: Optional[LocalizationProtocol] = None,
             strict_localization: bool = False,
+            auto_deferred_interactions: bool = False,
         ) -> None:
             ...

@@ -148,6 +148,7 @@ class InteractionBotBase(CommonBotBase):
         sync_commands_debug: bool = MISSING,
         sync_commands_on_cog_unload: bool = MISSING,
         test_guilds: Optional[Sequence[int]] = None,
+        auto_deferred_interactions: bool = False,
         **options: Any,
     ) -> None:
         if test_guilds and not all(isinstance(guild_id, int) for guild_id in test_guilds):
@@ -212,6 +213,8 @@ class InteractionBotBase(CommonBotBase):
         self._after_user_command_invoke = None
         self._before_message_command_invoke = None
         self._after_message_command_invoke = None
+
+        self._auto_deferred_interactions = auto_deferred_interactions
 
         self.all_slash_commands: Dict[str, InvokableSlashCommand] = {}
         self.all_user_commands: Dict[str, InvokableUserCommand] = {}
@@ -1375,6 +1378,11 @@ class InteractionBotBase(CommonBotBase):
         self.dispatch(event_name, interaction)
         try:
             if await self.application_command_can_run(interaction, call_once=True):
+                if (
+                    (self._auto_deferred_interactions and app_command.auto_deferred is None)
+                    or app_command.auto_deferred
+                ):
+                    await interaction.response.defer(ephemeral=app_command.auto_deferred_ephemeral)
                 await app_command.invoke(interaction)
                 self.dispatch(f"{event_name}_completion", interaction)
             else:
