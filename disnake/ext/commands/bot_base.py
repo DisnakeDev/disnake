@@ -191,7 +191,7 @@ class BotBase(CommonBotBase, GroupMixin):
 
         This only fires if you do not specify any listeners for command error.
         """
-        if self.extra_events.get("on_command_error", None):
+        if self.extra_events.get("on_command_error", None):  # type: ignore
             return
 
         command = context.command
@@ -575,7 +575,7 @@ class BotBase(CommonBotBase, GroupMixin):
             The invocation context to invoke.
         """
         if ctx.command is not None:
-            self.dispatch("command", ctx)
+            self.dispatch("command", ctx)  # type: ignore
             try:
                 if await self.can_run(ctx, call_once=True):
                     await ctx.command.invoke(ctx)
@@ -584,10 +584,10 @@ class BotBase(CommonBotBase, GroupMixin):
             except errors.CommandError as exc:
                 await ctx.command.dispatch_error(ctx, exc)
             else:
-                self.dispatch("command_completion", ctx)
+                self.dispatch("command_completion", ctx)  # type: ignore
         elif ctx.invoked_with:
             exc = errors.CommandNotFound(f'Command "{ctx.invoked_with}" is not found')
-            self.dispatch("command_error", ctx, exc)
+            self.dispatch("command_error", ctx, exc)  # type: ignore
 
     async def process_commands(self, message: Message) -> None:
         """|coro|
