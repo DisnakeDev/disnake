@@ -64,7 +64,6 @@ class CommonBotBase(Generic[CogT]):
     ) -> None:
         self.__cogs: Dict[str, Cog] = {}
         self.__extensions: Dict[str, types.ModuleType] = {}
-        self.extra_events: Dict[str, List[CoroFunc]] = {}
         self._is_closed: bool = False
 
         self.owner_id: Optional[int] = owner_id
@@ -81,13 +80,6 @@ class CommonBotBase(Generic[CogT]):
         self.reload: bool = reload
 
         super().__init__(*args, **kwargs)
-
-    def dispatch(self, event_name: str, *args: Any, **kwargs: Any) -> None:
-        # super() will resolve to Client
-        super().dispatch(event_name, *args, **kwargs)  # type: ignore
-        ev = "on_" + event_name
-        for event in self.extra_events.get(ev, []):
-            self._schedule_event(event, ev, *args, **kwargs)  # type: ignore
 
     async def _fill_owners(self) -> None:
         if self.owner_id or self.owner_ids:
@@ -199,24 +191,8 @@ class CommonBotBase(Generic[CogT]):
             The function is not a coroutine or a string or an :class:`.Event` was not passed
             as the name.
         """
-        if name is not MISSING and not isinstance(name, (str, Event)):
-            raise TypeError(
-                f"Bot.add_listener expected str or Enum but received {name.__class__.__name__!r} instead."
-            )
-
-        name_ = (
-            func.__name__
-            if name is MISSING
-            else (name if isinstance(name, str) else f"on_{name.value}")
-        )
-
-        if not asyncio.iscoroutinefunction(func):
-            raise TypeError("Listeners must be coroutines")
-
-        if name_ in self.extra_events:
-            self.extra_events[name_].append(func)
-        else:
-            self.extra_events[name_] = [func]
+        # resolve to Client
+        super().add_listener(func, name)  # type: ignore
 
     def remove_listener(self, func: CoroFunc, name: Union[str, Event] = MISSING) -> None:
         """Removes a listener from the pool of listeners.
@@ -234,21 +210,8 @@ class CommonBotBase(Generic[CogT]):
         TypeError
             The name passed was not a string or an :class:`.Event`.
         """
-        if name is not MISSING and not isinstance(name, (str, Event)):
-            raise TypeError(
-                f"Bot.remove_listener expected str or Enum but received {name.__class__.__name__!r} instead."
-            )
-        name = (
-            func.__name__
-            if name is MISSING
-            else (name if isinstance(name, str) else f"on_{name.value}")
-        )
-
-        if name in self.extra_events:
-            try:
-                self.extra_events[name].remove(func)
-            except ValueError:
-                pass
+        # resolve to Client
+        super().remove_listener(func, name)  # type: ignore
 
     def listen(self, name: Union[str, Event] = MISSING) -> Callable[[CFT], CFT]:
         """A decorator that registers another function as an external
@@ -284,16 +247,20 @@ class CommonBotBase(Generic[CogT]):
             The function being listened to is not a coroutine or a string or an :class:`.Event` was not passed
             as the name.
         """
-        if name is not MISSING and not isinstance(name, (str, Event)):
-            raise TypeError(
-                f"Bot.listen expected str or Enum but received {name.__class__.__name__!r} instead."
-            )
+        # resolve to Client
+        return super().listen(name)  # type: ignore
 
-        def decorator(func: CFT) -> CFT:
-            self.add_listener(func, name)
-            return func
+    def get_listeners(self) -> Mapping[str, List[CoroFunc]]:
+        """Mapping[:class:`str`, List[Callable]]: A read-only mapping of event names to listeners.
 
-        return decorator
+        .. note::
+            To add or remove a listener you should use :meth:`.add_listener` and
+            :meth:`.remove_listener`.
+
+        .. versionadded:: 2.9
+        """
+        # resolve to Client
+        return super().get_listeners()  # type: ignore
 
     # cogs
 
@@ -395,17 +362,6 @@ class CommonBotBase(Generic[CogT]):
         """Mapping[:class:`str`, :class:`Cog`]: A read-only mapping of cog name to cog."""
         return types.MappingProxyType(self.__cogs)
 
-    def get_listeners(self) -> Mapping[str, List[CoroFunc]]:
-        """Mapping[:class:`str`, List[Callable]]: A read-only mapping of event names to listeners.
-
-        .. note::
-            To add or remove a listener you should use :meth:`.add_listener` and
-            :meth:`.remove_listener`.
-
-        .. versionadded:: 2.9
-        """
-        return types.MappingProxyType(self.extra_events)
-
     # extensions
 
     def _remove_module_references(self, name: str) -> None:
@@ -415,7 +371,7 @@ class CommonBotBase(Generic[CogT]):
             if _is_submodule(name, cog.__module__):
                 self.remove_cog(cogname)
         # remove all the listeners from the module
-        for event_list in self.extra_events.copy().values():
+        for event_list in self.extra_events.copy().values():  # type: ignore
             remove = [
                 index
                 for index, event in enumerate(event_list)
