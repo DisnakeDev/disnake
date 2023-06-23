@@ -695,9 +695,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     @property
     def current_timeout(self) -> Optional[datetime.datetime]:
-        """Optional[:class:`datetime.datetime`]: Returns the datetime when the timeout expires.
-
-        If the member is not timed out or the timeout has already expired, returns ``None``.
+        """Optional[:class:`datetime.datetime`]: Returns the datetime when the timeout expires, if any.
 
         .. versionadded:: 2.3
         """
