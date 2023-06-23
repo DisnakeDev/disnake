@@ -698,6 +698,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         """Optional[:class:`datetime.datetime`]: Returns the datetime when the timeout expires.
 
         If the member is not timed out or the timeout has already expired, returns ``None``.
+
         .. versionadded:: 2.3
         """
         if self._communication_disabled_until is None:
