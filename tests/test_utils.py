@@ -475,9 +475,31 @@ def test_resolve_template(url, expected) -> None:
             r"\*hi\* \~\~a\~ \|aaa\~\*\\\`\`" "\n" r"\`py x\`\`\` \_\_uwu\_\_ y",
         ),
         (
+            r"## disnake",
+            "disnake",
+            r"\#\# disnake",
+        ),
+        (
+            r"""Inside is a long list of why markdown is an amazing tool
+- markdown supports lists
+ - honestly its a great tool that markdown supports said lists
+   - this is wrong but uh we'll get to that
+""",
+            r"""Inside is a long list of why markdown is an amazing tool
+markdown supports lists
+ honestly its a great tool that markdown supports said lists
+   this is wrong but uh we'll get to that
+""",
+            r"""Inside is a long list of why markdown is an amazing tool
+\- markdown supports lists
+ \- honestly its a great tool that markdown supports said lists
+   \- this is wrong but uh we'll get to that
+""",
+        ),
+        (
             "aaaaa\n> h\n>> abc \n>>> te*st_",
             "aaaaa\nh\n>> abc \ntest",
-            "aaaaa\n\\> h\n>> abc \n\\>>> te\\*st\\_",
+            "aaaaa\n\\> h\n>> abc \n\\>\\>\\> te\\*st\\_",
         ),
         (
             "*h*\n> [li|nk](~~url~~) xyz **https://google.com/stuff?uwu=owo",
@@ -513,64 +535,6 @@ def test_markdown(text: str, exp_remove, exp_escape) -> None:
 def test_markdown_links(text: str, expected, expected_ignore) -> None:
     assert utils.remove_markdown(text, ignore_links=False) == expected
     assert utils.remove_markdown(text, ignore_links=True) == expected_ignore
-
-
-@pytest.mark.parametrize(
-    ("text", "expected"),
-    [
-        (
-            r"# disnake",
-            r"disnake",
-        ),
-        (
-            r"## woah this should be removed\n  ### but not this one",
-            r"woah this should be removed\n  ### but not this one",
-        ),
-        (
-            r"""Inside is a long list of why markdown is an amazing tool
-- markdown supports lists
- - honestly its a great tool that markdown supports said lists
-   - this is wrong but uh we'll get to that
-""",
-            r"""Inside is a long list of why markdown is an amazing tool
-markdown supports lists
- honestly its a great tool that markdown supports said lists
-   this is wrong but uh we'll get to that
-""",
-        ),
-    ],
-)
-def test_remove_markdown(text: str, expected: str) -> None:
-    assert utils.remove_markdown(text) == expected
-
-
-@pytest.mark.parametrize(
-    ("text", "expected"),
-    [
-        (
-            r"# disnake",
-            r"\# disnake",
-        ),
-        (
-            "## escape these quotes\n  ### but not these",
-            "\\#\\# escape these quotes\n  ### but not these",
-        ),
-        (
-            r"""Inside is a long list of why markdown is an amazing tool
-- markdown supports lists
- - honestly its a great tool that markdown supports said lists
-   - this is wrong but uh we'll get to that
-""",
-            r"""Inside is a long list of why markdown is an amazing tool
-\- markdown supports lists
- \- honestly its a great tool that markdown supports said lists
-   \- this is wrong but uh we'll get to that
-""",
-        ),
-    ],
-)
-def test_escape_markdown(text: str, expected: str) -> None:
-    assert utils.escape_markdown(text) == expected
 
 
 @pytest.mark.parametrize(
