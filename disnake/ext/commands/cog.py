@@ -895,6 +895,7 @@ class Cog(metaclass=CogMeta):
                 pass
             try:
                 self.cog_unload()
-            except Exception:
-                # TODO: Consider calling the bot's on_error handler here
-                pass
+            except Exception as e:
+                # we pass the exception directly to the bot's on_error since
+                # inside a task sys.exc_info isn't able to get exception info
+                bot.loop.create_task(bot.on_error(f"{self.qualified_name}.cog_unload", exc=e))
