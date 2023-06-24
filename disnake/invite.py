@@ -571,6 +571,10 @@ class Invite(Hashable):
 
     @property
     def flags(self) -> InviteFlags:
+        """:class:`InviteFlags`: Invite's flags.
+
+        .. versionadded:: 2.10
+        """
         return InviteFlags._from_value(self._flags)
 
     async def delete(self, *, reason: Optional[str] = None) -> None:

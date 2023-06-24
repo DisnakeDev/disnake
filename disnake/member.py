@@ -716,6 +716,16 @@ class Member(disnake.abc.Messageable, _UserTag):
         """
         return MemberFlags._from_value(self._flags)
 
+    def is_guest(self) -> bool:
+        """Whether this member joined the guild as a guest (i.e., via a guest invite).
+
+        Returns
+        -------
+        :class:`bool`
+            Whether the member is a guest.
+        """
+        return self.joined_at is None
+
     @overload
     async def ban(
         self,
