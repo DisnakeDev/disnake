@@ -1805,7 +1805,6 @@ class ConnectionState:
             )
             return
 
-        # FIXME: use methods added in #980
         emoji: Optional[PartialEmoji] = None
         if emoji_data := data.get("emoji"):
             emoji = PartialEmoji.with_state(
@@ -1823,7 +1822,6 @@ class ConnectionState:
         self.dispatch("raw_voice_channel_effect", raw)
 
         if channel and member:
-            # TODO: upgrade `PartialEmoji` to `Emoji` here?
             self.dispatch("voice_channel_effect", channel, member, raw.effect)
 
     def parse_typing_start(self, data: gateway.TypingStartEvent) -> None:
