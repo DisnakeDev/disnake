@@ -726,15 +726,14 @@ class ConnectionState:
         # self._users is a list of Users, we're setting a ClientUser
         self._users[self.user.id] = self.user  # type: ignore
 
-        if self.application_id is None:
-            try:
-                application = data["application"]
-            except KeyError:
-                pass
-            else:
+        try:
+            application = data["application"]
+        except KeyError:
+            pass
+        else:
+            if self.application_id is None:
                 self.application_id = utils._get_as_snowflake(application, "id")
-                # flags will always be present here
-                self.application_flags = ApplicationFlags._from_value(application["flags"])
+            self.application_flags = ApplicationFlags._from_value(application["flags"])
 
         for guild_data in data["guilds"]:
             self._add_guild_from_data(guild_data)
@@ -887,6 +886,7 @@ class ConnectionState:
         emoji = PartialEmoji.with_state(
             self,
             id=emoji_id,
+            animated=emoji.get("animated", False),
             # may be `None` in gateway events if custom emoji data isn't available anymore
             # https://discord.com/developers/docs/resources/emoji#emoji-object-custom-emoji-examples
             name=emoji["name"],  # type: ignore
@@ -914,6 +914,7 @@ class ConnectionState:
         emoji = PartialEmoji.with_state(
             self,
             id=emoji_id,
+            animated=emoji.get("animated", False),
             # may be `None` in gateway events if custom emoji data isn't available anymore
             # https://discord.com/developers/docs/resources/emoji#emoji-object-custom-emoji-examples
             name=emoji["name"],  # type: ignore
@@ -2316,14 +2317,14 @@ class AutoShardedConnectionState(ConnectionState):
         # self._users is a list of Users, we're setting a ClientUser
         self._users[user.id] = user  # type: ignore
 
-        if self.application_id is None:
-            try:
-                application = data["application"]
-            except KeyError:
-                pass
-            else:
+        try:
+            application = data["application"]
+        except KeyError:
+            pass
+        else:
+            if self.application_id is None:
                 self.application_id = utils._get_as_snowflake(application, "id")
-                self.application_flags = ApplicationFlags._from_value(application["flags"])
+            self.application_flags = ApplicationFlags._from_value(application["flags"])
 
         for guild_data in data["guilds"]:
             self._add_guild_from_data(guild_data)

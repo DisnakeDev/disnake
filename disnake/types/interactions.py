@@ -306,7 +306,7 @@ class InteractionApplicationCommandCallbackData(TypedDict, total=False):
     allowed_mentions: AllowedMentions
     flags: int
     components: List[Component]
-    # TODO: missing attachment field
+    attachments: List[Attachment]
 
 
 class InteractionAutocompleteCallbackData(TypedDict):

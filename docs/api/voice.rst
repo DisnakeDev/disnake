@@ -191,6 +191,11 @@ PartyType
         The "Ocho" activity.
 
         .. versionadded:: 2.4
+    .. attribute:: gartic_phone
+
+        The "Gartic Phone" activity.
+
+        .. versionadded:: 2.9
 
 Events
 ------

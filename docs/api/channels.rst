@@ -34,6 +34,7 @@ VoiceChannel
 .. autoclass:: VoiceChannel()
     :members:
     :inherited-members:
+    :exclude-members: pins
 
 CategoryChannel
 ~~~~~~~~~~~~~~~
@@ -76,6 +77,7 @@ StageChannel
 .. autoclass:: StageChannel()
     :members:
     :inherited-members:
+    :exclude-members: pins
 
 ForumChannel
 ~~~~~~~~~~~~

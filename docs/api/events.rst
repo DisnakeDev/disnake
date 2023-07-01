@@ -764,7 +764,7 @@ Members
 .. function:: on_member_join(member)
               on_member_remove(member)
 
-    Called when a :class:`Member` leaves or joins a :class:`Guild`.
+    Called when a :class:`Member` joins or leaves a :class:`Guild` (this includes getting kicked/banned).
     If :func:`on_member_remove` is being used then consider using :func:`on_raw_member_remove` which will be called regardless of the cache.
 
     This requires :attr:`Intents.members` to be enabled.
@@ -774,7 +774,8 @@ Members
 
 .. function:: on_member_update(before, after)
 
-    Called when a :class:`Member` updates their profile.
+    Called when a :class:`Member` is updated in a :class:`Guild`. This will also be called
+    when a :class:`User` object linked to a guild :class:`Member` changes.
     Consider using :func:`on_raw_member_update` which will be called regardless of the cache.
 
     This is called when one or more of the following things change, but is not limited to:
@@ -795,7 +796,7 @@ Members
 
 .. function:: on_raw_member_remove(payload)
 
-    Called when a member leaves a :class:`Guild`.
+    Called when a member leaves a :class:`Guild` (this includes getting kicked/banned).
     Unlike :func:`on_member_remove`, this is called regardless of the member cache.
 
     .. versionadded:: 2.6
@@ -805,7 +806,8 @@ Members
 
 .. function:: on_raw_member_update(member)
 
-    Called when a member updates their profile.
+    Called when a :class:`Member` is updated in a :class:`Guild`. This will also be called
+    when a :class:`User` object linked to a guild :class:`Member` changes.
     Unlike :func:`on_member_update`, this is called regardless of the member cache.
 
     .. versionadded:: 2.6
@@ -864,6 +866,7 @@ Members
     - avatar
     - discriminator
     - name
+    - global_name
     - public_flags
 
     This requires :attr:`Intents.members` to be enabled.
