@@ -2,6 +2,7 @@
 
 import asyncio
 import datetime
+import functools
 import inspect
 import os
 import sys
@@ -890,6 +891,14 @@ def _toplevel():
     return inner
 
 
+def decorator(f):
+    @functools.wraps(f)
+    def wrap(self, *args, **kwargs):
+        return f(self, *args, **kwargs)
+
+    return wrap
+
+
 # used for `test_signature_has_self_param`
 class _Clazz:
     def func(self):
@@ -915,6 +924,10 @@ class _Clazz:
 
     rebind = _toplevel
 
+    @decorator
+    def decorated(self) -> None:
+        ...
+
 
 @pytest.mark.parametrize(
     ("function", "expected"),
@@ -937,6 +950,8 @@ class _Clazz:
         (_toplevel(), False),
         (_Clazz().func(), False),
         (_Clazz.Nested().func(), False),
+        # decorated method
+        (_Clazz.decorated, True),
     ],
 )
 def test_signature_has_self_param(function, expected) -> None:
