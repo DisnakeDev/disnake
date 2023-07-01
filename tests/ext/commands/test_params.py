@@ -213,3 +213,35 @@ class TestRangeStringParam:
         assert info.min_value == 1
         assert info.max_value == 2
         assert info.type == int
+
+
+class TestIsolateSelf:
+    def test_function(self) -> None:
+        def func(inter: disnake.ApplicationCommandInteraction, a: str, b: int) -> None:
+            ...
+
+        (cog, inter), params = commands.params.isolate_self(func)
+        assert cog is None  # should not be set
+        assert inter is not None
+        assert params.keys() == {"a", "b"}
+
+    def test_unbound_method(self) -> None:
+        class Cog(commands.Cog):
+            def func(self, inter: disnake.ApplicationCommandInteraction, a: str, b: int) -> None:
+                ...
+
+        (cog, inter), params = commands.params.isolate_self(Cog.func)
+        assert cog is not None  # *should* be set here
+        assert inter is not None
+        assert params.keys() == {"a", "b"}
+
+    # I don't think the param parsing logic ever handles bound methods, but testing for regressions anyway
+    def test_bound_method(self) -> None:
+        class Cog(commands.Cog):
+            def func(self, inter: disnake.ApplicationCommandInteraction, a: str, b: int) -> None:
+                ...
+
+        (cog, inter), params = commands.params.isolate_self(Cog().func)
+        assert cog is None  # should not be set here, since method is already bound
+        assert inter is not None
+        assert params.keys() == {"a", "b"}
