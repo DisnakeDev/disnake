@@ -417,6 +417,8 @@ class SystemChannelFlags(BaseFlags, inverted=True):
             join_notification_replies: bool = ...,
             join_notifications: bool = ...,
             premium_subscriptions: bool = ...,
+            role_subscription_purchase_notification_replies: bool = ...,
+            role_subscription_purchase_notifications: bool = ...,
         ) -> None:
             ...
 
@@ -439,12 +441,12 @@ class SystemChannelFlags(BaseFlags, inverted=True):
     @flag_value
     def join_notifications(self) -> int:
         """:class:`bool`: Returns ``True`` if the system channel is used for member join notifications."""
-        return 1
+        return 1 << 0
 
     @flag_value
     def premium_subscriptions(self) -> int:
         """:class:`bool`: Returns ``True`` if the system channel is used for "Nitro boosting" notifications."""
-        return 2
+        return 1 << 1
 
     @flag_value
     def guild_reminder_notifications(self) -> int:
@@ -452,7 +454,7 @@ class SystemChannelFlags(BaseFlags, inverted=True):
 
         .. versionadded:: 2.0
         """
-        return 4
+        return 1 << 2
 
     @flag_value
     def join_notification_replies(self) -> int:
@@ -461,7 +463,25 @@ class SystemChannelFlags(BaseFlags, inverted=True):
 
         .. versionadded:: 2.3
         """
-        return 8
+        return 1 << 3
+
+    @flag_value
+    def role_subscription_purchase_notifications(self):
+        """:class:`bool`: Returns ``True`` if the system channel shows role
+        subscription purchase/renewal notifications.
+
+        .. versionadded:: 2.9
+        """
+        return 1 << 4
+
+    @flag_value
+    def role_subscription_purchase_notification_replies(self):
+        """:class:`bool`: Returns ``True`` if the system channel shows sticker reply
+        buttons for role subscription purchase/renewal notifications.
+
+        .. versionadded:: 2.9
+        """
+        return 1 << 5
 
 
 class MessageFlags(BaseFlags):
@@ -565,6 +585,7 @@ class MessageFlags(BaseFlags):
             failed_to_mention_roles_in_thread: bool = ...,
             has_thread: bool = ...,
             is_crossposted: bool = ...,
+            is_voice_message: bool = ...,
             loading: bool = ...,
             source_message_deleted: bool = ...,
             suppress_embeds: bool = ...,
@@ -595,7 +616,7 @@ class MessageFlags(BaseFlags):
 
     @flag_value
     def urgent(self):
-        """:class:`bool`: Returns ``True`` if the source message is an urgent message.
+        """:class:`bool`: Returns ``True`` if the message is an urgent message.
 
         An urgent message is one sent by Discord Trust and Safety.
         """
@@ -603,7 +624,7 @@ class MessageFlags(BaseFlags):
 
     @flag_value
     def has_thread(self):
-        """:class:`bool`: Returns ``True`` if the source message is associated with a thread.
+        """:class:`bool`: Returns ``True`` if the message is associated with a thread.
 
         .. versionadded:: 2.0
         """
@@ -611,7 +632,7 @@ class MessageFlags(BaseFlags):
 
     @flag_value
     def ephemeral(self):
-        """:class:`bool`: Returns ``True`` if the source message is ephemeral.
+        """:class:`bool`: Returns ``True`` if the message is ephemeral.
 
         .. versionadded:: 2.0
         """
@@ -619,7 +640,7 @@ class MessageFlags(BaseFlags):
 
     @flag_value
     def loading(self):
-        """:class:`bool`: Returns ``True`` if the source message is a deferred
+        """:class:`bool`: Returns ``True`` if the message is a deferred
         interaction response and shows a "thinking" state.
 
         .. versionadded:: 2.3
@@ -628,7 +649,7 @@ class MessageFlags(BaseFlags):
 
     @flag_value
     def failed_to_mention_roles_in_thread(self):
-        """:class:`bool`: Returns ``True`` if the source message failed to
+        """:class:`bool`: Returns ``True`` if the message failed to
         mention some roles and add their members to the thread.
 
         .. versionadded:: 2.4
@@ -637,12 +658,22 @@ class MessageFlags(BaseFlags):
 
     @flag_value
     def suppress_notifications(self):
-        """:class:`bool`: Returns ``True`` if the source message does not
+        """:class:`bool`: Returns ``True`` if the message does not
         trigger push and desktop notifications.
 
         .. versionadded:: 2.9
         """
         return 1 << 12
+
+    @flag_value
+    def is_voice_message(self):
+        """:class:`bool`: Returns ``True`` if the message is a voice message.
+
+        Messages with this flag will have a single audio attachment, and no other content.
+
+        .. versionadded:: 2.9
+        """
+        return 1 << 13
 
 
 class PublicUserFlags(BaseFlags):
@@ -1116,6 +1147,7 @@ class Intents(BaseFlags):
         - :attr:`User.name`
         - :attr:`User.avatar`
         - :attr:`User.discriminator`
+        - :attr:`User.global_name`
 
         For more information go to the :ref:`member intent documentation <need_members_intent>`.
 
