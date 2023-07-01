@@ -68,6 +68,7 @@ from .iterators import EntitlementIterator, GuildIterator
 from .mentions import AllowedMentions
 from .object import Object
 from .sku import SKU
+from .soundboard import SoundboardSound
 from .stage_instance import StageInstance
 from .state import ConnectionState
 from .sticker import GuildSticker, StandardSticker, StickerPack, _sticker_factory
@@ -2351,6 +2352,24 @@ class Client:
         """
         data = await self.http.get_widget(guild_id)
         return Widget(state=self._connection, data=data)
+
+    async def fetch_default_soundboard_sounds(self) -> List[SoundboardSound]:
+        """|coro|
+
+        Retrieves the list of default :class:`.SoundboardSound`\\s provided by Discord.
+
+        Raises
+        ------
+        HTTPException
+            Retrieving the soundboard sounds failed.
+
+        Returns
+        -------
+        List[:class:`.SoundboardSound`]
+            The default soundboard sounds.
+        """
+        data = await self.http.get_soundboard_default_sounds()
+        return [SoundboardSound(data=d, state=self._connection) for d in data]
 
     async def application_info(self) -> AppInfo:
         """|coro|
