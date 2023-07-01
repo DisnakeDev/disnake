@@ -43,7 +43,7 @@ from disnake.enums import ChannelType, OptionType, try_enum_to_int
 from disnake.ext import commands
 from disnake.i18n import Localized
 from disnake.interactions import ApplicationCommandInteraction
-from disnake.utils import maybe_coroutine
+from disnake.utils import maybe_coroutine, signature_has_self_param
 
 from . import errors
 from .converter import CONVERTER_MAPPING
@@ -917,7 +917,7 @@ def isolate_self(
     cog_param: Optional[inspect.Parameter] = None
     inter_param: Optional[inspect.Parameter] = None
 
-    if parametersl[0].name == "self":
+    if signature_has_self_param(function):
         cog_param = parameters.pop(parametersl[0].name)
         parametersl.pop(0)
     if parametersl:
