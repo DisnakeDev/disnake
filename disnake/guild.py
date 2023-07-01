@@ -243,6 +243,7 @@ class Guild(Hashable):
         - ``ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE``: Guild has role subscriptions that can be purchased.
         - ``ROLE_SUBSCRIPTIONS_ENABLED``: Guild has enabled role subscriptions.
         - ``SEVEN_DAY_THREAD_ARCHIVE``: Guild has access to the seven day archive time for threads (no longer has any effect).
+        - ``SOUNDBOARD``: Guild has created soundboard sounds.
         - ``TEXT_IN_VOICE_ENABLED``: Guild has text in voice channels enabled (no longer has any effect).
         - ``THREE_DAY_THREAD_ARCHIVE``: Guild has access to the three day archive time for threads (no longer has any effect).
         - ``THREADS_ENABLED``: Guild has access to threads (no longer has any effect).
