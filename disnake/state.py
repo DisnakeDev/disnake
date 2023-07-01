@@ -1842,6 +1842,8 @@ class ConnectionState:
             return
 
         effect = VoiceChannelEffect(data=data, state=self)
+        if effect.sound:
+            effect.sound._state = self  # attach state to asset
         raw = RawVoiceChannelEffectEvent(data, effect)
 
         channel = guild.get_channel(raw.channel_id)

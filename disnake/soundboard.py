@@ -40,7 +40,7 @@ class PartialSoundboardSound(Hashable, AssetMixin):
         self,
         *,
         data: PartialSoundboardSoundPayload,
-        state: Optional[ConnectionState],
+        state: Optional[ConnectionState] = None,
     ) -> None:
         self._state = state
         self.id: int = int(data["sound_id"])
