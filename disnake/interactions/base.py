@@ -564,6 +564,9 @@ class Interaction:
             before deleting the original response message. If the deletion fails,
             then it is silently ignored.
 
+            Can be up to 15 minutes after the interaction was created
+            (see also :attr:`Interaction.expires_at`/:attr:`~Interaction.is_expired`).
+
         Raises
         ------
         HTTPException
