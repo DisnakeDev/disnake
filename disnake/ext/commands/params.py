@@ -786,7 +786,7 @@ class ParamInfo:
         return True
 
     def parse_converter_annotation(self, converter: Callable, fallback_annotation: Any) -> None:
-        _, parameters = isolate_self(signature(converter))
+        _, parameters = isolate_self(converter)
 
         if len(parameters) != 1:
             raise TypeError(
@@ -894,9 +894,20 @@ def safe_call(function: Callable[..., T], /, *possible_args: Any, **possible_kwa
 
 
 def isolate_self(
-    sig: inspect.Signature,
-) -> Tuple[Tuple[Optional[inspect.Parameter], ...], Dict[str, inspect.Parameter]]:
-    """Create parameters without self and the first interaction"""
+    function: Callable,
+    sig: Optional[inspect.Signature] = None,
+) -> Tuple[
+    Tuple[Optional[inspect.Parameter], Optional[inspect.Parameter]],
+    Dict[str, inspect.Parameter],
+]:
+    """Create parameters without self and the first interaction.
+
+    Optionally accepts an `inspect.Signature` object (as an optimization),
+    calls `signature(function)` if not provided.
+    """
+    if sig is None:
+        sig = signature(function)
+
     parameters = dict(sig.parameters)
     parametersl = list(sig.parameters.values())
 
@@ -956,15 +967,11 @@ def collect_params(
 ) -> Tuple[Optional[str], Optional[str], List[ParamInfo], Dict[str, Injection]]:
     """Collect all parameters in a function.
 
-    Optionally accepts an `inspect.Signature` object (as an optimization),
-    calls `signature(function)` if not provided.
+    Optionally accepts an `inspect.Signature` object as an optimization.
 
     Returns: (`cog parameter`, `interaction parameter`, `param infos`, `injections`)
     """
-    if sig is None:
-        sig = signature(function)
-
-    (cog_param, inter_param), parameters = isolate_self(sig)
+    (cog_param, inter_param), parameters = isolate_self(function, sig)
 
     doc = disnake.utils.parse_docstring(function)["params"]
 
