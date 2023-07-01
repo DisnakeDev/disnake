@@ -1031,7 +1031,7 @@ Voice
 
     This requires :attr:`Intents.voice_states` and :attr:`Intents.members` to be enabled.
 
-    .. versionadded:: 2.9
+    .. versionadded:: 2.10
 
     :param channel: The voice channel where the effect was sent.
     :type channel: :class:`abc.GuildChannel`
@@ -1047,7 +1047,7 @@ Voice
 
     This requires :attr:`Intents.voice_states` to be enabled.
 
-    .. versionadded:: 2.9
+    .. versionadded:: 2.10
 
     :param payload: The raw event payload data.
     :type payload: :class:`RawVoiceChannelEffectEvent`

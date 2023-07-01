@@ -128,7 +128,7 @@ VoiceChannelEffectAnimationType
 
     The type of an emoji reaction effect animation in a voice channel.
 
-    .. versionadded:: 2.9
+    .. versionadded:: 2.10
 
     .. attribute:: premium
 

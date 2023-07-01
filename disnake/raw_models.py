@@ -437,7 +437,7 @@ class RawGuildMemberRemoveEvent(_RawReprMixin):
 class RawVoiceChannelEffectEvent(_RawReprMixin):
     """Represents the event payload for an :func:`on_raw_voice_channel_effect` event.
 
-    .. versionadded:: 2.9
+    .. versionadded:: 2.10
 
     Attributes
     ----------

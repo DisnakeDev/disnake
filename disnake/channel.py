@@ -103,7 +103,7 @@ class VoiceChannelEffect:
 
     Different sets of attributes will be present, depending on the type of effect.
 
-    .. versionadded:: 2.9
+    .. versionadded:: 2.10
 
     Attributes
     ----------
