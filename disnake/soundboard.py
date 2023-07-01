@@ -14,41 +14,94 @@ if TYPE_CHECKING:
     from .guild import Guild
     from .partial_emoji import PartialEmoji
     from .state import ConnectionState
-    from .types.soundboard import SoundboardSound as SoundboardSoundPayload
+    from .types.soundboard import (
+        PartialSoundboardSound as PartialSoundboardSoundPayload,
+        SoundboardSound as SoundboardSoundPayload,
+    )
     from .user import User
 
 
-__all__ = ("SoundboardSound",)
+__all__ = (
+    "PartialSoundboardSound",
+    "SoundboardSound",
+)
 
 
-class SoundboardSound(Hashable, AssetMixin):
+class PartialSoundboardSound(Hashable, AssetMixin):
+    """TODO"""
+
+    __slots__ = (
+        "id",
+        "volume",
+        "override_path",
+    )
+
+    def __init__(
+        self,
+        *,
+        data: PartialSoundboardSoundPayload,
+        state: Optional[ConnectionState],
+    ) -> None:
+        self._state = state
+        self.id: int = int(data["sound_id"])
+        self.override_path: Optional[str] = data.get("override_path")
+
+        self._update(data)
+
+    def _update(self, data: PartialSoundboardSoundPayload) -> None:
+        self.volume: float = data["volume"]
+
+    def __repr__(self) -> str:
+        return f"<{self.__class__.__name__} id={self.id!r} override_path={self.override_path!r}>"
+
+    @property
+    def created_at(self) -> Optional[datetime.datetime]:
+        """Optional[:class:`datetime.datetime`]: Returns the sound's creation time in UTC.
+        Can be ``None`` if this is a default sound.
+        """
+        if self.override_path:
+            return None  # default sound
+        return snowflake_time(self.id)
+
+    @property
+    def url(self) -> str:
+        """:class:`str`: The url for the sound file."""
+        if self.override_path:
+            return f"{Asset.BASE}/soundboard-default-sounds/{self.override_path}"
+        return f"{Asset.BASE}/soundboard-sounds/{self.id}"
+
+    def is_default(self) -> bool:
+        """Whether the sound is a default sound provided by Discord.
+
+        :return type: :class:`bool`
+        """
+        return self.override_path is not None
+
+
+class SoundboardSound(PartialSoundboardSound):
     """TODO"""
 
     __slots__ = (
         "name",
-        "id",
-        "volume",
         "emoji",
-        "override_path",
         "guild_id",
         "available",
         "user",
     )
 
+    _state: ConnectionState
+
     def __init__(self, *, data: SoundboardSoundPayload, state: ConnectionState) -> None:
-        self._state: ConnectionState = state
-        self.id: int = int(data["sound_id"])
-        self.override_path: Optional[str] = data.get("override_path")
+        super().__init__(data=data, state=state)
+
         self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
         self.user: Optional[User] = (
             state.store_user(user_data) if (user_data := data.get("user")) is not None else None
         )
 
-        self._update(data)
-
     def _update(self, data: SoundboardSoundPayload) -> None:
+        super()._update(data)
         self.name: str = data["name"]
-        self.volume: float = data["volume"]
         self.emoji: Optional[Union[Emoji, PartialEmoji]] = self._state._get_emoji_from_fields(
             name=data.get("emoji_name"),
             id=_get_as_snowflake(data, "emoji_id"),
@@ -65,20 +118,8 @@ class SoundboardSound(Hashable, AssetMixin):
         return self.name
 
     @property
-    def created_at(self) -> datetime.datetime:
-        """:class:`datetime.datetime`: Returns the role's creation time in UTC."""
-        return snowflake_time(self.id)
-
-    @property
     def guild(self) -> Optional[Guild]:
         """Optional[:class:`Guild`]: The guild that this sound is from.
         Could be ``None`` if the bot is not in the guild.
         """
         return self._state._get_guild(self.guild_id)
-
-    @property
-    def url(self) -> str:
-        """:class:`str`: The url for the sound."""
-        if self.override_path:
-            return f"{Asset.BASE}/soundboard-default-sounds/{self.override_path}"
-        return f"{Asset.BASE}/soundboard-sounds/{self.id}"
