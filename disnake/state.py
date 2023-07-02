@@ -78,6 +78,7 @@ from .raw_models import (
     RawReactionActionEvent,
     RawReactionClearEmojiEvent,
     RawReactionClearEvent,
+    RawSoundboardSoundDeleteEvent,
     RawThreadDeleteEvent,
     RawThreadMemberRemoveEvent,
     RawTypingEvent,
@@ -2012,6 +2013,46 @@ class ConnectionState:
     def parse_entitlement_delete(self, data: gateway.EntitlementDelete) -> None:
         entitlement = Entitlement(data=data, state=self)
         self.dispatch("entitlement_delete", entitlement)
+
+
+    def parse_guild_soundboard_sound_create(self, data: gateway.GuildSoundboardSoundCreate) -> None:
+        guild_id = utils._get_as_snowflake(data, "guild_id")
+        guild = self._get_guild(guild_id)
+        if guild is None:
+            _log.debug(
+                "GUILD_SOUNDBOARD_SOUND_CREATE referencing unknown guild ID: %s. Discarding.",
+                guild_id,
+            )
+            return
+
+        sound = SoundboardSound(data=data, state=self, guild_id=guild.id)
+        self.dispatch("soundboard_sound_create", sound)
+
+    def parse_guild_soundboard_sound_update(self, data: gateway.GuildSoundboardSoundUpdate) -> None:
+        guild_id = utils._get_as_snowflake(data, "guild_id")
+        guild = self._get_guild(guild_id)
+        if guild is None:
+            _log.debug(
+                "GUILD_SOUNDBOARD_SOUND_UPDATE referencing unknown guild ID: %s. Discarding.",
+                guild_id,
+            )
+            return
+
+        sound = SoundboardSound(data=data, state=self, guild_id=guild.id)
+        self.dispatch("raw_soundboard_sound_update", sound)
+
+    def parse_guild_soundboard_sound_delete(self, data: gateway.GuildSoundboardSoundDelete) -> None:
+        guild = self._get_guild(int(data["guild_id"]))
+        if guild is None:
+            _log.debug(
+                "GUILD_SOUNDBOARD_SOUND_UPDATE referencing unknown guild ID: %s. Discarding.",
+                data["guild_id"],
+            )
+            return
+
+        sound_id = int(data["sound_id"])
+        raw = RawSoundboardSoundDeleteEvent(guild_id=guild.id, sound_id=sound_id)
+        self.dispatch("raw_soundboard_sound_delete", raw)
 
     def parse_soundboard_sounds(self, data: gateway.SoundboardSoundsEvent) -> None:
         guild_id = int(data["guild_id"])

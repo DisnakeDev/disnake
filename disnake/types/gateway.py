@@ -680,6 +680,20 @@ EntitlementUpdate = Entitlement
 EntitlementDelete = Entitlement
 
 
+# https://discord.com/developers/docs/topics/gateway-events#guild-soundboard-sound-create
+GuildSoundboardSoundCreate = SoundboardSound
+
+
+# https://discord.com/developers/docs/topics/gateway-events#guild-soundboard-sound-update
+GuildSoundboardSoundUpdate = SoundboardSound
+
+
+# https://discord.com/developers/docs/topics/gateway-events#guild-soundboard-sound-delete
+class GuildSoundboardSoundDelete(TypedDict):
+    guild_id: Snowflake
+    sound_id: Snowflake
+
+
 # https://discord.com/developers/docs/topics/gateway-events#soundboard-sounds
 class SoundboardSoundsEvent(TypedDict):
     guild_id: Snowflake
