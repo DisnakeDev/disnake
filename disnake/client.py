@@ -2353,11 +2353,12 @@ class Client:
         data = await self.http.get_widget(guild_id)
         return Widget(state=self._connection, data=data)
 
-    # TODO: naming (fetch_default_sounds?)
     async def fetch_default_soundboard_sounds(self) -> List[SoundboardSound]:
         """|coro|
 
         Retrieves the list of default :class:`.SoundboardSound`\\s provided by Discord.
+
+        .. versionadded:: 2.10
 
         Raises
         ------

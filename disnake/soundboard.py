@@ -28,7 +28,36 @@ __all__ = (
 
 
 class PartialSoundboardSound(Hashable, AssetMixin):
-    """TODO"""
+    """Represents a partial soundboard sound.
+
+    Used for sounds in :class:`VoiceChannelEffect`\\s,
+    and as the base for full :class:`SoundboardSound` objects.
+
+    .. versionadded:: 2.10
+
+    .. container:: operations
+
+        .. describe:: x == y
+
+            Checks if two soundboard sounds are equal.
+
+        .. describe:: x != y
+
+            Checks if two soundboard sounds are not equal.
+
+        .. describe:: hash(x)
+
+            Returns the soundboard sounds' hash.
+
+    Attributes
+    ----------
+    id: :class:`int`
+        The sound's ID.
+    volume: :class:`float`
+        The sound's volume (from ``0.0`` to ``1.0``).
+    override_path: Optional[:class:`str`]
+        The sound's filename, if applicable.
+    """
 
     __slots__ = (
         "id",
@@ -79,7 +108,45 @@ class PartialSoundboardSound(Hashable, AssetMixin):
 
 
 class SoundboardSound(PartialSoundboardSound):
-    """TODO"""
+    """Represents a soundboard sound.
+
+    .. versionadded:: 2.10
+
+    .. container:: operations
+
+        .. describe:: x == y
+
+            Checks if two soundboard sounds are equal.
+
+        .. describe:: x != y
+
+            Checks if two soundboard sounds are not equal.
+
+        .. describe:: hash(x)
+
+            Returns the soundboard sounds' hash.
+
+    Attributes
+    ----------
+    id: :class:`int`
+        The sound's ID.
+    volume: :class:`float`
+        The sound's volume (from ``0.0`` to ``1.0``).
+    override_path: Optional[:class:`str`]
+        The sound's filename, if applicable.
+    name: :class:`str`
+        The sound's name.
+    emoji: Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]
+        The sound's emoji, if any.
+        Due to a Discord limitation, this will have an empty
+        :attr:`~PartialEmoji.name` if it is a custom :class:`PartialEmoji`.
+    guild_id: Optional[:class:`int`]
+        The ID of the guild this sound belongs to, if any.
+    available: :class:`bool`
+        Whether this sound is available for use.
+    user: Optional[:class:`User`]
+        The user that created this sound.
+    """
 
     __slots__ = (
         "name",
@@ -126,9 +193,7 @@ class SoundboardSound(PartialSoundboardSound):
 
     @property
     def guild(self) -> Optional[Guild]:
-        """Optional[:class:`Guild`]: The guild that this sound is from.
-        Could be ``None`` if the bot is not in the guild.
-        """
+        """Optional[:class:`Guild`]: The guild that this sound is from, if any."""
         return self._state._get_guild(self.guild_id)
 
     async def edit(
@@ -139,7 +204,38 @@ class SoundboardSound(PartialSoundboardSound):
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
         reason: Optional[str] = None,
     ) -> SoundboardSound:
-        """TODO"""
+        """|coro|
+
+        Edits a :class:`SoundboardSound` for the guild.
+
+        You must have :attr:`~Permissions.manage_guild_expressions` permission to
+        do this.
+
+        All fields are optional.
+
+        Parameters
+        ----------
+        name: :class:`str`
+            The sounds's new name. Must be at least 2 characters.
+        volume: :class:`float`
+            The sound's new volume (from ``0.0`` to ``1.0``).
+        emoji: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
+            The sound's new emoji. Can be ``None``.
+        reason: Optional[:class:`str`]
+            The reason for editing this sound. Shows up on the audit log.
+
+        Raises
+        ------
+        Forbidden
+            You are not allowed to edit soundboard sounds.
+        HTTPException
+            An error occurred editing the soundboard sound.
+
+        Returns
+        -------
+        :class:`SoundboardSound`
+            The newly modified soundboard sound.
+        """
         payload: Dict[str, Any] = {}
 
         # FIXME: workaround for API issue, which clears volume + emoji if not provided
@@ -165,7 +261,25 @@ class SoundboardSound(PartialSoundboardSound):
         return SoundboardSound(data=data, state=self._state, guild_id=self.guild_id)
 
     async def delete(self, *, reason: Optional[str] = None) -> None:
-        """TODO"""
+        """|coro|
+
+        Deletes the :class:`SoundboardSound` from the guild.
+
+        You must have :attr:`~Permissions.manage_guild_expressions` permission to
+        do this.
+
+        Parameters
+        ----------
+        reason: Optional[:class:`str`]
+            The reason for deleting this sound. Shows up on the audit log.
+
+        Raises
+        ------
+        Forbidden
+            You are not allowed to delete soundboard sounds.
+        HTTPException
+            An error occurred deleting the soundboard sound.
+        """
         if not self.guild_id:
             raise RuntimeError  # default sound  # TODO: see above
         await self._state.http.delete_guild_soundboard_sound(self.guild_id, self.id, reason=reason)
