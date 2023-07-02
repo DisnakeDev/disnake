@@ -74,6 +74,7 @@ from .onboarding import Onboarding
 from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite
 from .role import Role
+from .soundboard import SoundboardSound
 from .stage_instance import StageInstance
 from .sticker import GuildSticker
 from .threads import Thread, ThreadMember
@@ -4962,6 +4963,33 @@ class Guild(Hashable):
         """
         data = await self._state.http.get_guild_onboarding(self.id)
         return Onboarding(data=data, guild=self)
+
+    async def create_sound(
+        self,
+        *,
+        name: str,
+        sound: AssetBytes,
+        volume: Optional[float] = None,
+        emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        reason: Optional[str] = None,
+    ) -> SoundboardSound:
+        """TODO"""
+        # TODO: consider trying to determine correct mime type, or leave it at images for now and keep using octet-stream here?
+        sound_data = await utils._assetbytes_to_base64_data(
+            sound, mime_type="application/octet-stream"
+        )
+        emoji_name, emoji_id = PartialEmoji._emoji_to_name_id(emoji)
+
+        data = await self._state.http.create_guild_soundboard_sound(
+            self.id,
+            name=name,
+            sound=sound_data,
+            volume=volume,
+            emoji_id=emoji_id,
+            emoji_name=emoji_name,
+            reason=reason,
+        )
+        return SoundboardSound(data=data, state=self._state, guild_id=self.id)
 
 
 PlaceholderID = NewType("PlaceholderID", int)
