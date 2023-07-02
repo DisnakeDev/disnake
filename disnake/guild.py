@@ -4964,6 +4964,22 @@ class Guild(Hashable):
         data = await self._state.http.get_guild_onboarding(self.id)
         return Onboarding(data=data, guild=self)
 
+    async def soundboard_sounds(self) -> List[SoundboardSound]:
+        """|coro|
+
+        Requests the :class:`list` of all soundboard sounds in this guild.
+
+        This is a websocket operation and can be slow.
+
+        .. versionadded:: 2.10
+
+        Returns
+        -------
+        List[:class:`SoundboardSound`]
+             The list of all the soundboard sounds within the guild.
+        """
+        return await self._state.request_soundboard(self)
+
     async def create_sound(
         self,
         *,
