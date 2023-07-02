@@ -2792,6 +2792,78 @@ class HTTPClient:
     def get_soundboard_default_sounds(self) -> Response[List[soundboard.SoundboardSound]]:
         return self.request(Route("GET", "/soundboard-default-sounds"))
 
+    def create_guild_soundboard_sound(
+        self,
+        guild_id: Snowflake,
+        *,
+        name: str,
+        sound: Optional[str],
+        volume: Optional[float] = None,
+        emoji_id: Optional[Snowflake] = None,
+        emoji_name: Optional[str] = None,
+        reason: Optional[str] = None,
+    ) -> Response[soundboard.SoundboardSound]:
+        payload: Dict[str, Any] = {
+            "name": name,
+            "sound": sound,
+        }
+
+        if volume is not None:
+            payload["volume"] = volume
+        if emoji_id is not None:
+            payload["emoji_id"] = emoji_id
+        if emoji_name is not None:
+            payload["emoji_name"] = emoji_name
+
+        return self.request(
+            Route("POST", "/guilds/{guild_id}/soundboard-sounds", guild_id=guild_id),
+            json=payload,
+            reason=reason,
+        )
+
+    def edit_guild_soundboard_sound(
+        self,
+        guild_id: Snowflake,
+        sound_id: Snowflake,
+        *,
+        reason: Optional[str] = None,
+        **fields: Any,
+    ) -> Response[soundboard.SoundboardSound]:
+        valid_keys = (
+            "name",
+            "volume",
+            "emoji_id",
+            "emoji_name",
+        )
+        payload = {k: v for k, v in fields.items() if k in valid_keys}
+        return self.request(
+            Route(
+                "PATCH",
+                "/guilds/{guild_id}/soundboard-sounds/{sound_id}",
+                guild_id=guild_id,
+                sound_id=sound_id,
+            ),
+            json=payload,
+            reason=reason,
+        )
+
+    def delete_guild_soundboard_sound(
+        self,
+        guild_id: Snowflake,
+        sound_id: Snowflake,
+        *,
+        reason: Optional[str] = None,
+    ) -> Response[None]:
+        return self.request(
+            Route(
+                "DELETE",
+                "/guilds/{guild_id}/soundboard-sounds/{sound_id}",
+                guild_id=guild_id,
+                sound_id=sound_id,
+            ),
+            reason=reason,
+        )
+
     # Misc
 
     def get_voice_regions(self) -> Response[List[voice.VoiceRegion]]:
