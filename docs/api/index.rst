@@ -116,6 +116,7 @@ Documents
     permissions
     roles
     skus
+    soundboard
     stage_instances
     stickers
     users
