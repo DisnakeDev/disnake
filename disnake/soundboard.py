@@ -144,8 +144,10 @@ class SoundboardSound(PartialSoundboardSound):
         The ID of the guild this sound belongs to, if any.
     available: :class:`bool`
         Whether this sound is available for use.
+    user_id: :class:`int`
+        The ID of the user that created this sound.
     user: Optional[:class:`User`]
-        The user that created this sound.
+        The user that created this sound. May be ``None`` if not in the bot's cache.
     """
 
     __slots__ = (
@@ -153,6 +155,7 @@ class SoundboardSound(PartialSoundboardSound):
         "emoji",
         "guild_id",
         "available",
+        "user_id",
         "user",
     )
 
@@ -169,8 +172,11 @@ class SoundboardSound(PartialSoundboardSound):
         super().__init__(data=data, state=state)
 
         self.guild_id: Optional[int] = guild_id or _get_as_snowflake(data, "guild_id")
+        self.user_id: int = int(data["user_id"])
         self.user: Optional[User] = (
-            state.store_user(user_data) if (user_data := data.get("user")) is not None else None
+            state.store_user(user_data)
+            if (user_data := data.get("user")) is not None
+            else state.get_user(self.user_id)
         )
 
     def _update(self, data: SoundboardSoundPayload) -> None:
