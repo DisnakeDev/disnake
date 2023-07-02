@@ -978,6 +978,36 @@ Scheduled Events
     :param payload: The raw event payload data.
     :type payload: :class:`RawGuildScheduledEventUserActionEvent`
 
+Soundboard
+++++++++++
+
+.. function:: on_soundboard_sound_create(sound)
+
+    Called when a :class:`SoundboardSound` is created.
+
+    .. versionadded:: 2.10
+
+    :param sound: The soundboard sound that was created.
+    :type sound: :class:`SoundboardSound`
+
+.. function:: on_raw_soundboard_sound_update(sound)
+
+    Called whenever a :class:`SoundboardSound` is updated.
+
+    .. versionadded:: 2.10
+
+    :param sound: The updated soundboard sound.
+    :type sound: :class:`SoundboardSound`
+
+.. function:: on_raw_soundboard_sound_delete(sound)
+
+    Called whenever a :class:`SoundboardSound` is deleted.
+
+    .. versionadded:: 2.10
+
+    :param sound: The raw event payload data.
+    :type sound: :class:`RawSoundboardSoundDeleteEvent`
+
 Stage Instances
 +++++++++++++++
 

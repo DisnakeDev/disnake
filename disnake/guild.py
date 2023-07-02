@@ -929,9 +929,8 @@ class Guild(Hashable):
         """:class:`int`: The maximum number of bytes files can have when uploaded to this guild."""
         return self._PREMIUM_GUILD_LIMITS[self.premium_tier].filesize
 
-    # TODO: naming
     @property
-    def sound_limit(self) -> int:
+    def soundboard_limit(self) -> int:
         """:class:`int`: The maximum number of soundboard slots this guild has.
 
         .. versionadded:: 2.10
@@ -4990,7 +4989,7 @@ class Guild(Hashable):
         """
         return await self._state.request_soundboard(self)
 
-    async def create_sound(
+    async def create_soundboard_sound(
         self,
         *,
         name: str,
@@ -4999,7 +4998,42 @@ class Guild(Hashable):
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
         reason: Optional[str] = None,
     ) -> SoundboardSound:
-        """TODO"""
+        """|coro|
+
+        Creates a :class:`SoundboardSound` for the guild.
+
+        You must have :attr:`~Permissions.manage_guild_expressions` permission to
+        do this.
+
+        .. versionadded:: 2.10
+
+        Parameters
+        ----------
+        name: :class:`str`
+            The sound name. Must be at least 2 characters.
+        sound: |resource_type|
+            The sound data.
+            Only MP3 is supported.
+        volume: Optional[:class:`float`]
+            The sound's volume (from ``0.0`` to ``1.0``).
+            Defaults to ``1.0``.
+        emoji: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
+            The sound's emoji, if any.
+        reason: Optional[:class:`str`]
+            The reason for creating this sound. Shows up on the audit log.
+
+        Raises
+        ------
+        Forbidden
+            You are not allowed to create soundboard sounds.
+        HTTPException
+            An error occurred creating a soundboard sound.
+
+        Returns
+        -------
+        :class:`SoundboardSound`
+            The newly created soundboard sound.
+        """
         # TODO: consider trying to determine correct mime type, or leave it at images for now and keep using octet-stream here?
         sound_data = await utils._assetbytes_to_base64_data(
             sound, mime_type="application/octet-stream"
