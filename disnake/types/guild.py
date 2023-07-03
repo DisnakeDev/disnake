@@ -68,6 +68,7 @@ GuildFeature = Literal[
     "ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE",
     "ROLE_SUBSCRIPTIONS_ENABLED",
     "SEVEN_DAY_THREAD_ARCHIVE",  # deprecated
+    "SOUNDBOARD",
     "TEXT_IN_VOICE_ENABLED",  # deprecated
     "THREADS_ENABLED",  # deprecated
     "THREE_DAY_THREAD_ARCHIVE",  # deprecated

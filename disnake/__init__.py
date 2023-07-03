@@ -60,6 +60,7 @@ from .raw_models import *
 from .reaction import *
 from .role import *
 from .shard import *
+from .soundboard import *
 from .stage_instance import *
 from .sticker import *
 from .team import *

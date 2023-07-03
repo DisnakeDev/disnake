@@ -114,6 +114,7 @@ Documents
     misc
     permissions
     roles
+    soundboard
     stage_instances
     stickers
     users

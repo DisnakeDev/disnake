@@ -288,6 +288,12 @@ async def test_assetbytes_base64() -> None:
 
     assert await utils._assetbytes_to_base64_data(mock_asset) == expected
 
+    # test mime override
+    assert (
+        await utils._assetbytes_to_base64_data(b"\x01\x02\x03", mime_type="application/json")
+        == "data:application/json;base64,AQID"
+    )
+
 
 @pytest.mark.parametrize(
     ("after", "use_clock", "expected"),

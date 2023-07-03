@@ -46,6 +46,7 @@ from .iterators import ArchivedThreadIterator
 from .mixins import Hashable
 from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite, Permissions
+from .soundboard import PartialSoundboardSound
 from .stage_instance import StageInstance
 from .threads import ForumTag, Thread
 from .utils import MISSING
@@ -89,6 +90,7 @@ if TYPE_CHECKING:
         VoiceChannel as VoiceChannelPayload,
     )
     from .types.snowflake import SnowflakeList
+    from .types.soundboard import PartialSoundboardSound as PartialSoundboardSoundPayload
     from .types.threads import ThreadArchiveDurationLiteral
     from .types.voice import VoiceChannelEffect as VoiceChannelEffectPayload
     from .ui.action_row import Components, MessageUIComponent
@@ -108,17 +110,20 @@ class VoiceChannelEffect:
     Attributes
     ----------
     emoji: Optional[:class:`PartialEmoji`]
-        The emoji, for emoji reaction effects.
+        The emoji, for emoji reaction and soundboard effects.
     animation_type: Optional[:class:`VoiceChannelEffectAnimationType`]
-        The emoji animation type, for emoji reaction effects.
+        The emoji animation type, for emoji reaction and soundboard effects.
     animation_id: Optional[:class:`int`]
-        The emoji animation ID, for emoji reaction effects.
+        The emoji animation ID, for emoji reaction and soundboard effects.
+    sound: Optional[:class:`PartialSoundboardSound`]
+        The sound data, for soundboard effects.
     """
 
     __slots__ = (
         "emoji",
         "animation_type",
         "animation_id",
+        "sound",
     )
 
     def __init__(self, data: VoiceChannelEffectPayload, emoji: Optional[PartialEmoji]) -> None:
@@ -133,10 +138,19 @@ class VoiceChannelEffect:
         except KeyError:
             self.animation_id: Optional[int] = None
 
+        self.sound: Optional[PartialSoundboardSound] = None
+        if sound_id := data.get("sound_id"):
+            sound_data: PartialSoundboardSoundPayload = {
+                "sound_id": sound_id,
+                "override_path": data.get("sound_override_path"),
+                "volume": data.get("sound_volume"),  # type: ignore  # assume this exists if sound_id is set
+            }
+            self.sound = PartialSoundboardSound(data=sound_data)
+
     def __repr__(self) -> str:
         return (
             f"<VoiceChannelEffect emoji={self.emoji!r} animation_type={self.animation_type!r}"
-            f" animation_id={self.animation_id!r}>"
+            f" animation_id={self.animation_id!r} sound={self.sound!r}>"
         )
 
 
