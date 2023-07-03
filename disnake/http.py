@@ -2736,7 +2736,7 @@ class HTTPClient:
         emoji_id: Optional[Snowflake] = None,
         emoji_name: Optional[str] = None,
         reason: Optional[str] = None,
-    ) -> Response[soundboard.SoundboardSound]:
+    ) -> Response[soundboard.GuildSoundboardSound]:
         payload: Dict[str, Any] = {
             "name": name,
             "sound": sound,
@@ -2762,7 +2762,7 @@ class HTTPClient:
         *,
         reason: Optional[str] = None,
         **fields: Any,
-    ) -> Response[soundboard.SoundboardSound]:
+    ) -> Response[soundboard.GuildSoundboardSound]:
         valid_keys = (
             "name",
             "volume",

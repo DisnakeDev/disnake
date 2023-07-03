@@ -74,7 +74,7 @@ from .onboarding import Onboarding
 from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite
 from .role import Role
-from .soundboard import SoundboardSound
+from .soundboard import GuildSoundboardSound
 from .stage_instance import StageInstance
 from .sticker import GuildSticker
 from .threads import Thread, ThreadMember
@@ -4966,7 +4966,7 @@ class Guild(Hashable):
         data = await self._state.http.get_guild_onboarding(self.id)
         return Onboarding(data=data, guild=self)
 
-    async def soundboard_sounds(self) -> List[SoundboardSound]:
+    async def soundboard_sounds(self) -> List[GuildSoundboardSound]:
         """|coro|
 
         Requests the :class:`list` of all soundboard sounds in this guild.
@@ -4977,7 +4977,7 @@ class Guild(Hashable):
 
         Returns
         -------
-        List[:class:`SoundboardSound`]
+        List[:class:`GuildSoundboardSound`]
              The list of all the soundboard sounds within the guild.
         """
         return await self._state.request_soundboard(self)
@@ -4990,10 +4990,10 @@ class Guild(Hashable):
         volume: Optional[float] = None,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
         reason: Optional[str] = None,
-    ) -> SoundboardSound:
+    ) -> GuildSoundboardSound:
         """|coro|
 
-        Creates a :class:`SoundboardSound` for the guild.
+        Creates a :class:`GuildSoundboardSound` for the guild.
 
         You must have :attr:`~Permissions.manage_guild_expressions` permission to
         do this.
@@ -5024,7 +5024,7 @@ class Guild(Hashable):
 
         Returns
         -------
-        :class:`SoundboardSound`
+        :class:`GuildSoundboardSound`
             The newly created soundboard sound.
         """
         # TODO: consider trying to determine correct mime type, or leave it at images for now and keep using octet-stream here?
@@ -5042,7 +5042,7 @@ class Guild(Hashable):
             emoji_name=emoji_name,
             reason=reason,
         )
-        return SoundboardSound(data=data, state=self._state, guild_id=self.id)
+        return GuildSoundboardSound(data=data, state=self._state, guild_id=self.id)
 
 
 PlaceholderID = NewType("PlaceholderID", int)

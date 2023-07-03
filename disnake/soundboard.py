@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from .guild import Guild
     from .state import ConnectionState
     from .types.soundboard import (
+        GuildSoundboardSound as GuildSoundboardSoundPayload,
         PartialSoundboardSound as PartialSoundboardSoundPayload,
         SoundboardSound as SoundboardSoundPayload,
     )
@@ -24,6 +25,7 @@ if TYPE_CHECKING:
 __all__ = (
     "PartialSoundboardSound",
     "SoundboardSound",
+    "GuildSoundboardSound",
 )
 
 
@@ -31,7 +33,7 @@ class PartialSoundboardSound(Hashable, AssetMixin):
     """Represents a partial soundboard sound.
 
     Used for sounds in :class:`VoiceChannelEffect`\\s,
-    and as the base for full :class:`SoundboardSound` objects.
+    and as the base for full :class:`SoundboardSound`/:class:`GuildSoundboardSound` objects.
 
     .. versionadded:: 2.10
 
@@ -140,23 +142,14 @@ class SoundboardSound(PartialSoundboardSound):
         The sound's emoji, if any.
         Due to a Discord limitation, this will have an empty
         :attr:`~PartialEmoji.name` if it is a custom :class:`PartialEmoji`.
-    guild_id: Optional[:class:`int`]
-        The ID of the guild this sound belongs to, if any.
-    available: :class:`bool`
-        Whether this sound is available for use.
     user_id: :class:`int`
         The ID of the user that created this sound.
-    user: Optional[:class:`User`]
-        The user that created this sound. May be ``None`` if not in the bot's cache.
     """
 
     __slots__ = (
         "name",
         "emoji",
-        "guild_id",
-        "available",
         "user_id",
-        "user",
     )
 
     _state: ConnectionState
@@ -166,18 +159,9 @@ class SoundboardSound(PartialSoundboardSound):
         *,
         data: SoundboardSoundPayload,
         state: ConnectionState,
-        # `guild_id` isn't sent over REST, so we manually keep track of it
-        guild_id: Optional[int],
     ) -> None:
         super().__init__(data=data, state=state)
-
-        self.guild_id: Optional[int] = guild_id or _get_as_snowflake(data, "guild_id")
         self.user_id: int = int(data["user_id"])
-        self.user: Optional[User] = (
-            state.store_user(user_data)
-            if (user_data := data.get("user")) is not None
-            else state.get_user(self.user_id)
-        )
 
     def _update(self, data: SoundboardSoundPayload) -> None:
         super()._update(data)
@@ -186,21 +170,86 @@ class SoundboardSound(PartialSoundboardSound):
             name=data.get("emoji_name"),
             id=_get_as_snowflake(data, "emoji_id"),
         )
+
+    def __repr__(self) -> str:
+        return f"<SoundboardSound id={self.id!r} name={self.name!r}>"
+
+
+class GuildSoundboardSound(SoundboardSound):
+    """Represents a soundboard sound that belongs to a guild.
+
+    .. versionadded:: 2.10
+
+    .. container:: operations
+
+        .. describe:: x == y
+
+            Checks if two soundboard sounds are equal.
+
+        .. describe:: x != y
+
+            Checks if two soundboard sounds are not equal.
+
+        .. describe:: hash(x)
+
+            Returns the soundboard sounds' hash.
+
+    Attributes
+    ----------
+    id: :class:`int`
+        The sound's ID.
+    volume: :class:`float`
+        The sound's volume (from ``0.0`` to ``1.0``).
+    name: :class:`str`
+        The sound's name.
+    emoji: Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]
+        The sound's emoji, if any.
+        Due to a Discord limitation, this will have an empty
+        :attr:`~PartialEmoji.name` if it is a custom :class:`PartialEmoji`.
+    guild_id: :class:`int`
+        The ID of the guild this sound belongs to.
+    available: :class:`bool`
+        Whether this sound is available for use.
+    user_id: :class:`int`
+        The ID of the user that created this sound.
+    user: Optional[:class:`User`]
+        The user that created this sound. May be ``None`` if not in the bot's cache.
+    """
+
+    __slots__ = ("guild_id", "user", "available")
+
+    def __init__(
+        self,
+        *,
+        data: GuildSoundboardSoundPayload,
+        state: ConnectionState,
+        # `guild_id` isn't sent over REST, so we manually keep track of it
+        guild_id: int,
+    ) -> None:
+        super().__init__(data=data, state=state)
+
+        self.guild_id: int = guild_id
+        self.user: Optional[User] = (
+            state.store_user(user_data)
+            if (user_data := data.get("user")) is not None
+            else state.get_user(self.user_id)
+        )
+
+    def _update(self, data: GuildSoundboardSoundPayload) -> None:
+        super()._update(data)
         self.available: bool = data.get("available", True)
 
     def __repr__(self) -> str:
         return (
-            f"<SoundboardSound id={self.id!r} name={self.name!r} guild_id={self.guild_id!r}"
-            f" user={self.user!r}>"
+            f"<GuildSoundboardSound id={self.id!r} name={self.name!r}"
+            f" guild_id={self.guild_id!r} user={self.user!r}>"
         )
 
-    def __str__(self) -> str:
-        return self.name
-
     @property
-    def guild(self) -> Optional[Guild]:
-        """Optional[:class:`Guild`]: The guild that this sound is from, if any."""
-        return self._state._get_guild(self.guild_id)
+    def guild(self) -> Guild:
+        """:class:`Guild`: The guild that this sound is from, if any."""
+        # this will most likely never return None
+        return self._state._get_guild(self.guild_id)  # type: ignore
 
     async def edit(
         self,
@@ -209,10 +258,10 @@ class SoundboardSound(PartialSoundboardSound):
         volume: float = MISSING,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
         reason: Optional[str] = None,
-    ) -> SoundboardSound:
+    ) -> GuildSoundboardSound:
         """|coro|
 
-        Edits a :class:`SoundboardSound` for the guild.
+        Edits a :class:`GuildSoundboardSound` for the guild.
 
         You must have :attr:`~Permissions.manage_guild_expressions` permission to
         do this.
@@ -239,7 +288,7 @@ class SoundboardSound(PartialSoundboardSound):
 
         Returns
         -------
-        :class:`SoundboardSound`
+        :class:`GuildSoundboardSound`
             The newly modified soundboard sound.
         """
         payload: Dict[str, Any] = {}
@@ -259,17 +308,15 @@ class SoundboardSound(PartialSoundboardSound):
             payload["emoji_name"] = emoji_name
             payload["emoji_id"] = emoji_id
 
-        if not self.guild_id:
-            raise RuntimeError  # default sound  # TODO: improve this, split into two classes or raise proper error here
         data = await self._state.http.edit_guild_soundboard_sound(
             self.guild_id, self.id, reason=reason, **payload
         )
-        return SoundboardSound(data=data, state=self._state, guild_id=self.guild_id)
+        return GuildSoundboardSound(data=data, state=self._state, guild_id=self.guild_id)
 
     async def delete(self, *, reason: Optional[str] = None) -> None:
         """|coro|
 
-        Deletes the :class:`SoundboardSound` from the guild.
+        Deletes the :class:`GuildSoundboardSound` from the guild.
 
         You must have :attr:`~Permissions.manage_guild_expressions` permission to
         do this.
@@ -286,6 +333,4 @@ class SoundboardSound(PartialSoundboardSound):
         HTTPException
             An error occurred deleting the soundboard sound.
         """
-        if not self.guild_id:
-            raise RuntimeError  # default sound  # TODO: see above
         await self._state.http.delete_guild_soundboard_sound(self.guild_id, self.id, reason=reason)
