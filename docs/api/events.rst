@@ -999,14 +999,14 @@ Soundboard
     :param sound: The updated soundboard sound.
     :type sound: :class:`GuildSoundboardSound`
 
-.. function:: on_raw_soundboard_sound_delete(sound)
+.. function:: on_raw_soundboard_sound_delete(payload)
 
     Called whenever a soundboard sound is deleted.
 
     .. versionadded:: 2.10
 
-    :param sound: The raw event payload data.
-    :type sound: :class:`RawSoundboardSoundDeleteEvent`
+    :param payload: The raw event payload data.
+    :type payload: :class:`RawSoundboardSoundDeleteEvent`
 
 Stage Instances
 +++++++++++++++
