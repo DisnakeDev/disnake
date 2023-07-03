@@ -108,26 +108,17 @@ class VoiceChannelEffect:
     Attributes
     ----------
     emoji: Optional[:class:`PartialEmoji`]
-        The emoji, for emoji reaction and soundboard effects.
+        The emoji, for emoji reaction effects.
     animation_type: Optional[:class:`VoiceChannelEffectAnimationType`]
-        The emoji animation type, for emoji reaction and soundboard effects.
+        The emoji animation type, for emoji reaction effects.
     animation_id: Optional[:class:`int`]
-        The emoji animation ID, for emoji reaction and soundboard effects.
-    sound_id: Optional[:class:`int`]
-        The sound ID, for soundboard effects.
-    sound_override_path: Optional[:class:`str`]
-        The filename of the default soundboard sound (if applicable), for soundboard effects.
-    sound_volume: Optional[:class:`float`]
-        The volume of the soundboard sound (from ``0.0`` to ``1.0``), for soundboard effects.
+        The emoji animation ID, for emoji reaction effects.
     """
 
     __slots__ = (
         "emoji",
         "animation_type",
         "animation_id",
-        "sound_id",
-        "sound_override_path",
-        "sound_volume",
     )
 
     def __init__(self, data: VoiceChannelEffectPayload, emoji: Optional[PartialEmoji]) -> None:
@@ -142,15 +133,10 @@ class VoiceChannelEffect:
         except KeyError:
             self.animation_id: Optional[int] = None
 
-        self.sound_id: Optional[int] = utils._get_as_snowflake(data, "sound_id")
-        self.sound_override_path: Optional[str] = data.get("sound_override_path")
-        self.sound_volume: Optional[float] = data.get("sound_volume")
-
     def __repr__(self) -> str:
         return (
             f"<VoiceChannelEffect emoji={self.emoji!r} animation_type={self.animation_type!r}"
-            f" animation_id={self.animation_id!r} sound_id={self.sound_id!r}"
-            f" sound_override_path={self.sound_override_path!r} sound_volume={self.sound_volume!r}>"
+            f" animation_id={self.animation_id!r}>"
         )
 
 
