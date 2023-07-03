@@ -22,7 +22,7 @@ from .member import MemberWithUser
 from .message import Message
 from .role import Role
 from .snowflake import Snowflake, SnowflakeList
-from .soundboard import SoundboardSound
+from .soundboard import GuildSoundboardSound
 from .sticker import GuildSticker
 from .threads import Thread, ThreadMember, ThreadMemberWithPresence, ThreadType
 from .user import AvatarDecorationData, User
@@ -681,11 +681,11 @@ EntitlementDelete = Entitlement
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-soundboard-sound-create
-GuildSoundboardSoundCreate = SoundboardSound
+GuildSoundboardSoundCreate = GuildSoundboardSound
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-soundboard-sound-update
-GuildSoundboardSoundUpdate = SoundboardSound
+GuildSoundboardSoundUpdate = GuildSoundboardSound
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-soundboard-sound-delete
@@ -697,4 +697,4 @@ class GuildSoundboardSoundDelete(TypedDict):
 # https://discord.com/developers/docs/topics/gateway-events#soundboard-sounds
 class SoundboardSoundsEvent(TypedDict):
     guild_id: Snowflake
-    soundboard_sounds: List[SoundboardSound]
+    soundboard_sounds: List[GuildSoundboardSound]

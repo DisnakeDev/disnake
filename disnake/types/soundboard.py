@@ -21,7 +21,10 @@ class SoundboardSound(PartialSoundboardSound):
     id: NotRequired[Snowflake]  # this seems to always equal `sound_id`
     emoji_id: Optional[Snowflake]
     emoji_name: Optional[str]
-    guild_id: NotRequired[Snowflake]
     user_id: Snowflake
+
+
+class GuildSoundboardSound(SoundboardSound):
+    guild_id: NotRequired[Snowflake]
     available: NotRequired[bool]
     user: NotRequired[User]

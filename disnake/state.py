@@ -85,7 +85,7 @@ from .raw_models import (
     RawVoiceChannelEffectEvent,
 )
 from .role import Role
-from .soundboard import SoundboardSound
+from .soundboard import GuildSoundboardSound
 from .stage_instance import StageInstance
 from .sticker import GuildSticker
 from .threads import Thread, ThreadMember
@@ -176,7 +176,7 @@ class ChunkRequest(AsyncRequest[List[Member]]):
         self.set_result(self.buffer)
 
 
-SoundboardRequest = AsyncRequest[List[SoundboardSound]]
+SoundboardRequest = AsyncRequest[List[GuildSoundboardSound]]
 
 
 _log = logging.getLogger(__name__)
@@ -353,7 +353,9 @@ class ConnectionState:
         for key in removed:
             del self._chunk_requests[key]
 
-    def process_soundboard_requests(self, guild_id: int, sounds: List[SoundboardSound]) -> None:
+    def process_soundboard_requests(
+        self, guild_id: int, sounds: List[GuildSoundboardSound]
+    ) -> None:
         if request := self._soundboard_requests.get(guild_id):
             request.set_result(sounds)
             del self._soundboard_requests[guild_id]
@@ -1418,7 +1420,7 @@ class ConnectionState:
 
     # n.b. we only support single guilds even though the gw request takes multiple,
     # since handling multiple guilds in one request becomes complicated, especially with sharding
-    async def request_soundboard(self, guild: Guild) -> List[SoundboardSound]:
+    async def request_soundboard(self, guild: Guild) -> List[GuildSoundboardSound]:
         request = self._soundboard_requests.get(guild.id)
         if request is None:
             self._soundboard_requests[guild.id] = request = SoundboardRequest(
@@ -2025,7 +2027,7 @@ class ConnectionState:
             )
             return
 
-        sound = SoundboardSound(data=data, state=self, guild_id=guild.id)
+        sound = GuildSoundboardSound(data=data, state=self, guild_id=guild.id)
         self.dispatch("soundboard_sound_create", sound)
 
     def parse_guild_soundboard_sound_update(self, data: gateway.GuildSoundboardSoundUpdate) -> None:
@@ -2038,7 +2040,7 @@ class ConnectionState:
             )
             return
 
-        sound = SoundboardSound(data=data, state=self, guild_id=guild.id)
+        sound = GuildSoundboardSound(data=data, state=self, guild_id=guild.id)
         self.dispatch("raw_soundboard_sound_update", sound)
 
     def parse_guild_soundboard_sound_delete(self, data: gateway.GuildSoundboardSoundDelete) -> None:
@@ -2057,7 +2059,7 @@ class ConnectionState:
     def parse_soundboard_sounds(self, data: gateway.SoundboardSoundsEvent) -> None:
         guild_id = int(data["guild_id"])
         sounds = [
-            SoundboardSound(data=d, state=self, guild_id=guild_id)
+            GuildSoundboardSound(data=d, state=self, guild_id=guild_id)
             for d in data["soundboard_sounds"]
         ]
         self.process_soundboard_requests(guild_id, sounds)

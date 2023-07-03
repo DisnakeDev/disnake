@@ -29,6 +29,15 @@ SoundboardSound
     :members:
     :inherited-members:
 
+GuildSoundboardSound
+~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: GuildSoundboardSound
+
+.. autoclass:: GuildSoundboardSound()
+    :members:
+    :inherited-members:
+
 RawSoundboardSoundDeleteEvent
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
