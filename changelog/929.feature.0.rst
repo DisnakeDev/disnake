@@ -1,1 +1,0 @@
-Add ``flags`` parameter to message send and edit methods.
