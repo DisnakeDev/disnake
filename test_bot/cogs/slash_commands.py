@@ -51,9 +51,9 @@ class SlashCommands(commands.Cog):
         self,
         inter: disnake.CommandInteraction[commands.Bot],
         a: int = commands.Param(None, lt=0),
-        b: Optional[commands.Range[1, ...]] = None,
-        c: Optional[commands.Range[0, 10]] = None,
-        d: Optional[commands.Range[0, 10.0]] = None,
+        b: Optional[commands.Range[int, 1, ...]] = None,
+        c: Optional[commands.Range[int, 0, 10]] = None,
+        d: Optional[commands.Range[float, 0, 10.0]] = None,
     ) -> None:
         """Limit slash command options to a range of values
 

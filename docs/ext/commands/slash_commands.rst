@@ -188,49 +188,28 @@ For instance, you could restrict an option to only accept positive integers:
         ...
 
 
-Instead of using :func:`Param <ext.commands.Param>`, you can also use a :class:`~ext.commands.Range` annotation.
+Instead of using :func:`~ext.commands.Param`, you can also use a :class:`~ext.commands.Range` annotation.
 The range bounds are both inclusive; using ``...`` as a bound indicates that this end of the range is unbounded.
-The type of the option is determined by the range bounds, with the option being a
-:class:`float` if at least one of the bounds is a :class:`float`, and :class:`int` otherwise.
+The type of the option is specified by the first type argument, which can be either :class:`int` or :class:`float`.
 
 .. code-block:: python3
 
     @bot.slash_command()
     async def ranges(
         inter: disnake.ApplicationCommandInteraction,
-        a: commands.Range[0, 10],       # 0 - 10 int
-        b: commands.Range[0, 10.0],     # 0 - 10 float
-        c: commands.Range[1, ...],      # positive int
+        a: commands.Range[int, 0, 10],       # 0 - 10 int
+        b: commands.Range[float, 0, 10.0],     # 0 - 10 float
+        c: commands.Range[int, 1, ...],      # positive int
     ):
         ...
-
-.. _type_checker_mypy_plugin:
-
-.. note::
-
-    Type checker support for :class:`~ext.commands.Range` and :class:`~ext.commands.String` (:ref:`see below <string_lengths>`) is limited.
-    Pylance/Pyright seem to handle it correctly; MyPy currently needs a plugin for it to understand :class:`~ext.commands.Range`
-    and :class:`~ext.commands.String` semantics, which can be added in the configuration file (``setup.cfg``, ``mypy.ini``):
-
-    .. code-block:: ini
-
-        [mypy]
-        plugins = disnake.ext.mypy_plugin
-
-    For ``pyproject.toml`` configs, use this instead:
-
-    .. code-block:: toml
-
-        [tool.mypy]
-        plugins = "disnake.ext.mypy_plugin"
 
 .. _string_lengths:
 
 String Lengths
 ++++++++++++++
 
-:class:`str` parameters support minimum and maximum allowed value lengths
-using the ``min_length`` and ``max_length`` parameters on :func:`Param <ext.commands.Param>`.
+:class:`str` parameters support minimum and maximum allowed lengths
+using the ``min_length`` and ``max_length`` parameters on :func:`~ext.commands.Param`.
 For instance, you could restrict an option to only accept a single character:
 
 .. code-block:: python3
@@ -253,27 +232,24 @@ Or restrict a tag command to limit tag names to 20 characters:
     ):
         ...
 
-Instead of using :func:`Param <ext.commands.Param>`, you can also use a :class:`~ext.commands.String` annotation.
+Instead of using :func:`~ext.commands.Param`, you can also use a :class:`~ext.commands.String` annotation.
 The length bounds are both inclusive; using ``...`` as a bound indicates that this end of the string length is unbounded.
+The first type argument should always be :class:`str`.
 
 .. code-block:: python3
 
     @bot.slash_command()
     async def strings(
         inter: disnake.ApplicationCommandInteraction,
-        a: commands.String[0, 10],       # a str no longer than 10 characters.
-        b: commands.String[10, 100],     # a str that's at least 10 characters but not longer than 100.
-        c: commands.String[50, ...]      # a str that's at least 50 characters.
+        a: commands.String[str, 0, 10],       # a str no longer than 10 characters.
+        b: commands.String[str, 10, 100],     # a str that's at least 10 characters but not longer than 100.
+        c: commands.String[str, 50, ...],     # a str that's at least 50 characters.
     ):
         ...
 
 .. note::
 
     There is a max length of 6000 characters, which is enforced by Discord.
-
-.. note::
-
-    For mypy type checking support, please see the above note about the :ref:`mypy plugin <type_checker_mypy_plugin>`.
 
 .. _docstrings:
 

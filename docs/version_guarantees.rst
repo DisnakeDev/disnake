@@ -7,7 +7,7 @@ Version Guarantees
 
 This library does **not** quite follow the semantic versioning principle, the notable difference being that breaking changes may not only occur on major version increases, but also on minor version bumps (think Python's own versioning scheme).
 The primary reason for this is the lack of guarantees on the Discord API side when it comes to breaking changes, which along with the dynamic nature of the API results in breaking changes sometimes being required more frequently than desired.
-However, any breaking changes will always be explicitly marked as such in the release notes.
+However, any breaking changes will always be explicitly marked as such in the :ref:`whats_new`.
 
 In general, the versioning scheme (``major.minor.micro``) used in this library aims to follow these rules:
 
