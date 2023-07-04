@@ -19,7 +19,9 @@ class Misc(commands.Cog):
         return disnake.File(io.BytesIO(data), "image.png", description=description)
 
     @commands.slash_command()
-    async def attachment_desc(self, inter: disnake.AppCmdInter, desc: str = "test") -> None:
+    async def attachment_desc(
+        self, inter: disnake.AppCmdInter[commands.Bot], desc: str = "test"
+    ) -> None:
         """Send an attachment with the given description (or the default)
 
         Parameters

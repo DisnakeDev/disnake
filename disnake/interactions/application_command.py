@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union
 
 from .. import utils
 from ..enums import ApplicationCommandType, Locale, OptionType, try_enum
@@ -10,7 +10,7 @@ from ..guild import Guild
 from ..member import Member
 from ..message import Message
 from ..user import User
-from .base import Interaction, InteractionDataResolved
+from .base import BotT, Interaction, InteractionDataResolved
 
 __all__ = (
     "ApplicationCommandInteraction",
@@ -33,15 +33,12 @@ __all__ = (
 MISSING = utils.MISSING
 
 if TYPE_CHECKING:
-    from ..client import Client
     from ..ext.commands import InvokableApplicationCommand
     from ..state import ConnectionState
     from ..types.interactions import (
         ApplicationCommandInteraction as ApplicationCommandInteractionPayload,
         ApplicationCommandInteractionData as ApplicationCommandInteractionDataPayload,
     )
-
-BotT = TypeVar("BotT", bound="Client")
 
 
 class ApplicationCommandInteraction(Interaction[BotT]):

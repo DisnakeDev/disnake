@@ -2,15 +2,14 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, TypeVar
+from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional
 
 from ..enums import ComponentType
 from ..message import Message
 from ..utils import cached_slot_property
-from .base import Interaction
+from .base import BotT, Interaction
 
 if TYPE_CHECKING:
-    from ..client import Client
     from ..state import ConnectionState
     from ..types.interactions import (
         ModalInteraction as ModalInteractionPayload,
@@ -20,8 +19,6 @@ if TYPE_CHECKING:
     )
 
 __all__ = ("ModalInteraction", "ModalInteractionData")
-
-BotT = TypeVar("BotT", bound="Client")
 
 
 class ModalInteraction(Interaction[BotT]):

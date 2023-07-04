@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Union
 
 from ..components import MessageComponent
 from ..enums import ComponentType, try_enum
 from ..message import Message
 from ..utils import cached_slot_property
-from .base import Interaction, InteractionDataResolved
+from .base import BotT, Interaction, InteractionDataResolved
 
 __all__ = (
     "MessageInteraction",
@@ -16,7 +16,6 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
-    from ..client import Client
     from ..member import Member
     from ..role import Role
     from ..state import ConnectionState
@@ -27,8 +26,6 @@ if TYPE_CHECKING:
     )
     from ..user import User
     from .base import InteractionChannel
-
-BotT = TypeVar("BotT", bound="Client")
 
 
 class MessageInteraction(Interaction[BotT]):
