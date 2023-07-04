@@ -211,11 +211,7 @@ class Interaction(Generic[BotT]):
 
     @property
     def bot(self) -> BotT:
-        """:class:`~disnake.ext.commands.Bot`: The bot handling the interaction.
-
-        Only applicable when used with :class:`~disnake.ext.commands.Bot`.
-        This is an alias for :attr:`.client`.
-        """
+        """:class:`~disnake.ext.commands.Bot`: An alias for :attr:`.client`."""
         return self.client
 
     @property
