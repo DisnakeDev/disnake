@@ -26,6 +26,17 @@ RoleTags
 .. autoclass:: RoleTags()
     :members:
 
+Data Classes
+------------
+
+RoleFlags
+~~~~~~~~~
+
+.. attributetable:: RoleFlags
+
+.. autoclass:: RoleFlags()
+    :members:
+
 Events
 ------
 
