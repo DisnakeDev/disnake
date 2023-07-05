@@ -65,7 +65,7 @@ jobs:
           delete-branch: true
           title: "release: v${{ inputs.version }}"
           body: |
-            Automated release PR, triggered by ${{ github.actor }} for ${{ github.ref }}.
+            Automated release PR, triggered by @${{ github.actor }} for ${{ github.sha }}.
           labels: |
             t: release
           assignees: |
