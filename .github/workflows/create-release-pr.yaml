@@ -22,7 +22,22 @@ jobs:
       VERSION_INPUT: ${{ inputs.version }}
 
     steps:
+      # https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/making-authenticated-api-requests-with-a-github-app-in-a-github-actions-workflow
+      - name: Generate app token
+        id: generate_token
+        uses: tibdex/github-app-token@b62528385c34dbc9f38e5f4225ac829252d1ea92
+        with:
+          app_id: ${{ secrets.BOT_APP_ID }}
+          private_key: ${{ secrets.BOT_PRIVATE_KEY }}
+
       - uses: actions/checkout@v3
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+
+      - name: Set git name/email
+        run: |
+          git config user.name "disnake-test-bot[bot]"
+          git config user.email "138718724+disnake-test-bot[bot]@users.noreply.github.com"
 
       - name: Set up environment
         uses: ./.github/actions/setup-env
@@ -39,12 +54,13 @@ jobs:
 
       - name: Build changelog
         run: |
-          towncrier build --yes --version "$VERSION_INPUT"
+          pdm run towncrier build --yes --version "$VERSION_INPUT"
           git commit -a -m "docs: build changelog"
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
+          token: ${{ steps.generate_token.outputs.token }}
           branch: auto/release-v${{ inputs.version }}
           delete-branch: true
           title: "release: v${{ inputs.version }}"
