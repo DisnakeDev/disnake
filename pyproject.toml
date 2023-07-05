@@ -70,9 +70,11 @@ tools = [
     "pre-commit~=3.0",
     "slotscheck~=0.16.4",
     "python-dotenv~=1.0.0",
-    "towncrier==23.6.0",
     "check-manifest==0.49",
     "ruff==0.0.261",
+]
+changelog = [
+    "towncrier==23.6.0",
 ]
 codemod = [
     # run codemods on the respository (mostly automated typing)
