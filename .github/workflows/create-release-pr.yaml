@@ -1,0 +1,56 @@
+# SPDX-License-Identifier: MIT
+
+name: Create Release PR
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "The new version number, e.g. `1.2.3`."
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  create-release-pr:
+    name: Create Release PR
+    runs-on: ubuntu-latest
+
+    env:
+      VERSION_INPUT: ${{ inputs.version }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up environment
+        uses: ./.github/actions/setup-env
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: pdm install -dG tools
+
+      - name: Update version
+        run: |
+          python scripts/ci/update_version.py "$VERSION_INPUT"
+          git commit -a -m "chore: update version to $VERSION_INPUT"
+
+      - name: Build changelog
+        run: |
+          towncrier build --yes --version "$VERSION_INPUT"
+          git commit -a -m "docs: build changelog"
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          branch: auto/release-v${{ inputs.version }}
+          delete-branch: true
+          title: "release: v${{ inputs.version }}"
+          body: |
+            Automated release PR, triggered by ${{ github.actor }} for ${{ github.ref }}.
+          labels: |
+            t: release
+          assignees: |
+            ${{ github.actor }}
