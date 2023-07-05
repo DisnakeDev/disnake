@@ -57,8 +57,8 @@ jobs:
           pdm run towncrier build --yes --version "$VERSION_INPUT"
           git commit -a -m "docs: build changelog"
 
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v5
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@153407881ec5c347639a548ade7d8ad1d6740e38
         with:
           token: ${{ steps.generate_token.outputs.token }}
           branch: auto/release-v${{ inputs.version }}
