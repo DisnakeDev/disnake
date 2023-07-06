@@ -1,0 +1,51 @@
+# SPDX-License-Identifier: MIT
+
+name: Build + Release
+
+# test build for push/PR/tag, but only upload release for tags
+on:
+  push:
+    branches:
+      - "master"
+      - 'v[0-9]+.[0-9]+.x'  # matches to backport branches, e.g. 3.6
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+"
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build Package
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up environment
+        id: setup
+        uses: ./.github/actions/setup-env
+        with:
+          python-version: 3.8
+
+      - name: Install dependencies
+        run: pdm install -dG build
+
+      - name: Build package
+        run: |
+          pdm run python -m build
+          ls -la dist/
+
+      - name: Twine check
+        run: pdm run twine check --strict dist/*
+
+      - name: Upload artifact
+        # only upload artifacts when necessary
+        if: |
+          startsWith(github.ref, 'refs/tags/') || contains(github.event.pull_request.labels.*.name, 't: release')
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: dist/
+          if-no-files-found: error

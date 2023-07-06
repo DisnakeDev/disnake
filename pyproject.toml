@@ -96,6 +96,11 @@ test = [
     "looptime~=0.2",
     "coverage[toml]~=6.5.0",
 ]
+build = [
+    "wheel~=0.40.0",
+    "build~=0.10.0",
+    "twine~=4.0.2",
+]
 
 [tool.pdm.scripts]
 black = { composite = ["lint black"], help = "Run black" }
