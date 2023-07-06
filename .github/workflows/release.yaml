@@ -40,6 +40,15 @@ jobs:
       - name: Twine check
         run: pdm run twine check --strict dist/*
 
+      - name: Show metadata
+        run: |
+          mkdir out/
+          tar -xf dist/*.tar.gz -C out/
+
+          echo -e "<details><summary>Metadata</summary>\n" >> $GITHUB_STEP_SUMMARY
+          cat out/*/PKG-INFO | sed 's/^/    /' >> $GITHUB_STEP_SUMMARY
+          echo -e "\n</details>\n" >> $GITHUB_STEP_SUMMARY
+
       - name: Upload artifact
         # only upload artifacts when necessary
         if: |
