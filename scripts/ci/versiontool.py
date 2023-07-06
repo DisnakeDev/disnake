@@ -84,11 +84,18 @@ def fail(msg: str) -> NoReturn:
 
 
 def main() -> None:
-    if len(sys.argv) != 2:
-        fail(f"Usage: {sys.argv[0]} <version>|dev")
+    if len(sys.argv) > 2:
+        fail(f"Usage: {sys.argv[0]} [<version>|dev]")
 
-    new_version_str = sys.argv[1]
     current_version = get_current_version()
+
+    # if no version is given, just print current version
+    if len(sys.argv) == 1:
+        print(str(current_version))
+        return
+
+    # else, update to specified version
+    new_version_str = sys.argv[1]
 
     if new_version_str == "dev":
         if current_version.releaselevel is not ReleaseLevel.final:
