@@ -10,8 +10,7 @@ on:
         type: string
         required: true
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   create-release-pr:
