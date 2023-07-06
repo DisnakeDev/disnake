@@ -66,6 +66,9 @@ jobs:
           title: "release: v${{ inputs.version }}"
           body: |
             Automated release PR, triggered by @${{ github.actor }} for ${{ github.sha }}.
+
+            ### Tasks
+            - [ ] Add changelogs from backports, if applicable.
           labels: |
             t: release
           assignees: |
