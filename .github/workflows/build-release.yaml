@@ -99,6 +99,8 @@ jobs:
     needs:
       - build
       - validate-tag
+    permissions:
+      contents: write  # required for creating releases
 
     steps:
       - name: Download build artifact
