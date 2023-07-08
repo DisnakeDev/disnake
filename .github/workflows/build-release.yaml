@@ -78,16 +78,16 @@ jobs:
 
       - name: Compare sdist version to git tag
         env:
-          GITHUB_TAG: ${{ github.ref_name }}
+          GIT_TAG: ${{ github.ref_name }}
         run: |
           mkdir out/
           tar -xf dist/*.tar.gz -C out/
 
           SDIST_VERSION="$(grep "^Version:" out/*/PKG-INFO | cut -d' ' -f2-)"
-          echo "GitHub Tag: $GITHUB_TAG"
-          echo "sdist Version: $SDIST_VERSION"
+          echo "git tag: $GIT_TAG"
+          echo "sdist version: $SDIST_VERSION"
 
-          if [ "$GITHUB_TAG" != "v$SDIST_VERSION" ]; then
+          if [ "$GIT_TAG" != "v$SDIST_VERSION" ]; then
             echo "error: git tag does not match sdist version" >&2
             exit 1
           fi
