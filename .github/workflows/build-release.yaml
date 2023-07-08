@@ -59,7 +59,6 @@ jobs:
           path: dist/
           if-no-files-found: error
 
-  # TODO: create github release (draft)
   # TODO: create PR for new dev version if not backport
 
   validate-tag:
@@ -91,6 +90,41 @@ jobs:
             echo "error: git tag does not match sdist version" >&2
             exit 1
           fi
+
+
+  release-github:
+    name: Create GitHub Draft Release
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    needs:
+      - build
+      - validate-tag
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: dist
+          path: dist/
+
+      - name: Calculate versions
+        id: versions
+        env:
+          GIT_TAG: ${{ github.ref_name }}
+        run: |
+          # v1.2.3 -> v1-2-3 (for changelog)
+          echo "docs_version=${GIT_TAG//./-}" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844  # v0.1.15
+        with:
+          files: dist/*
+          draft: true
+          body: |
+            TBD.
+
+            **Changelog**: https://docs.disnake.dev/en/stable/whats_new.html#${{ steps.versions.outputs.docs_version }}
+            **Git history**: https://github.com/${{ github.repository }}/compare/vTODO...${{ github.ref_name }}
 
 
   release-pypi:
