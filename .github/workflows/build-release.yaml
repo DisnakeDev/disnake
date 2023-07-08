@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   build:
-    name: Build Package
+    name: Build package
     runs-on: ubuntu-latest
 
     steps:
@@ -59,14 +59,17 @@ jobs:
           path: dist/
           if-no-files-found: error
 
-  # TODO: create PR for new dev version if not backport
 
   validate-tag:
-    name: Validate Tag
+    name: Validate tag
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     needs:
       - build
+    env:
+      GIT_TAG: ${{ github.ref_name }}
+    outputs:
+      bump_dev: ${{ steps.check-dev.outputs.bump_dev }}
 
     steps:
       - name: Download build artifact
@@ -76,8 +79,6 @@ jobs:
           path: dist/
 
       - name: Compare sdist version to git tag
-        env:
-          GIT_TAG: ${{ github.ref_name }}
         run: |
           mkdir out/
           tar -xf dist/*.tar.gz -C out/
@@ -91,9 +92,19 @@ jobs:
             exit 1
           fi
 
+      - name: Determine if dev version PR is needed
+        id: check-dev
+        run: |
+          BUMP_DEV=0
+          # if this is a new major/minor version, create a PR later
+          if [[ "$GIT_TAG" =~ ^v[0-9]+\.[0-9]+\.0$ ]]; then
+            BUMP_DEV=1
+          fi
+          echo "bump_dev=$BUMP_DEV" | tee -a $GITHUB_OUTPUT
+
 
   release-github:
-    name: Create GitHub Draft Release
+    name: Create GitHub draft release
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     needs:
@@ -152,3 +163,54 @@ jobs:
       #   with:
       #     print-hash: true
       #     repository-url: https://test.pypi.org/legacy/  # TODO
+
+
+  create-dev-version-pr:
+    name: Create dev version bump PR
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/') && needs.validate-tag.outputs.bump_dev
+    needs:
+      - validate-tag
+      - release-github
+      - release-pypi
+
+    steps:
+      # https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/making-authenticated-api-requests-with-a-github-app-in-a-github-actions-workflow
+      - name: Generate app token
+        id: generate_token
+        uses: tibdex/github-app-token@b62528385c34dbc9f38e5f4225ac829252d1ea92  # v1.8.0
+        with:
+          app_id: ${{ secrets.BOT_APP_ID }}
+          private_key: ${{ secrets.BOT_PRIVATE_KEY }}
+
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+          persist-credentials: false
+          ref: master  # the PR action wants a proper base branch
+
+      - name: Set git name/email
+        run: |
+          git config user.name "disnake-test-bot[bot]"
+          git config user.email "138718724+disnake-test-bot[bot]@users.noreply.github.com"
+
+      - name: Update version to dev
+        id: update-version
+        run: |
+          NEW_VERSION="$(python scripts/ci/versiontool.py --set dev)"
+          git commit -a -m "chore: update version to v$NEW_VERSION"
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@153407881ec5c347639a548ade7d8ad1d6740e38  # v5.0.2
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+          branch: auto/dev-v${{ steps.update-version.outputs.new_version }}
+          delete-branch: true
+          base: master
+          title: "chore: update version to v${{ steps.update-version.outputs.new_version }}"
+          body: |
+            Automated dev version PR.
+          labels: |
+            skip news
+            t: meta

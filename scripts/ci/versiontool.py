@@ -122,7 +122,7 @@ def main() -> None:
     if text != INIT:
         TARGET_FILE.write_text(text, "utf-8")
 
-    print(f"Updated version to {str(new_version)}")
+    print(str(new_version))
 
 
 main()
