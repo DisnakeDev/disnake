@@ -48,7 +48,7 @@ jobs:
 
       - name: Update version
         run: |
-          python scripts/ci/versiontool.py "$VERSION_INPUT"
+          python scripts/ci/versiontool.py --set "$VERSION_INPUT"
           git commit -a -m "chore: update version to $VERSION_INPUT"
 
       - name: Build changelog

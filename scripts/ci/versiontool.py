@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import re
 import sys
 from enum import Enum
@@ -84,18 +85,20 @@ def fail(msg: str) -> NoReturn:
 
 
 def main() -> None:
-    if len(sys.argv) > 2:
-        fail(f"Usage: {sys.argv[0]} [<version>|dev]")
+    parser = argparse.ArgumentParser()
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--set", metavar="VERSION", help="set new version (e.g. '1.2.3' or 'dev')")
+    group.add_argument("--show", action="store_true", help="print current version")
+    args = parser.parse_args()
 
     current_version = get_current_version()
 
-    # if no version is given, just print current version
-    if len(sys.argv) == 1:
+    if args.show:
         print(str(current_version))
         return
 
     # else, update to specified version
-    new_version_str = sys.argv[1]
+    new_version_str = args.set
 
     if new_version_str == "dev":
         if current_version.releaselevel is not ReleaseLevel.final:
