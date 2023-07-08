@@ -59,16 +59,48 @@ jobs:
           path: dist/
           if-no-files-found: error
 
-  # TODO: validate tag against current version
   # TODO: create github release (draft)
+  # TODO: create PR for new dev version if not backport
+
+  validate-tag:
+    name: Validate Tag
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    needs:
+      - build
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: dist
+          path: dist/
+
+      - name: Compare sdist version to git tag
+        env:
+          GITHUB_TAG: ${{ github.ref_name }}
+        run: |
+          mkdir out/
+          tar -xf dist/*.tar.gz -C out/
+
+          SDIST_VERSION="$(grep "^Version:" out/*/PKG-INFO | cut -d' ' -f2-)"
+          echo "GitHub Tag: $GITHUB_TAG"
+          echo "sdist Version: $SDIST_VERSION"
+
+          if [ "$GITHUB_TAG" != "v$SDIST_VERSION" ]; then
+            echo "error: git tag does not match sdist version" >&2
+            exit 1
+          fi
+
 
   release-pypi:
     name: Publish package to pypi.org
     environment: release-pypi
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    if: startsWith(github.ref, 'refs/tags/') && 1 == 0
     needs:
       - build
+      - validate-tag
     permissions:
       id-token: write  # this permission is mandatory for trusted publishing
 
