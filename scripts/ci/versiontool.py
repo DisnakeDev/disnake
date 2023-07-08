@@ -11,7 +11,7 @@ from typing import NamedTuple, NoReturn
 TARGET_FILE = Path("disnake/__init__.py")
 INIT = TARGET_FILE.read_text("utf-8")
 
-version_re = re.compile(r"(\d)+\.(\d+)\.(\d+)(?:(a|b|rc)(\d+)?)?")
+version_re = re.compile(r"(\d+)\.(\d+)\.(\d+)(?:(a|b|rc)(\d+)?)?")
 
 
 class ReleaseLevel(Enum):
