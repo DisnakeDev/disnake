@@ -3,11 +3,11 @@
 import asyncio
 import datetime
 import inspect
-import os
 import sys
 import warnings
 from dataclasses import dataclass
 from datetime import timedelta, timezone
+from pathlib import Path
 from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 from unittest import mock
 
@@ -797,60 +797,88 @@ def test_format_dt(dt, style, expected) -> None:
 
 
 @pytest.fixture(scope="session")
-def tmp_module_root(tmp_path_factory):
-    # this obviously isn't great code, but it'll do just fine for tests
+def tmp_module_root(tmp_path_factory: pytest.TempPathFactory):
     tmpdir = tmp_path_factory.mktemp("module_root")
-    for d in ["empty", "not_a_module", "mod/sub1/sub2"]:
-        (tmpdir / d).mkdir(parents=True)
-    for f in [
-        "test.py",
-        "not_a_module/abc.py",
-        "mod/__init__.py",
-        "mod/ext.py",
-        "mod/sub1/sub2/__init__.py",
-        "mod/sub1/sub2/abc.py",
-    ]:
-        (tmpdir / f).touch()
-    return tmpdir
+
+    setup = "def setup(bot): ..."
+    helpers.create_dirs(
+        tmpdir,
+        {
+            "a": {
+                "__init__.py": "",
+                "nosetup.py": "",
+                "withsetup.py": setup,
+                "empty_dir": {},
+                "not_a_module": {"abc.py": setup},
+                "a_module": {"__init__.py": "", "abc.py": setup},
+                "uncool_ext": {"__init__.py": ""},
+                "cool_ext": {"__init__.py": setup},
+                "mod": {
+                    "__init__.py": "",
+                    "ext.py": setup,
+                    "not_a_submodule": {
+                        "sub": {"__init__.py": setup},
+                    },
+                    "sub": {
+                        "__init__.py": "",
+                        "sub1": {"__init__.py": "", "abc.py": setup, "def.py": setup},
+                        "sub2": {"__init__.py": setup, "abc.py": setup},
+                    },
+                },
+            },
+        },
+    )
+
+    with helpers.chdir_module(tmpdir):
+        yield tmpdir
 
 
 @pytest.mark.parametrize(
-    ("path", "expected"),
+    ("ignore", "expected"),
     [
-        (".", ["test", "mod.ext"]),
-        ("./", ["test", "mod.ext"]),
-        ("empty/", []),
+        (
+            None,
+            [
+                "a.nosetup",
+                "a.withsetup",
+                "a.a_module.abc",
+                "a.cool_ext",
+                "a.mod.ext",
+                "a.mod.sub.sub1.abc",
+                "a.mod.sub.sub1.def",
+                "a.mod.sub.sub2",
+            ],
+        ),
+        (
+            ["a.nosetup", "a.mod.sub.sub1.abc", "a.mod.ext"],
+            [
+                "a.withsetup",
+                "a.a_module.abc",
+                "a.cool_ext",
+                "a.mod.sub.sub1.def",
+                "a.mod.sub.sub2",
+            ],
+        ),
+        (
+            lambda name: "ext" in name,  # pyright: ignore[reportUnknownLambdaType]
+            [
+                "a.nosetup",
+                "a.withsetup",
+                "a.a_module.abc",
+                "a.mod.sub.sub1.abc",
+                "a.mod.sub.sub1.def",
+                "a.mod.sub.sub2",
+            ],
+        ),
     ],
 )
-def test_search_directory(tmp_module_root, path, expected) -> None:
-    orig_cwd = os.getcwd()
-    try:
-        os.chdir(tmp_module_root)
-
-        # test relative and absolute paths
-        for p in [path, os.path.abspath(path)]:
-            assert sorted(utils.search_directory(p)) == sorted(expected)
-    finally:
-        os.chdir(orig_cwd)
+def test_walk_modules(tmp_module_root: Path, ignore, expected) -> None:
+    path = str(tmp_module_root / "a")
+    assert sorted(utils._walk_modules([path], "a.", ignore)) == sorted(expected)
 
 
-@pytest.mark.parametrize(
-    ("path", "exc"),
-    [
-        ("../../", r"Modules outside the cwd require a package to be specified"),
-        ("nonexistent", r"Provided path '.*?nonexistent' does not exist"),
-        ("test.py", r"Provided path '.*?test.py' is not a directory"),
-    ],
-)
-def test_search_directory_exc(tmp_module_root, path, exc) -> None:
-    orig_cwd = os.getcwd()
-    try:
-        os.chdir(tmp_module_root)
-
-        with pytest.raises(ValueError, match=exc):
-            list(utils.search_directory(tmp_module_root / path))
-    finally:
-        os.chdir(orig_cwd)
+def test_walk_modules_nonexistent(tmp_module_root: Path) -> None:
+    assert list(utils._walk_modules([str(tmp_module_root / "doesnotexist")], "doesnotexist.")) == []
 
 
 @pytest.mark.parametrize(

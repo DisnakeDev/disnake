@@ -1,10 +1,27 @@
 # SPDX-License-Identifier: MIT
 
+from __future__ import annotations
+
 import asyncio
+import contextlib
 import datetime
 import functools
+import os
+import sys
 import types
-from typing import TYPE_CHECKING, Callable, ContextManager, Optional, Type, TypeVar
+from pathlib import Path
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    ContextManager,
+    Dict,
+    Iterator,
+    Optional,
+    Type,
+    TypeVar,
+    Union,
+)
 from unittest import mock
 
 if TYPE_CHECKING:
@@ -68,3 +85,26 @@ class freeze_time(ContextManager):
                     return func(*args, **kwargs)
 
             return wrap_sync  # type: ignore
+
+
+def create_dirs(parent: Union[str, Path], data: Dict[str, Any]) -> None:
+    parent = Path(parent) if isinstance(parent, str) else parent
+    for name, value in data.items():
+        path = parent / name
+        if isinstance(value, dict):
+            path.mkdir()
+            create_dirs(path, value)
+        elif isinstance(value, str):
+            path.write_text(value)
+
+
+@contextlib.contextmanager
+def chdir_module(path: Union[str, Path]) -> Iterator[None]:
+    orig_cwd = os.getcwd()
+    try:
+        os.chdir(path)
+        sys.path.insert(0, str(path))
+        yield
+    finally:
+        os.chdir(orig_cwd)
+        sys.path.remove(str(path))

@@ -1,0 +1,3 @@
+|commands| Improve :func:`Bot.load_extensions <ext.commands.Bot.load_extensions>`, add :func:`Bot.find_extensions <ext.commands.Bot.find_extensions>`.
+- Better support for more complex extension hierarchies.
+- New ``package``, ``ignore``, and ``load_callback`` parameters.

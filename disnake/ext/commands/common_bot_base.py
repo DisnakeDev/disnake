@@ -16,9 +16,11 @@ from typing import (
     Callable,
     Dict,
     Generic,
+    Iterable,
     List,
     Mapping,
     Optional,
+    Sequence,
     Set,
     TypeVar,
     Union,
@@ -473,7 +475,7 @@ class CommonBotBase(Generic[CogT]):
     def _resolve_name(self, name: str, package: Optional[str]) -> str:
         try:
             return importlib.util.resolve_name(name, package)
-        except ImportError as e:
+        except (ValueError, ImportError) as e:  # 3.8 raises ValueError instead of ImportError
             raise errors.ExtensionNotFound(name) from e
 
     def load_extension(self, name: str, *, package: Optional[str] = None) -> None:
@@ -624,18 +626,149 @@ class CommonBotBase(Generic[CogT]):
             sys.modules.update(modules)
             raise
 
-    def load_extensions(self, path: str) -> None:
-        """Loads all extensions in a directory.
+    def find_extensions(
+        self,
+        root_module: str,
+        *,
+        package: Optional[str] = None,
+        ignore: Optional[Union[Iterable[str], Callable[[str], bool]]] = None,
+    ) -> Sequence[str]:
+        """Finds all extensions in a given module, also traversing into sub-packages.
 
-        .. versionadded:: 2.4
+        See :ref:`ext_commands_extensions_load` for details on how packages are found.
+
+        .. versionadded:: 2.7
+
+        .. note::
+            This imports all *packages* (not all modules) in the given path(s)
+            to access the ``__path__`` attribute for finding submodules,
+            unless they are filtered by the ``ignore`` parameter.
 
         Parameters
         ----------
-        path: :class:`str`
-            The path to search for extensions
+        root_module: :class:`str`
+            The module/package name to search in, for example ``cogs.admin``.
+            Also supports paths in the current working directory.
+        package: Optional[:class:`str`]
+            The package name to resolve relative imports with.
+            This is required when ``root_module`` is a relative module name, e.g ``.cogs.admin``.
+            Defaults to ``None``.
+        ignore: Optional[Union[Iterable[:class:`str`], Callable[[:class:`str`], :class:`bool`]]]
+            An iterable of module names to ignore, or a callable that's used for ignoring
+            modules (where the callable returning ``True`` results in the module being ignored).
+            Defaults to ``None``, i.e. no modules are ignored.
+
+            If it's an iterable, module names that start with any of the given strings will be ignored.
+
+        Raises
+        ------
+        ExtensionError
+            The given root module could not be found,
+            or the name of the root module could not be resolved using the provided ``package`` parameter.
+        ValueError
+            ``root_module`` is a path and outside of the cwd.
+        TypeError
+            The ``ignore`` parameter is of an invalid type.
+        ImportError
+            A package couldn't be imported.
+
+        Returns
+        -------
+        Sequence[:class:`str`]
+            The list of full extension names.
         """
-        for extension in disnake.utils.search_directory(path):
-            self.load_extension(extension)
+        if "/" in root_module or "\\" in root_module:
+            path = os.path.relpath(root_module)
+            if ".." in path:
+                raise ValueError(
+                    "Paths outside the cwd are not supported. Try using the module name instead."
+                )
+            root_module = path.replace(os.sep, ".")
+
+        # `find_spec` already calls `resolve_name`, but we want our custom error handling here
+        root_module = self._resolve_name(root_module, package)
+
+        if not (spec := importlib.util.find_spec(root_module)):
+            raise errors.ExtensionError(
+                f"Unable to find root module '{root_module}'", name=root_module
+            )
+
+        if not (paths := spec.submodule_search_locations):
+            raise errors.ExtensionError(
+                f"Module '{root_module}' is not a package", name=root_module
+            )
+
+        return tuple(disnake.utils._walk_modules(paths, prefix=f"{spec.name}.", ignore=ignore))
+
+    def load_extensions(
+        self,
+        root_module: str,
+        *,
+        package: Optional[str] = None,
+        ignore: Optional[Union[Iterable[str], Callable[[str], bool]]] = None,
+        load_callback: Optional[Callable[[str], None]] = None,
+    ) -> Union[List[str], List[Union[str, errors.ExtensionError]]]:
+        """Loads all extensions in a given module, also traversing into sub-packages.
+
+        See :func:`find_extensions` for details.
+
+        .. versionadded:: 2.4
+
+        .. versionchanged:: 2.7
+            Now accepts a module name instead of a filesystem path.
+            Improved package traversal, adding support for more complex extensions
+            with ``__init__.py`` files.
+            Also added ``package``, ``ignore``, and ``load_callback`` parameters.
+
+        .. note::
+            For further customization, you may use :func:`find_extensions`:
+
+            .. code-block:: python3
+
+                for extension_name in bot.find_extensions(...):
+                    ... # custom logic
+                    bot.load_extension(extension_name)
+
+        Parameters
+        ----------
+        root_module: :class:`str`
+            See :func:`find_extensions`.
+        package: Optional[:class:`str`]
+            See :func:`find_extensions`.
+        ignore: Optional[Union[Iterable[:class:`str`], Callable[[:class:`str`], :class:`bool`]]]
+            See :func:`find_extensions`.
+        load_callback: Optional[Callable[[:class:`str`], None]]
+            A callback that gets invoked with the extension name when each extension gets loaded.
+
+        Raises
+        ------
+        ExtensionError
+            The given root module could not be found,
+            or the name of the root module could not be resolved using the provided ``package`` parameter.
+            Other extension-related errors may also be raised
+            as this method calls :func:`load_extension` on all found extensions.
+            See :func:`load_extension` for further details on raised exceptions.
+        ValueError
+            ``root_module`` is a path and outside of the cwd.
+        TypeError
+            The ``ignore`` parameter is of an invalid type.
+        ImportError
+            A package (not module) couldn't be imported.
+
+        Returns
+        -------
+        List[:class:`str`]
+            The list of module names that have been loaded.
+        """
+        ret: List[str] = []
+
+        for ext_name in self.find_extensions(root_module, package=package, ignore=ignore):
+            self.load_extension(ext_name)
+            ret.append(ext_name)
+            if load_callback:
+                load_callback(ext_name)
+
+        return ret
 
     @property
     def extensions(self) -> Mapping[str, types.ModuleType]:

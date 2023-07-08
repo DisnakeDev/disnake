@@ -6,6 +6,7 @@ import array
 import asyncio
 import datetime
 import functools
+import importlib
 import json
 import os
 import pkgutil
@@ -1249,8 +1250,11 @@ def format_dt(dt: Union[datetime.datetime, float], /, style: TimestampStyle = "f
     return f"<t:{int(dt)}:{style}>"
 
 
+@deprecated("disnake.ext.commands.Bot.find_extensions")
 def search_directory(path: str) -> Iterator[str]:
     """Walk through a directory and yield all modules.
+
+    .. deprecated:: 2.7
 
     Parameters
     ----------
@@ -1283,6 +1287,49 @@ def search_directory(path: str) -> Iterator[str]:
             yield from search_directory(os.path.join(path, name))
         else:
             yield prefix + name
+
+
+# this is similar to pkgutil.walk_packages, but with a few modifications
+def _walk_modules(
+    paths: Iterable[str],
+    prefix: str = "",
+    ignore: Optional[Union[Iterable[str], Callable[[str], bool]]] = None,
+) -> Iterator[str]:
+    if isinstance(ignore, str):
+        raise TypeError("`ignore` must be an iterable of strings or a callable")
+
+    if isinstance(ignore, Iterable):
+        ignore_tup = tuple(ignore)
+        ignore = lambda path: path.startswith(ignore_tup)
+    # else, it's already a callable or None
+
+    seen: Set[str] = set()
+
+    for _, name, ispkg in pkgutil.iter_modules(paths, prefix):
+        if ignore and ignore(name):
+            continue
+
+        if not ispkg:
+            yield name
+            continue
+
+        # it's a package here
+        mod = importlib.import_module(name)
+
+        # if this module is a package but also has a `setup` function,
+        # yield it and don't look for other files in this module
+        if hasattr(mod, "setup"):
+            yield name
+            continue
+
+        sub_paths: List[str] = []
+        for p in mod.__path__ or []:
+            if p not in seen:
+                seen.add(p)
+                sub_paths.append(p)
+
+        if sub_paths:
+            yield from _walk_modules(sub_paths, prefix=f"{name}.", ignore=ignore)
 
 
 def as_valid_locale(locale: str) -> Optional[str]:

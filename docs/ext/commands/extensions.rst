@@ -64,3 +64,60 @@ Although rare, sometimes an extension needs to clean-up or know when it's being 
 
     def teardown(bot):
         print('I am being unloaded!')
+
+.. _ext_commands_extensions_load:
+
+Loading multiple extensions
+-----------------------------
+
+Commonly, you might have a package/folder that contains several modules.
+Instead of manually loading them one by one, you can use :meth:`.Bot.load_extensions` to load the entire package in one sweep.
+
+Consider the following directory structure:
+
+.. code-block::
+
+    my_bot/
+    ├─── cogs/
+    │    ├─── admin.py
+    │    ├─── fun.py
+    │    └─── other_complex_thing/
+    │         ├─── __init__.py (contains setup)
+    │         ├─── data.py
+    │         └─── models.py
+    └─── main.py
+
+Now, you could call :meth:`.Bot.load_extension` separately on ``cogs.admin``, ``cogs.fun``, and ``cogs.other_complex_thing``;
+however, if you add a new extension, you'd need to once again load it separately.
+
+Instead, you can use ``bot.load_extensions("my_bot.cogs")`` (or ``.load_extensions(".cogs", package=__package__)``)
+to load all of them automatically, without any extra work required.
+
+Customization
++++++++++++++++
+
+To adjust the loading process, for example to handle exceptions that may occur, use :meth:`.Bot.find_extensions`.
+This is also what :meth:`.Bot.load_extensions` uses internally.
+
+As an example, one could load extensions like this:
+
+.. code-block:: python3
+
+    for extension in bot.find_extensions("my_bot.cogs"):
+        try:
+            bot.load_extension(extension)
+        except commands.ExtensionError as e:
+            logger.warning(f"Failed to load extension {extension}: {e}")
+
+Discovery
++++++++++++
+
+:meth:`.Bot.find_extensions` (and by extension, :meth:`.Bot.load_extensions`) discover modules/extensions
+similar to :func:`py:pkgutil.walk_packages`; the given root package name is resolved,
+and submodules/-packages are iterated through recursively.
+
+If a package has a ``setup`` function (similar to ``my_bot.cogs.other_complex_thing`` above),
+it won't be traversed further, i.e. ``data.py`` and ``models.py`` in the example won't be considered separate extensions.
+
+Namespace packages (see `PEP 420 <https://peps.python.org/pep-0420/>`__) are not supported (other than
+the provided root package), meaning every subpackage must have an ``__init__.py`` file.

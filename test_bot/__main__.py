@@ -2,7 +2,6 @@
 
 import asyncio
 import logging
-import os
 import sys
 import traceback
 
@@ -50,10 +49,6 @@ class TestBot(commands.Bot):
             f"ID: {self.user.id}\n"
         )
         # fmt: on
-
-    def add_cog(self, cog: commands.Cog, *, override: bool = False) -> None:
-        logger.info("Loading cog %s", cog.qualified_name)
-        return super().add_cog(cog, override=override)
 
     async def on_command_error(self, ctx: commands.Context, error: commands.CommandError) -> None:
         msg = f"Command `{ctx.command}` failed due to `{error}`"
@@ -126,5 +121,9 @@ print(f"disnake: {disnake.__version__}\n")
 
 if __name__ == "__main__":
     bot = TestBot()
-    bot.load_extensions(os.path.join(__package__, Config.cogs_folder))
+    bot.load_extensions(
+        ".cogs",
+        package=__package__,
+        load_callback=lambda e: logger.info("Loaded extension %s.", e),
+    )
     bot.run(Config.token)
