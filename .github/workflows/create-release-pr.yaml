@@ -35,9 +35,12 @@ jobs:
           persist-credentials: false
 
       - name: Set git name/email
+        env:
+          GIT_USER: ${{ vars.GIT_APP_USER_NAME }}
+          GIT_EMAIL: ${{ vars.GIT_APP_USER_EMAIL }}
         run: |
-          git config user.name "disnake-test-bot[bot]"
-          git config user.email "138718724+disnake-test-bot[bot]@users.noreply.github.com"
+          git config user.name "$GIT_USER"
+          git config user.email "$GIT_EMAIL"
 
       - name: Set up environment
         uses: ./.github/actions/setup-env
