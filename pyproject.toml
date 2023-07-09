@@ -370,6 +370,7 @@ ignore = [
     "noxfile.py",
     # docs
     "CONTRIBUTING.md",
+    "RELEASING.md",
     "assets/**",
     "changelog/**",
     "docs/**",
