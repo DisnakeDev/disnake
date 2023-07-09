@@ -142,7 +142,9 @@ jobs:
 
   release-pypi:
     name: Publish package to pypi.org
-    environment: release-pypi
+    environment:
+      name: release-pypi
+      url: https://pypi.org/project/disnake/
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     needs:
