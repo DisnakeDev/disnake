@@ -2,7 +2,7 @@
 
 name: Build (+ Release)
 
-# test build for push/PR/tag, but only upload release for tags
+# test build for commit/tag, but only upload release for tags
 on:
   push:
     branches:
@@ -10,7 +10,6 @@ on:
       - 'v[0-9]+.[0-9]+.x'  # matches to backport branches, e.g. v3.6.x
     tags:
       - "v[0-9]+.[0-9]+.[0-9]+"
-  pull_request:
 
 permissions:
   contents: read

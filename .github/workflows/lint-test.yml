@@ -121,6 +121,13 @@ jobs:
       if: (success() || failure()) && steps.setup.outcome == 'success'
       run: nox -s check-manifest
 
+    # This only runs if the previous steps were successful, no point in running it otherwise
+    - name: Try building package
+      run: |
+        pdm install -dG build
+        pdm run python -m build
+        ls -la dist/
+
     # run the libcst parsers and check for changes
     - name: libcst codemod
       env:
