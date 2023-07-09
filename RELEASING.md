@@ -20,10 +20,10 @@ The branch should be `master` for major/minor releases and e.g. `1.2.x` for micr
     - **\*** Also create + force-push a `stable` tag for the same ref.
 4. Update the visibility of old/new versions on https://readthedocs.org.
     - **\*** Manually trigger a docs build for `stable`.
-4. Wait, update the created GitHub draft release, and prepare a Discord announcement.
-5. Approve the environment deployment when prompted, which will push the package to PyPI.
-6. Publish the prepared GitHub release and Discord announcement. 🎉
-7. **\*** Create a `v1.2.x` branch for future backports, and merge the newly created dev version PR.
+5. Wait, update the created GitHub draft release, and prepare a Discord announcement.
+6. Approve the environment deployment when prompted, which will push the package to PyPI.
+7. Publish the prepared GitHub release and Discord announcement. 🎉
+8. **\*** Create a `v1.2.x` branch for future backports, and merge the newly created dev version PR.
 
 
 ### Manual Steps
@@ -34,7 +34,7 @@ If the automated process above does not work for some reason, here's the abridge
 2. Follow steps 3. + 4. + 5. like above.
 3. Run `python -m build`, attach artifacts to GitHub release.
 4. Run `twine check dist/*` + `twine upload dist/*`.
-5. Follow steps 6. + 7. like above.
+5. Follow steps 7. + 8. like above.
 
 
 ## Repository Setup
