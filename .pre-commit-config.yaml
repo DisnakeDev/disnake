@@ -35,7 +35,7 @@ repos:
         args: [--negate]
         types: [text]
         exclude_types: [json, pofile]
-        exclude: 'changelog/|py.typed|disnake/bin/COPYING|.github/PULL_REQUEST_TEMPLATE.md|LICENSE|MANIFEST.in'
+        exclude: 'changelog/|py.typed|disnake/bin/COPYING|.github/PULL_REQUEST_TEMPLATE.md|.github/CODEOWNERS|LICENSE|MANIFEST.in'
 
   - repo: https://github.com/pycqa/isort
     rev: 5.12.0
