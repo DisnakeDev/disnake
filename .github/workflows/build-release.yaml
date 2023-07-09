@@ -158,11 +158,11 @@ jobs:
           name: dist
           path: dist/
 
-      # - name: Upload to pypi
-      #   uses: pypa/gh-action-pypi-publish@f5622bde02b04381239da3573277701ceca8f6a0  # v1.8.7
-      #   with:
-      #     print-hash: true
-      #     repository-url: https://test.pypi.org/legacy/  # TODO
+      - name: Upload to pypi
+        uses: pypa/gh-action-pypi-publish@f5622bde02b04381239da3573277701ceca8f6a0  # v1.8.7
+        with:
+          print-hash: true
+          repository-url: https://test.pypi.org/legacy/  # TODO
 
 
   create-dev-version-pr:
