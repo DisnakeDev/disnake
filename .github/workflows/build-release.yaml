@@ -46,7 +46,7 @@ jobs:
           tar -xf dist/*.tar.gz -C out/
 
           echo -e "<details><summary>Metadata</summary>\n" >> $GITHUB_STEP_SUMMARY
-          cat out/*/PKG-INFO | sed 's/^/    /' >> $GITHUB_STEP_SUMMARY
+          cat out/*/PKG-INFO | sed 's/^/    /' | tee -a $GITHUB_STEP_SUMMARY
           echo -e "\n</details>\n" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload artifact
