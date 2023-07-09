@@ -6,7 +6,7 @@ on:
   push:
     branches:
       - 'master'
-      - 'v[0-9]+.[0-9]+.x'  # matches to backport branches, e.g. 3.6
+      - 'v[0-9]+.[0-9]+.x'  # matches to backport branches, e.g. v3.6.x
       - 'run-ci/*'
     tags:
   pull_request:
