@@ -211,6 +211,8 @@ jobs:
           title: "chore: update version to v${{ steps.update-version.outputs.new_version }}"
           body: |
             Automated dev version PR.
+
+            <sub>https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}</sub>
           labels: |
             skip news
             t: meta
