@@ -95,7 +95,7 @@ jobs:
       - name: Determine if dev version PR is needed
         id: check-dev
         run: |
-          BUMP_DEV=0
+          BUMP_DEV=
           # if this is a new major/minor version, create a PR later
           if [[ "$GIT_TAG" =~ ^v[0-9]+\.[0-9]+\.0$ ]]; then
             BUMP_DEV=1
