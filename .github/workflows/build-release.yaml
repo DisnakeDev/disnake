@@ -16,6 +16,7 @@ permissions:
   contents: read
 
 jobs:
+  # Builds sdist and wheel, runs `twine check`, and optionally uploads artifacts.
   build:
     name: Build package
     runs-on: ubuntu-latest
@@ -60,6 +61,9 @@ jobs:
           if-no-files-found: error
 
 
+  ### Anything below this only runs for tags ###
+
+  # Ensures that git tag and built version match.
   validate-tag:
     name: Validate tag
     runs-on: ubuntu-latest
@@ -103,6 +107,7 @@ jobs:
           echo "bump_dev=$BUMP_DEV" | tee -a $GITHUB_OUTPUT
 
 
+  # Creates a draft release on GitHub, and uploads the artifacts there.
   release-github:
     name: Create GitHub draft release
     runs-on: ubuntu-latest
@@ -140,6 +145,7 @@ jobs:
             **Git history**: https://github.com/${{ github.repository }}/compare/vTODO...${{ github.ref_name }}
 
 
+  # Creates a PyPI release (using an environment which requires separate confirmation).
   release-pypi:
     name: Publish package to pypi.org
     environment:
@@ -166,6 +172,7 @@ jobs:
           print-hash: true
 
 
+  # Creates a PR to bump to an alpha version for development, if applicable.
   create-dev-version-pr:
     name: Create dev version bump PR
     runs-on: ubuntu-latest
