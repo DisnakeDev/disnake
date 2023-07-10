@@ -29,7 +29,7 @@ from .emoji import Emoji
 from .enums import ChannelType, InteractionType, MessageType, try_enum, try_enum_to_int
 from .errors import HTTPException
 from .file import File
-from .flags import MessageFlags
+from .flags import AttachmentFlags, MessageFlags
 from .guild import Guild
 from .member import Member
 from .mixins import Hashable
@@ -302,6 +302,7 @@ class Attachment(Hashable):
         "description",
         "duration",
         "waveform",
+        "_flags",
     )
 
     def __init__(self, *, data: AttachmentPayload, state: ConnectionState) -> None:
@@ -320,6 +321,7 @@ class Attachment(Hashable):
         self.waveform: Optional[bytes] = (
             b64decode(waveform_data) if (waveform_data := data.get("waveform")) else None
         )
+        self._flags: int = data.get("flags", 0)
 
     def is_spoiler(self) -> bool:
         """Whether this attachment contains a spoiler.
@@ -333,6 +335,14 @@ class Attachment(Hashable):
 
     def __str__(self) -> str:
         return self.url or ""
+
+    @property
+    def flags(self) -> AttachmentFlags:
+        """:class:`AttachmentFlags`: Returns the attachment's flags.
+
+        .. versionadded:: 2.10
+        """
+        return AttachmentFlags._from_value(self._flags)
 
     async def save(
         self,
