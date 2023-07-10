@@ -2360,6 +2360,12 @@ class AttachmentFlags(BaseFlags):
 
     __slots__ = ()
 
+    if TYPE_CHECKING:
+
+        @_generated
+        def __init__(self, *, is_remix: bool = ...) -> None:
+            ...
+
     @flag_value
     def is_remix(self):
         """:class:`bool`: Returns ``True`` if the attachment has been edited using the Remix feature."""
