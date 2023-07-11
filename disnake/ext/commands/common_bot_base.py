@@ -10,23 +10,10 @@ import os
 import sys
 import time
 import types
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Dict,
-    Generic,
-    List,
-    Mapping,
-    Optional,
-    Set,
-    TypeVar,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, Dict, Generic, List, Mapping, Optional, Set, TypeVar, Union
 
 import disnake
 import disnake.utils
-from disnake.enums import Event
 
 from . import errors
 from .cog import Cog
@@ -71,6 +58,9 @@ class CommonBotBase(Generic[CogT]):
         self.owner: Optional[disnake.User] = None
         self.owners: Set[disnake.TeamMember] = set()
 
+        if TYPE_CHECKING:
+            self.extra_events: Dict[str, List[CoroFunc]]
+
         if self.owner_id and self.owner_ids:
             raise TypeError("Both owner_id and owner_ids are set.")
 
@@ -80,6 +70,11 @@ class CommonBotBase(Generic[CogT]):
         self.reload: bool = reload
 
         super().__init__(*args, **kwargs)
+
+    # FIXME: make event name pos-only or remove entirely in v3.0
+    def dispatch(self, event_name: str, *args: Any, **kwargs: Any) -> None:
+        # super() will resolve to Client
+        super().dispatch(event_name, *args, **kwargs)  # type: ignore
 
     async def _fill_owners(self) -> None:
         if self.owner_id or self.owner_ids:
@@ -159,110 +154,6 @@ class CommonBotBase(Generic[CogT]):
                 self.owner = app.owner
                 self.owner_id = owner_id = app.owner.id
                 return user.id == owner_id
-
-    # listener registration
-
-    def add_listener(self, func: CoroFunc, name: Union[str, Event] = MISSING) -> None:
-        """The non decorator alternative to :meth:`.listen`.
-
-        Parameters
-        ----------
-        func: :ref:`coroutine <coroutine>`
-            The function to call.
-        name: Union[:class:`str`, :class:`.Event`]
-            The name of the event to listen for. Defaults to ``func.__name__``.
-
-        Example
-        --------
-
-        .. code-block:: python
-
-            async def on_ready(): pass
-            async def my_message(message): pass
-            async def another_message(message): pass
-
-            bot.add_listener(on_ready)
-            bot.add_listener(my_message, 'on_message')
-            bot.add_listener(another_message, Event.message)
-
-        Raises
-        ------
-        TypeError
-            The function is not a coroutine or a string or an :class:`.Event` was not passed
-            as the name.
-        """
-        # resolve to Client
-        super().add_listener(func, name)  # type: ignore
-
-    def remove_listener(self, func: CoroFunc, name: Union[str, Event] = MISSING) -> None:
-        """Removes a listener from the pool of listeners.
-
-        Parameters
-        ----------
-        func
-            The function that was used as a listener to remove.
-        name: Union[:class:`str`, :class:`.Event`]
-            The name of the event we want to remove. Defaults to
-            ``func.__name__``.
-
-        Raises
-        ------
-        TypeError
-            The name passed was not a string or an :class:`.Event`.
-        """
-        # resolve to Client
-        super().remove_listener(func, name)  # type: ignore
-
-    def listen(self, name: Union[str, Event] = MISSING) -> Callable[[CFT], CFT]:
-        """A decorator that registers another function as an external
-        event listener. Basically this allows you to listen to multiple
-        events from different places e.g. such as :func:`.on_ready`
-
-        The functions being listened to must be a :ref:`coroutine <coroutine>`.
-
-        Example
-        -------
-        .. code-block:: python3
-
-            @bot.listen()
-            async def on_message(message):
-                print('one')
-
-            # in some other file...
-
-            @bot.listen('on_message')
-            async def my_message(message):
-                print('two')
-
-            # in yet another file
-            @bot.listen(Event.message)
-            async def another_message(message):
-                print('three')
-
-        Would print one, two and three in an unspecified order.
-
-        Raises
-        ------
-        TypeError
-            The function being listened to is not a coroutine or a string or an :class:`.Event` was not passed
-            as the name.
-        """
-        # resolve to Client
-        return super().listen(name)  # type: ignore
-
-    def get_listeners(self) -> Mapping[str, List[CoroFunc]]:
-        """Mapping[:class:`str`, List[Callable]]: A read-only mapping of event names to listeners.
-
-        .. note::
-            To add or remove a listener you should use :meth:`.add_listener` and
-            :meth:`.remove_listener`.
-
-        .. versionadded:: 2.9
-        """
-        # resolve to Client
-        return super().get_listeners()  # type: ignore
-
-    # cogs
 
     def add_cog(self, cog: Cog, *, override: bool = False) -> None:
         """Adds a "cog" to the bot.
@@ -371,7 +262,7 @@ class CommonBotBase(Generic[CogT]):
             if _is_submodule(name, cog.__module__):
                 self.remove_cog(cogname)
         # remove all the listeners from the module
-        for event_list in self.extra_events.copy().values():  # type: ignore
+        for event_list in self.extra_events.copy().values():
             remove = [
                 index
                 for index, event in enumerate(event_list)

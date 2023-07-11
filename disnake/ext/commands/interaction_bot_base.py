@@ -931,7 +931,7 @@ class InteractionBotBase(CommonBotBase):
 
         This only fires if you do not specify any listeners for slash command error.
         """
-        if self.extra_events.get("on_slash_command_error", None):  # type: ignore
+        if self.extra_events.get("on_slash_command_error", None):
             return
 
         command = interaction.application_command
@@ -954,7 +954,7 @@ class InteractionBotBase(CommonBotBase):
 
         Similar to :meth:`on_slash_command_error() <Bot.on_slash_command_error>` but for user commands.
         """
-        if self.extra_events.get("on_user_command_error", None):  # type: ignore
+        if self.extra_events.get("on_user_command_error", None):
             return
         command = interaction.application_command
         if command and command.has_error_handler():
@@ -974,7 +974,7 @@ class InteractionBotBase(CommonBotBase):
 
         Similar to :meth:`on_slash_command_error() <Bot.on_slash_command_error>` but for message commands.
         """
-        if self.extra_events.get("on_message_command_error", None):  # type: ignore
+        if self.extra_events.get("on_message_command_error", None):
             return
         command = interaction.application_command
         if command and command.has_error_handler():
@@ -1372,11 +1372,11 @@ class InteractionBotBase(CommonBotBase):
             # This usually happens if the auto sync is disabled, so let's just ignore this.
             return
 
-        self.dispatch(event_name, interaction)  # type: ignore
+        self.dispatch(event_name, interaction)
         try:
             if await self.application_command_can_run(interaction, call_once=True):
                 await app_command.invoke(interaction)
-                self.dispatch(f"{event_name}_completion", interaction)  # type: ignore
+                self.dispatch(f"{event_name}_completion", interaction)
             else:
                 raise errors.CheckFailure("The global check_once functions failed.")
         except errors.CommandError as exc:

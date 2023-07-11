@@ -83,7 +83,6 @@ if TYPE_CHECKING:
     from .app_commands import APIApplicationCommand
     from .asset import AssetBytes
     from .channel import DMChannel
-    from .ext.commands._types import CoroFunc
     from .member import Member
     from .message import Message
     from .types.application_role_connection import (
@@ -99,8 +98,13 @@ __all__ = (
     "GatewayParams",
 )
 
+T = TypeVar("T")
+
+Coro = Coroutine[Any, Any, T]
+CoroFunc = Callable[..., Coro[Any]]
+
 CoroT = TypeVar("CoroT", bound=Callable[..., Coroutine[Any, Any, Any]])
-CFT = TypeVar("CFT", bound="CoroFunc")
+CFT = TypeVar("CFT", bound=CoroFunc)
 
 _log = logging.getLogger(__name__)
 
@@ -771,7 +775,9 @@ class Client:
     def add_listener(self, func: CoroFunc, name: Union[str, Event] = MISSING) -> None:
         """The non decorator alternative to :meth:`.listen`.
 
-        .. versionadded:: 2.10
+        .. versionchanged:: 2.10
+            The definition of this method was moved from the :class:`commands.Bot`
+            base class to :class:`.Client` class.
 
         Parameters
         ----------
@@ -821,7 +827,9 @@ class Client:
     def remove_listener(self, func: CoroFunc, name: Union[str, Event] = MISSING) -> None:
         """Removes a listener from the pool of listeners.
 
-        .. versionadded:: 2.10
+        .. versionchanged:: 2.10
+            The definition of this method was moved from the :class:`commands.Bot`
+            base class to :class:`.Client` class.
 
         Parameters
         ----------
@@ -859,7 +867,9 @@ class Client:
 
         The functions being listened to must be a :ref:`coroutine <coroutine>`.
 
-        .. versionadded:: 2.10
+        .. versionchanged:: 2.10
+            The definition of this method was moved from the :class:`commands.Bot`
+            base class to :class:`.Client` class.
 
         Example
         -------
@@ -906,7 +916,9 @@ class Client:
             To add or remove a listener you should use :meth:`.add_listener` and
             :meth:`.remove_listener`.
 
-        .. versionadded:: 2.10
+        .. versionchanged:: 2.10
+            The definition of this method was moved from the :class:`commands.Bot`
+            base class to :class:`.Client` class.
         """
         return types.MappingProxyType(self.extra_events)
 
