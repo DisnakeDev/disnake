@@ -776,7 +776,7 @@ class Client:
         """The non decorator alternative to :meth:`.listen`.
 
         .. versionchanged:: 2.10
-            The definition of this method was moved from the :class:`commands.Bot`
+            The definition of this method was moved from the :class:`.ext.commands.Bot`
             base class to :class:`.Client` class.
 
         Parameters
@@ -828,7 +828,7 @@ class Client:
         """Removes a listener from the pool of listeners.
 
         .. versionchanged:: 2.10
-            The definition of this method was moved from the :class:`commands.Bot`
+            The definition of this method was moved from the :class:`.ext.commands.Bot`
             base class to :class:`.Client` class.
 
         Parameters
@@ -868,7 +868,7 @@ class Client:
         The functions being listened to must be a :ref:`coroutine <coroutine>`.
 
         .. versionchanged:: 2.10
-            The definition of this method was moved from the :class:`commands.Bot`
+            The definition of this method was moved from the :class:`.ext.commands.Bot`
             base class to :class:`.Client` class.
 
         Example
@@ -917,7 +917,7 @@ class Client:
             :meth:`.remove_listener`.
 
         .. versionchanged:: 2.10
-            The definition of this method was moved from the :class:`commands.Bot`
+            The definition of this method was moved from the :class:`.ext.commands.Bot`
             base class to :class:`.Client` class.
         """
         return types.MappingProxyType(self.extra_events)
