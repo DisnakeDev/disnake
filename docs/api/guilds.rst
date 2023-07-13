@@ -323,7 +323,7 @@ OnboardingMode
 
     Represents the criteria used to satisfy onboarding constraints that are required for enabling it.
 
-    .. versionadded:: 2.9
+    .. versionadded:: 2.10
 
     .. attribute:: default
 
