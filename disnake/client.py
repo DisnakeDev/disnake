@@ -1777,6 +1777,8 @@ class Client:
             Whether to include approximate member and presence counts for the guilds.
             Defaults to ``True``.
 
+            .. versionadded:: 2.10
+
         Raises
         ------
         HTTPException
@@ -1836,6 +1838,8 @@ class Client:
         with_counts: :class:`bool`
             Whether to include approximate member and presence counts for the guild.
             Defaults to ``True``.
+
+            .. versionadded:: 2.10
 
         Raises
         ------
