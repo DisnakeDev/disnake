@@ -181,7 +181,7 @@ class OnboardingPromptOption(Hashable):
         self,
         *,
         title: str,
-        description: Optional[str],
+        description: Optional[str] = None,
         emoji: Optional[Union[str, PartialEmoji, Emoji]] = None,
         roles: Optional[Iterable[Snowflake]] = None,
         channels: Optional[Iterable[Snowflake]] = None,
