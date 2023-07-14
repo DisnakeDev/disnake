@@ -675,7 +675,7 @@ class GuildIterator(_AsyncIterator["Guild"]):
     """
 
     def __init__(
-        self, bot, limit: Optional[int], with_counts: bool, before=None, after=None
+        self, bot, limit: Optional[int], before=None, after=None, with_counts: bool = True
     ) -> None:
         if isinstance(before, datetime.datetime):
             before = Object(id=time_snowflake(before, high=False))
