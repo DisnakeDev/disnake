@@ -37,6 +37,7 @@ from ..flags import MessageFlags
 from ..http import Route, set_attachments, to_multipart, to_multipart_with_attachments
 from ..message import Message
 from ..mixins import Hashable
+from ..object import Object
 from ..ui.action_row import MessageUIComponent, components_to_dict
 from ..user import BaseUser, User
 
@@ -1440,19 +1441,30 @@ class Webhook(BaseWebhook):
 
         return Webhook(data=data, session=self.session, token=self.auth_token, state=self._state)
 
-    def _create_message(self, data, thread: Optional[Snowflake] = None):
-        state = _WebhookState(self, parent=self._state, thread=thread)
-        # state may be artificial (unlikely at this point...)
+    def _create_message(
+        self, data, *, thread: Optional[Snowflake] = None, thread_name: Optional[str] = None
+    ):
         channel_id = int(data["channel_id"])
-        # if the channel ID does not match, a new thread was created
+
+        # If channel IDs don't match, a new thread was most likely created;
+        # if the user passed a `thread_name`, assume this is the case and
+        # create a `thread` object for the state
+        if self.channel_id != channel_id and thread_name:
+            thread = Object(id=channel_id)
+
+        state = _WebhookState(self, parent=self._state, thread=thread)
+
+        # If the channel IDs don't match, the message was created in a thread
         if self.channel_id != channel_id:
             guild = self.guild
             msg_channel = guild and guild.get_channel_or_thread(channel_id)
         else:
             msg_channel = self.channel
+
         if not msg_channel:
             # state may be artificial (unlikely at this point...)
             msg_channel = PartialMessageable(state=self._state, id=channel_id)  # type: ignore
+
         # state is artificial
         return WebhookMessage(data=data, state=state, channel=msg_channel)  # type: ignore
 
@@ -1710,7 +1722,6 @@ class Webhook(BaseWebhook):
             flags=flags,
             view=view,
             components=components,
-            # TODO: check message.edit for this
             thread_name=thread_name,
             allowed_mentions=allowed_mentions,
             previous_allowed_mentions=previous_mentions,
@@ -1736,7 +1747,7 @@ class Webhook(BaseWebhook):
 
         msg = None
         if wait:
-            msg = self._create_message(data, thread=thread)
+            msg = self._create_message(data, thread=thread, thread_name=thread_name)
             if delete_after is not MISSING:
                 await msg.delete(delay=delete_after)
 

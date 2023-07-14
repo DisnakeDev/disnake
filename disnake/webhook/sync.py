@@ -22,6 +22,7 @@ from ..errors import DiscordServerError, Forbidden, HTTPException, NotFound, Web
 from ..flags import MessageFlags
 from ..http import Route
 from ..message import Message
+from ..object import Object
 from .async_ import BaseWebhook, _WebhookState, handle_message_parameters
 
 __all__ = (
@@ -864,11 +865,16 @@ class SyncWebhook(BaseWebhook):
             data=data, session=self.session, token=self.auth_token, state=self._state
         )
 
-    def _create_message(self, data, thread: Optional[Snowflake] = None):
-        state = _WebhookState(self, parent=self._state, thread=thread)
-        # state may be artificial (unlikely at this point...)
-        channel = self.channel
+    def _create_message(
+        self, data, *, thread: Optional[Snowflake] = None, thread_name: Optional[str] = None
+    ):
+        # see async webhook's _create_message for details
         channel_id = int(data["channel_id"])
+        if self.channel_id != channel_id and thread_name:
+            thread = Object(id=channel_id)
+
+        state = _WebhookState(self, parent=self._state, thread=thread)
+        channel = self.channel
         if not channel or self.channel_id != channel_id:
             channel = PartialMessageable(state=self._state, id=channel_id)  # type: ignore
         # state is artificial
@@ -1079,7 +1085,7 @@ class SyncWebhook(BaseWebhook):
                 for f in params.files:
                     f.close()
         if wait:
-            return self._create_message(data, thread=thread)
+            return self._create_message(data, thread=thread, thread_name=thread_name)
 
     def fetch_message(
         self, id: int, /, *, thread: Optional[Snowflake] = None
