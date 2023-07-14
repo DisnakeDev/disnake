@@ -472,9 +472,14 @@ class Member(disnake.abc.Messageable, _UserTag):
         )
         if original != modified:
             to_return = User._copy(self._user)
-            # fmt: off
-            u.name, u._avatar, u.discriminator, u.global_name, u._public_flags, u._avatar_decoration = modified
-            # fmt: on
+            (
+                u.name,
+                u._avatar,
+                u.discriminator,
+                u.global_name,
+                u._public_flags,
+                u._avatar_decoration,
+            ) = modified
             # Signal to dispatch on_user_update
             return to_return, u
 
