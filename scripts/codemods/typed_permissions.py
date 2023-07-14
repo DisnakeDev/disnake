@@ -6,9 +6,10 @@ from typing import Optional
 import libcst as cst
 import libcst.codemod.visitors as codevisitors
 import libcst.matchers as m
-from libcst import codemod
 
 from disnake import Permissions
+
+from .base import BaseCodemodCommand
 
 ALL_PERMISSIONS = sorted(Permissions.VALID_FLAGS.keys())
 
@@ -62,15 +63,9 @@ def remove_existing_permissions(params: cst.Parameters, *, is_overload: bool) ->
     )
 
 
-class PermissionTypings(codemod.VisitorBasedCodemodCommand):
+class PermissionTypings(BaseCodemodCommand):
     DESCRIPTION: str = "Adds overloads for all permissions."
-
-    def transform_module(self, tree: cst.Module) -> cst.Module:
-        if "@_overload_with_permissions" not in tree.code:
-            raise codemod.SkipFile(
-                "this module does not contain the required decorator: `@_overload_with_permissions`."
-            )
-        return super().transform_module(tree)
+    CHECK_MARKER: str = "@_overload_with_permissions"
 
     def leave_ClassDef(self, _: cst.ClassDef, node: cst.ClassDef):
         # this method manages where PermissionOverwrite defines the typed augmented permissions.

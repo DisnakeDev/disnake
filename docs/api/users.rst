@@ -127,7 +127,7 @@ DefaultAvatar
 
 .. class:: DefaultAvatar
 
-    Represents the default avatar of a Discord :class:`User`
+    Represents the default avatar of a Discord :class:`User`.
 
     .. attribute:: blurple
 
@@ -152,6 +152,12 @@ DefaultAvatar
 
         Represents the default avatar with the color red.
         See also :attr:`Colour.red`
+    .. attribute:: fuchsia
+
+        Represents the default avatar with the color fuchsia.
+        See also :attr:`Colour.fuchsia`
+
+        .. versionadded:: 2.9
 
 Events
 ------
