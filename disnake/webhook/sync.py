@@ -271,6 +271,7 @@ class WebhookAdapter:
         params = {"wait": int(wait)}
         if thread_id:
             params["thread_id"] = thread_id
+
         route = Route(
             "POST",
             "/webhooks/{webhook_id}/{webhook_token}",
@@ -288,7 +289,12 @@ class WebhookAdapter:
         message_id: int,
         *,
         session: Session,
+        thread_id: Optional[int] = None,
     ):
+        params: Dict[str, Any] = {}
+        if thread_id is not None:
+            params["thread_id"] = thread_id
+
         route = Route(
             "GET",
             "/webhooks/{webhook_id}/{webhook_token}/messages/{message_id}",
@@ -296,7 +302,7 @@ class WebhookAdapter:
             webhook_token=token,
             message_id=message_id,
         )
-        return self.request(route, session)
+        return self.request(route, session, params=params)
 
     def edit_webhook_message(
         self,
@@ -308,7 +314,12 @@ class WebhookAdapter:
         payload: Optional[Dict[str, Any]] = None,
         multipart: Optional[List[Dict[str, Any]]] = None,
         files: Optional[List[File]] = None,
+        thread_id: Optional[int] = None,
     ):
+        params: Dict[str, Any] = {}
+        if thread_id is not None:
+            params["thread_id"] = thread_id
+
         route = Route(
             "PATCH",
             "/webhooks/{webhook_id}/{webhook_token}/messages/{message_id}",
@@ -316,7 +327,9 @@ class WebhookAdapter:
             webhook_token=token,
             message_id=message_id,
         )
-        return self.request(route, session, payload=payload, multipart=multipart, files=files)
+        return self.request(
+            route, session, payload=payload, multipart=multipart, files=files, params=params
+        )
 
     def delete_webhook_message(
         self,
@@ -325,7 +338,12 @@ class WebhookAdapter:
         message_id: int,
         *,
         session: Session,
+        thread_id: Optional[int] = None,
     ):
+        params: Dict[str, Any] = {}
+        if thread_id is not None:
+            params["thread_id"] = thread_id
+
         route = Route(
             "DELETE",
             "/webhooks/{webhook_id}/{webhook_token}/messages/{message_id}",
@@ -333,7 +351,7 @@ class WebhookAdapter:
             webhook_token=token,
             message_id=message_id,
         )
-        return self.request(route, session)
+        return self.request(route, session, params=params)
 
     def fetch_webhook(
         self,
@@ -475,6 +493,7 @@ class SyncWebhookMessage(Message):
             files=files,
             attachments=attachments,
             allowed_mentions=allowed_mentions,
+            thread=self._state._thread,
         )
 
     def delete(self, *, delay: Optional[float] = None) -> None:
@@ -502,7 +521,7 @@ class SyncWebhookMessage(Message):
         """
         if delay is not None:
             time.sleep(delay)
-        self._state._webhook.delete_message(self.id)
+        self._state._webhook.delete_message(self.id, thread=self._state._thread)
 
 
 class SyncWebhook(BaseWebhook):
@@ -845,8 +864,8 @@ class SyncWebhook(BaseWebhook):
             data=data, session=self.session, token=self.auth_token, state=self._state
         )
 
-    def _create_message(self, data):
-        state = _WebhookState(self, parent=self._state)
+    def _create_message(self, data, thread: Optional[Snowflake] = None):
+        state = _WebhookState(self, parent=self._state, thread=thread)
         # state may be artificial (unlikely at this point...)
         channel = self.channel
         channel_id = int(data["channel_id"])
@@ -1060,9 +1079,11 @@ class SyncWebhook(BaseWebhook):
                 for f in params.files:
                     f.close()
         if wait:
-            return self._create_message(data)
+            return self._create_message(data, thread=thread)
 
-    def fetch_message(self, id: int, /) -> SyncWebhookMessage:
+    def fetch_message(
+        self, id: int, /, *, thread: Optional[Snowflake] = None
+    ) -> SyncWebhookMessage:
         """Retrieves a single :class:`SyncWebhookMessage` owned by this webhook.
 
         .. versionadded:: 2.0
@@ -1074,6 +1095,10 @@ class SyncWebhook(BaseWebhook):
         ----------
         id: :class:`int`
             The message ID to look for.
+        thread: Optional[:class:`~disnake.abc.Snowflake`]
+            The thread the message is in, if any.
+
+            .. versionadded:: 2.10
 
         Raises
         ------
@@ -1100,8 +1125,9 @@ class SyncWebhook(BaseWebhook):
             self.token,
             id,
             session=self.session,
+            thread_id=thread.id if thread else None,
         )
-        return self._create_message(data)
+        return self._create_message(data, thread=thread)
 
     def edit_message(
         self,
@@ -1114,6 +1140,7 @@ class SyncWebhook(BaseWebhook):
         files: List[File] = MISSING,
         attachments: Optional[List[Attachment]] = MISSING,
         allowed_mentions: Optional[AllowedMentions] = None,
+        thread: Optional[Snowflake] = None,
     ) -> SyncWebhookMessage:
         """Edits a message owned by this webhook.
 
@@ -1166,6 +1193,10 @@ class SyncWebhook(BaseWebhook):
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
+        thread: Optional[:class:`~disnake.abc.Snowflake`]
+            The thread the message is in, if any.
+
+            .. versionadded:: 2.10
 
         Raises
         ------
@@ -1186,7 +1217,7 @@ class SyncWebhook(BaseWebhook):
         # if no attachment list was provided but we're uploading new files,
         # use current attachments as the base
         if attachments is MISSING and (file or files):
-            attachments = self.fetch_message(message_id).attachments
+            attachments = self.fetch_message(message_id, thread=thread).attachments
 
         previous_mentions: Optional[AllowedMentions] = getattr(
             self._state, "allowed_mentions", None
@@ -1208,6 +1239,7 @@ class SyncWebhook(BaseWebhook):
                 self.token,
                 message_id,
                 session=self.session,
+                thread_id=thread.id if thread else None,
                 payload=params.payload,
                 multipart=params.multipart,
                 files=params.files,
@@ -1216,9 +1248,9 @@ class SyncWebhook(BaseWebhook):
             if params.files:
                 for f in params.files:
                     f.close()
-        return self._create_message(data)
+        return self._create_message(data, thread=thread)
 
-    def delete_message(self, message_id: int, /) -> None:
+    def delete_message(self, message_id: int, /, *, thread: Optional[Snowflake] = None) -> None:
         """Deletes a message owned by this webhook.
 
         This is a lower level interface to :meth:`WebhookMessage.delete` in case
@@ -1233,6 +1265,10 @@ class SyncWebhook(BaseWebhook):
         ----------
         message_id: :class:`int`
             The ID of the message to delete.
+        thread: Optional[:class:`~disnake.abc.Snowflake`]
+            The thread the message is in, if any.
+
+            .. versionadded:: 2.10
 
         Raises
         ------
@@ -1252,4 +1288,5 @@ class SyncWebhook(BaseWebhook):
             self.token,
             message_id,
             session=self.session,
+            thread_id=thread.id if thread else None,
         )
