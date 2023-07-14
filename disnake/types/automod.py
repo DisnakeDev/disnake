@@ -15,7 +15,7 @@ AutoModPresetType = Literal[1, 2, 3]
 
 
 class AutoModBlockMessageActionMetadata(TypedDict):
-    ...
+    custom_message: NotRequired[str]
 
 
 class AutoModSendAlertActionMetadata(TypedDict):
@@ -44,6 +44,7 @@ class AutoModTriggerMetadata(TypedDict, total=False):
     presets: List[AutoModPresetType]
     allow_list: List[str]
     mention_total_limit: int
+    mention_raid_protection_enabled: bool
 
 
 class AutoModRule(TypedDict):

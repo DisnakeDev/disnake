@@ -41,6 +41,7 @@ if TYPE_CHECKING:
     AnyBot = Union[Bot, AutoShardedBot, InteractionBot, AutoShardedInteractionBot]
 
 __all__ = ("CommonBotBase",)
+_log = logging.getLogger(__name__)
 
 CogT = TypeVar("CogT", bound="Cog")
 CFT = TypeVar("CFT", bound="CoroFunc")
@@ -108,16 +109,16 @@ class CommonBotBase(Generic[CogT]):
         for extension in tuple(self.__extensions):
             try:
                 self.unload_extension(extension)
-            except Exception:
-                # TODO: consider logging exception
-                pass
+            except Exception as error:
+                error.__suppress_context__ = True
+                _log.error("Failed to unload extension %r", extension, exc_info=error)
 
         for cog in tuple(self.__cogs):
             try:
                 self.remove_cog(cog)
-            except Exception:
-                # TODO: consider logging exception
-                pass
+            except Exception as error:
+                error.__suppress_context__ = True
+                _log.exception("Failed to remove cog %r", cog, exc_info=error)
 
         await super().close()  # type: ignore
 
@@ -257,8 +258,7 @@ class CommonBotBase(Generic[CogT]):
         The functions being listened to must be a :ref:`coroutine <coroutine>`.
 
         Example
-        --------
-
+        -------
         .. code-block:: python3
 
             @bot.listen()
@@ -395,6 +395,17 @@ class CommonBotBase(Generic[CogT]):
         """Mapping[:class:`str`, :class:`Cog`]: A read-only mapping of cog name to cog."""
         return types.MappingProxyType(self.__cogs)
 
+    def get_listeners(self) -> Mapping[str, List[CoroFunc]]:
+        """Mapping[:class:`str`, List[Callable]]: A read-only mapping of event names to listeners.
+
+        .. note::
+            To add or remove a listener you should use :meth:`.add_listener` and
+            :meth:`.remove_listener`.
+
+        .. versionadded:: 2.9
+        """
+        return types.MappingProxyType(self.extra_events)
+
     # extensions
 
     def _remove_module_references(self, name: str) -> None:
@@ -408,7 +419,7 @@ class CommonBotBase(Generic[CogT]):
             remove = [
                 index
                 for index, event in enumerate(event_list)
-                if event.__module__ is not None and _is_submodule(name, event.__module__)
+                if event.__module__ and _is_submodule(name, event.__module__)
             ]
 
             for index in reversed(remove):
@@ -422,9 +433,9 @@ class CommonBotBase(Generic[CogT]):
         else:
             try:
                 func(self)
-            except Exception:
-                # TODO: consider logging exception
-                pass
+            except Exception as error:
+                error.__suppress_context__ = True
+                _log.error("Exception in extension finalizer %r", key, exc_info=error)
         finally:
             self.__extensions.pop(key, None)
             sys.modules.pop(key, None)
@@ -447,7 +458,7 @@ class CommonBotBase(Generic[CogT]):
             setup = lib.setup
         except AttributeError:
             del sys.modules[key]
-            raise errors.NoEntryPointError(key)
+            raise errors.NoEntryPointError(key) from None
 
         try:
             setup(self)
@@ -462,8 +473,8 @@ class CommonBotBase(Generic[CogT]):
     def _resolve_name(self, name: str, package: Optional[str]) -> str:
         try:
             return importlib.util.resolve_name(name, package)
-        except ImportError:
-            raise errors.ExtensionNotFound(name)
+        except ImportError as e:
+            raise errors.ExtensionNotFound(name) from e
 
     def load_extension(self, name: str, *, package: Optional[str] = None) -> None:
         """Loads an extension.

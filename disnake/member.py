@@ -230,7 +230,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         .. describe:: str(x)
 
-            Returns the member's name with the discriminator.
+            Returns the member's username (with discriminator, if not migrated to new system yet).
 
     Attributes
     ----------
@@ -249,6 +249,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         The guild that the member belongs to.
     nick: Optional[:class:`str`]
         The guild specific nickname of the user.
+        This takes precedence over :attr:`.global_name` and :attr:`.name` when shown.
     pending: :class:`bool`
         Whether the member is pending member verification.
 
@@ -278,6 +279,8 @@ class Member(disnake.abc.Messageable, _UserTag):
     if TYPE_CHECKING:
         name: str
         id: int
+        discriminator: str
+        global_name: Optional[str]
         bot: bool
         system: bool
         created_at: datetime.datetime
@@ -346,7 +349,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     def __repr__(self) -> str:
         return (
-            f"<Member id={self._user.id} name={self._user.name!r} discriminator={self._user.discriminator!r}"
+            f"<Member id={self._user.id} name={self._user.name!r} global_name={self._user.global_name!r} discriminator={self._user.discriminator!r}"
             f" bot={self._user.bot} nick={self.nick!r} guild={self.guild!r}>"
         )
 
@@ -450,18 +453,28 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     def _update_inner_user(self, user: UserPayload) -> Optional[Tuple[User, User]]:
         u = self._user
-        original = (u.name, u._avatar, u.discriminator, u._public_flags, u._avatar_decoration)
+        original = (
+            u.name,
+            u._avatar,
+            u.discriminator,
+            u.global_name,
+            u._public_flags,
+            u._avatar_decoration,
+        )
         # These keys seem to always be available
         modified = (
             user["username"],
             user["avatar"],
             user["discriminator"],
+            user.get("global_name"),
             user.get("public_flags", 0),
             user.get("avatar_decoration", None),
         )
         if original != modified:
             to_return = User._copy(self._user)
-            (u.name, u._avatar, u.discriminator, u._public_flags, u._avatar_decoration) = modified
+            # fmt: off
+            u.name, u._avatar, u.discriminator, u.global_name, u._public_flags, u._avatar_decoration = modified
+            # fmt: on
             # Signal to dispatch on_user_update
             return to_return, u
 
@@ -485,11 +498,8 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     @property
     def tag(self) -> str:
-        return self._user.discriminator
-
-    @property
-    def discriminator(self) -> str:
-        return self._user.discriminator
+        """:class:`str`: An alias of :attr:`.discriminator`."""
+        return self.discriminator
 
     @property
     def mobile_status(self) -> Status:
@@ -568,11 +578,14 @@ class Member(disnake.abc.Messageable, _UserTag):
     def display_name(self) -> str:
         """:class:`str`: Returns the user's display name.
 
-        For regular users this is just their username, but
-        if they have a guild specific nickname then that
-        is returned instead.
+        If they have a guild-specific :attr:`nickname <.nick>`, then
+        that is returned. If not, this is their :attr:`global name <.global_name>`
+        if set, or their :attr:`username <.name>` otherwise.
+
+        .. versionchanged:: 2.9
+            Added :attr:`.global_name`.
         """
-        return self.nick or self.name
+        return self.nick or self.global_name or self.name
 
     @property
     def display_avatar(self) -> Asset:
@@ -693,11 +706,12 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     @property
     def current_timeout(self) -> Optional[datetime.datetime]:
-        """Optional[:class:`datetime.datetime`]: Returns the datetime when the timeout expires, if any.
+        """Optional[:class:`datetime.datetime`]: Returns the datetime when the timeout expires.
+
+        If the member is not timed out or the timeout has already expired, returns ``None``.
 
         .. versionadded:: 2.3
         """
-
         if self._communication_disabled_until is None:
             return None
 
@@ -887,7 +901,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         if suppress is not MISSING:
             if self.voice is None or self.voice.channel is None:
-                raise Exception("Cannot suppress a member which isn't in a vc")
+                raise Exception("Cannot suppress a member which isn't in a vc")  # noqa: TRY002
 
             voice_state_payload: Dict[str, Any] = {
                 "channel_id": self.voice.channel.id,
@@ -901,9 +915,7 @@ class Member(disnake.abc.Messageable, _UserTag):
                 await http.edit_my_voice_state(guild_id, voice_state_payload)
             else:
                 if not suppress:
-                    voice_state_payload[
-                        "request_to_speak_timestamp"
-                    ] = datetime.datetime.utcnow().isoformat()
+                    voice_state_payload["request_to_speak_timestamp"] = utils.utcnow().isoformat()
                 await http.edit_voice_state(guild_id, self.id, voice_state_payload)
 
         if voice_channel is not MISSING:
@@ -958,11 +970,11 @@ class Member(disnake.abc.Messageable, _UserTag):
             The operation failed.
         """
         if self.voice is None or self.voice.channel is None:
-            raise Exception("Cannot request to speak when not in a vc")
+            raise Exception("Cannot request to speak when not in a vc")  # noqa: TRY002
 
         payload = {
             "channel_id": self.voice.channel.id,
-            "request_to_speak_timestamp": datetime.datetime.utcnow().isoformat(),
+            "request_to_speak_timestamp": utils.utcnow().isoformat(),
         }
 
         if self._state.self_id != self.id:
@@ -997,8 +1009,7 @@ class Member(disnake.abc.Messageable, _UserTag):
     async def add_roles(
         self, *roles: Snowflake, reason: Optional[str] = None, atomic: bool = True
     ) -> None:
-        """
-        |coro|
+        """|coro|
 
         Gives the member a number of :class:`Role`\\s.
 
@@ -1038,8 +1049,7 @@ class Member(disnake.abc.Messageable, _UserTag):
     async def remove_roles(
         self, *roles: Snowflake, reason: Optional[str] = None, atomic: bool = True
     ) -> None:
-        """
-        |coro|
+        """|coro|
 
         Removes :class:`Role`\\s from this member.
 

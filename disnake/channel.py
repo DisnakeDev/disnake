@@ -78,6 +78,7 @@ if TYPE_CHECKING:
     from .threads import AnyThreadArchiveDuration, ThreadType
     from .types.channel import (
         CategoryChannel as CategoryChannelPayload,
+        DefaultReaction as DefaultReactionPayload,
         DMChannel as DMChannelPayload,
         ForumChannel as ForumChannelPayload,
         GroupDMChannel as GroupChannelPayload,
@@ -262,6 +263,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         ignore_timeout: bool = MISSING,
     ) -> Permissions:
         base = super().permissions_for(obj, ignore_timeout=ignore_timeout)
+        self._apply_implict_permissions(base)
 
         # text channels do not have voice related permissions
         denied = Permissions.voice()
@@ -477,14 +479,112 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             # the payload will always be the proper channel payload
             return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
 
-    @utils.copy_doc(disnake.abc.GuildChannel.clone)
     async def clone(
-        self, *, name: Optional[str] = None, reason: Optional[str] = None
+        self,
+        *,
+        name: Optional[str] = None,
+        topic: Optional[str] = MISSING,
+        position: int = MISSING,
+        nsfw: bool = MISSING,
+        category: Optional[Snowflake] = MISSING,
+        slowmode_delay: int = MISSING,
+        default_thread_slowmode_delay: Optional[int] = MISSING,
+        default_auto_archive_duration: AnyThreadArchiveDuration = MISSING,
+        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
+        news: bool = MISSING,
+        reason: Optional[str] = None,
     ) -> TextChannel:
+        """|coro|
+
+        Clones this channel. This creates a channel with the same properties
+        as this channel.
+
+        You must have :attr:`.Permissions.manage_channels` permission to
+        do this.
+
+        .. versionchanged:: 2.9
+            Added ``topic``, ``position``, ``nsfw``, ``category``, ``slowmode_delay``,
+            ``default_thread_slowmode_delay``, ``default_auto_archive_duration``, ``news``
+            and ``overwrites`` keyword-only parameters.
+
+        .. note::
+            The current :attr:`TextChannel.flags` value won't be cloned.
+            This is a Discord limitation.
+
+        Parameters
+        ----------
+        name: Optional[:class:`str`]
+            The name of the new channel. If not provided, defaults to this channel's name.
+        topic: Optional[:class:`str`]
+            The topic of the new channel. If not provided, defaults to this channel's topic.
+        position: :class:`int`
+            The position of the new channel. If not provided, defaults to this channel's position.
+        nsfw: :class:`bool`
+            Whether the new channel should be marked as NSFW. If not provided, defaults to this channel's NSFW value.
+        category: Optional[:class:`abc.Snowflake`]
+            The category where the new channel should be grouped. If not provided, defaults to this channel's category.
+        slowmode_delay: :class:`int`
+            The slowmode of the new channel. If not provided, defaults to this channel's slowmode.
+        default_thread_slowmode_delay: Optional[:class:`int`]
+            Specifies the slowmode rate limit at which users can send messages
+            in newly created threads in this channel, in seconds.
+            This does not apply retroactively to existing threads.
+            A value of ``0`` or ``None`` disables slowmode. The maximum value possible is ``21600``. If not provided, defaults
+            to this channel's default thread slowmode delay.
+        default_auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
+            The default auto archive duration of the new channel. If not provided, defaults to this channel's default auto archive duration.
+        overwrites: :class:`Mapping`
+            A :class:`Mapping` of target (either a role or a member) to :class:`PermissionOverwrite`
+            to apply to the channel. If not provided, defaults to this channel's overwrites.
+        news: :class:`bool`
+            Whether the new channel should be a news channel. News channels are text channels that can be followed.
+            This is only available to guilds that contain ``NEWS`` in :attr:`Guild.features`. If not provided, defaults to the current type of this channel.
+        reason: Optional[:class:`str`]
+            The reason for cloning this channel. Shows up on the audit log.
+
+        Raises
+        ------
+        Forbidden
+            You do not have the proper permissions to create this channel.
+        HTTPException
+            Creating the channel failed.
+
+        Returns
+        -------
+        :class:`TextChannel`
+            The newly created text channel.
+        """
+        if news is not MISSING:
+            # if news is True set the channel_type to News, otherwise if it's False set it to Text
+            channel_type = ChannelType.news if news else ChannelType.text
+        else:
+            # if news is not given falls back to the original TextChannel type
+            channel_type = self.type
+
         return await self._clone_impl(
-            {"topic": self.topic, "nsfw": self.nsfw, "rate_limit_per_user": self.slowmode_delay},
+            {
+                "topic": topic if topic is not MISSING else self.topic,
+                "position": position if position is not MISSING else self.position,
+                "nsfw": nsfw if nsfw is not MISSING else self.nsfw,
+                "type": channel_type.value,
+                "rate_limit_per_user": (
+                    slowmode_delay if slowmode_delay is not MISSING else self.slowmode_delay
+                ),
+                "default_thread_rate_limit_per_user": (
+                    default_thread_slowmode_delay
+                    if default_thread_slowmode_delay is not MISSING
+                    else self.default_thread_slowmode_delay
+                ),
+                "default_auto_archive_duration": (
+                    try_enum_to_int(default_auto_archive_duration)
+                    if default_auto_archive_duration is not MISSING
+                    else self.default_auto_archive_duration
+                ),
+            },
             name=name,
+            category=category,
             reason=reason,
+            overwrites=overwrites,
         )
 
     async def delete_messages(self, messages: Iterable[Snowflake]) -> None:
@@ -560,7 +660,6 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         Examples
         --------
-
         Deleting bot's messages ::
 
             def is_me(m):
@@ -989,7 +1088,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             The request to get the archived threads failed.
 
         Yields
-        -------
+        ------
         :class:`Thread`
             The archived threads.
         """
@@ -1084,6 +1183,35 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
             for key, value in self.guild._voice_states.items()
             if value.channel and value.channel.id == self.id
         }
+
+    @utils.copy_doc(disnake.abc.GuildChannel.permissions_for)
+    def permissions_for(
+        self,
+        obj: Union[Member, Role],
+        /,
+        *,
+        ignore_timeout: bool = MISSING,
+    ) -> Permissions:
+        base = super().permissions_for(obj, ignore_timeout=ignore_timeout)
+        self._apply_implict_permissions(base)
+
+        # voice channels cannot be edited by people who can't connect to them
+        # It also implicitly denies all other voice perms
+        if not base.connect:
+            denied = Permissions.voice()
+            # voice channels also deny all text related permissions
+            denied.value |= Permissions.text().value
+            # stage channels remove the stage permissions
+            denied.value |= Permissions.stage().value
+
+            denied.update(
+                manage_channels=True,
+                manage_roles=True,
+                manage_events=True,
+                manage_webhooks=True,
+            )
+            base.value &= ~denied.value
+        return base
 
 
 class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
@@ -1198,12 +1326,96 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         """
         return ChannelType.voice
 
-    @utils.copy_doc(disnake.abc.GuildChannel.clone)
     async def clone(
-        self, *, name: Optional[str] = None, reason: Optional[str] = None
+        self,
+        *,
+        name: Optional[str] = None,
+        bitrate: int = MISSING,
+        user_limit: int = MISSING,
+        position: int = MISSING,
+        category: Optional[Snowflake] = MISSING,
+        rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
+        video_quality_mode: VideoQualityMode = MISSING,
+        nsfw: bool = MISSING,
+        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
+        slowmode_delay: Optional[int] = MISSING,
+        reason: Optional[str] = None,
     ) -> VoiceChannel:
+        """|coro|
+
+        Clones this channel. This creates a channel with the same properties
+        as this channel.
+
+        You must have :attr:`.Permissions.manage_channels` permission to
+        do this.
+
+        .. versionchanged:: 2.9
+            Added ``bitrate``, ``user_limit``, ``position``, ``category``,
+            ``rtc_region``, ``video_quality_mode``, ``nsfw``, ``slowmode_delay``
+            and ``overwrites`` keyword-only parameters.
+
+        .. note::
+            The current :attr:`VoiceChannel.flags` value won't be cloned.
+            This is a Discord limitation.
+
+        Parameters
+        ----------
+        name: Optional[:class:`str`]
+            The name of the new channel. If not provided, defaults to this channel's name.
+        bitrate: :class:`int`
+            The bitrate of the new channel. If not provided, defaults to this channel's bitrate.
+        user_limit: :class:`int`
+            The user limit of the new channel. If not provided, defaults to this channel's user limit.
+        position: :class:`int`
+            The position of the new channel. If not provided, defaults to this channel's position.
+        category: Optional[:class:`abc.Snowflake`]
+            The category where the new channel should be grouped. If not provided, defaults to this channel's category.
+        rtc_region: Optional[Union[:class:`str`, :class:`VoiceRegion`]]
+            The rtc region of the new channel. If not provided, defaults to this channel's rtc region.
+        video_quality_mode: :class:`VideoQualityMode`
+            The video quality mode of the new channel. If not provided, defaults to this channel's video quality mode.
+        nsfw: :class:`bool`
+            Whether the new channel should be nsfw or not. If not provided, defaults to this channel's NSFW value.
+        overwrites: :class:`Mapping`
+            A :class:`Mapping` of target (either a role or a member) to :class:`PermissionOverwrite` to apply
+            to the channel. If not provided, defaults to this channel's overwrites.
+        slowmode_delay: Optional[:class:`int`]
+            The slowmode of the new channel. If not provided, defaults to this channel's slowmode.
+        reason: Optional[:class:`str`]
+            The reason for cloning this channel. Shows up on the audit log.
+
+        Raises
+        ------
+        Forbidden
+            You do not have the proper permissions to create this channel.
+        HTTPException
+            Creating the channel failed.
+
+        Returns
+        -------
+        :class:`VoiceChannel`
+            The channel that was created.
+        """
         return await self._clone_impl(
-            {"bitrate": self.bitrate, "user_limit": self.user_limit}, name=name, reason=reason
+            {
+                "bitrate": bitrate if bitrate is not MISSING else self.bitrate,
+                "user_limit": user_limit if user_limit is not MISSING else self.user_limit,
+                "position": position if position is not MISSING else self.position,
+                "rtc_region": (str(rtc_region) if rtc_region is not MISSING else self.rtc_region),
+                "video_quality_mode": (
+                    int(video_quality_mode)
+                    if video_quality_mode is not MISSING
+                    else int(self.video_quality_mode)
+                ),
+                "nsfw": nsfw if nsfw is not MISSING else self.nsfw,
+                "rate_limit_per_user": (
+                    slowmode_delay if slowmode_delay is not MISSING else self.slowmode_delay
+                ),
+            },
+            name=name,
+            category=category,
+            reason=reason,
+            overwrites=overwrites,
         )
 
     def is_nsfw(self) -> bool:
@@ -1259,26 +1471,6 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         from .message import PartialMessage
 
         return PartialMessage(channel=self, id=message_id)
-
-    @utils.copy_doc(disnake.abc.GuildChannel.permissions_for)
-    def permissions_for(
-        self,
-        obj: Union[Member, Role],
-        /,
-        *,
-        ignore_timeout: bool = MISSING,
-    ) -> Permissions:
-        base = super().permissions_for(obj, ignore_timeout=ignore_timeout)
-
-        # voice channels cannot be edited by people who can't connect to them
-        # It also implicitly denies all other voice perms
-        if not base.connect:
-            denied = Permissions.voice()
-            # voice channels also deny all text related permissions
-            denied.value |= Permissions.text().value
-            denied.update(manage_channels=True, manage_roles=True)
-            base.value &= ~denied.value
-        return base
 
     # if only these parameters are passed, `_move` is called and no channel will be returned
     @overload
@@ -1360,13 +1552,13 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         Parameters
         ----------
         name: :class:`str`
-            The new channel's name.
+            The channel's new name.
         bitrate: :class:`int`
-            The new channel's bitrate.
+            The channel's new bitrate.
         user_limit: :class:`int`
-            The new channel's user limit.
+            The channel's new user limit.
         position: :class:`int`
-            The new channel's position.
+            The channel's new position.
         sync_permissions: :class:`bool`
             Whether to sync permissions with the channel's new or pre-existing
             category. Defaults to ``False``.
@@ -1674,7 +1866,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         return Webhook.from_state(data, state=self._state)
 
 
-class StageChannel(VocalGuildChannel):
+class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
     """Represents a Discord guild stage channel.
 
     .. versionadded:: 1.7
@@ -1727,9 +1919,36 @@ class StageChannel(VocalGuildChannel):
         The camera video quality for the stage channel's participants.
 
         .. versionadded:: 2.0
+    nsfw: :class:`bool`
+        Whether the channel is marked as "not safe for work".
+
+        .. note::
+
+            To check if the channel or the guild of that channel are marked as NSFW, consider :meth:`is_nsfw` instead.
+
+        .. versionadded:: 2.9
+
+    slowmode_delay: :class:`int`
+        The number of seconds a member must wait between sending messages
+        in this channel. A value of `0` denotes that it is disabled.
+        Bots, and users with :attr:`~Permissions.manage_channels` or
+        :attr:`~Permissions.manage_messages`, bypass slowmode.
+
+        .. versionadded:: 2.9
+
+    last_message_id: Optional[:class:`int`]
+        The last message ID of the message sent to this channel. It may
+        *not* point to an existing or valid message.
+
+        .. versionadded:: 2.9
     """
 
-    __slots__ = ("topic",)
+    __slots__ = (
+        "topic",
+        "nsfw",
+        "slowmode_delay",
+        "last_message_id",
+    )
 
     def __repr__(self) -> str:
         attrs = (
@@ -1742,6 +1961,7 @@ class StageChannel(VocalGuildChannel):
             ("video_quality_mode", self.video_quality_mode),
             ("user_limit", self.user_limit),
             ("category_id", self.category_id),
+            ("nsfw", self.nsfw),
             ("flags", self.flags),
         )
         joined = " ".join(f"{k!s}={v!r}" for k, v in attrs)
@@ -1750,6 +1970,12 @@ class StageChannel(VocalGuildChannel):
     def _update(self, guild: Guild, data: StageChannelPayload) -> None:
         super()._update(guild, data)
         self.topic: Optional[str] = data.get("topic")
+        self.nsfw: bool = data.get("nsfw", False)
+        self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
+        self.last_message_id: Optional[int] = utils._get_as_snowflake(data, "last_message_id")
+
+    async def _get_channel(self):
+        return self
 
     @property
     def requesting_to_speak(self) -> List[Member]:
@@ -1803,11 +2029,155 @@ class StageChannel(VocalGuildChannel):
         """
         return ChannelType.stage_voice
 
-    @utils.copy_doc(disnake.abc.GuildChannel.clone)
     async def clone(
-        self, *, name: Optional[str] = None, reason: Optional[str] = None
+        self,
+        *,
+        name: Optional[str] = None,
+        bitrate: int = MISSING,
+        # user_limit: int = MISSING,
+        position: int = MISSING,
+        category: Optional[Snowflake] = MISSING,
+        slowmode_delay: int = MISSING,
+        rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
+        video_quality_mode: VideoQualityMode = MISSING,
+        nsfw: bool = MISSING,
+        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
+        reason: Optional[str] = None,
     ) -> StageChannel:
-        return await self._clone_impl({}, name=name, reason=reason)
+        """|coro|
+
+        Clones this channel. This creates a channel with the same properties
+        as this channel.
+
+        You must have :attr:`.Permissions.manage_channels` permission to
+        do this.
+
+        .. versionchanged:: 2.9
+            Added ``position``, ``category``, ``rtc_region``,
+            ``video_quality_mode``, ``bitrate``, ``nsfw``, ``slowmode_delay`` and ``overwrites`` keyword-only parameters.
+
+        .. note::
+            The current :attr:`StageChannel.flags` value won't be cloned.
+            This is a Discord limitation.
+
+        .. warning::
+            Currently the ``user_limit`` attribute is not cloned due to a Discord limitation.
+            You can directly edit the channel after its creation to set
+            a `user_limit`.
+
+        Parameters
+        ----------
+        name: Optional[:class:`str`]
+            The name of the new channel. If not provided, defaults to this channel's name.
+        bitrate: :class:`int`
+            The bitrate of the new channel. If not provided, defaults to this channel's bitrate.
+        position: :class:`int`
+            The position of the new channel. If not provided, defaults to this channel's position.
+        category: Optional[:class:`abc.Snowflake`]
+            The category where the new channel should be grouped. If not provided, defaults to this channel's category.
+        slowmode_delay: :class:`int`
+            The slowmode of the new channel. If not provided, defaults to this channel's slowmode.
+        rtc_region: Optional[Union[:class:`str`, :class:`VoiceRegion`]]
+            The rtc region of the new channel. If not provided, defaults to this channel's rtc region.
+        video_quality_mode: :class:`VideoQualityMode`
+            The video quality mode of the new channel. If not provided, defaults to this channel's video quality mode.
+        nsfw: :class:`bool`
+            Whether the new channel should be nsfw or not. If not provided, defaults to this channel's NSFW value.
+        overwrites: :class:`Mapping`
+            A :class:`Mapping` of target (either a role or a member) to :class:`PermissionOverwrite`
+            to apply to the channel. If not provided, defaults to this channel's overwrites.
+        reason: Optional[:class:`str`]
+            The reason for cloning this channel. Shows up on the audit log.
+
+        Raises
+        ------
+        Forbidden
+            You do not have the proper permissions to create this channel.
+        HTTPException
+            Creating the channel failed.
+
+        Returns
+        -------
+        :class:`StageChannel`
+            The channel that was created.
+        """
+        # TODO
+        # - check if discord-api-docs#5962 is solved and clone the user_limit attribute
+        return await self._clone_impl(
+            {
+                "rate_limit_per_user": (
+                    slowmode_delay if slowmode_delay is not MISSING else self.slowmode_delay
+                ),
+                "bitrate": bitrate if bitrate is not MISSING else self.bitrate,
+                # "user_limit": user_limit if user_limit is not MISSING else self.user_limit,
+                "position": position if position is not MISSING else self.position,
+                "rtc_region": (str(rtc_region) if rtc_region is not MISSING else self.rtc_region),
+                "video_quality_mode": (
+                    int(video_quality_mode)
+                    if video_quality_mode is not MISSING
+                    else int(self.video_quality_mode)
+                ),
+                "nsfw": nsfw if nsfw is not MISSING else self.nsfw,
+            },
+            name=name,
+            category=category,
+            reason=reason,
+            overwrites=overwrites,
+        )
+
+    def is_nsfw(self) -> bool:
+        """Whether the channel is marked as NSFW.
+
+        .. versionadded:: 2.9
+
+        :return type: :class:`bool`
+        """
+        return self.nsfw
+
+    @property
+    def last_message(self) -> Optional[Message]:
+        """Gets the last message in this channel from the cache.
+
+        The message might not be valid or point to an existing message.
+
+        .. admonition:: Reliable Fetching
+            :class: helpful
+
+            For a slightly more reliable method of fetching the
+            last message, consider using either :meth:`history`
+            or :meth:`fetch_message` with the :attr:`last_message_id`
+            attribute.
+
+        .. versionadded:: 2.9
+
+        Returns
+        -------
+        Optional[:class:`Message`]
+            The last message in this channel or ``None`` if not found.
+        """
+        return self._state._get_message(self.last_message_id) if self.last_message_id else None
+
+    def get_partial_message(self, message_id: int, /) -> PartialMessage:
+        """Creates a :class:`PartialMessage` from the given message ID.
+
+        This is useful if you want to work with a message and only have its ID without
+        doing an unnecessary API call.
+
+        .. versionadded:: 2.9
+
+        Parameters
+        ----------
+        message_id: :class:`int`
+            The message ID to create a partial message for.
+
+        Returns
+        -------
+        :class:`PartialMessage`
+            The partial message object.
+        """
+        from .message import PartialMessage
+
+        return PartialMessage(channel=self, id=message_id)
 
     @property
     def instance(self) -> Optional[StageInstance]:
@@ -1816,24 +2186,6 @@ class StageChannel(VocalGuildChannel):
         .. versionadded:: 2.0
         """
         return utils.get(self.guild.stage_instances, channel_id=self.id)
-
-    @utils.copy_doc(disnake.abc.GuildChannel.permissions_for)
-    def permissions_for(
-        self,
-        obj: Union[Member, Role],
-        /,
-        *,
-        ignore_timeout: bool = MISSING,
-    ) -> Permissions:
-        base = super().permissions_for(obj, ignore_timeout=ignore_timeout)
-
-        # voice channels cannot be edited by people who can't connect to them
-        # It also implicitly denies all other voice perms
-        if not base.connect:
-            denied = Permissions.voice()
-            denied.update(manage_channels=True, manage_roles=True)
-            base.value &= ~denied.value
-        return base
 
     async def create_instance(
         self,
@@ -1954,13 +2306,16 @@ class StageChannel(VocalGuildChannel):
         self,
         *,
         name: str = ...,
+        bitrate: int = ...,
+        user_limit: int = ...,
         position: int = ...,
         sync_permissions: bool = ...,
         category: Optional[Snowflake] = ...,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
         rtc_region: Optional[Union[str, VoiceRegion]] = ...,
         video_quality_mode: VideoQualityMode = ...,
-        bitrate: int = ...,
+        nsfw: bool = ...,
+        slowmode_delay: Optional[int] = ...,
         flags: ChannelFlags = ...,
         reason: Optional[str] = ...,
     ) -> StageChannel:
@@ -1970,13 +2325,16 @@ class StageChannel(VocalGuildChannel):
         self,
         *,
         name: str = MISSING,
+        bitrate: int = MISSING,
+        user_limit: int = MISSING,
         position: int = MISSING,
         sync_permissions: bool = MISSING,
         category: Optional[Snowflake] = MISSING,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
         rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
-        bitrate: int = MISSING,
+        nsfw: bool = MISSING,
+        slowmode_delay: Optional[int] = MISSING,
         flags: ChannelFlags = MISSING,
         reason: Optional[str] = None,
         **kwargs: Never,
@@ -1997,12 +2355,26 @@ class StageChannel(VocalGuildChannel):
         .. versionchanged:: 2.6
             Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
 
+        .. versionchanged:: 2.9
+            The ``user_limit``, ``nsfw``, and ``slowmode_delay``
+            keyword-only parameters were added.
+
         Parameters
         ----------
         name: :class:`str`
-            The new channel's name.
+            The channel's new name.
+        bitrate: :class:`int`
+            The channel's new bitrate.
+
+            .. versionadded:: 2.6
+
+        user_limit: :class:`int`
+            The channel's new user limit.
+
+            .. versionadded:: 2.9
+
         position: :class:`int`
-            The new channel's position.
+            The channel's new position.
         sync_permissions: :class:`bool`
             Whether to sync permissions with the channel's new or pre-existing
             category. Defaults to ``False``.
@@ -2018,12 +2390,18 @@ class StageChannel(VocalGuildChannel):
         video_quality_mode: :class:`VideoQualityMode`
             The camera video quality for the stage channel's participants.
 
-            .. versionadded:: 2.0
+            .. versionadded:: 2.9
 
-        bitrate: :class:`int`
-            The new channel's bitrate.
+        nsfw: :class:`bool`
+            Whether to mark the channel as NSFW.
 
-            .. versionadded:: 2.6
+            .. versionadded:: 2.9
+
+        slowmode_delay: Optional[:class:`int`]
+            Specifies the slowmode rate limit for users in this channel, in seconds.
+            A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
+
+            .. versionadded:: 2.9
 
         flags: :class:`ChannelFlags`
             The new flags to set for this channel. This will overwrite any existing flags set on this channel.
@@ -2052,20 +2430,254 @@ class StageChannel(VocalGuildChannel):
         """
         payload = await self._edit(
             name=name,
+            bitrate=bitrate,
             position=position,
+            user_limit=user_limit,
             sync_permissions=sync_permissions,
             category=category,
             overwrites=overwrites,
             rtc_region=rtc_region,
             video_quality_mode=video_quality_mode,
-            bitrate=bitrate,
+            nsfw=nsfw,
             flags=flags,
+            slowmode_delay=slowmode_delay,
             reason=reason,
             **kwargs,
         )
         if payload is not None:
             # the payload will always be the proper channel payload
             return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
+
+    async def delete_messages(self, messages: Iterable[Snowflake]) -> None:
+        """|coro|
+
+        Deletes a list of messages. This is similar to :meth:`Message.delete`
+        except it bulk deletes multiple messages.
+
+        As a special case, if the number of messages is 0, then nothing
+        is done. If the number of messages is 1 then single message
+        delete is done. If it's more than two, then bulk delete is used.
+
+        You cannot bulk delete more than 100 messages or messages that
+        are older than 14 days.
+
+        You must have :attr:`~Permissions.manage_messages` permission to
+        do this.
+
+        .. versionadded:: 2.9
+
+        Parameters
+        ----------
+        messages: Iterable[:class:`abc.Snowflake`]
+            An iterable of messages denoting which ones to bulk delete.
+
+        Raises
+        ------
+        ClientException
+            The number of messages to delete was more than 100.
+        Forbidden
+            You do not have proper permissions to delete the messages.
+        NotFound
+            If single delete, then the message was already deleted.
+        HTTPException
+            Deleting the messages failed.
+        """
+        if not isinstance(messages, (list, tuple)):
+            messages = list(messages)
+
+        if len(messages) == 0:
+            return  # do nothing
+
+        if len(messages) == 1:
+            message_id: int = messages[0].id
+            await self._state.http.delete_message(self.id, message_id)
+            return
+
+        if len(messages) > 100:
+            raise ClientException("Can only bulk delete messages up to 100 messages")
+
+        message_ids: SnowflakeList = [m.id for m in messages]
+        await self._state.http.delete_messages(self.id, message_ids)
+
+    async def purge(
+        self,
+        *,
+        limit: Optional[int] = 100,
+        check: Callable[[Message], bool] = MISSING,
+        before: Optional[SnowflakeTime] = None,
+        after: Optional[SnowflakeTime] = None,
+        around: Optional[SnowflakeTime] = None,
+        oldest_first: Optional[bool] = False,
+        bulk: bool = True,
+    ) -> List[Message]:
+        """|coro|
+
+        Purges a list of messages that meet the criteria given by the predicate
+        ``check``. If a ``check`` is not provided then all messages are deleted
+        without discrimination.
+
+        You must have :attr:`~Permissions.manage_messages` permission to
+        delete messages even if they are your own.
+        :attr:`~Permissions.read_message_history` permission is
+        also needed to retrieve message history.
+
+        .. versionadded:: 2.9
+
+        .. note::
+
+            See :meth:`TextChannel.purge` for examples.
+
+        Parameters
+        ----------
+        limit: Optional[:class:`int`]
+            The number of messages to search through. This is not the number
+            of messages that will be deleted, though it can be.
+        check: Callable[[:class:`Message`], :class:`bool`]
+            The function used to check if a message should be deleted.
+            It must take a :class:`Message` as its sole parameter.
+        before: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+            Same as ``before`` in :meth:`history`.
+        after: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+            Same as ``after`` in :meth:`history`.
+        around: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+            Same as ``around`` in :meth:`history`.
+        oldest_first: Optional[:class:`bool`]
+            Same as ``oldest_first`` in :meth:`history`.
+        bulk: :class:`bool`
+            If ``True``, use bulk delete. Setting this to ``False`` is useful for mass-deleting
+            a bot's own messages without :attr:`Permissions.manage_messages`. When ``True``, will
+            fall back to single delete if messages are older than two weeks.
+
+        Raises
+        ------
+        Forbidden
+            You do not have proper permissions to do the actions required.
+        HTTPException
+            Purging the messages failed.
+
+        Returns
+        -------
+        List[:class:`.Message`]
+            A list of messages that were deleted.
+        """
+        if check is MISSING:
+            check = lambda m: True
+
+        iterator = self.history(
+            limit=limit, before=before, after=after, oldest_first=oldest_first, around=around
+        )
+        ret: List[Message] = []
+        count = 0
+
+        minimum_time = int((time.time() - 14 * 24 * 60 * 60) * 1000.0 - 1420070400000) << 22
+        strategy = self.delete_messages if bulk else _single_delete_strategy
+
+        async for message in iterator:
+            if count == 100:
+                to_delete = ret[-100:]
+                await strategy(to_delete)
+                count = 0
+                await asyncio.sleep(1)
+
+            if not check(message):
+                continue
+
+            if message.id < minimum_time:
+                # older than 14 days old
+                if count == 1:
+                    await ret[-1].delete()
+                elif count >= 2:
+                    to_delete = ret[-count:]
+                    await strategy(to_delete)
+
+                count = 0
+                strategy = _single_delete_strategy
+
+            count += 1
+            ret.append(message)
+
+        # SOme messages remaining to poll
+        if count >= 2:
+            # more than 2 messages -> bulk delete
+            to_delete = ret[-count:]
+            await strategy(to_delete)
+        elif count == 1:
+            # delete a single message
+            await ret[-1].delete()
+
+        return ret
+
+    async def webhooks(self) -> List[Webhook]:
+        """|coro|
+
+        Retrieves the list of webhooks this channel has.
+
+        You must have :attr:`~.Permissions.manage_webhooks` permission to
+        use this.
+
+        .. versionadded:: 2.9
+
+        Raises
+        ------
+        Forbidden
+            You don't have permissions to get the webhooks.
+
+        Returns
+        -------
+        List[:class:`Webhook`]
+            The list of webhooks this channel has.
+        """
+        from .webhook import Webhook
+
+        data = await self._state.http.channel_webhooks(self.id)
+        return [Webhook.from_state(d, state=self._state) for d in data]
+
+    async def create_webhook(
+        self, *, name: str, avatar: Optional[bytes] = None, reason: Optional[str] = None
+    ) -> Webhook:
+        """|coro|
+
+        Creates a webhook for this channel.
+
+        You must have :attr:`~.Permissions.manage_webhooks` permission to
+        do this.
+
+        .. versionadded:: 2.9
+
+        Parameters
+        ----------
+        name: :class:`str`
+            The webhook's name.
+        avatar: Optional[:class:`bytes`]
+            The webhook's default avatar.
+            This operates similarly to :meth:`~ClientUser.edit`.
+        reason: Optional[:class:`str`]
+            The reason for creating this webhook. Shows up in the audit logs.
+
+        Raises
+        ------
+        NotFound
+            The ``avatar`` asset couldn't be found.
+        Forbidden
+            You do not have permissions to create a webhook.
+        HTTPException
+            Creating the webhook failed.
+        TypeError
+            The ``avatar`` asset is a lottie sticker (see :func:`Sticker.read`).
+
+        Returns
+        -------
+        :class:`Webhook`
+            The newly created webhook.
+        """
+        from .webhook import Webhook
+
+        avatar_data = await utils._assetbytes_to_base64_data(avatar)
+
+        data = await self._state.http.create_webhook(
+            self.id, name=str(name), avatar=avatar_data, reason=reason
+        )
+        return Webhook.from_state(data, state=self._state)
 
 
 class CategoryChannel(disnake.abc.GuildChannel, Hashable):
@@ -2154,6 +2766,19 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         """
         return ChannelType.category
 
+    @utils.copy_doc(disnake.abc.GuildChannel.permissions_for)
+    def permissions_for(
+        self,
+        obj: Union[Member, Role],
+        /,
+        *,
+        ignore_timeout: bool = MISSING,
+    ) -> Permissions:
+        base = super().permissions_for(obj, ignore_timeout=ignore_timeout)
+        self._apply_implict_permissions(base)
+
+        return base
+
     def is_nsfw(self) -> bool:
         """Whether the category is marked as NSFW.
 
@@ -2161,11 +2786,61 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         """
         return self.nsfw
 
-    @utils.copy_doc(disnake.abc.GuildChannel.clone)
     async def clone(
-        self, *, name: Optional[str] = None, reason: Optional[str] = None
+        self,
+        *,
+        name: Optional[str] = None,
+        position: int = MISSING,
+        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
+        reason: Optional[str] = None,
     ) -> CategoryChannel:
-        return await self._clone_impl({"nsfw": self.nsfw}, name=name, reason=reason)
+        """|coro|
+
+        Clones this channel. This creates a channel with the same properties
+        as this channel.
+
+        You must have :attr:`.Permissions.manage_channels` permission to
+        do this.
+
+        .. versionchanged:: 2.9
+            Added ``position``, ``nsfw`` and ``overwrites`` keyword-only parameters.
+
+        .. note::
+            The current :attr:`CategoryChannel.flags` value won't be cloned.
+            This is a Discord limitation.
+
+        Parameters
+        ----------
+        name: Optional[:class:`str`]
+            The name of the new channel. If not provided, defaults to this channel's name.
+        position: :class:`int`
+            The position of the new channel. If not provided, defaults to this channel's position.
+        overwrites: :class:`Mapping`
+            A :class:`Mapping` of target (either a role or a member) to :class:`PermissionOverwrite`
+            to apply to the channel. If not provided, defaults to this channel's overwrites.
+        reason: Optional[:class:`str`]
+            The reason for cloning this channel. Shows up on the audit log.
+
+        Raises
+        ------
+        Forbidden
+            You do not have the proper permissions to create this channel.
+        HTTPException
+            Creating the channel failed.
+
+        Returns
+        -------
+        :class:`CategoryChannel`
+            The channel that was created.
+        """
+        return await self._clone_impl(
+            {
+                "position": position if position is not MISSING else self.position,
+            },
+            name=name,
+            reason=reason,
+            overwrites=overwrites,
+        )
 
     # if only these parameters are passed, `_move` is called and no channel will be returned
     @overload
@@ -2646,6 +3321,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         ignore_timeout: bool = MISSING,
     ) -> Permissions:
         base = super().permissions_for(obj, ignore_timeout=ignore_timeout)
+        self._apply_implict_permissions(base)
 
         # forum channels do not have voice related permissions
         denied = Permissions.voice()
@@ -2690,8 +3366,9 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
         .. versionadded:: 2.6
         """
-        return PartialEmoji._emoji_from_name_id(
-            self._default_reaction_emoji_name, self._default_reaction_emoji_id, state=self._state
+        return self._state._get_emoji_from_fields(
+            name=self._default_reaction_emoji_name,
+            id=self._default_reaction_emoji_id,
         )
 
     @property
@@ -2937,19 +3614,131 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             # the payload will always be the proper channel payload
             return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
 
-    @utils.copy_doc(disnake.abc.GuildChannel.clone)
     async def clone(
-        self, *, name: Optional[str] = None, reason: Optional[str] = None
+        self,
+        *,
+        name: Optional[str] = None,
+        topic: Optional[str] = MISSING,
+        position: int = MISSING,
+        nsfw: bool = MISSING,
+        category: Optional[Snowflake] = MISSING,
+        slowmode_delay: Optional[int] = MISSING,
+        default_thread_slowmode_delay: Optional[int] = MISSING,
+        default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
+        available_tags: Sequence[ForumTag] = MISSING,
+        default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
+        default_sort_order: Optional[ThreadSortOrder] = MISSING,
+        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
+        reason: Optional[str] = None,
     ) -> ForumChannel:
+        """|coro|
+
+        Clones this channel. This creates a channel with the same properties
+        as this channel.
+
+        You must have :attr:`.Permissions.manage_channels` permission to
+        do this.
+
+        .. versionchanged:: 2.9
+            Added new ``topic``, ``position``, ``nsfw``, ``category``, ``slowmode_delay``,
+            ``default_thread_slowmode_delay``, ``default_auto_archive_duration``,
+            ``available_tags``, ``default_reaction``, ``default_sort_order``
+            and ``overwrites`` keyword-only paremters.
+
+        .. note::
+            The current :attr:`ForumChannel.flags` value won't be cloned.
+            This is a Discord limitation.
+
+        Parameters
+        ----------
+        name: Optional[:class:`str`]
+            The name of the new channel. If not provided, defaults to this channel's name.
+        topic: Optional[:class:`str`]
+            The topic of the new channel. If not provided, defaults to this channel's topic.
+        position: :class:`int`
+            The position of the new channel. If not provided, defaults to this channel's position.
+        nsfw: :class:`bool`
+            Whether the new channel should be nsfw or not. If not provided, defaults to this channel's NSFW value.
+        category: Optional[:class:`abc.Snowflake`]
+            The category where the new channel should be grouped. If not provided, defaults to this channel's category.
+        slowmode_delay: Optional[:class:`int`]
+            The slowmode delay of the new channel. If not provided, defaults to this channel's slowmode delay.
+        default_thread_slowmode_delay: Optional[:class:`int`]
+            The default thread slowmode delay of the new channel. If not provided, defaults to this channel's default thread slowmode delay.
+        default_auto_archive_duration: Optional[Union[:class:`int`, :class:`ThreadArchiveDuration`]]
+            The default auto archive duration of the new channel. If not provided, defaults to this channel's default auto archive duration.
+        available_tags: Sequence[:class:`ForumTag`]
+            The applicable tags of the new channel. If not provided, defaults to this channel's available tags.
+        default_reaction: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
+            The default reaction of the new channel. If not provided, defaults to this channel's default reaction.
+        default_sort_order: Optional[:class:`ThreadSortOrder`]
+            The default sort order of the new channel. If not provided, defaults to this channel's default sort order.
+        overwrites: :class:`Mapping`
+            A :class:`Mapping` of target (either a role or a member) to :class:`PermissionOverwrite`
+            to apply to the channel. If not provided, defaults to this channel's overwrites.
+        reason: Optional[:class:`str`]
+            The reason for cloning this channel. Shows up on the audit log.
+
+        Raises
+        ------
+        Forbidden
+            You do not have the proper permissions to create this channel.
+        HTTPException
+            Creating the channel failed.
+
+        Returns
+        -------
+        :class:`ForumChannel`
+            The channel that was created.
+        """
+        default_reaction_emoji_payload: Optional[DefaultReactionPayload] = MISSING
+        if default_reaction is MISSING:
+            default_reaction = self.default_reaction
+
+        if default_reaction is not None:
+            emoji_name, emoji_id = PartialEmoji._emoji_to_name_id(default_reaction)
+            default_reaction_emoji_payload = {
+                "emoji_name": emoji_name,
+                "emoji_id": emoji_id,
+            }
+        else:
+            default_reaction_emoji_payload = None
+
+        if default_sort_order is MISSING:
+            default_sort_order = self.default_sort_order
+
         return await self._clone_impl(
             {
-                "topic": self.topic,
-                "nsfw": self.nsfw,
-                "rate_limit_per_user": self.slowmode_delay,
-                "default_auto_archive_duration": self.default_auto_archive_duration,
+                "topic": topic if topic is not MISSING else self.topic,
+                "position": position if position is not MISSING else self.position,
+                "nsfw": nsfw if nsfw is not MISSING else self.nsfw,
+                "rate_limit_per_user": (
+                    slowmode_delay if slowmode_delay is not MISSING else self.slowmode_delay
+                ),
+                "default_thread_rate_limit_per_user": (
+                    default_thread_slowmode_delay
+                    if default_thread_slowmode_delay is not MISSING
+                    else self.default_thread_slowmode_delay
+                ),
+                "default_auto_archive_duration": (
+                    try_enum_to_int(default_auto_archive_duration)
+                    if default_auto_archive_duration is not MISSING
+                    else self.default_auto_archive_duration
+                ),
+                "available_tags": (
+                    [tag.to_dict() for tag in available_tags]
+                    if available_tags is not MISSING
+                    else [tag.to_dict() for tag in self.available_tags]
+                ),
+                "default_reaction_emoji": default_reaction_emoji_payload,
+                "default_sort_order": (
+                    try_enum_to_int(default_sort_order) if default_sort_order is not None else None
+                ),
             },
             name=name,
+            category=category,
             reason=reason,
+            overwrites=overwrites,
         )
 
     def get_thread(self, thread_id: int, /) -> Optional[Thread]:
@@ -3253,7 +4042,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             The request to get the archived threads failed.
 
         Yields
-        -------
+        ------
         :class:`Thread`
             The archived threads.
         """
@@ -3447,6 +4236,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         self.me = state.user
         self.recipient = state.get_user(user_id) if user_id != self.me.id else None
         self.last_pin_timestamp = None
+        self._flags = 0
         return self
 
     @property
@@ -3464,8 +4254,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
 
     @property
     def jump_url(self) -> str:
-        """
-        A URL that can be used to jump to this channel.
+        """A URL that can be used to jump to this channel.
 
         .. versionadded:: 2.4
         """

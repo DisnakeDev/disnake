@@ -62,6 +62,7 @@ GuildFeature = Literal[
     "PARTNERED",
     "PREVIEW_ENABLED",
     "PRIVATE_THREADS",  # deprecated
+    "RAID_ALERTS_DISABLED",
     "RELAY_ENABLED",
     "ROLE_ICONS",
     "ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE",
@@ -122,11 +123,13 @@ class Guild(_BaseGuildPreview):
     preferred_locale: str
     public_updates_channel_id: Optional[Snowflake]
     max_video_channel_users: NotRequired[int]
+    max_stage_video_channel_users: NotRequired[int]
     approximate_member_count: NotRequired[int]
     approximate_presence_count: NotRequired[int]
     nsfw_level: NSFWLevel
     stickers: NotRequired[List[GuildSticker]]
     premium_progress_bar_enabled: bool
+    safety_alerts_channel_id: Optional[Snowflake]
 
     # specific to GUILD_CREATE event
     joined_at: NotRequired[Optional[str]]

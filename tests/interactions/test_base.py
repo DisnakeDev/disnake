@@ -20,12 +20,12 @@ if TYPE_CHECKING:
 
 @pytest.mark.asyncio
 class TestInteractionResponse:
-    @pytest.fixture()
+    @pytest.fixture
     def response(self):
         inter = mock.Mock(disnake.Interaction)
         return disnake.InteractionResponse(inter)
 
-    @pytest.fixture()
+    @pytest.fixture
     def adapter(self):
         adapter = mock.AsyncMock()
         disnake.interactions.base.async_context.set(adapter)
@@ -86,7 +86,7 @@ class TestInteractionResponse:
     )
     async def test_defer(
         self, response: disnake.InteractionResponse, adapter, parent_type, with_message, expected
-    ):
+    ) -> None:
         response._parent.type = parent_type
 
         await response.defer(with_message=with_message)
@@ -106,7 +106,7 @@ class TestInteractionResponse:
     )
     async def test_defer_ephemeral(
         self, response: disnake.InteractionResponse, adapter, with_message, expected_data
-    ):
+    ) -> None:
         response._parent.type = disnake.InteractionType.component
 
         await response.defer(with_message=with_message, ephemeral=True)
@@ -118,7 +118,9 @@ class TestInteractionResponse:
             data=expected_data,
         )
 
-    async def test_defer_invalid_parent(self, response: disnake.InteractionResponse, adapter):
+    async def test_defer_invalid_parent(
+        self, response: disnake.InteractionResponse, adapter
+    ) -> None:
         # autocomplete can't be deferred
         response._parent.type = disnake.InteractionType.application_command_autocomplete
 
@@ -129,13 +131,13 @@ class TestInteractionResponse:
 
 class TestInteractionDataResolved:
     # TODO: use proper mock models once we have state/guild mocks
-    @pytest.fixture()
+    @pytest.fixture
     def state(self):
         s = mock.Mock(spec_set=ConnectionState)
         s._get_guild.return_value = None
         return s
 
-    def test_init_member(self, state):
+    def test_init_member(self, state) -> None:
         member_payload: MemberPayload = {
             "roles": [],
             "joined_at": "2022-09-02T22:00:55.069000+00:00",
@@ -179,7 +181,7 @@ class TestInteractionDataResolved:
         assert len(resolved.users) == 0
 
     @pytest.mark.parametrize("channel_type", [t.value for t in disnake.ChannelType])
-    def test_channel(self, state, channel_type):
+    def test_channel(self, state, channel_type) -> None:
         channel_data: ResolvedPartialChannelPayload = {
             "id": "42",
             "type": channel_type,
