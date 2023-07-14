@@ -129,7 +129,7 @@ AutoModActionType
 
         The rule will prevent the user from using text, voice, or other interactions.
 
-        .. versionadded:: 2.9
+        .. versionadded:: 2.10
 
 AutoModEventType
 ~~~~~~~~~~~~~~~~
@@ -161,7 +161,7 @@ AutoModEventType
 
         The rule will apply when a member joins or edits their profile.
 
-        .. versionadded:: 2.9
+        .. versionadded:: 2.10
 
 AutoModTriggerType
 ~~~~~~~~~~~~~~~~~~

@@ -247,7 +247,7 @@ class AutoModBlockInteractionAction(AutoModAction):
     To see which trigger types this can be used with,
     refer to :ref:`this table <automod_trigger_action_table>`.
 
-    .. versionadded:: 2.9
+    .. versionadded:: 2.10
 
     Attributes
     ----------
