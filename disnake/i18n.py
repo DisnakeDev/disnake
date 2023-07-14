@@ -237,7 +237,7 @@ class LocalizationValue:
         """Optional[Dict[:class:`str`, :class:`str`]]: A dict with a locale -> localization mapping, if available."""
         if self._data is MISSING:
             warnings.warn(
-                "value was never localized, this is likely a library bug",
+                f"value ('{self._key}') was never localized, this is likely a library bug",
                 LocalizationWarning,
                 stacklevel=2,
             )
