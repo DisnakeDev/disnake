@@ -1,1 +1,1 @@
-Guilds fetched with :meth:`Client.fetch_guilds` now have ``approximate_member_count`` and ``approximate_presence_count`` fields filled.
+Added ``with_counts`` field to :meth:`Client.fetch_guild` and :meth:`Client.fetch_guilds`, used to determine whether or not to include the guild's member count and presence information.
