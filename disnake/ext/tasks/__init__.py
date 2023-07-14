@@ -92,9 +92,8 @@ class Loop(Generic[LF]):
         reconnect: bool = True,
         loop: asyncio.AbstractEventLoop = MISSING,
     ) -> None:
-        """
-        .. note:
-            If you overwrite ``__init__`` arguments, make sure to redefine .clone too.
+        """.. note:
+        If you overwrite ``__init__`` arguments, make sure to redefine .clone too.
         """
         self.coro: LF = coro
         self.reconnect: bool = reconnect
@@ -189,7 +188,7 @@ class Loop(Generic[LF]):
         except Exception as exc:
             self._has_failed = True
             await self._call_loop_function("error", exc)
-            raise exc
+            raise
         finally:
             await self._call_loop_function("after_loop")
             self._handle.cancel()
@@ -281,8 +280,7 @@ class Loop(Generic[LF]):
         return self._next_iteration
 
     async def __call__(self, *args: Any, **kwargs: Any) -> Any:
-        """
-        |coro|
+        """|coro|
 
         Calls the internal callback that the task holds.
 
@@ -301,8 +299,7 @@ class Loop(Generic[LF]):
         return await self.coro(*args, **kwargs)
 
     def start(self, *args: Any, **kwargs: Any) -> asyncio.Task[None]:
-        """
-        Starts the internal task in the event loop.
+        """Starts the internal task in the event loop.
 
         Parameters
         ----------
@@ -336,8 +333,7 @@ class Loop(Generic[LF]):
         return self._task
 
     def stop(self) -> None:
-        """
-        Gracefully stops the task from running.
+        """Gracefully stops the task from running.
 
         Unlike :meth:`cancel`\\, this allows the task to finish its
         current iteration before gracefully exiting.
@@ -366,8 +362,7 @@ class Loop(Generic[LF]):
             self._task.cancel()
 
     def restart(self, *args: Any, **kwargs: Any) -> None:
-        """
-        A convenience method to restart the internal task.
+        """A convenience method to restart the internal task.
 
         .. note::
 
@@ -391,8 +386,7 @@ class Loop(Generic[LF]):
             self._task.cancel()
 
     def add_exception_type(self, *exceptions: Type[BaseException]) -> None:
-        """
-        Adds exception types to be handled during the reconnect logic.
+        """Adds exception types to be handled during the reconnect logic.
 
         By default the exception types handled are those handled by
         :meth:`disnake.Client.connect`\\, which includes a lot of internet disconnection
@@ -429,8 +423,7 @@ class Loop(Generic[LF]):
         self._valid_exception = ()
 
     def remove_exception_type(self, *exceptions: Type[BaseException]) -> bool:
-        """
-        Removes exception types from being handled during the reconnect logic.
+        """Removes exception types from being handled during the reconnect logic.
 
         Parameters
         ----------
@@ -562,7 +555,7 @@ class Loop(Generic[LF]):
         if not asyncio.iscoroutinefunction(coro):
             raise TypeError(f"Expected coroutine function, received {coro.__class__.__name__!r}.")
 
-        self._error = coro
+        self._error = coro  # type: ignore
         return coro
 
     def _get_next_sleep_time(self) -> datetime.datetime:
@@ -795,7 +788,6 @@ def loop(
         an invalid value for the ``time`` parameter was passed,
         or ``time`` parameter was passed in conjunction with relative time parameters.
     """
-
     if (origin := get_origin(cls)) is not None:
         cls = origin
 

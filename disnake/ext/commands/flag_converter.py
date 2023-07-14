@@ -51,7 +51,7 @@ if TYPE_CHECKING:
 class Flag:
     """Represents a flag parameter for :class:`FlagConverter`.
 
-    The :func:`~disnake.ext.commands.flag` function helps
+    The :func:`.flag` function helps
     create these flag objects, but it is not necessary to
     do so. These cannot be constructed manually.
 
@@ -187,7 +187,7 @@ def get_flags(
                 # typing.Union
                 if flag.max_args is MISSING:
                     flag.max_args = 1
-                if annotation.__args__[-1] is type(None) and flag.default is MISSING:  # noqa: E721
+                if annotation.__args__[-1] is type(None) and flag.default is MISSING:
                     # typing.Optional
                     flag.default = None
             elif origin is tuple:
@@ -411,7 +411,7 @@ async def convert_flag(ctx: Context, argument: str, flag: Flag, annotation: Any 
             # typing.List[x]
             annotation = args[0]
             return await convert_flag(ctx, argument, flag, annotation)
-        elif origin is Union and args[-1] is type(None):  # noqa: E721
+        elif origin is Union and args[-1] is type(None):
             # typing.Optional[x]
             annotation = Union[args[:-1]]  # type: ignore
             return await run_converters(ctx, annotation, argument, param)
@@ -579,7 +579,7 @@ class FlagConverter(metaclass=FlagsMeta):
                 values = arguments[name]
             except KeyError:
                 if flag.required:
-                    raise MissingRequiredFlag(flag)
+                    raise MissingRequiredFlag(flag) from None
                 else:
                     if callable(flag.default):
                         default = await maybe_coroutine(flag.default, ctx)

@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""
-A simple example showing context menu commands.
+"""A simple example showing context menu commands.
 User commands show up in the context menu (right-click/tap) of users,
 while message commands show up in the context menu of messages.
 """

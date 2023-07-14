@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""
-An example showcasing different builtin converter types.
-"""
+"""An example showcasing different builtin converter types."""
 
 # A list of all available converter types can be found at
 # https://docs.disnake.dev/en/stable/ext/commands/commands.html#discord-converters.
@@ -71,6 +69,7 @@ async def multiply(ctx: commands.Context, number: int, maybe: bool):
 
     if maybe is True:
         return await ctx.send(str(number * 2))
+
     await ctx.send(str(number * 5))
 
 

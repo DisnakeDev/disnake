@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""
-Some examples showing how to customize slash command options.
-"""
+"""Some examples showing how to customize slash command options."""
 
 import os
 from typing import Union
@@ -51,8 +49,7 @@ async def description(
     user: disnake.User,
     channel: disnake.TextChannel,
 ):
-    """
-    A random command
+    """A random command
 
     Parameters
     ----------
@@ -74,18 +71,15 @@ async def defaults(
 
 
 # You may limit numbers to a certain range using `commands.Range`.
-# "..." is impicitly infinity. Range[0, ...] therefore means any integer from 0 to infinity,
-# and Range[..., 0] means anything from -inf to 0.
-
-# The 1.0 in the `fraction` parameter below is important - the usage of a float specifies
-# that the argument may be a float in that range, not just an integer.
-# All of these bounds are inclusive, meaning `Range[1, 4]` would allow any of 1, 2, 3, or 4.
+# "..." is impicitly infinity. Range[int, 0, ...] therefore means any integer from 0 to infinity,
+# and Range[int, ..., 0] means anything from -inf to 0.
+# All of these bounds are inclusive, meaning `Range[int, 1, 4]` would allow any of 1, 2, 3, or 4.
 @bot.slash_command()
 async def ranges(
     inter: disnake.CommandInteraction,
-    ranking: commands.Range[1, 10],
-    negative: commands.Range[..., 0],
-    fraction: commands.Range[0, 1.0],
+    ranking: commands.Range[int, 1, 10],
+    negative: commands.Range[int, ..., 0],
+    fraction: commands.Range[float, 0, 1.0],
 ):
     """Command with limited ranges
 

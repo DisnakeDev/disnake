@@ -223,9 +223,7 @@ class ApplicationCommandInteractionData(Dict[str, Any]):
     def _get_chain_and_kwargs(
         self, chain: Optional[Tuple[str, ...]] = None
     ) -> Tuple[Tuple[str, ...], Dict[str, Any]]:
-        """
-        Returns a chain of sub-command names and a dict of filled options.
-        """
+        """Returns a chain of sub-command names and a dict of filled options."""
         if chain is None:
             chain = ()
         for option in self.options:
@@ -255,7 +253,7 @@ class ApplicationCommandInteractionData(Dict[str, Any]):
 
 
 class ApplicationCommandInteractionDataOption(Dict[str, Any]):
-    """This class represents the structure of an interaction data option from the API.
+    """Represents the structure of an interaction data option from the API.
 
     Attributes
     ----------

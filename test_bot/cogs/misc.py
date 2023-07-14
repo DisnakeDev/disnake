@@ -8,7 +8,7 @@ from disnake.ext import commands
 
 
 class Misc(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot) -> None:
         self.bot: commands.Bot = bot
 
     def _get_file(self, description: str) -> disnake.File:
@@ -20,8 +20,7 @@ class Misc(commands.Cog):
 
     @commands.slash_command()
     async def attachment_desc(self, inter: disnake.AppCmdInter, desc: str = "test") -> None:
-        """
-        Send an attachment with the given description (or the default)
+        """Send an attachment with the given description (or the default)
 
         Parameters
         ----------
@@ -31,8 +30,7 @@ class Misc(commands.Cog):
 
     @commands.slash_command()
     async def attachment_desc_edit(self, inter: disnake.AppCmdInter, desc: str = "test") -> None:
-        """
-        Send a message with a button, which sends an attachment with the given description (or the default)
+        """Send a message with a button, which sends an attachment with the given description (or the default)
 
         Parameters
         ----------
@@ -48,5 +46,5 @@ class Misc(commands.Cog):
         await inter.response.send_message(".", view=view)
 
 
-def setup(bot):
+def setup(bot) -> None:
     bot.add_cog(Misc(bot))

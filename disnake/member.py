@@ -28,6 +28,7 @@ from .activity import ActivityTypes, create_activity
 from .asset import Asset
 from .colour import Colour
 from .enums import Status, try_enum
+from .flags import MemberFlags
 from .object import Object
 from .permissions import Permissions
 from .user import BaseUser, User, _UserTag
@@ -229,7 +230,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         .. describe:: str(x)
 
-            Returns the member's name with the discriminator.
+            Returns the member's username (with discriminator, if not migrated to new system yet).
 
     Attributes
     ----------
@@ -248,6 +249,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         The guild that the member belongs to.
     nick: Optional[:class:`str`]
         The guild specific nickname of the user.
+        This takes precedence over :attr:`.global_name` and :attr:`.name` when shown.
     pending: :class:`bool`
         Whether the member is pending member verification.
 
@@ -271,11 +273,14 @@ class Member(disnake.abc.Messageable, _UserTag):
         "_state",
         "_avatar",
         "_communication_disabled_until",
+        "_flags",
     )
 
     if TYPE_CHECKING:
         name: str
         id: int
+        discriminator: str
+        global_name: Optional[str]
         bot: bool
         system: bool
         created_at: datetime.datetime
@@ -336,13 +341,14 @@ class Member(disnake.abc.Messageable, _UserTag):
         self._avatar: Optional[str] = data.get("avatar")
         timeout_datetime = utils.parse_time(data.get("communication_disabled_until"))
         self._communication_disabled_until: Optional[datetime.datetime] = timeout_datetime
+        self._flags: int = data.get("flags", 0)
 
     def __str__(self) -> str:
         return str(self._user)
 
     def __repr__(self) -> str:
         return (
-            f"<Member id={self._user.id} name={self._user.name!r} discriminator={self._user.discriminator!r}"
+            f"<Member id={self._user.id} name={self._user.name!r} global_name={self._user.global_name!r} discriminator={self._user.discriminator!r}"
             f" bot={self._user.bot} nick={self.nick!r} guild={self.guild!r}>"
         )
 
@@ -371,6 +377,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         self._roles = utils.SnowflakeList(map(int, data["roles"]))
         self.nick = data.get("nick", None)
         self.pending = data.get("pending", False)
+        self._flags = data.get("flags", 0)
 
     @classmethod
     def _try_upgrade(
@@ -399,6 +406,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         self._state = member._state
         self._avatar = member._avatar
         self._communication_disabled_until = member.current_timeout
+        self._flags = member._flags
 
         # Reference will not be copied unless necessary by PRESENCE_UPDATE
         # See below
@@ -427,6 +435,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         self._avatar = data.get("avatar")
         timeout_datetime = utils.parse_time(data.get("communication_disabled_until"))
         self._communication_disabled_until = timeout_datetime
+        self._flags = data.get("flags", 0)
 
     def _presence_update(
         self, data: PresenceData, user: UserPayload
@@ -443,17 +452,18 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     def _update_inner_user(self, user: UserPayload) -> Optional[Tuple[User, User]]:
         u = self._user
-        original = (u.name, u._avatar, u.discriminator, u._public_flags)
+        original = (u.name, u._avatar, u.discriminator, u.global_name, u._public_flags)
         # These keys seem to always be available
         modified = (
             user["username"],
             user["avatar"],
             user["discriminator"],
+            user.get("global_name"),
             user.get("public_flags", 0),
         )
         if original != modified:
             to_return = User._copy(self._user)
-            u.name, u._avatar, u.discriminator, u._public_flags = modified
+            u.name, u._avatar, u.discriminator, u.global_name, u._public_flags = modified
             # Signal to dispatch on_user_update
             return to_return, u
 
@@ -477,11 +487,8 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     @property
     def tag(self) -> str:
-        return self._user.discriminator
-
-    @property
-    def discriminator(self) -> str:
-        return self._user.discriminator
+        """:class:`str`: An alias of :attr:`.discriminator`."""
+        return self.discriminator
 
     @property
     def mobile_status(self) -> Status:
@@ -560,11 +567,14 @@ class Member(disnake.abc.Messageable, _UserTag):
     def display_name(self) -> str:
         """:class:`str`: Returns the user's display name.
 
-        For regular users this is just their username, but
-        if they have a guild specific nickname then that
-        is returned instead.
+        If they have a guild-specific :attr:`nickname <.nick>`, then
+        that is returned. If not, this is their :attr:`global name <.global_name>`
+        if set, or their :attr:`username <.name>` otherwise.
+
+        .. versionchanged:: 2.9
+            Added :attr:`.global_name`.
         """
-        return self.nick or self.name
+        return self.nick or self.global_name or self.name
 
     @property
     def display_avatar(self) -> Asset:
@@ -685,11 +695,12 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     @property
     def current_timeout(self) -> Optional[datetime.datetime]:
-        """Optional[:class:`datetime.datetime`]: Returns the datetime when the timeout expires, if any.
+        """Optional[:class:`datetime.datetime`]: Returns the datetime when the timeout expires.
+
+        If the member is not timed out or the timeout has already expired, returns ``None``.
 
         .. versionadded:: 2.3
         """
-
         if self._communication_disabled_until is None:
             return None
 
@@ -698,6 +709,14 @@ class Member(disnake.abc.Messageable, _UserTag):
             return None
 
         return self._communication_disabled_until
+
+    @property
+    def flags(self) -> MemberFlags:
+        """:class:`MemberFlags`: Returns the member's flags.
+
+        .. versionadded:: 2.8
+        """
+        return MemberFlags._from_value(self._flags)
 
     @overload
     async def ban(
@@ -759,6 +778,8 @@ class Member(disnake.abc.Messageable, _UserTag):
         roles: Sequence[disnake.abc.Snowflake] = MISSING,
         voice_channel: Optional[VocalGuildChannel] = MISSING,
         timeout: Optional[Union[float, datetime.timedelta, datetime.datetime]] = MISSING,
+        flags: MemberFlags = MISSING,
+        bypasses_verification: bool = MISSING,
         reason: Optional[str] = None,
     ) -> Optional[Member]:
         """|coro|
@@ -781,6 +802,10 @@ class Member(disnake.abc.Messageable, _UserTag):
         | voice_channel                | :attr:`Permissions.move_members`    |
         +------------------------------+-------------------------------------+
         | timeout                      | :attr:`Permissions.moderate_members`|
+        +------------------------------+-------------------------------------+
+        | flags                        | :attr:`Permissions.moderate_members`|
+        +------------------------------+-------------------------------------+
+        | bypasses_verification        | :attr:`Permissions.moderate_members`|
         +------------------------------+-------------------------------------+
 
         All parameters are optional.
@@ -815,6 +840,19 @@ class Member(disnake.abc.Messageable, _UserTag):
             Set to ``None`` to remove the timeout. Supports up to 28 days in the future.
 
             .. versionadded:: 2.3
+
+        flags: :class:`MemberFlags`
+            The member's new flags. To know what flags are editable,
+            see :ddocs:`the documentation <resources/guild#guild-member-object-guild-member-flags>`.
+
+            If parameter ``bypasses_verification`` is provided, that will override the setting of :attr:`MemberFlags.bypasses_verification`.
+
+            .. versionadded:: 2.8
+
+        bypasses_verification: :class:`bool`
+            Whether the member bypasses guild verification requirements.
+
+            .. versionadded:: 2.8
 
         reason: Optional[:class:`str`]
             The reason for editing this member. Shows up on the audit log.
@@ -852,7 +890,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         if suppress is not MISSING:
             if self.voice is None or self.voice.channel is None:
-                raise Exception("Cannot suppress a member which isn't in a vc")
+                raise Exception("Cannot suppress a member which isn't in a vc")  # noqa: TRY002
 
             voice_state_payload: Dict[str, Any] = {
                 "channel_id": self.voice.channel.id,
@@ -866,9 +904,7 @@ class Member(disnake.abc.Messageable, _UserTag):
                 await http.edit_my_voice_state(guild_id, voice_state_payload)
             else:
                 if not suppress:
-                    voice_state_payload[
-                        "request_to_speak_timestamp"
-                    ] = datetime.datetime.utcnow().isoformat()
+                    voice_state_payload["request_to_speak_timestamp"] = utils.utcnow().isoformat()
                 await http.edit_voice_state(guild_id, self.id, voice_state_payload)
 
         if voice_channel is not MISSING:
@@ -888,6 +924,14 @@ class Member(disnake.abc.Messageable, _UserTag):
                 payload["communication_disabled_until"] = dt.isoformat()
             else:
                 payload["communication_disabled_until"] = None
+
+        if bypasses_verification is not MISSING:
+            # create base flags if flags are provided, otherwise use the internal flags.
+            flags = MemberFlags._from_value(self._flags if flags is MISSING else flags.value)
+            flags.bypasses_verification = bypasses_verification
+
+        if flags is not MISSING:
+            payload["flags"] = flags.value
 
         if payload:
             data = await http.edit_member(guild_id, self.id, reason=reason, **payload)
@@ -915,11 +959,11 @@ class Member(disnake.abc.Messageable, _UserTag):
             The operation failed.
         """
         if self.voice is None or self.voice.channel is None:
-            raise Exception("Cannot request to speak when not in a vc")
+            raise Exception("Cannot request to speak when not in a vc")  # noqa: TRY002
 
         payload = {
             "channel_id": self.voice.channel.id,
-            "request_to_speak_timestamp": datetime.datetime.utcnow().isoformat(),
+            "request_to_speak_timestamp": utils.utcnow().isoformat(),
         }
 
         if self._state.self_id != self.id:
@@ -954,8 +998,7 @@ class Member(disnake.abc.Messageable, _UserTag):
     async def add_roles(
         self, *roles: Snowflake, reason: Optional[str] = None, atomic: bool = True
     ) -> None:
-        """
-        |coro|
+        """|coro|
 
         Gives the member a number of :class:`Role`\\s.
 
@@ -995,8 +1038,7 @@ class Member(disnake.abc.Messageable, _UserTag):
     async def remove_roles(
         self, *roles: Snowflake, reason: Optional[str] = None, atomic: bool = True
     ) -> None:
-        """
-        |coro|
+        """|coro|
 
         Removes :class:`Role`\\s from this member.
 

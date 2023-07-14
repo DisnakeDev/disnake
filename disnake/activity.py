@@ -139,6 +139,7 @@ class _BaseActivity:
 # tag type for user-settable activities
 class BaseActivity(_BaseActivity):
     """The base activity that all user-settable activities inherit from.
+
     A user-settable activity is one that can be used in :meth:`Client.change_presence`.
 
     The following types currently count as user-settable:
@@ -610,14 +611,16 @@ class Spotify(_BaseActivity):
     def colour(self) -> Colour:
         """:class:`Colour`: Returns the Spotify integration colour, as a :class:`Colour`.
 
-        There is an alias for this named :attr:`color`"""
+        There is an alias for this named :attr:`color`
+        """
         return Colour(0x1DB954)
 
     @property
     def color(self) -> Colour:
         """:class:`Colour`: Returns the Spotify integration colour, as a :class:`Colour`.
 
-        There is an alias for this named :attr:`colour`"""
+        There is an alias for this named :attr:`colour`
+        """
         return self.colour
 
     def to_dict(self) -> Dict[str, Any]:
