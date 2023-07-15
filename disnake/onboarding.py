@@ -212,7 +212,7 @@ class OnboardingPromptOption(Hashable):
     @classmethod
     def _from_dict(cls, *, data: OnboardingPromptOptionPayload, guild: Guild) -> Self:
         if emoji_data := data.get("emoji"):
-            emoji = guild._state.get_reaction_emoji(emoji_data)
+            emoji = guild._state._get_emoji_from_data(emoji_data)
         else:
             emoji = None
 
