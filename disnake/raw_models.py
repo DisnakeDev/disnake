@@ -169,7 +169,7 @@ class RawReactionActionEvent(_RawReprMixin):
             This now also includes the correct :attr:`~PartialEmoji.animated` value when a reaction was removed.
 
     member: Optional[:class:`Member`]
-        The member who added the reaction. Only available if `event_type` is `REACTION_ADD` and the reaction is inside a guild.
+        The member who added the reaction. Only available if :attr:`event_type` is ``REACTION_ADD`` and the reaction is inside a guild.
 
         .. versionadded:: 1.3
 
@@ -182,7 +182,7 @@ class RawReactionActionEvent(_RawReprMixin):
 
     message_author_id: Optional[:class:`int`]
         The ID of the author who created the message that was reacted to.
-        Only available if `event_type` is `REACTION_ADD`.
+        Only available if :attr:`event_type` is ``REACTION_ADD``.
         May also be ``None`` if the message was created by a webhook.
 
         .. versionadded:: 2.10
