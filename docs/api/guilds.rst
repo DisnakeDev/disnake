@@ -327,11 +327,11 @@ OnboardingMode
 
     .. attribute:: default
 
-        Counts only Default Channels towards constraints.
+        Counts only :attr:`Onboarding.default_channels` towards constraints.
 
     .. attribute:: advanced
 
-        Counts Default Channels and Questions towards constraints.
+        Counts :attr:`Onboarding.default_channels` and :attr:`~Onboarding.prompts` towards constraints.
 
 
 Events

@@ -82,6 +82,9 @@ class OnboardingPrompt(Hashable):
 
     Attributes
     ----------
+    id: :class:`int`
+        The onboarding prompt's ID. Note that if this onboarding prompt was manually constructed,
+        this will be ``0``.
     title: :class:`str`
         The onboarding prompt's title.
     options: List[:class:`OnboardingPromptOption`]
@@ -163,6 +166,9 @@ class OnboardingPromptOption(Hashable):
 
     Attributes
     ----------
+    id: :class:`int`
+        The onboarding prompt option's ID. Note that if this onboarding prompt option was manually constructed,
+        this will be ``0``.
     title: :class:`str`
         The prompt option's title.
     description: Optional[:class:`str`]
