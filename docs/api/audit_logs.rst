@@ -1675,6 +1675,18 @@ AuditLogAction
         See :attr:`automod_block_message` for more information on how the
         :attr:`~AuditLogEntry.extra` field is set.
 
+    .. attribute:: creator_monetization_request_created
+
+        A creator monetization request was created.
+
+        .. versionadded:: 2.10
+
+    .. attribute:: creator_monetization_terms_accepted
+
+        The creator monetization terms were accepted.
+
+        .. versionadded:: 2.10
+
 AuditLogActionCategory
 ~~~~~~~~~~~~~~~~~~~~~~
 
