@@ -1,6 +1,4 @@
-Implement Onboarding.
-    - Add :class:`Onboarding`, :class:`OnboardingPrompt` and :class:`OnboardingPromptOption`.
-    - Add :meth:`Guild.onboarding` and :meth:`Guild.edit_onboarding`.
-    - Add new enums.
-        - :class:`OnboardingPromptType`
-        - :class:`OnboardingMode`
+Allow editing Onboarding.
+    - :class:`OnboardingPrompt` and :class:`OnboardingPromptOption` are now user-constructable.
+    - Add :meth:`Guild.edit_onboarding`.
+    - Add :class:`OnboardingMode` enum.
