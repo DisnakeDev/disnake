@@ -143,8 +143,7 @@ class OnboardingPrompt(Hashable):
             in_onboarding=data["in_onboarding"],
             type=try_enum(OnboardingPromptType, data["type"]),
         )
-        if "id" in data:
-            self.id = int(data["id"])
+        self.id = int(data["id"])
         return self
 
     def to_dict(self) -> OnboardingPromptPayload:
@@ -225,8 +224,7 @@ class OnboardingPromptOption(Hashable):
             roles=[Object(id=role_id) for role_id in data["role_ids"]],
             channels=[Object(id=channel_id) for channel_id in data["channel_ids"]],
         )
-        if "id" in data:
-            self.id = int(data["id"])
+        self.id = int(data["id"])
         return self
 
     def to_dict(self) -> OnboardingPromptOptionPayload:
