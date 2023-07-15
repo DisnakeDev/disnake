@@ -176,8 +176,10 @@ class OnboardingPromptOption(Hashable):
         The prompt option's emoji.
     roles: Optional[FrozenSet[:class:`abc.Snowflake`]]
         The IDs of the roles that will be added to the user when they select this option.
+        At creation, this must be set if :attr:`.channels` is not set.
     channels: Optional[FrozenSet[:class:`abc.Snowflake`]]
         The IDs of the channels that the user will see when they select this option.
+        At creation, this must be set if :attr:`.roles` is not set.
     """
 
     __slots__ = ("id", "title", "description", "emoji", "guild", "roles", "channels")
@@ -191,9 +193,6 @@ class OnboardingPromptOption(Hashable):
         roles: Optional[Iterable[Snowflake]] = None,
         channels: Optional[Iterable[Snowflake]] = None,
     ) -> None:
-        if roles is None and channels is None:
-            raise TypeError("Either roles or channels must be provided.")
-
         self.id: int = 0
         self.title: str = title
         self.description: Optional[str] = description
