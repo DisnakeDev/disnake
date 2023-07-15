@@ -2,7 +2,7 @@
 
 from typing import List, Literal, Optional, TypedDict
 
-from .emoji import Emoji
+from .emoji import PartialEmoji
 from .snowflake import Snowflake, SnowflakeList
 
 OnboardingPromptType = Literal[0, 1]
@@ -13,7 +13,7 @@ class OnboardingPromptOption(TypedDict):
     id: Snowflake
     title: str
     description: Optional[str]
-    emoji: Emoji
+    emoji: PartialEmoji
     role_ids: SnowflakeList
     channel_ids: SnowflakeList
 
