@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 
     from .abc import Snowflake
     from .guild import Guild, GuildChannel
+    from .state import ConnectionState
     from .types.emoji import Emoji as EmojiPayload
     from .types.onboarding import (
         Onboarding as OnboardingPayload,
@@ -54,7 +55,8 @@ class Onboarding:
 
     def _from_data(self, data: OnboardingPayload) -> None:
         self.prompts: List[OnboardingPrompt] = [
-            OnboardingPrompt._from_dict(data=prompt, guild=self.guild) for prompt in data["prompts"]
+            OnboardingPrompt._from_dict(data=prompt, state=self.guild._state)
+            for prompt in data["prompts"]
         ]
         self.enabled: bool = data["enabled"]
         self.default_channel_ids: FrozenSet[int] = (
@@ -131,11 +133,11 @@ class OnboardingPrompt(Hashable):
         )
 
     @classmethod
-    def _from_dict(cls, *, data: OnboardingPromptPayload, guild: Guild) -> Self:
+    def _from_dict(cls, *, data: OnboardingPromptPayload, state: ConnectionState) -> Self:
         self = cls(
             title=data["title"],
             options=[
-                OnboardingPromptOption._from_dict(data=option, guild=guild)
+                OnboardingPromptOption._from_dict(data=option, state=state)
                 for option in data["options"]
             ],
             single_select=data["single_select"],
@@ -210,9 +212,9 @@ class OnboardingPromptOption(Hashable):
         )
 
     @classmethod
-    def _from_dict(cls, *, data: OnboardingPromptOptionPayload, guild: Guild) -> Self:
+    def _from_dict(cls, *, data: OnboardingPromptOptionPayload, state: ConnectionState) -> Self:
         if emoji_data := data.get("emoji"):
-            emoji = guild._state._get_emoji_from_data(emoji_data)
+            emoji = state._get_emoji_from_data(emoji_data)
         else:
             emoji = None
 
