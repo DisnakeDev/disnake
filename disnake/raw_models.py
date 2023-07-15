@@ -181,7 +181,7 @@ class RawReactionActionEvent(_RawReprMixin):
         .. versionadded:: 1.3
 
     message_author_id: Optional[:class:`int`]
-        The ID of the author who created the message that was reacted to.
+        The ID of the author who created the message that got a reaction.
         Only available if :attr:`event_type` is ``REACTION_ADD``.
         May also be ``None`` if the message was created by a webhook.
 
