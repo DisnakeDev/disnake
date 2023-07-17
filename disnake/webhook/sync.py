@@ -627,7 +627,7 @@ class SyncWebhook(BaseWebhook):
     def from_url(
         cls, url: str, *, session: Session = MISSING, bot_token: Optional[str] = None
     ) -> SyncWebhook:
-        """Creates a :class:`SyncWebhook` from a webhook URL.
+        """Creates a partial :class:`SyncWebhook` from a webhook URL.
 
         .. versionchanged:: 2.6
             Raises :exc:`ValueError` instead of ``InvalidArgument``.
@@ -653,8 +653,8 @@ class SyncWebhook(BaseWebhook):
         Returns
         -------
         :class:`SyncWebhook`
-            A :class:`SyncWebhook` object with which it is possible
-            to handle webhooks synchronously.
+            A partial :class:`SyncWebhook`.
+            A partial webhook is just a webhook object with an ID and a token.
         """
         m = re.search(
             r"discord(?:app)?.com/api/webhooks/(?P<id>[0-9]{17,19})/(?P<token>[A-Za-z0-9\.\-\_]{60,68})",
