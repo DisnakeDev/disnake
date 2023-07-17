@@ -70,7 +70,7 @@ from .template import Template
 from .threads import Thread
 from .ui.view import View
 from .user import ClientUser, User
-from .utils import MISSING
+from .utils import MISSING, deprecated
 from .voice_client import VoiceClient
 from .voice_region import VoiceRegion
 from .webhook import Webhook
@@ -1315,7 +1315,7 @@ class Client:
         .. note::
 
             To retrieve standard stickers, use :meth:`.fetch_sticker`.
-            or :meth:`.fetch_premium_sticker_packs`.
+            or :meth:`.fetch_sticker_packs`.
 
         Returns
         -------
@@ -2331,12 +2331,15 @@ class Client:
         cls, _ = _sticker_factory(data["type"])  # type: ignore
         return cls(state=self._connection, data=data)  # type: ignore
 
-    async def fetch_premium_sticker_packs(self) -> List[StickerPack]:
+    async def fetch_sticker_packs(self) -> List[StickerPack]:
         """|coro|
 
-        Retrieves all available premium sticker packs.
+        Retrieves all available sticker packs.
 
         .. versionadded:: 2.0
+
+        .. versionchanged:: 2.10
+            Renamed from ``fetch_premium_sticker_packs``.
 
         Raises
         ------
@@ -2346,10 +2349,18 @@ class Client:
         Returns
         -------
         List[:class:`.StickerPack`]
-            All available premium sticker packs.
+            All available sticker packs.
         """
-        data = await self.http.list_premium_sticker_packs()
+        data = await self.http.list_sticker_packs()
         return [StickerPack(state=self._connection, data=pack) for pack in data["sticker_packs"]]
+
+    @deprecated("fetch_sticker_packs")
+    async def fetch_premium_sticker_packs(self) -> List[StickerPack]:
+        """An alias of :meth:`fetch_sticker_packs`.
+
+        .. deprecated:: 2.10
+        """
+        return await self.fetch_sticker_packs()
 
     async def create_dm(self, user: Snowflake) -> DMChannel:
         """|coro|
