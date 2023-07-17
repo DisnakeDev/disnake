@@ -41,9 +41,6 @@ def _is_submodule(parent: str, child: str) -> bool:
 
 
 class CommonBotBase(Generic[CogT]):
-    if TYPE_CHECKING:
-        extra_events: Dict[str, List[CoroFunc]]
-
     def __init__(
         self,
         *args: Any,
@@ -60,6 +57,9 @@ class CommonBotBase(Generic[CogT]):
         self.owner_ids: Set[int] = owner_ids or set()
         self.owner: Optional[disnake.User] = None
         self.owners: Set[disnake.TeamMember] = set()
+
+        if TYPE_CHECKING:
+            self.extra_events: Dict[str, List[CoroFunc]]
 
         if self.owner_id and self.owner_ids:
             raise TypeError("Both owner_id and owner_ids are set.")
