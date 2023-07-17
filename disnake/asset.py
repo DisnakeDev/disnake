@@ -244,15 +244,6 @@ class Asset(AssetMixin):
         )
 
     @classmethod
-    def _from_cover_image(cls, state: AnyState, object_id: int, cover_image_hash: str) -> Self:
-        return cls(
-            state,
-            url=f"{cls.BASE}/app-assets/{object_id}/store/{cover_image_hash}.png?size=1024",
-            key=cover_image_hash,
-            animated=False,
-        )
-
-    @classmethod
     def _from_guild_image(cls, state: AnyState, guild_id: int, image: str, path: str) -> Self:
         return cls(
             state,

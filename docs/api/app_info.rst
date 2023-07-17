@@ -10,14 +10,6 @@ This section documents everything related to application information.
 Discord Models
 --------------
 
-AppInfo
-~~~~~~~
-
-.. attributetable:: AppInfo
-
-.. autoclass:: AppInfo()
-    :members:
-
 PartialAppInfo
 ~~~~~~~~~~~~~~
 
@@ -25,6 +17,24 @@ PartialAppInfo
 
 .. autoclass:: PartialAppInfo()
     :members:
+
+AppInfo
+~~~~~~~
+
+.. attributetable:: AppInfo
+
+.. autoclass:: AppInfo()
+    :members:
+    :inherited-members:
+
+BotAppInfo
+~~~~~~~~~~
+
+.. attributetable:: BotAppInfo
+
+.. autoclass:: BotAppInfo()
+    :members:
+    :inherited-members:
 
 InstallParams
 ~~~~~~~~~~~~~

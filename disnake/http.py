@@ -2633,7 +2633,7 @@ class HTTPClient:
     def get_voice_regions(self) -> Response[List[voice.VoiceRegion]]:
         return self.request(Route("GET", "/voice/regions"))
 
-    def application_info(self) -> Response[appinfo.AppInfo]:
+    def application_info(self) -> Response[appinfo.BotAppInfo]:
         return self.request(Route("GET", "/oauth2/applications/@me"))
 
     def get_application_role_connection_metadata_records(

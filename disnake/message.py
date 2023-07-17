@@ -23,6 +23,7 @@ from typing import (
 )
 
 from . import utils
+from .appinfo import PartialAppInfo
 from .components import ActionRow, MessageComponent, _component_factory
 from .embeds import Embed
 from .emoji import Emoji
@@ -51,6 +52,7 @@ if TYPE_CHECKING:
     from .role import Role
     from .state import ConnectionState
     from .threads import AnyThreadArchiveDuration
+    from .types.appinfo import PartialAppInfo as PartialAppInfoPayload
     from .types.components import Component as ComponentPayload
     from .types.embed import Embed as EmbedPayload
     from .types.gateway import (
@@ -66,7 +68,6 @@ if TYPE_CHECKING:
         Attachment as AttachmentPayload,
         Message as MessagePayload,
         MessageActivity as MessageActivityPayload,
-        MessageApplication as MessageApplicationPayload,
         MessageReference as MessageReferencePayload,
         Reaction as ReactionPayload,
         RoleSubscriptionData as RoleSubscriptionDataPayload,
@@ -862,16 +863,12 @@ class Message(Hashable):
 
         - ``type``: An integer denoting the type of message activity being requested.
         - ``party_id``: The party ID associated with the party.
-    application: Optional[:class:`dict`]
+    application: Optional[:class:`PartialAppInfo`]
         The rich presence enabled application associated with this message.
 
-        It is a dictionary with the following keys:
+        .. versionchanged:: 2.9
+            This is now a :class:`PartialAppInfo` object instead of a plain :class:`dict`.
 
-        - ``id``: A string representing the application's ID.
-        - ``name``: A string representing the application's name.
-        - ``description``: A string representing the application's description.
-        - ``icon``: A string representing the icon ID of the application.
-        - ``cover_image``: A string representing the embed's image asset ID.
     stickers: List[:class:`StickerItem`]
         A list of sticker items given to the message.
 
@@ -950,8 +947,6 @@ class Message(Hashable):
             Attachment(data=a, state=self._state) for a in data["attachments"]
         ]
         self.embeds: List[Embed] = [Embed.from_dict(a) for a in data["embeds"]]
-        self.application: Optional[MessageApplicationPayload] = data.get("application")
-        self.activity: Optional[MessageActivityPayload] = data.get("activity")
         # for user experience, on_message has no business getting partials
         # TODO: Subscripted message to include the channel
         self.channel: Union[GuildMessageable, DMChannel] = channel  # type: ignore
@@ -973,6 +968,13 @@ class Message(Hashable):
             _component_factory(d, type=ActionRow[MessageComponent])
             for d in data.get("components", [])
         ]
+
+        application: Optional[PartialAppInfoPayload] = data.get("application")
+        self.application: Optional[PartialAppInfo] = (
+            PartialAppInfo(state=state, data=application) if application is not None else None
+        )
+
+        self.activity: Optional[MessageActivityPayload] = data.get("activity")
 
         inter_payload = data.get("interaction")
         inter = (
@@ -1121,8 +1123,8 @@ class Message(Hashable):
     def _handle_flags(self, value: int) -> None:
         self.flags = MessageFlags._from_value(value)
 
-    def _handle_application(self, value: MessageApplicationPayload) -> None:
-        self.application = value
+    def _handle_application(self, value: PartialAppInfoPayload) -> None:
+        self.application = PartialAppInfo(state=self._state, data=value)
 
     def _handle_activity(self, value: MessageActivityPayload) -> None:
         self.activity = value
@@ -1506,9 +1508,7 @@ class Message(Hashable):
 
         if self.type is MessageType.guild_application_premium_subscription:
             application_name = (
-                self.application["name"]
-                if self.application and "name" in self.application
-                else "a deleted application"
+                self.application.name if self.application else "a deleted application"
             )
             return f"{self.author.name} upgraded {application_name} to premium for this server! 🎉"
 

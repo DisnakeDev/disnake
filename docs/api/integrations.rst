@@ -36,6 +36,7 @@ IntegrationApplication
 
 .. autoclass:: IntegrationApplication()
     :members:
+    :inherited-members:
 
 StreamIntegration
 ~~~~~~~~~~~~~~~~~

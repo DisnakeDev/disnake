@@ -5,9 +5,10 @@ from __future__ import annotations
 import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type
 
+from .appinfo import PartialAppInfo
 from .enums import ExpireBehaviour, try_enum
 from .user import User
-from .utils import MISSING, _get_as_snowflake, deprecated, parse_time, warn_deprecated
+from .utils import MISSING, _get_as_snowflake, deprecated, parse_time
 
 __all__ = (
     "IntegrationAccount",
@@ -21,6 +22,7 @@ __all__ = (
 if TYPE_CHECKING:
     from .guild import Guild
     from .role import Role
+    from .state import ConnectionState
     from .types.integration import (
         BotIntegration as BotIntegrationPayload,
         Integration as IntegrationPayload,
@@ -311,10 +313,14 @@ class StreamIntegration(Integration):
         self.synced_at = datetime.datetime.now(datetime.timezone.utc)
 
 
-class IntegrationApplication:
+class IntegrationApplication(PartialAppInfo):
     """Represents an application for a bot integration.
 
     .. versionadded:: 2.0
+
+    .. versionchanged:: 2.9
+        Now inherits from :class:`PartialAppInfo`, :attr:`icon` type
+        changed to :class:`Asset`.
 
     Attributes
     ----------
@@ -322,45 +328,19 @@ class IntegrationApplication:
         The application's ID.
     name: :class:`str`
         The application's name.
-    icon: Optional[:class:`str`]
-        The application's icon hash.
     description: :class:`str`
-        The application's description. Can be an empty string.
+        The application's description.
     user: Optional[:class:`User`]
         The bot user associated with this application.
     """
 
-    __slots__ = (
-        "id",
-        "name",
-        "icon",
-        "description",
-        "_summary",
-        "user",
-    )
+    __slots__ = ("user",)
 
-    def __init__(self, *, data: IntegrationApplicationPayload, state) -> None:
-        self.id: int = int(data["id"])
-        self.name: str = data["name"]
-        self.icon: Optional[str] = data["icon"]
-        self.description: str = data["description"]
-        self._summary: str = data.get("summary", "")
+    def __init__(self, *, state: ConnectionState, data: IntegrationApplicationPayload) -> None:
+        super().__init__(state=state, data=data)
+
         user = data.get("bot")
         self.user: Optional[User] = User(state=state, data=user) if user else None
-
-    @property
-    def summary(self) -> str:
-        """:class:`str`: The application's summary. Can be an empty string.
-
-        .. deprecated:: 2.5
-
-            This field is deprecated by discord and is now always blank. Consider using :attr:`.description` instead.
-        """
-        warn_deprecated(
-            "summary is deprecated and will be removed in a future version. Consider using description instead.",
-            stacklevel=2,
-        )
-        return self._summary
 
 
 class BotIntegration(Integration):

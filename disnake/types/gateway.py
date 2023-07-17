@@ -7,7 +7,7 @@ from typing import Any, List, Literal, Optional, Sequence, Tuple, TypedDict, Uni
 from typing_extensions import NotRequired
 
 from .activity import PartialPresenceUpdate, PresenceData, SendableActivity
-from .appinfo import PartialAppInfo, PartialGatewayAppInfo
+from .appinfo import AppInfo, PartialGatewayAppInfo
 from .audit_log import AuditLogEntry
 from .automod import AutoModAction, AutoModRule, AutoModTriggerType
 from .channel import Channel, GuildChannel, StageInstance
@@ -344,7 +344,7 @@ class InviteCreateEvent(TypedDict):
     max_uses: int
     target_type: NotRequired[InviteTargetType]
     target_user: NotRequired[User]
-    target_application: NotRequired[PartialAppInfo]
+    target_application: NotRequired[AppInfo]
     temporary: bool
     uses: int  # always 0
 

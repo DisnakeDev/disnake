@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, List, Optional, Union
 
-from .appinfo import PartialAppInfo
+from .appinfo import AppInfo
 from .asset import Asset
 from .enums import ChannelType, InviteTarget, NSFWLevel, VerificationLevel, try_enum
 from .guild_scheduled_event import GuildScheduledEvent
@@ -363,7 +363,7 @@ class Invite(Hashable):
 
         .. versionadded:: 2.0
 
-    target_application: Optional[:class:`PartialAppInfo`]
+    target_application: Optional[:class:`AppInfo`]
         The embedded application the invite targets, if any.
 
         .. versionadded:: 2.0
@@ -455,8 +455,8 @@ class Invite(Hashable):
         self.target_type: InviteTarget = try_enum(InviteTarget, data.get("target_type", 0))
 
         application = data.get("target_application")
-        self.target_application: Optional[PartialAppInfo] = (
-            PartialAppInfo(data=application, state=state) if application else None
+        self.target_application: Optional[AppInfo] = (
+            AppInfo(data=application, state=state) if application else None
         )
 
         if scheduled_event := data.get("guild_scheduled_event"):

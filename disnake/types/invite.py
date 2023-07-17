@@ -6,7 +6,7 @@ from typing import Literal, Optional, TypedDict
 
 from typing_extensions import NotRequired
 
-from .appinfo import PartialAppInfo
+from .appinfo import AppInfo
 from .channel import InviteChannel
 from .guild import InviteGuild
 from .guild_scheduled_event import GuildScheduledEvent
@@ -35,7 +35,7 @@ class Invite(_InviteMetadata):
     inviter: NotRequired[PartialUser]
     target_type: NotRequired[InviteTargetType]
     target_user: NotRequired[PartialUser]
-    target_application: NotRequired[PartialAppInfo]
+    target_application: NotRequired[AppInfo]
     approximate_presence_count: NotRequired[int]
     approximate_member_count: NotRequired[int]
     expires_at: NotRequired[Optional[str]]

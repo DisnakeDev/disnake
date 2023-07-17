@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from .state import ConnectionState
     from .types.appinfo import (
         AppInfo as AppInfoPayload,
+        BotAppInfo as BotAppInfoPayload,
         InstallParams as InstallParamsPayload,
         PartialAppInfo as PartialAppInfoPayload,
         Team as TeamPayload,
@@ -21,8 +22,9 @@ if TYPE_CHECKING:
     from .user import User
 
 __all__ = (
-    "AppInfo",
     "PartialAppInfo",
+    "AppInfo",
+    "BotAppInfo",
     "InstallParams",
 )
 
@@ -65,8 +67,16 @@ class InstallParams:
         return utils.oauth_url(self._app_id, scopes=self.scopes, permissions=self.permissions)
 
 
-class AppInfo:
-    """Represents the application info for the bot provided by Discord.
+class PartialAppInfo:
+    """Represents partial application information, for example applications in
+    game/stream invites in messages.
+
+    .. versionadded:: 2.0
+
+    .. versionchanged:: 2.9
+        Moved ``rpc_origins``, ``verify_key``, ``terms_of_service_url``,
+        and ``privacy_policy_url`` attributes to the :class:`AppInfo` class instead.
+        Added :attr:`cover_image`, and removed deprecated ``summary`` attribute.
 
     Attributes
     ----------
@@ -74,29 +84,80 @@ class AppInfo:
         The application's ID.
     name: :class:`str`
         The application's name.
-    owner: :class:`User`
-        The application's owner.
-    team: Optional[:class:`Team`]
-        The application's team.
-
-        .. versionadded:: 1.3
-
     description: :class:`str`
         The application's description.
-    bot_public: :class:`bool`
-        Whether the bot can be invited by anyone or if it is locked
-        to the application owner.
-    bot_require_code_grant: :class:`bool`
-        Whether the bot requires the completion of the full oauth2 code
-        grant flow to join.
-    rpc_origins: Optional[List[:class:`str`]]
+    """
+
+    __slots__ = (
+        "_state",
+        "id",
+        "name",
+        "description",
+        "_icon",
+        "_cover_image",
+    )
+
+    def __init__(self, *, state: ConnectionState, data: PartialAppInfoPayload) -> None:
+        self._state: ConnectionState = state
+
+        self.id: int = int(data["id"])
+        self.name: str = data["name"]
+        self.description: str = data.get("description") or ""
+        self._icon: Optional[str] = data.get("icon")
+        self._cover_image: Optional[str] = data.get("cover_image")
+
+    def __repr__(self) -> str:
+        return (
+            f"<{self.__class__.__name__} id={self.id}"
+            f" name={self.name!r} description={self.description!r}>"
+        )
+
+    @property
+    def icon(self) -> Optional[Asset]:
+        """Optional[:class:`.Asset`]: Retrieves the application's icon asset, if any."""
+        if self._icon is None:
+            return None
+        return Asset._from_icon(self._state, self.id, self._icon, path="app")
+
+    @property
+    def cover_image(self) -> Optional[Asset]:
+        """Optional[:class:`.Asset`]: Retrieves the application's cover image asset, if any."""
+        if self._cover_image is None:
+            return None
+        return Asset._from_icon(self._state, self.id, self._cover_image, path="app")
+
+
+class AppInfo(PartialAppInfo):
+    """Represents application information, for example applications in invites.
+
+    .. versionadded:: 2.0
+
+    .. versionchanged:: 2.9
+        Removed deprecated ``summary`` attribute.
+
+    Attributes
+    ----------
+    id: :class:`int`
+        The application's ID.
+    name: :class:`str`
+        The application's name.
+    description: :class:`str`
+        The application's description.
+    rpc_origins: List[:class:`str`]
         A list of RPC origin URLs, if RPC is enabled.
     verify_key: :class:`str`
         The hex encoded key for verification in interactions and the
         GameSDK's :ddocs:`GetTicket <game-sdk/applications#getticket>`.
-
-        .. versionadded:: 1.3
-
+    terms_of_service_url: Optional[:class:`str`]
+        The application's terms of service URL, if set.
+    privacy_policy_url: Optional[:class:`str`]
+        The application's privacy policy URL, if set.
+    bot_public: Optional[:class:`bool`]
+        Whether the bot can be invited by anyone or if it is locked
+        to the application owner.
+    bot_require_code_grant: Optional[:class:`bool`]
+        Whether the bot requires the completion of the full oauth2 code
+        grant flow to join.
     guild_id: Optional[:class:`int`]
         If this application is a game sold on Discord,
         this field will be the guild to which it has been linked to.
@@ -115,16 +176,6 @@ class AppInfo:
         this field will be the URL slug that links to the store page.
 
         .. versionadded:: 1.3
-
-    terms_of_service_url: Optional[:class:`str`]
-        The application's terms of service URL, if set.
-
-        .. versionadded:: 2.0
-
-    privacy_policy_url: Optional[:class:`str`]
-        The application's privacy policy URL, if set.
-
-        .. versionadded:: 2.0
 
     flags: Optional[:class:`ApplicationFlags`]
         The application's public flags.
@@ -154,24 +205,15 @@ class AppInfo:
     """
 
     __slots__ = (
-        "_state",
-        "description",
-        "id",
-        "name",
         "rpc_origins",
+        "verify_key",
+        "terms_of_service_url",
+        "privacy_policy_url",
         "bot_public",
         "bot_require_code_grant",
-        "owner",
-        "_icon",
-        "_summary",
-        "verify_key",
-        "team",
         "guild_id",
         "primary_sku_id",
         "slug",
-        "_cover_image",
-        "terms_of_service_url",
-        "privacy_policy_url",
         "flags",
         "tags",
         "install_params",
@@ -180,31 +222,21 @@ class AppInfo:
     )
 
     def __init__(self, state: ConnectionState, data: AppInfoPayload) -> None:
-        from .team import Team
+        super().__init__(state=state, data=data)
 
-        self._state: ConnectionState = state
-        self.id: int = int(data["id"])
-        self.name: str = data["name"]
-        self.description: str = data["description"]
-        self._icon: Optional[str] = data["icon"]
-        self.rpc_origins: List[str] = data["rpc_origins"]
-        self.bot_public: bool = data["bot_public"]
-        self.bot_require_code_grant: bool = data["bot_require_code_grant"]
-        self.owner: User = state.create_user(data["owner"])
-
-        team: Optional[TeamPayload] = data.get("team")
-        self.team: Optional[Team] = Team(state, team) if team else None
-
-        self._summary: str = data.get("summary", "")
         self.verify_key: str = data["verify_key"]
+
+        self.rpc_origins: List[str] = data.get("rpc_origins") or []
+        self.terms_of_service_url: Optional[str] = data.get("terms_of_service_url")
+        self.privacy_policy_url: Optional[str] = data.get("privacy_policy_url")
+
+        self.bot_public: Optional[bool] = data.get("bot_public")
+        self.bot_require_code_grant: Optional[bool] = data.get("bot_require_code_grant")
 
         self.guild_id: Optional[int] = utils._get_as_snowflake(data, "guild_id")
 
         self.primary_sku_id: Optional[int] = utils._get_as_snowflake(data, "primary_sku_id")
         self.slug: Optional[str] = data.get("slug")
-        self._cover_image: Optional[str] = data.get("cover_image")
-        self.terms_of_service_url: Optional[str] = data.get("terms_of_service_url")
-        self.privacy_policy_url: Optional[str] = data.get("privacy_policy_url")
 
         flags: Optional[int] = data.get("flags")
         self.flags: Optional[ApplicationFlags] = (
@@ -219,30 +251,6 @@ class AppInfo:
             "role_connections_verification_url"
         )
 
-    def __repr__(self) -> str:
-        return (
-            f"<{self.__class__.__name__} id={self.id} name={self.name!r} "
-            f"description={self.description!r} public={self.bot_public} "
-            f"owner={self.owner!r}>"
-        )
-
-    @property
-    def icon(self) -> Optional[Asset]:
-        """Optional[:class:`.Asset`]: Retrieves the application's icon asset, if any."""
-        if self._icon is None:
-            return None
-        return Asset._from_icon(self._state, self.id, self._icon, path="app")
-
-    @property
-    def cover_image(self) -> Optional[Asset]:
-        """Optional[:class:`.Asset`]: Retrieves the cover image on a store embed, if any.
-
-        This is only available if the application is a game sold on Discord.
-        """
-        if self._cover_image is None:
-            return None
-        return Asset._from_cover_image(self._state, self.id, self._cover_image)
-
     @property
     def guild(self) -> Optional[Guild]:
         """Optional[:class:`Guild`]: If this application is a game sold on Discord,
@@ -252,28 +260,14 @@ class AppInfo:
         """
         return self._state._get_guild(self.guild_id)
 
-    @property
-    def summary(self) -> str:
-        """:class:`str`: If this application is a game sold on Discord,
-        this field will be the summary field for the store page of its primary SKU.
 
-        .. versionadded:: 1.3
+class BotAppInfo(AppInfo):
+    """Represents the application info for the bot provided by Discord.
 
-        .. deprecated:: 2.5
+    Equivalent to :class:`AppInfo`, but with additional :attr:`owner`
+    and :attr:`team` attributes.
 
-            This field is deprecated by discord and is now always blank. Consider using :attr:`.description` instead.
-        """
-        utils.warn_deprecated(
-            "summary is deprecated and will be removed in a future version. Consider using description instead.",
-            stacklevel=2,
-        )
-        return self._summary
-
-
-class PartialAppInfo:
-    """Represents a partial AppInfo given by :func:`~disnake.abc.GuildChannel.create_invite`.
-
-    .. versionadded:: 2.0
+    .. versionadded:: 2.9
 
     Attributes
     ----------
@@ -283,7 +277,7 @@ class PartialAppInfo:
         The application's name.
     description: :class:`str`
         The application's description.
-    rpc_origins: Optional[List[:class:`str`]]
+    rpc_origins: List[:class:`str`]
         A list of RPC origin URLs, if RPC is enabled.
     verify_key: :class:`str`
         The hex encoded key for verification in interactions and the
@@ -292,54 +286,58 @@ class PartialAppInfo:
         The application's terms of service URL, if set.
     privacy_policy_url: Optional[:class:`str`]
         The application's privacy policy URL, if set.
+    bot_public: Optional[:class:`bool`]
+        Whether the bot can be invited by anyone or if it is locked
+        to the application owner.
+    bot_require_code_grant: Optional[:class:`bool`]
+        Whether the bot requires the completion of the full oauth2 code
+        grant flow to join.
+    guild_id: Optional[:class:`int`]
+        If this application is a game sold on Discord,
+        this field will be the guild to which it has been linked to.
+    primary_sku_id: Optional[:class:`int`]
+        If this application is a game sold on Discord,
+        this field will be the ID of the "Game SKU" that is created,
+        if it exists.
+    slug: Optional[:class:`str`]
+        If this application is a game sold on Discord,
+        this field will be the URL slug that links to the store page.
+    flags: Optional[:class:`ApplicationFlags`]
+        The application's public flags.
+    tags: Optional[List[:class:`str`]]
+        The application's tags.
+    install_params: Optional[:class:`InstallParams`]
+        The installation parameters for this application.
+    custom_install_url: Optional[:class:`str`]
+        The custom installation url for this application.
+    role_connections_verification_url: Optional[:class:`str`]
+        The application's role connection verification entry point,
+        which when configured will render the app as a verification method
+        in the guild role verification configuration.
+    owner: :class:`User`
+        The application's owner.
+    team: Optional[:class:`Team`]
+        The application's team.
     """
 
     __slots__ = (
-        "_state",
-        "id",
-        "name",
-        "description",
-        "rpc_origins",
-        "_summary",
-        "verify_key",
-        "terms_of_service_url",
-        "privacy_policy_url",
-        "_icon",
+        "owner",
+        "team",
     )
 
-    def __init__(self, *, state: ConnectionState, data: PartialAppInfoPayload) -> None:
-        self._state: ConnectionState = state
-        self.id: int = int(data["id"])
-        self.name: str = data["name"]
-        self._icon: Optional[str] = data.get("icon")
-        self.description: str = data["description"]
-        self.rpc_origins: Optional[List[str]] = data.get("rpc_origins")
-        self._summary: str = data.get("summary", "")
-        self.verify_key: str = data["verify_key"]
-        self.terms_of_service_url: Optional[str] = data.get("terms_of_service_url")
-        self.privacy_policy_url: Optional[str] = data.get("privacy_policy_url")
+    def __init__(self, state: ConnectionState, data: BotAppInfoPayload) -> None:
+        super().__init__(state=state, data=data)
+
+        self.owner: User = state.create_user(data["owner"])
+
+        from .team import Team
+
+        team: Optional[TeamPayload] = data.get("team")
+        self.team: Optional[Team] = Team(state, team) if team else None
 
     def __repr__(self) -> str:
-        return f"<{self.__class__.__name__} id={self.id} name={self.name!r} description={self.description!r}>"
-
-    @property
-    def icon(self) -> Optional[Asset]:
-        """Optional[:class:`.Asset`]: Retrieves the application's icon asset, if any."""
-        if self._icon is None:
-            return None
-        return Asset._from_icon(self._state, self.id, self._icon, path="app")
-
-    @property
-    def summary(self) -> str:
-        """:class:`str`: If this application is a game sold on Discord,
-        this field will be the summary field for the store page of its primary SKU.
-
-        .. deprecated:: 2.5
-
-            This field is deprecated by discord and is now always blank. Consider using :attr:`.description` instead.
-        """
-        utils.warn_deprecated(
-            "summary is deprecated and will be removed in a future version. Consider using description instead.",
-            stacklevel=2,
+        return (
+            f"<{self.__class__.__name__} id={self.id} name={self.name!r} "
+            f"description={self.description!r} public={self.bot_public} "
+            f"owner={self.owner!r}>"
         )
-        return self._summary

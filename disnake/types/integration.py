@@ -6,16 +6,12 @@ from typing import List, Literal, Optional, TypedDict, Union
 
 from typing_extensions import NotRequired
 
+from .appinfo import PartialAppInfo
 from .snowflake import Snowflake
 from .user import User
 
 
-class IntegrationApplication(TypedDict):
-    id: Snowflake
-    name: str
-    icon: Optional[str]
-    description: str
-    summary: str
+class IntegrationApplication(PartialAppInfo):
     bot: NotRequired[User]
 
 

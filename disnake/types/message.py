@@ -6,6 +6,7 @@ from typing import List, Literal, Optional, TypedDict, Union
 
 from typing_extensions import NotRequired
 
+from .appinfo import PartialAppInfo
 from .channel import ChannelType
 from .components import Component
 from .embed import Embed
@@ -54,14 +55,6 @@ class MessageActivity(TypedDict):
     party_id: NotRequired[str]
 
 
-class MessageApplication(TypedDict):
-    id: Snowflake
-    description: str
-    icon: Optional[str]
-    name: str
-    cover_image: NotRequired[str]
-
-
 class MessageReference(TypedDict, total=False):
     message_id: Snowflake
     channel_id: Snowflake
@@ -102,7 +95,7 @@ class Message(TypedDict):
     webhook_id: NotRequired[Snowflake]
     type: MessageType
     activity: NotRequired[MessageActivity]
-    application: NotRequired[MessageApplication]
+    application: NotRequired[PartialAppInfo]
     application_id: NotRequired[Snowflake]
     message_reference: NotRequired[MessageReference]
     flags: NotRequired[int]
