@@ -104,7 +104,6 @@ Coro = Coroutine[Any, Any, T]
 CoroFunc = Callable[..., Coro[Any]]
 
 CoroT = TypeVar("CoroT", bound=Callable[..., Coroutine[Any, Any, Any]])
-CFT = TypeVar("CFT", bound=CoroFunc)
 
 _log = logging.getLogger(__name__)
 
@@ -807,7 +806,7 @@ class Client:
         """
         if name is not MISSING and not isinstance(name, (str, Event)):
             raise TypeError(
-                f"Bot.add_listener expected str or Enum but received {name.__class__.__name__!r} instead."
+                f"add_listener expected str or Enum but received {name.__class__.__name__!r} instead."
             )
 
         name_ = (
@@ -846,7 +845,7 @@ class Client:
         """
         if name is not MISSING and not isinstance(name, (str, Event)):
             raise TypeError(
-                f"Bot.remove_listener expected str or Enum but received {name.__class__.__name__!r} instead."
+                f"remove_listener expected str or Enum but received {name.__class__.__name__!r} instead."
             )
         name = (
             func.__name__
@@ -860,7 +859,7 @@ class Client:
             except ValueError:
                 pass
 
-    def listen(self, name: Union[str, Event] = MISSING) -> Callable[[CFT], CFT]:
+    def listen(self, name: Union[str, Event] = MISSING) -> Callable[[CoroT], CoroT]:
         """A decorator that registers another function as an external
         event listener. Basically this allows you to listen to multiple
         events from different places e.g. such as :func:`.on_ready`
@@ -900,10 +899,10 @@ class Client:
         """
         if name is not MISSING and not isinstance(name, (str, Event)):
             raise TypeError(
-                f"Bot.listen expected str or Enum but received {name.__class__.__name__!r} instead."
+                f"listen expected str or Enum but received {name.__class__.__name__!r} instead."
             )
 
-        def decorator(func: CFT) -> CFT:
+        def decorator(func: CoroT) -> CoroT:
             self.add_listener(func, name)
             return func
 
