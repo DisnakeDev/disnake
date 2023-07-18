@@ -775,8 +775,8 @@ class Client:
         """The non decorator alternative to :meth:`.listen`.
 
         .. versionchanged:: 2.10
-            The definition of this method was moved from the :class:`.ext.commands.Bot`
-            base class to :class:`.Client` class.
+            The definition of this method was moved from :class:`.ext.commands.Bot`
+            to the :class:`.Client` class.
 
         Parameters
         ----------
