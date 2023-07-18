@@ -41,6 +41,23 @@ overriding the specific events. For example: ::
             if message.content.startswith('$hello'):
                 await message.reply(f'Hello, {message.author}!')
 
+The third way is through the use of a ``listener``. A listener is a function that gets executed
+when the event that you're listening to is dispatched.
+Listeners are really useful because you can listen to the same event multiple times, this means
+that you can have multiple functions that will be called when an event is dispatched.
+You can register listeners using the :meth:`Client.listen` decorator or through the :meth:`Client.add_listener`
+method. Similarly you can remove a listener using the :meth:`Client.remove_listener` method. ::
+
+    @client.listen()
+    async def on_message(message: disnake.Message):
+        await message.reply(f'Hello, {message.author}')
+
+    async def my_on_ready():
+        print(f'Logged in as {client.user}')
+
+    client.add_listener(my_on_ready, 'on_ready')
+
+
 Another way is to use :meth:`Client.wait_for`, which is a single-use event handler to wait for
 something to happen in more specific scenarios: ::
 
@@ -59,17 +76,6 @@ something to happen in more specific scenarios: ::
 
 The above pieces of code are essentially equal, and both respond with ``Hello, {author's username here}!`` message
 when a user sends a ``$hello`` message.
-
-.. warning::
-
-    Event handlers described here are a bit different from :class:`~ext.commands.Bot`'s *event listeners*.
-
-    :class:`Client`'s event handlers are unique, which means you can only have one of each type (i.e. only one `on_message`, one `on_member_ban`, etc.). With :class:`~ext.commands.Bot` however, you can have as many *listeners*
-    of the same type as you want.
-
-    Also note that :meth:`Bot.event() <disnake.ext.commands.Bot.event>` is the same as :class:`Client`'s
-    :meth:`~Client.event` (since :class:`~ext.commands.Bot` subclasses :class:`Client`) and does not allow to listen/watch
-    for multiple events of the same type. Consider using :meth:`Bot.listen() <disnake.ext.commands.Bot.listen>` instead.
 
 .. note::
 
@@ -126,9 +132,8 @@ This section documents events related to :class:`Client` and its connectivity to
 
         ``on_error`` will only be dispatched to :meth:`Client.event`.
 
-        It will not be received by :meth:`Client.wait_for`, or, if used,
-        :ref:`ext_commands_api_bots` listeners such as
-        :meth:`~ext.commands.Bot.listen` or :meth:`~ext.commands.Cog.listener`.
+        It will not be received by :meth:`Client.wait_for` and listeners
+        such as :meth:`Client.listen`, or :meth:`~ext.commands.Cog.listener`.
 
     :param event: The name of the event that raised the exception.
     :type event: :class:`str`
@@ -154,9 +159,8 @@ This section documents events related to :class:`Client` and its connectivity to
     .. note::
         ``on_gateway_error`` will only be dispatched to :meth:`Client.event`.
 
-        It will not be received by :meth:`Client.wait_for`, or, if used,
-        :ref:`ext_commands_api_bots` listeners such as
-        :meth:`~ext.commands.Bot.listen` or :meth:`~ext.commands.Cog.listener`.
+        It will not be received by :meth:`Client.wait_for` and listeners
+        such as :meth:`Client.listen`, or :meth:`~ext.commands.Cog.listener`.
 
     .. note::
         This will not be dispatched for exceptions that occur while parsing ``READY`` and
