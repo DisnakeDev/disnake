@@ -76,7 +76,7 @@ class ModalInteraction(Interaction[BotT]):
         self.data: ModalInteractionData = ModalInteractionData(data=data["data"])
 
         if message_data := data.get("message"):
-            message = Message(state=self._state, channel=self.channel, data=message_data)  # type: ignore # pyright bug
+            message = Message(state=self._state, channel=self.channel, data=message_data)
         else:
             message = None
         self.message: Optional[Message] = message
