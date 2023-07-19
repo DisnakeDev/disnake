@@ -549,6 +549,7 @@ class Guild(Hashable):
         self.emojis: Tuple[Emoji, ...] = ()
         self.stickers: Tuple[GuildSticker, ...] = ()
         # don't cache emojis/stickers if this is part of a gw event and the intent is disabled
+        # (we still want to store them on this guild object even with the intent disabled if obtained from `fetch_guild` etc.)
         if not from_gateway or state._intents.emojis_and_stickers:
             self.emojis = tuple(state.store_emoji(self, d) for d in guild.get("emojis", []))
             self.stickers = tuple(state.store_sticker(self, d) for d in guild.get("stickers", []))
