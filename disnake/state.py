@@ -275,6 +275,10 @@ class ConnectionState:
         if not self._intents.members or member_cache_flags._empty:
             self.store_user = self.create_user
 
+        if not self._intents.emojis_and_stickers:
+            self.store_emoji = self.create_emoji
+            self.store_sticker = self.create_sticker
+
         self.parsers = parsers = {}
         for attr, func in inspect.getmembers(self):
             if attr.startswith("parse_"):
@@ -398,10 +402,16 @@ class ConnectionState:
         self._emojis[emoji_id] = emoji = Emoji(guild=guild, state=self, data=data)
         return emoji
 
+    def create_emoji(self, guild: Guild, data: EmojiPayload) -> Emoji:
+        return Emoji(guild=guild, state=self, data=data)
+
     def store_sticker(self, guild: Guild, data: GuildStickerPayload) -> GuildSticker:
         sticker_id = int(data["id"])
         self._stickers[sticker_id] = sticker = GuildSticker(state=self, data=data)
         return sticker
+
+    def create_sticker(self, guild: Guild, data: GuildStickerPayload) -> GuildSticker:
+        return GuildSticker(state=self, data=data)
 
     def store_view(self, view: View, message_id: Optional[int] = None) -> None:
         self._view_store.add_view(view, message_id)
@@ -575,6 +585,7 @@ class ConnectionState:
         guild = Guild(
             data=data,  # type: ignore  # may be unavailable guild
             state=self,
+            from_gateway=True,
         )
         self._add_guild(guild)
         return guild
@@ -1337,6 +1348,8 @@ class ConnectionState:
             )
             return
 
+        # n.b. this isn't gated by an intent check, since we shouldn't receive
+        # this event in the first place if the intent is disabled
         before_emojis = guild.emojis
         for emoji in before_emojis:
             self._emojis.pop(emoji.id, None)
@@ -1366,7 +1379,7 @@ class ConnectionState:
             guild = self._get_guild(int(data["id"]))
             if guild is not None:
                 guild.unavailable = False
-                guild._from_data(data)  # type: ignore  # data type not narrowed correctly to full guild
+                guild._from_data(data, from_gateway=True)  # type: ignore  # data type not narrowed correctly to full guild
                 return guild
 
         return self._add_guild_from_data(data)
@@ -1444,7 +1457,7 @@ class ConnectionState:
         guild = self._get_guild(int(data["id"]))
         if guild is not None:
             old_guild = copy.copy(guild)
-            guild._from_data(data)
+            guild._from_data(data, from_gateway=True)
             self.dispatch("guild_update", old_guild, guild)
         else:
             _log.debug("GUILD_UPDATE referencing an unknown guild ID: %s. Discarding.", data["id"])
