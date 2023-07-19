@@ -1366,8 +1366,8 @@ class ConnectionState:
             return
 
         before_stickers = guild.stickers
-        for emoji in before_stickers:
-            self._stickers.pop(emoji.id, None)
+        for sticker in before_stickers:
+            self._stickers.pop(sticker.id, None)
         guild.stickers = tuple(self.store_sticker(guild, d) for d in data["stickers"])
         self.dispatch("guild_stickers_update", guild, before_stickers, guild.stickers)
 
