@@ -590,12 +590,13 @@ class Guild(Hashable):
                 stage_instance = StageInstance(guild=self, data=s, state=state)
                 self._stage_instances[stage_instance.id] = stage_instance
 
-        scheduled_events = guild.get("guild_scheduled_events")
-        if scheduled_events is not None:
-            self._scheduled_events = {}
-            for e in scheduled_events:
-                scheduled_event = GuildScheduledEvent(state=state, data=e)
-                self._scheduled_events[scheduled_event.id] = scheduled_event
+        if not from_gateway or state._intents.guild_scheduled_events:
+            scheduled_events = guild.get("guild_scheduled_events")
+            if scheduled_events is not None:
+                self._scheduled_events = {}
+                for e in scheduled_events:
+                    scheduled_event = GuildScheduledEvent(state=state, data=e)
+                    self._scheduled_events[scheduled_event.id] = scheduled_event
 
         cache_joined = self._state.member_cache_flags.joined
         self_id = self._state.self_id
