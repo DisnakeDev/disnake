@@ -150,6 +150,7 @@ class _BaseActivity:
 
         .. versionchanged:: 2.10
             Moved from :class:`Activity` to base type, making this available to all activity types.
+            Additionally, supports dynamic asset urls using the ``mp:`` prefix now.
         """
         try:
             large_image = self.assets["large_image"]
@@ -164,6 +165,7 @@ class _BaseActivity:
 
         .. versionchanged:: 2.10
             Moved from :class:`Activity` to base type, making this available to all activity types.
+            Additionally, supports dynamic asset urls using the ``mp:`` prefix now.
         """
         try:
             small_image = self.assets["small_image"]
