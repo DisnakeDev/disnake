@@ -423,7 +423,6 @@ class DiscordWebSocket:
         ws = cls(socket, loop=client.loop)
 
         # dynamically add attributes needed
-        # ws.token = client.http.token  # type: ignore
         ws.token = client._token  # type: ignore
         ws._connection = client._connection
         ws._discord_parsers = client._connection.parsers
