@@ -6,14 +6,10 @@ import asyncio
 import logging
 import re
 import sys
-import weakref
-from datetime import datetime
-from errno import ECONNRESET
+from datetime import datetime, timezone
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
-    cast,
     ClassVar,
     Coroutine,
     Dict,
@@ -26,6 +22,7 @@ from typing import (
     Type,
     TypeVar,
     Union,
+    cast,
 )
 from urllib.parse import quote as _uriquote
 
@@ -50,8 +47,6 @@ _log = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from types import TracebackType
-
-    from typing_extensions import Self
 
     from .enums import InteractionResponseType
     from .file import File
@@ -255,7 +250,6 @@ class RateLimit:
 
     async def update(self, response: aiohttp.ClientResponse) -> None:
         """Updates the rate limit with information from the response."""
-
         if response.headers.get("X-RateLimit-Global") == "true":
             # The response is intended for the global rate limit, not a regular rate limit.
             return
@@ -297,7 +291,8 @@ class RateLimit:
         # Updates the datetime of the reset.
         x_reset = response.headers.get("X-RateLimit-Reset")
         if x_reset is not None:
-            self.reset = datetime.utcfromtimestamp(float(x_reset))
+            # self.reset = datetime.utcfromtimestamp(float(x_reset))
+            self.reset = datetime.fromtimestamp(float(x_reset), tz=timezone.utc)
 
         # Updates the reset-after count, being pessimistic.
         x_reset_after = response.headers.get("X-RateLimit-Reset-After")
@@ -436,8 +431,7 @@ class RateLimit:
 
 
 class GlobalRateLimit(RateLimit):
-    """
-    Represents the global rate limit, and thus has to have slightly modified behavior.
+    """Represents the global rate limit, and thus has to have slightly modified behavior.
 
     Still not thread safe.
     """
@@ -537,26 +531,28 @@ aiohttp.hdrs.WEBSOCKET = "websocket"  # type: ignore
 
 class HTTPClient:
     """Represents an HTTP client for sending HTTP requests to and handling the rate limits of the Discord API.
-        Also, not thread safe.
-        Parameters
-        ----------
-        connector
-        default_max_per_second: :class:`int`
-            Maximum amount of requests per second per authorization.
-            Discord by default only allows 50 requests per second, but if your bot has had its maximum increased, then
-            increase this parameter.
-        time_offset: :class:`float`
-            Amount of seconds added to all ratelimit timers for lag compensation.
-            Due to latency and Discord servers not perfectly time synced, having no offset can cause 429's to occur even
-            with us following the reported X-RateLimit-Reset-After.
-            Increasing will protect from erroneous 429s but will slow bucket resets, lowering max theoretical speed.
-            Decreasing will hasten bucket resets and increase max theoretical speed but may cause 429s.
-        default_auth: Optional[:class:`str`]
-            Default string to use in the Authorization header if it's not manually provided.
-        proxy
-        proxy_auth
-        loop
-        """
+    Also, not thread safe.
+
+    Parameters
+    ----------
+    connector
+    default_max_per_second: :class:`int`
+        Maximum amount of requests per second per authorization.
+        Discord by default only allows 50 requests per second, but if your bot has had its maximum increased, then
+        increase this parameter.
+    time_offset: :class:`float`
+        Amount of seconds added to all ratelimit timers for lag compensation.
+        Due to latency and Discord servers not perfectly time synced, having no offset can cause 429's to occur even
+        with us following the reported X-RateLimit-Reset-After.
+        Increasing will protect from erroneous 429s but will slow bucket resets, lowering max theoretical speed.
+        Decreasing will hasten bucket resets and increase max theoretical speed but may cause 429s.
+    default_auth: Optional[:class:`str`]
+        Default string to use in the Authorization header if it's not manually provided.
+    proxy
+    proxy_auth
+    loop
+    """
+
     def __init__(
         self,
         connector: Optional[aiohttp.BaseConnector] = None,
@@ -621,7 +617,7 @@ class HTTPClient:
         return ret
 
     def _set_url_rate_limit(
-            self, method: str, route: Route, auth: str | None, rate_limit: RateLimit
+        self, method: str, route: Route, auth: str | None, rate_limit: RateLimit
     ) -> None:
         self._url_rate_limits[(method, route.bucket, auth)] = rate_limit
 
@@ -632,7 +628,7 @@ class HTTPClient:
         self._default_auth = auth
 
     def _make_headers(
-            self, original_headers: dict[str, str], *, auth: str | None = None
+        self, original_headers: dict[str, str], *, auth: str | None = None
     ) -> dict[str, str]:
         ret = original_headers.copy()
         if "Authorization" not in ret and self._default_auth:
@@ -834,13 +830,13 @@ class HTTPClient:
     #         raise RuntimeError("Unreachable code in HTTP handling")
 
     async def request(
-            self,
-            route: Route,
-            *,
-            files: Optional[Sequence[File]] = None,
-            form: Optional[Iterable[Dict[str, Any]]] = None,
-            auth: Optional[str] = None,
-            **kwargs: Any,
+        self,
+        route: Route,
+        *,
+        files: Optional[Sequence[File]] = None,
+        form: Optional[Iterable[Dict[str, Any]]] = None,
+        auth: Optional[str] = None,
+        **kwargs: Any,
     ) -> Any:
         if not self.__session:
             self.__session = aiohttp.ClientSession(
@@ -888,7 +884,7 @@ class HTTPClient:
                     async with url_rate_limit:
                         # This check is for asyncio.gather()'d requests where the rate limit can change.
                         if (
-                                temp := self._get_url_rate_limit(route.method, route, auth)
+                            temp := self._get_url_rate_limit(route.method, route, auth)
                         ) is not url_rate_limit and not None:
                             temp = cast(RateLimit, temp)
                             _log.debug(
@@ -903,18 +899,31 @@ class HTTPClient:
                                 f.reset(seek=retry_count)
 
                         if form:
+                            # form_data = aiohttp.FormData(quote_fields=False)
+                            # for params in form:
+                            #     form_data.add_field(**params)
+                            # kwargs["data"] = form_data
+                            # NOTE: for `quote_fields`, see https://github.com/aio-libs/aiohttp/issues/4012
                             form_data = aiohttp.FormData(quote_fields=False)
-                            for params in form:
-                                form_data.add_field(**params)
+                            for p in form:
+                                # manually escape chars, just in case
+                                name = re.sub(
+                                    r"[^\x21\x23-\x5b\x5d-\x7e]",
+                                    lambda m: f"\\{m.group(0)}",
+                                    p["name"],
+                                )
+                                form_data.add_field(
+                                    name=name, **{k: v for k, v in p.items() if k != "name"}
+                                )
                             kwargs["data"] = form_data
 
                         async with self.__session.request(
-                                method=route.method,
-                                url=route.url,
-                                headers=headers,
-                                proxy=self._proxy,
-                                proxy_auth=self._proxy_auth,
-                                **kwargs,
+                            method=route.method,
+                            url=route.url,
+                            headers=headers,
+                            proxy=self._proxy,
+                            proxy_auth=self._proxy_auth,
+                            **kwargs,
                         ) as response:
                             _log.debug(
                                 "%s %s with %s has returned %s",
@@ -930,10 +939,10 @@ class HTTPClient:
                             except IncorrectBucket as e:
                                 # This condition can be met when doing asyncio.gather()'d requests.
                                 if (
-                                        temp := self._buckets.get(
-                                            # The empty string default makes pyright happy. (hopefully)
-                                            response.headers.get("X-RateLimit-Bucket", "")
-                                        )
+                                    temp := self._buckets.get(
+                                        # The empty string default makes pyright happy. (hopefully)
+                                        response.headers.get("X-RateLimit-Bucket", "")
+                                    )
                                 ) is not None:
                                     _log.debug(
                                         "Route %s was given a different bucket, found it.",
@@ -956,7 +965,7 @@ class HTTPClient:
                                     await url_rate_limit.update(response)
 
                             if url_rate_limit.bucket is not None and self._buckets.get(
-                                    url_rate_limit.bucket
+                                url_rate_limit.bucket
                             ) not in (url_rate_limit, None):
                                 # If the current RateLimit bucket name exists, but the stored RateLimit is not the
                                 #  current RateLimit, finish up and signal that the current bucket should be migrated
@@ -1025,7 +1034,7 @@ class HTTPClient:
                                         raise HTTPException(response, ret)
 
                                     _log.warning(
-                                        'We are being rate limited. Retrying in %.2f seconds. '
+                                        "We are being rate limited. Retrying in %.2f seconds. "
                                         'Handled under the bucket "%s"',
                                         url_rate_limit.reset_after,
                                         url_rate_limit.bucket,
@@ -1129,7 +1138,7 @@ class HTTPClient:
         return data
 
     async def exchange_access_code(
-            self, *, client_id: int, client_secret: str, code: str, redirect_uri: str
+        self, *, client_id: int, client_secret: str, code: str, redirect_uri: str
     ):
         # TODO: Look into how viable this function is here.
         # This doesn't actually have hard ratelimits it seems? Not in the headers at least. The default bucket should
