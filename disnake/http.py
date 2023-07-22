@@ -206,7 +206,7 @@ class IncorrectBucket(DiscordException):
 
 
 class RateLimit:
-    """Used to time gate a large batch of requests to only occur X every Y seconds. Used via ``async with``
+    """Used to time gate a large batch of requests to only occur X every Y seconds. Used via an async context manager.
 
     NOT THREAD SAFE.
 
@@ -885,7 +885,7 @@ class HTTPClient:
                         # This check is for asyncio.gather()'d requests where the rate limit can change.
                         if (
                             temp := self._get_url_rate_limit(route.method, route, auth)
-                        ) is not url_rate_limit and not None:
+                        ) not in (url_rate_limit, None):
                             temp = cast(RateLimit, temp)
                             _log.debug(
                                 "Route %s had the rate limit changed, resetting and retrying.",
@@ -986,7 +986,7 @@ class HTTPClient:
                                 else:
                                     raise ValueError(
                                         f"Migrating to bucket {correct_rate_limit.bucket}, but "
-                                        f"correct_rate_limit.bucket is falsey. This is likely an internal Nextcord "
+                                        f"correct_rate_limit.bucket is falsey. This is likely an internal Disnake "
                                         f"issue and should be reported."
                                     )
                                 # Update the correct RateLimit object with our findings.
@@ -1065,7 +1065,7 @@ class HTTPClient:
             except RateLimitMigrating:
                 if url_rate_limit.migrating is None:
                     raise ValueError(
-                        "RateLimitMigrating raised, but RateLimit.migrating is None. This is an internal Nextcord "
+                        "RateLimitMigrating raised, but RateLimit.migrating is None. This is an internal Disnake "
                         "error and should be reported!"
                     )
                 else:
@@ -1083,7 +1083,7 @@ class HTTPClient:
 
             if retry_count >= max_retry_count - 1:
                 _log.error(
-                    "Hit retry %s/%s on %s, either something is wrong with Discord or Nextcord.",
+                    "Hit retry %s/%s on %s, either something is wrong with Discord or Disnake.",
                     retry_count + 1,
                     max_retry_count,
                     rate_limit_path,
