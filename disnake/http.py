@@ -566,8 +566,8 @@ class HTTPClient:
         # dispatch: Callable,
     ) -> None:
         # TODO: Think about adding ratelimit_multiplier? Would reduce the internal RateLimit.limit by that
-        #  float (such as 0.7) and could allow people to run multiple NC bots/processes on the same token while avoiding
-        #  ratelimit issues. Could also help with replit-style scenarios.
+        #  float (such as 0.7) and could allow people to run multiple Disnake bots/processes on the same token while
+        #  avoiding ratelimit issues. Could also help with replit-style scenarios.
         self.__session: aiohttp.ClientSession = MISSING  # Set when performing a request.
         self._connector = connector
         self._default_max_per_second = default_max_per_second
@@ -1074,7 +1074,7 @@ class HTTPClient:
                         # This means we have an internal issue that we need to fix.
                         raise ValueError(
                             "RateLimit said to migrate, but the RateLimit to migrate was not found? This is an "
-                            "internal Nextcord error and should be reported!"
+                            "internal Disnake error and should be reported!"
                         )
 
             else:
