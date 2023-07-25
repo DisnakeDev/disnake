@@ -586,7 +586,7 @@ class SyncWebhook(BaseWebhook):
     def partial(
         cls, id: int, token: str, *, session: Session = MISSING, bot_token: Optional[str] = None
     ) -> SyncWebhook:
-        """Creates a partial :class:`Webhook`.
+        """Creates a partial :class:`SyncWebhook`.
 
         Parameters
         ----------
@@ -605,8 +605,8 @@ class SyncWebhook(BaseWebhook):
 
         Returns
         -------
-        :class:`Webhook`
-            A partial :class:`Webhook`.
+        :class:`SyncWebhook`
+            A partial :class:`SyncWebhook`.
             A partial webhook is just a webhook object with an ID and a token.
         """
         data: WebhookPayload = {
@@ -627,7 +627,7 @@ class SyncWebhook(BaseWebhook):
     def from_url(
         cls, url: str, *, session: Session = MISSING, bot_token: Optional[str] = None
     ) -> SyncWebhook:
-        """Creates a partial :class:`Webhook` from a webhook URL.
+        """Creates a partial :class:`SyncWebhook` from a webhook URL.
 
         .. versionchanged:: 2.6
             Raises :exc:`ValueError` instead of ``InvalidArgument``.
@@ -652,8 +652,8 @@ class SyncWebhook(BaseWebhook):
 
         Returns
         -------
-        :class:`Webhook`
-            A partial :class:`Webhook`.
+        :class:`SyncWebhook`
+            A partial :class:`SyncWebhook`.
             A partial webhook is just a webhook object with an ID and a token.
         """
         m = re.search(
