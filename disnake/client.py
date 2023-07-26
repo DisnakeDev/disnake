@@ -1673,6 +1673,9 @@ class Client:
 
         Changes the client's presence.
 
+        .. versionchanged:: 2.0
+            Removed the ``afk`` keyword-only parameter.
+
         .. versionchanged:: 2.6
             Raises :exc:`TypeError` instead of ``InvalidArgument``.
 
@@ -1683,9 +1686,6 @@ class Client:
 
             game = disnake.Game("with the API")
             await client.change_presence(status=disnake.Status.idle, activity=game)
-
-        .. versionchanged:: 2.0
-            Removed the ``afk`` keyword-only parameter.
 
         Parameters
         ----------
@@ -1731,6 +1731,7 @@ class Client:
         limit: Optional[int] = 100,
         before: Optional[SnowflakeTime] = None,
         after: Optional[SnowflakeTime] = None,
+        with_counts: bool = True,
     ) -> GuildIterator:
         """Retrieves an :class:`.AsyncIterator` that enables receiving your guilds.
 
@@ -1772,6 +1773,11 @@ class Client:
             Retrieve guilds after this date or object.
             If a datetime is provided, it is recommended to use a UTC aware datetime.
             If the datetime is naive, it is assumed to be local time.
+        with_counts: :class:`bool`
+            Whether to include approximate member and presence counts for the guilds.
+            Defaults to ``True``.
+
+            .. versionadded:: 2.10
 
         Raises
         ------
@@ -1783,7 +1789,7 @@ class Client:
         :class:`.Guild`
             The guild with the guild data parsed.
         """
-        return GuildIterator(self, limit=limit, before=before, after=after)
+        return GuildIterator(self, limit=limit, before=before, after=after, with_counts=with_counts)
 
     async def fetch_template(self, code: Union[Template, str]) -> Template:
         """|coro|
@@ -1811,7 +1817,7 @@ class Client:
         data = await self.http.get_template(code)
         return Template(data=data, state=self._connection)
 
-    async def fetch_guild(self, guild_id: int, /) -> Guild:
+    async def fetch_guild(self, guild_id: int, /, *, with_counts: bool = True) -> Guild:
         """|coro|
 
         Retrieves a :class:`.Guild` from the given ID.
@@ -1829,6 +1835,11 @@ class Client:
         ----------
         guild_id: :class:`int`
             The ID of the guild to retrieve.
+        with_counts: :class:`bool`
+            Whether to include approximate member and presence counts for the guild.
+            Defaults to ``True``.
+
+            .. versionadded:: 2.10
 
         Raises
         ------
@@ -1842,7 +1853,7 @@ class Client:
         :class:`.Guild`
             The guild from the given ID.
         """
-        data = await self.http.get_guild(guild_id)
+        data = await self.http.get_guild(guild_id, with_counts=with_counts)
         return Guild(data=data, state=self._connection)
 
     async def fetch_guild_preview(
@@ -1893,6 +1904,11 @@ class Client:
         See :func:`guild_builder` for a more comprehensive alternative.
 
         Bot accounts in 10 or more guilds are not allowed to create guilds.
+
+        .. note::
+
+            Using this, you will **not** receive :attr:`.Guild.channels`, :attr:`.Guild.members`,
+            :attr:`.Member.activity` and :attr:`.Member.voice` per :class:`.Member`.
 
         .. versionchanged:: 2.5
             Removed the ``region`` parameter.
@@ -1950,6 +1966,11 @@ class Client:
         See :class:`.GuildBuilder` for details and examples.
 
         Bot accounts in 10 or more guilds are not allowed to create guilds.
+
+        .. note::
+
+            Using this, you will **not** receive :attr:`.Guild.channels`, :attr:`.Guild.members`,
+            :attr:`.Member.activity` and :attr:`.Member.voice` per :class:`.Member`.
 
         .. versionadded:: 2.8
 
