@@ -656,8 +656,14 @@ class HTTPClient:
         """
         ret = original_headers.copy()
 
-        if "Authorization" not in ret and auth is not None:
-            ret["Authorization"] = self._default_auth if auth is MISSING else auth
+        if "Authorization" not in ret:
+            if auth is None:
+                pass  # We do nothing, this is here to make the logic easier to read.
+            elif auth is MISSING:
+                if self._default_auth is not None:
+                    ret["Authorization"] = self._default_auth
+            else:  # auth isn't None or MISSING, so it must be something.
+                ret["Authorization"] = auth
 
         if "User-Agent" not in ret and self.user_agent:
             ret["User-Agent"] = self.user_agent
@@ -937,10 +943,11 @@ class HTTPClient:
                 async with global_rate_limit:
                     async with url_rate_limit:
                         # This check is for asyncio.gather()'d requests where the rate limit can change.
-                        if (
-                            temp := self._get_url_rate_limit(route.method, route, auth)
-                        ) not in (url_rate_limit, None):
-                            temp = cast(RateLimit, temp)
+                        if (temp := self._get_url_rate_limit(route.method, route, auth)) not in (
+                            url_rate_limit,
+                            None,
+                        ):
+                            # temp = cast(RateLimit, temp)
                             _log.debug(
                                 "Route %s had the rate limit changed, resetting and retrying.",
                                 rate_limit_path,
@@ -1062,7 +1069,10 @@ class HTTPClient:
                                         await asyncio.sleep(1 + retry_count * 2)
                                         should_retry = True
                                     else:
-                                        _log.info("Path %s encountered a Discord server issue.", rate_limit_path)
+                                        _log.info(
+                                            "Path %s encountered a Discord server issue.",
+                                            rate_limit_path,
+                                        )
                                         raise DiscordServerError(response, ret)
                                 elif response.status == 401:
                                     _log.warning(
@@ -1104,8 +1114,12 @@ class HTTPClient:
                                         )
                                         should_retry = True
                                     else:
-                                        _log.warning("We are being rate limited on path %s.", rate_limit_path)
-                                        raise HTTPException(response, ret)  # TODO: Make actual HTTPRateLimit error?
+                                        _log.warning(
+                                            "We are being rate limited on path %s.", rate_limit_path
+                                        )
+                                        raise HTTPException(
+                                            response, ret
+                                        )  # TODO: Make actual HTTPRateLimit error?
 
                                 elif response.status >= 500:
                                     raise DiscordServerError(response, ret)
