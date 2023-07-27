@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, List, Optional, Union
 from .appinfo import PartialAppInfo
 from .asset import Asset
 from .enums import ChannelType, InviteTarget, NSFWLevel, VerificationLevel, try_enum
+from .flags import InviteFlags
 from .guild_scheduled_event import GuildScheduledEvent
 from .mixins import Hashable
 from .object import Object
@@ -398,6 +399,7 @@ class Invite(Hashable):
         "guild_scheduled_event",
         "guild_welcome_screen",
         "_state",
+        "_flags",
     )
 
     BASE = "https://discord.gg"
@@ -465,6 +467,8 @@ class Invite(Hashable):
             )
         else:
             self.guild_scheduled_event: Optional[GuildScheduledEvent] = None
+
+        self._flags: int = data.get("flags", 0)
 
     @classmethod
     def from_incomplete(cls, *, state: ConnectionState, data: InvitePayload) -> Self:
@@ -564,6 +568,14 @@ class Invite(Hashable):
         if self.guild_scheduled_event:
             url += f"?event={self.guild_scheduled_event.id}"
         return url
+
+    @property
+    def flags(self) -> InviteFlags:
+        """:class:`InviteFlags`: Invite's flags.
+
+        .. versionadded:: 2.10
+        """
+        return InviteFlags._from_value(self._flags)
 
     async def delete(self, *, reason: Optional[str] = None) -> None:
         """|coro|

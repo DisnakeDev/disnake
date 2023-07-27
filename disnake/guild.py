@@ -245,6 +245,7 @@ class Guild(Hashable):
         - ``VERIFIED``: Guild is a verified server.
         - ``VIP_REGIONS``: Guild has VIP voice regions.
         - ``WELCOME_SCREEN_ENABLED``: Guild has enabled the welcome screen.
+        - ``GUESTS_ENABLED``: Guild has access to guest invites.
     premium_progress_bar_enabled: :class:`bool`
         Whether the server boost progress bar is enabled.
     premium_tier: :class:`int`

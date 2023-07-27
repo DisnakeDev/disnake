@@ -40,6 +40,7 @@ __all__ = (
     "ChannelFlags",
     "AutoModKeywordPresets",
     "MemberFlags",
+    "InviteFlags",
 )
 
 BF = TypeVar("BF", bound="BaseFlags")
@@ -2289,3 +2290,94 @@ class MemberFlags(BaseFlags):
     def started_onboarding(self):
         """:class:`bool`: Returns ``True`` if the member has started onboarding."""
         return 1 << 3
+
+
+class InviteFlags(BaseFlags):
+    """Wraps up a Discord Invite flag value.
+
+    See :class:`SystemChannelFlags`.
+
+    .. container:: operations
+
+        .. describe:: x == y
+
+            Checks if two InviteFlags instances are equal.
+        .. describe:: x != y
+
+            Checks if two InviteFlags instances are not equal.
+        .. describe:: x <= y
+
+            Checks if a InviteFlags instance is a subset of another InviteFlags instance.
+
+        .. describe:: x >= y
+
+            Checks if a InviteFlags instance is a superset of another InviteFlags instance.
+
+        .. describe:: x < y
+
+            Checks if a InviteFlags instance is a strict subset of another InviteFlags instance.
+
+        .. describe:: x > y
+
+            Checks if a InviteFlags instance is a strict superset of another InviteFlags instance.
+
+        .. describe:: x | y, x |= y
+
+            Returns a new InviteFlags instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
+
+        .. describe:: x & y, x &= y
+
+            Returns a new InviteFlags instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
+
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new InviteFlags instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+
+        .. describe:: ~x
+
+            Returns a new InviteFlags instance with all flags from x inverted.
+
+        .. describe:: hash(x)
+
+               Return the flag's hash.
+        .. describe:: iter(x)
+
+               Returns an iterator of ``(name, value)`` pairs. This allows it
+               to be, for example, constructed as a dict or a list of pairs.
+
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: InviteFlags.y | InviteFlags.z, InviteFlags(y=True) | InviteFlags.z
+
+            Returns a InviteFlags instance with all provided flags enabled.
+
+        .. describe:: ~InviteFlags.y
+
+            Returns a InviteFlags instance with all flags except ``y`` inverted from their default value.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    value: :class:`int`
+        The raw value. This value is a bit array field of a 53-bit integer
+        representing the currently available flags. You should query
+        flags via the properties rather than using this raw value.
+    """
+
+    __slots__ = ()
+
+    if TYPE_CHECKING:
+
+        @_generated
+        def __init__(self, *, guest: bool = ...) -> None:
+            ...
+
+    @flag_value
+    def guest(self):
+        """:class:`bool`: Returns ``True`` if the invite is a guest invite."""
+        return 1 << 0

@@ -34,6 +34,17 @@ PartialInviteChannel
 .. autoclass:: PartialInviteChannel()
     :members:
 
+Data Classes
+------------
+
+InviteFlags
+~~~~~~~~~~~
+
+.. attributetable:: InviteFlags
+
+.. autoclass:: InviteFlags()
+    :members:
+
 Enumerations
 ------------
 
