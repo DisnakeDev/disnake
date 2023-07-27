@@ -42,7 +42,7 @@ from disnake.channel import _channel_type_factory
 from disnake.enums import ChannelType, OptionType, try_enum_to_int
 from disnake.ext import commands
 from disnake.i18n import Localized
-from disnake.interactions import ApplicationCommandInteraction, Interaction
+from disnake.interactions import ApplicationCommandInteraction
 from disnake.utils import maybe_coroutine
 
 from . import errors
@@ -912,11 +912,8 @@ def isolate_self(
         parametersl.pop(0)
     if parametersl:
         annot = parametersl[0].annotation
-        if (
-            issubclass_(annot, ApplicationCommandInteraction)
-            or annot is inspect.Parameter.empty
-            or issubclass_(get_origin(annot), Interaction)
-        ):
+        annot = get_origin(annot) or annot
+        if issubclass_(annot, ApplicationCommandInteraction) or annot is inspect.Parameter.empty:
             inter_param = parameters.pop(parametersl[0].name)
 
     return (cog_param, inter_param), parameters
