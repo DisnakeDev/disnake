@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional
 from ..enums import ComponentType
 from ..message import Message
 from ..utils import cached_slot_property
-from .base import BotT, Interaction
+from .base import ClientT, Interaction
 
 if TYPE_CHECKING:
     from ..state import ConnectionState
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 __all__ = ("ModalInteraction", "ModalInteractionData")
 
 
-class ModalInteraction(Interaction[BotT]):
+class ModalInteraction(Interaction[ClientT]):
     """Represents an interaction with a modal.
 
     .. versionadded:: 2.4

@@ -10,7 +10,7 @@ from ..guild import Guild
 from ..member import Member
 from ..message import Message
 from ..user import User
-from .base import BotT, Interaction, InteractionDataResolved
+from .base import ClientT, Interaction, InteractionDataResolved
 
 __all__ = (
     "ApplicationCommandInteraction",
@@ -41,7 +41,7 @@ if TYPE_CHECKING:
     )
 
 
-class ApplicationCommandInteraction(Interaction[BotT]):
+class ApplicationCommandInteraction(Interaction[ClientT]):
     """Represents an interaction with an application command.
 
     Current examples are slash commands, user commands and message commands.
@@ -119,7 +119,7 @@ class ApplicationCommandInteraction(Interaction[BotT]):
         return kwargs
 
 
-class GuildCommandInteraction(ApplicationCommandInteraction[BotT]):
+class GuildCommandInteraction(ApplicationCommandInteraction[ClientT]):
     """An :class:`ApplicationCommandInteraction` subclass, primarily meant for annotations.
 
     This prevents the command from being invoked in DMs by automatically setting
@@ -137,7 +137,7 @@ class GuildCommandInteraction(ApplicationCommandInteraction[BotT]):
     me: Member
 
 
-class UserCommandInteraction(ApplicationCommandInteraction[BotT]):
+class UserCommandInteraction(ApplicationCommandInteraction[ClientT]):
     """An :class:`ApplicationCommandInteraction` subclass meant for annotations.
 
     No runtime behavior is changed but annotations are modified
@@ -147,7 +147,7 @@ class UserCommandInteraction(ApplicationCommandInteraction[BotT]):
     target: Union[User, Member]
 
 
-class MessageCommandInteraction(ApplicationCommandInteraction[BotT]):
+class MessageCommandInteraction(ApplicationCommandInteraction[ClientT]):
     """An :class:`ApplicationCommandInteraction` subclass meant for annotations.
 
     No runtime behavior is changed but annotations are modified

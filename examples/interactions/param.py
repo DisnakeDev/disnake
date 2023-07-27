@@ -65,7 +65,7 @@ async def description(
 async def defaults(
     inter: disnake.CommandInteraction[commands.Bot],
     string: str = "this is a default value",
-    user: disnake.User = commands.Param(lambda inter: inter.author),  # type: ignore
+    user: disnake.User = commands.Param(lambda inter: inter.author),
 ):
     ...
 

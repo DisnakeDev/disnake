@@ -91,6 +91,7 @@ else:
 T = TypeVar("T", bound=Any)
 TypeT = TypeVar("TypeT", bound=Type[Any])
 CallableT = TypeVar("CallableT", bound=Callable[..., Any])
+BotT = TypeVar("BotT", bound="disnake.Client", covariant=True)
 
 __all__ = (
     "Range",
@@ -986,7 +987,9 @@ def collect_params(
             injections[parameter.name] = default
         elif parameter.annotation in Injection._registered:
             injections[parameter.name] = Injection._registered[parameter.annotation]
-        elif issubclass_(parameter.annotation, ApplicationCommandInteraction):
+        elif issubclass_(
+            get_origin(parameter.annotation) or parameter.annotation, ApplicationCommandInteraction
+        ):
             if inter_param is None:
                 inter_param = parameter
             else:
@@ -1120,14 +1123,17 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
         if param.autocomplete:
             command.autocompleters[param.name] = param.autocomplete
 
-    if issubclass_(sig.parameters[inter_param].annotation, disnake.GuildCommandInteraction):
+    if issubclass_(
+        get_origin(annot := sig.parameters[inter_param].annotation) or annot,
+        disnake.GuildCommandInteraction,
+    ):
         command._guild_only = True
 
     return [param.to_option() for param in params]
 
 
 def Param(
-    default: Union[Any, Callable[[ApplicationCommandInteraction], Any]] = ...,
+    default: Union[Any, Callable[[ApplicationCommandInteraction[BotT]], Any]] = ...,
     *,
     name: LocalizedOptional = None,
     description: LocalizedOptional = None,
