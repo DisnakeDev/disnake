@@ -1,1 +1,1 @@
-Add :attr:`Role.flags`.
+Add :class:`RoleFlags` type and :attr:`Role.flags`.
