@@ -40,6 +40,7 @@ __all__ = (
     "ChannelFlags",
     "AutoModKeywordPresets",
     "MemberFlags",
+    "RoleFlags",
     "AttachmentFlags",
 )
 
@@ -2290,6 +2291,86 @@ class MemberFlags(BaseFlags):
     def started_onboarding(self):
         """:class:`bool`: Returns ``True`` if the member has started onboarding."""
         return 1 << 3
+
+
+class RoleFlags(BaseFlags):
+    """Wraps up Discord Role flags.
+
+    .. container:: operations
+
+        .. describe:: x == y
+
+            Checks if two RoleFlags instances are equal.
+        .. describe:: x != y
+
+            Checks if two RoleFlags instances are not equal.
+        .. describe:: x <= y
+
+            Checks if an RoleFlags instance is a subset of another RoleFlags instance.
+        .. describe:: x >= y
+
+            Checks if an RoleFlags instance is a superset of another RoleFlags instance.
+        .. describe:: x < y
+
+            Checks if an RoleFlags instance is a strict subset of another RoleFlags instance.
+        .. describe:: x > y
+
+            Checks if an RoleFlags instance is a strict superset of another RoleFlags instance.
+        .. describe:: x | y, x |= y
+
+            Returns a new RoleFlags instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
+        .. describe:: x & y, x &= y
+
+            Returns a new RoleFlags instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new RoleFlags instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+        .. describe:: ~x
+
+            Returns a new RoleFlags instance with all flags from x inverted.
+        .. describe:: hash(x)
+
+            Returns the flag's hash.
+        .. describe:: iter(x)
+
+            Returns an iterator of ``(name, value)`` pairs. This allows it
+            to be, for example, constructed as a dict or a list of pairs.
+            Note that aliases are not shown.
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: RoleFlags.y | RoleFlags.z, RoleFlags(y=True) | RoleFlags.z
+
+            Returns a RoleFlags instance with all provided flags enabled.
+
+        .. describe:: ~RoleFlags.y
+
+            Returns a RoleFlags instance with all flags except ``y`` inverted from their default value.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    value: :class:`int`
+        The raw value. You should query flags via the properties
+        rather than using this raw value.
+    """
+
+    __slots__ = ()
+
+    if TYPE_CHECKING:
+
+        @_generated
+        def __init__(self, *, in_prompt: bool = ...) -> None:
+            ...
+
+    @flag_value
+    def in_prompt(self):
+        """:class:`bool`: Returns ``True`` if the role can be selected by members in an onboarding prompt."""
+        return 1 << 0
 
 
 class AttachmentFlags(BaseFlags):
