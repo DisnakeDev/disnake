@@ -12,6 +12,8 @@ from libcst import codemod
 
 from disnake import flags
 
+from .base import BaseCodemodCommand
+
 BASE_FLAG_CLASSES = (flags.BaseFlags, flags.ListBaseFlags)
 
 MODULES = (
@@ -20,7 +22,7 @@ MODULES = (
 )
 
 
-class FlagTypings(codemod.VisitorBasedCodemodCommand):
+class FlagTypings(BaseCodemodCommand):
     DESCRIPTION: str = (
         "Types every flag classes's init method, using overloads or if typechecking blocks."
     )
