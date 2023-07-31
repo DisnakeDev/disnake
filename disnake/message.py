@@ -508,6 +508,8 @@ class Attachment(Hashable):
             result["duration_secs"] = self.duration
         if self.waveform is not None:
             result["waveform"] = b64encode(self.waveform).decode("ascii")
+        if self._flags:
+            result["flags"] = self._flags
         return result
 
 
