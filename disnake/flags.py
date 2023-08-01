@@ -2088,7 +2088,7 @@ class ChannelFlags(BaseFlags):
 
         This only applies to channels of type :class:`MediaChannel`.
 
-        .. versionadded:: 2.9
+        .. versionadded:: 2.10
         """
         return 1 << 15
 

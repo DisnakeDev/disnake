@@ -4390,7 +4390,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
 class MediaChannel(ThreadOnlyGuildChannel):
     """Represents a Discord Media channel.
 
-    .. versionadded:: 2.9
+    .. versionadded:: 2.10
 
     .. container:: operations
 

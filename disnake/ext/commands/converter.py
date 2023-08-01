@@ -635,7 +635,7 @@ class ForumChannelConverter(IDConverter[disnake.ForumChannel]):
 class MediaChannelConverter(IDConverter[disnake.MediaChannel]):
     """Converts to a :class:`~disnake.MediaChannel`.
 
-    .. versionadded:: 2.9
+    .. versionadded:: 2.10
 
     All lookups are via the local guild. If in a DM context, then the lookup
     is done by the global cache.

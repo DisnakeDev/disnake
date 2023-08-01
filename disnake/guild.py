@@ -705,7 +705,7 @@ class Guild(Hashable):
 
         This is sorted by the position and are in UI order from top to bottom.
 
-        .. versionadded:: 2.9
+        .. versionadded:: 2.10
         """
         r = [ch for ch in self._channels.values() if isinstance(ch, MediaChannel)]
         r.sort(key=lambda c: (c.position, c.id))
@@ -1789,7 +1789,7 @@ class Guild(Hashable):
 
         This is similar to :meth:`create_text_channel` except makes a :class:`MediaChannel` instead.
 
-        .. versionadded:: 2.9
+        .. versionadded:: 2.10
 
         Parameters
         ----------

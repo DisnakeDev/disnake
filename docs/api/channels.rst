@@ -251,7 +251,7 @@ ChannelType
 
         A channel of only threads but for media, similar to forum channels.
 
-        .. versionadded:: 2.9
+        .. versionadded:: 2.10
 
 ThreadArchiveDuration
 ~~~~~~~~~~~~~~~~~~~~~
