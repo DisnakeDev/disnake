@@ -102,90 +102,7 @@ async def _single_delete_strategy(messages: Iterable[Message]) -> None:
         await m.delete()
 
 
-class WebhookableChannel:
-    __slots__ = ()
-
-    if TYPE_CHECKING:
-        id: int
-        _state: ConnectionState
-
-    async def webhooks(self) -> List[Webhook]:
-        """|coro|
-
-        Retrieves the list of webhooks this channel has.
-
-        You must have :attr:`~.Permissions.manage_webhooks` permission to
-        use this.
-
-        Raises
-        ------
-        Forbidden
-            You don't have permissions to get the webhooks.
-
-        Returns
-        -------
-        List[:class:`Webhook`]
-            The list of webhooks this channel has.
-        """
-        from .webhook import Webhook
-
-        data = await self._state.http.channel_webhooks(self.id)
-        return [Webhook.from_state(d, state=self._state) for d in data]
-
-    async def create_webhook(
-        self, *, name: str, avatar: Optional[AssetBytes] = None, reason: Optional[str] = None
-    ) -> Webhook:
-        """|coro|
-
-        Creates a webhook for this channel.
-
-        You must have :attr:`~.Permissions.manage_webhooks` permission to
-        do this.
-
-        .. versionchanged:: 1.1
-            The ``reason`` keyword-only parameter was added.
-
-        Parameters
-        ----------
-        name: :class:`str`
-            The webhook's name.
-        avatar: Optional[|resource_type|]
-            The webhook's default avatar.
-            This operates similarly to :meth:`~ClientUser.edit`.
-
-            .. versionchanged:: 2.5
-                Now accepts various resource types in addition to :class:`bytes`.
-
-        reason: Optional[:class:`str`]
-            The reason for creating this webhook. Shows up in the audit logs.
-
-        Raises
-        ------
-        NotFound
-            The ``avatar`` asset couldn't be found.
-        Forbidden
-            You do not have permissions to create a webhook.
-        HTTPException
-            Creating the webhook failed.
-        TypeError
-            The ``avatar`` asset is a lottie sticker (see :func:`Sticker.read`).
-
-        Returns
-        -------
-        :class:`Webhook`
-            The newly created webhook.
-        """
-        from .webhook import Webhook
-
-        avatar_data = await utils._assetbytes_to_base64_data(avatar)
-
-        data = await self._state.http.create_webhook(
-            self.id, name=str(name), avatar=avatar_data, reason=reason
-        )
-        return Webhook.from_state(data, state=self._state)
-
-
-class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, WebhookableChannel, Hashable):
+class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
     """Represents a Discord guild text channel.
 
     .. container:: operations
@@ -833,6 +750,81 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Webhookable
 
         return ret
 
+    async def webhooks(self) -> List[Webhook]:
+        """|coro|
+
+        Retrieves the list of webhooks this channel has.
+
+        You must have :attr:`~.Permissions.manage_webhooks` permission to
+        use this.
+
+        Raises
+        ------
+        Forbidden
+            You don't have permissions to get the webhooks.
+
+        Returns
+        -------
+        List[:class:`Webhook`]
+            The list of webhooks this channel has.
+        """
+        from .webhook import Webhook
+
+        data = await self._state.http.channel_webhooks(self.id)
+        return [Webhook.from_state(d, state=self._state) for d in data]
+
+    async def create_webhook(
+        self, *, name: str, avatar: Optional[AssetBytes] = None, reason: Optional[str] = None
+    ) -> Webhook:
+        """|coro|
+
+        Creates a webhook for this channel.
+
+        You must have :attr:`~.Permissions.manage_webhooks` permission to
+        do this.
+
+        .. versionchanged:: 1.1
+            The ``reason`` keyword-only parameter was added.
+
+        Parameters
+        ----------
+        name: :class:`str`
+            The webhook's name.
+        avatar: Optional[|resource_type|]
+            The webhook's default avatar.
+            This operates similarly to :meth:`~ClientUser.edit`.
+
+            .. versionchanged:: 2.5
+                Now accepts various resource types in addition to :class:`bytes`.
+
+        reason: Optional[:class:`str`]
+            The reason for creating this webhook. Shows up in the audit logs.
+
+        Raises
+        ------
+        NotFound
+            The ``avatar`` asset couldn't be found.
+        Forbidden
+            You do not have permissions to create a webhook.
+        HTTPException
+            Creating the webhook failed.
+        TypeError
+            The ``avatar`` asset is a lottie sticker (see :func:`Sticker.read`).
+
+        Returns
+        -------
+        :class:`Webhook`
+            The newly created webhook.
+        """
+        from .webhook import Webhook
+
+        avatar_data = await utils._assetbytes_to_base64_data(avatar)
+
+        data = await self._state.http.create_webhook(
+            self.id, name=str(name), avatar=avatar_data, reason=reason
+        )
+        return Webhook.from_state(data, state=self._state)
+
     async def follow(self, *, destination: TextChannel, reason: Optional[str] = None) -> Webhook:
         """|coro|
 
@@ -1224,7 +1216,7 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
         return base
 
 
-class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel, WebhookableChannel):
+class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
     """Represents a Discord guild voice channel.
 
     .. container:: operations
@@ -1803,8 +1795,80 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel, WebhookableChanne
 
         return ret
 
+    async def webhooks(self) -> List[Webhook]:
+        """|coro|
 
-class StageChannel(disnake.abc.Messageable, VocalGuildChannel, WebhookableChannel):
+        Retrieves the list of webhooks this channel has.
+
+        You must have :attr:`~.Permissions.manage_webhooks` permission to
+        use this.
+
+        .. versionadded:: 2.5
+
+        Raises
+        ------
+        Forbidden
+            You don't have permissions to get the webhooks.
+
+        Returns
+        -------
+        List[:class:`Webhook`]
+            The list of webhooks this channel has.
+        """
+        from .webhook import Webhook
+
+        data = await self._state.http.channel_webhooks(self.id)
+        return [Webhook.from_state(d, state=self._state) for d in data]
+
+    async def create_webhook(
+        self, *, name: str, avatar: Optional[bytes] = None, reason: Optional[str] = None
+    ) -> Webhook:
+        """|coro|
+
+        Creates a webhook for this channel.
+
+        You must have :attr:`~.Permissions.manage_webhooks` permission to
+        do this.
+
+        .. versionadded:: 2.5
+
+        Parameters
+        ----------
+        name: :class:`str`
+            The webhook's name.
+        avatar: Optional[:class:`bytes`]
+            The webhook's default avatar.
+            This operates similarly to :meth:`~ClientUser.edit`.
+        reason: Optional[:class:`str`]
+            The reason for creating this webhook. Shows up in the audit logs.
+
+        Raises
+        ------
+        NotFound
+            The ``avatar`` asset couldn't be found.
+        Forbidden
+            You do not have permissions to create a webhook.
+        HTTPException
+            Creating the webhook failed.
+        TypeError
+            The ``avatar`` asset is a lottie sticker (see :func:`Sticker.read`).
+
+        Returns
+        -------
+        :class:`Webhook`
+            The newly created webhook.
+        """
+        from .webhook import Webhook
+
+        avatar_data = await utils._assetbytes_to_base64_data(avatar)
+
+        data = await self._state.http.create_webhook(
+            self.id, name=str(name), avatar=avatar_data, reason=reason
+        )
+        return Webhook.from_state(data, state=self._state)
+
+
+class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
     """Represents a Discord guild stage channel.
 
     .. versionadded:: 1.7
@@ -2544,6 +2608,78 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel, WebhookableChanne
             await ret[-1].delete()
 
         return ret
+
+    async def webhooks(self) -> List[Webhook]:
+        """|coro|
+
+        Retrieves the list of webhooks this channel has.
+
+        You must have :attr:`~.Permissions.manage_webhooks` permission to
+        use this.
+
+        .. versionadded:: 2.9
+
+        Raises
+        ------
+        Forbidden
+            You don't have permissions to get the webhooks.
+
+        Returns
+        -------
+        List[:class:`Webhook`]
+            The list of webhooks this channel has.
+        """
+        from .webhook import Webhook
+
+        data = await self._state.http.channel_webhooks(self.id)
+        return [Webhook.from_state(d, state=self._state) for d in data]
+
+    async def create_webhook(
+        self, *, name: str, avatar: Optional[bytes] = None, reason: Optional[str] = None
+    ) -> Webhook:
+        """|coro|
+
+        Creates a webhook for this channel.
+
+        You must have :attr:`~.Permissions.manage_webhooks` permission to
+        do this.
+
+        .. versionadded:: 2.9
+
+        Parameters
+        ----------
+        name: :class:`str`
+            The webhook's name.
+        avatar: Optional[:class:`bytes`]
+            The webhook's default avatar.
+            This operates similarly to :meth:`~ClientUser.edit`.
+        reason: Optional[:class:`str`]
+            The reason for creating this webhook. Shows up in the audit logs.
+
+        Raises
+        ------
+        NotFound
+            The ``avatar`` asset couldn't be found.
+        Forbidden
+            You do not have permissions to create a webhook.
+        HTTPException
+            Creating the webhook failed.
+        TypeError
+            The ``avatar`` asset is a lottie sticker (see :func:`Sticker.read`).
+
+        Returns
+        -------
+        :class:`Webhook`
+            The newly created webhook.
+        """
+        from .webhook import Webhook
+
+        avatar_data = await utils._assetbytes_to_base64_data(avatar)
+
+        data = await self._state.http.create_webhook(
+            self.id, name=str(name), avatar=avatar_data, reason=reason
+        )
+        return Webhook.from_state(data, state=self._state)
 
 
 class CategoryChannel(disnake.abc.GuildChannel, Hashable):
@@ -3489,6 +3625,78 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
             self.id, self.guild, limit=limit, joined=False, private=False, before=before
         )
 
+    async def webhooks(self) -> List[Webhook]:
+        """|coro|
+
+        Retrieves the list of webhooks this channel has.
+
+        You must have :attr:`~.Permissions.manage_webhooks` permission to
+        use this.
+
+        .. versionadded:: 2.6
+
+        Raises
+        ------
+        Forbidden
+            You don't have permissions to get the webhooks.
+
+        Returns
+        -------
+        List[:class:`Webhook`]
+            The list of webhooks this channel has.
+        """
+        from .webhook import Webhook
+
+        data = await self._state.http.channel_webhooks(self.id)
+        return [Webhook.from_state(d, state=self._state) for d in data]
+
+    async def create_webhook(
+        self, *, name: str, avatar: Optional[bytes] = None, reason: Optional[str] = None
+    ) -> Webhook:
+        """|coro|
+
+        Creates a webhook for this channel.
+
+        You must have :attr:`~.Permissions.manage_webhooks` permission to
+        do this.
+
+        .. versionadded:: 2.6
+
+        Parameters
+        ----------
+        name: :class:`str`
+            The webhook's name.
+        avatar: Optional[:class:`bytes`]
+            The webhook's default avatar.
+            This operates similarly to :meth:`~ClientUser.edit`.
+        reason: Optional[:class:`str`]
+            The reason for creating this webhook. Shows up in the audit logs.
+
+        Raises
+        ------
+        NotFound
+            The ``avatar`` asset couldn't be found.
+        Forbidden
+            You do not have permissions to create a webhook.
+        HTTPException
+            Creating the webhook failed.
+        TypeError
+            The ``avatar`` asset is a lottie sticker (see :func:`Sticker.read`).
+
+        Returns
+        -------
+        :class:`Webhook`
+            The newly created webhook.
+        """
+        from .webhook import Webhook
+
+        avatar_data = await utils._assetbytes_to_base64_data(avatar)
+
+        data = await self._state.http.create_webhook(
+            self.id, name=str(name), avatar=avatar_data, reason=reason
+        )
+        return Webhook.from_state(data, state=self._state)
+
     def get_tag(self, tag_id: int, /) -> Optional[ForumTag]:
         """Returns a thread tag with the given ID.
 
@@ -3527,7 +3735,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         return utils.get(self._available_tags.values(), name=name)
 
 
-class ForumChannel(ThreadOnlyGuildChannel, WebhookableChannel):
+class ForumChannel(ThreadOnlyGuildChannel):
     """Represents a Discord Forum channel.
 
     .. versionadded:: 2.5
@@ -4179,7 +4387,7 @@ class ForumChannel(ThreadOnlyGuildChannel, WebhookableChannel):
         return ThreadWithMessage(thread, message)
 
 
-class MediaChannel(ThreadOnlyGuildChannel, WebhookableChannel):
+class MediaChannel(ThreadOnlyGuildChannel):
     """Represents a Discord Media channel.
 
     .. versionadded:: 2.9
