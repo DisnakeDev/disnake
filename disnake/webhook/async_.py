@@ -494,8 +494,8 @@ def handle_message_parameters_dict(
     stickers: Sequence[Union[GuildSticker, StickerItem]] = MISSING,
     # these parameters are exclusive to webhooks in forum channels
     # XXX: consider moving serialization of these elsewhere?
-    thread_name: Optional[str] = None,
-    applied_tags: Optional[Sequence[Snowflake]] = None,
+    thread_name: str = MISSING,
+    applied_tags: Sequence[Snowflake] = MISSING,
 ) -> DictPayloadParameters:
     if files is not MISSING and file is not MISSING:
         raise TypeError("Cannot mix file and files keyword arguments.")
@@ -557,7 +557,7 @@ def handle_message_parameters_dict(
     if stickers is not MISSING:
         payload["sticker_ids"] = [s.id for s in stickers]
 
-    if thread_name is not None:
+    if thread_name:
         payload["thread_name"] = thread_name
     if applied_tags:
         payload["applied_tags"] = [t.id for t in applied_tags]
@@ -585,8 +585,8 @@ def handle_message_parameters(
     previous_allowed_mentions: Optional[AllowedMentions] = None,
     stickers: Sequence[Union[GuildSticker, StickerItem]] = MISSING,
     # these parameters are exclusive to webhooks in forum channels
-    thread_name: Optional[str] = None,
-    applied_tags: Optional[Sequence[Snowflake]] = None,
+    thread_name: str = MISSING,
+    applied_tags: Sequence[Snowflake] = MISSING,
 ) -> PayloadParameters:
     params = handle_message_parameters_dict(
         content=content,
@@ -1509,7 +1509,7 @@ class Webhook(BaseWebhook):
         view: View = MISSING,
         components: Components[MessageUIComponent] = MISSING,
         thread: Snowflake = MISSING,
-        thread_name: Optional[str] = None,
+        thread_name: str = MISSING,
         applied_tags: Sequence[Snowflake] = MISSING,
         wait: bool = False,
         delete_after: float = MISSING,
@@ -1686,9 +1686,11 @@ class Webhook(BaseWebhook):
                 view.timeout = 15 * 60.0
 
         thread_id: Optional[int] = None
-        if thread is not MISSING and (thread_name is not None or applied_tags is not MISSING):
-            raise TypeError("Cannot use `thread_name` or `applied_tags` when `thread` is provided.")
-        elif thread is not MISSING:
+        if thread is not MISSING:
+            if thread_name or applied_tags:
+                raise TypeError(
+                    "Cannot use `thread_name` or `applied_tags` when `thread` is provided."
+                )
             thread_id = thread.id
 
         params = handle_message_parameters(

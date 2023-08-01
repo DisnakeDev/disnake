@@ -926,7 +926,7 @@ class SyncWebhook(BaseWebhook):
         flags: MessageFlags = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         thread: Snowflake = MISSING,
-        thread_name: Optional[str] = None,
+        thread_name: str = MISSING,
         applied_tags: Sequence[Snowflake] = MISSING,
         wait: bool = False,
     ) -> Optional[SyncWebhookMessage]:
@@ -1046,9 +1046,11 @@ class SyncWebhook(BaseWebhook):
             content = MISSING
 
         thread_id: Optional[int] = None
-        if thread is not MISSING and (thread_name is not None or applied_tags is not MISSING):
-            raise TypeError("Cannot use `thread_name` or `applied_tags` when `thread` is provided.")
-        elif thread is not MISSING:
+        if thread is not MISSING:
+            if thread_name or applied_tags:
+                raise TypeError(
+                    "Cannot use `thread_name` or `applied_tags` when `thread` is provided."
+                )
             thread_id = thread.id
 
         params = handle_message_parameters(
