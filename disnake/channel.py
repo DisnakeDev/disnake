@@ -263,6 +263,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         ignore_timeout: bool = MISSING,
     ) -> Permissions:
         base = super().permissions_for(obj, ignore_timeout=ignore_timeout)
+        self._apply_implict_permissions(base)
 
         # text channels do not have voice related permissions
         denied = Permissions.voice()
@@ -508,7 +509,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         .. note::
             The current :attr:`TextChannel.flags` value won't be cloned.
-            This is a discord limitation.
+            This is a Discord limitation.
 
         Parameters
         ----------
@@ -1183,6 +1184,35 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
             if value.channel and value.channel.id == self.id
         }
 
+    @utils.copy_doc(disnake.abc.GuildChannel.permissions_for)
+    def permissions_for(
+        self,
+        obj: Union[Member, Role],
+        /,
+        *,
+        ignore_timeout: bool = MISSING,
+    ) -> Permissions:
+        base = super().permissions_for(obj, ignore_timeout=ignore_timeout)
+        self._apply_implict_permissions(base)
+
+        # voice channels cannot be edited by people who can't connect to them
+        # It also implicitly denies all other voice perms
+        if not base.connect:
+            denied = Permissions.voice()
+            # voice channels also deny all text related permissions
+            denied.value |= Permissions.text().value
+            # stage channels remove the stage permissions
+            denied.value |= Permissions.stage().value
+
+            denied.update(
+                manage_channels=True,
+                manage_roles=True,
+                manage_events=True,
+                manage_webhooks=True,
+            )
+            base.value &= ~denied.value
+        return base
+
 
 class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
     """Represents a Discord guild voice channel.
@@ -1326,7 +1356,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         .. note::
             The current :attr:`VoiceChannel.flags` value won't be cloned.
-            This is a discord limitation.
+            This is a Discord limitation.
 
         Parameters
         ----------
@@ -1441,32 +1471,6 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         from .message import PartialMessage
 
         return PartialMessage(channel=self, id=message_id)
-
-    @utils.copy_doc(disnake.abc.GuildChannel.permissions_for)
-    def permissions_for(
-        self,
-        obj: Union[Member, Role],
-        /,
-        *,
-        ignore_timeout: bool = MISSING,
-    ) -> Permissions:
-        base = super().permissions_for(obj, ignore_timeout=ignore_timeout)
-
-        # voice channels cannot be edited by people who can't connect to them
-        # It also implicitly denies all other voice perms
-        if not base.connect:
-            denied = Permissions.voice()
-            # voice channels also deny all text related permissions
-            denied.value |= Permissions.text().value
-
-            denied.update(
-                manage_channels=True,
-                manage_roles=True,
-                manage_events=True,
-                manage_webhooks=True,
-            )
-            base.value &= ~denied.value
-        return base
 
     # if only these parameters are passed, `_move` is called and no channel will be returned
     @overload
@@ -2054,7 +2058,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         .. note::
             The current :attr:`StageChannel.flags` value won't be cloned.
-            This is a discord limitation.
+            This is a Discord limitation.
 
         .. warning::
             Currently the ``user_limit`` attribute is not cloned due to a Discord limitation.
@@ -2182,31 +2186,6 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         .. versionadded:: 2.0
         """
         return utils.get(self.guild.stage_instances, channel_id=self.id)
-
-    @utils.copy_doc(disnake.abc.GuildChannel.permissions_for)
-    def permissions_for(
-        self,
-        obj: Union[Member, Role],
-        /,
-        *,
-        ignore_timeout: bool = MISSING,
-    ) -> Permissions:
-        base = super().permissions_for(obj, ignore_timeout=ignore_timeout)
-
-        # voice channels cannot be edited by people who can't connect to them
-        # It also implicitly denies all other channel permissions.
-        if not base.connect:
-            denied = Permissions.voice()
-            denied.value |= Permissions.text().value
-            denied.value |= Permissions.stage().value
-            denied.update(
-                manage_channels=True,
-                manage_roles=True,
-                manage_events=True,
-                manage_webhooks=True,
-            )
-            base.value &= ~denied.value
-        return base
 
     async def create_instance(
         self,
@@ -2787,6 +2766,19 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         """
         return ChannelType.category
 
+    @utils.copy_doc(disnake.abc.GuildChannel.permissions_for)
+    def permissions_for(
+        self,
+        obj: Union[Member, Role],
+        /,
+        *,
+        ignore_timeout: bool = MISSING,
+    ) -> Permissions:
+        base = super().permissions_for(obj, ignore_timeout=ignore_timeout)
+        self._apply_implict_permissions(base)
+
+        return base
+
     def is_nsfw(self) -> bool:
         """Whether the category is marked as NSFW.
 
@@ -2815,7 +2807,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
         .. note::
             The current :attr:`CategoryChannel.flags` value won't be cloned.
-            This is a discord limitation.
+            This is a Discord limitation.
 
         Parameters
         ----------
@@ -3329,6 +3321,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         ignore_timeout: bool = MISSING,
     ) -> Permissions:
         base = super().permissions_for(obj, ignore_timeout=ignore_timeout)
+        self._apply_implict_permissions(base)
 
         # forum channels do not have voice related permissions
         denied = Permissions.voice()
@@ -3654,7 +3647,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
         .. note::
             The current :attr:`ForumChannel.flags` value won't be cloned.
-            This is a discord limitation.
+            This is a Discord limitation.
 
         Parameters
         ----------
