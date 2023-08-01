@@ -3819,7 +3819,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
 
     __slots__ = ("default_layout",)
 
-    def _update(self, guild: Guild, data: ForumChannelPayload):
+    def _update(self, guild: Guild, data: ForumChannelPayload) -> None:
         super()._update(guild=guild, data=data)
         self.default_layout: ThreadLayout = (
             try_enum(ThreadLayout, layout)
@@ -3884,7 +3884,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
         require_tag: bool = ...,
         available_tags: Sequence[ForumTag] = ...,
         default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = ...,
-        default_sort_order: Optional[ThreadSortOrder] = MISSING,
+        default_sort_order: Optional[ThreadSortOrder] = ...,
         reason: Optional[str] = ...,
     ) -> ForumChannel:
         ...
