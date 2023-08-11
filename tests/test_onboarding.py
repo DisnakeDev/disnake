@@ -27,7 +27,7 @@ onboarding_prompt_option_payload: onboarding_types.OnboardingPromptOption = {
 @pytest.fixture
 def onboarding_prompt_option() -> OnboardingPromptOption:
     return OnboardingPromptOption._from_dict(
-        state=mock.Mock(ConnectionState, id=123),
+        state=mock.Mock(ConnectionState),
         data=onboarding_types.OnboardingPromptOption(
             id="0",
             title="test",
