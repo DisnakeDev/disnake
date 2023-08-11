@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, FrozenSet, Iterable, List, Optional, Union
+from typing import TYPE_CHECKING, FrozenSet, Iterable, List, Optional, Union, overload
 
 from .emoji import Emoji, PartialEmoji
 from .enums import OnboardingMode, OnboardingPromptType, try_enum
@@ -185,6 +185,30 @@ class OnboardingPromptOption(Hashable):
     """
 
     __slots__ = ("id", "title", "description", "emoji", "guild", "roles", "channels")
+
+    @overload
+    def __init__(
+        self,
+        *,
+        title: str,
+        description: Optional[str] = None,
+        emoji: Optional[Union[str, PartialEmoji, Emoji]] = None,
+        roles: Iterable[Snowflake],
+        channels: Optional[Iterable[Snowflake]] = None,
+    ):
+        ...
+
+    @overload
+    def __init__(
+        self,
+        *,
+        title: str,
+        description: Optional[str] = None,
+        emoji: Optional[Union[str, PartialEmoji, Emoji]] = None,
+        roles: Optional[Iterable[Snowflake]] = None,
+        channels: Iterable[Snowflake],
+    ):
+        ...
 
     def __init__(
         self,
