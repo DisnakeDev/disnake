@@ -4032,6 +4032,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
         available_tags: Sequence[ForumTag] = MISSING,
         default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
         default_sort_order: Optional[ThreadSortOrder] = MISSING,
+        default_layout: ThreadLayout = MISSING,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
         reason: Optional[str] = None,
     ) -> ForumChannel:
@@ -4042,6 +4043,15 @@ class ForumChannel(ThreadOnlyGuildChannel):
 
         You must have :attr:`.Permissions.manage_channels` permission to
         do this.
+
+        .. versionchanged:: 2.9
+            Added new ``topic``, ``position``, ``nsfw``, ``category``, ``slowmode_delay``,
+            ``default_thread_slowmode_delay``, ``default_auto_archive_duration``,
+            ``available_tags``, ``default_reaction``, ``default_sort_order``
+            and ``overwrites`` keyword-only parameters.
+
+        .. versionchanged:: 2.10
+            Added ``default_layout`` parameter.
 
         .. note::
             The current :attr:`ForumChannel.flags` value won't be cloned.
@@ -4071,6 +4081,8 @@ class ForumChannel(ThreadOnlyGuildChannel):
             The default reaction of the new channel. If not provided, defaults to this channel's default reaction.
         default_sort_order: Optional[:class:`ThreadSortOrder`]
             The default sort order of the new channel. If not provided, defaults to this channel's default sort order.
+        default_layout: :class:`ThreadLayout`
+            The default layout of threads in the new channel. If not provided, defaults to this channel's default layout.
         overwrites: :class:`Mapping`
             A :class:`Mapping` of target (either a role or a member) to :class:`PermissionOverwrite`
             to apply to the channel. If not provided, defaults to this channel's overwrites.
@@ -4102,9 +4114,6 @@ class ForumChannel(ThreadOnlyGuildChannel):
         else:
             default_reaction_emoji_payload = None
 
-        if default_sort_order is MISSING:
-            default_sort_order = self.default_sort_order
-
         return await self._clone_impl(
             {
                 "topic": topic if topic is not MISSING else self.topic,
@@ -4130,7 +4139,14 @@ class ForumChannel(ThreadOnlyGuildChannel):
                 ),
                 "default_reaction_emoji": default_reaction_emoji_payload,
                 "default_sort_order": (
-                    try_enum_to_int(default_sort_order) if default_sort_order is not None else None
+                    try_enum_to_int(default_sort_order)
+                    if default_sort_order is not MISSING
+                    else try_enum_to_int(self.default_sort_order)
+                ),
+                "default_forum_layout": (
+                    try_enum_to_int(default_layout)
+                    if default_layout is not MISSING
+                    else try_enum_to_int(self.default_layout)
                 ),
             },
             name=name,

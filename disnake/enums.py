@@ -396,6 +396,8 @@ class AuditLogAction(Enum):
     automod_block_message                 = 143
     automod_send_alert_message            = 144
     automod_timeout                       = 145
+    creator_monetization_request_created  = 150
+    creator_monetization_terms_accepted   = 151
     # fmt: on
 
     @property
@@ -456,6 +458,8 @@ class AuditLogAction(Enum):
             AuditLogAction.automod_block_message:                 None,
             AuditLogAction.automod_send_alert_message:            None,
             AuditLogAction.automod_timeout:                       None,
+            AuditLogAction.creator_monetization_request_created:  None,
+            AuditLogAction.creator_monetization_terms_accepted:   None,
         }
         # fmt: on
         return lookup[self]
@@ -501,6 +505,8 @@ class AuditLogAction(Enum):
             return "automod_rule"
         elif v < 146:
             return "user"
+        elif v < 152:
+            return None
         else:
             return None
 
