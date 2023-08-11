@@ -3561,7 +3561,7 @@ class Guild(Hashable):
 
         Creates a :class:`Role` for the guild.
 
-        All fields are optional.
+        All parameters are optional.
 
         You must have :attr:`~Permissions.manage_roles` permission to
         do this.
@@ -4760,6 +4760,8 @@ class Guild(Hashable):
 
         You must have :attr:`.Permissions.manage_guild` and :attr:`.Permissions.manage_roles`
         permissions to do this.
+
+        All parameters are optional.
 
         .. versionadded:: 2.10
 
