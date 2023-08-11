@@ -1,1 +1,0 @@
-Add :attr:`Guild.max_stage_video_channel_users`.
