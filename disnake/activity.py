@@ -754,6 +754,8 @@ class CustomActivity(BaseActivity):
         The custom activity's name.
     emoji: Optional[:class:`PartialEmoji`]
         The emoji to pass to the activity, if any.
+
+        This currently cannot be set by bots.
     """
 
     __slots__ = ("name", "emoji", "state")
@@ -768,7 +770,10 @@ class CustomActivity(BaseActivity):
     ) -> None:
         super().__init__(**kwargs)
         self.name: Optional[str] = name
-        self.state: Optional[str] = state
+        # fall back to `name`, since `state` is the relevant field for custom status (`name` is not shown)
+        self.state: Optional[str] = state or name
+
+        # The official client uses "Custom Status" as the name, the actual name is in `state`
         if self.name == "Custom Status":
             self.name = self.state
 
