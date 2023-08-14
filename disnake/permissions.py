@@ -1008,6 +1008,7 @@ class Permissions(BaseFlags):
         """
         return 1 << 47
 
+
 def _augment_from_permissions(cls):
     cls.VALID_NAMES = set(Permissions.VALID_FLAGS)
     aliases = set()
