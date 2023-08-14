@@ -1,0 +1,1 @@
+Add `USE_CLYDE_AI` permission
