@@ -673,6 +673,7 @@ def default_member_permissions(
     start_embedded_activities: bool = ...,
     stream: bool = ...,
     use_application_commands: bool = ...,
+    use_clyde_ai: bool = ...,
     use_embedded_activities: bool = ...,
     use_external_emojis: bool = ...,
     use_external_sounds: bool = ...,

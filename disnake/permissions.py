@@ -201,6 +201,7 @@ class Permissions(BaseFlags):
         start_embedded_activities: bool = ...,
         stream: bool = ...,
         use_application_commands: bool = ...,
+        use_clyde_ai: bool = ...,
         use_embedded_activities: bool = ...,
         use_external_emojis: bool = ...,
         use_external_sounds: bool = ...,
@@ -396,6 +397,9 @@ class Permissions(BaseFlags):
 
         .. versionchanged:: 2.9
             Added :attr:`send_voice_messages` permission.
+
+        .. versionchanged:: 2.10
+            Added :attr:`use_clyde_ai` permission.
         """
         return cls(
             send_messages=True,
@@ -414,6 +418,7 @@ class Permissions(BaseFlags):
             send_tts_messages=True,
             use_slash_commands=True,
             send_voice_messages=True,
+            use_clyde_ai=True,
         )
 
     @classmethod
@@ -569,6 +574,7 @@ class Permissions(BaseFlags):
         start_embedded_activities: bool = ...,
         stream: bool = ...,
         use_application_commands: bool = ...,
+        use_clyde_ai: bool = ...,
         use_embedded_activities: bool = ...,
         use_external_emojis: bool = ...,
         use_external_sounds: bool = ...,
@@ -994,6 +1000,13 @@ class Permissions(BaseFlags):
         """
         return 1 << 46
 
+    @flag_value
+    def use_clyde_ai(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can use Clyde AI.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 47
 
 def _augment_from_permissions(cls):
     cls.VALID_NAMES = set(Permissions.VALID_FLAGS)
@@ -1103,6 +1116,7 @@ class PermissionOverwrite:
         start_embedded_activities: Optional[bool]
         stream: Optional[bool]
         use_application_commands: Optional[bool]
+        use_clyde_ai: Optional[bool]
         use_embedded_activities: Optional[bool]
         use_external_emojis: Optional[bool]
         use_external_sounds: Optional[bool]
@@ -1167,6 +1181,7 @@ class PermissionOverwrite:
         start_embedded_activities: Optional[bool] = ...,
         stream: Optional[bool] = ...,
         use_application_commands: Optional[bool] = ...,
+        use_clyde_ai: Optional[bool] = ...,
         use_embedded_activities: Optional[bool] = ...,
         use_external_emojis: Optional[bool] = ...,
         use_external_sounds: Optional[bool] = ...,
@@ -1298,6 +1313,7 @@ class PermissionOverwrite:
         start_embedded_activities: Optional[bool] = ...,
         stream: Optional[bool] = ...,
         use_application_commands: Optional[bool] = ...,
+        use_clyde_ai: Optional[bool] = ...,
         use_embedded_activities: Optional[bool] = ...,
         use_external_emojis: Optional[bool] = ...,
         use_external_sounds: Optional[bool] = ...,
