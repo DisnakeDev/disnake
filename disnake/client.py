@@ -654,8 +654,10 @@ class Client:
     async def get_or_fetch_user(self, user_id: int, *, strict: bool = False) -> Optional[User]:
         """|coro|
 
-        Tries to get the user from the cache. If fails, it tries to
-        fetch the user from the API.
+        Tries to get the user from the cache. If it fails,
+        fetches the user from the API.
+
+        This only propagates exceptions when the ``strict`` parameter is enabled.
 
         Parameters
         ----------
