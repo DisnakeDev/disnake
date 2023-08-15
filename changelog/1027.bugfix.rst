@@ -1,1 +1,0 @@
-Fix error when trying to access :attr:`Client.application_flags` if an ``application_id`` was passed to the constructor.
