@@ -317,6 +317,9 @@ class Permissions(BaseFlags):
 
         .. versionchanged:: 2.9
             Added :attr:`use_soundboard` and :attr:`send_voice_messages` permissions.
+
+        .. versionchanged:: 2.10
+            Added :attr:`use_clyde_ai` permission.
         """
         instance = cls.all()
         instance.update(
