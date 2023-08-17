@@ -1,1 +1,1 @@
-Add `USE_CLYDE_AI` permission
+Add :attr:`Permissions.use_clyde_ai`.
