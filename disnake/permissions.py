@@ -1002,7 +1002,7 @@ class Permissions(BaseFlags):
 
     @flag_value
     def use_clyde_ai(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can use Clyde AI.
+        """:class:`bool`: Returns ``True`` if a user can interact with the Clyde AI bot.
 
         .. versionadded:: 2.10
         """
