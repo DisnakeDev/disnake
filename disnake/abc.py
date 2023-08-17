@@ -642,6 +642,7 @@ class GuildChannel(ABC):
             base.mention_everyone = False
             base.embed_links = False
             base.attach_files = False
+            base.use_clyde_ai = False
 
         # if you can't view a channel then you have no permissions there
         if not base.view_channel:
