@@ -217,9 +217,10 @@ class BaseActivity(_BaseActivity):
     __slots__ = ()
 
 
-# there are additional urls for twitch/youtube/spotify, however
+# There are additional urls for twitch/youtube/spotify, however
 # it appears that Discord does not want to document those:
 # https://github.com/discord/discord-api-docs/pull/4617
+# They are partially supported by different properties, e.g. `Spotify.album_cover_url`.
 _ACTIVITY_URLS = {
     "mp": "https://media.discordapp.net/{}",
 }
