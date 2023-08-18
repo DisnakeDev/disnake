@@ -253,7 +253,9 @@ class GuildScheduledEvent(Hashable):
 
         Deletes the guild scheduled event.
 
-        You must have :attr:`.Permissions.manage_events` permission to do this.
+        You must have :attr:`~Permissions.manage_events` permission to do this.
+        If this event was created by you, :attr:`~Permissions.create_events`
+        permission is also sufficient.
 
         Raises
         ------
@@ -382,7 +384,9 @@ class GuildScheduledEvent(Hashable):
 
         Edits the guild scheduled event.
 
-        You must have :attr:`.Permissions.manage_events` permission to do this.
+        You must have :attr:`~Permissions.manage_events` permission to do this.
+        If this event was created by you, :attr:`~Permissions.create_events`
+        permission is also sufficient.
 
         .. versionchanged:: 2.6
             Updates must follow requirements of :func:`Guild.create_scheduled_event`
@@ -536,7 +540,9 @@ class GuildScheduledEvent(Hashable):
 
         Changes the event status to :attr:`~GuildScheduledEventStatus.active`.
 
-        You must have :attr:`.Permissions.manage_events` permission to do this.
+        You must have :attr:`~Permissions.manage_events` permission to do this.
+        If this event was created by you, :attr:`~Permissions.create_events`
+        permission is also sufficient.
 
         .. versionadded:: 2.7
 
@@ -570,7 +576,9 @@ class GuildScheduledEvent(Hashable):
 
         Changes the event status to :attr:`~GuildScheduledEventStatus.completed`.
 
-        You must have :attr:`.Permissions.manage_events` permission to do this.
+        You must have :attr:`~Permissions.manage_events` permission to do this.
+        If this event was created by you, :attr:`~Permissions.create_events`
+        permission is also sufficient.
 
         .. versionadded:: 2.7
 
@@ -604,7 +612,9 @@ class GuildScheduledEvent(Hashable):
 
         Changes the event status to :attr:`~GuildScheduledEventStatus.cancelled`.
 
-        You must have :attr:`.Permissions.manage_events` permission to do this.
+        You must have :attr:`~Permissions.manage_events` permission to do this.
+        If this event was created by you, :attr:`~Permissions.create_events`
+        permission is also sufficient.
 
         .. versionadded:: 2.7
 

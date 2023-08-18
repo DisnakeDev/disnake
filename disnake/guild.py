@@ -2387,7 +2387,7 @@ class Guild(Hashable):
 
         Creates a :class:`GuildScheduledEvent`.
 
-        You must have :attr:`.Permissions.manage_events` permission to do this.
+        You must have :attr:`~Permissions.create_events` permission to do this.
 
         Based on the channel/entity type, there are different restrictions regarding
         other parameter values, as shown in this table:
@@ -3211,7 +3211,7 @@ class Guild(Hashable):
 
         Creates a :class:`Sticker` for the guild.
 
-        You must have :attr:`~Permissions.manage_guild_expressions` permission to
+        You must have :attr:`~Permissions.create_guild_expressions` permission to
         do this.
 
         .. versionadded:: 2.0
@@ -3263,6 +3263,8 @@ class Guild(Hashable):
 
         You must have :attr:`~Permissions.manage_guild_expressions` permission to
         do this.
+        If this sticker was created by you, :attr:`~Permissions.create_guild_expressions`
+        permission is also sufficient.
 
         .. versionadded:: 2.0
 
@@ -3276,7 +3278,7 @@ class Guild(Hashable):
         Raises
         ------
         Forbidden
-            You are not allowed to delete stickers.
+            You are not allowed to delete this sticker.
         HTTPException
             An error occurred deleting the sticker.
         """
@@ -3360,7 +3362,7 @@ class Guild(Hashable):
         Emojis with subscription roles (see ``roles`` below) are considered premium emoji,
         and count towards a separate limit of 25 emojis.
 
-        You must have :attr:`~Permissions.manage_guild_expressions` permission to
+        You must have :attr:`~Permissions.create_guild_expressions` permission to
         do this.
 
         Parameters
@@ -3420,6 +3422,8 @@ class Guild(Hashable):
 
         You must have :attr:`~Permissions.manage_guild_expressions` permission to
         do this.
+        If this emoji was created by you, :attr:`~Permissions.create_guild_expressions`
+        permission is also sufficient.
 
         Parameters
         ----------
@@ -3431,7 +3435,7 @@ class Guild(Hashable):
         Raises
         ------
         Forbidden
-            You are not allowed to delete emojis.
+            You are not allowed to delete this emoji.
         HTTPException
             An error occurred deleting the emoji.
         """

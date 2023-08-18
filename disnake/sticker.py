@@ -393,7 +393,8 @@ class GuildSticker(Sticker):
     user: Optional[:class:`User`]
         The user that created this sticker. This can only be retrieved using
         :meth:`Guild.fetch_sticker`/:meth:`Guild.fetch_stickers` while
-        having the :attr:`~Permissions.manage_guild_expressions` permission.
+        having the :attr:`~Permissions.create_guild_expressions` or
+        :attr:`~Permissions.manage_guild_expressions` permission.
     emoji: :class:`str`
         The name of a unicode emoji that represents this sticker.
     """
@@ -435,6 +436,8 @@ class GuildSticker(Sticker):
 
         You must have :attr:`~Permissions.manage_guild_expressions` permission to
         do this.
+        If this sticker was created by you, :attr:`~Permissions.create_guild_expressions`
+        permission is also sufficient.
 
         Parameters
         ----------
@@ -450,7 +453,7 @@ class GuildSticker(Sticker):
         Raises
         ------
         Forbidden
-            You are not allowed to edit stickers.
+            You are not allowed to edit this sticker.
         HTTPException
             An error occurred editing the sticker.
 
@@ -489,6 +492,8 @@ class GuildSticker(Sticker):
 
         You must have :attr:`~Permissions.manage_guild_expressions` permission to
         do this.
+        If this sticker was created by you, :attr:`~Permissions.create_guild_expressions`
+        permission is also sufficient.
 
         Parameters
         ----------
@@ -498,7 +503,7 @@ class GuildSticker(Sticker):
         Raises
         ------
         Forbidden
-            You are not allowed to delete stickers.
+            You are not allowed to delete this sticker.
         HTTPException
             An error occurred deleting the sticker.
         """

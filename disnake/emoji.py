@@ -70,7 +70,8 @@ class Emoji(_EmojiTag, AssetMixin):
     user: Optional[:class:`User`]
         The user that created this emoji. This can only be retrieved using
         :meth:`Guild.fetch_emoji`/:meth:`Guild.fetch_emojis` while
-        having the :attr:`~Permissions.manage_guild_expressions` permission.
+        having the :attr:`~Permissions.create_guild_expressions` or
+        :attr:`~Permissions.manage_guild_expressions` permission.
     """
 
     __slots__: Tuple[str, ...] = (
@@ -183,6 +184,8 @@ class Emoji(_EmojiTag, AssetMixin):
 
         You must have :attr:`~Permissions.manage_guild_expressions` permission to
         do this.
+        If this emoji was created by you, :attr:`~Permissions.create_guild_expressions`
+        permission is also sufficient.
 
         Parameters
         ----------
@@ -192,7 +195,7 @@ class Emoji(_EmojiTag, AssetMixin):
         Raises
         ------
         Forbidden
-            You are not allowed to delete emojis.
+            You are not allowed to delete this emoji.
         HTTPException
             An error occurred deleting the emoji.
         """
@@ -207,6 +210,8 @@ class Emoji(_EmojiTag, AssetMixin):
 
         You must have :attr:`~Permissions.manage_guild_expressions` permission to
         do this.
+        If this emoji was created by you, :attr:`~Permissions.create_guild_expressions`
+        permission is also sufficient.
 
         .. versionchanged:: 2.0
             The newly updated emoji is returned.
@@ -227,7 +232,7 @@ class Emoji(_EmojiTag, AssetMixin):
         Raises
         ------
         Forbidden
-            You are not allowed to edit emojis.
+            You are not allowed to edit this emoji.
         HTTPException
             An error occurred editing the emoji.
 
