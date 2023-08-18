@@ -1207,6 +1207,7 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
             denied.update(
                 manage_channels=True,
                 manage_roles=True,
+                create_events=True,
                 manage_events=True,
                 manage_webhooks=True,
             )
