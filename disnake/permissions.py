@@ -164,7 +164,9 @@ class Permissions(BaseFlags):
         ban_members: bool = ...,
         change_nickname: bool = ...,
         connect: bool = ...,
+        create_events: bool = ...,
         create_forum_threads: bool = ...,
+        create_guild_expressions: bool = ...,
         create_instant_invite: bool = ...,
         create_private_threads: bool = ...,
         create_public_threads: bool = ...,
@@ -532,7 +534,9 @@ class Permissions(BaseFlags):
         ban_members: bool = ...,
         change_nickname: bool = ...,
         connect: bool = ...,
+        create_events: bool = ...,
         create_forum_threads: bool = ...,
+        create_guild_expressions: bool = ...,
         create_instant_invite: bool = ...,
         create_private_threads: bool = ...,
         create_public_threads: bool = ...,
@@ -830,8 +834,9 @@ class Permissions(BaseFlags):
 
     @flag_value
     def manage_guild_expressions(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can create, edit, or delete
-        emojis, stickers, and soundboard sounds.
+        """:class:`bool`: Returns ``True`` if a user can edit or delete
+        emojis, stickers, and soundboard sounds created by all users.
+        See also :attr:`~Permissions.create_guild_expressions`.
 
         .. versionadded:: 2.9
         """
@@ -879,7 +884,9 @@ class Permissions(BaseFlags):
 
     @flag_value
     def manage_events(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can manage guild events.
+        """:class:`bool`: Returns ``True`` if a user can edit or delete guild scheduled events
+        created by all users.
+        See also :attr:`~Permissions.create_events`.
 
         .. versionadded:: 2.0
         """
@@ -979,6 +986,24 @@ class Permissions(BaseFlags):
         return 1 << 42
 
     @flag_value
+    def create_guild_expressions(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can create
+        emojis, stickers, and soundboard sounds, as well as edit and delete those they created.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 43
+
+    @flag_value
+    def create_events(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can create guild scheduled events,
+        as well as edit and delete those they created.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 44
+
+    @flag_value
     def use_external_sounds(self) -> int:
         """:class:`bool`: Returns ``True`` if a user can use custom soundboard sounds from other guilds.
 
@@ -1066,7 +1091,9 @@ class PermissionOverwrite:
         ban_members: Optional[bool]
         change_nickname: Optional[bool]
         connect: Optional[bool]
+        create_events: Optional[bool]
         create_forum_threads: Optional[bool]
+        create_guild_expressions: Optional[bool]
         create_instant_invite: Optional[bool]
         create_private_threads: Optional[bool]
         create_public_threads: Optional[bool]
@@ -1130,7 +1157,9 @@ class PermissionOverwrite:
         ban_members: Optional[bool] = ...,
         change_nickname: Optional[bool] = ...,
         connect: Optional[bool] = ...,
+        create_events: Optional[bool] = ...,
         create_forum_threads: Optional[bool] = ...,
+        create_guild_expressions: Optional[bool] = ...,
         create_instant_invite: Optional[bool] = ...,
         create_private_threads: Optional[bool] = ...,
         create_public_threads: Optional[bool] = ...,
@@ -1261,7 +1290,9 @@ class PermissionOverwrite:
         ban_members: Optional[bool] = ...,
         change_nickname: Optional[bool] = ...,
         connect: Optional[bool] = ...,
+        create_events: Optional[bool] = ...,
         create_forum_threads: Optional[bool] = ...,
+        create_guild_expressions: Optional[bool] = ...,
         create_instant_invite: Optional[bool] = ...,
         create_private_threads: Optional[bool] = ...,
         create_public_threads: Optional[bool] = ...,
