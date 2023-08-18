@@ -293,6 +293,7 @@ class Permissions(BaseFlags):
         ``True`` and the guild-specific ones set to ``False``. The guild-specific
         permissions are currently:
 
+        - :attr:`create_guild_expressions`
         - :attr:`manage_guild_expressions`
         - :attr:`view_audit_log`
         - :attr:`view_guild_insights`
@@ -318,12 +319,16 @@ class Permissions(BaseFlags):
 
         .. versionchanged:: 2.9
             Added :attr:`use_soundboard` and :attr:`send_voice_messages` permissions.
+
+        .. versionchanged:: 2.10
+            Added :attr:`create_events` permission.
         """
         instance = cls.all()
         instance.update(
             administrator=False,
             ban_members=False,
             change_nickname=False,
+            create_guild_expressions=False,
             kick_members=False,
             manage_guild=False,
             manage_guild_expressions=False,
@@ -349,11 +354,15 @@ class Permissions(BaseFlags):
 
         .. versionchanged:: 2.9
             Added :attr:`view_creator_monetization_analytics` permission.
+
+        .. versionchanged:: 2.10
+            Added :attr:`create_guild_expressions` permission.
         """
         return cls(
             view_channel=True,
             manage_channels=True,
             manage_roles=True,
+            create_guild_expressions=True,
             manage_guild_expressions=True,
             view_audit_log=True,
             view_guild_insights=True,
@@ -477,8 +486,12 @@ class Permissions(BaseFlags):
         "Events" permissions from the official Discord UI set to ``True``.
 
         .. versionadded:: 2.4
+
+        .. versionchanged:: 2.10
+            Added :attr:`create_events` permission.
         """
         return cls(
+            create_events=True,
             manage_events=True,
         )
 
