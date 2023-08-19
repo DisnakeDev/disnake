@@ -66,6 +66,7 @@ CustomActivity
 .. autoclass:: CustomActivity
     :members:
     :inherited-members:
+    :exclude-members: large_image_url, large_image_text, small_image_url, small_image_text
 
 Enumerations
 ------------
