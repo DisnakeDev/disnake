@@ -770,8 +770,6 @@ class Client:
         Check :func:`~disnake.on_error` for more details.
         """
         print(f"Ignoring exception in {event_method}", file=sys.stderr)
-        if exc := kwargs.get("exc", None):
-            return traceback.print_exception(exc)
         traceback.print_exc()
 
     async def _dispatch_gateway_error(
