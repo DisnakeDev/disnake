@@ -145,6 +145,14 @@ MessageFlags
 .. autoclass:: MessageFlags()
     :members:
 
+AttachmentFlags
+~~~~~~~~~~~~~~~
+
+.. attributetable:: AttachmentFlags
+
+.. autoclass:: AttachmentFlags()
+    :members:
+
 AllowedMentions
 ~~~~~~~~~~~~~~~
 
