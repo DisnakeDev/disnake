@@ -897,7 +897,7 @@ class Cog(metaclass=CogMeta):
                 pass
             try:
                 self.cog_unload()
-            except:  # noqa: E722
+            except Exception as e:
                 _log.error(
-                    "An error occurred while unloading the %s cog.", self.qualified_name, exc_info=1
+                    "An error occurred while unloading the %s cog.", self.qualified_name, exc_info=e
                 )
