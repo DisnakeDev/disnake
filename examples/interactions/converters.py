@@ -15,7 +15,7 @@ bot = commands.Bot(command_prefix=commands.when_mentioned)
 @bot.slash_command()
 async def clean_command(
     inter: disnake.CommandInteraction[commands.Bot],
-    text: str = commands.Param(converter=lambda inter, text: text.replace("@", "\\@")),  # type: ignore
+    text: str = commands.Param(converter=lambda inter, text: text.replace("@", "\\@")),
 ):
     ...
 

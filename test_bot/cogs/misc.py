@@ -41,7 +41,7 @@ class Misc(commands.Cog):
         desc: The attachment description
         """
         button = disnake.ui.Button(label="edit")
-        button.callback = lambda interaction: interaction.response.edit_message(  # type: ignore
+        button.callback = lambda interaction: interaction.response.edit_message(
             file=self._get_file(desc)
         )
 
