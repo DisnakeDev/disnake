@@ -654,8 +654,10 @@ class Client:
     async def get_or_fetch_user(self, user_id: int, *, strict: bool = False) -> Optional[User]:
         """|coro|
 
-        Tries to get the user from the cache. If fails, it tries to
-        fetch the user from the API.
+        Tries to get the user from the cache. If it fails,
+        fetches the user from the API.
+
+        This only propagates exceptions when the ``strict`` parameter is enabled.
 
         Parameters
         ----------
@@ -1731,6 +1733,7 @@ class Client:
         limit: Optional[int] = 100,
         before: Optional[SnowflakeTime] = None,
         after: Optional[SnowflakeTime] = None,
+        with_counts: bool = True,
     ) -> GuildIterator:
         """Retrieves an :class:`.AsyncIterator` that enables receiving your guilds.
 
@@ -1772,6 +1775,11 @@ class Client:
             Retrieve guilds after this date or object.
             If a datetime is provided, it is recommended to use a UTC aware datetime.
             If the datetime is naive, it is assumed to be local time.
+        with_counts: :class:`bool`
+            Whether to include approximate member and presence counts for the guilds.
+            Defaults to ``True``.
+
+            .. versionadded:: 2.10
 
         Raises
         ------
@@ -1783,7 +1791,7 @@ class Client:
         :class:`.Guild`
             The guild with the guild data parsed.
         """
-        return GuildIterator(self, limit=limit, before=before, after=after)
+        return GuildIterator(self, limit=limit, before=before, after=after, with_counts=with_counts)
 
     async def fetch_template(self, code: Union[Template, str]) -> Template:
         """|coro|
@@ -1811,7 +1819,7 @@ class Client:
         data = await self.http.get_template(code)
         return Template(data=data, state=self._connection)
 
-    async def fetch_guild(self, guild_id: int, /) -> Guild:
+    async def fetch_guild(self, guild_id: int, /, *, with_counts: bool = True) -> Guild:
         """|coro|
 
         Retrieves a :class:`.Guild` from the given ID.
@@ -1829,6 +1837,11 @@ class Client:
         ----------
         guild_id: :class:`int`
             The ID of the guild to retrieve.
+        with_counts: :class:`bool`
+            Whether to include approximate member and presence counts for the guild.
+            Defaults to ``True``.
+
+            .. versionadded:: 2.10
 
         Raises
         ------
@@ -1842,7 +1855,7 @@ class Client:
         :class:`.Guild`
             The guild from the given ID.
         """
-        data = await self.http.get_guild(guild_id)
+        data = await self.http.get_guild(guild_id, with_counts=with_counts)
         return Guild(data=data, state=self._connection)
 
     async def fetch_guild_preview(

@@ -21,6 +21,7 @@ class Role(TypedDict):
     managed: bool
     mentionable: bool
     tags: NotRequired[RoleTags]
+    flags: int
 
 
 class RoleTags(TypedDict, total=False):
