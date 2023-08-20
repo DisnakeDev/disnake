@@ -1,1 +1,1 @@
-Log errors raised by :meth:`.ext.commands.Cog.cog_unload`.
+|commands| Log errors raised by :meth:`.ext.commands.Cog.cog_unload`.
