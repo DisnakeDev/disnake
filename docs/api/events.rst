@@ -16,9 +16,11 @@ So, what are events anyway? Most of the :class:`Client` application cycle is bas
 to notify client about certain actions like message deletion, emoji creation, member nickname updates, etc.
 
 This library provides a few ways to register an
-*event handler* — a special function which will listen for specific types of events — which allows you to take action based on certain events.
+*event handler* or *event listener* — a special function which will listen for specific types of events — which allows you to take action based on certain events.
 
-The first way is through the use of the :meth:`Client.event` decorator: ::
+The first way to create an *event handler* is through the use of the :meth:`Client.event` decorator.
+Note that these are unique, which means you can only have one of
+each type (i.e. only one ``on_message``, one ``on_member_ban``, etc.): ::
 
     client = disnake.Client(...)
 
@@ -30,8 +32,9 @@ The first way is through the use of the :meth:`Client.event` decorator: ::
         if message.content.startswith('$hello'):
             await message.reply(f'Hello, {message.author}!')
 
-The second way is through subclassing :class:`Client` and
-overriding the specific events. For example: ::
+
+Another way is through subclassing :class:`Client` and overriding the specific events,
+which has essentially the same effect as the :meth:`Client.event` decorator. For example: ::
 
     class MyClient(disnake.Client):
         async def on_message(self, message):
@@ -41,10 +44,9 @@ overriding the specific events. For example: ::
             if message.content.startswith('$hello'):
                 await message.reply(f'Hello, {message.author}!')
 
-The third way is through the use of a ``listener``. A listener is a function that gets executed
-when the event that you're listening to is dispatched.
-Listeners are really useful because you can listen to the same event multiple times, this means
-that you can have multiple functions that will be called when an event is dispatched.
+
+A separate way is through the use of an *event listener*. These are similar to the *event handlers*
+described above, but allow you to have as many *listeners* of the same type as you want.
 You can register listeners using the :meth:`Client.listen` decorator or through the :meth:`Client.add_listener`
 method. Similarly you can remove a listener using the :meth:`Client.remove_listener` method. ::
 
@@ -52,13 +54,14 @@ method. Similarly you can remove a listener using the :meth:`Client.remove_liste
     async def on_message(message: disnake.Message):
         await message.reply(f'Hello, {message.author}')
 
+
     async def my_on_ready():
         print(f'Logged in as {client.user}')
 
     client.add_listener(my_on_ready, 'on_ready')
 
 
-Another way is to use :meth:`Client.wait_for`, which is a single-use event handler to wait for
+Lastly, :meth:`Client.wait_for` is a single-use event handler to wait for
 something to happen in more specific scenarios: ::
 
     @client.event
@@ -73,9 +76,6 @@ something to happen in more specific scenarios: ::
             # wait for a message that passes the check
             msg = await client.wait_for('message', check=check)
             await channel.send(f'Hello {msg.author}!')
-
-The above pieces of code are essentially equal, and both respond with ``Hello, {author's username here}!`` message
-when a user sends a ``$hello`` message.
 
 .. note::
 
