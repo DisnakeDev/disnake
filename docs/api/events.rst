@@ -52,7 +52,11 @@ method. Similarly you can remove a listener using the :meth:`Client.remove_liste
 
     @client.listen()
     async def on_message(message: disnake.Message):
-        await message.reply(f'Hello, {message.author}')
+        if message.author.bot:
+            return
+
+        if message.content.startswith('$hello'):
+            await message.reply(f'Hello, {message.author}')
 
 
     async def my_on_ready():
