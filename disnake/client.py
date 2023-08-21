@@ -7,6 +7,7 @@ import logging
 import signal
 import sys
 import traceback
+import types
 import warnings
 from datetime import datetime, timedelta
 from errno import ECONNRESET
@@ -19,6 +20,7 @@ from typing import (
     Generator,
     List,
     Literal,
+    Mapping,
     NamedTuple,
     Optional,
     Sequence,
@@ -44,7 +46,7 @@ from .application_role_connection import ApplicationRoleConnectionMetadata
 from .backoff import ExponentialBackoff
 from .channel import PartialMessageable, _threaded_channel_factory
 from .emoji import Emoji
-from .enums import ApplicationCommandType, ChannelType, Status
+from .enums import ApplicationCommandType, ChannelType, Event, Status
 from .errors import (
     ConnectionClosed,
     GatewayNotFound,
@@ -81,7 +83,6 @@ if TYPE_CHECKING:
     from .app_commands import APIApplicationCommand
     from .asset import AssetBytes
     from .channel import DMChannel
-    from .enums import Event
     from .member import Member
     from .message import Message
     from .types.application_role_connection import (
@@ -96,6 +97,11 @@ __all__ = (
     "SessionStartLimit",
     "GatewayParams",
 )
+
+T = TypeVar("T")
+
+Coro = Coroutine[Any, Any, T]
+CoroFunc = Callable[..., Coro[Any]]
 
 CoroT = TypeVar("CoroT", bound=Callable[..., Coroutine[Any, Any, Any]])
 
@@ -454,6 +460,8 @@ class Client:
         if self.gateway_params.encoding != "json":
             raise ValueError("Gateway encodings other than `json` are currently not supported.")
 
+        self.extra_events: Dict[str, List[CoroFunc]] = {}
+
     # internals
 
     def _get_websocket(
@@ -761,6 +769,159 @@ class Client:
             pass
         else:
             self._schedule_event(coro, method, *args, **kwargs)
+
+        for event_ in self.extra_events.get(method, []):
+            self._schedule_event(event_, method, *args, **kwargs)
+
+    def add_listener(self, func: CoroFunc, name: Union[str, Event] = MISSING) -> None:
+        """The non decorator alternative to :meth:`.listen`.
+
+        .. versionchanged:: 2.10
+            The definition of this method was moved from :class:`.ext.commands.Bot`
+            to the :class:`.Client` class.
+
+        Parameters
+        ----------
+        func: :ref:`coroutine <coroutine>`
+            The function to call.
+        name: Union[:class:`str`, :class:`.Event`]
+            The name of the event to listen for. Defaults to ``func.__name__``.
+
+        Example
+        --------
+
+        .. code-block:: python
+
+            async def on_ready(): pass
+            async def my_message(message): pass
+            async def another_message(message): pass
+
+            client.add_listener(on_ready)
+            client.add_listener(my_message, 'on_message')
+            client.add_listener(another_message, Event.message)
+
+        Raises
+        ------
+        TypeError
+            The function is not a coroutine or a string or an :class:`.Event` was not passed
+            as the name.
+        """
+        if name is not MISSING and not isinstance(name, (str, Event)):
+            raise TypeError(
+                f"add_listener expected str or Enum but received {name.__class__.__name__!r} instead."
+            )
+
+        name_ = (
+            func.__name__
+            if name is MISSING
+            else (name if isinstance(name, str) else f"on_{name.value}")
+        )
+
+        if not asyncio.iscoroutinefunction(func):
+            raise TypeError("Listeners must be coroutines")
+
+        if name_ in self.extra_events:
+            self.extra_events[name_].append(func)
+        else:
+            self.extra_events[name_] = [func]
+
+    def remove_listener(self, func: CoroFunc, name: Union[str, Event] = MISSING) -> None:
+        """Removes a listener from the pool of listeners.
+
+        .. versionchanged:: 2.10
+            The definition of this method was moved from :class:`.ext.commands.Bot`
+            to the :class:`.Client` class.
+
+        Parameters
+        ----------
+        func
+            The function that was used as a listener to remove.
+        name: Union[:class:`str`, :class:`.Event`]
+            The name of the event we want to remove. Defaults to
+            ``func.__name__``.
+
+        Raises
+        ------
+        TypeError
+            The name passed was not a string or an :class:`.Event`.
+        """
+        if name is not MISSING and not isinstance(name, (str, Event)):
+            raise TypeError(
+                f"remove_listener expected str or Enum but received {name.__class__.__name__!r} instead."
+            )
+        name = (
+            func.__name__
+            if name is MISSING
+            else (name if isinstance(name, str) else f"on_{name.value}")
+        )
+
+        if name in self.extra_events:
+            try:
+                self.extra_events[name].remove(func)
+            except ValueError:
+                pass
+
+    def listen(self, name: Union[str, Event] = MISSING) -> Callable[[CoroT], CoroT]:
+        """A decorator that registers another function as an external
+        event listener. Basically this allows you to listen to multiple
+        events from different places e.g. such as :func:`.on_ready`
+
+        The functions being listened to must be a :ref:`coroutine <coroutine>`.
+
+        .. versionchanged:: 2.10
+            The definition of this method was moved from :class:`.ext.commands.Bot`
+            to the :class:`.Client` class.
+
+        Example
+        -------
+        .. code-block:: python3
+
+            @client.listen()
+            async def on_message(message):
+                print('one')
+
+            # in some other file...
+
+            @client.listen('on_message')
+            async def my_message(message):
+                print('two')
+
+            # in yet another file
+            @client.listen(Event.message)
+            async def another_message(message):
+                print('three')
+
+        Would print one, two and three in an unspecified order.
+
+        Raises
+        ------
+        TypeError
+            The function being listened to is not a coroutine or a string or an :class:`.Event` was not passed
+            as the name.
+        """
+        if name is not MISSING and not isinstance(name, (str, Event)):
+            raise TypeError(
+                f"listen expected str or Enum but received {name.__class__.__name__!r} instead."
+            )
+
+        def decorator(func: CoroT) -> CoroT:
+            self.add_listener(func, name)
+            return func
+
+        return decorator
+
+    def get_listeners(self) -> Mapping[str, List[CoroFunc]]:
+        """Mapping[:class:`str`, List[Callable]]: A read-only mapping of event names to listeners.
+
+        .. note::
+            To add or remove a listener you should use :meth:`.add_listener` and
+            :meth:`.remove_listener`.
+
+        .. versionchanged:: 2.10
+            The definition of this method was moved from :class:`.ext.commands.Bot`
+            to the :class:`.Client` class.
+        """
+        return types.MappingProxyType(self.extra_events)
 
     async def on_error(self, event_method: str, *args: Any, **kwargs: Any) -> None:
         """|coro|
