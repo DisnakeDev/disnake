@@ -338,6 +338,7 @@ class InviteCreateEvent(TypedDict):
     channel_id: Snowflake
     code: str
     created_at: str
+    flags: NotRequired[int]
     guild_id: NotRequired[Snowflake]
     inviter: NotRequired[User]
     max_age: int

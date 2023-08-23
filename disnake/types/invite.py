@@ -30,6 +30,7 @@ class _InviteMetadata(TypedDict, total=False):
 
 class Invite(_InviteMetadata):
     code: str
+    flags: NotRequired[int]
     guild: NotRequired[InviteGuild]
     channel: InviteChannel
     inviter: NotRequired[PartialUser]
