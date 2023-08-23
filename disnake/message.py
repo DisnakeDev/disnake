@@ -591,7 +591,7 @@ class MessageReference:
     def with_state(cls, state: ConnectionState, data: MessageReferencePayload) -> Self:
         self = cls.__new__(cls)
         self.message_id = utils._get_as_snowflake(data, "message_id")
-        self.channel_id = int(data.pop("channel_id"))
+        self.channel_id = int(data["channel_id"])
         self.guild_id = utils._get_as_snowflake(data, "guild_id")
         self.fail_if_not_exists = data.get("fail_if_not_exists", True)
         self._state = state
@@ -646,10 +646,9 @@ class MessageReference:
         return f"<MessageReference message_id={self.message_id!r} channel_id={self.channel_id!r} guild_id={self.guild_id!r}>"
 
     def to_dict(self) -> MessageReferencePayload:
-        result: MessageReferencePayload = (
-            {"message_id": self.message_id} if self.message_id is not None else {}
-        )
-        result["channel_id"] = self.channel_id
+        result: MessageReferencePayload = {"channel_id": self.channel_id}
+        if self.message_id is not None:
+            result["message_id"] = self.message_id
         if self.guild_id is not None:
             result["guild_id"] = self.guild_id
         if self.fail_if_not_exists is not None:
