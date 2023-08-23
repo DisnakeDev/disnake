@@ -219,6 +219,7 @@ class Guild(Hashable):
         - ``DISCOVERABLE``: Guild shows up in Server Discovery.
         - ``ENABLED_DISCOVERABLE_BEFORE``: Guild had Server Discovery enabled at least once.
         - ``FEATURABLE``: Guild is able to be featured in Server Discovery.
+        - ``GUESTS_ENABLED``: Guild has access to guest invites.
         - ``HAS_DIRECTORY_ENTRY``: Guild is listed in a student hub.
         - ``HUB``: Guild is a student hub.
         - ``INVITE_SPLASH``: Guild's invite page can have a special splash.
@@ -245,7 +246,6 @@ class Guild(Hashable):
         - ``VERIFIED``: Guild is a verified server.
         - ``VIP_REGIONS``: Guild has VIP voice regions.
         - ``WELCOME_SCREEN_ENABLED``: Guild has enabled the welcome screen.
-        - ``GUESTS_ENABLED``: Guild has access to guest invites.
     premium_progress_bar_enabled: :class:`bool`
         Whether the server boost progress bar is enabled.
     premium_tier: :class:`int`

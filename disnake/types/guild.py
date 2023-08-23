@@ -47,6 +47,7 @@ GuildFeature = Literal[
     "DISCOVERABLE",
     "ENABLED_DISCOVERABLE_BEFORE",
     "FEATURABLE",
+    "GUESTS_ENABLED",
     "GUILD_HOME_TEST",  # not yet documented/finalised
     "HAS_DIRECTORY_ENTRY",
     "HUB",
