@@ -21,7 +21,8 @@ __all__ = (
 
 
 class Team:
-    """Represents an application team for a bot provided by Discord.
+    """Represents an application team.
+    Teams are groups of users who share access to an application's configuration.
 
     Attributes
     ----------
@@ -30,7 +31,7 @@ class Team:
     name: :class:`str`
         The team name.
     owner_id: :class:`int`
-        The team's owner ID.
+        The team owner's ID.
     members: List[:class:`TeamMember`]
         A list of the members in the team.
 
@@ -44,7 +45,7 @@ class Team:
 
         self.id: int = int(data["id"])
         self.name: str = data["name"]
-        self._icon: Optional[str] = data["icon"]
+        self._icon: Optional[str] = data.get("icon")
         self.owner_id: Optional[int] = utils._get_as_snowflake(data, "owner_user_id")
         self.members: List[TeamMember] = [
             TeamMember(self, self._state, member) for member in data["members"]
@@ -113,19 +114,15 @@ class TeamMember(BaseUser):
             See the `help article <https://dis.gd/app-usernames>`__ for details.
 
     global_name: Optional[:class:`str`]
-        The team members's global display name, if set.
+        The team member's global display name, if set.
         This takes precedence over :attr:`.name` when shown.
 
         .. versionadded:: 2.9
 
-    avatar: Optional[:class:`str`]
-        The avatar hash the team member has. Could be None.
-    bot: :class:`bool`
-        Specifies if the user is a bot account.
     team: :class:`Team`
         The team that the member is from.
     membership_state: :class:`TeamMembershipState`
-        The membership state of the member (e.g. invited or accepted)
+        The membership state of the member (e.g. invited or accepted).
     """
 
     __slots__ = ("team", "membership_state", "permissions")
