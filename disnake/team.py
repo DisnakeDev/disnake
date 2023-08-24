@@ -125,14 +125,13 @@ class TeamMember(BaseUser):
         The membership state of the member (e.g. invited or accepted).
     """
 
-    __slots__ = ("team", "membership_state", "permissions")
+    __slots__ = ("team", "membership_state")
 
     def __init__(self, team: Team, state: ConnectionState, data: TeamMemberPayload) -> None:
         self.team: Team = team
         self.membership_state: TeamMembershipState = try_enum(
             TeamMembershipState, data["membership_state"]
         )
-        self.permissions: List[str] = data["permissions"]
         super().__init__(state=state, data=data["user"])
 
     def __repr__(self) -> str:

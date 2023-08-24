@@ -11,10 +11,9 @@ TeamMembershipState = Literal[1, 2]
 
 
 class TeamMember(TypedDict):
-    user: PartialUser
     membership_state: TeamMembershipState
-    permissions: List[str]
     team_id: Snowflake
+    user: PartialUser
 
 
 class Team(TypedDict):
