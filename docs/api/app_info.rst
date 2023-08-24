@@ -89,6 +89,31 @@ TeamMembershipState
 
         Represents a member currently in the team.
 
+TeamMemberRole
+~~~~~~~~~~~~~~
+
+.. class:: TeamMemberRole
+
+    Represents the role of a team member retrieved through :func:`Client.application_info`.
+
+    .. versionadded:: 2.10
+
+    .. attribute:: owner
+
+        Owners have the most permissions, an can take destructive actions on the team and team-owned applications.
+
+    .. attribute:: admin
+
+        Admins have similar access as owners, except they cannot take destructive actions on the team or team-owned apps.
+
+    .. attribute:: developer
+
+        Developers can access information about a team and team-owned applications, and take limited actions on them, like configuring interaction endpoints or resetting the bot token.
+
+    .. attribute:: read_only
+
+        Read-only members can access information about a team and team-owned applications.
+
 ApplicationRoleConnectionMetadataType
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

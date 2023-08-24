@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, List, Optional
 
 from . import utils
 from .asset import Asset
-from .enums import TeamMembershipState, try_enum
+from .enums import TeamMemberRole, TeamMembershipState, try_enum
 from .user import BaseUser
 
 if TYPE_CHECKING:
@@ -123,15 +123,18 @@ class TeamMember(BaseUser):
         The team that the member is from.
     membership_state: :class:`TeamMembershipState`
         The membership state of the member (e.g. invited or accepted).
+    role: :class:`TeamMemberRole`
+        The role of the team member in the team.
     """
 
-    __slots__ = ("team", "membership_state")
+    __slots__ = ("team", "membership_state", "role")
 
     def __init__(self, team: Team, state: ConnectionState, data: TeamMemberPayload) -> None:
         self.team: Team = team
         self.membership_state: TeamMembershipState = try_enum(
             TeamMembershipState, data["membership_state"]
         )
+        self.role: TeamMemberRole = try_enum(TeamMemberRole, data.get("role"))
         super().__init__(state=state, data=data["user"])
 
     def __repr__(self) -> str:
