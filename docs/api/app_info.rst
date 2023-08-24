@@ -49,6 +49,7 @@ TeamMember
 
 .. autoclass:: TeamMember()
     :members:
+    :inherited-members:
 
 Data Classes
 ------------
