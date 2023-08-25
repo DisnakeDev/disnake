@@ -919,6 +919,11 @@ AuditLogAction
         the :class:`User` who got kicked. If the user is not found then it is
         a :class:`Object` with the user's ID.
 
+        When this is the action, the type of :attr:`~AuditLogEntry.extra` may be
+        set to an unspecified proxy object with one attribute:
+
+        - ``integration_type``: A string representing the type of the integration which performed the action, if any.
+
         When this is the action, :attr:`~AuditLogEntry.changes` is empty.
 
     .. attribute:: member_prune
@@ -983,6 +988,11 @@ AuditLogAction
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`Member` or :class:`User` who got the role. If the user is not found then it is
         a :class:`Object` with the user's ID.
+
+        When this is the action, the type of :attr:`~AuditLogEntry.extra` may be
+        set to an unspecified proxy object with one attribute:
+
+        - ``integration_type``: A string representing the type of the integration which performed the action, if any.
 
         Possible attributes for :class:`AuditLogDiff`:
 
