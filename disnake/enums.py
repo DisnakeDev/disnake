@@ -553,7 +553,6 @@ class TeamMembershipState(Enum):
 
 
 class TeamMemberRole(Enum):
-    owner = "owner"
     admin = "admin"
     developer = "developer"
     read_only = "read_only"

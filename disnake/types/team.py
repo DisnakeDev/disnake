@@ -8,7 +8,7 @@ from .snowflake import Snowflake
 from .user import PartialUser
 
 TeamMembershipState = Literal[1, 2]
-TeamMemberRole = Literal["owner", "admin", "developer", "read_only"]
+TeamMemberRole = Literal["admin", "developer", "read_only"]
 
 
 class TeamMember(TypedDict):

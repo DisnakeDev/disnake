@@ -99,13 +99,9 @@ TeamMemberRole
 
     .. versionadded:: 2.10
 
-    .. attribute:: owner
-
-        Owners have the most permissions, an can take destructive actions on the team and team-owned applications.
-
     .. attribute:: admin
 
-        Admins have similar access as owners, except they cannot take destructive actions on the team or team-owned apps.
+        Admins have the most permissions. An admin can only take destructive actions on the team or team-owned apps if they are the team owner.
 
     .. attribute:: developer
 
