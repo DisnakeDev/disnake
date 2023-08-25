@@ -83,6 +83,10 @@ AuditLogEvent = Literal[
     141,
     142,
     143,
+    144,
+    145,
+    150,
+    151,
 ]
 
 
@@ -299,7 +303,7 @@ AuditLogChange = Union[
 class AuditEntryInfo(TypedDict):
     delete_member_days: str
     members_removed: str
-    channel_id: Snowflake
+    channel_id: Optional[Snowflake]
     message_id: Snowflake
     count: str
     id: Snowflake

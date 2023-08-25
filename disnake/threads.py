@@ -6,7 +6,7 @@ import asyncio
 import time
 from typing import TYPE_CHECKING, Callable, Dict, Iterable, List, Literal, Optional, Sequence, Union
 
-from .abc import Messageable
+from .abc import GuildChannel, Messageable
 from .enums import ChannelType, ThreadArchiveDuration, try_enum, try_enum_to_int
 from .errors import ClientException
 from .flags import ChannelFlags
@@ -165,7 +165,7 @@ class Thread(Messageable, Hashable):
 
     def __init__(self, *, guild: Guild, state: ConnectionState, data: ThreadPayload) -> None:
         self._state: ConnectionState = state
-        self.guild = guild
+        self.guild: Guild = guild
         self._members: Dict[int, ThreadMember] = {}
         self._from_data(data)
 
@@ -183,21 +183,21 @@ class Thread(Messageable, Hashable):
         return self.name
 
     def _from_data(self, data: ThreadPayload) -> None:
-        self.id = int(data["id"])
-        self.parent_id = int(data["parent_id"])
-        self.owner_id = _get_as_snowflake(data, "owner_id")
-        self.name = data["name"]
+        self.id: int = int(data["id"])
+        self.parent_id: int = int(data["parent_id"])
+        self.owner_id: Optional[int] = _get_as_snowflake(data, "owner_id")
+        self.name: str = data["name"]
         self._type: ThreadType = try_enum(ChannelType, data["type"])  # type: ignore
-        self.last_message_id = _get_as_snowflake(data, "last_message_id")
-        self.slowmode_delay = data.get("rate_limit_per_user", 0)
-        self.message_count = data.get("message_count") or 0
-        self.total_message_sent = data.get("total_message_sent") or 0
-        self.member_count = data.get("member_count")
+        self.last_message_id: Optional[int] = _get_as_snowflake(data, "last_message_id")
+        self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
+        self.message_count: int = data.get("message_count") or 0
+        self.total_message_sent: int = data.get("total_message_sent") or 0
+        self.member_count: Optional[int] = data.get("member_count")
         self.last_pin_timestamp: Optional[datetime.datetime] = parse_time(
             data.get("last_pin_timestamp")
         )
         self._flags: int = data.get("flags", 0)
-        self._applied_tags = list(map(int, data.get("applied_tags", [])))
+        self._applied_tags: List[int] = list(map(int, data.get("applied_tags", [])))
         self._unroll_metadata(data["thread_metadata"])
 
         try:
@@ -208,14 +208,16 @@ class Thread(Messageable, Hashable):
             self.me = ThreadMember(self, member)
 
     def _unroll_metadata(self, data: ThreadMetadata) -> None:
-        self.archived = data["archived"]
-        self.auto_archive_duration = data["auto_archive_duration"]
-        self.archive_timestamp = parse_time(data["archive_timestamp"])
-        self.locked = data.get("locked", False)
-        self.invitable = data.get("invitable", True)
-        self.create_timestamp = parse_time(data.get("create_timestamp"))
+        self.archived: bool = data["archived"]
+        self.auto_archive_duration: ThreadArchiveDurationLiteral = data["auto_archive_duration"]
+        self.archive_timestamp: datetime.datetime = parse_time(data["archive_timestamp"])
+        self.locked: bool = data.get("locked", False)
+        self.invitable: bool = data.get("invitable", True)
+        self.create_timestamp: Optional[datetime.datetime] = parse_time(
+            data.get("create_timestamp")
+        )
 
-    def _update(self, data) -> None:
+    def _update(self, data: ThreadPayload) -> None:
         try:
             self.name = data["name"]
         except KeyError:
@@ -421,9 +423,15 @@ class Thread(Messageable, Hashable):
         or :class:`~disnake.Role`.
 
         Since threads do not have their own permissions, they inherit them
-        from the parent channel. This is a convenience method for
-        calling :meth:`~disnake.TextChannel.permissions_for` on the
-        parent channel.
+        from the parent channel.
+        However, the permission context is different compared to a normal channel,
+        so this method has different behavior than calling the parent's
+        :attr:`GuildChannel.permissions_for <.abc.GuildChannel.permissions_for>`
+        method directly.
+
+        .. versionchanged:: 2.9
+            Properly takes :attr:`Permissions.send_messages_in_threads`
+            into consideration.
 
         Parameters
         ----------
@@ -458,7 +466,24 @@ class Thread(Messageable, Hashable):
         parent = self.parent
         if parent is None:
             raise ClientException("Parent channel not found")
-        return parent.permissions_for(obj, ignore_timeout=ignore_timeout)
+        # n.b. GuildChannel is used here so implicit overrides are not applied based on send_messages
+        base = GuildChannel.permissions_for(parent, obj, ignore_timeout=ignore_timeout)
+
+        # if you can't send a message in a channel then you can't have certain
+        # permissions as well
+        if not base.send_messages_in_threads:
+            base.send_tts_messages = False
+            base.send_voice_messages = False
+            base.mention_everyone = False
+            base.embed_links = False
+            base.attach_files = False
+
+        # if you can't view a channel then you have no permissions there
+        if not base.view_channel:
+            denied = Permissions.all_channel()
+            base.value &= ~denied.value
+
+        return base
 
     async def delete_messages(self, messages: Iterable[Snowflake]) -> None:
         """|coro|
@@ -1174,9 +1199,10 @@ class ForumTag(Hashable):
 
     @classmethod
     def _from_data(cls, *, data: ForumTagPayload, state: ConnectionState) -> Self:
-        emoji_id = _get_as_snowflake(data, "emoji_id") or None
-        emoji_name = data.get("emoji_name")
-        emoji = PartialEmoji._emoji_from_name_id(emoji_name, emoji_id, state=state)
+        emoji = state._get_emoji_from_fields(
+            name=data.get("emoji_name"),
+            id=_get_as_snowflake(data, "emoji_id"),
+        )
 
         self = cls(
             name=data["name"],

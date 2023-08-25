@@ -164,6 +164,10 @@ class RawReactionActionEvent(_RawReprMixin):
         The guild ID where the reaction addition or removal took place, if applicable.
     emoji: :class:`PartialEmoji`
         The custom or unicode emoji being used.
+
+        .. versionchanged:: 2.9
+            This now also includes the correct :attr:`~PartialEmoji.animated` value when a reaction was removed.
+
     member: Optional[:class:`Member`]
         The member who added the reaction. Only available if `event_type` is `REACTION_ADD` and the reaction is inside a guild.
 
@@ -252,10 +256,13 @@ class RawReactionClearEmojiEvent(_RawReprMixin):
     emoji: :class:`PartialEmoji`
         The custom or unicode emoji being removed.
 
+        .. versionchanged:: 2.9
+            This now also includes the correct :attr:`~PartialEmoji.animated` value.
+
     burst: :class:`bool`
         Whether the reaction is Super reaction.
 
-        .. versionadded:: 2.9
+        .. versionadded:: 2.10
     """
 
     __slots__ = ("message_id", "channel_id", "guild_id", "emoji", "burst")

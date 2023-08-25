@@ -16,9 +16,11 @@ So, what are events anyway? Most of the :class:`Client` application cycle is bas
 to notify client about certain actions like message deletion, emoji creation, member nickname updates, etc.
 
 This library provides a few ways to register an
-*event handler* — a special function which will listen for specific types of events — which allows you to take action based on certain events.
+*event handler* or *event listener* — a special function which will listen for specific types of events — which allows you to take action based on certain events.
 
-The first way is through the use of the :meth:`Client.event` decorator: ::
+The first way to create an *event handler* is through the use of the :meth:`Client.event` decorator.
+Note that these are unique, which means you can only have one of
+each type (i.e. only one ``on_message``, one ``on_member_ban``, etc.): ::
 
     client = disnake.Client(...)
 
@@ -30,8 +32,9 @@ The first way is through the use of the :meth:`Client.event` decorator: ::
         if message.content.startswith('$hello'):
             await message.reply(f'Hello, {message.author}!')
 
-The second way is through subclassing :class:`Client` and
-overriding the specific events. For example: ::
+
+Another way is through subclassing :class:`Client` and overriding the specific events,
+which has essentially the same effect as the :meth:`Client.event` decorator. For example: ::
 
     class MyClient(disnake.Client):
         async def on_message(self, message):
@@ -41,7 +44,28 @@ overriding the specific events. For example: ::
             if message.content.startswith('$hello'):
                 await message.reply(f'Hello, {message.author}!')
 
-Another way is to use :meth:`Client.wait_for`, which is a single-use event handler to wait for
+
+A separate way is through the use of an *event listener*. These are similar to the *event handlers*
+described above, but allow you to have as many *listeners* of the same type as you want.
+You can register listeners using the :meth:`Client.listen` decorator or through the :meth:`Client.add_listener`
+method. Similarly you can remove a listener using the :meth:`Client.remove_listener` method. ::
+
+    @client.listen()
+    async def on_message(message: disnake.Message):
+        if message.author.bot:
+            return
+
+        if message.content.startswith('$hello'):
+            await message.reply(f'Hello, {message.author}')
+
+
+    async def my_on_ready():
+        print(f'Logged in as {client.user}')
+
+    client.add_listener(my_on_ready, 'on_ready')
+
+
+Lastly, :meth:`Client.wait_for` is a single-use event handler to wait for
 something to happen in more specific scenarios: ::
 
     @client.event
@@ -56,20 +80,6 @@ something to happen in more specific scenarios: ::
             # wait for a message that passes the check
             msg = await client.wait_for('message', check=check)
             await channel.send(f'Hello {msg.author}!')
-
-The above pieces of code are essentially equal, and both respond with ``Hello, {author's username here}!`` message
-when a user sends a ``$hello`` message.
-
-.. warning::
-
-    Event handlers described here are a bit different from :class:`~ext.commands.Bot`'s *event listeners*.
-
-    :class:`Client`'s event handlers are unique, which means you can only have one of each type (i.e. only one `on_message`, one `on_member_ban`, etc.). With :class:`~ext.commands.Bot` however, you can have as many *listeners*
-    of the same type as you want.
-
-    Also note that :meth:`Bot.event() <disnake.ext.commands.Bot.event>` is the same as :class:`Client`'s
-    :meth:`~Client.event` (since :class:`~ext.commands.Bot` subclasses :class:`Client`) and does not allow to listen/watch
-    for multiple events of the same type. Consider using :meth:`Bot.listen() <disnake.ext.commands.Bot.listen>` instead.
 
 .. note::
 
@@ -126,9 +136,8 @@ This section documents events related to :class:`Client` and its connectivity to
 
         ``on_error`` will only be dispatched to :meth:`Client.event`.
 
-        It will not be received by :meth:`Client.wait_for`, or, if used,
-        :ref:`ext_commands_api_bots` listeners such as
-        :meth:`~ext.commands.Bot.listen` or :meth:`~ext.commands.Cog.listener`.
+        It will not be received by :meth:`Client.wait_for` and listeners
+        such as :meth:`Client.listen`, or :meth:`~ext.commands.Cog.listener`.
 
     :param event: The name of the event that raised the exception.
     :type event: :class:`str`
@@ -154,9 +163,8 @@ This section documents events related to :class:`Client` and its connectivity to
     .. note::
         ``on_gateway_error`` will only be dispatched to :meth:`Client.event`.
 
-        It will not be received by :meth:`Client.wait_for`, or, if used,
-        :ref:`ext_commands_api_bots` listeners such as
-        :meth:`~ext.commands.Bot.listen` or :meth:`~ext.commands.Cog.listener`.
+        It will not be received by :meth:`Client.wait_for` and listeners
+        such as :meth:`Client.listen`, or :meth:`~ext.commands.Cog.listener`.
 
     .. note::
         This will not be dispatched for exceptions that occur while parsing ``READY`` and
@@ -574,6 +582,27 @@ Application Commands
     :param permissions: The updated permission object.
     :type permissions: :class:`GuildApplicationCommandPermissions`
 
+Audit Logs
+++++++++++
+
+.. function:: on_audit_log_entry_create(entry)
+
+    Called when an audit log entry is created.
+    You must have the :attr:`~Permissions.view_audit_log` permission to receive this.
+
+    This requires :attr:`Intents.moderation` to be enabled.
+
+    .. warning::
+        This scope of data in this gateway event is limited, which means it is much more
+        reliant on the cache than :meth:`Guild.audit_logs`.
+        Because of this, :attr:`AuditLogEntry.target` and :attr:`AuditLogEntry.user`
+        will frequently be of type :class:`Object` instead of the respective model.
+
+    .. versionadded:: 2.8
+
+    :param entry: The audit log entry that was created.
+    :type entry: :class:`AuditLogEntry`
+
 AutoMod
 +++++++
 
@@ -697,27 +726,6 @@ Integrations
     :param payload: The raw event payload data.
     :type payload: :class:`RawIntegrationDeleteEvent`
 
-Audit Logs
-++++++++++
-
-.. function:: on_audit_log_entry_create(entry)
-
-    Called when an audit log entry is created.
-    You must have the :attr:`~Permissions.view_audit_log` permission to receive this.
-
-    This requires :attr:`Intents.moderation` to be enabled.
-
-    .. warning::
-        This scope of data in this gateway event is limited, which means it is much more
-        reliant on the cache than :meth:`Guild.audit_logs`.
-        Because of this, :attr:`AuditLogEntry.target` and :attr:`AuditLogEntry.user`
-        will frequently be of type :class:`Object` instead of the respective model.
-
-    .. versionadded:: 2.8
-
-    :param entry: The audit log entry that was created.
-    :type entry: :class:`AuditLogEntry`
-
 Invites
 +++++++
 
@@ -764,7 +772,7 @@ Members
 .. function:: on_member_join(member)
               on_member_remove(member)
 
-    Called when a :class:`Member` leaves or joins a :class:`Guild`.
+    Called when a :class:`Member` joins or leaves a :class:`Guild` (this includes getting kicked/banned).
     If :func:`on_member_remove` is being used then consider using :func:`on_raw_member_remove` which will be called regardless of the cache.
 
     This requires :attr:`Intents.members` to be enabled.
@@ -774,7 +782,8 @@ Members
 
 .. function:: on_member_update(before, after)
 
-    Called when a :class:`Member` updates their profile.
+    Called when a :class:`Member` is updated in a :class:`Guild`. This will also be called
+    when a :class:`User` object linked to a guild :class:`Member` changes.
     Consider using :func:`on_raw_member_update` which will be called regardless of the cache.
 
     This is called when one or more of the following things change, but is not limited to:
@@ -795,7 +804,7 @@ Members
 
 .. function:: on_raw_member_remove(payload)
 
-    Called when a member leaves a :class:`Guild`.
+    Called when a member leaves a :class:`Guild` (this includes getting kicked/banned).
     Unlike :func:`on_member_remove`, this is called regardless of the member cache.
 
     .. versionadded:: 2.6
@@ -805,7 +814,8 @@ Members
 
 .. function:: on_raw_member_update(member)
 
-    Called when a member updates their profile.
+    Called when a :class:`Member` is updated in a :class:`Guild`. This will also be called
+    when a :class:`User` object linked to a guild :class:`Member` changes.
     Unlike :func:`on_member_update`, this is called regardless of the member cache.
 
     .. versionadded:: 2.6
@@ -864,6 +874,7 @@ Members
     - avatar
     - discriminator
     - name
+    - global_name
     - public_flags
 
     This requires :attr:`Intents.members` to be enabled.
@@ -872,6 +883,32 @@ Members
     :type before: :class:`User`
     :param after: The user's updated info.
     :type after: :class:`User`
+
+Roles
++++++
+
+.. function:: on_guild_role_create(role)
+              on_guild_role_delete(role)
+
+    Called when a :class:`Guild` creates or deletes a :class:`Role`.
+
+    To get the guild it belongs to, use :attr:`Role.guild`.
+
+    This requires :attr:`Intents.guilds` to be enabled.
+
+    :param role: The role that was created or deleted.
+    :type role: :class:`Role`
+
+.. function:: on_guild_role_update(before, after)
+
+    Called when a :class:`Role` is changed guild-wide.
+
+    This requires :attr:`Intents.guilds` to be enabled.
+
+    :param before: The updated role's old info.
+    :type before: :class:`Role`
+    :param after: The updated role's updated info.
+    :type after: :class:`Role`
 
 Scheduled Events
 ++++++++++++++++
@@ -972,32 +1009,6 @@ Stickers
     :type before: Sequence[:class:`GuildSticker`]
     :param after: A list of stickers after the update.
     :type after: Sequence[:class:`GuildSticker`]
-
-Roles
-+++++
-
-.. function:: on_guild_role_create(role)
-              on_guild_role_delete(role)
-
-    Called when a :class:`Guild` creates or deletes a :class:`Role`.
-
-    To get the guild it belongs to, use :attr:`Role.guild`.
-
-    This requires :attr:`Intents.guilds` to be enabled.
-
-    :param role: The role that was created or deleted.
-    :type role: :class:`Role`
-
-.. function:: on_guild_role_update(before, after)
-
-    Called when a :class:`Role` is changed guild-wide.
-
-    This requires :attr:`Intents.guilds` to be enabled.
-
-    :param before: The updated role's old info.
-    :type before: :class:`Role`
-    :param after: The updated role's updated info.
-    :type after: :class:`Role`
 
 Voice
 +++++

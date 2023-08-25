@@ -69,6 +69,30 @@ BanEntry
 
         :type: :class:`User`
 
+Onboarding
+~~~~~~~~~~
+
+.. attributetable:: Onboarding
+
+.. autoclass:: Onboarding()
+    :members:
+
+OnboardingPrompt
+~~~~~~~~~~~~~~~~
+
+.. attributetable:: OnboardingPrompt
+
+.. autoclass:: OnboardingPrompt()
+    :members:
+
+OnboardingPromptOption
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: OnboardingPromptOption
+
+.. autoclass:: OnboardingPromptOption()
+    :members:
+
 Data Classes
 ------------
 
@@ -273,6 +297,24 @@ NSFWLevel
     .. attribute:: age_restricted
 
         The guild may contain NSFW content.
+
+
+OnboardingPromptType
+~~~~~~~~~~~~~~~~~~~~
+
+.. class:: OnboardingPromptType
+
+    Represents the type of onboarding prompt.
+
+    .. versionadded:: 2.9
+
+    .. attribute:: multiple_choice
+
+        The prompt is a multiple choice prompt.
+
+    .. attribute:: dropdown
+
+        The prompt is a dropdown prompt.
 
 
 Events

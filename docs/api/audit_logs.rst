@@ -996,7 +996,7 @@ AuditLogAction
         When this is the action, the type of :attr:`~AuditLogEntry.extra` is
         set to an unspecified proxy object with two attributes:
 
-        - ``channel``: A :class:`TextChannel` or :class:`Object` with the channel ID where the members were moved.
+        - ``channel``: A :class:`abc.GuildChannel` or :class:`Object` with the channel ID where the members were moved.
         - ``count``: An integer specifying how many members were moved.
 
         .. versionadded:: 1.3
@@ -1230,7 +1230,7 @@ AuditLogAction
         set to an unspecified proxy object with two attributes:
 
         - ``count``: An integer specifying how many messages were deleted.
-        - ``channel``: A :class:`TextChannel` or :class:`Object` with the channel ID where the message got deleted.
+        - ``channel``: A :class:`abc.GuildChannel`, :class:`Thread` or :class:`Object` with the channel ID where the message got deleted.
 
     .. attribute:: message_bulk_delete
 
@@ -1257,7 +1257,7 @@ AuditLogAction
         When this is the action, the type of :attr:`~AuditLogEntry.extra` is
         set to an unspecified proxy object with two attributes:
 
-        - ``channel``: A :class:`TextChannel` or :class:`Object` with the channel ID where the message was pinned.
+        - ``channel``: A :class:`abc.GuildChannel`, :class:`Thread` or :class:`Object` with the channel ID where the message was pinned.
         - ``message_id``: the ID of the message which was pinned.
 
         .. versionadded:: 1.3
@@ -1273,7 +1273,7 @@ AuditLogAction
         When this is the action, the type of :attr:`~AuditLogEntry.extra` is
         set to an unspecified proxy object with two attributes:
 
-        - ``channel``: A :class:`TextChannel` or :class:`Object` with the channel ID where the message was unpinned.
+        - ``channel``: A :class:`abc.GuildChannel`, :class:`Thread` or :class:`Object` with the channel ID where the message was unpinned.
         - ``message_id``: the ID of the message which was unpinned.
 
         .. versionadded:: 1.3
@@ -1649,9 +1649,11 @@ AuditLogAction
         When this is the action, the type of :attr:`~AuditLogEntry.extra` is
         set to an unspecified proxy object with these attributes:
 
-        - ``channel``: A :class:`~abc.GuildChannel`, :class:`Thread` or :class:`Object` with the channel ID where the message got blocked.
+        - ``channel``: A :class:`abc.GuildChannel`, :class:`Thread` or :class:`Object` with the channel ID where the message got blocked. May also be ``None``.
         - ``rule_name``: A :class:`str` with the name of the rule that matched.
         - ``rule_trigger_type``: An :class:`AutoModTriggerType` value with the trigger type of the rule.
+
+        .. versionadded:: 2.6
 
     .. attribute:: automod_send_alert_message
 
@@ -1664,6 +1666,8 @@ AuditLogAction
         See :attr:`automod_block_message` for more information on how the
         :attr:`~AuditLogEntry.extra` field is set.
 
+        .. versionadded:: 2.6
+
     .. attribute:: automod_timeout
 
         A user was timed out by an auto moderation rule.
@@ -1674,6 +1678,20 @@ AuditLogAction
 
         See :attr:`automod_block_message` for more information on how the
         :attr:`~AuditLogEntry.extra` field is set.
+
+        .. versionadded:: 2.6
+
+    .. attribute:: creator_monetization_request_created
+
+        A creator monetization request was created.
+
+        .. versionadded:: 2.10
+
+    .. attribute:: creator_monetization_terms_accepted
+
+        The creator monetization terms were accepted.
+
+        .. versionadded:: 2.10
 
 AuditLogActionCategory
 ~~~~~~~~~~~~~~~~~~~~~~

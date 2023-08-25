@@ -427,6 +427,11 @@ class VoiceClient(VoiceProtocol):
             try:
                 await self.ws.poll_event()
             except (ConnectionClosed, asyncio.TimeoutError) as exc:
+                # Ensure the keep alive handler is closed
+                if self.ws._keep_alive:
+                    self.ws._keep_alive.stop()
+                    self.ws._keep_alive = None
+
                 if isinstance(exc, ConnectionClosed):
                     # The following close codes are undocumented so I will document them here.
                     # 1000 - normal closure (obviously)
