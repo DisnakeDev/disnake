@@ -729,15 +729,15 @@ class HTTPClient:
     ) -> Response[List[user.User]]:
         r = Route(
             "GET",
-            "/channels/{channel_id}/messages/{message_id}/reactions/{emoji}?type={type}",
+            "/channels/{channel_id}/messages/{message_id}/reactions/{emoji}",
             channel_id=channel_id,
             message_id=message_id,
             emoji=emoji,
-            type=type,
         )
 
         params: Dict[str, Any] = {
             "limit": limit,
+            "type": type,
         }
         if after:
             params["after"] = after
