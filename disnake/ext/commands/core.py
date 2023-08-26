@@ -63,7 +63,6 @@ if TYPE_CHECKING:
     from disnake.message import Message
 
     from ._types import AppCheck, Check, Coro, CoroFunc, Error, Hook
-    from .base_core import InvokableApplicationCommand
 
 
 __all__ = (
@@ -1922,29 +1921,7 @@ def app_check(predicate: AppCheck) -> Callable[[T], T]:
     predicate: Callable[[:class:`disnake.ApplicationCommandInteraction`], :class:`bool`]
         The predicate to check if the command should be invoked.
     """
-
-    def decorator(func: Union[InvokableApplicationCommand, CoroFunc]) -> Union[Command, CoroFunc]:
-        if hasattr(func, "__command_flag__"):
-            func.checks.append(predicate)
-        else:
-            if not hasattr(func, "__commands_checks__"):
-                func.__commands_checks__ = []  # type: ignore
-
-            func.__commands_checks__.append(predicate)  # type: ignore
-
-        return func
-
-    if asyncio.iscoroutinefunction(predicate):
-        decorator.predicate = predicate
-    else:
-
-        @functools.wraps(predicate)
-        async def wrapper(ctx):
-            return predicate(ctx)  # type: ignore
-
-        decorator.predicate = wrapper
-
-    return decorator  # type: ignore
+    return check(predicate)  # type: ignore
 
 
 def app_check_any(*checks: AppCheck) -> Callable[[T], T]:
@@ -1990,29 +1967,10 @@ def app_check_any(*checks: AppCheck) -> Callable[[T], T]:
         async def only_for_owners(inter):
             await inter.send('Hello mister owner!')
     """
-    unwrapped = []
-    for wrapped in checks:
-        try:
-            pred = wrapped.predicate
-        except AttributeError:
-            raise TypeError(f"{wrapped!r} must be wrapped by commands.check decorator") from None
-        else:
-            unwrapped.append(pred)
-
-    async def predicate(ctx: AnyContext) -> bool:
-        errors = []
-        for func in unwrapped:
-            try:
-                value = await func(ctx)
-            except CheckFailure as e:
-                errors.append(e)
-            else:
-                if value:
-                    return True
-        # if we're here, all checks failed
-        raise CheckAnyFailure(unwrapped, errors)
-
-    return check(predicate)
+    try:
+        return check_any(*checks)  # type: ignore
+    except TypeError as e:
+        raise TypeError(str(e).replace("commands.check", "commands.app_check"))  # fix err message
 
 
 def has_role(item: Union[int, str]) -> Callable[[T], T]:
