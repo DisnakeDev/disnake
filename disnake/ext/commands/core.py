@@ -1859,71 +1859,9 @@ def check_any(*checks: Check) -> Callable[[T], T]:
 
 
 def app_check(predicate: AppCheck) -> Callable[[T], T]:
-    """A decorator that adds a check to the :class:`disnake.ext.commands.InvokableApplicationCommand` or its
-    subclasses. These checks could be accessed via :attr:`.Command.checks`.
-
-    These checks should be predicates that take in a single parameter taking
-    a :class:`disnake.ApplicationCommandInteraction`. If the check returns a
-    ``False``-like value then during invocation a :exc:`.CheckFailure`
-    exception is raised and sent to the event corresponding to your application
-    command's type.
-
-    If an exception should be thrown in the predicate then it should be a
-    subclass of :exc:`.CommandError`. Any exception not subclassed from it
-    will be propagated while those subclassed will be sent to
-    the event corresponding to your application command's type.
-
-    A special attribute named ``predicate`` is bound to the value
-    returned by this decorator to retrieve the predicate passed to the
-    decorator. This allows the following introspection and chaining to be done:
-
-    .. code-block:: python3
-
-        def owner_or_permissions(**perms):
-            original = commands.has_permissions(**perms).predicate
-            async def extended_check(inter):
-                if inter.guild is None:
-                    return False
-                return inter.guild.owner_id == inter.author.id or await original(ctx)
-            return commands.app_check(extended_check)
-
-    .. note::
-
-        The function returned by ``predicate`` is **always** a coroutine,
-        even if the original function was not a coroutine.
-
-    .. note::
-        See :func:`.check` for this function's prefix command counterpart.
+    """Same as :func:`.check`, but for app commands.
 
     .. versionadded:: 2.10
-
-    Examples
-    --------
-    Creating a basic check to see if the command invoker is you.
-
-    .. code-block:: python3
-
-        def check_if_it_is_me(inter):
-            return ctx.message.author.id == 85309593344815104
-
-        @bot.slash_command()
-        @commands.app_check(check_if_it_is_me)
-        async def only_for_me(inter):
-            await inter.send('I know you!')
-
-    Transforming common checks into its own decorator:
-
-    .. code-block:: python3
-
-        def is_me():
-            def predicate(inter):
-                return ctx.message.author.id == 85309593344815104
-            return commands.check(predicate)
-
-        @bot.slash_command()
-        @is_me()
-        async def only_me(inter):
-            await inter.send('Only you!')
 
     Parameters
     ----------
@@ -1934,15 +1872,11 @@ def app_check(predicate: AppCheck) -> Callable[[T], T]:
 
 
 def app_check_any(*checks: AppCheck) -> Callable[[T], T]:
-    """An :func:`app_check` that is added that checks if any of the checks passed
-    will pass, i.e. using logical OR.
+    """Same as :func:`.check_any`, but for app commands.
 
-    If all checks fail then :exc:`.CheckAnyFailure` is raised to signal the failure.
-    It inherits from :exc:`.CheckFailure`.
-
-    .. note::
-
-        The ``predicate`` attribute for this function **is** a coroutine.
+    .. warning::
+        You cannot use various pre-made checks like :func:`.dm_only` or :func:`.is_owner`
+        as arguments to this function, since they are made for prefix commands, bot app ones.
 
     .. note::
         See :func:`.check_any` for this function's prefix command counterpart.
@@ -1961,23 +1895,6 @@ def app_check_any(*checks: AppCheck) -> Callable[[T], T]:
     TypeError
         A check passed has not been decorated with the :func:`app_check`
         decorator.
-
-    Examples
-    --------
-    Creating a basic check to see if it's the bot owner or
-    the server owner:
-
-    .. code-block:: python3
-
-        def is_guild_owner():
-            def predicate(inter):
-                return inter.guild is not None and inter.guild.owner_id == inter.author.id
-            return commands.app_check(predicate)
-
-        @bot.slash_command()
-        @commands.app_check_any(is_guild_owner())
-        async def only_for_owners(inter):
-            await inter.send('Hello mister owner!')
     """
     try:
         return check_any(*checks)  # type: ignore
