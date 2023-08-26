@@ -1653,6 +1653,8 @@ AuditLogAction
         - ``rule_name``: A :class:`str` with the name of the rule that matched.
         - ``rule_trigger_type``: An :class:`AutoModTriggerType` value with the trigger type of the rule.
 
+        .. versionadded:: 2.6
+
     .. attribute:: automod_send_alert_message
 
         An alert message was sent by an auto moderation rule.
@@ -1664,6 +1666,8 @@ AuditLogAction
         See :attr:`automod_block_message` for more information on how the
         :attr:`~AuditLogEntry.extra` field is set.
 
+        .. versionadded:: 2.6
+
     .. attribute:: automod_timeout
 
         A user was timed out by an auto moderation rule.
@@ -1674,6 +1678,20 @@ AuditLogAction
 
         See :attr:`automod_block_message` for more information on how the
         :attr:`~AuditLogEntry.extra` field is set.
+
+        .. versionadded:: 2.6
+
+    .. attribute:: creator_monetization_request_created
+
+        A creator monetization request was created.
+
+        .. versionadded:: 2.10
+
+    .. attribute:: creator_monetization_terms_accepted
+
+        The creator monetization terms were accepted.
+
+        .. versionadded:: 2.10
 
 AuditLogActionCategory
 ~~~~~~~~~~~~~~~~~~~~~~
