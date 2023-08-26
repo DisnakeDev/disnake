@@ -1000,8 +1000,8 @@ class InteractionBotBase(CommonBotBase):
     ) -> None:
         """Adds a global application command check to the bot.
 
-        This is the non-decorator interface to :meth:`.check`,
-        :meth:`.check_once`, :meth:`.slash_command_check` and etc.
+        This is the non-decorator interface to :meth:`.app_check`,
+        :meth:`.slash_command_check` and etc.
 
         You must specify at least one of the bool parameters, otherwise
         the check won't be added.
@@ -1060,7 +1060,7 @@ class InteractionBotBase(CommonBotBase):
             The function to remove from the global checks.
         call_once: :class:`bool`
             Whether the function was added with ``call_once=True`` in
-            the :meth:`.Bot.add_check` call or using :meth:`.check_once`.
+            the :meth:`.Bot.add_app_command_check` call.
         slash_commands: :class:`bool`
             Whether this check was for slash commands.
         user_commands: :class:`bool`
