@@ -1,4 +1,6 @@
-name: Validate PRs
+# SPDX-License-Identifier: MIT
+
+name: Validate PRs Title
 
 on:
   pull_request_target:
