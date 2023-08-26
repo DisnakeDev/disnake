@@ -1000,7 +1000,7 @@ class InteractionBotBase(CommonBotBase):
     ) -> None:
         """Adds a global application command check to the bot.
 
-        This is the non-decorator interface to :meth:`.app_check`,
+        This is the non-decorator interface to :func:`.app_check`,
         :meth:`.slash_command_check` and etc.
 
         You must specify at least one of the bool parameters, otherwise

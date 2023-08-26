@@ -1885,8 +1885,7 @@ def app_check_any(*checks: AppCheck) -> Callable[[T], T]:
 
     Parameters
     ----------
-    *checks: Callable[[:class:`disnake.ApplicationCommandInteraction
-    `], :class:`bool`]
+    *checks: Callable[[:class:`disnake.ApplicationCommandInteraction`], :class:`bool`]
         An argument list of checks that have been decorated with
         the :func:`app_check` decorator.
 
