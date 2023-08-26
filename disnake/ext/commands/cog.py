@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import inspect
+import logging
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -48,6 +49,7 @@ __all__ = (
 FuncT = TypeVar("FuncT", bound=Callable[..., Any])
 
 MISSING: Any = disnake.utils.MISSING
+_log = logging.getLogger(__name__)
 
 
 def _cog_special_method(func: FuncT) -> FuncT:
@@ -895,6 +897,7 @@ class Cog(metaclass=CogMeta):
                 pass
             try:
                 self.cog_unload()
-            except Exception:
-                # TODO: Consider calling the bot's on_error handler here
-                pass
+            except Exception as e:
+                _log.error(
+                    "An error occurred while unloading the %s cog.", self.qualified_name, exc_info=e
+                )

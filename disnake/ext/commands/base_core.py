@@ -256,7 +256,7 @@ class InvokableApplicationCommand(ABC):
     def add_check(self, func: AppCheck) -> None:
         """Adds a check to the application command.
 
-        This is the non-decorator interface to :func:`.check`.
+        This is the non-decorator interface to :func:`.app_check`.
 
         Parameters
         ----------
