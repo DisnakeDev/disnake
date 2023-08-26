@@ -1868,7 +1868,7 @@ def app_check(predicate: AppCheck) -> Callable[[T], T]:
     predicate: Callable[[:class:`disnake.ApplicationCommandInteraction`], :class:`bool`]
         The predicate to check if the command should be invoked.
     """
-    return check(predicate)  # type: ignore
+    return check(predicate)  # type: ignore  # impl is the same, typings are different
 
 
 def app_check_any(*checks: AppCheck) -> Callable[[T], T]:
@@ -1897,7 +1897,7 @@ def app_check_any(*checks: AppCheck) -> Callable[[T], T]:
         decorator.
     """
     try:
-        return check_any(*checks)  # type: ignore
+        return check_any(*checks)  # type: ignore  # impl is the same, typings are different
     except TypeError as e:
         raise TypeError(str(e).replace("commands.check", "commands.app_check"))  # fix err message
 
