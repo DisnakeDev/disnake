@@ -1879,7 +1879,7 @@ def app_check(predicate: AppCheck) -> Callable[[T], T]:
                 if inter.guild is None:
                     return False
                 return inter.guild.owner_id == inter.author.id or await original(ctx)
-            return commands.check(extended_check)
+            return commands.app_check(extended_check)
 
     .. note::
 
@@ -1925,7 +1925,7 @@ def app_check(predicate: AppCheck) -> Callable[[T], T]:
 
 
 def app_check_any(*checks: AppCheck) -> Callable[[T], T]:
-    """A :func:`check` that is added that checks if any of the checks passed
+    """An :func:`app_check` that is added that checks if any of the checks passed
     will pass, i.e. using logical OR.
 
     If all checks fail then :exc:`.CheckAnyFailure` is raised to signal the failure.
@@ -1942,12 +1942,12 @@ def app_check_any(*checks: AppCheck) -> Callable[[T], T]:
     *checks: Callable[[:class:`disnake.ApplicationCommandInteraction
     `], :class:`bool`]
         An argument list of checks that have been decorated with
-        the :func:`check` decorator.
+        the :func:`app_check` decorator.
 
     Raises
     ------
     TypeError
-        A check passed has not been decorated with the :func:`check`
+        A check passed has not been decorated with the :func:`app_check`
         decorator.
 
     Examples
@@ -1960,10 +1960,10 @@ def app_check_any(*checks: AppCheck) -> Callable[[T], T]:
         def is_guild_owner():
             def predicate(inter):
                 return inter.guild is not None and inter.guild.owner_id == inter.author.id
-            return commands.check(predicate)
+            return commands.app_check(predicate)
 
         @bot.slash_command()
-        @commands.check_any(commands.is_owner(), is_guild_owner())
+        @commands.app_check_any(is_guild_owner())
         async def only_for_owners(inter):
             await inter.send('Hello mister owner!')
     """
