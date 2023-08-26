@@ -1724,6 +1724,9 @@ def check(predicate: Check) -> Callable[[T], T]:
         The function returned by ``predicate`` is **always** a coroutine,
         even if the original function was not a coroutine.
 
+    .. note::
+        See :func:`.app_check` for this function's application command counterpart.
+
     .. versionchanged:: 1.3
         The ``predicate`` attribute was added.
 
@@ -1795,6 +1798,9 @@ def check_any(*checks: Check) -> Callable[[T], T]:
     .. note::
 
         The ``predicate`` attribute for this function **is** a coroutine.
+
+    .. note::
+        See :func:`.app_check_any` for this function's application command counterpart.
 
     .. versionadded:: 1.3
 
@@ -1886,6 +1892,9 @@ def app_check(predicate: AppCheck) -> Callable[[T], T]:
         The function returned by ``predicate`` is **always** a coroutine,
         even if the original function was not a coroutine.
 
+    .. note::
+        See :func:`.check` for this function's prefix command counterpart.
+
     .. versionadded:: 2.10
 
     Examples
@@ -1934,6 +1943,9 @@ def app_check_any(*checks: AppCheck) -> Callable[[T], T]:
     .. note::
 
         The ``predicate`` attribute for this function **is** a coroutine.
+
+    .. note::
+        See :func:`.check_any` for this function's prefix command counterpart.
 
     .. versionadded:: 2.10
 
