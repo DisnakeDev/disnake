@@ -183,7 +183,12 @@ class RawReactionActionEvent(_RawReprMixin):
     burst: :class:`bool`
         Whether the reaction is Super reaction.
 
-        .. versionadded:: 2.9
+        .. versionadded:: 2.10
+
+    burst_colors: List[:class:`Colour`]
+        The list of :class:`Colour` used for Super reaction.
+
+        .. versionadded:: 2.10
     """
 
     __slots__ = (
@@ -195,6 +200,7 @@ class RawReactionActionEvent(_RawReprMixin):
         "event_type",
         "member",
         "burst",
+        "burst_colors",
     )
 
     def __init__(
@@ -210,6 +216,7 @@ class RawReactionActionEvent(_RawReprMixin):
         self.event_type: ReactionEventType = event_type
         self.member: Optional[Member] = None
         self.burst: bool = data["burst"]
+        self.burst_colors: List[str] = data.get("burst_colors", [])
         try:
             self.guild_id: Optional[int] = int(data["guild_id"])
         except KeyError:
@@ -271,7 +278,7 @@ class RawReactionClearEmojiEvent(_RawReprMixin):
         self.emoji: PartialEmoji = emoji
         self.message_id: int = int(data["message_id"])
         self.channel_id: int = int(data["channel_id"])
-        self.burst: bool = data["burst"]
+        self.burst: bool = data.get("burst", False)
         try:
             self.guild_id: Optional[int] = int(data["guild_id"])
         except KeyError:

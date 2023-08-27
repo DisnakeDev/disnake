@@ -32,9 +32,11 @@ class ReactionCountDetails(TypedDict):
 
 class Reaction(TypedDict):
     count: int
-    me: bool
-    emoji: PartialEmoji
     count_details: ReactionCountDetails
+    me: bool
+    me_burst: bool
+    emoji: PartialEmoji
+    burst_count: int
     burst_colors: List[str]
 
 

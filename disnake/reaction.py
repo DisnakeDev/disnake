@@ -72,7 +72,7 @@ class Reaction:
         self.emoji: Union[PartialEmoji, Emoji, str] = emoji or message._state._get_emoji_from_data(  # type: ignore
             data["emoji"]
         )
-        self.count: int = data.get("count", 1)
+        self.count: int = data["count_details"].get("normal", 1)
         self.me: bool = data["me"]
 
     # TODO: typeguard
@@ -205,13 +205,15 @@ class Reaction:
         if limit is None:
             limit = self.count
 
-        return ReactionIterator(self.message, emoji, limit, after, type=0)
+        return ReactionIterator(
+            self.message, emoji, limit, after, type=1 if isinstance(self, BurstReaction) else 0
+        )
 
 
 class BurstReaction(Reaction):
     """Represents a Super reaction to a message.
 
-    .. versionadded:: 2.9
+    .. versionadded:: 2.10
 
     This class is a subclass of :class:`.Reaction`.
 
@@ -248,15 +250,14 @@ class BurstReaction(Reaction):
         If the user sent this Super reaction.
     message: :class:`Message`
         The message this Super reaction belongs to.
-    burst_colors: List[:class:`Colour`]
-        The list of :class:`Colour` used for super reaction.
-
-        .. note::
-
-            This information is only available via :meth:`abc.Messageable.fetch_message`.
+    colors: List[:class:`Colour`]
+        The list of :class:`Colour` used for Super reaction.
     """
 
-    __slots__ = "burst_colors"
+    __slots__ = (
+        "_raw_colors",
+        "burst_colors",
+    )
 
     def __init__(
         self,
@@ -264,65 +265,15 @@ class BurstReaction(Reaction):
         message: Message,
         data: ReactionPayload,
         emoji: Optional[Union[PartialEmoji, Emoji, str]] = None,
-        colors: List[Colour],
     ) -> None:
         super().__init__(message=message, data=data, emoji=emoji)
-        self.burst_colors: List[Colour] = colors
+        self.count: int = data["count_details"].get("burst", 1)
+        self.me: bool = data["me_burst"]
+        self._raw_colors: List[str] = data.get("burst_colors", [])
 
     def __repr__(self) -> str:
         return f"<BurstReaction emoji={self.emoji!r} me={self.me} count={self.count}>"
 
-    def users(
-        self, *, limit: Optional[int] = None, after: Optional[Snowflake] = None
-    ) -> ReactionIterator:
-        """Returns an :class:`AsyncIterator` representing the users that have Super reacted to the message.
-
-        The ``after`` parameter must represent a member
-        and meet the :class:`abc.Snowflake` abc.
-
-        Examples
-        --------
-        Usage ::
-
-            # We do not actually recommend doing this.
-            async for user in reaction.users():
-                await channel.send(f'{user} has Super reacted with {reaction.emoji}!')
-
-        Flattening into a list: ::
-
-            users = await reaction.users().flatten()
-            # users is now a list of User...
-            winner = random.choice(users)
-            await channel.send(f'{winner} has won the raffle.')
-
-        Parameters
-        ----------
-        limit: Optional[:class:`int`]
-            The maximum number of results to return.
-            If not provided, returns all the users who
-            Super reacted to the message.
-        after: Optional[:class:`abc.Snowflake`]
-            For pagination, Super reactions are sorted by member.
-
-        Raises
-        ------
-        HTTPException
-            Getting the users for the Super reaction failed.
-
-        Yields
-        ------
-        Union[:class:`User`, :class:`Member`]
-            The member (if retrievable) or the user that has reacted
-            to this message. The case where it can be a :class:`Member` is
-            in a guild message context. Sometimes it can be a :class:`User`
-            if the member has left the guild.
-        """
-        if not isinstance(self.emoji, str):
-            emoji = f"{self.emoji.name}:{self.emoji.id}"
-        else:
-            emoji = self.emoji
-
-        if limit is None:
-            limit = self.count
-
-        return ReactionIterator(self.message, emoji, limit, after, type=1)
+    @property
+    def colors(self) -> List[Colour]:
+        return [Colour(int(c.lstrip("#"), base=16)) for c in self._raw_colors]
