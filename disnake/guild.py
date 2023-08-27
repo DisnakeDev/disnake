@@ -2699,6 +2699,8 @@ class Guild(Hashable):
 
         Raises
         ------
+        NotFound
+            A member with this ID does not exist in the guild.
         Forbidden
             You do not have access to the guild.
         HTTPException
@@ -3476,10 +3478,12 @@ class Guild(Hashable):
     ) -> Optional[Member]:
         """|coro|
 
-        Tries to get a member from the cache with the given ID. If fails, it fetches
-        the member from the API and caches it.
+        Tries to get the member from the cache. If it fails,
+        fetches the member from the API and caches it.
 
         If you want to make a bulk get-or-fetch call, use :meth:`get_or_fetch_members`.
+
+        This only propagates exceptions when the ``strict`` parameter is enabled.
 
         Parameters
         ----------
