@@ -7,7 +7,10 @@ import logging
 import signal
 import sys
 import traceback
+import types
+import warnings
 from datetime import datetime, timedelta
+from errno import ECONNRESET
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -17,6 +20,7 @@ from typing import (
     Generator,
     List,
     Literal,
+    Mapping,
     NamedTuple,
     Optional,
     Sequence,
@@ -38,10 +42,11 @@ from .app_commands import (
     GuildApplicationCommandPermissions,
 )
 from .appinfo import AppInfo
+from .application_role_connection import ApplicationRoleConnectionMetadata
 from .backoff import ExponentialBackoff
 from .channel import PartialMessageable, _threaded_channel_factory
 from .emoji import Emoji
-from .enums import ApplicationCommandType, ChannelType, Status
+from .enums import ApplicationCommandType, ChannelType, Event, Status
 from .errors import (
     ConnectionClosed,
     GatewayNotFound,
@@ -52,7 +57,7 @@ from .errors import (
 )
 from .flags import ApplicationFlags, Intents, MemberCacheFlags
 from .gateway import DiscordWebSocket, ReconnectWebSocket
-from .guild import Guild
+from .guild import Guild, GuildBuilder
 from .guild_preview import GuildPreview
 from .http import HTTPClient
 from .i18n import LocalizationProtocol, LocalizationStore
@@ -67,7 +72,7 @@ from .template import Template
 from .threads import Thread
 from .ui.view import View
 from .user import ClientUser, User
-from .utils import MISSING
+from .utils import MISSING, deprecated
 from .voice_client import VoiceClient
 from .voice_region import VoiceRegion
 from .webhook import Webhook
@@ -80,6 +85,9 @@ if TYPE_CHECKING:
     from .channel import DMChannel
     from .member import Member
     from .message import Message
+    from .types.application_role_connection import (
+        ApplicationRoleConnectionMetadata as ApplicationRoleConnectionMetadataPayload,
+    )
     from .types.gateway import SessionStartLimit as SessionStartLimitPayload
     from .voice_client import VoiceProtocol
 
@@ -90,8 +98,12 @@ __all__ = (
     "GatewayParams",
 )
 
-CoroT = TypeVar("CoroT", bound=Callable[..., Coroutine[Any, Any, Any]])
+T = TypeVar("T")
 
+Coro = Coroutine[Any, Any, T]
+CoroFunc = Callable[..., Coro[Any]]
+
+CoroT = TypeVar("CoroT", bound=Callable[..., Coroutine[Any, Any, Any]])
 
 _log = logging.getLogger(__name__)
 
@@ -161,7 +173,7 @@ class SessionStartLimit:
         "reset_time",
     )
 
-    def __init__(self, data: SessionStartLimitPayload):
+    def __init__(self, data: SessionStartLimitPayload) -> None:
         self.total: int = data["total"]
         self.remaining: int = data["remaining"]
         self.reset_after: int = data["reset_after"]
@@ -169,7 +181,7 @@ class SessionStartLimit:
 
         self.reset_time: datetime = utils.utcnow() + timedelta(milliseconds=self.reset_after)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"<SessionStartLimit total={self.total!r} remaining={self.remaining!r} "
             f"reset_after={self.reset_after!r} max_concurrency={self.max_concurrency!r} reset_time={self.reset_time!s}>"
@@ -177,8 +189,7 @@ class SessionStartLimit:
 
 
 class GatewayParams(NamedTuple):
-    """
-    Container type for configuring gateway connections.
+    """Container type for configuring gateway connections.
 
     .. versionadded:: 2.6
 
@@ -197,8 +208,7 @@ class GatewayParams(NamedTuple):
 
 
 class Client:
-    """
-    Represents a client connection that connects to Discord.
+    """Represents a client connection that connects to Discord.
     This class is used to interact with the Discord WebSocket and API.
 
     A number of options can be passed to the :class:`Client`.
@@ -375,10 +385,17 @@ class Client:
         intents: Optional[Intents] = None,
         chunk_guilds_at_startup: Optional[bool] = None,
         member_cache_flags: Optional[MemberCacheFlags] = None,
-    ):
+    ) -> None:
         # self.ws is set in the connect method
         self.ws: DiscordWebSocket = None  # type: ignore
-        self.loop: asyncio.AbstractEventLoop = asyncio.get_event_loop() if loop is None else loop
+
+        if loop is None:
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", DeprecationWarning)
+                self.loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()
+        else:
+            self.loop: asyncio.AbstractEventLoop = loop
+
         self.loop.set_debug(asyncio_debug)
         self._listeners: Dict[str, List[Tuple[asyncio.Future, Callable[..., bool]]]] = {}
         self.session_start_limit: Optional[SessionStartLimit] = None
@@ -442,6 +459,8 @@ class Client:
         self.gateway_params: GatewayParams = gateway_params or GatewayParams()
         if self.gateway_params.encoding != "json":
             raise ValueError("Gateway encodings other than `json` are currently not supported.")
+
+        self.extra_events: Dict[str, List[CoroFunc]] = {}
 
     # internals
 
@@ -643,8 +662,10 @@ class Client:
     async def get_or_fetch_user(self, user_id: int, *, strict: bool = False) -> Optional[User]:
         """|coro|
 
-        Tries to get the user from the cache. If fails, it tries to
-        fetch the user from the API.
+        Tries to get the user from the cache. If it fails,
+        fetches the user from the API.
+
+        This only propagates exceptions when the ``strict`` parameter is enabled.
 
         Parameters
         ----------
@@ -748,6 +769,159 @@ class Client:
             pass
         else:
             self._schedule_event(coro, method, *args, **kwargs)
+
+        for event_ in self.extra_events.get(method, []):
+            self._schedule_event(event_, method, *args, **kwargs)
+
+    def add_listener(self, func: CoroFunc, name: Union[str, Event] = MISSING) -> None:
+        """The non decorator alternative to :meth:`.listen`.
+
+        .. versionchanged:: 2.10
+            The definition of this method was moved from :class:`.ext.commands.Bot`
+            to the :class:`.Client` class.
+
+        Parameters
+        ----------
+        func: :ref:`coroutine <coroutine>`
+            The function to call.
+        name: Union[:class:`str`, :class:`.Event`]
+            The name of the event to listen for. Defaults to ``func.__name__``.
+
+        Example
+        --------
+
+        .. code-block:: python
+
+            async def on_ready(): pass
+            async def my_message(message): pass
+            async def another_message(message): pass
+
+            client.add_listener(on_ready)
+            client.add_listener(my_message, 'on_message')
+            client.add_listener(another_message, Event.message)
+
+        Raises
+        ------
+        TypeError
+            The function is not a coroutine or a string or an :class:`.Event` was not passed
+            as the name.
+        """
+        if name is not MISSING and not isinstance(name, (str, Event)):
+            raise TypeError(
+                f"add_listener expected str or Enum but received {name.__class__.__name__!r} instead."
+            )
+
+        name_ = (
+            func.__name__
+            if name is MISSING
+            else (name if isinstance(name, str) else f"on_{name.value}")
+        )
+
+        if not asyncio.iscoroutinefunction(func):
+            raise TypeError("Listeners must be coroutines")
+
+        if name_ in self.extra_events:
+            self.extra_events[name_].append(func)
+        else:
+            self.extra_events[name_] = [func]
+
+    def remove_listener(self, func: CoroFunc, name: Union[str, Event] = MISSING) -> None:
+        """Removes a listener from the pool of listeners.
+
+        .. versionchanged:: 2.10
+            The definition of this method was moved from :class:`.ext.commands.Bot`
+            to the :class:`.Client` class.
+
+        Parameters
+        ----------
+        func
+            The function that was used as a listener to remove.
+        name: Union[:class:`str`, :class:`.Event`]
+            The name of the event we want to remove. Defaults to
+            ``func.__name__``.
+
+        Raises
+        ------
+        TypeError
+            The name passed was not a string or an :class:`.Event`.
+        """
+        if name is not MISSING and not isinstance(name, (str, Event)):
+            raise TypeError(
+                f"remove_listener expected str or Enum but received {name.__class__.__name__!r} instead."
+            )
+        name = (
+            func.__name__
+            if name is MISSING
+            else (name if isinstance(name, str) else f"on_{name.value}")
+        )
+
+        if name in self.extra_events:
+            try:
+                self.extra_events[name].remove(func)
+            except ValueError:
+                pass
+
+    def listen(self, name: Union[str, Event] = MISSING) -> Callable[[CoroT], CoroT]:
+        """A decorator that registers another function as an external
+        event listener. Basically this allows you to listen to multiple
+        events from different places e.g. such as :func:`.on_ready`
+
+        The functions being listened to must be a :ref:`coroutine <coroutine>`.
+
+        .. versionchanged:: 2.10
+            The definition of this method was moved from :class:`.ext.commands.Bot`
+            to the :class:`.Client` class.
+
+        Example
+        -------
+        .. code-block:: python3
+
+            @client.listen()
+            async def on_message(message):
+                print('one')
+
+            # in some other file...
+
+            @client.listen('on_message')
+            async def my_message(message):
+                print('two')
+
+            # in yet another file
+            @client.listen(Event.message)
+            async def another_message(message):
+                print('three')
+
+        Would print one, two and three in an unspecified order.
+
+        Raises
+        ------
+        TypeError
+            The function being listened to is not a coroutine or a string or an :class:`.Event` was not passed
+            as the name.
+        """
+        if name is not MISSING and not isinstance(name, (str, Event)):
+            raise TypeError(
+                f"listen expected str or Enum but received {name.__class__.__name__!r} instead."
+            )
+
+        def decorator(func: CoroT) -> CoroT:
+            self.add_listener(func, name)
+            return func
+
+        return decorator
+
+    def get_listeners(self) -> Mapping[str, List[CoroFunc]]:
+        """Mapping[:class:`str`, List[Callable]]: A read-only mapping of event names to listeners.
+
+        .. note::
+            To add or remove a listener you should use :meth:`.add_listener` and
+            :meth:`.remove_listener`.
+
+        .. versionchanged:: 2.10
+            The definition of this method was moved from :class:`.ext.commands.Bot`
+            to the :class:`.Client` class.
+        """
+        return types.MappingProxyType(self.extra_events)
 
     async def on_error(self, event_method: str, *args: Any, **kwargs: Any) -> None:
         """|coro|
@@ -962,7 +1136,7 @@ class Client:
                     return
 
                 # If we get connection reset by peer then try to RESUME
-                if isinstance(exc, OSError) and exc.errno in (54, 10054):
+                if isinstance(exc, OSError) and exc.errno == ECONNRESET:
                     ws_params.update(
                         sequence=self.ws.sequence,
                         initial=False,
@@ -1089,14 +1263,14 @@ class Client:
         except NotImplementedError:
             pass
 
-        async def runner():
+        async def runner() -> None:
             try:
                 await self.start(*args, **kwargs)
             finally:
                 if not self.is_closed():
                     await self.close()
 
-        def stop_loop_on_completion(f):
+        def stop_loop_on_completion(f) -> None:
             loop.stop()
 
         future = asyncio.ensure_future(runner(), loop=loop)
@@ -1152,7 +1326,7 @@ class Client:
         return Status.online
 
     @status.setter
-    def status(self, value):
+    def status(self, value) -> None:
         if value is Status.offline:
             self._connection._status = "invisible"
         elif isinstance(value, Status):
@@ -1304,7 +1478,7 @@ class Client:
         .. note::
 
             To retrieve standard stickers, use :meth:`.fetch_sticker`.
-            or :meth:`.fetch_premium_sticker_packs`.
+            or :meth:`.fetch_sticker_packs`.
 
         Returns
         -------
@@ -1370,8 +1544,7 @@ class Client:
         return list(data.values())
 
     def get_guild_slash_commands(self, guild_id: int) -> List[APISlashCommand]:
-        """
-        Returns a list of all slash commands in the guild with the given ID.
+        """Returns a list of all slash commands in the guild with the given ID.
 
         Parameters
         ----------
@@ -1387,8 +1560,7 @@ class Client:
         return [cmd for cmd in data.values() if isinstance(cmd, APISlashCommand)]
 
     def get_guild_user_commands(self, guild_id: int) -> List[APIUserCommand]:
-        """
-        Returns a list of all user commands in the guild with the given ID.
+        """Returns a list of all user commands in the guild with the given ID.
 
         Parameters
         ----------
@@ -1404,8 +1576,7 @@ class Client:
         return [cmd for cmd in data.values() if isinstance(cmd, APIUserCommand)]
 
     def get_guild_message_commands(self, guild_id: int) -> List[APIMessageCommand]:
-        """
-        Returns a list of all message commands in the guild with the given ID.
+        """Returns a list of all message commands in the guild with the given ID.
 
         Parameters
         ----------
@@ -1421,8 +1592,7 @@ class Client:
         return [cmd for cmd in data.values() if isinstance(cmd, APIMessageCommand)]
 
     def get_global_command(self, id: int) -> Optional[APIApplicationCommand]:
-        """
-        Returns a global application command with the given ID.
+        """Returns a global application command with the given ID.
 
         Parameters
         ----------
@@ -1437,8 +1607,7 @@ class Client:
         return self._connection._get_global_application_command(id)
 
     def get_guild_command(self, guild_id: int, id: int) -> Optional[APIApplicationCommand]:
-        """
-        Returns a guild application command with the given guild ID and application command ID.
+        """Returns a guild application command with the given guild ID and application command ID.
 
         Parameters
         ----------
@@ -1457,8 +1626,7 @@ class Client:
     def get_global_command_named(
         self, name: str, cmd_type: Optional[ApplicationCommandType] = None
     ) -> Optional[APIApplicationCommand]:
-        """
-        Returns a global application command matching the given name.
+        """Returns a global application command matching the given name.
 
         Parameters
         ----------
@@ -1477,8 +1645,7 @@ class Client:
     def get_guild_command_named(
         self, guild_id: int, name: str, cmd_type: Optional[ApplicationCommandType] = None
     ) -> Optional[APIApplicationCommand]:
-        """
-        Returns a guild application command matching the given name.
+        """Returns a guild application command matching the given name.
 
         Parameters
         ----------
@@ -1514,7 +1681,7 @@ class Client:
 
     def wait_for(
         self,
-        event: str,
+        event: Union[str, Event],
         *,
         check: Optional[Callable[..., bool]] = None,
         timeout: Optional[float] = None,
@@ -1534,14 +1701,13 @@ class Client:
 
         In case the event returns multiple arguments, a :class:`tuple` containing those
         arguments is returned instead. Please check the
-        :ref:`documentation <discord-api-events>` for a list of events and their
+        :ref:`documentation <disnake_api_events>` for a list of events and their
         parameters.
 
         This function returns the **first event that meets the requirements**.
 
         Examples
         --------
-
         Waiting for a user reply: ::
 
             @client.event
@@ -1554,6 +1720,19 @@ class Client:
                         return m.content == 'hello' and m.channel == channel
 
                     msg = await client.wait_for('message', check=check)
+                    await channel.send(f'Hello {msg.author}!')
+
+            # using events enums:
+            @client.event
+            async def on_message(message):
+                if message.content.startswith('$greet'):
+                    channel = message.channel
+                    await channel.send('Say hello!')
+
+                    def check(m):
+                        return m.content == 'hello' and m.channel == channel
+
+                    msg = await client.wait_for(Event.message, check=check)
                     await channel.send(f'Hello {msg.author}!')
 
         Waiting for a thumbs up reaction from the message author: ::
@@ -1577,9 +1756,10 @@ class Client:
 
         Parameters
         ----------
-        event: :class:`str`
-            The event name, similar to the :ref:`event reference <discord-api-events>`,
-            but without the ``on_`` prefix, to wait for.
+        event: Union[:class:`str`, :class:`.Event`]
+            The event name, similar to the :ref:`event reference <disnake_api_events>`,
+            but without the ``on_`` prefix, to wait for. It's recommended
+            to use :class:`.Event`.
         check: Optional[Callable[..., :class:`bool`]]
             A predicate to check what to wait for. The arguments must meet the
             parameters of the event being waited for.
@@ -1597,17 +1777,17 @@ class Client:
         Any
             Returns no arguments, a single argument, or a :class:`tuple` of multiple
             arguments that mirrors the parameters passed in the
-            :ref:`event reference <discord-api-events>`.
+            :ref:`event <disnake_api_events>`.
         """
         future = self.loop.create_future()
         if check is None:
 
-            def _check(*args):
+            def _check(*args) -> bool:
                 return True
 
             check = _check
 
-        ev = event.lower()
+        ev = event.lower() if isinstance(event, str) else event.value
         try:
             listeners = self._listeners[ev]
         except KeyError:
@@ -1622,13 +1802,12 @@ class Client:
     def event(self, coro: CoroT) -> CoroT:
         """A decorator that registers an event to listen to.
 
-        You can find more info about the events on the :ref:`documentation below <discord-api-events>`.
+        You can find more info about the events in the :ref:`documentation <disnake_api_events>`.
 
         The events must be a :ref:`coroutine <coroutine>`, if not, :exc:`TypeError` is raised.
 
         Example
-        ---------
-
+        -------
         .. code-block:: python3
 
             @client.event
@@ -1652,10 +1831,13 @@ class Client:
         *,
         activity: Optional[BaseActivity] = None,
         status: Optional[Status] = None,
-    ):
+    ) -> None:
         """|coro|
 
         Changes the client's presence.
+
+        .. versionchanged:: 2.0
+            Removed the ``afk`` keyword-only parameter.
 
         .. versionchanged:: 2.6
             Raises :exc:`TypeError` instead of ``InvalidArgument``.
@@ -1667,9 +1849,6 @@ class Client:
 
             game = disnake.Game("with the API")
             await client.change_presence(status=disnake.Status.idle, activity=game)
-
-        .. versionchanged:: 2.0
-            Removed the ``afk`` keyword-only parameter.
 
         Parameters
         ----------
@@ -1715,6 +1894,7 @@ class Client:
         limit: Optional[int] = 100,
         before: Optional[SnowflakeTime] = None,
         after: Optional[SnowflakeTime] = None,
+        with_counts: bool = True,
     ) -> GuildIterator:
         """Retrieves an :class:`.AsyncIterator` that enables receiving your guilds.
 
@@ -1729,7 +1909,6 @@ class Client:
 
         Examples
         --------
-
         Usage ::
 
             async for guild in client.fetch_guilds(limit=150):
@@ -1757,6 +1936,11 @@ class Client:
             Retrieve guilds after this date or object.
             If a datetime is provided, it is recommended to use a UTC aware datetime.
             If the datetime is naive, it is assumed to be local time.
+        with_counts: :class:`bool`
+            Whether to include approximate member and presence counts for the guilds.
+            Defaults to ``True``.
+
+            .. versionadded:: 2.10
 
         Raises
         ------
@@ -1764,11 +1948,11 @@ class Client:
             Retrieving the guilds failed.
 
         Yields
-        --------
+        ------
         :class:`.Guild`
             The guild with the guild data parsed.
         """
-        return GuildIterator(self, limit=limit, before=before, after=after)
+        return GuildIterator(self, limit=limit, before=before, after=after, with_counts=with_counts)
 
     async def fetch_template(self, code: Union[Template, str]) -> Template:
         """|coro|
@@ -1796,7 +1980,7 @@ class Client:
         data = await self.http.get_template(code)
         return Template(data=data, state=self._connection)
 
-    async def fetch_guild(self, guild_id: int, /) -> Guild:
+    async def fetch_guild(self, guild_id: int, /, *, with_counts: bool = True) -> Guild:
         """|coro|
 
         Retrieves a :class:`.Guild` from the given ID.
@@ -1814,6 +1998,11 @@ class Client:
         ----------
         guild_id: :class:`int`
             The ID of the guild to retrieve.
+        with_counts: :class:`bool`
+            Whether to include approximate member and presence counts for the guild.
+            Defaults to ``True``.
+
+            .. versionadded:: 2.10
 
         Raises
         ------
@@ -1827,7 +2016,7 @@ class Client:
         :class:`.Guild`
             The guild from the given ID.
         """
-        data = await self.http.get_guild(guild_id)
+        data = await self.http.get_guild(guild_id, with_counts=with_counts)
         return Guild(data=data, state=self._connection)
 
     async def fetch_guild_preview(
@@ -1875,7 +2064,14 @@ class Client:
 
         Creates a :class:`.Guild`.
 
-        Bot accounts in more than 10 guilds are not allowed to create guilds.
+        See :func:`guild_builder` for a more comprehensive alternative.
+
+        Bot accounts in 10 or more guilds are not allowed to create guilds.
+
+        .. note::
+
+            Using this, you will **not** receive :attr:`.Guild.channels`, :attr:`.Guild.members`,
+            :attr:`.Member.activity` and :attr:`.Member.voice` per :class:`.Member`.
 
         .. versionchanged:: 2.5
             Removed the ``region`` parameter.
@@ -1913,8 +2109,7 @@ class Client:
         Returns
         -------
         :class:`.Guild`
-            The created guild. This is not the same guild that is
-            added to cache.
+            The created guild. This is not the same guild that is added to cache.
         """
         if icon is not MISSING:
             icon_base64 = await utils._assetbytes_to_base64_data(icon)
@@ -1926,6 +2121,33 @@ class Client:
         else:
             data = await self.http.create_guild(name, icon_base64)
         return Guild(data=data, state=self._connection)
+
+    def guild_builder(self, name: str) -> GuildBuilder:
+        """Creates a builder object that can be used to create more complex guilds.
+
+        This is a more comprehensive alternative to :func:`create_guild`.
+        See :class:`.GuildBuilder` for details and examples.
+
+        Bot accounts in 10 or more guilds are not allowed to create guilds.
+
+        .. note::
+
+            Using this, you will **not** receive :attr:`.Guild.channels`, :attr:`.Guild.members`,
+            :attr:`.Member.activity` and :attr:`.Member.voice` per :class:`.Member`.
+
+        .. versionadded:: 2.8
+
+        Parameters
+        ----------
+        name: :class:`str`
+            The name of the guild.
+
+        Returns
+        -------
+        :class:`.GuildBuilder`
+            The guild builder object for configuring and creating a new guild.
+        """
+        return GuildBuilder(name=name, state=self._connection)
 
     async def fetch_stage_instance(self, channel_id: int, /) -> StageInstance:
         """|coro|
@@ -2272,12 +2494,15 @@ class Client:
         cls, _ = _sticker_factory(data["type"])  # type: ignore
         return cls(state=self._connection, data=data)  # type: ignore
 
-    async def fetch_premium_sticker_packs(self) -> List[StickerPack]:
+    async def fetch_sticker_packs(self) -> List[StickerPack]:
         """|coro|
 
-        Retrieves all available premium sticker packs.
+        Retrieves all available sticker packs.
 
         .. versionadded:: 2.0
+
+        .. versionchanged:: 2.10
+            Renamed from ``fetch_premium_sticker_packs``.
 
         Raises
         ------
@@ -2287,10 +2512,18 @@ class Client:
         Returns
         -------
         List[:class:`.StickerPack`]
-            All available premium sticker packs.
+            All available sticker packs.
         """
-        data = await self.http.list_premium_sticker_packs()
+        data = await self.http.list_sticker_packs()
         return [StickerPack(state=self._connection, data=pack) for pack in data["sticker_packs"]]
+
+    @deprecated("fetch_sticker_packs")
+    async def fetch_premium_sticker_packs(self) -> List[StickerPack]:
+        """An alias of :meth:`fetch_sticker_packs`.
+
+        .. deprecated:: 2.10
+        """
+        return await self.fetch_sticker_packs()
 
     async def create_dm(self, user: Snowflake) -> DMChannel:
         """|coro|
@@ -2467,7 +2700,7 @@ class Client:
         command_id: :class:`int`
             The ID of the application command to delete.
         """
-        return await self._connection.delete_global_command(command_id)
+        await self._connection.delete_global_command(command_id)
 
     async def bulk_overwrite_global_commands(
         self, application_commands: List[ApplicationCommand]
@@ -2609,7 +2842,7 @@ class Client:
         command_id: :class:`int`
             The ID of the application command to delete.
         """
-        await self.http.delete_guild_command(self.application_id, guild_id, command_id)
+        await self._connection.delete_guild_command(guild_id, command_id)
 
     async def bulk_overwrite_guild_commands(
         self, guild_id: int, application_commands: List[ApplicationCommand]
@@ -2679,3 +2912,64 @@ class Client:
             The permissions configured for the specified application command.
         """
         return await self._connection.fetch_command_permissions(guild_id, command_id)
+
+    async def fetch_role_connection_metadata(self) -> List[ApplicationRoleConnectionMetadata]:
+        """|coro|
+
+        Retrieves the :class:`.ApplicationRoleConnectionMetadata` records for the application.
+
+        .. versionadded:: 2.8
+
+        Raises
+        ------
+        HTTPException
+            Retrieving the metadata records failed.
+
+        Returns
+        -------
+        List[:class:`.ApplicationRoleConnectionMetadata`]
+            The list of metadata records.
+        """
+        data = await self.http.get_application_role_connection_metadata_records(self.application_id)
+        return [ApplicationRoleConnectionMetadata._from_data(record) for record in data]
+
+    async def edit_role_connection_metadata(
+        self, records: Sequence[ApplicationRoleConnectionMetadata]
+    ) -> List[ApplicationRoleConnectionMetadata]:
+        """|coro|
+
+        Edits the :class:`.ApplicationRoleConnectionMetadata` records for the application.
+
+        An application can have up to 5 metadata records.
+
+        .. warning::
+            This will overwrite all existing metadata records.
+            Consider :meth:`fetching <fetch_role_connection_metadata>` them first,
+            and constructing the new list of metadata records based off of the returned list.
+
+        .. versionadded:: 2.8
+
+        Parameters
+        ----------
+        records: Sequence[:class:`.ApplicationRoleConnectionMetadata`]
+            The new metadata records.
+
+        Raises
+        ------
+        HTTPException
+            Editing the metadata records failed.
+
+        Returns
+        -------
+        List[:class:`.ApplicationRoleConnectionMetadata`]
+            The list of newly edited metadata records.
+        """
+        payload: List[ApplicationRoleConnectionMetadataPayload] = []
+        for record in records:
+            record._localize(self.i18n)
+            payload.append(record.to_dict())
+
+        data = await self.http.edit_application_role_connection_metadata_records(
+            self.application_id, payload
+        )
+        return [ApplicationRoleConnectionMetadata._from_data(record) for record in data]

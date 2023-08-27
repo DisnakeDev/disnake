@@ -178,6 +178,7 @@ class Permissions(BaseFlags):
         manage_emojis_and_stickers: bool = ...,
         manage_events: bool = ...,
         manage_guild: bool = ...,
+        manage_guild_expressions: bool = ...,
         manage_messages: bool = ...,
         manage_nicknames: bool = ...,
         manage_permissions: bool = ...,
@@ -195,19 +196,23 @@ class Permissions(BaseFlags):
         send_messages: bool = ...,
         send_messages_in_threads: bool = ...,
         send_tts_messages: bool = ...,
+        send_voice_messages: bool = ...,
         speak: bool = ...,
         start_embedded_activities: bool = ...,
         stream: bool = ...,
         use_application_commands: bool = ...,
         use_embedded_activities: bool = ...,
         use_external_emojis: bool = ...,
+        use_external_sounds: bool = ...,
         use_external_stickers: bool = ...,
         use_slash_commands: bool = ...,
+        use_soundboard: bool = ...,
         use_voice_activation: bool = ...,
         view_audit_log: bool = ...,
         view_channel: bool = ...,
+        view_creator_monetization_analytics: bool = ...,
         view_guild_insights: bool = ...,
-    ):
+    ) -> None:
         ...
 
     @overload
@@ -215,11 +220,11 @@ class Permissions(BaseFlags):
     def __init__(
         self,
         permissions: int = 0,
-    ):
+    ) -> None:
         ...
 
     @_overload_with_permissions
-    def __init__(self, permissions: int = 0, **kwargs: bool):
+    def __init__(self, permissions: int = 0, **kwargs: bool) -> None:
         if not isinstance(permissions, int):
             raise TypeError(
                 f"Expected int parameter, received {permissions.__class__.__name__} instead."
@@ -267,7 +272,8 @@ class Permissions(BaseFlags):
     @cached_creation
     def none(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with all
-        permissions set to ``False``."""
+        permissions set to ``False``.
+        """
         return cls(0)
 
     @classmethod
@@ -285,14 +291,16 @@ class Permissions(BaseFlags):
         ``True`` and the guild-specific ones set to ``False``. The guild-specific
         permissions are currently:
 
-        - :attr:`manage_emojis`
+        - :attr:`manage_guild_expressions`
         - :attr:`view_audit_log`
         - :attr:`view_guild_insights`
+        - :attr:`view_creator_monetization_analytics`
         - :attr:`manage_guild`
         - :attr:`change_nickname`
         - :attr:`manage_nicknames`
         - :attr:`kick_members`
         - :attr:`ban_members`
+        - :attr:`moderate_members`
         - :attr:`administrator`
 
         .. versionchanged:: 1.7
@@ -305,21 +313,24 @@ class Permissions(BaseFlags):
 
         .. versionchanged:: 2.3
             Added :attr:`use_embedded_activities` permission.
+
+        .. versionchanged:: 2.9
+            Added :attr:`use_soundboard` and :attr:`send_voice_messages` permissions.
         """
-        guild_specific_perms = {
-            "administrator",
-            "ban_members",
-            "change_nickname",
-            "kick_members",
-            "manage_emojis",
-            "manage_guild",
-            "manage_nicknames",
-            "moderate_members",
-            "view_audit_log",
-            "view_guild_insights",
-        }
         instance = cls.all()
-        instance.update(**dict.fromkeys(guild_specific_perms, False))
+        instance.update(
+            administrator=False,
+            ban_members=False,
+            change_nickname=False,
+            kick_members=False,
+            manage_guild=False,
+            manage_guild_expressions=False,
+            manage_nicknames=False,
+            moderate_members=False,
+            view_audit_log=False,
+            view_guild_insights=False,
+            view_creator_monetization_analytics=False,
+        )
         return instance
 
     @classmethod
@@ -333,14 +344,18 @@ class Permissions(BaseFlags):
            permissions :attr:`administrator`, :attr:`create_instant_invite`, :attr:`kick_members`,
            :attr:`ban_members`, :attr:`change_nickname` and :attr:`manage_nicknames` are
            no longer part of the general permissions.
+
+        .. versionchanged:: 2.9
+            Added :attr:`view_creator_monetization_analytics` permission.
         """
         return cls(
             view_channel=True,
             manage_channels=True,
             manage_roles=True,
-            manage_emojis_and_stickers=True,
+            manage_guild_expressions=True,
             view_audit_log=True,
             view_guild_insights=True,
+            view_creator_monetization_analytics=True,
             manage_webhooks=True,
             manage_guild=True,
         )
@@ -378,6 +393,9 @@ class Permissions(BaseFlags):
         .. versionchanged:: 2.0
            Added :attr:`create_public_threads`, :attr:`create_private_threads`, :attr:`manage_threads`,
            :attr:`send_messages_in_threads` and :attr:`use_external_stickers` permissions.
+
+        .. versionchanged:: 2.9
+            Added :attr:`send_voice_messages` permission.
         """
         return cls(
             send_messages=True,
@@ -395,6 +413,7 @@ class Permissions(BaseFlags):
             read_message_history=True,
             send_tts_messages=True,
             use_slash_commands=True,
+            send_voice_messages=True,
         )
 
     @classmethod
@@ -405,12 +424,17 @@ class Permissions(BaseFlags):
 
         .. versionchanged:: 2.3
             Added :attr:`use_embedded_activities` permission.
+
+        .. versionchanged:: 2.9
+            Added :attr:`use_soundboard` and :attr:`use_external_sounds` permissions.
         """
         return cls(
             connect=True,
             speak=True,
             stream=True,
             use_embedded_activities=True,
+            use_soundboard=True,
+            use_external_sounds=True,
             use_voice_activation=True,
             priority_speaker=True,
             mute_members=True,
@@ -522,6 +546,7 @@ class Permissions(BaseFlags):
         manage_emojis_and_stickers: bool = ...,
         manage_events: bool = ...,
         manage_guild: bool = ...,
+        manage_guild_expressions: bool = ...,
         manage_messages: bool = ...,
         manage_nicknames: bool = ...,
         manage_permissions: bool = ...,
@@ -539,17 +564,21 @@ class Permissions(BaseFlags):
         send_messages: bool = ...,
         send_messages_in_threads: bool = ...,
         send_tts_messages: bool = ...,
+        send_voice_messages: bool = ...,
         speak: bool = ...,
         start_embedded_activities: bool = ...,
         stream: bool = ...,
         use_application_commands: bool = ...,
         use_embedded_activities: bool = ...,
         use_external_emojis: bool = ...,
+        use_external_sounds: bool = ...,
         use_external_stickers: bool = ...,
         use_slash_commands: bool = ...,
+        use_soundboard: bool = ...,
         use_voice_activation: bool = ...,
         view_audit_log: bool = ...,
         view_channel: bool = ...,
+        view_creator_monetization_analytics: bool = ...,
         view_guild_insights: bool = ...,
     ) -> None:
         ...
@@ -563,8 +592,7 @@ class Permissions(BaseFlags):
 
     @_overload_with_permissions
     def update(self, **kwargs: bool) -> None:
-        """
-        Bulk updates this permission object.
+        """Bulk updates this permission object.
 
         Allows you to set multiple attributes by using keyword
         arguments. The names must be equivalent to the properties
@@ -623,7 +651,8 @@ class Permissions(BaseFlags):
     def manage_channels(self) -> int:
         """:class:`bool`: Returns ``True`` if a user can edit, delete, or create channels in the guild.
 
-        This also corresponds to the "Manage Channel" channel-specific override."""
+        This also corresponds to the "Manage Channel" channel-specific override.
+        """
         return 1 << 4
 
     @flag_value
@@ -670,7 +699,8 @@ class Permissions(BaseFlags):
     @flag_value
     def send_messages(self) -> int:
         """:class:`bool`: Returns ``True`` if a user can send messages from all or specific text channels
-        and create threads in forum channels."""
+        and create threads in forum channels.
+        """
         return 1 << 11
 
     @make_permission_alias("send_messages")
@@ -799,13 +829,22 @@ class Permissions(BaseFlags):
         return 1 << 29
 
     @flag_value
-    def manage_emojis(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can create, edit, or delete emojis."""
+    def manage_guild_expressions(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can create, edit, or delete
+        emojis, stickers, and soundboard sounds.
+
+        .. versionadded:: 2.9
+        """
         return 1 << 30
 
-    @make_permission_alias("manage_emojis")
+    @make_permission_alias("manage_guild_expressions")
+    def manage_emojis(self) -> int:
+        """:class:`bool`: An alias for :attr:`manage_guild_expressions`."""
+        return 1 << 30
+
+    @make_permission_alias("manage_guild_expressions")
     def manage_emojis_and_stickers(self) -> int:
-        """:class:`bool`: An alias for :attr:`manage_emojis`.
+        """:class:`bool`: An alias for :attr:`manage_guild_expressions`.
 
         .. versionadded:: 2.0
         """
@@ -916,11 +955,44 @@ class Permissions(BaseFlags):
 
     @flag_value
     def moderate_members(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can perform limited moderation actions (timeout).
+        """:class:`bool`: Returns ``True`` if a user can perform limited moderation actions,
+        such as timeouts or editing members' flags.
 
         .. versionadded:: 2.3
         """
         return 1 << 40
+
+    @flag_value
+    def view_creator_monetization_analytics(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can view role subscription insights.
+
+        .. versionadded:: 2.9
+        """
+        return 1 << 41
+
+    @flag_value
+    def use_soundboard(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can use the soundboard in voice channels.
+
+        .. versionadded:: 2.9
+        """
+        return 1 << 42
+
+    @flag_value
+    def use_external_sounds(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can use custom soundboard sounds from other guilds.
+
+        .. versionadded:: 2.9
+        """
+        return 1 << 45
+
+    @flag_value
+    def send_voice_messages(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can send voice messages.
+
+        .. versionadded:: 2.9
+        """
+        return 1 << 46
 
 
 def _augment_from_permissions(cls):
@@ -941,7 +1013,7 @@ def _augment_from_permissions(cls):
         def getter(self, x=key):
             return self._values.get(x)
 
-        def setter(self, value, x=key):
+        def setter(self, value, x=key) -> None:
             self._set(x, value)
 
         prop = property(getter, setter)
@@ -953,8 +1025,7 @@ def _augment_from_permissions(cls):
 
 @_augment_from_permissions
 class PermissionOverwrite:
-    """
-    A type that is used to represent a channel specific permission.
+    """A type that is used to represent a channel specific permission.
 
     Unlike a regular :class:`Permissions`\\, the default value of a
     permission is equivalent to ``None`` and not ``False``. Setting
@@ -1009,6 +1080,7 @@ class PermissionOverwrite:
         manage_emojis_and_stickers: Optional[bool]
         manage_events: Optional[bool]
         manage_guild: Optional[bool]
+        manage_guild_expressions: Optional[bool]
         manage_messages: Optional[bool]
         manage_nicknames: Optional[bool]
         manage_permissions: Optional[bool]
@@ -1026,17 +1098,21 @@ class PermissionOverwrite:
         send_messages: Optional[bool]
         send_messages_in_threads: Optional[bool]
         send_tts_messages: Optional[bool]
+        send_voice_messages: Optional[bool]
         speak: Optional[bool]
         start_embedded_activities: Optional[bool]
         stream: Optional[bool]
         use_application_commands: Optional[bool]
         use_embedded_activities: Optional[bool]
         use_external_emojis: Optional[bool]
+        use_external_sounds: Optional[bool]
         use_external_stickers: Optional[bool]
         use_slash_commands: Optional[bool]
+        use_soundboard: Optional[bool]
         use_voice_activation: Optional[bool]
         view_audit_log: Optional[bool]
         view_channel: Optional[bool]
+        view_creator_monetization_analytics: Optional[bool]
         view_guild_insights: Optional[bool]
 
     if TYPE_CHECKING:
@@ -1068,6 +1144,7 @@ class PermissionOverwrite:
         manage_emojis_and_stickers: Optional[bool] = ...,
         manage_events: Optional[bool] = ...,
         manage_guild: Optional[bool] = ...,
+        manage_guild_expressions: Optional[bool] = ...,
         manage_messages: Optional[bool] = ...,
         manage_nicknames: Optional[bool] = ...,
         manage_permissions: Optional[bool] = ...,
@@ -1085,30 +1162,34 @@ class PermissionOverwrite:
         send_messages: Optional[bool] = ...,
         send_messages_in_threads: Optional[bool] = ...,
         send_tts_messages: Optional[bool] = ...,
+        send_voice_messages: Optional[bool] = ...,
         speak: Optional[bool] = ...,
         start_embedded_activities: Optional[bool] = ...,
         stream: Optional[bool] = ...,
         use_application_commands: Optional[bool] = ...,
         use_embedded_activities: Optional[bool] = ...,
         use_external_emojis: Optional[bool] = ...,
+        use_external_sounds: Optional[bool] = ...,
         use_external_stickers: Optional[bool] = ...,
         use_slash_commands: Optional[bool] = ...,
+        use_soundboard: Optional[bool] = ...,
         use_voice_activation: Optional[bool] = ...,
         view_audit_log: Optional[bool] = ...,
         view_channel: Optional[bool] = ...,
+        view_creator_monetization_analytics: Optional[bool] = ...,
         view_guild_insights: Optional[bool] = ...,
-    ):
+    ) -> None:
         ...
 
     @overload
     @_generated
     def __init__(
         self,
-    ):
+    ) -> None:
         ...
 
     @_overload_with_permissions
-    def __init__(self, **kwargs: Optional[bool]):
+    def __init__(self, **kwargs: Optional[bool]) -> None:
         self._values: Dict[str, Optional[bool]] = {}
 
         for key, value in kwargs.items():
@@ -1131,7 +1212,6 @@ class PermissionOverwrite:
 
     def pair(self) -> Tuple[Permissions, Permissions]:
         """Tuple[:class:`Permissions`, :class:`Permissions`]: Returns the (allow, deny) pair from this overwrite."""
-
         allow = Permissions.none()
         deny = Permissions.none()
 
@@ -1195,6 +1275,7 @@ class PermissionOverwrite:
         manage_emojis_and_stickers: Optional[bool] = ...,
         manage_events: Optional[bool] = ...,
         manage_guild: Optional[bool] = ...,
+        manage_guild_expressions: Optional[bool] = ...,
         manage_messages: Optional[bool] = ...,
         manage_nicknames: Optional[bool] = ...,
         manage_permissions: Optional[bool] = ...,
@@ -1212,17 +1293,21 @@ class PermissionOverwrite:
         send_messages: Optional[bool] = ...,
         send_messages_in_threads: Optional[bool] = ...,
         send_tts_messages: Optional[bool] = ...,
+        send_voice_messages: Optional[bool] = ...,
         speak: Optional[bool] = ...,
         start_embedded_activities: Optional[bool] = ...,
         stream: Optional[bool] = ...,
         use_application_commands: Optional[bool] = ...,
         use_embedded_activities: Optional[bool] = ...,
         use_external_emojis: Optional[bool] = ...,
+        use_external_sounds: Optional[bool] = ...,
         use_external_stickers: Optional[bool] = ...,
         use_slash_commands: Optional[bool] = ...,
+        use_soundboard: Optional[bool] = ...,
         use_voice_activation: Optional[bool] = ...,
         view_audit_log: Optional[bool] = ...,
         view_channel: Optional[bool] = ...,
+        view_creator_monetization_analytics: Optional[bool] = ...,
         view_guild_insights: Optional[bool] = ...,
     ) -> None:
         ...
@@ -1236,8 +1321,7 @@ class PermissionOverwrite:
 
     @_overload_with_permissions
     def update(self, **kwargs: Optional[bool]) -> None:
-        """
-        Bulk updates this permission overwrite object.
+        """Bulk updates this permission overwrite object.
 
         Allows you to set multiple attributes by using keyword
         arguments. The names must be equivalent to the properties

@@ -130,7 +130,7 @@ class InvokableApplicationCommand(ABC):
         self.__original_kwargs__ = {k: v for k, v in kwargs.items() if v is not None}
         return self
 
-    def __init__(self, func: CommandCallback, *, name: Optional[str] = None, **kwargs):
+    def __init__(self, func: CommandCallback, *, name: Optional[str] = None, **kwargs) -> None:
         self.__command_flag__ = None
         self._callback: CommandCallback = func
         self.name: str = name or func.__name__
@@ -147,14 +147,6 @@ class InvokableApplicationCommand(ABC):
             raise TypeError(
                 "`default_permission` is deprecated and will always be set to `True`. "
                 "See `default_member_permissions` and `dm_permission` instead."
-            )
-
-        # n.b. this was supported previously, but reverted due to
-        # uncertainty about upcoming upstream changes
-        if "nsfw" in kwargs:
-            raise TypeError(
-                "The `nsfw` parameter is not supported. "
-                "If you set it before, use an earlier version to reset it to `False`."
             )
 
         try:
@@ -271,7 +263,6 @@ class InvokableApplicationCommand(ABC):
         func
             The function that will be used as a check.
         """
-
         self.checks.append(func)
 
     def remove_check(self, func: Check) -> None:
@@ -285,7 +276,6 @@ class InvokableApplicationCommand(ABC):
         func
             The function to remove from the checks.
         """
-
         try:
             self.checks.remove(func)
         except ValueError:
@@ -390,10 +380,8 @@ class InvokableApplicationCommand(ABC):
 
         return 0.0
 
+    # This method isn't really usable in this class, but it's usable in subclasses.
     async def invoke(self, inter: ApplicationCommandInteraction, *args, **kwargs) -> None:
-        """
-        This method isn't really usable in this class, but it's usable in subclasses.
-        """
         await self.prepare(inter)
 
         try:
@@ -428,7 +416,6 @@ class InvokableApplicationCommand(ABC):
         TypeError
             The coroutine passed is not actually a coroutine.
         """
-
         if not asyncio.iscoroutinefunction(coro):
             raise TypeError("The error handler must be a coroutine.")
 
@@ -436,9 +423,7 @@ class InvokableApplicationCommand(ABC):
         return coro
 
     def has_error_handler(self) -> bool:
-        """
-        Checks whether the application command has an error handler registered.
-        """
+        """Checks whether the application command has an error handler registered."""
         return hasattr(self, "on_error")
 
     async def _call_local_error_handler(
@@ -603,7 +588,6 @@ class InvokableApplicationCommand(ABC):
         :class:`bool`
             A boolean indicating if the application command can be invoked.
         """
-
         original = inter.application_command
         inter.application_command = self
 
@@ -666,6 +650,7 @@ def default_member_permissions(
     manage_emojis_and_stickers: bool = ...,
     manage_events: bool = ...,
     manage_guild: bool = ...,
+    manage_guild_expressions: bool = ...,
     manage_messages: bool = ...,
     manage_nicknames: bool = ...,
     manage_permissions: bool = ...,
@@ -683,17 +668,21 @@ def default_member_permissions(
     send_messages: bool = ...,
     send_messages_in_threads: bool = ...,
     send_tts_messages: bool = ...,
+    send_voice_messages: bool = ...,
     speak: bool = ...,
     start_embedded_activities: bool = ...,
     stream: bool = ...,
     use_application_commands: bool = ...,
     use_embedded_activities: bool = ...,
     use_external_emojis: bool = ...,
+    use_external_sounds: bool = ...,
     use_external_stickers: bool = ...,
     use_slash_commands: bool = ...,
+    use_soundboard: bool = ...,
     use_voice_activation: bool = ...,
     view_audit_log: bool = ...,
     view_channel: bool = ...,
+    view_creator_monetization_analytics: bool = ...,
     view_guild_insights: bool = ...,
 ) -> Callable[[T], T]:
     ...
@@ -709,9 +698,8 @@ def default_member_permissions(
 
 @_overload_with_permissions
 def default_member_permissions(value: int = 0, **permissions: bool) -> Callable[[T], T]:
-    """
-    A decorator that sets default required member permissions for the command.
-    Unlike :func:`~.ext.commands.has_permissions`, this decorator does not add any checks.
+    """A decorator that sets default required member permissions for the command.
+    Unlike :func:`~.has_permissions`, this decorator does not add any checks.
     Instead, it prevents the command from being run by members without *all* required permissions,
     if not overridden by moderators on a guild-specific basis.
 

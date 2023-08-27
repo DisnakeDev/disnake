@@ -8,7 +8,7 @@ import disnake.abc
 
 from .asset import Asset
 from .colour import Colour
-from .enums import DefaultAvatar, Locale, try_enum
+from .enums import Locale, try_enum
 from .flags import PublicUserFlags
 from .utils import MISSING, _assetbytes_to_base64_data, snowflake_time
 
@@ -42,6 +42,7 @@ class BaseUser(_UserTag):
         "name",
         "id",
         "discriminator",
+        "global_name",
         "_avatar",
         "_banner",
         "_accent_colour",
@@ -55,6 +56,7 @@ class BaseUser(_UserTag):
         name: str
         id: int
         discriminator: str
+        global_name: Optional[str]
         bot: bool
         system: bool
         _state: ConnectionState
@@ -71,12 +73,16 @@ class BaseUser(_UserTag):
 
     def __repr__(self) -> str:
         return (
-            f"<BaseUser id={self.id} name={self.name!r} discriminator={self.discriminator!r}"
-            f" bot={self.bot} system={self.system}>"
+            f"<BaseUser id={self.id} name={self.name!r} global_name={self.global_name!r}"
+            f" discriminator={self.discriminator!r} bot={self.bot} system={self.system}>"
         )
 
     def __str__(self) -> str:
-        return f"{self.name}#{self.discriminator}"
+        discriminator = self.discriminator
+        if discriminator == "0":
+            return self.name
+        # legacy behavior
+        return f"{self.name}#{discriminator}"
 
     def __eq__(self, other: Any) -> bool:
         return isinstance(other, _UserTag) and other.id == self.id
@@ -91,6 +97,7 @@ class BaseUser(_UserTag):
         self.name = data["username"]
         self.id = int(data["id"])
         self.discriminator = data["discriminator"]
+        self.global_name = data.get("global_name")
         self._avatar = data["avatar"]
         self._banner = data.get("banner", None)
         self._accent_colour = data.get("accent_color", None)
@@ -105,6 +112,7 @@ class BaseUser(_UserTag):
         self.name = user.name
         self.id = user.id
         self.discriminator = user.discriminator
+        self.global_name = user.global_name
         self._avatar = user._avatar
         self._banner = user._banner
         self._accent_colour = user._accent_colour
@@ -120,7 +128,9 @@ class BaseUser(_UserTag):
             "id": self.id,
             "avatar": self._avatar,
             "discriminator": self.discriminator,
+            "global_name": self.global_name,
             "bot": self.bot,
+            "public_flags": self._public_flags,
         }
 
     @property
@@ -141,8 +151,17 @@ class BaseUser(_UserTag):
 
     @property
     def default_avatar(self) -> Asset:
-        """:class:`Asset`: Returns the default avatar for a given user. This is calculated by the user's discriminator."""
-        return Asset._from_default_avatar(self._state, int(self.discriminator) % len(DefaultAvatar))
+        """:class:`Asset`: Returns the default avatar for a given user.
+
+        .. versionchanged:: 2.9
+            Added handling for users migrated to the new username system without discriminators.
+        """
+        if self.discriminator == "0":
+            index = (self.id >> 22) % 6
+        else:
+            # legacy behavior
+            index = int(self.discriminator) % 5
+        return Asset._from_default_avatar(self._state, index)
 
     @property
     def display_avatar(self) -> Asset:
@@ -232,11 +251,13 @@ class BaseUser(_UserTag):
     def display_name(self) -> str:
         """:class:`str`: Returns the user's display name.
 
-        For regular users this is just their username, but
-        if they have a guild specific nickname then that
-        is returned instead.
+        This is their :attr:`global name <.global_name>` if set,
+        or their :attr:`username <.name>` otherwise.
+
+        .. versionchanged:: 2.9
+            Added :attr:`.global_name`.
         """
-        return self.name
+        return self.global_name or self.name
 
     def mentioned_in(self, message: Message) -> bool:
         """Checks if the user is mentioned in the specified message.
@@ -251,7 +272,6 @@ class BaseUser(_UserTag):
         :class:`bool`
             Indicates if the user is mentioned in the message.
         """
-
         if message.mention_everyone:
             return True
 
@@ -277,7 +297,7 @@ class ClientUser(BaseUser):
 
         .. describe:: str(x)
 
-            Returns the user's name with discriminator.
+            Returns the user's username (with discriminator, if not migrated to new system yet).
 
     Attributes
     ----------
@@ -286,7 +306,14 @@ class ClientUser(BaseUser):
     id: :class:`int`
         The user's unique ID.
     discriminator: :class:`str`
-        The user's discriminator. This is given when the username has conflicts.
+        The user's discriminator.
+
+    global_name: Optional[:class:`str`]
+        The user's global display name, if set.
+        This takes precedence over :attr:`.name` when shown.
+
+        .. versionadded:: 2.9
+
     bot: :class:`bool`
         Specifies if the user is a bot account.
     system: :class:`bool`
@@ -319,7 +346,7 @@ class ClientUser(BaseUser):
 
     def __repr__(self) -> str:
         return (
-            f"<ClientUser id={self.id} name={self.name!r} discriminator={self.discriminator!r}"
+            f"<ClientUser id={self.id} name={self.name!r} global_name={self.global_name!r} discriminator={self.discriminator!r}"
             f" bot={self.bot} verified={self.verified} mfa_enabled={self.mfa_enabled}>"
         )
 
@@ -408,7 +435,7 @@ class User(BaseUser, disnake.abc.Messageable):
 
         .. describe:: str(x)
 
-            Returns the user's name with discriminator.
+            Returns the user's username (with discriminator, if not migrated to new system yet).
 
     Attributes
     ----------
@@ -417,36 +444,33 @@ class User(BaseUser, disnake.abc.Messageable):
     id: :class:`int`
         The user's unique ID.
     discriminator: :class:`str`
-        The user's discriminator. This is given when the username has conflicts.
+        The user's discriminator.
+
+        .. note::
+            This is being phased out by Discord; the username system is moving away from ``username#discriminator``
+            to users having a globally unique username.
+            The value of a single zero (``"0"``) indicates that the user has been migrated to the new system.
+            See the `help article <https://dis.gd/app-usernames>`__ for details.
+
+    global_name: Optional[:class:`str`]
+        The user's global display name, if set.
+        This takes precedence over :attr:`.name` when shown.
+
+        .. versionadded:: 2.9
+
     bot: :class:`bool`
         Specifies if the user is a bot account.
     system: :class:`bool`
         Specifies if the user is a system user (i.e. represents Discord officially).
     """
 
-    __slots__ = ("_stored",)
-
-    def __init__(
-        self, *, state: ConnectionState, data: Union[UserPayload, PartialUserPayload]
-    ) -> None:
-        super().__init__(state=state, data=data)
-        self._stored: bool = False
+    __slots__ = ("__weakref__",)
 
     def __repr__(self) -> str:
-        return f"<User id={self.id} name={self.name!r} discriminator={self.discriminator!r} bot={self.bot}>"
-
-    def __del__(self) -> None:
-        try:
-            if self._stored:
-                self._state.deref_user(self.id)
-        except KeyError:
-            pass
-
-    @classmethod
-    def _copy(cls, user: User) -> Self:
-        self = super()._copy(user)
-        self._stored = False
-        return self
+        return (
+            f"<User id={self.id} name={self.name!r} global_name={self.global_name!r}"
+            f" discriminator={self.discriminator!r} bot={self.bot}>"
+        )
 
     async def _get_channel(self) -> DMChannel:
         ch = await self.create_dm()

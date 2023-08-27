@@ -77,7 +77,7 @@ class PartialEmoji(_EmojiTag, AssetMixin):
     if TYPE_CHECKING:
         id: Optional[int]
 
-    def __init__(self, *, name: str, animated: bool = False, id: Optional[int] = None):
+    def __init__(self, *, name: str, animated: bool = False, id: Optional[int] = None) -> None:
         self.animated = animated
         self.name = name
         self.id = id
@@ -160,7 +160,7 @@ class PartialEmoji(_EmojiTag, AssetMixin):
             return f"<a:{self.name}:{self.id}>"
         return f"<:{self.name}:{self.id}>"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"<{self.__class__.__name__} animated={self.animated} name={self.name!r} id={self.id}>"
         )
@@ -267,25 +267,3 @@ class PartialEmoji(_EmojiTag, AssetMixin):
             return None, emoji.id
         else:
             return emoji.name, None
-
-    # utility method for unusual emoji model in forums
-    @staticmethod
-    def _emoji_from_name_id(
-        name: Optional[str], id: Optional[int], *, state: ConnectionState
-    ) -> Optional[Union[Emoji, PartialEmoji]]:
-        if not (name or id):
-            return None
-
-        emoji: Optional[Union[Emoji, PartialEmoji]] = None
-        if id:
-            emoji = state.get_emoji(id)
-        if not emoji:
-            emoji = PartialEmoji.with_state(
-                state=state,
-                # Note: this does not render correctly if it's a custom emoji, there's just no name information for those here.
-                # This may change in a future API version, but for now we'll just have to accept it.
-                name=name or "",
-                id=id,
-                # `animated` is unknown but presumably we already got the (animated) emoji from the guild cache at this point
-            )
-        return emoji

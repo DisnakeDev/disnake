@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""
-A basic example showing how to integrate audio from youtube-dl into voice chat.
-"""
+"""A basic example showing how to integrate audio from youtube-dl into voice chat."""
 
 # NOTE: this example requires ffmpeg (https://ffmpeg.org/download.html) to be installed
 #       and available in your `%PATH%` or `$PATH`
@@ -71,7 +69,6 @@ class Music(commands.Cog):
     @commands.command()
     async def join(self, ctx, *, channel: disnake.VoiceChannel):
         """Joins a voice channel"""
-
         if ctx.voice_client is not None:
             return await ctx.voice_client.move_to(channel)
 
@@ -109,7 +106,6 @@ class Music(commands.Cog):
     @commands.command()
     async def volume(self, ctx, volume: int):
         """Changes the player's volume"""
-
         if ctx.voice_client is None:
             return await ctx.send("Not connected to a voice channel.")
 
@@ -119,7 +115,6 @@ class Music(commands.Cog):
     @commands.command()
     async def stop(self, ctx):
         """Stops and disconnects the bot from voice"""
-
         await ctx.voice_client.disconnect()
 
     async def ensure_voice(self, ctx):

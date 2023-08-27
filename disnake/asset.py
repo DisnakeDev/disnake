@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import io
 import os
-from typing import TYPE_CHECKING, Literal, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Literal, Optional, Tuple, Union
 
 import yarl
 
@@ -15,10 +15,14 @@ from .file import File
 __all__ = ("Asset",)
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from .state import ConnectionState
+    from .webhook.async_ import BaseWebhook, _WebhookState
 
     ValidStaticFormatTypes = Literal["webp", "jpeg", "jpg", "png"]
     ValidAssetFormatTypes = Literal["webp", "jpeg", "jpg", "png", "gif"]
+    AnyState = Union[ConnectionState, _WebhookState[BaseWebhook]]
 
 AssetBytes = Union[bytes, "AssetMixin"]
 
@@ -31,7 +35,7 @@ MISSING = utils.MISSING
 
 class AssetMixin:
     url: str
-    _state: Optional[ConnectionState]
+    _state: Optional[AnyState]
 
     __slots__: Tuple[str, ...] = ("_state",)
 
@@ -118,7 +122,7 @@ class AssetMixin:
             Raises :exc:`TypeError` instead of ``InvalidArgument``.
 
         Parameters
-        -----------
+        ----------
         spoiler: :class:`bool`
             Whether the file is a spoiler.
         filename: Optional[:class:`str`]
@@ -191,14 +195,14 @@ class Asset(AssetMixin):
 
     BASE = "https://cdn.discordapp.com"
 
-    def __init__(self, state, *, url: str, key: str, animated: bool = False):
-        self._state = state
-        self._url = url
-        self._animated = animated
-        self._key = key
+    def __init__(self, state: AnyState, *, url: str, key: str, animated: bool = False) -> None:
+        self._state: AnyState = state
+        self._url: str = url
+        self._animated: bool = animated
+        self._key: str = key
 
     @classmethod
-    def _from_default_avatar(cls, state, index: int) -> Asset:
+    def _from_default_avatar(cls, state: AnyState, index: int) -> Self:
         return cls(
             state,
             url=f"{cls.BASE}/embed/avatars/{index}.png",
@@ -207,7 +211,7 @@ class Asset(AssetMixin):
         )
 
     @classmethod
-    def _from_avatar(cls, state, user_id: int, avatar: str) -> Asset:
+    def _from_avatar(cls, state: AnyState, user_id: int, avatar: str) -> Self:
         animated = avatar.startswith("a_")
         format = "gif" if animated else "png"
         return cls(
@@ -218,7 +222,9 @@ class Asset(AssetMixin):
         )
 
     @classmethod
-    def _from_guild_avatar(cls, state, guild_id: int, member_id: int, avatar: str) -> Asset:
+    def _from_guild_avatar(
+        cls, state: AnyState, guild_id: int, member_id: int, avatar: str
+    ) -> Self:
         animated = avatar.startswith("a_")
         format = "gif" if animated else "png"
         return cls(
@@ -229,7 +235,7 @@ class Asset(AssetMixin):
         )
 
     @classmethod
-    def _from_icon(cls, state, object_id: int, icon_hash: str, path: str) -> Asset:
+    def _from_icon(cls, state: AnyState, object_id: int, icon_hash: str, path: str) -> Self:
         return cls(
             state,
             url=f"{cls.BASE}/{path}-icons/{object_id}/{icon_hash}.png?size=1024",
@@ -238,7 +244,7 @@ class Asset(AssetMixin):
         )
 
     @classmethod
-    def _from_cover_image(cls, state, object_id: int, cover_image_hash: str) -> Asset:
+    def _from_cover_image(cls, state: AnyState, object_id: int, cover_image_hash: str) -> Self:
         return cls(
             state,
             url=f"{cls.BASE}/app-assets/{object_id}/store/{cover_image_hash}.png?size=1024",
@@ -247,7 +253,7 @@ class Asset(AssetMixin):
         )
 
     @classmethod
-    def _from_guild_image(cls, state, guild_id: int, image: str, path: str) -> Asset:
+    def _from_guild_image(cls, state: AnyState, guild_id: int, image: str, path: str) -> Self:
         return cls(
             state,
             url=f"{cls.BASE}/{path}/{guild_id}/{image}.png?size=1024",
@@ -256,7 +262,7 @@ class Asset(AssetMixin):
         )
 
     @classmethod
-    def _from_guild_icon(cls, state, guild_id: int, icon_hash: str) -> Asset:
+    def _from_guild_icon(cls, state: AnyState, guild_id: int, icon_hash: str) -> Self:
         animated = icon_hash.startswith("a_")
         format = "gif" if animated else "png"
         return cls(
@@ -267,7 +273,7 @@ class Asset(AssetMixin):
         )
 
     @classmethod
-    def _from_sticker_banner(cls, state, banner: int) -> Asset:
+    def _from_sticker_banner(cls, state: AnyState, banner: int) -> Self:
         return cls(
             state,
             url=f"{cls.BASE}/app-assets/710982414301790216/store/{banner}.png",
@@ -276,7 +282,7 @@ class Asset(AssetMixin):
         )
 
     @classmethod
-    def _from_banner(cls, state, id: int, banner_hash: str) -> Asset:
+    def _from_banner(cls, state: AnyState, id: int, banner_hash: str) -> Self:
         animated = banner_hash.startswith("a_")
         format = "gif" if animated else "png"
         return cls(
@@ -287,7 +293,7 @@ class Asset(AssetMixin):
         )
 
     @classmethod
-    def _from_role_icon(cls, state, role_id: int, icon_hash: str) -> Asset:
+    def _from_role_icon(cls, state: AnyState, role_id: int, icon_hash: str) -> Self:
         animated = icon_hash.startswith("a_")
         format = "gif" if animated else "png"
         return cls(
@@ -298,7 +304,9 @@ class Asset(AssetMixin):
         )
 
     @classmethod
-    def _from_guild_scheduled_event_image(cls, state, event_id: int, image_hash: str) -> Asset:
+    def _from_guild_scheduled_event_image(
+        cls, state: AnyState, event_id: int, image_hash: str
+    ) -> Self:
         return cls(
             state,
             url=f"{cls.BASE}/guild-events/{event_id}/{image_hash}.png?size=2048",
@@ -312,14 +320,14 @@ class Asset(AssetMixin):
     def __len__(self) -> int:
         return len(self._url)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         shorten = self._url.replace(self.BASE, "")
         return f"<Asset url={shorten!r}>"
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         return isinstance(other, Asset) and self._url == other._url
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self._url)
 
     @property
@@ -396,8 +404,8 @@ class Asset(AssetMixin):
         else:
             url = url.with_query(url.raw_query_string)
 
-        url = str(url)
-        return Asset(state=self._state, url=url, key=self._key, animated=self._animated)
+        url_str = str(url)
+        return Asset(state=self._state, url=url_str, key=self._key, animated=self._animated)
 
     def with_size(self, size: int, /) -> Asset:
         """Returns a new asset with the specified size.
@@ -456,8 +464,8 @@ class Asset(AssetMixin):
 
         url = yarl.URL(self._url)
         path, _ = os.path.splitext(url.path)
-        url = str(url.with_path(f"{path}.{format}").with_query(url.raw_query_string))
-        return Asset(state=self._state, url=url, key=self._key, animated=self._animated)
+        url_str = str(url.with_path(f"{path}.{format}").with_query(url.raw_query_string))
+        return Asset(state=self._state, url=url_str, key=self._key, animated=self._animated)
 
     def with_static_format(self, format: ValidStaticFormatTypes, /) -> Asset:
         """Returns a new asset with the specified static format.

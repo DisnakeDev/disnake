@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""
-disnake.ext.commands
+"""disnake.ext.commands
 ~~~~~~~~~~~~~~~~~~~~~
 
 An extension module to facilitate creation of bot commands.
@@ -21,6 +20,7 @@ from .ctx_menus_core import *
 from .custom_warnings import *
 from .errors import *
 from .flag_converter import *
+from .flags import *
 from .help import *
 from .params import *
 from .slash_core import *

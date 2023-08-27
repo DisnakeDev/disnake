@@ -10,19 +10,7 @@ import os
 import sys
 import time
 import types
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Dict,
-    Generic,
-    List,
-    Mapping,
-    Optional,
-    Set,
-    TypeVar,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, Dict, Generic, List, Mapping, Optional, Set, TypeVar, Union
 
 import disnake
 import disnake.utils
@@ -35,10 +23,12 @@ if TYPE_CHECKING:
 
     from ._types import CoroFunc
     from .bot import AutoShardedBot, AutoShardedInteractionBot, Bot, InteractionBot
+    from .help import HelpCommand
 
     AnyBot = Union[Bot, AutoShardedBot, InteractionBot, AutoShardedInteractionBot]
 
 __all__ = ("CommonBotBase",)
+_log = logging.getLogger(__name__)
 
 CogT = TypeVar("CogT", bound="Cog")
 CFT = TypeVar("CFT", bound="CoroFunc")
@@ -51,6 +41,9 @@ def _is_submodule(parent: str, child: str) -> bool:
 
 
 class CommonBotBase(Generic[CogT]):
+    if TYPE_CHECKING:
+        extra_events: Dict[str, List[CoroFunc]]
+
     def __init__(
         self,
         *args: Any,
@@ -58,10 +51,9 @@ class CommonBotBase(Generic[CogT]):
         owner_ids: Optional[Set[int]] = None,
         reload: bool = False,
         **kwargs: Any,
-    ):
+    ) -> None:
         self.__cogs: Dict[str, Cog] = {}
         self.__extensions: Dict[str, types.ModuleType] = {}
-        self.extra_events: Dict[str, List[CoroFunc]] = {}
         self._is_closed: bool = False
 
         self.owner_id: Optional[int] = owner_id
@@ -77,20 +69,12 @@ class CommonBotBase(Generic[CogT]):
 
         self.reload: bool = reload
 
-        loop = asyncio.get_event_loop()
-        loop.create_task(self._fill_owners())
-
-        if self.reload:
-            loop.create_task(self._watchdog())
-
         super().__init__(*args, **kwargs)
 
+    # FIXME: make event name pos-only or remove entirely in v3.0
     def dispatch(self, event_name: str, *args: Any, **kwargs: Any) -> None:
         # super() will resolve to Client
         super().dispatch(event_name, *args, **kwargs)  # type: ignore
-        ev = "on_" + event_name
-        for event in self.extra_events.get(ev, []):
-            self._schedule_event(event, ev, *args, **kwargs)  # type: ignore
 
     async def _fill_owners(self) -> None:
         if self.owner_id or self.owner_ids:
@@ -112,18 +96,26 @@ class CommonBotBase(Generic[CogT]):
         for extension in tuple(self.__extensions):
             try:
                 self.unload_extension(extension)
-            except Exception:
-                # TODO: consider logging exception
-                pass
+            except Exception as error:
+                error.__suppress_context__ = True
+                _log.error("Failed to unload extension %r", extension, exc_info=error)
 
         for cog in tuple(self.__cogs):
             try:
                 self.remove_cog(cog)
-            except Exception:
-                # TODO: consider logging exception
-                pass
+            except Exception as error:
+                error.__suppress_context__ = True
+                _log.exception("Failed to remove cog %r", cog, exc_info=error)
 
         await super().close()  # type: ignore
+
+    @disnake.utils.copy_doc(disnake.Client.login)
+    async def login(self, token: str) -> None:
+        self.loop.create_task(self._fill_owners())  # type: ignore
+
+        if self.reload:
+            self.loop.create_task(self._watchdog())  # type: ignore
+        await super().login(token=token)  # type: ignore
 
     async def is_owner(self, user: Union[disnake.User, disnake.Member]) -> bool:
         """|coro|
@@ -162,101 +154,6 @@ class CommonBotBase(Generic[CogT]):
                 self.owner = app.owner
                 self.owner_id = owner_id = app.owner.id
                 return user.id == owner_id
-
-    # listener registration
-
-    def add_listener(self, func: CoroFunc, name: str = MISSING) -> None:
-        """The non decorator alternative to :meth:`.listen`.
-
-        Parameters
-        ----------
-        func: :ref:`coroutine <coroutine>`
-            The function to call.
-        name: :class:`str`
-            The name of the event to listen for. Defaults to ``func.__name__``.
-
-        Example
-        --------
-
-        .. code-block:: python
-
-            async def on_ready(): pass
-            async def my_message(message): pass
-
-            bot.add_listener(on_ready)
-            bot.add_listener(my_message, 'on_message')
-
-        Raises
-        ------
-        TypeError
-            The function is not a coroutine.
-        """
-        name = func.__name__ if name is MISSING else name
-
-        if not asyncio.iscoroutinefunction(func):
-            raise TypeError("Listeners must be coroutines")
-
-        if name in self.extra_events:
-            self.extra_events[name].append(func)
-        else:
-            self.extra_events[name] = [func]
-
-    def remove_listener(self, func: CoroFunc, name: str = MISSING) -> None:
-        """Removes a listener from the pool of listeners.
-
-        Parameters
-        ----------
-        func
-            The function that was used as a listener to remove.
-        name: :class:`str`
-            The name of the event we want to remove. Defaults to
-            ``func.__name__``.
-        """
-        name = func.__name__ if name is MISSING else name
-
-        if name in self.extra_events:
-            try:
-                self.extra_events[name].remove(func)
-            except ValueError:
-                pass
-
-    def listen(self, name: str = MISSING) -> Callable[[CFT], CFT]:
-        """A decorator that registers another function as an external
-        event listener. Basically this allows you to listen to multiple
-        events from different places e.g. such as :func:`.on_ready`
-
-        The functions being listened to must be a :ref:`coroutine <coroutine>`.
-
-        Example
-        --------
-
-        .. code-block:: python3
-
-            @bot.listen()
-            async def on_message(message):
-                print('one')
-
-            # in some other file...
-
-            @bot.listen('on_message')
-            async def my_message(message):
-                print('two')
-
-        Would print one and two in an unspecified order.
-
-        Raises
-        ------
-        TypeError
-            The function being listened to is not a coroutine.
-        """
-
-        def decorator(func: CFT) -> CFT:
-            self.add_listener(func, name)
-            return func
-
-        return decorator
-
-    # cogs
 
     def add_cog(self, cog: Cog, *, override: bool = False) -> None:
         """Adds a "cog" to the bot.
@@ -343,7 +240,7 @@ class CommonBotBase(Generic[CogT]):
         if cog is None:
             return
 
-        help_command = getattr(self, "_help_command", None)
+        help_command: Optional[HelpCommand] = getattr(self, "_help_command", None)
         if help_command and help_command.cog is cog:
             help_command.cog = None
         # NOTE: Should be covariant
@@ -369,7 +266,7 @@ class CommonBotBase(Generic[CogT]):
             remove = [
                 index
                 for index, event in enumerate(event_list)
-                if event.__module__ is not None and _is_submodule(name, event.__module__)
+                if event.__module__ and _is_submodule(name, event.__module__)
             ]
 
             for index in reversed(remove):
@@ -383,9 +280,9 @@ class CommonBotBase(Generic[CogT]):
         else:
             try:
                 func(self)
-            except Exception:
-                # TODO: consider logging exception
-                pass
+            except Exception as error:
+                error.__suppress_context__ = True
+                _log.error("Exception in extension finalizer %r", key, exc_info=error)
         finally:
             self.__extensions.pop(key, None)
             sys.modules.pop(key, None)
@@ -408,7 +305,7 @@ class CommonBotBase(Generic[CogT]):
             setup = lib.setup
         except AttributeError:
             del sys.modules[key]
-            raise errors.NoEntryPointError(key)
+            raise errors.NoEntryPointError(key) from None
 
         try:
             setup(self)
@@ -423,8 +320,8 @@ class CommonBotBase(Generic[CogT]):
     def _resolve_name(self, name: str, package: Optional[str]) -> str:
         try:
             return importlib.util.resolve_name(name, package)
-        except ImportError:
-            raise errors.ExtensionNotFound(name)
+        except ImportError as e:
+            raise errors.ExtensionNotFound(name) from e
 
     def load_extension(self, name: str, *, package: Optional[str] = None) -> None:
         """Loads an extension.
@@ -592,7 +489,7 @@ class CommonBotBase(Generic[CogT]):
         """Mapping[:class:`str`, :class:`py:types.ModuleType`]: A read-only mapping of extension name to extension."""
         return types.MappingProxyType(self.__extensions)
 
-    async def _watchdog(self):
+    async def _watchdog(self) -> None:
         """|coro|
 
         Starts the bot watchdog which will watch currently loaded extensions

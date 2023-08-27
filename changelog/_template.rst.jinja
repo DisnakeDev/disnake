@@ -12,7 +12,8 @@
 {% if category_data['showcontent'] %}
 {% for text, issues in sections[section][category].items() %}
 {% set lines = text.strip().splitlines() %}
-- {{ lines[0] }} ({{ issues|join(', ') }})
+- {{ lines[0] }} {% if issues %}({{ issues|join(', ') }}){% endif %}
+
 {% if lines|length > 1 %}
   {{ lines[1:]|join('\n  ') }}
 {% endif %}

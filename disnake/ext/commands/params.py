@@ -10,6 +10,8 @@ import inspect
 import itertools
 import math
 import sys
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from enum import Enum, EnumMeta
 from typing import (
     TYPE_CHECKING,
@@ -22,6 +24,7 @@ from typing import (
     Generic,
     List,
     Literal,
+    NoReturn,
     Optional,
     Sequence,
     Tuple,
@@ -31,7 +34,6 @@ from typing import (
     get_args,
     get_origin,
     get_type_hints,
-    overload,
 )
 
 import disnake
@@ -121,7 +123,7 @@ def issubclass_(obj: Any, tp: Union[TypeT, Tuple[TypeT, ...]]) -> TypeGuard[Type
 
 
 def remove_optionals(annotation: Any) -> Any:
-    """remove unwanted optionals from an annotation"""
+    """Remove unwanted optionals from an annotation"""
     if get_origin(annotation) in (Union, UnionType):
         args = tuple(i for i in annotation.__args__ if i not in (None, type(None)))
         if len(args) == 1:
@@ -151,13 +153,13 @@ def signature(func: Callable) -> inspect.Signature:
     for name, param in signature.parameters.items():
         if isinstance(param.annotation, str):
             param = param.replace(annotation=typehints.get(name, inspect.Parameter.empty))
-        if param.annotation is type(None):  # noqa: E721
+        if param.annotation is type(None):
             param = param.replace(annotation=None)
 
         parameters.append(param)
 
     return_annotation = typehints.get("return", inspect.Parameter.empty)
-    if return_annotation is type(None):  # noqa: E721
+    if return_annotation is type(None):
         return_annotation = None
 
     return signature.replace(parameters=parameters, return_annotation=return_annotation)
@@ -279,135 +281,163 @@ class Injection(Generic[P, T_]):
         return decorator
 
 
-class RangeMeta(type):
-    """Custom Generic implementation for Range"""
+@dataclass(frozen=True)
+class _BaseRange(ABC):
+    """Internal base type for supporting ``Range[...]`` and ``String[...]``."""
 
-    @overload
-    def __getitem__(
-        self, args: Tuple[Union[int, EllipsisType], Union[int, EllipsisType]]
-    ) -> Type[int]:
-        ...
+    _allowed_types: ClassVar[Tuple[Type[Any], ...]]
 
-    @overload
-    def __getitem__(
-        self, args: Tuple[Union[float, EllipsisType], Union[float, EllipsisType]]
-    ) -> Type[float]:
-        ...
+    underlying_type: Type[Any]
+    min_value: Optional[Union[int, float]]
+    max_value: Optional[Union[int, float]]
 
-    def __getitem__(self, args: Tuple[Any, ...]) -> Any:
-        a, b = [None if isinstance(x, type(Ellipsis)) else x for x in args]
-        return Range.create(min_value=a, max_value=b)
+    def __class_getitem__(cls, params: Tuple[Any, ...]) -> Self:
+        # deconstruct type arguments
+        if not isinstance(params, tuple):
+            params = (params,)
 
+        name = cls.__name__
 
-class Range(type, metaclass=RangeMeta):
-    """Type depicting a limited range of allowed values.
+        if len(params) == 2:
+            # backwards compatibility for `Range[1, 2]`
 
-    See :ref:`param_ranges` for more information.
+            # FIXME: the warning context is incorrect when used with stringified annotations,
+            # and points to the eval frame instead of user code
+            disnake.utils.warn_deprecated(
+                f"Using `{name}` without an explicit type argument is deprecated, "
+                "as this form does not work well with modern type-checkers. "
+                f"Use `{name}[<type>, <min>, <max>]` instead.",
+                stacklevel=2,
+            )
 
-    .. versionadded:: 2.4
+            # infer type from min/max values
+            params = (cls._infer_type(params),) + params
 
-    """
+        if len(params) != 3:
+            raise TypeError(
+                f"`{name}` expects 3 type arguments ({name}[<type>, <min>, <max>]), got {len(params)}"
+            )
 
-    min_value: Optional[float]
-    max_value: Optional[float]
+        underlying_type, min_value, max_value = params
 
-    @overload
-    @classmethod
-    def create(
-        cls,
-        min_value: Optional[int] = None,
-        max_value: Optional[int] = None,
-        *,
-        le: Optional[int] = None,
-        lt: Optional[int] = None,
-        ge: Optional[int] = None,
-        gt: Optional[int] = None,
-    ) -> Type[int]:
-        ...
+        # validate type (argument 1)
+        if not isinstance(underlying_type, type):
+            raise TypeError(f"First `{name}` argument must be a type, not `{underlying_type!r}`")
 
-    @overload
-    @classmethod
-    def create(
-        cls,
-        min_value: Optional[float] = None,
-        max_value: Optional[float] = None,
-        *,
-        le: Optional[float] = None,
-        lt: Optional[float] = None,
-        ge: Optional[float] = None,
-        gt: Optional[float] = None,
-    ) -> Type[float]:
-        ...
+        if not issubclass(underlying_type, cls._allowed_types):
+            allowed = "/".join(t.__name__ for t in cls._allowed_types)
+            raise TypeError(f"First `{name}` argument must be {allowed}, not `{underlying_type!r}`")
 
-    @classmethod
-    def create(
-        cls,
-        min_value: Optional[float] = None,
-        max_value: Optional[float] = None,
-        *,
-        le: Optional[float] = None,
-        lt: Optional[float] = None,
-        ge: Optional[float] = None,
-        gt: Optional[float] = None,
-    ) -> Any:
-        """Construct a new range with any possible constraints"""
-        self = cls(cls.__name__, (), {})
-        self.min_value = min_value if min_value is not None else _xt_to_xe(le, lt, -1)
-        self.max_value = max_value if max_value is not None else _xt_to_xe(ge, gt, 1)
-        return self
+        # validate min/max (arguments 2/3)
+        min_value = cls._coerce_bound(min_value, "min")
+        max_value = cls._coerce_bound(max_value, "max")
 
-    @property
-    def underlying_type(self) -> Union[Type[int], Type[float]]:
-        if isinstance(self.min_value, float) or isinstance(self.max_value, float):
-            return float
+        if min_value is None and max_value is None:
+            raise ValueError(f"`{name}` bounds cannot both be empty")
 
-        return int
+        # n.b. this allows bounds to be equal, which doesn't really serve a purpose with numbers,
+        # but is still accepted by the api
+        if min_value is not None and max_value is not None and min_value > max_value:
+            raise ValueError(
+                f"`{name}` minimum ({min_value}) must be less than or equal to maximum ({max_value})"
+            )
+
+        return cls(underlying_type=underlying_type, min_value=min_value, max_value=max_value)
+
+    @staticmethod
+    def _coerce_bound(value: Any, name: str) -> Optional[Union[int, float]]:
+        if value is None or isinstance(value, EllipsisType):
+            return None
+        elif isinstance(value, (int, float)):
+            if not math.isfinite(value):
+                raise ValueError(f"{name} value may not be NaN, inf, or -inf")
+            return value
+        else:
+            raise TypeError(f"{name} value must be int, float, None, or `...`, not `{type(value)}`")
 
     def __repr__(self) -> str:
         a = "..." if self.min_value is None else self.min_value
         b = "..." if self.max_value is None else self.max_value
-        return f"{type(self).__name__}[{a}, {b}]"
-
-
-class StringMeta(type):
-    """Custom Generic implementation for String."""
-
-    def __getitem__(
-        self, args: Tuple[Union[int, EllipsisType], Union[int, EllipsisType]]
-    ) -> Type[str]:
-        a, b = [None if isinstance(x, EllipsisType) else x for x in args]
-        return String.create(min_length=a, max_length=b)
-
-
-class String(type, metaclass=StringMeta):
-    """Type depicting a string option with limited length.
-
-    See :ref:`string_lengths` for more information.
-
-    .. versionadded:: 2.6
-
-    """
-
-    min_length: Optional[int]
-    max_length: Optional[int]
-    underlying_type: Final[Type[str]] = str
+        return f"{type(self).__name__}[{self.underlying_type.__name__}, {a}, {b}]"
 
     @classmethod
-    def create(
-        cls,
-        min_length: Optional[int] = None,
-        max_length: Optional[int] = None,
-    ) -> Any:
-        """Construct a new String with constraints."""
-        self = cls(cls.__name__, (), {})
-        self.min_length = min_length
-        self.max_length = max_length
-        return self
+    @abstractmethod
+    def _infer_type(cls, params: Tuple[Any, ...]) -> Type[Any]:
+        raise NotImplementedError
 
-    def __repr__(self) -> str:
-        a = "..." if self.min_length is None else self.min_length
-        b = "..." if self.max_length is None else self.max_length
-        return f"{type(self).__name__}[{a}, {b}]"
+    # hack to get `typing._type_check` to pass, e.g. when using `Range` as a generic parameter
+    def __call__(self) -> NoReturn:
+        raise NotImplementedError
+
+    # support new union syntax for `Range[int, 1, 2] | None`
+    if sys.version_info >= (3, 10):
+
+        def __or__(self, other):
+            return Union[self, other]  # type: ignore
+
+
+if TYPE_CHECKING:
+    # aliased import since mypy doesn't understand `Range = Annotated`
+    from typing_extensions import Annotated as Range, Annotated as String
+else:
+
+    @dataclass(frozen=True, repr=False)
+    class Range(_BaseRange):
+        """Type representing a number with a limited range of allowed values.
+
+        See :ref:`param_ranges` for more information.
+
+        .. versionadded:: 2.4
+
+        .. versionchanged:: 2.9
+            Syntax changed from ``Range[5, 10]`` to ``Range[int, 5, 10]``;
+            the type (:class:`int` or :class:`float`) must now be specified explicitly.
+        """
+
+        _allowed_types = (int, float)
+
+        def __post_init__(self):
+            for value in (self.min_value, self.max_value):
+                if value is None:
+                    continue
+
+                if self.underlying_type is int and not isinstance(value, int):
+                    raise TypeError("Range[int, ...] bounds must be int, not float")
+
+        @classmethod
+        def _infer_type(cls, params: Tuple[Any, ...]) -> Type[Any]:
+            if any(isinstance(p, float) for p in params):
+                return float
+            return int
+
+    @dataclass(frozen=True, repr=False)
+    class String(_BaseRange):
+        """Type representing a string option with a limited length.
+
+        See :ref:`string_lengths` for more information.
+
+        .. versionadded:: 2.6
+
+        .. versionchanged:: 2.9
+            Syntax changed from ``String[5, 10]`` to ``String[str, 5, 10]``;
+            the type (:class:`str`) must now be specified explicitly.
+        """
+
+        _allowed_types = (str,)
+
+        def __post_init__(self):
+            for value in (self.min_value, self.max_value):
+                if value is None:
+                    continue
+
+                if not isinstance(value, int):
+                    raise TypeError("String bounds must be int, not float")
+                if value < 0:
+                    raise ValueError("String bounds may not be negative")
+
+        @classmethod
+        def _infer_type(cls, params: Tuple[Any, ...]) -> Type[Any]:
+            return str
 
 
 class LargeInt(int):
@@ -530,6 +560,31 @@ class ParamInfo:
         self.max_length = max_length
         self.large = large
 
+    def copy(self) -> ParamInfo:
+        # n. b. this method needs to be manually updated when a new attribute is added.
+        cls = self.__class__
+        ins = cls.__new__(cls)
+
+        ins.name = self.name
+        ins.name_localizations = self.name_localizations._copy()
+        ins.description = self.description
+        ins.description_localizations = self.description_localizations._copy()
+        ins.default = self.default
+        ins.param_name = self.param_name
+        ins.converter = self.converter
+        ins.convert_default = self.convert_default
+        ins.autocomplete = self.autocomplete
+        ins.choices = self.choices.copy()
+        ins.type = self.type
+        ins.channel_types = self.channel_types.copy()
+        ins.max_value = self.max_value
+        ins.min_value = self.min_value
+        ins.min_length = self.min_length
+        ins.max_length = self.max_length
+        ins.large = self.large
+
+        return ins
+
     @property
     def required(self) -> bool:
         return self.default is Ellipsis
@@ -559,7 +614,8 @@ class ParamInfo:
         parsed_docstring = parsed_docstring or {}
 
         if isinstance(param.default, cls):
-            self = param.default
+            # we copy this ParamInfo instance because it can be used in multiple signatures
+            self = param.default.copy()
         else:
             default = param.default if param.default is not inspect.Parameter.empty else ...
             self = cls(default)
@@ -675,14 +731,14 @@ class ParamInfo:
         if annotation is inspect.Parameter.empty or annotation is Any:
             return False
 
-        # resolve type aliases
+        # resolve type aliases and special types
         if isinstance(annotation, Range):
             self.min_value = annotation.min_value
             self.max_value = annotation.max_value
             annotation = annotation.underlying_type
         if isinstance(annotation, String):
-            self.min_length = annotation.min_length
-            self.max_length = annotation.max_length
+            self.min_length = annotation.min_value
+            self.max_length = annotation.max_value
             annotation = annotation.underlying_type
         if issubclass_(annotation, LargeInt):
             self.large = True
@@ -730,7 +786,7 @@ class ParamInfo:
         return True
 
     def parse_converter_annotation(self, converter: Callable, fallback_annotation: Any) -> None:
-        _, parameters = isolate_self(converter)
+        _, parameters = isolate_self(signature(converter))
 
         if len(parameters) != 1:
             raise TypeError(
@@ -838,11 +894,9 @@ def safe_call(function: Callable[..., T], /, *possible_args: Any, **possible_kwa
 
 
 def isolate_self(
-    function: Callable,
+    sig: inspect.Signature,
 ) -> Tuple[Tuple[Optional[inspect.Parameter], ...], Dict[str, inspect.Parameter]]:
     """Create parameters without self and the first interaction"""
-    sig = signature(function)
-
     parameters = dict(sig.parameters)
     parametersl = list(sig.parameters.values())
 
@@ -898,12 +952,20 @@ def classify_autocompleter(autocompleter: AnyAutocompleter) -> None:
 
 def collect_params(
     function: Callable,
+    sig: Optional[inspect.Signature] = None,
 ) -> Tuple[Optional[str], Optional[str], List[ParamInfo], Dict[str, Injection]]:
-    """Collect all parameters in a function
+    """Collect all parameters in a function.
+
+    Optionally accepts an `inspect.Signature` object (as an optimization),
+    calls `signature(function)` if not provided.
 
     Returns: (`cog parameter`, `interaction parameter`, `param infos`, `injections`)
     """
-    (cog_param, inter_param), parameters = isolate_self(function)
+    if sig is None:
+        sig = signature(function)
+
+    (cog_param, inter_param), parameters = isolate_self(sig)
+
     doc = disnake.utils.parse_docstring(function)["params"]
 
     paraminfos: List[ParamInfo] = []
@@ -949,7 +1011,6 @@ def collect_params(
 def collect_nested_params(function: Callable) -> List[ParamInfo]:
     """Collect all options from a function"""
     # TODO: Have these be actually sorted properly and not have injections always at the end
-
     _, _, paraminfos, injections = collect_params(function)
 
     for injection in injections.values():
@@ -1028,7 +1089,9 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
     Returns the created options
     """
     sig = signature(command.callback)
-    _, inter_param, params, injections = collect_params(command.callback)
+    # pass `sig` down to avoid having to call `signature(func)` another time,
+    # which may cause side effects with deferred annotations and warnings
+    _, inter_param, params, injections = collect_params(command.callback, sig)
 
     if inter_param is None:
         raise TypeError(f"Couldn't find an interaction parameter in {command.callback}")
@@ -1225,7 +1288,6 @@ def inject(
             extension works, but at runtime this is always an :class:`Injection` instance.
             You can find more in-depth explanation :ref:`here <why_params_and_injections_return_any>`.
     """
-
     return Injection(function, autocompleters=autocompleters)
 
 
@@ -1266,8 +1328,7 @@ def injection(
 def option_enum(
     choices: Union[Dict[str, TChoice], List[TChoice]], **kwargs: TChoice
 ) -> Type[TChoice]:
-    """
-    A utility function to create an enum type.
+    """A utility function to create an enum type.
     Returns a new :class:`~enum.Enum` based on the provided parameters.
 
     .. versionadded:: 2.1
@@ -1291,7 +1352,7 @@ def option_enum(
 class ConverterMethod(classmethod):
     """A class to help register a method as a converter method."""
 
-    def __set_name__(self, owner: Any, name: str):
+    def __set_name__(self, owner: Any, name: str) -> None:
         # this feels wrong
         function = self.__get__(None, owner)
         ParamInfo._registered_converters[owner] = function
@@ -1321,7 +1382,7 @@ def register_injection(
     .. versionadded:: 2.3
 
     .. versionchanged:: 2.6
-        Now returns :class:`disnake.ext.commands.Injection`.
+        Now returns :class:`.Injection`.
 
     .. versionchanged:: 2.6
         Added ``autocompleters`` keyword-only argument.

@@ -40,30 +40,40 @@ This code sample shows how to set the registration to be local:
 
 For global registration, don't specify this parameter.
 
-Another useful parameter is ``sync_commands_debug``. If set to ``True``, you receive debug messages related to the
-app command registration by default, without having to change the log level of any loggers
-(see the documentation on :class:`Bot <ext.commands.Bot>` for more info).
+In order to configure specific properties about command sync, there's a configuration
+class which may be passed to the Bot, :class:`~.ext.commands.CommandSyncFlags`.
+
+Setting :attr:`CommandSyncFlags.sync_commands_debug <.ext.commands.CommandSyncFlags.sync_commands_debug>` to ``True``, will print debug messages related to the
+app command registration to the console (or logger if enabled).
+
 This is useful if you want to figure out some registration details:
 
 .. code-block:: python3
 
     from disnake.ext import commands
 
+    command_sync_flags = commands.CommandSyncFlags.default()
+    command_sync_flags.sync_commands_debug = True
+
     bot = commands.Bot(
         command_prefix='!',
         test_guilds=[123456789], # Optional
-        sync_commands_debug=True
+        command_sync_flags=command_sync_flags,
     )
 
-If you want to disable the automatic registration, set ``sync_commands`` to ``False``:
+If you want to disable the automatic registration, set :attr:`CommandSyncFlags.sync_commands <.ext.commands.CommandSyncFlags.sync_commands>`
+to ``False``, or use :meth:`CommandSyncFlags.none() <.ext.commands.CommandSyncFlags.none>`
 
 .. code-block:: python3
 
     from disnake.ext import commands
 
+    command_sync_flags = commands.CommandSyncFlags.none()
+    command_sync_flags.sync_commands = False
+
     bot = commands.Bot(
         command_prefix='!',
-        sync_commands=False
+        command_sync_flags=command_sync_flags,
     )
 
 Basic Slash Command
@@ -178,49 +188,28 @@ For instance, you could restrict an option to only accept positive integers:
         ...
 
 
-Instead of using :func:`Param <ext.commands.Param>`, you can also use a :class:`~ext.commands.Range` annotation.
+Instead of using :func:`~ext.commands.Param`, you can also use a :class:`~ext.commands.Range` annotation.
 The range bounds are both inclusive; using ``...`` as a bound indicates that this end of the range is unbounded.
-The type of the option is determined by the range bounds, with the option being a
-:class:`float` if at least one of the bounds is a :class:`float`, and :class:`int` otherwise.
+The type of the option is specified by the first type argument, which can be either :class:`int` or :class:`float`.
 
 .. code-block:: python3
 
     @bot.slash_command()
     async def ranges(
         inter: disnake.ApplicationCommandInteraction,
-        a: commands.Range[0, 10],       # 0 - 10 int
-        b: commands.Range[0, 10.0],     # 0 - 10 float
-        c: commands.Range[1, ...],      # positive int
+        a: commands.Range[int, 0, 10],       # 0 - 10 int
+        b: commands.Range[float, 0, 10.0],     # 0 - 10 float
+        c: commands.Range[int, 1, ...],      # positive int
     ):
         ...
-
-.. _type_checker_mypy_plugin:
-
-.. note::
-
-    Type checker support for :class:`~ext.commands.Range` and :class:`~ext.commands.String` (:ref:`see below <string_lengths>`) is limited.
-    Pylance/Pyright seem to handle it correctly; MyPy currently needs a plugin for it to understand :class:`~ext.commands.Range`
-    and :class:`~ext.commands.String` semantics, which can be added in the configuration file (``setup.cfg``, ``mypy.ini``):
-
-    .. code-block:: ini
-
-        [mypy]
-        plugins = disnake.ext.mypy_plugin
-
-    For ``pyproject.toml`` configs, use this instead:
-
-    .. code-block:: toml
-
-        [tool.mypy]
-        plugins = "disnake.ext.mypy_plugin"
 
 .. _string_lengths:
 
 String Lengths
 ++++++++++++++
 
-:class:`str` parameters support minimum and maximum allowed value lengths
-using the ``min_length`` and ``max_length`` parameters on :func:`Param <ext.commands.Param>`.
+:class:`str` parameters support minimum and maximum allowed lengths
+using the ``min_length`` and ``max_length`` parameters on :func:`~ext.commands.Param`.
 For instance, you could restrict an option to only accept a single character:
 
 .. code-block:: python3
@@ -243,27 +232,24 @@ Or restrict a tag command to limit tag names to 20 characters:
     ):
         ...
 
-Instead of using :func:`Param <ext.commands.Param>`, you can also use a :class:`~ext.commands.String` annotation.
+Instead of using :func:`~ext.commands.Param`, you can also use a :class:`~ext.commands.String` annotation.
 The length bounds are both inclusive; using ``...`` as a bound indicates that this end of the string length is unbounded.
+The first type argument should always be :class:`str`.
 
 .. code-block:: python3
 
     @bot.slash_command()
     async def strings(
         inter: disnake.ApplicationCommandInteraction,
-        a: commands.String[0, 10],       # a str no longer than 10 characters.
-        b: commands.String[10, 100],     # a str that's at least 10 characters but not longer than 100.
-        c: commands.String[50, ...]      # a str that's at least 50 characters.
+        a: commands.String[str, 0, 10],       # a str no longer than 10 characters.
+        b: commands.String[str, 10, 100],     # a str that's at least 10 characters but not longer than 100.
+        c: commands.String[str, 50, ...],     # a str that's at least 50 characters.
     ):
         ...
 
 .. note::
 
     There is a max length of 6000 characters, which is enforced by Discord.
-
-.. note::
-
-    For mypy type checking support, please see the above note about the :ref:`mypy plugin <type_checker_mypy_plugin>`.
 
 .. _docstrings:
 

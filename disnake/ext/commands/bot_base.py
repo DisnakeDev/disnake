@@ -72,8 +72,7 @@ def when_mentioned_or(*prefixes: str) -> Callable[[BotBase, Message], List[str]]
     These are meant to be passed into the :attr:`.Bot.command_prefix` attribute.
 
     Example
-    --------
-
+    -------
     .. code-block:: python3
 
         bot = commands.Bot(command_prefix=commands.when_mentioned_or('!'))
@@ -92,7 +91,7 @@ def when_mentioned_or(*prefixes: str) -> Callable[[BotBase, Message], List[str]]
 
 
     See Also
-    ----------
+    --------
     :func:`.when_mentioned`
     """
 
@@ -109,7 +108,7 @@ def _is_submodule(parent: str, child: str) -> bool:
 
 
 class _DefaultRepr:
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<default-help-command>"
 
 
@@ -122,16 +121,16 @@ class BotBase(CommonBotBase, GroupMixin):
         command_prefix: Optional[
             Union[PrefixType, Callable[[Self, Message], MaybeCoro[PrefixType]]]
         ] = None,
-        help_command: HelpCommand = _default,
+        help_command: Optional[HelpCommand] = _default,
         description: Optional[str] = None,
         *,
         strip_after_prefix: bool = False,
         **options: Any,
-    ):
+    ) -> None:
         super().__init__(**options)
 
         if not isinstance(self, disnake.Client):
-            raise RuntimeError("BotBase mixin must be used with disnake.Client")
+            raise RuntimeError("BotBase mixin must be used with disnake.Client")  # noqa: TRY004
 
         alternative = (
             "AutoShardedInteractionBot"
@@ -169,7 +168,7 @@ class BotBase(CommonBotBase, GroupMixin):
         self._before_invoke: Optional[CoroFunc] = None
         self._after_invoke: Optional[CoroFunc] = None
 
-        self._help_command = None
+        self._help_command: Optional[HelpCommand] = None
         self.description: str = inspect.cleandoc(description) if description else ""
         self.strip_after_prefix: bool = strip_after_prefix
 
@@ -263,8 +262,7 @@ class BotBase(CommonBotBase, GroupMixin):
             pass
 
     def check(self, func: T) -> T:
-        """
-        A decorator that adds a global check to the bot.
+        """A decorator that adds a global check to the bot.
 
         This is for text commands only, and doesn't apply to application commands.
 
@@ -281,8 +279,7 @@ class BotBase(CommonBotBase, GroupMixin):
         :exc:`.CommandError`.
 
         Example
-        ---------
-
+        -------
         .. code-block:: python3
 
             @bot.check
@@ -295,8 +292,7 @@ class BotBase(CommonBotBase, GroupMixin):
         return func
 
     def check_once(self, func: CFT) -> CFT:
-        """
-        A decorator that adds a "call once" global check to the bot.
+        """A decorator that adds a "call once" global check to the bot.
 
         This is for text commands only, and doesn't apply to application commands.
 
@@ -323,8 +319,7 @@ class BotBase(CommonBotBase, GroupMixin):
         :exc:`.CommandError`.
 
         Example
-        ---------
-
+        -------
         .. code-block:: python3
 
             @bot.check_once
@@ -379,8 +374,7 @@ class BotBase(CommonBotBase, GroupMixin):
         return coro
 
     def after_invoke(self, coro: CFT) -> CFT:
-        """
-        A decorator that registers a coroutine as a post-invoke hook.
+        """A decorator that registers a coroutine as a post-invoke hook.
 
         This is for text commands only, and doesn't apply to application commands.
 
@@ -433,18 +427,16 @@ class BotBase(CommonBotBase, GroupMixin):
 
     @help_command.setter
     def help_command(self, value: Optional[HelpCommand]) -> None:
-        if value is not None:
-            if not isinstance(value, HelpCommand):
-                raise TypeError("help_command must be a subclass of HelpCommand")
-            if self._help_command is not None:
-                self._help_command._remove_from_bot(self)
-            self._help_command = value
-            value._add_to_bot(self)
-        elif self._help_command is not None:
+        if value is not None and not isinstance(value, HelpCommand):
+            raise TypeError("help_command must be a subclass of HelpCommand or None")
+
+        if self._help_command is not None:
             self._help_command._remove_from_bot(self)
-            self._help_command = None
-        else:
-            self._help_command = None
+
+        self._help_command = value
+
+        if value is not None:
+            value._add_to_bot(self)
 
     # command processing
 
@@ -484,7 +476,7 @@ class BotBase(CommonBotBase, GroupMixin):
                 raise TypeError(
                     "command_prefix must be plain string, iterable of strings, or callable "
                     f"returning either of these, not {ret.__class__.__name__}"
-                )
+                ) from None
 
             if not ret:
                 raise ValueError("Iterable command_prefix must contain at least one prefix")
@@ -492,8 +484,7 @@ class BotBase(CommonBotBase, GroupMixin):
         return ret
 
     async def get_context(self, message: Message, *, cls: Type[CXT] = Context) -> CXT:
-        """
-        |coro|
+        """|coro|
 
         Returns the invocation context from the message.
 
@@ -521,7 +512,6 @@ class BotBase(CommonBotBase, GroupMixin):
             The invocation context. The type of this can change via the
             ``cls`` parameter.
         """
-
         view = StringView(message.content)
         ctx = cast("CXT", cls(prefix=None, view=view, bot=self, message=message))
 
@@ -550,7 +540,7 @@ class BotBase(CommonBotBase, GroupMixin):
                     raise TypeError(
                         "get_prefix must return either a string or a list of string, "
                         f"not {prefix.__class__.__name__}"
-                    )
+                    ) from None
 
                 # It's possible a bad command_prefix got us here.
                 for value in prefix:
@@ -558,7 +548,7 @@ class BotBase(CommonBotBase, GroupMixin):
                         raise TypeError(
                             "Iterable command_prefix or list returned from get_prefix must "
                             f"contain only strings, not {value.__class__.__name__}"
-                        )
+                        ) from None
 
                 # Getting here shouldn't happen
                 raise
@@ -627,5 +617,5 @@ class BotBase(CommonBotBase, GroupMixin):
         ctx = await self.get_context(message)
         await self.invoke(ctx)
 
-    async def on_message(self, message):
+    async def on_message(self, message) -> None:
         await self.process_commands(message)

@@ -68,8 +68,9 @@ class Emoji(_EmojiTag, AssetMixin):
     available: :class:`bool`
         Whether the emoji is available for use.
     user: Optional[:class:`User`]
-        The user that created the emoji. This can only be retrieved using :meth:`Guild.fetch_emoji` and
-        having :attr:`~Permissions.manage_emojis` permission.
+        The user that created this emoji. This can only be retrieved using
+        :meth:`Guild.fetch_emoji`/:meth:`Guild.fetch_emojis` while
+        having the :attr:`~Permissions.manage_guild_expressions` permission.
     """
 
     __slots__: Tuple[str, ...] = (
@@ -86,12 +87,12 @@ class Emoji(_EmojiTag, AssetMixin):
 
     def __init__(
         self, *, guild: Union[Guild, GuildPreview], state: ConnectionState, data: EmojiPayload
-    ):
+    ) -> None:
         self.guild_id: int = guild.id
         self._state: ConnectionState = state
         self._from_data(data)
 
-    def _from_data(self, emoji: EmojiPayload):
+    def _from_data(self, emoji: EmojiPayload) -> None:
         self.require_colons: bool = emoji.get("require_colons", False)
         self.managed: bool = emoji.get("managed", False)
         self.id: int = int(emoji["id"])  # type: ignore
@@ -145,6 +146,9 @@ class Emoji(_EmojiTag, AssetMixin):
         """List[:class:`Role`]: A :class:`list` of roles that are allowed to use this emoji.
 
         If roles is empty, the emoji is unrestricted.
+
+        Emojis with :attr:`subscription roles <RoleTags.integration_id>` are considered premium emojis,
+        and count towards a separate limit of 25 emojis.
         """
         guild = self.guild
         if guild is None:
@@ -177,7 +181,7 @@ class Emoji(_EmojiTag, AssetMixin):
 
         Deletes the custom emoji.
 
-        You must have :attr:`~Permissions.manage_emojis` permission to
+        You must have :attr:`~Permissions.manage_guild_expressions` permission to
         do this.
 
         Parameters
@@ -197,12 +201,11 @@ class Emoji(_EmojiTag, AssetMixin):
     async def edit(
         self, *, name: str = MISSING, roles: List[Snowflake] = MISSING, reason: Optional[str] = None
     ) -> Emoji:
-        """
-        |coro|
+        """|coro|
 
         Edits the custom emoji.
 
-        You must have :attr:`~Permissions.manage_emojis` permission to
+        You must have :attr:`~Permissions.manage_guild_expressions` permission to
         do this.
 
         .. versionchanged:: 2.0
@@ -214,6 +217,10 @@ class Emoji(_EmojiTag, AssetMixin):
             The new emoji name.
         roles: Optional[List[:class:`~disnake.abc.Snowflake`]]
             A list of roles that can use this emoji. An empty list can be passed to make it available to everyone.
+
+            An emoji cannot have both subscription roles (see :attr:`RoleTags.integration_id`) and
+            non-subscription roles, and emojis can't be converted between premium and non-premium
+            after creation.
         reason: Optional[:class:`str`]
             The reason for editing this emoji. Shows up on the audit log.
 

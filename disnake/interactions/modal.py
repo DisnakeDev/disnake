@@ -71,7 +71,7 @@ class ModalInteraction(Interaction):
 
     __slots__ = ("message", "_cs_text_values")
 
-    def __init__(self, *, data: ModalInteractionPayload, state: ConnectionState):
+    def __init__(self, *, data: ModalInteractionPayload, state: ConnectionState) -> None:
         super().__init__(data=data, state=state)
         self.data: ModalInteractionData = ModalInteractionData(data=data["data"])
 
@@ -82,8 +82,7 @@ class ModalInteraction(Interaction):
         self.message: Optional[Message] = message
 
     def walk_raw_components(self) -> Generator[ModalInteractionComponentDataPayload, None, None]:
-        """
-        Returns a generator that yields raw component data from action rows one by one, as provided by Discord.
+        """Returns a generator that yields raw component data from action rows one by one, as provided by Discord.
         This does not contain all fields of the components due to API limitations.
 
         .. versionadded:: 2.6
@@ -98,7 +97,8 @@ class ModalInteraction(Interaction):
     @cached_slot_property("_cs_text_values")
     def text_values(self) -> Dict[str, str]:
         """Dict[:class:`str`, :class:`str`]: Returns the text values the user has entered in the modal.
-        This is a dict of the form ``{custom_id: value}``."""
+        This is a dict of the form ``{custom_id: value}``.
+        """
         text_input_type = ComponentType.text_input.value
         return {
             component["custom_id"]: component.get("value") or ""
@@ -130,7 +130,7 @@ class ModalInteractionData(Dict[str, Any]):
 
     __slots__ = ("custom_id", "components")
 
-    def __init__(self, *, data: ModalInteractionDataPayload):
+    def __init__(self, *, data: ModalInteractionDataPayload) -> None:
         super().__init__(data)
         self.custom_id: str = data["custom_id"]
         # This uses a stripped-down action row TypedDict, as we only receive
@@ -138,5 +138,5 @@ class ModalInteractionData(Dict[str, Any]):
         # and relevant fields like a select's `values`.
         self.components: List[ModalInteractionActionRowPayload] = data["components"]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<ModalInteractionData custom_id={self.custom_id!r} components={self.components!r}>"

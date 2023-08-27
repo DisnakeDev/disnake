@@ -69,7 +69,7 @@ class PartialIntegration:
     guild: :class:`Guild`
         The guild of the integration.
     type: :class:`str`
-        The integration type (i.e. Twitch).
+        The integration type (i.e. ``twitch``).
     account: :class:`IntegrationAccount`
         The account linked to this integration.
     application_id: Optional[:class:`int`]
@@ -89,7 +89,7 @@ class PartialIntegration:
         self.guild = guild
         self._from_data(data)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<{self.__class__.__name__} id={self.id} name={self.name!r}>"
 
     def _from_data(self, data: PartialIntegrationPayload) -> None:
@@ -119,7 +119,7 @@ class Integration(PartialIntegration):
         Whether the integration is currently enabled.
     account: :class:`IntegrationAccount`
         The account linked to this integration.
-    user: :class:`User`
+    user: Optional[:class:`User`]
         The user that added this integration.
     """
 
@@ -339,7 +339,7 @@ class IntegrationApplication:
         "user",
     )
 
-    def __init__(self, *, data: IntegrationApplicationPayload, state):
+    def __init__(self, *, data: IntegrationApplicationPayload, state) -> None:
         self.id: int = int(data["id"])
         self.name: str = data["name"]
         self.icon: Optional[str] = data["icon"]
@@ -401,7 +401,7 @@ class BotIntegration(Integration):
         )
         self.scopes: List[str] = data.get("scopes") or []
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"<{self.__class__.__name__} id={self.id}"
             f" name={self.name!r} scopes={self.scopes!r}>"

@@ -7,9 +7,9 @@ import time
 from collections import deque
 from typing import TYPE_CHECKING, Any, Callable, Deque, Dict, Optional
 
+from disnake.abc import PrivateChannel
 from disnake.enums import Enum
 
-from ...abc import PrivateChannel
 from .errors import MaxConcurrencyReached
 
 if TYPE_CHECKING:
@@ -198,7 +198,7 @@ class CooldownMapping:
         return self._type
 
     @classmethod
-    def from_cooldown(cls, rate, per, type) -> Self:
+    def from_cooldown(cls, rate: float, per: float, type) -> Self:
         return cls(Cooldown(rate, per), type)
 
     def _bucket_key(self, msg: Message) -> Any:
@@ -267,7 +267,7 @@ class DynamicCooldownMapping(CooldownMapping):
 
 
 class _Semaphore:
-    """This class is a version of a semaphore.
+    """A custom version of a semaphore.
 
     If you're wondering why asyncio.Semaphore isn't being used,
     it's because it doesn't expose the internal value. This internal
@@ -283,7 +283,7 @@ class _Semaphore:
 
     def __init__(self, number: int) -> None:
         self.value: int = number
-        self.loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()
+        self.loop: asyncio.AbstractEventLoop = asyncio.get_running_loop()
         self._waiters: Deque[asyncio.Future] = deque()
 
     def __repr__(self) -> str:

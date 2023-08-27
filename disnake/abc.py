@@ -25,12 +25,20 @@ from typing import (
 
 from . import utils
 from .context_managers import Typing
-from .enums import ChannelType, PartyType, ThreadSortOrder, VideoQualityMode, try_enum_to_int
+from .enums import (
+    ChannelType,
+    PartyType,
+    ThreadLayout,
+    ThreadSortOrder,
+    VideoQualityMode,
+    try_enum_to_int,
+)
 from .errors import ClientException
 from .file import File
 from .flags import ChannelFlags, MessageFlags
 from .invite import Invite
 from .mentions import AllowedMentions
+from .object import Object
 from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite, Permissions
 from .role import Role
@@ -91,7 +99,7 @@ MISSING = utils.MISSING
 class Snowflake(Protocol):
     """An ABC that details the common operations on a Discord model.
 
-    Almost all :ref:`Discord models <discord_api_models>` meet this
+    Almost all :ref:`Discord models <discord_model>` meet this
     abstract base class.
 
     If you want to create a snowflake on your own, consider using
@@ -125,8 +133,19 @@ class User(Snowflake, Protocol):
         The user's username.
     discriminator: :class:`str`
         The user's discriminator.
-    avatar: :class:`~disnake.Asset`
-        The avatar asset the user has.
+
+        .. note::
+            This is being phased out by Discord; the username system is moving away from ``username#discriminator``
+            to users having a globally unique username.
+            The value of a single zero (``"0"``) indicates that the user has been migrated to the new system.
+            See the `help article <https://dis.gd/app-usernames>`__ for details.
+
+    global_name: Optional[:class:`str`]
+        The user's global display name, if set.
+        This takes precedence over :attr:`.name` when shown.
+
+        .. versionadded:: 2.9
+
     bot: :class:`bool`
         Whether the user is a bot account.
     """
@@ -135,7 +154,7 @@ class User(Snowflake, Protocol):
 
     name: str
     discriminator: str
-    avatar: Asset
+    global_name: Optional[str]
     bot: bool
 
     @property
@@ -146,6 +165,13 @@ class User(Snowflake, Protocol):
     @property
     def mention(self) -> str:
         """:class:`str`: Returns a string that allows you to mention the given user."""
+        raise NotImplementedError
+
+    @property
+    def avatar(self) -> Optional[Asset]:
+        """Optional[:class:`~disnake.Asset`]: Returns an :class:`~disnake.Asset` for
+        the avatar the user has.
+        """
         raise NotImplementedError
 
 
@@ -177,7 +203,7 @@ class _Overwrites:
     ROLE = 0
     MEMBER = 1
 
-    def __init__(self, data: PermissionOverwritePayload):
+    def __init__(self, data: PermissionOverwritePayload) -> None:
         self.id: int = int(data["id"])
         self.allow: int = int(data.get("allow", 0))
         self.deny: int = int(data.get("deny", 0))
@@ -236,7 +262,9 @@ class GuildChannel(ABC):
 
     if TYPE_CHECKING:
 
-        def __init__(self, *, state: ConnectionState, guild: Guild, data: Mapping[str, Any]):
+        def __init__(
+            self, *, state: ConnectionState, guild: Guild, data: Mapping[str, Any]
+        ) -> None:
             ...
 
     def __str__(self) -> str:
@@ -311,6 +339,7 @@ class GuildChannel(ABC):
         available_tags: Sequence[ForumTag] = MISSING,
         default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
         default_sort_order: Optional[ThreadSortOrder] = MISSING,
+        default_layout: ThreadLayout = MISSING,
         reason: Optional[str] = None,
     ) -> Optional[ChannelPayload]:
         parent_id: Optional[int]
@@ -415,6 +444,10 @@ class GuildChannel(ABC):
                 try_enum_to_int(default_sort_order) if default_sort_order is not None else None
             )
 
+        default_layout_payload: int = MISSING
+        if default_layout is not MISSING:
+            default_layout_payload = try_enum_to_int(default_layout)
+
         options: Dict[str, Any] = {
             "name": name,
             "parent_id": parent_id,
@@ -434,6 +467,7 @@ class GuildChannel(ABC):
             "available_tags": available_tags_payload,
             "default_reaction_emoji": default_reaction_emoji_payload,
             "default_sort_order": default_sort_order_payload,
+            "default_forum_layout": default_layout_payload,
         }
         options = {k: v for k, v in options.items() if v is not MISSING}
 
@@ -468,7 +502,8 @@ class GuildChannel(ABC):
     @property
     def changed_roles(self) -> List[Role]:
         """List[:class:`.Role`]: Returns a list of roles that have been overridden from
-        their default values in the :attr:`.Guild.roles` attribute."""
+        their default values in the :attr:`.Guild.roles` attribute.
+        """
         ret = []
         g = self.guild
         for overwrite in filter(lambda o: o.is_role(), self._overwrites):
@@ -588,8 +623,7 @@ class GuildChannel(ABC):
 
     @property
     def jump_url(self) -> str:
-        """
-        A URL that can be used to jump to this channel.
+        """A URL that can be used to jump to this channel.
 
         .. versionadded:: 2.4
 
@@ -598,6 +632,21 @@ class GuildChannel(ABC):
             This exists for all guild channels but may not be usable by the client for all guild channel types.
         """
         return f"https://discord.com/channels/{self.guild.id}/{self.id}"
+
+    def _apply_implict_permissions(self, base: Permissions) -> None:
+        # if you can't send a message in a channel then you can't have certain
+        # permissions as well
+        if not base.send_messages:
+            base.send_tts_messages = False
+            base.send_voice_messages = False
+            base.mention_everyone = False
+            base.embed_links = False
+            base.attach_files = False
+
+        # if you can't view a channel then you have no permissions there
+        if not base.view_channel:
+            denied = Permissions.all_channel()
+            base.value &= ~denied.value
 
     def permissions_for(
         self,
@@ -750,24 +799,11 @@ class GuildChannel(ABC):
                 base.handle_overwrite(allow=overwrite.allow, deny=overwrite.deny)
                 break
 
-        # if you can't send a message in a channel then you can't have certain
-        # permissions as well
-        if not base.send_messages:
-            base.send_tts_messages = False
-            base.mention_everyone = False
-            base.embed_links = False
-            base.attach_files = False
-
-        # if you can't view a channel then you have no permissions there
-        if not base.view_channel:
-            denied = Permissions.all_channel()
-            base.value &= ~denied.value
-
         # if you have a timeout then you can't have any permissions
         # except read messages and read message history
         if not ignore_timeout and obj.current_timeout:
-            denied = Permissions(view_channel=True, read_message_history=True)
-            base.value &= denied.value
+            allowed = Permissions(view_channel=True, read_message_history=True)
+            base.value &= allowed.value
 
         return base
 
@@ -831,6 +867,7 @@ class GuildChannel(ABC):
         manage_emojis_and_stickers: Optional[bool] = ...,
         manage_events: Optional[bool] = ...,
         manage_guild: Optional[bool] = ...,
+        manage_guild_expressions: Optional[bool] = ...,
         manage_messages: Optional[bool] = ...,
         manage_nicknames: Optional[bool] = ...,
         manage_permissions: Optional[bool] = ...,
@@ -848,24 +885,34 @@ class GuildChannel(ABC):
         send_messages: Optional[bool] = ...,
         send_messages_in_threads: Optional[bool] = ...,
         send_tts_messages: Optional[bool] = ...,
+        send_voice_messages: Optional[bool] = ...,
         speak: Optional[bool] = ...,
         start_embedded_activities: Optional[bool] = ...,
         stream: Optional[bool] = ...,
         use_application_commands: Optional[bool] = ...,
         use_embedded_activities: Optional[bool] = ...,
         use_external_emojis: Optional[bool] = ...,
+        use_external_sounds: Optional[bool] = ...,
         use_external_stickers: Optional[bool] = ...,
         use_slash_commands: Optional[bool] = ...,
+        use_soundboard: Optional[bool] = ...,
         use_voice_activation: Optional[bool] = ...,
         view_audit_log: Optional[bool] = ...,
         view_channel: Optional[bool] = ...,
+        view_creator_monetization_analytics: Optional[bool] = ...,
         view_guild_insights: Optional[bool] = ...,
     ) -> None:
         ...
 
-    async def set_permissions(self, target, *, overwrite=MISSING, reason=None, **permissions):
-        """
-        |coro|
+    async def set_permissions(
+        self,
+        target,
+        *,
+        overwrite: Optional[PermissionOverwrite] = MISSING,
+        reason: Optional[str] = None,
+        **permissions,
+    ) -> None:
+        """|coro|
 
         Sets the channel specific permission overwrites for a target in the
         channel.
@@ -893,7 +940,6 @@ class GuildChannel(ABC):
 
         Examples
         --------
-
         Setting allow and deny: ::
 
             await message.channel.set_permissions(message.author, view_channel=True,
@@ -951,8 +997,8 @@ class GuildChannel(ABC):
                 raise TypeError("No overwrite provided.")
             try:
                 overwrite = PermissionOverwrite(**permissions)
-            except (ValueError, TypeError):
-                raise TypeError("Invalid permissions given to keyword arguments.")
+            except (ValueError, TypeError) as e:
+                raise TypeError("Invalid permissions given to keyword arguments.") from e
         else:
             if len(permissions) > 0:
                 raise TypeError("Cannot mix overwrite and keyword arguments.")
@@ -974,15 +1020,46 @@ class GuildChannel(ABC):
         base_attrs: Dict[str, Any],
         *,
         name: Optional[str] = None,
+        category: Optional[Snowflake] = MISSING,
+        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
         reason: Optional[str] = None,
     ) -> Self:
-        base_attrs["permission_overwrites"] = [x._asdict() for x in self._overwrites]
-        base_attrs["parent_id"] = self.category_id
+        # if the overwrites are MISSING, defaults to the
+        # original permissions of the channel
+        overwrites_payload: List[PermissionOverwritePayload]
+        if overwrites is not MISSING:
+            if not isinstance(overwrites, dict):
+                raise TypeError("overwrites parameter expects a dict.")
+
+            overwrites_payload = []
+            for target, perm in overwrites.items():
+                if not isinstance(perm, PermissionOverwrite):
+                    raise TypeError(
+                        f"Expected PermissionOverwrite, received {perm.__class__.__name__}"
+                    )
+
+                allow, deny = perm.pair()
+                payload: PermissionOverwritePayload = {
+                    "allow": str(allow.value),
+                    "deny": str(deny.value),
+                    "id": target.id,
+                    "type": (_Overwrites.ROLE if isinstance(target, Role) else _Overwrites.MEMBER),
+                }
+                overwrites_payload.append(payload)
+        else:
+            overwrites_payload = [x._asdict() for x in self._overwrites]
+        base_attrs["permission_overwrites"] = overwrites_payload
+        if category is not MISSING:
+            base_attrs["parent_id"] = category.id if category else None
+        else:
+            # if no category was given don't change the category
+            base_attrs["parent_id"] = self.category_id
         base_attrs["name"] = name or self.name
+        channel_type = base_attrs.get("type") or self.type.value
         guild_id = self.guild.id
         cls = self.__class__
         data = await self._state.http.create_channel(
-            guild_id, self.type.value, reason=reason, **base_attrs
+            guild_id, channel_type, reason=reason, **base_attrs
         )
         obj = cls(state=self._state, guild=self.guild, data=data)
 
@@ -1203,7 +1280,7 @@ class GuildChannel(ABC):
         unique: bool = True,
         target_type: Optional[InviteTarget] = None,
         target_user: Optional[User] = None,
-        target_application: Optional[PartyType] = None,
+        target_application: Optional[Union[Snowflake, PartyType]] = None,
         guild_scheduled_event: Optional[GuildScheduledEvent] = None,
     ) -> Invite:
         """|coro|
@@ -1216,8 +1293,14 @@ class GuildChannel(ABC):
         Parameters
         ----------
         max_age: :class:`int`
-            How long the invite should last in seconds. If it's 0 then the invite
+            How long the invite should last in seconds. If set to ``0``, then the invite
             doesn't expire. Defaults to ``0``.
+
+            .. warning::
+
+                If the guild is not a Community guild (has ``COMMUNITY`` in :attr:`.Guild.features`),
+                this must be set to a number between ``1`` and ``2592000`` seconds.
+
         max_uses: :class:`int`
             How many uses the invite could be used for. If it's 0 then there
             are unlimited uses. Defaults to ``0``.
@@ -1234,15 +1317,18 @@ class GuildChannel(ABC):
             .. versionadded:: 2.0
 
         target_user: Optional[:class:`User`]
-            The user whose stream to display for this invite, required if `target_type` is `TargetType.stream`.
+            The user whose stream to display for this invite, required if ``target_type`` is :attr:`.InviteTarget.stream`.
             The user must be streaming in the channel.
 
             .. versionadded:: 2.0
 
-        target_application: Optional[:class:`.PartyType`]
-            The ID of the embedded application for the invite, required if `target_type` is `TargetType.embedded_application`.
+        target_application: Optional[:class:`.Snowflake`]
+            The ID of the embedded application for the invite, required if ``target_type`` is :attr:`.InviteTarget.embedded_application`.
 
             .. versionadded:: 2.0
+
+            .. versionchanged:: 2.9
+                ``PartyType`` is deprecated, and :class:`.Snowflake` should be used instead.
 
         guild_scheduled_event: Optional[:class:`.GuildScheduledEvent`]
             The guild scheduled event to include with the invite.
@@ -1264,6 +1350,12 @@ class GuildChannel(ABC):
         :class:`.Invite`
             The newly created invite.
         """
+        if isinstance(target_application, PartyType):
+            utils.warn_deprecated(
+                "PartyType is deprecated and will be removed in future version",
+                stacklevel=2,
+            )
+            target_application = Object(target_application.value)
         data = await self._state.http.create_invite(
             self.id,
             reason=reason,
@@ -1273,7 +1365,7 @@ class GuildChannel(ABC):
             unique=unique,
             target_type=try_enum_to_int(target_type),
             target_user_id=target_user.id if target_user else None,
-            target_application_id=try_enum_to_int(target_application),
+            target_application_id=target_application.id if target_application else None,
         )
         invite = Invite.from_incomplete(data=data, state=self._state)
         invite.guild_scheduled_event = guild_scheduled_event
@@ -1314,9 +1406,10 @@ class Messageable:
     - :class:`~disnake.GroupChannel`
     - :class:`~disnake.User`
     - :class:`~disnake.Member`
-    - :class:`~disnake.ext.commands.Context`
     - :class:`~disnake.Thread`
     - :class:`~disnake.VoiceChannel`
+    - :class:`~disnake.StageChannel`
+    - :class:`~disnake.ext.commands.Context`
     - :class:`~disnake.PartialMessageable`
     """
 
@@ -1338,6 +1431,7 @@ class Messageable:
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: AllowedMentions = ...,
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
@@ -1358,6 +1452,7 @@ class Messageable:
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: AllowedMentions = ...,
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
@@ -1378,6 +1473,7 @@ class Messageable:
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: AllowedMentions = ...,
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
@@ -1398,6 +1494,7 @@ class Messageable:
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: AllowedMentions = ...,
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
@@ -1418,7 +1515,8 @@ class Messageable:
         stickers: Optional[Sequence[Union[GuildSticker, StickerItem]]] = None,
         delete_after: Optional[float] = None,
         nonce: Optional[Union[str, int]] = None,
-        suppress_embeds: bool = False,
+        suppress_embeds: Optional[bool] = None,
+        flags: Optional[MessageFlags] = None,
         allowed_mentions: Optional[AllowedMentions] = None,
         reference: Optional[Union[Message, MessageReference, PartialMessage]] = None,
         mention_author: Optional[bool] = None,
@@ -1514,9 +1612,19 @@ class Messageable:
 
         suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This hides
-            all embeds from the UI if set to ``True``.
+            all the embeds from the UI if set to ``True``.
 
             .. versionadded:: 2.5
+
+        flags: :class:`.MessageFlags`
+            The flags to set for this message.
+            Only :attr:`~.MessageFlags.suppress_embeds` and :attr:`~.MessageFlags.suppress_notifications`
+            are supported.
+
+            If parameter ``suppress_embeds`` is provided,
+            that will override the setting of :attr:`.MessageFlags.suppress_embeds`.
+
+            .. versionadded:: 2.9
 
         Raises
         ------
@@ -1606,10 +1714,12 @@ class Messageable:
         else:
             components_payload = None
 
-        if suppress_embeds:
-            flags = MessageFlags.suppress_embeds.flag
-        else:
-            flags = 0
+        flags_payload = None
+        if suppress_embeds is not None:
+            flags = MessageFlags._from_value(0 if flags is None else flags.value)
+            flags.suppress_embeds = suppress_embeds
+        if flags is not None:
+            flags_payload = flags.value
 
         if files is not None:
             if len(files) > 10:
@@ -1629,7 +1739,7 @@ class Messageable:
                     message_reference=reference_payload,
                     stickers=stickers_payload,
                     components=components_payload,
-                    flags=flags,
+                    flags=flags_payload,
                 )
             finally:
                 for f in files:
@@ -1645,7 +1755,7 @@ class Messageable:
                 message_reference=reference_payload,
                 stickers=stickers_payload,
                 components=components_payload,
-                flags=flags,
+                flags=flags_payload,
             )
 
         ret = state.create_message(channel=channel, data=data)
@@ -1756,7 +1866,6 @@ class Messageable:
 
         Examples
         --------
-
         Usage ::
 
             counter = 0
@@ -1803,7 +1912,7 @@ class Messageable:
             The request to get message history failed.
 
         Yields
-        -------
+        ------
         :class:`.Message`
             The message with the message data parsed.
         """

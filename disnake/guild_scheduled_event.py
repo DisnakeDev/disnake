@@ -41,8 +41,7 @@ __all__ = ("GuildScheduledEventMetadata", "GuildScheduledEvent")
 
 
 class GuildScheduledEventMetadata:
-    """
-    Represents a guild scheduled event entity metadata.
+    """Represents a guild scheduled event entity metadata.
 
     .. versionadded:: 2.3
 
@@ -55,7 +54,7 @@ class GuildScheduledEventMetadata:
 
     __slots__ = ("location",)
 
-    def __init__(self, *, location: Optional[str] = None):
+    def __init__(self, *, location: Optional[str] = None) -> None:
         self.location: Optional[str] = location
 
     def __repr__(self) -> str:
@@ -74,8 +73,7 @@ class GuildScheduledEventMetadata:
 
 
 class GuildScheduledEvent(Hashable):
-    """
-    Represents a guild scheduled event.
+    """Represents a guild scheduled event.
 
     .. versionadded:: 2.3
 
@@ -153,7 +151,7 @@ class GuildScheduledEvent(Hashable):
         "_cs_channel",
     )
 
-    def __init__(self, *, state: ConnectionState, data: GuildScheduledEventPayload):
+    def __init__(self, *, state: ConnectionState, data: GuildScheduledEventPayload) -> None:
         self._state: ConnectionState = state
         self._update(data)
 
@@ -690,7 +688,6 @@ class GuildScheduledEvent(Hashable):
 
         Examples
         --------
-
         Usage ::
 
             async for user in event.fetch_users(limit=500):

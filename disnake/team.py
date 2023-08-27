@@ -38,7 +38,7 @@ class Team:
 
     __slots__ = ("_state", "id", "name", "_icon", "owner_id", "members")
 
-    def __init__(self, state: ConnectionState, data: TeamPayload):
+    def __init__(self, state: ConnectionState, data: TeamPayload) -> None:
         self._state: ConnectionState = state
 
         self.id: int = int(data["id"])
@@ -84,7 +84,7 @@ class TeamMember(BaseUser):
 
         .. describe:: str(x)
 
-            Returns the team member's name with discriminator.
+            Returns the team member's username (with discriminator, if not migrated to new system yet).
 
     .. versionadded:: 1.3
 
@@ -95,7 +95,20 @@ class TeamMember(BaseUser):
     id: :class:`int`
         The team member's unique ID.
     discriminator: :class:`str`
-        The team member's discriminator. This is given when the username has conflicts.
+        The team member's discriminator.
+
+        .. note::
+            This is being phased out by Discord; the username system is moving away from ``username#discriminator``
+            to users having a globally unique username.
+            The value of a single zero (``"0"``) indicates that the user has been migrated to the new system.
+            See the `help article <https://dis.gd/app-usernames>`__ for details.
+
+    global_name: Optional[:class:`str`]
+        The team members's global display name, if set.
+        This takes precedence over :attr:`.name` when shown.
+
+        .. versionadded:: 2.9
+
     avatar: Optional[:class:`str`]
         The avatar hash the team member has. Could be None.
     bot: :class:`bool`
@@ -108,7 +121,7 @@ class TeamMember(BaseUser):
 
     __slots__ = ("team", "membership_state", "permissions")
 
-    def __init__(self, team: Team, state: ConnectionState, data: TeamMemberPayload):
+    def __init__(self, team: Team, state: ConnectionState, data: TeamMemberPayload) -> None:
         self.team: Team = team
         self.membership_state: TeamMembershipState = try_enum(
             TeamMembershipState, data["membership_state"]
@@ -118,6 +131,6 @@ class TeamMember(BaseUser):
 
     def __repr__(self) -> str:
         return (
-            f"<{self.__class__.__name__} id={self.id} name={self.name!r} "
-            f"discriminator={self.discriminator!r} membership_state={self.membership_state!r}>"
+            f"<{self.__class__.__name__} id={self.id} name={self.name!r} global_name={self.global_name!r}"
+            f" discriminator={self.discriminator!r} membership_state={self.membership_state!r}>"
         )
