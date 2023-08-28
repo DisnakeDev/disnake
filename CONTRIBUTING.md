@@ -77,7 +77,8 @@ All of the following checks also automatically run for every PR on GitHub, so do
 
 ### Commit/PR Naming Guidelines
 
-We use a simplified version of the commonly known [conventional commit format](https://www.conventionalcommits.org/en/v1.0.0/). While not necessarily required (but appreciated) for individual commit messages, please title your PR according to this schema:
+This project uses the commonly known [conventional commit format](https://www.conventionalcommits.org/en/v1.0.0/).
+While not necessarily required (but appreciated) for individual commit messages, please make sure to title your PR according to this schema:
 
 ```
 <type>(<scope>)<!>: <short summary>
