@@ -41,6 +41,7 @@ class AppInfo(BaseAppInfo):
     tags: NotRequired[List[str]]
     install_params: NotRequired[InstallParams]
     custom_install_url: NotRequired[str]
+    role_connections_verification_url: NotRequired[str]
 
 
 class PartialAppInfo(BaseAppInfo, total=False):
@@ -49,6 +50,7 @@ class PartialAppInfo(BaseAppInfo, total=False):
     flags: int
 
 
+# see https://discord.com/developers/docs/topics/gateway-events#ready-ready-event-fields
 class PartialGatewayAppInfo(TypedDict):
     id: Snowflake
     flags: int

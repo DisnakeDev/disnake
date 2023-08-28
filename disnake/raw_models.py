@@ -164,6 +164,10 @@ class RawReactionActionEvent(_RawReprMixin):
         The guild ID where the reaction addition or removal took place, if applicable.
     emoji: :class:`PartialEmoji`
         The custom or unicode emoji being used.
+
+        .. versionchanged:: 2.9
+            This now also includes the correct :attr:`~PartialEmoji.animated` value when a reaction was removed.
+
     member: Optional[:class:`Member`]
         The member who added the reaction. Only available if `event_type` is `REACTION_ADD` and the reaction is inside a guild.
 
@@ -236,6 +240,9 @@ class RawReactionClearEmojiEvent(_RawReprMixin):
         The guild ID where the reaction clear took place, if applicable.
     emoji: :class:`PartialEmoji`
         The custom or unicode emoji being removed.
+
+        .. versionchanged:: 2.9
+            This now also includes the correct :attr:`~PartialEmoji.animated` value.
     """
 
     __slots__ = ("message_id", "channel_id", "guild_id", "emoji")
@@ -381,6 +388,9 @@ class RawTypingEvent(_RawReprMixin):
         The member object of the user who started typing or ``None`` if it was in a DM.
     timestamp: :class:`datetime.datetime`
         The UTC datetime when the user started typing.
+
+        .. versionchanged:: 2.9
+            Changed from naive to aware datetime.
     """
 
     __slots__ = ("user_id", "channel_id", "guild_id", "member", "timestamp")
@@ -389,7 +399,9 @@ class RawTypingEvent(_RawReprMixin):
         self.user_id: int = int(data["user_id"])
         self.channel_id: int = int(data["channel_id"])
         self.member: Optional[Member] = None
-        self.timestamp: datetime.datetime = datetime.datetime.utcfromtimestamp(data["timestamp"])
+        self.timestamp: datetime.datetime = datetime.datetime.fromtimestamp(
+            data["timestamp"], tz=datetime.timezone.utc
+        )
         try:
             self.guild_id: Optional[int] = int(data["guild_id"])
         except KeyError:

@@ -6,6 +6,7 @@ import asyncio
 import logging
 import re
 from contextvars import ContextVar
+from errno import ECONNRESET
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -54,7 +55,7 @@ if TYPE_CHECKING:
 
     from ..abc import Snowflake
     from ..asset import AssetBytes
-    from ..channel import ForumChannel, TextChannel, VoiceChannel
+    from ..channel import ForumChannel, StageChannel, TextChannel, VoiceChannel
     from ..embeds import Embed
     from ..file import File
     from ..guild import Guild
@@ -209,7 +210,7 @@ class AsyncWebhookAdapter:
                             raise HTTPException(response, data)
 
                 except OSError as e:
-                    if attempt < 4 and e.errno in (54, 10054):
+                    if attempt < 4 and e.errno == ECONNRESET:
                         await asyncio.sleep(1 + attempt * 2)
                         continue
                     raise
@@ -478,8 +479,9 @@ def handle_message_parameters_dict(
     username: str = MISSING,
     avatar_url: Any = MISSING,
     tts: bool = False,
-    ephemeral: Optional[bool] = None,
-    suppress_embeds: Optional[bool] = None,
+    ephemeral: Optional[bool] = MISSING,
+    suppress_embeds: Optional[bool] = MISSING,
+    flags: MessageFlags = MISSING,
     file: File = MISSING,
     files: List[File] = MISSING,
     attachments: Optional[List[Attachment]] = MISSING,
@@ -530,12 +532,14 @@ def handle_message_parameters_dict(
     if username:
         payload["username"] = username
 
-    if ephemeral is not None or suppress_embeds is not None:
-        payload["flags"] = 0
-        if suppress_embeds:
-            payload["flags"] |= MessageFlags.suppress_embeds.flag
-        if ephemeral:
-            payload["flags"] |= MessageFlags.ephemeral.flag
+    if ephemeral not in (None, MISSING) or suppress_embeds not in (None, MISSING):
+        flags = MessageFlags._from_value(0 if flags is MISSING else flags.value)
+        if suppress_embeds not in (None, MISSING):
+            flags.suppress_embeds = suppress_embeds
+        if ephemeral not in (None, MISSING):
+            flags.ephemeral = ephemeral
+    if flags is not MISSING:
+        payload["flags"] = flags.value
 
     if allowed_mentions:
         if previous_allowed_mentions is not None:
@@ -562,8 +566,9 @@ def handle_message_parameters(
     username: str = MISSING,
     avatar_url: Any = MISSING,
     tts: bool = False,
-    ephemeral: Optional[bool] = None,
-    suppress_embeds: Optional[bool] = None,
+    ephemeral: Optional[bool] = MISSING,
+    suppress_embeds: Optional[bool] = MISSING,
+    flags: MessageFlags = MISSING,
     file: File = MISSING,
     files: List[File] = MISSING,
     attachments: Optional[List[Attachment]] = MISSING,
@@ -583,6 +588,7 @@ def handle_message_parameters(
         tts=tts,
         ephemeral=ephemeral,
         suppress_embeds=suppress_embeds,
+        flags=flags,
         file=file,
         files=files,
         attachments=attachments,
@@ -969,8 +975,8 @@ class BaseWebhook(Hashable):
         return self._state and self._state._get_guild(self.guild_id)
 
     @property
-    def channel(self) -> Optional[Union[TextChannel, VoiceChannel, ForumChannel]]:
-        """Optional[Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`ForumChannel`]]: The channel this webhook belongs to.
+    def channel(self) -> Optional[Union[TextChannel, VoiceChannel, ForumChannel, StageChannel]]:
+        """Optional[Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`ForumChannel`, :class:`StageChannel`]]: The channel this webhook belongs to.
 
         If this is a partial webhook, then this will always return ``None``.
 
@@ -1007,7 +1013,8 @@ class Webhook(BaseWebhook):
 
     There are two main ways to use Webhooks. The first is through the ones
     received by the library such as :meth:`.Guild.webhooks`, :meth:`.TextChannel.webhooks`,
-    and :meth:`.VoiceChannel.webhooks`. The ones received by the library will
+    :meth:`.ForumChannel.webhooks`, :meth:`.VoiceChannel.webhooks`,
+    and :meth:`.StageChannel.webhooks`. The ones received by the library will
     automatically be bound using the library's internal HTTP session.
 
     The second form involves creating a webhook object manually using the
@@ -1203,6 +1210,7 @@ class Webhook(BaseWebhook):
                 "username": user.name,
                 "discriminator": user.discriminator,
                 "id": user.id,
+                "global_name": user.global_name,
                 "avatar": user._avatar,
             },
         }
@@ -1433,6 +1441,7 @@ class Webhook(BaseWebhook):
         tts: bool = ...,
         ephemeral: bool = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         file: File = ...,
         files: List[File] = ...,
         embed: Embed = ...,
@@ -1457,6 +1466,7 @@ class Webhook(BaseWebhook):
         tts: bool = ...,
         ephemeral: bool = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         file: File = ...,
         files: List[File] = ...,
         embed: Embed = ...,
@@ -1478,8 +1488,9 @@ class Webhook(BaseWebhook):
         username: str = MISSING,
         avatar_url: Any = MISSING,
         tts: bool = False,
-        ephemeral: bool = False,
-        suppress_embeds: bool = False,
+        ephemeral: bool = MISSING,
+        suppress_embeds: bool = MISSING,
+        flags: MessageFlags = MISSING,
         file: File = MISSING,
         files: List[File] = MISSING,
         embed: Embed = MISSING,
@@ -1598,6 +1609,16 @@ class Webhook(BaseWebhook):
 
             .. versionadded:: 2.5
 
+        flags: :class:`MessageFlags`
+            The flags to set for this message.
+            Only :attr:`~MessageFlags.suppress_embeds`, :attr:`~MessageFlags.ephemeral`
+            and :attr:`~MessageFlags.suppress_notifications` are supported.
+
+            If parameters ``suppress_embeds`` or ``ephemeral`` are provided,
+            they will override the corresponding setting of this ``flags`` parameter.
+
+            .. versionadded:: 2.9
+
         Raises
         ------
         HTTPException
@@ -1661,6 +1682,7 @@ class Webhook(BaseWebhook):
             embeds=embeds,
             ephemeral=ephemeral,
             suppress_embeds=suppress_embeds,
+            flags=flags,
             view=view,
             components=components,
             thread_name=thread_name,

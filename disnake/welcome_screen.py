@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, List, Optional, Union
 
 from . import utils
 from .partial_emoji import PartialEmoji, _EmojiTag
@@ -74,22 +74,15 @@ class WelcomeScreenChannel:
         *,
         data: WelcomeScreenChannelPayload,
         state: ConnectionState,
-        guild: Union[Guild, PartialInviteGuild],
     ) -> WelcomeScreenChannel:
-        emoji_id = utils._get_as_snowflake(data, "emoji_id")
-        emoji_name = data.get("emoji_name") or None
-        emoji = None
-        if emoji_name:
-            emojis: Optional[Tuple[Emoji]]
-            if emojis := getattr(guild, "emojis", None):
-                emoji = utils.get(emojis, id=emoji_id, name=emoji_name)
-            if not emoji:
-                emoji = PartialEmoji.with_state(state, name=emoji_name, id=emoji_id)
+        emoji = state._get_emoji_from_fields(
+            name=data.get("emoji_name"),
+            id=utils._get_as_snowflake(data, "emoji_id"),
+        )
 
         return cls(id=int(data["channel_id"]), description=data["description"], emoji=emoji)
 
     def to_dict(self) -> WelcomeScreenChannelPayload:
-
         result: WelcomeScreenChannelPayload = {}  # type: ignore
         result["channel_id"] = self.id
         result["description"] = self.description
@@ -133,7 +126,7 @@ class WelcomeScreen:
         self._guild = guild
         self.description: Optional[str] = data.get("description")
         self.channels: List[WelcomeScreenChannel] = [
-            WelcomeScreenChannel._from_data(data=channel, state=state, guild=guild)
+            WelcomeScreenChannel._from_data(data=channel, state=state)
             for channel in data["welcome_channels"]
         ]
 

@@ -12,12 +12,14 @@ import logging
 import re
 import threading
 import time
+from errno import ECONNRESET
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Type, Union, overload
 from urllib.parse import quote as urlquote
 
 from .. import utils
 from ..channel import PartialMessageable
 from ..errors import DiscordServerError, Forbidden, HTTPException, NotFound, WebhookTokenMissing
+from ..flags import MessageFlags
 from ..http import Route
 from ..message import Message
 from .async_ import BaseWebhook, _WebhookState, handle_message_parameters
@@ -186,7 +188,7 @@ class WebhookAdapter:
                             raise HTTPException(response, data)
 
                 except OSError as e:
-                    if attempt < 4 and e.errno in (54, 10054):
+                    if attempt < 4 and e.errno == ECONNRESET:
                         time.sleep(1 + attempt * 2)
                         continue
                     raise
@@ -584,7 +586,7 @@ class SyncWebhook(BaseWebhook):
     def partial(
         cls, id: int, token: str, *, session: Session = MISSING, bot_token: Optional[str] = None
     ) -> SyncWebhook:
-        """Creates a partial :class:`Webhook`.
+        """Creates a partial :class:`SyncWebhook`.
 
         Parameters
         ----------
@@ -603,8 +605,8 @@ class SyncWebhook(BaseWebhook):
 
         Returns
         -------
-        :class:`Webhook`
-            A partial :class:`Webhook`.
+        :class:`SyncWebhook`
+            A partial :class:`SyncWebhook`.
             A partial webhook is just a webhook object with an ID and a token.
         """
         data: WebhookPayload = {
@@ -625,7 +627,7 @@ class SyncWebhook(BaseWebhook):
     def from_url(
         cls, url: str, *, session: Session = MISSING, bot_token: Optional[str] = None
     ) -> SyncWebhook:
-        """Creates a partial :class:`Webhook` from a webhook URL.
+        """Creates a partial :class:`SyncWebhook` from a webhook URL.
 
         .. versionchanged:: 2.6
             Raises :exc:`ValueError` instead of ``InvalidArgument``.
@@ -650,8 +652,8 @@ class SyncWebhook(BaseWebhook):
 
         Returns
         -------
-        :class:`Webhook`
-            A partial :class:`Webhook`.
+        :class:`SyncWebhook`
+            A partial :class:`SyncWebhook`.
             A partial webhook is just a webhook object with an ID and a token.
         """
         m = re.search(
@@ -866,6 +868,7 @@ class SyncWebhook(BaseWebhook):
         embed: Embed = ...,
         embeds: List[Embed] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: AllowedMentions = ...,
         thread: Snowflake = ...,
         thread_name: str = ...,
@@ -886,6 +889,7 @@ class SyncWebhook(BaseWebhook):
         embed: Embed = ...,
         embeds: List[Embed] = ...,
         suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: AllowedMentions = ...,
         thread: Snowflake = ...,
         thread_name: str = ...,
@@ -905,6 +909,7 @@ class SyncWebhook(BaseWebhook):
         embed: Embed = MISSING,
         embeds: List[Embed] = MISSING,
         suppress_embeds: bool = MISSING,
+        flags: MessageFlags = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         thread: Snowflake = MISSING,
         thread_name: Optional[str] = None,
@@ -969,6 +974,16 @@ class SyncWebhook(BaseWebhook):
 
             .. versionadded:: 2.5
 
+        flags: :class:`MessageFlags`
+            The flags to set for this message.
+            Only :attr:`~MessageFlags.suppress_embeds` and :attr:`~MessageFlags.suppress_notifications`
+            are supported.
+
+            If parameter ``suppress_embeds`` is provided,
+            that will override the setting of :attr:`MessageFlags.suppress_embeds`.
+
+            .. versionadded:: 2.9
+
         wait: :class:`bool`
             Whether the server should wait before sending a response. This essentially
             means that the return type of this function changes from ``None`` to
@@ -1017,6 +1032,7 @@ class SyncWebhook(BaseWebhook):
             avatar_url=avatar_url,
             tts=tts,
             suppress_embeds=suppress_embeds,
+            flags=flags,
             file=file,
             files=files,
             embed=embed,

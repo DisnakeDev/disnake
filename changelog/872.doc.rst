@@ -1,1 +1,0 @@
-Remove documentation regarding private threads requiring boosts.

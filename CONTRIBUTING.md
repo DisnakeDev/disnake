@@ -2,6 +2,9 @@
 
 # Contributing to disnake
 
+- [Bug Reports](#good-bug-reports)
+- [Creating Pull Requests](#creating-a-pull-request)
+
 First off, thanks for taking the time to contribute. It makes the library substantially better. :+1:
 
 The following is a set of guidelines for contributing to the repository. These are mostly guidelines, not hard rules.
@@ -17,6 +20,7 @@ Generally speaking questions are better suited in our resources below.
 
 Please try your best not to create new issues in the issue tracker just to ask questions. Most of them don't belong there unless they provide value to a larger audience.
 
+---
 
 ## Good Bug Reports
 
@@ -33,6 +37,8 @@ Please be aware of the following things when filing bug reports.
 
 If the bug report is missing this information then it'll take us longer to fix the issue. We will probably ask for clarification, and barring that if no response was given then the issue will be closed.
 
+---
+
 ## Creating a Pull Request
 
 Creating a pull request is fairly simple, just make sure it focuses on a single aspect and doesn't manage to have scope creep and it's probably good to go.
@@ -41,13 +47,13 @@ Creating a pull request is fairly simple, just make sure it focuses on a single 
 
 We would greatly appreciate the code submitted to be of a consistent style with other code in disnake. This project follows PEP-8 guidelines (mostly) with a column limit of 100 characters.
 
-We use [`nox`](https://nox.thea.codes/en/stable/) for automating development tasks. Run these commands to
-install `nox` and `taskipy` as well as the required dependencies in your environment,
-and to set up [`pre-commit`](https://pre-commit.com/#quick-start) hooks.  
-Make sure you have a virtualenv activated if you don't want it to install the packages globally!
+
+We use [`PDM`](https://pdm.fming.dev/) for development. If PDM is not already installed on your system, you can follow their [installation steps here](https://pdm.fming.dev/latest/#installation) to get started.
+
+Once PDM is installed and avaliable, use the following command to initialise a virtual environment, install the necessary development dependencies, and install the [`pre-commit`](https://pre-commit.com/#quick-start) hooks.
+.
 ```
-pip install nox taskipy
-task setup_env
+pdm run setup_env
 ```
 
 The installed `pre-commit` hooks will automatically run before every commit, which will format/lint the code
@@ -60,23 +66,23 @@ are not text files, in which case exceptions can be made. These headers must exi
 documented at [https://spdx.dev/ids/](https://spdx.dev/ids/).
 
 
-### Tasks
+### Scripts
 
-To run all important checks and tests, use `nox`:
+To run all important checks and tests, use `pdm run nox`:
 ```sh
-nox -R
+pdm run nox -R
 ```
 
-You can also choose to only run a single task; run `task --list` to view all available tasks and use `task <name>` to run them.
+You can also choose to only run a single task; run `pdm run --list` to view all available scripts and use `pdm run <name>` to run them.
 
-Some notes (all of the mentioned tasks are automatically run by `nox -R`, see above):
-- If `pre-commit` hooks aren't installed, run `task lint` manually to check and fix the formatting in all files.  
+Some notes (all of the mentioned scripts are automatically run by `pdm run nox -R`, see above):
+- If `pre-commit` hooks aren't installed, run `pdm run lint` manually to check and fix the formatting in all files.  
   **Note**: If the code is formatted incorrectly, `pre-commit` will apply fixes and exit without committing the changes - just stage and commit again.
-- For type-checking, run `task pyright`. You can use `task pyright -w` to automatically re-check on every file change.  
+- For type-checking, run `pdm run pyright`. You can use `pdm run pyright -w` to automatically re-check on every file change.  
   **Note**: If you're using VSCode and pylance, it will use the same type-checking settings, which generally means that you don't necessarily have to run `pyright` separately. However, there can be version differences which may lead to different results when later run in CI on GitHub.
-- Tests can be run using `task test`. If you changed some functionality, you may have to adjust a few tests - if you added new features, it would be great if you added new tests for them as well.
+- Tests can be run using `pdm run test`. If you changed some functionality, you may have to adjust a few tests - if you added new features, it would be great if you added new tests for them as well.
 
-A PR cannot be merged as long as there are any failing tasks.
+A PR cannot be merged as long as there are any failing checks.
 
 ### Changelogs
 
@@ -90,6 +96,7 @@ We use [towncrier](https://github.com/twisted/towncrier) for managing our change
 
 If you do not meet any of these guidelines, don't fret. Chances are they will be fixed upon rebasing but please do try to meet them to remove some of the workload.
 
+---
 
 ## How do I add a new feature?
 

@@ -105,16 +105,21 @@ class WidgetMember(BaseUser):
 
         .. describe:: str(x)
 
-            Returns the widget member's `name#discriminator`.
+            Returns the widget member's name.
 
     Attributes
     ----------
     id: :class:`int`
         The member's anonymized ID.
     name: :class:`str`
-        The member's nickname (if set in the guild) or username.
+        The member's name.
     discriminator: :class:`str`
         The member's anonymized discriminator.
+
+        .. note::
+            This is being phased out by Discord; the username system is moving away from ``username#discriminator``
+            to users having a globally unique username.
+            See the `help article <https://dis.gd/app-usernames>`__ for details.
     status: :class:`Status`
         The member's status.
     activity: Optional[Union[:class:`BaseActivity`, :class:`Spotify`]]
@@ -166,8 +171,7 @@ class WidgetMember(BaseUser):
     # and instead a separate `avatar_url` field with a full url
     @property
     def avatar(self) -> Optional[Asset]:
-        """
-        Optional[:class:`Asset`]: The user's avatar.
+        """Optional[:class:`Asset`]: The user's avatar.
         The size can be chosen using :func:`Asset.with_size`, however the format is always
         static and cannot be changed through :func:`Asset.with_format` or similar methods.
         """
@@ -252,7 +256,6 @@ class WidgetSettings:
         :class:`WidgetSettings`
             The new widget settings.
         """
-
         return await self.guild.edit_widget(enabled=enabled, channel=channel, reason=reason)
 
 
@@ -288,9 +291,8 @@ class Widget:
         .. note::
 
             Due to a Discord limitation, if this data is available
-            the users will be "anonymized" with linear IDs and discriminator
-            information being incorrect. Likewise, the number of members
-            retrieved is capped.
+            the users will be "anonymized" with linear IDs.
+            Likewise, the number of members retrieved is capped.
 
     presence_count: :class:`int`
         The number of online members in the server.
