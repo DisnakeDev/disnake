@@ -25,9 +25,9 @@ from typing import (
 )
 
 import disnake
-from disnake.app_commands import ApplicationCommand, Option, SlashCommand
+from disnake.app_commands import ApplicationCommand, Option, OptionChoice, SlashCommand
 from disnake.custom_warnings import SyncWarning
-from disnake.enums import ApplicationCommandType
+from disnake.enums import ApplicationCommandType, OptionType
 from disnake.errors import HTTPException, _flatten_error_dict
 from disnake.utils import warn_deprecated
 
@@ -47,7 +47,6 @@ from .slash_core import InvokableSlashCommand, SubCommand, SubCommandGroup, slas
 if TYPE_CHECKING:
     from typing_extensions import NotRequired, ParamSpec
 
-    from disnake.app_commands import OptionChoice
     from disnake.i18n import LocalizedOptional
     from disnake.interactions import (
         ApplicationCommandInteraction,
@@ -139,7 +138,7 @@ def _format_diff(diff: _Diff) -> str:
     return "\n".join(f"| {line}" for line in lines)
 
 
-def _parse_sync_warning(exception: Exception, commands: List[ApplicationCommand]) -> str:
+def _parse_sync_warning(exception: Exception, app_commands: List[ApplicationCommand]) -> str:
     if (
         not isinstance(exception, HTTPException)
         or exception.status != 400
@@ -150,24 +149,60 @@ def _parse_sync_warning(exception: Exception, commands: List[ApplicationCommand]
     try:
         sync_warnings: List[str] = []
         for command_num, error in exception._errors.items():
-            command = commands[int(command_num)]
+            commands: List[
+                Tuple[List[int], List[str], ApplicationCommand | Option]
+            ] = _innermost_commands(app_commands[int(command_num)])
+            for command_option_path, command_name_components, command in commands:
+                command_name = " ".join(command_name_components + [command.name])
+                message = f"In /{command_name}:\n"
+                message_len = len(message)
 
-            message = f"In {command.name}:\n"
-            for key, value in error.items():
-                message = _parse_options(
-                    message,
-                    key,
-                    value,
-                    command.options if isinstance(command, SlashCommand) else [],
-                    2,
-                    "Option",
-                )
+                # If the command is nested, being a sub command or sub command group, recur down the options
+                # to find the errors pertaining to it
+                command_errors = error
+                for path in command_option_path:
+                    command_errors = command_errors.get("options", {}).get(str(path), {})
 
-            sync_warnings.append(message)
+                for key, value in command_errors.items():
+                    message = _parse_options(
+                        message,
+                        key,
+                        value,
+                        command.options if isinstance(command, (SlashCommand, Option)) else [],
+                        2,
+                    )
+
+                # If the length of the message didn't change, no need to print it
+                if len(message) != message_len:
+                    sync_warnings.append(message)
 
         return "\n".join(sync_warnings)
-    except Exception:
+    except Exception as e:
+        _log.error(e)
         return str(exception)
+
+
+def _innermost_commands(
+    command: ApplicationCommand | Option,
+    command_components: Optional[List[str]] = None,
+    path: Optional[List[int]] = None,
+):
+    """Given a command, find all the lowest level sub commands. This ensures that when we log sync errors, we don't
+    include logs for parent commands and sub command groups.
+    """
+    command_components = command_components or []
+    path = path or []
+
+    innermost_objects = [(path, command_components, command)]
+    if not (isinstance(command, (SlashCommand, Option)) and command.options):
+        return innermost_objects
+
+    for idx, option in enumerate(command.options):
+        if option.type in [OptionType.sub_command, OptionType.sub_command_group]:
+            innermost_objects.extend(
+                _innermost_commands(option, command_components + [command.name], path + [idx])
+            )
+    return innermost_objects
 
 
 def _parse_options(
@@ -176,14 +211,7 @@ def _parse_options(
     value: Any,
     options: Union[List[Option], List[OptionChoice]],
     indent_level: int,
-    metadata: str,
 ):
-
-    # When we are parsing an option or choice, the metadata param will tell us where the `options` came from
-    # This metadata is attached to the message to show if the key is an Option or Choice
-    # We use new_metadata for when we parse a non-decimal key, since we need to carry this metadata
-    # over to the next iteration.
-
     # It is helpful to know the error dict looks something like
     # {
     #     "options": {
@@ -199,17 +227,28 @@ def _parse_options(
 
     new_metadata = ""
     if key.isdecimal():
-        new_metadata = f" ({metadata} {key})"
         option = options[int(key)]
+        option_type = "Choice" if isinstance(option, OptionChoice) else "Option"
+        new_metadata = f" ({option_type} {key})"
         key = option.name
 
         if isinstance(option, Option):
             if option.options:
-                metadata = "Option"
                 options = option.options
             elif option.choices:
-                metadata = "Choice"
                 options = option.choices
+    # When the key isn't a number, we print either "options" or "choices". We only want to add "options" if one
+    # of the options is an actual option, not a sub command or sub command group.
+    elif (
+        key == "options"
+        and options
+        and all(
+            isinstance(o, Option)
+            and o.type in [OptionType.sub_command, OptionType.sub_command_group]
+            for o in options
+        )
+    ):
+        return message
 
     message += f"{' ' * indent_level}{key}{new_metadata}:\n"
     indent_level += 2
@@ -218,7 +257,7 @@ def _parse_options(
         return message + f"{' ' * indent_level}{_flatten_error_dict({key: value}).get(key)}\n"
 
     for k, v in value.items():
-        message = _parse_options(message, k, v, options, indent_level, metadata)
+        message = _parse_options(message, k, v, options, indent_level)
 
     return message
 
@@ -909,7 +948,9 @@ class InteractionBotBase(CommonBotBase):
                 except Exception as e:
                     sync_warnings = _parse_sync_warning(e, to_send)
                     warnings.warn(
-                        f"Failed to overwrite global commands due to \n{sync_warnings}", SyncWarning, stacklevel=1
+                        f"Failed to overwrite global commands due to \n{sync_warnings}",
+                        SyncWarning,
+                        stacklevel=1,
                     )
 
         # Same process but for each specified guild individually.

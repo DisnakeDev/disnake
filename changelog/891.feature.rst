@@ -1,2 +1,1 @@
-Adds :attr:`HTTPException._errors` for parsing errors.
-Adds :meth:`_parse_sync_warning` and :meth:`_parse_options` more informative errors for command sync warnings.
+Improve logging for command sync warnings.
