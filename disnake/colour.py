@@ -304,5 +304,23 @@ class Colour:
         """
         return cls(0xFEE75C)
 
+    @classmethod
+    def light_embed(cls) -> Self:
+        """A factory method that returns a :class:`Colour` with a value of ``0xF2F3F5``.
+        This matches the embed background colour on Discord's light theme.
+
+        .. versionadded:: 2.10
+        """
+        return cls(0xF2F3F5)
+
+    @classmethod
+    def dark_embed(cls) -> Self:
+        """A factory method that returns a :class:`Colour` with a value of ``0x2B2D31``.
+        This matches the embed background colour on Discord's dark theme.
+
+        .. versionadded:: 2.10
+        """
+        return cls(0x2B2D31)
+
 
 Color = Colour
