@@ -887,7 +887,6 @@ class GuildChannel(ABC):
         send_messages_in_threads: Optional[bool] = ...,
         send_tts_messages: Optional[bool] = ...,
         send_voice_messages: Optional[bool] = ...,
-        set_voice_channel_status: Optional[bool] = ...,
         speak: Optional[bool] = ...,
         start_embedded_activities: Optional[bool] = ...,
         stream: Optional[bool] = ...,

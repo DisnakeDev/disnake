@@ -197,7 +197,6 @@ class Permissions(BaseFlags):
         send_messages_in_threads: bool = ...,
         send_tts_messages: bool = ...,
         send_voice_messages: bool = ...,
-        set_voice_channel_status: bool = ...,
         speak: bool = ...,
         start_embedded_activities: bool = ...,
         stream: bool = ...,
@@ -320,7 +319,7 @@ class Permissions(BaseFlags):
             Added :attr:`use_soundboard` and :attr:`send_voice_messages` permissions.
 
         .. versionchanged:: 2.10
-            Added :attr:`use_clyde_ai`, :attr:`set_voice_channel_status` permissions.
+            Added :attr:`use_clyde_ai` permission.
         """
         instance = cls.all()
         instance.update(
@@ -436,9 +435,6 @@ class Permissions(BaseFlags):
 
         .. versionchanged:: 2.9
             Added :attr:`use_soundboard` and :attr:`use_external_sounds` permissions.
-
-        .. versionchanged:: 2.10
-            Added :attr:`set_voice_channel_status` permission.
         """
         return cls(
             connect=True,
@@ -452,7 +448,6 @@ class Permissions(BaseFlags):
             mute_members=True,
             deafen_members=True,
             move_members=True,
-            set_voice_channel_status=True,
         )
 
     @classmethod
@@ -578,7 +573,6 @@ class Permissions(BaseFlags):
         send_messages_in_threads: bool = ...,
         send_tts_messages: bool = ...,
         send_voice_messages: bool = ...,
-        set_voice_channel_status: bool = ...,
         speak: bool = ...,
         start_embedded_activities: bool = ...,
         stream: bool = ...,
@@ -1017,14 +1011,6 @@ class Permissions(BaseFlags):
         """
         return 1 << 47
 
-    @flag_value
-    def set_voice_channel_status(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can set a voice channel's status.
-
-        .. versionadded:: 2.10
-        """
-        return 1 << 48
-
 
 def _augment_from_permissions(cls):
     cls.VALID_NAMES = set(Permissions.VALID_FLAGS)
@@ -1130,7 +1116,6 @@ class PermissionOverwrite:
         send_messages_in_threads: Optional[bool]
         send_tts_messages: Optional[bool]
         send_voice_messages: Optional[bool]
-        set_voice_channel_status: Optional[bool]
         speak: Optional[bool]
         start_embedded_activities: Optional[bool]
         stream: Optional[bool]
@@ -1196,7 +1181,6 @@ class PermissionOverwrite:
         send_messages_in_threads: Optional[bool] = ...,
         send_tts_messages: Optional[bool] = ...,
         send_voice_messages: Optional[bool] = ...,
-        set_voice_channel_status: Optional[bool] = ...,
         speak: Optional[bool] = ...,
         start_embedded_activities: Optional[bool] = ...,
         stream: Optional[bool] = ...,
@@ -1329,7 +1313,6 @@ class PermissionOverwrite:
         send_messages_in_threads: Optional[bool] = ...,
         send_tts_messages: Optional[bool] = ...,
         send_voice_messages: Optional[bool] = ...,
-        set_voice_channel_status: Optional[bool] = ...,
         speak: Optional[bool] = ...,
         start_embedded_activities: Optional[bool] = ...,
         stream: Optional[bool] = ...,
