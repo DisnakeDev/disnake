@@ -1,1 +1,1 @@
-Add :attr:`Permissions.use_clyde_ai` and :attr:`Permissions.set_voice_channel_status`.
+Add :attr:`Permissions.use_clyde_ai`.
