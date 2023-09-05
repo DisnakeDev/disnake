@@ -91,6 +91,7 @@ else:
 T = TypeVar("T", bound=Any)
 TypeT = TypeVar("TypeT", bound=Type[Any])
 CallableT = TypeVar("CallableT", bound=Callable[..., Any])
+BotT = TypeVar("BotT", bound="disnake.Client", covariant=True)
 
 __all__ = (
     "Range",
@@ -520,11 +521,11 @@ class ParamInfo:
 
     def __init__(
         self,
-        default: Union[Any, Callable[[ApplicationCommandInteraction], Any]] = ...,
+        default: Union[Any, Callable[[ApplicationCommandInteraction[BotT]], Any]] = ...,
         *,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        converter: Optional[Callable[[ApplicationCommandInteraction, Any], Any]] = None,
+        converter: Optional[Callable[[ApplicationCommandInteraction[BotT], Any], Any]] = None,
         convert_default: bool = False,
         autocomplete: Optional[AnyAutocompleter] = None,
         choices: Optional[Choices] = None,
@@ -911,6 +912,7 @@ def isolate_self(
         parametersl.pop(0)
     if parametersl:
         annot = parametersl[0].annotation
+        annot = get_origin(annot) or annot
         if issubclass_(annot, ApplicationCommandInteraction) or annot is inspect.Parameter.empty:
             inter_param = parameters.pop(parametersl[0].name)
 
@@ -982,7 +984,9 @@ def collect_params(
             injections[parameter.name] = default
         elif parameter.annotation in Injection._registered:
             injections[parameter.name] = Injection._registered[parameter.annotation]
-        elif issubclass_(parameter.annotation, ApplicationCommandInteraction):
+        elif issubclass_(
+            get_origin(parameter.annotation) or parameter.annotation, ApplicationCommandInteraction
+        ):
             if inter_param is None:
                 inter_param = parameter
             else:
@@ -1116,21 +1120,24 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
         if param.autocomplete:
             command.autocompleters[param.name] = param.autocomplete
 
-    if issubclass_(sig.parameters[inter_param].annotation, disnake.GuildCommandInteraction):
+    if issubclass_(
+        get_origin(annot := sig.parameters[inter_param].annotation) or annot,
+        disnake.GuildCommandInteraction,
+    ):
         command._guild_only = True
 
     return [param.to_option() for param in params]
 
 
 def Param(
-    default: Union[Any, Callable[[ApplicationCommandInteraction], Any]] = ...,
+    default: Union[Any, Callable[[ApplicationCommandInteraction[BotT]], Any]] = ...,
     *,
     name: LocalizedOptional = None,
     description: LocalizedOptional = None,
     choices: Optional[Choices] = None,
-    converter: Optional[Callable[[ApplicationCommandInteraction, Any], Any]] = None,
+    converter: Optional[Callable[[ApplicationCommandInteraction[BotT], Any], Any]] = None,
     convert_defaults: bool = False,
-    autocomplete: Optional[Callable[[ApplicationCommandInteraction, str], Any]] = None,
+    autocomplete: Optional[Callable[[ApplicationCommandInteraction[BotT], str], Any]] = None,
     channel_types: Optional[List[ChannelType]] = None,
     lt: Optional[float] = None,
     le: Optional[float] = None,

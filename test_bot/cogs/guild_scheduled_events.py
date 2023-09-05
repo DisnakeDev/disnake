@@ -13,14 +13,17 @@ class GuildScheduledEvents(commands.Cog):
 
     @commands.slash_command()
     async def fetch_event(
-        self, inter: disnake.GuildCommandInteraction, id: commands.LargeInt
+        self, inter: disnake.GuildCommandInteraction[commands.Bot], id: commands.LargeInt
     ) -> None:
         gse = await inter.guild.fetch_scheduled_event(id)
         await inter.response.send_message(str(gse.image))
 
     @commands.slash_command()
     async def edit_event(
-        self, inter: disnake.GuildCommandInteraction, id: commands.LargeInt, new_image: bool
+        self,
+        inter: disnake.GuildCommandInteraction[commands.Bot],
+        id: commands.LargeInt,
+        new_image: bool,
     ) -> None:
         await inter.response.defer()
         gse = await inter.guild.fetch_scheduled_event(id)
@@ -33,7 +36,10 @@ class GuildScheduledEvents(commands.Cog):
 
     @commands.slash_command()
     async def create_event(
-        self, inter: disnake.GuildCommandInteraction, name: str, channel: disnake.VoiceChannel
+        self,
+        inter: disnake.GuildCommandInteraction[commands.Bot],
+        name: str,
+        channel: disnake.VoiceChannel,
     ) -> None:
         image = disnake.File("./assets/banner.png")
         gse = await inter.guild.create_scheduled_event(
