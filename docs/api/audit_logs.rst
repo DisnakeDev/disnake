@@ -936,7 +936,7 @@ AuditLogAction
         When this is the action, the type of :attr:`~AuditLogEntry.extra` is
         set to an unspecified proxy object with two attributes:
 
-        - ``delete_members_days``: An integer specifying how far the prune was.
+        - ``delete_member_days``: An integer specifying how far the prune was.
         - ``members_removed``: An integer specifying how many members were removed.
 
         When this is the action, :attr:`~AuditLogEntry.changes` is empty.
