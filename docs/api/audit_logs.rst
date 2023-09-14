@@ -42,17 +42,17 @@ AuditLogChanges
         :attr:`~AuditLogEntry.category`\, the data retrieved by this
         attribute differs:
 
-        +----------------------------------------+---------------------------------------------------+
-        |                Category                |                    Description                    |
-        +----------------------------------------+---------------------------------------------------+
-        | :attr:`~AuditLogActionCategory.create` | All attributes are set to ``None``.               |
-        +----------------------------------------+---------------------------------------------------+
-        | :attr:`~AuditLogActionCategory.delete` | All attributes are set the value before deletion. |
-        +----------------------------------------+---------------------------------------------------+
-        | :attr:`~AuditLogActionCategory.update` | All attributes are set the value before updating. |
-        +----------------------------------------+---------------------------------------------------+
-        | ``None``                               | No attributes are set.                            |
-        +----------------------------------------+---------------------------------------------------+
+        +----------------------------------------+------------------------------------------------------+
+        |                Category                |                    Description                       |
+        +----------------------------------------+------------------------------------------------------+
+        | :attr:`~AuditLogActionCategory.create` | All attributes are set to ``None``.                  |
+        +----------------------------------------+------------------------------------------------------+
+        | :attr:`~AuditLogActionCategory.delete` | All attributes are set to the value before deletion. |
+        +----------------------------------------+------------------------------------------------------+
+        | :attr:`~AuditLogActionCategory.update` | All attributes are set to the value before updating. |
+        +----------------------------------------+------------------------------------------------------+
+        | ``None``                               | No attributes are set.                               |
+        +----------------------------------------+------------------------------------------------------+
 
     .. attribute:: after
 
@@ -62,17 +62,17 @@ AuditLogChanges
         :attr:`~AuditLogEntry.category`\, the data retrieved by this
         attribute differs:
 
-        +----------------------------------------+--------------------------------------------------+
-        |                Category                |                   Description                    |
-        +----------------------------------------+--------------------------------------------------+
-        | :attr:`~AuditLogActionCategory.create` | All attributes are set to the created value      |
-        +----------------------------------------+--------------------------------------------------+
-        | :attr:`~AuditLogActionCategory.delete` | All attributes are set to ``None``               |
-        +----------------------------------------+--------------------------------------------------+
-        | :attr:`~AuditLogActionCategory.update` | All attributes are set the value after updating. |
-        +----------------------------------------+--------------------------------------------------+
-        | ``None``                               | No attributes are set.                           |
-        +----------------------------------------+--------------------------------------------------+
+        +----------------------------------------+-----------------------------------------------------+
+        |                Category                |                   Description                       |
+        +----------------------------------------+-----------------------------------------------------+
+        | :attr:`~AuditLogActionCategory.create` | All attributes are set to the created value.        |
+        +----------------------------------------+-----------------------------------------------------+
+        | :attr:`~AuditLogActionCategory.delete` | All attributes are set to ``None``.                 |
+        +----------------------------------------+-----------------------------------------------------+
+        | :attr:`~AuditLogActionCategory.update` | All attributes are set to the value after updating. |
+        +----------------------------------------+-----------------------------------------------------+
+        | ``None``                               | No attributes are set.                              |
+        +----------------------------------------+-----------------------------------------------------+
 
 AuditLogDiff
 ~~~~~~~~~~~~
