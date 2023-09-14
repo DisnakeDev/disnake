@@ -514,7 +514,8 @@ class _AuditLogProxyKickOrMemberRoleAction:
 class AuditLogEntry(Hashable):
     """Represents an Audit Log entry.
 
-    You retrieve these via :meth:`Guild.audit_logs`.
+    You can retrieve these via :meth:`Guild.audit_logs`,
+    or via the :func:`on_audit_log_entry_create` event.
 
     .. container:: operations
 
