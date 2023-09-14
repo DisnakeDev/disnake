@@ -97,7 +97,7 @@ AuditLogDiff
 
         .. describe:: iter(diff)
 
-            Returns an iterator over (attribute, value) tuple of this diff.
+            Returns an iterator over ``(attribute, value)`` tuples of this diff.
 
     .. attribute:: name
 
