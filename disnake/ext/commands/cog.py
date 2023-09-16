@@ -754,21 +754,11 @@ class Cog(metaclass=CogMeta):
         for index, command in enumerate(self.__cog_app_commands__):
             command.cog = self
             try:
-                if isinstance(command, InvokableSlashCommand):
-                    bot.add_slash_command(command)
-                elif isinstance(command, InvokableUserCommand):
-                    bot.add_user_command(command)
-                elif isinstance(command, InvokableMessageCommand):
-                    bot.add_message_command(command)
+                bot.add_app_command(command)
             except Exception:
                 # undo our additions
                 for to_undo in self.__cog_app_commands__[:index]:
-                    if isinstance(to_undo, InvokableSlashCommand):
-                        bot.remove_slash_command(to_undo.name)
-                    elif isinstance(to_undo, InvokableUserCommand):
-                        bot.remove_user_command(to_undo.name)
-                    elif isinstance(to_undo, InvokableMessageCommand):
-                        bot.remove_message_command(to_undo.name)
+                    bot.remove_app_command(to_undo.body.type, to_undo.name, to_undo.guild_ids)
                 raise
 
         if not hasattr(self.cog_load.__func__, "__cog_special_method__"):
@@ -841,12 +831,9 @@ class Cog(metaclass=CogMeta):
                     bot.remove_command(command.name)  # type: ignore
 
             for app_command in self.__cog_app_commands__:
-                if isinstance(app_command, InvokableSlashCommand):
-                    bot.remove_slash_command(app_command.name)
-                elif isinstance(app_command, InvokableUserCommand):
-                    bot.remove_user_command(app_command.name)
-                elif isinstance(app_command, InvokableMessageCommand):
-                    bot.remove_message_command(app_command.name)
+                bot.remove_app_command(
+                    app_command.body.type, app_command.name, app_command.guild_ids
+                )
 
             for name, method_name in self.__cog_listeners__:
                 bot.remove_listener(getattr(self, method_name), name)
