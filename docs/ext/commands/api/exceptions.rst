@@ -186,6 +186,9 @@ Exceptions
 .. autoexception:: CommandRegistrationError
     :members:
 
+.. autoexception:: AppCommandRegistrationError
+    :members:
+
 
 Exception Hierarchy
 ~~~~~~~~~~~~~~~~~~~

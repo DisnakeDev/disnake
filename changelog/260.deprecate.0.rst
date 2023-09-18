@@ -1,0 +1,1 @@
+|commands| :attr:`InteractionBotBase.all_slash_commands` is deprecated.

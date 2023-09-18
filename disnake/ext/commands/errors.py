@@ -1023,6 +1023,7 @@ class CommandRegistrationError(ClientException):
         type_ = "alias" if alias_conflict else "command"
         super().__init__(f"The {type_} {name} is already an existing command or alias.")
 
+
 # we inherit CommandRegistrationError for backwards compatibility,
 # because this error replaced CommandRegistrationError in several places
 class AppCommandRegistrationError(CommandRegistrationError):

@@ -1,0 +1,1 @@
+|commands| Add :meth:`InteractionBotBase.remove_app_command`.

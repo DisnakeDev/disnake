@@ -1,0 +1,1 @@
+|commands| :meth:`InteractionBotBase.remove_slash_command` is deprecated.
