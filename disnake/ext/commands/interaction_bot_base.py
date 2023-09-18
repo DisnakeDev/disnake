@@ -236,7 +236,6 @@ class InteractionBotBase(CommonBotBase):
         self._after_message_command_invoke = None
 
         self.all_app_commands: Dict[AppCmdIndex, InvokableApplicationCommand] = {}
-        # TODO: add .all_xxx_commands properties with deprecation warnings
 
     @disnake.utils.copy_doc(disnake.Client.login)
     async def login(self, token: str) -> None:
@@ -286,6 +285,48 @@ class InteractionBotBase(CommonBotBase):
             cmd for cmd in self.all_app_commands.values() if isinstance(cmd, InvokableMessageCommand)
         )
 
+    @property
+    def all_slash_commands(self) -> Dict[str, InvokableSlashCommand]:
+        # no docstring because it was an attribute and now it's deprecated
+        warn_deprecated(
+            "all_slash_commands is deprecated and will be removed in a future version. "
+            "Use all_app_commands as a replacement.",
+            stacklevel=3,
+        )
+        return {
+            cmd.name: cmd
+            for cmd in self.all_app_commands.values()
+            if isinstance(cmd, InvokableSlashCommand)
+        }
+
+    @property
+    def all_user_commands(self) -> Dict[str, InvokableUserCommand]:
+        # no docstring because it was an attribute and now it's deprecated
+        warn_deprecated(
+            "all_user_commands is deprecated and will be removed in a future version. "
+            "Use all_app_commands as a replacement.",
+            stacklevel=3,
+        )
+        return {
+            cmd.name: cmd
+            for cmd in self.all_app_commands.values()
+            if isinstance(cmd, InvokableUserCommand)
+        }
+
+    @property
+    def all_message_commands(self) -> Dict[str, InvokableMessageCommand]:
+        # no docstring because it was an attribute and now it's deprecated
+        warn_deprecated(
+            "all_message_commands is deprecated and will be removed in a future version. "
+            "Use all_app_commands as a replacement.",
+            stacklevel=3,
+        )
+        return {
+            cmd.name: cmd
+            for cmd in self.all_app_commands.values()
+            if isinstance(cmd, InvokableMessageCommand)
+        }
+
     def add_app_command(self, app_command: InvokableApplicationCommand) -> None:
         """Adds an :class:`InvokableApplicationCommand` into the internal list of app commands.
 
@@ -327,7 +368,9 @@ class InteractionBotBase(CommonBotBase):
 
             # localization may be called multiple times for the same command but it's harmless
             app_command.body.localize(self.i18n)
-
+            # note that we're adding the same command object for each guild_id
+            # this ensures that any changes that happen to app_command after add_app_command
+            # (such as hook attachments or permission modifications) apply properly
             self.all_app_commands[cmd_index] = app_command
 
     def add_slash_command(self, slash_command: InvokableSlashCommand) -> None:
@@ -428,11 +471,12 @@ class InteractionBotBase(CommonBotBase):
         """
 
         if guild_ids is None:
-            extended_guild_ids = (None,)
             # a global command may end up being a local command if test_guilds were specified
             # so we should remove this "global" command from each test guild
             if self._test_guilds is not None:
-                extended_guild_ids += self._test_guilds
+                extended_guild_ids = self._test_guilds
+            else:
+                extended_guild_ids = (None,)
         else:
             extended_guild_ids = guild_ids
 
@@ -442,6 +486,7 @@ class InteractionBotBase(CommonBotBase):
             cmd = self.all_app_commands.pop(cmd_index, None)
             if result is None:
                 result = cmd
+
         return result
 
     def _emulate_old_app_command_remove(self, cmd_type: ApplicationCommandType, name: str) -> Any:
@@ -552,7 +597,7 @@ class InteractionBotBase(CommonBotBase):
             if command is None:
                 return None
             return _match_subcommand_chain(command, chain)  # type: ignore
-
+        # this is mostly for backwards compatibility, as previously guild_id arg didn't exist
         for command in self.all_app_commands.values():
             if not isinstance(command, InvokableSlashCommand):
                 continue
@@ -587,7 +632,7 @@ class InteractionBotBase(CommonBotBase):
             if command is None:
                 return None
             return command  # type: ignore
-
+        # this is mostly for backwards compatibility, as previously guild_id arg didn't exist
         for command in self.all_app_commands.values():
             if isinstance(command, InvokableUserCommand) and command.name == name:
                 return command
@@ -619,7 +664,7 @@ class InteractionBotBase(CommonBotBase):
             if command is None:
                 return None
             return command  # type: ignore
-
+        # this is mostly for backwards compatibility, as previously guild_id arg didn't exist
         for command in self.all_app_commands.values():
             if isinstance(command, InvokableMessageCommand) and command.name == name:
                 return command
@@ -875,9 +920,15 @@ class InteractionBotBase(CommonBotBase):
     # command synchronisation
 
     def _ordered_unsynced_commands(
-        self, test_guilds: Optional[Sequence[int]] = None
+        self, test_guilds: Optional[Sequence[int]] = MISSING
     ) -> Tuple[List[ApplicationCommand], Dict[int, List[ApplicationCommand]]]:
-        # TODO: deprecation warning for the test_guilds arg
+        if test_guilds is not MISSING:
+            warn_deprecated(
+                "Argument test_guilds of _ordered_unsynced_commands is deprecated "
+                "and will be removed in a future version.",
+                stacklevel=3,
+            )
+
         global_cmds = []
         guilds = {}
 
