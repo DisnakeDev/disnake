@@ -267,25 +267,25 @@ class InteractionBotBase(CommonBotBase):
     @property
     def slash_commands(self) -> Set[InvokableSlashCommand]:
         """Set[:class:`InvokableSlashCommand`]: A set of all slash commands the bot has."""
-        return set(
+        return {
             cmd for cmd in self.all_app_commands.values() if isinstance(cmd, InvokableSlashCommand)
-        )
+        }
 
     @property
     def user_commands(self) -> Set[InvokableUserCommand]:
         """Set[:class:`InvokableUserCommand`]: A set of all user commands the bot has."""
-        return set(
+        return {
             cmd for cmd in self.all_app_commands.values() if isinstance(cmd, InvokableUserCommand)
-        )
+        }
 
     @property
     def message_commands(self) -> Set[InvokableMessageCommand]:
         """Set[:class:`InvokableMessageCommand`]: A set of all message commands the bot has."""
-        return set(
+        return {
             cmd
             for cmd in self.all_app_commands.values()
             if isinstance(cmd, InvokableMessageCommand)
-        )
+        }
 
     @property
     def all_slash_commands(self) -> Dict[str, InvokableSlashCommand]:
@@ -348,7 +348,6 @@ class InteractionBotBase(CommonBotBase):
         TypeError
             The app command passed is not an instance of :class:`InvokableApplicationCommand`.
         """
-
         if not isinstance(self, disnake.Client):
             raise NotImplementedError("This method is only usable in disnake.Client subclasses")
 
@@ -475,7 +474,6 @@ class InteractionBotBase(CommonBotBase):
         Optional[:class:`InvokableApplicationCommand`]
             The app command that was removed. If the key data was not valid then ``None`` is returned instead.
         """
-
         if guild_ids is None:
             # a global command may end up being a local command if test_guilds were specified
             # so we should remove this "global" command from each test guild
