@@ -350,8 +350,8 @@ class InteractionBotBase(CommonBotBase):
         if not isinstance(self, disnake.Client):
             raise NotImplementedError("This method is only usable in disnake.Client subclasses")
 
-        if not isinstance(slash_command, InvokableSlashCommand):
-            raise TypeError("The slash_command passed must be an instance of InvokableSlashCommand")
+        if not isinstance(app_command, InvokableApplicationCommand):
+            raise TypeError("The app_command passed must be an instance of InvokableApplicationCommand")
 
         if app_command.guild_ids is None:
             # if test_guilds are specified then we add the same command for each test guild
