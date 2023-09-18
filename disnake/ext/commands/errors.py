@@ -1045,7 +1045,9 @@ class AppCommandRegistrationError(CommandRegistrationError):
         or ``None`` if it was a global command.
     """
 
-    def __init__(self, cmd_type: ApplicationCommandType, name: str, guild_id: Optional[int]) -> None:
+    def __init__(
+        self, cmd_type: ApplicationCommandType, name: str, guild_id: Optional[int]
+    ) -> None:
         self.cmd_type: ApplicationCommandType = cmd_type
         self.name: str = name
         self.guild_id: Optional[int] = guild_id

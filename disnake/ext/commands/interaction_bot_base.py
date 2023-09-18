@@ -282,7 +282,9 @@ class InteractionBotBase(CommonBotBase):
     def message_commands(self) -> Set[InvokableMessageCommand]:
         """Set[:class:`InvokableMessageCommand`]: A set of all message commands the bot has."""
         return set(
-            cmd for cmd in self.all_app_commands.values() if isinstance(cmd, InvokableMessageCommand)
+            cmd
+            for cmd in self.all_app_commands.values()
+            if isinstance(cmd, InvokableMessageCommand)
         )
 
     @property
@@ -351,7 +353,9 @@ class InteractionBotBase(CommonBotBase):
             raise NotImplementedError("This method is only usable in disnake.Client subclasses")
 
         if not isinstance(app_command, InvokableApplicationCommand):
-            raise TypeError("The app_command passed must be an instance of InvokableApplicationCommand")
+            raise TypeError(
+                "The app_command passed must be an instance of InvokableApplicationCommand"
+            )
 
         if app_command.guild_ids is None:
             # if test_guilds are specified then we add the same command for each test guild
@@ -364,7 +368,9 @@ class InteractionBotBase(CommonBotBase):
                 type=app_command.body.type, name=app_command.name, guild_id=guild_id
             )
             if cmd_index in self.all_app_commands:
-                raise AppCommandRegistrationError(cmd_index.type, cmd_index.name, cmd_index.guild_id)
+                raise AppCommandRegistrationError(
+                    cmd_index.type, cmd_index.name, cmd_index.guild_id
+                )
 
             # localization may be called multiple times for the same command but it's harmless
             app_command.body.localize(self.i18n)
@@ -625,9 +631,7 @@ class InteractionBotBase(CommonBotBase):
             The user command that was requested. If not found, returns ``None``.
         """
         if guild_id is not MISSING:
-            cmd_index = AppCmdIndex(
-                type=ApplicationCommandType.user, name=name, guild_id=guild_id
-            )
+            cmd_index = AppCmdIndex(type=ApplicationCommandType.user, name=name, guild_id=guild_id)
             command = self.all_app_commands.get(cmd_index)
             if command is None:
                 return None
