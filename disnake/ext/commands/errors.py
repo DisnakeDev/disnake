@@ -1031,13 +1031,13 @@ class AppCommandRegistrationError(CommandRegistrationError):
     because a command with the same key already exists.
     A key is determined by command type, name, and guild_id.
 
-    This inherits from :exc:`disnake.CommandRegistrationError`
+    This inherits from :exc:`CommandRegistrationError`
 
     .. versionadded:: 2.10
 
     Attributes
     ----------
-    cmd_type: :class:`ApplicationCommandType`
+    cmd_type: :class:`disnake.ApplicationCommandType`
         The command type.
     name: :class:`str`
         The command name.

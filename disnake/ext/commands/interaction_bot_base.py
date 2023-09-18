@@ -462,7 +462,7 @@ class InteractionBotBase(CommonBotBase):
 
         Parameters
         ----------
-        cmd_type: :class:`ApplicationCommandType`
+        cmd_type: :class:`disnake.ApplicationCommandType`
             The type of the app command to remove.
         name: :class:`str`
             The name of the app command to remove.
