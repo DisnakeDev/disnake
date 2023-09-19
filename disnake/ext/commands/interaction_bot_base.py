@@ -149,7 +149,7 @@ def _format_diff(diff: _Diff) -> str:
 def _match_subcommand_chain(
     command: InvokableSlashCommand, chain: List[str]
 ) -> Union[InvokableSlashCommand, SubCommand, SubCommandGroup, None]:
-    """This is an internal function that returns a subcommand with a route matching the chain.
+    """An internal function that returns a subcommand with a route matching the chain.
     If there's no match then ``None`` is returned.
     """
     if command.name != chain[0]:
