@@ -149,6 +149,9 @@ def _format_diff(diff: _Diff) -> str:
 def _match_subcommand_chain(
     command: InvokableSlashCommand, chain: List[str]
 ) -> Union[InvokableSlashCommand, SubCommand, SubCommandGroup, None]:
+    """This is an internal function that returns a subcommand with a route matching the chain.
+    If there's no match then ``None`` is returned.
+    """
     if command.name != chain[0]:
         return None
     if len(chain) == 1:
@@ -332,7 +335,8 @@ class InteractionBotBase(CommonBotBase):
     def add_app_command(self, app_command: InvokableApplicationCommand) -> None:
         """Adds an :class:`InvokableApplicationCommand` into the internal list of app commands.
 
-        This is usually not called, instead shortcut decorators are used.
+        This is usually not called, instead shortcut decorators are used, such as
+        :meth:`.slash_command`, :meth:`.user_command` or :meth:`.message_command`.
 
         .. versionadded:: 2.10
 
@@ -583,6 +587,9 @@ class InteractionBotBase(CommonBotBase):
         ------
         TypeError
             The name is not a string.
+        ValueError
+            Parameter ``guild_id`` was not provided in a case where different slash commands
+            have the same name but different guild_ids.
 
         Returns
         -------
@@ -601,13 +608,28 @@ class InteractionBotBase(CommonBotBase):
             if command is None:
                 return None
             return _match_subcommand_chain(command, chain)  # type: ignore
+
         # this is mostly for backwards compatibility, as previously guild_id arg didn't exist
+        result = None
         for command in self.all_app_commands.values():
             if not isinstance(command, InvokableSlashCommand):
                 continue
-            result = _match_subcommand_chain(command, chain)
-            if result is not None:
-                return result
+            chain_match = _match_subcommand_chain(command, chain)
+            if chain_match is None:
+                continue
+            if result is None:
+                result = chain_match
+                continue
+            # we should check whether there's an ambiguity in command search
+            result_guild_ids = (result.root_parent or result).guild_ids
+            match_guild_ids = (chain_match.root_parent or chain_match).guild_ids
+            if result_guild_ids != match_guild_ids:
+                raise ValueError(
+                    "Argument guild_id must be provided if there're different slash commands "
+                    "with the same name but different guilds or one of them is global."
+                )
+
+        return result
 
     def get_user_command(
         self, name: str, guild_id: Optional[int] = MISSING
@@ -623,6 +645,12 @@ class InteractionBotBase(CommonBotBase):
             The guild ID corresponding to the user command or ``None`` if it's a global command.
             If this is not specified then the first match is returned instead.
 
+        Raises
+        ------
+        ValueError
+            Parameter ``guild_id`` was not provided in a case where different user commands
+            have the same name but different guild_ids.
+
         Returns
         -------
         Optional[:class:`InvokableUserCommand`]
@@ -635,9 +663,20 @@ class InteractionBotBase(CommonBotBase):
                 return None
             return command  # type: ignore
         # this is mostly for backwards compatibility, as previously guild_id arg didn't exist
+        result = None
         for command in self.all_app_commands.values():
-            if isinstance(command, InvokableUserCommand) and command.name == name:
-                return command
+            if not isinstance(command, InvokableUserCommand) or command.name != name:
+                continue
+            if result is None:
+                result = command
+            # we should check whether there's an ambiguity in command search
+            elif result.guild_ids != command.guild_ids:
+                raise ValueError(
+                    "Argument guild_id must be provided if there're different user commands "
+                    "with the same name but different guilds or one of them is global."
+                )
+
+        return result
 
     def get_message_command(
         self, name: str, guild_id: Optional[int] = MISSING
@@ -653,6 +692,12 @@ class InteractionBotBase(CommonBotBase):
             The guild ID corresponding to the message command or ``None`` if it's a global command.
             If this is not specified then the first match is returned instead.
 
+        Raises
+        ------
+        ValueError
+            Parameter ``guild_id`` was not provided in a case where different message commands
+            have the same name but different guild_ids.
+
         Returns
         -------
         Optional[:class:`InvokableMessageCommand`]
@@ -667,9 +712,20 @@ class InteractionBotBase(CommonBotBase):
                 return None
             return command  # type: ignore
         # this is mostly for backwards compatibility, as previously guild_id arg didn't exist
+        result = None
         for command in self.all_app_commands.values():
-            if isinstance(command, InvokableMessageCommand) and command.name == name:
-                return command
+            if not isinstance(command, InvokableMessageCommand) or command.name != name:
+                continue
+            if result is None:
+                result = command
+            # we should check whether there's an ambiguity in command search
+            elif result.guild_ids != command.guild_ids:
+                raise ValueError(
+                    "Argument guild_id must be provided if there're different message commands "
+                    "with the same name but different guilds or one of them is global."
+                )
+
+        return result
 
     def slash_command(
         self,
