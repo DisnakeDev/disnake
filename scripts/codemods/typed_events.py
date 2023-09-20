@@ -126,11 +126,10 @@ class EventTypings(codemod.VisitorBasedCodemodCommand):
         new_overload = new_overload.with_changes(returns=cst.Annotation(new_annotation))
 
         # set `self` annotation as a workaround for overloads in subclasses
-        if event_data.bot:
-            self_type = "AnyBotT" if "AnyBotT" in new_annotation_str else "AnyBot"  # fun.
+        if event_data.self_type:
             new_overload = new_overload.with_deep_changes(
                 get_param(new_overload, "self"),
-                annotation=cst.Annotation(cst.Name(self_type)),
+                annotation=cst.Annotation(cst.Name(event_data.self_type)),
             )
 
         return new_overload

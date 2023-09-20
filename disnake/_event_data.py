@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from .enums import Event
 
@@ -12,17 +12,17 @@ class EventData:
         self,
         *,
         arg_types: List[str],
-        bot: bool = False,
+        self_type: Optional[str] = None,
         event_only: bool = False,
     ) -> None:
         self.arg_types: Tuple[str, ...] = tuple(arg_types)
-        """Type names of event arguments, e.g. `("Guild", "User")`"""
+        """Type names of event arguments, e.g. `("Guild", "User")`."""
 
-        self.bot: bool = bot
-        """Whether the event is specific to ext.commands"""
+        self.self_type: Optional[str] = self_type
+        """The annotation for the `self` parameter, used for bot-only events."""
 
         self.event_only: bool = event_only
-        """Whether the event can only be used through `@event` and not other listeners"""
+        """Whether the event can only be used through `@event`, and not with listeners."""
 
 
 EVENT_DATA: Dict[Event, EventData] = {
@@ -317,52 +317,53 @@ EVENT_DATA: Dict[Event, EventData] = {
     Event.raw_typing: EventData(
         arg_types=["RawTypingEvent"],
     ),
+    # bot-only:
     Event.command: EventData(
-        arg_types=["commands.Context"],
-        bot=True,
+        arg_types=["commands.Context[AnyPrefixBotT]"],
+        self_type="AnyPrefixBotT",
     ),
     Event.command_completion: EventData(
-        arg_types=["commands.Context"],
-        bot=True,
+        arg_types=["commands.Context[AnyPrefixBotT]"],
+        self_type="AnyPrefixBotT",
     ),
     Event.command_error: EventData(
-        arg_types=["commands.Context", "commands.CommandError"],
-        bot=True,
+        arg_types=["commands.Context[AnyPrefixBotT]", "commands.CommandError"],
+        self_type="AnyPrefixBotT",
     ),
     Event.slash_command: EventData(
         arg_types=["ApplicationCommandInteraction[AnyBotT]"],
-        bot=True,
+        self_type="AnyBotT",
     ),
     Event.slash_command_completion: EventData(
         arg_types=["ApplicationCommandInteraction[AnyBotT]"],
-        bot=True,
+        self_type="AnyBotT",
     ),
     Event.slash_command_error: EventData(
         arg_types=["ApplicationCommandInteraction[AnyBotT]", "commands.CommandError"],
-        bot=True,
+        self_type="AnyBotT",
     ),
     Event.user_command: EventData(
         arg_types=["ApplicationCommandInteraction[AnyBotT]"],
-        bot=True,
+        self_type="AnyBotT",
     ),
     Event.user_command_completion: EventData(
         arg_types=["ApplicationCommandInteraction[AnyBotT]"],
-        bot=True,
+        self_type="AnyBotT",
     ),
     Event.user_command_error: EventData(
         arg_types=["ApplicationCommandInteraction[AnyBotT]", "commands.CommandError"],
-        bot=True,
+        self_type="AnyBotT",
     ),
     Event.message_command: EventData(
         arg_types=["ApplicationCommandInteraction[AnyBotT]"],
-        bot=True,
+        self_type="AnyBotT",
     ),
     Event.message_command_completion: EventData(
         arg_types=["ApplicationCommandInteraction[AnyBotT]"],
-        bot=True,
+        self_type="AnyBotT",
     ),
     Event.message_command_error: EventData(
         arg_types=["ApplicationCommandInteraction[AnyBotT]", "commands.CommandError"],
-        bot=True,
+        self_type="AnyBotT",
     ),
 }

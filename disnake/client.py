@@ -121,14 +121,15 @@ if TYPE_CHECKING:
     from .types.gateway import SessionStartLimit as SessionStartLimitPayload
     from .voice_client import VoiceProtocol
 
+    AnyPrefixBot = Union[commands.Bot, commands.AutoShardedBot]
     AnyBot = Union[
-        commands.Bot,
-        commands.AutoShardedBot,
+        AnyPrefixBot,
         commands.InteractionBot,
         commands.AutoShardedInteractionBot,
     ]
     # we can't use `typing.Self` when the `self: AnyBot` parameter is annotated,
     # so go back to the old way of using a TypeVar for those overloads
+    AnyPrefixBotT = TypeVar("AnyPrefixBotT", bound=AnyPrefixBot)
     AnyBotT = TypeVar("AnyBotT", bound=AnyBot)
 
 
@@ -2770,34 +2771,36 @@ class Client:
     @overload
     @_generated
     def wait_for(
-        self: AnyBot,
+        self: AnyPrefixBotT,
         event: Literal[Event.command, "command"],
         *,
-        check: Optional[Callable[[commands.Context], bool]] = None,
+        check: Optional[Callable[[commands.Context[AnyPrefixBotT]], bool]] = None,
         timeout: Optional[float] = None,
-    ) -> Coroutine[Any, Any, commands.Context]:
+    ) -> Coroutine[Any, Any, commands.Context[AnyPrefixBotT]]:
         ...
 
     @overload
     @_generated
     def wait_for(
-        self: AnyBot,
+        self: AnyPrefixBotT,
         event: Literal[Event.command_completion, "command_completion"],
         *,
-        check: Optional[Callable[[commands.Context], bool]] = None,
+        check: Optional[Callable[[commands.Context[AnyPrefixBotT]], bool]] = None,
         timeout: Optional[float] = None,
-    ) -> Coroutine[Any, Any, commands.Context]:
+    ) -> Coroutine[Any, Any, commands.Context[AnyPrefixBotT]]:
         ...
 
     @overload
     @_generated
     def wait_for(
-        self: AnyBot,
+        self: AnyPrefixBotT,
         event: Literal[Event.command_error, "command_error"],
         *,
-        check: Optional[Callable[[commands.Context, commands.CommandError], bool]] = None,
+        check: Optional[
+            Callable[[commands.Context[AnyPrefixBotT], commands.CommandError], bool]
+        ] = None,
         timeout: Optional[float] = None,
-    ) -> Coroutine[Any, Any, Tuple[commands.Context, commands.CommandError]]:
+    ) -> Coroutine[Any, Any, Tuple[commands.Context[AnyPrefixBotT], commands.CommandError]]:
         ...
 
     @overload
