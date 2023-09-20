@@ -507,10 +507,15 @@ class _AuditLogProxyAutoModAction:
     rule_trigger_type: enums.AutoModTriggerType
 
 
+class _AuditLogProxyKickOrMemberRoleAction:
+    integration_type: Optional[str]
+
+
 class AuditLogEntry(Hashable):
     """Represents an Audit Log entry.
 
-    You retrieve these via :meth:`Guild.audit_logs`.
+    You can retrieve these via :meth:`Guild.audit_logs`,
+    or via the :func:`on_audit_log_entry_create` event.
 
     .. container:: operations
 
@@ -529,9 +534,6 @@ class AuditLogEntry(Hashable):
     .. versionchanged:: 1.7
         Audit log entries are now comparable and hashable.
 
-    .. versionchanged:: 2.8
-        :attr:`user` can return :class:`Object` if the user is not found.
-
     Attributes
     ----------
     action: :class:`AuditLogAction`
@@ -539,6 +541,9 @@ class AuditLogEntry(Hashable):
     user: Optional[Union[:class:`Member`, :class:`User`, :class:`Object`]]
         The user who initiated this action. Usually :class:`Member`\\, unless gone
         then it's a :class:`User`.
+
+        .. versionchanged:: 2.8
+            May now be an :class:`Object` if the user could not be found.
     id: :class:`int`
         The entry ID.
     target: Any
@@ -589,7 +594,6 @@ class AuditLogEntry(Hashable):
 
         if isinstance(self.action, enums.AuditLogAction) and extra:
             if self.action is enums.AuditLogAction.member_prune:
-                # member prune has two keys with useful information
                 elems = {
                     "delete_member_days": utils._get_as_snowflake(extra, "delete_member_days"),
                     "members_removed": utils._get_as_snowflake(extra, "members_removed"),
@@ -607,13 +611,11 @@ class AuditLogEntry(Hashable):
                 }
                 self.extra = type("_AuditLogProxy", (), elems)()
             elif self.action is enums.AuditLogAction.member_disconnect:
-                # The member disconnect action has a dict with some information
                 elems = {
                     "count": int(extra["count"]),
                 }
                 self.extra = type("_AuditLogProxy", (), elems)()
             elif self.action.name.endswith("pin"):
-                # the pin actions have a dict with some information
                 elems = {
                     "channel": self._get_channel_or_thread(
                         utils._get_as_snowflake(extra, "channel_id")
@@ -622,7 +624,6 @@ class AuditLogEntry(Hashable):
                 }
                 self.extra = type("_AuditLogProxy", (), elems)()
             elif self.action.name.startswith("overwrite_"):
-                # the overwrite_ actions have a dict with some information
                 instance_id = int(extra["id"])
                 the_type = extra.get("type")
                 if the_type == "1":
@@ -662,6 +663,15 @@ class AuditLogEntry(Hashable):
                     ),
                 }
                 self.extra = type("_AuditLogProxy", (), elems)()
+            elif self.action in (
+                enums.AuditLogAction.kick,
+                enums.AuditLogAction.member_role_update,
+            ):
+                elems = {
+                    # unlike other extras, this key isn't always provided
+                    "integration_type": extra.get("integration_type"),
+                }
+                self.extra = type("_AuditLogProxy", (), elems)()
 
         self.extra: Any
         # actually this but there's no reason to annoy users with this:
@@ -672,6 +682,7 @@ class AuditLogEntry(Hashable):
         #     _AuditLogProxyPinAction,
         #     _AuditLogProxyStageInstanceAction,
         #     _AuditLogProxyAutoModAction,
+        #     _AuditLogProxyKickOrMemberRoleAction,
         #     Member, User, None,
         #     Role,
         # ]
