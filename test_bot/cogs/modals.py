@@ -24,7 +24,7 @@ class MyModal(disnake.ui.Modal):
         ]
         super().__init__(title="Create Tag", custom_id="create_tag", components=components)
 
-    async def callback(self, inter: disnake.ModalInteraction) -> None:
+    async def callback(self, inter: disnake.ModalInteraction[commands.Bot]) -> None:
         embed = disnake.Embed(title="Tag Creation")
         for key, value in inter.text_values.items():
             embed.add_field(name=key.capitalize(), value=value, inline=False)
@@ -36,12 +36,12 @@ class Modals(commands.Cog):
         self.bot = bot
 
     @commands.slash_command()
-    async def create_tag(self, inter: disnake.AppCmdInter) -> None:
+    async def create_tag(self, inter: disnake.AppCmdInter[commands.Bot]) -> None:
         """Sends a Modal to create a tag."""
         await inter.response.send_modal(modal=MyModal())
 
     @commands.slash_command()
-    async def create_tag_low(self, inter: disnake.AppCmdInter) -> None:
+    async def create_tag_low(self, inter: disnake.AppCmdInter[commands.Bot]) -> None:
         """Sends a Modal to create a tag but with a low-level implementation."""
         await inter.response.send_modal(
             title="Create Tag",

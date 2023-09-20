@@ -141,14 +141,14 @@ class CachedSlotProperty(Generic[T, T_co]):
         self.__doc__ = function.__doc__
 
     @overload
-    def __get__(self, instance: None, owner: Type[T]) -> Self:
+    def __get__(self, instance: None, owner: Type[Any]) -> Self:
         ...
 
     @overload
-    def __get__(self, instance: T, owner: Type[T]) -> T_co:
+    def __get__(self, instance: T, owner: Type[Any]) -> T_co:
         ...
 
-    def __get__(self, instance: Optional[T], owner: Type[T]) -> Any:
+    def __get__(self, instance: Optional[T], owner: Type[Any]) -> Any:
         if instance is None:
             return self
 
