@@ -246,25 +246,25 @@ EVENT_DATA: Dict[Event, EventData] = {
         arg_types=["StageInstance"],
     ),
     Event.application_command: EventData(
-        arg_types=["ApplicationCommandInteraction"],
+        arg_types=["ApplicationCommandInteraction[Self]"],
     ),
     Event.application_command_autocomplete: EventData(
-        arg_types=["ApplicationCommandInteraction"],
+        arg_types=["ApplicationCommandInteraction[Self]"],
     ),
     Event.button_click: EventData(
-        arg_types=["MessageInteraction"],
+        arg_types=["MessageInteraction[Self]"],
     ),
     Event.dropdown: EventData(
-        arg_types=["MessageInteraction"],
+        arg_types=["MessageInteraction[Self]"],
     ),
     Event.interaction: EventData(
-        arg_types=["Interaction"],
+        arg_types=["Interaction[Self]"],
     ),
     Event.message_interaction: EventData(
-        arg_types=["MessageInteraction"],
+        arg_types=["MessageInteraction[Self]"],
     ),
     Event.modal_submit: EventData(
-        arg_types=["ModalInteraction"],
+        arg_types=["ModalInteraction[Self]"],
     ),
     Event.message: EventData(
         arg_types=["Message"],
@@ -330,39 +330,39 @@ EVENT_DATA: Dict[Event, EventData] = {
         bot=True,
     ),
     Event.slash_command: EventData(
-        arg_types=["ApplicationCommandInteraction"],
+        arg_types=["ApplicationCommandInteraction[AnyBotT]"],
         bot=True,
     ),
     Event.slash_command_completion: EventData(
-        arg_types=["ApplicationCommandInteraction"],
+        arg_types=["ApplicationCommandInteraction[AnyBotT]"],
         bot=True,
     ),
     Event.slash_command_error: EventData(
-        arg_types=["ApplicationCommandInteraction", "commands.CommandError"],
+        arg_types=["ApplicationCommandInteraction[AnyBotT]", "commands.CommandError"],
         bot=True,
     ),
     Event.user_command: EventData(
-        arg_types=["ApplicationCommandInteraction"],
+        arg_types=["ApplicationCommandInteraction[AnyBotT]"],
         bot=True,
     ),
     Event.user_command_completion: EventData(
-        arg_types=["ApplicationCommandInteraction"],
+        arg_types=["ApplicationCommandInteraction[AnyBotT]"],
         bot=True,
     ),
     Event.user_command_error: EventData(
-        arg_types=["ApplicationCommandInteraction", "commands.CommandError"],
+        arg_types=["ApplicationCommandInteraction[AnyBotT]", "commands.CommandError"],
         bot=True,
     ),
     Event.message_command: EventData(
-        arg_types=["ApplicationCommandInteraction"],
+        arg_types=["ApplicationCommandInteraction[AnyBotT]"],
         bot=True,
     ),
     Event.message_command_completion: EventData(
-        arg_types=["ApplicationCommandInteraction"],
+        arg_types=["ApplicationCommandInteraction[AnyBotT]"],
         bot=True,
     ),
     Event.message_command_error: EventData(
-        arg_types=["ApplicationCommandInteraction", "commands.CommandError"],
+        arg_types=["ApplicationCommandInteraction[AnyBotT]", "commands.CommandError"],
         bot=True,
     ),
 }

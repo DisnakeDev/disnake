@@ -79,6 +79,8 @@ from .webhook import Webhook
 from .widget import Widget
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from disnake.ext import commands
 
     from .abc import GuildChannel, Messageable, PrivateChannel, Snowflake, SnowflakeTime
@@ -125,6 +127,9 @@ if TYPE_CHECKING:
         commands.InteractionBot,
         commands.AutoShardedInteractionBot,
     ]
+    # we can't use `typing.Self` when the `self: AnyBot` parameter is annotated,
+    # so go back to the old way of using a TypeVar for those overloads
+    AnyBotT = TypeVar("AnyBotT", bound=AnyBot)
 
 
 __all__ = (
@@ -2500,9 +2505,9 @@ class Client:
         self,
         event: Literal[Event.application_command, "application_command"],
         *,
-        check: Optional[Callable[[ApplicationCommandInteraction], bool]] = None,
+        check: Optional[Callable[[ApplicationCommandInteraction[Self]], bool]] = None,
         timeout: Optional[float] = None,
-    ) -> Coroutine[Any, Any, ApplicationCommandInteraction]:
+    ) -> Coroutine[Any, Any, ApplicationCommandInteraction[Self]]:
         ...
 
     @overload
@@ -2511,9 +2516,9 @@ class Client:
         self,
         event: Literal[Event.application_command_autocomplete, "application_command_autocomplete"],
         *,
-        check: Optional[Callable[[ApplicationCommandInteraction], bool]] = None,
+        check: Optional[Callable[[ApplicationCommandInteraction[Self]], bool]] = None,
         timeout: Optional[float] = None,
-    ) -> Coroutine[Any, Any, ApplicationCommandInteraction]:
+    ) -> Coroutine[Any, Any, ApplicationCommandInteraction[Self]]:
         ...
 
     @overload
@@ -2522,9 +2527,9 @@ class Client:
         self,
         event: Literal[Event.button_click, "button_click"],
         *,
-        check: Optional[Callable[[MessageInteraction], bool]] = None,
+        check: Optional[Callable[[MessageInteraction[Self]], bool]] = None,
         timeout: Optional[float] = None,
-    ) -> Coroutine[Any, Any, MessageInteraction]:
+    ) -> Coroutine[Any, Any, MessageInteraction[Self]]:
         ...
 
     @overload
@@ -2533,9 +2538,9 @@ class Client:
         self,
         event: Literal[Event.dropdown, "dropdown"],
         *,
-        check: Optional[Callable[[MessageInteraction], bool]] = None,
+        check: Optional[Callable[[MessageInteraction[Self]], bool]] = None,
         timeout: Optional[float] = None,
-    ) -> Coroutine[Any, Any, MessageInteraction]:
+    ) -> Coroutine[Any, Any, MessageInteraction[Self]]:
         ...
 
     @overload
@@ -2544,9 +2549,9 @@ class Client:
         self,
         event: Literal[Event.interaction, "interaction"],
         *,
-        check: Optional[Callable[[Interaction], bool]] = None,
+        check: Optional[Callable[[Interaction[Self]], bool]] = None,
         timeout: Optional[float] = None,
-    ) -> Coroutine[Any, Any, Interaction]:
+    ) -> Coroutine[Any, Any, Interaction[Self]]:
         ...
 
     @overload
@@ -2555,9 +2560,9 @@ class Client:
         self,
         event: Literal[Event.message_interaction, "message_interaction"],
         *,
-        check: Optional[Callable[[MessageInteraction], bool]] = None,
+        check: Optional[Callable[[MessageInteraction[Self]], bool]] = None,
         timeout: Optional[float] = None,
-    ) -> Coroutine[Any, Any, MessageInteraction]:
+    ) -> Coroutine[Any, Any, MessageInteraction[Self]]:
         ...
 
     @overload
@@ -2566,9 +2571,9 @@ class Client:
         self,
         event: Literal[Event.modal_submit, "modal_submit"],
         *,
-        check: Optional[Callable[[ModalInteraction], bool]] = None,
+        check: Optional[Callable[[ModalInteraction[Self]], bool]] = None,
         timeout: Optional[float] = None,
-    ) -> Coroutine[Any, Any, ModalInteraction]:
+    ) -> Coroutine[Any, Any, ModalInteraction[Self]]:
         ...
 
     @overload
@@ -2798,106 +2803,106 @@ class Client:
     @overload
     @_generated
     def wait_for(
-        self: AnyBot,
+        self: AnyBotT,
         event: Literal[Event.slash_command, "slash_command"],
         *,
-        check: Optional[Callable[[ApplicationCommandInteraction], bool]] = None,
+        check: Optional[Callable[[ApplicationCommandInteraction[AnyBotT]], bool]] = None,
         timeout: Optional[float] = None,
-    ) -> Coroutine[Any, Any, ApplicationCommandInteraction]:
+    ) -> Coroutine[Any, Any, ApplicationCommandInteraction[AnyBotT]]:
         ...
 
     @overload
     @_generated
     def wait_for(
-        self: AnyBot,
+        self: AnyBotT,
         event: Literal[Event.slash_command_completion, "slash_command_completion"],
         *,
-        check: Optional[Callable[[ApplicationCommandInteraction], bool]] = None,
+        check: Optional[Callable[[ApplicationCommandInteraction[AnyBotT]], bool]] = None,
         timeout: Optional[float] = None,
-    ) -> Coroutine[Any, Any, ApplicationCommandInteraction]:
+    ) -> Coroutine[Any, Any, ApplicationCommandInteraction[AnyBotT]]:
         ...
 
     @overload
     @_generated
     def wait_for(
-        self: AnyBot,
+        self: AnyBotT,
         event: Literal[Event.slash_command_error, "slash_command_error"],
         *,
         check: Optional[
-            Callable[[ApplicationCommandInteraction, commands.CommandError], bool]
+            Callable[[ApplicationCommandInteraction[AnyBotT], commands.CommandError], bool]
         ] = None,
         timeout: Optional[float] = None,
-    ) -> Coroutine[Any, Any, Tuple[ApplicationCommandInteraction, commands.CommandError]]:
+    ) -> Coroutine[Any, Any, Tuple[ApplicationCommandInteraction[AnyBotT], commands.CommandError]]:
         ...
 
     @overload
     @_generated
     def wait_for(
-        self: AnyBot,
+        self: AnyBotT,
         event: Literal[Event.user_command, "user_command"],
         *,
-        check: Optional[Callable[[ApplicationCommandInteraction], bool]] = None,
+        check: Optional[Callable[[ApplicationCommandInteraction[AnyBotT]], bool]] = None,
         timeout: Optional[float] = None,
-    ) -> Coroutine[Any, Any, ApplicationCommandInteraction]:
+    ) -> Coroutine[Any, Any, ApplicationCommandInteraction[AnyBotT]]:
         ...
 
     @overload
     @_generated
     def wait_for(
-        self: AnyBot,
+        self: AnyBotT,
         event: Literal[Event.user_command_completion, "user_command_completion"],
         *,
-        check: Optional[Callable[[ApplicationCommandInteraction], bool]] = None,
+        check: Optional[Callable[[ApplicationCommandInteraction[AnyBotT]], bool]] = None,
         timeout: Optional[float] = None,
-    ) -> Coroutine[Any, Any, ApplicationCommandInteraction]:
+    ) -> Coroutine[Any, Any, ApplicationCommandInteraction[AnyBotT]]:
         ...
 
     @overload
     @_generated
     def wait_for(
-        self: AnyBot,
+        self: AnyBotT,
         event: Literal[Event.user_command_error, "user_command_error"],
         *,
         check: Optional[
-            Callable[[ApplicationCommandInteraction, commands.CommandError], bool]
+            Callable[[ApplicationCommandInteraction[AnyBotT], commands.CommandError], bool]
         ] = None,
         timeout: Optional[float] = None,
-    ) -> Coroutine[Any, Any, Tuple[ApplicationCommandInteraction, commands.CommandError]]:
+    ) -> Coroutine[Any, Any, Tuple[ApplicationCommandInteraction[AnyBotT], commands.CommandError]]:
         ...
 
     @overload
     @_generated
     def wait_for(
-        self: AnyBot,
+        self: AnyBotT,
         event: Literal[Event.message_command, "message_command"],
         *,
-        check: Optional[Callable[[ApplicationCommandInteraction], bool]] = None,
+        check: Optional[Callable[[ApplicationCommandInteraction[AnyBotT]], bool]] = None,
         timeout: Optional[float] = None,
-    ) -> Coroutine[Any, Any, ApplicationCommandInteraction]:
+    ) -> Coroutine[Any, Any, ApplicationCommandInteraction[AnyBotT]]:
         ...
 
     @overload
     @_generated
     def wait_for(
-        self: AnyBot,
+        self: AnyBotT,
         event: Literal[Event.message_command_completion, "message_command_completion"],
         *,
-        check: Optional[Callable[[ApplicationCommandInteraction], bool]] = None,
+        check: Optional[Callable[[ApplicationCommandInteraction[AnyBotT]], bool]] = None,
         timeout: Optional[float] = None,
-    ) -> Coroutine[Any, Any, ApplicationCommandInteraction]:
+    ) -> Coroutine[Any, Any, ApplicationCommandInteraction[AnyBotT]]:
         ...
 
     @overload
     @_generated
     def wait_for(
-        self: AnyBot,
+        self: AnyBotT,
         event: Literal[Event.message_command_error, "message_command_error"],
         *,
         check: Optional[
-            Callable[[ApplicationCommandInteraction, commands.CommandError], bool]
+            Callable[[ApplicationCommandInteraction[AnyBotT], commands.CommandError], bool]
         ] = None,
         timeout: Optional[float] = None,
-    ) -> Coroutine[Any, Any, Tuple[ApplicationCommandInteraction, commands.CommandError]]:
+    ) -> Coroutine[Any, Any, Tuple[ApplicationCommandInteraction[AnyBotT], commands.CommandError]]:
         ...
 
     # fallback for custom events

@@ -72,7 +72,7 @@ def _test_typing_wait_for(client: disnake.Client, bot: commands.Bot) -> None:
     _ = client.wait_for(Event.slash_command_error)  # type: ignore  # this should error
     _ = assert_type(
         bot.wait_for(Event.slash_command),
-        Coroutine[Any, Any, disnake.ApplicationCommandInteraction],
+        Coroutine[Any, Any, disnake.ApplicationCommandInteraction[commands.Bot]],
     )
 
 
