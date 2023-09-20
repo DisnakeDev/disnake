@@ -282,9 +282,6 @@ class Colour:
         This will appear transparent on Discord's dark theme.
 
         .. versionadded:: 1.5
-
-        .. versionchanged:: 2.10
-            Updated from ``0x36393F`` to ``0x313338`` to reflect theme changes.
         """
         return cls(0x313338)
 
