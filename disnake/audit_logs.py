@@ -510,7 +510,8 @@ class _AuditLogProxyAutoModAction:
 class AuditLogEntry(Hashable):
     """Represents an Audit Log entry.
 
-    You retrieve these via :meth:`Guild.audit_logs`.
+    You can retrieve these via :meth:`Guild.audit_logs`,
+    or via the :func:`on_audit_log_entry_create` event.
 
     .. container:: operations
 
@@ -529,9 +530,6 @@ class AuditLogEntry(Hashable):
     .. versionchanged:: 1.7
         Audit log entries are now comparable and hashable.
 
-    .. versionchanged:: 2.8
-        :attr:`user` can return :class:`Object` if the user is not found.
-
     Attributes
     ----------
     action: :class:`AuditLogAction`
@@ -539,6 +537,9 @@ class AuditLogEntry(Hashable):
     user: Optional[Union[:class:`Member`, :class:`User`, :class:`Object`]]
         The user who initiated this action. Usually :class:`Member`\\, unless gone
         then it's a :class:`User`.
+
+        .. versionchanged:: 2.8
+            May now be an :class:`Object` if the user could not be found.
     id: :class:`int`
         The entry ID.
     target: Any
