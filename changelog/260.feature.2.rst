@@ -1,1 +1,1 @@
-|commands| Add :class:`AppCommandRegistrationError`.
+|commands| Add :class:`ApplicationCommandRegistrationError`.

@@ -75,7 +75,7 @@ __all__ = (
     "ExtensionFailed",
     "ExtensionNotFound",
     "CommandRegistrationError",
-    "AppCommandRegistrationError",
+    "ApplicationCommandRegistrationError",
     "FlagError",
     "BadFlagArgument",
     "MissingFlagArgument",
@@ -1026,7 +1026,7 @@ class CommandRegistrationError(ClientException):
 
 # we inherit CommandRegistrationError for backwards compatibility,
 # because this error replaced CommandRegistrationError in several places
-class AppCommandRegistrationError(CommandRegistrationError):
+class ApplicationCommandRegistrationError(CommandRegistrationError):
     """An exception raised when the app command can't be added
     because a command with the same key already exists.
     A key is determined by command type, name, and guild_id.
@@ -1052,6 +1052,8 @@ class AppCommandRegistrationError(CommandRegistrationError):
         self.cmd_type: ApplicationCommandType = cmd_type
         self.name: str = name
         self.guild_id: Optional[int] = guild_id
+        # backwards compatibility
+        self.alias_conflict: bool = False
         # fixed API naming here because no one calls slash commands "chat input"
         type_ = "slash" if cmd_type is ApplicationCommandType.chat_input else cmd_type.name
         if guild_id is None:

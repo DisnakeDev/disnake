@@ -40,7 +40,7 @@ from .ctx_menus_core import (
     message_command,
     user_command,
 )
-from .errors import AppCommandRegistrationError
+from .errors import ApplicationCommandRegistrationError
 from .flags import CommandSyncFlags
 from .slash_core import InvokableSlashCommand, SubCommand, SubCommandGroup, slash_command
 
@@ -347,7 +347,7 @@ class InteractionBotBase(CommonBotBase):
 
         Raises
         ------
-        AppCommandRegistrationError
+        ApplicationCommandRegistrationError
             The app command is already registered.
         TypeError
             The app command passed is not an instance of :class:`InvokableApplicationCommand`.
@@ -371,7 +371,7 @@ class InteractionBotBase(CommonBotBase):
                 type=app_command.body.type, name=app_command.name, guild_id=guild_id
             )
             if cmd_index in self.all_app_commands:
-                raise AppCommandRegistrationError(
+                raise ApplicationCommandRegistrationError(
                     cmd_index.type, cmd_index.name, cmd_index.guild_id
                 )
 
