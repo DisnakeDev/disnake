@@ -111,11 +111,12 @@ class CommonBotBase(Generic[CogT]):
     async def login(self, token: str) -> None:
         await super().login(token=token)  # type: ignore
 
+        loop: asyncio.AbstractEventLoop = self.loop  # type: ignore
         if self.reload:
-            self.loop.create_task(self._watchdog())  # type: ignore
+            loop.create_task(self._watchdog())
 
         # prefetch
-        self.loop.create_task(self._fill_owners())  # type: ignore
+        loop.create_task(self._fill_owners())
 
     async def is_owner(self, user: Union[disnake.User, disnake.Member]) -> bool:
         """|coro|
