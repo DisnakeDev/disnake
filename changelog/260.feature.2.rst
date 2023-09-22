@@ -1,1 +1,1 @@
-|commands| Add :class:`ApplicationCommandRegistrationError`.
+|commands| Add :class:`.ext.commands.ApplicationCommandRegistrationError`.

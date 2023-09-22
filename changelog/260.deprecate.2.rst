@@ -1,3 +1,1 @@
-|commands| :meth:`InteractionBot.remove_slash_command`,
-:meth:`InteractionBot.remove_user_command`,
-:meth:`InteractionBot.remove_message_command` are deprecated.
+|commands| :meth:`.ext.commands.InteractionBot.remove_slash_command`, :meth:`.ext.commands.InteractionBot.remove_user_command`, :meth:`.ext.commands.InteractionBot.remove_message_command` are deprecated.
