@@ -1,1 +1,0 @@
-|commands| :meth:`InteractionBotBase.remove_user_command` is deprecated.

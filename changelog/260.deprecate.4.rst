@@ -1,1 +1,0 @@
-|commands| :meth:`InteractionBotBase.add_user_command` is deprecated.

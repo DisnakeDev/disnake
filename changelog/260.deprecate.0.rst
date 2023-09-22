@@ -1,1 +1,3 @@
-|commands| :attr:`InteractionBotBase.all_slash_commands` is deprecated.
+|commands| :attr:`InteractionBot.all_slash_commands`,
+:attr:`InteractionBot.all_user_commands`,
+:attr:`InteractionBot.all_message_commands` are deprecated.

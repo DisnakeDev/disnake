@@ -1,1 +1,0 @@
-|commands| Add ``guild_id`` parameter to :meth:`InteractionBotBase.get_user_command`.

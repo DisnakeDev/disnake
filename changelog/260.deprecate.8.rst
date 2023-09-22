@@ -1,1 +1,0 @@
-|commands| :meth:`InteractionBotBase.remove_message_command` is deprecated.

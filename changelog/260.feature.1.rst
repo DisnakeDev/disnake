@@ -1,1 +1,2 @@
-|commands| Add :meth:`InteractionBotBase.remove_app_command`.
+|commands| Add ``guild_id`` parameter to :meth:`InteractionBot.get_slash_command`,
+:meth:`InteractionBot.get_user_command`, and :meth:`InteractionBot.get_message_command`.
