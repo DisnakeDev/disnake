@@ -123,7 +123,7 @@ class CommonBotBase(Generic[CogT]):
         Checks if a :class:`~disnake.User` or :class:`~disnake.Member` is the owner of
         this bot.
 
-        If an :attr:`owner_id` is not set, it is fetched automatically
+        If :attr:`owner_id` and :attr:`owner_ids` are not set, they are fetched automatically
         through the use of :meth:`~.Bot.application_info`.
 
         .. versionchanged:: 1.3
