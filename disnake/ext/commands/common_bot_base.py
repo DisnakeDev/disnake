@@ -82,11 +82,18 @@ class CommonBotBase(Generic[CogT]):
 
         app: disnake.AppInfo = await self.application_info()  # type: ignore
         if app.team:
-            self.owners = set(app.team.members)
-            self.owner_ids = {m.id for m in app.team.members}
+            self.owners = owners = set(
+                filter(self._is_team_member_considered_owner, app.team.members)
+            )
+            self.owner_ids = {m.id for m in owners}
         else:
             self.owner = app.owner
             self.owner_id = app.owner.id
+
+    # someone may want to override this behavior, but we'll leave it undocumented for now.
+    def _is_team_member_considered_owner(self, member: disnake.TeamMember) -> bool:
+        # these roles can access the bot token, consider them bot owners
+        return member.role in (disnake.TeamMemberRole.admin, disnake.TeamMemberRole.developer)
 
     async def close(self) -> None:
         self._is_closed = True
@@ -130,6 +137,10 @@ class CommonBotBase(Generic[CogT]):
         .. versionchanged:: 1.3
             The function also checks if the application is team-owned if
             :attr:`owner_ids` is not set.
+
+        .. versionchanged:: 2.10
+            Also team roles into account; only team members with the :attr:`~disnake.TeamMemberRole.admin`
+            or :attr:`~disnake.TeamMemberRole.developer` roles are considered bot owners.
 
         Parameters
         ----------
