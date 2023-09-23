@@ -27,7 +27,7 @@ from disnake.enums import Event
 from ._types import _BaseCommand
 from .base_core import InvokableApplicationCommand
 from .ctx_menus_core import InvokableMessageCommand, InvokableUserCommand
-from .slash_core import InvokableSlashCommand
+from .slash_core import InvokableSlashCommand, SubCommand, SubCommandGroup
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -753,6 +753,8 @@ class Cog(metaclass=CogMeta):
 
         for index, command in enumerate(self.__cog_app_commands__):
             command.cog = self
+            if isinstance(command, (SubCommand, SubCommandGroup)):
+                continue
             try:
                 bot.add_app_command(command)
             except Exception:

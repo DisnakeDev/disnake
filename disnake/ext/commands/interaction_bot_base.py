@@ -359,6 +359,11 @@ class InteractionBotBase(CommonBotBase):
             raise TypeError(
                 "The app_command passed must be an instance of InvokableApplicationCommand"
             )
+        if isinstance(app_command, (SubCommand, SubCommandGroup)):
+            raise TypeError(
+                "The app_command passed must be a top level command, "
+                "not an instance of SubCommand or SubCommandGroup"
+            )
 
         if app_command.guild_ids is None:
             # if test_guilds are specified then we add the same command for each test guild
