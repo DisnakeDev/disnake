@@ -975,7 +975,7 @@ class InteractionBotBase(CommonBotBase):
     # command synchronisation
 
     def _ordered_unsynced_commands(
-        self
+        self,
     ) -> Tuple[List[ApplicationCommand], Dict[int, List[ApplicationCommand]]]:
         global_cmds = []
         guilds = {}
