@@ -82,18 +82,16 @@ class CommonBotBase(Generic[CogT]):
 
         app: disnake.AppInfo = await self.application_info()  # type: ignore
         if app.team:
-            self.owners = owners = set(
-                filter(self._is_team_member_considered_owner, app.team.members)
-            )
+            self.owners = owners = {
+                member
+                for member in app.team.members
+                # these roles can access the bot token, consider them bot owners
+                if member.role in (disnake.TeamMemberRole.admin, disnake.TeamMemberRole.developer)
+            }
             self.owner_ids = {m.id for m in owners}
         else:
             self.owner = app.owner
             self.owner_id = app.owner.id
-
-    # someone may want to override this behavior, but we'll leave it undocumented for now.
-    def _is_team_member_considered_owner(self, member: disnake.TeamMember) -> bool:
-        # these roles can access the bot token, consider them bot owners
-        return member.role in (disnake.TeamMemberRole.admin, disnake.TeamMemberRole.developer)
 
     async def close(self) -> None:
         self._is_closed = True
