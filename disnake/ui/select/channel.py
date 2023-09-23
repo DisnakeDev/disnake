@@ -185,7 +185,7 @@ def channel_select(
     ----------
     cls: Type[:class:`ChannelSelect`]
         The select subclass to create an instance of. If provided, the following parameters
-        described below do no apply. Instead, this decorator will accept the same keywords
+        described below do not apply. Instead, this decorator will accept the same keywords
         as the passed cls does.
     placeholder: Optional[:class:`str`]
         The placeholder text that is shown if nothing is selected, if any.
