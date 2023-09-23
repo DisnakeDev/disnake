@@ -1,1 +1,1 @@
-|commands| Add :class:`~disnake.ext.commands.ApplicationCommandRegistrationError`.
+|commands| Add :class:`.ext.commands.ApplicationCommandRegistrationError`.
