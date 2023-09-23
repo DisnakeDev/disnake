@@ -168,9 +168,7 @@ def channel_select(
 
 
 def channel_select(
-    cls: Type[Object[S_co, P]] = ChannelSelect[Any],
-    /,
-    **kwargs: Any,
+    cls: Type[Object[S_co, P]] = ChannelSelect[Any], **kwargs: Any
 ) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
     """A decorator that attaches a channel select menu to a component.
 

@@ -144,9 +144,7 @@ def mentionable_select(
 
 
 def mentionable_select(
-    cls: Type[Object[S_co, P]] = MentionableSelect[Any],
-    /,
-    **kwargs: Any,
+    cls: Type[Object[S_co, P]] = MentionableSelect[Any], **kwargs: Any
 ) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
     """A decorator that attaches a mentionable (user/member/role) select menu to a component.
 

@@ -143,9 +143,7 @@ def user_select(
 
 
 def user_select(
-    cls: Type[Object[S_co, P]] = UserSelect[Any],
-    /,
-    **kwargs: Any,
+    cls: Type[Object[S_co, P]] = UserSelect[Any], **kwargs: Any
 ) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
     """A decorator that attaches a user select menu to a component.
 
