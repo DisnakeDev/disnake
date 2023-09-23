@@ -254,14 +254,6 @@ class InteractionBotBase(CommonBotBase):
         """
         return CommandSyncFlags._from_value(self._command_sync_flags.value)
 
-    def application_commands_iterator(self) -> Iterable[InvokableApplicationCommand]:
-        warn_deprecated(
-            "application_commands_iterator is deprecated and will be removed in a future version. "
-            "Use all_app_commands.values() instead.",
-            stacklevel=3,
-        )
-        return self.all_app_commands.values()
-
     @property
     def application_commands(self) -> Set[InvokableApplicationCommand]:
         """Set[:class:`InvokableApplicationCommand`]: A set of all application commands the bot has."""
@@ -983,15 +975,8 @@ class InteractionBotBase(CommonBotBase):
     # command synchronisation
 
     def _ordered_unsynced_commands(
-        self, test_guilds: Optional[Sequence[int]] = MISSING
+        self
     ) -> Tuple[List[ApplicationCommand], Dict[int, List[ApplicationCommand]]]:
-        if test_guilds is not MISSING:
-            warn_deprecated(
-                "Argument test_guilds of _ordered_unsynced_commands is deprecated "
-                "and will be removed in a future version.",
-                stacklevel=3,
-            )
-
         global_cmds = []
         guilds = {}
 
