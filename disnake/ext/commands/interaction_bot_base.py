@@ -1509,6 +1509,8 @@ class InteractionBotBase(CommonBotBase):
         inter: :class:`disnake.ApplicationCommandInteraction`
             The interaction to process.
         """
+        # `inter.data.guild_id` is the guild ID the command is registered to,
+        # so this is correct even when a global command is called from a guild
         cmd_index = AppCmdIndex(
             type=inter.data.type, name=inter.data.name, guild_id=inter.data.guild_id
         )
@@ -1587,6 +1589,8 @@ class InteractionBotBase(CommonBotBase):
 
         command_type = interaction.data.type
         event_name = None
+        # `inter.data.guild_id` is the guild ID the command is registered to,
+        # so this is correct even when a global command is called from a guild
         cmd_index = AppCmdIndex(
             type=command_type, name=interaction.data.name, guild_id=interaction.data.guild_id
         )
