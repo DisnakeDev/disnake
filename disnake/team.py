@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import datetime
 from typing import TYPE_CHECKING, List, Optional
 
 from . import utils
@@ -51,6 +52,14 @@ class Team:
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} id={self.id} name={self.name}>"
+
+    @property
+    def created_at(self) -> datetime.datetime:
+        """:class:`datetime.datetime`: Returns the team's creation time in UTC.
+
+        .. versionadded:: 2.10
+        """
+        return utils.snowflake_time(self.id)
 
     @property
     def icon(self) -> Optional[Asset]:

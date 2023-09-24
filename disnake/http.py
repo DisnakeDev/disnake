@@ -1035,6 +1035,7 @@ class HTTPClient:
             "available_tags",
             "default_reaction_emoji",
             "default_sort_order",
+            "default_forum_layout",
         )
         payload.update({k: v for k, v in options.items() if k in valid_keys and v is not None})
 
@@ -1284,9 +1285,11 @@ class HTTPClient:
         limit: int,
         before: Optional[Snowflake] = None,
         after: Optional[Snowflake] = None,
+        with_counts: bool = True,
     ) -> Response[List[guild.Guild]]:
         params: Dict[str, Any] = {
             "limit": limit,
+            "with_counts": int(with_counts),
         }
 
         if before:
@@ -1544,7 +1547,7 @@ class HTTPClient:
     def get_sticker(self, sticker_id: Snowflake) -> Response[sticker.Sticker]:
         return self.request(Route("GET", "/stickers/{sticker_id}", sticker_id=sticker_id))
 
-    def list_premium_sticker_packs(self) -> Response[sticker.ListPremiumStickerPacks]:
+    def list_sticker_packs(self) -> Response[sticker.ListStickerPacks]:
         return self.request(Route("GET", "/sticker-packs"))
 
     def get_all_guild_stickers(self, guild_id: Snowflake) -> Response[List[sticker.GuildSticker]]:
@@ -1872,6 +1875,7 @@ class HTTPClient:
             "mentionable",
             "icon",
             "unicode_emoji",
+            "flags",
         )
         payload = {k: v for k, v in fields.items() if k in valid_keys}
         return self.request(r, json=payload, reason=reason)
