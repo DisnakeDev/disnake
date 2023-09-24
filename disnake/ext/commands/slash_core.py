@@ -332,6 +332,7 @@ class SubCommand(InvokableApplicationCommand):
 
     @property
     def description(self) -> str:
+        """:class:`str`: The slash sub command's description. Shorthand for :attr:`.SlashCommand.description`"""
         return self.body.description
 
     @property
@@ -508,10 +509,12 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
     @property
     def description(self) -> str:
+        """:class:`str`: The slash command's description. Shorthand for :attr:`.SlashCommand.description`"""
         return self.body.description
 
     @property
     def options(self) -> List[Option]:
+        """List[:class:`.Option`]: The list of options the slash command has. Shorthand for :attr:`.SlashCommand.options`"""
         return self.body.options
 
     def sub_command(
