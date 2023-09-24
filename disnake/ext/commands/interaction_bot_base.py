@@ -605,11 +605,8 @@ class InteractionBotBase(CommonBotBase):
                 continue
             if result is None:
                 result = chain_match
-                continue
             # we should check whether there's an ambiguity in command search
-            result_guild_ids = (result.root_parent or result).guild_ids
-            match_guild_ids = (chain_match.root_parent or chain_match).guild_ids
-            if result_guild_ids != match_guild_ids:
+            elif chain_match is not result:
                 raise ValueError(
                     "Argument guild_id must be provided if there're different slash commands "
                     "with the same name but different guilds or one of them is global."
@@ -656,7 +653,7 @@ class InteractionBotBase(CommonBotBase):
             if result is None:
                 result = command
             # we should check whether there's an ambiguity in command search
-            elif result.guild_ids != command.guild_ids:
+            elif command is not result:
                 raise ValueError(
                     "Argument guild_id must be provided if there're different user commands "
                     "with the same name but different guilds or one of them is global."
@@ -705,7 +702,7 @@ class InteractionBotBase(CommonBotBase):
             if result is None:
                 result = command
             # we should check whether there's an ambiguity in command search
-            elif result.guild_ids != command.guild_ids:
+            elif command is not result:
                 raise ValueError(
                     "Argument guild_id must be provided if there're different message commands "
                     "with the same name but different guilds or one of them is global."
