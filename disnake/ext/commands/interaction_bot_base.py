@@ -443,7 +443,7 @@ class InteractionBotBase(CommonBotBase):
         self.add_app_command(message_command)
 
     def remove_app_command(
-        self, cmd_type: ApplicationCommandType, name: str, guild_ids: Optional[Tuple[int, ...]]
+        self, cmd_type: ApplicationCommandType, name: str, *, guild_ids: Optional[Sequence[int]]
     ) -> Optional[InvokableApplicationCommand]:
         """Removes an :class:`InvokableApplicationCommand` from the internal list of app commands.
 
@@ -455,13 +455,14 @@ class InteractionBotBase(CommonBotBase):
             The type of the app command to remove.
         name: :class:`str`
             The name of the app command to remove.
-        guild_ids: Optional[Tuple[:class:`str`, ...]]
-            The IDs of the guilds from which the command should be removed.
+        guild_ids: Optional[Sequence[:class:`int`]]
+            The IDs of the guilds from which the command should be removed,
+            or ``None`` if global. Defaults to ``None``.
 
         Returns
         -------
         Optional[:class:`InvokableApplicationCommand`]
-            The app command that was removed. If the key data was not valid then ``None`` is returned instead.
+            The app command that was removed. If no matching command was found, then ``None`` is returned instead.
         """
         if guild_ids is None:
             # a global command may end up being a local command if test_guilds were specified

@@ -760,7 +760,9 @@ class Cog(metaclass=CogMeta):
             except Exception:
                 # undo our additions
                 for to_undo in self.__cog_app_commands__[:index]:
-                    bot.remove_app_command(to_undo.body.type, to_undo.name, to_undo.guild_ids)
+                    bot.remove_app_command(
+                        to_undo.body.type, to_undo.name, guild_ids=to_undo.guild_ids
+                    )
                 raise
 
         if not hasattr(self.cog_load.__func__, "__cog_special_method__"):
@@ -834,7 +836,7 @@ class Cog(metaclass=CogMeta):
 
             for app_command in self.__cog_app_commands__:
                 bot.remove_app_command(
-                    app_command.body.type, app_command.name, app_command.guild_ids
+                    app_command.body.type, app_command.name, guild_ids=app_command.guild_ids
                 )
 
             for name, method_name in self.__cog_listeners__:
