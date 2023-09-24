@@ -332,7 +332,7 @@ class SubCommand(InvokableApplicationCommand):
 
     @property
     def description(self) -> str:
-        """:class:`str`: The slash sub command's description. Shorthand for :attr:`.SlashCommand.description`"""
+        """:class:`str`: The slash sub command's description. Shorthand for :attr:`.Option.description`"""
         return self.body.description
 
     @property
