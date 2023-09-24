@@ -490,12 +490,12 @@ class InteractionBotBase(CommonBotBase):
             "Use remove_app_command instead.",
             stacklevel=3,
         )
-        bad_keys = []
+        bad_keys: List[AppCmdIndex] = []
         for key in self.all_app_commands.keys():
             if key.type is cmd_type and key.name == name:
                 bad_keys.append(key)
 
-        result = None
+        result: Optional[InvokableApplicationCommand] = None
         for key in bad_keys:
             cmd = self.all_app_commands.pop(key, None)
             if result is None:
@@ -517,7 +517,7 @@ class InteractionBotBase(CommonBotBase):
         Optional[:class:`InvokableSlashCommand`]
             The slash command that was removed. If the name is not valid then ``None`` is returned instead.
         """
-        self._emulate_old_app_command_remove(ApplicationCommandType.chat_input, name)
+        return self._emulate_old_app_command_remove(ApplicationCommandType.chat_input, name)
 
     def remove_user_command(self, name: str) -> Optional[InvokableUserCommand]:
         """Removes an :class:`InvokableUserCommand` from the internal list
@@ -533,7 +533,7 @@ class InteractionBotBase(CommonBotBase):
         Optional[:class:`InvokableUserCommand`]
             The user command that was removed. If the name is not valid then ``None`` is returned instead.
         """
-        self._emulate_old_app_command_remove(ApplicationCommandType.user, name)
+        return self._emulate_old_app_command_remove(ApplicationCommandType.user, name)
 
     def remove_message_command(self, name: str) -> Optional[InvokableMessageCommand]:
         """Removes an :class:`InvokableMessageCommand` from the internal list
@@ -549,7 +549,7 @@ class InteractionBotBase(CommonBotBase):
         Optional[:class:`InvokableMessageCommand`]
             The message command that was removed. If the name is not valid then ``None`` is returned instead.
         """
-        self._emulate_old_app_command_remove(ApplicationCommandType.message, name)
+        return self._emulate_old_app_command_remove(ApplicationCommandType.message, name)
 
     def get_slash_command(
         self, name: str, guild_id: Optional[int] = MISSING
@@ -966,8 +966,8 @@ class InteractionBotBase(CommonBotBase):
     def _ordered_unsynced_commands(
         self,
     ) -> Tuple[List[ApplicationCommand], Dict[int, List[ApplicationCommand]]]:
-        global_cmds = []
-        guilds = {}
+        global_cmds: List[ApplicationCommand] = []
+        guilds: Dict[int, List[ApplicationCommand]] = {}
 
         for key, cmd in self.all_app_commands.items():
             if not cmd.auto_sync:
