@@ -29,7 +29,7 @@ import disnake
 from disnake.app_commands import ApplicationCommand, Option
 from disnake.custom_warnings import SyncWarning
 from disnake.enums import ApplicationCommandType
-from disnake.utils import warn_deprecated
+from disnake.utils import deprecated, warn_deprecated
 
 from . import errors
 from .base_core import InvokableApplicationCommand
@@ -283,13 +283,9 @@ class InteractionBotBase(CommonBotBase):
         }
 
     @property
+    @deprecated("slash_commands")
     def all_slash_commands(self) -> Dict[str, InvokableSlashCommand]:
         # no docstring because it was an attribute and now it's deprecated
-        warn_deprecated(
-            "all_slash_commands is deprecated and will be removed in a future version. "
-            "Use all_app_commands as a replacement.",
-            stacklevel=3,
-        )
         return {
             cmd.name: cmd
             for cmd in self.all_app_commands.values()
@@ -297,13 +293,9 @@ class InteractionBotBase(CommonBotBase):
         }
 
     @property
+    @deprecated("user_commands")
     def all_user_commands(self) -> Dict[str, InvokableUserCommand]:
         # no docstring because it was an attribute and now it's deprecated
-        warn_deprecated(
-            "all_user_commands is deprecated and will be removed in a future version. "
-            "Use all_app_commands as a replacement.",
-            stacklevel=3,
-        )
         return {
             cmd.name: cmd
             for cmd in self.all_app_commands.values()
@@ -311,13 +303,9 @@ class InteractionBotBase(CommonBotBase):
         }
 
     @property
+    @deprecated("message_commands")
     def all_message_commands(self) -> Dict[str, InvokableMessageCommand]:
         # no docstring because it was an attribute and now it's deprecated
-        warn_deprecated(
-            "all_message_commands is deprecated and will be removed in a future version. "
-            "Use all_app_commands as a replacement.",
-            stacklevel=3,
-        )
         return {
             cmd.name: cmd
             for cmd in self.all_app_commands.values()
