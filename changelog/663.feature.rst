@@ -1,0 +1,1 @@
+Rewrite HTTP ratelimiting to use the :ddocs:`X-RateLimit-Bucket header <topics/rate-limits#header-format>`.
