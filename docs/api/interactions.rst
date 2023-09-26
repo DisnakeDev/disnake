@@ -216,7 +216,7 @@ InteractionResponseType
         See also :meth:`InteractionResponse.pong`
     .. attribute:: channel_message
 
-        Respond to the interaction with a message.
+        Responds to the interaction with a message.
 
         See also :meth:`InteractionResponse.send_message`
     .. attribute:: deferred_channel_message
@@ -245,6 +245,16 @@ InteractionResponseType
         Responds to the interaction by displaying a modal.
 
         See also :meth:`InteractionResponse.send_modal`
+
+        .. versionadded:: 2.4
+    .. attribute:: premium_required
+
+        Responds to the interaction with a message containing an upgrade button.
+        Only available for applications with monetization enabled.
+
+        See also :meth:`InteractionResponse.send_premium_required`
+
+        .. versionadded:: 2.10
 
 Events
 ------

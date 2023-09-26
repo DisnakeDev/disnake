@@ -330,16 +330,6 @@ class Interaction(Generic[ClientT]):
 
         Fetches the original interaction response message associated with the interaction.
 
-        Here is a table with response types and their associated original response:
-
-        .. csv-table::
-            :header: "Response type", "Original response"
-
-            :meth:`InteractionResponse.send_message`, "The message you sent"
-            :meth:`InteractionResponse.edit_message`, "The message you edited"
-            :meth:`InteractionResponse.defer`, "The message with thinking state (bot is thinking...)"
-            "Other response types", "None"
-
         Repeated calls to this will return a cached value.
 
         .. versionchanged:: 2.6
@@ -1404,6 +1394,35 @@ class InteractionResponse:
 
         if modal is not None:
             parent._state.store_modal(parent.author.id, modal)
+
+    async def send_premium_required(self) -> None:
+        """|coro|
+
+        Responds to this interaction with a message containing an upgrade button.
+
+        Only available for applications with monetization enabled.
+
+        Raises
+        ------
+        HTTPException
+            Sending the response has failed.
+        InteractionResponded
+            This interaction has already been responded to before.
+        """
+        if self._response_type is not None:
+            raise InteractionResponded(self._parent)
+
+        parent = self._parent
+        adapter = async_context.get()
+        response_type = InteractionResponseType.premium_required
+        await adapter.create_interaction_response(
+            parent.id,
+            parent.token,
+            session=parent._session,
+            type=response_type.value,
+        )
+
+        self._response_type = response_type
 
 
 class _InteractionMessageState:

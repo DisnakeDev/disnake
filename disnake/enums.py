@@ -605,14 +605,13 @@ class InteractionType(Enum):
 
 class InteractionResponseType(Enum):
     pong = 1
-    # ack = 2 (deprecated)
-    # channel_message = 3 (deprecated)
-    channel_message = 4  # (with source)
-    deferred_channel_message = 5  # (with source)
-    deferred_message_update = 6  # for components
-    message_update = 7  # for components
-    application_command_autocomplete_result = 8  # for autocomplete
-    modal = 9  # for modals
+    channel_message = 4
+    deferred_channel_message = 5
+    deferred_message_update = 6
+    message_update = 7
+    application_command_autocomplete_result = 8
+    modal = 9
+    premium_required = 10
 
 
 class VideoQualityMode(Enum):
