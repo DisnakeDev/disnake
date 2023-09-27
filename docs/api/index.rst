@@ -114,6 +114,7 @@ Documents
     misc
     permissions
     roles
+    skus
     stage_instances
     stickers
     users

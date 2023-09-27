@@ -42,6 +42,7 @@ __all__ = (
     "MemberFlags",
     "RoleFlags",
     "AttachmentFlags",
+    "SKUFlags",
 )
 
 BF = TypeVar("BF", bound="BaseFlags")
@@ -2451,3 +2452,90 @@ class AttachmentFlags(BaseFlags):
     def is_remix(self):
         """:class:`bool`: Returns ``True`` if the attachment has been edited using the Remix feature."""
         return 1 << 2
+
+
+class SKUFlags(BaseFlags):
+    """Wraps up Discord SKU flags.
+
+    .. container:: operations
+
+        .. describe:: x == y
+
+            Checks if two SKUFlags instances are equal.
+        .. describe:: x != y
+
+            Checks if two SKUFlags instances are not equal.
+        .. describe:: x <= y
+
+            Checks if an SKUFlags instance is a subset of another SKUFlags instance.
+        .. describe:: x >= y
+
+            Checks if an SKUFlags instance is a superset of another SKUFlags instance.
+        .. describe:: x < y
+
+            Checks if an SKUFlags instance is a strict subset of another SKUFlags instance.
+        .. describe:: x > y
+
+            Checks if an SKUFlags instance is a strict superset of another SKUFlags instance.
+        .. describe:: x | y, x |= y
+
+            Returns a new SKUFlags instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
+        .. describe:: x & y, x &= y
+
+            Returns a new SKUFlags instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new SKUFlags instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+        .. describe:: ~x
+
+            Returns a new SKUFlags instance with all flags from x inverted.
+        .. describe:: hash(x)
+
+            Returns the flag's hash.
+        .. describe:: iter(x)
+
+            Returns an iterator of ``(name, value)`` pairs. This allows it
+            to be, for example, constructed as a dict or a list of pairs.
+            Note that aliases are not shown.
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: SKUFlags.y | SKUFlags.z, SKUFlags(y=True) | SKUFlags.z
+
+            Returns a SKUFlags instance with all provided flags enabled.
+
+        .. describe:: ~SKUFlags.y
+
+            Returns a SKUFlags instance with all flags except ``y`` inverted from their default value.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    value: :class:`int`
+        The raw value. You should query flags via the properties
+        rather than using this raw value.
+    """
+
+    __slots__ = ()
+
+    if TYPE_CHECKING:
+
+        @_generated
+        def __init__(
+            self, *, guild_subscription: bool = ..., user_subscription: bool = ...
+        ) -> None:
+            ...
+
+    @flag_value
+    def guild_subscription(self):
+        """:class:`bool`: Returns ``True`` if the SKU is an application subscription applied to a guild."""
+        return 1 << 7
+
+    @flag_value
+    def user_subscription(self):
+        """:class:`bool`: Returns ``True`` if the SKU is an application subscription applied to a user."""
+        return 1 << 8

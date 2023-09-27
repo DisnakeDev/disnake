@@ -67,6 +67,7 @@ __all__ = (
     "Event",
     "ApplicationRoleConnectionMetadataType",
     "OnboardingPromptType",
+    "SKUType",
 )
 
 
@@ -1306,6 +1307,11 @@ class ApplicationRoleConnectionMetadataType(Enum):
 class OnboardingPromptType(Enum):
     multiple_choice = 0
     dropdown = 1
+
+
+class SKUType(Enum):
+    subscription = 5
+    subscription_group = 6
 
 
 T = TypeVar("T")
