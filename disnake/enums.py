@@ -68,6 +68,7 @@ __all__ = (
     "ApplicationRoleConnectionMetadataType",
     "OnboardingPromptType",
     "SKUType",
+    "EntitlementType",
 )
 
 
@@ -1312,6 +1313,10 @@ class OnboardingPromptType(Enum):
 class SKUType(Enum):
     subscription = 5
     subscription_group = 6
+
+
+class EntitlementType(Enum):
+    application_subscription = 8
 
 
 T = TypeVar("T")

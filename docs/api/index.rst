@@ -101,6 +101,7 @@ Documents
     clients
     components
     emoji
+    entitlements
     events
     exceptions
     guilds
