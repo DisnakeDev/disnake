@@ -65,6 +65,7 @@ from .invite import Invite
 from .iterators import GuildIterator
 from .mentions import AllowedMentions
 from .object import Object
+from .sku import SKU
 from .stage_instance import StageInstance
 from .state import ConnectionState
 from .sticker import GuildSticker, StandardSticker, StickerPack, _sticker_factory
@@ -2973,3 +2974,24 @@ class Client:
             self.application_id, payload
         )
         return [ApplicationRoleConnectionMetadata._from_data(record) for record in data]
+
+    async def skus(self) -> List[SKU]:
+        """|coro|
+
+        Retrieves the :class:`.SKU`\\s for the application.
+
+        To manage application subscription entitlements, you should use the SKU
+        with :attr:`.SKUType.subscription`.
+
+        Raises
+        ------
+        HTTPException
+            Retrieving the SKUs failed.
+
+        Returns
+        -------
+        List[:class:`.SKU`]
+            The list of SKUs.
+        """
+        data = await self.http.get_skus(self.application_id)
+        return [SKU(data=d) for d in data]
