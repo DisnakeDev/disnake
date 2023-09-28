@@ -62,7 +62,7 @@ from .guild_preview import GuildPreview
 from .http import HTTPClient
 from .i18n import LocalizationProtocol, LocalizationStore
 from .invite import Invite
-from .iterators import GuildIterator
+from .iterators import EntitlementIterator, GuildIterator
 from .mentions import AllowedMentions
 from .object import Object
 from .sku import SKU
@@ -2995,3 +2995,71 @@ class Client:
         """
         data = await self.http.get_skus(self.application_id)
         return [SKU(data=d) for d in data]
+
+    # TODO: consider adding `abc.User.entitlements` and/or `Guild.entitlements` iterators as shortcuts?
+    def entitlements(
+        self,
+        *,
+        limit: Optional[int] = 100,
+        before: Optional[SnowflakeTime] = None,
+        after: Optional[SnowflakeTime] = None,
+        user: Optional[Snowflake] = None,
+        guild: Optional[Snowflake] = None,
+        skus: Optional[Sequence[Snowflake]] = None,
+        exclude_ended: bool = False,
+    ) -> EntitlementIterator:
+        """Retrieves an :class:`.AsyncIterator` that enables receiving entitlements for the application.
+
+        .. note::
+
+            This method is an API call. To get the entitlements of the invoking user in interactions,
+            consider using :attr:`.Interaction.entitlements`.
+
+        If ``before`` is specified, entitlements are returned in reverse order,
+        i.e. starting with the highest ID.
+
+        All parameters are optional.
+
+        .. versionadded:: 2.10
+
+        Parameters
+        ----------
+        limit: Optional[:class:`int`]
+            The number of entitlements to retrieve.
+            If ``None``, retrieves every entitlement.
+            Note, however, that this would make it a slow operation.
+            Defaults to ``100``.
+        before: Union[:class:`.abc.Snowflake`, :class:`datetime.datetime`]
+            Retrieves entitlements created before this date or object.
+        after: Union[:class:`.abc.Snowflake`, :class:`datetime.datetime`]
+            Retrieve entitlements created after this date or object.
+        user: Optional[:class:`.abc.Snowflake`]
+            The user to retrieve entitlements for.
+        guild: Optional[:class:`.abc.Snowflake`]
+            The guild to retrieve entitlements for.
+        skus: Optional[Sequence[:class:`.abc.Snowflake`]]
+            The SKUs for which entitlements are retrieved.
+        exclude_ended: :class:`bool`
+            Whether to exclude ended/expired entitlements. Defaults to ``False``.
+
+        Raises
+        ------
+        HTTPException
+            Retrieving the entitlements failed.
+
+        Yields
+        ------
+        :class:`.Entitlement`
+            The entitlements for the given parameters.
+        """
+        return EntitlementIterator(
+            self.application_id,
+            state=self._connection,
+            limit=limit,
+            before=before,
+            after=after,
+            user_id=user.id if user is not None else None,
+            guild_id=guild.id if guild is not None else None,
+            sku_ids=[sku.id for sku in skus] if skus else None,
+            exclude_ended=exclude_ended,
+        )

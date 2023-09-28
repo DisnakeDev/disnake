@@ -22,6 +22,10 @@ __all__ = ("Entitlement",)
 class Entitlement(Hashable):
     """Represents an entitlement.
 
+    This can be retrieved using :meth:`Client.entitlements`, from
+    :attr:`Interaction.entitlements` when using interactions, or from the
+    :func:`on_entitlement_create`/:func:`on_entitlement_update` events.
+
     .. container:: operations
 
         .. describe:: x == y

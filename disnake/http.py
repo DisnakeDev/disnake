@@ -60,6 +60,7 @@ if TYPE_CHECKING:
         components,
         embed,
         emoji,
+        entitlement,
         gateway,
         guild,
         guild_scheduled_event,
@@ -2280,6 +2281,40 @@ class HTTPClient:
         return self.request(
             Route("GET", "/applications/{application_id}/skus", application_id=application_id)
         )
+
+    def get_entitlements(
+        self,
+        application_id: Snowflake,
+        *,
+        # TODO: what happens when both are specified?
+        before: Optional[Snowflake] = None,
+        after: Optional[Snowflake] = None,
+        limit: int = 100,
+        user_id: Optional[Snowflake] = None,
+        guild_id: Optional[Snowflake] = None,
+        sku_ids: Optional[SnowflakeList] = None,
+        # TODO: what's the default for this in the API?
+        exclude_ended: bool = False,
+    ) -> Response[List[entitlement.Entitlement]]:
+        params: Dict[str, Any] = {
+            "limit": limit,
+            "exclude_ended": int(exclude_ended),
+        }
+        if before is not None:
+            params["before"] = before
+        if after is not None:
+            params["after"] = after
+        if user_id is not None:
+            params["user_id"] = user_id
+        if guild_id is not None:
+            params["guild_id"] = guild_id
+        if sku_ids:
+            params["sku_ids"] = ",".join(map(str, sku_ids))
+
+        r = Route(
+            "GET", "/applications/{application_id}/entitlements", application_id=application_id
+        )
+        return self.request(r, params=params)
 
     # Application commands (global)
 
