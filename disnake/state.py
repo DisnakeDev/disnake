@@ -45,6 +45,7 @@ from .channel import (
     _guild_channel_factory,
 )
 from .emoji import Emoji
+from .entitlement import Entitlement
 from .enums import ApplicationCommandType, ChannelType, ComponentType, MessageType, Status, try_enum
 from .flags import ApplicationFlags, Intents, MemberCacheFlags
 from .guild import Guild
@@ -1904,6 +1905,21 @@ class ConnectionState:
             webhooks={},
         )
         self.dispatch("audit_log_entry_create", entry)
+
+    # TODO: these are untested (like everything else, tbqh); the _UPDATE and _DELETE contents are undocumented
+    # TODO: do these get called for test entitlements?
+    # TODO: presumably no intents required?
+    def parse_entitlement_create(self, data: gateway.EntitlementCreate) -> None:
+        entitlement = Entitlement(data=data, state=self)
+        self.dispatch("entitlement_create", entitlement)
+
+    def parse_entitlement_update(self, data: gateway.EntitlementUpdate) -> None:
+        entitlement = Entitlement(data=data, state=self)
+        self.dispatch("entitlement_update", entitlement)
+
+    def parse_entitlement_delete(self, data: gateway.EntitlementDelete) -> None:
+        entitlement = Entitlement(data=data, state=self)
+        self.dispatch("entitlement_delete", entitlement)
 
     def _get_reaction_user(
         self, channel: MessageableChannel, user_id: int

@@ -1243,6 +1243,15 @@ class Event(Enum):
     """Called when someone begins typing a message regardless of whether `Intents.members` and `Intents.guilds` are enabled.
     Represents the :func:`on_raw_typing` event.
     """
+    entitlement_create = "entitlement_create"
+    """Called when a user subscribes to an SKU, creating a new :class:`Entitlement`.
+    Represents the :func:`on_entitlement_create` event."""
+    entitlement_update = "entitlement_update"
+    """Called when a user's subscription renews.
+    Represents the :func:`on_entitlement_update` event."""
+    entitlement_delete = "entitlement_delete"
+    """Called when a user's entitlement is deleted.
+    Represents the :func:`on_entitlement_delete` event."""
     # ext.commands events
     command = "command"
     """Called when a command is found and is about to be invoked.

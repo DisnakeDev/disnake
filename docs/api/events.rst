@@ -1442,6 +1442,42 @@ This section documents events related to Discord chat messages.
     :param data: The raw event payload data.
     :type data: :class:`RawTypingEvent`
 
+Entitlements
+~~~~~~~~~~~~
+
+This section documents events related to entitlements, which are related to application subscriptions.
+
+.. function:: on_entitlement_create(entitlement)
+
+    Called when a user subscribes to an SKU, creating a new :class:`Entitlement`.
+
+    .. versionadded:: 2.10
+
+    :param entitlement: The entitlement that was created.
+    :type entitlement: :class:`Entitlement`
+
+.. function:: on_entitlement_update(entitlement)
+
+    Called when a user's subscription renews.
+    The :attr:`Entitlement.ends_at` attribute reflects the new expiration date.
+
+    .. versionadded:: 2.10
+
+    :param entitlement: The entitlement that was updated.
+    :type entitlement: :class:`Entitlement`
+
+.. function:: on_entitlement_delete(entitlement)
+
+    Called when a user's entitlement is deleted.
+
+    .. note::
+        This does not get called when an entitlement expires;
+        it only occurs in case of refunds or due to manual removal.
+
+    .. versionadded:: 2.10
+
+    :param entitlement: The entitlement that was deleted.
+    :type entitlement: :class:`Entitlement`
 
 Enumerations
 ------------

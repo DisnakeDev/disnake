@@ -34,3 +34,10 @@ EntitlementType
     .. attribute:: application_subscription
 
         Represents an entitlement for an application subscription.
+
+Events
+------
+
+- :func:`on_entitlement_create(entitlement) <disnake.on_entitlement_create>`
+- :func:`on_entitlement_update(entitlement) <disnake.on_entitlement_update>`
+- :func:`on_entitlement_delete(entitlement) <disnake.on_entitlement_delete>`

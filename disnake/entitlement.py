@@ -23,8 +23,8 @@ class Entitlement(Hashable):
     """Represents an entitlement.
 
     This can be retrieved using :meth:`Client.entitlements`, from
-    :attr:`Interaction.entitlements` when using interactions, or from the
-    :func:`on_entitlement_create`/:func:`on_entitlement_update` events.
+    :attr:`Interaction.entitlements` when using interactions, or from
+    events (e.g. :func:`on_entitlement_create`).
 
     Note that some entitlements may have ended already; consider using
     :meth:`is_active` to check whether a given entitlement is considered valid at the current time,
