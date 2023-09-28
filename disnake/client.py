@@ -3014,8 +3014,8 @@ class Client:
 
         .. note::
 
-            This method is an API call. To get the entitlements of the invoking user in interactions,
-            consider using :attr:`.Interaction.entitlements`.
+            This method is an API call. To get the entitlements of the invoking user/guild
+            in interactions, consider using :attr:`.Interaction.entitlements`.
 
         If ``before`` is specified, entitlements are returned in reverse order,
         i.e. starting with the highest ID.

@@ -9,6 +9,7 @@ from typing_extensions import NotRequired
 from .channel import ChannelType
 from .components import Component, Modal
 from .embed import Embed
+from .entitlement import Entitlement
 from .i18n import LocalizationDict
 from .member import Member, MemberWithUser
 from .role import Role
@@ -264,6 +265,7 @@ class _BaseUserInteraction(_BaseInteraction):
     app_permissions: NotRequired[str]
     guild_id: NotRequired[Snowflake]
     guild_locale: NotRequired[str]
+    entitlements: List[Entitlement]
     # one of these two will always exist, according to docs
     member: NotRequired[MemberWithUser]
     user: NotRequired[User]
