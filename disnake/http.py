@@ -2316,6 +2316,40 @@ class HTTPClient:
         )
         return self.request(r, params=params)
 
+    def create_test_entitlement(
+        self,
+        application_id: Snowflake,
+        sku_id: Snowflake,
+        owner_id: Snowflake,
+        *,
+        owner_type: Literal[1, 2],  # 1: user, 2: guild
+    ) -> Response[entitlement.Entitlement]:
+        payload: Dict[str, Any] = {
+            "sku_id": sku_id,
+            "owner_id": owner_id,
+            "owner_type": owner_type,
+        }
+        return self.request(
+            Route(
+                "POST", "/applications/{application_id}/entitlements", application_id=application_id
+            ),
+            json=payload,
+        )
+
+    def delete_test_entitlement(
+        self,
+        application_id: Snowflake,
+        entitlement_id: Snowflake,
+    ) -> Response[None]:
+        return self.request(
+            Route(
+                "DELETE",
+                "/applications/{application_id}/entitlements/{entitlement_id}",
+                application_id=application_id,
+                entitlement_id=entitlement_id,
+            )
+        )
+
     # Application commands (global)
 
     def get_global_commands(

@@ -32,7 +32,7 @@ from typing import (
 
 import aiohttp
 
-from . import utils
+from . import abc, utils
 from .activity import ActivityTypes, BaseActivity, create_activity
 from .app_commands import (
     APIMessageCommand,
@@ -46,6 +46,7 @@ from .application_role_connection import ApplicationRoleConnectionMetadata
 from .backoff import ExponentialBackoff
 from .channel import PartialMessageable, _threaded_channel_factory
 from .emoji import Emoji
+from .entitlement import Entitlement
 from .enums import ApplicationCommandType, ChannelType, Event, Status
 from .errors import (
     ConnectionClosed,
@@ -3065,3 +3066,36 @@ class Client:
             sku_ids=[sku.id for sku in skus] if skus else None,
             exclude_ended=exclude_ended,
         )
+
+    # TODO: naming (create_entitlement?)
+    async def create_test_entitlement(
+        self, sku: Snowflake, owner: Union[abc.User, Guild]
+    ) -> Entitlement:
+        """|coro|
+
+        Creates a new :class:`.Entitlement` for the given user or guild, with no expiry.
+
+        Parameters
+        ----------
+        sku: :class:`.abc.Snowflake`
+            The :class:`.SKU` to grant the entitlement for.
+        owner: Union[:class:`.abc.User`, :class:`.Guild`]
+            The user or guild to grant the entitlement to.
+
+        Raises
+        ------
+        HTTPException
+            Creating the entitlement failed.
+
+        Returns
+        -------
+        :class:`.Entitlement`
+            The newly created entitlement.
+        """
+        data = await self.http.create_test_entitlement(
+            self.application_id,
+            sku_id=sku.id,
+            owner_id=owner.id,
+            owner_type=1 if isinstance(owner, abc.User) else 2,
+        )
+        return Entitlement(data=data, state=self._connection)
