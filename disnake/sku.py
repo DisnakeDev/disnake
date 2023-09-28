@@ -18,6 +18,8 @@ __all__ = ("SKU",)
 class SKU(Hashable):
     """Represents an SKU.
 
+    This can be retrieved using :meth:`Client.skus`.
+
     .. container:: operations
 
         .. describe:: x == y

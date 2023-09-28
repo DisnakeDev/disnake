@@ -26,6 +26,10 @@ class Entitlement(Hashable):
     :attr:`Interaction.entitlements` when using interactions, or from the
     :func:`on_entitlement_create`/:func:`on_entitlement_update` events.
 
+    Note that some entitlements may have ended already; consider using
+    :meth:`is_active` to check whether a given entitlement is considered valid at the current time,
+    or use ``exclude_ended=True`` when fetching entitlements using :meth:`Client.entitlements`.
+
     .. container:: operations
 
         .. describe:: x == y
@@ -52,16 +56,22 @@ class Entitlement(Hashable):
         The ID of the associated SKU.
     user_id: Optional[:class:`int`]
         The ID of the user that is granted access to the entitlement's SKU.
+
+        See also :attr:`user`.
     guild_id: Optional[:class:`int`]
         The ID of the guild that is granted access to the entitlement's SKU.
+
+        See also :attr:`guild`.
     application_id: :class:`int`
         The parent application's ID.
     starts_at: Optional[:class:`datetime.datetime`]
-        The time at which the entitlement starts being valid.
+        The time at which the entitlement starts being active.
         Set to ``None`` when this is a test entitlement.
     ends_at: Optional[:class:`datetime.datetime`]
-        The time at which the entitlement stops being valid.
+        The time at which the entitlement stops being active.
         Set to ``None`` when this is a test entitlement.
+
+        You can use :meth:`is_active` to check whether this entitlement is still active.
     """
 
     __slots__ = (
@@ -109,12 +119,20 @@ class Entitlement(Hashable):
     def user(self) -> Optional[User]:
         """Optional[:class:`User`]: The user that is granted access to
         this entitlement's SKU, if applicable.
+
+        Requires the user to be cached.
+        See also :attr:`user_id`.
         """
         return self._state.get_user(self.user_id)
 
-    # TODO: naming - (is_)valid/active/expired ?
-    @property
-    def is_valid(self) -> bool:
+    def is_active(self) -> bool:
+        """Whether the entitlement is currently active,
+        based on :attr:`starts_at` and :attr:`ends_at`.
+
+        Always returns ``True`` for test entitlements.
+
+        :return type: :class:`bool`
+        """
         now = utcnow()
         if self.starts_at is not None and now < self.starts_at:
             return False

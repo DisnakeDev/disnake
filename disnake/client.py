@@ -2983,6 +2983,8 @@ class Client:
         To manage application subscription entitlements, you should use the SKU
         with :attr:`.SKUType.subscription`.
 
+        .. versionadded:: 2.10
+
         Raises
         ------
         HTTPException
