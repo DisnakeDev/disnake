@@ -83,6 +83,10 @@ AuditLogEvent = Literal[
     141,
     142,
     143,
+    144,
+    145,
+    150,
+    151,
 ]
 
 
@@ -296,10 +300,12 @@ AuditLogChange = Union[
 ]
 
 
+# All of these are technically only required for matching event types,
+# but they're typed as required keys for simplicity
 class AuditEntryInfo(TypedDict):
     delete_member_days: str
     members_removed: str
-    channel_id: Snowflake
+    channel_id: Optional[Snowflake]
     message_id: Snowflake
     count: str
     id: Snowflake
@@ -308,6 +314,7 @@ class AuditEntryInfo(TypedDict):
     application_id: Snowflake
     auto_moderation_rule_name: str
     auto_moderation_rule_trigger_type: str
+    integration_type: str
 
 
 class AuditLogEntry(TypedDict):

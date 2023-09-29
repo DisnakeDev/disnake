@@ -35,7 +35,6 @@ class Sidebar {
       let next = ref.nextElementSibling;
 
       if (next && next.tagName === "UL") {
-
         let icon = document.createElement('span');
         icon.className = 'material-icons collapsible-arrow expanded';
         icon.innerText = 'expand_more';
@@ -54,24 +53,36 @@ class Sidebar {
 
         ref.classList.add('ref-internal-padding')
         ref.parentNode.insertBefore(icon, ref);
+
+        // collapse all top-level toc entries, except the current page's
+        // (i.e. all entries that don't contain a `#`)
+        const refUrl = new URL(ref.href);
+        if (!refUrl.hash) {
+          // `false` to update immediately
+          this.collapseSection(icon, false);
+        }
       }
     }
   }
 
-  collapseSection(icon) {
+  collapseSection(icon, defer = true) {
     icon.classList.remove('expanded');
     icon.classList.add('collapsed');
     let children = icon.nextElementSibling.nextElementSibling;
     // <arrow><heading>
     // --> <square><children>
-    setTimeout(() => children.style.display = "none", 75)
+    const update = () => children.style.display = "none";
+    if (defer) setTimeout(update, 75);
+    else update();
   }
 
-  expandSection(icon) {
+  expandSection(icon, defer = true) {
     icon.classList.remove('collapse');
     icon.classList.add('expanded');
     let children = icon.nextElementSibling.nextElementSibling;
-    setTimeout(() => children.style.display = "block", 75)
+    const update = () => children.style.display = "block";
+    if (defer) setTimeout(update, 75);
+    else update();
   }
 
   setActiveLink(section) {
@@ -92,6 +103,13 @@ class Sidebar {
     }
   }
 
+  scrollToCurrent() {
+    const currentSection = this.element.querySelector("li.current");
+    if (currentSection) {
+      // setTimeout(..., 0) to avoid layout race condition
+      setTimeout(() => currentSection.scrollIntoView({block: "center"}), 0);
+    }
+  }
 }
 
 function getCurrentSection() {
@@ -101,10 +119,12 @@ function getCurrentSection() {
   }
   else {
     if (sections) {
+      const headerOffset = document.querySelector("main").offsetTop;  // height of header
       sections.forEach(section => {
-        let rect = section.getBoundingClientRect();
-        // offset to give space for the sticky header
-        if (rect.top - 90 + document.body.offsetTop < 1) {
+        const rect = section.getBoundingClientRect();
+        // plus offset for more leniency
+        // (section doesn't have to be scrolled all the way to the top to be considered active)
+        if (rect.top < headerOffset + 50) {
           currentSection = section;
         }
       });
@@ -113,11 +133,34 @@ function getCurrentSection() {
   return currentSection;
 }
 
+// create interactive sidebar
 document.addEventListener('DOMContentLoaded', () => {
   sidebar = new Sidebar(document.getElementById('sidebar'));
   sidebar.createCollapsableSections();
+  sidebar.scrollToCurrent();
 
   window.addEventListener('scroll', () => {
     sidebar.setActiveLink(getCurrentSection());
   });
 });
+
+function sidebarSearch() {
+  const filter = document.getElementById('sidebar-search-box').value.toUpperCase();
+  const items = document.querySelectorAll('#sidebar li')
+
+  // Loop through all list items, and hide those who don't match the search query
+  for (const item of items) {
+    const a = item.querySelector("a");
+    const itemText = a.textContent || a.innerText;
+    if (itemText.toUpperCase().indexOf(filter) > -1) {
+      // we need to convert all of the parents back into visible mode
+      let el = item;
+      while (el) {
+        el.style.display = "";
+        el = el.parentNode.closest("#sidebar li");
+      }
+    } else {
+      item.style.display = "none";
+    }
+  }
+}

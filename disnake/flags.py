@@ -40,6 +40,8 @@ __all__ = (
     "ChannelFlags",
     "AutoModKeywordPresets",
     "MemberFlags",
+    "RoleFlags",
+    "AttachmentFlags",
 )
 
 BF = TypeVar("BF", bound="BaseFlags")
@@ -283,8 +285,7 @@ class BaseFlags:
 
 
 class ListBaseFlags(BaseFlags, no_fill_flags=True):
-    """
-    A base class for flags that aren't powers of 2.
+    """A base class for flags that aren't powers of 2.
     Instead, values are used as exponents to map to powers of 2 to avoid collisions,
     and only the combined value is stored, which allows all bitwise operations to work as expected.
     """
@@ -318,8 +319,7 @@ class ListBaseFlags(BaseFlags, no_fill_flags=True):
 
 
 class SystemChannelFlags(BaseFlags, inverted=True):
-    """
-    Wraps up a Discord system channel flag value.
+    """Wraps up a Discord system channel flag value.
 
     Similar to :class:`Permissions`\\, the properties provided are two way.
     You can set and retrieve individual bits using the properties as if they
@@ -419,6 +419,8 @@ class SystemChannelFlags(BaseFlags, inverted=True):
             join_notification_replies: bool = ...,
             join_notifications: bool = ...,
             premium_subscriptions: bool = ...,
+            role_subscription_purchase_notification_replies: bool = ...,
+            role_subscription_purchase_notifications: bool = ...,
         ) -> None:
             ...
 
@@ -439,36 +441,53 @@ class SystemChannelFlags(BaseFlags, inverted=True):
             raise TypeError("Value to set for SystemChannelFlags must be a bool.")
 
     @flag_value
-    def join_notifications(self):
+    def join_notifications(self) -> int:
         """:class:`bool`: Returns ``True`` if the system channel is used for member join notifications."""
-        return 1
+        return 1 << 0
 
     @flag_value
-    def premium_subscriptions(self):
+    def premium_subscriptions(self) -> int:
         """:class:`bool`: Returns ``True`` if the system channel is used for "Nitro boosting" notifications."""
-        return 2
+        return 1 << 1
 
     @flag_value
-    def guild_reminder_notifications(self):
+    def guild_reminder_notifications(self) -> int:
         """:class:`bool`: Returns ``True`` if the system channel is used for server setup helpful tips notifications.
 
         .. versionadded:: 2.0
         """
-        return 4
+        return 1 << 2
 
     @flag_value
-    def join_notification_replies(self):
+    def join_notification_replies(self) -> int:
         """:class:`bool`: Returns ``True`` if the system channel shows sticker reply
         buttons for member join notifications.
 
         .. versionadded:: 2.3
         """
-        return 8
+        return 1 << 3
+
+    @flag_value
+    def role_subscription_purchase_notifications(self):
+        """:class:`bool`: Returns ``True`` if the system channel shows role
+        subscription purchase/renewal notifications.
+
+        .. versionadded:: 2.9
+        """
+        return 1 << 4
+
+    @flag_value
+    def role_subscription_purchase_notification_replies(self):
+        """:class:`bool`: Returns ``True`` if the system channel shows sticker reply
+        buttons for role subscription purchase/renewal notifications.
+
+        .. versionadded:: 2.9
+        """
+        return 1 << 5
 
 
 class MessageFlags(BaseFlags):
-    """
-    Wraps up a Discord Message flag value.
+    """Wraps up a Discord Message flag value.
 
     See :class:`SystemChannelFlags`.
 
@@ -568,6 +587,7 @@ class MessageFlags(BaseFlags):
             failed_to_mention_roles_in_thread: bool = ...,
             has_thread: bool = ...,
             is_crossposted: bool = ...,
+            is_voice_message: bool = ...,
             loading: bool = ...,
             source_message_deleted: bool = ...,
             suppress_embeds: bool = ...,
@@ -598,7 +618,7 @@ class MessageFlags(BaseFlags):
 
     @flag_value
     def urgent(self):
-        """:class:`bool`: Returns ``True`` if the source message is an urgent message.
+        """:class:`bool`: Returns ``True`` if the message is an urgent message.
 
         An urgent message is one sent by Discord Trust and Safety.
         """
@@ -606,7 +626,7 @@ class MessageFlags(BaseFlags):
 
     @flag_value
     def has_thread(self):
-        """:class:`bool`: Returns ``True`` if the source message is associated with a thread.
+        """:class:`bool`: Returns ``True`` if the message is associated with a thread.
 
         .. versionadded:: 2.0
         """
@@ -614,7 +634,7 @@ class MessageFlags(BaseFlags):
 
     @flag_value
     def ephemeral(self):
-        """:class:`bool`: Returns ``True`` if the source message is ephemeral.
+        """:class:`bool`: Returns ``True`` if the message is ephemeral.
 
         .. versionadded:: 2.0
         """
@@ -622,7 +642,7 @@ class MessageFlags(BaseFlags):
 
     @flag_value
     def loading(self):
-        """:class:`bool`: Returns ``True`` if the source message is a deferred
+        """:class:`bool`: Returns ``True`` if the message is a deferred
         interaction response and shows a "thinking" state.
 
         .. versionadded:: 2.3
@@ -631,7 +651,7 @@ class MessageFlags(BaseFlags):
 
     @flag_value
     def failed_to_mention_roles_in_thread(self):
-        """:class:`bool`: Returns ``True`` if the source message failed to
+        """:class:`bool`: Returns ``True`` if the message failed to
         mention some roles and add their members to the thread.
 
         .. versionadded:: 2.4
@@ -640,17 +660,26 @@ class MessageFlags(BaseFlags):
 
     @flag_value
     def suppress_notifications(self):
-        """:class:`bool`: Returns ``True`` if the source message does not
+        """:class:`bool`: Returns ``True`` if the message does not
         trigger push and desktop notifications.
 
         .. versionadded:: 2.9
         """
         return 1 << 12
 
+    @flag_value
+    def is_voice_message(self):
+        """:class:`bool`: Returns ``True`` if the message is a voice message.
+
+        Messages with this flag will have a single audio attachment, and no other content.
+
+        .. versionadded:: 2.9
+        """
+        return 1 << 13
+
 
 class PublicUserFlags(BaseFlags):
-    """
-    Wraps up the Discord User Public flags.
+    """Wraps up the Discord User Public flags.
 
     .. container:: operations
 
@@ -885,8 +914,7 @@ class PublicUserFlags(BaseFlags):
 
 
 class Intents(BaseFlags):
-    """
-    Wraps up a Discord gateway intent flag.
+    """Wraps up a Discord gateway intent flag.
 
     Similar to :class:`Permissions`\\, the properties provided are two way.
     You can set and retrieve individual bits using the properties as if they
@@ -1121,6 +1149,7 @@ class Intents(BaseFlags):
         - :attr:`User.name`
         - :attr:`User.avatar`
         - :attr:`User.discriminator`
+        - :attr:`User.global_name`
 
         For more information go to the :ref:`member intent documentation <need_members_intent>`.
 
@@ -1706,7 +1735,7 @@ class MemberCacheFlags(BaseFlags):
         return self.value == self.DEFAULT_VALUE
 
     @flag_value
-    def voice(self):
+    def voice(self) -> int:
         """:class:`bool`: Whether to cache members that are in voice.
 
         This requires :attr:`Intents.voice_states`.
@@ -1716,7 +1745,7 @@ class MemberCacheFlags(BaseFlags):
         return 1
 
     @flag_value
-    def joined(self):
+    def joined(self) -> int:
         """:class:`bool`: Whether to cache members that joined the guild
         or are chunked as part of the initial log in flow.
 
@@ -1762,8 +1791,7 @@ class MemberCacheFlags(BaseFlags):
 
 
 class ApplicationFlags(BaseFlags):
-    """
-    Wraps up the Discord Application flags.
+    """Wraps up the Discord Application flags.
 
     .. container:: operations
 
@@ -1856,6 +1884,7 @@ class ApplicationFlags(BaseFlags):
         def __init__(
             self,
             *,
+            application_auto_moderation_rule_create_badge: bool = ...,
             application_command_badge: bool = ...,
             embedded: bool = ...,
             gateway_guild_members: bool = ...,
@@ -1867,6 +1896,11 @@ class ApplicationFlags(BaseFlags):
             verification_pending_guild_limit: bool = ...,
         ) -> None:
             ...
+
+    @flag_value
+    def application_auto_moderation_rule_create_badge(self):
+        """:class:`bool`: Returns ``True`` if the application uses the Auto Moderation API."""
+        return 1 << 6
 
     @flag_value
     def gateway_presence(self):
@@ -2045,8 +2079,7 @@ class ChannelFlags(BaseFlags):
 
 
 class AutoModKeywordPresets(ListBaseFlags):
-    """
-    Wraps up the pre-defined auto moderation keyword lists, provided by Discord.
+    """Wraps up the pre-defined auto moderation keyword lists, provided by Discord.
 
     .. container:: operations
 
@@ -2258,3 +2291,163 @@ class MemberFlags(BaseFlags):
     def started_onboarding(self):
         """:class:`bool`: Returns ``True`` if the member has started onboarding."""
         return 1 << 3
+
+
+class RoleFlags(BaseFlags):
+    """Wraps up Discord Role flags.
+
+    .. container:: operations
+
+        .. describe:: x == y
+
+            Checks if two RoleFlags instances are equal.
+        .. describe:: x != y
+
+            Checks if two RoleFlags instances are not equal.
+        .. describe:: x <= y
+
+            Checks if an RoleFlags instance is a subset of another RoleFlags instance.
+        .. describe:: x >= y
+
+            Checks if an RoleFlags instance is a superset of another RoleFlags instance.
+        .. describe:: x < y
+
+            Checks if an RoleFlags instance is a strict subset of another RoleFlags instance.
+        .. describe:: x > y
+
+            Checks if an RoleFlags instance is a strict superset of another RoleFlags instance.
+        .. describe:: x | y, x |= y
+
+            Returns a new RoleFlags instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
+        .. describe:: x & y, x &= y
+
+            Returns a new RoleFlags instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new RoleFlags instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+        .. describe:: ~x
+
+            Returns a new RoleFlags instance with all flags from x inverted.
+        .. describe:: hash(x)
+
+            Returns the flag's hash.
+        .. describe:: iter(x)
+
+            Returns an iterator of ``(name, value)`` pairs. This allows it
+            to be, for example, constructed as a dict or a list of pairs.
+            Note that aliases are not shown.
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: RoleFlags.y | RoleFlags.z, RoleFlags(y=True) | RoleFlags.z
+
+            Returns a RoleFlags instance with all provided flags enabled.
+
+        .. describe:: ~RoleFlags.y
+
+            Returns a RoleFlags instance with all flags except ``y`` inverted from their default value.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    value: :class:`int`
+        The raw value. You should query flags via the properties
+        rather than using this raw value.
+    """
+
+    __slots__ = ()
+
+    if TYPE_CHECKING:
+
+        @_generated
+        def __init__(self, *, in_prompt: bool = ...) -> None:
+            ...
+
+    @flag_value
+    def in_prompt(self):
+        """:class:`bool`: Returns ``True`` if the role can be selected by members in an onboarding prompt."""
+        return 1 << 0
+
+
+class AttachmentFlags(BaseFlags):
+    """Wraps up Discord Attachment flags.
+
+    .. container:: operations
+
+        .. describe:: x == y
+
+            Checks if two AttachmentFlags instances are equal.
+        .. describe:: x != y
+
+            Checks if two AttachmentFlags instances are not equal.
+        .. describe:: x <= y
+
+            Checks if an AttachmentFlags instance is a subset of another AttachmentFlags instance.
+        .. describe:: x >= y
+
+            Checks if an AttachmentFlags instance is a superset of another AttachmentFlags instance.
+        .. describe:: x < y
+
+            Checks if an AttachmentFlags instance is a strict subset of another AttachmentFlags instance.
+        .. describe:: x > y
+
+            Checks if an AttachmentFlags instance is a strict superset of another AttachmentFlags instance.
+        .. describe:: x | y, x |= y
+
+            Returns a new AttachmentFlags instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
+        .. describe:: x & y, x &= y
+
+            Returns a new AttachmentFlags instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new AttachmentFlags instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+        .. describe:: ~x
+
+            Returns a new AttachmentFlags instance with all flags from x inverted.
+        .. describe:: hash(x)
+
+            Returns the flag's hash.
+        .. describe:: iter(x)
+
+            Returns an iterator of ``(name, value)`` pairs. This allows it
+            to be, for example, constructed as a dict or a list of pairs.
+            Note that aliases are not shown.
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: AttachmentFlags.y | AttachmentFlags.z, AttachmentFlags(y=True) | AttachmentFlags.z
+
+            Returns a AttachmentFlags instance with all provided flags enabled.
+
+        .. describe:: ~AttachmentFlags.y
+
+            Returns a AttachmentFlags instance with all flags except ``y`` inverted from their default value.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    value: :class:`int`
+        The raw value. You should query flags via the properties
+        rather than using this raw value.
+    """
+
+    __slots__ = ()
+
+    if TYPE_CHECKING:
+
+        @_generated
+        def __init__(self, *, is_remix: bool = ...) -> None:
+            ...
+
+    @flag_value
+    def is_remix(self):
+        """:class:`bool`: Returns ``True`` if the attachment has been edited using the Remix feature."""
+        return 1 << 2

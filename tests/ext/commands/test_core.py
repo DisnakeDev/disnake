@@ -25,7 +25,7 @@ class CustomCog(commands.Cog):
 
 
 class TestDecorators:
-    def _test_typing_defaults(self):
+    def _test_typing_defaults(self) -> None:
         base = commands.GroupMixin[None]()
 
         # no cog
@@ -63,7 +63,7 @@ class TestDecorators:
                 expected_text="Group[CustomCog, (a: int, b: str), bool]",
             )
 
-    def _test_typing_cls(self):
+    def _test_typing_cls(self) -> None:
         class CustomCommand(commands.Command):
             ...
 

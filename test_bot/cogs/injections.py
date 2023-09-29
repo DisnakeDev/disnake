@@ -12,7 +12,7 @@ from disnake.ext import commands
 
 
 def injected(user: disnake.User, channel: disnake.TextChannel):
-    """This description should not be shown
+    """An injection callback. This description should not be shown.
 
     Parameters
     ----------
@@ -31,7 +31,7 @@ class PrefixConverter:
         self.prefix = prefix
         self.suffix = suffix
 
-    def __call__(self, inter: disnake.CommandInteraction, a: str = "init"):
+    def __call__(self, inter: disnake.CommandInteraction[commands.Bot], a: str = "init"):
         return self.prefix + a + self.suffix
 
 
@@ -41,7 +41,7 @@ class HopeToGod:
         self.discriminator = discriminator
 
     @commands.converter_method
-    async def convert(cls, inter: disnake.CommandInteraction, user: disnake.User):
+    async def convert(cls, inter: disnake.CommandInteraction[commands.Bot], user: disnake.User):
         return cls(user.name, user.discriminator)
 
     def __repr__(self) -> str:
@@ -62,7 +62,7 @@ async def perhaps_this_is_it(
     disc_channel: disnake.TextChannel = commands.Param(lambda i: i.channel),
     large: int = commands.Param(0, large=True),
 ) -> PerhapsThis:
-    """This description should not be shown
+    """A registered injection callback. This description should not be shown.
 
     Parameters
     ----------
@@ -73,12 +73,12 @@ async def perhaps_this_is_it(
 
 
 class InjectionSlashCommands(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot) -> None:
         self.bot: commands.Bot = bot
         self.exponent = 2
 
     async def injected_method(self, number: int = 3):
-        """This should not be shown
+        """An instance injection callback. This description should not be shown.
 
         Parameters
         ----------
@@ -89,12 +89,12 @@ class InjectionSlashCommands(commands.Cog):
     @commands.slash_command()
     async def injection_command(
         self,
-        inter: disnake.CommandInteraction,
+        inter: disnake.CommandInteraction[commands.Bot],
         sqrt: Optional[float] = commands.Param(None, converter=lambda i, x: x**0.5),
         prefixed: str = commands.Param(converter=PrefixConverter("__", "__")),
         other: Tuple[int, str] = commands.inject(injected),
         some: int = commands.inject(injected_method),
-    ):
+    ) -> None:
         """A command gotten from explicit converts and injections
 
         Parameters
@@ -109,10 +109,10 @@ class InjectionSlashCommands(commands.Cog):
     @commands.slash_command()
     async def discerned_injections(
         self,
-        inter: disnake.CommandInteraction,
+        inter: disnake.CommandInteraction[commands.Bot],
         perhaps: PerhapsThis,
         god: Optional[HopeToGod] = None,
-    ):
+    ) -> None:
         """A command gotten just with annotations
 
         Parameters
@@ -123,5 +123,5 @@ class InjectionSlashCommands(commands.Cog):
         await inter.response.send_message(f"```py\n{pformat(locals())}\n```")
 
 
-def setup(bot):
+def setup(bot) -> None:
     bot.add_cog(InjectionSlashCommands(bot))

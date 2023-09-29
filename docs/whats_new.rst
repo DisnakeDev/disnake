@@ -2,20 +2,182 @@
 
 .. currentmodule:: disnake
 
-.. |commands| replace:: [:ref:`ext.commands <discord_ext_commands>`]
-.. |tasks| replace:: [:ref:`ext.tasks <discord_ext_tasks>`]
+.. |commands| replace:: [:ref:`ext.commands <disnake_ext_commands>`]
+.. |tasks| replace:: [:ref:`ext.tasks <disnake_ext_tasks>`]
 
 .. _whats_new:
 
 Changelog
-============
+=========
 
 This page keeps a detailed human friendly rendering of what's new and changed
-in specific versions.
+in specific versions. Please see :ref:`version_guarantees` for more information.
 
 .. towncrier-draft-entries:: |release| [UNRELEASED]
 
 .. towncrier release notes start
+
+.. _vp2p9p0:
+
+v2.9.0
+------
+
+This release comes with support for the new username system, text in stage, role subscriptions, silent messages, and onboarding.
+The documentation has been updated, splitting the monolithic API Reference page into smaller :doc:`pages <api/index>`.
+
+See below for a complete list of changes.
+
+Deprecations
+~~~~~~~~~~~~
+- :attr:`AutoModTriggerType.harmful_link` is obsolete, it is now enabled Discord-wide. (:issue:`986`)
+- The :class:`PartyType` enum is deprecated, as voice activity IDs are not officially documented and the enum regularly becomes outdated. (:issue:`1035`)
+- |commands| :class:`~disnake.ext.commands.Range` and :class:`~disnake.ext.commands.String` now require a type argument (i.e. ``Range[int, 1, 5]`` instead of ``Range[1, 5]``, similarly with ``String[str, 2, 4]``). The old form is deprecated. (:issue:`991`)
+- |commands| The mypy plugin is now a no-op. It was previously used for supporting ``Range[]`` and ``String[]`` annotations. (:issue:`991`)
+
+New Features
+~~~~~~~~~~~~
+- Clone most attributes in :meth:`TextChannel.clone`, :meth:`VoiceChannel.clone`, :meth:`StageChannel.clone`, :meth:`CategoryChannel.clone`, and :meth:`ForumChannel.clone`, and add them as keyword-only parameters to make in-place edits. See the specific ``clone`` method's documentation for details. (:issue:`635`)
+- Add :attr:`Guild.max_stage_video_channel_users`. (:issue:`741`)
+- Implement new :attr:`AutoModTriggerMetadata.mention_raid_protection_enabled` parameter. (:issue:`898`)
+- Add support for raid alerts. (:issue:`899`)
+        - Add :attr:`Guild.safety_alerts_channel`.
+        - Add ``raid_alerts_disabled`` and ``safety_alerts_channel`` parameters to :meth:`Guild.edit`.
+- Add features related to role subscriptions. (:issue:`904`, :issue:`913`)
+    - New message type: :attr:`~MessageType.role_subscription_purchase`.
+    - New role tags: :attr:`RoleTags.subscription_listing_id`, :attr:`RoleTags.is_available_for_purchase`, and :attr:`RoleTags.is_subscription`.
+    - New type :class:`RoleSubscriptionData` and attribute :attr:`Message.role_subscription_data`.
+    - New system channel flags: :attr:`~SystemChannelFlags.role_subscription_purchase_notifications` and :attr:`~SystemChannelFlags.role_subscription_purchase_notification_replies`.
+- Add ``oldest_first`` parameter to :meth:`Guild.audit_logs`. (:issue:`919`)
+- Implement Onboarding. (:issue:`928`)
+        - Add :class:`Onboarding`, :class:`OnboardingPrompt` and :class:`OnboardingPromptOption`.
+        - Add :meth:`Guild.onboarding`.
+- Add ``flags`` parameter to message send and edit methods. (:issue:`929`)
+- Add :attr:`MessageFlags.suppress_notifications`. (:issue:`929`)
+- Messages can now be sent within :class:`StageChannel` instances. (:issue:`942`)
+    - :class:`StageChannel` now inherits from :class:`abc.Messageable`
+    - New :class:`StageChannel` properties:
+        :attr:`.nsfw <StageChannel.nsfw>`, :attr:`.slowmode_delay <StageChannel.slowmode_delay>`, :attr:`.last_message_id <StageChannel.last_message_id>`, :attr:`.last_message <StageChannel.last_message>`
+    - New :class:`StageChannel` methods:
+        :func:`.is_nsfw <StageChannel.is_nsfw>`, :func:`.get_partial_message <StageChannel.get_partial_message>`, :func:`.delete_messages <StageChannel.delete_messages>`, :func:`.purge <StageChannel.purge>`, :func:`.webhooks <StageChannel.webhooks>`, :func:`.create_webhook <StageChannel.create_webhook>`
+    - Add ``nsfw`` and ``slowmode_delay`` parameters to :func:`Guild.create_stage_channel` and :func:`CategoryChannel.create_stage_channel`
+    - Add ``nsfw`` and ``slowmode_delay`` parameters to :func:`StageChannel.edit`
+    - Add text related permission support to :func:`StageChannel.permissions_for`.
+- New message types that are sent within :class:`StageChannel` instances: (:issue:`942`)
+    - :attr:`MessageType.stage_start`, :attr:`MessageType.stage_end`, :attr:`MessageType.stage_speaker`, and :attr:`MessageType.stage_topic`.
+- Add edit support for ``user_limit`` to :meth:`StageChannel.edit`. (:issue:`942`)
+- Add support for setting ``user_limit`` and ``video_quality_mode`` when creating a :class:`StageChannel` with :func:`Guild.create_stage_channel`. (:issue:`942`)
+- Cleanup general error raising to be less confusing. (:issue:`950`)
+    - Overall, most errors about incorrect types no longer include the internal error in their traceback.
+- Add support for :attr:`AutoModBlockMessageAction.custom_message` (:issue:`954`)
+- Support comparison of :class:`VoiceRegion` objects. (:issue:`962`)
+- Add a new voice channel activity, :attr:`PartyType.gartic_phone`. (:issue:`984`)
+- Add :attr:`ApplicationFlags.application_auto_moderation_rule_create_badge` (:issue:`988`)
+- Add new permission fields. (:issue:`989`, :issue:`997`, :issue:`1006`)
+    - :attr:`Permissions.manage_guild_expressions` (which :attr:`~Permissions.manage_emojis` and :attr:`~Permissions.manage_emojis_and_stickers` are now aliased to)
+    - :attr:`Permissions.view_creator_monetization_analytics`
+    - :attr:`Permissions.use_soundboard`
+    - :attr:`Permissions.send_voice_messages`
+    - :attr:`Permissions.use_external_sounds`
+- Add support for new username system - see the official `help article <https://dis.gd/app-usernames>`__ for details. Existing functionality is kept backwards-compatible while the migration is still ongoing. (:issue:`1025`, :issue:`1044`)
+    - Add :attr:`User.global_name`, and update attributes/methods to account for it:
+        - :attr:`User.display_name` and :attr:`Member.display_name`
+        - :meth:`Guild.get_member_named`
+    - Update ``str(user)`` and ``str(member)`` to not include ``#0`` discriminator of migrated users.
+    - Adjust :attr:`User.default_avatar` to account for new default avatar handling, also adding :attr:`DefaultAvatar.fuchsia`.
+- Support ``animated`` emoji field in reaction removal events (e.g. :func:`on_raw_reaction_remove`). (:issue:`1040`)
+- Implement receiving voice messages. (:issue:`1041`)
+    - New flag: :class:`MessageFlags.is_voice_message`
+    - New :class:`Attachment` fields: :attr:`~Attachment.duration`, :attr:`~Attachment.waveform`
+- |commands| Add :meth:`Bot.get_listeners() <disnake.ext.commands.Bot.get_listeners>`. (:issue:`976`)
+- |commands| :class:`~ext.commands.UserConverter` and :class:`~ext.commands.MemberConverter`, now mostly match the behavior of :meth:`Guild.get_member_named`
+
+Bug Fixes
+~~~~~~~~~
+- Fix a bug with :meth:`ForumChannel.clone` not properly copying the ``default_auto_archive_duration`` attribute into the newly-cloned channel. (:issue:`635`)
+- Fix :class:`VoiceClient` not continuing to play audio when moving between channels. (:issue:`845`)
+- Prevent stray voice websocket heartbeat threads after reconnecting. (:issue:`863`)
+- Fix KeepAlive logging un-intentionally attempting to interpolate stack trace logger calls (:issue:`940`)
+- Fix :meth:`.VoiceChannel.permissions_for` not disabling :attr:`Permissions.manage_webhooks` when the user cannot connect to the channel. (:issue:`942`)
+- :attr:`RawTypingEvent.timestamp` is now a timezone-aware :class:`~datetime.datetime` instead of a naive one. (:issue:`945`)
+- Fix attribute error when attempting to access :class:`DMChannel.flags` under certain circumstances. (:issue:`960`)
+- Fix voice connection discovery using incorrect packet sizes. (:issue:`967`)
+- Fix :meth:`Guild.get_or_fetch_members` not caching anything in the case of 1 unresolved ID. (:issue:`974`)
+- Fix audit log parsing issue with new user profile automod actions. (:issue:`995`)
+- Improve :class:`GuildSticker` deserialization, fix :meth:`GuildSticker.edit` parameter types to match documentation. (:issue:`996`)
+- Fix :meth:`ForumChannel.create_thread` usage with files only (and no other content), and fix file descriptions not being sent on thread creation. (:issue:`1008`)
+- Fix some instances where threads were not being returned in :attr:`AuditLogEntry.extra`. (:issue:`1009`)
+- :meth:`Guild.fetch_members` no longer requires the :attr:`~Intents.members` intent to be enabled when connecting to the gateway, now it solely depends on the intent being enabled in the developer portal. (:issue:`1013`)
+- Fix error when trying to access :attr:`Client.application_flags` if an ``application_id`` was passed to the constructor. (:issue:`1027`)
+- Raise :exc:`TypeError` in :meth:`Guild.create_automod_rule` and :meth:`AutoModRule.edit` when an action has an invalid type, instead of a rather cryptic error. (:issue:`1030`)
+- Fix permission resolution for :class:`Thread`\s to use :attr:`Permissions.send_messages_in_threads` instead of :attr:`Permissions.send_messages` for calculating implicit permissions. (:issue:`1047`)
+- Fix typing issue with :class:`abc.User` protocol requirements, which previously resulted in :class:`User` and :class:`Member` not conforming to the protocol. (:issue:`1051`)
+- |commands| Allow referencing the same `ParamInfo` instance in multiple signatures. (:issue:`946`)
+- |commands| Fix type-checker support for :class:`~disnake.ext.commands.Range` and :class:`~disnake.ext.commands.String` by requiring type argument (i.e. ``Range[int, 1, 5]`` instead of ``Range[1, 5]``). (:issue:`991`)
+- |commands| Raise ``TypeError`` if :class:`~.ext.commands.InteractionBot` or :class:`~.ext.commands.AutoShardedInteractionBot` has prefix commands related things in a :class:`~.ext.commands.Cog` (:issue:`1018`)
+- |commands| Fix member nickname not being used by :class:`~ext.commands.clean_content` converter when user wasn't found in mentions. (:issue:`1029`)
+
+Documentation
+~~~~~~~~~~~~~
+- Split the monolithic API Reference pages into multiple sub-references. (:issue:`392`)
+    - Main ``disnake`` API reference can now be found at :doc:`API Reference <api/index>`.
+    - ``disnake.ext.commands`` API reference is now under :doc:`Commands API Reference <ext/commands/api/index>`.
+    - Legacy ``api.html`` and ``ext/commands/api.html`` pages are deprecated.
+    - - Links with pre-existing references (eg ``/api.html#disnake.AppInfo``) will be redirected to their appropriate page.
+- Update automod rule limits. (:issue:`931`)
+- Remove incorrect documentation for :meth:`InvokableApplicationCommand.invoke`. (:issue:`961`)
+- Add a searchbox for filtering the sidebar on the API Reference pages. (:issue:`963`)
+- Clarify docs about the :func:`.on_member_update` and :func:`.on_raw_member_update` events. (:issue:`992`)
+- Remove ``pins()`` method from unsupported channel types. (:issue:`1033`)
+- Update "Creating a Bot Account" page with newer images and synchronise info according to latest changes made by Discord. (:issue:`1039`)
+- Add note to :attr:`GuildChannel.create_invite <.abc.GuildChannel.create_invite>` and all subclasses about the new 30 day expiration limit imposed for non-community guilds. (:issue:`1056`)
+- |commands| Fix commands extension events being duplicated in search results. (:issue:`944`)
+
+Miscellaneous
+~~~~~~~~~~~~~
+- Change dependency and environment management to use `pdm <https://pdm.fming.dev/>`__. (:issue:`836`, :issue:`953`)
+    Please check `CONTRIBUTING.md <https://github.com/DisnakeDev/disnake/tree/master/CONTRIBUTING.md>`__ for more details.
+- Change the main linter to ``ruff`` instead of ``flake8``. (:issue:`935`)
+- Update Sphinx to v7.0.1. (:issue:`936`, :issue:`1020`)
+- Support PyNaCl v1.5. (:issue:`968`)
+- Remove :func:`disnake.utils.parse_token` (never documented), which has been broken for newer tokens for some time, and was based on unofficial information about the token structure. (:issue:`990`)
+- Update typings of :attr:`Message.activity` and internal :class:`Team` payloads to match API documentation. (:issue:`996`)
+- Increase the default :attr:`Guild.filesize_limit` from 8MB to 25MB, matching the recent increase by Discord. (:issue:`1005`)
+
+
+.. _vp2p8p2:
+
+v2.8.2
+------
+
+This maintainence release contains backports from v2.9.0.
+
+Bug Fixes
+~~~~~~~~~
+- Fix audit log parsing issue with new user profile automod actions. (:issue:`995`)
+- Improve :class:`GuildSticker` deserialization, fix :meth:`GuildSticker.edit` parameter types to match documentation. (:issue:`996`)
+- Fix :meth:`ForumChannel.create_thread` usage with files only (and no other content), and fix file descriptions not being sent on thread creation. (:issue:`1008`)
+
+Miscellaneous
+~~~~~~~~~~~~~
+- Update typings of :attr:`Message.activity` and internal :class:`Team` payloads to match API documentation. (:issue:`996`)
+- Increase the default :attr:`Guild.filesize_limit` from 8MB to 25MB, matching the recent increase by Discord. (:issue:`1005`)
+
+
+.. _vp2p8p1:
+
+v2.8.1
+------
+
+Bug Fixes
+~~~~~~~~~
+- Fix :class:`VoiceClient` not continuing to play audio when moving between channels. (:issue:`845`)
+- Fix KeepAlive logging un-intentionally attempting to interpolate stack trace logger calls (:issue:`940`)
+- Fix attribute error when attempting to access :class:`DMChannel.flags` under certain circumstances. (:issue:`960`)
+- Fix voice connection discovery using incorrect packet sizes. (:issue:`967`)
+
+Documentation
+~~~~~~~~~~~~~
+- Update automod rule limits. (:issue:`931`)
 
 .. _vp2p8p0:
 
@@ -80,6 +242,18 @@ Documentation
 Miscellaneous
 ~~~~~~~~~~~~~
 - Declare a :pep:`517` build backend in pyproject.toml, and use :pep:`621` to define most package metadata. (:issue:`830`)
+
+.. _vp2p7p2:
+
+v2.7.2
+------
+
+Bug Fixes
+~~~~~~~~~
+- Fix :class:`VoiceClient` not continuing to play audio when moving between channels. (:issue:`845`)
+- Fix KeepAlive logging un-intentionally attempting to interpolate stack trace logger calls (:issue:`940`)
+- Fix attribute error when attempting to access :class:`DMChannel.flags` under certain circumstances. (:issue:`960`)
+- Fix voice connection discovery using incorrect packet sizes. (:issue:`967`)
 
 .. _vp2p7p1:
 
@@ -210,9 +384,9 @@ This release adds support for new forum channel features (like tags) as well as 
 
 Also note the breaking changes listed below, which may require additional code changes.
 
-
 Breaking Changes
 ~~~~~~~~~~~~~~~~
+
 - Update :class:`Client` classes such that their initialization kwargs are explicitly stated and typehinted. (:issue:`371`)
     - Replaced ``**kwargs`` / ``**options`` with explicit keyword arguments for the ``__init__`` methods of :class:`Client`, :class:`ext.commands.Bot`, :class:`ext.commands.InteractionBot`, all ``AutoSharded*`` variants, and all relevant parent classes.
 - Call new :func:`disnake.on_gateway_error` instead of letting exceptions propagate that occurred while deserializing a received gateway event. (:issue:`401`)
@@ -242,12 +416,14 @@ Breaking Changes
 
 Deprecations
 ~~~~~~~~~~~~
+
 - ``EmptyEmbed`` and ``Embed.Empty`` are deprecated in favor of ``None``, have been removed from the documentation, and will result in type-checking errors. (:issue:`435`, :issue:`768`)
 - The ``delete_message_days`` parameter of :func:`Guild.ban` and :func:`Member.ban` is deprecated in favour of ``clean_history_duration``. (:issue:`659`)
 - |commands| Using ``command_prefix=None`` with :class:`~disnake.ext.commands.Bot` is now deprecated in favour of :class:`~disnake.ext.commands.InteractionBot`. (:issue:`689`)
 
 New Features
 ~~~~~~~~~~~~
+
 - Add custom type support for :func:`disnake.ui.button` and :func:`disnake.ui.select` decorators using ``cls`` parameter. (:issue:`281`)
 - Add :func:`disnake.on_gateway_error`, :func:`Client.on_gateway_error` and ``enable_gateway_error_handler`` client parameter. (:issue:`401`)
 - Update channel edit method annotations. (:issue:`418`)
@@ -346,6 +522,7 @@ New Features
 
 Bug Fixes
 ~~~~~~~~~
+
 - Update incorrect channel edit method annotations. (:issue:`418`)
     - Fix ``sync_permissions`` parameter type.
     - Remove ``topic`` parameter from :func:`StageChannel.edit`, add ``bitrate``.
@@ -383,6 +560,7 @@ Bug Fixes
 
 Documentation
 ~~~~~~~~~~~~~
+
 - Add sidebar-navigable sub-sections to Event Reference section of API Reference documentation. (:issue:`460`)
 - Remove notes that global application command rollout takes up to an hour. (:issue:`518`)
 - Update sphinx from 4.4.0 to version 5.1, and take advantage of new options. (:issue:`522`, :issue:`565`)
@@ -411,6 +589,7 @@ Documentation
 
 Miscellaneous
 ~~~~~~~~~~~~~
+
 - Refactor the test bot to be easier to use for all users. (:issue:`247`)
 - Refactor channel edit overloads and internals, improving typing. (:issue:`418`)
 - Run pyright on examples and fix any typing issues uncovered by this change. (:issue:`519`)
@@ -447,7 +626,6 @@ Miscellaneous
 - Update typings to explicitly specify optional types for parameters with a ``None`` default. (:issue:`751`)
 - Adopt `SPDX License Headers <https://spdx.dev/ids>`_ across all project files. (:issue:`756`)
 
-
 .. _vp2p5p3:
 
 v2.5.3
@@ -466,7 +644,6 @@ Miscellaneous
 
 - Limit installation of ``cchardet`` in the ``[speed]`` extra to Python versions below 3.10 (see `aiohttp#6857 <https://github.com/aio-libs/aiohttp/pull/6857>`__). (:issue:`772`)
 
-
 .. _vp2p5p2:
 
 v2.5.2
@@ -475,7 +652,7 @@ v2.5.2
 This release is a bugfix release with backports from upto v2.6.0.
 
 Bug Fixes
-~~~~~~~~~~
+~~~~~~~~~
 
 - Warn the user that bools are not supported for ``default_member_permissions``. (:issue:`520`)
 - Update the Guild Iterator to not get stuck in an infinite loop. (:issue:`526`)
@@ -495,7 +672,7 @@ Bug Fixes
 - Improve channel/guild fallback in resolved interaction data, using :class:`PartialMessageable` for unhandled/unknown channels instead of using ``None``. (:issue:`646`)
 
 Documentation
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 - Remove notes that global application command rollout takes up to an hour. (:issue:`518`)
 - Update the requests intersphinx url to the new url of the requests documentation. (:issue:`539`)
@@ -512,11 +689,10 @@ Bug Fixes
 
 - |commands| Fix :func:`~ext.commands.InvokableSlashCommand.autocomplete` decorator in cogs (:issue:`521`)
 
-
 .. _vp2p5p0:
 
 v2.5.0
----------
+------
 
 This version adds support for **API v10** (which comes with a few breaking changes),
 **forum channels**, **localizations**, **permissions v2**, improves API coverage by adding support for previously
@@ -531,9 +707,8 @@ See `this page <https://guide.disnake.dev/popular-topics/intents#why-do-most-mes
 If you do not have access to the intent yet, you can temporarily continue using API v9 by calling ``disnake.http._workaround_set_api_version(9)`` before connecting,
 which will keep sending message content before the intent deadline, even with the intent disabled.
 
-
 Breaking Changes
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 - The :attr:`~Intents.message_content` intent is now required to receive message content and related fields, see above (:issue:`353`)
 - The new permissions v2 system revamped application command permissions, with the most notable changes being the
@@ -555,7 +730,7 @@ Breaking Changes
 
 
 Deprecations
-~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 - Public stages and stage discoverability are deprecated and no longer supported (:issue:`287`)
 - Voice regions on guild level are deprecated and no longer have any effect;
@@ -567,7 +742,7 @@ Deprecations
 
 
 New Features
-~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 - Support API v10 (:issue:`353`)
     - New intent: :attr:`Intents.message_content`
@@ -658,9 +833,8 @@ New Features
 - |commands| Add :attr:`~ext.commands.InvokableApplicationCommand.extras` to application commands (:issue:`483`)
 - |commands| Add ``slash_command_attrs``, ``user_command_attrs`` and ``message_command_attrs`` :class:`~ext.commands.Cog` parameters (:issue:`501`)
 
-
 Bug Fixes
-~~~~~~~~~~
+~~~~~~~~~
 
 - Improve components exception message (:issue:`352`)
 - Use proper HTTP method for joining threads, remove unused methods (:issue:`356`)
@@ -696,9 +870,8 @@ Bug Fixes
 - |commands| Fix unloading of listeners with custom names (:issue:`444`)
 - |commands| Fix parameter name conflicts in slash commands (:issue:`503`)
 
-
 Documentation
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 - Disable mathjax in documentation to improve loading times (:issue:`370`)
 - Update return type of :func:`Guild.create_template` (:issue:`372`)
@@ -714,9 +887,8 @@ Documentation
 - Update :func:`on_member_update` documentation to include new and future attributes (:issue:`510`)
 - Fix miscellaneous issues, improve formatting (:issue:`511`)
 
-
 Miscellaneous
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 - Fix remaining pyright issues, add pyright CI (:issue:`311`, :issue:`387`, :issue:`514`)
 - Update dev dependencies and CI (:issue:`345`, :issue:`386`, :issue:`451`)
@@ -733,7 +905,7 @@ v2.4.1
 This release is a bugfix release with backports from v2.5.0 up to v2.5.2.
 
 Bug Fixes
-~~~~~~~~~~
+~~~~~~~~~
 
 - Fix missing ``create_public_threads`` permission in :attr:`Permissions.private_channel` (:issue:`373`)
 - Fix :attr:`PartialInviteChannel.__str__ <PartialInviteChannel>` (:issue:`383`)
@@ -758,15 +930,13 @@ Bug Fixes
 - |commands| Fix unloading of listeners with custom names (:issue:`444`)
 - |commands| Handle :class:`.VoiceChannel` in :func:`commands.is_nsfw`. (:issue:`536`)
 
-
 Documentation
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 - Update the requests intersphinx url to the new url of the requests documentation. (:issue:`539`)
 
-
 Miscellaneous
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 - Update dev dependencies and CI (:issue:`451`)
 
@@ -780,23 +950,21 @@ and the ability to directly send message components without views,
 as well as several fixes and other general improvements.
 
 Breaking Changes
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 - The constructor of :class:`ApplicationCommand` and its subtypes no longer accepts ``**kwargs`` for setting internal values (:issue:`249`)
     - This shouldn't affect anyone, as ``**kwargs`` was only used for setting fields returned by the API and had no effect if the user set them
 - :attr:`Interaction.permissions` now returns proper permission values in DMs (:issue:`321`)
 - The ``reason`` parameter for sticker endpoints in :class:`HTTPClient` is now kwarg-only
 
-
 Deprecations
-~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 - :attr:`Thread.archiver_id` is not being provided by the API anymore and will be removed in a future version (:issue:`295`)
 - :attr:`Invite.revoked` is not being provided by the API anymore and will be removed in a future version (:issue:`309`)
 
-
 New Features
-~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 - Add :attr:`Interaction.locale` and :attr:`Interaction.guild_locale` properties to interactions (:issue:`225`)
 - Add :class:`ui.ActionRow` and ``components`` kwarg to send methods (:issue:`224`)
@@ -832,9 +1000,8 @@ New Features
 - Add :meth:`Guild.get_or_fetch_members` with an alias :meth:`Guild.getch_members` (:issue:`322`).
 - Add :attr:`abc.GuildChannel.jump_url`, :attr:`DMChannel.jump_url` and :attr:`Thread.jump_url` (:issue:`319`)
 
-
 Bug Fixes
-~~~~~~~~~~
+~~~~~~~~~
 
 - Fix missing support for ``reason`` parameter in some methods (:issue:`266`)
 - Improve validation of slash command and option names (:issue:`267`)
@@ -845,17 +1012,15 @@ Bug Fixes
 - Fix ``permissions`` annotation of :func:`abc.GuildChannel.set_permissions` (:issue:`349`)
 - Fix :func:`tasks.loop <disnake.ext.tasks.loop>` usage with fixed times (:issue:`337`)
 
-
 Documentation
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 - Show tooltips when hovering over links (:issue:`236`, :issue:`242`)
 - General content improvements/adjustments (:issue:`275`)
 - Slight redesign and general layout improvements (:issue:`278`)
 
-
 Miscellaneous
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 - Improve examples (:issue:`209`, :issue:`262`, :issue:`270`, :issue:`307`, :issue:`332`, :issue:`341`)
 - Improve typing/annotations of several parts of the library (:issue:`249`, :issue:`256`, :issue:`263`, :issue:`279`, :issue:`292`, :issue:`299`, :issue:`308`)
@@ -864,7 +1029,6 @@ Miscellaneous
 - Improve member deserialization (:issue:`304`)
 - Split application command objects into separate types for data returned by the API (:issue:`299`)
 - Update README banner (:issue:`343`)
-
 
 .. _vp2p3p2:
 
@@ -875,7 +1039,6 @@ Bug Fixes
 ~~~~~~~~~
 
 - Fix invalid default value for application command option descriptions (:issue:`338`)
-
 
 .. _vp2p3p1:
 
@@ -898,13 +1061,11 @@ Bug Fixes
 - Fix type-checking of ``guild_ids`` / ``test_guilds`` parameters which could break application command caching (:issue:`300`, :issue:`325`)
 - Fix :func:`Guild.create_sticker` not working when no description was provided (:issue:`328`)
 
-
 Documentation
 ~~~~~~~~~~~~~
 
 - Fix :func:`~ext.commands.guild_permissions` documentation
 - Fix missing dropdown icon (:issue:`235`)
-
 
 Miscellaneous
 ~~~~~~~~~~~~~
@@ -912,11 +1073,10 @@ Miscellaneous
 - Add ``isort`` and ``black`` pre-commit hooks, run isort (:issue:`169`, :issue:`173`, :issue:`233`)
 - Rename ``tests`` directory (:issue:`232`)
 
-
 .. _vp2p3p0:
 
 v2.3.0
--------
+------
 
 This version contains several new features and fixes,
 notably support for guild scheduled events, guild timeouts,
@@ -925,7 +1085,7 @@ and a slash command rework with parameter injections, as well as several documen
 Note: the :ref:`version_guarantees` have been updated to more accurately reflect the versioning scheme this library is following.
 
 Breaking Changes
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 - The supported aiohttp version range changed from ``>=3.6.0,<3.8.0`` to ``>=3.7.0,<3.9.0``
 - Due to the upcoming text-in-voice feature (not yet released at the time of writing),
@@ -936,13 +1096,13 @@ Breaking Changes
 - ``disnake.types.ThreadArchiveDuration`` is now ``ThreadArchiveDurationLiteral``, to avoid confusion with the new :class:`ThreadArchiveDuration` enum
 
 Deprecations
-~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 - The ``role_ids`` and ``user_ids`` parameters for :func:`guild_permissions <ext.commands.guild_permissions>` are now
   ``roles`` and ``users`` respectively; the old parameter names will be removed in a future version
 
 New Features
-~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 - Add guild scheduled events (:issue:`151`, :issue:`217`)
     - New intent: :attr:`Intents.guild_scheduled_events` (enabled by default)
@@ -1033,9 +1193,8 @@ New Features
     - :attr:`UserFlags.http_interactions_bot`, :attr:`PublicUserFlags.http_interactions_bot`
     - :attr:`UserFlags.spammer`, :attr:`PublicUserFlags.spammer`
 
-
 Bug Fixes
-~~~~~~~~~~
+~~~~~~~~~
 
 - Fix dispatch of typing events in DMs (:issue:`176`)
 - Try to retrieve objects in received interactions from cache first (fixing properties like :attr:`Member.status` on member parameters for commands) (:issue:`182`, :issue:`213`)
@@ -1049,9 +1208,8 @@ Bug Fixes
 - |commands| Fix unnecessary application command sync without changes
 - |commands| Fix incorrect detection of deprecated guild commands in sync algorithm while sync is in progress (:issue:`205`)
 
-
 Documentation
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 - Move documentation to https://docs.disnake.dev/
 - Update :ref:`version_guarantees` (:issue:`200`)
@@ -1075,16 +1233,14 @@ Documentation
 - Fix incorrect type for :attr:`Invite.channel` in documentation
 - Add additional information about application command sync algorithm and syncing commands in sharded bots (:issue:`205`)
 
-
 Miscellaneous
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 - Add Python 3.10 to package classifiers (:issue:`127`)
 - Change supported aiohttp version range from ``>=3.6.0,<3.8.0`` to ``>=3.7.0,<3.9.0`` (:issue:`119`, :issue:`164`)
 - Add guide for configuring inviting a bot through its profile (:issue:`153`)
 - Rewrite project README (:issue:`191`)
 - Improve examples (:issue:`143`)
-
 
 .. _vp2p2p3:
 
@@ -1096,14 +1252,13 @@ Bug Fixes
 
 - Fix invalid default value for application command option descriptions (:issue:`338`)
 
-
 .. _vp2p2p2:
 
 v2.2.2
--------
+------
 
 Bug Fixes
-~~~~~~~~~~
+~~~~~~~~~
 
 - Fix channel conversion in audit log entries
 - Fix improper error handling in context menu commands
@@ -1114,7 +1269,7 @@ Bug Fixes
 - Fix warning related to new option properties
 
 Documentation
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 - Update repository links to new organization
 - Fix duplicate entries in documentation
@@ -1124,20 +1279,20 @@ Documentation
 .. _vp2p2p1:
 
 v2.2.1
--------
+------
 
 Bug Fixes
-~~~~~~~~~~
+~~~~~~~~~
 
 - Fixed error related to guild member count
 
 .. _vp2p2p0:
 
 v2.2.0
--------
+------
 
 New Features
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 - Add :meth:`Interaction.send`
 - Add kwarg ``attachments`` to edit methods
@@ -1153,10 +1308,10 @@ New Features
 .. _vp2p1p5:
 
 v2.1.5
--------
+------
 
 New Features
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 - Add :class:`InteractionReference`
 - Add :class:`UnresolvedGuildApplicationCommandPermissions`
@@ -1167,7 +1322,7 @@ New Features
 - |commands| Add kwarg ``owner`` to :func:`guild_permissions <ext.commands.guild_permissions>`
 
 Bug Fixes
-~~~~~~~~~~
+~~~~~~~~~
 
 - Command deletions on reconnections
 - Pending sync tasks on loop termination
@@ -1175,20 +1330,20 @@ Bug Fixes
 .. _vp2p1p4:
 
 v2.1.4
--------
+------
 
 Bug Fixes
-~~~~~~~~~~
+~~~~~~~~~
 
 - Fixed some issues with application command permissions synchronisation
 
 .. _vp2p1p3:
 
 v2.1.3
--------
+------
 
 New Features
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 - Add :class:`GuildApplicationCommandPermissions`
 - Add :class:`PartialGuildApplicationCommandPermissions`
@@ -1202,7 +1357,7 @@ New Features
 - |commands| Add kwargs ``sync_commands_on_cog_unload`` and ``sync_permissions`` to :class:`InteractionBotBase <ext.commands.InteractionBotBase>`
 
 Bug Fixes
-~~~~~~~~~~
+~~~~~~~~~
 
 - Music
 - ``default_permission`` kwarg in user / message commands
@@ -1211,12 +1366,12 @@ Bug Fixes
 .. _vp2p1p2:
 
 v2.1.2
--------
+------
 
 This is the first stable version of this discord.py 2.0 fork.
 
 New Features
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 - Add interaction hierarchy. :class:`Interaction` is now the base class for other interaction types, such as :class:`ApplicationCommandInteraction` and :class:`MessageInteraction`.
 - Add interaction data wrappers: :class:`ApplicationCommandInteractionData` and :class:`MessageInteractionData`.

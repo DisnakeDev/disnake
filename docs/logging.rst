@@ -3,10 +3,11 @@
 :orphan:
 
 .. versionadded:: 0.6.0
+
 .. _logging_setup:
 
 Setting Up Logging
-===================
+==================
 
 *disnake* logs errors and debug information via the :mod:`logging` python
 module. It is strongly recommended that the logging module is
@@ -41,8 +42,6 @@ outputting them to the console the following snippet can be used::
 This is recommended, especially at verbose levels such as ``INFO``
 and ``DEBUG``, as there are a lot of events logged and it would clog the
 stdout of your program.
-
-
 
 For more information, check the documentation and tutorial of the
 :mod:`logging` module.

@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional
 from ..enums import ComponentType
 from ..message import Message
 from ..utils import cached_slot_property
-from .base import Interaction
+from .base import ClientT, Interaction
 
 if TYPE_CHECKING:
     from ..state import ConnectionState
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 __all__ = ("ModalInteraction", "ModalInteractionData")
 
 
-class ModalInteraction(Interaction):
+class ModalInteraction(Interaction[ClientT]):
     """Represents an interaction with a modal.
 
     .. versionadded:: 2.4
@@ -82,8 +82,7 @@ class ModalInteraction(Interaction):
         self.message: Optional[Message] = message
 
     def walk_raw_components(self) -> Generator[ModalInteractionComponentDataPayload, None, None]:
-        """
-        Returns a generator that yields raw component data from action rows one by one, as provided by Discord.
+        """Returns a generator that yields raw component data from action rows one by one, as provided by Discord.
         This does not contain all fields of the components due to API limitations.
 
         .. versionadded:: 2.6
@@ -98,7 +97,8 @@ class ModalInteraction(Interaction):
     @cached_slot_property("_cs_text_values")
     def text_values(self) -> Dict[str, str]:
         """Dict[:class:`str`, :class:`str`]: Returns the text values the user has entered in the modal.
-        This is a dict of the form ``{custom_id: value}``."""
+        This is a dict of the form ``{custom_id: value}``.
+        """
         text_input_type = ComponentType.text_input.value
         return {
             component["custom_id"]: component.get("value") or ""

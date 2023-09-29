@@ -10,7 +10,7 @@ from ..guild import Guild
 from ..member import Member
 from ..message import Message
 from ..user import User
-from .base import Interaction, InteractionDataResolved
+from .base import ClientT, Interaction, InteractionDataResolved
 
 __all__ = (
     "ApplicationCommandInteraction",
@@ -41,7 +41,7 @@ if TYPE_CHECKING:
     )
 
 
-class ApplicationCommandInteraction(Interaction):
+class ApplicationCommandInteraction(Interaction[ClientT]):
     """Represents an interaction with an application command.
 
     Current examples are slash commands, user commands and message commands.
@@ -119,7 +119,7 @@ class ApplicationCommandInteraction(Interaction):
         return kwargs
 
 
-class GuildCommandInteraction(ApplicationCommandInteraction):
+class GuildCommandInteraction(ApplicationCommandInteraction[ClientT]):
     """An :class:`ApplicationCommandInteraction` subclass, primarily meant for annotations.
 
     This prevents the command from being invoked in DMs by automatically setting
@@ -137,7 +137,7 @@ class GuildCommandInteraction(ApplicationCommandInteraction):
     me: Member
 
 
-class UserCommandInteraction(ApplicationCommandInteraction):
+class UserCommandInteraction(ApplicationCommandInteraction[ClientT]):
     """An :class:`ApplicationCommandInteraction` subclass meant for annotations.
 
     No runtime behavior is changed but annotations are modified
@@ -147,7 +147,7 @@ class UserCommandInteraction(ApplicationCommandInteraction):
     target: Union[User, Member]
 
 
-class MessageCommandInteraction(ApplicationCommandInteraction):
+class MessageCommandInteraction(ApplicationCommandInteraction[ClientT]):
     """An :class:`ApplicationCommandInteraction` subclass meant for annotations.
 
     No runtime behavior is changed but annotations are modified
@@ -223,9 +223,7 @@ class ApplicationCommandInteractionData(Dict[str, Any]):
     def _get_chain_and_kwargs(
         self, chain: Optional[Tuple[str, ...]] = None
     ) -> Tuple[Tuple[str, ...], Dict[str, Any]]:
-        """
-        Returns a chain of sub-command names and a dict of filled options.
-        """
+        """Returns a chain of sub-command names and a dict of filled options."""
         if chain is None:
             chain = ()
         for option in self.options:
@@ -255,7 +253,7 @@ class ApplicationCommandInteractionData(Dict[str, Any]):
 
 
 class ApplicationCommandInteractionDataOption(Dict[str, Any]):
-    """This class represents the structure of an interaction data option from the API.
+    """Represents the structure of an interaction data option from the API.
 
     Attributes
     ----------

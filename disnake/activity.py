@@ -135,10 +135,68 @@ class _BaseActivity:
     def to_dict(self) -> ActivityPayload:
         raise NotImplementedError
 
+    def _create_image_url(self, asset: str) -> Optional[str]:
+        # `asset` can be a simple ID (see `Activity._create_image_url`),
+        # or a string of the format `<prefix>:<id>`
+        prefix, _, asset_id = asset.partition(":")
+
+        if asset_id and (url_fmt := _ACTIVITY_URLS.get(prefix)):
+            return url_fmt.format(asset_id)
+        return None
+
+    @property
+    def large_image_url(self) -> Optional[str]:
+        """Optional[:class:`str`]: Returns a URL pointing to the large image asset of this activity, if applicable.
+
+        .. versionchanged:: 2.10
+            Moved from :class:`Activity` to base type, making this available to all activity types.
+            Additionally, supports dynamic asset urls using the ``mp:`` prefix now.
+        """
+        try:
+            large_image = self.assets["large_image"]
+        except KeyError:
+            return None
+        else:
+            return self._create_image_url(large_image)
+
+    @property
+    def small_image_url(self) -> Optional[str]:
+        """Optional[:class:`str`]: Returns a URL pointing to the small image asset of this activity, if applicable.
+
+        .. versionchanged:: 2.10
+            Moved from :class:`Activity` to base type, making this available to all activity types.
+            Additionally, supports dynamic asset urls using the ``mp:`` prefix now.
+        """
+        try:
+            small_image = self.assets["small_image"]
+        except KeyError:
+            return None
+        else:
+            return self._create_image_url(small_image)
+
+    @property
+    def large_image_text(self) -> Optional[str]:
+        """Optional[:class:`str`]: Returns the large image asset hover text of this activity, if applicable.
+
+        .. versionchanged:: 2.10
+            Moved from :class:`Activity` to base type, making this available to all activity types.
+        """
+        return self.assets.get("large_text", None)
+
+    @property
+    def small_image_text(self) -> Optional[str]:
+        """Optional[:class:`str`]: Returns the small image asset hover text of this activity, if applicable.
+
+        .. versionchanged:: 2.10
+            Moved from :class:`Activity` to base type, making this available to all activity types.
+        """
+        return self.assets.get("small_text", None)
+
 
 # tag type for user-settable activities
 class BaseActivity(_BaseActivity):
     """The base activity that all user-settable activities inherit from.
+
     A user-settable activity is one that can be used in :meth:`Client.change_presence`.
 
     The following types currently count as user-settable:
@@ -157,6 +215,15 @@ class BaseActivity(_BaseActivity):
     """
 
     __slots__ = ()
+
+
+# There are additional urls for twitch/youtube/spotify, however
+# it appears that Discord does not want to document those:
+# https://github.com/discord/discord-api-docs/pull/4617
+# They are partially supported by different properties, e.g. `Spotify.album_cover_url`.
+_ACTIVITY_URLS = {
+    "mp": "https://media.discordapp.net/{}",
+}
 
 
 class Activity(BaseActivity):
@@ -319,41 +386,17 @@ class Activity(BaseActivity):
             ret["timestamps"] = self._timestamps
         return ret
 
-    @property
-    def large_image_url(self) -> Optional[str]:
-        """Optional[:class:`str`]: Returns a URL pointing to the large image asset of this activity, if applicable."""
-        if self.application_id is None:
-            return None
+    def _create_image_url(self, asset: str) -> Optional[str]:
+        # if parent method already returns valid url, use that
+        if url := super()._create_image_url(asset):
+            return url
 
-        try:
-            large_image = self.assets["large_image"]
-        except KeyError:
-            return None
-        else:
-            return f"{Asset.BASE}/app-assets/{self.application_id}/{large_image}.png"
+        # if it's not a `<prefix>:<id>` asset and we have an application ID, create url
+        if ":" not in asset and self.application_id:
+            return f"{Asset.BASE}/app-assets/{self.application_id}/{asset}.png"
 
-    @property
-    def small_image_url(self) -> Optional[str]:
-        """Optional[:class:`str`]: Returns a URL pointing to the small image asset of this activity, if applicable."""
-        if self.application_id is None:
-            return None
-
-        try:
-            small_image = self.assets["small_image"]
-        except KeyError:
-            return None
-        else:
-            return f"{Asset.BASE}/app-assets/{self.application_id}/{small_image}.png"
-
-    @property
-    def large_image_text(self) -> Optional[str]:
-        """Optional[:class:`str`]: Returns the large image asset hover text of this activity, if applicable."""
-        return self.assets.get("large_text", None)
-
-    @property
-    def small_image_text(self) -> Optional[str]:
-        """Optional[:class:`str`]: Returns the small image asset hover text of this activity, if applicable."""
-        return self.assets.get("small_text", None)
+        # else, it's an unknown asset url
+        return None
 
 
 class Game(BaseActivity):
@@ -610,14 +653,16 @@ class Spotify(_BaseActivity):
     def colour(self) -> Colour:
         """:class:`Colour`: Returns the Spotify integration colour, as a :class:`Colour`.
 
-        There is an alias for this named :attr:`color`"""
+        There is an alias for this named :attr:`color`
+        """
         return Colour(0x1DB954)
 
     @property
     def color(self) -> Colour:
         """:class:`Colour`: Returns the Spotify integration colour, as a :class:`Colour`.
 
-        There is an alias for this named :attr:`colour`"""
+        There is an alias for this named :attr:`colour`
+        """
         return self.colour
 
     def to_dict(self) -> Dict[str, Any]:
@@ -751,6 +796,8 @@ class CustomActivity(BaseActivity):
         The custom activity's name.
     emoji: Optional[:class:`PartialEmoji`]
         The emoji to pass to the activity, if any.
+
+        This currently cannot be set by bots.
     """
 
     __slots__ = ("name", "emoji", "state")
@@ -765,7 +812,10 @@ class CustomActivity(BaseActivity):
     ) -> None:
         super().__init__(**kwargs)
         self.name: Optional[str] = name
-        self.state: Optional[str] = state
+        # Fall back to `name`, since `state` is the relevant field for custom status (`name` is not shown)
+        self.state: Optional[str] = state or name
+
+        # The official client uses "Custom Status" as the name, the actual name is in `state`
         if self.name == "Custom Status":
             self.name = self.state
 
@@ -859,7 +909,9 @@ def create_activity(
 
     activity: ActivityTypes
     game_type = try_enum(ActivityType, data.get("type", -1))
-    if game_type is ActivityType.playing and not ("application_id" in data or "session_id" in data):
+    if game_type is ActivityType.playing and not (
+        "application_id" in data or "session_id" in data or "state" in data
+    ):
         activity = Game(**data)  # type: ignore  # pyright bug(?)
     elif game_type is ActivityType.custom and "name" in data:
         activity = CustomActivity(**data)  # type: ignore
