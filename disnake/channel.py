@@ -2225,7 +2225,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
             The guild scheduled event associated with the stage instance.
             Setting this will automatically start the event.
 
-            .. versionadded:: 2.8
+            .. versionadded:: 2.10
 
         reason: Optional[:class:`str`]
             The reason the stage instance was created. Shows up on the audit log.
