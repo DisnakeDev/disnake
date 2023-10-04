@@ -106,6 +106,14 @@ SelectOption
 .. autoclass:: SelectOption
     :members:
 
+SelectDefaultValue
+~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: SelectDefaultValue
+
+.. autoclass:: SelectDefaultValue
+    :members:
+
 TextInput
 ~~~~~~~~~
 
