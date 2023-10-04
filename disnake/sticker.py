@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from .types.sticker import (
         EditGuildSticker,
         GuildSticker as GuildStickerPayload,
-        ListPremiumStickerPacks as ListPremiumStickerPacksPayload,
+        ListStickerPacks as ListStickerPacksPayload,
         StandardSticker as StandardStickerPayload,
         Sticker as StickerPayload,
         StickerItem as StickerItemPayload,
@@ -348,7 +348,7 @@ class StandardSticker(Sticker):
         :class:`StickerPack`
             The retrieved sticker pack.
         """
-        data: ListPremiumStickerPacksPayload = await self._state.http.list_premium_sticker_packs()
+        data: ListStickerPacksPayload = await self._state.http.list_sticker_packs()
         packs = data["sticker_packs"]
         pack = find(lambda d: int(d["id"]) == self.pack_id, packs)
 

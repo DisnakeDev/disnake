@@ -29,7 +29,7 @@ from .emoji import Emoji
 from .enums import ChannelType, InteractionType, MessageType, try_enum, try_enum_to_int
 from .errors import HTTPException
 from .file import File
-from .flags import MessageFlags
+from .flags import AttachmentFlags, MessageFlags
 from .guild import Guild
 from .member import Member
 from .mixins import Hashable
@@ -302,6 +302,7 @@ class Attachment(Hashable):
         "description",
         "duration",
         "waveform",
+        "_flags",
     )
 
     def __init__(self, *, data: AttachmentPayload, state: ConnectionState) -> None:
@@ -320,6 +321,7 @@ class Attachment(Hashable):
         self.waveform: Optional[bytes] = (
             b64decode(waveform_data) if (waveform_data := data.get("waveform")) else None
         )
+        self._flags: int = data.get("flags", 0)
 
     def is_spoiler(self) -> bool:
         """Whether this attachment contains a spoiler.
@@ -333,6 +335,14 @@ class Attachment(Hashable):
 
     def __str__(self) -> str:
         return self.url or ""
+
+    @property
+    def flags(self) -> AttachmentFlags:
+        """:class:`AttachmentFlags`: Returns the attachment's flags.
+
+        .. versionadded:: 2.10
+        """
+        return AttachmentFlags._from_value(self._flags)
 
     async def save(
         self,
@@ -498,6 +508,8 @@ class Attachment(Hashable):
             result["duration_secs"] = self.duration
         if self.waveform is not None:
             result["waveform"] = b64encode(self.waveform).decode("ascii")
+        if self._flags:
+            result["flags"] = self._flags
         return result
 
 
@@ -591,7 +603,7 @@ class MessageReference:
     def with_state(cls, state: ConnectionState, data: MessageReferencePayload) -> Self:
         self = cls.__new__(cls)
         self.message_id = utils._get_as_snowflake(data, "message_id")
-        self.channel_id = int(data.pop("channel_id"))
+        self.channel_id = int(data["channel_id"])
         self.guild_id = utils._get_as_snowflake(data, "guild_id")
         self.fail_if_not_exists = data.get("fail_if_not_exists", True)
         self._state = state
@@ -646,10 +658,9 @@ class MessageReference:
         return f"<MessageReference message_id={self.message_id!r} channel_id={self.channel_id!r} guild_id={self.guild_id!r}>"
 
     def to_dict(self) -> MessageReferencePayload:
-        result: MessageReferencePayload = (
-            {"message_id": self.message_id} if self.message_id is not None else {}
-        )
-        result["channel_id"] = self.channel_id
+        result: MessageReferencePayload = {"channel_id": self.channel_id}
+        if self.message_id is not None:
+            result["message_id"] = self.message_id
         if self.guild_id is not None:
             result["guild_id"] = self.guild_id
         if self.fail_if_not_exists is not None:

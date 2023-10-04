@@ -64,5 +64,5 @@ class EditGuildSticker(TypedDict, total=False):
     description: Optional[str]
 
 
-class ListPremiumStickerPacks(TypedDict):
+class ListStickerPacks(TypedDict):
     sticker_packs: List[StickerPack]

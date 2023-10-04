@@ -42,17 +42,17 @@ AuditLogChanges
         :attr:`~AuditLogEntry.category`\, the data retrieved by this
         attribute differs:
 
-        +----------------------------------------+---------------------------------------------------+
-        |                Category                |                    Description                    |
-        +----------------------------------------+---------------------------------------------------+
-        | :attr:`~AuditLogActionCategory.create` | All attributes are set to ``None``.               |
-        +----------------------------------------+---------------------------------------------------+
-        | :attr:`~AuditLogActionCategory.delete` | All attributes are set the value before deletion. |
-        +----------------------------------------+---------------------------------------------------+
-        | :attr:`~AuditLogActionCategory.update` | All attributes are set the value before updating. |
-        +----------------------------------------+---------------------------------------------------+
-        | ``None``                               | No attributes are set.                            |
-        +----------------------------------------+---------------------------------------------------+
+        +----------------------------------------+------------------------------------------------------+
+        |                Category                |                    Description                       |
+        +----------------------------------------+------------------------------------------------------+
+        | :attr:`~AuditLogActionCategory.create` | All attributes are set to ``None``.                  |
+        +----------------------------------------+------------------------------------------------------+
+        | :attr:`~AuditLogActionCategory.delete` | All attributes are set to the value before deletion. |
+        +----------------------------------------+------------------------------------------------------+
+        | :attr:`~AuditLogActionCategory.update` | All attributes are set to the value before updating. |
+        +----------------------------------------+------------------------------------------------------+
+        | ``None``                               | No attributes are set.                               |
+        +----------------------------------------+------------------------------------------------------+
 
     .. attribute:: after
 
@@ -62,17 +62,17 @@ AuditLogChanges
         :attr:`~AuditLogEntry.category`\, the data retrieved by this
         attribute differs:
 
-        +----------------------------------------+--------------------------------------------------+
-        |                Category                |                   Description                    |
-        +----------------------------------------+--------------------------------------------------+
-        | :attr:`~AuditLogActionCategory.create` | All attributes are set to the created value      |
-        +----------------------------------------+--------------------------------------------------+
-        | :attr:`~AuditLogActionCategory.delete` | All attributes are set to ``None``               |
-        +----------------------------------------+--------------------------------------------------+
-        | :attr:`~AuditLogActionCategory.update` | All attributes are set the value after updating. |
-        +----------------------------------------+--------------------------------------------------+
-        | ``None``                               | No attributes are set.                           |
-        +----------------------------------------+--------------------------------------------------+
+        +----------------------------------------+-----------------------------------------------------+
+        |                Category                |                   Description                       |
+        +----------------------------------------+-----------------------------------------------------+
+        | :attr:`~AuditLogActionCategory.create` | All attributes are set to the created value.        |
+        +----------------------------------------+-----------------------------------------------------+
+        | :attr:`~AuditLogActionCategory.delete` | All attributes are set to ``None``.                 |
+        +----------------------------------------+-----------------------------------------------------+
+        | :attr:`~AuditLogActionCategory.update` | All attributes are set to the value after updating. |
+        +----------------------------------------+-----------------------------------------------------+
+        | ``None``                               | No attributes are set.                              |
+        +----------------------------------------+-----------------------------------------------------+
 
 AuditLogDiff
 ~~~~~~~~~~~~
@@ -97,7 +97,7 @@ AuditLogDiff
 
         .. describe:: iter(diff)
 
-            Returns an iterator over (attribute, value) tuple of this diff.
+            Returns an iterator over ``(attribute, value)`` tuples of this diff.
 
     .. attribute:: name
 
@@ -919,6 +919,11 @@ AuditLogAction
         the :class:`User` who got kicked. If the user is not found then it is
         a :class:`Object` with the user's ID.
 
+        When this is the action, the type of :attr:`~AuditLogEntry.extra` may be
+        set to an unspecified proxy object with one attribute:
+
+        - ``integration_type``: A string representing the type of the integration which performed the action, if any.
+
         When this is the action, :attr:`~AuditLogEntry.changes` is empty.
 
     .. attribute:: member_prune
@@ -931,7 +936,7 @@ AuditLogAction
         When this is the action, the type of :attr:`~AuditLogEntry.extra` is
         set to an unspecified proxy object with two attributes:
 
-        - ``delete_members_days``: An integer specifying how far the prune was.
+        - ``delete_member_days``: An integer specifying how far the prune was.
         - ``members_removed``: An integer specifying how many members were removed.
 
         When this is the action, :attr:`~AuditLogEntry.changes` is empty.
@@ -983,6 +988,11 @@ AuditLogAction
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`Member` or :class:`User` who got the role. If the user is not found then it is
         a :class:`Object` with the user's ID.
+
+        When this is the action, the type of :attr:`~AuditLogEntry.extra` may be
+        set to an unspecified proxy object with one attribute:
+
+        - ``integration_type``: A string representing the type of the integration which performed the action, if any.
 
         Possible attributes for :class:`AuditLogDiff`:
 
@@ -1653,6 +1663,8 @@ AuditLogAction
         - ``rule_name``: A :class:`str` with the name of the rule that matched.
         - ``rule_trigger_type``: An :class:`AutoModTriggerType` value with the trigger type of the rule.
 
+        .. versionadded:: 2.6
+
     .. attribute:: automod_send_alert_message
 
         An alert message was sent by an auto moderation rule.
@@ -1664,6 +1676,8 @@ AuditLogAction
         See :attr:`automod_block_message` for more information on how the
         :attr:`~AuditLogEntry.extra` field is set.
 
+        .. versionadded:: 2.6
+
     .. attribute:: automod_timeout
 
         A user was timed out by an auto moderation rule.
@@ -1674,6 +1688,20 @@ AuditLogAction
 
         See :attr:`automod_block_message` for more information on how the
         :attr:`~AuditLogEntry.extra` field is set.
+
+        .. versionadded:: 2.6
+
+    .. attribute:: creator_monetization_request_created
+
+        A creator monetization request was created.
+
+        .. versionadded:: 2.10
+
+    .. attribute:: creator_monetization_terms_accepted
+
+        The creator monetization terms were accepted.
+
+        .. versionadded:: 2.10
 
 AuditLogActionCategory
 ~~~~~~~~~~~~~~~~~~~~~~
