@@ -98,6 +98,14 @@ UserSelectMenu
     :members:
     :inherited-members:
 
+SelectOption
+~~~~~~~~~~~~
+
+.. attributetable:: SelectOption
+
+.. autoclass:: SelectOption
+    :members:
+
 TextInput
 ~~~~~~~~~
 
@@ -106,17 +114,6 @@ TextInput
 .. autoclass:: TextInput()
     :members:
     :inherited-members:
-
-Data Classes
--------------
-
-SelectOption
-~~~~~~~~~~~~
-
-.. attributetable:: SelectOption
-
-.. autoclass:: SelectOption
-    :members:
 
 Enumerations
 ------------
