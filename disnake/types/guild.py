@@ -84,7 +84,7 @@ GuildFeature = Literal[
 ]
 
 
-class IncidentsData(TypedDict):
+class IncidentsData(TypedDict, total=False):
     invites_disabled_until: Optional[str]
     dms_disabled_until: Optional[str]
     # TODO: raid_detected_at, dm_spam_detected_at ?

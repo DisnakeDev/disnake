@@ -2085,7 +2085,9 @@ class Guild(Hashable):
         splash: Optional[AssetBytes] = MISSING,
         discovery_splash: Optional[AssetBytes] = MISSING,
         community: bool = MISSING,
-        invites_disabled: bool = MISSING,
+        invites_disabled: Union[bool, datetime.timedelta, datetime.datetime] = MISSING,
+        # TODO: this literal is somewhat ugly
+        dms_disabled: Union[Literal[False], datetime.timedelta, datetime.datetime] = MISSING,
         raid_alerts_disabled: bool = MISSING,
         afk_channel: Optional[VoiceChannel] = MISSING,
         owner: Snowflake = MISSING,
@@ -2265,6 +2267,40 @@ class Guild(Hashable):
 
         if vanity_code is not MISSING:
             await http.change_vanity_code(self.id, vanity_code, reason=reason)
+
+        # TODO: consider turning this into a separate method instead
+        # TODO: also, we currently need to include the old data, otherwise existing fields get unset
+        if invites_disabled is not MISSING or dms_disabled is not MISSING:
+            payload: IncidentsDataPayload = {}
+
+            # this has turned out unnecessarily complex, but until we know more about how this
+            # works with the INVITES_DISABLED guild feature, it is how it is
+            if invites_disabled is not MISSING:
+                if invites_disabled is True:
+                    pass
+                else:
+                    if invites_disabled is False:
+                        payload["invites_disabled_until"] = None
+                    else:
+                        if isinstance(invites_disabled, datetime.timedelta):
+                            invites_disabled = utils.utcnow() + invites_disabled
+                        payload["invites_disabled_until"] = utils.isoformat_utc(invites_disabled)
+                    invites_disabled = (
+                        MISSING  # unset this so we don't try setting the guild feature below
+                    )
+
+            if dms_disabled is not MISSING:
+                if dms_disabled is True:
+                    raise ValueError("dms_disabled may not be set to `True`")
+                elif dms_disabled is False:
+                    payload["dms_disabled_until"] = None
+                else:
+                    if isinstance(dms_disabled, datetime.timedelta):
+                        dms_disabled = utils.utcnow() + dms_disabled
+                    payload["dms_disabled_until"] = utils.isoformat_utc(dms_disabled)
+
+            if payload:
+                await http.edit_guild_incident_actions(self.id, **payload)
 
         fields: Dict[str, Any] = {}
         if name is not MISSING:
