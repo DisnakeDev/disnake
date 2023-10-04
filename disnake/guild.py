@@ -134,7 +134,20 @@ class _GuildLimit(NamedTuple):
 
 # TODO: "IncidentData"?
 class IncidentsData:
-    """TODO"""
+    """Represents data about various security incidents/actions in a guild.
+
+    .. container:: operations
+
+        .. describe:: x == y
+
+            Checks if two ``IncidentsData`` instances are equal.
+
+        .. describe:: x != y
+
+            Checks if two ``IncidentsData`` instances are not equal.
+
+    .. versionadded:: 2.10
+    """
 
     __slots__ = ("_invites_disabled_until", "_dms_disabled_until")
 
@@ -148,7 +161,9 @@ class IncidentsData:
 
     @property
     def invites_disabled_until(self) -> Optional[datetime.datetime]:
-        """TODO"""
+        """Optional[:class:`datetime.datetime`]: Returns the datetime until
+        which users cannot join the server via invites, if any.
+        """
         if (
             self._invites_disabled_until is not None
             and self._invites_disabled_until < utils.utcnow()
@@ -159,7 +174,12 @@ class IncidentsData:
 
     @property
     def dms_disabled_until(self) -> Optional[datetime.datetime]:
-        """TODO"""
+        """Optional[:class:`datetime.datetime`]: Returns the datetime until
+        which members cannot send DMs to each other, if any.
+
+        This does not apply to moderators, bots, or members who are
+        already friends with each other.
+        """
         if self._dms_disabled_until is not None and self._dms_disabled_until < utils.utcnow():
             self._dms_disabled_until = None
 
@@ -354,7 +374,7 @@ class Guild(Hashable):
         .. versionadded:: 2.5
 
     incidents_data: Optional[:class:`IncidentsData`]
-        # TODO
+        Data about various security incidents/actions in this guild, like disabled invites/DMs.
 
         .. versionadded:: 2.10
     """
@@ -632,7 +652,6 @@ class Guild(Hashable):
         self._safety_alerts_channel_id: Optional[int] = utils._get_as_snowflake(
             guild, "safety_alerts_channel_id"
         )
-        # TODO: only store if at least one valid value?
         self.incidents_data: Optional[IncidentsData] = (
             IncidentsData(incidents_data)
             if (incidents_data := guild.get("incidents_data"))
