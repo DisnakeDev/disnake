@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
     from ...member import Member
     from ...user import User
-    from ..item import DecoratedItem, ItemCallbackType, Object
+    from ..item import DecoratedItem, ItemCallbackType, ItemShape
 
 
 __all__ = (
@@ -137,13 +137,13 @@ def user_select(
 
 @overload
 def user_select(
-    cls: Type[Object[S_co, P]], *_: P.args, **kwargs: P.kwargs
+    cls: Type[ItemShape[S_co, P]], *_: P.args, **kwargs: P.kwargs
 ) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
     ...
 
 
 def user_select(
-    cls: Type[Object[S_co, P]] = UserSelect[Any],
+    cls: Type[ItemShape[S_co, P]] = UserSelect[Any],
     /,
     **kwargs: Any,
 ) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:

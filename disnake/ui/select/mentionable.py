@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from ...member import Member
     from ...role import Role
     from ...user import User
-    from ..item import DecoratedItem, ItemCallbackType, Object
+    from ..item import DecoratedItem, ItemCallbackType, ItemShape
 
 
 __all__ = (
@@ -138,13 +138,13 @@ def mentionable_select(
 
 @overload
 def mentionable_select(
-    cls: Type[Object[S_co, P]], *_: P.args, **kwargs: P.kwargs
+    cls: Type[ItemShape[S_co, P]], *_: P.args, **kwargs: P.kwargs
 ) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
     ...
 
 
 def mentionable_select(
-    cls: Type[Object[S_co, P]] = MentionableSelect[Any],
+    cls: Type[ItemShape[S_co, P]] = MentionableSelect[Any],
     /,
     **kwargs: Any,
 ) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:

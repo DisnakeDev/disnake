@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from ...role import Role
-    from ..item import DecoratedItem, ItemCallbackType, Object
+    from ..item import DecoratedItem, ItemCallbackType, ItemShape
 
 
 __all__ = (
@@ -136,13 +136,13 @@ def role_select(
 
 @overload
 def role_select(
-    cls: Type[Object[S_co, P]], *_: P.args, **kwargs: P.kwargs
+    cls: Type[ItemShape[S_co, P]], *_: P.args, **kwargs: P.kwargs
 ) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
     ...
 
 
 def role_select(
-    cls: Type[Object[S_co, P]] = RoleSelect[Any],
+    cls: Type[ItemShape[S_co, P]] = RoleSelect[Any],
     /,
     **kwargs: Any,
 ) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:

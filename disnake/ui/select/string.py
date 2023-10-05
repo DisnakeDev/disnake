@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
     from ...emoji import Emoji
     from ...partial_emoji import PartialEmoji
-    from ..item import DecoratedItem, ItemCallbackType, Object
+    from ..item import DecoratedItem, ItemCallbackType, ItemShape
 
 
 __all__ = (
@@ -262,13 +262,13 @@ def string_select(
 
 @overload
 def string_select(
-    cls: Type[Object[S_co, P]], *_: P.args, **kwargs: P.kwargs
+    cls: Type[ItemShape[S_co, P]], *_: P.args, **kwargs: P.kwargs
 ) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
     ...
 
 
 def string_select(
-    cls: Type[Object[S_co, P]] = StringSelect[Any],
+    cls: Type[ItemShape[S_co, P]] = StringSelect[Any],
     /,
     **kwargs: Any,
 ) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
