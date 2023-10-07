@@ -145,6 +145,7 @@ def user_select(
     min_values: int = 1,
     max_values: int = 1,
     disabled: bool = False,
+    default_values: Optional[Sequence[SelectDefaultValueInputType[Union[User, Member]]]] = None,
     row: Optional[int] = None,
 ) -> Callable[[ItemCallbackType[UserSelect[V_co]]], DecoratedItem[UserSelect[V_co]]]:
     ...
@@ -198,5 +199,10 @@ def user_select(
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select is disabled. Defaults to ``False``.
+    default_values: Optional[Sequence[Union[:class:`~disnake.User`, :class:`.Member`, :class:`.SelectDefaultValue`, :class:`.Object`]]]
+        The list of values (users/members) that are selected by default.
+        If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
+
+        .. versionadded:: 2.10
     """
     return _create_decorator(cls, UserSelect, **kwargs)

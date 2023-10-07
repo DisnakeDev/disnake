@@ -154,6 +154,9 @@ def mentionable_select(
     min_values: int = 1,
     max_values: int = 1,
     disabled: bool = False,
+    default_values: Optional[
+        Sequence[SelectDefaultValueMultiInputType[Union[User, Member, Role]]]
+    ] = None,
     row: Optional[int] = None,
 ) -> Callable[[ItemCallbackType[MentionableSelect[V_co]]], DecoratedItem[MentionableSelect[V_co]]]:
     ...
@@ -207,5 +210,12 @@ def mentionable_select(
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select is disabled. Defaults to ``False``.
+    default_values: Optional[Sequence[Union[:class:`~disnake.User`, :class:`.Member`, :class:`.Role`, :class:`.SelectDefaultValue`]]]
+        The list of values (users/roles) that are selected by default.
+        If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
+
+        Note that unlike other select menu types, this does not support :class:`.Object`\\s due to ambiguities.
+
+        .. versionadded:: 2.10
     """
     return _create_decorator(cls, MentionableSelect, **kwargs)

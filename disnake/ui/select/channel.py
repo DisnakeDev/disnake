@@ -184,6 +184,7 @@ def channel_select(
     max_values: int = 1,
     disabled: bool = False,
     channel_types: Optional[List[ChannelType]] = None,
+    default_values: Optional[Sequence[SelectDefaultValueInputType[InteractionChannel]]] = None,
     row: Optional[int] = None,
 ) -> Callable[[ItemCallbackType[ChannelSelect[V_co]]], DecoratedItem[ChannelSelect[V_co]]]:
     ...
@@ -240,5 +241,10 @@ def channel_select(
     channel_types: Optional[List[:class:`.ChannelType`]]
         The list of channel types that can be selected in this select menu.
         Defaults to all types (i.e. ``None``).
+    default_values: Optional[Sequence[Union[:class:`.abc.GuildChannel`, :class:`.Thread`, :class:`.PartialMessageable`, :class:`.SelectDefaultValue`, :class:`.Object`]]]
+        The list of values (channels) that are selected by default.
+        If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
+
+        .. versionadded:: 2.10
     """
     return _create_decorator(cls, ChannelSelect, **kwargs)

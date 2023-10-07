@@ -144,6 +144,7 @@ def role_select(
     min_values: int = 1,
     max_values: int = 1,
     disabled: bool = False,
+    default_values: Optional[Sequence[SelectDefaultValueInputType[Role]]] = None,
     row: Optional[int] = None,
 ) -> Callable[[ItemCallbackType[RoleSelect[V_co]]], DecoratedItem[RoleSelect[V_co]]]:
     ...
@@ -197,5 +198,10 @@ def role_select(
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select is disabled. Defaults to ``False``.
+    default_values: Optional[Sequence[Union[:class:`.Role`, :class:`.SelectDefaultValue`, :class:`.Object`]]]
+        The list of values (roles) that are selected by default.
+        If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
+
+        .. versionadded:: 2.10
     """
     return _create_decorator(cls, RoleSelect, **kwargs)
