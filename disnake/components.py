@@ -672,6 +672,9 @@ class SelectDefaultValue:
             "type": self.type.value,
         }
 
+    def __repr__(self) -> str:
+        return f"<SelectDefaultValue id={self.id!r} type={self.type!s}>"
+
 
 class TextInput(Component):
     """Represents a text input from the Discord Bot UI Kit.
