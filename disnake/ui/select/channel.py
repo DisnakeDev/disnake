@@ -61,12 +61,6 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "InteractionChannel", V_co]):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select is disabled.
-    row: Optional[:class:`int`]
-        The relative row this select menu belongs to. A Discord component can only have 5
-        rows. By default, items are arranged automatically into those 5 rows. If you'd
-        like to control the relative positioning of the row then passing an index is advised.
-        For example, row=1 will show up before row=2. Defaults to ``None``, which is automatic
-        ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     channel_types: Optional[List[:class:`.ChannelType`]]
         The list of channel types that can be selected in this select menu.
         Defaults to all types (i.e. ``None``).
@@ -75,6 +69,12 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "InteractionChannel", V_co]):
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
         .. versionadded:: 2.10
+    row: Optional[:class:`int`]
+        The relative row this select menu belongs to. A Discord component can only have 5
+        rows. By default, items are arranged automatically into those 5 rows. If you'd
+        like to control the relative positioning of the row then passing an index is advised.
+        For example, row=1 will show up before row=2. Defaults to ``None``, which is automatic
+        ordering. The row number must be between 0 and 4 (i.e. zero indexed).
 
     Attributes
     ----------
@@ -97,8 +97,8 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "InteractionChannel", V_co]):
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
-        default_values: Optional[Sequence[SelectDefaultValueInputType[InteractionChannel]]] = None,
         channel_types: Optional[List[ChannelType]] = None,
+        default_values: Optional[Sequence[SelectDefaultValueInputType[InteractionChannel]]] = None,
         row: Optional[int] = None,
     ) -> None:
         ...
@@ -112,8 +112,8 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "InteractionChannel", V_co]):
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
-        default_values: Optional[Sequence[SelectDefaultValueInputType[InteractionChannel]]] = None,
         channel_types: Optional[List[ChannelType]] = None,
+        default_values: Optional[Sequence[SelectDefaultValueInputType[InteractionChannel]]] = None,
         row: Optional[int] = None,
     ) -> None:
         ...
@@ -126,8 +126,8 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "InteractionChannel", V_co]):
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
-        default_values: Optional[Sequence[SelectDefaultValueInputType[InteractionChannel]]] = None,
         channel_types: Optional[List[ChannelType]] = None,
+        default_values: Optional[Sequence[SelectDefaultValueInputType[InteractionChannel]]] = None,
         row: Optional[int] = None,
     ) -> None:
         super().__init__(
@@ -151,8 +151,8 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "InteractionChannel", V_co]):
             min_values=component.min_values,
             max_values=component.max_values,
             disabled=component.disabled,
-            default_values=component.default_values,
             channel_types=component.channel_types,
+            default_values=component.default_values,
             row=None,
         )
 
