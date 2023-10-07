@@ -2526,9 +2526,18 @@ class SKUFlags(BaseFlags):
 
         @_generated
         def __init__(
-            self, *, guild_subscription: bool = ..., user_subscription: bool = ...
+            self,
+            *,
+            available: bool = ...,
+            guild_subscription: bool = ...,
+            user_subscription: bool = ...,
         ) -> None:
             ...
+
+    @flag_value
+    def available(self):
+        """:class:`bool`: Returns ``True`` if the SKU can be purchased."""
+        return 1 << 2
 
     @flag_value
     def guild_subscription(self):
