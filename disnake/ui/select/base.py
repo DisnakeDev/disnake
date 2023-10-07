@@ -74,7 +74,6 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         "min_values",
         "max_values",
         "disabled",
-        "default_values",
     )
     # We have to set this to MISSING in order to overwrite the abstract property from WrappedComponent
     _underlying: SelectMenuT = MISSING

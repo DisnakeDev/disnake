@@ -287,7 +287,8 @@ class BaseSelectMenu(Component):
         "default_values",
     )
 
-    __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+    # FIXME: this isn't pretty; we should decouple __repr__ from slots
+    __repr_info__: ClassVar[Tuple[str, ...]] = tuple(s for s in __slots__ if s != "default_values")
 
     def __init__(self, data: BaseSelectMenuPayload) -> None:
         self.type: ComponentType = try_enum(ComponentType, data["type"])
