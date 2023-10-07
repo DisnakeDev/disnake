@@ -167,10 +167,11 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         """
         return self._underlying.default_values
 
-    # TODO: make this accept multiple types similar to constructor?
     @default_values.setter
-    def default_values(self, value: List[SelectDefaultValue]) -> None:
-        self._underlying.default_values = value
+    def default_values(
+        self, value: Optional[Sequence[SelectDefaultValueInputType[SelectValueT]]]
+    ) -> None:
+        self._underlying.default_values = self._transform_default_values(value) if value else []
 
     @property
     def values(self) -> List[SelectValueT]:
