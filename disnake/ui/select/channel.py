@@ -2,12 +2,27 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, List, Optional, Tuple, Type, TypeVar, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+    TypeVar,
+    overload,
+)
 
+from ...abc import GuildChannel
+from ...channel import PartialMessageable
 from ...components import ChannelSelectMenu
-from ...enums import ChannelType, ComponentType
+from ...enums import ChannelType, ComponentType, SelectDefaultValueType
+from ...object import Object
+from ...threads import Thread
 from ...utils import MISSING
-from .base import BaseSelect, P, V_co, _create_decorator
+from .base import BaseSelect, P, SelectDefaultValueInputType, V_co, _create_decorator
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -64,6 +79,10 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "InteractionChannel", V_co]):
 
     __repr_attributes__: Tuple[str, ...] = BaseSelect.__repr_attributes__ + ("channel_types",)
 
+    _default_value_type_map = {
+        (GuildChannel, Thread, PartialMessageable, Object): SelectDefaultValueType.channel,
+    }
+
     @overload
     def __init__(
         self: ChannelSelect[None],
@@ -73,6 +92,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "InteractionChannel", V_co]):
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
+        default_values: Optional[Sequence[SelectDefaultValueInputType[InteractionChannel]]] = None,
         channel_types: Optional[List[ChannelType]] = None,
         row: Optional[int] = None,
     ) -> None:
@@ -87,6 +107,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "InteractionChannel", V_co]):
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
+        default_values: Optional[Sequence[SelectDefaultValueInputType[InteractionChannel]]] = None,
         channel_types: Optional[List[ChannelType]] = None,
         row: Optional[int] = None,
     ) -> None:
@@ -100,6 +121,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "InteractionChannel", V_co]):
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
+        default_values: Optional[Sequence[SelectDefaultValueInputType[InteractionChannel]]] = None,
         channel_types: Optional[List[ChannelType]] = None,
         row: Optional[int] = None,
     ) -> None:
@@ -111,6 +133,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "InteractionChannel", V_co]):
             min_values=min_values,
             max_values=max_values,
             disabled=disabled,
+            default_values=default_values,
             row=row,
         )
         self._underlying.channel_types = channel_types or None
@@ -123,6 +146,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "InteractionChannel", V_co]):
             min_values=component.min_values,
             max_values=component.max_values,
             disabled=component.disabled,
+            default_values=component.default_values,
             channel_types=component.channel_types,
             row=None,
         )

@@ -98,6 +98,9 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
 
     __repr_attributes__: Tuple[str, ...] = BaseSelect.__repr_attributes__ + ("options",)
 
+    # In practice this should never be used by anything, might as well have it anyway though.
+    _default_value_type_map = {}
+
     @overload
     def __init__(
         self: StringSelect[None],
@@ -145,6 +148,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
             min_values=min_values,
             max_values=max_values,
             disabled=disabled,
+            default_values=None,
             row=row,
         )
         self._underlying.options = [] if options is MISSING else _parse_select_options(options)

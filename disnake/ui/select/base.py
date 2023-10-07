@@ -9,18 +9,23 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
+    ClassVar,
     Generic,
     List,
+    Mapping,
     Optional,
+    Sequence,
     Tuple,
     Type,
     TypeVar,
+    Union,
     get_origin,
 )
 
-from ...components import AnySelectMenu
-from ...enums import ComponentType
-from ...utils import MISSING
+from ...components import AnySelectMenu, SelectDefaultValue
+from ...enums import ComponentType, SelectDefaultValueType
+from ...object import Object
+from ...utils import MISSING, humanize_list
 from ..item import DecoratedItem, Item, ItemShape
 
 __all__ = ("BaseSelect",)
@@ -28,6 +33,7 @@ __all__ = ("BaseSelect",)
 if TYPE_CHECKING:
     from typing_extensions import ParamSpec, Self
 
+    from ...abc import Snowflake
     from ...interactions import MessageInteraction
     from ..item import ItemCallbackType
     from ..view import View
@@ -41,6 +47,10 @@ V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
 SelectMenuT = TypeVar("SelectMenuT", bound=AnySelectMenu)
 SelectValueT = TypeVar("SelectValueT")
 P = ParamSpec("P")
+
+SelectDefaultValueMultiInputType = Union[SelectValueT, SelectDefaultValue]
+# almost the same as above, but with `Object`; used for selects where the type isn't ambiguous (i.e. all except mentionable select)
+SelectDefaultValueInputType = Union[SelectDefaultValueMultiInputType[SelectValueT], Object]
 
 
 class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
@@ -64,9 +74,13 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         "min_values",
         "max_values",
         "disabled",
+        "default_values",
     )
     # We have to set this to MISSING in order to overwrite the abstract property from WrappedComponent
     _underlying: SelectMenuT = MISSING
+
+    # Subclasses are expected to set this
+    _default_value_type_map: ClassVar[Mapping[Tuple[Type[Snowflake], ...], SelectDefaultValueType]]
 
     def __init__(
         self,
@@ -78,6 +92,7 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         min_values: int,
         max_values: int,
         disabled: bool,
+        default_values: Optional[Sequence[SelectDefaultValueInputType[SelectValueT]]],
         row: Optional[int],
     ) -> None:
         super().__init__()
@@ -91,6 +106,7 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
             min_values=min_values,
             max_values=max_values,
             disabled=disabled,
+            default_values=self._transform_default_values(default_values) if default_values else [],
         )
         self.row = row
 
@@ -170,6 +186,45 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         :return type: :class:`bool`
         """
         return True
+
+    @classmethod
+    def _transform_default_values(
+        cls, values: Sequence[SelectDefaultValueInputType[SelectValueT]]
+    ) -> List[SelectDefaultValue]:
+        result: List[SelectDefaultValue] = []
+        default_value_types = set(cls._default_value_type_map.values())
+
+        for value in values:
+            # If we have a SelectDefaultValue, just use it as-is
+            if isinstance(value, SelectDefaultValue):
+                if value.type not in default_value_types:
+                    allowed_types = [str(t) for t in default_value_types]
+                    raise ValueError(
+                        f"SelectDefaultValue.type should be {humanize_list(allowed_types, 'or')}, not {value.type}"
+                    )
+                result.append(value)
+                continue
+
+            # Otherwise, look through the list of allowed input types and
+            # get the associated SelectDefaultValueType
+            for (
+                types,
+                value_type,  # noqa: B007  # we use value_type outside of the loop
+            ) in cls._default_value_type_map.items():
+                if isinstance(value, types):
+                    break
+            else:
+                allowed_types = [
+                    t.__name__ for ts in cls._default_value_type_map.keys() for t in ts
+                ]
+                allowed_types.append(SelectDefaultValue.__name__)
+                raise TypeError(
+                    f"Expected type of default value to be {humanize_list(allowed_types, 'or')}, not {type(value)!r}"
+                )
+
+            result.append(SelectDefaultValue(value.id, value_type))
+
+        return result
 
 
 def _create_decorator(

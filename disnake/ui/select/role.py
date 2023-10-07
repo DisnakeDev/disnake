@@ -2,17 +2,18 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, Optional, Type, TypeVar, overload
+from typing import TYPE_CHECKING, Any, Callable, Optional, Sequence, Type, TypeVar, overload
 
 from ...components import RoleSelectMenu
-from ...enums import ComponentType
+from ...enums import ComponentType, SelectDefaultValueType
+from ...object import Object
+from ...role import Role
 from ...utils import MISSING
-from .base import BaseSelect, P, V_co, _create_decorator
+from .base import BaseSelect, P, SelectDefaultValueInputType, V_co, _create_decorator
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ...role import Role
     from ..item import DecoratedItem, ItemCallbackType, ItemShape
 
 
@@ -59,6 +60,10 @@ class RoleSelect(BaseSelect[RoleSelectMenu, "Role", V_co]):
         A list of roles that have been selected by the user.
     """
 
+    _default_value_type_map = {
+        (Role, Object): SelectDefaultValueType.role,
+    }
+
     @overload
     def __init__(
         self: RoleSelect[None],
@@ -68,6 +73,7 @@ class RoleSelect(BaseSelect[RoleSelectMenu, "Role", V_co]):
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
+        default_values: Optional[Sequence[SelectDefaultValueInputType[Role]]] = None,
         row: Optional[int] = None,
     ) -> None:
         ...
@@ -81,6 +87,7 @@ class RoleSelect(BaseSelect[RoleSelectMenu, "Role", V_co]):
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
+        default_values: Optional[Sequence[SelectDefaultValueInputType[Role]]] = None,
         row: Optional[int] = None,
     ) -> None:
         ...
@@ -93,6 +100,7 @@ class RoleSelect(BaseSelect[RoleSelectMenu, "Role", V_co]):
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
+        default_values: Optional[Sequence[SelectDefaultValueInputType[Role]]] = None,
         row: Optional[int] = None,
     ) -> None:
         super().__init__(
@@ -103,6 +111,7 @@ class RoleSelect(BaseSelect[RoleSelectMenu, "Role", V_co]):
             min_values=min_values,
             max_values=max_values,
             disabled=disabled,
+            default_values=default_values,
             row=row,
         )
 
@@ -114,6 +123,7 @@ class RoleSelect(BaseSelect[RoleSelectMenu, "Role", V_co]):
             min_values=component.min_values,
             max_values=component.max_values,
             disabled=component.disabled,
+            default_values=component.default_values,
             row=None,
         )
 

@@ -2,19 +2,19 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, Optional, Type, TypeVar, Union, overload
+from typing import TYPE_CHECKING, Any, Callable, Optional, Sequence, Type, TypeVar, Union, overload
 
 from ...components import MentionableSelectMenu
-from ...enums import ComponentType
+from ...enums import ComponentType, SelectDefaultValueType
+from ...member import Member
+from ...role import Role
+from ...user import ClientUser, User
 from ...utils import MISSING
-from .base import BaseSelect, P, V_co, _create_decorator
+from .base import BaseSelect, P, SelectDefaultValueMultiInputType, V_co, _create_decorator
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ...member import Member
-    from ...role import Role
-    from ...user import User
     from ..item import DecoratedItem, ItemCallbackType, ItemShape
 
 
@@ -61,6 +61,11 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
         A list of users, members and/or roles that have been selected by the user.
     """
 
+    _default_value_type_map = {
+        (Member, User, ClientUser): SelectDefaultValueType.user,
+        (Role,): SelectDefaultValueType.role,
+    }
+
     @overload
     def __init__(
         self: MentionableSelect[None],
@@ -70,6 +75,9 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
+        default_values: Optional[
+            Sequence[SelectDefaultValueMultiInputType[Union[User, Member, Role]]]
+        ] = None,
         row: Optional[int] = None,
     ) -> None:
         ...
@@ -83,6 +91,9 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
+        default_values: Optional[
+            Sequence[SelectDefaultValueMultiInputType[Union[User, Member, Role]]]
+        ] = None,
         row: Optional[int] = None,
     ) -> None:
         ...
@@ -95,6 +106,9 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
+        default_values: Optional[
+            Sequence[SelectDefaultValueMultiInputType[Union[User, Member, Role]]]
+        ] = None,
         row: Optional[int] = None,
     ) -> None:
         super().__init__(
@@ -105,6 +119,7 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
             min_values=min_values,
             max_values=max_values,
             disabled=disabled,
+            default_values=default_values,
             row=row,
         )
 
@@ -116,6 +131,7 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
             min_values=component.min_values,
             max_values=component.max_values,
             disabled=component.disabled,
+            default_values=component.default_values,
             row=None,
         )
 
