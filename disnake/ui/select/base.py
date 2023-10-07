@@ -162,7 +162,7 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
 
     @property
     def default_values(self) -> List[SelectDefaultValue]:
-        """:class:`bool`: The list of values that are selected by default.
+        """List[:class:`.SelectDefaultValue`]: The list of values that are selected by default.
         Only available for auto-populated select menus.
         """
         return self._underlying.default_values
