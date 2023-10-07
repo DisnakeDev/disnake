@@ -242,3 +242,24 @@ TextInputStyle
     .. attribute:: long
 
         An alias for :attr:`paragraph`.
+
+SelectDefaultValueType
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. class:: SelectDefaultValueType
+
+    Represents the type of a :class:`SelectDefaultValue`.
+
+    .. versionadded:: 2.10
+
+    .. attribute:: user
+
+        Represents a user/member.
+
+    .. attribute:: role
+
+        Represents a role.
+
+    .. attribute:: channel
+
+        Represents a channel.
