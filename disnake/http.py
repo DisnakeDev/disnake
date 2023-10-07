@@ -2007,6 +2007,7 @@ class HTTPClient:
             "topic",
             "privacy_level",
             "send_start_notification",
+            "guild_scheduled_event_id",
         )
         payload = {k: v for k, v in payload.items() if k in valid_keys}
 
