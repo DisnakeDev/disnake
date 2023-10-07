@@ -71,6 +71,7 @@ StringSelect
 .. autoclass:: StringSelect
     :members:
     :inherited-members:
+    :exclude-members: default_values
 
 ChannelSelect
 ~~~~~~~~~~~~~

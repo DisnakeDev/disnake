@@ -161,6 +161,18 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         self._underlying.disabled = bool(value)
 
     @property
+    def default_values(self) -> List[SelectDefaultValue]:
+        """:class:`bool`: The list of values that are selected by default.
+        Only available for auto-populated select menus.
+        """
+        return self._underlying.default_values
+
+    # TODO: make this accept multiple types similar to constructor?
+    @default_values.setter
+    def default_values(self, value: List[SelectDefaultValue]) -> None:
+        self._underlying.default_values = value
+
+    @property
     def values(self) -> List[SelectValueT]:
         return self._selected_values
 
