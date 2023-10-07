@@ -54,6 +54,13 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
         like to control the relative positioning of the row then passing an index is advised.
         For example, row=1 will show up before row=2. Defaults to ``None``, which is automatic
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
+    default_values: Optional[Sequence[Union[:class:`~disnake.User`, :class:`.Member`, :class:`.Role`, :class:`.SelectDefaultValue`]]]
+        The list of values (users/roles) that are selected by default.
+        If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
+
+        Note that unlike other select menu types, this does not support :class:`.Object`\\s due to ambiguities.
+
+        .. versionadded:: 2.10
 
     Attributes
     ----------

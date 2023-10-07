@@ -271,7 +271,8 @@ class BaseSelectMenu(Component):
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
     default_values: List[:class:`SelectDefaultValue`]
-        A list of default values (users/roles/channels) that are selected by default.
+        The list of values (users/roles/channels) that are selected by default.
+        If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
         Only available for auto-populated select menus.
 
         .. versionadded:: 2.10
@@ -390,7 +391,8 @@ class UserSelectMenu(BaseSelectMenu):
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
     default_values: List[:class:`SelectDefaultValue`]
-        A list of default values (users/members) that are selected by default.
+        The list of values (users/members) that are selected by default.
+        If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
         .. versionadded:: 2.10
     """
@@ -427,7 +429,8 @@ class RoleSelectMenu(BaseSelectMenu):
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
     default_values: List[:class:`SelectDefaultValue`]
-        A list of default values (roles) that are selected by default.
+        The list of values (roles) that are selected by default.
+        If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
         .. versionadded:: 2.10
     """
@@ -464,7 +467,8 @@ class MentionableSelectMenu(BaseSelectMenu):
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
     default_values: List[:class:`SelectDefaultValue`]
-        A list of default values (users/roles) that are selected by default.
+        The list of values (users/roles) that are selected by default.
+        If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
         .. versionadded:: 2.10
     """
@@ -504,7 +508,8 @@ class ChannelSelectMenu(BaseSelectMenu):
         A list of channel types that can be selected in this select menu.
         If ``None``, channels of all types may be selected.
     default_values: List[:class:`SelectDefaultValue`]
-        A list of default values (channels) that are selected by default.
+        The list of values (channels) that are selected by default.
+        If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
         .. versionadded:: 2.10
     """
