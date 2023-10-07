@@ -80,7 +80,7 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
     _underlying: SelectMenuT = MISSING
 
     # Subclasses are expected to set this
-    _default_value_type_map: ClassVar[Mapping[Tuple[Type[Snowflake], ...], SelectDefaultValueType]]
+    _default_value_type_map: ClassVar[Mapping[SelectDefaultValueType, Tuple[Type[Snowflake], ...]]]
 
     def __init__(
         self,
@@ -192,13 +192,12 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         cls, values: Sequence[SelectDefaultValueInputType[SelectValueT]]
     ) -> List[SelectDefaultValue]:
         result: List[SelectDefaultValue] = []
-        default_value_types = set(cls._default_value_type_map.values())
 
         for value in values:
             # If we have a SelectDefaultValue, just use it as-is
             if isinstance(value, SelectDefaultValue):
-                if value.type not in default_value_types:
-                    allowed_types = [str(t) for t in default_value_types]
+                if value.type not in cls._default_value_type_map:
+                    allowed_types = [str(t) for t in cls._default_value_type_map]
                     raise ValueError(
                         f"SelectDefaultValue.type should be {humanize_list(allowed_types, 'or')}, not {value.type}"
                     )
@@ -208,14 +207,14 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
             # Otherwise, look through the list of allowed input types and
             # get the associated SelectDefaultValueType
             for (
-                types,
                 value_type,  # noqa: B007  # we use value_type outside of the loop
+                types,
             ) in cls._default_value_type_map.items():
                 if isinstance(value, types):
                     break
             else:
                 allowed_types = [
-                    t.__name__ for ts in cls._default_value_type_map.keys() for t in ts
+                    t.__name__ for ts in cls._default_value_type_map.values() for t in ts
                 ]
                 allowed_types.append(SelectDefaultValue.__name__)
                 raise TypeError(

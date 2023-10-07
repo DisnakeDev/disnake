@@ -62,8 +62,8 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
     """
 
     _default_value_type_map = {
-        (Member, User, ClientUser): SelectDefaultValueType.user,
-        (Role,): SelectDefaultValueType.role,
+        SelectDefaultValueType.user: (Member, User, ClientUser),
+        SelectDefaultValueType.role: (Role,),
     }
 
     @overload

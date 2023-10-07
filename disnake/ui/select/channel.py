@@ -80,7 +80,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "InteractionChannel", V_co]):
     __repr_attributes__: Tuple[str, ...] = BaseSelect.__repr_attributes__ + ("channel_types",)
 
     _default_value_type_map = {
-        (GuildChannel, Thread, PartialMessageable, Object): SelectDefaultValueType.channel,
+        SelectDefaultValueType.channel: (GuildChannel, Thread, PartialMessageable, Object),
     }
 
     @overload

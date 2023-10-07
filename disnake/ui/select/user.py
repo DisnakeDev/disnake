@@ -62,7 +62,7 @@ class UserSelect(BaseSelect[UserSelectMenu, "Union[User, Member]", V_co]):
     """
 
     _default_value_type_map = {
-        (Member, User, ClientUser, Object): SelectDefaultValueType.user,
+        SelectDefaultValueType.user: (Member, User, ClientUser, Object),
     }
 
     @overload

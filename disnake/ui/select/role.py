@@ -61,7 +61,7 @@ class RoleSelect(BaseSelect[RoleSelectMenu, "Role", V_co]):
     """
 
     _default_value_type_map = {
-        (Role, Object): SelectDefaultValueType.role,
+        SelectDefaultValueType.role: (Role, Object),
     }
 
     @overload
