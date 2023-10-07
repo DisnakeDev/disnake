@@ -16,6 +16,6 @@ class Entitlement(TypedDict):
     guild_id: NotRequired[Snowflake]
     application_id: Snowflake
     type: EntitlementType
-    consumed: bool  # always false in this case
+    deleted: bool
     starts_at: NotRequired[str]
     ends_at: NotRequired[str]

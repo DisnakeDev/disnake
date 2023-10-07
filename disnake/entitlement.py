@@ -66,6 +66,8 @@ class Entitlement(Hashable):
         See also :attr:`guild`.
     application_id: :class:`int`
         The parent application's ID.
+    deleted: :class:`bool`
+        Whether the entitlement was deleted.
     starts_at: Optional[:class:`datetime.datetime`]
         The time at which the entitlement starts being active.
         Set to ``None`` when this is a test entitlement.
@@ -84,6 +86,7 @@ class Entitlement(Hashable):
         "guild_id",
         "application_id",
         "type",
+        "deleted",
         "starts_at",
         "ends_at",
     )
@@ -97,6 +100,7 @@ class Entitlement(Hashable):
         self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
         self.application_id: int = int(data["application_id"])
         self.type: EntitlementType = try_enum(EntitlementType, data["type"])
+        self.deleted: bool = data.get("deleted", False)
         self.starts_at: Optional[datetime.datetime] = parse_time(data.get("starts_at"))
         self.ends_at: Optional[datetime.datetime] = parse_time(data.get("ends_at"))
 
@@ -135,11 +139,15 @@ class Entitlement(Hashable):
 
         :return type: :class:`bool`
         """
+        if self.deleted:
+            return False
+
         now = utcnow()
         if self.starts_at is not None and now < self.starts_at:
             return False
         if self.ends_at is not None and now >= self.ends_at:
             return False
+
         return True
 
     async def delete(self) -> None:
