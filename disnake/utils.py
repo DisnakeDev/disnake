@@ -1252,6 +1252,21 @@ def get_signature_parameters(
     return params
 
 
+def get_signature_return(function: Callable[..., Any]) -> Any:
+    signature = inspect.signature(function)
+
+    # same as parameters above, but for the return annotation
+    ret = signature.return_annotation
+    if ret is not _inspect_empty:
+        if ret is None:
+            ret = type(None)
+        else:
+            globalns = _get_function_globals(function)
+            ret = evaluate_annotation(ret, globalns, globalns, {})
+
+    return ret
+
+
 TimestampStyle = Literal["f", "F", "d", "D", "t", "T", "R"]
 
 
