@@ -1212,22 +1212,41 @@ def unwrap_function(function: Callable[..., Any]) -> Callable[..., Any]:
             return function
 
 
+def _get_function_globals(function: Callable[..., Any]) -> Dict[str, Any]:
+    unwrap = unwrap_function(function)
+    try:
+        return unwrap.__globals__
+    except AttributeError:
+        return {}
+
+
+_inspect_empty = inspect.Parameter.empty
+
+
 def get_signature_parameters(
-    function: Callable[..., Any], globalns: Dict[str, Any]
+    function: Callable[..., Any], globalns: Optional[Dict[str, Any]] = None
 ) -> Dict[str, inspect.Parameter]:
-    signature = inspect.signature(function)
-    params = {}
+    # if no globalns provided, unwrap (where needed) and get global namespace from there
+    if globalns is None:
+        globalns = _get_function_globals(function)
+
+    params: Dict[str, inspect.Parameter] = {}
     cache: Dict[str, Any] = {}
+
+    signature = inspect.signature(function)
+
+    # eval all parameter annotations
     for name, parameter in signature.parameters.items():
         annotation = parameter.annotation
-        if annotation is parameter.empty:
+        if annotation is _inspect_empty:
             params[name] = parameter
             continue
-        if annotation is None:
-            params[name] = parameter.replace(annotation=type(None))
-            continue
 
-        annotation = evaluate_annotation(annotation, globalns, globalns, cache)
+        if annotation is None:
+            annotation = type(None)
+        else:
+            annotation = evaluate_annotation(annotation, globalns, globalns, cache)
+
         params[name] = parameter.replace(annotation=annotation)
 
     return params
