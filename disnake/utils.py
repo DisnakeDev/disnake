@@ -6,6 +6,7 @@ import array
 import asyncio
 import datetime
 import functools
+import inspect
 import json
 import os
 import pkgutil
@@ -1198,6 +1199,38 @@ def resolve_annotation(
     if cache is None:
         cache = {}
     return evaluate_annotation(annotation, globalns, locals, cache)
+
+
+def unwrap_function(function: Callable[..., Any]) -> Callable[..., Any]:
+    partial = functools.partial
+    while True:
+        if hasattr(function, "__wrapped__"):
+            function = function.__wrapped__
+        elif isinstance(function, partial):
+            function = function.func
+        else:
+            return function
+
+
+def get_signature_parameters(
+    function: Callable[..., Any], globalns: Dict[str, Any]
+) -> Dict[str, inspect.Parameter]:
+    signature = inspect.signature(function)
+    params = {}
+    cache: Dict[str, Any] = {}
+    for name, parameter in signature.parameters.items():
+        annotation = parameter.annotation
+        if annotation is parameter.empty:
+            params[name] = parameter
+            continue
+        if annotation is None:
+            params[name] = parameter.replace(annotation=type(None))
+            continue
+
+        annotation = evaluate_annotation(annotation, globalns, globalns, cache)
+        params[name] = parameter.replace(annotation=annotation)
+
+    return params
 
 
 TimestampStyle = Literal["f", "F", "d", "D", "t", "T", "R"]
