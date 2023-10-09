@@ -10,6 +10,7 @@ import inspect
 import itertools
 import math
 import sys
+import types
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum, EnumMeta
@@ -755,7 +756,12 @@ class ParamInfo:
         return True
 
     def parse_converter_annotation(self, converter: Callable, fallback_annotation: Any) -> None:
-        _, parameters = isolate_self(get_signature_parameters(converter))
+        if isinstance(converter, (types.FunctionType, types.MethodType)):
+            converter_func = converter
+        else:
+            # if converter isn't a function/method, it should be a callable object/type
+            converter_func = converter.__call__
+        _, parameters = isolate_self(get_signature_parameters(converter_func))
 
         if len(parameters) != 1:
             raise TypeError(
