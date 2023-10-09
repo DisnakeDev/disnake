@@ -759,7 +759,9 @@ class ParamInfo:
         if isinstance(converter, (types.FunctionType, types.MethodType)):
             converter_func = converter
         else:
-            # if converter isn't a function/method, it should be a callable object/type
+            # if converter isn't a function/method, assume it's a callable object/type
+            # (we need `__call__` here to get the correct global namespace later, since
+            # classes do not have `__globals__`)
             converter_func = converter.__call__
         _, parameters = isolate_self(get_signature_parameters(converter_func))
 
