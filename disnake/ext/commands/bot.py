@@ -170,19 +170,19 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
     help_command: Optional[:class:`.HelpCommand`]
         The help command implementation to use. This can be dynamically
         set at runtime. To remove the help command pass ``None``. For more
-        information on implementing a help command, see :ref:`ext_commands_help_command`.
+        information on implementing a help command, see :ref:`ext_commands_api_help_commands`.
 
         This can be provided as a parameter at creation.
 
     owner_id: Optional[:class:`int`]
-        The user ID that owns the bot. If this is not set and is then queried via
+        The ID of the user that owns the bot. If this is not set and is then queried via
         :meth:`.is_owner` then it is fetched automatically using
         :meth:`~.Bot.application_info`.
 
         This can be provided as a parameter at creation.
 
     owner_ids: Optional[Collection[:class:`int`]]
-        The user IDs that owns the bot. This is similar to :attr:`owner_id`.
+        The IDs of the users that own the bot. This is similar to :attr:`owner_id`.
         If this is not set and the application is team based, then it is
         fetched automatically using :meth:`~.Bot.application_info`.
         For performance reasons it is recommended to use a :class:`set`
@@ -394,14 +394,14 @@ class InteractionBot(InteractionBotBase, disnake.Client):
     Attributes
     ----------
     owner_id: Optional[:class:`int`]
-        The user ID that owns the bot. If this is not set and is then queried via
+        The ID of the user that owns the bot. If this is not set and is then queried via
         :meth:`.is_owner` then it is fetched automatically using
         :meth:`~.Bot.application_info`.
 
         This can be provided as a parameter at creation.
 
     owner_ids: Optional[Collection[:class:`int`]]
-        The user IDs that owns the bot. This is similar to :attr:`owner_id`.
+        The IDs of the users that own the bot. This is similar to :attr:`owner_id`.
         If this is not set and the application is team based, then it is
         fetched automatically using :meth:`~.Bot.application_info`.
         For performance reasons it is recommended to use a :class:`set`

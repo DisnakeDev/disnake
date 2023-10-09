@@ -105,16 +105,21 @@ class WidgetMember(BaseUser):
 
         .. describe:: str(x)
 
-            Returns the widget member's `name#discriminator`.
+            Returns the widget member's name.
 
     Attributes
     ----------
     id: :class:`int`
         The member's anonymized ID.
     name: :class:`str`
-        The member's nickname (if set in the guild) or username.
+        The member's name.
     discriminator: :class:`str`
         The member's anonymized discriminator.
+
+        .. note::
+            This is being phased out by Discord; the username system is moving away from ``username#discriminator``
+            to users having a globally unique username.
+            See the `help article <https://dis.gd/app-usernames>`__ for details.
     status: :class:`Status`
         The member's status.
     activity: Optional[Union[:class:`BaseActivity`, :class:`Spotify`]]
@@ -286,9 +291,8 @@ class Widget:
         .. note::
 
             Due to a Discord limitation, if this data is available
-            the users will be "anonymized" with linear IDs and discriminator
-            information being incorrect. Likewise, the number of members
-            retrieved is capped.
+            the users will be "anonymized" with linear IDs.
+            Likewise, the number of members retrieved is capped.
 
     presence_count: :class:`int`
         The number of online members in the server.

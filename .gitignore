@@ -32,6 +32,7 @@ venvs/
 coverage.xml
 __pypackages__/
 .pdm.toml
+.pdm-python
 pdm.lock
 
 !test_bot/locale/*.json

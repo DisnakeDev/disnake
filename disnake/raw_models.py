@@ -6,7 +6,7 @@ import datetime
 from typing import TYPE_CHECKING, List, Literal, Optional, Set, Union, cast
 
 from .enums import ChannelType, try_enum
-from .utils import get_slots
+from .utils import _get_as_snowflake, get_slots
 
 if TYPE_CHECKING:
     from .member import Member
@@ -164,8 +164,12 @@ class RawReactionActionEvent(_RawReprMixin):
         The guild ID where the reaction addition or removal took place, if applicable.
     emoji: :class:`PartialEmoji`
         The custom or unicode emoji being used.
+
+        .. versionchanged:: 2.9
+            This now also includes the correct :attr:`~PartialEmoji.animated` value when a reaction was removed.
+
     member: Optional[:class:`Member`]
-        The member who added the reaction. Only available if `event_type` is `REACTION_ADD` and the reaction is inside a guild.
+        The member who added the reaction. Only available if :attr:`event_type` is ``REACTION_ADD`` and the reaction is inside a guild.
 
         .. versionadded:: 1.3
 
@@ -175,9 +179,25 @@ class RawReactionActionEvent(_RawReprMixin):
         ``REACTION_REMOVE`` for reaction removal.
 
         .. versionadded:: 1.3
+
+    message_author_id: Optional[:class:`int`]
+        The ID of the author who created the message that got a reaction.
+        Only available if :attr:`event_type` is ``REACTION_ADD``.
+        May also be ``None`` if the message was created by a webhook.
+
+        .. versionadded:: 2.10
     """
 
-    __slots__ = ("message_id", "user_id", "channel_id", "guild_id", "emoji", "event_type", "member")
+    __slots__ = (
+        "message_id",
+        "user_id",
+        "channel_id",
+        "guild_id",
+        "emoji",
+        "event_type",
+        "member",
+        "message_author_id",
+    )
 
     def __init__(
         self,
@@ -195,6 +215,7 @@ class RawReactionActionEvent(_RawReprMixin):
             self.guild_id: Optional[int] = int(data["guild_id"])
         except KeyError:
             self.guild_id: Optional[int] = None
+        self.message_author_id: Optional[int] = _get_as_snowflake(data, "message_author_id")
 
 
 class RawReactionClearEvent(_RawReprMixin):
@@ -236,6 +257,9 @@ class RawReactionClearEmojiEvent(_RawReprMixin):
         The guild ID where the reaction clear took place, if applicable.
     emoji: :class:`PartialEmoji`
         The custom or unicode emoji being removed.
+
+        .. versionchanged:: 2.9
+            This now also includes the correct :attr:`~PartialEmoji.animated` value.
     """
 
     __slots__ = ("message_id", "channel_id", "guild_id", "emoji")

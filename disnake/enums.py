@@ -66,6 +66,7 @@ __all__ = (
     "ThreadLayout",
     "Event",
     "ApplicationRoleConnectionMetadataType",
+    "OnboardingPromptType",
 )
 
 
@@ -265,6 +266,7 @@ class PartyType(Enum):
     watch_together = 880218394199220334
     sketch_heads = 902271654783242291
     ocho = 832025144389533716
+    gartic_phone = 1007373802981822582
 
 
 class SpeakingState(Enum):
@@ -320,6 +322,7 @@ class DefaultAvatar(Enum):
     green = 2
     orange = 3
     red = 4
+    fuchsia = 5
 
     def __str__(self) -> str:
         return self.name
@@ -392,6 +395,8 @@ class AuditLogAction(Enum):
     automod_block_message                 = 143
     automod_send_alert_message            = 144
     automod_timeout                       = 145
+    creator_monetization_request_created  = 150
+    creator_monetization_terms_accepted   = 151
     # fmt: on
 
     @property
@@ -452,6 +457,8 @@ class AuditLogAction(Enum):
             AuditLogAction.automod_block_message:                 None,
             AuditLogAction.automod_send_alert_message:            None,
             AuditLogAction.automod_timeout:                       None,
+            AuditLogAction.creator_monetization_request_created:  None,
+            AuditLogAction.creator_monetization_terms_accepted:   None,
         }
         # fmt: on
         return lookup[self]
@@ -497,6 +504,8 @@ class AuditLogAction(Enum):
             return "automod_rule"
         elif v < 146:
             return "user"
+        elif v < 152:
+            return None
         else:
             return None
 
@@ -1001,13 +1010,13 @@ class Event(Enum):
     """Called when a `Guild` creates a new `Role`.
     Represents the :func:`on_guild_role_create` event.
     """
-    guild_role_update = "guild_role_update"
-    """Called when a `Guild` updates a `Role`.
-    Represents the :func:`on_guild_role_update` event.
-    """
     guild_role_delete = "guild_role_delete"
     """Called when a `Guild` deletes a `Role`.
     Represents the :func:`on_guild_role_delete` event.
+    """
+    guild_role_update = "guild_role_update"
+    """Called when a `Guild` updates a `Role`.
+    Represents the :func:`on_guild_role_update` event.
     """
     guild_emojis_update = "guild_emojis_update"
     """Called when a `Guild` adds or removes `Emoji`.
@@ -1069,6 +1078,10 @@ class Event(Enum):
     """Called when an `AutoModRule` is deleted.
     Represents the :func:`on_automod_rule_delete` event.
     """
+    audit_log_entry_create = "audit_log_entry_create"
+    """Called when an audit log entry is created.
+    Represents the :func:`on_audit_log_entry_create` event.
+    """
     integration_create = "integration_create"
     """Called when an integration is created.
     Represents the :func:`on_integration_create` event.
@@ -1085,25 +1098,21 @@ class Event(Enum):
     """Called when a `Member` joins a `Guild`.
     Represents the :func:`on_member_join` event.
     """
-    member_update = "member_update"
-    """Called when a `Member` updates their profile.
-    Represents the :func:`on_member_update` event.
-    """
     member_remove = "member_remove"
     """Called when a `Member` leaves a `Guild`.
     Represents the :func:`on_member_remove` event.
+    """
+    member_update = "member_update"
+    """Called when a `Member` is updated in a `Guild`.
+    Represents the :func:`on_member_update` event.
     """
     raw_member_remove = "raw_member_remove"
     """Called when a member leaves a `Guild` regardless of the member cache.
     Represents the :func:`on_raw_member_remove` event.
     """
     raw_member_update = "raw_member_update"
-    """Called when a member updates their profile regardless of the member cache.
+    """Called when a `Member` is updated in a `Guild` regardless of the member cache.
     Represents the :func:`on_raw_member_update` event.
-    """
-    audit_log_entry_create = "audit_log_entry_create"
-    """Called when an audit log entry is created.
-    Represents the :func:`on_audit_log_entry_create` event.
     """
     member_ban = "member_ban"
     """Called when user gets banned from a `Guild`.
@@ -1129,13 +1138,13 @@ class Event(Enum):
     """Called when a `StageInstance` is created for a `StageChannel`.
     Represents the :func:`on_stage_instance_create` event.
     """
-    stage_instance_update = "stage_instance_update"
-    """Called when a `StageInstance` is updated.
-    Represents the :func:`on_stage_instance_update` event.
-    """
     stage_instance_delete = "stage_instance_delete"
     """Called when a `StageInstance` is deleted for a `StageChannel`.
     Represents the :func:`on_stage_instance_delete` event.
+    """
+    stage_instance_update = "stage_instance_update"
+    """Called when a `StageInstance` is updated.
+    Represents the :func:`on_stage_instance_update` event.
     """
     application_command = "application_command"
     """Called when an application command is invoked.
@@ -1181,13 +1190,13 @@ class Event(Enum):
     """Called when messages are bulk deleted.
     Represents the :func:`on_bulk_message_delete` event.
     """
-    raw_message_delete = "raw_message_delete"
-    """Called when a message is deleted regardless of the message being in the internal message cache or not.
-    Represents the :func:`on_raw_message_delete` event.
-    """
     raw_message_edit = "raw_message_edit"
     """Called when a message is edited regardless of the state of the internal message cache.
     Represents the :func:`on_raw_message_edit` event.
+    """
+    raw_message_delete = "raw_message_delete"
+    """Called when a message is deleted regardless of the message being in the internal message cache or not.
+    Represents the :func:`on_raw_message_delete` event.
     """
     raw_bulk_message_delete = "raw_bulk_message_delete"
     """Called when a bulk delete is triggered regardless of the messages being in the internal message cache or not.
@@ -1293,6 +1302,11 @@ class ApplicationRoleConnectionMetadataType(Enum):
     datetime_greater_than_or_equal = 6
     boolean_equal = 7
     boolean_not_equal = 8
+
+
+class OnboardingPromptType(Enum):
+    multiple_choice = 0
+    dropdown = 1
 
 
 T = TypeVar("T")

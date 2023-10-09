@@ -904,7 +904,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         await self.prepare(ctx)
 
         # terminate the invoked_subcommand chain.
-        # since we're in a regular command (and not a group) then
+        # since we're in a regular prefix command (and not a group) then
         # the invoked subcommand is None.
         ctx.invoked_subcommand = None
         ctx.subcommand_passed = None
@@ -2044,12 +2044,14 @@ def has_permissions(
     send_messages: bool = ...,
     send_messages_in_threads: bool = ...,
     send_tts_messages: bool = ...,
+    send_voice_messages: bool = ...,
     speak: bool = ...,
     start_embedded_activities: bool = ...,
     stream: bool = ...,
     use_application_commands: bool = ...,
     use_embedded_activities: bool = ...,
     use_external_emojis: bool = ...,
+    use_external_sounds: bool = ...,
     use_external_stickers: bool = ...,
     use_slash_commands: bool = ...,
     use_soundboard: bool = ...,
@@ -2164,12 +2166,14 @@ def bot_has_permissions(
     send_messages: bool = ...,
     send_messages_in_threads: bool = ...,
     send_tts_messages: bool = ...,
+    send_voice_messages: bool = ...,
     speak: bool = ...,
     start_embedded_activities: bool = ...,
     stream: bool = ...,
     use_application_commands: bool = ...,
     use_embedded_activities: bool = ...,
     use_external_emojis: bool = ...,
+    use_external_sounds: bool = ...,
     use_external_stickers: bool = ...,
     use_slash_commands: bool = ...,
     use_soundboard: bool = ...,
@@ -2262,12 +2266,14 @@ def has_guild_permissions(
     send_messages: bool = ...,
     send_messages_in_threads: bool = ...,
     send_tts_messages: bool = ...,
+    send_voice_messages: bool = ...,
     speak: bool = ...,
     start_embedded_activities: bool = ...,
     stream: bool = ...,
     use_application_commands: bool = ...,
     use_embedded_activities: bool = ...,
     use_external_emojis: bool = ...,
+    use_external_sounds: bool = ...,
     use_external_stickers: bool = ...,
     use_slash_commands: bool = ...,
     use_soundboard: bool = ...,
@@ -2357,12 +2363,14 @@ def bot_has_guild_permissions(
     send_messages: bool = ...,
     send_messages_in_threads: bool = ...,
     send_tts_messages: bool = ...,
+    send_voice_messages: bool = ...,
     speak: bool = ...,
     start_embedded_activities: bool = ...,
     stream: bool = ...,
     use_application_commands: bool = ...,
     use_embedded_activities: bool = ...,
     use_external_emojis: bool = ...,
+    use_external_sounds: bool = ...,
     use_external_stickers: bool = ...,
     use_slash_commands: bool = ...,
     use_soundboard: bool = ...,

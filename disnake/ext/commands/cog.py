@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import inspect
+import logging
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -48,6 +49,7 @@ __all__ = (
 FuncT = TypeVar("FuncT", bound=Callable[..., Any])
 
 MISSING: Any = disnake.utils.MISSING
+_log = logging.getLogger(__name__)
 
 
 def _cog_special_method(func: FuncT) -> FuncT:
@@ -723,7 +725,15 @@ class Cog(metaclass=CogMeta):
         pass
 
     def _inject(self, bot: AnyBot) -> Self:
+        from .bot import AutoShardedInteractionBot, InteractionBot
+
         cls = self.__class__
+
+        if (
+            isinstance(bot, (InteractionBot, AutoShardedInteractionBot))
+            and len(self.__cog_commands__) > 0
+        ):
+            raise TypeError("@commands.command is not supported for interaction bots.")
 
         # realistically, the only thing that can cause loading errors
         # is essentially just the command loading, which raises if there are
@@ -766,10 +776,16 @@ class Cog(metaclass=CogMeta):
 
         # check if we're overriding the default
         if cls.bot_check is not Cog.bot_check:
-            bot.add_check(self.bot_check)  # type: ignore
+            if isinstance(bot, (InteractionBot, AutoShardedInteractionBot)):
+                raise TypeError("Cog.bot_check is not supported for interaction bots.")
+
+            bot.add_check(self.bot_check)
 
         if cls.bot_check_once is not Cog.bot_check_once:
-            bot.add_check(self.bot_check_once, call_once=True)  # type: ignore
+            if isinstance(bot, (InteractionBot, AutoShardedInteractionBot)):
+                raise TypeError("Cog.bot_check_once is not supported for interaction bots.")
+
+            bot.add_check(self.bot_check_once, call_once=True)
 
         # Add application command checks
         if cls.bot_slash_command_check is not Cog.bot_slash_command_check:
@@ -881,6 +897,7 @@ class Cog(metaclass=CogMeta):
                 pass
             try:
                 self.cog_unload()
-            except Exception:
-                # TODO: Consider calling the bot's on_error handler here
-                pass
+            except Exception as e:
+                _log.error(
+                    "An error occurred while unloading the %s cog.", self.qualified_name, exc_info=e
+                )

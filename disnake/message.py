@@ -6,6 +6,7 @@ import asyncio
 import datetime
 import io
 import re
+from base64 import b64decode, b64encode
 from os import PathLike
 from typing import (
     TYPE_CHECKING,
@@ -28,7 +29,7 @@ from .emoji import Emoji
 from .enums import ChannelType, InteractionType, MessageType, try_enum, try_enum_to_int
 from .errors import HTTPException
 from .file import File
-from .flags import MessageFlags
+from .flags import AttachmentFlags, MessageFlags
 from .guild import Guild
 from .member import Member
 from .mixins import Hashable
@@ -68,6 +69,7 @@ if TYPE_CHECKING:
         MessageApplication as MessageApplicationPayload,
         MessageReference as MessageReferencePayload,
         Reaction as ReactionPayload,
+        RoleSubscriptionData as RoleSubscriptionDataPayload,
     )
     from .types.threads import ThreadArchiveDurationLiteral
     from .types.user import User as UserPayload
@@ -83,6 +85,7 @@ __all__ = (
     "MessageReference",
     "InteractionReference",
     "DeletedReferencedMessage",
+    "RoleSubscriptionData",
 )
 
 
@@ -258,7 +261,7 @@ class Attachment(Hashable):
         case of images. When the message is deleted, this URL might be valid for a few
         minutes or not valid at all.
     content_type: Optional[:class:`str`]
-        The attachment's `media type <https://en.wikipedia.org/wiki/Media_type>`_
+        The attachment's `media type <https://en.wikipedia.org/wiki/Media_type>`_.
 
         .. versionadded:: 1.7
 
@@ -268,9 +271,21 @@ class Attachment(Hashable):
         .. versionadded:: 2.1
 
     description: :class:`str`
-        The attachment's description
+        The attachment's description.
 
         .. versionadded:: 2.3
+
+    duration: Optional[:class:`float`]
+        The duration of the audio attachment in seconds, if this is attached to a voice message
+        (see :attr:`MessageFlags.is_voice_message`).
+
+        .. versionadded:: 2.9
+
+    waveform: Optional[:class:`bytes`]
+        The byte array representing a sampled waveform, if this is attached to a voice message
+        (see :attr:`MessageFlags.is_voice_message`).
+
+        .. versionadded:: 2.9
     """
 
     __slots__ = (
@@ -285,6 +300,9 @@ class Attachment(Hashable):
         "content_type",
         "ephemeral",
         "description",
+        "duration",
+        "waveform",
+        "_flags",
     )
 
     def __init__(self, *, data: AttachmentPayload, state: ConnectionState) -> None:
@@ -299,6 +317,11 @@ class Attachment(Hashable):
         self.content_type: Optional[str] = data.get("content_type")
         self.ephemeral: bool = data.get("ephemeral", False)
         self.description: Optional[str] = data.get("description")
+        self.duration: Optional[float] = data.get("duration_secs")
+        self.waveform: Optional[bytes] = (
+            b64decode(waveform_data) if (waveform_data := data.get("waveform")) else None
+        )
+        self._flags: int = data.get("flags", 0)
 
     def is_spoiler(self) -> bool:
         """Whether this attachment contains a spoiler.
@@ -312,6 +335,14 @@ class Attachment(Hashable):
 
     def __str__(self) -> str:
         return self.url or ""
+
+    @property
+    def flags(self) -> AttachmentFlags:
+        """:class:`AttachmentFlags`: Returns the attachment's flags.
+
+        .. versionadded:: 2.10
+        """
+        return AttachmentFlags._from_value(self._flags)
 
     async def save(
         self,
@@ -473,6 +504,12 @@ class Attachment(Hashable):
             result["content_type"] = self.content_type
         if self.description:
             result["description"] = self.description
+        if self.duration is not None:
+            result["duration_secs"] = self.duration
+        if self.waveform is not None:
+            result["waveform"] = b64encode(self.waveform).decode("ascii")
+        if self._flags:
+            result["flags"] = self._flags
         return result
 
 
@@ -566,7 +603,7 @@ class MessageReference:
     def with_state(cls, state: ConnectionState, data: MessageReferencePayload) -> Self:
         self = cls.__new__(cls)
         self.message_id = utils._get_as_snowflake(data, "message_id")
-        self.channel_id = int(data.pop("channel_id"))
+        self.channel_id = int(data["channel_id"])
         self.guild_id = utils._get_as_snowflake(data, "guild_id")
         self.fail_if_not_exists = data.get("fail_if_not_exists", True)
         self._state = state
@@ -621,10 +658,9 @@ class MessageReference:
         return f"<MessageReference message_id={self.message_id!r} channel_id={self.channel_id!r} guild_id={self.guild_id!r}>"
 
     def to_dict(self) -> MessageReferencePayload:
-        result: MessageReferencePayload = (
-            {"message_id": self.message_id} if self.message_id is not None else {}
-        )
-        result["channel_id"] = self.channel_id
+        result: MessageReferencePayload = {"channel_id": self.channel_id}
+        if self.message_id is not None:
+            result["message_id"] = self.message_id
         if self.guild_id is not None:
             result["guild_id"] = self.guild_id
         if self.fail_if_not_exists is not None:
@@ -675,6 +711,40 @@ class InteractionReference:
     @property
     def author(self) -> User:
         return self.user
+
+
+class RoleSubscriptionData:
+    """Represents metadata of the role subscription purchase/renewal in a message
+    of type :attr:`MessageType.role_subscription_purchase`.
+
+    .. versionadded:: 2.9
+
+    Attributes
+    ----------
+    role_subscription_listing_id: :class:`int`
+        The ID of the subscription listing the user subscribed to.
+
+        See also :attr:`RoleTags.subscription_listing_id`.
+    tier_name: :class:`str`
+        The name of the tier the user subscribed to.
+    total_months_subscribed: :class:`int`
+        The cumulative number of months the user has been subscribed for.
+    is_renewal: :class:`bool`
+        Whether this message is for a subscription renewal instead of a new subscription.
+    """
+
+    __slots__ = (
+        "role_subscription_listing_id",
+        "tier_name",
+        "total_months_subscribed",
+        "is_renewal",
+    )
+
+    def __init__(self, data: RoleSubscriptionDataPayload) -> None:
+        self.role_subscription_listing_id: int = int(data["role_subscription_listing_id"])
+        self.tier_name: str = data["tier_name"]
+        self.total_months_subscribed: int = data["total_months_subscribed"]
+        self.is_renewal: bool = data["is_renewal"]
 
 
 def flatten_handlers(cls):
@@ -829,7 +899,6 @@ class Message(Hashable):
 
     __slots__ = (
         "_state",
-        "_edited_timestamp",
         "_cs_channel_mentions",
         "_cs_raw_mentions",
         "_cs_clean_content",
@@ -861,6 +930,8 @@ class Message(Hashable):
         "stickers",
         "components",
         "guild",
+        "_edited_timestamp",
+        "_role_subscription_data",
     )
 
     if TYPE_CHECKING:
@@ -929,6 +1000,10 @@ class Message(Hashable):
         if thread_data := data.get("thread"):
             if not self.thread and isinstance(self.guild, Guild):
                 self.guild._store_thread(thread_data)
+
+        self._role_subscription_data: Optional[RoleSubscriptionDataPayload] = data.get(
+            "role_subscription_data"
+        )
 
         try:
             ref = data["message_reference"]
@@ -1248,6 +1323,17 @@ class Message(Hashable):
 
         return self.guild.get_thread(self.id)
 
+    @property
+    def role_subscription_data(self) -> Optional[RoleSubscriptionData]:
+        """Optional[:class:`RoleSubscriptionData`]: The metadata of the role
+        subscription purchase/renewal, if this message is a :attr:`MessageType.role_subscription_purchase`.
+
+        .. versionadded:: 2.9
+        """
+        if not self._role_subscription_data:
+            return None
+        return RoleSubscriptionData(self._role_subscription_data)
+
     def is_system(self) -> bool:
         """Whether the message is a system message.
 
@@ -1397,8 +1483,22 @@ class Message(Hashable):
         if self.type is MessageType.auto_moderation_action:
             return self.content
 
-        # TODO: `MessageType.role_subscription_purchase` requires `Message.role_subscription_data`,
-        #       which is currently undocumented
+        if self.type is MessageType.role_subscription_purchase:
+            if not (data := self.role_subscription_data):
+                return
+
+            guild_name = f"**{self.guild.name}**" if self.guild else None
+            if data.total_months_subscribed > 0:
+                action = "renewed" if data.is_renewal else "joined"
+                return (
+                    f"{self.author.name} {action} **{data.tier_name}** and has been a subscriber "
+                    f"of {guild_name} for {data.total_months_subscribed} "
+                    f"{'month' if data.total_months_subscribed == 1 else 'months'}!"
+                )
+            elif data.is_renewal:
+                return f"{self.author.name} renewed **{data.tier_name}** in their {guild_name} membership!"
+            else:
+                return f"{self.author.name} joined **{data.tier_name}** as a subscriber of {guild_name}!"
 
         if self.type is MessageType.interaction_premium_upsell:
             return self.content
@@ -1729,6 +1829,8 @@ class Message(Hashable):
         You must have the :attr:`~Permissions.manage_messages` permission to do
         this in a non-private channel context.
 
+        This does not work with messages sent in a :class:`VoiceChannel` or :class:`StageChannel`.
+
         Parameters
         ----------
         reason: Optional[:class:`str`]
@@ -1744,7 +1846,7 @@ class Message(Hashable):
             The message or channel was not found or deleted.
         HTTPException
             Pinning the message failed, probably due to the channel
-            having more than 50 pinned messages.
+            having more than 50 pinned messages or the channel not supporting pins.
         """
         await self._state.http.pin_message(self.channel.id, self.id, reason=reason)
         self.pinned = True

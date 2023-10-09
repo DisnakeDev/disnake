@@ -52,12 +52,12 @@ voice = [
     "PyNaCl>=1.3.0,<1.6",
 ]
 docs = [
-    "sphinx==6.0.1",
+    "sphinx==7.0.1",
     "sphinxcontrib-trio~=1.1.2",
     "sphinx-hoverxref==1.3.0",
     "sphinx-autobuild~=2021.3",
     "sphinxcontrib-towncrier==0.3.2a0",
-    "towncrier==22.12.0",
+    "towncrier==23.6.0",
     "sphinx-notfound-page==0.8.3",
 ]
 discord = ["discord-disnake"]
@@ -70,9 +70,9 @@ tools = [
     "pre-commit~=3.0",
     "slotscheck~=0.16.4",
     "python-dotenv~=1.0.0",
-    "towncrier==22.12.0",
+    "towncrier==23.6.0",
     "check-manifest==0.49",
-    "ruff==0.0.257",
+    "ruff==0.0.261",
 ]
 codemod = [
     # run codemods on the respository (mostly automated typing)
@@ -215,12 +215,14 @@ ignore = [
     "T201", # print found, printing is currently accepted in the test bot
     "PT",   # this is not a module of pytest tests
 ]
+"scripts/*.py" = ["S101"] # use of assert is okay in scripts
 "tests/*.py" = ["S101"] # use of assert is okay in test files
 # we are not using noqa in the example files themselves
 "examples/*.py" = [
     "B008", # do not perform function calls in argument defaults, this is how most commands work
-    "T201", # print found, printing is okay in examples
     "PT",   # this is not a module of pytest tests
+    "S311", # pseudo-random generators aren't suitable for cryptographic purposes
+    "T201", # print found, printing is okay in examples
 ]
 "examples/basic_voice.py" = ["S104"] # possible binding to all interfaces
 "examples/views/tic_tac_toe.py" = ["E741"] # ambigious variable name: `O`

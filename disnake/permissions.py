@@ -196,12 +196,14 @@ class Permissions(BaseFlags):
         send_messages: bool = ...,
         send_messages_in_threads: bool = ...,
         send_tts_messages: bool = ...,
+        send_voice_messages: bool = ...,
         speak: bool = ...,
         start_embedded_activities: bool = ...,
         stream: bool = ...,
         use_application_commands: bool = ...,
         use_embedded_activities: bool = ...,
         use_external_emojis: bool = ...,
+        use_external_sounds: bool = ...,
         use_external_stickers: bool = ...,
         use_slash_commands: bool = ...,
         use_soundboard: bool = ...,
@@ -313,23 +315,22 @@ class Permissions(BaseFlags):
             Added :attr:`use_embedded_activities` permission.
 
         .. versionchanged:: 2.9
-            Added :attr:`use_soundboard` permission.
+            Added :attr:`use_soundboard` and :attr:`send_voice_messages` permissions.
         """
-        guild_specific_perms = {
-            "administrator",
-            "ban_members",
-            "change_nickname",
-            "kick_members",
-            "manage_guild_expressions",
-            "manage_guild",
-            "manage_nicknames",
-            "moderate_members",
-            "view_audit_log",
-            "view_guild_insights",
-            "view_creator_monetization_analytics",
-        }
         instance = cls.all()
-        instance.update(**dict.fromkeys(guild_specific_perms, False))
+        instance.update(
+            administrator=False,
+            ban_members=False,
+            change_nickname=False,
+            kick_members=False,
+            manage_guild=False,
+            manage_guild_expressions=False,
+            manage_nicknames=False,
+            moderate_members=False,
+            view_audit_log=False,
+            view_guild_insights=False,
+            view_creator_monetization_analytics=False,
+        )
         return instance
 
     @classmethod
@@ -392,6 +393,9 @@ class Permissions(BaseFlags):
         .. versionchanged:: 2.0
            Added :attr:`create_public_threads`, :attr:`create_private_threads`, :attr:`manage_threads`,
            :attr:`send_messages_in_threads` and :attr:`use_external_stickers` permissions.
+
+        .. versionchanged:: 2.9
+            Added :attr:`send_voice_messages` permission.
         """
         return cls(
             send_messages=True,
@@ -409,6 +413,7 @@ class Permissions(BaseFlags):
             read_message_history=True,
             send_tts_messages=True,
             use_slash_commands=True,
+            send_voice_messages=True,
         )
 
     @classmethod
@@ -421,7 +426,7 @@ class Permissions(BaseFlags):
             Added :attr:`use_embedded_activities` permission.
 
         .. versionchanged:: 2.9
-            Added :attr:`use_soundboard` permission.
+            Added :attr:`use_soundboard` and :attr:`use_external_sounds` permissions.
         """
         return cls(
             connect=True,
@@ -429,6 +434,7 @@ class Permissions(BaseFlags):
             stream=True,
             use_embedded_activities=True,
             use_soundboard=True,
+            use_external_sounds=True,
             use_voice_activation=True,
             priority_speaker=True,
             mute_members=True,
@@ -558,12 +564,14 @@ class Permissions(BaseFlags):
         send_messages: bool = ...,
         send_messages_in_threads: bool = ...,
         send_tts_messages: bool = ...,
+        send_voice_messages: bool = ...,
         speak: bool = ...,
         start_embedded_activities: bool = ...,
         stream: bool = ...,
         use_application_commands: bool = ...,
         use_embedded_activities: bool = ...,
         use_external_emojis: bool = ...,
+        use_external_sounds: bool = ...,
         use_external_stickers: bool = ...,
         use_slash_commands: bool = ...,
         use_soundboard: bool = ...,
@@ -970,6 +978,22 @@ class Permissions(BaseFlags):
         """
         return 1 << 42
 
+    @flag_value
+    def use_external_sounds(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can use custom soundboard sounds from other guilds.
+
+        .. versionadded:: 2.9
+        """
+        return 1 << 45
+
+    @flag_value
+    def send_voice_messages(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can send voice messages.
+
+        .. versionadded:: 2.9
+        """
+        return 1 << 46
+
 
 def _augment_from_permissions(cls):
     cls.VALID_NAMES = set(Permissions.VALID_FLAGS)
@@ -1074,12 +1098,14 @@ class PermissionOverwrite:
         send_messages: Optional[bool]
         send_messages_in_threads: Optional[bool]
         send_tts_messages: Optional[bool]
+        send_voice_messages: Optional[bool]
         speak: Optional[bool]
         start_embedded_activities: Optional[bool]
         stream: Optional[bool]
         use_application_commands: Optional[bool]
         use_embedded_activities: Optional[bool]
         use_external_emojis: Optional[bool]
+        use_external_sounds: Optional[bool]
         use_external_stickers: Optional[bool]
         use_slash_commands: Optional[bool]
         use_soundboard: Optional[bool]
@@ -1136,12 +1162,14 @@ class PermissionOverwrite:
         send_messages: Optional[bool] = ...,
         send_messages_in_threads: Optional[bool] = ...,
         send_tts_messages: Optional[bool] = ...,
+        send_voice_messages: Optional[bool] = ...,
         speak: Optional[bool] = ...,
         start_embedded_activities: Optional[bool] = ...,
         stream: Optional[bool] = ...,
         use_application_commands: Optional[bool] = ...,
         use_embedded_activities: Optional[bool] = ...,
         use_external_emojis: Optional[bool] = ...,
+        use_external_sounds: Optional[bool] = ...,
         use_external_stickers: Optional[bool] = ...,
         use_slash_commands: Optional[bool] = ...,
         use_soundboard: Optional[bool] = ...,
@@ -1265,12 +1293,14 @@ class PermissionOverwrite:
         send_messages: Optional[bool] = ...,
         send_messages_in_threads: Optional[bool] = ...,
         send_tts_messages: Optional[bool] = ...,
+        send_voice_messages: Optional[bool] = ...,
         speak: Optional[bool] = ...,
         start_embedded_activities: Optional[bool] = ...,
         stream: Optional[bool] = ...,
         use_application_commands: Optional[bool] = ...,
         use_embedded_activities: Optional[bool] = ...,
         use_external_emojis: Optional[bool] = ...,
+        use_external_sounds: Optional[bool] = ...,
         use_external_stickers: Optional[bool] = ...,
         use_slash_commands: Optional[bool] = ...,
         use_soundboard: Optional[bool] = ...,
