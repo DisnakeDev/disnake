@@ -24,8 +24,6 @@ os.environ.update(
         "PDM_IGNORE_SAVED_PYTHON": "1",
     },
 )
-# support the python parser in case the native parser isn't available
-os.environ.setdefault("LIBCST_PARSER_TYPE", "native")
 
 
 nox.options.error_on_external_run = True

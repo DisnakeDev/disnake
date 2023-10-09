@@ -131,8 +131,6 @@ jobs:
 
     # run the libcst parsers and check for changes
     - name: libcst codemod
-      env:
-        LIBCST_PARSER_TYPE: "native"
       run: |
         nox -s codemod -- run-all
         if [ -n "$(git status --porcelain)" ]; then
