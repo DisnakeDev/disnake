@@ -1144,6 +1144,13 @@ def evaluate_annotation(
         cache[tp] = evaluated
         return evaluated
 
+    # TypeAliasType, 3.12+
+    if hasattr(tp, "__value__"):
+        # accessing `__value__` automatically evaluates the type alias in the annotation scope;
+        # recurse to resolve possible forwardrefs
+        return evaluate_annotation(tp.__value__, globals, locals, cache)
+
+    # GenericAlias
     if hasattr(tp, "__args__"):
         implicit_str = True
         is_literal = False
