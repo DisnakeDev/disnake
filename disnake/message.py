@@ -106,8 +106,7 @@ def convert_emoji_reaction(emoji: Union[EmojiInputType, Reaction]) -> str:
 
     assert_never(emoji)
     raise TypeError(
-        "emoji argument must be str, Emoji, PartialEmoji, or Reaction, not"
-        f" {emoji.__class__.__name__}."
+        f"emoji argument must be str, Emoji, PartialEmoji, or Reaction, not {emoji.__class__.__name__}."
     )
 
 
@@ -309,10 +308,7 @@ class Attachment(Hashable):
         return self.filename.startswith("SPOILER_")
 
     def __repr__(self) -> str:
-        return (
-            "<Attachment"
-            f" id={self.id} filename={self.filename!r} url={self.url!r} ephemeral={self.ephemeral!r}>"
-        )
+        return f"<Attachment id={self.id} filename={self.filename!r} url={self.url!r} ephemeral={self.ephemeral!r}>"
 
     def __str__(self) -> str:
         return self.url or ""
@@ -496,10 +492,7 @@ class DeletedReferencedMessage:
         self._parent: MessageReference = parent
 
     def __repr__(self) -> str:
-        return (
-            "<DeletedReferencedMessage"
-            f" id={self.id} channel_id={self.channel_id} guild_id={self.guild_id!r}>"
-        )
+        return f"<DeletedReferencedMessage id={self.id} channel_id={self.channel_id} guild_id={self.guild_id!r}>"
 
     @property
     def id(self) -> int:
@@ -625,10 +618,7 @@ class MessageReference:
         return f"https://discord.com/channels/{guild_id}/{self.channel_id}/{self.message_id}"
 
     def __repr__(self) -> str:
-        return (
-            "<MessageReference"
-            f" message_id={self.message_id!r} channel_id={self.channel_id!r} guild_id={self.guild_id!r}>"
-        )
+        return f"<MessageReference message_id={self.message_id!r} channel_id={self.channel_id!r} guild_id={self.guild_id!r}>"
 
     def to_dict(self) -> MessageReferencePayload:
         result: MessageReferencePayload = (
@@ -680,10 +670,7 @@ class InteractionReference:
         self.user: User = User(state=state, data=data["user"])
 
     def __repr__(self) -> str:
-        return (
-            "<InteractionReference"
-            f" id={self.id!r} type={self.type!r} name={self.name!r} user={self.user!r}>"
-        )
+        return f"<InteractionReference id={self.id!r} type={self.type!r} name={self.name!r} user={self.user!r}>"
 
     @property
     def author(self) -> User:
@@ -974,9 +961,7 @@ class Message(Hashable):
 
     def __repr__(self) -> str:
         name = self.__class__.__name__
-        return (
-            f"<{name} id={self.id} channel={self.channel!r} type={self.type!r} author={self.author!r} flags={self.flags!r}>"
-        )
+        return f"<{name} id={self.id} channel={self.channel!r} type={self.type!r} author={self.author!r} flags={self.flags!r}>"
 
     def _try_patch(self, data, key, transform=None) -> None:
         try:
@@ -1352,73 +1337,40 @@ class Message(Hashable):
 
         if self.type is MessageType.premium_guild_tier_1:
             if not self.content:
-                return (
-                    f"{self.author.name} just boosted the server! {self.guild} has achieved **Level"
-                    " 1!**"
-                )
+                return f"{self.author.name} just boosted the server! {self.guild} has achieved **Level 1!**"
             else:
-                return (
-                    f"{self.author.name} just boosted the server **{self.content}** times!"
-                    f" {self.guild} has achieved **Level 1!**"
-                )
+                return f"{self.author.name} just boosted the server **{self.content}** times! {self.guild} has achieved **Level 1!**"
 
         if self.type is MessageType.premium_guild_tier_2:
             if not self.content:
-                return (
-                    f"{self.author.name} just boosted the server! {self.guild} has achieved **Level"
-                    " 2!**"
-                )
+                return f"{self.author.name} just boosted the server! {self.guild} has achieved **Level 2!**"
             else:
-                return (
-                    f"{self.author.name} just boosted the server **{self.content}** times!"
-                    f" {self.guild} has achieved **Level 2!**"
-                )
+                return f"{self.author.name} just boosted the server **{self.content}** times! {self.guild} has achieved **Level 2!**"
 
         if self.type is MessageType.premium_guild_tier_3:
             if not self.content:
-                return (
-                    f"{self.author.name} just boosted the server! {self.guild} has achieved **Level"
-                    " 3!**"
-                )
+                return f"{self.author.name} just boosted the server! {self.guild} has achieved **Level 3!**"
             else:
-                return (
-                    f"{self.author.name} just boosted the server **{self.content}** times!"
-                    f" {self.guild} has achieved **Level 3!**"
-                )
+                return f"{self.author.name} just boosted the server **{self.content}** times! {self.guild} has achieved **Level 3!**"
 
         if self.type is MessageType.channel_follow_add:
-            return (
-                f"{self.author.name} has added {self.content} to this channel. Its most important"
-                " updates will show up here."
-            )
+            return f"{self.author.name} has added {self.content} to this channel. Its most important updates will show up here."
 
         if self.type is MessageType.guild_stream:
             # the author will be a Member
             return f"{self.author.name} is live! Now streaming {self.author.activity.name}."  # type: ignore
 
         if self.type is MessageType.guild_discovery_disqualified:
-            return (
-                "This server has been removed from Server Discovery because it no longer passes all"
-                " the requirements. Check Server Settings for more details."
-            )
+            return "This server has been removed from Server Discovery because it no longer passes all the requirements. Check Server Settings for more details."
 
         if self.type is MessageType.guild_discovery_requalified:
-            return (
-                "This server is eligible for Server Discovery again and has been automatically"
-                " relisted!"
-            )
+            return "This server is eligible for Server Discovery again and has been automatically relisted!"
 
         if self.type is MessageType.guild_discovery_grace_period_initial_warning:
-            return (
-                "This server has failed Discovery activity requirements for 1 week. If this server"
-                " fails for 4 weeks in a row, it will be automatically removed from Discovery."
-            )
+            return "This server has failed Discovery activity requirements for 1 week. If this server fails for 4 weeks in a row, it will be automatically removed from Discovery."
 
         if self.type is MessageType.guild_discovery_grace_period_final_warning:
-            return (
-                "This server has failed Discovery activity requirements for 3 weeks in a row. If"
-                " this server fails for 1 more week, it will be removed from Discovery."
-            )
+            return "This server has failed Discovery activity requirements for 3 weeks in a row. If this server fails for 1 more week, it will be removed from Discovery."
 
         if self.type is MessageType.thread_created:
             return f"{self.author.name} started a thread: **{self.content}**. See all threads."
@@ -1437,10 +1389,7 @@ class Message(Hashable):
 
         if self.type is MessageType.guild_invite_reminder:
             # todo: determine if this should be the owner content or the user content
-            return (
-                "Wondering who to invite?\nStart by inviting anyone who can help you build the"
-                " server!"
-            )
+            return "Wondering who to invite?\nStart by inviting anyone who can help you build the server!"
 
         if self.type is MessageType.context_menu_command:
             return self.content
@@ -2175,9 +2124,8 @@ class PartialMessage(Hashable):
             ChannelType.stage_voice,
         ):
             raise TypeError(
-                "Expected TextChannel, VoiceChannel, DMChannel, StageChannel, Thread, or"
-                f" PartialMessageable with a valid type, not {type(channel)!r} (type:"
-                f" {channel.type!r})"
+                f"Expected TextChannel, VoiceChannel, DMChannel, StageChannel, Thread, or PartialMessageable "
+                f"with a valid type, not {type(channel)!r} (type: {channel.type!r})"
             )
 
         self.channel: MessageableChannel = channel

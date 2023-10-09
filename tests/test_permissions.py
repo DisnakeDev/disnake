@@ -321,7 +321,7 @@ class TestPermissionOverwrite:
         assert not hasattr(po, "h")
 
     @pytest.mark.parametrize(
-        "expected",
+        ("expected"),
         [
             ({"view_channel": True}),
             ({"ban_members": None}),

@@ -95,8 +95,7 @@ class Modal:
         for c in component:
             if not isinstance(c, TextInput):
                 raise TypeError(
-                    "component must be of type 'TextInput' or a list of 'TextInput' objects, not"
-                    f" {type(c).__name__}."
+                    f"component must be of type 'TextInput' or a list of 'TextInput' objects, not {type(c).__name__}."
                 )
             try:
                 self.components[-1].append_item(c)

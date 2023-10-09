@@ -264,10 +264,7 @@ class AppInfo:
             This field is deprecated by discord and is now always blank. Consider using :attr:`.description` instead.
         """
         utils.warn_deprecated(
-            (
-                "summary is deprecated and will be removed in a future version. Consider using"
-                " description instead."
-            ),
+            "summary is deprecated and will be removed in a future version. Consider using description instead.",
             stacklevel=2,
         )
         return self._summary
@@ -323,9 +320,7 @@ class PartialAppInfo:
         self.privacy_policy_url: Optional[str] = data.get("privacy_policy_url")
 
     def __repr__(self) -> str:
-        return (
-            f"<{self.__class__.__name__} id={self.id} name={self.name!r} description={self.description!r}>"
-        )
+        return f"<{self.__class__.__name__} id={self.id} name={self.name!r} description={self.description!r}>"
 
     @property
     def icon(self) -> Optional[Asset]:
@@ -344,10 +339,7 @@ class PartialAppInfo:
             This field is deprecated by discord and is now always blank. Consider using :attr:`.description` instead.
         """
         utils.warn_deprecated(
-            (
-                "summary is deprecated and will be removed in a future version. Consider using"
-                " description instead."
-            ),
+            "summary is deprecated and will be removed in a future version. Consider using description instead.",
             stacklevel=2,
         )
         return self._summary

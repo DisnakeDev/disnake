@@ -207,10 +207,7 @@ class WidgetSettings:
         self.channel_id: Optional[int] = _get_as_snowflake(data, "channel_id")
 
     def __repr__(self) -> str:
-        return (
-            "<WidgetSettings"
-            f" enabled={self.enabled!r} channel_id={self.channel_id!r} guild={self.guild!r}>"
-        )
+        return f"<WidgetSettings enabled={self.enabled!r} channel_id={self.channel_id!r} guild={self.guild!r}>"
 
     @property
     def channel(self) -> Optional[GuildChannel]:

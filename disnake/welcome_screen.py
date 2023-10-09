@@ -66,10 +66,7 @@ class WelcomeScreenChannel:
             raise TypeError("emoji must be None, a str, PartialEmoji, or Emoji instance.")
 
     def __repr__(self) -> str:
-        return (
-            "<WelcomeScreenChannel"
-            f" id={self.id!r} emoji={self.emoji!r} description={self.description!r}>"
-        )
+        return f"<WelcomeScreenChannel id={self.id!r} emoji={self.emoji!r} description={self.description!r}>"
 
     @classmethod
     def _from_data(
@@ -140,10 +137,7 @@ class WelcomeScreen:
         ]
 
     def __repr__(self) -> str:
-        return (
-            "<WelcomeScreen"
-            f" description={self.description!r} channels={self.channels!r} enabled={self.enabled!r}>"
-        )
+        return f"<WelcomeScreen description={self.description!r} channels={self.channels!r} enabled={self.enabled!r}>"
 
     @property
     def enabled(self) -> bool:

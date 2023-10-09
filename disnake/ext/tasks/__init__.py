@@ -615,8 +615,7 @@ class Loop(Generic[LF]):
             return [inner]
         if not isinstance(time, Sequence):
             raise TypeError(
-                "Expected datetime.time or a sequence of datetime.time for ``time``, received"
-                f" {type(time)!r} instead."
+                f"Expected datetime.time or a sequence of datetime.time for ``time``, received {type(time)!r} instead."
             )
         if not time:
             raise ValueError("time parameter must not be an empty sequence.")
@@ -625,8 +624,7 @@ class Loop(Generic[LF]):
         for index, t in enumerate(time):
             if not isinstance(t, dt):
                 raise TypeError(
-                    f"Expected a sequence of {dt!r} for ``time``, received {type(t).__name__!r} at"
-                    f" index {index} instead."
+                    f"Expected a sequence of {dt!r} for ``time``, received {type(t).__name__!r} at index {index} instead."
                 )
             ret.append(t if t.tzinfo is not None else t.replace(tzinfo=utc))
 

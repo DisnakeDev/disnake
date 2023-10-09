@@ -1995,10 +1995,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
                 raise TypeError("privacy_level field must be of type PrivacyLevel")
             if privacy_level is StagePrivacyLevel.public:
                 utils.warn_deprecated(
-                    (
-                        "Setting privacy_level to public is deprecated and will be removed in a"
-                        " future version."
-                    ),
+                    "Setting privacy_level to public is deprecated and will be removed in a future version.",
                     stacklevel=2,
                 )
 
@@ -2493,10 +2490,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         self._update(guild, data)
 
     def __repr__(self) -> str:
-        return (
-            "<CategoryChannel"
-            f" id={self.id} name={self.name!r} position={self.position} nsfw={self.nsfw} flags={self.flags!r}>"
-        )
+        return f"<CategoryChannel id={self.id} name={self.name!r} position={self.position} nsfw={self.nsfw} flags={self.flags!r}>"
 
     def _update(self, guild: Guild, data: CategoryChannelPayload) -> None:
         self.guild: Guild = guild

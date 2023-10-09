@@ -200,8 +200,7 @@ class CommonBotBase(Generic[CogT]):
         """
         if name is not MISSING and not isinstance(name, (str, Event)):
             raise TypeError(
-                "Bot.add_listener expected str or Enum but received"
-                f" {name.__class__.__name__!r} instead."
+                f"Bot.add_listener expected str or Enum but received {name.__class__.__name__!r} instead."
             )
 
         name_ = (
@@ -236,8 +235,7 @@ class CommonBotBase(Generic[CogT]):
         """
         if name is not MISSING and not isinstance(name, (str, Event)):
             raise TypeError(
-                "Bot.remove_listener expected str or Enum but received"
-                f" {name.__class__.__name__!r} instead."
+                f"Bot.remove_listener expected str or Enum but received {name.__class__.__name__!r} instead."
             )
         name = (
             func.__name__

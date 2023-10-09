@@ -80,8 +80,7 @@ def _validate_name(name: str) -> None:
 
     if not isinstance(name, str):
         raise TypeError(
-            "Slash command name and option names must be an instance of class 'str', received"
-            f" '{name.__class__}'"
+            f"Slash command name and option names must be an instance of class 'str', received '{name.__class__}'"
         )
 
     if name != name.lower() or not re.fullmatch(r"[\w-]{1,32}", name):
@@ -989,10 +988,7 @@ class ApplicationCommandPermissions:
         self._guild_id: int = guild_id
 
     def __repr__(self) -> str:
-        return (
-            "<ApplicationCommandPermissions"
-            f" id={self.id!r} type={self.type!r} permission={self.permission!r}>"
-        )
+        return f"<ApplicationCommandPermissions id={self.id!r} type={self.type!r} permission={self.permission!r}>"
 
     def __eq__(self, other):
         return (
@@ -1056,8 +1052,7 @@ class GuildApplicationCommandPermissions:
 
     def __repr__(self) -> str:
         return (
-            "<GuildApplicationCommandPermissions"
-            f" id={self.id!r} application_id={self.application_id!r}"
+            f"<GuildApplicationCommandPermissions id={self.id!r} application_id={self.application_id!r}"
             f" guild_id={self.guild_id!r} permissions={self.permissions!r}>"
         )
 

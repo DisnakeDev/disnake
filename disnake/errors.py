@@ -205,9 +205,8 @@ class SessionStartLimitReached(ClientException):
     def __init__(self, session_start_limit: SessionStartLimit, requested: int = 1) -> None:
         self.session_start_limit: SessionStartLimit = session_start_limit
         super().__init__(
-            "Daily session start limit has been reached, resets at"
-            f" {self.session_start_limit.reset_time} Requested {requested} shards, have only"
-            f" {session_start_limit.remaining} remaining."
+            f"Daily session start limit has been reached, resets at {self.session_start_limit.reset_time} "
+            f"Requested {requested} shards, have only {session_start_limit.remaining} remaining."
         )
 
 
@@ -240,10 +239,7 @@ class ConnectionClosed(ClientException):
         4011: "Sharding required - you are required to shard your connection in order to connect.",
         4012: "Invalid API version",
         4013: "Invalid intents",
-        4014: (
-            "Disallowed intents - you tried to specify an intent that you have not enabled or are"
-            " not approved for."
-        ),
+        4014: "Disallowed intents - you tried to specify an intent that you have not enabled or are not approved for.",
     }
 
     # https://discord.com/developers/docs/topics/opcodes-and-status-codes#voice-voice-close-event-codes
@@ -253,10 +249,7 @@ class ConnectionClosed(ClientException):
         4006: "Session no longer valid",
         4011: "Server not found",
         4012: "Unknown protocol",
-        4014: (
-            "Disconnected, channel was deleted, you were kicked, voice server changed, or the main"
-            " gateway session was dropped."
-        ),
+        4014: "Disconnected, channel was deleted, you were kicked, voice server changed, or the main gateway session was dropped.",
         4015: "Voice server crashed",
         4016: "Unknown encryption mode",
     }
@@ -303,11 +296,10 @@ class PrivilegedIntentsRequired(ClientException):
     def __init__(self, shard_id: Optional[int]) -> None:
         self.shard_id: Optional[int] = shard_id
         msg = (
-            f"Shard ID {shard_id} is requesting privileged intents that have not been explicitly"
-            " enabled in the developer portal. It is recommended to go to"
-            " https://discord.com/developers/applications/ and explicitly enable the privileged"
-            " intents within your application's page. If this is not possible, then consider"
-            " disabling the privileged intents instead."
+            f"Shard ID {shard_id} is requesting privileged intents that have not been explicitly enabled in the "
+            "developer portal. It is recommended to go to https://discord.com/developers/applications/ "
+            "and explicitly enable the privileged intents within your application's page. If this is not "
+            "possible, then consider disabling the privileged intents instead."
         )
         super().__init__(msg)
 

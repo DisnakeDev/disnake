@@ -1567,10 +1567,8 @@ class ConnectionState:
 
         else:
             _log.debug(
-                (
-                    "GUILD_SCHEDULED_EVENT_UPDATE referencing "
-                    "unknown scheduled event ID: %s. Discarding."
-                ),
+                "GUILD_SCHEDULED_EVENT_UPDATE referencing "
+                "unknown scheduled event ID: %s. Discarding.",
                 data["id"],
             )
 
@@ -2168,10 +2166,7 @@ class AutoShardedConnectionState(ConnectionState):
                                 current_bucket, timeout=max_concurrency * 70.0
                             )
                         except asyncio.TimeoutError:
-                            fmt = (
-                                "Shard ID %s failed to wait for chunks from a sub-bucket with"
-                                " length %d"
-                            )
+                            fmt = "Shard ID %s failed to wait for chunks from a sub-bucket with length %d"
                             _log.warning(fmt, guild.shard_id, len(current_bucket))
                         finally:
                             current_bucket = []

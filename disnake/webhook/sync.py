@@ -153,10 +153,7 @@ class WebhookAdapter:
                         if remaining == "0" and response.status_code != 429:
                             delta = utils._parse_ratelimit_header(response)
                             _log.debug(
-                                (
-                                    "Webhook ID %s has been pre-emptively rate limited, waiting"
-                                    " %.2f seconds"
-                                ),
+                                "Webhook ID %s has been pre-emptively rate limited, waiting %.2f seconds",
                                 webhook_id,
                                 delta,
                             )

@@ -21,8 +21,7 @@ def show_version() -> None:
     )
     disnake_ver = disnake.version_info
     entries.append(
-        "- disnake"
-        f" v{disnake_ver.major}.{disnake_ver.minor}.{disnake_ver.micro}-{disnake_ver.releaselevel}"
+        f"- disnake v{disnake_ver.major}.{disnake_ver.minor}.{disnake_ver.micro}-{disnake_ver.releaselevel}"
     )
     try:
         version = importlib.metadata.version("disnake")
