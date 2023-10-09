@@ -8,7 +8,7 @@ import sys
 import warnings
 from dataclasses import dataclass
 from datetime import timedelta, timezone
-from typing import Any, Dict, List, Literal, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
 from unittest import mock
 
 import pytest
@@ -18,6 +18,12 @@ import disnake
 from disnake import utils
 
 from . import helpers
+
+if TYPE_CHECKING:
+    from typing_extensions import TypeAliasType
+elif sys.version_info >= (3, 12):
+    # non-3.12 tests shouldn't be using this
+    from typing import TypeAliasType
 
 
 def test_missing() -> None:
@@ -782,6 +788,13 @@ def test_resolve_annotation_literal() -> None:
         TypeError, match=r"Literal arguments must be of type str, int, bool, or NoneType."
     ):
         utils.resolve_annotation(Literal[timezone.utc, 3], globals(), locals(), {})  # type: ignore
+
+
+@pytest.mark.skipif(sys.version_info < (3, 12), reason="syntax requires py3.12")
+def test_resolve_annotation_typealiastype() -> None:
+    # this is equivalent to `type CoolList = List['int']`
+    CoolList = TypeAliasType("CoolList", List["int"])
+    assert utils.resolve_annotation(CoolList, globals(), locals(), {}) == List[int]
 
 
 @pytest.mark.parametrize(
