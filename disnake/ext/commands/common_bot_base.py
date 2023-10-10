@@ -80,9 +80,7 @@ class CommonBotBase(Generic[CogT]):
         if self.owner_id or self.owner_ids:
             return
 
-        await self.wait_until_first_connect()  # type: ignore
-
-        app = await self.application_info()  # type: ignore
+        app: disnake.AppInfo = await self.application_info()  # type: ignore
         if app.team:
             self.owners = set(app.team.members)
             self.owner_ids = {m.id for m in app.team.members}
@@ -111,11 +109,14 @@ class CommonBotBase(Generic[CogT]):
 
     @disnake.utils.copy_doc(disnake.Client.login)
     async def login(self, token: str) -> None:
-        self.loop.create_task(self._fill_owners())  # type: ignore
-
-        if self.reload:
-            self.loop.create_task(self._watchdog())  # type: ignore
         await super().login(token=token)  # type: ignore
+
+        loop: asyncio.AbstractEventLoop = self.loop  # type: ignore
+        if self.reload:
+            loop.create_task(self._watchdog())
+
+        # prefetch
+        loop.create_task(self._fill_owners())
 
     async def is_owner(self, user: Union[disnake.User, disnake.Member]) -> bool:
         """|coro|
@@ -123,7 +124,7 @@ class CommonBotBase(Generic[CogT]):
         Checks if a :class:`~disnake.User` or :class:`~disnake.Member` is the owner of
         this bot.
 
-        If an :attr:`owner_id` is not set, it is fetched automatically
+        If :attr:`owner_id` and :attr:`owner_ids` are not set, they are fetched automatically
         through the use of :meth:`~.Bot.application_info`.
 
         .. versionchanged:: 1.3
@@ -140,20 +141,13 @@ class CommonBotBase(Generic[CogT]):
         :class:`bool`
             Whether the user is the owner.
         """
+        if not self.owner_id and not self.owner_ids:
+            await self._fill_owners()
+
         if self.owner_id:
             return user.id == self.owner_id
-        elif self.owner_ids:
-            return user.id in self.owner_ids
         else:
-            app = await self.application_info()  # type: ignore
-            if app.team:
-                self.owners = set(app.team.members)
-                self.owner_ids = ids = {m.id for m in app.team.members}
-                return user.id in ids
-            else:
-                self.owner = app.owner
-                self.owner_id = owner_id = app.owner.id
-                return user.id == owner_id
+            return user.id in self.owner_ids
 
     def add_cog(self, cog: Cog, *, override: bool = False) -> None:
         """Adds a "cog" to the bot.

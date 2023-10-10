@@ -299,6 +299,7 @@ class _BaseReactionEvent(TypedDict):
 # https://discord.com/developers/docs/topics/gateway-events#message-reaction-add
 class MessageReactionAddEvent(_BaseReactionEvent):
     member: NotRequired[MemberWithUser]
+    message_author_id: NotRequired[Snowflake]
 
 
 # https://discord.com/developers/docs/topics/gateway-events#message-reaction-remove

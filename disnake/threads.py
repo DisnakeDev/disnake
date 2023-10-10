@@ -332,7 +332,7 @@ class Thread(Messageable, Hashable):
         """:class:`datetime.datetime`: Returns the thread's creation time in UTC.
 
         .. versionchanged:: 2.4
-            If create_timestamp is provided by discord, that will be used instead of the time in the ID.
+            If ``create_timestamp`` is provided by Discord, that will be used instead of the time in the ID.
         """
         return self.create_timestamp or snowflake_time(self.id)
 
@@ -1182,6 +1182,14 @@ class ForumTag(Hashable):
             f"<ForumTag id={self.id!r} name={self.name!r}"
             f" moderated={self.moderated!r} emoji={self.emoji!r}>"
         )
+
+    @property
+    def created_at(self) -> datetime.datetime:
+        """:class:`datetime.datetime`: Returns the tag's creation time in UTC.
+
+        .. versionadded:: 2.10
+        """
+        return snowflake_time(self.id)
 
     def to_dict(self) -> PartialForumTagPayload:
         emoji_name, emoji_id = PartialEmoji._emoji_to_name_id(self.emoji)
