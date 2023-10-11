@@ -1,0 +1,1 @@
+Add :attr:`.Attachment.expires_at` and :attr:`.Attachment.is_expired` properties to :class:`.Attachment`.

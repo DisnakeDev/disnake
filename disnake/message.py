@@ -21,6 +21,7 @@ from typing import (
     cast,
     overload,
 )
+from urllib.parse import parse_qs, urlparse
 
 from . import utils
 from .components import ActionRow, MessageComponent, _component_factory
@@ -302,6 +303,7 @@ class Attachment(Hashable):
         "description",
         "duration",
         "waveform",
+        "_ex",
         "_flags",
     )
 
@@ -321,7 +323,24 @@ class Attachment(Hashable):
         self.waveform: Optional[bytes] = (
             b64decode(waveform_data) if (waveform_data := data.get("waveform")) else None
         )
+        _params = urlparse(self.url)
+        self._ex = parse_qs(_params.query)["ex"][0]
         self._flags: int = data.get("flags", 0)
+
+    def expires_at(self) -> datetime.datetime:
+        """The date when this attachment will expire.
+
+        :return type: :class:`datetime.datetime`
+        """
+        timestamp = int(self._ex, 16)
+        return datetime.datetime.fromtimestamp(timestamp, tz=datetime.timezone.utc)
+
+    def is_expired(self) -> bool:
+        """Whether this attachment expired or not.
+
+        :return type: :class:`bool`
+        """
+        return utils.utcnow() >= self.expires_at()
 
     def is_spoiler(self) -> bool:
         """Whether this attachment contains a spoiler.
