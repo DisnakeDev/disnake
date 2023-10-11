@@ -161,7 +161,7 @@ class OptionChoice:
 class Option:
     """Represents a slash command option.
 
-    Parameters
+    Attributes
     ----------
     name: Union[:class:`str`, :class:`.Localized`]
         The option's name.

@@ -337,6 +337,7 @@ class SubCommand(InvokableApplicationCommand):
 
     @property
     def body(self) -> Option:
+        """:class:`.Option`: The API representation for this slash sub command. Shorthand for :attr:`.SubCommand.option`"""
         return self.option
 
     async def _call_autocompleter(
