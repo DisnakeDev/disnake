@@ -324,15 +324,19 @@ class Attachment(Hashable):
             b64decode(waveform_data) if (waveform_data := data.get("waveform")) else None
         )
         _params = urlparse(self.url)
-        self._ex = parse_qs(_params.query)["ex"][0]
+        self._ex = parse_qs(_params.query).get("ex")
         self._flags: int = data.get("flags", 0)
 
-    def expires_at(self) -> datetime.datetime:
+    def expires_at(self) -> Optional[datetime.datetime]:
         """The date when this attachment will expire.
+        ``None`` if the ``ex`` param is not present in :attr:`.Attachment.url`.
 
-        :return type: :class:`datetime.datetime`
+        :return type: Optional[:class:`datetime.datetime`]
         """
-        timestamp = int(self._ex, 16)
+        if not self._ex:
+            return
+
+        timestamp = int(self._ex[0], 16)
         return datetime.datetime.fromtimestamp(timestamp, tz=datetime.timezone.utc)
 
     def is_expired(self) -> bool:
@@ -340,7 +344,11 @@ class Attachment(Hashable):
 
         :return type: :class:`bool`
         """
-        return utils.utcnow() >= self.expires_at()
+        ex = self.expires_at()
+        if not ex:
+            return False
+
+        return utils.utcnow() >= ex
 
     def is_spoiler(self) -> bool:
         """Whether this attachment contains a spoiler.
