@@ -163,23 +163,15 @@ class Option:
 
     Attributes
     ----------
-    name: Union[:class:`str`, :class:`.Localized`]
+    name: :class:`str`
         The option's name.
-
-        .. versionchanged:: 2.5
-            Added support for localizations.
-
-    description: Optional[Union[:class:`str`, :class:`.Localized`]]
+    description: :class:`str`
         The option's description.
-
-        .. versionchanged:: 2.5
-            Added support for localizations.
-
     type: :class:`OptionType`
         The option type, e.g. :class:`OptionType.user`.
     required: :class:`bool`
         Whether this option is required.
-    choices: Union[List[:class:`OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
+    choices: List[:class:`OptionChoice`]
         The list of option choices.
     options: List[:class:`Option`]
         The list of sub options. Normally you don't have to specify it directly,
