@@ -377,7 +377,7 @@ def test_get_slots() -> None:
         __slots__ = {"c": "uwu"}
 
     class D(B, C):
-        __slots__ = "xyz"
+        __slots__ = "xyz"  # noqa: PLC0205  # this is intentional
 
     assert list(utils.get_slots(D)) == ["a", "a2", "c", "xyz"]
 
