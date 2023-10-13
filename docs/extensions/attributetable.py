@@ -6,7 +6,7 @@ import importlib
 import inspect
 import re
 from collections import defaultdict
-from typing import TYPE_CHECKING, DefaultDict, Dict, List, NamedTuple, Optional, Tuple
+from typing import TYPE_CHECKING, ClassVar, DefaultDict, Dict, List, NamedTuple, Optional, Tuple
 
 from docutils import nodes
 from sphinx import addnodes
@@ -17,6 +17,7 @@ if TYPE_CHECKING:
     from _types import SphinxExtensionMeta
     from sphinx.application import Sphinx
     from sphinx.environment import BuildEnvironment
+    from sphinx.util.typing import OptionSpec
     from sphinx.writers.html import HTMLTranslator
 
 
@@ -100,7 +101,7 @@ class PyAttributeTable(SphinxDirective):
     required_arguments = 1
     optional_arguments = 0
     final_argument_whitespace = False
-    option_spec = {}
+    option_spec: ClassVar[OptionSpec] = {}
 
     def parse_name(self, content: str) -> Tuple[str, Optional[str]]:
         match = _name_parser_regex.match(content)
