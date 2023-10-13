@@ -1146,8 +1146,11 @@ def evaluate_annotation(
 
     # TypeAliasType, 3.12+
     if hasattr(tp, "__value__"):
-        # accessing `__value__` automatically evaluates the type alias in the annotation scope;
-        # recurse to resolve possible forwardrefs
+        # Use __module__ to get the namespace in which the type alias was defined.
+        if mod := sys.modules.get(tp.__module__):
+            globals = locals = mod.__dict__
+        # Accessing `__value__` automatically evaluates the type alias in the annotation scope.
+        # (recurse to resolve possible forwardrefs)
         return evaluate_annotation(tp.__value__, globals, locals, cache)
 
     # GenericAlias
