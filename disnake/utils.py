@@ -1157,22 +1157,29 @@ def evaluate_annotation(
 
     # GenericAlias / UnionType
     if hasattr(tp, "__args__"):
-        implicit_str = True
-        is_literal = False
-        orig_args = args = tp.__args__
         if not hasattr(tp, "__origin__"):
             if tp.__class__ is UnionType:
                 converted = Union[args]  # type: ignore
                 return evaluate_annotation(converted, globals, locals, cache)
 
             return tp
-        if tp.__origin__ is Union:
+
+        implicit_str = True
+        is_literal = False
+        orig_args = args = tp.__args__
+        orig_origin = origin = tp.__origin__
+
+        # origin can be a TypeAliasType too, resolve it and continue
+        if hasattr(origin, "__value__"):
+            origin = _resolve_typealiastype(origin, globals, locals, cache)
+
+        if origin is Union:
             try:
                 if args.index(type(None)) != len(args) - 1:
                     args = normalise_optional_params(tp.__args__)
             except ValueError:
                 pass
-        if tp.__origin__ is Literal:
+        if origin is Literal:
             if not PY_310:
                 args = flatten_literal_params(tp.__args__)
             implicit_str = False
@@ -1188,13 +1195,17 @@ def evaluate_annotation(
         ):
             raise TypeError("Literal arguments must be of type str, int, bool, or NoneType.")
 
+        if origin != orig_origin:
+            # we can't use `copy_with` in this case, so just skip all of the following logic
+            return origin[evaluated_args]
+
         if evaluated_args == orig_args:
             return tp
 
         try:
             return tp.copy_with(evaluated_args)
         except AttributeError:
-            return tp.__origin__[evaluated_args]
+            return origin[evaluated_args]
 
     # TypeAliasType, 3.12+
     if hasattr(tp, "__value__"):
