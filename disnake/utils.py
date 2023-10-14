@@ -1119,6 +1119,17 @@ def normalise_optional_params(parameters: Iterable[Any]) -> Tuple[Any, ...]:
     return tuple(p for p in parameters if p is not none_cls) + (none_cls,)
 
 
+def _resolve_typealiastype(
+    tp: Any, globals: Dict[str, Any], locals: Dict[str, Any], cache: Dict[str, Any]
+):
+    # Use __module__ to get the namespace in which the type alias was defined.
+    if mod := sys.modules.get(tp.__module__):
+        globals = locals = mod.__dict__
+    # Accessing `__value__` automatically evaluates the type alias in the annotation scope.
+    # (recurse to resolve possible forwardrefs, aliases, etc.)
+    return evaluate_annotation(tp.__value__, globals, locals, cache)
+
+
 def evaluate_annotation(
     tp: Any,
     globals: Dict[str, Any],
@@ -1144,16 +1155,7 @@ def evaluate_annotation(
         cache[tp] = evaluated
         return evaluated
 
-    # TypeAliasType, 3.12+
-    if hasattr(tp, "__value__"):
-        # Use __module__ to get the namespace in which the type alias was defined.
-        if mod := sys.modules.get(tp.__module__):
-            globals = locals = mod.__dict__
-        # Accessing `__value__` automatically evaluates the type alias in the annotation scope.
-        # (recurse to resolve possible forwardrefs)
-        return evaluate_annotation(tp.__value__, globals, locals, cache)
-
-    # GenericAlias
+    # GenericAlias / UnionType
     if hasattr(tp, "__args__"):
         implicit_str = True
         is_literal = False
@@ -1193,6 +1195,10 @@ def evaluate_annotation(
             return tp.copy_with(evaluated_args)
         except AttributeError:
             return tp.__origin__[evaluated_args]
+
+    # TypeAliasType, 3.12+
+    if hasattr(tp, "__value__"):
+        return _resolve_typealiastype(tp, globals, locals, cache)
 
     return tp
 
