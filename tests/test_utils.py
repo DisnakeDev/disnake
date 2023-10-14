@@ -8,7 +8,7 @@ import sys
 import warnings
 from dataclasses import dataclass
 from datetime import timedelta, timezone
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, TypeVar, Union
 from unittest import mock
 
 import pytest
@@ -17,7 +17,7 @@ import yarl
 import disnake
 from disnake import utils
 
-from . import helpers
+from . import helpers, utils_helper_module
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAliasType
@@ -791,10 +791,42 @@ def test_resolve_annotation_literal() -> None:
 
 
 @pytest.mark.skipif(sys.version_info < (3, 12), reason="syntax requires py3.12")
-def test_resolve_annotation_typealiastype() -> None:
-    # this is equivalent to `type CoolList = List['int']`
-    CoolList = TypeAliasType("CoolList", List["int"])
-    assert utils.resolve_annotation(CoolList, globals(), locals(), {}) == List[int]
+class TestResolveAnnotationTypeAliasType:
+    def test_simple(self) -> None:
+        # this is equivalent to `type CoolList = List[int]`
+        CoolList = TypeAliasType("CoolList", List[int])
+        assert utils.resolve_annotation(CoolList, globals(), locals(), {}) == List[int]
+
+    def test_generic(self) -> None:
+        # this is equivalent to `type CoolList[T] = List[T]; CoolList[int]`
+        T = TypeVar("T")
+        CoolList = TypeAliasType("CoolList", List[T], type_params=(T,))
+
+        annotation = CoolList[int]
+        assert utils.resolve_annotation(annotation, globals(), locals(), {}) == List[int]
+
+    # alias and arg in local scope
+    def test_forwardref_local(self) -> None:
+        T = TypeVar("T")
+        IntOrStr = Union[int, str]
+        CoolList = TypeAliasType("CoolList", List[T], type_params=(T,))
+
+        annotation = CoolList["IntOrStr"]
+        assert utils.resolve_annotation(annotation, globals(), locals(), {}) == List[IntOrStr]
+
+    # alias and arg in other module scope
+    def test_forwardref_module(self) -> None:
+        resolved = utils.resolve_annotation(
+            utils_helper_module.ListWithForwardRefAlias, globals(), locals(), {}
+        )
+        assert resolved == List[Union[int, str]]
+
+    # combination of the previous two, alias in other module scope and arg in local scope
+    def test_forwardref_mixed(self) -> None:
+        LocalIntOrStr = Union[int, str]
+
+        annotation = utils_helper_module.GenericListAlias["LocalIntOrStr"]
+        assert utils.resolve_annotation(annotation, globals(), locals(), {}) == List[LocalIntOrStr]
 
 
 @pytest.mark.parametrize(
