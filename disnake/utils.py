@@ -1159,7 +1159,7 @@ def evaluate_annotation(
     if hasattr(tp, "__args__"):
         if not hasattr(tp, "__origin__"):
             if tp.__class__ is UnionType:
-                converted = Union[args]  # type: ignore
+                converted = Union[tp.__args__]  # type: ignore
                 return evaluate_annotation(converted, globals, locals, cache)
 
             return tp
