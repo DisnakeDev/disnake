@@ -72,7 +72,7 @@ tools = [
     "python-dotenv~=1.0.0",
     "towncrier==23.6.0",
     "check-manifest==0.49",
-    "ruff==0.0.261",
+    "ruff==0.0.292",
 ]
 codemod = [
     # run codemods on the respository (mostly automated typing)
@@ -177,15 +177,23 @@ ignore = [
     "RUF005", # might not be actually faster
     "RUF006", # might not be an issue/very extreme cases
 
+    # calling subprocess with dynamic arguments is generally fine, the only way to avoid this is ignoring it
+    "S603",
+
+    # partial executable paths (i.e. "git" instead of "/usr/bin/git") are fine
+    "S607",
+
     # ignore try-except-pass. Bare excepts are caught with E722
     "S110",
 
     # provide specific codes on type: ignore
     "PGH003",
 
+    # typevar names don't match variance (we don't always want this)
+    "PLC0105",
+
     # import aliases are fixed by isort
     "PLC0414",
-
 
     # outer loop variables are overwritten by inner assignment target, these are mostly intentional
     "PLW2901",
