@@ -31,7 +31,6 @@ from typing import (
     Type,
     TypeVar,
     Union,
-    get_args,
     get_origin,
     get_type_hints,
 )
@@ -114,9 +113,9 @@ def issubclass_(obj: Any, tp: Union[TypeT, Tuple[TypeT, ...]]) -> TypeGuard[Type
         return False
     elif not isinstance(obj, type):
         # Assume we have a type hint
-        if get_origin(obj) in (Union, UnionType, Optional):
-            obj = get_args(obj)
-            return any(isinstance(o, type) and issubclass(o, tp) for o in obj)
+        if get_origin(obj) in (Union, UnionType):
+            # If we have a Union, try matching any of its args
+            return any(issubclass_(o, tp) for o in obj.__args__)
         else:
             # Other type hint specializations are not supported
             return False
