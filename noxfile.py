@@ -24,8 +24,6 @@ os.environ.update(
         "PDM_IGNORE_SAVED_PYTHON": "1",
     },
 )
-# support the python parser in case the native parser isn't available
-os.environ.setdefault("LIBCST_PARSER_TYPE", "native")
 
 
 nox.options.error_on_external_run = True
@@ -204,7 +202,7 @@ def pyright(session: nox.Session) -> None:
         pass
 
 
-@nox.session(python=["3.8", "3.9", "3.10", "3.11"])
+@nox.session(python=["3.8", "3.9", "3.10", "3.11", "3.12"])
 @nox.parametrize(
     "extras",
     [

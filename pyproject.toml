@@ -76,19 +76,19 @@ tools = [
 ]
 codemod = [
     # run codemods on the respository (mostly automated typing)
-    "libcst~=0.4.9",
+    "libcst~=1.1.0",
     "black==23.9.1",
     "autotyping==23.2.0",
 ]
 typing = [
     # this is not pyright itself, but the python wrapper
     "pyright==1.1.291",
-    "typing-extensions~=4.5.0",
+    "typing-extensions~=4.8.0",
     # only used for type-checking, version does not matter
     "pytz",
 ]
 test = [
-    "pytest~=7.2.1",
+    "pytest~=7.4.2",
     "pytest-cov~=4.0.0",
     "pytest-asyncio~=0.20.3",
     "looptime~=0.2",
@@ -120,7 +120,7 @@ runner = "pdm run"
 
 [tool.black]
 line-length = 100
-target-version = ["py38", "py39", "py310", "py311"]
+target-version = ["py38", "py39", "py310", "py311", "py312"]
 
 [tool.isort]
 profile = "black"
