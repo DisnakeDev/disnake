@@ -103,6 +103,17 @@ class TestParamInfo:
         assert inter is not None
         assert parameters == ({"a": mock.ANY})
 
+    def test_isolate_self_union(self) -> None:
+        def func(
+            i: Union[commands.Context, disnake.ApplicationCommandInteraction[commands.Bot]], a: int
+        ) -> None:
+            ...
+
+        (cog, inter), parameters = params.isolate_self(params.signature(func))
+        assert cog is None
+        assert inter is not None
+        assert parameters == ({"a": mock.ANY})
+
 
 # this uses `Range` for testing `_BaseRange`, `String` should work equally
 class TestBaseRange:
