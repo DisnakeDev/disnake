@@ -25,6 +25,7 @@ from typing import (
     Optional,
     Sequence,
     Tuple,
+    TypedDict,
     TypeVar,
     Union,
     overload,
@@ -79,6 +80,8 @@ from .webhook import Webhook
 from .widget import Widget
 
 if TYPE_CHECKING:
+    from typing_extensions import NotRequired
+
     from .abc import GuildChannel, PrivateChannel, Snowflake, SnowflakeTime
     from .app_commands import APIApplicationCommand
     from .asset import AssetBytes
@@ -205,6 +208,17 @@ class GatewayParams(NamedTuple):
 
     encoding: Literal["json"] = "json"
     zlib: bool = True
+
+
+# used for typing the ws parameter dict in the connect() loop
+class _WebSocketParams(TypedDict):
+    initial: bool
+    shard_id: Optional[int]
+    gateway: Optional[str]
+
+    sequence: NotRequired[Optional[int]]
+    resume: NotRequired[bool]
+    session: NotRequired[Optional[str]]
 
 
 class Client:
@@ -1080,7 +1094,7 @@ class Client:
         if not ignore_session_start_limit and self.session_start_limit.remaining == 0:
             raise SessionStartLimitReached(self.session_start_limit)
 
-        ws_params = {
+        ws_params: _WebSocketParams = {
             "initial": True,
             "shard_id": self.shard_id,
             "gateway": initial_gateway,
@@ -1104,18 +1118,22 @@ class Client:
 
                 while True:
                     await self.ws.poll_event()
+
             except ReconnectWebSocket as e:
                 _log.info("Got a request to %s the websocket.", e.op)
                 self.dispatch("disconnect")
                 ws_params.update(
-                    sequence=self.ws.sequence,
-                    resume=e.resume,
-                    session=self.ws.session_id,
-                    # use current (possibly new) gateway if resuming,
-                    # reset to default if not
-                    gateway=self.ws.resume_gateway if e.resume else initial_gateway,
+                    {
+                        "sequence": self.ws.sequence,
+                        "resume": e.resume,
+                        "session": self.ws.session_id,
+                        # use current (possibly new) gateway if resuming,
+                        # reset to default if not
+                        "gateway": self.ws.resume_gateway if e.resume else initial_gateway,
+                    }
                 )
                 continue
+
             except (
                 OSError,
                 HTTPException,
@@ -1138,11 +1156,13 @@ class Client:
                 # If we get connection reset by peer then try to RESUME
                 if isinstance(exc, OSError) and exc.errno == ECONNRESET:
                     ws_params.update(
-                        sequence=self.ws.sequence,
-                        initial=False,
-                        resume=True,
-                        session=self.ws.session_id,
-                        gateway=self.ws.resume_gateway,
+                        {
+                            "sequence": self.ws.sequence,
+                            "initial": False,
+                            "resume": True,
+                            "session": self.ws.session_id,
+                            "gateway": self.ws.resume_gateway,
+                        }
                     )
                     continue
 
@@ -1165,18 +1185,22 @@ class Client:
                     # Always identify back to the initial gateway if we failed while connecting.
                     # This is in case we fail to connect to the resume_gateway instance.
                     ws_params.update(
-                        resume=False,
-                        gateway=initial_gateway,
+                        {
+                            "resume": False,
+                            "gateway": initial_gateway,
+                        }
                     )
                 else:
                     # Just try to resume the session.
                     # If it's not RESUME-able then the gateway will invalidate the session.
                     # This is apparently what the official Discord client does.
                     ws_params.update(
-                        sequence=self.ws.sequence,
-                        resume=True,
-                        session=self.ws.session_id,
-                        gateway=self.ws.resume_gateway,
+                        {
+                            "sequence": self.ws.sequence,
+                            "resume": True,
+                            "session": self.ws.session_id,
+                            "gateway": self.ws.resume_gateway,
+                        }
                     )
 
     async def close(self) -> None:
