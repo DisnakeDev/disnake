@@ -9,6 +9,7 @@ from typing import (
     Dict,
     Generic,
     List,
+    Literal,
     Optional,
     Tuple,
     Type,
@@ -22,7 +23,7 @@ from .partial_emoji import PartialEmoji, _EmojiTag
 from .utils import MISSING, assert_never, get_slots
 
 if TYPE_CHECKING:
-    from typing_extensions import Self
+    from typing_extensions import Self, TypeAlias
 
     from .emoji import Emoji
     from .types.components import (
@@ -63,12 +64,16 @@ AnySelectMenu = Union[
     "MentionableSelectMenu",
     "ChannelSelectMenu",
 ]
+
+SelectMenuType = Literal[
+    ComponentType.string_select,
+    ComponentType.user_select,
+    ComponentType.role_select,
+    ComponentType.mentionable_select,
+    ComponentType.channel_select,
+]
+
 MessageComponent = Union["Button", "AnySelectMenu"]
-
-if TYPE_CHECKING:  # TODO: remove when we add modal select support
-    from typing_extensions import TypeAlias
-
-# ModalComponent = Union["TextInput", "AnySelectMenu"]
 ModalComponent: TypeAlias = "TextInput"
 
 NestedComponent = Union[MessageComponent, ModalComponent]
@@ -131,8 +136,6 @@ class ActionRow(Component, Generic[ComponentT]):
 
     Attributes
     ----------
-    type: :class:`ComponentType`
-        The type of component.
     children: List[Union[:class:`Button`, :class:`BaseSelectMenu`, :class:`TextInput`]]
         The children components that this holds, if any.
     """
@@ -142,10 +145,9 @@ class ActionRow(Component, Generic[ComponentT]):
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
 
     def __init__(self, data: ActionRowPayload) -> None:
-        self.type: ComponentType = try_enum(ComponentType, data["type"])
-        self.children: List[ComponentT] = [
-            _component_factory(d) for d in data.get("components", [])
-        ]
+        self.type: Literal[ComponentType.action_row] = ComponentType.action_row
+        children = [_component_factory(d) for d in data.get("components", [])]
+        self.children: List[ComponentT] = children  # type: ignore
 
     def to_dict(self) -> ActionRowPayload:
         return {
@@ -195,7 +197,7 @@ class Button(Component):
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
 
     def __init__(self, data: ButtonComponentPayload) -> None:
-        self.type: ComponentType = try_enum(ComponentType, data["type"])
+        self.type: Literal[ComponentType.button] = ComponentType.button
         self.style: ButtonStyle = try_enum(ButtonStyle, data["style"])
         self.custom_id: Optional[str] = data.get("custom_id")
         self.url: Optional[str] = data.get("url")
@@ -209,7 +211,7 @@ class Button(Component):
 
     def to_dict(self) -> ButtonComponentPayload:
         payload: ButtonComponentPayload = {
-            "type": 2,
+            "type": self.type.value,
             "style": self.style.value,
             "disabled": self.disabled,
         }
@@ -274,7 +276,9 @@ class BaseSelectMenu(Component):
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
 
     def __init__(self, data: BaseSelectMenuPayload) -> None:
-        self.type: ComponentType = try_enum(ComponentType, data["type"])
+        component_type = try_enum(ComponentType, data["type"])
+        self.type: SelectMenuType = component_type  # type: ignore
+
         self.custom_id: str = data["custom_id"]
         self.placeholder: Optional[str] = data.get("placeholder")
         self.min_values: int = data.get("min_values", 1)
@@ -329,6 +333,7 @@ class StringSelectMenu(BaseSelectMenu):
     __slots__: Tuple[str, ...] = ("options",)
 
     __repr_info__: ClassVar[Tuple[str, ...]] = BaseSelectMenu.__repr_info__ + __slots__
+    type: Literal[ComponentType.string_select]
 
     def __init__(self, data: StringSelectMenuPayload) -> None:
         super().__init__(data)
@@ -372,6 +377,8 @@ class UserSelectMenu(BaseSelectMenu):
 
     __slots__: Tuple[str, ...] = ()
 
+    type: Literal[ComponentType.user_select]
+
     if TYPE_CHECKING:
 
         def to_dict(self) -> UserSelectMenuPayload:
@@ -405,6 +412,8 @@ class RoleSelectMenu(BaseSelectMenu):
 
     __slots__: Tuple[str, ...] = ()
 
+    type: Literal[ComponentType.role_select]
+
     if TYPE_CHECKING:
 
         def to_dict(self) -> RoleSelectMenuPayload:
@@ -437,6 +446,8 @@ class MentionableSelectMenu(BaseSelectMenu):
     """
 
     __slots__: Tuple[str, ...] = ()
+
+    type: Literal[ComponentType.mentionable_select]
 
     if TYPE_CHECKING:
 
@@ -475,6 +486,7 @@ class ChannelSelectMenu(BaseSelectMenu):
     __slots__: Tuple[str, ...] = ("channel_types",)
 
     __repr_info__: ClassVar[Tuple[str, ...]] = BaseSelectMenu.__repr_info__ + __slots__
+    type: Literal[ComponentType.channel_select]
 
     def __init__(self, data: ChannelSelectMenuPayload) -> None:
         super().__init__(data)
@@ -643,7 +655,7 @@ class TextInput(Component):
     def __init__(self, data: TextInputPayload) -> None:
         style = data.get("style", TextInputStyle.short.value)
 
-        self.type: ComponentType = try_enum(ComponentType, data["type"])
+        self.type: Literal[ComponentType.text_input] = ComponentType.text_input
         self.custom_id: str = data["custom_id"]
         self.style: TextInputStyle = try_enum(TextInputStyle, style)
         self.label: Optional[str] = data.get("label")
