@@ -758,8 +758,8 @@ def test_normalise_optional_params(params, expected) -> None:
         ("Tuple[dict, List[Literal[42, 99]]]", Tuple[dict, List[Literal[42, 99]]], True),
         # 3.10 union syntax
         pytest.param(
-            "int | Literal[False]",
-            Union[int, Literal[False]],
+            "int | float",
+            Union[int, float],
             True,
             marks=pytest.mark.skipif(sys.version_info < (3, 10), reason="syntax requires py3.10"),
         ),

@@ -1134,11 +1134,14 @@ def evaluate_annotation(
     if implicit_str and isinstance(tp, str):
         if tp in cache:
             return cache[tp]
-        evaluated = eval(  # noqa: PGH001 # this is how annotations are supposed to be unstringifed
-            tp, globals, locals
-        )
+
+        # this is how annotations are supposed to be unstringifed
+        evaluated = eval(tp, globals, locals)  # noqa: PGH001
+        # recurse to resolve nested args further
+        evaluated = evaluate_annotation(evaluated, globals, locals, cache)
+
         cache[tp] = evaluated
-        return evaluate_annotation(evaluated, globals, locals, cache)
+        return evaluated
 
     if hasattr(tp, "__args__"):
         implicit_str = True
