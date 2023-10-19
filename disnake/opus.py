@@ -234,12 +234,12 @@ def _load_default() -> bool:
             _bitness = struct.calcsize("P") * 8
             _target = "x64" if _bitness > 32 else "x86"
             _filename = os.path.join(_basedir, "bin", f"libopus-0.{_target}.dll")
-            _lib = libopus_loader(_filename)  # noqa: PLW0603
+            _lib = libopus_loader(_filename)
         else:
             path = ctypes.util.find_library("opus")
             if not path:
                 raise AssertionError("could not find the opus library")
-            _lib = libopus_loader(path)  # noqa: PLW0603
+            _lib = libopus_loader(path)
     except Exception:
         _lib = MISSING
 
