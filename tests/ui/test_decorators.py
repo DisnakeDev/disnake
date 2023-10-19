@@ -30,16 +30,16 @@ class _CustomButton(ui.Button[V_co]):
 
 class TestDecorator:
     def test_default(self) -> None:
-        with create_callback(ui.Button) as func:
+        with create_callback(ui.Button[ui.View]) as func:
             res = ui.button(custom_id="123")(func)
-            assert_type(res, ui.item.DecoratedItem[ui.Button])
+            assert_type(res, ui.item.DecoratedItem[ui.Button[ui.View]])
 
             assert func.__discord_ui_model_type__ is ui.Button
             assert func.__discord_ui_model_kwargs__ == {"custom_id": "123"}
 
-        with create_callback(ui.StringSelect) as func:
+        with create_callback(ui.StringSelect[ui.View]) as func:
             res = ui.string_select(custom_id="123")(func)
-            assert_type(res, ui.item.DecoratedItem[ui.StringSelect])
+            assert_type(res, ui.item.DecoratedItem[ui.StringSelect[ui.View]])
 
             assert func.__discord_ui_model_type__ is ui.StringSelect
             assert func.__discord_ui_model_kwargs__ == {"custom_id": "123"}
@@ -67,4 +67,4 @@ class TestDecorator:
     @pytest.mark.parametrize("cls", [123, int, ui.StringSelect])
     def test_cls_invalid(self, cls) -> None:
         with pytest.raises(TypeError, match=r"cls argument must be"):
-            ui.button(cls=cls)  # type: ignore
+            ui.button(cls=cls)
