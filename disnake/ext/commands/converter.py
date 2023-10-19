@@ -1161,7 +1161,7 @@ def get_converter(param: inspect.Parameter) -> Any:
     return converter
 
 
-_GenericAlias = type(List[T])
+_GenericAlias = type(List[Any])
 
 
 def is_generic_type(tp: Any, *, _GenericAlias: Type = _GenericAlias) -> bool:

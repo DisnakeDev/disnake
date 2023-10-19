@@ -1353,7 +1353,7 @@ def option_enum(
 
     choices = choices or kwargs
     first, *_ = choices.values()
-    return Enum("", choices, type=type(first))
+    return Enum("", choices, type=type(first))  # type: ignore
 
 
 class ConverterMethod(classmethod):

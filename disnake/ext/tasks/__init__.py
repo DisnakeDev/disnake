@@ -734,7 +734,7 @@ def loop(
 
 
 def loop(
-    cls: Type[Object[L_co, Concatenate[LF, P]]] = Loop[LF],
+    cls: Type[Object[L_co, Concatenate[LF, P]]] = Loop[Any],
     **kwargs: Any,
 ) -> Callable[[LF], L_co]:
     """A decorator that schedules a task in the background for you with
