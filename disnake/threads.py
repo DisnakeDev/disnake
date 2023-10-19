@@ -12,6 +12,7 @@ from .errors import ClientException
 from .flags import ChannelFlags
 from .mixins import Hashable
 from .partial_emoji import PartialEmoji, _EmojiTag
+from .permissions import Permissions
 from .utils import MISSING, _get_as_snowflake, _unique, parse_time, snowflake_time
 
 __all__ = (
@@ -31,7 +32,6 @@ if TYPE_CHECKING:
     from .guild import Guild
     from .member import Member
     from .message import Message, PartialMessage
-    from .permissions import Permissions
     from .role import Role
     from .state import ConnectionState
     from .types.snowflake import SnowflakeList
