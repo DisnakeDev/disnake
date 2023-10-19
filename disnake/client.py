@@ -1196,7 +1196,8 @@ class Client:
                 # if an error happens during disconnects, disregard it.
                 pass
 
-        if self.ws is not None and self.ws.open:
+        # can be None if not connected
+        if self.ws is not None and self.ws.open:  # pyright: ignore[reportUnnecessaryComparison]
             await self.ws.close(code=1000)
 
         await self.http.close()
@@ -1874,16 +1875,15 @@ class Client:
 
         await self.ws.change_presence(activity=activity, status=status_str)
 
+        activities = () if activity is None else (activity,)
         for guild in self._connection.guilds:
             me = guild.me
-            if me is None:
+            if me is None:  # pyright: ignore[reportUnnecessaryComparison]
+                # may happen if guild is unavailable
                 continue
 
-            if activity is not None:
-                me.activities = (activity,)  # type: ignore
-            else:
-                me.activities = ()
-
+            # Member.activities is typehinted as Tuple[ActivityType, ...], we may be setting it as Tuple[BaseActivity, ...]
+            me.activities = activities  # type: ignore
             me.status = status
 
     # Guild stuff

@@ -473,7 +473,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             overwrites=overwrites,
             flags=flags,
             reason=reason,
-            **kwargs,
+            **kwargs,  # type: ignore
         )
         if payload is not None:
             # the payload will always be the proper channel payload
@@ -1628,7 +1628,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             slowmode_delay=slowmode_delay,
             flags=flags,
             reason=reason,
-            **kwargs,
+            **kwargs,  # type: ignore
         )
         if payload is not None:
             # the payload will always be the proper channel payload
@@ -2453,7 +2453,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
             flags=flags,
             slowmode_delay=slowmode_delay,
             reason=reason,
-            **kwargs,
+            **kwargs,  # type: ignore
         )
         if payload is not None:
             # the payload will always be the proper channel payload
@@ -2946,7 +2946,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             overwrites=overwrites,
             flags=flags,
             reason=reason,
-            **kwargs,
+            **kwargs,  # type: ignore
         )
         if payload is not None:
             # the payload will always be the proper channel payload
@@ -3619,7 +3619,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             default_sort_order=default_sort_order,
             default_layout=default_layout,
             reason=reason,
-            **kwargs,
+            **kwargs,  # type: ignore
         )
         if payload is not None:
             # the payload will always be the proper channel payload
@@ -3994,7 +3994,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             stickers=stickers,
         )
 
-        if auto_archive_duration is not None:
+        if auto_archive_duration not in (MISSING, None):
             auto_archive_duration = cast(
                 "ThreadArchiveDurationLiteral", try_enum_to_int(auto_archive_duration)
             )

@@ -536,7 +536,7 @@ async def _assetbytes_to_base64_data(data: Optional[AssetBytes]) -> Optional[str
 if HAS_ORJSON:
 
     def _to_json(obj: Any) -> str:
-        return orjson.dumps(obj).decode("utf-8")
+        return orjson.dumps(obj).decode("utf-8")  # type: ignore
 
     _from_json = orjson.loads  # type: ignore
 
@@ -569,7 +569,8 @@ async def maybe_coroutine(
         return value  # type: ignore  # typeguard doesn't narrow in the negative case
 
 
-async def async_all(gen: Iterable[Union[Awaitable[bool], bool]], *, check=_isawaitable) -> bool:
+async def async_all(gen: Iterable[Union[Awaitable[bool], bool]]) -> bool:
+    check = _isawaitable
     for elem in gen:
         if check(elem):
             elem = await elem

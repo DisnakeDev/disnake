@@ -151,7 +151,7 @@ class Emoji(_EmojiTag, AssetMixin):
         and count towards a separate limit of 25 emojis.
         """
         guild = self.guild
-        if guild is None:
+        if guild is None:  # pyright: ignore[reportUnnecessaryComparison]
             return []
 
         return [role for role in guild.roles if self._roles.has(role.id)]
