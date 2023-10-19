@@ -81,9 +81,6 @@ else:
 
 if sys.version_info >= (3, 10):
     from types import EllipsisType, UnionType
-elif TYPE_CHECKING:
-    UnionType = object()
-    EllipsisType = ellipsis  # noqa: F821
 else:
     UnionType = object()
     EllipsisType = type(Ellipsis)
