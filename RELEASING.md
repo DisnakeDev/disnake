@@ -11,19 +11,17 @@ Note that pre-releases (alpha/beta/rc) don't quite work with the current setup; 
 
 ## Steps
 
-These steps are mostly equivalent for major/minor (feature) and micro (bugfix) releases; steps marked with **\*** are exclusive to major/minor releases.  
+These steps are mostly equivalent for major/minor (feature) and micro (bugfix) releases.  
 The branch should be `master` for major/minor releases and e.g. `1.2.x` for micro releases.
 
 1. Run the `Create Release PR` workflow from the GitHub UI (or CLI), specifying the correct branch and new version.
-2. Wait until a PR containing the changelog and version bump is created. Update the changelog description and merge the PR.
-3. In the CLI, fetch changes and create + push a tag for the newly created commit, which will trigger another workflow.
-    - **\*** Also create + force-push a `stable` tag for the same ref.
-4. Update the visibility of old/new versions on https://readthedocs.org.
-    - **\*** Manually trigger a docs build for `stable`.
-5. Wait, update the created GitHub draft release, and prepare a Discord announcement.
-6. Approve the environment deployment when prompted, which will push the package to PyPI.
-7. Publish the prepared GitHub release and Discord announcement. 🎉
-8. **\*** Create a `v1.2.x` branch for future backports, and merge the newly created dev version PR.
+    1. Wait until a PR containing the changelog and version bump is created. Update the changelog description and merge the PR.
+    2. In the CLI, fetch changes and create + push a tag for the newly created commit, which will trigger another workflow.
+        - [if latest] Also force-push a `stable` tag for the same ref.
+    3. Update the visibility of old/new versions on https://readthedocs.org.
+2. Approve the environment deployment when prompted, which will push the package to PyPI.
+    1. Update and publish the created GitHub draft release, as well as a Discord announcement. 🎉
+3. [if major/minor] Create a `v1.2.x` branch for future backports, and merge the newly created dev version PR.
 
 
 ### Manual Steps
@@ -31,10 +29,10 @@ The branch should be `master` for major/minor releases and e.g. `1.2.x` for micr
 If the automated process above does not work for some reason, here's the abridged version of the manual release process:
 
 1. Update version in `__init__.py`, run `towncrier build`. Commit, push, create + merge PR.
-2. Follow steps 3. + 4. + 5. like above.
+2. Follow steps 1.ii. + 1.iii. like above.
 3. Run `python -m build`, attach artifacts to GitHub release.
 4. Run `twine check dist/*` + `twine upload dist/*`.
-5. Follow steps 7. + 8. like above.
+5. Follow steps 2.i. + 3. like above.
 
 
 ## Repository Setup
