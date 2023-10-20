@@ -1458,8 +1458,9 @@ This section documents events related to entitlements, which are related to appl
 
 .. function:: on_entitlement_update(entitlement)
 
-    Called when a user's subscription renews.
-    The :attr:`Entitlement.ends_at` attribute reflects the new expiration date.
+    Called when a user's entitlement is updated,
+    for example when the subscription gets renewed (in which case
+    the :attr:`Entitlement.ends_at` attribute reflects the new expiration date).
 
     .. versionadded:: 2.10
 
