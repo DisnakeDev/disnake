@@ -2193,6 +2193,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         topic: str,
         privacy_level: StagePrivacyLevel = MISSING,
         notify_everyone: bool = False,
+        guild_scheduled_event: Snowflake = MISSING,
         reason: Optional[str] = None,
     ) -> StageInstance:
         """|coro|
@@ -2213,14 +2214,21 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
             The stage instance's topic.
         privacy_level: :class:`StagePrivacyLevel`
             The stage instance's privacy level. Defaults to :attr:`StagePrivacyLevel.guild_only`.
-        reason: Optional[:class:`str`]
-            The reason the stage instance was created. Shows up on the audit log.
         notify_everyone: :class:`bool`
             Whether to notify ``@everyone`` that the stage instance has started.
             Requires the :attr:`~Permissions.mention_everyone` permission on the stage channel.
             Defaults to ``False``.
 
             .. versionadded:: 2.5
+
+        guild_scheduled_event: :class:`abc.Snowflake`
+            The guild scheduled event associated with the stage instance.
+            Setting this will automatically start the event.
+
+            .. versionadded:: 2.10
+
+        reason: Optional[:class:`str`]
+            The reason the stage instance was created. Shows up on the audit log.
 
         Raises
         ------
@@ -2252,6 +2260,9 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
                 )
 
             payload["privacy_level"] = privacy_level.value
+
+        if guild_scheduled_event is not MISSING:
+            payload["guild_scheduled_event_id"] = guild_scheduled_event.id
 
         data = await self._state.http.create_stage_instance(**payload, reason=reason)
         return StageInstance(guild=self.guild, state=self._state, data=data)
@@ -3628,6 +3639,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         available_tags: Sequence[ForumTag] = MISSING,
         default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
         default_sort_order: Optional[ThreadSortOrder] = MISSING,
+        default_layout: ThreadLayout = MISSING,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
         reason: Optional[str] = None,
     ) -> ForumChannel:
@@ -3643,7 +3655,10 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             Added new ``topic``, ``position``, ``nsfw``, ``category``, ``slowmode_delay``,
             ``default_thread_slowmode_delay``, ``default_auto_archive_duration``,
             ``available_tags``, ``default_reaction``, ``default_sort_order``
-            and ``overwrites`` keyword-only paremters.
+            and ``overwrites`` keyword-only parameters.
+
+        .. versionchanged:: 2.10
+            Added ``default_layout`` parameter.
 
         .. note::
             The current :attr:`ForumChannel.flags` value won't be cloned.
@@ -3673,6 +3688,8 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             The default reaction of the new channel. If not provided, defaults to this channel's default reaction.
         default_sort_order: Optional[:class:`ThreadSortOrder`]
             The default sort order of the new channel. If not provided, defaults to this channel's default sort order.
+        default_layout: :class:`ThreadLayout`
+            The default layout of threads in the new channel. If not provided, defaults to this channel's default layout.
         overwrites: :class:`Mapping`
             A :class:`Mapping` of target (either a role or a member) to :class:`PermissionOverwrite`
             to apply to the channel. If not provided, defaults to this channel's overwrites.
@@ -3704,9 +3721,6 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         else:
             default_reaction_emoji_payload = None
 
-        if default_sort_order is MISSING:
-            default_sort_order = self.default_sort_order
-
         return await self._clone_impl(
             {
                 "topic": topic if topic is not MISSING else self.topic,
@@ -3732,7 +3746,14 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
                 ),
                 "default_reaction_emoji": default_reaction_emoji_payload,
                 "default_sort_order": (
-                    try_enum_to_int(default_sort_order) if default_sort_order is not None else None
+                    try_enum_to_int(default_sort_order)
+                    if default_sort_order is not MISSING
+                    else try_enum_to_int(self.default_sort_order)
+                ),
+                "default_forum_layout": (
+                    try_enum_to_int(default_layout)
+                    if default_layout is not MISSING
+                    else try_enum_to_int(self.default_layout)
                 ),
             },
             name=name,
