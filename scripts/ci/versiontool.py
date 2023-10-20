@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import NamedTuple, NoReturn
 
 TARGET_FILE = Path("disnake/__init__.py")
-INIT = TARGET_FILE.read_text("utf-8")
+ORIG_INIT_CONTENTS = TARGET_FILE.read_text("utf-8")
 
 version_re = re.compile(r"(\d+)\.(\d+)\.(\d+)(?:(a|b|rc)(\d+)?)?")
 
@@ -60,7 +60,7 @@ class VersionInfo(NamedTuple):
 
 
 def get_current_version() -> VersionInfo:
-    match = re.search(r"^__version__\b.*\"(.+?)\"$", INIT, re.MULTILINE)
+    match = re.search(r"^__version__\b.*\"(.+?)\"$", ORIG_INIT_CONTENTS, re.MULTILINE)
     assert match, "could not find current version in __init__.py"
     return VersionInfo.from_str(match[1])
 
@@ -113,13 +113,13 @@ def main() -> None:
     else:
         new_version = VersionInfo.from_str(new_version_str)
 
-    text = INIT
-    text = replace_line(text, r"^__version__\b", f'__version__ = "{str(new_version)}"')
+    text = ORIG_INIT_CONTENTS
+    text = replace_line(text, r"^__version__\b", f'__version__ = "{new_version!s}"')
     text = replace_line(
         text, r"^version_info\b", f"version_info: VersionInfo = {new_version.to_versioninfo()}"
     )
 
-    if text != INIT:
+    if text != ORIG_INIT_CONTENTS:
         TARGET_FILE.write_text(text, "utf-8")
 
     print(str(new_version))
