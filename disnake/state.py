@@ -1906,8 +1906,6 @@ class ConnectionState:
         )
         self.dispatch("audit_log_entry_create", entry)
 
-    # TODO: do these get called for test entitlements?
-    # TODO: presumably no intents required?
     def parse_entitlement_create(self, data: gateway.EntitlementCreate) -> None:
         entitlement = Entitlement(data=data, state=self)
         self.dispatch("entitlement_create", entitlement)
