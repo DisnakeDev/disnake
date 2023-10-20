@@ -2999,7 +2999,6 @@ class Client:
         data = await self.http.get_skus(self.application_id)
         return [SKU(data=d) for d in data]
 
-    # TODO: consider adding `abc.User.entitlements` and/or `Guild.entitlements` iterators as shortcuts?
     def entitlements(
         self,
         *,
@@ -3010,6 +3009,7 @@ class Client:
         guild: Optional[Snowflake] = None,
         skus: Optional[Sequence[Snowflake]] = None,
         exclude_ended: bool = False,
+        oldest_first: bool = False,
     ) -> EntitlementIterator:
         """Retrieves an :class:`.AsyncIterator` that enables receiving entitlements for the application.
 
@@ -3018,8 +3018,8 @@ class Client:
             This method is an API call. To get the entitlements of the invoking user/guild
             in interactions, consider using :attr:`.Interaction.entitlements`.
 
-        If ``before`` is specified, entitlements are returned in reverse order,
-        i.e. starting with the highest ID.
+        Entries are returned in order from newest to oldest by default;
+        pass ``oldest_first=True`` to reverse the iteration order.
 
         All parameters are optional.
 
@@ -3034,8 +3034,12 @@ class Client:
             Defaults to ``100``.
         before: Union[:class:`.abc.Snowflake`, :class:`datetime.datetime`]
             Retrieves entitlements created before this date or object.
+            If a datetime is provided, it is recommended to use a UTC aware datetime.
+            If the datetime is naive, it is assumed to be local time.
         after: Union[:class:`.abc.Snowflake`, :class:`datetime.datetime`]
             Retrieve entitlements created after this date or object.
+            If a datetime is provided, it is recommended to use a UTC aware datetime.
+            If the datetime is naive, it is assumed to be local time.
         user: Optional[:class:`.abc.Snowflake`]
             The user to retrieve entitlements for.
         guild: Optional[:class:`.abc.Snowflake`]
@@ -3044,6 +3048,8 @@ class Client:
             The SKUs for which entitlements are retrieved.
         exclude_ended: :class:`bool`
             Whether to exclude ended/expired entitlements. Defaults to ``False``.
+        oldest_first: :class:`bool`
+            If set to ``True``, return entries in oldest->newest order. Defaults to ``False``.
 
         Raises
         ------
@@ -3065,6 +3071,7 @@ class Client:
             guild_id=guild.id if guild is not None else None,
             sku_ids=[sku.id for sku in skus] if skus else None,
             exclude_ended=exclude_ended,
+            oldest_first=oldest_first,
         )
 
     async def create_entitlement(

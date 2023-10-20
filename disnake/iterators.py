@@ -1027,6 +1027,9 @@ class GuildScheduledEventUserIterator(_AsyncIterator[Union["User", "Member"]]):
         return data
 
 
+# The endpoint for this paginates like audit logs,
+# i.e. descending when no parameter or `before` is given,
+# and ascending when `after` is given.
 class EntitlementIterator(_AsyncIterator["Entitlement"]):
     def __init__(
         self,
@@ -1040,6 +1043,7 @@ class EntitlementIterator(_AsyncIterator["Entitlement"]):
         before: Optional[Union[Snowflake, datetime.datetime]] = None,
         after: Optional[Union[Snowflake, datetime.datetime]] = None,
         exclude_ended: bool = False,
+        oldest_first: bool = False,
     ) -> None:
         if isinstance(before, datetime.datetime):
             before = Object(id=time_snowflake(before, high=False))
@@ -1049,7 +1053,7 @@ class EntitlementIterator(_AsyncIterator["Entitlement"]):
         self.application_id: int = application_id
         self.limit: Optional[int] = limit
         self.before: Optional[Snowflake] = before
-        self.after: Optional[Snowflake] = after
+        self.after: Snowflake = after or OLDEST_OBJECT
         self.user_id: Optional[int] = user_id
         self.guild_id: Optional[int] = guild_id
         self.sku_ids: Optional[List[int]] = sku_ids
@@ -1061,16 +1065,14 @@ class EntitlementIterator(_AsyncIterator["Entitlement"]):
         self.entitlements: asyncio.Queue[Entitlement] = asyncio.Queue()
 
         self._filter: Optional[Callable[[EntitlementPayload], bool]] = None
-        if self.before is not None:
-            self._strategy = self._before_strategy
-            if self.after is not None:
-                self._filter = lambda e: int(e["id"]) > self.after.id  # type: ignore
-            # reverse if using `before` strategy, since chunks are always received in
-            # ascending order (200-299, 100-199, 0-99) regardless of before/after
-            self.reverse = True
-        else:
+        if oldest_first:
             self._strategy = self._after_strategy
-            self.reverse = False
+            if self.before:
+                self._filter = lambda m: int(m["id"]) < self.before.id  # type: ignore
+        else:
+            self._strategy = self._before_strategy
+            if self.after and self.after != OLDEST_OBJECT:
+                self._filter = lambda m: int(m["id"]) > self.after.id
 
     async def next(self) -> Entitlement:
         if self.entitlements.empty():
@@ -1098,8 +1100,6 @@ class EntitlementIterator(_AsyncIterator["Entitlement"]):
         if len(data) < 100:
             self.limit = 0  # terminate loop
 
-        if self.reverse:
-            data = reversed(data)
         if self._filter:
             data = filter(self._filter, data)
 
@@ -1120,11 +1120,11 @@ class EntitlementIterator(_AsyncIterator["Entitlement"]):
         if len(data):
             if self.limit is not None:
                 self.limit -= retrieve
-            self.before = Object(id=int(data[0]["id"]))
+            self.before = Object(id=int(data[-1]["id"]))
         return data
 
     async def _after_strategy(self, retrieve: int) -> List[EntitlementPayload]:
-        after = self.after.id if self.after else None
+        after = self.after.id
         data = await self.request(
             self.application_id,
             after=after,
@@ -1137,5 +1137,6 @@ class EntitlementIterator(_AsyncIterator["Entitlement"]):
         if len(data):
             if self.limit is not None:
                 self.limit -= retrieve
+            # endpoint returns items in ascending order when `after` is used
             self.after = Object(id=int(data[-1]["id"]))
         return data
