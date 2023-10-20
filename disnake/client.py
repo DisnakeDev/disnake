@@ -3095,6 +3095,6 @@ class Client:
             self.application_id,
             sku_id=sku.id,
             owner_id=owner.id,
-            owner_type=1 if isinstance(owner, abc.User) else 2,
+            owner_type=2 if isinstance(owner, abc.User) else 1,
         )
         return Entitlement(data=data, state=self._connection)
