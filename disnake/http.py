@@ -2287,14 +2287,13 @@ class HTTPClient:
         self,
         application_id: Snowflake,
         *,
-        # TODO: what happens when both are specified?
+        # if both are specified, `after` takes priority and `before` gets ignored
         before: Optional[Snowflake] = None,
         after: Optional[Snowflake] = None,
         limit: int = 100,
         user_id: Optional[Snowflake] = None,
         guild_id: Optional[Snowflake] = None,
         sku_ids: Optional[SnowflakeList] = None,
-        # TODO: what's the default for this in the API?
         exclude_ended: bool = False,
     ) -> Response[List[entitlement.Entitlement]]:
         params: Dict[str, Any] = {

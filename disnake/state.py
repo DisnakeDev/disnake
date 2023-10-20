@@ -1906,7 +1906,6 @@ class ConnectionState:
         )
         self.dispatch("audit_log_entry_create", entry)
 
-    # TODO: these are untested (like everything else, tbqh); the _UPDATE and _DELETE contents are undocumented
     # TODO: do these get called for test entitlements?
     # TODO: presumably no intents required?
     def parse_entitlement_create(self, data: gateway.EntitlementCreate) -> None:

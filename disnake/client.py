@@ -3067,13 +3067,12 @@ class Client:
             exclude_ended=exclude_ended,
         )
 
-    # TODO: naming (create_entitlement?)
-    async def create_test_entitlement(
+    async def create_entitlement(
         self, sku: Snowflake, owner: Union[abc.User, Guild]
     ) -> Entitlement:
         """|coro|
 
-        Creates a new :class:`.Entitlement` for the given user or guild, with no expiry.
+        Creates a new test :class:`.Entitlement` for the given user or guild, with no expiry.
 
         Parameters
         ----------

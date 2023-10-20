@@ -30,7 +30,7 @@ class Entitlement(Hashable):
     :meth:`is_active` to check whether a given entitlement is considered active at the current time,
     or use ``exclude_ended=True`` when fetching entitlements using :meth:`Client.entitlements`.
 
-    You may create new entitlements for testing purposes using :meth:`Client.create_test_entitlement`.
+    You may create new entitlements for testing purposes using :meth:`Client.create_entitlement`.
 
     .. container:: operations
 
