@@ -1417,6 +1417,8 @@ class InteractionResponse:
 
         Only available for applications with monetization enabled.
 
+        .. versionadded:: 2.10
+
         Raises
         ------
         HTTPException
