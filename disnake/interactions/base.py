@@ -1419,6 +1419,17 @@ class InteractionResponse:
 
         .. versionadded:: 2.10
 
+        Example
+        -------
+        Require an application subscription for a command: ::
+
+            @bot.slash_command()
+            async def cool_command(inter: disnake.ApplicationCommandInteraction):
+                if not inter.entitlements:
+                    await inter.response.require_premium()
+                    return  # skip remaining code
+                ...
+
         Raises
         ------
         HTTPException
