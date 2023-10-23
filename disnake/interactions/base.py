@@ -1410,7 +1410,7 @@ class InteractionResponse:
         if modal is not None:
             parent._state.store_modal(parent.author.id, modal)
 
-    async def send_premium_required(self) -> None:
+    async def require_premium(self) -> None:
         """|coro|
 
         Responds to this interaction with a message containing an upgrade button.

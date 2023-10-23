@@ -252,7 +252,7 @@ InteractionResponseType
         Responds to the interaction with a message containing an upgrade button.
         Only available for applications with monetization enabled.
 
-        See also :meth:`InteractionResponse.send_premium_required`
+        See also :meth:`InteractionResponse.require_premium`
 
         .. versionadded:: 2.10
 
