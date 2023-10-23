@@ -265,7 +265,7 @@ class _BaseUserInteraction(_BaseInteraction):
     app_permissions: NotRequired[str]
     guild_id: NotRequired[Snowflake]
     guild_locale: NotRequired[str]
-    entitlements: List[Entitlement]
+    entitlements: NotRequired[List[Entitlement]]
     # one of these two will always exist, according to docs
     member: NotRequired[MemberWithUser]
     user: NotRequired[User]

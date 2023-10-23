@@ -2322,7 +2322,7 @@ class HTTPClient:
         sku_id: Snowflake,
         owner_id: Snowflake,
         *,
-        owner_type: Literal[1, 2],  # 1: user, 2: guild
+        owner_type: Literal[1, 2],  # 1: guild, 2: user
     ) -> Response[entitlement.Entitlement]:
         payload: Dict[str, Any] = {
             "sku_id": sku_id,
