@@ -38,7 +38,7 @@ class PartialEmoji(_EmojiTag, AssetMixin):
     - "Raw" data events such as :func:`on_raw_reaction_add`
     - Custom emoji that the bot cannot see from e.g. :attr:`Message.reactions`
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 

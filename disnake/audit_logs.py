@@ -517,7 +517,7 @@ class AuditLogEntry(Hashable):
     You can retrieve these via :meth:`Guild.audit_logs`,
     or via the :func:`on_audit_log_entry_create` event.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 

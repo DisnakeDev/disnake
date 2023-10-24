@@ -54,7 +54,7 @@ if TYPE_CHECKING:
 class Thread(Messageable, Hashable):
     """Represents a Discord thread.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -1018,7 +1018,7 @@ class Thread(Messageable, Hashable):
 class ThreadMember(Hashable):
     """Represents a Discord thread member.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -1092,7 +1092,7 @@ class ThreadMember(Hashable):
 class ForumTag(Hashable):
     """Represents a tag for threads in forum channels.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 

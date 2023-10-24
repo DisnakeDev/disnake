@@ -22,7 +22,7 @@ class Colour:
 
     There is an alias for this called Color.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 

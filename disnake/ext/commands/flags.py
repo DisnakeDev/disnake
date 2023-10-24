@@ -25,7 +25,7 @@ class CommandSyncFlags(BaseFlags):
 
     .. versionadded:: 2.7
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
