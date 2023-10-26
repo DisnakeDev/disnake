@@ -1122,9 +1122,15 @@ def normalise_optional_params(parameters: Iterable[Any]) -> Tuple[Any, ...]:
 def _resolve_typealiastype(
     tp: Any, globals: Dict[str, Any], locals: Dict[str, Any], cache: Dict[str, Any]
 ):
-    # Use __module__ to get the namespace in which the type alias was defined.
+    # Use __module__ to get the (global) namespace in which the type alias was defined.
     if mod := sys.modules.get(tp.__module__):
-        globals = locals = mod.__dict__
+        mod_globals = mod.__dict__
+        if mod_globals is not globals or mod_globals is not locals:
+            # if the namespace changed (usually when a TypeAliasType was imported from a different module),
+            # drop the cache since names can resolve differently now
+            cache = {}
+        globals = locals = mod_globals
+
     # Accessing `__value__` automatically evaluates the type alias in the annotation scope.
     # (recurse to resolve possible forwardrefs, aliases, etc.)
     return evaluate_annotation(tp.__value__, globals, locals, cache)
