@@ -1034,7 +1034,7 @@ class Webhook(BaseWebhook):
 
     For a synchronous counterpart, see :class:`SyncWebhook`.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 

@@ -48,7 +48,7 @@ class PartialInviteChannel:
     guild the :class:`Invite` resolves to.
 
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -137,7 +137,7 @@ class PartialInviteGuild:
     This model will be given when the user is not part of the
     guild the :class:`Invite` resolves to.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -256,7 +256,7 @@ class Invite(Hashable):
     Depending on the way this object was created, some of the attributes can
     have a value of ``None`` (see table below).
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 

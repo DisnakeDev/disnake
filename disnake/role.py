@@ -140,7 +140,7 @@ class RoleTags:
 class Role(Hashable):
     """Represents a Discord role in a :class:`Guild`.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
