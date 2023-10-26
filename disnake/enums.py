@@ -763,7 +763,7 @@ class WidgetStyle(Enum):
 # reference: https://discord.com/developers/docs/reference#locales
 class Locale(Enum):
     bg = "bg"
-    "Bulgarian | български"  # noqa: RUF001
+    "Bulgarian | български"
     cs = "cs"
     "Czech | Čeština"
     da = "da"
@@ -771,7 +771,7 @@ class Locale(Enum):
     de = "de"
     "German | Deutsch"
     el = "el"
-    "Greek | Ελληνικά"  # noqa: RUF001
+    "Greek | Ελληνικά"
     en_GB = "en-GB"
     "English, UK | English, UK"
     en_US = "en-US"
@@ -817,7 +817,7 @@ class Locale(Enum):
     tr = "tr"
     "Turkish | Türkçe"
     uk = "uk"
-    "Ukrainian | Українська"  # noqa: RUF001
+    "Ukrainian | Українська"
     vi = "vi"
     "Vietnamese | Tiếng Việt"
     zh_CN = "zh-CN"

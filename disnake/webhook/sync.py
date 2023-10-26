@@ -510,7 +510,7 @@ class SyncWebhook(BaseWebhook):
 
     For an asynchronous counterpart, see :class:`Webhook`.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 

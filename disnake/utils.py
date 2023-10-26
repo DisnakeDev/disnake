@@ -818,7 +818,7 @@ def remove_markdown(text: str, *, ignore_links: bool = True) -> str:
     regex = _MARKDOWN_STOCK_REGEX
     if ignore_links:
         regex = f"(?:{_URL_REGEX}|{regex})"
-    return re.sub(regex, replacement, text, 0, re.MULTILINE)
+    return re.sub(regex, replacement, text, flags=re.MULTILINE)
 
 
 def escape_markdown(text: str, *, as_needed: bool = False, ignore_links: bool = True) -> str:
@@ -857,7 +857,7 @@ def escape_markdown(text: str, *, as_needed: bool = False, ignore_links: bool = 
         regex = _MARKDOWN_STOCK_REGEX
         if ignore_links:
             regex = f"(?:{_URL_REGEX}|{regex})"
-        return re.sub(regex, replacement, text, 0, re.MULTILINE)
+        return re.sub(regex, replacement, text, flags=re.MULTILINE)
     else:
         text = re.sub(r"\\", r"\\\\", text)
         return _MARKDOWN_ESCAPE_REGEX.sub(r"\\\1", text)
@@ -1134,11 +1134,14 @@ def evaluate_annotation(
     if implicit_str and isinstance(tp, str):
         if tp in cache:
             return cache[tp]
-        evaluated = eval(  # noqa: PGH001 # this is how annotations are supposed to be unstringifed
-            tp, globals, locals
-        )
+
+        # this is how annotations are supposed to be unstringifed
+        evaluated = eval(tp, globals, locals)  # noqa: PGH001, S307
+        # recurse to resolve nested args further
+        evaluated = evaluate_annotation(evaluated, globals, locals, cache)
+
         cache[tp] = evaluated
-        return evaluate_annotation(evaluated, globals, locals, cache)
+        return evaluated
 
     if hasattr(tp, "__args__"):
         implicit_str = True

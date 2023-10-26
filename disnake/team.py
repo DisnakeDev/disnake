@@ -78,7 +78,7 @@ class Team:
 class TeamMember(BaseUser):
     """Represents a team member in a team.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 

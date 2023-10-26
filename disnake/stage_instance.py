@@ -24,7 +24,7 @@ class StageInstance(Hashable):
 
     .. versionadded:: 2.0
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
