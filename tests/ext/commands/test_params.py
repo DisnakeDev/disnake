@@ -10,6 +10,7 @@ import pytest
 import disnake
 from disnake import Member, Role, User
 from disnake.ext import commands
+from disnake.ext.commands import params
 
 OptionType = disnake.OptionType
 
@@ -65,6 +66,53 @@ class TestParamInfo:
             arg_mock = mock.Mock(arg_type)
             with pytest.raises(commands.errors.MemberNotFound):
                 await info.verify_type(mock.Mock(), arg_mock)
+
+    def test_isolate_self(self) -> None:
+        def func(a: int) -> None:
+            ...
+
+        (cog, inter), parameters = params.isolate_self(params.signature(func))
+        assert cog is None
+        assert inter is None
+        assert parameters == ({"a": mock.ANY})
+
+    def test_isolate_self_inter(self) -> None:
+        def func(i: disnake.ApplicationCommandInteraction, a: int) -> None:
+            ...
+
+        (cog, inter), parameters = params.isolate_self(params.signature(func))
+        assert cog is None
+        assert inter is not None
+        assert parameters == ({"a": mock.ANY})
+
+    def test_isolate_self_cog_inter(self) -> None:
+        def func(self, i: disnake.ApplicationCommandInteraction, a: int) -> None:
+            ...
+
+        (cog, inter), parameters = params.isolate_self(params.signature(func))
+        assert cog is not None
+        assert inter is not None
+        assert parameters == ({"a": mock.ANY})
+
+    def test_isolate_self_generic(self) -> None:
+        def func(i: disnake.ApplicationCommandInteraction[commands.Bot], a: int) -> None:
+            ...
+
+        (cog, inter), parameters = params.isolate_self(params.signature(func))
+        assert cog is None
+        assert inter is not None
+        assert parameters == ({"a": mock.ANY})
+
+    def test_isolate_self_union(self) -> None:
+        def func(
+            i: Union[commands.Context, disnake.ApplicationCommandInteraction[commands.Bot]], a: int
+        ) -> None:
+            ...
+
+        (cog, inter), parameters = params.isolate_self(params.signature(func))
+        assert cog is None
+        assert inter is not None
+        assert parameters == ({"a": mock.ANY})
 
 
 # this uses `Range` for testing `_BaseRange`, `String` should work equally
@@ -189,7 +237,6 @@ class TestRangeStringParam:
         assert info.max_value is None
         assert info.type == annotation.underlying_type
 
-    # uses lambdas since new union syntax isn't supported on all versions
     @pytest.mark.parametrize(
         "annotation_str",
         [
