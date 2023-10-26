@@ -21,3 +21,6 @@ if version >= (3, 12):
 
     T = TypeVar("T")
     GenericListAlias = TypeAliasType("GenericListAlias", List[T], type_params=(T,))
+
+    DuplicateAlias = str
+    ListWithDuplicateAlias = TypeAliasType("ListWithDuplicateAlias", List["DuplicateAlias"])

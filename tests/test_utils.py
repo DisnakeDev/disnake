@@ -828,6 +828,26 @@ class TestResolveAnnotationTypeAliasType:
         annotation = utils_helper_module.GenericListAlias["LocalIntOrStr"]
         assert utils.resolve_annotation(annotation, globals(), locals(), {}) == List[LocalIntOrStr]
 
+    # two different forwardrefs with same name
+    def test_forwardref_duplicate(self) -> None:
+        DuplicateAlias = int
+
+        # first, resolve an annotation where `DuplicateAlias` resolves to the local int
+        cache = {}
+        assert (
+            utils.resolve_annotation(List["DuplicateAlias"], globals(), locals(), cache)
+            == List[int]
+        )
+
+        # then, resolve an annotation where the globalns changes and `DuplicateAlias` resolves to something else
+        # (i.e. this should not resolve to `List[int]` despite {"DuplicateAlias": int} in the cache)
+        assert (
+            utils.resolve_annotation(
+                utils_helper_module.ListWithDuplicateAlias, globals(), locals(), cache
+            )
+            == List[str]
+        )
+
 
 @pytest.mark.parametrize(
     ("dt", "style", "expected"),
