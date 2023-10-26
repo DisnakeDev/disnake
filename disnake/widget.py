@@ -34,7 +34,7 @@ __all__ = (
 class WidgetChannel:
     """Represents a "partial" widget channel.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -89,7 +89,7 @@ class WidgetChannel:
 class WidgetMember(BaseUser):
     """Represents a "partial" member of the widget's guild.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -262,7 +262,7 @@ class WidgetSettings:
 class Widget:
     """Represents a :class:`Guild` widget.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 

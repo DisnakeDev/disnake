@@ -32,7 +32,6 @@ from typing import (
     Type,
     TypeVar,
     Union,
-    get_args,
     get_origin,
 )
 
@@ -110,17 +109,26 @@ __all__ = (
 
 
 def issubclass_(obj: Any, tp: Union[TypeT, Tuple[TypeT, ...]]) -> TypeGuard[TypeT]:
+    """Similar to the builtin `issubclass`, but more lenient.
+    Can also handle unions (`issubclass(Union[int, str], int)`) and
+    generic types (`issubclass(X[T], X)`) in the first argument.
+    """
     if not isinstance(tp, (type, tuple)):
         return False
-    elif not isinstance(obj, type):
-        # Assume we have a type hint
-        if get_origin(obj) in (Union, UnionType, Optional):
-            obj = get_args(obj)
-            return any(isinstance(o, type) and issubclass(o, tp) for o in obj)
-        else:
-            # Other type hint specializations are not supported
-            return False
-    return issubclass(obj, tp)
+    elif isinstance(obj, type):
+        # common case
+        return issubclass(obj, tp)
+
+    # At this point, `obj` is likely a generic type hint
+    if (origin := get_origin(obj)) is None:
+        return False
+
+    if origin in (Union, UnionType):
+        # If we have a Union, try matching any of its args
+        # (recursively, to handle possibly generic types inside this union)
+        return any(issubclass_(o, tp) for o in obj.__args__)
+    else:
+        return isinstance(origin, type) and issubclass(origin, tp)
 
 
 def remove_optionals(annotation: Any) -> Any:
@@ -888,7 +896,6 @@ def isolate_self(
         parametersl.pop(0)
     if parametersl:
         annot = parametersl[0].annotation
-        annot = get_origin(annot) or annot
         if issubclass_(annot, ApplicationCommandInteraction) or annot is inspect.Parameter.empty:
             inter_param = parameters.pop(parametersl[0].name)
 
@@ -960,9 +967,7 @@ def collect_params(
             injections[parameter.name] = default
         elif parameter.annotation in Injection._registered:
             injections[parameter.name] = Injection._registered[parameter.annotation]
-        elif issubclass_(
-            get_origin(parameter.annotation) or parameter.annotation, ApplicationCommandInteraction
-        ):
+        elif issubclass_(parameter.annotation, ApplicationCommandInteraction):
             if inter_param is None:
                 inter_param = parameter
             else:
@@ -1096,10 +1101,7 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
         if param.autocomplete:
             command.autocompleters[param.name] = param.autocomplete
 
-    if issubclass_(
-        get_origin(annot := parameters[inter_param].annotation) or annot,
-        disnake.GuildCommandInteraction,
-    ):
+    if issubclass_(parameters[inter_param].annotation, disnake.GuildCommandInteraction):
         command._guild_only = True
 
     return [param.to_option() for param in params]
