@@ -71,7 +71,7 @@ class TestParamInfo:
         def func(a: int) -> None:
             ...
 
-        (cog, inter), parameters = params.isolate_self(params.signature(func))
+        (cog, inter), parameters = params.isolate_self(params.get_signature_parameters(func))
         assert cog is None
         assert inter is None
         assert parameters == ({"a": mock.ANY})
@@ -80,7 +80,7 @@ class TestParamInfo:
         def func(i: disnake.ApplicationCommandInteraction, a: int) -> None:
             ...
 
-        (cog, inter), parameters = params.isolate_self(params.signature(func))
+        (cog, inter), parameters = params.isolate_self(params.get_signature_parameters(func))
         assert cog is None
         assert inter is not None
         assert parameters == ({"a": mock.ANY})
@@ -89,7 +89,7 @@ class TestParamInfo:
         def func(self, i: disnake.ApplicationCommandInteraction, a: int) -> None:
             ...
 
-        (cog, inter), parameters = params.isolate_self(params.signature(func))
+        (cog, inter), parameters = params.isolate_self(params.get_signature_parameters(func))
         assert cog is not None
         assert inter is not None
         assert parameters == ({"a": mock.ANY})
@@ -98,7 +98,7 @@ class TestParamInfo:
         def func(i: disnake.ApplicationCommandInteraction[commands.Bot], a: int) -> None:
             ...
 
-        (cog, inter), parameters = params.isolate_self(params.signature(func))
+        (cog, inter), parameters = params.isolate_self(params.get_signature_parameters(func))
         assert cog is None
         assert inter is not None
         assert parameters == ({"a": mock.ANY})
@@ -109,7 +109,7 @@ class TestParamInfo:
         ) -> None:
             ...
 
-        (cog, inter), parameters = params.isolate_self(params.signature(func))
+        (cog, inter), parameters = params.isolate_self(params.get_signature_parameters(func))
         assert cog is None
         assert inter is not None
         assert parameters == ({"a": mock.ANY})
