@@ -44,7 +44,7 @@ class TestDecorator:
             assert func.__discord_ui_model_type__ is ui.StringSelect
             assert func.__discord_ui_model_kwargs__ == {"custom_id": "123"}
 
-    # from here on out we're only testing the button decorator,
+    # from here on out we're mostly only testing the button decorator,
     # as @ui.string_select etc. works identically
 
     @pytest.mark.parametrize("cls", [_CustomButton, _CustomButton[Any]])
@@ -64,7 +64,18 @@ class TestDecorator:
             this_should_not_work="h",  # type: ignore
         )
 
-    @pytest.mark.parametrize("cls", [123, int, ui.StringSelect])
-    def test_cls_invalid(self, cls) -> None:
-        with pytest.raises(TypeError, match=r"cls argument must be"):
-            ui.button(cls=cls)  # type: ignore
+    @pytest.mark.parametrize(
+        ("decorator", "invalid_cls"),
+        [
+            (ui.button, ui.StringSelect),
+            (ui.string_select, ui.Button),
+            (ui.user_select, ui.Button),
+            (ui.role_select, ui.Button),
+            (ui.mentionable_select, ui.Button),
+            (ui.channel_select, ui.Button),
+        ],
+    )
+    def test_cls_invalid(self, decorator, invalid_cls) -> None:
+        for cls in [123, int, invalid_cls]:
+            with pytest.raises(TypeError, match=r"cls argument must be"):
+                decorator(cls=cls)
