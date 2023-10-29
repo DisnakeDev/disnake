@@ -220,7 +220,7 @@ async def _edit_handler(
 class Attachment(Hashable):
     """Represents an attachment from Discord.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: str(x)
 
@@ -766,7 +766,7 @@ def flatten_handlers(cls):
 class Message(Hashable):
     """Represents a message from Discord.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -2177,7 +2177,7 @@ class PartialMessage(Hashable):
 
     .. versionadded:: 1.6
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 

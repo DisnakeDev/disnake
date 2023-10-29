@@ -1,19 +1,9 @@
 # SPDX-License-Identifier: MIT
 
-from typing import TYPE_CHECKING
+from typing_extensions import assert_type
 
 from disnake.ext import commands
 from tests.helpers import reveal_type
-
-if TYPE_CHECKING:
-    from typing_extensions import assert_type
-
-    # NOTE: using undocumented `expected_text` parameter of pyright instead of `assert_type`,
-    # as `assert_type` can't handle bound ParamSpecs
-    reveal_type(
-        42,  # type: ignore
-        expected_text="str",  # type: ignore
-    )
 
 
 class CustomContext(commands.Context):

@@ -130,7 +130,7 @@ class Guild(Hashable):
 
     This is referred to as a "server" in the official Discord UI.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
