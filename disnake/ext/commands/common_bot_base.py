@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import collections.abc
+import importlib.machinery
 import importlib.util
 import logging
 import os
@@ -19,8 +20,6 @@ from . import errors
 from .cog import Cog
 
 if TYPE_CHECKING:
-    import importlib.machinery
-
     from ._types import CoroFunc
     from .bot import AutoShardedBot, AutoShardedInteractionBot, Bot, InteractionBot
     from .help import HelpCommand

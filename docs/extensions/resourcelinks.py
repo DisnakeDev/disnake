@@ -10,11 +10,12 @@ from docutils import nodes, utils
 from sphinx.util.nodes import split_explicit_title
 
 if TYPE_CHECKING:
-    from _types import SphinxExtensionMeta
     from docutils.nodes import Node, system_message
     from docutils.parsers.rst.states import Inliner
     from sphinx.application import Sphinx
     from sphinx.util.typing import RoleFunction
+
+    from ._types import SphinxExtensionMeta
 
 
 def make_link_role(resource_links: Dict[str, str]) -> RoleFunction:

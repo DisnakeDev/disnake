@@ -112,7 +112,7 @@ if TYPE_CHECKING:
 class Embed:
     """Represents a Discord embed.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 

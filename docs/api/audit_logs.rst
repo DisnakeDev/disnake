@@ -93,7 +93,7 @@ AuditLogDiff
     on the action being done, check the documentation for :class:`AuditLogAction`,
     otherwise check the documentation below for all attributes that are possible.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: iter(diff)
 
