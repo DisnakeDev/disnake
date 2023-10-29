@@ -7,8 +7,9 @@ from typing import TYPE_CHECKING
 from sphinx.util import logging as sphinx_logging
 
 if TYPE_CHECKING:
-    from _types import SphinxExtensionMeta
     from sphinx.application import Sphinx
+
+    from ._types import SphinxExtensionMeta
 
 
 class NitpickFileIgnorer(logging.Filter):

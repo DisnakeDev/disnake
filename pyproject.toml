@@ -156,7 +156,7 @@ select = [
     # "RET", # flake8-return
     # "SIM", # flake8-simplify
     "TID251", # flake8-tidy-imports, replaces S404
-    # "TCH", # flake8-type-checking
+    "TCH",    # flake8-type-checking
     "RUF",    # ruff specific exceptions
     "PT",     # flake8-pytest-style
     "Q",      # flake8-quotes
@@ -204,6 +204,13 @@ ignore = [
 
     # outer loop variables are overwritten by inner assignment target, these are mostly intentional
     "PLW2901",
+
+    # ignore imports that could be moved into type-checking blocks
+    # (no real advantage other than possibly avoiding cycles,
+    # but can be dangerous in places where we need to parse signatures)
+    "TCH001",
+    "TCH002",
+    "TCH003",
 
     # temporary disables, to fix later
     "D205",   # blank line required between summary and description
