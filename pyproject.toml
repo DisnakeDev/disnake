@@ -70,9 +70,11 @@ tools = [
     "pre-commit~=3.0",
     "slotscheck~=0.16.4",
     "python-dotenv~=1.0.0",
-    "towncrier==23.6.0",
     "check-manifest==0.49",
     "ruff==0.0.261",
+]
+changelog = [
+    "towncrier==23.6.0",
 ]
 codemod = [
     # run codemods on the respository (mostly automated typing)
@@ -93,6 +95,11 @@ test = [
     "pytest-asyncio~=0.20.3",
     "looptime~=0.2",
     "coverage[toml]~=6.5.0",
+]
+build = [
+    "wheel~=0.40.0",
+    "build~=0.10.0",
+    "twine~=4.0.2",
 ]
 
 [tool.pdm.scripts]
@@ -216,6 +223,7 @@ ignore = [
     "PT",   # this is not a module of pytest tests
 ]
 "tests/*.py" = ["S101"] # use of assert is okay in test files
+"scripts/*.py" = ["S101"] # use of assert is okay in scripts
 # we are not using noqa in the example files themselves
 "examples/*.py" = [
     "B008", # do not perform function calls in argument defaults, this is how most commands work
@@ -362,6 +370,7 @@ ignore = [
     "noxfile.py",
     # docs
     "CONTRIBUTING.md",
+    "RELEASE.md",
     "assets/**",
     "changelog/**",
     "docs/**",
