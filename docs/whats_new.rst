@@ -24,7 +24,7 @@ v2.9.1
 
 Bug Fixes
 ~~~~~~~~~
-- Allow ``cls`` argument in select menu decorators (e.g. :func`ui.string_select`) to be specified by keyword instead of being positional-only. (:issue:`1111`)
+- Allow ``cls`` argument in select menu decorators (e.g. :func:`ui.string_select`) to be specified by keyword instead of being positional-only. (:issue:`1111`)
 - |commands| Fix edge case in evaluation of multiple identical annotations with forwardrefs in a single signature. (:issue:`1120`)
 - Fix :meth:`Thread.permissions_for` not working in some cases due to an incorrect import. (:issue:`1123`)
 
