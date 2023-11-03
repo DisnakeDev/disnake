@@ -258,7 +258,8 @@ class InteractionBotBase(CommonBotBase):
     @property
     def all_app_commands(self) -> MappingProxyType[AppCmdIndex, InvokableApplicationCommand]:
         """MappingProxyType[:class:`AppCmdIndex`, :class:`InvokableApplicationCommand`]:
-        A mapping proxy with all application commands the bot has."""
+        A mapping proxy with all application commands the bot has.
+        """
         return MappingProxyType(self._all_app_commands)
 
     @property
@@ -357,11 +358,8 @@ class InteractionBotBase(CommonBotBase):
                 "not an instance of SubCommand or SubCommandGroup"
             )
 
-        if app_command.guild_ids is None:
-            # if test_guilds are specified then we add the same command for each test guild
-            guild_ids = (None,) if self._test_guilds is None else self._test_guilds
-        else:
-            guild_ids = app_command.guild_ids
+        test_guilds = (None,) if self._test_guilds is None else self._test_guilds
+        guild_ids = app_command.guild_ids or test_guilds
 
         for guild_id in guild_ids:
             cmd_index = AppCmdIndex(
