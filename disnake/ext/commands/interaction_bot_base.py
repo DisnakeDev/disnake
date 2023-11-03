@@ -7,6 +7,7 @@ import logging
 import sys
 import traceback
 import warnings
+from types import MappingProxyType
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -238,7 +239,7 @@ class InteractionBotBase(CommonBotBase):
         self._before_message_command_invoke = None
         self._after_message_command_invoke = None
 
-        self.all_app_commands: Dict[AppCmdIndex, InvokableApplicationCommand] = {}
+        self._all_app_commands: Dict[AppCmdIndex, InvokableApplicationCommand] = {}
 
     @disnake.utils.copy_doc(disnake.Client.login)
     async def login(self, token: str) -> None:
@@ -255,22 +256,28 @@ class InteractionBotBase(CommonBotBase):
         return CommandSyncFlags._from_value(self._command_sync_flags.value)
 
     @property
+    def all_app_commands(self) -> MappingProxyType[AppCmdIndex, InvokableApplicationCommand]:
+        """MappingProxyType[:class:`AppCmdIndex`, :class:`InvokableApplicationCommand`]:
+        A mapping proxy with all application commands the bot has."""
+        return MappingProxyType(self._all_app_commands)
+
+    @property
     def application_commands(self) -> Set[InvokableApplicationCommand]:
         """Set[:class:`InvokableApplicationCommand`]: A set of all application commands the bot has."""
-        return set(self.all_app_commands.values())
+        return set(self._all_app_commands.values())
 
     @property
     def slash_commands(self) -> Set[InvokableSlashCommand]:
         """Set[:class:`InvokableSlashCommand`]: A set of all slash commands the bot has."""
         return {
-            cmd for cmd in self.all_app_commands.values() if isinstance(cmd, InvokableSlashCommand)
+            cmd for cmd in self._all_app_commands.values() if isinstance(cmd, InvokableSlashCommand)
         }
 
     @property
     def user_commands(self) -> Set[InvokableUserCommand]:
         """Set[:class:`InvokableUserCommand`]: A set of all user commands the bot has."""
         return {
-            cmd for cmd in self.all_app_commands.values() if isinstance(cmd, InvokableUserCommand)
+            cmd for cmd in self._all_app_commands.values() if isinstance(cmd, InvokableUserCommand)
         }
 
     @property
@@ -278,7 +285,7 @@ class InteractionBotBase(CommonBotBase):
         """Set[:class:`InvokableMessageCommand`]: A set of all message commands the bot has."""
         return {
             cmd
-            for cmd in self.all_app_commands.values()
+            for cmd in self._all_app_commands.values()
             if isinstance(cmd, InvokableMessageCommand)
         }
 
@@ -288,7 +295,7 @@ class InteractionBotBase(CommonBotBase):
         # no docstring because it was an attribute and now it's deprecated
         return {
             cmd.name: cmd
-            for cmd in self.all_app_commands.values()
+            for cmd in self._all_app_commands.values()
             if isinstance(cmd, InvokableSlashCommand)
         }
 
@@ -298,7 +305,7 @@ class InteractionBotBase(CommonBotBase):
         # no docstring because it was an attribute and now it's deprecated
         return {
             cmd.name: cmd
-            for cmd in self.all_app_commands.values()
+            for cmd in self._all_app_commands.values()
             if isinstance(cmd, InvokableUserCommand)
         }
 
@@ -308,7 +315,7 @@ class InteractionBotBase(CommonBotBase):
         # no docstring because it was an attribute and now it's deprecated
         return {
             cmd.name: cmd
-            for cmd in self.all_app_commands.values()
+            for cmd in self._all_app_commands.values()
             if isinstance(cmd, InvokableMessageCommand)
         }
 
@@ -360,7 +367,7 @@ class InteractionBotBase(CommonBotBase):
             cmd_index = AppCmdIndex(
                 type=app_command.body.type, name=app_command.name, guild_id=guild_id
             )
-            if cmd_index in self.all_app_commands:
+            if cmd_index in self._all_app_commands:
                 raise ApplicationCommandRegistrationError(
                     cmd_index.type, cmd_index.name, cmd_index.guild_id
                 )
@@ -370,7 +377,7 @@ class InteractionBotBase(CommonBotBase):
             # note that we're adding the same command object for each guild_id
             # this ensures that any changes that happen to app_command after add_app_command
             # (such as hook attachments or permission modifications) apply properly
-            self.all_app_commands[cmd_index] = app_command
+            self._all_app_commands[cmd_index] = app_command
 
     def add_slash_command(self, slash_command: InvokableSlashCommand) -> None:
         """Adds an :class:`InvokableSlashCommand` into the internal list of slash commands.
@@ -482,7 +489,7 @@ class InteractionBotBase(CommonBotBase):
         result = None
         for guild_id in extended_guild_ids:
             cmd_index = AppCmdIndex(type=cmd_type, name=name, guild_id=guild_id)
-            cmd = self.all_app_commands.pop(cmd_index, None)
+            cmd = self._all_app_commands.pop(cmd_index, None)
             if result is None:
                 result = cmd
 
@@ -496,13 +503,13 @@ class InteractionBotBase(CommonBotBase):
             stacklevel=3,
         )
         bad_keys: List[AppCmdIndex] = []
-        for key in self.all_app_commands.keys():
+        for key in self._all_app_commands.keys():
             if key.type is cmd_type and key.name == name:
                 bad_keys.append(key)
 
         result: Optional[InvokableApplicationCommand] = None
         for key in bad_keys:
-            cmd = self.all_app_commands.pop(key, None)
+            cmd = self._all_app_commands.pop(key, None)
             if result is None:
                 result = cmd
 
@@ -595,14 +602,14 @@ class InteractionBotBase(CommonBotBase):
             cmd_index = AppCmdIndex(
                 type=ApplicationCommandType.chat_input, name=chain[0], guild_id=guild_id
             )
-            command = self.all_app_commands.get(cmd_index)
+            command = self._all_app_commands.get(cmd_index)
             if command is None:
                 return None
             return _match_subcommand_chain(command, chain)  # type: ignore
 
         # this is mostly for backwards compatibility, as previously guild_id arg didn't exist
         result = None
-        for command in self.all_app_commands.values():
+        for command in self._all_app_commands.values():
             if not isinstance(command, InvokableSlashCommand):
                 continue
             chain_match = _match_subcommand_chain(command, chain)
@@ -646,13 +653,13 @@ class InteractionBotBase(CommonBotBase):
         """
         if guild_id is not MISSING:
             cmd_index = AppCmdIndex(type=ApplicationCommandType.user, name=name, guild_id=guild_id)
-            command = self.all_app_commands.get(cmd_index)
+            command = self._all_app_commands.get(cmd_index)
             if command is None:
                 return None
             return command  # type: ignore
         # this is mostly for backwards compatibility, as previously guild_id arg didn't exist
         result = None
-        for command in self.all_app_commands.values():
+        for command in self._all_app_commands.values():
             if not isinstance(command, InvokableUserCommand) or command.name != name:
                 continue
             if result is None:
@@ -695,13 +702,13 @@ class InteractionBotBase(CommonBotBase):
             cmd_index = AppCmdIndex(
                 type=ApplicationCommandType.message, name=name, guild_id=guild_id
             )
-            command = self.all_app_commands.get(cmd_index)
+            command = self._all_app_commands.get(cmd_index)
             if command is None:
                 return None
             return command  # type: ignore
         # this is mostly for backwards compatibility, as previously guild_id arg didn't exist
         result = None
-        for command in self.all_app_commands.values():
+        for command in self._all_app_commands.values():
             if not isinstance(command, InvokableMessageCommand) or command.name != name:
                 continue
             if result is None:
@@ -977,7 +984,7 @@ class InteractionBotBase(CommonBotBase):
         global_cmds: List[ApplicationCommand] = []
         guilds: Dict[int, List[ApplicationCommand]] = {}
 
-        for key, cmd in self.all_app_commands.items():
+        for key, cmd in self._all_app_commands.items():
             if not cmd.auto_sync:
                 cmd.body._always_synced = True
 
@@ -1523,7 +1530,7 @@ class InteractionBotBase(CommonBotBase):
             type=inter.data.type, name=inter.data.name, guild_id=inter.data.guild_id
         )
         # this happens to always be a slash command
-        slash_command = self.all_app_commands.get(cmd_index)
+        slash_command = self._all_app_commands.get(cmd_index)
 
         if slash_command is None:
             return
@@ -1602,7 +1609,7 @@ class InteractionBotBase(CommonBotBase):
         cmd_index = AppCmdIndex(
             type=command_type, name=interaction.data.name, guild_id=interaction.data.guild_id
         )
-        app_command = self.all_app_commands.get(cmd_index)
+        app_command = self._all_app_commands.get(cmd_index)
 
         if command_type is ApplicationCommandType.chat_input:
             event_name = "slash_command"
