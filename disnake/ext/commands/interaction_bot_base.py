@@ -82,8 +82,8 @@ class _Diff(TypedDict):
 
 
 class AppCmdIndex(NamedTuple):
-    """A named tuple used for indexation of :class:`InvokableApplicationCommand`s
-    stored in bot's cache.
+    """A named tuple used for indexation of :class:`InvokableApplicationCommand`
+    objects stored in bot's cache.
 
     Attributes
     ----------
