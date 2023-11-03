@@ -62,7 +62,7 @@ if TYPE_CHECKING:
     P = ParamSpec("P")
 
 
-__all__ = ("InteractionBotBase",)
+__all__ = ("InteractionBotBase", "AppCmdIndex")
 
 MISSING: Any = disnake.utils.MISSING
 
@@ -95,6 +95,7 @@ class AppCmdIndex(NamedTuple):
         One of the guild IDs this command should be registered to,
         or ``None`` if it's a global command.
     """
+
     type: ApplicationCommandType
     name: str
     guild_id: Optional[int]
