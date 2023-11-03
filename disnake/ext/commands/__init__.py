@@ -22,5 +22,6 @@ from .errors import *
 from .flag_converter import *
 from .flags import *
 from .help import *
+from .interaction_bot_base import *
 from .params import *
 from .slash_core import *
