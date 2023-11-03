@@ -82,6 +82,19 @@ class _Diff(TypedDict):
 
 
 class AppCmdIndex(NamedTuple):
+    """A named tuple used for indexation of :class:`InvokableApplicationCommand`s
+    stored in bot's cache.
+
+    Attributes
+    ----------
+    type: :class:`ApplicationCommandType`
+        The type of the application command being stored.
+    name: :class:`str`
+        The name of the application command being stored.
+    guild_id: :class:`int`
+        One of the guild IDs this command should be registered to,
+        or ``None`` if it's a global command.
+    """
     type: ApplicationCommandType
     name: str
     guild_id: Optional[int]
