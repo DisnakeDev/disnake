@@ -201,7 +201,7 @@ class CheckAnyFailure(CheckFailure):
     ----------
     errors: List[:class:`CheckFailure`]
         A list of errors that were caught during execution.
-    checks: List[Callable[[Union[:class:`Context`, :class:`ApplicationCommandInteraction`]], :class:`bool`]]
+    checks: List[Callable[[Union[:class:`Context`, :class:`disnake.ApplicationCommandInteraction`]], :class:`bool`]]
         A list of check predicates that failed.
     """
 
