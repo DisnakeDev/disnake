@@ -48,7 +48,7 @@ __all__ = (
 class Paginator:
     """A class that aids in paginating code blocks for Discord messages.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: len(x)
 

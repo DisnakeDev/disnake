@@ -103,7 +103,7 @@ async def _single_delete_strategy(messages: Iterable[Message]) -> None:
 class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
     """Represents a Discord guild text channel.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -1217,7 +1217,7 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
 class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
     """Represents a Discord guild voice channel.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -1871,7 +1871,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
     .. versionadded:: 1.7
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -2696,7 +2696,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
     These are useful to group channels to logical compartments.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -3145,7 +3145,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
     .. versionadded:: 2.5
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -4184,7 +4184,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 class DMChannel(disnake.abc.Messageable, Hashable):
     """Represents a Discord direct message channel.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -4347,7 +4347,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
 class GroupChannel(disnake.abc.Messageable, Hashable):
     """Represents a Discord group channel.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -4506,7 +4506,7 @@ class PartialMessageable(disnake.abc.Messageable, Hashable):
 
     .. versionadded:: 2.0
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 

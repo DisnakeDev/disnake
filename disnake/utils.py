@@ -6,6 +6,7 @@ import array
 import asyncio
 import datetime
 import functools
+import inspect
 import json
 import os
 import pkgutil
@@ -1136,13 +1137,14 @@ def evaluate_annotation(
     if implicit_str and isinstance(tp, str):
         if tp in cache:
             return cache[tp]
-        evaluated = (
-            eval(  # noqa: PGH001, S307 # this is how annotations are supposed to be unstringifed
-                tp, globals, locals
-            )
-        )
+
+        # this is how annotations are supposed to be unstringifed
+        evaluated = eval(tp, globals, locals)  # noqa: PGH001, S307
+        # recurse to resolve nested args further
+        evaluated = evaluate_annotation(evaluated, globals, locals, cache)
+
         cache[tp] = evaluated
-        return evaluate_annotation(evaluated, globals, locals, cache)
+        return evaluated
 
     if hasattr(tp, "__args__"):
         implicit_str = True
@@ -1202,6 +1204,72 @@ def resolve_annotation(
     if cache is None:
         cache = {}
     return evaluate_annotation(annotation, globalns, locals, cache)
+
+
+def unwrap_function(function: Callable[..., Any]) -> Callable[..., Any]:
+    partial = functools.partial
+    while True:
+        if hasattr(function, "__wrapped__"):
+            function = function.__wrapped__
+        elif isinstance(function, partial):
+            function = function.func
+        else:
+            return function
+
+
+def _get_function_globals(function: Callable[..., Any]) -> Dict[str, Any]:
+    unwrap = unwrap_function(function)
+    try:
+        return unwrap.__globals__
+    except AttributeError:
+        return {}
+
+
+_inspect_empty = inspect.Parameter.empty
+
+
+def get_signature_parameters(
+    function: Callable[..., Any], globalns: Optional[Dict[str, Any]] = None
+) -> Dict[str, inspect.Parameter]:
+    # if no globalns provided, unwrap (where needed) and get global namespace from there
+    if globalns is None:
+        globalns = _get_function_globals(function)
+
+    params: Dict[str, inspect.Parameter] = {}
+    cache: Dict[str, Any] = {}
+
+    signature = inspect.signature(function)
+
+    # eval all parameter annotations
+    for name, parameter in signature.parameters.items():
+        annotation = parameter.annotation
+        if annotation is _inspect_empty:
+            params[name] = parameter
+            continue
+
+        if annotation is None:
+            annotation = type(None)
+        else:
+            annotation = evaluate_annotation(annotation, globalns, globalns, cache)
+
+        params[name] = parameter.replace(annotation=annotation)
+
+    return params
+
+
+def get_signature_return(function: Callable[..., Any]) -> Any:
+    signature = inspect.signature(function)
+
+    # same as parameters above, but for the return annotation
+    ret = signature.return_annotation
+    if ret is not _inspect_empty:
+        if ret is None:
+            ret = type(None)
+        else:
+            globalns = _get_function_globals(function)
+            ret = evaluate_annotation(ret, globalns, globalns, {})
+
+    return ret
 
 
 TimestampStyle = Literal["f", "F", "d", "D", "t", "T", "R"]

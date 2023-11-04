@@ -164,7 +164,7 @@ class AssetMixin:
 class Asset(AssetMixin):
     """Represents a CDN asset on Discord.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: str(x)
 
