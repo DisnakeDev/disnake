@@ -5,7 +5,7 @@ import copy
 import functools
 import itertools
 import re
-from typing import TYPE_CHECKING, Any, Callable, Iterable, Optional
+from typing import TYPE_CHECKING, Any, Callable, ClassVar, Iterable, Mapping, Optional
 
 import disnake.utils
 
@@ -48,7 +48,7 @@ __all__ = (
 class Paginator:
     """A class that aids in paginating code blocks for Discord messages.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: len(x)
 
@@ -279,7 +279,7 @@ class HelpCommand:
         ones passed in the :class:`.Command` constructor.
     """
 
-    MENTION_TRANSFORMS = {
+    MENTION_TRANSFORMS: ClassVar[Mapping[str, str]] = {
         "@everyone": "@\u200beveryone",
         "@here": "@\u200bhere",
         r"<@!?[0-9]{17,19}>": "@deleted-user",
