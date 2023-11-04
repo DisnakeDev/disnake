@@ -1867,7 +1867,8 @@ def app_check_any(*checks: AppCheck) -> Callable[[T], T]:
     try:
         return check_any(*checks)  # type: ignore  # impl is the same, typings are different
     except TypeError as e:
-        raise TypeError(str(e).replace("commands.check", "commands.app_check"))  # fix err message
+        msg = str(e).replace("commands.check", "commands.app_check")  # fix err message
+        raise TypeError(msg) from None
 
 
 def has_role(item: Union[int, str]) -> Callable[[T], T]:
