@@ -708,7 +708,7 @@ class Object(Protocol[T_co, P]):
     def __new__(cls) -> T_co:
         ...
 
-    def __init__(*args: P.args, **kwargs: P.kwargs) -> None:
+    def __init__(self, *args: P.args, **kwargs: P.kwargs) -> None:
         ...
 
 
