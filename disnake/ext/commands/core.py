@@ -1847,10 +1847,6 @@ def app_check(predicate: AppCheck) -> Callable[[T], T]:
 def app_check_any(*checks: AppCheck) -> Callable[[T], T]:
     """Same as :func:`.check_any`, but for app commands.
 
-    .. warning::
-        You cannot use various pre-made checks like :func:`.dm_only` or :func:`.is_owner`
-        as arguments to this function, since they are made for prefix commands, bot app ones.
-
     .. note::
         See :func:`.check_any` for this function's prefix command counterpart.
 
