@@ -1287,6 +1287,45 @@ def get_signature_return(function: Callable[..., Any]) -> Any:
     return ret
 
 
+def signature_has_self_param(function: Callable[..., Any]) -> bool:
+    # If a function was defined in a class and is not bound (i.e. is not types.MethodType),
+    # it should have a `self` parameter.
+    # Bound methods technically also have a `self` parameter, but this is
+    # used in conjunction with `inspect.signature`, which drops that parameter.
+    #
+    # There isn't really any way to reliably detect whether a function
+    # was defined in a class, other than `__qualname__`, thanks to PEP 3155.
+    # As noted in the PEP, this doesn't work with rebinding, but that should be a pretty rare edge case.
+    #
+    #
+    # There are a few possible situations here - for the purposes of this method,
+    # we want to detect the second case only:
+    # (1) For *unbound* (~ top-level) functions, `__qualname__ == __name__`.
+    # (2) The preceding component for *methods in classes* will be the class name, resulting in `Clazz.func`.
+    # (3) A somewhat special case are *nested functions*, which use `containing_func.<locals>.func`.
+    #
+    # Working solely based on this string is certainly not ideal,
+    # but the compiler does a bunch of processing just for that attribute,
+    # and there's really no other way to retrieve this information through other means later.
+    # (3.10: https://github.com/python/cpython/blob/e07086db03d2dc1cd2e2a24f6c9c0ddd422b4cf0/Python/compile.c#L744)
+    #
+    # Not reliable for classmethod/staticmethod.
+
+    qname = function.__qualname__
+    if qname == function.__name__:
+        # (1)
+        return False
+
+    if isinstance(function, types.MethodType):
+        return False
+
+    # "a.b.c.d" => "a.b.c"
+    parent = qname.rsplit(".", 1)[0]
+
+    # (2), (3)
+    return not parent.endswith(".<locals>")
+
+
 TimestampStyle = Literal["f", "F", "d", "D", "t", "T", "R"]
 
 
@@ -1416,45 +1455,6 @@ def humanize_list(values: List[str], combine: str) -> str:
 # This is only to avoid "unreachable code", which pyright doesn't type-check.
 def assert_never(arg: Never, /) -> None:
     pass
-
-
-def signature_has_self_param(function: Callable[..., Any]) -> bool:
-    # If a function was defined in a class and is not bound (i.e. is not types.MethodType),
-    # it should have a `self` parameter.
-    # Bound methods technically also have a `self` parameter, but this is
-    # used in conjunction with `inspect.signature`, which drops that parameter.
-    #
-    # There isn't really any way to reliably detect whether a function
-    # was defined in a class, other than `__qualname__`, thanks to PEP 3155.
-    # As noted in the PEP, this doesn't work with rebinding, but that should be a pretty rare edge case.
-    #
-    #
-    # There are a few possible situations here - for the purposes of this method,
-    # we want to detect the second case only:
-    # (1) For *unbound* (~ top-level) functions, `__qualname__ == __name__`.
-    # (2) The preceding component for *methods in classes* will be the class name, resulting in `Clazz.func`.
-    # (3) A somewhat special case are *nested functions*, which use `containing_func.<locals>.func`.
-    #
-    # Working solely based on this string is certainly not ideal,
-    # but the compiler does a bunch of processing just for that attribute,
-    # and there's really no other way to retrieve this information through other means later.
-    # (3.10: https://github.com/python/cpython/blob/e07086db03d2dc1cd2e2a24f6c9c0ddd422b4cf0/Python/compile.c#L744)
-    #
-    # Not reliable for classmethod/staticmethod.
-
-    qname = function.__qualname__
-    if qname == function.__name__:
-        # (1)
-        return False
-
-    if isinstance(function, types.MethodType):
-        return False
-
-    # "a.b.c.d" => "a.b.c"
-    parent = qname.rsplit(".", 1)[0]
-
-    # (2), (3)
-    return not parent.endswith(".<locals>")
 
 
 # n.b. This must be imported and used as @ _overload_with_permissions (without the space)
