@@ -404,7 +404,7 @@ class Client:
             connector,
             proxy=proxy,
             proxy_auth=proxy_auth,
-            unsync_clock=assume_unsync_clock,
+            # unsync_clock=assume_unsync_clock,
             loop=self.loop,
         )
 
@@ -438,6 +438,7 @@ class Client:
         self._first_connect: asyncio.Event = asyncio.Event()
         self._connection._get_websocket = self._get_websocket
         self._connection._get_client = lambda: self
+        self._token: str | None = None
 
         if VoiceClient.warn_nacl:
             VoiceClient.warn_nacl = False
@@ -1025,7 +1026,9 @@ class Client:
         if not isinstance(token, str):
             raise TypeError(f"token must be of type str, got {type(token).__name__} instead")
 
-        data = await self.http.static_login(token.strip())
+        self._token = token.strip()
+
+        data = await self.http.static_login(f"Bot {self._token}")
         self._connection.user = ClientUser(state=self._connection, data=data)
 
     async def connect(
