@@ -71,7 +71,7 @@ class TestParamInfo:
         def func(a: int) -> None:
             ...
 
-        (cog, inter), parameters = params.isolate_self(params.get_signature_parameters(func))
+        (cog, inter), parameters = params.isolate_self(func)
         assert cog is None
         assert inter is None
         assert parameters == ({"a": mock.ANY})
@@ -80,16 +80,17 @@ class TestParamInfo:
         def func(i: disnake.ApplicationCommandInteraction, a: int) -> None:
             ...
 
-        (cog, inter), parameters = params.isolate_self(params.get_signature_parameters(func))
+        (cog, inter), parameters = params.isolate_self(func)
         assert cog is None
         assert inter is not None
         assert parameters == ({"a": mock.ANY})
 
     def test_isolate_self_cog_inter(self) -> None:
-        def func(self, i: disnake.ApplicationCommandInteraction, a: int) -> None:
-            ...
+        class X:
+            def func(self, i: disnake.ApplicationCommandInteraction, a: int) -> None:
+                ...
 
-        (cog, inter), parameters = params.isolate_self(params.get_signature_parameters(func))
+        (cog, inter), parameters = params.isolate_self(X.func)
         assert cog is not None
         assert inter is not None
         assert parameters == ({"a": mock.ANY})
@@ -98,7 +99,7 @@ class TestParamInfo:
         def func(i: disnake.ApplicationCommandInteraction[commands.Bot], a: int) -> None:
             ...
 
-        (cog, inter), parameters = params.isolate_self(params.get_signature_parameters(func))
+        (cog, inter), parameters = params.isolate_self(func)
         assert cog is None
         assert inter is not None
         assert parameters == ({"a": mock.ANY})
@@ -109,7 +110,7 @@ class TestParamInfo:
         ) -> None:
             ...
 
-        (cog, inter), parameters = params.isolate_self(params.get_signature_parameters(func))
+        (cog, inter), parameters = params.isolate_self(func)
         assert cog is None
         assert inter is not None
         assert parameters == ({"a": mock.ANY})
