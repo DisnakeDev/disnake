@@ -215,80 +215,62 @@ class TestRangeStringParam:
 
 
 class TestIsolateSelf:
-    def test_function(self) -> None:
-        def func(inter: disnake.ApplicationCommandInteraction, a: str, b: int) -> None:
+    def test_function_simple(self) -> None:
+        def func(a: int) -> None:
+            ...
+
+        (cog, inter), params = commands.params.isolate_self(func)
+        assert cog is None
+        assert inter is None
+        assert params.keys() == {"a"}
+
+    def test_function_inter(self) -> None:
+        def func(inter: disnake.ApplicationCommandInteraction, a: int) -> None:
             ...
 
         (cog, inter), params = commands.params.isolate_self(func)
         assert cog is None  # should not be set
         assert inter is not None
-        assert params.keys() == {"a", "b"}
+        assert params.keys() == {"a"}
 
     def test_unbound_method(self) -> None:
         class Cog(commands.Cog):
-            def func(self, inter: disnake.ApplicationCommandInteraction, a: str, b: int) -> None:
+            def func(self, inter: disnake.ApplicationCommandInteraction, a: int) -> None:
                 ...
 
         (cog, inter), params = commands.params.isolate_self(Cog.func)
         assert cog is not None  # *should* be set here
         assert inter is not None
-        assert params.keys() == {"a", "b"}
+        assert params.keys() == {"a"}
 
     # I don't think the param parsing logic ever handles bound methods, but testing for regressions anyway
     def test_bound_method(self) -> None:
         class Cog(commands.Cog):
-            def func(self, inter: disnake.ApplicationCommandInteraction, a: str, b: int) -> None:
+            def func(self, inter: disnake.ApplicationCommandInteraction, a: int) -> None:
                 ...
 
         (cog, inter), params = commands.params.isolate_self(Cog().func)
         assert cog is None  # should not be set here, since method is already bound
         assert inter is not None
-        assert params.keys() == {"a", "b"}
+        assert params.keys() == {"a"}
 
-    def test_isolate_self(self) -> None:
-        def func(a: int) -> None:
+    def test_generic(self) -> None:
+        def func(inter: disnake.ApplicationCommandInteraction[commands.Bot], a: int) -> None:
             ...
 
-        (cog, inter), parameters = commands.params.isolate_self(func)
-        assert cog is None
-        assert inter is None
-        assert parameters == ({"a": mock.ANY})
-
-    def test_isolate_self_inter(self) -> None:
-        def func(i: disnake.ApplicationCommandInteraction, a: int) -> None:
-            ...
-
-        (cog, inter), parameters = commands.params.isolate_self(func)
+        (cog, inter), params = commands.params.isolate_self(func)
         assert cog is None
         assert inter is not None
-        assert parameters == ({"a": mock.ANY})
+        assert params.keys() == {"a"}
 
-    def test_isolate_self_cog_inter(self) -> None:
-        class X:
-            def func(self, i: disnake.ApplicationCommandInteraction, a: int) -> None:
-                ...
-
-        (cog, inter), parameters = commands.params.isolate_self(X.func)
-        assert cog is not None
-        assert inter is not None
-        assert parameters == ({"a": mock.ANY})
-
-    def test_isolate_self_generic(self) -> None:
-        def func(i: disnake.ApplicationCommandInteraction[commands.Bot], a: int) -> None:
-            ...
-
-        (cog, inter), parameters = commands.params.isolate_self(func)
-        assert cog is None
-        assert inter is not None
-        assert parameters == ({"a": mock.ANY})
-
-    def test_isolate_self_union(self) -> None:
+    def test_inter_union(self) -> None:
         def func(
-            i: Union[commands.Context, disnake.ApplicationCommandInteraction[commands.Bot]], a: int
+            inter: Union[commands.Context, disnake.ApplicationCommandInteraction[commands.Bot]],
+            a: int,
         ) -> None:
             ...
 
-        (cog, inter), parameters = commands.params.isolate_self(func)
+        (cog, inter), params = commands.params.isolate_self(func)
         assert cog is None
         assert inter is not None
-        assert parameters == ({"a": mock.ANY})
+        assert params.keys() == {"a"}
