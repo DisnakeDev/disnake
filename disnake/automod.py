@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import timedelta
+import datetime
 from typing import (
     TYPE_CHECKING,
     Dict,
@@ -25,7 +25,7 @@ from .enums import (
     try_enum_to_int,
 )
 from .flags import AutoModKeywordPresets
-from .utils import MISSING, _get_as_snowflake
+from .utils import MISSING, _get_as_snowflake, snowflake_time
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -207,10 +207,10 @@ class AutoModTimeoutAction(AutoModAction):
 
     _metadata: AutoModTimeoutActionMetadata
 
-    def __init__(self, duration: Union[int, timedelta]) -> None:
+    def __init__(self, duration: Union[int, datetime.timedelta]) -> None:
         super().__init__(type=AutoModActionType.timeout)
 
-        if isinstance(duration, timedelta):
+        if isinstance(duration, datetime.timedelta):
             duration = int(duration.total_seconds())
         self._metadata["duration_seconds"] = duration
 
@@ -491,6 +491,14 @@ class AutoModRule:
             if (exempt_channels := data.get("exempt_channels"))
             else frozenset()
         )
+
+    @property
+    def created_at(self) -> datetime.datetime:
+        """:class:`datetime.datetime`: Returns the rule's creation time in UTC.
+
+        .. versionadded:: 2.10
+        """
+        return snowflake_time(self.id)
 
     @property
     def actions(self) -> List[AutoModAction]:

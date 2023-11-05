@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from .types.sticker import (
         EditGuildSticker,
         GuildSticker as GuildStickerPayload,
-        ListPremiumStickerPacks as ListPremiumStickerPacksPayload,
+        ListStickerPacks as ListStickerPacksPayload,
         StandardSticker as StandardStickerPayload,
         Sticker as StickerPayload,
         StickerItem as StickerItemPayload,
@@ -44,7 +44,7 @@ class StickerPack(Hashable):
     .. versionchanged:: 2.8
         :attr:`cover_sticker_id`, :attr:`cover_sticker` and :attr:`banner` are now optional.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: str(x)
 
@@ -163,7 +163,7 @@ class StickerItem(_StickerTag):
 
     .. versionadded:: 2.0
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: str(x)
 
@@ -226,7 +226,7 @@ class Sticker(_StickerTag):
 
     .. versionadded:: 1.6
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: str(x)
 
@@ -283,7 +283,7 @@ class StandardSticker(Sticker):
 
     .. versionadded:: 2.0
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: str(x)
 
@@ -348,7 +348,7 @@ class StandardSticker(Sticker):
         :class:`StickerPack`
             The retrieved sticker pack.
         """
-        data: ListPremiumStickerPacksPayload = await self._state.http.list_premium_sticker_packs()
+        data: ListStickerPacksPayload = await self._state.http.list_sticker_packs()
         packs = data["sticker_packs"]
         pack = find(lambda d: int(d["id"]) == self.pack_id, packs)
 
@@ -362,7 +362,7 @@ class GuildSticker(Sticker):
 
     .. versionadded:: 2.0
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: str(x)
 
