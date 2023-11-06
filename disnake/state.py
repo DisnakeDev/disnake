@@ -191,7 +191,6 @@ class ConnectionState:
         handlers: Dict[str, Callable],
         hooks: Dict[str, Callable],
         http: HTTPClient,
-        loop: asyncio.AbstractEventLoop,
         max_messages: Optional[int] = 1000,
         application_id: Optional[int] = None,
         heartbeat_timeout: float = 60.0,
@@ -203,7 +202,8 @@ class ConnectionState:
         chunk_guilds_at_startup: Optional[bool] = None,
         member_cache_flags: Optional[MemberCacheFlags] = None,
     ) -> None:
-        self.loop: asyncio.AbstractEventLoop = loop
+        # Set after Client.login
+        self.loop: asyncio.AbstractEventLoop = MISSING
         self.http: HTTPClient = http
         self.max_messages: Optional[int] = max_messages
         if self.max_messages is not None and self.max_messages <= 0:

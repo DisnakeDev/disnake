@@ -219,9 +219,9 @@ class InteractionBotBase(CommonBotBase):
 
     @disnake.utils.copy_doc(disnake.Client.login)
     async def login(self, token: str) -> None:
-        self._schedule_app_command_preparation()
-
         await super().login(token)
+
+        self._schedule_app_command_preparation()
 
     @property
     def command_sync_flags(self) -> CommandSyncFlags:

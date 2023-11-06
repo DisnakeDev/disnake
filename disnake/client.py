@@ -469,7 +469,6 @@ class Client:
             handlers=self._handlers,
             hooks=self._hooks,
             http=self.http,
-            loop=self.loop,
             max_messages=max_messages,
             application_id=application_id,
             heartbeat_timeout=heartbeat_timeout,
@@ -1006,6 +1005,11 @@ class Client:
         if not isinstance(token, str):
             raise TypeError(f"token must be of type str, got {type(token).__name__} instead")
 
+        loop = asyncio.get_running_loop()
+        self.loop = loop
+        self.http.loop = loop
+        self._connection.loop = loop
+
         data = await self.http.static_login(token.strip())
         self._connection.user = ClientUser(state=self._connection, data=data)
 
@@ -1210,9 +1214,6 @@ class Client:
         TypeError
             An unexpected keyword argument was received.
         """
-        self.loop = asyncio.get_running_loop()
-        self.http.loop = self.loop
-        self._connection.loop = self.loop
         try:
             await self.login(token)
             await self.connect(reconnect=reconnect)
