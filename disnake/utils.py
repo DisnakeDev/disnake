@@ -1230,6 +1230,7 @@ _inspect_empty = inspect.Parameter.empty
 def get_signature_parameters(
     function: Callable[..., Any],
     globalns: Optional[Dict[str, Any]] = None,
+    *,
     skip_standard_params: bool = False,
 ) -> Dict[str, inspect.Parameter]:
     # if no globalns provided, unwrap (where needed) and get global namespace from there
