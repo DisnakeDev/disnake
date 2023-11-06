@@ -93,7 +93,6 @@ class Shard:
         self._client: Client = client
         self._dispatch: Callable[..., None] = client.dispatch
         self._queue_put: Callable[[EventItem], None] = queue_put
-        self.loop: asyncio.AbstractEventLoop = self._client.loop
         self._disconnect: bool = False
         self._reconnect = client._reconnect
         self._backoff: ExponentialBackoff = ExponentialBackoff()
@@ -113,7 +112,7 @@ class Shard:
         return self.ws.shard_id  # type: ignore
 
     def launch(self) -> None:
-        self._task = self.loop.create_task(self.worker())
+        self._task = self._client.loop.create_task(self.worker())
 
     def _cancel_task(self) -> None:
         if self._task is not None and not self._task.done():
@@ -329,13 +328,11 @@ class AutoShardedClient(Client):
         self,
         *,
         asyncio_debug: bool = False,
-        loop: Optional[asyncio.AbstractEventLoop] = None,
         shard_ids: Optional[List[int]] = None,  # instead of Client's shard_id: Optional[int]
         shard_count: Optional[int] = None,
         enable_debug_events: bool = False,
         enable_gateway_error_handler: bool = True,
         gateway_params: Optional[GatewayParams] = None,
-        connector: Optional[aiohttp.BaseConnector] = None,
         proxy: Optional[str] = None,
         proxy_auth: Optional[aiohttp.BasicAuth] = None,
         assume_unsync_clock: bool = True,
@@ -391,7 +388,6 @@ class AutoShardedClient(Client):
             handlers=self._handlers,
             hooks=self._hooks,
             http=self.http,
-            loop=self.loop,
             **options,
         )
 

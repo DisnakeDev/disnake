@@ -4,11 +4,9 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import signal
 import sys
 import traceback
 import types
-import warnings
 from datetime import datetime, timedelta
 from errno import ECONNRESET
 from typing import (
@@ -221,15 +219,9 @@ class Client:
 
         .. versionchanged:: 1.3
             Allow disabling the message cache and change the default size to ``1000``.
-    loop: Optional[:class:`asyncio.AbstractEventLoop`]
-        The :class:`asyncio.AbstractEventLoop` to use for asynchronous operations.
-        Defaults to ``None``, in which case the default event loop is used via
-        :func:`asyncio.get_event_loop()`.
     asyncio_debug: :class:`bool`
         Whether to enable asyncio debugging when the client starts.
         Defaults to False.
-    connector: Optional[:class:`aiohttp.BaseConnector`]
-        The connector to use for connection pooling.
     proxy: Optional[:class:`str`]
         Proxy URL.
     proxy_auth: Optional[:class:`aiohttp.BasicAuth`]
@@ -345,8 +337,6 @@ class Client:
     ----------
     ws
         The websocket gateway the client is currently connected to. Could be ``None``.
-    loop: :class:`asyncio.AbstractEventLoop`
-        The event loop that the client uses for asynchronous operations.
     session_start_limit: Optional[:class:`SessionStartLimit`]
         Information about the current session start limit.
         Only available after initiating the connection.
@@ -363,7 +353,6 @@ class Client:
         self,
         *,
         asyncio_debug: bool = False,
-        loop: Optional[asyncio.AbstractEventLoop] = None,
         shard_id: Optional[int] = None,
         shard_count: Optional[int] = None,
         enable_debug_events: bool = False,
@@ -371,7 +360,6 @@ class Client:
         localization_provider: Optional[LocalizationProtocol] = None,
         strict_localization: bool = False,
         gateway_params: Optional[GatewayParams] = None,
-        connector: Optional[aiohttp.BaseConnector] = None,
         proxy: Optional[str] = None,
         proxy_auth: Optional[aiohttp.BasicAuth] = None,
         assume_unsync_clock: bool = True,
@@ -389,19 +377,12 @@ class Client:
         # self.ws is set in the connect method
         self.ws: DiscordWebSocket = None  # type: ignore
 
-        if loop is None:
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore", DeprecationWarning)
-                self.loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()
-        else:
-            self.loop: asyncio.AbstractEventLoop = loop
+        self.loop: asyncio.AbstractEventLoop = MISSING
 
-        self.loop.set_debug(asyncio_debug)
         self._listeners: Dict[str, List[Tuple[asyncio.Future, Callable[..., bool]]]] = {}
         self.session_start_limit: Optional[SessionStartLimit] = None
 
         self.http: HTTPClient = HTTPClient(
-            connector,
             proxy=proxy,
             proxy_auth=proxy_auth,
             unsync_clock=assume_unsync_clock,
@@ -728,7 +709,7 @@ class Client:
     ) -> asyncio.Task:
         wrapped = self._run_event(coro, event_name, *args, **kwargs)
         # Schedules the task
-        return asyncio.create_task(wrapped, name=f"disnake: {event_name}")
+        return self.loop.create_task(wrapped, name=f"disnake: {event_name}")
 
     def dispatch(self, event: str, *args: Any, **kwargs: Any) -> None:
         _log.debug("Dispatching event %s", event)
@@ -1201,6 +1182,7 @@ class Client:
 
         await self.http.close()
         self._ready.clear()
+        self.loop = MISSING
 
     def clear(self) -> None:
         """Clears the internal state of the bot.
@@ -1226,10 +1208,15 @@ class Client:
         TypeError
             An unexpected keyword argument was received.
         """
-        await self.login(token)
-        await self.connect(
-            reconnect=reconnect, ignore_session_start_limit=ignore_session_start_limit
-        )
+        self.loop = asyncio.get_running_loop()
+        self.http.loop = self.loop
+        self._connection.loop = self.loop
+        try:
+            await self.login(token)
+            await self.connect(reconnect=reconnect)
+        finally:
+            if not self.is_closed():
+                await self.close()
 
     def run(self, *args: Any, **kwargs: Any) -> None:
         """A blocking call that abstracts away the event loop
@@ -1239,15 +1226,12 @@ class Client:
         function should not be used. Use :meth:`start` coroutine
         or :meth:`connect` + :meth:`login`.
 
-        Roughly Equivalent to: ::
+        Equivalent to: ::
 
             try:
-                loop.run_until_complete(start(*args, **kwargs))
+                asyncio.run(start(*args, **kwargs))
             except KeyboardInterrupt:
-                loop.run_until_complete(close())
-                # cancel all tasks lingering
-            finally:
-                loop.close()
+                return
 
         .. warning::
 
@@ -1255,41 +1239,10 @@ class Client:
             is blocking. That means that registration of events or anything being
             called after this function call will not execute until it returns.
         """
-        loop = self.loop
-
         try:
-            loop.add_signal_handler(signal.SIGINT, lambda: loop.stop())
-            loop.add_signal_handler(signal.SIGTERM, lambda: loop.stop())
-        except NotImplementedError:
-            pass
-
-        async def runner() -> None:
-            try:
-                await self.start(*args, **kwargs)
-            finally:
-                if not self.is_closed():
-                    await self.close()
-
-        def stop_loop_on_completion(f) -> None:
-            loop.stop()
-
-        future = asyncio.ensure_future(runner(), loop=loop)
-        future.add_done_callback(stop_loop_on_completion)
-        try:
-            loop.run_forever()
+            asyncio.run(self.start(*args, **kwargs))
         except KeyboardInterrupt:
-            _log.info("Received signal to terminate bot and event loop.")
-        finally:
-            future.remove_done_callback(stop_loop_on_completion)
-            _log.info("Cleaning up tasks.")
-            _cleanup_loop(loop)
-
-        if not future.cancelled():
-            try:
-                return future.result()
-            except KeyboardInterrupt:
-                # I am unsure why this gets raised here but suppress it anyway
-                return None
+            return
 
     # properties
 
