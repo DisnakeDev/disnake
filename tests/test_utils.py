@@ -928,6 +928,8 @@ class _Clazz:
     def decorated(self) -> None:
         ...
 
+    _lambda = lambda: None
+
 
 @pytest.mark.parametrize(
     ("function", "expected"),
@@ -952,6 +954,10 @@ class _Clazz:
         (_Clazz.Nested().func(), False),
         # decorated method
         (_Clazz.decorated, True),
+        (_Clazz().decorated, False),
+        # lambda (class-level)
+        (_Clazz._lambda, False),
+        (_Clazz()._lambda, False),
     ],
 )
 def test_signature_has_self_param(function, expected) -> None:

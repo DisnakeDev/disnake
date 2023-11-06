@@ -1300,10 +1300,14 @@ def signature_has_self_param(function: Callable[..., Any]) -> bool:
     #
     #
     # There are a few possible situations here - for the purposes of this method,
-    # we want to detect the second case only:
-    # (1) For *unbound* (~ top-level) functions, `__qualname__ == __name__`.
-    # (2) The preceding component for *methods in classes* will be the class name, resulting in `Clazz.func`.
-    # (3) A somewhat special case are *nested functions*, which use `containing_func.<locals>.func`.
+    # we want to detect the first case only:
+    # (1) The preceding component for *methods in classes* will be the class name, resulting in `Clazz.func`.
+    # (2) For *unbound* functions (not methods), `__qualname__ == __name__`.
+    # (3) Bound methods (i.e. types.MethodType) don't have a `self` parameter in the context of this function (see first paragraph).
+    #     (we currently don't expect to handle bound methods anywhere, but check this for consistency anyway).
+    # (4) A somewhat special case are lambdas defined in a class namespace (but not inside a method), which use `Clazz.<lambda>` and shouldn't match (1).
+    #     (lambdas at class level are a bit funky; we currently only expect them in the `Param(converter=)` kwarg, which doesn't take a `self` parameter).
+    # (5) Similarly, *nested functions* use `containing_func.<locals>.func` and shouldn't have a `self` parameter.
     #
     # Working solely based on this string is certainly not ideal,
     # but the compiler does a bunch of processing just for that attribute,
@@ -1314,16 +1318,21 @@ def signature_has_self_param(function: Callable[..., Any]) -> bool:
 
     qname = function.__qualname__
     if qname == function.__name__:
-        # (1)
+        # (2)
         return False
 
     if isinstance(function, types.MethodType):
+        # (3)
         return False
 
-    # "a.b.c.d" => "a.b.c"
-    parent = qname.rsplit(".", 1)[0]
+    # "a.b.c.d" => "a.b.c", "d"
+    parent, basename = qname.rsplit(".", 1)
 
-    # (2), (3)
+    if basename == "<lambda>":
+        # (4)
+        return False
+
+    # (5)
     return not parent.endswith(".<locals>")
 
 
