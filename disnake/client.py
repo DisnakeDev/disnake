@@ -27,6 +27,7 @@ from typing import (
     Union,
     overload,
 )
+import warnings
 
 import aiohttp
 
@@ -77,6 +78,7 @@ from .webhook import Webhook
 from .widget import Widget
 
 if TYPE_CHECKING:
+    from typing_extensions import Never
     from .abc import GuildChannel, PrivateChannel, Snowflake, SnowflakeTime
     from .app_commands import APIApplicationCommand
     from .asset import AssetBytes
@@ -449,6 +451,26 @@ class Client:
         if self._first_connect.is_set():
             return
         self._first_connect.set()
+
+    @property
+    def loop(self):
+        """:class:`asyncio.AbstractEventLoop`: Same as :func:`asyncio.get_running_loop`.
+
+        .. deprecated:: 2.10
+            Use :func:`asyncio.get_running_loop` directly.
+        """
+        warnings.warn(
+            "Accessing `Client.loop` is deprecated. Use `asyncio.get_running_loop()` instead.",
+            category=DeprecationWarning,
+        )
+        return asyncio.get_running_loop()
+
+    @loop.setter
+    def loop(self, _value: Never):
+        warnings.warn(
+            "Setting `Client.loop` is deprecated and has no effect. Use `asyncio.get_running_loop()` instead.",
+            category=DeprecationWarning,
+        )
 
     @property
     def latency(self) -> float:
