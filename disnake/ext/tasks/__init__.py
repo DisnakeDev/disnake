@@ -49,18 +49,21 @@ ET = TypeVar("ET", bound=Callable[[Any, BaseException], Coroutine[Any, Any, Any]
 
 
 class SleepHandle:
-    __slots__ = ("future", "loop", "handle")
+    __slots__ = ("future", "handle")
 
-    def __init__(self, dt: datetime.datetime, *, loop: asyncio.AbstractEventLoop) -> None:
-        self.loop = loop
-        self.future: asyncio.Future[bool] = loop.create_future()
+    def __init__(self, dt: datetime.datetime) -> None:
+        self.future: asyncio.Future[bool] = asyncio.get_running_loop().create_future()
         relative_delta = disnake.utils.compute_timedelta(dt)
-        self.handle = loop.call_later(relative_delta, self.future.set_result, True)
+        self.handle = asyncio.get_running_loop().call_later(
+            relative_delta, self.future.set_result, True
+        )
 
     def recalculate(self, dt: datetime.datetime) -> None:
         self.handle.cancel()
         relative_delta = disnake.utils.compute_timedelta(dt)
-        self.handle = self.loop.call_later(relative_delta, self.future.set_result, True)
+        self.handle = asyncio.get_running_loop().call_later(
+            relative_delta, self.future.set_result, True
+        )
 
     def wait(self) -> asyncio.Future[bool]:
         return self.future
@@ -136,7 +139,7 @@ class Loop(Generic[LF]):
             await coro(*args, **kwargs)
 
     def _try_sleep_until(self, dt: datetime.datetime):
-        self._handle = SleepHandle(dt=dt, loop=asyncio.get_running_loop())
+        self._handle = SleepHandle(dt=dt)
         return self._handle.wait()
 
     async def _loop(self, *args: Any, **kwargs: Any) -> None:

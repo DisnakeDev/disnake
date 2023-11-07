@@ -106,41 +106,6 @@ CoroT = TypeVar("CoroT", bound=Callable[..., Coroutine[Any, Any, Any]])
 _log = logging.getLogger(__name__)
 
 
-def _cancel_tasks(loop: asyncio.AbstractEventLoop) -> None:
-    tasks = {t for t in asyncio.all_tasks(loop=loop) if not t.done()}
-
-    if not tasks:
-        return
-
-    _log.info("Cleaning up after %d tasks.", len(tasks))
-    for task in tasks:
-        task.cancel()
-
-    loop.run_until_complete(asyncio.gather(*tasks, return_exceptions=True))
-    _log.info("All tasks finished cancelling.")
-
-    for task in tasks:
-        if task.cancelled():
-            continue
-        if task.exception() is not None:
-            loop.call_exception_handler(
-                {
-                    "message": "Unhandled exception during Client.run shutdown.",
-                    "exception": task.exception(),
-                    "task": task,
-                }
-            )
-
-
-def _cleanup_loop(loop: asyncio.AbstractEventLoop) -> None:
-    try:
-        _cancel_tasks(loop)
-        loop.run_until_complete(loop.shutdown_asyncgens())
-    finally:
-        _log.info("Closing the event loop.")
-        loop.close()
-
-
 class SessionStartLimit:
     """A class that contains information about the current session start limit,
     at the time when the client connected for the first time.
@@ -352,7 +317,6 @@ class Client:
     def __init__(
         self,
         *,
-        asyncio_debug: bool = False,
         shard_id: Optional[int] = None,
         shard_count: Optional[int] = None,
         enable_debug_events: bool = False,
@@ -377,8 +341,6 @@ class Client:
         # self.ws is set in the connect method
         self.ws: DiscordWebSocket = None  # type: ignore
 
-        self.loop: asyncio.AbstractEventLoop = MISSING
-
         self._listeners: Dict[str, List[Tuple[asyncio.Future, Callable[..., bool]]]] = {}
         self.session_start_limit: Optional[SessionStartLimit] = None
 
@@ -386,7 +348,6 @@ class Client:
             proxy=proxy,
             proxy_auth=proxy_auth,
             unsync_clock=assume_unsync_clock,
-            loop=self.loop,
         )
 
         self._handlers: Dict[str, Callable] = {
@@ -708,7 +669,7 @@ class Client:
     ) -> asyncio.Task:
         wrapped = self._run_event(coro, event_name, *args, **kwargs)
         # Schedules the task
-        return self.loop.create_task(wrapped, name=f"disnake: {event_name}")
+        return asyncio.create_task(wrapped, name=f"disnake: {event_name}")
 
     def dispatch(self, event: str, *args: Any, **kwargs: Any) -> None:
         _log.debug("Dispatching event %s", event)
@@ -1005,11 +966,6 @@ class Client:
         if not isinstance(token, str):
             raise TypeError(f"token must be of type str, got {type(token).__name__} instead")
 
-        loop = asyncio.get_running_loop()
-        self.loop = loop
-        self.http.loop = loop
-        self._connection.loop = loop
-
         data = await self.http.static_login(token.strip())
         self._connection.user = ClientUser(state=self._connection, data=data)
 
@@ -1188,7 +1144,6 @@ class Client:
 
         await self.http.close()
         self._ready.clear()
-        self.loop = MISSING
 
     def clear(self) -> None:
         """Clears the internal state of the bot.
@@ -1755,7 +1710,7 @@ class Client:
             arguments that mirrors the parameters passed in the
             :ref:`event <disnake_api_events>`.
         """
-        future = self.loop.create_future()
+        future = asyncio.get_running_loop().create_future()
         if check is None:
 
             def _check(*args) -> bool:

@@ -53,7 +53,7 @@ class TestBot(commands.Bot):
         # fmt: on
 
     async def setup_hook(self) -> None:
-        bot.load_extensions(os.path.join(__package__, Config.cogs_folder))
+        self.load_extensions(os.path.join(__package__, Config.cogs_folder))
 
     def add_cog(self, cog: commands.Cog, *, override: bool = False) -> None:
         logger.info("Loading cog %s", cog.qualified_name)
