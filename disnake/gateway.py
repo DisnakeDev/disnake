@@ -593,6 +593,7 @@ class DiscordWebSocket:
                     shard_id=self.shard_id,
                     loop=asyncio.get_running_loop(),
                 )
+                self._keep_alive.name = "disnake heartbeat thread"
                 # send a heartbeat immediately
                 await self.send_as_json(self._keep_alive.get_payload())
                 self._keep_alive.start()
