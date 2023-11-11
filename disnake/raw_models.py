@@ -5,6 +5,7 @@ from __future__ import annotations
 import datetime
 from typing import TYPE_CHECKING, List, Literal, Optional, Set, Union, cast
 
+from .channel import VoiceChannelEffect
 from .enums import ChannelType, try_enum
 from .utils import _get_as_snowflake, get_slots
 
@@ -26,6 +27,7 @@ if TYPE_CHECKING:
         MessageUpdateEvent,
         ThreadDeleteEvent,
         TypingStartEvent,
+        VoiceChannelEffectSendEvent,
     )
     from .user import User
 
@@ -43,6 +45,7 @@ __all__ = (
     "RawThreadMemberRemoveEvent",
     "RawTypingEvent",
     "RawGuildMemberRemoveEvent",
+    "RawVoiceChannelEffectEvent",
 )
 
 
@@ -446,3 +449,39 @@ class RawGuildMemberRemoveEvent(_RawReprMixin):
     def __init__(self, user: Union[User, Member], guild_id: int) -> None:
         self.user: Union[User, Member] = user
         self.guild_id: int = guild_id
+
+
+class RawVoiceChannelEffectEvent(_RawReprMixin):
+    """Represents the event payload for an :func:`on_raw_voice_channel_effect` event.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    channel_id: :class:`int`
+        The ID of the channel where the effect was sent.
+    guild_id: :class:`int`
+        The ID of the guild where the effect was sent.
+    user_id: :class:`int`
+        The ID of the user who sent the effect.
+    effect: :class:`VoiceChannelEffect`
+        The effect that was sent.
+    member: Optional[:class:`Member`]
+        The member who sent the effect, if they could be found in the internal cache.
+    """
+
+    __slots__ = (
+        "channel_id",
+        "guild_id",
+        "user_id",
+        "effect",
+        "member",
+    )
+
+    def __init__(self, data: VoiceChannelEffectSendEvent, emoji: Optional[PartialEmoji]) -> None:
+        self.channel_id: int = int(data["channel_id"])
+        self.guild_id: int = int(data["guild_id"])
+        self.user_id: int = int(data["user_id"])
+        self.effect: VoiceChannelEffect = VoiceChannelEffect(data, emoji)
+
+        self.member: Optional[Member] = None

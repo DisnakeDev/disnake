@@ -35,6 +35,7 @@ from .enums import (
     ThreadLayout,
     ThreadSortOrder,
     VideoQualityMode,
+    VoiceChannelEffectAnimationType,
     try_enum,
     try_enum_to_int,
 )
@@ -50,6 +51,7 @@ from .threads import ForumTag, Thread
 from .utils import MISSING
 
 __all__ = (
+    "VoiceChannelEffect",
     "TextChannel",
     "VoiceChannel",
     "StageChannel",
@@ -88,11 +90,54 @@ if TYPE_CHECKING:
     )
     from .types.snowflake import SnowflakeList
     from .types.threads import ThreadArchiveDurationLiteral
+    from .types.voice import VoiceChannelEffect as VoiceChannelEffectPayload
     from .ui.action_row import Components, MessageUIComponent
     from .ui.view import View
     from .user import BaseUser, ClientUser, User
     from .voice_region import VoiceRegion
     from .webhook import Webhook
+
+
+class VoiceChannelEffect:
+    """An effect sent by a member in a voice channel.
+
+    Different sets of attributes will be present, depending on the type of effect.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    emoji: Optional[:class:`PartialEmoji`]
+        The emoji, for emoji reaction effects.
+    animation_type: Optional[:class:`VoiceChannelEffectAnimationType`]
+        The emoji animation type, for emoji reaction effects.
+    animation_id: Optional[:class:`int`]
+        The emoji animation ID, for emoji reaction effects.
+    """
+
+    __slots__ = (
+        "emoji",
+        "animation_type",
+        "animation_id",
+    )
+
+    def __init__(self, data: VoiceChannelEffectPayload, emoji: Optional[PartialEmoji]) -> None:
+        self.emoji: Optional[PartialEmoji] = emoji
+        self.animation_type = (
+            try_enum(VoiceChannelEffectAnimationType, value)
+            if (value := data.get("animation_type")) is not None
+            else None
+        )
+        try:
+            self.animation_id: Optional[int] = int(data["animation_id"])
+        except KeyError:
+            self.animation_id: Optional[int] = None
+
+    def __repr__(self) -> str:
+        return (
+            f"<VoiceChannelEffect emoji={self.emoji!r} animation_type={self.animation_type!r}"
+            f" animation_id={self.animation_id!r}>"
+        )
 
 
 async def _single_delete_strategy(messages: Iterable[Message]) -> None:
