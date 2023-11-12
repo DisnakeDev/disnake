@@ -71,7 +71,10 @@ async def on_ready():
     print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------")
 
 
-bot.add_cog(MyCog())
+@bot.event
+async def on_setup():
+    await bot.add_cog(MyCog())
+
 
 if __name__ == "__main__":
     bot.run(os.getenv("BOT_TOKEN"))

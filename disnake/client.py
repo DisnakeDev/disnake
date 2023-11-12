@@ -1007,7 +1007,7 @@ class Client:
         data = await self.http.static_login(token.strip())
         self._connection.user = ClientUser(state=self._connection, data=data)
 
-        await self.setup_hook()
+        self.dispatch("setup")
 
     async def connect(
         self, *, reconnect: bool = True, ignore_session_start_limit: bool = False
@@ -1213,26 +1213,6 @@ class Client:
         finally:
             if not self.is_closed():
                 await self.close()
-
-    async def setup_hook(self) -> None:
-        """A coroutine to be called to setup the bot.
-
-        To perform asynchronous setup after the bot is logged in but before
-        it has connected to the websocket, override this.
-
-        This is only called once, in :meth:`.login`, before any events are
-        dispatched, making it a better solution than doing such setup in
-        the :func:`disnake.on_ready` event.
-
-        .. warning::
-            Since this is called *before* the websocket connection is made,
-            anything that waits for the websocket will deadlock, which includes
-            methods like :meth:`.wait_for`, :meth:`.wait_until_ready` and
-            :meth:`.wait_until_first_connect`.
-
-        .. versionadded:: 2.10
-        """
-        pass
 
     def run(self, *args: Any, **kwargs: Any) -> None:
         """A blocking call that abstracts away the event loop
