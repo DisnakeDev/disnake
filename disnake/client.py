@@ -480,7 +480,7 @@ class Client:
         return asyncio.get_running_loop()
 
     @loop.setter
-    def loop(self, _value: Never):
+    def loop(self, _value: Never) -> None:
         warnings.warn(
             "Setting `Client.loop` is deprecated and has no effect. Use `asyncio.get_running_loop()` instead.",
             category=DeprecationWarning,
