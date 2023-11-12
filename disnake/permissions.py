@@ -76,7 +76,7 @@ class Permissions(BaseFlags):
         You can now use keyword arguments to initialize :class:`Permissions`
         similar to :meth:`update`.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -1036,7 +1036,7 @@ class PermissionOverwrite:
     The values supported by this are the same as :class:`Permissions`
     with the added possibility of it being set to ``None``.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 

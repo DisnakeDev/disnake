@@ -14,11 +14,12 @@ from sphinx.locale import _
 from sphinx.util.docutils import SphinxDirective
 
 if TYPE_CHECKING:
-    from _types import SphinxExtensionMeta
     from sphinx.application import Sphinx
     from sphinx.environment import BuildEnvironment
     from sphinx.util.typing import OptionSpec
     from sphinx.writers.html import HTMLTranslator
+
+    from ._types import SphinxExtensionMeta
 
 
 class attributetable(nodes.General, nodes.Element):
