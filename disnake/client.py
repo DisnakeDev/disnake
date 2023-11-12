@@ -979,8 +979,8 @@ class Client:
 
     async def setup_hook(self) -> None:
         """A hook that allows you to perform asynchronous setup like
-        initiating database connections after the bot is logged in but
-        before it has connected to the websocket.
+        initiating database connections or loading cogs/extensions after
+        the bot is logged in but before it has connected to the websocket.
 
         This is only called once, in :meth:`.login`, before any events are
         dispatched, making it a better solution than doing such setup in
