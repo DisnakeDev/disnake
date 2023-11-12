@@ -591,7 +591,7 @@ class DiscordWebSocket:
                     ws=self,
                     interval=interval,
                     shard_id=self.shard_id,
-                    loop=asyncio.get_running_loop(), # share loop to the thread
+                    loop=asyncio.get_running_loop(),  # share loop to the thread
                 )
                 self._keep_alive.name = "disnake heartbeat thread"
                 # send a heartbeat immediately
