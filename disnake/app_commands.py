@@ -161,6 +161,48 @@ class OptionChoice:
 class Option:
     """Represents a slash command option.
 
+    Parameters
+    ----------
+    name: Union[:class:`str`, :class:`.Localized`]
+        The option's name.
+
+        .. versionchanged:: 2.5
+            Added support for localizations.
+
+    description: Optional[Union[:class:`str`, :class:`.Localized`]]
+        The option's description.
+
+        .. versionchanged:: 2.5
+            Added support for localizations.
+
+    type: :class:`OptionType`
+        The option type, e.g. :class:`OptionType.user`.
+    required: :class:`bool`
+        Whether this option is required.
+    choices: Union[List[:class:`OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
+        The list of option choices.
+    options: List[:class:`Option`]
+        The list of sub options. Normally you don't have to specify it directly,
+        instead consider using ``@main_cmd.sub_command`` or ``@main_cmd.sub_command_group`` decorators.
+    channel_types: List[:class:`ChannelType`]
+        The list of channel types that your option supports, if the type is :class:`OptionType.channel`.
+        By default, it supports all channel types.
+    autocomplete: :class:`bool`
+        Whether this option can be autocompleted.
+    min_value: Union[:class:`int`, :class:`float`]
+        The minimum value permitted.
+    max_value: Union[:class:`int`, :class:`float`]
+        The maximum value permitted.
+    min_length: :class:`int`
+        The minimum length for this option if this is a string option.
+
+        .. versionadded:: 2.6
+
+    max_length: :class:`int`
+        The maximum length for this option if this is a string option.
+
+        .. versionadded:: 2.6
+
     Attributes
     ----------
     name: :class:`str`
