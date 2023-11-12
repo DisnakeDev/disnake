@@ -333,6 +333,7 @@ class AutoShardedClient(Client):
         enable_debug_events: bool = False,
         enable_gateway_error_handler: bool = True,
         gateway_params: Optional[GatewayParams] = None,
+        connector: Optional[aiohttp.BaseConnector] = None,
         proxy: Optional[str] = None,
         proxy_auth: Optional[aiohttp.BasicAuth] = None,
         assume_unsync_clock: bool = True,
