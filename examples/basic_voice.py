@@ -9,7 +9,7 @@
 
 import asyncio
 import os
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 import disnake
 import youtube_dl  # type: ignore

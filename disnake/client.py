@@ -478,6 +478,7 @@ class Client:
         warnings.warn(
             "Accessing `Client.loop` is deprecated. Use `asyncio.get_running_loop()` instead.",
             category=DeprecationWarning,
+            stacklevel=2,
         )
         return asyncio.get_running_loop()
 
@@ -486,6 +487,7 @@ class Client:
         warnings.warn(
             "Setting `Client.loop` is deprecated and has no effect. Use `asyncio.get_running_loop()` instead.",
             category=DeprecationWarning,
+            stacklevel=2,
         )
 
     @property
