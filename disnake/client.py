@@ -187,9 +187,6 @@ class Client:
 
         .. versionchanged:: 1.3
             Allow disabling the message cache and change the default size to ``1000``.
-    asyncio_debug: :class:`bool`
-        Whether to enable asyncio debugging when the client starts.
-        Defaults to False.
     connector: Optional[:class:`aiohttp.BaseConnector`]
         The connector to use for connection pooling.
     proxy: Optional[:class:`str`]
