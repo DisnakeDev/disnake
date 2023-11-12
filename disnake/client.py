@@ -978,19 +978,19 @@ class Client:
             await asyncio.sleep(5.0)
 
     async def setup_hook(self) -> None:
-        """An event that allows you to perform asyncronous setup like
+        """A hook that allows you to perform asynchronous setup like
         initiating database connections after the bot is logged in but
         before it has connected to the websocket.
 
-        This is only called once, in :meth:`Client.login`, before any events are
+        This is only called once, in :meth:`.login`, before any events are
         dispatched, making it a better solution than doing such setup in
         the :func:`disnake.on_ready` event.
 
         .. warning::
             Since this is called *before* the websocket connection is made,
             anything that waits for the websocket will deadlock, which includes
-            methods like :meth:`Client.wait_for`, :meth:`Client.wait_until_ready`
-            and :meth:`Client.wait_until_first_connect`.
+            methods like :meth:`.wait_for`, :meth:`.wait_until_ready`
+            and :meth:`.wait_until_first_connect`.
 
         .. versionadded:: 2.10
         """
