@@ -7,6 +7,7 @@ import logging
 import sys
 import traceback
 import types
+import warnings
 from datetime import datetime, timedelta
 from errno import ECONNRESET
 from typing import (
@@ -27,7 +28,6 @@ from typing import (
     Union,
     overload,
 )
-import warnings
 
 import aiohttp
 
@@ -79,6 +79,7 @@ from .widget import Widget
 
 if TYPE_CHECKING:
     from typing_extensions import Never
+
     from .abc import GuildChannel, PrivateChannel, Snowflake, SnowflakeTime
     from .app_commands import APIApplicationCommand
     from .asset import AssetBytes
@@ -189,6 +190,8 @@ class Client:
     asyncio_debug: :class:`bool`
         Whether to enable asyncio debugging when the client starts.
         Defaults to False.
+    connector: Optional[:class:`aiohttp.BaseConnector`]
+        The connector to use for connection pooling.
     proxy: Optional[:class:`str`]
         Proxy URL.
     proxy_auth: Optional[:class:`aiohttp.BasicAuth`]
@@ -326,6 +329,7 @@ class Client:
         localization_provider: Optional[LocalizationProtocol] = None,
         strict_localization: bool = False,
         gateway_params: Optional[GatewayParams] = None,
+        connector: Optional[aiohttp.BaseConnector] = None,
         proxy: Optional[str] = None,
         proxy_auth: Optional[aiohttp.BasicAuth] = None,
         assume_unsync_clock: bool = True,
@@ -346,7 +350,19 @@ class Client:
         self._listeners: Dict[str, List[Tuple[asyncio.Future, Callable[..., bool]]]] = {}
         self.session_start_limit: Optional[SessionStartLimit] = None
 
+        if connector:
+            try:
+                asyncio.get_running_loop()
+            except RuntimeError:
+                raise RuntimeError(
+                    (
+                        "`connector` was created outside of an asyncio loop consider moving bot class "
+                        "instantiation to an async main function and then manually asyncio.run it"
+                    )
+                ) from None
+
         self.http: HTTPClient = HTTPClient(
+            connector,
             proxy=proxy,
             proxy_auth=proxy_auth,
             unsync_clock=assume_unsync_clock,
@@ -967,7 +983,8 @@ class Client:
     async def login(self, token: str) -> None:
         """|coro|
 
-        Logs in the client with the specified credentials.
+        Logs in the client with the specified credentials and calls
+        :meth:`.setup_hook`.
 
         Parameters
         ----------

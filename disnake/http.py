@@ -449,9 +449,9 @@ class HTTPClient:
     # login management
 
     async def static_login(self, token: str) -> user.User:
-        # Necessary to get aiohttp to stop complaining about session creation
         if self.connector is MISSING:
             self.connector = aiohttp.TCPConnector(limit=0)
+        # Necessary to get aiohttp to stop complaining about session creation
         self.__session = aiohttp.ClientSession(
             connector=self.connector, ws_response_class=DiscordClientWebSocketResponse
         )
