@@ -1,1 +1,0 @@
-Skip evaluating annotations of ``self`` (if present) and ``ctx`` parameter in prefix commands. These may now use stringified annotations with types that aren't imported/available at runtime.
