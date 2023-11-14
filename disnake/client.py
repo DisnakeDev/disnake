@@ -1227,7 +1227,9 @@ class Client:
         """
         try:
             await self.login(token)
-            await self.connect(reconnect=reconnect)
+            await self.connect(
+                reconnect=reconnect, ignore_session_start_limit=ignore_session_start_limit
+            )
         finally:
             if not self.is_closed():
                 await self.close()
