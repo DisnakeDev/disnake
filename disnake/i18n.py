@@ -236,8 +236,9 @@ class LocalizationValue:
     def data(self) -> Optional[Dict[str, str]]:
         """Optional[Dict[:class:`str`, :class:`str`]]: A dict with a locale -> localization mapping, if available."""
         if self._data is MISSING:
+            # This will happen when `_link(store)` hasn't been called yet, which *shouldn't* occur under normal circumstances.
             warnings.warn(
-                f"value ('{self._key}') was never localized, this is likely a library bug",
+                f"Localization value ('{self._key}') was never linked to bot; this may be a library bug.",
                 LocalizationWarning,
                 stacklevel=2,
             )
