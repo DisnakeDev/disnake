@@ -28,6 +28,7 @@ if TYPE_CHECKING:
     from .emoji import Emoji
     from .types.components import (
         ActionRow as ActionRowPayload,
+        AnySelectMenu as AnySelectMenuPayload,
         BaseSelectMenu as BaseSelectMenuPayload,
         ButtonComponent as ButtonComponentPayload,
         ChannelSelectMenu as ChannelSelectMenuPayload,
@@ -275,7 +276,10 @@ class BaseSelectMenu(Component):
 
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
 
-    def __init__(self, data: BaseSelectMenuPayload) -> None:
+    # n.b: ideally this would be `BaseSelectMenuPayload`,
+    # but pyright made TypedDict keys invariant and doesn't
+    # fully support readonly items yet (which would help avoid this)
+    def __init__(self, data: AnySelectMenuPayload) -> None:
         component_type = try_enum(ComponentType, data["type"])
         self.type: SelectMenuType = component_type  # type: ignore
 
