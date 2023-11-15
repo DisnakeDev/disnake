@@ -535,7 +535,7 @@ class ParamInfo:
         self.max_length = max_length
         self.large = large
 
-    def copy(self) -> ParamInfo:
+    def copy(self) -> Self:
         # n. b. this method needs to be manually updated when a new attribute is added.
         cls = self.__class__
         ins = cls.__new__(cls)
