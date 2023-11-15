@@ -245,6 +245,10 @@ class LocalizationValue:
         return self._data
 
     def __eq__(self, other) -> bool:
+        # if both are pending, compare keys instead
+        if self._data is MISSING and other._data is MISSING:
+            return self._key == other._key
+
         d1 = self.data
         d2 = other.data
         # consider values equal if they're both falsy, or actually equal
