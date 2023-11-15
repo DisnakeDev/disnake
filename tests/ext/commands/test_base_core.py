@@ -95,7 +95,7 @@ def test_localization_copy() -> None:
         ):
             ...
 
-    # this should not raise a warning about missing localizations
+    # Ensure the command copy that happens on cog init doesn't raise a LocalizationWarning for the options.
     cog = Cog()
 
     with pytest.warns(disnake.LocalizationWarning):
