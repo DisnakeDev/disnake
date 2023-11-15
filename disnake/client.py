@@ -1123,14 +1123,12 @@ class Client:
                 _log.info("Got a request to %s the websocket.", e.op)
                 self.dispatch("disconnect")
                 ws_params.update(
-                    {
-                        "sequence": self.ws.sequence,
-                        "resume": e.resume,
-                        "session": self.ws.session_id,
-                        # use current (possibly new) gateway if resuming,
-                        # reset to default if not
-                        "gateway": self.ws.resume_gateway if e.resume else initial_gateway,
-                    }
+                    sequence=self.ws.sequence,
+                    resume=e.resume,
+                    session=self.ws.session_id,
+                    # use current (possibly new) gateway if resuming,
+                    # reset to default if not
+                    gateway=self.ws.resume_gateway if e.resume else initial_gateway,
                 )
                 continue
 
@@ -1156,13 +1154,11 @@ class Client:
                 # If we get connection reset by peer then try to RESUME
                 if isinstance(exc, OSError) and exc.errno == ECONNRESET:
                     ws_params.update(
-                        {
-                            "sequence": self.ws.sequence,
-                            "initial": False,
-                            "resume": True,
-                            "session": self.ws.session_id,
-                            "gateway": self.ws.resume_gateway,
-                        }
+                        sequence=self.ws.sequence,
+                        initial=False,
+                        resume=True,
+                        session=self.ws.session_id,
+                        gateway=self.ws.resume_gateway,
                     )
                     continue
 
@@ -1185,22 +1181,18 @@ class Client:
                     # Always identify back to the initial gateway if we failed while connecting.
                     # This is in case we fail to connect to the resume_gateway instance.
                     ws_params.update(
-                        {
-                            "resume": False,
-                            "gateway": initial_gateway,
-                        }
+                        resume=False,
+                        gateway=initial_gateway,
                     )
                 else:
                     # Just try to resume the session.
                     # If it's not RESUME-able then the gateway will invalidate the session.
                     # This is apparently what the official Discord client does.
                     ws_params.update(
-                        {
-                            "sequence": self.ws.sequence,
-                            "resume": True,
-                            "session": self.ws.session_id,
-                            "gateway": self.ws.resume_gateway,
-                        }
+                        sequence=self.ws.sequence,
+                        resume=True,
+                        session=self.ws.session_id,
+                        gateway=self.ws.resume_gateway,
                     )
 
     async def close(self) -> None:
