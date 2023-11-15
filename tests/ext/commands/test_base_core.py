@@ -92,7 +92,7 @@ def test_localization_copy() -> None:
             self,
             inter,
             param: int = commands.Param(name=disnake.Localized("param", key="PARAM")),
-        ):
+        ) -> None:
             ...
 
     # Ensure the command copy that happens on cog init doesn't raise a LocalizationWarning for the options.
