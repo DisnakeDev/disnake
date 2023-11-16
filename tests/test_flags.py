@@ -494,7 +494,6 @@ class TestListBaseFlags:
 class TestIntents:
     def test_all_only_valid(self) -> None:
         """Test that Intents.all() doesn't include flags that aren't defined."""
-
         intents = flags.Intents.all()
 
         assert not (1 << 18 | 1 << 17) & intents.value

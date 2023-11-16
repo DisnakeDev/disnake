@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from disnake.threads import Thread
     from disnake.types.snowflake import Snowflake, SnowflakeList
 
-    from .context import Context
+    from .context import AnyContext
     from .cooldowns import BucketType, Cooldown
     from .flag_converter import Flag
 
@@ -83,8 +83,7 @@ __all__ = (
 
 
 class CommandError(DiscordException):
-    """
-    The base exception type for all command related errors.
+    """The base exception type for all command related errors.
 
     This inherits from :exc:`disnake.DiscordException`.
 
@@ -109,7 +108,7 @@ class ConversionError(CommandError):
 
     Attributes
     ----------
-    converter: :class:`disnake.ext.commands.Converter`
+    converter: :class:`.Converter`
         The converter that failed.
     original: :exc:`Exception`
         The original exception that was raised. You can also get this via
@@ -182,7 +181,8 @@ class BadArgument(UserInputError):
 
 
 class CheckFailure(CommandError):
-    """Exception raised when the predicates in :attr:`.Command.checks` have failed.
+    """Exception raised when the predicates in :attr:`.Command.checks` or
+    :attr:`.InvokableApplicationCommand.checks` have failed.
 
     This inherits from :exc:`CommandError`
     """
@@ -191,7 +191,7 @@ class CheckFailure(CommandError):
 
 
 class CheckAnyFailure(CheckFailure):
-    """Exception raised when all predicates in :func:`check_any` fail.
+    """Exception raised when all predicates in :func:`check_any` or :func:`app_check_any` fail.
 
     This inherits from :exc:`CheckFailure`.
 
@@ -201,13 +201,15 @@ class CheckAnyFailure(CheckFailure):
     ----------
     errors: List[:class:`CheckFailure`]
         A list of errors that were caught during execution.
-    checks: List[Callable[[:class:`Context`], :class:`bool`]]
+    checks: List[Callable[[Union[:class:`Context`, :class:`disnake.ApplicationCommandInteraction`]], :class:`bool`]]
         A list of check predicates that failed.
     """
 
-    def __init__(self, checks: List[CheckFailure], errors: List[Callable[[Context], bool]]) -> None:
+    def __init__(
+        self, checks: List[CheckFailure], errors: List[Callable[[AnyContext], bool]]
+    ) -> None:
         self.checks: List[CheckFailure] = checks
-        self.errors: List[Callable[[Context], bool]] = errors
+        self.errors: List[Callable[[AnyContext], bool]] = errors
         super().__init__("You do not have permission to run this command.")
 
 
@@ -1043,7 +1045,7 @@ class TooManyFlags(FlagError):
 
     Attributes
     ----------
-    flag: :class:`~disnake.ext.commands.Flag`
+    flag: :class:`.Flag`
         The flag that received too many values.
     values: List[:class:`str`]
         The values that were passed.
@@ -1066,7 +1068,7 @@ class BadFlagArgument(FlagError):
 
     Attributes
     ----------
-    flag: :class:`~disnake.ext.commands.Flag`
+    flag: :class:`.Flag`
         The flag that failed to convert.
     """
 
@@ -1089,7 +1091,7 @@ class MissingRequiredFlag(FlagError):
 
     Attributes
     ----------
-    flag: :class:`~disnake.ext.commands.Flag`
+    flag: :class:`.Flag`
         The required flag that was not found.
     """
 
@@ -1107,7 +1109,7 @@ class MissingFlagArgument(FlagError):
 
     Attributes
     ----------
-    flag: :class:`~disnake.ext.commands.Flag`
+    flag: :class:`.Flag`
         The flag that did not get a value.
     """
 

@@ -24,8 +24,12 @@ from typing import (
 from ..components import (
     ActionRow as ActionRowComponent,
     Button as ButtonComponent,
+    ChannelSelectMenu as ChannelSelectComponent,
+    MentionableSelectMenu as MentionableSelectComponent,
     MessageComponent,
-    SelectMenu as SelectComponent,
+    RoleSelectMenu as RoleSelectComponent,
+    StringSelectMenu as StringSelectComponent,
+    UserSelectMenu as UserSelectComponent,
     _component_factory,
 )
 from ..enums import ComponentType, try_enum_to_int
@@ -57,10 +61,26 @@ def _component_to_item(component: MessageComponent) -> Item:
         from .button import Button
 
         return Button.from_component(component)
-    if isinstance(component, SelectComponent):
-        from .select import Select
+    if isinstance(component, StringSelectComponent):
+        from .select import StringSelect
 
-        return Select.from_component(component)
+        return StringSelect.from_component(component)
+    if isinstance(component, UserSelectComponent):
+        from .select import UserSelect
+
+        return UserSelect.from_component(component)
+    if isinstance(component, RoleSelectComponent):
+        from .select import RoleSelect
+
+        return RoleSelect.from_component(component)
+    if isinstance(component, MentionableSelectComponent):
+        from .select import MentionableSelect
+
+        return MentionableSelect.from_component(component)
+    if isinstance(component, ChannelSelectComponent):
+        from .select import ChannelSelect
+
+        return ChannelSelect.from_component(component)
 
     assert_never(component)
     return Item.from_component(component)
@@ -69,7 +89,7 @@ def _component_to_item(component: MessageComponent) -> Item:
 class _ViewWeights:
     __slots__ = ("weights",)
 
-    def __init__(self, children: List[Item]):
+    def __init__(self, children: List[Item]) -> None:
         self.weights: List[int] = [0, 0, 0, 0, 0]
 
         key: Callable[[Item[View]], int] = lambda i: sys.maxsize if i.row is None else i.row
@@ -147,7 +167,7 @@ class View:
 
         cls.__view_children_items__ = children
 
-    def __init__(self, *, timeout: Optional[float] = 180.0):
+    def __init__(self, *, timeout: Optional[float] = 180.0) -> None:
         self.timeout = timeout
         self.children: List[Item] = []
         for func in self.__view_children_items__:
@@ -376,14 +396,14 @@ class View:
             self.__timeout_expiry = time.monotonic() + self.timeout
             self.__timeout_task = loop.create_task(self.__timeout_task_impl())
 
-    def _dispatch_timeout(self):
+    def _dispatch_timeout(self) -> None:
         if self.__stopped.done():
             return
 
         self.__stopped.set_result(True)
         asyncio.create_task(self.on_timeout(), name=f"disnake-ui-view-timeout-{self.id}")
 
-    def _dispatch_item(self, item: Item, interaction: MessageInteraction):
+    def _dispatch_item(self, item: Item, interaction: MessageInteraction) -> None:
         if self.__stopped.done():
             return
 
@@ -391,7 +411,7 @@ class View:
             self._scheduled_task(item, interaction), name=f"disnake-ui-view-dispatch-{self.id}"
         )
 
-    def refresh(self, components: List[ActionRowComponent[MessageComponent]]):
+    def refresh(self, components: List[ActionRowComponent[MessageComponent]]) -> None:
         # TODO: this is pretty hacky at the moment
         old_state: Dict[Tuple[int, str], Item] = {
             (item.type.value, item.custom_id): item  # type: ignore
@@ -480,7 +500,7 @@ class View:
 
 
 class ViewStore:
-    def __init__(self, state: ConnectionState):
+    def __init__(self, state: ConnectionState) -> None:
         # (component_type, message_id, custom_id): (View, Item)
         self._views: Dict[Tuple[int, Optional[int], str], Tuple[View, Item]] = {}
         # message_id: View
@@ -492,16 +512,16 @@ class ViewStore:
         views = {view.id: view for view, _ in self._views.values() if view.is_persistent()}
         return list(views.values())
 
-    def __verify_integrity(self):
+    def __verify_integrity(self) -> None:
         to_remove: List[Tuple[int, Optional[int], str]] = []
-        for (k, (view, _)) in self._views.items():
+        for k, (view, _) in self._views.items():
             if view.is_finished():
                 to_remove.append(k)
 
         for k in to_remove:
             del self._views[k]
 
-    def add_view(self, view: View, message_id: Optional[int] = None):
+    def add_view(self, view: View, message_id: Optional[int] = None) -> None:
         self.__verify_integrity()
 
         view._start_listening_from_store(self)
@@ -512,7 +532,7 @@ class ViewStore:
         if message_id is not None:
             self._synced_message_views[message_id] = view
 
-    def remove_view(self, view: View):
+    def remove_view(self, view: View) -> None:
         for item in view.children:
             if item.is_dispatchable():
                 self._views.pop((item.type.value, item.custom_id), None)  # type: ignore
@@ -522,7 +542,7 @@ class ViewStore:
                 del self._synced_message_views[key]
                 break
 
-    def dispatch(self, interaction: MessageInteraction):
+    def dispatch(self, interaction: MessageInteraction) -> None:
         self.__verify_integrity()
         message_id: Optional[int] = interaction.message and interaction.message.id
         component_type = try_enum_to_int(interaction.data.component_type)
@@ -538,13 +558,13 @@ class ViewStore:
         item.refresh_state(interaction)
         view._dispatch_item(item, interaction)
 
-    def is_message_tracked(self, message_id: int):
+    def is_message_tracked(self, message_id: int) -> bool:
         return message_id in self._synced_message_views
 
     def remove_message_tracking(self, message_id: int) -> Optional[View]:
         return self._synced_message_views.pop(message_id, None)
 
-    def update_from_message(self, message_id: int, components: List[ComponentPayload]):
+    def update_from_message(self, message_id: int, components: List[ComponentPayload]) -> None:
         # pre-req: is_message_tracked == true
         view = self._synced_message_views[message_id]
         view.refresh(

@@ -1,20 +1,25 @@
 # SPDX-License-Identifier: MIT
+from __future__ import annotations
 
 import asyncio
 import importlib
 import inspect
 import re
 from collections import defaultdict
-from typing import DefaultDict, Dict, List, NamedTuple, Optional, Tuple
+from typing import TYPE_CHECKING, ClassVar, DefaultDict, Dict, List, NamedTuple, Optional, Tuple
 
-from _types import SphinxExtensionMeta
 from docutils import nodes
 from sphinx import addnodes
-from sphinx.application import Sphinx
-from sphinx.environment import BuildEnvironment
 from sphinx.locale import _
 from sphinx.util.docutils import SphinxDirective
-from sphinx.writers.html import HTMLTranslator
+
+if TYPE_CHECKING:
+    from sphinx.application import Sphinx
+    from sphinx.environment import BuildEnvironment
+    from sphinx.util.typing import OptionSpec
+    from sphinx.writers.html import HTMLTranslator
+
+    from ._types import SphinxExtensionMeta
 
 
 class attributetable(nodes.General, nodes.Element):
@@ -97,7 +102,7 @@ class PyAttributeTable(SphinxDirective):
     required_arguments = 1
     optional_arguments = 0
     final_argument_whitespace = False
-    option_spec = {}
+    option_spec: ClassVar[OptionSpec] = {}
 
     def parse_name(self, content: str) -> Tuple[str, Optional[str]]:
         match = _name_parser_regex.match(content)
@@ -163,7 +168,7 @@ def build_lookup_table(env: BuildEnvironment) -> Dict[str, List[str]]:
         "class",
     }
 
-    for (fullname, _unused, objtype, _unused, _unused, _unused) in domain.get_objects():
+    for fullname, _unused, objtype, _unused, _unused, _unused in domain.get_objects():
         if objtype in ignored:
             continue
 

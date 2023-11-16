@@ -6,14 +6,16 @@ import array
 import asyncio
 import datetime
 import functools
+import inspect
 import json
 import os
 import pkgutil
 import re
 import sys
+import types
 import unicodedata
 import warnings
-from base64 import b64encode, urlsafe_b64decode as b64decode
+from base64 import b64encode
 from bisect import bisect_left
 from inspect import getdoc as _getdoc, isawaitable as _isawaitable, signature as _signature
 from operator import attrgetter
@@ -31,6 +33,7 @@ from typing import (
     List,
     Literal,
     Mapping,
+    NoReturn,
     Optional,
     Protocol,
     Sequence,
@@ -57,7 +60,6 @@ else:
 
 __all__ = (
     "oauth_url",
-    "parse_token",
     "snowflake_time",
     "time_snowflake",
     "find",
@@ -77,13 +79,16 @@ DISCORD_EPOCH = 1420070400000
 
 
 class _MissingSentinel:
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         return False
 
-    def __bool__(self):
+    def __hash__(self) -> int:
+        return 0
+
+    def __bool__(self) -> bool:
         return False
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "..."
 
 
@@ -91,7 +96,7 @@ MISSING: Any = _MissingSentinel()
 
 
 class _cached_property:
-    def __init__(self, function):
+    def __init__(self, function) -> None:
         self.function = function
         self.__doc__: Optional[str] = function.__doc__
 
@@ -138,14 +143,14 @@ class CachedSlotProperty(Generic[T, T_co]):
         self.__doc__ = function.__doc__
 
     @overload
-    def __get__(self, instance: None, owner: Type[T]) -> Self:
+    def __get__(self, instance: None, owner: Type[Any]) -> Self:
         ...
 
     @overload
-    def __get__(self, instance: T, owner: Type[T]) -> T_co:
+    def __get__(self, instance: T, owner: Type[Any]) -> T_co:
         ...
 
-    def __get__(self, instance: Optional[T], owner: Type[T]) -> Any:
+    def __get__(self, instance: Optional[T], owner: Type[Any]) -> Any:
         if instance is None:
             return self
 
@@ -164,7 +169,7 @@ class classproperty(Generic[T_co]):
     def __get__(self, instance: Optional[Any], owner: Type[Any]) -> T_co:
         return self.fget(owner)
 
-    def __set__(self, instance, value) -> None:
+    def __set__(self, instance, value) -> NoReturn:
         raise AttributeError("cannot set attribute")
 
 
@@ -178,7 +183,7 @@ def cached_slot_property(name: str) -> Callable[[Callable[[T], T_co]], CachedSlo
 class SequenceProxy(Sequence[T_co]):
     """Read-only proxy of a Sequence."""
 
-    def __init__(self, proxied: Sequence[T_co]):
+    def __init__(self, proxied: Sequence[T_co]) -> None:
         self.__proxied = proxied
 
     def __getitem__(self, idx: int) -> T_co:
@@ -326,36 +331,8 @@ def oauth_url(
     return url
 
 
-def parse_token(token: str) -> Tuple[int, datetime.datetime, bytes]:
-    """Parse a token into its parts
-
-    Returns
-
-    Parameters
-    ----------
-    token: :class:`str`
-        The bot token
-
-    Returns
-    -------
-    Tuple[:class:`int`, :class:`datetime.datetime`, :class:`bytes`]
-        The bot's ID, the time when the token was generated and the hmac.
-    """
-    parts = token.split(".")
-
-    user_id = int(b64decode(parts[0]))
-
-    timestamp = int.from_bytes(b64decode(parts[1] + "=="), "big")
-    created_at = datetime.datetime.fromtimestamp(timestamp, datetime.timezone.utc)
-
-    hmac = b64decode(parts[2] + "==")
-
-    return user_id, created_at, hmac
-
-
 def snowflake_time(id: int) -> datetime.datetime:
-    """
-    Parameters
+    """Parameters
     ----------
     id: :class:`int`
         The snowflake ID.
@@ -414,7 +391,6 @@ def find(predicate: Callable[[T], Any], seq: Iterable[T]) -> Optional[T]:
     seq: :class:`collections.abc.Iterable`
         The iterable to search through.
     """
-
     for element in seq:
         if predicate(element):
             return element
@@ -422,8 +398,7 @@ def find(predicate: Callable[[T], Any], seq: Iterable[T]) -> Optional[T]:
 
 
 def get(iterable: Iterable[T], **attrs: Any) -> Optional[T]:
-    """
-    A helper that returns the first element in the iterable that meets
+    """A helper that returns the first element in the iterable that meets
     all the traits passed in ``attrs``. This is an alternative for
     :func:`~disnake.utils.find`.
 
@@ -439,7 +414,6 @@ def get(iterable: Iterable[T], **attrs: Any) -> Optional[T]:
 
     Examples
     --------
-
     Basic usage:
 
     .. code-block:: python3
@@ -465,7 +439,6 @@ def get(iterable: Iterable[T], **attrs: Any) -> Optional[T]:
     **attrs
         Keyword arguments that denote attributes to search with.
     """
-
     # global -> local
     _all = all
     attrget = attrgetter
@@ -612,7 +585,7 @@ async def sane_wait_for(futures: Iterable[Awaitable[T]], *, timeout: float) -> S
     done, pending = await asyncio.wait(ensured, timeout=timeout, return_when=asyncio.ALL_COMPLETED)
 
     if len(pending) != 0:
-        raise asyncio.TimeoutError()
+        raise asyncio.TimeoutError
 
     return done
 
@@ -691,7 +664,7 @@ class SnowflakeList(array.array):
 
     if TYPE_CHECKING:
 
-        def __init__(self, data: Iterable[int], *, is_sorted: bool = False):
+        def __init__(self, data: Iterable[int], *, is_sorted: bool = False) -> None:
             ...
 
     def __new__(cls, data: Iterable[int], *, is_sorted: bool = False):
@@ -739,8 +712,7 @@ def resolve_invite(
 def resolve_invite(
     invite: Union[Invite, str], *, with_params: bool = False
 ) -> Union[str, Tuple[str, Dict[str, str]]]:
-    """
-    Resolves an invite from a :class:`~disnake.Invite`, URL or code.
+    """Resolves an invite from a :class:`~disnake.Invite`, URL or code.
 
     Parameters
     ----------
@@ -776,8 +748,7 @@ def resolve_invite(
 
 
 def resolve_template(code: Union[Template, str]) -> str:
-    """
-    Resolves a template code from a :class:`~disnake.Template`, URL or code.
+    """Resolves a template code from a :class:`~disnake.Template`, URL or code.
 
     .. versionadded:: 1.4
 
@@ -849,12 +820,11 @@ def remove_markdown(text: str, *, ignore_links: bool = True) -> str:
     regex = _MARKDOWN_STOCK_REGEX
     if ignore_links:
         regex = f"(?:{_URL_REGEX}|{regex})"
-    return re.sub(regex, replacement, text, 0, re.MULTILINE)
+    return re.sub(regex, replacement, text, flags=re.MULTILINE)
 
 
 def escape_markdown(text: str, *, as_needed: bool = False, ignore_links: bool = True) -> str:
-    """
-    A helper function that escapes Discord's markdown.
+    """A helper function that escapes Discord's markdown.
 
     Parameters
     ----------
@@ -877,7 +847,6 @@ def escape_markdown(text: str, *, as_needed: bool = False, ignore_links: bool = 
     :class:`str`
         The text with the markdown special characters escaped with a slash.
     """
-
     if not as_needed:
 
         def replacement(match):
@@ -890,7 +859,7 @@ def escape_markdown(text: str, *, as_needed: bool = False, ignore_links: bool = 
         regex = _MARKDOWN_STOCK_REGEX
         if ignore_links:
             regex = f"(?:{_URL_REGEX}|{regex})"
-        return re.sub(regex, replacement, text, 0, re.MULTILINE)
+        return re.sub(regex, replacement, text, flags=re.MULTILINE)
     else:
         text = re.sub(r"\\", r"\\\\", text)
         return _MARKDOWN_ESCAPE_REGEX.sub(r"\\\1", text)
@@ -1167,11 +1136,14 @@ def evaluate_annotation(
     if implicit_str and isinstance(tp, str):
         if tp in cache:
             return cache[tp]
-        evaluated = eval(  # noqa: S307  # this is how annotations are supposed to be evaled
-            tp, globals, locals
-        )
+
+        # this is how annotations are supposed to be unstringifed
+        evaluated = eval(tp, globals, locals)  # noqa: PGH001, S307
+        # recurse to resolve nested args further
+        evaluated = evaluate_annotation(evaluated, globals, locals, cache)
+
         cache[tp] = evaluated
-        return evaluate_annotation(evaluated, globals, locals, cache)
+        return evaluated
 
     if hasattr(tp, "__args__"):
         implicit_str = True
@@ -1233,6 +1205,137 @@ def resolve_annotation(
     return evaluate_annotation(annotation, globalns, locals, cache)
 
 
+def unwrap_function(function: Callable[..., Any]) -> Callable[..., Any]:
+    partial = functools.partial
+    while True:
+        if hasattr(function, "__wrapped__"):
+            function = function.__wrapped__
+        elif isinstance(function, partial):
+            function = function.func
+        else:
+            return function
+
+
+def _get_function_globals(function: Callable[..., Any]) -> Dict[str, Any]:
+    unwrap = unwrap_function(function)
+    try:
+        return unwrap.__globals__
+    except AttributeError:
+        return {}
+
+
+_inspect_empty = inspect.Parameter.empty
+
+
+def get_signature_parameters(
+    function: Callable[..., Any],
+    globalns: Optional[Dict[str, Any]] = None,
+    *,
+    skip_standard_params: bool = False,
+) -> Dict[str, inspect.Parameter]:
+    # if no globalns provided, unwrap (where needed) and get global namespace from there
+    if globalns is None:
+        globalns = _get_function_globals(function)
+
+    params: Dict[str, inspect.Parameter] = {}
+    cache: Dict[str, Any] = {}
+
+    signature = inspect.signature(function)
+    iterator = iter(signature.parameters.items())
+
+    if skip_standard_params:
+        # skip `self` (if present) and `ctx` parameters,
+        # since their annotations are irrelevant
+        skip = 2 if signature_has_self_param(function) else 1
+
+        for _ in range(skip):
+            try:
+                next(iterator)
+            except StopIteration:
+                raise ValueError(
+                    f"Expected command callback to have at least {skip} parameter(s)"
+                ) from None
+
+    # eval all parameter annotations
+    for name, parameter in iterator:
+        annotation = parameter.annotation
+        if annotation is _inspect_empty:
+            params[name] = parameter
+            continue
+
+        if annotation is None:
+            annotation = type(None)
+        else:
+            annotation = evaluate_annotation(annotation, globalns, globalns, cache)
+
+        params[name] = parameter.replace(annotation=annotation)
+
+    return params
+
+
+def get_signature_return(function: Callable[..., Any]) -> Any:
+    signature = inspect.signature(function)
+
+    # same as parameters above, but for the return annotation
+    ret = signature.return_annotation
+    if ret is not _inspect_empty:
+        if ret is None:
+            ret = type(None)
+        else:
+            globalns = _get_function_globals(function)
+            ret = evaluate_annotation(ret, globalns, globalns, {})
+
+    return ret
+
+
+def signature_has_self_param(function: Callable[..., Any]) -> bool:
+    # If a function was defined in a class and is not bound (i.e. is not types.MethodType),
+    # it should have a `self` parameter.
+    # Bound methods technically also have a `self` parameter, but this is
+    # used in conjunction with `inspect.signature`, which drops that parameter.
+    #
+    # There isn't really any way to reliably detect whether a function
+    # was defined in a class, other than `__qualname__`, thanks to PEP 3155.
+    # As noted in the PEP, this doesn't work with rebinding, but that should be a pretty rare edge case.
+    #
+    #
+    # There are a few possible situations here - for the purposes of this method,
+    # we want to detect the first case only:
+    # (1) The preceding component for *methods in classes* will be the class name, resulting in `Clazz.func`.
+    # (2) For *unbound* functions (not methods), `__qualname__ == __name__`.
+    # (3) Bound methods (i.e. types.MethodType) don't have a `self` parameter in the context of this function (see first paragraph).
+    #     (we currently don't expect to handle bound methods anywhere, except the default help command implementation).
+    # (4) A somewhat special case are lambdas defined in a class namespace (but not inside a method), which use `Clazz.<lambda>` and shouldn't match (1).
+    #     (lambdas at class level are a bit funky; we currently only expect them in the `Param(converter=)` kwarg, which doesn't take a `self` parameter).
+    # (5) Similarly, *nested functions* use `containing_func.<locals>.func` and shouldn't have a `self` parameter.
+    #
+    # Working solely based on this string is certainly not ideal,
+    # but the compiler does a bunch of processing just for that attribute,
+    # and there's really no other way to retrieve this information through other means later.
+    # (3.10: https://github.com/python/cpython/blob/e07086db03d2dc1cd2e2a24f6c9c0ddd422b4cf0/Python/compile.c#L744)
+    #
+    # Not reliable for classmethod/staticmethod.
+
+    qname = function.__qualname__
+    if qname == function.__name__:
+        # (2)
+        return False
+
+    if isinstance(function, types.MethodType):
+        # (3)
+        return False
+
+    # "a.b.c.d" => "a.b.c", "d"
+    parent, basename = qname.rsplit(".", 1)
+
+    if basename == "<lambda>":
+        # (4)
+        return False
+
+    # (5)
+    return not parent.endswith(".<locals>")
+
+
 TimestampStyle = Literal["f", "F", "d", "D", "t", "T", "R"]
 
 
@@ -1291,7 +1394,7 @@ def search_directory(path: str) -> Iterator[str]:
         The path to search for modules
 
     Yields
-    -------
+    ------
     :class:`str`
         The name of the found module. (usable in load_extension)
     """
@@ -1319,8 +1422,7 @@ def search_directory(path: str) -> Iterator[str]:
 
 
 def as_valid_locale(locale: str) -> Optional[str]:
-    """
-    Converts the provided locale name to a name that is valid for use with the API,
+    """Converts the provided locale name to a name that is valid for use with the API,
     for example by returning ``en-US`` for ``en_US``.
     Returns ``None`` for invalid names.
 

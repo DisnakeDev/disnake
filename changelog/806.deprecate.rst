@@ -1,1 +1,0 @@
-|commands| Deprecate the ``sync_commands``, ``sync_commands_debug``, and  ``sync_commands_on_cog_unload`` parameters of :class:`~disnake.ext.commands.Bot` and :class:`~disnake.ext.commands.InteractionBot`. These have been replaced with the ``command_sync_flags`` parameter which takes a :class:`~disnake.ext.commands.CommandSyncFlags` instance.

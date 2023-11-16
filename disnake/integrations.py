@@ -7,7 +7,14 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type
 
 from .enums import ExpireBehaviour, try_enum
 from .user import User
-from .utils import MISSING, _get_as_snowflake, deprecated, parse_time, warn_deprecated
+from .utils import (
+    MISSING,
+    _get_as_snowflake,
+    deprecated,
+    parse_time,
+    snowflake_time,
+    warn_deprecated,
+)
 
 __all__ = (
     "IntegrationAccount",
@@ -69,7 +76,7 @@ class PartialIntegration:
     guild: :class:`Guild`
         The guild of the integration.
     type: :class:`str`
-        The integration type (i.e. Twitch).
+        The integration type (i.e. ``twitch``).
     account: :class:`IntegrationAccount`
         The account linked to this integration.
     application_id: Optional[:class:`int`]
@@ -89,7 +96,7 @@ class PartialIntegration:
         self.guild = guild
         self._from_data(data)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<{self.__class__.__name__} id={self.id} name={self.name!r}>"
 
     def _from_data(self, data: PartialIntegrationPayload) -> None:
@@ -98,6 +105,15 @@ class PartialIntegration:
         self.name: str = data["name"]
         self.account: IntegrationAccount = IntegrationAccount(data["account"])
         self.application_id: Optional[int] = _get_as_snowflake(data, "application_id")
+
+    @property
+    def created_at(self) -> datetime.datetime:
+        """:class:`datetime.datetime`: Returns the integration's
+        (*not* the associated application's) creation time in UTC.
+
+        .. versionadded:: 2.10
+        """
+        return snowflake_time(self.id)
 
 
 class Integration(PartialIntegration):
@@ -119,7 +135,7 @@ class Integration(PartialIntegration):
         Whether the integration is currently enabled.
     account: :class:`IntegrationAccount`
         The account linked to this integration.
-    user: :class:`User`
+    user: Optional[:class:`User`]
         The user that added this integration.
     """
 
@@ -339,7 +355,7 @@ class IntegrationApplication:
         "user",
     )
 
-    def __init__(self, *, data: IntegrationApplicationPayload, state):
+    def __init__(self, *, data: IntegrationApplicationPayload, state) -> None:
         self.id: int = int(data["id"])
         self.name: str = data["name"]
         self.icon: Optional[str] = data["icon"]
@@ -401,7 +417,7 @@ class BotIntegration(Integration):
         )
         self.scopes: List[str] = data.get("scopes") or []
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"<{self.__class__.__name__} id={self.id}"
             f" name={self.name!r} scopes={self.scopes!r}>"

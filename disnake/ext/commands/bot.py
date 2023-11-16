@@ -10,7 +10,6 @@ from .bot_base import BotBase, when_mentioned, when_mentioned_or
 from .interaction_bot_base import InteractionBotBase
 
 if TYPE_CHECKING:
-
     import asyncio
 
     import aiohttp
@@ -62,7 +61,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
 
         .. versionadded:: 2.1
 
-    command_sync_flags: :class:`.ext.commands.CommandSyncFlags`
+    command_sync_flags: :class:`.CommandSyncFlags`
         The command sync flags for the session. This is a way of
         controlling when and how application commands will be synced with the Discord API.
         If not given, defaults to :func:`CommandSyncFlags.default`.
@@ -171,19 +170,19 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
     help_command: Optional[:class:`.HelpCommand`]
         The help command implementation to use. This can be dynamically
         set at runtime. To remove the help command pass ``None``. For more
-        information on implementing a help command, see :ref:`ext_commands_help_command`.
+        information on implementing a help command, see :ref:`ext_commands_api_help_commands`.
 
         This can be provided as a parameter at creation.
 
     owner_id: Optional[:class:`int`]
-        The user ID that owns the bot. If this is not set and is then queried via
+        The ID of the user that owns the bot. If this is not set and is then queried via
         :meth:`.is_owner` then it is fetched automatically using
         :meth:`~.Bot.application_info`.
 
         This can be provided as a parameter at creation.
 
     owner_ids: Optional[Collection[:class:`int`]]
-        The user IDs that owns the bot. This is similar to :attr:`owner_id`.
+        The IDs of the users that own the bot. This is similar to :attr:`owner_id`.
         If this is not set and the application is team based, then it is
         fetched automatically using :meth:`~.Bot.application_info`.
         For performance reasons it is recommended to use a :class:`set`
@@ -225,7 +224,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
             command_prefix: Optional[
                 Union[PrefixType, Callable[[Self, Message], MaybeCoro[PrefixType]]]
             ] = None,
-            help_command: HelpCommand = ...,
+            help_command: Optional[HelpCommand] = ...,
             description: Optional[str] = None,
             *,
             strip_after_prefix: bool = False,
@@ -261,12 +260,12 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
             member_cache_flags: Optional[MemberCacheFlags] = None,
             localization_provider: Optional[LocalizationProtocol] = None,
             strict_localization: bool = False,
-        ):
+        ) -> None:
             ...
 
 
 class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
-    """This is similar to :class:`.Bot` except that it is inherited from
+    """Similar to :class:`.Bot`, except that it is inherited from
     :class:`disnake.AutoShardedClient` instead.
     """
 
@@ -277,7 +276,7 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
             command_prefix: Optional[
                 Union[PrefixType, Callable[[Self, Message], MaybeCoro[PrefixType]]]
             ] = None,
-            help_command: HelpCommand = ...,
+            help_command: Optional[HelpCommand] = ...,
             description: Optional[str] = None,
             *,
             strip_after_prefix: bool = False,
@@ -313,7 +312,7 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
             member_cache_flags: Optional[MemberCacheFlags] = None,
             localization_provider: Optional[LocalizationProtocol] = None,
             strict_localization: bool = False,
-        ):
+        ) -> None:
             ...
 
 
@@ -336,7 +335,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
 
         .. versionadded:: 2.1
 
-    command_sync_flags: :class:`.ext.commands.CommandSyncFlags`
+    command_sync_flags: :class:`.CommandSyncFlags`
         The command sync flags for the session. This is a way of
         controlling when and how application commands will be synced with the Discord API.
         If not given, defaults to :func:`CommandSyncFlags.default`.
@@ -395,14 +394,14 @@ class InteractionBot(InteractionBotBase, disnake.Client):
     Attributes
     ----------
     owner_id: Optional[:class:`int`]
-        The user ID that owns the bot. If this is not set and is then queried via
+        The ID of the user that owns the bot. If this is not set and is then queried via
         :meth:`.is_owner` then it is fetched automatically using
         :meth:`~.Bot.application_info`.
 
         This can be provided as a parameter at creation.
 
     owner_ids: Optional[Collection[:class:`int`]]
-        The user IDs that owns the bot. This is similar to :attr:`owner_id`.
+        The IDs of the users that own the bot. This is similar to :attr:`owner_id`.
         If this is not set and the application is team based, then it is
         fetched automatically using :meth:`~.Bot.application_info`.
         For performance reasons it is recommended to use a :class:`set`
@@ -462,12 +461,12 @@ class InteractionBot(InteractionBotBase, disnake.Client):
             member_cache_flags: Optional[MemberCacheFlags] = None,
             localization_provider: Optional[LocalizationProtocol] = None,
             strict_localization: bool = False,
-        ):
+        ) -> None:
             ...
 
 
 class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
-    """This is similar to :class:`.InteractionBot` except that it is inherited from
+    """Similar to :class:`.InteractionBot`, except that it is inherited from
     :class:`disnake.AutoShardedClient` instead.
     """
 
@@ -507,5 +506,5 @@ class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
             member_cache_flags: Optional[MemberCacheFlags] = None,
             localization_provider: Optional[LocalizationProtocol] = None,
             strict_localization: bool = False,
-        ):
+        ) -> None:
             ...

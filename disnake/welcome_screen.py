@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, List, Optional, Union
 
 from . import utils
 from .partial_emoji import PartialEmoji, _EmojiTag
@@ -52,7 +52,7 @@ class WelcomeScreenChannel:
         id: int,
         description: str,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
-    ):
+    ) -> None:
         self.id: int = id
         self.description: str = description
         self.emoji: Optional[Union[Emoji, PartialEmoji]] = None
@@ -65,7 +65,7 @@ class WelcomeScreenChannel:
         else:
             raise TypeError("emoji must be None, a str, PartialEmoji, or Emoji instance.")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<WelcomeScreenChannel id={self.id!r} emoji={self.emoji!r} description={self.description!r}>"
 
     @classmethod
@@ -74,22 +74,15 @@ class WelcomeScreenChannel:
         *,
         data: WelcomeScreenChannelPayload,
         state: ConnectionState,
-        guild: Union[Guild, PartialInviteGuild],
     ) -> WelcomeScreenChannel:
-        emoji_id = utils._get_as_snowflake(data, "emoji_id")
-        emoji_name = data.get("emoji_name") or None
-        emoji = None
-        if emoji_name:
-            emojis: Optional[Tuple[Emoji]]
-            if emojis := getattr(guild, "emojis", None):
-                emoji = utils.get(emojis, id=emoji_id, name=emoji_name)
-            if not emoji:
-                emoji = PartialEmoji.with_state(state, name=emoji_name, id=emoji_id)
+        emoji = state._get_emoji_from_fields(
+            name=data.get("emoji_name"),
+            id=utils._get_as_snowflake(data, "emoji_id"),
+        )
 
         return cls(id=int(data["channel_id"]), description=data["description"], emoji=emoji)
 
     def to_dict(self) -> WelcomeScreenChannelPayload:
-
         result: WelcomeScreenChannelPayload = {}  # type: ignore
         result["channel_id"] = self.id
         result["description"] = self.description
@@ -128,12 +121,12 @@ class WelcomeScreen:
         data: WelcomeScreenPayload,
         state: ConnectionState,
         guild: Union[Guild, PartialInviteGuild],
-    ):
+    ) -> None:
         self._state = state
         self._guild = guild
         self.description: Optional[str] = data.get("description")
         self.channels: List[WelcomeScreenChannel] = [
-            WelcomeScreenChannel._from_data(data=channel, state=state, guild=guild)
+            WelcomeScreenChannel._from_data(data=channel, state=state)
             for channel in data["welcome_channels"]
         ]
 

@@ -29,7 +29,7 @@ class Object(Hashable):
     receive this class rather than the actual data class. These cases are
     extremely rare.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -49,7 +49,7 @@ class Object(Hashable):
         The ID of the object.
     """
 
-    def __init__(self, id: SupportsIntCast):
+    def __init__(self, id: SupportsIntCast) -> None:
         try:
             id = int(id)
         except ValueError:

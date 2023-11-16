@@ -4,13 +4,13 @@ from __future__ import annotations
 
 import copy
 import functools
-import inspect
 import itertools
 import re
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
+    ClassVar,
     Dict,
     Generator,
     Iterable,
@@ -32,7 +32,7 @@ from .errors import CommandError
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ._types import Check, FuncT
+    from ._types import Check, FuncT, MaybeCoro
     from .bot import AutoShardedBot, Bot
     from .bot_base import BotBase
     from .cog import Cog
@@ -79,7 +79,7 @@ __all__ = (
 class Paginator:
     """A class that aids in paginating code blocks for Discord messages.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: len(x)
 
@@ -236,16 +236,6 @@ class _HelpCommandImpl(Command[Optional["Cog"], Any, None]):
     ) -> None:
         await self._injected.on_help_command_error(ctx, error)
 
-    @property
-    def clean_params(self) -> Dict[str, inspect.Parameter]:
-        result = self.params.copy()
-        try:
-            del result[next(iter(result))]
-        except StopIteration:
-            raise ValueError("Missing context parameter") from None
-        else:
-            return result
-
     def _inject_into_cog(self, cog: Cog) -> None:
         # Warning: hacky
 
@@ -284,8 +274,7 @@ class _HelpCommandImpl(Command[Optional["Cog"], Any, None]):
 
 
 class HelpCommand:
-    """
-    The base implementation for help command formatting.
+    """The base implementation for help command formatting.
 
     .. note::
 
@@ -318,7 +307,7 @@ class HelpCommand:
         ones passed in the :class:`.Command` constructor.
     """
 
-    MENTION_TRANSFORMS = {
+    MENTION_TRANSFORMS: ClassVar[Mapping[str, str]] = {
         "@everyone": "@\u200beveryone",
         "@here": "@\u200bhere",
         r"<@!?[0-9]{17,19}>": "@deleted-user",
@@ -370,8 +359,7 @@ class HelpCommand:
         self._command_impl._eject_cog()
 
     def add_check(self, func: Check) -> None:
-        """
-        Adds a check to the help command.
+        """Adds a check to the help command.
 
         .. versionadded:: 1.4
 
@@ -383,8 +371,7 @@ class HelpCommand:
         self._command_impl.add_check(func)
 
     def remove_check(self, func: Check) -> None:
-        """
-        Removes a check from the help command.
+        """Removes a check from the help command.
 
         This function is idempotent and will not raise an exception if
         the function is not in the command's checks.
@@ -506,7 +493,7 @@ class HelpCommand:
         if cog is not None:
             self._command_impl._inject_into_cog(cog)
 
-    def command_not_found(self, string: str) -> str:
+    def command_not_found(self, string: str) -> MaybeCoro[str]:
         """|maybecoro|
 
         A method called when a command is not found in the help command.
@@ -527,7 +514,7 @@ class HelpCommand:
         """
         return f'No command called "{string}" found.'
 
-    def subcommand_not_found(self, command: Command[Any, ..., Any], string: str) -> str:
+    def subcommand_not_found(self, command: Command[Any, ..., Any], string: str) -> MaybeCoro[str]:
         """|maybecoro|
 
         A method called when a command did not have a subcommand requested in the help command.
@@ -587,7 +574,6 @@ class HelpCommand:
         List[:class:`Command`]
             A list of commands that passed the filter.
         """
-
         # set `key` iff `sort` is true
         if not sort:
             key = None
@@ -966,7 +952,7 @@ class DefaultHelpCommand(HelpCommand):
             return text[: self.width - 3].rstrip() + "..."
         return text
 
-    def get_ending_note(self) -> str:
+    def get_ending_note(self) -> Optional[str]:
         """Returns help command's ending note. This is mainly useful to override for i18n purposes.
 
         :return type: :class:`str`
@@ -1176,7 +1162,7 @@ class MinimalHelpCommand(HelpCommand):
         for page in self.paginator.pages:
             await destination.send(page)
 
-    def get_opening_note(self) -> str:
+    def get_opening_note(self) -> Optional[str]:
         """Returns help command's opening note. This is mainly useful to override for i18n purposes.
 
         The default implementation returns ::
@@ -1198,7 +1184,7 @@ class MinimalHelpCommand(HelpCommand):
     def get_command_signature(self, command: Command[Any, ..., Any]) -> str:
         return f"{self.context.clean_prefix}{command.qualified_name} {command.signature}"
 
-    def get_ending_note(self) -> str:
+    def get_ending_note(self) -> Optional[str]:
         """Return the help command's ending note. This is mainly useful to override for i18n purposes.
 
         The default implementation does nothing.

@@ -8,6 +8,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Dict,
+    Generic,
     List,
     Mapping,
     Optional,
@@ -23,6 +24,7 @@ from ..app_commands import OptionChoice
 from ..channel import PartialMessageable, _threaded_guild_channel_factory
 from ..enums import (
     ChannelType,
+    ComponentType,
     InteractionResponseType,
     InteractionType,
     Locale,
@@ -94,9 +96,10 @@ if TYPE_CHECKING:
 MISSING: Any = utils.MISSING
 
 T = TypeVar("T")
+ClientT = TypeVar("ClientT", bound="Client", covariant=True)
 
 
-class Interaction:
+class Interaction(Generic[ClientT]):
     """A base class representing a user-initiated Discord interaction.
 
     An interaction happens when a user performs an action that the client needs to
@@ -169,12 +172,12 @@ class Interaction:
         "_cs_expires_at",
     )
 
-    def __init__(self, *, data: InteractionPayload, state: ConnectionState):
+    def __init__(self, *, data: InteractionPayload, state: ConnectionState) -> None:
         self.data: Mapping[str, Any] = data.get("data") or {}
         self._state: ConnectionState = state
         # TODO: Maybe use a unique session
         self._session: ClientSession = state.http._HTTPClient__session  # type: ignore
-        self.client: Client = state._get_client()
+        self.client: ClientT = cast(ClientT, state._get_client())
         self._original_response: Optional[InteractionMessage] = None
 
         self.id: int = int(data["id"])
@@ -207,13 +210,9 @@ class Interaction:
             self.author = self._state.store_user(user)
 
     @property
-    def bot(self) -> AnyBot:
-        """:class:`~disnake.ext.commands.Bot`: The bot handling the interaction.
-
-        Only applicable when used with :class:`~disnake.ext.commands.Bot`.
-        This is an alias for :attr:`.client`.
-        """
-        return self.client  # type: ignore
+    def bot(self) -> ClientT:
+        """:class:`~disnake.ext.commands.Bot`: An alias for :attr:`.client`."""
+        return self.client
 
     @property
     def created_at(self) -> datetime:
@@ -223,7 +222,8 @@ class Interaction:
     @property
     def user(self) -> Union[User, Member]:
         """Union[:class:`.User`, :class:`.Member`]: The user or member that sent the interaction.
-        There is an alias for this named :attr:`author`."""
+        There is an alias for this named :attr:`author`.
+        """
         return self.author
 
     @property
@@ -381,7 +381,10 @@ class Interaction:
         attachments: Optional[List[Attachment]] = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[Components[MessageUIComponent]] = MISSING,
+        suppress_embeds: bool = MISSING,
+        flags: MessageFlags = MISSING,
         allowed_mentions: Optional[AllowedMentions] = None,
+        delete_after: Optional[float] = None,
     ) -> InteractionMessage:
         """|coro|
 
@@ -446,6 +449,33 @@ class Interaction:
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
 
+        suppress_embeds: :class:`bool`
+            Whether to suppress embeds for the message. This hides
+            all the embeds from the UI if set to ``True``. If set
+            to ``False``, this brings the embeds back if they were
+            suppressed.
+
+            .. versionadded:: 2.7
+
+        flags: :class:`MessageFlags`
+            The new flags to set for this message. Overrides existing flags.
+            Only :attr:`~MessageFlags.suppress_embeds` is supported.
+
+            If parameter ``suppress_embeds`` is provided,
+            that will override the setting of :attr:`.MessageFlags.suppress_embeds`.
+
+            .. versionadded:: 2.9
+
+        delete_after: Optional[:class:`float`]
+            If provided, the number of seconds to wait in the background
+            before deleting the message we just edited. If the deletion fails,
+            then it is silently ignored.
+
+            Can be up to 15 minutes after the interaction was created
+            (see also :attr:`Interaction.expires_at`/:attr:`~Interaction.is_expired`).
+
+            .. versionadded:: 2.10
+
         Raises
         ------
         HTTPException
@@ -477,6 +507,8 @@ class Interaction:
             embeds=embeds,
             view=view,
             components=components,
+            suppress_embeds=suppress_embeds,
+            flags=flags,
             allowed_mentions=allowed_mentions,
             previous_allowed_mentions=previous_mentions,
         )
@@ -502,8 +534,13 @@ class Interaction:
         # The message channel types should always match
         state = _InteractionMessageState(self, self._state)
         message = InteractionMessage(state=state, channel=self.channel, data=data)  # type: ignore
+
         if view and not view.is_finished():
             self._state.store_view(view, message.id)
+
+        if delete_after is not None:
+            await self.delete_original_response(delay=delete_after)
+
         return message
 
     async def delete_original_response(self, *, delay: Optional[float] = None) -> None:
@@ -520,10 +557,13 @@ class Interaction:
 
         Parameters
         ----------
-        delay: :class:`float`
+        delay: Optional[:class:`float`]
             If provided, the number of seconds to wait in the background
             before deleting the original response message. If the deletion fails,
             then it is silently ignored.
+
+            Can be up to 15 minutes after the interaction was created
+            (see also :attr:`Interaction.expires_at`/:attr:`~Interaction.is_expired`).
 
         Raises
         ------
@@ -541,7 +581,7 @@ class Interaction:
 
         if delay is not None:
 
-            async def delete(delay: float):
+            async def delete(delay: float) -> None:
                 await asyncio.sleep(delay)
                 try:
                     await deleter
@@ -576,8 +616,9 @@ class Interaction:
         view: View = MISSING,
         components: Components[MessageUIComponent] = MISSING,
         tts: bool = False,
-        ephemeral: bool = False,
-        suppress_embeds: bool = False,
+        ephemeral: bool = MISSING,
+        suppress_embeds: bool = MISSING,
+        flags: MessageFlags = MISSING,
         delete_after: float = MISSING,
     ) -> None:
         """|coro|
@@ -630,9 +671,19 @@ class Interaction:
             is set to 15 minutes.
         suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This hides
-            all embeds from the UI if set to ``True``.
+            all the embeds from the UI if set to ``True``.
 
             .. versionadded:: 2.5
+
+        flags: :class:`MessageFlags`
+            The flags to set for this message.
+            Only :attr:`~MessageFlags.suppress_embeds`, :attr:`~MessageFlags.ephemeral`
+            and :attr:`~MessageFlags.suppress_notifications` are supported.
+
+            If parameters ``suppress_embeds`` or ``ephemeral`` are provided,
+            they will override the corresponding setting of this ``flags`` parameter.
+
+            .. versionadded:: 2.9
 
         delete_after: :class:`float`
             If provided, the number of seconds to wait in the background
@@ -670,6 +721,7 @@ class Interaction:
             tts=tts,
             ephemeral=ephemeral,
             suppress_embeds=suppress_embeds,
+            flags=flags,
             delete_after=delete_after,
         )
 
@@ -687,7 +739,7 @@ class InteractionResponse:
         "_response_type",
     )
 
-    def __init__(self, parent: Interaction):
+    def __init__(self, parent: Interaction) -> None:
         self._parent: Interaction = parent
         self._response_type: Optional[InteractionResponseType] = None
 
@@ -841,8 +893,9 @@ class InteractionResponse:
         view: View = MISSING,
         components: Components[MessageUIComponent] = MISSING,
         tts: bool = False,
-        ephemeral: bool = False,
-        suppress_embeds: bool = False,
+        ephemeral: bool = MISSING,
+        suppress_embeds: bool = MISSING,
+        flags: MessageFlags = MISSING,
         delete_after: float = MISSING,
     ) -> None:
         """|coro|
@@ -892,9 +945,19 @@ class InteractionResponse:
 
         suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This hides
-            all embeds from the UI if set to ``True``.
+            all the embeds from the UI if set to ``True``.
 
             .. versionadded:: 2.5
+
+        flags: :class:`MessageFlags`
+            The flags to set for this message.
+            Only :attr:`~MessageFlags.suppress_embeds`, :attr:`~MessageFlags.ephemeral`
+            and :attr:`~MessageFlags.suppress_notifications` are supported.
+
+            If parameters ``suppress_embeds`` or ``ephemeral`` are provided,
+            they will override the corresponding setting of this ``flags`` parameter.
+
+            .. versionadded:: 2.9
 
         Raises
         ------
@@ -955,11 +1018,14 @@ class InteractionResponse:
         if content is not None:
             payload["content"] = str(content)
 
-        payload["flags"] = 0
-        if suppress_embeds:
-            payload["flags"] |= MessageFlags.suppress_embeds.flag
-        if ephemeral:
-            payload["flags"] |= MessageFlags.ephemeral.flag
+        if suppress_embeds is not MISSING or ephemeral is not MISSING:
+            flags = MessageFlags._from_value(0 if flags is MISSING else flags.value)
+            if suppress_embeds is not MISSING:
+                flags.suppress_embeds = suppress_embeds
+            if ephemeral is not MISSING:
+                flags.ephemeral = ephemeral
+        if flags is not MISSING:
+            payload["flags"] = flags.value
 
         if view is not MISSING:
             payload["components"] = view.to_components()
@@ -1011,6 +1077,7 @@ class InteractionResponse:
         allowed_mentions: AllowedMentions = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[Components[MessageUIComponent]] = MISSING,
+        delete_after: Optional[float] = None,
     ) -> None:
         """|coro|
 
@@ -1072,6 +1139,16 @@ class InteractionResponse:
             If ``None`` is passed then the components are removed.
 
             .. versionadded:: 2.4
+
+        delete_after: Optional[:class:`float`]
+            If provided, the number of seconds to wait in the background
+            before deleting the message we just edited. If the deletion fails,
+            then it is silently ignored.
+
+            Can be up to 15 minutes after the interaction was created
+            (see also :attr:`Interaction.expires_at`/:attr:`~Interaction.is_expired`).
+
+            .. versionadded:: 2.10
 
         Raises
         ------
@@ -1171,6 +1248,9 @@ class InteractionResponse:
             state.store_view(view, message.id)
 
         self._response_type = response_type
+
+        if delete_after is not None:
+            await self._parent.delete_original_response(delay=delete_after)
 
     async def autocomplete(self, *, choices: Choices) -> None:
         """|coro|
@@ -1299,7 +1379,6 @@ class InteractionResponse:
         if modal is not None:
             modal_data = modal.to_components()
         elif title and components and custom_id:
-
             rows = components_to_dict(components)
             if len(rows) > 5:
                 raise ValueError("Maximum number of components exceeded.")
@@ -1330,7 +1409,7 @@ class InteractionResponse:
 class _InteractionMessageState:
     __slots__ = ("_parent", "_interaction")
 
-    def __init__(self, interaction: Interaction, parent: ConnectionState):
+    def __init__(self, interaction: Interaction, parent: ConnectionState) -> None:
         self._interaction: Interaction = interaction
         self._parent: ConnectionState = parent
 
@@ -1373,7 +1452,7 @@ class InteractionMessage(Message):
         The actual contents of the message.
     embeds: List[:class:`Embed`]
         A list of embeds the message has.
-    channel: Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`Thread`, :class:`DMChannel`, :class:`GroupChannel`, :class:`PartialMessageable`]
+    channel: Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`StageChannel`, :class:`Thread`, :class:`DMChannel`, :class:`GroupChannel`, :class:`PartialMessageable`]
         The channel that the message was sent from.
         Could be a :class:`DMChannel` or :class:`GroupChannel` if it's a private message.
     reference: Optional[:class:`~disnake.MessageReference`]
@@ -1434,9 +1513,12 @@ class InteractionMessage(Message):
         embed: Optional[Embed] = ...,
         file: File = ...,
         attachments: Optional[List[Attachment]] = ...,
+        suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
+        delete_after: Optional[float] = ...,
     ) -> InteractionMessage:
         ...
 
@@ -1448,9 +1530,12 @@ class InteractionMessage(Message):
         embed: Optional[Embed] = ...,
         files: List[File] = ...,
         attachments: Optional[List[Attachment]] = ...,
+        suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
+        delete_after: Optional[float] = ...,
     ) -> InteractionMessage:
         ...
 
@@ -1462,9 +1547,12 @@ class InteractionMessage(Message):
         embeds: List[Embed] = ...,
         file: File = ...,
         attachments: Optional[List[Attachment]] = ...,
+        suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
+        delete_after: Optional[float] = ...,
     ) -> InteractionMessage:
         ...
 
@@ -1476,9 +1564,12 @@ class InteractionMessage(Message):
         embeds: List[Embed] = ...,
         files: List[File] = ...,
         attachments: Optional[List[Attachment]] = ...,
+        suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
+        delete_after: Optional[float] = ...,
     ) -> InteractionMessage:
         ...
 
@@ -1491,9 +1582,12 @@ class InteractionMessage(Message):
         file: File = MISSING,
         files: List[File] = MISSING,
         attachments: Optional[List[Attachment]] = MISSING,
+        suppress_embeds: bool = MISSING,
+        flags: MessageFlags = MISSING,
         allowed_mentions: Optional[AllowedMentions] = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[Components[MessageUIComponent]] = MISSING,
+        delete_after: Optional[float] = None,
     ) -> Message:
         """|coro|
 
@@ -1544,9 +1638,35 @@ class InteractionMessage(Message):
 
             .. versionadded:: 2.4
 
+        suppress_embeds: :class:`bool`
+            Whether to suppress embeds for the message. This hides
+            all the embeds from the UI if set to ``True``. If set
+            to ``False``, this brings the embeds back if they were
+            suppressed.
+
+            .. versionadded:: 2.7
+
+        flags: :class:`MessageFlags`
+            The new flags to set for this message. Overrides existing flags.
+            Only :attr:`~MessageFlags.suppress_embeds` is supported.
+
+            If parameter ``suppress_embeds`` is provided,
+            that will override the setting of :attr:`.MessageFlags.suppress_embeds`.
+
+            .. versionadded:: 2.9
+
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
+        delete_after: Optional[:class:`float`]
+            If provided, the number of seconds to wait in the background
+            before deleting the message we just edited. If the deletion fails,
+            then it is silently ignored.
+
+            Can be up to 15 minutes after the interaction was created
+            (see also :attr:`Interaction.expires_at`/:attr:`~Interaction.is_expired`).
+
+            .. versionadded:: 2.10
 
         Raises
         ------
@@ -1575,9 +1695,12 @@ class InteractionMessage(Message):
                 embeds=embeds,
                 files=files,
                 attachments=attachments,
+                suppress_embeds=suppress_embeds,
+                flags=flags,
                 allowed_mentions=allowed_mentions,
                 view=view,
                 components=components,
+                delete_after=delete_after,
                 **params,
             )
 
@@ -1594,9 +1717,12 @@ class InteractionMessage(Message):
             file=file,
             files=files,
             attachments=attachments,
+            suppress_embeds=suppress_embeds,
+            flags=flags,
             allowed_mentions=allowed_mentions,
             view=view,
             components=components,
+            delete_after=delete_after,
         )
 
     async def delete(self, *, delay: Optional[float] = None) -> None:
@@ -1623,7 +1749,7 @@ class InteractionMessage(Message):
             return await super().delete(delay=delay)
         if delay is not None:
 
-            async def inner_call(delay: float = delay):
+            async def inner_call(delay: float = delay) -> None:
                 await asyncio.sleep(delay)
                 try:
                     await self._state._interaction.delete_original_response()
@@ -1670,7 +1796,7 @@ class InteractionDataResolved(Dict[str, Any]):
         data: InteractionDataResolvedPayload,
         state: ConnectionState,
         guild_id: Optional[int],
-    ):
+    ) -> None:
         data = data or {}
         super().__init__(data)
 
@@ -1755,16 +1881,28 @@ class InteractionDataResolved(Dict[str, Any]):
         for str_id, attachment in attachments.items():
             self.attachments[int(str_id)] = Attachment(data=attachment, state=state)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"<InteractionDataResolved members={self.members!r} users={self.users!r} "
             f"roles={self.roles!r} channels={self.channels!r} messages={self.messages!r} attachments={self.attachments!r}>"
         )
 
+    @overload
     def get_with_type(
-        self, key: Snowflake, data_type: OptionType, default: T = None
+        self, key: Snowflake, data_type: Union[OptionType, ComponentType]
+    ) -> Union[Member, User, Role, InteractionChannel, Message, Attachment, None]:
+        ...
+
+    @overload
+    def get_with_type(
+        self, key: Snowflake, data_type: Union[OptionType, ComponentType], default: T
     ) -> Union[Member, User, Role, InteractionChannel, Message, Attachment, T]:
-        if data_type is OptionType.mentionable:
+        ...
+
+    def get_with_type(
+        self, key: Snowflake, data_type: Union[OptionType, ComponentType], default: T = None
+    ) -> Union[Member, User, Role, InteractionChannel, Message, Attachment, T, None]:
+        if data_type is OptionType.mentionable or data_type is ComponentType.mentionable_select:
             key = int(key)
             if (result := self.members.get(key)) is not None:
                 return result
@@ -1772,16 +1910,16 @@ class InteractionDataResolved(Dict[str, Any]):
                 return result
             return self.roles.get(key, default)
 
-        if data_type is OptionType.user:
+        if data_type is OptionType.user or data_type is ComponentType.user_select:
             key = int(key)
             if (member := self.members.get(key)) is not None:
                 return member
             return self.users.get(key, default)
 
-        if data_type is OptionType.channel:
+        if data_type is OptionType.channel or data_type is ComponentType.channel_select:
             return self.channels.get(int(key), default)
 
-        if data_type is OptionType.role:
+        if data_type is OptionType.role or data_type is ComponentType.role_select:
             return self.roles.get(int(key), default)
 
         if data_type is OptionType.attachment:

@@ -5,11 +5,11 @@ from typing import List, Literal, Optional, TypedDict
 from typing_extensions import NotRequired
 
 from .activity import PartialPresenceUpdate
-from .channel import GuildChannel, StageInstance
+from .channel import CreateGuildChannel, GuildChannel, StageInstance
 from .emoji import Emoji
 from .guild_scheduled_event import GuildScheduledEvent
 from .member import Member
-from .role import Role
+from .role import CreateRole, Role
 from .snowflake import Snowflake
 from .sticker import GuildSticker
 from .threads import Thread
@@ -41,6 +41,8 @@ GuildFeature = Literal[
     "BANNER",
     "COMMUNITY",
     "CREATOR_MONETIZABLE",  # not yet documented/finalised
+    "CREATOR_MONETIZABLE_PROVISIONAL",
+    "CREATOR_STORE_PAGE",
     "DEVELOPER_SUPPORT_SERVER",
     "DISCOVERABLE",
     "ENABLED_DISCOVERABLE_BEFORE",
@@ -53,18 +55,18 @@ GuildFeature = Literal[
     "LINKED_TO_HUB",
     "MEMBER_PROFILES",  # not sure what this does, if anything
     "MEMBER_VERIFICATION_GATE_ENABLED",
-    "MONETIZATION_ENABLED",
     "MORE_EMOJI",
     "MORE_STICKERS",
     "NEWS",
     "NEW_THREAD_PERMISSIONS",  # deprecated
     "PARTNERED",
     "PREVIEW_ENABLED",
-    "PRIVATE_THREADS",
+    "PRIVATE_THREADS",  # deprecated
+    "RAID_ALERTS_DISABLED",
     "RELAY_ENABLED",
     "ROLE_ICONS",
-    "ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE",  # not yet documented/finalised
-    "ROLE_SUBSCRIPTIONS_ENABLED",  # not yet documented/finalised
+    "ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE",
+    "ROLE_SUBSCRIPTIONS_ENABLED",
     "SEVEN_DAY_THREAD_ARCHIVE",  # deprecated
     "TEXT_IN_VOICE_ENABLED",  # deprecated
     "THREADS_ENABLED",  # deprecated
@@ -121,11 +123,13 @@ class Guild(_BaseGuildPreview):
     preferred_locale: str
     public_updates_channel_id: Optional[Snowflake]
     max_video_channel_users: NotRequired[int]
+    max_stage_video_channel_users: NotRequired[int]
     approximate_member_count: NotRequired[int]
     approximate_presence_count: NotRequired[int]
     nsfw_level: NSFWLevel
     stickers: NotRequired[List[GuildSticker]]
     premium_progress_bar_enabled: bool
+    safety_alerts_channel_id: Optional[Snowflake]
 
     # specific to GUILD_CREATE event
     joined_at: NotRequired[Optional[str]]
@@ -162,3 +166,25 @@ class RolePositionUpdate(TypedDict):
 
 class MFALevelUpdate(TypedDict):
     level: MFALevel
+
+
+class CreateGuildPlaceholderRole(CreateRole):
+    id: Snowflake
+
+
+class CreateGuildPlaceholderChannel(CreateGuildChannel):
+    id: NotRequired[Snowflake]
+
+
+class CreateGuild(TypedDict):
+    name: str
+    icon: NotRequired[str]
+    verification_level: NotRequired[VerificationLevel]
+    default_message_notifications: NotRequired[DefaultMessageNotificationLevel]
+    explicit_content_filter: NotRequired[ExplicitContentFilterLevel]
+    roles: NotRequired[List[CreateGuildPlaceholderRole]]
+    channels: NotRequired[List[CreateGuildPlaceholderChannel]]
+    afk_channel_id: NotRequired[Snowflake]
+    afk_timeout: NotRequired[int]
+    system_channel_id: NotRequired[Snowflake]
+    system_channel_flags: NotRequired[int]

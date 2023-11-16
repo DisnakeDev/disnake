@@ -1,0 +1,1 @@
+Add ``guild_scheduled_event`` parameter to :meth:`StageChannel.create_instance`.

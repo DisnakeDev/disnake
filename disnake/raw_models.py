@@ -6,7 +6,7 @@ import datetime
 from typing import TYPE_CHECKING, List, Literal, Optional, Set, Union, cast
 
 from .enums import ChannelType, try_enum
-from .utils import get_slots
+from .utils import _get_as_snowflake, get_slots
 
 if TYPE_CHECKING:
     from .member import Member
@@ -164,8 +164,12 @@ class RawReactionActionEvent(_RawReprMixin):
         The guild ID where the reaction addition or removal took place, if applicable.
     emoji: :class:`PartialEmoji`
         The custom or unicode emoji being used.
+
+        .. versionchanged:: 2.9
+            This now also includes the correct :attr:`~PartialEmoji.animated` value when a reaction was removed.
+
     member: Optional[:class:`Member`]
-        The member who added the reaction. Only available if `event_type` is `REACTION_ADD` and the reaction is inside a guild.
+        The member who added the reaction. Only available if :attr:`event_type` is ``REACTION_ADD`` and the reaction is inside a guild.
 
         .. versionadded:: 1.3
 
@@ -175,9 +179,25 @@ class RawReactionActionEvent(_RawReprMixin):
         ``REACTION_REMOVE`` for reaction removal.
 
         .. versionadded:: 1.3
+
+    message_author_id: Optional[:class:`int`]
+        The ID of the author who created the message that got a reaction.
+        Only available if :attr:`event_type` is ``REACTION_ADD``.
+        May also be ``None`` if the message was created by a webhook.
+
+        .. versionadded:: 2.10
     """
 
-    __slots__ = ("message_id", "user_id", "channel_id", "guild_id", "emoji", "event_type", "member")
+    __slots__ = (
+        "message_id",
+        "user_id",
+        "channel_id",
+        "guild_id",
+        "emoji",
+        "event_type",
+        "member",
+        "message_author_id",
+    )
 
     def __init__(
         self,
@@ -195,6 +215,7 @@ class RawReactionActionEvent(_RawReprMixin):
             self.guild_id: Optional[int] = int(data["guild_id"])
         except KeyError:
             self.guild_id: Optional[int] = None
+        self.message_author_id: Optional[int] = _get_as_snowflake(data, "message_author_id")
 
 
 class RawReactionClearEvent(_RawReprMixin):
@@ -236,6 +257,9 @@ class RawReactionClearEmojiEvent(_RawReprMixin):
         The guild ID where the reaction clear took place, if applicable.
     emoji: :class:`PartialEmoji`
         The custom or unicode emoji being removed.
+
+        .. versionchanged:: 2.9
+            This now also includes the correct :attr:`~PartialEmoji.animated` value.
     """
 
     __slots__ = ("message_id", "channel_id", "guild_id", "emoji")
@@ -296,7 +320,7 @@ class RawGuildScheduledEventUserActionEvent(_RawReprMixin):
 
     def __init__(
         self, data: Union[GuildScheduledEventUserAddEvent, GuildScheduledEventUserRemoveEvent]
-    ):
+    ) -> None:
         self.event_id: int = int(data["guild_scheduled_event_id"])
         self.user_id: int = int(data["user_id"])
         self.guild_id: int = int(data["guild_id"])
@@ -329,7 +353,7 @@ class RawThreadDeleteEvent(_RawReprMixin):
         "thread",
     )
 
-    def __init__(self, data: ThreadDeleteEvent):
+    def __init__(self, data: ThreadDeleteEvent) -> None:
         self.thread_id: int = int(data["id"])
         self.thread_type: ThreadType = cast("ThreadType", try_enum(ChannelType, data["type"]))
         self.guild_id: int = int(data["guild_id"])
@@ -358,7 +382,7 @@ class RawThreadMemberRemoveEvent(_RawReprMixin):
         "cached_member",
     )
 
-    def __init__(self, thread: Thread, member_id: int):
+    def __init__(self, thread: Thread, member_id: int) -> None:
         self.thread: Thread = thread
         self.member_id: int = member_id
         self.cached_member: Optional[ThreadMember] = None
@@ -381,6 +405,9 @@ class RawTypingEvent(_RawReprMixin):
         The member object of the user who started typing or ``None`` if it was in a DM.
     timestamp: :class:`datetime.datetime`
         The UTC datetime when the user started typing.
+
+        .. versionchanged:: 2.9
+            Changed from naive to aware datetime.
     """
 
     __slots__ = ("user_id", "channel_id", "guild_id", "member", "timestamp")
@@ -389,7 +416,9 @@ class RawTypingEvent(_RawReprMixin):
         self.user_id: int = int(data["user_id"])
         self.channel_id: int = int(data["channel_id"])
         self.member: Optional[Member] = None
-        self.timestamp: datetime.datetime = datetime.datetime.utcfromtimestamp(data["timestamp"])
+        self.timestamp: datetime.datetime = datetime.datetime.fromtimestamp(
+            data["timestamp"], tz=datetime.timezone.utc
+        )
         try:
             self.guild_id: Optional[int] = int(data["guild_id"])
         except KeyError:
@@ -414,6 +443,6 @@ class RawGuildMemberRemoveEvent(_RawReprMixin):
         "user",
     )
 
-    def __init__(self, user: Union[User, Member], guild_id: int):
+    def __init__(self, user: Union[User, Member], guild_id: int) -> None:
         self.user: Union[User, Member] = user
         self.guild_id: int = guild_id

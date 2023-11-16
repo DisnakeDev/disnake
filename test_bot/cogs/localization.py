@@ -10,13 +10,13 @@ from disnake.ext import commands
 
 
 class Localizations(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot) -> None:
         self.bot: commands.Bot = bot
 
     @commands.slash_command()
     async def localized_command(
         self,
-        inter: disnake.AppCmdInter,
+        inter: disnake.AppCmdInter[commands.Bot],
         auto: str,
         choice: str = commands.Param(
             choices=[
@@ -33,8 +33,7 @@ class Localizations(commands.Cog):
             description=Localized(data={Locale.en_GB: "insert bri'ish description here"}),
         ),
     ) -> None:
-        """
-        {{ MY_LOC_CMD }} Does absolutely nothing
+        """{{ MY_LOC_CMD }} Does absolutely nothing
 
         Parameters
         ----------
@@ -46,7 +45,7 @@ class Localizations(commands.Cog):
 
     @localized_command.autocomplete("auto")
     async def autocomp(
-        self, inter: disnake.AppCmdInter, value: str
+        self, inter: disnake.AppCmdInter[commands.Bot], value: str
     ) -> "disnake.app_commands.Choices":
         # not really autocomplete, only used for showing autocomplete localization
         x = list(map(str, range(1, 6)))
@@ -54,11 +53,11 @@ class Localizations(commands.Cog):
         return [Localized(v, key=f"AUTOCOMP_{v}") for v in x]
 
     @commands.slash_command()
-    async def localized_top_level(self, inter: disnake.AppCmdInter) -> None:
+    async def localized_top_level(self, inter: disnake.AppCmdInter[commands.Bot]) -> None:
         pass
 
     @localized_top_level.sub_command_group()
-    async def second(self, inter: disnake.AppCmdInter) -> None:
+    async def second(self, inter: disnake.AppCmdInter[commands.Bot]) -> None:
         pass
 
     @second.sub_command(
@@ -67,7 +66,7 @@ class Localizations(commands.Cog):
     )
     async def third(
         self,
-        inter: disnake.AppCmdInter,
+        inter: disnake.AppCmdInter[commands.Bot],
         value: str = commands.Param(name=Localized("a_string", key="A_VERY_COOL_PARAM_NAME")),
     ) -> None:
         await inter.response.send_message(f"```py\n{pformat(locals())}\n```")
@@ -76,9 +75,9 @@ class Localizations(commands.Cog):
     @commands.message_command(
         name=Localized("Localized Reverse", key="MSG_REVERSE"),
     )
-    async def cmd_msg(self, inter: disnake.AppCmdInter, msg: disnake.Message) -> None:
+    async def cmd_msg(self, inter: disnake.AppCmdInter[commands.Bot], msg: disnake.Message) -> None:
         await inter.response.send_message(msg.content[::-1])
 
 
-def setup(bot):
+def setup(bot) -> None:
     bot.add_cog(Localizations(bot))

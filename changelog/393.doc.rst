@@ -1,1 +1,0 @@
- Speed up page load by changing hoverxref tooltips to be lazily loaded.

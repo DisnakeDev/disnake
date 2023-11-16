@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+import datetime
 from typing import TYPE_CHECKING, Optional
 
 from .enums import StagePrivacyLevel, try_enum
 from .mixins import Hashable
-from .utils import MISSING, _get_as_snowflake, cached_slot_property, warn_deprecated
+from .utils import MISSING, _get_as_snowflake, cached_slot_property, snowflake_time, warn_deprecated
 
 __all__ = ("StageInstance",)
 
@@ -23,7 +24,7 @@ class StageInstance(Hashable):
 
     .. versionadded:: 2.0
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -71,7 +72,7 @@ class StageInstance(Hashable):
         self.guild = guild
         self._update(data)
 
-    def _update(self, data: StageInstancePayload):
+    def _update(self, data: StageInstancePayload) -> None:
         self.id: int = int(data["id"])
         self.channel_id: int = int(data["channel_id"])
         self.topic: str = data["topic"]
@@ -83,6 +84,14 @@ class StageInstance(Hashable):
 
     def __repr__(self) -> str:
         return f"<StageInstance id={self.id} guild={self.guild!r} channel_id={self.channel_id} topic={self.topic!r}>"
+
+    @property
+    def created_at(self) -> datetime.datetime:
+        """:class:`datetime.datetime`: Returns the stage instance's creation time in UTC.
+
+        .. versionadded:: 2.10
+        """
+        return snowflake_time(self.id)
 
     @cached_slot_property("_cs_channel")
     def channel(self) -> Optional[StageChannel]:

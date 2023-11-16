@@ -1,1 +1,0 @@
-Add :func:`GuildScheduledEvent.start`, :func:`.end <GuildScheduledEvent.end>` and :func:`.cancel <GuildScheduledEvent.cancel>` shortcuts.

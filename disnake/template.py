@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, NoReturn, Optional
 
 from .guild import Guild
 from .utils import MISSING, _assetbytes_to_base64_data, parse_time
@@ -21,12 +21,12 @@ if TYPE_CHECKING:
 class _FriendlyHttpAttributeErrorHelper:
     __slots__ = ()
 
-    def __getattr__(self, attr):
+    def __getattr__(self, attr) -> NoReturn:
         raise AttributeError("PartialTemplateState does not support http methods.")
 
 
 class _PartialTemplateState:
-    def __init__(self, *, state):
+    def __init__(self, *, state) -> None:
         self.__state = state
         self.http = _FriendlyHttpAttributeErrorHelper()
 
@@ -61,7 +61,7 @@ class _PartialTemplateState:
     async def query_members(self, **kwargs: Any):
         return []
 
-    def __getattr__(self, attr):
+    def __getattr__(self, attr) -> NoReturn:
         raise AttributeError(f"PartialTemplateState does not support {attr!r}.")
 
 
@@ -220,7 +220,6 @@ class Template:
         :class:`Template`
             The newly edited template.
         """
-
         data = await self._state.http.sync_template(self.source_guild.id, self.code)
         return Template(state=self._state, data=data)
 

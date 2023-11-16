@@ -1,1 +1,0 @@
-Properly document that :attr:`Message.system_content` may return ``None``. While this is documented as a breaking change, this function always could return ``None`` if the message type was not recognised.

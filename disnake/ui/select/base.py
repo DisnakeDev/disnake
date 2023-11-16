@@ -50,7 +50,11 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
 
     This isn't meant to be used directly, instead use one of the concrete select menu types:
 
-    - :class:`disnake.ui.Select`
+    - :class:`disnake.ui.StringSelect`
+    - :class:`disnake.ui.UserSelect`
+    - :class:`disnake.ui.RoleSelect`
+    - :class:`disnake.ui.MentionableSelect`
+    - :class:`disnake.ui.ChannelSelect`
 
     .. versionadded:: 2.7
     """
@@ -96,7 +100,7 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         return self._underlying.custom_id
 
     @custom_id.setter
-    def custom_id(self, value: str):
+    def custom_id(self, value: str) -> None:
         if not isinstance(value, str):
             raise TypeError("custom_id must be None or str")
 
@@ -108,7 +112,7 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         return self._underlying.placeholder
 
     @placeholder.setter
-    def placeholder(self, value: Optional[str]):
+    def placeholder(self, value: Optional[str]) -> None:
         if value is not None and not isinstance(value, str):
             raise TypeError("placeholder must be None or str")
 
@@ -120,7 +124,7 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         return self._underlying.min_values
 
     @min_values.setter
-    def min_values(self, value: int):
+    def min_values(self, value: int) -> None:
         self._underlying.min_values = int(value)
 
     @property
@@ -129,7 +133,7 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         return self._underlying.max_values
 
     @max_values.setter
-    def max_values(self, value: int):
+    def max_values(self, value: int) -> None:
         self._underlying.max_values = int(value)
 
     @property
@@ -138,7 +142,7 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         return self._underlying.disabled
 
     @disabled.setter
-    def disabled(self, value: bool):
+    def disabled(self, value: bool) -> None:
         self._underlying.disabled = bool(value)
 
     @property
@@ -153,8 +157,7 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         self._underlying = component
 
     def refresh_state(self, interaction: MessageInteraction) -> None:
-        # TODO: change typing of `interaction.values`
-        self._selected_values = interaction.values  # type: ignore
+        self._selected_values = interaction.resolved_values  # type: ignore
 
     @classmethod
     @abstractmethod

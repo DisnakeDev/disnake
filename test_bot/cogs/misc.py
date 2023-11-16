@@ -8,7 +8,7 @@ from disnake.ext import commands
 
 
 class Misc(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot) -> None:
         self.bot: commands.Bot = bot
 
     def _get_file(self, description: str) -> disnake.File:
@@ -19,9 +19,10 @@ class Misc(commands.Cog):
         return disnake.File(io.BytesIO(data), "image.png", description=description)
 
     @commands.slash_command()
-    async def attachment_desc(self, inter: disnake.AppCmdInter, desc: str = "test") -> None:
-        """
-        Send an attachment with the given description (or the default)
+    async def attachment_desc(
+        self, inter: disnake.AppCmdInter[commands.Bot], desc: str = "test"
+    ) -> None:
+        """Send an attachment with the given description (or the default)
 
         Parameters
         ----------
@@ -30,9 +31,10 @@ class Misc(commands.Cog):
         await inter.response.send_message(file=self._get_file(desc))
 
     @commands.slash_command()
-    async def attachment_desc_edit(self, inter: disnake.AppCmdInter, desc: str = "test") -> None:
-        """
-        Send a message with a button, which sends an attachment with the given description (or the default)
+    async def attachment_desc_edit(
+        self, inter: disnake.AppCmdInter[commands.Bot], desc: str = "test"
+    ) -> None:
+        """Send a message with a button, which sends an attachment with the given description (or the default)
 
         Parameters
         ----------
@@ -48,5 +50,5 @@ class Misc(commands.Cog):
         await inter.response.send_message(".", view=view)
 
 
-def setup(bot):
+def setup(bot) -> None:
     bot.add_cog(Misc(bot))

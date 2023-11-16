@@ -1,21 +1,9 @@
 # SPDX-License-Identifier: MIT
 
-from typing import TYPE_CHECKING
+from typing_extensions import assert_type
 
 from disnake.ext import commands
-
-if TYPE_CHECKING:
-    from typing_extensions import assert_type
-
-    # NOTE: using undocumented `expected_text` parameter of pyright instead of `assert_type`,
-    # as `assert_type` can't handle bound ParamSpecs
-    #
-    # sanity check: if `reveal_type` isn't working as intended,
-    # the second `type: ignore` will be flagged
-    reveal_type(  # noqa: F821
-        42,  # type: ignore
-        expected_text="str",  # type: ignore
-    )
+from tests.helpers import reveal_type
 
 
 class CustomContext(commands.Context):
@@ -27,7 +15,7 @@ class CustomCog(commands.Cog):
 
 
 class TestDecorators:
-    def _test_typing_defaults(self):
+    def _test_typing_defaults(self) -> None:
         base = commands.GroupMixin[None]()
 
         # no cog
@@ -36,13 +24,13 @@ class TestDecorators:
             ...
 
         for cd in (commands.command(), base.command()):
-            reveal_type(  # noqa: F821
+            reveal_type(
                 cd(f1),  # type: ignore
                 expected_text="Command[None, (a: int, b: str), bool]",
             )
 
         for gd in (commands.group(), base.group()):
-            reveal_type(  # noqa: F821
+            reveal_type(
                 gd(f1),  # type: ignore
                 expected_text="Group[None, (a: int, b: str), bool]",
             )
@@ -54,18 +42,18 @@ class TestDecorators:
             ...
 
         for cd in (commands.command(), base.command()):
-            reveal_type(  # noqa: F821
+            reveal_type(
                 cd(f2),  # type: ignore
                 expected_text="Command[CustomCog, (a: int, b: str), bool]",
             )
 
         for gd in (commands.group(), base.group()):
-            reveal_type(  # noqa: F821
+            reveal_type(
                 gd(f2),  # type: ignore
                 expected_text="Group[CustomCog, (a: int, b: str), bool]",
             )
 
-    def _test_typing_cls(self):
+    def _test_typing_cls(self) -> None:
         class CustomCommand(commands.Command):
             ...
 

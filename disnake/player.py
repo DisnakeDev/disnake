@@ -7,7 +7,7 @@ import io
 import logging
 import re
 import shlex
-import subprocess
+import subprocess  # noqa: TID251
 import sys
 import threading
 import time
@@ -135,7 +135,7 @@ class FFmpegAudio(AudioSource):
         executable: str = "ffmpeg",
         args: Any,
         **subprocess_kwargs: Any,
-    ):
+    ) -> None:
         piping = subprocess_kwargs.get("stdin") == subprocess.PIPE
         if piping and isinstance(source, str):
             raise TypeError(
@@ -366,12 +366,11 @@ class FFmpegOpusAudio(FFmpegAudio):
         bitrate: int = 128,
         codec: Optional[str] = None,
         executable: str = "ffmpeg",
-        pipe=False,
+        pipe: bool = False,
         stderr=None,
         before_options=None,
         options=None,
     ) -> None:
-
         args = []
         subprocess_kwargs = {
             "stdin": subprocess.PIPE if pipe else subprocess.DEVNULL,
@@ -430,7 +429,6 @@ class FFmpegOpusAudio(FFmpegAudio):
 
         Examples
         --------
-
         Use this function to create an :class:`FFmpegOpusAudio` instance instead of the constructor: ::
 
             source = await disnake.FFmpegOpusAudio.from_probe("song.webm")
@@ -477,7 +475,6 @@ class FFmpegOpusAudio(FFmpegAudio):
         :class:`FFmpegOpusAudio`
             An instance of this class.
         """
-
         executable = kwargs.get("executable")
         codec, bitrate = await cls.probe(source, method=method, executable=executable)
         return cls(source, bitrate=bitrate, codec=codec, **kwargs)  # type: ignore
@@ -517,7 +514,6 @@ class FFmpegOpusAudio(FFmpegAudio):
         Optional[Tuple[Optional[:class:`str`], Optional[:class:`int`]]]
             A 2-tuple with the codec and bitrate of the input source.
         """
-
         method = method or "native"
         executable = executable or "ffmpeg"
         probefunc = fallback = None
@@ -540,7 +536,7 @@ class FFmpegOpusAudio(FFmpegAudio):
             )
 
         codec = bitrate = None
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         try:
             codec, bitrate = await loop.run_in_executor(None, lambda: probefunc(source, executable))
         except Exception:
@@ -642,7 +638,7 @@ class PCMVolumeTransformer(AudioSource, Generic[AT]):
         The audio source is opus encoded.
     """
 
-    def __init__(self, original: AT, volume: float = 1.0):
+    def __init__(self, original: AT, volume: float = 1.0) -> None:
         if not isinstance(original, AudioSource):
             raise TypeError(f"expected AudioSource not {original.__class__.__name__}.")
 
@@ -672,7 +668,7 @@ class PCMVolumeTransformer(AudioSource, Generic[AT]):
 class AudioPlayer(threading.Thread):
     DELAY: float = OpusEncoder.FRAME_LENGTH / 1000.0
 
-    def __init__(self, source: AudioSource, client: VoiceClient, *, after=None):
+    def __init__(self, source: AudioSource, client: VoiceClient, *, after=None) -> None:
         threading.Thread.__init__(self)
         self.daemon: bool = True
         self.source: AudioSource = source
@@ -690,12 +686,10 @@ class AudioPlayer(threading.Thread):
             raise TypeError('Expected a callable for the "after" parameter.')
 
     def _do_run(self) -> None:
-        self.loops = 0
-        self._start = time.perf_counter()
+        self._reset_state(speak=True)
 
         # getattr lookup speed ups
         play_audio = self.client.send_audio_packet
-        self._speak(True)
 
         while not self._end.is_set():
             # are we paused?
@@ -709,8 +703,7 @@ class AudioPlayer(threading.Thread):
                 # wait until we are connected
                 self._connected.wait()
                 # reset our internal data
-                self.loops = 0
-                self._start = time.perf_counter()
+                self._reset_state(speak=self._resumed.is_set())
 
             self.loops += 1
             data = self.source.read()
@@ -723,6 +716,14 @@ class AudioPlayer(threading.Thread):
             next_time = self._start + self.DELAY * self.loops
             delay = max(0, self.DELAY + (next_time - time.perf_counter()))
             time.sleep(delay)
+
+    # this is called right after (re)connecting;
+    # reset the timings and set the speaking state accordingly
+    def _reset_state(self, *, speak: bool) -> None:
+        self.loops = 0
+        self._start = time.perf_counter()
+        if speak:
+            self._speak(True)
 
     def run(self) -> None:
         try:
