@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import datetime
 from typing import TYPE_CHECKING, List, Optional
 
 from . import utils
@@ -53,6 +54,14 @@ class Team:
         return f"<{self.__class__.__name__} id={self.id} name={self.name}>"
 
     @property
+    def created_at(self) -> datetime.datetime:
+        """:class:`datetime.datetime`: Returns the team's creation time in UTC.
+
+        .. versionadded:: 2.10
+        """
+        return utils.snowflake_time(self.id)
+
+    @property
     def icon(self) -> Optional[Asset]:
         """Optional[:class:`.Asset`]: Retrieves the team's icon asset, if any."""
         if self._icon is None:
@@ -68,7 +77,7 @@ class Team:
 class TeamMember(BaseUser):
     """Represents a team member in a team.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 

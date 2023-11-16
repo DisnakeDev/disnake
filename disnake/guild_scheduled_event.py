@@ -77,7 +77,7 @@ class GuildScheduledEvent(Hashable):
 
     .. versionadded:: 2.3
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 

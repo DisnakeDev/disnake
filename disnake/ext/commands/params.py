@@ -10,6 +10,7 @@ import inspect
 import itertools
 import math
 import sys
+import types
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum, EnumMeta
@@ -31,9 +32,7 @@ from typing import (
     Type,
     TypeVar,
     Union,
-    get_args,
     get_origin,
-    get_type_hints,
 )
 
 import disnake
@@ -43,7 +42,12 @@ from disnake.enums import ChannelType, OptionType, try_enum_to_int
 from disnake.ext import commands
 from disnake.i18n import Localized
 from disnake.interactions import ApplicationCommandInteraction
-from disnake.utils import maybe_coroutine
+from disnake.utils import (
+    get_signature_parameters,
+    get_signature_return,
+    maybe_coroutine,
+    signature_has_self_param,
+)
 
 from . import errors
 from .converter import CONVERTER_MAPPING
@@ -91,6 +95,7 @@ else:
 T = TypeVar("T", bound=Any)
 TypeT = TypeVar("TypeT", bound=Type[Any])
 CallableT = TypeVar("CallableT", bound=Callable[..., Any])
+BotT = TypeVar("BotT", bound="disnake.Client", covariant=True)
 
 __all__ = (
     "Range",
@@ -109,17 +114,26 @@ __all__ = (
 
 
 def issubclass_(obj: Any, tp: Union[TypeT, Tuple[TypeT, ...]]) -> TypeGuard[TypeT]:
+    """Similar to the builtin `issubclass`, but more lenient.
+    Can also handle unions (`issubclass(Union[int, str], int)`) and
+    generic types (`issubclass(X[T], X)`) in the first argument.
+    """
     if not isinstance(tp, (type, tuple)):
         return False
-    elif not isinstance(obj, type):
-        # Assume we have a type hint
-        if get_origin(obj) in (Union, UnionType, Optional):
-            obj = get_args(obj)
-            return any(isinstance(o, type) and issubclass(o, tp) for o in obj)
-        else:
-            # Other type hint specializations are not supported
-            return False
-    return issubclass(obj, tp)
+    elif isinstance(obj, type):
+        # common case
+        return issubclass(obj, tp)
+
+    # At this point, `obj` is likely a generic type hint
+    if (origin := get_origin(obj)) is None:
+        return False
+
+    if origin in (Union, UnionType):
+        # If we have a Union, try matching any of its args
+        # (recursively, to handle possibly generic types inside this union)
+        return any(issubclass_(o, tp) for o in obj.__args__)
+    else:
+        return isinstance(origin, type) and issubclass(origin, tp)
 
 
 def remove_optionals(annotation: Any) -> Any:
@@ -132,37 +146,6 @@ def remove_optionals(annotation: Any) -> Any:
             annotation = Union[args]  # type: ignore
 
     return annotation
-
-
-def signature(func: Callable) -> inspect.Signature:
-    """Get the signature with evaluated annotations wherever possible
-
-    This is equivalent to `signature(..., eval_str=True)` in python 3.10
-    """
-    if sys.version_info >= (3, 10):
-        return inspect.signature(func, eval_str=True)
-
-    if inspect.isfunction(func) or inspect.ismethod(func):
-        typehints = get_type_hints(func)
-    else:
-        typehints = get_type_hints(func.__call__)
-
-    signature = inspect.signature(func)
-    parameters = []
-
-    for name, param in signature.parameters.items():
-        if isinstance(param.annotation, str):
-            param = param.replace(annotation=typehints.get(name, inspect.Parameter.empty))
-        if param.annotation is type(None):
-            param = param.replace(annotation=None)
-
-        parameters.append(param)
-
-    return_annotation = typehints.get("return", inspect.Parameter.empty)
-    if return_annotation is type(None):
-        return_annotation = None
-
-    return signature.replace(parameters=parameters, return_annotation=return_annotation)
 
 
 def _xt_to_xe(xe: Optional[float], xt: Optional[float], direction: float = 1) -> Optional[float]:
@@ -520,11 +503,11 @@ class ParamInfo:
 
     def __init__(
         self,
-        default: Union[Any, Callable[[ApplicationCommandInteraction], Any]] = ...,
+        default: Union[Any, Callable[[ApplicationCommandInteraction[BotT]], Any]] = ...,
         *,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        converter: Optional[Callable[[ApplicationCommandInteraction, Any], Any]] = None,
+        converter: Optional[Callable[[ApplicationCommandInteraction[BotT], Any], Any]] = None,
         convert_default: bool = False,
         autocomplete: Optional[AnyAutocompleter] = None,
         choices: Optional[Choices] = None,
@@ -786,7 +769,14 @@ class ParamInfo:
         return True
 
     def parse_converter_annotation(self, converter: Callable, fallback_annotation: Any) -> None:
-        _, parameters = isolate_self(signature(converter))
+        if isinstance(converter, (types.FunctionType, types.MethodType)):
+            converter_func = converter
+        else:
+            # if converter isn't a function/method, assume it's a callable object/type
+            # (we need `__call__` here to get the correct global namespace later, since
+            # classes do not have `__globals__`)
+            converter_func = converter.__call__
+        _, parameters = isolate_self(converter_func)
 
         if len(parameters) != 1:
             raise TypeError(
@@ -849,9 +839,9 @@ class ParamInfo:
 def safe_call(function: Callable[..., T], /, *possible_args: Any, **possible_kwargs: Any) -> T:
     """Calls a function without providing any extra unexpected arguments"""
     MISSING: Any = object()
-    sig = signature(function)
+    parameters = get_signature_parameters(function)
 
-    kinds = {p.kind for p in sig.parameters.values()}
+    kinds = {p.kind for p in parameters.values()}
     arb = {inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD}
     if arb.issubset(kinds):
         raise TypeError(
@@ -865,7 +855,7 @@ def safe_call(function: Callable[..., T], /, *possible_args: Any, **possible_kwa
 
     for index, parameter, posarg in itertools.zip_longest(
         itertools.count(),
-        sig.parameters.values(),
+        parameters.values(),
         possible_args,
         fillvalue=MISSING,
     ):
@@ -894,19 +884,26 @@ def safe_call(function: Callable[..., T], /, *possible_args: Any, **possible_kwa
 
 
 def isolate_self(
-    sig: inspect.Signature,
+    function: Callable,
+    parameters: Optional[Dict[str, inspect.Parameter]] = None,
 ) -> Tuple[Tuple[Optional[inspect.Parameter], ...], Dict[str, inspect.Parameter]]:
-    """Create parameters without self and the first interaction"""
-    parameters = dict(sig.parameters)
-    parametersl = list(sig.parameters.values())
+    """Create parameters without self and the first interaction.
 
+    Optionally accepts a `{str: inspect.Parameter}` dict as an optimization,
+    calls `get_signature_parameters(function)` if not provided.
+    """
+    if parameters is None:
+        parameters = get_signature_parameters(function)
     if not parameters:
         return (None, None), {}
+
+    parameters = dict(parameters)  # shallow copy
+    parametersl = list(parameters.values())
 
     cog_param: Optional[inspect.Parameter] = None
     inter_param: Optional[inspect.Parameter] = None
 
-    if parametersl[0].name == "self":
+    if signature_has_self_param(function):
         cog_param = parameters.pop(parametersl[0].name)
         parametersl.pop(0)
     if parametersl:
@@ -952,19 +949,15 @@ def classify_autocompleter(autocompleter: AnyAutocompleter) -> None:
 
 def collect_params(
     function: Callable,
-    sig: Optional[inspect.Signature] = None,
+    parameters: Optional[Dict[str, inspect.Parameter]] = None,
 ) -> Tuple[Optional[str], Optional[str], List[ParamInfo], Dict[str, Injection]]:
     """Collect all parameters in a function.
 
-    Optionally accepts an `inspect.Signature` object (as an optimization),
-    calls `signature(function)` if not provided.
+    Optionally accepts a `{str: inspect.Parameter}` dict as an optimization.
 
     Returns: (`cog parameter`, `interaction parameter`, `param infos`, `injections`)
     """
-    if sig is None:
-        sig = signature(function)
-
-    (cog_param, inter_param), parameters = isolate_self(sig)
+    (cog_param, inter_param), parameters = isolate_self(function, parameters)
 
     doc = disnake.utils.parse_docstring(function)["params"]
 
@@ -1088,10 +1081,10 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
 
     Returns the created options
     """
-    sig = signature(command.callback)
-    # pass `sig` down to avoid having to call `signature(func)` another time,
+    parameters = get_signature_parameters(command.callback)
+    # pass `parameters` down to avoid having to call `get_signature_parameters(func)` another time,
     # which may cause side effects with deferred annotations and warnings
-    _, inter_param, params, injections = collect_params(command.callback, sig)
+    _, inter_param, params, injections = collect_params(command.callback, parameters)
 
     if inter_param is None:
         raise TypeError(f"Couldn't find an interaction parameter in {command.callback}")
@@ -1116,21 +1109,21 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
         if param.autocomplete:
             command.autocompleters[param.name] = param.autocomplete
 
-    if issubclass_(sig.parameters[inter_param].annotation, disnake.GuildCommandInteraction):
+    if issubclass_(parameters[inter_param].annotation, disnake.GuildCommandInteraction):
         command._guild_only = True
 
     return [param.to_option() for param in params]
 
 
 def Param(
-    default: Union[Any, Callable[[ApplicationCommandInteraction], Any]] = ...,
+    default: Union[Any, Callable[[ApplicationCommandInteraction[BotT]], Any]] = ...,
     *,
     name: LocalizedOptional = None,
     description: LocalizedOptional = None,
     choices: Optional[Choices] = None,
-    converter: Optional[Callable[[ApplicationCommandInteraction, Any], Any]] = None,
+    converter: Optional[Callable[[ApplicationCommandInteraction[BotT], Any], Any]] = None,
     convert_defaults: bool = False,
-    autocomplete: Optional[Callable[[ApplicationCommandInteraction, str], Any]] = None,
+    autocomplete: Optional[Callable[[ApplicationCommandInteraction[BotT], str], Any]] = None,
     channel_types: Optional[List[ChannelType]] = None,
     lt: Optional[float] = None,
     le: Optional[float] = None,
@@ -1398,12 +1391,11 @@ def register_injection(
     :class:`Injection`
         The injection being registered.
     """
-    sig = signature(function)
-    tp = sig.return_annotation
+    tp = get_signature_return(function)
 
     if tp is inspect.Parameter.empty:
         raise TypeError("Injection must have a return annotation")
     if tp in ParamInfo.TYPES:
         raise TypeError("Injection cannot overwrite builtin types")
 
-    return Injection.register(function, sig.return_annotation, autocompleters=autocompleters)
+    return Injection.register(function, tp, autocompleters=autocompleters)

@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 
     from disnake.interactions import ApplicationCommandInteraction
 
-    from ._types import Check, Coro, Error, Hook
+    from ._types import AppCheck, Coro, Error, Hook
     from .cog import Cog
 
     ApplicationCommandInteractionT = TypeVar(
@@ -155,7 +155,7 @@ class InvokableApplicationCommand(ABC):
         except AttributeError:
             checks = kwargs.get("checks", [])
 
-        self.checks: List[Check] = checks
+        self.checks: List[AppCheck] = checks
 
         try:
             cooldown = func.__commands_cooldown__
@@ -253,10 +253,10 @@ class InvokableApplicationCommand(ABC):
     def callback(self) -> CommandCallback:
         return self._callback
 
-    def add_check(self, func: Check) -> None:
+    def add_check(self, func: AppCheck) -> None:
         """Adds a check to the application command.
 
-        This is the non-decorator interface to :func:`.check`.
+        This is the non-decorator interface to :func:`.app_check`.
 
         Parameters
         ----------
@@ -265,7 +265,7 @@ class InvokableApplicationCommand(ABC):
         """
         self.checks.append(func)
 
-    def remove_check(self, func: Check) -> None:
+    def remove_check(self, func: AppCheck) -> None:
         """Removes a check from the application command.
 
         This function is idempotent and will not raise an exception

@@ -5,7 +5,7 @@ import copy
 import functools
 import itertools
 import re
-from typing import TYPE_CHECKING, Any, Callable, Iterable, Optional
+from typing import TYPE_CHECKING, Any, Callable, ClassVar, Iterable, Mapping, Optional
 
 import disnake.utils
 
@@ -48,7 +48,7 @@ __all__ = (
 class Paginator:
     """A class that aids in paginating code blocks for Discord messages.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: len(x)
 
@@ -202,16 +202,6 @@ class _HelpCommandImpl(Command):
     async def _on_error_cog_implementation(self, dummy, ctx, error) -> None:
         await self._injected.on_help_command_error(ctx, error)
 
-    @property
-    def clean_params(self):
-        result = self.params.copy()
-        try:
-            del result[next(iter(result))]
-        except StopIteration:
-            raise ValueError("Missing context parameter") from None
-        else:
-            return result
-
     def _inject_into_cog(self, cog) -> None:
         # Warning: hacky
 
@@ -279,7 +269,7 @@ class HelpCommand:
         ones passed in the :class:`.Command` constructor.
     """
 
-    MENTION_TRANSFORMS = {
+    MENTION_TRANSFORMS: ClassVar[Mapping[str, str]] = {
         "@everyone": "@\u200beveryone",
         "@here": "@\u200bhere",
         r"<@!?[0-9]{17,19}>": "@deleted-user",

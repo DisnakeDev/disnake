@@ -33,7 +33,7 @@ jobs:
           python-version: '3.9'
 
       - name: Install dependencies
-        run: pdm install -dG tools
+        run: pdm install -dG changelog
 
       - name: Check for presence of a Change Log fragment (only pull requests)
         # NOTE: The pull request' base branch needs to be fetched so towncrier
