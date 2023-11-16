@@ -850,7 +850,7 @@ class Permissions(BaseFlags):
         """:class:`bool`: Returns ``True`` if a user can edit or delete
         emojis, stickers, and soundboard sounds created by all users.
 
-        See also :attr:`~Permissions.create_guild_expressions`.
+        See also :attr:`create_guild_expressions`.
 
         .. versionadded:: 2.9
         """
@@ -901,7 +901,7 @@ class Permissions(BaseFlags):
         """:class:`bool`: Returns ``True`` if a user can edit or delete guild scheduled events
         created by all users.
 
-        See also :attr:`~Permissions.create_events`.
+        See also :attr:`create_events`.
 
         .. versionadded:: 2.0
         """
@@ -1005,7 +1005,7 @@ class Permissions(BaseFlags):
         """:class:`bool`: Returns ``True`` if a user can create emojis, stickers,
         and soundboard sounds, as well as edit and delete the ones they created.
 
-        See also :attr:`~Permissions.manage_guild_expressions`.
+        See also :attr:`manage_guild_expressions`.
 
         .. versionadded:: 2.10
         """
@@ -1016,7 +1016,7 @@ class Permissions(BaseFlags):
         """:class:`bool`: Returns ``True`` if a user can create guild scheduled events,
         as well as edit and delete the ones they created.
 
-        See also :attr:`~Permissions.manage_events`.
+        See also :attr:`manage_events`.
 
         .. versionadded:: 2.10
         """
