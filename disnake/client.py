@@ -469,7 +469,7 @@ class Client:
     def loop(self):
         """:class:`asyncio.AbstractEventLoop`: Same as :func:`asyncio.get_running_loop`.
 
-        .. deprecated:: 2.10
+        .. deprecated:: 3.0
             Use :func:`asyncio.get_running_loop` directly.
         """
         warnings.warn(
@@ -1003,6 +1003,9 @@ class Client:
         Logs in the client with the specified credentials and calls
         :meth:`.setup_hook`.
 
+        .. versionchanged:: 3.0
+            Now also calls :meth:`.setup_hook`.
+
         Parameters
         ----------
         token: :class:`str`
@@ -1254,6 +1257,9 @@ class Client:
             This function must be the last function to call due to the fact that it
             is blocking. That means that registration of events or anything being
             called after this function call will not execute until it returns.
+
+        .. versionchanged:: 3.0
+            Changed to use :func:`asyncio.run`, instead of custom logic.
         """
         try:
             asyncio.run(self.start(*args, **kwargs))

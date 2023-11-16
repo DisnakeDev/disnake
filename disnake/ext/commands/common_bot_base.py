@@ -158,6 +158,9 @@ class CommonBotBase(Generic[CogT]):
             :exc:`.ClientException` is raised when a cog with the same name
             is already loaded.
 
+        .. versionchanged:: 3.0
+            This is now a coroutine.
+
         Parameters
         ----------
         cog: :class:`.Cog`
@@ -218,6 +221,9 @@ class CommonBotBase(Generic[CogT]):
         cog has registered will be removed as well.
 
         If no cog is found then this method has no effect.
+
+        .. versionchanged:: 3.0
+            This is now a coroutine.
 
         Parameters
         ----------
@@ -326,6 +332,9 @@ class CommonBotBase(Generic[CogT]):
         the entry point on what to do when the extension is loaded. This entry
         point must have a single argument, the ``bot``.
 
+        .. versionchanged:: 3.0
+            This is now a coroutine.
+
         Parameters
         ----------
         name: :class:`str`
@@ -373,6 +382,9 @@ class CommonBotBase(Generic[CogT]):
         parameter, the ``bot``, similar to ``setup`` from
         :meth:`~.Bot.load_extension`.
 
+        .. versionchanged:: 3.0
+            This is now a coroutine.
+
         Parameters
         ----------
         name: :class:`str`
@@ -409,6 +421,9 @@ class CommonBotBase(Generic[CogT]):
         equivalent to a :meth:`unload_extension` followed by a :meth:`load_extension`
         except done in an atomic way. That is, if an operation fails mid-reload then
         the bot will roll-back to the prior working state.
+
+        .. versionchanged:: 3.0
+            This is now a coroutine.
 
         Parameters
         ----------
@@ -468,6 +483,9 @@ class CommonBotBase(Generic[CogT]):
         """Loads all extensions in a directory.
 
         .. versionadded:: 2.4
+
+        .. versionchanged:: 3.0
+            This is now a coroutine.
 
         Parameters
         ----------

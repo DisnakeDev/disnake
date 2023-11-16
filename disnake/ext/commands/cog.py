@@ -476,12 +476,22 @@ class Cog(metaclass=CogMeta):
 
     @_cog_special_method
     async def cog_load(self) -> None:
-        """A special method that is called when the cog is added."""
+        """A special method that is called when the cog is added.
+
+        .. versionchanged:: 3.0
+            This is now ``await``ed directly instead of being scheduled as a task.
+
+            This is now run when the cog fully finished loading.
+        """
         pass
 
     @_cog_special_method
     async def cog_unload(self) -> None:
-        """A special method that is called when the cog gets removed."""
+        """A special method that is called when the cog gets removed.
+
+        .. versionchanged:: 3.0
+            This can now be a coroutine.
+        """
         pass
 
     @_cog_special_method
