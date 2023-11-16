@@ -1002,8 +1002,8 @@ class Permissions(BaseFlags):
 
     @flag_value
     def create_guild_expressions(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can create
-        emojis, stickers, and soundboard sounds, as well as edit and delete those they created.
+        """:class:`bool`: Returns ``True`` if a user can create emojis, stickers,
+        and soundboard sounds, as well as edit and delete the ones they created.
 
         See also :attr:`~Permissions.manage_guild_expressions`.
 
@@ -1014,7 +1014,7 @@ class Permissions(BaseFlags):
     @flag_value
     def create_events(self) -> int:
         """:class:`bool`: Returns ``True`` if a user can create guild scheduled events,
-        as well as edit and delete those they created.
+        as well as edit and delete the ones they created.
 
         See also :attr:`~Permissions.manage_events`.
 
