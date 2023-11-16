@@ -381,7 +381,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         except AttributeError:
             globalns = {}
 
-        params = get_signature_parameters(function, globalns)
+        params = get_signature_parameters(function, globalns, skip_standard_params=True)
         for param in params.values():
             if param.annotation is Greedy:
                 raise TypeError("Unparameterized Greedy[...] is disallowed in signature.")
@@ -607,21 +607,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
         Useful for inspecting signature.
         """
-        result = self.params.copy()
-        if self.cog is not None:
-            # first parameter is self
-            try:
-                del result[next(iter(result))]
-            except StopIteration:
-                raise ValueError("missing 'self' parameter") from None
-
-        try:
-            # first/second parameter is context
-            del result[next(iter(result))]
-        except StopIteration:
-            raise ValueError("missing 'context' parameter") from None
-
-        return result
+        return self.params.copy()
 
     @property
     def full_parent_name(self) -> str:
@@ -693,27 +679,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         kwargs = ctx.kwargs
 
         view = ctx.view
-        iterator = iter(self.params.items())
-
-        if self.cog is not None:
-            # we have 'self' as the first parameter so just advance
-            # the iterator and resume parsing
-            try:
-                next(iterator)
-            except StopIteration:
-                raise disnake.ClientException(
-                    f'Callback for {self.name} command is missing "self" parameter.'
-                ) from None
-
-        # next we have the 'ctx' as the next parameter
-        try:
-            next(iterator)
-        except StopIteration:
-            raise disnake.ClientException(
-                f'Callback for {self.name} command is missing "ctx" parameter.'
-            ) from None
-
-        for name, param in iterator:
+        for name, param in self.params.items():
             ctx.current_parameter = param
             if param.kind in (param.POSITIONAL_OR_KEYWORD, param.POSITIONAL_ONLY):
                 transformed = await self.transform(ctx, param)
