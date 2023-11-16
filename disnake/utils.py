@@ -1304,7 +1304,7 @@ def signature_has_self_param(function: Callable[..., Any]) -> bool:
     # (1) The preceding component for *methods in classes* will be the class name, resulting in `Clazz.func`.
     # (2) For *unbound* functions (not methods), `__qualname__ == __name__`.
     # (3) Bound methods (i.e. types.MethodType) don't have a `self` parameter in the context of this function (see first paragraph).
-    #     (we currently don't expect to handle bound methods anywhere, but check this for consistency anyway).
+    #     (we currently don't expect to handle bound methods anywhere, except the default help command implementation).
     # (4) A somewhat special case are lambdas defined in a class namespace (but not inside a method), which use `Clazz.<lambda>` and shouldn't match (1).
     #     (lambdas at class level are a bit funky; we currently only expect them in the `Param(converter=)` kwarg, which doesn't take a `self` parameter).
     # (5) Similarly, *nested functions* use `containing_func.<locals>.func` and shouldn't have a `self` parameter.
