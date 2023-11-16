@@ -455,7 +455,7 @@ class HelpCommand:
         """
 
         def replace(
-            obj: Match[str], *, transforms: Dict[str, str] = self.MENTION_TRANSFORMS
+            obj: Match[str], *, transforms: Mapping[str, str] = self.MENTION_TRANSFORMS
         ) -> str:
             return transforms.get(obj.group(0), "@invalid")
 
