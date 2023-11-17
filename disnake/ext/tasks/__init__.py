@@ -708,7 +708,7 @@ class Object(Protocol[T_co, P]):
     def __new__(cls) -> T_co:
         ...
 
-    def __init__(*args: P.args, **kwargs: P.kwargs) -> None:
+    def __init__(self, *args: P.args, **kwargs: P.kwargs) -> None:
         ...
 
 
@@ -734,7 +734,7 @@ def loop(
 
 
 def loop(
-    cls: Type[Object[L_co, Concatenate[LF, P]]] = Loop[LF],
+    cls: Type[Object[L_co, Concatenate[LF, P]]] = Loop[Any],
     **kwargs: Any,
 ) -> Callable[[LF], L_co]:
     """A decorator that schedules a task in the background for you with
