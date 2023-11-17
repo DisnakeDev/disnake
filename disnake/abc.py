@@ -390,7 +390,7 @@ class GuildChannel(ABC):
             if p_id is not None and (parent := self.guild.get_channel(p_id)):
                 overwrites_payload = [c._asdict() for c in parent._overwrites]
 
-        if overwrites is not MISSING and overwrites is not None:
+        if overwrites not in (MISSING, None):
             overwrites_payload = []
             for target, perm in overwrites.items():
                 if not isinstance(perm, PermissionOverwrite):

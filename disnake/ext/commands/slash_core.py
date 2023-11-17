@@ -666,7 +666,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             group = self.children.get(chain[0])
             if not isinstance(group, SubCommandGroup):
                 raise AssertionError("the first subcommand is not a SubCommandGroup instance")
-            subcmd = group.children.get(chain[1]) if group is not None else None
+            subcmd = group.children.get(chain[1])
         else:
             raise ValueError("Command chain is too long")
 
@@ -695,7 +695,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             group = self.children.get(chain[0])
             if not isinstance(group, SubCommandGroup):
                 raise AssertionError("the first subcommand is not a SubCommandGroup instance")
-            subcmd = group.children.get(chain[1]) if group is not None else None
+            subcmd = group.children.get(chain[1])
         else:
             raise ValueError("Command chain is too long")
 

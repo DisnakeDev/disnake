@@ -27,7 +27,12 @@ from typing import (
 )
 
 import disnake
-from disnake.utils import _generated, _overload_with_permissions
+from disnake.utils import (
+    _generated,
+    _overload_with_permissions,
+    get_signature_parameters,
+    unwrap_function,
+)
 
 from ._types import _BaseCommand
 from .cog import Cog
@@ -62,7 +67,7 @@ if TYPE_CHECKING:
 
     from disnake.message import Message
 
-    from ._types import Check, Coro, CoroFunc, Error, Hook
+    from ._types import AppCheck, Check, Coro, CoroFunc, Error, Hook
 
 
 __all__ = (
@@ -76,6 +81,8 @@ __all__ = (
     "has_any_role",
     "check",
     "check_any",
+    "app_check",
+    "app_check_any",
     "before_invoke",
     "after_invoke",
     "bot_has_role",
@@ -112,42 +119,6 @@ if TYPE_CHECKING:
     ]
 else:
     P = TypeVar("P")
-
-
-def unwrap_function(function: Callable[..., Any]) -> Callable[..., Any]:
-    partial = functools.partial
-    while True:
-        if hasattr(function, "__wrapped__"):
-            function = function.__wrapped__
-        elif isinstance(function, partial):
-            function = function.func
-        else:
-            return function
-
-
-def get_signature_parameters(
-    function: Callable[..., Any], globalns: Dict[str, Any]
-) -> Dict[str, inspect.Parameter]:
-    signature = inspect.signature(function)
-    params = {}
-    cache: Dict[str, Any] = {}
-    eval_annotation = disnake.utils.evaluate_annotation
-    for name, parameter in signature.parameters.items():
-        annotation = parameter.annotation
-        if annotation is parameter.empty:
-            params[name] = parameter
-            continue
-        if annotation is None:
-            params[name] = parameter.replace(annotation=type(None))
-            continue
-
-        annotation = eval_annotation(annotation, globalns, globalns, cache)
-        if annotation is Greedy:
-            raise TypeError("Unparameterized Greedy[...] is disallowed in signature.")
-
-        params[name] = parameter.replace(annotation=annotation)
-
-    return params
 
 
 def wrap_callback(coro):
@@ -410,7 +381,11 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         except AttributeError:
             globalns = {}
 
-        self.params = get_signature_parameters(function, globalns)
+        params = get_signature_parameters(function, globalns, skip_standard_params=True)
+        for param in params.values():
+            if param.annotation is Greedy:
+                raise TypeError("Unparameterized Greedy[...] is disallowed in signature.")
+        self.params = params
 
     def add_check(self, func: Check) -> None:
         """Adds a check to the command.
@@ -632,21 +607,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
         Useful for inspecting signature.
         """
-        result = self.params.copy()
-        if self.cog is not None:
-            # first parameter is self
-            try:
-                del result[next(iter(result))]
-            except StopIteration:
-                raise ValueError("missing 'self' parameter") from None
-
-        try:
-            # first/second parameter is context
-            del result[next(iter(result))]
-        except StopIteration:
-            raise ValueError("missing 'context' parameter") from None
-
-        return result
+        return self.params.copy()
 
     @property
     def full_parent_name(self) -> str:
@@ -718,27 +679,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         kwargs = ctx.kwargs
 
         view = ctx.view
-        iterator = iter(self.params.items())
-
-        if self.cog is not None:
-            # we have 'self' as the first parameter so just advance
-            # the iterator and resume parsing
-            try:
-                next(iterator)
-            except StopIteration:
-                raise disnake.ClientException(
-                    f'Callback for {self.name} command is missing "self" parameter.'
-                ) from None
-
-        # next we have the 'ctx' as the next parameter
-        try:
-            next(iterator)
-        except StopIteration:
-            raise disnake.ClientException(
-                f'Callback for {self.name} command is missing "ctx" parameter.'
-            ) from None
-
-        for name, param in iterator:
+        for name, param in self.params.items():
             ctx.current_parameter = param
             if param.kind in (param.POSITIONAL_OR_KEYWORD, param.POSITIONAL_ONLY):
                 transformed = await self.transform(ctx, param)
@@ -814,7 +755,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             dt = ctx.message.edited_at or ctx.message.created_at
             current = dt.replace(tzinfo=datetime.timezone.utc).timestamp()
             bucket = self._buckets.get_bucket(ctx.message, current)
-            if bucket is not None:
+            if bucket is not None:  # pyright: ignore[reportUnnecessaryComparison]
                 retry_after = bucket.update_rate_limit(current)
                 if retry_after:
                     raise CommandOnCooldown(bucket, retry_after, self._buckets.type)  # type: ignore
@@ -1722,6 +1663,9 @@ def check(predicate: Check) -> Callable[[T], T]:
         The function returned by ``predicate`` is **always** a coroutine,
         even if the original function was not a coroutine.
 
+    .. note::
+        See :func:`.app_check` for this function's application command counterpart.
+
     .. versionchanged:: 1.3
         The ``predicate`` attribute was added.
 
@@ -1774,7 +1718,7 @@ def check(predicate: Check) -> Callable[[T], T]:
         decorator.predicate = predicate
     else:
 
-        @functools.wraps(predicate)
+        @functools.wraps(predicate)  # type: ignore
         async def wrapper(ctx):
             return predicate(ctx)  # type: ignore
 
@@ -1793,6 +1737,9 @@ def check_any(*checks: Check) -> Callable[[T], T]:
     .. note::
 
         The ``predicate`` attribute for this function **is** a coroutine.
+
+    .. note::
+        See :func:`.app_check_any` for this function's application command counterpart.
 
     .. versionadded:: 1.3
 
@@ -1848,6 +1795,46 @@ def check_any(*checks: Check) -> Callable[[T], T]:
         raise CheckAnyFailure(unwrapped, errors)
 
     return check(predicate)
+
+
+def app_check(predicate: AppCheck) -> Callable[[T], T]:
+    """Same as :func:`.check`, but for app commands.
+
+    .. versionadded:: 2.10
+
+    Parameters
+    ----------
+    predicate: Callable[[:class:`disnake.ApplicationCommandInteraction`], :class:`bool`]
+        The predicate to check if the command should be invoked.
+    """
+    return check(predicate)  # type: ignore  # impl is the same, typings are different
+
+
+def app_check_any(*checks: AppCheck) -> Callable[[T], T]:
+    """Same as :func:`.check_any`, but for app commands.
+
+    .. note::
+        See :func:`.check_any` for this function's prefix command counterpart.
+
+    .. versionadded:: 2.10
+
+    Parameters
+    ----------
+    *checks: Callable[[:class:`disnake.ApplicationCommandInteraction`], :class:`bool`]
+        An argument list of checks that have been decorated with
+        the :func:`app_check` decorator.
+
+    Raises
+    ------
+    TypeError
+        A check passed has not been decorated with the :func:`app_check`
+        decorator.
+    """
+    try:
+        return check_any(*checks)  # type: ignore  # impl is the same, typings are different
+    except TypeError as e:
+        msg = str(e).replace("commands.check", "commands.app_check")  # fix err message
+        raise TypeError(msg) from None
 
 
 def has_role(item: Union[int, str]) -> Callable[[T], T]:

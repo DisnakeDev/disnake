@@ -589,7 +589,8 @@ class AutoShardedClient(Client):
         activities = () if activity is None else (activity,)
         for guild in guilds:
             me = guild.me
-            if me is None:
+            if me is None:  # pyright: ignore[reportUnnecessaryComparison]
+                # may happen if guild is unavailable
                 continue
 
             # Member.activities is typehinted as Tuple[ActivityType, ...], we may be setting it as Tuple[BaseActivity, ...]
