@@ -245,7 +245,7 @@ def _transform_datetime(entry: AuditLogEntry, data: Optional[str]) -> Optional[d
 
 
 def _transform_privacy_level(
-    entry: AuditLogEntry, data: int
+    entry: AuditLogEntry, data: Optional[int]
 ) -> Optional[Union[enums.StagePrivacyLevel, enums.GuildScheduledEventPrivacyLevel]]:
     if data is None:
         return None

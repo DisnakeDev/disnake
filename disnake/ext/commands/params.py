@@ -85,9 +85,6 @@ else:
 
 if sys.version_info >= (3, 10):
     from types import EllipsisType, UnionType
-elif TYPE_CHECKING:
-    UnionType = object()
-    EllipsisType = ellipsis  # noqa: F821
 else:
     UnionType = object()
     EllipsisType = type(Ellipsis)
@@ -543,7 +540,7 @@ class ParamInfo:
         self.max_length = max_length
         self.large = large
 
-    def copy(self) -> ParamInfo:
+    def copy(self) -> Self:
         # n. b. this method needs to be manually updated when a new attribute is added.
         cls = self.__class__
         ins = cls.__new__(cls)
@@ -1339,7 +1336,7 @@ def option_enum(
 
     choices = choices or kwargs
     first, *_ = choices.values()
-    return Enum("", choices, type=type(first))
+    return Enum("", choices, type=type(first))  # type: ignore
 
 
 class ConverterMethod(classmethod):

@@ -303,7 +303,7 @@ class InvokableApplicationCommand(ABC):
             dt = inter.created_at
             current = dt.replace(tzinfo=datetime.timezone.utc).timestamp()
             bucket = self._buckets.get_bucket(inter, current)  # type: ignore
-            if bucket is not None:
+            if bucket is not None:  # pyright: ignore[reportUnnecessaryComparison]
                 retry_after = bucket.update_rate_limit(current)
                 if retry_after:
                     raise CommandOnCooldown(bucket, retry_after, self._buckets.type)  # type: ignore

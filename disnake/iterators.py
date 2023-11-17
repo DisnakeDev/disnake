@@ -106,7 +106,7 @@ class _AsyncIterator(AsyncIterator[T]):
     def map(self, func: _Func[T, OT]) -> _MappedAsyncIterator[OT]:
         return _MappedAsyncIterator(self, func)
 
-    def filter(self, predicate: _Func[T, bool]) -> _FilteredAsyncIterator[T]:
+    def filter(self, predicate: Optional[_Func[T, bool]]) -> _FilteredAsyncIterator[T]:
         return _FilteredAsyncIterator(self, predicate)
 
     async def flatten(self) -> List[T]:
@@ -152,11 +152,11 @@ class _MappedAsyncIterator(_AsyncIterator[OT]):
 
 
 class _FilteredAsyncIterator(_AsyncIterator[T]):
-    def __init__(self, iterator: _AsyncIterator[T], predicate: _Func[T, bool]) -> None:
+    def __init__(self, iterator: _AsyncIterator[T], predicate: Optional[_Func[T, bool]]) -> None:
         self.iterator = iterator
 
         if predicate is None:
-            predicate = lambda x: bool(x)
+            predicate = bool  # similar to the `filter` builtin, a `None` filter drops falsy items
 
         self.predicate: _Func[T, bool] = predicate
 
@@ -626,8 +626,8 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
             }
 
             for element in entries:
-                # TODO: remove this if statement later
-                if element["action_type"] is None:
+                # https://github.com/discord/discord-api-docs/issues/5055#issuecomment-1266363766
+                if element["action_type"] is None:  # pyright: ignore[reportUnnecessaryComparison]
                     continue
 
                 await self.entries.put(
