@@ -42,7 +42,12 @@ from disnake.enums import ChannelType, OptionType, try_enum_to_int
 from disnake.ext import commands
 from disnake.i18n import Localized
 from disnake.interactions import ApplicationCommandInteraction
-from disnake.utils import get_signature_parameters, get_signature_return, maybe_coroutine
+from disnake.utils import (
+    get_signature_parameters,
+    get_signature_return,
+    maybe_coroutine,
+    signature_has_self_param,
+)
 
 from . import errors
 from .converter import CONVERTER_MAPPING
@@ -768,7 +773,7 @@ class ParamInfo:
             # (we need `__call__` here to get the correct global namespace later, since
             # classes do not have `__globals__`)
             converter_func = converter.__call__
-        _, parameters = isolate_self(get_signature_parameters(converter_func))
+        _, parameters = isolate_self(converter_func)
 
         if len(parameters) != 1:
             raise TypeError(
@@ -876,9 +881,16 @@ def safe_call(function: Callable[..., T], /, *possible_args: Any, **possible_kwa
 
 
 def isolate_self(
-    parameters: Dict[str, inspect.Parameter],
+    function: Callable,
+    parameters: Optional[Dict[str, inspect.Parameter]] = None,
 ) -> Tuple[Tuple[Optional[inspect.Parameter], ...], Dict[str, inspect.Parameter]]:
-    """Create parameters without self and the first interaction"""
+    """Create parameters without self and the first interaction.
+
+    Optionally accepts a `{str: inspect.Parameter}` dict as an optimization,
+    calls `get_signature_parameters(function)` if not provided.
+    """
+    if parameters is None:
+        parameters = get_signature_parameters(function)
     if not parameters:
         return (None, None), {}
 
@@ -888,7 +900,7 @@ def isolate_self(
     cog_param: Optional[inspect.Parameter] = None
     inter_param: Optional[inspect.Parameter] = None
 
-    if parametersl[0].name == "self":
+    if signature_has_self_param(function):
         cog_param = parameters.pop(parametersl[0].name)
         parametersl.pop(0)
     if parametersl:
@@ -938,15 +950,11 @@ def collect_params(
 ) -> Tuple[Optional[str], Optional[str], List[ParamInfo], Dict[str, Injection]]:
     """Collect all parameters in a function.
 
-    Optionally accepts a `{str: inspect.Parameter}` dict as an optimization,
-    calls `get_signature_parameters(function)` if not provided.
+    Optionally accepts a `{str: inspect.Parameter}` dict as an optimization.
 
     Returns: (`cog parameter`, `interaction parameter`, `param infos`, `injections`)
     """
-    if parameters is None:
-        parameters = get_signature_parameters(function)
-
-    (cog_param, inter_param), parameters = isolate_self(parameters)
+    (cog_param, inter_param), parameters = isolate_self(function, parameters)
 
     doc = disnake.utils.parse_docstring(function)["params"]
 

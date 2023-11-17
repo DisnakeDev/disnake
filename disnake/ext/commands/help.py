@@ -202,16 +202,6 @@ class _HelpCommandImpl(Command):
     async def _on_error_cog_implementation(self, dummy, ctx, error) -> None:
         await self._injected.on_help_command_error(ctx, error)
 
-    @property
-    def clean_params(self):
-        result = self.params.copy()
-        try:
-            del result[next(iter(result))]
-        except StopIteration:
-            raise ValueError("Missing context parameter") from None
-        else:
-            return result
-
     def _inject_into_cog(self, cog) -> None:
         # Warning: hacky
 
