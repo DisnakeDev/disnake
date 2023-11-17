@@ -136,7 +136,7 @@ class CommonBotBase(Generic[CogT]):
             :attr:`owner_ids` is not set.
 
         .. versionchanged:: 2.10
-            Also take team roles into account; only team members with the :attr:`~disnake.TeamMemberRole.admin`
+            Also takes team roles into account; only team members with the :attr:`~disnake.TeamMemberRole.admin`
             or :attr:`~disnake.TeamMemberRole.developer` roles are considered bot owners.
 
         Parameters
