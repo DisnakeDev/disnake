@@ -25,7 +25,6 @@ from typing import (
     Tuple,
     TypeVar,
     Union,
-    cast,
     overload,
 )
 
@@ -596,7 +595,6 @@ class ConnectionState:
             if channel is None:
                 if "author" in data:
                     # MessagePayload
-                    data = cast("MessagePayload", data)
                     user_id = int(data["author"]["id"])
                 else:
                     # TypingStartEvent
@@ -633,8 +631,6 @@ class ConnectionState:
     ):
         guild_id = guild.id
         ws = self._get_websocket(guild_id)
-        if ws is None:
-            raise RuntimeError("Somehow do not have a websocket for this guild_id")
 
         request = ChunkRequest(guild.id, self._get_guild, cache=cache)
         self._chunk_requests[request.nonce] = request
@@ -1792,6 +1788,8 @@ class ConnectionState:
                 logging_coroutine(coro, info="Voice Protocol voice server update handler")
             )
 
+    # FIXME: this should be refactored. The `GroupChannel` path will never be hit,
+    # `raw.timestamp` exists so no need to parse it twice, and `.get_user` should be used before falling back
     def parse_typing_start(self, data: gateway.TypingStartEvent) -> None:
         channel, guild = self._get_guild_channel(data)
         raw = RawTypingEvent(data)
@@ -1806,7 +1804,7 @@ class ConnectionState:
 
         self.dispatch("raw_typing", raw)
 
-        if channel is not None:
+        if channel is not None:  # pyright: ignore[reportUnnecessaryComparison]
             member = None
             if raw.member is not None:
                 member = raw.member

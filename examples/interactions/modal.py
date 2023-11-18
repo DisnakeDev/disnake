@@ -2,6 +2,8 @@
 
 """An example demonstrating two methods of sending modals and handling modal responses."""
 
+# pyright: reportUnknownLambdaType=false
+
 import asyncio
 import os
 

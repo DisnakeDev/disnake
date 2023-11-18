@@ -10,18 +10,7 @@ import logging
 import sys
 import traceback
 import warnings
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Iterable,
-    List,
-    Optional,
-    Type,
-    TypeVar,
-    Union,
-    cast,
-)
+from typing import TYPE_CHECKING, Any, Callable, Iterable, List, Optional, Type, TypeVar, Union
 
 import disnake
 
@@ -414,7 +403,7 @@ class BotBase(CommonBotBase, GroupMixin):
         await super()._remove_module_references(name)
         # remove all the commands from the module
         for cmd in self.all_commands.copy().values():
-            if cmd.module is not None and _is_submodule(name, cmd.module):
+            if cmd.module and _is_submodule(name, cmd.module):
                 if isinstance(cmd, GroupMixin):
                     cmd.recursively_remove_all_commands()
                 self.remove_command(cmd.name)
@@ -513,7 +502,7 @@ class BotBase(CommonBotBase, GroupMixin):
             ``cls`` parameter.
         """
         view = StringView(message.content)
-        ctx = cast("CXT", cls(prefix=None, view=view, bot=self, message=message))
+        ctx = cls(prefix=None, view=view, bot=self, message=message)
 
         if message.author.id == self.user.id:  # type: ignore
             return ctx

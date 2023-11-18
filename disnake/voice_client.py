@@ -276,7 +276,7 @@ class VoiceClient(VoiceProtocol):
         self.server_id = int(data["guild_id"])
         endpoint = data.get("endpoint")
 
-        if endpoint is None or self.token is None:
+        if endpoint is None or not self.token:
             _log.warning(
                 "Awaiting endpoint... This requires waiting. "
                 "If timeout occurred considering raising the timeout and reconnecting."

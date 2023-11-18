@@ -55,7 +55,7 @@ class Modal:
         custom_id: str = MISSING,
         timeout: float = 600,
     ) -> None:
-        if timeout is None:
+        if timeout is None:  # pyright: ignore[reportUnnecessaryComparison]
             raise ValueError("Timeout may not be None")
 
         rows = components_to_rows(components)

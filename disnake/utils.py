@@ -134,6 +134,7 @@ T = TypeVar("T")
 V = TypeVar("V")
 T_co = TypeVar("T_co", covariant=True)
 _Iter = Union[Iterator[T], AsyncIterator[T]]
+_BytesLike = Union[bytes, bytearray, memoryview]
 
 
 class CachedSlotProperty(Generic[T, T_co]):
@@ -489,7 +490,7 @@ _mime_type_extensions = {
 }
 
 
-def _get_mime_type_for_image(data: bytes) -> str:
+def _get_mime_type_for_image(data: _BytesLike) -> str:
     if data[0:8] == b"\x89\x50\x4E\x47\x0D\x0A\x1A\x0A":
         return "image/png"
     elif data[0:3] == b"\xff\xd8\xff" or data[6:10] in (b"JFIF", b"Exif"):
@@ -502,14 +503,14 @@ def _get_mime_type_for_image(data: bytes) -> str:
         raise ValueError("Unsupported image type given")
 
 
-def _bytes_to_base64_data(data: bytes) -> str:
+def _bytes_to_base64_data(data: _BytesLike) -> str:
     fmt = "data:{mime};base64,{data}"
     mime = _get_mime_type_for_image(data)
     b64 = b64encode(data).decode("ascii")
     return fmt.format(mime=mime, data=b64)
 
 
-def _get_extension_for_image(data: bytes) -> Optional[str]:
+def _get_extension_for_image(data: _BytesLike) -> Optional[str]:
     try:
         mime_type = _get_mime_type_for_image(data)
     except ValueError:
@@ -538,7 +539,7 @@ async def _assetbytes_to_base64_data(data: Optional[AssetBytes]) -> Optional[str
 if HAS_ORJSON:
 
     def _to_json(obj: Any) -> str:
-        return orjson.dumps(obj).decode("utf-8")
+        return orjson.dumps(obj).decode("utf-8")  # type: ignore
 
     _from_json = orjson.loads  # type: ignore
 
@@ -571,7 +572,8 @@ async def maybe_coroutine(
         return value  # type: ignore  # typeguard doesn't narrow in the negative case
 
 
-async def async_all(gen: Iterable[Union[Awaitable[bool], bool]], *, check=_isawaitable) -> bool:
+async def async_all(gen: Iterable[Union[Awaitable[bool], bool]]) -> bool:
+    check = _isawaitable
     for elem in gen:
         if check(elem):
             elem = await elem

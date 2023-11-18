@@ -228,7 +228,7 @@ class CooldownMapping:
         key = self._bucket_key(message)
         if key not in self._cache:
             bucket = self.create_bucket(message)
-            if bucket is not None:
+            if bucket is not None:  # pyright: ignore[reportUnnecessaryComparison]
                 self._cache[key] = bucket
         else:
             bucket = self._cache[key]

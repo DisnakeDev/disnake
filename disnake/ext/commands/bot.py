@@ -182,7 +182,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
     owner_ids: Optional[Collection[:class:`int`]]
         The IDs of the users that own the bot. This is similar to :attr:`owner_id`.
         If this is not set and the application is team based, then it is
-        fetched automatically using :meth:`~.Bot.application_info`.
+        fetched automatically using :meth:`~.Bot.application_info` (taking team roles into account).
         For performance reasons it is recommended to use a :class:`set`
         for the collection. You cannot set both ``owner_id`` and ``owner_ids``.
 
@@ -397,7 +397,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
     owner_ids: Optional[Collection[:class:`int`]]
         The IDs of the users that own the bot. This is similar to :attr:`owner_id`.
         If this is not set and the application is team based, then it is
-        fetched automatically using :meth:`~.Bot.application_info`.
+        fetched automatically using :meth:`~.Bot.application_info` (taking team roles into account).
         For performance reasons it is recommended to use a :class:`set`
         for the collection. You cannot set both ``owner_id`` and ``owner_ids``.
 

@@ -65,7 +65,7 @@ class Modals(commands.Cog):
 
         modal_inter: disnake.ModalInteraction = await self.bot.wait_for(
             "modal_submit",
-            check=lambda i: i.custom_id == "create_tag2" and i.author.id == inter.author.id,
+            check=lambda i: i.custom_id == "create_tag2" and i.author.id == inter.author.id,  # type: ignore  # unknown parameter type
         )
 
         embed = disnake.Embed(title="Tag Creation")
