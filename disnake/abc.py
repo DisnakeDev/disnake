@@ -642,6 +642,7 @@ class GuildChannel(ABC):
             base.mention_everyone = False
             base.embed_links = False
             base.attach_files = False
+            base.use_clyde_ai = False
 
         # if you can't view a channel then you have no permissions there
         if not base.view_channel:
@@ -886,10 +887,12 @@ class GuildChannel(ABC):
         send_messages_in_threads: Optional[bool] = ...,
         send_tts_messages: Optional[bool] = ...,
         send_voice_messages: Optional[bool] = ...,
+        set_voice_channel_status: Optional[bool] = ...,
         speak: Optional[bool] = ...,
         start_embedded_activities: Optional[bool] = ...,
         stream: Optional[bool] = ...,
         use_application_commands: Optional[bool] = ...,
+        use_clyde_ai: Optional[bool] = ...,
         use_embedded_activities: Optional[bool] = ...,
         use_external_emojis: Optional[bool] = ...,
         use_external_sounds: Optional[bool] = ...,
