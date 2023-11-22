@@ -202,6 +202,40 @@ class Option:
         The maximum length for this option if this is a string option.
 
         .. versionadded:: 2.6
+
+    Attributes
+    ----------
+    name: :class:`str`
+        The option's name.
+    description: :class:`str`
+        The option's description.
+    type: :class:`OptionType`
+        The option type, e.g. :class:`OptionType.user`.
+    required: :class:`bool`
+        Whether this option is required.
+    choices: List[:class:`OptionChoice`]
+        The list of option choices.
+    options: List[:class:`Option`]
+        The list of sub options. Normally you don't have to specify it directly,
+        instead consider using ``@main_cmd.sub_command`` or ``@main_cmd.sub_command_group`` decorators.
+    channel_types: List[:class:`ChannelType`]
+        The list of channel types that your option supports, if the type is :class:`OptionType.channel`.
+        By default, it supports all channel types.
+    autocomplete: :class:`bool`
+        Whether this option can be autocompleted.
+    min_value: Union[:class:`int`, :class:`float`]
+        The minimum value permitted.
+    max_value: Union[:class:`int`, :class:`float`]
+        The maximum value permitted.
+    min_length: :class:`int`
+        The minimum length for this option if this is a string option.
+
+        .. versionadded:: 2.6
+
+    max_length: :class:`int`
+        The maximum length for this option if this is a string option.
+
+        .. versionadded:: 2.6
     """
 
     __slots__ = (

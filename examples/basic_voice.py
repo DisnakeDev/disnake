@@ -33,8 +33,6 @@ ytdl_format_options = {
     "source_address": "0.0.0.0",  # bind to ipv4 since ipv6 addresses cause issues sometimes
 }
 
-ffmpeg_options = {"options": "-vn"}
-
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
 
@@ -59,7 +57,7 @@ class YTDLSource(disnake.PCMVolumeTransformer):
 
         filename = data["url"] if stream else ytdl.prepare_filename(data)
 
-        return cls(disnake.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
+        return cls(disnake.FFmpegPCMAudio(filename, options="-vn"), data=data)
 
 
 class Music(commands.Cog):

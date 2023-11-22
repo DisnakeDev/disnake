@@ -63,6 +63,12 @@ Functions
 .. autofunction:: check_any(*checks)
     :decorator:
 
+.. autofunction:: app_check(predicate)
+    :decorator:
+
+.. autofunction:: app_check_any(*checks)
+    :decorator:
+
 .. autofunction:: has_role(item)
     :decorator:
 

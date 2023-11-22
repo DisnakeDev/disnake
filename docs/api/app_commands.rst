@@ -97,7 +97,7 @@ Option
 
 .. attributetable:: Option
 
-.. autoclass:: Option()
+.. autoclass:: Option
     :members:
 
 OptionChoice

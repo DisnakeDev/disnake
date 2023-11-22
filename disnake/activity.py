@@ -921,7 +921,7 @@ def create_activity(
     elif game_type is ActivityType.listening and "sync_id" in data and "session_id" in data:
         activity = Spotify(**data)
     else:
-        activity = Activity(**data)
+        activity = Activity(**data)  # type: ignore
 
     if isinstance(activity, (Activity, CustomActivity)) and activity.emoji and state:
         activity.emoji._state = state
