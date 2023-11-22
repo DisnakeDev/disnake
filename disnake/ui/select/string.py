@@ -268,7 +268,7 @@ def string_select(
 
 
 def string_select(
-    cls: Type[Object[S_co, P]] = StringSelect[Any], **kwargs: Any
+    cls: Type[Object[S_co, ...]] = StringSelect[Any], **kwargs: Any
 ) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
     """A decorator that attaches a string select menu to a component.
 

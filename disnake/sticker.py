@@ -450,7 +450,7 @@ class GuildSticker(Sticker):
         Raises
         ------
         Forbidden
-            You are not allowed to edit stickers.
+            You are not allowed to edit this sticker.
         HTTPException
             An error occurred editing the sticker.
 
@@ -498,7 +498,7 @@ class GuildSticker(Sticker):
         Raises
         ------
         Forbidden
-            You are not allowed to delete stickers.
+            You are not allowed to delete this sticker.
         HTTPException
             An error occurred deleting the sticker.
         """

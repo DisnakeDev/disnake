@@ -35,6 +35,7 @@ __all__ = (
     "ActivityType",
     "NotificationLevel",
     "TeamMembershipState",
+    "TeamMemberRole",
     "WebhookType",
     "ExpireBehaviour",
     "ExpireBehavior",
@@ -466,7 +467,7 @@ class AuditLogAction(Enum):
     @property
     def target_type(self) -> Optional[str]:
         v = self.value
-        if v == -1:
+        if v == -1:  # pyright: ignore[reportUnnecessaryComparison]
             return "all"
         elif v < 10:
             return "guild"
@@ -551,6 +552,15 @@ class TeamMembershipState(Enum):
     accepted = 2
 
 
+class TeamMemberRole(Enum):
+    admin = "admin"
+    developer = "developer"
+    read_only = "read_only"
+
+    def __str__(self) -> str:
+        return self.name
+
+
 class WebhookType(Enum):
     incoming = 1
     channel_follower = 2
@@ -627,7 +637,7 @@ class ComponentType(Enum):
     action_row = 1
     button = 2
     string_select = 3
-    select = string_select  # backwards compatibility
+    select = 3  # backwards compatibility
     text_input = 4
     user_select = 5
     role_select = 6

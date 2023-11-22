@@ -658,13 +658,14 @@ class MessageReference:
         return f"<MessageReference message_id={self.message_id!r} channel_id={self.channel_id!r} guild_id={self.guild_id!r}>"
 
     def to_dict(self) -> MessageReferencePayload:
-        result: MessageReferencePayload = {"channel_id": self.channel_id}
+        result: MessageReferencePayload = {
+            "channel_id": self.channel_id,
+            "fail_if_not_exists": self.fail_if_not_exists,
+        }
         if self.message_id is not None:
             result["message_id"] = self.message_id
         if self.guild_id is not None:
             result["guild_id"] = self.guild_id
-        if self.fail_if_not_exists is not None:
-            result["fail_if_not_exists"] = self.fail_if_not_exists
         return result
 
     to_message_reference_dict = to_dict

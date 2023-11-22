@@ -2,6 +2,7 @@
 
 import asyncio
 import datetime
+import functools
 import inspect
 import os
 import sys
@@ -880,3 +881,84 @@ def test_as_valid_locale(locale, expected) -> None:
 )
 def test_humanize_list(values, expected) -> None:
     assert utils.humanize_list(values, "plus") == expected
+
+
+# used for `test_signature_has_self_param`
+def _toplevel():
+    def inner() -> None:
+        ...
+
+    return inner
+
+
+def decorator(f):
+    @functools.wraps(f)
+    def wrap(self, *args, **kwargs):
+        return f(self, *args, **kwargs)
+
+    return wrap
+
+
+# used for `test_signature_has_self_param`
+class _Clazz:
+    def func(self):
+        def inner() -> None:
+            ...
+
+        return inner
+
+    @classmethod
+    def cmethod(cls) -> None:
+        ...
+
+    @staticmethod
+    def smethod() -> None:
+        ...
+
+    class Nested:
+        def func(self):
+            def inner() -> None:
+                ...
+
+            return inner
+
+    rebind = _toplevel
+
+    @decorator
+    def decorated(self) -> None:
+        ...
+
+    _lambda = lambda: None
+
+
+@pytest.mark.parametrize(
+    ("function", "expected"),
+    [
+        # top-level function
+        (_toplevel, False),
+        # methods in class
+        (_Clazz.func, True),
+        (_Clazz().func, False),
+        # unfortunately doesn't work
+        (_Clazz.rebind, False),
+        (_Clazz().rebind, False),
+        # classmethod/staticmethod isn't supported, but checked to ensure consistency
+        (_Clazz.cmethod, False),
+        (_Clazz.smethod, True),
+        # nested class methods
+        (_Clazz.Nested.func, True),
+        (_Clazz.Nested().func, False),
+        # inner methods
+        (_toplevel(), False),
+        (_Clazz().func(), False),
+        (_Clazz.Nested().func(), False),
+        # decorated method
+        (_Clazz.decorated, True),
+        (_Clazz().decorated, False),
+        # lambda (class-level)
+        (_Clazz._lambda, False),
+        (_Clazz()._lambda, False),
+    ],
+)
+def test_signature_has_self_param(function, expected) -> None:
+    assert utils.signature_has_self_param(function) == expected
