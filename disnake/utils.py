@@ -1139,6 +1139,7 @@ def _resolve_typealiastype(
     return evaluate_annotation(tp.__value__, globals, locals, cache)
 
 
+# FIXME: this should be split up into smaller functions for clarity and easier maintenance
 def evaluate_annotation(
     tp: Any,
     globals: Dict[str, Any],
