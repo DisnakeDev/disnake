@@ -142,7 +142,7 @@ def role_select(
 
 
 def role_select(
-    cls: Type[Object[S_co, P]] = RoleSelect[Any], **kwargs: Any
+    cls: Type[Object[S_co, ...]] = RoleSelect[Any], **kwargs: Any
 ) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
     """A decorator that attaches a role select menu to a component.
 

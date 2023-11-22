@@ -1855,7 +1855,7 @@ class InteractionDataResolved(Dict[str, Any]):
                     guild
                     and guild.get_channel_or_thread(channel_id)
                     or factory(
-                        guild=guild_fallback,  # type: ignore
+                        guild=guild_fallback,
                         state=state,
                         data=channel,  # type: ignore
                     )
