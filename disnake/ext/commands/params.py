@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import asyncio
 import collections.abc
+import copy
 import inspect
 import itertools
 import math
@@ -554,7 +555,7 @@ class ParamInfo:
         ins.converter = self.converter
         ins.convert_default = self.convert_default
         ins.autocomplete = self.autocomplete
-        ins.choices = self.choices.copy()
+        ins.choices = copy.copy(self.choices)
         ins.type = self.type
         ins.channel_types = self.channel_types.copy()
         ins.max_value = self.max_value
