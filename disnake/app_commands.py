@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 import re
 from abc import ABC
-from typing import TYPE_CHECKING, ClassVar, Dict, List, Mapping, Optional, Tuple, Union
+from typing import TYPE_CHECKING, ClassVar, List, Mapping, Optional, Sequence, Tuple, Union
 
 from .enums import (
     ApplicationCommandPermissionType,
@@ -37,10 +37,10 @@ if TYPE_CHECKING:
     )
 
     Choices = Union[
-        List["OptionChoice"],
-        List[ApplicationCommandOptionChoiceValue],
-        Dict[str, ApplicationCommandOptionChoiceValue],
-        List[Localized[str]],
+        Sequence["OptionChoice"],
+        Sequence[ApplicationCommandOptionChoiceValue],
+        Mapping[str, ApplicationCommandOptionChoiceValue],
+        Sequence[Localized[str]],
     ]
 
     APIApplicationCommand = Union["APIUserCommand", "APIMessageCommand", "APISlashCommand"]
@@ -303,6 +303,9 @@ class Option:
         if choices is not None:
             if autocomplete:
                 raise TypeError("can not specify both choices and autocomplete args")
+
+            if isinstance(choices, str):  # str matches `Sequence[str]`, but isn't meant to be used
+                raise TypeError("choices argument should be a list/sequence or dict, not str")
 
             if isinstance(choices, Mapping):
                 self.choices = [OptionChoice(name, value) for name, value in choices.items()]

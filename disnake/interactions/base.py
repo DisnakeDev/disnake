@@ -1277,6 +1277,9 @@ class InteractionResponse:
         if isinstance(choices, Mapping):
             choices_data = [{"name": n, "value": v} for n, v in choices.items()]
         else:
+            if isinstance(choices, str):  # str matches `Sequence[str]`, but isn't meant to be used
+                raise TypeError("choices argument should be a list/sequence or dict, not str")
+
             choices_data = []
             value: ApplicationCommandOptionChoicePayload
             i18n = self._parent.client.i18n
