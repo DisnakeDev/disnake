@@ -1260,8 +1260,8 @@ class InteractionResponse:
 
         Parameters
         ----------
-        choices: Union[List[:class:`OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
-            The list of choices to suggest.
+        choices: Union[Sequence[:class:`OptionChoice`], Sequence[Union[:class:`str`, :class:`int`, :class:`float`]], Mapping[:class:`str`, Union[:class:`str`, :class:`int`, :class:`float`]]]
+            The choices to suggest.
 
         Raises
         ------

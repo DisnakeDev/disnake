@@ -179,8 +179,8 @@ class Option:
         The option type, e.g. :class:`OptionType.user`.
     required: :class:`bool`
         Whether this option is required.
-    choices: Union[List[:class:`OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
-        The list of option choices.
+    choices: Union[Sequence[:class:`OptionChoice`], Sequence[Union[:class:`str`, :class:`int`, :class:`float`]], Mapping[:class:`str`, Union[:class:`str`, :class:`int`, :class:`float`]]]
+        The pre-defined choices for this option.
     options: List[:class:`Option`]
         The list of sub options. Normally you don't have to specify it directly,
         instead consider using ``@main_cmd.sub_command`` or ``@main_cmd.sub_command_group`` decorators.
@@ -214,7 +214,7 @@ class Option:
     required: :class:`bool`
         Whether this option is required.
     choices: List[:class:`OptionChoice`]
-        The list of option choices.
+        The list of pre-defined choices.
     options: List[:class:`Option`]
         The list of sub options. Normally you don't have to specify it directly,
         instead consider using ``@main_cmd.sub_command`` or ``@main_cmd.sub_command_group`` decorators.
