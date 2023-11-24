@@ -373,7 +373,7 @@ class Option:
     def add_choice(
         self,
         name: LocalizedRequired,
-        value: Union[str, int],
+        value: ApplicationCommandOptionChoiceValue,
     ) -> None:
         """Adds an OptionChoice to the list of current choices,
         parameters are the same as for :class:`OptionChoice`.
