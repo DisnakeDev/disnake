@@ -1,0 +1,1 @@
+Update ``choices`` type for app commands to accept any :class:`Sequence` or :class:`Mapping`, instead of the more constrained :class:`list`/:class:`dict` types.
