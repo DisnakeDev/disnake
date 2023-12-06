@@ -22,6 +22,7 @@ from .app_commands import application_command_factory
 from .audit_logs import AuditLogEntry
 from .automod import AutoModRule
 from .bans import BanEntry
+from .entitlement import Entitlement
 from .errors import NoMoreItems
 from .guild_scheduled_event import GuildScheduledEvent
 from .integrations import PartialIntegration
@@ -37,6 +38,7 @@ __all__ = (
     "GuildIterator",
     "MemberIterator",
     "GuildScheduledEventUserIterator",
+    "EntitlementIterator",
 )
 
 if TYPE_CHECKING:
@@ -51,6 +53,7 @@ if TYPE_CHECKING:
         AuditLogEntry as AuditLogEntryPayload,
         AuditLogEvent,
     )
+    from .types.entitlement import Entitlement as EntitlementPayload
     from .types.guild import Ban as BanPayload, Guild as GuildPayload
     from .types.guild_scheduled_event import (
         GuildScheduledEventUser as GuildScheduledEventUserPayload,
@@ -1021,4 +1024,119 @@ class GuildScheduledEventUserIterator(_AsyncIterator[Union["User", "Member"]]):
             if self.limit is not None:
                 self.limit -= retrieve
             self.after = Object(id=int(data[-1]["user"]["id"]))
+        return data
+
+
+# The endpoint for this paginates like audit logs,
+# i.e. descending when no parameter or `before` is given,
+# and ascending when `after` is given.
+class EntitlementIterator(_AsyncIterator["Entitlement"]):
+    def __init__(
+        self,
+        application_id: int,
+        *,
+        state: ConnectionState,
+        limit: Optional[int],
+        user_id: Optional[int] = None,
+        guild_id: Optional[int] = None,
+        sku_ids: Optional[List[int]] = None,
+        before: Optional[Union[Snowflake, datetime.datetime]] = None,
+        after: Optional[Union[Snowflake, datetime.datetime]] = None,
+        exclude_ended: bool = False,
+        oldest_first: bool = False,
+    ) -> None:
+        if isinstance(before, datetime.datetime):
+            before = Object(id=time_snowflake(before, high=False))
+        if isinstance(after, datetime.datetime):
+            after = Object(id=time_snowflake(after, high=True))
+
+        self.application_id: int = application_id
+        self.limit: Optional[int] = limit
+        self.before: Optional[Snowflake] = before
+        self.after: Snowflake = after or OLDEST_OBJECT
+        self.user_id: Optional[int] = user_id
+        self.guild_id: Optional[int] = guild_id
+        self.sku_ids: Optional[List[int]] = sku_ids
+        self.exclude_ended: bool = exclude_ended
+
+        self.state: ConnectionState = state
+        self.request = state.http.get_entitlements
+
+        self.entitlements: asyncio.Queue[Entitlement] = asyncio.Queue()
+
+        self._filter: Optional[Callable[[EntitlementPayload], bool]] = None
+        if oldest_first:
+            self._strategy = self._after_strategy
+            if self.before:
+                self._filter = lambda m: int(m["id"]) < self.before.id  # type: ignore
+        else:
+            self._strategy = self._before_strategy
+            if self.after and self.after != OLDEST_OBJECT:
+                self._filter = lambda m: int(m["id"]) > self.after.id
+
+    async def next(self) -> Entitlement:
+        if self.entitlements.empty():
+            await self._fill()
+
+        try:
+            return self.entitlements.get_nowait()
+        except asyncio.QueueEmpty:
+            raise NoMoreItems from None
+
+    def _get_retrieve(self) -> bool:
+        limit = self.limit
+        if limit is None or limit > 100:
+            retrieve = 100
+        else:
+            retrieve = limit
+        self.retrieve: int = retrieve
+        return retrieve > 0
+
+    async def _fill(self) -> None:
+        if not self._get_retrieve():
+            return
+
+        data = await self._strategy(self.retrieve)
+        if len(data) < 100:
+            self.limit = 0  # terminate loop
+
+        if self._filter:
+            data = filter(self._filter, data)
+
+        for entitlement in data:
+            await self.entitlements.put(Entitlement(data=entitlement, state=self.state))
+
+    async def _before_strategy(self, retrieve: int) -> List[EntitlementPayload]:
+        before = self.before.id if self.before else None
+        data = await self.request(
+            self.application_id,
+            before=before,
+            limit=retrieve,
+            user_id=self.user_id,
+            guild_id=self.guild_id,
+            exclude_ended=self.exclude_ended,
+        )
+
+        if len(data):
+            if self.limit is not None:
+                self.limit -= retrieve
+            self.before = Object(id=int(data[-1]["id"]))
+        return data
+
+    async def _after_strategy(self, retrieve: int) -> List[EntitlementPayload]:
+        after = self.after.id
+        data = await self.request(
+            self.application_id,
+            after=after,
+            limit=retrieve,
+            user_id=self.user_id,
+            guild_id=self.guild_id,
+            exclude_ended=self.exclude_ended,
+        )
+
+        if len(data):
+            if self.limit is not None:
+                self.limit -= retrieve
+            # endpoint returns items in ascending order when `after` is used
+            self.after = Object(id=int(data[-1]["id"]))
         return data

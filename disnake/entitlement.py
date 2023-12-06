@@ -22,11 +22,15 @@ __all__ = ("Entitlement",)
 class Entitlement(Hashable):
     """Represents an entitlement.
 
-    This is usually retrieved from :attr:`Interaction.entitlements` when using interactions,
-    or provided by events (e.g. :func:`on_entitlement_create`).
+    This is usually retrieved using :meth:`Client.entitlements`, from
+    :attr:`Interaction.entitlements` when using interactions, or provided by
+    events (e.g. :func:`on_entitlement_create`).
 
     Note that some entitlements may have ended already; consider using
-    :meth:`is_active` to check whether a given entitlement is considered active at the current time.
+    :meth:`is_active` to check whether a given entitlement is considered active at the current time,
+    or use ``exclude_ended=True`` when fetching entitlements using :meth:`Client.entitlements`.
+
+    You may create new entitlements for testing purposes using :meth:`Client.create_entitlement`.
 
     .. container:: operations
 
@@ -145,3 +149,20 @@ class Entitlement(Hashable):
             return False
 
         return True
+
+    async def delete(self) -> None:
+        """|coro|
+
+        Deletes the entitlement.
+
+        This is only valid for test entitlements; you cannot use this to
+        delete entitlements that users purchased.
+
+        Raises
+        ------
+        NotFound
+            The entitlement does not exist.
+        HTTPException
+            Deleting the entitlement failed.
+        """
+        await self._state.http.delete_test_entitlement(self.application_id, self.id)

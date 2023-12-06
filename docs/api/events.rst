@@ -1451,7 +1451,8 @@ This section documents events related to entitlements, which are used for applic
 
     Called when an entitlement is created.
 
-    This is usually caused by a user subscribing to an SKU.
+    This is usually caused by a user subscribing to an SKU,
+    or when a new test entitlement is created (see :meth:`Client.create_entitlement`).
 
     .. versionadded:: 2.10
 
