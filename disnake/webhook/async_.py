@@ -493,7 +493,6 @@ def handle_message_parameters_dict(
     previous_allowed_mentions: Optional[AllowedMentions] = None,
     stickers: Sequence[Union[GuildSticker, StickerItem]] = MISSING,
     # these parameters are exclusive to webhooks in forum channels
-    # XXX: consider moving serialization of these elsewhere?
     thread_name: str = MISSING,
     applied_tags: Sequence[Snowflake] = MISSING,
 ) -> DictPayloadParameters:
