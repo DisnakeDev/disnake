@@ -202,16 +202,6 @@ class _HelpCommandImpl(Command):
     async def _on_error_cog_implementation(self, dummy, ctx, error) -> None:
         await self._injected.on_help_command_error(ctx, error)
 
-    @property
-    def clean_params(self):
-        result = self.params.copy()
-        try:
-            del result[next(iter(result))]
-        except StopIteration:
-            raise ValueError("Missing context parameter") from None
-        else:
-            return result
-
     def _inject_into_cog(self, cog) -> None:
         # Warning: hacky
 
@@ -378,7 +368,11 @@ class HelpCommand:
         """
         command_name = self._command_impl.name
         ctx = self.context
-        if ctx is None or ctx.command is None or ctx.command.qualified_name != command_name:
+        if (
+            ctx is disnake.utils.MISSING
+            or ctx.command is None
+            or ctx.command.qualified_name != command_name
+        ):
             return command_name
         return ctx.invoked_with
 

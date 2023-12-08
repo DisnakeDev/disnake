@@ -414,7 +414,7 @@ class LocalizationStore(LocalizationProtocol):
         except Exception as e:
             raise RuntimeError(f"Unable to load '{path}': {e}") from e
 
-    def _load_dict(self, data: Dict[str, str], locale: str) -> None:
+    def _load_dict(self, data: Dict[str, Optional[str]], locale: str) -> None:
         if not isinstance(data, dict) or not all(
             o is None or isinstance(o, str) for o in data.values()
         ):

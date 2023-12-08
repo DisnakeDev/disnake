@@ -2,13 +2,14 @@
 
 import asyncio
 import datetime
+import functools
 import inspect
 import os
 import sys
 import warnings
 from dataclasses import dataclass
 from datetime import timedelta, timezone
-from typing import Any, Dict, List, Literal, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, TypeVar, Union
 from unittest import mock
 
 import pytest
@@ -17,7 +18,13 @@ import yarl
 import disnake
 from disnake import utils
 
-from . import helpers
+from . import helpers, utils_helper_module
+
+if TYPE_CHECKING:
+    from typing_extensions import TypeAliasType
+elif sys.version_info >= (3, 12):
+    # non-3.12 tests shouldn't be using this
+    from typing import TypeAliasType
 
 
 def test_missing() -> None:
@@ -784,6 +791,65 @@ def test_resolve_annotation_literal() -> None:
         utils.resolve_annotation(Literal[timezone.utc, 3], globals(), locals(), {})  # type: ignore
 
 
+@pytest.mark.skipif(sys.version_info < (3, 12), reason="syntax requires py3.12")
+class TestResolveAnnotationTypeAliasType:
+    def test_simple(self) -> None:
+        # this is equivalent to `type CoolList = List[int]`
+        CoolList = TypeAliasType("CoolList", List[int])
+        assert utils.resolve_annotation(CoolList, globals(), locals(), {}) == List[int]
+
+    def test_generic(self) -> None:
+        # this is equivalent to `type CoolList[T] = List[T]; CoolList[int]`
+        T = TypeVar("T")
+        CoolList = TypeAliasType("CoolList", List[T], type_params=(T,))
+
+        annotation = CoolList[int]
+        assert utils.resolve_annotation(annotation, globals(), locals(), {}) == List[int]
+
+    # alias and arg in local scope
+    def test_forwardref_local(self) -> None:
+        T = TypeVar("T")
+        IntOrStr = Union[int, str]
+        CoolList = TypeAliasType("CoolList", List[T], type_params=(T,))
+
+        annotation = CoolList["IntOrStr"]
+        assert utils.resolve_annotation(annotation, globals(), locals(), {}) == List[IntOrStr]
+
+    # alias and arg in other module scope
+    def test_forwardref_module(self) -> None:
+        resolved = utils.resolve_annotation(
+            utils_helper_module.ListWithForwardRefAlias, globals(), locals(), {}
+        )
+        assert resolved == List[Union[int, str]]
+
+    # combination of the previous two, alias in other module scope and arg in local scope
+    def test_forwardref_mixed(self) -> None:
+        LocalIntOrStr = Union[int, str]
+
+        annotation = utils_helper_module.GenericListAlias["LocalIntOrStr"]
+        assert utils.resolve_annotation(annotation, globals(), locals(), {}) == List[LocalIntOrStr]
+
+    # two different forwardrefs with same name
+    def test_forwardref_duplicate(self) -> None:
+        DuplicateAlias = int
+
+        # first, resolve an annotation where `DuplicateAlias` resolves to the local int
+        cache = {}
+        assert (
+            utils.resolve_annotation(List["DuplicateAlias"], globals(), locals(), cache)
+            == List[int]
+        )
+
+        # then, resolve an annotation where the globalns changes and `DuplicateAlias` resolves to something else
+        # (i.e. this should not resolve to `List[int]` despite {"DuplicateAlias": int} in the cache)
+        assert (
+            utils.resolve_annotation(
+                utils_helper_module.ListWithDuplicateAlias, globals(), locals(), cache
+            )
+            == List[str]
+        )
+
+
 @pytest.mark.parametrize(
     ("dt", "style", "expected"),
     [
@@ -880,3 +946,84 @@ def test_as_valid_locale(locale, expected) -> None:
 )
 def test_humanize_list(values, expected) -> None:
     assert utils.humanize_list(values, "plus") == expected
+
+
+# used for `test_signature_has_self_param`
+def _toplevel():
+    def inner() -> None:
+        ...
+
+    return inner
+
+
+def decorator(f):
+    @functools.wraps(f)
+    def wrap(self, *args, **kwargs):
+        return f(self, *args, **kwargs)
+
+    return wrap
+
+
+# used for `test_signature_has_self_param`
+class _Clazz:
+    def func(self):
+        def inner() -> None:
+            ...
+
+        return inner
+
+    @classmethod
+    def cmethod(cls) -> None:
+        ...
+
+    @staticmethod
+    def smethod() -> None:
+        ...
+
+    class Nested:
+        def func(self):
+            def inner() -> None:
+                ...
+
+            return inner
+
+    rebind = _toplevel
+
+    @decorator
+    def decorated(self) -> None:
+        ...
+
+    _lambda = lambda: None
+
+
+@pytest.mark.parametrize(
+    ("function", "expected"),
+    [
+        # top-level function
+        (_toplevel, False),
+        # methods in class
+        (_Clazz.func, True),
+        (_Clazz().func, False),
+        # unfortunately doesn't work
+        (_Clazz.rebind, False),
+        (_Clazz().rebind, False),
+        # classmethod/staticmethod isn't supported, but checked to ensure consistency
+        (_Clazz.cmethod, False),
+        (_Clazz.smethod, True),
+        # nested class methods
+        (_Clazz.Nested.func, True),
+        (_Clazz.Nested().func, False),
+        # inner methods
+        (_toplevel(), False),
+        (_Clazz().func(), False),
+        (_Clazz.Nested().func(), False),
+        # decorated method
+        (_Clazz.decorated, True),
+        (_Clazz().decorated, False),
+        # lambda (class-level)
+        (_Clazz._lambda, False),
+        (_Clazz()._lambda, False),
+    ],
+)
+def test_signature_has_self_param(function, expected) -> None:
+    assert utils.signature_has_self_param(function) == expected
