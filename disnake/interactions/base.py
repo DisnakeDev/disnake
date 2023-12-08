@@ -8,6 +8,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Dict,
+    Generic,
     List,
     Mapping,
     Optional,
@@ -95,9 +96,10 @@ if TYPE_CHECKING:
 MISSING: Any = utils.MISSING
 
 T = TypeVar("T")
+ClientT = TypeVar("ClientT", bound="Client", covariant=True)
 
 
-class Interaction:
+class Interaction(Generic[ClientT]):
     """A base class representing a user-initiated Discord interaction.
 
     An interaction happens when a user performs an action that the client needs to
@@ -175,7 +177,7 @@ class Interaction:
         self._state: ConnectionState = state
         # TODO: Maybe use a unique session
         self._session: ClientSession = state.http._HTTPClient__session  # type: ignore
-        self.client: Client = state._get_client()
+        self.client: ClientT = cast(ClientT, state._get_client())
         self._original_response: Optional[InteractionMessage] = None
 
         self.id: int = int(data["id"])
@@ -208,13 +210,9 @@ class Interaction:
             self.author = self._state.store_user(user)
 
     @property
-    def bot(self) -> AnyBot:
-        """:class:`~disnake.ext.commands.Bot`: The bot handling the interaction.
-
-        Only applicable when used with :class:`~disnake.ext.commands.Bot`.
-        This is an alias for :attr:`.client`.
-        """
-        return self.client  # type: ignore
+    def bot(self) -> ClientT:
+        """:class:`~disnake.ext.commands.Bot`: An alias for :attr:`.client`."""
+        return self.client
 
     @property
     def created_at(self) -> datetime:
@@ -1262,8 +1260,8 @@ class InteractionResponse:
 
         Parameters
         ----------
-        choices: Union[List[:class:`OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
-            The list of choices to suggest.
+        choices: Union[Sequence[:class:`OptionChoice`], Sequence[Union[:class:`str`, :class:`int`, :class:`float`]], Mapping[:class:`str`, Union[:class:`str`, :class:`int`, :class:`float`]]]
+            The choices to suggest.
 
         Raises
         ------
@@ -1279,6 +1277,9 @@ class InteractionResponse:
         if isinstance(choices, Mapping):
             choices_data = [{"name": n, "value": v} for n, v in choices.items()]
         else:
+            if isinstance(choices, str):  # str matches `Sequence[str]`, but isn't meant to be used
+                raise TypeError("choices argument should be a list/sequence or dict, not str")
+
             choices_data = []
             value: ApplicationCommandOptionChoicePayload
             i18n = self._parent.client.i18n
@@ -1857,7 +1858,7 @@ class InteractionDataResolved(Dict[str, Any]):
                     guild
                     and guild.get_channel_or_thread(channel_id)
                     or factory(
-                        guild=guild_fallback,  # type: ignore
+                        guild=guild_fallback,
                         state=state,
                         data=channel,  # type: ignore
                     )

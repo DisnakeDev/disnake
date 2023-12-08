@@ -35,6 +35,7 @@ __all__ = (
     "ActivityType",
     "NotificationLevel",
     "TeamMembershipState",
+    "TeamMemberRole",
     "WebhookType",
     "ExpireBehaviour",
     "ExpireBehavior",
@@ -395,6 +396,8 @@ class AuditLogAction(Enum):
     automod_block_message                 = 143
     automod_send_alert_message            = 144
     automod_timeout                       = 145
+    creator_monetization_request_created  = 150
+    creator_monetization_terms_accepted   = 151
     # fmt: on
 
     @property
@@ -455,6 +458,8 @@ class AuditLogAction(Enum):
             AuditLogAction.automod_block_message:                 None,
             AuditLogAction.automod_send_alert_message:            None,
             AuditLogAction.automod_timeout:                       None,
+            AuditLogAction.creator_monetization_request_created:  None,
+            AuditLogAction.creator_monetization_terms_accepted:   None,
         }
         # fmt: on
         return lookup[self]
@@ -462,7 +467,7 @@ class AuditLogAction(Enum):
     @property
     def target_type(self) -> Optional[str]:
         v = self.value
-        if v == -1:
+        if v == -1:  # pyright: ignore[reportUnnecessaryComparison]
             return "all"
         elif v < 10:
             return "guild"
@@ -500,6 +505,8 @@ class AuditLogAction(Enum):
             return "automod_rule"
         elif v < 146:
             return "user"
+        elif v < 152:
+            return None
         else:
             return None
 
@@ -543,6 +550,15 @@ class ActivityType(Enum):
 class TeamMembershipState(Enum):
     invited = 1
     accepted = 2
+
+
+class TeamMemberRole(Enum):
+    admin = "admin"
+    developer = "developer"
+    read_only = "read_only"
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class WebhookType(Enum):
@@ -621,7 +637,7 @@ class ComponentType(Enum):
     action_row = 1
     button = 2
     string_select = 3
-    select = string_select  # backwards compatibility
+    select = 3  # backwards compatibility
     text_input = 4
     user_select = 5
     role_select = 6
@@ -747,7 +763,7 @@ class WidgetStyle(Enum):
 # reference: https://discord.com/developers/docs/reference#locales
 class Locale(Enum):
     bg = "bg"
-    "Bulgarian | български"  # noqa: RUF001
+    "Bulgarian | български"
     cs = "cs"
     "Czech | Čeština"
     da = "da"
@@ -755,7 +771,7 @@ class Locale(Enum):
     de = "de"
     "German | Deutsch"
     el = "el"
-    "Greek | Ελληνικά"  # noqa: RUF001
+    "Greek | Ελληνικά"
     en_GB = "en-GB"
     "English, UK | English, UK"
     en_US = "en-US"
@@ -801,7 +817,7 @@ class Locale(Enum):
     tr = "tr"
     "Turkish | Türkçe"
     uk = "uk"
-    "Ukrainian | Українська"  # noqa: RUF001
+    "Ukrainian | Українська"
     vi = "vi"
     "Vietnamese | Tiếng Việt"
     zh_CN = "zh-CN"

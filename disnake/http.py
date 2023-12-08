@@ -248,19 +248,18 @@ class HTTPClient:
             )
 
     async def ws_connect(self, url: str, *, compress: int = 0) -> aiohttp.ClientWebSocketResponse:
-        kwargs = {
-            "proxy_auth": self.proxy_auth,
-            "proxy": self.proxy,
-            "max_msg_size": 0,
-            "timeout": 30.0,
-            "autoclose": False,
-            "headers": {
+        return await self.__session.ws_connect(
+            url,
+            proxy_auth=self.proxy_auth,
+            proxy=self.proxy,
+            max_msg_size=0,
+            timeout=30.0,
+            autoclose=False,
+            headers={
                 "User-Agent": self.user_agent,
             },
-            "compress": compress,
-        }
-
-        return await self.__session.ws_connect(url, **kwargs)
+            compress=compress,
+        )
 
     async def request(
         self,
@@ -276,9 +275,7 @@ class HTTPClient:
 
         lock = self._locks.get(bucket)
         if lock is None:
-            lock = asyncio.Lock()
-            if bucket is not None:
-                self._locks[bucket] = lock
+            self._locks[bucket] = lock = asyncio.Lock()
 
         # header creation
         headers: Dict[str, str] = {
@@ -1035,6 +1032,7 @@ class HTTPClient:
             "available_tags",
             "default_reaction_emoji",
             "default_sort_order",
+            "default_forum_layout",
         )
         payload.update({k: v for k, v in options.items() if k in valid_keys and v is not None})
 
@@ -1546,7 +1544,7 @@ class HTTPClient:
     def get_sticker(self, sticker_id: Snowflake) -> Response[sticker.Sticker]:
         return self.request(Route("GET", "/stickers/{sticker_id}", sticker_id=sticker_id))
 
-    def list_premium_sticker_packs(self) -> Response[sticker.ListPremiumStickerPacks]:
+    def list_sticker_packs(self) -> Response[sticker.ListStickerPacks]:
         return self.request(Route("GET", "/sticker-packs"))
 
     def get_all_guild_stickers(self, guild_id: Snowflake) -> Response[List[sticker.GuildSticker]]:
@@ -2004,6 +2002,7 @@ class HTTPClient:
             "topic",
             "privacy_level",
             "send_start_notification",
+            "guild_scheduled_event_id",
         )
         payload = {k: v for k, v in payload.items() if k in valid_keys}
 
