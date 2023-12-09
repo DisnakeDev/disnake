@@ -74,7 +74,7 @@ if TYPE_CHECKING:
     from .message import AllowedMentions, Message, PartialMessage
     from .role import Role
     from .state import ConnectionState
-    from .sticker import GuildSticker, StickerItem
+    from .sticker import GuildSticker, StandardSticker, StickerItem
     from .threads import AnyThreadArchiveDuration, ThreadType
     from .types.channel import (
         CategoryChannel as CategoryChannelPayload,
@@ -3769,7 +3769,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         file: File = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
-        stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
+        stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
         components: Components = ...,
@@ -3790,7 +3790,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         files: List[File] = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
-        stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
+        stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
         components: Components = ...,
@@ -3811,7 +3811,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         file: File = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
-        stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
+        stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
         components: Components = ...,
@@ -3832,7 +3832,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         files: List[File] = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
-        stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
+        stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
         components: Components = ...,
@@ -3854,7 +3854,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         files: List[File] = MISSING,
         suppress_embeds: bool = MISSING,
         flags: MessageFlags = MISSING,
-        stickers: Sequence[Union[GuildSticker, StickerItem]] = MISSING,
+        stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
         components: Components[MessageUIComponent] = MISSING,
@@ -3918,7 +3918,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         files: List[:class:`.File`]
             A list of files to upload. Must be a maximum of 10.
             This cannot be mixed with the ``file`` parameter.
-        stickers: Sequence[Union[:class:`.GuildSticker`, :class:`.StickerItem`]]
+        stickers: Sequence[Union[:class:`.GuildSticker`, :class:`.StandardSticker`, :class:`.StickerItem`]]
             A list of stickers to upload. Must be a maximum of 3.
         allowed_mentions: :class:`.AllowedMentions`
             Controls the mentions being processed in this message. If this is

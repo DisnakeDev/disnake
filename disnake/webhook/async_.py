@@ -63,7 +63,7 @@ if TYPE_CHECKING:
     from ..mentions import AllowedMentions
     from ..message import Attachment
     from ..state import ConnectionState
-    from ..sticker import GuildSticker, StickerItem
+    from ..sticker import GuildSticker, StandardSticker, StickerItem
     from ..types.message import Message as MessagePayload
     from ..types.webhook import Webhook as WebhookPayload
     from ..ui.action_row import Components
@@ -491,7 +491,7 @@ def handle_message_parameters_dict(
     components: Optional[Components[MessageUIComponent]] = MISSING,
     allowed_mentions: Optional[AllowedMentions] = MISSING,
     previous_allowed_mentions: Optional[AllowedMentions] = None,
-    stickers: Sequence[Union[GuildSticker, StickerItem]] = MISSING,
+    stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = MISSING,
     thread_name: Optional[str] = None,
 ) -> DictPayloadParameters:
     if files is not MISSING and file is not MISSING:
@@ -578,7 +578,7 @@ def handle_message_parameters(
     components: Optional[Components[MessageUIComponent]] = MISSING,
     allowed_mentions: Optional[AllowedMentions] = MISSING,
     previous_allowed_mentions: Optional[AllowedMentions] = None,
-    stickers: Sequence[Union[GuildSticker, StickerItem]] = MISSING,
+    stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = MISSING,
     thread_name: Optional[str] = None,
 ) -> PayloadParameters:
     params = handle_message_parameters_dict(
