@@ -755,7 +755,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             dt = ctx.message.edited_at or ctx.message.created_at
             current = dt.replace(tzinfo=datetime.timezone.utc).timestamp()
             bucket = self._buckets.get_bucket(ctx.message, current)
-            if bucket is not None:
+            if bucket is not None:  # pyright: ignore[reportUnnecessaryComparison]
                 retry_after = bucket.update_rate_limit(current)
                 if retry_after:
                     raise CommandOnCooldown(bucket, retry_after, self._buckets.type)  # type: ignore
@@ -1718,7 +1718,7 @@ def check(predicate: Check) -> Callable[[T], T]:
         decorator.predicate = predicate
     else:
 
-        @functools.wraps(predicate)
+        @functools.wraps(predicate)  # type: ignore
         async def wrapper(ctx):
             return predicate(ctx)  # type: ignore
 
@@ -1999,7 +1999,9 @@ def has_permissions(
     ban_members: bool = ...,
     change_nickname: bool = ...,
     connect: bool = ...,
+    create_events: bool = ...,
     create_forum_threads: bool = ...,
+    create_guild_expressions: bool = ...,
     create_instant_invite: bool = ...,
     create_private_threads: bool = ...,
     create_public_threads: bool = ...,
@@ -2121,7 +2123,9 @@ def bot_has_permissions(
     ban_members: bool = ...,
     change_nickname: bool = ...,
     connect: bool = ...,
+    create_events: bool = ...,
     create_forum_threads: bool = ...,
+    create_guild_expressions: bool = ...,
     create_instant_invite: bool = ...,
     create_private_threads: bool = ...,
     create_public_threads: bool = ...,
@@ -2221,7 +2225,9 @@ def has_guild_permissions(
     ban_members: bool = ...,
     change_nickname: bool = ...,
     connect: bool = ...,
+    create_events: bool = ...,
     create_forum_threads: bool = ...,
+    create_guild_expressions: bool = ...,
     create_instant_invite: bool = ...,
     create_private_threads: bool = ...,
     create_public_threads: bool = ...,
@@ -2318,7 +2324,9 @@ def bot_has_guild_permissions(
     ban_members: bool = ...,
     change_nickname: bool = ...,
     connect: bool = ...,
+    create_events: bool = ...,
     create_forum_threads: bool = ...,
+    create_guild_expressions: bool = ...,
     create_instant_invite: bool = ...,
     create_private_threads: bool = ...,
     create_public_threads: bool = ...,

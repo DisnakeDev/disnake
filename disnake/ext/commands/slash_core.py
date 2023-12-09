@@ -332,10 +332,12 @@ class SubCommand(InvokableApplicationCommand):
 
     @property
     def description(self) -> str:
+        """:class:`str`: The slash sub command's description. Shorthand for :attr:`self.body.description <.Option.description>`."""
         return self.body.description
 
     @property
     def body(self) -> Option:
+        """:class:`.Option`: The API representation for this slash sub command. Shorthand for :attr:`.SubCommand.option`"""
         return self.option
 
     async def _call_autocompleter(
@@ -508,10 +510,12 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
     @property
     def description(self) -> str:
+        """:class:`str`: The slash command's description. Shorthand for :attr:`self.body.description <.SlashCommand.description>`."""
         return self.body.description
 
     @property
     def options(self) -> List[Option]:
+        """List[:class:`.Option`]: The list of options the slash command has. Shorthand for :attr:`self.body.options <.SlashCommand.options>`."""
         return self.body.options
 
     def sub_command(
@@ -666,7 +670,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             group = self.children.get(chain[0])
             if not isinstance(group, SubCommandGroup):
                 raise AssertionError("the first subcommand is not a SubCommandGroup instance")
-            subcmd = group.children.get(chain[1]) if group is not None else None
+            subcmd = group.children.get(chain[1])
         else:
             raise ValueError("Command chain is too long")
 
@@ -695,7 +699,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             group = self.children.get(chain[0])
             if not isinstance(group, SubCommandGroup):
                 raise AssertionError("the first subcommand is not a SubCommandGroup instance")
-            subcmd = group.children.get(chain[1]) if group is not None else None
+            subcmd = group.children.get(chain[1])
         else:
             raise ValueError("Command chain is too long")
 

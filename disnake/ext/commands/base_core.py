@@ -303,7 +303,7 @@ class InvokableApplicationCommand(ABC):
             dt = inter.created_at
             current = dt.replace(tzinfo=datetime.timezone.utc).timestamp()
             bucket = self._buckets.get_bucket(inter, current)  # type: ignore
-            if bucket is not None:
+            if bucket is not None:  # pyright: ignore[reportUnnecessaryComparison]
                 retry_after = bucket.update_rate_limit(current)
                 if retry_after:
                     raise CommandOnCooldown(bucket, retry_after, self._buckets.type)  # type: ignore
@@ -636,7 +636,9 @@ def default_member_permissions(
     ban_members: bool = ...,
     change_nickname: bool = ...,
     connect: bool = ...,
+    create_events: bool = ...,
     create_forum_threads: bool = ...,
+    create_guild_expressions: bool = ...,
     create_instant_invite: bool = ...,
     create_private_threads: bool = ...,
     create_public_threads: bool = ...,
