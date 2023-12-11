@@ -446,7 +446,7 @@ class InteractionBotBase(CommonBotBase):
         self.add_app_command(message_command)
 
     def remove_app_command(
-        self, cmd_type: ApplicationCommandType, name: str, *, guild_ids: Optional[Sequence[int]]
+        self, cmd_type: ApplicationCommandType, name: str, *, guild_id: Optional[int]
     ) -> Optional[InvokableApplicationCommand]:
         """Removes an :class:`InvokableApplicationCommand` from the internal list of app commands.
 
@@ -458,27 +458,38 @@ class InteractionBotBase(CommonBotBase):
             The type of the app command to remove.
         name: :class:`str`
             The name of the app command to remove.
-        guild_ids: Optional[Sequence[:class:`int`]]
-            The IDs of the guilds from which the command should be removed,
-            or ``None`` if global. Defaults to ``None``.
+        guild_id: Optional[:class:`int`]
+            The ID of the guild from which this command should be removed,
+            or ``None`` if it's global.
 
         Returns
         -------
         Optional[:class:`InvokableApplicationCommand`]
             The app command that was removed. If no matching command was found, then ``None`` is returned instead.
         """
-        test_guilds = (None,) if self._test_guilds is None else self._test_guilds
-        # this is consistent with the behavior of command synchronisation
-        extended_guild_ids = guild_ids or test_guilds
+        if guild_id is not None or self._test_guilds is None:
+            cmd_index = AppCmdIndex(type=cmd_type, name=name, guild_id=guild_id)
+            return self._all_app_commands.pop(cmd_index, None)
 
         result = None
-        for guild_id in extended_guild_ids:
+        for guild_id in self._test_guilds:
             cmd_index = AppCmdIndex(type=cmd_type, name=name, guild_id=guild_id)
             cmd = self._all_app_commands.pop(cmd_index, None)
             if result is None:
                 result = cmd
 
         return result
+
+    def _remove_app_commands(
+        self, cmd_type: ApplicationCommandType, name: str, *, guild_ids: Optional[Sequence[int]]
+    ) -> None:
+        test_guilds = (None,) if self._test_guilds is None else self._test_guilds
+        # this is consistent with the behavior of command synchronisation
+        final_guild_ids = guild_ids or test_guilds
+
+        for guild_id in final_guild_ids:
+            cmd_index = AppCmdIndex(type=cmd_type, name=name, guild_id=guild_id)
+            self._all_app_commands.pop(cmd_index, None)
 
     def _emulate_old_app_command_remove(self, cmd_type: ApplicationCommandType, name: str) -> Any:
         type_info = "slash" if cmd_type is ApplicationCommandType.chat_input else cmd_type.name
