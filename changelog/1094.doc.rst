@@ -1,0 +1,1 @@
+Add inherited attributes to :class:`TeamMember`, and fix :attr:`TeamMember.avatar` documentation.

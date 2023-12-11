@@ -290,9 +290,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         return g.voice_client if g else None
 
     async def send_help(self, *args: Any) -> Any:
-        """send_help(entity=<bot>)
-
-        |coro|
+        """|coro|
 
         Shows the help command for the specified entity if given.
         The entity can be a command or a cog.

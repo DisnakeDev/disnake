@@ -248,19 +248,18 @@ class HTTPClient:
             )
 
     async def ws_connect(self, url: str, *, compress: int = 0) -> aiohttp.ClientWebSocketResponse:
-        kwargs = {
-            "proxy_auth": self.proxy_auth,
-            "proxy": self.proxy,
-            "max_msg_size": 0,
-            "timeout": 30.0,
-            "autoclose": False,
-            "headers": {
+        return await self.__session.ws_connect(
+            url,
+            proxy_auth=self.proxy_auth,
+            proxy=self.proxy,
+            max_msg_size=0,
+            timeout=30.0,
+            autoclose=False,
+            headers={
                 "User-Agent": self.user_agent,
             },
-            "compress": compress,
-        }
-
-        return await self.__session.ws_connect(url, **kwargs)
+            compress=compress,
+        )
 
     async def request(
         self,
@@ -276,9 +275,7 @@ class HTTPClient:
 
         lock = self._locks.get(bucket)
         if lock is None:
-            lock = asyncio.Lock()
-            if bucket is not None:
-                self._locks[bucket] = lock
+            self._locks[bucket] = lock = asyncio.Lock()
 
         # header creation
         headers: Dict[str, str] = {
@@ -2005,6 +2002,7 @@ class HTTPClient:
             "topic",
             "privacy_level",
             "send_start_notification",
+            "guild_scheduled_event_id",
         )
         payload = {k: v for k, v in payload.items() if k in valid_keys}
 

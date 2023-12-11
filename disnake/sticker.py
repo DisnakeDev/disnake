@@ -44,7 +44,7 @@ class StickerPack(Hashable):
     .. versionchanged:: 2.8
         :attr:`cover_sticker_id`, :attr:`cover_sticker` and :attr:`banner` are now optional.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: str(x)
 
@@ -163,7 +163,7 @@ class StickerItem(_StickerTag):
 
     .. versionadded:: 2.0
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: str(x)
 
@@ -226,7 +226,7 @@ class Sticker(_StickerTag):
 
     .. versionadded:: 1.6
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: str(x)
 
@@ -283,7 +283,7 @@ class StandardSticker(Sticker):
 
     .. versionadded:: 2.0
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: str(x)
 
@@ -362,7 +362,7 @@ class GuildSticker(Sticker):
 
     .. versionadded:: 2.0
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: str(x)
 
@@ -450,7 +450,7 @@ class GuildSticker(Sticker):
         Raises
         ------
         Forbidden
-            You are not allowed to edit stickers.
+            You are not allowed to edit this sticker.
         HTTPException
             An error occurred editing the sticker.
 
@@ -498,7 +498,7 @@ class GuildSticker(Sticker):
         Raises
         ------
         Forbidden
-            You are not allowed to delete stickers.
+            You are not allowed to delete this sticker.
         HTTPException
             An error occurred deleting the sticker.
         """

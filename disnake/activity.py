@@ -404,7 +404,7 @@ class Game(BaseActivity):
 
     This is typically displayed via **Playing** on the official Discord client.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -487,7 +487,7 @@ class Streaming(BaseActivity):
 
     This is typically displayed via **Streaming** on the official Discord client.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -597,7 +597,7 @@ class Streaming(BaseActivity):
 class Spotify(_BaseActivity):
     """Represents a Spotify listening activity from Discord.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -770,7 +770,7 @@ class Spotify(_BaseActivity):
 class CustomActivity(BaseActivity):
     """Represents a Custom activity from Discord.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -921,7 +921,7 @@ def create_activity(
     elif game_type is ActivityType.listening and "sync_id" in data and "session_id" in data:
         activity = Spotify(**data)
     else:
-        activity = Activity(**data)
+        activity = Activity(**data)  # type: ignore
 
     if isinstance(activity, (Activity, CustomActivity)) and activity.emoji and state:
         activity.emoji._state = state

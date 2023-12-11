@@ -55,7 +55,7 @@ if TYPE_CHECKING:
     )
     from disnake.permissions import Permissions
 
-    from ._types import Check, CoroFunc
+    from ._types import AppCheck, CoroFunc
     from .base_core import CogT, CommandCallback, InteractionCommandCallback
 
     P = ParamSpec("P")
@@ -1226,7 +1226,7 @@ class InteractionBotBase(CommonBotBase):
 
     def add_app_command_check(
         self,
-        func: Check,
+        func: AppCheck,
         *,
         call_once: bool = False,
         slash_commands: bool = False,
@@ -1235,8 +1235,8 @@ class InteractionBotBase(CommonBotBase):
     ) -> None:
         """Adds a global application command check to the bot.
 
-        This is the non-decorator interface to :meth:`.check`,
-        :meth:`.check_once`, :meth:`.slash_command_check` and etc.
+        This is the non-decorator interface to :func:`.app_check`,
+        :meth:`.slash_command_check` and etc.
 
         You must specify at least one of the bool parameters, otherwise
         the check won't be added.
@@ -1274,7 +1274,7 @@ class InteractionBotBase(CommonBotBase):
 
     def remove_app_command_check(
         self,
-        func: Check,
+        func: AppCheck,
         *,
         call_once: bool = False,
         slash_commands: bool = False,
@@ -1295,7 +1295,7 @@ class InteractionBotBase(CommonBotBase):
             The function to remove from the global checks.
         call_once: :class:`bool`
             Whether the function was added with ``call_once=True`` in
-            the :meth:`.Bot.add_check` call or using :meth:`.check_once`.
+            the :meth:`.Bot.add_app_command_check` call.
         slash_commands: :class:`bool`
             Whether this check was for slash commands.
         user_commands: :class:`bool`
@@ -1414,7 +1414,7 @@ class InteractionBotBase(CommonBotBase):
         ) -> Callable[[ApplicationCommandInteraction], Any]:
             # T was used instead of Check to ensure the type matches on return
             self.add_app_command_check(
-                func,  # type: ignore
+                func,
                 call_once=call_once,
                 slash_commands=slash_commands,
                 user_commands=user_commands,

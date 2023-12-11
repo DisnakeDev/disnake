@@ -114,7 +114,7 @@ async def get_game_user(
     if user is None:
         return await db.get_game_user(id=inter.author.id)
 
-    game_user: GameUser = await db.search_game_user(username=user, server=server)
+    game_user: Optional[GameUser] = await db.search_game_user(username=user, server=server)
     if game_user is None:
         raise commands.CommandError(f"User with username {user!r} could not be found")
 
