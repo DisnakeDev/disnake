@@ -15,7 +15,6 @@ from typing import (
     Dict,
     Iterable,
     List,
-    NamedTuple,
     Optional,
     Sequence,
     Set,
@@ -33,7 +32,7 @@ from disnake.enums import ApplicationCommandType
 from disnake.utils import deprecated, warn_deprecated
 
 from . import errors
-from .base_core import InvokableApplicationCommand
+from .base_core import AppCmdIndex, InvokableApplicationCommand
 from .common_bot_base import CommonBotBase
 from .ctx_menus_core import (
     InvokableMessageCommand,
@@ -62,7 +61,7 @@ if TYPE_CHECKING:
     P = ParamSpec("P")
 
 
-__all__ = ("InteractionBotBase", "AppCmdIndex")
+__all__ = ("InteractionBotBase",)
 
 MISSING: Any = disnake.utils.MISSING
 
@@ -79,26 +78,6 @@ class _Diff(TypedDict):
     edit: List[ApplicationCommand]
     delete: List[ApplicationCommand]
     delete_ignored: NotRequired[List[ApplicationCommand]]
-
-
-class AppCmdIndex(NamedTuple):
-    """A named tuple used for indexation of :class:`InvokableApplicationCommand`
-    objects stored in bot's cache.
-
-    Attributes
-    ----------
-    type: :class:`disnake.ApplicationCommandType`
-        The type of the application command being stored.
-    name: :class:`str`
-        The name of the application command being stored.
-    guild_id: :class:`int`
-        One of the guild IDs this command should be registered to,
-        or ``None`` if it's a global command.
-    """
-
-    type: ApplicationCommandType
-    name: str
-    guild_id: Optional[int]
 
 
 def _get_to_send_from_diff(diff: _Diff):
@@ -271,8 +250,8 @@ class InteractionBotBase(CommonBotBase):
 
     @property
     def all_app_commands(self) -> MappingProxyType[AppCmdIndex, InvokableApplicationCommand]:
-        """MappingProxyType[:class:`AppCmdIndex`, :class:`InvokableApplicationCommand`]:
-        A mapping proxy with all application commands the bot has.
+        """Mapping[:class:`AppCmdIndex`, :class:`InvokableApplicationCommand`]:
+        A read-only mapping with all application commands the bot has.
         """
         return MappingProxyType(self._all_app_commands)
 
