@@ -467,15 +467,9 @@ class InteractionBotBase(CommonBotBase):
         Optional[:class:`InvokableApplicationCommand`]
             The app command that was removed. If no matching command was found, then ``None`` is returned instead.
         """
-        if guild_ids is None:
-            # a global command may end up being a local command if test_guilds were specified
-            # so we should remove this "global" command from each test guild
-            if self._test_guilds is not None:
-                extended_guild_ids = self._test_guilds
-            else:
-                extended_guild_ids = (None,)
-        else:
-            extended_guild_ids = guild_ids
+        test_guilds = (None,) if self._test_guilds is None else self._test_guilds
+        # this is consistent with the behavior of command synchronisation
+        extended_guild_ids = guild_ids or test_guilds
 
         result = None
         for guild_id in extended_guild_ids:
