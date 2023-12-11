@@ -370,6 +370,7 @@ class InteractionBotBase(CommonBotBase):
             # (such as hook attachments or permission modifications) apply properly
             self._all_app_commands[cmd_index] = app_command
 
+    @deprecated("add_app_command")
     def add_slash_command(self, slash_command: InvokableSlashCommand) -> None:
         """Adds an :class:`InvokableSlashCommand` into the internal list of slash commands.
 
@@ -388,13 +389,9 @@ class InteractionBotBase(CommonBotBase):
         TypeError
             The slash command passed is not an instance of :class:`InvokableSlashCommand`.
         """
-        warn_deprecated(
-            "add_slash_command is deprecated and will be removed in a future version. "
-            "Use add_app_command instead.",
-            stacklevel=3,
-        )
         self.add_app_command(slash_command)
 
+    @deprecated("add_app_command")
     def add_user_command(self, user_command: InvokableUserCommand) -> None:
         """Adds an :class:`InvokableUserCommand` into the internal list of user commands.
 
@@ -413,13 +410,9 @@ class InteractionBotBase(CommonBotBase):
         TypeError
             The user command passed is not an instance of :class:`InvokableUserCommand`.
         """
-        warn_deprecated(
-            "add_user_command is deprecated and will be removed in a future version. "
-            "Use add_app_command instead.",
-            stacklevel=3,
-        )
         self.add_app_command(user_command)
 
+    @deprecated("add_app_command")
     def add_message_command(self, message_command: InvokableMessageCommand) -> None:
         """Adds an :class:`InvokableMessageCommand` into the internal list of message commands.
 
@@ -438,11 +431,6 @@ class InteractionBotBase(CommonBotBase):
         TypeError
             The message command passed is not an instance of :class:`InvokableMessageCommand`.
         """
-        warn_deprecated(
-            "add_message_command is deprecated and will be removed in a future version. "
-            "Use add_app_command instead.",
-            stacklevel=3,
-        )
         self.add_app_command(message_command)
 
     def remove_app_command(
