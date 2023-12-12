@@ -49,6 +49,7 @@ TeamMember
 
 .. autoclass:: TeamMember()
     :members:
+    :inherited-members:
 
 Data Classes
 ------------
@@ -88,6 +89,27 @@ TeamMembershipState
     .. attribute:: accepted
 
         Represents a member currently in the team.
+
+TeamMemberRole
+~~~~~~~~~~~~~~
+
+.. class:: TeamMemberRole
+
+    Represents the role of a team member retrieved through :func:`Client.application_info`.
+
+    .. versionadded:: 2.10
+
+    .. attribute:: admin
+
+        Admins have the most permissions. An admin can only take destructive actions on the team or team-owned apps if they are the team owner.
+
+    .. attribute:: developer
+
+        Developers can access information about a team and team-owned applications, and take limited actions on them, like configuring interaction endpoints or resetting the bot token.
+
+    .. attribute:: read_only
+
+        Read-only members can access information about a team and team-owned applications.
 
 ApplicationRoleConnectionMetadataType
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

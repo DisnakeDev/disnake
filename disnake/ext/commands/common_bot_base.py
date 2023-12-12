@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import collections.abc
+import importlib.machinery
 import importlib.util
 import logging
 import os
@@ -19,8 +20,6 @@ from . import errors
 from .cog import Cog
 
 if TYPE_CHECKING:
-    import importlib.machinery
-
     from ._types import CoroFunc
     from .bot import AutoShardedBot, AutoShardedInteractionBot, Bot, InteractionBot
     from .help import HelpCommand
@@ -82,8 +81,13 @@ class CommonBotBase(Generic[CogT]):
 
         app: disnake.AppInfo = await self.application_info()  # type: ignore
         if app.team:
-            self.owners = set(app.team.members)
-            self.owner_ids = {m.id for m in app.team.members}
+            self.owners = owners = {
+                member
+                for member in app.team.members
+                # these roles can access the bot token, consider them bot owners
+                if member.role in (disnake.TeamMemberRole.admin, disnake.TeamMemberRole.developer)
+            }
+            self.owner_ids = {m.id for m in owners}
         else:
             self.owner = app.owner
             self.owner_id = app.owner.id
@@ -130,6 +134,10 @@ class CommonBotBase(Generic[CogT]):
         .. versionchanged:: 1.3
             The function also checks if the application is team-owned if
             :attr:`owner_ids` is not set.
+
+        .. versionchanged:: 2.10
+            Also takes team roles into account; only team members with the :attr:`~disnake.TeamMemberRole.admin`
+            or :attr:`~disnake.TeamMemberRole.developer` roles are considered bot owners.
 
         Parameters
         ----------

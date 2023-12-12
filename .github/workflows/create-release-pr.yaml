@@ -1,0 +1,81 @@
+# SPDX-License-Identifier: MIT
+
+name: Create Release PR
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "The new version number, e.g. `1.2.3`."
+        type: string
+        required: true
+
+permissions: {}
+
+jobs:
+  create-release-pr:
+    name: Create Release PR
+    runs-on: ubuntu-latest
+
+    env:
+      VERSION_INPUT: ${{ inputs.version }}
+
+    steps:
+      # https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/making-authenticated-api-requests-with-a-github-app-in-a-github-actions-workflow
+      - name: Generate app token
+        id: generate_token
+        uses: tibdex/github-app-token@b62528385c34dbc9f38e5f4225ac829252d1ea92  # v1.8.0
+        with:
+          app_id: ${{ secrets.BOT_APP_ID }}
+          private_key: ${{ secrets.BOT_PRIVATE_KEY }}
+
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+          persist-credentials: false
+
+      - name: Set git name/email
+        env:
+          GIT_USER: ${{ vars.GIT_APP_USER_NAME }}
+          GIT_EMAIL: ${{ vars.GIT_APP_USER_EMAIL }}
+        run: |
+          git config user.name "$GIT_USER"
+          git config user.email "$GIT_EMAIL"
+
+      - name: Set up environment
+        uses: ./.github/actions/setup-env
+        with:
+          python-version: 3.8
+
+      - name: Install dependencies
+        run: pdm install -dG changelog
+
+      - name: Update version
+        run: |
+          python scripts/ci/versiontool.py --set "$VERSION_INPUT"
+          git commit -a -m "chore: update version to $VERSION_INPUT"
+
+      - name: Build changelog
+        run: |
+          pdm run towncrier build --yes --version "$VERSION_INPUT"
+          git commit -a -m "docs: build changelog"
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@153407881ec5c347639a548ade7d8ad1d6740e38  # v5.0.2
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+          branch: auto/release-v${{ inputs.version }}
+          delete-branch: true
+          title: "release: v${{ inputs.version }}"
+          body: |
+            Automated release PR, triggered by @${{ github.actor }} for ${{ github.sha }}.
+
+            ### Tasks
+            - [ ] Add changelogs from backports, if applicable.
+            - [ ] Once merged, create + push a tag.
+
+            <sub>https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}</sub>
+          labels: |
+            t: release
+          assignees: |
+            ${{ github.actor }}

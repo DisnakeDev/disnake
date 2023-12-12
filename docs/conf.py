@@ -52,6 +52,7 @@ extensions = [
     "exception_hierarchy",
     "attributetable",
     "resourcelinks",
+    "collapse",
     "nitpick_file_ignorer",
 ]
 

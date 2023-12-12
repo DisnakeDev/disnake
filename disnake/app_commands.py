@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 import re
 from abc import ABC
-from typing import TYPE_CHECKING, ClassVar, Dict, List, Mapping, Optional, Tuple, Union
+from typing import TYPE_CHECKING, ClassVar, List, Mapping, Optional, Sequence, Tuple, Union
 
 from .enums import (
     ApplicationCommandPermissionType,
@@ -37,10 +37,10 @@ if TYPE_CHECKING:
     )
 
     Choices = Union[
-        List["OptionChoice"],
-        List[ApplicationCommandOptionChoiceValue],
-        Dict[str, ApplicationCommandOptionChoiceValue],
-        List[Localized[str]],
+        Sequence["OptionChoice"],
+        Sequence[ApplicationCommandOptionChoiceValue],
+        Mapping[str, ApplicationCommandOptionChoiceValue],
+        Sequence[Localized[str]],
     ]
 
     APIApplicationCommand = Union["APIUserCommand", "APIMessageCommand", "APISlashCommand"]
@@ -179,8 +179,42 @@ class Option:
         The option type, e.g. :class:`OptionType.user`.
     required: :class:`bool`
         Whether this option is required.
-    choices: Union[List[:class:`OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
-        The list of option choices.
+    choices: Union[Sequence[:class:`OptionChoice`], Sequence[Union[:class:`str`, :class:`int`, :class:`float`]], Mapping[:class:`str`, Union[:class:`str`, :class:`int`, :class:`float`]]]
+        The pre-defined choices for this option.
+    options: List[:class:`Option`]
+        The list of sub options. Normally you don't have to specify it directly,
+        instead consider using ``@main_cmd.sub_command`` or ``@main_cmd.sub_command_group`` decorators.
+    channel_types: List[:class:`ChannelType`]
+        The list of channel types that your option supports, if the type is :class:`OptionType.channel`.
+        By default, it supports all channel types.
+    autocomplete: :class:`bool`
+        Whether this option can be autocompleted.
+    min_value: Union[:class:`int`, :class:`float`]
+        The minimum value permitted.
+    max_value: Union[:class:`int`, :class:`float`]
+        The maximum value permitted.
+    min_length: :class:`int`
+        The minimum length for this option if this is a string option.
+
+        .. versionadded:: 2.6
+
+    max_length: :class:`int`
+        The maximum length for this option if this is a string option.
+
+        .. versionadded:: 2.6
+
+    Attributes
+    ----------
+    name: :class:`str`
+        The option's name.
+    description: :class:`str`
+        The option's description.
+    type: :class:`OptionType`
+        The option type, e.g. :class:`OptionType.user`.
+    required: :class:`bool`
+        Whether this option is required.
+    choices: List[:class:`OptionChoice`]
+        The list of pre-defined choices.
     options: List[:class:`Option`]
         The list of sub options. Normally you don't have to specify it directly,
         instead consider using ``@main_cmd.sub_command`` or ``@main_cmd.sub_command_group`` decorators.
@@ -270,6 +304,9 @@ class Option:
             if autocomplete:
                 raise TypeError("can not specify both choices and autocomplete args")
 
+            if isinstance(choices, str):  # str matches `Sequence[str]`, but isn't meant to be used
+                raise TypeError("choices argument should be a list/sequence or dict, not str")
+
             if isinstance(choices, Mapping):
                 self.choices = [OptionChoice(name, value) for name, value in choices.items()]
             else:
@@ -336,7 +373,7 @@ class Option:
     def add_choice(
         self,
         name: LocalizedRequired,
-        value: Union[str, int],
+        value: ApplicationCommandOptionChoiceValue,
     ) -> None:
         """Adds an OptionChoice to the list of current choices,
         parameters are the same as for :class:`OptionChoice`.
@@ -354,7 +391,7 @@ class Option:
         description: LocalizedOptional = None,
         type: Optional[OptionType] = None,
         required: bool = False,
-        choices: Optional[List[OptionChoice]] = None,
+        choices: Optional[Choices] = None,
         options: Optional[list] = None,
         channel_types: Optional[List[ChannelType]] = None,
         autocomplete: bool = False,
@@ -850,7 +887,7 @@ class SlashCommand(ApplicationCommand):
         description: LocalizedOptional = None,
         type: Optional[OptionType] = None,
         required: bool = False,
-        choices: Optional[List[OptionChoice]] = None,
+        choices: Optional[Choices] = None,
         options: Optional[list] = None,
         channel_types: Optional[List[ChannelType]] = None,
         autocomplete: bool = False,
