@@ -487,15 +487,12 @@ class Invite(Hashable):
                 # If it's not cached, then it has to be a partial guild
                 guild = PartialInviteGuild(state, guild_data, guild_id)
 
-        # todo: this is no longer true
-        # As far as I know, invites always need a channel
-        # So this should never raise.
-        channel: Union[PartialInviteChannel, GuildChannel] = PartialInviteChannel(
-            data=data["channel"], state=state
-        )
-        if guild is not None and not isinstance(guild, PartialInviteGuild):
-            # Upgrade the partial data if applicable
-            channel = guild.get_channel(channel.id) or channel
+        channel: Optional[Union[PartialInviteChannel, GuildChannel]] = None
+        if channel_data := data.get("channel"):
+            channel = PartialInviteChannel(data=channel_data, state=state)
+            if guild is not None and not isinstance(guild, PartialInviteGuild):
+                # Upgrade the partial data if applicable
+                channel = guild.get_channel(channel.id) or channel
 
         return cls(state=state, data=data, guild=guild, channel=channel)
 
