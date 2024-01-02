@@ -3921,6 +3921,7 @@ class Guild(Hashable):
         payload["max_uses"] = 0
         payload["max_age"] = 0
         payload["uses"] = payload.get("uses", 0)
+        payload["type"] = 0
         return Invite(state=self._state, data=payload, guild=self, channel=channel)
 
     # TODO: use MISSING when async iterators get refactored
