@@ -16,7 +16,7 @@ from .guild import Guild, UnavailableGuild
 from .guild_scheduled_event import GuildScheduledEvent
 from .integration import BaseIntegration
 from .interactions import BaseInteraction, GuildApplicationCommandPermissions
-from .invite import InviteTargetType
+from .invite import InviteTargetType, InviteType
 from .member import MemberWithUser
 from .message import Message
 from .role import Role
@@ -347,6 +347,7 @@ class InviteCreateEvent(TypedDict):
     target_user: NotRequired[User]
     target_application: NotRequired[PartialAppInfo]
     temporary: bool
+    type: InviteType
     uses: int  # always 0
 
 
