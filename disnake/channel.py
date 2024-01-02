@@ -74,7 +74,7 @@ if TYPE_CHECKING:
     from .message import AllowedMentions, Message, PartialMessage
     from .role import Role
     from .state import ConnectionState
-    from .sticker import GuildSticker, StickerItem
+    from .sticker import GuildSticker, StandardSticker, StickerItem
     from .threads import AnyThreadArchiveDuration, ThreadType
     from .types.channel import (
         CategoryChannel as CategoryChannelPayload,
@@ -103,7 +103,7 @@ async def _single_delete_strategy(messages: Iterable[Message]) -> None:
 class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
     """Represents a Discord guild text channel.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -473,7 +473,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             overwrites=overwrites,
             flags=flags,
             reason=reason,
-            **kwargs,
+            **kwargs,  # type: ignore
         )
         if payload is not None:
             # the payload will always be the proper channel payload
@@ -1207,6 +1207,7 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
             denied.update(
                 manage_channels=True,
                 manage_roles=True,
+                create_events=True,
                 manage_events=True,
                 manage_webhooks=True,
             )
@@ -1217,7 +1218,7 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
 class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
     """Represents a Discord guild voice channel.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -1628,7 +1629,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             slowmode_delay=slowmode_delay,
             flags=flags,
             reason=reason,
-            **kwargs,
+            **kwargs,  # type: ignore
         )
         if payload is not None:
             # the payload will always be the proper channel payload
@@ -1871,7 +1872,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
     .. versionadded:: 1.7
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -2193,6 +2194,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         topic: str,
         privacy_level: StagePrivacyLevel = MISSING,
         notify_everyone: bool = False,
+        guild_scheduled_event: Snowflake = MISSING,
         reason: Optional[str] = None,
     ) -> StageInstance:
         """|coro|
@@ -2213,14 +2215,21 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
             The stage instance's topic.
         privacy_level: :class:`StagePrivacyLevel`
             The stage instance's privacy level. Defaults to :attr:`StagePrivacyLevel.guild_only`.
-        reason: Optional[:class:`str`]
-            The reason the stage instance was created. Shows up on the audit log.
         notify_everyone: :class:`bool`
             Whether to notify ``@everyone`` that the stage instance has started.
             Requires the :attr:`~Permissions.mention_everyone` permission on the stage channel.
             Defaults to ``False``.
 
             .. versionadded:: 2.5
+
+        guild_scheduled_event: :class:`abc.Snowflake`
+            The guild scheduled event associated with the stage instance.
+            Setting this will automatically start the event.
+
+            .. versionadded:: 2.10
+
+        reason: Optional[:class:`str`]
+            The reason the stage instance was created. Shows up on the audit log.
 
         Raises
         ------
@@ -2252,6 +2261,9 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
                 )
 
             payload["privacy_level"] = privacy_level.value
+
+        if guild_scheduled_event is not MISSING:
+            payload["guild_scheduled_event_id"] = guild_scheduled_event.id
 
         data = await self._state.http.create_stage_instance(**payload, reason=reason)
         return StageInstance(guild=self.guild, state=self._state, data=data)
@@ -2442,7 +2454,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
             flags=flags,
             slowmode_delay=slowmode_delay,
             reason=reason,
-            **kwargs,
+            **kwargs,  # type: ignore
         )
         if payload is not None:
             # the payload will always be the proper channel payload
@@ -2685,7 +2697,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
     These are useful to group channels to logical compartments.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -2935,7 +2947,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             overwrites=overwrites,
             flags=flags,
             reason=reason,
-            **kwargs,
+            **kwargs,  # type: ignore
         )
         if payload is not None:
             # the payload will always be the proper channel payload
@@ -3134,7 +3146,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
     .. versionadded:: 2.5
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -3608,7 +3620,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             default_sort_order=default_sort_order,
             default_layout=default_layout,
             reason=reason,
-            **kwargs,
+            **kwargs,  # type: ignore
         )
         if payload is not None:
             # the payload will always be the proper channel payload
@@ -3779,7 +3791,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         file: File = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
-        stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
+        stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
         components: Components = ...,
@@ -3800,7 +3812,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         files: List[File] = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
-        stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
+        stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
         components: Components = ...,
@@ -3821,7 +3833,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         file: File = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
-        stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
+        stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
         components: Components = ...,
@@ -3842,7 +3854,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         files: List[File] = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
-        stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
+        stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
         components: Components = ...,
@@ -3864,7 +3876,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         files: List[File] = MISSING,
         suppress_embeds: bool = MISSING,
         flags: MessageFlags = MISSING,
-        stickers: Sequence[Union[GuildSticker, StickerItem]] = MISSING,
+        stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
         components: Components[MessageUIComponent] = MISSING,
@@ -3928,7 +3940,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         files: List[:class:`.File`]
             A list of files to upload. Must be a maximum of 10.
             This cannot be mixed with the ``file`` parameter.
-        stickers: Sequence[Union[:class:`.GuildSticker`, :class:`.StickerItem`]]
+        stickers: Sequence[Union[:class:`.GuildSticker`, :class:`.StandardSticker`, :class:`.StickerItem`]]
             A list of stickers to upload. Must be a maximum of 3.
         allowed_mentions: :class:`.AllowedMentions`
             Controls the mentions being processed in this message. If this is
@@ -3983,7 +3995,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             stickers=stickers,
         )
 
-        if auto_archive_duration is not None:
+        if auto_archive_duration not in (MISSING, None):
             auto_archive_duration = cast(
                 "ThreadArchiveDurationLiteral", try_enum_to_int(auto_archive_duration)
             )
@@ -4173,7 +4185,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 class DMChannel(disnake.abc.Messageable, Hashable):
     """Represents a Discord direct message channel.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -4336,7 +4348,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
 class GroupChannel(disnake.abc.Messageable, Hashable):
     """Represents a Discord group channel.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -4495,7 +4507,7 @@ class PartialMessageable(disnake.abc.Messageable, Hashable):
 
     .. versionadded:: 2.0
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 

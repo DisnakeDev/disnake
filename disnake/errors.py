@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Mapping, Optional, Tuple, Union
 
 if TYPE_CHECKING:
     from aiohttp import ClientResponse, ClientWebSocketResponse
@@ -225,7 +225,7 @@ class ConnectionClosed(ClientException):
     """
 
     # https://discord.com/developers/docs/topics/opcodes-and-status-codes#gateway-gateway-close-event-codes
-    GATEWAY_CLOSE_EVENT_REASONS: Dict[int, str] = {
+    GATEWAY_CLOSE_EVENT_REASONS: ClassVar[Mapping[int, str]] = {
         4000: "Unknown error",
         4001: "Unknown opcode",
         4002: "Decode error",
@@ -243,7 +243,7 @@ class ConnectionClosed(ClientException):
     }
 
     # https://discord.com/developers/docs/topics/opcodes-and-status-codes#voice-voice-close-event-codes
-    GATEWAY_VOICE_CLOSE_EVENT_REASONS: Dict[int, str] = {
+    GATEWAY_VOICE_CLOSE_EVENT_REASONS: ClassVar[Mapping[int, str]] = {
         **GATEWAY_CLOSE_EVENT_REASONS,
         4002: "Failed to decode payload",
         4006: "Session no longer valid",

@@ -329,7 +329,7 @@ class SystemChannelFlags(BaseFlags, inverted=True):
     to enable or disable.
     Arguments are applied in order, similar to :class:`Permissions`.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -491,7 +491,7 @@ class MessageFlags(BaseFlags):
 
     See :class:`SystemChannelFlags`.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -681,7 +681,7 @@ class MessageFlags(BaseFlags):
 class PublicUserFlags(BaseFlags):
     """Wraps up the Discord User Public flags.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -930,7 +930,7 @@ class Intents(BaseFlags):
 
     .. versionadded:: 1.5
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -1617,7 +1617,7 @@ class MemberCacheFlags(BaseFlags):
 
     .. versionadded:: 1.5
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -1793,7 +1793,7 @@ class MemberCacheFlags(BaseFlags):
 class ApplicationFlags(BaseFlags):
     """Wraps up the Discord Application flags.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -1968,7 +1968,7 @@ class ApplicationFlags(BaseFlags):
 class ChannelFlags(BaseFlags):
     """Wraps up the Discord Channel flags.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -2081,7 +2081,7 @@ class ChannelFlags(BaseFlags):
 class AutoModKeywordPresets(ListBaseFlags):
     """Wraps up the pre-defined auto moderation keyword lists, provided by Discord.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -2194,7 +2194,7 @@ class AutoModKeywordPresets(ListBaseFlags):
 class MemberFlags(BaseFlags):
     """Wraps up Discord Member flags.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -2296,7 +2296,7 @@ class MemberFlags(BaseFlags):
 class RoleFlags(BaseFlags):
     """Wraps up Discord Role flags.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -2376,7 +2376,7 @@ class RoleFlags(BaseFlags):
 class AttachmentFlags(BaseFlags):
     """Wraps up Discord Attachment flags.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
