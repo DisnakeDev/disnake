@@ -247,6 +247,7 @@ InteractionResponseType
         See also :meth:`InteractionResponse.send_modal`
 
         .. versionadded:: 2.4
+
     .. attribute:: premium_required
 
         Responds to the interaction with a message containing an upgrade button.
