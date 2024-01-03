@@ -63,7 +63,7 @@ if TYPE_CHECKING:
     from ..mentions import AllowedMentions
     from ..message import Attachment
     from ..state import ConnectionState
-    from ..sticker import GuildSticker, StickerItem
+    from ..sticker import GuildSticker, StandardSticker, StickerItem
     from ..types.message import Message as MessagePayload
     from ..types.webhook import Webhook as WebhookPayload
     from ..ui.action_row import Components
@@ -491,8 +491,10 @@ def handle_message_parameters_dict(
     components: Optional[Components[MessageUIComponent]] = MISSING,
     allowed_mentions: Optional[AllowedMentions] = MISSING,
     previous_allowed_mentions: Optional[AllowedMentions] = None,
-    stickers: Sequence[Union[GuildSticker, StickerItem]] = MISSING,
-    thread_name: Optional[str] = None,
+    stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = MISSING,
+    # these parameters are exclusive to webhooks in forum channels
+    thread_name: str = MISSING,
+    applied_tags: Sequence[Snowflake] = MISSING,
 ) -> DictPayloadParameters:
     if files is not MISSING and file is not MISSING:
         raise TypeError("Cannot mix file and files keyword arguments.")
@@ -554,8 +556,10 @@ def handle_message_parameters_dict(
     if stickers is not MISSING:
         payload["sticker_ids"] = [s.id for s in stickers]
 
-    if thread_name is not None:
+    if thread_name:
         payload["thread_name"] = thread_name
+    if applied_tags:
+        payload["applied_tags"] = [t.id for t in applied_tags]
 
     return DictPayloadParameters(payload=payload, files=files)
 
@@ -578,8 +582,10 @@ def handle_message_parameters(
     components: Optional[Components[MessageUIComponent]] = MISSING,
     allowed_mentions: Optional[AllowedMentions] = MISSING,
     previous_allowed_mentions: Optional[AllowedMentions] = None,
-    stickers: Sequence[Union[GuildSticker, StickerItem]] = MISSING,
-    thread_name: Optional[str] = None,
+    stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = MISSING,
+    # these parameters are exclusive to webhooks in forum channels
+    thread_name: str = MISSING,
+    applied_tags: Sequence[Snowflake] = MISSING,
 ) -> PayloadParameters:
     params = handle_message_parameters_dict(
         content=content,
@@ -600,6 +606,7 @@ def handle_message_parameters(
         previous_allowed_mentions=previous_allowed_mentions,
         stickers=stickers,
         thread_name=thread_name,
+        applied_tags=applied_tags,
     )
 
     if params.files:
@@ -1451,6 +1458,7 @@ class Webhook(BaseWebhook):
         components: Components[MessageUIComponent] = ...,
         thread: Snowflake = ...,
         thread_name: str = ...,
+        applied_tags: Sequence[Snowflake] = ...,
         wait: Literal[True],
         delete_after: float = ...,
     ) -> WebhookMessage:
@@ -1476,6 +1484,7 @@ class Webhook(BaseWebhook):
         components: Components[MessageUIComponent] = ...,
         thread: Snowflake = ...,
         thread_name: str = ...,
+        applied_tags: Sequence[Snowflake] = ...,
         wait: Literal[False] = ...,
         delete_after: float = ...,
     ) -> None:
@@ -1499,7 +1508,8 @@ class Webhook(BaseWebhook):
         view: View = MISSING,
         components: Components[MessageUIComponent] = MISSING,
         thread: Snowflake = MISSING,
-        thread_name: Optional[str] = None,
+        thread_name: str = MISSING,
+        applied_tags: Sequence[Snowflake] = MISSING,
         wait: bool = False,
         delete_after: float = MISSING,
     ) -> Optional[WebhookMessage]:
@@ -1515,6 +1525,10 @@ class Webhook(BaseWebhook):
         If the ``embed`` parameter is provided, it must be of type :class:`Embed` and
         it must be a rich embed type. You cannot mix the ``embed`` parameter with the
         ``embeds`` parameter, which must be a :class:`list` of :class:`Embed` objects to send.
+
+        To send a message in a thread, provide the ``thread`` parameter.
+        If this webhook is in a :class:`ForumChannel`, the ``thread_name`` parameter can
+        be used to create a new thread instead (optionally with ``applied_tags``).
 
         .. versionchanged:: 2.6
             Raises :exc:`WebhookTokenMissing` instead of ``InvalidArgument``.
@@ -1587,6 +1601,11 @@ class Webhook(BaseWebhook):
                 representing the created thread, may be a :class:`PartialMessageable`.
 
             .. versionadded:: 2.6
+        applied_tags: Sequence[:class:`abc.Snowflake`]
+            If in a forum channel and creating a new thread (see ``thread_name`` above),
+            the tags to apply to the new thread. Maximum of 5.
+
+            .. versionadded:: 2.10
 
         wait: :class:`bool`
             Whether the server should wait before sending a response. This essentially
@@ -1632,7 +1651,7 @@ class Webhook(BaseWebhook):
             You specified both ``embed`` and ``embeds`` or ``file`` and ``files``.
             ``ephemeral`` was passed with the improper webhook type.
             There was no state attached with this webhook when giving it a view.
-            Both ``thread`` and ``thread_name`` were provided.
+            Both ``thread`` and ``thread_name``/``applied_tags`` were provided.
         WebhookTokenMissing
             There was no token associated with this webhook.
         ValueError
@@ -1666,9 +1685,11 @@ class Webhook(BaseWebhook):
                 view.timeout = 15 * 60.0
 
         thread_id: Optional[int] = None
-        if thread is not MISSING and thread_name is not None:
-            raise TypeError("only one of thread and thread_name can be provided.")
-        elif thread is not MISSING:
+        if thread is not MISSING:
+            if thread_name or applied_tags:
+                raise TypeError(
+                    "Cannot use `thread_name` or `applied_tags` when `thread` is provided."
+                )
             thread_id = thread.id
 
         params = handle_message_parameters(
@@ -1686,6 +1707,7 @@ class Webhook(BaseWebhook):
             view=view,
             components=components,
             thread_name=thread_name,
+            applied_tags=applied_tags,
             allowed_mentions=allowed_mentions,
             previous_allowed_mentions=previous_mentions,
         )
