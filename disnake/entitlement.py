@@ -116,7 +116,7 @@ class Entitlement(Hashable):
 
     @property
     def created_at(self) -> datetime.datetime:
-        """:class:`datetime.datetime`: Returns the SKU's creation time in UTC."""
+        """:class:`datetime.datetime`: Returns the entitlement's creation time in UTC."""
         return snowflake_time(self.id)
 
     @property
