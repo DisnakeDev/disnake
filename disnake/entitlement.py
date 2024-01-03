@@ -32,7 +32,7 @@ class Entitlement(Hashable):
 
     You may create new entitlements for testing purposes using :meth:`Client.create_entitlement`.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 

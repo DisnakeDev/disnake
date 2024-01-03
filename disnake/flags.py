@@ -2457,7 +2457,7 @@ class AttachmentFlags(BaseFlags):
 class SKUFlags(BaseFlags):
     """Wraps up Discord SKU flags.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 

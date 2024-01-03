@@ -22,7 +22,7 @@ class SKU(Hashable):
 
     This can be retrieved using :meth:`Client.skus`.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
