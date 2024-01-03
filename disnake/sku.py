@@ -79,8 +79,5 @@ class SKU(Hashable):
 
     @property
     def flags(self) -> SKUFlags:
-        """:class:`SKUFlags`: Returns the SKU's flags.
-
-        .. versionadded:: 2.10
-        """
+        """:class:`SKUFlags`: Returns the SKU's flags."""
         return SKUFlags._from_value(self._flags)
