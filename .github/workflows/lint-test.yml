@@ -125,8 +125,11 @@ jobs:
     - name: Try building package
       run: |
         pdm install -dG build
+
         pdm run python -m build
         ls -la dist/
+
+        pdm run twine check --strict dist/*
 
     # run the libcst parsers and check for changes
     - name: libcst codemod

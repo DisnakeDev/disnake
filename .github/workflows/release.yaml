@@ -1,13 +1,9 @@
 # SPDX-License-Identifier: MIT
 
-name: Build (+ Release)
+name: Release
 
-# test build for commit/tag, but only upload release for tags
 on:
   push:
-    branches:
-      - "master"
-      - 'v[0-9]+.[0-9]+.x'  # matches to backport branches, e.g. v3.6.x
     tags:
       - "v[0-9]+.[0-9]+.[0-9]+"
 
@@ -15,7 +11,7 @@ permissions:
   contents: read
 
 jobs:
-  # Builds sdist and wheel, runs `twine check`, and optionally uploads artifacts.
+  # Builds sdist and wheel, runs `twine check`, and uploads artifacts.
   build:
     name: Build package
     runs-on: ubuntu-latest
@@ -50,8 +46,6 @@ jobs:
           echo -e "\n</details>\n" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload artifact
-        # only upload artifacts when necessary
-        if: startsWith(github.ref, 'refs/tags/')
         uses: actions/upload-artifact@v3
         with:
           name: dist
@@ -59,13 +53,10 @@ jobs:
           if-no-files-found: error
 
 
-  ### Anything below this only runs for tags ###
-
   # Ensures that git tag and built version match.
   validate-tag:
     name: Validate tag
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
     needs:
       - build
     env:
@@ -109,7 +100,6 @@ jobs:
   release-github:
     name: Create GitHub draft release
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
     needs:
       - build
       - validate-tag
@@ -150,7 +140,6 @@ jobs:
       name: release-pypi
       url: https://pypi.org/project/disnake/
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
     needs:
       - build
       - validate-tag
@@ -174,7 +163,7 @@ jobs:
   create-dev-version-pr:
     name: Create dev version bump PR
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/') && needs.validate-tag.outputs.bump_dev
+    if: needs.validate-tag.outputs.bump_dev
     needs:
       - validate-tag
       - release-github
