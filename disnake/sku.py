@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import datetime
 from typing import TYPE_CHECKING
 
 from .enums import SKUType, try_enum
 from .flags import SKUFlags
 from .mixins import Hashable
+from .utils import snowflake_time
 
 if TYPE_CHECKING:
     from .types.sku import SKU as SKUPayload
@@ -69,6 +71,11 @@ class SKU(Hashable):
 
     def __repr__(self) -> str:
         return f"<SKU id={self.id!r} type={self.type!r} name={self.name!r}>"
+
+    @property
+    def created_at(self) -> datetime.datetime:
+        """:class:`datetime.datetime`: Returns the SKU's creation time in UTC."""
+        return snowflake_time(self.id)
 
     @property
     def flags(self) -> SKUFlags:

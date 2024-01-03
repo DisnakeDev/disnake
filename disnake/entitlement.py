@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Optional
 
 from .enums import EntitlementType, try_enum
 from .mixins import Hashable
-from .utils import _get_as_snowflake, parse_time, utcnow
+from .utils import _get_as_snowflake, parse_time, snowflake_time, utcnow
 
 if TYPE_CHECKING:
     from .guild import Guild
@@ -113,6 +113,11 @@ class Entitlement(Hashable):
         return (
             f"<Entitlement id={self.id!r} sku_id={self.sku_id!r} type={self.type!r} {grant_repr}>"
         )
+
+    @property
+    def created_at(self) -> datetime.datetime:
+        """:class:`datetime.datetime`: Returns the SKU's creation time in UTC."""
+        return snowflake_time(self.id)
 
     @property
     def guild(self) -> Optional[Guild]:
