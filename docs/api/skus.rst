@@ -7,6 +7,7 @@ SKUs
 
 This section documents everything related to SKUs, which represent items being
 sold on Discord, like application subscriptions.
+See the :ddocs:`official docs <monetization/overview>` for more info.
 
 Discord Models
 ---------------
