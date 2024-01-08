@@ -81,6 +81,10 @@ Locale
 
         The ``es_ES`` (Spanish) locale.
 
+    .. attribute:: es_LATAM
+
+        The ``es-419`` (Spanish, LATAM) locale.
+
     .. attribute:: fi
 
         The ``fi`` (Finnish) locale.
