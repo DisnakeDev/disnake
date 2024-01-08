@@ -85,6 +85,8 @@ Locale
 
         The ``es-419`` (Spanish, LATAM) locale.
 
+        .. versionadded:: 2.10
+
     .. attribute:: fi
 
         The ``fi`` (Finnish) locale.
