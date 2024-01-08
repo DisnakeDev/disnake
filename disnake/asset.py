@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     ValidAssetFormatTypes = Literal["webp", "jpeg", "jpg", "png", "gif"]
     AnyState = Union[ConnectionState, _WebhookState[BaseWebhook]]
 
-AssetBytes = Union[bytes, "AssetMixin"]
+AssetBytes = Union[utils._BytesLike, "AssetMixin"]
 
 VALID_STATIC_FORMATS = frozenset({"jpeg", "jpg", "webp", "png"})
 VALID_ASSET_FORMATS = VALID_STATIC_FORMATS | {"gif"}
@@ -164,7 +164,7 @@ class AssetMixin:
 class Asset(AssetMixin):
     """Represents a CDN asset on Discord.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: str(x)
 
