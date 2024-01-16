@@ -85,7 +85,7 @@ if TYPE_CHECKING:
     from typing_extensions import NotRequired
 
     from .abc import GuildChannel, PrivateChannel, Snowflake, SnowflakeTime
-    from .app_commands import APIApplicationCommand
+    from .app_commands import APIApplicationCommand, MessageCommand, SlashCommand, UserCommand
     from .asset import AssetBytes
     from .channel import DMChannel
     from .member import Member
@@ -2660,6 +2660,24 @@ class Client:
         """
         return await self._connection.fetch_global_command(command_id)
 
+    @overload
+    async def create_global_command(self, application_command: SlashCommand) -> APISlashCommand:
+        ...
+
+    @overload
+    async def create_global_command(self, application_command: UserCommand) -> APIUserCommand:
+        ...
+
+    @overload
+    async def create_global_command(self, application_command: MessageCommand) -> APIMessageCommand:
+        ...
+
+    @overload
+    async def create_global_command(
+        self, application_command: ApplicationCommand
+    ) -> APIApplicationCommand:
+        ...
+
     async def create_global_command(
         self, application_command: ApplicationCommand
     ) -> APIApplicationCommand:
@@ -2681,6 +2699,30 @@ class Client:
         """
         application_command.localize(self.i18n)
         return await self._connection.create_global_command(application_command)
+
+    @overload
+    async def edit_global_command(
+        self, command_id: int, new_command: SlashCommand
+    ) -> APISlashCommand:
+        ...
+
+    @overload
+    async def edit_global_command(
+        self, command_id: int, new_command: UserCommand
+    ) -> APIUserCommand:
+        ...
+
+    @overload
+    async def edit_global_command(
+        self, command_id: int, new_command: MessageCommand
+    ) -> APIMessageCommand:
+        ...
+
+    @overload
+    async def edit_global_command(
+        self, command_id: int, new_command: ApplicationCommand
+    ) -> APIApplicationCommand:
+        ...
 
     async def edit_global_command(
         self, command_id: int, new_command: ApplicationCommand
@@ -2796,6 +2838,30 @@ class Client:
         """
         return await self._connection.fetch_guild_command(guild_id, command_id)
 
+    @overload
+    async def create_guild_command(
+        self, guild_id: int, application_command: SlashCommand
+    ) -> APISlashCommand:
+        ...
+
+    @overload
+    async def create_guild_command(
+        self, guild_id: int, application_command: UserCommand
+    ) -> APIUserCommand:
+        ...
+
+    @overload
+    async def create_guild_command(
+        self, guild_id: int, application_command: MessageCommand
+    ) -> APIMessageCommand:
+        ...
+
+    @overload
+    async def create_guild_command(
+        self, guild_id: int, application_command: ApplicationCommand
+    ) -> APIApplicationCommand:
+        ...
+
     async def create_guild_command(
         self, guild_id: int, application_command: ApplicationCommand
     ) -> APIApplicationCommand:
@@ -2819,6 +2885,30 @@ class Client:
         """
         application_command.localize(self.i18n)
         return await self._connection.create_guild_command(guild_id, application_command)
+
+    @overload
+    async def edit_guild_command(
+        self, guild_id: int, command_id: int, new_command: SlashCommand
+    ) -> APISlashCommand:
+        ...
+
+    @overload
+    async def edit_guild_command(
+        self, guild_id: int, command_id: int, new_command: UserCommand
+    ) -> APIUserCommand:
+        ...
+
+    @overload
+    async def edit_guild_command(
+        self, guild_id: int, command_id: int, new_command: MessageCommand
+    ) -> APIMessageCommand:
+        ...
+
+    @overload
+    async def edit_guild_command(
+        self, guild_id: int, command_id: int, new_command: ApplicationCommand
+    ) -> APIApplicationCommand:
+        ...
 
     async def edit_guild_command(
         self, guild_id: int, command_id: int, new_command: ApplicationCommand
