@@ -865,6 +865,23 @@ Members
     :param after: The updated member's updated info.
     :type after: :class:`Member`
 
+.. function:: on_raw_presence_update(payload)
+
+    Called when a :class:`User` updates their presence.
+    Unlike :func:`on_presence_update`, this is called regardless of the member cache.
+
+    This is called when one or more of the following things change:
+
+    - status
+    - activity
+
+    This requires :attr:`Intents.presences` and :attr:`Intents.members` to be enabled.
+
+    .. versionadded:: 2.10
+
+    :param payload: The raw event payload data.
+    :type payload: :class:`RawPresenceUpdateEvent`
+
 .. function:: on_user_update(before, after)
 
     Called when a :class:`User` is updated.

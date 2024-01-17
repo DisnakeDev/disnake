@@ -1229,6 +1229,9 @@ class Event(Enum):
     """Called when a message has a specific reaction removed from it.
     Represents the :func:`on_reaction_clear_emoji` event.
     """
+    raw_presence_update = "raw_presence_update"
+    """Called when a user's presence changes regardless of the state of the internal member cache.
+    Represents the :func:`on_raw_presence_update` event."""
     raw_reaction_add = "raw_reaction_add"
     """Called when a message has a reaction added regardless of the state of the internal message cache.
     Represents the :func:`on_raw_reaction_add` event.
