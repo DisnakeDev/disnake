@@ -16,7 +16,6 @@ keywords = ["disnake", "discord", "discord api"]
 license = { text = "MIT" }
 dependencies = [
     "aiohttp>=3.7.0,<4.0",
-    "esbonio>=0.16.4",
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
