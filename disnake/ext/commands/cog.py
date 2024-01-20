@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import inspect
+import logging
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -48,6 +49,7 @@ __all__ = (
 FuncT = TypeVar("FuncT", bound=Callable[..., Any])
 
 MISSING: Any = disnake.utils.MISSING
+_log = logging.getLogger(__name__)
 
 
 def _cog_special_method(func: FuncT) -> FuncT:
@@ -787,30 +789,30 @@ class Cog(metaclass=CogMeta):
 
         # Add application command checks
         if cls.bot_slash_command_check is not Cog.bot_slash_command_check:
-            bot.add_app_command_check(self.bot_slash_command_check, slash_commands=True)  # type: ignore
+            bot.add_app_command_check(self.bot_slash_command_check, slash_commands=True)
 
         if cls.bot_user_command_check is not Cog.bot_user_command_check:
-            bot.add_app_command_check(self.bot_user_command_check, user_commands=True)  # type: ignore
+            bot.add_app_command_check(self.bot_user_command_check, user_commands=True)
 
         if cls.bot_message_command_check is not Cog.bot_message_command_check:
-            bot.add_app_command_check(self.bot_message_command_check, message_commands=True)  # type: ignore
+            bot.add_app_command_check(self.bot_message_command_check, message_commands=True)
 
         # Add app command one-off checks
         if cls.bot_slash_command_check_once is not Cog.bot_slash_command_check_once:
             bot.add_app_command_check(
-                self.bot_slash_command_check_once,  # type: ignore
+                self.bot_slash_command_check_once,
                 call_once=True,
                 slash_commands=True,
             )
 
         if cls.bot_user_command_check_once is not Cog.bot_user_command_check_once:
             bot.add_app_command_check(
-                self.bot_user_command_check_once, call_once=True, user_commands=True  # type: ignore
+                self.bot_user_command_check_once, call_once=True, user_commands=True
             )
 
         if cls.bot_message_command_check_once is not Cog.bot_message_command_check_once:
             bot.add_app_command_check(
-                self.bot_message_command_check_once,  # type: ignore
+                self.bot_message_command_check_once,
                 call_once=True,
                 message_commands=True,
             )
@@ -857,32 +859,32 @@ class Cog(metaclass=CogMeta):
 
             # Remove application command checks
             if cls.bot_slash_command_check is not Cog.bot_slash_command_check:
-                bot.remove_app_command_check(self.bot_slash_command_check, slash_commands=True)  # type: ignore
+                bot.remove_app_command_check(self.bot_slash_command_check, slash_commands=True)
 
             if cls.bot_user_command_check is not Cog.bot_user_command_check:
-                bot.remove_app_command_check(self.bot_user_command_check, user_commands=True)  # type: ignore
+                bot.remove_app_command_check(self.bot_user_command_check, user_commands=True)
 
             if cls.bot_message_command_check is not Cog.bot_message_command_check:
-                bot.remove_app_command_check(self.bot_message_command_check, message_commands=True)  # type: ignore
+                bot.remove_app_command_check(self.bot_message_command_check, message_commands=True)
 
             # Remove app command one-off checks
             if cls.bot_slash_command_check_once is not Cog.bot_slash_command_check_once:
                 bot.remove_app_command_check(
-                    self.bot_slash_command_check_once,  # type: ignore
+                    self.bot_slash_command_check_once,
                     call_once=True,
                     slash_commands=True,
                 )
 
             if cls.bot_user_command_check_once is not Cog.bot_user_command_check_once:
                 bot.remove_app_command_check(
-                    self.bot_user_command_check_once,  # type: ignore
+                    self.bot_user_command_check_once,
                     call_once=True,
                     user_commands=True,
                 )
 
             if cls.bot_message_command_check_once is not Cog.bot_message_command_check_once:
                 bot.remove_app_command_check(
-                    self.bot_message_command_check_once,  # type: ignore
+                    self.bot_message_command_check_once,
                     call_once=True,
                     message_commands=True,
                 )
@@ -895,6 +897,7 @@ class Cog(metaclass=CogMeta):
                 pass
             try:
                 self.cog_unload()
-            except Exception:
-                # TODO: Consider calling the bot's on_error handler here
-                pass
+            except Exception as e:
+                _log.error(
+                    "An error occurred while unloading the %s cog.", self.qualified_name, exc_info=e
+                )

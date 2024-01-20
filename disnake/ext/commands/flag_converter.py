@@ -435,7 +435,7 @@ class FlagConverter(metaclass=FlagsMeta):
     how this converter works, check the appropriate
     :ref:`documentation <ext_commands_flag_converter>`.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: iter(x)
 

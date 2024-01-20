@@ -25,7 +25,6 @@ from typing import (
     Tuple,
     TypeVar,
     Union,
-    cast,
     overload,
 )
 
@@ -45,6 +44,7 @@ from .channel import (
     _guild_channel_factory,
 )
 from .emoji import Emoji
+from .entitlement import Entitlement
 from .enums import ApplicationCommandType, ChannelType, ComponentType, MessageType, Status, try_enum
 from .flags import ApplicationFlags, Intents, MemberCacheFlags
 from .guild import Guild
@@ -600,7 +600,6 @@ class ConnectionState:
             if channel is None:
                 if "author" in data:
                     # MessagePayload
-                    data = cast("MessagePayload", data)
                     user_id = int(data["author"]["id"])
                 else:
                     # TypingStartEvent
@@ -637,8 +636,6 @@ class ConnectionState:
     ):
         guild_id = guild.id
         ws = self._get_websocket(guild_id)
-        if ws is None:
-            raise RuntimeError("Somehow do not have a websocket for this guild_id")
 
         request = ChunkRequest(guild.id, self.loop, self._get_guild, cache=cache)
         self._chunk_requests[request.nonce] = request
@@ -1796,6 +1793,8 @@ class ConnectionState:
                 logging_coroutine(coro, info="Voice Protocol voice server update handler")
             )
 
+    # FIXME: this should be refactored. The `GroupChannel` path will never be hit,
+    # `raw.timestamp` exists so no need to parse it twice, and `.get_user` should be used before falling back
     def parse_typing_start(self, data: gateway.TypingStartEvent) -> None:
         channel, guild = self._get_guild_channel(data)
         raw = RawTypingEvent(data)
@@ -1810,7 +1809,7 @@ class ConnectionState:
 
         self.dispatch("raw_typing", raw)
 
-        if channel is not None:
+        if channel is not None:  # pyright: ignore[reportUnnecessaryComparison]
             member = None
             if raw.member is not None:
                 member = raw.member
@@ -1904,6 +1903,18 @@ class ConnectionState:
             webhooks={},
         )
         self.dispatch("audit_log_entry_create", entry)
+
+    def parse_entitlement_create(self, data: gateway.EntitlementCreate) -> None:
+        entitlement = Entitlement(data=data, state=self)
+        self.dispatch("entitlement_create", entitlement)
+
+    def parse_entitlement_update(self, data: gateway.EntitlementUpdate) -> None:
+        entitlement = Entitlement(data=data, state=self)
+        self.dispatch("entitlement_update", entitlement)
+
+    def parse_entitlement_delete(self, data: gateway.EntitlementDelete) -> None:
+        entitlement = Entitlement(data=data, state=self)
+        self.dispatch("entitlement_delete", entitlement)
 
     def _get_reaction_user(
         self, channel: MessageableChannel, user_id: int

@@ -20,7 +20,7 @@ class Template(TypedDict):
     description: Optional[str]
     usage_count: int
     creator_id: Snowflake
-    creator: User
+    creator: Optional[User]  # unsure when this can be null, but the spec says so
     created_at: str
     updated_at: str
     source_guild_id: Snowflake

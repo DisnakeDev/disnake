@@ -40,6 +40,9 @@ __all__ = (
     "ChannelFlags",
     "AutoModKeywordPresets",
     "MemberFlags",
+    "RoleFlags",
+    "AttachmentFlags",
+    "SKUFlags",
 )
 
 BF = TypeVar("BF", bound="BaseFlags")
@@ -327,7 +330,7 @@ class SystemChannelFlags(BaseFlags, inverted=True):
     to enable or disable.
     Arguments are applied in order, similar to :class:`Permissions`.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -489,7 +492,7 @@ class MessageFlags(BaseFlags):
 
     See :class:`SystemChannelFlags`.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -679,7 +682,7 @@ class MessageFlags(BaseFlags):
 class PublicUserFlags(BaseFlags):
     """Wraps up the Discord User Public flags.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -928,7 +931,7 @@ class Intents(BaseFlags):
 
     .. versionadded:: 1.5
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -1615,7 +1618,7 @@ class MemberCacheFlags(BaseFlags):
 
     .. versionadded:: 1.5
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -1791,7 +1794,7 @@ class MemberCacheFlags(BaseFlags):
 class ApplicationFlags(BaseFlags):
     """Wraps up the Discord Application flags.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -1966,7 +1969,7 @@ class ApplicationFlags(BaseFlags):
 class ChannelFlags(BaseFlags):
     """Wraps up the Discord Channel flags.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -2079,7 +2082,7 @@ class ChannelFlags(BaseFlags):
 class AutoModKeywordPresets(ListBaseFlags):
     """Wraps up the pre-defined auto moderation keyword lists, provided by Discord.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -2192,7 +2195,7 @@ class AutoModKeywordPresets(ListBaseFlags):
 class MemberFlags(BaseFlags):
     """Wraps up Discord Member flags.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -2289,3 +2292,259 @@ class MemberFlags(BaseFlags):
     def started_onboarding(self):
         """:class:`bool`: Returns ``True`` if the member has started onboarding."""
         return 1 << 3
+
+
+class RoleFlags(BaseFlags):
+    """Wraps up Discord Role flags.
+
+    .. collapse:: operations
+
+        .. describe:: x == y
+
+            Checks if two RoleFlags instances are equal.
+        .. describe:: x != y
+
+            Checks if two RoleFlags instances are not equal.
+        .. describe:: x <= y
+
+            Checks if an RoleFlags instance is a subset of another RoleFlags instance.
+        .. describe:: x >= y
+
+            Checks if an RoleFlags instance is a superset of another RoleFlags instance.
+        .. describe:: x < y
+
+            Checks if an RoleFlags instance is a strict subset of another RoleFlags instance.
+        .. describe:: x > y
+
+            Checks if an RoleFlags instance is a strict superset of another RoleFlags instance.
+        .. describe:: x | y, x |= y
+
+            Returns a new RoleFlags instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
+        .. describe:: x & y, x &= y
+
+            Returns a new RoleFlags instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new RoleFlags instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+        .. describe:: ~x
+
+            Returns a new RoleFlags instance with all flags from x inverted.
+        .. describe:: hash(x)
+
+            Returns the flag's hash.
+        .. describe:: iter(x)
+
+            Returns an iterator of ``(name, value)`` pairs. This allows it
+            to be, for example, constructed as a dict or a list of pairs.
+            Note that aliases are not shown.
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: RoleFlags.y | RoleFlags.z, RoleFlags(y=True) | RoleFlags.z
+
+            Returns a RoleFlags instance with all provided flags enabled.
+
+        .. describe:: ~RoleFlags.y
+
+            Returns a RoleFlags instance with all flags except ``y`` inverted from their default value.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    value: :class:`int`
+        The raw value. You should query flags via the properties
+        rather than using this raw value.
+    """
+
+    __slots__ = ()
+
+    if TYPE_CHECKING:
+
+        @_generated
+        def __init__(self, *, in_prompt: bool = ...) -> None:
+            ...
+
+    @flag_value
+    def in_prompt(self):
+        """:class:`bool`: Returns ``True`` if the role can be selected by members in an onboarding prompt."""
+        return 1 << 0
+
+
+class AttachmentFlags(BaseFlags):
+    """Wraps up Discord Attachment flags.
+
+    .. collapse:: operations
+
+        .. describe:: x == y
+
+            Checks if two AttachmentFlags instances are equal.
+        .. describe:: x != y
+
+            Checks if two AttachmentFlags instances are not equal.
+        .. describe:: x <= y
+
+            Checks if an AttachmentFlags instance is a subset of another AttachmentFlags instance.
+        .. describe:: x >= y
+
+            Checks if an AttachmentFlags instance is a superset of another AttachmentFlags instance.
+        .. describe:: x < y
+
+            Checks if an AttachmentFlags instance is a strict subset of another AttachmentFlags instance.
+        .. describe:: x > y
+
+            Checks if an AttachmentFlags instance is a strict superset of another AttachmentFlags instance.
+        .. describe:: x | y, x |= y
+
+            Returns a new AttachmentFlags instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
+        .. describe:: x & y, x &= y
+
+            Returns a new AttachmentFlags instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new AttachmentFlags instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+        .. describe:: ~x
+
+            Returns a new AttachmentFlags instance with all flags from x inverted.
+        .. describe:: hash(x)
+
+            Returns the flag's hash.
+        .. describe:: iter(x)
+
+            Returns an iterator of ``(name, value)`` pairs. This allows it
+            to be, for example, constructed as a dict or a list of pairs.
+            Note that aliases are not shown.
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: AttachmentFlags.y | AttachmentFlags.z, AttachmentFlags(y=True) | AttachmentFlags.z
+
+            Returns a AttachmentFlags instance with all provided flags enabled.
+
+        .. describe:: ~AttachmentFlags.y
+
+            Returns a AttachmentFlags instance with all flags except ``y`` inverted from their default value.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    value: :class:`int`
+        The raw value. You should query flags via the properties
+        rather than using this raw value.
+    """
+
+    __slots__ = ()
+
+    if TYPE_CHECKING:
+
+        @_generated
+        def __init__(self, *, is_remix: bool = ...) -> None:
+            ...
+
+    @flag_value
+    def is_remix(self):
+        """:class:`bool`: Returns ``True`` if the attachment has been edited using the Remix feature."""
+        return 1 << 2
+
+
+class SKUFlags(BaseFlags):
+    """Wraps up Discord SKU flags.
+
+    .. collapse:: operations
+
+        .. describe:: x == y
+
+            Checks if two SKUFlags instances are equal.
+        .. describe:: x != y
+
+            Checks if two SKUFlags instances are not equal.
+        .. describe:: x <= y
+
+            Checks if an SKUFlags instance is a subset of another SKUFlags instance.
+        .. describe:: x >= y
+
+            Checks if an SKUFlags instance is a superset of another SKUFlags instance.
+        .. describe:: x < y
+
+            Checks if an SKUFlags instance is a strict subset of another SKUFlags instance.
+        .. describe:: x > y
+
+            Checks if an SKUFlags instance is a strict superset of another SKUFlags instance.
+        .. describe:: x | y, x |= y
+
+            Returns a new SKUFlags instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
+        .. describe:: x & y, x &= y
+
+            Returns a new SKUFlags instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new SKUFlags instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+        .. describe:: ~x
+
+            Returns a new SKUFlags instance with all flags from x inverted.
+        .. describe:: hash(x)
+
+            Returns the flag's hash.
+        .. describe:: iter(x)
+
+            Returns an iterator of ``(name, value)`` pairs. This allows it
+            to be, for example, constructed as a dict or a list of pairs.
+            Note that aliases are not shown.
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: SKUFlags.y | SKUFlags.z, SKUFlags(y=True) | SKUFlags.z
+
+            Returns a SKUFlags instance with all provided flags enabled.
+
+        .. describe:: ~SKUFlags.y
+
+            Returns a SKUFlags instance with all flags except ``y`` inverted from their default value.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    value: :class:`int`
+        The raw value. You should query flags via the properties
+        rather than using this raw value.
+    """
+
+    __slots__ = ()
+
+    if TYPE_CHECKING:
+
+        @_generated
+        def __init__(
+            self,
+            *,
+            available: bool = ...,
+            guild_subscription: bool = ...,
+            user_subscription: bool = ...,
+        ) -> None:
+            ...
+
+    @flag_value
+    def available(self):
+        """:class:`bool`: Returns ``True`` if the SKU can be purchased."""
+        return 1 << 2
+
+    @flag_value
+    def guild_subscription(self):
+        """:class:`bool`: Returns ``True`` if the SKU is an application subscription applied to a guild."""
+        return 1 << 7
+
+    @flag_value
+    def user_subscription(self):
+        """:class:`bool`: Returns ``True`` if the SKU is an application subscription applied to a user."""
+        return 1 << 8
