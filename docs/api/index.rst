@@ -101,6 +101,7 @@ Documents
     clients
     components
     emoji
+    entitlements
     events
     exceptions
     guilds
@@ -114,6 +115,7 @@ Documents
     misc
     permissions
     roles
+    skus
     stage_instances
     stickers
     users

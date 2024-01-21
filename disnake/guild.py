@@ -2387,7 +2387,7 @@ class Guild(Hashable):
 
         Creates a :class:`GuildScheduledEvent`.
 
-        You must have :attr:`.Permissions.manage_events` permission to do this.
+        You must have :attr:`~Permissions.manage_events` permission to do this.
 
         Based on the channel/entity type, there are different restrictions regarding
         other parameter values, as shown in this table:
@@ -3274,7 +3274,7 @@ class Guild(Hashable):
         Raises
         ------
         Forbidden
-            You are not allowed to delete stickers.
+            You are not allowed to delete this sticker.
         HTTPException
             An error occurred deleting the sticker.
         """
@@ -3429,7 +3429,7 @@ class Guild(Hashable):
         Raises
         ------
         Forbidden
-            You are not allowed to delete emojis.
+            You are not allowed to delete this emoji.
         HTTPException
             An error occurred deleting the emoji.
         """

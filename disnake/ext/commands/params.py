@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import asyncio
 import collections.abc
+import copy
 import inspect
 import itertools
 import math
@@ -451,8 +452,8 @@ class ParamInfo:
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    choices: Union[List[:class:`.OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
-        The list of choices of this slash command option.
+    choices: Union[Sequence[:class:`.OptionChoice`], Sequence[Union[:class:`str`, :class:`int`, :class:`float`]], Mapping[:class:`str`, Union[:class:`str`, :class:`int`, :class:`float`]]]
+        The pre-defined choices for this option.
     ge: :class:`float`
         The lowest allowed value for this option.
     le: :class:`float`
@@ -554,7 +555,7 @@ class ParamInfo:
         ins.converter = self.converter
         ins.convert_default = self.convert_default
         ins.autocomplete = self.autocomplete
-        ins.choices = self.choices.copy()
+        ins.choices = copy.copy(self.choices)
         ins.type = self.type
         ins.channel_types = self.channel_types.copy()
         ins.max_value = self.max_value
@@ -1155,8 +1156,8 @@ def Param(
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    choices: Union[List[:class:`.OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
-        A list of choices for this option.
+    choices: Union[Sequence[:class:`.OptionChoice`], Sequence[Union[:class:`str`, :class:`int`, :class:`float`]], Mapping[:class:`str`, Union[:class:`str`, :class:`int`, :class:`float`]]]
+        The pre-defined choices for this slash command option.
     converter: Callable[[:class:`.ApplicationCommandInteraction`, Any], Any]
         A function that will convert the original input to a desired format.
         Kwarg aliases: ``conv``.

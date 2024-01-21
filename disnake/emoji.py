@@ -192,7 +192,7 @@ class Emoji(_EmojiTag, AssetMixin):
         Raises
         ------
         Forbidden
-            You are not allowed to delete emojis.
+            You are not allowed to delete this emoji.
         HTTPException
             An error occurred deleting the emoji.
         """
@@ -227,7 +227,7 @@ class Emoji(_EmojiTag, AssetMixin):
         Raises
         ------
         Forbidden
-            You are not allowed to edit emojis.
+            You are not allowed to edit this emoji.
         HTTPException
             An error occurred editing the emoji.
 
