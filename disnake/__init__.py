@@ -37,6 +37,7 @@ from .components import *
 from .custom_warnings import *
 from .embeds import *
 from .emoji import *
+from .entitlement import *
 from .enums import *
 from .errors import *
 from .file import *
@@ -60,6 +61,7 @@ from .raw_models import *
 from .reaction import *
 from .role import *
 from .shard import *
+from .sku import *
 from .stage_instance import *
 from .sticker import *
 from .team import *
