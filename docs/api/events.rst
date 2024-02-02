@@ -870,7 +870,7 @@ Members
     Called when a member updates their presence.
     Unlike :func:`on_presence_update`, this is called regardless of the member cache.
 
-    This requires :attr:`Intents.presences` and :attr:`Intents.members` to be enabled.
+    This requires :attr:`Intents.presences` to be enabled.
 
     .. versionadded:: 2.10
 
