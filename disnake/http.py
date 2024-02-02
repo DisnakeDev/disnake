@@ -60,6 +60,7 @@ if TYPE_CHECKING:
         components,
         embed,
         emoji,
+        entitlement,
         gateway,
         guild,
         guild_scheduled_event,
@@ -70,6 +71,7 @@ if TYPE_CHECKING:
         message,
         onboarding,
         role,
+        sku,
         sticker,
         template,
         threads,
@@ -2270,6 +2272,80 @@ class HTTPClient:
 
     def get_guild_onboarding(self, guild_id: Snowflake) -> Response[onboarding.Onboarding]:
         return self.request(Route("GET", "/guilds/{guild_id}/onboarding", guild_id=guild_id))
+
+    # SKUs/Entitlements
+
+    def get_skus(self, application_id: Snowflake) -> Response[List[sku.SKU]]:
+        return self.request(
+            Route("GET", "/applications/{application_id}/skus", application_id=application_id)
+        )
+
+    def get_entitlements(
+        self,
+        application_id: Snowflake,
+        *,
+        # if both are specified, `after` takes priority and `before` gets ignored
+        before: Optional[Snowflake] = None,
+        after: Optional[Snowflake] = None,
+        limit: int = 100,
+        user_id: Optional[Snowflake] = None,
+        guild_id: Optional[Snowflake] = None,
+        sku_ids: Optional[SnowflakeList] = None,
+        exclude_ended: bool = False,
+    ) -> Response[List[entitlement.Entitlement]]:
+        params: Dict[str, Any] = {
+            "limit": limit,
+            "exclude_ended": int(exclude_ended),
+        }
+        if before is not None:
+            params["before"] = before
+        if after is not None:
+            params["after"] = after
+        if user_id is not None:
+            params["user_id"] = user_id
+        if guild_id is not None:
+            params["guild_id"] = guild_id
+        if sku_ids:
+            params["sku_ids"] = ",".join(map(str, sku_ids))
+
+        r = Route(
+            "GET", "/applications/{application_id}/entitlements", application_id=application_id
+        )
+        return self.request(r, params=params)
+
+    def create_test_entitlement(
+        self,
+        application_id: Snowflake,
+        sku_id: Snowflake,
+        owner_id: Snowflake,
+        *,
+        owner_type: Literal[1, 2],  # 1: guild, 2: user
+    ) -> Response[entitlement.Entitlement]:
+        payload: Dict[str, Any] = {
+            "sku_id": sku_id,
+            "owner_id": owner_id,
+            "owner_type": owner_type,
+        }
+        return self.request(
+            Route(
+                "POST", "/applications/{application_id}/entitlements", application_id=application_id
+            ),
+            json=payload,
+        )
+
+    def delete_test_entitlement(
+        self,
+        application_id: Snowflake,
+        entitlement_id: Snowflake,
+    ) -> Response[None]:
+        return self.request(
+            Route(
+                "DELETE",
+                "/applications/{application_id}/entitlements/{entitlement_id}",
+                application_id=application_id,
+                entitlement_id=entitlement_id,
+            )
+        )
 
     # Application commands (global)
 
