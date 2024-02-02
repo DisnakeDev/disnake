@@ -72,9 +72,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - name: Install dependencies
-      run: |
-        pdm update --pre aiohttp  # XXX: temporarily install aiohttp prerelease for 3.12
-        pdm install -d -Gspeed -Gdocs -Gvoice
+      run: pdm install -d -Gspeed -Gdocs -Gvoice
 
     - name: Add .venv/bin to PATH
       run: dirname "$(pdm info --python)" >> $GITHUB_PATH
@@ -171,13 +169,11 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - name: Install dependencies
-      run: |
-        pdm update --pre aiohttp  # XXX: temporarily install aiohttp prerelease for 3.12
-        pdm install -dG test  # needed for coverage
+      run: pdm install -dG test  # needed for coverage
 
     - name: Test package install
       run: |
-        python -m pip install --pre .  # XXX: temporarily install aiohttp prerelease for 3.12; remove --pre flag again later
+        python -m pip install .
 
     - name: Run pytest
       id: run_tests
