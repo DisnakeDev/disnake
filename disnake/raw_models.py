@@ -472,6 +472,6 @@ class RawPresenceUpdateEvent(_RawReprMixin):
     )
 
     def __init__(self, data: PresenceUpdateEvent) -> None:
-        self.user_id = int(data["user"]["id"])
-        self.guild_id = int(data["guild_id"])
-        self.data = data
+        self.user_id: int = int(data["user"]["id"])
+        self.guild_id: int = int(data["guild_id"])
+        self.data: PresenceUpdateEvent = data

@@ -867,13 +867,8 @@ Members
 
 .. function:: on_raw_presence_update(payload)
 
-    Called when a :class:`User` updates their presence.
+    Called when a member updates their presence.
     Unlike :func:`on_presence_update`, this is called regardless of the member cache.
-
-    This is called when one or more of the following things change:
-
-    - status
-    - activity
 
     This requires :attr:`Intents.presences` and :attr:`Intents.members` to be enabled.
 

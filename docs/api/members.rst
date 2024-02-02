@@ -37,7 +37,7 @@ RawGuildMemberRemoveEvent
 RawPresenceUpdateEvent
 ~~~~~~~~~~~~~~~~~~~~~~
 
-.. attributetable:: RawGuildMemberRemoveEvent
+.. attributetable:: RawPresenceUpdateEvent
 
 .. autoclass:: RawPresenceUpdateEvent()
     :members:
