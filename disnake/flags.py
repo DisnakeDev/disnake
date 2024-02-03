@@ -1284,6 +1284,7 @@ class Intents(BaseFlags):
         This corresponds to the following events:
 
         - :func:`on_presence_update`
+        - :func:`on_raw_presence_update`
 
         This also corresponds to the following attributes and classes in terms of cache:
 
