@@ -23,7 +23,7 @@ __all__ = (
 
 
 class RoleSelect(BaseSelect[RoleSelectMenu, "Role", V_co]):
-    """Represents a UI user select menu.
+    """Represents a UI role select menu.
 
     This is usually represented as a drop down menu.
 
