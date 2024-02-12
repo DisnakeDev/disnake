@@ -300,7 +300,7 @@ ThreadSortOrder
 
 .. class:: ThreadSortOrder
 
-    Represents the sort order of threads in :class:`ForumChannel`\s.
+    Represents the sort order of threads in a :class:`ForumChannel` or :class:`MediaChannel`.
 
     .. versionadded:: 2.6
 

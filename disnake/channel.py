@@ -3350,15 +3350,15 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
 
     @property
     def available_tags(self) -> List[ForumTag]:
-        """List[:class:`ForumTag`]: The available tags for threads in this forum channel.
+        """List[:class:`ForumTag`]: The available tags for threads in this channel.
 
-        To create/edit/delete tags, use :func:`~ForumChannel.edit`.
+        To create/edit/delete tags, use :func:`edit`.
 
         .. versionadded:: 2.6
         """
         return list(self._available_tags.values())
 
-    # both of these are re-implemented due to forum channels not being messageables
+    # both of these are re-implemented due to thread-only channels not being messageables
     async def trigger_typing(self) -> None:
         """|coro|
 
@@ -3519,7 +3519,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
             Specifies the slowmode rate limit for users in this thread, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
             If set to ``None`` or not provided, slowmode is inherited from the parent's
-            :attr:`~ForumChannel.default_thread_slowmode_delay`.
+            :attr:`default_thread_slowmode_delay`.
         applied_tags: Sequence[:class:`abc.Snowflake`]
             The tags to apply to the new thread. Maximum of 5.
 
@@ -3775,7 +3775,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         """Returns a thread tag with the given name.
 
         Tags can be uniquely identified based on the name, as tag names
-        in a forum channel must be unique.
+        in a channel must be unique.
 
         .. versionadded:: 2.6
 

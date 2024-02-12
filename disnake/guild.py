@@ -702,7 +702,7 @@ class Guild(Hashable):
 
     @property
     def media_channels(self) -> List[MediaChannel]:
-        """List[:class:`MediaChannel`]: A list of forum channels that belong to this guild.
+        """List[:class:`MediaChannel`]: A list of media channels that belong to this guild.
 
         This is sorted by the position and are in UI order from top to bottom.
 

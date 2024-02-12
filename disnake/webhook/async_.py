@@ -1015,7 +1015,7 @@ class BaseWebhook(Hashable):
 
         If this is a partial webhook, then this will always return ``None``.
 
-        Webhooks in channels of types :class:`ForumChannel` or :class:`MediaChannel` can not send messages directly.
+        Webhooks in a :class:`ForumChannel` or :class:`MediaChannel` can not send messages directly.
         They can only create new threads (see ``thread_name`` for :attr:`Webhook.send`)
         and interact with existing threads.
         """
@@ -1048,7 +1048,7 @@ class Webhook(BaseWebhook):
 
     There are two main ways to use Webhooks. The first is through the ones
     received by the library such as :meth:`.Guild.webhooks`, :meth:`.TextChannel.webhooks`,
-    :meth:`.ForumChannel.webhooks`, :meth:`.VoiceChannel.webhooks`, :meth:`MediaChannel.webhooks`
+    :meth:`.VoiceChannel.webhooks`, :meth:`.ForumChannel.webhooks`, :meth:`MediaChannel.webhooks`
     and :meth:`.StageChannel.webhooks`. The ones received by the library will
     automatically be bound using the library's internal HTTP session.
 
@@ -1566,7 +1566,7 @@ class Webhook(BaseWebhook):
         ``embeds`` parameter, which must be a :class:`list` of :class:`Embed` objects to send.
 
         To send a message in a thread, provide the ``thread`` parameter.
-        If this webhook is in a :class:`ForumChannel`, the ``thread_name`` parameter can
+        If this webhook is in a :class:`ForumChannel`/:class:`MediaChannel`, the ``thread_name`` parameter can
         be used to create a new thread instead (optionally with ``applied_tags``).
 
         .. versionchanged:: 2.6
@@ -1632,7 +1632,7 @@ class Webhook(BaseWebhook):
             .. versionadded:: 2.0
 
         thread_name: :class:`str`
-            If in a forum channel, and ``thread`` is not specified,
+            If in a forum/media channel, and ``thread`` is not specified,
             the name of the newly created thread.
 
             .. note::
@@ -1641,7 +1641,7 @@ class Webhook(BaseWebhook):
 
             .. versionadded:: 2.6
         applied_tags: Sequence[:class:`abc.Snowflake`]
-            If in a forum channel and creating a new thread (see ``thread_name`` above),
+            If in a forum/media channel and creating a new thread (see ``thread_name`` above),
             the tags to apply to the new thread. Maximum of 5.
 
             .. versionadded:: 2.10

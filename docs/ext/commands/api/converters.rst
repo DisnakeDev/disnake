@@ -48,6 +48,9 @@ Classes
 .. autoclass:: ForumChannelConverter
     :members:
 
+.. autoclass:: MediaChannelConverter
+    :members:
+
 .. autoclass:: ThreadConverter
     :members:
 

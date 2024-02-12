@@ -1090,7 +1090,7 @@ class ThreadMember(Hashable):
 
 
 class ForumTag(Hashable):
-    """Represents a tag for threads in forum channels.
+    """Represents a tag for threads in forum/media channels.
 
     .. collapse:: operations
 
