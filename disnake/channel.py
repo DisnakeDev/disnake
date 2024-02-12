@@ -3850,12 +3850,11 @@ class ForumChannel(ThreadOnlyGuildChannel):
         """
         return ChannelType.forum
 
-        # if only these parameters are passed, `_move` is called and no channel will be returned
-
     @utils.copy_doc(disnake.abc.Messageable.typing)
     def typing(self) -> Typing:
         return Typing(self)
 
+    # if only these parameters are passed, `_move` is called and no channel will be returned
     @overload
     async def edit(
         self,
