@@ -249,7 +249,7 @@ ChannelType
 
     .. attribute:: media
 
-        A channel of only threads but for media, similar to forum channels.
+        A channel of only threads but with a focus on media, similar to forum channels.
 
         .. versionadded:: 2.10
 

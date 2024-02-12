@@ -4192,6 +4192,9 @@ class ForumChannel(ThreadOnlyGuildChannel):
 class MediaChannel(ThreadOnlyGuildChannel):
     """Represents a Discord Media channel.
 
+    Media channels are very similar to forum channels - only threads can be created in them,
+    with only minor differences in functionality.
+
     .. versionadded:: 2.10
 
     .. collapse:: operations
