@@ -133,7 +133,7 @@ class Guild(Hashable):
 
     This is referred to as a "server" in the official Discord UI.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -2528,7 +2528,7 @@ class Guild(Hashable):
 
         Creates a :class:`GuildScheduledEvent`.
 
-        You must have :attr:`.Permissions.manage_events` permission to do this.
+        You must have :attr:`~Permissions.manage_events` permission to do this.
 
         Based on the channel/entity type, there are different restrictions regarding
         other parameter values, as shown in this table:
@@ -2840,6 +2840,8 @@ class Guild(Hashable):
 
         Raises
         ------
+        NotFound
+            A member with this ID does not exist in the guild.
         Forbidden
             You do not have access to the guild.
         HTTPException
@@ -3275,10 +3277,6 @@ class Guild(Hashable):
 
         def convert(d):
             factory, _ = _integration_factory(d["type"])
-            if factory is None:
-                raise InvalidData(
-                    "Unknown integration type {type!r} for integration ID {id}".format_map(d)
-                )
             return factory(guild=self, data=d)
 
         return [convert(d) for d in data]
@@ -3417,7 +3415,7 @@ class Guild(Hashable):
         Raises
         ------
         Forbidden
-            You are not allowed to delete stickers.
+            You are not allowed to delete this sticker.
         HTTPException
             An error occurred deleting the sticker.
         """
@@ -3572,7 +3570,7 @@ class Guild(Hashable):
         Raises
         ------
         Forbidden
-            You are not allowed to delete emojis.
+            You are not allowed to delete this emoji.
         HTTPException
             An error occurred deleting the emoji.
         """
@@ -3617,10 +3615,12 @@ class Guild(Hashable):
     ) -> Optional[Member]:
         """|coro|
 
-        Tries to get a member from the cache with the given ID. If fails, it fetches
-        the member from the API and caches it.
+        Tries to get the member from the cache. If it fails,
+        fetches the member from the API and caches it.
 
         If you want to make a bulk get-or-fetch call, use :meth:`get_or_fetch_members`.
+
+        This only propagates exceptions when the ``strict`` parameter is enabled.
 
         Parameters
         ----------

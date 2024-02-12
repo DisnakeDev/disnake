@@ -4,16 +4,19 @@ from typing import TYPE_CHECKING
 from unittest import mock
 
 import pytest
+from typing_extensions import assert_type
 
 import disnake
-from disnake.ui import ActionRow, Button, StringSelect, TextInput, WrappedComponent
+from disnake.ui import (
+    ActionRow,
+    Button,
+    MessageUIComponent,
+    ModalUIComponent,
+    StringSelect,
+    TextInput,
+    WrappedComponent,
+)
 from disnake.ui.action_row import components_to_dict, components_to_rows
-
-if TYPE_CHECKING:
-    from typing_extensions import assert_type
-
-    from disnake.ui import MessageUIComponent, ModalUIComponent
-
 
 button1 = Button()
 button2 = Button()
@@ -133,9 +136,8 @@ class TestActionRow:
         row_msg = ActionRow.with_message_components()
         assert list(row_msg.children) == []
 
-        if TYPE_CHECKING:
-            assert_type(row_modal, ActionRow[ModalUIComponent])
-            assert_type(row_msg, ActionRow[MessageUIComponent])
+        assert_type(row_modal, ActionRow[ModalUIComponent])
+        assert_type(row_msg, ActionRow[MessageUIComponent])
 
     def test_rows_from_message(self) -> None:
         rows = [

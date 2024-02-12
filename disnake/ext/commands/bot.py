@@ -175,16 +175,16 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
         This can be provided as a parameter at creation.
 
     owner_id: Optional[:class:`int`]
-        The user ID that owns the bot. If this is not set and is then queried via
+        The ID of the user that owns the bot. If this is not set and is then queried via
         :meth:`.is_owner` then it is fetched automatically using
         :meth:`~.Bot.application_info`.
 
         This can be provided as a parameter at creation.
 
     owner_ids: Optional[Collection[:class:`int`]]
-        The user IDs that owns the bot. This is similar to :attr:`owner_id`.
+        The IDs of the users that own the bot. This is similar to :attr:`owner_id`.
         If this is not set and the application is team based, then it is
-        fetched automatically using :meth:`~.Bot.application_info`.
+        fetched automatically using :meth:`~.Bot.application_info` (taking team roles into account).
         For performance reasons it is recommended to use a :class:`set`
         for the collection. You cannot set both ``owner_id`` and ``owner_ids``.
 
@@ -394,16 +394,16 @@ class InteractionBot(InteractionBotBase, disnake.Client):
     Attributes
     ----------
     owner_id: Optional[:class:`int`]
-        The user ID that owns the bot. If this is not set and is then queried via
+        The ID of the user that owns the bot. If this is not set and is then queried via
         :meth:`.is_owner` then it is fetched automatically using
         :meth:`~.Bot.application_info`.
 
         This can be provided as a parameter at creation.
 
     owner_ids: Optional[Collection[:class:`int`]]
-        The user IDs that owns the bot. This is similar to :attr:`owner_id`.
+        The IDs of the users that own the bot. This is similar to :attr:`owner_id`.
         If this is not set and the application is team based, then it is
-        fetched automatically using :meth:`~.Bot.application_info`.
+        fetched automatically using :meth:`~.Bot.application_info` (taking team roles into account).
         For performance reasons it is recommended to use a :class:`set`
         for the collection. You cannot set both ``owner_id`` and ``owner_ids``.
 
