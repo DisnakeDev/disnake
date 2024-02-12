@@ -3241,7 +3241,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         base = super().permissions_for(obj, ignore_timeout=ignore_timeout)
         self._apply_implict_permissions(base)
 
-        # forumable channels do not have voice related permissions
+        # thread-only channels do not have voice related permissions
         denied = Permissions.voice()
         base.value &= ~denied.value
         return base
