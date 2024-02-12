@@ -118,7 +118,7 @@ ThreadSortOrder = Literal[0, 1]
 ThreadLayout = Literal[0, 1, 2]
 
 
-class _BaseForumGuildChannel(_BaseGuildChannel):
+class _BaseThreadOnlyGuildChannel(_BaseGuildChannel):
     topic: NotRequired[Optional[str]]
     last_message_id: NotRequired[Optional[Snowflake]]
     default_auto_archive_duration: NotRequired[ThreadArchiveDurationLiteral]
@@ -128,12 +128,12 @@ class _BaseForumGuildChannel(_BaseGuildChannel):
     default_sort_order: NotRequired[Optional[ThreadSortOrder]]
 
 
-class ForumChannel(_BaseForumGuildChannel):
+class ForumChannel(_BaseThreadOnlyGuildChannel):
     type: Literal[15]
     default_forum_layout: NotRequired[ThreadLayout]
 
 
-class MediaChannel(_BaseForumGuildChannel):
+class MediaChannel(_BaseThreadOnlyGuildChannel):
     type: Literal[16]
 
 
