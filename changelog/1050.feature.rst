@@ -1,8 +1,7 @@
-- Add support for Media channels.
+- Add support for media channels.
     - Add :class:`MediaChannel`.
-        - Unless otherwise noted, MediaChannels behave just like ForumChannels.
+        - Unless otherwise noted, media channels behave just like forum channels.
+    - Add :attr:`ChannelType.media`.
     - Add :attr:`CategoryChannel.media_channels`, :attr:`Guild.media_channels`.
     - Add :attr:`CategoryChannel.create_media_channel`, :attr:`Guild.create_media_channel`.
     - Add :attr:`ChannelFlags.hide_media_download_options`.
-    - Add support for :class:`MediaChannel` threads to :func:`Thread.add_tags` and :func:`Thread.remove_tags`.
-    - Add :attr:`ChannelType.media`.

@@ -3494,7 +3494,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
     ) -> ThreadWithMessage:
         """|coro|
 
-        Creates a thread in this forum/media channel.
+        Creates a thread in this channel.
 
         You must have the :attr:`~Permissions.create_forum_threads` permission to do this.
 
@@ -3793,7 +3793,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
 
 
 class ForumChannel(ThreadOnlyGuildChannel):
-    """Represents a Discord Forum channel.
+    """Represents a Discord guild forum channel.
 
     .. versionadded:: 2.5
 
@@ -4229,7 +4229,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
 
 
 class MediaChannel(ThreadOnlyGuildChannel):
-    """Represents a Discord Media channel.
+    """Represents a Discord guild media channel.
 
     Media channels are very similar to forum channels - only threads can be created in them,
     with only minor differences in functionality.
