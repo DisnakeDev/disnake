@@ -3896,6 +3896,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
         available_tags: Sequence[ForumTag] = ...,
         default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = ...,
         default_sort_order: Optional[ThreadSortOrder] = ...,
+        default_layout: ThreadLayout = ...,
         reason: Optional[str] = ...,
     ) -> ForumChannel:
         ...
@@ -3918,6 +3919,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
         available_tags: Sequence[ForumTag] = MISSING,
         default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
         default_sort_order: Optional[ThreadSortOrder] = MISSING,
+        default_layout: ThreadLayout = MISSING,
         reason: Optional[str] = None,
         **kwargs: Never,
     ) -> Optional[ForumChannel]:
@@ -3927,6 +3929,9 @@ class ForumChannel(ThreadOnlyGuildChannel):
 
         You must have :attr:`~Permissions.manage_channels` permission to
         do this.
+
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
 
         Parameters
         ----------
@@ -3954,6 +3959,8 @@ class ForumChannel(ThreadOnlyGuildChannel):
             This does not apply retroactively to existing threads.
             A value of ``0`` or ``None`` disables slowmode. The maximum value possible is ``21600``.
 
+            .. versionadded:: 2.6
+
         overwrites: :class:`Mapping`
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the channel.
@@ -3964,8 +3971,12 @@ class ForumChannel(ThreadOnlyGuildChannel):
             The new flags to set for this channel. This will overwrite any existing flags set on this channel.
             If parameter ``require_tag`` is provided, that will override the setting of :attr:`ChannelFlags.require_tag`.
 
+            .. versionadded:: 2.6
+
         require_tag: :class:`bool`
             Whether all newly created threads are required to have a tag.
+
+            .. versionadded:: 2.6
 
         available_tags: Sequence[:class:`ForumTag`]
             The new :class:`ForumTag`\\s available for threads in this channel.
@@ -3976,11 +3987,22 @@ class ForumChannel(ThreadOnlyGuildChannel):
 
             See :class:`ForumTag` for examples regarding creating/editing tags.
 
+            .. versionadded:: 2.6
+
         default_reaction: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
             The new default emoji shown for reacting to threads.
 
+            .. versionadded:: 2.6
+
         default_sort_order: Optional[:class:`ThreadSortOrder`]
             The new default sort order of threads in this channel.
+
+            .. versionadded:: 2.6
+
+        default_layout: :class:`ThreadLayout`
+            The new default layout of threads in this channel.
+
+            .. versionadded:: 2.8
 
         reason: Optional[:class:`str`]
             The reason for editing this channel. Shows up on the audit log.
@@ -4022,6 +4044,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
             available_tags=available_tags,
             default_reaction=default_reaction,
             default_sort_order=default_sort_order,
+            default_layout=default_layout,
             reason=reason,
             **kwargs,  # type: ignore
         )
@@ -4276,7 +4299,7 @@ class MediaChannel(ThreadOnlyGuildChannel):
         *,
         sync_permissions: bool,
         reason: Optional[str] = ...,
-    ) -> Optional[ForumChannel]:
+    ) -> Optional[MediaChannel]:
         ...
 
     @overload
@@ -4298,9 +4321,8 @@ class MediaChannel(ThreadOnlyGuildChannel):
         available_tags: Sequence[ForumTag] = ...,
         default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = ...,
         default_sort_order: Optional[ThreadSortOrder] = ...,
-        default_layout: ThreadLayout = ...,
         reason: Optional[str] = ...,
-    ) -> ForumChannel:
+    ) -> MediaChannel:
         ...
 
     async def edit(
@@ -4321,19 +4343,15 @@ class MediaChannel(ThreadOnlyGuildChannel):
         available_tags: Sequence[ForumTag] = MISSING,
         default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
         default_sort_order: Optional[ThreadSortOrder] = MISSING,
-        default_layout: ThreadLayout = MISSING,
         reason: Optional[str] = None,
         **kwargs: Never,
-    ) -> Optional[ForumChannel]:
+    ) -> Optional[MediaChannel]:
         """|coro|
 
         Edits the channel.
 
         You must have :attr:`~Permissions.manage_channels` permission to
         do this.
-
-        .. versionchanged:: 2.6
-            Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
 
         Parameters
         ----------
@@ -4360,9 +4378,6 @@ class MediaChannel(ThreadOnlyGuildChannel):
             in newly created threads in this channel, in seconds.
             This does not apply retroactively to existing threads.
             A value of ``0`` or ``None`` disables slowmode. The maximum value possible is ``21600``.
-
-            .. versionadded:: 2.6
-
         overwrites: :class:`Mapping`
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the channel.
@@ -4372,14 +4387,8 @@ class MediaChannel(ThreadOnlyGuildChannel):
         flags: :class:`ChannelFlags`
             The new flags to set for this channel. This will overwrite any existing flags set on this channel.
             If parameter ``require_tag`` is provided, that will override the setting of :attr:`ChannelFlags.require_tag`.
-
-            .. versionadded:: 2.6
-
         require_tag: :class:`bool`
             Whether all newly created threads are required to have a tag.
-
-            .. versionadded:: 2.6
-
         available_tags: Sequence[:class:`ForumTag`]
             The new :class:`ForumTag`\\s available for threads in this channel.
             Can be used to create new tags and edit/reorder/delete existing tags.
@@ -4388,24 +4397,10 @@ class MediaChannel(ThreadOnlyGuildChannel):
             Note that this overwrites all tags, removing existing tags unless they're passed as well.
 
             See :class:`ForumTag` for examples regarding creating/editing tags.
-
-            .. versionadded:: 2.6
-
         default_reaction: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
             The new default emoji shown for reacting to threads.
-
-            .. versionadded:: 2.6
-
         default_sort_order: Optional[:class:`ThreadSortOrder`]
             The new default sort order of threads in this channel.
-
-            .. versionadded:: 2.6
-
-        default_layout: :class:`ThreadLayout`
-            The new default layout of threads in this channel.
-
-            .. versionadded:: 2.8
-
         reason: Optional[:class:`str`]
             The reason for editing this channel. Shows up on the audit log.
 
@@ -4422,8 +4417,8 @@ class MediaChannel(ThreadOnlyGuildChannel):
 
         Returns
         -------
-        Optional[:class:`ForumChannel`]
-            The newly edited forum channel. If the edit was only positional
+        Optional[:class:`MediaChannel`]
+            The newly edited media channel. If the edit was only positional
             then ``None`` is returned instead.
         """
         if require_tag is not MISSING:
@@ -4446,7 +4441,6 @@ class MediaChannel(ThreadOnlyGuildChannel):
             available_tags=available_tags,
             default_reaction=default_reaction,
             default_sort_order=default_sort_order,
-            default_layout=default_layout,
             reason=reason,
             **kwargs,  # type: ignore
         )
@@ -4479,15 +4473,9 @@ class MediaChannel(ThreadOnlyGuildChannel):
         You must have :attr:`.Permissions.manage_channels` permission to
         do this.
 
-        .. versionchanged:: 2.9
-            Added new ``topic``, ``position``, ``nsfw``, ``category``, ``slowmode_delay``,
-            ``default_thread_slowmode_delay``, ``default_auto_archive_duration``,
-            ``available_tags``, ``default_reaction``, ``default_sort_order``
-            and ``overwrites`` keyword-only paremters.
-
         .. note::
-            The current :attr:`ForumChannel.flags` value won't be cloned.
-            This is a discord limitation.
+            The current :attr:`MediaChannel.flags` value won't be cloned.
+            This is a Discord limitation.
 
         Parameters
         ----------
@@ -4528,7 +4516,7 @@ class MediaChannel(ThreadOnlyGuildChannel):
 
         Returns
         -------
-        :class:`ForumChannel`
+        :class:`MediaChannel`
             The channel that was created.
         """
         default_reaction_emoji_payload: Optional[DefaultReactionPayload] = MISSING
