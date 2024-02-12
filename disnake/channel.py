@@ -3223,8 +3223,8 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
 
         self._fill_overwrites(data)
 
-    def _get_channel(self):
-        raise NotImplementedError
+    async def _get_channel(self) -> Self:
+        return self
 
     @property
     def _sorting_bucket(self) -> int:
@@ -3841,9 +3841,6 @@ class ForumChannel(ThreadOnlyGuildChannel):
             else ThreadLayout.not_set
         )
 
-    async def _get_channel(self):
-        return self
-
     @property
     def type(self) -> Literal[ChannelType.forum]:
         """:class:`ChannelType`: The channel's Discord type.
@@ -4265,9 +4262,6 @@ class MediaChannel(ThreadOnlyGuildChannel):
     """
 
     __slots__ = ()
-
-    async def _get_channel(self):
-        return self
 
     @property
     def type(self) -> Literal[ChannelType.media]:
