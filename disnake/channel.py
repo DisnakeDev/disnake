@@ -3221,6 +3221,8 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
             else None
         )
 
+        self._fill_overwrites(data)
+
     def _get_channel(self):
         raise NotImplementedError
 
