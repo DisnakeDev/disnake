@@ -4313,6 +4313,15 @@ class MediaChannel(ThreadOnlyGuildChannel):
         """
         return ChannelType.media
 
+    def hides_media_download_options(self) -> bool:
+        """Whether the channel hides the embedded media download options.
+
+        This is a shortcut to :attr:`self.flags.hide_media_download_options <ChannelFlags.hide_media_download_options>`.
+
+        :return type: :class:`bool`
+        """
+        return self.flags.hide_media_download_options
+
     # if only these parameters are passed, `_move` is called and no channel will be returned
     @overload
     async def edit(
