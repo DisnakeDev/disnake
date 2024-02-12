@@ -3012,7 +3012,10 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         """
 
         def comparator(channel):
-            return (not isinstance(channel, (TextChannel, ForumChannel)), channel.position)
+            return (
+                not isinstance(channel, (TextChannel, ThreadOnlyGuildChannel)),
+                channel.position,
+            )
 
         ret = [c for c in self.guild.channels if c.category_id == self.id]
         ret.sort(key=comparator)
@@ -3064,6 +3067,20 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             c
             for c in self.guild.channels
             if c.category_id == self.id and isinstance(c, ForumChannel)
+        ]
+        ret.sort(key=lambda c: (c.position, c.id))
+        return ret
+
+    @property
+    def media_channels(self) -> List[MediaChannel]:
+        """List[:class:`MediaChannel`]: Returns the media channels that are under this category.
+
+        .. versionadded:: 2.10
+        """
+        ret = [
+            c
+            for c in self.guild.channels
+            if c.category_id == self.id and isinstance(c, MediaChannel)
         ]
         ret.sort(key=lambda c: (c.position, c.id))
         return ret
@@ -3128,6 +3145,22 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             raise TypeError("got an unexpected keyword argument 'category'")
         return await self.guild.create_forum_channel(name, category=self, **options)
 
+    async def create_media_channel(self, name: str, **options: Any) -> MediaChannel:
+        """|coro|
+
+        A shortcut method to :meth:`Guild.create_media_channel` to create a :class:`MediaChannel` in the category.
+
+        .. versionadded:: 2.10
+
+        Returns
+        -------
+        :class:`MediaChannel`
+            The newly created media channel.
+        """
+        if "category" in options:
+            raise TypeError("got an unexpected keyword argument 'category'")
+        return await self.guild.create_media_channel(name, category=self, **options)
+
 
 class NewsChannel(TextChannel):
     """Represents a Discord news channel
@@ -3166,7 +3199,13 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         "_overwrites",
     )
 
-    def __init__(self, *, state: ConnectionState, guild: Guild, data: ForumChannelPayload) -> None:
+    def __init__(
+        self,
+        *,
+        state: ConnectionState,
+        guild: Guild,
+        data: Union[ForumChannelPayload, MediaChannelPayload],
+    ) -> None:
         self._state: ConnectionState = state
         self.id: int = int(data["id"])
         self._type: int = data["type"]

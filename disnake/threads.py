@@ -403,10 +403,10 @@ class Thread(Messageable, Hashable):
 
         .. versionadded:: 2.6
         """
-        from .channel import ForumChannel, MediaChannel  # cyclic import
+        from .channel import ThreadOnlyGuildChannel  # cyclic import
 
         parent = self.parent
-        if not isinstance(parent, (ForumChannel, MediaChannel)):
+        if not isinstance(parent, ThreadOnlyGuildChannel):
             return []
 
         # threads may have tag IDs for tags that don't exist anymore
