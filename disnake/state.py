@@ -43,7 +43,7 @@ from .channel import (
     TextChannel,
     VoiceChannel,
     _guild_channel_factory,
-    _threaded_guild_channel_factory,
+    _threaded_channel_factory,
 )
 from .emoji import Emoji
 from .entitlement import Entitlement
@@ -91,13 +91,12 @@ from .utils import MISSING
 from .webhook import Webhook
 
 if TYPE_CHECKING:
-    from .abc import MessageableChannel, PrivateChannel
+    from .abc import AnyChannel, MessageableChannel, PrivateChannel
     from .app_commands import APIApplicationCommand, ApplicationCommand
     from .client import Client
     from .gateway import DiscordWebSocket
     from .guild import GuildChannel, VocalGuildChannel
     from .http import HTTPClient
-    from .interactions.base import InteractionChannel, InteractionMessageable
     from .types import gateway
     from .types.activity import Activity as ActivityPayload
     from .types.channel import DMChannel as DMChannelPayload
@@ -2039,7 +2038,7 @@ class ConnectionState:
         guild: Optional[Union[Guild, Object]],
         *,
         return_messageable: Literal[False] = False,
-    ) -> InteractionChannel:
+    ) -> AnyChannel:
         ...
 
     @overload
@@ -2049,10 +2048,10 @@ class ConnectionState:
         guild: Optional[Union[Guild, Object]],
         *,
         return_messageable: Literal[True],
-    ) -> InteractionMessageable:
+    ) -> MessageableChannel:
         ...
 
-    # note: this resolves private channels (and unknown types) to `PartialMessageable`
+    # note: this resolves unknown types to `PartialMessageable`
     def _get_partial_interaction_channel(
         self,
         data: InteractionChannelPayload,
@@ -2060,18 +2059,23 @@ class ConnectionState:
         *,
         # this param is purely for type-checking, it has no effect on runtime behavior.
         return_messageable: bool = False,
-    ) -> InteractionChannel:
+    ) -> AnyChannel:
         channel_id = int(data["id"])
         channel_type = data["type"]
 
-        factory, _ = _threaded_guild_channel_factory(channel_type)
-        if not factory or not guild:
+        factory, ch_type = _threaded_channel_factory(channel_type)
+        if not factory:
             return PartialMessageable(
                 state=self,
                 id=channel_id,
-                type=try_enum(ChannelType, channel_type),
+                type=ch_type,
             )
 
+        if ch_type in (ChannelType.group, ChannelType.private):
+            # the factory will be a DMChannel or GroupChannel here
+            return factory(me=self.user, data=data, state=self)  # type: ignore
+
+        # the factory can't be a DMChannel or GroupChannel here
         data.setdefault("position", 0)  # type: ignore
         return (
             isinstance(guild, Guild)

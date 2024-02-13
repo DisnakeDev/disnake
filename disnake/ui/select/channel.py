@@ -12,7 +12,7 @@ from .base import BaseSelect, P, V_co, _create_decorator
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ...interactions.base import InteractionChannel
+    from ...abc import AnyChannel
     from ..item import DecoratedItem, ItemCallbackType, Object
 
 
@@ -22,7 +22,7 @@ __all__ = (
 )
 
 
-class ChannelSelect(BaseSelect[ChannelSelectMenu, "InteractionChannel", V_co]):
+class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
     """Represents a UI channel select menu.
 
     This is usually represented as a drop down menu.
