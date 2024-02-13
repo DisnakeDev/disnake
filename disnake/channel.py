@@ -4663,7 +4663,10 @@ class DMChannel(disnake.abc.Messageable, Hashable):
 
     def __init__(self, *, me: ClientUser, state: ConnectionState, data: DMChannelPayload) -> None:
         self._state: ConnectionState = state
-        self.recipient: Optional[User] = state.store_user(data["recipients"][0])  # type: ignore
+        self.recipient: Optional[User] = None
+        if recipients := data.get("recipients"):
+            self.recipient = state.store_user(recipients[0])  # type: ignore
+
         self.me: ClientUser = me
         self.id: int = int(data["id"])
         self.last_pin_timestamp: Optional[datetime.datetime] = utils.parse_time(
