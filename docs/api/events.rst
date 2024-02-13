@@ -869,6 +869,9 @@ Members
 
     Called when a member updates their presence.
     Unlike :func:`on_presence_update`, this is called regardless of the member cache.
+    
+    Since the data payload can be partial and the Discord API does not validate the types of the fields,
+    care must be taken when accessing stuff in the dictionary.
 
     This requires :attr:`Intents.presences` to be enabled.
 
