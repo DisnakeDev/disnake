@@ -279,7 +279,7 @@ class VoiceClient(VoiceProtocol):
         self.server_id = int(data["guild_id"])
         endpoint = data.get("endpoint")
 
-        if endpoint is None or self.token is None:
+        if endpoint is None or not self.token:
             _log.warning(
                 "Awaiting endpoint... This requires waiting. "
                 "If timeout occurred considering raising the timeout and reconnecting."
@@ -427,6 +427,11 @@ class VoiceClient(VoiceProtocol):
             try:
                 await self.ws.poll_event()
             except (ConnectionClosed, asyncio.TimeoutError) as exc:
+                # Ensure the keep alive handler is closed
+                if self.ws._keep_alive:
+                    self.ws._keep_alive.stop()
+                    self.ws._keep_alive = None
+
                 if isinstance(exc, ConnectionClosed):
                     # The following close codes are undocumented so I will document them here.
                     # 1000 - normal closure (obviously)

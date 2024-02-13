@@ -245,7 +245,7 @@ def _transform_datetime(entry: AuditLogEntry, data: Optional[str]) -> Optional[d
 
 
 def _transform_privacy_level(
-    entry: AuditLogEntry, data: int
+    entry: AuditLogEntry, data: Optional[int]
 ) -> Optional[Union[enums.StagePrivacyLevel, enums.GuildScheduledEventPrivacyLevel]]:
     if data is None:
         return None
@@ -484,7 +484,7 @@ class _AuditLogProxyMemberPrune:
 
 
 class _AuditLogProxyMemberMoveOrMessageDelete:
-    channel: abc.GuildChannel
+    channel: Union[abc.GuildChannel, Thread]
     count: int
 
 
@@ -493,7 +493,7 @@ class _AuditLogProxyMemberDisconnect:
 
 
 class _AuditLogProxyPinAction:
-    channel: abc.GuildChannel
+    channel: Union[abc.GuildChannel, Thread]
     message_id: int
 
 
@@ -501,18 +501,23 @@ class _AuditLogProxyStageInstanceAction:
     channel: abc.GuildChannel
 
 
-class _AuditLogProxyAutoModBlockMessage:
-    channel: abc.GuildChannel
+class _AuditLogProxyAutoModAction:
+    channel: Optional[Union[abc.GuildChannel, Thread]]
     rule_name: str
     rule_trigger_type: enums.AutoModTriggerType
+
+
+class _AuditLogProxyKickOrMemberRoleAction:
+    integration_type: Optional[str]
 
 
 class AuditLogEntry(Hashable):
     """Represents an Audit Log entry.
 
-    You retrieve these via :meth:`Guild.audit_logs`.
+    You can retrieve these via :meth:`Guild.audit_logs`,
+    or via the :func:`on_audit_log_entry_create` event.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -529,9 +534,6 @@ class AuditLogEntry(Hashable):
     .. versionchanged:: 1.7
         Audit log entries are now comparable and hashable.
 
-    .. versionchanged:: 2.8
-        :attr:`user` can return :class:`Object` if the user is not found.
-
     Attributes
     ----------
     action: :class:`AuditLogAction`
@@ -539,6 +541,9 @@ class AuditLogEntry(Hashable):
     user: Optional[Union[:class:`Member`, :class:`User`, :class:`Object`]]
         The user who initiated this action. Usually :class:`Member`\\, unless gone
         then it's a :class:`User`.
+
+        .. versionchanged:: 2.8
+            May now be an :class:`Object` if the user could not be found.
     id: :class:`int`
         The entry ID.
     target: Any
@@ -589,34 +594,36 @@ class AuditLogEntry(Hashable):
 
         if isinstance(self.action, enums.AuditLogAction) and extra:
             if self.action is enums.AuditLogAction.member_prune:
-                # member prune has two keys with useful information
-                self.extra = type(
-                    "_AuditLogProxy", (), {k: int(v) for k, v in extra.items()}  # type: ignore
-                )()
+                elems = {
+                    "delete_member_days": utils._get_as_snowflake(extra, "delete_member_days"),
+                    "members_removed": utils._get_as_snowflake(extra, "members_removed"),
+                }
+                self.extra = type("_AuditLogProxy", (), elems)()
             elif (
                 self.action is enums.AuditLogAction.member_move
                 or self.action is enums.AuditLogAction.message_delete
             ):
                 elems = {
                     "count": int(extra["count"]),
-                    "channel": self._get_channel(utils._get_as_snowflake(extra, "channel_id")),
+                    "channel": self._get_channel_or_thread(
+                        utils._get_as_snowflake(extra, "channel_id")
+                    ),
                 }
                 self.extra = type("_AuditLogProxy", (), elems)()
             elif self.action is enums.AuditLogAction.member_disconnect:
-                # The member disconnect action has a dict with some information
                 elems = {
                     "count": int(extra["count"]),
                 }
                 self.extra = type("_AuditLogProxy", (), elems)()
             elif self.action.name.endswith("pin"):
-                # the pin actions have a dict with some information
                 elems = {
-                    "channel": self._get_channel(utils._get_as_snowflake(extra, "channel_id")),
+                    "channel": self._get_channel_or_thread(
+                        utils._get_as_snowflake(extra, "channel_id")
+                    ),
                     "message_id": int(extra["message_id"]),
                 }
                 self.extra = type("_AuditLogProxy", (), elems)()
             elif self.action.name.startswith("overwrite_"):
-                # the overwrite_ actions have a dict with some information
                 instance_id = int(extra["id"])
                 the_type = extra.get("type")
                 if the_type == "1":
@@ -629,7 +636,9 @@ class AuditLogEntry(Hashable):
                     self.extra = role
             elif self.action.name.startswith("stage_instance"):
                 elems = {
-                    "channel": self._get_channel(utils._get_as_snowflake(extra, "channel_id")),
+                    "channel": self._get_channel_or_thread(
+                        utils._get_as_snowflake(extra, "channel_id")
+                    )
                 }
                 self.extra = type("_AuditLogProxy", (), elems)()
             elif self.action is enums.AuditLogAction.application_command_permission_update:
@@ -644,12 +653,23 @@ class AuditLogEntry(Hashable):
                 enums.AuditLogAction.automod_timeout,
             ):
                 elems = {
-                    "channel": (self._get_channel(utils._get_as_snowflake(extra, "channel_id"))),
+                    "channel": (
+                        self._get_channel_or_thread(utils._get_as_snowflake(extra, "channel_id"))
+                    ),
                     "rule_name": extra["auto_moderation_rule_name"],
                     "rule_trigger_type": enums.try_enum(
                         enums.AutoModTriggerType,
                         int(extra["auto_moderation_rule_trigger_type"]),
                     ),
+                }
+                self.extra = type("_AuditLogProxy", (), elems)()
+            elif self.action in (
+                enums.AuditLogAction.kick,
+                enums.AuditLogAction.member_role_update,
+            ):
+                elems = {
+                    # unlike other extras, this key isn't always provided
+                    "integration_type": extra.get("integration_type"),
                 }
                 self.extra = type("_AuditLogProxy", (), elems)()
 
@@ -661,7 +681,8 @@ class AuditLogEntry(Hashable):
         #     _AuditLogProxyMemberDisconnect,
         #     _AuditLogProxyPinAction,
         #     _AuditLogProxyStageInstanceAction,
-        #     _AuditLogProxyAutoModBlockMessage,
+        #     _AuditLogProxyAutoModAction,
+        #     _AuditLogProxyKickOrMemberRoleAction,
         #     Member, User, None,
         #     Role,
         # ]
@@ -681,10 +702,12 @@ class AuditLogEntry(Hashable):
             return None
         return self.guild.get_member(user_id) or self._users.get(user_id) or Object(id=user_id)
 
-    def _get_channel(self, channel_id: Optional[int]) -> Union[abc.GuildChannel, Object, None]:
+    def _get_channel_or_thread(
+        self, channel_id: Optional[int]
+    ) -> Union[abc.GuildChannel, Thread, Object, None]:
         if not channel_id:
             return None
-        return self.guild.get_channel(channel_id) or Object(channel_id)
+        return self.guild.get_channel_or_thread(channel_id) or Object(channel_id)
 
     def _get_integration_by_application_id(
         self, application_id: int

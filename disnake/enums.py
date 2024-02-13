@@ -35,6 +35,7 @@ __all__ = (
     "ActivityType",
     "NotificationLevel",
     "TeamMembershipState",
+    "TeamMemberRole",
     "WebhookType",
     "ExpireBehaviour",
     "ExpireBehavior",
@@ -67,6 +68,8 @@ __all__ = (
     "Event",
     "ApplicationRoleConnectionMetadataType",
     "OnboardingPromptType",
+    "SKUType",
+    "EntitlementType",
 )
 
 
@@ -322,6 +325,7 @@ class DefaultAvatar(Enum):
     green = 2
     orange = 3
     red = 4
+    fuchsia = 5
 
     def __str__(self) -> str:
         return self.name
@@ -394,6 +398,8 @@ class AuditLogAction(Enum):
     automod_block_message                 = 143
     automod_send_alert_message            = 144
     automod_timeout                       = 145
+    creator_monetization_request_created  = 150
+    creator_monetization_terms_accepted   = 151
     # fmt: on
 
     @property
@@ -454,6 +460,8 @@ class AuditLogAction(Enum):
             AuditLogAction.automod_block_message:                 None,
             AuditLogAction.automod_send_alert_message:            None,
             AuditLogAction.automod_timeout:                       None,
+            AuditLogAction.creator_monetization_request_created:  None,
+            AuditLogAction.creator_monetization_terms_accepted:   None,
         }
         # fmt: on
         return lookup[self]
@@ -461,7 +469,7 @@ class AuditLogAction(Enum):
     @property
     def target_type(self) -> Optional[str]:
         v = self.value
-        if v == -1:
+        if v == -1:  # pyright: ignore[reportUnnecessaryComparison]
             return "all"
         elif v < 10:
             return "guild"
@@ -499,6 +507,8 @@ class AuditLogAction(Enum):
             return "automod_rule"
         elif v < 146:
             return "user"
+        elif v < 152:
+            return None
         else:
             return None
 
@@ -542,6 +552,15 @@ class ActivityType(Enum):
 class TeamMembershipState(Enum):
     invited = 1
     accepted = 2
+
+
+class TeamMemberRole(Enum):
+    admin = "admin"
+    developer = "developer"
+    read_only = "read_only"
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class WebhookType(Enum):
@@ -598,14 +617,13 @@ class InteractionType(Enum):
 
 class InteractionResponseType(Enum):
     pong = 1
-    # ack = 2 (deprecated)
-    # channel_message = 3 (deprecated)
-    channel_message = 4  # (with source)
-    deferred_channel_message = 5  # (with source)
-    deferred_message_update = 6  # for components
-    message_update = 7  # for components
-    application_command_autocomplete_result = 8  # for autocomplete
-    modal = 9  # for modals
+    channel_message = 4
+    deferred_channel_message = 5
+    deferred_message_update = 6
+    message_update = 7
+    application_command_autocomplete_result = 8
+    modal = 9
+    premium_required = 10
 
 
 class VideoQualityMode(Enum):
@@ -620,7 +638,7 @@ class ComponentType(Enum):
     action_row = 1
     button = 2
     string_select = 3
-    select = string_select  # backwards compatibility
+    select = 3  # backwards compatibility
     text_input = 4
     user_select = 5
     role_select = 6
@@ -746,7 +764,7 @@ class WidgetStyle(Enum):
 # reference: https://discord.com/developers/docs/reference#locales
 class Locale(Enum):
     bg = "bg"
-    "Bulgarian | български"  # noqa: RUF001
+    "Bulgarian | български"
     cs = "cs"
     "Czech | Čeština"
     da = "da"
@@ -754,7 +772,7 @@ class Locale(Enum):
     de = "de"
     "German | Deutsch"
     el = "el"
-    "Greek | Ελληνικά"  # noqa: RUF001
+    "Greek | Ελληνικά"
     en_GB = "en-GB"
     "English, UK | English, UK"
     en_US = "en-US"
@@ -800,7 +818,7 @@ class Locale(Enum):
     tr = "tr"
     "Turkish | Türkçe"
     uk = "uk"
-    "Ukrainian | Українська"  # noqa: RUF001
+    "Ukrainian | Українська"
     vi = "vi"
     "Vietnamese | Tiếng Việt"
     zh_CN = "zh-CN"
@@ -1235,6 +1253,15 @@ class Event(Enum):
     """Called when someone begins typing a message regardless of whether `Intents.members` and `Intents.guilds` are enabled.
     Represents the :func:`on_raw_typing` event.
     """
+    entitlement_create = "entitlement_create"
+    """Called when a user subscribes to an SKU, creating a new :class:`Entitlement`.
+    Represents the :func:`on_entitlement_create` event."""
+    entitlement_update = "entitlement_update"
+    """Called when a user's subscription renews.
+    Represents the :func:`on_entitlement_update` event."""
+    entitlement_delete = "entitlement_delete"
+    """Called when a user's entitlement is deleted.
+    Represents the :func:`on_entitlement_delete` event."""
     # ext.commands events
     command = "command"
     """Called when a command is found and is about to be invoked.
@@ -1300,6 +1327,15 @@ class ApplicationRoleConnectionMetadataType(Enum):
 class OnboardingPromptType(Enum):
     multiple_choice = 0
     dropdown = 1
+
+
+class SKUType(Enum):
+    subscription = 5
+    subscription_group = 6
+
+
+class EntitlementType(Enum):
+    application_subscription = 8
 
 
 T = TypeVar("T")

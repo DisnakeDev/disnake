@@ -2,6 +2,7 @@
 
 import pytest
 
+import disnake
 from disnake import Permissions
 from disnake.ext import commands
 
@@ -82,3 +83,20 @@ class TestDefaultPermissions:
 
         assert Cog.overwrite_decorator_below.default_member_permissions == Permissions(64)
         assert Cog().overwrite_decorator_below.default_member_permissions == Permissions(64)
+
+
+def test_localization_copy() -> None:
+    class Cog(commands.Cog):
+        @commands.slash_command()
+        async def cmd(
+            self,
+            inter,
+            param: int = commands.Param(name=disnake.Localized("param", key="PARAM")),
+        ) -> None:
+            ...
+
+    # Ensure the command copy that happens on cog init doesn't raise a LocalizationWarning for the options.
+    cog = Cog()
+
+    with pytest.warns(disnake.LocalizationWarning):
+        assert cog.get_slash_commands()[0].options[0].name_localizations.data is None

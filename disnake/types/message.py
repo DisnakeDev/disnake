@@ -42,6 +42,9 @@ class Attachment(TypedDict):
     height: NotRequired[Optional[int]]
     width: NotRequired[Optional[int]]
     ephemeral: NotRequired[bool]
+    duration_secs: NotRequired[float]
+    waveform: NotRequired[str]
+    flags: NotRequired[int]
 
 
 MessageActivityType = Literal[1, 2, 3, 5]
@@ -60,11 +63,11 @@ class MessageApplication(TypedDict):
     cover_image: NotRequired[str]
 
 
-class MessageReference(TypedDict, total=False):
-    message_id: Snowflake
+class MessageReference(TypedDict):
+    message_id: NotRequired[Snowflake]
     channel_id: Snowflake
-    guild_id: Snowflake
-    fail_if_not_exists: bool
+    guild_id: NotRequired[Snowflake]
+    fail_if_not_exists: NotRequired[bool]
 
 
 class RoleSubscriptionData(TypedDict):

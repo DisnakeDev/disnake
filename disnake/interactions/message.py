@@ -8,7 +8,7 @@ from ..components import MessageComponent
 from ..enums import ComponentType, try_enum
 from ..message import Message
 from ..utils import cached_slot_property
-from .base import Interaction, InteractionDataResolved
+from .base import ClientT, Interaction, InteractionDataResolved
 
 __all__ = (
     "MessageInteraction",
@@ -28,7 +28,7 @@ if TYPE_CHECKING:
     from .base import InteractionChannel
 
 
-class MessageInteraction(Interaction):
+class MessageInteraction(Interaction[ClientT]):
     """Represents an interaction with a message component.
 
     Current examples are buttons and dropdowns.

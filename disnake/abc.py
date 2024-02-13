@@ -38,10 +38,11 @@ from .file import File
 from .flags import ChannelFlags, MessageFlags
 from .invite import Invite
 from .mentions import AllowedMentions
+from .object import Object
 from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite, Permissions
 from .role import Role
-from .sticker import GuildSticker, StickerItem
+from .sticker import GuildSticker, StandardSticker, StickerItem
 from .ui.action_row import components_to_dict
 from .utils import _overload_with_permissions
 from .voice_client import VoiceClient, VoiceProtocol
@@ -143,12 +144,8 @@ class User(Snowflake, Protocol):
         The user's global display name, if set.
         This takes precedence over :attr:`.name` when shown.
 
-        For bots, this is the application name.
-
         .. versionadded:: 2.9
 
-    avatar: :class:`~disnake.Asset`
-        The avatar asset the user has.
     bot: :class:`bool`
         Whether the user is a bot account.
     """
@@ -158,7 +155,6 @@ class User(Snowflake, Protocol):
     name: str
     discriminator: str
     global_name: Optional[str]
-    avatar: Asset
     bot: bool
 
     @property
@@ -169,6 +165,13 @@ class User(Snowflake, Protocol):
     @property
     def mention(self) -> str:
         """:class:`str`: Returns a string that allows you to mention the given user."""
+        raise NotImplementedError
+
+    @property
+    def avatar(self) -> Optional[Asset]:
+        """Optional[:class:`~disnake.Asset`]: Returns an :class:`~disnake.Asset` for
+        the avatar the user has.
+        """
         raise NotImplementedError
 
 
@@ -387,7 +390,7 @@ class GuildChannel(ABC):
             if p_id is not None and (parent := self.guild.get_channel(p_id)):
                 overwrites_payload = [c._asdict() for c in parent._overwrites]
 
-        if overwrites is not MISSING and overwrites is not None:
+        if overwrites not in (MISSING, None):
             overwrites_payload = []
             for target, perm in overwrites.items():
                 if not isinstance(perm, PermissionOverwrite):
@@ -630,6 +633,21 @@ class GuildChannel(ABC):
         """
         return f"https://discord.com/channels/{self.guild.id}/{self.id}"
 
+    def _apply_implict_permissions(self, base: Permissions) -> None:
+        # if you can't send a message in a channel then you can't have certain
+        # permissions as well
+        if not base.send_messages:
+            base.send_tts_messages = False
+            base.send_voice_messages = False
+            base.mention_everyone = False
+            base.embed_links = False
+            base.attach_files = False
+
+        # if you can't view a channel then you have no permissions there
+        if not base.view_channel:
+            denied = Permissions.all_channel()
+            base.value &= ~denied.value
+
     def permissions_for(
         self,
         obj: Union[Member, Role],
@@ -781,25 +799,11 @@ class GuildChannel(ABC):
                 base.handle_overwrite(allow=overwrite.allow, deny=overwrite.deny)
                 break
 
-        # if you can't send a message in a channel then you can't have certain
-        # permissions as well
-        if not base.send_messages:
-            base.send_tts_messages = False
-            base.send_voice_messages = False
-            base.mention_everyone = False
-            base.embed_links = False
-            base.attach_files = False
-
-        # if you can't view a channel then you have no permissions there
-        if not base.view_channel:
-            denied = Permissions.all_channel()
-            base.value &= ~denied.value
-
         # if you have a timeout then you can't have any permissions
         # except read messages and read message history
         if not ignore_timeout and obj.current_timeout:
-            denied = Permissions(view_channel=True, read_message_history=True)
-            base.value &= denied.value
+            allowed = Permissions(view_channel=True, read_message_history=True)
+            base.value &= allowed.value
 
         return base
 
@@ -849,7 +853,9 @@ class GuildChannel(ABC):
         ban_members: Optional[bool] = ...,
         change_nickname: Optional[bool] = ...,
         connect: Optional[bool] = ...,
+        create_events: Optional[bool] = ...,
         create_forum_threads: Optional[bool] = ...,
+        create_guild_expressions: Optional[bool] = ...,
         create_instant_invite: Optional[bool] = ...,
         create_private_threads: Optional[bool] = ...,
         create_public_threads: Optional[bool] = ...,
@@ -1276,7 +1282,7 @@ class GuildChannel(ABC):
         unique: bool = True,
         target_type: Optional[InviteTarget] = None,
         target_user: Optional[User] = None,
-        target_application: Optional[PartyType] = None,
+        target_application: Optional[Union[Snowflake, PartyType]] = None,
         guild_scheduled_event: Optional[GuildScheduledEvent] = None,
     ) -> Invite:
         """|coro|
@@ -1289,7 +1295,7 @@ class GuildChannel(ABC):
         Parameters
         ----------
         max_age: :class:`int`
-            How long the invite should last in seconds. If it's 0 then the invite
+            How long the invite should last in seconds. If set to ``0``, then the invite
             doesn't expire. Defaults to ``0``.
         max_uses: :class:`int`
             How many uses the invite could be used for. If it's 0 then there
@@ -1307,15 +1313,18 @@ class GuildChannel(ABC):
             .. versionadded:: 2.0
 
         target_user: Optional[:class:`User`]
-            The user whose stream to display for this invite, required if `target_type` is `TargetType.stream`.
+            The user whose stream to display for this invite, required if ``target_type`` is :attr:`.InviteTarget.stream`.
             The user must be streaming in the channel.
 
             .. versionadded:: 2.0
 
-        target_application: Optional[:class:`.PartyType`]
-            The ID of the embedded application for the invite, required if `target_type` is `TargetType.embedded_application`.
+        target_application: Optional[:class:`.Snowflake`]
+            The ID of the embedded application for the invite, required if ``target_type`` is :attr:`.InviteTarget.embedded_application`.
 
             .. versionadded:: 2.0
+
+            .. versionchanged:: 2.9
+                ``PartyType`` is deprecated, and :class:`.Snowflake` should be used instead.
 
         guild_scheduled_event: Optional[:class:`.GuildScheduledEvent`]
             The guild scheduled event to include with the invite.
@@ -1337,6 +1346,12 @@ class GuildChannel(ABC):
         :class:`.Invite`
             The newly created invite.
         """
+        if isinstance(target_application, PartyType):
+            utils.warn_deprecated(
+                "PartyType is deprecated and will be removed in future version",
+                stacklevel=2,
+            )
+            target_application = Object(target_application.value)
         data = await self._state.http.create_invite(
             self.id,
             reason=reason,
@@ -1346,7 +1361,7 @@ class GuildChannel(ABC):
             unique=unique,
             target_type=try_enum_to_int(target_type),
             target_user_id=target_user.id if target_user else None,
-            target_application_id=try_enum_to_int(target_application),
+            target_application_id=target_application.id if target_application else None,
         )
         invite = Invite.from_incomplete(data=data, state=self._state)
         invite.guild_scheduled_event = guild_scheduled_event
@@ -1408,7 +1423,7 @@ class Messageable:
         tts: bool = ...,
         embed: Embed = ...,
         file: File = ...,
-        stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
+        stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
         suppress_embeds: bool = ...,
@@ -1429,7 +1444,7 @@ class Messageable:
         tts: bool = ...,
         embed: Embed = ...,
         files: List[File] = ...,
-        stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
+        stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
         suppress_embeds: bool = ...,
@@ -1450,7 +1465,7 @@ class Messageable:
         tts: bool = ...,
         embeds: List[Embed] = ...,
         file: File = ...,
-        stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
+        stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
         suppress_embeds: bool = ...,
@@ -1471,7 +1486,7 @@ class Messageable:
         tts: bool = ...,
         embeds: List[Embed] = ...,
         files: List[File] = ...,
-        stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
+        stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
         suppress_embeds: bool = ...,
@@ -1493,7 +1508,7 @@ class Messageable:
         embeds: Optional[List[Embed]] = None,
         file: Optional[File] = None,
         files: Optional[List[File]] = None,
-        stickers: Optional[Sequence[Union[GuildSticker, StickerItem]]] = None,
+        stickers: Optional[Sequence[Union[GuildSticker, StandardSticker, StickerItem]]] = None,
         delete_after: Optional[float] = None,
         nonce: Optional[Union[str, int]] = None,
         suppress_embeds: Optional[bool] = None,
@@ -1546,7 +1561,7 @@ class Messageable:
         files: List[:class:`.File`]
             A list of files to upload. Must be a maximum of 10.
             This cannot be mixed with the ``file`` parameter.
-        stickers: Sequence[Union[:class:`.GuildSticker`, :class:`.StickerItem`]]
+        stickers: Sequence[Union[:class:`.GuildSticker`, :class:`.StandardSticker`, :class:`.StickerItem`]]
             A list of stickers to upload. Must be a maximum of 3.
 
             .. versionadded:: 2.0

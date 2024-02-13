@@ -6,6 +6,7 @@ import asyncio
 import datetime
 import io
 import re
+from base64 import b64decode, b64encode
 from os import PathLike
 from typing import (
     TYPE_CHECKING,
@@ -28,7 +29,7 @@ from .emoji import Emoji
 from .enums import ChannelType, InteractionType, MessageType, try_enum, try_enum_to_int
 from .errors import HTTPException
 from .file import File
-from .flags import MessageFlags
+from .flags import AttachmentFlags, MessageFlags
 from .guild import Guild
 from .member import Member
 from .mixins import Hashable
@@ -219,7 +220,7 @@ async def _edit_handler(
 class Attachment(Hashable):
     """Represents an attachment from Discord.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: str(x)
 
@@ -260,7 +261,7 @@ class Attachment(Hashable):
         case of images. When the message is deleted, this URL might be valid for a few
         minutes or not valid at all.
     content_type: Optional[:class:`str`]
-        The attachment's `media type <https://en.wikipedia.org/wiki/Media_type>`_
+        The attachment's `media type <https://en.wikipedia.org/wiki/Media_type>`_.
 
         .. versionadded:: 1.7
 
@@ -270,9 +271,21 @@ class Attachment(Hashable):
         .. versionadded:: 2.1
 
     description: :class:`str`
-        The attachment's description
+        The attachment's description.
 
         .. versionadded:: 2.3
+
+    duration: Optional[:class:`float`]
+        The duration of the audio attachment in seconds, if this is attached to a voice message
+        (see :attr:`MessageFlags.is_voice_message`).
+
+        .. versionadded:: 2.9
+
+    waveform: Optional[:class:`bytes`]
+        The byte array representing a sampled waveform, if this is attached to a voice message
+        (see :attr:`MessageFlags.is_voice_message`).
+
+        .. versionadded:: 2.9
     """
 
     __slots__ = (
@@ -287,6 +300,9 @@ class Attachment(Hashable):
         "content_type",
         "ephemeral",
         "description",
+        "duration",
+        "waveform",
+        "_flags",
     )
 
     def __init__(self, *, data: AttachmentPayload, state: ConnectionState) -> None:
@@ -301,6 +317,11 @@ class Attachment(Hashable):
         self.content_type: Optional[str] = data.get("content_type")
         self.ephemeral: bool = data.get("ephemeral", False)
         self.description: Optional[str] = data.get("description")
+        self.duration: Optional[float] = data.get("duration_secs")
+        self.waveform: Optional[bytes] = (
+            b64decode(waveform_data) if (waveform_data := data.get("waveform")) else None
+        )
+        self._flags: int = data.get("flags", 0)
 
     def is_spoiler(self) -> bool:
         """Whether this attachment contains a spoiler.
@@ -314,6 +335,14 @@ class Attachment(Hashable):
 
     def __str__(self) -> str:
         return self.url or ""
+
+    @property
+    def flags(self) -> AttachmentFlags:
+        """:class:`AttachmentFlags`: Returns the attachment's flags.
+
+        .. versionadded:: 2.10
+        """
+        return AttachmentFlags._from_value(self._flags)
 
     async def save(
         self,
@@ -475,6 +504,12 @@ class Attachment(Hashable):
             result["content_type"] = self.content_type
         if self.description:
             result["description"] = self.description
+        if self.duration is not None:
+            result["duration_secs"] = self.duration
+        if self.waveform is not None:
+            result["waveform"] = b64encode(self.waveform).decode("ascii")
+        if self._flags:
+            result["flags"] = self._flags
         return result
 
 
@@ -568,7 +603,7 @@ class MessageReference:
     def with_state(cls, state: ConnectionState, data: MessageReferencePayload) -> Self:
         self = cls.__new__(cls)
         self.message_id = utils._get_as_snowflake(data, "message_id")
-        self.channel_id = int(data.pop("channel_id"))
+        self.channel_id = int(data["channel_id"])
         self.guild_id = utils._get_as_snowflake(data, "guild_id")
         self.fail_if_not_exists = data.get("fail_if_not_exists", True)
         self._state = state
@@ -623,14 +658,14 @@ class MessageReference:
         return f"<MessageReference message_id={self.message_id!r} channel_id={self.channel_id!r} guild_id={self.guild_id!r}>"
 
     def to_dict(self) -> MessageReferencePayload:
-        result: MessageReferencePayload = (
-            {"message_id": self.message_id} if self.message_id is not None else {}
-        )
-        result["channel_id"] = self.channel_id
+        result: MessageReferencePayload = {
+            "channel_id": self.channel_id,
+            "fail_if_not_exists": self.fail_if_not_exists,
+        }
+        if self.message_id is not None:
+            result["message_id"] = self.message_id
         if self.guild_id is not None:
             result["guild_id"] = self.guild_id
-        if self.fail_if_not_exists is not None:
-            result["fail_if_not_exists"] = self.fail_if_not_exists
         return result
 
     to_message_reference_dict = to_dict
@@ -732,7 +767,7 @@ def flatten_handlers(cls):
 class Message(Hashable):
     """Represents a message from Discord.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -2143,7 +2178,7 @@ class PartialMessage(Hashable):
 
     .. versionadded:: 1.6
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 

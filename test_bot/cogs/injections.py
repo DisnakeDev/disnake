@@ -31,7 +31,7 @@ class PrefixConverter:
         self.prefix = prefix
         self.suffix = suffix
 
-    def __call__(self, inter: disnake.CommandInteraction, a: str = "init"):
+    def __call__(self, inter: disnake.CommandInteraction[commands.Bot], a: str = "init"):
         return self.prefix + a + self.suffix
 
 
@@ -41,7 +41,7 @@ class HopeToGod:
         self.discriminator = discriminator
 
     @commands.converter_method
-    async def convert(cls, inter: disnake.CommandInteraction, user: disnake.User):
+    async def convert(cls, inter: disnake.CommandInteraction[commands.Bot], user: disnake.User):
         return cls(user.name, user.discriminator)
 
     def __repr__(self) -> str:
@@ -89,7 +89,7 @@ class InjectionSlashCommands(commands.Cog):
     @commands.slash_command()
     async def injection_command(
         self,
-        inter: disnake.CommandInteraction,
+        inter: disnake.CommandInteraction[commands.Bot],
         sqrt: Optional[float] = commands.Param(None, converter=lambda i, x: x**0.5),
         prefixed: str = commands.Param(converter=PrefixConverter("__", "__")),
         other: Tuple[int, str] = commands.inject(injected),
@@ -109,7 +109,7 @@ class InjectionSlashCommands(commands.Cog):
     @commands.slash_command()
     async def discerned_injections(
         self,
-        inter: disnake.CommandInteraction,
+        inter: disnake.CommandInteraction[commands.Bot],
         perhaps: PerhapsThis,
         god: Optional[HopeToGod] = None,
     ) -> None:

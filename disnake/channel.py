@@ -74,7 +74,7 @@ if TYPE_CHECKING:
     from .message import AllowedMentions, Message, PartialMessage
     from .role import Role
     from .state import ConnectionState
-    from .sticker import GuildSticker, StickerItem
+    from .sticker import GuildSticker, StandardSticker, StickerItem
     from .threads import AnyThreadArchiveDuration, ThreadType
     from .types.channel import (
         CategoryChannel as CategoryChannelPayload,
@@ -103,7 +103,7 @@ async def _single_delete_strategy(messages: Iterable[Message]) -> None:
 class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
     """Represents a Discord guild text channel.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -263,6 +263,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         ignore_timeout: bool = MISSING,
     ) -> Permissions:
         base = super().permissions_for(obj, ignore_timeout=ignore_timeout)
+        self._apply_implict_permissions(base)
 
         # text channels do not have voice related permissions
         denied = Permissions.voice()
@@ -472,7 +473,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             overwrites=overwrites,
             flags=flags,
             reason=reason,
-            **kwargs,
+            **kwargs,  # type: ignore
         )
         if payload is not None:
             # the payload will always be the proper channel payload
@@ -508,7 +509,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         .. note::
             The current :attr:`TextChannel.flags` value won't be cloned.
-            This is a discord limitation.
+            This is a Discord limitation.
 
         Parameters
         ----------
@@ -1183,11 +1184,41 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
             if value.channel and value.channel.id == self.id
         }
 
+    @utils.copy_doc(disnake.abc.GuildChannel.permissions_for)
+    def permissions_for(
+        self,
+        obj: Union[Member, Role],
+        /,
+        *,
+        ignore_timeout: bool = MISSING,
+    ) -> Permissions:
+        base = super().permissions_for(obj, ignore_timeout=ignore_timeout)
+        self._apply_implict_permissions(base)
+
+        # voice channels cannot be edited by people who can't connect to them
+        # It also implicitly denies all other voice perms
+        if not base.connect:
+            denied = Permissions.voice()
+            # voice channels also deny all text related permissions
+            denied.value |= Permissions.text().value
+            # stage channels remove the stage permissions
+            denied.value |= Permissions.stage().value
+
+            denied.update(
+                manage_channels=True,
+                manage_roles=True,
+                create_events=True,
+                manage_events=True,
+                manage_webhooks=True,
+            )
+            base.value &= ~denied.value
+        return base
+
 
 class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
     """Represents a Discord guild voice channel.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -1326,7 +1357,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         .. note::
             The current :attr:`VoiceChannel.flags` value won't be cloned.
-            This is a discord limitation.
+            This is a Discord limitation.
 
         Parameters
         ----------
@@ -1441,32 +1472,6 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         from .message import PartialMessage
 
         return PartialMessage(channel=self, id=message_id)
-
-    @utils.copy_doc(disnake.abc.GuildChannel.permissions_for)
-    def permissions_for(
-        self,
-        obj: Union[Member, Role],
-        /,
-        *,
-        ignore_timeout: bool = MISSING,
-    ) -> Permissions:
-        base = super().permissions_for(obj, ignore_timeout=ignore_timeout)
-
-        # voice channels cannot be edited by people who can't connect to them
-        # It also implicitly denies all other voice perms
-        if not base.connect:
-            denied = Permissions.voice()
-            # voice channels also deny all text related permissions
-            denied.value |= Permissions.text().value
-
-            denied.update(
-                manage_channels=True,
-                manage_roles=True,
-                manage_events=True,
-                manage_webhooks=True,
-            )
-            base.value &= ~denied.value
-        return base
 
     # if only these parameters are passed, `_move` is called and no channel will be returned
     @overload
@@ -1624,7 +1629,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             slowmode_delay=slowmode_delay,
             flags=flags,
             reason=reason,
-            **kwargs,
+            **kwargs,  # type: ignore
         )
         if payload is not None:
             # the payload will always be the proper channel payload
@@ -1867,7 +1872,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
     .. versionadded:: 1.7
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -2054,7 +2059,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         .. note::
             The current :attr:`StageChannel.flags` value won't be cloned.
-            This is a discord limitation.
+            This is a Discord limitation.
 
         .. warning::
             Currently the ``user_limit`` attribute is not cloned due to a Discord limitation.
@@ -2183,37 +2188,13 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         """
         return utils.get(self.guild.stage_instances, channel_id=self.id)
 
-    @utils.copy_doc(disnake.abc.GuildChannel.permissions_for)
-    def permissions_for(
-        self,
-        obj: Union[Member, Role],
-        /,
-        *,
-        ignore_timeout: bool = MISSING,
-    ) -> Permissions:
-        base = super().permissions_for(obj, ignore_timeout=ignore_timeout)
-
-        # voice channels cannot be edited by people who can't connect to them
-        # It also implicitly denies all other channel permissions.
-        if not base.connect:
-            denied = Permissions.voice()
-            denied.value |= Permissions.text().value
-            denied.value |= Permissions.stage().value
-            denied.update(
-                manage_channels=True,
-                manage_roles=True,
-                manage_events=True,
-                manage_webhooks=True,
-            )
-            base.value &= ~denied.value
-        return base
-
     async def create_instance(
         self,
         *,
         topic: str,
         privacy_level: StagePrivacyLevel = MISSING,
         notify_everyone: bool = False,
+        guild_scheduled_event: Snowflake = MISSING,
         reason: Optional[str] = None,
     ) -> StageInstance:
         """|coro|
@@ -2234,14 +2215,21 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
             The stage instance's topic.
         privacy_level: :class:`StagePrivacyLevel`
             The stage instance's privacy level. Defaults to :attr:`StagePrivacyLevel.guild_only`.
-        reason: Optional[:class:`str`]
-            The reason the stage instance was created. Shows up on the audit log.
         notify_everyone: :class:`bool`
             Whether to notify ``@everyone`` that the stage instance has started.
             Requires the :attr:`~Permissions.mention_everyone` permission on the stage channel.
             Defaults to ``False``.
 
             .. versionadded:: 2.5
+
+        guild_scheduled_event: :class:`abc.Snowflake`
+            The guild scheduled event associated with the stage instance.
+            Setting this will automatically start the event.
+
+            .. versionadded:: 2.10
+
+        reason: Optional[:class:`str`]
+            The reason the stage instance was created. Shows up on the audit log.
 
         Raises
         ------
@@ -2273,6 +2261,9 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
                 )
 
             payload["privacy_level"] = privacy_level.value
+
+        if guild_scheduled_event is not MISSING:
+            payload["guild_scheduled_event_id"] = guild_scheduled_event.id
 
         data = await self._state.http.create_stage_instance(**payload, reason=reason)
         return StageInstance(guild=self.guild, state=self._state, data=data)
@@ -2463,7 +2454,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
             flags=flags,
             slowmode_delay=slowmode_delay,
             reason=reason,
-            **kwargs,
+            **kwargs,  # type: ignore
         )
         if payload is not None:
             # the payload will always be the proper channel payload
@@ -2706,7 +2697,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
     These are useful to group channels to logical compartments.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -2787,6 +2778,19 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         """
         return ChannelType.category
 
+    @utils.copy_doc(disnake.abc.GuildChannel.permissions_for)
+    def permissions_for(
+        self,
+        obj: Union[Member, Role],
+        /,
+        *,
+        ignore_timeout: bool = MISSING,
+    ) -> Permissions:
+        base = super().permissions_for(obj, ignore_timeout=ignore_timeout)
+        self._apply_implict_permissions(base)
+
+        return base
+
     def is_nsfw(self) -> bool:
         """Whether the category is marked as NSFW.
 
@@ -2815,7 +2819,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
         .. note::
             The current :attr:`CategoryChannel.flags` value won't be cloned.
-            This is a discord limitation.
+            This is a Discord limitation.
 
         Parameters
         ----------
@@ -2943,7 +2947,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             overwrites=overwrites,
             flags=flags,
             reason=reason,
-            **kwargs,
+            **kwargs,  # type: ignore
         )
         if payload is not None:
             # the payload will always be the proper channel payload
@@ -3142,7 +3146,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
     .. versionadded:: 2.5
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -3329,6 +3333,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         ignore_timeout: bool = MISSING,
     ) -> Permissions:
         base = super().permissions_for(obj, ignore_timeout=ignore_timeout)
+        self._apply_implict_permissions(base)
 
         # forum channels do not have voice related permissions
         denied = Permissions.voice()
@@ -3615,7 +3620,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             default_sort_order=default_sort_order,
             default_layout=default_layout,
             reason=reason,
-            **kwargs,
+            **kwargs,  # type: ignore
         )
         if payload is not None:
             # the payload will always be the proper channel payload
@@ -3635,6 +3640,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         available_tags: Sequence[ForumTag] = MISSING,
         default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
         default_sort_order: Optional[ThreadSortOrder] = MISSING,
+        default_layout: ThreadLayout = MISSING,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
         reason: Optional[str] = None,
     ) -> ForumChannel:
@@ -3650,11 +3656,14 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             Added new ``topic``, ``position``, ``nsfw``, ``category``, ``slowmode_delay``,
             ``default_thread_slowmode_delay``, ``default_auto_archive_duration``,
             ``available_tags``, ``default_reaction``, ``default_sort_order``
-            and ``overwrites`` keyword-only paremters.
+            and ``overwrites`` keyword-only parameters.
+
+        .. versionchanged:: 2.10
+            Added ``default_layout`` parameter.
 
         .. note::
             The current :attr:`ForumChannel.flags` value won't be cloned.
-            This is a discord limitation.
+            This is a Discord limitation.
 
         Parameters
         ----------
@@ -3680,6 +3689,8 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             The default reaction of the new channel. If not provided, defaults to this channel's default reaction.
         default_sort_order: Optional[:class:`ThreadSortOrder`]
             The default sort order of the new channel. If not provided, defaults to this channel's default sort order.
+        default_layout: :class:`ThreadLayout`
+            The default layout of threads in the new channel. If not provided, defaults to this channel's default layout.
         overwrites: :class:`Mapping`
             A :class:`Mapping` of target (either a role or a member) to :class:`PermissionOverwrite`
             to apply to the channel. If not provided, defaults to this channel's overwrites.
@@ -3711,9 +3722,6 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         else:
             default_reaction_emoji_payload = None
 
-        if default_sort_order is MISSING:
-            default_sort_order = self.default_sort_order
-
         return await self._clone_impl(
             {
                 "topic": topic if topic is not MISSING else self.topic,
@@ -3739,7 +3747,14 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
                 ),
                 "default_reaction_emoji": default_reaction_emoji_payload,
                 "default_sort_order": (
-                    try_enum_to_int(default_sort_order) if default_sort_order is not None else None
+                    try_enum_to_int(default_sort_order)
+                    if default_sort_order is not MISSING
+                    else try_enum_to_int(self.default_sort_order)
+                ),
+                "default_forum_layout": (
+                    try_enum_to_int(default_layout)
+                    if default_layout is not MISSING
+                    else try_enum_to_int(self.default_layout)
                 ),
             },
             name=name,
@@ -3776,7 +3791,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         file: File = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
-        stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
+        stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
         components: Components = ...,
@@ -3797,7 +3812,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         files: List[File] = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
-        stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
+        stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
         components: Components = ...,
@@ -3818,7 +3833,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         file: File = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
-        stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
+        stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
         components: Components = ...,
@@ -3839,7 +3854,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         files: List[File] = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
-        stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
+        stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
         components: Components = ...,
@@ -3861,7 +3876,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         files: List[File] = MISSING,
         suppress_embeds: bool = MISSING,
         flags: MessageFlags = MISSING,
-        stickers: Sequence[Union[GuildSticker, StickerItem]] = MISSING,
+        stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
         components: Components[MessageUIComponent] = MISSING,
@@ -3925,7 +3940,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         files: List[:class:`.File`]
             A list of files to upload. Must be a maximum of 10.
             This cannot be mixed with the ``file`` parameter.
-        stickers: Sequence[Union[:class:`.GuildSticker`, :class:`.StickerItem`]]
+        stickers: Sequence[Union[:class:`.GuildSticker`, :class:`.StandardSticker`, :class:`.StickerItem`]]
             A list of stickers to upload. Must be a maximum of 3.
         allowed_mentions: :class:`.AllowedMentions`
             Controls the mentions being processed in this message. If this is
@@ -3980,7 +3995,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             stickers=stickers,
         )
 
-        if auto_archive_duration is not None:
+        if auto_archive_duration not in (MISSING, None):
             auto_archive_duration = cast(
                 "ThreadArchiveDurationLiteral", try_enum_to_int(auto_archive_duration)
             )
@@ -4170,7 +4185,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 class DMChannel(disnake.abc.Messageable, Hashable):
     """Represents a Discord direct message channel.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -4333,7 +4348,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
 class GroupChannel(disnake.abc.Messageable, Hashable):
     """Represents a Discord group channel.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -4492,7 +4507,7 @@ class PartialMessageable(disnake.abc.Messageable, Hashable):
 
     .. versionadded:: 2.0
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 

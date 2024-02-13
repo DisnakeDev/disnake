@@ -24,8 +24,6 @@ os.environ.update(
         "PDM_IGNORE_SAVED_PYTHON": "1",
     },
 )
-# support the python parser in case the native parser isn't available
-os.environ.setdefault("LIBCST_PARSER_TYPE", "native")
 
 
 nox.options.error_on_external_run = True
@@ -178,17 +176,7 @@ def codemod(session: nox.Session) -> None:
         # run all of the transformers on disnake
         session.log("Running all transformers.")
 
-        res: str = session.run(*base_command, "list", silent=True)  # type: ignore
-        transformers = [line.split("-")[0].strip() for line in res.splitlines()]
-        session.log("Transformers: " + ", ".join(transformers))
-
-        for trans in transformers:
-            # remove autotyping transformers, since we run them with custom parameters later
-            if trans.startswith("autotyping."):
-                session.log("Skipping autotyping transformer.")
-                continue
-
-            session.run(*base_command_codemod, trans, "disnake")
+        session.run(*base_command_codemod, "combined.CombinedCodemod", "disnake")
     elif session.posargs:
         if len(session.posargs) < 2:
             session.posargs.append("disnake")
@@ -214,7 +202,7 @@ def pyright(session: nox.Session) -> None:
         pass
 
 
-@nox.session(python=["3.8", "3.9", "3.10", "3.11"])
+@nox.session(python=["3.8", "3.9", "3.10", "3.11", "3.12"])
 @nox.parametrize(
     "extras",
     [

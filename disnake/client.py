@@ -7,6 +7,7 @@ import logging
 import signal
 import sys
 import traceback
+import types
 import warnings
 from datetime import datetime, timedelta
 from errno import ECONNRESET
@@ -19,10 +20,12 @@ from typing import (
     Generator,
     List,
     Literal,
+    Mapping,
     NamedTuple,
     Optional,
     Sequence,
     Tuple,
+    TypedDict,
     TypeVar,
     Union,
     overload,
@@ -30,7 +33,7 @@ from typing import (
 
 import aiohttp
 
-from . import utils
+from . import abc, utils
 from .activity import ActivityTypes, BaseActivity, create_activity
 from .app_commands import (
     APIMessageCommand,
@@ -44,7 +47,8 @@ from .application_role_connection import ApplicationRoleConnectionMetadata
 from .backoff import ExponentialBackoff
 from .channel import PartialMessageable, _threaded_channel_factory
 from .emoji import Emoji
-from .enums import ApplicationCommandType, ChannelType, Status
+from .entitlement import Entitlement
+from .enums import ApplicationCommandType, ChannelType, Event, Status
 from .errors import (
     ConnectionClosed,
     GatewayNotFound,
@@ -60,9 +64,10 @@ from .guild_preview import GuildPreview
 from .http import HTTPClient
 from .i18n import LocalizationProtocol, LocalizationStore
 from .invite import Invite
-from .iterators import GuildIterator
+from .iterators import EntitlementIterator, GuildIterator
 from .mentions import AllowedMentions
 from .object import Object
+from .sku import SKU
 from .stage_instance import StageInstance
 from .state import ConnectionState
 from .sticker import GuildSticker, StandardSticker, StickerPack, _sticker_factory
@@ -70,18 +75,19 @@ from .template import Template
 from .threads import Thread
 from .ui.view import View
 from .user import ClientUser, User
-from .utils import MISSING
+from .utils import MISSING, deprecated
 from .voice_client import VoiceClient
 from .voice_region import VoiceRegion
 from .webhook import Webhook
 from .widget import Widget
 
 if TYPE_CHECKING:
+    from typing_extensions import NotRequired
+
     from .abc import GuildChannel, PrivateChannel, Snowflake, SnowflakeTime
-    from .app_commands import APIApplicationCommand
+    from .app_commands import APIApplicationCommand, MessageCommand, SlashCommand, UserCommand
     from .asset import AssetBytes
     from .channel import DMChannel
-    from .enums import Event
     from .member import Member
     from .message import Message
     from .types.application_role_connection import (
@@ -96,6 +102,11 @@ __all__ = (
     "SessionStartLimit",
     "GatewayParams",
 )
+
+T = TypeVar("T")
+
+Coro = Coroutine[Any, Any, T]
+CoroFunc = Callable[..., Coro[Any]]
 
 CoroT = TypeVar("CoroT", bound=Callable[..., Coroutine[Any, Any, Any]])
 
@@ -199,6 +210,17 @@ class GatewayParams(NamedTuple):
 
     encoding: Literal["json"] = "json"
     zlib: bool = True
+
+
+# used for typing the ws parameter dict in the connect() loop
+class _WebSocketParams(TypedDict):
+    initial: bool
+    shard_id: Optional[int]
+    gateway: Optional[str]
+
+    sequence: NotRequired[Optional[int]]
+    resume: NotRequired[bool]
+    session: NotRequired[Optional[str]]
 
 
 class Client:
@@ -454,6 +476,8 @@ class Client:
         if self.gateway_params.encoding != "json":
             raise ValueError("Gateway encodings other than `json` are currently not supported.")
 
+        self.extra_events: Dict[str, List[CoroFunc]] = {}
+
     # internals
 
     def _get_websocket(
@@ -654,8 +678,10 @@ class Client:
     async def get_or_fetch_user(self, user_id: int, *, strict: bool = False) -> Optional[User]:
         """|coro|
 
-        Tries to get the user from the cache. If fails, it tries to
-        fetch the user from the API.
+        Tries to get the user from the cache. If it fails,
+        fetches the user from the API.
+
+        This only propagates exceptions when the ``strict`` parameter is enabled.
 
         Parameters
         ----------
@@ -759,6 +785,159 @@ class Client:
             pass
         else:
             self._schedule_event(coro, method, *args, **kwargs)
+
+        for event_ in self.extra_events.get(method, []):
+            self._schedule_event(event_, method, *args, **kwargs)
+
+    def add_listener(self, func: CoroFunc, name: Union[str, Event] = MISSING) -> None:
+        """The non decorator alternative to :meth:`.listen`.
+
+        .. versionchanged:: 2.10
+            The definition of this method was moved from :class:`.ext.commands.Bot`
+            to the :class:`.Client` class.
+
+        Parameters
+        ----------
+        func: :ref:`coroutine <coroutine>`
+            The function to call.
+        name: Union[:class:`str`, :class:`.Event`]
+            The name of the event to listen for. Defaults to ``func.__name__``.
+
+        Example
+        --------
+
+        .. code-block:: python
+
+            async def on_ready(): pass
+            async def my_message(message): pass
+            async def another_message(message): pass
+
+            client.add_listener(on_ready)
+            client.add_listener(my_message, 'on_message')
+            client.add_listener(another_message, Event.message)
+
+        Raises
+        ------
+        TypeError
+            The function is not a coroutine or a string or an :class:`.Event` was not passed
+            as the name.
+        """
+        if name is not MISSING and not isinstance(name, (str, Event)):
+            raise TypeError(
+                f"add_listener expected str or Enum but received {name.__class__.__name__!r} instead."
+            )
+
+        name_ = (
+            func.__name__
+            if name is MISSING
+            else (name if isinstance(name, str) else f"on_{name.value}")
+        )
+
+        if not asyncio.iscoroutinefunction(func):
+            raise TypeError("Listeners must be coroutines")
+
+        if name_ in self.extra_events:
+            self.extra_events[name_].append(func)
+        else:
+            self.extra_events[name_] = [func]
+
+    def remove_listener(self, func: CoroFunc, name: Union[str, Event] = MISSING) -> None:
+        """Removes a listener from the pool of listeners.
+
+        .. versionchanged:: 2.10
+            The definition of this method was moved from :class:`.ext.commands.Bot`
+            to the :class:`.Client` class.
+
+        Parameters
+        ----------
+        func
+            The function that was used as a listener to remove.
+        name: Union[:class:`str`, :class:`.Event`]
+            The name of the event we want to remove. Defaults to
+            ``func.__name__``.
+
+        Raises
+        ------
+        TypeError
+            The name passed was not a string or an :class:`.Event`.
+        """
+        if name is not MISSING and not isinstance(name, (str, Event)):
+            raise TypeError(
+                f"remove_listener expected str or Enum but received {name.__class__.__name__!r} instead."
+            )
+        name = (
+            func.__name__
+            if name is MISSING
+            else (name if isinstance(name, str) else f"on_{name.value}")
+        )
+
+        if name in self.extra_events:
+            try:
+                self.extra_events[name].remove(func)
+            except ValueError:
+                pass
+
+    def listen(self, name: Union[str, Event] = MISSING) -> Callable[[CoroT], CoroT]:
+        """A decorator that registers another function as an external
+        event listener. Basically this allows you to listen to multiple
+        events from different places e.g. such as :func:`.on_ready`
+
+        The functions being listened to must be a :ref:`coroutine <coroutine>`.
+
+        .. versionchanged:: 2.10
+            The definition of this method was moved from :class:`.ext.commands.Bot`
+            to the :class:`.Client` class.
+
+        Example
+        -------
+        .. code-block:: python3
+
+            @client.listen()
+            async def on_message(message):
+                print('one')
+
+            # in some other file...
+
+            @client.listen('on_message')
+            async def my_message(message):
+                print('two')
+
+            # in yet another file
+            @client.listen(Event.message)
+            async def another_message(message):
+                print('three')
+
+        Would print one, two and three in an unspecified order.
+
+        Raises
+        ------
+        TypeError
+            The function being listened to is not a coroutine or a string or an :class:`.Event` was not passed
+            as the name.
+        """
+        if name is not MISSING and not isinstance(name, (str, Event)):
+            raise TypeError(
+                f"listen expected str or Enum but received {name.__class__.__name__!r} instead."
+            )
+
+        def decorator(func: CoroT) -> CoroT:
+            self.add_listener(func, name)
+            return func
+
+        return decorator
+
+    def get_listeners(self) -> Mapping[str, List[CoroFunc]]:
+        """Mapping[:class:`str`, List[Callable]]: A read-only mapping of event names to listeners.
+
+        .. note::
+            To add or remove a listener you should use :meth:`.add_listener` and
+            :meth:`.remove_listener`.
+
+        .. versionchanged:: 2.10
+            The definition of this method was moved from :class:`.ext.commands.Bot`
+            to the :class:`.Client` class.
+        """
+        return types.MappingProxyType(self.extra_events)
 
     async def on_error(self, event_method: str, *args: Any, **kwargs: Any) -> None:
         """|coro|
@@ -917,7 +1096,7 @@ class Client:
         if not ignore_session_start_limit and self.session_start_limit.remaining == 0:
             raise SessionStartLimitReached(self.session_start_limit)
 
-        ws_params = {
+        ws_params: _WebSocketParams = {
             "initial": True,
             "shard_id": self.shard_id,
             "gateway": initial_gateway,
@@ -941,6 +1120,7 @@ class Client:
 
                 while True:
                     await self.ws.poll_event()
+
             except ReconnectWebSocket as e:
                 _log.info("Got a request to %s the websocket.", e.op)
                 self.dispatch("disconnect")
@@ -953,6 +1133,7 @@ class Client:
                     gateway=self.ws.resume_gateway if e.resume else initial_gateway,
                 )
                 continue
+
             except (
                 OSError,
                 HTTPException,
@@ -1033,7 +1214,8 @@ class Client:
                 # if an error happens during disconnects, disregard it.
                 pass
 
-        if self.ws is not None and self.ws.open:
+        # can be None if not connected
+        if self.ws is not None and self.ws.open:  # pyright: ignore[reportUnnecessaryComparison]
             await self.ws.close(code=1000)
 
         await self.http.close()
@@ -1315,7 +1497,7 @@ class Client:
         .. note::
 
             To retrieve standard stickers, use :meth:`.fetch_sticker`.
-            or :meth:`.fetch_premium_sticker_packs`.
+            or :meth:`.fetch_sticker_packs`.
 
         Returns
         -------
@@ -1673,6 +1855,9 @@ class Client:
 
         Changes the client's presence.
 
+        .. versionchanged:: 2.0
+            Removed the ``afk`` keyword-only parameter.
+
         .. versionchanged:: 2.6
             Raises :exc:`TypeError` instead of ``InvalidArgument``.
 
@@ -1683,9 +1868,6 @@ class Client:
 
             game = disnake.Game("with the API")
             await client.change_presence(status=disnake.Status.idle, activity=game)
-
-        .. versionchanged:: 2.0
-            Removed the ``afk`` keyword-only parameter.
 
         Parameters
         ----------
@@ -1711,16 +1893,15 @@ class Client:
 
         await self.ws.change_presence(activity=activity, status=status_str)
 
+        activities = () if activity is None else (activity,)
         for guild in self._connection.guilds:
             me = guild.me
-            if me is None:
+            if me is None:  # pyright: ignore[reportUnnecessaryComparison]
+                # may happen if guild is unavailable
                 continue
 
-            if activity is not None:
-                me.activities = (activity,)  # type: ignore
-            else:
-                me.activities = ()
-
+            # Member.activities is typehinted as Tuple[ActivityType, ...], we may be setting it as Tuple[BaseActivity, ...]
+            me.activities = activities  # type: ignore
             me.status = status
 
     # Guild stuff
@@ -1731,6 +1912,7 @@ class Client:
         limit: Optional[int] = 100,
         before: Optional[SnowflakeTime] = None,
         after: Optional[SnowflakeTime] = None,
+        with_counts: bool = True,
     ) -> GuildIterator:
         """Retrieves an :class:`.AsyncIterator` that enables receiving your guilds.
 
@@ -1772,6 +1954,11 @@ class Client:
             Retrieve guilds after this date or object.
             If a datetime is provided, it is recommended to use a UTC aware datetime.
             If the datetime is naive, it is assumed to be local time.
+        with_counts: :class:`bool`
+            Whether to include approximate member and presence counts for the guilds.
+            Defaults to ``True``.
+
+            .. versionadded:: 2.10
 
         Raises
         ------
@@ -1783,7 +1970,7 @@ class Client:
         :class:`.Guild`
             The guild with the guild data parsed.
         """
-        return GuildIterator(self, limit=limit, before=before, after=after)
+        return GuildIterator(self, limit=limit, before=before, after=after, with_counts=with_counts)
 
     async def fetch_template(self, code: Union[Template, str]) -> Template:
         """|coro|
@@ -1811,7 +1998,7 @@ class Client:
         data = await self.http.get_template(code)
         return Template(data=data, state=self._connection)
 
-    async def fetch_guild(self, guild_id: int, /) -> Guild:
+    async def fetch_guild(self, guild_id: int, /, *, with_counts: bool = True) -> Guild:
         """|coro|
 
         Retrieves a :class:`.Guild` from the given ID.
@@ -1829,6 +2016,11 @@ class Client:
         ----------
         guild_id: :class:`int`
             The ID of the guild to retrieve.
+        with_counts: :class:`bool`
+            Whether to include approximate member and presence counts for the guild.
+            Defaults to ``True``.
+
+            .. versionadded:: 2.10
 
         Raises
         ------
@@ -1842,7 +2034,7 @@ class Client:
         :class:`.Guild`
             The guild from the given ID.
         """
-        data = await self.http.get_guild(guild_id)
+        data = await self.http.get_guild(guild_id, with_counts=with_counts)
         return Guild(data=data, state=self._connection)
 
     async def fetch_guild_preview(
@@ -1893,6 +2085,11 @@ class Client:
         See :func:`guild_builder` for a more comprehensive alternative.
 
         Bot accounts in 10 or more guilds are not allowed to create guilds.
+
+        .. note::
+
+            Using this, you will **not** receive :attr:`.Guild.channels`, :attr:`.Guild.members`,
+            :attr:`.Member.activity` and :attr:`.Member.voice` per :class:`.Member`.
 
         .. versionchanged:: 2.5
             Removed the ``region`` parameter.
@@ -1950,6 +2147,11 @@ class Client:
         See :class:`.GuildBuilder` for details and examples.
 
         Bot accounts in 10 or more guilds are not allowed to create guilds.
+
+        .. note::
+
+            Using this, you will **not** receive :attr:`.Guild.channels`, :attr:`.Guild.members`,
+            :attr:`.Member.activity` and :attr:`.Member.voice` per :class:`.Member`.
 
         .. versionadded:: 2.8
 
@@ -2310,12 +2512,15 @@ class Client:
         cls, _ = _sticker_factory(data["type"])  # type: ignore
         return cls(state=self._connection, data=data)  # type: ignore
 
-    async def fetch_premium_sticker_packs(self) -> List[StickerPack]:
+    async def fetch_sticker_packs(self) -> List[StickerPack]:
         """|coro|
 
-        Retrieves all available premium sticker packs.
+        Retrieves all available sticker packs.
 
         .. versionadded:: 2.0
+
+        .. versionchanged:: 2.10
+            Renamed from ``fetch_premium_sticker_packs``.
 
         Raises
         ------
@@ -2325,10 +2530,18 @@ class Client:
         Returns
         -------
         List[:class:`.StickerPack`]
-            All available premium sticker packs.
+            All available sticker packs.
         """
-        data = await self.http.list_premium_sticker_packs()
+        data = await self.http.list_sticker_packs()
         return [StickerPack(state=self._connection, data=pack) for pack in data["sticker_packs"]]
+
+    @deprecated("fetch_sticker_packs")
+    async def fetch_premium_sticker_packs(self) -> List[StickerPack]:
+        """An alias of :meth:`fetch_sticker_packs`.
+
+        .. deprecated:: 2.10
+        """
+        return await self.fetch_sticker_packs()
 
     async def create_dm(self, user: Snowflake) -> DMChannel:
         """|coro|
@@ -2447,6 +2660,24 @@ class Client:
         """
         return await self._connection.fetch_global_command(command_id)
 
+    @overload
+    async def create_global_command(self, application_command: SlashCommand) -> APISlashCommand:
+        ...
+
+    @overload
+    async def create_global_command(self, application_command: UserCommand) -> APIUserCommand:
+        ...
+
+    @overload
+    async def create_global_command(self, application_command: MessageCommand) -> APIMessageCommand:
+        ...
+
+    @overload
+    async def create_global_command(
+        self, application_command: ApplicationCommand
+    ) -> APIApplicationCommand:
+        ...
+
     async def create_global_command(
         self, application_command: ApplicationCommand
     ) -> APIApplicationCommand:
@@ -2468,6 +2699,30 @@ class Client:
         """
         application_command.localize(self.i18n)
         return await self._connection.create_global_command(application_command)
+
+    @overload
+    async def edit_global_command(
+        self, command_id: int, new_command: SlashCommand
+    ) -> APISlashCommand:
+        ...
+
+    @overload
+    async def edit_global_command(
+        self, command_id: int, new_command: UserCommand
+    ) -> APIUserCommand:
+        ...
+
+    @overload
+    async def edit_global_command(
+        self, command_id: int, new_command: MessageCommand
+    ) -> APIMessageCommand:
+        ...
+
+    @overload
+    async def edit_global_command(
+        self, command_id: int, new_command: ApplicationCommand
+    ) -> APIApplicationCommand:
+        ...
 
     async def edit_global_command(
         self, command_id: int, new_command: ApplicationCommand
@@ -2583,6 +2838,30 @@ class Client:
         """
         return await self._connection.fetch_guild_command(guild_id, command_id)
 
+    @overload
+    async def create_guild_command(
+        self, guild_id: int, application_command: SlashCommand
+    ) -> APISlashCommand:
+        ...
+
+    @overload
+    async def create_guild_command(
+        self, guild_id: int, application_command: UserCommand
+    ) -> APIUserCommand:
+        ...
+
+    @overload
+    async def create_guild_command(
+        self, guild_id: int, application_command: MessageCommand
+    ) -> APIMessageCommand:
+        ...
+
+    @overload
+    async def create_guild_command(
+        self, guild_id: int, application_command: ApplicationCommand
+    ) -> APIApplicationCommand:
+        ...
+
     async def create_guild_command(
         self, guild_id: int, application_command: ApplicationCommand
     ) -> APIApplicationCommand:
@@ -2606,6 +2885,30 @@ class Client:
         """
         application_command.localize(self.i18n)
         return await self._connection.create_guild_command(guild_id, application_command)
+
+    @overload
+    async def edit_guild_command(
+        self, guild_id: int, command_id: int, new_command: SlashCommand
+    ) -> APISlashCommand:
+        ...
+
+    @overload
+    async def edit_guild_command(
+        self, guild_id: int, command_id: int, new_command: UserCommand
+    ) -> APIUserCommand:
+        ...
+
+    @overload
+    async def edit_guild_command(
+        self, guild_id: int, command_id: int, new_command: MessageCommand
+    ) -> APIMessageCommand:
+        ...
+
+    @overload
+    async def edit_guild_command(
+        self, guild_id: int, command_id: int, new_command: ApplicationCommand
+    ) -> APIApplicationCommand:
+        ...
 
     async def edit_guild_command(
         self, guild_id: int, command_id: int, new_command: ApplicationCommand
@@ -2778,3 +3081,133 @@ class Client:
             self.application_id, payload
         )
         return [ApplicationRoleConnectionMetadata._from_data(record) for record in data]
+
+    async def skus(self) -> List[SKU]:
+        """|coro|
+
+        Retrieves the :class:`.SKU`\\s for the application.
+
+        To manage application subscription entitlements, you should use the SKU
+        with :attr:`.SKUType.subscription`.
+
+        .. versionadded:: 2.10
+
+        Raises
+        ------
+        HTTPException
+            Retrieving the SKUs failed.
+
+        Returns
+        -------
+        List[:class:`.SKU`]
+            The list of SKUs.
+        """
+        data = await self.http.get_skus(self.application_id)
+        return [SKU(data=d) for d in data]
+
+    def entitlements(
+        self,
+        *,
+        limit: Optional[int] = 100,
+        before: Optional[SnowflakeTime] = None,
+        after: Optional[SnowflakeTime] = None,
+        user: Optional[Snowflake] = None,
+        guild: Optional[Snowflake] = None,
+        skus: Optional[Sequence[Snowflake]] = None,
+        exclude_ended: bool = False,
+        oldest_first: bool = False,
+    ) -> EntitlementIterator:
+        """Retrieves an :class:`.AsyncIterator` that enables receiving entitlements for the application.
+
+        .. note::
+
+            This method is an API call. To get the entitlements of the invoking user/guild
+            in interactions, consider using :attr:`.Interaction.entitlements`.
+
+        Entries are returned in order from newest to oldest by default;
+        pass ``oldest_first=True`` to reverse the iteration order.
+
+        All parameters are optional.
+
+        .. versionadded:: 2.10
+
+        Parameters
+        ----------
+        limit: Optional[:class:`int`]
+            The number of entitlements to retrieve.
+            If ``None``, retrieves every entitlement.
+            Note, however, that this would make it a slow operation.
+            Defaults to ``100``.
+        before: Union[:class:`.abc.Snowflake`, :class:`datetime.datetime`]
+            Retrieves entitlements created before this date or object.
+            If a datetime is provided, it is recommended to use a UTC aware datetime.
+            If the datetime is naive, it is assumed to be local time.
+        after: Union[:class:`.abc.Snowflake`, :class:`datetime.datetime`]
+            Retrieve entitlements created after this date or object.
+            If a datetime is provided, it is recommended to use a UTC aware datetime.
+            If the datetime is naive, it is assumed to be local time.
+        user: Optional[:class:`.abc.Snowflake`]
+            The user to retrieve entitlements for.
+        guild: Optional[:class:`.abc.Snowflake`]
+            The guild to retrieve entitlements for.
+        skus: Optional[Sequence[:class:`.abc.Snowflake`]]
+            The SKUs for which entitlements are retrieved.
+        exclude_ended: :class:`bool`
+            Whether to exclude ended/expired entitlements. Defaults to ``False``.
+        oldest_first: :class:`bool`
+            If set to ``True``, return entries in oldest->newest order. Defaults to ``False``.
+
+        Raises
+        ------
+        HTTPException
+            Retrieving the entitlements failed.
+
+        Yields
+        ------
+        :class:`.Entitlement`
+            The entitlements for the given parameters.
+        """
+        return EntitlementIterator(
+            self.application_id,
+            state=self._connection,
+            limit=limit,
+            before=before,
+            after=after,
+            user_id=user.id if user is not None else None,
+            guild_id=guild.id if guild is not None else None,
+            sku_ids=[sku.id for sku in skus] if skus else None,
+            exclude_ended=exclude_ended,
+            oldest_first=oldest_first,
+        )
+
+    async def create_entitlement(
+        self, sku: Snowflake, owner: Union[abc.User, Guild]
+    ) -> Entitlement:
+        """|coro|
+
+        Creates a new test :class:`.Entitlement` for the given user or guild, with no expiry.
+
+        Parameters
+        ----------
+        sku: :class:`.abc.Snowflake`
+            The :class:`.SKU` to grant the entitlement for.
+        owner: Union[:class:`.abc.User`, :class:`.Guild`]
+            The user or guild to grant the entitlement to.
+
+        Raises
+        ------
+        HTTPException
+            Creating the entitlement failed.
+
+        Returns
+        -------
+        :class:`.Entitlement`
+            The newly created entitlement.
+        """
+        data = await self.http.create_test_entitlement(
+            self.application_id,
+            sku_id=sku.id,
+            owner_id=owner.id,
+            owner_type=2 if isinstance(owner, abc.User) else 1,
+        )
+        return Entitlement(data=data, state=self._connection)
