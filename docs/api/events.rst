@@ -865,6 +865,21 @@ Members
     :param after: The updated member's updated info.
     :type after: :class:`Member`
 
+.. function:: on_raw_presence_update(payload)
+
+    Called when a member updates their presence.
+    Unlike :func:`on_presence_update`, this is called regardless of the member cache.
+
+    Since the data payload can be partial and the Discord API does not validate the types of the fields,
+    care must be taken when accessing stuff in the dictionary.
+
+    This requires :attr:`Intents.presences` to be enabled.
+
+    .. versionadded:: 2.10
+
+    :param payload: The raw event payload data.
+    :type payload: :class:`RawPresenceUpdateEvent`
+
 .. function:: on_user_update(before, after)
 
     Called when a :class:`User` is updated.

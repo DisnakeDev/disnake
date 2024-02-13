@@ -70,6 +70,7 @@ from .raw_models import (
     RawIntegrationDeleteEvent,
     RawMessageDeleteEvent,
     RawMessageUpdateEvent,
+    RawPresenceUpdateEvent,
     RawReactionActionEvent,
     RawReactionClearEmojiEvent,
     RawReactionClearEvent,
@@ -974,13 +975,13 @@ class ConnectionState:
             _log.debug("PRESENCE_UPDATE referencing an unknown guild ID: %s. Discarding.", guild_id)
             return
 
+        raw = RawPresenceUpdateEvent(data)
+        self.dispatch("raw_presence_update", raw)
+
         user = data["user"]
         member_id = int(user["id"])
         member = guild.get_member(member_id)
         if member is None:
-            _log.debug(
-                "PRESENCE_UPDATE referencing an unknown member ID: %s. Discarding", member_id
-            )
             return
 
         old_member = Member._copy(member)
