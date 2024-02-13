@@ -54,8 +54,8 @@ class MessageInteraction(Interaction[ClientT]):
         are not resolved as there is no data to complete them.
         These are :class:`PartialMessageable` instead.
 
-        .. versionchanged:: 2.9
-            If the interaction was sent from a thread and bot cannot normally access the thread,
+        .. versionchanged:: 2.10
+            If the interaction was sent from a thread and the bot cannot normally access the thread,
             this is now a proper :class:`Thread` object.
 
         .. note::
