@@ -365,13 +365,6 @@ class ClientUser(BaseUser):
 
         Edits the current profile of the client.
 
-        .. note::
-
-            To upload an avatar, a resource (see below) or a :term:`py:bytes-like object`
-            must be passed in that represents the image being uploaded.
-
-            The only image formats supported for uploading are JPG and PNG.
-
         .. versionchanged:: 2.0
             The edit is no longer in-place, instead the newly edited client user is returned.
 
@@ -385,6 +378,8 @@ class ClientUser(BaseUser):
         avatar: Optional[|resource_type|]
             A :term:`py:bytes-like object` or asset representing the image to upload.
             Could be ``None`` to denote no avatar.
+
+            Only JPG, PNG, WEBP (static), and GIF (static/animated) images are supported.
 
             .. versionchanged:: 2.5
                 Now accepts various resource types in addition to :class:`bytes`.
