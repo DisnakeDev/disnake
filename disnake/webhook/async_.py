@@ -56,7 +56,7 @@ if TYPE_CHECKING:
 
     from ..abc import Snowflake
     from ..asset import AssetBytes
-    from ..channel import ForumChannel, StageChannel, TextChannel, VoiceChannel
+    from ..channel import ForumChannel, MediaChannel, StageChannel, TextChannel, VoiceChannel
     from ..embeds import Embed
     from ..file import File
     from ..guild import Guild
@@ -511,7 +511,7 @@ def handle_message_parameters_dict(
     allowed_mentions: Optional[AllowedMentions] = MISSING,
     previous_allowed_mentions: Optional[AllowedMentions] = None,
     stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = MISSING,
-    # these parameters are exclusive to webhooks in forum channels
+    # these parameters are exclusive to webhooks in forum/media channels
     thread_name: str = MISSING,
     applied_tags: Sequence[Snowflake] = MISSING,
 ) -> DictPayloadParameters:
@@ -602,7 +602,7 @@ def handle_message_parameters(
     allowed_mentions: Optional[AllowedMentions] = MISSING,
     previous_allowed_mentions: Optional[AllowedMentions] = None,
     stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = MISSING,
-    # these parameters are exclusive to webhooks in forum channels
+    # these parameters are exclusive to webhooks in forum/media channels
     thread_name: str = MISSING,
     applied_tags: Sequence[Snowflake] = MISSING,
 ) -> PayloadParameters:
@@ -1008,13 +1008,15 @@ class BaseWebhook(Hashable):
         return self._state and self._state._get_guild(self.guild_id)
 
     @property
-    def channel(self) -> Optional[Union[TextChannel, VoiceChannel, ForumChannel, StageChannel]]:
-        """Optional[Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`ForumChannel`, :class:`StageChannel`]]: The channel this webhook belongs to.
+    def channel(
+        self,
+    ) -> Optional[Union[TextChannel, VoiceChannel, StageChannel, ForumChannel, MediaChannel]]:
+        """Optional[Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`StageChannel`, :class:`ForumChannel`, :class:`MediaChannel`]]: The channel this webhook belongs to.
 
         If this is a partial webhook, then this will always return ``None``.
 
-        Webhooks in :class:`ForumChannel`\\s can not send messages directly,
-        they can only create new threads (see ``thread_name`` for :attr:`Webhook.send`)
+        Webhooks in a :class:`ForumChannel` or :class:`MediaChannel` can not send messages directly.
+        They can only create new threads (see ``thread_name`` for :attr:`Webhook.send`)
         and interact with existing threads.
         """
         guild = self.guild
@@ -1046,7 +1048,7 @@ class Webhook(BaseWebhook):
 
     There are two main ways to use Webhooks. The first is through the ones
     received by the library such as :meth:`.Guild.webhooks`, :meth:`.TextChannel.webhooks`,
-    :meth:`.ForumChannel.webhooks`, :meth:`.VoiceChannel.webhooks`,
+    :meth:`.VoiceChannel.webhooks`, :meth:`.ForumChannel.webhooks`, :meth:`MediaChannel.webhooks`
     and :meth:`.StageChannel.webhooks`. The ones received by the library will
     automatically be bound using the library's internal HTTP session.
 
@@ -1564,7 +1566,7 @@ class Webhook(BaseWebhook):
         ``embeds`` parameter, which must be a :class:`list` of :class:`Embed` objects to send.
 
         To send a message in a thread, provide the ``thread`` parameter.
-        If this webhook is in a :class:`ForumChannel`, the ``thread_name`` parameter can
+        If this webhook is in a :class:`ForumChannel`/:class:`MediaChannel`, the ``thread_name`` parameter can
         be used to create a new thread instead (optionally with ``applied_tags``).
 
         .. versionchanged:: 2.6
@@ -1630,7 +1632,7 @@ class Webhook(BaseWebhook):
             .. versionadded:: 2.0
 
         thread_name: :class:`str`
-            If in a forum channel, and ``thread`` is not specified,
+            If in a forum/media channel, and ``thread`` is not specified,
             the name of the newly created thread.
 
             .. note::
@@ -1639,7 +1641,7 @@ class Webhook(BaseWebhook):
 
             .. versionadded:: 2.6
         applied_tags: Sequence[:class:`abc.Snowflake`]
-            If in a forum channel and creating a new thread (see ``thread_name`` above),
+            If in a forum/media channel and creating a new thread (see ``thread_name`` above),
             the tags to apply to the new thread. Maximum of 5.
 
             .. versionadded:: 2.10

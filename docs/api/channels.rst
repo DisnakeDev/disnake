@@ -92,6 +92,19 @@ ForumChannel
     .. automethod:: typing
         :async-with:
 
+MediaChannel
+~~~~~~~~~~~~
+
+.. attributetable:: MediaChannel
+
+.. autoclass:: MediaChannel()
+    :members:
+    :inherited-members:
+    :exclude-members: typing
+
+    .. automethod:: typing
+        :async-with:
+
 DMChannel
 ~~~~~~~~~
 
@@ -234,6 +247,12 @@ ChannelType
 
         .. versionadded:: 2.5
 
+    .. attribute:: media
+
+        A channel of only threads but with a focus on media, similar to forum channels.
+
+        .. versionadded:: 2.10
+
 ThreadArchiveDuration
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -281,7 +300,7 @@ ThreadSortOrder
 
 .. class:: ThreadSortOrder
 
-    Represents the sort order of threads in :class:`ForumChannel`\s.
+    Represents the sort order of threads in a :class:`ForumChannel` or :class:`MediaChannel`.
 
     .. versionadded:: 2.6
 

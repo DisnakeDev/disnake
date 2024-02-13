@@ -1412,18 +1412,12 @@ This section documents events related to Discord chat messages.
 
     Called when someone begins typing a message.
 
-    The ``channel`` parameter can be a :class:`abc.Messageable` instance, or a :class:`ForumChannel`.
+    The ``channel`` parameter can be a :class:`abc.Messageable` instance, or a :class:`ForumChannel` or :class:`MediaChannel`.
     If channel is an :class:`abc.Messageable` instance, it could be a :class:`TextChannel`,
     :class:`VoiceChannel`, :class:`StageChannel`, :class:`GroupChannel`, or :class:`DMChannel`.
 
-    .. versionchanged:: 2.5
-        ``channel`` may be a type :class:`ForumChannel`
-
-    .. versionchanged:: 2.9
-        ``channel`` may be a type :class:`StageChannel`
-
-    If the ``channel`` is a :class:`TextChannel`, :class:`ForumChannel`, :class:`VoiceChannel`, or :class:`StageChannel` then the
-    ``user`` parameter is a :class:`Member`, otherwise it is a :class:`User`.
+    If the ``channel`` is not a :class:`DMChannel`,
+    then the ``user`` parameter is a :class:`Member`, otherwise it is a :class:`User`.
 
     If the ``channel`` is a :class:`DMChannel` and the user is not found in the internal user/member cache,
     then this event will not be called. Consider using :func:`on_raw_typing` instead.
@@ -1441,7 +1435,7 @@ This section documents events related to Discord chat messages.
         to enable the members intent.
 
     :param channel: The location where the typing originated from.
-    :type channel: Union[:class:`abc.Messageable`, :class:`ForumChannel`]
+    :type channel: Union[:class:`abc.Messageable`, :class:`ForumChannel`, :class:`MediaChannel`]
     :param user: The user that started typing.
     :type user: Union[:class:`User`, :class:`Member`]
     :param when: When the typing started as an aware datetime in UTC.

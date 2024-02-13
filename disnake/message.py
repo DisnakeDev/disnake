@@ -1385,7 +1385,7 @@ class Message(Hashable):
             if (
                 self.channel.type is ChannelType.public_thread
                 and (parent := getattr(self.channel, "parent", None))
-                and parent.type is ChannelType.forum
+                and parent.type in (ChannelType.forum, ChannelType.media)
             ):
                 return f"{self.author.name} changed the post title: **{self.content}**"
             return f"{self.author.name} changed the channel name: **{self.content}**"
