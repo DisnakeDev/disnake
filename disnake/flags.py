@@ -2057,14 +2057,20 @@ class ChannelFlags(BaseFlags):
     if TYPE_CHECKING:
 
         @_generated
-        def __init__(self, *, pinned: bool = ..., require_tag: bool = ...) -> None:
+        def __init__(
+            self,
+            *,
+            hide_media_download_options: bool = ...,
+            pinned: bool = ...,
+            require_tag: bool = ...,
+        ) -> None:
             ...
 
     @flag_value
     def pinned(self):
         """:class:`bool`: Returns ``True`` if the thread is pinned.
 
-        This only applies to channels of type :class:`Thread`.
+        This only applies to threads that are part of a :class:`ForumChannel` or :class:`MediaChannel`.
         """
         return 1 << 1
 
@@ -2072,11 +2078,21 @@ class ChannelFlags(BaseFlags):
     def require_tag(self):
         """:class:`bool`: Returns ``True`` if the channel requires all newly created threads to have a tag.
 
-        This only applies to channels of type :class:`ForumChannel`.
+        This only applies to channels of types :class:`ForumChannel` or :class:`MediaChannel`.
 
         .. versionadded:: 2.6
         """
         return 1 << 4
+
+    @flag_value
+    def hide_media_download_options(self):
+        """:class:`bool`: Returns ``True`` if the channel hides the embedded media download options.
+
+        This only applies to channels of type :class:`MediaChannel`.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 15
 
 
 class AutoModKeywordPresets(ListBaseFlags):
