@@ -1956,6 +1956,7 @@ class InteractionDataResolved(Dict[str, Any]):
             else:
                 channel = cast(
                     "Optional[MessageableChannel]",
+                    # TODO: don't use state.get_channel
                     (guild and guild.get_channel(channel_id) or state.get_channel(channel_id)),
                 )
 
