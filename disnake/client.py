@@ -109,6 +109,7 @@ if TYPE_CHECKING:
         RawIntegrationDeleteEvent,
         RawMessageDeleteEvent,
         RawMessageUpdateEvent,
+        RawPresenceUpdateEvent,
         RawReactionActionEvent,
         RawReactionClearEmojiEvent,
         RawReactionClearEvent,
@@ -2719,6 +2720,17 @@ class Client:
     @_generated
     def wait_for(
         self,
+        event: Literal[Event.raw_presence_update, "raw_presence_update"],
+        *,
+        check: Optional[Callable[[RawPresenceUpdateEvent], bool]] = None,
+        timeout: Optional[float] = None,
+    ) -> Coroutine[Any, Any, RawPresenceUpdateEvent]:
+        ...
+
+    @overload
+    @_generated
+    def wait_for(
+        self,
         event: Literal[Event.raw_reaction_add, "raw_reaction_add"],
         *,
         check: Optional[Callable[[RawReactionActionEvent], bool]] = None,
@@ -2783,6 +2795,39 @@ class Client:
         check: Optional[Callable[[RawTypingEvent], bool]] = None,
         timeout: Optional[float] = None,
     ) -> Coroutine[Any, Any, RawTypingEvent]:
+        ...
+
+    @overload
+    @_generated
+    def wait_for(
+        self,
+        event: Literal[Event.entitlement_create, "entitlement_create"],
+        *,
+        check: Optional[Callable[[Entitlement], bool]] = None,
+        timeout: Optional[float] = None,
+    ) -> Coroutine[Any, Any, Entitlement]:
+        ...
+
+    @overload
+    @_generated
+    def wait_for(
+        self,
+        event: Literal[Event.entitlement_update, "entitlement_update"],
+        *,
+        check: Optional[Callable[[Entitlement], bool]] = None,
+        timeout: Optional[float] = None,
+    ) -> Coroutine[Any, Any, Entitlement]:
+        ...
+
+    @overload
+    @_generated
+    def wait_for(
+        self,
+        event: Literal[Event.entitlement_delete, "entitlement_delete"],
+        *,
+        check: Optional[Callable[[Entitlement], bool]] = None,
+        timeout: Optional[float] = None,
+    ) -> Coroutine[Any, Any, Entitlement]:
         ...
 
     @overload

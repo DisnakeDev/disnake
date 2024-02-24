@@ -299,6 +299,9 @@ EVENT_DATA: Dict[Event, EventData] = {
     Event.reaction_clear_emoji: EventData(
         arg_types=["Reaction"],
     ),
+    Event.raw_presence_update: EventData(
+        arg_types=["RawPresenceUpdateEvent"],
+    ),
     Event.raw_reaction_add: EventData(
         arg_types=["RawReactionActionEvent"],
     ),
@@ -316,6 +319,15 @@ EVENT_DATA: Dict[Event, EventData] = {
     ),
     Event.raw_typing: EventData(
         arg_types=["RawTypingEvent"],
+    ),
+    Event.entitlement_create: EventData(
+        arg_types=["Entitlement"],
+    ),
+    Event.entitlement_update: EventData(
+        arg_types=["Entitlement"],
+    ),
+    Event.entitlement_delete: EventData(
+        arg_types=["Entitlement"],
     ),
     # bot-only:
     Event.command: EventData(
