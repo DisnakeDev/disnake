@@ -7,10 +7,11 @@ from typing import List, Optional, cast
 
 import libcst as cst
 import libcst.matchers as m
-from libcst import codemod
 
 from disnake import Event
 from disnake._event_data import EVENT_DATA, EventData
+
+from .base import BaseCodemodCommand
 
 
 def get_param(func: cst.FunctionDef, name: str) -> cst.Param:
@@ -19,18 +20,12 @@ def get_param(func: cst.FunctionDef, name: str) -> cst.Param:
     return cast(cst.Param, results[0])
 
 
-class EventTypings(codemod.VisitorBasedCodemodCommand):
+class EventTypings(BaseCodemodCommand):
     DESCRIPTION: str = "Adds overloads for library events."
+    CHECK_MARKER: str = "@_overload_with_events"
 
     flag_classes: List[str]
     imported_module: types.ModuleType
-
-    def transform_module(self, tree: cst.Module) -> cst.Module:
-        if "@_overload_with_events" not in tree.code:
-            raise codemod.SkipFile(
-                "this module does not contain the required decorator: `@_overload_with_events`."
-            )
-        return super().transform_module(tree)
 
     def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
         # don't recurse into the body of a function
