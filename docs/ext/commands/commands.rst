@@ -387,6 +387,7 @@ A lot of Discord models work out of the gate as a parameter:
 - :class:`StageChannel` (since v1.7)
 - :class:`CategoryChannel`
 - :class:`ForumChannel` (since v2.5)
+- :class:`MediaChannel` (since v2.10)
 - :class:`Thread` (since v2.0)
 - :class:`Colour`
 - :class:`Role`
@@ -429,6 +430,8 @@ converter is given below:
 | :class:`CategoryChannel`     | :class:`~ext.commands.CategoryChannelConverter`        |
 +------------------------------+--------------------------------------------------------+
 | :class:`ForumChannel`        | :class:`~ext.commands.ForumChannelConverter`           |
++------------------------------+--------------------------------------------------------+
+| :class:`MediaChannel`        | :class:`~ext.commands.MediaChannelConverter`           |
 +------------------------------+--------------------------------------------------------+
 | :class:`Thread`              | :class:`~ext.commands.ThreadConverter`                 |
 +------------------------------+--------------------------------------------------------+

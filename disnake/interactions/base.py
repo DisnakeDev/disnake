@@ -22,6 +22,7 @@ from typing import (
 from .. import utils
 from ..app_commands import OptionChoice
 from ..channel import PartialMessageable, _threaded_guild_channel_factory
+from ..entitlement import Entitlement
 from ..enums import (
     ChannelType,
     ComponentType,
@@ -142,6 +143,11 @@ class Interaction(Generic[ClientT]):
         The token to continue the interaction. These are valid for 15 minutes.
     client: :class:`Client`
         The interaction client.
+    entitlements: List[:class:`Entitlement`]
+        The entitlements for the invoking user and guild,
+        representing access to an application subscription.
+
+        .. versionadded:: 2.10
     """
 
     __slots__: Tuple[str, ...] = (
@@ -157,6 +163,7 @@ class Interaction(Generic[ClientT]):
         "locale",
         "guild_locale",
         "client",
+        "entitlements",
         "_app_permissions",
         "_permissions",
         "_state",
@@ -182,18 +189,20 @@ class Interaction(Generic[ClientT]):
         self.token: str = data["token"]
         self.version: int = data["version"]
         self.application_id: int = int(data["application_id"])
-        self._app_permissions: int = int(data.get("app_permissions", 0))
 
         self.channel_id: int = int(data["channel_id"])
         self.guild_id: Optional[int] = utils._get_as_snowflake(data, "guild_id")
+
         self.locale: Locale = try_enum(Locale, data["locale"])
         guild_locale = data.get("guild_locale")
         self.guild_locale: Optional[Locale] = (
             try_enum(Locale, guild_locale) if guild_locale else None
         )
+
+        self._app_permissions: int = int(data.get("app_permissions", 0))
+        self._permissions: Optional[int] = None
         # one of user and member will always exist
         self.author: Union[User, Member] = MISSING
-        self._permissions = None
 
         if self.guild_id and (member := data.get("member")):
             guild: Guild = self.guild or Object(id=self.guild_id)  # type: ignore
@@ -205,6 +214,12 @@ class Interaction(Generic[ClientT]):
             self._permissions = int(member.get("permissions", 0))
         elif user := data.get("user"):
             self.author = self._state.store_user(user)
+
+        self.entitlements: List[Entitlement] = (
+            [Entitlement(data=e, state=state) for e in entitlements_data]
+            if (entitlements_data := data.get("entitlements"))
+            else []
+        )
 
     @property
     def bot(self) -> ClientT:
@@ -326,16 +341,6 @@ class Interaction(Generic[ClientT]):
         """|coro|
 
         Fetches the original interaction response message associated with the interaction.
-
-        Here is a table with response types and their associated original response:
-
-        .. csv-table::
-            :header: "Response type", "Original response"
-
-            :meth:`InteractionResponse.send_message`, "The message you sent"
-            :meth:`InteractionResponse.edit_message`, "The message you edited"
-            :meth:`InteractionResponse.defer`, "The message with thinking state (bot is thinking...)"
-            "Other response types", "None"
 
         Repeated calls to this will return a cached value.
 
@@ -1404,6 +1409,48 @@ class InteractionResponse:
 
         if modal is not None:
             parent._state.store_modal(parent.author.id, modal)
+
+    async def require_premium(self) -> None:
+        """|coro|
+
+        Responds to this interaction with a message containing an upgrade button.
+
+        Only available for applications with monetization enabled.
+
+        .. versionadded:: 2.10
+
+        Example
+        -------
+        Require an application subscription for a command: ::
+
+            @bot.slash_command()
+            async def cool_command(inter: disnake.ApplicationCommandInteraction):
+                if not inter.entitlements:
+                    await inter.response.require_premium()
+                    return  # skip remaining code
+                ...
+
+        Raises
+        ------
+        HTTPException
+            Sending the response has failed.
+        InteractionResponded
+            This interaction has already been responded to before.
+        """
+        if self._response_type is not None:
+            raise InteractionResponded(self._parent)
+
+        parent = self._parent
+        adapter = async_context.get()
+        response_type = InteractionResponseType.premium_required
+        await adapter.create_interaction_response(
+            parent.id,
+            parent.token,
+            session=parent._session,
+            type=response_type.value,
+        )
+
+        self._response_type = response_type
 
 
 class _InteractionMessageState:
