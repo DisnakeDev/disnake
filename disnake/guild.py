@@ -3001,7 +3001,7 @@ class Guild(Hashable):
         The inactive members are denoted if they have not logged on in
         ``days`` number of days and they have no roles.
 
-        You must have :attr:`~Permissions.kick_members` permission
+        You must have :attr:`~Permissions.manage_guild` permission
         to use this.
 
         To check how many members you would prune without actually pruning,
