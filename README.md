@@ -102,8 +102,6 @@ async def ping(ctx):
 bot.run("BOT_TOKEN")
 ```
 
-[1]: https://github.com/
-
 You can find more examples in the [examples directory](https://github.com/DisnakeDev/disnake/tree/master/examples).
 
 <br>
