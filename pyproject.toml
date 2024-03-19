@@ -106,7 +106,6 @@ build = [
 [tool.pdm.scripts]
 black = { composite = ["lint black"], help = "Run black" }
 docs = { cmd = "nox -Rs docs --", help = "Build the documentation for development" }
-isort = { composite = ["lint isort"], help = "Run isort" }
 lint = { cmd = "nox -Rs lint --", help = "Check all files for linting errors" }
 pyright = { cmd = "nox -Rs pyright --", help = "Run pyright" }
 setup_env = { cmd = "pdm install -d -G speed -G docs -G voice", help = "Set up the local environment and all dependencies" }
@@ -117,7 +116,6 @@ test = { cmd = "nox -Rs test --", help = "Run pytest" }
 [tool.taskipy.tasks]
 black = { cmd = "black", help = "Run black" }
 docs = { cmd = "docs", help = "Build the documentation for development" }
-isort = { cmd = "isort", help = "Run isort" }
 lint = { cmd = "lint", help = "Check all files for linting errors" }
 pyright = { cmd = "pyright", help = "Run pyright" }
 setup_env = { cmd = "setup_env", help = "Setup the local environment and set up all dependencies" }
@@ -129,13 +127,6 @@ runner = "pdm run"
 [tool.black]
 line-length = 100
 target-version = ["py38", "py39", "py310", "py311", "py312"]
-
-[tool.isort]
-profile = "black"
-py_version = 38
-line_length = 100
-combine_as_imports = true
-filter_files = true
 
 [tool.ruff]
 line-length = 100
@@ -171,6 +162,7 @@ select = [
     # "PLR",    # pylint refactor
     "PLW",    # pylint warnings
     "TRY002", "TRY004", "TRY201", # tryceratops
+    "I",
 ]
 ignore = [
     # star imports
@@ -202,7 +194,7 @@ ignore = [
     # typevar names don't match variance (we don't always want this)
     "PLC0105",
 
-    # import aliases are fixed by isort
+    # import aliases are fixed by ruff
     "PLC0414",
 
     # outer loop variables are overwritten by inner assignment target, these are mostly intentional
@@ -252,6 +244,9 @@ ignore = [
 ]
 "examples/basic_voice.py" = ["S104"] # possible binding to all interfaces
 "examples/views/tic_tac_toe.py" = ["E741"] # ambigious variable name: `O`
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"

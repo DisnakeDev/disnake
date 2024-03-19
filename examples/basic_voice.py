@@ -11,8 +11,9 @@ import asyncio
 import os
 from typing import Any, Dict, Optional
 
-import disnake
 import youtube_dl  # type: ignore
+
+import disnake
 from disnake.ext import commands
 
 # Suppress noise about console usage from errors
