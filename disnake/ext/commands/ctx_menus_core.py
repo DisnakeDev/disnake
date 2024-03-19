@@ -284,7 +284,7 @@ def user_command(
     """
 
     def decorator(
-        func: InteractionCommandCallback[CogT, UserCommandInteraction, P]
+        func: InteractionCommandCallback[CogT, UserCommandInteraction, P],
     ) -> InvokableUserCommand:
         if not asyncio.iscoroutinefunction(func):
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
@@ -366,7 +366,7 @@ def message_command(
     """
 
     def decorator(
-        func: InteractionCommandCallback[CogT, MessageCommandInteraction, P]
+        func: InteractionCommandCallback[CogT, MessageCommandInteraction, P],
     ) -> InvokableMessageCommand:
         if not asyncio.iscoroutinefunction(func):
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")

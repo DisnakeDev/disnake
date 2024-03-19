@@ -890,13 +890,11 @@ ActivityTypes = Union[Activity, Game, CustomActivity, Streaming, Spotify]
 @overload
 def create_activity(
     data: Union[ActivityPayload, WidgetActivityPayload], *, state: Optional[ConnectionState] = None
-) -> ActivityTypes:
-    ...
+) -> ActivityTypes: ...
 
 
 @overload
-def create_activity(data: None, *, state: Optional[ConnectionState] = None) -> None:
-    ...
+def create_activity(data: None, *, state: Optional[ConnectionState] = None) -> None: ...
 
 
 def create_activity(

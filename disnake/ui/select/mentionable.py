@@ -71,8 +71,7 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
         max_values: int = 1,
         disabled: bool = False,
         row: Optional[int] = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     def __init__(
@@ -84,8 +83,7 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
         max_values: int = 1,
         disabled: bool = False,
         row: Optional[int] = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     def __init__(
         self,
@@ -132,15 +130,15 @@ def mentionable_select(
     max_values: int = 1,
     disabled: bool = False,
     row: Optional[int] = None,
-) -> Callable[[ItemCallbackType[MentionableSelect[V_co]]], DecoratedItem[MentionableSelect[V_co]]]:
-    ...
+) -> Callable[
+    [ItemCallbackType[MentionableSelect[V_co]]], DecoratedItem[MentionableSelect[V_co]]
+]: ...
 
 
 @overload
 def mentionable_select(
     cls: Type[Object[S_co, P]], *_: P.args, **kwargs: P.kwargs
-) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
-    ...
+) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]: ...
 
 
 def mentionable_select(

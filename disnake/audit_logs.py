@@ -215,7 +215,7 @@ def _flags_transformer(
 
 
 def _list_transformer(
-    func: Callable[[AuditLogEntry, Any], T]
+    func: Callable[[AuditLogEntry, Any], T],
 ) -> Callable[[AuditLogEntry, Any], List[T]]:
     def _transform(entry: AuditLogEntry, data: Any) -> List[T]:
         if not data:
@@ -302,11 +302,9 @@ class AuditLogDiff:
 
     if TYPE_CHECKING:
 
-        def __getattr__(self, item: str) -> Any:
-            ...
+        def __getattr__(self, item: str) -> Any: ...
 
-        def __setattr__(self, key: str, value: Any) -> Any:
-            ...
+        def __setattr__(self, key: str, value: Any) -> Any: ...
 
 
 Transformer = Callable[["AuditLogEntry", Any], Any]
@@ -807,7 +805,9 @@ class AuditLogEntry(Hashable):
             "uses": changeset.uses,
         }
 
-        obj = Invite(state=self._state, data=fake_payload, guild=self.guild, channel=changeset.channel)  # type: ignore
+        obj = Invite(
+            state=self._state, data=fake_payload, guild=self.guild, channel=changeset.channel
+        )  # type: ignore
         try:
             obj.inviter = changeset.inviter
         except AttributeError:

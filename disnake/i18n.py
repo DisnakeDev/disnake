@@ -87,12 +87,10 @@ class Localized(Generic[StringT]):
     __slots__ = ("string", "localizations")
 
     @overload
-    def __init__(self: Localized[StringT], string: StringT, *, key: str) -> None:
-        ...
+    def __init__(self: Localized[StringT], string: StringT, *, key: str) -> None: ...
 
     @overload
-    def __init__(self: Localized[Optional[str]], *, key: str) -> None:
-        ...
+    def __init__(self: Localized[Optional[str]], *, key: str) -> None: ...
 
     @overload
     def __init__(
@@ -100,16 +98,14 @@ class Localized(Generic[StringT]):
         string: StringT,
         *,
         data: Union[Optional[LocalizationsDict], LocalizationValue],
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     def __init__(
         self: Localized[Optional[str]],
         *,
         data: Union[Optional[LocalizationsDict], LocalizationValue],
-    ) -> None:
-        ...
+    ) -> None: ...
 
     # note: `data` accepting `LocalizationValue` is intentionally undocumented,
     # as it's only meant to be used internally
@@ -131,13 +127,13 @@ class Localized(Generic[StringT]):
 
     @overload
     @classmethod
-    def _cast(cls, string: LocalizedOptional, required: Literal[False]) -> Localized[Optional[str]]:
-        ...
+    def _cast(
+        cls, string: LocalizedOptional, required: Literal[False]
+    ) -> Localized[Optional[str]]: ...
 
     @overload
     @classmethod
-    def _cast(cls, string: LocalizedRequired, required: Literal[True]) -> Localized[str]:
-        ...
+    def _cast(cls, string: LocalizedRequired, required: Literal[True]) -> Localized[str]: ...
 
     @classmethod
     def _cast(cls, string: Union[Optional[str], Localized[Any]], required: bool) -> Localized[Any]:
@@ -150,12 +146,10 @@ class Localized(Generic[StringT]):
         return string
 
     @overload
-    def _upgrade(self, *, key: Optional[str]) -> Self:
-        ...
+    def _upgrade(self, *, key: Optional[str]) -> Self: ...
 
     @overload
-    def _upgrade(self, string: str, *, key: Optional[str] = None) -> Localized[str]:
-        ...
+    def _upgrade(self, string: str, *, key: Optional[str] = None) -> Localized[str]: ...
 
     def _upgrade(
         self: Localized[Any], string: Optional[str] = None, *, key: Optional[str] = None

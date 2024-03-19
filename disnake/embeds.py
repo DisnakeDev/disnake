@@ -438,12 +438,10 @@ class Embed:
         return cast("_EmbedMediaProxy", EmbedProxy(self._image))
 
     @overload
-    def set_image(self, url: Optional[Any]) -> Self:
-        ...
+    def set_image(self, url: Optional[Any]) -> Self: ...
 
     @overload
-    def set_image(self, *, file: File) -> Self:
-        ...
+    def set_image(self, *, file: File) -> Self: ...
 
     def set_image(self, url: Optional[Any] = MISSING, *, file: File = MISSING) -> Self:
         """Sets the image for the embed content.
@@ -489,12 +487,10 @@ class Embed:
         return cast("_EmbedMediaProxy", EmbedProxy(self._thumbnail))
 
     @overload
-    def set_thumbnail(self, url: Optional[Any]) -> Self:
-        ...
+    def set_thumbnail(self, url: Optional[Any]) -> Self: ...
 
     @overload
-    def set_thumbnail(self, *, file: File) -> Self:
-        ...
+    def set_thumbnail(self, *, file: File) -> Self: ...
 
     def set_thumbnail(self, url: Optional[Any] = MISSING, *, file: File = MISSING) -> Self:
         """Sets the thumbnail for the embed content.
