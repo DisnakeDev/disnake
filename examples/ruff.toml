@@ -1,0 +1,6 @@
+# SPDX-License-Identifier: MIT
+
+extend = "../pyproject.toml"
+
+[lint.isort]
+known-third-party = ["disnake"]
