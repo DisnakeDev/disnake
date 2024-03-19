@@ -175,7 +175,12 @@ class FFmpegAudio(AudioSource):
             raise ClientException(f"Popen failed: {exc.__class__.__name__}: {exc}") from exc
 
     def _kill_process(self) -> None:
-        proc = self._process
+        try:
+            proc = self._process
+        except AttributeError:
+            # may occur if something errors while spawning process
+            return
+
         if proc is MISSING:
             return
 
