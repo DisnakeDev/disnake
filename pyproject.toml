@@ -80,6 +80,7 @@ changelog = [
 codemod = [
     # run codemods on the respository (mostly automated typing)
     "libcst~=1.1.0",
+    "ruff==0.3.3",
     "autotyping==23.2.0",
 ]
 typing = [
