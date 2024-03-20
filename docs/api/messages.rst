@@ -145,6 +145,14 @@ MessageFlags
 .. autoclass:: MessageFlags()
     :members:
 
+AttachmentFlags
+~~~~~~~~~~~~~~~
+
+.. attributetable:: AttachmentFlags
+
+.. autoclass:: AttachmentFlags()
+    :members:
+
 AllowedMentions
 ~~~~~~~~~~~~~~~
 
@@ -180,14 +188,14 @@ MessageType
     Specifies the type of :class:`Message`. This is used to denote if a message
     is to be interpreted as a system message or a regular message.
 
-    .. container:: operations
+    .. collapse:: operations
 
-      .. describe:: x == y
+        .. describe:: x == y
 
-          Checks if two messages are equal.
-      .. describe:: x != y
+            Checks if two messages are equal.
+        .. describe:: x != y
 
-          Checks if two messages are not equal.
+            Checks if two messages are not equal.
 
     .. attribute:: default
 

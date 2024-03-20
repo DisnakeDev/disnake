@@ -24,6 +24,7 @@ V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
 if TYPE_CHECKING:
     from typing_extensions import ParamSpec, Self
 
+    from ..client import Client
     from ..components import NestedComponent
     from ..enums import ComponentType
     from ..interactions import MessageInteraction
@@ -34,6 +35,8 @@ if TYPE_CHECKING:
 
 else:
     ParamSpec = TypeVar
+
+ClientT = TypeVar("ClientT", bound="Client")
 
 
 class WrappedComponent(ABC):
@@ -142,7 +145,7 @@ class Item(WrappedComponent, Generic[V_co]):
         """Optional[:class:`View`]: The underlying view for this item."""
         return self._view
 
-    async def callback(self, interaction: MessageInteraction, /) -> None:
+    async def callback(self, interaction: MessageInteraction[ClientT], /) -> None:
         """|coro|
 
         The callback associated with this UI item.
@@ -181,5 +184,5 @@ class Object(Protocol[T_co, P]):
     def __new__(cls) -> T_co:
         ...
 
-    def __init__(*args: P.args, **kwargs: P.kwargs) -> None:
+    def __init__(self, *args: P.args, **kwargs: P.kwargs) -> None:
         ...

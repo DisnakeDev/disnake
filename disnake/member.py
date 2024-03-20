@@ -212,7 +212,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     This implements a lot of the functionality of :class:`User`.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
