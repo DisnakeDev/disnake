@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Dict, List, Literal, Optional, TypedDict, Unio
 
 from typing_extensions import NotRequired
 
+from .appinfo import ApplicationIntegrationType
 from .channel import ChannelType
 from .components import Component, Modal
 from .embed import Embed
@@ -23,6 +24,10 @@ if TYPE_CHECKING:
 
 ApplicationCommandType = Literal[1, 2, 3]
 
+# TODO: naming?
+# to quote the notion doc, "Not limited to application command interactions. Unfortunate naming here"
+InteractionContextType = Literal[1, 2, 3]  # GUILD, BOT_DM, PRIVATE_CHANNEL
+
 
 class ApplicationCommand(TypedDict):
     id: Snowflake
@@ -35,9 +40,13 @@ class ApplicationCommand(TypedDict):
     description_localizations: NotRequired[Optional[LocalizationDict]]
     options: NotRequired[List[ApplicationCommandOption]]
     default_member_permissions: NotRequired[Optional[str]]
-    dm_permission: NotRequired[Optional[bool]]
+    dm_permission: NotRequired[Optional[bool]]  # deprecated
     default_permission: NotRequired[bool]  # deprecated
     nsfw: NotRequired[bool]
+    # TODO: according to the spec, this is also optional + nullable, though I haven't encountered that yet
+    integration_types: List[ApplicationIntegrationType]
+    # TODO: this appears to be optional + nullable
+    contexts: List[InteractionContextType]
     version: Snowflake
 
 
@@ -254,6 +263,7 @@ class _BaseInteraction(TypedDict):
     application_id: Snowflake
     token: str
     version: Literal[1]
+    app_permissions: str
 
 
 # common properties in non-ping interactions
@@ -262,10 +272,12 @@ class _BaseUserInteraction(_BaseInteraction):
     # but it is assumed to always exist on non-ping interactions
     channel_id: Snowflake
     locale: str
-    app_permissions: NotRequired[str]
     guild_id: NotRequired[Snowflake]
     guild_locale: NotRequired[str]
     entitlements: NotRequired[List[Entitlement]]
+    # keys are stringified ApplicationIntegrationType's
+    authorizing_integration_owners: NotRequired[Dict[str, Snowflake]]
+    context: NotRequired[InteractionContextType]
     # one of these two will always exist, according to docs
     member: NotRequired[MemberWithUser]
     user: NotRequired[User]
@@ -336,6 +348,37 @@ class InteractionMessageReference(TypedDict):
     user: User
 
 
+class _BaseInteractionMetadata(TypedDict):
+    id: Snowflake
+    type: InteractionType
+    user_id: Snowflake
+    # keys are stringified ApplicationIntegrationType's
+    authorizing_integration_owners: Dict[str, Snowflake]
+    original_response_message_id: NotRequired[Snowflake]  # only on followups
+
+
+class ApplicationCommandInteractionMetadata(_BaseInteractionMetadata):
+    name: NotRequired[str]  # not documented
+
+
+class MessageComponentInteractionMetadata(_BaseInteractionMetadata):
+    interacted_message_id: Snowflake
+
+
+class ModalInteractionMetadata(_BaseInteractionMetadata):
+    triggering_interaction_metadata: Union[
+        ApplicationCommandInteractionMetadata,
+        MessageComponentInteractionMetadata,
+    ]
+
+
+InteractionMetadata = Union[
+    ApplicationCommandInteractionMetadata,
+    MessageComponentInteractionMetadata,
+    ModalInteractionMetadata,
+]
+
+
 class EditApplicationCommand(TypedDict):
     name: str
     name_localizations: NotRequired[Optional[LocalizationDict]]
@@ -343,8 +386,10 @@ class EditApplicationCommand(TypedDict):
     description_localizations: NotRequired[Optional[LocalizationDict]]
     options: NotRequired[Optional[List[ApplicationCommandOption]]]
     default_member_permissions: NotRequired[Optional[str]]
-    dm_permission: NotRequired[bool]
+    dm_permission: NotRequired[bool]  # deprecated
     default_permission: NotRequired[bool]  # deprecated
     nsfw: NotRequired[bool]
-    # TODO: remove, this cannot be changed
+    integration_types: NotRequired[List[ApplicationIntegrationType]]
+    contexts: NotRequired[List[InteractionContextType]]
+    # n.b. this cannot be changed
     type: NotRequired[ApplicationCommandType]
