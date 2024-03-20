@@ -200,7 +200,7 @@ class BaseUser(_UserTag):
     def avatar_decoration(self) -> Optional[Asset]:
         """Optional[:class:`Asset`]: Returns the user's avatar decoration asset, if available.
 
-        .. versionadded:: 2.8
+        .. versionadded:: 2.10
 
         .. note::
 
