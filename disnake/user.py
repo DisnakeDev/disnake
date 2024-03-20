@@ -204,8 +204,6 @@ class BaseUser(_UserTag):
 
         .. note::
 
-            This information is only available via :meth:`Client.fetch_user`.
-
             Since Discord always sends an animated PNG for animated avatar decorations,
             the following methods will not work as expected:
 
