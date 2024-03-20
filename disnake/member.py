@@ -459,7 +459,7 @@ class Member(disnake.abc.Messageable, _UserTag):
             u.discriminator,
             u.global_name,
             u._public_flags,
-            u._avatar_decoration,
+            u._avatar_decoration_data,
         )
         # These keys seem to always be available
         modified = (
@@ -468,7 +468,7 @@ class Member(disnake.abc.Messageable, _UserTag):
             user["discriminator"],
             user.get("global_name"),
             user.get("public_flags", 0),
-            user.get("avatar_decoration", None),
+            user.get("avatar_decoration_data", None),
         )
         if original != modified:
             to_return = User._copy(self._user)
@@ -478,7 +478,7 @@ class Member(disnake.abc.Messageable, _UserTag):
                 u.discriminator,
                 u.global_name,
                 u._public_flags,
-                u._avatar_decoration,
+                u._avatar_decoration_data,
             ) = modified
             # Signal to dispatch on_user_update
             return to_return, u

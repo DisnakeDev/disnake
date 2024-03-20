@@ -7,6 +7,11 @@ from typing_extensions import NotRequired
 from .snowflake import Snowflake
 
 
+class AvatarDecorationData(TypedDict):
+    asset: str
+    sku_id: Snowflake
+
+
 class PartialUser(TypedDict):
     id: Snowflake
     username: str
@@ -30,4 +35,4 @@ class User(PartialUser, total=False):
     flags: int
     premium_type: PremiumType
     public_flags: int
-    avatar_decoration: Optional[str]
+    avatar_decoration_data: Optional[AvatarDecorationData]
