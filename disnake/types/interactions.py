@@ -43,10 +43,8 @@ class ApplicationCommand(TypedDict):
     dm_permission: NotRequired[Optional[bool]]  # deprecated
     default_permission: NotRequired[bool]  # deprecated
     nsfw: NotRequired[bool]
-    # TODO: according to the spec, this is also optional + nullable, though I haven't encountered that yet
-    integration_types: List[ApplicationIntegrationType]
-    # TODO: this appears to be optional + nullable
-    contexts: List[InteractionContextType]
+    integration_types: NotRequired[List[ApplicationIntegrationType]]
+    contexts: NotRequired[Optional[List[InteractionContextType]]]
     version: Snowflake
 
 
@@ -389,7 +387,7 @@ class EditApplicationCommand(TypedDict):
     dm_permission: NotRequired[bool]  # deprecated
     default_permission: NotRequired[bool]  # deprecated
     nsfw: NotRequired[bool]
-    integration_types: NotRequired[List[ApplicationIntegrationType]]
-    contexts: NotRequired[List[InteractionContextType]]
+    integration_types: NotRequired[Optional[List[ApplicationIntegrationType]]]
+    contexts: NotRequired[Optional[List[InteractionContextType]]]
     # n.b. this cannot be changed
     type: NotRequired[ApplicationCommandType]
