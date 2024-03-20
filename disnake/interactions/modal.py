@@ -57,16 +57,21 @@ class ModalInteraction(Interaction[ClientT]):
         .. versionchanged:: 2.5
             Changed to :class:`Locale` instead of :class:`str`.
 
+    client: :class:`Client`
+        The interaction client.
+    entitlements: List[:class:`Entitlement`]
+        The entitlements for the invoking user and guild,
+        representing access to an application subscription.
+
+        .. versionadded:: 2.10
+
+    data: :class:`ModalInteractionData`
+        The wrapped interaction data.
     message: Optional[:class:`Message`]
         The message that this interaction's modal originated from,
         if the modal was sent in response to a component interaction.
 
         .. versionadded:: 2.5
-
-    data: :class:`ModalInteractionData`
-        The wrapped interaction data.
-    client: :class:`Client`
-        The interaction client.
     """
 
     __slots__ = ("message", "_cs_text_values")

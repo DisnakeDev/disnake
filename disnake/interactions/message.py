@@ -69,12 +69,18 @@ class MessageInteraction(Interaction[ClientT]):
         .. versionchanged:: 2.5
             Changed to :class:`Locale` instead of :class:`str`.
 
-    message: Optional[:class:`Message`]
-        The message that sent this interaction.
-    data: :class:`MessageInteractionData`
-        The wrapped interaction data.
     client: :class:`Client`
         The interaction client.
+    entitlements: List[:class:`Entitlement`]
+        The entitlements for the invoking user and guild,
+        representing access to an application subscription.
+
+        .. versionadded:: 2.10
+
+    data: :class:`MessageInteractionData`
+        The wrapped interaction data.
+    message: Optional[:class:`Message`]
+        The message that this interaction's component is attached to.
     """
 
     def __init__(self, *, data: MessageInteractionPayload, state: ConnectionState) -> None:
