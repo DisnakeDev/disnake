@@ -194,6 +194,45 @@ ApplicationCommandPermissionType
 
         Represents a permission that affects channels.
 
+ApplicationIntegrationType
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. class:: ApplicationIntegrationType
+
+    Represents the context in which an application or application command can be installed.
+
+    See the :ddocs:`official documentation <resources/application#installation-context>` for more info.
+
+    .. versionadded:: 2.10
+
+    .. attribute:: guild
+
+        Installable to guilds.
+    .. attribute:: user
+
+        Installable to users.
+
+InteractionContextType
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. class:: InteractionContextType
+
+    Represents the context in which an application command can be used.
+
+    See the :ddocs:`official documentation <interactions/application-commands#interaction-contexts>` for more info.
+
+    .. versionadded:: 2.10
+
+    .. attribute:: guild
+
+        Represents a command that's usable in guilds.
+    .. attribute:: bot_dm
+
+        Represents a command that's usable in DMs with the bot.
+    .. attribute:: private_channel
+
+        Represents a command that's usable in DMs and group DMs with other users.
+
 Events
 ------
 
