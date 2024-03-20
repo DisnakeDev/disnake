@@ -77,6 +77,16 @@ class MessageInteraction(Interaction[ClientT]):
 
         .. versionadded:: 2.10
 
+    authorizing_integration_owners: Dict[:class:`ApplicationIntegrationType`, int]
+        XXX
+
+        .. versionadded:: 2.10
+
+    context: Optional[:class:`InteractionContextType`]
+        XXX
+
+        .. versionadded:: 2.10
+
     data: :class:`MessageInteractionData`
         The wrapped interaction data.
     message: Optional[:class:`Message`]

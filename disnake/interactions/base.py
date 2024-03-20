@@ -24,8 +24,10 @@ from ..app_commands import OptionChoice
 from ..channel import PartialMessageable, _threaded_guild_channel_factory
 from ..entitlement import Entitlement
 from ..enums import (
+    ApplicationIntegrationType,
     ChannelType,
     ComponentType,
+    InteractionContextType,
     InteractionResponseType,
     InteractionType,
     Locale,
@@ -151,6 +153,16 @@ class Interaction(Generic[ClientT]):
         representing access to an application subscription.
 
         .. versionadded:: 2.10
+
+    authorizing_integration_owners: Dict[:class:`ApplicationIntegrationType`, int]
+        XXX
+
+        .. versionadded:: 2.10
+
+    context: Optional[:class:`InteractionContextType`]
+        XXX
+
+        .. versionadded:: 2.10
     """
 
     __slots__: Tuple[str, ...] = (
@@ -167,6 +179,8 @@ class Interaction(Generic[ClientT]):
         "guild_locale",
         "client",
         "entitlements",
+        "authorizing_integration_owners",
+        "context",
         "_app_permissions",
         "_permissions",
         "_state",
@@ -224,6 +238,21 @@ class Interaction(Generic[ClientT]):
             else []
         )
 
+        # TODO: reconsider if/how to expose this:
+        # type 0 is either "0" or matches self.guild.id
+        # type 1 should(?) match self.user.id
+        # ... this completely falls apart for message.interaction_metadata
+        self.authorizing_integration_owners: Dict[ApplicationIntegrationType, int] = {
+            try_enum(ApplicationIntegrationType, int(k)): int(v)
+            for k, v in (data.get("authorizing_integration_owners") or {}).items()
+        }
+
+        self.context: Optional[InteractionContextType] = (
+            try_enum(InteractionContextType, context)
+            if (context := data.get("context")) is not None
+            else None
+        )
+
     @property
     def bot(self) -> ClientT:
         """:class:`~disnake.ext.commands.Bot`: An alias for :attr:`.client`."""
@@ -251,9 +280,8 @@ class Interaction(Generic[ClientT]):
         """Union[:class:`.Member`, :class:`.ClientUser`]:
         Similar to :attr:`.Guild.me` except it may return the :class:`.ClientUser` in private message contexts.
         """
-        if self.guild is None:
-            return None if self.bot is None else self.bot.user  # type: ignore
-        return self.guild.me
+        # TODO: guild.me will return None once we start using the partial guild from the interaction
+        return self.guild.me if self.guild is not None else self.client.user
 
     @utils.cached_slot_property("_cs_channel")
     def channel(self) -> Union[GuildMessageable, PartialMessageable]:
@@ -298,6 +326,7 @@ class Interaction(Generic[ClientT]):
         """
         if self.guild_id:
             return Permissions(self._app_permissions)
+        # TODO: this fallback should be unnecessary now
         return Permissions.private_channel()
 
     @utils.cached_slot_property("_cs_response")
