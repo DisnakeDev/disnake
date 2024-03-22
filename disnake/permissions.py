@@ -76,7 +76,7 @@ class Permissions(BaseFlags):
         You can now use keyword arguments to initialize :class:`Permissions`
         similar to :meth:`update`.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -164,7 +164,9 @@ class Permissions(BaseFlags):
         ban_members: bool = ...,
         change_nickname: bool = ...,
         connect: bool = ...,
+        create_events: bool = ...,
         create_forum_threads: bool = ...,
+        create_guild_expressions: bool = ...,
         create_instant_invite: bool = ...,
         create_private_threads: bool = ...,
         create_public_threads: bool = ...,
@@ -291,6 +293,7 @@ class Permissions(BaseFlags):
         ``True`` and the guild-specific ones set to ``False``. The guild-specific
         permissions are currently:
 
+        - :attr:`create_guild_expressions`
         - :attr:`manage_guild_expressions`
         - :attr:`view_audit_log`
         - :attr:`view_guild_insights`
@@ -316,12 +319,16 @@ class Permissions(BaseFlags):
 
         .. versionchanged:: 2.9
             Added :attr:`use_soundboard` and :attr:`send_voice_messages` permissions.
+
+        .. versionchanged:: 2.10
+            Added :attr:`create_events` permission.
         """
         instance = cls.all()
         instance.update(
             administrator=False,
             ban_members=False,
             change_nickname=False,
+            create_guild_expressions=False,
             kick_members=False,
             manage_guild=False,
             manage_guild_expressions=False,
@@ -347,11 +354,15 @@ class Permissions(BaseFlags):
 
         .. versionchanged:: 2.9
             Added :attr:`view_creator_monetization_analytics` permission.
+
+        .. versionchanged:: 2.10
+            Added :attr:`create_guild_expressions` permission.
         """
         return cls(
             view_channel=True,
             manage_channels=True,
             manage_roles=True,
+            create_guild_expressions=True,
             manage_guild_expressions=True,
             view_audit_log=True,
             view_guild_insights=True,
@@ -475,8 +486,12 @@ class Permissions(BaseFlags):
         "Events" permissions from the official Discord UI set to ``True``.
 
         .. versionadded:: 2.4
+
+        .. versionchanged:: 2.10
+            Added :attr:`create_events` permission.
         """
         return cls(
+            create_events=True,
             manage_events=True,
         )
 
@@ -532,7 +547,9 @@ class Permissions(BaseFlags):
         ban_members: bool = ...,
         change_nickname: bool = ...,
         connect: bool = ...,
+        create_events: bool = ...,
         create_forum_threads: bool = ...,
+        create_guild_expressions: bool = ...,
         create_instant_invite: bool = ...,
         create_private_threads: bool = ...,
         create_public_threads: bool = ...,
@@ -699,7 +716,7 @@ class Permissions(BaseFlags):
     @flag_value
     def send_messages(self) -> int:
         """:class:`bool`: Returns ``True`` if a user can send messages from all or specific text channels
-        and create threads in forum channels.
+        and create threads in forum/media channels.
         """
         return 1 << 11
 
@@ -830,8 +847,10 @@ class Permissions(BaseFlags):
 
     @flag_value
     def manage_guild_expressions(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can create, edit, or delete
-        emojis, stickers, and soundboard sounds.
+        """:class:`bool`: Returns ``True`` if a user can edit or delete
+        emojis, stickers, and soundboard sounds created by all users.
+
+        See also :attr:`create_guild_expressions`.
 
         .. versionadded:: 2.9
         """
@@ -879,7 +898,10 @@ class Permissions(BaseFlags):
 
     @flag_value
     def manage_events(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can manage guild events.
+        """:class:`bool`: Returns ``True`` if a user can edit or delete guild scheduled events
+        created by all users.
+
+        See also :attr:`create_events`.
 
         .. versionadded:: 2.0
         """
@@ -979,6 +1001,28 @@ class Permissions(BaseFlags):
         return 1 << 42
 
     @flag_value
+    def create_guild_expressions(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can create emojis, stickers,
+        and soundboard sounds, as well as edit and delete the ones they created.
+
+        See also :attr:`manage_guild_expressions`.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 43
+
+    @flag_value
+    def create_events(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can create guild scheduled events,
+        as well as edit and delete the ones they created.
+
+        See also :attr:`manage_events`.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 44
+
+    @flag_value
     def use_external_sounds(self) -> int:
         """:class:`bool`: Returns ``True`` if a user can use custom soundboard sounds from other guilds.
 
@@ -1036,7 +1080,7 @@ class PermissionOverwrite:
     The values supported by this are the same as :class:`Permissions`
     with the added possibility of it being set to ``None``.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -1066,7 +1110,9 @@ class PermissionOverwrite:
         ban_members: Optional[bool]
         change_nickname: Optional[bool]
         connect: Optional[bool]
+        create_events: Optional[bool]
         create_forum_threads: Optional[bool]
+        create_guild_expressions: Optional[bool]
         create_instant_invite: Optional[bool]
         create_private_threads: Optional[bool]
         create_public_threads: Optional[bool]
@@ -1130,7 +1176,9 @@ class PermissionOverwrite:
         ban_members: Optional[bool] = ...,
         change_nickname: Optional[bool] = ...,
         connect: Optional[bool] = ...,
+        create_events: Optional[bool] = ...,
         create_forum_threads: Optional[bool] = ...,
+        create_guild_expressions: Optional[bool] = ...,
         create_instant_invite: Optional[bool] = ...,
         create_private_threads: Optional[bool] = ...,
         create_public_threads: Optional[bool] = ...,
@@ -1261,7 +1309,9 @@ class PermissionOverwrite:
         ban_members: Optional[bool] = ...,
         change_nickname: Optional[bool] = ...,
         connect: Optional[bool] = ...,
+        create_events: Optional[bool] = ...,
         create_forum_threads: Optional[bool] = ...,
+        create_guild_expressions: Optional[bool] = ...,
         create_instant_invite: Optional[bool] = ...,
         create_private_threads: Optional[bool] = ...,
         create_public_threads: Optional[bool] = ...,

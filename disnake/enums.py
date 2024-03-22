@@ -35,6 +35,7 @@ __all__ = (
     "ActivityType",
     "NotificationLevel",
     "TeamMembershipState",
+    "TeamMemberRole",
     "WebhookType",
     "ExpireBehaviour",
     "ExpireBehavior",
@@ -68,6 +69,8 @@ __all__ = (
     "ApplicationRoleConnectionMetadataType",
     "OnboardingPromptType",
     "OnboardingMode",
+    "SKUType",
+    "EntitlementType",
 )
 
 
@@ -214,6 +217,7 @@ class ChannelType(Enum):
     stage_voice = 13
     guild_directory = 14
     forum = 15
+    media = 16
 
     def __str__(self) -> str:
         return self.name
@@ -467,7 +471,7 @@ class AuditLogAction(Enum):
     @property
     def target_type(self) -> Optional[str]:
         v = self.value
-        if v == -1:
+        if v == -1:  # pyright: ignore[reportUnnecessaryComparison]
             return "all"
         elif v < 10:
             return "guild"
@@ -552,6 +556,15 @@ class TeamMembershipState(Enum):
     accepted = 2
 
 
+class TeamMemberRole(Enum):
+    admin = "admin"
+    developer = "developer"
+    read_only = "read_only"
+
+    def __str__(self) -> str:
+        return self.name
+
+
 class WebhookType(Enum):
     incoming = 1
     channel_follower = 2
@@ -606,14 +619,13 @@ class InteractionType(Enum):
 
 class InteractionResponseType(Enum):
     pong = 1
-    # ack = 2 (deprecated)
-    # channel_message = 3 (deprecated)
-    channel_message = 4  # (with source)
-    deferred_channel_message = 5  # (with source)
-    deferred_message_update = 6  # for components
-    message_update = 7  # for components
-    application_command_autocomplete_result = 8  # for autocomplete
-    modal = 9  # for modals
+    channel_message = 4
+    deferred_channel_message = 5
+    deferred_message_update = 6
+    message_update = 7
+    application_command_autocomplete_result = 8
+    modal = 9
+    premium_required = 10
 
 
 class VideoQualityMode(Enum):
@@ -628,7 +640,7 @@ class ComponentType(Enum):
     action_row = 1
     button = 2
     string_select = 3
-    select = string_select  # backwards compatibility
+    select = 3  # backwards compatibility
     text_input = 4
     user_select = 5
     role_select = 6
@@ -754,7 +766,7 @@ class WidgetStyle(Enum):
 # reference: https://discord.com/developers/docs/reference#locales
 class Locale(Enum):
     bg = "bg"
-    "Bulgarian | български"  # noqa: RUF001
+    "Bulgarian | български"
     cs = "cs"
     "Czech | Čeština"
     da = "da"
@@ -762,7 +774,7 @@ class Locale(Enum):
     de = "de"
     "German | Deutsch"
     el = "el"
-    "Greek | Ελληνικά"  # noqa: RUF001
+    "Greek | Ελληνικά"
     en_GB = "en-GB"
     "English, UK | English, UK"
     en_US = "en-US"
@@ -808,7 +820,7 @@ class Locale(Enum):
     tr = "tr"
     "Turkish | Türkçe"
     uk = "uk"
-    "Ukrainian | Українська"  # noqa: RUF001
+    "Ukrainian | Українська"
     vi = "vi"
     "Vietnamese | Tiếng Việt"
     zh_CN = "zh-CN"
@@ -1219,6 +1231,9 @@ class Event(Enum):
     """Called when a message has a specific reaction removed from it.
     Represents the :func:`on_reaction_clear_emoji` event.
     """
+    raw_presence_update = "raw_presence_update"
+    """Called when a user's presence changes regardless of the state of the internal member cache.
+    Represents the :func:`on_raw_presence_update` event."""
     raw_reaction_add = "raw_reaction_add"
     """Called when a message has a reaction added regardless of the state of the internal message cache.
     Represents the :func:`on_raw_reaction_add` event.
@@ -1243,6 +1258,15 @@ class Event(Enum):
     """Called when someone begins typing a message regardless of whether `Intents.members` and `Intents.guilds` are enabled.
     Represents the :func:`on_raw_typing` event.
     """
+    entitlement_create = "entitlement_create"
+    """Called when a user subscribes to an SKU, creating a new :class:`Entitlement`.
+    Represents the :func:`on_entitlement_create` event."""
+    entitlement_update = "entitlement_update"
+    """Called when a user's subscription renews.
+    Represents the :func:`on_entitlement_update` event."""
+    entitlement_delete = "entitlement_delete"
+    """Called when a user's entitlement is deleted.
+    Represents the :func:`on_entitlement_delete` event."""
     # ext.commands events
     command = "command"
     """Called when a command is found and is about to be invoked.
@@ -1313,6 +1337,15 @@ class OnboardingPromptType(Enum):
 class OnboardingMode(Enum):
     default = 0
     advanced = 1
+
+
+class SKUType(Enum):
+    subscription = 5
+    subscription_group = 6
+
+
+class EntitlementType(Enum):
+    application_subscription = 8
 
 
 T = TypeVar("T")

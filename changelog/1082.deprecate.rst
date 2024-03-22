@@ -1,0 +1,1 @@
+:meth:`Client.fetch_premium_sticker_packs` was renamed to :meth:`Client.fetch_sticker_packs`; the old name is deprecated.

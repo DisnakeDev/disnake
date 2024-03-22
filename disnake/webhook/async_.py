@@ -37,6 +37,7 @@ from ..flags import MessageFlags
 from ..http import Route, set_attachments, to_multipart, to_multipart_with_attachments
 from ..message import Message
 from ..mixins import Hashable
+from ..object import Object
 from ..ui.action_row import MessageUIComponent, components_to_dict
 from ..user import BaseUser, User
 
@@ -55,7 +56,7 @@ if TYPE_CHECKING:
 
     from ..abc import Snowflake
     from ..asset import AssetBytes
-    from ..channel import ForumChannel, StageChannel, TextChannel, VoiceChannel
+    from ..channel import ForumChannel, MediaChannel, StageChannel, TextChannel, VoiceChannel
     from ..embeds import Embed
     from ..file import File
     from ..guild import Guild
@@ -63,7 +64,7 @@ if TYPE_CHECKING:
     from ..mentions import AllowedMentions
     from ..message import Attachment
     from ..state import ConnectionState
-    from ..sticker import GuildSticker, StickerItem
+    from ..sticker import GuildSticker, StandardSticker, StickerItem
     from ..types.message import Message as MessagePayload
     from ..types.webhook import Webhook as WebhookPayload
     from ..ui.action_row import Components
@@ -293,6 +294,7 @@ class AsyncWebhookAdapter:
         params = {"wait": int(wait)}
         if thread_id:
             params["thread_id"] = thread_id
+
         route = Route(
             "POST",
             "/webhooks/{webhook_id}/{webhook_token}",
@@ -310,7 +312,12 @@ class AsyncWebhookAdapter:
         message_id: int,
         *,
         session: aiohttp.ClientSession,
+        thread_id: Optional[int] = None,
     ) -> Response[MessagePayload]:
+        params: Dict[str, Any] = {}
+        if thread_id is not None:
+            params["thread_id"] = thread_id
+
         route = Route(
             "GET",
             "/webhooks/{webhook_id}/{webhook_token}/messages/{message_id}",
@@ -318,7 +325,7 @@ class AsyncWebhookAdapter:
             webhook_token=token,
             message_id=message_id,
         )
-        return self.request(route, session)
+        return self.request(route, session, params=params)
 
     def edit_webhook_message(
         self,
@@ -330,7 +337,12 @@ class AsyncWebhookAdapter:
         payload: Optional[Dict[str, Any]] = None,
         multipart: Optional[List[Dict[str, Any]]] = None,
         files: Optional[List[File]] = None,
+        thread_id: Optional[int] = None,
     ) -> Response[Message]:
+        params: Dict[str, Any] = {}
+        if thread_id is not None:
+            params["thread_id"] = thread_id
+
         route = Route(
             "PATCH",
             "/webhooks/{webhook_id}/{webhook_token}/messages/{message_id}",
@@ -338,7 +350,9 @@ class AsyncWebhookAdapter:
             webhook_token=token,
             message_id=message_id,
         )
-        return self.request(route, session, payload=payload, multipart=multipart, files=files)
+        return self.request(
+            route, session, payload=payload, multipart=multipart, files=files, params=params
+        )
 
     def delete_webhook_message(
         self,
@@ -347,7 +361,12 @@ class AsyncWebhookAdapter:
         message_id: int,
         *,
         session: aiohttp.ClientSession,
+        thread_id: Optional[int] = None,
     ) -> Response[None]:
+        params: Dict[str, Any] = {}
+        if thread_id is not None:
+            params["thread_id"] = thread_id
+
         route = Route(
             "DELETE",
             "/webhooks/{webhook_id}/{webhook_token}/messages/{message_id}",
@@ -355,7 +374,7 @@ class AsyncWebhookAdapter:
             webhook_token=token,
             message_id=message_id,
         )
-        return self.request(route, session)
+        return self.request(route, session, params=params)
 
     def fetch_webhook(
         self,
@@ -491,8 +510,10 @@ def handle_message_parameters_dict(
     components: Optional[Components[MessageUIComponent]] = MISSING,
     allowed_mentions: Optional[AllowedMentions] = MISSING,
     previous_allowed_mentions: Optional[AllowedMentions] = None,
-    stickers: Sequence[Union[GuildSticker, StickerItem]] = MISSING,
-    thread_name: Optional[str] = None,
+    stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = MISSING,
+    # these parameters are exclusive to webhooks in forum/media channels
+    thread_name: str = MISSING,
+    applied_tags: Sequence[Snowflake] = MISSING,
 ) -> DictPayloadParameters:
     if files is not MISSING and file is not MISSING:
         raise TypeError("Cannot mix file and files keyword arguments.")
@@ -554,8 +575,10 @@ def handle_message_parameters_dict(
     if stickers is not MISSING:
         payload["sticker_ids"] = [s.id for s in stickers]
 
-    if thread_name is not None:
+    if thread_name:
         payload["thread_name"] = thread_name
+    if applied_tags:
+        payload["applied_tags"] = [t.id for t in applied_tags]
 
     return DictPayloadParameters(payload=payload, files=files)
 
@@ -578,8 +601,10 @@ def handle_message_parameters(
     components: Optional[Components[MessageUIComponent]] = MISSING,
     allowed_mentions: Optional[AllowedMentions] = MISSING,
     previous_allowed_mentions: Optional[AllowedMentions] = None,
-    stickers: Sequence[Union[GuildSticker, StickerItem]] = MISSING,
-    thread_name: Optional[str] = None,
+    stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = MISSING,
+    # these parameters are exclusive to webhooks in forum/media channels
+    thread_name: str = MISSING,
+    applied_tags: Sequence[Snowflake] = MISSING,
 ) -> PayloadParameters:
     params = handle_message_parameters_dict(
         content=content,
@@ -600,6 +625,7 @@ def handle_message_parameters(
         previous_allowed_mentions=previous_allowed_mentions,
         stickers=stickers,
         thread_name=thread_name,
+        applied_tags=applied_tags,
     )
 
     if params.files:
@@ -684,10 +710,14 @@ WebhookT = TypeVar("WebhookT", bound="BaseWebhook")
 
 
 class _WebhookState(Generic[WebhookT]):
-    __slots__ = ("_parent", "_webhook")
+    __slots__ = ("_parent", "_webhook", "_thread")
 
     def __init__(
-        self, webhook: WebhookT, parent: Optional[Union[ConnectionState, _WebhookState]]
+        self,
+        webhook: WebhookT,
+        parent: Optional[Union[ConnectionState, _WebhookState]],
+        *,
+        thread: Optional[Snowflake] = None,
     ) -> None:
         self._webhook: WebhookT = webhook
 
@@ -696,6 +726,8 @@ class _WebhookState(Generic[WebhookT]):
             self._parent = None
         else:
             self._parent = parent
+
+        self._thread: Optional[Snowflake] = thread
 
     def _get_guild(self, guild_id):
         if self._parent is not None:
@@ -854,6 +886,7 @@ class WebhookMessage(Message):
             view=view,
             components=components,
             allowed_mentions=allowed_mentions,
+            thread=self._state._thread,
         )
 
     async def delete(self, *, delay: Optional[float] = None) -> None:
@@ -881,13 +914,13 @@ class WebhookMessage(Message):
             async def inner_call(delay: float = delay) -> None:
                 await asyncio.sleep(delay)
                 try:
-                    await self._state._webhook.delete_message(self.id)
+                    await self._state._webhook.delete_message(self.id, thread=self._state._thread)
                 except HTTPException:
                     pass
 
             asyncio.create_task(inner_call())
         else:
-            await self._state._webhook.delete_message(self.id)
+            await self._state._webhook.delete_message(self.id, thread=self._state._thread)
 
 
 class BaseWebhook(Hashable):
@@ -975,13 +1008,15 @@ class BaseWebhook(Hashable):
         return self._state and self._state._get_guild(self.guild_id)
 
     @property
-    def channel(self) -> Optional[Union[TextChannel, VoiceChannel, ForumChannel, StageChannel]]:
-        """Optional[Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`ForumChannel`, :class:`StageChannel`]]: The channel this webhook belongs to.
+    def channel(
+        self,
+    ) -> Optional[Union[TextChannel, VoiceChannel, StageChannel, ForumChannel, MediaChannel]]:
+        """Optional[Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`StageChannel`, :class:`ForumChannel`, :class:`MediaChannel`]]: The channel this webhook belongs to.
 
         If this is a partial webhook, then this will always return ``None``.
 
-        Webhooks in :class:`ForumChannel`\\s can not send messages directly,
-        they can only create new threads (see ``thread_name`` for :attr:`Webhook.send`)
+        Webhooks in a :class:`ForumChannel` or :class:`MediaChannel` can not send messages directly.
+        They can only create new threads (see ``thread_name`` for :attr:`Webhook.send`)
         and interact with existing threads.
         """
         guild = self.guild
@@ -1013,7 +1048,7 @@ class Webhook(BaseWebhook):
 
     There are two main ways to use Webhooks. The first is through the ones
     received by the library such as :meth:`.Guild.webhooks`, :meth:`.TextChannel.webhooks`,
-    :meth:`.ForumChannel.webhooks`, :meth:`.VoiceChannel.webhooks`,
+    :meth:`.VoiceChannel.webhooks`, :meth:`.ForumChannel.webhooks`, :meth:`MediaChannel.webhooks`
     and :meth:`.StageChannel.webhooks`. The ones received by the library will
     automatically be bound using the library's internal HTTP session.
 
@@ -1034,7 +1069,7 @@ class Webhook(BaseWebhook):
 
     For a synchronous counterpart, see :class:`SyncWebhook`.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -1415,19 +1450,30 @@ class Webhook(BaseWebhook):
 
         return Webhook(data=data, session=self.session, token=self.auth_token, state=self._state)
 
-    def _create_message(self, data):
-        state = _WebhookState(self, parent=self._state)
-        # state may be artificial (unlikely at this point...)
+    def _create_message(
+        self, data, *, thread: Optional[Snowflake] = None, thread_name: Optional[str] = None
+    ):
         channel_id = int(data["channel_id"])
-        # if the channel ID does not match, a new thread was created
+
+        # If channel IDs don't match, a new thread was most likely created;
+        # if the user passed a `thread_name`, assume this is the case and
+        # create a `thread` object for the state
+        if self.channel_id != channel_id and thread_name:
+            thread = Object(id=channel_id)
+
+        state = _WebhookState(self, parent=self._state, thread=thread)
+
+        # If the channel IDs don't match, the message was created in a thread
         if self.channel_id != channel_id:
             guild = self.guild
             msg_channel = guild and guild.get_channel_or_thread(channel_id)
         else:
             msg_channel = self.channel
+
         if not msg_channel:
             # state may be artificial (unlikely at this point...)
             msg_channel = PartialMessageable(state=self._state, id=channel_id)  # type: ignore
+
         # state is artificial
         return WebhookMessage(data=data, state=state, channel=msg_channel)  # type: ignore
 
@@ -1451,6 +1497,7 @@ class Webhook(BaseWebhook):
         components: Components[MessageUIComponent] = ...,
         thread: Snowflake = ...,
         thread_name: str = ...,
+        applied_tags: Sequence[Snowflake] = ...,
         wait: Literal[True],
         delete_after: float = ...,
     ) -> WebhookMessage:
@@ -1476,6 +1523,7 @@ class Webhook(BaseWebhook):
         components: Components[MessageUIComponent] = ...,
         thread: Snowflake = ...,
         thread_name: str = ...,
+        applied_tags: Sequence[Snowflake] = ...,
         wait: Literal[False] = ...,
         delete_after: float = ...,
     ) -> None:
@@ -1499,7 +1547,8 @@ class Webhook(BaseWebhook):
         view: View = MISSING,
         components: Components[MessageUIComponent] = MISSING,
         thread: Snowflake = MISSING,
-        thread_name: Optional[str] = None,
+        thread_name: str = MISSING,
+        applied_tags: Sequence[Snowflake] = MISSING,
         wait: bool = False,
         delete_after: float = MISSING,
     ) -> Optional[WebhookMessage]:
@@ -1515,6 +1564,10 @@ class Webhook(BaseWebhook):
         If the ``embed`` parameter is provided, it must be of type :class:`Embed` and
         it must be a rich embed type. You cannot mix the ``embed`` parameter with the
         ``embeds`` parameter, which must be a :class:`list` of :class:`Embed` objects to send.
+
+        To send a message in a thread, provide the ``thread`` parameter.
+        If this webhook is in a :class:`ForumChannel`/:class:`MediaChannel`, the ``thread_name`` parameter can
+        be used to create a new thread instead (optionally with ``applied_tags``).
 
         .. versionchanged:: 2.6
             Raises :exc:`WebhookTokenMissing` instead of ``InvalidArgument``.
@@ -1574,12 +1627,12 @@ class Webhook(BaseWebhook):
             .. versionadded:: 2.4
 
         thread: :class:`~disnake.abc.Snowflake`
-            The thread to send this webhook to.
+            The thread to send this message to.
 
             .. versionadded:: 2.0
 
         thread_name: :class:`str`
-            If in a forum channel, and ``thread`` is not specified,
+            If in a forum/media channel, and ``thread`` is not specified,
             the name of the newly created thread.
 
             .. note::
@@ -1587,6 +1640,11 @@ class Webhook(BaseWebhook):
                 representing the created thread, may be a :class:`PartialMessageable`.
 
             .. versionadded:: 2.6
+        applied_tags: Sequence[:class:`abc.Snowflake`]
+            If in a forum/media channel and creating a new thread (see ``thread_name`` above),
+            the tags to apply to the new thread. Maximum of 5.
+
+            .. versionadded:: 2.10
 
         wait: :class:`bool`
             Whether the server should wait before sending a response. This essentially
@@ -1632,7 +1690,7 @@ class Webhook(BaseWebhook):
             You specified both ``embed`` and ``embeds`` or ``file`` and ``files``.
             ``ephemeral`` was passed with the improper webhook type.
             There was no state attached with this webhook when giving it a view.
-            Both ``thread`` and ``thread_name`` were provided.
+            Both ``thread`` and ``thread_name``/``applied_tags`` were provided.
         WebhookTokenMissing
             There was no token associated with this webhook.
         ValueError
@@ -1666,9 +1724,11 @@ class Webhook(BaseWebhook):
                 view.timeout = 15 * 60.0
 
         thread_id: Optional[int] = None
-        if thread is not MISSING and thread_name is not None:
-            raise TypeError("only one of thread and thread_name can be provided.")
-        elif thread is not MISSING:
+        if thread is not MISSING:
+            if thread_name or applied_tags:
+                raise TypeError(
+                    "Cannot use `thread_name` or `applied_tags` when `thread` is provided."
+                )
             thread_id = thread.id
 
         params = handle_message_parameters(
@@ -1686,6 +1746,7 @@ class Webhook(BaseWebhook):
             view=view,
             components=components,
             thread_name=thread_name,
+            applied_tags=applied_tags,
             allowed_mentions=allowed_mentions,
             previous_allowed_mentions=previous_mentions,
         )
@@ -1710,7 +1771,7 @@ class Webhook(BaseWebhook):
 
         msg = None
         if wait:
-            msg = self._create_message(data)
+            msg = self._create_message(data, thread=thread, thread_name=thread_name)
             if delete_after is not MISSING:
                 await msg.delete(delay=delete_after)
 
@@ -1720,7 +1781,7 @@ class Webhook(BaseWebhook):
 
         return msg
 
-    async def fetch_message(self, id: int) -> WebhookMessage:
+    async def fetch_message(self, id: int, *, thread: Optional[Snowflake] = None) -> WebhookMessage:
         """|coro|
 
         Retrieves a single :class:`WebhookMessage` owned by this webhook.
@@ -1734,6 +1795,10 @@ class Webhook(BaseWebhook):
         ----------
         id: :class:`int`
             The message ID to look for.
+        thread: Optional[:class:`~disnake.abc.Snowflake`]
+            The thread the message is in, if any.
+
+            .. versionadded:: 2.10
 
         Raises
         ------
@@ -1760,8 +1825,9 @@ class Webhook(BaseWebhook):
             self.token,
             id,
             session=self.session,
+            thread_id=thread.id if thread else None,
         )
-        return self._create_message(data)
+        return self._create_message(data, thread=thread)
 
     async def edit_message(
         self,
@@ -1776,6 +1842,7 @@ class Webhook(BaseWebhook):
         view: Optional[View] = MISSING,
         components: Optional[Components[MessageUIComponent]] = MISSING,
         allowed_mentions: Optional[AllowedMentions] = None,
+        thread: Optional[Snowflake] = None,
     ) -> WebhookMessage:
         """|coro|
 
@@ -1851,6 +1918,10 @@ class Webhook(BaseWebhook):
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
+        thread: Optional[:class:`~disnake.abc.Snowflake`]
+            The thread the message is in, if any.
+
+            .. versionadded:: 2.10
 
         Raises
         ------
@@ -1883,7 +1954,7 @@ class Webhook(BaseWebhook):
         # if no attachment list was provided but we're uploading new files,
         # use current attachments as the base
         if attachments is MISSING and (file or files):
-            attachments = (await self.fetch_message(message_id)).attachments
+            attachments = (await self.fetch_message(message_id, thread=thread)).attachments
 
         previous_mentions: Optional[AllowedMentions] = getattr(
             self._state, "allowed_mentions", None
@@ -1907,6 +1978,7 @@ class Webhook(BaseWebhook):
                 self.token,
                 message_id,
                 session=self.session,
+                thread_id=thread.id if thread else None,
                 payload=params.payload,
                 multipart=params.multipart,
                 files=params.files,
@@ -1916,12 +1988,14 @@ class Webhook(BaseWebhook):
                 for f in params.files:
                     f.close()
 
-        message = self._create_message(data)
+        message = self._create_message(data, thread=thread)
         if view and not view.is_finished():
             self._state.store_view(view, message_id)
         return message
 
-    async def delete_message(self, message_id: int, /) -> None:
+    async def delete_message(
+        self, message_id: int, /, *, thread: Optional[Snowflake] = None
+    ) -> None:
         """|coro|
 
         Deletes a message owned by this webhook.
@@ -1938,6 +2012,10 @@ class Webhook(BaseWebhook):
         ----------
         message_id: :class:`int`
             The ID of the message to delete.
+        thread: Optional[:class:`~disnake.abc.Snowflake`]
+            The thread the message is in, if any.
+
+            .. versionadded:: 2.10
 
         Raises
         ------
@@ -1957,4 +2035,5 @@ class Webhook(BaseWebhook):
             self.token,
             message_id,
             session=self.session,
+            thread_id=thread.id if thread else None,
         )

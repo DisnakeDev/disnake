@@ -16,9 +16,11 @@ So, what are events anyway? Most of the :class:`Client` application cycle is bas
 to notify client about certain actions like message deletion, emoji creation, member nickname updates, etc.
 
 This library provides a few ways to register an
-*event handler* — a special function which will listen for specific types of events — which allows you to take action based on certain events.
+*event handler* or *event listener* — a special function which will listen for specific types of events — which allows you to take action based on certain events.
 
-The first way is through the use of the :meth:`Client.event` decorator: ::
+The first way to create an *event handler* is through the use of the :meth:`Client.event` decorator.
+Note that these are unique, which means you can only have one of
+each type (i.e. only one ``on_message``, one ``on_member_ban``, etc.): ::
 
     client = disnake.Client(...)
 
@@ -30,8 +32,9 @@ The first way is through the use of the :meth:`Client.event` decorator: ::
         if message.content.startswith('$hello'):
             await message.reply(f'Hello, {message.author}!')
 
-The second way is through subclassing :class:`Client` and
-overriding the specific events. For example: ::
+
+Another way is through subclassing :class:`Client` and overriding the specific events,
+which has essentially the same effect as the :meth:`Client.event` decorator. For example: ::
 
     class MyClient(disnake.Client):
         async def on_message(self, message):
@@ -41,7 +44,28 @@ overriding the specific events. For example: ::
             if message.content.startswith('$hello'):
                 await message.reply(f'Hello, {message.author}!')
 
-Another way is to use :meth:`Client.wait_for`, which is a single-use event handler to wait for
+
+A separate way is through the use of an *event listener*. These are similar to the *event handlers*
+described above, but allow you to have as many *listeners* of the same type as you want.
+You can register listeners using the :meth:`Client.listen` decorator or through the :meth:`Client.add_listener`
+method. Similarly you can remove a listener using the :meth:`Client.remove_listener` method. ::
+
+    @client.listen()
+    async def on_message(message: disnake.Message):
+        if message.author.bot:
+            return
+
+        if message.content.startswith('$hello'):
+            await message.reply(f'Hello, {message.author}')
+
+
+    async def my_on_ready():
+        print(f'Logged in as {client.user}')
+
+    client.add_listener(my_on_ready, 'on_ready')
+
+
+Lastly, :meth:`Client.wait_for` is a single-use event handler to wait for
 something to happen in more specific scenarios: ::
 
     @client.event
@@ -56,20 +80,6 @@ something to happen in more specific scenarios: ::
             # wait for a message that passes the check
             msg = await client.wait_for('message', check=check)
             await channel.send(f'Hello {msg.author}!')
-
-The above pieces of code are essentially equal, and both respond with ``Hello, {author's username here}!`` message
-when a user sends a ``$hello`` message.
-
-.. warning::
-
-    Event handlers described here are a bit different from :class:`~ext.commands.Bot`'s *event listeners*.
-
-    :class:`Client`'s event handlers are unique, which means you can only have one of each type (i.e. only one `on_message`, one `on_member_ban`, etc.). With :class:`~ext.commands.Bot` however, you can have as many *listeners*
-    of the same type as you want.
-
-    Also note that :meth:`Bot.event() <disnake.ext.commands.Bot.event>` is the same as :class:`Client`'s
-    :meth:`~Client.event` (since :class:`~ext.commands.Bot` subclasses :class:`Client`) and does not allow to listen/watch
-    for multiple events of the same type. Consider using :meth:`Bot.listen() <disnake.ext.commands.Bot.listen>` instead.
 
 .. note::
 
@@ -126,9 +136,8 @@ This section documents events related to :class:`Client` and its connectivity to
 
         ``on_error`` will only be dispatched to :meth:`Client.event`.
 
-        It will not be received by :meth:`Client.wait_for`, or, if used,
-        :ref:`ext_commands_api_bots` listeners such as
-        :meth:`~ext.commands.Bot.listen` or :meth:`~ext.commands.Cog.listener`.
+        It will not be received by :meth:`Client.wait_for` and listeners
+        such as :meth:`Client.listen`, or :meth:`~ext.commands.Cog.listener`.
 
     :param event: The name of the event that raised the exception.
     :type event: :class:`str`
@@ -154,9 +163,8 @@ This section documents events related to :class:`Client` and its connectivity to
     .. note::
         ``on_gateway_error`` will only be dispatched to :meth:`Client.event`.
 
-        It will not be received by :meth:`Client.wait_for`, or, if used,
-        :ref:`ext_commands_api_bots` listeners such as
-        :meth:`~ext.commands.Bot.listen` or :meth:`~ext.commands.Cog.listener`.
+        It will not be received by :meth:`Client.wait_for` and listeners
+        such as :meth:`Client.listen`, or :meth:`~ext.commands.Cog.listener`.
 
     .. note::
         This will not be dispatched for exceptions that occur while parsing ``READY`` and
@@ -857,6 +865,21 @@ Members
     :param after: The updated member's updated info.
     :type after: :class:`Member`
 
+.. function:: on_raw_presence_update(payload)
+
+    Called when a member updates their presence.
+    Unlike :func:`on_presence_update`, this is called regardless of the member cache.
+
+    Since the data payload can be partial and the Discord API does not validate the types of the fields,
+    care must be taken when accessing stuff in the dictionary.
+
+    This requires :attr:`Intents.presences` to be enabled.
+
+    .. versionadded:: 2.10
+
+    :param payload: The raw event payload data.
+    :type payload: :class:`RawPresenceUpdateEvent`
+
 .. function:: on_user_update(before, after)
 
     Called when a :class:`User` is updated.
@@ -1389,18 +1412,12 @@ This section documents events related to Discord chat messages.
 
     Called when someone begins typing a message.
 
-    The ``channel`` parameter can be a :class:`abc.Messageable` instance, or a :class:`ForumChannel`.
+    The ``channel`` parameter can be a :class:`abc.Messageable` instance, or a :class:`ForumChannel` or :class:`MediaChannel`.
     If channel is an :class:`abc.Messageable` instance, it could be a :class:`TextChannel`,
     :class:`VoiceChannel`, :class:`StageChannel`, :class:`GroupChannel`, or :class:`DMChannel`.
 
-    .. versionchanged:: 2.5
-        ``channel`` may be a type :class:`ForumChannel`
-
-    .. versionchanged:: 2.9
-        ``channel`` may be a type :class:`StageChannel`
-
-    If the ``channel`` is a :class:`TextChannel`, :class:`ForumChannel`, :class:`VoiceChannel`, or :class:`StageChannel` then the
-    ``user`` parameter is a :class:`Member`, otherwise it is a :class:`User`.
+    If the ``channel`` is not a :class:`DMChannel`,
+    then the ``user`` parameter is a :class:`Member`, otherwise it is a :class:`User`.
 
     If the ``channel`` is a :class:`DMChannel` and the user is not found in the internal user/member cache,
     then this event will not be called. Consider using :func:`on_raw_typing` instead.
@@ -1418,7 +1435,7 @@ This section documents events related to Discord chat messages.
         to enable the members intent.
 
     :param channel: The location where the typing originated from.
-    :type channel: Union[:class:`abc.Messageable`, :class:`ForumChannel`]
+    :type channel: Union[:class:`abc.Messageable`, :class:`ForumChannel`, :class:`MediaChannel`]
     :param user: The user that started typing.
     :type user: Union[:class:`User`, :class:`Member`]
     :param when: When the typing started as an aware datetime in UTC.
@@ -1434,6 +1451,47 @@ This section documents events related to Discord chat messages.
     :param data: The raw event payload data.
     :type data: :class:`RawTypingEvent`
 
+Entitlements
+~~~~~~~~~~~~
+
+This section documents events related to entitlements, which are used for application subscriptions.
+
+.. function:: on_entitlement_create(entitlement)
+
+    Called when an entitlement is created.
+
+    This is usually caused by a user subscribing to an SKU,
+    or when a new test entitlement is created (see :meth:`Client.create_entitlement`).
+
+    .. versionadded:: 2.10
+
+    :param entitlement: The entitlement that was created.
+    :type entitlement: :class:`Entitlement`
+
+.. function:: on_entitlement_update(entitlement)
+
+    Called when an entitlement is updated.
+
+    This happens e.g. when a user's subscription gets renewed (in which case the
+    :attr:`Entitlement.ends_at` attribute reflects the new expiration date).
+
+    .. versionadded:: 2.10
+
+    :param entitlement: The entitlement that was updated.
+    :type entitlement: :class:`Entitlement`
+
+.. function:: on_entitlement_delete(entitlement)
+
+    Called when an entitlement is deleted.
+
+    .. note::
+        This does not get called when an entitlement expires;
+        it only occurs e.g. in case of refunds or due to manual removal.
+
+    .. versionadded:: 2.10
+
+    :param entitlement: The entitlement that was deleted.
+    :type entitlement: :class:`Entitlement`
 
 Enumerations
 ------------

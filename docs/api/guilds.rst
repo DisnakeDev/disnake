@@ -131,7 +131,7 @@ VerificationLevel
     Specifies a :class:`Guild`\'s verification level, which is the criteria in
     which a member must meet before being able to send messages to the guild.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. versionadded:: 2.0
 
@@ -180,9 +180,7 @@ NotificationLevel
 
     Specifies whether a :class:`Guild` has notifications on for all messages or mentions only by default.
 
-    .. container:: operations
-
-        .. versionadded:: 2.0
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -219,9 +217,7 @@ ContentFilter
     learning algorithms that Discord uses to detect if an image contains
     NSFW content.
 
-    .. container:: operations
-
-        .. versionadded:: 2.0
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -261,7 +257,7 @@ NSFWLevel
 
     .. versionadded:: 2.0
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 

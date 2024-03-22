@@ -7,9 +7,10 @@ from docutils import nodes
 from docutils.parsers.rst import Directive
 
 if TYPE_CHECKING:
-    from _types import SphinxExtensionMeta
     from sphinx.application import Sphinx
     from sphinx.writers.html import HTMLTranslator
+
+    from ._types import SphinxExtensionMeta
 
 
 class exception_hierarchy(nodes.General, nodes.Element):
