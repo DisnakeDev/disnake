@@ -1553,12 +1553,6 @@ class InteractionMessage(Message):
         Could be a :class:`DMChannel` or :class:`GroupChannel` if it's a private message.
     reference: Optional[:class:`~disnake.MessageReference`]
         The message that this message references. This is only applicable to message replies.
-    interaction: Optional[:class:`~disnake.InteractionReference`]
-        The interaction that this message references.
-        This exists only when the message is a response to an interaction without an existing message.
-
-        .. versionadded:: 2.1
-
     mention_everyone: :class:`bool`
         Specifies if the message mentions everyone.
 

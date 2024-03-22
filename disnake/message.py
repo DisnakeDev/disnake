@@ -39,7 +39,7 @@ from .sticker import StickerItem
 from .threads import Thread
 from .ui.action_row import components_to_dict
 from .user import User
-from .utils import MISSING, assert_never, escape_mentions
+from .utils import MISSING, assert_never, deprecated, escape_mentions
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -679,6 +679,9 @@ class InteractionReference:
 
     .. versionadded:: 2.1
 
+    .. deprecated:: 2.10
+        Use :attr:`Message.interaction_metadata` instead.
+
     Attributes
     ----------
     id: :class:`int`
@@ -817,12 +820,6 @@ class Message(Hashable):
 
         .. versionadded:: 1.5
 
-    interaction: Optional[:class:`~disnake.InteractionReference`]
-        The interaction that this message references.
-        This exists only when the message is a response to an interaction without an existing message.
-
-        .. versionadded:: 2.1
-
     mention_everyone: :class:`bool`
         Specifies if the message mentions everyone.
 
@@ -925,7 +922,7 @@ class Message(Hashable):
         "flags",
         "reactions",
         "reference",
-        "interaction",
+        "_interaction",
         "application",
         "activity",
         "stickers",
@@ -986,11 +983,11 @@ class Message(Hashable):
             for d in data.get("components", [])
         ]
 
-        inter_payload = data.get("interaction")
-        inter = (
-            None if inter_payload is None else InteractionReference(state=state, data=inter_payload)
+        self._interaction: Optional[InteractionReference] = (
+            InteractionReference(state=state, data=interaction)
+            if (interaction := data.get("interaction")) is not None
+            else None
         )
-        self.interaction: Optional[InteractionReference] = inter
 
         try:
             # if the channel doesn't have a guild attribute, we handle that
@@ -1526,6 +1523,19 @@ class Message(Hashable):
 
         # in the event of an unknown or unsupported message type, we return nothing
         return None
+
+    @property
+    @deprecated("interaction_metadata")
+    def interaction(self) -> Optional[InteractionReference]:
+        """Optional[:class:`~disnake.InteractionReference`]: The interaction that this message references.
+        This exists only when the message is a response to an interaction without an existing message.
+
+        .. versionadded:: 2.1
+
+        .. deprecated:: 2.10
+            Use :attr:`interaction_metadata` instead.
+        """
+        return self._interaction
 
     async def delete(self, *, delay: Optional[float] = None) -> None:
         """|coro|
