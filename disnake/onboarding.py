@@ -113,9 +113,9 @@ class OnboardingPrompt(Hashable):
         title: str,
         options: List[OnboardingPromptOption],
         type: OnboardingPromptType,
-        single_select: bool,
-        required: bool,
-        in_onboarding: bool,
+        single_select: bool = False,
+        required: bool = False,
+        in_onboarding: bool = True,
     ) -> None:
         self.id: int = int.from_bytes(os.urandom(4))
         self.title: str = title
