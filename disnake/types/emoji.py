@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: MIT
 
-from typing import NotRequired, Optional, TypedDict
+from typing import Optional, TypedDict
+
+from typing_extensions import NotRequired
 
 from .snowflake import Snowflake, SnowflakeList
 from .user import User
