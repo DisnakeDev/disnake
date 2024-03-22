@@ -7,12 +7,14 @@ from .emoji import Emoji, PartialEmoji
 from .enums import OnboardingMode, OnboardingPromptType, try_enum
 from .mixins import Hashable
 from .object import Object
+from .utils import _get_as_snowflake
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
     from .abc import Snowflake
     from .guild import Guild, GuildChannel
+    from .role import Role
     from .state import ConnectionState
     from .types.emoji import Emoji as EmojiPayload
     from .types.onboarding import (
@@ -55,7 +57,7 @@ class Onboarding:
 
     def _from_data(self, data: OnboardingPayload) -> None:
         self.prompts: List[OnboardingPrompt] = [
-            OnboardingPrompt._from_dict(data=prompt, state=self.guild._state)
+            OnboardingPrompt._from_dict(data=prompt, state=self.guild._state, guild=self.guild)
             for prompt in data["prompts"]
         ]
         self.enabled: bool = data["enabled"]
@@ -133,11 +135,13 @@ class OnboardingPrompt(Hashable):
         )
 
     @classmethod
-    def _from_dict(cls, *, data: OnboardingPromptPayload, state: ConnectionState) -> Self:
+    def _from_dict(
+        cls, *, data: OnboardingPromptPayload, state: ConnectionState, guild: Guild
+    ) -> Self:
         self = cls(
             title=data["title"],
             options=[
-                OnboardingPromptOption._from_dict(data=option, state=state)
+                OnboardingPromptOption._from_dict(data=option, state=state, guild=guild)
                 for option in data["options"]
             ],
             single_select=data["single_select"],
@@ -176,15 +180,24 @@ class OnboardingPromptOption(Hashable):
         The prompt option's description.
     emoji: Optional[Union[:class:`PartialEmoji`, :class:`Emoji`, :class:`str`]]
         The prompt option's emoji.
-    roles: Optional[FrozenSet[:class:`abc.Snowflake`]]
+    roles: FrozenSet[:class:`int`]
         The IDs of the roles that will be added to the user when they select this option.
         At creation, this must be set if :attr:`.channels` is not set.
-    channels: Optional[FrozenSet[:class:`abc.Snowflake`]]
+    channels: FrozenSet[:class:`int`]
         The IDs of the channels that the user will see when they select this option.
         At creation, this must be set if :attr:`.roles` is not set.
     """
 
-    __slots__ = ("id", "title", "description", "emoji", "guild", "roles", "channels")
+    __slots__ = (
+        "id",
+        "title",
+        "description",
+        "emoji",
+        "guild",
+        "role_ids",
+        "channel_ids",
+        "_guild",
+    )
 
     @overload
     def __init__(
@@ -218,13 +231,17 @@ class OnboardingPromptOption(Hashable):
         emoji: Optional[Union[str, PartialEmoji, Emoji]] = None,
         roles: Optional[Iterable[Snowflake]] = None,
         channels: Optional[Iterable[Snowflake]] = None,
+        _guild: Optional[Guild] = None,
     ) -> None:
         self.id: int = 0
         self.title: str = title
         self.description: Optional[str] = description
-        self.roles: FrozenSet[Snowflake] = frozenset(roles) if roles else frozenset()
-        self.channels: FrozenSet[Snowflake] = frozenset(channels) if channels else frozenset()
+        self.role_ids: FrozenSet[int] = frozenset([r.id for r in roles]) if roles else frozenset()
+        self.channel_ids: FrozenSet[int] = (
+            frozenset([c.id for c in channels]) if channels else frozenset()
+        )
         self.emoji: Optional[Union[Emoji, PartialEmoji, str]] = emoji
+        self._guild = _guild
 
     def __str__(self) -> str:
         return self.title
@@ -236,23 +253,34 @@ class OnboardingPromptOption(Hashable):
         )
 
     @classmethod
-    def _from_dict(cls, *, data: OnboardingPromptOptionPayload, state: ConnectionState) -> Self:
-        if emoji_data := data.get("emoji"):
-            emoji = state._get_emoji_from_data(emoji_data)
-        else:
-            emoji = None
+    def _from_dict(
+        cls, *, data: OnboardingPromptOptionPayload, state: ConnectionState, guild: Guild
+    ) -> Self:
+        emoji = state._get_emoji_from_fields(
+            name=data.get("emoji_name"),
+            id=_get_as_snowflake(data, "emoji_id"),
+            animated=data.get("emoji_animated", None),
+        )
 
-        self = cls(
+        self = cls(  # type: ignore
             title=data["title"],
             description=data.get("description"),
             emoji=emoji,
             roles=[Object(id=role_id) for role_id in data["role_ids"]],
             channels=[Object(id=channel_id) for channel_id in data["channel_ids"]],
+            _guild=guild,
         )
         self.id = int(data["id"])
         return self
 
     def to_dict(self) -> OnboardingPromptOptionPayload:
+        payload: OnboardingPromptOptionPayload = {
+            "id": self.id,
+            "title": self.title,
+            "description": self.description,
+            "role_ids": list(self.role_ids),
+            "channel_ids": list(self.channel_ids),
+        }
         emoji: EmojiPayload = {}  # type: ignore
 
         if isinstance(self.emoji, (Emoji, PartialEmoji)):
@@ -260,11 +288,33 @@ class OnboardingPromptOption(Hashable):
         elif isinstance(self.emoji, str):
             emoji["name"] = self.emoji
 
-        return {
-            "id": self.id,
-            "title": self.title,
-            "description": self.description,
-            "emoji": emoji,
-            "role_ids": [role.id for role in self.roles],
-            "channel_ids": [channel.id for channel in self.channels],
-        }
+        if emoji_name := emoji.get("name"):
+            payload["emoji_name"] = emoji_name
+        if emoji_id := emoji.get("id"):
+            payload["emoji_id"] = emoji_id
+        if (emoji_animated := emoji.get("animated")) is not None:
+            payload["emoji_animated"] = emoji_animated
+
+        return payload
+
+    @property
+    def roles(self) -> List[Role]:
+        """List[:class:`Role`]: A list of roles that will be added to the user when they select this option.
+
+        Accesing this during construction will raise an :exc:`ValueError`.
+        """
+        if not self._guild or self.id == 0:
+            # TODO: better message and error?
+            raise ValueError("You cannot access this on construction.")
+        return list(filter(None, map(self._guild.get_role, self.role_ids)))
+
+    @property
+    def channels(self) -> List[GuildChannel]:
+        """List[:class:`abc.GuildChannel`]: A list of channels that the user will see when they select this option.
+
+        Accesing this during construction will raise an :exc:`ValueError`.
+        """
+        if not self._guild or self.id == 0:
+            # TODO: better message and error?
+            raise ValueError("You cannot access this on construction.")
+        return list(filter(None, map(self._guild.get_channel, self.channel_ids)))
