@@ -1,4 +1,4 @@
-Allow editing Onboarding.
-    - :class:`OnboardingPrompt` and :class:`OnboardingPromptOption` are now user-constructable.
+Allow editing Onboarding configurations.
+    - :class:`OnboardingPrompt` and :class:`OnboardingPromptOption` are now user-constructible.
     - Add :meth:`Guild.edit_onboarding`.
-    - Add :class:`OnboardingMode` enum.
+    - Add :attr:`Onboarding.mode`.
