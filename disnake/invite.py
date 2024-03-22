@@ -311,6 +311,7 @@ class Invite(Hashable):
         The type of the invite.
 
         .. versionadded:: 2.10
+
     guild: Optional[Union[:class:`Guild`, :class:`Object`, :class:`PartialInviteGuild`]]
         The guild the invite is for. Can be ``None`` if it's not a guild invite (see :attr:`type`).
     max_age: Optional[:class:`int`]
