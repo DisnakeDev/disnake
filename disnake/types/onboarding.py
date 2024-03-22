@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: MIT
 
-from typing import List, Literal, NotRequired, Optional, TypedDict
+from typing import List, Literal, Optional, TypedDict
+
+from typing_extensions import NotRequired
 
 from .emoji import PartialEmoji
 from .snowflake import Snowflake, SnowflakeList
