@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: MIT
 from __future__ import annotations
 
+import os
 from typing import TYPE_CHECKING, FrozenSet, Iterable, List, Optional, Union, overload
 
 from .emoji import Emoji, PartialEmoji
@@ -33,7 +34,7 @@ __all__ = (
 class Onboarding:
     """Represents a guild onboarding object.
 
-    .. versionadded:: 2.9
+    .. versionadded:: 2.10
 
     Attributes
     ----------
@@ -82,7 +83,7 @@ class Onboarding:
 class OnboardingPrompt(Hashable):
     """Represents an onboarding prompt.
 
-    .. versionadded:: 2.9
+    .. versionadded:: 2.10
 
     Attributes
     ----------
@@ -116,7 +117,7 @@ class OnboardingPrompt(Hashable):
         required: bool,
         in_onboarding: bool,
     ) -> None:
-        self.id: int = 0
+        self.id: int = int.from_bytes(os.urandom(4))
         self.title: str = title
         self.options: List[OnboardingPromptOption] = options
         self.single_select: bool = single_select
@@ -167,7 +168,7 @@ class OnboardingPrompt(Hashable):
 class OnboardingPromptOption(Hashable):
     """Represents an onboarding prompt option.
 
-    .. versionadded:: 2.9
+    .. versionadded:: 2.10
 
     Attributes
     ----------
