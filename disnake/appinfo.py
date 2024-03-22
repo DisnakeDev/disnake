@@ -45,12 +45,20 @@ class InstallParams:
 
     __slots__ = (
         "_app_id",
+        "_integration_type",
         "scopes",
         "permissions",
     )
 
-    def __init__(self, data: InstallParamsPayload, parent: AppInfo) -> None:
+    def __init__(
+        self,
+        data: InstallParamsPayload,
+        parent: AppInfo,
+        *,
+        integration_type: Optional[ApplicationIntegrationType] = None,
+    ) -> None:
         self._app_id = parent.id
+        self._integration_type = integration_type
         self.scopes = data["scopes"]
         self.permissions = Permissions(int(data["permissions"]))
 
@@ -65,7 +73,12 @@ class InstallParams:
         :class:`str`
             The invite url.
         """
-        return utils.oauth_url(self._app_id, scopes=self.scopes, permissions=self.permissions)
+        return utils.oauth_url(
+            self._app_id,
+            scopes=self.scopes,
+            permissions=self.permissions,
+            integration_type=self._integration_type,
+        )
 
 
 class IntegrationTypeConfiguration:
@@ -82,10 +95,14 @@ class IntegrationTypeConfiguration:
     __slots__ = ("install_params",)
 
     def __init__(
-        self, data: ApplicationIntegrationTypeConfigurationPayload, parent: AppInfo
+        self,
+        data: ApplicationIntegrationTypeConfigurationPayload,
+        *,
+        parent: AppInfo,
+        integration_type: ApplicationIntegrationType,
     ) -> None:
         self.install_params: Optional[InstallParams] = (
-            InstallParams(install_params, parent=parent)
+            InstallParams(install_params, parent=parent, integration_type=integration_type)
             if (install_params := data.get("oauth2_install_params"))
             else None
         )
@@ -255,16 +272,17 @@ class AppInfo:
         self.role_connections_verification_url: Optional[str] = data.get(
             "role_connections_verification_url"
         )
-        # this structure is weird, but it's probably the best we're going to get.
+
         self.integration_types_config: Dict[
             ApplicationIntegrationType, IntegrationTypeConfiguration
-        ] = {
-            try_enum(ApplicationIntegrationType, int(_type)): IntegrationTypeConfiguration(
+        ] = {}
+        for _type, config in (data.get("integration_types_config") or {}).items():
+            integration_type = try_enum(ApplicationIntegrationType, int(_type))
+            self.integration_types_config[integration_type] = IntegrationTypeConfiguration(
                 config or {},
                 parent=self,
+                integration_type=integration_type,
             )
-            for _type, config in (data.get("integration_types_config") or {}).items()
-        }
 
     def __repr__(self) -> str:
         return (
