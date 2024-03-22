@@ -565,6 +565,31 @@ class HTTPClient:
 
         return self.request(r, json=payload)
 
+    def get_poll_answer_voters(
+        self, channel_id: Snowflake, message_id: Snowflake, answer_id: int
+    ) -> Response[List[user.User]]:
+        return self.request(
+            Route(
+                "GET",
+                "/channels/{channel_id}/polls/{message_id}/answers/{answer_id}",
+                channel_id=channel_id,
+                message_id=message_id,
+                answer_id=answer_id,
+            )
+        )
+
+    def expire_poll(
+        self, channel_id: Snowflake, message_id: Snowflake
+    ) -> Response[message.Message]:
+        return self.request(
+            Route(
+                "GET",
+                "/channels/{channel_id}/poll/{message_id}/expire",
+                channel_id=channel_id,
+                message_id=message_id,
+            )
+        )
+
     def send_typing(self, channel_id: Snowflake) -> Response[None]:
         return self.request(Route("POST", "/channels/{channel_id}/typing", channel_id=channel_id))
 

@@ -1342,6 +1342,10 @@ class EntitlementType(Enum):
     application_subscription = 8
 
 
+class PollType(Enum):
+    default = 1
+
+
 T = TypeVar("T")
 
 
