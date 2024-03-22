@@ -54,6 +54,14 @@ InteractionReference
 .. autoclass:: InteractionReference
     :members:
 
+InteractionMetadata
+~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: InteractionMetadata
+
+.. autoclass:: InteractionMetadata
+    :members:
+
 RoleSubscriptionData
 ~~~~~~~~~~~~~~~~~~~~
 

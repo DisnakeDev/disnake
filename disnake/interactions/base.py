@@ -1553,6 +1553,11 @@ class InteractionMessage(Message):
         Could be a :class:`DMChannel` or :class:`GroupChannel` if it's a private message.
     reference: Optional[:class:`~disnake.MessageReference`]
         The message that this message references. This is only applicable to message replies.
+    interaction_metadata: Optional[:class:`InteractionMetadata`]
+        The metadata about the interaction that caused this message, if any.
+
+        .. versionadded:: 2.10
+
     mention_everyone: :class:`bool`
         Specifies if the message mentions everyone.
 
