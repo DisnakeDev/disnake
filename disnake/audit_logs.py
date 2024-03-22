@@ -805,6 +805,8 @@ class AuditLogEntry(Hashable):
             "code": changeset.code,
             "temporary": changeset.temporary,
             "uses": changeset.uses,
+            "type": 0,
+            "channel": None,
         }
 
         obj = Invite(state=self._state, data=fake_payload, guild=self.guild, channel=changeset.channel)  # type: ignore
