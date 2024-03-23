@@ -70,7 +70,9 @@ class SendableActivity(TypedDict):
 
 
 class Activity(SendableActivity, total=False):
-    created_at: int  # required according to docs, but we treat it as optional for easier serialization
+    created_at: (
+        int  # required according to docs, but we treat it as optional for easier serialization
+    )
     timestamps: ActivityTimestamps
     application_id: Snowflake
     details: Optional[str]

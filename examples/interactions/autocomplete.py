@@ -31,8 +31,7 @@ async def autocomplete_langs(inter, string: str) -> List[str]:
 async def languages_1(
     inter: disnake.CommandInteraction,
     language: str = commands.Param(autocomplete=autocomplete_langs),
-):
-    ...
+): ...
 
 
 # Instead of using Param, you can also create autocomplete options
@@ -43,8 +42,7 @@ async def languages_1(
 
 
 @bot.slash_command()
-async def languages_2(inter: disnake.CommandInteraction, language: str):
-    ...
+async def languages_2(inter: disnake.CommandInteraction, language: str): ...
 
 
 @languages_2.autocomplete("language")

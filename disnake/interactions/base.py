@@ -1313,8 +1313,7 @@ class InteractionResponse:
         self._response_type = response_type
 
     @overload
-    async def send_modal(self, modal: Modal) -> None:
-        ...
+    async def send_modal(self, modal: Modal) -> None: ...
 
     @overload
     async def send_modal(
@@ -1323,8 +1322,7 @@ class InteractionResponse:
         title: str,
         custom_id: str,
         components: Components[ModalUIComponent],
-    ) -> None:
-        ...
+    ) -> None: ...
 
     async def send_modal(
         self,
@@ -1569,8 +1567,7 @@ class InteractionMessage(Message):
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
         delete_after: Optional[float] = ...,
-    ) -> InteractionMessage:
-        ...
+    ) -> InteractionMessage: ...
 
     @overload
     async def edit(
@@ -1586,8 +1583,7 @@ class InteractionMessage(Message):
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
         delete_after: Optional[float] = ...,
-    ) -> InteractionMessage:
-        ...
+    ) -> InteractionMessage: ...
 
     @overload
     async def edit(
@@ -1603,8 +1599,7 @@ class InteractionMessage(Message):
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
         delete_after: Optional[float] = ...,
-    ) -> InteractionMessage:
-        ...
+    ) -> InteractionMessage: ...
 
     @overload
     async def edit(
@@ -1620,8 +1615,7 @@ class InteractionMessage(Message):
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
         delete_after: Optional[float] = ...,
-    ) -> InteractionMessage:
-        ...
+    ) -> InteractionMessage: ...
 
     async def edit(
         self,
@@ -1940,14 +1934,12 @@ class InteractionDataResolved(Dict[str, Any]):
     @overload
     def get_with_type(
         self, key: Snowflake, data_type: Union[OptionType, ComponentType]
-    ) -> Union[Member, User, Role, InteractionChannel, Message, Attachment, None]:
-        ...
+    ) -> Union[Member, User, Role, InteractionChannel, Message, Attachment, None]: ...
 
     @overload
     def get_with_type(
         self, key: Snowflake, data_type: Union[OptionType, ComponentType], default: T
-    ) -> Union[Member, User, Role, InteractionChannel, Message, Attachment, T]:
-        ...
+    ) -> Union[Member, User, Role, InteractionChannel, Message, Attachment, T]: ...
 
     def get_with_type(
         self, key: Snowflake, data_type: Union[OptionType, ComponentType], default: T = None

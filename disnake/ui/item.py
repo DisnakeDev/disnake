@@ -55,13 +55,11 @@ class WrappedComponent(ABC):
 
     @property
     @abstractmethod
-    def _underlying(self) -> NestedComponent:
-        ...
+    def _underlying(self) -> NestedComponent: ...
 
     @property
     @abstractmethod
-    def width(self) -> int:
-        ...
+    def width(self) -> int: ...
 
     def __repr__(self) -> str:
         attrs = " ".join(f"{key}={getattr(self, key)!r}" for key in self.__repr_attributes__)
@@ -92,12 +90,10 @@ class Item(WrappedComponent, Generic[V_co]):
     __repr_attributes__: Tuple[str, ...] = ("row",)
 
     @overload
-    def __init__(self: Item[None]) -> None:
-        ...
+    def __init__(self: Item[None]) -> None: ...
 
     @overload
-    def __init__(self: Item[V_co]) -> None:
-        ...
+    def __init__(self: Item[V_co]) -> None: ...
 
     def __init__(self) -> None:
         self._view: V_co = None  # type: ignore
@@ -168,12 +164,10 @@ I_co = TypeVar("I_co", bound=Item, covariant=True)
 # which work as `View.__init__` replaces the handler with the item
 class DecoratedItem(Protocol[I_co]):
     @overload
-    def __get__(self, obj: None, objtype: Any) -> ItemCallbackType:
-        ...
+    def __get__(self, obj: None, objtype: Any) -> ItemCallbackType: ...
 
     @overload
-    def __get__(self, obj: Any, objtype: Any) -> I_co:
-        ...
+    def __get__(self, obj: Any, objtype: Any) -> I_co: ...
 
 
 T_co = TypeVar("T_co", covariant=True)
@@ -181,8 +175,6 @@ P = ParamSpec("P")
 
 
 class Object(Protocol[T_co, P]):
-    def __new__(cls) -> T_co:
-        ...
+    def __new__(cls) -> T_co: ...
 
-    def __init__(self, *args: P.args, **kwargs: P.kwargs) -> None:
-        ...
+    def __init__(self, *args: P.args, **kwargs: P.kwargs) -> None: ...

@@ -1581,8 +1581,7 @@ class Message(Hashable):
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
         delete_after: Optional[float] = ...,
-    ) -> Message:
-        ...
+    ) -> Message: ...
 
     @overload
     async def edit(
@@ -1598,8 +1597,7 @@ class Message(Hashable):
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
         delete_after: Optional[float] = ...,
-    ) -> Message:
-        ...
+    ) -> Message: ...
 
     @overload
     async def edit(
@@ -1615,8 +1613,7 @@ class Message(Hashable):
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
         delete_after: Optional[float] = ...,
-    ) -> Message:
-        ...
+    ) -> Message: ...
 
     @overload
     async def edit(
@@ -1632,8 +1629,7 @@ class Message(Hashable):
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
         delete_after: Optional[float] = ...,
-    ) -> Message:
-        ...
+    ) -> Message: ...
 
     async def edit(
         self,
@@ -2293,8 +2289,7 @@ class PartialMessage(Hashable):
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
         delete_after: Optional[float] = ...,
-    ) -> Message:
-        ...
+    ) -> Message: ...
 
     @overload
     async def edit(
@@ -2310,8 +2305,7 @@ class PartialMessage(Hashable):
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
         delete_after: Optional[float] = ...,
-    ) -> Message:
-        ...
+    ) -> Message: ...
 
     @overload
     async def edit(
@@ -2327,8 +2321,7 @@ class PartialMessage(Hashable):
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
         delete_after: Optional[float] = ...,
-    ) -> Message:
-        ...
+    ) -> Message: ...
 
     @overload
     async def edit(
@@ -2344,8 +2337,7 @@ class PartialMessage(Hashable):
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
         delete_after: Optional[float] = ...,
-    ) -> Message:
-        ...
+    ) -> Message: ...
 
     async def edit(
         self,
