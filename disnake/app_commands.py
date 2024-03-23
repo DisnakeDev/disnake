@@ -7,8 +7,10 @@ import re
 from abc import ABC
 from typing import (
     TYPE_CHECKING,
+    AbstractSet,
     ClassVar,
     Collection,
+    Final,
     List,
     Mapping,
     Optional,
@@ -478,6 +480,12 @@ class Option:
             o.localize(store)
 
 
+# This is what the API uses by default, when not sending `integration_types` (or null).
+DEFAULT_INTEGRATION_TYPES: Final[AbstractSet[ApplicationIntegrationType]] = frozenset(
+    {ApplicationIntegrationType.guild}
+)
+
+
 class ApplicationCommand(ABC):
     """The base class for application commands.
 
@@ -515,6 +523,7 @@ class ApplicationCommand(ABC):
 
     integration_types: Optional[Set[:class:`ApplicationIntegrationType`]]
         The integration types/installation contexts where the command is available.
+        Defaults to :attr:`ApplicationIntegrationType.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
@@ -566,10 +575,8 @@ class ApplicationCommand(ABC):
         else:
             self._default_member_permissions = default_member_permissions.value
 
-        # TODO: should these be frozensets?
-        # TODO: we probably actually have to replicate the api default here so that sync works properly
-        self.integration_types: Optional[Set[ApplicationIntegrationType]] = (
-            set(integration_types) if integration_types else None
+        self.integration_types: Optional[Set[ApplicationIntegrationType]] = set(
+            integration_types or DEFAULT_INTEGRATION_TYPES
         )
         self.contexts: Optional[Set[InteractionContextType]] = set(contexts) if contexts else None
 
@@ -697,6 +704,7 @@ class UserCommand(ApplicationCommand):
 
     integration_types: Optional[Set[:class:`ApplicationIntegrationType`]]
         The integration types/installation contexts where the command is available.
+        Defaults to :attr:`ApplicationIntegrationType.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
@@ -759,6 +767,7 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
 
     integration_types: Optional[Set[:class:`ApplicationIntegrationType`]]
         The integration types/installation contexts where the command is available.
+        Defaults to :attr:`ApplicationIntegrationType.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
@@ -836,6 +845,7 @@ class MessageCommand(ApplicationCommand):
 
     integration_types: Optional[Set[:class:`ApplicationIntegrationType`]]
         The integration types/installation contexts where the command is available.
+        Defaults to :attr:`ApplicationIntegrationType.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
@@ -898,6 +908,7 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
 
     integration_types: Optional[Set[:class:`ApplicationIntegrationType`]]
         The integration types/installation contexts where the command is available.
+        Defaults to :attr:`ApplicationIntegrationType.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
@@ -982,6 +993,7 @@ class SlashCommand(ApplicationCommand):
 
     integration_types: Optional[Set[:class:`ApplicationIntegrationType`]]
         The integration types/installation contexts where the command is available.
+        Defaults to :attr:`ApplicationIntegrationType.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
@@ -1128,6 +1140,7 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
 
     integration_types: Optional[Set[:class:`ApplicationIntegrationType`]]
         The integration types/installation contexts where the command is available.
+        Defaults to :attr:`ApplicationIntegrationType.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
