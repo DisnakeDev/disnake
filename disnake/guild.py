@@ -27,7 +27,7 @@ from . import abc, utils
 from .app_commands import GuildApplicationCommandPermissions
 from .asset import Asset
 from .automod import AutoModAction, AutoModRule
-from .bans import BanEntry, BulkBan
+from .bans import BanEntry, BulkBanResult
 from .channel import (
     CategoryChannel,
     ForumChannel,
@@ -4013,7 +4013,7 @@ class Guild(Hashable):
         *users: Snowflake,
         clean_history_duration: Union[int, datetime.timedelta] = 86400,
         reason: Optional[str] = None,
-    ) -> BulkBan:
+    ) -> BulkBanResult:
         """|coro|
 
         Bans multiple users from the guild.
@@ -4050,7 +4050,7 @@ class Guild(Hashable):
 
         Returns
         -------
-        :class:`BulkBan`
+        :class:`BulkBanResult`
             An object containing the successful and failed bans.
         """
         if isinstance(clean_history_duration, datetime.timedelta):
@@ -4070,7 +4070,7 @@ class Guild(Hashable):
             reason=reason,
         )
 
-        return BulkBan(
+        return BulkBanResult(
             # these keys should always exist, but have a fallback just in case
             [Object(u) for u in (data.get("banned_users") or [])],
             [Object(u) for u in (data.get("failed_users") or [])],

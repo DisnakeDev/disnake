@@ -23,7 +23,7 @@ class Ban(TypedDict):
     user: User
 
 
-class BulkBan(TypedDict):
+class BulkBanResult(TypedDict):
     banned_users: List[Snowflake]
     failed_users: List[Snowflake]
 

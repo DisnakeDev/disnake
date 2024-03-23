@@ -69,10 +69,10 @@ BanEntry
 
         :type: :class:`User`
 
-BulkBan
-~~~~~~~
+BulkBanResult
+~~~~~~~~~~~~~
 
-.. class:: BulkBan
+.. class:: BulkBanResult
 
     A namedtuple which represents the successful and failed bans returned from :meth:`~Guild.bulk_ban`.
 

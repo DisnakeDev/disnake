@@ -16,6 +16,6 @@ class BanEntry(NamedTuple):
     user: "User"
 
 
-class BulkBan(NamedTuple):
+class BulkBanResult(NamedTuple):
     banned: List[Snowflake]
     failed: List[Snowflake]

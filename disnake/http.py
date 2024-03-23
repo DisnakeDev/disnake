@@ -883,7 +883,7 @@ class HTTPClient:
         *,
         delete_message_seconds: int = 86400,
         reason: Optional[str] = None,
-    ) -> Response[guild.BulkBan]:
+    ) -> Response[guild.BulkBanResult]:
         r = Route("POST", "/guilds/{guild_id}/bulk-ban", guild_id=guild_id)
         payload = {
             "user_ids": user_ids,
