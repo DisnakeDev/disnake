@@ -356,7 +356,7 @@ class _BaseInteractionMetadata(TypedDict):
 
 
 class ApplicationCommandInteractionMetadata(_BaseInteractionMetadata):
-    name: NotRequired[str]  # not documented
+    name: str  # not documented
 
 
 class MessageComponentInteractionMetadata(_BaseInteractionMetadata):
