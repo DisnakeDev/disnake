@@ -4011,7 +4011,7 @@ class Guild(Hashable):
     async def bulk_ban(
         self,
         *users: Snowflake,
-        clean_history_duration: Union[int, datetime.timedelta] = 86400,
+        clean_history_duration: Union[int, datetime.timedelta] = 0,
         reason: Optional[str] = None,
     ) -> BulkBanResult:
         """|coro|
@@ -4030,7 +4030,7 @@ class Guild(Hashable):
         clean_history_duration: Union[:class:`int`, :class:`datetime.timedelta`]
             The timespan (seconds or timedelta) of messages to delete from the users
             in the guild, up to 7 days (604800 seconds).
-            Defaults to 1 day (86400 seconds).
+            Defaults to ``0``.
 
             .. note::
                 This may not be accurate with small durations (e.g. a few minutes)

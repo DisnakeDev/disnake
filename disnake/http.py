@@ -881,7 +881,7 @@ class HTTPClient:
         user_ids: List[Snowflake],
         guild_id: Snowflake,
         *,
-        delete_message_seconds: int = 86400,
+        delete_message_seconds: int = 0,
         reason: Optional[str] = None,
     ) -> Response[guild.BulkBanResult]:
         r = Route("POST", "/guilds/{guild_id}/bulk-ban", guild_id=guild_id)
