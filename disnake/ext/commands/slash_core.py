@@ -8,6 +8,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
+    Collection,
     Dict,
     List,
     Optional,
@@ -19,7 +20,7 @@ from typing import (
 
 from disnake import utils
 from disnake.app_commands import Option, SlashCommand
-from disnake.enums import OptionType
+from disnake.enums import ApplicationIntegrationType, InteractionContextType, OptionType
 from disnake.i18n import Localized
 from disnake.interactions import ApplicationCommandInteraction
 from disnake.permissions import Permissions
@@ -436,6 +437,8 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
+        integration_types: Optional[Collection[ApplicationIntegrationType]] = None,
+        contexts: Optional[Collection[InteractionContextType]] = None,
         guild_ids: Optional[Sequence[int]] = None,
         connectors: Optional[Dict[str, str]] = None,
         auto_sync: Optional[bool] = None,
@@ -472,6 +475,8 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             dm_permission=dm_permission and not self._guild_only,
             default_member_permissions=default_member_permissions,
             nsfw=nsfw,
+            integration_types=integration_types,
+            contexts=contexts,
         )
 
     @property
@@ -753,6 +758,8 @@ def slash_command(
     dm_permission: Optional[bool] = None,
     default_member_permissions: Optional[Union[Permissions, int]] = None,
     nsfw: Optional[bool] = None,
+    integration_types: Optional[Collection[ApplicationIntegrationType]] = None,
+    contexts: Optional[Collection[InteractionContextType]] = None,
     options: Optional[List[Option]] = None,
     guild_ids: Optional[Sequence[int]] = None,
     connectors: Optional[Dict[str, str]] = None,
@@ -783,6 +790,19 @@ def slash_command(
         Defaults to ``False``.
 
         .. versionadded:: 2.8
+
+    integration_types: Optional[Set[:class:`.ApplicationIntegrationType`]]
+        The integration types/installation contexts where the command is available.
+        Defaults to :attr:`.ApplicationIntegrationType.guild` only.
+        Only available for global commands.
+
+        .. versionadded:: 2.10
+
+    contexts: Optional[Set[:class:`.InteractionContextType`]]
+        The interaction contexts where the command can be used.
+        Only available for global commands.
+
+        .. versionadded:: 2.10
 
     options: List[:class:`.Option`]
         The list of slash command options. The options will be visible in Discord.
@@ -834,6 +854,8 @@ def slash_command(
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
             nsfw=nsfw,
+            integration_types=integration_types,
+            contexts=contexts,
             guild_ids=guild_ids,
             connectors=connectors,
             auto_sync=auto_sync,

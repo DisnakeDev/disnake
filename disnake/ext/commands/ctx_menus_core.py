@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Collection, Dict, Optional, Sequence, Tuple, Union
 
 from disnake.app_commands import MessageCommand, UserCommand
+from disnake.enums import ApplicationIntegrationType, InteractionContextType
 from disnake.i18n import Localized
 from disnake.permissions import Permissions
 
@@ -76,6 +77,8 @@ class InvokableUserCommand(InvokableApplicationCommand):
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
+        integration_types: Optional[Collection[ApplicationIntegrationType]] = None,
+        contexts: Optional[Collection[InteractionContextType]] = None,
         guild_ids: Optional[Sequence[int]] = None,
         auto_sync: Optional[bool] = None,
         **kwargs,
@@ -103,6 +106,8 @@ class InvokableUserCommand(InvokableApplicationCommand):
             dm_permission=dm_permission and not self._guild_only,
             default_member_permissions=default_member_permissions,
             nsfw=nsfw,
+            integration_types=integration_types,
+            contexts=contexts,
         )
 
     async def _call_external_error_handlers(
@@ -178,6 +183,8 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
+        integration_types: Optional[Collection[ApplicationIntegrationType]] = None,
+        contexts: Optional[Collection[InteractionContextType]] = None,
         guild_ids: Optional[Sequence[int]] = None,
         auto_sync: Optional[bool] = None,
         **kwargs,
@@ -199,6 +206,8 @@ class InvokableMessageCommand(InvokableApplicationCommand):
             dm_permission=dm_permission and not self._guild_only,
             default_member_permissions=default_member_permissions,
             nsfw=nsfw,
+            integration_types=integration_types,
+            contexts=contexts,
         )
 
     async def _call_external_error_handlers(
@@ -234,6 +243,8 @@ def user_command(
     dm_permission: Optional[bool] = None,
     default_member_permissions: Optional[Union[Permissions, int]] = None,
     nsfw: Optional[bool] = None,
+    integration_types: Optional[Collection[ApplicationIntegrationType]] = None,
+    contexts: Optional[Collection[InteractionContextType]] = None,
     guild_ids: Optional[Sequence[int]] = None,
     auto_sync: Optional[bool] = None,
     extras: Optional[Dict[str, Any]] = None,
@@ -263,6 +274,19 @@ def user_command(
         Defaults to ``False``.
 
         .. versionadded:: 2.8
+
+    integration_types: Optional[Set[:class:`.ApplicationIntegrationType`]]
+        The integration types/installation contexts where the command is available.
+        Defaults to :attr:`.ApplicationIntegrationType.guild` only.
+        Only available for global commands.
+
+        .. versionadded:: 2.10
+
+    contexts: Optional[Set[:class:`.InteractionContextType`]]
+        The interaction contexts where the command can be used.
+        Only available for global commands.
+
+        .. versionadded:: 2.10
 
     auto_sync: :class:`bool`
         Whether to automatically register the command. Defaults to ``True``.
@@ -298,6 +322,8 @@ def user_command(
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
             nsfw=nsfw,
+            integration_types=integration_types,
+            contexts=contexts,
             guild_ids=guild_ids,
             auto_sync=auto_sync,
             extras=extras,
@@ -313,6 +339,8 @@ def message_command(
     dm_permission: Optional[bool] = None,
     default_member_permissions: Optional[Union[Permissions, int]] = None,
     nsfw: Optional[bool] = None,
+    integration_types: Optional[Collection[ApplicationIntegrationType]] = None,
+    contexts: Optional[Collection[InteractionContextType]] = None,
     guild_ids: Optional[Sequence[int]] = None,
     auto_sync: Optional[bool] = None,
     extras: Optional[Dict[str, Any]] = None,
@@ -345,6 +373,19 @@ def message_command(
         Defaults to ``False``.
 
         .. versionadded:: 2.8
+
+    integration_types: Optional[Set[:class:`.ApplicationIntegrationType`]]
+        The integration types/installation contexts where the command is available.
+        Defaults to :attr:`.ApplicationIntegrationType.guild` only.
+        Only available for global commands.
+
+        .. versionadded:: 2.10
+
+    contexts: Optional[Set[:class:`.InteractionContextType`]]
+        The interaction contexts where the command can be used.
+        Only available for global commands.
+
+        .. versionadded:: 2.10
 
     auto_sync: :class:`bool`
         Whether to automatically register the command. Defaults to ``True``.
@@ -380,6 +421,8 @@ def message_command(
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
             nsfw=nsfw,
+            integration_types=integration_types,
+            contexts=contexts,
             guild_ids=guild_ids,
             auto_sync=auto_sync,
             extras=extras,
