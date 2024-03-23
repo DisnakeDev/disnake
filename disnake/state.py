@@ -43,6 +43,7 @@ from .channel import (
     TextChannel,
     VoiceChannel,
     _guild_channel_factory,
+    _threaded_guild_channel_factory,
 )
 from .emoji import Emoji
 from .entitlement import Entitlement
@@ -93,13 +94,14 @@ if TYPE_CHECKING:
     from .app_commands import APIApplicationCommand, ApplicationCommand
     from .client import Client
     from .gateway import DiscordWebSocket
-    from .guild import GuildChannel, VocalGuildChannel
+    from .guild import GuildChannel, GuildMessageable, VocalGuildChannel
     from .http import HTTPClient
     from .types import gateway
     from .types.activity import Activity as ActivityPayload
     from .types.channel import DMChannel as DMChannelPayload
     from .types.emoji import Emoji as EmojiPayload, PartialEmoji as PartialEmojiPayload
     from .types.guild import Guild as GuildPayload, UnavailableGuild as UnavailableGuildPayload
+    from .types.interactions import InteractionChannel as InteractionChannelPayload
     from .types.message import Message as MessagePayload
     from .types.sticker import GuildSticker as GuildStickerPayload
     from .types.user import User as UserPayload
@@ -1994,6 +1996,32 @@ class ConnectionState:
             return self._emojis[emoji_id]
         except KeyError:
             return emoji
+
+    # note: this resolves private channels (and unknown types) to `PartialMessageable`
+    def _get_partial_interaction_channel(
+        self, data: InteractionChannelPayload, guild: Optional[Union[Guild, Object]]
+    ) -> Union[GuildMessageable, PartialMessageable]:
+        channel_id = int(data["id"])
+        channel_type = data["type"]
+
+        factory, _ = _threaded_guild_channel_factory(channel_type)
+        if not factory:
+            return PartialMessageable(
+                state=self,
+                id=channel_id,
+                type=try_enum(ChannelType, channel_type),
+            )
+
+        data.setdefault("position", 0)  # type: ignore
+        return (
+            isinstance(guild, Guild)
+            and guild.get_channel_or_thread(channel_id)
+            or factory(
+                guild=guild,  # type: ignore  # FIXME: create proper fallback guild instead of passing Object
+                state=self,
+                data=data,  # type: ignore  # generic payload type
+            )
+        )
 
     def get_channel(self, id: Optional[int]) -> Optional[Union[Channel, Thread]]:
         if id is None:
