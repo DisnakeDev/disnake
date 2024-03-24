@@ -4016,7 +4016,7 @@ class Guild(Hashable):
     ) -> BulkBanResult:
         """|coro|
 
-        Bans multiple users from the guild.
+        Bans multiple users from the guild at once.
 
         The users must meet the :class:`abc.Snowflake` abc.
 

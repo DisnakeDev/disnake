@@ -1,1 +1,1 @@
-Add :meth:`Guild.bulk_ban`.
+Support banning multiple users at once using :meth:`Guild.bulk_ban`.
