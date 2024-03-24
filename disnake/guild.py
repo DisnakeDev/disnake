@@ -4023,6 +4023,8 @@ class Guild(Hashable):
         You must have :attr:`~Permissions.ban_members` and :attr:`~Permissions.manage_guild`
         permissions to do this.
 
+        .. versionadded:: 2.10
+
         Parameters
         ----------
         *users: :class:`abc.Snowflake`
