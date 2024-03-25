@@ -293,6 +293,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         banner: Optional[Asset]
         accent_color: Optional[Colour]
         accent_colour: Optional[Colour]
+        avatar_decoration: Optional[Asset]
 
     @overload
     def __init__(
@@ -452,7 +453,14 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     def _update_inner_user(self, user: UserPayload) -> Optional[Tuple[User, User]]:
         u = self._user
-        original = (u.name, u._avatar, u.discriminator, u.global_name, u._public_flags)
+        original = (
+            u.name,
+            u._avatar,
+            u.discriminator,
+            u.global_name,
+            u._public_flags,
+            u._avatar_decoration_data,
+        )
         # These keys seem to always be available
         modified = (
             user["username"],
@@ -460,10 +468,18 @@ class Member(disnake.abc.Messageable, _UserTag):
             user["discriminator"],
             user.get("global_name"),
             user.get("public_flags", 0),
+            user.get("avatar_decoration_data", None),
         )
         if original != modified:
             to_return = User._copy(self._user)
-            u.name, u._avatar, u.discriminator, u.global_name, u._public_flags = modified
+            (
+                u.name,
+                u._avatar,
+                u.discriminator,
+                u.global_name,
+                u._public_flags,
+                u._avatar_decoration_data,
+            ) = modified
             # Signal to dispatch on_user_update
             return to_return, u
 
