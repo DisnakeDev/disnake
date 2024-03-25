@@ -587,7 +587,6 @@ class HTTPClient:
     def expire_poll(
         self, channel_id: Snowflake, message_id: Snowflake
     ) -> Response[message.Message]:
-        print(channel_id, message_id)
         return self.request(
             Route(
                 "POST",
