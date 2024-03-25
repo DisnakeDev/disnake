@@ -283,7 +283,6 @@ class HTTPClient:
         # header creation
         headers: Dict[str, str] = {
             "User-Agent": self.user_agent,
-            "x-super-properties": "eyJvcyI6IkxpbnV4IiwiY2xpZW50X2J1aWxkX251bWJlciI6Mjc4MTE0fQ==",
         }
 
         if self.token is not None:
