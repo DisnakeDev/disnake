@@ -83,23 +83,23 @@ jobs:
         echo "PYRIGHT_VERSION=$PYRIGHT_VERSION" >> $GITHUB_ENV
 
     - name: Run pyright (Linux)
-      uses: jakebailey/pyright-action@v1.4.1
+      uses: jakebailey/pyright-action@v2.2.1
       id: pyright-linux
       with:
         version: ${{ env.PYRIGHT_VERSION }}
         python-version: ${{ steps.setup-env.outputs.python-version }}
         python-platform: "Linux"
-        no-comments: ${{ matrix.python-version != '3.8' }}  # only add comments for one version
+        annotate: ${{ matrix.python-version == '3.8' }}  # only add comments for one version
         warnings: true
 
     - name: Run pyright (Windows)
-      uses: jakebailey/pyright-action@v1.4.1
+      uses: jakebailey/pyright-action@v2.2.1
       if: always() && (steps.pyright-linux.outcome == 'success' || steps.pyright-linux.outcome == 'failure')
       with:
         version: ${{ env.PYRIGHT_VERSION }}
         python-version: ${{ steps.setup-env.outputs.python-version }}
         python-platform: "Windows"
-        no-comments: true  # only add comments for one platform (see above)
+        annotate: false  # only add comments for one platform (see above)
         warnings: true
 
   misc:
