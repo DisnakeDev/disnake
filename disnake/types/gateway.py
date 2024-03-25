@@ -323,6 +323,18 @@ class MessageReactionRemoveEmojiEvent(TypedDict):
     emoji: PartialEmoji
 
 
+class MessagePollVoteAddEvent(TypedDict):
+    channel_id: Snowflake
+    guild_id: NotRequired[Snowflake]
+    message_id: Snowflake
+    user_id: Snowflake
+    answer_id: int
+
+
+class MessagePollVoteRemoveEvent(MessagePollVoteAddEvent):
+    ...
+
+
 # https://discord.com/developers/docs/topics/gateway-events#interaction-create
 InteractionCreateEvent = BaseInteraction
 

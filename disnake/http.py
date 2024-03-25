@@ -70,6 +70,7 @@ if TYPE_CHECKING:
         member,
         message,
         onboarding,
+        poll,
         role,
         sku,
         sticker,
@@ -282,6 +283,7 @@ class HTTPClient:
         # header creation
         headers: Dict[str, str] = {
             "User-Agent": self.user_agent,
+            "x-super-properties": "eyJvcyI6IkxpbnV4IiwiY2xpZW50X2J1aWxkX251bWJlciI6Mjc4MTE0fQ==",
         }
 
         if self.token is not None:
@@ -528,6 +530,7 @@ class HTTPClient:
         message_reference: Optional[message.MessageReference] = None,
         stickers: Optional[Sequence[Snowflake]] = None,
         components: Optional[Sequence[components.Component]] = None,
+        poll: Optional[poll.PollCreatePayload] = None,
         flags: Optional[int] = None,
     ) -> Response[message.Message]:
         r = Route("POST", "/channels/{channel_id}/messages", channel_id=channel_id)
@@ -563,6 +566,9 @@ class HTTPClient:
         if flags is not None:
             payload["flags"] = flags
 
+        if poll is not None:
+            payload["poll"] = poll
+
         return self.request(r, json=payload)
 
     def get_poll_answer_voters(
@@ -581,10 +587,11 @@ class HTTPClient:
     def expire_poll(
         self, channel_id: Snowflake, message_id: Snowflake
     ) -> Response[message.Message]:
+        print(channel_id, message_id)
         return self.request(
             Route(
-                "GET",
-                "/channels/{channel_id}/poll/{message_id}/expire",
+                "POST",
+                "/channels/{channel_id}/polls/{message_id}/expire",
                 channel_id=channel_id,
                 message_id=message_id,
             )
@@ -607,6 +614,7 @@ class HTTPClient:
         message_reference: Optional[message.MessageReference] = None,
         stickers: Optional[Sequence[Snowflake]] = None,
         components: Optional[Sequence[components.Component]] = None,
+        poll: Optional[poll.PollCreatePayload] = None,
         flags: Optional[int] = None,
     ) -> Response[message.Message]:
         payload: Dict[str, Any] = {"tts": tts}
@@ -628,6 +636,8 @@ class HTTPClient:
             payload["sticker_ids"] = stickers
         if flags is not None:
             payload["flags"] = flags
+        if poll:
+            payload["poll"] = poll
 
         multipart = to_multipart_with_attachments(payload, files)
 
@@ -647,6 +657,7 @@ class HTTPClient:
         message_reference: Optional[message.MessageReference] = None,
         stickers: Optional[Sequence[Snowflake]] = None,
         components: Optional[Sequence[components.Component]] = None,
+        poll: Optional[poll.PollCreatePayload] = None,
         flags: Optional[int] = None,
     ) -> Response[message.Message]:
         r = Route("POST", "/channels/{channel_id}/messages", channel_id=channel_id)
@@ -662,6 +673,7 @@ class HTTPClient:
             message_reference=message_reference,
             stickers=stickers,
             components=components,
+            poll=poll,
             flags=flags,
         )
 

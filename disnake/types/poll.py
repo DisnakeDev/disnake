@@ -43,3 +43,25 @@ class Poll(TypedDict):
     layout_type: PollType
     # sent only as part of responses from Discord's API/Gateway
     results: PollResult
+
+
+class EmojiPayload(TypedDict):
+    id: NotRequired[int]
+    name: NotRequired[str]
+
+
+class PollCreateMediaPayload(TypedDict):
+    text: NotRequired[str]
+    emoji: NotRequired[EmojiPayload]
+
+
+class PollCreateAnswerPayload(TypedDict):
+    poll_media: PollCreateMediaPayload
+
+
+class PollCreatePayload(TypedDict):
+    question: PollCreateMediaPayload
+    answers: List[PollCreateAnswerPayload]
+    duration: int
+    allow_multiselect: bool
+    layout_type: NotRequired[int]
