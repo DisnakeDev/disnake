@@ -8,6 +8,7 @@ on:
       - opened
       - reopened
       - edited
+      - synchronize
 
 permissions:
   pull-requests: read
