@@ -29,18 +29,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Run pre-commit
       id: pre-commit
-      uses: pre-commit/action@v3.0.0
+      uses: pre-commit/action@v3.0.1
 
   docs:
     # unlike the other workflows, we are using version 20.04 here as
     # readthedocs uses 20.04 for building our docs, and we want to be explicit
     runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up environment
       uses: ./.github/actions/setup-env
@@ -60,7 +60,7 @@ jobs:
     continue-on-error: ${{ matrix.experimental }}
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up environment
       id: setup-env
@@ -105,7 +105,7 @@ jobs:
   misc:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up environment
       id: setup
@@ -160,7 +160,7 @@ jobs:
       GITHUB_STEP_SUMMARY_FOOTER: "</pre></details>\n"
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up environment
       id: setup-env

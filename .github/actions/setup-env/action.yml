@@ -22,7 +22,7 @@ runs:
   steps:
     - name: Set up pdm with python ${{ inputs.python-version }}
       id: setup-python
-      uses: pdm-project/setup-pdm@v3
+      uses: pdm-project/setup-pdm@v4
       with:
         python-version: ${{ inputs.python-version }}
         version: "2.4.6"
