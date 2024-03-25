@@ -29,9 +29,6 @@ runs:
         cache: false
         cache-dependency-path: ${{ inputs.cache-dependency-path }}
         enable-pep582: false  # Disable PEP 582 package loading globally
-      env:
-        # temporary fix, see https://github.com/pdm-project/pdm/issues/1894#issuecomment-1537126396
-        PDM_DEPS: 'urllib3<2'
 
     - name: Disable PDM version check
       shell: bash
