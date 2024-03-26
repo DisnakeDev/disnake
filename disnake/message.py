@@ -220,7 +220,7 @@ async def _edit_handler(
 class Attachment(Hashable):
     """Represents an attachment from Discord.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: str(x)
 
@@ -658,13 +658,14 @@ class MessageReference:
         return f"<MessageReference message_id={self.message_id!r} channel_id={self.channel_id!r} guild_id={self.guild_id!r}>"
 
     def to_dict(self) -> MessageReferencePayload:
-        result: MessageReferencePayload = {"channel_id": self.channel_id}
+        result: MessageReferencePayload = {
+            "channel_id": self.channel_id,
+            "fail_if_not_exists": self.fail_if_not_exists,
+        }
         if self.message_id is not None:
             result["message_id"] = self.message_id
         if self.guild_id is not None:
             result["guild_id"] = self.guild_id
-        if self.fail_if_not_exists is not None:
-            result["fail_if_not_exists"] = self.fail_if_not_exists
         return result
 
     to_message_reference_dict = to_dict
@@ -766,7 +767,7 @@ def flatten_handlers(cls):
 class Message(Hashable):
     """Represents a message from Discord.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -1384,7 +1385,7 @@ class Message(Hashable):
             if (
                 self.channel.type is ChannelType.public_thread
                 and (parent := getattr(self.channel, "parent", None))
-                and parent.type is ChannelType.forum
+                and parent.type in (ChannelType.forum, ChannelType.media)
             ):
                 return f"{self.author.name} changed the post title: **{self.content}**"
             return f"{self.author.name} changed the channel name: **{self.content}**"
@@ -2082,7 +2083,7 @@ class Message(Hashable):
         return Thread(guild=self.guild, state=self._state, data=data)
 
     async def reply(
-        self, content: Optional[str] = None, *, fail_if_not_exists: bool = True, **kwargs
+        self, content: Optional[str] = None, *, fail_if_not_exists: bool = True, **kwargs: Any
     ) -> Message:
         """|coro|
 
@@ -2177,7 +2178,7 @@ class PartialMessage(Hashable):
 
     .. versionadded:: 1.6
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 

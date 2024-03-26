@@ -176,18 +176,18 @@ def _transform_tag_id(
         return None
 
     # cyclic imports
-    from .channel import ForumChannel
+    from .channel import ThreadOnlyGuildChannel
 
     tag: Optional[ForumTag] = None
     tag_id = int(data)
     thread = entry.target
     # try thread parent first
-    if isinstance(thread, Thread) and isinstance(thread.parent, ForumChannel):
+    if isinstance(thread, Thread) and isinstance(thread.parent, ThreadOnlyGuildChannel):
         tag = thread.parent.get_tag(tag_id)
     else:
-        # if not found (possibly deleted thread), search all forum channels
-        for forum in entry.guild.forum_channels:
-            if tag := forum.get_tag(tag_id):
+        # if not found (possibly deleted thread), search all forum/media channels
+        for channel in entry.guild._channels.values():
+            if isinstance(channel, ThreadOnlyGuildChannel) and (tag := channel.get_tag(tag_id)):
                 break
 
     return tag or Object(id=tag_id)
@@ -245,7 +245,7 @@ def _transform_datetime(entry: AuditLogEntry, data: Optional[str]) -> Optional[d
 
 
 def _transform_privacy_level(
-    entry: AuditLogEntry, data: int
+    entry: AuditLogEntry, data: Optional[int]
 ) -> Optional[Union[enums.StagePrivacyLevel, enums.GuildScheduledEventPrivacyLevel]]:
     if data is None:
         return None
@@ -517,7 +517,7 @@ class AuditLogEntry(Hashable):
     You can retrieve these via :meth:`Guild.audit_logs`,
     or via the :func:`on_audit_log_entry_create` event.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 

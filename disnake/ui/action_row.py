@@ -96,7 +96,7 @@ TextInputCompatibleActionRowT = TypeVar(
 class ActionRow(Generic[UIComponentT]):
     """Represents a UI action row. Useful for lower level component manipulation.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x[i]
 
@@ -164,7 +164,8 @@ class ActionRow(Generic[UIComponentT]):
     def __init__(self: ActionRow[StrictUIComponentT], *components: StrictUIComponentT) -> None:
         ...
 
-    def __init__(self, *components: UIComponentT) -> None:
+    # n.b. this should be `*components: UIComponentT`, but pyright does not like it
+    def __init__(self, *components: Union[MessageUIComponent, ModalUIComponent]) -> None:
         self._children: List[UIComponentT] = []
 
         for component in components:
@@ -172,7 +173,7 @@ class ActionRow(Generic[UIComponentT]):
                 raise TypeError(
                     f"components should be of type WrappedComponent, got {type(component).__name__}."
                 )
-            self.append_item(component)
+            self.append_item(component)  # type: ignore
 
     def __repr__(self) -> str:
         return f"<ActionRow children={self._children!r}>"

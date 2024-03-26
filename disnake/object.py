@@ -29,7 +29,7 @@ class Object(Hashable):
     receive this class rather than the actual data class. These cases are
     extremely rare.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 

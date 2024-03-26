@@ -865,6 +865,21 @@ Members
     :param after: The updated member's updated info.
     :type after: :class:`Member`
 
+.. function:: on_raw_presence_update(payload)
+
+    Called when a member updates their presence.
+    Unlike :func:`on_presence_update`, this is called regardless of the member cache.
+
+    Since the data payload can be partial and the Discord API does not validate the types of the fields,
+    care must be taken when accessing stuff in the dictionary.
+
+    This requires :attr:`Intents.presences` to be enabled.
+
+    .. versionadded:: 2.10
+
+    :param payload: The raw event payload data.
+    :type payload: :class:`RawPresenceUpdateEvent`
+
 .. function:: on_user_update(before, after)
 
     Called when a :class:`User` is updated.
@@ -1397,18 +1412,12 @@ This section documents events related to Discord chat messages.
 
     Called when someone begins typing a message.
 
-    The ``channel`` parameter can be a :class:`abc.Messageable` instance, or a :class:`ForumChannel`.
+    The ``channel`` parameter can be a :class:`abc.Messageable` instance, or a :class:`ForumChannel` or :class:`MediaChannel`.
     If channel is an :class:`abc.Messageable` instance, it could be a :class:`TextChannel`,
     :class:`VoiceChannel`, :class:`StageChannel`, :class:`GroupChannel`, or :class:`DMChannel`.
 
-    .. versionchanged:: 2.5
-        ``channel`` may be a type :class:`ForumChannel`
-
-    .. versionchanged:: 2.9
-        ``channel`` may be a type :class:`StageChannel`
-
-    If the ``channel`` is a :class:`TextChannel`, :class:`ForumChannel`, :class:`VoiceChannel`, or :class:`StageChannel` then the
-    ``user`` parameter is a :class:`Member`, otherwise it is a :class:`User`.
+    If the ``channel`` is not a :class:`DMChannel`,
+    then the ``user`` parameter is a :class:`Member`, otherwise it is a :class:`User`.
 
     If the ``channel`` is a :class:`DMChannel` and the user is not found in the internal user/member cache,
     then this event will not be called. Consider using :func:`on_raw_typing` instead.
@@ -1426,7 +1435,7 @@ This section documents events related to Discord chat messages.
         to enable the members intent.
 
     :param channel: The location where the typing originated from.
-    :type channel: Union[:class:`abc.Messageable`, :class:`ForumChannel`]
+    :type channel: Union[:class:`abc.Messageable`, :class:`ForumChannel`, :class:`MediaChannel`]
     :param user: The user that started typing.
     :type user: Union[:class:`User`, :class:`Member`]
     :param when: When the typing started as an aware datetime in UTC.
@@ -1442,6 +1451,47 @@ This section documents events related to Discord chat messages.
     :param data: The raw event payload data.
     :type data: :class:`RawTypingEvent`
 
+Entitlements
+~~~~~~~~~~~~
+
+This section documents events related to entitlements, which are used for application subscriptions.
+
+.. function:: on_entitlement_create(entitlement)
+
+    Called when an entitlement is created.
+
+    This is usually caused by a user subscribing to an SKU,
+    or when a new test entitlement is created (see :meth:`Client.create_entitlement`).
+
+    .. versionadded:: 2.10
+
+    :param entitlement: The entitlement that was created.
+    :type entitlement: :class:`Entitlement`
+
+.. function:: on_entitlement_update(entitlement)
+
+    Called when an entitlement is updated.
+
+    This happens e.g. when a user's subscription gets renewed (in which case the
+    :attr:`Entitlement.ends_at` attribute reflects the new expiration date).
+
+    .. versionadded:: 2.10
+
+    :param entitlement: The entitlement that was updated.
+    :type entitlement: :class:`Entitlement`
+
+.. function:: on_entitlement_delete(entitlement)
+
+    Called when an entitlement is deleted.
+
+    .. note::
+        This does not get called when an entitlement expires;
+        it only occurs e.g. in case of refunds or due to manual removal.
+
+    .. versionadded:: 2.10
+
+    :param entitlement: The entitlement that was deleted.
+    :type entitlement: :class:`Entitlement`
 
 Enumerations
 ------------

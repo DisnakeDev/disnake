@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 
     from disnake.interactions import ApplicationCommandInteraction
 
-    from ._types import Check, Coro, Error, Hook
+    from ._types import AppCheck, Coro, Error, Hook
     from .cog import Cog
 
     ApplicationCommandInteractionT = TypeVar(
@@ -130,7 +130,7 @@ class InvokableApplicationCommand(ABC):
         self.__original_kwargs__ = {k: v for k, v in kwargs.items() if v is not None}
         return self
 
-    def __init__(self, func: CommandCallback, *, name: Optional[str] = None, **kwargs) -> None:
+    def __init__(self, func: CommandCallback, *, name: Optional[str] = None, **kwargs: Any) -> None:
         self.__command_flag__ = None
         self._callback: CommandCallback = func
         self.name: str = name or func.__name__
@@ -155,7 +155,7 @@ class InvokableApplicationCommand(ABC):
         except AttributeError:
             checks = kwargs.get("checks", [])
 
-        self.checks: List[Check] = checks
+        self.checks: List[AppCheck] = checks
 
         try:
             cooldown = func.__commands_cooldown__
@@ -253,10 +253,10 @@ class InvokableApplicationCommand(ABC):
     def callback(self) -> CommandCallback:
         return self._callback
 
-    def add_check(self, func: Check) -> None:
+    def add_check(self, func: AppCheck) -> None:
         """Adds a check to the application command.
 
-        This is the non-decorator interface to :func:`.check`.
+        This is the non-decorator interface to :func:`.app_check`.
 
         Parameters
         ----------
@@ -265,7 +265,7 @@ class InvokableApplicationCommand(ABC):
         """
         self.checks.append(func)
 
-    def remove_check(self, func: Check) -> None:
+    def remove_check(self, func: AppCheck) -> None:
         """Removes a check from the application command.
 
         This function is idempotent and will not raise an exception
@@ -281,7 +281,9 @@ class InvokableApplicationCommand(ABC):
         except ValueError:
             pass
 
-    async def __call__(self, interaction: ApplicationCommandInteraction, *args, **kwargs) -> Any:
+    async def __call__(
+        self, interaction: ApplicationCommandInteraction, *args: Any, **kwargs: Any
+    ) -> Any:
         """|coro|
 
         Calls the internal callback that the application command holds.
@@ -303,7 +305,7 @@ class InvokableApplicationCommand(ABC):
             dt = inter.created_at
             current = dt.replace(tzinfo=datetime.timezone.utc).timestamp()
             bucket = self._buckets.get_bucket(inter, current)  # type: ignore
-            if bucket is not None:
+            if bucket is not None:  # pyright: ignore[reportUnnecessaryComparison]
                 retry_after = bucket.update_rate_limit(current)
                 if retry_after:
                     raise CommandOnCooldown(bucket, retry_after, self._buckets.type)  # type: ignore
@@ -381,7 +383,7 @@ class InvokableApplicationCommand(ABC):
         return 0.0
 
     # This method isn't really usable in this class, but it's usable in subclasses.
-    async def invoke(self, inter: ApplicationCommandInteraction, *args, **kwargs) -> None:
+    async def invoke(self, inter: ApplicationCommandInteraction, *args: Any, **kwargs: Any) -> None:
         await self.prepare(inter)
 
         try:
@@ -636,7 +638,9 @@ def default_member_permissions(
     ban_members: bool = ...,
     change_nickname: bool = ...,
     connect: bool = ...,
+    create_events: bool = ...,
     create_forum_threads: bool = ...,
+    create_guild_expressions: bool = ...,
     create_instant_invite: bool = ...,
     create_private_threads: bool = ...,
     create_public_threads: bool = ...,

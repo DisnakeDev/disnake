@@ -25,6 +25,7 @@ from typing import (
     Optional,
     Sequence,
     Tuple,
+    TypedDict,
     TypeVar,
     Union,
     overload,
@@ -32,7 +33,7 @@ from typing import (
 
 import aiohttp
 
-from . import utils
+from . import abc, utils
 from .activity import ActivityTypes, BaseActivity, create_activity
 from .app_commands import (
     APIMessageCommand,
@@ -46,6 +47,7 @@ from .application_role_connection import ApplicationRoleConnectionMetadata
 from .backoff import ExponentialBackoff
 from .channel import PartialMessageable, _threaded_channel_factory
 from .emoji import Emoji
+from .entitlement import Entitlement
 from .enums import ApplicationCommandType, ChannelType, Event, Status
 from .errors import (
     ConnectionClosed,
@@ -62,9 +64,10 @@ from .guild_preview import GuildPreview
 from .http import HTTPClient
 from .i18n import LocalizationProtocol, LocalizationStore
 from .invite import Invite
-from .iterators import GuildIterator
+from .iterators import EntitlementIterator, GuildIterator
 from .mentions import AllowedMentions
 from .object import Object
+from .sku import SKU
 from .stage_instance import StageInstance
 from .state import ConnectionState
 from .sticker import GuildSticker, StandardSticker, StickerPack, _sticker_factory
@@ -79,8 +82,10 @@ from .webhook import Webhook
 from .widget import Widget
 
 if TYPE_CHECKING:
+    from typing_extensions import NotRequired
+
     from .abc import GuildChannel, PrivateChannel, Snowflake, SnowflakeTime
-    from .app_commands import APIApplicationCommand
+    from .app_commands import APIApplicationCommand, MessageCommand, SlashCommand, UserCommand
     from .asset import AssetBytes
     from .channel import DMChannel
     from .member import Member
@@ -205,6 +210,17 @@ class GatewayParams(NamedTuple):
 
     encoding: Literal["json"] = "json"
     zlib: bool = True
+
+
+# used for typing the ws parameter dict in the connect() loop
+class _WebSocketParams(TypedDict):
+    initial: bool
+    shard_id: Optional[int]
+    gateway: Optional[str]
+
+    sequence: NotRequired[Optional[int]]
+    resume: NotRequired[bool]
+    session: NotRequired[Optional[str]]
 
 
 class Client:
@@ -1080,7 +1096,7 @@ class Client:
         if not ignore_session_start_limit and self.session_start_limit.remaining == 0:
             raise SessionStartLimitReached(self.session_start_limit)
 
-        ws_params = {
+        ws_params: _WebSocketParams = {
             "initial": True,
             "shard_id": self.shard_id,
             "gateway": initial_gateway,
@@ -1104,6 +1120,7 @@ class Client:
 
                 while True:
                     await self.ws.poll_event()
+
             except ReconnectWebSocket as e:
                 _log.info("Got a request to %s the websocket.", e.op)
                 self.dispatch("disconnect")
@@ -1116,6 +1133,7 @@ class Client:
                     gateway=self.ws.resume_gateway if e.resume else initial_gateway,
                 )
                 continue
+
             except (
                 OSError,
                 HTTPException,
@@ -1196,7 +1214,8 @@ class Client:
                 # if an error happens during disconnects, disregard it.
                 pass
 
-        if self.ws is not None and self.ws.open:
+        # can be None if not connected
+        if self.ws is not None and self.ws.open:  # pyright: ignore[reportUnnecessaryComparison]
             await self.ws.close(code=1000)
 
         await self.http.close()
@@ -1874,16 +1893,15 @@ class Client:
 
         await self.ws.change_presence(activity=activity, status=status_str)
 
+        activities = () if activity is None else (activity,)
         for guild in self._connection.guilds:
             me = guild.me
-            if me is None:
+            if me is None:  # pyright: ignore[reportUnnecessaryComparison]
+                # may happen if guild is unavailable
                 continue
 
-            if activity is not None:
-                me.activities = (activity,)  # type: ignore
-            else:
-                me.activities = ()
-
+            # Member.activities is typehinted as Tuple[ActivityType, ...], we may be setting it as Tuple[BaseActivity, ...]
+            me.activities = activities  # type: ignore
             me.status = status
 
     # Guild stuff
@@ -2642,6 +2660,24 @@ class Client:
         """
         return await self._connection.fetch_global_command(command_id)
 
+    @overload
+    async def create_global_command(self, application_command: SlashCommand) -> APISlashCommand:
+        ...
+
+    @overload
+    async def create_global_command(self, application_command: UserCommand) -> APIUserCommand:
+        ...
+
+    @overload
+    async def create_global_command(self, application_command: MessageCommand) -> APIMessageCommand:
+        ...
+
+    @overload
+    async def create_global_command(
+        self, application_command: ApplicationCommand
+    ) -> APIApplicationCommand:
+        ...
+
     async def create_global_command(
         self, application_command: ApplicationCommand
     ) -> APIApplicationCommand:
@@ -2663,6 +2699,30 @@ class Client:
         """
         application_command.localize(self.i18n)
         return await self._connection.create_global_command(application_command)
+
+    @overload
+    async def edit_global_command(
+        self, command_id: int, new_command: SlashCommand
+    ) -> APISlashCommand:
+        ...
+
+    @overload
+    async def edit_global_command(
+        self, command_id: int, new_command: UserCommand
+    ) -> APIUserCommand:
+        ...
+
+    @overload
+    async def edit_global_command(
+        self, command_id: int, new_command: MessageCommand
+    ) -> APIMessageCommand:
+        ...
+
+    @overload
+    async def edit_global_command(
+        self, command_id: int, new_command: ApplicationCommand
+    ) -> APIApplicationCommand:
+        ...
 
     async def edit_global_command(
         self, command_id: int, new_command: ApplicationCommand
@@ -2778,6 +2838,30 @@ class Client:
         """
         return await self._connection.fetch_guild_command(guild_id, command_id)
 
+    @overload
+    async def create_guild_command(
+        self, guild_id: int, application_command: SlashCommand
+    ) -> APISlashCommand:
+        ...
+
+    @overload
+    async def create_guild_command(
+        self, guild_id: int, application_command: UserCommand
+    ) -> APIUserCommand:
+        ...
+
+    @overload
+    async def create_guild_command(
+        self, guild_id: int, application_command: MessageCommand
+    ) -> APIMessageCommand:
+        ...
+
+    @overload
+    async def create_guild_command(
+        self, guild_id: int, application_command: ApplicationCommand
+    ) -> APIApplicationCommand:
+        ...
+
     async def create_guild_command(
         self, guild_id: int, application_command: ApplicationCommand
     ) -> APIApplicationCommand:
@@ -2801,6 +2885,30 @@ class Client:
         """
         application_command.localize(self.i18n)
         return await self._connection.create_guild_command(guild_id, application_command)
+
+    @overload
+    async def edit_guild_command(
+        self, guild_id: int, command_id: int, new_command: SlashCommand
+    ) -> APISlashCommand:
+        ...
+
+    @overload
+    async def edit_guild_command(
+        self, guild_id: int, command_id: int, new_command: UserCommand
+    ) -> APIUserCommand:
+        ...
+
+    @overload
+    async def edit_guild_command(
+        self, guild_id: int, command_id: int, new_command: MessageCommand
+    ) -> APIMessageCommand:
+        ...
+
+    @overload
+    async def edit_guild_command(
+        self, guild_id: int, command_id: int, new_command: ApplicationCommand
+    ) -> APIApplicationCommand:
+        ...
 
     async def edit_guild_command(
         self, guild_id: int, command_id: int, new_command: ApplicationCommand
@@ -2973,3 +3081,133 @@ class Client:
             self.application_id, payload
         )
         return [ApplicationRoleConnectionMetadata._from_data(record) for record in data]
+
+    async def skus(self) -> List[SKU]:
+        """|coro|
+
+        Retrieves the :class:`.SKU`\\s for the application.
+
+        To manage application subscription entitlements, you should use the SKU
+        with :attr:`.SKUType.subscription`.
+
+        .. versionadded:: 2.10
+
+        Raises
+        ------
+        HTTPException
+            Retrieving the SKUs failed.
+
+        Returns
+        -------
+        List[:class:`.SKU`]
+            The list of SKUs.
+        """
+        data = await self.http.get_skus(self.application_id)
+        return [SKU(data=d) for d in data]
+
+    def entitlements(
+        self,
+        *,
+        limit: Optional[int] = 100,
+        before: Optional[SnowflakeTime] = None,
+        after: Optional[SnowflakeTime] = None,
+        user: Optional[Snowflake] = None,
+        guild: Optional[Snowflake] = None,
+        skus: Optional[Sequence[Snowflake]] = None,
+        exclude_ended: bool = False,
+        oldest_first: bool = False,
+    ) -> EntitlementIterator:
+        """Retrieves an :class:`.AsyncIterator` that enables receiving entitlements for the application.
+
+        .. note::
+
+            This method is an API call. To get the entitlements of the invoking user/guild
+            in interactions, consider using :attr:`.Interaction.entitlements`.
+
+        Entries are returned in order from newest to oldest by default;
+        pass ``oldest_first=True`` to reverse the iteration order.
+
+        All parameters are optional.
+
+        .. versionadded:: 2.10
+
+        Parameters
+        ----------
+        limit: Optional[:class:`int`]
+            The number of entitlements to retrieve.
+            If ``None``, retrieves every entitlement.
+            Note, however, that this would make it a slow operation.
+            Defaults to ``100``.
+        before: Union[:class:`.abc.Snowflake`, :class:`datetime.datetime`]
+            Retrieves entitlements created before this date or object.
+            If a datetime is provided, it is recommended to use a UTC aware datetime.
+            If the datetime is naive, it is assumed to be local time.
+        after: Union[:class:`.abc.Snowflake`, :class:`datetime.datetime`]
+            Retrieve entitlements created after this date or object.
+            If a datetime is provided, it is recommended to use a UTC aware datetime.
+            If the datetime is naive, it is assumed to be local time.
+        user: Optional[:class:`.abc.Snowflake`]
+            The user to retrieve entitlements for.
+        guild: Optional[:class:`.abc.Snowflake`]
+            The guild to retrieve entitlements for.
+        skus: Optional[Sequence[:class:`.abc.Snowflake`]]
+            The SKUs for which entitlements are retrieved.
+        exclude_ended: :class:`bool`
+            Whether to exclude ended/expired entitlements. Defaults to ``False``.
+        oldest_first: :class:`bool`
+            If set to ``True``, return entries in oldest->newest order. Defaults to ``False``.
+
+        Raises
+        ------
+        HTTPException
+            Retrieving the entitlements failed.
+
+        Yields
+        ------
+        :class:`.Entitlement`
+            The entitlements for the given parameters.
+        """
+        return EntitlementIterator(
+            self.application_id,
+            state=self._connection,
+            limit=limit,
+            before=before,
+            after=after,
+            user_id=user.id if user is not None else None,
+            guild_id=guild.id if guild is not None else None,
+            sku_ids=[sku.id for sku in skus] if skus else None,
+            exclude_ended=exclude_ended,
+            oldest_first=oldest_first,
+        )
+
+    async def create_entitlement(
+        self, sku: Snowflake, owner: Union[abc.User, Guild]
+    ) -> Entitlement:
+        """|coro|
+
+        Creates a new test :class:`.Entitlement` for the given user or guild, with no expiry.
+
+        Parameters
+        ----------
+        sku: :class:`.abc.Snowflake`
+            The :class:`.SKU` to grant the entitlement for.
+        owner: Union[:class:`.abc.User`, :class:`.Guild`]
+            The user or guild to grant the entitlement to.
+
+        Raises
+        ------
+        HTTPException
+            Creating the entitlement failed.
+
+        Returns
+        -------
+        :class:`.Entitlement`
+            The newly created entitlement.
+        """
+        data = await self.http.create_test_entitlement(
+            self.application_id,
+            sku_id=sku.id,
+            owner_id=owner.id,
+            owner_type=2 if isinstance(owner, abc.User) else 1,
+        )
+        return Entitlement(data=data, state=self._connection)

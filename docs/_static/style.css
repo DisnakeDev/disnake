@@ -1313,21 +1313,20 @@ rect.highlighted {
     fill: var(--highlighted-text);
 }
 
-.container.operations {
+details.operations {
   padding: 10px;
   border: 1px solid var(--codeblock-border);
   margin-bottom: 20px;
 }
 
-.container.operations::before {
-  content: 'Supported Operations';
-  color: var(--main-big-headers-text);
-  display: block;
-  padding-bottom: 0.5em;
+details.operations dl {
+  margin-top: 15px;
+  margin-bottom: 15px;
 }
 
-.container.operations > dl.describe > dt {
-  background-color: var(--api-entry-background);
+details.operations > summary::after {
+  content: 'Supported Operations';
+  color: var(--main-big-headers-text);
 }
 
 .table-wrapper {

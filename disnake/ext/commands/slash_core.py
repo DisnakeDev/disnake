@@ -142,7 +142,7 @@ class SubCommandGroup(InvokableApplicationCommand):
         parent: InvokableSlashCommand,
         *,
         name: LocalizedOptional = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
@@ -193,7 +193,7 @@ class SubCommandGroup(InvokableApplicationCommand):
         options: Optional[list] = None,
         connectors: Optional[dict] = None,
         extras: Optional[Dict[str, Any]] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> Callable[[CommandCallback], SubCommand]:
         """A decorator that creates a subcommand in the subcommand group.
         Parameters are the same as in :class:`InvokableSlashCommand.sub_command`
@@ -272,7 +272,7 @@ class SubCommand(InvokableApplicationCommand):
         description: LocalizedOptional = None,
         options: Optional[list] = None,
         connectors: Optional[Dict[str, str]] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
@@ -332,10 +332,12 @@ class SubCommand(InvokableApplicationCommand):
 
     @property
     def description(self) -> str:
+        """:class:`str`: The slash sub command's description. Shorthand for :attr:`self.body.description <.Option.description>`."""
         return self.body.description
 
     @property
     def body(self) -> Option:
+        """:class:`.Option`: The API representation for this slash sub command. Shorthand for :attr:`.SubCommand.option`"""
         return self.option
 
     async def _call_autocompleter(
@@ -343,7 +345,7 @@ class SubCommand(InvokableApplicationCommand):
     ) -> Optional[Choices]:
         return await _call_autocompleter(self, param, inter, user_input)
 
-    async def invoke(self, inter: ApplicationCommandInteraction, *args, **kwargs) -> None:
+    async def invoke(self, inter: ApplicationCommandInteraction, *args: Any, **kwargs: Any) -> None:
         for k, v in self.connectors.items():
             if k in kwargs:
                 kwargs[v] = kwargs.pop(k)
@@ -437,7 +439,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         guild_ids: Optional[Sequence[int]] = None,
         connectors: Optional[Dict[str, str]] = None,
         auto_sync: Optional[bool] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
@@ -508,10 +510,12 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
     @property
     def description(self) -> str:
+        """:class:`str`: The slash command's description. Shorthand for :attr:`self.body.description <.SlashCommand.description>`."""
         return self.body.description
 
     @property
     def options(self) -> List[Option]:
+        """List[:class:`.Option`]: The list of options the slash command has. Shorthand for :attr:`self.body.options <.SlashCommand.options>`."""
         return self.body.options
 
     def sub_command(
@@ -521,7 +525,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         options: Optional[list] = None,
         connectors: Optional[dict] = None,
         extras: Optional[Dict[str, Any]] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> Callable[[CommandCallback], SubCommand]:
         """A decorator that creates a subcommand under the base command.
 
@@ -583,7 +587,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         self,
         name: LocalizedOptional = None,
         extras: Optional[Dict[str, Any]] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> Callable[[CommandCallback], SubCommandGroup]:
         """A decorator that creates a subcommand group under the base command.
 
@@ -666,7 +670,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             group = self.children.get(chain[0])
             if not isinstance(group, SubCommandGroup):
                 raise AssertionError("the first subcommand is not a SubCommandGroup instance")
-            subcmd = group.children.get(chain[1]) if group is not None else None
+            subcmd = group.children.get(chain[1])
         else:
             raise ValueError("Command chain is too long")
 
@@ -695,7 +699,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             group = self.children.get(chain[0])
             if not isinstance(group, SubCommandGroup):
                 raise AssertionError("the first subcommand is not a SubCommandGroup instance")
-            subcmd = group.children.get(chain[1]) if group is not None else None
+            subcmd = group.children.get(chain[1])
         else:
             raise ValueError("Command chain is too long")
 
@@ -754,7 +758,7 @@ def slash_command(
     connectors: Optional[Dict[str, str]] = None,
     auto_sync: Optional[bool] = None,
     extras: Optional[Dict[str, Any]] = None,
-    **kwargs,
+    **kwargs: Any,
 ) -> Callable[[CommandCallback], InvokableSlashCommand]:
     """A decorator that builds a slash command.
 

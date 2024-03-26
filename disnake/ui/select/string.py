@@ -272,9 +272,7 @@ def string_select(
 
 
 def string_select(
-    cls: Type[ItemShape[S_co, P]] = StringSelect[Any],
-    /,
-    **kwargs: Any,
+    cls: Type[ItemShape[S_co, ...]] = StringSelect[Any], **kwargs: Any
 ) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
     """A decorator that attaches a string select menu to a component.
 
@@ -292,7 +290,7 @@ def string_select(
     ----------
     cls: Type[:class:`StringSelect`]
         The select subclass to create an instance of. If provided, the following parameters
-        described below do no apply. Instead, this decorator will accept the same keywords
+        described below do not apply. Instead, this decorator will accept the same keywords
         as the passed cls does.
 
         .. versionadded:: 2.6

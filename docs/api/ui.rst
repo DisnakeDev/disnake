@@ -129,7 +129,7 @@ TextInput
 Functions
 ---------
 
-.. autofunction:: button(cls=Button, *, style=ButtonStyle.secondary, label=None, disabled=False, custom_id=..., url=None, emoji=None, row=None)
+.. autofunction:: button(cls=Button, *, custom_id=..., style=ButtonStyle.secondary, label=None, disabled=False, url=None, emoji=None, row=None)
     :decorator:
 
 .. autofunction:: string_select(cls=StringSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, options=..., disabled=False, row=None)

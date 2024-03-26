@@ -82,10 +82,16 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
 
     token: :class:`str`
         The token to continue the interaction. These are valid for 15 minutes.
-    data: :class:`ApplicationCommandInteractionData`
-        The wrapped interaction data.
     client: :class:`Client`
         The interaction client.
+    entitlements: List[:class:`Entitlement`]
+        The entitlements for the invoking user and guild,
+        representing access to an application subscription.
+
+        .. versionadded:: 2.10
+
+    data: :class:`ApplicationCommandInteractionData`
+        The wrapped interaction data.
     application_command: :class:`.InvokableApplicationCommand`
         The command invoked by the interaction.
     command_failed: :class:`bool`

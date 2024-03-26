@@ -170,9 +170,7 @@ def mentionable_select(
 
 
 def mentionable_select(
-    cls: Type[ItemShape[S_co, P]] = MentionableSelect[Any],
-    /,
-    **kwargs: Any,
+    cls: Type[ItemShape[S_co, ...]] = MentionableSelect[Any], **kwargs: Any
 ) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
     """A decorator that attaches a mentionable (user/member/role) select menu to a component.
 
@@ -189,7 +187,7 @@ def mentionable_select(
     ----------
     cls: Type[:class:`MentionableSelect`]
         The select subclass to create an instance of. If provided, the following parameters
-        described below do no apply. Instead, this decorator will accept the same keywords
+        described below do not apply. Instead, this decorator will accept the same keywords
         as the passed cls does.
     placeholder: Optional[:class:`str`]
         The placeholder text that is shown if nothing is selected, if any.

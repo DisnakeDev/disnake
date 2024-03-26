@@ -12,6 +12,7 @@ from .errors import ClientException
 from .flags import ChannelFlags
 from .mixins import Hashable
 from .partial_emoji import PartialEmoji, _EmojiTag
+from .permissions import Permissions
 from .utils import MISSING, _get_as_snowflake, _unique, parse_time, snowflake_time
 
 __all__ = (
@@ -26,12 +27,11 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from .abc import Snowflake, SnowflakeTime
-    from .channel import CategoryChannel, ForumChannel, TextChannel
+    from .channel import CategoryChannel, ForumChannel, MediaChannel, TextChannel
     from .emoji import Emoji
     from .guild import Guild
     from .member import Member
     from .message import Message, PartialMessage
-    from .permissions import Permissions
     from .role import Role
     from .state import ConnectionState
     from .types.snowflake import SnowflakeList
@@ -54,7 +54,7 @@ if TYPE_CHECKING:
 class Thread(Messageable, Hashable):
     """Represents a Discord thread.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -83,7 +83,7 @@ class Thread(Messageable, Hashable):
     id: :class:`int`
         The thread ID.
     parent_id: :class:`int`
-        The parent :class:`TextChannel` or :class:`ForumChannel` ID this thread belongs to.
+        The parent :class:`TextChannel`, :class:`ForumChannel`, or :class:`MediaChannel` ID this thread belongs to.
     owner_id: Optional[:class:`int`]
         The user's ID that created this thread.
     last_message_id: Optional[:class:`int`]
@@ -242,8 +242,8 @@ class Thread(Messageable, Hashable):
         return self._type
 
     @property
-    def parent(self) -> Optional[Union[TextChannel, ForumChannel]]:
-        """Optional[Union[:class:`TextChannel`, :class:`ForumChannel`]]: The parent channel this thread belongs to."""
+    def parent(self) -> Optional[Union[TextChannel, ForumChannel, MediaChannel]]:
+        """Optional[Union[:class:`TextChannel`, :class:`ForumChannel`, :class:`MediaChannel`]]: The parent channel this thread belongs to."""
         return self.guild.get_channel(self.parent_id)  # type: ignore
 
     @property
@@ -384,7 +384,7 @@ class Thread(Messageable, Hashable):
         return parent is not None and parent.is_nsfw()
 
     def is_pinned(self) -> bool:
-        """Whether the thread is pinned in a :class:`ForumChannel`
+        """Whether the thread is pinned in a :class:`ForumChannel` or :class:`MediaChannel`.
 
         Pinned threads are not affected by the auto archive duration.
 
@@ -399,14 +399,14 @@ class Thread(Messageable, Hashable):
     @property
     def applied_tags(self) -> List[ForumTag]:
         """List[:class:`ForumTag`]: The tags currently applied to this thread.
-        Only applicable to threads in :class:`ForumChannel`\\s.
+        Only applicable to threads in channels of type :class:`ForumChannel` or :class:`MediaChannel`.
 
         .. versionadded:: 2.6
         """
-        from .channel import ForumChannel  # cyclic import
+        from .channel import ThreadOnlyGuildChannel  # cyclic import
 
         parent = self.parent
-        if not isinstance(parent, ForumChannel):
+        if not isinstance(parent, ThreadOnlyGuildChannel):
             return []
 
         # threads may have tag IDs for tags that don't exist anymore
@@ -697,7 +697,7 @@ class Thread(Messageable, Hashable):
             Specifies the slowmode rate limit for users in this thread, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
         pinned: :class:`bool`
-            Whether to pin the thread or not. This is only available for threads created in a :class:`ForumChannel`.
+            Whether to pin the thread or not. This is only available for threads created in a :class:`ForumChannel` or :class:`MediaChannel`.
 
             .. versionadded:: 2.5
 
@@ -711,7 +711,7 @@ class Thread(Messageable, Hashable):
             The new tags of the thread. Maximum of 5.
             Can also be used to reorder existing tags.
 
-            This is only available for threads in a :class:`ForumChannel`.
+            This is only available for threads in a :class:`ForumChannel` or :class:`MediaChannel`.
 
             If :attr:`~ForumTag.moderated` tags are edited, :attr:`Permissions.manage_threads`
             permissions are required.
@@ -831,7 +831,7 @@ class Thread(Messageable, Hashable):
         Parameters
         ----------
         user: :class:`abc.Snowflake`
-            The user to add to the thread.
+            The user to remove from the thread.
 
         Raises
         ------
@@ -894,7 +894,7 @@ class Thread(Messageable, Hashable):
         Deletes this thread.
 
         You must have :attr:`~Permissions.manage_threads` to delete threads.
-        Alternatively, you may delete a thread if it's in a :class:`ForumChannel`,
+        Alternatively, you may delete a thread if it's in a :class:`ForumChannel` or :class:`MediaChannel`,
         you are the thread creator, and there are no messages other than the initial message.
 
         Parameters
@@ -918,7 +918,7 @@ class Thread(Messageable, Hashable):
 
         Adds the given tags to this thread, up to 5 in total.
 
-        The thread must be in a :class:`ForumChannel`.
+        The thread must be in a :class:`ForumChannel` or :class:`MediaChannel`.
 
         Adding tags requires you to have :attr:`.Permissions.manage_threads` permissions,
         or be the owner of the thread.
@@ -955,7 +955,7 @@ class Thread(Messageable, Hashable):
 
         Removes the given tags from this thread.
 
-        The thread must be in a :class:`ForumChannel`.
+        The thread must be in a :class:`ForumChannel` or :class:`MediaChannel`.
 
         Removing tags requires you to have :attr:`.Permissions.manage_threads` permissions,
         or be the owner of the thread.
@@ -1018,7 +1018,7 @@ class Thread(Messageable, Hashable):
 class ThreadMember(Hashable):
     """Represents a Discord thread member.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -1090,9 +1090,9 @@ class ThreadMember(Hashable):
 
 
 class ForumTag(Hashable):
-    """Represents a tag for threads in forum channels.
+    """Represents a tag for threads in forum/media channels.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -1229,7 +1229,7 @@ class ForumTag(Hashable):
         moderated: bool = MISSING,
     ) -> Self:
         """Returns a new instance with the given changes applied,
-        for easy use with :func:`ForumChannel.edit`.
+        for easy use with :func:`ForumChannel.edit` or :func:`MediaChannel.edit`.
         All other fields will be kept intact.
 
         Returns

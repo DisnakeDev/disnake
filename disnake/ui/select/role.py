@@ -24,7 +24,7 @@ __all__ = (
 
 
 class RoleSelect(BaseSelect[RoleSelectMenu, "Role", V_co]):
-    """Represents a UI user select menu.
+    """Represents a UI role select menu.
 
     This is usually represented as a drop down menu.
 
@@ -158,9 +158,7 @@ def role_select(
 
 
 def role_select(
-    cls: Type[ItemShape[S_co, P]] = RoleSelect[Any],
-    /,
-    **kwargs: Any,
+    cls: Type[ItemShape[S_co, ...]] = RoleSelect[Any], **kwargs: Any
 ) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
     """A decorator that attaches a role select menu to a component.
 
@@ -177,7 +175,7 @@ def role_select(
     ----------
     cls: Type[:class:`RoleSelect`]
         The select subclass to create an instance of. If provided, the following parameters
-        described below do no apply. Instead, this decorator will accept the same keywords
+        described below do not apply. Instead, this decorator will accept the same keywords
         as the passed cls does.
     placeholder: Optional[:class:`str`]
         The placeholder text that is shown if nothing is selected, if any.

@@ -93,7 +93,7 @@ AuditLogDiff
     on the action being done, check the documentation for :class:`AuditLogAction`,
     otherwise check the documentation below for all attributes that are possible.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: iter(diff)
 
@@ -282,10 +282,10 @@ AuditLogDiff
 
     .. attribute:: topic
 
-        The topic of a :class:`TextChannel`, :class:`StageChannel`, :class:`StageInstance` or :class:`ForumChannel`.
+        The topic of a :class:`TextChannel`, :class:`StageChannel`, :class:`StageInstance`, :class:`ForumChannel` or :class:`MediaChannel`.
 
         See also :attr:`TextChannel.topic`, :attr:`StageChannel.topic`,
-        :attr:`StageInstance.topic` or :attr:`ForumChannel.topic`.
+        :attr:`StageInstance.topic`, :attr:`ForumChannel.topic` or :attr:`MediaChannel.topic`.
 
         :type: :class:`str`
 
@@ -467,7 +467,7 @@ AuditLogDiff
 
         See also :attr:`TextChannel.slowmode_delay`, :attr:`VoiceChannel.slowmode_delay`,
         :attr:`StageChannel.slowmode_delay`, :attr:`ForumChannel.slowmode_delay`,
-        or :attr:`Thread.slowmode_delay`.
+        :attr:`MediaChannel.slowmode_delay` or :attr:`Thread.slowmode_delay`.
 
         :type: :class:`int`
 
@@ -476,8 +476,9 @@ AuditLogDiff
         The default number of seconds members have to wait before
         sending another message in new threads created in the channel.
 
-        See also :attr:`TextChannel.default_thread_slowmode_delay` or
-        :attr:`ForumChannel.default_thread_slowmode_delay`.
+        See also :attr:`TextChannel.default_thread_slowmode_delay`,
+        :attr:`ForumChannel.default_thread_slowmode_delay` or
+        :attr:`MediaChannel.default_thread_slowmode_delay`.
 
         :type: :class:`int`
 
@@ -510,7 +511,7 @@ AuditLogDiff
 
         Whether the channel is marked as "not safe for work".
 
-        See also :attr:`TextChannel.nsfw`, :attr:`VoiceChannel.nsfw`, :attr:`StageChannel.nsfw`, or :attr:`ForumChannel.nsfw`.
+        See also :attr:`TextChannel.nsfw`, :attr:`VoiceChannel.nsfw`, :attr:`StageChannel.nsfw`, :attr:`ForumChannel.nsfw` or :attr:`MediaChannel.nsfw`.
 
         :type: :class:`bool`
 
@@ -687,7 +688,7 @@ AuditLogDiff
 
     .. attribute:: applied_tags
 
-        The tags applied to a thread in a forum channel being changed.
+        The tags applied to a thread in a forum/media channel being changed.
 
         If a tag is not found, then it is an :class:`Object` with the ID
         being set.
@@ -696,13 +697,13 @@ AuditLogDiff
 
     .. attribute:: available_tags
 
-        The available tags for threads in a forum channel being changed.
+        The available tags for threads in a forum/media channel being changed.
 
         :type: List[:class:`ForumTag`]
 
     .. attribute:: default_reaction
 
-        The default emoji shown for reacting to threads in a forum channel being changed.
+        The default emoji shown for reacting to threads in a forum/media channel being changed.
 
         Due to a Discord limitation, this will have an empty
         :attr:`~PartialEmoji.name` if it is a custom :class:`PartialEmoji`.
@@ -711,7 +712,7 @@ AuditLogDiff
 
     .. attribute:: default_sort_order
 
-        The default sort order of threads in a forum channel being changed.
+        The default sort order of threads in a forum/media channel being changed.
 
         :type: Optional[:class:`ThreadSortOrder`]
 
