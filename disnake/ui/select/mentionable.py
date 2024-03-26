@@ -2,8 +2,22 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, Optional, Sequence, Type, TypeVar, Union, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    ClassVar,
+    Mapping,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    overload,
+)
 
+from ...abc import Snowflake
 from ...components import MentionableSelectMenu
 from ...enums import ComponentType, SelectDefaultValueType
 from ...member import Member
@@ -68,7 +82,9 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
         A list of users, members and/or roles that have been selected by the user.
     """
 
-    _default_value_type_map = {
+    _default_value_type_map: ClassVar[
+        Mapping[SelectDefaultValueType, Tuple[Type[Snowflake], ...]]
+    ] = {
         SelectDefaultValueType.user: (Member, User, ClientUser),
         SelectDefaultValueType.role: (Role,),
     }

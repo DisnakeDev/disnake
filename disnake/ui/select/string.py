@@ -6,8 +6,10 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
+    ClassVar,
     Dict,
     List,
+    Mapping,
     Optional,
     Tuple,
     Type,
@@ -16,8 +18,9 @@ from typing import (
     overload,
 )
 
+from ...abc import Snowflake
 from ...components import SelectOption, StringSelectMenu
-from ...enums import ComponentType
+from ...enums import ComponentType, SelectDefaultValueType
 from ...utils import MISSING
 from .base import BaseSelect, P, V_co, _create_decorator
 
@@ -99,7 +102,9 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
     __repr_attributes__: Tuple[str, ...] = BaseSelect.__repr_attributes__ + ("options",)
 
     # In practice this should never be used by anything, might as well have it anyway though.
-    _default_value_type_map = {}
+    _default_value_type_map: ClassVar[
+        Mapping[SelectDefaultValueType, Tuple[Type[Snowflake], ...]]
+    ] = {}
 
     @overload
     def __init__(

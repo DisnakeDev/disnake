@@ -6,7 +6,9 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
+    ClassVar,
     List,
+    Mapping,
     Optional,
     Sequence,
     Tuple,
@@ -15,7 +17,7 @@ from typing import (
     overload,
 )
 
-from ...abc import GuildChannel
+from ...abc import GuildChannel, Snowflake
 from ...channel import PartialMessageable
 from ...components import ChannelSelectMenu
 from ...enums import ChannelType, ComponentType, SelectDefaultValueType
@@ -84,7 +86,9 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "InteractionChannel", V_co]):
 
     __repr_attributes__: Tuple[str, ...] = BaseSelect.__repr_attributes__ + ("channel_types",)
 
-    _default_value_type_map = {
+    _default_value_type_map: ClassVar[
+        Mapping[SelectDefaultValueType, Tuple[Type[Snowflake], ...]]
+    ] = {
         SelectDefaultValueType.channel: (GuildChannel, Thread, PartialMessageable, Object),
     }
 

@@ -2,8 +2,21 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, Optional, Sequence, Type, TypeVar, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    ClassVar,
+    Mapping,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+    TypeVar,
+    overload,
+)
 
+from ...abc import Snowflake
 from ...components import RoleSelectMenu
 from ...enums import ComponentType, SelectDefaultValueType
 from ...object import Object
@@ -65,7 +78,9 @@ class RoleSelect(BaseSelect[RoleSelectMenu, "Role", V_co]):
         A list of roles that have been selected by the user.
     """
 
-    _default_value_type_map = {
+    _default_value_type_map: ClassVar[
+        Mapping[SelectDefaultValueType, Tuple[Type[Snowflake], ...]]
+    ] = {
         SelectDefaultValueType.role: (Role, Object),
     }
 

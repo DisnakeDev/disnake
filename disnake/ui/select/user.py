@@ -2,8 +2,22 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, Optional, Sequence, Type, TypeVar, Union, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    ClassVar,
+    Mapping,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    overload,
+)
 
+from ...abc import Snowflake
 from ...components import UserSelectMenu
 from ...enums import ComponentType, SelectDefaultValueType
 from ...member import Member
@@ -66,7 +80,9 @@ class UserSelect(BaseSelect[UserSelectMenu, "Union[User, Member]", V_co]):
         A list of users/members that have been selected by the user.
     """
 
-    _default_value_type_map = {
+    _default_value_type_map: ClassVar[
+        Mapping[SelectDefaultValueType, Tuple[Type[Snowflake], ...]]
+    ] = {
         SelectDefaultValueType.user: (Member, User, ClientUser, Object),
     }
 
