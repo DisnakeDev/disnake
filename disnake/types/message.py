@@ -10,7 +10,7 @@ from .channel import ChannelType
 from .components import Component
 from .embed import Embed
 from .emoji import PartialEmoji
-from .interactions import InteractionMessageReference
+from .interactions import InteractionDataResolved, InteractionMessageReference
 from .member import Member, UserWithMember
 from .snowflake import Snowflake, SnowflakeList
 from .sticker import StickerItem
@@ -114,6 +114,8 @@ class Message(TypedDict):
     sticker_items: NotRequired[List[StickerItem]]
     position: NotRequired[int]
     role_subscription_data: NotRequired[RoleSubscriptionData]
+    # contains resolved objects for `default_values` of select menus in this message; we currently don't have a use for this
+    resolved: NotRequired[InteractionDataResolved]
 
     # specific to MESSAGE_CREATE/MESSAGE_UPDATE events
     guild_id: NotRequired[Snowflake]
