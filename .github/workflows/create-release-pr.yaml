@@ -66,7 +66,7 @@ jobs:
           token: ${{ steps.generate_token.outputs.token }}
           branch: auto/release-v${{ inputs.version }}
           delete-branch: true
-          title: "release: v${{ inputs.version }}"
+          title: "chore(release): v${{ inputs.version }}"
           body: |
             Automated release PR, triggered by @${{ github.actor }} for ${{ github.sha }}.
 
