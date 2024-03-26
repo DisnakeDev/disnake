@@ -69,6 +69,26 @@ BanEntry
 
         :type: :class:`User`
 
+BulkBanResult
+~~~~~~~~~~~~~
+
+.. class:: BulkBanResult
+
+    A namedtuple which represents the successful and failed bans returned from :meth:`~Guild.bulk_ban`.
+
+    .. versionadded:: 2.10
+
+    .. attribute:: banned
+
+        The list of users that were successfully banned.
+
+        :type: List[:class:`Object`]
+    .. attribute:: failed
+
+        The list of users that were not banned.
+
+        :type: List[:class:`Object`]
+
 Onboarding
 ~~~~~~~~~~
 
