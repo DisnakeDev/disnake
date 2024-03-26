@@ -22,7 +22,7 @@ jobs:
     if: contains(github.event.pull_request.labels.*.name, 'skip news') != true
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           # towncrier needs a non-shallow clone
           fetch-depth: '0'
