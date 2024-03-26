@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 from . import utils
 from .asset import Asset
+from .enums import ApplicationIntegrationType, try_enum
 from .flags import ApplicationFlags
 from .permissions import Permissions
 
@@ -14,6 +15,7 @@ if TYPE_CHECKING:
     from .state import ConnectionState
     from .types.appinfo import (
         AppInfo as AppInfoPayload,
+        ApplicationIntegrationTypeConfiguration as ApplicationIntegrationTypeConfigurationPayload,
         InstallParams as InstallParamsPayload,
         PartialAppInfo as PartialAppInfoPayload,
         Team as TeamPayload,
@@ -24,6 +26,7 @@ __all__ = (
     "AppInfo",
     "PartialAppInfo",
     "InstallParams",
+    "IntegrationTypeConfiguration",
 )
 
 
@@ -42,12 +45,20 @@ class InstallParams:
 
     __slots__ = (
         "_app_id",
+        "_integration_type",
         "scopes",
         "permissions",
     )
 
-    def __init__(self, data: InstallParamsPayload, parent: AppInfo) -> None:
+    def __init__(
+        self,
+        data: InstallParamsPayload,
+        parent: AppInfo,
+        *,
+        integration_type: Optional[ApplicationIntegrationType] = None,
+    ) -> None:
         self._app_id = parent.id
+        self._integration_type = integration_type
         self.scopes = data["scopes"]
         self.permissions = Permissions(int(data["permissions"]))
 
@@ -62,7 +73,39 @@ class InstallParams:
         :class:`str`
             The invite url.
         """
-        return utils.oauth_url(self._app_id, scopes=self.scopes, permissions=self.permissions)
+        return utils.oauth_url(
+            self._app_id,
+            scopes=self.scopes,
+            permissions=self.permissions,
+            integration_type=self._integration_type,
+        )
+
+
+class IntegrationTypeConfiguration:
+    """Represents the configuration for a particular application integration type.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    install_params: Optional[:class:`InstallParams`]
+        The installation parameters for this integration type.
+    """
+
+    __slots__ = ("install_params",)
+
+    def __init__(
+        self,
+        data: ApplicationIntegrationTypeConfigurationPayload,
+        *,
+        parent: AppInfo,
+        integration_type: ApplicationIntegrationType,
+    ) -> None:
+        self.install_params: Optional[InstallParams] = (
+            InstallParams(install_params, parent=parent, integration_type=integration_type)
+            if (install_params := data.get("oauth2_install_params"))
+            else None
+        )
 
 
 class AppInfo:
@@ -139,6 +182,8 @@ class AppInfo:
     install_params: Optional[:class:`InstallParams`]
         The installation parameters for this application.
 
+        See also :attr:`integration_types_config` for integration type-specific configuration.
+
         .. versionadded:: 2.5
 
     custom_install_url: Optional[:class:`str`]
@@ -151,6 +196,14 @@ class AppInfo:
         in the guild role verification configuration.
 
         .. versionadded:: 2.8
+    integration_types_config: Dict[:class:`ApplicationIntegrationType`, :class:`IntegrationTypeConfiguration`]
+        The mapping of integration types/installation contexts to their respective configuration parameters.
+
+        For example, an :attr:`ApplicationIntegrationType.guild` key being present means that
+        the application can be installed to guilds, and its value is the configuration (e.g. scopes, permissions)
+        that will be used during installation, if any.
+
+        .. versionadded:: 2.10
     """
 
     __slots__ = (
@@ -177,6 +230,7 @@ class AppInfo:
         "install_params",
         "custom_install_url",
         "role_connections_verification_url",
+        "integration_types_config",
     )
 
     def __init__(self, state: ConnectionState, data: AppInfoPayload) -> None:
@@ -218,6 +272,17 @@ class AppInfo:
         self.role_connections_verification_url: Optional[str] = data.get(
             "role_connections_verification_url"
         )
+
+        self.integration_types_config: Dict[
+            ApplicationIntegrationType, IntegrationTypeConfiguration
+        ] = {}
+        for _type, config in (data.get("integration_types_config") or {}).items():
+            integration_type = try_enum(ApplicationIntegrationType, int(_type))
+            self.integration_types_config[integration_type] = IntegrationTypeConfiguration(
+                config or {},
+                parent=self,
+                integration_type=integration_type,
+            )
 
     def __repr__(self) -> str:
         return (
