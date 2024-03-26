@@ -74,6 +74,7 @@ if TYPE_CHECKING:
     from ..file import File
     from ..guild import GuildChannel, GuildMessageable
     from ..mentions import AllowedMentions
+    from ..poll import Poll
     from ..state import ConnectionState
     from ..threads import Thread
     from ..types.components import Modal as ModalPayload
@@ -625,6 +626,7 @@ class Interaction(Generic[ClientT]):
         suppress_embeds: bool = MISSING,
         flags: MessageFlags = MISSING,
         delete_after: float = MISSING,
+        poll: Poll = MISSING,
     ) -> None:
         """|coro|
 
@@ -701,6 +703,11 @@ class Interaction(Generic[ClientT]):
             .. versionchanged:: 2.7
                 Added support for ephemeral responses.
 
+        poll: :class:`Poll`
+            The poll to send with the message.
+
+            .. versionadded:: 2.10
+
         Raises
         ------
         HTTPException
@@ -728,6 +735,7 @@ class Interaction(Generic[ClientT]):
             suppress_embeds=suppress_embeds,
             flags=flags,
             delete_after=delete_after,
+            poll=poll,
         )
 
 
@@ -902,6 +910,7 @@ class InteractionResponse:
         suppress_embeds: bool = MISSING,
         flags: MessageFlags = MISSING,
         delete_after: float = MISSING,
+        poll: Poll = MISSING,
     ) -> None:
         """|coro|
 
@@ -963,6 +972,12 @@ class InteractionResponse:
             they will override the corresponding setting of this ``flags`` parameter.
 
             .. versionadded:: 2.9
+
+        poll: :class:`Poll`
+            The poll to send with the message.
+
+            .. versionadded:: 2.10
+
 
         Raises
         ------
@@ -1037,6 +1052,8 @@ class InteractionResponse:
 
         if components is not MISSING:
             payload["components"] = components_to_dict(components)
+        if poll is not MISSING:
+            payload["poll"] = poll._to_dict()
 
         parent = self._parent
         adapter = async_context.get()

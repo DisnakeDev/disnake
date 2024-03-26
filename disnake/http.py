@@ -70,6 +70,7 @@ if TYPE_CHECKING:
         member,
         message,
         onboarding,
+        poll,
         role,
         sku,
         sticker,
@@ -528,6 +529,7 @@ class HTTPClient:
         message_reference: Optional[message.MessageReference] = None,
         stickers: Optional[Sequence[Snowflake]] = None,
         components: Optional[Sequence[components.Component]] = None,
+        poll: Optional[poll.PollCreatePayload] = None,
         flags: Optional[int] = None,
     ) -> Response[message.Message]:
         r = Route("POST", "/channels/{channel_id}/messages", channel_id=channel_id)
@@ -563,7 +565,35 @@ class HTTPClient:
         if flags is not None:
             payload["flags"] = flags
 
+        if poll is not None:
+            payload["poll"] = poll
+
         return self.request(r, json=payload)
+
+    def get_poll_answer_voters(
+        self, channel_id: Snowflake, message_id: Snowflake, answer_id: int
+    ) -> Response[List[user.User]]:
+        return self.request(
+            Route(
+                "GET",
+                "/channels/{channel_id}/polls/{message_id}/answers/{answer_id}",
+                channel_id=channel_id,
+                message_id=message_id,
+                answer_id=answer_id,
+            )
+        )
+
+    def expire_poll(
+        self, channel_id: Snowflake, message_id: Snowflake
+    ) -> Response[message.Message]:
+        return self.request(
+            Route(
+                "POST",
+                "/channels/{channel_id}/polls/{message_id}/expire",
+                channel_id=channel_id,
+                message_id=message_id,
+            )
+        )
 
     def send_typing(self, channel_id: Snowflake) -> Response[None]:
         return self.request(Route("POST", "/channels/{channel_id}/typing", channel_id=channel_id))
@@ -582,6 +612,7 @@ class HTTPClient:
         message_reference: Optional[message.MessageReference] = None,
         stickers: Optional[Sequence[Snowflake]] = None,
         components: Optional[Sequence[components.Component]] = None,
+        poll: Optional[poll.PollCreatePayload] = None,
         flags: Optional[int] = None,
     ) -> Response[message.Message]:
         payload: Dict[str, Any] = {"tts": tts}
@@ -603,6 +634,8 @@ class HTTPClient:
             payload["sticker_ids"] = stickers
         if flags is not None:
             payload["flags"] = flags
+        if poll:
+            payload["poll"] = poll
 
         multipart = to_multipart_with_attachments(payload, files)
 
@@ -622,6 +655,7 @@ class HTTPClient:
         message_reference: Optional[message.MessageReference] = None,
         stickers: Optional[Sequence[Snowflake]] = None,
         components: Optional[Sequence[components.Component]] = None,
+        poll: Optional[poll.PollCreatePayload] = None,
         flags: Optional[int] = None,
     ) -> Response[message.Message]:
         r = Route("POST", "/channels/{channel_id}/messages", channel_id=channel_id)
@@ -637,6 +671,7 @@ class HTTPClient:
             message_reference=message_reference,
             stickers=stickers,
             components=components,
+            poll=poll,
             flags=flags,
         )
 

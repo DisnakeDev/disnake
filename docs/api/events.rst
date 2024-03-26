@@ -1243,6 +1243,32 @@ This section documents events related to Discord chat messages.
     :param messages: The messages that have been deleted.
     :type messages: List[:class:`Message`]
 
+.. function:: on_message_poll_vote_add(guild, channel, message, answer_id)
+
+    Called when a vote is added on a poll. If the guild is not found in the internal cache, then this event will not be called.
+
+    :param guild: The guild where the poll vote was added.
+    :type guild: :class:`Guild`
+    :param channel: The channel where the poll vote was added.
+    :type channel: :class:`?`
+    :param message: The message that contains the poll for which the poll vote was added.
+    :type message: :class:`Message`
+    :param answer_id: The ID of the answer for which the vote was added.
+    :type answer_id: :class:`int`
+
+.. function:: on_message_poll_vote_remove(guild, channel, message, answer_id)
+
+    Called when a vote is removed on a poll. If the guild is not found in the internal cache, then this event will not be called.
+
+    :param guild: The guild where the poll vote was removed.
+    :type guild: :class:`Guild`
+    :param channel: The channel where the poll vote was removed.
+    :type channel: :class:`?`
+    :param message: The message that contains the poll for which the poll vote was removed.
+    :type message: :class:`Message`
+    :param answer_id: The ID of the answer for which the vote was removed.
+    :type answer_id: :class:`int`
+
 .. function:: on_raw_message_edit(payload)
 
     Called when a message is edited. Unlike :func:`on_message_edit`, this is called
@@ -1292,6 +1318,22 @@ This section documents events related to Discord chat messages.
 
     :param payload: The raw event payload data.
     :type payload: :class:`RawBulkMessageDeleteEvent`
+
+.. function:: on_raw_message_poll_vote_add(payload)
+
+    Called when a vote is added on a poll. Unlike :func:`on_message_poll_vote_add`, this is
+    called regardless of the guilds being in the internal guild cache or not.
+
+    :param payload: The raw event payload data.
+    :type payload: :class:`RawMessagePollVoteActionEvent`
+
+.. function:: on_raw_message_poll_vote_remove(payload)
+
+    Called when a vote is removed on a poll. Unlike :func:`on_message_poll_vote_remove`, this is
+    called regardless of the guilds being in the internal guild cache or not.
+
+    :param payload: The raw event payload data.
+    :type payload: :class:`RawMessagePollVoteActionEvent`
 
 .. function:: on_reaction_add(reaction, user)
 

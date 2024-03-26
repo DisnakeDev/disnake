@@ -69,6 +69,7 @@ from .raw_models import (
     RawGuildScheduledEventUserActionEvent,
     RawIntegrationDeleteEvent,
     RawMessageDeleteEvent,
+    RawMessagePollVoteActionEvent,
     RawMessageUpdateEvent,
     RawPresenceUpdateEvent,
     RawReactionActionEvent,
@@ -929,6 +930,25 @@ class ConnectionState:
             else:
                 if reaction:
                     self.dispatch("reaction_clear_emoji", reaction)
+
+    def _handle_poll_event(
+        self, raw: RawMessagePollVoteActionEvent, event_type: Literal["add", "remove"]
+    ) -> None:
+        message = self._get_message(raw.message_id)
+        guild = self._get_guild(raw.guild_id)
+        if guild is not None:
+            channel = guild.get_channel(raw.channel_id)
+            self.dispatch(f"message_poll_vote_{event_type}", guild, channel, message, raw.answer_id)
+
+    def parse_message_poll_vote_add(self, data: gateway.MessagePollVoteAddEvent) -> None:
+        raw = RawMessagePollVoteActionEvent(data, "POLL_VOTE_ADD")
+        self.dispatch("raw_message_poll_vote_add", raw)
+        self._handle_poll_event(raw, "add")
+
+    def parse_message_poll_vote_remove(self, data: gateway.MessagePollVoteRemoveEvent) -> None:
+        raw = RawMessagePollVoteActionEvent(data, "POLL_VOTE_REMOVE")
+        self.dispatch("raw_message_poll_vote_remove", raw)
+        self._handle_poll_event(raw, "remove")
 
     def parse_interaction_create(self, data: gateway.InteractionCreateEvent) -> None:
         # note: this does not use an intermediate variable for `data["type"]` since

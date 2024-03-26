@@ -22,7 +22,7 @@ from typing import (
     overload,
 )
 
-from . import utils
+from . import poll, utils
 from .components import ActionRow, MessageComponent, _component_factory
 from .embeds import Embed
 from .emoji import Emoji
@@ -896,6 +896,11 @@ class Message(Hashable):
 
     guild: Optional[:class:`Guild`]
         The guild that the message belongs to, if applicable.
+
+    poll: Optional[:class:`Poll`]
+        The poll contained in this message.
+
+            .. versionadded:: 2.10
     """
 
     __slots__ = (
@@ -931,6 +936,7 @@ class Message(Hashable):
         "stickers",
         "components",
         "guild",
+        "poll",
         "_edited_timestamp",
         "_role_subscription_data",
     )
@@ -991,6 +997,9 @@ class Message(Hashable):
             None if inter_payload is None else InteractionReference(state=state, data=inter_payload)
         )
         self.interaction: Optional[InteractionReference] = inter
+        self.poll: Optional[poll.Poll] = poll.Poll.from_payload(
+            channel=channel, message=self, state=state, data=data.get("poll")
+        )
 
         try:
             # if the channel doesn't have a guild attribute, we handle that
