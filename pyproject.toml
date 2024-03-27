@@ -207,6 +207,9 @@ ignore = [
     "TCH002",
     "TCH003",
 
+    "S311",    # insecure RNG usage, we don't use these for security-related things
+    "PLE0237", # pyright seems to catch this already
+
     # temporary disables, to fix later
     "D205",   # blank line required between summary and description
     "D401",   # first line of docstring should be in imperative mood
@@ -216,7 +219,6 @@ ignore = [
     "E501",   # line too long
     "E731",   # assigning lambdas to variables
     "T201",   # print statements
-    "S311",   # insecure RNG usage, we don't use these for security-related things
 ]
 
 [tool.ruff.lint.per-file-ignores]

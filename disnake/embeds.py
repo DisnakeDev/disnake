@@ -203,7 +203,7 @@ class Embed:
         self.description: Optional[str] = str(description) if description is not None else None
         self.url: Optional[str] = str(url) if url is not None else None
 
-        self.timestamp = timestamp  # noqa: PLE0237 # false positive
+        self.timestamp = timestamp
 
         # possible values:
         # - MISSING: embed color will be _default_color
@@ -211,7 +211,7 @@ class Embed:
         # - Color: embed color will be set to specified color
         if colour is not MISSING:
             color = colour
-        self.colour = color  # noqa: PLE0237 # false positive
+        self.colour = color
 
         self._thumbnail: Optional[EmbedThumbnailPayload] = None
         self._video: Optional[EmbedVideoPayload] = None
