@@ -162,7 +162,7 @@ select = [
     # "PLR",    # pylint refactor
     "PLW",    # pylint warnings
     "TRY002", "TRY004", "TRY201", # tryceratops
-    "I",
+    "I", # isort
 ]
 ignore = [
     # star imports
