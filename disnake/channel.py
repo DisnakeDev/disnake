@@ -3000,7 +3000,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         ...
 
     @utils.copy_doc(disnake.abc.GuildChannel.move)
-    async def move(self, **kwargs) -> None:
+    async def move(self, **kwargs: Any) -> None:
         kwargs.pop("category", None)
         return await super().move(**kwargs)
 
