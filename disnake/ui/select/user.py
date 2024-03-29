@@ -70,8 +70,7 @@ class UserSelect(BaseSelect[UserSelectMenu, "Union[User, Member]", V_co]):
         max_values: int = 1,
         disabled: bool = False,
         row: Optional[int] = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     def __init__(
@@ -83,8 +82,7 @@ class UserSelect(BaseSelect[UserSelectMenu, "Union[User, Member]", V_co]):
         max_values: int = 1,
         disabled: bool = False,
         row: Optional[int] = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     def __init__(
         self,
@@ -131,15 +129,13 @@ def user_select(
     max_values: int = 1,
     disabled: bool = False,
     row: Optional[int] = None,
-) -> Callable[[ItemCallbackType[UserSelect[V_co]]], DecoratedItem[UserSelect[V_co]]]:
-    ...
+) -> Callable[[ItemCallbackType[UserSelect[V_co]]], DecoratedItem[UserSelect[V_co]]]: ...
 
 
 @overload
 def user_select(
     cls: Type[Object[S_co, P]], *_: P.args, **kwargs: P.kwargs
-) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
-    ...
+) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]: ...
 
 
 def user_select(

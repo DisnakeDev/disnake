@@ -75,8 +75,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "InteractionChannel", V_co]):
         disabled: bool = False,
         channel_types: Optional[List[ChannelType]] = None,
         row: Optional[int] = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     def __init__(
@@ -89,8 +88,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "InteractionChannel", V_co]):
         disabled: bool = False,
         channel_types: Optional[List[ChannelType]] = None,
         row: Optional[int] = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     def __init__(
         self,
@@ -156,15 +154,13 @@ def channel_select(
     disabled: bool = False,
     channel_types: Optional[List[ChannelType]] = None,
     row: Optional[int] = None,
-) -> Callable[[ItemCallbackType[ChannelSelect[V_co]]], DecoratedItem[ChannelSelect[V_co]]]:
-    ...
+) -> Callable[[ItemCallbackType[ChannelSelect[V_co]]], DecoratedItem[ChannelSelect[V_co]]]: ...
 
 
 @overload
 def channel_select(
     cls: Type[Object[S_co, P]], *_: P.args, **kwargs: P.kwargs
-) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
-    ...
+) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]: ...
 
 
 def channel_select(

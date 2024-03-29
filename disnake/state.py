@@ -1376,14 +1376,12 @@ class ConnectionState:
     @overload
     async def chunk_guild(
         self, guild: Guild, *, wait: Literal[False], cache: Optional[bool] = None
-    ) -> asyncio.Future[List[Member]]:
-        ...
+    ) -> asyncio.Future[List[Member]]: ...
 
     @overload
     async def chunk_guild(
         self, guild: Guild, *, wait: Literal[True] = True, cache: Optional[bool] = None
-    ) -> List[Member]:
-        ...
+    ) -> List[Member]: ...
 
     async def chunk_guild(
         self, guild: Guild, *, wait: bool = True, cache: Optional[bool] = None
@@ -2028,7 +2026,9 @@ class ConnectionState:
         *,
         with_localizations: bool = True,
     ) -> List[APIApplicationCommand]:
-        results = await self.http.get_global_commands(self.application_id, with_localizations=with_localizations)  # type: ignore
+        results = await self.http.get_global_commands(
+            self.application_id, with_localizations=with_localizations
+        )  # type: ignore
         return [application_command_factory(data) for data in results]
 
     async def fetch_global_command(self, command_id: int) -> APIApplicationCommand:
@@ -2039,7 +2039,8 @@ class ConnectionState:
         self, application_command: ApplicationCommand
     ) -> APIApplicationCommand:
         result = await self.http.upsert_global_command(
-            self.application_id, application_command.to_dict()  # type: ignore
+            self.application_id,
+            application_command.to_dict(),  # type: ignore
         )
         cmd = application_command_factory(result)
         self._add_global_application_command(cmd)
@@ -2049,7 +2050,9 @@ class ConnectionState:
         self, command_id: int, new_command: ApplicationCommand
     ) -> APIApplicationCommand:
         result = await self.http.edit_global_command(
-            self.application_id, command_id, new_command.to_dict()  # type: ignore
+            self.application_id,
+            command_id,
+            new_command.to_dict(),  # type: ignore
         )
         cmd = application_command_factory(result)
         self._add_global_application_command(cmd)
@@ -2076,7 +2079,9 @@ class ConnectionState:
         *,
         with_localizations: bool = True,
     ) -> List[APIApplicationCommand]:
-        results = await self.http.get_guild_commands(self.application_id, guild_id, with_localizations=with_localizations)  # type: ignore
+        results = await self.http.get_guild_commands(
+            self.application_id, guild_id, with_localizations=with_localizations
+        )  # type: ignore
         return [application_command_factory(data) for data in results]
 
     async def fetch_guild_command(self, guild_id: int, command_id: int) -> APIApplicationCommand:
@@ -2087,7 +2092,9 @@ class ConnectionState:
         self, guild_id: int, application_command: ApplicationCommand
     ) -> APIApplicationCommand:
         result = await self.http.upsert_guild_command(
-            self.application_id, guild_id, application_command.to_dict()  # type: ignore
+            self.application_id,
+            guild_id,
+            application_command.to_dict(),  # type: ignore
         )
         cmd = application_command_factory(result)
         self._add_guild_application_command(guild_id, cmd)
@@ -2097,7 +2104,10 @@ class ConnectionState:
         self, guild_id: int, command_id: int, new_command: ApplicationCommand
     ) -> APIApplicationCommand:
         result = await self.http.edit_guild_command(
-            self.application_id, guild_id, command_id, new_command.to_dict()  # type: ignore
+            self.application_id,
+            guild_id,
+            command_id,
+            new_command.to_dict(),  # type: ignore
         )
         cmd = application_command_factory(result)
         self._add_guild_application_command(guild_id, cmd)
@@ -2105,7 +2115,9 @@ class ConnectionState:
 
     async def delete_guild_command(self, guild_id: int, command_id: int) -> None:
         await self.http.delete_guild_command(
-            self.application_id, guild_id, command_id  # type: ignore
+            self.application_id,
+            guild_id,
+            command_id,  # type: ignore
         )
         self._remove_guild_application_command(guild_id, command_id)
 
@@ -2114,7 +2126,9 @@ class ConnectionState:
     ) -> List[APIApplicationCommand]:
         payload = [cmd.to_dict() for cmd in application_commands]
         results = await self.http.bulk_upsert_guild_commands(
-            self.application_id, guild_id, payload  # type: ignore
+            self.application_id,
+            guild_id,
+            payload,  # type: ignore
         )
         commands = [application_command_factory(data) for data in results]
         self._guild_application_commands[guild_id] = {cmd.id: cmd for cmd in commands}
@@ -2126,7 +2140,8 @@ class ConnectionState:
         self, guild_id: int
     ) -> List[GuildApplicationCommandPermissions]:
         array = await self.http.get_guild_application_command_permissions(
-            self.application_id, guild_id  # type: ignore
+            self.application_id,
+            guild_id,  # type: ignore
         )
         return [GuildApplicationCommandPermissions(state=self, data=obj) for obj in array]
 
@@ -2134,7 +2149,9 @@ class ConnectionState:
         self, guild_id: int, command_id: int
     ) -> GuildApplicationCommandPermissions:
         data = await self.http.get_application_command_permissions(
-            self.application_id, guild_id, command_id  # type: ignore
+            self.application_id,
+            guild_id,
+            command_id,  # type: ignore
         )
         return GuildApplicationCommandPermissions(state=self, data=data)
 
