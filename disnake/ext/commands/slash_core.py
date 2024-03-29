@@ -142,7 +142,7 @@ class SubCommandGroup(InvokableApplicationCommand):
         parent: InvokableSlashCommand,
         *,
         name: LocalizedOptional = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
@@ -193,7 +193,7 @@ class SubCommandGroup(InvokableApplicationCommand):
         options: Optional[list] = None,
         connectors: Optional[dict] = None,
         extras: Optional[Dict[str, Any]] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> Callable[[CommandCallback], SubCommand]:
         """A decorator that creates a subcommand in the subcommand group.
         Parameters are the same as in :class:`InvokableSlashCommand.sub_command`
@@ -272,7 +272,7 @@ class SubCommand(InvokableApplicationCommand):
         description: LocalizedOptional = None,
         options: Optional[list] = None,
         connectors: Optional[Dict[str, str]] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
@@ -345,7 +345,7 @@ class SubCommand(InvokableApplicationCommand):
     ) -> Optional[Choices]:
         return await _call_autocompleter(self, param, inter, user_input)
 
-    async def invoke(self, inter: ApplicationCommandInteraction, *args, **kwargs) -> None:
+    async def invoke(self, inter: ApplicationCommandInteraction, *args: Any, **kwargs: Any) -> None:
         for k, v in self.connectors.items():
             if k in kwargs:
                 kwargs[v] = kwargs.pop(k)
@@ -439,7 +439,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         guild_ids: Optional[Sequence[int]] = None,
         connectors: Optional[Dict[str, str]] = None,
         auto_sync: Optional[bool] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
@@ -525,7 +525,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         options: Optional[list] = None,
         connectors: Optional[dict] = None,
         extras: Optional[Dict[str, Any]] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> Callable[[CommandCallback], SubCommand]:
         """A decorator that creates a subcommand under the base command.
 
@@ -587,7 +587,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         self,
         name: LocalizedOptional = None,
         extras: Optional[Dict[str, Any]] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> Callable[[CommandCallback], SubCommandGroup]:
         """A decorator that creates a subcommand group under the base command.
 
@@ -758,7 +758,7 @@ def slash_command(
     connectors: Optional[Dict[str, str]] = None,
     auto_sync: Optional[bool] = None,
     extras: Optional[Dict[str, Any]] = None,
-    **kwargs,
+    **kwargs: Any,
 ) -> Callable[[CommandCallback], InvokableSlashCommand]:
     """A decorator that builds a slash command.
 
