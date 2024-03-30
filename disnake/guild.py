@@ -4010,7 +4010,7 @@ class Guild(Hashable):
 
     async def bulk_ban(
         self,
-        users: List[Snowflake],
+        users: Sequence[Snowflake],
         *,
         clean_history_duration: Union[int, datetime.timedelta] = 0,
         reason: Optional[str] = None,
@@ -4028,7 +4028,7 @@ class Guild(Hashable):
 
         Parameters
         ----------
-        users: List[:class:`abc.Snowflake`]
+        users: Sequence[:class:`abc.Snowflake`]
             The users to ban from the guild, up to 200.
         clean_history_duration: Union[:class:`int`, :class:`datetime.timedelta`]
             The timespan (seconds or timedelta) of messages to delete from the users

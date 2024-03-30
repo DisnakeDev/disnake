@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, NamedTuple, Optional
+from typing import TYPE_CHECKING, NamedTuple, Optional, Sequence
 
 __all__ = ("BanEntry",)
 
@@ -17,5 +17,5 @@ class BanEntry(NamedTuple):
 
 
 class BulkBanResult(NamedTuple):
-    banned: List[Snowflake]
-    failed: List[Snowflake]
+    banned: Sequence[Snowflake]
+    failed: Sequence[Snowflake]

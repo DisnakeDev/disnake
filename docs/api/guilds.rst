@@ -80,14 +80,14 @@ BulkBanResult
 
     .. attribute:: banned
 
-        The list of users that were successfully banned.
+        The users that were successfully banned.
 
-        :type: List[:class:`Object`]
+        :type: Sequence[:class:`Object`]
     .. attribute:: failed
 
-        The list of users that were not banned.
+        The users that were not banned.
 
-        :type: List[:class:`Object`]
+        :type: Sequence[:class:`Object`]
 
 Onboarding
 ~~~~~~~~~~
