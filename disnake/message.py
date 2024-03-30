@@ -2083,7 +2083,7 @@ class Message(Hashable):
         return Thread(guild=self.guild, state=self._state, data=data)
 
     async def reply(
-        self, content: Optional[str] = None, *, fail_if_not_exists: bool = True, **kwargs
+        self, content: Optional[str] = None, *, fail_if_not_exists: bool = True, **kwargs: Any
     ) -> Message:
         """|coro|
 

@@ -2181,7 +2181,7 @@ class HTTPClient:
         guild_id: Snowflake,
         *,
         reason: Optional[str] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> Response[welcome_screen.WelcomeScreen]:
         valid_keys = (
             "enabled",
