@@ -37,6 +37,7 @@ from .channel import (
     DMChannel,
     ForumChannel,
     GroupChannel,
+    MediaChannel,
     PartialMessageable,
     StageChannel,
     TextChannel,
@@ -69,6 +70,7 @@ from .raw_models import (
     RawIntegrationDeleteEvent,
     RawMessageDeleteEvent,
     RawMessageUpdateEvent,
+    RawPresenceUpdateEvent,
     RawReactionActionEvent,
     RawReactionClearEmojiEvent,
     RawReactionClearEvent,
@@ -766,7 +768,7 @@ class ConnectionState:
             if channel.__class__ is Thread and not (
                 message.type is MessageType.thread_starter_message
                 or (
-                    type(channel.parent) is ForumChannel  # type: ignore
+                    type(channel.parent) in (ForumChannel, MediaChannel)  # type: ignore
                     and channel.id == message.id
                 )
             ):
@@ -973,13 +975,13 @@ class ConnectionState:
             _log.debug("PRESENCE_UPDATE referencing an unknown guild ID: %s. Discarding.", guild_id)
             return
 
+        raw = RawPresenceUpdateEvent(data)
+        self.dispatch("raw_presence_update", raw)
+
         user = data["user"]
         member_id = int(user["id"])
         member = guild.get_member(member_id)
         if member is None:
-            _log.debug(
-                "PRESENCE_UPDATE referencing an unknown member ID: %s. Discarding", member_id
-            )
             return
 
         old_member = Member._copy(member)
@@ -1111,8 +1113,8 @@ class ConnectionState:
         guild._add_thread(thread)
         if not has_thread:
             if data.get("newly_created"):
-                if isinstance(thread.parent, ForumChannel):
-                    thread.parent.last_thread_id = thread.id
+                if type(thread.parent) in (ForumChannel, MediaChannel):
+                    thread.parent.last_thread_id = thread.id  # type: ignore
 
                 self.dispatch("thread_create", thread)
             else:
