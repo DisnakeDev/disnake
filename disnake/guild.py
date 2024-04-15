@@ -1234,7 +1234,7 @@ class Guild(Hashable):
         name: str,
         *,
         reason: Optional[str] = None,
-        category: Optional[CategoryChannel] = None,
+        category: Optional[Snowflake] = None,
         position: int = MISSING,
         topic: Optional[str] = MISSING,
         slowmode_delay: int = MISSING,
@@ -1292,7 +1292,7 @@ class Guild(Hashable):
             A :class:`dict` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply upon creation of a channel.
             Useful for creating secret channels.
-        category: Optional[:class:`CategoryChannel`]
+        category: Optional[:class:`abc.Snowflake`]
             The category to place the newly created channel under.
             The permissions will be automatically synced to category if no
             overwrites are provided.
@@ -1388,7 +1388,7 @@ class Guild(Hashable):
         self,
         name: str,
         *,
-        category: Optional[CategoryChannel] = None,
+        category: Optional[Snowflake] = None,
         position: int = MISSING,
         bitrate: int = MISSING,
         user_limit: int = MISSING,
@@ -1414,7 +1414,7 @@ class Guild(Hashable):
             A :class:`dict` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply upon creation of a channel.
             Useful for creating secret channels.
-        category: Optional[:class:`CategoryChannel`]
+        category: Optional[:class:`abc.Snowflake`]
             The category to place the newly created channel under.
             The permissions will be automatically synced to category if no
             overwrites are provided.
@@ -1512,7 +1512,7 @@ class Guild(Hashable):
         rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
-        category: Optional[CategoryChannel] = None,
+        category: Optional[Snowflake] = None,
         nsfw: bool = MISSING,
         slowmode_delay: int = MISSING,
         reason: Optional[str] = None,
@@ -1540,7 +1540,7 @@ class Guild(Hashable):
             A :class:`dict` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply upon creation of a channel.
             Useful for creating secret channels.
-        category: Optional[:class:`CategoryChannel`]
+        category: Optional[:class:`abc.Snowflake`]
             The category to place the newly created channel under.
             The permissions will be automatically synced to category if no
             overwrites are provided.
@@ -1633,7 +1633,7 @@ class Guild(Hashable):
         name: str,
         *,
         topic: Optional[str] = None,
-        category: Optional[CategoryChannel] = None,
+        category: Optional[Snowflake] = None,
         position: int = MISSING,
         slowmode_delay: int = MISSING,
         default_thread_slowmode_delay: int = MISSING,
@@ -1661,7 +1661,7 @@ class Guild(Hashable):
             The channel's name.
         topic: Optional[:class:`str`]
             The channel's topic.
-        category: Optional[:class:`CategoryChannel`]
+        category: Optional[:class:`abc.Snowflake`]
             The category to place the newly created channel under.
             The permissions will be automatically synced to category if no
             overwrites are provided.
@@ -1783,7 +1783,7 @@ class Guild(Hashable):
         name: str,
         *,
         topic: Optional[str] = None,
-        category: Optional[CategoryChannel] = None,
+        category: Optional[Snowflake] = None,
         position: int = MISSING,
         slowmode_delay: int = MISSING,
         default_thread_slowmode_delay: int = MISSING,
@@ -1807,7 +1807,7 @@ class Guild(Hashable):
             The channel's name.
         topic: Optional[:class:`str`]
             The channel's topic.
-        category: Optional[:class:`CategoryChannel`]
+        category: Optional[:class:`abc.Snowflake`]
             The category to place the newly created channel under.
             The permissions will be automatically synced to category if no
             overwrites are provided.
@@ -3001,8 +3001,8 @@ class Guild(Hashable):
         The inactive members are denoted if they have not logged on in
         ``days`` number of days and they have no roles.
 
-        You must have :attr:`~Permissions.kick_members` permission
-        to use this.
+        You must have the :attr:`~Permissions.manage_guild` and
+        :attr:`~Permissions.kick_members` permissions to use this.
 
         To check how many members you would prune without actually pruning,
         see the :meth:`estimate_pruned_members` function.
