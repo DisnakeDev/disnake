@@ -17,7 +17,7 @@ class PollMedia(TypedDict):
 
 class PollAnswer(TypedDict):
     # sent only as part of responses from Discord's API/Gateway
-    answer_id: Snowflake
+    answer_id: int
     poll_media: PollMedia
 
 
