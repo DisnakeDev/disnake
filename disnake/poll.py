@@ -146,7 +146,7 @@ class PollMedia:
                     payload["emoji"] = {"id": self.emoji.id}
                 else:
                     payload["emoji"] = {"name": self.emoji.name}
-            elif isinstance(self.emoji, str):
+            else:
                 payload["emoji"] = {"name": self.emoji}
         return payload
 
