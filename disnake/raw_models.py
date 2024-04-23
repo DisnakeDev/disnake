@@ -160,13 +160,13 @@ class RawMessagePollVoteActionEvent(_RawReprMixin):
     Attributes
     ----------
     message_id: :class:`int`
-        The message ID that got or lost a reaction.
+        The message ID that got or lost a vote.
     user_id: :class:`int`
-        The user ID who added the reaction or whose reaction was removed.
+        The user ID who added the vote or whose vote was removed.
     channel_id: :class:`int`
-        The channel ID where the reaction addition or removal took place.
+        The channel ID where the vote addition or removal took place.
     guild_id: Optional[:class:`int`]
-        The guild ID where the reaction addition or removal took place, if applicable.
+        The guild ID where the vote addition or removal took place, if applicable.
     answer_id: :class:`int`
         The ID of the answer that was voted or unvoted.
     event_type: :class:`str`
