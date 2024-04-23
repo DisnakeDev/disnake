@@ -157,6 +157,8 @@ class RawMessagePollVoteActionEvent(_RawReprMixin):
     """Represents the event payload for :func:`on_raw_message_poll_vote_add` and
     :func:`on_raw_message_poll_vote_remove` events.
 
+    .. versionadded:: 2.10
+
     Attributes
     ----------
     message_id: :class:`int`
