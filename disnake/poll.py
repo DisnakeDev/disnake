@@ -93,7 +93,9 @@ class PollResult:
 
 
 class PollMedia:
-    """Represents a poll media from discord.
+    """Represents data of a poll's question/answers.
+    
+    You must specify at least one of the parameters when creating an instance.
 
     Parameters
     ----------
@@ -101,11 +103,6 @@ class PollMedia:
         The text of this media.
     emoji: Optional[Union[:class:`Emoji`, :class:`PartialEmoji`, :class:`str`]]
         The emoji of this media.
-
-
-    .. note::
-
-        You are expected to pass at least text or emoji. They can't be both none at the same time.
 
     Attributes
     ----------
