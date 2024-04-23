@@ -118,7 +118,7 @@ class PollMedia:
         self, text: Optional[str] = None, *, emoji: Optional[Union[Emoji, PartialEmoji, str]] = None
     ) -> None:
         if text is None and emoji is None:
-            raise ValueError("Either one of text or emoji must be not none.")
+            raise ValueError("At least one of `text` or `emoji` must not be None")
 
         self.text = text
         self.emoji = emoji
