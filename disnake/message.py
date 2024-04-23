@@ -900,7 +900,7 @@ class Message(Hashable):
     poll: Optional[:class:`Poll`]
         The poll contained in this message.
 
-            .. versionadded:: 2.10
+        .. versionadded:: 2.10
     """
 
     __slots__ = (
