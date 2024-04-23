@@ -1598,6 +1598,32 @@ class Intents(BaseFlags):
         """
         return (1 << 20) | (1 << 21)
 
+    @flag_value
+    def guild_polls(self):
+        """:class:`bool`: Whether guild polls related events are enabled.
+
+        .. versionadded:: 2.10
+
+        This corresponds to the following events:
+
+        - :func:`on_message_poll_vote_add`
+        - :func:`on_message_poll_vote_remove`
+        """
+        return 1 << 24
+
+    @flag_value
+    def dm_polls(self):
+        """:class:`bool`: Whether direct polls related events are enabled.
+
+        .. versionadded:: 2.10
+
+        This corresponds to the following events:
+
+        - :func:`on_message_poll_vote_add`
+        - :func:`on_message_poll_vote_remove`
+        """
+        return 1 << 25
+
 
 class MemberCacheFlags(BaseFlags):
     """Controls the library's cache policy when it comes to members.
