@@ -124,7 +124,7 @@ class PollMedia:
         self.emoji = emoji
 
     def __repr__(self) -> str:
-        return f"<{self.__class__.__name__} text={self.text} emoji={self.emoji!r}>"
+        return f"<{self.__class__.__name__} text={self.text!r} emoji={self.emoji!r}>"
 
     @classmethod
     def from_payload(cls, data: PollMediaPayload) -> PollMedia:
