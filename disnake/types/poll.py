@@ -36,13 +36,13 @@ class PollResult(TypedDict):
 
 
 class Poll(TypedDict):
-    question: str
+    question: PollMedia
     answers: List[PollAnswer]
-    expiry: str
+    expiry: Optional[str]
     allow_multiselect: bool
     layout_type: PollType
     # sent only as part of responses from Discord's API/Gateway
-    results: PollResult
+    results: NotRequired[PollResult]
 
 
 class EmojiPayload(TypedDict):
