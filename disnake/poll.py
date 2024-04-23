@@ -254,9 +254,10 @@ class Poll:
     question: :class:`str`
         The question text of the poll.
     answers: List[:class:`PollAnswer`]
-        The answers for this poll.
+        The answers for this poll, up to 10.
     duration: :class:`datetime.timedelta`
-        The total duration of the poll. Defaults to 1 day.
+        The total duration of the poll, up to 7 days. Defaults to 1 day.
+        Note that this gets rounded down to the closest hour.
     allow_multiselect: :class:`bool`
         Whether users will be able to pick more than one answer. Defaults to ``False``.
     layout_type: :class:`PollType`
