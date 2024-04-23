@@ -5,9 +5,9 @@ from __future__ import annotations
 from datetime import timedelta
 from typing import TYPE_CHECKING, List, Optional, Union
 
-from . import message, utils
+from . import utils
 from .emoji import Emoji
-from .enums import PollType, try_enum
+from .enums import PollLayoutType, try_enum
 from .partial_emoji import PartialEmoji
 from .user import User
 
@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from datetime import datetime
 
     from .abc import MessageableChannel
+    from .message import Message
     from .state import ConnectionState
     from .types.poll import (
         Poll as PollPayload,
@@ -47,6 +48,8 @@ class PollAnswerCount:
         The number of votes for this answer.
     me_voted: :class:`bool`
         Whether the current user voted for this answer.
+
+    .. versionadded:: 2.10
     """
 
     __slots__ = (
@@ -75,6 +78,8 @@ class PollResult:
         Whether the votes have been precisely counted.
     answer_counts: List[:class:`PollAnswerCount`]
         The counts for each answer.
+
+    .. versionadded:: 2.10
     """
 
     __slots__ = (
@@ -94,7 +99,7 @@ class PollResult:
 
 class PollMedia:
     """Represents data of a poll's question/answers.
-    
+
     You must specify at least one of the parameters when creating an instance.
 
     Parameters
@@ -110,6 +115,8 @@ class PollMedia:
         The text of this media.
     emoji: Optional[:class:`PartialEmoji`]
         The emoji of this media.
+
+    .. versionadded:: 2.10
     """
 
     __slots__ = ("text", "emoji")
@@ -127,12 +134,15 @@ class PollMedia:
         return f"<{self.__class__.__name__} text={self.text!r} emoji={self.emoji!r}>"
 
     @classmethod
-    def from_payload(cls, data: PollMediaPayload) -> PollMedia:
+    def from_dict(cls, state: ConnectionState, data: PollMediaPayload) -> PollMedia:
         text = data.get("text")
 
         emoji = None
-        if _emoji := data.get("emoji"):
-            emoji = PartialEmoji.from_dict(_emoji)
+        if emoji_data := data.get("emoji"):
+            if _emoji := state._get_emoji_from_data(emoji_data):
+                emoji = _emoji
+            else:
+                emoji = PartialEmoji.from_dict(emoji_data)
 
         return cls(text=text, emoji=emoji)
 
@@ -164,16 +174,20 @@ class PollAnswer:
         .. note::
 
             If this is str you are expected to pass the name of the emoji. This works only for discord default emojis. For custom emojis you need to use an Emoji or PartialEmoji object.
+    poll: :class:`Poll`
+        The poll that contain this answer.
 
     Attributes
     ----------
     answer_id: :class:`int`
         The ID of the answer that this object represents.
-    poll_media: :class:`PollMedia`
+    media: :class:`PollMedia`
         The media fields linked to this answer.
+
+    .. versionadded:: 2.10
     """
 
-    __slots__ = ("_state", "_channel_id", "_message_id", "answer_id", "poll_media")
+    __slots__ = ("_state", "_channel_id", "_message_id", "answer_id", "media", "poll")
 
     def __init__(
         self, text: Optional[str] = None, *, emoji: Optional[Union[Emoji, PartialEmoji, str]] = None
@@ -182,14 +196,15 @@ class PollAnswer:
         self._channel_id: int
         self._message_id: int
         self.answer_id: int
+        self.poll: Poll
 
-        self.poll_media = PollMedia(text, emoji=emoji)
+        self.media = PollMedia(text, emoji=emoji)
 
     def __repr__(self) -> str:
-        return f"<{self.__class__.__name__} poll_media={self.poll_media!r}>"
+        return f"<{self.__class__.__name__} poll_media={self.media!r}>"
 
     @classmethod
-    def from_payload(
+    def from_dict(
         cls, state: ConnectionState, channel_id: int, message_id: int, data: PollAnswerPayload
     ) -> PollAnswer:
         poll_media_payload = data["poll_media"]
@@ -202,9 +217,9 @@ class PollAnswer:
         return answer
 
     def _to_dict(self) -> PollCreateAnswerPayload:
-        return {"poll_media": self.poll_media._to_dict()}
+        return {"poll_media": self.media._to_dict()}
 
-    async def get_voters(self) -> List[User]:
+    async def get_voters(self, after: Optional[int] = None, *, limit: int = 25) -> List[User]:
         """|coro|
 
         Get a list of users that voted for this specific answer.
@@ -212,6 +227,13 @@ class PollAnswer:
         .. note::
 
             This method works only on PollAnswer(s) objects that are fetched from the API and not on the ones built manually.
+
+        Parameters
+        ----------
+        after: Optional[:class:`int`]
+            Get users who votes for this answer after this user ID.
+        limit: :class:`int`
+            The maximum number of users to return. Must be between 1 and 100.
 
         Raises
         ------
@@ -241,7 +263,7 @@ class PollAnswer:
             )
 
         data = await self._state.http.get_poll_answer_voters(
-            self._channel_id, self._message_id, self.answer_id
+            self._channel_id, self._message_id, self.answer_id, after, limit
         )
         return [User(state=self._state, data=user) for user in data["users"]]
 
@@ -251,8 +273,8 @@ class Poll:
 
     Parameters
     ----------
-    question: :class:`str`
-        The question text of the poll.
+    question: :class:`PollMedia`
+        The question of the poll.
     answers: List[:class:`PollAnswer`]
         The answers for this poll, up to 10.
     duration: :class:`datetime.timedelta`
@@ -279,8 +301,8 @@ class Poll:
 
             This attribute is available only if you fetched the Poll object from the API.
 
-    question: :class:`str`
-        The question text of the poll.
+    question: :class:`PollMedia`
+        The question of the poll.
     answers: List[:class:`PollAnswer`]
         The available answers for this poll.
     expiry: :class:`datetime.datetime`
@@ -300,6 +322,8 @@ class Poll:
         .. note::
 
             This attribute is not None only if you fetched the Poll object from the API.
+
+    .. versionadded:: 2.10
     """
 
     __slots__ = (
@@ -317,81 +341,77 @@ class Poll:
 
     def __init__(
         self,
-        question: str,
+        question: PollMedia,
         *,
         answers: List[PollAnswer],
-        duration: Optional[timedelta] = timedelta(hours=24),
+        duration: timedelta = timedelta(hours=24),
         allow_multiselect: bool = False,
-        layout_type: PollType = PollType.default,
+        layout_type: PollLayoutType = PollLayoutType.default,
     ) -> None:
         self._state: ConnectionState
         self.channel: MessageableChannel
-        self.message: message.Message
-        self.expiry: datetime
+        self.message: Message
 
-        self.question: str = question
+        self.question: PollMedia = question
         self.answers: List[PollAnswer] = answers
         self.results: Optional[PollResult] = None
 
-        self.duration: Optional[timedelta] = duration
+        self.duration: timedelta = duration
         if not duration:
             self.duration = timedelta(hours=0)
 
         self.allow_multiselect: bool = allow_multiselect
-        self.layout_type: PollType = layout_type
+        self.layout_type: PollLayoutType = layout_type
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} question={self.question} answers={self.answers!r}>"
 
+    @property
+    def expires_at(self) -> Optional[datetime]:
+        if not hasattr(self, "message"):
+            return None
+        return self.message.created_at + self.duration
+
     @classmethod
-    def from_payload(
+    def from_dict(
         cls,
         channel: MessageableChannel,
-        message: message.Message,
+        message: Message,
         state: ConnectionState,
-        data: Optional[PollPayload] = None,
-    ) -> Optional[Poll]:
-        if data is None:
-            return None
-
+        data: PollPayload,
+    ) -> Poll:
         poll = cls(
-            question=data["question"],
+            question=PollMedia.from_dict(state, data["question"]),
             answers=[
-                PollAnswer.from_payload(state, channel.id, message.id, answer)
+                PollAnswer.from_dict(state, channel.id, message.id, answer)
                 for answer in data["answers"]
             ],
-            duration=None,
+            duration=(utils.parse_time(data["expiry"]) - message.created_at),
             allow_multiselect=data["allow_multiselect"],
-            layout_type=try_enum(PollType, data["layout_type"]),
+            layout_type=try_enum(PollLayoutType, data["layout_type"]),
         )
+        for answer in poll.answers:
+            answer.poll = poll
         poll._state = state
         poll.channel = channel
         poll.message = message
-        poll.expiry = utils.parse_time(data["expiry"])
         poll.results = None
-        if results := data["results"]:
+        if results := data.get("results"):
             poll.results = PollResult(results)
 
         return poll
 
     def _to_dict(self) -> PollCreatePayload:
-        # pyright is not able to tell that we are adding a keyword later,
-        # so we build answers first and then pass directly the list, building
-        # the dict object in one go
-        answers: List[PollCreateAnswerPayload] = []
-        for answer in self.answers:
-            answers.append(answer._to_dict())
-
         payload: PollCreatePayload = {
-            "question": {"text": self.question},
-            "duration": (int(self.duration.total_seconds()) // 3600),  # type: ignore
+            "question": self.question._to_dict(),
+            "duration": (int(self.duration.total_seconds()) // 3600),
             "allow_multiselect": self.allow_multiselect,
             "layout_type": self.layout_type.value,
-            "answers": answers,
+            "answers": [answer._to_dict() for answer in self.answers],
         }
         return payload
 
-    async def expire(self) -> message.Message:
+    async def expire(self) -> Message:
         """|coro|
 
         Immediately ends a poll.
@@ -421,4 +441,4 @@ class Poll:
             )
 
         data = await self._state.http.expire_poll(self.channel.id, self.message.id)
-        return message.Message(state=self._state, channel=self.channel, data=data)
+        return self._state.create_message(channel=self.channel, data=data)

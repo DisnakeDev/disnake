@@ -571,8 +571,18 @@ class HTTPClient:
         return self.request(r, json=payload)
 
     def get_poll_answer_voters(
-        self, channel_id: Snowflake, message_id: Snowflake, answer_id: int
+        self,
+        channel_id: Snowflake,
+        message_id: Snowflake,
+        answer_id: int,
+        after: Optional[Snowflake],
+        limit: int,
     ) -> Response[List[user.User]]:
+        params: Dict[str, Any] = {"limit": limit}
+
+        if after is not None:
+            params["after"] = after
+
         return self.request(
             Route(
                 "GET",
@@ -580,7 +590,8 @@ class HTTPClient:
                 channel_id=channel_id,
                 message_id=message_id,
                 answer_id=answer_id,
-            )
+            ),
+            params=params,
         )
 
     def expire_poll(

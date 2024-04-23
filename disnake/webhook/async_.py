@@ -512,10 +512,10 @@ def handle_message_parameters_dict(
     allowed_mentions: Optional[AllowedMentions] = MISSING,
     previous_allowed_mentions: Optional[AllowedMentions] = None,
     stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = MISSING,
+    poll: Poll = MISSING,
     # these parameters are exclusive to webhooks in forum/media channels
     thread_name: str = MISSING,
     applied_tags: Sequence[Snowflake] = MISSING,
-    poll: Poll = MISSING,
 ) -> DictPayloadParameters:
     if files is not MISSING and file is not MISSING:
         raise TypeError("Cannot mix file and files keyword arguments.")
@@ -606,10 +606,10 @@ def handle_message_parameters(
     allowed_mentions: Optional[AllowedMentions] = MISSING,
     previous_allowed_mentions: Optional[AllowedMentions] = None,
     stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = MISSING,
+    poll: Poll = MISSING,
     # these parameters are exclusive to webhooks in forum/media channels
     thread_name: str = MISSING,
     applied_tags: Sequence[Snowflake] = MISSING,
-    poll: Poll = MISSING,
 ) -> PayloadParameters:
     params = handle_message_parameters_dict(
         content=content,

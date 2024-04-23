@@ -934,11 +934,20 @@ class ConnectionState:
     def _handle_poll_event(
         self, raw: RawMessagePollVoteActionEvent, event_type: Literal["add", "remove"]
     ) -> None:
-        message = self._get_message(raw.message_id)
+        member_id = raw.user_id
         guild = self._get_guild(raw.guild_id)
         if guild is not None:
-            channel = guild.get_channel(raw.channel_id)
-            self.dispatch(f"message_poll_vote_{event_type}", guild, channel, message, raw.answer_id)
+            member = guild.get_member(member_id)
+            if member is not None:
+                raw.member = member
+            else:
+                raw.member = None
+        else:
+            raw.member = None
+        self.dispatch(f"raw_message_poll_vote_{event_type}", raw)
+
+        if raw.member:
+            self.dispatch(f"message_poll_vote_{event_type}", raw.member, raw.answer_id)
 
     def parse_message_poll_vote_add(self, data: gateway.MessagePollVoteAddEvent) -> None:
         raw = RawMessagePollVoteActionEvent(data, "POLL_VOTE_ADD")

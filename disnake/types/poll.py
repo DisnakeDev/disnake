@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-from typing import List, Literal, TypedDict
+from typing import List, Literal, Optional, TypedDict
 
 from typing_extensions import NotRequired
 
 from .emoji import PartialEmoji
-from .snowflake import Snowflake
 
 
 class PollMedia(TypedDict):

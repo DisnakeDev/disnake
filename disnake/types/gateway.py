@@ -331,8 +331,12 @@ class MessagePollVoteAddEvent(TypedDict):
     answer_id: int
 
 
-class MessagePollVoteRemoveEvent(MessagePollVoteAddEvent):
-    ...
+class MessagePollVoteRemoveEvent(TypedDict):
+    channel_id: Snowflake
+    guild_id: NotRequired[Snowflake]
+    message_id: Snowflake
+    user_id: Snowflake
+    answer_id: int
 
 
 # https://discord.com/developers/docs/topics/gateway-events#interaction-create

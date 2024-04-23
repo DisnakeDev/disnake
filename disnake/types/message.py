@@ -115,11 +115,11 @@ class Message(TypedDict):
     sticker_items: NotRequired[List[StickerItem]]
     position: NotRequired[int]
     role_subscription_data: NotRequired[RoleSubscriptionData]
+    poll: NotRequired[Poll]
 
     # specific to MESSAGE_CREATE/MESSAGE_UPDATE events
     guild_id: NotRequired[Snowflake]
     member: NotRequired[Member]
-    poll: NotRequired[Poll]
 
 
 AllowedMentionType = Literal["roles", "users", "everyone"]

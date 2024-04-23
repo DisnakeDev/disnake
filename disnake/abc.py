@@ -1533,7 +1533,7 @@ class Messageable:
         The content must be a type that can convert to a string through ``str(content)``.
 
         At least one of ``content``, ``embed``/``embeds``, ``file``/``files``,
-        ``stickers``, ``components``, or ``view`` must be provided.
+        ``stickers``, ``components``, ``poll`` or ``view`` must be provided.
 
         To upload a single file, the ``file`` parameter should be used with a
         single :class:`.File` object. To upload multiple files, the ``files``

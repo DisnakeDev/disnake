@@ -70,7 +70,7 @@ __all__ = (
     "OnboardingPromptType",
     "SKUType",
     "EntitlementType",
-    "PollType",
+    "PollLayoutType",
 )
 
 
@@ -1199,6 +1199,10 @@ class Event(Enum):
     """Called when a message is deleted.
     Represents the :func:`on_message_delete` event.
     """
+    bulk_message_delete = "bulk_message_delete"
+    """Called when messages are bulk deleted.
+    Represents the :func:`on_bulk_message_delete` event.
+    """
     message_poll_vote_add = "message_poll_vote_add"
     """Called when a vote is added on a `Poll`.
     Represents the :func:`on_message_poll_vote_add` event.
@@ -1206,10 +1210,6 @@ class Event(Enum):
     message_poll_vote_remove = "message_poll_vote_remove"
     """Called when a vote is removed from a `Poll`.
     Represents the :func:`on_message_poll_vote_remove` event.
-    """
-    bulk_message_delete = "bulk_message_delete"
-    """Called when messages are bulk deleted.
-    Represents the :func:`on_bulk_message_delete` event.
     """
     raw_message_edit = "raw_message_edit"
     """Called when a message is edited regardless of the state of the internal message cache.
@@ -1219,6 +1219,10 @@ class Event(Enum):
     """Called when a message is deleted regardless of the message being in the internal message cache or not.
     Represents the :func:`on_raw_message_delete` event.
     """
+    raw_bulk_message_delete = "raw_bulk_message_delete"
+    """Called when a bulk delete is triggered regardless of the messages being in the internal message cache or not.
+    Represents the :func:`on_raw_bulk_message_delete` event.
+    """
     raw_message_poll_vote_add = "raw_message_poll_vote_add"
     """Called when a vote is added on a `Poll` regardless of the internal message cache.
     Represents the :func:`on_raw_message_poll_vote_add` event.
@@ -1226,10 +1230,6 @@ class Event(Enum):
     raw_message_poll_vote_remove = "raw_message_poll_vote_remove"
     """Called when a vote is removed from a `Poll` regardless of the internal message cache.
     Represents the :func:`on_raw_message_poll_vote_remove` event.
-    """
-    raw_bulk_message_delete = "raw_bulk_message_delete"
-    """Called when a bulk delete is triggered regardless of the messages being in the internal message cache or not.
-    Represents the :func:`on_raw_bulk_message_delete` event.
     """
     reaction_add = "reaction_add"
     """Called when a message has a reaction added to it.
@@ -1359,7 +1359,7 @@ class EntitlementType(Enum):
     application_subscription = 8
 
 
-class PollType(Enum):
+class PollLayoutType(Enum):
     default = 1
     """The default poll layout type."""
 

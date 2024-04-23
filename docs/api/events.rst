@@ -1243,29 +1243,21 @@ This section documents events related to Discord chat messages.
     :param messages: The messages that have been deleted.
     :type messages: List[:class:`Message`]
 
-.. function:: on_message_poll_vote_add(guild, channel, message, answer_id)
+.. function:: on_message_poll_vote_add(member, answer_id)
 
-    Called when a vote is added on a poll. If the guild is not found in the internal cache, then this event will not be called.
+    Called when a vote is added on a poll. If the guild or the member is not found in the internal cache, then this event will not be called.
 
-    :param guild: The guild where the poll vote was added.
-    :type guild: :class:`Guild`
-    :param channel: The channel where the poll vote was added.
-    :type channel: :class:`?`
-    :param message: The message that contains the poll for which the poll vote was added.
-    :type message: :class:`Message`
+    :param member: The member who voted.
+    :type member: :class:`Member`
     :param answer_id: The ID of the answer for which the vote was added.
     :type answer_id: :class:`int`
 
-.. function:: on_message_poll_vote_remove(guild, channel, message, answer_id)
+.. function:: on_message_poll_vote_remove(member, answer_id)
 
-    Called when a vote is removed on a poll. If the guild is not found in the internal cache, then this event will not be called.
+    Called when a vote is removed on a poll. If the guild or the member is not found in the internal cache, then this event will not be called.
 
-    :param guild: The guild where the poll vote was removed.
-    :type guild: :class:`Guild`
-    :param channel: The channel where the poll vote was removed.
-    :type channel: :class:`?`
-    :param message: The message that contains the poll for which the poll vote was removed.
-    :type message: :class:`Message`
+    :param member: The member who removed the vote.
+    :type member: :class:`Member`
     :param answer_id: The ID of the answer for which the vote was removed.
     :type answer_id: :class:`int`
 
