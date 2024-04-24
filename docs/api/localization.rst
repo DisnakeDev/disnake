@@ -71,15 +71,21 @@ Locale
 
     .. attribute:: en_GB
 
-        The ``en_GB`` (English, UK) locale.
+        The ``en-GB`` (English, UK) locale.
 
     .. attribute:: en_US
 
-        The ``en_US`` (English, US) locale.
+        The ``en-US`` (English, US) locale.
 
     .. attribute:: es_ES
 
-        The ``es_ES`` (Spanish) locale.
+        The ``es-ES`` (Spanish) locale.
+
+    .. attribute:: es_LATAM
+
+        The ``es-419`` (Spanish, LATAM) locale.
+
+        .. versionadded:: 2.10
 
     .. attribute:: fi
 
@@ -137,7 +143,7 @@ Locale
 
     .. attribute:: pt_BR
 
-        The ``pt_BR`` (Portuguese) locale.
+        The ``pt-BR`` (Portuguese) locale.
 
     .. attribute:: ro
 
@@ -149,7 +155,7 @@ Locale
 
     .. attribute:: sv_SE
 
-        The ``sv_SE`` (Swedish) locale.
+        The ``sv-SE`` (Swedish) locale.
 
     .. attribute:: th
 
@@ -169,8 +175,8 @@ Locale
 
     .. attribute:: zh_CN
 
-        The ``zh_CN`` (Chinese, China) locale.
+        The ``zh-CN`` (Chinese, China) locale.
 
     .. attribute:: zh_TW
 
-        The ``zh_TW`` (Chinese, Taiwan) locale.
+        The ``zh-TW`` (Chinese, Taiwan) locale.
