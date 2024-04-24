@@ -790,6 +790,8 @@ class Locale(Enum):
     "English, US | English, US"
     es_ES = "es-ES"
     "Spanish | Español"
+    es_LATAM = "es-419"
+    "Spanish, LATAM | Español, LATAM"
     fi = "fi"
     "Finnish | Suomi"
     fr = "fr"
