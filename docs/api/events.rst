@@ -1247,6 +1247,13 @@ This section documents events related to Discord chat messages.
 
     Called when a vote is added on a poll. If the guild or the member is not found in the internal cache, then this event will not be called.
 
+    This requires :attr:`Intents.guild_polls` or :attr:`Intents.dm_polls` to be enabled to receive events about polls sent in guilds or DMs.
+
+    .. note::
+
+        You can use :attr:`Intents.polls` to enable both :attr:`Intents.guild_polls` and :attr:`Intents.dm_polls` in one go.
+
+
     :param member: The member who voted.
     :type member: :class:`Member`
     :param answer_id: The ID of the answer for which the vote was added.
@@ -1255,6 +1262,13 @@ This section documents events related to Discord chat messages.
 .. function:: on_message_poll_vote_remove(member, answer_id)
 
     Called when a vote is removed on a poll. If the guild or the member is not found in the internal cache, then this event will not be called.
+
+    This requires :attr:`Intents.guild_polls` or :attr:`Intents.dm_polls` to be enabled to receive events about polls sent in guilds or DMs.
+
+    .. note::
+
+        You can use :attr:`Intents.polls` to enable both :attr:`Intents.guild_polls` and :attr:`Intents.dm_polls` in one go.
+
 
     :param member: The member who removed the vote.
     :type member: :class:`Member`

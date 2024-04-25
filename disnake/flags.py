@@ -1028,11 +1028,13 @@ class Intents(BaseFlags):
         automod_execution: bool = ...,
         bans: bool = ...,
         dm_messages: bool = ...,
+        dm_polls: bool = ...,
         dm_reactions: bool = ...,
         dm_typing: bool = ...,
         emojis: bool = ...,
         emojis_and_stickers: bool = ...,
         guild_messages: bool = ...,
+        guild_polls: bool = ...,
         guild_reactions: bool = ...,
         guild_scheduled_events: bool = ...,
         guild_typing: bool = ...,
@@ -1043,6 +1045,7 @@ class Intents(BaseFlags):
         message_content: bool = ...,
         messages: bool = ...,
         moderation: bool = ...,
+        polls: bool = ...,
         presences: bool = ...,
         reactions: bool = ...,
         typing: bool = ...,
@@ -1398,6 +1401,7 @@ class Intents(BaseFlags):
         - :attr:`~disnake.Message.embeds`
         - :attr:`~disnake.Message.attachments`
         - :attr:`~disnake.Message.components`
+        - :attr:`~disnake.Message.poll`
 
         The following cases will always have the above fields:
 
@@ -1597,6 +1601,19 @@ class Intents(BaseFlags):
         This does not correspond to any attributes or classes in the library in terms of cache.
         """
         return (1 << 20) | (1 << 21)
+
+    @alias_flag_value
+    def polls(self):
+        """:class:`bool`: Whether guild and direct message polls related events are enabled.
+
+        This is a shortcut to set or get both :attr:`guild_polls` and :attr:`dm_polls`.
+
+        This corresponds to the following events:
+
+        - :func:`on_message_poll_vote_add` (both guilds and DMs)
+        - :func:`on_message_poll_vote_remove` (both guilds and DMs)
+        """
+        return (1 << 24) | (1 << 25)
 
     @flag_value
     def guild_polls(self):

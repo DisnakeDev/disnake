@@ -641,6 +641,7 @@ class GuildChannel(ABC):
         if not base.send_messages:
             base.send_tts_messages = False
             base.send_voice_messages = False
+            base.send_polls = False
             base.mention_everyone = False
             base.embed_links = False
             base.attach_files = False
@@ -888,6 +889,7 @@ class GuildChannel(ABC):
         request_to_speak: Optional[bool] = ...,
         send_messages: Optional[bool] = ...,
         send_messages_in_threads: Optional[bool] = ...,
+        send_polls: Optional[bool] = ...,
         send_tts_messages: Optional[bool] = ...,
         send_voice_messages: Optional[bool] = ...,
         speak: Optional[bool] = ...,

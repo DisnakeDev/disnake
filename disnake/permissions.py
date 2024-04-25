@@ -197,6 +197,7 @@ class Permissions(BaseFlags):
         request_to_speak: bool = ...,
         send_messages: bool = ...,
         send_messages_in_threads: bool = ...,
+        send_polls: bool = ...,
         send_tts_messages: bool = ...,
         send_voice_messages: bool = ...,
         speak: bool = ...,
@@ -425,6 +426,7 @@ class Permissions(BaseFlags):
             send_tts_messages=True,
             use_slash_commands=True,
             send_voice_messages=True,
+            send_polls=True,
         )
 
     @classmethod
@@ -580,6 +582,7 @@ class Permissions(BaseFlags):
         request_to_speak: bool = ...,
         send_messages: bool = ...,
         send_messages_in_threads: bool = ...,
+        send_polls: bool = ...,
         send_tts_messages: bool = ...,
         send_voice_messages: bool = ...,
         speak: bool = ...,
@@ -1151,6 +1154,7 @@ class PermissionOverwrite:
         request_to_speak: Optional[bool]
         send_messages: Optional[bool]
         send_messages_in_threads: Optional[bool]
+        send_polls: Optional[bool]
         send_tts_messages: Optional[bool]
         send_voice_messages: Optional[bool]
         speak: Optional[bool]
@@ -1217,6 +1221,7 @@ class PermissionOverwrite:
         request_to_speak: Optional[bool] = ...,
         send_messages: Optional[bool] = ...,
         send_messages_in_threads: Optional[bool] = ...,
+        send_polls: Optional[bool] = ...,
         send_tts_messages: Optional[bool] = ...,
         send_voice_messages: Optional[bool] = ...,
         speak: Optional[bool] = ...,
@@ -1350,6 +1355,7 @@ class PermissionOverwrite:
         request_to_speak: Optional[bool] = ...,
         send_messages: Optional[bool] = ...,
         send_messages_in_threads: Optional[bool] = ...,
+        send_polls: Optional[bool] = ...,
         send_tts_messages: Optional[bool] = ...,
         send_voice_messages: Optional[bool] = ...,
         speak: Optional[bool] = ...,

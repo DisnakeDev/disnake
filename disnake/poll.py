@@ -40,6 +40,8 @@ __all__ = (
 class PollAnswerCount:
     """Represents a poll answer count from discord.
 
+    .. versionadded:: 2.10
+
     Attributes
     ----------
     id: :class:`int`
@@ -48,8 +50,6 @@ class PollAnswerCount:
         The number of votes for this answer.
     me_voted: :class:`bool`
         Whether the current user voted for this answer.
-
-    .. versionadded:: 2.10
     """
 
     __slots__ = (
@@ -72,14 +72,14 @@ class PollAnswerCount:
 class PollResult:
     """Represents a poll result from discord.
 
+    .. versionadded:: 2.10
+
     Attributes
     ----------
     is_finalized: :class:`bool`
         Whether the votes have been precisely counted.
     answer_counts: List[:class:`PollAnswerCount`]
         The counts for each answer.
-
-    .. versionadded:: 2.10
     """
 
     __slots__ = (
@@ -102,6 +102,8 @@ class PollMedia:
 
     You must specify at least one of the parameters when creating an instance.
 
+    .. versionadded:: 2.10
+
     Parameters
     ----------
     text: Optional[:class:`str`]
@@ -115,8 +117,6 @@ class PollMedia:
         The text of this media.
     emoji: Optional[:class:`PartialEmoji`]
         The emoji of this media.
-
-    .. versionadded:: 2.10
     """
 
     __slots__ = ("text", "emoji")
@@ -161,6 +161,8 @@ class PollMedia:
 class PollAnswer:
     """Represents a poll answer from discord.
 
+    .. versionadded:: 2.10
+
     Parameters
     ----------
     text: Optional[:class:`str`]
@@ -176,15 +178,13 @@ class PollAnswer:
 
     Attributes
     ----------
-    answer_id: :class:`int`
+    id: :class:`int`
         The ID of the answer that this object represents.
     media: :class:`PollMedia`
         The media fields linked to this answer.
-
-    .. versionadded:: 2.10
     """
 
-    __slots__ = ("_state", "_channel_id", "_message_id", "answer_id", "media", "poll")
+    __slots__ = ("_state", "_channel_id", "_message_id", "id", "media", "poll")
 
     def __init__(
         self, text: Optional[str] = None, *, emoji: Optional[Union[Emoji, PartialEmoji, str]] = None
@@ -192,7 +192,7 @@ class PollAnswer:
         self._state: ConnectionState
         self._channel_id: int
         self._message_id: int
-        self.answer_id: int
+        self.id: int
         self.poll: Poll
 
         self.media = PollMedia(text, emoji=emoji)
@@ -206,7 +206,7 @@ class PollAnswer:
     ) -> PollAnswer:
         poll_media_payload = data["poll_media"]
         answer = cls(poll_media_payload.get("text"), emoji=poll_media_payload.get("text"))
-        answer.answer_id = int(data["answer_id"])
+        answer.id = int(data["answer_id"])
         answer._state = state
         answer._channel_id = channel_id
         answer._message_id = message_id
@@ -260,13 +260,15 @@ class PollAnswer:
             )
 
         data = await self._state.http.get_poll_answer_voters(
-            self._channel_id, self._message_id, self.answer_id, after, limit
+            self._channel_id, self._message_id, self.id, after=after, limit=limit
         )
         return [User(state=self._state, data=user) for user in data["users"]]
 
 
 class Poll:
     """Represents a poll from Discord.
+
+    .. versionadded:: 2.10
 
     Parameters
     ----------
@@ -319,8 +321,6 @@ class Poll:
         .. note::
 
             This attribute is not None only if you fetched the Poll object from the API.
-
-    .. versionadded:: 2.10
     """
 
     __slots__ = (
@@ -353,9 +353,7 @@ class Poll:
         self.answers: List[PollAnswer] = answers
         self.results: Optional[PollResult] = None
 
-        self.duration: timedelta = duration
-        if not duration:
-            self.duration = timedelta(hours=0)
+        self.duration: Optional[timedelta] = duration
 
         self.allow_multiselect: bool = allow_multiselect
         self.layout_type: PollLayoutType = layout_type
@@ -366,7 +364,9 @@ class Poll:
     @property
     def expires_at(self) -> Optional[datetime]:
         if not hasattr(self, "message"):
-            return None
+            return
+        if self.duration is None:
+            return
         return self.message.created_at + self.duration
 
     @classmethod
@@ -383,7 +383,11 @@ class Poll:
                 PollAnswer.from_dict(state, channel.id, message.id, answer)
                 for answer in data["answers"]
             ],
-            duration=(utils.parse_time(data["expiry"]) - message.created_at),
+            duration=(
+                (utils.parse_time(data["expiry"]) - message.created_at)
+                if data["expiry"]
+                else None  # type: ignore
+            ),
             allow_multiselect=data["allow_multiselect"],
             layout_type=try_enum(PollLayoutType, data["layout_type"]),
         )
@@ -401,7 +405,7 @@ class Poll:
     def _to_dict(self) -> PollCreatePayload:
         payload: PollCreatePayload = {
             "question": self.question._to_dict(),
-            "duration": (int(self.duration.total_seconds()) // 3600),
+            "duration": (int(self.duration.total_seconds()) // 3600),  # type: ignore
             "allow_multiselect": self.allow_multiselect,
             "layout_type": self.layout_type.value,
             "answers": [answer._to_dict() for answer in self.answers],
