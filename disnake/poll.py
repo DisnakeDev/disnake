@@ -173,14 +173,8 @@ class PollAnswer:
 
     Parameters
     ----------
-    text: Optional[:class:`str`]
-        The text of the answer.
-    emoji: Optional[Union[:class:`Emoji`, :class:`PartialEmoji`, :class:`str`]]
-        The emoji of the answer.
-
-        .. note::
-
-            If this is str you are expected to pass the name of the emoji. This works only for discord default emojis. For custom emojis you need to use an Emoji or PartialEmoji object.
+    media: :class:`PollMedia`
+        The media object to set the text and/or emoji for this answer.
 
     Attributes
     ----------
@@ -194,16 +188,14 @@ class PollAnswer:
 
     __slots__ = ("_state", "_channel_id", "_message_id", "id", "media", "poll")
 
-    def __init__(
-        self, text: Optional[str] = None, *, emoji: Optional[Union[Emoji, PartialEmoji, str]] = None
-    ) -> None:
+    def __init__(self, media: PollMedia) -> None:
         self._state: ConnectionState
         self._channel_id: int
         self._message_id: int
         self.id: int
         self.poll: Poll
 
-        self.media = PollMedia(text, emoji=emoji)
+        self.media = media
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} poll_media={self.media!r}>"
@@ -212,8 +204,7 @@ class PollAnswer:
     def from_dict(
         cls, state: ConnectionState, channel_id: int, message_id: int, data: PollAnswerPayload
     ) -> PollAnswer:
-        poll_media_payload = data["poll_media"]
-        answer = cls(poll_media_payload.get("text"), emoji=poll_media_payload.get("emoji"))
+        answer = cls(PollMedia.from_dict(state, data["poll_media"]))
         answer.id = int(data["answer_id"])
         answer._state = state
         answer._channel_id = channel_id
