@@ -19,3 +19,4 @@ class Entitlement(TypedDict):
     deleted: bool
     starts_at: NotRequired[str]
     ends_at: NotRequired[str]
+    consumed: NotRequired[bool]
