@@ -6,7 +6,7 @@ from datetime import timedelta
 from typing import TYPE_CHECKING, List, Optional, Union
 
 from . import utils
-from .emoji import Emoji
+from .emoji import Emoji, _EmojiTag
 from .enums import PollLayoutType, try_enum
 from .partial_emoji import PartialEmoji
 from .user import User
@@ -128,7 +128,15 @@ class PollMedia:
             raise ValueError("At least one of `text` or `emoji` must not be None")
 
         self.text = text
-        self.emoji = emoji
+        self.emoji: Optional[Union[Emoji, PartialEmoji]] = None
+        if emoji is None:
+            self.emoji = None
+        elif isinstance(emoji, str):
+            self.emoji = PartialEmoji.from_str(emoji)
+        elif isinstance(emoji, _EmojiTag):
+            self.emoji = emoji
+        else:
+            raise TypeError("emoji must be None, a str, PartialEmoji, or Emoji instance.")
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} text={self.text!r} emoji={self.emoji!r}>"
