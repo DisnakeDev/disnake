@@ -575,13 +575,16 @@ class HTTPClient:
         channel_id: Snowflake,
         message_id: Snowflake,
         answer_id: int,
-        after: Optional[Snowflake],
-        limit: int,
+        *,
+        after: Optional[Snowflake] = None,
+        limit: Optional[int] = None,
     ) -> Response[List[user.User]]:
-        params: Dict[str, Any] = {"limit": limit}
+        params: Dict[str, Any] = {}
 
         if after is not None:
             params["after"] = after
+        if limit is not None:
+            params["limit"] = limit
 
         return self.request(
             Route(
