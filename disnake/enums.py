@@ -1336,6 +1336,8 @@ class OnboardingPromptType(Enum):
 
 
 class SKUType(Enum):
+    durable = 2
+    consumable = 3
     subscription = 5
     subscription_group = 6
 
