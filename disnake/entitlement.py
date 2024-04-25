@@ -160,6 +160,22 @@ class Entitlement(Hashable):
 
         return True
 
+    async def consume(self) -> None:
+        """|coro|
+
+        Marks the entitlement as consumed.
+
+        This is only valid for consumable one-time entitlements; see :attr:`consumed`.
+
+        Raises
+        ------
+        NotFound
+            The entitlement does not exist.
+        HTTPException
+            Consuming the entitlement failed.
+        """
+        await self._state.http.consume_entitlement(self.application_id, self.id)
+
     async def delete(self) -> None:
         """|coro|
 
