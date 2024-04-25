@@ -1243,7 +1243,7 @@ This section documents events related to Discord chat messages.
     :param messages: The messages that have been deleted.
     :type messages: List[:class:`Message`]
 
-.. function:: on_message_poll_vote_add(member, answer_id)
+.. function:: on_message_poll_vote_add(member, answer)
 
     Called when a vote is added on a poll. If the guild or the member is not found in the internal cache, then this event will not be called.
 
@@ -1256,10 +1256,10 @@ This section documents events related to Discord chat messages.
 
     :param member: The member who voted.
     :type member: :class:`Member`
-    :param answer_id: The ID of the answer for which the vote was added.
-    :type answer_id: :class:`int`
+    :param answer: The :class:`PollAnswer` object for which the vote was added.
+    :type answer: :class:`PollAnswer`
 
-.. function:: on_message_poll_vote_remove(member, answer_id)
+.. function:: on_message_poll_vote_remove(member, answer)
 
     Called when a vote is removed on a poll. If the guild or the member is not found in the internal cache, then this event will not be called.
 
@@ -1272,8 +1272,8 @@ This section documents events related to Discord chat messages.
 
     :param member: The member who removed the vote.
     :type member: :class:`Member`
-    :param answer_id: The ID of the answer for which the vote was removed.
-    :type answer_id: :class:`int`
+    :param answer: The :class:`PollAnswer` object for which the vote was removed.
+    :type answer: :class:`PollAnswer`
 
 .. function:: on_raw_message_edit(payload)
 

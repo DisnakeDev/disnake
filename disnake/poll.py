@@ -181,8 +181,6 @@ class PollAnswer:
         .. note::
 
             If this is str you are expected to pass the name of the emoji. This works only for discord default emojis. For custom emojis you need to use an Emoji or PartialEmoji object.
-    poll: :class:`Poll`
-        The poll that contain this answer.
 
     Attributes
     ----------
@@ -190,6 +188,8 @@ class PollAnswer:
         The ID of the answer that this object represents.
     media: :class:`PollMedia`
         The media fields linked to this answer.
+    poll: :class:`Poll`
+        The poll that contain this answer.
     """
 
     __slots__ = ("_state", "_channel_id", "_message_id", "id", "media", "poll")
@@ -213,7 +213,7 @@ class PollAnswer:
         cls, state: ConnectionState, channel_id: int, message_id: int, data: PollAnswerPayload
     ) -> PollAnswer:
         poll_media_payload = data["poll_media"]
-        answer = cls(poll_media_payload.get("text"), emoji=poll_media_payload.get("text"))
+        answer = cls(poll_media_payload.get("text"), emoji=poll_media_payload.get("emoji"))
         answer.id = int(data["answer_id"])
         answer._state = state
         answer._channel_id = channel_id
