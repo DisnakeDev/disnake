@@ -289,8 +289,8 @@ class Poll:
         Note that this gets rounded down to the closest hour.
     allow_multiselect: :class:`bool`
         Whether users will be able to pick more than one answer. Defaults to ``False``.
-    layout_type: :class:`PollType`
-        The layout type of the poll. Defaults to :attr:`PollType.default`.
+    layout_type: :class:`PollLayoutType`
+        The layout type of the poll. Defaults to :attr:`PollLayoutType.default`.
 
     Attributes
     ----------
@@ -321,7 +321,7 @@ class Poll:
 
     allow_multiselect: :class:`bool`
         Whether users are able to pick more than one answer.
-    layout_type: :class:`PollType`
+    layout_type: :class:`PollLayoutType`
         The type of the layout of the poll.
     results: Optional[:class:`PollResult`]
         The results of the poll.

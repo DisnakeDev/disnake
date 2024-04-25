@@ -397,10 +397,10 @@ MessageType
 
         .. versionadded:: 2.8
 
-PollType
-~~~~~~~~
+PollLayoutType
+~~~~~~~~~~~~~~
 
-.. autoclass:: PollType
+.. autoclass:: PollLayoutType
     :members:
 
 Events

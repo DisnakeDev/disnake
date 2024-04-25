@@ -1631,7 +1631,7 @@ class Messageable:
 
             .. versionadded:: 2.9
 
-        poll: :class:`Poll`
+        poll: :class:`.Poll`
             The poll to send with the message.
 
             .. versionadded:: 2.10
