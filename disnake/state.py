@@ -956,12 +956,10 @@ class ConnectionState:
 
     def parse_message_poll_vote_add(self, data: gateway.MessagePollVoteAddEvent) -> None:
         raw = RawMessagePollVoteActionEvent(data, "POLL_VOTE_ADD")
-        self.dispatch("raw_message_poll_vote_add", raw)
         self._handle_poll_event(raw, "add")
 
     def parse_message_poll_vote_remove(self, data: gateway.MessagePollVoteRemoveEvent) -> None:
         raw = RawMessagePollVoteActionEvent(data, "POLL_VOTE_REMOVE")
-        self.dispatch("raw_message_poll_vote_remove", raw)
         self._handle_poll_event(raw, "remove")
 
     def parse_interaction_create(self, data: gateway.InteractionCreateEvent) -> None:
