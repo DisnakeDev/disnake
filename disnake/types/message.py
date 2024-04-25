@@ -63,7 +63,11 @@ class MessageApplication(TypedDict):
     cover_image: NotRequired[str]
 
 
+MessageReferenceType = Literal[0, 1]
+
+
 class MessageReference(TypedDict):
+    type: NotRequired[MessageReferenceType]
     message_id: NotRequired[Snowflake]
     channel_id: Snowflake
     guild_id: NotRequired[Snowflake]

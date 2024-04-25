@@ -26,7 +26,14 @@ from . import utils
 from .components import ActionRow, MessageComponent, _component_factory
 from .embeds import Embed
 from .emoji import Emoji
-from .enums import ChannelType, InteractionType, MessageType, try_enum, try_enum_to_int
+from .enums import (
+    ChannelType,
+    InteractionType,
+    MessageReferenceType,
+    MessageType,
+    try_enum,
+    try_enum_to_int,
+)
 from .errors import HTTPException
 from .file import File
 from .flags import AttachmentFlags, MessageFlags
@@ -558,6 +565,11 @@ class MessageReference:
 
     Attributes
     ----------
+    type: :class:`MessageReferenceType`
+        The type of the message reference.
+
+        .. versionadded:: 2.10
+
     message_id: Optional[:class:`int`]
         The ID of the message referenced.
     channel_id: :class:`int`
@@ -582,11 +594,20 @@ class MessageReference:
         .. versionadded:: 1.6
     """
 
-    __slots__ = ("message_id", "channel_id", "guild_id", "fail_if_not_exists", "resolved", "_state")
+    __slots__ = (
+        "type",
+        "message_id",
+        "channel_id",
+        "guild_id",
+        "fail_if_not_exists",
+        "resolved",
+        "_state",
+    )
 
     def __init__(
         self,
         *,
+        type: MessageReferenceType = MessageReferenceType.default,
         message_id: int,
         channel_id: int,
         guild_id: Optional[int] = None,
@@ -594,6 +615,7 @@ class MessageReference:
     ) -> None:
         self._state: Optional[ConnectionState] = None
         self.resolved: Optional[Union[Message, DeletedReferencedMessage]] = None
+        self.type: MessageReferenceType = type
         self.message_id: Optional[int] = message_id
         self.channel_id: int = channel_id
         self.guild_id: Optional[int] = guild_id
@@ -602,6 +624,9 @@ class MessageReference:
     @classmethod
     def with_state(cls, state: ConnectionState, data: MessageReferencePayload) -> Self:
         self = cls.__new__(cls)
+        # if the type is not present in the message reference object returned by the API
+        # we assume automatically that it's a DEFAULT (aka message reply) message reference
+        self.type = try_enum(MessageReferenceType, data.get("type", 0))
         self.message_id = utils._get_as_snowflake(data, "message_id")
         self.channel_id = int(data["channel_id"])
         self.guild_id = utils._get_as_snowflake(data, "guild_id")
@@ -611,7 +636,13 @@ class MessageReference:
         return self
 
     @classmethod
-    def from_message(cls, message: Message, *, fail_if_not_exists: bool = True) -> Self:
+    def from_message(
+        cls,
+        message: Message,
+        *,
+        type: MessageReferenceType = MessageReferenceType.default,
+        fail_if_not_exists: bool = True,
+    ) -> Self:
         """Creates a :class:`MessageReference` from an existing :class:`~disnake.Message`.
 
         .. versionadded:: 1.6
@@ -620,6 +651,12 @@ class MessageReference:
         ----------
         message: :class:`~disnake.Message`
             The message to be converted into a reference.
+        type: :class:`MessageReferenceType`
+            The type of the message reference. This is used to control whether to reply
+            or forward a message.
+
+            .. versionadded:: 2.10
+
         fail_if_not_exists: :class:`bool`
             Whether replying to the referenced message should raise :class:`HTTPException`
             if the message no longer exists or Discord could not fetch the message.
@@ -632,6 +669,7 @@ class MessageReference:
             A reference to the message.
         """
         self = cls(
+            type=type,
             message_id=message.id,
             channel_id=message.channel.id,
             guild_id=getattr(message.guild, "id", None),
@@ -655,10 +693,11 @@ class MessageReference:
         return f"https://discord.com/channels/{guild_id}/{self.channel_id}/{self.message_id}"
 
     def __repr__(self) -> str:
-        return f"<MessageReference message_id={self.message_id!r} channel_id={self.channel_id!r} guild_id={self.guild_id!r}>"
+        return f"<MessageReference type={self.type!r} message_id={self.message_id!r} channel_id={self.channel_id!r} guild_id={self.guild_id!r}>"
 
     def to_dict(self) -> MessageReferencePayload:
         result: MessageReferencePayload = {
+            "type": self.type.value,
             "channel_id": self.channel_id,
             "fail_if_not_exists": self.fail_if_not_exists,
         }
@@ -2128,13 +2167,35 @@ class Message(Hashable):
             reference = self
         return await self.channel.send(content, reference=reference, **kwargs)
 
-    def to_reference(self, *, fail_if_not_exists: bool = True) -> MessageReference:
+    async def forward(
+        self, content: Optional[str] = None, *, fail_if_not_exists: bool = True, **kwargs: Any
+    ) -> Message:
+        if not fail_if_not_exists:
+            reference = MessageReference.from_message(
+                self, type=MessageReferenceType.forward, fail_if_not_exists=False
+            )
+        else:
+            reference = MessageReference.from_message(self, type=MessageReferenceType.forward)
+        return await self.channel.send(content, reference=reference, **kwargs)
+
+    def to_reference(
+        self,
+        *,
+        reference_type: MessageReferenceType = MessageReferenceType.default,
+        fail_if_not_exists: bool = True,
+    ) -> MessageReference:
         """Creates a :class:`~disnake.MessageReference` from the current message.
 
         .. versionadded:: 1.6
 
         Parameters
         ----------
+        reference_type: :class:`MessageReferenceType`
+            The type of the message reference. This is used to control whether to reply
+            or forward a message.
+
+            .. versionadded:: 2.10
+
         fail_if_not_exists: :class:`bool`
             Whether replying using the message reference should raise :class:`HTTPException`
             if the message no longer exists or Discord could not fetch the message.
@@ -2146,7 +2207,9 @@ class Message(Hashable):
         :class:`~disnake.MessageReference`
             The reference to this message.
         """
-        return MessageReference.from_message(self, fail_if_not_exists=fail_if_not_exists)
+        return MessageReference.from_message(
+            self, type=reference_type, fail_if_not_exists=fail_if_not_exists
+        )
 
     def to_message_reference_dict(self) -> MessageReferencePayload:
         data: MessageReferencePayload = {

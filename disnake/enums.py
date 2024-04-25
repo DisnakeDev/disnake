@@ -70,6 +70,7 @@ __all__ = (
     "OnboardingPromptType",
     "SKUType",
     "EntitlementType",
+    "MessageReferenceType",
 )
 
 
@@ -1342,6 +1343,13 @@ class SKUType(Enum):
 
 class EntitlementType(Enum):
     application_subscription = 8
+
+
+class MessageReferenceType(Enum):
+    default = 0
+    """A standard message reference used in message replies."""
+    forward = 1
+    """Reference used to point to a message at a point in time (forward)."""
 
 
 T = TypeVar("T")
