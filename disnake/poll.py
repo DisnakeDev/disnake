@@ -139,10 +139,7 @@ class PollMedia:
 
         emoji = None
         if emoji_data := data.get("emoji"):
-            if _emoji := state._get_emoji_from_data(emoji_data):
-                emoji = _emoji
-            else:
-                emoji = PartialEmoji.from_dict(emoji_data)
+            emoji = state._get_emoji_from_data(emoji_data)
 
         return cls(text=text, emoji=emoji)
 
