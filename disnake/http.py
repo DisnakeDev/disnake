@@ -578,7 +578,7 @@ class HTTPClient:
         *,
         after: Optional[Snowflake] = None,
         limit: Optional[int] = None,
-    ) -> Response[List[user.User]]:
+    ) -> Response[poll.PollVoters]:
         params: Dict[str, Any] = {}
 
         if after is not None:

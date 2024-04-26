@@ -7,6 +7,7 @@ from typing import List, Literal, Optional, TypedDict
 from typing_extensions import NotRequired
 
 from .emoji import PartialEmoji
+from .user import User
 
 
 class PollMedia(TypedDict):
@@ -32,6 +33,10 @@ class PollAnswerCount(TypedDict):
 class PollResult(TypedDict):
     is_finalized: bool
     answer_counts: List[PollAnswerCount]
+
+
+class PollVoters(TypedDict):
+    users: List[User]
 
 
 class Poll(TypedDict):

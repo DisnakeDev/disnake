@@ -178,22 +178,22 @@ class PollAnswer:
 
     Attributes
     ----------
-    id: :class:`int`
-        The ID of the answer that this object represents.
+    id: Optional[:class:`int`]
+        The ID of the answer that this object represents. This will be None only when the object
+        is builded manually. The library always provide this attribute.
     media: :class:`PollMedia`
         The media fields linked to this answer.
-    poll: :class:`Poll`
-        The poll that contain this answer.
+    poll: Optional[:class:`Poll`]
+        The poll that contain this answer. This will be None only when the object
+        is builded manually. The library always provide this attribute.
     """
 
     __slots__ = ("_state", "_channel_id", "_message_id", "id", "media", "poll")
 
     def __init__(self, media: PollMedia) -> None:
-        self._state: ConnectionState
-        self._channel_id: int
-        self._message_id: int
-        self.id: int
-        self.poll: Poll
+        self._state: Optional[ConnectionState] = None
+        self.id: Optional[int] = None
+        self.poll: Optional[Poll] = None
 
         self.media = media
 
@@ -201,14 +201,10 @@ class PollAnswer:
         return f"<{self.__class__.__name__} poll_media={self.media!r}>"
 
     @classmethod
-    def from_dict(
-        cls, state: ConnectionState, channel_id: int, message_id: int, data: PollAnswerPayload
-    ) -> PollAnswer:
+    def from_dict(cls, state: ConnectionState, data: PollAnswerPayload) -> PollAnswer:
         answer = cls(PollMedia.from_dict(state, data["poll_media"]))
         answer.id = int(data["answer_id"])
         answer._state = state
-        answer._channel_id = channel_id
-        answer._message_id = message_id
 
         return answer
 
@@ -245,15 +241,7 @@ class PollAnswer:
         List[:class:`User`]
             The users that voted for this answer.
         """
-        if not all(
-            hasattr(self, member)
-            for member in (
-                "_state",
-                "_channel_id",
-                "_message_id",
-                "answer_id",
-            )
-        ):
+        if not self._state or not self.id:
             raise ValueError(
                 "This object was manually builded. To use this method you need to get a poll from the discord API!"
             )
@@ -285,21 +273,23 @@ class Poll:
 
     Attributes
     ----------
-    channel: Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`StageChannel`, :class:`Thread`, :class:`DMChannel`, :class:`GroupChannel`, :class:`PartialMessageable`]
-        The channel that the poll was sent from.
+    channel: Optional[Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`StageChannel`, :class:`Thread`, :class:`DMChannel`, :class:`GroupChannel`, :class:`PartialMessageable`]]
+        The channel that the poll was sent from. This will be None only when the object
+        is builded manually. The library always provide this attribute.
 
         .. note::
 
             This attribute is available only if you fetched the Poll object from the API.
 
-    message: :class:`Message`
-        The message which contain this poll.
+    message: Optional[:class:`Message`]
+        The message which contain this poll. This will be None only when the object
+        is builded manually. The library always provide this attribute.
 
         .. note::
 
             This attribute is available only if you fetched the Poll object from the API.
 
-    question: :class:`PollMedia`
+    question: Union[:class:`str`, :class:`PollMedia`]
         The question of the poll.
     answers: List[:class:`PollAnswer`]
         The available answers for this poll.
@@ -337,18 +327,22 @@ class Poll:
 
     def __init__(
         self,
-        question: PollMedia,
+        question: Union[str, PollMedia],
         *,
         answers: List[PollAnswer],
         duration: timedelta = timedelta(hours=24),
         allow_multiselect: bool = False,
         layout_type: PollLayoutType = PollLayoutType.default,
     ) -> None:
-        self._state: ConnectionState
-        self.channel: MessageableChannel
-        self.message: Message
+        self._state: Optional[ConnectionState] = None
+        self.channel: Optional[MessageableChannel] = None
+        self.message: Optional[Message] = None
 
-        self.question: PollMedia = question
+        if isinstance(question, str):
+            self.question = PollMedia(question)
+        else:
+            self.question: PollMedia = question
+
         self.answers: List[PollAnswer] = answers
         self.results: Optional[PollResult] = None
 
@@ -362,9 +356,7 @@ class Poll:
 
     @property
     def expires_at(self) -> Optional[datetime]:
-        if not hasattr(self, "message"):
-            return
-        if self.duration is None:
+        if not self.duration or not self.message:
             return
         return self.message.created_at + self.duration
 
@@ -378,20 +370,15 @@ class Poll:
     ) -> Poll:
         poll = cls(
             question=PollMedia.from_dict(state, data["question"]),
-            answers=[
-                PollAnswer.from_dict(state, channel.id, message.id, answer)
-                for answer in data["answers"]
-            ],
-            duration=(
-                (utils.parse_time(data["expiry"]) - message.created_at)
-                if data["expiry"]
-                else None  # type: ignore
-            ),
+            answers=[PollAnswer.from_dict(state, answer) for answer in data["answers"]],
             allow_multiselect=data["allow_multiselect"],
             layout_type=try_enum(PollLayoutType, data["layout_type"]),
         )
         for answer in poll.answers:
             answer.poll = poll
+        poll.duration = (
+            (utils.parse_time(data["expiry"]) - message.created_at) if data["expiry"] else None
+        )
         poll._state = state
         poll.channel = channel
         poll.message = message
@@ -435,7 +422,7 @@ class Poll:
         :class:`Message`
             The message which contains the expired `Poll`.
         """
-        if not all(hasattr(self, member) for member in ("_state", "channel", "message")):
+        if not self._state or not self.channel or not self.message:
             raise ValueError(
                 "This object was manually builded. To use this method you need to get a poll from the discord API!"
             )
