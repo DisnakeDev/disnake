@@ -6,10 +6,11 @@ from datetime import timedelta
 from typing import TYPE_CHECKING, List, Optional, Union
 
 from . import utils
+from .abc import Snowflake
 from .emoji import Emoji, _EmojiTag
 from .enums import PollLayoutType, try_enum
+from .iterators import PollAnswerIterator
 from .partial_emoji import PartialEmoji
-from .user import User
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -211,10 +212,12 @@ class PollAnswer:
     def _to_dict(self) -> PollCreateAnswerPayload:
         return {"poll_media": self.media._to_dict()}
 
-    async def get_voters(self, after: Optional[int] = None, *, limit: int = 25) -> List[User]:
-        """|coro|
+    def voters(
+        self, *, limit: Optional[int] = 100, after: Optional[Snowflake] = None
+    ) -> PollAnswerIterator:
+        """Returns an :class:`AsyncIterator` representing the users that have voted for this answer.
 
-        Get a list of users that voted for this specific answer.
+        The ``after`` parameter must represent a member and meet the :class:`abc.Snowflake` abc.
 
         .. note::
 
@@ -222,10 +225,13 @@ class PollAnswer:
 
         Parameters
         ----------
-        after: Optional[:class:`int`]
-            Get users who votes for this answer after this user ID.
-        limit: :class:`int`
-            The maximum number of users to return. Must be between 1 and 100.
+        limit: Optional[:class:`int`]
+            The maximum number of results to return.
+            If ``None``, retrieves every user who voted for this answer.
+            Note, however, that this would make it a slow operation.
+            Defaults to ``100``.
+        after: Optional[:class:`abc.Snowflake`]
+            For pagination, votes are sorted by member.
 
         Raises
         ------
@@ -236,20 +242,20 @@ class PollAnswer:
         ValueError
             You tried to invoke this method on an incomplete object, most likely one that wasn't fetched from the API.
 
-        Returns
-        -------
-        List[:class:`User`]
-            The users that voted for this answer.
+        Yields
+        ------
+        Union[:class:`User`, :class:`Member`]
+            The member (if retrievable) or the user that has voted
+            for this answer. The case where it can be a :class:`Member` is
+            in a guild message context. Sometimes it can be a :class:`User`
+            if the member has left the guild.
         """
-        if not self._state or not self.id:
+        if not (self.id is not None and self.poll and self.poll.message):
             raise ValueError(
                 "This object was manually builded. To use this method you need to get a poll from the discord API!"
             )
 
-        data = await self._state.http.get_poll_answer_voters(
-            self._channel_id, self._message_id, self.id, after=after, limit=limit
-        )
-        return [User(state=self._state, data=user) for user in data["users"]]
+        return PollAnswerIterator(self.poll.message, self.id, limit=limit, after=after)
 
 
 class Poll:
