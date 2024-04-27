@@ -177,6 +177,13 @@ PartialMessage
 .. autoclass:: PartialMessage
     :members:
 
+ForwardedMessage
+~~~~~~~~~~~~~~~~
+
+.. attributetable:: ForwardedMessage
+
+.. autoclass:: ForwardedMessage
+
 Enumerations
 ------------
 

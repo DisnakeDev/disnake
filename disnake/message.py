@@ -94,6 +94,7 @@ __all__ = (
     "InteractionReference",
     "DeletedReferencedMessage",
     "RoleSubscriptionData",
+    "ForwardedMessage",
 )
 
 
