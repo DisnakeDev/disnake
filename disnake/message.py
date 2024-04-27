@@ -2177,6 +2177,35 @@ class Message(Hashable):
     async def forward(
         self, content: Optional[str] = None, *, fail_if_not_exists: bool = True, **kwargs: Any
     ) -> Message:
+        """|coro|
+
+        A shortcut method to :meth:`.abc.Messageable.send` to forward a
+        :class:`.Message`.
+
+        .. versionadded:: 2.10
+
+        Parameters
+        ----------
+        fail_if_not_exists: :class:`bool`
+            Whether replying using the message reference should raise :exc:`~disnake.HTTPException`
+            if the message no longer exists or Discord could not fetch the message.
+
+        Raises
+        ------
+        HTTPException
+            Sending the message failed.
+        Forbidden
+            You do not have the proper permissions to send the message.
+        TypeError
+            You specified both ``embed`` and ``embeds``, or ``file`` and ``files``, or ``view`` and ``components``.
+        ValueError
+            The ``files`` or ``embeds`` list is too large.
+
+        Returns
+        -------
+        :class:`.Message`
+            The message that was sent.
+        """
         if not fail_if_not_exists:
             reference = MessageReference.from_message(
                 self, type=MessageReferenceType.forward, fail_if_not_exists=False
