@@ -74,6 +74,20 @@ class MessageReference(TypedDict):
     fail_if_not_exists: NotRequired[bool]
 
 
+class ForwardedMessage(TypedDict):
+    content: str
+    embeds: List[Embed]
+    attachments: List[Attachment]
+    timestamp: str
+    edited_timestamp: Optional[str]
+    flags: NotRequired[int]
+
+
+class MessageSnapshot(TypedDict):
+    message: ForwardedMessage
+    guild_id: NotRequired[Snowflake]
+
+
 class RoleSubscriptionData(TypedDict):
     role_subscription_listing_id: Snowflake
     tier_name: str
@@ -110,6 +124,7 @@ class Message(TypedDict):
     application: NotRequired[MessageApplication]
     application_id: NotRequired[Snowflake]
     message_reference: NotRequired[MessageReference]
+    message_snapshots: NotRequired[List[MessageSnapshot]]
     flags: NotRequired[int]
     referenced_message: NotRequired[Optional[Message]]
     interaction: NotRequired[InteractionMessageReference]

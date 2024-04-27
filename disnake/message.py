@@ -71,6 +71,7 @@ if TYPE_CHECKING:
     from .types.member import Member as MemberPayload, UserWithMember as UserWithMemberPayload
     from .types.message import (
         Attachment as AttachmentPayload,
+        ForwardedMessage as ForwardedMessagePayload,
         Message as MessagePayload,
         MessageActivity as MessageActivityPayload,
         MessageApplication as MessageApplicationPayload,
@@ -933,6 +934,11 @@ class Message(Hashable):
 
         .. versionadded:: 2.0
 
+    message_snapshots: list[:class:`ForwardedMessage`]
+        A list of forwarded messages.
+
+        .. versionadded:: 2.10
+
     guild: Optional[:class:`Guild`]
         The guild that the message belongs to, if applicable.
     """
@@ -965,6 +971,7 @@ class Message(Hashable):
         "reactions",
         "reference",
         "interaction",
+        "message_snapshots",
         "application",
         "activity",
         "stickers",
@@ -1030,6 +1037,14 @@ class Message(Hashable):
             None if inter_payload is None else InteractionReference(state=state, data=inter_payload)
         )
         self.interaction: Optional[InteractionReference] = inter
+        self.message_snapshots: List[ForwardedMessage] = [
+            ForwardedMessage(
+                state=self._state,
+                guild_id=utils._get_as_snowflake(a, "guild_id"),
+                data=a["message"],
+            )
+            for a in data.get("message_snapshots", [])
+        ]
 
         try:
             # if the channel doesn't have a guild attribute, we handle that
@@ -2129,21 +2144,13 @@ class Message(Hashable):
         A shortcut method to :meth:`.abc.Messageable.send` to reply to the
         :class:`.Message`.
 
-        .. versionadded:: 1.6
-
-        .. versionchanged:: 2.3
-            Added ``fail_if_not_exists`` keyword argument. Defaults to ``True``.
-
-        .. versionchanged:: 2.6
-            Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
+        .. versionadded:: 2.10
 
         Parameters
         ----------
         fail_if_not_exists: :class:`bool`
             Whether replying using the message reference should raise :exc:`~disnake.HTTPException`
             if the message no longer exists or Discord could not fetch the message.
-
-            .. versionadded:: 2.3
 
         Raises
         ------
@@ -2213,6 +2220,9 @@ class Message(Hashable):
 
     def to_message_reference_dict(self) -> MessageReferencePayload:
         data: MessageReferencePayload = {
+            # defaulting to REPLY when implicitly transforming a Message or
+            # PartialMessage object to a MessageReference
+            "type": 0,
             "message_id": self.id,
             "channel_id": self.channel.id,
         }
@@ -2574,3 +2584,65 @@ class PartialMessage(Hashable):
             components=components,
             delete_after=delete_after,
         )
+
+
+class ForwardedMessage:
+    """Represent a forwarded :class:`Message`.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    guild_id: Optional[:class:`int`]
+        The guild id from which the message come from. This should never be None.
+    guild: Optional[:class:`Guild`]
+        The guild from which the message come from. This is None if the guild is not cached.
+    content: :class:`str`
+        The actual contents of the message.
+    embeds: List[:class:`Embed`]
+        A list of embeds the message has.
+    attachments: List[:class:`Attachment`]
+        A list of attachments given to a message.
+    flags: :class:`MessageFlags`
+        Extra features of the message.
+    """
+
+    __slots__ = (
+        "guild_id",
+        "guild",
+        "content",
+        "embeds",
+        "attachments",
+        "_timestamp",
+        "_edited_timestamp",
+        "flags",
+    )
+
+    def __init__(
+        self, *, state: ConnectionState, guild_id: Optional[int], data: ForwardedMessagePayload
+    ) -> None:
+        self.guild_id: Optional[int] = guild_id
+        self.guild: Optional[Guild] = state._get_guild(guild_id)
+        self.content: str = data["content"]
+        self.embeds: List[Embed] = [Embed.from_dict(a) for a in data["embeds"]]
+        self.attachments: List[Attachment] = [
+            Attachment(data=a, state=state) for a in data["attachments"]
+        ]
+        self._timestamp: datetime.datetime = utils.parse_time(data["timestamp"])
+        self._edited_timestamp: Optional[datetime.datetime] = utils.parse_time(
+            data["edited_timestamp"]
+        )
+        self.flags: MessageFlags = MessageFlags._from_value(data.get("flags", 0))
+
+    def __repr__(self) -> str:
+        return f"<{self.__class__.__name__} guild_id={self.guild_id}>"
+
+    @property
+    def created_at(self) -> datetime.datetime:
+        """:class:`datetime.datetime`: The message's creation time in UTC."""
+        return self._timestamp
+
+    @property
+    def edited_at(self) -> Optional[datetime.datetime]:
+        """Optional[:class:`datetime.datetime`]: An aware UTC datetime object containing the edited time of the message."""
+        return self._edited_timestamp
