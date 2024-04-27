@@ -349,6 +349,9 @@ MessageType
 
         .. versionadded:: 2.8
 
+.. autoclass:: MessageReferenceType
+    :members:
+
 Events
 ------
 
