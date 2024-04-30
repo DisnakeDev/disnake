@@ -573,11 +573,11 @@ class MessageReference:
         .. versionadded:: 2.10
 
     message_id: Optional[:class:`int`]
-        The ID of the message referenced.
+        The ID of the message referenced. In case of forwarding this should be the id of the message to forward.
     channel_id: :class:`int`
-        The channel ID of the message referenced.
+        The channel ID of the message referenced. In case of forwarding this should be the id of the channel where to forward the message.
     guild_id: Optional[:class:`int`]
-        The guild ID of the message referenced.
+        The guild ID of the message referenced. In case of forwarding this should be the id of the guild where to forward the message.
     fail_if_not_exists: :class:`bool`
         Whether replying to the referenced message should raise :class:`HTTPException`
         if the message no longer exists or Discord could not fetch the message.
@@ -643,6 +643,8 @@ class MessageReference:
         message: Message,
         *,
         type: MessageReferenceType = MessageReferenceType.default,
+        channel_id: Optional[int] = None,
+        guild_id: Optional[int] = None,
         fail_if_not_exists: bool = True,
     ) -> Self:
         """Creates a :class:`MessageReference` from an existing :class:`~disnake.Message`.
@@ -659,22 +661,47 @@ class MessageReference:
 
             .. versionadded:: 2.10
 
+        channel_id: Optional[:class:`int`]
+            The channel id where the message forward should be sent. This parameter is required to be passed only in case of message forwarding.
+
+            .. versionadded:: 2.10
+
+        guild_id: Optional[:class:`int`]
+            The guild id where the message forward should be sent. This parameter is used in message forwarding. Unlike ``channel_id`` this can be None even when forwarding.
+
+            .. versionadded:: 2.10
+
         fail_if_not_exists: :class:`bool`
             Whether replying to the referenced message should raise :class:`HTTPException`
             if the message no longer exists or Discord could not fetch the message.
 
             .. versionadded:: 1.7
 
+        Raises
+        ------
+        ValueError
+            You are forwarding a message but you're not passing ``channel_id``.
+
         Returns
         -------
         :class:`MessageReference`
             A reference to the message.
         """
+        channel_id_ = message.channel.id
+        if type is MessageReferenceType.forward:
+            if not channel_id:
+                raise ValueError("channel_id must be passed in case of message forwarding")
+            channel_id_ = channel_id
+
         self = cls(
             type=type,
             message_id=message.id,
-            channel_id=message.channel.id,
-            guild_id=getattr(message.guild, "id", None),
+            channel_id=channel_id_,
+            guild_id=(
+                getattr(message.guild, "id", None)
+                if type is MessageReferenceType.default
+                else guild_id
+            ),
             fail_if_not_exists=fail_if_not_exists,
         )
         self._state = message._state
@@ -2176,7 +2203,13 @@ class Message(Hashable):
         return await self.channel.send(content, reference=reference, **kwargs)
 
     async def forward(
-        self, content: Optional[str] = None, *, fail_if_not_exists: bool = True, **kwargs: Any
+        self,
+        content: Optional[str] = None,
+        *,
+        channel_id: int,
+        guild_id: Optional[int] = None,
+        fail_if_not_exists: bool = True,
+        **kwargs: Any,
     ) -> Message:
         """|coro|
 
@@ -2187,6 +2220,16 @@ class Message(Hashable):
 
         Parameters
         ----------
+        channel_id: :class:`int`
+            The channel id where the message forward should be sent.
+
+            .. versionadded:: 2.10
+
+        guild_id: Optional[:class:`int`]
+            The guild id where the message forward should be sent. Unlike ``channel_id`` this can be None.
+
+            .. versionadded:: 2.10
+
         fail_if_not_exists: :class:`bool`
             Whether replying using the message reference should raise :exc:`~disnake.HTTPException`
             if the message no longer exists or Discord could not fetch the message.
@@ -2209,16 +2252,24 @@ class Message(Hashable):
         """
         if not fail_if_not_exists:
             reference = MessageReference.from_message(
-                self, type=MessageReferenceType.forward, fail_if_not_exists=False
+                self,
+                type=MessageReferenceType.forward,
+                channel_id=channel_id,
+                guild_id=guild_id,
+                fail_if_not_exists=False,
             )
         else:
-            reference = MessageReference.from_message(self, type=MessageReferenceType.forward)
+            reference = MessageReference.from_message(
+                self, type=MessageReferenceType.forward, channel_id=channel_id, guild_id=guild_id
+            )
         return await self.channel.send(content, reference=reference, **kwargs)
 
     def to_reference(
         self,
         *,
         reference_type: MessageReferenceType = MessageReferenceType.default,
+        channel_id: Optional[int] = None,
+        guild_id: Optional[int] = None,
         fail_if_not_exists: bool = True,
     ) -> MessageReference:
         """Creates a :class:`~disnake.MessageReference` from the current message.
@@ -2230,6 +2281,16 @@ class Message(Hashable):
         reference_type: :class:`MessageReferenceType`
             The type of the message reference. This is used to control whether to reply
             or forward a message.
+
+            .. versionadded:: 2.10
+
+        channel_id: Optional[:class:`int`]
+            The channel id where the message forward should be sent. This parameter is required to be passed only in case of message forwarding.
+
+            .. versionadded:: 2.10
+
+        guild_id: Optional[:class:`int`]
+            The guild id where the message forward should be sent. This parameter is used in message forwarding. Unlike ``channel_id`` this can be None even when forwarding.
 
             .. versionadded:: 2.10
 
@@ -2245,7 +2306,11 @@ class Message(Hashable):
             The reference to this message.
         """
         return MessageReference.from_message(
-            self, type=reference_type, fail_if_not_exists=fail_if_not_exists
+            self,
+            type=reference_type,
+            channel_id=channel_id,
+            guild_id=guild_id,
+            fail_if_not_exists=fail_if_not_exists,
         )
 
     def to_message_reference_dict(self) -> MessageReferencePayload:
