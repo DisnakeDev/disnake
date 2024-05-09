@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from .abc import Messageable
-    from .channel import ForumChannel
+    from .channel import ThreadOnlyGuildChannel
 
 __all__ = ("Typing",)
 
@@ -25,8 +25,8 @@ def _typing_done_callback(fut: asyncio.Future) -> None:
 
 
 class Typing:
-    def __init__(self, messageable: Union[Messageable, ForumChannel]) -> None:
-        self.messageable: Union[Messageable, ForumChannel] = messageable
+    def __init__(self, messageable: Union[Messageable, ThreadOnlyGuildChannel]) -> None:
+        self.messageable: Union[Messageable, ThreadOnlyGuildChannel] = messageable
 
     async def do_typing(self) -> None:
         try:

@@ -24,6 +24,7 @@ if TYPE_CHECKING:
         MessageReactionRemoveEmojiEvent,
         MessageReactionRemoveEvent,
         MessageUpdateEvent,
+        PresenceUpdateEvent,
         ThreadDeleteEvent,
         TypingStartEvent,
     )
@@ -43,6 +44,7 @@ __all__ = (
     "RawThreadMemberRemoveEvent",
     "RawTypingEvent",
     "RawGuildMemberRemoveEvent",
+    "RawPresenceUpdateEvent",
 )
 
 
@@ -446,3 +448,30 @@ class RawGuildMemberRemoveEvent(_RawReprMixin):
     def __init__(self, user: Union[User, Member], guild_id: int) -> None:
         self.user: Union[User, Member] = user
         self.guild_id: int = guild_id
+
+
+class RawPresenceUpdateEvent(_RawReprMixin):
+    """Represents the event payload for an :func:`on_raw_presence_update` event.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    user_id: :class:`int`
+        The ID of the user whose presence was updated.
+    guild_id: :class:`int`
+        The ID of the guild where the user's presence changed.
+    data: :class:`dict`
+        The raw data given by the :ddocs:`gateway <topics/gateway-events#presence-update>`.
+    """
+
+    __slots__ = (
+        "user_id",
+        "guild_id",
+        "data",
+    )
+
+    def __init__(self, data: PresenceUpdateEvent) -> None:
+        self.user_id: int = int(data["user"]["id"])
+        self.guild_id: int = int(data["guild_id"])
+        self.data: PresenceUpdateEvent = data

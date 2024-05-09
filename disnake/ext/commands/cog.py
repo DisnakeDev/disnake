@@ -479,7 +479,7 @@ class Cog(metaclass=CogMeta):
         """A special method that is called when the cog is added.
 
         .. versionchanged:: 3.0
-            This is now ``await``ed directly instead of being scheduled as a task.
+            This is now ``await``\\ed directly instead of being scheduled as a task.
 
             This is now run when the cog fully finished loading.
         """
