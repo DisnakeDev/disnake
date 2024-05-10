@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from ...interactions.base import InteractionChannel
-    from ..item import DecoratedItem, ItemCallbackType, Object
+    from ..item import DecoratedItem, ItemCallbackType, ItemShape
 
 
 __all__ = (
@@ -162,13 +162,13 @@ def channel_select(
 
 @overload
 def channel_select(
-    cls: Type[Object[S_co, P]], *_: P.args, **kwargs: P.kwargs
+    cls: Type[ItemShape[S_co, P]], *_: P.args, **kwargs: P.kwargs
 ) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
     ...
 
 
 def channel_select(
-    cls: Type[Object[S_co, ...]] = ChannelSelect[Any], **kwargs: Any
+    cls: Type[ItemShape[S_co, ...]] = ChannelSelect[Any], **kwargs: Any
 ) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
     """A decorator that attaches a channel select menu to a component.
 
