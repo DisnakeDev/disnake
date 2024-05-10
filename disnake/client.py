@@ -1006,7 +1006,7 @@ class Client:
             methods like :meth:`.wait_for`, :meth:`.wait_until_ready`
             and :meth:`.wait_until_first_connect`.
 
-        .. versionadded:: 2.10
+        .. versionadded:: 3.0
         """
 
     # login state management
