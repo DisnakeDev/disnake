@@ -10,6 +10,7 @@ from typing import (
     Any,
     ClassVar,
     Dict,
+    Iterable,
     List,
     Literal,
     NamedTuple,
@@ -27,7 +28,7 @@ from . import abc, utils
 from .app_commands import GuildApplicationCommandPermissions
 from .asset import Asset
 from .automod import AutoModAction, AutoModRule
-from .bans import BanEntry
+from .bans import BanEntry, BulkBanResult
 from .channel import (
     CategoryChannel,
     ForumChannel,
@@ -68,6 +69,7 @@ from .invite import Invite
 from .iterators import AuditLogIterator, BanIterator, MemberIterator
 from .member import Member, VoiceState
 from .mixins import Hashable
+from .object import Object
 from .onboarding import Onboarding
 from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite
@@ -4006,6 +4008,77 @@ class Guild(Hashable):
             Unbanning failed.
         """
         await self._state.http.unban(user.id, self.id, reason=reason)
+
+    async def bulk_ban(
+        self,
+        users: Iterable[Snowflake],
+        *,
+        clean_history_duration: Union[int, datetime.timedelta] = 0,
+        reason: Optional[str] = None,
+    ) -> BulkBanResult:
+        """|coro|
+
+        Bans multiple users from the guild at once.
+
+        The users must meet the :class:`abc.Snowflake` abc.
+
+        You must have :attr:`~Permissions.ban_members` and :attr:`~Permissions.manage_guild`
+        permissions to do this.
+
+        .. versionadded:: 2.10
+
+        Parameters
+        ----------
+        users: Iterable[:class:`abc.Snowflake`]
+            The users to ban from the guild, up to 200.
+        clean_history_duration: Union[:class:`int`, :class:`datetime.timedelta`]
+            The timespan (seconds or timedelta) of messages to delete from the users
+            in the guild, up to 7 days (604800 seconds).
+            Defaults to ``0``.
+
+            .. note::
+                This may not be accurate with small durations (e.g. a few minutes)
+                and delete a couple minutes' worth of messages more than specified.
+
+        reason: Optional[:class:`str`]
+            The reason for banning the users. Shows up on the audit log.
+
+        Raises
+        ------
+        TypeError
+            ``clean_history_duration`` has an invalid type.
+        Forbidden
+            You do not have the proper permissions to bulk ban.
+        HTTPException
+            Banning failed. This is also raised if none of the users could be banned.
+
+        Returns
+        -------
+        :class:`BulkBanResult`
+            An object containing the successful and failed bans.
+        """
+        if isinstance(clean_history_duration, datetime.timedelta):
+            delete_message_seconds = int(clean_history_duration.total_seconds())
+        elif isinstance(clean_history_duration, int):
+            delete_message_seconds = clean_history_duration
+        else:
+            raise TypeError(
+                "`clean_history_duration` should be int or timedelta, "
+                f"not {type(clean_history_duration).__name__}"
+            )
+
+        data = await self._state.http.bulk_ban(
+            [user.id for user in users],
+            self.id,
+            delete_message_seconds=delete_message_seconds,
+            reason=reason,
+        )
+
+        return BulkBanResult(
+            # these keys should always exist, but have a fallback just in case
+            [Object(u) for u in (data.get("banned_users") or [])],
+            [Object(u) for u in (data.get("failed_users") or [])],
+        )
 
     async def vanity_invite(self, *, use_cached: bool = False) -> Optional[Invite]:
         """|coro|
