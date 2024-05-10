@@ -156,20 +156,20 @@ def channel_select(
     disabled: bool = False,
     channel_types: Optional[List[ChannelType]] = None,
     row: Optional[int] = None,
-) -> Callable[[ItemCallbackType[ChannelSelect[V_co]]], DecoratedItem[ChannelSelect[V_co]]]:
+) -> Callable[[ItemCallbackType[V_co, ChannelSelect[V_co]]], DecoratedItem[ChannelSelect[V_co]]]:
     ...
 
 
 @overload
 def channel_select(
     cls: Type[Object[S_co, P]], *_: P.args, **kwargs: P.kwargs
-) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
+) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
     ...
 
 
 def channel_select(
     cls: Type[Object[S_co, ...]] = ChannelSelect[Any], **kwargs: Any
-) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
+) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
     """A decorator that attaches a channel select menu to a component.
 
     The function being decorated should have three parameters, ``self`` representing

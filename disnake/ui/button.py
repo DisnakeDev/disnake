@@ -263,20 +263,20 @@ def button(
     style: ButtonStyle = ButtonStyle.secondary,
     emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
     row: Optional[int] = None,
-) -> Callable[[ItemCallbackType[Button[V_co]]], DecoratedItem[Button[V_co]]]:
+) -> Callable[[ItemCallbackType[V_co, Button[V_co]]], DecoratedItem[Button[V_co]]]:
     ...
 
 
 @overload
 def button(
     cls: Type[Object[B_co, P]], *_: P.args, **kwargs: P.kwargs
-) -> Callable[[ItemCallbackType[B_co]], DecoratedItem[B_co]]:
+) -> Callable[[ItemCallbackType[V_co, B_co]], DecoratedItem[B_co]]:
     ...
 
 
 def button(
     cls: Type[Object[B_co, ...]] = Button[Any], **kwargs: Any
-) -> Callable[[ItemCallbackType[B_co]], DecoratedItem[B_co]]:
+) -> Callable[[ItemCallbackType[V_co, B_co]], DecoratedItem[B_co]]:
     """A decorator that attaches a button to a component.
 
     The function being decorated should have three parameters, ``self`` representing
@@ -325,7 +325,7 @@ def button(
     if not isinstance(cls, type) or not issubclass(cls, Button):
         raise TypeError(f"cls argument must be a subclass of Button, got {cls!r}")
 
-    def decorator(func: ItemCallbackType[B_co]) -> DecoratedItem[B_co]:
+    def decorator(func: ItemCallbackType[V_co, B_co]) -> DecoratedItem[B_co]:
         if not asyncio.iscoroutinefunction(func):
             raise TypeError("button function must be a coroutine function")
 

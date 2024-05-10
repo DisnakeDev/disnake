@@ -179,7 +179,7 @@ def _create_decorator(
     /,
     *args: P.args,
     **kwargs: P.kwargs,
-) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
+) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
     if args:
         # the `*args` def above is just to satisfy the typechecker
         raise RuntimeError("expected no *args")
@@ -190,7 +190,7 @@ def _create_decorator(
     if not isinstance(cls, type) or not issubclass(cls, base_cls):
         raise TypeError(f"cls argument must be a subclass of {base_cls.__name__}, got {cls!r}")
 
-    def decorator(func: ItemCallbackType[S_co]) -> DecoratedItem[S_co]:
+    def decorator(func: ItemCallbackType[V_co, S_co]) -> DecoratedItem[S_co]:
         if not asyncio.iscoroutinefunction(func):
             raise TypeError("select function must be a coroutine function")
 

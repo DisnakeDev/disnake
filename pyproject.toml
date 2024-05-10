@@ -210,6 +210,8 @@ ignore = [
     "S311",    # insecure RNG usage, we don't use these for security-related things
     "PLE0237", # pyright seems to catch this already
 
+    "E741",  # ambiguous variable names
+
     # temporary disables, to fix later
     "D205",   # blank line required between summary and description
     "D401",   # first line of docstring should be in imperative mood
@@ -245,7 +247,6 @@ ignore = [
     "T201", # print found, printing is okay in examples
 ]
 "examples/basic_voice.py" = ["S104"] # possible binding to all interfaces
-"examples/views/tic_tac_toe.py" = ["E741"] # ambigious variable name: `O`
 
 [tool.ruff.lint.isort]
 combine-as-imports = true
