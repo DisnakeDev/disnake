@@ -788,25 +788,29 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         Depending on the parameter passed, this requires different permissions listed below:
 
-        +------------------------------+-------------------------------------+
-        |   Parameter                  |              Permission             |
-        +------------------------------+-------------------------------------+
-        | nick                         | :attr:`Permissions.manage_nicknames`|
-        +------------------------------+-------------------------------------+
-        | mute                         | :attr:`Permissions.mute_members`    |
-        +------------------------------+-------------------------------------+
-        | deafen                       | :attr:`Permissions.deafen_members`  |
-        +------------------------------+-------------------------------------+
-        | roles                        | :attr:`Permissions.manage_roles`    |
-        +------------------------------+-------------------------------------+
-        | voice_channel                | :attr:`Permissions.move_members`    |
-        +------------------------------+-------------------------------------+
-        | timeout                      | :attr:`Permissions.moderate_members`|
-        +------------------------------+-------------------------------------+
-        | flags                        | :attr:`Permissions.moderate_members`|
-        +------------------------------+-------------------------------------+
-        | bypasses_verification        | :attr:`Permissions.moderate_members`|
-        +------------------------------+-------------------------------------+
+        +------------------------------+--------------------------------------+
+        |   Parameter                  |              Permission              |
+        +==============================+======================================+
+        | nick                         | :attr:`Permissions.manage_nicknames` |
+        +------------------------------+--------------------------------------+
+        | mute                         | :attr:`Permissions.mute_members`     |
+        +------------------------------+--------------------------------------+
+        | deafen                       | :attr:`Permissions.deafen_members`   |
+        +------------------------------+--------------------------------------+
+        | roles                        | :attr:`Permissions.manage_roles`     |
+        +------------------------------+--------------------------------------+
+        | voice_channel                | :attr:`Permissions.move_members`     |
+        +------------------------------+--------------------------------------+
+        | timeout                      | :attr:`Permissions.moderate_members` |
+        +------------------------------+--------------------------------------+
+        | flags                        | :attr:`Permissions.manage_guild` or  |
+        |                              | :attr:`Permissions.manage_roles` or  |
+        |                              | (:attr:`Permissions.moderate_members`|
+        |                              | + :attr:`Permissions.kick_members`   |
+        |                              | + :attr:`Permissions.ban_members`)   |
+        +------------------------------+--------------------------------------+
+        | bypasses_verification        | (same as ``flags``)                  |
+        +------------------------------+--------------------------------------+
 
         All parameters are optional.
 
