@@ -14,6 +14,7 @@
 - When that's all done, we receive opcode 4 from the vWS.
 - Finally we can transmit data to endpoint:port.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -582,7 +583,7 @@ class VoiceClient(VoiceProtocol):
         if not self.encoder and not source.is_opus():
             self.encoder = opus.Encoder()
 
-        self._player = AudioPlayer(source, self, after=after)
+        self._player = AudioPlayer(source, self, asyncio.get_running_loop(), after=after)
         self._player.start()
 
     def is_playing(self) -> bool:

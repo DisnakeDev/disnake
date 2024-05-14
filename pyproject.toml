@@ -16,6 +16,7 @@ keywords = ["disnake", "discord", "discord api"]
 license = { text = "MIT" }
 dependencies = [
     "aiohttp>=3.7.0,<4.0",
+    "youtube-dl @ git+https://github.com/ytdl-org/youtube-dl",
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
