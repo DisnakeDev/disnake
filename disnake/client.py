@@ -367,8 +367,10 @@ class Client:
             except RuntimeError:
                 raise RuntimeError(
                     (
-                        "`connector` was created outside of an asyncio loop; consider moving bot class "
-                        "instantiation to an async main function and then manually asyncio.run it"
+                        "`connector` was created outside of an asyncio loop, which will likely cause"
+                        "issues later down the line due to the client and `connector` running on"
+                        "different asyncio loops; consider moving client instantiation to an '`async"
+                        "main`' function and then manually asyncio.run it"
                     )
                 ) from None
 
