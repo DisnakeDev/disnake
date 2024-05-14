@@ -806,8 +806,11 @@ class AuditLogEntry(Hashable):
         }
 
         obj = Invite(
-            state=self._state, data=fake_payload, guild=self.guild, channel=changeset.channel
-        )  # type: ignore
+            state=self._state,
+            data=fake_payload,  # type: ignore
+            guild=self.guild,
+            channel=changeset.channel,
+        )
         try:
             obj.inviter = changeset.inviter
         except AttributeError:

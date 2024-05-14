@@ -440,8 +440,8 @@ class Member(disnake.abc.Messageable, _UserTag):
     ) -> Optional[Tuple[User, User]]:
         self.activities = tuple(create_activity(a, state=self._state) for a in data["activities"])
         self._client_status = {
-            sys.intern(key): sys.intern(value)
-            for key, value in data.get("client_status", {}).items()  # type: ignore
+            sys.intern(key): sys.intern(value)  # type: ignore
+            for key, value in data.get("client_status", {}).items()
         }
         self._client_status[None] = sys.intern(data["status"])
 

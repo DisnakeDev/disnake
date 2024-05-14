@@ -976,8 +976,8 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
     def _is_typing_optional(self, annotation: Union[T, Optional[T]]) -> TypeGuard[Optional[T]]:
         return (
-            getattr(annotation, "__origin__", None) is Union and type(None) in annotation.__args__
-        )  # type: ignore
+            getattr(annotation, "__origin__", None) is Union and type(None) in annotation.__args__  # type: ignore
+        )
 
     @property
     def signature(self) -> str:

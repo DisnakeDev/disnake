@@ -429,8 +429,8 @@ class Invite(Hashable):
 
         inviter_data = data.get("inviter")
         self.inviter: Optional[User] = (
-            None if inviter_data is None else self._state.create_user(inviter_data)
-        )  # type: ignore
+            None if inviter_data is None else self._state.create_user(inviter_data)  # type: ignore
+        )
 
         self.channel: Optional[InviteChannelType] = self._resolve_channel(
             data.get("channel"), channel
@@ -453,8 +453,8 @@ class Invite(Hashable):
 
         target_user_data = data.get("target_user")
         self.target_user: Optional[User] = (
-            None if target_user_data is None else self._state.create_user(target_user_data)
-        )  # type: ignore
+            None if target_user_data is None else self._state.create_user(target_user_data)  # type: ignore
+        )
 
         self.target_type: InviteTarget = try_enum(InviteTarget, data.get("target_type", 0))
 
