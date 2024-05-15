@@ -70,4 +70,5 @@ class InteractionFollowupWebhook(Webhook):
             delete_after=delete_after,
             suppress_embeds=suppress_embeds,
             flags=flags,
-        )  # type: ignore
+            wait=True,
+        )
