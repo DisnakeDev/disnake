@@ -19,6 +19,8 @@ from typing import (
     overload,
 )
 
+from disnake.webhook.interaction import InteractionFollowupWebhook
+
 from .. import utils
 from ..app_commands import OptionChoice
 from ..channel import PartialMessageable, _threaded_guild_channel_factory
@@ -310,14 +312,14 @@ class Interaction(Generic[ClientT]):
         return InteractionResponse(self)
 
     @utils.cached_slot_property("_cs_followup")
-    def followup(self) -> Webhook:
+    def followup(self) -> InteractionFollowupWebhook:
         """:class:`Webhook`: Returns the follow up webhook for follow up interactions."""
         payload = {
             "id": self.application_id,
             "type": WebhookType.application.value,
             "token": self.token,
         }
-        return Webhook.from_state(data=payload, state=self._state)
+        return Webhook.from_state(data=payload, state=self._state)  # type: ignore
 
     @utils.cached_slot_property("_cs_expires_at")
     def expires_at(self) -> datetime:
