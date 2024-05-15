@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: MIT
 
+from __future__ import annotations
+
 from collections.abc import Sequence
 from typing import List, Optional
 
