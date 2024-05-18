@@ -91,7 +91,7 @@ def test_localization_copy() -> None:
         async def cmd(
             self,
             inter,
-            param: int = commands.Param(name=disnake.Localized("param", key="PARAM")),
+            param: int = commands.Param(name=disnake.Localized("param", key="PARAM")),  # noqa: B008
         ) -> None:
             ...
 
