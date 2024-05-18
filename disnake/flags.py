@@ -42,6 +42,7 @@ __all__ = (
     "MemberFlags",
     "RoleFlags",
     "AttachmentFlags",
+    "SKUFlags",
 )
 
 BF = TypeVar("BF", bound="BaseFlags")
@@ -1283,6 +1284,7 @@ class Intents(BaseFlags):
         This corresponds to the following events:
 
         - :func:`on_presence_update`
+        - :func:`on_raw_presence_update`
 
         This also corresponds to the following attributes and classes in terms of cache:
 
@@ -2056,14 +2058,20 @@ class ChannelFlags(BaseFlags):
     if TYPE_CHECKING:
 
         @_generated
-        def __init__(self, *, pinned: bool = ..., require_tag: bool = ...) -> None:
+        def __init__(
+            self,
+            *,
+            hide_media_download_options: bool = ...,
+            pinned: bool = ...,
+            require_tag: bool = ...,
+        ) -> None:
             ...
 
     @flag_value
     def pinned(self):
         """:class:`bool`: Returns ``True`` if the thread is pinned.
 
-        This only applies to channels of type :class:`Thread`.
+        This only applies to threads that are part of a :class:`ForumChannel` or :class:`MediaChannel`.
         """
         return 1 << 1
 
@@ -2071,11 +2079,21 @@ class ChannelFlags(BaseFlags):
     def require_tag(self):
         """:class:`bool`: Returns ``True`` if the channel requires all newly created threads to have a tag.
 
-        This only applies to channels of type :class:`ForumChannel`.
+        This only applies to channels of types :class:`ForumChannel` or :class:`MediaChannel`.
 
         .. versionadded:: 2.6
         """
         return 1 << 4
+
+    @flag_value
+    def hide_media_download_options(self):
+        """:class:`bool`: Returns ``True`` if the channel hides the embedded media download options.
+
+        This only applies to channels of type :class:`MediaChannel`.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 15
 
 
 class AutoModKeywordPresets(ListBaseFlags):
@@ -2451,3 +2469,99 @@ class AttachmentFlags(BaseFlags):
     def is_remix(self):
         """:class:`bool`: Returns ``True`` if the attachment has been edited using the Remix feature."""
         return 1 << 2
+
+
+class SKUFlags(BaseFlags):
+    """Wraps up Discord SKU flags.
+
+    .. collapse:: operations
+
+        .. describe:: x == y
+
+            Checks if two SKUFlags instances are equal.
+        .. describe:: x != y
+
+            Checks if two SKUFlags instances are not equal.
+        .. describe:: x <= y
+
+            Checks if an SKUFlags instance is a subset of another SKUFlags instance.
+        .. describe:: x >= y
+
+            Checks if an SKUFlags instance is a superset of another SKUFlags instance.
+        .. describe:: x < y
+
+            Checks if an SKUFlags instance is a strict subset of another SKUFlags instance.
+        .. describe:: x > y
+
+            Checks if an SKUFlags instance is a strict superset of another SKUFlags instance.
+        .. describe:: x | y, x |= y
+
+            Returns a new SKUFlags instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
+        .. describe:: x & y, x &= y
+
+            Returns a new SKUFlags instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new SKUFlags instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+        .. describe:: ~x
+
+            Returns a new SKUFlags instance with all flags from x inverted.
+        .. describe:: hash(x)
+
+            Returns the flag's hash.
+        .. describe:: iter(x)
+
+            Returns an iterator of ``(name, value)`` pairs. This allows it
+            to be, for example, constructed as a dict or a list of pairs.
+            Note that aliases are not shown.
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: SKUFlags.y | SKUFlags.z, SKUFlags(y=True) | SKUFlags.z
+
+            Returns a SKUFlags instance with all provided flags enabled.
+
+        .. describe:: ~SKUFlags.y
+
+            Returns a SKUFlags instance with all flags except ``y`` inverted from their default value.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    value: :class:`int`
+        The raw value. You should query flags via the properties
+        rather than using this raw value.
+    """
+
+    __slots__ = ()
+
+    if TYPE_CHECKING:
+
+        @_generated
+        def __init__(
+            self,
+            *,
+            available: bool = ...,
+            guild_subscription: bool = ...,
+            user_subscription: bool = ...,
+        ) -> None:
+            ...
+
+    @flag_value
+    def available(self):
+        """:class:`bool`: Returns ``True`` if the SKU can be purchased."""
+        return 1 << 2
+
+    @flag_value
+    def guild_subscription(self):
+        """:class:`bool`: Returns ``True`` if the SKU is an application subscription applied to a guild."""
+        return 1 << 7
+
+    @flag_value
+    def user_subscription(self):
+        """:class:`bool`: Returns ``True`` if the SKU is an application subscription applied to a user."""
+        return 1 << 8

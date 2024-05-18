@@ -12,6 +12,7 @@ from .audit_log import AuditLogEntry
 from .automod import AutoModAction, AutoModRule, AutoModTriggerType
 from .channel import Channel, GuildChannel, StageInstance
 from .emoji import Emoji, PartialEmoji
+from .entitlement import Entitlement
 from .guild import Guild, UnavailableGuild
 from .guild_scheduled_event import GuildScheduledEvent
 from .integration import BaseIntegration
@@ -626,3 +627,15 @@ class AutoModerationActionExecutionEvent(TypedDict):
     content: NotRequired[str]
     matched_content: NotRequired[Optional[str]]
     matched_keyword: NotRequired[Optional[str]]
+
+
+# https://discord.com/developers/docs/monetization/entitlements#new-entitlement
+EntitlementCreate = Entitlement
+
+
+# https://discord.com/developers/docs/monetization/entitlements#updated-entitlement
+EntitlementUpdate = Entitlement
+
+
+# https://discord.com/developers/docs/monetization/entitlements#deleted-entitlement
+EntitlementDelete = Entitlement

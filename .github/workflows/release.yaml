@@ -1,13 +1,9 @@
 # SPDX-License-Identifier: MIT
 
-name: Build (+ Release)
+name: Release
 
-# test build for commit/tag, but only upload release for tags
 on:
   push:
-    branches:
-      - "master"
-      - 'v[0-9]+.[0-9]+.x'  # matches to backport branches, e.g. v3.6.x
     tags:
       - "v[0-9]+.[0-9]+.[0-9]+"
 
@@ -15,13 +11,13 @@ permissions:
   contents: read
 
 jobs:
-  # Builds sdist and wheel, runs `twine check`, and optionally uploads artifacts.
+  # Builds sdist and wheel, runs `twine check`, and uploads artifacts.
   build:
     name: Build package
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up environment
         id: setup
@@ -50,22 +46,17 @@ jobs:
           echo -e "\n</details>\n" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload artifact
-        # only upload artifacts when necessary
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dist
           path: dist/
           if-no-files-found: error
 
 
-  ### Anything below this only runs for tags ###
-
   # Ensures that git tag and built version match.
   validate-tag:
     name: Validate tag
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
     needs:
       - build
     env:
@@ -75,7 +66,7 @@ jobs:
 
     steps:
       - name: Download build artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: dist
           path: dist/
@@ -109,7 +100,6 @@ jobs:
   release-github:
     name: Create GitHub draft release
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
     needs:
       - build
       - validate-tag
@@ -118,7 +108,7 @@ jobs:
 
     steps:
       - name: Download build artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: dist
           path: dist/
@@ -132,7 +122,7 @@ jobs:
           echo "docs_version=${GIT_TAG//./-}" >> $GITHUB_OUTPUT
 
       - name: Create Release
-        uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844  # v0.1.15
+        uses: softprops/action-gh-release@9d7c94cfd0a1f3ed45544c887983e9fa900f0564  # v2.0.4
         with:
           files: dist/*
           draft: true
@@ -150,7 +140,6 @@ jobs:
       name: release-pypi
       url: https://pypi.org/project/disnake/
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
     needs:
       - build
       - validate-tag
@@ -159,13 +148,13 @@ jobs:
 
     steps:
       - name: Download build artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: dist
           path: dist/
 
       - name: Upload to pypi
-        uses: pypa/gh-action-pypi-publish@f5622bde02b04381239da3573277701ceca8f6a0  # v1.8.7
+        uses: pypa/gh-action-pypi-publish@81e9d935c883d0b210363ab89cf05f3894778450  # v1.8.14
         with:
           print-hash: true
 
@@ -174,7 +163,7 @@ jobs:
   create-dev-version-pr:
     name: Create dev version bump PR
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/') && needs.validate-tag.outputs.bump_dev
+    if: needs.validate-tag.outputs.bump_dev
     needs:
       - validate-tag
       - release-github
@@ -184,12 +173,12 @@ jobs:
       # https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/making-authenticated-api-requests-with-a-github-app-in-a-github-actions-workflow
       - name: Generate app token
         id: generate_token
-        uses: tibdex/github-app-token@b62528385c34dbc9f38e5f4225ac829252d1ea92  # v1.8.0
+        uses: actions/create-github-app-token@f2acddfb5195534d487896a656232b016a682f3c  # v1.9.0
         with:
-          app_id: ${{ secrets.BOT_APP_ID }}
-          private_key: ${{ secrets.BOT_PRIVATE_KEY }}
+          app-id: ${{ secrets.BOT_APP_ID }}
+          private-key: ${{ secrets.BOT_PRIVATE_KEY }}
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           token: ${{ steps.generate_token.outputs.token }}
           persist-credentials: false
@@ -211,7 +200,7 @@ jobs:
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
 
       - name: Create pull request
-        uses: peter-evans/create-pull-request@153407881ec5c347639a548ade7d8ad1d6740e38  # v5.0.2
+        uses: peter-evans/create-pull-request@70a41aba780001da0a30141984ae2a0c95d8704e  # v6.0.2
         with:
           token: ${{ steps.generate_token.outputs.token }}
           branch: auto/dev-v${{ steps.update-version.outputs.new_version }}

@@ -69,6 +69,8 @@ __all__ = (
     "Event",
     "ApplicationRoleConnectionMetadataType",
     "OnboardingPromptType",
+    "SKUType",
+    "EntitlementType",
 )
 
 
@@ -215,6 +217,7 @@ class ChannelType(Enum):
     stage_voice = 13
     guild_directory = 14
     forum = 15
+    media = 16
 
     def __str__(self) -> str:
         return self.name
@@ -622,14 +625,13 @@ class InteractionType(Enum):
 
 class InteractionResponseType(Enum):
     pong = 1
-    # ack = 2 (deprecated)
-    # channel_message = 3 (deprecated)
-    channel_message = 4  # (with source)
-    deferred_channel_message = 5  # (with source)
-    deferred_message_update = 6  # for components
-    message_update = 7  # for components
-    application_command_autocomplete_result = 8  # for autocomplete
-    modal = 9  # for modals
+    channel_message = 4
+    deferred_channel_message = 5
+    deferred_message_update = 6
+    message_update = 7
+    application_command_autocomplete_result = 8
+    modal = 9
+    premium_required = 10
 
 
 class VideoQualityMode(Enum):
@@ -785,6 +787,8 @@ class Locale(Enum):
     "English, US | English, US"
     es_ES = "es-ES"
     "Spanish | Español"
+    es_LATAM = "es-419"
+    "Spanish, LATAM | Español, LATAM"
     fi = "fi"
     "Finnish | Suomi"
     fr = "fr"
@@ -1235,6 +1239,9 @@ class Event(Enum):
     """Called when a message has a specific reaction removed from it.
     Represents the :func:`on_reaction_clear_emoji` event.
     """
+    raw_presence_update = "raw_presence_update"
+    """Called when a user's presence changes regardless of the state of the internal member cache.
+    Represents the :func:`on_raw_presence_update` event."""
     raw_reaction_add = "raw_reaction_add"
     """Called when a message has a reaction added regardless of the state of the internal message cache.
     Represents the :func:`on_raw_reaction_add` event.
@@ -1259,6 +1266,15 @@ class Event(Enum):
     """Called when someone begins typing a message regardless of whether `Intents.members` and `Intents.guilds` are enabled.
     Represents the :func:`on_raw_typing` event.
     """
+    entitlement_create = "entitlement_create"
+    """Called when a user subscribes to an SKU, creating a new :class:`Entitlement`.
+    Represents the :func:`on_entitlement_create` event."""
+    entitlement_update = "entitlement_update"
+    """Called when a user's subscription renews.
+    Represents the :func:`on_entitlement_update` event."""
+    entitlement_delete = "entitlement_delete"
+    """Called when a user's entitlement is deleted.
+    Represents the :func:`on_entitlement_delete` event."""
     # ext.commands events
     command = "command"
     """Called when a command is found and is about to be invoked.
@@ -1324,6 +1340,15 @@ class ApplicationRoleConnectionMetadataType(Enum):
 class OnboardingPromptType(Enum):
     multiple_choice = 0
     dropdown = 1
+
+
+class SKUType(Enum):
+    subscription = 5
+    subscription_group = 6
+
+
+class EntitlementType(Enum):
+    application_subscription = 8
 
 
 T = TypeVar("T")

@@ -359,18 +359,15 @@ class ClientUser(BaseUser):
         self.mfa_enabled = data.get("mfa_enabled", False)
 
     async def edit(
-        self, *, username: str = MISSING, avatar: Optional[AssetBytes] = MISSING
+        self,
+        *,
+        username: str = MISSING,
+        avatar: Optional[AssetBytes] = MISSING,
+        banner: Optional[AssetBytes] = MISSING,
     ) -> ClientUser:
         """|coro|
 
         Edits the current profile of the client.
-
-        .. note::
-
-            To upload an avatar, a resource (see below) or a :term:`py:bytes-like object`
-            must be passed in that represents the image being uploaded.
-
-            The only image formats supported for uploading are JPG and PNG.
 
         .. versionchanged:: 2.0
             The edit is no longer in-place, instead the newly edited client user is returned.
@@ -386,19 +383,29 @@ class ClientUser(BaseUser):
             A :term:`py:bytes-like object` or asset representing the image to upload.
             Could be ``None`` to denote no avatar.
 
+            Only JPG, PNG, WEBP (static), and GIF (static/animated) images are supported.
+
             .. versionchanged:: 2.5
                 Now accepts various resource types in addition to :class:`bytes`.
+
+        banner: Optional[|resource_type|]
+            A :term:`py:bytes-like object` or asset representing the image to upload.
+            Could be ``None`` to denote no banner.
+
+            Only JPG, PNG, WEBP (static), and GIF (static/animated) images are supported.
+
+            .. versionadded:: 2.10
 
         Raises
         ------
         NotFound
-            The ``avatar`` asset couldn't be found.
+            The ``avatar`` or ``banner`` asset couldn't be found.
         HTTPException
             Editing your profile failed.
         TypeError
-            The ``avatar`` asset is a lottie sticker (see :func:`Sticker.read`).
+            The ``avatar`` or ``banner`` asset is a lottie sticker (see :func:`Sticker.read`).
         ValueError
-            Wrong image format passed for ``avatar``.
+            Wrong image format passed for ``avatar`` or ``banner``.
 
         Returns
         -------
@@ -411,6 +418,9 @@ class ClientUser(BaseUser):
 
         if avatar is not MISSING:
             payload["avatar"] = await _assetbytes_to_base64_data(avatar)
+
+        if banner is not MISSING:
+            payload["banner"] = await _assetbytes_to_base64_data(banner)
 
         data: UserPayload = await self._state.http.edit_profile(payload)
         return ClientUser(state=self._state, data=data)

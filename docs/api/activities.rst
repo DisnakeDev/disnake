@@ -140,3 +140,4 @@ Events
 ------
 
 - :func:`on_presence_update(before, after) <disnake.on_presence_update>`
+- :func:`on_raw_presence_update(payload) <disnake.on_raw_presence_update>`

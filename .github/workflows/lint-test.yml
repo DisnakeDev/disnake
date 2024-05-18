@@ -29,18 +29,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Run pre-commit
       id: pre-commit
-      uses: pre-commit/action@v3.0.0
+      uses: pre-commit/action@v3.0.1
 
   docs:
     # unlike the other workflows, we are using version 20.04 here as
     # readthedocs uses 20.04 for building our docs, and we want to be explicit
     runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up environment
       uses: ./.github/actions/setup-env
@@ -60,7 +60,7 @@ jobs:
     continue-on-error: ${{ matrix.experimental }}
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up environment
       id: setup-env
@@ -72,9 +72,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - name: Install dependencies
-      run: |
-        pdm update --pre aiohttp  # XXX: temporarily install aiohttp prerelease for 3.12
-        pdm install -d -Gspeed -Gdocs -Gvoice
+      run: pdm install -d -Gspeed -Gdocs -Gvoice
 
     - name: Add .venv/bin to PATH
       run: dirname "$(pdm info --python)" >> $GITHUB_PATH
@@ -85,29 +83,29 @@ jobs:
         echo "PYRIGHT_VERSION=$PYRIGHT_VERSION" >> $GITHUB_ENV
 
     - name: Run pyright (Linux)
-      uses: jakebailey/pyright-action@v1.4.1
+      uses: jakebailey/pyright-action@v2.2.1
       id: pyright-linux
       with:
         version: ${{ env.PYRIGHT_VERSION }}
         python-version: ${{ steps.setup-env.outputs.python-version }}
         python-platform: "Linux"
-        no-comments: ${{ matrix.python-version != '3.8' }}  # only add comments for one version
+        annotate: ${{ matrix.python-version == '3.8' }}  # only add comments for one version
         warnings: true
 
     - name: Run pyright (Windows)
-      uses: jakebailey/pyright-action@v1.4.1
+      uses: jakebailey/pyright-action@v2.2.1
       if: always() && (steps.pyright-linux.outcome == 'success' || steps.pyright-linux.outcome == 'failure')
       with:
         version: ${{ env.PYRIGHT_VERSION }}
         python-version: ${{ steps.setup-env.outputs.python-version }}
         python-platform: "Windows"
-        no-comments: true  # only add comments for one platform (see above)
+        annotate: false  # only add comments for one platform (see above)
         warnings: true
 
   misc:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up environment
       id: setup
@@ -127,8 +125,11 @@ jobs:
     - name: Try building package
       run: |
         pdm install -dG build
+
         pdm run python -m build
         ls -la dist/
+
+        pdm run twine check --strict dist/*
 
     # run the libcst parsers and check for changes
     - name: libcst codemod
@@ -159,7 +160,7 @@ jobs:
       GITHUB_STEP_SUMMARY_FOOTER: "</pre></details>\n"
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up environment
       id: setup-env
@@ -168,13 +169,11 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - name: Install dependencies
-      run: |
-        pdm update --pre aiohttp  # XXX: temporarily install aiohttp prerelease for 3.12
-        pdm install -dG test  # needed for coverage
+      run: pdm install -dG test  # needed for coverage
 
     - name: Test package install
       run: |
-        python -m pip install --pre .  # XXX: temporarily install aiohttp prerelease for 3.12; remove --pre flag again later
+        python -m pip install .
 
     - name: Run pytest
       id: run_tests
