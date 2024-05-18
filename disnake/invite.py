@@ -548,12 +548,10 @@ class Invite(Hashable):
 
     def __repr__(self) -> str:
         s = f"<Invite code={self.code!r} type={self.type!r}"
+        if self.type is InviteType.guild:
+            s += f" guild={self.guild!r} online={self.approximate_presence_count}"
         if self.type is not InviteType.friend:
-            s += (
-                f" guild={self.guild!r}"
-                f" online={self.approximate_presence_count}"
-                f" members={self.approximate_member_count}"
-            )
+            s += f" members={self.approximate_member_count}"
         s += ">"
         return s
 
