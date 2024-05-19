@@ -33,7 +33,7 @@ class Invite(_InviteMetadata):
     code: str
     type: InviteType
     guild: NotRequired[InviteGuild]
-    channel: InviteChannel
+    channel: Optional[InviteChannel]
     inviter: NotRequired[PartialUser]
     target_type: NotRequired[InviteTargetType]
     target_user: NotRequired[PartialUser]
