@@ -54,7 +54,7 @@ from ..permissions import Permissions
 from ..role import Role
 from ..ui.action_row import components_to_dict
 from ..user import ClientUser, User
-from ..webhook.async_ import Webhook, async_context, handle_message_parameters
+from ..webhook.async_ import async_context, handle_message_parameters
 
 __all__ = (
     "Interaction",
@@ -319,7 +319,7 @@ class Interaction(Generic[ClientT]):
             "type": WebhookType.application.value,
             "token": self.token,
         }
-        return Webhook.from_state(data=payload, state=self._state)  # type: ignore
+        return InteractionFollowupWebhook.from_state(data=payload, state=self._state)
 
     @utils.cached_slot_property("_cs_expires_at")
     def expires_at(self) -> datetime:
