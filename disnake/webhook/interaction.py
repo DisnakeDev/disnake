@@ -51,9 +51,8 @@ class InteractionFollowupWebhook(Webhook):
         Sends a message using the webhook.
 
         This is the same as :meth:`Webhook.send` but with type hints changed. Namely,
-        the return type is :class:`WebhookMessage` instead of :class:`Message` because
-        ``wait=True`` for interaction webhooks, and ``username`` and ``avatar_url`` are
-        not supported.
+        this method always returns a :class:`WebhookMessage` because ``wait=True`` for
+        interaction webhooks, and ``username`` and ``avatar_url`` are not supported.
 
         Returns
         -------
