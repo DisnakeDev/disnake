@@ -3,17 +3,22 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import List, Optional
+from typing import TYPE_CHECKING
 
-from disnake.abc import Snowflake
-from disnake.embeds import Embed
-from disnake.file import File
-from disnake.flags import MessageFlags
-from disnake.mentions import AllowedMentions
-from disnake.ui.action_row import Components, MessageUIComponent
-from disnake.ui.view import View
-from disnake.utils import MISSING
-from disnake.webhook.async_ import Webhook, WebhookMessage
+from ..utils import MISSING
+from .async_ import Webhook
+
+if TYPE_CHECKING:
+    from typing import List, Optional
+
+    from ..abc import Snowflake
+    from ..embeds import Embed
+    from ..file import File
+    from ..flags import MessageFlags
+    from ..mentions import AllowedMentions
+    from ..ui.action_row import Components, MessageUIComponent
+    from ..ui.view import View
+    from ..webhook.async_ import WebhookMessage
 
 __all__ = ("InteractionFollowupWebhook",)
 
