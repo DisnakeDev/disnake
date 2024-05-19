@@ -477,8 +477,8 @@ class ParamInfo:
         .. versionadded:: 2.6
     """
 
+    # fmt: off
     TYPES: ClassVar[Dict[type, int]] = {
-        # fmt: off
         str: OptionType.string.value,
         int: OptionType.integer.value,
         bool: OptionType.boolean.value,
@@ -495,8 +495,8 @@ class ParamInfo:
         Union[disnake.User, disnake.Member, disnake.Role]: OptionType.mentionable.value,
         float: OptionType.number.value,
         disnake.Attachment: OptionType.attachment.value,
-        # fmt: on
     }
+    # fmt: on
     _registered_converters: ClassVar[Dict[type, Callable]] = {}
 
     def __init__(
