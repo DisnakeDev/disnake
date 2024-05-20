@@ -210,7 +210,7 @@ class OnboardingPromptOption(Hashable):
         emoji: Optional[Union[str, PartialEmoji, Emoji]] = None,
         roles: Iterable[Snowflake],
         channels: Optional[Iterable[Snowflake]] = None,
-    ):
+    ) -> None:
         ...
 
     @overload
@@ -222,7 +222,7 @@ class OnboardingPromptOption(Hashable):
         emoji: Optional[Union[str, PartialEmoji, Emoji]] = None,
         roles: Optional[Iterable[Snowflake]] = None,
         channels: Iterable[Snowflake],
-    ):
+    ) -> None:
         ...
 
     def __init__(
