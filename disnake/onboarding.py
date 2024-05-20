@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: MIT
 from __future__ import annotations
 
+import os
 from typing import TYPE_CHECKING, FrozenSet, Iterable, List, Optional, Union, overload
 
 from .emoji import Emoji, PartialEmoji
@@ -153,7 +154,7 @@ class OnboardingPrompt(Hashable):
 
     def to_dict(self) -> OnboardingPromptPayload:
         return {
-            "id": self.id,
+            "id": int.from_bytes(os.urandom(4), "big"),
             "title": self.title,
             "options": [option.to_dict() for option in self.options],
             "single_select": self.single_select,
