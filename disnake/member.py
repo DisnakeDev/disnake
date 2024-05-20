@@ -440,6 +440,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         timeout_datetime = utils.parse_time(data.get("communication_disabled_until"))
         self._communication_disabled_until = timeout_datetime
         self._flags = data.get("flags", 0)
+        self._avatar_decoration_data = data.get("avatar_decoration_data")
 
     def _presence_update(
         self, data: PresenceData, user: UserPayload
