@@ -235,7 +235,6 @@ class OnboardingPromptOption(Hashable):
         emoji: Optional[Union[str, PartialEmoji, Emoji]] = None,
         roles: Optional[Iterable[Snowflake]] = None,
         channels: Optional[Iterable[Snowflake]] = None,
-        _guild: Optional[Guild] = None,
     ) -> None:
         self.id: int = 0
         self.title: str = title
@@ -245,7 +244,7 @@ class OnboardingPromptOption(Hashable):
             frozenset([c.id for c in channels]) if channels else frozenset()
         )
         self.emoji: Optional[Union[Emoji, PartialEmoji, str]] = emoji
-        self._guild = _guild
+        self._guild: Optional[Guild] = None
 
     def __str__(self) -> str:
         return self.title
@@ -264,14 +263,14 @@ class OnboardingPromptOption(Hashable):
             animated=data.get("emoji_animated", None),
         )
 
-        self = cls(  # type: ignore
+        self = cls(
             title=data["title"],
             description=data.get("description"),
             emoji=emoji,
             roles=[Object(id=role_id) for role_id in data["role_ids"]],
             channels=[Object(id=channel_id) for channel_id in data["channel_ids"]],
-            _guild=guild,
         )
+        self._guild = guild
         self.id = int(data["id"])
         return self
 
