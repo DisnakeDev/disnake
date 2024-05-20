@@ -58,7 +58,7 @@ if TYPE_CHECKING:
         MemberWithUser as MemberWithUserPayload,
         UserWithMember as UserWithMemberPayload,
     )
-    from .types.user import User as UserPayload
+    from .types.user import AvatarDecorationData as AvatarDecorationDataPayload, User as UserPayload
     from .types.voice import (
         GuildVoiceState as GuildVoiceStatePayload,
         VoiceState as VoiceStatePayload,
@@ -274,6 +274,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         "_avatar",
         "_communication_disabled_until",
         "_flags",
+        "_avatar_decoration_data",
     )
 
     if TYPE_CHECKING:
@@ -293,7 +294,6 @@ class Member(disnake.abc.Messageable, _UserTag):
         banner: Optional[Asset]
         accent_color: Optional[Colour]
         accent_colour: Optional[Colour]
-        avatar_decoration: Optional[Asset]
 
     @overload
     def __init__(
@@ -343,6 +343,9 @@ class Member(disnake.abc.Messageable, _UserTag):
         timeout_datetime = utils.parse_time(data.get("communication_disabled_until"))
         self._communication_disabled_until: Optional[datetime.datetime] = timeout_datetime
         self._flags: int = data.get("flags", 0)
+        self._avatar_decoration_data: Optional[AvatarDecorationDataPayload] = data.get(
+            "avatar_decoration_data"
+        )
 
     def __str__(self) -> str:
         return str(self._user)
@@ -733,6 +736,26 @@ class Member(disnake.abc.Messageable, _UserTag):
         .. versionadded:: 2.8
         """
         return MemberFlags._from_value(self._flags)
+
+    @property
+    def avatar_decoration(self) -> Optional[Asset]:
+        """Optional[:class:`Asset`]: Returns the user's avatar decoration asset, if available.
+
+        .. versionadded:: 2.10
+
+        .. note::
+
+            Since Discord always sends an animated PNG for animated avatar decorations,
+            the following methods will not work as expected:
+
+            - :meth:`Asset.replace`
+            - :meth:`Asset.with_size`
+            - :meth:`Asset.with_format`
+            - :meth:`Asset.with_static_format`
+        """
+        if self._avatar_decoration_data is None:
+            return None
+        return Asset._from_avatar_decoration(self._state, self._avatar_decoration_data["asset"])
 
     @overload
     async def ban(
