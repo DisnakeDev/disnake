@@ -214,9 +214,7 @@ class BaseUser(_UserTag):
         """
         if self._avatar_decoration_data is None:
             return None
-        return Asset._from_avatar_decoration(
-            self._state, self.id, self._avatar_decoration_data["asset"]
-        )
+        return Asset._from_avatar_decoration(self._state, self._avatar_decoration_data["asset"])
 
     @property
     def accent_colour(self) -> Optional[Colour]:
