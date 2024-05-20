@@ -195,6 +195,9 @@ class Asset(AssetMixin):
 
     BASE = "https://cdn.discordapp.com"
 
+    # only used in special cases where Discord doesn't provide an asset on the CDN url
+    BASE_MEDIA = "https://media.discordapp.net"
+
     def __init__(self, state: AnyState, *, url: str, key: str, animated: bool = False) -> None:
         self._state: AnyState = state
         self._url: str = url
