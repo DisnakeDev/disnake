@@ -7,7 +7,6 @@ from .emoji import Emoji, PartialEmoji
 from .enums import OnboardingMode, OnboardingPromptType, try_enum
 from .mixins import Hashable
 from .object import Object
-from .utils import _get_as_snowflake
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -255,11 +254,10 @@ class OnboardingPromptOption(Hashable):
 
     @classmethod
     def _from_dict(cls, *, data: OnboardingPromptOptionPayload, guild: Guild) -> Self:
-        emoji = guild._state._get_emoji_from_fields(
-            name=data.get("emoji_name"),
-            id=_get_as_snowflake(data, "emoji_id"),
-            animated=data.get("emoji_animated", None),
-        )
+        if emoji_data := data.get("emoji"):
+            emoji = guild._state._get_emoji_from_data(emoji_data)
+        else:
+            emoji = None
 
         self = cls(
             title=data["title"],
