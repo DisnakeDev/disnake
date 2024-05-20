@@ -184,12 +184,10 @@ class OnboardingPromptOption(Hashable):
         The prompt option's description.
     emoji: Optional[Union[:class:`PartialEmoji`, :class:`Emoji`, :class:`str`]]
         The prompt option's emoji.
-    roles: FrozenSet[:class:`int`]
+    role_ids: FrozenSet[:class:`int`]
         The IDs of the roles that will be added to the user when they select this option.
-        At creation, this must be set if :attr:`.channels` is not set.
-    channels: FrozenSet[:class:`int`]
+    channel_ids: FrozenSet[:class:`int`]
         The IDs of the channels that the user will see when they select this option.
-        At creation, this must be set if :attr:`.roles` is not set.
     """
 
     __slots__ = (
