@@ -82,6 +82,10 @@ class OnboardingPrompt(Hashable):
 
     .. versionadded:: 2.9
 
+    .. versionchanged:: 2.10
+
+        This is now user-constructible.
+
     Attributes
     ----------
     id: :class:`int`
@@ -164,6 +168,10 @@ class OnboardingPromptOption(Hashable):
     """Represents an onboarding prompt option.
 
     .. versionadded:: 2.9
+
+    .. versionchanged:: 2.10
+
+        This is now user-constructible.
 
     Attributes
     ----------
