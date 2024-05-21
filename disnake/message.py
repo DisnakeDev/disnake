@@ -1533,7 +1533,10 @@ class Message(Hashable):
 
         if self.type is MessageType.guild_incident_report_raid:
             guild_name = self.guild.name if self.guild else None
-            return f"{self.author.name} reported a raid in {guild_name}"
+            return f"{self.author.name} reported a raid in {guild_name}."
+
+        if self.type is MessageType.guild_incident_report_false_alarm:
+            return f"{self.author.name} resolved an Activity Alert."
 
         # in the event of an unknown or unsupported message type, we return nothing
         return None
