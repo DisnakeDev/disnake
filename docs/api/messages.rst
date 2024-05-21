@@ -367,6 +367,8 @@ MessageType
 
         The system message denoting that a raid report was a false alarm.
 
+        .. versionadded:: 2.10
+
 Events
 ------
 
