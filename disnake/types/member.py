@@ -20,7 +20,7 @@ class BaseMember(TypedDict):
     permissions: NotRequired[str]
     communication_disabled_until: NotRequired[Optional[str]]
     flags: int
-    avatar_decoration_data: NotRequired[AvatarDecorationData]
+    avatar_decoration_data: NotRequired[Optional[AvatarDecorationData]]
 
 
 class Member(BaseMember, total=False):
