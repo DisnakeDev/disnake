@@ -1,1 +1,4 @@
-Add support for avatar decorations using :attr:`User.avatar_decoration` and :attr:`Member.avatar_decoration`.
+Add support for avatar decorations using:
+- :attr:`User.avatar_decoration`
+- :attr:`Member.display_avatar_decoration`
+- :attr:`Member.guild_avatar_decoration`

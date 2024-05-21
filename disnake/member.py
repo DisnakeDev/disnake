@@ -739,8 +739,31 @@ class Member(disnake.abc.Messageable, _UserTag):
         return MemberFlags._from_value(self._flags)
 
     @property
-    def avatar_decoration(self) -> Optional[Asset]:
-        """Optional[:class:`Asset`]: Returns the user's avatar decoration asset, if available.
+    def display_avatar_decoration(self) -> Optional[Asset]:
+        """Optional[:class:`Asset`]: Returns the member's display avatar decoration.
+
+        For regular members this is just their avatar decoration, but
+        if they have a guild specific avatar decoration then that
+        is returned instead.
+
+        .. versionadded:: 2.10
+
+        .. note::
+
+            Since Discord always sends an animated PNG for animated avatar decorations,
+            the following methods will not work as expected:
+
+            - :meth:`Asset.replace`
+            - :meth:`Asset.with_size`
+            - :meth:`Asset.with_format`
+            - :meth:`Asset.with_static_format`
+        """
+        return self.guild_avatar_decoration or self._user.avatar_decoration
+
+    @property
+    def guild_avatar_decoration(self) -> Optional[Asset]:
+        """Optional[:class:`Asset`]: Returns an :class:`Asset` for the guild avatar decoration
+        the member has. If unavailable, ``None`` is returned.
 
         .. versionadded:: 2.10
 
