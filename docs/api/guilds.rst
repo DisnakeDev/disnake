@@ -105,12 +105,28 @@ OnboardingPrompt
 .. autoclass:: OnboardingPrompt()
     :members:
 
+APIOnboardingPromptOption
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: APIOnboardingPromptOption
+
+.. autoclass:: APIOnboardingPromptOption()
+    :members:
+
 OnboardingPromptOption
 ~~~~~~~~~~~~~~~~~~~~~~
 
 .. attributetable:: OnboardingPromptOption
 
 .. autoclass:: OnboardingPromptOption()
+    :members:
+
+APIOnboardingPrompt
+~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: APIOnboardingPrompt
+
+.. autoclass:: APIOnboardingPrompt()
     :members:
 
 Data Classes

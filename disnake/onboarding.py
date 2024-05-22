@@ -7,11 +7,8 @@ from typing import TYPE_CHECKING, FrozenSet, Iterable, List, Optional, Union, ov
 from .emoji import Emoji, PartialEmoji
 from .enums import OnboardingMode, OnboardingPromptType, try_enum
 from .mixins import Hashable
-from .object import Object
 
 if TYPE_CHECKING:
-    from typing_extensions import Self
-
     from .abc import Snowflake
     from .guild import Guild, GuildChannel
     from .role import Role
@@ -25,7 +22,9 @@ if TYPE_CHECKING:
 __all__ = (
     "Onboarding",
     "OnboardingPrompt",
+    "APIOnboardingPrompt",
     "OnboardingPromptOption",
+    "APIOnboardingPromptOption",
 )
 
 
@@ -38,7 +37,7 @@ class Onboarding:
     ----------
     guild: :class:`Guild`
         The guild this onboarding is part of.
-    prompts: List[:class:`OnboardingPrompt`]
+    prompts: List[:class:`APIOnboardingPrompt`]
         The prompts shown during onboarding and in community customization.
     enabled: :class:`bool`
         Whether onboarding is enabled.
@@ -55,8 +54,8 @@ class Onboarding:
         self._from_data(data)
 
     def _from_data(self, data: OnboardingPayload) -> None:
-        self.prompts: List[OnboardingPrompt] = [
-            OnboardingPrompt._from_dict(data=prompt, guild=self.guild) for prompt in data["prompts"]
+        self.prompts: List[APIOnboardingPrompt] = [
+            APIOnboardingPrompt(data=prompt, guild=self.guild) for prompt in data["prompts"]
         ]
         self.enabled: bool = data["enabled"]
         self.default_channel_ids: FrozenSet[int] = (
@@ -86,11 +85,8 @@ class OnboardingPrompt(Hashable):
 
         This is now user-constructible.
 
-    Attributes
+    Parameters
     ----------
-    id: :class:`int`
-        The onboarding prompt's ID. Note that if this onboarding prompt was manually constructed,
-        this will be ``0``.
     title: :class:`str`
         The onboarding prompt's title.
     options: List[:class:`OnboardingPromptOption`]
@@ -106,7 +102,7 @@ class OnboardingPrompt(Hashable):
         If ``False``, the prompt will only appear in community customization.
     """
 
-    __slots__ = ("id", "title", "options", "single_select", "required", "in_onboarding", "type")
+    __slots__ = ("id", "title", "options", "type", "single_select", "required", "in_onboarding")
 
     def __init__(
         self,
@@ -121,10 +117,10 @@ class OnboardingPrompt(Hashable):
         self.id: int = 0
         self.title: str = title
         self.options: List[OnboardingPromptOption] = options
+        self.type: OnboardingPromptType = type
         self.single_select: bool = single_select
         self.required: bool = required
         self.in_onboarding: bool = in_onboarding
-        self.type: OnboardingPromptType = type
 
     def __str__(self) -> str:
         return self.title
@@ -135,22 +131,6 @@ class OnboardingPrompt(Hashable):
             f" single_select={self.single_select!r} required={self.required!r}"
             f" in_onboarding={self.in_onboarding!r} type={self.type!r}>"
         )
-
-    @classmethod
-    def _from_dict(cls, *, data: OnboardingPromptPayload, guild: Guild) -> Self:
-        self = cls(
-            title=data["title"],
-            options=[
-                OnboardingPromptOption._from_dict(data=option, guild=guild)
-                for option in data["options"]
-            ],
-            single_select=data["single_select"],
-            required=data["required"],
-            in_onboarding=data["in_onboarding"],
-            type=try_enum(OnboardingPromptType, data["type"]),
-        )
-        self.id = int(data["id"])
-        return self
 
     def to_dict(self) -> OnboardingPromptPayload:
         return {
@@ -164,6 +144,49 @@ class OnboardingPrompt(Hashable):
         }
 
 
+class APIOnboardingPrompt(OnboardingPrompt):
+    """Represents an onboarding prompt returned by the API.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    id: :class:`int`
+        The onboarding prompt's ID.
+    title: :class:`str`
+        The onboarding prompt's title.
+    options: List[:class:`APIOnboardingPromptOption`]
+        The onboarding prompt's options.
+    type: :class:`OnboardingPromptType`
+        The onboarding prompt's type.
+    single_select: :class:`bool`
+        Whether users are limited to selecting one option for the prompt.
+    required: :class:`bool`
+        Whether the prompt is required before a user completes the onboarding flow.
+    in_onboarding: :class:`bool`
+        Whether the prompt is present in the onboarding flow.
+        If ``False``, the prompt will only appear in community customization.
+    """
+
+    def __init__(self, *, data: OnboardingPromptPayload, guild: Guild) -> None:
+        self.id: int = int(data["id"])
+        self.title: str = data["title"]
+        self.options: List[APIOnboardingPromptOption] = [
+            APIOnboardingPromptOption(data=o, guild=guild) for o in data["options"]
+        ]
+        self.single_select: bool = data["single_select"]
+        self.required: bool = data["required"]
+        self.in_onboarding: bool = data["in_onboarding"]
+        self.type: OnboardingPromptType = try_enum(OnboardingPromptType, data["type"])
+
+    def __repr__(self) -> str:
+        return (
+            f"<APIOnboardingPrompt id={self.id!r} title={self.title!r} options={self.options!r}"
+            f" single_select={self.single_select!r} required={self.required!r}"
+            f" in_onboarding={self.in_onboarding!r} type={self.type!r}>"
+        )
+
+
 class OnboardingPromptOption(Hashable):
     """Represents an onboarding prompt option.
 
@@ -173,21 +196,20 @@ class OnboardingPromptOption(Hashable):
 
         This is now user-constructible.
 
-    Attributes
+    Parameters
     ----------
-    id: :class:`int`
-        The onboarding prompt option's ID. Note that if this onboarding prompt option was manually constructed,
-        this will be ``0``.
     title: :class:`str`
         The prompt option's title.
     description: Optional[:class:`str`]
         The prompt option's description.
     emoji: Optional[Union[:class:`PartialEmoji`, :class:`Emoji`, :class:`str`]]
         The prompt option's emoji.
-    role_ids: FrozenSet[:class:`int`]
+    roles: Iterable[:class:`.abc.Snowflake`]
         The IDs of the roles that will be added to the user when they select this option.
-    channel_ids: FrozenSet[:class:`int`]
+        This must be set if ``channels`` is not set.
+    channels: Iterable[:class:`.abc.Snowflake`]
         The IDs of the channels that the user will see when they select this option.
+        This must be set if ``roles`` is not set.
     """
 
     __slots__ = (
@@ -242,7 +264,6 @@ class OnboardingPromptOption(Hashable):
             frozenset([c.id for c in channels]) if channels else frozenset()
         )
         self.emoji: Optional[Union[Emoji, PartialEmoji, str]] = emoji
-        self._guild: Optional[Guild] = None
 
     def __str__(self) -> str:
         return self.title
@@ -252,24 +273,6 @@ class OnboardingPromptOption(Hashable):
             f"<OnboardingPromptOption id={self.id!r} title={self.title!r} "
             f"description={self.description!r} emoji={self.emoji!r}>"
         )
-
-    @classmethod
-    def _from_dict(cls, *, data: OnboardingPromptOptionPayload, guild: Guild) -> Self:
-        if emoji_data := data.get("emoji"):
-            emoji = guild._state._get_emoji_from_data(emoji_data)
-        else:
-            emoji = None
-
-        self = cls(
-            title=data["title"],
-            description=data.get("description"),
-            emoji=emoji,
-            roles=[Object(id=role_id) for role_id in data["role_ids"]],
-            channels=[Object(id=channel_id) for channel_id in data["channel_ids"]],
-        )
-        self._guild = guild
-        self.id = int(data["id"])
-        return self
 
     def to_dict(self) -> OnboardingPromptOptionPayload:
         payload: OnboardingPromptOptionPayload = {
@@ -295,24 +298,54 @@ class OnboardingPromptOption(Hashable):
 
         return payload
 
+
+class APIOnboardingPromptOption(OnboardingPromptOption):
+    """Represents an onboarding prompt option returned by the API.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    id: :class:`int`
+        The onboarding prompt option's ID.
+    title: :class:`str`
+        The prompt option's title.
+    description: Optional[:class:`str`]
+        The prompt option's description.
+    emoji: Optional[Union[:class:`PartialEmoji`, :class:`Emoji`, :class:`str`]]
+        The prompt option's emoji.
+    role_ids: FrozenSet[:class:`int`]
+        The IDs of the roles that will be added to the user when they select this option.
+    channel_ids: FrozenSet[:class:`int`]
+        The IDs of the channels that the user will see when they select this option.
+    """
+
+    def __init__(self, *, data: OnboardingPromptOptionPayload, guild: Guild) -> None:
+        self.id: int = int(data["id"])
+        self.title: str = data["title"]
+        self.description: Optional[str] = data.get("description")
+        self.role_ids: FrozenSet[int] = frozenset(int(r) for r in data["role_ids"])
+        self.channel_ids: FrozenSet[int] = frozenset(int(c) for c in data["channel_ids"])
+        self._guild: Guild = guild
+
+        if emoji_data := data.get("emoji"):
+            emoji = guild._state._get_emoji_from_data(emoji_data)
+        else:
+            emoji = None
+        self.emoji = emoji
+
+    def __repr__(self) -> str:
+        return (
+            f"<APIOnboardingPromptOption id={self.id!r} title={self.title!r} "
+            f"description={self.description!r} emoji={self.emoji!r}>"
+        )
+
     @property
     def roles(self) -> List[Role]:
-        """List[:class:`Role`]: A list of roles that will be added to the user when they select this option.
-
-        Accesing this during construction will raise an :exc:`ValueError`.
-        """
-        if not self._guild or self.id == 0:
-            # TODO: better message and error?
-            raise ValueError("You cannot access this on construction.")
+        """List[:class:`Role`]: A list of roles that will be added to the user when they select this option."""
         return list(filter(None, map(self._guild.get_role, self.role_ids)))
 
     @property
     def channels(self) -> List[GuildChannel]:
-        """List[:class:`abc.GuildChannel`]: A list of channels that the user will see when they select this option.
-
-        Accesing this during construction will raise an :exc:`ValueError`.
-        """
-        if not self._guild or self.id == 0:
-            # TODO: better message and error?
-            raise ValueError("You cannot access this on construction.")
+        """List[:class:`abc.GuildChannel`]: A list of channels that the user will see when they select this option."""
         return list(filter(None, map(self._guild.get_channel, self.channel_ids)))
