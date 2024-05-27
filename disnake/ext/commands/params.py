@@ -766,7 +766,9 @@ class ParamInfo:
 
         return True
 
-    def parse_converter_annotation(self, converter: Callable, fallback_annotation: Any) -> None:
+    def parse_converter_annotation(
+        self, converter: Callable[..., Any], fallback_annotation: Any
+    ) -> None:
         if isinstance(converter, (types.FunctionType, types.MethodType)):
             converter_func = converter
         else:
