@@ -491,7 +491,7 @@ class Cog(metaclass=CogMeta):
         pass
 
     @_cog_special_method
-    def bot_check_once(self, ctx: Context) -> bool:
+    def bot_check_once(self, ctx: Context[Any]) -> bool:
         """A special method that registers as a :meth:`.Bot.check_once`
         check.
 
@@ -503,7 +503,7 @@ class Cog(metaclass=CogMeta):
         return True
 
     @_cog_special_method
-    def bot_check(self, ctx: Context) -> bool:
+    def bot_check(self, ctx: Context[Any]) -> bool:
         """A special method that registers as a :meth:`.Bot.check`
         check.
 
@@ -515,7 +515,7 @@ class Cog(metaclass=CogMeta):
         return True
 
     @_cog_special_method
-    def bot_slash_command_check_once(self, inter: ApplicationCommandInteraction) -> bool:
+    def bot_slash_command_check_once(self, inter: ApplicationCommandInteraction[Any]) -> bool:
         """A special method that registers as a :meth:`.Bot.slash_command_check_once`
         check.
 
@@ -525,7 +525,7 @@ class Cog(metaclass=CogMeta):
         return True
 
     @_cog_special_method
-    def bot_slash_command_check(self, inter: ApplicationCommandInteraction) -> bool:
+    def bot_slash_command_check(self, inter: ApplicationCommandInteraction[Any]) -> bool:
         """A special method that registers as a :meth:`.Bot.slash_command_check`
         check.
 
@@ -535,27 +535,27 @@ class Cog(metaclass=CogMeta):
         return True
 
     @_cog_special_method
-    def bot_user_command_check_once(self, inter: ApplicationCommandInteraction) -> bool:
+    def bot_user_command_check_once(self, inter: ApplicationCommandInteraction[Any]) -> bool:
         """Similar to :meth:`.Bot.slash_command_check_once` but for user commands."""
         return True
 
     @_cog_special_method
-    def bot_user_command_check(self, inter: ApplicationCommandInteraction) -> bool:
+    def bot_user_command_check(self, inter: ApplicationCommandInteraction[Any]) -> bool:
         """Similar to :meth:`.Bot.slash_command_check` but for user commands."""
         return True
 
     @_cog_special_method
-    def bot_message_command_check_once(self, inter: ApplicationCommandInteraction) -> bool:
+    def bot_message_command_check_once(self, inter: ApplicationCommandInteraction[Any]) -> bool:
         """Similar to :meth:`.Bot.slash_command_check_once` but for message commands."""
         return True
 
     @_cog_special_method
-    def bot_message_command_check(self, inter: ApplicationCommandInteraction) -> bool:
+    def bot_message_command_check(self, inter: ApplicationCommandInteraction[Any]) -> bool:
         """Similar to :meth:`.Bot.slash_command_check` but for message commands."""
         return True
 
     @_cog_special_method
-    def cog_check(self, ctx: Context) -> bool:
+    def cog_check(self, ctx: Context[Any]) -> bool:
         """A special method that registers as a :func:`~.check`
         for every text command and subcommand in this cog.
 
@@ -567,7 +567,7 @@ class Cog(metaclass=CogMeta):
         return True
 
     @_cog_special_method
-    def cog_slash_command_check(self, inter: ApplicationCommandInteraction) -> bool:
+    def cog_slash_command_check(self, inter: ApplicationCommandInteraction[Any]) -> bool:
         """A special method that registers as a :func:`~.check`
         for every slash command and subcommand in this cog.
 
@@ -577,17 +577,17 @@ class Cog(metaclass=CogMeta):
         return True
 
     @_cog_special_method
-    def cog_user_command_check(self, inter: ApplicationCommandInteraction) -> bool:
+    def cog_user_command_check(self, inter: ApplicationCommandInteraction[Any]) -> bool:
         """Similar to :meth:`.Cog.cog_slash_command_check` but for user commands."""
         return True
 
     @_cog_special_method
-    def cog_message_command_check(self, inter: ApplicationCommandInteraction) -> bool:
+    def cog_message_command_check(self, inter: ApplicationCommandInteraction[Any]) -> bool:
         """Similar to :meth:`.Cog.cog_slash_command_check` but for message commands."""
         return True
 
     @_cog_special_method
-    async def cog_command_error(self, ctx: Context, error: Exception) -> None:
+    async def cog_command_error(self, ctx: Context[Any], error: Exception) -> None:
         """A special method that is called whenever an error
         is dispatched inside this cog.
 
@@ -609,7 +609,7 @@ class Cog(metaclass=CogMeta):
 
     @_cog_special_method
     async def cog_slash_command_error(
-        self, inter: ApplicationCommandInteraction, error: Exception
+        self, inter: ApplicationCommandInteraction[Any], error: Exception
     ) -> None:
         """A special method that is called whenever an error
         is dispatched inside this cog.
@@ -630,20 +630,20 @@ class Cog(metaclass=CogMeta):
 
     @_cog_special_method
     async def cog_user_command_error(
-        self, inter: ApplicationCommandInteraction, error: Exception
+        self, inter: ApplicationCommandInteraction[Any], error: Exception
     ) -> None:
         """Similar to :func:`cog_slash_command_error` but for user commands."""
         pass
 
     @_cog_special_method
     async def cog_message_command_error(
-        self, inter: ApplicationCommandInteraction, error: Exception
+        self, inter: ApplicationCommandInteraction[Any], error: Exception
     ) -> None:
         """Similar to :func:`cog_slash_command_error` but for message commands."""
         pass
 
     @_cog_special_method
-    async def cog_before_invoke(self, ctx: Context) -> None:
+    async def cog_before_invoke(self, ctx: Context[Any]) -> None:
         """A special method that acts as a cog local pre-invoke hook,
         similar to :meth:`.Command.before_invoke`.
 
@@ -659,7 +659,7 @@ class Cog(metaclass=CogMeta):
         pass
 
     @_cog_special_method
-    async def cog_after_invoke(self, ctx: Context) -> None:
+    async def cog_after_invoke(self, ctx: Context[Any]) -> None:
         """A special method that acts as a cog local post-invoke hook,
         similar to :meth:`.Command.after_invoke`.
 
@@ -675,7 +675,9 @@ class Cog(metaclass=CogMeta):
         pass
 
     @_cog_special_method
-    async def cog_before_slash_command_invoke(self, inter: ApplicationCommandInteraction) -> None:
+    async def cog_before_slash_command_invoke(
+        self, inter: ApplicationCommandInteraction[Any]
+    ) -> None:
         """A special method that acts as a cog local pre-invoke hook.
 
         This is similar to :meth:`.Command.before_invoke` but for slash commands.
@@ -690,7 +692,9 @@ class Cog(metaclass=CogMeta):
         pass
 
     @_cog_special_method
-    async def cog_after_slash_command_invoke(self, inter: ApplicationCommandInteraction) -> None:
+    async def cog_after_slash_command_invoke(
+        self, inter: ApplicationCommandInteraction[Any]
+    ) -> None:
         """A special method that acts as a cog local post-invoke hook.
 
         This is similar to :meth:`.Command.after_invoke` but for slash commands.
@@ -705,22 +709,30 @@ class Cog(metaclass=CogMeta):
         pass
 
     @_cog_special_method
-    async def cog_before_user_command_invoke(self, inter: ApplicationCommandInteraction) -> None:
+    async def cog_before_user_command_invoke(
+        self, inter: ApplicationCommandInteraction[Any]
+    ) -> None:
         """Similar to :meth:`cog_before_slash_command_invoke` but for user commands."""
         pass
 
     @_cog_special_method
-    async def cog_after_user_command_invoke(self, inter: ApplicationCommandInteraction) -> None:
+    async def cog_after_user_command_invoke(
+        self, inter: ApplicationCommandInteraction[Any]
+    ) -> None:
         """Similar to :meth:`cog_after_slash_command_invoke` but for user commands."""
         pass
 
     @_cog_special_method
-    async def cog_before_message_command_invoke(self, inter: ApplicationCommandInteraction) -> None:
+    async def cog_before_message_command_invoke(
+        self, inter: ApplicationCommandInteraction[Any]
+    ) -> None:
         """Similar to :meth:`cog_before_slash_command_invoke` but for message commands."""
         pass
 
     @_cog_special_method
-    async def cog_after_message_command_invoke(self, inter: ApplicationCommandInteraction) -> None:
+    async def cog_after_message_command_invoke(
+        self, inter: ApplicationCommandInteraction[Any]
+    ) -> None:
         """Similar to :meth:`cog_after_slash_command_invoke` but for message commands."""
         pass
 

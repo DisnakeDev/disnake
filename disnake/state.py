@@ -940,7 +940,7 @@ class ConnectionState:
         # it wouldn't allow automatically narrowing the `data` union type based
         # on the `["type"]` field
 
-        interaction: Interaction
+        interaction: Interaction[Any]
 
         if data["type"] == 1:
             # PING interaction should never be received

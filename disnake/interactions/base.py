@@ -744,8 +744,8 @@ class InteractionResponse:
         "_response_type",
     )
 
-    def __init__(self, parent: Interaction) -> None:
-        self._parent: Interaction = parent
+    def __init__(self, parent: Interaction[Any]) -> None:
+        self._parent: Interaction[Any] = parent
         self._response_type: Optional[InteractionResponseType] = None
 
     @property
@@ -1172,7 +1172,7 @@ class InteractionResponse:
 
         if parent.type not in (InteractionType.component, InteractionType.modal_submit):
             raise InteractionNotEditable(parent)
-        parent = cast("Union[MessageInteraction, ModalInteraction]", parent)
+        parent = cast("Union[MessageInteraction[Any], ModalInteraction[Any]]", parent)
         message = parent.message
         # message in modal interactions only exists if modal was sent from component interaction
         if not message:
@@ -1459,8 +1459,8 @@ class InteractionResponse:
 class _InteractionMessageState:
     __slots__ = ("_parent", "_interaction")
 
-    def __init__(self, interaction: Interaction, parent: ConnectionState) -> None:
-        self._interaction: Interaction = interaction
+    def __init__(self, interaction: Interaction[Any], parent: ConnectionState) -> None:
+        self._interaction: Interaction[Any] = interaction
         self._parent: ConnectionState = parent
 
     def _get_guild(self, guild_id):

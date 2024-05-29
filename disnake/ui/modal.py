@@ -6,7 +6,7 @@ import asyncio
 import os
 import sys
 import traceback
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 from ..enums import TextInputStyle
 from ..utils import MISSING
@@ -14,7 +14,6 @@ from .action_row import ActionRow, components_to_rows
 from .text_input import TextInput
 
 if TYPE_CHECKING:
-    from ..client import Client
     from ..interactions.modal import ModalInteraction
     from ..state import ConnectionState
     from ..types.components import Modal as ModalPayload
@@ -22,8 +21,6 @@ if TYPE_CHECKING:
 
 
 __all__ = ("Modal",)
-
-ClientT = TypeVar("ClientT", bound="Client")
 
 
 class Modal:
@@ -159,7 +156,7 @@ class Modal:
             )
         )
 
-    async def callback(self, interaction: ModalInteraction[ClientT], /) -> None:
+    async def callback(self, interaction: ModalInteraction[Any], /) -> None:
         """|coro|
 
         The callback associated with this modal.
@@ -173,7 +170,7 @@ class Modal:
         """
         pass
 
-    async def on_error(self, error: Exception, interaction: ModalInteraction[ClientT]) -> None:
+    async def on_error(self, error: Exception, interaction: ModalInteraction[Any]) -> None:
         """|coro|
 
         A callback that is called when an error occurs.
@@ -206,7 +203,7 @@ class Modal:
 
         return payload
 
-    async def _scheduled_task(self, interaction: ModalInteraction) -> None:
+    async def _scheduled_task(self, interaction: ModalInteraction[Any]) -> None:
         try:
             await self.callback(interaction)
         except Exception as e:
@@ -219,7 +216,7 @@ class Modal:
                     interaction.author.id, interaction.custom_id
                 )
 
-    def dispatch(self, interaction: ModalInteraction) -> None:
+    def dispatch(self, interaction: ModalInteraction[Any]) -> None:
         asyncio.create_task(
             self._scheduled_task(interaction), name=f"disnake-ui-modal-dispatch-{self.custom_id}"
         )
@@ -252,7 +249,7 @@ class ModalStore:
         else:
             await modal.on_timeout()
 
-    def dispatch(self, interaction: ModalInteraction) -> None:
+    def dispatch(self, interaction: ModalInteraction[Any]) -> None:
         key = (interaction.author.id, interaction.custom_id)
         modal = self._modals.get(key)
         if modal is not None:

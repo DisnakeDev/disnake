@@ -70,7 +70,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
 
     def __init__(
         self,
-        func: InteractionCommandCallback[CogT, UserCommandInteraction, P],
+        func: InteractionCommandCallback[CogT, UserCommandInteraction[Any], P],
         *,
         name: LocalizedOptional = None,
         dm_permission: Optional[bool] = None,
@@ -106,7 +106,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
         )
 
     async def _call_external_error_handlers(
-        self, inter: ApplicationCommandInteraction, error: CommandError
+        self, inter: ApplicationCommandInteraction[Any], error: CommandError
     ) -> None:
         stop_propagation = False
         cog = self.cog
@@ -123,7 +123,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
 
     async def __call__(
         self,
-        interaction: ApplicationCommandInteraction,
+        interaction: ApplicationCommandInteraction[Any],
         target: Any = None,
         *args: Any,
         **kwargs: Any,
@@ -176,7 +176,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
 
     def __init__(
         self,
-        func: InteractionCommandCallback[CogT, MessageCommandInteraction, P],
+        func: InteractionCommandCallback[CogT, MessageCommandInteraction[Any], P],
         *,
         name: LocalizedOptional = None,
         dm_permission: Optional[bool] = None,
@@ -206,7 +206,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         )
 
     async def _call_external_error_handlers(
-        self, inter: ApplicationCommandInteraction, error: CommandError
+        self, inter: ApplicationCommandInteraction[Any], error: CommandError
     ) -> None:
         stop_propagation = False
         cog = self.cog
@@ -223,7 +223,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
 
     async def __call__(
         self,
-        interaction: ApplicationCommandInteraction,
+        interaction: ApplicationCommandInteraction[Any],
         target: Any = None,
         *args: Any,
         **kwargs: Any,
@@ -246,7 +246,7 @@ def user_command(
     auto_sync: Optional[bool] = None,
     extras: Optional[Dict[str, Any]] = None,
     **kwargs: Any,
-) -> Callable[[InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand]:
+) -> Callable[[InteractionCommandCallback[CogT, UserCommandInteraction[Any], P]], InvokableUserCommand]:
     """A shortcut decorator that builds a user command.
 
     Parameters
@@ -292,7 +292,7 @@ def user_command(
     """
 
     def decorator(
-        func: InteractionCommandCallback[CogT, UserCommandInteraction, P]
+        func: InteractionCommandCallback[CogT, UserCommandInteraction[Any], P]
     ) -> InvokableUserCommand:
         if not asyncio.iscoroutinefunction(func):
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
@@ -326,7 +326,7 @@ def message_command(
     extras: Optional[Dict[str, Any]] = None,
     **kwargs: Any,
 ) -> Callable[
-    [InteractionCommandCallback[CogT, MessageCommandInteraction, P]],
+    [InteractionCommandCallback[CogT, MessageCommandInteraction[Any], P]],
     InvokableMessageCommand,
 ]:
     """A shortcut decorator that builds a message command.
@@ -374,7 +374,7 @@ def message_command(
     """
 
     def decorator(
-        func: InteractionCommandCallback[CogT, MessageCommandInteraction, P]
+        func: InteractionCommandCallback[CogT, MessageCommandInteraction[Any], P]
     ) -> InvokableMessageCommand:
         if not asyncio.iscoroutinefunction(func):
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")

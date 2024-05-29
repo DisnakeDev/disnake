@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from ..types.components import Component as ComponentPayload
     from .view import View
 
-    ItemCallbackType = Callable[[Any, ItemT, MessageInteraction], Coroutine[Any, Any, Any]]
+    ItemCallbackType = Callable[[Any, ItemT, MessageInteraction[Any]], Coroutine[Any, Any, Any]]
 
 else:
     ParamSpec = TypeVar
@@ -114,7 +114,7 @@ class Item(WrappedComponent, Generic[V_co]):
     def refresh_component(self, component: NestedComponent) -> None:
         return None
 
-    def refresh_state(self, interaction: MessageInteraction) -> None:
+    def refresh_state(self, interaction: MessageInteraction[Any]) -> None:
         return None
 
     @classmethod

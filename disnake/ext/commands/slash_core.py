@@ -341,11 +341,13 @@ class SubCommand(InvokableApplicationCommand):
         return self.option
 
     async def _call_autocompleter(
-        self, param: str, inter: ApplicationCommandInteraction, user_input: str
+        self, param: str, inter: ApplicationCommandInteraction[Any], user_input: str
     ) -> Optional[Choices]:
         return await _call_autocompleter(self, param, inter, user_input)
 
-    async def invoke(self, inter: ApplicationCommandInteraction, *args: Any, **kwargs: Any) -> None:
+    async def invoke(
+        self, inter: ApplicationCommandInteraction[Any], *args: Any, **kwargs: Any
+    ) -> None:
         for k, v in self.connectors.items():
             if k in kwargs:
                 kwargs[v] = kwargs.pop(k)
@@ -639,7 +641,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         return _autocomplete(self, option_name)
 
     async def _call_external_error_handlers(
-        self, inter: ApplicationCommandInteraction, error: CommandError
+        self, inter: ApplicationCommandInteraction[Any], error: CommandError
     ) -> None:
         stop_propagation = False
         cog = self.cog
@@ -655,11 +657,11 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             inter.bot.dispatch("slash_command_error", inter, error)
 
     async def _call_autocompleter(
-        self, param: str, inter: ApplicationCommandInteraction, user_input: str
+        self, param: str, inter: ApplicationCommandInteraction[Any], user_input: str
     ) -> Optional[Choices]:
         return await _call_autocompleter(self, param, inter, user_input)
 
-    async def _call_relevant_autocompleter(self, inter: ApplicationCommandInteraction) -> None:
+    async def _call_relevant_autocompleter(self, inter: ApplicationCommandInteraction[Any]) -> None:
         chain, _ = inter.data._get_chain_and_kwargs()
 
         if len(chain) == 0:
@@ -686,7 +688,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         if choices is not None:
             await inter.response.autocomplete(choices=choices)
 
-    async def invoke_children(self, inter: ApplicationCommandInteraction) -> None:
+    async def invoke_children(self, inter: ApplicationCommandInteraction[Any]) -> None:
         chain, kwargs = inter.data._get_chain_and_kwargs()
 
         if len(chain) == 0:
@@ -717,7 +719,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                 if not await subcmd._call_local_error_handler(inter, exc):
                     raise
 
-    async def invoke(self, inter: ApplicationCommandInteraction) -> None:
+    async def invoke(self, inter: ApplicationCommandInteraction[Any]) -> None:
         await self.prepare(inter)
 
         try:

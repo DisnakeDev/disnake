@@ -300,7 +300,7 @@ class HelpCommand:
         self.command_attrs = attrs = options.pop("command_attrs", {})
         attrs.setdefault("name", "help")
         attrs.setdefault("help", "Shows this message")
-        self.context: Context = disnake.utils.MISSING
+        self.context: Context[Any] = disnake.utils.MISSING
         self._command_impl = _HelpCommandImpl(self, **self.command_attrs)
 
     def copy(self):

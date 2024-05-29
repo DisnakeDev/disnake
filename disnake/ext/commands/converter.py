@@ -1218,7 +1218,7 @@ CONVERTER_MAPPING: Dict[Type[Any], Type[Converter]] = {
 
 
 async def _actual_conversion(
-    ctx: Context,
+    ctx: Context[Any],
     converter: Union[Type[T], Type[Converter[T]], Converter[T], Callable[[str], T]],
     argument: str,
     param: inspect.Parameter,
@@ -1257,7 +1257,7 @@ async def _actual_conversion(
         raise BadArgument(f'Converting to "{name}" failed for parameter "{param.name}".') from exc
 
 
-async def run_converters(ctx: Context, converter, argument: str, param: inspect.Parameter):
+async def run_converters(ctx: Context[Any], converter, argument: str, param: inspect.Parameter):
     """|coro|
 
     Runs converters for a given converter, argument, and parameter.
