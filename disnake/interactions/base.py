@@ -70,7 +70,6 @@ if TYPE_CHECKING:
     from ..app_commands import Choices
     from ..client import Client
     from ..embeds import Embed
-    from ..ext.commands import AutoShardedBot, Bot
     from ..file import File
     from ..guild import GuildChannel, GuildMessageable
     from ..mentions import AllowedMentions
@@ -90,8 +89,6 @@ if TYPE_CHECKING:
     from .modal import ModalInteraction
 
     InteractionChannel = Union[GuildChannel, Thread, PartialMessageable]
-
-    AnyBot = Union[Bot, AutoShardedBot]
 
 
 MISSING: Any = utils.MISSING

@@ -623,7 +623,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         in ``?one two three`` the parent name would be ``one two``.
         """
         entries = []
-        command: Command[Any, ..., Any] = self
+        command: Command[CogT, ..., Any] = self
         # command.parent is type-hinted as GroupMixin some attributes are resolved via MRO
         while command.parent is not None:
             command = command.parent  # type: ignore
@@ -632,7 +632,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         return " ".join(reversed(entries))
 
     @property
-    def parents(self) -> List[Group]:
+    def parents(self) -> List[Group[CogT, ..., Any]]:
         """List[:class:`Group`]: Retrieves the parents of this command.
 
         If the command has no parents then it returns an empty :class:`list`.
@@ -642,7 +642,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         .. versionadded:: 1.1
         """
         entries = []
-        command: Command[Any, ..., Any] = self
+        command: Command[CogT, ..., Any] = self
         while command.parent is not None:
             command = command.parent  # type: ignore
             entries.append(command)
@@ -650,7 +650,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         return entries
 
     @property
-    def root_parent(self) -> Optional[Group]:
+    def root_parent(self) -> Optional[Group[CogT, ..., Any]]:
         """Optional[:class:`Group`]: Retrieves the root parent of this command.
 
         If the command has no parents then it returns ``None``.
@@ -1709,7 +1709,9 @@ def check(predicate: Check) -> Callable[[T], T]:
         The predicate to check if the command should be invoked.
     """
 
-    def decorator(func: Union[Command, CoroFunc]) -> Union[Command, CoroFunc]:
+    def decorator(
+        func: Union[Command[CogT, P, T], CoroFunc],
+    ) -> Union[Command[CogT, P, T], CoroFunc]:
         if hasattr(func, "__command_flag__"):
             func.checks.append(predicate)
         else:
@@ -2531,7 +2533,9 @@ def cooldown(
             Callables are now supported for custom bucket types.
     """
 
-    def decorator(func: Union[Command, CoroFunc]) -> Union[Command, CoroFunc]:
+    def decorator(
+        func: Union[Command[CogT, P, T], CoroFunc],
+    ) -> Union[Command[CogT, P, T], CoroFunc]:
         if hasattr(func, "__command_flag__"):
             func._buckets = CooldownMapping(Cooldown(rate, per), type)
         else:
@@ -2575,7 +2579,9 @@ def dynamic_cooldown(
     if not callable(cooldown):
         raise TypeError("A callable must be provided")
 
-    def decorator(func: Union[Command, CoroFunc]) -> Union[Command, CoroFunc]:
+    def decorator(
+        func: Union[Command[CogT, P, T], CoroFunc],
+    ) -> Union[Command[CogT, P, T], CoroFunc]:
         if hasattr(func, "__command_flag__"):
             func._buckets = DynamicCooldownMapping(cooldown, type)
         else:
@@ -2611,7 +2617,9 @@ def max_concurrency(
         then the command waits until it can be executed.
     """
 
-    def decorator(func: Union[Command, CoroFunc]) -> Union[Command, CoroFunc]:
+    def decorator(
+        func: Union[Command[CogT, P, T], CoroFunc],
+    ) -> Union[Command[CogT, P, T], CoroFunc]:
         value = MaxConcurrency(number, per=per, wait=wait)
         if hasattr(func, "__command_flag__"):
             func._max_concurrency = value
@@ -2660,7 +2668,9 @@ def before_invoke(coro) -> Callable[[T], T]:
         bot.add_cog(What())
     """
 
-    def decorator(func: Union[Command, CoroFunc]) -> Union[Command, CoroFunc]:
+    def decorator(
+        func: Union[Command[CogT, P, T], CoroFunc],
+    ) -> Union[Command[CogT, P, T], CoroFunc]:
         if hasattr(func, "__command_flag__"):
             func.before_invoke(coro)
         else:
@@ -2679,7 +2689,9 @@ def after_invoke(coro) -> Callable[[T], T]:
     .. versionadded:: 1.4
     """
 
-    def decorator(func: Union[Command, CoroFunc]) -> Union[Command, CoroFunc]:
+    def decorator(
+        func: Union[Command[CogT, P, T], CoroFunc],
+    ) -> Union[Command[CogT, P, T], CoroFunc]:
         if hasattr(func, "__command_flag__"):
             func.after_invoke(coro)
         else:
