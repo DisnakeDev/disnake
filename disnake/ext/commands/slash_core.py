@@ -190,8 +190,8 @@ class SubCommandGroup(InvokableApplicationCommand):
         self,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        options: Optional[list] = None,
-        connectors: Optional[dict] = None,
+        options: Optional[List[Option]] = None,
+        connectors: Optional[Dict[str, str]] = None,
         extras: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ) -> Callable[[CommandCallback], SubCommand]:
@@ -270,7 +270,7 @@ class SubCommand(InvokableApplicationCommand):
         *,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        options: Optional[list] = None,
+        options: Optional[List[Option]] = None,
         connectors: Optional[Dict[str, str]] = None,
         **kwargs: Any,
     ) -> None:
@@ -524,8 +524,8 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         self,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        options: Optional[list] = None,
-        connectors: Optional[dict] = None,
+        options: Optional[List[Option]] = None,
+        connectors: Optional[Dict[str, str]] = None,
         extras: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ) -> Callable[[CommandCallback], SubCommand]:

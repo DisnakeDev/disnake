@@ -497,7 +497,7 @@ class ParamInfo:
         disnake.Attachment:                                OptionType.attachment.value,
         # fmt: on
     }
-    _registered_converters: ClassVar[Dict[type, Callable]] = {}
+    _registered_converters: ClassVar[Dict[type, Callable[..., Any]]] = {}
 
     def __init__(
         self,
@@ -884,7 +884,7 @@ def safe_call(function: Callable[..., T], /, *possible_args: Any, **possible_kwa
 
 
 def isolate_self(
-    function: Callable,
+    function: Callable[..., Any],
     parameters: Optional[Dict[str, inspect.Parameter]] = None,
 ) -> Tuple[Tuple[Optional[inspect.Parameter], ...], Dict[str, inspect.Parameter]]:
     """Create parameters without self and the first interaction.
@@ -948,7 +948,7 @@ def classify_autocompleter(autocompleter: AnyAutocompleter) -> None:
 
 
 def collect_params(
-    function: Callable,
+    function: Callable[..., Any],
     parameters: Optional[Dict[str, inspect.Parameter]] = None,
 ) -> Tuple[Optional[str], Optional[str], List[ParamInfo], Dict[str, Injection]]:
     """Collect all parameters in a function.
@@ -1001,7 +1001,7 @@ def collect_params(
     )
 
 
-def collect_nested_params(function: Callable) -> List[ParamInfo]:
+def collect_nested_params(function: Callable[..., Any]) -> List[ParamInfo]:
     """Collect all options from a function"""
     # TODO: Have these be actually sorted properly and not have injections always at the end
     _, _, paraminfos, injections = collect_params(function)
@@ -1057,8 +1057,12 @@ async def run_injections(
 
 
 async def call_param_func(
-    function: Callable, interaction: ApplicationCommandInteraction, /, *args: Any, **kwargs: Any
-) -> Any:
+    function: Callable[..., T],
+    interaction: ApplicationCommandInteraction,
+    /,
+    *args: Any,
+    **kwargs: Any,
+) -> T:
     """Call a function utilizing ParamInfo"""
     cog_param, inter_param, paraminfos, injections = collect_params(function)
     formatted_kwargs = format_kwargs(interaction, cog_param, inter_param, *args, **kwargs)
