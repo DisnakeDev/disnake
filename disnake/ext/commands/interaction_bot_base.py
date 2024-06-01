@@ -664,7 +664,8 @@ class InteractionBotBase(CommonBotBase):
         extras: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ) -> Callable[
-        [InteractionCommandCallback[CogT, MessageCommandInteraction[Any], P]], InvokableMessageCommand
+        [InteractionCommandCallback[CogT, MessageCommandInteraction[Any], P]],
+        InvokableMessageCommand,
     ]:
         """A shortcut decorator that invokes :func:`~disnake.ext.commands.message_command` and adds it to
         the internal command list.

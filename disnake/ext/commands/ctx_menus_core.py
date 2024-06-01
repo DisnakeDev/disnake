@@ -246,7 +246,9 @@ def user_command(
     auto_sync: Optional[bool] = None,
     extras: Optional[Dict[str, Any]] = None,
     **kwargs: Any,
-) -> Callable[[InteractionCommandCallback[CogT, UserCommandInteraction[Any], P]], InvokableUserCommand]:
+) -> Callable[
+    [InteractionCommandCallback[CogT, UserCommandInteraction[Any], P]], InvokableUserCommand
+]:
     """A shortcut decorator that builds a user command.
 
     Parameters
