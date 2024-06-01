@@ -3404,7 +3404,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
-        components: Components = ...,
+        components: Components[MessageUIComponent] = ...,
         reason: Optional[str] = None,
     ) -> ThreadWithMessage:
         ...
@@ -3425,7 +3425,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
-        components: Components = ...,
+        components: Components[MessageUIComponent] = ...,
         reason: Optional[str] = None,
     ) -> ThreadWithMessage:
         ...
@@ -3446,7 +3446,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
-        components: Components = ...,
+        components: Components[MessageUIComponent] = ...,
         reason: Optional[str] = None,
     ) -> ThreadWithMessage:
         ...
@@ -3467,7 +3467,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
-        components: Components = ...,
+        components: Components[MessageUIComponent] = ...,
         reason: Optional[str] = None,
     ) -> ThreadWithMessage:
         ...

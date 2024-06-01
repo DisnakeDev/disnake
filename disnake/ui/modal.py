@@ -61,7 +61,7 @@ class Modal:
 
         self.title: str = title
         self.custom_id: str = os.urandom(16).hex() if custom_id is MISSING else custom_id
-        self.components: List[ActionRow] = rows
+        self.components: List[ActionRow[ModalUIComponent]] = rows
         self.timeout: float = timeout
 
     def __repr__(self) -> str:
