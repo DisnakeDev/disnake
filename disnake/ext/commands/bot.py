@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, Callable, List, Optional, Sequence, Set, 
 
 import disnake
 
-from .bot_base import BotBase, when_mentioned, when_mentioned_or
+from .bot_base import BotBase, CogT, when_mentioned, when_mentioned_or
 from .interaction_bot_base import InteractionBotBase
 
 if TYPE_CHECKING:
@@ -42,7 +42,7 @@ __all__ = (
 MISSING: Any = disnake.utils.MISSING
 
 
-class Bot(BotBase, InteractionBotBase, disnake.Client):
+class Bot(BotBase[CogT], InteractionBotBase[CogT], disnake.Client):
     """Represents a discord bot.
 
     This class is a subclass of :class:`disnake.Client` and as a result
@@ -264,7 +264,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
             ...
 
 
-class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
+class AutoShardedBot(BotBase[CogT], InteractionBotBase[CogT], disnake.AutoShardedClient):
     """Similar to :class:`.Bot`, except that it is inherited from
     :class:`disnake.AutoShardedClient` instead.
     """
@@ -316,7 +316,7 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
             ...
 
 
-class InteractionBot(InteractionBotBase, disnake.Client):
+class InteractionBot(InteractionBotBase[CogT], disnake.Client):
     """Represents a discord bot for application commands only.
 
     This class is a subclass of :class:`disnake.Client` and as a result
@@ -465,7 +465,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
             ...
 
 
-class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
+class AutoShardedInteractionBot(InteractionBotBase[CogT], disnake.AutoShardedClient):
     """Similar to :class:`.InteractionBot`, except that it is inherited from
     :class:`disnake.AutoShardedClient` instead.
     """

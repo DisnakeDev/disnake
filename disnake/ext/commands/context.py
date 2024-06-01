@@ -32,7 +32,7 @@ MISSING: Any = disnake.utils.MISSING
 
 
 T = TypeVar("T")
-BotT = TypeVar("BotT", bound="Union[Bot, AutoShardedBot]")
+BotT = TypeVar("BotT", bound="Union[Bot[Any], AutoShardedBot[Any]]")
 CogT = TypeVar("CogT", bound="Cog")
 
 if TYPE_CHECKING:

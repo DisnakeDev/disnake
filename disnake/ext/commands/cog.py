@@ -38,7 +38,10 @@ if TYPE_CHECKING:
     from .context import Context
     from .core import Command
 
-    AnyBot = Union[Bot, AutoShardedBot, InteractionBot, AutoShardedInteractionBot]
+    CogT = TypeVar("CogT", bound="Cog")
+    AnyBot = Union[
+        Bot[CogT], AutoShardedBot[CogT], InteractionBot[CogT], AutoShardedInteractionBot[CogT]
+    ]
 
 
 __all__ = (
@@ -145,7 +148,7 @@ class CogMeta(type):
     __cog_slash_settings__: Dict[str, Any]
     __cog_user_settings__: Dict[str, Any]
     __cog_message_settings__: Dict[str, Any]
-    __cog_commands__: List[Command]
+    __cog_commands__: List[Command[Any, ..., Any]]
     __cog_app_commands__: List[InvokableApplicationCommand]
     __cog_listeners__: List[Tuple[str, str]]
 
@@ -238,7 +241,7 @@ class Cog(metaclass=CogMeta):
 
     __cog_name__: ClassVar[str]
     __cog_settings__: ClassVar[Dict[str, Any]]
-    __cog_commands__: ClassVar[List[Command]]
+    __cog_commands__: ClassVar[List[Command[Self, ..., Any]]]
     __cog_app_commands__: ClassVar[List[InvokableApplicationCommand]]
     __cog_listeners__: ClassVar[List[Tuple[str, str]]]
 
@@ -285,7 +288,7 @@ class Cog(metaclass=CogMeta):
 
         return self
 
-    def get_commands(self) -> List[Command]:
+    def get_commands(self) -> List[Command[Self, ..., Any]]:
         """Returns a list of commands the cog has.
 
         Returns
@@ -366,7 +369,7 @@ class Cog(metaclass=CogMeta):
     def description(self, description: str) -> None:
         self.__cog_description__ = description
 
-    def walk_commands(self) -> Generator[Command, None, None]:
+    def walk_commands(self) -> Generator[Command[Self, ..., Any], None, None]:
         """An iterator that recursively walks through this cog's commands and subcommands.
 
         Yields
@@ -736,7 +739,7 @@ class Cog(metaclass=CogMeta):
         """Similar to :meth:`cog_after_slash_command_invoke` but for message commands."""
         pass
 
-    def _inject(self, bot: AnyBot) -> Self:
+    def _inject(self, bot: AnyBot[Self]) -> Self:
         from .bot import AutoShardedInteractionBot, InteractionBot
 
         cls = self.__class__
@@ -844,7 +847,7 @@ class Cog(metaclass=CogMeta):
 
         return self
 
-    def _eject(self, bot: AnyBot) -> None:
+    def _eject(self, bot: AnyBot[Self]) -> None:
         cls = self.__class__
 
         try:

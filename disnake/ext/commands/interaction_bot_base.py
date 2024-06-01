@@ -31,7 +31,7 @@ from disnake.enums import ApplicationCommandType
 from disnake.utils import warn_deprecated
 
 from . import errors
-from .base_core import InvokableApplicationCommand
+from .base_core import CogT, InvokableApplicationCommand
 from .common_bot_base import CommonBotBase
 from .ctx_menus_core import (
     InvokableMessageCommand,
@@ -55,7 +55,7 @@ if TYPE_CHECKING:
     from disnake.permissions import Permissions
 
     from ._types import AppCheck, CoroFunc
-    from .base_core import CogT, CommandCallback, InteractionCommandCallback
+    from .base_core import CommandCallback, InteractionCommandCallback
 
     P = ParamSpec("P")
 
@@ -139,7 +139,7 @@ def _format_diff(diff: _Diff) -> str:
     return "\n".join(f"| {line}" for line in lines)
 
 
-class InteractionBotBase(CommonBotBase):
+class InteractionBotBase(CommonBotBase[CogT]):
     def __init__(
         self,
         *,
