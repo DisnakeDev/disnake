@@ -292,7 +292,7 @@ class _BaseRange(ABC, Generic[NumberT]):
     def __class_getitem__(cls, params: tuple[Any, ...]) -> Self:
         if cls is _BaseRange:
             # needed since made generic
-            return super().__class_getitem__(params)  # pyright: ignore[reportAttributeAccessIssue]
+            return super().__class_getitem__(params)  # pyright: ignore
 
         # deconstruct type arguments
         if not isinstance(params, tuple):
