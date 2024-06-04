@@ -71,6 +71,7 @@ __all__ = (
     "StageChannelConverter",
     "CategoryChannelConverter",
     "ForumChannelConverter",
+    "MediaChannelConverter",
     "ThreadConverter",
     "ColourConverter",
     "ColorConverter",
@@ -631,6 +632,27 @@ class ForumChannelConverter(IDConverter[disnake.ForumChannel]):
         )
 
 
+class MediaChannelConverter(IDConverter[disnake.MediaChannel]):
+    """Converts to a :class:`~disnake.MediaChannel`.
+
+    .. versionadded:: 2.10
+
+    All lookups are via the local guild. If in a DM context, then the lookup
+    is done by the global cache.
+
+    The lookup strategy is as follows (in order):
+
+    1. Lookup by ID.
+    2. Lookup by mention.
+    3. Lookup by name
+    """
+
+    async def convert(self, ctx: AnyContext, argument: str) -> disnake.MediaChannel:
+        return GuildChannelConverter._resolve_channel(
+            ctx, argument, "media_channels", disnake.MediaChannel
+        )
+
+
 class ThreadConverter(IDConverter[disnake.Thread]):
     """Coverts to a :class:`~disnake.Thread`.
 
@@ -1133,7 +1155,7 @@ class Greedy(List[T]):
             raise TypeError("Greedy[...] expects a type or a Converter instance.")
 
         if converter in (str, type(None)) or origin is Greedy:
-            raise TypeError(f"Greedy[{converter.__name__}] is invalid.")  # type: ignore
+            raise TypeError(f"Greedy[{converter.__name__}] is invalid.")
 
         if origin is Union and type(None) in args:
             raise TypeError(f"Greedy[{converter!r}] is invalid.")
@@ -1161,7 +1183,7 @@ def get_converter(param: inspect.Parameter) -> Any:
     return converter
 
 
-_GenericAlias = type(List[T])
+_GenericAlias = type(List[Any])
 
 
 def is_generic_type(tp: Any, *, _GenericAlias: Type = _GenericAlias) -> bool:
@@ -1186,6 +1208,7 @@ CONVERTER_MAPPING: Dict[Type[Any], Type[Converter]] = {
     disnake.PartialEmoji: PartialEmojiConverter,
     disnake.CategoryChannel: CategoryChannelConverter,
     disnake.ForumChannel: ForumChannelConverter,
+    disnake.MediaChannel: MediaChannelConverter,
     disnake.Thread: ThreadConverter,
     disnake.abc.GuildChannel: GuildChannelConverter,
     disnake.GuildSticker: GuildStickerConverter,
@@ -1222,7 +1245,7 @@ async def _actual_conversion(
         raise ConversionError(converter, exc) from exc
 
     try:
-        return converter(argument)
+        return converter(argument)  # type: ignore
     except CommandError:
         raise
     except Exception as exc:

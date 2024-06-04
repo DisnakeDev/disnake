@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     ValidAssetFormatTypes = Literal["webp", "jpeg", "jpg", "png", "gif"]
     AnyState = Union[ConnectionState, _WebhookState[BaseWebhook]]
 
-AssetBytes = Union[bytes, "AssetMixin"]
+AssetBytes = Union[utils._BytesLike, "AssetMixin"]
 
 VALID_STATIC_FORMATS = frozenset({"jpeg", "jpg", "webp", "png"})
 VALID_ASSET_FORMATS = VALID_STATIC_FORMATS | {"gif"}
@@ -164,7 +164,7 @@ class AssetMixin:
 class Asset(AssetMixin):
     """Represents a CDN asset on Discord.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: str(x)
 
@@ -194,6 +194,9 @@ class Asset(AssetMixin):
     )
 
     BASE = "https://cdn.discordapp.com"
+
+    # only used in special cases where Discord doesn't provide an asset on the CDN url
+    BASE_MEDIA = "https://media.discordapp.net"
 
     def __init__(self, state: AnyState, *, url: str, key: str, animated: bool = False) -> None:
         self._state: AnyState = state
@@ -312,6 +315,16 @@ class Asset(AssetMixin):
             url=f"{cls.BASE}/guild-events/{event_id}/{image_hash}.png?size=2048",
             key=image_hash,
             animated=False,
+        )
+
+    @classmethod
+    def _from_avatar_decoration(cls, state: AnyState, avatar_decoration_asset: str) -> Self:
+        animated = avatar_decoration_asset.startswith("a_")
+        return cls(
+            state,
+            url=f"{cls.BASE}/avatar-decoration-presets/{avatar_decoration_asset}.png?size=1024",
+            key=avatar_decoration_asset,
+            animated=animated,
         )
 
     def __str__(self) -> str:

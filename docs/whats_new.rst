@@ -17,6 +17,44 @@ in specific versions. Please see :ref:`version_guarantees` for more information.
 
 .. towncrier release notes start
 
+.. _vp2p9p2:
+
+v2.9.2
+------
+
+Bug Fixes
+~~~~~~~~~
+- |commands| Fix erroneous :class:`LocalizationWarning`\s when using localized slash command parameters in cogs. (:issue:`1133`)
+- Handle unexpected ``RECONNECT`` opcode where ``HELLO`` is expected during initial shard connection. (:issue:`1155`)
+- Reconnect gateway websocket on protocol errors. (:issue:`1159`)
+- Avoid ``AttributeError`` in :class:`FFmpegAudio` when cleaning up after failing to spawn ffmpeg process. (:issue:`1164`)
+- Fix base URL for stickers with :attr:`StickerFormatType.gif`. (:issue:`1189`)
+
+Documentation
+~~~~~~~~~~~~~
+- Adding some clarifying documentation around the executable parameters of audio classes based off of internal discussions. (:issue:`1158`)
+
+Miscellaneous
+~~~~~~~~~~~~~
+- Add :class:`StandardSticker` to ``stickers`` parameter type annotation of :meth:`Messageable.send` and :meth:`ForumChannel.create_thread`. (:issue:`1134`)
+
+
+.. _vp2p9p1:
+
+v2.9.1
+------
+
+Bug Fixes
+~~~~~~~~~
+- Allow ``cls`` argument in select menu decorators (e.g. :func:`ui.string_select`) to be specified by keyword instead of being positional-only. (:issue:`1111`)
+- |commands| Fix edge case in evaluation of multiple identical annotations with forwardrefs in a single signature. (:issue:`1120`)
+- Fix :meth:`Thread.permissions_for` not working in some cases due to an incorrect import. (:issue:`1123`)
+
+Documentation
+~~~~~~~~~~~~~
+- Miscellaneous grammar/typo fixes for :doc:`api/audit_logs`. (:issue:`1105`)
+
+
 .. _vp2p9p0:
 
 v2.9.0

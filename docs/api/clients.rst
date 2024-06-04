@@ -20,13 +20,16 @@ Client
 
 .. autoclass:: Client
     :members:
-    :exclude-members: fetch_guilds, event
+    :exclude-members: fetch_guilds, event, listen
 
     .. automethod:: Client.event()
         :decorator:
 
     .. automethod:: Client.fetch_guilds
         :async-for:
+
+    .. automethod:: Client.listen(name=None)
+        :decorator:
 
 AutoShardedClient
 ~~~~~~~~~~~~~~~~~

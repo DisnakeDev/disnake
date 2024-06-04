@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional
 from ..enums import ComponentType
 from ..message import Message
 from ..utils import cached_slot_property
-from .base import Interaction
+from .base import ClientT, Interaction
 
 if TYPE_CHECKING:
     from ..state import ConnectionState
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 __all__ = ("ModalInteraction", "ModalInteractionData")
 
 
-class ModalInteraction(Interaction):
+class ModalInteraction(Interaction[ClientT]):
     """Represents an interaction with a modal.
 
     .. versionadded:: 2.4
@@ -57,16 +57,21 @@ class ModalInteraction(Interaction):
         .. versionchanged:: 2.5
             Changed to :class:`Locale` instead of :class:`str`.
 
+    client: :class:`Client`
+        The interaction client.
+    entitlements: List[:class:`Entitlement`]
+        The entitlements for the invoking user and guild,
+        representing access to an application subscription.
+
+        .. versionadded:: 2.10
+
+    data: :class:`ModalInteractionData`
+        The wrapped interaction data.
     message: Optional[:class:`Message`]
         The message that this interaction's modal originated from,
         if the modal was sent in response to a component interaction.
 
         .. versionadded:: 2.5
-
-    data: :class:`ModalInteractionData`
-        The wrapped interaction data.
-    client: :class:`Client`
-        The interaction client.
     """
 
     __slots__ = ("message", "_cs_text_values")

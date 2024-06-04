@@ -12,6 +12,7 @@ from .audit_log import AuditLogEntry
 from .automod import AutoModAction, AutoModRule, AutoModTriggerType
 from .channel import Channel, GuildChannel, StageInstance
 from .emoji import Emoji, PartialEmoji
+from .entitlement import Entitlement
 from .guild import Guild, UnavailableGuild
 from .guild_scheduled_event import GuildScheduledEvent
 from .integration import BaseIntegration
@@ -23,7 +24,7 @@ from .role import Role
 from .snowflake import Snowflake, SnowflakeList
 from .sticker import GuildSticker
 from .threads import Thread, ThreadMember, ThreadMemberWithPresence, ThreadType
-from .user import User
+from .user import AvatarDecorationData, User
 from .voice import GuildVoiceState, SupportedModes, VoiceChannelEffect
 
 
@@ -299,6 +300,7 @@ class _BaseReactionEvent(TypedDict):
 # https://discord.com/developers/docs/topics/gateway-events#message-reaction-add
 class MessageReactionAddEvent(_BaseReactionEvent):
     member: NotRequired[MemberWithUser]
+    message_author_id: NotRequired[Snowflake]
 
 
 # https://discord.com/developers/docs/topics/gateway-events#message-reaction-remove
@@ -439,6 +441,7 @@ class GuildMemberUpdateEvent(TypedDict):
     pending: NotRequired[bool]
     communication_disabled_until: NotRequired[Optional[str]]
     flags: int
+    avatar_decoration_data: NotRequired[Optional[AvatarDecorationData]]
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-emojis-update
@@ -631,3 +634,15 @@ class AutoModerationActionExecutionEvent(TypedDict):
     content: NotRequired[str]
     matched_content: NotRequired[Optional[str]]
     matched_keyword: NotRequired[Optional[str]]
+
+
+# https://discord.com/developers/docs/monetization/entitlements#new-entitlement
+EntitlementCreate = Entitlement
+
+
+# https://discord.com/developers/docs/monetization/entitlements#updated-entitlement
+EntitlementUpdate = Entitlement
+
+
+# https://discord.com/developers/docs/monetization/entitlements#deleted-entitlement
+EntitlementDelete = Entitlement

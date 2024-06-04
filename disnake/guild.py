@@ -10,6 +10,7 @@ from typing import (
     Any,
     ClassVar,
     Dict,
+    Iterable,
     List,
     Literal,
     NamedTuple,
@@ -27,10 +28,11 @@ from . import abc, utils
 from .app_commands import GuildApplicationCommandPermissions
 from .asset import Asset
 from .automod import AutoModAction, AutoModRule
-from .bans import BanEntry
+from .bans import BanEntry, BulkBanResult
 from .channel import (
     CategoryChannel,
     ForumChannel,
+    MediaChannel,
     StageChannel,
     TextChannel,
     VoiceChannel,
@@ -50,6 +52,7 @@ from .enums import (
     Locale,
     NotificationLevel,
     NSFWLevel,
+    ThreadLayout,
     ThreadSortOrder,
     VerificationLevel,
     VideoQualityMode,
@@ -66,6 +69,7 @@ from .invite import Invite
 from .iterators import AuditLogIterator, BanIterator, MemberIterator
 from .member import Member, VoiceState
 from .mixins import Hashable
+from .object import Object
 from .onboarding import Onboarding
 from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite
@@ -113,7 +117,9 @@ if TYPE_CHECKING:
     from .webhook import Webhook
 
     GuildMessageable = Union[TextChannel, Thread, VoiceChannel, StageChannel]
-    GuildChannel = Union[VoiceChannel, StageChannel, TextChannel, CategoryChannel, ForumChannel]
+    GuildChannel = Union[
+        VoiceChannel, StageChannel, TextChannel, CategoryChannel, ForumChannel, MediaChannel
+    ]
     ByCategoryItem = Tuple[Optional[CategoryChannel], List[GuildChannel]]
 
 
@@ -129,7 +135,7 @@ class Guild(Hashable):
 
     This is referred to as a "server" in the official Discord UI.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -697,6 +703,18 @@ class Guild(Hashable):
         return r
 
     @property
+    def media_channels(self) -> List[MediaChannel]:
+        """List[:class:`MediaChannel`]: A list of media channels that belong to this guild.
+
+        This is sorted by the position and are in UI order from top to bottom.
+
+        .. versionadded:: 2.10
+        """
+        r = [ch for ch in self._channels.values() if isinstance(ch, MediaChannel)]
+        r.sort(key=lambda c: (c.position, c.id))
+        return r
+
+    @property
     def me(self) -> Member:
         """:class:`Member`: Similar to :attr:`Client.user` except an instance of :class:`Member`.
         This is essentially used to get the member version of yourself.
@@ -1218,7 +1236,7 @@ class Guild(Hashable):
         name: str,
         *,
         reason: Optional[str] = None,
-        category: Optional[CategoryChannel] = None,
+        category: Optional[Snowflake] = None,
         position: int = MISSING,
         topic: Optional[str] = MISSING,
         slowmode_delay: int = MISSING,
@@ -1276,7 +1294,7 @@ class Guild(Hashable):
             A :class:`dict` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply upon creation of a channel.
             Useful for creating secret channels.
-        category: Optional[:class:`CategoryChannel`]
+        category: Optional[:class:`abc.Snowflake`]
             The category to place the newly created channel under.
             The permissions will be automatically synced to category if no
             overwrites are provided.
@@ -1372,7 +1390,7 @@ class Guild(Hashable):
         self,
         name: str,
         *,
-        category: Optional[CategoryChannel] = None,
+        category: Optional[Snowflake] = None,
         position: int = MISSING,
         bitrate: int = MISSING,
         user_limit: int = MISSING,
@@ -1398,7 +1416,7 @@ class Guild(Hashable):
             A :class:`dict` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply upon creation of a channel.
             Useful for creating secret channels.
-        category: Optional[:class:`CategoryChannel`]
+        category: Optional[:class:`abc.Snowflake`]
             The category to place the newly created channel under.
             The permissions will be automatically synced to category if no
             overwrites are provided.
@@ -1496,7 +1514,7 @@ class Guild(Hashable):
         rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
-        category: Optional[CategoryChannel] = None,
+        category: Optional[Snowflake] = None,
         nsfw: bool = MISSING,
         slowmode_delay: int = MISSING,
         reason: Optional[str] = None,
@@ -1524,7 +1542,7 @@ class Guild(Hashable):
             A :class:`dict` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply upon creation of a channel.
             Useful for creating secret channels.
-        category: Optional[:class:`CategoryChannel`]
+        category: Optional[:class:`abc.Snowflake`]
             The category to place the newly created channel under.
             The permissions will be automatically synced to category if no
             overwrites are provided.
@@ -1617,7 +1635,7 @@ class Guild(Hashable):
         name: str,
         *,
         topic: Optional[str] = None,
-        category: Optional[CategoryChannel] = None,
+        category: Optional[Snowflake] = None,
         position: int = MISSING,
         slowmode_delay: int = MISSING,
         default_thread_slowmode_delay: int = MISSING,
@@ -1627,6 +1645,7 @@ class Guild(Hashable):
         available_tags: Optional[Sequence[ForumTag]] = None,
         default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = None,
         default_sort_order: Optional[ThreadSortOrder] = None,
+        default_layout: Optional[ThreadLayout] = None,
         reason: Optional[str] = None,
     ) -> ForumChannel:
         """|coro|
@@ -1644,7 +1663,7 @@ class Guild(Hashable):
             The channel's name.
         topic: Optional[:class:`str`]
             The channel's topic.
-        category: Optional[:class:`CategoryChannel`]
+        category: Optional[:class:`abc.Snowflake`]
             The category to place the newly created channel under.
             The permissions will be automatically synced to category if no
             overwrites are provided.
@@ -1687,6 +1706,11 @@ class Guild(Hashable):
             The default sort order of threads in this channel.
 
             .. versionadded:: 2.6
+
+        default_layout: :class:`ThreadLayout`
+            The default layout of threads in this channel.
+
+            .. versionadded:: 2.10
 
         reason: Optional[:class:`str`]
             The reason for creating this channel. Shows up on the audit log.
@@ -1739,6 +1763,9 @@ class Guild(Hashable):
         if default_sort_order is not None:
             options["default_sort_order"] = try_enum_to_int(default_sort_order)
 
+        if default_layout is not None:
+            options["default_forum_layout"] = try_enum_to_int(default_layout)
+
         data = await self._create_channel(
             name,
             overwrites=overwrites,
@@ -1748,6 +1775,132 @@ class Guild(Hashable):
             **options,
         )
         channel = ForumChannel(state=self._state, guild=self, data=data)
+
+        # temporarily add to the cache
+        self._channels[channel.id] = channel
+        return channel
+
+    async def create_media_channel(
+        self,
+        name: str,
+        *,
+        topic: Optional[str] = None,
+        category: Optional[Snowflake] = None,
+        position: int = MISSING,
+        slowmode_delay: int = MISSING,
+        default_thread_slowmode_delay: int = MISSING,
+        default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = None,
+        nsfw: bool = MISSING,
+        overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
+        available_tags: Optional[Sequence[ForumTag]] = None,
+        default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        default_sort_order: Optional[ThreadSortOrder] = None,
+        reason: Optional[str] = None,
+    ) -> MediaChannel:
+        """|coro|
+
+        This is similar to :meth:`create_text_channel` except makes a :class:`MediaChannel` instead.
+
+        .. versionadded:: 2.10
+
+        Parameters
+        ----------
+        name: :class:`str`
+            The channel's name.
+        topic: Optional[:class:`str`]
+            The channel's topic.
+        category: Optional[:class:`abc.Snowflake`]
+            The category to place the newly created channel under.
+            The permissions will be automatically synced to category if no
+            overwrites are provided.
+        position: :class:`int`
+            The position in the channel list. This is a number that starts
+            at 0. e.g. the top channel is position 0.
+        slowmode_delay: :class:`int`
+            Specifies the slowmode rate limit at which users can create
+            threads in this channel, in seconds.
+            A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
+            If not provided, slowmode is disabled.
+        default_thread_slowmode_delay: :class:`int`
+            Specifies the slowmode rate limit at which users can send messages
+            in newly created threads in this channel, in seconds.
+            A value of ``0`` disables slowmode by default. The maximum value possible is ``21600``.
+            If not provided, slowmode is disabled.
+        default_auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
+            The default auto archive duration in minutes for threads created in this channel.
+            Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
+        nsfw: :class:`bool`
+            Whether to mark the channel as NSFW.
+        overwrites: Dict[Union[:class:`Role`, :class:`Member`], :class:`PermissionOverwrite`]
+            A :class:`dict` of target (either a role or a member) to
+            :class:`PermissionOverwrite` to apply upon creation of a channel.
+            Useful for creating secret channels.
+        available_tags: Optional[Sequence[:class:`ForumTag`]]
+            The tags available for threads in this channel.
+        default_reaction: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
+            The default emoji shown for reacting to threads.
+        default_sort_order: Optional[:class:`ThreadSortOrder`]
+            The default sort order of threads in this channel.
+        reason: Optional[:class:`str`]
+            The reason for creating this channel. Shows up on the audit log.
+
+        Raises
+        ------
+        Forbidden
+            You do not have the proper permissions to create this channel.
+        HTTPException
+            Creating the channel failed.
+        TypeError
+            The permission overwrite information is not in proper form.
+
+        Returns
+        -------
+        :class:`MediaChannel`
+            The channel that was just created.
+        """
+        options = {}
+        if position is not MISSING:
+            options["position"] = position
+
+        if topic is not MISSING:
+            options["topic"] = topic
+
+        if slowmode_delay is not MISSING:
+            options["rate_limit_per_user"] = slowmode_delay
+
+        if default_thread_slowmode_delay is not MISSING:
+            options["default_thread_rate_limit_per_user"] = default_thread_slowmode_delay
+
+        if nsfw is not MISSING:
+            options["nsfw"] = nsfw
+
+        if default_auto_archive_duration is not None:
+            options["default_auto_archive_duration"] = cast(
+                "ThreadArchiveDurationLiteral", try_enum_to_int(default_auto_archive_duration)
+            )
+
+        if available_tags is not None:
+            options["available_tags"] = [tag.to_dict() for tag in available_tags]
+
+        if default_reaction is not None:
+            emoji_name, emoji_id = PartialEmoji._emoji_to_name_id(default_reaction)
+            options["default_reaction_emoji"] = {
+                "emoji_name": emoji_name,
+                "emoji_id": emoji_id,
+            }
+
+        if default_sort_order is not None:
+            options["default_sort_order"] = try_enum_to_int(default_sort_order)
+
+        data = await self._create_channel(
+            name,
+            overwrites=overwrites,
+            channel_type=ChannelType.media,
+            category=category,
+            reason=reason,
+            **options,
+        )
+        channel = MediaChannel(state=self._state, guild=self, data=data)
 
         # temporarily add to the cache
         self._channels[channel.id] = channel
@@ -2377,7 +2530,7 @@ class Guild(Hashable):
 
         Creates a :class:`GuildScheduledEvent`.
 
-        You must have :attr:`.Permissions.manage_events` permission to do this.
+        You must have :attr:`~Permissions.manage_events` permission to do this.
 
         Based on the channel/entity type, there are different restrictions regarding
         other parameter values, as shown in this table:
@@ -2689,6 +2842,8 @@ class Guild(Hashable):
 
         Raises
         ------
+        NotFound
+            A member with this ID does not exist in the guild.
         Forbidden
             You do not have access to the guild.
         HTTPException
@@ -2848,8 +3003,8 @@ class Guild(Hashable):
         The inactive members are denoted if they have not logged on in
         ``days`` number of days and they have no roles.
 
-        You must have :attr:`~Permissions.kick_members` permission
-        to use this.
+        You must have the :attr:`~Permissions.manage_guild` and
+        :attr:`~Permissions.kick_members` permissions to use this.
 
         To check how many members you would prune without actually pruning,
         see the :meth:`estimate_pruned_members` function.
@@ -3124,10 +3279,6 @@ class Guild(Hashable):
 
         def convert(d):
             factory, _ = _integration_factory(d["type"])
-            if factory is None:
-                raise InvalidData(
-                    "Unknown integration type {type!r} for integration ID {id}".format_map(d)
-                )
             return factory(guild=self, data=d)
 
         return [convert(d) for d in data]
@@ -3266,7 +3417,7 @@ class Guild(Hashable):
         Raises
         ------
         Forbidden
-            You are not allowed to delete stickers.
+            You are not allowed to delete this sticker.
         HTTPException
             An error occurred deleting the sticker.
         """
@@ -3421,7 +3572,7 @@ class Guild(Hashable):
         Raises
         ------
         Forbidden
-            You are not allowed to delete emojis.
+            You are not allowed to delete this emoji.
         HTTPException
             An error occurred deleting the emoji.
         """
@@ -3466,10 +3617,12 @@ class Guild(Hashable):
     ) -> Optional[Member]:
         """|coro|
 
-        Tries to get a member from the cache with the given ID. If fails, it fetches
-        the member from the API and caches it.
+        Tries to get the member from the cache. If it fails,
+        fetches the member from the API and caches it.
 
         If you want to make a bulk get-or-fetch call, use :meth:`get_or_fetch_members`.
+
+        This only propagates exceptions when the ``strict`` parameter is enabled.
 
         Parameters
         ----------
@@ -3855,6 +4008,77 @@ class Guild(Hashable):
             Unbanning failed.
         """
         await self._state.http.unban(user.id, self.id, reason=reason)
+
+    async def bulk_ban(
+        self,
+        users: Iterable[Snowflake],
+        *,
+        clean_history_duration: Union[int, datetime.timedelta] = 0,
+        reason: Optional[str] = None,
+    ) -> BulkBanResult:
+        """|coro|
+
+        Bans multiple users from the guild at once.
+
+        The users must meet the :class:`abc.Snowflake` abc.
+
+        You must have :attr:`~Permissions.ban_members` and :attr:`~Permissions.manage_guild`
+        permissions to do this.
+
+        .. versionadded:: 2.10
+
+        Parameters
+        ----------
+        users: Iterable[:class:`abc.Snowflake`]
+            The users to ban from the guild, up to 200.
+        clean_history_duration: Union[:class:`int`, :class:`datetime.timedelta`]
+            The timespan (seconds or timedelta) of messages to delete from the users
+            in the guild, up to 7 days (604800 seconds).
+            Defaults to ``0``.
+
+            .. note::
+                This may not be accurate with small durations (e.g. a few minutes)
+                and delete a couple minutes' worth of messages more than specified.
+
+        reason: Optional[:class:`str`]
+            The reason for banning the users. Shows up on the audit log.
+
+        Raises
+        ------
+        TypeError
+            ``clean_history_duration`` has an invalid type.
+        Forbidden
+            You do not have the proper permissions to bulk ban.
+        HTTPException
+            Banning failed. This is also raised if none of the users could be banned.
+
+        Returns
+        -------
+        :class:`BulkBanResult`
+            An object containing the successful and failed bans.
+        """
+        if isinstance(clean_history_duration, datetime.timedelta):
+            delete_message_seconds = int(clean_history_duration.total_seconds())
+        elif isinstance(clean_history_duration, int):
+            delete_message_seconds = clean_history_duration
+        else:
+            raise TypeError(
+                "`clean_history_duration` should be int or timedelta, "
+                f"not {type(clean_history_duration).__name__}"
+            )
+
+        data = await self._state.http.bulk_ban(
+            [user.id for user in users],
+            self.id,
+            delete_message_seconds=delete_message_seconds,
+            reason=reason,
+        )
+
+        return BulkBanResult(
+            # these keys should always exist, but have a fallback just in case
+            [Object(u) for u in (data.get("banned_users") or [])],
+            [Object(u) for u in (data.get("failed_users") or [])],
+        )
 
     async def vanity_invite(self, *, use_cached: bool = False) -> Optional[Invite]:
         """|coro|

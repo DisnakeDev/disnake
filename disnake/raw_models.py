@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, List, Literal, Optional, Set, Union, cast
 
 from .channel import VoiceChannelEffect
 from .enums import ChannelType, try_enum
-from .utils import get_slots
+from .utils import _get_as_snowflake, get_slots
 
 if TYPE_CHECKING:
     from .member import Member
@@ -25,6 +25,7 @@ if TYPE_CHECKING:
         MessageReactionRemoveEmojiEvent,
         MessageReactionRemoveEvent,
         MessageUpdateEvent,
+        PresenceUpdateEvent,
         ThreadDeleteEvent,
         TypingStartEvent,
         VoiceChannelEffectSendEvent,
@@ -45,6 +46,7 @@ __all__ = (
     "RawThreadMemberRemoveEvent",
     "RawTypingEvent",
     "RawGuildMemberRemoveEvent",
+    "RawPresenceUpdateEvent",
     "RawVoiceChannelEffectEvent",
 )
 
@@ -172,7 +174,7 @@ class RawReactionActionEvent(_RawReprMixin):
             This now also includes the correct :attr:`~PartialEmoji.animated` value when a reaction was removed.
 
     member: Optional[:class:`Member`]
-        The member who added the reaction. Only available if `event_type` is `REACTION_ADD` and the reaction is inside a guild.
+        The member who added the reaction. Only available if :attr:`event_type` is ``REACTION_ADD`` and the reaction is inside a guild.
 
         .. versionadded:: 1.3
 
@@ -182,9 +184,25 @@ class RawReactionActionEvent(_RawReprMixin):
         ``REACTION_REMOVE`` for reaction removal.
 
         .. versionadded:: 1.3
+
+    message_author_id: Optional[:class:`int`]
+        The ID of the author who created the message that got a reaction.
+        Only available if :attr:`event_type` is ``REACTION_ADD``.
+        May also be ``None`` if the message was created by a webhook.
+
+        .. versionadded:: 2.10
     """
 
-    __slots__ = ("message_id", "user_id", "channel_id", "guild_id", "emoji", "event_type", "member")
+    __slots__ = (
+        "message_id",
+        "user_id",
+        "channel_id",
+        "guild_id",
+        "emoji",
+        "event_type",
+        "member",
+        "message_author_id",
+    )
 
     def __init__(
         self,
@@ -202,6 +220,7 @@ class RawReactionActionEvent(_RawReprMixin):
             self.guild_id: Optional[int] = int(data["guild_id"])
         except KeyError:
             self.guild_id: Optional[int] = None
+        self.message_author_id: Optional[int] = _get_as_snowflake(data, "message_author_id")
 
 
 class RawReactionClearEvent(_RawReprMixin):
@@ -432,6 +451,33 @@ class RawGuildMemberRemoveEvent(_RawReprMixin):
     def __init__(self, user: Union[User, Member], guild_id: int) -> None:
         self.user: Union[User, Member] = user
         self.guild_id: int = guild_id
+
+
+class RawPresenceUpdateEvent(_RawReprMixin):
+    """Represents the event payload for an :func:`on_raw_presence_update` event.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    user_id: :class:`int`
+        The ID of the user whose presence was updated.
+    guild_id: :class:`int`
+        The ID of the guild where the user's presence changed.
+    data: :class:`dict`
+        The raw data given by the :ddocs:`gateway <topics/gateway-events#presence-update>`.
+    """
+
+    __slots__ = (
+        "user_id",
+        "guild_id",
+        "data",
+    )
+
+    def __init__(self, data: PresenceUpdateEvent) -> None:
+        self.user_id: int = int(data["user"]["id"])
+        self.guild_id: int = int(data["guild_id"])
+        self.data: PresenceUpdateEvent = data
 
 
 class RawVoiceChannelEffectEvent(_RawReprMixin):

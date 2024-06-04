@@ -10,7 +10,7 @@ from ..guild import Guild
 from ..member import Member
 from ..message import Message
 from ..user import User
-from .base import Interaction, InteractionDataResolved
+from .base import ClientT, Interaction, InteractionDataResolved
 
 __all__ = (
     "ApplicationCommandInteraction",
@@ -41,7 +41,7 @@ if TYPE_CHECKING:
     )
 
 
-class ApplicationCommandInteraction(Interaction):
+class ApplicationCommandInteraction(Interaction[ClientT]):
     """Represents an interaction with an application command.
 
     Current examples are slash commands, user commands and message commands.
@@ -82,10 +82,16 @@ class ApplicationCommandInteraction(Interaction):
 
     token: :class:`str`
         The token to continue the interaction. These are valid for 15 minutes.
-    data: :class:`ApplicationCommandInteractionData`
-        The wrapped interaction data.
     client: :class:`Client`
         The interaction client.
+    entitlements: List[:class:`Entitlement`]
+        The entitlements for the invoking user and guild,
+        representing access to an application subscription.
+
+        .. versionadded:: 2.10
+
+    data: :class:`ApplicationCommandInteractionData`
+        The wrapped interaction data.
     application_command: :class:`.InvokableApplicationCommand`
         The command invoked by the interaction.
     command_failed: :class:`bool`
@@ -119,7 +125,7 @@ class ApplicationCommandInteraction(Interaction):
         return kwargs
 
 
-class GuildCommandInteraction(ApplicationCommandInteraction):
+class GuildCommandInteraction(ApplicationCommandInteraction[ClientT]):
     """An :class:`ApplicationCommandInteraction` subclass, primarily meant for annotations.
 
     This prevents the command from being invoked in DMs by automatically setting
@@ -137,7 +143,7 @@ class GuildCommandInteraction(ApplicationCommandInteraction):
     me: Member
 
 
-class UserCommandInteraction(ApplicationCommandInteraction):
+class UserCommandInteraction(ApplicationCommandInteraction[ClientT]):
     """An :class:`ApplicationCommandInteraction` subclass meant for annotations.
 
     No runtime behavior is changed but annotations are modified
@@ -147,7 +153,7 @@ class UserCommandInteraction(ApplicationCommandInteraction):
     target: Union[User, Member]
 
 
-class MessageCommandInteraction(ApplicationCommandInteraction):
+class MessageCommandInteraction(ApplicationCommandInteraction[ClientT]):
     """An :class:`ApplicationCommandInteraction` subclass meant for annotations.
 
     No runtime behavior is changed but annotations are modified

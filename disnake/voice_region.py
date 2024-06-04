@@ -14,7 +14,7 @@ __all__ = ("VoiceRegion",)
 class VoiceRegion:
     """Represents a Discord voice region.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 

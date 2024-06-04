@@ -27,6 +27,7 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Internet",
     "Topic :: Software Development :: Libraries",
     "Topic :: Software Development :: Libraries :: Python Modules",
@@ -70,35 +71,41 @@ tools = [
     "pre-commit~=3.0",
     "slotscheck~=0.16.4",
     "python-dotenv~=1.0.0",
-    "towncrier==23.6.0",
     "check-manifest==0.49",
-    "ruff==0.0.261",
+    "ruff==0.3.4",
+]
+changelog = [
+    "towncrier==23.6.0",
 ]
 codemod = [
     # run codemods on the respository (mostly automated typing)
-    "libcst~=0.4.9",
-    "black==23.1.0",
+    "libcst~=1.1.0",
+    "black==23.9.1",
     "autotyping==23.2.0",
 ]
 typing = [
     # this is not pyright itself, but the python wrapper
-    "pyright==1.1.291",
-    "typing-extensions~=4.5.0",
+    "pyright==1.1.336",
+    "typing-extensions~=4.8.0",
     # only used for type-checking, version does not matter
     "pytz",
 ]
 test = [
-    "pytest~=7.2.1",
+    "pytest~=7.4.2",
     "pytest-cov~=4.0.0",
     "pytest-asyncio~=0.20.3",
     "looptime~=0.2",
     "coverage[toml]~=6.5.0",
 ]
+build = [
+    "wheel~=0.40.0",
+    "build~=0.10.0",
+    "twine~=4.0.2",
+]
 
 [tool.pdm.scripts]
 black = { composite = ["lint black"], help = "Run black" }
 docs = { cmd = "nox -Rs docs --", help = "Build the documentation for development" }
-isort = { composite = ["lint isort"], help = "Run isort" }
 lint = { cmd = "nox -Rs lint --", help = "Check all files for linting errors" }
 pyright = { cmd = "nox -Rs pyright --", help = "Run pyright" }
 setup_env = { cmd = "pdm install -d -G speed -G docs -G voice", help = "Set up the local environment and all dependencies" }
@@ -109,7 +116,6 @@ test = { cmd = "nox -Rs test --", help = "Run pytest" }
 [tool.taskipy.tasks]
 black = { cmd = "black", help = "Run black" }
 docs = { cmd = "docs", help = "Build the documentation for development" }
-isort = { cmd = "isort", help = "Run isort" }
 lint = { cmd = "lint", help = "Check all files for linting errors" }
 pyright = { cmd = "pyright", help = "Run pyright" }
 setup_env = { cmd = "setup_env", help = "Setup the local environment and set up all dependencies" }
@@ -120,18 +126,13 @@ runner = "pdm run"
 
 [tool.black]
 line-length = 100
-target-version = ["py38", "py39", "py310", "py311"]
-
-[tool.isort]
-profile = "black"
-py_version = 38
-line_length = 100
-combine_as_imports = true
-filter_files = true
+target-version = ["py38", "py39", "py310", "py311", "py312"]
 
 [tool.ruff]
 line-length = 100
 target-version = "py38"
+
+[tool.ruff.lint]
 select = [
     # commented out codes are intended to be enabled in future prs
     "F", # pyflakes
@@ -149,7 +150,7 @@ select = [
     # "RET", # flake8-return
     # "SIM", # flake8-simplify
     "TID251", # flake8-tidy-imports, replaces S404
-    # "TCH", # flake8-type-checking
+    "TCH",    # flake8-type-checking
     "RUF",    # ruff specific exceptions
     "PT",     # flake8-pytest-style
     "Q",      # flake8-quotes
@@ -161,6 +162,7 @@ select = [
     # "PLR",    # pylint refactor
     "PLW",    # pylint warnings
     "TRY002", "TRY004", "TRY201", # tryceratops
+    "I", # isort
 ]
 ignore = [
     # star imports
@@ -177,18 +179,36 @@ ignore = [
     "RUF005", # might not be actually faster
     "RUF006", # might not be an issue/very extreme cases
 
+    # calling subprocess with dynamic arguments is generally fine, the only way to avoid this is ignoring it
+    "S603",
+
+    # partial executable paths (i.e. "git" instead of "/usr/bin/git") are fine
+    "S607",
+
     # ignore try-except-pass. Bare excepts are caught with E722
     "S110",
 
     # provide specific codes on type: ignore
     "PGH003",
 
-    # import aliases are fixed by isort
-    "PLC0414",
+    # typevar names don't match variance (we don't always want this)
+    "PLC0105",
 
+    # import aliases are fixed by ruff
+    "PLC0414",
 
     # outer loop variables are overwritten by inner assignment target, these are mostly intentional
     "PLW2901",
+
+    # ignore imports that could be moved into type-checking blocks
+    # (no real advantage other than possibly avoiding cycles,
+    # but can be dangerous in places where we need to parse signatures)
+    "TCH001",
+    "TCH002",
+    "TCH003",
+
+    "S311",    # insecure RNG usage, we don't use these for security-related things
+    "PLE0237", # pyright seems to catch this already
 
     # temporary disables, to fix later
     "D205",   # blank line required between summary and description
@@ -201,7 +221,7 @@ ignore = [
     "T201",   # print statements
 ]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "disnake/__main__.py" = ["T201"] # print statements are okay in our simple cli
 "disnake/i18n.py" = [
     "B027", # lib bug. Excluded here because ruff does not have a --disable-noqa flag yet
@@ -216,6 +236,7 @@ ignore = [
     "PT",   # this is not a module of pytest tests
 ]
 "tests/*.py" = ["S101"] # use of assert is okay in test files
+"scripts/*.py" = ["S101"] # use of assert is okay in scripts
 # we are not using noqa in the example files themselves
 "examples/*.py" = [
     "B008", # do not perform function calls in argument defaults, this is how most commands work
@@ -226,11 +247,17 @@ ignore = [
 "examples/basic_voice.py" = ["S104"] # possible binding to all interfaces
 "examples/views/tic_tac_toe.py" = ["E741"] # ambigious variable name: `O`
 
-[tool.ruff.flake8-pytest-style]
+[tool.ruff.lint.isort]
+combine-as-imports = true
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.ruff.lint.flake8-pytest-style]
 fixture-parentheses = false
 mark-parentheses = false
 
-[tool.ruff.flake8-tidy-imports.banned-api]
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
 "subprocess".msg = "Consider possible security implications associated with the subprocess module." # replaces S404
 
 [tool.towncrier]
@@ -362,6 +389,7 @@ ignore = [
     "noxfile.py",
     # docs
     "CONTRIBUTING.md",
+    "RELEASE.md",
     "assets/**",
     "changelog/**",
     "docs/**",

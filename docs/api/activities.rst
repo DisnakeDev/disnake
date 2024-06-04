@@ -66,6 +66,7 @@ CustomActivity
 .. autoclass:: CustomActivity
     :members:
     :inherited-members:
+    :exclude-members: large_image_url, large_image_text, small_image_url, small_image_text
 
 Enumerations
 ------------
@@ -139,3 +140,4 @@ Events
 ------
 
 - :func:`on_presence_update(before, after) <disnake.on_presence_update>`
+- :func:`on_raw_presence_update(payload) <disnake.on_raw_presence_update>`
