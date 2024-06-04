@@ -101,9 +101,42 @@ VoiceRegion
 .. autoclass:: VoiceRegion()
     :members:
 
+VoiceChannelEffect
+~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: VoiceChannelEffect
+
+.. autoclass:: VoiceChannelEffect()
+    :members:
+
+RawVoiceChannelEffectEvent
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: RawVoiceChannelEffectEvent
+
+.. autoclass:: RawVoiceChannelEffectEvent()
+    :members:
+
 
 Enumerations
 ------------
+
+VoiceChannelEffectAnimationType
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. class:: VoiceChannelEffectAnimationType
+
+    The type of an emoji reaction effect animation in a voice channel.
+
+    .. versionadded:: 2.10
+
+    .. attribute:: premium
+
+        A fun animation, sent by a Nitro subscriber.
+
+    .. attribute:: basic
+
+        A standard animation.
 
 PartyType
 ~~~~~~~~~
@@ -168,3 +201,5 @@ Events
 ------
 
 - :func:`on_voice_state_update(member, before, after) <disnake.on_voice_state_update>`
+- :func:`on_voice_channel_effect(channel, member, effect) <disnake.on_voice_channel_effect>`
+- :func:`on_raw_voice_channel_effect(payload) <disnake.on_raw_voice_channel_effect>`
