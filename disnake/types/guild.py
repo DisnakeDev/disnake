@@ -61,6 +61,7 @@ GuildFeature = Literal[
     "MEMBER_PROFILES",  # not sure what this does, if anything
     "MEMBER_VERIFICATION_GATE_ENABLED",
     "MORE_EMOJI",
+    "MORE_SOUNDBOARD",
     "MORE_STICKERS",
     "NEWS",
     "NEW_THREAD_PERMISSIONS",  # deprecated

@@ -234,6 +234,7 @@ class Guild(Hashable):
         - ``LINKED_TO_HUB``: Guild is linked to a student hub.
         - ``MEMBER_VERIFICATION_GATE_ENABLED``: Guild has Membership Screening enabled.
         - ``MORE_EMOJI``: Guild has increased custom emoji slots.
+        - ``MORE_SOUNDBOARD``: Guild has increased custom soundboard slots.
         - ``MORE_STICKERS``: Guild has increased custom sticker slots.
         - ``NEWS``: Guild can create news channels.
         - ``NEW_THREAD_PERMISSIONS``: Guild is using the new thread permission system.
@@ -935,7 +936,8 @@ class Guild(Hashable):
 
         .. versionadded:: 2.10
         """
-        return self._PREMIUM_GUILD_LIMITS[self.premium_tier].sounds
+        more_soundboard = 96 if "MORE_SOUNDBOARD" in self.features else 0
+        return max(more_soundboard, self._PREMIUM_GUILD_LIMITS[self.premium_tier].sounds)
 
     @property
     def members(self) -> List[Member]:
