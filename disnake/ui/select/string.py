@@ -10,7 +10,6 @@ from typing import (
     List,
     Optional,
     Tuple,
-    Type,
     TypeVar,
     Union,
     overload,
@@ -26,7 +25,7 @@ if TYPE_CHECKING:
 
     from ...emoji import Emoji
     from ...partial_emoji import PartialEmoji
-    from ..item import DecoratedItem, ItemCallbackType, ItemShape
+    from ..item import DecoratedItem, ItemCallbackType
 
 
 __all__ = (
@@ -262,13 +261,13 @@ def string_select(
 
 @overload
 def string_select(
-    cls: Type[ItemShape[S_co, P]], *_: P.args, **kwargs: P.kwargs
+    cls: Callable[P, S_co], *_: P.args, **kwargs: P.kwargs
 ) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
     ...
 
 
 def string_select(
-    cls: Type[ItemShape[S_co, ...]] = StringSelect[Any], **kwargs: Any
+    cls: Callable[..., S_co] = StringSelect[Any], **kwargs: Any
 ) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
     """A decorator that attaches a string select menu to a component.
 

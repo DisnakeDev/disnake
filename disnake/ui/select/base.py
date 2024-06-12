@@ -21,7 +21,7 @@ from typing import (
 from ...components import AnySelectMenu
 from ...enums import ComponentType
 from ...utils import MISSING
-from ..item import DecoratedItem, Item, ItemShape
+from ..item import DecoratedItem, Item
 
 __all__ = ("BaseSelect",)
 
@@ -173,7 +173,7 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
 
 
 def _create_decorator(
-    cls: Type[ItemShape[S_co, P]],
+    cls: Callable[P, S_co],
     # only for input validation
     base_cls: Type[BaseSelect[Any, Any, Any]],
     /,

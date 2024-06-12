@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, Optional, Type, TypeVar, overload
+from typing import TYPE_CHECKING, Any, Callable, Optional, TypeVar, overload
 
 from ...components import RoleSelectMenu
 from ...enums import ComponentType
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from ...role import Role
-    from ..item import DecoratedItem, ItemCallbackType, ItemShape
+    from ..item import DecoratedItem, ItemCallbackType
 
 
 __all__ = (
@@ -136,13 +136,13 @@ def role_select(
 
 @overload
 def role_select(
-    cls: Type[ItemShape[S_co, P]], *_: P.args, **kwargs: P.kwargs
+    cls: Callable[P, S_co], *_: P.args, **kwargs: P.kwargs
 ) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
     ...
 
 
 def role_select(
-    cls: Type[ItemShape[S_co, ...]] = RoleSelect[Any], **kwargs: Any
+    cls: Callable[..., S_co] = RoleSelect[Any], **kwargs: Any
 ) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
     """A decorator that attaches a role select menu to a component.
 

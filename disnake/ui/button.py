@@ -10,7 +10,6 @@ from typing import (
     Callable,
     Optional,
     Tuple,
-    Type,
     TypeVar,
     Union,
     get_origin,
@@ -21,7 +20,7 @@ from ..components import Button as ButtonComponent
 from ..enums import ButtonStyle, ComponentType
 from ..partial_emoji import PartialEmoji, _EmojiTag
 from ..utils import MISSING
-from .item import DecoratedItem, Item, ItemShape
+from .item import DecoratedItem, Item
 
 __all__ = (
     "Button",
@@ -269,13 +268,13 @@ def button(
 
 @overload
 def button(
-    cls: Type[ItemShape[B_co, P]], *_: P.args, **kwargs: P.kwargs
+    cls: Callable[P, B_co], *_: P.args, **kwargs: P.kwargs
 ) -> Callable[[ItemCallbackType[V_co, B_co]], DecoratedItem[B_co]]:
     ...
 
 
 def button(
-    cls: Type[ItemShape[B_co, ...]] = Button[Any], **kwargs: Any
+    cls: Callable[..., B_co] = Button[Any], **kwargs: Any
 ) -> Callable[[ItemCallbackType[V_co, B_co]], DecoratedItem[B_co]]:
     """A decorator that attaches a button to a component.
 

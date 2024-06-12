@@ -23,7 +23,7 @@ I = TypeVar("I", bound="Item[Any]")
 V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
 
 if TYPE_CHECKING:
-    from typing_extensions import ParamSpec, Self
+    from typing_extensions import Self
 
     from ..client import Client
     from ..components import NestedComponent
@@ -174,16 +174,4 @@ class DecoratedItem(Protocol[I]):
 
     @overload
     def __get__(self, obj: Any, objtype: Any) -> I:
-        ...
-
-
-T_co = TypeVar("T_co", covariant=True)
-P = ParamSpec("P")
-
-
-class ItemShape(Protocol[T_co, P]):
-    def __new__(cls) -> T_co:
-        ...
-
-    def __init__(self, *args: P.args, **kwargs: P.kwargs) -> None:
         ...
