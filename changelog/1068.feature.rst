@@ -1,0 +1,7 @@
+Implement soundboard features.
+- Sound models: :class:`PartialSoundboardSound`, :class:`SoundboardSound`, :class:`GuildSoundboardSound`.
+- Managing sounds:
+    - Fetch soundboard sounds using :meth:`Client.fetch_default_soundboard_sounds` and :meth:`Guild.soundboard_sounds`.
+    - New sounds can be created with :meth:`Guild.create_soundboard_sound`.
+- New attributes: :attr:`Guild.soundboard_limit`, :attr:`VoiceChannelEffect.sound`
+- New events: :attr:`~Event.soundboard_sound_create`, :attr:`~Event.raw_soundboard_sound_update`, :attr:`~Event.raw_soundboard_sound_delete`

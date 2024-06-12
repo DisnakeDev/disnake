@@ -22,6 +22,7 @@ from .member import MemberWithUser
 from .message import Message
 from .role import Role
 from .snowflake import Snowflake, SnowflakeList
+from .soundboard import GuildSoundboardSound
 from .sticker import GuildSticker
 from .threads import Thread, ThreadMember, ThreadMemberWithPresence, ThreadType
 from .user import AvatarDecorationData, User
@@ -151,6 +152,18 @@ class RequestMembersData(TypedDict):
 class RequestMembersCommand(TypedDict):
     op: Literal[8]
     d: RequestMembersData
+
+
+# opcode 31
+
+
+class RequestSoundboardData(TypedDict):
+    guild_ids: List[int]
+
+
+class RequestSoundboardCommand(TypedDict):
+    op: Literal[31]
+    d: RequestSoundboardData
 
 
 #####
@@ -646,3 +659,23 @@ EntitlementUpdate = Entitlement
 
 # https://discord.com/developers/docs/monetization/entitlements#deleted-entitlement
 EntitlementDelete = Entitlement
+
+
+# https://discord.com/developers/docs/topics/gateway-events#guild-soundboard-sound-create
+GuildSoundboardSoundCreate = GuildSoundboardSound
+
+
+# https://discord.com/developers/docs/topics/gateway-events#guild-soundboard-sound-update
+GuildSoundboardSoundUpdate = GuildSoundboardSound
+
+
+# https://discord.com/developers/docs/topics/gateway-events#guild-soundboard-sound-delete
+class GuildSoundboardSoundDelete(TypedDict):
+    guild_id: Snowflake
+    sound_id: Snowflake
+
+
+# https://discord.com/developers/docs/topics/gateway-events#soundboard-sounds
+class SoundboardSoundsEvent(TypedDict):
+    guild_id: Snowflake
+    soundboard_sounds: List[GuildSoundboardSound]

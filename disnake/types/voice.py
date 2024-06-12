@@ -63,3 +63,6 @@ class VoiceChannelEffect(TypedDict, total=False):
     emoji: Optional[PartialEmoji]
     animation_type: VoiceChannelEffectAnimationType
     animation_id: int
+    sound_id: Snowflake
+    sound_override_path: Optional[str]
+    sound_volume: float

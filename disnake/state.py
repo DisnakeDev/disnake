@@ -18,6 +18,7 @@ from typing import (
     Coroutine,
     Deque,
     Dict,
+    Generic,
     List,
     Literal,
     Optional,
@@ -74,12 +75,14 @@ from .raw_models import (
     RawReactionActionEvent,
     RawReactionClearEmojiEvent,
     RawReactionClearEvent,
+    RawSoundboardSoundDeleteEvent,
     RawThreadDeleteEvent,
     RawThreadMemberRemoveEvent,
     RawTypingEvent,
     RawVoiceChannelEffectEvent,
 )
 from .role import Role
+from .soundboard import GuildSoundboardSound
 from .stage_instance import StageInstance
 from .sticker import GuildSticker
 from .threads import Thread, ThreadMember
@@ -107,12 +110,38 @@ if TYPE_CHECKING:
     from .types.webhook import Webhook as WebhookPayload
     from .voice_client import VoiceProtocol
 
-    T = TypeVar("T")
     Channel = Union[GuildChannel, VocalGuildChannel, PrivateChannel]
     PartialChannel = Union[Channel, PartialMessageable]
 
+T = TypeVar("T")
 
-class ChunkRequest:
+
+class AsyncRequest(Generic[T]):
+    def __init__(self, guild_id: int, loop: asyncio.AbstractEventLoop) -> None:
+        self.guild_id: int = guild_id
+        self.loop: asyncio.AbstractEventLoop = loop
+        self.waiters: List[asyncio.Future[T]] = []
+
+    async def wait(self) -> T:
+        future: asyncio.Future[T] = self.loop.create_future()
+        self.waiters.append(future)
+        try:
+            return await future
+        finally:
+            self.waiters.remove(future)
+
+    def get_future(self) -> asyncio.Future[T]:
+        future: asyncio.Future[T] = self.loop.create_future()
+        self.waiters.append(future)
+        return future
+
+    def set_result(self, result: T) -> None:
+        for future in self.waiters:
+            if not future.done():
+                future.set_result(result)
+
+
+class ChunkRequest(AsyncRequest[List[Member]]):
     def __init__(
         self,
         guild_id: int,
@@ -121,13 +150,11 @@ class ChunkRequest:
         *,
         cache: bool = True,
     ) -> None:
-        self.guild_id: int = guild_id
+        super().__init__(guild_id=guild_id, loop=loop)
         self.resolver: Callable[[int], Any] = resolver
-        self.loop: asyncio.AbstractEventLoop = loop
         self.cache: bool = cache
         self.nonce: str = os.urandom(16).hex()
         self.buffer: List[Member] = []
-        self.waiters: List[asyncio.Future[List[Member]]] = []
 
     def add_members(self, members: List[Member]) -> None:
         self.buffer.extend(members)
@@ -141,23 +168,11 @@ class ChunkRequest:
                 if existing is None or existing.joined_at is None:
                     guild._add_member(member)
 
-    async def wait(self) -> List[Member]:
-        future = self.loop.create_future()
-        self.waiters.append(future)
-        try:
-            return await future
-        finally:
-            self.waiters.remove(future)
-
-    def get_future(self) -> asyncio.Future[List[Member]]:
-        future = self.loop.create_future()
-        self.waiters.append(future)
-        return future
-
     def done(self) -> None:
-        for future in self.waiters:
-            if not future.done():
-                future.set_result(self.buffer)
+        self.set_result(self.buffer)
+
+
+SoundboardRequest = AsyncRequest[List[GuildSoundboardSound]]
 
 
 _log = logging.getLogger(__name__)
@@ -228,6 +243,7 @@ class ConnectionState:
 
         self.allowed_mentions: Optional[AllowedMentions] = allowed_mentions
         self._chunk_requests: Dict[Union[int, str], ChunkRequest] = {}
+        self._soundboard_requests: Dict[int, SoundboardRequest] = {}
 
         if activity:
             if not isinstance(activity, BaseActivity):
@@ -332,6 +348,13 @@ class ConnectionState:
 
         for key in removed:
             del self._chunk_requests[key]
+
+    def process_soundboard_requests(
+        self, guild_id: int, sounds: List[GuildSoundboardSound]
+    ) -> None:
+        if request := self._soundboard_requests.get(guild_id):
+            request.set_result(sounds)
+            del self._soundboard_requests[guild_id]
 
     def call_handlers(self, key: str, *args: Any, **kwargs: Any) -> None:
         try:
@@ -1358,6 +1381,23 @@ class ConnectionState:
         guild.stickers = tuple(self.store_sticker(guild, d) for d in data["stickers"])
         self.dispatch("guild_stickers_update", guild, before_stickers, guild.stickers)
 
+    # n.b. we only support single guilds even though the gw request takes multiple,
+    # since handling multiple guilds in one request becomes complicated, especially with sharding
+    async def request_soundboard(self, guild: Guild) -> List[GuildSoundboardSound]:
+        request = self._soundboard_requests.get(guild.id)
+        if request is None:
+            self._soundboard_requests[guild.id] = request = SoundboardRequest(
+                guild.id, loop=self.loop
+            )
+            ws = self._get_websocket(guild.id)
+            await ws.request_soundboard([guild.id])
+
+        try:
+            return await asyncio.wait_for(request.wait(), timeout=30.0)
+        except asyncio.TimeoutError:
+            _log.warning("Timed out waiting for soundboard sounds for guild_id %d", guild.id)
+            raise
+
     def _get_create_guild(self, data: gateway.GuildCreateEvent) -> Guild:
         if data.get("unavailable") is False:
             # GUILD_CREATE with unavailable in the response
@@ -1814,6 +1854,8 @@ class ConnectionState:
             )
 
         raw = RawVoiceChannelEffectEvent(data, emoji)
+        if raw.effect.sound:
+            raw.effect.sound._state = self  # attach state to asset
 
         # TODO: narrow channel type to VoiceChannel?
         channel = guild.get_channel(raw.channel_id)
@@ -1945,6 +1987,54 @@ class ConnectionState:
     def parse_entitlement_delete(self, data: gateway.EntitlementDelete) -> None:
         entitlement = Entitlement(data=data, state=self)
         self.dispatch("entitlement_delete", entitlement)
+
+
+    def parse_guild_soundboard_sound_create(self, data: gateway.GuildSoundboardSoundCreate) -> None:
+        guild_id = utils._get_as_snowflake(data, "guild_id")
+        guild = self._get_guild(guild_id)
+        if guild is None:
+            _log.debug(
+                "GUILD_SOUNDBOARD_SOUND_CREATE referencing unknown guild ID: %s. Discarding.",
+                guild_id,
+            )
+            return
+
+        sound = GuildSoundboardSound(data=data, state=self, guild_id=guild.id)
+        self.dispatch("soundboard_sound_create", sound)
+
+    def parse_guild_soundboard_sound_update(self, data: gateway.GuildSoundboardSoundUpdate) -> None:
+        guild_id = utils._get_as_snowflake(data, "guild_id")
+        guild = self._get_guild(guild_id)
+        if guild is None:
+            _log.debug(
+                "GUILD_SOUNDBOARD_SOUND_UPDATE referencing unknown guild ID: %s. Discarding.",
+                guild_id,
+            )
+            return
+
+        sound = GuildSoundboardSound(data=data, state=self, guild_id=guild.id)
+        self.dispatch("raw_soundboard_sound_update", sound)
+
+    def parse_guild_soundboard_sound_delete(self, data: gateway.GuildSoundboardSoundDelete) -> None:
+        guild = self._get_guild(int(data["guild_id"]))
+        if guild is None:
+            _log.debug(
+                "GUILD_SOUNDBOARD_SOUND_UPDATE referencing unknown guild ID: %s. Discarding.",
+                data["guild_id"],
+            )
+            return
+
+        sound_id = int(data["sound_id"])
+        raw = RawSoundboardSoundDeleteEvent(guild_id=guild.id, sound_id=sound_id)
+        self.dispatch("raw_soundboard_sound_delete", raw)
+
+    def parse_soundboard_sounds(self, data: gateway.SoundboardSoundsEvent) -> None:
+        guild_id = int(data["guild_id"])
+        sounds = [
+            GuildSoundboardSound(data=d, state=self, guild_id=guild_id)
+            for d in data["soundboard_sounds"]
+        ]
+        self.process_soundboard_requests(guild_id, sounds)
 
     def _get_reaction_user(
         self, channel: MessageableChannel, user_id: int
