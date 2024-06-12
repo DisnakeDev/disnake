@@ -296,8 +296,7 @@ class AutoModTriggerMetadata:
         keyword_filter: Optional[Sequence[str]],
         regex_patterns: Optional[Sequence[str]] = None,
         allow_list: Optional[Sequence[str]] = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     def __init__(
@@ -306,8 +305,7 @@ class AutoModTriggerMetadata:
         keyword_filter: Optional[Sequence[str]] = None,
         regex_patterns: Optional[Sequence[str]],
         allow_list: Optional[Sequence[str]] = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     def __init__(
@@ -315,14 +313,12 @@ class AutoModTriggerMetadata:
         *,
         presets: AutoModKeywordPresets,
         allow_list: Optional[Sequence[str]] = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     def __init__(
         self, *, mention_total_limit: int, mention_raid_protection_enabled: bool = False
-    ) -> None:
-        ...
+    ) -> None: ...
 
     def __init__(
         self,

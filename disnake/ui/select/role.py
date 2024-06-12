@@ -69,8 +69,7 @@ class RoleSelect(BaseSelect[RoleSelectMenu, "Role", V_co]):
         max_values: int = 1,
         disabled: bool = False,
         row: Optional[int] = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     def __init__(
@@ -82,8 +81,7 @@ class RoleSelect(BaseSelect[RoleSelectMenu, "Role", V_co]):
         max_values: int = 1,
         disabled: bool = False,
         row: Optional[int] = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     def __init__(
         self,
@@ -130,15 +128,13 @@ def role_select(
     max_values: int = 1,
     disabled: bool = False,
     row: Optional[int] = None,
-) -> Callable[[ItemCallbackType[RoleSelect[V_co]]], DecoratedItem[RoleSelect[V_co]]]:
-    ...
+) -> Callable[[ItemCallbackType[RoleSelect[V_co]]], DecoratedItem[RoleSelect[V_co]]]: ...
 
 
 @overload
 def role_select(
     cls: Type[Object[S_co, P]], *_: P.args, **kwargs: P.kwargs
-) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
-    ...
+) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]: ...
 
 
 def role_select(

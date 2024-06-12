@@ -13,8 +13,7 @@ class TestLoops:
     def test_decorator(self) -> None:
         class Cog(commands.Cog):
             @loop(seconds=30, minutes=0, hours=0)
-            async def task(self) -> None:
-                ...
+            async def task(self) -> None: ...
 
         for c in (Cog, Cog()):
             assert c.task.seconds == 30
@@ -22,8 +21,7 @@ class TestLoops:
         with pytest.raises(TypeError, match="must be a coroutine"):
 
             @loop()  # type: ignore
-            def task() -> None:
-                ...
+            def task() -> None: ...
 
     def test_mixing_time(self) -> None:
         async def callback() -> None:
@@ -35,8 +33,7 @@ class TestLoops:
         with pytest.raises(TypeError):
 
             @loop(seconds=30, time=datetime.time())
-            async def task() -> None:
-                ...
+            async def task() -> None: ...
 
     def test_inheritance(self) -> None:
         class HyperLoop(Loop[LF]):
@@ -57,8 +54,7 @@ class TestLoops:
                 return instance
 
         class WhileTrueLoop:
-            def __init__(self, coro: Any) -> None:
-                ...
+            def __init__(self, coro: Any) -> None: ...
 
         async def callback() -> None:
             pass
@@ -67,8 +63,7 @@ class TestLoops:
 
         class Cog(commands.Cog):
             @loop(cls=HyperLoop[Any], time_tup=(1, 2, 3))
-            async def task(self) -> None:
-                ...
+            async def task(self) -> None: ...
 
         for c in (Cog, Cog()):
             assert (c.task.seconds, c.task.minutes, c.task.hours) == (1, 2, 3)
@@ -76,5 +71,4 @@ class TestLoops:
         with pytest.raises(TypeError, match="subclass of Loop"):
 
             @loop(cls=WhileTrueLoop)  # type: ignore
-            async def task() -> None:
-                ...
+            async def task() -> None: ...
