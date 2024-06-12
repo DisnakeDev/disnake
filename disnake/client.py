@@ -3088,7 +3088,7 @@ class Client:
         Retrieves the :class:`.SKU`\\s for the application.
 
         To manage application subscription entitlements, you should use the SKU
-        with :attr:`.SKUType.subscription`.
+        with :attr:`.SKUType.subscription` (not the :attr:`~.SKUType.subscription_group` one).
 
         .. versionadded:: 2.10
 
