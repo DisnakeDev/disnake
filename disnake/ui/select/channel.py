@@ -210,4 +210,4 @@ def channel_select(
         The list of channel types that can be selected in this select menu.
         Defaults to all types (i.e. ``None``).
     """
-    return _create_decorator(cls, ChannelSelect, **kwargs)
+    return _create_decorator(cls, **kwargs)

@@ -7,7 +7,6 @@ import os
 from abc import ABC, abstractmethod
 from typing import (
     TYPE_CHECKING,
-    Any,
     Callable,
     Generic,
     List,
@@ -174,8 +173,6 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
 
 def _create_decorator(
     cls: Callable[P, S_co],
-    # only for input validation
-    base_cls: Type[BaseSelect[Any, Any, Any]],
     /,
     *args: P.args,
     **kwargs: P.kwargs,
@@ -186,9 +183,6 @@ def _create_decorator(
 
     if (origin := get_origin(cls)) is not None:
         cls = origin
-
-    if not isinstance(cls, type) or not issubclass(cls, base_cls):
-        raise TypeError(f"cls argument must be a subclass of {base_cls.__name__}, got {cls!r}")
 
     def decorator(func: ItemCallbackType[V_co, S_co]) -> DecoratedItem[S_co]:
         if not asyncio.iscoroutinefunction(func):

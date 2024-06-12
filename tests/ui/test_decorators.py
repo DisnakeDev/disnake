@@ -70,19 +70,3 @@ class TestDecorator:
             cls=_CustomButton,
             this_should_not_work="h",  # type: ignore
         )
-
-    @pytest.mark.parametrize(
-        ("decorator", "invalid_cls"),
-        [
-            (ui.button, ui.StringSelect),
-            (ui.string_select, ui.Button),
-            (ui.user_select, ui.Button),
-            (ui.role_select, ui.Button),
-            (ui.mentionable_select, ui.Button),
-            (ui.channel_select, ui.Button),
-        ],
-    )
-    def test_cls_invalid(self, decorator, invalid_cls) -> None:
-        for cls in [123, int, invalid_cls]:
-            with pytest.raises(TypeError, match=r"cls argument must be"):
-                decorator(cls=cls)

@@ -185,4 +185,4 @@ def mentionable_select(
     disabled: :class:`bool`
         Whether the select is disabled. Defaults to ``False``.
     """
-    return _create_decorator(cls, MentionableSelect, **kwargs)
+    return _create_decorator(cls, **kwargs)
