@@ -1524,6 +1524,20 @@ class Message(Hashable):
             )
             return f"{self.author.name} upgraded {application_name} to premium for this server! 🎉"
 
+        if self.type is MessageType.guild_incident_alert_mode_enabled:
+            enabled_until = utils.parse_time(self.content)
+            return f"{self.author.name} enabled security actions until {enabled_until.strftime('%d/%m/%Y, %H:%M')}."
+
+        if self.type is MessageType.guild_incident_alert_mode_disabled:
+            return f"{self.author.name} disabled security actions."
+
+        if self.type is MessageType.guild_incident_report_raid:
+            guild_name = self.guild.name if self.guild else None
+            return f"{self.author.name} reported a raid in {guild_name}."
+
+        if self.type is MessageType.guild_incident_report_false_alarm:
+            return f"{self.author.name} resolved an Activity Alert."
+
         # in the event of an unknown or unsupported message type, we return nothing
         return None
 
