@@ -3185,7 +3185,10 @@ class Guild(Hashable):
         data = await self._state.http.invites_from(self.id)
         result = []
         for invite in data:
-            channel = self.get_channel(int(invite["channel"]["id"]))
+            if channel_data := invite.get("channel"):
+                channel = self.get_channel(int(channel_data["id"]))
+            else:
+                channel = None
             result.append(Invite(state=self._state, data=invite, guild=self, channel=channel))
 
         return result
@@ -4130,11 +4133,15 @@ class Guild(Hashable):
         # reliable or a thing anymore
         data = await self._state.http.get_invite(payload["code"])
 
-        channel = self.get_channel(int(data["channel"]["id"]))
+        if channel_data := data.get("channel"):
+            channel = self.get_channel(int(channel_data["id"]))
+        else:
+            channel = None
         payload["temporary"] = False
         payload["max_uses"] = 0
         payload["max_age"] = 0
         payload["uses"] = payload.get("uses", 0)
+        payload["type"] = 0
         return Invite(state=self._state, data=payload, guild=self, channel=channel)
 
     # TODO: use MISSING when async iterators get refactored

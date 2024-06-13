@@ -12,6 +12,7 @@ from .guild import InviteGuild
 from .guild_scheduled_event import GuildScheduledEvent
 from .user import PartialUser
 
+InviteType = Literal[0, 1, 2]
 InviteTargetType = Literal[1, 2]
 
 
@@ -30,8 +31,9 @@ class _InviteMetadata(TypedDict, total=False):
 
 class Invite(_InviteMetadata):
     code: str
+    type: InviteType
     guild: NotRequired[InviteGuild]
-    channel: InviteChannel
+    channel: Optional[InviteChannel]
     inviter: NotRequired[PartialUser]
     target_type: NotRequired[InviteTargetType]
     target_user: NotRequired[PartialUser]
