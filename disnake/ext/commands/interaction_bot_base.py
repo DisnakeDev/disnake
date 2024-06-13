@@ -12,6 +12,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
+    Collection,
     Dict,
     Iterable,
     List,
@@ -27,7 +28,7 @@ from typing import (
 import disnake
 from disnake.app_commands import ApplicationCommand, Option
 from disnake.custom_warnings import SyncWarning
-from disnake.enums import ApplicationCommandType
+from disnake.enums import ApplicationCommandType, ApplicationIntegrationType, InteractionContextType
 from disnake.utils import warn_deprecated
 
 from . import errors
@@ -489,6 +490,8 @@ class InteractionBotBase(CommonBotBase):
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
+        integration_types: Optional[Collection[ApplicationIntegrationType]] = None,
+        contexts: Optional[Collection[InteractionContextType]] = None,
         options: Optional[List[Option]] = None,
         guild_ids: Optional[Sequence[int]] = None,
         connectors: Optional[Dict[str, str]] = None,
@@ -531,6 +534,19 @@ class InteractionBotBase(CommonBotBase):
 
             .. versionadded:: 2.8
 
+        integration_types: Optional[Set[:class:`.ApplicationIntegrationType`]]
+            The integration types/installation contexts where the command is available.
+            Defaults to :attr:`.ApplicationIntegrationType.guild` only.
+            Only available for global commands.
+
+            .. versionadded:: 2.10
+
+        contexts: Optional[Set[:class:`.InteractionContextType`]]
+            The interaction contexts where the command can be used.
+            Only available for global commands.
+
+            .. versionadded:: 2.10
+
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
         guild_ids: Sequence[:class:`int`]
@@ -564,6 +580,8 @@ class InteractionBotBase(CommonBotBase):
                 dm_permission=dm_permission,
                 default_member_permissions=default_member_permissions,
                 nsfw=nsfw,
+                integration_types=integration_types,
+                contexts=contexts,
                 guild_ids=guild_ids,
                 connectors=connectors,
                 auto_sync=auto_sync,
@@ -582,6 +600,8 @@ class InteractionBotBase(CommonBotBase):
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
+        integration_types: Optional[Collection[ApplicationIntegrationType]] = None,
+        contexts: Optional[Collection[InteractionContextType]] = None,
         guild_ids: Optional[Sequence[int]] = None,
         auto_sync: Optional[bool] = None,
         extras: Optional[Dict[str, Any]] = None,
@@ -615,6 +635,19 @@ class InteractionBotBase(CommonBotBase):
 
             .. versionadded:: 2.8
 
+        integration_types: Optional[Set[:class:`.ApplicationIntegrationType`]]
+            The integration types/installation contexts where the command is available.
+            Defaults to :attr:`.ApplicationIntegrationType.guild` only.
+            Only available for global commands.
+
+            .. versionadded:: 2.10
+
+        contexts: Optional[Set[:class:`.InteractionContextType`]]
+            The interaction contexts where the command can be used.
+            Only available for global commands.
+
+            .. versionadded:: 2.10
+
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``.
         guild_ids: Sequence[:class:`int`]
@@ -642,6 +675,8 @@ class InteractionBotBase(CommonBotBase):
                 dm_permission=dm_permission,
                 default_member_permissions=default_member_permissions,
                 nsfw=nsfw,
+                integration_types=integration_types,
+                contexts=contexts,
                 guild_ids=guild_ids,
                 auto_sync=auto_sync,
                 extras=extras,
@@ -659,6 +694,8 @@ class InteractionBotBase(CommonBotBase):
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
+        integration_types: Optional[Collection[ApplicationIntegrationType]] = None,
+        contexts: Optional[Collection[InteractionContextType]] = None,
         guild_ids: Optional[Sequence[int]] = None,
         auto_sync: Optional[bool] = None,
         extras: Optional[Dict[str, Any]] = None,
@@ -692,6 +729,19 @@ class InteractionBotBase(CommonBotBase):
 
             .. versionadded:: 2.8
 
+        integration_types: Optional[Set[:class:`.ApplicationIntegrationType`]]
+            The integration types/installation contexts where the command is available.
+            Defaults to :attr:`.ApplicationIntegrationType.guild` only.
+            Only available for global commands.
+
+            .. versionadded:: 2.10
+
+        contexts: Optional[Set[:class:`.InteractionContextType`]]
+            The interaction contexts where the command can be used.
+            Only available for global commands.
+
+            .. versionadded:: 2.10
+
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
         guild_ids: Sequence[:class:`int`]
@@ -719,6 +769,8 @@ class InteractionBotBase(CommonBotBase):
                 dm_permission=dm_permission,
                 default_member_permissions=default_member_permissions,
                 nsfw=nsfw,
+                integration_types=integration_types,
+                contexts=contexts,
                 guild_ids=guild_ids,
                 auto_sync=auto_sync,
                 extras=extras,
