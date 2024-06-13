@@ -153,10 +153,10 @@ class View:
     """
 
     __discord_ui_view__: ClassVar[bool] = True
-    __view_children_items__: ClassVar[List[ItemCallbackType[Item]]] = []
+    __view_children_items__: ClassVar[List[ItemCallbackType[Self, Item[Self]]]] = []
 
     def __init_subclass__(cls) -> None:
-        children: List[ItemCallbackType[Item]] = []
+        children: List[ItemCallbackType[Self, Item[Self]]] = []
         for base in reversed(cls.__mro__):
             for member in base.__dict__.values():
                 if hasattr(member, "__discord_ui_model_type__"):
@@ -169,9 +169,9 @@ class View:
 
     def __init__(self, *, timeout: Optional[float] = 180.0) -> None:
         self.timeout = timeout
-        self.children: List[Item] = []
+        self.children: List[Item[Self]] = []
         for func in self.__view_children_items__:
-            item: Item = func.__discord_ui_model_type__(**func.__discord_ui_model_kwargs__)
+            item: Item[Self] = func.__discord_ui_model_type__(**func.__discord_ui_model_kwargs__)
             item.callback = partial(func, self, item)
             item._view = self
             setattr(self, func.__name__, item)
