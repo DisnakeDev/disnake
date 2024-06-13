@@ -2,6 +2,8 @@
 
 from typing import Optional, TypedDict
 
+from typing_extensions import NotRequired
+
 from .snowflake import Snowflake, SnowflakeList
 from .user import User
 
@@ -9,6 +11,7 @@ from .user import User
 class PartialEmoji(TypedDict):
     id: Optional[Snowflake]
     name: Optional[str]
+    animated: NotRequired[bool]
 
 
 class Emoji(PartialEmoji, total=False):
@@ -16,7 +19,6 @@ class Emoji(PartialEmoji, total=False):
     user: User
     require_colons: bool
     managed: bool
-    animated: bool
     available: bool
 
 

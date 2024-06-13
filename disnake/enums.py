@@ -68,6 +68,7 @@ __all__ = (
     "Event",
     "ApplicationRoleConnectionMetadataType",
     "OnboardingPromptType",
+    "OnboardingMode",
     "SKUType",
     "EntitlementType",
 )
@@ -1337,6 +1338,11 @@ class ApplicationRoleConnectionMetadataType(Enum):
 class OnboardingPromptType(Enum):
     multiple_choice = 0
     dropdown = 1
+
+
+class OnboardingMode(Enum):
+    default = 0
+    advanced = 1
 
 
 class SKUType(Enum):
