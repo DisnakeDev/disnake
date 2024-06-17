@@ -70,6 +70,7 @@ __all__ = (
     "OnboardingPromptType",
     "SKUType",
     "EntitlementType",
+    "PollLayoutType",
 )
 
 
@@ -1208,6 +1209,14 @@ class Event(Enum):
     """Called when messages are bulk deleted.
     Represents the :func:`on_bulk_message_delete` event.
     """
+    message_poll_vote_add = "message_poll_vote_add"
+    """Called when a vote is added on a `Poll`.
+    Represents the :func:`on_message_poll_vote_add` event.
+    """
+    message_poll_vote_remove = "message_poll_vote_remove"
+    """Called when a vote is removed from a `Poll`.
+    Represents the :func:`on_message_poll_vote_remove` event.
+    """
     raw_message_edit = "raw_message_edit"
     """Called when a message is edited regardless of the state of the internal message cache.
     Represents the :func:`on_raw_message_edit` event.
@@ -1219,6 +1228,14 @@ class Event(Enum):
     raw_bulk_message_delete = "raw_bulk_message_delete"
     """Called when a bulk delete is triggered regardless of the messages being in the internal message cache or not.
     Represents the :func:`on_raw_bulk_message_delete` event.
+    """
+    raw_message_poll_vote_add = "raw_message_poll_vote_add"
+    """Called when a vote is added on a `Poll` regardless of the internal message cache.
+    Represents the :func:`on_raw_message_poll_vote_add` event.
+    """
+    raw_message_poll_vote_remove = "raw_message_poll_vote_remove"
+    """Called when a vote is removed from a `Poll` regardless of the internal message cache.
+    Represents the :func:`on_raw_message_poll_vote_remove` event.
     """
     reaction_add = "reaction_add"
     """Called when a message has a reaction added to it.
@@ -1355,6 +1372,11 @@ class EntitlementType(Enum):
     user_gift = 6
     premium_purchase = 7
     application_subscription = 8
+
+
+class PollLayoutType(Enum):
+    default = 1
+    """The default poll layout type."""
 
 
 T = TypeVar("T")

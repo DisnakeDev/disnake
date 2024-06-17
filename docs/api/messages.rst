@@ -94,6 +94,14 @@ RawMessageUpdateEvent
 .. autoclass:: RawMessageUpdateEvent()
     :members:
 
+RawMessagePollVoteActionEvent
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: RawMessagePollVoteActionEvent
+
+.. autoclass:: RawMessagePollVoteActionEvent()
+    :members:
+
 RawReactionActionEvent
 ~~~~~~~~~~~~~~~~~~~~~~
 
@@ -175,6 +183,46 @@ PartialMessage
 .. attributetable:: PartialMessage
 
 .. autoclass:: PartialMessage
+    :members:
+
+Poll
+~~~~
+
+.. attributetable:: Poll
+
+.. autoclass:: Poll
+    :members:
+
+PollAnswer
+~~~~~~~~~~
+
+.. attributetable:: PollAnswer
+
+.. autoclass:: PollAnswer
+    :members:
+
+PollMedia
+~~~~~~~~~
+
+.. attributetable:: PollMedia
+
+.. autoclass:: PollMedia
+    :members:
+
+PollResult
+~~~~~~~~~~
+
+.. attributetable:: PollResult
+
+.. autoclass:: PollResult()
+    :members:
+
+PollAnswerCount
+~~~~~~~~~~~~~~~
+
+.. attributetable:: PollAnswerCount
+
+.. autoclass:: PollAnswerCount()
     :members:
 
 Enumerations
@@ -369,6 +417,12 @@ MessageType
 
         .. versionadded:: 2.10
 
+PollLayoutType
+~~~~~~~~~~~~~~
+
+.. autoclass:: PollLayoutType
+    :members:
+
 Events
 ------
 
@@ -376,10 +430,14 @@ Events
 - :func:`on_message_edit(before, after) <disnake.on_message_edit>`
 - :func:`on_message_delete(message) <disnake.on_message_delete>`
 - :func:`on_bulk_message_delete(messages) <disnake.on_bulk_message_delete>`
+- :func:`on_message_poll_vote_add(member, asnwer_id) <disnake.on_message_poll_vote_add>`
+- :func:`on_message_poll_vote_removed(member, asnwer_id) <disnake.on_message_poll_vote_remove>`
 
 - :func:`on_raw_message_edit(payload) <disnake.on_raw_message_edit>`
 - :func:`on_raw_message_delete(payload) <disnake.on_raw_message_delete>`
 - :func:`on_raw_bulk_message_delete(payload) <disnake.on_raw_bulk_message_delete>`
+- :func:`on_raw_message_poll_vote_add(payload) <disnake.on_raw_message_poll_vote_add>`
+- :func:`on_raw_message_poll_vote_remove(payload) <disnake.on_raw_message_poll_vote_remove>`
 
 - :func:`on_reaction_add(reaction, user) <disnake.on_reaction_add>`
 - :func:`on_reaction_remove(reaction, user) <disnake.on_reaction_remove>`
