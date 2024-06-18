@@ -455,7 +455,7 @@ else:
 
 
 class LargeInt(int):
-    """Type representing integers `=<-2**53`, `>=2**53` in slash commands."""
+    """Type representing integers `<=-2**53`, `>=2**53` in slash commands."""
 
 
 # option types that require additional handling in verify_type
