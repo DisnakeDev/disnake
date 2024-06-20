@@ -47,14 +47,14 @@ class File:
     __slots__ = ("fp", "filename", "spoiler", "description", "_original_pos", "_owner", "_closer")
 
     if TYPE_CHECKING:
-        fp: io.BufferedIOBase
+        fp: Union[io.TextIOBase, io.BufferedIOBase]
         filename: Optional[str]
         spoiler: bool
         description: Optional[str]
 
     def __init__(
         self,
-        fp: Union[str, bytes, os.PathLike, io.BufferedIOBase],
+        fp: Union[str, bytes, os.PathLike, io.TextIOBase, io.BufferedIOBase],
         filename: Optional[str] = None,
         *,
         spoiler: bool = False,
