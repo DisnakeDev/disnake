@@ -693,24 +693,48 @@ class InteractionReference:
 
             For interaction references created before July 18th, 2022, this will not include group or subcommand names.
 
-    user: :class:`User`
-        The interaction author.
+    user: Union[:class:`User`, :class:`Member`]
+        The user or member that triggered the referenced interaction.
+
+        .. versionchanged:: 2.10
+            This is now a :class:`Member` when in a guild, if the message was received via a
+            gateway event or the member is cached.
     """
 
-    __slots__ = ("id", "type", "name", "user", "_state")
+    __slots__ = ("id", "type", "name", "user")
 
-    def __init__(self, *, state: ConnectionState, data: InteractionMessageReferencePayload) -> None:
-        self._state: ConnectionState = state
+    def __init__(
+        self,
+        *,
+        state: ConnectionState,
+        guild: Optional[Guild],
+        data: InteractionMessageReferencePayload,
+    ) -> None:
         self.id: int = int(data["id"])
         self.type: InteractionType = try_enum(InteractionType, int(data["type"]))
         self.name: str = data["name"]
-        self.user: User = User(state=state, data=data["user"])
+
+        user: Optional[Union[User, Member]] = None
+        if guild:
+            if isinstance(guild, Guild):  # this can be a placeholder object in interactions
+                user = guild.get_member(int(data["user"]["id"]))
+
+            # If not cached, try data from event.
+            # This is only available via gateway (message_create/_edit), not HTTP
+            if not user and (member := data.get("member")):
+                user = Member(data=member, user_data=data["user"], guild=guild, state=state)
+
+        # If still none, deserialize user
+        if not user:
+            user = state.store_user(data["user"])
+
+        self.user: Union[User, Member] = user
 
     def __repr__(self) -> str:
         return f"<InteractionReference id={self.id!r} type={self.type!r} name={self.name!r} user={self.user!r}>"
 
     @property
-    def author(self) -> User:
+    def author(self) -> Union[User, Member]:
         return self.user
 
 
@@ -986,17 +1010,17 @@ class Message(Hashable):
             for d in data.get("components", [])
         ]
 
-        inter_payload = data.get("interaction")
-        inter = (
-            None if inter_payload is None else InteractionReference(state=state, data=inter_payload)
-        )
-        self.interaction: Optional[InteractionReference] = inter
-
         try:
             # if the channel doesn't have a guild attribute, we handle that
             self.guild = channel.guild  # type: ignore
         except AttributeError:
             self.guild = state._get_guild(utils._get_as_snowflake(data, "guild_id"))
+
+        self.interaction: Optional[InteractionReference] = (
+            InteractionReference(state=state, guild=self.guild, data=interaction)
+            if (interaction := data.get("interaction"))
+            else None
+        )
 
         if thread_data := data.get("thread"):
             if not self.thread and isinstance(self.guild, Guild):
