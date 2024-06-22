@@ -356,26 +356,28 @@ class _BaseRange(ABC):
         def __or__(self, other):
             return Union[self, other]  # type: ignore
 
-
 if TYPE_CHECKING:
-    # aliased import since mypy doesn't understand `Range = Annotated`
-    from typing_extensions import Annotated as Range, Annotated as String
+    from typing_extensions import Annotated as Range
 else:
-
     @dataclass(frozen=True, repr=False)
     class Range(_BaseRange):
         """Type representing a number with a limited range of allowed values.
+
+        Supports int, float, and LargeInt.
 
         See :ref:`param_ranges` for more information.
 
         .. versionadded:: 2.4
 
-        .. versionchanged:: 2.9
+        .. versionchanged:: 2.9.2
             Syntax changed from ``Range[5, 10]`` to ``Range[int, 5, 10]``;
-            the type (:class:`int` or :class:`float`) must now be specified explicitly.
+            the type (:class:`int`, :class:`float`, or :class:`LargeInt`) must now be specified explicitly.
         """
+        min_value: Any
+        max_value: Any
+        underlying_type: Type[Any]
 
-        _allowed_types = (int, float)
+        _allowed_types = (int, float, LargeInt)
 
         def __post_init__(self):
             for value in (self.min_value, self.max_value):
@@ -384,13 +386,37 @@ else:
 
                 if self.underlying_type is int and not isinstance(value, int):
                     raise TypeError("Range[int, ...] bounds must be int, not float")
+                if self.underlying_type is LargeInt and not isinstance(value, int):
+                    raise TypeError("Range[LargeInt, ...] bounds must be int, not float")
 
         @classmethod
         def _infer_type(cls, params: Tuple[Any, ...]) -> Type[Any]:
             if any(isinstance(p, float) for p in params):
                 return float
+            if any(isinstance(p, LargeInt) for p in params):
+                return LargeInt
             return int
 
+        def __call__(self, value: Any) -> Any:
+            value = self.underlying_type(value)
+            if not (self.min_value <= value <= self.max_value):
+                raise ValueError(f"{value} is not within the range {self.min_value} to {self.max_value}.")
+            return value
+    
+    
+    class LargeIntRangeConverter(commands.Converter):
+        """Utility class to enable LargeInt support"""
+        def __init__(self, min_value, max_value):
+            self.range = Range(min_value=int(min_value), max_value=int(max_value), underlying_type=LargeInt)
+    
+        async def convert(self, ctx, argument):
+            try:
+                value = self.range(argument)
+            except ValueError as e:
+                raise commands.BadArgument(str(e))
+            return value
+    
+    
     @dataclass(frozen=True, repr=False)
     class String(_BaseRange):
         """Type representing a string option with a limited length.
