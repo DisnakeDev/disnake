@@ -31,7 +31,7 @@ from disnake.enums import ApplicationCommandType
 from disnake.utils import warn_deprecated
 
 from . import errors
-from .base_core import InvokableApplicationCommand
+from .base_core import CogT, InvokableApplicationCommand
 from .common_bot_base import CommonBotBase
 from .ctx_menus_core import (
     InvokableMessageCommand,
@@ -55,7 +55,7 @@ if TYPE_CHECKING:
     from disnake.permissions import Permissions
 
     from ._types import AppCheck, CoroFunc
-    from .base_core import CogT, CommandCallback, InteractionCommandCallback
+    from .base_core import CommandCallback, InteractionCommandCallback
 
     P = ParamSpec("P")
 
@@ -139,7 +139,7 @@ def _format_diff(diff: _Diff) -> str:
     return "\n".join(f"| {line}" for line in lines)
 
 
-class InteractionBotBase(CommonBotBase):
+class InteractionBotBase(CommonBotBase[CogT]):
     def __init__(
         self,
         *,
@@ -587,7 +587,7 @@ class InteractionBotBase(CommonBotBase):
         extras: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ) -> Callable[
-        [InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand
+        [InteractionCommandCallback[CogT, UserCommandInteraction[Any], P]], InvokableUserCommand
     ]:
         """A shortcut decorator that invokes :func:`~disnake.ext.commands.user_command` and adds it to
         the internal command list.
@@ -635,7 +635,7 @@ class InteractionBotBase(CommonBotBase):
         """
 
         def decorator(
-            func: InteractionCommandCallback[CogT, UserCommandInteraction, P]
+            func: InteractionCommandCallback[CogT, UserCommandInteraction[Any], P],
         ) -> InvokableUserCommand:
             result = user_command(
                 name=name,
@@ -664,7 +664,8 @@ class InteractionBotBase(CommonBotBase):
         extras: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ) -> Callable[
-        [InteractionCommandCallback[CogT, MessageCommandInteraction, P]], InvokableMessageCommand
+        [InteractionCommandCallback[CogT, MessageCommandInteraction[Any], P]],
+        InvokableMessageCommand,
     ]:
         """A shortcut decorator that invokes :func:`~disnake.ext.commands.message_command` and adds it to
         the internal command list.
@@ -712,7 +713,7 @@ class InteractionBotBase(CommonBotBase):
         """
 
         def decorator(
-            func: InteractionCommandCallback[CogT, MessageCommandInteraction, P]
+            func: InteractionCommandCallback[CogT, MessageCommandInteraction[Any], P],
         ) -> InvokableMessageCommand:
             result = message_command(
                 name=name,
@@ -920,7 +921,7 @@ class InteractionBotBase(CommonBotBase):
     # Error handlers
 
     async def on_slash_command_error(
-        self, interaction: ApplicationCommandInteraction, exception: errors.CommandError
+        self, interaction: ApplicationCommandInteraction[Any], exception: errors.CommandError
     ) -> None:
         """|coro|
 
@@ -948,7 +949,7 @@ class InteractionBotBase(CommonBotBase):
         )
 
     async def on_user_command_error(
-        self, interaction: ApplicationCommandInteraction, exception: errors.CommandError
+        self, interaction: ApplicationCommandInteraction[Any], exception: errors.CommandError
     ) -> None:
         """|coro|
 
@@ -968,7 +969,7 @@ class InteractionBotBase(CommonBotBase):
         )
 
     async def on_message_command_error(
-        self, interaction: ApplicationCommandInteraction, exception: errors.CommandError
+        self, interaction: ApplicationCommandInteraction[Any], exception: errors.CommandError
     ) -> None:
         """|coro|
 
@@ -1132,8 +1133,8 @@ class InteractionBotBase(CommonBotBase):
         user_commands: bool = False,
         message_commands: bool = False,
     ) -> Callable[
-        [Callable[[ApplicationCommandInteraction], Any]],
-        Callable[[ApplicationCommandInteraction], Any],
+        [Callable[[ApplicationCommandInteraction[Any]], Any]],
+        Callable[[ApplicationCommandInteraction[Any]], Any],
     ]:
         """A decorator that adds a global application command check to the bot.
 
@@ -1175,8 +1176,8 @@ class InteractionBotBase(CommonBotBase):
             message_commands = True
 
         def decorator(
-            func: Callable[[ApplicationCommandInteraction], Any]
-        ) -> Callable[[ApplicationCommandInteraction], Any]:
+            func: Callable[[ApplicationCommandInteraction[Any]], Any],
+        ) -> Callable[[ApplicationCommandInteraction[Any]], Any]:
             # T was used instead of Check to ensure the type matches on return
             self.add_app_command_check(
                 func,
@@ -1190,7 +1191,7 @@ class InteractionBotBase(CommonBotBase):
         return decorator
 
     async def application_command_can_run(
-        self, inter: ApplicationCommandInteraction, *, call_once: bool = False
+        self, inter: ApplicationCommandInteraction[Any], *, call_once: bool = False
     ) -> bool:
         if inter.data.type is ApplicationCommandType.chat_input:
             checks = self._slash_command_check_once if call_once else self._slash_command_checks
@@ -1264,7 +1265,7 @@ class InteractionBotBase(CommonBotBase):
     # command processing
 
     async def process_app_command_autocompletion(
-        self, inter: ApplicationCommandInteraction
+        self, inter: ApplicationCommandInteraction[Any]
     ) -> None:
         """|coro|
 
@@ -1290,7 +1291,7 @@ class InteractionBotBase(CommonBotBase):
             await slash_command._call_relevant_autocompleter(inter)
 
     async def process_application_commands(
-        self, interaction: ApplicationCommandInteraction
+        self, interaction: ApplicationCommandInteraction[Any]
     ) -> None:
         """|coro|
 
@@ -1382,10 +1383,10 @@ class InteractionBotBase(CommonBotBase):
         except errors.CommandError as exc:
             await app_command.dispatch_error(interaction, exc)
 
-    async def on_application_command(self, interaction: ApplicationCommandInteraction) -> None:
+    async def on_application_command(self, interaction: ApplicationCommandInteraction[Any]) -> None:
         await self.process_application_commands(interaction)
 
     async def on_application_command_autocomplete(
-        self, interaction: ApplicationCommandInteraction
+        self, interaction: ApplicationCommandInteraction[Any]
     ) -> None:
         await self.process_app_command_autocompletion(interaction)

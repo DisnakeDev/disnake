@@ -11,6 +11,7 @@ from functools import partial
 from itertools import groupby
 from typing import (
     TYPE_CHECKING,
+    Any,
     Callable,
     ClassVar,
     Dict,
@@ -318,7 +319,7 @@ class View:
         self.__weights.clear()
         return self
 
-    async def interaction_check(self, interaction: MessageInteraction) -> bool:
+    async def interaction_check(self, interaction: MessageInteraction[Any]) -> bool:
         """|coro|
 
         A callback that is called when an interaction happens within the view
@@ -353,7 +354,9 @@ class View:
         """
         pass
 
-    async def on_error(self, error: Exception, item: Item, interaction: MessageInteraction) -> None:
+    async def on_error(
+        self, error: Exception, item: Item, interaction: MessageInteraction[Any]
+    ) -> None:
         """|coro|
 
         A callback that is called when an item's callback or :meth:`interaction_check`
@@ -373,7 +376,7 @@ class View:
         print(f"Ignoring exception in view {self} for item {item}:", file=sys.stderr)
         traceback.print_exception(error.__class__, error, error.__traceback__, file=sys.stderr)
 
-    async def _scheduled_task(self, item: Item, interaction: MessageInteraction):
+    async def _scheduled_task(self, item: Item, interaction: MessageInteraction[Any]):
         try:
             if self.timeout:
                 self.__timeout_expiry = time.monotonic() + self.timeout
@@ -403,7 +406,7 @@ class View:
         self.__stopped.set_result(True)
         asyncio.create_task(self.on_timeout(), name=f"disnake-ui-view-timeout-{self.id}")
 
-    def _dispatch_item(self, item: Item, interaction: MessageInteraction) -> None:
+    def _dispatch_item(self, item: Item, interaction: MessageInteraction[Any]) -> None:
         if self.__stopped.done():
             return
 
@@ -542,7 +545,7 @@ class ViewStore:
                 del self._synced_message_views[key]
                 break
 
-    def dispatch(self, interaction: MessageInteraction) -> None:
+    def dispatch(self, interaction: MessageInteraction[Any]) -> None:
         self.__verify_integrity()
         message_id: Optional[int] = interaction.message and interaction.message.id
         component_type = try_enum_to_int(interaction.data.component_type)

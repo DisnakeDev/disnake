@@ -701,7 +701,7 @@ class Loop(Generic[LF]):
 
 
 T_co = TypeVar("T_co", covariant=True)
-L_co = TypeVar("L_co", bound=Loop, covariant=True)
+L_co = TypeVar("L_co", bound=Loop[Any], covariant=True)
 
 
 class Object(Protocol[T_co, P]):

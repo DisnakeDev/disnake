@@ -315,7 +315,7 @@ class InteractionException(ClientException):
         The interaction that was responded to.
     """
 
-    interaction: Interaction
+    interaction: Interaction[Any]
 
 
 class InteractionTimedOut(InteractionException):
@@ -330,8 +330,8 @@ class InteractionTimedOut(InteractionException):
         The interaction that was responded to.
     """
 
-    def __init__(self, interaction: Interaction) -> None:
-        self.interaction: Interaction = interaction
+    def __init__(self, interaction: Interaction[Any]) -> None:
+        self.interaction: Interaction[Any] = interaction
 
         msg = (
             "Interaction took more than 3 seconds to be responded to. "
@@ -359,8 +359,8 @@ class InteractionResponded(InteractionException):
         The interaction that's already been responded to.
     """
 
-    def __init__(self, interaction: Interaction) -> None:
-        self.interaction: Interaction = interaction
+    def __init__(self, interaction: Interaction[Any]) -> None:
+        self.interaction: Interaction[Any] = interaction
         super().__init__("This interaction has already been responded to before")
 
 
@@ -378,8 +378,8 @@ class InteractionNotResponded(InteractionException):
         The interaction that hasn't been responded to.
     """
 
-    def __init__(self, interaction: Interaction) -> None:
-        self.interaction: Interaction = interaction
+    def __init__(self, interaction: Interaction[Any]) -> None:
+        self.interaction: Interaction[Any] = interaction
         super().__init__("This interaction hasn't been responded to yet")
 
 
@@ -394,8 +394,8 @@ class ModalChainNotSupported(InteractionException):
         The interaction that was responded to.
     """
 
-    def __init__(self, interaction: ModalInteraction) -> None:
-        self.interaction: ModalInteraction = interaction
+    def __init__(self, interaction: ModalInteraction[Any]) -> None:
+        self.interaction: ModalInteraction[Any] = interaction
         super().__init__("You cannot respond to a modal with another modal.")
 
 
@@ -411,8 +411,8 @@ class InteractionNotEditable(InteractionException):
         The interaction that was responded to.
     """
 
-    def __init__(self, interaction: Interaction) -> None:
-        self.interaction: Interaction = interaction
+    def __init__(self, interaction: Interaction[Any]) -> None:
+        self.interaction: Interaction[Any] = interaction
         super().__init__("This interaction does not have a message to edit.")
 
 

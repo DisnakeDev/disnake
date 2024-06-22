@@ -64,7 +64,10 @@ class AssetMixin:
         return await self._state.http.get_from_cdn(self.url)
 
     async def save(
-        self, fp: Union[str, bytes, os.PathLike, io.BufferedIOBase], *, seek_begin: bool = True
+        self,
+        fp: Union[str, bytes, os.PathLike[str], os.PathLike[bytes], io.BufferedIOBase],
+        *,
+        seek_begin: bool = True,
     ) -> int:
         """|coro|
 
