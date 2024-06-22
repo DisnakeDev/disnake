@@ -357,7 +357,7 @@ class _BaseRange(ABC):
             return Union[self, other]  # type: ignore
 
 if TYPE_CHECKING:
-    from typing_extensions import Annotated as Range
+    from typing_extensions import Annotated as Range, Annotated as String
 else:
     @dataclass(frozen=True, repr=False)
     class Range(_BaseRange):
