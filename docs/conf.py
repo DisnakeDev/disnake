@@ -291,6 +291,7 @@ html_context = {
         ("disnake.ext.commands", "ext/commands"),
         ("disnake.ext.tasks", "ext/tasks"),
     ],
+    "READTHEDOCS": _IS_READTHEDOCS,
 }
 
 resource_links = {
