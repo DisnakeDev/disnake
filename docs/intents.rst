@@ -98,7 +98,7 @@ Message Content Intent
 ++++++++++++++++++++++
 
 - Whether you want a prefix that isn't the bot mention.
-- Whether you want to access the contents of messages. This includes content (text), embeds, attachments, and components.
+- Whether you want to access the contents of messages. This includes content (text), embeds, attachments, components and polls.
 
 .. _need_presence_intent:
 
