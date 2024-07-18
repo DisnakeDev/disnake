@@ -1795,6 +1795,27 @@ class ConnectionState:
                 logging_coroutine(coro, info="Voice Protocol voice server update handler")
             )
 
+    def parse_voice_channel_status_update(self, data: gateway.VoiceChannelStatusUpdate) -> None:
+        guild_id = int(data["guild_id"])
+        guild = self._get_guild(guild_id)
+
+        if guild is None:
+            _log.debug(
+                "VOICE_CHANNEL_STATUS_UPDATE referencing an unknown guild ID: %s. Discarding",
+                guild_id,
+            )
+            return
+
+        channel_id = int(data["id"])
+        channel = guild.get_channel(channel_id)
+        if channel is None:
+            _log.debug(
+                "VOICE_CHANNEL_STATUS_UPDATE referencing an unknown channel ID: %s. Discarding",
+                channel_id,
+            )
+
+        self.dispatch("voice_channel_status_update", channel, data["status"])
+
     # FIXME: this should be refactored. The `GroupChannel` path will never be hit,
     # `raw.timestamp` exists so no need to parse it twice, and `.get_user` should be used before falling back
     def parse_typing_start(self, data: gateway.TypingStartEvent) -> None:

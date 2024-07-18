@@ -1152,6 +1152,10 @@ class Event(Enum):
     """Called when a `Member` changes their `VoiceState`.
     Represents the :func:`on_voice_state_update` event.
     """
+    voice_channel_status_update = "voice_channel_status_update"
+    """Called when a voice channel status is updated.
+    Represents the :func:`on_voice_channel_status_update` event.
+    """
     stage_instance_create = "stage_instance_create"
     """Called when a `StageInstance` is created for a `StageChannel`.
     Represents the :func:`on_stage_instance_create` event.

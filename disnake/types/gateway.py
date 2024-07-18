@@ -639,3 +639,10 @@ EntitlementUpdate = Entitlement
 
 # https://discord.com/developers/docs/monetization/entitlements#deleted-entitlement
 EntitlementDelete = Entitlement
+
+
+# https://discord.com/developers/docs/topics/gateway-events#voice-channel-status-update
+class VoiceChannelStatusUpdate(TypedDict):
+    id: Snowflake
+    guild_id: Snowflake
+    status: Optional[str]
