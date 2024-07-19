@@ -215,6 +215,10 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
         application commands.
 
         .. versionadded:: 2.5
+
+    cache_app_emojis: :class:`bool`
+        Whether to automatically fetch and cache the application's emojis on startup and when fetching.
+        Defaults to ``False``.
     """
 
     if TYPE_CHECKING:
@@ -258,6 +262,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
             intents: Optional[Intents] = None,
             chunk_guilds_at_startup: Optional[bool] = None,
             member_cache_flags: Optional[MemberCacheFlags] = None,
+            cache_app_emojis: bool = False,
             localization_provider: Optional[LocalizationProtocol] = None,
             strict_localization: bool = False,
         ) -> None:
@@ -310,6 +315,7 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
             intents: Optional[Intents] = None,
             chunk_guilds_at_startup: Optional[bool] = None,
             member_cache_flags: Optional[MemberCacheFlags] = None,
+            cache_app_emojis: bool = False,
             localization_provider: Optional[LocalizationProtocol] = None,
             strict_localization: bool = False,
         ) -> None:
@@ -423,6 +429,10 @@ class InteractionBot(InteractionBotBase, disnake.Client):
         application commands.
 
         .. versionadded:: 2.5
+
+    cache_app_emojis: :class:`bool`
+        Whether to automatically fetch and cache the application's emojis on startup and when fetching.
+        Defaults to ``False``.
     """
 
     if TYPE_CHECKING:
@@ -459,6 +469,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
             intents: Optional[Intents] = None,
             chunk_guilds_at_startup: Optional[bool] = None,
             member_cache_flags: Optional[MemberCacheFlags] = None,
+            cache_app_emojis: bool = False,
             localization_provider: Optional[LocalizationProtocol] = None,
             strict_localization: bool = False,
         ) -> None:
@@ -504,6 +515,7 @@ class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
             intents: Optional[Intents] = None,
             chunk_guilds_at_startup: Optional[bool] = None,
             member_cache_flags: Optional[MemberCacheFlags] = None,
+            cache_app_emojis: bool = False,
             localization_provider: Optional[LocalizationProtocol] = None,
             strict_localization: bool = False,
         ) -> None:

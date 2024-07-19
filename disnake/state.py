@@ -44,7 +44,7 @@ from .channel import (
     VoiceChannel,
     _guild_channel_factory,
 )
-from .emoji import Emoji
+from .emoji import ApplicationEmoji, Emoji, GuildEmoji
 from .entitlement import Entitlement
 from .enums import ApplicationCommandType, ChannelType, ComponentType, MessageType, Status, try_enum
 from .flags import ApplicationFlags, Intents, MemberCacheFlags
@@ -204,6 +204,7 @@ class ConnectionState:
         intents: Optional[Intents] = None,
         chunk_guilds_at_startup: Optional[bool] = None,
         member_cache_flags: Optional[MemberCacheFlags] = None,
+        cache_app_emojis: bool = False
     ) -> None:
         self.loop: asyncio.AbstractEventLoop = loop
         self.http: HTTPClient = http
@@ -277,6 +278,8 @@ class ConnectionState:
         if not self._intents.members or member_cache_flags._empty:
             self.store_user = self.create_user
 
+        self.cache_app_emojis: bool = cache_app_emojis
+
         self.parsers = parsers = {}
         for attr, func in inspect.getmembers(self):
             if attr.startswith("parse_"):
@@ -293,7 +296,7 @@ class ConnectionState:
         # - the weakref slot + object in user objects likely results in a small increase in memory usage
         # - accesses on `_users` are slower, e.g. `__getitem__` takes ~1us with weakrefs and ~0.2us without
         self._users: weakref.WeakValueDictionary[int, User] = weakref.WeakValueDictionary()
-        self._emojis: Dict[int, Emoji] = {}
+        self._emojis: Dict[int, Emoji, ApplicationEmoji] = {}
         self._stickers: Dict[int, GuildSticker] = {}
         self._guilds: Dict[int, Guild] = {}
 
@@ -394,10 +397,19 @@ class ConnectionState:
         # the keys of self._users are ints
         return self._users.get(id)  # type: ignore
 
-    def store_emoji(self, guild: Guild, data: EmojiPayload) -> Emoji:
+    def store_emoji(self, guild: Guild, data: EmojiPayload) -> GuildEmoji:
         # the id will be present here
         emoji_id = int(data["id"])  # type: ignore
-        self._emojis[emoji_id] = emoji = Emoji(guild=guild, state=self, data=data)
+        self._emojis[emoji_id] = emoji = GuildEmoji(guild=guild, state=self, data=data)
+        return emoji
+
+    def store_application_emoji(
+        self, application_id: int, data: EmojiPayload
+    ) -> ApplicationEmoji:
+        emoji = ApplicationEmoji(application_id=application_id, state=self, data=data)
+        if self.cache_app_emojis:
+            emoji_id = int(data["id"])  # type: ignore
+            self._emojis[emoji_id] = emoji
         return emoji
 
     def store_sticker(self, guild: Guild, data: GuildStickerPayload) -> GuildSticker:
@@ -435,7 +447,7 @@ class ConnectionState:
         self._guilds.pop(guild.id, None)
 
         for emoji in guild.emojis:
-            self._emojis.pop(emoji.id, None)
+            self._remove_emoji(emoji.id)
 
         for sticker in guild.stickers:
             self._stickers.pop(sticker.id, None)
@@ -508,16 +520,19 @@ class ConnectionState:
                 return cmd
 
     @property
-    def emojis(self) -> List[Emoji]:
+    def emojis(self) -> List[GuildEmoji | ApplicationEmoji]:
         return list(self._emojis.values())
 
     @property
     def stickers(self) -> List[GuildSticker]:
         return list(self._stickers.values())
 
-    def get_emoji(self, emoji_id: Optional[int]) -> Optional[Emoji]:
+    def get_emoji(self, emoji_id: Optional[int]) -> Optional[Union[GuildEmoji, ApplicationEmoji]]:
         # the keys of self._emojis are ints
         return self._emojis.get(emoji_id)  # type: ignore
+
+    def _remove_emoji(self, emoji: GuildEmoji | ApplicationEmoji) -> None:
+        self._emojis.pop(emoji.id, None)
 
     def get_sticker(self, sticker_id: Optional[int]) -> Optional[GuildSticker]:
         # the keys of self._stickers are ints
@@ -2272,6 +2287,11 @@ class AutoShardedConnectionState(ConnectionState):
                     self.dispatch("guild_join", guild)
 
             self.dispatch("shard_ready", shard_id)
+
+        if self.cache_app_emojis and self.application_id:
+            data = await self.http.get_all_application_emojis(self.application_id)
+            for e in data.get("items", []):
+                self.store_application_emoji(self.application_id, e)
 
         # remove the state
         try:

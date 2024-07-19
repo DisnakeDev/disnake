@@ -46,7 +46,7 @@ from .appinfo import AppInfo
 from .application_role_connection import ApplicationRoleConnectionMetadata
 from .backoff import ExponentialBackoff
 from .channel import PartialMessageable, _threaded_channel_factory
-from .emoji import Emoji
+from .emoji import ApplicationEmoji, GuildEmoji
 from .entitlement import Entitlement
 from .enums import ApplicationCommandType, ChannelType, Event, Status
 from .errors import (
@@ -401,6 +401,7 @@ class Client:
         intents: Optional[Intents] = None,
         chunk_guilds_at_startup: Optional[bool] = None,
         member_cache_flags: Optional[MemberCacheFlags] = None,
+        cache_app_emojis: bool = False,
     ) -> None:
         # self.ws is set in the connect method
         self.ws: DiscordWebSocket = None  # type: ignore
@@ -444,6 +445,7 @@ class Client:
             intents=intents,
             chunk_guilds_at_startup=chunk_guilds_at_startup,
             member_cache_flags=member_cache_flags,
+            cache_app_emojis=cache_app_emojis
         )
         self.shard_id: Optional[int] = shard_id
         self.shard_count: Optional[int] = shard_count
@@ -492,12 +494,13 @@ class Client:
         application_id: Optional[int],
         heartbeat_timeout: float,
         guild_ready_timeout: float,
+        cache_app_emojis: bool,
         allowed_mentions: Optional[AllowedMentions],
         activity: Optional[BaseActivity],
         status: Optional[Union[str, Status]],
         intents: Optional[Intents],
         chunk_guilds_at_startup: Optional[bool],
-        member_cache_flags: Optional[MemberCacheFlags],
+        member_cache_flags: Optional[MemberCacheFlags]
     ) -> ConnectionState:
         return ConnectionState(
             dispatch=self.dispatch,
@@ -515,6 +518,7 @@ class Client:
             intents=intents,
             chunk_guilds_at_startup=chunk_guilds_at_startup,
             member_cache_flags=member_cache_flags,
+            cache_app_emojis=cache_app_emojis
         )
 
     def _handle_ready(self) -> None:
@@ -559,8 +563,14 @@ class Client:
         return self._connection.guilds
 
     @property
-    def emojis(self) -> List[Emoji]:
-        """List[:class:`.Emoji`]: The emojis that the connected client has."""
+    def emojis(self) -> list[GuildEmoji | ApplicationEmoji]:
+        """The emojis that the connected client has.
+
+        .. note::
+
+        This only includes the application's emojis if :attr:`~Client.cache_app_emojis` is
+``True``.
+        """
         return self._connection.emojis
 
     @property
@@ -1474,7 +1484,7 @@ class Client:
         """
         return self._connection.get_user(id)
 
-    def get_emoji(self, id: int, /) -> Optional[Emoji]:
+    def get_emoji(self, id: int, /) -> Optional[Union[GuildEmoji, ApplicationEmoji]]:
         """Returns an emoji with the given ID.
 
         Parameters
@@ -3211,3 +3221,87 @@ class Client:
             owner_type=2 if isinstance(owner, abc.User) else 1,
         )
         return Entitlement(data=data, state=self._connection)
+
+    async def fetch_application_emojis(self) -> list[ApplicationEmoji]:
+        r"""|coro|
+        Retrieves all custom :class:`ApplicationEmoji`\s from the application.
+
+        Raises
+        ---------
+        HTTPException
+            An error occurred fetching the emojis.
+
+        Returns
+        --------
+        List[:class:`ApplicationEmoji`]
+            The retrieved emojis.
+        """
+        data = await self._connection.http.get_all_application_emojis(self.application_id)
+        return [
+            self._connection.store_application_emoji(self.application_id, d)
+            for d in data["items"]
+        ]
+
+    async def fetch_application_emoji(self, emoji_id: int, /) -> ApplicationEmoji:
+        """|coro|
+        Retrieves a custom :class:`ApplicationEmoji` from the application.
+
+        Parameters
+        ----------
+        emoji_id: :class:`int`
+            The emoji's ID.
+
+        Returns
+        -------
+        :class:`ApplicationEmoji`
+            The retrieved emoji.
+
+        Raises
+        ------
+        NotFound
+            The emoji requested could not be found.
+        HTTPException
+            An error occurred fetching the emoji.
+        """
+        data = await self._connection.http.get_application_emoji(
+            self.application_id, emoji_id
+        )
+        return self._connection.store_application_emoji(self.application_id, data)
+
+    async def create_application_emoji(
+        self,
+        *,
+        name: str,
+        image: bytes,
+    ) -> ApplicationEmoji:
+        r"""|coro|
+        Creates a custom :class:`ApplicationEmoji` for the application.
+        There is currently a limit of 2000 emojis per application.
+
+        Parameters
+        -----------
+        name: :class:`str`
+            The emoji name. Must be at least 2 characters.
+        image: :class:`bytes`
+            The :term:`py:bytes-like object` representing the image data to use.
+            Only JPG, PNG and GIF images are supported.
+
+        Raises
+        -------
+        Forbidden
+            You are not allowed to create emojis.
+        HTTPException
+            An error occurred creating an emoji.
+
+        Returns
+        --------
+        :class:`ApplicationEmoji`
+            The created emoji.
+        """
+
+        img = utils._bytes_to_base64_data(image)
+        data = await self._connection.http.create_application_emoji(
+            self.application_id, name, img
+        )
+        return self._connection.store_application_emoji(self.application_id, data)
+
