@@ -67,7 +67,7 @@ if TYPE_CHECKING:
     from .channel import CategoryChannel, DMChannel, PartialMessageable
     from .client import Client
     from .embeds import Embed
-    from .emoji import Emoji
+    from .emoji import Emoji, ApplicationEmoji
     from .enums import InviteTarget
     from .guild import Guild, GuildMessageable
     from .guild_scheduled_event import GuildScheduledEvent
@@ -338,7 +338,7 @@ class GuildChannel(ABC):
         video_quality_mode: VideoQualityMode = MISSING,
         flags: ChannelFlags = MISSING,
         available_tags: Sequence[ForumTag] = MISSING,
-        default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
+        default_reaction: Optional[Union[str, Emoji, ApplicationEmoji, PartialEmoji]] = MISSING,
         default_sort_order: Optional[ThreadSortOrder] = MISSING,
         default_layout: ThreadLayout = MISSING,
         reason: Optional[str] = None,

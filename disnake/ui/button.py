@@ -92,7 +92,7 @@ class Button(Item[V_co]):
         disabled: bool = False,
         custom_id: Optional[str] = None,
         url: Optional[str] = None,
-        emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        emoji: Optional[Union[str, Emoji, ApplicationEmoji, PartialEmoji]] = None,
         row: Optional[int] = None,
     ) -> None:
         ...
@@ -106,7 +106,7 @@ class Button(Item[V_co]):
         disabled: bool = False,
         custom_id: Optional[str] = None,
         url: Optional[str] = None,
-        emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        emoji: Optional[Union[str, Emoji, ApplicationEmoji, PartialEmoji]] = None,
         row: Optional[int] = None,
     ) -> None:
         ...
@@ -119,7 +119,7 @@ class Button(Item[V_co]):
         disabled: bool = False,
         custom_id: Optional[str] = None,
         url: Optional[str] = None,
-        emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        emoji: Optional[Union[str, Emoji, ApplicationEmoji, PartialEmoji]] = None,
         row: Optional[int] = None,
     ) -> None:
         super().__init__()
@@ -217,7 +217,7 @@ class Button(Item[V_co]):
         return self._underlying.emoji
 
     @emoji.setter
-    def emoji(self, value: Optional[Union[str, Emoji, PartialEmoji]]) -> None:
+    def emoji(self, value: Optional[Union[str, Emoji, ApplicationEmoji, PartialEmoji]]) -> None:
         if value is not None:
             if isinstance(value, str):
                 self._underlying.emoji = PartialEmoji.from_str(value)
@@ -261,7 +261,7 @@ def button(
     custom_id: Optional[str] = None,
     disabled: bool = False,
     style: ButtonStyle = ButtonStyle.secondary,
-    emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+    emoji: Optional[Union[str, Emoji, ApplicationEmoji, PartialEmoji]] = None,
     row: Optional[int] = None,
 ) -> Callable[[ItemCallbackType[Button[V_co]]], DecoratedItem[Button[V_co]]]:
     ...

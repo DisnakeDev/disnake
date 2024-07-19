@@ -245,7 +245,7 @@ class ActionRow(Generic[UIComponentT]):
         disabled: bool = False,
         custom_id: Optional[str] = None,
         url: Optional[str] = None,
-        emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        emoji: Optional[Union[str, Emoji, ApplicationEmoji, PartialEmoji]] = None,
     ) -> ButtonCompatibleActionRowT:
         """Add a button to the action row. Can only be used if the action
         row holds message components.

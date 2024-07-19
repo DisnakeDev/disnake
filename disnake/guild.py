@@ -40,7 +40,7 @@ from .channel import (
     _threaded_guild_channel_factory,
 )
 from .colour import Colour
-from .emoji import Emoji
+from .emoji import Emoji, ApplicationEmoji
 from .enums import (
     AuditLogAction,
     AutoModEventType,
@@ -1643,7 +1643,7 @@ class Guild(Hashable):
         nsfw: bool = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
         available_tags: Optional[Sequence[ForumTag]] = None,
-        default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        default_reaction: Optional[Union[str, Emoji, ApplicationEmoji, PartialEmoji]] = None,
         default_sort_order: Optional[ThreadSortOrder] = None,
         default_layout: Optional[ThreadLayout] = None,
         reason: Optional[str] = None,
@@ -1793,7 +1793,7 @@ class Guild(Hashable):
         nsfw: bool = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
         available_tags: Optional[Sequence[ForumTag]] = None,
-        default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        default_reaction: Optional[Union[str, Emoji, ApplicationEmoji, PartialEmoji]] = None,
         default_sort_order: Optional[ThreadSortOrder] = None,
         reason: Optional[str] = None,
     ) -> MediaChannel:

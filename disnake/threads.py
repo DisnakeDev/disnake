@@ -1225,7 +1225,7 @@ class ForumTag(Hashable):
         self,
         *,
         name: str = MISSING,
-        emoji: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
+        emoji: Optional[Union[str, Emoji, ApplicationEmoji, PartialEmoji]] = MISSING,
         moderated: bool = MISSING,
     ) -> Self:
         """Returns a new instance with the given changes applied,

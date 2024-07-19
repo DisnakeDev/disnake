@@ -181,7 +181,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         label: str,
         value: str = MISSING,
         description: Optional[str] = None,
-        emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        emoji: Optional[Union[str, Emoji, ApplicationEmoji, PartialEmoji]] = None,
         default: bool = False,
     ) -> None:
         """Adds an option to the select menu.
