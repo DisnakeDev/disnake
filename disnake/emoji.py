@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Iterator, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Iterator, List, Optional, Tuple, Union
 
 from .asset import Asset, AssetMixin
 from .partial_emoji import PartialEmoji, _EmojiTag
@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 
     from .abc import Snowflake
     from .guild import Guild
+    from .guild_preview import GuildPreview
     from .role import Role
     from .state import ConnectionState
     from .types.emoji import Emoji as EmojiPayload
@@ -190,7 +191,7 @@ class GuildEmoji(BaseEmoji):
         having the :attr:`~Permissions.manage_guild_expressions` permission.
     """
 
-    def __init__(self, *, guild: Guild, state: ConnectionState, data: EmojiPayload):
+    def __init__(self, *, guild: Union[Guild, GuildPreview], state: ConnectionState, data: EmojiPayload):
         self.guild_id: int = guild.id
         super().__init__(state=state, data=data)
 

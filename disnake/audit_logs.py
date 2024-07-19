@@ -43,7 +43,7 @@ if TYPE_CHECKING:
 
     from .app_commands import APIApplicationCommand
     from .automod import AutoModRule
-    from .emoji import Emoji
+    from .emoji import Emoji, ApplicationEmoji
     from .guild import Guild
     from .guild_scheduled_event import GuildScheduledEvent
     from .integrations import PartialIntegration
@@ -817,7 +817,7 @@ class AuditLogEntry(Hashable):
     def _convert_target_webhook(self, target_id: int) -> Union[Webhook, Object]:
         return self._webhooks.get(target_id) or Object(id=target_id)
 
-    def _convert_target_emoji(self, target_id: int) -> Union[Emoji, Object]:
+    def _convert_target_emoji(self, target_id: int) -> Union[Emoji, ApplicationEmoji, Object]:
         return self._state.get_emoji(target_id) or Object(id=target_id)
 
     def _convert_target_message(self, target_id: int) -> Union[Member, User, Object, None]:

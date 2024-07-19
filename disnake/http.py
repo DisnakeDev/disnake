@@ -1709,7 +1709,7 @@ class HTTPClient:
         )
         return self.request(r, json=payload, reason=reason)
 
-    def get_all_application_emojis(self, application_id: Snowflake) -> Response[List[emoji.Emoji]]:
+    def get_all_application_emojis(self, application_id: Snowflake) -> Response[Dict[str, List[emoji.Emoji]]]:
         return self.request(
             Route("GET", "/applications/{application_id}/emojis", application_id=application_id)
         )

@@ -445,7 +445,7 @@ class ConnectionState:
         self._guilds.pop(guild.id, None)
 
         for emoji in guild.emojis:
-            self._remove_emoji(emoji.id)
+            self._remove_emoji(emoji)
 
         for sticker in guild.stickers:
             self._stickers.pop(sticker.id, None)

@@ -3235,9 +3235,9 @@ class Client:
         List[:class:`ApplicationEmoji`]
             The retrieved emojis.
         """
-        data = await self._connection.http.get_all_application_emojis(self.application_id)
+        emojis = await self._connection.http.get_all_application_emojis(self.application_id)
         return [
-            self._connection.store_application_emoji(self.application_id, d) for d in data["items"]
+            self._connection.store_application_emoji(self.application_id, e) for e in emojis['items']
         ]
 
     async def fetch_application_emoji(self, emoji_id: int, /) -> ApplicationEmoji:
