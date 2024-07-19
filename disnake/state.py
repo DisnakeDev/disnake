@@ -2037,12 +2037,11 @@ class ConnectionState:
     # since there're no events related to application command updates
 
     async def fetch_global_commands(
-            self,
-            *,
-            with_localizations: bool = True,
+        self,
+        *,
+        with_localizations: bool = True,
     ) -> List[APIApplicationCommand]:
-        results = await self.http.get_global_commands(self.application_id,
-                                                      with_localizations=with_localizations)  # type: ignore
+        results = await self.http.get_global_commands(self.application_id, with_localizations=with_localizations)  # type: ignore
         return [application_command_factory(data) for data in results]
 
     async def fetch_global_command(self, command_id: int) -> APIApplicationCommand:
@@ -2085,13 +2084,12 @@ class ConnectionState:
     # Application commands (guild)
 
     async def fetch_guild_commands(
-            self,
-            guild_id: int,
-            *,
-            with_localizations: bool = True,
+        self,
+        guild_id: int,
+        *,
+        with_localizations: bool = True,
     ) -> List[APIApplicationCommand]:
-        results = await self.http.get_guild_commands(self.application_id, guild_id,
-                                                     with_localizations=with_localizations)  # type: ignore
+        results = await self.http.get_guild_commands(self.application_id, guild_id, with_localizations=with_localizations)  # type: ignore
         return [application_command_factory(data) for data in results]
 
     async def fetch_guild_command(self, guild_id: int, command_id: int) -> APIApplicationCommand:

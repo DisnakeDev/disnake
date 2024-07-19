@@ -40,7 +40,7 @@ from .text_input import TextInput
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ..emoji import Emoji
+    from ..emoji import Emoji, ApplicationEmoji
     from ..message import Message
     from ..partial_emoji import PartialEmoji
     from ..types.components import ActionRow as ActionRowPayload
