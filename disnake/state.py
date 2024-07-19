@@ -204,7 +204,7 @@ class ConnectionState:
         intents: Optional[Intents] = None,
         chunk_guilds_at_startup: Optional[bool] = None,
         member_cache_flags: Optional[MemberCacheFlags] = None,
-        cache_app_emojis: bool = False
+        cache_app_emojis: bool = False,
     ) -> None:
         self.loop: asyncio.AbstractEventLoop = loop
         self.http: HTTPClient = http
@@ -403,9 +403,7 @@ class ConnectionState:
         self._emojis[emoji_id] = emoji = GuildEmoji(guild=guild, state=self, data=data)
         return emoji
 
-    def store_application_emoji(
-        self, application_id: int, data: EmojiPayload
-    ) -> ApplicationEmoji:
+    def store_application_emoji(self, application_id: int, data: EmojiPayload) -> ApplicationEmoji:
         emoji = ApplicationEmoji(application_id=application_id, state=self, data=data)
         if self.cache_app_emojis:
             emoji_id = int(data["id"])  # type: ignore
@@ -520,7 +518,7 @@ class ConnectionState:
                 return cmd
 
     @property
-    def emojis(self) -> List[GuildEmoji | ApplicationEmoji]:
+    def emojis(self) -> List[Union[GuildEmoji, ApplicationEmoji]]:
         return list(self._emojis.values())
 
     @property
@@ -531,7 +529,7 @@ class ConnectionState:
         # the keys of self._emojis are ints
         return self._emojis.get(emoji_id)  # type: ignore
 
-    def _remove_emoji(self, emoji: GuildEmoji | ApplicationEmoji) -> None:
+    def _remove_emoji(self, emoji: Union[GuildEmoji, ApplicationEmoji]) -> None:
         self._emojis.pop(emoji.id, None)
 
     def get_sticker(self, sticker_id: Optional[int]) -> Optional[GuildSticker]:

@@ -2,18 +2,14 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Iterator, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Iterator, List, Optional, Tuple
 
 from .asset import Asset, AssetMixin
 from .partial_emoji import PartialEmoji, _EmojiTag
 from .user import User
 from .utils import MISSING, SnowflakeList, snowflake_time
 
-__all__ = (
-    "Emoji",
-    "GuildEmoji",
-    "ApplicationEmoji"
-)
+__all__ = ("Emoji", "GuildEmoji", "ApplicationEmoji")
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -89,9 +85,7 @@ class BaseEmoji(_EmojiTag, AssetMixin):
         "available",
     )
 
-    def __init__(
-            self, *, state: ConnectionState, data: EmojiPayload
-    ) -> None:
+    def __init__(self, *, state: ConnectionState, data: EmojiPayload) -> None:
         self._state: ConnectionState = state
         self._from_data(data)
 
@@ -261,7 +255,7 @@ class GuildEmoji(BaseEmoji):
         await self._state.http.delete_custom_emoji(self.guild.id, self.id, reason=reason)
 
     async def edit(
-            self, *, name: str = MISSING, roles: List[Snowflake] = MISSING, reason: Optional[str] = None
+        self, *, name: str = MISSING, roles: List[Snowflake] = MISSING, reason: Optional[str] = None
     ) -> GuildEmoji:
         """|coro|
 
@@ -362,9 +356,7 @@ class ApplicationEmoji(BaseEmoji):
         The user that created the emoji.
     """
 
-    def __init__(
-            self, *, application_id: int, state: ConnectionState, data: EmojiPayload
-    ):
+    def __init__(self, *, application_id: int, state: ConnectionState, data: EmojiPayload):
         self.application_id: int = application_id
         super().__init__(state=state, data=data)
 
@@ -387,38 +379,36 @@ class ApplicationEmoji(BaseEmoji):
         HTTPException
             An error occurred deleting the emoji.
         """
-
         await self._state.http.delete_application_emoji(self.application_id, self.id)
         if self._state.cache_app_emojis and self._state.get_emoji(self.id):
             self._state._remove_emoji(self)
 
     async def edit(
-            self,
-            *,
-            name: str = MISSING,
+        self,
+        *,
+        name: str = MISSING,
     ) -> ApplicationEmoji:
         r"""|coro|
         Edits the application emoji.
         You must own the emoji to do this.
 
         Parameters
-        -----------
+        ----------
         name: :class:`str`
             The new emoji name.
 
         Raises
-        -------
+        ------
         Forbidden
             You are not allowed to edit the emoji.
         HTTPException
             An error occurred editing the emoji.
 
         Returns
-        --------
+        -------
         :class:`ApplicationEmoji`
             The newly updated emoji.
         """
-
         payload = {}
         if name is not MISSING:
             payload["name"] = name
