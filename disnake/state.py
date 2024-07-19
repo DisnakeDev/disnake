@@ -1942,7 +1942,7 @@ class ConnectionState:
 
     def _get_emoji_from_data(
         self, data: PartialEmojiPayload
-    ) -> Optional[Union[str, Emoji, PartialEmoji]]:
+    ) -> Optional[Union[str, Emoji, ApplicationEmoji, PartialEmoji]]:
         """Convert partial emoji data to proper emoji.
         Returns unicode emojis as strings.
 
@@ -1973,7 +1973,7 @@ class ConnectionState:
         name: Optional[str],
         id: Optional[int],
         animated: Optional[bool] = False,
-    ) -> Optional[Union[Emoji, PartialEmoji]]:
+    ) -> Optional[Union[Emoji, ApplicationEmoji ,PartialEmoji]]:
         """Convert partial emoji fields to proper emoji, if possible.
         If both `id` and `name` are nullish, returns `None`.
 
@@ -1999,7 +1999,7 @@ class ConnectionState:
             animated=animated or False,
         )
 
-    def _upgrade_partial_emoji(self, emoji: PartialEmoji) -> Union[Emoji, PartialEmoji, str]:
+    def _upgrade_partial_emoji(self, emoji: PartialEmoji) -> Union[Emoji, ApplicationEmoji, PartialEmoji, str]:
         emoji_id = emoji.id
         if not emoji_id:
             return emoji.name
