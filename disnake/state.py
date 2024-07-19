@@ -296,7 +296,7 @@ class ConnectionState:
         # - the weakref slot + object in user objects likely results in a small increase in memory usage
         # - accesses on `_users` are slower, e.g. `__getitem__` takes ~1us with weakrefs and ~0.2us without
         self._users: weakref.WeakValueDictionary[int, User] = weakref.WeakValueDictionary()
-        self._emojis: Dict[int, Emoji, ApplicationEmoji] = {}
+        self._emojis: Dict[int, Union[GuildEmoji, ApplicationEmoji]] = {}
         self._stickers: Dict[int, GuildSticker] = {}
         self._guilds: Dict[int, Guild] = {}
 
