@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 
     from .abc import Snowflake, SnowflakeTime
     from .channel import CategoryChannel, ForumChannel, MediaChannel, TextChannel
-    from .emoji import Emoji
+    from .emoji import Emoji, ApplicationEmoji
     from .guild import Guild
     from .member import Member
     from .message import Message, PartialMessage
@@ -1157,14 +1157,14 @@ class ForumTag(Hashable):
         self,
         *,
         name: str,
-        emoji: Optional[Union[str, PartialEmoji, Emoji]] = None,
+        emoji: Optional[Union[str, PartialEmoji, ApplicationEmoji, Emoji]] = None,
         moderated: bool = False,
     ) -> None:
         self.id: int = 0
         self.name: str = name
         self.moderated: bool = moderated
 
-        self.emoji: Optional[Union[Emoji, PartialEmoji]] = None
+        self.emoji: Optional[Union[Emoji, ApplicationEmoji, PartialEmoji]] = None
         if emoji is None:
             self.emoji = None
         elif isinstance(emoji, str):

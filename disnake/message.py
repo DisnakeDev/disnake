@@ -25,7 +25,7 @@ from typing import (
 from . import utils
 from .components import ActionRow, MessageComponent, _component_factory
 from .embeds import Embed
-from .emoji import Emoji
+from .emoji import Emoji, ApplicationEmoji
 from .enums import ChannelType, InteractionType, MessageType, try_enum, try_enum_to_int
 from .errors import HTTPException
 from .file import File
@@ -76,7 +76,7 @@ if TYPE_CHECKING:
     from .ui.action_row import Components, MessageUIComponent
     from .ui.view import View
 
-    EmojiInputType = Union[Emoji, PartialEmoji, str]
+    EmojiInputType = Union[Emoji, ApplicationEmoji, PartialEmoji, str]
 
 __all__ = (
     "Attachment",
@@ -93,7 +93,7 @@ def convert_emoji_reaction(emoji: Union[EmojiInputType, Reaction]) -> str:
     if isinstance(emoji, Reaction):
         emoji = emoji.emoji
 
-    if isinstance(emoji, Emoji):
+    if isinstance(emoji, Emoji) or isinstance(emoji, ApplicationEmoji):
         return f"{emoji.name}:{emoji.id}"
     if isinstance(emoji, PartialEmoji):
         return emoji._as_reaction()

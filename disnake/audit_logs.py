@@ -280,7 +280,7 @@ def _transform_automod_trigger_metadata(
 
 def _transform_default_reaction(
     entry: AuditLogEntry, data: Optional[DefaultReactionPayload]
-) -> Optional[Union[Emoji, PartialEmoji]]:
+) -> Optional[Union[Emoji, ApplicationEmoji, PartialEmoji]]:
     if data is None:
         return None
     return entry._state._get_emoji_from_fields(
