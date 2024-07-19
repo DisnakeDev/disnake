@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, Optional, Type, TypeVar, Union, overload
+from typing import TYPE_CHECKING, Any, Callable, Optional, TypeVar, Union, overload
 
 from ...components import UserSelectMenu
 from ...enums import ComponentType
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
     from ...member import Member
     from ...user import User
-    from ..item import DecoratedItem, ItemCallbackType, Object
+    from ..item import DecoratedItem, ItemCallbackType
 
 
 __all__ = (
@@ -131,20 +131,20 @@ def user_select(
     max_values: int = 1,
     disabled: bool = False,
     row: Optional[int] = None,
-) -> Callable[[ItemCallbackType[UserSelect[V_co]]], DecoratedItem[UserSelect[V_co]]]:
+) -> Callable[[ItemCallbackType[V_co, UserSelect[V_co]]], DecoratedItem[UserSelect[V_co]]]:
     ...
 
 
 @overload
 def user_select(
-    cls: Type[Object[S_co, P]], *_: P.args, **kwargs: P.kwargs
-) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
+    cls: Callable[P, S_co], *_: P.args, **kwargs: P.kwargs
+) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
     ...
 
 
 def user_select(
-    cls: Type[Object[S_co, ...]] = UserSelect[Any], **kwargs: Any
-) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
+    cls: Callable[..., S_co] = UserSelect[Any], **kwargs: Any
+) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
     """A decorator that attaches a user select menu to a component.
 
     The function being decorated should have three parameters, ``self`` representing
@@ -182,4 +182,4 @@ def user_select(
     disabled: :class:`bool`
         Whether the select is disabled. Defaults to ``False``.
     """
-    return _create_decorator(cls, UserSelect, **kwargs)
+    return _create_decorator(cls, **kwargs)
