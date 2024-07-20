@@ -9,7 +9,7 @@ from .partial_emoji import PartialEmoji, _EmojiTag
 from .user import User
 from .utils import MISSING, SnowflakeList, snowflake_time
 
-__all__ = ("Emoji", "GuildEmoji", "ApplicationEmoji")
+__all__ = ("BaseEmoji", "Emoji", "GuildEmoji", "ApplicationEmoji")
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -23,10 +23,14 @@ if TYPE_CHECKING:
 
 
 class BaseEmoji(_EmojiTag, AssetMixin):
-    """Represents a custom emoji.
+    """Represents an abstract custom emoji.
 
-    Depending on the way this object was created, some of the attributes can
-    have a value of ``None``.
+    This is usually represented as a custom emoji.
+
+    This isn’t meant to be used directly, instead use one of the concrete custom emoji types:
+
+    - :class:`GuildEmoji`
+    - :class:`ApplicationEmoji`
 
     .. collapse:: operations
 
@@ -146,6 +150,8 @@ class GuildEmoji(BaseEmoji):
     Depending on the way this object was created, some of the attributes can
     have a value of ``None``.
 
+    This is an alias for :class:`Emoji`.
+
     .. collapse:: operations
 
         .. describe:: x == y
@@ -256,7 +262,7 @@ class GuildEmoji(BaseEmoji):
         await self._state.http.delete_custom_emoji(self.guild.id, self.id, reason=reason)
 
     async def edit(
-        self, *, name: str = MISSING, roles: List[Snowflake] = MISSING, reason: Optional[str] = None
+            self, *, name: str = MISSING, roles: List[Snowflake] = MISSING, reason: Optional[str] = None
     ) -> GuildEmoji:
         """|coro|
 
@@ -385,9 +391,9 @@ class ApplicationEmoji(BaseEmoji):
             self._state._remove_emoji(self)
 
     async def edit(
-        self,
-        *,
-        name: str = MISSING,
+            self,
+            *,
+            name: str = MISSING,
     ) -> ApplicationEmoji:
         r"""|coro|
         Edits the application emoji.

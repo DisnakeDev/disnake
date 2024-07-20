@@ -2,26 +2,51 @@
 
 .. currentmodule:: disnake
 
-Emoji
-=====
+Emojis
+======
 
 This section documents everything related to Discord
 :ddocs:`emoji <resources/emoji>`.
 
 Discord Models
----------------
+--------------
 
 Emoji
 ~~~~~
 
-.. attributetable:: Emoji
+.. autoclass:: Emoji
+    :members:
+    :inherited-members:
 
-.. autoclass:: Emoji()
+BaseEmoji
+~~~~~~~~~
+
+.. attributetable:: BaseEmoji
+
+.. autoclass:: BaseEmoji
+    :members:
+    :inherited-members:
+
+GuildEmoji
+~~~~~~~~~~
+
+.. attributetable:: GuildEmoji
+
+.. autoclass:: GuildEmoji
+    :members:
+    :inherited-members:
+
+ApplicationEmoji
+~~~~~~~~~~~~~~~~~
+
+.. attributetable:: ApplicationEmoji
+
+.. autoclass:: ApplicationEmoji
     :members:
     :inherited-members:
 
 Data Classes
--------------
+------------
 
 PartialEmoji
 ~~~~~~~~~~~~
