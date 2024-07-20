@@ -27,7 +27,7 @@ class BaseEmoji(_EmojiTag, AssetMixin):
 
     This is usually represented as a custom emoji.
 
-    This isn’t meant to be used directly, instead use one of the concrete custom emoji types:
+    This isn't meant to be used directly, instead use one of the concrete custom emoji types:
 
     - :class:`GuildEmoji`
     - :class:`ApplicationEmoji`
@@ -309,6 +309,11 @@ class GuildEmoji(BaseEmoji):
             self.guild.id, self.id, payload=payload, reason=reason
         )
         return GuildEmoji(guild=self.guild, data=data, state=self._state)
+
+
+class Emoji(GuildEmoji):
+    def __init__(self, *, guild: Union[Guild, GuildPreview], state: ConnectionState, data: EmojiPayload):
+        super().__init__(guild=guild, state=state, data=data)
 
 
 Emoji = GuildEmoji
