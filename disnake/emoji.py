@@ -311,11 +311,6 @@ class GuildEmoji(BaseEmoji):
         return GuildEmoji(guild=self.guild, data=data, state=self._state)
 
 
-class Emoji(GuildEmoji):
-    def __init__(self, *, guild: Union[Guild, GuildPreview], state: ConnectionState, data: EmojiPayload):
-        super().__init__(guild=guild, state=state, data=data)
-
-
 Emoji = GuildEmoji
 
 
