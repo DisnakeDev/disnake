@@ -25,7 +25,7 @@ from typing import (
 from . import utils
 from .components import ActionRow, MessageComponent, _component_factory
 from .embeds import Embed
-from .emoji import Emoji, ApplicationEmoji
+from .emoji import ApplicationEmoji, Emoji
 from .enums import ChannelType, InteractionType, MessageType, try_enum, try_enum_to_int
 from .errors import HTTPException
 from .file import File

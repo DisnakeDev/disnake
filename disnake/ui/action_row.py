@@ -40,7 +40,7 @@ from .text_input import TextInput
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ..emoji import Emoji, ApplicationEmoji
+    from ..emoji import ApplicationEmoji, Emoji
     from ..message import Message
     from ..partial_emoji import PartialEmoji
     from ..types.components import ActionRow as ActionRowPayload
@@ -275,7 +275,7 @@ class ActionRow(Generic[UIComponentT]):
             Whether the button is disabled or not.
         label: Optional[:class:`str`]
             The label of the button, if any.
-        emoji: Optional[Union[:class:`.PartialEmoji`, :class:`.Emoji`, :class:`str`]]
+        emoji: Optional[Union[:class:`.PartialEmoji`, :class:`.GuildEmoji`, :class:`.ApplicationEmoji`, :class:`str`]]
             The emoji of the button, if available.
 
         Raises

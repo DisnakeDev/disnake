@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-from typing import Optional, TypedDict, List
+from typing import List, Optional, TypedDict
 
 from .snowflake import Snowflake, SnowflakeList
 from .user import User

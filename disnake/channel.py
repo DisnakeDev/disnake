@@ -69,7 +69,7 @@ if TYPE_CHECKING:
     from .abc import Snowflake, SnowflakeTime
     from .asset import AssetBytes
     from .embeds import Embed
-    from .emoji import Emoji, ApplicationEmoji
+    from .emoji import ApplicationEmoji, Emoji
     from .guild import Guild, GuildChannel as GuildChannelType
     from .member import Member, VoiceState
     from .message import AllowedMentions, Message, PartialMessage
@@ -3314,7 +3314,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         return self.flags.require_tag
 
     @property
-    def default_reaction(self) -> Optional[Union[Emoji, ApplicationEmoji ,PartialEmoji]]:
+    def default_reaction(self) -> Optional[Union[Emoji, ApplicationEmoji, PartialEmoji]]:
         """Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]:
         The default emoji shown for reacting to threads.
 

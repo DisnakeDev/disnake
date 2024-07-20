@@ -25,7 +25,7 @@ from .utils import MISSING, assert_never, get_slots
 if TYPE_CHECKING:
     from typing_extensions import Self, TypeAlias
 
-    from .emoji import Emoji, ApplicationEmoji
+    from .emoji import ApplicationEmoji, Emoji
     from .types.components import (
         ActionRow as ActionRowPayload,
         AnySelectMenu as AnySelectMenuPayload,

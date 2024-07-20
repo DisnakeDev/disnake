@@ -373,6 +373,9 @@ class Client:
         application commands.
 
         .. versionadded:: 2.5
+    cache_app_emojis: :class:`bool`
+        Whether to automatically fetch and cache the application's emojis on startup and when fetching.
+        Defaults to ``False``.
     """
 
     def __init__(
@@ -567,7 +570,7 @@ class Client:
         """The emojis that the connected client has.
 
         .. note::
-            This only includes the application's emojis if :attr:`~Client.cache_app_emojis` is
+            This only includes the application's emojis if :attr:`.cache_app_emojis` is
             ``True``.
         """
         return self._connection.emojis
@@ -1493,7 +1496,7 @@ class Client:
 
         Returns
         -------
-        Optional[:class:`.Emoji`]
+        Optional[Union[:class:`disnake.emoji.GuildEmoji`, :class:`disnake.emoji.ApplicationEmoji`]]
             The custom emoji or ``None`` if not found.
         """
         return self._connection.get_emoji(id)
@@ -3223,7 +3226,7 @@ class Client:
 
     async def fetch_application_emojis(self) -> list[ApplicationEmoji]:
         r"""|coro|
-        Retrieves all custom :class:`ApplicationEmoji`\s from the application.
+        Retrieves all custom :class:`disnake.emoji.ApplicationEmoji`\s from the application.
 
         Raises
         ------
@@ -3232,17 +3235,18 @@ class Client:
 
         Returns
         -------
-        List[:class:`ApplicationEmoji`]
+        List[:class:`disnake.emoji.ApplicationEmoji`]
             The retrieved emojis.
         """
         emojis = await self._connection.http.get_all_application_emojis(self.application_id)
         return [
-            self._connection.store_application_emoji(self.application_id, e) for e in emojis['items']
+            self._connection.store_application_emoji(self.application_id, e)
+            for e in emojis["items"]
         ]
 
     async def fetch_application_emoji(self, emoji_id: int, /) -> ApplicationEmoji:
         """|coro|
-        Retrieves a custom :class:`ApplicationEmoji` from the application.
+        Retrieves a custom :class:`disnake.emoji.ApplicationEmoji` from the application.
 
         Parameters
         ----------
@@ -3251,7 +3255,7 @@ class Client:
 
         Returns
         -------
-        :class:`ApplicationEmoji`
+        :class:`disnake.emoji.ApplicationEmoji`
             The retrieved emoji.
 
         Raises
@@ -3271,7 +3275,7 @@ class Client:
         image: bytes,
     ) -> ApplicationEmoji:
         r"""|coro|
-        Creates a custom :class:`ApplicationEmoji` for the application.
+        Creates a custom :class:`disnake.emoji.ApplicationEmoji` for the application.
         There is currently a limit of 2000 emojis per application.
 
         Parameters
@@ -3291,7 +3295,7 @@ class Client:
 
         Returns
         -------
-        :class:`ApplicationEmoji`
+        :class:`disnake.emoji.ApplicationEmoji`
             The created emoji.
         """
         img = utils._bytes_to_base64_data(image)

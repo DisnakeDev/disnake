@@ -1063,11 +1063,11 @@ msgstr ":exc:`.HTTPException` -- 招待の取り消しに失敗した。"
 #: disnake.ext.commands.Bot.emojis:1 of
 #, fuzzy
 msgid "The emojis that the connected client has."
-msgstr "List[:class:`.Emoji`] -- 接続したクライアントがアクセスできる絵文字。"
+msgstr "List[Union[:class:`GuildEmoji`, :class:`ApplicationEmoji`]] -- 接続したクライアントがアクセスできる絵文字。"
 
 #: disnake.ext.commands.Bot.emojis:3 of
 #, fuzzy
-msgid "List[:class:`.Emoji`]"
+msgid "List[Union[:class:`GuildEmoji`, :class:`ApplicationEmoji`]]"
 msgstr ":class:`.Guild`"
 
 #: disnake.ext.commands.Bot.event:1 of
@@ -1598,7 +1598,7 @@ msgid "The custom emoji or ``None`` if not found."
 msgstr ""
 
 #: disnake.ext.commands.Bot.get_emoji:7 of
-msgid "Optional[:class:`.Emoji`]"
+msgid "Optional[Union[:class:`GuildEmoji`, :class:`ApplicationEmoji`]]"
 msgstr ""
 
 #: disnake.ext.commands.Bot.get_guild:1 of
@@ -6021,7 +6021,7 @@ msgstr ""
 #~ "from the internal list of commands."
 #~ msgstr ""
 
-#~ msgid "Optional[:class:`.Emoji`]: Returns an emoji with the given ID."
+#~ msgid "Optional[Union[:class:`GuildEmoji`, :class:`ApplicationEmoji`]]: Returns an emoji with the given ID."
 #~ msgstr ""
 
 #~ msgid "Optional[:class:`.Guild`]: Returns a guild with the given ID."

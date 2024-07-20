@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 
     from .abc import Snowflake, SnowflakeTime
     from .channel import CategoryChannel, ForumChannel, MediaChannel, TextChannel
-    from .emoji import Emoji, ApplicationEmoji
+    from .emoji import ApplicationEmoji, Emoji
     from .guild import Guild
     from .member import Member
     from .message import Message, PartialMessage

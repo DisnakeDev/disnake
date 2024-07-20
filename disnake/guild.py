@@ -40,7 +40,7 @@ from .channel import (
     _threaded_guild_channel_factory,
 )
 from .colour import Colour
-from .emoji import Emoji, ApplicationEmoji
+from .emoji import ApplicationEmoji, Emoji
 from .enums import (
     AuditLogAction,
     AutoModEventType,

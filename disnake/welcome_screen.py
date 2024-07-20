@@ -8,7 +8,7 @@ from . import utils
 from .partial_emoji import PartialEmoji, _EmojiTag
 
 if TYPE_CHECKING:
-    from .emoji import Emoji, ApplicationEmoji
+    from .emoji import ApplicationEmoji, Emoji
     from .guild import Guild
     from .invite import PartialInviteGuild
     from .state import ConnectionState

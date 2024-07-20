@@ -43,7 +43,7 @@ if TYPE_CHECKING:
 
     from .app_commands import APIApplicationCommand
     from .automod import AutoModRule
-    from .emoji import Emoji, ApplicationEmoji
+    from .emoji import ApplicationEmoji, Emoji
     from .guild import Guild
     from .guild_scheduled_event import GuildScheduledEvent
     from .integrations import PartialIntegration

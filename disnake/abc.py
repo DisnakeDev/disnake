@@ -67,7 +67,7 @@ if TYPE_CHECKING:
     from .channel import CategoryChannel, DMChannel, PartialMessageable
     from .client import Client
     from .embeds import Embed
-    from .emoji import Emoji, ApplicationEmoji
+    from .emoji import ApplicationEmoji, Emoji
     from .enums import InviteTarget
     from .guild import Guild, GuildMessageable
     from .guild_scheduled_event import GuildScheduledEvent

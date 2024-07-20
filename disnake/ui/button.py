@@ -31,7 +31,7 @@ __all__ = (
 if TYPE_CHECKING:
     from typing_extensions import ParamSpec, Self
 
-    from ..emoji import Emoji, ApplicationEmoji
+    from ..emoji import ApplicationEmoji, Emoji
     from .item import ItemCallbackType
     from .view import View
 
@@ -62,7 +62,7 @@ class Button(Item[V_co]):
         Whether the button is disabled.
     label: Optional[:class:`str`]
         The label of the button, if any.
-    emoji: Optional[Union[:class:`.PartialEmoji`, :class:`.Emoji`, :class:`str`]]
+    emoji: Optional[Union[:class:`.PartialEmoji`, :class:`.GuildEmoji`, :class:`.ApplicationEmoji`, :class:`str`]]
         The emoji of the button, if available.
     row: Optional[:class:`int`]
         The relative row this button belongs to. A Discord component can only have 5
@@ -309,9 +309,9 @@ def button(
         The style of the button. Defaults to :attr:`.ButtonStyle.grey`.
     disabled: :class:`bool`
         Whether the button is disabled. Defaults to ``False``.
-    emoji: Optional[Union[:class:`str`, :class:`.Emoji`, :class:`.PartialEmoji`]]
+    emoji: Optional[Union[:class:`str`, :class:`.GuildEmoji`, :class:`.ApplicationEmoji`, :class:`.PartialEmoji`]]
         The emoji of the button. This can be in string form or a :class:`.PartialEmoji`
-        or a full :class:`.Emoji`.
+        or a full :class:`.GuildEmoji`, :class:`.ApplicationEmoji`,.
     row: Optional[:class:`int`]
         The relative row this button belongs to. A Discord component can only have 5
         rows. By default, items are arranged automatically into those 5 rows. If you'd

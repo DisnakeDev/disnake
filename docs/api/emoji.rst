@@ -2,10 +2,19 @@
 
 .. currentmodule:: disnake
 
+Emojis
+======
+
+This section documents everything related to Discord
+:ddocs:`emoji <resources/emoji>`.
+
+Discord Models
+---------------
+
 Emoji
 ~~~~~
 
-.. autoclass:: disnake.Emoji
+.. autoclass:: Emoji
    :members:
    :inherited-members:
 

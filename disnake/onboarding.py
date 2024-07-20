@@ -7,7 +7,7 @@ from .enums import OnboardingPromptType, try_enum
 from .mixins import Hashable
 
 if TYPE_CHECKING:
-    from .emoji import Emoji, PartialEmoji, ApplicationEmoji
+    from .emoji import ApplicationEmoji, Emoji, PartialEmoji
     from .guild import Guild, GuildChannel
     from .role import Role
     from .types.onboarding import (

@@ -197,7 +197,9 @@ class GuildEmoji(BaseEmoji):
         having the :attr:`~Permissions.manage_guild_expressions` permission.
     """
 
-    def __init__(self, *, guild: Union[Guild, GuildPreview], state: ConnectionState, data: EmojiPayload):
+    def __init__(
+        self, *, guild: Union[Guild, GuildPreview], state: ConnectionState, data: EmojiPayload
+    ) -> None:
         self.guild_id: int = guild.id
         super().__init__(state=state, data=data)
 
@@ -262,7 +264,7 @@ class GuildEmoji(BaseEmoji):
         await self._state.http.delete_custom_emoji(self.guild.id, self.id, reason=reason)
 
     async def edit(
-            self, *, name: str = MISSING, roles: List[Snowflake] = MISSING, reason: Optional[str] = None
+        self, *, name: str = MISSING, roles: List[Snowflake] = MISSING, reason: Optional[str] = None
     ) -> GuildEmoji:
         """|coro|
 
@@ -363,11 +365,11 @@ class ApplicationEmoji(BaseEmoji):
         The user that created the emoji.
     """
 
-    def __init__(self, *, application_id: int, state: ConnectionState, data: EmojiPayload):
+    def __init__(self, *, application_id: int, state: ConnectionState, data: EmojiPayload) -> None:
         self.application_id: int = application_id
         super().__init__(state=state, data=data)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<ApplicationEmoji id={self.id} name={self.name!r} animated={self.animated}>"
 
     def is_usable(self) -> bool:
@@ -391,9 +393,9 @@ class ApplicationEmoji(BaseEmoji):
             self._state._remove_emoji(self)
 
     async def edit(
-            self,
-            *,
-            name: str = MISSING,
+        self,
+        *,
+        name: str = MISSING,
     ) -> ApplicationEmoji:
         r"""|coro|
         Edits the application emoji.

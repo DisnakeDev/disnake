@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import Self
 
-    from .emoji import Emoji, ApplicationEmoji
+    from .emoji import ApplicationEmoji, Emoji
     from .state import ConnectionState
     from .types.activity import ActivityEmoji as ActivityEmojiPayload
     from .types.emoji import Emoji as EmojiPayload, PartialEmoji as PartialEmojiPayload

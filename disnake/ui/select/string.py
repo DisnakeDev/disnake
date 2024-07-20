@@ -24,7 +24,7 @@ from .base import BaseSelect, P, V_co, _create_decorator
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ...emoji import Emoji, ApplicationEmoji
+    from ...emoji import ApplicationEmoji, Emoji
     from ...partial_emoji import PartialEmoji
     from ..item import DecoratedItem, ItemCallbackType, Object
 
@@ -200,9 +200,9 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         description: Optional[:class:`str`]
             An additional description of the option, if any.
             Can only be up to 100 characters.
-        emoji: Optional[Union[:class:`str`, :class:`.Emoji`, :class:`.PartialEmoji`]]
+        emoji: Optional[Union[:class:`str`, :class:`.GuildEmoji`, :class:`.ApplicationEmoji`, :class:`.PartialEmoji`]]
             The emoji of the option, if available. This can either be a string representing
-            the custom or unicode emoji or an instance of :class:`.PartialEmoji` or :class:`.Emoji`.
+            the custom or unicode emoji or an instance of :class:`.PartialEmoji` or :class:`.GuildEmoji`, :class:`.ApplicationEmoji`.
         default: :class:`bool`
             Whether this option is selected by default.
 

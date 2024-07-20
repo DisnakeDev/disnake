@@ -10,7 +10,7 @@ __all__ = ("Reaction",)
 
 if TYPE_CHECKING:
     from .abc import Snowflake
-    from .emoji import Emoji, ApplicationEmoji
+    from .emoji import ApplicationEmoji, Emoji
     from .message import Message
     from .partial_emoji import PartialEmoji
     from .types.message import Reaction as ReactionPayload
@@ -61,7 +61,7 @@ class Reaction:
         *,
         message: Message,
         data: ReactionPayload,
-        emoji: Optional[Union[PartialEmoji, Emoji, ApplicationEmoji,str]] = None,
+        emoji: Optional[Union[PartialEmoji, Emoji, ApplicationEmoji, str]] = None,
     ) -> None:
         self.message: Message = message
         # _get_emoji_from_data won't return None

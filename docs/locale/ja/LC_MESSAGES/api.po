@@ -666,11 +666,11 @@ msgstr ":class:`.Guild`"
 #: disnake.Client.emojis:1 of
 #, fuzzy
 msgid "The emojis that the connected client has."
-msgstr "List[:class:`.Emoji`] -- 接続したクライアントがアクセスできる絵文字。"
+msgstr "List[Union[:class:`GuildEmoji`, :class:`ApplicationEmoji`]] -- 接続したクライアントがアクセスできる絵文字。"
 
 #: disnake.Client.emojis:3 of
 #, fuzzy
-msgid "List[:class:`.Emoji`]"
+msgid "List[Union[:class:`GuildEmoji`, :class:`ApplicationEmoji`]]"
 msgstr ":class:`.Webhook`"
 
 #: disnake.Client.cached_messages:1 of
@@ -1347,14 +1347,14 @@ msgstr ":class:`~disnake.User`"
 #: disnake.Client.get_emoji:1 of
 #, fuzzy
 msgid "Returns an emoji with the given ID."
-msgstr "Optional[:class:`.Emoji`]: 与えられたIDを持つ絵文字を返します。"
+msgstr "Optional[Union[:class:`GuildEmoji`, :class:`ApplicationEmoji`]]: 与えられたIDを持つ絵文字を返します。"
 
 #: disnake.Client.get_emoji:6 of
 msgid "The custom emoji or ``None`` if not found."
 msgstr ""
 
 #: disnake.Client.get_emoji:7 of
-msgid "Optional[:class:`.Emoji`]"
+msgid "Optional[Union[:class:`GuildEmoji`, :class:`ApplicationEmoji`]]"
 msgstr ""
 
 #: disnake.Client.get_all_channels:1 of
