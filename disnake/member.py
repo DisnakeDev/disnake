@@ -628,7 +628,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         """Optional[:class:`Asset`]: Returns the member's display banner.
 
         For regular members this is just their banner, but
-        if they have a guild specific avatar then that
+        if they have a guild specific banner then that
         is returned instead.
 
         .. versionadded:: 2.10
