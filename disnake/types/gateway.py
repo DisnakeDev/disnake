@@ -434,6 +434,7 @@ class GuildMemberUpdateEvent(TypedDict):
     user: User
     nick: NotRequired[Optional[str]]
     avatar: Optional[str]
+    banner: Optional[str]
     joined_at: Optional[str]
     premium_since: NotRequired[Optional[str]]
     deaf: NotRequired[bool]

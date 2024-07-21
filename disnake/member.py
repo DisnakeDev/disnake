@@ -411,6 +411,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         self.activities = member.activities
         self._state = member._state
         self._avatar = member._avatar
+        self._banner = member._banner
         self._communication_disabled_until = member.current_timeout
         self._flags = member._flags
 
@@ -439,6 +440,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         self.premium_since = utils.parse_time(data.get("premium_since"))
         self._roles = utils.SnowflakeList(map(int, data["roles"]))
         self._avatar = data.get("avatar")
+        self._banner = data.get("banner")
         timeout_datetime = utils.parse_time(data.get("communication_disabled_until"))
         self._communication_disabled_until = timeout_datetime
         self._flags = data.get("flags", 0)
