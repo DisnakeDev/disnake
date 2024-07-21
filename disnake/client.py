@@ -1918,8 +1918,8 @@ class Client:
 
         .. note::
 
-            Using this, you will only receive :attr:`.Guild.owner`, :attr:`.Guild.icon`,
-            :attr:`.Guild.id`, and :attr:`.Guild.name` per :class:`.Guild`.
+            Using this, you will only receive :attr:`.Guild.id`, :attr:`.Guild.name`,
+            :attr:`.Guild.features`, :attr:`.Guild.icon`, and :attr:`.Guild.banner` per :class:`.Guild`.
 
         .. note::
 
