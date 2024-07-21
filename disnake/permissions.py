@@ -407,6 +407,9 @@ class Permissions(BaseFlags):
 
         .. versionchanged:: 2.9
             Added :attr:`send_voice_messages` permission.
+
+        .. versionchanged:: 2.10
+            Moved :attr:`use_application_commands` permission to :attr:`apps`.
         """
         return cls(
             send_messages=True,
@@ -423,7 +426,6 @@ class Permissions(BaseFlags):
             manage_threads=True,
             read_message_history=True,
             send_tts_messages=True,
-            use_slash_commands=True,
             send_voice_messages=True,
         )
 
@@ -438,12 +440,14 @@ class Permissions(BaseFlags):
 
         .. versionchanged:: 2.9
             Added :attr:`use_soundboard` and :attr:`use_external_sounds` permissions.
+
+        .. versionchanged:: 2.10
+            Moved :attr:`use_embedded_activities` permission to :attr:`apps`.
         """
         return cls(
             connect=True,
             speak=True,
             stream=True,
-            use_embedded_activities=True,
             use_soundboard=True,
             use_external_sounds=True,
             use_voice_activation=True,
@@ -477,6 +481,19 @@ class Permissions(BaseFlags):
             manage_channels=True,
             mute_members=True,
             move_members=True,
+        )
+
+    @classmethod
+    @cached_creation
+    def apps(cls) -> Self:
+        """A factory method that creates a :class:`Permissions` with all
+        "Apps" permissions from the official Discord UI set to ``True``.
+
+        .. versionadded:: 2.10
+        """
+        return cls(
+            use_application_commands=True,
+            use_embedded_activities=True,
         )
 
     @classmethod
