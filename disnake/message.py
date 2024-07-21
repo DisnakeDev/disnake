@@ -998,9 +998,9 @@ class Message(Hashable):
         )
         self.interaction: Optional[InteractionReference] = inter
 
-        self.poll = None
+        self.poll: Optional[poll.Poll] = None
         if poll_data := data.get("poll"):
-            self.poll: Optional[poll.Poll] = poll.Poll.from_dict(
+            self.poll = poll.Poll.from_dict(
                 channel=channel, message=self, state=state, data=poll_data
             )
 
