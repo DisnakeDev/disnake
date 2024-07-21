@@ -22,7 +22,7 @@ from typing import (
     overload,
 )
 
-from . import poll, utils
+from . import utils
 from .components import ActionRow, MessageComponent, _component_factory
 from .embeds import Embed
 from .emoji import Emoji
@@ -34,6 +34,7 @@ from .guild import Guild
 from .member import Member
 from .mixins import Hashable
 from .partial_emoji import PartialEmoji
+from .poll import Poll
 from .reaction import Reaction
 from .sticker import StickerItem
 from .threads import Thread
@@ -998,11 +999,9 @@ class Message(Hashable):
         )
         self.interaction: Optional[InteractionReference] = inter
 
-        self.poll: Optional[poll.Poll] = None
+        self.poll: Optional[Poll] = None
         if poll_data := data.get("poll"):
-            self.poll = poll.Poll.from_dict(
-                channel=channel, message=self, state=state, data=poll_data
-            )
+            self.poll = Poll.from_dict(channel=channel, message=self, state=state, data=poll_data)
 
         try:
             # if the channel doesn't have a guild attribute, we handle that

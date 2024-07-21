@@ -21,7 +21,7 @@ class PollAnswer(TypedDict):
     poll_media: PollMedia
 
 
-PollType = Literal[1]
+PollLayoutType = Literal[1]
 
 
 class PollAnswerCount(TypedDict):
@@ -44,7 +44,7 @@ class Poll(TypedDict):
     answers: List[PollAnswer]
     expiry: Optional[str]
     allow_multiselect: bool
-    layout_type: PollType
+    layout_type: PollLayoutType
     # sent only as part of responses from Discord's API/Gateway
     results: NotRequired[PollResult]
 

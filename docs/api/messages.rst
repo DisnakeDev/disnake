@@ -400,8 +400,15 @@ MessageType
 PollLayoutType
 ~~~~~~~~~~~~~~
 
-.. autoclass:: PollLayoutType
-    :members:
+.. class:: PollLayoutType
+
+    Specifies the layout of a :class:`Poll`.
+
+    .. versionadded:: 2.10
+
+    .. attribute:: default
+
+        The default poll layout type.
 
 Events
 ------

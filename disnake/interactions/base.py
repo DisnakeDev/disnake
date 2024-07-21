@@ -1567,6 +1567,10 @@ class InteractionMessage(Message):
         A list of components in the message.
     guild: Optional[:class:`Guild`]
         The guild that the message belongs to, if applicable.
+    poll: Optional[:class:`Poll`]
+        The poll contained in this message.
+
+        .. versionadded:: 2.10
     """
 
     __slots__ = ()

@@ -165,7 +165,7 @@ class RawMessagePollVoteActionEvent(_RawReprMixin):
         The message ID that got or lost a vote.
     user_id: :class:`int`
         The user ID who added the vote or whose vote was removed.
-    member: Optional[:class:`Member`]
+    cached_member: Optional[:class:`Member`]
         The member who added the vote. Available only when the guilds and members are cached.
     channel_id: :class:`int`
         The channel ID where the vote addition or removal took place.
@@ -182,7 +182,7 @@ class RawMessagePollVoteActionEvent(_RawReprMixin):
     __slots__ = (
         "message_id",
         "user_id",
-        "member",
+        "cached_member",
         "channel_id",
         "guild_id",
         "event_type",
@@ -196,7 +196,7 @@ class RawMessagePollVoteActionEvent(_RawReprMixin):
     ) -> None:
         self.message_id: int = int(data["message_id"])
         self.user_id: int = int(data["user_id"])
-        self.member: Optional[Member] = None
+        self.cached_member: Optional[Member] = None
         self.channel_id: int = int(data["channel_id"])
         self.event_type = event_type
         self.answer_id: int = int(data["answer_id"])

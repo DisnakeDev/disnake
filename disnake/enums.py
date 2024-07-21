@@ -1363,7 +1363,6 @@ class EntitlementType(Enum):
 
 class PollLayoutType(Enum):
     default = 1
-    """The default poll layout type."""
 
 
 T = TypeVar("T")
