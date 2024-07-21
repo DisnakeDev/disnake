@@ -24,7 +24,7 @@ from .role import Role
 from .snowflake import Snowflake, SnowflakeList
 from .sticker import GuildSticker
 from .threads import Thread, ThreadMember, ThreadMemberWithPresence, ThreadType
-from .user import User
+from .user import AvatarDecorationData, User
 from .voice import GuildVoiceState, SupportedModes
 
 
@@ -457,6 +457,7 @@ class GuildMemberUpdateEvent(TypedDict):
     pending: NotRequired[bool]
     communication_disabled_until: NotRequired[Optional[str]]
     flags: int
+    avatar_decoration_data: NotRequired[Optional[AvatarDecorationData]]
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-emojis-update

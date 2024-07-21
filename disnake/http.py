@@ -2412,6 +2412,20 @@ class HTTPClient:
             )
         )
 
+    def consume_entitlement(
+        self,
+        application_id: Snowflake,
+        entitlement_id: Snowflake,
+    ) -> Response[None]:
+        return self.request(
+            Route(
+                "POST",
+                "/applications/{application_id}/entitlements/{entitlement_id}/consume",
+                application_id=application_id,
+                entitlement_id=entitlement_id,
+            )
+        )
+
     # Application commands (global)
 
     def get_global_commands(
