@@ -204,6 +204,7 @@ class Permissions(BaseFlags):
         stream: bool = ...,
         use_application_commands: bool = ...,
         use_embedded_activities: bool = ...,
+        use_external_apps: bool = ...,
         use_external_emojis: bool = ...,
         use_external_sounds: bool = ...,
         use_external_stickers: bool = ...,
@@ -494,6 +495,7 @@ class Permissions(BaseFlags):
         return cls(
             use_application_commands=True,
             use_embedded_activities=True,
+            use_external_apps=True,
         )
 
     @classmethod
@@ -604,6 +606,7 @@ class Permissions(BaseFlags):
         stream: bool = ...,
         use_application_commands: bool = ...,
         use_embedded_activities: bool = ...,
+        use_external_apps: bool = ...,
         use_external_emojis: bool = ...,
         use_external_sounds: bool = ...,
         use_external_stickers: bool = ...,
@@ -1055,6 +1058,18 @@ class Permissions(BaseFlags):
         """
         return 1 << 46
 
+    @flag_value
+    def use_external_apps(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user's apps can send public responses.
+
+        If disabled, users can still use their user-installed applications, but the responses
+        will be forced ephemeral (i.e. only visible to them).
+        Only applies to user-installed apps that are not also installed to the guild.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 50
+
 
 def _augment_from_permissions(cls):
     cls.VALID_NAMES = set(Permissions.VALID_FLAGS)
@@ -1167,6 +1182,7 @@ class PermissionOverwrite:
         stream: Optional[bool]
         use_application_commands: Optional[bool]
         use_embedded_activities: Optional[bool]
+        use_external_apps: Optional[bool]
         use_external_emojis: Optional[bool]
         use_external_sounds: Optional[bool]
         use_external_stickers: Optional[bool]
@@ -1233,6 +1249,7 @@ class PermissionOverwrite:
         stream: Optional[bool] = ...,
         use_application_commands: Optional[bool] = ...,
         use_embedded_activities: Optional[bool] = ...,
+        use_external_apps: Optional[bool] = ...,
         use_external_emojis: Optional[bool] = ...,
         use_external_sounds: Optional[bool] = ...,
         use_external_stickers: Optional[bool] = ...,
@@ -1366,6 +1383,7 @@ class PermissionOverwrite:
         stream: Optional[bool] = ...,
         use_application_commands: Optional[bool] = ...,
         use_embedded_activities: Optional[bool] = ...,
+        use_external_apps: Optional[bool] = ...,
         use_external_emojis: Optional[bool] = ...,
         use_external_sounds: Optional[bool] = ...,
         use_external_stickers: Optional[bool] = ...,
