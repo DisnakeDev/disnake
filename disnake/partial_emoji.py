@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import Self
 
-    from .emoji import ApplicationEmoji, Emoji
+    from .emoji import AnyEmoji
     from .state import ConnectionState
     from .types.activity import ActivityEmoji as ActivityEmojiPayload
     from .types.emoji import Emoji as EmojiPayload, PartialEmoji as PartialEmojiPayload
@@ -254,7 +254,7 @@ class PartialEmoji(_EmojiTag, AssetMixin):
     # (e.g. default reaction, tag emoji)
     @staticmethod
     def _emoji_to_name_id(
-        emoji: Optional[Union[str, Emoji, ApplicationEmoji, PartialEmoji]]
+        emoji: Optional[Union[str, AnyEmoji, PartialEmoji]]
     ) -> Tuple[Optional[str], Optional[int]]:
         if emoji is None:
             return None, None

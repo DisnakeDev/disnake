@@ -9,7 +9,7 @@ from .partial_emoji import PartialEmoji, _EmojiTag
 from .user import User
 from .utils import MISSING, SnowflakeList, snowflake_time
 
-__all__ = ("BaseEmoji", "Emoji", "GuildEmoji", "ApplicationEmoji")
+__all__ = ("BaseEmoji", "Emoji", "GuildEmoji", "ApplicationEmoji", "AnyEmoji")
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -67,8 +67,6 @@ class BaseEmoji(_EmojiTag, AssetMixin):
         Whether the emoji is animated or not.
     managed: :class:`bool`
         Whether the emoji is managed by a Twitch integration.
-    guild_id: :class:`int`
-        The guild ID the emoji belongs to.
     available: :class:`bool`
         Whether the emoji is available for use.
     user: Optional[:class:`User`]
@@ -84,8 +82,6 @@ class BaseEmoji(_EmojiTag, AssetMixin):
         "id",
         "name",
         "_roles",
-        "guild_id",
-        "application_id",
         "user",
         "available",
     )
@@ -196,6 +192,8 @@ class GuildEmoji(BaseEmoji):
         :meth:`Guild.fetch_emoji`/:meth:`Guild.fetch_emojis` while
         having the :attr:`~Permissions.manage_guild_expressions` permission.
     """
+
+    __slots__: Tuple[str, ...] = BaseEmoji.__slots__ + ("guild_id",)
 
     def __init__(
         self, *, guild: Union[Guild, GuildPreview], state: ConnectionState, data: EmojiPayload
@@ -365,6 +363,8 @@ class ApplicationEmoji(BaseEmoji):
         The user that created the emoji.
     """
 
+    __slots__: Tuple[str, ...] = BaseEmoji.__slots__ + ("application_id",)
+
     def __init__(self, *, application_id: int, state: ConnectionState, data: EmojiPayload) -> None:
         self.application_id: int = application_id
         super().__init__(state=state, data=data)
@@ -426,3 +426,6 @@ class ApplicationEmoji(BaseEmoji):
             self.application_id, self.id, payload=payload
         )
         return self._state.store_application_emoji(self.application_id, data)
+
+
+AnyEmoji = Union[GuildEmoji, ApplicationEmoji]

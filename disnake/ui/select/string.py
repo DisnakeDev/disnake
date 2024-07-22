@@ -24,7 +24,7 @@ from .base import BaseSelect, P, V_co, _create_decorator
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ...emoji import ApplicationEmoji, Emoji
+    from ...emoji import AnyEmoji
     from ...partial_emoji import PartialEmoji
     from ..item import DecoratedItem, ItemCallbackType, Object
 
@@ -181,7 +181,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         label: str,
         value: str = MISSING,
         description: Optional[str] = None,
-        emoji: Optional[Union[str, Emoji, ApplicationEmoji, PartialEmoji]] = None,
+        emoji: Optional[Union[str, AnyEmoji, PartialEmoji]] = None,
         default: bool = False,
     ) -> None:
         """Adds an option to the select menu.

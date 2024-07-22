@@ -69,7 +69,7 @@ if TYPE_CHECKING:
     from .abc import Snowflake, SnowflakeTime
     from .asset import AssetBytes
     from .embeds import Embed
-    from .emoji import ApplicationEmoji, Emoji
+    from .emoji import AnyEmoji
     from .guild import Guild, GuildChannel as GuildChannelType
     from .member import Member, VoiceState
     from .message import AllowedMentions, Message, PartialMessage
@@ -3314,7 +3314,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         return self.flags.require_tag
 
     @property
-    def default_reaction(self) -> Optional[Union[Emoji, ApplicationEmoji, PartialEmoji]]:
+    def default_reaction(self) -> Optional[Union[AnyEmoji, PartialEmoji]]:
         """Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]:
         The default emoji shown for reacting to threads.
 
@@ -3932,7 +3932,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
         flags: ChannelFlags = ...,
         require_tag: bool = ...,
         available_tags: Sequence[ForumTag] = ...,
-        default_reaction: Optional[Union[str, Emoji, ApplicationEmoji, PartialEmoji]] = ...,
+        default_reaction: Optional[Union[str, AnyEmoji, PartialEmoji]] = ...,
         default_sort_order: Optional[ThreadSortOrder] = ...,
         default_layout: ThreadLayout = ...,
         reason: Optional[str] = ...,
@@ -3955,7 +3955,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
         flags: ChannelFlags = MISSING,
         require_tag: bool = MISSING,
         available_tags: Sequence[ForumTag] = MISSING,
-        default_reaction: Optional[Union[str, Emoji, ApplicationEmoji, PartialEmoji]] = MISSING,
+        default_reaction: Optional[Union[str, AnyEmoji, PartialEmoji]] = MISSING,
         default_sort_order: Optional[ThreadSortOrder] = MISSING,
         default_layout: ThreadLayout = MISSING,
         reason: Optional[str] = None,
@@ -4102,7 +4102,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
         default_thread_slowmode_delay: Optional[int] = MISSING,
         default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
         available_tags: Sequence[ForumTag] = MISSING,
-        default_reaction: Optional[Union[str, Emoji, ApplicationEmoji, PartialEmoji]] = MISSING,
+        default_reaction: Optional[Union[str, AnyEmoji, PartialEmoji]] = MISSING,
         default_sort_order: Optional[ThreadSortOrder] = MISSING,
         default_layout: ThreadLayout = MISSING,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
@@ -4362,7 +4362,7 @@ class MediaChannel(ThreadOnlyGuildChannel):
         flags: ChannelFlags = ...,
         require_tag: bool = ...,
         available_tags: Sequence[ForumTag] = ...,
-        default_reaction: Optional[Union[str, Emoji, ApplicationEmoji, PartialEmoji]] = ...,
+        default_reaction: Optional[Union[str, AnyEmoji, PartialEmoji]] = ...,
         default_sort_order: Optional[ThreadSortOrder] = ...,
         reason: Optional[str] = ...,
     ) -> MediaChannel:
@@ -4384,7 +4384,7 @@ class MediaChannel(ThreadOnlyGuildChannel):
         flags: ChannelFlags = MISSING,
         require_tag: bool = MISSING,
         available_tags: Sequence[ForumTag] = MISSING,
-        default_reaction: Optional[Union[str, Emoji, ApplicationEmoji, PartialEmoji]] = MISSING,
+        default_reaction: Optional[Union[str, AnyEmoji, PartialEmoji]] = MISSING,
         default_sort_order: Optional[ThreadSortOrder] = MISSING,
         reason: Optional[str] = None,
         **kwargs: Never,
@@ -4503,7 +4503,7 @@ class MediaChannel(ThreadOnlyGuildChannel):
         default_thread_slowmode_delay: Optional[int] = MISSING,
         default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
         available_tags: Sequence[ForumTag] = MISSING,
-        default_reaction: Optional[Union[str, Emoji, ApplicationEmoji, PartialEmoji]] = MISSING,
+        default_reaction: Optional[Union[str, AnyEmoji, PartialEmoji]] = MISSING,
         default_sort_order: Optional[ThreadSortOrder] = MISSING,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
         reason: Optional[str] = None,

@@ -44,7 +44,7 @@ from .channel import (
     VoiceChannel,
     _guild_channel_factory,
 )
-from .emoji import ApplicationEmoji, Emoji, GuildEmoji
+from .emoji import AnyEmoji, ApplicationEmoji, GuildEmoji
 from .entitlement import Entitlement
 from .enums import ApplicationCommandType, ChannelType, ComponentType, MessageType, Status, try_enum
 from .flags import ApplicationFlags, Intents, MemberCacheFlags
@@ -296,7 +296,7 @@ class ConnectionState:
         # - the weakref slot + object in user objects likely results in a small increase in memory usage
         # - accesses on `_users` are slower, e.g. `__getitem__` takes ~1us with weakrefs and ~0.2us without
         self._users: weakref.WeakValueDictionary[int, User] = weakref.WeakValueDictionary()
-        self._emojis: Dict[int, Union[GuildEmoji, ApplicationEmoji]] = {}
+        self._emojis: Dict[int, AnyEmoji] = {}
         self._stickers: Dict[int, GuildSticker] = {}
         self._guilds: Dict[int, Guild] = {}
 
@@ -518,18 +518,18 @@ class ConnectionState:
                 return cmd
 
     @property
-    def emojis(self) -> List[Union[GuildEmoji, ApplicationEmoji]]:
+    def emojis(self) -> List[AnyEmoji]:
         return list(self._emojis.values())
 
     @property
     def stickers(self) -> List[GuildSticker]:
         return list(self._stickers.values())
 
-    def get_emoji(self, emoji_id: Optional[int]) -> Optional[Union[GuildEmoji, ApplicationEmoji]]:
+    def get_emoji(self, emoji_id: Optional[int]) -> Optional[AnyEmoji]:
         # the keys of self._emojis are ints
         return self._emojis.get(emoji_id)  # type: ignore
 
-    def _remove_emoji(self, emoji: Union[GuildEmoji, ApplicationEmoji]) -> None:
+    def _remove_emoji(self, emoji: AnyEmoji) -> None:
         self._emojis.pop(emoji.id, None)
 
     def get_sticker(self, sticker_id: Optional[int]) -> Optional[GuildSticker]:
@@ -1942,7 +1942,7 @@ class ConnectionState:
 
     def _get_emoji_from_data(
         self, data: PartialEmojiPayload
-    ) -> Optional[Union[str, Emoji, ApplicationEmoji, PartialEmoji]]:
+    ) -> Optional[Union[str, AnyEmoji, PartialEmoji]]:
         """Convert partial emoji data to proper emoji.
         Returns unicode emojis as strings.
 
@@ -1973,7 +1973,7 @@ class ConnectionState:
         name: Optional[str],
         id: Optional[int],
         animated: Optional[bool] = False,
-    ) -> Optional[Union[Emoji, ApplicationEmoji, PartialEmoji]]:
+    ) -> Optional[Union[AnyEmoji, PartialEmoji]]:
         """Convert partial emoji fields to proper emoji, if possible.
         If both `id` and `name` are nullish, returns `None`.
 
@@ -1999,9 +1999,7 @@ class ConnectionState:
             animated=animated or False,
         )
 
-    def _upgrade_partial_emoji(
-        self, emoji: PartialEmoji
-    ) -> Union[Emoji, ApplicationEmoji, PartialEmoji, str]:
+    def _upgrade_partial_emoji(self, emoji: PartialEmoji) -> Union[AnyEmoji, PartialEmoji, str]:
         emoji_id = emoji.id
         if not emoji_id:
             return emoji.name

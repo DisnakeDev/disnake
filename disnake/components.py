@@ -25,7 +25,7 @@ from .utils import MISSING, assert_never, get_slots
 if TYPE_CHECKING:
     from typing_extensions import Self, TypeAlias
 
-    from .emoji import ApplicationEmoji, Emoji
+    from .emoji import AnyEmoji
     from .types.components import (
         ActionRow as ActionRowPayload,
         AnySelectMenu as AnySelectMenuPayload,
@@ -546,7 +546,7 @@ class SelectOption:
         label: str,
         value: str = MISSING,
         description: Optional[str] = None,
-        emoji: Optional[Union[str, Emoji, ApplicationEmoji, PartialEmoji]] = None,
+        emoji: Optional[Union[str, AnyEmoji, PartialEmoji]] = None,
         default: bool = False,
     ) -> None:
         self.label = label

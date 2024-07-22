@@ -40,7 +40,7 @@ from .text_input import TextInput
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ..emoji import ApplicationEmoji, Emoji
+    from ..emoji import AnyEmoji
     from ..message import Message
     from ..partial_emoji import PartialEmoji
     from ..types.components import ActionRow as ActionRowPayload
@@ -245,7 +245,7 @@ class ActionRow(Generic[UIComponentT]):
         disabled: bool = False,
         custom_id: Optional[str] = None,
         url: Optional[str] = None,
-        emoji: Optional[Union[str, Emoji, ApplicationEmoji, PartialEmoji]] = None,
+        emoji: Optional[Union[str, AnyEmoji, PartialEmoji]] = None,
     ) -> ButtonCompatibleActionRowT:
         """Add a button to the action row. Can only be used if the action
         row holds message components.

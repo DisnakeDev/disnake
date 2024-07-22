@@ -8,7 +8,7 @@ from . import utils
 from .partial_emoji import PartialEmoji, _EmojiTag
 
 if TYPE_CHECKING:
-    from .emoji import ApplicationEmoji, Emoji
+    from .emoji import AnyEmoji
     from .guild import Guild
     from .invite import PartialInviteGuild
     from .state import ConnectionState
@@ -51,11 +51,11 @@ class WelcomeScreenChannel:
         *,
         id: int,
         description: str,
-        emoji: Optional[Union[str, Emoji, ApplicationEmoji, PartialEmoji]] = None,
+        emoji: Optional[Union[str, AnyEmoji, PartialEmoji]] = None,
     ) -> None:
         self.id: int = id
         self.description: str = description
-        self.emoji: Optional[Union[Emoji, ApplicationEmoji, PartialEmoji]] = None
+        self.emoji: Optional[Union[AnyEmoji, PartialEmoji]] = None
         if emoji is None:
             self.emoji = None
         elif isinstance(emoji, str):

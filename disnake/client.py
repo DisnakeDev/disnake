@@ -46,7 +46,7 @@ from .appinfo import AppInfo
 from .application_role_connection import ApplicationRoleConnectionMetadata
 from .backoff import ExponentialBackoff
 from .channel import PartialMessageable, _threaded_channel_factory
-from .emoji import ApplicationEmoji, GuildEmoji
+from .emoji import AnyEmoji, ApplicationEmoji
 from .entitlement import Entitlement
 from .enums import ApplicationCommandType, ChannelType, Event, Status
 from .errors import (
@@ -566,7 +566,7 @@ class Client:
         return self._connection.guilds
 
     @property
-    def emojis(self) -> List[Union[GuildEmoji, ApplicationEmoji]]:
+    def emojis(self) -> List[AnyEmoji]:
         """The emojis that the connected client has.
 
         .. note::
@@ -1486,7 +1486,7 @@ class Client:
         """
         return self._connection.get_user(id)
 
-    def get_emoji(self, id: int, /) -> Optional[Union[GuildEmoji, ApplicationEmoji]]:
+    def get_emoji(self, id: int, /) -> Optional[AnyEmoji]:
         """Returns an emoji with the given ID.
 
         Parameters

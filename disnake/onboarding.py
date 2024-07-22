@@ -7,7 +7,7 @@ from .enums import OnboardingPromptType, try_enum
 from .mixins import Hashable
 
 if TYPE_CHECKING:
-    from .emoji import ApplicationEmoji, Emoji, PartialEmoji
+    from .emoji import AnyEmoji, PartialEmoji
     from .guild import Guild, GuildChannel
     from .role import Role
     from .types.onboarding import (
@@ -170,7 +170,7 @@ class OnboardingPromptOption(Hashable):
             else frozenset()
         )
 
-        self.emoji: Optional[Union[Emoji, ApplicationEmoji, PartialEmoji, str]]
+        self.emoji: Optional[Union[AnyEmoji, PartialEmoji, str]]
         if emoji_data := data.get("emoji"):
             self.emoji = guild._state.get_reaction_emoji(emoji_data)
         else:
