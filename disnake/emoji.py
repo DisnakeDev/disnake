@@ -193,7 +193,7 @@ class GuildEmoji(BaseEmoji):
         having the :attr:`~Permissions.manage_guild_expressions` permission.
     """
 
-    __slots__: Tuple[str, ...] = BaseEmoji.__slots__ + ("guild_id",)
+    __slots__: Tuple[str, ...] = ("guild_id",)
 
     def __init__(
         self, *, guild: Union[Guild, GuildPreview], state: ConnectionState, data: EmojiPayload
@@ -363,7 +363,7 @@ class ApplicationEmoji(BaseEmoji):
         The user that created the emoji.
     """
 
-    __slots__: Tuple[str, ...] = BaseEmoji.__slots__ + ("application_id",)
+    __slots__: Tuple[str, ...] = ("application_id",)
 
     def __init__(self, *, application_id: int, state: ConnectionState, data: EmojiPayload) -> None:
         self.application_id: int = application_id
