@@ -5,9 +5,9 @@ from __future__ import annotations
 import asyncio
 import datetime
 import io
+import os
 import re
 from base64 import b64decode, b64encode
-from os import PathLike
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -346,7 +346,7 @@ class Attachment(Hashable):
 
     async def save(
         self,
-        fp: Union[io.BufferedIOBase, PathLike],
+        fp: Union[io.BufferedIOBase, os.PathLike[str], os.PathLike[bytes]],
         *,
         seek_begin: bool = True,
         use_cached: bool = False,

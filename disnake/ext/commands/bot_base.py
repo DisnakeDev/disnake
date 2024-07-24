@@ -6,7 +6,6 @@ import asyncio
 import collections
 import collections.abc
 import inspect
-import logging
 import sys
 import traceback
 import warnings
@@ -15,7 +14,7 @@ from typing import TYPE_CHECKING, Any, Callable, Iterable, List, Optional, Type,
 import disnake
 
 from . import errors
-from .common_bot_base import CommonBotBase
+from .common_bot_base import CogT, CommonBotBase
 from .context import Context
 from .core import GroupMixin
 from .custom_warnings import MessageContentPrefixWarning
@@ -39,14 +38,12 @@ MISSING: Any = disnake.utils.MISSING
 
 T = TypeVar("T")
 CFT = TypeVar("CFT", bound="CoroFunc")
-CXT = TypeVar("CXT", bound="Context")
+CXT = TypeVar("CXT", bound="Context[Any]")
 
 PrefixType = Union[str, Iterable[str]]
 
-_log = logging.getLogger(__name__)
 
-
-def when_mentioned(bot: BotBase, msg: Message) -> List[str]:
+def when_mentioned(bot: BotBase[Any], msg: Message) -> List[str]:
     """A callable that implements a command prefix equivalent to being mentioned.
 
     These are meant to be passed into the :attr:`.Bot.command_prefix` attribute.
@@ -55,7 +52,7 @@ def when_mentioned(bot: BotBase, msg: Message) -> List[str]:
     return [f"<@{bot.user.id}> ", f"<@!{bot.user.id}> "]  # type: ignore
 
 
-def when_mentioned_or(*prefixes: str) -> Callable[[BotBase, Message], List[str]]:
+def when_mentioned_or(*prefixes: str) -> Callable[[BotBase[Any], Message], List[str]]:
     """A callable that implements when mentioned or other prefixes provided.
 
     These are meant to be passed into the :attr:`.Bot.command_prefix` attribute.
@@ -104,7 +101,7 @@ class _DefaultRepr:
 _default: Any = _DefaultRepr()
 
 
-class BotBase(CommonBotBase, GroupMixin):
+class BotBase(CommonBotBase[CogT], GroupMixin[CogT]):
     def __init__(
         self,
         command_prefix: Optional[
@@ -168,7 +165,11 @@ class BotBase(CommonBotBase, GroupMixin):
 
     # internal helpers
 
-    async def on_command_error(self, context: Context, exception: errors.CommandError) -> None:
+    async def on_command_error(
+        self,
+        context: Context[Self],  # pyright: ignore[reportInvalidTypeArguments]
+        exception: errors.CommandError,
+    ) -> None:
         """|coro|
 
         The default command error handler provided by the bot.
@@ -319,7 +320,7 @@ class BotBase(CommonBotBase, GroupMixin):
         self.add_check(func, call_once=True)
         return func
 
-    async def can_run(self, ctx: Context, *, call_once: bool = False) -> bool:
+    async def can_run(self, ctx: Context[Any], *, call_once: bool = False) -> bool:
         data = self._check_once if call_once else self._checks
 
         if len(data) == 0:
@@ -552,7 +553,7 @@ class BotBase(CommonBotBase, GroupMixin):
         ctx.command = self.all_commands.get(invoker)
         return ctx
 
-    async def invoke(self, ctx: Context) -> None:
+    async def invoke(self, ctx: Context[Any]) -> None:
         """|coro|
 
         Invokes the command given under the invocation context and
@@ -606,5 +607,5 @@ class BotBase(CommonBotBase, GroupMixin):
         ctx = await self.get_context(message)
         await self.invoke(ctx)
 
-    async def on_message(self, message) -> None:
+    async def on_message(self, message: Message) -> None:
         await self.process_commands(message)

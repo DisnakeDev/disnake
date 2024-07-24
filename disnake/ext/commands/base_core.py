@@ -37,7 +37,7 @@ if TYPE_CHECKING:
     from .cog import Cog
 
     ApplicationCommandInteractionT = TypeVar(
-        "ApplicationCommandInteractionT", bound=ApplicationCommandInteraction, covariant=True
+        "ApplicationCommandInteractionT", bound=ApplicationCommandInteraction[Any], covariant=True
     )
 
     P = ParamSpec("P")
@@ -282,7 +282,7 @@ class InvokableApplicationCommand(ABC):
             pass
 
     async def __call__(
-        self, interaction: ApplicationCommandInteraction, *args: Any, **kwargs: Any
+        self, interaction: ApplicationCommandInteraction[Any], *args: Any, **kwargs: Any
     ) -> Any:
         """|coro|
 
@@ -300,7 +300,7 @@ class InvokableApplicationCommand(ABC):
         else:
             return await self.callback(interaction, *args, **kwargs)
 
-    def _prepare_cooldowns(self, inter: ApplicationCommandInteraction) -> None:
+    def _prepare_cooldowns(self, inter: ApplicationCommandInteraction[Any]) -> None:
         if self._buckets.valid:
             dt = inter.created_at
             current = dt.replace(tzinfo=datetime.timezone.utc).timestamp()
@@ -310,7 +310,7 @@ class InvokableApplicationCommand(ABC):
                 if retry_after:
                     raise CommandOnCooldown(bucket, retry_after, self._buckets.type)  # type: ignore
 
-    async def prepare(self, inter: ApplicationCommandInteraction) -> None:
+    async def prepare(self, inter: ApplicationCommandInteraction[Any]) -> None:
         inter.application_command = self
 
         if not await self.can_run(inter):
@@ -327,7 +327,7 @@ class InvokableApplicationCommand(ABC):
                 await self._max_concurrency.release(inter)  # type: ignore
             raise
 
-    def is_on_cooldown(self, inter: ApplicationCommandInteraction) -> bool:
+    def is_on_cooldown(self, inter: ApplicationCommandInteraction[Any]) -> bool:
         """Checks whether the application command is currently on cooldown.
 
         Parameters
@@ -348,7 +348,7 @@ class InvokableApplicationCommand(ABC):
         current = dt.replace(tzinfo=datetime.timezone.utc).timestamp()
         return bucket.get_tokens(current) == 0
 
-    def reset_cooldown(self, inter: ApplicationCommandInteraction) -> None:
+    def reset_cooldown(self, inter: ApplicationCommandInteraction[Any]) -> None:
         """Resets the cooldown on this application command.
 
         Parameters
@@ -360,7 +360,7 @@ class InvokableApplicationCommand(ABC):
             bucket = self._buckets.get_bucket(inter)  # type: ignore
             bucket.reset()
 
-    def get_cooldown_retry_after(self, inter: ApplicationCommandInteraction) -> float:
+    def get_cooldown_retry_after(self, inter: ApplicationCommandInteraction[Any]) -> float:
         """Retrieves the amount of seconds before this application command can be tried again.
 
         Parameters
@@ -383,7 +383,9 @@ class InvokableApplicationCommand(ABC):
         return 0.0
 
     # This method isn't really usable in this class, but it's usable in subclasses.
-    async def invoke(self, inter: ApplicationCommandInteraction, *args: Any, **kwargs: Any) -> None:
+    async def invoke(
+        self, inter: ApplicationCommandInteraction[Any], *args: Any, **kwargs: Any
+    ) -> None:
         await self.prepare(inter)
 
         try:
@@ -429,7 +431,7 @@ class InvokableApplicationCommand(ABC):
         return hasattr(self, "on_error")
 
     async def _call_local_error_handler(
-        self, inter: ApplicationCommandInteraction, error: CommandError
+        self, inter: ApplicationCommandInteraction[Any], error: CommandError
     ) -> Any:
         if not self.has_error_handler():
             return
@@ -441,18 +443,18 @@ class InvokableApplicationCommand(ABC):
             return await injected(inter, error)
 
     async def _call_external_error_handlers(
-        self, inter: ApplicationCommandInteraction, error: CommandError
+        self, inter: ApplicationCommandInteraction[Any], error: CommandError
     ) -> None:
         """Overridden in subclasses"""
         raise error
 
     async def dispatch_error(
-        self, inter: ApplicationCommandInteraction, error: CommandError
+        self, inter: ApplicationCommandInteraction[Any], error: CommandError
     ) -> None:
         if not await self._call_local_error_handler(inter, error):
             await self._call_external_error_handlers(inter, error)
 
-    async def call_before_hooks(self, inter: ApplicationCommandInteraction) -> None:
+    async def call_before_hooks(self, inter: ApplicationCommandInteraction[Any]) -> None:
         # now that we're done preparing we can call the pre-command hooks
         # first, call the command local hook:
         cog = self.cog
@@ -487,7 +489,7 @@ class InvokableApplicationCommand(ABC):
         if hook is not None:
             await hook(inter)
 
-    async def call_after_hooks(self, inter: ApplicationCommandInteraction) -> None:
+    async def call_after_hooks(self, inter: ApplicationCommandInteraction[Any]) -> None:
         cog = self.cog
         if self._after_invoke is not None:
             instance = getattr(self._after_invoke, "__self__", cog)
@@ -568,7 +570,7 @@ class InvokableApplicationCommand(ABC):
         """Optional[:class:`str`]: The name of the cog this application command belongs to, if any."""
         return type(self.cog).__cog_name__ if self.cog is not None else None
 
-    async def can_run(self, inter: ApplicationCommandInteraction) -> bool:
+    async def can_run(self, inter: ApplicationCommandInteraction[Any]) -> bool:
         """|coro|
 
         Checks if the command can be executed by checking all the predicates

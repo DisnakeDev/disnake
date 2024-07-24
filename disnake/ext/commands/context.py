@@ -32,7 +32,7 @@ MISSING: Any = disnake.utils.MISSING
 
 
 T = TypeVar("T")
-BotT = TypeVar("BotT", bound="Union[Bot, AutoShardedBot]")
+BotT = TypeVar("BotT", bound="Union[Bot[Any], AutoShardedBot[Any]]")
 CogT = TypeVar("CogT", bound="Cog")
 
 if TYPE_CHECKING:
@@ -106,10 +106,10 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         args: List[Any] = MISSING,
         kwargs: Dict[str, Any] = MISSING,
         prefix: Optional[str] = None,
-        command: Optional[Command] = None,
+        command: Optional[Command[Any, ..., Any]] = None,
         invoked_with: Optional[str] = None,
         invoked_parents: List[str] = MISSING,
-        invoked_subcommand: Optional[Command] = None,
+        invoked_subcommand: Optional[Command[Any, ..., Any]] = None,
         subcommand_passed: Optional[str] = None,
         command_failed: bool = False,
         current_parameter: Optional[inspect.Parameter] = None,
@@ -119,11 +119,11 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         self.args: List[Any] = args or []
         self.kwargs: Dict[str, Any] = kwargs or {}
         self.prefix: Optional[str] = prefix
-        self.command: Optional[Command] = command
+        self.command: Optional[Command[Any, ..., Any]] = command
         self.view: StringView = view
         self.invoked_with: Optional[str] = invoked_with
         self.invoked_parents: List[str] = invoked_parents or []
-        self.invoked_subcommand: Optional[Command] = invoked_subcommand
+        self.invoked_subcommand: Optional[Command[Any, ..., Any]] = invoked_subcommand
         self.subcommand_passed: Optional[str] = subcommand_passed
         self.command_failed: bool = command_failed
         self.current_parameter: Optional[inspect.Parameter] = current_parameter
@@ -371,7 +371,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         return await self.message.reply(content, **kwargs)
 
 
-class GuildContext(Context):
+class GuildContext(Context[BotT]):
     """A Context subclass meant for annotation
 
     No runtime behavior is changed but annotations are modified
@@ -384,4 +384,4 @@ class GuildContext(Context):
     me: Member
 
 
-AnyContext = Union[Context, ApplicationCommandInteraction]
+AnyContext = Union[Context[BotT], ApplicationCommandInteraction[BotT]]
