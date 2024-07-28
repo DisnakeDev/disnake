@@ -47,7 +47,7 @@ __all__ = (
     "RawTypingEvent",
     "RawGuildMemberRemoveEvent",
     "RawPresenceUpdateEvent",
-    "RawMessagePollVoteActionEvent",
+    "RawPollVoteActionEvent",
 )
 
 
@@ -153,7 +153,7 @@ class RawMessageUpdateEvent(_RawReprMixin):
 PollEventType = Literal["POLL_VOTE_ADD", "POLL_VOTE_REMOVE"]
 
 
-class RawMessagePollVoteActionEvent(_RawReprMixin):
+class RawPollVoteActionEvent(_RawReprMixin):
     """Represents the event payload for :func:`on_raw_message_poll_vote_add` and
     :func:`on_raw_message_poll_vote_remove` events.
 
