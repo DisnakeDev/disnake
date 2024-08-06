@@ -1,0 +1,1 @@
+Add new ``poll_result`` message type.
