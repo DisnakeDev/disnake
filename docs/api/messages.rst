@@ -369,6 +369,12 @@ MessageType
 
         .. versionadded:: 2.10
 
+    .. attribute:: poll_result
+
+        The system message denoting that a poll expired, announcing the most voted answer.
+
+        .. versionadded:: 2.10
+
 Events
 ------
 
