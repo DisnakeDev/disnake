@@ -1004,6 +1004,19 @@ class Member(disnake.abc.Messageable, _UserTag):
             data = await http.edit_member(guild_id, self.id, reason=reason, **payload)
             return Member(data=data, guild=self.guild, state=self._state)
 
+    async def fetch_voice_state(self) -> VoiceState:
+        """|coro|
+
+        Fetches the :class:`VoiceState` of the member.
+
+        .. versionadded:: 2.10
+        """
+        data = await self._state.http.get_voice_state(self.guild.id, self.id)
+        channel_id = utils._get_as_snowflake(data, "channel_id")
+
+        _, _, after = self.guild._update_voice_state(data, channel_id)
+        return after
+
     async def request_to_speak(self) -> None:
         """|coro|
 
