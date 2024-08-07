@@ -209,14 +209,6 @@ PollMedia
 .. autoclass:: PollMedia
     :members:
 
-PollResult
-~~~~~~~~~~
-
-.. attributetable:: PollResult
-
-.. autoclass:: PollResult()
-    :members:
-
 PollAnswerCount
 ~~~~~~~~~~~~~~~
 
