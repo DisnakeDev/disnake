@@ -945,16 +945,16 @@ class ConnectionState:
             if member is not None:
                 raw.cached_member = member
 
-        self.dispatch(f"raw_message_poll_vote_{event_type}", raw)
+        self.dispatch(f"raw_poll_vote_{event_type}", raw)
 
         if raw.cached_member is not None and answer is not None:
-            self.dispatch(f"message_poll_vote_{event_type}", raw.cached_member, answer)
+            self.dispatch(f"poll_vote_{event_type}", raw.cached_member, answer)
 
-    def parse_message_poll_vote_add(self, data: gateway.MessagePollVoteAddEvent) -> None:
+    def parse_message_poll_vote_add(self, data: gateway.PollVoteAddEvent) -> None:
         raw = RawPollVoteActionEvent(data, "POLL_VOTE_ADD")
         self._handle_poll_event(raw, "add")
 
-    def parse_message_poll_vote_remove(self, data: gateway.MessagePollVoteRemoveEvent) -> None:
+    def parse_message_poll_vote_remove(self, data: gateway.PollVoteRemoveEvent) -> None:
         raw = RawPollVoteActionEvent(data, "POLL_VOTE_REMOVE")
         self._handle_poll_event(raw, "remove")
 

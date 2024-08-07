@@ -1243,7 +1243,7 @@ This section documents events related to Discord chat messages.
     :param messages: The messages that have been deleted.
     :type messages: List[:class:`Message`]
 
-.. function:: on_message_poll_vote_add(member, answer)
+.. function:: on_poll_vote_add(member, answer)
 
     Called when a vote is added on a poll. If the guild or the member is not found in the internal cache, then this event will not be called.
 
@@ -1259,7 +1259,7 @@ This section documents events related to Discord chat messages.
     :param answer: The :class:`PollAnswer` object for which the vote was added.
     :type answer: :class:`PollAnswer`
 
-.. function:: on_message_poll_vote_remove(member, answer)
+.. function:: on_poll_vote_remove(member, answer)
 
     Called when a vote is removed on a poll. If the guild or the member is not found in the internal cache, then this event will not be called.
 
@@ -1325,21 +1325,21 @@ This section documents events related to Discord chat messages.
     :param payload: The raw event payload data.
     :type payload: :class:`RawBulkMessageDeleteEvent`
 
-.. function:: on_raw_message_poll_vote_add(payload)
+.. function:: on_raw_poll_vote_add(payload)
 
-    Called when a vote is added on a poll. Unlike :func:`on_message_poll_vote_add`, this is
+    Called when a vote is added on a poll. Unlike :func:`on_poll_vote_add`, this is
     called regardless of the guilds being in the internal guild cache or not.
 
     :param payload: The raw event payload data.
-    :type payload: :class:`RawMessagePollVoteActionEvent`
+    :type payload: :class:`RawPollVoteActionEvent`
 
-.. function:: on_raw_message_poll_vote_remove(payload)
+.. function:: on_raw_poll_vote_remove(payload)
 
-    Called when a vote is removed on a poll. Unlike :func:`on_message_poll_vote_remove`, this is
+    Called when a vote is removed on a poll. Unlike :func:`on_poll_vote_remove`, this is
     called regardless of the guilds being in the internal guild cache or not.
 
     :param payload: The raw event payload data.
-    :type payload: :class:`RawMessagePollVoteActionEvent`
+    :type payload: :class:`RawPollVoteActionEvent`
 
 .. function:: on_reaction_add(reaction, user)
 

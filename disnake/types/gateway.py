@@ -323,7 +323,7 @@ class MessageReactionRemoveEmojiEvent(TypedDict):
     emoji: PartialEmoji
 
 
-class MessagePollVoteAddEvent(TypedDict):
+class PollVoteAddEvent(TypedDict):
     channel_id: Snowflake
     guild_id: NotRequired[Snowflake]
     message_id: Snowflake
@@ -331,7 +331,7 @@ class MessagePollVoteAddEvent(TypedDict):
     answer_id: int
 
 
-class MessagePollVoteRemoveEvent(TypedDict):
+class PollVoteRemoveEvent(TypedDict):
     channel_id: Snowflake
     guild_id: NotRequired[Snowflake]
     message_id: Snowflake

@@ -19,13 +19,13 @@ if TYPE_CHECKING:
         IntegrationDeleteEvent,
         MessageDeleteBulkEvent,
         MessageDeleteEvent,
-        MessagePollVoteAddEvent,
-        MessagePollVoteRemoveEvent,
         MessageReactionAddEvent,
         MessageReactionRemoveAllEvent,
         MessageReactionRemoveEmojiEvent,
         MessageReactionRemoveEvent,
         MessageUpdateEvent,
+        PollVoteAddEvent,
+        PollVoteRemoveEvent,
         PresenceUpdateEvent,
         ThreadDeleteEvent,
         TypingStartEvent,
@@ -154,8 +154,8 @@ PollEventType = Literal["POLL_VOTE_ADD", "POLL_VOTE_REMOVE"]
 
 
 class RawPollVoteActionEvent(_RawReprMixin):
-    """Represents the event payload for :func:`on_raw_message_poll_vote_add` and
-    :func:`on_raw_message_poll_vote_remove` events.
+    """Represents the event payload for :func:`on_raw_poll_vote_add` and
+    :func:`on_raw_poll_vote_remove` events.
 
     .. versionadded:: 2.10
 
@@ -191,7 +191,7 @@ class RawPollVoteActionEvent(_RawReprMixin):
 
     def __init__(
         self,
-        data: Union[MessagePollVoteAddEvent, MessagePollVoteRemoveEvent],
+        data: Union[PollVoteAddEvent, PollVoteRemoveEvent],
         event_type: PollEventType,
     ) -> None:
         self.message_id: int = int(data["message_id"])
