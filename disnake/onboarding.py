@@ -1,15 +1,18 @@
 # SPDX-License-Identifier: MIT
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, FrozenSet, List, Optional, Union
+import os
+from typing import TYPE_CHECKING, FrozenSet, Iterable, List, Optional, Union, overload
 
-from .enums import OnboardingPromptType, try_enum
+from .emoji import Emoji, PartialEmoji
+from .enums import OnboardingMode, OnboardingPromptType, try_enum
 from .mixins import Hashable
 
 if TYPE_CHECKING:
-    from .emoji import Emoji, PartialEmoji
+    from .abc import Snowflake
     from .guild import Guild, GuildChannel
     from .role import Role
+    from .types.emoji import Emoji as EmojiPayload
     from .types.onboarding import (
         Onboarding as OnboardingPayload,
         OnboardingPrompt as OnboardingPromptPayload,
@@ -19,7 +22,9 @@ if TYPE_CHECKING:
 __all__ = (
     "Onboarding",
     "OnboardingPrompt",
+    "APIOnboardingPrompt",
     "OnboardingPromptOption",
+    "APIOnboardingPromptOption",
 )
 
 
@@ -32,28 +37,25 @@ class Onboarding:
     ----------
     guild: :class:`Guild`
         The guild this onboarding is part of.
-    prompts: List[:class:`OnboardingPrompt`]
+    prompts: List[:class:`APIOnboardingPrompt`]
         The prompts shown during onboarding and in community customization.
     enabled: :class:`bool`
         Whether onboarding is enabled.
     default_channel_ids: FrozenSet[:class:`int`]
         The IDs of the channels that will be shown to new members by default.
+    mode: :class:`OnboardingMode`
+        The onboarding mode, defining criteria for enabling onboarding.
     """
 
-    __slots__ = (
-        "guild",
-        "prompts",
-        "enabled",
-        "default_channel_ids",
-    )
+    __slots__ = ("guild", "prompts", "enabled", "default_channel_ids", "mode")
 
     def __init__(self, *, guild: Guild, data: OnboardingPayload) -> None:
         self.guild: Guild = guild
         self._from_data(data)
 
     def _from_data(self, data: OnboardingPayload) -> None:
-        self.prompts: List[OnboardingPrompt] = [
-            OnboardingPrompt(data=prompt, guild=self.guild) for prompt in data["prompts"]
+        self.prompts: List[APIOnboardingPrompt] = [
+            APIOnboardingPrompt(data=prompt, guild=self.guild) for prompt in data["prompts"]
         ]
         self.enabled: bool = data["enabled"]
         self.default_channel_ids: FrozenSet[int] = (
@@ -61,6 +63,7 @@ class Onboarding:
             if (exempt_channels := data["default_channel_ids"])
             else frozenset()
         )
+        self.mode: OnboardingMode = try_enum(OnboardingMode, data["mode"])
 
     def __repr__(self) -> str:
         return (
@@ -78,16 +81,18 @@ class OnboardingPrompt(Hashable):
 
     .. versionadded:: 2.9
 
-    Attributes
+    .. versionchanged:: 2.10
+
+        This is now user-constructible.
+
+    Parameters
     ----------
-    id: :class:`int`
-        The onboarding prompt's ID.
-    type: :class:`OnboardingPromptType`
-        The onboarding prompt's type.
-    options: List[:class:`OnboardingPromptOption`]
-        The onboarding prompt's options.
     title: :class:`str`
         The onboarding prompt's title.
+    options: List[:class:`OnboardingPromptOption`]
+        The onboarding prompt's options.
+    type: :class:`OnboardingPromptType`
+        The onboarding prompt's type.
     single_select: :class:`bool`
         Whether users are limited to selecting one option for the prompt.
     required: :class:`bool`
@@ -97,29 +102,25 @@ class OnboardingPrompt(Hashable):
         If ``False``, the prompt will only appear in community customization.
     """
 
-    __slots__ = (
-        "guild",
-        "id",
-        "title",
-        "options",
-        "single_select",
-        "required",
-        "in_onboarding",
-        "type",
-    )
+    __slots__ = ("id", "title", "options", "type", "single_select", "required", "in_onboarding")
 
-    def __init__(self, *, guild: Guild, data: OnboardingPromptPayload) -> None:
-        self.guild = guild
-
-        self.id: int = int(data["id"])
-        self.title: str = data["title"]
-        self.options: List[OnboardingPromptOption] = [
-            OnboardingPromptOption(data=option, guild=guild) for option in data["options"]
-        ]
-        self.single_select: bool = data["single_select"]
-        self.required: bool = data["required"]
-        self.in_onboarding: bool = data["in_onboarding"]
-        self.type: OnboardingPromptType = try_enum(OnboardingPromptType, data["type"])
+    def __init__(
+        self,
+        *,
+        title: str,
+        options: List[OnboardingPromptOption],
+        type: OnboardingPromptType,
+        single_select: bool = False,
+        required: bool = False,
+        in_onboarding: bool = True,
+    ) -> None:
+        self.id: int = 0
+        self.title: str = title
+        self.options: List[OnboardingPromptOption] = options
+        self.type: OnboardingPromptType = type
+        self.single_select: bool = single_select
+        self.required: bool = required
+        self.in_onboarding: bool = in_onboarding
 
     def __str__(self) -> str:
         return self.title
@@ -131,50 +132,138 @@ class OnboardingPrompt(Hashable):
             f" in_onboarding={self.in_onboarding!r} type={self.type!r}>"
         )
 
+    def to_dict(self) -> OnboardingPromptPayload:
+        return {
+            "id": int.from_bytes(os.urandom(4), "big"),
+            "title": self.title,
+            "options": [option.to_dict() for option in self.options],
+            "single_select": self.single_select,
+            "required": self.required,
+            "in_onboarding": self.in_onboarding,
+            "type": self.type.value,
+        }
+
+
+class APIOnboardingPrompt(OnboardingPrompt):
+    """Represents an onboarding prompt returned by the API.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    id: :class:`int`
+        The onboarding prompt's ID.
+    title: :class:`str`
+        The onboarding prompt's title.
+    options: List[:class:`APIOnboardingPromptOption`]
+        The onboarding prompt's options.
+    type: :class:`OnboardingPromptType`
+        The onboarding prompt's type.
+    single_select: :class:`bool`
+        Whether users are limited to selecting one option for the prompt.
+    required: :class:`bool`
+        Whether the prompt is required before a user completes the onboarding flow.
+    in_onboarding: :class:`bool`
+        Whether the prompt is present in the onboarding flow.
+        If ``False``, the prompt will only appear in community customization.
+    """
+
+    def __init__(self, *, data: OnboardingPromptPayload, guild: Guild) -> None:
+        self.id: int = int(data["id"])
+        self.title: str = data["title"]
+        self.options: List[APIOnboardingPromptOption] = [
+            APIOnboardingPromptOption(data=o, guild=guild) for o in data["options"]
+        ]
+        self.single_select: bool = data["single_select"]
+        self.required: bool = data["required"]
+        self.in_onboarding: bool = data["in_onboarding"]
+        self.type: OnboardingPromptType = try_enum(OnboardingPromptType, data["type"])
+
+    def __repr__(self) -> str:
+        return (
+            f"<APIOnboardingPrompt id={self.id!r} title={self.title!r} options={self.options!r}"
+            f" single_select={self.single_select!r} required={self.required!r}"
+            f" in_onboarding={self.in_onboarding!r} type={self.type!r}>"
+        )
+
 
 class OnboardingPromptOption(Hashable):
     """Represents an onboarding prompt option.
 
     .. versionadded:: 2.9
 
-    Attributes
+    .. versionchanged:: 2.10
+
+        This is now user-constructible.
+
+    Parameters
     ----------
-    id: :class:`int`
-        The prompt option's ID.
-    emoji: Optional[Union[:class:`PartialEmoji`, :class:`Emoji`, :class:`str`]]
-        The prompt option's emoji.
     title: :class:`str`
         The prompt option's title.
     description: Optional[:class:`str`]
         The prompt option's description.
-    role_ids: FrozenSet[:class:`int`]
+    emoji: Optional[Union[:class:`PartialEmoji`, :class:`Emoji`, :class:`str`]]
+        The prompt option's emoji.
+    roles: Iterable[:class:`.abc.Snowflake`]
         The IDs of the roles that will be added to the user when they select this option.
-    channel_ids: FrozenSet[:class:`int`]
+        This must be set if ``channels`` is not set.
+    channels: Iterable[:class:`.abc.Snowflake`]
         The IDs of the channels that the user will see when they select this option.
+        This must be set if ``roles`` is not set.
     """
 
-    __slots__ = ("id", "title", "description", "emoji", "guild", "role_ids", "channel_ids")
+    __slots__ = (
+        "id",
+        "title",
+        "description",
+        "emoji",
+        "guild",
+        "role_ids",
+        "channel_ids",
+        "_guild",
+    )
 
-    def __init__(self, *, guild: Guild, data: OnboardingPromptOptionPayload) -> None:
-        self.guild: Guild = guild
+    @overload
+    def __init__(
+        self,
+        *,
+        title: str,
+        description: Optional[str] = None,
+        emoji: Optional[Union[str, PartialEmoji, Emoji]] = None,
+        roles: Iterable[Snowflake],
+        channels: Optional[Iterable[Snowflake]] = None,
+    ) -> None:
+        ...
 
-        self.id: int = int(data["id"])
-        self.title: str = data["title"]
-        self.description: Optional[str] = data["description"]
-        self.role_ids: FrozenSet[int] = (
-            frozenset(map(int, roles_ids)) if (roles_ids := data.get("role_ids")) else frozenset()
-        )
+    @overload
+    def __init__(
+        self,
+        *,
+        title: str,
+        description: Optional[str] = None,
+        emoji: Optional[Union[str, PartialEmoji, Emoji]] = None,
+        roles: Optional[Iterable[Snowflake]] = None,
+        channels: Iterable[Snowflake],
+    ) -> None:
+        ...
+
+    def __init__(
+        self,
+        *,
+        title: str,
+        description: Optional[str] = None,
+        emoji: Optional[Union[str, PartialEmoji, Emoji]] = None,
+        roles: Optional[Iterable[Snowflake]] = None,
+        channels: Optional[Iterable[Snowflake]] = None,
+    ) -> None:
+        self.id: int = 0
+        self.title: str = title
+        self.description: Optional[str] = description
+        self.role_ids: FrozenSet[int] = frozenset([r.id for r in roles]) if roles else frozenset()
         self.channel_ids: FrozenSet[int] = (
-            frozenset(map(int, channels_ids))
-            if (channels_ids := data.get("channel_ids"))
-            else frozenset()
+            frozenset([c.id for c in channels]) if channels else frozenset()
         )
-
-        self.emoji: Optional[Union[Emoji, PartialEmoji, str]]
-        if emoji_data := data.get("emoji"):
-            self.emoji = guild._state.get_reaction_emoji(emoji_data)
-        else:
-            self.emoji = None
+        self.emoji: Optional[Union[Emoji, PartialEmoji, str]] = emoji
 
     def __str__(self) -> str:
         return self.title
@@ -185,12 +274,78 @@ class OnboardingPromptOption(Hashable):
             f"description={self.description!r} emoji={self.emoji!r}>"
         )
 
+    def to_dict(self) -> OnboardingPromptOptionPayload:
+        payload: OnboardingPromptOptionPayload = {
+            "id": self.id,
+            "title": self.title,
+            "description": self.description,
+            "role_ids": list(self.role_ids),
+            "channel_ids": list(self.channel_ids),
+        }
+        emoji: EmojiPayload = {}  # type: ignore
+
+        if isinstance(self.emoji, (Emoji, PartialEmoji)):
+            emoji = self.emoji._to_partial().to_dict()
+        elif isinstance(self.emoji, str):
+            emoji["name"] = self.emoji
+
+        if emoji_name := emoji.get("name"):
+            payload["emoji_name"] = emoji_name
+        if emoji_id := emoji.get("id"):
+            payload["emoji_id"] = emoji_id
+        if (emoji_animated := emoji.get("animated")) is not None:
+            payload["emoji_animated"] = emoji_animated
+
+        return payload
+
+
+class APIOnboardingPromptOption(OnboardingPromptOption):
+    """Represents an onboarding prompt option returned by the API.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    id: :class:`int`
+        The onboarding prompt option's ID.
+    title: :class:`str`
+        The prompt option's title.
+    description: Optional[:class:`str`]
+        The prompt option's description.
+    emoji: Optional[Union[:class:`PartialEmoji`, :class:`Emoji`, :class:`str`]]
+        The prompt option's emoji.
+    role_ids: FrozenSet[:class:`int`]
+        The IDs of the roles that will be added to the user when they select this option.
+    channel_ids: FrozenSet[:class:`int`]
+        The IDs of the channels that the user will see when they select this option.
+    """
+
+    def __init__(self, *, data: OnboardingPromptOptionPayload, guild: Guild) -> None:
+        self.id: int = int(data["id"])
+        self.title: str = data["title"]
+        self.description: Optional[str] = data.get("description")
+        self.role_ids: FrozenSet[int] = frozenset(int(r) for r in data["role_ids"])
+        self.channel_ids: FrozenSet[int] = frozenset(int(c) for c in data["channel_ids"])
+        self._guild: Guild = guild
+
+        if emoji_data := data.get("emoji"):
+            emoji = guild._state._get_emoji_from_data(emoji_data)
+        else:
+            emoji = None
+        self.emoji = emoji
+
+    def __repr__(self) -> str:
+        return (
+            f"<APIOnboardingPromptOption id={self.id!r} title={self.title!r} "
+            f"description={self.description!r} emoji={self.emoji!r}>"
+        )
+
     @property
     def roles(self) -> List[Role]:
         """List[:class:`Role`]: A list of roles that will be added to the user when they select this option."""
-        return list(filter(None, map(self.guild.get_role, self.role_ids)))
+        return list(filter(None, map(self._guild.get_role, self.role_ids)))
 
     @property
     def channels(self) -> List[GuildChannel]:
         """List[:class:`abc.GuildChannel`]: A list of channels that the user will see when they select this option."""
-        return list(filter(None, map(self.guild.get_channel, self.channel_ids)))
+        return list(filter(None, map(self._guild.get_channel, self.channel_ids)))

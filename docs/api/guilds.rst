@@ -105,12 +105,28 @@ OnboardingPrompt
 .. autoclass:: OnboardingPrompt()
     :members:
 
+APIOnboardingPromptOption
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: APIOnboardingPromptOption
+
+.. autoclass:: APIOnboardingPromptOption()
+    :members:
+
 OnboardingPromptOption
 ~~~~~~~~~~~~~~~~~~~~~~
 
 .. attributetable:: OnboardingPromptOption
 
 .. autoclass:: OnboardingPromptOption()
+    :members:
+
+APIOnboardingPrompt
+~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: APIOnboardingPrompt
+
+.. autoclass:: APIOnboardingPrompt()
     :members:
 
 Data Classes
@@ -331,6 +347,23 @@ OnboardingPromptType
     .. attribute:: dropdown
 
         The prompt is a dropdown prompt.
+
+OnboardingMode
+~~~~~~~~~~~~~~
+
+.. class:: OnboardingMode
+
+    Represents the criteria used to satisfy onboarding constraints that are required for enabling it.
+
+    .. versionadded:: 2.10
+
+    .. attribute:: default
+
+        Counts only :attr:`Onboarding.default_channels` towards constraints.
+
+    .. attribute:: advanced
+
+        Counts :attr:`Onboarding.default_channels` and :attr:`~Onboarding.prompts` towards constraints.
 
 
 Events
