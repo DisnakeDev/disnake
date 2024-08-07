@@ -26,11 +26,9 @@ if TYPE_CHECKING:
         PollCreateMediaPayload,
         PollCreatePayload,
         PollMedia as PollMediaPayload,
-        PollResult as PollResultPayload,
     )
 
 __all__ = (
-    "PollResult",
     "PollAnswerCount",
     "PollMedia",
     "PollAnswer",
@@ -49,53 +47,23 @@ class PollAnswerCount:
         The ID of the answer the counts are of.
     count: :class:`int`
         The number of votes for this answer.
-    me_voted: :class:`bool`
+    self_voted: :class:`bool`
         Whether the current user voted for this answer.
     """
 
     __slots__ = (
         "id",
         "count",
-        "me_voted",
+        "self_voted",
     )
 
     def __init__(self, data: PollAnswerCountPayload) -> None:
         self.id: int = int(data["id"])
         self.count: int = int(data["count"])
-        self.me_voted: bool = data["me_voted"]
+        self.self_voted: bool = data["me_voted"]
 
     def __repr__(self) -> str:
-        return (
-            f"<{self.__class__.__name__} id={self.id} count={self.count} me_voted={self.me_voted}>"
-        )
-
-
-class PollResult:
-    """Represents a poll result from discord.
-
-    .. versionadded:: 2.10
-
-    Attributes
-    ----------
-    is_finalized: :class:`bool`
-        Whether the votes have been precisely counted.
-    answer_counts: List[:class:`PollAnswerCount`]
-        The counts for each answer.
-    """
-
-    __slots__ = (
-        "is_finalized",
-        "answer_counts",
-    )
-
-    def __init__(self, data: PollResultPayload) -> None:
-        self.is_finalized: bool = data["is_finalized"]
-        self.answer_counts: List[PollAnswerCount] = [
-            PollAnswerCount(answer) for answer in data["answer_counts"]
-        ]
-
-    def __repr__(self) -> str:
-        return f"<{self.__class__.__name__} is_finalized={self.is_finalized}>"
+        return f"<{self.__class__.__name__} id={self.id} count={self.count} self_voted={self.self_voted}>"
 
 
 class PollMedia:
@@ -187,16 +155,21 @@ class PollAnswer:
     poll: Optional[:class:`Poll`]
         The poll that contain this answer. This will be None only when the object
         is builded manually. The library always provide this attribute.
+    count: :class:`int`
+        The number of votes for this answer.
+    self_voted: :class:`bool`
+        Whether the current user voted for this answer.
     """
 
-    __slots__ = ("_state", "_channel_id", "_message_id", "id", "media", "poll")
+    __slots__ = ("_state", "id", "media", "poll", "count", "self_voted")
 
     def __init__(self, media: PollMedia) -> None:
         self._state: Optional[ConnectionState] = None
         self.id: Optional[int] = None
         self.poll: Optional[Poll] = None
-
         self.media = media
+        self.count: int = 0
+        self.self_voted: bool = False
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} poll_media={self.media!r}>"
@@ -299,28 +272,16 @@ class Poll:
         The question of the poll.
     answers: List[:class:`PollAnswer`]
         The available answers for this poll.
-    expiry: :class:`datetime.datetime`
-        The expiration date till users will be able to vote for this poll.
-
-        .. note::
-
-            This attribute is not None only if you fetched the Poll object from the API.
-
+    duration: Optional[:class:`datetime.timedelta`]
+        The remaining duration for this poll. ``None`` if already expired.
     allow_multiselect: :class:`bool`
         Whether users are able to pick more than one answer.
     layout_type: :class:`PollLayoutType`
         The type of the layout of the poll.
-    results: Optional[:class:`PollResult`]
-        The results of the poll.
-
-        .. note::
-
-            This attribute is not None only if you fetched the Poll object from the API.
-
-    .. note::
-
-        To get a ``Poll`` object from the API you need to have the ``message_content`` intent enabled.
-
+    is_finalized: :class:`bool`
+        Whether the votes have been precisely counted.
+    answer_counts: Optional[List[:class:`PollAnswerCount`]]
+        The counts for each answer.
     """
 
     __slots__ = (
@@ -330,10 +291,10 @@ class Poll:
         "question",
         "answers",
         "duration",
-        "expiry",
         "allow_multiselect",
         "layout_type",
-        "results",
+        "is_finalized",
+        "answer_counts",
     )
 
     def __init__(
@@ -355,12 +316,11 @@ class Poll:
             self.question: PollMedia = question
 
         self.answers: List[PollAnswer] = answers
-        self.results: Optional[PollResult] = None
-
         self.duration: Optional[timedelta] = duration
-
         self.allow_multiselect: bool = allow_multiselect
         self.layout_type: PollLayoutType = layout_type
+        self.is_finalized: bool = False
+        self.answer_counts: Optional[List[PollAnswerCount]] = None
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} question={self.question} answers={self.answers!r}>"
@@ -387,15 +347,22 @@ class Poll:
         )
         for answer in poll.answers:
             answer.poll = poll
-        poll.duration = (
-            (utils.parse_time(data["expiry"]) - message.created_at) if data["expiry"] else None
-        )
         poll._state = state
         poll.channel = channel
         poll.message = message
-        poll.results = None
+
+        # this should always be not None but we check
+        # for a null value anyway
         if results := data.get("results"):
-            poll.results = PollResult(results)
+            poll.is_finalized = results["is_finalized"]
+            poll.answer_counts = [PollAnswerCount(answer) for answer in results["answer_counts"]]
+
+        if poll.is_finalized:
+            poll.duration = None
+        else:
+            poll.duration = (
+                (utils.parse_time(data["expiry"]) - message.created_at) if data["expiry"] else None
+            )
 
         return poll
 
