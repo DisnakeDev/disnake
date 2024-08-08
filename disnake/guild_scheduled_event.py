@@ -285,8 +285,7 @@ class GuildScheduledEvent(Hashable):
         entity_metadata: Optional[GuildScheduledEventMetadata] = ...,
         status: GuildScheduledEventStatus = ...,
         reason: Optional[str] = ...,
-    ) -> GuildScheduledEvent:
-        ...
+    ) -> GuildScheduledEvent: ...
 
     # new entity_type is `external`, no channel
     @overload
@@ -304,8 +303,7 @@ class GuildScheduledEvent(Hashable):
         entity_metadata: GuildScheduledEventMetadata = ...,
         status: GuildScheduledEventStatus = ...,
         reason: Optional[str] = ...,
-    ) -> GuildScheduledEvent:
-        ...
+    ) -> GuildScheduledEvent: ...
 
     # new entity_type is `voice` or `stage_instance`, no entity_metadata
     @overload
@@ -325,8 +323,7 @@ class GuildScheduledEvent(Hashable):
         scheduled_end_time: Optional[datetime] = ...,
         status: GuildScheduledEventStatus = ...,
         reason: Optional[str] = ...,
-    ) -> GuildScheduledEvent:
-        ...
+    ) -> GuildScheduledEvent: ...
 
     # channel=None, no entity_type
     @overload
@@ -343,8 +340,7 @@ class GuildScheduledEvent(Hashable):
         entity_metadata: GuildScheduledEventMetadata = ...,
         status: GuildScheduledEventStatus = ...,
         reason: Optional[str] = ...,
-    ) -> GuildScheduledEvent:
-        ...
+    ) -> GuildScheduledEvent: ...
 
     # valid channel, no entity_type
     @overload
@@ -360,8 +356,7 @@ class GuildScheduledEvent(Hashable):
         scheduled_end_time: Optional[datetime] = ...,
         status: GuildScheduledEventStatus = ...,
         reason: Optional[str] = ...,
-    ) -> GuildScheduledEvent:
-        ...
+    ) -> GuildScheduledEvent: ...
 
     async def edit(
         self,

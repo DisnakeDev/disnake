@@ -329,8 +329,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         category: Optional[Snowflake] = ...,
         sync_permissions: bool = ...,
         reason: Optional[str] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     # only passing `sync_permissions` may or may not return a channel,
     # depending on whether the channel is in a category
@@ -340,8 +339,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         *,
         sync_permissions: bool,
         reason: Optional[str] = ...,
-    ) -> Optional[TextChannel]:
-        ...
+    ) -> Optional[TextChannel]: ...
 
     @overload
     async def edit(
@@ -360,8 +358,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
         flags: ChannelFlags = ...,
         reason: Optional[str] = ...,
-    ) -> TextChannel:
-        ...
+    ) -> TextChannel: ...
 
     async def edit(
         self,
@@ -926,8 +923,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         auto_archive_duration: Optional[AnyThreadArchiveDuration] = None,
         slowmode_delay: Optional[int] = None,
         reason: Optional[str] = None,
-    ) -> Thread:
-        ...
+    ) -> Thread: ...
 
     @overload
     async def create_thread(
@@ -939,8 +935,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         invitable: Optional[bool] = None,
         slowmode_delay: Optional[int] = None,
         reason: Optional[str] = None,
-    ) -> Thread:
-        ...
+    ) -> Thread: ...
 
     async def create_thread(
         self,
@@ -1484,8 +1479,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         category: Optional[Snowflake] = ...,
         sync_permissions: bool = ...,
         reason: Optional[str] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     # only passing `sync_permissions` may or may not return a channel,
     # depending on whether the channel is in a category
@@ -1495,8 +1489,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         *,
         sync_permissions: bool,
         reason: Optional[str] = ...,
-    ) -> Optional[VoiceChannel]:
-        ...
+    ) -> Optional[VoiceChannel]: ...
 
     @overload
     async def edit(
@@ -1515,8 +1508,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         slowmode_delay: Optional[int] = ...,
         flags: ChannelFlags = ...,
         reason: Optional[str] = ...,
-    ) -> VoiceChannel:
-        ...
+    ) -> VoiceChannel: ...
 
     async def edit(
         self,
@@ -2301,8 +2293,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         category: Optional[Snowflake] = ...,
         sync_permissions: bool = ...,
         reason: Optional[str] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     # only passing `sync_permissions` may or may not return a channel,
     # depending on whether the channel is in a category
@@ -2312,8 +2303,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         *,
         sync_permissions: bool,
         reason: Optional[str] = ...,
-    ) -> Optional[StageChannel]:
-        ...
+    ) -> Optional[StageChannel]: ...
 
     @overload
     async def edit(
@@ -2332,8 +2322,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         slowmode_delay: Optional[int] = ...,
         flags: ChannelFlags = ...,
         reason: Optional[str] = ...,
-    ) -> StageChannel:
-        ...
+    ) -> StageChannel: ...
 
     async def edit(
         self,
@@ -2863,8 +2852,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         *,
         position: int,
         reason: Optional[str] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     async def edit(
@@ -2876,8 +2864,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
         flags: ChannelFlags = ...,
         reason: Optional[str] = ...,
-    ) -> CategoryChannel:
-        ...
+    ) -> CategoryChannel: ...
 
     async def edit(
         self,
@@ -2963,8 +2950,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         offset: int = ...,
         sync_permissions: bool = ...,
         reason: Optional[str] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     async def move(
@@ -2974,8 +2960,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         offset: int = ...,
         sync_permissions: bool = ...,
         reason: Optional[str] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     async def move(
@@ -2985,8 +2970,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         offset: int = ...,
         sync_permissions: bool = ...,
         reason: Optional[str] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     async def move(
@@ -2996,8 +2980,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         offset: int = ...,
         sync_permissions: bool = ...,
         reason: Optional[str] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @utils.copy_doc(disnake.abc.GuildChannel.move)
     async def move(self, **kwargs: Any) -> None:
@@ -3406,8 +3389,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         view: View = ...,
         components: Components = ...,
         reason: Optional[str] = None,
-    ) -> ThreadWithMessage:
-        ...
+    ) -> ThreadWithMessage: ...
 
     @overload
     async def create_thread(
@@ -3427,8 +3409,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         view: View = ...,
         components: Components = ...,
         reason: Optional[str] = None,
-    ) -> ThreadWithMessage:
-        ...
+    ) -> ThreadWithMessage: ...
 
     @overload
     async def create_thread(
@@ -3448,8 +3429,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         view: View = ...,
         components: Components = ...,
         reason: Optional[str] = None,
-    ) -> ThreadWithMessage:
-        ...
+    ) -> ThreadWithMessage: ...
 
     @overload
     async def create_thread(
@@ -3469,8 +3449,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         view: View = ...,
         components: Components = ...,
         reason: Optional[str] = None,
-    ) -> ThreadWithMessage:
-        ...
+    ) -> ThreadWithMessage: ...
 
     async def create_thread(
         self,
@@ -3901,8 +3880,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
         category: Optional[Snowflake] = ...,
         sync_permissions: bool = ...,
         reason: Optional[str] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     # only passing `sync_permissions` may or may not return a channel,
     # depending on whether the channel is in a category
@@ -3912,8 +3890,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
         *,
         sync_permissions: bool,
         reason: Optional[str] = ...,
-    ) -> Optional[ForumChannel]:
-        ...
+    ) -> Optional[ForumChannel]: ...
 
     @overload
     async def edit(
@@ -3936,8 +3913,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
         default_sort_order: Optional[ThreadSortOrder] = ...,
         default_layout: ThreadLayout = ...,
         reason: Optional[str] = ...,
-    ) -> ForumChannel:
-        ...
+    ) -> ForumChannel: ...
 
     async def edit(
         self,
@@ -4331,8 +4307,7 @@ class MediaChannel(ThreadOnlyGuildChannel):
         category: Optional[Snowflake] = ...,
         sync_permissions: bool = ...,
         reason: Optional[str] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     # only passing `sync_permissions` may or may not return a channel,
     # depending on whether the channel is in a category
@@ -4342,8 +4317,7 @@ class MediaChannel(ThreadOnlyGuildChannel):
         *,
         sync_permissions: bool,
         reason: Optional[str] = ...,
-    ) -> Optional[MediaChannel]:
-        ...
+    ) -> Optional[MediaChannel]: ...
 
     @overload
     async def edit(
@@ -4365,8 +4339,7 @@ class MediaChannel(ThreadOnlyGuildChannel):
         default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = ...,
         default_sort_order: Optional[ThreadSortOrder] = ...,
         reason: Optional[str] = ...,
-    ) -> MediaChannel:
-        ...
+    ) -> MediaChannel: ...
 
     async def edit(
         self,
@@ -5034,7 +5007,7 @@ def _threaded_guild_channel_factory(channel_type: int):
 
 
 def _channel_type_factory(
-    cls: Union[Type[disnake.abc.GuildChannel], Type[Thread]]
+    cls: Union[Type[disnake.abc.GuildChannel], Type[Thread]],
 ) -> List[ChannelType]:
     return {
         disnake.abc.GuildChannel: list(ChannelType.__members__.values()),

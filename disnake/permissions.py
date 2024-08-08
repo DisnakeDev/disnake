@@ -215,16 +215,14 @@ class Permissions(BaseFlags):
         view_channel: bool = ...,
         view_creator_monetization_analytics: bool = ...,
         view_guild_insights: bool = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     @_generated
     def __init__(
         self,
         permissions: int = 0,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @_overload_with_permissions
     def __init__(self, permissions: int = 0, **kwargs: bool) -> None:
@@ -617,15 +615,13 @@ class Permissions(BaseFlags):
         view_channel: bool = ...,
         view_creator_monetization_analytics: bool = ...,
         view_guild_insights: bool = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     @_generated
     def update(
         self,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @_overload_with_permissions
     def update(self, **kwargs: bool) -> None:
@@ -1260,15 +1256,13 @@ class PermissionOverwrite:
         view_channel: Optional[bool] = ...,
         view_creator_monetization_analytics: Optional[bool] = ...,
         view_guild_insights: Optional[bool] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     @_generated
     def __init__(
         self,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @_overload_with_permissions
     def __init__(self, **kwargs: Optional[bool]) -> None:
@@ -1394,15 +1388,13 @@ class PermissionOverwrite:
         view_channel: Optional[bool] = ...,
         view_creator_monetization_analytics: Optional[bool] = ...,
         view_guild_insights: Optional[bool] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     @_generated
     def update(
         self,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @_overload_with_permissions
     def update(self, **kwargs: Optional[bool]) -> None:

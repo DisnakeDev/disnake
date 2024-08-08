@@ -254,7 +254,7 @@ class PartialEmoji(_EmojiTag, AssetMixin):
     # (e.g. default reaction, tag emoji)
     @staticmethod
     def _emoji_to_name_id(
-        emoji: Optional[Union[str, Emoji, PartialEmoji]]
+        emoji: Optional[Union[str, Emoji, PartialEmoji]],
     ) -> Tuple[Optional[str], Optional[int]]:
         if emoji is None:
             return None, None
