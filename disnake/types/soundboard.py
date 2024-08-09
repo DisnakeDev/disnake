@@ -17,13 +17,11 @@ class PartialSoundboardSound(TypedDict):
 
 class SoundboardSound(PartialSoundboardSound):
     name: str
-    id: NotRequired[Snowflake]  # this seems to always equal `sound_id`
     emoji_id: Optional[Snowflake]
     emoji_name: Optional[str]
-    user_id: Snowflake
+    available: bool
 
 
 class GuildSoundboardSound(SoundboardSound):
     guild_id: NotRequired[Snowflake]
-    available: NotRequired[bool]
     user: NotRequired[User]
