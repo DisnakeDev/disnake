@@ -1011,6 +1011,12 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         .. versionadded:: 2.10
 
+        .. warning::
+
+            If the :attr:`disnake.Intents.voice_states` is disabled caching this could lead to a memory leak.
+            This could happen because with the intent disabled you don't receive voice state updates, hence
+            the cached voice state could possibly never be removed from the cache.
+
         Parameters
         ----------
         cache: :class:`bool`
