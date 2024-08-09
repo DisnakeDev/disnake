@@ -474,6 +474,7 @@ class Thread(Messageable, Hashable):
         if not base.send_messages_in_threads:
             base.send_tts_messages = False
             base.send_voice_messages = False
+            base.send_polls = False
             base.mention_everyone = False
             base.embed_links = False
             base.attach_files = False
