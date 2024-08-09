@@ -245,6 +245,11 @@ class Attachment(Hashable):
     ----------
     id: :class:`int`
         The attachment's ID.
+    title: Optional[:class:`str`]
+        The attachment title.
+
+        .. versionadded:: 2.10
+
     size: :class:`int`
         The attachment's size in bytes.
     height: Optional[:class:`int`]
@@ -290,6 +295,7 @@ class Attachment(Hashable):
 
     __slots__ = (
         "id",
+        "title",
         "size",
         "height",
         "width",
@@ -307,6 +313,7 @@ class Attachment(Hashable):
 
     def __init__(self, *, data: AttachmentPayload, state: ConnectionState) -> None:
         self.id: int = int(data["id"])
+        self.title: Optional[str] = data.get("title")
         self.size: int = data["size"]
         self.height: Optional[int] = data.get("height")
         self.width: Optional[int] = data.get("width")
