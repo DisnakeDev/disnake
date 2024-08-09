@@ -1067,6 +1067,7 @@ class Permissions(BaseFlags):
         """
         return 1 << 49
 
+    @flag_value
     def use_external_apps(self) -> int:
         """:class:`bool`: Returns ``True`` if a user's apps can send public responses.
 
