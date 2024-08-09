@@ -277,12 +277,6 @@ class GuildSoundboardSound(SoundboardSound):
         """
         payload: Dict[str, Any] = {}
 
-        # FIXME: workaround for API issue, which clears volume + emoji if not provided
-        if volume is MISSING:
-            volume = self.volume
-        if emoji is MISSING:
-            emoji = self.emoji
-
         if name is not MISSING:
             payload["name"] = name
         if volume is not MISSING:
