@@ -11,6 +11,7 @@ from .guild_scheduled_event import GuildScheduledEvent
 from .member import Member
 from .role import CreateRole, Role
 from .snowflake import Snowflake
+from .soundboard import GuildSoundboardSound
 from .sticker import GuildSticker
 from .threads import Thread
 from .user import User
@@ -149,6 +150,7 @@ class Guild(_BaseGuildPreview):
     presences: NotRequired[List[PartialPresenceUpdate]]
     stage_instances: NotRequired[List[StageInstance]]
     guild_scheduled_events: NotRequired[List[GuildScheduledEvent]]
+    soundboard_sounds: NotRequired[List[GuildSoundboardSound]]
 
 
 class InviteGuild(Guild, total=False):

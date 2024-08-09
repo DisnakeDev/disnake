@@ -24,4 +24,4 @@ class SoundboardSound(PartialSoundboardSound):
 
 class GuildSoundboardSound(SoundboardSound):
     guild_id: NotRequired[Snowflake]
-    user: NotRequired[User]
+    user: NotRequired[User]  # only available via REST, given appropriate permissions
