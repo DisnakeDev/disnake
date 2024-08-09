@@ -1918,8 +1918,8 @@ class Client:
 
         .. note::
 
-            Using this, you will only receive :attr:`.Guild.owner`, :attr:`.Guild.icon`,
-            :attr:`.Guild.id`, and :attr:`.Guild.name` per :class:`.Guild`.
+            Using this, you will only receive :attr:`.Guild.id`, :attr:`.Guild.name`,
+            :attr:`.Guild.features`, :attr:`.Guild.icon`, and :attr:`.Guild.banner` per :class:`.Guild`.
 
         .. note::
 
@@ -3088,7 +3088,7 @@ class Client:
         Retrieves the :class:`.SKU`\\s for the application.
 
         To manage application subscription entitlements, you should use the SKU
-        with :attr:`.SKUType.subscription`.
+        with :attr:`.SKUType.subscription` (not the :attr:`~.SKUType.subscription_group` one).
 
         .. versionadded:: 2.10
 
