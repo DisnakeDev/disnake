@@ -63,11 +63,29 @@ class MessageApplication(TypedDict):
     cover_image: NotRequired[str]
 
 
+MessageReferenceType = Literal[0, 1]
+
+
 class MessageReference(TypedDict):
+    type: NotRequired[MessageReferenceType]
     message_id: NotRequired[Snowflake]
     channel_id: Snowflake
     guild_id: NotRequired[Snowflake]
     fail_if_not_exists: NotRequired[bool]
+
+
+class ForwardedMessage(TypedDict):
+    content: str
+    embeds: List[Embed]
+    attachments: List[Attachment]
+    timestamp: str
+    edited_timestamp: Optional[str]
+    flags: NotRequired[int]
+
+
+class MessageSnapshot(TypedDict):
+    message: ForwardedMessage
+    guild_id: NotRequired[Snowflake]
 
 
 class RoleSubscriptionData(TypedDict):
@@ -106,6 +124,7 @@ class Message(TypedDict):
     application: NotRequired[MessageApplication]
     application_id: NotRequired[Snowflake]
     message_reference: NotRequired[MessageReference]
+    message_snapshots: NotRequired[List[MessageSnapshot]]
     flags: NotRequired[int]
     referenced_message: NotRequired[Optional[Message]]
     interaction: NotRequired[InteractionMessageReference]

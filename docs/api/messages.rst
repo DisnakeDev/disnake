@@ -177,6 +177,13 @@ PartialMessage
 .. autoclass:: PartialMessage
     :members:
 
+ForwardedMessage
+~~~~~~~~~~~~~~~~
+
+.. attributetable:: ForwardedMessage
+
+.. autoclass:: ForwardedMessage
+
 Enumerations
 ------------
 
@@ -368,6 +375,9 @@ MessageType
         The system message denoting that a raid report was a false alarm.
 
         .. versionadded:: 2.10
+
+.. autoclass:: MessageReferenceType
+    :members:
 
 Events
 ------
