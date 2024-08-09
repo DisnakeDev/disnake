@@ -166,6 +166,11 @@ class Guild(Hashable):
 
         .. versionadded:: 2.0
 
+    soundboard_sounds: Tuple[:class:`GuildSoundboardSound`, ...]
+        All soundboard sounds that the guild owns.
+
+        .. versionadded:: 2.10
+
     afk_timeout: :class:`int`
         The timeout to get sent to the AFK channel.
     afk_channel: Optional[:class:`VoiceChannel`]
@@ -325,6 +330,7 @@ class Guild(Hashable):
         "mfa_level",
         "emojis",
         "stickers",
+        "soundboard_sounds",
         "features",
         "verification_level",
         "explicit_content_filter",
@@ -557,6 +563,10 @@ class Guild(Hashable):
         )
         self.stickers: Tuple[GuildSticker, ...] = tuple(
             state.store_sticker(self, d) for d in guild.get("stickers", [])
+        )
+        # TODO: rest methods
+        self.soundboard_sounds: Tuple[GuildSoundboardSound, ...] = tuple(
+            state.store_soundboard_sound(self, d) for d in guild.get("soundboard_sounds", [])
         )
         self.features: List[GuildFeature] = guild.get("features", [])
         self._splash: Optional[str] = guild.get("splash")

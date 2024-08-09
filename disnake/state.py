@@ -109,6 +109,7 @@ if TYPE_CHECKING:
     from .types.guild import Guild as GuildPayload, UnavailableGuild as UnavailableGuildPayload
     from .types.interactions import InteractionChannel as InteractionChannelPayload
     from .types.message import Message as MessagePayload
+    from .types.soundboard import GuildSoundboardSound as GuildSoundboardSoundPayload
     from .types.sticker import GuildSticker as GuildStickerPayload
     from .types.user import User as UserPayload
     from .types.webhook import Webhook as WebhookPayload
@@ -312,6 +313,7 @@ class ConnectionState:
         self._users: weakref.WeakValueDictionary[int, User] = weakref.WeakValueDictionary()
         self._emojis: Dict[int, Emoji] = {}
         self._stickers: Dict[int, GuildSticker] = {}
+        self._soundboard_sounds: Dict[int, GuildSoundboardSound] = {}
         self._guilds: Dict[int, Guild] = {}
 
         if application_commands:
@@ -422,6 +424,15 @@ class ConnectionState:
         self._stickers[sticker_id] = sticker = GuildSticker(state=self, data=data)
         return sticker
 
+    def store_soundboard_sound(
+        self, guild: Guild, data: GuildSoundboardSoundPayload
+    ) -> GuildSoundboardSound:
+        sticker_id = int(data["sound_id"])
+        self._soundboard_sounds[sticker_id] = sound = GuildSoundboardSound(
+            state=self, data=data, guild_id=guild.id
+        )
+        return sound
+
     def store_view(self, view: View, message_id: Optional[int] = None) -> None:
         self._view_store.add_view(view, message_id)
 
@@ -456,6 +467,9 @@ class ConnectionState:
 
         for sticker in guild.stickers:
             self._stickers.pop(sticker.id, None)
+
+        for sound in guild.soundboard_sounds:
+            self._soundboard_sounds.pop(sound.id, None)
 
         del guild
 
@@ -532,6 +546,10 @@ class ConnectionState:
     def stickers(self) -> List[GuildSticker]:
         return list(self._stickers.values())
 
+    @property
+    def soundboard_sounds(self) -> List[GuildSoundboardSound]:
+        return list(self._soundboard_sounds.values())
+
     def get_emoji(self, emoji_id: Optional[int]) -> Optional[Emoji]:
         # the keys of self._emojis are ints
         return self._emojis.get(emoji_id)  # type: ignore
@@ -539,6 +557,10 @@ class ConnectionState:
     def get_sticker(self, sticker_id: Optional[int]) -> Optional[GuildSticker]:
         # the keys of self._stickers are ints
         return self._stickers.get(sticker_id)  # type: ignore
+
+    def get_soundboard_sound(self, sound_id: Optional[int]) -> Optional[GuildSoundboardSound]:
+        # the keys of self._soundboard_sounds are ints
+        return self._soundboard_sounds.get(sound_id)  # type: ignore
 
     @property
     def private_channels(self) -> List[PrivateChannel]:
@@ -1988,6 +2010,7 @@ class ConnectionState:
         entitlement = Entitlement(data=data, state=self)
         self.dispatch("entitlement_delete", entitlement)
 
+    # TODO: update cache, add non-raw events
     def parse_guild_soundboard_sound_create(self, data: gateway.GuildSoundboardSoundCreate) -> None:
         guild_id = utils._get_as_snowflake(data, "guild_id")
         guild = self._get_guild(guild_id)

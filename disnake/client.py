@@ -68,7 +68,7 @@ from .iterators import EntitlementIterator, GuildIterator
 from .mentions import AllowedMentions
 from .object import Object
 from .sku import SKU
-from .soundboard import SoundboardSound
+from .soundboard import GuildSoundboardSound, SoundboardSound
 from .stage_instance import StageInstance
 from .state import ConnectionState
 from .sticker import GuildSticker, StandardSticker, StickerPack, _sticker_factory
@@ -571,6 +571,14 @@ class Client:
         .. versionadded:: 2.0
         """
         return self._connection.stickers
+
+    @property
+    def soundboard_sounds(self) -> List[GuildSoundboardSound]:
+        """List[:class:`.GuildSoundboardSound`]: The soundboard sounds that the connected client has.
+
+        .. versionadded:: 2.10
+        """
+        return self._connection.soundboard_sounds
 
     @property
     def cached_messages(self) -> Sequence[Message]:
@@ -1497,7 +1505,7 @@ class Client:
 
         .. note::
 
-            To retrieve standard stickers, use :meth:`.fetch_sticker`.
+            To retrieve standard stickers, use :meth:`.fetch_sticker`
             or :meth:`.fetch_sticker_packs`.
 
         Returns
@@ -1506,6 +1514,22 @@ class Client:
             The sticker or ``None`` if not found.
         """
         return self._connection.get_sticker(id)
+
+    def get_soundboard_sounds(self, id: int, /) -> Optional[GuildSoundboardSound]:
+        """Returns a guild soundboard sound with the given ID.
+
+        .. versionadded:: 2.10
+
+        .. note::
+
+            To retrieve standard soundboard sounds, use :meth:`.fetch_default_soundboard_sounds`.
+
+        Returns
+        -------
+        Optional[:class:`.GuildSoundboardSound`]
+            The soundboard sound or ``None`` if not found.
+        """
+        return self._connection.get_soundboard_sound(id)
 
     def get_all_channels(self) -> Generator[GuildChannel, None, None]:
         """A generator that retrieves every :class:`.abc.GuildChannel` the client can 'access'.
