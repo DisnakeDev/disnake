@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import timedelta
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 from . import utils
 from .abc import Snowflake
@@ -270,8 +270,6 @@ class Poll:
 
     question: Union[:class:`str`, :class:`PollMedia`]
         The question of the poll.
-    answers: List[:class:`PollAnswer`]
-        The available answers for this poll.
     duration: Optional[:class:`datetime.timedelta`]
         The remaining duration for this poll. ``None`` if already expired.
     allow_multiselect: :class:`bool`
@@ -289,7 +287,7 @@ class Poll:
         "channel",
         "message",
         "question",
-        "answers",
+        "_answers",
         "duration",
         "allow_multiselect",
         "layout_type",
@@ -315,7 +313,10 @@ class Poll:
         else:
             self.question: PollMedia = question
 
-        self.answers: List[PollAnswer] = answers
+        self._answers: Dict[int, PollAnswer] = {}
+        for answer in answers:
+            self._answers[len(self._answers) + 1] = answer
+
         self.duration: Optional[timedelta] = duration
         self.allow_multiselect: bool = allow_multiselect
         self.layout_type: PollLayoutType = layout_type
@@ -326,10 +327,31 @@ class Poll:
         return f"<{self.__class__.__name__} question={self.question} answers={self.answers!r}>"
 
     @property
+    def answers(self) -> List[PollAnswer]:
+        """List[:class:`PollAnswer`]: return the list of answers for this poll."""
+        return list(self._answers.values())
+
+    @property
     def expires_at(self) -> Optional[datetime]:
+        """Optional[:class:`datetime`]: the expiration date for this poll, if available."""
         if not self.duration or not self.message:
             return
         return self.message.created_at + self.duration
+
+    def get_answer(self, answer_id: int, /) -> Optional[PollAnswer]:
+        """Return the requested poll answer.
+
+        Parameters
+        ----------
+        answer_id: :class:`int`
+            The answer id.
+
+        Returns
+        -------
+        Optional[:class:`PollAnswer`]
+            The requested answer.
+        """
+        return self._answers.get(answer_id)
 
     @classmethod
     def from_dict(
@@ -341,12 +363,13 @@ class Poll:
     ) -> Poll:
         poll = cls(
             question=PollMedia.from_dict(state, data["question"]),
-            answers=[PollAnswer.from_dict(state, answer) for answer in data["answers"]],
+            answers=[],
             allow_multiselect=data["allow_multiselect"],
             layout_type=try_enum(PollLayoutType, data["layout_type"]),
         )
-        for answer in poll.answers:
-            answer.poll = poll
+        for answer in data["answers"]:
+            poll._answers[answer["answer_id"]] = PollAnswer.from_dict(state, answer)
+
         poll._state = state
         poll.channel = channel
         poll.message = message
@@ -372,7 +395,7 @@ class Poll:
             "duration": (int(self.duration.total_seconds()) // 3600),  # type: ignore
             "allow_multiselect": self.allow_multiselect,
             "layout_type": self.layout_type.value,
-            "answers": [answer._to_dict() for answer in self.answers],
+            "answers": [answer._to_dict() for answer in self._answers.values()],
         }
         return payload
 
