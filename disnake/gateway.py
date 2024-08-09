@@ -46,7 +46,6 @@ if TYPE_CHECKING:
         IdentifyCommand,
         PresenceUpdateCommand,
         RequestMembersCommand,
-        RequestSoundboardCommand,
         ResumeCommand,
         VoiceIdentifyCommand,
         VoicePayload,
@@ -325,8 +324,6 @@ class DiscordWebSocket:
         a connection issue.
     GUILD_SYNC
         Send only. Requests a guild sync.
-    REQUEST_SOUNDBOARD
-        Send only. Requests the list of soundboard sounds for each of the provided guilds.
     gateway
         The gateway we are currently connected to.
     token
@@ -346,7 +343,6 @@ class DiscordWebSocket:
     HELLO: Final[Literal[10]] = 10
     HEARTBEAT_ACK: Final[Literal[11]] = 11
     GUILD_SYNC: Final[Literal[12]] = 12
-    REQUEST_SOUNDBOARD: Final[Literal[31]] = 31
 
     def __init__(
         self, socket: aiohttp.ClientWebSocketResponse, *, loop: asyncio.AbstractEventLoop
@@ -839,13 +835,6 @@ class DiscordWebSocket:
         }
 
         _log.debug("Updating our voice state to %s.", payload)
-        await self.send_as_json(payload)
-
-    async def request_soundboard(self, guild_ids: List[int]) -> None:
-        payload: RequestSoundboardCommand = {
-            "op": self.REQUEST_SOUNDBOARD,
-            "d": {"guild_ids": guild_ids},
-        }
         await self.send_as_json(payload)
 
     async def close(self, code: int = 4000) -> None:

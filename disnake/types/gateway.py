@@ -154,18 +154,6 @@ class RequestMembersCommand(TypedDict):
     d: RequestMembersData
 
 
-# opcode 31
-
-
-class RequestSoundboardData(TypedDict):
-    guild_ids: List[int]
-
-
-class RequestSoundboardCommand(TypedDict):
-    op: Literal[31]
-    d: RequestSoundboardData
-
-
 #####
 # Voice payloads (receive)
 #####
@@ -692,9 +680,3 @@ GuildSoundboardSoundUpdate = GuildSoundboardSound
 class GuildSoundboardSoundDelete(TypedDict):
     guild_id: Snowflake
     sound_id: Snowflake
-
-
-# https://discord.com/developers/docs/topics/gateway-events#soundboard-sounds
-class SoundboardSoundsEvent(TypedDict):
-    guild_id: Snowflake
-    soundboard_sounds: List[GuildSoundboardSound]
