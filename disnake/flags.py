@@ -1401,7 +1401,6 @@ class Intents(BaseFlags):
         - :attr:`~disnake.Message.embeds`
         - :attr:`~disnake.Message.attachments`
         - :attr:`~disnake.Message.components`
-        - :attr:`~disnake.Message.poll`
 
         The following cases will always have the above fields:
 
@@ -1610,8 +1609,8 @@ class Intents(BaseFlags):
 
         This corresponds to the following events:
 
-        - :func:`on_message_poll_vote_add` (both guilds and DMs)
-        - :func:`on_message_poll_vote_remove` (both guilds and DMs)
+        - :func:`on_poll_vote_add` (both guilds and DMs)
+        - :func:`on_poll_vote_remove` (both guilds and DMs)
         """
         return (1 << 24) | (1 << 25)
 
@@ -1623,8 +1622,8 @@ class Intents(BaseFlags):
 
         This corresponds to the following events:
 
-        - :func:`on_message_poll_vote_add`
-        - :func:`on_message_poll_vote_remove`
+        - :func:`on_poll_vote_add`
+        - :func:`on_poll_vote_remove`
         """
         return 1 << 24
 
@@ -1636,8 +1635,8 @@ class Intents(BaseFlags):
 
         This corresponds to the following events:
 
-        - :func:`on_message_poll_vote_add`
-        - :func:`on_message_poll_vote_remove`
+        - :func:`on_poll_vote_add`
+        - :func:`on_poll_vote_remove`
         """
         return 1 << 25
 

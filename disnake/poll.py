@@ -308,7 +308,7 @@ class Poll:
 
     @property
     def expires_at(self) -> Optional[datetime]:
-        """Optional[:class:`datetime`]: the expiration date for this poll, if available."""
+        """Optional[:class:`datetime.datetime`]: the expiration date for this poll, if available."""
         if not self.duration or not self.message:
             return
         return self.message.created_at + self.duration
