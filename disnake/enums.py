@@ -515,9 +515,6 @@ class AuditLogAction(Enum):
             return "thread"
         elif v < 122:
             return "application_command_or_integration"
-        elif v < 133:
-            # TODO: implement AuditLogEntry handler
-            return "soundboard_sound"
         elif v < 140:
             return None
         elif v < 143:
