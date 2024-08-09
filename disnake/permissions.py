@@ -1062,7 +1062,6 @@ class Permissions(BaseFlags):
         return 1 << 46
 
     @flag_value
-
     def send_polls(self) -> int:
         """:class:`bool`: Returns ``True`` if a user can send polls.
 
