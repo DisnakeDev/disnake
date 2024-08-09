@@ -205,7 +205,6 @@ class Permissions(BaseFlags):
         stream: bool = ...,
         use_application_commands: bool = ...,
         use_embedded_activities: bool = ...,
-        use_external_apps: bool = ...,
         use_external_emojis: bool = ...,
         use_external_sounds: bool = ...,
         use_external_stickers: bool = ...,
@@ -609,7 +608,6 @@ class Permissions(BaseFlags):
         stream: bool = ...,
         use_application_commands: bool = ...,
         use_embedded_activities: bool = ...,
-        use_external_apps: bool = ...,
         use_external_emojis: bool = ...,
         use_external_sounds: bool = ...,
         use_external_stickers: bool = ...,
@@ -1193,7 +1191,6 @@ class PermissionOverwrite:
         stream: Optional[bool]
         use_application_commands: Optional[bool]
         use_embedded_activities: Optional[bool]
-        use_external_apps: Optional[bool]
         use_external_emojis: Optional[bool]
         use_external_sounds: Optional[bool]
         use_external_stickers: Optional[bool]
@@ -1261,7 +1258,6 @@ class PermissionOverwrite:
         stream: Optional[bool] = ...,
         use_application_commands: Optional[bool] = ...,
         use_embedded_activities: Optional[bool] = ...,
-        use_external_apps: Optional[bool] = ...,
         use_external_emojis: Optional[bool] = ...,
         use_external_sounds: Optional[bool] = ...,
         use_external_stickers: Optional[bool] = ...,
@@ -1396,7 +1392,6 @@ class PermissionOverwrite:
         stream: Optional[bool] = ...,
         use_application_commands: Optional[bool] = ...,
         use_embedded_activities: Optional[bool] = ...,
-        use_external_apps: Optional[bool] = ...,
         use_external_emojis: Optional[bool] = ...,
         use_external_sounds: Optional[bool] = ...,
         use_external_stickers: Optional[bool] = ...,
