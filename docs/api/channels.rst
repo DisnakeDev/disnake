@@ -187,7 +187,7 @@ ThreadWithMessage
 
 .. class:: ThreadWithMessage
 
-    A namedtuple which represents a thread and message returned from :meth:`ForumChannel.create_thread`.
+    A :class:`~typing.NamedTuple` which represents a thread and message returned from :meth:`ForumChannel.create_thread`.
 
     .. attribute:: thread
 
