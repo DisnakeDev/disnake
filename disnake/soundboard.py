@@ -136,15 +136,11 @@ class SoundboardSound(PartialSoundboardSound):
         The sound's emoji, if any.
         Due to a Discord limitation, this will have an empty
         :attr:`~PartialEmoji.name` if it is a custom :class:`PartialEmoji`.
-    user_id: :class:`int`
-        The ID of the user that created this sound.
+    available: :class:`bool`
+        Whether this sound is available for use.
     """
 
-    __slots__ = (
-        "name",
-        "emoji",
-        "user_id",
-    )
+    __slots__ = ("name", "emoji", "available")
 
     _state: ConnectionState
 
@@ -155,7 +151,7 @@ class SoundboardSound(PartialSoundboardSound):
         state: ConnectionState,
     ) -> None:
         super().__init__(data=data, state=state)
-        self.user_id: int = int(data["user_id"])
+        # base class calls `_update`
 
     def _update(self, data: SoundboardSoundPayload) -> None:
         super()._update(data)
@@ -164,6 +160,7 @@ class SoundboardSound(PartialSoundboardSound):
             name=data.get("emoji_name"),
             id=_get_as_snowflake(data, "emoji_id"),
         )
+        self.available: bool = data.get("available", True)
 
     def __repr__(self) -> str:
         return f"<SoundboardSound id={self.id!r} name={self.name!r}>"
@@ -204,13 +201,11 @@ class GuildSoundboardSound(SoundboardSound):
         The ID of the guild this sound belongs to.
     available: :class:`bool`
         Whether this sound is available for use.
-    user_id: :class:`int`
-        The ID of the user that created this sound.
     user: Optional[:class:`User`]
         The user that created this sound. May be ``None`` if not in the bot's cache.
     """
 
-    __slots__ = ("guild_id", "user", "available")
+    __slots__ = ("guild_id", "user")
 
     def __init__(
         self,
@@ -223,15 +218,10 @@ class GuildSoundboardSound(SoundboardSound):
         super().__init__(data=data, state=state)
 
         self.guild_id: int = guild_id
+        # TODO: `user` only appears to be available over REST, gw still sends `user_id`?
         self.user: Optional[User] = (
-            state.store_user(user_data)
-            if (user_data := data.get("user")) is not None
-            else state.get_user(self.user_id)
+            state.store_user(user_data) if (user_data := data.get("user")) is not None else None
         )
-
-    def _update(self, data: GuildSoundboardSoundPayload) -> None:
-        super()._update(data)
-        self.available: bool = data.get("available", True)
 
     def __repr__(self) -> str:
         return (
@@ -241,7 +231,7 @@ class GuildSoundboardSound(SoundboardSound):
 
     @property
     def guild(self) -> Guild:
-        """:class:`Guild`: The guild that this sound is from, if any."""
+        """:class:`Guild`: The guild that this sound is from."""
         # this will most likely never return None
         return self._state._get_guild(self.guild_id)  # type: ignore
 
