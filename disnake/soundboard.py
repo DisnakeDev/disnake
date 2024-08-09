@@ -57,14 +57,11 @@ class PartialSoundboardSound(Hashable, AssetMixin):
         The sound's ID.
     volume: :class:`float`
         The sound's volume (from ``0.0`` to ``1.0``).
-    override_path: Optional[:class:`str`]
-        The sound's filename, if applicable.
     """
 
     __slots__ = (
         "id",
         "volume",
-        "override_path",
     )
 
     def __init__(
@@ -75,7 +72,6 @@ class PartialSoundboardSound(Hashable, AssetMixin):
     ) -> None:
         self._state = state
         self.id: int = int(data["sound_id"])
-        self.override_path: Optional[str] = data.get("override_path")
 
         self._update(data)
 
@@ -83,22 +79,20 @@ class PartialSoundboardSound(Hashable, AssetMixin):
         self.volume: float = data["volume"]
 
     def __repr__(self) -> str:
-        return f"<{self.__class__.__name__} id={self.id!r} override_path={self.override_path!r}>"
+        return f"<{self.__class__.__name__} id={self.id!r}>"
 
     @property
     def created_at(self) -> Optional[datetime.datetime]:
         """Optional[:class:`datetime.datetime`]: Returns the sound's creation time in UTC.
         Can be ``None`` if this is a default sound.
         """
-        if self.override_path:
-            return None  # default sound
+        if self.is_default():
+            return None
         return snowflake_time(self.id)
 
     @property
     def url(self) -> str:
         """:class:`str`: The url for the sound file."""
-        if self.override_path:
-            return f"{Asset.BASE}/soundboard-default-sounds/{self.override_path}"
         return f"{Asset.BASE}/soundboard-sounds/{self.id}"
 
     def is_default(self) -> bool:
@@ -106,7 +100,9 @@ class PartialSoundboardSound(Hashable, AssetMixin):
 
         :return type: :class:`bool`
         """
-        return self.override_path is not None
+        # default sounds have IDs starting from 1, i.e. tiny numbers compared to real snowflakes.
+        # assume any "snowflake" with a zero timestamp is for a default sound
+        return (self.id >> 22) == 0
 
 
 class SoundboardSound(PartialSoundboardSound):
@@ -134,8 +130,6 @@ class SoundboardSound(PartialSoundboardSound):
         The sound's ID.
     volume: :class:`float`
         The sound's volume (from ``0.0`` to ``1.0``).
-    override_path: Optional[:class:`str`]
-        The sound's filename, if applicable.
     name: :class:`str`
         The sound's name.
     emoji: Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]

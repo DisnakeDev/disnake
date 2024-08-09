@@ -13,7 +13,6 @@ from .user import User
 class PartialSoundboardSound(TypedDict):
     sound_id: Snowflake
     volume: float
-    override_path: Optional[str]
 
 
 class SoundboardSound(PartialSoundboardSound):
