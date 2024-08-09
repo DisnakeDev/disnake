@@ -940,10 +940,16 @@ class ConnectionState:
             member = guild.get_member(raw.user_id)
             message = self._get_message(raw.message_id)
             if message is not None and message.poll is not None:
-                answer = utils.get(message.poll.answers, id=raw.answer_id)
+                answer = message.poll.get_answer(raw.answer_id)
 
             if member is not None:
                 raw.cached_member = member
+
+        if answer is not None:
+            if event_type == "add":
+                answer.count += 1
+            else:
+                answer.count -= 1
 
         self.dispatch(f"raw_poll_vote_{event_type}", raw)
 

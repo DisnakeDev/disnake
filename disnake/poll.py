@@ -208,7 +208,7 @@ class Poll:
     ----------
     question: :class:`PollMedia`
         The question of the poll.
-    answers: List[:class:`PollAnswer`]
+    answers: List[Union[:class:`str`, :class:`PollAnswer`]]
         The answers for this poll, up to 10.
     duration: :class:`datetime.timedelta`
         The total duration of the poll, up to 32 days. Defaults to 1 day.
@@ -264,7 +264,7 @@ class Poll:
         self,
         question: Union[str, PollMedia],
         *,
-        answers: List[PollAnswer],
+        answers: List[Union[str, PollAnswer]],
         duration: timedelta = timedelta(hours=24),
         allow_multiselect: bool = False,
         layout_type: PollLayoutType = PollLayoutType.default,
@@ -275,12 +275,23 @@ class Poll:
 
         if isinstance(question, str):
             self.question = PollMedia(question)
-        else:
+        elif isinstance(question, PollMedia):
             self.question: PollMedia = question
+        else:
+            raise TypeError(
+                f"Expected 'str' or 'PollMedia' for 'question', got {question.__class__.__name__!r}."
+            )
 
         self._answers: Dict[int, PollAnswer] = {}
         for answer in answers:
-            self._answers[len(self._answers) + 1] = answer
+            if isinstance(answer, PollAnswer):
+                self._answers[len(self._answers) + 1] = answer
+            elif isinstance(answer, str):
+                self._answers[len(self._answers) + 1] = PollAnswer(PollMedia(answer))
+            else:
+                raise TypeError(
+                    f"Expected 'List[str]' or 'List[PollAnswer]' for 'answers', got List[{answer.__class__.__name__!r}]."
+                )
 
         self.duration: Optional[timedelta] = duration
         self.allow_multiselect: bool = allow_multiselect
