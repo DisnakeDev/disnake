@@ -41,6 +41,7 @@ __all__ = (
     "ExpireBehavior",
     "StickerType",
     "StickerFormatType",
+    "InviteType",
     "InviteTarget",
     "VideoQualityMode",
     "ComponentType",
@@ -604,6 +605,12 @@ STICKER_FORMAT_LOOKUP: Dict[StickerFormatType, str] = {
     StickerFormatType.lottie: "json",
     StickerFormatType.gif: "gif",
 }
+
+
+class InviteType(Enum):
+    guild = 0
+    group_dm = 1
+    friend = 2
 
 
 class InviteTarget(Enum):
