@@ -209,14 +209,6 @@ PollMedia
 .. autoclass:: PollMedia
     :members:
 
-PollAnswerCount
-~~~~~~~~~~~~~~~
-
-.. attributetable:: PollAnswerCount
-
-.. autoclass:: PollAnswerCount()
-    :members:
-
 Enumerations
 ------------
 
