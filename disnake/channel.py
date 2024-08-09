@@ -3494,7 +3494,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
     ) -> ThreadWithMessage:
         """|coro|
 
-        Creates a thread in this channel.
+        Creates a thread (with an initial message) in this channel.
 
         You must have the :attr:`~Permissions.create_forum_threads` permission to do this.
 
@@ -3506,6 +3506,10 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
 
         .. versionchanged:: 2.6
             The ``content`` parameter is no longer required.
+
+        .. note::
+            Unlike :meth:`TextChannel.create_thread`,
+            this **returns a tuple** with both the created **thread and message**.
 
         Parameters
         ----------
@@ -3583,10 +3587,8 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
 
         Returns
         -------
-        Tuple[:class:`Thread`, :class:`Message`]
+        :class:`ThreadWithMessage`
             A :class:`~typing.NamedTuple` with the newly created thread and the message sent in it.
-
-            These values can also be accessed through the ``thread`` and ``message`` fields.
         """
         from .message import Message
         from .webhook.async_ import handle_message_parameters_dict

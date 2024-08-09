@@ -56,7 +56,7 @@ BanEntry
 
 .. class:: BanEntry
 
-    A namedtuple which represents a ban returned from :meth:`~Guild.bans`.
+    A :class:`~typing.NamedTuple` which represents a ban returned from :meth:`~Guild.bans`.
 
     .. attribute:: reason
 
@@ -74,7 +74,7 @@ BulkBanResult
 
 .. class:: BulkBanResult
 
-    A namedtuple which represents the successful and failed bans returned from :meth:`~Guild.bulk_ban`.
+    A :class:`~typing.NamedTuple` which represents the successful and failed bans returned from :meth:`~Guild.bulk_ban`.
 
     .. versionadded:: 2.10
 
