@@ -400,6 +400,9 @@ class AuditLogAction(Enum):
     thread_update                         = 111
     thread_delete                         = 112
     application_command_permission_update = 121
+    soundboard_sound_create               = 130
+    soundboard_sound_update               = 131
+    soundboard_sound_delete               = 132
     automod_rule_create                   = 140
     automod_rule_update                   = 141
     automod_rule_delete                   = 142
@@ -462,6 +465,9 @@ class AuditLogAction(Enum):
             AuditLogAction.guild_scheduled_event_update:          AuditLogActionCategory.update,
             AuditLogAction.guild_scheduled_event_delete:          AuditLogActionCategory.delete,
             AuditLogAction.application_command_permission_update: AuditLogActionCategory.update,
+            AuditLogAction.soundboard_sound_create:               AuditLogActionCategory.create,
+            AuditLogAction.soundboard_sound_update:               AuditLogActionCategory.update,
+            AuditLogAction.soundboard_sound_delete:               AuditLogActionCategory.delete,
             AuditLogAction.automod_rule_create:                   AuditLogActionCategory.create,
             AuditLogAction.automod_rule_update:                   AuditLogActionCategory.update,
             AuditLogAction.automod_rule_delete:                   AuditLogActionCategory.delete,
@@ -509,6 +515,9 @@ class AuditLogAction(Enum):
             return "thread"
         elif v < 122:
             return "application_command_or_integration"
+        elif v < 133:
+            # TODO: implement AuditLogEntry handler
+            return "soundboard_sound"
         elif v < 140:
             return None
         elif v < 143:
