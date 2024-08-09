@@ -41,6 +41,7 @@ __all__ = (
     "ExpireBehavior",
     "StickerType",
     "StickerFormatType",
+    "InviteType",
     "InviteTarget",
     "VideoQualityMode",
     "ComponentType",
@@ -256,6 +257,10 @@ class MessageType(Enum):
     stage_speaker = 29
     stage_topic = 31
     guild_application_premium_subscription = 32
+    guild_incident_alert_mode_enabled = 36
+    guild_incident_alert_mode_disabled = 37
+    guild_incident_report_raid = 38
+    guild_incident_report_false_alarm = 39
 
 
 class PartyType(Enum):
@@ -601,6 +606,12 @@ STICKER_FORMAT_LOOKUP: Dict[StickerFormatType, str] = {
     StickerFormatType.lottie: "json",
     StickerFormatType.gif: "gif",
 }
+
+
+class InviteType(Enum):
+    guild = 0
+    group_dm = 1
+    friend = 2
 
 
 class InviteTarget(Enum):
@@ -1350,11 +1361,20 @@ class OnboardingPromptType(Enum):
 
 
 class SKUType(Enum):
+    durable = 2
+    consumable = 3
     subscription = 5
     subscription_group = 6
 
 
 class EntitlementType(Enum):
+    purchase = 1
+    premium_subscription = 2
+    developer_gift = 3
+    test_mode_purchase = 4
+    free_purchase = 5
+    user_gift = 6
+    premium_purchase = 7
     application_subscription = 8
 
 

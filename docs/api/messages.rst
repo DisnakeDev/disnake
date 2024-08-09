@@ -348,6 +348,26 @@ MessageType
         The system message denoting that a guild member has subscribed to an application.
 
         .. versionadded:: 2.8
+    .. attribute:: guild_incident_alert_mode_enabled
+
+        The system message denoting that an admin enabled security actions.
+
+        .. versionadded:: 2.10
+    .. attribute:: guild_incident_alert_mode_disabled
+
+        The system message denoting that an admin disabled security actions.
+
+        .. versionadded:: 2.10
+    .. attribute:: guild_incident_report_raid
+
+        The system message denoting that an admin reported a raid.
+
+        .. versionadded:: 2.10
+    .. attribute:: guild_incident_report_false_alarm
+
+        The system message denoting that a raid report was a false alarm.
+
+        .. versionadded:: 2.10
 
 Events
 ------
