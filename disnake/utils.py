@@ -48,7 +48,7 @@ from typing import (
 )
 from urllib.parse import parse_qs, urlencode
 
-from .enums import Locale
+from .enums import ApplicationIntegrationType, Locale
 
 try:
     import orjson
@@ -289,9 +289,9 @@ def oauth_url(
     redirect_uri: str = MISSING,
     scopes: Iterable[str] = MISSING,
     disable_guild_select: bool = False,
+    integration_type: Optional[ApplicationIntegrationType] = None,
 ) -> str:
-    """A helper function that returns the OAuth2 URL for inviting the bot
-    into guilds.
+    """A helper function that returns the OAuth2 URL for authorizing the application.
 
     Parameters
     ----------
@@ -314,6 +314,11 @@ def oauth_url(
 
         .. versionadded:: 2.0
 
+    integration_type: Optional[:class:`~disnake.ApplicationIntegrationType`]
+        An optional integration type/installation context to install the application in.
+
+        .. versionadded:: 2.10
+
     Returns
     -------
     :class:`str`
@@ -329,6 +334,8 @@ def oauth_url(
         url += "&response_type=code&" + urlencode({"redirect_uri": redirect_uri})
     if disable_guild_select:
         url += "&disable_guild_select=true"
+    if integration_type is not None:
+        url += f"&integration_type={integration_type.value}"
     return url
 
 

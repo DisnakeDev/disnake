@@ -71,6 +71,8 @@ __all__ = (
     "OnboardingPromptType",
     "SKUType",
     "EntitlementType",
+    "ApplicationIntegrationType",
+    "InteractionContextType",
 )
 
 
@@ -1362,6 +1364,18 @@ class EntitlementType(Enum):
     user_gift = 6
     premium_purchase = 7
     application_subscription = 8
+
+
+# TODO: `guild` vs `guild_install`
+class ApplicationIntegrationType(Enum):
+    guild = 0
+    user = 1
+
+
+class InteractionContextType(Enum):
+    guild = 0
+    bot_dm = 1
+    private_channel = 2
 
 
 T = TypeVar("T")

@@ -10,7 +10,7 @@ from .channel import ChannelType
 from .components import Component
 from .embed import Embed
 from .emoji import PartialEmoji
-from .interactions import InteractionMessageReference
+from .interactions import InteractionMessageReference, InteractionMetadata
 from .member import Member, UserWithMember
 from .snowflake import Snowflake, SnowflakeList
 from .sticker import StickerItem
@@ -108,7 +108,8 @@ class Message(TypedDict):
     message_reference: NotRequired[MessageReference]
     flags: NotRequired[int]
     referenced_message: NotRequired[Optional[Message]]
-    interaction: NotRequired[InteractionMessageReference]
+    interaction: NotRequired[InteractionMessageReference]  # deprecated
+    interaction_metadata: NotRequired[InteractionMetadata]
     thread: NotRequired[Thread]
     components: NotRequired[List[Component]]
     sticker_items: NotRequired[List[StickerItem]]
