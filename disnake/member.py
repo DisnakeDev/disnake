@@ -1004,7 +1004,7 @@ class Member(disnake.abc.Messageable, _UserTag):
             data = await http.edit_member(guild_id, self.id, reason=reason, **payload)
             return Member(data=data, guild=self.guild, state=self._state)
 
-    async def fetch_voice_state(self, *, cache: bool) -> VoiceState:
+    async def fetch_voice_state(self, *, cache: bool = False) -> VoiceState:
         """|coro|
 
         Fetches the :class:`VoiceState` of the member.
@@ -1014,7 +1014,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         Parameters
         ----------
         cache: :class:`bool`
-            Whether to cache the fetched voice state.
+            Whether to cache the fetched voice state. Defaults to ``False``.
 
         Raises
         ------
