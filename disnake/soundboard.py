@@ -202,7 +202,9 @@ class GuildSoundboardSound(SoundboardSound):
     available: :class:`bool`
         Whether this sound is available for use.
     user: Optional[:class:`User`]
-        The user that created this sound. May be ``None`` if not in the bot's cache.
+        The user that created this sound. This can only be retrieved using
+        :meth:`Guild.fetch_soundboard_sound`/:meth:`Guild.fetch_soundboard_sounds` while
+        having the :attr:`~Permissions.manage_guild_expressions` permission.
     """
 
     __slots__ = ("guild_id", "user")
@@ -218,7 +220,6 @@ class GuildSoundboardSound(SoundboardSound):
         super().__init__(data=data, state=state)
 
         self.guild_id: int = guild_id
-        # TODO: `user` only appears to be available over REST, gw still sends `user_id`?
         self.user: Optional[User] = (
             state.store_user(user_data) if (user_data := data.get("user")) is not None else None
         )
