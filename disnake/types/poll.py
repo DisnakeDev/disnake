@@ -7,6 +7,7 @@ from typing import List, Literal, Optional, TypedDict
 from typing_extensions import NotRequired
 
 from .emoji import PartialEmoji
+from .snowflake import Snowflake
 from .user import User
 
 
@@ -17,7 +18,7 @@ class PollMedia(TypedDict):
 
 class PollAnswer(TypedDict):
     # sent only as part of responses from Discord's API/Gateway
-    answer_id: int
+    answer_id: Snowflake
     poll_media: PollMedia
 
 
@@ -25,7 +26,7 @@ PollLayoutType = Literal[1]
 
 
 class PollAnswerCount(TypedDict):
-    id: int
+    id: Snowflake
     count: int
     me_voted: bool
 

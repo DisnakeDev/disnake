@@ -21,7 +21,6 @@ if TYPE_CHECKING:
     from .types.poll import (
         Poll as PollPayload,
         PollAnswer as PollAnswerPayload,
-        PollAnswerCount as PollAnswerCountPayload,
         PollCreateAnswerPayload,
         PollCreateMediaPayload,
         PollCreatePayload,
@@ -29,41 +28,10 @@ if TYPE_CHECKING:
     )
 
 __all__ = (
-    "PollAnswerCount",
     "PollMedia",
     "PollAnswer",
     "Poll",
 )
-
-
-class PollAnswerCount:
-    """Represents a poll answer count from discord.
-
-    .. versionadded:: 2.10
-
-    Attributes
-    ----------
-    id: :class:`int`
-        The ID of the answer the counts are of.
-    count: :class:`int`
-        The number of votes for this answer.
-    self_voted: :class:`bool`
-        Whether the current user voted for this answer.
-    """
-
-    __slots__ = (
-        "id",
-        "count",
-        "self_voted",
-    )
-
-    def __init__(self, data: PollAnswerCountPayload) -> None:
-        self.id: int = int(data["id"])
-        self.count: int = int(data["count"])
-        self.self_voted: bool = data["me_voted"]
-
-    def __repr__(self) -> str:
-        return f"<{self.__class__.__name__} id={self.id} count={self.count} self_voted={self.self_voted}>"
 
 
 class PollMedia:
@@ -278,8 +246,6 @@ class Poll:
         The type of the layout of the poll.
     is_finalized: :class:`bool`
         Whether the votes have been precisely counted.
-    answer_counts: Optional[List[:class:`PollAnswerCount`]]
-        The counts for each answer.
     """
 
     __slots__ = (
@@ -292,7 +258,6 @@ class Poll:
         "allow_multiselect",
         "layout_type",
         "is_finalized",
-        "answer_counts",
     )
 
     def __init__(
@@ -321,7 +286,6 @@ class Poll:
         self.allow_multiselect: bool = allow_multiselect
         self.layout_type: PollLayoutType = layout_type
         self.is_finalized: bool = False
-        self.answer_counts: Optional[List[PollAnswerCount]] = None
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} question={self.question} answers={self.answers!r}>"
@@ -368,7 +332,7 @@ class Poll:
             layout_type=try_enum(PollLayoutType, data["layout_type"]),
         )
         for answer in data["answers"]:
-            poll._answers[answer["answer_id"]] = PollAnswer.from_dict(state, answer)
+            poll._answers[int(answer["answer_id"])] = PollAnswer.from_dict(state, answer)
 
         poll._state = state
         poll.channel = channel
@@ -378,7 +342,15 @@ class Poll:
         # for a null value anyway
         if results := data.get("results"):
             poll.is_finalized = results["is_finalized"]
-            poll.answer_counts = [PollAnswerCount(answer) for answer in results["answer_counts"]]
+
+            for answer_count in results["answer_counts"]:
+                try:
+                    answer = poll._answers[int(answer_count["id"])]
+                except KeyError:
+                    # this should never happen
+                    continue
+                answer.count = answer_count["count"]
+                answer.self_voted = answer_count["me_voted"]
 
         if poll.is_finalized:
             poll.duration = None
