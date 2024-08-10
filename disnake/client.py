@@ -2519,6 +2519,11 @@ class Client:
 
         .. versionadded:: 2.10
 
+        Parameters
+        ----------
+        pack_id: :class:`int`
+            The ID of the sticker pack to retrieve.
+
         Raises
         ------
         HTTPException
