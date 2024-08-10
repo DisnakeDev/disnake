@@ -1,1 +1,1 @@
-Add :attr:`disnake.Attachment.title` new attribute.
+Add new :attr:`Attachment.title` attribute.
