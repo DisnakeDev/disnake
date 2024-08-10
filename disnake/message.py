@@ -46,6 +46,7 @@ if TYPE_CHECKING:
 
     from .abc import GuildChannel, MessageableChannel, Snowflake
     from .channel import DMChannel
+    from .embeds import _EmbedFieldProxy
     from .guild import GuildMessageable
     from .mentions import AllowedMentions
     from .role import Role
@@ -1537,6 +1538,25 @@ class Message(Hashable):
 
         if self.type is MessageType.guild_incident_report_false_alarm:
             return f"{self.author.name} resolved an Activity Alert."
+
+        if self.type is MessageType.poll_result:
+            poll_result_embed = self.embeds[0]
+            get_field: Callable[[str], Optional[_EmbedFieldProxy]] = lambda field_name: utils.get(
+                poll_result_embed.fields, name=field_name
+            )
+            # should never be none
+            question = get_field("poll_question_text").value  # type: ignore
+            # should never be none
+            total_votes = get_field("total_votes").value  # type: ignore
+            winning_answer = get_field("victor_answer_text")
+            winning_answer_votes = get_field("victor_answer_votes")
+            msg = f"{self.author.global_name}'s poll {question} has closed. "
+            if winning_answer and winning_answer_votes:
+                msg += (
+                    f"{winning_answer.value} won with {winning_answer_votes.value} "
+                    f"({(100 * int(winning_answer_votes.value)) // int(total_votes)}%)."  # type: ignore
+                )
+            return msg
 
         # in the event of an unknown or unsupported message type, we return nothing
         return None
