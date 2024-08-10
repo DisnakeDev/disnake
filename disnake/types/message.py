@@ -33,8 +33,8 @@ class Reaction(TypedDict):
 
 class Attachment(TypedDict):
     id: Snowflake
-    title: NotRequired[str]
     filename: str
+    title: NotRequired[str]
     description: NotRequired[str]
     content_type: NotRequired[str]
     size: int
