@@ -1550,10 +1550,10 @@ class Message(Hashable):
             total_votes = get_field("total_votes").value  # type: ignore
             winning_answer = get_field("victor_answer_text")
             winning_answer_votes = get_field("victor_answer_votes")
-            msg = f"{self.author.global_name}'s poll {question} has closed. "
+            msg = f"{self.author.global_name}'s poll {question} has closed."
             if winning_answer and winning_answer_votes:
                 msg += (
-                    f"{winning_answer.value} won with {winning_answer_votes.value} "
+                    f" {winning_answer.value} won with {winning_answer_votes.value} "
                     f"({(100 * int(winning_answer_votes.value)) // int(total_votes)}%)."  # type: ignore
                 )
             return msg
