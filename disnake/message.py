@@ -246,7 +246,8 @@ class Attachment(Hashable):
     id: :class:`int`
         The attachment's ID.
     title: Optional[:class:`str`]
-        The attachment title.
+        The attachment title. If the filename contained special characters,
+        this will be set to the original filename, without filename extension.
 
         .. versionadded:: 2.10
 
