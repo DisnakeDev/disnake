@@ -20,6 +20,15 @@ Emoji
     :members:
     :inherited-members:
 
+ApplicationEmoji
+~~~~~~~~~~~~~~~~
+
+.. attributable:: ApplicationEmoji
+
+.. autoclass:: ApplicationEmoji()
+    :members:
+    :inherited-members:
+
 Data Classes
 -------------
 
