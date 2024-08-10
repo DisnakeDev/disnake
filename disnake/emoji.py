@@ -9,7 +9,7 @@ from .partial_emoji import PartialEmoji, _EmojiTag
 from .user import User
 from .utils import MISSING, SnowflakeList, snowflake_time
 
-__all__ = ("Emoji",)
+__all__ = ("Emoji", "ApplicationEmoji", "AppEmoji")
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -246,3 +246,103 @@ class Emoji(_EmojiTag, AssetMixin):
             self.guild.id, self.id, payload=payload, reason=reason
         )
         return Emoji(guild=self.guild, data=data, state=self._state)
+
+
+class ApplicationEmoji(Emoji):
+    """Represents an application custom emoji.
+
+    .. versionadded:: 2.10
+
+    .. collapse:: operations
+
+        .. describe:: x == y
+
+            Checks if two emoji are the same.
+
+        .. describe:: x != y
+
+            Checks if two emoji are not the same.
+
+        .. describe:: hash(x)
+
+            Return the emoji's hash.
+
+        .. describe:: iter(x)
+
+            Returns an iterator of ``(field, value)`` pairs. This allows this class
+            to be used as an iterable in list/dict/etc constructions.
+
+        .. describe:: str(x)
+
+            Returns the emoji rendered for Discord.
+
+    Attributes
+    ----------
+    name: :class:`str`
+        The emoji's name.
+    id: :class:`int`
+        The emoji's ID.
+    application_id: :class:`int`
+        The apllication ID this emoji belongs to.
+    require_colons: :class:`bool`
+        Whether colons are required to use this emoji in the client (:PJSalt: vs PJSalt).
+    animated: :class:`bool`
+        Whether the emoji is animated or not.
+    managed: :class:`bool`
+        Whether the emoji is managed by a Twitch integration.
+    available: :class:`bool`
+        Whether the emoji is available for use.
+    user: :class:`User`
+        The user that created this emoji.
+    """
+
+    def __init__(self, *, app_id: int, state: ConnectionState, data: EmojiPayload) -> None:
+        self.guild_id: Optional[int] = None
+        self.application_id: int = app_id
+        self._state: ConnectionState = state
+        self._from_data(data)
+
+    def __repr__(self) -> str:
+        return f"<ApplicationEmoji id={self.id} application_id={self.application_id} name={self.name} animated={self.animated} managed={self.managed}>"
+
+    async def edit(self, *, name: str) -> ApplicationEmoji:
+        """|coro|
+
+        Edits the application custom emoji.
+
+        Parameters
+        ----------
+        name: :class:`str`
+            The new emoji name.
+
+        Raises
+        ------
+        Forbidden
+            You are not allowed to edit this emoji.
+        HTTPException
+            An error occurred editing the emoji.
+
+        Returns
+        -------
+        :class:`ApplicationEmoji`
+            The newly updated emoji.
+        """
+        data = await self._state.http.edit_app_emoji(self.application_id, self.id, name)
+        return ApplicationEmoji(app_id=self.application_id, state=self._state, data=data)
+
+    async def delete(self) -> None:
+        """|coro|
+
+        Deletes the application custom emoji.
+
+        Raises
+        ------
+        Forbidden
+            You are not allowed to delete this emoji.
+        HTTPException
+            An error occurred deleting the emoji.
+        """
+        await self._state.http.delete_app_emoji(self.application_id, self.id)
+
+
+AppEmoji = ApplicationEmoji
