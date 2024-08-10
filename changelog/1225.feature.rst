@@ -1,0 +1,4 @@
+Implement new :attr:`Message.type`: :attr:`MessageType.purchase_notifcation`.
+- New types :class:`PurchaseNotificationInfo`, :class:`GuildProductInfo`.
+- New :attr:`Message.purchase_information` attribute.
+- New enum :class:`PurchaseType`.

@@ -26,7 +26,14 @@ from . import utils
 from .components import ActionRow, MessageComponent, _component_factory
 from .embeds import Embed
 from .emoji import Emoji
-from .enums import ChannelType, InteractionType, MessageType, try_enum, try_enum_to_int
+from .enums import (
+    ChannelType,
+    InteractionType,
+    MessageType,
+    PurchaseType,
+    try_enum,
+    try_enum_to_int,
+)
 from .errors import HTTPException
 from .file import File
 from .flags import AttachmentFlags, MessageFlags
@@ -64,10 +71,12 @@ if TYPE_CHECKING:
     from .types.member import Member as MemberPayload, UserWithMember as UserWithMemberPayload
     from .types.message import (
         Attachment as AttachmentPayload,
+        GuildProductPurchase as GuildProductPayload,
         Message as MessagePayload,
         MessageActivity as MessageActivityPayload,
         MessageApplication as MessageApplicationPayload,
         MessageReference as MessageReferencePayload,
+        PurchaseNotification as PurchaseNotificationPayload,
         Reaction as ReactionPayload,
         RoleSubscriptionData as RoleSubscriptionDataPayload,
     )
@@ -86,6 +95,8 @@ __all__ = (
     "InteractionReference",
     "DeletedReferencedMessage",
     "RoleSubscriptionData",
+    "GuildProductInfo",
+    "PurchaseNotificationInfo",
 )
 
 
@@ -748,6 +759,42 @@ class RoleSubscriptionData:
         self.is_renewal: bool = data["is_renewal"]
 
 
+class GuildProductInfo:
+    """Represents the information about the guild product purchased by a user in a message
+    of type :attr:`MessageType.purchase_notification`.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    listing_id: :class:`int`
+        The ID of the listing the user purchased.
+    product_name: :class:`str`
+        The name of the product the user purchased.
+    """
+
+    __slots__ = ("listing_id", "product_name")
+
+    def __init__(self, data: GuildProductPayload) -> None:
+        self.listing_id: int = int(data["listing_id"])
+        self.product_name: str = data["product_name"]
+
+
+class PurchaseNotificationInfo:
+    """Represents the information about a purchase made by a user in a message of type
+    :attr:`MessageType.purchase_notification`.
+
+    .. versionadded:: 2.10
+    """
+
+    __slots__ = ("type", "guild_product")
+
+    def __init__(self, data: PurchaseNotificationPayload) -> None:
+        self.type: PurchaseType = try_enum(PurchaseType, data["type"])
+        guild_product_info = data.get("guild_product_purchase")
+        self.guild_product: Optional[GuildProductInfo] = (GuildProductInfo(guild_product_info) if guild_product_info is not None else None)
+
+
 def flatten_handlers(cls):
     prefix = len("_handle_")
     handlers = [
@@ -894,6 +941,11 @@ class Message(Hashable):
 
         .. versionadded:: 2.0
 
+    purchase_notification: Optional[:class:`PurchaseNotification`]
+        The purchase a user made if this message is of type :attr:`MessageType.purchase_notification`.
+
+        .. versionadded:: 2.10
+
     guild: Optional[:class:`Guild`]
         The guild that the message belongs to, if applicable.
     """
@@ -930,6 +982,7 @@ class Message(Hashable):
         "activity",
         "stickers",
         "components",
+        "purchase_notification",
         "guild",
         "_edited_timestamp",
         "_role_subscription_data",
@@ -985,6 +1038,9 @@ class Message(Hashable):
             _component_factory(d, type=ActionRow[MessageComponent])
             for d in data.get("components", [])
         ]
+
+        purchase_notif = data.get("purchase_notification")
+        self.purchase_notification: Optional[PurchaseNotificationInfo] = PurchaseNotificationInfo(purchase_notif) if purchase_notif is not None else None
 
         inter_payload = data.get("interaction")
         inter = (
@@ -1537,6 +1593,12 @@ class Message(Hashable):
 
         if self.type is MessageType.guild_incident_report_false_alarm:
             return f"{self.author.name} resolved an Activity Alert."
+
+        if self.type is MessageType.purchase_notification and self.purchase_notification is not None:
+            if self.purchase_notification.guild_product is not None:
+                return f"{self.author.name} has purchased {self.purchase_notification.guild_product.product_name}!"
+
+            # TODO: maybe more purcahse notification types will be added?
 
         # in the event of an unknown or unsupported message type, we return nothing
         return None
