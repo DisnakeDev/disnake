@@ -229,9 +229,9 @@ class VoiceClient(VoiceProtocol):
 
     warn_nacl = not has_nacl
     supported_modes: Tuple[SupportedModes, ...] = (
+        # "aead_aes256_gcm_rtpsize",  # supported in libsodium, but not exposed by pynacl
+        "aead_xchacha20_poly1305_rtpsize",
         "xsalsa20_poly1305_lite",
-        "xsalsa20_poly1305_suffix",
-        "xsalsa20_poly1305",
     )
 
     @property
@@ -512,8 +512,8 @@ class VoiceClient(VoiceProtocol):
         header = bytearray(12)
 
         # Formulate rtp header
-        header[0] = 0x80
-        header[1] = 0x78
+        header[0] = 0x80  # version = 2
+        header[1] = 0x78  # payload type = 120 (opus)
         struct.pack_into(">H", header, 2, self.sequence)
         struct.pack_into(">I", header, 4, self.timestamp)
         struct.pack_into(">I", header, 8, self.ssrc)
@@ -521,18 +521,19 @@ class VoiceClient(VoiceProtocol):
         encrypt_packet = getattr(self, f"_encrypt_{self.mode}")
         return encrypt_packet(header, data)
 
-    def _encrypt_xsalsa20_poly1305(self, header: bytes, data) -> bytes:
-        box = nacl.secret.SecretBox(bytes(self.secret_key))
+    def _encrypt_aead_xchacha20_poly1305_rtpsize(self, header: bytes, data) -> bytes:
+        box = nacl.secret.Aead(bytes(self.secret_key))
         nonce = bytearray(24)
-        nonce[:12] = header
 
-        return header + box.encrypt(bytes(data), bytes(nonce)).ciphertext
+        nonce[:4] = struct.pack(">I", self._lite_nonce)
+        # TODO: simplify this
+        self.checked_add("_lite_nonce", 1, 4294967295)
 
-    def _encrypt_xsalsa20_poly1305_suffix(self, header: bytes, data) -> bytes:
-        box = nacl.secret.SecretBox(bytes(self.secret_key))
-        nonce = nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)
-
-        return header + box.encrypt(bytes(data), nonce).ciphertext + nonce
+        return (
+            header
+            + box.encrypt(bytes(data), aad=bytes(header), nonce=bytes(nonce)).ciphertext
+            + nonce[:4]
+        )
 
     def _encrypt_xsalsa20_poly1305_lite(self, header: bytes, data) -> bytes:
         box = nacl.secret.SecretBox(bytes(self.secret_key))
