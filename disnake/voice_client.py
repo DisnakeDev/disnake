@@ -521,28 +521,29 @@ class VoiceClient(VoiceProtocol):
         encrypt_packet = getattr(self, f"_encrypt_{self.mode}")
         return encrypt_packet(header, data)
 
+    def _get_nonce(self) -> bytes:
+        nonce = bytearray(24)
+        nonce[:4] = struct.pack(">I", self._lite_nonce)
+
+        self._lite_nonce += 1
+        if self._lite_nonce > 4294967295:
+            self._lite_nonce = 0
+
+        return bytes(nonce)
+
     def _encrypt_aead_xchacha20_poly1305_rtpsize(self, header: bytes, data) -> bytes:
         box = nacl.secret.Aead(bytes(self.secret_key))
-        nonce = bytearray(24)
-
-        nonce[:4] = struct.pack(">I", self._lite_nonce)
-        # TODO: simplify this
-        self.checked_add("_lite_nonce", 1, 4294967295)
+        nonce = self._get_nonce()
 
         return (
-            header
-            + box.encrypt(bytes(data), aad=bytes(header), nonce=bytes(nonce)).ciphertext
-            + nonce[:4]
+            header + box.encrypt(bytes(data), aad=bytes(header), nonce=nonce).ciphertext + nonce[:4]
         )
 
     def _encrypt_xsalsa20_poly1305_lite(self, header: bytes, data) -> bytes:
         box = nacl.secret.SecretBox(bytes(self.secret_key))
-        nonce = bytearray(24)
+        nonce = self._get_nonce()
 
-        nonce[:4] = struct.pack(">I", self._lite_nonce)
-        self.checked_add("_lite_nonce", 1, 4294967295)
-
-        return header + box.encrypt(bytes(data), bytes(nonce)).ciphertext + nonce[:4]
+        return header + box.encrypt(bytes(data), nonce).ciphertext + nonce[:4]
 
     def play(
         self, source: AudioSource, *, after: Optional[Callable[[Optional[Exception]], Any]] = None
