@@ -147,9 +147,21 @@ class IncidentsData:
             Checks if two ``IncidentsData`` instances are not equal.
 
     .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    dm_spam_detected_at: Optional[:class:`datetime.datetime`]
+        The datetime at which DM spam was last detected.
+    raid_detected_at: Optional[:class:`datetime.datetime`]
+        The datetime at which a raid was last detected.
     """
 
-    __slots__ = ("_invites_disabled_until", "_dms_disabled_until")
+    __slots__ = (
+        "_invites_disabled_until",
+        "_dms_disabled_until",
+        "dm_spam_detected_at",
+        "raid_detected_at",
+    )
 
     def __init__(self, data: IncidentsDataPayload) -> None:
         self._invites_disabled_until: Optional[datetime.datetime] = utils.parse_time(
@@ -157,6 +169,12 @@ class IncidentsData:
         )
         self._dms_disabled_until: Optional[datetime.datetime] = utils.parse_time(
             data.get("dms_disabled_until")
+        )
+        self.dm_spam_detected_at: Optional[datetime.datetime] = utils.parse_time(
+            data.get("dm_spam_detected_at")
+        )
+        self.raid_detected_at: Optional[datetime.datetime] = utils.parse_time(
+            data.get("raid_detected_at")
         )
 
     @property
