@@ -151,9 +151,9 @@ class IncidentsData:
     Attributes
     ----------
     dm_spam_detected_at: Optional[:class:`datetime.datetime`]
-        The datetime at which DM spam was last detected.
+        The time (in UTC) at which DM spam was last detected.
     raid_detected_at: Optional[:class:`datetime.datetime`]
-        The datetime at which a raid was last detected.
+        The time (in UTC) at which a raid was last detected.
     """
 
     __slots__ = (
@@ -179,7 +179,7 @@ class IncidentsData:
 
     @property
     def invites_disabled_until(self) -> Optional[datetime.datetime]:
-        """Optional[:class:`datetime.datetime`]: Returns the datetime until
+        """Optional[:class:`datetime.datetime`]: Returns the time (in UTC) until
         which users cannot join the server via invites, if any.
         """
         if (
@@ -192,7 +192,7 @@ class IncidentsData:
 
     @property
     def dms_disabled_until(self) -> Optional[datetime.datetime]:
-        """Optional[:class:`datetime.datetime`]: Returns the datetime until
+        """Optional[:class:`datetime.datetime`]: Returns the time (in UTC) until
         which members cannot send DMs to each other, if any.
 
         This does not apply to moderators, bots, or members who are
