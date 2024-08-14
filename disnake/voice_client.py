@@ -229,7 +229,6 @@ class VoiceClient(VoiceProtocol):
 
     warn_nacl = not has_nacl
     supported_modes: Tuple[SupportedModes, ...] = (
-        # "aead_aes256_gcm_rtpsize",  # supported in libsodium, but not exposed by pynacl
         "aead_xchacha20_poly1305_rtpsize",
         "xsalsa20_poly1305_lite",
     )
