@@ -132,11 +132,10 @@ class _GuildLimit(NamedTuple):
     filesize: int
 
 
-# TODO: "IncidentData"?
 class IncidentsData:
     """Represents data about various security incidents/actions in a guild.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
