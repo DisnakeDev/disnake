@@ -208,6 +208,8 @@ class IncidentsData:
             isinstance(other, IncidentsData)
             and self.invites_disabled_until == other.invites_disabled_until
             and self.dms_disabled_until == other.dms_disabled_until
+            and self.dm_spam_detected_at == other.dm_spam_detected_at
+            and self.raid_detected_at == other.raid_detected_at
         )
 
 
