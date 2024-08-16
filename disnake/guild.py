@@ -2105,9 +2105,9 @@ class Guild(Hashable):
         splash: Optional[AssetBytes] = MISSING,
         discovery_splash: Optional[AssetBytes] = MISSING,
         community: bool = MISSING,
-        # TODO: naming; "dms_disabled=datetime" feels weird
-        invites_disabled: Union[datetime.datetime, datetime.timedelta, bool] = MISSING,
-        dms_disabled: Union[datetime.datetime, datetime.timedelta, Literal[False]] = MISSING,
+        invites_disabled: bool = MISSING,
+        invites_disabled_until: Optional[Union[datetime.datetime, datetime.timedelta]] = MISSING,
+        dms_disabled_until: Optional[Union[datetime.datetime, datetime.timedelta]] = MISSING,
         raid_alerts_disabled: bool = MISSING,
         afk_channel: Optional[VoiceChannel] = MISSING,
         owner: Snowflake = MISSING,
@@ -2192,25 +2192,35 @@ class Guild(Hashable):
         community: :class:`bool`
             Whether the guild should be a Community guild. If set to ``True``\\, both ``rules_channel``
             and ``public_updates_channel`` parameters are required.
-        invites_disabled: Union[:class:`datetime.datetime`, :class:`datetime.timedelta`, :class:`bool`]
-            Whether the guild has paused invites, preventing new users from joining.
-            Can also be set to a :class:`~datetime.datetime` or :class:`~datetime.timedelta` to
-            pause invites until/for a certain time instead.
+        invites_disabled: :class:`bool`
+            Whether the guild has paused invites (indefinitely), preventing new users from joining.
+            See also the ``invites_disabled_until`` parameter.
 
             This is only available to guilds that contain ``COMMUNITY``
             in :attr:`Guild.features`.
 
+            This cannot be changed at the same time as the ``community`` feature due a Discord API limitation.
+
             .. versionadded:: 2.6
 
-            .. versionchanged:: 2.10
-                Support disabling invites for a specific duration.
+        invites_disabled_until: Optional[Union[:class:`datetime.datetime`, :class:`datetime.timedelta`]]
+            The time until/for which invites are paused.
+            See also the ``invites_disabled`` parameter.
 
-        dms_disabled: Union[:class:`datetime.datetime`, :class:`datetime.timedelta`, :class:`bool`]
+            Can be set to ``None`` to re-enable invites.
+
+            This is only available to guilds that contain ``COMMUNITY``
+            in :attr:`Guild.features`.
+
+            .. versionadded:: 2.10
+
+        dms_disabled_until: Union[:class:`datetime.datetime`, :class:`datetime.timedelta`]
             The time until/for which DMs between guild members are disabled.
-            Can be set to ``False`` to re-enable DMs.
 
             This does not apply to moderators, bots, or members who are
             already friends with each other.
+
+            Can be set to ``None`` to re-enable DMs.
 
             This is only available to guilds that contain ``COMMUNITY``
             in :attr:`Guild.features`.
@@ -2303,36 +2313,26 @@ class Guild(Hashable):
         if vanity_code is not MISSING:
             await http.change_vanity_code(self.id, vanity_code, reason=reason)
 
-        # TODO: consider turning this into a separate method instead
-        # TODO: also, we currently need to include the old data, otherwise existing fields get unset
-        if invites_disabled is not MISSING or dms_disabled is not MISSING:
+        if invites_disabled_until is not MISSING or dms_disabled_until is not MISSING:
             payload: IncidentsDataPayload = {}
 
-            # this has turned out unnecessarily complex, but until we know more about how this
-            # works with the INVITES_DISABLED guild feature, it is how it is
-            if invites_disabled is not MISSING:
-                if invites_disabled is True:
-                    pass
-                else:
-                    if invites_disabled is False:
-                        payload["invites_disabled_until"] = None
-                    else:
-                        if isinstance(invites_disabled, datetime.timedelta):
-                            invites_disabled = utils.utcnow() + invites_disabled
-                        payload["invites_disabled_until"] = utils.isoformat_utc(invites_disabled)
+            # we need to include the old values, otherwise Discord will consider them set to `null`
+            # (which would e.g. re-enable DMs when disabling invites)
+            if self.incidents_data:
+                if invites_disabled_until is MISSING:
+                    invites_disabled_until = self.incidents_data.invites_disabled_until
+                if dms_disabled_until is MISSING:
+                    dms_disabled_until = self.incidents_data.dms_disabled_until
 
-                    # unset this so we don't try setting the guild feature below
-                    invites_disabled = MISSING
+            if invites_disabled_until is not MISSING:
+                if isinstance(invites_disabled_until, datetime.timedelta):
+                    invites_disabled_until = utils.utcnow() + invites_disabled_until
+                payload["invites_disabled_until"] = utils.isoformat_utc(invites_disabled_until)
 
-            if dms_disabled is not MISSING:
-                if dms_disabled is True:
-                    raise ValueError("dms_disabled may not be set to `True`")
-                elif dms_disabled is False:
-                    payload["dms_disabled_until"] = None
-                else:
-                    if isinstance(dms_disabled, datetime.timedelta):
-                        dms_disabled = utils.utcnow() + dms_disabled
-                    payload["dms_disabled_until"] = utils.isoformat_utc(dms_disabled)
+            if dms_disabled_until is not MISSING:
+                if isinstance(dms_disabled_until, datetime.timedelta):
+                    dms_disabled_until = utils.utcnow() + dms_disabled_until
+                payload["dms_disabled_until"] = utils.isoformat_utc(dms_disabled_until)
 
             if payload:
                 await http.edit_guild_incident_actions(self.id, **payload)
