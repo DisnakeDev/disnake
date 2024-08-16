@@ -1398,7 +1398,7 @@ class HTTPClient:
         )
 
     def edit_guild_incident_actions(
-        self, guild_id: Snowflake, **payload: Any
+        self, guild_id: Snowflake, payload: guild.IncidentsData
     ) -> Response[guild.IncidentsData]:
         r = Route("PUT", "/guilds/{guild_id}/incident-actions", guild_id=guild_id)
         return self.request(r, json=payload)

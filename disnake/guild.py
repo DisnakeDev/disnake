@@ -2335,7 +2335,7 @@ class Guild(Hashable):
                 payload["dms_disabled_until"] = utils.isoformat_utc(dms_disabled_until)
 
             if payload:
-                await http.edit_guild_incident_actions(self.id, **payload)
+                await http.edit_guild_incident_actions(self.id, payload)
 
         fields: Dict[str, Any] = {}
         if name is not MISSING:
