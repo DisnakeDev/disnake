@@ -495,7 +495,7 @@ class RawVoiceChannelEffectEvent(_RawReprMixin):
         The ID of the user who sent the effect.
     effect: :class:`VoiceChannelEffect`
         The effect that was sent.
-    member: Optional[:class:`Member`]
+    cached_member: Optional[:class:`Member`]
         The member who sent the effect, if they could be found in the internal cache.
     """
 
@@ -504,7 +504,7 @@ class RawVoiceChannelEffectEvent(_RawReprMixin):
         "guild_id",
         "user_id",
         "effect",
-        "member",
+        "cached_member",
     )
 
     def __init__(self, data: VoiceChannelEffectSendEvent, emoji: Optional[PartialEmoji]) -> None:
@@ -513,4 +513,4 @@ class RawVoiceChannelEffectEvent(_RawReprMixin):
         self.user_id: int = int(data["user_id"])
         self.effect: VoiceChannelEffect = VoiceChannelEffect(data, emoji)
 
-        self.member: Optional[Member] = None
+        self.cached_member: Optional[Member] = None
