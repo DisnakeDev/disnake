@@ -2103,9 +2103,9 @@ class Guild(Hashable):
         splash: Optional[AssetBytes] = MISSING,
         discovery_splash: Optional[AssetBytes] = MISSING,
         community: bool = MISSING,
-        invites_disabled: Union[bool, datetime.timedelta, datetime.datetime] = MISSING,
-        # TODO: this literal is somewhat ugly
-        dms_disabled: Union[Literal[False], datetime.timedelta, datetime.datetime] = MISSING,
+        # TODO: naming; "dms_disabled=datetime" feels weird
+        invites_disabled: Union[datetime.datetime, datetime.timedelta, bool] = MISSING,
+        dms_disabled: Union[datetime.datetime, datetime.timedelta, Literal[False]] = MISSING,
         raid_alerts_disabled: bool = MISSING,
         afk_channel: Optional[VoiceChannel] = MISSING,
         owner: Snowflake = MISSING,
@@ -2190,15 +2190,30 @@ class Guild(Hashable):
         community: :class:`bool`
             Whether the guild should be a Community guild. If set to ``True``\\, both ``rules_channel``
             and ``public_updates_channel`` parameters are required.
-        invites_disabled: :class:`bool`
+        invites_disabled: Union[:class:`datetime.datetime`, :class:`datetime.timedelta`, :class:`bool`]
             Whether the guild has paused invites, preventing new users from joining.
+            Can also be set to a :class:`~datetime.datetime` or :class:`~datetime.timedelta` to
+            pause invites until/for a certain time instead.
 
             This is only available to guilds that contain ``COMMUNITY``
             in :attr:`Guild.features`.
 
-            This cannot be changed at the same time as the ``community`` feature due a Discord API limitation.
-
             .. versionadded:: 2.6
+
+            .. versionchanged:: 2.10
+                Support disabling invites for a specific duration.
+
+        dms_disabled: Union[:class:`datetime.datetime`, :class:`datetime.timedelta`, :class:`bool`]
+            The time until/for which DMs between guild members are disabled.
+            Can be set to ``False`` to re-enable DMs.
+
+            This does not apply to moderators, bots, or members who are
+            already friends with each other.
+
+            This is only available to guilds that contain ``COMMUNITY``
+            in :attr:`Guild.features`.
+
+            .. versionadded:: 2.10
 
         raid_alerts_disabled: :class:`bool`
             Whether the guild has disabled join raid alerts.
@@ -2303,9 +2318,9 @@ class Guild(Hashable):
                         if isinstance(invites_disabled, datetime.timedelta):
                             invites_disabled = utils.utcnow() + invites_disabled
                         payload["invites_disabled_until"] = utils.isoformat_utc(invites_disabled)
-                    invites_disabled = (
-                        MISSING  # unset this so we don't try setting the guild feature below
-                    )
+
+                    # unset this so we don't try setting the guild feature below
+                    invites_disabled = MISSING
 
             if dms_disabled is not MISSING:
                 if dms_disabled is True:
