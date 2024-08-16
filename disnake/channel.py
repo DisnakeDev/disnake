@@ -130,10 +130,7 @@ class VoiceChannelEffect:
             if (value := data.get("animation_type")) is not None
             else None
         )
-        try:
-            self.animation_id: Optional[int] = int(data["animation_id"])
-        except KeyError:
-            self.animation_id: Optional[int] = None
+        self.animation_id: Optional[int] = utils._get_as_snowflake(data, "animation_id")
 
     def __repr__(self) -> str:
         return (
