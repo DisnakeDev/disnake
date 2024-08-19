@@ -1515,7 +1515,7 @@ class Client:
         """
         return self._connection.get_sticker(id)
 
-    def get_soundboard_sounds(self, id: int, /) -> Optional[GuildSoundboardSound]:
+    def get_soundboard_sound(self, id: int, /) -> Optional[GuildSoundboardSound]:
         """Returns a guild soundboard sound with the given ID.
 
         .. versionadded:: 2.10
