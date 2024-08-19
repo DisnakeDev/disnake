@@ -46,7 +46,7 @@ from .iterators import ArchivedThreadIterator
 from .mixins import Hashable
 from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite, Permissions
-from .soundboard import PartialSoundboardSound
+from .soundboard import GuildSoundboardSound, PartialSoundboardSound, SoundboardSound
 from .stage_instance import StageInstance
 from .threads import ForumTag, Thread
 from .utils import MISSING
@@ -1929,6 +1929,37 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             self.id, name=str(name), avatar=avatar_data, reason=reason
         )
         return Webhook.from_state(data, state=self._state)
+
+    async def send_soundboard_sound(self, sound: SoundboardSound, /) -> None:
+        """|coro|
+
+        Sends a soundboard sound in this channel.
+
+        You must have :attr:`~Permissions.speak` and :attr:`~Permissions.use_soundboard`
+        permissions to do this. For sounds from different guilds, you must also have
+        :attr:`~Permissions.use_external_sounds` permission.
+        Additionally, you may not be muted or deafened.
+
+        Parameters
+        ----------
+        sound: Union[:class:`SoundboardSound`, :class:`GuildSoundboardSound`]
+            The sound to send in the channel.
+
+        Raises
+        ------
+        Forbidden
+            You are not allowed to send soundboard sounds.
+        HTTPException
+            An error occurred sending the soundboard sound.
+        """
+        if isinstance(sound, GuildSoundboardSound):
+            source_guild_id = sound.guild_id
+        else:
+            source_guild_id = None
+
+        await self._state.http.send_soundboard_sound(
+            self.id, sound.id, source_guild_id=source_guild_id
+        )
 
 
 class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
