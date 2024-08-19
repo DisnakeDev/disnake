@@ -51,7 +51,6 @@ __all__ = (
     "RawPresenceUpdateEvent",
     "RawPollVoteActionEvent",
     "RawVoiceChannelEffectEvent",
-    "RawSoundboardSoundDeleteEvent",
 )
 
 
@@ -574,26 +573,3 @@ class RawVoiceChannelEffectEvent(_RawReprMixin):
         self.effect: VoiceChannelEffect = effect
 
         self.cached_member: Optional[Member] = None
-
-
-class RawSoundboardSoundDeleteEvent(_RawReprMixin):
-    """Represents the event payload for an :func:`on_raw_soundboard_sound_delete` event.
-
-    .. versionadded:: 2.10
-
-    Attributes
-    ----------
-    guild_id: :class:`int`
-        The ID of the guild the sound was removed from.
-    sound_id: :class:`int`
-        The ID of the sound that was removed.
-    """
-
-    __slots__ = (
-        "guild_id",
-        "sound_id",
-    )
-
-    def __init__(self, *, guild_id: int, sound_id: int) -> None:
-        self.guild_id: int = guild_id
-        self.sound_id: int = sound_id

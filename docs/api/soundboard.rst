@@ -38,18 +38,10 @@ GuildSoundboardSound
     :members:
     :inherited-members:
 
-RawSoundboardSoundDeleteEvent
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. attributetable:: RawSoundboardSoundDeleteEvent
-
-.. autoclass:: RawSoundboardSoundDeleteEvent()
-    :members:
-
 
 Events
 ------
 
 - :func:`on_soundboard_sound_create(sound) <disnake.on_soundboard_sound_create>`
-- :func:`on_raw_soundboard_sound_update(sound) <disnake.on_raw_soundboard_sound_update>`
-- :func:`on_raw_soundboard_sound_delete(payload) <disnake.on_raw_soundboard_sound_delete>`
+- :func:`on_soundboard_sound_update(sound) <disnake.on_soundboard_sound_update>`
+- :func:`on_soundboard_sound_delete(payload) <disnake.on_soundboard_sound_delete>`

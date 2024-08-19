@@ -5,5 +5,5 @@ Implement soundboard features.
     - New sounds can be created with :meth:`Guild.create_soundboard_sound`.
 - Send sounds using :meth:`VoiceChannel.send_soundboard_sound`.
 - New attributes: :attr:`Guild.soundboard_limit`, :attr:`VoiceChannelEffect.sound`, :attr:`Client.soundboard_sounds`
-- New events: :attr:`~Event.soundboard_sound_create`, :attr:`~Event.raw_soundboard_sound_update`, :attr:`~Event.raw_soundboard_sound_delete`
+- New events: :attr:`~Event.soundboard_sound_create`, :attr:`~Event.soundboard_sound_update`, :attr:`~Event.soundboard_sound_delete`
 - New audit log actions: :attr:`AuditLogAction.soundboard_sound_create`, :attr:`~AuditLogAction.soundboard_sound_update`, :attr:`~AuditLogAction.soundboard_sound_delete`

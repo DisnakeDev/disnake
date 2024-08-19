@@ -982,31 +982,25 @@ Soundboard
 ++++++++++
 
 .. function:: on_soundboard_sound_create(sound)
+              on_soundboard_sound_delete(sound)
 
-    Called when a soundboard sound is created.
+    Called when a :class:`GuildSoundboardSound` is created or deleted.
 
     .. versionadded:: 2.10
 
-    :param sound: The soundboard sound that was created.
+    :param sound: The soundboard sound that was created or deleted.
     :type sound: :class:`GuildSoundboardSound`
 
-.. function:: on_raw_soundboard_sound_update(sound)
+.. function:: on_soundboard_sound_update(before, after)
 
-    Called whenever a soundboard sound is updated.
-
-    .. versionadded:: 2.10
-
-    :param sound: The updated soundboard sound.
-    :type sound: :class:`GuildSoundboardSound`
-
-.. function:: on_raw_soundboard_sound_delete(payload)
-
-    Called whenever a soundboard sound is deleted.
+    Called whenever a :class:`GuildSoundboardSound` is updated.
 
     .. versionadded:: 2.10
 
-    :param payload: The raw event payload data.
-    :type payload: :class:`RawSoundboardSoundDeleteEvent`
+    :param before: The soundboard sound before the update.
+    :type before: :class:`GuildSoundboardSound`
+    :param after: The soundboard sound after the update.
+    :type after: :class:`GuildSoundboardSound`
 
 Stage Instances
 +++++++++++++++

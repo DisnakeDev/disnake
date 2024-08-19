@@ -1186,15 +1186,15 @@ class Event(Enum):
 
     .. versionadded:: 2.10
     """
-    raw_soundboard_sound_update = "raw_soundboard_sound_update"
+    soundboard_sound_update = "soundboard_sound_update"
     """Called when a `GuildSoundboardSound` is updated.
-    Represents the :func:`on_raw_soundboard_sound_update` event.
+    Represents the :func:`on_soundboard_sound_update` event.
 
     .. versionadded:: 2.10
     """
-    raw_soundboard_sound_delete = "raw_soundboard_sound_delete"
+    soundboard_sound_delete = "soundboard_sound_delete"
     """Called when a `GuildSoundboardSound` is deleted.
-    Represents the :func:`raw_soundboard_sound_delete` event.
+    Represents the :func:`soundboard_sound_delete` event.
 
     .. versionadded:: 2.10
     """

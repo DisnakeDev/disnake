@@ -78,7 +78,6 @@ from .raw_models import (
     RawReactionActionEvent,
     RawReactionClearEmojiEvent,
     RawReactionClearEvent,
-    RawSoundboardSoundDeleteEvent,
     RawThreadDeleteEvent,
     RawThreadMemberRemoveEvent,
     RawTypingEvent,
@@ -2010,7 +2009,6 @@ class ConnectionState:
         entitlement = Entitlement(data=data, state=self)
         self.dispatch("entitlement_delete", entitlement)
 
-    # TODO: update cache, add non-raw events
     def parse_guild_soundboard_sound_create(self, data: gateway.GuildSoundboardSoundCreate) -> None:
         guild_id = utils._get_as_snowflake(data, "guild_id")
         guild = self._get_guild(guild_id)
@@ -2025,30 +2023,32 @@ class ConnectionState:
         self.dispatch("soundboard_sound_create", sound)
 
     def parse_guild_soundboard_sound_update(self, data: gateway.GuildSoundboardSoundUpdate) -> None:
-        guild_id = utils._get_as_snowflake(data, "guild_id")
-        guild = self._get_guild(guild_id)
-        if guild is None:
+        sound_id = int(data["sound_id"])
+        sound = self.get_soundboard_sound(sound_id)
+        if sound is None:
             _log.debug(
-                "GUILD_SOUNDBOARD_SOUND_UPDATE referencing unknown guild ID: %s. Discarding.",
-                guild_id,
+                "GUILD_SOUNDBOARD_SOUND_UPDATE referencing unknown sound ID: %s. Discarding.",
+                sound_id,
             )
             return
 
-        sound = GuildSoundboardSound(data=data, state=self, guild_id=guild.id)
-        self.dispatch("raw_soundboard_sound_update", sound)
+        old_sound = copy.copy(sound)
+        sound._update(data)
+        self.dispatch("soundboard_sound_update", old_sound, sound)
 
     def parse_guild_soundboard_sound_delete(self, data: gateway.GuildSoundboardSoundDelete) -> None:
-        guild = self._get_guild(int(data["guild_id"]))
-        if guild is None:
+        sound_id = int(data["sound_id"])
+        sound = self.get_soundboard_sound(sound_id)
+        if sound is None:
             _log.debug(
-                "GUILD_SOUNDBOARD_SOUND_UPDATE referencing unknown guild ID: %s. Discarding.",
-                data["guild_id"],
+                "GUILD_SOUNDBOARD_SOUND_UPDATE referencing unknown sound ID: %s. Discarding.",
+                sound_id,
             )
             return
 
-        sound_id = int(data["sound_id"])
-        raw = RawSoundboardSoundDeleteEvent(guild_id=guild.id, sound_id=sound_id)
-        self.dispatch("raw_soundboard_sound_delete", raw)
+        self.dispatch("soundboard_sound_delete", sound)
+
+    # TODO: parse_guild_soundboard_sounds_update
 
     def _get_reaction_user(
         self, channel: MessageableChannel, user_id: int
