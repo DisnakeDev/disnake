@@ -1033,7 +1033,7 @@ class Intents(BaseFlags):
         dm_typing: bool = ...,
         emojis: bool = ...,
         emojis_and_stickers: bool = ...,
-        guild_expressions: bool = ...,
+        expressions: bool = ...,
         guild_messages: bool = ...,
         guild_polls: bool = ...,
         guild_reactions: bool = ...,
@@ -1189,7 +1189,7 @@ class Intents(BaseFlags):
         return 1 << 2
 
     @flag_value
-    def guild_expressions(self):
+    def expressions(self):
         """:class:`bool`: Whether events related to guild emojis, stickers, and
         soundboard sounds are enabled.
 
@@ -1220,7 +1220,7 @@ class Intents(BaseFlags):
 
     @alias_flag_value
     def emojis_and_stickers(self):
-        """:class:`bool`: Alias of :attr:`.guild_expressions`.
+        """:class:`bool`: Alias of :attr:`.expressions`.
 
         .. versionadded:: 2.0
 
@@ -1231,7 +1231,7 @@ class Intents(BaseFlags):
 
     @alias_flag_value
     def emojis(self):
-        """:class:`bool`: Alias of :attr:`.guild_expressions`.
+        """:class:`bool`: Alias of :attr:`.expressions`.
 
         .. versionchanged:: 2.0
             Changed to an alias.
