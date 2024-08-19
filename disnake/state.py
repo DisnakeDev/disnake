@@ -42,6 +42,7 @@ from .channel import (
     StageChannel,
     TextChannel,
     VoiceChannel,
+    VoiceChannelEffect,
     _guild_channel_factory,
 )
 from .emoji import Emoji
@@ -1813,7 +1814,8 @@ class ConnectionState:
                 name=emoji_data.get("name") or "",
             )
 
-        raw = RawVoiceChannelEffectEvent(data, emoji)
+        effect = VoiceChannelEffect(data, emoji)
+        raw = RawVoiceChannelEffectEvent(data, effect)
 
         # TODO: narrow channel type to VoiceChannel?
         channel = guild.get_channel(raw.channel_id)
@@ -1821,7 +1823,7 @@ class ConnectionState:
         self.dispatch("raw_voice_channel_effect", raw)
 
         if channel and member:
-            self.dispatch("voice_channel_effect", channel, member, raw.effect)
+            self.dispatch("voice_channel_effect", channel, member, effect)
 
     # FIXME: this should be refactored. The `GroupChannel` path will never be hit,
     # `raw.timestamp` exists so no need to parse it twice, and `.get_user` should be used before falling back

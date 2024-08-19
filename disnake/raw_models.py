@@ -5,11 +5,11 @@ from __future__ import annotations
 import datetime
 from typing import TYPE_CHECKING, List, Literal, Optional, Set, Union, cast
 
-from .channel import VoiceChannelEffect
 from .enums import ChannelType, try_enum
 from .utils import _get_as_snowflake, get_slots
 
 if TYPE_CHECKING:
+    from .channel import VoiceChannelEffect
     from .member import Member
     from .message import Message
     from .partial_emoji import PartialEmoji
@@ -507,10 +507,10 @@ class RawVoiceChannelEffectEvent(_RawReprMixin):
         "cached_member",
     )
 
-    def __init__(self, data: VoiceChannelEffectSendEvent, emoji: Optional[PartialEmoji]) -> None:
+    def __init__(self, data: VoiceChannelEffectSendEvent, effect: VoiceChannelEffect) -> None:
         self.channel_id: int = int(data["channel_id"])
         self.guild_id: int = int(data["guild_id"])
         self.user_id: int = int(data["user_id"])
-        self.effect: VoiceChannelEffect = VoiceChannelEffect(data, emoji)
+        self.effect: VoiceChannelEffect = effect
 
         self.cached_member: Optional[Member] = None
