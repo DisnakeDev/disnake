@@ -109,7 +109,7 @@ class VoiceChannelEffect:
 
     Attributes
     ----------
-    emoji: Optional[:class:`PartialEmoji`]
+    emoji: Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]
         The emoji, for emoji reaction effects.
     animation_type: Optional[:class:`VoiceChannelEffectAnimationType`]
         The emoji animation type, for emoji reaction effects.
@@ -123,8 +123,14 @@ class VoiceChannelEffect:
         "animation_id",
     )
 
-    def __init__(self, data: VoiceChannelEffectPayload, emoji: Optional[PartialEmoji]) -> None:
-        self.emoji: Optional[PartialEmoji] = emoji
+    def __init__(self, *, data: VoiceChannelEffectPayload, state: ConnectionState) -> None:
+        self.emoji: Optional[Union[Emoji, PartialEmoji]] = None
+        if emoji_data := data.get("emoji"):
+            emoji = state._get_emoji_from_data(emoji_data)
+            if isinstance(emoji, str):
+                emoji = PartialEmoji(name=emoji)
+            self.emoji = emoji
+
         self.animation_type = (
             try_enum(VoiceChannelEffectAnimationType, value)
             if (value := data.get("animation_type")) is not None

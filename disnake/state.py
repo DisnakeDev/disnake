@@ -1805,16 +1805,7 @@ class ConnectionState:
             )
             return
 
-        emoji: Optional[PartialEmoji] = None
-        if emoji_data := data.get("emoji"):
-            emoji = PartialEmoji.with_state(
-                self,
-                animated=emoji_data.get("animated", False),
-                id=utils._get_as_snowflake(emoji_data, "id"),
-                name=emoji_data.get("name") or "",
-            )
-
-        effect = VoiceChannelEffect(data, emoji)
+        effect = VoiceChannelEffect(data=data, state=self)
         raw = RawVoiceChannelEffectEvent(data, effect)
 
         # TODO: narrow channel type to VoiceChannel?
