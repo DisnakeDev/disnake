@@ -2789,7 +2789,7 @@ class HTTPClient:
 
     # Soundboard
 
-    def get_soundboard_default_sounds(self) -> Response[List[soundboard.SoundboardSound]]:
+    def get_default_soundboard_sounds(self) -> Response[List[soundboard.SoundboardSound]]:
         return self.request(Route("GET", "/soundboard-default-sounds"))
 
     def create_guild_soundboard_sound(
