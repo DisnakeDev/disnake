@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Optional, TypedDict
+from typing import List, Optional, TypedDict
 
 from typing_extensions import NotRequired
 
@@ -25,3 +25,7 @@ class SoundboardSound(PartialSoundboardSound):
 class GuildSoundboardSound(SoundboardSound):
     guild_id: NotRequired[Snowflake]
     user: NotRequired[User]  # only available via REST, given appropriate permissions
+
+
+class ListGuildSoundboardSounds(TypedDict):
+    items: List[GuildSoundboardSound]

@@ -5047,6 +5047,59 @@ class Guild(Hashable):
         )
         return GuildSoundboardSound(data=data, state=self._state, guild_id=self.id)
 
+    async def fetch_soundboard_sound(self, sound_id: int, /) -> GuildSoundboardSound:
+        """|coro|
+
+        Retrieves a soundboard sound from the guild.
+        See also :func:`~Guild.fetch_soundboard_sounds`.
+
+        .. note::
+
+            This method is an API call. For general usage, consider :attr:`soundboard_sounds` instead.
+
+        .. versionadded:: 2.10
+
+        Raises
+        ------
+        NotFound
+            A soundboard sound with the provided ID does not exist in the guild.
+        HTTPException
+            Retrieving the soundboard sound failed.
+
+        Returns
+        -------
+        :class:`GuildSoundboardSound`
+            The soundboard sound.
+        """
+        data = await self._state.http.get_guild_soundboard_sound(self.id, sound_id)
+        return GuildSoundboardSound(data=data, state=self._state, guild_id=self.id)
+
+    async def fetch_soundboard_sounds(self) -> List[GuildSoundboardSound]:
+        """|coro|
+
+        Retrieves all :class:`GuildSoundboardSound`\\s that the guild has.
+
+        .. note::
+
+            This method is an API call. For general usage, consider :attr:`soundboard_sounds` instead.
+
+        .. versionadded:: 2.10
+
+        Raises
+        ------
+        HTTPException
+            Retrieving the soundboard sounds failed.
+
+        Returns
+        -------
+        List[:class:`GuildSoundboardSound`]
+            All soundboard sounds that the guild has.
+        """
+        data = await self._state.http.get_guild_soundboard_sounds(self.id)
+        return [
+            GuildSoundboardSound(data=d, state=self._state, guild_id=self.id) for d in data["items"]
+        ]
+
 
 PlaceholderID = NewType("PlaceholderID", int)
 
