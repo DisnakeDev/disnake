@@ -152,7 +152,6 @@ class VoiceChannelEffect:
             else:
                 sound_data: PartialSoundboardSoundPayload = {
                     "sound_id": sound_id,
-                    "override_path": data.get("sound_override_path"),
                     "volume": data.get("sound_volume"),  # type: ignore  # assume this exists if sound_id is set
                 }
                 self.sound = PartialSoundboardSound(data=sound_data, state=state)
