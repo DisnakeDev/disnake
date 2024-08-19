@@ -2394,7 +2394,7 @@ class Client:
         List[:class:`.SoundboardSound`]
             The default soundboard sounds.
         """
-        data = await self.http.get_soundboard_default_sounds()
+        data = await self.http.get_default_soundboard_sounds()
         return [SoundboardSound(data=d, state=self._connection) for d in data]
 
     async def application_info(self) -> AppInfo:
