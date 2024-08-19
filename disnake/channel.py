@@ -117,8 +117,10 @@ class VoiceChannelEffect:
         The emoji animation type, for emoji reaction and soundboard effects.
     animation_id: Optional[:class:`int`]
         The emoji animation ID, for emoji reaction and soundboard effects.
-    sound: Optional[:class:`PartialSoundboardSound`]
+    sound: Optional[Union[:class:`GuildSoundboardSound`, :class:`PartialSoundboardSound`]]
         The sound data, for soundboard effects.
+        This will be a :class:`PartialSoundboardSound` if it's a default sound
+        or from an external guild.
     """
 
     __slots__ = (
@@ -143,14 +145,17 @@ class VoiceChannelEffect:
         )
         self.animation_id: Optional[int] = utils._get_as_snowflake(data, "animation_id")
 
-        self.sound: Optional[PartialSoundboardSound] = None
-        if sound_id := data.get("sound_id"):
-            sound_data: PartialSoundboardSoundPayload = {
-                "sound_id": sound_id,
-                "override_path": data.get("sound_override_path"),
-                "volume": data.get("sound_volume"),  # type: ignore  # assume this exists if sound_id is set
-            }
-            self.sound = PartialSoundboardSound(data=sound_data)
+        self.sound: Optional[Union[GuildSoundboardSound, PartialSoundboardSound]] = None
+        if sound_id := utils._get_as_snowflake(data, "sound_id"):
+            if sound := state.get_soundboard_sound(sound_id):
+                self.sound = sound
+            else:
+                sound_data: PartialSoundboardSoundPayload = {
+                    "sound_id": sound_id,
+                    "override_path": data.get("sound_override_path"),
+                    "volume": data.get("sound_volume"),  # type: ignore  # assume this exists if sound_id is set
+                }
+                self.sound = PartialSoundboardSound(data=sound_data, state=state)
 
     def __repr__(self) -> str:
         return (
