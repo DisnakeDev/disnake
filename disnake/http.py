@@ -2864,6 +2864,24 @@ class HTTPClient:
             reason=reason,
         )
 
+    def send_soundboard_sound(
+        self,
+        channel_id: Snowflake,
+        sound_id: Snowflake,
+        *,
+        source_guild_id: Optional[Snowflake] = None,
+    ) -> Response[None]:
+        payload: Dict[str, Any] = {
+            "sound_id": sound_id,
+        }
+        if source_guild_id is not None:
+            payload["source_guild_id"] = source_guild_id
+
+        return self.request(
+            Route("POST", "/channels/{channel_id}/send-soundboard-sound", channel_id=channel_id),
+            json=payload,
+        )
+
     # Misc
 
     def get_voice_regions(self) -> Response[List[voice.VoiceRegion]]:
