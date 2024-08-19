@@ -4,10 +4,13 @@ from typing import List, Literal, Optional, TypedDict
 
 from typing_extensions import NotRequired
 
+from .emoji import PartialEmoji
 from .member import MemberWithUser
 from .snowflake import Snowflake
 
 SupportedModes = Literal["xsalsa20_poly1305_lite", "xsalsa20_poly1305_suffix", "xsalsa20_poly1305"]
+
+VoiceChannelEffectAnimationType = Literal[0, 1]
 
 
 class _VoiceState(TypedDict):
@@ -54,3 +57,9 @@ class VoiceReady(TypedDict):
     port: int
     modes: List[SupportedModes]
     heartbeat_interval: int
+
+
+class VoiceChannelEffect(TypedDict, total=False):
+    emoji: Optional[PartialEmoji]
+    animation_type: Optional[VoiceChannelEffectAnimationType]
+    animation_id: int
