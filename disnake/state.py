@@ -2019,7 +2019,7 @@ class ConnectionState:
             )
             return
 
-        sound = GuildSoundboardSound(data=data, state=self, guild_id=guild.id)
+        sound = self.store_soundboard_sound(guild, data)
         self.dispatch("soundboard_sound_create", sound)
 
     def parse_guild_soundboard_sound_update(self, data: gateway.GuildSoundboardSoundUpdate) -> None:
@@ -2046,6 +2046,7 @@ class ConnectionState:
             )
             return
 
+        self._soundboard_sounds.pop(sound.id, None)
         self.dispatch("soundboard_sound_delete", sound)
 
     # TODO: parse_guild_soundboard_sounds_update
