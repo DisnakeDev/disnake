@@ -42,6 +42,4 @@ GuildSoundboardSound
 Events
 ------
 
-- :func:`on_soundboard_sound_create(sound) <disnake.on_soundboard_sound_create>`
-- :func:`on_soundboard_sound_update(sound) <disnake.on_soundboard_sound_update>`
-- :func:`on_soundboard_sound_delete(payload) <disnake.on_soundboard_sound_delete>`
+- :func:`on_soundboard_sounds_update(guild, before, after) <disnake.on_soundboard_sounds_update>`

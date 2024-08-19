@@ -72,10 +72,6 @@ class PartialSoundboardSound(Hashable, AssetMixin):
     ) -> None:
         self._state = state
         self.id: int = int(data["sound_id"])
-
-        self._update(data)
-
-    def _update(self, data: PartialSoundboardSoundPayload) -> None:
         self.volume: float = data["volume"]
 
     def __repr__(self) -> str:
@@ -151,10 +147,7 @@ class SoundboardSound(PartialSoundboardSound):
         state: ConnectionState,
     ) -> None:
         super().__init__(data=data, state=state)
-        # base class calls `_update`
 
-    def _update(self, data: SoundboardSoundPayload) -> None:
-        super()._update(data)
         self.name: str = data["name"]
         self.emoji: Optional[Union[Emoji, PartialEmoji]] = self._state._get_emoji_from_fields(
             name=data.get("emoji_name"),

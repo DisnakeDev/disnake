@@ -981,30 +981,20 @@ Scheduled Events
 Soundboard
 ++++++++++
 
-.. function:: on_soundboard_sound_create(sound)
-              on_soundboard_sound_delete(sound)
+.. function:: on_guild_soundboard_sounds_update(guild, before, after)
 
-    Called when a :class:`GuildSoundboardSound` is created or deleted.
-
-    This requires :attr:`Intents.guild_expressions` to be enabled.
-
-    .. versionadded:: 2.10
-
-    :param sound: The soundboard sound that was created or deleted.
-    :type sound: :class:`GuildSoundboardSound`
-
-.. function:: on_soundboard_sound_update(before, after)
-
-    Called whenever a :class:`GuildSoundboardSound` is updated.
+    Called when a :class:`Guild` updates its soundboard sounds.
 
     This requires :attr:`Intents.guild_expressions` to be enabled.
 
     .. versionadded:: 2.10
 
-    :param before: The soundboard sound before the update.
-    :type before: :class:`GuildSoundboardSound`
-    :param after: The soundboard sound after the update.
-    :type after: :class:`GuildSoundboardSound`
+    :param guild: The guild who got their soundboard sounds updated.
+    :type guild: :class:`Guild`
+    :param before: A list of soundboard sounds before the update.
+    :type before: Sequence[:class:`GuildSoundboardSound`]
+    :param after: A list of soundboard sounds after the update.
+    :type after: Sequence[:class:`GuildSoundboardSound`]
 
 Stage Instances
 +++++++++++++++
