@@ -564,7 +564,6 @@ class Guild(Hashable):
         self.stickers: Tuple[GuildSticker, ...] = tuple(
             state.store_sticker(self, d) for d in guild.get("stickers", [])
         )
-        # TODO: rest methods
         self.soundboard_sounds: Tuple[GuildSoundboardSound, ...] = tuple(
             state.store_soundboard_sound(self, d) for d in guild.get("soundboard_sounds", [])
         )

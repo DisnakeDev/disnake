@@ -42,4 +42,4 @@ GuildSoundboardSound
 Events
 ------
 
-- :func:`on_soundboard_sounds_update(guild, before, after) <disnake.on_soundboard_sounds_update>`
+- :func:`on_guild_soundboard_sounds_update(guild, before, after) <disnake.on_guild_soundboard_sounds_update>`
