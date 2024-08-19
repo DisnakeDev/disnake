@@ -37,7 +37,7 @@ class PartialSoundboardSound(Hashable, AssetMixin):
 
     .. versionadded:: 2.10
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -110,7 +110,7 @@ class SoundboardSound(PartialSoundboardSound):
 
     .. versionadded:: 2.10
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -171,7 +171,7 @@ class GuildSoundboardSound(SoundboardSound):
 
     .. versionadded:: 2.10
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
