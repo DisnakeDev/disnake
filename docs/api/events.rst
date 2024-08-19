@@ -670,7 +670,7 @@ Emojis
 
     Called when a :class:`Guild` adds or removes :class:`Emoji`.
 
-    This requires :attr:`Intents.guild_expressions` to be enabled.
+    This requires :attr:`Intents.expressions` to be enabled.
 
     :param guild: The guild who got their emojis updated.
     :type guild: :class:`Guild`
@@ -985,7 +985,7 @@ Soundboard
 
     Called when a :class:`Guild` updates its soundboard sounds.
 
-    This requires :attr:`Intents.guild_expressions` to be enabled.
+    This requires :attr:`Intents.expressions` to be enabled.
 
     .. versionadded:: 2.10
 
@@ -1032,7 +1032,7 @@ Stickers
 
     Called when a :class:`Guild` updates its stickers.
 
-    This requires :attr:`Intents.guild_expressions` to be enabled.
+    This requires :attr:`Intents.expressions` to be enabled.
 
     .. versionadded:: 2.0
 
