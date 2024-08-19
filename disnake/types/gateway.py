@@ -17,14 +17,14 @@ from .guild import Guild, UnavailableGuild
 from .guild_scheduled_event import GuildScheduledEvent
 from .integration import BaseIntegration
 from .interactions import BaseInteraction, GuildApplicationCommandPermissions
-from .invite import InviteTargetType
+from .invite import InviteTargetType, InviteType
 from .member import MemberWithUser
 from .message import Message
 from .role import Role
 from .snowflake import Snowflake, SnowflakeList
 from .sticker import GuildSticker
 from .threads import Thread, ThreadMember, ThreadMemberWithPresence, ThreadType
-from .user import User
+from .user import AvatarDecorationData, User
 from .voice import GuildVoiceState, SupportedModes
 
 
@@ -348,6 +348,7 @@ class InviteCreateEvent(TypedDict):
     target_user: NotRequired[User]
     target_application: NotRequired[PartialAppInfo]
     temporary: bool
+    type: InviteType
     uses: int  # always 0
 
 
@@ -441,6 +442,7 @@ class GuildMemberUpdateEvent(TypedDict):
     pending: NotRequired[bool]
     communication_disabled_until: NotRequired[Optional[str]]
     flags: int
+    avatar_decoration_data: NotRequired[Optional[AvatarDecorationData]]
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-emojis-update
