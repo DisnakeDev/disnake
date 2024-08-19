@@ -349,13 +349,14 @@ class InteractionMessageReference(TypedDict):
 class _BaseInteractionMetadata(TypedDict):
     id: Snowflake
     type: InteractionType
-    user_id: Snowflake
+    user: User
     # keys are stringified ApplicationIntegrationType's
     authorizing_integration_owners: Dict[str, Snowflake]
     original_response_message_id: NotRequired[Snowflake]  # only on followups
 
 
 class ApplicationCommandInteractionMetadata(_BaseInteractionMetadata):
+    # TODO: consider removing this again
     name: str  # not documented
 
 

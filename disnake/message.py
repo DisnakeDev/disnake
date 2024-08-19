@@ -737,8 +737,8 @@ class InteractionMetadata:
         The ID of the interaction.
     type: :class:`InteractionType`
         The type of the interaction.
-    user_id: :class:`int`
-        The ID of the user that triggered the interaction.
+    user: :class:`User`
+        The user that triggered the interaction.
     authorizing_integration_owners: Dict[:class:`ApplicationIntegrationType`, int]
         The authorizing user/guild for the application installation related to the interaction.
         See :attr:`Interaction.authorizing_integration_owners` for details.
@@ -761,7 +761,7 @@ class InteractionMetadata:
         "_state",
         "id",
         "type",
-        "user_id",
+        "user",
         "authorizing_integration_owners",
         "original_response_message_id",
         "name",
@@ -774,8 +774,8 @@ class InteractionMetadata:
 
         self.id: int = int(data.get("id"))
         self.type: InteractionType = try_enum(InteractionType, int(data["type"]))
-        # TODO: consider @property def user(self) -> Member | User | None
-        self.user_id: int = int(data.get("user_id"))
+        # TODO: consider trying member cache first?
+        self.user: User = state.store_user(data["user"])
         self.authorizing_integration_owners: Dict[ApplicationIntegrationType, int] = {
             try_enum(ApplicationIntegrationType, int(k)): int(v)
             for k, v in (data.get("authorizing_integration_owners") or {}).items()
