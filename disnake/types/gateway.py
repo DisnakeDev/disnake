@@ -680,3 +680,11 @@ GuildSoundboardSoundUpdate = GuildSoundboardSound
 class GuildSoundboardSoundDelete(TypedDict):
     guild_id: Snowflake
     sound_id: Snowflake
+
+
+# https://discord.com/developers/docs/topics/gateway-events#guild-soundboard-sounds-update
+# NOTE: the docs currently claim that this is a simple array; for now, this is
+# based on the code in the desktop client, which shows this familiar structure
+class GuildSoundboardSoundsUpdate(TypedDict):
+    guild_id: Snowflake
+    soundboard_sounds: List[GuildSoundboardSound]

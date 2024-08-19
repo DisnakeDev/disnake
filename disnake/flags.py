@@ -1199,9 +1199,7 @@ class Intents(BaseFlags):
 
         - :func:`on_guild_emojis_update`
         - :func:`on_guild_stickers_update`
-        - :func:`on_soundboard_sound_create`
-        - :func:`on_soundboard_sound_update`
-        - :func:`on_soundboard_sound_delete`
+        - :func:`on_guild_soundboard_sounds_update`
 
         This also corresponds to the following attributes and classes in terms of cache:
 

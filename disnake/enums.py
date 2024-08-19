@@ -1059,6 +1059,12 @@ class Event(Enum):
     """Called when a `Guild` updates its stickers.
     Represents the :func:`on_guild_stickers_update` event.
     """
+    guild_soundboard_sounds_update = "guild_soundboard_sounds_update"
+    """Called when a `Guild` updates its soundboard sounds.
+    Represents the :func:`on_guild_soundboard_sounds_update` event.
+
+    .. versionadded:: 2.10
+    """
     guild_integrations_update = "guild_integrations_update"
     """Called whenever an integration is created, modified, or removed from a guild.
     Represents the :func:`on_guild_integrations_update` event.
@@ -1180,24 +1186,6 @@ class Event(Enum):
 
     .. versionadded:: 2.10
     """
-    soundboard_sound_create = "soundboard_sound_create"
-    """Called when a `GuildSoundboardSound` is created.
-    Represents the :func:`on_soundboard_sound_create` event.
-
-    .. versionadded:: 2.10
-    """
-    soundboard_sound_update = "soundboard_sound_update"
-    """Called when a `GuildSoundboardSound` is updated.
-    Represents the :func:`on_soundboard_sound_update` event.
-
-    .. versionadded:: 2.10
-    """
-    soundboard_sound_delete = "soundboard_sound_delete"
-    """Called when a `GuildSoundboardSound` is deleted.
-    Represents the :func:`soundboard_sound_delete` event.
-
-    .. versionadded:: 2.10
-    """
     stage_instance_create = "stage_instance_create"
     """Called when a `StageInstance` is created for a `StageChannel`.
     Represents the :func:`on_stage_instance_create` event.
@@ -1300,7 +1288,8 @@ class Event(Enum):
     """
     raw_presence_update = "raw_presence_update"
     """Called when a user's presence changes regardless of the state of the internal member cache.
-    Represents the :func:`on_raw_presence_update` event."""
+    Represents the :func:`on_raw_presence_update` event.
+    """
     raw_reaction_add = "raw_reaction_add"
     """Called when a message has a reaction added regardless of the state of the internal message cache.
     Represents the :func:`on_raw_reaction_add` event.
@@ -1327,13 +1316,22 @@ class Event(Enum):
     """
     entitlement_create = "entitlement_create"
     """Called when a user subscribes to an SKU, creating a new :class:`Entitlement`.
-    Represents the :func:`on_entitlement_create` event."""
+    Represents the :func:`on_entitlement_create` event.
+
+    .. versionadded:: 2.10
+    """
     entitlement_update = "entitlement_update"
     """Called when a user's subscription renews.
-    Represents the :func:`on_entitlement_update` event."""
+    Represents the :func:`on_entitlement_update` event.
+
+    .. versionadded:: 2.10
+    """
     entitlement_delete = "entitlement_delete"
     """Called when a user's entitlement is deleted.
-    Represents the :func:`on_entitlement_delete` event."""
+    Represents the :func:`on_entitlement_delete` event.
+
+    .. versionadded:: 2.10
+    """
     # ext.commands events
     command = "command"
     """Called when a command is found and is about to be invoked.

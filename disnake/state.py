@@ -2020,23 +2020,25 @@ class ConnectionState:
             return
 
         sound = self.store_soundboard_sound(guild, data)
-        self.dispatch("soundboard_sound_create", sound)
+
+        # since both single-target `SOUND_CREATE`/`_UPDATE`/`_DELETE`s and a generic `SOUNDS_UPDATE`
+        # exist, turn these events into synthetic `SOUNDS_UPDATE`s
+        self._handle_soundboard_update(
+            guild,
+            # append new sound
+            guild.soundboard_sounds + (sound,),
+        )
 
     def parse_guild_soundboard_sound_update(self, data: gateway.GuildSoundboardSoundUpdate) -> None:
-        sound_id = int(data["sound_id"])
-        sound = self.get_soundboard_sound(sound_id)
-        if sound is None:
+        guild_id = utils._get_as_snowflake(data, "guild_id")
+        guild = self._get_guild(guild_id)
+        if guild is None:
             _log.debug(
-                "GUILD_SOUNDBOARD_SOUND_UPDATE referencing unknown sound ID: %s. Discarding.",
-                sound_id,
+                "GUILD_SOUNDBOARD_SOUND_UPDATE referencing an unknown guild ID: %s. Discarding.",
+                guild_id,
             )
             return
 
-        old_sound = copy.copy(sound)
-        sound._update(data)
-        self.dispatch("soundboard_sound_update", old_sound, sound)
-
-    def parse_guild_soundboard_sound_delete(self, data: gateway.GuildSoundboardSoundDelete) -> None:
         sound_id = int(data["sound_id"])
         sound = self.get_soundboard_sound(sound_id)
         if sound is None:
@@ -2047,9 +2049,66 @@ class ConnectionState:
             return
 
         self._soundboard_sounds.pop(sound.id, None)
-        self.dispatch("soundboard_sound_delete", sound)
+        new_sound = self.store_soundboard_sound(guild, data)
 
-    # TODO: parse_guild_soundboard_sounds_update
+        self._handle_soundboard_update(
+            guild,
+            # replace sound in tuple at same position
+            tuple((new_sound if s.id == sound.id else s) for s in guild.soundboard_sounds),
+        )
+
+    def parse_guild_soundboard_sound_delete(self, data: gateway.GuildSoundboardSoundDelete) -> None:
+        guild = self._get_guild(int(data["guild_id"]))
+        if guild is None:
+            _log.debug(
+                "GUILD_SOUNDBOARD_SOUND_DELETE referencing an unknown guild ID: %s. Discarding.",
+                data["guild_id"],
+            )
+            return
+
+        sound_id = int(data["sound_id"])
+        sound = self.get_soundboard_sound(sound_id)
+        if sound is None:
+            _log.debug(
+                "GUILD_SOUNDBOARD_SOUND_UPDATE referencing unknown sound ID: %s. Discarding.",
+                sound_id,
+            )
+            return
+
+        self._soundboard_sounds.pop(sound.id, None)
+
+        self._handle_soundboard_update(
+            guild,
+            # remove sound from tuple
+            tuple(s for s in guild.soundboard_sounds if s.id != sound.id),
+        )
+
+    def parse_guild_soundboard_sounds_update(
+        self, data: gateway.GuildSoundboardSoundsUpdate
+    ) -> None:
+        guild = self._get_guild(int(data["guild_id"]))
+        if guild is None:
+            _log.debug(
+                "GUILD_SOUNDBOARD_SOUNDS_UPDATE referencing an unknown guild ID: %s. Discarding.",
+                data["guild_id"],
+            )
+            return
+
+        for sound in guild.soundboard_sounds:
+            self._soundboard_sounds.pop(sound.id, None)
+
+        self._handle_soundboard_update(
+            guild,
+            tuple(self.store_soundboard_sound(guild, d) for d in data["soundboard_sounds"]),
+        )
+
+    def _handle_soundboard_update(
+        self, guild: Guild, new_sounds: Tuple[GuildSoundboardSound, ...]
+    ) -> None:
+        before_sounds = guild.soundboard_sounds
+        guild.soundboard_sounds = new_sounds
+
+        self.dispatch("guild_soundboard_sounds_update", guild, before_sounds, new_sounds)
 
     def _get_reaction_user(
         self, channel: MessageableChannel, user_id: int
