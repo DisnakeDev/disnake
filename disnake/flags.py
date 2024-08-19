@@ -1033,6 +1033,7 @@ class Intents(BaseFlags):
         dm_typing: bool = ...,
         emojis: bool = ...,
         emojis_and_stickers: bool = ...,
+        guild_expressions: bool = ...,
         guild_messages: bool = ...,
         guild_polls: bool = ...,
         guild_reactions: bool = ...,
@@ -1188,35 +1189,54 @@ class Intents(BaseFlags):
         return 1 << 2
 
     @flag_value
-    def emojis(self):
-        """:class:`bool`: Alias of :attr:`.emojis_and_stickers`.
+    def guild_expressions(self):
+        """:class:`bool`: Whether events related to guild emojis, stickers, and
+        soundboard sounds are enabled.
 
-        .. versionchanged:: 2.0
-            Changed to an alias.
-        """
-        return 1 << 3
-
-    @alias_flag_value
-    def emojis_and_stickers(self):
-        """:class:`bool`: Whether guild emoji and sticker related events are enabled.
-
-        .. versionadded:: 2.0
+        .. versionadded:: 2.10
 
         This corresponds to the following events:
 
         - :func:`on_guild_emojis_update`
         - :func:`on_guild_stickers_update`
+        - :func:`on_soundboard_sound_create`
+        - :func:`on_soundboard_sound_update`
+        - :func:`on_soundboard_sound_delete`
 
         This also corresponds to the following attributes and classes in terms of cache:
 
         - :class:`Emoji`
         - :class:`GuildSticker`
+        - :class:`GuildSoundboardSound`
         - :meth:`Client.get_emoji`
         - :meth:`Client.get_sticker`
+        - :meth:`Client.get_soundboard_sound`
         - :meth:`Client.emojis`
         - :meth:`Client.stickers`
+        - :meth:`Client.soundboard_sounds`
         - :attr:`Guild.emojis`
         - :attr:`Guild.stickers`
+        - :attr:`Guild.soundboard_sounds`
+        """
+        return 1 << 3
+
+    @alias_flag_value
+    def emojis_and_stickers(self):
+        """:class:`bool`: Alias of :attr:`.guild_expressions`.
+
+        .. versionadded:: 2.0
+
+        .. versionchanged:: 2.10
+            Changed to an alias.
+        """
+        return 1 << 3
+
+    @alias_flag_value
+    def emojis(self):
+        """:class:`bool`: Alias of :attr:`.guild_expressions`.
+
+        .. versionchanged:: 2.0
+            Changed to an alias.
         """
         return 1 << 3
 
