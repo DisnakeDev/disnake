@@ -426,8 +426,8 @@ class ConnectionState:
     def store_soundboard_sound(
         self, guild: Guild, data: GuildSoundboardSoundPayload
     ) -> GuildSoundboardSound:
-        sticker_id = int(data["sound_id"])
-        self._soundboard_sounds[sticker_id] = sound = GuildSoundboardSound(
+        sound_id = int(data["sound_id"])
+        self._soundboard_sounds[sound_id] = sound = GuildSoundboardSound(
             state=self, data=data, guild_id=guild.id
         )
         return sound
@@ -1423,8 +1423,8 @@ class ConnectionState:
             return
 
         before_stickers = guild.stickers
-        for emoji in before_stickers:
-            self._stickers.pop(emoji.id, None)
+        for sticker in before_stickers:
+            self._stickers.pop(sticker.id, None)
         guild.stickers = tuple(self.store_sticker(guild, d) for d in data["stickers"])
         self.dispatch("guild_stickers_update", guild, before_stickers, guild.stickers)
 
