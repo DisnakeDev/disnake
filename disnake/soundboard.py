@@ -204,7 +204,8 @@ class GuildSoundboardSound(SoundboardSound):
     user: Optional[:class:`User`]
         The user that created this sound. This can only be retrieved using
         :meth:`Guild.fetch_soundboard_sound`/:meth:`Guild.fetch_soundboard_sounds` while
-        having the :attr:`~Permissions.manage_guild_expressions` permission.
+        having the :attr:`~Permissions.create_guild_expressions` or
+        :attr:`~Permissions.manage_guild_expressions` permission.
     """
 
     __slots__ = ("guild_id", "user")
@@ -250,6 +251,8 @@ class GuildSoundboardSound(SoundboardSound):
 
         You must have :attr:`~Permissions.manage_guild_expressions` permission to
         do this.
+        If this sound was created by you, :attr:`~Permissions.create_guild_expressions`
+        permission is also sufficient.
 
         All fields are optional.
 
@@ -267,7 +270,7 @@ class GuildSoundboardSound(SoundboardSound):
         Raises
         ------
         Forbidden
-            You are not allowed to edit soundboard sounds.
+            You are not allowed to edit this soundboard sound.
         HTTPException
             An error occurred editing the soundboard sound.
 
@@ -299,6 +302,8 @@ class GuildSoundboardSound(SoundboardSound):
 
         You must have :attr:`~Permissions.manage_guild_expressions` permission to
         do this.
+        If this sound was created by you, :attr:`~Permissions.create_guild_expressions`
+        permission is also sufficient.
 
         Parameters
         ----------
@@ -308,7 +313,7 @@ class GuildSoundboardSound(SoundboardSound):
         Raises
         ------
         Forbidden
-            You are not allowed to delete soundboard sounds.
+            You are not allowed to delete this soundboard sound.
         HTTPException
             An error occurred deleting the soundboard sound.
         """
