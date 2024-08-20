@@ -219,7 +219,8 @@ class Poll:
     duration: Optional[:class:`datetime.timedelta`]
         The original duration for this poll. ``None`` if the poll is a non-expiring poll.
     expires_at: Optional[:class:`datetime.datetime`]
-        The date when this poll will expire. ``None`` if the poll is a non-expiring poll.
+        The date when this poll will expire. ``None`` if the poll is a non-expiring poll
+        or if this object was created manually and did not originate from the API.
     allow_multiselect: :class:`bool`
         Whether users are able to pick more than one answer.
     layout_type: :class:`PollLayoutType`
