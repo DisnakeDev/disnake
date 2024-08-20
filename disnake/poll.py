@@ -57,7 +57,7 @@ class PollMedia:
     __slots__ = ("text", "emoji")
 
     def __init__(
-        self, text: Optional[str] = None, *, emoji: Optional[Union[Emoji, PartialEmoji, str]] = None
+        self, text: Optional[str], *, emoji: Optional[Union[Emoji, PartialEmoji, str]] = None
     ) -> None:
         if text is None and emoji is None:
             raise ValueError("At least one of `text` or `emoji` must not be None")
