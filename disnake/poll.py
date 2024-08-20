@@ -268,11 +268,11 @@ class Poll:
             )
 
         self._answers: Dict[int, PollAnswer] = {}
-        for answer in answers:
+        for i, answer in enumerate(answers, 1):
             if isinstance(answer, PollAnswer):
-                self._answers[len(self._answers) + 1] = answer
+                self._answers[i] = answer
             elif isinstance(answer, str):
-                self._answers[len(self._answers) + 1] = PollAnswer(PollMedia(answer))
+                self._answers[i] = PollAnswer(PollMedia(answer))
             else:
                 raise TypeError(
                     f"Expected 'List[str]' or 'List[PollAnswer]' for 'answers', got List[{answer.__class__.__name__!r}]."
