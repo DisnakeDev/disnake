@@ -216,21 +216,11 @@ class Poll:
     Attributes
     ----------
     channel: Optional[Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`StageChannel`, :class:`Thread`, :class:`DMChannel`, :class:`GroupChannel`, :class:`PartialMessageable`]]
-        The channel that the poll was sent from. This will be None only when the object
-        is builded manually. The library always provide this attribute.
-
-        .. note::
-
-            This attribute is available only if you fetched the Poll object from the API.
-
+        The channel that the poll was sent in. This will be ``None`` only if this object was created manually
+        and did not originate from the API.
     message: Optional[:class:`Message`]
-        The message which contain this poll. This will be None only when the object
-        is builded manually. The library always provide this attribute.
-
-        .. note::
-
-            This attribute is available only if you fetched the Poll object from the API.
-
+        The message which contains this poll. This will be ``None`` only if this object was created manually
+        and did not originate from the API.
     question: Union[:class:`str`, :class:`PollMedia`]
         The question of the poll.
     duration: Optional[:class:`datetime.timedelta`]
