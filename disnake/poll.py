@@ -15,7 +15,6 @@ from .partial_emoji import PartialEmoji
 if TYPE_CHECKING:
     from datetime import datetime
 
-    from .abc import MessageableChannel
     from .message import Message
     from .state import ConnectionState
     from .types.poll import (
@@ -64,9 +63,7 @@ class PollMedia:
 
         self.text = text
         self.emoji: Optional[Union[Emoji, PartialEmoji]] = None
-        if emoji is None:
-            self.emoji = None
-        elif isinstance(emoji, str):
+        if isinstance(emoji, str):
             self.emoji = PartialEmoji.from_str(emoji)
         elif isinstance(emoji, _EmojiTag):
             self.emoji = emoji
@@ -124,10 +121,9 @@ class PollAnswer:
         Whether the current user voted for this answer.
     """
 
-    __slots__ = ("_state", "id", "media", "poll", "count", "self_voted")
+    __slots__ = ("id", "media", "poll", "count", "self_voted")
 
     def __init__(self, media: PollMedia) -> None:
-        self._state: Optional[ConnectionState] = None
         self.id: Optional[int] = None
         self.poll: Optional[Poll] = None
         self.media = media
@@ -138,10 +134,10 @@ class PollAnswer:
         return f"<{self.__class__.__name__} media={self.media!r}>"
 
     @classmethod
-    def from_dict(cls, state: ConnectionState, data: PollAnswerPayload) -> PollAnswer:
+    def from_dict(cls, state: ConnectionState, poll: Poll, data: PollAnswerPayload) -> PollAnswer:
         answer = cls(PollMedia.from_dict(state, data["poll_media"]))
         answer.id = int(data["answer_id"])
-        answer._state = state
+        answer.poll = poll
 
         return answer
 
@@ -224,7 +220,9 @@ class Poll:
     question: Union[:class:`str`, :class:`PollMedia`]
         The question of the poll.
     duration: Optional[:class:`datetime.timedelta`]
-        The remaining duration for this poll. ``None`` if already expired.
+        The original duration for this poll. ``None`` if the poll is a non-expiring poll.
+    expires_at: Optional[:class:`datetime.datetime`]
+        The date when this poll will expire. ``None`` if the poll is a non-expiring poll.
     allow_multiselect: :class:`bool`
         Whether users are able to pick more than one answer.
     layout_type: :class:`PollLayoutType`
@@ -235,11 +233,11 @@ class Poll:
 
     __slots__ = (
         "_state",
-        "channel",
         "message",
         "question",
         "_answers",
         "duration",
+        "expires_at",
         "allow_multiselect",
         "layout_type",
         "is_finalized",
@@ -255,7 +253,6 @@ class Poll:
         layout_type: PollLayoutType = PollLayoutType.default,
     ) -> None:
         self._state: Optional[ConnectionState] = None
-        self.channel: Optional[MessageableChannel] = None
         self.message: Optional[Message] = None
 
         if isinstance(question, str):
@@ -279,6 +276,7 @@ class Poll:
                 )
 
         self.duration: Optional[timedelta] = duration
+        self.expires_at: Optional[datetime] = None
         self.allow_multiselect: bool = allow_multiselect
         self.layout_type: PollLayoutType = layout_type
         self.is_finalized: bool = False
@@ -289,17 +287,35 @@ class Poll:
     @property
     def answers(self) -> List[PollAnswer]:
         """List[:class:`PollAnswer`]: The list of answers for this poll.
-        
+
         See also :meth:`get_answer` to get specific answers by ID.
         """
         return list(self._answers.values())
 
     @property
-    def expires_at(self) -> Optional[datetime]:
-        """Optional[:class:`datetime.datetime`]: The expiration date for this poll, if available."""
-        if not self.duration or not self.message:
+    def created_at(self) -> Optional[datetime]:
+        """Optional[:class:`datetime.datetime`]: When this poll was created.
+
+        ``None`` if this poll does not originate from the discord API.
+        """
+        if not self.message:
             return
-        return self.message.created_at + self.duration
+        return utils.snowflake_time(self.message.id)
+
+    @property
+    def remaining_duration(self) -> Optional[timedelta]:
+        """Optional[:class:`timedelta]: The remaining duration for this poll.
+        If this poll is finalized this property will arbitrarily return a
+        zero valued timedelta.
+
+        ``None`` if this poll does not originate from the discord API.
+        """
+        if self.is_finalized:
+            return timedelta(hours=0)
+        if not self.expires_at or not self.message:
+            return
+
+        return self.expires_at - utils.snowflake_time(self.message.id)
 
     def get_answer(self, answer_id: int, /) -> Optional[PollAnswer]:
         """Return the requested poll answer.
@@ -319,11 +335,10 @@ class Poll:
     @classmethod
     def from_dict(
         cls,
-        channel: MessageableChannel,
         message: Message,
-        state: ConnectionState,
         data: PollPayload,
     ) -> Poll:
+        state = message._state
         poll = cls(
             question=PollMedia.from_dict(state, data["question"]),
             answers=[],
@@ -331,14 +346,20 @@ class Poll:
             layout_type=try_enum(PollLayoutType, data["layout_type"]),
         )
         for answer in data["answers"]:
-            poll._answers[int(answer["answer_id"])] = PollAnswer.from_dict(state, answer)
+            answer_obj = PollAnswer.from_dict(state, poll, answer)
+            poll._answers[int(answer["answer_id"])] = answer_obj
 
         poll._state = state
-        poll.channel = channel
         poll.message = message
+        poll.expires_at = utils.parse_time(data["expiry"])
+        if poll.expires_at:
+            poll.duration = poll.expires_at - utils.snowflake_time(poll.message.id)
+        else:
+            # future support for non-expiring polls
+            # read the foot note https://discord.com/developers/docs/resources/poll#poll-object-poll-object-structure
+            poll.expires_at = None
+            poll.duration = None
 
-        # this should always be not None but we check
-        # for a null value anyway
         if results := data.get("results"):
             poll.is_finalized = results["is_finalized"]
 
@@ -350,13 +371,6 @@ class Poll:
                     continue
                 answer.count = answer_count["count"]
                 answer.self_voted = answer_count["me_voted"]
-
-        if poll.is_finalized:
-            poll.duration = None
-        else:
-            poll.duration = (
-                (utils.parse_time(data["expiry"]) - message.created_at) if data["expiry"] else None
-            )
 
         return poll
 
@@ -394,10 +408,10 @@ class Poll:
         :class:`Message`
             The message which contains the expired `Poll`.
         """
-        if not self._state or not self.channel or not self.message:
+        if not self._state or not self.message:
             raise ValueError(
                 "This object was manually built. To use this method, you need to use a poll object retrieved from the Discord API."
             )
 
-        data = await self._state.http.expire_poll(self.channel.id, self.message.id)
-        return self._state.create_message(channel=self.channel, data=data)
+        data = await self._state.http.expire_poll(self.message.channel.id, self.message.id)
+        return self._state.create_message(channel=self.message.channel, data=data)

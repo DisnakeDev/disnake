@@ -1001,7 +1001,7 @@ class Message(Hashable):
 
         self.poll: Optional[Poll] = None
         if poll_data := data.get("poll"):
-            self.poll = Poll.from_dict(channel=channel, message=self, state=state, data=poll_data)
+            self.poll = Poll.from_dict(message=self, data=poll_data)
 
         try:
             # if the channel doesn't have a guild attribute, we handle that
