@@ -211,9 +211,6 @@ class Poll:
 
     Attributes
     ----------
-    channel: Optional[Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`StageChannel`, :class:`Thread`, :class:`DMChannel`, :class:`GroupChannel`, :class:`PartialMessageable`]]
-        The channel that the poll was sent in. This will be ``None`` only if this object was created manually
-        and did not originate from the API.
     message: Optional[:class:`Message`]
         The message which contains this poll. This will be ``None`` only if this object was created manually
         and did not originate from the API.
