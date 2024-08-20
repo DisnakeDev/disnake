@@ -1,0 +1,1 @@
+Rename :attr:`Intents.emojis_and_stickers` to :attr:`Intents.expressions`. An alias is provided for backwards compatibility.
