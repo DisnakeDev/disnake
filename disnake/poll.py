@@ -201,8 +201,8 @@ class Poll:
 
     Parameters
     ----------
-    question: :class:`PollMedia`
-        The question of the poll.
+    question: Union[:class:`str`, :class:`PollMedia`]
+        The question of the poll. Currently, emojis are not supported in poll questions.
     answers: List[Union[:class:`str`, :class:`PollAnswer`]]
         The answers for this poll, up to 10.
     duration: :class:`datetime.timedelta`
