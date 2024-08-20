@@ -1330,6 +1330,12 @@ This section documents events related to Discord chat messages.
     Called when a vote is added on a poll. Unlike :func:`on_poll_vote_add`, this is
     called regardless of the guilds being in the internal guild cache or not.
 
+    This requires :attr:`Intents.guild_polls` or :attr:`Intents.dm_polls` to be enabled to receive events about polls sent in guilds or DMs.
+
+    .. note::
+
+        You can use :attr:`Intents.polls` to enable both :attr:`Intents.guild_polls` and :attr:`Intents.dm_polls` in one go.
+
     :param payload: The raw event payload data.
     :type payload: :class:`RawPollVoteActionEvent`
 
@@ -1337,6 +1343,12 @@ This section documents events related to Discord chat messages.
 
     Called when a vote is removed on a poll. Unlike :func:`on_poll_vote_remove`, this is
     called regardless of the guilds being in the internal guild cache or not.
+
+    This requires :attr:`Intents.guild_polls` or :attr:`Intents.dm_polls` to be enabled to receive events about polls sent in guilds or DMs.
+
+    .. note::
+
+        You can use :attr:`Intents.polls` to enable both :attr:`Intents.guild_polls` and :attr:`Intents.dm_polls` in one go.
 
     :param payload: The raw event payload data.
     :type payload: :class:`RawPollVoteActionEvent`
