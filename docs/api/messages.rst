@@ -95,7 +95,7 @@ RawMessageUpdateEvent
     :members:
 
 RawPollVoteActionEvent
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
 
 .. attributetable:: RawPollVoteActionEvent
 
