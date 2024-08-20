@@ -176,7 +176,7 @@ class PollAnswer:
         Forbidden
             Tried to get the voters for this answer without the required permissions.
         ValueError
-            You tried to invoke this method on an incomplete object, most likely one that wasn't fetched from the API.
+            You tried to invoke this method on an object that didn't originate from the API.
 
         Yields
         ------
