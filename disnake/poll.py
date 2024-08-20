@@ -302,7 +302,7 @@ class Poll:
 
     @property
     def remaining_duration(self) -> Optional[timedelta]:
-        """Optional[:class:`timedelta]: The remaining duration for this poll.
+        """Optional[:class:`timedelta`]: The remaining duration for this poll.
         If this poll is finalized this property will arbitrarily return a
         zero valued timedelta.
 
