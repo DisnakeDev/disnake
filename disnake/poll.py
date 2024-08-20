@@ -188,7 +188,7 @@ class PollAnswer:
         """
         if not (self.id is not None and self.poll and self.poll.message):
             raise ValueError(
-                "This object was manually builded. To use this method you need to get a poll from the discord API!"
+                "This object was manually built. To use this method, you need to use a poll object retrieved from the Discord API."
             )
 
         return PollAnswerIterator(self.poll.message, self.id, limit=limit, after=after)
