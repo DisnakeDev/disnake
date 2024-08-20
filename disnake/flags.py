@@ -1443,7 +1443,7 @@ class Intents(BaseFlags):
 
     @flag_value
     def guild_reactions(self):
-        """:class:`bool`: Whether guild message reaction related events are enabled.
+        """:class:`bool`: Whether guild reaction related events are enabled.
 
         See also :attr:`dm_reactions` for DMs or :attr:`reactions` for both.
 
@@ -1499,7 +1499,7 @@ class Intents(BaseFlags):
 
     @flag_value
     def guild_typing(self):
-        """:class:`bool`: Whether guild and direct message typing related events are enabled.
+        """:class:`bool`: Whether guild typing related events are enabled.
 
         See also :attr:`dm_typing` for DMs or :attr:`typing` for both.
 
@@ -1513,7 +1513,7 @@ class Intents(BaseFlags):
 
     @flag_value
     def dm_typing(self):
-        """:class:`bool`: Whether guild and direct message typing related events are enabled.
+        """:class:`bool`: Whether direct message typing related events are enabled.
 
         See also :attr:`guild_typing` for guilds or :attr:`typing` for both.
 
