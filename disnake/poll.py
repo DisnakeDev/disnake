@@ -389,8 +389,8 @@ class Poll:
 
         .. note::
 
-            This method works only on Poll(s) objects that are
-            fetched from the API and not on the ones built manually.
+            This method works only on Poll(s) objects that originate
+            from the API and not on the ones built manually.
 
         Raises
         ------
