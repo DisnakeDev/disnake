@@ -421,8 +421,8 @@ Events
 - :func:`on_message_edit(before, after) <disnake.on_message_edit>`
 - :func:`on_message_delete(message) <disnake.on_message_delete>`
 - :func:`on_bulk_message_delete(messages) <disnake.on_bulk_message_delete>`
-- :func:`on_poll_vote_add(member, asnwer_id) <disnake.on_poll_vote_add>`
-- :func:`on_poll_vote_removed(member, asnwer_id) <disnake.on_poll_vote_remove>`
+- :func:`on_poll_vote_add(member, answer) <disnake.on_poll_vote_add>`
+- :func:`on_poll_vote_removed(member, answer) <disnake.on_poll_vote_remove>`
 
 - :func:`on_raw_message_edit(payload) <disnake.on_raw_message_edit>`
 - :func:`on_raw_message_delete(payload) <disnake.on_raw_message_delete>`
