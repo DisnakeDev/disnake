@@ -284,7 +284,7 @@ class Poll:
         self.is_finalized: bool = False
 
     def __repr__(self) -> str:
-        return f"<{self.__class__.__name__} question={self.question} answers={self.answers!r}>"
+        return f"<{self.__class__.__name__} question={self.question!r} answers={self.answers!r}>"
 
     @property
     def answers(self) -> List[PollAnswer]:
