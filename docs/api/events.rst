@@ -1245,7 +1245,7 @@ This section documents events related to Discord chat messages.
 
 .. function:: on_poll_vote_add(member, answer)
 
-    Called when a vote is added on a poll. If the guild or the member is not found in the internal cache, then this event will not be called.
+    Called when a vote is added on a poll. If the member or message is not found in the internal cache, then this event will not be called.
 
     This requires :attr:`Intents.guild_polls` or :attr:`Intents.dm_polls` to be enabled to receive events about polls sent in guilds or DMs.
 
