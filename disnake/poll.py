@@ -111,13 +111,13 @@ class PollAnswer:
     Attributes
     ----------
     id: Optional[:class:`int`]
-        The ID of the answer that this object represents. This will be None only when the object
-        is builded manually. The library always provide this attribute.
+        The ID of this answer. This will be ``None`` only if this object was created manually
+        and did not originate from the API.
     media: :class:`PollMedia`
-        The media fields linked to this answer.
+        The media fields of this answer.
     poll: Optional[:class:`Poll`]
-        The poll that contain this answer. This will be None only when the object
-        is builded manually. The library always provide this attribute.
+        The poll associated with this answer. This will be ``None`` only if this object was created manually
+        and did not originate from the API.
     count: :class:`int`
         The number of votes for this answer.
     self_voted: :class:`bool`
