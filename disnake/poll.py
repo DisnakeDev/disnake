@@ -37,13 +37,11 @@ __all__ = (
 class PollMedia:
     """Represents data of a poll's question/answers.
 
-    You must specify at least one of the parameters when creating an instance.
-
     .. versionadded:: 2.10
 
     Parameters
     ----------
-    text: Optional[:class:`str`]
+    text: :class:`str`
         The text of this media.
     emoji: Optional[Union[:class:`Emoji`, :class:`PartialEmoji`, :class:`str`]]
         The emoji of this media.
