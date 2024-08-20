@@ -1629,7 +1629,7 @@ class Intents(BaseFlags):
 
     @flag_value
     def dm_polls(self):
-        """:class:`bool`: Whether direct polls related events are enabled.
+        """:class:`bool`: Whether direct message polls related events are enabled.
 
         .. versionadded:: 2.10
 
