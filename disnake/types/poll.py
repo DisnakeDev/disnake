@@ -47,7 +47,7 @@ class Poll(TypedDict):
     allow_multiselect: bool
     layout_type: PollLayoutType
     # sent only as part of responses from Discord's API/Gateway
-    results: PollResult
+    results: NotRequired[PollResult]
 
 
 class EmojiPayload(TypedDict):
