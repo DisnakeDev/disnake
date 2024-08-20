@@ -288,7 +288,10 @@ class Poll:
 
     @property
     def answers(self) -> List[PollAnswer]:
-        """List[:class:`PollAnswer`]: return the list of answers for this poll."""
+        """List[:class:`PollAnswer`]: The list of answers for this poll.
+        
+        See also :meth:`get_answer` to get specific answers by ID.
+        """
         return list(self._answers.values())
 
     @property
