@@ -408,7 +408,7 @@ class Poll:
         """
         if not self._state or not self.channel or not self.message:
             raise ValueError(
-                "This object was manually builded. To use this method you need to get a poll from the discord API!"
+                "This object was manually built. To use this method, you need to use a poll object retrieved from the Discord API."
             )
 
         data = await self._state.http.expire_poll(self.channel.id, self.message.id)
