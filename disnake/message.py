@@ -772,7 +772,7 @@ class InteractionMetadata:
     def __init__(self, *, state: ConnectionState, data: InteractionMetadataPayload) -> None:
         self._state: ConnectionState = state
 
-        self.id: int = int(data.get("id"))
+        self.id: int = int(data["id"])
         self.type: InteractionType = try_enum(InteractionType, int(data["type"]))
         # TODO: consider trying member cache first?
         self.user: User = state.store_user(data["user"])
