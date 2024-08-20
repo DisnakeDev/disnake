@@ -62,6 +62,22 @@ RoleSubscriptionData
 .. autoclass:: RoleSubscriptionData
     :members:
 
+GuildProductInfo
+~~~~~~~~~~~~~~~~
+
+.. attributetable:: GuildProductInfo
+
+.. autoclass:: GuildProductInfo
+    :members:
+
+PurchaseNotificationInfo
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: PurchaseNotificationInfo
+
+.. autoclass:: PurchaseNotificationInfo
+    :members:
+
 RawTypingEvent
 ~~~~~~~~~~~~~~
 
@@ -182,6 +198,14 @@ Enumerations
 
 MessageType
 ~~~~~~~~~~~
+
+.. class:: PurchaseType
+
+    Specifies the type of purchase for :class:`PurchaseNotificationInfo`.
+
+    .. attribute:: guild_product
+
+        The purchase is of a product from a guild.
 
 .. class:: MessageType
 
@@ -366,6 +390,11 @@ MessageType
     .. attribute:: guild_incident_report_false_alarm
 
         The system message denoting that a raid report was a false alarm.
+
+        .. versionadded:: 2.10
+    .. attribute:: purchase_notification
+
+        The system message denoting that a user has purchased a product.
 
         .. versionadded:: 2.10
 
