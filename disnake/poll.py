@@ -135,7 +135,7 @@ class PollAnswer:
         self.self_voted: bool = False
 
     def __repr__(self) -> str:
-        return f"<{self.__class__.__name__} poll_media={self.media!r}>"
+        return f"<{self.__class__.__name__} media={self.media!r}>"
 
     @classmethod
     def from_dict(cls, state: ConnectionState, data: PollAnswerPayload) -> PollAnswer:
