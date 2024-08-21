@@ -128,7 +128,9 @@ class _StickerTag(Hashable, AssetMixin):
     @property
     def url(self) -> str:
         """:class:`str`: The url for the sticker's image."""
-        return f"{Asset.BASE}/stickers/{self.id}.{self.format.file_extension}"
+        # https://github.com/discord/discord-api-docs/issues/6675#issuecomment-1954755672
+        base = Asset.BASE_MEDIA if self.format is StickerFormatType.gif else Asset.BASE
+        return f"{base}/stickers/{self.id}.{self.format.file_extension}"
 
     async def read(self) -> bytes:
         """|coro|

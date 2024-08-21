@@ -23,7 +23,11 @@ if TYPE_CHECKING:
     from .message import Message
     from .state import ConnectionState
     from .types.channel import DMChannel as DMChannelPayload
-    from .types.user import PartialUser as PartialUserPayload, User as UserPayload
+    from .types.user import (
+        AvatarDecorationData as AvatarDecorationDataPayload,
+        PartialUser as PartialUserPayload,
+        User as UserPayload,
+    )
 
 
 __all__ = (
@@ -43,11 +47,12 @@ class BaseUser(_UserTag):
         "id",
         "discriminator",
         "global_name",
-        "_avatar",
-        "_banner",
-        "_accent_colour",
         "bot",
         "system",
+        "_avatar",
+        "_banner",
+        "_avatar_decoration_data",
+        "_accent_colour",
         "_public_flags",
         "_state",
     )
@@ -62,7 +67,8 @@ class BaseUser(_UserTag):
         _state: ConnectionState
         _avatar: Optional[str]
         _banner: Optional[str]
-        _accent_colour: Optional[str]
+        _avatar_decoration_data: Optional[AvatarDecorationDataPayload]
+        _accent_colour: Optional[int]
         _public_flags: int
 
     def __init__(
@@ -100,6 +106,7 @@ class BaseUser(_UserTag):
         self.global_name = data.get("global_name")
         self._avatar = data["avatar"]
         self._banner = data.get("banner", None)
+        self._avatar_decoration_data = data.get("avatar_decoration_data", None)
         self._accent_colour = data.get("accent_color", None)
         self._public_flags = data.get("public_flags", 0)
         self.bot = data.get("bot", False)
@@ -115,6 +122,7 @@ class BaseUser(_UserTag):
         self.global_name = user.global_name
         self._avatar = user._avatar
         self._banner = user._banner
+        self._avatar_decoration_data = user._avatar_decoration_data
         self._accent_colour = user._accent_colour
         self.bot = user.bot
         self._state = user._state
@@ -131,6 +139,7 @@ class BaseUser(_UserTag):
             "global_name": self.global_name,
             "bot": self.bot,
             "public_flags": self._public_flags,
+            "avatar_decoration_data": self._avatar_decoration_data,
         }
 
     @property
@@ -180,11 +189,32 @@ class BaseUser(_UserTag):
         .. versionadded:: 2.0
 
         .. note::
+
             This information is only available via :meth:`Client.fetch_user`.
         """
         if self._banner is None:
             return None
         return Asset._from_banner(self._state, self.id, self._banner)
+
+    @property
+    def avatar_decoration(self) -> Optional[Asset]:
+        """Optional[:class:`Asset`]: Returns the user's avatar decoration asset, if available.
+
+        .. versionadded:: 2.10
+
+        .. note::
+
+            Since Discord always sends an animated PNG for animated avatar decorations,
+            the following methods will not work as expected:
+
+            - :meth:`Asset.replace`
+            - :meth:`Asset.with_size`
+            - :meth:`Asset.with_format`
+            - :meth:`Asset.with_static_format`
+        """
+        if self._avatar_decoration_data is None:
+            return None
+        return Asset._from_avatar_decoration(self._state, self._avatar_decoration_data["asset"])
 
     @property
     def accent_colour(self) -> Optional[Colour]:
@@ -359,7 +389,11 @@ class ClientUser(BaseUser):
         self.mfa_enabled = data.get("mfa_enabled", False)
 
     async def edit(
-        self, *, username: str = MISSING, avatar: Optional[AssetBytes] = MISSING
+        self,
+        *,
+        username: str = MISSING,
+        avatar: Optional[AssetBytes] = MISSING,
+        banner: Optional[AssetBytes] = MISSING,
     ) -> ClientUser:
         """|coro|
 
@@ -384,16 +418,24 @@ class ClientUser(BaseUser):
             .. versionchanged:: 2.5
                 Now accepts various resource types in addition to :class:`bytes`.
 
+        banner: Optional[|resource_type|]
+            A :term:`py:bytes-like object` or asset representing the image to upload.
+            Could be ``None`` to denote no banner.
+
+            Only JPG, PNG, WEBP (static), and GIF (static/animated) images are supported.
+
+            .. versionadded:: 2.10
+
         Raises
         ------
         NotFound
-            The ``avatar`` asset couldn't be found.
+            The ``avatar`` or ``banner`` asset couldn't be found.
         HTTPException
             Editing your profile failed.
         TypeError
-            The ``avatar`` asset is a lottie sticker (see :func:`Sticker.read`).
+            The ``avatar`` or ``banner`` asset is a lottie sticker (see :func:`Sticker.read`).
         ValueError
-            Wrong image format passed for ``avatar``.
+            Wrong image format passed for ``avatar`` or ``banner``.
 
         Returns
         -------
@@ -406,6 +448,9 @@ class ClientUser(BaseUser):
 
         if avatar is not MISSING:
             payload["avatar"] = await _assetbytes_to_base64_data(avatar)
+
+        if banner is not MISSING:
+            payload["banner"] = await _assetbytes_to_base64_data(banner)
 
         data: UserPayload = await self._state.http.edit_profile(payload)
         return ClientUser(state=self._state, data=data)

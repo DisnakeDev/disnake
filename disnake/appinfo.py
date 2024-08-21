@@ -98,8 +98,7 @@ class AppInfo:
         .. versionadded:: 1.3
 
     guild_id: Optional[:class:`int`]
-        If this application is a game sold on Discord,
-        this field will be the guild to which it has been linked to.
+        The ID of the guild associated with the application, if any.
 
         .. versionadded:: 1.3
 
@@ -151,6 +150,15 @@ class AppInfo:
         in the guild role verification configuration.
 
         .. versionadded:: 2.8
+    approximate_guild_count: :class:`int`
+        The approximate number of guilds the application is installed to.
+
+        .. versionadded:: 2.10
+    approximate_user_install_count: :class:`int`
+        The approximate number of users that have installed the application
+        (for user-installable apps).
+
+        .. versionadded:: 2.10
     """
 
     __slots__ = (
@@ -177,6 +185,8 @@ class AppInfo:
         "install_params",
         "custom_install_url",
         "role_connections_verification_url",
+        "approximate_guild_count",
+        "approximate_user_install_count",
     )
 
     def __init__(self, state: ConnectionState, data: AppInfoPayload) -> None:
@@ -218,6 +228,8 @@ class AppInfo:
         self.role_connections_verification_url: Optional[str] = data.get(
             "role_connections_verification_url"
         )
+        self.approximate_guild_count: int = data.get("approximate_guild_count", 0)
+        self.approximate_user_install_count: int = data.get("approximate_user_install_count", 0)
 
     def __repr__(self) -> str:
         return (
@@ -245,8 +257,7 @@ class AppInfo:
 
     @property
     def guild(self) -> Optional[Guild]:
-        """Optional[:class:`Guild`]: If this application is a game sold on Discord,
-        this field will be the guild to which it has been linked
+        """Optional[:class:`Guild`]: The guild associated with the application, if any.
 
         .. versionadded:: 1.3
         """

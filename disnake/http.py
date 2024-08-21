@@ -876,6 +876,22 @@ class HTTPClient:
         r = Route("DELETE", "/guilds/{guild_id}/bans/{user_id}", guild_id=guild_id, user_id=user_id)
         return self.request(r, reason=reason)
 
+    def bulk_ban(
+        self,
+        user_ids: List[Snowflake],
+        guild_id: Snowflake,
+        *,
+        delete_message_seconds: int = 0,
+        reason: Optional[str] = None,
+    ) -> Response[guild.BulkBanResult]:
+        r = Route("POST", "/guilds/{guild_id}/bulk-ban", guild_id=guild_id)
+        payload = {
+            "user_ids": user_ids,
+            "delete_message_seconds": delete_message_seconds,
+        }
+
+        return self.request(r, json=payload, reason=reason)
+
     def get_guild_voice_regions(self, guild_id: Snowflake) -> Response[List[voice.VoiceRegion]]:
         return self.request(Route("GET", "/guilds/{guild_id}/regions", guild_id=guild_id))
 
@@ -1546,6 +1562,9 @@ class HTTPClient:
     def get_sticker(self, sticker_id: Snowflake) -> Response[sticker.Sticker]:
         return self.request(Route("GET", "/stickers/{sticker_id}", sticker_id=sticker_id))
 
+    def get_sticker_pack(self, pack_id: Snowflake) -> Response[sticker.StickerPack]:
+        return self.request(Route("GET", "/sticker-packs/{pack_id}", pack_id=pack_id))
+
     def list_sticker_packs(self) -> Response[sticker.ListStickerPacks]:
         return self.request(Route("GET", "/sticker-packs"))
 
@@ -2165,7 +2184,7 @@ class HTTPClient:
         guild_id: Snowflake,
         *,
         reason: Optional[str] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> Response[welcome_screen.WelcomeScreen]:
         valid_keys = (
             "enabled",
@@ -2342,6 +2361,20 @@ class HTTPClient:
             Route(
                 "DELETE",
                 "/applications/{application_id}/entitlements/{entitlement_id}",
+                application_id=application_id,
+                entitlement_id=entitlement_id,
+            )
+        )
+
+    def consume_entitlement(
+        self,
+        application_id: Snowflake,
+        entitlement_id: Snowflake,
+    ) -> Response[None]:
+        return self.request(
+            Route(
+                "POST",
+                "/applications/{application_id}/entitlements/{entitlement_id}/consume",
                 application_id=application_id,
                 entitlement_id=entitlement_id,
             )

@@ -182,6 +182,24 @@ ForumTag
     :members:
     :inherited-members:
 
+ThreadWithMessage
+~~~~~~~~~~~~~~~~~
+
+.. class:: ThreadWithMessage
+
+    A :class:`~typing.NamedTuple` which represents a thread and message returned from :meth:`ForumChannel.create_thread`.
+
+    .. attribute:: thread
+
+        The created thread.
+
+        :type: :class:`Thread`
+    .. attribute:: message
+
+        The initial message in the thread.
+
+        :type: :class:`Message`
+
 Enumerations
 ------------
 
