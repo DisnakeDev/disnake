@@ -46,7 +46,7 @@ from .appinfo import AppInfo
 from .application_role_connection import ApplicationRoleConnectionMetadata
 from .backoff import ExponentialBackoff
 from .channel import PartialMessageable, _threaded_channel_factory
-from .emoji import ApplicationEmoji, Emoji
+from .emoji import Emoji
 from .entitlement import Entitlement
 from .enums import ApplicationCommandType, ChannelType, Event, Status
 from .errors import (
@@ -568,8 +568,11 @@ class Client:
         return self._connection.emojis
 
     @property
-    def application_emojis(self) -> List[ApplicationEmoji]:
-        """List[:class:`.ApplicationEmoji`]: The application emojis that the connected client has."""
+    def application_emojis(self) -> List[Emoji]:
+        """List[:class:`.ApplicationEmoji`]: The application emojis that the connected client has.
+
+        .. versionadded:: 2.10
+        """
         return self._connection.application_emojis
 
     @property
@@ -723,18 +726,18 @@ class Client:
     @overload
     async def get_or_fetch_application_emoji(
         self, emoji_id: int, *, strict: Literal[False] = ...
-    ) -> Optional[ApplicationEmoji]:
+    ) -> Optional[Emoji]:
         ...
 
     @overload
     async def get_or_fetch_application_emoji(
         self, emoji_id: int, *, strict: Literal[True] = ...
-    ) -> ApplicationEmoji:
+    ) -> Emoji:
         ...
 
     async def get_or_fetch_application_emoji(
         self, emoji_id: int, *, strict: bool = False
-    ) -> Optional[ApplicationEmoji]:
+    ) -> Optional[Emoji]:
         """|coro|
 
         Tries to get the application emoji from the cache. If it fails,
@@ -756,7 +759,7 @@ class Client:
 
         Returns
         -------
-        Optional[:class:`~disnake.ApplicationEmoji`]
+        Optional[:class:`~disnake.Emoji`]
             The app emoji with the given ID, or ``None`` if not found and ``strict`` is set to ``False``.
         """
         app_emoji = self.get_application_emoji(emoji_id)
@@ -1550,7 +1553,7 @@ class Client:
         """
         return self._connection.get_emoji(id)
 
-    def get_application_emoji(self, emoji_id: int, /) -> Optional[ApplicationEmoji]:
+    def get_application_emoji(self, emoji_id: int, /) -> Optional[Emoji]:
         """Returns an application emoji with the given ID.
 
         .. versionadded:: 2.10
@@ -1567,7 +1570,7 @@ class Client:
 
         Returns
         -------
-        Optional[:class:`ApplicationEmoji`]
+        Optional[:class:`Emoji`]
             The returned application emoji or ``None`` if not found.
         """
         return self._connection.get_application_emoji(emoji_id)
@@ -2455,12 +2458,10 @@ class Client:
             data["rpc_origins"] = None
         return AppInfo(self._connection, data)
 
-    async def fetch_application_emoji(
-        self, emoji_id: int, /, cache: bool = False
-    ) -> ApplicationEmoji:
+    async def fetch_application_emoji(self, emoji_id: int, /, cache: bool = False) -> Emoji:
         """|coro|
 
-        Retrieves an application level :class:`~disnake.ApplicationEmoji` based on its ID.
+        Retrieves an application level :class:`~disnake.Emoji` based on its ID.
 
         .. note::
 
@@ -2484,16 +2485,16 @@ class Client:
 
         Returns
         -------
-        :class:`ApplicationEmoji`
+        :class:`Emoji`
             The application emoji you requested.
         """
         data = await self.http.get_app_emoji(self.application_id, emoji_id)
 
         if cache:
             return self._connection.store_application_emoji(data=data)
-        return ApplicationEmoji(app_id=self.application_id, state=self._connection, data=data)
+        return Emoji(guild=None, state=self._connection, data=data)
 
-    async def create_application_emoji(self, *, name: str, image: AssetBytes) -> ApplicationEmoji:
+    async def create_application_emoji(self, *, name: str, image: AssetBytes) -> Emoji:
         """|coro|
 
         Creates an application emoji.
@@ -2523,17 +2524,17 @@ class Client:
 
         Returns
         -------
-        :class:`ApplicationEmoji`
+        :class:`Emoji`
             The newly created application emoji.
         """
         img = await utils._assetbytes_to_base64_data(image)
         data = await self.http.create_app_emoji(self.application_id, name, img)
         return self._connection.store_application_emoji(data)
 
-    async def fetch_application_emojis(self, *, cache: bool = False) -> List[ApplicationEmoji]:
+    async def fetch_application_emojis(self, *, cache: bool = False) -> List[Emoji]:
         """|coro|
 
-        Retrieves all the :class:`ApplicationEmoji` of the application.
+        Retrieves all the :class:`Emoji` of the application.
 
         ..  versionadded:: 2.10
 
@@ -2552,7 +2553,7 @@ class Client:
 
         Returns
         -------
-        List[:class:`ApplicationEmoji`]
+        List[:class:`Emoji`]
             The list of application emojis you requested.
         """
         data = await self.http.get_all_app_emojis(self.application_id)
@@ -2564,10 +2565,7 @@ class Client:
 
             return app_emojis
 
-        return [
-            ApplicationEmoji(app_id=self.application_id, state=self._connection, data=emoji_data)
-            for emoji_data in data
-        ]
+        return [Emoji(guild=None, state=self._connection, data=emoji_data) for emoji_data in data]
 
     async def fetch_user(self, user_id: int, /) -> User:
         """|coro|

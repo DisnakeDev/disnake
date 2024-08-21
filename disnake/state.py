@@ -44,7 +44,7 @@ from .channel import (
     VoiceChannel,
     _guild_channel_factory,
 )
-from .emoji import ApplicationEmoji, Emoji
+from .emoji import Emoji
 from .entitlement import Entitlement
 from .enums import ApplicationCommandType, ChannelType, ComponentType, MessageType, Status, try_enum
 from .flags import ApplicationFlags, Intents, MemberCacheFlags
@@ -297,7 +297,7 @@ class ConnectionState:
         # - accesses on `_users` are slower, e.g. `__getitem__` takes ~1us with weakrefs and ~0.2us without
         self._users: weakref.WeakValueDictionary[int, User] = weakref.WeakValueDictionary()
         self._emojis: Dict[int, Emoji] = {}
-        self._application_emojis: Dict[int, ApplicationEmoji] = {}
+        self._application_emojis: Dict[int, Emoji] = {}
         self._stickers: Dict[int, GuildSticker] = {}
         self._guilds: Dict[int, Guild] = {}
 
@@ -404,9 +404,9 @@ class ConnectionState:
         self._emojis[emoji_id] = emoji = Emoji(guild=guild, state=self, data=data)
         return emoji
 
-    def store_application_emoji(self, data: EmojiPayload) -> ApplicationEmoji:
+    def store_application_emoji(self, data: EmojiPayload) -> Emoji:
         emoji_id = int(data["id"])  # type: ignore
-        self._application_emojis[emoji_id] = emoji = ApplicationEmoji(app_id=self.application_id, state=self, data=data)  # type: ignore
+        self._application_emojis[emoji_id] = emoji = Emoji(guild=None, state=self, data=data)
         return emoji
 
     def store_sticker(self, guild: Guild, data: GuildStickerPayload) -> GuildSticker:
@@ -521,7 +521,7 @@ class ConnectionState:
         return list(self._emojis.values())
 
     @property
-    def application_emojis(self) -> List[ApplicationEmoji]:
+    def application_emojis(self) -> List[Emoji]:
         return list(self._application_emojis.values())
 
     @property
@@ -532,7 +532,7 @@ class ConnectionState:
         # the keys of self._emojis are ints
         return self._emojis.get(emoji_id)  # type: ignore
 
-    def get_application_emoji(self, emoji_id: Optional[int]) -> Optional[ApplicationEmoji]:
+    def get_application_emoji(self, emoji_id: Optional[int]) -> Optional[Emoji]:
         # the keys of self._application_emojis are ints
         return self._application_emojis.get(emoji_id)  # type: ignore
 
