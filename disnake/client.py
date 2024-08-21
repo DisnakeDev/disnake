@@ -569,7 +569,7 @@ class Client:
 
     @property
     def application_emojis(self) -> List[Emoji]:
-        """List[:class:`.ApplicationEmoji`]: The application emojis that the connected client has.
+        """List[:class:`.Emoji`]: The application emojis that the connected client has.
 
         .. versionadded:: 2.10
         """
@@ -1570,7 +1570,7 @@ class Client:
 
         Returns
         -------
-        Optional[:class:`Emoji`]
+        Optional[:class:`.Emoji`]
             The returned application emoji or ``None`` if not found.
         """
         return self._connection.get_application_emoji(emoji_id)
@@ -2485,7 +2485,7 @@ class Client:
 
         Returns
         -------
-        :class:`Emoji`
+        :class:`.Emoji`
             The application emoji you requested.
         """
         data = await self.http.get_app_emoji(self.application_id, emoji_id)
@@ -2524,7 +2524,7 @@ class Client:
 
         Returns
         -------
-        :class:`Emoji`
+        :class:`.Emoji`
             The newly created application emoji.
         """
         img = await utils._assetbytes_to_base64_data(image)
@@ -2534,7 +2534,7 @@ class Client:
     async def fetch_application_emojis(self, *, cache: bool = False) -> List[Emoji]:
         """|coro|
 
-        Retrieves all the :class:`Emoji` of the application.
+        Retrieves all the :class:`.Emoji` of the application.
 
         ..  versionadded:: 2.10
 
@@ -2553,7 +2553,7 @@ class Client:
 
         Returns
         -------
-        List[:class:`Emoji`]
+        List[:class:`.Emoji`]
             The list of application emojis you requested.
         """
         data = await self.http.get_all_app_emojis(self.application_id)
