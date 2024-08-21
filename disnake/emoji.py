@@ -98,7 +98,6 @@ class Emoji(_EmojiTag, AssetMixin):
         data: EmojiPayload,
     ) -> None:
         self.guild_id: Optional[int] = guild.id if guild else None
-        self._application_id: Optional[int] = state.application_id
         self._state: ConnectionState = state
         self._from_data(data)
 
@@ -188,7 +187,7 @@ class Emoji(_EmojiTag, AssetMixin):
         """
         if self.guild is None:
             return
-        return self._application_id
+        return self._state.application_id
 
     def is_usable(self) -> bool:
         """Whether the bot can use this emoji.
