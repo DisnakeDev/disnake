@@ -1624,8 +1624,10 @@ class Intents(BaseFlags):
 
         This corresponds to the following events:
 
-        - :func:`on_poll_vote_add`
-        - :func:`on_poll_vote_remove`
+        - :func:`on_poll_vote_add` (only for guilds)
+        - :func:`on_poll_vote_remove` (only for guilds)
+        - :func:`on_raw_poll_vote_add` (only for guilds)
+        - :func:`on_raw_poll_vote_remove` (only for guilds)
         """
         return 1 << 24
 
