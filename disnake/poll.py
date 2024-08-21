@@ -214,7 +214,7 @@ class Poll:
     message: Optional[:class:`Message`]
         The message which contains this poll. This will be ``None`` only if this object was created manually
         and did not originate from the API.
-    question: Union[:class:`str`, :class:`PollMedia`]
+    question: :class:`PollMedia`
         The question of the poll.
     duration: Optional[:class:`datetime.timedelta`]
         The original duration for this poll. ``None`` if the poll is a non-expiring poll.
