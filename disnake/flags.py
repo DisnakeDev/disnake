@@ -1639,8 +1639,10 @@ class Intents(BaseFlags):
 
         This corresponds to the following events:
 
-        - :func:`on_poll_vote_add`
-        - :func:`on_poll_vote_remove`
+        - :func:`on_poll_vote_add` (only for DMs)
+        - :func:`on_poll_vote_remove` (only for DMs)
+        - :func:`on_raw_poll_vote_add` (only for DMs)
+        - :func:`on_raw_poll_vote_remove` (only for DMs)
         """
         return 1 << 25
 
