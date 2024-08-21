@@ -230,7 +230,6 @@ class Poll:
     """
 
     __slots__ = (
-        "_state",
         "message",
         "question",
         "_answers",
@@ -250,7 +249,6 @@ class Poll:
         allow_multiselect: bool = False,
         layout_type: PollLayoutType = PollLayoutType.default,
     ) -> None:
-        self._state: Optional[ConnectionState] = None
         self.message: Optional[Message] = None
 
         if isinstance(question, str):
@@ -347,7 +345,6 @@ class Poll:
             answer_obj = PollAnswer.from_dict(state, poll, answer)
             poll._answers[int(answer["answer_id"])] = answer_obj
 
-        poll._state = state
         poll.message = message
         poll.expires_at = utils.parse_time(data["expiry"])
         if poll.expires_at:
@@ -406,10 +403,10 @@ class Poll:
         :class:`Message`
             The message which contains the expired `Poll`.
         """
-        if not self._state or not self.message:
+        if not self.message:
             raise ValueError(
                 "This object was manually built. To use this method, you need to use a poll object retrieved from the Discord API."
             )
 
-        data = await self._state.http.expire_poll(self.message.channel.id, self.message.id)
-        return self._state.create_message(channel=self.message.channel, data=data)
+        data = await self.message._state.http.expire_poll(self.message.channel.id, self.message.id)
+        return self.message._state.create_message(channel=self.message.channel, data=data)
