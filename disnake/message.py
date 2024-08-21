@@ -253,6 +253,12 @@ class Attachment(Hashable):
         The attachment's width, in pixels. Only applicable to images and videos.
     filename: :class:`str`
         The attachment's filename.
+    title: Optional[:class:`str`]
+        The attachment title. If the filename contained special characters,
+        this will be set to the original filename, without filename extension.
+
+        .. versionadded:: 2.10
+
     url: :class:`str`
         The attachment URL. If the message this attachment was attached
         to is deleted, then this will 404.
@@ -294,6 +300,7 @@ class Attachment(Hashable):
         "height",
         "width",
         "filename",
+        "title",
         "url",
         "proxy_url",
         "_http",
@@ -311,6 +318,7 @@ class Attachment(Hashable):
         self.height: Optional[int] = data.get("height")
         self.width: Optional[int] = data.get("width")
         self.filename: str = data["filename"]
+        self.title: Optional[str] = data.get("title")
         self.url: str = data["url"]
         self.proxy_url: str = data["proxy_url"]
         self._http = state.http
@@ -510,6 +518,8 @@ class Attachment(Hashable):
             result["waveform"] = b64encode(self.waveform).decode("ascii")
         if self._flags:
             result["flags"] = self._flags
+        if self.title:
+            result["title"] = self.title
         return result
 
 

@@ -2709,6 +2709,33 @@ class Client:
         cls, _ = _sticker_factory(data["type"])  # type: ignore
         return cls(state=self._connection, data=data)  # type: ignore
 
+    async def fetch_sticker_pack(self, pack_id: int, /) -> StickerPack:
+        """|coro|
+
+        Retrieves a :class:`.StickerPack` with the given ID.
+
+        .. versionadded:: 2.10
+
+        Parameters
+        ----------
+        pack_id: :class:`int`
+            The ID of the sticker pack to retrieve.
+
+        Raises
+        ------
+        HTTPException
+            Retrieving the sticker pack failed.
+        NotFound
+            Invalid sticker pack ID.
+
+        Returns
+        -------
+        :class:`.StickerPack`
+            The sticker pack you requested.
+        """
+        data = await self.http.get_sticker_pack(pack_id)
+        return StickerPack(state=self._connection, data=data)
+
     async def fetch_sticker_packs(self) -> List[StickerPack]:
         """|coro|
 
