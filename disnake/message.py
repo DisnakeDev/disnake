@@ -253,6 +253,12 @@ class Attachment(Hashable):
         The attachment's width, in pixels. Only applicable to images and videos.
     filename: :class:`str`
         The attachment's filename.
+    title: Optional[:class:`str`]
+        The attachment title. If the filename contained special characters,
+        this will be set to the original filename, without filename extension.
+
+        .. versionadded:: 2.10
+
     url: :class:`str`
         The attachment URL. If the message this attachment was attached
         to is deleted, then this will 404.
@@ -294,6 +300,7 @@ class Attachment(Hashable):
         "height",
         "width",
         "filename",
+        "title",
         "url",
         "proxy_url",
         "_http",
@@ -311,6 +318,7 @@ class Attachment(Hashable):
         self.height: Optional[int] = data.get("height")
         self.width: Optional[int] = data.get("width")
         self.filename: str = data["filename"]
+        self.title: Optional[str] = data.get("title")
         self.url: str = data["url"]
         self.proxy_url: str = data["proxy_url"]
         self._http = state.http
@@ -510,6 +518,8 @@ class Attachment(Hashable):
             result["waveform"] = b64encode(self.waveform).decode("ascii")
         if self._flags:
             result["flags"] = self._flags
+        if self.title:
+            result["title"] = self.title
         return result
 
 
@@ -1385,7 +1395,7 @@ class Message(Hashable):
             if (
                 self.channel.type is ChannelType.public_thread
                 and (parent := getattr(self.channel, "parent", None))
-                and parent.type is ChannelType.forum
+                and parent.type in (ChannelType.forum, ChannelType.media)
             ):
                 return f"{self.author.name} changed the post title: **{self.content}**"
             return f"{self.author.name} changed the channel name: **{self.content}**"
@@ -1523,6 +1533,20 @@ class Message(Hashable):
                 else "a deleted application"
             )
             return f"{self.author.name} upgraded {application_name} to premium for this server! 🎉"
+
+        if self.type is MessageType.guild_incident_alert_mode_enabled:
+            enabled_until = utils.parse_time(self.content)
+            return f"{self.author.name} enabled security actions until {enabled_until.strftime('%d/%m/%Y, %H:%M')}."
+
+        if self.type is MessageType.guild_incident_alert_mode_disabled:
+            return f"{self.author.name} disabled security actions."
+
+        if self.type is MessageType.guild_incident_report_raid:
+            guild_name = self.guild.name if self.guild else None
+            return f"{self.author.name} reported a raid in {guild_name}."
+
+        if self.type is MessageType.guild_incident_report_false_alarm:
+            return f"{self.author.name} resolved an Activity Alert."
 
         # in the event of an unknown or unsupported message type, we return nothing
         return None
@@ -2083,7 +2107,7 @@ class Message(Hashable):
         return Thread(guild=self.guild, state=self._state, data=data)
 
     async def reply(
-        self, content: Optional[str] = None, *, fail_if_not_exists: bool = True, **kwargs
+        self, content: Optional[str] = None, *, fail_if_not_exists: bool = True, **kwargs: Any
     ) -> Message:
         """|coro|
 

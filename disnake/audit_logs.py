@@ -64,6 +64,7 @@ if TYPE_CHECKING:
         DefaultReaction as DefaultReactionPayload,
         PermissionOverwrite as PermissionOverwritePayload,
     )
+    from .types.invite import Invite as InvitePayload
     from .types.role import Role as RolePayload
     from .types.snowflake import Snowflake
     from .types.threads import ForumTag as ForumTagPayload
@@ -176,18 +177,18 @@ def _transform_tag_id(
         return None
 
     # cyclic imports
-    from .channel import ForumChannel
+    from .channel import ThreadOnlyGuildChannel
 
     tag: Optional[ForumTag] = None
     tag_id = int(data)
     thread = entry.target
     # try thread parent first
-    if isinstance(thread, Thread) and isinstance(thread.parent, ForumChannel):
+    if isinstance(thread, Thread) and isinstance(thread.parent, ThreadOnlyGuildChannel):
         tag = thread.parent.get_tag(tag_id)
     else:
-        # if not found (possibly deleted thread), search all forum channels
-        for forum in entry.guild.forum_channels:
-            if tag := forum.get_tag(tag_id):
+        # if not found (possibly deleted thread), search all forum/media channels
+        for channel in entry.guild._channels.values():
+            if isinstance(channel, ThreadOnlyGuildChannel) and (tag := channel.get_tag(tag_id)):
                 break
 
     return tag or Object(id=tag_id)
@@ -799,15 +800,19 @@ class AuditLogEntry(Hashable):
         # so figure out which change has the full invite data
         changeset = self.before if self.action is enums.AuditLogAction.invite_delete else self.after
 
-        fake_payload = {
+        fake_payload: InvitePayload = {
             "max_age": changeset.max_age,
             "max_uses": changeset.max_uses,
             "code": changeset.code,
             "temporary": changeset.temporary,
             "uses": changeset.uses,
+            "type": 0,
+            "channel": None,
         }
 
-        obj = Invite(state=self._state, data=fake_payload, guild=self.guild, channel=changeset.channel)  # type: ignore
+        obj = Invite(
+            state=self._state, data=fake_payload, guild=self.guild, channel=changeset.channel
+        )
         try:
             obj.inviter = changeset.inviter
         except AttributeError:

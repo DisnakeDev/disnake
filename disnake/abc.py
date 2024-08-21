@@ -234,6 +234,7 @@ class GuildChannel(ABC):
     - :class:`.CategoryChannel`
     - :class:`.StageChannel`
     - :class:`.ForumChannel`
+    - :class:`.MediaChannel`
 
     This ABC must also implement :class:`.abc.Snowflake`.
 
@@ -893,6 +894,7 @@ class GuildChannel(ABC):
         stream: Optional[bool] = ...,
         use_application_commands: Optional[bool] = ...,
         use_embedded_activities: Optional[bool] = ...,
+        use_external_apps: Optional[bool] = ...,
         use_external_emojis: Optional[bool] = ...,
         use_external_sounds: Optional[bool] = ...,
         use_external_stickers: Optional[bool] = ...,
@@ -1149,7 +1151,7 @@ class GuildChannel(ABC):
     ) -> None:
         ...
 
-    async def move(self, **kwargs) -> None:
+    async def move(self, **kwargs: Any) -> None:
         """|coro|
 
         A rich interface to help move a channel relative to other channels.

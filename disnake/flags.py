@@ -1284,6 +1284,7 @@ class Intents(BaseFlags):
         This corresponds to the following events:
 
         - :func:`on_presence_update`
+        - :func:`on_raw_presence_update`
 
         This also corresponds to the following attributes and classes in terms of cache:
 
@@ -1442,7 +1443,7 @@ class Intents(BaseFlags):
 
     @flag_value
     def guild_reactions(self):
-        """:class:`bool`: Whether guild message reaction related events are enabled.
+        """:class:`bool`: Whether guild reaction related events are enabled.
 
         See also :attr:`dm_reactions` for DMs or :attr:`reactions` for both.
 
@@ -1498,7 +1499,7 @@ class Intents(BaseFlags):
 
     @flag_value
     def guild_typing(self):
-        """:class:`bool`: Whether guild and direct message typing related events are enabled.
+        """:class:`bool`: Whether guild typing related events are enabled.
 
         See also :attr:`dm_typing` for DMs or :attr:`typing` for both.
 
@@ -1512,7 +1513,7 @@ class Intents(BaseFlags):
 
     @flag_value
     def dm_typing(self):
-        """:class:`bool`: Whether guild and direct message typing related events are enabled.
+        """:class:`bool`: Whether direct message typing related events are enabled.
 
         See also :attr:`guild_typing` for guilds or :attr:`typing` for both.
 
@@ -2057,14 +2058,20 @@ class ChannelFlags(BaseFlags):
     if TYPE_CHECKING:
 
         @_generated
-        def __init__(self, *, pinned: bool = ..., require_tag: bool = ...) -> None:
+        def __init__(
+            self,
+            *,
+            hide_media_download_options: bool = ...,
+            pinned: bool = ...,
+            require_tag: bool = ...,
+        ) -> None:
             ...
 
     @flag_value
     def pinned(self):
         """:class:`bool`: Returns ``True`` if the thread is pinned.
 
-        This only applies to channels of type :class:`Thread`.
+        This only applies to threads that are part of a :class:`ForumChannel` or :class:`MediaChannel`.
         """
         return 1 << 1
 
@@ -2072,11 +2079,21 @@ class ChannelFlags(BaseFlags):
     def require_tag(self):
         """:class:`bool`: Returns ``True`` if the channel requires all newly created threads to have a tag.
 
-        This only applies to channels of type :class:`ForumChannel`.
+        This only applies to channels of types :class:`ForumChannel` or :class:`MediaChannel`.
 
         .. versionadded:: 2.6
         """
         return 1 << 4
+
+    @flag_value
+    def hide_media_download_options(self):
+        """:class:`bool`: Returns ``True`` if the channel hides the embedded media download options.
+
+        This only applies to channels of type :class:`MediaChannel`.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 15
 
 
 class AutoModKeywordPresets(ListBaseFlags):

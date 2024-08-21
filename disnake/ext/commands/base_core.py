@@ -130,7 +130,7 @@ class InvokableApplicationCommand(ABC):
         self.__original_kwargs__ = {k: v for k, v in kwargs.items() if v is not None}
         return self
 
-    def __init__(self, func: CommandCallback, *, name: Optional[str] = None, **kwargs) -> None:
+    def __init__(self, func: CommandCallback, *, name: Optional[str] = None, **kwargs: Any) -> None:
         self.__command_flag__ = None
         self._callback: CommandCallback = func
         self.name: str = name or func.__name__
@@ -281,7 +281,9 @@ class InvokableApplicationCommand(ABC):
         except ValueError:
             pass
 
-    async def __call__(self, interaction: ApplicationCommandInteraction, *args, **kwargs) -> Any:
+    async def __call__(
+        self, interaction: ApplicationCommandInteraction, *args: Any, **kwargs: Any
+    ) -> Any:
         """|coro|
 
         Calls the internal callback that the application command holds.
@@ -381,7 +383,7 @@ class InvokableApplicationCommand(ABC):
         return 0.0
 
     # This method isn't really usable in this class, but it's usable in subclasses.
-    async def invoke(self, inter: ApplicationCommandInteraction, *args, **kwargs) -> None:
+    async def invoke(self, inter: ApplicationCommandInteraction, *args: Any, **kwargs: Any) -> None:
         await self.prepare(inter)
 
         try:
@@ -676,6 +678,7 @@ def default_member_permissions(
     stream: bool = ...,
     use_application_commands: bool = ...,
     use_embedded_activities: bool = ...,
+    use_external_apps: bool = ...,
     use_external_emojis: bool = ...,
     use_external_sounds: bool = ...,
     use_external_stickers: bool = ...,

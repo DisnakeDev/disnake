@@ -967,7 +967,7 @@ class SyncWebhook(BaseWebhook):
         ``embeds`` parameter, which must be a :class:`list` of :class:`Embed` objects to send.
 
         To send a message in a thread, provide the ``thread`` parameter.
-        If this webhook is in a :class:`ForumChannel`, the ``thread_name`` parameter can
+        If this webhook is in a :class:`ForumChannel`/:class:`MediaChannel`, the ``thread_name`` parameter can
         be used to create a new thread instead (optionally with ``applied_tags``).
 
         .. versionchanged:: 2.6
@@ -1007,13 +1007,13 @@ class SyncWebhook(BaseWebhook):
             .. versionadded:: 2.0
 
         thread_name: :class:`str`
-            If in a forum channel, and ``thread`` is not specified,
+            If in a forum/media channel, and ``thread`` is not specified,
             the name of the newly created thread.
 
             .. versionadded:: 2.6
 
         applied_tags: Sequence[:class:`abc.Snowflake`]
-            If in a forum channel and creating a new thread (see ``thread_name`` above),
+            If in a forum/media channel and creating a new thread (see ``thread_name`` above),
             the tags to apply to the new thread. Maximum of 5.
 
             .. versionadded:: 2.10

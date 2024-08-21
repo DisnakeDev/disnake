@@ -37,6 +37,27 @@ PartialInviteChannel
 Enumerations
 ------------
 
+InviteType
+~~~~~~~~~~
+
+.. class:: InviteType
+
+    Represents the type of an invite.
+
+    .. versionadded:: 2.10
+
+    .. attribute:: guild
+
+        Represents an invite to a guild.
+
+    .. attribute:: group_dm
+
+        Represents an invite to a group channel.
+
+    .. attribute:: friend
+
+        Represents a friend invite.
+
 InviteTarget
 ~~~~~~~~~~~~
 

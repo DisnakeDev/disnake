@@ -4,7 +4,7 @@ from typing import Literal, TypedDict
 
 from .snowflake import Snowflake
 
-SKUType = Literal[5, 6]
+SKUType = Literal[2, 3, 5, 6]
 
 
 class SKU(TypedDict):
