@@ -2005,7 +2005,7 @@ class ConnectionState:
         channel_type = data["type"]
 
         factory, _ = _threaded_guild_channel_factory(channel_type)
-        if not factory:
+        if not factory or not guild:
             return PartialMessageable(
                 state=self,
                 id=channel_id,
