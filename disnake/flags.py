@@ -1628,6 +1628,11 @@ class Intents(BaseFlags):
         - :func:`on_poll_vote_remove` (only for guilds)
         - :func:`on_raw_poll_vote_add` (only for guilds)
         - :func:`on_raw_poll_vote_remove` (only for guilds)
+
+        This also corresponds to the following attributes and classes in terms of cache:
+
+        - :attr:`Message.poll` (only for guild messages)
+        - :class:`Poll` and all its attributes.
         """
         return 1 << 24
 
@@ -1643,6 +1648,11 @@ class Intents(BaseFlags):
         - :func:`on_poll_vote_remove` (only for DMs)
         - :func:`on_raw_poll_vote_add` (only for DMs)
         - :func:`on_raw_poll_vote_remove` (only for DMs)
+
+        This also corresponds to the following attributes and classes in terms of cache:
+
+        - :attr:`Message.poll` (only for DM messages)
+        - :class:`Poll` and all its attributes.
         """
         return 1 << 25
 
