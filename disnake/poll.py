@@ -218,9 +218,6 @@ class Poll:
         The question of the poll.
     duration: Optional[:class:`datetime.timedelta`]
         The original duration for this poll. ``None`` if the poll is a non-expiring poll.
-    expires_at: Optional[:class:`datetime.datetime`]
-        The date when this poll will expire. ``None`` if the poll is a non-expiring poll
-        or if this object was created manually and did not originate from the API.
     allow_multiselect: :class:`bool`
         Whether users are able to pick more than one answer.
     layout_type: :class:`PollLayoutType`
@@ -234,7 +231,6 @@ class Poll:
         "question",
         "_answers",
         "duration",
-        "expires_at",
         "allow_multiselect",
         "layout_type",
         "is_finalized",
@@ -272,7 +268,6 @@ class Poll:
                 )
 
         self.duration: Optional[timedelta] = duration
-        self.expires_at: Optional[datetime] = None
         self.allow_multiselect: bool = allow_multiselect
         self.layout_type: PollLayoutType = layout_type
         self.is_finalized: bool = False
@@ -299,6 +294,23 @@ class Poll:
         return utils.snowflake_time(self.message.id)
 
     @property
+    def expires_at(self) -> Optional[datetime]:
+        """Optional[:class:`datetime.datetime`]: The date when this poll will expire.
+
+        ``None`` if this poll does not originate from the discord API or if this
+        poll is non-expiring.
+        """
+        # non-expiring poll
+        if not self.duration:
+            return
+
+        created_at = self.created_at
+        # manually built object
+        if not created_at:
+            return
+        return created_at + self.duration
+
+    @property
     def remaining_duration(self) -> Optional[timedelta]:
         """Optional[:class:`datetime.timedelta`]: The remaining duration for this poll.
         If this poll is finalized this property will arbitrarily return a
@@ -311,7 +323,7 @@ class Poll:
         if not self.expires_at or not self.message:
             return
 
-        return self.expires_at - utils.snowflake_time(self.message.id)
+        return self.expires_at - utils.utcnow()
 
     def get_answer(self, answer_id: int, /) -> Optional[PollAnswer]:
         """Return the requested poll answer.
@@ -346,13 +358,11 @@ class Poll:
             poll._answers[int(answer["answer_id"])] = answer_obj
 
         poll.message = message
-        poll.expires_at = utils.parse_time(data["expiry"])
-        if poll.expires_at:
-            poll.duration = poll.expires_at - utils.snowflake_time(poll.message.id)
+        if expiry := data["expiry"]:
+            poll.duration = utils.parse_time(expiry) - utils.snowflake_time(poll.message.id)
         else:
             # future support for non-expiring polls
             # read the foot note https://discord.com/developers/docs/resources/poll#poll-object-poll-object-structure
-            poll.expires_at = None
             poll.duration = None
 
         if results := data.get("results"):
