@@ -1249,8 +1249,13 @@ class Message(Hashable):
     def _rebind_cached_references(self, new_guild: Guild, new_channel: GuildMessageable) -> None:
         self.guild = new_guild
         self.channel = new_channel
+
+        # rebind the members' guilds; the members themselves will potentially be
+        # updated later in _update_member_references, after re-chunking
         if isinstance(self.author, Member):
             self.author.guild = new_guild
+        if self.interaction and isinstance(self.interaction.user, Member):
+            self.interaction.user.guild = new_guild
 
     @utils.cached_slot_property("_cs_raw_mentions")
     def raw_mentions(self) -> List[int]:
