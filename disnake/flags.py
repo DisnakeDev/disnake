@@ -1611,6 +1611,8 @@ class Intents(BaseFlags):
 
         - :func:`on_poll_vote_add` (both guilds and DMs)
         - :func:`on_poll_vote_remove` (both guilds and DMs)
+        - :func:`on_raw_poll_vote_add` (both guilds and DMs)
+        - :func:`on_raw_poll_vote_remove` (both guilds and DMs)
         """
         return (1 << 24) | (1 << 25)
 
