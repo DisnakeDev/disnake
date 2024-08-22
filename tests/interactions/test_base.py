@@ -184,7 +184,7 @@ class TestInteractionDataResolved:
         assert len(resolved.members) == 1
         assert len(resolved.users) == 0
 
-    @pytest.mark.parametrize("channel_type", [t.value for t in disnake.ChannelType])
+    @pytest.mark.parametrize("channel_type", [t.value for t in disnake.ChannelType] + [99])
     def test_channel(self, state, channel_type) -> None:
         channel_data: InteractionChannelPayload = {
             "id": "42",
@@ -209,6 +209,6 @@ class TestInteractionDataResolved:
             return_messageable=False,
         )
 
-        # should be partial if and only if it's a dm/group
+        # should be partial if and only if it's a dm/group or unknown
         # TODO: currently includes directory channels (14), see `_get_partial_interaction_channel`
-        assert isinstance(channel, disnake.PartialMessageable) == (channel_type in (1, 3, 14))
+        assert isinstance(channel, disnake.PartialMessageable) == (channel_type in (1, 3, 14, 99))
