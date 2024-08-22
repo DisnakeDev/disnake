@@ -1907,22 +1907,32 @@ class InteractionDataResolved(Dict[str, Any]):
                 data=role,
             )
 
-        for channel_data in channels.values():
-            channel = state._get_partial_interaction_channel(channel_data, guild_fallback)
-            self.channels[channel.id] = channel
+        for str_id, channel_data in channels.items():
+            self.channels[int(str_id)] = state._get_partial_interaction_channel(
+                channel_data, guild_fallback
+            )
 
         for str_id, message in messages.items():
             channel_id = int(message["channel_id"])
-            channel = cast(
-                "Optional[MessageableChannel]",
-                (guild and guild.get_channel(channel_id) or state.get_channel(channel_id)),
-            )
+            channel: Optional[MessageableChannel] = None
 
-            if channel is None and channel_id == parent.channel.id:
-                # take parent interaction's `channel` into account
+            if (
+                channel_id == parent.channel.id
+                # we still want to fall back to state.get_channel when the
+                # parent channel is a dm/group channel, for now.
+                # FIXME: remove this once `parent.channel` supports `DMChannel`
+                and not isinstance(parent.channel, PartialMessageable)
+            ):
+                # fast path, this should generally be the case
                 channel = parent.channel
+            else:
+                channel = cast(
+                    "Optional[MessageableChannel]",
+                    (guild and guild.get_channel(channel_id) or state.get_channel(channel_id)),
+                )
+
             if channel is None:
-                # n.b. the channel is not part of `resolved.channels`,
+                # n.b. the message's channel is not sent as part of `resolved.channels`,
                 # so we need to fall back to partials here.
                 channel = PartialMessageable(state=state, id=channel_id, type=None)
 
