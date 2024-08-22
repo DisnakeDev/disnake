@@ -203,7 +203,10 @@ class TestInteractionDataResolved:
 
         # this should not raise
         channel = ConnectionState._get_partial_interaction_channel(
-            state, channel_data, disnake.Object(1234)
+            state,
+            channel_data,
+            disnake.Object(1234),
+            return_messageable=False,
         )
 
         # should be partial if and only if it's a dm/group

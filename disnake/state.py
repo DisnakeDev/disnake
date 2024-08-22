@@ -94,8 +94,9 @@ if TYPE_CHECKING:
     from .app_commands import APIApplicationCommand, ApplicationCommand
     from .client import Client
     from .gateway import DiscordWebSocket
-    from .guild import GuildChannel, GuildMessageable, VocalGuildChannel
+    from .guild import GuildChannel, VocalGuildChannel
     from .http import HTTPClient
+    from .interactions.base import InteractionChannel, InteractionMessageable
     from .types import gateway
     from .types.activity import Activity as ActivityPayload
     from .types.channel import DMChannel as DMChannelPayload
@@ -1997,10 +1998,35 @@ class ConnectionState:
         except KeyError:
             return emoji
 
+    @overload
+    def _get_partial_interaction_channel(
+        self,
+        data: InteractionChannelPayload,
+        guild: Optional[Union[Guild, Object]],
+        *,
+        return_messageable: Literal[False] = False,
+    ) -> InteractionChannel:
+        ...
+
+    @overload
+    def _get_partial_interaction_channel(
+        self,
+        data: InteractionChannelPayload,
+        guild: Optional[Union[Guild, Object]],
+        *,
+        return_messageable: Literal[True],
+    ) -> InteractionMessageable:
+        ...
+
     # note: this resolves private channels (and unknown types) to `PartialMessageable`
     def _get_partial_interaction_channel(
-        self, data: InteractionChannelPayload, guild: Optional[Union[Guild, Object]]
-    ) -> Union[GuildMessageable, PartialMessageable]:
+        self,
+        data: InteractionChannelPayload,
+        guild: Optional[Union[Guild, Object]],
+        *,
+        # this param is purely for type-checking, it has no effect on runtime behavior.
+        return_messageable: bool = False,
+    ) -> InteractionChannel:
         channel_id = int(data["id"])
         channel_type = data["type"]
 

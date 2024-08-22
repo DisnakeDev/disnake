@@ -74,7 +74,6 @@ if TYPE_CHECKING:
     from ..guild import GuildChannel, GuildMessageable
     from ..mentions import AllowedMentions
     from ..state import ConnectionState
-    from ..threads import Thread
     from ..types.components import Modal as ModalPayload
     from ..types.interactions import (
         ApplicationCommandOptionChoice as ApplicationCommandOptionChoicePayload,
@@ -88,7 +87,8 @@ if TYPE_CHECKING:
     from .message import MessageInteraction
     from .modal import ModalInteraction
 
-    InteractionChannel = Union[GuildChannel, Thread, PartialMessageable]
+    InteractionMessageable = Union[GuildMessageable, PartialMessageable]
+    InteractionChannel = Union[InteractionMessageable, GuildChannel]
 
     AnyBot = Union[Bot, AutoShardedBot]
 
@@ -234,9 +234,9 @@ class Interaction(Generic[ClientT]):
         elif user := data.get("user"):
             self.author = self._state.store_user(user)
 
-        self.channel: Union[
-            GuildMessageable, PartialMessageable
-        ] = state._get_partial_interaction_channel(data["channel"], guild_fallback)
+        self.channel: InteractionMessageable = state._get_partial_interaction_channel(
+            data["channel"], guild_fallback, return_messageable=True
+        )
 
         self.entitlements: List[Entitlement] = (
             [Entitlement(data=e, state=state) for e in entitlements_data]
@@ -1907,7 +1907,7 @@ class InteractionDataResolved(Dict[str, Any]):
                 data=role,
             )
 
-        for _, channel_data in channels.items():
+        for channel_data in channels.values():
             channel = state._get_partial_interaction_channel(channel_data, guild_fallback)
             self.channels[channel.id] = channel
 
