@@ -142,7 +142,7 @@ class Interaction(Generic[ClientT]):
 
         .. note::
             If you want to compute the interaction author's or bot's permissions in the channel,
-            consider using :attr:`permissions` or :attr:`app_permissions` instead.
+            consider using :attr:`permissions` or :attr:`app_permissions`.
 
     author: Union[:class:`User`, :class:`Member`]
         The user or member that sent the interaction.
@@ -226,7 +226,7 @@ class Interaction(Generic[ClientT]):
                 and guild_fallback.get_member(int(member["user"]["id"]))
                 or Member(
                     state=self._state,
-                    guild=guild_fallback,  # type: ignore
+                    guild=guild_fallback,  # type: ignore  # may be `Object`
                     data=member,
                 )
             )
