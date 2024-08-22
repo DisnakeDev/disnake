@@ -234,6 +234,7 @@ class Interaction(Generic[ClientT]):
         elif user := data.get("user"):
             self.author = self._state.store_user(user)
 
+        # TODO: consider making this optional in 3.0
         self.channel: InteractionMessageable = state._get_partial_interaction_channel(
             data["channel"], guild_fallback, return_messageable=True
         )
@@ -1853,7 +1854,7 @@ class InteractionDataResolved(Dict[str, Any]):
         self,
         *,
         data: InteractionDataResolvedPayload,
-        parent: Interaction,
+        parent: Interaction[ClientT],
     ) -> None:
         data = data or {}
         super().__init__(data)

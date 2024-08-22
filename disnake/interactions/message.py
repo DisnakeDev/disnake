@@ -178,7 +178,7 @@ class MessageInteractionData(Dict[str, Any]):
         self,
         *,
         data: MessageComponentInteractionDataPayload,
-        parent: MessageInteraction,
+        parent: MessageInteraction[ClientT],
     ) -> None:
         super().__init__(data)
         self.custom_id: str = data["custom_id"]

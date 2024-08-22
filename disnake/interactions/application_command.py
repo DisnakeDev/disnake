@@ -213,7 +213,7 @@ class ApplicationCommandInteractionData(Dict[str, Any]):
         self,
         *,
         data: ApplicationCommandInteractionDataPayload,
-        parent: ApplicationCommandInteraction,
+        parent: ApplicationCommandInteraction[ClientT],
     ) -> None:
         super().__init__(data)
         self.id: int = int(data["id"])
