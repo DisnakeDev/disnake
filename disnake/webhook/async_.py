@@ -512,7 +512,7 @@ def handle_message_parameters_dict(
     allowed_mentions: Optional[AllowedMentions] = MISSING,
     previous_allowed_mentions: Optional[AllowedMentions] = None,
     stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = MISSING,
-    poll: Optional[Poll] = MISSING,
+    poll: Poll = MISSING,
     # these parameters are exclusive to webhooks in forum/media channels
     thread_name: str = MISSING,
     applied_tags: Sequence[Snowflake] = MISSING,
@@ -581,7 +581,7 @@ def handle_message_parameters_dict(
         payload["thread_name"] = thread_name
     if applied_tags:
         payload["applied_tags"] = [t.id for t in applied_tags]
-    if poll:
+    if poll is not MISSING:
         payload["poll"] = poll._to_dict()
 
     return DictPayloadParameters(payload=payload, files=files)
@@ -606,7 +606,7 @@ def handle_message_parameters(
     allowed_mentions: Optional[AllowedMentions] = MISSING,
     previous_allowed_mentions: Optional[AllowedMentions] = None,
     stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = MISSING,
-    poll: Optional[Poll] = MISSING,
+    poll: Poll = MISSING,
     # these parameters are exclusive to webhooks in forum/media channels
     thread_name: str = MISSING,
     applied_tags: Sequence[Snowflake] = MISSING,

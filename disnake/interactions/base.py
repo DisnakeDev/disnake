@@ -387,7 +387,7 @@ class Interaction(Generic[ClientT]):
         attachments: Optional[List[Attachment]] = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[Components[MessageUIComponent]] = MISSING,
-        poll: Optional[Poll] = MISSING,
+        poll: Poll = MISSING,
         suppress_embeds: bool = MISSING,
         flags: MessageFlags = MISSING,
         allowed_mentions: Optional[AllowedMentions] = None,
@@ -452,7 +452,7 @@ class Interaction(Generic[ClientT]):
 
             .. versionadded:: 2.4
 
-        poll: Optional[:class:`Poll`]
+        poll: :class:`Poll`
             A poll. This can only be sent after a defer. If not used after a defer the
             discord API ignore the field.
 

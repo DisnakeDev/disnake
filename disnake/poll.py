@@ -116,19 +116,19 @@ class PollAnswer:
     poll: Optional[:class:`Poll`]
         The poll associated with this answer. This will be ``None`` only if this object was created manually
         and did not originate from the API.
-    count: :class:`int`
+    vote_count: :class:`int`
         The number of votes for this answer.
     self_voted: :class:`bool`
         Whether the current user voted for this answer.
     """
 
-    __slots__ = ("id", "media", "poll", "count", "self_voted")
+    __slots__ = ("id", "media", "poll", "vote_count", "self_voted")
 
     def __init__(self, media: PollMedia) -> None:
         self.id: Optional[int] = None
         self.poll: Optional[Poll] = None
         self.media = media
-        self.count: int = 0
+        self.vote_count: int = 0
         self.self_voted: bool = False
 
     def __repr__(self) -> str:
@@ -375,7 +375,7 @@ class Poll:
                 except KeyError:
                     # this should never happen
                     continue
-                answer.count = answer_count["count"]
+                answer.vote_count = answer_count["count"]
                 answer.self_voted = answer_count["me_voted"]
 
         return poll
