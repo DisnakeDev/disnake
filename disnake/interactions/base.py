@@ -453,8 +453,8 @@ class Interaction(Generic[ClientT]):
             .. versionadded:: 2.4
 
         poll: Optional[:class:`Poll`]
-            A poll. This can only be sent after a defer. If not used after a defer the
-            discord API ignore the field.
+            A poll. This can only be sent after initially responding with :meth:`~InteractionResponse.defer`.
+            Otherwise, the Discord API ignores the field.
 
             .. versionadded:: 2.10
 
