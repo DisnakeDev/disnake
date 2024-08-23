@@ -387,6 +387,7 @@ class Interaction(Generic[ClientT]):
         attachments: Optional[List[Attachment]] = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[Components[MessageUIComponent]] = MISSING,
+        poll: Optional[Poll] = MISSING,
         suppress_embeds: bool = MISSING,
         flags: MessageFlags = MISSING,
         allowed_mentions: Optional[AllowedMentions] = None,
@@ -451,6 +452,12 @@ class Interaction(Generic[ClientT]):
 
             .. versionadded:: 2.4
 
+        poll: Optional[:class:`Poll`]
+            A poll. This can only be sent after a defer. If not used after a defer the
+            discord API ignore the field.
+
+            .. versionadded:: 2.10
+
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
@@ -513,6 +520,7 @@ class Interaction(Generic[ClientT]):
             embeds=embeds,
             view=view,
             components=components,
+            poll=poll,
             suppress_embeds=suppress_embeds,
             flags=flags,
             allowed_mentions=allowed_mentions,

@@ -68,7 +68,8 @@ class PollMedia:
         elif isinstance(emoji, _EmojiTag):
             self.emoji = emoji
         else:
-            raise TypeError("emoji must be None, a str, PartialEmoji, or Emoji instance.")
+            if emoji is not None:
+                raise TypeError("Emoji must be None, a str, PartialEmoji, or Emoji instance.")
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} text={self.text!r} emoji={self.emoji!r}>"
