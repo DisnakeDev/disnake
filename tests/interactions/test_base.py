@@ -8,12 +8,12 @@ from unittest import mock
 import pytest
 
 import disnake
-from disnake import InteractionResponseType as ResponseType  # shortcut
+from disnake import Interaction, InteractionResponseType as ResponseType  # shortcut
 from disnake.state import ConnectionState
 from disnake.utils import MISSING
 
 if TYPE_CHECKING:
-    from disnake.types.interactions import ResolvedPartialChannel as ResolvedPartialChannelPayload
+    from disnake.types.interactions import InteractionChannel as InteractionChannelPayload
     from disnake.types.member import Member as MemberPayload
     from disnake.types.user import User as UserPayload
 
@@ -137,7 +137,14 @@ class TestInteractionDataResolved:
         s._get_guild.return_value = None
         return s
 
-    def test_init_member(self, state) -> None:
+    @pytest.fixture
+    def interaction(self, state):
+        i = mock.Mock(spec_set=Interaction)
+        i._state = state
+        i.guild_id = 1234
+        return i
+
+    def test_init_member(self, interaction) -> None:
         member_payload: MemberPayload = {
             "roles": [],
             "joined_at": "2022-09-02T22:00:55.069000+00:00",
@@ -156,8 +163,7 @@ class TestInteractionDataResolved:
         # user only, should deserialize user object
         resolved = disnake.InteractionDataResolved(
             data={"users": {"1234": user_payload}},
-            state=state,
-            guild_id=1234,
+            parent=interaction,
         )
         assert len(resolved.members) == 0
         assert len(resolved.users) == 1
@@ -165,8 +171,7 @@ class TestInteractionDataResolved:
         # member only, shouldn't deserialize anything
         resolved = disnake.InteractionDataResolved(
             data={"members": {"1234": member_payload}},
-            state=state,
-            guild_id=1234,
+            parent=interaction,
         )
         assert len(resolved.members) == 0
         assert len(resolved.users) == 0
@@ -174,15 +179,14 @@ class TestInteractionDataResolved:
         # user + member, should deserialize member object only
         resolved = disnake.InteractionDataResolved(
             data={"users": {"1234": user_payload}, "members": {"1234": member_payload}},
-            state=state,
-            guild_id=1234,
+            parent=interaction,
         )
         assert len(resolved.members) == 1
         assert len(resolved.users) == 0
 
-    @pytest.mark.parametrize("channel_type", [t.value for t in disnake.ChannelType])
+    @pytest.mark.parametrize("channel_type", [t.value for t in disnake.ChannelType] + [99])
     def test_channel(self, state, channel_type) -> None:
-        channel_data: ResolvedPartialChannelPayload = {
+        channel_data: InteractionChannelPayload = {
             "id": "42",
             "type": channel_type,
             "permissions": "7",
@@ -197,12 +201,14 @@ class TestInteractionDataResolved:
                 "locked": False,
             }
 
-        resolved = disnake.InteractionDataResolved(
-            data={"channels": {"42": channel_data}}, state=state, guild_id=1234
+        # this should not raise
+        channel = ConnectionState._get_partial_interaction_channel(
+            state,
+            channel_data,
+            disnake.Object(1234),
+            return_messageable=False,
         )
-        assert len(resolved.channels) == 1
 
-        channel = next(iter(resolved.channels.values()))
-        # should be partial if and only if it's a dm/group
-        # TODO: currently includes directory channels (14), see `InteractionDataResolved.__init__`
-        assert isinstance(channel, disnake.PartialMessageable) == (channel_type in (1, 3, 14))
+        # should be partial if and only if it's a dm/group or unknown
+        # TODO: currently includes directory channels (14), see `_get_partial_interaction_channel`
+        assert isinstance(channel, disnake.PartialMessageable) == (channel_type in (1, 3, 14, 99))

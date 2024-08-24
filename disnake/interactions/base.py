@@ -21,10 +21,9 @@ from typing import (
 
 from .. import utils
 from ..app_commands import OptionChoice
-from ..channel import PartialMessageable, _threaded_guild_channel_factory
+from ..channel import PartialMessageable
 from ..entitlement import Entitlement
 from ..enums import (
-    ChannelType,
     ComponentType,
     InteractionResponseType,
     InteractionType,
@@ -76,7 +75,6 @@ if TYPE_CHECKING:
     from ..mentions import AllowedMentions
     from ..poll import Poll
     from ..state import ConnectionState
-    from ..threads import Thread
     from ..types.components import Modal as ModalPayload
     from ..types.interactions import (
         ApplicationCommandOptionChoice as ApplicationCommandOptionChoicePayload,
@@ -90,7 +88,8 @@ if TYPE_CHECKING:
     from .message import MessageInteraction
     from .modal import ModalInteraction
 
-    InteractionChannel = Union[GuildChannel, Thread, PartialMessageable]
+    InteractionMessageable = Union[GuildMessageable, PartialMessageable]
+    InteractionChannel = Union[InteractionMessageable, GuildChannel]
 
     AnyBot = Union[Bot, AutoShardedBot]
 
@@ -131,8 +130,21 @@ class Interaction(Generic[ClientT]):
         .. versionchanged:: 2.5
             Changed to :class:`Locale` instead of :class:`str`.
 
-    channel_id: :class:`int`
-        The channel ID the interaction was sent from.
+    channel: Union[:class:`abc.GuildChannel`, :class:`Thread`, :class:`PartialMessageable`]
+        The channel the interaction was sent from.
+
+        Note that due to a Discord limitation, DM channels
+        are not resolved as there is no data to complete them.
+        These are :class:`PartialMessageable` instead.
+
+        .. versionchanged:: 2.10
+            If the interaction was sent from a thread and the bot cannot normally access the thread,
+            this is now a proper :class:`Thread` object.
+
+        .. note::
+            If you want to compute the interaction author's or bot's permissions in the channel,
+            consider using :attr:`permissions` or :attr:`app_permissions`.
+
     author: Union[:class:`User`, :class:`Member`]
         The user or member that sent the interaction.
     locale: :class:`Locale`
@@ -159,7 +171,7 @@ class Interaction(Generic[ClientT]):
         "id",
         "type",
         "guild_id",
-        "channel_id",
+        "channel",
         "application_id",
         "author",
         "token",
@@ -175,7 +187,6 @@ class Interaction(Generic[ClientT]):
         "_original_response",
         "_cs_response",
         "_cs_followup",
-        "_cs_channel",
         "_cs_me",
         "_cs_expires_at",
     )
@@ -193,8 +204,6 @@ class Interaction(Generic[ClientT]):
         self.token: str = data["token"]
         self.version: int = data["version"]
         self.application_id: int = int(data["application_id"])
-
-        self.channel_id: int = int(data["channel_id"])
         self.guild_id: Optional[int] = utils._get_as_snowflake(data, "guild_id")
 
         self.locale: Locale = try_enum(Locale, data["locale"])
@@ -208,16 +217,28 @@ class Interaction(Generic[ClientT]):
         # one of user and member will always exist
         self.author: Union[User, Member] = MISSING
 
-        if self.guild_id and (member := data.get("member")):
-            guild: Guild = self.guild or Object(id=self.guild_id)  # type: ignore
+        guild_fallback: Optional[Union[Guild, Object]] = None
+        if self.guild_id:
+            guild_fallback = self.guild or Object(self.guild_id)
+
+        if guild_fallback and (member := data.get("member")):
             self.author = (
-                isinstance(guild, Guild)
-                and guild.get_member(int(member["user"]["id"]))
-                or Member(state=self._state, guild=guild, data=member)
+                isinstance(guild_fallback, Guild)
+                and guild_fallback.get_member(int(member["user"]["id"]))
+                or Member(
+                    state=self._state,
+                    guild=guild_fallback,  # type: ignore  # may be `Object`
+                    data=member,
+                )
             )
             self._permissions = int(member.get("permissions", 0))
         elif user := data.get("user"):
             self.author = self._state.store_user(user)
+
+        # TODO: consider making this optional in 3.0
+        self.channel: InteractionMessageable = state._get_partial_interaction_channel(
+            data["channel"], guild_fallback, return_messageable=True
+        )
 
         self.entitlements: List[Entitlement] = (
             [Entitlement(data=e, state=state) for e in entitlements_data]
@@ -256,24 +277,13 @@ class Interaction(Generic[ClientT]):
             return None if self.bot is None else self.bot.user  # type: ignore
         return self.guild.me
 
-    @utils.cached_slot_property("_cs_channel")
-    def channel(self) -> Union[GuildMessageable, PartialMessageable]:
-        """Union[:class:`abc.GuildChannel`, :class:`Thread`, :class:`PartialMessageable`]: The channel the interaction was sent from.
+    @property
+    def channel_id(self) -> int:
+        """The channel ID the interaction was sent from.
 
-        Note that due to a Discord limitation, threads that the bot cannot access and DM channels
-        are not resolved since there is no data to complete them.
-        These are :class:`PartialMessageable` instead.
-
-        If you want to compute the interaction author's or bot's permissions in the channel,
-        consider using :attr:`permissions` or :attr:`app_permissions` instead.
+        See also :attr:`channel`.
         """
-        guild = self.guild
-        channel = guild and guild._resolve_channel(self.channel_id)
-        if channel is None:
-            # could be a thread channel in a guild, or a DM channel
-            type = None if self.guild_id is not None else ChannelType.private
-            return PartialMessageable(state=self._state, id=self.channel_id, type=type)
-        return channel  # type: ignore
+        return self.channel.id
 
     @property
     def permissions(self) -> Permissions:
@@ -1873,8 +1883,7 @@ class InteractionDataResolved(Dict[str, Any]):
         self,
         *,
         data: InteractionDataResolvedPayload,
-        state: ConnectionState,
-        guild_id: Optional[int],
+        parent: Interaction[ClientT],
     ) -> None:
         data = data or {}
         super().__init__(data)
@@ -1892,6 +1901,9 @@ class InteractionDataResolved(Dict[str, Any]):
         channels = data.get("channels", {})
         messages = data.get("messages", {})
         attachments = data.get("attachments", {})
+
+        state = parent._state
+        guild_id = parent.guild_id
 
         guild: Optional[Guild] = None
         # `guild_fallback` is only used in guild contexts, so this `MISSING` value should never be used.
@@ -1925,36 +1937,35 @@ class InteractionDataResolved(Dict[str, Any]):
                 data=role,
             )
 
-        for str_id, channel in channels.items():
-            channel_id = int(str_id)
-            factory, _ = _threaded_guild_channel_factory(channel["type"])
-            if factory:
-                channel["position"] = 0  # type: ignore
-                self.channels[channel_id] = (
-                    guild
-                    and guild.get_channel_or_thread(channel_id)
-                    or factory(
-                        guild=guild_fallback,
-                        state=state,
-                        data=channel,  # type: ignore
-                    )
-                )
-            else:
-                # TODO: guild_directory is not messageable
-                self.channels[channel_id] = PartialMessageable(
-                    state=state, id=channel_id, type=try_enum(ChannelType, channel["type"])
-                )
+        for str_id, channel_data in channels.items():
+            self.channels[int(str_id)] = state._get_partial_interaction_channel(
+                channel_data, guild_fallback
+            )
 
         for str_id, message in messages.items():
             channel_id = int(message["channel_id"])
-            channel = cast(
-                "Optional[MessageableChannel]",
-                (guild and guild.get_channel(channel_id) or state.get_channel(channel_id)),
-            )
+            channel: Optional[MessageableChannel] = None
+
+            if (
+                channel_id == parent.channel.id
+                # we still want to fall back to state.get_channel when the
+                # parent channel is a dm/group channel, for now.
+                # FIXME: remove this once `parent.channel` supports `DMChannel`
+                and not isinstance(parent.channel, PartialMessageable)
+            ):
+                # fast path, this should generally be the case
+                channel = parent.channel
+            else:
+                channel = cast(
+                    "Optional[MessageableChannel]",
+                    (guild and guild.get_channel(channel_id) or state.get_channel(channel_id)),
+                )
+
             if channel is None:
-                # The channel is not part of `resolved.channels`,
+                # n.b. the message's channel is not sent as part of `resolved.channels`,
                 # so we need to fall back to partials here.
                 channel = PartialMessageable(state=state, id=channel_id, type=None)
+
             self.messages[int(str_id)] = Message(state=state, channel=channel, data=message)
 
         for str_id, attachment in attachments.items():
