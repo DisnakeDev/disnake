@@ -96,7 +96,7 @@ class GuildApplicationCommandPermissions(TypedDict):
 InteractionType = Literal[1, 2, 3, 4, 5]
 
 
-class ResolvedPartialChannel(TypedDict):
+class InteractionChannel(TypedDict):
     id: Snowflake
     type: ChannelType
     permissions: str
@@ -111,7 +111,7 @@ class InteractionDataResolved(TypedDict, total=False):
     users: Dict[Snowflake, User]
     members: Dict[Snowflake, Member]
     roles: Dict[Snowflake, Role]
-    channels: Dict[Snowflake, ResolvedPartialChannel]
+    channels: Dict[Snowflake, InteractionChannel]
     # only in application commands
     messages: Dict[Snowflake, Message]
     attachments: Dict[Snowflake, Attachment]
@@ -266,9 +266,10 @@ class _BaseInteraction(TypedDict):
 
 # common properties in non-ping interactions
 class _BaseUserInteraction(_BaseInteraction):
-    # the docs specify `channel_id` as optional,
-    # but it is assumed to always exist on non-ping interactions
+    # the docs specify `channel_id` and 'channel` as optional,
+    # but they're assumed to always exist on non-ping interactions
     channel_id: Snowflake
+    channel: InteractionChannel
     locale: str
     guild_id: NotRequired[Snowflake]
     guild_locale: NotRequired[str]
@@ -344,6 +345,7 @@ class InteractionMessageReference(TypedDict):
     type: InteractionType
     name: str
     user: User
+    member: NotRequired[Member]
 
 
 class _BaseInteractionMetadata(TypedDict):

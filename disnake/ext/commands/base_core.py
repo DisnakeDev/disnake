@@ -690,6 +690,7 @@ def default_member_permissions(
     request_to_speak: bool = ...,
     send_messages: bool = ...,
     send_messages_in_threads: bool = ...,
+    send_polls: bool = ...,
     send_tts_messages: bool = ...,
     send_voice_messages: bool = ...,
     speak: bool = ...,

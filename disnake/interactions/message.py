@@ -47,8 +47,21 @@ class MessageInteraction(Interaction[ClientT]):
         The token to continue the interaction. These are valid for 15 minutes.
     guild_id: Optional[:class:`int`]
         The guild ID the interaction was sent from.
-    channel_id: :class:`int`
-        The channel ID the interaction was sent from.
+    channel: Union[:class:`abc.GuildChannel`, :class:`Thread`, :class:`PartialMessageable`]
+        The channel the interaction was sent from.
+
+        Note that due to a Discord limitation, DM channels
+        are not resolved as there is no data to complete them.
+        These are :class:`PartialMessageable` instead.
+
+        .. versionchanged:: 2.10
+            If the interaction was sent from a thread and the bot cannot normally access the thread,
+            this is now a proper :class:`Thread` object.
+
+        .. note::
+            If you want to compute the interaction author's or bot's permissions in the channel,
+            consider using :attr:`permissions` or :attr:`app_permissions`.
+
     author: Union[:class:`User`, :class:`Member`]
         The user or member that sent the interaction.
     locale: :class:`Locale`
@@ -112,9 +125,7 @@ class MessageInteraction(Interaction[ClientT]):
 
     def __init__(self, *, data: MessageInteractionPayload, state: ConnectionState) -> None:
         super().__init__(data=data, state=state)
-        self.data: MessageInteractionData = MessageInteractionData(
-            data=data["data"], state=state, guild_id=self.guild_id
-        )
+        self.data: MessageInteractionData = MessageInteractionData(data=data["data"], parent=self)
         self.message = Message(state=self._state, channel=self.channel, data=data["message"])
 
     @property
@@ -194,8 +205,7 @@ class MessageInteractionData(Dict[str, Any]):
         self,
         *,
         data: MessageComponentInteractionDataPayload,
-        state: ConnectionState,
-        guild_id: Optional[int],
+        parent: MessageInteraction[ClientT],
     ) -> None:
         super().__init__(data)
         self.custom_id: str = data["custom_id"]
@@ -206,7 +216,7 @@ class MessageInteractionData(Dict[str, Any]):
 
         empty_resolved: InteractionDataResolvedPayload = {}  # pyright shenanigans
         self.resolved = InteractionDataResolved(
-            data=data.get("resolved", empty_resolved), state=state, guild_id=guild_id
+            data=data.get("resolved", empty_resolved), parent=parent
         )
 
     def __repr__(self) -> str:
