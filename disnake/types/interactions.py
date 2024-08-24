@@ -335,6 +335,7 @@ class InteractionMessageReference(TypedDict):
     type: InteractionType
     name: str
     user: User
+    member: NotRequired[Member]
 
 
 class EditApplicationCommand(TypedDict):

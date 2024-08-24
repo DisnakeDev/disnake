@@ -2258,6 +2258,7 @@ class AutoShardedConnectionState(ConnectionState):
             if new_guild is None:
                 continue
 
+            # TODO: use PartialMessageable instead of Object (3.0)
             new_channel = new_guild._resolve_channel(vc.channel.id) or Object(id=vc.channel.id)
             if new_channel is not vc.channel:
                 vc.channel = new_channel  # type: ignore
@@ -2274,6 +2275,11 @@ class AutoShardedConnectionState(ConnectionState):
             new_author = msg.guild.get_member(msg.author.id)
             if new_author is not None and new_author is not msg.author:
                 msg.author = new_author
+
+            if msg.interaction is not None and isinstance(msg.interaction.user, Member):
+                new_author = msg.guild.get_member(msg.interaction.user.id)
+                if new_author is not None and new_author is not msg.interaction.user:
+                    msg.interaction.user = new_author
 
     async def chunker(
         self,
