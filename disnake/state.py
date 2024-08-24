@@ -947,9 +947,9 @@ class ConnectionState:
 
         if answer is not None:
             if event_type == "add":
-                answer.count += 1
+                answer.vote_count += 1
             else:
-                answer.count -= 1
+                answer.vote_count -= 1
 
         self.dispatch(f"raw_poll_vote_{event_type}", raw)
 
