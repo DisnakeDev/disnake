@@ -34,6 +34,7 @@ from .guild import Guild
 from .member import Member
 from .mixins import Hashable
 from .partial_emoji import PartialEmoji
+from .poll import Poll
 from .reaction import Reaction
 from .sticker import StickerItem
 from .threads import Thread
@@ -930,6 +931,11 @@ class Message(Hashable):
 
     guild: Optional[:class:`Guild`]
         The guild that the message belongs to, if applicable.
+
+    poll: Optional[:class:`Poll`]
+        The poll contained in this message.
+
+        .. versionadded:: 2.10
     """
 
     __slots__ = (
@@ -965,6 +971,7 @@ class Message(Hashable):
         "stickers",
         "components",
         "guild",
+        "poll",
         "_edited_timestamp",
         "_role_subscription_data",
     )
@@ -1019,6 +1026,10 @@ class Message(Hashable):
             _component_factory(d, type=ActionRow[MessageComponent])
             for d in data.get("components", [])
         ]
+
+        self.poll: Optional[Poll] = None
+        if poll_data := data.get("poll"):
+            self.poll = Poll.from_dict(message=self, data=poll_data)
 
         try:
             # if the channel doesn't have a guild attribute, we handle that
