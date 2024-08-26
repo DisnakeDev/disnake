@@ -34,6 +34,7 @@ from .guild import Guild
 from .member import Member
 from .mixins import Hashable
 from .partial_emoji import PartialEmoji
+from .poll import Poll
 from .reaction import Reaction
 from .sticker import StickerItem
 from .threads import Thread
@@ -253,6 +254,12 @@ class Attachment(Hashable):
         The attachment's width, in pixels. Only applicable to images and videos.
     filename: :class:`str`
         The attachment's filename.
+    title: Optional[:class:`str`]
+        The attachment title. If the filename contained special characters,
+        this will be set to the original filename, without filename extension.
+
+        .. versionadded:: 2.10
+
     url: :class:`str`
         The attachment URL. If the message this attachment was attached
         to is deleted, then this will 404.
@@ -294,6 +301,7 @@ class Attachment(Hashable):
         "height",
         "width",
         "filename",
+        "title",
         "url",
         "proxy_url",
         "_http",
@@ -311,6 +319,7 @@ class Attachment(Hashable):
         self.height: Optional[int] = data.get("height")
         self.width: Optional[int] = data.get("width")
         self.filename: str = data["filename"]
+        self.title: Optional[str] = data.get("title")
         self.url: str = data["url"]
         self.proxy_url: str = data["proxy_url"]
         self._http = state.http
@@ -510,6 +519,8 @@ class Attachment(Hashable):
             result["waveform"] = b64encode(self.waveform).decode("ascii")
         if self._flags:
             result["flags"] = self._flags
+        if self.title:
+            result["title"] = self.title
         return result
 
 
@@ -693,24 +704,48 @@ class InteractionReference:
 
             For interaction references created before July 18th, 2022, this will not include group or subcommand names.
 
-    user: :class:`User`
-        The interaction author.
+    user: Union[:class:`User`, :class:`Member`]
+        The user or member that triggered the referenced interaction.
+
+        .. versionchanged:: 2.10
+            This is now a :class:`Member` when in a guild, if the message was received via a
+            gateway event or the member is cached.
     """
 
-    __slots__ = ("id", "type", "name", "user", "_state")
+    __slots__ = ("id", "type", "name", "user")
 
-    def __init__(self, *, state: ConnectionState, data: InteractionMessageReferencePayload) -> None:
-        self._state: ConnectionState = state
+    def __init__(
+        self,
+        *,
+        state: ConnectionState,
+        guild: Optional[Guild],
+        data: InteractionMessageReferencePayload,
+    ) -> None:
         self.id: int = int(data["id"])
         self.type: InteractionType = try_enum(InteractionType, int(data["type"]))
         self.name: str = data["name"]
-        self.user: User = User(state=state, data=data["user"])
+
+        user: Optional[Union[User, Member]] = None
+        if guild:
+            if isinstance(guild, Guild):  # this can be a placeholder object in interactions
+                user = guild.get_member(int(data["user"]["id"]))
+
+            # If not cached, try data from event.
+            # This is only available via gateway (message_create/_edit), not HTTP
+            if not user and (member := data.get("member")):
+                user = Member(data=member, user_data=data["user"], guild=guild, state=state)
+
+        # If still none, deserialize user
+        if not user:
+            user = state.store_user(data["user"])
+
+        self.user: Union[User, Member] = user
 
     def __repr__(self) -> str:
         return f"<InteractionReference id={self.id!r} type={self.type!r} name={self.name!r} user={self.user!r}>"
 
     @property
-    def author(self) -> User:
+    def author(self) -> Union[User, Member]:
         return self.user
 
 
@@ -896,6 +931,11 @@ class Message(Hashable):
 
     guild: Optional[:class:`Guild`]
         The guild that the message belongs to, if applicable.
+
+    poll: Optional[:class:`Poll`]
+        The poll contained in this message.
+
+        .. versionadded:: 2.10
     """
 
     __slots__ = (
@@ -931,6 +971,7 @@ class Message(Hashable):
         "stickers",
         "components",
         "guild",
+        "poll",
         "_edited_timestamp",
         "_role_subscription_data",
     )
@@ -986,17 +1027,21 @@ class Message(Hashable):
             for d in data.get("components", [])
         ]
 
-        inter_payload = data.get("interaction")
-        inter = (
-            None if inter_payload is None else InteractionReference(state=state, data=inter_payload)
-        )
-        self.interaction: Optional[InteractionReference] = inter
+        self.poll: Optional[Poll] = None
+        if poll_data := data.get("poll"):
+            self.poll = Poll.from_dict(message=self, data=poll_data)
 
         try:
             # if the channel doesn't have a guild attribute, we handle that
             self.guild = channel.guild  # type: ignore
         except AttributeError:
             self.guild = state._get_guild(utils._get_as_snowflake(data, "guild_id"))
+
+        self.interaction: Optional[InteractionReference] = (
+            InteractionReference(state=state, guild=self.guild, data=interaction)
+            if (interaction := data.get("interaction"))
+            else None
+        )
 
         if thread_data := data.get("thread"):
             if not self.thread and isinstance(self.guild, Guild):
@@ -1215,8 +1260,13 @@ class Message(Hashable):
     def _rebind_cached_references(self, new_guild: Guild, new_channel: GuildMessageable) -> None:
         self.guild = new_guild
         self.channel = new_channel
+
+        # rebind the members' guilds; the members themselves will potentially be
+        # updated later in _update_member_references, after re-chunking
         if isinstance(self.author, Member):
             self.author.guild = new_guild
+        if self.interaction and isinstance(self.interaction.user, Member):
+            self.interaction.user.guild = new_guild
 
     @utils.cached_slot_property("_cs_raw_mentions")
     def raw_mentions(self) -> List[int]:
