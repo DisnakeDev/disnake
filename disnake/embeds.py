@@ -399,6 +399,11 @@ class Embed:
             Passing a :class:`disnake.File` object will make the embed not
             reusable.
 
+        .. note::
+            If used with the other ``set_*`` methods you must ensure
+            that the :attr:`.File.filename` is different than the other file(s)
+            that you are passing.
+
         Parameters
         ----------
         text: :class:`str`
@@ -470,6 +475,11 @@ class Embed:
             Passing a :class:`disnake.File` object will make the embed not
             reusable.
 
+        .. note::
+            If used with the other ``set_*`` methods you must ensure
+            that the :attr:`.File.filename` is different than the other file(s)
+            that you are passing.
+
         .. versionchanged:: 1.4
             Passing ``None`` removes the image.
 
@@ -520,6 +530,11 @@ class Embed:
         .. warning::
             Passing a :class:`disnake.File` object will make the embed not
             reusable.
+
+        .. note::
+            If used with the other ``set_*`` methods you must ensure
+            that the :attr:`.File.filename` is different than the other file(s)
+            that you are passing.
 
         .. versionchanged:: 1.4
             Passing ``None`` removes the thumbnail.
@@ -590,6 +605,11 @@ class Embed:
         .. warning::
             Passing a :class:`disnake.File` object will make the embed not
             reusable.
+
+        .. note::
+            If used with the other ``set_*`` methods you must ensure
+            that the :attr:`.File.filename` is different than the other file(s)
+            that you are passing.
 
         Parameters
         ----------
