@@ -386,11 +386,11 @@ class Embed:
         return cast("_EmbedFooterProxy", EmbedProxy(self._footer))
 
     @overload
-    def set_footer(self, *, text: Any, icon_url: Optional[Any]) -> Self:
+    def set_footer(self, *, text: Any, icon_url: Optional[Any] = ...) -> Self:
         ...
 
     @overload
-    def set_footer(self, *, text: Any, file: File) -> Self:
+    def set_footer(self, *, text: Any, file: File = ...) -> Self:
         ...
 
     def set_footer(
@@ -596,11 +596,13 @@ class Embed:
         return cast("_EmbedAuthorProxy", EmbedProxy(self._author))
 
     @overload
-    def set_author(self, *, name: Any, url: Optional[Any], icon_url: Optional[Any]) -> Self:
+    def set_author(
+        self, *, name: Any, url: Optional[Any] = ..., icon_url: Optional[Any] = ...
+    ) -> Self:
         ...
 
     @overload
-    def set_author(self, *, name: Any, url: Optional[Any], file: File) -> Self:
+    def set_author(self, *, name: Any, url: Optional[Any] = ..., file: File = ...) -> Self:
         ...
 
     def set_author(
