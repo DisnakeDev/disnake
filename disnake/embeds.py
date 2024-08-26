@@ -431,7 +431,7 @@ class Embed:
             "text": str(text),
         }
 
-        result = self._handle_resource(icon_url, file, key="footer")
+        result = self._handle_resource(icon_url, file, key="footer", strict=False)
         if result is not None:
             self._footer["icon_url"] = result
 
@@ -649,7 +649,9 @@ class Embed:
         if url is not None:
             self._author["url"] = str(url)
 
-        result = self._handle_resource(icon_url, file, key="author")
+        result = self._handle_resource(
+            icon_url if icon_url else None, file, key="author", strict=False
+        )
         if result is not None:
             self._author["icon_url"] = result
 
@@ -884,9 +886,15 @@ class Embed:
 
     get_default_color = get_default_colour
 
-    def _handle_resource(self, url: Optional[Any], file: File, *, key: _FileKey) -> Optional[str]:
-        if not (url is MISSING) ^ (file is MISSING):
-            raise TypeError("Exactly one of url or file must be provided")
+    def _handle_resource(
+        self, url: Optional[Any], file: File, *, key: _FileKey, strict: bool = True
+    ) -> Optional[str]:
+        if strict:
+            if not (url is MISSING) ^ (file is MISSING):
+                raise TypeError("Exactly one of url or file must be provided")
+        else:
+            if url is not MISSING and file is not MISSING:
+                raise TypeError("Only one of url or file must be provided, not both.")
 
         if file:
             if file.filename is None:
