@@ -10,6 +10,7 @@ from typing import (
     Any,
     Callable,
     ClassVar,
+    Coroutine,
     Dict,
     Generator,
     List,
@@ -491,7 +492,7 @@ class Cog(metaclass=CogMeta):
         pass
 
     @_cog_special_method
-    def bot_check_once(self, ctx: Context) -> bool:
+    def bot_check_once(self, ctx: Context) -> Union[bool, Coroutine[Any, Any, bool]]:
         """A special method that registers as a :meth:`.Bot.check_once`
         check.
 
@@ -503,7 +504,7 @@ class Cog(metaclass=CogMeta):
         return True
 
     @_cog_special_method
-    def bot_check(self, ctx: Context) -> bool:
+    def bot_check(self, ctx: Context) -> Union[bool, Coroutine[Any, Any, bool]]:
         """A special method that registers as a :meth:`.Bot.check`
         check.
 
@@ -515,7 +516,9 @@ class Cog(metaclass=CogMeta):
         return True
 
     @_cog_special_method
-    def bot_slash_command_check_once(self, inter: ApplicationCommandInteraction) -> bool:
+    def bot_slash_command_check_once(
+        self, inter: ApplicationCommandInteraction
+    ) -> Union[bool, Coroutine[Any, Any, bool]]:
         """A special method that registers as a :meth:`.Bot.slash_command_check_once`
         check.
 
@@ -525,7 +528,9 @@ class Cog(metaclass=CogMeta):
         return True
 
     @_cog_special_method
-    def bot_slash_command_check(self, inter: ApplicationCommandInteraction) -> bool:
+    def bot_slash_command_check(
+        self, inter: ApplicationCommandInteraction
+    ) -> Union[bool, Coroutine[Any, Any, bool]]:
         """A special method that registers as a :meth:`.Bot.slash_command_check`
         check.
 
@@ -535,27 +540,35 @@ class Cog(metaclass=CogMeta):
         return True
 
     @_cog_special_method
-    def bot_user_command_check_once(self, inter: ApplicationCommandInteraction) -> bool:
+    def bot_user_command_check_once(
+        self, inter: ApplicationCommandInteraction
+    ) -> Union[bool, Coroutine[Any, Any, bool]]:
         """Similar to :meth:`.Bot.slash_command_check_once` but for user commands."""
         return True
 
     @_cog_special_method
-    def bot_user_command_check(self, inter: ApplicationCommandInteraction) -> bool:
+    def bot_user_command_check(
+        self, inter: ApplicationCommandInteraction
+    ) -> Union[bool, Coroutine[Any, Any, bool]]:
         """Similar to :meth:`.Bot.slash_command_check` but for user commands."""
         return True
 
     @_cog_special_method
-    def bot_message_command_check_once(self, inter: ApplicationCommandInteraction) -> bool:
+    def bot_message_command_check_once(
+        self, inter: ApplicationCommandInteraction
+    ) -> Union[bool, Coroutine[Any, Any, bool]]:
         """Similar to :meth:`.Bot.slash_command_check_once` but for message commands."""
         return True
 
     @_cog_special_method
-    def bot_message_command_check(self, inter: ApplicationCommandInteraction) -> bool:
+    def bot_message_command_check(
+        self, inter: ApplicationCommandInteraction
+    ) -> Union[bool, Coroutine[Any, Any, bool]]:
         """Similar to :meth:`.Bot.slash_command_check` but for message commands."""
         return True
 
     @_cog_special_method
-    def cog_check(self, ctx: Context) -> bool:
+    def cog_check(self, ctx: Context) -> Union[bool, Coroutine[Any, Any, bool]]:
         """A special method that registers as a :func:`~.check`
         for every text command and subcommand in this cog.
 
@@ -567,7 +580,9 @@ class Cog(metaclass=CogMeta):
         return True
 
     @_cog_special_method
-    def cog_slash_command_check(self, inter: ApplicationCommandInteraction) -> bool:
+    def cog_slash_command_check(
+        self, inter: ApplicationCommandInteraction
+    ) -> Union[bool, Coroutine[Any, Any, bool]]:
         """A special method that registers as a :func:`~.check`
         for every slash command and subcommand in this cog.
 
@@ -577,12 +592,16 @@ class Cog(metaclass=CogMeta):
         return True
 
     @_cog_special_method
-    def cog_user_command_check(self, inter: ApplicationCommandInteraction) -> bool:
+    def cog_user_command_check(
+        self, inter: ApplicationCommandInteraction
+    ) -> Union[bool, Coroutine[Any, Any, bool]]:
         """Similar to :meth:`.Cog.cog_slash_command_check` but for user commands."""
         return True
 
     @_cog_special_method
-    def cog_message_command_check(self, inter: ApplicationCommandInteraction) -> bool:
+    def cog_message_command_check(
+        self, inter: ApplicationCommandInteraction
+    ) -> Union[bool, Coroutine[Any, Any, bool]]:
         """Similar to :meth:`.Cog.cog_slash_command_check` but for message commands."""
         return True
 
