@@ -2071,10 +2071,12 @@ class ConnectionState:
                 type=ch_type,
             )
 
-        # TODO: check private channel cache for these first
         if ch_type in (ChannelType.group, ChannelType.private):
-            # the factory will be a DMChannel or GroupChannel here
-            return factory(me=self.user, data=data, state=self)  # type: ignore
+            return (
+                self._get_private_channel(channel_id)
+                # the factory will be a DMChannel or GroupChannel here
+                or factory(me=self.user, data=data, state=self)  # type: ignore
+            )
 
         # the factory can't be a DMChannel or GroupChannel here
         data.setdefault("position", 0)  # type: ignore
