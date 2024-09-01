@@ -4806,8 +4806,10 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
     ----------
     recipients: List[:class:`User`]
         The users you are participating with in the group channel.
+        If this channel is received through the gateway, the recipient information
+        may not be always available.
     me: :class:`ClientUser`
-        The user presenting yourself.
+        The user representing yourself.
     id: :class:`int`
         The group channel ID.
     owner: Optional[:class:`User`]
