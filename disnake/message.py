@@ -1540,6 +1540,8 @@ class Message(Hashable):
             return f"{self.author.name} resolved an Activity Alert."
 
         if self.type is MessageType.poll_result:
+            if not self.embeds:
+                return None
             poll_result_embed = self.embeds[0]
             get_field: Callable[[str], Optional[_EmbedFieldProxy]] = lambda field_name: utils.get(
                 poll_result_embed.fields, name=field_name
