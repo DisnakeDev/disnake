@@ -46,7 +46,7 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from .abc import GuildChannel, MessageableChannel, Snowflake
-    from .channel import DMChannel
+    from .channel import DMChannel, GroupChannel
     from .guild import GuildMessageable
     from .mentions import AllowedMentions
     from .role import Role
@@ -1007,7 +1007,7 @@ class Message(Hashable):
         self.activity: Optional[MessageActivityPayload] = data.get("activity")
         # for user experience, on_message has no business getting partials
         # TODO: Subscripted message to include the channel
-        self.channel: Union[GuildMessageable, DMChannel] = channel  # type: ignore
+        self.channel: Union[GuildMessageable, DMChannel, GroupChannel] = channel  # type: ignore
         self.position: Optional[int] = data.get("position", None)
         self._edited_timestamp: Optional[datetime.datetime] = utils.parse_time(
             data["edited_timestamp"]
@@ -2258,7 +2258,7 @@ class PartialMessage(Hashable):
 
     Attributes
     ----------
-    channel: Union[:class:`TextChannel`, :class:`Thread`, :class:`DMChannel`, :class:`VoiceChannel`, :class:`StageChannel`, :class:`PartialMessageable`]
+    channel: Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`StageChannel`, :class:`Thread`, :class:`DMChannel`, :class:`GroupChannel`, :class:`PartialMessageable`]
         The channel associated with this partial message.
     id: :class:`int`
         The message ID.

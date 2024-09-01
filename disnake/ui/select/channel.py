@@ -58,7 +58,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
 
     Attributes
     ----------
-    values: List[Union[:class:`.abc.GuildChannel`, :class:`.Thread`, :class:`.PartialMessageable`]]
+    values: List[Union[:class:`.abc.GuildChannel`, :class:`.Thread`, :class:`.abc.PrivateChannel`, :class:`.PartialMessageable`]]
         A list of channels that have been selected by the user.
     """
 
