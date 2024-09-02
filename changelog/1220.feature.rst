@@ -1,0 +1,1 @@
+Add :attr:`AppInfo.approximate_guild_count` and :attr:`AppInfo.approximate_user_install_count`.
