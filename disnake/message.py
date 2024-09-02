@@ -1556,15 +1556,15 @@ class Message(Hashable):
             total_votes = poll_embed_fields["total_votes"]
             winning_answer = poll_embed_fields.get("victor_answer_text")
             winning_answer_votes = poll_embed_fields.get("victor_answer_votes")
-            msg = (
-                f"{self.author.global_name}'s poll {question} has closed. With {total_votes} votes."
-            )
+            msg = f"{self.author.display_name}'s poll {question} has closed."
 
             if winning_answer and winning_answer_votes:
                 msg += (
                     f" {winning_answer} won with {winning_answer_votes} "
                     f"({(100 * int(winning_answer_votes)) // int(total_votes)}%)."
                 )
+            else:
+                msg += f" With {total_votes} total votes."
             return msg
 
         # in the event of an unknown or unsupported message type, we return nothing
