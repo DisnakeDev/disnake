@@ -46,7 +46,6 @@ if TYPE_CHECKING:
 
     from .abc import GuildChannel, MessageableChannel, Snowflake
     from .channel import DMChannel
-    from .embeds import _EmbedFieldProxy
     from .guild import GuildMessageable
     from .mentions import AllowedMentions
     from .role import Role
@@ -1541,22 +1540,30 @@ class Message(Hashable):
 
         if self.type is MessageType.poll_result:
             if not self.embeds:
-                return None
+                return
+
             poll_result_embed = self.embeds[0]
-            get_field: Callable[[str], Optional[_EmbedFieldProxy]] = lambda field_name: utils.get(
-                poll_result_embed.fields, name=field_name
+            poll_embed_fields: Dict[str, str] = {}
+            if not poll_result_embed._fields:
+                return
+
+            for field in poll_result_embed._fields:
+                poll_embed_fields[field["name"]] = field["value"]
+
+            # should never be none
+            question = poll_embed_fields["poll_question_text"]
+            # should never be none
+            total_votes = poll_embed_fields["total_votes"]
+            winning_answer = poll_embed_fields.get("victor_answer_text")
+            winning_answer_votes = poll_embed_fields.get("victor_answer_votes")
+            msg = (
+                f"{self.author.global_name}'s poll {question} has closed. With {total_votes} votes."
             )
-            # should never be none
-            question = get_field("poll_question_text").value  # type: ignore
-            # should never be none
-            total_votes = get_field("total_votes").value  # type: ignore
-            winning_answer = get_field("victor_answer_text")
-            winning_answer_votes = get_field("victor_answer_votes")
-            msg = f"{self.author.global_name}'s poll {question} has closed."
+
             if winning_answer and winning_answer_votes:
                 msg += (
-                    f" {winning_answer.value} won with {winning_answer_votes.value} "
-                    f"({(100 * int(winning_answer_votes.value)) // int(total_votes)}%)."  # type: ignore
+                    f" {winning_answer} won with {winning_answer_votes} "
+                    f"({(100 * int(winning_answer_votes)) // int(total_votes)}%)."
                 )
             return msg
 
