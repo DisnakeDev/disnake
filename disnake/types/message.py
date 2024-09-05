@@ -12,6 +12,7 @@ from .embed import Embed
 from .emoji import PartialEmoji
 from .interactions import InteractionMessageReference
 from .member import Member, UserWithMember
+from .poll import Poll
 from .snowflake import Snowflake, SnowflakeList
 from .sticker import StickerItem
 from .threads import Thread
@@ -34,6 +35,7 @@ class Reaction(TypedDict):
 class Attachment(TypedDict):
     id: Snowflake
     filename: str
+    title: NotRequired[str]
     description: NotRequired[str]
     content_type: NotRequired[str]
     size: int
@@ -78,7 +80,7 @@ class RoleSubscriptionData(TypedDict):
 
 
 # fmt: off
-MessageType = Literal[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32]
+MessageType = Literal[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 36, 37, 38, 39]
 # fmt: on
 
 
@@ -114,6 +116,7 @@ class Message(TypedDict):
     sticker_items: NotRequired[List[StickerItem]]
     position: NotRequired[int]
     role_subscription_data: NotRequired[RoleSubscriptionData]
+    poll: NotRequired[Poll]
 
     # specific to MESSAGE_CREATE/MESSAGE_UPDATE events
     guild_id: NotRequired[Snowflake]

@@ -24,6 +24,8 @@ if TYPE_CHECKING:
         MessageReactionRemoveEmojiEvent,
         MessageReactionRemoveEvent,
         MessageUpdateEvent,
+        PollVoteAddEvent,
+        PollVoteRemoveEvent,
         PresenceUpdateEvent,
         ThreadDeleteEvent,
         TypingStartEvent,
@@ -45,6 +47,7 @@ __all__ = (
     "RawTypingEvent",
     "RawGuildMemberRemoveEvent",
     "RawPresenceUpdateEvent",
+    "RawPollVoteActionEvent",
 )
 
 
@@ -141,6 +144,62 @@ class RawMessageUpdateEvent(_RawReprMixin):
         self.channel_id: int = int(data["channel_id"])
         self.data: MessageUpdateEvent = data
         self.cached_message: Optional[Message] = None
+        try:
+            self.guild_id: Optional[int] = int(data["guild_id"])
+        except KeyError:
+            self.guild_id: Optional[int] = None
+
+
+PollEventType = Literal["POLL_VOTE_ADD", "POLL_VOTE_REMOVE"]
+
+
+class RawPollVoteActionEvent(_RawReprMixin):
+    """Represents the event payload for :func:`on_raw_poll_vote_add` and
+    :func:`on_raw_poll_vote_remove` events.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    message_id: :class:`int`
+        The message ID that got or lost a vote.
+    user_id: :class:`int`
+        The user ID who added the vote or whose vote was removed.
+    cached_member: Optional[:class:`Member`]
+        The member who added the vote. Available only when the guilds and members are cached.
+    channel_id: :class:`int`
+        The channel ID where the vote addition or removal took place.
+    guild_id: Optional[:class:`int`]
+        The guild ID where the vote addition or removal took place, if applicable.
+    answer_id: :class:`int`
+        The ID of the answer that was voted or unvoted.
+    event_type: :class:`str`
+        The event type that triggered this action. Can be
+        ``POLL_VOTE_ADD`` for vote addition or
+        ``POLL_VOTE_REMOVE`` for vote removal.
+    """
+
+    __slots__ = (
+        "message_id",
+        "user_id",
+        "cached_member",
+        "channel_id",
+        "guild_id",
+        "event_type",
+        "answer_id",
+    )
+
+    def __init__(
+        self,
+        data: Union[PollVoteAddEvent, PollVoteRemoveEvent],
+        event_type: PollEventType,
+    ) -> None:
+        self.message_id: int = int(data["message_id"])
+        self.user_id: int = int(data["user_id"])
+        self.cached_member: Optional[Member] = None
+        self.channel_id: int = int(data["channel_id"])
+        self.event_type = event_type
+        self.answer_id: int = int(data["answer_id"])
         try:
             self.guild_id: Optional[int] = int(data["guild_id"])
         except KeyError:
