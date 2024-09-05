@@ -224,6 +224,15 @@ def linkcode_resolve(domain: str, info: Dict[str, Any]) -> Optional[str]:
     return f"{github_repo}/blob/{git_ref}/disnake/{path}"
 
 
+# Links used for cross-referencing stuff in other documentation
+# when this is updated hoverxref_intersphinx also needs to be updated IF THE docs are hosted on readthedocs.
+intersphinx_mapping = {
+    "py": ("https://docs.python.org/3", None),
+    "aio": ("https://docs.aiohttp.org/en/stable/", None),
+    "req": ("https://requests.readthedocs.io/en/latest/", None),
+}
+
+
 hoverx_default_type = "tooltip"
 hoverxref_domains = ["py"]
 hoverxref_role_types = dict.fromkeys(
@@ -234,19 +243,7 @@ hoverxref_tooltip_theme = ["tooltipster-custom"]
 hoverxref_tooltip_lazy = True
 
 # these have to match the keys on intersphinx_mapping, and those projects must be hosted on readthedocs.
-hoverxref_intersphinx = [
-    "py",
-    "aio",
-    "req",
-]
-
-# Links used for cross-referencing stuff in other documentation
-# when this is updated hoverxref_intersphinx also needs to be updated IF THE docs are hosted on readthedocs.
-intersphinx_mapping = {
-    "py": ("https://docs.python.org/3", None),
-    "aio": ("https://docs.aiohttp.org/en/stable/", None),
-    "req": ("https://requests.readthedocs.io/en/latest/", None),
-}
+hoverxref_intersphinx = list(intersphinx_mapping.keys())
 
 
 # use proxied API endpoint on readthedocs to avoid CORS issues
@@ -290,6 +287,7 @@ html_context = {
         ("disnake.ext.commands", "ext/commands"),
         ("disnake.ext.tasks", "ext/tasks"),
     ],
+    "READTHEDOCS": _IS_READTHEDOCS,
 }
 
 resource_links = {
