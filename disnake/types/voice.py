@@ -10,7 +10,6 @@ from .snowflake import Snowflake
 SupportedModes = Literal[
     # "aead_aes256_gcm_rtpsize",  # supported in libsodium, but not exposed by pynacl
     "aead_xchacha20_poly1305_rtpsize",
-    "xsalsa20_poly1305_lite",
 ]
 
 

@@ -228,10 +228,7 @@ class VoiceClient(VoiceProtocol):
         self.ws: DiscordVoiceWebSocket = MISSING
 
     warn_nacl = not has_nacl
-    supported_modes: Tuple[SupportedModes, ...] = (
-        "aead_xchacha20_poly1305_rtpsize",
-        "xsalsa20_poly1305_lite",
-    )
+    supported_modes: Tuple[SupportedModes, ...] = ("aead_xchacha20_poly1305_rtpsize",)
 
     @property
     def guild(self) -> Guild:
@@ -540,12 +537,6 @@ class VoiceClient(VoiceProtocol):
             + box.encrypt(bytes(data), aad=bytes(header), nonce=padded_nonce).ciphertext
             + nonce
         )
-
-    def _encrypt_xsalsa20_poly1305_lite(self, header: bytes, data) -> bytes:
-        box = nacl.secret.SecretBox(bytes(self.secret_key))
-        nonce, padded_nonce = self._get_nonce(nacl.secret.SecretBox.NONCE_SIZE)
-
-        return header + box.encrypt(bytes(data), padded_nonce).ciphertext + nonce
 
     def play(
         self, source: AudioSource, *, after: Optional[Callable[[Optional[Exception]], Any]] = None
