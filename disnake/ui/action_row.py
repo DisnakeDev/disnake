@@ -39,8 +39,8 @@ from .text_input import TextInput
 if TYPE_CHECKING:
     from typing_extensions import Self
 
+    from ..abc import AnyChannel
     from ..emoji import Emoji
-    from ..interactions.base import InteractionChannel
     from ..member import Member
     from ..message import Message
     from ..partial_emoji import PartialEmoji
@@ -548,7 +548,7 @@ class ActionRow(Generic[UIComponentT]):
         max_values: int = 1,
         disabled: bool = False,
         channel_types: Optional[List[ChannelType]] = None,
-        default_values: Optional[Sequence[SelectDefaultValueInputType[InteractionChannel]]] = None,
+        default_values: Optional[Sequence[SelectDefaultValueInputType[AnyChannel]]] = None,
     ) -> SelectCompatibleActionRowT:
         """Add a channel select menu to the action row. Can only be used if the action
         row holds message components.

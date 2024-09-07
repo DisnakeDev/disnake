@@ -102,7 +102,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
         max_values: int = 1,
         disabled: bool = False,
         channel_types: Optional[List[ChannelType]] = None,
-        default_values: Optional[Sequence[SelectDefaultValueInputType[InteractionChannel]]] = None,
+        default_values: Optional[Sequence[SelectDefaultValueInputType[AnyChannel]]] = None,
         row: Optional[int] = None,
     ) -> None:
         ...
@@ -117,7 +117,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
         max_values: int = 1,
         disabled: bool = False,
         channel_types: Optional[List[ChannelType]] = None,
-        default_values: Optional[Sequence[SelectDefaultValueInputType[InteractionChannel]]] = None,
+        default_values: Optional[Sequence[SelectDefaultValueInputType[AnyChannel]]] = None,
         row: Optional[int] = None,
     ) -> None:
         ...
@@ -131,7 +131,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
         max_values: int = 1,
         disabled: bool = False,
         channel_types: Optional[List[ChannelType]] = None,
-        default_values: Optional[Sequence[SelectDefaultValueInputType[InteractionChannel]]] = None,
+        default_values: Optional[Sequence[SelectDefaultValueInputType[AnyChannel]]] = None,
         row: Optional[int] = None,
     ) -> None:
         super().__init__(
@@ -188,7 +188,7 @@ def channel_select(
     max_values: int = 1,
     disabled: bool = False,
     channel_types: Optional[List[ChannelType]] = None,
-    default_values: Optional[Sequence[SelectDefaultValueInputType[InteractionChannel]]] = None,
+    default_values: Optional[Sequence[SelectDefaultValueInputType[AnyChannel]]] = None,
     row: Optional[int] = None,
 ) -> Callable[[ItemCallbackType[ChannelSelect[V_co]]], DecoratedItem[ChannelSelect[V_co]]]:
     ...
