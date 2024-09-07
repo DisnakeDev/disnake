@@ -41,6 +41,7 @@ __all__ = (
     "ExpireBehavior",
     "StickerType",
     "StickerFormatType",
+    "InviteType",
     "InviteTarget",
     "VideoQualityMode",
     "ComponentType",
@@ -71,6 +72,7 @@ __all__ = (
     "OnboardingPromptType",
     "SKUType",
     "EntitlementType",
+    "PollLayoutType",
 )
 
 
@@ -256,6 +258,10 @@ class MessageType(Enum):
     stage_speaker = 29
     stage_topic = 31
     guild_application_premium_subscription = 32
+    guild_incident_alert_mode_enabled = 36
+    guild_incident_alert_mode_disabled = 37
+    guild_incident_report_raid = 38
+    guild_incident_report_false_alarm = 39
 
 
 class PartyType(Enum):
@@ -601,6 +607,12 @@ STICKER_FORMAT_LOOKUP: Dict[StickerFormatType, str] = {
     StickerFormatType.lottie: "json",
     StickerFormatType.gif: "gif",
 }
+
+
+class InviteType(Enum):
+    guild = 0
+    group_dm = 1
+    friend = 2
 
 
 class InviteTarget(Enum):
@@ -1214,6 +1226,14 @@ class Event(Enum):
     """Called when messages are bulk deleted.
     Represents the :func:`on_bulk_message_delete` event.
     """
+    poll_vote_add = "poll_vote_add"
+    """Called when a vote is added on a `Poll`.
+    Represents the :func:`on_poll_vote_add` event.
+    """
+    poll_vote_remove = "poll_vote_remove"
+    """Called when a vote is removed from a `Poll`.
+    Represents the :func:`on_poll_vote_remove` event.
+    """
     raw_message_edit = "raw_message_edit"
     """Called when a message is edited regardless of the state of the internal message cache.
     Represents the :func:`on_raw_message_edit` event.
@@ -1225,6 +1245,14 @@ class Event(Enum):
     raw_bulk_message_delete = "raw_bulk_message_delete"
     """Called when a bulk delete is triggered regardless of the messages being in the internal message cache or not.
     Represents the :func:`on_raw_bulk_message_delete` event.
+    """
+    raw_poll_vote_add = "raw_poll_vote_add"
+    """Called when a vote is added on a `Poll` regardless of the internal message cache.
+    Represents the :func:`on_raw_poll_vote_add` event.
+    """
+    raw_poll_vote_remove = "raw_poll_vote_remove"
+    """Called when a vote is removed from a `Poll` regardless of the internal message cache.
+    Represents the :func:`on_raw_poll_vote_remove` event.
     """
     reaction_add = "reaction_add"
     """Called when a message has a reaction added to it.
@@ -1346,12 +1374,25 @@ class OnboardingPromptType(Enum):
 
 
 class SKUType(Enum):
+    durable = 2
+    consumable = 3
     subscription = 5
     subscription_group = 6
 
 
 class EntitlementType(Enum):
+    purchase = 1
+    premium_subscription = 2
+    developer_gift = 3
+    test_mode_purchase = 4
+    free_purchase = 5
+    user_gift = 6
+    premium_purchase = 7
     application_subscription = 8
+
+
+class PollLayoutType(Enum):
+    default = 1
 
 
 T = TypeVar("T")

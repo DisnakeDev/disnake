@@ -6,7 +6,7 @@ from typing_extensions import NotRequired
 
 from .snowflake import Snowflake
 
-EntitlementType = Literal[8]
+EntitlementType = Literal[1, 2, 3, 4, 5, 6, 7, 8]
 
 
 class Entitlement(TypedDict):
@@ -19,3 +19,4 @@ class Entitlement(TypedDict):
     deleted: bool
     starts_at: NotRequired[str]
     ends_at: NotRequired[str]
+    consumed: NotRequired[bool]

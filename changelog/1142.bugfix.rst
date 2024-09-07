@@ -1,0 +1,1 @@
+Support fetching invites with ``null`` channel (e.g. friend invites).
