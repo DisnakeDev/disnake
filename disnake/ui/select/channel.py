@@ -18,7 +18,7 @@ from typing import (
 )
 
 from ...abc import GuildChannel, Snowflake
-from ...channel import PartialMessageable
+from ...channel import DMChannel, GroupChannel, PartialMessageable
 from ...components import ChannelSelectMenu
 from ...enums import ChannelType, ComponentType, SelectDefaultValueType
 from ...object import Object
@@ -66,7 +66,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
     channel_types: Optional[List[:class:`.ChannelType`]]
         The list of channel types that can be selected in this select menu.
         Defaults to all types (i.e. ``None``).
-    default_values: Optional[Sequence[Union[:class:`.abc.GuildChannel`, :class:`.Thread`, :class:`.PartialMessageable`, :class:`.SelectDefaultValue`, :class:`.Object`]]]
+    default_values: Optional[Sequence[Union[:class:`.abc.GuildChannel`, :class:`.Thread`, :class:`.abc.PrivateChannel`, :class:`.PartialMessageable`, :class:`.SelectDefaultValue`, :class:`.Object`]]]
         The list of values (channels) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -89,7 +89,14 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
     _default_value_type_map: ClassVar[
         Mapping[SelectDefaultValueType, Tuple[Type[Snowflake], ...]]
     ] = {
-        SelectDefaultValueType.channel: (GuildChannel, Thread, PartialMessageable, Object),
+        SelectDefaultValueType.channel: (
+            GuildChannel,
+            Thread,
+            DMChannel,
+            GroupChannel,
+            PartialMessageable,
+            Object,
+        ),
     }
 
     @overload
@@ -243,7 +250,7 @@ def channel_select(
     channel_types: Optional[List[:class:`.ChannelType`]]
         The list of channel types that can be selected in this select menu.
         Defaults to all types (i.e. ``None``).
-    default_values: Optional[Sequence[Union[:class:`.abc.GuildChannel`, :class:`.Thread`, :class:`.PartialMessageable`, :class:`.SelectDefaultValue`, :class:`.Object`]]]
+    default_values: Optional[Sequence[Union[:class:`.abc.GuildChannel`, :class:`.Thread`, :class:`.abc.PrivateChannel`, :class:`.PartialMessageable`, :class:`.SelectDefaultValue`, :class:`.Object`]]]
         The list of values (channels) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
