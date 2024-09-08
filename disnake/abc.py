@@ -178,6 +178,7 @@ class User(Snowflake, Protocol):
         raise NotImplementedError
 
 
+# FIXME: this shouldn't be a protocol. isinstance(thread, PrivateChannel) returns true, and issubclass doesn't work.
 @runtime_checkable
 class PrivateChannel(Snowflake, Protocol):
     """An ABC that details the common operations on a private Discord channel.
