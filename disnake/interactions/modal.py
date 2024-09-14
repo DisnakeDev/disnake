@@ -39,16 +39,18 @@ class ModalInteraction(Interaction[ClientT]):
         These are valid for 15 minutes.
     guild_id: Optional[:class:`int`]
         The guild ID the interaction was sent from.
-    channel: Union[:class:`abc.GuildChannel`, :class:`Thread`, :class:`PartialMessageable`]
+    channel: Union[:class:`abc.GuildChannel`, :class:`Thread`, :class:`abc.PrivateChannel`, :class:`PartialMessageable`]
         The channel the interaction was sent from.
 
         Note that due to a Discord limitation, DM channels
-        are not resolved as there is no data to complete them.
-        These are :class:`PartialMessageable` instead.
+        may not contain recipient information.
+        Unknown channel types will be :class:`PartialMessageable`.
 
         .. versionchanged:: 2.10
             If the interaction was sent from a thread and the bot cannot normally access the thread,
             this is now a proper :class:`Thread` object.
+            Private channels are now proper :class:`DMChannel`/:class:`GroupChannel`
+            objects instead of :class:`PartialMessageable`.
 
         .. note::
             If you want to compute the interaction author's or bot's permissions in the channel,

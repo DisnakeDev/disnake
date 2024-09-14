@@ -133,8 +133,9 @@ class TestInteractionDataResolved:
     # TODO: use proper mock models once we have state/guild mocks
     @pytest.fixture
     def state(self):
-        s = mock.Mock(spec_set=ConnectionState)
+        s = mock.Mock(spec=ConnectionState)
         s._get_guild.return_value = None
+        s.user = mock.Mock()
         return s
 
     @pytest.fixture
@@ -209,6 +210,5 @@ class TestInteractionDataResolved:
             return_messageable=False,
         )
 
-        # should be partial if and only if it's a dm/group or unknown
-        # TODO: currently includes directory channels (14), see `_get_partial_interaction_channel`
-        assert isinstance(channel, disnake.PartialMessageable) == (channel_type in (1, 3, 14, 99))
+        # should be partial if and only if it's an unknown/unexpected channel type
+        assert isinstance(channel, disnake.PartialMessageable) == (channel_type in (14, 99))
