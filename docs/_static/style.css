@@ -103,7 +103,7 @@ Historically however, thanks to:
   --rtd-ad-background: var(--grey-2);
   --rtd-ad-main-text: var(--grey-6);
   --rtd-ad-small-text: var(--grey-4);
-  --rtd-version-background: #272525;
+  --rtd-version-background: #272725;
   --rtd-version-main-text: #fcfcfc;
   --attribute-table-title: var(--grey-6);
   --attribute-table-list-border: var(--grey-3);
@@ -826,7 +826,7 @@ section h3 {
 }
 
 #to-top.is-rtd {
-  bottom: 90px;
+  bottom: 100px;
 }
 
 #to-top > span {

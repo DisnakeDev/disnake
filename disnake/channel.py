@@ -3494,7 +3494,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
     ) -> ThreadWithMessage:
         """|coro|
 
-        Creates a thread in this channel.
+        Creates a thread (with an initial message) in this channel.
 
         You must have the :attr:`~Permissions.create_forum_threads` permission to do this.
 
@@ -3506,6 +3506,10 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
 
         .. versionchanged:: 2.6
             The ``content`` parameter is no longer required.
+
+        .. note::
+            Unlike :meth:`TextChannel.create_thread`,
+            this **returns a tuple** with both the created **thread and message**.
 
         Parameters
         ----------
@@ -3583,10 +3587,8 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
 
         Returns
         -------
-        Tuple[:class:`Thread`, :class:`Message`]
+        :class:`ThreadWithMessage`
             A :class:`~typing.NamedTuple` with the newly created thread and the message sent in it.
-
-            These values can also be accessed through the ``thread`` and ``message`` fields.
         """
         from .message import Message
         from .webhook.async_ import handle_message_parameters_dict
@@ -4661,7 +4663,10 @@ class DMChannel(disnake.abc.Messageable, Hashable):
 
     def __init__(self, *, me: ClientUser, state: ConnectionState, data: DMChannelPayload) -> None:
         self._state: ConnectionState = state
-        self.recipient: Optional[User] = state.store_user(data["recipients"][0])  # type: ignore
+        self.recipient: Optional[User] = None
+        if recipients := data.get("recipients"):
+            self.recipient = state.store_user(recipients[0])  # type: ignore
+
         self.me: ClientUser = me
         self.id: int = int(data["id"])
         self.last_pin_timestamp: Optional[datetime.datetime] = utils.parse_time(
@@ -4801,8 +4806,10 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
     ----------
     recipients: List[:class:`User`]
         The users you are participating with in the group channel.
+        If this channel is received through the gateway, the recipient information
+        may not be always available.
     me: :class:`ClientUser`
-        The user presenting yourself.
+        The user representing yourself.
     id: :class:`int`
         The group channel ID.
     owner: Optional[:class:`User`]
