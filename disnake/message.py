@@ -1610,8 +1610,8 @@ class Message(Hashable):
 
             if winning_answer and winning_answer_votes:
                 msg += (
-                    f" {winning_answer} won with {winning_answer_votes} "
-                    f"({(100 * int(winning_answer_votes)) // int(total_votes)}%)."
+                    f"\n\n{winning_answer}"
+                    f"\nWinning answer • {(100 * int(winning_answer_votes)) // int(total_votes)}%"
                 )
             else:
                 msg += f" With {total_votes} total votes."
