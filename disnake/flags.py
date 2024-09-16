@@ -43,6 +43,8 @@ __all__ = (
     "RoleFlags",
     "AttachmentFlags",
     "SKUFlags",
+    "ApplicationIntegrationType",
+    "InteractionContextType",
 )
 
 BF = TypeVar("BF", bound="BaseFlags")
@@ -2623,3 +2625,185 @@ class SKUFlags(BaseFlags):
     def user_subscription(self):
         """:class:`bool`: Returns ``True`` if the SKU is an application subscription applied to a user."""
         return 1 << 8
+
+
+class ApplicationIntegrationType(ListBaseFlags):
+    """Represents the location(s) in which an application or application command can be installed.
+
+    See the :ddocs:`official documentation <resources/application#installation-context>` for more info.
+
+    .. collapse:: operations
+
+        .. describe:: x == y
+
+            Checks if two ApplicationIntegrationType instances are equal.
+        .. describe:: x != y
+
+            Checks if two ApplicationIntegrationType instances are not equal.
+        .. describe:: x <= y
+
+            Checks if an ApplicationIntegrationType instance is a subset of another ApplicationIntegrationType instance.
+        .. describe:: x >= y
+
+            Checks if an ApplicationIntegrationType instance is a superset of another ApplicationIntegrationType instance.
+        .. describe:: x < y
+
+            Checks if an ApplicationIntegrationType instance is a strict subset of another ApplicationIntegrationType instance.
+        .. describe:: x > y
+
+            Checks if an ApplicationIntegrationType instance is a strict superset of another ApplicationIntegrationType instance.
+        .. describe:: x | y, x |= y
+
+            Returns a new ApplicationIntegrationType instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
+        .. describe:: x & y, x &= y
+
+            Returns a new ApplicationIntegrationType instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new ApplicationIntegrationType instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+        .. describe:: ~x
+
+            Returns a new ApplicationIntegrationType instance with all flags from x inverted.
+        .. describe:: hash(x)
+
+            Returns the flag's hash.
+        .. describe:: iter(x)
+
+            Returns an iterator of ``(name, value)`` pairs. This allows it
+            to be, for example, constructed as a dict or a list of pairs.
+            Note that aliases are not shown.
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: ApplicationIntegrationType.y | ApplicationIntegrationType.z, ApplicationIntegrationType(y=True) | ApplicationIntegrationType.z
+
+            Returns a ApplicationIntegrationType instance with all provided flags enabled.
+
+        .. describe:: ~ApplicationIntegrationType.y
+
+            Returns a ApplicationIntegrationType instance with all flags except ``y`` inverted from their default value.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    value: :class:`int`
+        The raw value. You should query flags via the properties
+        rather than using this raw value.
+    """
+
+    __slots__ = ()
+
+    if TYPE_CHECKING:
+
+        @_generated
+        def __init__(self, *, guild: bool = ..., user: bool = ...) -> None:
+            ...
+
+    # TODO: `guild` vs `guild_install`
+    @flag_value
+    def guild(self):
+        """:class:`bool`: Returns ``True`` if installable to guilds."""
+        return 1 << 0
+
+    @flag_value
+    def user(self):
+        """:class:`bool`: Returns ``True`` if installable to users."""
+        return 1 << 1
+
+
+class InteractionContextType(ListBaseFlags):
+    """Represents the context in which an application command can be used.
+
+    See the :ddocs:`official documentation <interactions/application-commands#interaction-contexts>` for more info.
+
+    .. collapse:: operations
+
+        .. describe:: x == y
+
+            Checks if two InteractionContextType instances are equal.
+        .. describe:: x != y
+
+            Checks if two InteractionContextType instances are not equal.
+        .. describe:: x <= y
+
+            Checks if an InteractionContextType instance is a subset of another InteractionContextType instance.
+        .. describe:: x >= y
+
+            Checks if an InteractionContextType instance is a superset of another InteractionContextType instance.
+        .. describe:: x < y
+
+            Checks if an InteractionContextType instance is a strict subset of another InteractionContextType instance.
+        .. describe:: x > y
+
+            Checks if an InteractionContextType instance is a strict superset of another InteractionContextType instance.
+        .. describe:: x | y, x |= y
+
+            Returns a new InteractionContextType instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
+        .. describe:: x & y, x &= y
+
+            Returns a new InteractionContextType instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new InteractionContextType instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+        .. describe:: ~x
+
+            Returns a new InteractionContextType instance with all flags from x inverted.
+        .. describe:: hash(x)
+
+            Returns the flag's hash.
+        .. describe:: iter(x)
+
+            Returns an iterator of ``(name, value)`` pairs. This allows it
+            to be, for example, constructed as a dict or a list of pairs.
+            Note that aliases are not shown.
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: InteractionContextType.y | InteractionContextType.z, InteractionContextType(y=True) | InteractionContextType.z
+
+            Returns a InteractionContextType instance with all provided flags enabled.
+
+        .. describe:: ~InteractionContextType.y
+
+            Returns a InteractionContextType instance with all flags except ``y`` inverted from their default value.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    value: :class:`int`
+        The raw value. You should query flags via the properties
+        rather than using this raw value.
+    """
+
+    __slots__ = ()
+
+    if TYPE_CHECKING:
+
+        @_generated
+        def __init__(
+            self, *, bot_dm: bool = ..., guild: bool = ..., private_channel: bool = ...
+        ) -> None:
+            ...
+
+    @flag_value
+    def guild(self):
+        """:class:`bool`: Returns ``True`` if the command is usable in guilds."""
+        return 1 << 0
+
+    @flag_value
+    def bot_dm(self):
+        """:class:`bool`: Returns ``True`` if the command is usable in DMs with the bot."""
+        return 1 << 1
+
+    @flag_value
+    def private_channel(self):
+        """:class:`bool`: Returns ``True`` if the command is usable in DMs and group DMs with other users."""
+        return 1 << 2

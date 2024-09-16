@@ -24,9 +24,7 @@ from ..app_commands import OptionChoice
 from ..channel import PartialMessageable
 from ..entitlement import Entitlement
 from ..enums import (
-    ApplicationIntegrationType,
     ComponentType,
-    InteractionContextType,
     InteractionResponseType,
     InteractionType,
     Locale,
@@ -43,7 +41,7 @@ from ..errors import (
     ModalChainNotSupported,
     NotFound,
 )
-from ..flags import MessageFlags
+from ..flags import InteractionContextType, MessageFlags
 from ..guild import Guild
 from ..i18n import Localized
 from ..member import Member
@@ -279,13 +277,13 @@ class Interaction(Generic[ClientT]):
         # type 0 is either "0" or matches self.guild.id
         # type 1 should(?) match self.user.id
         # ... this completely falls apart for message.interaction_metadata
-        self.authorizing_integration_owners: Dict[ApplicationIntegrationType, int] = {
-            try_enum(ApplicationIntegrationType, int(k)): int(v)
-            for k, v in (data.get("authorizing_integration_owners") or {}).items()
+        self.authorizing_integration_owners: Dict[int, int] = {
+            int(k): int(v) for k, v in (data.get("authorizing_integration_owners") or {}).items()
         }
 
+        # TODO: document this properly; it's a flag object, but only one value will be set
         self.context: Optional[InteractionContextType] = (
-            try_enum(InteractionContextType, context)
+            InteractionContextType._from_values([context])
             if (context := data.get("context")) is not None
             else None
         )

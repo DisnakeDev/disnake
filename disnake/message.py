@@ -27,7 +27,6 @@ from .components import ActionRow, MessageComponent, _component_factory
 from .embeds import Embed
 from .emoji import Emoji
 from .enums import (
-    ApplicationIntegrationType,
     ChannelType,
     InteractionType,
     MessageType,
@@ -811,9 +810,9 @@ class InteractionMetadata:
         self.type: InteractionType = try_enum(InteractionType, int(data["type"]))
         # TODO: consider trying member cache first?
         self.user: User = state.store_user(data["user"])
-        self.authorizing_integration_owners: Dict[ApplicationIntegrationType, int] = {
-            try_enum(ApplicationIntegrationType, int(k)): int(v)
-            for k, v in (data.get("authorizing_integration_owners") or {}).items()
+        # TODO: update docs
+        self.authorizing_integration_owners: Dict[int, int] = {
+            int(k): int(v) for k, v in (data.get("authorizing_integration_owners") or {}).items()
         }
 
         # followup only

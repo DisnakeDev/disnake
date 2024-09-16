@@ -48,7 +48,7 @@ from typing import (
 )
 from urllib.parse import parse_qs, urlencode
 
-from .enums import ApplicationIntegrationType, Locale
+from .enums import Locale
 
 try:
     import orjson
@@ -120,6 +120,7 @@ if TYPE_CHECKING:
     from .invite import Invite
     from .permissions import Permissions
     from .template import Template
+    from .types.appinfo import ApplicationIntegrationType as ApplicationIntegrationTypeLiteral
 
     class _RequestLike(Protocol):
         headers: Mapping[str, Any]
@@ -289,7 +290,7 @@ def oauth_url(
     redirect_uri: str = MISSING,
     scopes: Iterable[str] = MISSING,
     disable_guild_select: bool = False,
-    integration_type: Optional[ApplicationIntegrationType] = None,
+    integration_type: Optional[ApplicationIntegrationTypeLiteral] = None,
 ) -> str:
     """A helper function that returns the OAuth2 URL for authorizing the application.
 
@@ -314,7 +315,7 @@ def oauth_url(
 
         .. versionadded:: 2.0
 
-    integration_type: Optional[:class:`~disnake.ApplicationIntegrationType`]
+    integration_type: Optional[:class:`int`]
         An optional integration type/installation context to install the application in.
 
         .. versionadded:: 2.10
@@ -335,7 +336,7 @@ def oauth_url(
     if disable_guild_select:
         url += "&disable_guild_select=true"
     if integration_type is not None:
-        url += f"&integration_type={integration_type.value}"
+        url += f"&integration_type={integration_type}"
     return url
 
 

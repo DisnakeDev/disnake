@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional, cast
 
 from . import utils
 from .asset import Asset
-from .enums import ApplicationIntegrationType, try_enum
 from .flags import ApplicationFlags
 from .permissions import Permissions
 
@@ -15,6 +14,7 @@ if TYPE_CHECKING:
     from .state import ConnectionState
     from .types.appinfo import (
         AppInfo as AppInfoPayload,
+        ApplicationIntegrationType as ApplicationIntegrationTypeLiteral,
         ApplicationIntegrationTypeConfiguration as ApplicationIntegrationTypeConfigurationPayload,
         InstallParams as InstallParamsPayload,
         PartialAppInfo as PartialAppInfoPayload,
@@ -55,10 +55,10 @@ class InstallParams:
         data: InstallParamsPayload,
         parent: AppInfo,
         *,
-        integration_type: Optional[ApplicationIntegrationType] = None,
+        integration_type: Optional[ApplicationIntegrationTypeLiteral] = None,
     ) -> None:
         self._app_id = parent.id
-        self._integration_type = integration_type
+        self._integration_type: Optional[ApplicationIntegrationTypeLiteral] = integration_type
         self.scopes = data["scopes"]
         self.permissions = Permissions(int(data["permissions"]))
 
@@ -99,7 +99,7 @@ class IntegrationTypeConfiguration:
         data: ApplicationIntegrationTypeConfigurationPayload,
         *,
         parent: AppInfo,
-        integration_type: ApplicationIntegrationType,
+        integration_type: ApplicationIntegrationTypeLiteral,
     ) -> None:
         self.install_params: Optional[InstallParams] = (
             InstallParams(install_params, parent=parent, integration_type=integration_type)
@@ -285,11 +285,10 @@ class AppInfo:
         self.approximate_guild_count: int = data.get("approximate_guild_count", 0)
         self.approximate_user_install_count: int = data.get("approximate_user_install_count", 0)
 
-        self.integration_types_config: Dict[
-            ApplicationIntegrationType, IntegrationTypeConfiguration
-        ] = {}
+        # TODO: update docs
+        self.integration_types_config: Dict[int, IntegrationTypeConfiguration] = {}
         for _type, config in (data.get("integration_types_config") or {}).items():
-            integration_type = try_enum(ApplicationIntegrationType, int(_type))
+            integration_type = cast("ApplicationIntegrationTypeLiteral", int(_type))
             self.integration_types_config[integration_type] = IntegrationTypeConfiguration(
                 config or {},
                 parent=self,

@@ -13,7 +13,6 @@ from typing import (
     Dict,
     List,
     Optional,
-    Set,
     Tuple,
     TypeVar,
     Union,
@@ -22,7 +21,8 @@ from typing import (
 )
 
 from disnake.app_commands import ApplicationCommand
-from disnake.enums import ApplicationCommandType, ApplicationIntegrationType, InteractionContextType
+from disnake.enums import ApplicationCommandType
+from disnake.flags import ApplicationIntegrationType, InteractionContextType
 from disnake.permissions import Permissions
 from disnake.utils import _generated, _overload_with_permissions, async_all, maybe_coroutine
 
@@ -251,8 +251,8 @@ class InvokableApplicationCommand(ABC):
         return self.body.default_member_permissions
 
     @property
-    def integration_types(self) -> Optional[Set[ApplicationIntegrationType]]:
-        """Optional[Set[:class:`.ApplicationIntegrationType`]]: The integration types/installation contexts
+    def integration_types(self) -> Optional[ApplicationIntegrationType]:
+        """Optional[:class:`.ApplicationIntegrationType`]: The integration types/installation contexts
         where the command is available. Only available for global commands.
 
         .. versionadded:: 2.10
@@ -260,8 +260,8 @@ class InvokableApplicationCommand(ABC):
         return self.body.integration_types
 
     @property
-    def contexts(self) -> Optional[Set[InteractionContextType]]:
-        """Optional[Set[:class:`.InteractionContextType`]]: The interaction contexts
+    def contexts(self) -> Optional[InteractionContextType]:
+        """Optional[:class:`.InteractionContextType`]: The interaction contexts
         where the command can be used. Only available for global commands.
 
         .. versionadded:: 2.10

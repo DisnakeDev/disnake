@@ -5,33 +5,19 @@ from __future__ import annotations
 import math
 import re
 from abc import ABC
-from typing import (
-    TYPE_CHECKING,
-    AbstractSet,
-    ClassVar,
-    Collection,
-    Final,
-    List,
-    Mapping,
-    Optional,
-    Sequence,
-    Set,
-    Tuple,
-    Union,
-)
+from typing import TYPE_CHECKING, ClassVar, List, Mapping, Optional, Sequence, Tuple, Union
 
 from .enums import (
     ApplicationCommandPermissionType,
     ApplicationCommandType,
-    ApplicationIntegrationType,
     ChannelType,
-    InteractionContextType,
     Locale,
     OptionType,
     enum_if_int,
     try_enum,
     try_enum_to_int,
 )
+from .flags import ApplicationIntegrationType, InteractionContextType
 from .i18n import Localized
 from .permissions import Permissions
 from .utils import MISSING, _get_as_snowflake, _maybe_cast
@@ -480,12 +466,6 @@ class Option:
             o.localize(store)
 
 
-# This is what the API uses by default, when not sending `integration_types` (or null).
-DEFAULT_INTEGRATION_TYPES: Final[AbstractSet[ApplicationIntegrationType]] = frozenset(
-    {ApplicationIntegrationType.guild}
-)
-
-
 class ApplicationCommand(ABC):
     """The base class for application commands.
 
@@ -521,14 +501,14 @@ class ApplicationCommand(ABC):
 
         .. versionadded:: 2.8
 
-    integration_types: Optional[Set[:class:`ApplicationIntegrationType`]]
+    integration_types: Optional[:class:`ApplicationIntegrationType`]
         The integration types/installation contexts where the command is available.
         Defaults to :attr:`ApplicationIntegrationType.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
 
-    contexts: Optional[Set[:class:`InteractionContextType`]]
+    contexts: Optional[:class:`InteractionContextType`]
         The interaction contexts where the command can be used.
         Only available for global commands.
 
@@ -551,8 +531,8 @@ class ApplicationCommand(ABC):
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
-        integration_types: Optional[Collection[ApplicationIntegrationType]] = None,
-        contexts: Optional[Collection[InteractionContextType]] = None,
+        integration_types: Optional[ApplicationIntegrationType] = None,
+        contexts: Optional[InteractionContextType] = None,
     ) -> None:
         self.type: ApplicationCommandType = enum_if_int(ApplicationCommandType, type)
 
@@ -574,10 +554,11 @@ class ApplicationCommand(ABC):
         else:
             self._default_member_permissions = default_member_permissions.value
 
-        self.integration_types: Optional[Set[ApplicationIntegrationType]] = set(
-            integration_types or DEFAULT_INTEGRATION_TYPES
-        )
-        self.contexts: Optional[Set[InteractionContextType]] = set(contexts) if contexts else None
+        # XXX: is this actually optional? reconsider the default/fallback value here.
+        self.integration_types: Optional[
+            ApplicationIntegrationType
+        ] = integration_types or ApplicationIntegrationType(guild=True)
+        self.contexts: Optional[InteractionContextType] = contexts
 
         self._always_synced: bool = False
 
@@ -655,15 +636,15 @@ class ApplicationCommand(ABC):
             ),
             "default_permission": True,
             "nsfw": self.nsfw,
-            "integration_types": (
-                list(map(try_enum_to_int, self.integration_types))
-                if self.integration_types is not None
-                else None
-            ),
-            "contexts": (
-                list(map(try_enum_to_int, self.contexts)) if self.contexts is not None else None
-            ),
         }
+
+        integration_types = (
+            self.integration_types.values if self.integration_types is not None else None
+        )
+        data["integration_types"] = integration_types
+
+        contexts = self.contexts.values if self.contexts is not None else None
+        data["contexts"] = contexts
 
         if (loc := self.name_localizations.data) is not None:
             data["name_localizations"] = loc
@@ -716,14 +697,14 @@ class UserCommand(ApplicationCommand):
 
         .. versionadded:: 2.8
 
-    integration_types: Optional[Set[:class:`ApplicationIntegrationType`]]
+    integration_types: Optional[:class:`ApplicationIntegrationType`]
         The integration types/installation contexts where the command is available.
         Defaults to :attr:`ApplicationIntegrationType.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
 
-    contexts: Optional[Set[:class:`InteractionContextType`]]
+    contexts: Optional[:class:`InteractionContextType`]
         The interaction contexts where the command can be used.
         Only available for global commands.
 
@@ -738,8 +719,8 @@ class UserCommand(ApplicationCommand):
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
-        integration_types: Optional[Collection[ApplicationIntegrationType]] = None,
-        contexts: Optional[Collection[InteractionContextType]] = None,
+        integration_types: Optional[ApplicationIntegrationType] = None,
+        contexts: Optional[InteractionContextType] = None,
     ) -> None:
         super().__init__(
             type=ApplicationCommandType.user,
@@ -779,14 +760,14 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
 
         .. versionadded:: 2.8
 
-    integration_types: Optional[Set[:class:`ApplicationIntegrationType`]]
+    integration_types: Optional[:class:`ApplicationIntegrationType`]
         The integration types/installation contexts where the command is available.
         Defaults to :attr:`ApplicationIntegrationType.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
 
-    contexts: Optional[Set[:class:`InteractionContextType`]]
+    contexts: Optional[:class:`InteractionContextType`]
         The interaction contexts where the command can be used.
         Only available for global commands.
 
@@ -816,12 +797,12 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
             default_member_permissions=_get_as_snowflake(data, "default_member_permissions"),
             nsfw=data.get("nsfw"),
             integration_types=(
-                [try_enum(ApplicationIntegrationType, t) for t in integration_types]
+                ApplicationIntegrationType._from_values(integration_types)
                 if (integration_types := data.get("integration_types")) is not None
                 else None
             ),
             contexts=(
-                [try_enum(InteractionContextType, t) for t in contexts]
+                InteractionContextType._from_values(contexts)
                 if (contexts := data.get("contexts")) is not None
                 else None
             ),
@@ -857,14 +838,14 @@ class MessageCommand(ApplicationCommand):
 
         .. versionadded:: 2.8
 
-    integration_types: Optional[Set[:class:`ApplicationIntegrationType`]]
+    integration_types: Optional[:class:`ApplicationIntegrationType`]
         The integration types/installation contexts where the command is available.
         Defaults to :attr:`ApplicationIntegrationType.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
 
-    contexts: Optional[Set[:class:`InteractionContextType`]]
+    contexts: Optional[:class:`InteractionContextType`]
         The interaction contexts where the command can be used.
         Only available for global commands.
 
@@ -879,8 +860,8 @@ class MessageCommand(ApplicationCommand):
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
-        integration_types: Optional[Collection[ApplicationIntegrationType]] = None,
-        contexts: Optional[Collection[InteractionContextType]] = None,
+        integration_types: Optional[ApplicationIntegrationType] = None,
+        contexts: Optional[InteractionContextType] = None,
     ) -> None:
         super().__init__(
             type=ApplicationCommandType.message,
@@ -920,14 +901,14 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
 
         .. versionadded:: 2.8
 
-    integration_types: Optional[Set[:class:`ApplicationIntegrationType`]]
+    integration_types: Optional[:class:`ApplicationIntegrationType`]
         The integration types/installation contexts where the command is available.
         Defaults to :attr:`ApplicationIntegrationType.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
 
-    contexts: Optional[Set[:class:`InteractionContextType`]]
+    contexts: Optional[:class:`InteractionContextType`]
         The interaction contexts where the command can be used.
         Only available for global commands.
 
@@ -957,12 +938,12 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
             default_member_permissions=_get_as_snowflake(data, "default_member_permissions"),
             nsfw=data.get("nsfw"),
             integration_types=(
-                [try_enum(ApplicationIntegrationType, t) for t in integration_types]
+                ApplicationIntegrationType._from_values(integration_types)
                 if (integration_types := data.get("integration_types")) is not None
                 else None
             ),
             contexts=(
-                [try_enum(InteractionContextType, t) for t in contexts]
+                InteractionContextType._from_values(contexts)
                 if (contexts := data.get("contexts")) is not None
                 else None
             ),
@@ -1005,14 +986,14 @@ class SlashCommand(ApplicationCommand):
 
         .. versionadded:: 2.8
 
-    integration_types: Optional[Set[:class:`ApplicationIntegrationType`]]
+    integration_types: Optional[:class:`ApplicationIntegrationType`]
         The integration types/installation contexts where the command is available.
         Defaults to :attr:`ApplicationIntegrationType.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
 
-    contexts: Optional[Set[:class:`InteractionContextType`]]
+    contexts: Optional[:class:`InteractionContextType`]
         The interaction contexts where the command can be used.
         Only available for global commands.
 
@@ -1035,8 +1016,8 @@ class SlashCommand(ApplicationCommand):
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
-        integration_types: Optional[Collection[ApplicationIntegrationType]] = None,
-        contexts: Optional[Collection[InteractionContextType]] = None,
+        integration_types: Optional[ApplicationIntegrationType] = None,
+        contexts: Optional[InteractionContextType] = None,
     ) -> None:
         super().__init__(
             type=ApplicationCommandType.chat_input,
@@ -1152,14 +1133,14 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
 
         .. versionadded:: 2.8
 
-    integration_types: Optional[Set[:class:`ApplicationIntegrationType`]]
+    integration_types: Optional[:class:`ApplicationIntegrationType`]
         The integration types/installation contexts where the command is available.
         Defaults to :attr:`ApplicationIntegrationType.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
 
-    contexts: Optional[Set[:class:`InteractionContextType`]]
+    contexts: Optional[:class:`InteractionContextType`]
         The interaction contexts where the command can be used.
         Only available for global commands.
 
@@ -1195,12 +1176,12 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
             default_member_permissions=_get_as_snowflake(data, "default_member_permissions"),
             nsfw=data.get("nsfw"),
             integration_types=(
-                [try_enum(ApplicationIntegrationType, t) for t in integration_types]
+                ApplicationIntegrationType._from_values(integration_types)
                 if (integration_types := data.get("integration_types")) is not None
                 else None
             ),
             contexts=(
-                [try_enum(InteractionContextType, t) for t in contexts]
+                InteractionContextType._from_values(contexts)
                 if (contexts := data.get("contexts")) is not None
                 else None
             ),

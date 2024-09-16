@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Any, Callable, Collection, Dict, Optional, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Sequence, Tuple, Union
 
 from disnake.app_commands import MessageCommand, UserCommand
-from disnake.enums import ApplicationIntegrationType, InteractionContextType
+from disnake.flags import ApplicationIntegrationType, InteractionContextType
 from disnake.i18n import Localized
 from disnake.permissions import Permissions
 
@@ -77,8 +77,8 @@ class InvokableUserCommand(InvokableApplicationCommand):
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
-        integration_types: Optional[Collection[ApplicationIntegrationType]] = None,
-        contexts: Optional[Collection[InteractionContextType]] = None,
+        integration_types: Optional[ApplicationIntegrationType] = None,
+        contexts: Optional[InteractionContextType] = None,
         guild_ids: Optional[Sequence[int]] = None,
         auto_sync: Optional[bool] = None,
         **kwargs: Any,
@@ -187,8 +187,8 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
-        integration_types: Optional[Collection[ApplicationIntegrationType]] = None,
-        contexts: Optional[Collection[InteractionContextType]] = None,
+        integration_types: Optional[ApplicationIntegrationType] = None,
+        contexts: Optional[InteractionContextType] = None,
         guild_ids: Optional[Sequence[int]] = None,
         auto_sync: Optional[bool] = None,
         **kwargs: Any,
@@ -251,8 +251,8 @@ def user_command(
     dm_permission: Optional[bool] = None,
     default_member_permissions: Optional[Union[Permissions, int]] = None,
     nsfw: Optional[bool] = None,
-    integration_types: Optional[Collection[ApplicationIntegrationType]] = None,
-    contexts: Optional[Collection[InteractionContextType]] = None,
+    integration_types: Optional[ApplicationIntegrationType] = None,
+    contexts: Optional[InteractionContextType] = None,
     guild_ids: Optional[Sequence[int]] = None,
     auto_sync: Optional[bool] = None,
     extras: Optional[Dict[str, Any]] = None,
@@ -283,14 +283,14 @@ def user_command(
 
         .. versionadded:: 2.8
 
-    integration_types: Optional[Set[:class:`.ApplicationIntegrationType`]]
+    integration_types: Optional[:class:`.ApplicationIntegrationType`]
         The integration types/installation contexts where the command is available.
         Defaults to :attr:`.ApplicationIntegrationType.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
 
-    contexts: Optional[Set[:class:`.InteractionContextType`]]
+    contexts: Optional[:class:`.InteractionContextType`]
         The interaction contexts where the command can be used.
         Only available for global commands.
 
@@ -347,8 +347,8 @@ def message_command(
     dm_permission: Optional[bool] = None,
     default_member_permissions: Optional[Union[Permissions, int]] = None,
     nsfw: Optional[bool] = None,
-    integration_types: Optional[Collection[ApplicationIntegrationType]] = None,
-    contexts: Optional[Collection[InteractionContextType]] = None,
+    integration_types: Optional[ApplicationIntegrationType] = None,
+    contexts: Optional[InteractionContextType] = None,
     guild_ids: Optional[Sequence[int]] = None,
     auto_sync: Optional[bool] = None,
     extras: Optional[Dict[str, Any]] = None,
@@ -382,14 +382,14 @@ def message_command(
 
         .. versionadded:: 2.8
 
-    integration_types: Optional[Set[:class:`.ApplicationIntegrationType`]]
+    integration_types: Optional[:class:`.ApplicationIntegrationType`]
         The integration types/installation contexts where the command is available.
         Defaults to :attr:`.ApplicationIntegrationType.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
 
-    contexts: Optional[Set[:class:`.InteractionContextType`]]
+    contexts: Optional[:class:`.InteractionContextType`]
         The interaction contexts where the command can be used.
         Only available for global commands.
 
