@@ -689,7 +689,7 @@ class SelectDefaultValue:
         }
 
     def __repr__(self) -> str:
-        return f"<SelectDefaultValue id={self.id!r} type={self.type!s}>"
+        return f"<SelectDefaultValue id={self.id!r} type={self.type.value!r}>"
 
 
 class TextInput(Component):
