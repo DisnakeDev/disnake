@@ -55,6 +55,16 @@ class flag_value(Generic[T]):
         self.__doc__ = func.__doc__
         self._parent: Type[T] = MISSING
 
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, self.__class__):
+            return self.flag == other.flag
+        if isinstance(other, BaseFlags):
+            return self._parent is other.__class__ and self.flag == other.value
+        return False
+
+    def __ne__(self, other: Any) -> bool:
+        return not self.__eq__(other)
+
     def __or__(self, other: Union[flag_value[T], T]) -> T:
         if isinstance(other, BaseFlags):
             if self._parent is not other.__class__:
@@ -148,7 +158,11 @@ class BaseFlags:
         return self
 
     def __eq__(self, other: Any) -> bool:
-        return isinstance(other, self.__class__) and self.value == other.value
+        if isinstance(other, self.__class__):
+            return self.value == other.value
+        if isinstance(other, flag_value):
+            return self.__class__ is other._parent and self.value == other.flag
+        return False
 
     def __ne__(self, other: Any) -> bool:
         return not self.__eq__(other)
