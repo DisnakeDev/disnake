@@ -95,17 +95,21 @@ def test_deprecated(mock_warn: mock.Mock, instead, msg) -> None:
 
 
 @pytest.mark.parametrize(
-    ("expected", "perms", "guild", "redirect", "scopes", "disable_select"),
+    ("params", "expected"),
     [
         (
+            {},
             {"scope": "bot"},
-            utils.MISSING,
-            utils.MISSING,
-            utils.MISSING,
-            utils.MISSING,
-            False,
         ),
         (
+            {
+                "permissions": disnake.Permissions(42),
+                "guild": disnake.Object(9999),
+                "redirect_uri": "http://endless.horse",
+                "scopes": ["bot", "applications.commands"],
+                "disable_guild_select": True,
+                "integration_type": 1,
+            },
             {
                 "scope": "bot applications.commands",
                 "permissions": "42",
@@ -113,24 +117,13 @@ def test_deprecated(mock_warn: mock.Mock, instead, msg) -> None:
                 "response_type": "code",
                 "redirect_uri": "http://endless.horse",
                 "disable_guild_select": "true",
+                "integration_type": "1",
             },
-            disnake.Permissions(42),
-            disnake.Object(9999),
-            "http://endless.horse",
-            ["bot", "applications.commands"],
-            True,
         ),
     ],
 )
-def test_oauth_url(expected, perms, guild, redirect, scopes, disable_select) -> None:
-    url = utils.oauth_url(
-        1234,
-        permissions=perms,
-        guild=guild,
-        redirect_uri=redirect,
-        scopes=scopes,
-        disable_guild_select=disable_select,
-    )
+def test_oauth_url(params, expected) -> None:
+    url = utils.oauth_url(1234, **params)
     assert dict(yarl.URL(url).query) == {"client_id": "1234", **expected}
 
 
