@@ -290,7 +290,7 @@ def oauth_url(
     redirect_uri: str = MISSING,
     scopes: Iterable[str] = MISSING,
     disable_guild_select: bool = False,
-    integration_type: Optional[ApplicationIntegrationTypeLiteral] = None,
+    integration_type: ApplicationIntegrationTypeLiteral = MISSING,
 ) -> str:
     """A helper function that returns the OAuth2 URL for authorizing the application.
 
@@ -315,7 +315,7 @@ def oauth_url(
 
         .. versionadded:: 2.0
 
-    integration_type: Optional[:class:`int`]
+    integration_type: :class:`int`
         An optional integration type/installation context to install the application in.
 
         .. versionadded:: 2.10
@@ -335,7 +335,7 @@ def oauth_url(
         url += "&response_type=code&" + urlencode({"redirect_uri": redirect_uri})
     if disable_guild_select:
         url += "&disable_guild_select=true"
-    if integration_type is not None:
+    if integration_type is not MISSING:
         url += f"&integration_type={integration_type}"
     return url
 

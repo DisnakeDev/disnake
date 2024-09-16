@@ -77,7 +77,9 @@ class InstallParams:
             self._app_id,
             scopes=self.scopes,
             permissions=self.permissions,
-            integration_type=self._integration_type,
+            integration_type=(
+                self._integration_type if self._integration_type is not None else utils.MISSING
+            ),
         )
 
 
