@@ -18,7 +18,14 @@ from typing import (
     cast,
 )
 
-from .enums import ButtonStyle, ChannelType, ComponentType, TextInputStyle, try_enum
+from .enums import (
+    ButtonStyle,
+    ChannelType,
+    ComponentType,
+    SelectDefaultValueType,
+    TextInputStyle,
+    try_enum,
+)
 from .partial_emoji import PartialEmoji, _EmojiTag
 from .utils import MISSING, assert_never, get_slots
 
@@ -35,6 +42,7 @@ if TYPE_CHECKING:
         Component as ComponentPayload,
         MentionableSelectMenu as MentionableSelectMenuPayload,
         RoleSelectMenu as RoleSelectMenuPayload,
+        SelectDefaultValue as SelectDefaultValuePayload,
         SelectOption as SelectOptionPayload,
         StringSelectMenu as StringSelectMenuPayload,
         TextInput as TextInputPayload,
@@ -53,6 +61,7 @@ __all__ = (
     "MentionableSelectMenu",
     "ChannelSelectMenu",
     "SelectOption",
+    "SelectDefaultValue",
     "TextInput",
 )
 
@@ -264,6 +273,12 @@ class BaseSelectMenu(Component):
         A list of options that can be selected in this select menu.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
+    default_values: List[:class:`SelectDefaultValue`]
+        The list of values (users/roles/channels) that are selected by default.
+        If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
+        Only available for auto-populated select menus.
+
+        .. versionadded:: 2.10
     """
 
     __slots__: Tuple[str, ...] = (
@@ -272,9 +287,11 @@ class BaseSelectMenu(Component):
         "min_values",
         "max_values",
         "disabled",
+        "default_values",
     )
 
-    __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+    # FIXME: this isn't pretty; we should decouple __repr__ from slots
+    __repr_info__: ClassVar[Tuple[str, ...]] = tuple(s for s in __slots__ if s != "default_values")
 
     # n.b: ideally this would be `BaseSelectMenuPayload`,
     # but pyright made TypedDict keys invariant and doesn't
@@ -288,6 +305,9 @@ class BaseSelectMenu(Component):
         self.min_values: int = data.get("min_values", 1)
         self.max_values: int = data.get("max_values", 1)
         self.disabled: bool = data.get("disabled", False)
+        self.default_values: List[SelectDefaultValue] = [
+            SelectDefaultValue._from_dict(d) for d in (data.get("default_values") or [])
+        ]
 
     def to_dict(self) -> BaseSelectMenuPayload:
         payload: BaseSelectMenuPayload = {
@@ -300,6 +320,9 @@ class BaseSelectMenu(Component):
 
         if self.placeholder:
             payload["placeholder"] = self.placeholder
+
+        if self.default_values:
+            payload["default_values"] = [v.to_dict() for v in self.default_values]
 
         return payload
 
@@ -377,6 +400,11 @@ class UserSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
+    default_values: List[:class:`SelectDefaultValue`]
+        The list of values (users/members) that are selected by default.
+        If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
+
+        .. versionadded:: 2.10
     """
 
     __slots__: Tuple[str, ...] = ()
@@ -412,6 +440,11 @@ class RoleSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
+    default_values: List[:class:`SelectDefaultValue`]
+        The list of values (roles) that are selected by default.
+        If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
+
+        .. versionadded:: 2.10
     """
 
     __slots__: Tuple[str, ...] = ()
@@ -447,6 +480,11 @@ class MentionableSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
+    default_values: List[:class:`SelectDefaultValue`]
+        The list of values (users/roles) that are selected by default.
+        If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
+
+        .. versionadded:: 2.10
     """
 
     __slots__: Tuple[str, ...] = ()
@@ -485,6 +523,11 @@ class ChannelSelectMenu(BaseSelectMenu):
     channel_types: Optional[List[:class:`ChannelType`]]
         A list of channel types that can be selected in this select menu.
         If ``None``, channels of all types may be selected.
+    default_values: List[:class:`SelectDefaultValue`]
+        The list of values (channels) that are selected by default.
+        If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
+
+        .. versionadded:: 2.10
     """
 
     __slots__: Tuple[str, ...] = ("channel_types",)
@@ -611,6 +654,42 @@ class SelectOption:
             payload["description"] = self.description
 
         return payload
+
+
+class SelectDefaultValue:
+    """Represents a default value of an auto-populated select menu (currently all
+    select menu types except :class:`StringSelectMenu`).
+
+    Depending on the :attr:`type` attribute, this can represent different types of objects.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    id: :class:`int`
+        The ID of the target object.
+    type: :class:`SelectDefaultValueType`
+        The type of the target object.
+    """
+
+    __slots__: Tuple[str, ...] = ("id", "type")
+
+    def __init__(self, id: int, type: SelectDefaultValueType) -> None:
+        self.id: int = id
+        self.type: SelectDefaultValueType = type
+
+    @classmethod
+    def _from_dict(cls, data: SelectDefaultValuePayload) -> Self:
+        return cls(int(data["id"]), try_enum(SelectDefaultValueType, data["type"]))
+
+    def to_dict(self) -> SelectDefaultValuePayload:
+        return {
+            "id": self.id,
+            "type": self.type.value,
+        }
+
+    def __repr__(self) -> str:
+        return f"<SelectDefaultValue id={self.id!r} type={self.type.value!r}>"
 
 
 class TextInput(Component):

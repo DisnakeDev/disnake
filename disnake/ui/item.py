@@ -180,7 +180,7 @@ T_co = TypeVar("T_co", covariant=True)
 P = ParamSpec("P")
 
 
-class Object(Protocol[T_co, P]):
+class ItemShape(Protocol[T_co, P]):
     def __new__(cls) -> T_co:
         ...
 

@@ -34,16 +34,21 @@ from ..utils import MISSING, SequenceProxy, assert_never
 from .button import Button
 from .item import WrappedComponent
 from .select import ChannelSelect, MentionableSelect, RoleSelect, StringSelect, UserSelect
-from .select.string import SelectOptionInput, V_co
 from .text_input import TextInput
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
+    from ..abc import AnyChannel
     from ..emoji import Emoji
+    from ..member import Member
     from ..message import Message
     from ..partial_emoji import PartialEmoji
+    from ..role import Role
     from ..types.components import ActionRow as ActionRowPayload
+    from ..user import User
+    from .select.base import SelectDefaultValueInputType, SelectDefaultValueMultiInputType
+    from .select.string import SelectOptionInput, V_co
 
 __all__ = (
     "ActionRow",
@@ -364,6 +369,7 @@ class ActionRow(Generic[UIComponentT]):
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
+        default_values: Optional[Sequence[SelectDefaultValueInputType[Union[User, Member]]]] = None,
     ) -> SelectCompatibleActionRowT:
         """Add a user select menu to the action row. Can only be used if the action
         row holds message components.
@@ -389,7 +395,12 @@ class ActionRow(Generic[UIComponentT]):
             The maximum number of items that must be chosen for this select menu.
             Defaults to 1 and must be between 1 and 25.
         disabled: :class:`bool`
-            Whether the select is disabled or not.
+            Whether the select is disabled. Defaults to ``False``.
+        default_values: Optional[Sequence[Union[:class:`~disnake.User`, :class:`.Member`, :class:`.SelectDefaultValue`, :class:`.Object`]]]
+            The list of values (users/members) that are selected by default.
+            If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
+
+            .. versionadded:: 2.10
 
         Raises
         ------
@@ -403,6 +414,7 @@ class ActionRow(Generic[UIComponentT]):
                 min_values=min_values,
                 max_values=max_values,
                 disabled=disabled,
+                default_values=default_values,
             ),
         )
         return self
@@ -415,6 +427,7 @@ class ActionRow(Generic[UIComponentT]):
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
+        default_values: Optional[Sequence[SelectDefaultValueInputType[Role]]] = None,
     ) -> SelectCompatibleActionRowT:
         """Add a role select menu to the action row. Can only be used if the action
         row holds message components.
@@ -440,7 +453,12 @@ class ActionRow(Generic[UIComponentT]):
             The maximum number of items that must be chosen for this select menu.
             Defaults to 1 and must be between 1 and 25.
         disabled: :class:`bool`
-            Whether the select is disabled or not.
+            Whether the select is disabled. Defaults to ``False``.
+        default_values: Optional[Sequence[Union[:class:`.Role`, :class:`.SelectDefaultValue`, :class:`.Object`]]]
+            The list of values (roles) that are selected by default.
+            If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
+
+            .. versionadded:: 2.10
 
         Raises
         ------
@@ -454,6 +472,7 @@ class ActionRow(Generic[UIComponentT]):
                 min_values=min_values,
                 max_values=max_values,
                 disabled=disabled,
+                default_values=default_values,
             ),
         )
         return self
@@ -466,6 +485,9 @@ class ActionRow(Generic[UIComponentT]):
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
+        default_values: Optional[
+            Sequence[SelectDefaultValueMultiInputType[Union[User, Member, Role]]]
+        ] = None,
     ) -> SelectCompatibleActionRowT:
         """Add a mentionable (user/member/role) select menu to the action row. Can only be used if the action
         row holds message components.
@@ -491,7 +513,14 @@ class ActionRow(Generic[UIComponentT]):
             The maximum number of items that must be chosen for this select menu.
             Defaults to 1 and must be between 1 and 25.
         disabled: :class:`bool`
-            Whether the select is disabled or not.
+            Whether the select is disabled. Defaults to ``False``.
+        default_values: Optional[Sequence[Union[:class:`~disnake.User`, :class:`.Member`, :class:`.Role`, :class:`.SelectDefaultValue`]]]
+            The list of values (users/roles) that are selected by default.
+            If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
+
+            Note that unlike other select menu types, this does not support :class:`.Object`\\s due to ambiguities.
+
+            .. versionadded:: 2.10
 
         Raises
         ------
@@ -505,6 +534,7 @@ class ActionRow(Generic[UIComponentT]):
                 min_values=min_values,
                 max_values=max_values,
                 disabled=disabled,
+                default_values=default_values,
             ),
         )
         return self
@@ -518,6 +548,7 @@ class ActionRow(Generic[UIComponentT]):
         max_values: int = 1,
         disabled: bool = False,
         channel_types: Optional[List[ChannelType]] = None,
+        default_values: Optional[Sequence[SelectDefaultValueInputType[AnyChannel]]] = None,
     ) -> SelectCompatibleActionRowT:
         """Add a channel select menu to the action row. Can only be used if the action
         row holds message components.
@@ -543,10 +574,15 @@ class ActionRow(Generic[UIComponentT]):
             The maximum number of items that must be chosen for this select menu.
             Defaults to 1 and must be between 1 and 25.
         disabled: :class:`bool`
-            Whether the select is disabled or not.
+            Whether the select is disabled. Defaults to ``False``.
         channel_types: Optional[List[:class:`.ChannelType`]]
             The list of channel types that can be selected in this select menu.
             Defaults to all types (i.e. ``None``).
+        default_values: Optional[Sequence[Union[:class:`.abc.GuildChannel`, :class:`.Thread`, :class:`.abc.PrivateChannel`, :class:`.PartialMessageable`, :class:`.SelectDefaultValue`, :class:`.Object`]]]
+            The list of values (channels) that are selected by default.
+            If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
+
+            .. versionadded:: 2.10
 
         Raises
         ------
@@ -561,6 +597,7 @@ class ActionRow(Generic[UIComponentT]):
                 max_values=max_values,
                 disabled=disabled,
                 channel_types=channel_types,
+                default_values=default_values,
             ),
         )
         return self
