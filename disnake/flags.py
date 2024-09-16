@@ -2234,14 +2234,14 @@ class AutoModKeywordPresets(ListBaseFlags):
             ...
 
     @classmethod
-    def all(cls: Type[AutoModKeywordPresets]) -> AutoModKeywordPresets:
+    def all(cls) -> Self:
         """A factory method that creates a :class:`AutoModKeywordPresets` with everything enabled."""
         self = cls.__new__(cls)
         self.value = all_flags_value(cls.VALID_FLAGS)
         return self
 
     @classmethod
-    def none(cls: Type[AutoModKeywordPresets]) -> AutoModKeywordPresets:
+    def none(cls) -> Self:
         """A factory method that creates a :class:`AutoModKeywordPresets` with everything disabled."""
         self = cls.__new__(cls)
         self.value = self.DEFAULT_VALUE
@@ -2703,6 +2703,13 @@ class ApplicationIntegrationType(ListBaseFlags):
         def __init__(self, *, guild: bool = ..., user: bool = ...) -> None:
             ...
 
+    @classmethod
+    def all(cls) -> Self:
+        """A factory method that creates a :class:`ApplicationIntegrationType` with everything enabled."""
+        self = cls.__new__(cls)
+        self.value = all_flags_value(cls.VALID_FLAGS)
+        return self
+
     # TODO: `guild` vs `guild_install`
     @flag_value
     def guild(self):
@@ -2792,6 +2799,13 @@ class InteractionContextType(ListBaseFlags):
             self, *, bot_dm: bool = ..., guild: bool = ..., private_channel: bool = ...
         ) -> None:
             ...
+
+    @classmethod
+    def all(cls) -> Self:
+        """A factory method that creates a :class:`InteractionContextType` with everything enabled."""
+        self = cls.__new__(cls)
+        self.value = all_flags_value(cls.VALID_FLAGS)
+        return self
 
     @flag_value
     def guild(self):
