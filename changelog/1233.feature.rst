@@ -1,0 +1,2 @@
+For interactions in private channels, :attr:`Interaction.channel` is now always a proper :class:`DMChannel` or :class:`GroupChannel` object, instead of :class:`PartialMessageable`.
+- This also applies to other channel objects in interactions, e.g. channel parameters in slash commands, or :attr:`ui.ChannelSelect.values`.

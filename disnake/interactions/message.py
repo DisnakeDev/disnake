@@ -16,6 +16,7 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
+    from ..abc import AnyChannel
     from ..member import Member
     from ..role import Role
     from ..state import ConnectionState
@@ -25,7 +26,6 @@ if TYPE_CHECKING:
         MessageInteraction as MessageInteractionPayload,
     )
     from ..user import User
-    from .base import InteractionChannel
 
 
 class MessageInteraction(Interaction[ClientT]):
@@ -47,16 +47,18 @@ class MessageInteraction(Interaction[ClientT]):
         The token to continue the interaction. These are valid for 15 minutes.
     guild_id: Optional[:class:`int`]
         The guild ID the interaction was sent from.
-    channel: Union[:class:`abc.GuildChannel`, :class:`Thread`, :class:`PartialMessageable`]
+    channel: Union[:class:`abc.GuildChannel`, :class:`Thread`, :class:`abc.PrivateChannel`, :class:`PartialMessageable`]
         The channel the interaction was sent from.
 
         Note that due to a Discord limitation, DM channels
-        are not resolved as there is no data to complete them.
-        These are :class:`PartialMessageable` instead.
+        may not contain recipient information.
+        Unknown channel types will be :class:`PartialMessageable`.
 
         .. versionchanged:: 2.10
             If the interaction was sent from a thread and the bot cannot normally access the thread,
             this is now a proper :class:`Thread` object.
+            Private channels are now proper :class:`DMChannel`/:class:`GroupChannel`
+            objects instead of :class:`PartialMessageable`.
 
         .. note::
             If you want to compute the interaction author's or bot's permissions in the channel,
@@ -143,7 +145,7 @@ class MessageInteraction(Interaction[ClientT]):
     @cached_slot_property("_cs_resolved_values")
     def resolved_values(
         self,
-    ) -> Optional[Sequence[Union[str, Member, User, Role, InteractionChannel]]]:
+    ) -> Optional[Sequence[Union[str, Member, User, Role, AnyChannel]]]:
         """Optional[Sequence[:class:`str`, :class:`Member`, :class:`User`, :class:`Role`, Union[:class:`abc.GuildChannel`, :class:`Thread`, :class:`PartialMessageable`]]]: The (resolved) values the user selected.
 
         For select menus of type :attr:`~ComponentType.string_select`,
@@ -161,7 +163,7 @@ class MessageInteraction(Interaction[ClientT]):
             return self.data.values
 
         resolved = self.data.resolved
-        values: List[Union[Member, User, Role, InteractionChannel]] = []
+        values: List[Union[Member, User, Role, AnyChannel]] = []
         for key in self.data.values:
             # force upcast to avoid typing issues; we expect the api to only provide valid values
             value: Any = resolved.get_with_type(key, component_type, key)

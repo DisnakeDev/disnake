@@ -67,13 +67,12 @@ if TYPE_CHECKING:
 
     from aiohttp import ClientSession
 
-    from ..abc import MessageableChannel
+    from ..abc import AnyChannel, MessageableChannel
     from ..app_commands import Choices
     from ..client import Client
     from ..embeds import Embed
     from ..ext.commands import AutoShardedBot, Bot
     from ..file import File
-    from ..guild import GuildChannel, GuildMessageable
     from ..mentions import AllowedMentions
     from ..poll import Poll
     from ..state import ConnectionState
@@ -89,9 +88,6 @@ if TYPE_CHECKING:
     from ..ui.view import View
     from .message import MessageInteraction
     from .modal import ModalInteraction
-
-    InteractionMessageable = Union[GuildMessageable, PartialMessageable]
-    InteractionChannel = Union[InteractionMessageable, GuildChannel]
 
     AnyBot = Union[Bot, AutoShardedBot]
 
@@ -132,16 +128,18 @@ class Interaction(Generic[ClientT]):
         .. versionchanged:: 2.5
             Changed to :class:`Locale` instead of :class:`str`.
 
-    channel: Union[:class:`abc.GuildChannel`, :class:`Thread`, :class:`PartialMessageable`]
+    channel: Union[:class:`abc.GuildChannel`, :class:`Thread`, :class:`abc.PrivateChannel`, :class:`PartialMessageable`]
         The channel the interaction was sent from.
 
         Note that due to a Discord limitation, DM channels
-        are not resolved as there is no data to complete them.
-        These are :class:`PartialMessageable` instead.
+        may not contain recipient information.
+        Unknown channel types will be :class:`PartialMessageable`.
 
         .. versionchanged:: 2.10
             If the interaction was sent from a thread and the bot cannot normally access the thread,
             this is now a proper :class:`Thread` object.
+            Private channels are now proper :class:`DMChannel`/:class:`GroupChannel`
+            objects instead of :class:`PartialMessageable`.
 
         .. note::
             If you want to compute the interaction author's or bot's permissions in the channel,
@@ -267,7 +265,7 @@ class Interaction(Generic[ClientT]):
             self.author = self._state.store_user(user)
 
         # TODO: consider making this optional in 3.0
-        self.channel: InteractionMessageable = state._get_partial_interaction_channel(
+        self.channel: MessageableChannel = state._get_partial_interaction_channel(
             data["channel"], guild_fallback, return_messageable=True
         )
 
@@ -1911,7 +1909,7 @@ class InteractionDataResolved(Dict[str, Any]):
         A mapping of IDs to users.
     roles: Dict[:class:`int`, :class:`Role`]
         A mapping of IDs to roles.
-    channels: Dict[:class:`int`, Union[:class:`abc.GuildChannel`, :class:`Thread`, :class:`PartialMessageable`]]
+    channels: Dict[:class:`int`, Union[:class:`abc.GuildChannel`, :class:`Thread`, :class:`abc.PrivateChannel`, :class:`PartialMessageable`]]
         A mapping of IDs to partial channels (only ``id``, ``name`` and ``permissions`` are included,
         threads also have ``thread_metadata`` and ``parent_id``).
     messages: Dict[:class:`int`, :class:`Message`]
@@ -1936,7 +1934,7 @@ class InteractionDataResolved(Dict[str, Any]):
         self.members: Dict[int, Member] = {}
         self.users: Dict[int, User] = {}
         self.roles: Dict[int, Role] = {}
-        self.channels: Dict[int, InteractionChannel] = {}
+        self.channels: Dict[int, AnyChannel] = {}
         self.messages: Dict[int, Message] = {}
         self.attachments: Dict[int, Attachment] = {}
 
@@ -1991,25 +1989,20 @@ class InteractionDataResolved(Dict[str, Any]):
             channel_id = int(message["channel_id"])
             channel: Optional[MessageableChannel] = None
 
-            if (
-                channel_id == parent.channel.id
-                # we still want to fall back to state.get_channel when the
-                # parent channel is a dm/group channel, for now.
-                # FIXME: remove this once `parent.channel` supports `DMChannel`
-                and not isinstance(parent.channel, PartialMessageable)
-            ):
+            if channel_id == parent.channel.id:
                 # fast path, this should generally be the case
                 channel = parent.channel
             else:
+                # in case this ever happens, fall back to guild channel cache
                 channel = cast(
                     "Optional[MessageableChannel]",
-                    (guild and guild.get_channel(channel_id) or state.get_channel(channel_id)),
+                    (guild and guild.get_channel(channel_id)),
                 )
 
-            if channel is None:
-                # n.b. the message's channel is not sent as part of `resolved.channels`,
-                # so we need to fall back to partials here.
-                channel = PartialMessageable(state=state, id=channel_id, type=None)
+                if channel is None:
+                    # n.b. the message's channel is not sent as part of `resolved.channels`,
+                    # so we need to fall back to partials here.
+                    channel = PartialMessageable(state=state, id=channel_id, type=None)
 
             self.messages[int(str_id)] = Message(state=state, channel=channel, data=message)
 
@@ -2025,18 +2018,18 @@ class InteractionDataResolved(Dict[str, Any]):
     @overload
     def get_with_type(
         self, key: Snowflake, data_type: Union[OptionType, ComponentType]
-    ) -> Union[Member, User, Role, InteractionChannel, Message, Attachment, None]:
+    ) -> Union[Member, User, Role, AnyChannel, Message, Attachment, None]:
         ...
 
     @overload
     def get_with_type(
         self, key: Snowflake, data_type: Union[OptionType, ComponentType], default: T
-    ) -> Union[Member, User, Role, InteractionChannel, Message, Attachment, T]:
+    ) -> Union[Member, User, Role, AnyChannel, Message, Attachment, T]:
         ...
 
     def get_with_type(
         self, key: Snowflake, data_type: Union[OptionType, ComponentType], default: T = None
-    ) -> Union[Member, User, Role, InteractionChannel, Message, Attachment, T, None]:
+    ) -> Union[Member, User, Role, AnyChannel, Message, Attachment, T, None]:
         if data_type is OptionType.mentionable or data_type is ComponentType.mentionable_select:
             key = int(key)
             if (result := self.members.get(key)) is not None:
@@ -2064,7 +2057,7 @@ class InteractionDataResolved(Dict[str, Any]):
 
     def get_by_id(
         self, key: Optional[int]
-    ) -> Optional[Union[Member, User, Role, InteractionChannel, Message, Attachment]]:
+    ) -> Optional[Union[Member, User, Role, AnyChannel, Message, Attachment]]:
         if key is None:
             return None
 

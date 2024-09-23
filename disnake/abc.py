@@ -64,12 +64,12 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from .asset import Asset
-    from .channel import CategoryChannel, DMChannel, PartialMessageable
+    from .channel import CategoryChannel, DMChannel, GroupChannel, PartialMessageable
     from .client import Client
     from .embeds import Embed
     from .emoji import Emoji
     from .enums import InviteTarget
-    from .guild import Guild, GuildMessageable
+    from .guild import Guild, GuildChannel as AnyGuildChannel, GuildMessageable
     from .guild_scheduled_event import GuildScheduledEvent
     from .iterators import HistoryIterator
     from .member import Member
@@ -90,7 +90,10 @@ if TYPE_CHECKING:
     from .user import ClientUser
     from .voice_region import VoiceRegion
 
-    MessageableChannel = Union[GuildMessageable, DMChannel, PartialMessageable]
+    MessageableChannel = Union[GuildMessageable, DMChannel, GroupChannel, PartialMessageable]
+    # include non-messageable channels, e.g. category/forum
+    AnyChannel = Union[MessageableChannel, AnyGuildChannel]
+
     SnowflakeTime = Union["Snowflake", datetime]
 
 MISSING = utils.MISSING
