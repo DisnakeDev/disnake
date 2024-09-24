@@ -2341,6 +2341,22 @@ class HTTPClient:
     def get_guild_onboarding(self, guild_id: Snowflake) -> Response[onboarding.Onboarding]:
         return self.request(Route("GET", "/guilds/{guild_id}/onboarding", guild_id=guild_id))
 
+    def edit_guild_onboarding(
+        self,
+        guild_id: Snowflake,
+        *,
+        reason: Optional[str] = None,
+        **fields: Any,
+    ) -> Response[onboarding.Onboarding]:
+        valid_keys = ("prompts", "default_channels_ids", "enabled", "mode")
+        payload = {k: v for k, v in fields.items() if k in valid_keys}
+
+        return self.request(
+            Route("PUT", "/guilds/{guild_id}/onboarding", guild_id=guild_id),
+            json=payload,
+            reason=reason,
+        )
+
     # SKUs/Entitlements
 
     def get_skus(self, application_id: Snowflake) -> Response[List[sku.SKU]]:
