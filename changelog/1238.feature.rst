@@ -1,1 +1,1 @@
-Add support for :class:`BaseFlags.__eq__` to allow comparison with flag_values and vice versa.
+Add support for ``BaseFlags`` to allow comparison with ``flag_values`` and vice versa.
