@@ -184,6 +184,21 @@ class TestBaseFlags:
         assert not ins == other
         assert ins != other
 
+    def test__eq__flag_value(self) -> None:
+        ins = TestFlags(one=True)
+        other = TestFlags(one=True, two=True)
+
+        assert ins == TestFlags.one
+        assert TestFlags.one == ins
+
+        assert not ins != TestFlags.one
+        assert ins != TestFlags.two
+
+        assert other != TestFlags.one
+        assert other != TestFlags.two
+
+        assert other == TestFlags.three
+
     def test__and__(self) -> None:
         ins = TestFlags(one=True, two=True)
         other = TestFlags(one=True, two=True)
