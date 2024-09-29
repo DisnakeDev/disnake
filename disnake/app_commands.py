@@ -541,7 +541,8 @@ class ApplicationCommand(ABC):
         self.name_localizations: LocalizationValue = name_loc.localizations
         self.nsfw: bool = False if nsfw is None else nsfw
 
-        self._dm_permission: Optional[bool] = dm_permission
+        # TODO: turn this into a property based on `1 in self.contexts` instead, stop sending dm_permission
+        self.dm_permission: bool = True if dm_permission is None else dm_permission
 
         self._default_member_permissions: Optional[int]
         if default_member_permissions is None:
@@ -583,19 +584,6 @@ class ApplicationCommand(ABC):
             return None
         return Permissions(self._default_member_permissions)
 
-    @property
-    def dm_permission(self):
-        # check if contexts are in use at all
-        if self.contexts:
-            return InteractionContextTypes.bot_dm in self.contexts
-
-        return self._dm_permission
-
-    @dm_permission.setter
-    def dm_permission(self, value: bool) -> None:
-        # todo: add a deprecation warning here
-        self._dm_permission = value
-
     def __repr__(self) -> str:
         attrs = " ".join(f"{key}={getattr(self, key)!r}" for key in self.__repr_info__)
         return f"<{type(self).__name__} {attrs}>"
@@ -634,6 +622,7 @@ class ApplicationCommand(ABC):
                 if self._default_member_permissions is not None
                 else None
             ),
+            "dm_permission": self.dm_permission,
             "default_permission": True,
             "nsfw": self.nsfw,
         }
@@ -648,9 +637,6 @@ class ApplicationCommand(ABC):
 
         if (loc := self.name_localizations.data) is not None:
             data["name_localizations"] = loc
-
-        if not self.contexts and self.dm_permission is not None:
-            data["dm_permission"] = self.dm_permission
 
         return data
 
