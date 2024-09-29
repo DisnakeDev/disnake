@@ -177,6 +177,33 @@ class _BaseSnowflakeComponentInteractionData(_BaseComponentInteractionData):
     resolved: NotRequired[InteractionDataResolved]
 
 
+class InteractionCallbackResponse(TypedDict):
+    interaction: InteractionCallback
+    resource: NotRequired[InteractionCallbackResource]
+
+
+class InteractionCallback(TypedDict):
+    id: Snowflake
+    type: InteractionType
+    activity_instance_id: NotRequired[str]
+    response_message_id: NotRequired[Snowflake]
+    response_message_loading: NotRequired[bool]
+    response_message_ephemeral: NotRequired[bool]
+
+
+class InteractionCallbackResource(TypedDict):
+    type: InteractionCallbackType
+    activity_instance: NotRequired[InteractionCallbackActivityInstanceResource]
+    message: NotRequired[Message]
+
+
+class InteractionCallbackActivityInstanceResource(TypedDict):
+    id: str
+
+
+InteractionCallbackType = Literal[1, 4, 5, 6, 7, 8, 9, 10, 12]
+
+
 ### Message interaction components
 
 
