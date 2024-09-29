@@ -997,12 +997,12 @@ class Intents(BaseFlags):
 
         .. describe:: Intents.y | Intents.z, Intents(y=True) | Intents.z
 
-            Returns a Intents instance with all provided flags enabled.
+            Returns an Intents instance with all provided flags enabled.
 
             .. versionadded:: 2.6
         .. describe:: ~Intents.y
 
-            Returns a Intents instance with all flags except ``y`` inverted from their default value.
+            Returns an Intents instance with all flags except ``y`` inverted from their default value.
 
             .. versionadded:: 2.6
 
@@ -1079,21 +1079,21 @@ class Intents(BaseFlags):
 
     @classmethod
     def all(cls) -> Self:
-        """A factory method that creates a :class:`Intents` with everything enabled."""
+        """A factory method that creates an :class:`Intents` instance with everything enabled."""
         self = cls.__new__(cls)
         self.value = all_flags_value(cls.VALID_FLAGS)
         return self
 
     @classmethod
     def none(cls) -> Self:
-        """A factory method that creates a :class:`Intents` with everything disabled."""
+        """A factory method that creates an :class:`Intents` instance with everything disabled."""
         self = cls.__new__(cls)
         self.value = self.DEFAULT_VALUE
         return self
 
     @classmethod
     def default(cls) -> Self:
-        """A factory method that creates a :class:`Intents` with everything enabled
+        """A factory method that creates an :class:`Intents` instance with everything enabled
         except :attr:`presences`, :attr:`members`, and :attr:`message_content`.
         """
         self = cls.all()
@@ -1780,14 +1780,14 @@ class MemberCacheFlags(BaseFlags):
 
     @classmethod
     def all(cls) -> Self:
-        """A factory method that creates a :class:`MemberCacheFlags` with everything enabled."""
+        """A factory method that creates a :class:`MemberCacheFlags` instance with everything enabled."""
         self = cls.__new__(cls)
         self.value = all_flags_value(cls.VALID_FLAGS)
         return self
 
     @classmethod
     def none(cls) -> Self:
-        """A factory method that creates a :class:`MemberCacheFlags` with everything disabled."""
+        """A factory method that creates a :class:`MemberCacheFlags` instance with everything disabled."""
         self = cls.__new__(cls)
         self.value = self.DEFAULT_VALUE
         return self
@@ -1819,7 +1819,7 @@ class MemberCacheFlags(BaseFlags):
 
     @classmethod
     def from_intents(cls, intents: Intents) -> Self:
-        """A factory method that creates a :class:`MemberCacheFlags` based on
+        """A factory method that creates a :class:`MemberCacheFlags` instance based on
         the currently selected :class:`Intents`.
 
         Parameters
@@ -1920,12 +1920,12 @@ class ApplicationFlags(BaseFlags):
 
         .. describe:: ApplicationFlags.y | ApplicationFlags.z, ApplicationFlags(y=True) | ApplicationFlags.z
 
-            Returns a ApplicationFlags instance with all provided flags enabled.
+            Returns an ApplicationFlags instance with all provided flags enabled.
 
             .. versionadded:: 2.6
         .. describe:: ~ApplicationFlags.y
 
-            Returns a ApplicationFlags instance with all flags except ``y`` inverted from their default value.
+            Returns an ApplicationFlags instance with all flags except ``y`` inverted from their default value.
 
             .. versionadded:: 2.6
 
@@ -2208,11 +2208,11 @@ class AutoModKeywordPresets(ListBaseFlags):
 
         .. describe:: AutoModKeywordPresets.y | AutoModKeywordPresets.z, AutoModKeywordPresets(y=True) | AutoModKeywordPresets.z
 
-            Returns a AutoModKeywordPresets instance with all provided flags enabled.
+            Returns an AutoModKeywordPresets instance with all provided flags enabled.
 
         .. describe:: ~AutoModKeywordPresets.y
 
-            Returns a AutoModKeywordPresets instance with all flags except ``y`` inverted from their default value.
+            Returns an AutoModKeywordPresets instance with all flags except ``y`` inverted from their default value.
 
     .. versionadded:: 2.6
 
@@ -2235,14 +2235,14 @@ class AutoModKeywordPresets(ListBaseFlags):
 
     @classmethod
     def all(cls) -> Self:
-        """A factory method that creates a :class:`AutoModKeywordPresets` with everything enabled."""
+        """A factory method that creates an :class:`AutoModKeywordPresets` instance with everything enabled."""
         self = cls.__new__(cls)
         self.value = all_flags_value(cls.VALID_FLAGS)
         return self
 
     @classmethod
     def none(cls) -> Self:
-        """A factory method that creates a :class:`AutoModKeywordPresets` with everything disabled."""
+        """A factory method that creates an :class:`AutoModKeywordPresets` instance with everything disabled."""
         self = cls.__new__(cls)
         self.value = self.DEFAULT_VALUE
         return self
@@ -2282,16 +2282,16 @@ class MemberFlags(BaseFlags):
             Checks if two MemberFlags instances are not equal.
         .. describe:: x <= y
 
-            Checks if an MemberFlags instance is a subset of another MemberFlags instance.
+            Checks if a MemberFlags instance is a subset of another MemberFlags instance.
         .. describe:: x >= y
 
-            Checks if an MemberFlags instance is a superset of another MemberFlags instance.
+            Checks if a MemberFlags instance is a superset of another MemberFlags instance.
         .. describe:: x < y
 
-            Checks if an MemberFlags instance is a strict subset of another MemberFlags instance.
+            Checks if a MemberFlags instance is a strict subset of another MemberFlags instance.
         .. describe:: x > y
 
-            Checks if an MemberFlags instance is a strict superset of another MemberFlags instance.
+            Checks if a MemberFlags instance is a strict superset of another MemberFlags instance.
         .. describe:: x | y, x |= y
 
             Returns a new MemberFlags instance with all enabled flags from both x and y.
@@ -2384,16 +2384,16 @@ class RoleFlags(BaseFlags):
             Checks if two RoleFlags instances are not equal.
         .. describe:: x <= y
 
-            Checks if an RoleFlags instance is a subset of another RoleFlags instance.
+            Checks if a RoleFlags instance is a subset of another RoleFlags instance.
         .. describe:: x >= y
 
-            Checks if an RoleFlags instance is a superset of another RoleFlags instance.
+            Checks if a RoleFlags instance is a superset of another RoleFlags instance.
         .. describe:: x < y
 
-            Checks if an RoleFlags instance is a strict subset of another RoleFlags instance.
+            Checks if a RoleFlags instance is a strict subset of another RoleFlags instance.
         .. describe:: x > y
 
-            Checks if an RoleFlags instance is a strict superset of another RoleFlags instance.
+            Checks if a RoleFlags instance is a strict superset of another RoleFlags instance.
         .. describe:: x | y, x |= y
 
             Returns a new RoleFlags instance with all enabled flags from both x and y.
@@ -2502,11 +2502,11 @@ class AttachmentFlags(BaseFlags):
 
         .. describe:: AttachmentFlags.y | AttachmentFlags.z, AttachmentFlags(y=True) | AttachmentFlags.z
 
-            Returns a AttachmentFlags instance with all provided flags enabled.
+            Returns an AttachmentFlags instance with all provided flags enabled.
 
         .. describe:: ~AttachmentFlags.y
 
-            Returns a AttachmentFlags instance with all flags except ``y`` inverted from their default value.
+            Returns an AttachmentFlags instance with all flags except ``y`` inverted from their default value.
 
     .. versionadded:: 2.10
 
@@ -2582,11 +2582,11 @@ class SKUFlags(BaseFlags):
 
         .. describe:: SKUFlags.y | SKUFlags.z, SKUFlags(y=True) | SKUFlags.z
 
-            Returns a SKUFlags instance with all provided flags enabled.
+            Returns an SKUFlags instance with all provided flags enabled.
 
         .. describe:: ~SKUFlags.y
 
-            Returns a SKUFlags instance with all flags except ``y`` inverted from their default value.
+            Returns an SKUFlags instance with all flags except ``y`` inverted from their default value.
 
     .. versionadded:: 2.10
 
@@ -2680,11 +2680,11 @@ class ApplicationIntegrationTypes(ListBaseFlags):
 
         .. describe:: ApplicationIntegrationTypes.y | ApplicationIntegrationTypes.z, ApplicationIntegrationTypes(y=True) | ApplicationIntegrationTypes.z
 
-            Returns a ApplicationIntegrationTypes instance with all provided flags enabled.
+            Returns an ApplicationIntegrationTypes instance with all provided flags enabled.
 
         .. describe:: ~ApplicationIntegrationTypes.y
 
-            Returns a ApplicationIntegrationTypes instance with all flags except ``y`` inverted from their default value.
+            Returns an ApplicationIntegrationTypes instance with all flags except ``y`` inverted from their default value.
 
     .. versionadded:: 2.10
 
@@ -2705,7 +2705,7 @@ class ApplicationIntegrationTypes(ListBaseFlags):
 
     @classmethod
     def all(cls) -> Self:
-        """A factory method that creates a :class:`ApplicationIntegrationTypes` with everything enabled."""
+        """A factory method that creates an :class:`ApplicationIntegrationTypes` instance with everything enabled."""
         self = cls.__new__(cls)
         self.value = all_flags_value(cls.VALID_FLAGS)
         return self
@@ -2775,11 +2775,11 @@ class InteractionContextTypes(ListBaseFlags):
 
         .. describe:: InteractionContextTypes.y | InteractionContextTypes.z, InteractionContextTypes(y=True) | InteractionContextTypes.z
 
-            Returns a InteractionContextTypes instance with all provided flags enabled.
+            Returns an InteractionContextTypes instance with all provided flags enabled.
 
         .. describe:: ~InteractionContextTypes.y
 
-            Returns a InteractionContextTypes instance with all flags except ``y`` inverted from their default value.
+            Returns an InteractionContextTypes instance with all flags except ``y`` inverted from their default value.
 
     .. versionadded:: 2.10
 
@@ -2802,7 +2802,7 @@ class InteractionContextTypes(ListBaseFlags):
 
     @classmethod
     def all(cls) -> Self:
-        """A factory method that creates a :class:`InteractionContextTypes` with everything enabled."""
+        """A factory method that creates an :class:`InteractionContextTypes` instance with everything enabled."""
         self = cls.__new__(cls)
         self.value = all_flags_value(cls.VALID_FLAGS)
         return self
