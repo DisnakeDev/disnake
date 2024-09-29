@@ -206,10 +206,10 @@ class AppInfo:
         (for user-installable apps).
 
         .. versionadded:: 2.10
-    integration_types_config: Dict[:class:`ApplicationIntegrationType`, :class:`IntegrationTypeConfiguration`]
+    integration_types_config: Dict[:class:`ApplicationIntegrationTypes`, :class:`IntegrationTypeConfiguration`]
         The mapping of integration types/installation contexts to their respective configuration parameters.
 
-        For example, an :attr:`ApplicationIntegrationType.guild` key being present means that
+        For example, an :attr:`ApplicationIntegrationTypes.guild` key being present means that
         the application can be installed to guilds, and its value is the configuration (e.g. scopes, permissions)
         that will be used during installation, if any.
 

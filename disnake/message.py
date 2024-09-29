@@ -773,7 +773,7 @@ class InteractionMetadata:
         The type of the interaction.
     user: :class:`User`
         The user that triggered the interaction.
-    authorizing_integration_owners: Dict[:class:`ApplicationIntegrationType`, int]
+    authorizing_integration_owners: Dict[:class:`ApplicationIntegrationTypes`, int]
         The authorizing user/guild for the application installation related to the interaction.
         See :attr:`Interaction.authorizing_integration_owners` for details.
     original_response_message_id: Optional[:class:`int`]

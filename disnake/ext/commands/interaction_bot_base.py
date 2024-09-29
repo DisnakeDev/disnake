@@ -28,7 +28,7 @@ import disnake
 from disnake.app_commands import ApplicationCommand, Option
 from disnake.custom_warnings import SyncWarning
 from disnake.enums import ApplicationCommandType
-from disnake.flags import ApplicationIntegrationType, InteractionContextType
+from disnake.flags import ApplicationIntegrationTypes, InteractionContextTypes
 from disnake.utils import warn_deprecated
 
 from . import errors
@@ -490,8 +490,8 @@ class InteractionBotBase(CommonBotBase):
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
-        integration_types: Optional[ApplicationIntegrationType] = None,
-        contexts: Optional[InteractionContextType] = None,
+        integration_types: Optional[ApplicationIntegrationTypes] = None,
+        contexts: Optional[InteractionContextTypes] = None,
         options: Optional[List[Option]] = None,
         guild_ids: Optional[Sequence[int]] = None,
         connectors: Optional[Dict[str, str]] = None,
@@ -534,14 +534,14 @@ class InteractionBotBase(CommonBotBase):
 
             .. versionadded:: 2.8
 
-        integration_types: Optional[:class:`.ApplicationIntegrationType`]
+        integration_types: Optional[:class:`.ApplicationIntegrationTypes`]
             The integration types/installation contexts where the command is available.
-            Defaults to :attr:`.ApplicationIntegrationType.guild` only.
+            Defaults to :attr:`.ApplicationIntegrationTypes.guild` only.
             Only available for global commands.
 
             .. versionadded:: 2.10
 
-        contexts: Optional[:class:`.InteractionContextType`]
+        contexts: Optional[:class:`.InteractionContextTypes`]
             The interaction contexts where the command can be used.
             Only available for global commands.
 
@@ -600,8 +600,8 @@ class InteractionBotBase(CommonBotBase):
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
-        integration_types: Optional[ApplicationIntegrationType] = None,
-        contexts: Optional[InteractionContextType] = None,
+        integration_types: Optional[ApplicationIntegrationTypes] = None,
+        contexts: Optional[InteractionContextTypes] = None,
         guild_ids: Optional[Sequence[int]] = None,
         auto_sync: Optional[bool] = None,
         extras: Optional[Dict[str, Any]] = None,
@@ -635,14 +635,14 @@ class InteractionBotBase(CommonBotBase):
 
             .. versionadded:: 2.8
 
-        integration_types: Optional[:class:`.ApplicationIntegrationType`]
+        integration_types: Optional[:class:`.ApplicationIntegrationTypes`]
             The integration types/installation contexts where the command is available.
-            Defaults to :attr:`.ApplicationIntegrationType.guild` only.
+            Defaults to :attr:`.ApplicationIntegrationTypes.guild` only.
             Only available for global commands.
 
             .. versionadded:: 2.10
 
-        contexts: Optional[:class:`.InteractionContextType`]
+        contexts: Optional[:class:`.InteractionContextTypes`]
             The interaction contexts where the command can be used.
             Only available for global commands.
 
@@ -694,8 +694,8 @@ class InteractionBotBase(CommonBotBase):
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
-        integration_types: Optional[ApplicationIntegrationType] = None,
-        contexts: Optional[InteractionContextType] = None,
+        integration_types: Optional[ApplicationIntegrationTypes] = None,
+        contexts: Optional[InteractionContextTypes] = None,
         guild_ids: Optional[Sequence[int]] = None,
         auto_sync: Optional[bool] = None,
         extras: Optional[Dict[str, Any]] = None,
@@ -729,14 +729,14 @@ class InteractionBotBase(CommonBotBase):
 
             .. versionadded:: 2.8
 
-        integration_types: Optional[:class:`.ApplicationIntegrationType`]
+        integration_types: Optional[:class:`.ApplicationIntegrationTypes`]
             The integration types/installation contexts where the command is available.
-            Defaults to :attr:`.ApplicationIntegrationType.guild` only.
+            Defaults to :attr:`.ApplicationIntegrationTypes.guild` only.
             Only available for global commands.
 
             .. versionadded:: 2.10
 
-        contexts: Optional[:class:`.InteractionContextType`]
+        contexts: Optional[:class:`.InteractionContextTypes`]
             The interaction contexts where the command can be used.
             Only available for global commands.
 

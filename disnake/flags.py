@@ -43,8 +43,8 @@ __all__ = (
     "RoleFlags",
     "AttachmentFlags",
     "SKUFlags",
-    "ApplicationIntegrationType",
-    "InteractionContextType",
+    "ApplicationIntegrationTypes",
+    "InteractionContextTypes",
 )
 
 BF = TypeVar("BF", bound="BaseFlags")
@@ -2627,7 +2627,7 @@ class SKUFlags(BaseFlags):
         return 1 << 8
 
 
-class ApplicationIntegrationType(ListBaseFlags):
+class ApplicationIntegrationTypes(ListBaseFlags):
     """Represents the location(s) in which an application or application command can be installed.
 
     See the :ddocs:`official documentation <resources/application#installation-context>` for more info.
@@ -2636,37 +2636,37 @@ class ApplicationIntegrationType(ListBaseFlags):
 
         .. describe:: x == y
 
-            Checks if two ApplicationIntegrationType instances are equal.
+            Checks if two ApplicationIntegrationTypes instances are equal.
         .. describe:: x != y
 
-            Checks if two ApplicationIntegrationType instances are not equal.
+            Checks if two ApplicationIntegrationTypes instances are not equal.
         .. describe:: x <= y
 
-            Checks if an ApplicationIntegrationType instance is a subset of another ApplicationIntegrationType instance.
+            Checks if an ApplicationIntegrationTypes instance is a subset of another ApplicationIntegrationTypes instance.
         .. describe:: x >= y
 
-            Checks if an ApplicationIntegrationType instance is a superset of another ApplicationIntegrationType instance.
+            Checks if an ApplicationIntegrationTypes instance is a superset of another ApplicationIntegrationTypes instance.
         .. describe:: x < y
 
-            Checks if an ApplicationIntegrationType instance is a strict subset of another ApplicationIntegrationType instance.
+            Checks if an ApplicationIntegrationTypes instance is a strict subset of another ApplicationIntegrationTypes instance.
         .. describe:: x > y
 
-            Checks if an ApplicationIntegrationType instance is a strict superset of another ApplicationIntegrationType instance.
+            Checks if an ApplicationIntegrationTypes instance is a strict superset of another ApplicationIntegrationTypes instance.
         .. describe:: x | y, x |= y
 
-            Returns a new ApplicationIntegrationType instance with all enabled flags from both x and y.
+            Returns a new ApplicationIntegrationTypes instance with all enabled flags from both x and y.
             (Using ``|=`` will update in place).
         .. describe:: x & y, x &= y
 
-            Returns a new ApplicationIntegrationType instance with only flags enabled on both x and y.
+            Returns a new ApplicationIntegrationTypes instance with only flags enabled on both x and y.
             (Using ``&=`` will update in place).
         .. describe:: x ^ y, x ^= y
 
-            Returns a new ApplicationIntegrationType instance with only flags enabled on one of x or y, but not both.
+            Returns a new ApplicationIntegrationTypes instance with only flags enabled on one of x or y, but not both.
             (Using ``^=`` will update in place).
         .. describe:: ~x
 
-            Returns a new ApplicationIntegrationType instance with all flags from x inverted.
+            Returns a new ApplicationIntegrationTypes instance with all flags from x inverted.
         .. describe:: hash(x)
 
             Returns the flag's hash.
@@ -2678,13 +2678,13 @@ class ApplicationIntegrationType(ListBaseFlags):
 
         Additionally supported are a few operations on class attributes.
 
-        .. describe:: ApplicationIntegrationType.y | ApplicationIntegrationType.z, ApplicationIntegrationType(y=True) | ApplicationIntegrationType.z
+        .. describe:: ApplicationIntegrationTypes.y | ApplicationIntegrationTypes.z, ApplicationIntegrationTypes(y=True) | ApplicationIntegrationTypes.z
 
-            Returns a ApplicationIntegrationType instance with all provided flags enabled.
+            Returns a ApplicationIntegrationTypes instance with all provided flags enabled.
 
-        .. describe:: ~ApplicationIntegrationType.y
+        .. describe:: ~ApplicationIntegrationTypes.y
 
-            Returns a ApplicationIntegrationType instance with all flags except ``y`` inverted from their default value.
+            Returns a ApplicationIntegrationTypes instance with all flags except ``y`` inverted from their default value.
 
     .. versionadded:: 2.10
 
@@ -2705,7 +2705,7 @@ class ApplicationIntegrationType(ListBaseFlags):
 
     @classmethod
     def all(cls) -> Self:
-        """A factory method that creates a :class:`ApplicationIntegrationType` with everything enabled."""
+        """A factory method that creates a :class:`ApplicationIntegrationTypes` with everything enabled."""
         self = cls.__new__(cls)
         self.value = all_flags_value(cls.VALID_FLAGS)
         return self
@@ -2722,8 +2722,8 @@ class ApplicationIntegrationType(ListBaseFlags):
         return 1 << 1
 
 
-class InteractionContextType(ListBaseFlags):
-    """Represents the context in which an application command can be used.
+class InteractionContextTypes(ListBaseFlags):
+    """Represents the context(s) in which an application command can be used.
 
     See the :ddocs:`official documentation <interactions/application-commands#interaction-contexts>` for more info.
 
@@ -2731,37 +2731,37 @@ class InteractionContextType(ListBaseFlags):
 
         .. describe:: x == y
 
-            Checks if two InteractionContextType instances are equal.
+            Checks if two InteractionContextTypes instances are equal.
         .. describe:: x != y
 
-            Checks if two InteractionContextType instances are not equal.
+            Checks if two InteractionContextTypes instances are not equal.
         .. describe:: x <= y
 
-            Checks if an InteractionContextType instance is a subset of another InteractionContextType instance.
+            Checks if an InteractionContextTypes instance is a subset of another InteractionContextTypes instance.
         .. describe:: x >= y
 
-            Checks if an InteractionContextType instance is a superset of another InteractionContextType instance.
+            Checks if an InteractionContextTypes instance is a superset of another InteractionContextTypes instance.
         .. describe:: x < y
 
-            Checks if an InteractionContextType instance is a strict subset of another InteractionContextType instance.
+            Checks if an InteractionContextTypes instance is a strict subset of another InteractionContextTypes instance.
         .. describe:: x > y
 
-            Checks if an InteractionContextType instance is a strict superset of another InteractionContextType instance.
+            Checks if an InteractionContextTypes instance is a strict superset of another InteractionContextTypes instance.
         .. describe:: x | y, x |= y
 
-            Returns a new InteractionContextType instance with all enabled flags from both x and y.
+            Returns a new InteractionContextTypes instance with all enabled flags from both x and y.
             (Using ``|=`` will update in place).
         .. describe:: x & y, x &= y
 
-            Returns a new InteractionContextType instance with only flags enabled on both x and y.
+            Returns a new InteractionContextTypes instance with only flags enabled on both x and y.
             (Using ``&=`` will update in place).
         .. describe:: x ^ y, x ^= y
 
-            Returns a new InteractionContextType instance with only flags enabled on one of x or y, but not both.
+            Returns a new InteractionContextTypes instance with only flags enabled on one of x or y, but not both.
             (Using ``^=`` will update in place).
         .. describe:: ~x
 
-            Returns a new InteractionContextType instance with all flags from x inverted.
+            Returns a new InteractionContextTypes instance with all flags from x inverted.
         .. describe:: hash(x)
 
             Returns the flag's hash.
@@ -2773,13 +2773,13 @@ class InteractionContextType(ListBaseFlags):
 
         Additionally supported are a few operations on class attributes.
 
-        .. describe:: InteractionContextType.y | InteractionContextType.z, InteractionContextType(y=True) | InteractionContextType.z
+        .. describe:: InteractionContextTypes.y | InteractionContextTypes.z, InteractionContextTypes(y=True) | InteractionContextTypes.z
 
-            Returns a InteractionContextType instance with all provided flags enabled.
+            Returns a InteractionContextTypes instance with all provided flags enabled.
 
-        .. describe:: ~InteractionContextType.y
+        .. describe:: ~InteractionContextTypes.y
 
-            Returns a InteractionContextType instance with all flags except ``y`` inverted from their default value.
+            Returns a InteractionContextTypes instance with all flags except ``y`` inverted from their default value.
 
     .. versionadded:: 2.10
 
@@ -2802,7 +2802,7 @@ class InteractionContextType(ListBaseFlags):
 
     @classmethod
     def all(cls) -> Self:
-        """A factory method that creates a :class:`InteractionContextType` with everything enabled."""
+        """A factory method that creates a :class:`InteractionContextTypes` with everything enabled."""
         self = cls.__new__(cls)
         self.value = all_flags_value(cls.VALID_FLAGS)
         return self

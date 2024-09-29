@@ -41,7 +41,7 @@ from ..errors import (
     ModalChainNotSupported,
     NotFound,
 )
-from ..flags import InteractionContextType, MessageFlags
+from ..flags import InteractionContextTypes, MessageFlags
 from ..guild import Guild
 from ..i18n import Localized
 from ..member import Member
@@ -163,16 +163,16 @@ class Interaction(Generic[ClientT]):
 
         .. versionadded:: 2.10
 
-    authorizing_integration_owners: Dict[:class:`ApplicationIntegrationType`, int]
+    authorizing_integration_owners: Dict[:class:`ApplicationIntegrationTypes`, int]
         The authorizing user/guild for the application installation.
 
         This is only available if the application was installed to a user, and is empty otherwise.
         If this interaction was triggered through an application command,
         this requirement also applies to the command itself; see :attr:`ApplicationCommand.integration_types`.
 
-        The value for the :attr:`ApplicationIntegrationType.user` key is the user ID.
+        The value for the :attr:`ApplicationIntegrationTypes.user` key is the user ID.
         If the application (and command) was also installed to the guild, the value for the
-        :attr:`ApplicationIntegrationType.guild` key is the guild ID, or ``0`` in DMs with the bot.
+        :attr:`ApplicationIntegrationTypes.guild` key is the guild ID, or ``0`` in DMs with the bot.
 
         See the :ddocs:`official docs <interactions/receiving-and-responding#interaction-object-authorizing-integration-owners-object>`
         for more information.
@@ -182,7 +182,7 @@ class Interaction(Generic[ClientT]):
 
         .. versionadded:: 2.10
 
-    context: Optional[:class:`InteractionContextType`]
+    context: Optional[:class:`InteractionContextTypes`]
         The context where the interaction was triggered from.
 
         This has the same requirements as :attr:`authorizing_integration_owners`; that is,
@@ -282,8 +282,8 @@ class Interaction(Generic[ClientT]):
         }
 
         # TODO: document this properly; it's a flag object, but only one value will be set
-        self.context: Optional[InteractionContextType] = (
-            InteractionContextType._from_values([context])
+        self.context: Optional[InteractionContextTypes] = (
+            InteractionContextTypes._from_values([context])
             if (context := data.get("context")) is not None
             else None
         )

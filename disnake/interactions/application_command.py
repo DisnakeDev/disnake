@@ -105,16 +105,16 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
 
         .. versionadded:: 2.10
 
-    authorizing_integration_owners: Dict[:class:`ApplicationIntegrationType`, int]
+    authorizing_integration_owners: Dict[:class:`ApplicationIntegrationTypes`, int]
         The authorizing user/guild for the application installation.
 
         This is only available if the application was installed to a user, and is empty otherwise.
         If this interaction was triggered through an application command,
         this requirement also applies to the command itself; see :attr:`ApplicationCommand.integration_types`.
 
-        The value for the :attr:`ApplicationIntegrationType.user` key is the user ID.
+        The value for the :attr:`ApplicationIntegrationTypes.user` key is the user ID.
         If the application (and command) was also installed to the guild, the value for the
-        :attr:`ApplicationIntegrationType.guild` key is the guild ID, or ``0`` in DMs with the bot.
+        :attr:`ApplicationIntegrationTypes.guild` key is the guild ID, or ``0`` in DMs with the bot.
 
         See the :ddocs:`official docs <interactions/receiving-and-responding#interaction-object-authorizing-integration-owners-object>`
         for more information.
@@ -124,7 +124,7 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
 
         .. versionadded:: 2.10
 
-    context: Optional[:class:`InteractionContextType`]
+    context: Optional[:class:`InteractionContextTypes`]
         The context where the interaction was triggered from.
 
         This has the same requirements as :attr:`authorizing_integration_owners`; that is,
