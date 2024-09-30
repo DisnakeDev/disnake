@@ -273,8 +273,8 @@ def user_command(
         Defaults to ``True``.
 
         .. deprecated:: 2.10
-            Use :attr:`contexts` instead.
-            This is equivalent to the :attr:`InteractionContextTypes.bot_dm` flag.
+            Use ``contexts`` instead.
+            This is equivalent to the :attr:`.InteractionContextTypes.bot_dm` flag.
 
     default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
         The default required permissions for this command.
@@ -377,8 +377,8 @@ def message_command(
         Defaults to ``True``.
 
         .. deprecated:: 2.10
-            Use :attr:`contexts` instead.
-            This is equivalent to the :attr:`InteractionContextTypes.bot_dm` flag.
+            Use ``contexts`` instead.
+            This is equivalent to the :attr:`.InteractionContextTypes.bot_dm` flag.
 
     default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
         The default required permissions for this command.
