@@ -634,7 +634,6 @@ class ApplicationCommand(ABC):
                 )
                 or (
                     self.integration_types == other.integration_types
-                    # TODO: `None` and (guild=True, bot_dm=True) are practically the same
                     and self.contexts == other.contexts
                 )
             )
@@ -686,8 +685,10 @@ class _APIApplicationCommandMixin:
         # deprecated, but kept until API stops returning this field
         self._default_permission = data.get("default_permission") is not False
 
-        # same deal, also deprecated
-        if (dm_permission := data.get("dm_permission")) is not None:
+        # same deal, also deprecated.
+        # Only apply if set to `False`, we want to keep `contexts` as-is if
+        # `dm_permission` is the default value (i.e. None/True) for syncing purposes
+        if (dm_permission := data.get("dm_permission")) is False:
             self._convert_dm_permission(dm_permission)
 
 
