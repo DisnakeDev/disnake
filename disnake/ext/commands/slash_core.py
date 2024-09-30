@@ -157,6 +157,7 @@ class SubCommandGroup(InvokableApplicationCommand):
         )
         self.qualified_name: str = f"{parent.qualified_name} {self.name}"
 
+        # TODO
         if (
             "dm_permission" in kwargs
             or "default_member_permissions" in kwargs
@@ -434,7 +435,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
         options: Optional[List[Option]] = None,
-        dm_permission: Optional[bool] = None,
+        dm_permission: Optional[bool] = None,  # deprecated
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
         integration_types: Optional[ApplicationIntegrationTypes] = None,
@@ -464,20 +465,20 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         except AttributeError:
             pass
 
-        dm_permission = True if dm_permission is None else dm_permission
-
         self.body: SlashCommand = SlashCommand(
             name=name_loc._upgrade(self.name, key=self.docstring["localization_key_name"]),
             description=desc_loc._upgrade(
                 self.docstring["description"] or "-", key=self.docstring["localization_key_desc"]
             ),
             options=options or [],
-            dm_permission=dm_permission and not self._guild_only,
+            dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
             nsfw=nsfw,
             integration_types=integration_types,
             contexts=contexts,
         )
+
+        self._apply_guild_only()
 
     @property
     def root_parent(self) -> None:
@@ -755,7 +756,7 @@ def slash_command(
     *,
     name: LocalizedOptional = None,
     description: LocalizedOptional = None,
-    dm_permission: Optional[bool] = None,
+    dm_permission: Optional[bool] = None,  # deprecated
     default_member_permissions: Optional[Union[Permissions, int]] = None,
     nsfw: Optional[bool] = None,
     integration_types: Optional[ApplicationIntegrationTypes] = None,
@@ -810,6 +811,11 @@ def slash_command(
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
         Defaults to ``True``.
+
+        .. deprecated:: 2.10
+            Use :attr:`contexts` instead.
+            This is equivalent to the :attr:`InteractionContextTypes.bot_dm` flag.
+
     default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
         The default required permissions for this command.
         See :attr:`.ApplicationCommand.default_member_permissions` for details.

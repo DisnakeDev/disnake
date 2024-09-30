@@ -170,8 +170,9 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
 class GuildCommandInteraction(ApplicationCommandInteraction[ClientT]):
     """An :class:`ApplicationCommandInteraction` subclass, primarily meant for annotations.
 
-    This prevents the command from being invoked in DMs by automatically setting
-    :attr:`ApplicationCommand.dm_permission` to ``False`` for user/message commands and top-level slash commands.
+    This prevents the command from being invoked in DMs by automatically adjusting the
+    :attr:`~InteractionContextTypes.bot_dm` and :attr:`~InteractionContextTypes.private_channel` flags of
+    :attr:`ApplicationCommand.contexts` to ``False`` for user/message commands and top-level slash commands.
 
     Note that this does not apply to slash subcommands, subcommand groups, or autocomplete callbacks.
 
@@ -182,7 +183,7 @@ class GuildCommandInteraction(ApplicationCommandInteraction[ClientT]):
     guild: Guild
     guild_id: int
     guild_locale: Locale
-    me: Member
+    me: Member  # TODO: this might be inaccurate now
 
 
 class UserCommandInteraction(ApplicationCommandInteraction[ClientT]):

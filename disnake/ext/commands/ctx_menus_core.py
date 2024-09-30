@@ -74,7 +74,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
         func: InteractionCommandCallback[CogT, UserCommandInteraction, P],
         *,
         name: LocalizedOptional = None,
-        dm_permission: Optional[bool] = None,
+        dm_permission: Optional[bool] = None,  # deprecated
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
         integration_types: Optional[ApplicationIntegrationTypes] = None,
@@ -99,16 +99,16 @@ class InvokableUserCommand(InvokableApplicationCommand):
                 )
             default_member_permissions = default_perms
 
-        dm_permission = True if dm_permission is None else dm_permission
-
         self.body = UserCommand(
             name=name_loc._upgrade(self.name),
-            dm_permission=dm_permission and not self._guild_only,
+            dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
             nsfw=nsfw,
             integration_types=integration_types,
             contexts=contexts,
         )
+
+        self._apply_guild_only()
 
     async def _call_external_error_handlers(
         self, inter: ApplicationCommandInteraction, error: CommandError
@@ -184,7 +184,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         func: InteractionCommandCallback[CogT, MessageCommandInteraction, P],
         *,
         name: LocalizedOptional = None,
-        dm_permission: Optional[bool] = None,
+        dm_permission: Optional[bool] = None,  # deprecated
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
         integration_types: Optional[ApplicationIntegrationTypes] = None,
@@ -203,16 +203,16 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         except AttributeError:
             pass
 
-        dm_permission = True if dm_permission is None else dm_permission
-
         self.body = MessageCommand(
             name=name_loc._upgrade(self.name),
-            dm_permission=dm_permission and not self._guild_only,
+            dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
             nsfw=nsfw,
             integration_types=integration_types,
             contexts=contexts,
         )
+
+        self._apply_guild_only()
 
     async def _call_external_error_handlers(
         self, inter: ApplicationCommandInteraction, error: CommandError
@@ -248,7 +248,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
 def user_command(
     *,
     name: LocalizedOptional = None,
-    dm_permission: Optional[bool] = None,
+    dm_permission: Optional[bool] = None,  # deprecated
     default_member_permissions: Optional[Union[Permissions, int]] = None,
     nsfw: Optional[bool] = None,
     integration_types: Optional[ApplicationIntegrationTypes] = None,
@@ -271,6 +271,11 @@ def user_command(
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
         Defaults to ``True``.
+
+        .. deprecated:: 2.10
+            Use :attr:`contexts` instead.
+            This is equivalent to the :attr:`InteractionContextTypes.bot_dm` flag.
+
     default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
         The default required permissions for this command.
         See :attr:`.ApplicationCommand.default_member_permissions` for details.
@@ -344,7 +349,7 @@ def user_command(
 def message_command(
     *,
     name: LocalizedOptional = None,
-    dm_permission: Optional[bool] = None,
+    dm_permission: Optional[bool] = None,  # deprecated
     default_member_permissions: Optional[Union[Permissions, int]] = None,
     nsfw: Optional[bool] = None,
     integration_types: Optional[ApplicationIntegrationTypes] = None,
@@ -370,6 +375,11 @@ def message_command(
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
         Defaults to ``True``.
+
+        .. deprecated:: 2.10
+            Use :attr:`contexts` instead.
+            This is equivalent to the :attr:`InteractionContextTypes.bot_dm` flag.
+
     default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
         The default required permissions for this command.
         See :attr:`.ApplicationCommand.default_member_permissions` for details.

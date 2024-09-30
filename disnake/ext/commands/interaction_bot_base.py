@@ -487,7 +487,7 @@ class InteractionBotBase(CommonBotBase):
         *,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        dm_permission: Optional[bool] = None,
+        dm_permission: Optional[bool] = None,  # deprecated
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
         integration_types: Optional[ApplicationIntegrationTypes] = None,
@@ -522,6 +522,11 @@ class InteractionBotBase(CommonBotBase):
         dm_permission: :class:`bool`
             Whether this command can be used in DMs.
             Defaults to ``True``.
+
+            .. deprecated:: 2.10
+                Use :attr:`contexts` instead.
+                This is equivalent to the :attr:`InteractionContextTypes.bot_dm` flag.
+
         default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
             The default required permissions for this command.
             See :attr:`.ApplicationCommand.default_member_permissions` for details.
@@ -597,7 +602,7 @@ class InteractionBotBase(CommonBotBase):
         self,
         *,
         name: LocalizedOptional = None,
-        dm_permission: Optional[bool] = None,
+        dm_permission: Optional[bool] = None,  # deprecated
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
         integration_types: Optional[ApplicationIntegrationTypes] = None,
@@ -623,6 +628,11 @@ class InteractionBotBase(CommonBotBase):
         dm_permission: :class:`bool`
             Whether this command can be used in DMs.
             Defaults to ``True``.
+
+            .. deprecated:: 2.10
+                Use :attr:`contexts` instead.
+                This is equivalent to the :attr:`InteractionContextTypes.bot_dm` flag.
+
         default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
             The default required permissions for this command.
             See :attr:`.ApplicationCommand.default_member_permissions` for details.
@@ -691,7 +701,7 @@ class InteractionBotBase(CommonBotBase):
         self,
         *,
         name: LocalizedOptional = None,
-        dm_permission: Optional[bool] = None,
+        dm_permission: Optional[bool] = None,  # deprecated
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
         integration_types: Optional[ApplicationIntegrationTypes] = None,
@@ -717,6 +727,11 @@ class InteractionBotBase(CommonBotBase):
         dm_permission: :class:`bool`
             Whether this command can be used in DMs.
             Defaults to ``True``.
+
+            .. deprecated:: 2.10
+                Use :attr:`contexts` instead.
+                This is equivalent to the :attr:`InteractionContextTypes.bot_dm` flag.
+
         default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
             The default required permissions for this command.
             See :attr:`.ApplicationCommand.default_member_permissions` for details.

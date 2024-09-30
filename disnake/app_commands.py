@@ -20,7 +20,7 @@ from .enums import (
 from .flags import ApplicationIntegrationTypes, InteractionContextTypes
 from .i18n import Localized
 from .permissions import Permissions
-from .utils import MISSING, _get_as_snowflake, _maybe_cast
+from .utils import MISSING, _get_as_snowflake, _maybe_cast, deprecated
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -486,15 +486,6 @@ class ApplicationCommand(ABC):
 
         .. versionadded:: 2.5
 
-    dm_permission: :class:`bool`
-        Whether this command can be used in DMs.
-        Defaults to ``True``.
-
-        .. versionadded:: 2.5
-
-        .. deprecated:: 2.10
-            Use :attr:`contexts` instead.
-
     nsfw: :class:`bool`
         Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
         Defaults to ``False``.
@@ -528,7 +519,7 @@ class ApplicationCommand(ABC):
         self,
         type: ApplicationCommandType,
         name: LocalizedRequired,
-        dm_permission: Optional[bool] = None,
+        dm_permission: Optional[bool] = None,  # deprecated
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
         integration_types: Optional[ApplicationIntegrationTypes] = None,
@@ -540,9 +531,6 @@ class ApplicationCommand(ABC):
         self.name: str = name_loc.string
         self.name_localizations: LocalizationValue = name_loc.localizations
         self.nsfw: bool = False if nsfw is None else nsfw
-
-        # TODO: turn this into a property based on `1 in self.contexts` instead, stop sending dm_permission
-        self.dm_permission: bool = True if dm_permission is None else dm_permission
 
         self._default_member_permissions: Optional[int]
         if default_member_permissions is None:
@@ -566,6 +554,14 @@ class ApplicationCommand(ABC):
         # reset `default_permission` if set before
         self._default_permission: bool = True
 
+        # TODO: consider throwing if both `dm_permission` and `contexts` are provided; take `GuildCommandInteraction` into account as well.
+
+        # `dm_permission` is deprecated; this turns it into `contexts.bot_dm`, which is equivalent.
+        # The API computes `dm_permission` based on `contexts` anyway (if set), so `contexts` is the
+        # source of truth here; it ignores `dm_permission` if `contexts` is set.
+        if dm_permission is not None:
+            self.dm_permission = dm_permission
+
     @property
     def default_member_permissions(self) -> Optional[Permissions]:
         """Optional[:class:`Permissions`]: The default required member permissions for this command.
@@ -583,6 +579,38 @@ class ApplicationCommand(ABC):
         if self._default_member_permissions is None:
             return None
         return Permissions(self._default_member_permissions)
+
+    @property
+    @deprecated("contexts")
+    def dm_permission(self) -> bool:
+        """
+        Whether this command can be used in DMs with the bot.
+
+        .. versionadded:: 2.5
+
+        .. deprecated:: 2.10
+            Use :attr:`contexts` instead.
+            This is equivalent to the :attr:`InteractionContextTypes.bot_dm` flag.
+        """
+        if self.contexts is not None:
+            return self.contexts.bot_dm
+
+        return True
+
+    @dm_permission.setter
+    @deprecated("contexts")
+    def dm_permission(self, value: bool) -> None:
+        self._convert_dm_permission(value)
+
+    # this is separate so we can call it internally while avoiding DeprecationWarnings
+    def _convert_dm_permission(self, value: bool, *, apply_private_channel: bool = False) -> None:
+        if self.contexts is None:
+            # this is the default if neither dm_permission nor contexts are set
+            self.contexts = InteractionContextTypes(guild=True, bot_dm=True)
+
+        self.contexts.bot_dm = value
+        if apply_private_channel:
+            self.contexts.private_channel = value
 
     def __repr__(self) -> str:
         attrs = " ".join(f"{key}={getattr(self, key)!r}" for key in self.__repr_info__)
@@ -605,8 +633,8 @@ class ApplicationCommand(ABC):
                     for obj in (self, other)
                 )
                 or (
-                    self.dm_permission == other.dm_permission
-                    and self.integration_types == other.integration_types
+                    self.integration_types == other.integration_types
+                    # TODO: `None` and (guild=True, bot_dm=True) are practically the same
                     and self.contexts == other.contexts
                 )
             )
@@ -622,7 +650,6 @@ class ApplicationCommand(ABC):
                 if self._default_member_permissions is not None
                 else None
             ),
-            "dm_permission": self.dm_permission,
             "default_permission": True,
             "nsfw": self.nsfw,
         }
@@ -648,12 +675,20 @@ class _APIApplicationCommandMixin:
     __repr_info__ = ("id",)
 
     def _update_common(self, data: ApplicationCommandPayload) -> None:
+        if not isinstance(self, ApplicationCommand):
+            raise TypeError("_APIApplicationCommandMixin must be used with ApplicationCommand")
+
         self.id: int = int(data["id"])
         self.application_id: int = int(data["application_id"])
         self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
         self.version: int = int(data["version"])
+
         # deprecated, but kept until API stops returning this field
         self._default_permission = data.get("default_permission") is not False
+
+        # same deal, also deprecated
+        if (dm_permission := data.get("dm_permission")) is not None:
+            self._convert_dm_permission(dm_permission)
 
 
 class UserCommand(ApplicationCommand):
@@ -667,15 +702,6 @@ class UserCommand(ApplicationCommand):
         Localizations for ``name``.
 
         .. versionadded:: 2.5
-
-    dm_permission: :class:`bool`
-        Whether this command can be used in DMs.
-        Defaults to ``True``.
-
-        .. versionadded:: 2.5
-
-        .. deprecated:: 2.10
-            Use :attr:`contexts` instead.
 
     nsfw: :class:`bool`
         Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
@@ -702,7 +728,7 @@ class UserCommand(ApplicationCommand):
     def __init__(
         self,
         name: LocalizedRequired,
-        dm_permission: Optional[bool] = None,
+        dm_permission: Optional[bool] = None,  # deprecated
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
         integration_types: Optional[ApplicationIntegrationTypes] = None,
@@ -732,14 +758,6 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
         Localizations for ``name``.
 
         .. versionadded:: 2.5
-
-    dm_permission: :class:`bool`
-        Whether this command can be used in DMs.
-
-        .. versionadded:: 2.5
-
-        .. deprecated:: 2.10
-            Use :attr:`contexts` instead.
 
     nsfw: :class:`bool`
         Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
@@ -779,7 +797,6 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
 
         self = cls(
             name=Localized(data["name"], data=data.get("name_localizations")),
-            dm_permission=data.get("dm_permission") is not False,
             default_member_permissions=_get_as_snowflake(data, "default_member_permissions"),
             nsfw=data.get("nsfw"),
             integration_types=(
@@ -809,15 +826,6 @@ class MessageCommand(ApplicationCommand):
 
         .. versionadded:: 2.5
 
-    dm_permission: :class:`bool`
-        Whether this command can be used in DMs.
-        Defaults to ``True``.
-
-        .. versionadded:: 2.5
-
-        .. deprecated:: 2.10
-            Use :attr:`contexts` instead.
-
     nsfw: :class:`bool`
         Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
         Defaults to ``False``.
@@ -843,7 +851,7 @@ class MessageCommand(ApplicationCommand):
     def __init__(
         self,
         name: LocalizedRequired,
-        dm_permission: Optional[bool] = None,
+        dm_permission: Optional[bool] = None,  # deprecated
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
         integration_types: Optional[ApplicationIntegrationTypes] = None,
@@ -873,14 +881,6 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
         Localizations for ``name``.
 
         .. versionadded:: 2.5
-
-    dm_permission: :class:`bool`
-        Whether this command can be used in DMs.
-
-        .. versionadded:: 2.5
-
-        .. deprecated:: 2.10
-            Use :attr:`contexts` instead.
 
     nsfw: :class:`bool`
         Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
@@ -920,7 +920,6 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
 
         self = cls(
             name=Localized(data["name"], data=data.get("name_localizations")),
-            dm_permission=data.get("dm_permission") is not False,
             default_member_permissions=_get_as_snowflake(data, "default_member_permissions"),
             nsfw=data.get("nsfw"),
             integration_types=(
@@ -957,15 +956,6 @@ class SlashCommand(ApplicationCommand):
 
         .. versionadded:: 2.5
 
-    dm_permission: :class:`bool`
-        Whether this command can be used in DMs.
-        Defaults to ``True``.
-
-        .. versionadded:: 2.5
-
-        .. deprecated:: 2.10
-            Use :attr:`contexts` instead.
-
     nsfw: :class:`bool`
         Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
         Defaults to ``False``.
@@ -999,7 +989,7 @@ class SlashCommand(ApplicationCommand):
         name: LocalizedRequired,
         description: LocalizedRequired,
         options: Optional[List[Option]] = None,
-        dm_permission: Optional[bool] = None,
+        dm_permission: Optional[bool] = None,  # deprecated
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
         integration_types: Optional[ApplicationIntegrationTypes] = None,
@@ -1106,14 +1096,6 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
 
         .. versionadded:: 2.5
 
-    dm_permission: :class:`bool`
-        Whether this command can be used in DMs.
-
-        .. versionadded:: 2.5
-
-        .. deprecated:: 2.10
-            Use :attr:`contexts` instead.
-
     nsfw: :class:`bool`
         Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
 
@@ -1158,7 +1140,6 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
             options=_maybe_cast(
                 data.get("options", MISSING), lambda x: list(map(Option.from_dict, x))
             ),
-            dm_permission=data.get("dm_permission") is not False,
             default_member_permissions=_get_as_snowflake(data, "default_member_permissions"),
             nsfw=data.get("nsfw"),
             integration_types=(

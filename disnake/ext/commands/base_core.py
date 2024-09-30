@@ -137,7 +137,7 @@ class InvokableApplicationCommand(ABC):
         self.name: str = name or func.__name__
         self.qualified_name: str = self.name
         # Annotation parser needs this attribute because body doesn't exist at this moment.
-        # We will use this attribute later in order to set the dm_permission.
+        # We will use this attribute later in order to set the allowed contexts.
         self._guild_only: bool = kwargs.get("guild_only", False)
         self.extras: Dict[str, Any] = kwargs.get("extras") or {}
 
@@ -228,6 +228,12 @@ class InvokableApplicationCommand(ABC):
             return self._ensure_assignment_on_copy(copy)
         else:
             return self.copy()
+
+    def _apply_guild_only(self) -> None:
+        # If we have a `GuildCommandInteraction` annotation,
+        # turn it into `contexts.bot_dm = contexts.private_channel = False`
+        if self._guild_only:
+            self.body._convert_dm_permission(False, apply_private_channel=True)
 
     @property
     def dm_permission(self) -> bool:
