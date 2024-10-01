@@ -563,11 +563,16 @@ class ApplicationCommand(ABC):
         # reset `default_permission` if set before
         self._default_permission: bool = True
 
-        # TODO: throw if both dm_permission and contexts are set; also consider this for property setters
         self._dm_permission: Optional[bool] = None
-        # use the property setter to emit a deprecation warning
         if dm_permission is not None:
+            # use the property setter to emit a deprecation warning
             self.dm_permission = dm_permission
+
+            # if both are provided, raise an exception
+            # (n.b. these can be assigned to later, in which case no exception will be raised.
+            # assume the user knows what they're doing, in that case)
+            if self.contexts is not None:
+                raise ValueError("Cannot use both `dm_permission` and `contexts` at the same time")
 
     @property
     def default_member_permissions(self) -> Optional[Permissions]:
