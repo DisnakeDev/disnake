@@ -654,8 +654,6 @@ class ApplicationCommand(ABC):
                 if self._default_member_permissions is not None
                 else None
             ),
-            # Discord will ignore this if `contexts` is also set
-            "dm_permission": self._dm_permission is not False,
             "default_permission": True,
             "nsfw": self.nsfw,
         }
@@ -667,6 +665,10 @@ class ApplicationCommand(ABC):
 
         contexts = self.contexts.values if self.contexts is not None else None
         data["contexts"] = contexts
+
+        # don't set `dm_permission` if `contexts` is set
+        if contexts is None:
+            data["dm_permission"] = self._dm_permission is not False
 
         if (loc := self.name_localizations.data) is not None:
             data["name_localizations"] = loc
