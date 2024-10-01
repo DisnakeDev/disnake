@@ -98,6 +98,23 @@ async def _call_autocompleter(
     return choices
 
 
+_INVALID_SUB_KWARGS = frozenset(
+    {"dm_permission", "default_member_permissions", "integration_types", "contexts"}
+)
+
+
+# this is just a helpful message for users trying to set specific
+# top-level-only fields on subcommands or groups
+def _check_invalid_sub_kwargs(func: CommandCallback, kwargs: Dict[str, Any]) -> None:
+    invalid_keys = kwargs.keys() & _INVALID_SUB_KWARGS
+    if hasattr(func, "__default_member_permissions__"):
+        invalid_keys.add("default_member_permissions")
+
+    if invalid_keys:
+        msg = f"Cannot set {utils.humanize_list(list(invalid_keys), 'or')} on subcommands or subcommand groups"
+        raise TypeError(msg)
+
+
 class SubCommandGroup(InvokableApplicationCommand):
     """A class that implements the protocol for a bot slash command group.
 
@@ -157,15 +174,7 @@ class SubCommandGroup(InvokableApplicationCommand):
         )
         self.qualified_name: str = f"{parent.qualified_name} {self.name}"
 
-        # TODO
-        if (
-            "dm_permission" in kwargs
-            or "default_member_permissions" in kwargs
-            or hasattr(func, "__default_member_permissions__")
-        ):
-            raise TypeError(
-                "Cannot set `default_member_permissions` or `dm_permission` on subcommand groups"
-            )
+        _check_invalid_sub_kwargs(func, kwargs)
 
     @property
     def root_parent(self) -> InvokableSlashCommand:
@@ -298,14 +307,7 @@ class SubCommand(InvokableApplicationCommand):
         )
         self.qualified_name = f"{parent.qualified_name} {self.name}"
 
-        if (
-            "dm_permission" in kwargs
-            or "default_member_permissions" in kwargs
-            or hasattr(func, "__default_member_permissions__")
-        ):
-            raise TypeError(
-                "Cannot set `default_member_permissions` or `dm_permission` on subcommands"
-            )
+        _check_invalid_sub_kwargs(func, kwargs)
 
     @property
     def root_parent(self) -> InvokableSlashCommand:
