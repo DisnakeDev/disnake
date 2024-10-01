@@ -22,6 +22,7 @@ from typing import (
 
 from disnake.app_commands import ApplicationCommand
 from disnake.enums import ApplicationCommandType
+from disnake.flags import ApplicationIntegrationTypes, InteractionContextTypes
 from disnake.permissions import Permissions
 from disnake.utils import _generated, _overload_with_permissions, async_all, maybe_coroutine
 
@@ -136,7 +137,7 @@ class InvokableApplicationCommand(ABC):
         self.name: str = name or func.__name__
         self.qualified_name: str = self.name
         # Annotation parser needs this attribute because body doesn't exist at this moment.
-        # We will use this attribute later in order to set the dm_permission.
+        # We will use this attribute later in order to set the allowed contexts.
         self._guild_only: bool = kwargs.get("guild_only", False)
         self.extras: Dict[str, Any] = kwargs.get("extras") or {}
 
@@ -146,7 +147,7 @@ class InvokableApplicationCommand(ABC):
         if "default_permission" in kwargs:
             raise TypeError(
                 "`default_permission` is deprecated and will always be set to `True`. "
-                "See `default_member_permissions` and `dm_permission` instead."
+                "See `default_member_permissions` and `contexts` instead."
             )
 
         try:
@@ -201,6 +202,8 @@ class InvokableApplicationCommand(ABC):
         ):
             other.body._default_member_permissions = self.body._default_member_permissions
 
+        # TODO: contexts?
+
         try:
             other.on_error = self.on_error
         except AttributeError:
@@ -228,6 +231,13 @@ class InvokableApplicationCommand(ABC):
         else:
             return self.copy()
 
+    def _apply_guild_only(self) -> None:
+        # If we have a `GuildCommandInteraction` annotation, set `contexts` accordingly.
+        if self._guild_only:
+            # n.b. this overwrites any user-specified `contexts` parameter,
+            # which is fine at least as long as no new contexts are added to the API
+            self.body.contexts = InteractionContextTypes(guild=True)
+
     @property
     def dm_permission(self) -> bool:
         """:class:`bool`: Whether this command can be used in DMs."""
@@ -248,6 +258,24 @@ class InvokableApplicationCommand(ABC):
         .. versionadded:: 2.5
         """
         return self.body.default_member_permissions
+
+    @property
+    def integration_types(self) -> Optional[ApplicationIntegrationTypes]:
+        """Optional[:class:`.ApplicationIntegrationTypes`]: The integration types/installation contexts
+        where the command is available. Only available for global commands.
+
+        .. versionadded:: 2.10
+        """
+        return self.body.integration_types
+
+    @property
+    def contexts(self) -> Optional[InteractionContextTypes]:
+        """Optional[:class:`.InteractionContextTypes`]: The interaction contexts
+        where the command can be used. Only available for global commands.
+
+        .. versionadded:: 2.10
+        """
+        return self.body.contexts
 
     @property
     def callback(self) -> CommandCallback:

@@ -6,6 +6,7 @@ import asyncio
 from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Sequence, Tuple, Union
 
 from disnake.app_commands import MessageCommand, UserCommand
+from disnake.flags import ApplicationIntegrationTypes, InteractionContextTypes
 from disnake.i18n import Localized
 from disnake.permissions import Permissions
 
@@ -73,9 +74,11 @@ class InvokableUserCommand(InvokableApplicationCommand):
         func: InteractionCommandCallback[CogT, UserCommandInteraction, P],
         *,
         name: LocalizedOptional = None,
-        dm_permission: Optional[bool] = None,
+        dm_permission: Optional[bool] = None,  # deprecated
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
+        integration_types: Optional[ApplicationIntegrationTypes] = None,
+        contexts: Optional[InteractionContextTypes] = None,
         guild_ids: Optional[Sequence[int]] = None,
         auto_sync: Optional[bool] = None,
         **kwargs: Any,
@@ -96,14 +99,16 @@ class InvokableUserCommand(InvokableApplicationCommand):
                 )
             default_member_permissions = default_perms
 
-        dm_permission = True if dm_permission is None else dm_permission
-
         self.body = UserCommand(
             name=name_loc._upgrade(self.name),
-            dm_permission=dm_permission and not self._guild_only,
+            dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
             nsfw=nsfw,
+            integration_types=integration_types,
+            contexts=contexts,
         )
+
+        self._apply_guild_only()
 
     async def _call_external_error_handlers(
         self, inter: ApplicationCommandInteraction, error: CommandError
@@ -179,9 +184,11 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         func: InteractionCommandCallback[CogT, MessageCommandInteraction, P],
         *,
         name: LocalizedOptional = None,
-        dm_permission: Optional[bool] = None,
+        dm_permission: Optional[bool] = None,  # deprecated
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
+        integration_types: Optional[ApplicationIntegrationTypes] = None,
+        contexts: Optional[InteractionContextTypes] = None,
         guild_ids: Optional[Sequence[int]] = None,
         auto_sync: Optional[bool] = None,
         **kwargs: Any,
@@ -196,14 +203,16 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         except AttributeError:
             pass
 
-        dm_permission = True if dm_permission is None else dm_permission
-
         self.body = MessageCommand(
             name=name_loc._upgrade(self.name),
-            dm_permission=dm_permission and not self._guild_only,
+            dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
             nsfw=nsfw,
+            integration_types=integration_types,
+            contexts=contexts,
         )
+
+        self._apply_guild_only()
 
     async def _call_external_error_handlers(
         self, inter: ApplicationCommandInteraction, error: CommandError
@@ -239,9 +248,11 @@ class InvokableMessageCommand(InvokableApplicationCommand):
 def user_command(
     *,
     name: LocalizedOptional = None,
-    dm_permission: Optional[bool] = None,
+    dm_permission: Optional[bool] = None,  # deprecated
     default_member_permissions: Optional[Union[Permissions, int]] = None,
     nsfw: Optional[bool] = None,
+    integration_types: Optional[ApplicationIntegrationTypes] = None,
+    contexts: Optional[InteractionContextTypes] = None,
     guild_ids: Optional[Sequence[int]] = None,
     auto_sync: Optional[bool] = None,
     extras: Optional[Dict[str, Any]] = None,
@@ -260,6 +271,11 @@ def user_command(
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
         Defaults to ``True``.
+
+        .. deprecated:: 2.10
+            Use ``contexts`` instead.
+            This is equivalent to the :attr:`.InteractionContextTypes.bot_dm` flag.
+
     default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
         The default required permissions for this command.
         See :attr:`.ApplicationCommand.default_member_permissions` for details.
@@ -271,6 +287,19 @@ def user_command(
         Defaults to ``False``.
 
         .. versionadded:: 2.8
+
+    integration_types: Optional[:class:`.ApplicationIntegrationTypes`]
+        The integration types/installation contexts where the command is available.
+        Defaults to :attr:`.ApplicationIntegrationTypes.guild` only.
+        Only available for global commands.
+
+        .. versionadded:: 2.10
+
+    contexts: Optional[:class:`.InteractionContextTypes`]
+        The interaction contexts where the command can be used.
+        Only available for global commands.
+
+        .. versionadded:: 2.10
 
     auto_sync: :class:`bool`
         Whether to automatically register the command. Defaults to ``True``.
@@ -306,6 +335,8 @@ def user_command(
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
             nsfw=nsfw,
+            integration_types=integration_types,
+            contexts=contexts,
             guild_ids=guild_ids,
             auto_sync=auto_sync,
             extras=extras,
@@ -318,9 +349,11 @@ def user_command(
 def message_command(
     *,
     name: LocalizedOptional = None,
-    dm_permission: Optional[bool] = None,
+    dm_permission: Optional[bool] = None,  # deprecated
     default_member_permissions: Optional[Union[Permissions, int]] = None,
     nsfw: Optional[bool] = None,
+    integration_types: Optional[ApplicationIntegrationTypes] = None,
+    contexts: Optional[InteractionContextTypes] = None,
     guild_ids: Optional[Sequence[int]] = None,
     auto_sync: Optional[bool] = None,
     extras: Optional[Dict[str, Any]] = None,
@@ -342,6 +375,11 @@ def message_command(
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
         Defaults to ``True``.
+
+        .. deprecated:: 2.10
+            Use ``contexts`` instead.
+            This is equivalent to the :attr:`.InteractionContextTypes.bot_dm` flag.
+
     default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
         The default required permissions for this command.
         See :attr:`.ApplicationCommand.default_member_permissions` for details.
@@ -353,6 +391,19 @@ def message_command(
         Defaults to ``False``.
 
         .. versionadded:: 2.8
+
+    integration_types: Optional[:class:`.ApplicationIntegrationTypes`]
+        The integration types/installation contexts where the command is available.
+        Defaults to :attr:`.ApplicationIntegrationTypes.guild` only.
+        Only available for global commands.
+
+        .. versionadded:: 2.10
+
+    contexts: Optional[:class:`.InteractionContextTypes`]
+        The interaction contexts where the command can be used.
+        Only available for global commands.
+
+        .. versionadded:: 2.10
 
     auto_sync: :class:`bool`
         Whether to automatically register the command. Defaults to ``True``.
@@ -388,6 +439,8 @@ def message_command(
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
             nsfw=nsfw,
+            integration_types=integration_types,
+            contexts=contexts,
             guild_ids=guild_ids,
             auto_sync=auto_sync,
             extras=extras,

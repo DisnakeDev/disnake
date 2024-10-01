@@ -717,3 +717,6 @@ Using this, you can specify if you want a certain slash command to work in DMs o
         ...
 
 This will make the ``config`` slash command invisible in DMs, while it will remain visible in guilds.
+
+..
+    TODO

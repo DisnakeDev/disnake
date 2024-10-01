@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional, cast
 
 from . import utils
 from .asset import Asset
@@ -14,6 +14,8 @@ if TYPE_CHECKING:
     from .state import ConnectionState
     from .types.appinfo import (
         AppInfo as AppInfoPayload,
+        ApplicationIntegrationType as ApplicationIntegrationTypeLiteral,
+        ApplicationIntegrationTypeConfiguration as ApplicationIntegrationTypeConfigurationPayload,
         InstallParams as InstallParamsPayload,
         PartialAppInfo as PartialAppInfoPayload,
         Team as TeamPayload,
@@ -24,6 +26,7 @@ __all__ = (
     "AppInfo",
     "PartialAppInfo",
     "InstallParams",
+    "IntegrationTypeConfiguration",
 )
 
 
@@ -42,12 +45,20 @@ class InstallParams:
 
     __slots__ = (
         "_app_id",
+        "_integration_type",
         "scopes",
         "permissions",
     )
 
-    def __init__(self, data: InstallParamsPayload, parent: AppInfo) -> None:
+    def __init__(
+        self,
+        data: InstallParamsPayload,
+        parent: AppInfo,
+        *,
+        integration_type: Optional[ApplicationIntegrationTypeLiteral] = None,
+    ) -> None:
         self._app_id = parent.id
+        self._integration_type: Optional[ApplicationIntegrationTypeLiteral] = integration_type
         self.scopes = data["scopes"]
         self.permissions = Permissions(int(data["permissions"]))
 
@@ -62,7 +73,41 @@ class InstallParams:
         :class:`str`
             The invite url.
         """
-        return utils.oauth_url(self._app_id, scopes=self.scopes, permissions=self.permissions)
+        return utils.oauth_url(
+            self._app_id,
+            scopes=self.scopes,
+            permissions=self.permissions,
+            integration_type=(
+                self._integration_type if self._integration_type is not None else utils.MISSING
+            ),
+        )
+
+
+class IntegrationTypeConfiguration:
+    """Represents the configuration for a particular application integration type.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    install_params: Optional[:class:`InstallParams`]
+        The installation parameters for this integration type.
+    """
+
+    __slots__ = ("install_params",)
+
+    def __init__(
+        self,
+        data: ApplicationIntegrationTypeConfigurationPayload,
+        *,
+        parent: AppInfo,
+        integration_type: ApplicationIntegrationTypeLiteral,
+    ) -> None:
+        self.install_params: Optional[InstallParams] = (
+            InstallParams(install_params, parent=parent, integration_type=integration_type)
+            if (install_params := data.get("oauth2_install_params"))
+            else None
+        )
 
 
 class AppInfo:
@@ -138,6 +183,8 @@ class AppInfo:
     install_params: Optional[:class:`InstallParams`]
         The installation parameters for this application.
 
+        See also :attr:`integration_types_config` for integration type-specific configuration.
+
         .. versionadded:: 2.5
 
     custom_install_url: Optional[:class:`str`]
@@ -157,6 +204,14 @@ class AppInfo:
     approximate_user_install_count: :class:`int`
         The approximate number of users that have installed the application
         (for user-installable apps).
+
+        .. versionadded:: 2.10
+    integration_types_config: Dict[:class:`ApplicationIntegrationTypes`, :class:`IntegrationTypeConfiguration`]
+        The mapping of integration types/installation contexts to their respective configuration parameters.
+
+        For example, an :attr:`ApplicationIntegrationTypes.guild` key being present means that
+        the application can be installed to guilds, and its value is the configuration (e.g. scopes, permissions)
+        that will be used during installation, if any.
 
         .. versionadded:: 2.10
     """
@@ -187,6 +242,7 @@ class AppInfo:
         "role_connections_verification_url",
         "approximate_guild_count",
         "approximate_user_install_count",
+        "integration_types_config",
     )
 
     def __init__(self, state: ConnectionState, data: AppInfoPayload) -> None:
@@ -230,6 +286,16 @@ class AppInfo:
         )
         self.approximate_guild_count: int = data.get("approximate_guild_count", 0)
         self.approximate_user_install_count: int = data.get("approximate_user_install_count", 0)
+
+        # TODO: update docs
+        self.integration_types_config: Dict[int, IntegrationTypeConfiguration] = {}
+        for _type, config in (data.get("integration_types_config") or {}).items():
+            integration_type = cast("ApplicationIntegrationTypeLiteral", int(_type))
+            self.integration_types_config[integration_type] = IntegrationTypeConfiguration(
+                config or {},
+                parent=self,
+                integration_type=integration_type,
+            )
 
     def __repr__(self) -> str:
         return (

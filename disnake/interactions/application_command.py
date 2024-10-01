@@ -105,6 +105,33 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
 
         .. versionadded:: 2.10
 
+    authorizing_integration_owners: Dict[:class:`ApplicationIntegrationTypes`, int]
+        The authorizing user/guild for the application installation.
+
+        This is only available if the application was installed to a user, and is empty otherwise.
+        If this interaction was triggered through an application command,
+        this requirement also applies to the command itself; see :attr:`ApplicationCommand.integration_types`.
+
+        The value for the :attr:`ApplicationIntegrationTypes.user` key is the user ID.
+        If the application (and command) was also installed to the guild, the value for the
+        :attr:`ApplicationIntegrationTypes.guild` key is the guild ID, or ``0`` in DMs with the bot.
+
+        See the :ddocs:`official docs <interactions/receiving-and-responding#interaction-object-authorizing-integration-owners-object>`
+        for more information.
+
+        For example, this would return ``{.guild: <guild_id>, .user: <user_id>}`` if invoked in a guild and installed to the guild and user,
+        or ``{.user: <user_id>}`` in a DM between two users.
+
+        .. versionadded:: 2.10
+
+    context: Optional[:class:`InteractionContextTypes`]
+        The context where the interaction was triggered from.
+
+        This has the same requirements as :attr:`authorizing_integration_owners`; that is,
+        this is only available if the application (and command) was installed to a user, and is ``None`` otherwise.
+
+        .. versionadded:: 2.10
+
     data: :class:`ApplicationCommandInteractionData`
         The wrapped interaction data.
     application_command: :class:`.InvokableApplicationCommand`
@@ -143,8 +170,9 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
 class GuildCommandInteraction(ApplicationCommandInteraction[ClientT]):
     """An :class:`ApplicationCommandInteraction` subclass, primarily meant for annotations.
 
-    This prevents the command from being invoked in DMs by automatically setting
-    :attr:`ApplicationCommand.dm_permission` to ``False`` for user/message commands and top-level slash commands.
+    This prevents the command from being invoked in DMs by automatically adjusting the
+    :attr:`~InteractionContextTypes.bot_dm` and :attr:`~InteractionContextTypes.private_channel` flags of
+    :attr:`ApplicationCommand.contexts` to ``False`` for user/message commands and top-level slash commands.
 
     Note that this does not apply to slash subcommands, subcommand groups, or autocomplete callbacks.
 
@@ -155,7 +183,7 @@ class GuildCommandInteraction(ApplicationCommandInteraction[ClientT]):
     guild: Guild
     guild_id: int
     guild_locale: Locale
-    me: Member
+    me: Member  # TODO: this might be inaccurate now
 
 
 class UserCommandInteraction(ApplicationCommandInteraction[ClientT]):

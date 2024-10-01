@@ -41,7 +41,7 @@ from ..errors import (
     ModalChainNotSupported,
     NotFound,
 )
-from ..flags import MessageFlags
+from ..flags import InteractionContextTypes, MessageFlags
 from ..guild import Guild
 from ..i18n import Localized
 from ..member import Member
@@ -162,6 +162,33 @@ class Interaction(Generic[ClientT]):
         representing access to an application subscription.
 
         .. versionadded:: 2.10
+
+    authorizing_integration_owners: Dict[:class:`ApplicationIntegrationTypes`, int]
+        The authorizing user/guild for the application installation.
+
+        This is only available if the application was installed to a user, and is empty otherwise.
+        If this interaction was triggered through an application command,
+        this requirement also applies to the command itself; see :attr:`ApplicationCommand.integration_types`.
+
+        The value for the :attr:`ApplicationIntegrationTypes.user` key is the user ID.
+        If the application (and command) was also installed to the guild, the value for the
+        :attr:`ApplicationIntegrationTypes.guild` key is the guild ID, or ``0`` in DMs with the bot.
+
+        See the :ddocs:`official docs <interactions/receiving-and-responding#interaction-object-authorizing-integration-owners-object>`
+        for more information.
+
+        For example, this would return ``{.guild: <guild_id>, .user: <user_id>}`` if invoked in a guild and installed to the guild and user,
+        or ``{.user: <user_id>}`` in a DM between two users.
+
+        .. versionadded:: 2.10
+
+    context: Optional[:class:`InteractionContextTypes`]
+        The context where the interaction was triggered from.
+
+        This has the same requirements as :attr:`authorizing_integration_owners`; that is,
+        this is only available if the application (and command) was installed to a user, and is ``None`` otherwise.
+
+        .. versionadded:: 2.10
     """
 
     __slots__: Tuple[str, ...] = (
@@ -178,6 +205,8 @@ class Interaction(Generic[ClientT]):
         "guild_locale",
         "client",
         "entitlements",
+        "authorizing_integration_owners",
+        "context",
         "_app_permissions",
         "_permissions",
         "_state",
@@ -244,6 +273,21 @@ class Interaction(Generic[ClientT]):
             else []
         )
 
+        # TODO: reconsider if/how to expose this:
+        # type 0 is either "0" or matches self.guild.id
+        # type 1 should(?) match self.user.id
+        # ... this completely falls apart for message.interaction_metadata
+        self.authorizing_integration_owners: Dict[int, int] = {
+            int(k): int(v) for k, v in (data.get("authorizing_integration_owners") or {}).items()
+        }
+
+        # TODO: document this properly; it's a flag object, but only one value will be set
+        self.context: Optional[InteractionContextTypes] = (
+            InteractionContextTypes._from_values([context])
+            if (context := data.get("context")) is not None
+            else None
+        )
+
     @property
     def bot(self) -> ClientT:
         """:class:`~disnake.ext.commands.Bot`: An alias for :attr:`.client`."""
@@ -271,9 +315,8 @@ class Interaction(Generic[ClientT]):
         """Union[:class:`.Member`, :class:`.ClientUser`]:
         Similar to :attr:`.Guild.me` except it may return the :class:`.ClientUser` in private message contexts.
         """
-        if self.guild is None:
-            return None if self.bot is None else self.bot.user  # type: ignore
-        return self.guild.me
+        # TODO: guild.me will return None once we start using the partial guild from the interaction
+        return self.guild.me if self.guild is not None else self.client.user
 
     @property
     def channel_id(self) -> int:
@@ -307,6 +350,7 @@ class Interaction(Generic[ClientT]):
         """
         if self.guild_id:
             return Permissions(self._app_permissions)
+        # TODO: this fallback should be unnecessary now
         return Permissions.private_channel()
 
     @utils.cached_slot_property("_cs_response")
@@ -1540,11 +1584,10 @@ class InteractionMessage(Message):
         Could be a :class:`DMChannel` or :class:`GroupChannel` if it's a private message.
     reference: Optional[:class:`~disnake.MessageReference`]
         The message that this message references. This is only applicable to message replies.
-    interaction: Optional[:class:`~disnake.InteractionReference`]
-        The interaction that this message references.
-        This exists only when the message is a response to an interaction without an existing message.
+    interaction_metadata: Optional[:class:`InteractionMetadata`]
+        The metadata about the interaction that caused this message, if any.
 
-        .. versionadded:: 2.1
+        .. versionadded:: 2.10
 
     mention_everyone: :class:`bool`
         Specifies if the message mentions everyone.
