@@ -94,6 +94,30 @@ def test_deprecated(mock_warn: mock.Mock, instead, msg) -> None:
     mock_warn.assert_called_once_with(msg, stacklevel=3, category=DeprecationWarning)
 
 
+@mock.patch.object(utils, "_root_module_path", os.path.dirname(__file__))
+@pytest.mark.xfail(
+    sys.version_info < (3, 12),
+    raises=AssertionError,
+    strict=True,
+    reason="requires 3.12 functionality",
+)
+def test_deprecated_skip() -> None:
+    def func(n: int) -> None:
+        if n == 0:
+            utils.warn_deprecated("test", skip_internal_frames=True)
+        else:
+            func(n - 1)
+
+    with warnings.catch_warnings(record=True) as result:
+        # show a warning a couple frames deep
+        func(10)
+
+    # if we successfully skipped all frames in the current module,
+    # we should end up in the mock decorator's frame
+    assert len(result) == 1
+    assert result[0].filename == mock.__file__
+
+
 @pytest.mark.parametrize(
     ("params", "expected"),
     [

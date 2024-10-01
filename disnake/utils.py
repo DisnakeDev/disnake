@@ -256,7 +256,9 @@ def copy_doc(original: Callable) -> Callable[[T], T]:
     return decorator
 
 
-def deprecated(instead: Optional[str] = None) -> Callable[[Callable[P, T]], Callable[P, T]]:
+def deprecated(
+    instead: Optional[str] = None, *, skip_internal_frames: bool = False
+) -> Callable[[Callable[P, T]], Callable[P, T]]:
     def actual_decorator(func: Callable[P, T]) -> Callable[P, T]:
         @functools.wraps(func)
         def decorated(*args: P.args, **kwargs: P.kwargs) -> T:
@@ -265,7 +267,7 @@ def deprecated(instead: Optional[str] = None) -> Callable[[Callable[P, T]], Call
             else:
                 msg = f"{func.__name__} is deprecated."
 
-            warn_deprecated(msg, stacklevel=2)
+            warn_deprecated(msg, stacklevel=2, skip_internal_frames=skip_internal_frames)
             return func(*args, **kwargs)
 
         return decorated
@@ -273,7 +275,18 @@ def deprecated(instead: Optional[str] = None) -> Callable[[Callable[P, T]], Call
     return actual_decorator
 
 
-def warn_deprecated(*args: Any, stacklevel: int = 1, **kwargs: Any) -> None:
+_root_module_path = os.path.join(os.path.dirname(__file__), "")  # add trailing slash
+
+
+def warn_deprecated(
+    *args: Any, stacklevel: int = 1, skip_internal_frames: bool = False, **kwargs: Any
+) -> None:
+    # NOTE: skip_file_prefixes was added in 3.12; in older versions,
+    # we'll just have to live with the warning location possibly being wrong
+    if sys.version_info >= (3, 12) and skip_internal_frames:
+        kwargs["skip_file_prefixes"] = (_root_module_path,)
+        stacklevel = 1  # reset stacklevel, assume we just want the first frame outside library code
+
     old_filters = warnings.filters[:]
     try:
         warnings.simplefilter("always", DeprecationWarning)

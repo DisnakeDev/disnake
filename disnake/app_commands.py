@@ -20,7 +20,7 @@ from .enums import (
 from .flags import ApplicationIntegrationTypes, InteractionContextTypes
 from .i18n import Localized
 from .permissions import Permissions
-from .utils import MISSING, _get_as_snowflake, _maybe_cast, deprecated
+from .utils import MISSING, _get_as_snowflake, _maybe_cast, deprecated, warn_deprecated
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -563,10 +563,15 @@ class ApplicationCommand(ABC):
         # reset `default_permission` if set before
         self._default_permission: bool = True
 
-        self._dm_permission: Optional[bool] = None
-        if dm_permission is not None:
-            # use the property setter to emit a deprecation warning
-            self.dm_permission = dm_permission
+        self._dm_permission: Optional[bool] = dm_permission
+        if self._dm_permission is not None:
+            warn_deprecated(
+                "dm_permission is deprecated, use contexts instead.",
+                stacklevel=2,
+                # the call stack can have different depths, depending on how the
+                # user created the command, so we can't reliably set a fixed stacklevel
+                skip_internal_frames=True,
+            )
 
             # if both are provided, raise an exception
             # (n.b. these can be assigned to later, in which case no exception will be raised.
