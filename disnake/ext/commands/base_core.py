@@ -144,6 +144,7 @@ class InvokableApplicationCommand(ABC):
         if not isinstance(self.name, str):
             raise TypeError("Name of a command must be a string.")
 
+        # TODO
         if "default_permission" in kwargs:
             raise TypeError(
                 "`default_permission` is deprecated and will always be set to `True`. "
@@ -202,6 +203,8 @@ class InvokableApplicationCommand(ABC):
         ):
             other.body._default_member_permissions = self.body._default_member_permissions
 
+        # TODO: contexts?
+
         try:
             other.on_error = self.on_error
         except AttributeError:
@@ -230,10 +233,13 @@ class InvokableApplicationCommand(ABC):
             return self.copy()
 
     def _apply_guild_only(self) -> None:
-        # If we have a `GuildCommandInteraction` annotation,
-        # turn it into `contexts.bot_dm = contexts.private_channel = False`
+        # If we have a `GuildCommandInteraction` annotation, set `contexts` accordingly.
         if self._guild_only:
-            self.body._convert_dm_permission(False, apply_private_channel=True)
+            if self.body.contexts is None:
+                self.body.contexts = InteractionContextTypes(guild=True)
+            else:
+                self.body.contexts.bot_dm = False
+                self.body.contexts.private_channel = False
 
     @property
     def dm_permission(self) -> bool:

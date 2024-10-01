@@ -486,6 +486,15 @@ class ApplicationCommand(ABC):
 
         .. versionadded:: 2.5
 
+    dm_permission: :class:`bool`
+        Whether this command can be used in DMs.
+        Defaults to ``True``.
+
+        .. versionadded:: 2.5
+
+        .. deprecated:: 2.10
+            Use :attr:`contexts` instead.
+
     nsfw: :class:`bool`
         Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
         Defaults to ``False``.
@@ -554,11 +563,9 @@ class ApplicationCommand(ABC):
         # reset `default_permission` if set before
         self._default_permission: bool = True
 
-        # TODO: consider throwing if both `dm_permission` and `contexts` are provided; take `GuildCommandInteraction` into account as well.
-
-        # `dm_permission` is deprecated; this turns it into `contexts.bot_dm`, which is equivalent.
-        # The API computes `dm_permission` based on `contexts` anyway (if set), so `contexts` is the
-        # source of truth here; it ignores `dm_permission` if `contexts` is set.
+        # TODO: throw if both dm_permission and contexts are set; also consider this for property setters
+        self._dm_permission: Optional[bool] = None
+        # use the property setter to emit a deprecation warning
         if dm_permission is not None:
             self.dm_permission = dm_permission
 
@@ -592,25 +599,13 @@ class ApplicationCommand(ABC):
             Use :attr:`contexts` instead.
             This is equivalent to the :attr:`InteractionContextTypes.bot_dm` flag.
         """
-        if self.contexts is not None:
-            return self.contexts.bot_dm
-
-        return True
+        # a `None` value is equivalent to `True` here
+        return self._dm_permission is not False
 
     @dm_permission.setter
     @deprecated("contexts")
     def dm_permission(self, value: bool) -> None:
-        self._convert_dm_permission(value)
-
-    # this is separate so we can call it internally while avoiding DeprecationWarnings
-    def _convert_dm_permission(self, value: bool, *, apply_private_channel: bool = False) -> None:
-        if self.contexts is None:
-            # this is the default if neither dm_permission nor contexts are set
-            self.contexts = InteractionContextTypes(guild=True, bot_dm=True)
-
-        self.contexts.bot_dm = value
-        if apply_private_channel:
-            self.contexts.private_channel = value
+        self._dm_permission = value
 
     def __repr__(self) -> str:
         attrs = " ".join(f"{key}={getattr(self, key)!r}" for key in self.__repr_info__)
@@ -633,7 +628,8 @@ class ApplicationCommand(ABC):
                     for obj in (self, other)
                 )
                 or (
-                    self.integration_types == other.integration_types
+                    self.dm_permission == other.dm_permission
+                    and self.integration_types == other.integration_types
                     and self.contexts == other.contexts
                 )
             )
@@ -649,6 +645,8 @@ class ApplicationCommand(ABC):
                 if self._default_member_permissions is not None
                 else None
             ),
+            # Discord will ignore this if `contexts` is also set
+            "dm_permission": self._dm_permission is not False,
             "default_permission": True,
             "nsfw": self.nsfw,
         }
@@ -686,10 +684,7 @@ class _APIApplicationCommandMixin:
         self._default_permission = data.get("default_permission") is not False
 
         # same deal, also deprecated.
-        # Only apply if set to `False`, we want to keep `contexts` as-is if
-        # `dm_permission` is the default value (i.e. None/True) for syncing purposes
-        if (dm_permission := data.get("dm_permission")) is False:
-            self._convert_dm_permission(dm_permission)
+        self._dm_permission = data.get("dm_permission")
 
 
 class UserCommand(ApplicationCommand):
@@ -703,6 +698,15 @@ class UserCommand(ApplicationCommand):
         Localizations for ``name``.
 
         .. versionadded:: 2.5
+
+    dm_permission: :class:`bool`
+        Whether this command can be used in DMs.
+        Defaults to ``True``.
+
+        .. versionadded:: 2.5
+
+        .. deprecated:: 2.10
+            Use :attr:`contexts` instead.
 
     nsfw: :class:`bool`
         Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
@@ -759,6 +763,14 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
         Localizations for ``name``.
 
         .. versionadded:: 2.5
+
+    dm_permission: :class:`bool`
+        Whether this command can be used in DMs.
+
+        .. versionadded:: 2.5
+
+        .. deprecated:: 2.10
+            Use :attr:`contexts` instead.
 
     nsfw: :class:`bool`
         Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
@@ -827,6 +839,15 @@ class MessageCommand(ApplicationCommand):
 
         .. versionadded:: 2.5
 
+    dm_permission: :class:`bool`
+        Whether this command can be used in DMs.
+        Defaults to ``True``.
+
+        .. versionadded:: 2.5
+
+        .. deprecated:: 2.10
+            Use :attr:`contexts` instead.
+
     nsfw: :class:`bool`
         Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
         Defaults to ``False``.
@@ -882,6 +903,14 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
         Localizations for ``name``.
 
         .. versionadded:: 2.5
+
+    dm_permission: :class:`bool`
+        Whether this command can be used in DMs.
+
+        .. versionadded:: 2.5
+
+        .. deprecated:: 2.10
+            Use :attr:`contexts` instead.
 
     nsfw: :class:`bool`
         Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
@@ -956,6 +985,15 @@ class SlashCommand(ApplicationCommand):
         Localizations for ``description``.
 
         .. versionadded:: 2.5
+
+    dm_permission: :class:`bool`
+        Whether this command can be used in DMs.
+        Defaults to ``True``.
+
+        .. versionadded:: 2.5
+
+        .. deprecated:: 2.10
+            Use :attr:`contexts` instead.
 
     nsfw: :class:`bool`
         Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
@@ -1096,6 +1134,14 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
         Localizations for ``description``.
 
         .. versionadded:: 2.5
+
+    dm_permission: :class:`bool`
+        Whether this command can be used in DMs.
+
+        .. versionadded:: 2.5
+
+        .. deprecated:: 2.10
+            Use :attr:`contexts` instead.
 
     nsfw: :class:`bool`
         Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
