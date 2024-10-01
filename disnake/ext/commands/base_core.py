@@ -144,11 +144,10 @@ class InvokableApplicationCommand(ABC):
         if not isinstance(self.name, str):
             raise TypeError("Name of a command must be a string.")
 
-        # TODO
         if "default_permission" in kwargs:
             raise TypeError(
                 "`default_permission` is deprecated and will always be set to `True`. "
-                "See `default_member_permissions` and `dm_permission` instead."
+                "See `default_member_permissions` and `contexts` instead."
             )
 
         try:
