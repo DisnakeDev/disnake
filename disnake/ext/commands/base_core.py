@@ -238,6 +238,7 @@ class InvokableApplicationCommand(ABC):
             if self.body.contexts is None:
                 self.body.contexts = InteractionContextTypes(guild=True)
             else:
+                # TODO: copy?
                 self.body.contexts.bot_dm = False
                 self.body.contexts.private_channel = False
 

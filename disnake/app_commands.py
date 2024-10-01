@@ -615,26 +615,35 @@ class ApplicationCommand(ABC):
         return self.name
 
     def __eq__(self, other) -> bool:
-        return (
+        if not (
             self.type == other.type
             and self.name == other.name
             and self.name_localizations == other.name_localizations
             and self.nsfw == other.nsfw
             and self._default_member_permissions == other._default_member_permissions
-            # ignore global-only fields if comparing guild commands
-            and (
-                any(
-                    (isinstance(obj, _APIApplicationCommandMixin) and obj.guild_id)
-                    for obj in (self, other)
-                )
-                or (
-                    self.dm_permission == other.dm_permission
-                    and self.integration_types == other.integration_types
-                    and self.contexts == other.contexts
-                )
-            )
             and self._default_permission == other._default_permission
-        )
+        ):
+            return False
+
+        # ignore global-only fields if comparing guild commands
+        if not any(
+            (isinstance(obj, _APIApplicationCommandMixin) and obj.guild_id) for obj in (self, other)
+        ):
+            if self.integration_types != other.integration_types:
+                return False
+
+            # `contexts` takes priority over `dm_permission`;
+            # ignore `dm_permission` if `contexts` is set,
+            # since the API returns both even when only `contexts` was provided
+            if self.contexts is not None or other.contexts is not None:
+                if self.contexts != other.contexts:
+                    return False
+            else:
+                # this is a bit awkward; `None` is equivalent to `True` in this case
+                if (self._dm_permission is not False) != (other._dm_permission is not False):
+                    return False
+
+        return True
 
     def to_dict(self) -> EditApplicationCommandPayload:
         data: EditApplicationCommandPayload = {
