@@ -486,15 +486,6 @@ class ApplicationCommand(ABC):
 
         .. versionadded:: 2.5
 
-    dm_permission: :class:`bool`
-        Whether this command can be used in DMs.
-        Defaults to ``True``.
-
-        .. versionadded:: 2.5
-
-        .. deprecated:: 2.10
-            Use :attr:`contexts` instead.
-
     nsfw: :class:`bool`
         Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
         Defaults to ``False``.
@@ -720,15 +711,6 @@ class UserCommand(ApplicationCommand):
 
         .. versionadded:: 2.5
 
-    dm_permission: :class:`bool`
-        Whether this command can be used in DMs.
-        Defaults to ``True``.
-
-        .. versionadded:: 2.5
-
-        .. deprecated:: 2.10
-            Use :attr:`contexts` instead.
-
     nsfw: :class:`bool`
         Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
         Defaults to ``False``.
@@ -784,14 +766,6 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
         Localizations for ``name``.
 
         .. versionadded:: 2.5
-
-    dm_permission: :class:`bool`
-        Whether this command can be used in DMs.
-
-        .. versionadded:: 2.5
-
-        .. deprecated:: 2.10
-            Use :attr:`contexts` instead.
 
     nsfw: :class:`bool`
         Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
@@ -860,15 +834,6 @@ class MessageCommand(ApplicationCommand):
 
         .. versionadded:: 2.5
 
-    dm_permission: :class:`bool`
-        Whether this command can be used in DMs.
-        Defaults to ``True``.
-
-        .. versionadded:: 2.5
-
-        .. deprecated:: 2.10
-            Use :attr:`contexts` instead.
-
     nsfw: :class:`bool`
         Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
         Defaults to ``False``.
@@ -924,14 +889,6 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
         Localizations for ``name``.
 
         .. versionadded:: 2.5
-
-    dm_permission: :class:`bool`
-        Whether this command can be used in DMs.
-
-        .. versionadded:: 2.5
-
-        .. deprecated:: 2.10
-            Use :attr:`contexts` instead.
 
     nsfw: :class:`bool`
         Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
@@ -1006,15 +963,6 @@ class SlashCommand(ApplicationCommand):
         Localizations for ``description``.
 
         .. versionadded:: 2.5
-
-    dm_permission: :class:`bool`
-        Whether this command can be used in DMs.
-        Defaults to ``True``.
-
-        .. versionadded:: 2.5
-
-        .. deprecated:: 2.10
-            Use :attr:`contexts` instead.
 
     nsfw: :class:`bool`
         Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
@@ -1155,14 +1103,6 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
         Localizations for ``description``.
 
         .. versionadded:: 2.5
-
-    dm_permission: :class:`bool`
-        Whether this command can be used in DMs.
-
-        .. versionadded:: 2.5
-
-        .. deprecated:: 2.10
-            Use :attr:`contexts` instead.
 
     nsfw: :class:`bool`
         Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
