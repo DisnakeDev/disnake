@@ -1824,6 +1824,8 @@ class Message(Hashable):
 
         Raises
         ------
+        NotFound
+            The message was not found.
         HTTPException
             Editing the message failed.
         Forbidden
