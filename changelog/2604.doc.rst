@@ -1,0 +1,1 @@
+Add NotFound error to Message.edit method's documentation.
