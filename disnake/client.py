@@ -901,7 +901,7 @@ class Client:
             @client.listen('on_message')
             async def my_message(message):
                 print('two')
-
+    
             # in yet another file
             @client.listen(Event.message)
             async def another_message(message):
@@ -1258,6 +1258,11 @@ class Client:
         function should not be used. Use :meth:`start` coroutine
         or :meth:`connect` + :meth:`login`.
 
+        Parameters
+        ----------
+        token: `str`
+            The discord token of the bot that is being ran.
+        
         Roughly Equivalent to: ::
 
             try:
