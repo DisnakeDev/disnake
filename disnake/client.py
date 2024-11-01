@@ -901,7 +901,7 @@ class Client:
             @client.listen('on_message')
             async def my_message(message):
                 print('two')
-    
+
             # in yet another file
             @client.listen(Event.message)
             async def another_message(message):
