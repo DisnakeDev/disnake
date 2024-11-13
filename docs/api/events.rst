@@ -1054,6 +1054,9 @@ Voice
 
     This requires :attr:`Intents.voice_states` and :attr:`Intents.members` to be enabled.
 
+    If the member is not found in the internal member cache, then this
+    event will not be called. Consider using :func:`on_raw_voice_channel_effect` instead.
+
     .. versionadded:: 2.10
 
     :param channel: The voice channel where the effect was sent.
