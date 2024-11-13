@@ -64,16 +64,17 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from .asset import Asset
-    from .channel import CategoryChannel, DMChannel, PartialMessageable
+    from .channel import CategoryChannel, DMChannel, GroupChannel, PartialMessageable
     from .client import Client
     from .embeds import Embed
     from .emoji import Emoji
     from .enums import InviteTarget
-    from .guild import Guild, GuildMessageable
+    from .guild import Guild, GuildChannel as AnyGuildChannel, GuildMessageable
     from .guild_scheduled_event import GuildScheduledEvent
     from .iterators import HistoryIterator
     from .member import Member
     from .message import Message, MessageReference, PartialMessage
+    from .poll import Poll
     from .state import ConnectionState
     from .threads import AnyThreadArchiveDuration, ForumTag
     from .types.channel import (
@@ -89,7 +90,10 @@ if TYPE_CHECKING:
     from .user import ClientUser
     from .voice_region import VoiceRegion
 
-    MessageableChannel = Union[GuildMessageable, DMChannel, PartialMessageable]
+    MessageableChannel = Union[GuildMessageable, DMChannel, GroupChannel, PartialMessageable]
+    # include non-messageable channels, e.g. category/forum
+    AnyChannel = Union[MessageableChannel, AnyGuildChannel]
+
     SnowflakeTime = Union["Snowflake", datetime]
 
 MISSING = utils.MISSING
@@ -640,6 +644,7 @@ class GuildChannel(ABC):
         if not base.send_messages:
             base.send_tts_messages = False
             base.send_voice_messages = False
+            base.send_polls = False
             base.mention_everyone = False
             base.embed_links = False
             base.attach_files = False
@@ -887,6 +892,7 @@ class GuildChannel(ABC):
         request_to_speak: Optional[bool] = ...,
         send_messages: Optional[bool] = ...,
         send_messages_in_threads: Optional[bool] = ...,
+        send_polls: Optional[bool] = ...,
         send_tts_messages: Optional[bool] = ...,
         send_voice_messages: Optional[bool] = ...,
         speak: Optional[bool] = ...,
@@ -1435,6 +1441,7 @@ class Messageable:
         mention_author: bool = ...,
         view: View = ...,
         components: Components[MessageUIComponent] = ...,
+        poll: Poll = ...,
     ) -> Message:
         ...
 
@@ -1456,6 +1463,7 @@ class Messageable:
         mention_author: bool = ...,
         view: View = ...,
         components: Components[MessageUIComponent] = ...,
+        poll: Poll = ...,
     ) -> Message:
         ...
 
@@ -1477,6 +1485,7 @@ class Messageable:
         mention_author: bool = ...,
         view: View = ...,
         components: Components[MessageUIComponent] = ...,
+        poll: Poll = ...,
     ) -> Message:
         ...
 
@@ -1498,6 +1507,7 @@ class Messageable:
         mention_author: bool = ...,
         view: View = ...,
         components: Components[MessageUIComponent] = ...,
+        poll: Poll = ...,
     ) -> Message:
         ...
 
@@ -1520,6 +1530,7 @@ class Messageable:
         mention_author: Optional[bool] = None,
         view: Optional[View] = None,
         components: Optional[Components[MessageUIComponent]] = None,
+        poll: Optional[Poll] = None,
     ):
         """|coro|
 
@@ -1528,7 +1539,7 @@ class Messageable:
         The content must be a type that can convert to a string through ``str(content)``.
 
         At least one of ``content``, ``embed``/``embeds``, ``file``/``files``,
-        ``stickers``, ``components``, or ``view`` must be provided.
+        ``stickers``, ``components``, ``poll`` or ``view`` must be provided.
 
         To upload a single file, the ``file`` parameter should be used with a
         single :class:`.File` object. To upload multiple files, the ``files``
@@ -1624,6 +1635,11 @@ class Messageable:
 
             .. versionadded:: 2.9
 
+        poll: :class:`.Poll`
+            The poll to send with the message.
+
+            .. versionadded:: 2.10
+
         Raises
         ------
         HTTPException
@@ -1675,6 +1691,10 @@ class Messageable:
         stickers_payload = None
         if stickers is not None:
             stickers_payload = [sticker.id for sticker in stickers]
+
+        poll_payload = None
+        if poll:
+            poll_payload = poll._to_dict()
 
         allowed_mentions_payload = None
         if allowed_mentions is None:
@@ -1737,6 +1757,7 @@ class Messageable:
                     message_reference=reference_payload,
                     stickers=stickers_payload,
                     components=components_payload,
+                    poll=poll_payload,
                     flags=flags_payload,
                 )
             finally:
@@ -1753,6 +1774,7 @@ class Messageable:
                 message_reference=reference_payload,
                 stickers=stickers_payload,
                 components=components_payload,
+                poll=poll_payload,
                 flags=flags_payload,
             )
 

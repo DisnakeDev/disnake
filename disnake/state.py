@@ -44,6 +44,7 @@ from .channel import (
     VoiceChannel,
     VoiceChannelEffect,
     _guild_channel_factory,
+    _threaded_channel_factory,
 )
 from .emoji import Emoji
 from .entitlement import Entitlement
@@ -71,6 +72,7 @@ from .raw_models import (
     RawIntegrationDeleteEvent,
     RawMessageDeleteEvent,
     RawMessageUpdateEvent,
+    RawPollVoteActionEvent,
     RawPresenceUpdateEvent,
     RawReactionActionEvent,
     RawReactionClearEmojiEvent,
@@ -91,7 +93,7 @@ from .utils import MISSING
 from .webhook import Webhook
 
 if TYPE_CHECKING:
-    from .abc import MessageableChannel, PrivateChannel
+    from .abc import AnyChannel, MessageableChannel, PrivateChannel
     from .app_commands import APIApplicationCommand, ApplicationCommand
     from .client import Client
     from .gateway import DiscordWebSocket
@@ -102,6 +104,7 @@ if TYPE_CHECKING:
     from .types.channel import DMChannel as DMChannelPayload
     from .types.emoji import Emoji as EmojiPayload, PartialEmoji as PartialEmojiPayload
     from .types.guild import Guild as GuildPayload, UnavailableGuild as UnavailableGuildPayload
+    from .types.interactions import InteractionChannel as InteractionChannelPayload
     from .types.message import Message as MessagePayload
     from .types.sticker import GuildSticker as GuildStickerPayload
     from .types.user import User as UserPayload
@@ -931,6 +934,39 @@ class ConnectionState:
             else:
                 if reaction:
                     self.dispatch("reaction_clear_emoji", reaction)
+
+    def _handle_poll_event(
+        self, raw: RawPollVoteActionEvent, event_type: Literal["add", "remove"]
+    ) -> None:
+        guild = self._get_guild(raw.guild_id)
+        answer = None
+        if guild is not None:
+            member = guild.get_member(raw.user_id)
+            message = self._get_message(raw.message_id)
+            if message is not None and message.poll is not None:
+                answer = message.poll.get_answer(raw.answer_id)
+
+            if member is not None:
+                raw.cached_member = member
+
+        if answer is not None:
+            if event_type == "add":
+                answer.vote_count += 1
+            else:
+                answer.vote_count -= 1
+
+        self.dispatch(f"raw_poll_vote_{event_type}", raw)
+
+        if raw.cached_member is not None and answer is not None:
+            self.dispatch(f"poll_vote_{event_type}", raw.cached_member, answer)
+
+    def parse_message_poll_vote_add(self, data: gateway.PollVoteAddEvent) -> None:
+        raw = RawPollVoteActionEvent(data, "POLL_VOTE_ADD")
+        self._handle_poll_event(raw, "add")
+
+    def parse_message_poll_vote_remove(self, data: gateway.PollVoteRemoveEvent) -> None:
+        raw = RawPollVoteActionEvent(data, "POLL_VOTE_REMOVE")
+        self._handle_poll_event(raw, "remove")
 
     def parse_interaction_create(self, data: gateway.InteractionCreateEvent) -> None:
         # note: this does not use an intermediate variable for `data["type"]` since
@@ -2016,6 +2052,65 @@ class ConnectionState:
         except KeyError:
             return emoji
 
+    @overload
+    def _get_partial_interaction_channel(
+        self,
+        data: InteractionChannelPayload,
+        guild: Optional[Union[Guild, Object]],
+        *,
+        return_messageable: Literal[False] = False,
+    ) -> AnyChannel:
+        ...
+
+    @overload
+    def _get_partial_interaction_channel(
+        self,
+        data: InteractionChannelPayload,
+        guild: Optional[Union[Guild, Object]],
+        *,
+        return_messageable: Literal[True],
+    ) -> MessageableChannel:
+        ...
+
+    # note: this resolves unknown types to `PartialMessageable`
+    def _get_partial_interaction_channel(
+        self,
+        data: InteractionChannelPayload,
+        guild: Optional[Union[Guild, Object]],
+        *,
+        # this param is purely for type-checking, it has no effect on runtime behavior.
+        return_messageable: bool = False,
+    ) -> AnyChannel:
+        channel_id = int(data["id"])
+        channel_type = data["type"]
+
+        factory, ch_type = _threaded_channel_factory(channel_type)
+        if not factory:
+            return PartialMessageable(
+                state=self,
+                id=channel_id,
+                type=ch_type,
+            )
+
+        if ch_type in (ChannelType.group, ChannelType.private):
+            return (
+                self._get_private_channel(channel_id)
+                # the factory will be a DMChannel or GroupChannel here
+                or factory(me=self.user, data=data, state=self)  # type: ignore
+            )
+
+        # the factory can't be a DMChannel or GroupChannel here
+        data.setdefault("position", 0)  # type: ignore
+        return (
+            isinstance(guild, Guild)
+            and guild.get_channel_or_thread(channel_id)
+            or factory(
+                guild=guild,  # type: ignore  # FIXME: create proper fallback guild instead of passing Object
+                state=self,
+                data=data,  # type: ignore  # generic payload type
+            )
+        )
+
     def get_channel(self, id: Optional[int]) -> Optional[Union[Channel, Thread]]:
         if id is None:
             return None
@@ -2191,6 +2286,7 @@ class AutoShardedConnectionState(ConnectionState):
             if new_guild is None:
                 continue
 
+            # TODO: use PartialMessageable instead of Object (3.0)
             new_channel = new_guild._resolve_channel(vc.channel.id) or Object(id=vc.channel.id)
             if new_channel is not vc.channel:
                 vc.channel = new_channel  # type: ignore
@@ -2207,6 +2303,11 @@ class AutoShardedConnectionState(ConnectionState):
             new_author = msg.guild.get_member(msg.author.id)
             if new_author is not None and new_author is not msg.author:
                 msg.author = new_author
+
+            if msg.interaction is not None and isinstance(msg.interaction.user, Member):
+                new_author = msg.guild.get_member(msg.interaction.user.id)
+                if new_author is not None and new_author is not msg.interaction.user:
+                    msg.interaction.user = new_author
 
     async def chunker(
         self,

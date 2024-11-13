@@ -1,0 +1,1 @@
+Add support for ``aead_xchacha20_poly1305_rtpsize`` encryption mode for voice connections, and remove deprecated ``xsalsa20_poly1305*`` modes.

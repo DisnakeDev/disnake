@@ -1028,11 +1028,13 @@ class Intents(BaseFlags):
         automod_execution: bool = ...,
         bans: bool = ...,
         dm_messages: bool = ...,
+        dm_polls: bool = ...,
         dm_reactions: bool = ...,
         dm_typing: bool = ...,
         emojis: bool = ...,
         emojis_and_stickers: bool = ...,
         guild_messages: bool = ...,
+        guild_polls: bool = ...,
         guild_reactions: bool = ...,
         guild_scheduled_events: bool = ...,
         guild_typing: bool = ...,
@@ -1043,6 +1045,7 @@ class Intents(BaseFlags):
         message_content: bool = ...,
         messages: bool = ...,
         moderation: bool = ...,
+        polls: bool = ...,
         presences: bool = ...,
         reactions: bool = ...,
         typing: bool = ...,
@@ -1445,7 +1448,7 @@ class Intents(BaseFlags):
 
     @flag_value
     def guild_reactions(self):
-        """:class:`bool`: Whether guild message reaction related events are enabled.
+        """:class:`bool`: Whether guild reaction related events are enabled.
 
         See also :attr:`dm_reactions` for DMs or :attr:`reactions` for both.
 
@@ -1501,7 +1504,7 @@ class Intents(BaseFlags):
 
     @flag_value
     def guild_typing(self):
-        """:class:`bool`: Whether guild and direct message typing related events are enabled.
+        """:class:`bool`: Whether guild typing related events are enabled.
 
         See also :attr:`dm_typing` for DMs or :attr:`typing` for both.
 
@@ -1515,7 +1518,7 @@ class Intents(BaseFlags):
 
     @flag_value
     def dm_typing(self):
-        """:class:`bool`: Whether guild and direct message typing related events are enabled.
+        """:class:`bool`: Whether direct message typing related events are enabled.
 
         See also :attr:`guild_typing` for guilds or :attr:`typing` for both.
 
@@ -1599,6 +1602,61 @@ class Intents(BaseFlags):
         This does not correspond to any attributes or classes in the library in terms of cache.
         """
         return (1 << 20) | (1 << 21)
+
+    @alias_flag_value
+    def polls(self):
+        """:class:`bool`: Whether guild and direct message polls related events are enabled.
+
+        This is a shortcut to set or get both :attr:`guild_polls` and :attr:`dm_polls`.
+
+        This corresponds to the following events:
+
+        - :func:`on_poll_vote_add` (both guilds and DMs)
+        - :func:`on_poll_vote_remove` (both guilds and DMs)
+        - :func:`on_raw_poll_vote_add` (both guilds and DMs)
+        - :func:`on_raw_poll_vote_remove` (both guilds and DMs)
+        """
+        return (1 << 24) | (1 << 25)
+
+    @flag_value
+    def guild_polls(self):
+        """:class:`bool`: Whether guild polls related events are enabled.
+
+        .. versionadded:: 2.10
+
+        This corresponds to the following events:
+
+        - :func:`on_poll_vote_add` (only for guilds)
+        - :func:`on_poll_vote_remove` (only for guilds)
+        - :func:`on_raw_poll_vote_add` (only for guilds)
+        - :func:`on_raw_poll_vote_remove` (only for guilds)
+
+        This also corresponds to the following attributes and classes in terms of cache:
+
+        - :attr:`Message.poll` (only for guild messages)
+        - :class:`Poll` and all its attributes.
+        """
+        return 1 << 24
+
+    @flag_value
+    def dm_polls(self):
+        """:class:`bool`: Whether direct message polls related events are enabled.
+
+        .. versionadded:: 2.10
+
+        This corresponds to the following events:
+
+        - :func:`on_poll_vote_add` (only for DMs)
+        - :func:`on_poll_vote_remove` (only for DMs)
+        - :func:`on_raw_poll_vote_add` (only for DMs)
+        - :func:`on_raw_poll_vote_remove` (only for DMs)
+
+        This also corresponds to the following attributes and classes in terms of cache:
+
+        - :attr:`Message.poll` (only for DM messages)
+        - :class:`Poll` and all its attributes.
+        """
+        return 1 << 25
 
 
 class MemberCacheFlags(BaseFlags):
