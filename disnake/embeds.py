@@ -637,7 +637,7 @@ class Embed:
         icon_url: Optional[:class:`str`]
             The URL of the author icon. Only HTTP(S) is supported.
         file: :class:`File`
-            The file to use as the image.
+            The file to use as the author icon.
 
             .. versionadded:: 2.10
         """
