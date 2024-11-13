@@ -347,8 +347,8 @@ class _BaseRange(ABC, Generic[NumberT]):
         return cls(underlying_type=underlying_type, min_value=min_value, max_value=max_value)
 
     @staticmethod
-    def _coerce_bound(value: Union[NumberT, None, EllipsisType], name: str) -> Optional[NumberT]:
-        if value is None or isinstance(value, EllipsisType):
+    def _coerce_bound(value: Union[Optional[NumberT], EllipsisType], name: str) -> Optional[NumberT]:
+        if value is None or value is ...:
             return None
         elif isinstance(value, (int, float)):
             if not math.isfinite(value):
