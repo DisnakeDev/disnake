@@ -1060,7 +1060,7 @@ Voice
     .. versionadded:: 2.10
 
     :param channel: The voice channel where the effect was sent.
-    :type channel: :class:`abc.GuildChannel`
+    :type channel: :class:`VoiceChannel`
     :param member: The member that sent the effect.
     :type member: :class:`Member`
     :param effect: The effect that was sent.

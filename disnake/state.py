@@ -1844,7 +1844,6 @@ class ConnectionState:
         effect = VoiceChannelEffect(data=data, state=self)
         raw = RawVoiceChannelEffectEvent(data, effect)
 
-        # TODO: narrow channel type to VoiceChannel?
         channel = guild.get_channel(raw.channel_id)
         raw.cached_member = member = guild.get_member(raw.user_id)
         self.dispatch("raw_voice_channel_effect", raw)
