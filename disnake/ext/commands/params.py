@@ -781,16 +781,25 @@ class ParamInfo:
             annotation = int
 
         if self.large:
-            self.type = str
             if annotation is not int:
                 msg = "Large integers must be annotated with int or LargeInt"
                 raise TypeError(msg)
+            self.type = str
 
-            # if either bound is None or ..., we cannot restrict the length
             if self.min_value is not None and self.max_value is not None:
+                # honestly would rather assert than type ignore these
                 self.min_length, self.max_length = _range_to_str_len(
-                    self.min_value, self.max_value  # pyright: ignore
+                    self.min_value,  # pyright: ignore
+                    self.max_value,  # pyright: ignore
                 )
+
+            elif self.min_value is not None and self.min_value > 0:
+                # 0 < min_value <= max_value == inf
+                self.min_length = _int_to_str_len(self.min_value)  # pyright: ignore
+
+            elif self.max_value is not None and self.max_value < 0:
+                # -inf == max_value <= min_value < 0
+                self.max_length = _int_to_str_len(self.max_value)  # pyright: ignore
 
         elif annotation in self.TYPES:
             self.type = annotation
