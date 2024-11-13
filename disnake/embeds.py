@@ -886,7 +886,7 @@ class Embed:
     get_default_color = get_default_colour
 
     def _handle_resource(
-        self, url: Optional[Any], file: File, *, key: _FileKey, required: bool = True
+        self, url: Optional[Any], file: Optional[File], *, key: _FileKey, required: bool = True
     ) -> Optional[str]:
         if required:
             if not (url is MISSING) ^ (file is MISSING):
