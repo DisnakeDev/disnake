@@ -408,9 +408,8 @@ class Embed:
             reusable.
 
         .. note::
-            If used with the other ``set_*`` methods you must ensure
-            that the :attr:`.File.filename` is different than the other file(s)
-            that you are passing.
+            If used with the other ``set_*`` methods, you must ensure
+            that the :attr:`.File.filename` is unique to avoid duplication.
 
         Parameters
         ----------
