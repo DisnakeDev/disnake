@@ -891,7 +891,7 @@ class Embed:
                 raise TypeError("Exactly one of url or file must be provided")
         else:
             if url is not MISSING and file is not MISSING:
-                raise TypeError("Only one of url or file must be provided, not both.")
+                raise TypeError("At most one of url or file may be provided, not both.")
 
         if file:
             if file.filename is None:
