@@ -1257,7 +1257,7 @@ class Client:
         If you want more control over the event loop then this
         function should not be used. Use :meth:`start` coroutine
         or :meth:`connect` + :meth:`login`.
-        
+
         Roughly Equivalent to: ::
 
             try:
