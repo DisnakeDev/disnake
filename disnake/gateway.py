@@ -696,7 +696,7 @@ class DiscordWebSocket:
         # try to reconnect.
         if self._close_code is None and self.socket.close_code == 1000:
             _log.info(
-                "Websocket remote in shard ID %s closed with %s. Assuming the connection dropped and attempting a reconnect.",
+                "Websocket remote in shard ID %s closed with %s. Assuming the connection dropped.",
                 self.shard_id,
                 self.socket.close_code,
             )
