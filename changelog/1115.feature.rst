@@ -1,0 +1,1 @@
+Add :class:`SelectDefaultValue`, and add :attr:`~UserSelectMenu.default_values` to all auto-populated select menu types.

@@ -47,6 +47,7 @@ __all__ = (
     "ComponentType",
     "ButtonStyle",
     "TextInputStyle",
+    "SelectDefaultValueType",
     "StagePrivacyLevel",
     "InteractionType",
     "InteractionResponseType",
@@ -691,6 +692,15 @@ class TextInputStyle(Enum):
     long = 2
 
     def __int__(self) -> int:
+        return self.value
+
+
+class SelectDefaultValueType(Enum):
+    user = "user"
+    role = "role"
+    channel = "channel"
+
+    def __str__(self) -> str:
         return self.value
 
 
