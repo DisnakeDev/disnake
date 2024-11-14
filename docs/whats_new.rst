@@ -22,6 +22,11 @@ in specific versions. Please see :ref:`version_guarantees` for more information.
 v2.9.3
 ------
 
+This is a maintainance release with several minor bugfixes.
+Notably, this includes support for a newer voice encryption mode;
+all modes supported in previous versions are scheduled to be :ddocs:`discontinued <change-log#voice-encryption-modes>` on 18th November 2024,
+and voice connections using the builtin :class:`VoiceClient` will fail to connect.
+
 New Features
 ~~~~~~~~~~~~
 - Add support for ``aead_xchacha20_poly1305_rtpsize`` encryption mode for voice connections, and remove deprecated ``xsalsa20_poly1305*`` modes. (:issue:`1228`)
