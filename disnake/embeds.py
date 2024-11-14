@@ -407,7 +407,7 @@ class Embed:
             Passing a :class:`disnake.File` object will make the embed not
             reusable.
 
-        .. note::
+        .. warning::
             If used with the other ``set_*`` methods, you must ensure
             that the :attr:`.File.filename` is unique to avoid duplication.
 
@@ -482,7 +482,7 @@ class Embed:
             Passing a :class:`disnake.File` object will make the embed not
             reusable.
 
-        .. note::
+        .. warning::
             If used with the other ``set_*`` methods you must ensure
             that the :attr:`.File.filename` is different than the other file(s)
             that you are passing.
@@ -538,7 +538,7 @@ class Embed:
             Passing a :class:`disnake.File` object will make the embed not
             reusable.
 
-        .. note::
+        .. warning::
             If used with the other ``set_*`` methods you must ensure
             that the :attr:`.File.filename` is different than the other file(s)
             that you are passing.
@@ -623,7 +623,7 @@ class Embed:
             Passing a :class:`disnake.File` object will make the embed not
             reusable.
 
-        .. note::
+        .. warning::
             If used with the other ``set_*`` methods you must ensure
             that the :attr:`.File.filename` is different than the other file(s)
             that you are passing.
