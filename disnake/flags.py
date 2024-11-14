@@ -1269,6 +1269,8 @@ class Intents(BaseFlags):
         This corresponds to the following events:
 
         - :func:`on_voice_state_update`
+        - :func:`on_voice_channel_effect`
+        - :func:`on_raw_voice_channel_effect`
 
         This also corresponds to the following attributes and classes in terms of cache:
 

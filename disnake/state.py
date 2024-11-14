@@ -42,6 +42,7 @@ from .channel import (
     StageChannel,
     TextChannel,
     VoiceChannel,
+    VoiceChannelEffect,
     _guild_channel_factory,
     _threaded_channel_factory,
 )
@@ -79,6 +80,7 @@ from .raw_models import (
     RawThreadDeleteEvent,
     RawThreadMemberRemoveEvent,
     RawTypingEvent,
+    RawVoiceChannelEffectEvent,
 )
 from .role import Role
 from .stage_instance import StageInstance
@@ -1809,7 +1811,6 @@ class ConnectionState:
                 if flags.voice:
                     if channel_id is None and flags._voice_only and member.id != self_id:
                         # Only remove from cache if we only have the voice flag enabled
-                        # Member doesn't meet the Snowflake protocol currently
                         guild._remove_member(member)
                     elif channel_id is not None:
                         guild._add_member(member)
@@ -1830,6 +1831,25 @@ class ConnectionState:
             asyncio.create_task(
                 logging_coroutine(coro, info="Voice Protocol voice server update handler")
             )
+
+    def parse_voice_channel_effect_send(self, data: gateway.VoiceChannelEffectSendEvent) -> None:
+        guild = self._get_guild(int(data["guild_id"]))
+        if guild is None:
+            _log.debug(
+                "VOICE_CHANNEL_EFFECT_SEND referencing an unknown guild ID: %s. Discarding.",
+                data["guild_id"],
+            )
+            return
+
+        effect = VoiceChannelEffect(data=data, state=self)
+        raw = RawVoiceChannelEffectEvent(data, effect)
+
+        channel = guild.get_channel(raw.channel_id)
+        raw.cached_member = member = guild.get_member(raw.user_id)
+        self.dispatch("raw_voice_channel_effect", raw)
+
+        if channel and member:
+            self.dispatch("voice_channel_effect", channel, member, effect)
 
     # FIXME: this should be refactored. The `GroupChannel` path will never be hit,
     # `raw.timestamp` exists so no need to parse it twice, and `.get_user` should be used before falling back

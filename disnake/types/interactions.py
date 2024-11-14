@@ -112,7 +112,9 @@ class InteractionDataResolved(TypedDict, total=False):
     members: Dict[Snowflake, Member]
     roles: Dict[Snowflake, Role]
     channels: Dict[Snowflake, InteractionChannel]
-    # only in application commands
+
+
+class ApplicationCommandInteractionDataResolved(InteractionDataResolved, total=False):
     messages: Dict[Snowflake, Message]
     attachments: Dict[Snowflake, Attachment]
 
@@ -165,7 +167,7 @@ class ApplicationCommandInteractionData(TypedDict):
     id: Snowflake
     name: str
     type: ApplicationCommandType
-    resolved: NotRequired[InteractionDataResolved]
+    resolved: NotRequired[ApplicationCommandInteractionDataResolved]
     options: NotRequired[List[ApplicationCommandInteractionDataOption]]
     # this is the guild the command is registered to, not the guild the command was invoked in (see interaction.guild_id)
     guild_id: NotRequired[Snowflake]
