@@ -1,0 +1,1 @@
+Do not use :class:`.abc.PrivateChannel` in an ``isinstance`` check as it structurally matches :class:`Thread`
