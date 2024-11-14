@@ -47,20 +47,24 @@ class File:
     __slots__ = ("fp", "filename", "spoiler", "description", "_original_pos", "_owner", "_closer")
 
     if TYPE_CHECKING:
-        fp: Union[io.TextIOBase, io.BufferedIOBase]
+        fp: io.BufferedIOBase
         filename: Optional[str]
         spoiler: bool
         description: Optional[str]
 
     def __init__(
         self,
-        fp: Union[str, bytes, os.PathLike, io.TextIOBase, io.BufferedIOBase],
+        fp: Union[str, bytes, os.PathLike[str], os.PathLike[bytes], io.StringIO, io.BufferedIOBase],
         filename: Optional[str] = None,
         *,
         spoiler: bool = False,
         description: Optional[str] = None,
     ) -> None:
-        if isinstance(fp, io.IOBase):
+        if isinstance(fp, io.StringIO):
+            self.fp = io.BytesIO(fp.getvalue().encode())
+            self._original_pos = 0
+            self._owner = True
+        elif isinstance(fp, io.IOBase):
             if not (fp.seekable() and fp.readable()):
                 raise ValueError(f"File buffer {fp!r} must be seekable and readable")
             self.fp = fp
