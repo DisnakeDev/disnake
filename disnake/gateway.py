@@ -687,6 +687,21 @@ class DiscordWebSocket:
         return float("inf") if heartbeat is None else heartbeat.latency
 
     def _can_handle_close(self) -> bool:
+        # bandaid fix for https://github.com/aio-libs/aiohttp/issues/8138
+        # tl;dr: on aiohttp >= 3.9.0 and python < 3.11.0, aiohttp returns close code 1000 (OK)
+        # on abrupt connection loss, not 1006 (ABNORMAL_CLOSURE) like one would expect, ultimately
+        # due to faulty ssl lifecycle handling in cpython.
+        # If we end up in a situation where the close code is 1000 but we didn't
+        # initiate the closure (i.e. `self._close_code` isn't set), assume this has happened and
+        # try to reconnect.
+        if self._close_code is None and self.socket.close_code == 1000:
+            _log.info(
+                "Websocket remote in shard ID %s closed with %s. Assuming the connection dropped.",
+                self.shard_id,
+                self.socket.close_code,
+            )
+            return True  # consider this a reconnectable close code
+
         code = self._close_code or self.socket.close_code
         return code not in (1000, 4004, 4010, 4011, 4012, 4013, 4014)
 
