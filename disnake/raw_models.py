@@ -9,6 +9,7 @@ from .enums import ChannelType, try_enum
 from .utils import _get_as_snowflake, get_slots
 
 if TYPE_CHECKING:
+    from .channel import VoiceChannelEffect
     from .member import Member
     from .message import Message
     from .partial_emoji import PartialEmoji
@@ -29,6 +30,7 @@ if TYPE_CHECKING:
         PresenceUpdateEvent,
         ThreadDeleteEvent,
         TypingStartEvent,
+        VoiceChannelEffectSendEvent,
     )
     from .user import User
 
@@ -48,6 +50,7 @@ __all__ = (
     "RawGuildMemberRemoveEvent",
     "RawPresenceUpdateEvent",
     "RawPollVoteActionEvent",
+    "RawVoiceChannelEffectEvent",
 )
 
 
@@ -534,3 +537,39 @@ class RawPresenceUpdateEvent(_RawReprMixin):
         self.user_id: int = int(data["user"]["id"])
         self.guild_id: int = int(data["guild_id"])
         self.data: PresenceUpdateEvent = data
+
+
+class RawVoiceChannelEffectEvent(_RawReprMixin):
+    """Represents the event payload for an :func:`on_raw_voice_channel_effect` event.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    channel_id: :class:`int`
+        The ID of the channel where the effect was sent.
+    guild_id: :class:`int`
+        The ID of the guild where the effect was sent.
+    user_id: :class:`int`
+        The ID of the user who sent the effect.
+    effect: :class:`VoiceChannelEffect`
+        The effect that was sent.
+    cached_member: Optional[:class:`Member`]
+        The member who sent the effect, if they could be found in the internal cache.
+    """
+
+    __slots__ = (
+        "channel_id",
+        "guild_id",
+        "user_id",
+        "effect",
+        "cached_member",
+    )
+
+    def __init__(self, data: VoiceChannelEffectSendEvent, effect: VoiceChannelEffect) -> None:
+        self.channel_id: int = int(data["channel_id"])
+        self.guild_id: int = int(data["guild_id"])
+        self.user_id: int = int(data["user_id"])
+        self.effect: VoiceChannelEffect = effect
+
+        self.cached_member: Optional[Member] = None

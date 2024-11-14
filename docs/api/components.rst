@@ -98,6 +98,22 @@ UserSelectMenu
     :members:
     :inherited-members:
 
+SelectOption
+~~~~~~~~~~~~
+
+.. attributetable:: SelectOption
+
+.. autoclass:: SelectOption
+    :members:
+
+SelectDefaultValue
+~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: SelectDefaultValue
+
+.. autoclass:: SelectDefaultValue
+    :members:
+
 TextInput
 ~~~~~~~~~
 
@@ -106,17 +122,6 @@ TextInput
 .. autoclass:: TextInput()
     :members:
     :inherited-members:
-
-Data Classes
--------------
-
-SelectOption
-~~~~~~~~~~~~
-
-.. attributetable:: SelectOption
-
-.. autoclass:: SelectOption
-    :members:
 
 Enumerations
 ------------
@@ -237,3 +242,24 @@ TextInputStyle
     .. attribute:: long
 
         An alias for :attr:`paragraph`.
+
+SelectDefaultValueType
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. class:: SelectDefaultValueType
+
+    Represents the type of a :class:`SelectDefaultValue`.
+
+    .. versionadded:: 2.10
+
+    .. attribute:: user
+
+        Represents a user/member.
+
+    .. attribute:: role
+
+        Represents a role.
+
+    .. attribute:: channel
+
+        Represents a channel.
