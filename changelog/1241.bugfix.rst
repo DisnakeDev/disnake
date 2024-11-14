@@ -1,0 +1,1 @@
+Attempt to handle abrupt websocket closures on ``aiohttp >= 3.9.0`` and ``python < 3.11.0`` gracefully.
