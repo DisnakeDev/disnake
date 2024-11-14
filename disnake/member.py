@@ -623,18 +623,10 @@ class Member(disnake.abc.Messageable, _UserTag):
             return None
         return Asset._from_guild_avatar(self._state, self.guild.id, self.id, self._avatar)
 
-    @property
-    def display_banner(self) -> Optional[Asset]:
-        """Optional[:class:`Asset`]: Returns the member's display banner.
-
-        For regular members this is just their banner, but
-        if they have a guild specific banner then that
-        is returned instead.
-
-        .. versionadded:: 2.10
-        """
-        return self.guild_banner or self._user.banner
-
+    # TODO
+    # implement a `display_banner` property
+    # for more info on why this wasn't implemented read this discussion
+    # https://github.com/DisnakeDev/disnake/pull/1204#discussion_r1685773429
     @property
     def guild_banner(self) -> Optional[Asset]:
         """Optional[:class:`Asset`]: Returns an :class:`Asset` for the guild banner
