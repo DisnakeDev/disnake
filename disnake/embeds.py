@@ -401,7 +401,7 @@ class Embed:
         This function returns the class instance to allow for fluent-style
         chaining.
 
-        At most one of ``icon_url`` or ``file`` may be passed.
+        At most one of ``icon_url`` or ``icon_file`` may be passed.
 
         .. warning::
             Passing a :class:`disnake.File` object will make the embed not
@@ -617,7 +617,7 @@ class Embed:
         This function returns the class instance to allow for fluent-style
         chaining.
 
-        At most one of ``icon_url`` or ``file`` may be passed.
+        At most one of ``icon_url`` or ``icon_file`` may be passed.
 
         .. warning::
             Passing a :class:`disnake.File` object will make the embed not
