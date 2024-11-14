@@ -1081,11 +1081,6 @@ class Message(Hashable):
             for d in data.get("components", [])
         ]
 
-        inter_payload = data.get("interaction")
-        inter = (
-            None if inter_payload is None else InteractionReference(state=state, data=inter_payload)
-        )
-        self.interaction: Optional[InteractionReference] = inter
         self.message_snapshots: List[ForwardedMessage] = [
             ForwardedMessage(
                 state=self._state,
