@@ -390,11 +390,11 @@ class Embed:
         ...
 
     @overload
-    def set_footer(self, *, text: Any, file: File = ...) -> Self:
+    def set_footer(self, *, text: Any, icon_file: File = ...) -> Self:
         ...
 
     def set_footer(
-        self, *, text: Any, icon_url: Optional[Any] = MISSING, file: File = MISSING
+        self, *, text: Any, icon_url: Optional[Any] = MISSING, icon_file: File = MISSING
     ) -> Self:
         """Sets the footer for the embed content.
 
@@ -421,7 +421,7 @@ class Embed:
 
         icon_url: Optional[:class:`str`]
             The URL of the footer icon. Only HTTP(S) is supported.
-        file: :class:`File`
+        icon_file: :class:`File`
             The file to use as the footer icon.
 
             .. versionadded:: 2.10
@@ -430,7 +430,7 @@ class Embed:
             "text": str(text),
         }
 
-        result = self._handle_resource(icon_url, file, key="footer", required=False)
+        result = self._handle_resource(icon_url, icon_file, key="footer", required=False)
         if result is not None:
             self._footer["icon_url"] = result
 
@@ -601,7 +601,7 @@ class Embed:
         ...
 
     @overload
-    def set_author(self, *, name: Any, url: Optional[Any] = ..., file: File = ...) -> Self:
+    def set_author(self, *, name: Any, url: Optional[Any] = ..., icon_file: File = ...) -> Self:
         ...
 
     def set_author(
@@ -610,7 +610,7 @@ class Embed:
         name: Any,
         url: Optional[Any] = None,
         icon_url: Optional[Any] = MISSING,
-        file: File = MISSING,
+        icon_file: File = MISSING,
     ) -> Self:
         """Sets the author for the embed content.
 
@@ -636,7 +636,7 @@ class Embed:
             The URL for the author.
         icon_url: Optional[:class:`str`]
             The URL of the author icon. Only HTTP(S) is supported.
-        file: :class:`File`
+        icon_file: :class:`File`
             The file to use as the author icon.
 
             .. versionadded:: 2.10
@@ -648,9 +648,7 @@ class Embed:
         if url is not None:
             self._author["url"] = str(url)
 
-        result = self._handle_resource(
-            icon_url if icon_url else None, file, key="author", required=False
-        )
+        result = self._handle_resource(icon_url, icon_file, key="author", required=False)
         if result is not None:
             self._author["icon_url"] = result
 
@@ -902,7 +900,7 @@ class Embed:
             return f"attachment://{file.filename}"
         else:
             self._files.pop(key, None)
-            return str(url) if url is not None else None
+            return str(url) if url else None
 
     def check_limits(self) -> None:
         """Checks if this embed fits within the limits dictated by Discord.
