@@ -1260,7 +1260,7 @@ class Client:
 
         Parameters
         ----------
-        token: `str`
+        token: :class:`str`
             The discord token of the bot that is being ran.
         
         Roughly Equivalent to: ::
