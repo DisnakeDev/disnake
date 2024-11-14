@@ -573,11 +573,11 @@ class MessageReference:
         .. versionadded:: 2.10
 
     message_id: Optional[:class:`int`]
-        The ID of the message referenced. In case of forwarding this should be the id of the message to forward.
+        The ID of the message referenced/forwarded.
     channel_id: :class:`int`
-        The channel ID of the message referenced. In case of forwarding this should be the id of the channel where to forward the message.
+        The channel ID of the message referenced/forwarded.
     guild_id: Optional[:class:`int`]
-        The guild ID of the message referenced. In case of forwarding this should be the id of the guild where to forward the message.
+        The guild ID of the message referenced/forwarded.
     fail_if_not_exists: :class:`bool`
         Whether replying to the referenced message should raise :class:`HTTPException`
         if the message no longer exists or Discord could not fetch the message.
@@ -643,8 +643,6 @@ class MessageReference:
         message: Message,
         *,
         type: MessageReferenceType = MessageReferenceType.default,
-        channel_id: Optional[int] = None,
-        guild_id: Optional[int] = None,
         fail_if_not_exists: bool = True,
     ) -> Self:
         """Creates a :class:`MessageReference` from an existing :class:`~disnake.Message`.
@@ -658,16 +656,6 @@ class MessageReference:
         type: :class:`MessageReferenceType`
             The type of the message reference. This is used to control whether to reply
             or forward a message.
-
-            .. versionadded:: 2.10
-
-        channel_id: Optional[:class:`int`]
-            The channel id where the message forward should be sent. This parameter is required to be passed only in case of message forwarding.
-
-            .. versionadded:: 2.10
-
-        guild_id: Optional[:class:`int`]
-            The guild id where the message forward should be sent. This parameter is used in message forwarding. Unlike ``channel_id`` this can be None even when forwarding.
 
             .. versionadded:: 2.10
 
@@ -688,20 +676,12 @@ class MessageReference:
             A reference to the message.
         """
         channel_id_ = message.channel.id
-        if type is MessageReferenceType.forward:
-            if not channel_id:
-                raise ValueError("channel_id must be passed in case of message forwarding")
-            channel_id_ = channel_id
 
         self = cls(
             type=type,
             message_id=message.id,
             channel_id=channel_id_,
-            guild_id=(
-                getattr(message.guild, "id", None)
-                if type is MessageReferenceType.default
-                else guild_id
-            ),
+            guild_id=getattr(message.guild, "id", None),
             fail_if_not_exists=fail_if_not_exists,
         )
         self._state = message._state
@@ -1068,7 +1048,6 @@ class Message(Hashable):
         self.message_snapshots: List[ForwardedMessage] = [
             ForwardedMessage(
                 state=self._state,
-                guild_id=utils._get_as_snowflake(a, "guild_id"),
                 data=a["message"],
             )
             for a in data.get("message_snapshots", [])
@@ -2172,13 +2151,21 @@ class Message(Hashable):
         A shortcut method to :meth:`.abc.Messageable.send` to reply to the
         :class:`.Message`.
 
-        .. versionadded:: 2.10
+        .. versionadded:: 1.6
+
+        .. versionchanged:: 2.3
+            Added ``fail_if_not_exists`` keyword argument. Defaults to ``True``.
+
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
 
         Parameters
         ----------
         fail_if_not_exists: :class:`bool`
             Whether replying using the message reference should raise :exc:`~disnake.HTTPException`
             if the message no longer exists or Discord could not fetch the message.
+
+            .. versionadded:: 2.3
 
         Raises
         ------
@@ -2204,10 +2191,8 @@ class Message(Hashable):
 
     async def forward(
         self,
-        content: Optional[str] = None,
         *,
-        channel_id: int,
-        guild_id: Optional[int] = None,
+        channel: MessageableChannel,
         fail_if_not_exists: bool = True,
         **kwargs: Any,
     ) -> Message:
@@ -2220,13 +2205,8 @@ class Message(Hashable):
 
         Parameters
         ----------
-        channel_id: :class:`int`
-            The channel id where the message forward should be sent.
-
-            .. versionadded:: 2.10
-
-        guild_id: Optional[:class:`int`]
-            The guild id where the message forward should be sent. Unlike ``channel_id`` this can be None.
+        channel: Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`StageChannel`, :class:`Thread`, :class:`DMChannel`, :class:`GroupChannel`, :class:`PartialMessageable`]
+            The channel where the message should be forwarded to.
 
             .. versionadded:: 2.10
 
@@ -2251,25 +2231,20 @@ class Message(Hashable):
             The message that was sent.
         """
         if not fail_if_not_exists:
-            reference = MessageReference.from_message(
-                self,
-                type=MessageReferenceType.forward,
-                channel_id=channel_id,
-                guild_id=guild_id,
+            reference = self.to_reference(
+                reference_type=MessageReferenceType.forward,
                 fail_if_not_exists=False,
             )
         else:
-            reference = MessageReference.from_message(
-                self, type=MessageReferenceType.forward, channel_id=channel_id, guild_id=guild_id
+            reference = self.to_reference(
+                reference_type=MessageReferenceType.forward,
             )
-        return await self.channel.send(content, reference=reference, **kwargs)
+        return await channel.send(reference=reference, **kwargs)
 
     def to_reference(
         self,
         *,
         reference_type: MessageReferenceType = MessageReferenceType.default,
-        channel_id: Optional[int] = None,
-        guild_id: Optional[int] = None,
         fail_if_not_exists: bool = True,
     ) -> MessageReference:
         """Creates a :class:`~disnake.MessageReference` from the current message.
@@ -2281,16 +2256,6 @@ class Message(Hashable):
         reference_type: :class:`MessageReferenceType`
             The type of the message reference. This is used to control whether to reply
             or forward a message.
-
-            .. versionadded:: 2.10
-
-        channel_id: Optional[:class:`int`]
-            The channel id where the message forward should be sent. This parameter is required to be passed only in case of message forwarding.
-
-            .. versionadded:: 2.10
-
-        guild_id: Optional[:class:`int`]
-            The guild id where the message forward should be sent. This parameter is used in message forwarding. Unlike ``channel_id`` this can be None even when forwarding.
 
             .. versionadded:: 2.10
 
@@ -2308,8 +2273,6 @@ class Message(Hashable):
         return MessageReference.from_message(
             self,
             type=reference_type,
-            channel_id=channel_id,
-            guild_id=guild_id,
             fail_if_not_exists=fail_if_not_exists,
         )
 
@@ -2688,10 +2651,9 @@ class ForwardedMessage:
 
     Attributes
     ----------
-    guild_id: Optional[:class:`int`]
-        The guild id from which the message come from. This should never be None.
-    guild: Optional[:class:`Guild`]
-        The guild from which the message come from. This is None if the guild is not cached.
+    type: :class:`MessageType`
+        The type of message. In most cases this should not be checked, but it is helpful
+        in cases where it might be a system message for :attr:`system_content`.
     content: :class:`str`
         The actual contents of the message.
     embeds: List[:class:`Embed`]
@@ -2700,24 +2662,41 @@ class ForwardedMessage:
         A list of attachments given to a message.
     flags: :class:`MessageFlags`
         Extra features of the message.
+    mentions: List[:class:`abc.User`]
+        A list of :class:`Member` that were mentioned. If the message is in a private message
+        then the list will be of :class:`User` instead. For messages that are not of type
+        :attr:`MessageType.default`\\, this array can be used to aid in system messages.
+        For more information, see :attr:`system_content`.
+
+        .. warning::
+
+            The order of the mentions list is not in any particular order so you should
+            not rely on it. This is a Discord limitation, not one with the library.
+    mention_roles: List[:class:`Role`]
+        A list of :class:`Role` that were mentioned. If the message is in a private message
+        then the list is always empty.
+    stickers: List[:class:`StickerItem`]
+        A list of sticker items given to the message.
+    components: List[:class:`Component`]
+        A list of components in the message.
     """
 
     __slots__ = (
-        "guild_id",
-        "guild",
+        "type",
         "content",
         "embeds",
         "attachments",
         "_timestamp",
         "_edited_timestamp",
         "flags",
+        "mentions",
+        "mention_roles",
+        "stickers",
+        "components",
     )
 
-    def __init__(
-        self, *, state: ConnectionState, guild_id: Optional[int], data: ForwardedMessagePayload
-    ) -> None:
-        self.guild_id: Optional[int] = guild_id
-        self.guild: Optional[Guild] = state._get_guild(guild_id)
+    def __init__(self, *, state: ConnectionState, data: ForwardedMessagePayload) -> None:
+        self.type: MessageType = try_enum(MessageType, data["type"])
         self.content: str = data["content"]
         self.embeds: List[Embed] = [Embed.from_dict(a) for a in data["embeds"]]
         self.attachments: List[Attachment] = [
@@ -2728,9 +2707,16 @@ class ForwardedMessage:
             data["edited_timestamp"]
         )
         self.flags: MessageFlags = MessageFlags._from_value(data.get("flags", 0))
+        self.stickers: List[StickerItem] = [
+            StickerItem(data=d, state=state) for d in data.get("sticker_items", [])
+        ]
+        self.components = [
+            _component_factory(d, type=ActionRow[MessageComponent])
+            for d in data.get("components", [])
+        ]
 
     def __repr__(self) -> str:
-        return f"<{self.__class__.__name__} guild_id={self.guild_id}>"
+        return f"<{self.__class__.__name__}>"
 
     @property
     def created_at(self) -> datetime.datetime:

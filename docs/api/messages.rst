@@ -183,6 +183,7 @@ ForwardedMessage
 .. attributetable:: ForwardedMessage
 
 .. autoclass:: ForwardedMessage
+    :members:
 
 Enumerations
 ------------
@@ -356,8 +357,29 @@ MessageType
 
         .. versionadded:: 2.8
 
-.. autoclass:: MessageReferenceType
-    :members:
+.. class:: MessageReferenceType
+
+    Specifies the type of :class:`MessageReference`. This is used to denote
+    if a message is normal or not (e.g replying or forwarding).
+
+    .. versionadded:: 2.10
+
+    .. collapse:: operations
+
+        .. describe:: x == y
+
+            Checks if two messages are equal.
+        .. describe:: x != y
+
+            Checks if two messages are not equal.
+
+    .. attribute:: default
+
+        A standard message reference used in message replies.
+
+    .. attribute:: forward
+
+        Reference used to point to a message at a point in time (forward).
 
 Events
 ------

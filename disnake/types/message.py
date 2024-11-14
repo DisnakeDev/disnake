@@ -74,18 +74,24 @@ class MessageReference(TypedDict):
     fail_if_not_exists: NotRequired[bool]
 
 
+# TODO: check if these attrs are unpacked in message.py (i think they are)
 class ForwardedMessage(TypedDict):
+    type: MessageType
     content: str
     embeds: List[Embed]
     attachments: List[Attachment]
     timestamp: str
     edited_timestamp: Optional[str]
     flags: NotRequired[int]
+    mentions: Union[List[User], List[UserWithMember]]
+    mention_roles: SnowflakeList
+    stickers: ...
+    sticker_items: NotRequired[List[StickerItem]]
+    components: NotRequired[List[Component]]
 
 
 class MessageSnapshot(TypedDict):
     message: ForwardedMessage
-    guild_id: NotRequired[Snowflake]
 
 
 class RoleSubscriptionData(TypedDict):
