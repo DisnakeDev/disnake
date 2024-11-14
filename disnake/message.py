@@ -1081,7 +1081,6 @@ class Message(Hashable):
             for d in data.get("components", [])
         ]
 
-
         inter_payload = data.get("interaction")
         inter = (
             None if inter_payload is None else InteractionReference(state=state, data=inter_payload)
@@ -2724,7 +2723,7 @@ class ForwardedMessage:
     ----------
     type: :class:`MessageType`
         The type of message. In most cases this should not be checked, but it is helpful
-        in cases where it might be a system message for :attr:`system_content`.
+        in cases where it might be a system message for :attr:`Message.system_content`.
     content: :class:`str`
         The actual contents of the message.
     embeds: List[:class:`Embed`]
@@ -2737,7 +2736,7 @@ class ForwardedMessage:
         A list of :class:`Member` that were mentioned. If the message is in a private message
         then the list will be of :class:`User` instead. For messages that are not of type
         :attr:`MessageType.default`\\, this array can be used to aid in system messages.
-        For more information, see :attr:`system_content`.
+        For more information, see :attr:`Message.system_content`.
 
         .. warning::
 
