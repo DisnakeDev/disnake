@@ -17,6 +17,28 @@ in specific versions. Please see :ref:`version_guarantees` for more information.
 
 .. towncrier release notes start
 
+.. _vp2p9p3:
+
+v2.9.3
+------
+
+New Features
+~~~~~~~~~~~~
+- Add support for ``aead_xchacha20_poly1305_rtpsize`` encryption mode for voice connections, and remove deprecated ``xsalsa20_poly1305*`` modes. (:issue:`1228`)
+
+Bug Fixes
+~~~~~~~~~
+- Attempt to handle abrupt websocket closures on ``aiohttp >= 3.9.0`` and ``python < 3.11.0`` gracefully. (:issue:`1241`)
+
+Documentation
+~~~~~~~~~~~~~
+- Adding some clarifying documentation around the type of :attr:`AuditLogEntry.extra` when the action is :attr:`~AuditLogAction.overwrite_create`. (:issue:`1180`)
+
+Miscellaneous
+~~~~~~~~~~~~~
+- Raise PyNaCl version requirement to ``v1.5.0``. (:issue:`1228`)
+
+
 .. _vp2p9p2:
 
 v2.9.2
