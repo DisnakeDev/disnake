@@ -11,7 +11,7 @@ import types
 import warnings
 from datetime import datetime, timedelta
 from errno import ECONNRESET
-from typing import ( 
+from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
