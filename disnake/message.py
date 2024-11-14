@@ -2682,7 +2682,7 @@ class PartialMessage(Hashable):
 
 
 class ForwardedMessage:
-    """Represent a forwarded :class:`Message`.
+    """Represents a forwarded :class:`Message`.
 
     .. versionadded:: 2.10
 
