@@ -94,6 +94,14 @@ RawMessageUpdateEvent
 .. autoclass:: RawMessageUpdateEvent()
     :members:
 
+RawPollVoteActionEvent
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: RawPollVoteActionEvent
+
+.. autoclass:: RawPollVoteActionEvent()
+    :members:
+
 RawReactionActionEvent
 ~~~~~~~~~~~~~~~~~~~~~~
 
@@ -176,6 +184,29 @@ PartialMessage
 
 .. autoclass:: PartialMessage
     :members:
+
+Poll
+~~~~
+
+.. attributetable:: Poll
+
+.. autoclass:: Poll
+    :members:
+
+PollAnswer
+~~~~~~~~~~
+
+.. attributetable:: PollAnswer
+
+.. autoclass:: PollAnswer
+    :members:
+
+PollMedia
+~~~~~~~~~
+
+.. attributetable:: PollMedia
+
+.. autoclass:: PollMedia
 
 ForwardedMessage
 ~~~~~~~~~~~~~~~~
@@ -356,6 +387,39 @@ MessageType
         The system message denoting that a guild member has subscribed to an application.
 
         .. versionadded:: 2.8
+    .. attribute:: guild_incident_alert_mode_enabled
+
+        The system message denoting that an admin enabled security actions.
+
+        .. versionadded:: 2.10
+    .. attribute:: guild_incident_alert_mode_disabled
+
+        The system message denoting that an admin disabled security actions.
+
+        .. versionadded:: 2.10
+    .. attribute:: guild_incident_report_raid
+
+        The system message denoting that an admin reported a raid.
+
+        .. versionadded:: 2.10
+    .. attribute:: guild_incident_report_false_alarm
+
+        The system message denoting that a raid report was a false alarm.
+
+        .. versionadded:: 2.10
+
+PollLayoutType
+~~~~~~~~~~~~~~
+
+.. class:: PollLayoutType
+
+    Specifies the layout of a :class:`Poll`.
+
+    .. versionadded:: 2.10
+
+    .. attribute:: default
+
+        The default poll layout type.
 
 .. class:: MessageReferenceType
 
@@ -388,10 +452,14 @@ Events
 - :func:`on_message_edit(before, after) <disnake.on_message_edit>`
 - :func:`on_message_delete(message) <disnake.on_message_delete>`
 - :func:`on_bulk_message_delete(messages) <disnake.on_bulk_message_delete>`
+- :func:`on_poll_vote_add(member, answer) <disnake.on_poll_vote_add>`
+- :func:`on_poll_vote_removed(member, answer) <disnake.on_poll_vote_remove>`
 
 - :func:`on_raw_message_edit(payload) <disnake.on_raw_message_edit>`
 - :func:`on_raw_message_delete(payload) <disnake.on_raw_message_delete>`
 - :func:`on_raw_bulk_message_delete(payload) <disnake.on_raw_bulk_message_delete>`
+- :func:`on_raw_poll_vote_add(payload) <disnake.on_raw_poll_vote_add>`
+- :func:`on_raw_poll_vote_remove(payload) <disnake.on_raw_poll_vote_remove>`
 
 - :func:`on_reaction_add(reaction, user) <disnake.on_reaction_add>`
 - :func:`on_reaction_remove(reaction, user) <disnake.on_reaction_remove>`

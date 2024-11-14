@@ -1,0 +1,5 @@
+Implement new :attr:`Message.type`\s:
+    - :attr:`MessageType.guild_incident_alert_mode_enabled`
+    - :attr:`MessageType.guild_incident_alert_mode_disabled`
+    - :attr:`MessageType.guild_incident_report_raid`
+    - :attr:`MessageType.guild_incident_report_false_alarm`
