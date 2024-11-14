@@ -8,11 +8,13 @@ from typing_extensions import NotRequired
 
 from .channel import ChannelType
 from .emoji import PartialEmoji
+from .snowflake import Snowflake
 
 ComponentType = Literal[1, 2, 3, 4, 5, 6, 7, 8]
 ButtonStyle = Literal[1, 2, 3, 4, 5]
 TextInputStyle = Literal[1, 2]
 
+SelectDefaultValueType = Literal["user", "role", "channel"]
 
 Component = Union["ActionRow", "ButtonComponent", "AnySelectMenu", "TextInput"]
 
@@ -40,12 +42,19 @@ class SelectOption(TypedDict):
     default: NotRequired[bool]
 
 
+class SelectDefaultValue(TypedDict):
+    id: Snowflake
+    type: SelectDefaultValueType
+
+
 class _SelectMenu(TypedDict):
     custom_id: str
     placeholder: NotRequired[str]
     min_values: NotRequired[int]
     max_values: NotRequired[int]
     disabled: NotRequired[bool]
+    # This is technically not applicable to string selects, but for simplicity we'll just have it here
+    default_values: NotRequired[List[SelectDefaultValue]]
 
 
 class BaseSelectMenu(_SelectMenu):

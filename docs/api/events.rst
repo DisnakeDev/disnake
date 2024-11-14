@@ -1048,6 +1048,36 @@ Voice
     :param after: The voice state after the changes.
     :type after: :class:`VoiceState`
 
+.. function:: on_voice_channel_effect(channel, member, effect)
+
+    Called when a :class:`Member` sends an effect in a voice channel the bot is connected to.
+
+    This requires :attr:`Intents.voice_states` and :attr:`Intents.members` to be enabled.
+
+    If the member is not found in the internal member cache, then this
+    event will not be called. Consider using :func:`on_raw_voice_channel_effect` instead.
+
+    .. versionadded:: 2.10
+
+    :param channel: The voice channel where the effect was sent.
+    :type channel: :class:`VoiceChannel`
+    :param member: The member that sent the effect.
+    :type member: :class:`Member`
+    :param effect: The effect that was sent.
+    :type effect: :class:`VoiceChannelEffect`
+
+.. function:: on_raw_voice_channel_effect(payload)
+
+    Called when a :class:`Member` sends an effect in a voice channel the bot is connected to.
+    Unlike :func:`on_voice_channel_effect`, this is called regardless of the member cache.
+
+    This requires :attr:`Intents.voice_states` to be enabled.
+
+    .. versionadded:: 2.10
+
+    :param payload: The raw event payload data.
+    :type payload: :class:`RawVoiceChannelEffectEvent`
+
 Interactions
 ~~~~~~~~~~~~
 
@@ -1243,6 +1273,38 @@ This section documents events related to Discord chat messages.
     :param messages: The messages that have been deleted.
     :type messages: List[:class:`Message`]
 
+.. function:: on_poll_vote_add(member, answer)
+
+    Called when a vote is added on a poll. If the member or message is not found in the internal cache, then this event will not be called.
+
+    This requires :attr:`Intents.guild_polls` or :attr:`Intents.dm_polls` to be enabled to receive events about polls sent in guilds or DMs.
+
+    .. note::
+
+        You can use :attr:`Intents.polls` to enable both :attr:`Intents.guild_polls` and :attr:`Intents.dm_polls` in one go.
+
+
+    :param member: The member who voted.
+    :type member: :class:`Member`
+    :param answer: The :class:`PollAnswer` object for which the vote was added.
+    :type answer: :class:`PollAnswer`
+
+.. function:: on_poll_vote_remove(member, answer)
+
+    Called when a vote is removed on a poll. If the member or message is not found in the internal cache, then this event will not be called.
+
+    This requires :attr:`Intents.guild_polls` or :attr:`Intents.dm_polls` to be enabled to receive events about polls sent in guilds or DMs.
+
+    .. note::
+
+        You can use :attr:`Intents.polls` to enable both :attr:`Intents.guild_polls` and :attr:`Intents.dm_polls` in one go.
+
+
+    :param member: The member who removed the vote.
+    :type member: :class:`Member`
+    :param answer: The :class:`PollAnswer` object for which the vote was removed.
+    :type answer: :class:`PollAnswer`
+
 .. function:: on_raw_message_edit(payload)
 
     Called when a message is edited. Unlike :func:`on_message_edit`, this is called
@@ -1292,6 +1354,34 @@ This section documents events related to Discord chat messages.
 
     :param payload: The raw event payload data.
     :type payload: :class:`RawBulkMessageDeleteEvent`
+
+.. function:: on_raw_poll_vote_add(payload)
+
+    Called when a vote is added on a poll. Unlike :func:`on_poll_vote_add`, this is
+    called regardless of the guilds being in the internal guild cache or not.
+
+    This requires :attr:`Intents.guild_polls` or :attr:`Intents.dm_polls` to be enabled to receive events about polls sent in guilds or DMs.
+
+    .. note::
+
+        You can use :attr:`Intents.polls` to enable both :attr:`Intents.guild_polls` and :attr:`Intents.dm_polls` in one go.
+
+    :param payload: The raw event payload data.
+    :type payload: :class:`RawPollVoteActionEvent`
+
+.. function:: on_raw_poll_vote_remove(payload)
+
+    Called when a vote is removed on a poll. Unlike :func:`on_poll_vote_remove`, this is
+    called regardless of the guilds being in the internal guild cache or not.
+
+    This requires :attr:`Intents.guild_polls` or :attr:`Intents.dm_polls` to be enabled to receive events about polls sent in guilds or DMs.
+
+    .. note::
+
+        You can use :attr:`Intents.polls` to enable both :attr:`Intents.guild_polls` and :attr:`Intents.dm_polls` in one go.
+
+    :param payload: The raw event payload data.
+    :type payload: :class:`RawPollVoteActionEvent`
 
 .. function:: on_reaction_add(reaction, user)
 
