@@ -2256,10 +2256,7 @@ class Message(Hashable):
 
     async def forward(
         self,
-        *,
         channel: MessageableChannel,
-        fail_if_not_exists: bool = True,
-        **kwargs: Any,
     ) -> Message:
         """|coro|
 
@@ -2273,43 +2270,28 @@ class Message(Hashable):
         channel: Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`StageChannel`, :class:`Thread`, :class:`DMChannel`, :class:`GroupChannel`, :class:`PartialMessageable`]
             The channel where the message should be forwarded to.
 
-            .. versionadded:: 2.10
-
-        fail_if_not_exists: :class:`bool`
-            Whether replying using the message reference should raise :exc:`~disnake.HTTPException`
-            if the message no longer exists or Discord could not fetch the message.
-
         Raises
         ------
         HTTPException
             Sending the message failed.
         Forbidden
             You do not have the proper permissions to send the message.
-        TypeError
-            You specified both ``embed`` and ``embeds``, or ``file`` and ``files``, or ``view`` and ``components``.
-        ValueError
-            The ``files`` or ``embeds`` list is too large.
 
         Returns
         -------
         :class:`.Message`
             The message that was sent.
         """
-        if not fail_if_not_exists:
-            reference = self.to_reference(
-                reference_type=MessageReferenceType.forward,
-                fail_if_not_exists=False,
-            )
-        else:
-            reference = self.to_reference(
-                reference_type=MessageReferenceType.forward,
-            )
-        return await channel.send(reference=reference, **kwargs)
+        reference = self.to_reference(
+            type=MessageReferenceType.forward,
+            fail_if_not_exists=False,
+        )
+        return await channel.send(reference=reference)
 
     def to_reference(
         self,
         *,
-        reference_type: MessageReferenceType = MessageReferenceType.default,
+        type: MessageReferenceType = MessageReferenceType.default,
         fail_if_not_exists: bool = True,
     ) -> MessageReference:
         """Creates a :class:`~disnake.MessageReference` from the current message.
@@ -2318,7 +2300,7 @@ class Message(Hashable):
 
         Parameters
         ----------
-        reference_type: :class:`MessageReferenceType`
+        type: :class:`MessageReferenceType`
             The type of the message reference. This is used to control whether to reply
             or forward a message.
 
@@ -2337,7 +2319,7 @@ class Message(Hashable):
         """
         return MessageReference.from_message(
             self,
-            type=reference_type,
+            type=type,
             fail_if_not_exists=fail_if_not_exists,
         )
 
