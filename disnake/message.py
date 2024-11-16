@@ -681,12 +681,10 @@ class MessageReference:
         :class:`MessageReference`
             A reference to the message.
         """
-        channel_id_ = message.channel.id
-
         self = cls(
             type=type,
             message_id=message.id,
-            channel_id=channel_id_,
+            channel_id=message.channel.id,
             guild_id=getattr(message.guild, "id", None),
             fail_if_not_exists=fail_if_not_exists,
         )
