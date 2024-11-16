@@ -69,14 +69,13 @@ MessageReferenceType = Literal[0, 1]
 
 
 class MessageReference(TypedDict):
-    type: NotRequired[MessageReferenceType]
+    type: MessageReferenceType
     message_id: NotRequired[Snowflake]
     channel_id: Snowflake
     guild_id: NotRequired[Snowflake]
     fail_if_not_exists: NotRequired[bool]
 
 
-# TODO: check if these attrs are unpacked in message.py (i think they are)
 class ForwardedMessage(TypedDict):
     type: MessageType
     content: str
@@ -87,7 +86,6 @@ class ForwardedMessage(TypedDict):
     flags: NotRequired[int]
     mentions: Union[List[User], List[UserWithMember]]
     mention_roles: SnowflakeList
-    stickers: ...
     sticker_items: NotRequired[List[StickerItem]]
     components: NotRequired[List[Component]]
 
