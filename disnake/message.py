@@ -676,11 +676,6 @@ class MessageReference:
 
             .. versionadded:: 1.7
 
-        Raises
-        ------
-        ValueError
-            You are forwarding a message but you're not passing ``channel_id``.
-
         Returns
         -------
         :class:`MessageReference`
