@@ -2285,10 +2285,6 @@ class Message(Hashable):
             Sending the message failed.
         Forbidden
             You do not have the proper permissions to send the message.
-        TypeError
-            You specified both ``embed`` and ``embeds``, or ``file`` and ``files``, or ``view`` and ``components``.
-        ValueError
-            The ``files`` or ``embeds`` list is too large.
 
         Returns
         -------
