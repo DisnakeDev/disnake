@@ -428,15 +428,6 @@ PollLayoutType
 
     .. versionadded:: 2.10
 
-    .. collapse:: operations
-
-        .. describe:: x == y
-
-            Checks if two messages are equal.
-        .. describe:: x != y
-
-            Checks if two messages are not equal.
-
     .. attribute:: default
 
         A standard message reference used in message replies.
