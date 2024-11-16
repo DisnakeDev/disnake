@@ -1074,14 +1074,6 @@ class Message(Hashable):
             for d in data.get("components", [])
         ]
 
-        self.message_snapshots: List[ForwardedMessage] = [
-            ForwardedMessage(
-                state=self._state,
-                data=a["message"],
-            )
-            for a in data.get("message_snapshots", [])
-        ]
-
         self.poll: Optional[Poll] = None
         if poll_data := data.get("poll"):
             self.poll = Poll.from_dict(message=self, data=poll_data)
@@ -1128,6 +1120,17 @@ class Message(Hashable):
 
                     # the channel will be the correct type here
                     ref.resolved = self.__class__(channel=chan, data=resolved, state=state)  # type: ignore
+
+        _ref = data.get("message_reference", {})
+        self.message_snapshots: List[ForwardedMessage] = [
+            ForwardedMessage(
+                state=self._state,
+                channel_id=utils._get_as_snowflake(_ref, "channel_id"),
+                guild_id=utils._get_as_snowflake(_ref, "guild_id"),
+                data=a["message"],
+            )
+            for a in data.get("message_snapshots", [])
+        ]
 
         for handler in ("author", "member", "mentions", "mention_roles"):
             try:
@@ -2732,6 +2735,11 @@ class ForwardedMessage:
         The actual contents of the message.
     embeds: List[:class:`Embed`]
         A list of embeds the message has.
+    channel: Optional[Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`StageChannel`, :class:`Thread`, :class:`DMChannel`, :class:`GroupChannel`, :class:`PartialMessageable`]]
+        The channel that the message was forwarded from.
+        Could be a :class:`DMChannel` or :class:`GroupChannel` if it's a private message. This could be ``None`` if the channel is not cached.
+    channel_id: :class:`int`
+        The ID of the channel where the message was forwarded from.
     attachments: List[:class:`Attachment`]
         A list of attachments given to a message.
     flags: :class:`MessageFlags`
@@ -2746,33 +2754,54 @@ class ForwardedMessage:
 
             The order of the mentions list is not in any particular order so you should
             not rely on it. This is a Discord limitation, not one with the library.
-    mention_roles: List[:class:`Role`]
+    role_mentions: List[:class:`Role`]
         A list of :class:`Role` that were mentioned. If the message is in a private message
         then the list is always empty.
     stickers: List[:class:`StickerItem`]
         A list of sticker items given to the message.
     components: List[:class:`Component`]
         A list of components in the message.
+    guild: Optional[:class:`Guild`]
+        The guild where the message was forwarded from, if applicable. This could
+        be ``None`` if the guild is not cached.
+    guild_id: Optional[:class:`int`]
+        The guild ID where the message was forwarded from, if applicable.
     """
 
     __slots__ = (
+        "_state",
         "type",
         "content",
         "embeds",
+        "channel",
+        "channel_id",
         "attachments",
         "_timestamp",
         "_edited_timestamp",
         "flags",
         "mentions",
-        "mention_roles",
+        "role_mentions",
         "stickers",
         "components",
+        "guild",
+        "guild_id",
     )
 
-    def __init__(self, *, state: ConnectionState, data: ForwardedMessagePayload) -> None:
+    def __init__(
+        self,
+        *,
+        state: ConnectionState,
+        channel_id: Optional[int],
+        guild_id: Optional[int],
+        data: ForwardedMessagePayload,
+    ) -> None:
+        self._state = state
         self.type: MessageType = try_enum(MessageType, data["type"])
         self.content: str = data["content"]
         self.embeds: List[Embed] = [Embed.from_dict(a) for a in data["embeds"]]
+        self.channel: Union[GuildMessageable, DMChannel, GroupChannel] = state.get_channel(channel_id)  # type: ignore
+        # should never be None in message_reference(s) that are forwarding
+        self.channel_id: int = channel_id  # type: ignore
         self.attachments: List[Attachment] = [
             Attachment(data=a, state=state) for a in data["attachments"]
         ]
@@ -2788,6 +2817,17 @@ class ForwardedMessage:
             _component_factory(d, type=ActionRow[MessageComponent])
             for d in data.get("components", [])
         ]
+        self.guild = state._get_guild(guild_id)
+        self.guild_id = guild_id
+
+        for handler in (
+            "mentions",
+            "mention_roles",
+        ):
+            try:
+                getattr(self, f"_handle_{handler}")(data[handler])
+            except KeyError:
+                continue
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__}>"
@@ -2801,3 +2841,27 @@ class ForwardedMessage:
     def edited_at(self) -> Optional[datetime.datetime]:
         """Optional[:class:`datetime.datetime`]: An aware UTC datetime object containing the edited time of the message."""
         return self._edited_timestamp
+
+    def _handle_mentions(self, mentions: List[UserWithMemberPayload]) -> None:
+        self.mentions = r = []
+        guild = self.guild
+        state = self._state
+        if not isinstance(guild, Guild):
+            self.mentions = [state.store_user(m) for m in mentions]
+            return
+
+        for mention in filter(None, mentions):
+            id_search = int(mention["id"])
+            member = guild.get_member(id_search)
+            if member is not None:
+                r.append(member)
+            else:
+                r.append(Member._try_upgrade(data=mention, guild=guild, state=state))
+
+    def _handle_mention_roles(self, role_mentions: List[int]) -> None:
+        self.role_mentions = []
+        if isinstance(self.guild, Guild):
+            for role_id in map(int, role_mentions):
+                role = self.guild.get_role(role_id)
+                if role is not None:
+                    self.role_mentions.append(role)
