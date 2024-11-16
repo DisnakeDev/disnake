@@ -2315,8 +2315,8 @@ class Message(Hashable):
         Parameters
         ----------
         reference_type: :class:`MessageReferenceType`
-            The type of the message reference. This is used to control whether to reply
-            or forward a message.
+            The type of the message reference. This is used to control whether to reply to
+            or forward a message. Defaults to replying.
 
             .. versionadded:: 2.10
 
