@@ -665,8 +665,8 @@ class MessageReference:
         message: :class:`~disnake.Message`
             The message to be converted into a reference.
         type: :class:`MessageReferenceType`
-            The type of the message reference. This is used to control whether to reply
-            or forward a message.
+            The type of the message reference. This is used to control whether to reply to
+            or forward a message. Defaults to replying.
 
             .. versionadded:: 2.10
 
@@ -675,11 +675,6 @@ class MessageReference:
             if the message no longer exists or Discord could not fetch the message.
 
             .. versionadded:: 1.7
-
-        Raises
-        ------
-        ValueError
-            You are forwarding a message but you're not passing ``channel_id``.
 
         Returns
         -------
@@ -2301,8 +2296,8 @@ class Message(Hashable):
         Parameters
         ----------
         type: :class:`MessageReferenceType`
-            The type of the message reference. This is used to control whether to reply
-            or forward a message.
+            The type of the message reference. This is used to control whether to reply to
+            or forward a message. Defaults to replying.
 
             .. versionadded:: 2.10
 
