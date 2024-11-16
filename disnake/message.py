@@ -2685,6 +2685,40 @@ class PartialMessage(Hashable):
             delete_after=delete_after,
         )
 
+    async def forward(
+        self,
+        channel: MessageableChannel,
+    ) -> Message:
+        """|coro|
+
+        A shortcut method to :meth:`.abc.Messageable.send` to forward a
+        :class:`.Message`.
+
+        .. versionadded:: 2.10
+
+        Parameters
+        ----------
+        channel: Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`StageChannel`, :class:`Thread`, :class:`DMChannel`, :class:`GroupChannel`, :class:`PartialMessageable`]
+            The channel where the message should be forwarded to.
+
+        Raises
+        ------
+        HTTPException
+            Sending the message failed.
+        Forbidden
+            You do not have the proper permissions to send the message.
+
+        Returns
+        -------
+        :class:`.Message`
+            The message that was sent.
+        """
+        reference = self.to_reference(
+            type=MessageReferenceType.forward,
+            fail_if_not_exists=False,
+        )
+        return await channel.send(reference=reference)
+
 
 class ForwardedMessage:
     """Represents a forwarded :class:`Message`.
