@@ -2820,14 +2820,26 @@ class ForwardedMessage:
         self.guild = state._get_guild(guild_id)
         self.guild_id = guild_id
 
-        for handler in (
-            "mentions",
-            "mention_roles",
-        ):
-            try:
-                getattr(self, f"_handle_{handler}")(data[handler])
-            except KeyError:
-                continue
+        self.mentions: List[Union[User, Member]] = []
+        if self.guild is None:
+            self.mentions = [state.store_user(m) for m in data["mentions"]]
+        else:
+            for mention in filter(None, data["mentions"]):
+                id_search = int(mention["id"])
+                member = self.guild.get_member(id_search)
+                if member is not None:
+                    self.mentions.append(member)
+                else:
+                    self.mentions.append(
+                        Member._try_upgrade(data=mention, guild=self.guild, state=state)
+                    )
+
+        self.role_mentions: List[Role] = []
+        if self.guild is not None:
+            for role_id in map(int, data.get("mention_roles", [])):
+                role = self.guild.get_role(role_id)
+                if role is not None:
+                    self.role_mentions.append(role)
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__}>"
@@ -2841,27 +2853,3 @@ class ForwardedMessage:
     def edited_at(self) -> Optional[datetime.datetime]:
         """Optional[:class:`datetime.datetime`]: An aware UTC datetime object containing the edited time of the message."""
         return self._edited_timestamp
-
-    def _handle_mentions(self, mentions: List[UserWithMemberPayload]) -> None:
-        self.mentions = r = []
-        guild = self.guild
-        state = self._state
-        if not isinstance(guild, Guild):
-            self.mentions = [state.store_user(m) for m in mentions]
-            return
-
-        for mention in filter(None, mentions):
-            id_search = int(mention["id"])
-            member = guild.get_member(id_search)
-            if member is not None:
-                r.append(member)
-            else:
-                r.append(Member._try_upgrade(data=mention, guild=guild, state=state))
-
-    def _handle_mention_roles(self, role_mentions: List[int]) -> None:
-        self.role_mentions = []
-        if isinstance(self.guild, Guild):
-            for role_id in map(int, role_mentions):
-                role = self.guild.get_role(role_id)
-                if role is not None:
-                    self.role_mentions.append(role)

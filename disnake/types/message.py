@@ -85,7 +85,9 @@ class ForwardedMessage(TypedDict):
     edited_timestamp: Optional[str]
     flags: NotRequired[int]
     mentions: Union[List[User], List[UserWithMember]]
-    mention_roles: SnowflakeList
+    # apparently mention_roles list is not sent if the msg
+    # is not forwarded in the same guild
+    mention_roles: NotRequired[SnowflakeList]
     sticker_items: NotRequired[List[StickerItem]]
     components: NotRequired[List[Component]]
 
