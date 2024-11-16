@@ -1706,23 +1706,8 @@ AuditLogAction
 AuditLogActionCategory
 ~~~~~~~~~~~~~~~~~~~~~~
 
-.. class:: AuditLogActionCategory
-
-    Represents the category that the :class:`AuditLogAction` belongs to.
-
-    This can be retrieved via :attr:`AuditLogEntry.category`.
-
-    .. attribute:: create
-
-        The action is the creation of something.
-
-    .. attribute:: delete
-
-        The action is the deletion of something.
-
-    .. attribute:: update
-
-        The action is the update of something.
+.. autoclass:: AuditLogActionCategory
+    :members:
 
 Events
 ------
