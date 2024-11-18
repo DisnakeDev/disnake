@@ -51,13 +51,13 @@ Enumerations
 UserFlags
 ~~~~~~~~~
 
-.. autoclass:: UserFlags
+.. autoclass:: UserFlags()
     :members:
 
 DefaultAvatar
 ~~~~~~~~~~~~~
 
-.. autoclass:: DefaultAvatar
+.. autoclass:: DefaultAvatar()
     :members:
 
 Events

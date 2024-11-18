@@ -76,17 +76,17 @@ Enumerations
 TeamMembershipState
 ~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: TeamMembershipState
+.. autoclass:: TeamMembershipState()
     :members:
 
 TeamMemberRole
 ~~~~~~~~~~~~~~
 
-.. autoclass:: TeamMemberRole
+.. autoclass:: TeamMemberRole()
     :members:
 
 ApplicationRoleConnectionMetadataType
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: ApplicationRoleConnectionMetadataType
+.. autoclass:: ApplicationRoleConnectionMetadataType()
     :members:

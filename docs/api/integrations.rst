@@ -68,7 +68,7 @@ Enumerations
 ExpireBehaviour
 ~~~~~~~~~~~~~~~
 
-.. autoclass:: ExpireBehaviour
+.. autoclass:: ExpireBehaviour()
     :members:
 
 Events

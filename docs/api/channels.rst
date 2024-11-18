@@ -206,31 +206,31 @@ Enumerations
 ChannelType
 ~~~~~~~~~~~
 
-.. autoclass:: ChannelType
+.. autoclass:: ChannelType()
     :members:
 
 ThreadArchiveDuration
 ~~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: ThreadArchiveDuration
+.. autoclass:: ThreadArchiveDuration()
     :members:
 
 VideoQualityMode
 ~~~~~~~~~~~~~~~~
 
-.. autoclass:: VideoQualityMode
+.. autoclass:: VideoQualityMode()
     :members:
 
 ThreadSortOrder
 ~~~~~~~~~~~~~~~
 
-.. autoclass:: ThreadSortOrder
+.. autoclass:: ThreadSortOrder()
     :members:
 
 ThreadLayout
 ~~~~~~~~~~~~
 
-.. autoclass:: ThreadLayout
+.. autoclass:: ThreadLayout()
     :members:
 
 Events

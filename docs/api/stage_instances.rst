@@ -25,7 +25,7 @@ Enumerations
 StagePrivacyLevel
 ~~~~~~~~~~~~~~~~~
 
-.. autoclass:: StagePrivacyLevel
+.. autoclass:: StagePrivacyLevel()
     :members:
 
 Events

@@ -114,19 +114,19 @@ Enumerations
 OptionType
 ~~~~~~~~~~
 
-.. autoclass:: OptionType
+.. autoclass:: OptionType()
     :members:
 
 ApplicationCommandType
 ~~~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: ApplicationCommandType
+.. autoclass:: ApplicationCommandType()
     :members:
 
 ApplicationCommandPermissionType
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: ApplicationCommandPermissionType
+.. autoclass:: ApplicationCommandPermissionType()
     :members:
 
 Events

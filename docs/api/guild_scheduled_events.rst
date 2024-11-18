@@ -43,19 +43,19 @@ Enumerations
 GuildScheduledEventEntityType
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: GuildScheduledEventEntityType
+.. autoclass:: GuildScheduledEventEntityType()
     :members:
 
 GuildScheduledEventStatus
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: GuildScheduledEventStatus
+.. autoclass:: GuildScheduledEventStatus()
     :members:
 
 GuildScheduledEventPrivacyLevel
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: GuildScheduledEventPrivacyLevel
+.. autoclass:: GuildScheduledEventPrivacyLevel()
     :members:
 
 Events

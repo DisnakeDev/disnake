@@ -1706,7 +1706,7 @@ AuditLogAction
 AuditLogActionCategory
 ~~~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: AuditLogActionCategory
+.. autoclass:: AuditLogActionCategory()
     :members:
 
 Events

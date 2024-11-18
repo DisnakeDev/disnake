@@ -43,5 +43,5 @@ Enumerations
 Locale
 ~~~~~~
 
-.. autoclass:: Locale
+.. autoclass:: Locale()
     :members:

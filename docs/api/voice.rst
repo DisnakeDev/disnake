@@ -124,13 +124,13 @@ Enumerations
 VoiceChannelEffectAnimationType
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: VoiceChannelEffectAnimationType
+.. autoclass:: VoiceChannelEffectAnimationType()
     :members:
 
 PartyType
 ~~~~~~~~~
 
-.. autoclass:: PartyType
+.. autoclass:: PartyType()
     :members:
 
 Events

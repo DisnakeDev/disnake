@@ -52,5 +52,5 @@ Enumerations
 WidgetStyle
 ~~~~~~~~~~~
 
-.. autoclass:: WidgetStyle
+.. autoclass:: WidgetStyle()
     :members:

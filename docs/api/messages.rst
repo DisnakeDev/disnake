@@ -215,13 +215,13 @@ Enumerations
 MessageType
 ~~~~~~~~~~~
 
-.. autoclass:: MessageType
+.. autoclass:: MessageType()
     :members:
 
 PollLayoutType
 ~~~~~~~~~~~~~~
 
-.. autoclass:: PollLayoutType
+.. autoclass:: PollLayoutType()
     :members:
 
 Events

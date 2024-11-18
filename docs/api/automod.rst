@@ -83,19 +83,19 @@ Enumerations
 AutoModActionType
 ~~~~~~~~~~~~~~~~~
 
-.. autoclass:: AutoModActionType
+.. autoclass:: AutoModActionType()
     :members:
 
 AutoModEventType
 ~~~~~~~~~~~~~~~~
 
-.. autoclass:: AutoModEventType
+.. autoclass:: AutoModEventType()
     :members:
 
 AutoModTriggerType
 ~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: AutoModTriggerType
+.. autoclass:: AutoModTriggerType()
     :members:
 
 Events

@@ -40,13 +40,13 @@ Enumerations
 InviteType
 ~~~~~~~~~~
 
-.. autoclass:: InviteType
+.. autoclass:: InviteType()
     :members:
 
 InviteTarget
 ~~~~~~~~~~~~
 
-.. autoclass:: InviteTarget
+.. autoclass:: InviteTarget()
     :members:
 
 Events

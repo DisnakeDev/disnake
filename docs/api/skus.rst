@@ -39,5 +39,5 @@ Enumerations
 SKUType
 ~~~~~~~
 
-.. autoclass:: SKUType
+.. autoclass:: SKUType()
     :members:

@@ -25,7 +25,7 @@ Enumerations
 EntitlementType
 ~~~~~~~~~~~~~~~
 
-.. autoclass:: EntitlementType
+.. autoclass:: EntitlementType()
     :members:
 
 Events

@@ -1589,5 +1589,5 @@ Enumerations
 Event
 ~~~~~
 
-.. autoclass:: Event
+.. autoclass:: Event()
     :members:

@@ -74,13 +74,13 @@ Enumerations
 ActivityType
 ~~~~~~~~~~~~
 
-.. autoclass:: ActivityType
+.. autoclass:: ActivityType()
     :members:
 
 Status
 ~~~~~~
 
-.. autoclass:: Status
+.. autoclass:: Status()
     :members:
 
 Events

@@ -67,7 +67,7 @@ Enumerations
 WebhookType
 ~~~~~~~~~~~
 
-.. autoclass:: WebhookType
+.. autoclass:: WebhookType()
     :members:
 
 Events

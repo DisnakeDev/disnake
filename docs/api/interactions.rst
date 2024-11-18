@@ -178,13 +178,13 @@ Enumerations
 InteractionType
 ~~~~~~~~~~~~~~~
 
-.. autoclass:: InteractionType
+.. autoclass:: InteractionType()
     :members:
 
 InteractionResponseType
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: InteractionResponseType
+.. autoclass:: InteractionResponseType()
     :members:
 
 Events

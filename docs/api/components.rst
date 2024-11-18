@@ -129,23 +129,23 @@ Enumerations
 ComponentType
 ~~~~~~~~~~~~~
 
-.. autoclass:: ComponentType
+.. autoclass:: ComponentType()
     :members:
 
 ButtonStyle
 ~~~~~~~~~~~
 
-.. autoclass:: ButtonStyle
+.. autoclass:: ButtonStyle()
     :members:
 
 TextInputStyle
 ~~~~~~~~~~~~~~
 
-.. autoclass:: TextInputStyle
+.. autoclass:: TextInputStyle()
     :members:
 
 SelectDefaultValueType
 ~~~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: SelectDefaultValueType
+.. autoclass:: SelectDefaultValueType()
     :members:

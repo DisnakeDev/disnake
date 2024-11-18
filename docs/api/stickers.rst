@@ -60,13 +60,13 @@ Enumerations
 StickerType
 ~~~~~~~~~~~
 
-.. autoclass:: StickerType
+.. autoclass:: StickerType()
     :members:
 
 StickerFormatType
 ~~~~~~~~~~~~~~~~~
 
-.. autoclass:: StickerFormatType
+.. autoclass:: StickerFormatType()
     :members:
 
 Events

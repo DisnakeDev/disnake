@@ -146,31 +146,31 @@ Enumerations
 VerificationLevel
 ~~~~~~~~~~~~~~~~~
 
-.. autoclass:: VerificationLevel
+.. autoclass:: VerificationLevel()
     :members:
 
 NotificationLevel
 ~~~~~~~~~~~~~~~~~
 
-.. autoclass:: NotificationLevel
+.. autoclass:: NotificationLevel()
     :members:
 
 ContentFilter
 ~~~~~~~~~~~~~
 
-.. autoclass:: ContentFilter
+.. autoclass:: ContentFilter()
     :members:
 
 NSFWLevel
 ~~~~~~~~~
 
-.. autoclass:: NSFWLevel
+.. autoclass:: NSFWLevel()
     :members:
 
 OnboardingPromptType
 ~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: OnboardingPromptType
+.. autoclass:: OnboardingPromptType()
     :members:
 
 Events
