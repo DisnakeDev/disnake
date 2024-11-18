@@ -34,6 +34,9 @@ def setup(app: Sphinx) -> SphinxExtensionMeta:
     app.setup_extension("sphinx.ext.autodoc")
     app.add_autodocumenter(EnumMemberDocumenter)
 
+    # show `Enum.name` instead of `<Enum.name: 123>` in signatures
+    disnake.enums._EnumValueBase.__repr__ = disnake.enums._EnumValueBase.__str__
+
     return {
         "parallel_read_safe": True,
         "parallel_write_safe": True,
