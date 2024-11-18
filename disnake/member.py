@@ -1023,34 +1023,23 @@ class Member(disnake.abc.Messageable, _UserTag):
             data = await http.edit_member(guild_id, self.id, reason=reason, **payload)
             return Member(data=data, guild=self.guild, state=self._state)
 
-    async def fetch_voice_state(self, *, cache: bool = False) -> VoiceState:
+    async def fetch_voice_state(self) -> VoiceState:
         """|coro|
 
         Fetches the :class:`VoiceState` of the member.
 
         .. versionadded:: 2.10
 
-        .. warning::
-
-            If the :attr:`disnake.Intents.voice_states` is disabled caching this could lead to a memory leak.
-            This could happen because with the intent disabled you don't receive voice state updates, hence
-            the cached voice state could possibly never be removed from the cache.
-
-        Parameters
-        ----------
-        cache: :class:`bool`
-            Whether to cache the fetched voice state. Defaults to ``False``.
-
         Raises
         ------
         NotFound
             The member for which you tried to fetch a voice state is not
             connected to a channel in this guild.
-
         Forbidden
             You do not have permission to fetch the member's voice state.
         HTTPException
             Fetching the voice state failed.
+
         Returns
         -------
         :class:`VoiceState`
@@ -1058,11 +1047,6 @@ class Member(disnake.abc.Messageable, _UserTag):
         """
         data = await self._state.http.get_voice_state(self.guild.id, self.id)
         channel_id = utils._get_as_snowflake(data, "channel_id")
-
-        if cache:
-            _, _, after = self.guild._update_voice_state(data, channel_id)
-            return after
-
         channel: Optional[VocalGuildChannel] = self.guild.get_channel(channel_id)  # type: ignore
         return VoiceState(data=data, channel=channel)
 
