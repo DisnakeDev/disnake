@@ -1286,7 +1286,9 @@ class Message(Hashable):
             # TODO: consider adding to cache here
             self.author = Member._from_message(message=self, data=member)
 
-    def _handle_mentions(self, mentions: List[UserWithMemberPayload]) -> None:
+    def _handle_mentions(
+        self, mentions: Union[List[UserPayload], List[UserWithMemberPayload]]
+    ) -> None:
         self.mentions = r = []
         guild = self.guild
         state = self._state
