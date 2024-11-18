@@ -1028,6 +1028,10 @@ class Member(disnake.abc.Messageable, _UserTag):
             The member for which you tried to fetch a voice state is not
             connected to a channel in this guild.
 
+        Forbidden
+            You do not have permission to fetch the member's voice state.
+        HTTPException
+            Fetching the voice state failed.
         Returns
         -------
         :class:`VoiceState`
