@@ -1369,16 +1369,16 @@ class NSFWLevel(Enum, comparable=True):
             Checks if two NSFW levels are not equal.
         .. describe:: x > y
 
-            Checks if a NSFW level is higher than another.
+            Checks if an NSFW level is higher than another.
         .. describe:: x < y
 
-            Checks if a NSFW level is lower than another.
+            Checks if an NSFW level is lower than another.
         .. describe:: x >= y
 
-            Checks if a NSFW level is higher or equal to another.
+            Checks if an NSFW level is higher or equal to another.
         .. describe:: x <= y
 
-            Checks if a NSFW level is lower or equal to another.
+            Checks if an NSFW level is lower or equal to another.
     """
 
     default = 0
