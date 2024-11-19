@@ -39,24 +39,5 @@ Enumerations
 SKUType
 ~~~~~~~
 
-.. class:: SKUType
-
-    Represents the type of an SKU.
-
-    .. versionadded:: 2.10
-
-    .. attribute:: durable
-
-        Represents a durable one-time purchase.
-
-    .. attribute:: consumable
-
-        Represents a consumable one-time purchase.
-
-    .. attribute:: subscription
-
-        Represents a recurring subscription.
-
-    .. attribute:: subscription_group
-
-        Represents a system-generated group for each :attr:`subscription` SKU.
+.. autoclass:: SKUType()
+    :members:

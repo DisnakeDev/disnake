@@ -35,16 +35,16 @@ class CommandSyncFlags(BaseFlags):
             Checks if two CommandSyncFlags instances are not equal.
         .. describe:: x <= y
 
-            Checks if an CommandSyncFlags instance is a subset of another CommandSyncFlags instance.
+            Checks if a CommandSyncFlags instance is a subset of another CommandSyncFlags instance.
         .. describe:: x >= y
 
-            Checks if an CommandSyncFlags instance is a superset of another CommandSyncFlags instance.
+            Checks if a CommandSyncFlags instance is a superset of another CommandSyncFlags instance.
         .. describe:: x < y
 
-            Checks if an CommandSyncFlags instance is a strict subset of another CommandSyncFlags instance.
+            Checks if a CommandSyncFlags instance is a strict subset of another CommandSyncFlags instance.
         .. describe:: x > y
 
-            Checks if an CommandSyncFlags instance is a strict superset of another CommandSyncFlags instance.
+            Checks if a CommandSyncFlags instance is a strict superset of another CommandSyncFlags instance.
         .. describe:: x | y, x |= y
 
             Returns a new CommandSyncFlags instance with all enabled flags from both x and y.

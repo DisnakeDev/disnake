@@ -1,0 +1,1 @@
+Move enum member documentation into docstrings.

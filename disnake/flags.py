@@ -2282,16 +2282,16 @@ class MemberFlags(BaseFlags):
             Checks if two MemberFlags instances are not equal.
         .. describe:: x <= y
 
-            Checks if an MemberFlags instance is a subset of another MemberFlags instance.
+            Checks if a MemberFlags instance is a subset of another MemberFlags instance.
         .. describe:: x >= y
 
-            Checks if an MemberFlags instance is a superset of another MemberFlags instance.
+            Checks if a MemberFlags instance is a superset of another MemberFlags instance.
         .. describe:: x < y
 
-            Checks if an MemberFlags instance is a strict subset of another MemberFlags instance.
+            Checks if a MemberFlags instance is a strict subset of another MemberFlags instance.
         .. describe:: x > y
 
-            Checks if an MemberFlags instance is a strict superset of another MemberFlags instance.
+            Checks if a MemberFlags instance is a strict superset of another MemberFlags instance.
         .. describe:: x | y, x |= y
 
             Returns a new MemberFlags instance with all enabled flags from both x and y.
@@ -2384,16 +2384,16 @@ class RoleFlags(BaseFlags):
             Checks if two RoleFlags instances are not equal.
         .. describe:: x <= y
 
-            Checks if an RoleFlags instance is a subset of another RoleFlags instance.
+            Checks if a RoleFlags instance is a subset of another RoleFlags instance.
         .. describe:: x >= y
 
-            Checks if an RoleFlags instance is a superset of another RoleFlags instance.
+            Checks if a RoleFlags instance is a superset of another RoleFlags instance.
         .. describe:: x < y
 
-            Checks if an RoleFlags instance is a strict subset of another RoleFlags instance.
+            Checks if a RoleFlags instance is a strict subset of another RoleFlags instance.
         .. describe:: x > y
 
-            Checks if an RoleFlags instance is a strict superset of another RoleFlags instance.
+            Checks if a RoleFlags instance is a strict superset of another RoleFlags instance.
         .. describe:: x | y, x |= y
 
             Returns a new RoleFlags instance with all enabled flags from both x and y.

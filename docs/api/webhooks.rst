@@ -67,25 +67,8 @@ Enumerations
 WebhookType
 ~~~~~~~~~~~
 
-.. class:: WebhookType
-
-    Represents the type of webhook that can be received.
-
-    .. versionadded:: 1.3
-
-    .. attribute:: incoming
-
-        Represents a webhook that can post messages to channels with a token.
-
-    .. attribute:: channel_follower
-
-        Represents a webhook that is internally managed by Discord, used for following channels.
-
-    .. attribute:: application
-
-        Represents a webhook that is used for interactions or applications.
-
-        .. versionadded:: 2.0
+.. autoclass:: WebhookType()
+    :members:
 
 Events
 ------

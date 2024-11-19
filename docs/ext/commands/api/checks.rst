@@ -26,33 +26,8 @@ Enumerations
 BucketType
 ~~~~~~~~~~
 
-.. class:: BucketType
-
-    Specifies a type of bucket for, e.g. a cooldown.
-
-    .. attribute:: default
-
-        The default bucket operates on a global basis.
-    .. attribute:: user
-
-        The user bucket operates on a per-user basis.
-    .. attribute:: guild
-
-        The guild bucket operates on a per-guild basis.
-    .. attribute:: channel
-
-        The channel bucket operates on a per-channel basis.
-    .. attribute:: member
-
-        The member bucket operates on a per-member basis.
-    .. attribute:: category
-
-        The category bucket operates on a per-category basis.
-    .. attribute:: role
-
-        The role bucket operates on a per-role basis.
-
-        .. versionadded:: 1.3
+.. autoclass:: BucketType()
+    :members:
 
 Functions
 ---------
