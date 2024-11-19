@@ -15,6 +15,11 @@ if TYPE_CHECKING:
 
 
 class EnumMemberDocumenter(AttributeDocumenter):
+    """
+    Custom enum member documenter which hides enum values.
+    Gets used automatically for all `_EnumValueBase` instances.
+    """
+
     objtype = "enumattribute"
     directivetype = AttributeDocumenter.objtype
     priority = 10 + AttributeDocumenter.priority
@@ -32,6 +37,7 @@ class EnumMemberDocumenter(AttributeDocumenter):
 
 def setup(app: Sphinx) -> SphinxExtensionMeta:
     app.setup_extension("sphinx.ext.autodoc")
+
     app.add_autodocumenter(EnumMemberDocumenter)
 
     # show `Enum.name` instead of `<Enum.name: 123>` in signatures
