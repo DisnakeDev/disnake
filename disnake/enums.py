@@ -115,6 +115,7 @@ class EnumMeta(type):
         _enum_member_names_: ClassVar[List[str]]
         _enum_member_map_: ClassVar[Dict[str, Any]]
         _enum_value_map_: ClassVar[Dict[Any, Any]]
+        _enum_value_cls_: ClassVar[Type[_EnumValueBase]]
 
     def __new__(cls, name: str, bases, attrs, *, comparable: bool = False):
         value_mapping = {}
