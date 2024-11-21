@@ -1588,6 +1588,35 @@ class Message(Hashable):
         if self.type is MessageType.guild_incident_report_false_alarm:
             return f"{self.author.name} resolved an Activity Alert."
 
+        if self.type is MessageType.poll_result:
+            if not self.embeds:
+                return
+
+            poll_result_embed = self.embeds[0]
+            poll_embed_fields: Dict[str, str] = {}
+            if not poll_result_embed._fields:
+                return
+
+            for field in poll_result_embed._fields:
+                poll_embed_fields[field["name"]] = field["value"]
+
+            # should never be none
+            question = poll_embed_fields["poll_question_text"]
+            # should never be none
+            total_votes = poll_embed_fields["total_votes"]
+            winning_answer = poll_embed_fields.get("victor_answer_text")
+            winning_answer_votes = poll_embed_fields.get("victor_answer_votes")
+            msg = f"{self.author.display_name}'s poll {question} has closed."
+
+            if winning_answer and winning_answer_votes:
+                msg += (
+                    f"\n\n{winning_answer}"
+                    f"\nWinning answer • {(100 * int(winning_answer_votes)) // int(total_votes)}%"
+                )
+            else:
+                msg += "\n\nThere was no winner."
+            return msg
+
         # in the event of an unknown or unsupported message type, we return nothing
         return None
 
