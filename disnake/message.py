@@ -2731,8 +2731,7 @@ class ForwardedMessage:
     Attributes
     ----------
     type: :class:`MessageType`
-        The type of message. In most cases this should not be checked, but it is helpful
-        in cases where it might be a system message for :attr:`Message.system_content`.
+        The type of message.
     content: :class:`str`
         The actual contents of the message.
     embeds: List[:class:`Embed`]
