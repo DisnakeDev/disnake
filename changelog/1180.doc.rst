@@ -1,1 +1,0 @@
-Adding some clarifying documentation around the type of :attr:`AuditLogEntry.extra` when the action is :attr:`~AuditLogAction.overwrite_create`.

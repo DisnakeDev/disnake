@@ -47,6 +47,7 @@ __all__ = (
     "ComponentType",
     "ButtonStyle",
     "TextInputStyle",
+    "SelectDefaultValueType",
     "StagePrivacyLevel",
     "InteractionType",
     "InteractionResponseType",
@@ -72,6 +73,7 @@ __all__ = (
     "SKUType",
     "EntitlementType",
     "PollLayoutType",
+    "VoiceChannelEffectAnimationType",
 )
 
 
@@ -694,6 +696,15 @@ class TextInputStyle(Enum):
         return self.value
 
 
+class SelectDefaultValueType(Enum):
+    user = "user"
+    role = "role"
+    channel = "channel"
+
+    def __str__(self) -> str:
+        return self.value
+
+
 class ApplicationCommandType(Enum):
     chat_input = 1
     user = 2
@@ -1161,6 +1172,19 @@ class Event(Enum):
     """Called when a `Member` changes their `VoiceState`.
     Represents the :func:`on_voice_state_update` event.
     """
+    voice_channel_effect = "voice_channel_effect"
+    """Called when a `Member` sends an effect in a voice channel the bot is connected to.
+    Represents the :func:`on_voice_channel_effect` event.
+
+    .. versionadded:: 2.10
+    """
+    raw_voice_channel_effect = "raw_voice_channel_effect"
+    """Called when a `Member` sends an effect in a voice channel the bot is connected to,
+    regardless of the member cache.
+    Represents the :func:`on_raw_voice_channel_effect` event.
+
+    .. versionadded:: 2.10
+    """
     stage_instance_create = "stage_instance_create"
     """Called when a `StageInstance` is created for a `StageChannel`.
     Represents the :func:`on_stage_instance_create` event.
@@ -1384,6 +1408,11 @@ class EntitlementType(Enum):
 
 class PollLayoutType(Enum):
     default = 1
+
+
+class VoiceChannelEffectAnimationType(Enum):
+    premium = 0
+    basic = 1
 
 
 T = TypeVar("T")

@@ -43,7 +43,6 @@ from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite, Permissions
 from .role import Role
 from .sticker import GuildSticker, StandardSticker, StickerItem
-from .ui.action_row import components_to_dict
 from .utils import _overload_with_permissions
 from .voice_client import VoiceClient, VoiceProtocol
 
@@ -179,6 +178,7 @@ class User(Snowflake, Protocol):
         raise NotImplementedError
 
 
+# FIXME: this shouldn't be a protocol. isinstance(thread, PrivateChannel) returns true, and issubclass doesn't work.
 @runtime_checkable
 class PrivateChannel(Snowflake, Protocol):
     """An ABC that details the common operations on a private Discord channel.
@@ -1719,16 +1719,14 @@ class Messageable:
 
         if view is not None and components is not None:
             raise TypeError("cannot pass both view and components parameter to send()")
-
         elif view:
             if not hasattr(view, "__discord_ui_view__"):
                 raise TypeError(f"view parameter must be View not {view.__class__!r}")
-
             components_payload = view.to_components()
-
         elif components:
-            components_payload = components_to_dict(components)
+            from .ui.action_row import components_to_dict
 
+            components_payload = components_to_dict(components)
         else:
             components_payload = None
 

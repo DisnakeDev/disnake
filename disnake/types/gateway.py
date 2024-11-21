@@ -25,7 +25,7 @@ from .snowflake import Snowflake, SnowflakeList
 from .sticker import GuildSticker
 from .threads import Thread, ThreadMember, ThreadMemberWithPresence, ThreadType
 from .user import AvatarDecorationData, User
-from .voice import GuildVoiceState, SupportedModes
+from .voice import GuildVoiceState, SupportedModes, VoiceChannelEffect
 
 
 class SessionStartLimit(TypedDict):
@@ -453,6 +453,7 @@ class GuildMemberUpdateEvent(TypedDict):
     user: User
     nick: NotRequired[Optional[str]]
     avatar: Optional[str]
+    banner: Optional[str]
     joined_at: Optional[str]
     premium_since: NotRequired[Optional[str]]
     deaf: NotRequired[bool]
@@ -610,6 +611,13 @@ class VoiceServerUpdateEvent(TypedDict):
     token: str
     guild_id: Snowflake
     endpoint: Optional[str]
+
+
+# https://discord.com/developers/docs/topics/gateway-events#voice-channel-effect-send
+class VoiceChannelEffectSendEvent(VoiceChannelEffect):
+    channel_id: Snowflake
+    guild_id: Snowflake
+    user_id: Snowflake
 
 
 # https://discord.com/developers/docs/topics/gateway-events#typing-start
