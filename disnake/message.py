@@ -1614,7 +1614,7 @@ class Message(Hashable):
                     f"\nWinning answer • {(100 * int(winning_answer_votes)) // int(total_votes)}%"
                 )
             else:
-                msg += f"\n\nThere was no winner."
+                msg += "\n\nThere was no winner."
             return msg
 
         # in the event of an unknown or unsupported message type, we return nothing
