@@ -149,7 +149,7 @@ select = [
     # "RET", # flake8-return
     # "SIM", # flake8-simplify
     "TID251", # flake8-tidy-imports, replaces S404
-    "TCH",    # flake8-type-checking
+    "TC",     # flake8-type-checking
     "RUF",    # ruff specific exceptions
     "PT",     # flake8-pytest-style
     "Q",      # flake8-quotes
@@ -202,9 +202,9 @@ ignore = [
     # ignore imports that could be moved into type-checking blocks
     # (no real advantage other than possibly avoiding cycles,
     # but can be dangerous in places where we need to parse signatures)
-    "TCH001",
-    "TCH002",
-    "TCH003",
+    "TC001",
+    "TC002",
+    "TC003",
 
     "S311",    # insecure RNG usage, we don't use these for security-related things
     "PLE0237", # pyright seems to catch this already
