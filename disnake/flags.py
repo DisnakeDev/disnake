@@ -678,6 +678,16 @@ class MessageFlags(BaseFlags):
         """
         return 1 << 13
 
+    @flag_value
+    def has_snapshot(self):
+        """:class:`bool`: Returns ``True`` if the message is a forward message.
+
+        Messages with this flag will have only the forward data, and no other content.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 14
+
 
 class PublicUserFlags(BaseFlags):
     """Wraps up the Discord User Public flags.
