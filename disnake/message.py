@@ -2733,9 +2733,6 @@ class ForwardedMessage:
         The actual contents of the message.
     embeds: List[:class:`Embed`]
         A list of embeds the message has.
-    channel: Optional[Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`StageChannel`, :class:`Thread`, :class:`DMChannel`, :class:`GroupChannel`, :class:`PartialMessageable`]]
-        The channel that the message was forwarded from.
-        Could be a :class:`DMChannel` or :class:`GroupChannel` if it's a private message. This could be ``None`` if the channel is not cached.
     channel_id: :class:`int`
         The ID of the channel where the message was forwarded from.
     attachments: List[:class:`Attachment`]
@@ -2759,9 +2756,6 @@ class ForwardedMessage:
         A list of sticker items given to the message.
     components: List[:class:`Component`]
         A list of components in the message.
-    guild: Optional[:class:`Guild`]
-        The guild where the message was forwarded from, if applicable. This could
-        be ``None`` if the guild is not cached.
     guild_id: Optional[:class:`int`]
         The guild ID where the message was forwarded from, if applicable.
     """
@@ -2771,7 +2765,6 @@ class ForwardedMessage:
         "type",
         "content",
         "embeds",
-        "channel",
         "channel_id",
         "attachments",
         "_timestamp",
@@ -2781,7 +2774,6 @@ class ForwardedMessage:
         "role_mentions",
         "stickers",
         "components",
-        "guild",
         "guild_id",
     )
 
