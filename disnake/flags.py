@@ -2370,6 +2370,31 @@ class MemberFlags(BaseFlags):
         """:class:`bool`: Returns ``True`` if the member has started onboarding."""
         return 1 << 3
 
+    @flag_value
+    def is_guest(self):
+        """:class:`bool`: Returns ``True`` if the member is a guest and can ony access the voice channel they were invited to."""
+        return 1 << 4
+
+    @flag_value
+    def started_home_actions(self):
+        """:class:`bool`: Returns ``True`` if the member has started the Server Guide actions."""
+        return 1 << 5
+
+    @flag_value
+    def completed_home_actions(self):
+        """:class:`bool`: Returns ``True`` if the member has completed the Server Guide actions."""
+        return 1 << 6
+
+    @flag_value
+    def automod_quarantined_username(self):
+        """:class:`bool`: Returns ``True`` if the member's username, display name, or nickname is blocked by AutoMod."""
+        return 1 << 7
+
+    @flag_value
+    def dm_settings_upsell_acknowledged(self):
+        """:class:`bool`: Returns ``True`` if the member has dismissed the DM settings upsell."""
+        return 1 << 9
+
 
 class RoleFlags(BaseFlags):
     """Wraps up Discord Role flags.
