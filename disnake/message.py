@@ -2834,16 +2834,14 @@ class ForwardedMessage:
 
     @property
     def guild(self) -> Optional[Guild]:
-        """
-        Optional[:class:`disnake.Guild`]: The guild where the message was forwarded from, if applicable.
+        """Optional[:class:`disnake.Guild`]: The guild where the message was forwarded from, if applicable.
         This could be ``None`` if the guild is not cached.
         """
         return self._state._get_guild(self.guild_id)
 
     @property
     def channel(self) -> Optional[Union[GuildChannel, Thread, PartialMessageable]]:
-        """
-        Optional[Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`StageChannel`, :class:`Thread`, :class:`PartialMessageable`]]:
+        """Optional[Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`StageChannel`, :class:`Thread`, :class:`PartialMessageable`]]:
         The channel that the message was forwarded from. This could be ``None`` if the channel is not cached or a
         :class:`disnake.PartialMessageable` if the ``guild`` is not cached or if the message forwarded is not coming from a guild (e.g DMs).
         """
