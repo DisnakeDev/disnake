@@ -2343,9 +2343,14 @@ class MemberFlags(BaseFlags):
         def __init__(
             self,
             *,
+            automod_quarantined_username: bool = ...,
             bypasses_verification: bool = ...,
+            completed_home_actions: bool = ...,
             completed_onboarding: bool = ...,
             did_rejoin: bool = ...,
+            dm_settings_upsell_acknowledged: bool = ...,
+            is_guest: bool = ...,
+            started_home_actions: bool = ...,
             started_onboarding: bool = ...,
         ) -> None:
             ...
