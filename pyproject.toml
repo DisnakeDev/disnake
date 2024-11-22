@@ -71,7 +71,7 @@ tools = [
     "slotscheck~=0.16.4",
     "python-dotenv~=1.0.0",
     "check-manifest==0.49",
-    "ruff==0.3.4",
+    "ruff==0.8.0",
 ]
 changelog = [
     "towncrier==23.6.0",
