@@ -23,6 +23,7 @@ from typing import (
 )
 
 from . import utils
+from .channel import PartialMessageable
 from .components import ActionRow, MessageComponent, _component_factory
 from .embeds import Embed
 from .emoji import Emoji
@@ -2419,6 +2420,7 @@ class PartialMessage(Hashable):
     reply = Message.reply
     to_reference = Message.to_reference
     to_message_reference_dict = Message.to_message_reference_dict
+    forward = Message.forward
 
     def __init__(self, *, channel: MessageableChannel, id: int) -> None:
         if channel.type not in (
@@ -2717,40 +2719,6 @@ class PartialMessage(Hashable):
             delete_after=delete_after,
         )
 
-    async def forward(
-        self,
-        channel: MessageableChannel,
-    ) -> Message:
-        """|coro|
-
-        A shortcut method to :meth:`.abc.Messageable.send` to forward a
-        :class:`.Message`.
-
-        .. versionadded:: 2.10
-
-        Parameters
-        ----------
-        channel: Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`StageChannel`, :class:`Thread`, :class:`DMChannel`, :class:`GroupChannel`, :class:`PartialMessageable`]
-            The channel where the message should be forwarded to.
-
-        Raises
-        ------
-        HTTPException
-            Sending the message failed.
-        Forbidden
-            You do not have the proper permissions to send the message.
-
-        Returns
-        -------
-        :class:`.Message`
-            The message that was sent.
-        """
-        reference = self.to_reference(
-            type=MessageReferenceType.forward,
-            fail_if_not_exists=False,
-        )
-        return await channel.send(reference=reference)
-
 
 class ForwardedMessage:
     """Represents a forwarded :class:`Message`.
@@ -2829,7 +2797,6 @@ class ForwardedMessage:
         self.type: MessageType = try_enum(MessageType, data["type"])
         self.content: str = data["content"]
         self.embeds: List[Embed] = [Embed.from_dict(a) for a in data["embeds"]]
-        self.channel: Union[GuildMessageable, DMChannel, GroupChannel] = state.get_channel(channel_id)  # type: ignore
         # should never be None in message_reference(s) that are forwarding
         self.channel_id: int = channel_id  # type: ignore
         self.attachments: List[Attachment] = [
@@ -2847,7 +2814,6 @@ class ForwardedMessage:
             _component_factory(d, type=ActionRow[MessageComponent])
             for d in data.get("components", [])
         ]
-        self.guild = state._get_guild(guild_id)
         self.guild_id = guild_id
 
         self.mentions: List[Union[User, Member]] = []
@@ -2873,6 +2839,27 @@ class ForwardedMessage:
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__}>"
+
+    @property
+    def guild(self) -> Optional[Guild]:
+        """
+        Optional[:class:`disnake.Guild`]: The guild where the message was forwarded from, if applicable.
+        This could be ``None`` if the guild is not cached.
+        """
+        return self._state._get_guild(self.guild_id)
+
+    @property
+    def channel(self) -> Optional[Union[GuildChannel, Thread, PartialMessageable]]:
+        """
+        Optional[Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`StageChannel`, :class:`Thread`, :class:`PartialMessageable`]]:
+        The channel that the message was forwarded from. This could be ``None`` if the channel is not cached or a
+        :class:`disnake.PartialMessageable` if the ``guild`` is not cached or if the message forwarded is not coming from a guild (e.g DMs).
+        """
+        if self.guild:
+            channel = self.guild.get_channel_or_thread(self.channel_id)
+        else:
+            channel = PartialMessageable(state=self._state, id=self.channel_id)
+        return channel
 
     @property
     def created_at(self) -> datetime.datetime:
