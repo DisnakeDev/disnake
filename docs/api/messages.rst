@@ -408,6 +408,12 @@ MessageType
 
         .. versionadded:: 2.10
 
+    .. attribute:: poll_result
+
+        The system message denoting that a poll expired, announcing the most voted answer.
+
+        .. versionadded:: 2.10
+
 PollLayoutType
 ~~~~~~~~~~~~~~
 
@@ -420,6 +426,9 @@ PollLayoutType
     .. attribute:: default
 
         The default poll layout type.
+
+MessageReferenceType
+~~~~~~~~~~~~~~~~~~~~
 
 .. class:: MessageReferenceType
 
