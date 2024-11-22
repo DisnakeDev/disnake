@@ -178,6 +178,10 @@ ignore = [
     "RUF005", # might not be actually faster
     "RUF006", # might not be an issue/very extreme cases
 
+    # we keep __all__ and __slots__ (roughly) sorted by source, not alphabetically
+    "RUF022",
+    "RUF023",
+
     # calling subprocess with dynamic arguments is generally fine, the only way to avoid this is ignoring it
     "S603",
 
@@ -258,6 +262,13 @@ mark-parentheses = false
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "subprocess".msg = "Consider possible security implications associated with the subprocess module." # replaces S404
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = [
+    # this is immutable, except for storing locks, which are fine to share across contexts
+    "disnake.webhook.async_.AsyncWebhookAdapter",
+]
+
 
 [tool.towncrier]
 template = "changelog/_template.rst.jinja"

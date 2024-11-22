@@ -140,10 +140,10 @@ class TestRange:
 
     def test_valid(self) -> None:
         x: Any = commands.Range[int, -1, 2]
-        assert x.underlying_type == int
+        assert x.underlying_type is int
 
         x: Any = commands.Range[float, ..., 23.45]
-        assert x.underlying_type == float
+        assert x.underlying_type is float
 
 
 class TestString:
@@ -211,7 +211,7 @@ class TestRangeStringParam:
 
         assert info.min_value == 1
         assert info.max_value == 2
-        assert info.type == int
+        assert info.type is int
 
 
 class TestIsolateSelf:
