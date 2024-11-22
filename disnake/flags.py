@@ -586,6 +586,7 @@ class MessageFlags(BaseFlags):
             crossposted: bool = ...,
             ephemeral: bool = ...,
             failed_to_mention_roles_in_thread: bool = ...,
+            has_snapshot: bool = ...,
             has_thread: bool = ...,
             is_crossposted: bool = ...,
             is_voice_message: bool = ...,
