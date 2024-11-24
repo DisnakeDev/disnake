@@ -2377,7 +2377,7 @@ class MemberFlags(BaseFlags):
 
     @flag_value
     def is_guest(self):
-        """:class:`bool`: Returns ``True`` if the member is a guest and can ony access the voice channel they were invited to."""
+        """:class:`bool`: Returns ``True`` if the member is a guest and can only access the voice channel they were invited to."""
         return 1 << 4
 
     @flag_value
