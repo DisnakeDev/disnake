@@ -3581,7 +3581,7 @@ class Guild(Hashable):
         """
         await self._state.http.delete_custom_emoji(self.id, emoji.id, reason=reason)
 
-    async def fetch_role(self, role_id: Union[int, Object]) -> Role:
+    async def fetch_role(self, /, role_id: int) -> Role:
         """|coro|
 
         Retrieve a :class:`Role`.
@@ -3592,6 +3592,10 @@ class Guild(Hashable):
 
         .. versionadded:: 2.10
 
+        Parameters
+        ----------
+        role_id: :class:`int`
+            The ID of the role to retrieve.
 
         Raises
         ------
@@ -3603,10 +3607,7 @@ class Guild(Hashable):
         :class:`Role`
             The retrieved role.
         """
-        data = await self._state.http.get_role(
-            self.id,
-            role_id=(role_id if isinstance(role_id, int) else role_id.id),
-        )
+        data = await self._state.http.get_role(self.id, role_id=role_id)
         return Role(guild=self, state=self._state, data=data)
 
     async def fetch_roles(self) -> List[Role]:
