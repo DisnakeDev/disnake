@@ -1044,6 +1044,7 @@ class EntitlementIterator(_AsyncIterator["Entitlement"]):
         before: Optional[Union[Snowflake, datetime.datetime]] = None,
         after: Optional[Union[Snowflake, datetime.datetime]] = None,
         exclude_ended: bool = False,
+        exclude_deleted: bool = False,
         oldest_first: bool = False,
     ) -> None:
         if isinstance(before, datetime.datetime):
@@ -1059,6 +1060,7 @@ class EntitlementIterator(_AsyncIterator["Entitlement"]):
         self.guild_id: Optional[int] = guild_id
         self.sku_ids: Optional[List[int]] = sku_ids
         self.exclude_ended: bool = exclude_ended
+        self.exclude_deleted: bool = exclude_deleted
 
         self.state: ConnectionState = state
         self.request = state.http.get_entitlements
@@ -1116,6 +1118,7 @@ class EntitlementIterator(_AsyncIterator["Entitlement"]):
             user_id=self.user_id,
             guild_id=self.guild_id,
             exclude_ended=self.exclude_ended,
+            exclude_deleted=self.exclude_deleted,
         )
 
         if len(data):
@@ -1133,6 +1136,7 @@ class EntitlementIterator(_AsyncIterator["Entitlement"]):
             user_id=self.user_id,
             guild_id=self.guild_id,
             exclude_ended=self.exclude_ended,
+            exclude_deleted=self.exclude_deleted,
         )
 
         if len(data):

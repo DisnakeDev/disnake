@@ -2360,10 +2360,12 @@ class HTTPClient:
         guild_id: Optional[Snowflake] = None,
         sku_ids: Optional[SnowflakeList] = None,
         exclude_ended: bool = False,
+        exclude_deleted: bool = False,
     ) -> Response[List[entitlement.Entitlement]]:
         params: Dict[str, Any] = {
             "limit": limit,
             "exclude_ended": int(exclude_ended),
+            "exclude_deleted": int(exclude_deleted),
         }
         if before is not None:
             params["before"] = before
