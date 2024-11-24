@@ -3216,6 +3216,36 @@ class Client:
             oldest_first=oldest_first,
         )
 
+    async def fetch_entitlement(self, /, entitlement_id: int) -> Entitlement:
+        """|coro|
+
+        Retrieves a :class:`.Entitlement` for the given ID.
+
+        .. note::
+
+            This method is an API call. To get the entitlements of the invoking user/guild
+            in interactions, consider using :attr:`.Interaction.entitlements`.
+
+        .. versionadded:: 2.10
+
+        Parameters
+        ----------
+        entitlement_id: :class:`int`
+            The ID of the entitlement to retrieve.
+
+        Raises
+        ------
+        HTTPException
+            Retrieving the entitlement failed.
+
+        Returns
+        -------
+        :class:`.Entitlement`
+            The retrieved entitlement.
+        """
+        data = await self.http.get_entitlement(self.application_id, entitlement_id=entitlement_id)
+        return Entitlement(data=data, state=self._connection)
+
     async def create_entitlement(
         self, sku: Snowflake, owner: Union[abc.User, Guild]
     ) -> Entitlement:

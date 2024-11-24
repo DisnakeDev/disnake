@@ -1,0 +1,2 @@
+- Add the new ``exclude_deleted``` argument to :meth:`.Client.entitlements`.
+- Add the new :meth:`.Client.fetch_entitlement` method.
