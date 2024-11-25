@@ -793,12 +793,12 @@ class InteractionMetadata:
         The ID of the message containing the component.
         Only present on :attr:`InteractionType.component` interactions.
 
-    triggering_interaction_metadata: Optional[InteractionMetadata]
+    triggering_interaction_metadata: Optional[:class:`InteractionMetadata`]
         The metadata of the original interaction that triggered the modal.
         Only present on :attr:`InteractionType.modal_submit` interactions.
     """
 
-    __slots__ = [
+    __slots__ = (
         "id",
         "type",
         "user",
@@ -808,7 +808,7 @@ class InteractionMetadata:
         "target_message_id",
         "interacted_message_id",
         "triggering_interaction_metadata",
-    ]
+    )
 
     def __init__(self, *, state: ConnectionState, data: InteractionMetadataPayload) -> None:
         self.id: int = int(data["id"])
