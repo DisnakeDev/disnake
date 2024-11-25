@@ -3599,6 +3599,8 @@ class Guild(Hashable):
 
         Raises
         ------
+        NotFound
+            The role requested could not be found.
         HTTPException
             Retrieving the role failed.
 
