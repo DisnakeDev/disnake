@@ -798,9 +798,7 @@ class InteractionMetadata:
         Only present on :attr:`InteractionType.modal_submit` interactions.
     """
 
-    # TODO: do we even need state here
     __slots__ = [
-        "_state",
         "id",
         "type",
         "user",
@@ -813,8 +811,6 @@ class InteractionMetadata:
     ]
 
     def __init__(self, *, state: ConnectionState, data: InteractionMetadataPayload) -> None:
-        self._state: ConnectionState = state
-
         self.id: int = int(data["id"])
         self.type: InteractionType = try_enum(InteractionType, int(data["type"]))
         self.user: User = state.create_user(data["user"])
