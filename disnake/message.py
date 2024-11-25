@@ -784,12 +784,10 @@ class InteractionMetadata:
 
     target_user: Optional[:class:`User`]
         The ID of the message the command was run on.
-        Only present on :attr:`InteractionType.application_command` interactions of
-        :attr:`ApplicationCommandType.message` commands.
+        Only present on interactions of :attr:`ApplicationCommandType.message` commands.
     target_message_id: Optional[:class:`int`]
         The user the command was run on.
-        Only present on :attr:`InteractionType.application_command` interactions of
-        :attr:`ApplicationCommandType.user` commands.
+        Only present on interactions of :attr:`ApplicationCommandType.user` commands.
 
     interacted_message_id: Optional[:class:`int`]
         The ID of the message containing the component.
