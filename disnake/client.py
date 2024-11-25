@@ -3216,7 +3216,7 @@ class Client:
             oldest_first=oldest_first,
         )
 
-    async def fetch_entitlement(self, /, entitlement_id: int) -> Entitlement:
+    async def fetch_entitlement(self, entitlement_id: int, /) -> Entitlement:
         """|coro|
 
         Retrieves a :class:`.Entitlement` for the given ID.
