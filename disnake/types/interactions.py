@@ -360,9 +360,6 @@ class _BaseInteractionMetadata(TypedDict):
 
 
 class ApplicationCommandInteractionMetadata(_BaseInteractionMetadata):
-    # TODO: consider removing this again
-    name: str  # not documented
-
     target_user: NotRequired[User]  # only on user command interactions
     target_message_id: NotRequired[Snowflake]  # only on message command interactions
 

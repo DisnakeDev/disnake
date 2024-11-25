@@ -780,9 +780,6 @@ class InteractionMetadata:
         The ID of the original response message.
         Only present on :attr:`~Interaction.followup` messages.
 
-    name: Optional[:class:`str`]
-        The name of the command, including group and subcommand name if applicable (separated by spaces).
-        Only present on :attr:`InteractionType.application_command` interactions.
     target_user: Optional[:class:`User`]
         The ID of the message the command was run on.
         Only present on :attr:`InteractionType.application_command` interactions of
@@ -809,7 +806,6 @@ class InteractionMetadata:
         "user",
         "authorizing_integration_owners",
         "original_response_message_id",
-        "name",
         "target_user",
         "target_message_id",
         "interacted_message_id",
@@ -835,7 +831,6 @@ class InteractionMetadata:
         )
 
         # application command/type 2 only
-        self.name: Optional[str] = data.get("name")
         self.target_user: Optional[User] = (
             state.store_user(target_user) if (target_user := data.get("target_user")) else None
         )
