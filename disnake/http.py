@@ -1922,7 +1922,7 @@ class HTTPClient:
 
     # Role management
 
-    def get_role(self, guild_id: Snowflake, *, role_id: Snowflake) -> Response[role.Role]:
+    def get_role(self, guild_id: Snowflake, role_id: Snowflake) -> Response[role.Role]:
         return self.request(
             Route("GET", "/guilds/{guild_id}/roles/{role_id}", guild_id=guild_id, role_id=role_id)
         )
