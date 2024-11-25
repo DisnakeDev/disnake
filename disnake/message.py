@@ -817,9 +817,7 @@ class InteractionMetadata:
 
         self.id: int = int(data["id"])
         self.type: InteractionType = try_enum(InteractionType, int(data["type"]))
-        # TODO: consider trying member cache first? (+ other user attribute below)
-        # TODO: don't store these users
-        self.user: User = state.store_user(data["user"])
+        self.user: User = state.create_user(data["user"])
         # TODO: update docs
         self.authorizing_integration_owners: Dict[int, int] = {
             int(k): int(v) for k, v in (data.get("authorizing_integration_owners") or {}).items()
@@ -832,7 +830,7 @@ class InteractionMetadata:
 
         # application command/type 2 only
         self.target_user: Optional[User] = (
-            state.store_user(target_user) if (target_user := data.get("target_user")) else None
+            state.create_user(target_user) if (target_user := data.get("target_user")) else None
         )
         self.target_message_id: Optional[int] = _get_as_snowflake(data, "target_message_id")
 

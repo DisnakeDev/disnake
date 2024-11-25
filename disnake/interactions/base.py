@@ -259,6 +259,7 @@ class Interaction(Generic[ClientT]):
             )
             self._permissions = int(member.get("permissions", 0))
         elif user := data.get("user"):
+            # TODO: this shouldn't store users, since they don't necessarily get evicted
             self.author = self._state.store_user(user)
 
         # TODO: consider making this optional in 3.0
