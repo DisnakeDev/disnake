@@ -779,12 +779,23 @@ class InteractionMetadata:
     original_response_message_id: Optional[:class:`int`]
         The ID of the original response message.
         Only present on :attr:`~Interaction.followup` messages.
+
     name: Optional[:class:`str`]
         The name of the command, including group and subcommand name if applicable (separated by spaces).
         Only present on :attr:`InteractionType.application_command` interactions.
+    target_user: Optional[:class:`User`]
+        The ID of the message the command was run on.
+        Only present on :attr:`InteractionType.application_command` interactions of
+        :attr:`ApplicationCommandType.message` commands.
+    target_message_id: Optional[:class:`int`]
+        The user the command was run on.
+        Only present on :attr:`InteractionType.application_command` interactions of
+        :attr:`ApplicationCommandType.user` commands.
+
     interacted_message_id: Optional[:class:`int`]
         The ID of the message containing the component.
         Only present on :attr:`InteractionType.component` interactions.
+
     triggering_interaction_metadata: Optional[InteractionMetadata]
         The metadata of the original interaction that triggered the modal.
         Only present on :attr:`InteractionType.modal_submit` interactions.
@@ -799,6 +810,8 @@ class InteractionMetadata:
         "authorizing_integration_owners",
         "original_response_message_id",
         "name",
+        "target_user",
+        "target_message_id",
         "interacted_message_id",
         "triggering_interaction_metadata",
     ]
@@ -808,7 +821,8 @@ class InteractionMetadata:
 
         self.id: int = int(data["id"])
         self.type: InteractionType = try_enum(InteractionType, int(data["type"]))
-        # TODO: consider trying member cache first?
+        # TODO: consider trying member cache first? (+ other user attribute below)
+        # TODO: don't store these users
         self.user: User = state.store_user(data["user"])
         # TODO: update docs
         self.authorizing_integration_owners: Dict[int, int] = {
@@ -819,10 +833,17 @@ class InteractionMetadata:
         self.original_response_message_id: Optional[int] = _get_as_snowflake(
             data, "original_response_message_id"
         )
+
         # application command/type 2 only
         self.name: Optional[str] = data.get("name")
+        self.target_user: Optional[User] = (
+            state.store_user(target_user) if (target_user := data.get("target_user")) else None
+        )
+        self.target_message_id: Optional[int] = _get_as_snowflake(data, "target_message_id")
+
         # component/type 3 only
         self.interacted_message_id: Optional[int] = _get_as_snowflake(data, "interacted_message_id")
+
         # modal_submit/type 5 only
         self.triggering_interaction_metadata: Optional[InteractionMetadata] = (
             InteractionMetadata(state=state, data=metadata)
@@ -930,7 +951,7 @@ class Message(Hashable):
     reference: Optional[:class:`~disnake.MessageReference`]
         The message that this message references. This is only applicable to messages of
         type :attr:`MessageType.pins_add`, crossposted messages created by a
-        followed channel integration, or message replies.
+        followed channel integration, message replies, or application command responses.
 
         .. versionadded:: 1.5
 
