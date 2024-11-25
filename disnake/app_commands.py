@@ -466,7 +466,7 @@ class Option:
             o.localize(store)
 
 
-class ApplicationCommand(ABC):
+class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventually
     """The base class for application commands.
 
     The following classes implement this ABC:

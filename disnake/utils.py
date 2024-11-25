@@ -1179,7 +1179,7 @@ def evaluate_annotation(
             return cache[tp]
 
         # this is how annotations are supposed to be unstringifed
-        evaluated = eval(tp, globals, locals)  # noqa: PGH001, S307
+        evaluated = eval(tp, globals, locals)  # noqa: S307
         # recurse to resolve nested args further
         evaluated = evaluate_annotation(evaluated, globals, locals, cache)
 

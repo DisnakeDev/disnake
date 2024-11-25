@@ -252,11 +252,10 @@ class Interaction(Generic[ClientT]):
             self.author = (
                 isinstance(guild_fallback, Guild)
                 and guild_fallback.get_member(int(member["user"]["id"]))
-                or Member(
-                    state=self._state,
-                    guild=guild_fallback,  # type: ignore  # may be `Object`
-                    data=member,
-                )
+            ) or Member(
+                state=self._state,
+                guild=guild_fallback,  # type: ignore  # may be `Object`
+                data=member,
             )
             self._permissions = int(member.get("permissions", 0))
         elif user := data.get("user"):
@@ -1958,15 +1957,11 @@ class InteractionDataResolved(Dict[str, Any]):
             user_id = int(str_id)
             member = members.get(str_id)
             if member is not None:
-                self.members[user_id] = (
-                    guild
-                    and guild.get_member(user_id)
-                    or Member(
-                        data=member,
-                        user_data=user,
-                        guild=guild_fallback,  # type: ignore
-                        state=state,
-                    )
+                self.members[user_id] = (guild and guild.get_member(user_id)) or Member(
+                    data=member,
+                    user_data=user,
+                    guild=guild_fallback,  # type: ignore
+                    state=state,
                 )
             else:
                 self.users[user_id] = User(state=state, data=user)
