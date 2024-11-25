@@ -66,6 +66,7 @@ if TYPE_CHECKING:
         MessageUpdateEvent,
     )
     from .types.interactions import (
+        AuthorizingIntegrationOwners as AuthorizingIntegrationOwnersPayload,
         InteractionMessageReference as InteractionMessageReferencePayload,
         InteractionMetadata as InteractionMetadataPayload,
     )
@@ -94,6 +95,7 @@ __all__ = (
     "MessageReference",
     "InteractionReference",
     "InteractionMetadata",
+    "AuthorizingIntegrationOwners",
     "RoleSubscriptionData",
 )
 
@@ -773,9 +775,9 @@ class InteractionMetadata:
         The type of the interaction.
     user: :class:`User`
         The user that triggered the interaction.
-    authorizing_integration_owners: Dict[:class:`ApplicationIntegrationTypes`, int]
-        The authorizing user/guild for the application installation related to the interaction.
-        See :attr:`Interaction.authorizing_integration_owners` for details.
+    authorizing_integration_owners: :class:`AuthorizingIntegrationOwners`
+        Details about the authorizing user/guild for the application installation
+        related to the interaction.
     original_response_message_id: Optional[:class:`int`]
         The ID of the original response message.
         Only present on :attr:`~Interaction.followup` messages.
@@ -814,10 +816,9 @@ class InteractionMetadata:
         self.id: int = int(data["id"])
         self.type: InteractionType = try_enum(InteractionType, int(data["type"]))
         self.user: User = state.create_user(data["user"])
-        # TODO: update docs
-        self.authorizing_integration_owners: Dict[int, int] = {
-            int(k): int(v) for k, v in (data.get("authorizing_integration_owners") or {}).items()
-        }
+        self.authorizing_integration_owners: AuthorizingIntegrationOwners = (
+            AuthorizingIntegrationOwners(data.get("authorizing_integration_owners") or {})
+        )
 
         # followup only
         self.original_response_message_id: Optional[int] = _get_as_snowflake(
@@ -839,6 +840,36 @@ class InteractionMetadata:
             if (metadata := data.get("triggering_interaction_metadata"))
             else None
         )
+
+
+class AuthorizingIntegrationOwners:
+    """Represents details about the authorizing guild/user for the application installation
+    related to an interaction.
+
+    See the :ddocs:`official docs <interactions/receiving-and-responding#interaction-object-authorizing-integration-owners-object>`
+    for more information.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    guild_id: Optional[:class:`int`]
+        The ID of the authorizing guild, if the application (and command, if applicable)
+        was installed to the guild. In DMs with the bot, this will be ``0``.
+    user_id: Optional[:class:`int`]
+        The ID of the authorizing user, if the application (and command, if applicable)
+        was installed to the user.
+    """
+
+    __slots__ = ("guild_id", "user_id")
+
+    def __init__(self, data: AuthorizingIntegrationOwnersPayload) -> None:
+        # keys are stringified ApplicationIntegrationTypes
+        self.guild_id: Optional[int] = _get_as_snowflake(data, "0")
+        self.user_id: Optional[int] = _get_as_snowflake(data, "1")
+
+    def __repr__(self) -> str:
+        return f"<{self.__class__.__name__} guild_id={self.guild_id!r} user_id={self.user_id!r}>"
 
 
 class RoleSubscriptionData:

@@ -45,7 +45,7 @@ from ..flags import InteractionContextTypes, MessageFlags
 from ..guild import Guild
 from ..i18n import Localized
 from ..member import Member
-from ..message import Attachment, Message
+from ..message import Attachment, AuthorizingIntegrationOwners, Message
 from ..object import Object
 from ..permissions import Permissions
 from ..role import Role
@@ -163,28 +163,16 @@ class Interaction(Generic[ClientT]):
 
         .. versionadded:: 2.10
 
-    authorizing_integration_owners: Dict[:class:`ApplicationIntegrationTypes`, int]
-        The authorizing user/guild for the application installation.
-
-        This is only available if the application was installed to a user, and is empty otherwise.
-        If this interaction was triggered through an application command,
-        this requirement also applies to the command itself; see :attr:`ApplicationCommand.integration_types`.
-
-        The value for the :attr:`ApplicationIntegrationTypes.user` key is the user ID.
-        If the application (and command) was also installed to the guild, the value for the
-        :attr:`ApplicationIntegrationTypes.guild` key is the guild ID, or ``0`` in DMs with the bot.
-
-        See the :ddocs:`official docs <interactions/receiving-and-responding#interaction-object-authorizing-integration-owners-object>`
-        for more information.
-
-        For example, this would return ``{.guild: <guild_id>, .user: <user_id>}`` if invoked in a guild and installed to the guild and user,
-        or ``{.user: <user_id>}`` in a DM between two users.
+    authorizing_integration_owners: :class:`AuthorizingIntegrationOwners`
+        Details about the authorizing user/guild for the application installation
+        related to the interaction.
 
         .. versionadded:: 2.10
 
     context: Optional[:class:`InteractionContextTypes`]
         The context where the interaction was triggered from.
 
+        TODO: the following likely no longer applies
         This has the same requirements as :attr:`authorizing_integration_owners`; that is,
         this is only available if the application (and command) was installed to a user, and is ``None`` otherwise.
 
@@ -273,13 +261,9 @@ class Interaction(Generic[ClientT]):
             else []
         )
 
-        # TODO: reconsider if/how to expose this:
-        # type 0 is either "0" or matches self.guild.id
-        # type 1 should(?) match self.user.id
-        # ... this completely falls apart for message.interaction_metadata
-        self.authorizing_integration_owners: Dict[int, int] = {
-            int(k): int(v) for k, v in (data.get("authorizing_integration_owners") or {}).items()
-        }
+        self.authorizing_integration_owners: AuthorizingIntegrationOwners = (
+            AuthorizingIntegrationOwners(data.get("authorizing_integration_owners") or {})
+        )
 
         # TODO: document this properly; it's a flag object, but only one value will be set
         self.context: Optional[InteractionContextTypes] = (

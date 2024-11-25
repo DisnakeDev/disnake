@@ -257,6 +257,10 @@ class ModalInteractionData(TypedDict):
 ## Interactions
 
 
+# keys are stringified ApplicationIntegrationType's
+AuthorizingIntegrationOwners = Dict[str, Snowflake]
+
+
 # base type for *all* interactions
 class _BaseInteraction(TypedDict):
     id: Snowflake
@@ -276,8 +280,7 @@ class _BaseUserInteraction(_BaseInteraction):
     guild_id: NotRequired[Snowflake]
     guild_locale: NotRequired[str]
     entitlements: NotRequired[List[Entitlement]]
-    # keys are stringified ApplicationIntegrationType's
-    authorizing_integration_owners: NotRequired[Dict[str, Snowflake]]
+    authorizing_integration_owners: NotRequired[AuthorizingIntegrationOwners]
     context: NotRequired[InteractionContextType]
     # one of these two will always exist, according to docs
     member: NotRequired[MemberWithUser]
@@ -354,8 +357,7 @@ class _BaseInteractionMetadata(TypedDict):
     id: Snowflake
     type: InteractionType
     user: User
-    # keys are stringified ApplicationIntegrationType's
-    authorizing_integration_owners: Dict[str, Snowflake]
+    authorizing_integration_owners: AuthorizingIntegrationOwners
     original_response_message_id: NotRequired[Snowflake]  # only on followups
 
 
