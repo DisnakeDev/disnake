@@ -3581,7 +3581,7 @@ class Guild(Hashable):
         """
         await self._state.http.delete_custom_emoji(self.id, emoji.id, reason=reason)
 
-    async def fetch_role(self, /, role_id: int) -> Role:
+    async def fetch_role(self, role_id: int, /) -> Role:
         """|coro|
 
         Retrieve a :class:`Role`.
