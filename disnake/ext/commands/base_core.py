@@ -211,7 +211,6 @@ class InvokableApplicationCommand(ABC):
         ):
             other.body._default_member_permissions = self.body._default_member_permissions
 
-        # TODO: check if this still works with GuildCommandInteraction
         # TODO: actually `copy` these objects
         if (
             self.body.integration_types != other.body.integration_types
@@ -880,9 +879,11 @@ def contexts(
         if isinstance(func, InvokableApplicationCommand):
             if isinstance(func, (SubCommand, SubCommandGroup)):
                 raise TypeError("Cannot set `contexts` on subcommands or subcommand groups")
-            if func.body.contexts is not None:
-                raise ValueError("Cannot set `contexts` in both parameter and decorator")
-            func.body.contexts = contexts
+            # special case - don't overwrite if `_guild_only` was set, since that takes priority
+            if not func._guild_only:
+                if func.body.contexts is not None:
+                    raise ValueError("Cannot set `contexts` in both parameter and decorator")
+                func.body.contexts = contexts
         else:
             func.__contexts__ = contexts  # type: ignore
         return func

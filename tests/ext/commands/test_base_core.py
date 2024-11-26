@@ -17,11 +17,12 @@ class DecoratorMeta:
         self.attr_key = f"{type}_command_attrs"
 
 
-class TestDefaultPermissions:
-    @pytest.fixture(params=["slash", "user", "message"])
-    def meta(self, request):
-        return DecoratorMeta(request.param)
+@pytest.fixture(params=["slash", "user", "message"])
+def meta(request):
+    return DecoratorMeta(request.param)
 
+
+class TestDefaultPermissions:
     def test_decorator(self, meta: DecoratorMeta) -> None:
         class Cog(commands.Cog):
             @meta.decorator(default_member_permissions=64)
@@ -100,6 +101,19 @@ class TestDefaultPermissions:
 
         assert Cog.overwrite_decorator_below.default_member_permissions == Permissions(64)
         assert Cog().overwrite_decorator_below.default_member_permissions == Permissions(64)
+
+
+def test_contexts_guildcommandinteraction(meta: DecoratorMeta) -> None:
+    class Cog(commands.Cog):
+        # this shouldn't raise, it should be silently ignored
+        @commands.contexts(bot_dm=True)
+        # this is a legacy parameter, essentially the same as using `GuildCommandInteraction`
+        @meta.decorator(guild_only=True)
+        async def cmd(self, _) -> None:
+            ...
+
+    for c in (Cog, Cog()):
+        assert c.cmd.contexts == disnake.InteractionContextTypes(guild=True)
 
 
 def test_localization_copy() -> None:
