@@ -89,15 +89,9 @@ class InvokableUserCommand(InvokableApplicationCommand):
         self.auto_sync: bool = True if auto_sync is None else auto_sync
 
         try:
-            default_perms: int = func.__default_member_permissions__
+            default_member_permissions = func.__default_member_permissions__
         except AttributeError:
             pass
-        else:
-            if default_member_permissions is not None:
-                raise ValueError(
-                    "Cannot set `default_member_permissions` in both parameter and decorator"
-                )
-            default_member_permissions = default_perms
 
         self.body = UserCommand(
             name=name_loc._upgrade(self.name),

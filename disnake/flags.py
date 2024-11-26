@@ -2345,9 +2345,14 @@ class MemberFlags(BaseFlags):
         def __init__(
             self,
             *,
+            automod_quarantined_username: bool = ...,
             bypasses_verification: bool = ...,
+            completed_home_actions: bool = ...,
             completed_onboarding: bool = ...,
             did_rejoin: bool = ...,
+            dm_settings_upsell_acknowledged: bool = ...,
+            is_guest: bool = ...,
+            started_home_actions: bool = ...,
             started_onboarding: bool = ...,
         ) -> None:
             ...
@@ -2371,6 +2376,46 @@ class MemberFlags(BaseFlags):
     def started_onboarding(self):
         """:class:`bool`: Returns ``True`` if the member has started onboarding."""
         return 1 << 3
+
+    @flag_value
+    def is_guest(self):
+        """:class:`bool`: Returns ``True`` if the member is a guest and can only access the voice channel they were invited to.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 4
+
+    @flag_value
+    def started_home_actions(self):
+        """:class:`bool`: Returns ``True`` if the member has started the Server Guide actions.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 5
+
+    @flag_value
+    def completed_home_actions(self):
+        """:class:`bool`: Returns ``True`` if the member has completed the Server Guide actions.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 6
+
+    @flag_value
+    def automod_quarantined_username(self):
+        """:class:`bool`: Returns ``True`` if the member's username, display name, or nickname is blocked by AutoMod.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 7
+
+    @flag_value
+    def dm_settings_upsell_acknowledged(self):
+        """:class:`bool`: Returns ``True`` if the member has dismissed the DM settings upsell.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 9
 
 
 class RoleFlags(BaseFlags):
