@@ -44,7 +44,7 @@ repos:
         name: "run black in all files"
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.3.4
+    rev: v0.8.0
     hooks:
       - id: ruff
         args: [--fix, --fixable=I]
