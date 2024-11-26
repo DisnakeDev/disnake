@@ -3581,6 +3581,37 @@ class Guild(Hashable):
         """
         await self._state.http.delete_custom_emoji(self.id, emoji.id, reason=reason)
 
+    async def fetch_role(self, role_id: int, /) -> Role:
+        """|coro|
+
+        Retrieve a :class:`Role`.
+
+        .. note::
+
+            This method is an API call. For general usage, consider :meth:`get_role` or :attr:`roles` instead.
+
+        .. versionadded:: 2.10
+
+        Parameters
+        ----------
+        role_id: :class:`int`
+            The ID of the role to retrieve.
+
+        Raises
+        ------
+        NotFound
+            The role requested could not be found.
+        HTTPException
+            Retrieving the role failed.
+
+        Returns
+        -------
+        :class:`Role`
+            The retrieved role.
+        """
+        data = await self._state.http.get_role(self.id, role_id=role_id)
+        return Role(guild=self, state=self._state, data=data)
+
     async def fetch_roles(self) -> List[Role]:
         """|coro|
 
