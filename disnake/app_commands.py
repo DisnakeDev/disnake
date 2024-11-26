@@ -544,6 +544,7 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
             self._default_member_permissions = default_member_permissions.value
 
         # XXX: is this actually optional? reconsider the default/fallback value here.
+        # XXX: additionally, if the fallback gets removed, add a duplicate check to the decorator
         self.integration_types: Optional[
             ApplicationIntegrationTypes
         ] = integration_types or ApplicationIntegrationTypes(guild=True)

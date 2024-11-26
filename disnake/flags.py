@@ -2674,6 +2674,7 @@ class SKUFlags(BaseFlags):
         return 1 << 8
 
 
+# TODO: rename to just `IntegrationTypes`?
 class ApplicationIntegrationTypes(ListBaseFlags):
     """Represents the location(s) in which an application or application command can be installed.
 

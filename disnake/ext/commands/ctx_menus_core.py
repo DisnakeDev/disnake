@@ -92,6 +92,14 @@ class InvokableUserCommand(InvokableApplicationCommand):
             default_member_permissions = func.__default_member_permissions__
         except AttributeError:
             pass
+        try:
+            integration_types = func.__integration_types__
+        except AttributeError:
+            pass
+        try:
+            contexts = func.__contexts__
+        except AttributeError:
+            pass
 
         self.body = UserCommand(
             name=name_loc._upgrade(self.name),
@@ -194,6 +202,14 @@ class InvokableMessageCommand(InvokableApplicationCommand):
 
         try:
             default_member_permissions = func.__default_member_permissions__
+        except AttributeError:
+            pass
+        try:
+            integration_types = func.__integration_types__
+        except AttributeError:
+            pass
+        try:
+            contexts = func.__contexts__
         except AttributeError:
             pass
 

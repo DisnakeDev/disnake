@@ -50,7 +50,12 @@ if TYPE_CHECKING:
     ]
 
 
-__all__ = ("InvokableApplicationCommand", "default_member_permissions")
+__all__ = (
+    "InvokableApplicationCommand",
+    "default_member_permissions",
+    "integration_types",
+    "contexts",
+)
 
 
 T = TypeVar("T")
@@ -185,6 +190,7 @@ class InvokableApplicationCommand(ABC):
         self._before_invoke: Optional[Hook] = None
         self._after_invoke: Optional[Hook] = None
 
+    # this should copy all attributes that can be changed after instantiation via decorators
     def _ensure_assignment_on_copy(self, other: AppCommandT) -> AppCommandT:
         other._before_invoke = self._before_invoke
         other._after_invoke = self._after_invoke
@@ -197,12 +203,19 @@ class InvokableApplicationCommand(ABC):
             other._max_concurrency = cast(MaxConcurrency, self._max_concurrency).copy()
 
         if self.body._default_member_permissions != other.body._default_member_permissions and (
+            # special case, since we want to allow overwriting this with None on a per-command basis;
+            # see https://github.com/DisnakeDev/disnake/pull/678#issuecomment-1227125000
             "default_member_permissions" not in other.__original_kwargs__
             or self.body._default_member_permissions is not None
         ):
             other.body._default_member_permissions = self.body._default_member_permissions
 
-        # TODO: contexts?
+        # TODO: check if this still works with GuildCommandInteraction
+        if self.body.integration_types != other.body.integration_types:
+            other.body.integration_types = self.body.integration_types
+
+        if self.body.contexts != other.body.contexts:
+            other.body.contexts = self.body.contexts
 
         try:
             other.on_error = self.on_error
@@ -732,7 +745,7 @@ def default_member_permissions(
 
 @_overload_with_permissions
 def default_member_permissions(value: int = 0, **permissions: bool) -> Callable[[T], T]:
-    """A decorator that sets default required member permissions for the command.
+    """A decorator that sets default required member permissions for the application command.
     Unlike :func:`~.has_permissions`, this decorator does not add any checks.
     Instead, it prevents the command from being run by members without *all* required permissions,
     if not overridden by moderators on a guild-specific basis.
@@ -741,6 +754,8 @@ def default_member_permissions(value: int = 0, **permissions: bool) -> Callable[
 
     .. note::
         This does not work with slash subcommands/groups.
+
+    .. versionadded:: 2.5
 
     Example
     -------
@@ -786,6 +801,79 @@ def default_member_permissions(value: int = 0, **permissions: bool) -> Callable[
             func.body._default_member_permissions = perms_value
         else:
             func.__default_member_permissions__ = perms_value  # type: ignore
+        return func
+
+    return decorator
+
+
+def integration_types(*, guild: bool = False, user: bool = False) -> Callable[[T], T]:
+    """A decorator that sets the integration types/installation contexts where the
+    application command is available.
+
+    See also the ``integration_types`` parameter for application command decorators.
+
+    .. note::
+        This does not work with slash subcommands/groups.
+
+    .. versionadded:: 2.10
+
+    Parameters
+    ----------
+    **params: bool
+        The integration types; see :class:`.ApplicationIntegrationTypes`.
+        Setting a parameter to ``False`` does not affect the result.
+    """
+
+    def decorator(func: T) -> T:
+        from .slash_core import SubCommand, SubCommandGroup
+
+        integration_types = ApplicationIntegrationTypes(guild=guild, user=user)
+        if isinstance(func, InvokableApplicationCommand):
+            if isinstance(func, (SubCommand, SubCommandGroup)):
+                raise TypeError(
+                    "Cannot set `integration_types` on subcommands or subcommand groups"
+                )
+            # TODO: check if both parameter and decorator are set, see other comment in command object
+            func.body.integration_types = integration_types
+        else:
+            func.__integration_types__ = integration_types  # type: ignore
+        return func
+
+    return decorator
+
+
+# TODO: naming
+def contexts(
+    *, guild: bool = False, bot_dm: bool = False, private_channel: bool = False
+) -> Callable[[T], T]:
+    """A decorator that sets the interaction contexts where the application command can be used.
+
+    See also the ``contexts`` parameter for application command decorators.
+
+    .. note::
+        This does not work with slash subcommands/groups.
+
+    .. versionadded:: 2.10
+
+    Parameters
+    ----------
+    **params: bool
+        The interaction contexts; see :class:`.InteractionContextTypes`.
+        Setting a parameter to ``False`` does not affect the result.
+    """
+
+    def decorator(func: T) -> T:
+        from .slash_core import SubCommand, SubCommandGroup
+
+        contexts = InteractionContextTypes(
+            guild=guild, bot_dm=bot_dm, private_channel=private_channel
+        )
+        if isinstance(func, InvokableApplicationCommand):
+            if isinstance(func, (SubCommand, SubCommandGroup)):
+                raise TypeError("Cannot set `contexts` on subcommands or subcommand groups")
+            func.body.contexts = contexts
+        else:
+            func.__contexts__ = contexts  # type: ignore
         return func
 
     return decorator

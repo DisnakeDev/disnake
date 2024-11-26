@@ -107,8 +107,14 @@ _INVALID_SUB_KWARGS = frozenset(
 # top-level-only fields on subcommands or groups
 def _check_invalid_sub_kwargs(func: CommandCallback, kwargs: Dict[str, Any]) -> None:
     invalid_keys = kwargs.keys() & _INVALID_SUB_KWARGS
-    if hasattr(func, "__default_member_permissions__"):
-        invalid_keys.add("default_member_permissions")
+
+    for decorator_key in [
+        "__default_member_permissions__",
+        "__integration_types__",
+        "__contexts__",
+    ]:
+        if hasattr(func, decorator_key):
+            invalid_keys.add(decorator_key.strip("_"))
 
     if invalid_keys:
         msg = f"Cannot set {utils.humanize_list(list(invalid_keys), 'or')} on subcommands or subcommand groups"
@@ -464,6 +470,14 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
         try:
             default_member_permissions = func.__default_member_permissions__
+        except AttributeError:
+            pass
+        try:
+            integration_types = func.__integration_types__
+        except AttributeError:
+            pass
+        try:
+            contexts = func.__contexts__
         except AttributeError:
             pass
 
