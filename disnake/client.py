@@ -2504,7 +2504,7 @@ class Client:
         Parameters
         ----------
         name: :class:`str`
-            The name of the new string.
+            The emoji name. Must be at least 2 characters.
         image: |resource_type|
             The image data of the emoji.
             Only JPG, PNG and GIF images are supported.
