@@ -66,7 +66,7 @@ class InstallParams:
         return f"<InstallParams scopes={self.scopes!r} permissions={self.permissions!r}>"
 
     def to_url(self) -> str:
-        """Return a string that can be used to add this application to a server.
+        """Returns a string that can be used to install this application.
 
         Returns
         -------
@@ -183,7 +183,8 @@ class AppInfo:
     install_params: Optional[:class:`InstallParams`]
         The installation parameters for this application.
 
-        See also :attr:`integration_types_config` for integration type-specific configuration.
+        See also :attr:`guild_integration_type_config`/:attr:`user_integration_type_config`
+        for integration type-specific configuration.
 
         .. versionadded:: 2.5
 
@@ -204,14 +205,6 @@ class AppInfo:
     approximate_user_install_count: :class:`int`
         The approximate number of users that have installed the application
         (for user-installable apps).
-
-        .. versionadded:: 2.10
-    integration_types_config: Dict[:class:`ApplicationIntegrationTypes`, :class:`IntegrationTypeConfiguration`]
-        The mapping of integration types/installation contexts to their respective configuration parameters.
-
-        For example, an :attr:`ApplicationIntegrationTypes.guild` key being present means that
-        the application can be installed to guilds, and its value is the configuration (e.g. scopes, permissions)
-        that will be used during installation, if any.
 
         .. versionadded:: 2.10
     """
@@ -242,7 +235,7 @@ class AppInfo:
         "role_connections_verification_url",
         "approximate_guild_count",
         "approximate_user_install_count",
-        "integration_types_config",
+        "_integration_types_config",
     )
 
     def __init__(self, state: ConnectionState, data: AppInfoPayload) -> None:
@@ -287,11 +280,13 @@ class AppInfo:
         self.approximate_guild_count: int = data.get("approximate_guild_count", 0)
         self.approximate_user_install_count: int = data.get("approximate_user_install_count", 0)
 
-        # TODO: update docs
-        self.integration_types_config: Dict[int, IntegrationTypeConfiguration] = {}
-        for _type, config in (data.get("integration_types_config") or {}).items():
-            integration_type = cast("ApplicationIntegrationTypeLiteral", int(_type))
-            self.integration_types_config[integration_type] = IntegrationTypeConfiguration(
+        # this is a bit of a mess, but there's no better way to expose this data for now
+        self._integration_types_config: Dict[
+            ApplicationIntegrationTypeLiteral, IntegrationTypeConfiguration
+        ] = {}
+        for type_str, config in (data.get("integration_types_config") or {}).items():
+            integration_type = cast("ApplicationIntegrationTypeLiteral", int(type_str))
+            self._integration_types_config[integration_type] = IntegrationTypeConfiguration(
                 config or {},
                 parent=self,
                 integration_type=integration_type,
@@ -345,6 +340,24 @@ class AppInfo:
             stacklevel=2,
         )
         return self._summary
+
+    @property
+    def guild_integration_type_config(self) -> Optional[IntegrationTypeConfiguration]:
+        """Optional[:class:`IntegrationTypeConfiguration`]: The guild installation parameters for
+        this application. If this application cannot be installed to guilds, returns ``None``.
+
+        .. versionadded:: 2.10
+        """
+        return self._integration_types_config.get(0)
+
+    @property
+    def user_integration_type_config(self) -> Optional[IntegrationTypeConfiguration]:
+        """Optional[:class:`IntegrationTypeConfiguration`]: The user installation parameters for
+        this application. If this application cannot be installed to users, returns ``None``.
+
+        .. versionadded:: 2.10
+        """
+        return self._integration_types_config.get(1)
 
 
 class PartialAppInfo:
