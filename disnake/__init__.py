@@ -57,6 +57,7 @@ from .onboarding import *
 from .partial_emoji import *
 from .permissions import *
 from .player import *
+from .poll import *
 from .raw_models import *
 from .reaction import *
 from .role import *

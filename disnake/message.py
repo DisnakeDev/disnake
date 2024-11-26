@@ -34,6 +34,7 @@ from .guild import Guild
 from .member import Member
 from .mixins import Hashable
 from .partial_emoji import PartialEmoji
+from .poll import Poll
 from .reaction import Reaction
 from .sticker import StickerItem
 from .threads import Thread
@@ -45,7 +46,7 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from .abc import GuildChannel, MessageableChannel, Snowflake
-    from .channel import DMChannel
+    from .channel import DMChannel, GroupChannel
     from .guild import GuildMessageable
     from .mentions import AllowedMentions
     from .role import Role
@@ -703,24 +704,48 @@ class InteractionReference:
 
             For interaction references created before July 18th, 2022, this will not include group or subcommand names.
 
-    user: :class:`User`
-        The interaction author.
+    user: Union[:class:`User`, :class:`Member`]
+        The user or member that triggered the referenced interaction.
+
+        .. versionchanged:: 2.10
+            This is now a :class:`Member` when in a guild, if the message was received via a
+            gateway event or the member is cached.
     """
 
-    __slots__ = ("id", "type", "name", "user", "_state")
+    __slots__ = ("id", "type", "name", "user")
 
-    def __init__(self, *, state: ConnectionState, data: InteractionMessageReferencePayload) -> None:
-        self._state: ConnectionState = state
+    def __init__(
+        self,
+        *,
+        state: ConnectionState,
+        guild: Optional[Guild],
+        data: InteractionMessageReferencePayload,
+    ) -> None:
         self.id: int = int(data["id"])
         self.type: InteractionType = try_enum(InteractionType, int(data["type"]))
         self.name: str = data["name"]
-        self.user: User = User(state=state, data=data["user"])
+
+        user: Optional[Union[User, Member]] = None
+        if guild:
+            if isinstance(guild, Guild):  # this can be a placeholder object in interactions
+                user = guild.get_member(int(data["user"]["id"]))
+
+            # If not cached, try data from event.
+            # This is only available via gateway (message_create/_edit), not HTTP
+            if not user and (member := data.get("member")):
+                user = Member(data=member, user_data=data["user"], guild=guild, state=state)
+
+        # If still none, deserialize user
+        if not user:
+            user = state.store_user(data["user"])
+
+        self.user: Union[User, Member] = user
 
     def __repr__(self) -> str:
         return f"<InteractionReference id={self.id!r} type={self.type!r} name={self.name!r} user={self.user!r}>"
 
     @property
-    def author(self) -> User:
+    def author(self) -> Union[User, Member]:
         return self.user
 
 
@@ -906,6 +931,11 @@ class Message(Hashable):
 
     guild: Optional[:class:`Guild`]
         The guild that the message belongs to, if applicable.
+
+    poll: Optional[:class:`Poll`]
+        The poll contained in this message.
+
+        .. versionadded:: 2.10
     """
 
     __slots__ = (
@@ -941,6 +971,7 @@ class Message(Hashable):
         "stickers",
         "components",
         "guild",
+        "poll",
         "_edited_timestamp",
         "_role_subscription_data",
     )
@@ -976,7 +1007,7 @@ class Message(Hashable):
         self.activity: Optional[MessageActivityPayload] = data.get("activity")
         # for user experience, on_message has no business getting partials
         # TODO: Subscripted message to include the channel
-        self.channel: Union[GuildMessageable, DMChannel] = channel  # type: ignore
+        self.channel: Union[GuildMessageable, DMChannel, GroupChannel] = channel  # type: ignore
         self.position: Optional[int] = data.get("position", None)
         self._edited_timestamp: Optional[datetime.datetime] = utils.parse_time(
             data["edited_timestamp"]
@@ -996,17 +1027,21 @@ class Message(Hashable):
             for d in data.get("components", [])
         ]
 
-        inter_payload = data.get("interaction")
-        inter = (
-            None if inter_payload is None else InteractionReference(state=state, data=inter_payload)
-        )
-        self.interaction: Optional[InteractionReference] = inter
+        self.poll: Optional[Poll] = None
+        if poll_data := data.get("poll"):
+            self.poll = Poll.from_dict(message=self, data=poll_data)
 
         try:
             # if the channel doesn't have a guild attribute, we handle that
             self.guild = channel.guild  # type: ignore
         except AttributeError:
             self.guild = state._get_guild(utils._get_as_snowflake(data, "guild_id"))
+
+        self.interaction: Optional[InteractionReference] = (
+            InteractionReference(state=state, guild=self.guild, data=interaction)
+            if (interaction := data.get("interaction"))
+            else None
+        )
 
         if thread_data := data.get("thread"):
             if not self.thread and isinstance(self.guild, Guild):
@@ -1225,8 +1260,13 @@ class Message(Hashable):
     def _rebind_cached_references(self, new_guild: Guild, new_channel: GuildMessageable) -> None:
         self.guild = new_guild
         self.channel = new_channel
+
+        # rebind the members' guilds; the members themselves will potentially be
+        # updated later in _update_member_references, after re-chunking
         if isinstance(self.author, Member):
             self.author.guild = new_guild
+        if self.interaction and isinstance(self.interaction.user, Member):
+            self.interaction.user.guild = new_guild
 
     @utils.cached_slot_property("_cs_raw_mentions")
     def raw_mentions(self) -> List[int]:
@@ -1547,6 +1587,35 @@ class Message(Hashable):
 
         if self.type is MessageType.guild_incident_report_false_alarm:
             return f"{self.author.name} resolved an Activity Alert."
+
+        if self.type is MessageType.poll_result:
+            if not self.embeds:
+                return
+
+            poll_result_embed = self.embeds[0]
+            poll_embed_fields: Dict[str, str] = {}
+            if not poll_result_embed._fields:
+                return
+
+            for field in poll_result_embed._fields:
+                poll_embed_fields[field["name"]] = field["value"]
+
+            # should never be none
+            question = poll_embed_fields["poll_question_text"]
+            # should never be none
+            total_votes = poll_embed_fields["total_votes"]
+            winning_answer = poll_embed_fields.get("victor_answer_text")
+            winning_answer_votes = poll_embed_fields.get("victor_answer_votes")
+            msg = f"{self.author.display_name}'s poll {question} has closed."
+
+            if winning_answer and winning_answer_votes:
+                msg += (
+                    f"\n\n{winning_answer}"
+                    f"\nWinning answer • {(100 * int(winning_answer_votes)) // int(total_votes)}%"
+                )
+            else:
+                msg += "\n\nThere was no winner."
+            return msg
 
         # in the event of an unknown or unsupported message type, we return nothing
         return None
@@ -2218,7 +2287,7 @@ class PartialMessage(Hashable):
 
     Attributes
     ----------
-    channel: Union[:class:`TextChannel`, :class:`Thread`, :class:`DMChannel`, :class:`VoiceChannel`, :class:`StageChannel`, :class:`PartialMessageable`]
+    channel: Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`StageChannel`, :class:`Thread`, :class:`DMChannel`, :class:`GroupChannel`, :class:`PartialMessageable`]
         The channel associated with this partial message.
     id: :class:`int`
         The message ID.
