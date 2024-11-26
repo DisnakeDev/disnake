@@ -51,7 +51,7 @@ class Emoji(_EmojiTag, AssetMixin):
 
             Returns the emoji rendered for Discord.
 
-    .. versionchanched:: 2.10
+    .. versionchanged:: 2.10
 
         This class can now represents app emojis too. Denoted by having :attr:`.Emoji.guild_id` as ``None``.
 
