@@ -53,8 +53,8 @@ class TestDefaultPermissions:
                 async def above(self, _) -> None:
                     ...
 
-        # putting the decorator below shouldn't fail
-        # (this is a side effect of how command copying works,
+        # putting the decorator below shouldn't fail, for now
+        # FIXME: (this is a side effect of how command copying works,
         # and while this *should* probably fail, we're just testing
         # for regressions for now)
         class Cog2(commands.Cog):
