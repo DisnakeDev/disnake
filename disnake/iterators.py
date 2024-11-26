@@ -1044,7 +1044,7 @@ class EntitlementIterator(_AsyncIterator["Entitlement"]):
         before: Optional[Union[Snowflake, datetime.datetime]] = None,
         after: Optional[Union[Snowflake, datetime.datetime]] = None,
         exclude_ended: bool = False,
-        exclude_deleted: bool = False,
+        exclude_deleted: bool = True,
         oldest_first: bool = False,
     ) -> None:
         if isinstance(before, datetime.datetime):

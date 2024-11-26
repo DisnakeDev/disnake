@@ -2,4 +2,4 @@ Support application subscriptions and one-time purchases (see the :ddocs:`offici
 - New types: :class:`SKU`, :class:`Entitlement`.
 - New :attr:`Interaction.entitlements` attribute, and :meth:`InteractionResponse.require_premium` response type.
 - New events: :func:`on_entitlement_create`, :func:`on_entitlement_update`, :func:`on_entitlement_delete`.
-- New :class:`Client` methods: :meth:`~Client.skus`, :meth:`~Client.entitlements`, :meth:`~Client.create_entitlement`.
+- New :class:`Client` methods: :meth:`~Client.skus`, :meth:`~Client.entitlements`, :meth:`.Client.fetch_entitlement`, :meth:`~Client.create_entitlement`.

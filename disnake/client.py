@@ -3147,7 +3147,7 @@ class Client:
         guild: Optional[Snowflake] = None,
         skus: Optional[Sequence[Snowflake]] = None,
         exclude_ended: bool = False,
-        exclude_deleted: bool = False,
+        exclude_deleted: bool = True,
         oldest_first: bool = False,
     ) -> EntitlementIterator:
         """Retrieves an :class:`.AsyncIterator` that enables receiving entitlements for the application.
@@ -3188,7 +3188,7 @@ class Client:
         exclude_ended: :class:`bool`
             Whether to exclude ended/expired entitlements. Defaults to ``False``.
         exclude_deleted: :class:`bool`
-            Whether to exclude deleted entitlements. Defaults to ``False``.
+            Whether to exclude deleted entitlements. Defaults to ``True``.
         oldest_first: :class:`bool`
             If set to ``True``, return entries in oldest->newest order. Defaults to ``False``.
 

@@ -2384,7 +2384,7 @@ class HTTPClient:
         return self.request(r, params=params)
 
     def get_entitlement(
-        self, application_id: Snowflake, *, entitlement_id: int
+        self, application_id: Snowflake, entitlement_id: int
     ) -> Response[entitlement.Entitlement]:
         return self.request(
             Route(
