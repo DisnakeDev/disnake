@@ -628,7 +628,7 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
         if not any(
             (isinstance(obj, _APIApplicationCommandMixin) and obj.guild_id) for obj in (self, other)
         ):
-            if self.integration_types != other.integration_types:
+            if self._integration_types_with_default != other._integration_types_with_default:
                 return False
 
             # `contexts` takes priority over `dm_permission`;
@@ -643,6 +643,20 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
                     return False
 
         return True
+
+    @property
+    def _integration_types_with_default(self) -> Optional[ApplicationIntegrationTypes]:
+        # if this is an api-provided command object, keep things as-is
+        if self.integration_types is None and not isinstance(self, _APIApplicationCommandMixin):
+            # The purpose of this default is to avoid re-syncing after the updating to the new version,
+            # at least as long as the user hasn't enabled user installs in the dev portal
+            # (i.e. if they haven't, the api defaults to this value as well).
+            # Additionally, this provides consistency independent of the dev portal configuration,
+            # even if it might not be ideal.
+            # In an ideal world, we would make use of `application_info().integration_types_config`.
+            return ApplicationIntegrationTypes(guild=True)
+
+        return self.integration_types
 
     def to_dict(self) -> EditApplicationCommandPayload:
         data: EditApplicationCommandPayload = {
