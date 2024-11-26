@@ -180,7 +180,7 @@ class Emoji(_EmojiTag, AssetMixin):
 
     @property
     def application_id(self) -> Optional[int]:
-        """:class:`int`: The ID of the application which owns this emoji.
+        """Optional[:class:`int`]: The ID of the application which owns this emoji.
 
         .. versionadded:: 2.10
         """
