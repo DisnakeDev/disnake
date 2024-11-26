@@ -211,18 +211,19 @@ class InvokableApplicationCommand(ABC):
         ):
             other.body._default_member_permissions = self.body._default_member_permissions
 
-        # TODO: actually `copy` these objects
         if (
             self.body.integration_types != other.body.integration_types
             and self.body.integration_types is not None  # see above
         ):
-            other.body.integration_types = self.body.integration_types
+            other.body.integration_types = ApplicationIntegrationTypes._from_value(
+                self.body.integration_types.value
+            )
 
         if (
             self.body.contexts != other.body.contexts
             and self.body.contexts is not None  # see above
         ):
-            other.body.contexts = self.body.contexts
+            other.body.contexts = InteractionContextTypes._from_value(self.body.contexts.value)
 
         try:
             other.on_error = self.on_error
