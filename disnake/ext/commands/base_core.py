@@ -202,11 +202,12 @@ class InvokableApplicationCommand(ABC):
             # _max_concurrency won't be None at this point
             other._max_concurrency = cast(MaxConcurrency, self._max_concurrency).copy()
 
-        if self.body._default_member_permissions != other.body._default_member_permissions and (
-            # special case, since we want to allow overwriting this with None on a per-command basis;
-            # see https://github.com/DisnakeDev/disnake/pull/678#issuecomment-1227125000
-            "default_member_permissions" not in other.__original_kwargs__
-            or self.body._default_member_permissions is not None
+        if (
+            # see https://github.com/DisnakeDev/disnake/pull/678#discussion_r938113624:
+            # if these are not equal, then either `self` had a decorator, or `other` got a
+            # value from `*_command_attrs`; we only want to copy in the former case
+            self.body._default_member_permissions != other.body._default_member_permissions
+            and self.body._default_member_permissions is not None
         ):
             other.body._default_member_permissions = self.body._default_member_permissions
 
