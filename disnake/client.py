@@ -2518,7 +2518,7 @@ class Client:
         HTTPException
             An error occurred creating an app emoji.
         TypeError
-            The ``image`` asset is a lottie sticker (see :func:`Sticker.read`).
+            The ``image`` asset is a lottie sticker (see :func:`Sticker.read <disnake.Sticker.read>`).
         ValueError
             Wrong image format passed for ``image``.
 
