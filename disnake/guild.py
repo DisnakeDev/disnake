@@ -4668,7 +4668,10 @@ class Guild(Hashable):
             data = await self._state.http.get_my_voice_state(self.id)
         else:
             data = await self._state.http.get_voice_state(self.id, member_id)
-        return VoiceState(data=data)
+
+        channel_id = utils._get_as_snowflake(data, "channel_id")
+        channel: Optional[VocalGuildChannel] = self.get_channel(channel_id)  # type: ignore
+        return VoiceState(data=data, channel=channel)
 
     async def change_voice_state(
         self, *, channel: Optional[Snowflake], self_mute: bool = False, self_deaf: bool = False
