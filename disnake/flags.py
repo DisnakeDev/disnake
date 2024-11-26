@@ -2712,9 +2712,6 @@ class ApplicationIntegrationTypes(ListBaseFlags):
         self.value = all_flags_value(cls.VALID_FLAGS)
         return self
 
-    # TODO: none() ?
-
-    # TODO: `guild` vs `guild_install`
     @flag_value
     def guild(self):
         """:class:`bool`: Returns ``True`` if installable to guilds."""
