@@ -509,7 +509,7 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
     __repr_info__: ClassVar[Tuple[str, ...]] = (
         "type",
         "name",
-        "default_member_permisions",
+        "default_member_permissions",
         "nsfw",
         "integration_types",
         "contexts",
