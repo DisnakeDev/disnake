@@ -543,11 +543,8 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
         else:
             self._default_member_permissions = default_member_permissions.value
 
-        # XXX: is this actually optional? reconsider the default/fallback value here.
-        # XXX: additionally, if the fallback gets removed, add a duplicate check to the decorator
-        self.integration_types: Optional[
-            ApplicationIntegrationTypes
-        ] = integration_types or ApplicationIntegrationTypes(guild=True)
+        # note: this defaults to `[0]` for syncing purposes only
+        self.integration_types: Optional[ApplicationIntegrationTypes] = integration_types
         self.contexts: Optional[InteractionContextTypes] = contexts
 
         self._always_synced: bool = False
@@ -661,7 +658,9 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
         }
 
         integration_types = (
-            self.integration_types.values if self.integration_types is not None else None
+            self._integration_types_with_default.values
+            if self._integration_types_with_default is not None
+            else None
         )
         data["integration_types"] = integration_types
 

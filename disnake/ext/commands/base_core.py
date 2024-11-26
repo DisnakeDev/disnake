@@ -212,10 +212,17 @@ class InvokableApplicationCommand(ABC):
             other.body._default_member_permissions = self.body._default_member_permissions
 
         # TODO: check if this still works with GuildCommandInteraction
-        if self.body.integration_types != other.body.integration_types:
+        # TODO: actually `copy` these objects
+        if (
+            self.body.integration_types != other.body.integration_types
+            and self.body.integration_types is not None  # see above
+        ):
             other.body.integration_types = self.body.integration_types
 
-        if self.body.contexts != other.body.contexts:
+        if (
+            self.body.contexts != other.body.contexts
+            and self.body.contexts is not None  # see above
+        ):
             other.body.contexts = self.body.contexts
 
         try:
@@ -834,7 +841,8 @@ def integration_types(*, guild: bool = False, user: bool = False) -> Callable[[T
                 raise TypeError(
                     "Cannot set `integration_types` on subcommands or subcommand groups"
                 )
-            # TODO: check if both parameter and decorator are set, see other comment in command object
+            if func.body.integration_types is not None:
+                raise ValueError("Cannot set `integration_types` in both parameter and decorator")
             func.body.integration_types = integration_types
         else:
             func.__integration_types__ = integration_types  # type: ignore
@@ -872,6 +880,8 @@ def contexts(
         if isinstance(func, InvokableApplicationCommand):
             if isinstance(func, (SubCommand, SubCommandGroup)):
                 raise TypeError("Cannot set `contexts` on subcommands or subcommand groups")
+            if func.body.contexts is not None:
+                raise ValueError("Cannot set `contexts` in both parameter and decorator")
             func.body.contexts = contexts
         else:
             func.__contexts__ = contexts  # type: ignore
