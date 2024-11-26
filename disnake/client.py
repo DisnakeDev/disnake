@@ -2538,7 +2538,6 @@ class Client:
 
         ..  versionadded:: 2.10
 
-
         Parameters
         ----------
         cache: :class:`bool`
