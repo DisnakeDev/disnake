@@ -185,7 +185,7 @@ class Emoji(_EmojiTag, AssetMixin):
         .. versionadded:: 2.10
         """
         if self.guild is None:
-            return
+            return None
         return self._state.application_id
 
     def is_usable(self) -> bool:
