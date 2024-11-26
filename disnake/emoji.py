@@ -166,9 +166,7 @@ class Emoji(_EmojiTag, AssetMixin):
 
     @property
     def guild(self) -> Optional[Guild]:
-        """Optional[:class:`Guild`]: The guild this emoji belongs to.
-
-        ``None`` if this is an app emoji.
+        """Optional[:class:`Guild`]: The guild this emoji belongs to. ``None`` if this is an app emoji.
 
         .. versionchanged:: 2.10
 
