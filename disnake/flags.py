@@ -2377,27 +2377,42 @@ class MemberFlags(BaseFlags):
 
     @flag_value
     def is_guest(self):
-        """:class:`bool`: Returns ``True`` if the member is a guest and can only access the voice channel they were invited to."""
+        """:class:`bool`: Returns ``True`` if the member is a guest and can only access the voice channel they were invited to.
+
+        .. versionadded:: 2.10
+        """
         return 1 << 4
 
     @flag_value
     def started_home_actions(self):
-        """:class:`bool`: Returns ``True`` if the member has started the Server Guide actions."""
+        """:class:`bool`: Returns ``True`` if the member has started the Server Guide actions.
+
+        .. versionadded:: 2.10
+        """
         return 1 << 5
 
     @flag_value
     def completed_home_actions(self):
-        """:class:`bool`: Returns ``True`` if the member has completed the Server Guide actions."""
+        """:class:`bool`: Returns ``True`` if the member has completed the Server Guide actions.
+
+        .. versionadded:: 2.10
+        """
         return 1 << 6
 
     @flag_value
     def automod_quarantined_username(self):
-        """:class:`bool`: Returns ``True`` if the member's username, display name, or nickname is blocked by AutoMod."""
+        """:class:`bool`: Returns ``True`` if the member's username, display name, or nickname is blocked by AutoMod.
+
+        .. versionadded:: 2.10
+        """
         return 1 << 7
 
     @flag_value
     def dm_settings_upsell_acknowledged(self):
-        """:class:`bool`: Returns ``True`` if the member has dismissed the DM settings upsell."""
+        """:class:`bool`: Returns ``True`` if the member has dismissed the DM settings upsell.
+
+        .. versionadded:: 2.10
+        """
         return 1 << 9
 
 
