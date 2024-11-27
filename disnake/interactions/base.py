@@ -172,9 +172,9 @@ class Interaction(Generic[ClientT]):
     context: Optional[:class:`InteractionContextTypes`]
         The context where the interaction was triggered from.
 
-        TODO: the following likely no longer applies
-        This has the same requirements as :attr:`authorizing_integration_owners`; that is,
-        this is only available if the application (and command) was installed to a user, and is ``None`` otherwise.
+        This is a flag object, with exactly one of the flags set to ``True``.
+        To check whether an interaction originated from e.g. a :attr:`~InteractionContextTypes.guild`
+        context, you can use ``if interaction.context.guild:``.
 
         .. versionadded:: 2.10
     """
@@ -265,7 +265,6 @@ class Interaction(Generic[ClientT]):
             AuthorizingIntegrationOwners(data.get("authorizing_integration_owners") or {})
         )
 
-        # TODO: document this properly; it's a flag object, but only one value will be set
         self.context: Optional[InteractionContextTypes] = (
             InteractionContextTypes._from_values([context])
             if (context := data.get("context")) is not None

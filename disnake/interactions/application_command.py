@@ -114,8 +114,9 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
     context: Optional[:class:`InteractionContextTypes`]
         The context where the interaction was triggered from.
 
-        This has the same requirements as :attr:`authorizing_integration_owners`; that is,
-        this is only available if the application (and command) was installed to a user, and is ``None`` otherwise.
+        This is a flag object, with exactly one of the flags set to ``True``.
+        To check whether an interaction originated from e.g. a :attr:`~InteractionContextTypes.guild`
+        context, you can use ``if interaction.context.guild:``.
 
         .. versionadded:: 2.10
 
