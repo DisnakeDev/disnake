@@ -247,7 +247,6 @@ class Interaction(Generic[ClientT]):
             )
             self._permissions = int(member.get("permissions", 0))
         elif user := data.get("user"):
-            # TODO: this shouldn't store users, since they don't necessarily get evicted
             self.author = self._state.store_user(user)
 
         # TODO: consider making this optional in 3.0
@@ -335,16 +334,12 @@ class Interaction(Generic[ClientT]):
     def app_permissions(self) -> Permissions:
         """:class:`Permissions`: The resolved permissions of the bot in the channel, including overwrites.
 
-        In a guild context, this is provided directly by Discord.
-
-        In a non-guild context this will be an instance of :meth:`Permissions.private_channel`.
-
         .. versionadded:: 2.6
+
+        .. versionchanged:: 2.10
+            This is now always provided by Discord.
         """
-        if self.guild_id:
-            return Permissions(self._app_permissions)
-        # TODO: this fallback should be unnecessary now
-        return Permissions.private_channel()
+        return Permissions(self._app_permissions)
 
     @utils.cached_slot_property("_cs_response")
     def response(self) -> InteractionResponse:

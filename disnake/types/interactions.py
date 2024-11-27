@@ -24,8 +24,6 @@ if TYPE_CHECKING:
 
 ApplicationCommandType = Literal[1, 2, 3]
 
-# TODO: naming?
-# to quote the notion doc, "Not limited to application command interactions. Unfortunate naming here"
 InteractionContextType = Literal[1, 2, 3]  # GUILD, BOT_DM, PRIVATE_CHANNEL
 
 
