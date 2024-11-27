@@ -154,6 +154,7 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
         return kwargs
 
 
+# TODO(3.0): make these classes @type_check_only and not affect runtime behavior, or even remove entirely
 class GuildCommandInteraction(ApplicationCommandInteraction[ClientT]):
     """An :class:`ApplicationCommandInteraction` subclass, primarily meant for annotations.
 

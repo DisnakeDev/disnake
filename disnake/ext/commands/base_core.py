@@ -255,6 +255,7 @@ class InvokableApplicationCommand(ABC):
     def _apply_guild_only(self) -> None:
         # If we have a `GuildCommandInteraction` annotation, set `contexts` accordingly.
         if self._guild_only:
+            # FIXME(3.0): this should raise if contexts were set elsewhere already
             # n.b. this overwrites any user-specified `contexts` parameter,
             # which is fine at least as long as no new contexts are added to the API
             self.body.contexts = InteractionContextTypes(guild=True)

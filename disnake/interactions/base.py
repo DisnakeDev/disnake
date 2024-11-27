@@ -291,15 +291,26 @@ class Interaction(Generic[ClientT]):
 
     @property
     def guild(self) -> Optional[Guild]:
-        """Optional[:class:`Guild`]: The guild the interaction was sent from."""
+        """Optional[:class:`Guild`]: The guild the interaction was sent from.
+
+        .. note::
+            In some scenarios, e.g. for user-installed applications, this will usually be
+            ``None``, despite the interaction originating from a guild.
+            This will only return a full :class:`Guild` for cached guilds,
+            i.e. those the bot is already a member of.
+
+            To check whether an interaction was sent from a guild, consider using
+            :attr:`guild_id` or :attr:`context` instead.
+        """
         return self._state._get_guild(self.guild_id)
 
     @utils.cached_slot_property("_cs_me")
     def me(self) -> Union[Member, ClientUser]:
-        """Union[:class:`.Member`, :class:`.ClientUser`]:
-        Similar to :attr:`.Guild.me` except it may return the :class:`.ClientUser` in private message contexts.
+        """Union[:class:`.Member`, :class:`.ClientUser`]: Similar to :attr:`.Guild.me`,
+        except it may return the :class:`.ClientUser` in private message contexts or
+        when the bot is not a member of the guild (e.g. in the case of user-installed applications).
         """
-        # TODO: guild.me will return None once we start using the partial guild from the interaction
+        # NOTE: guild.me will return None if we start using the partial guild from the interaction
         return self.guild.me if self.guild is not None else self.client.user
 
     @property
@@ -649,7 +660,7 @@ class Interaction(Generic[ClientT]):
             raise
 
     # legacy namings
-    # these MAY begin a deprecation warning in 2.7 but SHOULD have a deprecation version in 2.8
+    # TODO: these should have a deprecation warning before 3.0
     original_message = original_response
     edit_original_message = edit_original_response
     delete_original_message = delete_original_response
