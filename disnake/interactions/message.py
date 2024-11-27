@@ -98,7 +98,7 @@ class MessageInteraction(Interaction[ClientT]):
 
         .. versionadded:: 2.10
 
-    context: Optional[:class:`InteractionContextTypes`]
+    context: :class:`InteractionContextTypes`
         The context where the interaction was triggered from.
 
         This is a flag object, with exactly one of the flags set to ``True``.

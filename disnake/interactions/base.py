@@ -169,7 +169,7 @@ class Interaction(Generic[ClientT]):
 
         .. versionadded:: 2.10
 
-    context: Optional[:class:`InteractionContextTypes`]
+    context: :class:`InteractionContextTypes`
         The context where the interaction was triggered from.
 
         This is a flag object, with exactly one of the flags set to ``True``.
@@ -265,10 +265,9 @@ class Interaction(Generic[ClientT]):
             AuthorizingIntegrationOwners(data.get("authorizing_integration_owners") or {})
         )
 
-        self.context: Optional[InteractionContextTypes] = (
-            InteractionContextTypes._from_values([context])
-            if (context := data.get("context")) is not None
-            else None
+        # this *should* always exist, but fall back to an empty flag object if it somehow doesn't
+        self.context: InteractionContextTypes = InteractionContextTypes._from_values(
+            [context] if (context := data.get("context")) is not None else []
         )
 
     @property
