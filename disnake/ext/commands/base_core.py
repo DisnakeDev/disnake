@@ -253,12 +253,13 @@ class InvokableApplicationCommand(ABC):
             return self.copy()
 
     def _apply_guild_only(self) -> None:
-        # If we have a `GuildCommandInteraction` annotation, set `contexts` accordingly.
+        # If we have a `GuildCommandInteraction` annotation, set `contexts` and `integration_types` accordingly.
+        # This matches the old pre-user-apps behavior.
         if self._guild_only:
-            # FIXME(3.0): this should raise if contexts were set elsewhere already
-            # n.b. this overwrites any user-specified `contexts` parameter,
-            # which is fine at least as long as no new contexts are added to the API
+            # n.b. this overwrites any user-specified parameter
+            # FIXME(3.0): this should raise if these were set elsewhere (except `*_command_attrs`) already
             self.body.contexts = InteractionContextTypes(guild=True)
+            self.body.integration_types = ApplicationIntegrationTypes(guild=True)
 
     @property
     def dm_permission(self) -> bool:
@@ -842,9 +843,13 @@ def integration_types(*, guild: bool = False, user: bool = False) -> Callable[[T
                 raise TypeError(
                     "Cannot set `integration_types` on subcommands or subcommand groups"
                 )
-            if func.body.integration_types is not None:
-                raise ValueError("Cannot set `integration_types` in both parameter and decorator")
-            func.body.integration_types = integration_types
+            # special case - don't overwrite if `_guild_only` was set, since that takes priority
+            if not func._guild_only:
+                if func.body.integration_types is not None:
+                    raise ValueError(
+                        "Cannot set `integration_types` in both parameter and decorator"
+                    )
+                func.body.integration_types = integration_types
         else:
             func.__integration_types__ = integration_types  # type: ignore
         return func

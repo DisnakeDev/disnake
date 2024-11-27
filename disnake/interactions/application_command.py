@@ -154,14 +154,13 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
         return kwargs
 
 
-# TODO(3.0): make these classes @type_check_only and not affect runtime behavior, or even remove entirely
+# TODO(3.0): consider making these classes @type_check_only and not affect runtime behavior, or even remove entirely
 class GuildCommandInteraction(ApplicationCommandInteraction[ClientT]):
     """An :class:`ApplicationCommandInteraction` subclass, primarily meant for annotations.
 
-    This prevents the command from being invoked in DMs by automatically adjusting the
-    :attr:`~InteractionContextTypes.bot_dm` and :attr:`~InteractionContextTypes.private_channel` flags of
-    :attr:`ApplicationCommand.contexts` to ``False`` for user/message commands and top-level slash commands.
-
+    This restricts the command to only be usable in guilds and only as a guild-installed command,
+    by automatically setting :attr:`ApplicationCommand.contexts` to :attr:`~InteractionContextTypes.guild` only
+    and :attr:`ApplicationCommand.integration_types` to :attr:`~ApplicationIntegrationTypes.guild` only.
     Note that this does not apply to slash subcommands, subcommand groups, or autocomplete callbacks.
 
     Additionally, annotations of some attributes are modified to match the expected types in guilds.
@@ -171,7 +170,7 @@ class GuildCommandInteraction(ApplicationCommandInteraction[ClientT]):
     guild: Guild
     guild_id: int
     guild_locale: Locale
-    me: Member  # TODO: this might be inaccurate now
+    me: Member
 
 
 class UserCommandInteraction(ApplicationCommandInteraction[ClientT]):
