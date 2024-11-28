@@ -4673,7 +4673,7 @@ class Guild(Hashable):
         data = await self._state.http.get_guild_voice_regions(self.id)
         return [VoiceRegion(data=region) for region in data]
 
-    async def fetch_voice_state(self, member_id: int) -> VoiceState:
+    async def fetch_voice_state(self, member_id: int, /) -> VoiceState:
         """|coro|
 
         Fetches the :class:`VoiceState` of a member.
