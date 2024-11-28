@@ -4676,7 +4676,11 @@ class Guild(Hashable):
     async def fetch_voice_state(self, member_id: int) -> VoiceState:
         """|coro|
 
-        Fetches the :class:`VoiceState` of the member.
+        Fetches the :class:`VoiceState` of a member.
+
+        .. note::
+
+            This method is an API call. For general usage, consider :attr:`Member.voice` instead.
 
         .. versionadded:: 2.10
 
