@@ -544,11 +544,15 @@ class InteractionBotBase(CommonBotBase):
             Defaults to :attr:`.ApplicationIntegrationTypes.guild` only.
             Only available for global commands.
 
+            See :ref:`app_command_contexts` for details.
+
             .. versionadded:: 2.10
 
         contexts: Optional[:class:`.InteractionContextTypes`]
             The interaction contexts where the command can be used.
             Only available for global commands.
+
+            See :ref:`app_command_contexts` for details.
 
             .. versionadded:: 2.10
 
@@ -650,11 +654,15 @@ class InteractionBotBase(CommonBotBase):
             Defaults to :attr:`.ApplicationIntegrationTypes.guild` only.
             Only available for global commands.
 
+            See :ref:`app_command_contexts` for details.
+
             .. versionadded:: 2.10
 
         contexts: Optional[:class:`.InteractionContextTypes`]
             The interaction contexts where the command can be used.
             Only available for global commands.
+
+            See :ref:`app_command_contexts` for details.
 
             .. versionadded:: 2.10
 
@@ -749,11 +757,15 @@ class InteractionBotBase(CommonBotBase):
             Defaults to :attr:`.ApplicationIntegrationTypes.guild` only.
             Only available for global commands.
 
+            See :ref:`app_command_contexts` for details.
+
             .. versionadded:: 2.10
 
         contexts: Optional[:class:`.InteractionContextTypes`]
             The interaction contexts where the command can be used.
             Only available for global commands.
+
+            See :ref:`app_command_contexts` for details.
 
             .. versionadded:: 2.10
 
