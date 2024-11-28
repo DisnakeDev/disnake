@@ -888,6 +888,10 @@ def contexts(
                 raise TypeError("Cannot set `contexts` on subcommands or subcommand groups")
             # special case - don't overwrite if `_guild_only` was set, since that takes priority
             if not func._guild_only:
+                if func.body._dm_permission is not None:
+                    raise ValueError(
+                        "Cannot use both `dm_permission` and `contexts` at the same time"
+                    )
                 if func.body.contexts is not None:
                     raise ValueError("Cannot set `contexts` in both parameter and decorator")
                 func.body.contexts = contexts
