@@ -4684,6 +4684,11 @@ class Guild(Hashable):
 
         .. versionadded:: 2.10
 
+        Parameters
+        ----------
+        member_id: :class:`int`
+            The ID of the member.
+
         Raises
         ------
         NotFound
