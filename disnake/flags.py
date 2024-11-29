@@ -600,6 +600,7 @@ class MessageFlags(BaseFlags):
             crossposted: bool = ...,
             ephemeral: bool = ...,
             failed_to_mention_roles_in_thread: bool = ...,
+            has_snapshot: bool = ...,
             has_thread: bool = ...,
             is_crossposted: bool = ...,
             is_voice_message: bool = ...,
@@ -691,6 +692,16 @@ class MessageFlags(BaseFlags):
         .. versionadded:: 2.9
         """
         return 1 << 13
+
+    @flag_value
+    def has_snapshot(self):
+        """:class:`bool`: Returns ``True`` if the message is a forward message.
+
+        Messages with this flag will have only the forward data, and no other content.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 14
 
 
 class PublicUserFlags(BaseFlags):

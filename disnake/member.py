@@ -387,11 +387,15 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     @classmethod
     def _try_upgrade(
-        cls, *, data: UserWithMemberPayload, guild: Guild, state: ConnectionState
+        cls,
+        *,
+        data: Union[UserPayload, UserWithMemberPayload],
+        guild: Guild,
+        state: ConnectionState,
     ) -> Union[User, Self]:
         # A User object with a 'member' key
         try:
-            member_data = data.pop("member")
+            member_data = data.pop("member")  # type: ignore
         except KeyError:
             return state.create_user(data)
         else:

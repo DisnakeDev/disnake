@@ -1,0 +1,1 @@
+Add support for message forwarding. New :class:`ForwardedMessage`, new enum :class:`MessageReferenceType`,  new method :func:`Message.forward`, edited :class:`MessageReference` to support message forwarding.
