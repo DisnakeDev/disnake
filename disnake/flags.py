@@ -56,7 +56,7 @@ class flag_value(Generic[T]):
         self._parent: Type[T] = MISSING
 
     def __eq__(self, other: Any) -> bool:
-        if isinstance(other, self.__class__):
+        if isinstance(other, flag_value):
             return self.flag == other.flag
         if isinstance(other, BaseFlags):
             return self._parent is other.__class__ and self.flag == other.value
