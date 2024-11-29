@@ -1048,6 +1048,36 @@ Voice
     :param after: The voice state after the changes.
     :type after: :class:`VoiceState`
 
+.. function:: on_voice_channel_effect(channel, member, effect)
+
+    Called when a :class:`Member` sends an effect in a voice channel the bot is connected to.
+
+    This requires :attr:`Intents.voice_states` and :attr:`Intents.members` to be enabled.
+
+    If the member is not found in the internal member cache, then this
+    event will not be called. Consider using :func:`on_raw_voice_channel_effect` instead.
+
+    .. versionadded:: 2.10
+
+    :param channel: The voice channel where the effect was sent.
+    :type channel: :class:`VoiceChannel`
+    :param member: The member that sent the effect.
+    :type member: :class:`Member`
+    :param effect: The effect that was sent.
+    :type effect: :class:`VoiceChannelEffect`
+
+.. function:: on_raw_voice_channel_effect(payload)
+
+    Called when a :class:`Member` sends an effect in a voice channel the bot is connected to.
+    Unlike :func:`on_voice_channel_effect`, this is called regardless of the member cache.
+
+    This requires :attr:`Intents.voice_states` to be enabled.
+
+    .. versionadded:: 2.10
+
+    :param payload: The raw event payload data.
+    :type payload: :class:`RawVoiceChannelEffectEvent`
+
 Interactions
 ~~~~~~~~~~~~
 

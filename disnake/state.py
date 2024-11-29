@@ -42,6 +42,7 @@ from .channel import (
     StageChannel,
     TextChannel,
     VoiceChannel,
+    VoiceChannelEffect,
     _guild_channel_factory,
     _threaded_channel_factory,
 )
@@ -79,6 +80,7 @@ from .raw_models import (
     RawThreadDeleteEvent,
     RawThreadMemberRemoveEvent,
     RawTypingEvent,
+    RawVoiceChannelEffectEvent,
 )
 from .role import Role
 from .stage_instance import StageInstance
@@ -456,7 +458,7 @@ class ConnectionState:
         /,
     ) -> None:
         if not application_command.id:
-            AssertionError("The provided application command does not have an ID")
+            raise AssertionError("The provided application command does not have an ID")
         self._global_application_commands[application_command.id] = application_command
 
     def _remove_global_application_command(self, application_command_id: int, /) -> None:
@@ -476,7 +478,7 @@ class ConnectionState:
         self, guild_id: int, application_command: APIApplicationCommand
     ) -> None:
         if not application_command.id:
-            AssertionError("The provided application command does not have an ID")
+            raise AssertionError("The provided application command does not have an ID")
         try:
             granula = self._guild_application_commands[guild_id]
             granula[application_command.id] = application_command
@@ -1809,7 +1811,6 @@ class ConnectionState:
                 if flags.voice:
                     if channel_id is None and flags._voice_only and member.id != self_id:
                         # Only remove from cache if we only have the voice flag enabled
-                        # Member doesn't meet the Snowflake protocol currently
                         guild._remove_member(member)
                     elif channel_id is not None:
                         guild._add_member(member)
@@ -1830,6 +1831,25 @@ class ConnectionState:
             asyncio.create_task(
                 logging_coroutine(coro, info="Voice Protocol voice server update handler")
             )
+
+    def parse_voice_channel_effect_send(self, data: gateway.VoiceChannelEffectSendEvent) -> None:
+        guild = self._get_guild(int(data["guild_id"]))
+        if guild is None:
+            _log.debug(
+                "VOICE_CHANNEL_EFFECT_SEND referencing an unknown guild ID: %s. Discarding.",
+                data["guild_id"],
+            )
+            return
+
+        effect = VoiceChannelEffect(data=data, state=self)
+        raw = RawVoiceChannelEffectEvent(data, effect)
+
+        channel = guild.get_channel(raw.channel_id)
+        raw.cached_member = member = guild.get_member(raw.user_id)
+        self.dispatch("raw_voice_channel_effect", raw)
+
+        if channel and member:
+            self.dispatch("voice_channel_effect", channel, member, effect)
 
     # FIXME: this should be refactored. The `GroupChannel` path will never be hit,
     # `raw.timestamp` exists so no need to parse it twice, and `.get_user` should be used before falling back
@@ -2080,14 +2100,10 @@ class ConnectionState:
 
         # the factory can't be a DMChannel or GroupChannel here
         data.setdefault("position", 0)  # type: ignore
-        return (
-            isinstance(guild, Guild)
-            and guild.get_channel_or_thread(channel_id)
-            or factory(
-                guild=guild,  # type: ignore  # FIXME: create proper fallback guild instead of passing Object
-                state=self,
-                data=data,  # type: ignore  # generic payload type
-            )
+        return (isinstance(guild, Guild) and guild.get_channel_or_thread(channel_id)) or factory(
+            guild=guild,  # type: ignore  # FIXME: create proper fallback guild instead of passing Object
+            state=self,
+            data=data,  # type: ignore  # generic payload type
         )
 
     def get_channel(self, id: Optional[int]) -> Optional[Union[Channel, Thread]]:
