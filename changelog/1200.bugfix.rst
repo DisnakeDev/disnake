@@ -1,1 +1,1 @@
-Do not use :class:`.abc.PrivateChannel` in an ``isinstance`` check as it structurally matches :class:`Thread`.
+|commands| Fix usage of :attr:`~ext.commands.BucketType.role`\-type cooldowns in threads, which incorrectly operated on a per-channel basis instead.
