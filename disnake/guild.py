@@ -4673,6 +4673,46 @@ class Guild(Hashable):
         data = await self._state.http.get_guild_voice_regions(self.id)
         return [VoiceRegion(data=region) for region in data]
 
+    async def fetch_voice_state(self, member_id: int, /) -> VoiceState:
+        """|coro|
+
+        Fetches the :class:`VoiceState` of a member.
+
+        .. note::
+
+            This method is an API call. For general usage, consider :attr:`Member.voice` instead.
+
+        .. versionadded:: 2.10
+
+        Parameters
+        ----------
+        member_id: :class:`int`
+            The ID of the member.
+
+        Raises
+        ------
+        NotFound
+            The member for which you tried to fetch a voice state is not
+            connected to a channel in this guild.
+        Forbidden
+            You do not have permission to fetch the member's voice state.
+        HTTPException
+            Fetching the voice state failed.
+
+        Returns
+        -------
+        :class:`VoiceState`
+            The voice state of the member.
+        """
+        if member_id == self.me.id:
+            data = await self._state.http.get_my_voice_state(self.id)
+        else:
+            data = await self._state.http.get_voice_state(self.id, member_id)
+
+        channel_id = utils._get_as_snowflake(data, "channel_id")
+        channel: Optional[VocalGuildChannel] = self.get_channel(channel_id)  # type: ignore
+        return VoiceState(data=data, channel=channel)
+
     async def change_voice_state(
         self, *, channel: Optional[Snowflake], self_mute: bool = False, self_deaf: bool = False
     ) -> None:

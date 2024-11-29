@@ -984,6 +984,17 @@ class HTTPClient:
         }
         return self.request(r, json=payload, reason=reason)
 
+    def get_my_voice_state(self, guild_id: Snowflake) -> Response[voice.GuildVoiceState]:
+        return self.request(Route("GET", "/guilds/{guild_id}/voice-states/@me", guild_id=guild_id))
+
+    def get_voice_state(
+        self, guild_id: Snowflake, user_id: Snowflake
+    ) -> Response[voice.GuildVoiceState]:
+        r = Route(
+            "GET", "/guilds/{guild_id}/voice-states/{user_id}", guild_id=guild_id, user_id=user_id
+        )
+        return self.request(r)
+
     def edit_my_voice_state(self, guild_id: Snowflake, payload: Dict[str, Any]) -> Response[None]:
         r = Route("PATCH", "/guilds/{guild_id}/voice-states/@me", guild_id=guild_id)
         return self.request(r, json=payload)
