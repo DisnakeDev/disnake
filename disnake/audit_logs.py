@@ -365,12 +365,15 @@ class AuditLogChanges:
         "available_tags":                     (None, _list_transformer(_transform_tag)),
         "default_reaction_emoji":             ("default_reaction", _transform_default_reaction),
         "default_sort_order":                 (None, _enum_transformer(enums.ThreadSortOrder)),
+        "sound_id":                           ("id", _transform_snowflake),
     }
     # fmt: on
 
     def __init__(self, entry: AuditLogEntry, data: List[AuditLogChangePayload]) -> None:
         self.before = AuditLogDiff()
         self.after = AuditLogDiff()
+
+        has_emoji_fields = False
 
         for elem in data:
             attr = elem["key"]
@@ -389,6 +392,10 @@ class AuditLogChanges:
                     entry, cast("AuditLogChangeAppCmdPermsPayload", elem)
                 )
                 continue
+
+            # special case for flat emoji fields (discord, why), these will be merged later
+            if attr == "emoji_id" or attr == "emoji_name":
+                has_emoji_fields = True
 
             transformer: Optional[Transformer]
 
@@ -419,6 +426,9 @@ class AuditLogChanges:
                     after = transformer(entry, after)
 
             setattr(self.after, attr, after)
+
+        if has_emoji_fields:
+            self._merge_emoji(entry)
 
         # add an alias
         if hasattr(self.after, "colour"):
@@ -476,6 +486,16 @@ class AuditLogChanges:
         if (new := data.get("new_value")) is not None:
             self.after.command_permissions[entity_id] = ApplicationCommandPermissions(
                 data=new, guild_id=guild_id
+            )
+
+    def _merge_emoji(self, entry: AuditLogEntry) -> None:
+        for diff in (self.before, self.after):
+            emoji_id: Optional[str] = diff.__dict__.pop("emoji_id", None)
+            emoji_name: Optional[str] = diff.__dict__.pop("emoji_name", None)
+
+            diff.emoji = entry._state._get_emoji_from_fields(
+                name=emoji_name,
+                id=int(emoji_id) if emoji_id else None,
             )
 
 

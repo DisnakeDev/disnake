@@ -503,9 +503,9 @@ def _get_mime_type_for_image(data: _BytesLike) -> str:
         raise ValueError("Unsupported image type given")
 
 
-def _bytes_to_base64_data(data: _BytesLike) -> str:
+def _bytes_to_base64_data(data: _BytesLike, *, mime_type: Optional[str] = None) -> str:
     fmt = "data:{mime};base64,{data}"
-    mime = _get_mime_type_for_image(data)
+    mime = mime_type or _get_mime_type_for_image(data)
     b64 = b64encode(data).decode("ascii")
     return fmt.format(mime=mime, data=b64)
 
@@ -519,21 +519,23 @@ def _get_extension_for_image(data: _BytesLike) -> Optional[str]:
 
 
 @overload
-async def _assetbytes_to_base64_data(data: None) -> None:
+async def _assetbytes_to_base64_data(data: None, *, mime_type: Optional[str] = None) -> None:
     ...
 
 
 @overload
-async def _assetbytes_to_base64_data(data: AssetBytes) -> str:
+async def _assetbytes_to_base64_data(data: AssetBytes, *, mime_type: Optional[str] = None) -> str:
     ...
 
 
-async def _assetbytes_to_base64_data(data: Optional[AssetBytes]) -> Optional[str]:
+async def _assetbytes_to_base64_data(
+    data: Optional[AssetBytes], *, mime_type: Optional[str] = None
+) -> Optional[str]:
     if data is None:
         return None
     if not isinstance(data, (bytes, bytearray, memoryview)):
         data = await data.read()
-    return _bytes_to_base64_data(data)
+    return _bytes_to_base64_data(data, mime_type=mime_type)
 
 
 if HAS_ORJSON:

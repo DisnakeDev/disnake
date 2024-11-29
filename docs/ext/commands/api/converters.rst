@@ -78,6 +78,9 @@ Classes
 .. autoclass:: GuildStickerConverter
     :members:
 
+.. autoclass:: GuildSoundboardSoundConverter
+    :members:
+
 .. autoclass:: PermissionsConverter
     :members:
 
