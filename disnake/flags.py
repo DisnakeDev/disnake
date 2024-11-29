@@ -55,6 +55,16 @@ class flag_value(Generic[T]):
         self.__doc__ = func.__doc__
         self._parent: Type[T] = MISSING
 
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, flag_value):
+            return self.flag == other.flag
+        if isinstance(other, BaseFlags):
+            return self._parent is other.__class__ and self.flag == other.value
+        return False
+
+    def __ne__(self, other: Any) -> bool:
+        return not self.__eq__(other)
+
     def __or__(self, other: Union[flag_value[T], T]) -> T:
         if isinstance(other, BaseFlags):
             if self._parent is not other.__class__:
@@ -148,7 +158,11 @@ class BaseFlags:
         return self
 
     def __eq__(self, other: Any) -> bool:
-        return isinstance(other, self.__class__) and self.value == other.value
+        if isinstance(other, self.__class__):
+            return self.value == other.value
+        if isinstance(other, flag_value):
+            return self.__class__ is other._parent and self.value == other.flag
+        return False
 
     def __ne__(self, other: Any) -> bool:
         return not self.__eq__(other)
@@ -2343,9 +2357,14 @@ class MemberFlags(BaseFlags):
         def __init__(
             self,
             *,
+            automod_quarantined_username: bool = ...,
             bypasses_verification: bool = ...,
+            completed_home_actions: bool = ...,
             completed_onboarding: bool = ...,
             did_rejoin: bool = ...,
+            dm_settings_upsell_acknowledged: bool = ...,
+            is_guest: bool = ...,
+            started_home_actions: bool = ...,
             started_onboarding: bool = ...,
         ) -> None:
             ...
@@ -2369,6 +2388,46 @@ class MemberFlags(BaseFlags):
     def started_onboarding(self):
         """:class:`bool`: Returns ``True`` if the member has started onboarding."""
         return 1 << 3
+
+    @flag_value
+    def is_guest(self):
+        """:class:`bool`: Returns ``True`` if the member is a guest and can only access the voice channel they were invited to.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 4
+
+    @flag_value
+    def started_home_actions(self):
+        """:class:`bool`: Returns ``True`` if the member has started the Server Guide actions.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 5
+
+    @flag_value
+    def completed_home_actions(self):
+        """:class:`bool`: Returns ``True`` if the member has completed the Server Guide actions.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 6
+
+    @flag_value
+    def automod_quarantined_username(self):
+        """:class:`bool`: Returns ``True`` if the member's username, display name, or nickname is blocked by AutoMod.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 7
+
+    @flag_value
+    def dm_settings_upsell_acknowledged(self):
+        """:class:`bool`: Returns ``True`` if the member has dismissed the DM settings upsell.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 9
 
 
 class RoleFlags(BaseFlags):
