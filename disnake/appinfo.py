@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional, cast
 
 from . import utils
 from .asset import Asset
@@ -14,6 +14,8 @@ if TYPE_CHECKING:
     from .state import ConnectionState
     from .types.appinfo import (
         AppInfo as AppInfoPayload,
+        ApplicationIntegrationType as ApplicationIntegrationTypeLiteral,
+        ApplicationIntegrationTypeConfiguration as ApplicationIntegrationTypeConfigurationPayload,
         InstallParams as InstallParamsPayload,
         PartialAppInfo as PartialAppInfoPayload,
         Team as TeamPayload,
@@ -24,6 +26,7 @@ __all__ = (
     "AppInfo",
     "PartialAppInfo",
     "InstallParams",
+    "IntegrationTypeConfiguration",
 )
 
 
@@ -42,12 +45,20 @@ class InstallParams:
 
     __slots__ = (
         "_app_id",
+        "_integration_type",
         "scopes",
         "permissions",
     )
 
-    def __init__(self, data: InstallParamsPayload, parent: AppInfo) -> None:
+    def __init__(
+        self,
+        data: InstallParamsPayload,
+        parent: AppInfo,
+        *,
+        integration_type: Optional[ApplicationIntegrationTypeLiteral] = None,
+    ) -> None:
         self._app_id = parent.id
+        self._integration_type: Optional[ApplicationIntegrationTypeLiteral] = integration_type
         self.scopes = data["scopes"]
         self.permissions = Permissions(int(data["permissions"]))
 
@@ -55,14 +66,48 @@ class InstallParams:
         return f"<InstallParams scopes={self.scopes!r} permissions={self.permissions!r}>"
 
     def to_url(self) -> str:
-        """Return a string that can be used to add this application to a server.
+        """Returns a string that can be used to install this application.
 
         Returns
         -------
         :class:`str`
             The invite url.
         """
-        return utils.oauth_url(self._app_id, scopes=self.scopes, permissions=self.permissions)
+        return utils.oauth_url(
+            self._app_id,
+            scopes=self.scopes,
+            permissions=self.permissions,
+            integration_type=(
+                self._integration_type if self._integration_type is not None else utils.MISSING
+            ),
+        )
+
+
+class IntegrationTypeConfiguration:
+    """Represents the configuration for a particular application integration type.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    install_params: Optional[:class:`InstallParams`]
+        The installation parameters for this integration type.
+    """
+
+    __slots__ = ("install_params",)
+
+    def __init__(
+        self,
+        data: ApplicationIntegrationTypeConfigurationPayload,
+        *,
+        parent: AppInfo,
+        integration_type: ApplicationIntegrationTypeLiteral,
+    ) -> None:
+        self.install_params: Optional[InstallParams] = (
+            InstallParams(install_params, parent=parent, integration_type=integration_type)
+            if (install_params := data.get("oauth2_install_params"))
+            else None
+        )
 
 
 class AppInfo:
@@ -138,6 +183,9 @@ class AppInfo:
     install_params: Optional[:class:`InstallParams`]
         The installation parameters for this application.
 
+        See also :attr:`guild_integration_type_config`/:attr:`user_integration_type_config`
+        for integration type-specific configuration.
+
         .. versionadded:: 2.5
 
     custom_install_url: Optional[:class:`str`]
@@ -187,6 +235,7 @@ class AppInfo:
         "role_connections_verification_url",
         "approximate_guild_count",
         "approximate_user_install_count",
+        "_integration_types_config",
     )
 
     def __init__(self, state: ConnectionState, data: AppInfoPayload) -> None:
@@ -230,6 +279,18 @@ class AppInfo:
         )
         self.approximate_guild_count: int = data.get("approximate_guild_count", 0)
         self.approximate_user_install_count: int = data.get("approximate_user_install_count", 0)
+
+        # this is a bit of a mess, but there's no better way to expose this data for now
+        self._integration_types_config: Dict[
+            ApplicationIntegrationTypeLiteral, IntegrationTypeConfiguration
+        ] = {}
+        for type_str, config in (data.get("integration_types_config") or {}).items():
+            integration_type = cast("ApplicationIntegrationTypeLiteral", int(type_str))
+            self._integration_types_config[integration_type] = IntegrationTypeConfiguration(
+                config or {},
+                parent=self,
+                integration_type=integration_type,
+            )
 
     def __repr__(self) -> str:
         return (
@@ -279,6 +340,24 @@ class AppInfo:
             stacklevel=2,
         )
         return self._summary
+
+    @property
+    def guild_integration_type_config(self) -> Optional[IntegrationTypeConfiguration]:
+        """Optional[:class:`IntegrationTypeConfiguration`]: The guild installation parameters for
+        this application. If this application cannot be installed to guilds, returns ``None``.
+
+        .. versionadded:: 2.10
+        """
+        return self._integration_types_config.get(0)
+
+    @property
+    def user_integration_type_config(self) -> Optional[IntegrationTypeConfiguration]:
+        """Optional[:class:`IntegrationTypeConfiguration`]: The user installation parameters for
+        this application. If this application cannot be installed to users, returns ``None``.
+
+        .. versionadded:: 2.10
+        """
+        return self._integration_types_config.get(1)
 
 
 class PartialAppInfo:

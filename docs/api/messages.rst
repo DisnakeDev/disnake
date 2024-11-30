@@ -51,7 +51,15 @@ InteractionReference
 
 .. attributetable:: InteractionReference
 
-.. autoclass:: InteractionReference
+.. autoclass:: InteractionReference()
+    :members:
+
+InteractionMetadata
+~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: InteractionMetadata
+
+.. autoclass:: InteractionMetadata()
     :members:
 
 RoleSubscriptionData
@@ -59,7 +67,7 @@ RoleSubscriptionData
 
 .. attributetable:: RoleSubscriptionData
 
-.. autoclass:: RoleSubscriptionData
+.. autoclass:: RoleSubscriptionData()
     :members:
 
 RawTypingEvent

@@ -119,6 +119,3 @@ Functions
 
 .. autofunction:: is_nsfw(,)
     :decorator:
-
-.. autofunction:: default_member_permissions(value=0, **permissions)
-    :decorator:
