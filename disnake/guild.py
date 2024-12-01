@@ -370,7 +370,9 @@ class Guild(Hashable):
         3: _GuildLimit(emoji=250, stickers=60, bitrate=384e3, filesize=104857600),
     }
 
-    def __init__(self, *, data: GuildPayload, state: ConnectionState) -> None:
+    def __init__(
+        self, *, data: GuildPayload, state: ConnectionState, from_gateway: bool = False
+    ) -> None:
         self._channels: Dict[int, GuildChannel] = {}
         self._members: Dict[int, Member] = {}
         self._voice_states: Dict[int, VoiceState] = {}
@@ -378,7 +380,7 @@ class Guild(Hashable):
         self._stage_instances: Dict[int, StageInstance] = {}
         self._scheduled_events: Dict[int, GuildScheduledEvent] = {}
         self._state: ConnectionState = state
-        self._from_data(data)
+        self._from_data(data, from_gateway=from_gateway)
 
     def _add_channel(self, channel: GuildChannel, /) -> None:
         self._channels[channel.id] = channel
@@ -518,7 +520,7 @@ class Guild(Hashable):
         """
         return self._state._get_guild_command_named(self.id, name)
 
-    def _from_data(self, guild: GuildPayload) -> None:
+    def _from_data(self, guild: GuildPayload, *, from_gateway: bool = False) -> None:
         # according to Stan, this is always available even if the guild is unavailable
         # I don't have this guarantee when someone updates the guild.
         member_count = guild.get("member_count", None)
@@ -541,6 +543,7 @@ class Guild(Hashable):
         self._banner: Optional[str] = guild.get("banner")
         self.unavailable: bool = guild.get("unavailable", False)
         self.id: int = int(guild["id"])
+
         self._roles: Dict[int, Role] = {}
         state = self._state  # speed up attribute access
         for r in guild.get("roles", []):
@@ -548,12 +551,15 @@ class Guild(Hashable):
             self._roles[role.id] = role
 
         self.mfa_level: MFALevel = guild.get("mfa_level", 0)
-        self.emojis: Tuple[Emoji, ...] = tuple(
-            state.store_emoji(self, d) for d in guild.get("emojis", [])
-        )
-        self.stickers: Tuple[GuildSticker, ...] = tuple(
-            state.store_sticker(self, d) for d in guild.get("stickers", [])
-        )
+
+        self.emojis: Tuple[Emoji, ...] = ()
+        self.stickers: Tuple[GuildSticker, ...] = ()
+        # don't cache emojis/stickers if this is part of a gw event and the intent is disabled
+        # (we still want to store them on this guild object even with the intent disabled if obtained from `fetch_guild` etc.)
+        if not from_gateway or state._intents.emojis_and_stickers:
+            self.emojis = tuple(state.store_emoji(self, d) for d in guild.get("emojis", []))
+            self.stickers = tuple(state.store_sticker(self, d) for d in guild.get("stickers", []))
+
         self.features: List[GuildFeature] = guild.get("features", [])
         self._splash: Optional[str] = guild.get("splash")
         self._system_channel_id: Optional[int] = utils._get_as_snowflake(guild, "system_channel_id")
@@ -591,12 +597,13 @@ class Guild(Hashable):
                 stage_instance = StageInstance(guild=self, data=s, state=state)
                 self._stage_instances[stage_instance.id] = stage_instance
 
-        scheduled_events = guild.get("guild_scheduled_events")
-        if scheduled_events is not None:
-            self._scheduled_events = {}
-            for e in scheduled_events:
-                scheduled_event = GuildScheduledEvent(state=state, data=e)
-                self._scheduled_events[scheduled_event.id] = scheduled_event
+        if not from_gateway or state._intents.guild_scheduled_events:
+            scheduled_events = guild.get("guild_scheduled_events")
+            if scheduled_events is not None:
+                self._scheduled_events = {}
+                for e in scheduled_events:
+                    scheduled_event = GuildScheduledEvent(state=state, data=e)
+                    self._scheduled_events[scheduled_event.id] = scheduled_event
 
         cache_joined = self._state.member_cache_flags.joined
         self_id = self._state.self_id
