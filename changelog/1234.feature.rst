@@ -1,0 +1,1 @@
+Adding :method:`Embed.add_some_fields` and :metaclass:`ModalMeta` for :class:`Modal`
