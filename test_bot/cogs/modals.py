@@ -6,23 +6,23 @@ from disnake.ext import commands
 
 
 class MyModal(disnake.ui.Modal):
-    def __init__(self) -> None:
-        components = [
-            disnake.ui.TextInput(
-                label="Name",
-                placeholder="The name of the tag",
-                custom_id="name",
-                style=TextInputStyle.short,
-                max_length=50,
-            ),
-            disnake.ui.TextInput(
-                label="Description",
-                placeholder="The description of the tag",
-                custom_id="description",
-                style=TextInputStyle.paragraph,
-            ),
-        ]
-        super().__init__(title="Create Tag", custom_id="create_tag", components=components)
+    __title__ = "Create Tag"
+    __custom_id__ = "create_tag"
+    
+    name = disnake.ui.TextInput(
+        label="Name",
+        placeholder="The name of the tag",
+        custom_id="name",
+        style=TextInputStyle.short,
+        max_length=50,
+    )
+    
+    description = disnake.ui.TextInput(
+        label="Description",
+        placeholder="The description of the tag",
+        custom_id="description",
+        style=TextInputStyle.paragraph,
+    )
 
     async def callback(self, inter: disnake.ModalInteraction[commands.Bot]) -> None:
         embed = disnake.Embed(title="Tag Creation")

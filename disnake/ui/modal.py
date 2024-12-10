@@ -6,10 +6,9 @@ import asyncio
 import os
 import sys
 import traceback
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, TypeVar, Union, Type
 
 from ..enums import TextInputStyle
-from ..utils import MISSING
 from .action_row import ActionRow, components_to_rows
 from .text_input import TextInput
 
@@ -23,50 +22,93 @@ if TYPE_CHECKING:
 
 __all__ = ("Modal",)
 
+
 ClientT = TypeVar("ClientT", bound="Client")
 
 
-class Modal:
-    """Represents a UI Modal.
 
-    .. versionadded:: 2.4
+class ModalMeta(type):
+    """A metaclass for defining a modal"""
+    
+    def __new__(cls: Type[ModalMeta], *args: Any, **kwargs: Any) -> ModalMeta:
+        name, bases, attrs = args
+        if not bases:
+            return super().__new__(cls, name, bases, attrs)
+        
+        components: Components[ModalUIComponent] = []
+        for value in attrs.values():
+            if isinstance(value, TextInput):
+                components.append(value)
+                
+        if not components:
+            raise TypeError(f"No text inputs found for class {name}")
+        
+        rows: List[ActionRow] = components_to_rows(components)
+        if len(rows) > 5:
+            raise ValueError("Maximum number of components exceeded. Max components - 5")
+        
+        attrs.update({"components": rows})
+        return super().__new__(cls, name, bases, attrs)
+
+
+
+class Modal(metaclass=ModalMeta):
+    """Represents a UI Modal.
 
     Parameters
     ----------
-    title: :class:`str`
+    __title__: :class:`str`
         The title of the modal.
-    components: |components_type|
-        The components to display in the modal. Up to 5 action rows.
-    custom_id: :class:`str`
+    __custom_id__: :class:`str`
         The custom ID of the modal.
-    timeout: :class:`float`
+    __timeout__: :class:`float`
         The time to wait until the modal is removed from cache, if no interaction is made.
         Modals without timeouts are not supported, since there's no event for when a modal is closed.
         Defaults to 600 seconds.
+        
+    Example:
+        class MyModal(disnake.ui.Modal):
+            __title__ = "Register"
+            __custom_id__ = "register-modal"
+            __timeout__ = 100
+                
+            username = TextInput(
+                label="Username",
+                custom_id="username"
+            )
+            email = TextInput(
+                label="Email",
+                custom_id="email"
+            )
+            age = TextInput(
+                label="Age",
+                custom_id="age",
+                required=False
+            )
     """
-
+    __title__: str
+    __custom_id__: str
+    __timeout__: float
+    
     __slots__ = ("title", "custom_id", "components", "timeout")
 
-    def __init__(
-        self,
-        *,
-        title: str,
-        components: Components[ModalUIComponent],
-        custom_id: str = MISSING,
-        timeout: float = 600,
-    ) -> None:
-        if timeout is None:  # pyright: ignore[reportUnnecessaryComparison]
-            raise ValueError("Timeout may not be None")
-
-        rows = components_to_rows(components)
-        if len(rows) > 5:
-            raise ValueError("Maximum number of components exceeded.")
-
-        self.title: str = title
-        self.custom_id: str = os.urandom(16).hex() if custom_id is MISSING else custom_id
-        self.components: List[ActionRow] = rows
-        self.timeout: float = timeout
-
+    def __init__(self) -> None:
+        modal_dict = self.__class__.__dict__
+        
+        self.title: Union[str, None] = modal_dict.get("__title__")
+        self.custom_id: Union[str, None] = modal_dict.get("__custom_id__")
+        self.timeout: Union[float, None] = modal_dict.get("__timeout__")
+        self.components: Union[List[ActionRow], None] = modal_dict.get("components")
+        
+        if self.title is None:
+            raise TypeError("Missing required argument __title__")
+        
+        if self.custom_id is None:
+            self.custom_id = os.urandom(16).hex()
+            
+        if self.timeout is None:
+            self.timeout = 600
+        
     def __repr__(self) -> str:
         return (
             f"<Modal custom_id={self.custom_id!r} title={self.title!r} "
@@ -196,6 +238,7 @@ class Modal:
         without an interaction being made.
         """
         pass
+    
 
     def to_components(self) -> ModalPayload:
         payload: ModalPayload = {
@@ -203,7 +246,6 @@ class Modal:
             "custom_id": self.custom_id,
             "components": [component.to_component_dict() for component in self.components],
         }
-
         return payload
 
     async def _scheduled_task(self, interaction: ModalInteraction) -> None:

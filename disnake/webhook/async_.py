@@ -427,7 +427,6 @@ class AsyncWebhookAdapter:
             if files:
                 set_attachments(data, files)
             payload["data"] = data
-
         if files:
             multipart = to_multipart(payload, files)
             return self.request(route, session=session, multipart=multipart, files=files)
