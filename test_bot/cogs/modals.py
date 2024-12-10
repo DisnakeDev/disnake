@@ -8,7 +8,7 @@ from disnake.ext import commands
 class MyModal(disnake.ui.Modal):
     __title__ = "Create Tag"
     __custom_id__ = "create_tag"
-    
+
     name = disnake.ui.TextInput(
         label="Name",
         placeholder="The name of the tag",
@@ -16,7 +16,7 @@ class MyModal(disnake.ui.Modal):
         style=TextInputStyle.short,
         max_length=50,
     )
-    
+
     description = disnake.ui.TextInput(
         label="Description",
         placeholder="The description of the tag",

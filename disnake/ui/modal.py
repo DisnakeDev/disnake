@@ -6,7 +6,7 @@ import asyncio
 import os
 import sys
 import traceback
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, TypeVar, Union, Type
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type, TypeVar, Union
 
 from ..enums import TextInputStyle
 from .action_row import ActionRow, components_to_rows
@@ -26,30 +26,28 @@ __all__ = ("Modal",)
 ClientT = TypeVar("ClientT", bound="Client")
 
 
-
 class ModalMeta(type):
     """A metaclass for defining a modal"""
-    
+
     def __new__(cls: Type[ModalMeta], *args: Any, **kwargs: Any) -> ModalMeta:
         name, bases, attrs = args
         if not bases:
             return super().__new__(cls, name, bases, attrs)
-        
+
         components: Components[ModalUIComponent] = []
         for value in attrs.values():
             if isinstance(value, TextInput):
                 components.append(value)
-                
+
         if not components:
             raise TypeError(f"No text inputs found for class {name}")
-        
+
         rows: List[ActionRow] = components_to_rows(components)
         if len(rows) > 5:
             raise ValueError("Maximum number of components exceeded. Max components - 5")
-        
+
         attrs.update({"components": rows})
         return super().__new__(cls, name, bases, attrs)
-
 
 
 class Modal(metaclass=ModalMeta):
@@ -65,13 +63,13 @@ class Modal(metaclass=ModalMeta):
         The time to wait until the modal is removed from cache, if no interaction is made.
         Modals without timeouts are not supported, since there's no event for when a modal is closed.
         Defaults to 600 seconds.
-        
+
     Example:
         class MyModal(disnake.ui.Modal):
             __title__ = "Register"
             __custom_id__ = "register-modal"
             __timeout__ = 100
-                
+
             username = TextInput(
                 label="Username",
                 custom_id="username"
@@ -86,29 +84,30 @@ class Modal(metaclass=ModalMeta):
                 required=False
             )
     """
+
     __title__: str
     __custom_id__: str
     __timeout__: float
-    
+
     __slots__ = ("title", "custom_id", "components", "timeout")
 
     def __init__(self) -> None:
         modal_dict = self.__class__.__dict__
-        
-        self.title: Union[str, None] = modal_dict.get("__title__")
-        self.custom_id: Union[str, None] = modal_dict.get("__custom_id__")
-        self.timeout: Union[float, None] = modal_dict.get("__timeout__")
-        self.components: Union[List[ActionRow], None] = modal_dict.get("components")
-        
-        if self.title is None:
+
+        self.title: str = modal_dict.get("__title__", str)
+        self.custom_id: str = modal_dict.get("__custom_id__", str)
+        self.timeout: float = modal_dict.get("__timeout__", float)
+        self.components: List[ActionRow] = modal_dict.get("components", List[ActionRow])
+
+        if not self.title:
             raise TypeError("Missing required argument __title__")
-        
-        if self.custom_id is None:
+
+        if not self.custom_id:
             self.custom_id = os.urandom(16).hex()
-            
-        if self.timeout is None:
+
+        if not self.timeout:
             self.timeout = 600
-        
+
     def __repr__(self) -> str:
         return (
             f"<Modal custom_id={self.custom_id!r} title={self.title!r} "
@@ -238,7 +237,6 @@ class Modal(metaclass=ModalMeta):
         without an interaction being made.
         """
         pass
-    
 
     def to_components(self) -> ModalPayload:
         payload: ModalPayload = {

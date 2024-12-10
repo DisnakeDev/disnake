@@ -26,7 +26,7 @@ bot = commands.Bot(command_prefix=commands.when_mentioned)
 class MyModal(disnake.ui.Modal):
     __title__ = "Create Tag"
     __custom_id__ = "create_tag"
-    
+
     name = disnake.ui.TextInput(
         label="Name",
         placeholder="The name of the tag",

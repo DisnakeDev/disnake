@@ -674,19 +674,18 @@ class Embed:
             self._fields = [field]
 
         return self
-    
-    
+
     def add_some_fields(self, *data: Dict[str, Any]) -> Self:
-        """This function allows you to create several fields at once
+        """Function allows you to create several fields at once
 
         This function returns the class instance to allow for fluent-style
         chaining.
 
         Parameters
         ----------
-        data: :class:`dict` 
+        data: :class:`dict`
             field data in dictionary
-            
+
             Example:
                 add_some_fields(
                     {"name": "Jack", "value": "Barker", "inline": False}
@@ -697,22 +696,21 @@ class Embed:
         for element in data:
             if (element.get("name") is None) or (element.get("value") is None):
                 raise TypeError("Missing argument. Name and Value - required.")
-                                             
+
             fields.append(
                 {
-                    "inline": element.get("inline"),
+                    "inline": bool(element.get("inline")),
                     "name": str(element.get("name")),
-                    "value": str(element.get("value"))
+                    "value": str(element.get("value")),
                 }
             )
-            
+
         if self._fields is not None:
             self._fields.extend(fields)
         else:
             self._fields = fields
-            
+
         return self
-    
 
     def clear_fields(self) -> None:
         """Removes all fields from this embed."""
