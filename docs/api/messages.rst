@@ -433,8 +433,8 @@ MessageReferenceType
 
 .. class:: MessageReferenceType
 
-    Specifies the type of :class:`MessageReference`. This is used to denote
-    if a message is normal or not (e.g replying or forwarding).
+    Specifies the type of :class:`MessageReference`. This can be used to determine
+    if a message is e.g. a reply or a forwarded message.
 
     .. versionadded:: 2.10
 
