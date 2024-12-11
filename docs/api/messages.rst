@@ -207,6 +207,7 @@ PollMedia
 .. attributetable:: PollMedia
 
 .. autoclass:: PollMedia
+    :members:
 
 ForwardedMessage
 ~~~~~~~~~~~~~~~~
