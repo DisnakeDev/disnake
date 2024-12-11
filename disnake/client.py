@@ -91,7 +91,7 @@ if TYPE_CHECKING:
     from .asset import AssetBytes
     from .audit_logs import AuditLogEntry
     from .automod import AutoModActionExecution, AutoModRule
-    from .channel import DMChannel, ForumChannel, GroupChannel
+    from .channel import DMChannel, ForumChannel, GroupChannel, VoiceChannelEffect
     from .guild_scheduled_event import GuildScheduledEvent
     from .integrations import Integration
     from .interactions import (
@@ -102,6 +102,7 @@ if TYPE_CHECKING:
     )
     from .member import Member, VoiceState
     from .message import Message
+    from .poll import PollAnswer
     from .raw_models import (
         RawBulkMessageDeleteEvent,
         RawGuildMemberRemoveEvent,
@@ -109,6 +110,7 @@ if TYPE_CHECKING:
         RawIntegrationDeleteEvent,
         RawMessageDeleteEvent,
         RawMessageUpdateEvent,
+        RawPollVoteActionEvent,
         RawPresenceUpdateEvent,
         RawReactionActionEvent,
         RawReactionClearEmojiEvent,
@@ -116,6 +118,7 @@ if TYPE_CHECKING:
         RawThreadDeleteEvent,
         RawThreadMemberRemoveEvent,
         RawTypingEvent,
+        RawVoiceChannelEffectEvent,
     )
     from .reaction import Reaction
     from .role import Role
@@ -2494,6 +2497,28 @@ class Client:
     @_generated
     def wait_for(
         self,
+        event: Literal[Event.voice_channel_effect, "voice_channel_effect"],
+        *,
+        check: Optional[Callable[[GuildChannel, Member, VoiceChannelEffect], bool]] = None,
+        timeout: Optional[float] = None,
+    ) -> Coroutine[Any, Any, Tuple[GuildChannel, Member, VoiceChannelEffect]]:
+        ...
+
+    @overload
+    @_generated
+    def wait_for(
+        self,
+        event: Literal[Event.raw_voice_channel_effect, "raw_voice_channel_effect"],
+        *,
+        check: Optional[Callable[[RawVoiceChannelEffectEvent], bool]] = None,
+        timeout: Optional[float] = None,
+    ) -> Coroutine[Any, Any, RawVoiceChannelEffectEvent]:
+        ...
+
+    @overload
+    @_generated
+    def wait_for(
+        self,
         event: Literal[Event.stage_instance_create, "stage_instance_create"],
         *,
         check: Optional[Callable[[StageInstance], bool]] = None,
@@ -2648,6 +2673,28 @@ class Client:
     @_generated
     def wait_for(
         self,
+        event: Literal[Event.poll_vote_add, "poll_vote_add"],
+        *,
+        check: Optional[Callable[[Member, PollAnswer], bool]] = None,
+        timeout: Optional[float] = None,
+    ) -> Coroutine[Any, Any, Tuple[Member, PollAnswer]]:
+        ...
+
+    @overload
+    @_generated
+    def wait_for(
+        self,
+        event: Literal[Event.poll_vote_remove, "poll_vote_remove"],
+        *,
+        check: Optional[Callable[[Member, PollAnswer], bool]] = None,
+        timeout: Optional[float] = None,
+    ) -> Coroutine[Any, Any, Tuple[Member, PollAnswer]]:
+        ...
+
+    @overload
+    @_generated
+    def wait_for(
+        self,
         event: Literal[Event.raw_message_edit, "raw_message_edit"],
         *,
         check: Optional[Callable[[RawMessageUpdateEvent], bool]] = None,
@@ -2675,6 +2722,28 @@ class Client:
         check: Optional[Callable[[RawBulkMessageDeleteEvent], bool]] = None,
         timeout: Optional[float] = None,
     ) -> Coroutine[Any, Any, RawBulkMessageDeleteEvent]:
+        ...
+
+    @overload
+    @_generated
+    def wait_for(
+        self,
+        event: Literal[Event.raw_poll_vote_add, "raw_poll_vote_add"],
+        *,
+        check: Optional[Callable[[RawPollVoteActionEvent], bool]] = None,
+        timeout: Optional[float] = None,
+    ) -> Coroutine[Any, Any, RawPollVoteActionEvent]:
+        ...
+
+    @overload
+    @_generated
+    def wait_for(
+        self,
+        event: Literal[Event.raw_poll_vote_remove, "raw_poll_vote_remove"],
+        *,
+        check: Optional[Callable[[RawPollVoteActionEvent], bool]] = None,
+        timeout: Optional[float] = None,
+    ) -> Coroutine[Any, Any, RawPollVoteActionEvent]:
         ...
 
     @overload

@@ -236,6 +236,12 @@ EVENT_DATA: Dict[Event, EventData] = {
     Event.voice_state_update: EventData(
         arg_types=["Member", "VoiceState", "VoiceState"],
     ),
+    Event.voice_channel_effect: EventData(
+        arg_types=["GuildChannel", "Member", "VoiceChannelEffect"],
+    ),
+    Event.raw_voice_channel_effect: EventData(
+        arg_types=["RawVoiceChannelEffectEvent"],
+    ),
     Event.stage_instance_create: EventData(
         arg_types=["StageInstance"],
     ),
@@ -278,6 +284,12 @@ EVENT_DATA: Dict[Event, EventData] = {
     Event.bulk_message_delete: EventData(
         arg_types=["List[Message]"],
     ),
+    Event.poll_vote_add: EventData(
+        arg_types=["Member", "PollAnswer"],
+    ),
+    Event.poll_vote_remove: EventData(
+        arg_types=["Member", "PollAnswer"],
+    ),
     Event.raw_message_edit: EventData(
         arg_types=["RawMessageUpdateEvent"],
     ),
@@ -286,6 +298,12 @@ EVENT_DATA: Dict[Event, EventData] = {
     ),
     Event.raw_bulk_message_delete: EventData(
         arg_types=["RawBulkMessageDeleteEvent"],
+    ),
+    Event.raw_poll_vote_add: EventData(
+        arg_types=["RawPollVoteActionEvent"],
+    ),
+    Event.raw_poll_vote_remove: EventData(
+        arg_types=["RawPollVoteActionEvent"],
     ),
     Event.reaction_add: EventData(
         arg_types=["Reaction", "Union[Member, User]"],
