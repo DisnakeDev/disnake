@@ -209,6 +209,14 @@ PollMedia
 .. autoclass:: PollMedia
     :members:
 
+ForwardedMessage
+~~~~~~~~~~~~~~~~
+
+.. attributetable:: ForwardedMessage
+
+.. autoclass:: ForwardedMessage
+    :members:
+
 Enumerations
 ------------
 
@@ -420,6 +428,23 @@ PollLayoutType
 
         The default poll layout type.
 
+MessageReferenceType
+~~~~~~~~~~~~~~~~~~~~
+
+.. class:: MessageReferenceType
+
+    Specifies the type of :class:`MessageReference`. This can be used to determine
+    if a message is e.g. a reply or a forwarded message.
+
+    .. versionadded:: 2.10
+
+    .. attribute:: default
+
+        A standard message reference used in message replies.
+
+    .. attribute:: forward
+
+        Reference used to point to a message at a point in time (forward).
 
 Events
 ------
