@@ -70,6 +70,7 @@ if TYPE_CHECKING:
         member,
         message,
         onboarding,
+        poll,
         role,
         sku,
         sticker,
@@ -528,6 +529,7 @@ class HTTPClient:
         message_reference: Optional[message.MessageReference] = None,
         stickers: Optional[Sequence[Snowflake]] = None,
         components: Optional[Sequence[components.Component]] = None,
+        poll: Optional[poll.PollCreatePayload] = None,
         flags: Optional[int] = None,
     ) -> Response[message.Message]:
         r = Route("POST", "/channels/{channel_id}/messages", channel_id=channel_id)
@@ -563,7 +565,49 @@ class HTTPClient:
         if flags is not None:
             payload["flags"] = flags
 
+        if poll is not None:
+            payload["poll"] = poll
+
         return self.request(r, json=payload)
+
+    def get_poll_answer_voters(
+        self,
+        channel_id: Snowflake,
+        message_id: Snowflake,
+        answer_id: int,
+        *,
+        after: Optional[Snowflake] = None,
+        limit: Optional[int] = None,
+    ) -> Response[poll.PollVoters]:
+        params: Dict[str, Any] = {}
+
+        if after is not None:
+            params["after"] = after
+        if limit is not None:
+            params["limit"] = limit
+
+        return self.request(
+            Route(
+                "GET",
+                "/channels/{channel_id}/polls/{message_id}/answers/{answer_id}",
+                channel_id=channel_id,
+                message_id=message_id,
+                answer_id=answer_id,
+            ),
+            params=params,
+        )
+
+    def expire_poll(
+        self, channel_id: Snowflake, message_id: Snowflake
+    ) -> Response[message.Message]:
+        return self.request(
+            Route(
+                "POST",
+                "/channels/{channel_id}/polls/{message_id}/expire",
+                channel_id=channel_id,
+                message_id=message_id,
+            )
+        )
 
     def send_typing(self, channel_id: Snowflake) -> Response[None]:
         return self.request(Route("POST", "/channels/{channel_id}/typing", channel_id=channel_id))
@@ -582,6 +626,7 @@ class HTTPClient:
         message_reference: Optional[message.MessageReference] = None,
         stickers: Optional[Sequence[Snowflake]] = None,
         components: Optional[Sequence[components.Component]] = None,
+        poll: Optional[poll.PollCreatePayload] = None,
         flags: Optional[int] = None,
     ) -> Response[message.Message]:
         payload: Dict[str, Any] = {"tts": tts}
@@ -603,6 +648,8 @@ class HTTPClient:
             payload["sticker_ids"] = stickers
         if flags is not None:
             payload["flags"] = flags
+        if poll:
+            payload["poll"] = poll
 
         multipart = to_multipart_with_attachments(payload, files)
 
@@ -622,6 +669,7 @@ class HTTPClient:
         message_reference: Optional[message.MessageReference] = None,
         stickers: Optional[Sequence[Snowflake]] = None,
         components: Optional[Sequence[components.Component]] = None,
+        poll: Optional[poll.PollCreatePayload] = None,
         flags: Optional[int] = None,
     ) -> Response[message.Message]:
         r = Route("POST", "/channels/{channel_id}/messages", channel_id=channel_id)
@@ -637,6 +685,7 @@ class HTTPClient:
             message_reference=message_reference,
             stickers=stickers,
             components=components,
+            poll=poll,
             flags=flags,
         )
 
@@ -876,6 +925,22 @@ class HTTPClient:
         r = Route("DELETE", "/guilds/{guild_id}/bans/{user_id}", guild_id=guild_id, user_id=user_id)
         return self.request(r, reason=reason)
 
+    def bulk_ban(
+        self,
+        user_ids: List[Snowflake],
+        guild_id: Snowflake,
+        *,
+        delete_message_seconds: int = 0,
+        reason: Optional[str] = None,
+    ) -> Response[guild.BulkBanResult]:
+        r = Route("POST", "/guilds/{guild_id}/bulk-ban", guild_id=guild_id)
+        payload = {
+            "user_ids": user_ids,
+            "delete_message_seconds": delete_message_seconds,
+        }
+
+        return self.request(r, json=payload, reason=reason)
+
     def get_guild_voice_regions(self, guild_id: Snowflake) -> Response[List[voice.VoiceRegion]]:
         return self.request(Route("GET", "/guilds/{guild_id}/regions", guild_id=guild_id))
 
@@ -918,6 +983,17 @@ class HTTPClient:
             "nick": nickname,
         }
         return self.request(r, json=payload, reason=reason)
+
+    def get_my_voice_state(self, guild_id: Snowflake) -> Response[voice.GuildVoiceState]:
+        return self.request(Route("GET", "/guilds/{guild_id}/voice-states/@me", guild_id=guild_id))
+
+    def get_voice_state(
+        self, guild_id: Snowflake, user_id: Snowflake
+    ) -> Response[voice.GuildVoiceState]:
+        r = Route(
+            "GET", "/guilds/{guild_id}/voice-states/{user_id}", guild_id=guild_id, user_id=user_id
+        )
+        return self.request(r)
 
     def edit_my_voice_state(self, guild_id: Snowflake, payload: Dict[str, Any]) -> Response[None]:
         r = Route("PATCH", "/guilds/{guild_id}/voice-states/@me", guild_id=guild_id)
@@ -1546,6 +1622,9 @@ class HTTPClient:
     def get_sticker(self, sticker_id: Snowflake) -> Response[sticker.Sticker]:
         return self.request(Route("GET", "/stickers/{sticker_id}", sticker_id=sticker_id))
 
+    def get_sticker_pack(self, pack_id: Snowflake) -> Response[sticker.StickerPack]:
+        return self.request(Route("GET", "/sticker-packs/{pack_id}", pack_id=pack_id))
+
     def list_sticker_packs(self) -> Response[sticker.ListStickerPacks]:
         return self.request(Route("GET", "/sticker-packs"))
 
@@ -1853,6 +1932,11 @@ class HTTPClient:
         )
 
     # Role management
+
+    def get_role(self, guild_id: Snowflake, role_id: Snowflake) -> Response[role.Role]:
+        return self.request(
+            Route("GET", "/guilds/{guild_id}/roles/{role_id}", guild_id=guild_id, role_id=role_id)
+        )
 
     def get_roles(self, guild_id: Snowflake) -> Response[List[role.Role]]:
         return self.request(Route("GET", "/guilds/{guild_id}/roles", guild_id=guild_id))
@@ -2165,7 +2249,7 @@ class HTTPClient:
         guild_id: Snowflake,
         *,
         reason: Optional[str] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> Response[welcome_screen.WelcomeScreen]:
         valid_keys = (
             "enabled",
@@ -2292,10 +2376,12 @@ class HTTPClient:
         guild_id: Optional[Snowflake] = None,
         sku_ids: Optional[SnowflakeList] = None,
         exclude_ended: bool = False,
+        exclude_deleted: bool = False,
     ) -> Response[List[entitlement.Entitlement]]:
         params: Dict[str, Any] = {
             "limit": limit,
             "exclude_ended": int(exclude_ended),
+            "exclude_deleted": int(exclude_deleted),
         }
         if before is not None:
             params["before"] = before
@@ -2312,6 +2398,18 @@ class HTTPClient:
             "GET", "/applications/{application_id}/entitlements", application_id=application_id
         )
         return self.request(r, params=params)
+
+    def get_entitlement(
+        self, application_id: Snowflake, entitlement_id: int
+    ) -> Response[entitlement.Entitlement]:
+        return self.request(
+            Route(
+                "GET",
+                "/applications/{application_id}/entitlements/{entitlement_id}",
+                application_id=application_id,
+                entitlement_id=entitlement_id,
+            )
+        )
 
     def create_test_entitlement(
         self,
@@ -2342,6 +2440,20 @@ class HTTPClient:
             Route(
                 "DELETE",
                 "/applications/{application_id}/entitlements/{entitlement_id}",
+                application_id=application_id,
+                entitlement_id=entitlement_id,
+            )
+        )
+
+    def consume_entitlement(
+        self,
+        application_id: Snowflake,
+        entitlement_id: Snowflake,
+    ) -> Response[None]:
+        return self.request(
+            Route(
+                "POST",
+                "/applications/{application_id}/entitlements/{entitlement_id}/consume",
                 application_id=application_id,
                 entitlement_id=entitlement_id,
             )

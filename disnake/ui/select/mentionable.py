@@ -2,20 +2,34 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, Optional, Type, TypeVar, Union, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    ClassVar,
+    Mapping,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    overload,
+)
 
+from ...abc import Snowflake
 from ...components import MentionableSelectMenu
-from ...enums import ComponentType
+from ...enums import ComponentType, SelectDefaultValueType
+from ...member import Member
+from ...role import Role
+from ...user import ClientUser, User
 from ...utils import MISSING
-from .base import BaseSelect, P, V_co, _create_decorator
+from .base import BaseSelect, P, SelectDefaultValueMultiInputType, V_co, _create_decorator
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ...member import Member
-    from ...role import Role
-    from ...user import User
-    from ..item import DecoratedItem, ItemCallbackType, Object
+    from ..item import DecoratedItem, ItemCallbackType, ItemShape
 
 
 __all__ = (
@@ -48,6 +62,13 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select is disabled.
+    default_values: Optional[Sequence[Union[:class:`~disnake.User`, :class:`.Member`, :class:`.Role`, :class:`.SelectDefaultValue`]]]
+        The list of values (users/roles) that are selected by default.
+        If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
+
+        Note that unlike other select menu types, this does not support :class:`.Object`\\s due to ambiguities.
+
+        .. versionadded:: 2.10
     row: Optional[:class:`int`]
         The relative row this select menu belongs to. A Discord component can only have 5
         rows. By default, items are arranged automatically into those 5 rows. If you'd
@@ -61,6 +82,13 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
         A list of users, members and/or roles that have been selected by the user.
     """
 
+    _default_value_type_map: ClassVar[
+        Mapping[SelectDefaultValueType, Tuple[Type[Snowflake], ...]]
+    ] = {
+        SelectDefaultValueType.user: (Member, User, ClientUser),
+        SelectDefaultValueType.role: (Role,),
+    }
+
     @overload
     def __init__(
         self: MentionableSelect[None],
@@ -70,6 +98,9 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
+        default_values: Optional[
+            Sequence[SelectDefaultValueMultiInputType[Union[User, Member, Role]]]
+        ] = None,
         row: Optional[int] = None,
     ) -> None:
         ...
@@ -83,6 +114,9 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
+        default_values: Optional[
+            Sequence[SelectDefaultValueMultiInputType[Union[User, Member, Role]]]
+        ] = None,
         row: Optional[int] = None,
     ) -> None:
         ...
@@ -95,6 +129,9 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
+        default_values: Optional[
+            Sequence[SelectDefaultValueMultiInputType[Union[User, Member, Role]]]
+        ] = None,
         row: Optional[int] = None,
     ) -> None:
         super().__init__(
@@ -105,6 +142,7 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
             min_values=min_values,
             max_values=max_values,
             disabled=disabled,
+            default_values=default_values,
             row=row,
         )
 
@@ -116,6 +154,7 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
             min_values=component.min_values,
             max_values=component.max_values,
             disabled=component.disabled,
+            default_values=component.default_values,
             row=None,
         )
 
@@ -131,6 +170,9 @@ def mentionable_select(
     min_values: int = 1,
     max_values: int = 1,
     disabled: bool = False,
+    default_values: Optional[
+        Sequence[SelectDefaultValueMultiInputType[Union[User, Member, Role]]]
+    ] = None,
     row: Optional[int] = None,
 ) -> Callable[[ItemCallbackType[MentionableSelect[V_co]]], DecoratedItem[MentionableSelect[V_co]]]:
     ...
@@ -138,13 +180,13 @@ def mentionable_select(
 
 @overload
 def mentionable_select(
-    cls: Type[Object[S_co, P]], *_: P.args, **kwargs: P.kwargs
+    cls: Type[ItemShape[S_co, P]], *_: P.args, **kwargs: P.kwargs
 ) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
     ...
 
 
 def mentionable_select(
-    cls: Type[Object[S_co, ...]] = MentionableSelect[Any], **kwargs: Any
+    cls: Type[ItemShape[S_co, ...]] = MentionableSelect[Any], **kwargs: Any
 ) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
     """A decorator that attaches a mentionable (user/member/role) select menu to a component.
 
@@ -182,5 +224,12 @@ def mentionable_select(
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select is disabled. Defaults to ``False``.
+    default_values: Optional[Sequence[Union[:class:`~disnake.User`, :class:`.Member`, :class:`.Role`, :class:`.SelectDefaultValue`]]]
+        The list of values (users/roles) that are selected by default.
+        If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
+
+        Note that unlike other select menu types, this does not support :class:`.Object`\\s due to ambiguities.
+
+        .. versionadded:: 2.10
     """
     return _create_decorator(cls, MentionableSelect, **kwargs)

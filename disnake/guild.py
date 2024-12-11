@@ -10,6 +10,7 @@ from typing import (
     Any,
     ClassVar,
     Dict,
+    Iterable,
     List,
     Literal,
     NamedTuple,
@@ -27,7 +28,7 @@ from . import abc, utils
 from .app_commands import GuildApplicationCommandPermissions
 from .asset import Asset
 from .automod import AutoModAction, AutoModRule
-from .bans import BanEntry
+from .bans import BanEntry, BulkBanResult
 from .channel import (
     CategoryChannel,
     ForumChannel,
@@ -68,6 +69,7 @@ from .invite import Invite
 from .iterators import AuditLogIterator, BanIterator, MemberIterator
 from .member import Member, VoiceState
 from .mixins import Hashable
+from .object import Object
 from .onboarding import Onboarding
 from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite
@@ -1234,7 +1236,7 @@ class Guild(Hashable):
         name: str,
         *,
         reason: Optional[str] = None,
-        category: Optional[CategoryChannel] = None,
+        category: Optional[Snowflake] = None,
         position: int = MISSING,
         topic: Optional[str] = MISSING,
         slowmode_delay: int = MISSING,
@@ -1292,7 +1294,7 @@ class Guild(Hashable):
             A :class:`dict` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply upon creation of a channel.
             Useful for creating secret channels.
-        category: Optional[:class:`CategoryChannel`]
+        category: Optional[:class:`abc.Snowflake`]
             The category to place the newly created channel under.
             The permissions will be automatically synced to category if no
             overwrites are provided.
@@ -1388,7 +1390,7 @@ class Guild(Hashable):
         self,
         name: str,
         *,
-        category: Optional[CategoryChannel] = None,
+        category: Optional[Snowflake] = None,
         position: int = MISSING,
         bitrate: int = MISSING,
         user_limit: int = MISSING,
@@ -1414,7 +1416,7 @@ class Guild(Hashable):
             A :class:`dict` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply upon creation of a channel.
             Useful for creating secret channels.
-        category: Optional[:class:`CategoryChannel`]
+        category: Optional[:class:`abc.Snowflake`]
             The category to place the newly created channel under.
             The permissions will be automatically synced to category if no
             overwrites are provided.
@@ -1512,7 +1514,7 @@ class Guild(Hashable):
         rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
-        category: Optional[CategoryChannel] = None,
+        category: Optional[Snowflake] = None,
         nsfw: bool = MISSING,
         slowmode_delay: int = MISSING,
         reason: Optional[str] = None,
@@ -1540,7 +1542,7 @@ class Guild(Hashable):
             A :class:`dict` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply upon creation of a channel.
             Useful for creating secret channels.
-        category: Optional[:class:`CategoryChannel`]
+        category: Optional[:class:`abc.Snowflake`]
             The category to place the newly created channel under.
             The permissions will be automatically synced to category if no
             overwrites are provided.
@@ -1633,7 +1635,7 @@ class Guild(Hashable):
         name: str,
         *,
         topic: Optional[str] = None,
-        category: Optional[CategoryChannel] = None,
+        category: Optional[Snowflake] = None,
         position: int = MISSING,
         slowmode_delay: int = MISSING,
         default_thread_slowmode_delay: int = MISSING,
@@ -1661,7 +1663,7 @@ class Guild(Hashable):
             The channel's name.
         topic: Optional[:class:`str`]
             The channel's topic.
-        category: Optional[:class:`CategoryChannel`]
+        category: Optional[:class:`abc.Snowflake`]
             The category to place the newly created channel under.
             The permissions will be automatically synced to category if no
             overwrites are provided.
@@ -1783,7 +1785,7 @@ class Guild(Hashable):
         name: str,
         *,
         topic: Optional[str] = None,
-        category: Optional[CategoryChannel] = None,
+        category: Optional[Snowflake] = None,
         position: int = MISSING,
         slowmode_delay: int = MISSING,
         default_thread_slowmode_delay: int = MISSING,
@@ -1807,7 +1809,7 @@ class Guild(Hashable):
             The channel's name.
         topic: Optional[:class:`str`]
             The channel's topic.
-        category: Optional[:class:`CategoryChannel`]
+        category: Optional[:class:`abc.Snowflake`]
             The category to place the newly created channel under.
             The permissions will be automatically synced to category if no
             overwrites are provided.
@@ -3001,8 +3003,8 @@ class Guild(Hashable):
         The inactive members are denoted if they have not logged on in
         ``days`` number of days and they have no roles.
 
-        You must have :attr:`~Permissions.kick_members` permission
-        to use this.
+        You must have the :attr:`~Permissions.manage_guild` and
+        :attr:`~Permissions.kick_members` permissions to use this.
 
         To check how many members you would prune without actually pruning,
         see the :meth:`estimate_pruned_members` function.
@@ -3183,7 +3185,10 @@ class Guild(Hashable):
         data = await self._state.http.invites_from(self.id)
         result = []
         for invite in data:
-            channel = self.get_channel(int(invite["channel"]["id"]))
+            if channel_data := invite.get("channel"):
+                channel = self.get_channel(int(channel_data["id"]))
+            else:
+                channel = None
             result.append(Invite(state=self._state, data=invite, guild=self, channel=channel))
 
         return result
@@ -3575,6 +3580,37 @@ class Guild(Hashable):
             An error occurred deleting the emoji.
         """
         await self._state.http.delete_custom_emoji(self.id, emoji.id, reason=reason)
+
+    async def fetch_role(self, role_id: int, /) -> Role:
+        """|coro|
+
+        Retrieve a :class:`Role`.
+
+        .. note::
+
+            This method is an API call. For general usage, consider :meth:`get_role` or :attr:`roles` instead.
+
+        .. versionadded:: 2.10
+
+        Parameters
+        ----------
+        role_id: :class:`int`
+            The ID of the role to retrieve.
+
+        Raises
+        ------
+        NotFound
+            The role requested could not be found.
+        HTTPException
+            Retrieving the role failed.
+
+        Returns
+        -------
+        :class:`Role`
+            The retrieved role.
+        """
+        data = await self._state.http.get_role(self.id, role_id=role_id)
+        return Role(guild=self, state=self._state, data=data)
 
     async def fetch_roles(self) -> List[Role]:
         """|coro|
@@ -4007,6 +4043,77 @@ class Guild(Hashable):
         """
         await self._state.http.unban(user.id, self.id, reason=reason)
 
+    async def bulk_ban(
+        self,
+        users: Iterable[Snowflake],
+        *,
+        clean_history_duration: Union[int, datetime.timedelta] = 0,
+        reason: Optional[str] = None,
+    ) -> BulkBanResult:
+        """|coro|
+
+        Bans multiple users from the guild at once.
+
+        The users must meet the :class:`abc.Snowflake` abc.
+
+        You must have :attr:`~Permissions.ban_members` and :attr:`~Permissions.manage_guild`
+        permissions to do this.
+
+        .. versionadded:: 2.10
+
+        Parameters
+        ----------
+        users: Iterable[:class:`abc.Snowflake`]
+            The users to ban from the guild, up to 200.
+        clean_history_duration: Union[:class:`int`, :class:`datetime.timedelta`]
+            The timespan (seconds or timedelta) of messages to delete from the users
+            in the guild, up to 7 days (604800 seconds).
+            Defaults to ``0``.
+
+            .. note::
+                This may not be accurate with small durations (e.g. a few minutes)
+                and delete a couple minutes' worth of messages more than specified.
+
+        reason: Optional[:class:`str`]
+            The reason for banning the users. Shows up on the audit log.
+
+        Raises
+        ------
+        TypeError
+            ``clean_history_duration`` has an invalid type.
+        Forbidden
+            You do not have the proper permissions to bulk ban.
+        HTTPException
+            Banning failed. This is also raised if none of the users could be banned.
+
+        Returns
+        -------
+        :class:`BulkBanResult`
+            An object containing the successful and failed bans.
+        """
+        if isinstance(clean_history_duration, datetime.timedelta):
+            delete_message_seconds = int(clean_history_duration.total_seconds())
+        elif isinstance(clean_history_duration, int):
+            delete_message_seconds = clean_history_duration
+        else:
+            raise TypeError(
+                "`clean_history_duration` should be int or timedelta, "
+                f"not {type(clean_history_duration).__name__}"
+            )
+
+        data = await self._state.http.bulk_ban(
+            [user.id for user in users],
+            self.id,
+            delete_message_seconds=delete_message_seconds,
+            reason=reason,
+        )
+
+        return BulkBanResult(
+            # these keys should always exist, but have a fallback just in case
+            [Object(u) for u in (data.get("banned_users") or [])],
+            [Object(u) for u in (data.get("failed_users") or [])],
+        )
+
     async def vanity_invite(self, *, use_cached: bool = False) -> Optional[Invite]:
         """|coro|
 
@@ -4057,11 +4164,15 @@ class Guild(Hashable):
         # reliable or a thing anymore
         data = await self._state.http.get_invite(payload["code"])
 
-        channel = self.get_channel(int(data["channel"]["id"]))
+        if channel_data := data.get("channel"):
+            channel = self.get_channel(int(channel_data["id"]))
+        else:
+            channel = None
         payload["temporary"] = False
         payload["max_uses"] = 0
         payload["max_age"] = 0
         payload["uses"] = payload.get("uses", 0)
+        payload["type"] = 0
         return Invite(state=self._state, data=payload, guild=self, channel=channel)
 
     # TODO: use MISSING when async iterators get refactored
@@ -4561,6 +4672,46 @@ class Guild(Hashable):
         """
         data = await self._state.http.get_guild_voice_regions(self.id)
         return [VoiceRegion(data=region) for region in data]
+
+    async def fetch_voice_state(self, member_id: int, /) -> VoiceState:
+        """|coro|
+
+        Fetches the :class:`VoiceState` of a member.
+
+        .. note::
+
+            This method is an API call. For general usage, consider :attr:`Member.voice` instead.
+
+        .. versionadded:: 2.10
+
+        Parameters
+        ----------
+        member_id: :class:`int`
+            The ID of the member.
+
+        Raises
+        ------
+        NotFound
+            The member for which you tried to fetch a voice state is not
+            connected to a channel in this guild.
+        Forbidden
+            You do not have permission to fetch the member's voice state.
+        HTTPException
+            Fetching the voice state failed.
+
+        Returns
+        -------
+        :class:`VoiceState`
+            The voice state of the member.
+        """
+        if member_id == self.me.id:
+            data = await self._state.http.get_my_voice_state(self.id)
+        else:
+            data = await self._state.http.get_voice_state(self.id, member_id)
+
+        channel_id = utils._get_as_snowflake(data, "channel_id")
+        channel: Optional[VocalGuildChannel] = self.get_channel(channel_id)  # type: ignore
+        return VoiceState(data=data, channel=channel)
 
     async def change_voice_state(
         self, *, channel: Optional[Snowflake], self_mute: bool = False, self_deaf: bool = False

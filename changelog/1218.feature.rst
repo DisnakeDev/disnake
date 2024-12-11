@@ -1,0 +1,1 @@
+Add new :attr:`Attachment.title` attribute.

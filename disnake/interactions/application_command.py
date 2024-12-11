@@ -58,8 +58,23 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
         The application ID that the interaction was for.
     guild_id: Optional[:class:`int`]
         The guild ID the interaction was sent from.
-    channel_id: :class:`int`
-        The channel ID the interaction was sent from.
+    channel: Union[:class:`abc.GuildChannel`, :class:`Thread`, :class:`abc.PrivateChannel`, :class:`PartialMessageable`]
+        The channel the interaction was sent from.
+
+        Note that due to a Discord limitation, DM channels
+        may not contain recipient information.
+        Unknown channel types will be :class:`PartialMessageable`.
+
+        .. versionchanged:: 2.10
+            If the interaction was sent from a thread and the bot cannot normally access the thread,
+            this is now a proper :class:`Thread` object.
+            Private channels are now proper :class:`DMChannel`/:class:`GroupChannel`
+            objects instead of :class:`PartialMessageable`.
+
+        .. note::
+            If you want to compute the interaction author's or bot's permissions in the channel,
+            consider using :attr:`permissions` or :attr:`app_permissions`.
+
     author: Union[:class:`User`, :class:`Member`]
         The user or member that sent the interaction.
     locale: :class:`Locale`
@@ -82,10 +97,16 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
 
     token: :class:`str`
         The token to continue the interaction. These are valid for 15 minutes.
-    data: :class:`ApplicationCommandInteractionData`
-        The wrapped interaction data.
     client: :class:`Client`
         The interaction client.
+    entitlements: List[:class:`Entitlement`]
+        The entitlements for the invoking user and guild,
+        representing access to an application subscription.
+
+        .. versionadded:: 2.10
+
+    data: :class:`ApplicationCommandInteractionData`
+        The wrapped interaction data.
     application_command: :class:`.InvokableApplicationCommand`
         The command invoked by the interaction.
     command_failed: :class:`bool`
@@ -97,7 +118,7 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
     ) -> None:
         super().__init__(data=data, state=state)
         self.data: ApplicationCommandInteractionData = ApplicationCommandInteractionData(
-            data=data["data"], state=state, guild_id=self.guild_id
+            data=data["data"], parent=self
         )
         self.application_command: InvokableApplicationCommand = MISSING
         self.command_failed: bool = False
@@ -194,17 +215,14 @@ class ApplicationCommandInteractionData(Dict[str, Any]):
         self,
         *,
         data: ApplicationCommandInteractionDataPayload,
-        state: ConnectionState,
-        guild_id: Optional[int],
+        parent: ApplicationCommandInteraction[ClientT],
     ) -> None:
         super().__init__(data)
         self.id: int = int(data["id"])
         self.name: str = data["name"]
         self.type: ApplicationCommandType = try_enum(ApplicationCommandType, data["type"])
 
-        self.resolved = InteractionDataResolved(
-            data=data.get("resolved", {}), state=state, guild_id=guild_id
-        )
+        self.resolved = InteractionDataResolved(data=data.get("resolved", {}), parent=parent)
         self.target_id: Optional[int] = utils._get_as_snowflake(data, "target_id")
         target = self.resolved.get_by_id(self.target_id)
         self.target: Optional[Union[User, Member, Message]] = target  # type: ignore

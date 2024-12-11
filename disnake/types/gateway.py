@@ -17,15 +17,15 @@ from .guild import Guild, UnavailableGuild
 from .guild_scheduled_event import GuildScheduledEvent
 from .integration import BaseIntegration
 from .interactions import BaseInteraction, GuildApplicationCommandPermissions
-from .invite import InviteTargetType
+from .invite import InviteTargetType, InviteType
 from .member import MemberWithUser
 from .message import Message
 from .role import Role
 from .snowflake import Snowflake, SnowflakeList
 from .sticker import GuildSticker
 from .threads import Thread, ThreadMember, ThreadMemberWithPresence, ThreadType
-from .user import User
-from .voice import GuildVoiceState, SupportedModes
+from .user import AvatarDecorationData, User
+from .voice import GuildVoiceState, SupportedModes, VoiceChannelEffect
 
 
 class SessionStartLimit(TypedDict):
@@ -323,6 +323,24 @@ class MessageReactionRemoveEmojiEvent(TypedDict):
     emoji: PartialEmoji
 
 
+# https://discord.com/developers/docs/topics/gateway-events#message-poll-vote-add
+class PollVoteAddEvent(TypedDict):
+    channel_id: Snowflake
+    guild_id: NotRequired[Snowflake]
+    message_id: Snowflake
+    user_id: Snowflake
+    answer_id: int
+
+
+# https://discord.com/developers/docs/topics/gateway-events#message-poll-vote-remove
+class PollVoteRemoveEvent(TypedDict):
+    channel_id: Snowflake
+    guild_id: NotRequired[Snowflake]
+    message_id: Snowflake
+    user_id: Snowflake
+    answer_id: int
+
+
 # https://discord.com/developers/docs/topics/gateway-events#interaction-create
 InteractionCreateEvent = BaseInteraction
 
@@ -348,6 +366,7 @@ class InviteCreateEvent(TypedDict):
     target_user: NotRequired[User]
     target_application: NotRequired[PartialAppInfo]
     temporary: bool
+    type: InviteType
     uses: int  # always 0
 
 
@@ -434,6 +453,7 @@ class GuildMemberUpdateEvent(TypedDict):
     user: User
     nick: NotRequired[Optional[str]]
     avatar: Optional[str]
+    banner: Optional[str]
     joined_at: Optional[str]
     premium_since: NotRequired[Optional[str]]
     deaf: NotRequired[bool]
@@ -441,6 +461,7 @@ class GuildMemberUpdateEvent(TypedDict):
     pending: NotRequired[bool]
     communication_disabled_until: NotRequired[Optional[str]]
     flags: int
+    avatar_decoration_data: NotRequired[Optional[AvatarDecorationData]]
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-emojis-update
@@ -590,6 +611,13 @@ class VoiceServerUpdateEvent(TypedDict):
     token: str
     guild_id: Snowflake
     endpoint: Optional[str]
+
+
+# https://discord.com/developers/docs/topics/gateway-events#voice-channel-effect-send
+class VoiceChannelEffectSendEvent(VoiceChannelEffect):
+    channel_id: Snowflake
+    guild_id: Snowflake
+    user_id: Snowflake
 
 
 # https://discord.com/developers/docs/topics/gateway-events#typing-start

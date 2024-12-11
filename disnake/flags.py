@@ -55,6 +55,16 @@ class flag_value(Generic[T]):
         self.__doc__ = func.__doc__
         self._parent: Type[T] = MISSING
 
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, flag_value):
+            return self.flag == other.flag
+        if isinstance(other, BaseFlags):
+            return self._parent is other.__class__ and self.flag == other.value
+        return False
+
+    def __ne__(self, other: Any) -> bool:
+        return not self.__eq__(other)
+
     def __or__(self, other: Union[flag_value[T], T]) -> T:
         if isinstance(other, BaseFlags):
             if self._parent is not other.__class__:
@@ -148,7 +158,11 @@ class BaseFlags:
         return self
 
     def __eq__(self, other: Any) -> bool:
-        return isinstance(other, self.__class__) and self.value == other.value
+        if isinstance(other, self.__class__):
+            return self.value == other.value
+        if isinstance(other, flag_value):
+            return self.__class__ is other._parent and self.value == other.flag
+        return False
 
     def __ne__(self, other: Any) -> bool:
         return not self.__eq__(other)
@@ -1028,11 +1042,13 @@ class Intents(BaseFlags):
         automod_execution: bool = ...,
         bans: bool = ...,
         dm_messages: bool = ...,
+        dm_polls: bool = ...,
         dm_reactions: bool = ...,
         dm_typing: bool = ...,
         emojis: bool = ...,
         emojis_and_stickers: bool = ...,
         guild_messages: bool = ...,
+        guild_polls: bool = ...,
         guild_reactions: bool = ...,
         guild_scheduled_events: bool = ...,
         guild_typing: bool = ...,
@@ -1043,6 +1059,7 @@ class Intents(BaseFlags):
         message_content: bool = ...,
         messages: bool = ...,
         moderation: bool = ...,
+        polls: bool = ...,
         presences: bool = ...,
         reactions: bool = ...,
         typing: bool = ...,
@@ -1264,6 +1281,8 @@ class Intents(BaseFlags):
         This corresponds to the following events:
 
         - :func:`on_voice_state_update`
+        - :func:`on_voice_channel_effect`
+        - :func:`on_raw_voice_channel_effect`
 
         This also corresponds to the following attributes and classes in terms of cache:
 
@@ -1443,7 +1462,7 @@ class Intents(BaseFlags):
 
     @flag_value
     def guild_reactions(self):
-        """:class:`bool`: Whether guild message reaction related events are enabled.
+        """:class:`bool`: Whether guild reaction related events are enabled.
 
         See also :attr:`dm_reactions` for DMs or :attr:`reactions` for both.
 
@@ -1499,7 +1518,7 @@ class Intents(BaseFlags):
 
     @flag_value
     def guild_typing(self):
-        """:class:`bool`: Whether guild and direct message typing related events are enabled.
+        """:class:`bool`: Whether guild typing related events are enabled.
 
         See also :attr:`dm_typing` for DMs or :attr:`typing` for both.
 
@@ -1513,7 +1532,7 @@ class Intents(BaseFlags):
 
     @flag_value
     def dm_typing(self):
-        """:class:`bool`: Whether guild and direct message typing related events are enabled.
+        """:class:`bool`: Whether direct message typing related events are enabled.
 
         See also :attr:`guild_typing` for guilds or :attr:`typing` for both.
 
@@ -1597,6 +1616,61 @@ class Intents(BaseFlags):
         This does not correspond to any attributes or classes in the library in terms of cache.
         """
         return (1 << 20) | (1 << 21)
+
+    @alias_flag_value
+    def polls(self):
+        """:class:`bool`: Whether guild and direct message polls related events are enabled.
+
+        This is a shortcut to set or get both :attr:`guild_polls` and :attr:`dm_polls`.
+
+        This corresponds to the following events:
+
+        - :func:`on_poll_vote_add` (both guilds and DMs)
+        - :func:`on_poll_vote_remove` (both guilds and DMs)
+        - :func:`on_raw_poll_vote_add` (both guilds and DMs)
+        - :func:`on_raw_poll_vote_remove` (both guilds and DMs)
+        """
+        return (1 << 24) | (1 << 25)
+
+    @flag_value
+    def guild_polls(self):
+        """:class:`bool`: Whether guild polls related events are enabled.
+
+        .. versionadded:: 2.10
+
+        This corresponds to the following events:
+
+        - :func:`on_poll_vote_add` (only for guilds)
+        - :func:`on_poll_vote_remove` (only for guilds)
+        - :func:`on_raw_poll_vote_add` (only for guilds)
+        - :func:`on_raw_poll_vote_remove` (only for guilds)
+
+        This also corresponds to the following attributes and classes in terms of cache:
+
+        - :attr:`Message.poll` (only for guild messages)
+        - :class:`Poll` and all its attributes.
+        """
+        return 1 << 24
+
+    @flag_value
+    def dm_polls(self):
+        """:class:`bool`: Whether direct message polls related events are enabled.
+
+        .. versionadded:: 2.10
+
+        This corresponds to the following events:
+
+        - :func:`on_poll_vote_add` (only for DMs)
+        - :func:`on_poll_vote_remove` (only for DMs)
+        - :func:`on_raw_poll_vote_add` (only for DMs)
+        - :func:`on_raw_poll_vote_remove` (only for DMs)
+
+        This also corresponds to the following attributes and classes in terms of cache:
+
+        - :attr:`Message.poll` (only for DM messages)
+        - :class:`Poll` and all its attributes.
+        """
+        return 1 << 25
 
 
 class MemberCacheFlags(BaseFlags):
@@ -2283,9 +2357,14 @@ class MemberFlags(BaseFlags):
         def __init__(
             self,
             *,
+            automod_quarantined_username: bool = ...,
             bypasses_verification: bool = ...,
+            completed_home_actions: bool = ...,
             completed_onboarding: bool = ...,
             did_rejoin: bool = ...,
+            dm_settings_upsell_acknowledged: bool = ...,
+            is_guest: bool = ...,
+            started_home_actions: bool = ...,
             started_onboarding: bool = ...,
         ) -> None:
             ...
@@ -2309,6 +2388,46 @@ class MemberFlags(BaseFlags):
     def started_onboarding(self):
         """:class:`bool`: Returns ``True`` if the member has started onboarding."""
         return 1 << 3
+
+    @flag_value
+    def is_guest(self):
+        """:class:`bool`: Returns ``True`` if the member is a guest and can only access the voice channel they were invited to.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 4
+
+    @flag_value
+    def started_home_actions(self):
+        """:class:`bool`: Returns ``True`` if the member has started the Server Guide actions.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 5
+
+    @flag_value
+    def completed_home_actions(self):
+        """:class:`bool`: Returns ``True`` if the member has completed the Server Guide actions.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 6
+
+    @flag_value
+    def automod_quarantined_username(self):
+        """:class:`bool`: Returns ``True`` if the member's username, display name, or nickname is blocked by AutoMod.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 7
+
+    @flag_value
+    def dm_settings_upsell_acknowledged(self):
+        """:class:`bool`: Returns ``True`` if the member has dismissed the DM settings upsell.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 9
 
 
 class RoleFlags(BaseFlags):

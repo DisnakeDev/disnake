@@ -78,7 +78,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
         nsfw: Optional[bool] = None,
         guild_ids: Optional[Sequence[int]] = None,
         auto_sync: Optional[bool] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
@@ -86,15 +86,9 @@ class InvokableUserCommand(InvokableApplicationCommand):
         self.auto_sync: bool = True if auto_sync is None else auto_sync
 
         try:
-            default_perms: int = func.__default_member_permissions__
+            default_member_permissions = func.__default_member_permissions__
         except AttributeError:
             pass
-        else:
-            if default_member_permissions is not None:
-                raise ValueError(
-                    "Cannot set `default_member_permissions` in both parameter and decorator"
-                )
-            default_member_permissions = default_perms
 
         dm_permission = True if dm_permission is None else dm_permission
 
@@ -122,7 +116,11 @@ class InvokableUserCommand(InvokableApplicationCommand):
             inter.bot.dispatch("user_command_error", inter, error)
 
     async def __call__(
-        self, interaction: ApplicationCommandInteraction, target: Any = None, *args, **kwargs
+        self,
+        interaction: ApplicationCommandInteraction,
+        target: Any = None,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         # the target may just not be passed in
         args = (target or interaction.target,) + args
@@ -180,7 +178,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         nsfw: Optional[bool] = None,
         guild_ids: Optional[Sequence[int]] = None,
         auto_sync: Optional[bool] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
@@ -218,7 +216,11 @@ class InvokableMessageCommand(InvokableApplicationCommand):
             inter.bot.dispatch("message_command_error", inter, error)
 
     async def __call__(
-        self, interaction: ApplicationCommandInteraction, target: Any = None, *args, **kwargs
+        self,
+        interaction: ApplicationCommandInteraction,
+        target: Any = None,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         # the target may just not be passed in
         args = (target or interaction.target,) + args
@@ -237,7 +239,7 @@ def user_command(
     guild_ids: Optional[Sequence[int]] = None,
     auto_sync: Optional[bool] = None,
     extras: Optional[Dict[str, Any]] = None,
-    **kwargs,
+    **kwargs: Any,
 ) -> Callable[[InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand]:
     """A shortcut decorator that builds a user command.
 
@@ -316,7 +318,7 @@ def message_command(
     guild_ids: Optional[Sequence[int]] = None,
     auto_sync: Optional[bool] = None,
     extras: Optional[Dict[str, Any]] = None,
-    **kwargs,
+    **kwargs: Any,
 ) -> Callable[
     [InteractionCommandCallback[CogT, MessageCommandInteraction, P]],
     InvokableMessageCommand,
