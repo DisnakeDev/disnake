@@ -804,7 +804,7 @@ class ParamInfo:
         self.param_name = param.name
 
     def parse_doc(self, doc: disnake.utils._DocstringParam) -> None:
-        if self.type == str and doc["type"] is not None:
+        if self.type is str and doc["type"] is not None:
             self.parse_annotation(doc["type"])
 
         self.description = self.description or doc["description"]
