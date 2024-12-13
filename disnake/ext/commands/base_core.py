@@ -860,7 +860,6 @@ def install_types(*, guild: bool = False, user: bool = False) -> Callable[[T], T
     return decorator
 
 
-# TODO: naming
 def contexts(
     *, guild: bool = False, bot_dm: bool = False, private_channel: bool = False
 ) -> Callable[[T], T]:
