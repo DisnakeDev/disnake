@@ -25,9 +25,10 @@ from typing import (
 )
 
 import disnake
-from disnake.app_commands import ApplicationCommand, Option
+from disnake.app_commands import ApplicationCommand, Option, OptionChoice, SlashCommand
 from disnake.custom_warnings import SyncWarning
-from disnake.enums import ApplicationCommandType
+from disnake.enums import ApplicationCommandType, OptionType
+from disnake.errors import HTTPException, _flatten_error_dict
 from disnake.utils import warn_deprecated
 
 from . import errors
@@ -59,14 +60,12 @@ if TYPE_CHECKING:
 
     P = ParamSpec("P")
 
-
 __all__ = ("InteractionBotBase",)
 
 MISSING: Any = disnake.utils.MISSING
 
 T = TypeVar("T")
 CFT = TypeVar("CFT", bound="CoroFunc")
-
 
 _log = logging.getLogger(__name__)
 
@@ -137,6 +136,130 @@ def _format_diff(diff: _Diff) -> str:
             lines.append("    -")
 
     return "\n".join(f"| {line}" for line in lines)
+
+
+def _parse_sync_warning(exception: Exception, app_commands: List[ApplicationCommand]) -> str:
+    if (
+        not isinstance(exception, HTTPException)
+        or exception.status != 400
+        or not isinstance(exception._errors, dict)
+    ):
+        return str(exception)
+
+    try:
+        sync_warnings: List[str] = []
+        for command_num, error in exception._errors.items():
+            commands: List[
+                Tuple[List[int], List[str], ApplicationCommand | Option]
+            ] = _innermost_commands(app_commands[int(command_num)])
+            for command_option_path, command_name_components, command in commands:
+                command_name = " ".join(command_name_components + [command.name])
+                message = f"In /{command_name}:\n"
+                message_len = len(message)
+
+                # If the command is nested, being a sub command or sub command group, recur down the options
+                # to find the errors pertaining to it
+                command_errors = error
+                for path in command_option_path:
+                    command_errors = command_errors.get("options", {}).get(str(path), {})
+
+                for key, value in command_errors.items():
+                    message = _parse_options(
+                        message,
+                        key,
+                        value,
+                        command.options if isinstance(command, (SlashCommand, Option)) else [],
+                        2,
+                    )
+
+                # If the length of the message didn't change, no need to print it
+                if len(message) != message_len:
+                    sync_warnings.append(message)
+
+        return "\n".join(sync_warnings)
+    except Exception as e:
+        _log.error(e)
+        return str(exception)
+
+
+def _innermost_commands(
+    command: ApplicationCommand | Option,
+    command_components: Optional[List[str]] = None,
+    path: Optional[List[int]] = None,
+):
+    """Given a command, find all the lowest level sub commands. This ensures that when we log sync errors, we don't
+    include logs for parent commands and sub command groups.
+    """
+    command_components = command_components or []
+    path = path or []
+
+    innermost_objects = [(path, command_components, command)]
+    if not (isinstance(command, (SlashCommand, Option)) and command.options):
+        return innermost_objects
+
+    for idx, option in enumerate(command.options):
+        if option.type in [OptionType.sub_command, OptionType.sub_command_group]:
+            innermost_objects.extend(
+                _innermost_commands(option, command_components + [command.name], path + [idx])
+            )
+    return innermost_objects
+
+
+def _parse_options(
+    message: str,
+    key: str,
+    value: Any,
+    options: Union[List[Option], List[OptionChoice]],
+    indent_level: int,
+):
+    # It is helpful to know the error dict looks something like
+    # {
+    #     "options": {
+    #         "0": {
+    #             "choices": {
+    #                 "0": {
+    #                     "name": {"_errors": ...}
+    #                 }
+    #             }
+    #         }
+    #     }
+    # }
+
+    new_metadata = ""
+    if key.isdecimal():
+        option = options[int(key)]
+        option_type = "Choice" if isinstance(option, OptionChoice) else "Option"
+        new_metadata = f" ({option_type} {key})"
+        key = option.name
+
+        if isinstance(option, Option):
+            if option.options:
+                options = option.options
+            elif option.choices:
+                options = option.choices
+    # When the key isn't a number, we print either "options" or "choices". We only want to add "options" if one
+    # of the options is an actual option, not a sub command or sub command group.
+    elif (
+        key == "options"
+        and options
+        and all(
+            isinstance(o, Option)
+            and o.type in [OptionType.sub_command, OptionType.sub_command_group]
+            for o in options
+        )
+    ):
+        return message
+
+    message += f"{' ' * indent_level}{key}{new_metadata}:\n"
+    indent_level += 2
+
+    if "_errors" in value:
+        return message + f"{' ' * indent_level}{_flatten_error_dict({key: value}).get(key)}\n"
+
+    for k, v in value.items():
+        message = _parse_options(message, k, v, options, indent_level)
+
+    return message
 
 
 class InteractionBotBase(CommonBotBase):
@@ -823,8 +946,11 @@ class InteractionBotBase(CommonBotBase):
                 try:
                     await self.bulk_overwrite_global_commands(to_send)
                 except Exception as e:
+                    sync_warnings = _parse_sync_warning(e, to_send)
                     warnings.warn(
-                        f"Failed to overwrite global commands due to {e}", SyncWarning, stacklevel=1
+                        f"Failed to overwrite global commands due to \n{sync_warnings}",
+                        SyncWarning,
+                        stacklevel=1,
                     )
 
         # Same process but for each specified guild individually.
@@ -855,8 +981,9 @@ class InteractionBotBase(CommonBotBase):
                     try:
                         await self.bulk_overwrite_guild_commands(guild_id, to_send)
                     except Exception as e:
+                        sync_warnings = _parse_sync_warning(e, to_send)
                         warnings.warn(
-                            f"Failed to overwrite commands in <Guild id={guild_id}> due to {e}",
+                            f"Failed to overwrite commands in <Guild id={guild_id}> due to \n{sync_warnings}",
                             SyncWarning,
                             stacklevel=1,
                         )
