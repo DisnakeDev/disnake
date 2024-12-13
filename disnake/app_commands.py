@@ -17,7 +17,7 @@ from .enums import (
     try_enum,
     try_enum_to_int,
 )
-from .flags import ApplicationIntegrationTypes, InteractionContextTypes
+from .flags import ApplicationInstallTypes, InteractionContextTypes
 from .i18n import Localized
 from .permissions import Permissions
 from .utils import MISSING, _get_as_snowflake, _maybe_cast, deprecated, warn_deprecated
@@ -492,9 +492,9 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
 
         .. versionadded:: 2.8
 
-    integration_types: Optional[:class:`ApplicationIntegrationTypes`]
-        The integration types/installation contexts where the command is available.
-        Defaults to :attr:`ApplicationIntegrationTypes.guild` only.
+    install_types: Optional[:class:`ApplicationInstallTypes`]
+        The installation types where the command is available.
+        Defaults to :attr:`ApplicationInstallTypes.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
@@ -511,7 +511,7 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
         "name",
         "default_member_permissions",
         "nsfw",
-        "integration_types",
+        "install_types",
         "contexts",
     )
 
@@ -522,7 +522,7 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
         dm_permission: Optional[bool] = None,  # deprecated
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
-        integration_types: Optional[ApplicationIntegrationTypes] = None,
+        install_types: Optional[ApplicationInstallTypes] = None,
         contexts: Optional[InteractionContextTypes] = None,
     ) -> None:
         self.type: ApplicationCommandType = enum_if_int(ApplicationCommandType, type)
@@ -544,7 +544,7 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
             self._default_member_permissions = default_member_permissions.value
 
         # note: this defaults to `[0]` for syncing purposes only
-        self.integration_types: Optional[ApplicationIntegrationTypes] = integration_types
+        self.install_types: Optional[ApplicationInstallTypes] = install_types
         self.contexts: Optional[InteractionContextTypes] = contexts
 
         self._always_synced: bool = False
@@ -628,7 +628,7 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
         if not any(
             (isinstance(obj, _APIApplicationCommandMixin) and obj.guild_id) for obj in (self, other)
         ):
-            if self._integration_types_with_default != other._integration_types_with_default:
+            if self._install_types_with_default != other._install_types_with_default:
                 return False
 
             # `contexts` takes priority over `dm_permission`;
@@ -645,18 +645,18 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
         return True
 
     @property
-    def _integration_types_with_default(self) -> Optional[ApplicationIntegrationTypes]:
+    def _install_types_with_default(self) -> Optional[ApplicationInstallTypes]:
         # if this is an api-provided command object, keep things as-is
-        if self.integration_types is None and not isinstance(self, _APIApplicationCommandMixin):
+        if self.install_types is None and not isinstance(self, _APIApplicationCommandMixin):
             # The purpose of this default is to avoid re-syncing after the updating to the new version,
             # at least as long as the user hasn't enabled user installs in the dev portal
             # (i.e. if they haven't, the api defaults to this value as well).
             # Additionally, this provides consistency independent of the dev portal configuration,
             # even if it might not be ideal.
-            # In an ideal world, we would make use of `application_info().integration_types_config`.
-            return ApplicationIntegrationTypes(guild=True)
+            # In an ideal world, we would make use of `application_info().install_types_config`.
+            return ApplicationInstallTypes(guild=True)
 
-        return self.integration_types
+        return self.install_types
 
     def to_dict(self) -> EditApplicationCommandPayload:
         data: EditApplicationCommandPayload = {
@@ -671,12 +671,12 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
             "nsfw": self.nsfw,
         }
 
-        integration_types = (
-            self._integration_types_with_default.values
-            if self._integration_types_with_default is not None
+        install_types = (
+            self._install_types_with_default.values
+            if self._install_types_with_default is not None
             else None
         )
-        data["integration_types"] = integration_types
+        data["integration_types"] = install_types
 
         contexts = self.contexts.values if self.contexts is not None else None
         data["contexts"] = contexts
@@ -731,9 +731,9 @@ class UserCommand(ApplicationCommand):
 
         .. versionadded:: 2.8
 
-    integration_types: Optional[:class:`ApplicationIntegrationTypes`]
-        The integration types/installation contexts where the command is available.
-        Defaults to :attr:`ApplicationIntegrationTypes.guild` only.
+    install_types: Optional[:class:`ApplicationInstallTypes`]
+        The installation types where the command is available.
+        Defaults to :attr:`ApplicationInstallTypes.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
@@ -753,7 +753,7 @@ class UserCommand(ApplicationCommand):
         dm_permission: Optional[bool] = None,  # deprecated
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
-        integration_types: Optional[ApplicationIntegrationTypes] = None,
+        install_types: Optional[ApplicationInstallTypes] = None,
         contexts: Optional[InteractionContextTypes] = None,
     ) -> None:
         super().__init__(
@@ -762,7 +762,7 @@ class UserCommand(ApplicationCommand):
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
             nsfw=nsfw,
-            integration_types=integration_types,
+            install_types=install_types,
             contexts=contexts,
         )
 
@@ -786,9 +786,9 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
 
         .. versionadded:: 2.8
 
-    integration_types: Optional[:class:`ApplicationIntegrationTypes`]
-        The integration types/installation contexts where the command is available.
-        Defaults to :attr:`ApplicationIntegrationTypes.guild` only.
+    install_types: Optional[:class:`ApplicationInstallTypes`]
+        The installation types where the command is available.
+        Defaults to :attr:`ApplicationInstallTypes.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
@@ -821,9 +821,9 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
             name=Localized(data["name"], data=data.get("name_localizations")),
             default_member_permissions=_get_as_snowflake(data, "default_member_permissions"),
             nsfw=data.get("nsfw"),
-            integration_types=(
-                ApplicationIntegrationTypes._from_values(integration_types)
-                if (integration_types := data.get("integration_types")) is not None
+            install_types=(
+                ApplicationInstallTypes._from_values(install_types)
+                if (install_types := data.get("integration_types")) is not None
                 else None
             ),
             contexts=(
@@ -854,9 +854,9 @@ class MessageCommand(ApplicationCommand):
 
         .. versionadded:: 2.8
 
-    integration_types: Optional[:class:`ApplicationIntegrationTypes`]
-        The integration types/installation contexts where the command is available.
-        Defaults to :attr:`ApplicationIntegrationTypes.guild` only.
+    install_types: Optional[:class:`ApplicationInstallTypes`]
+        The installation types where the command is available.
+        Defaults to :attr:`ApplicationInstallTypes.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
@@ -876,7 +876,7 @@ class MessageCommand(ApplicationCommand):
         dm_permission: Optional[bool] = None,  # deprecated
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
-        integration_types: Optional[ApplicationIntegrationTypes] = None,
+        install_types: Optional[ApplicationInstallTypes] = None,
         contexts: Optional[InteractionContextTypes] = None,
     ) -> None:
         super().__init__(
@@ -885,7 +885,7 @@ class MessageCommand(ApplicationCommand):
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
             nsfw=nsfw,
-            integration_types=integration_types,
+            install_types=install_types,
             contexts=contexts,
         )
 
@@ -909,9 +909,9 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
 
         .. versionadded:: 2.8
 
-    integration_types: Optional[:class:`ApplicationIntegrationTypes`]
-        The integration types/installation contexts where the command is available.
-        Defaults to :attr:`ApplicationIntegrationTypes.guild` only.
+    install_types: Optional[:class:`ApplicationInstallTypes`]
+        The installation types where the command is available.
+        Defaults to :attr:`ApplicationInstallTypes.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
@@ -944,9 +944,9 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
             name=Localized(data["name"], data=data.get("name_localizations")),
             default_member_permissions=_get_as_snowflake(data, "default_member_permissions"),
             nsfw=data.get("nsfw"),
-            integration_types=(
-                ApplicationIntegrationTypes._from_values(integration_types)
-                if (integration_types := data.get("integration_types")) is not None
+            install_types=(
+                ApplicationInstallTypes._from_values(install_types)
+                if (install_types := data.get("integration_types")) is not None
                 else None
             ),
             contexts=(
@@ -984,9 +984,9 @@ class SlashCommand(ApplicationCommand):
 
         .. versionadded:: 2.8
 
-    integration_types: Optional[:class:`ApplicationIntegrationTypes`]
-        The integration types/installation contexts where the command is available.
-        Defaults to :attr:`ApplicationIntegrationTypes.guild` only.
+    install_types: Optional[:class:`ApplicationInstallTypes`]
+        The installation types where the command is available.
+        Defaults to :attr:`ApplicationInstallTypes.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
@@ -1014,7 +1014,7 @@ class SlashCommand(ApplicationCommand):
         dm_permission: Optional[bool] = None,  # deprecated
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
-        integration_types: Optional[ApplicationIntegrationTypes] = None,
+        install_types: Optional[ApplicationInstallTypes] = None,
         contexts: Optional[InteractionContextTypes] = None,
     ) -> None:
         super().__init__(
@@ -1023,7 +1023,7 @@ class SlashCommand(ApplicationCommand):
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
             nsfw=nsfw,
-            integration_types=integration_types,
+            install_types=install_types,
             contexts=contexts,
         )
         _validate_name(self.name)
@@ -1123,9 +1123,9 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
 
         .. versionadded:: 2.8
 
-    integration_types: Optional[:class:`ApplicationIntegrationTypes`]
-        The integration types/installation contexts where the command is available.
-        Defaults to :attr:`ApplicationIntegrationTypes.guild` only.
+    install_types: Optional[:class:`ApplicationInstallTypes`]
+        The installation types where the command is available.
+        Defaults to :attr:`ApplicationInstallTypes.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
@@ -1164,9 +1164,9 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
             ),
             default_member_permissions=_get_as_snowflake(data, "default_member_permissions"),
             nsfw=data.get("nsfw"),
-            integration_types=(
-                ApplicationIntegrationTypes._from_values(integration_types)
-                if (integration_types := data.get("integration_types")) is not None
+            install_types=(
+                ApplicationInstallTypes._from_values(install_types)
+                if (install_types := data.get("integration_types")) is not None
                 else None
             ),
             contexts=(

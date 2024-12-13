@@ -108,12 +108,12 @@ OptionChoice
 .. autoclass:: OptionChoice()
     :members:
 
-ApplicationIntegrationTypes
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ApplicationInstallTypes
+~~~~~~~~~~~~~~~~~~~~~~~
 
-.. attributetable:: ApplicationIntegrationTypes
+.. attributetable:: ApplicationInstallTypes
 
-.. autoclass:: ApplicationIntegrationTypes()
+.. autoclass:: ApplicationInstallTypes()
     :members:
 
 InteractionContextTypes

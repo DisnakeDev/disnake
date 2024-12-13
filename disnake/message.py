@@ -898,7 +898,7 @@ class AuthorizingIntegrationOwners:
     __slots__ = ("guild_id", "user_id")
 
     def __init__(self, data: AuthorizingIntegrationOwnersPayload) -> None:
-        # keys are stringified ApplicationIntegrationTypes
+        # keys are stringified ApplicationInstallTypes
         self.guild_id: Optional[int] = _get_as_snowflake(data, "0")
         self.user_id: Optional[int] = _get_as_snowflake(data, "1")
 

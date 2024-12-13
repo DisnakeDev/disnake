@@ -107,7 +107,7 @@ def test_contexts_guildcommandinteraction(meta: DecoratorMeta) -> None:
     class Cog(commands.Cog):
         # this shouldn't raise, it should be silently ignored
         @commands.contexts(bot_dm=True)
-        @commands.integration_types(user=True)
+        @commands.install_types(user=True)
         # this is a legacy parameter, essentially the same as using `GuildCommandInteraction`
         @meta.decorator(guild_only=True)
         async def cmd(self, _) -> None:
@@ -115,7 +115,7 @@ def test_contexts_guildcommandinteraction(meta: DecoratorMeta) -> None:
 
     for c in (Cog, Cog()):
         assert c.cmd.contexts == disnake.InteractionContextTypes(guild=True)
-        assert c.cmd.integration_types == disnake.ApplicationIntegrationTypes(guild=True)
+        assert c.cmd.install_types == disnake.ApplicationInstallTypes(guild=True)
 
 
 def test_localization_copy() -> None:

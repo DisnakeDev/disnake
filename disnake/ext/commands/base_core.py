@@ -22,7 +22,7 @@ from typing import (
 
 from disnake.app_commands import ApplicationCommand
 from disnake.enums import ApplicationCommandType
-from disnake.flags import ApplicationIntegrationTypes, InteractionContextTypes
+from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
 from disnake.permissions import Permissions
 from disnake.utils import _generated, _overload_with_permissions, async_all, maybe_coroutine
 
@@ -53,7 +53,7 @@ if TYPE_CHECKING:
 __all__ = (
     "InvokableApplicationCommand",
     "default_member_permissions",
-    "integration_types",
+    "install_types",
     "contexts",
 )
 
@@ -212,11 +212,11 @@ class InvokableApplicationCommand(ABC):
             other.body._default_member_permissions = self.body._default_member_permissions
 
         if (
-            self.body.integration_types != other.body.integration_types
-            and self.body.integration_types is not None  # see above
+            self.body.install_types != other.body.install_types
+            and self.body.install_types is not None  # see above
         ):
-            other.body.integration_types = ApplicationIntegrationTypes._from_value(
-                self.body.integration_types.value
+            other.body.install_types = ApplicationInstallTypes._from_value(
+                self.body.install_types.value
             )
 
         if (
@@ -253,13 +253,13 @@ class InvokableApplicationCommand(ABC):
             return self.copy()
 
     def _apply_guild_only(self) -> None:
-        # If we have a `GuildCommandInteraction` annotation, set `contexts` and `integration_types` accordingly.
+        # If we have a `GuildCommandInteraction` annotation, set `contexts` and `install_types` accordingly.
         # This matches the old pre-user-apps behavior.
         if self._guild_only:
             # n.b. this overwrites any user-specified parameter
             # FIXME(3.0): this should raise if these were set elsewhere (except `*_command_attrs`) already
             self.body.contexts = InteractionContextTypes(guild=True)
-            self.body.integration_types = ApplicationIntegrationTypes(guild=True)
+            self.body.install_types = ApplicationInstallTypes(guild=True)
 
     @property
     def dm_permission(self) -> bool:
@@ -283,13 +283,13 @@ class InvokableApplicationCommand(ABC):
         return self.body.default_member_permissions
 
     @property
-    def integration_types(self) -> Optional[ApplicationIntegrationTypes]:
-        """Optional[:class:`.ApplicationIntegrationTypes`]: The integration types/installation contexts
+    def install_types(self) -> Optional[ApplicationInstallTypes]:
+        """Optional[:class:`.ApplicationInstallTypes`]: The installation types
         where the command is available. Only available for global commands.
 
         .. versionadded:: 2.10
         """
-        return self.body.integration_types
+        return self.body.install_types
 
     @property
     def contexts(self) -> Optional[InteractionContextTypes]:
@@ -816,11 +816,11 @@ def default_member_permissions(value: int = 0, **permissions: bool) -> Callable[
     return decorator
 
 
-def integration_types(*, guild: bool = False, user: bool = False) -> Callable[[T], T]:
-    """A decorator that sets the integration types/installation contexts where the
+def install_types(*, guild: bool = False, user: bool = False) -> Callable[[T], T]:
+    """A decorator that sets the installation types where the
     application command is available.
 
-    See also the ``integration_types`` parameter for application command decorators.
+    See also the ``install_types`` parameter for application command decorators.
 
     .. note::
         This does not work with slash subcommands/groups.
@@ -830,28 +830,24 @@ def integration_types(*, guild: bool = False, user: bool = False) -> Callable[[T
     Parameters
     ----------
     **params: bool
-        The integration types; see :class:`.ApplicationIntegrationTypes`.
+        The installation types; see :class:`.ApplicationInstallTypes`.
         Setting a parameter to ``False`` does not affect the result.
     """
 
     def decorator(func: T) -> T:
         from .slash_core import SubCommand, SubCommandGroup
 
-        integration_types = ApplicationIntegrationTypes(guild=guild, user=user)
+        install_types = ApplicationInstallTypes(guild=guild, user=user)
         if isinstance(func, InvokableApplicationCommand):
             if isinstance(func, (SubCommand, SubCommandGroup)):
-                raise TypeError(
-                    "Cannot set `integration_types` on subcommands or subcommand groups"
-                )
+                raise TypeError("Cannot set `install_types` on subcommands or subcommand groups")
             # special case - don't overwrite if `_guild_only` was set, since that takes priority
             if not func._guild_only:
-                if func.body.integration_types is not None:
-                    raise ValueError(
-                        "Cannot set `integration_types` in both parameter and decorator"
-                    )
-                func.body.integration_types = integration_types
+                if func.body.install_types is not None:
+                    raise ValueError("Cannot set `install_types` in both parameter and decorator")
+                func.body.install_types = install_types
         else:
-            func.__integration_types__ = integration_types  # type: ignore
+            func.__install_types__ = install_types  # type: ignore
         return func
 
     return decorator

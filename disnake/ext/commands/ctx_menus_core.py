@@ -6,7 +6,7 @@ import asyncio
 from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Sequence, Tuple, Union
 
 from disnake.app_commands import MessageCommand, UserCommand
-from disnake.flags import ApplicationIntegrationTypes, InteractionContextTypes
+from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
 from disnake.i18n import Localized
 from disnake.permissions import Permissions
 
@@ -77,7 +77,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
         dm_permission: Optional[bool] = None,  # deprecated
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
-        integration_types: Optional[ApplicationIntegrationTypes] = None,
+        install_types: Optional[ApplicationInstallTypes] = None,
         contexts: Optional[InteractionContextTypes] = None,
         guild_ids: Optional[Sequence[int]] = None,
         auto_sync: Optional[bool] = None,
@@ -93,7 +93,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
         except AttributeError:
             pass
         try:
-            integration_types = func.__integration_types__
+            install_types = func.__install_types__
         except AttributeError:
             pass
         try:
@@ -106,7 +106,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
             nsfw=nsfw,
-            integration_types=integration_types,
+            install_types=install_types,
             contexts=contexts,
         )
 
@@ -189,7 +189,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         dm_permission: Optional[bool] = None,  # deprecated
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
-        integration_types: Optional[ApplicationIntegrationTypes] = None,
+        install_types: Optional[ApplicationInstallTypes] = None,
         contexts: Optional[InteractionContextTypes] = None,
         guild_ids: Optional[Sequence[int]] = None,
         auto_sync: Optional[bool] = None,
@@ -205,7 +205,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         except AttributeError:
             pass
         try:
-            integration_types = func.__integration_types__
+            install_types = func.__install_types__
         except AttributeError:
             pass
         try:
@@ -218,7 +218,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
             nsfw=nsfw,
-            integration_types=integration_types,
+            install_types=install_types,
             contexts=contexts,
         )
 
@@ -261,7 +261,7 @@ def user_command(
     dm_permission: Optional[bool] = None,  # deprecated
     default_member_permissions: Optional[Union[Permissions, int]] = None,
     nsfw: Optional[bool] = None,
-    integration_types: Optional[ApplicationIntegrationTypes] = None,
+    install_types: Optional[ApplicationInstallTypes] = None,
     contexts: Optional[InteractionContextTypes] = None,
     guild_ids: Optional[Sequence[int]] = None,
     auto_sync: Optional[bool] = None,
@@ -298,9 +298,9 @@ def user_command(
 
         .. versionadded:: 2.8
 
-    integration_types: Optional[:class:`.ApplicationIntegrationTypes`]
-        The integration types/installation contexts where the command is available.
-        Defaults to :attr:`.ApplicationIntegrationTypes.guild` only.
+    install_types: Optional[:class:`.ApplicationInstallTypes`]
+        The installation types where the command is available.
+        Defaults to :attr:`.ApplicationInstallTypes.guild` only.
         Only available for global commands.
 
         See :ref:`app_command_contexts` for details.
@@ -349,7 +349,7 @@ def user_command(
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
             nsfw=nsfw,
-            integration_types=integration_types,
+            install_types=install_types,
             contexts=contexts,
             guild_ids=guild_ids,
             auto_sync=auto_sync,
@@ -366,7 +366,7 @@ def message_command(
     dm_permission: Optional[bool] = None,  # deprecated
     default_member_permissions: Optional[Union[Permissions, int]] = None,
     nsfw: Optional[bool] = None,
-    integration_types: Optional[ApplicationIntegrationTypes] = None,
+    install_types: Optional[ApplicationInstallTypes] = None,
     contexts: Optional[InteractionContextTypes] = None,
     guild_ids: Optional[Sequence[int]] = None,
     auto_sync: Optional[bool] = None,
@@ -406,9 +406,9 @@ def message_command(
 
         .. versionadded:: 2.8
 
-    integration_types: Optional[:class:`.ApplicationIntegrationTypes`]
-        The integration types/installation contexts where the command is available.
-        Defaults to :attr:`.ApplicationIntegrationTypes.guild` only.
+    install_types: Optional[:class:`.ApplicationInstallTypes`]
+        The installation types where the command is available.
+        Defaults to :attr:`.ApplicationInstallTypes.guild` only.
         Only available for global commands.
 
         See :ref:`app_command_contexts` for details.
@@ -457,7 +457,7 @@ def message_command(
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
             nsfw=nsfw,
-            integration_types=integration_types,
+            install_types=install_types,
             contexts=contexts,
             guild_ids=guild_ids,
             auto_sync=auto_sync,

@@ -26,7 +26,7 @@ __all__ = (
     "AppInfo",
     "PartialAppInfo",
     "InstallParams",
-    "IntegrationTypeConfiguration",
+    "InstallTypeConfiguration",
 )
 
 
@@ -45,7 +45,7 @@ class InstallParams:
 
     __slots__ = (
         "_app_id",
-        "_integration_type",
+        "_install_type",
         "scopes",
         "permissions",
     )
@@ -55,10 +55,10 @@ class InstallParams:
         data: InstallParamsPayload,
         parent: AppInfo,
         *,
-        integration_type: Optional[ApplicationIntegrationTypeLiteral] = None,
+        install_type: Optional[ApplicationIntegrationTypeLiteral] = None,
     ) -> None:
         self._app_id = parent.id
-        self._integration_type: Optional[ApplicationIntegrationTypeLiteral] = integration_type
+        self._install_type: Optional[ApplicationIntegrationTypeLiteral] = install_type
         self.scopes = data["scopes"]
         self.permissions = Permissions(int(data["permissions"]))
 
@@ -78,20 +78,20 @@ class InstallParams:
             scopes=self.scopes,
             permissions=self.permissions,
             integration_type=(
-                self._integration_type if self._integration_type is not None else utils.MISSING
+                self._install_type if self._install_type is not None else utils.MISSING
             ),
         )
 
 
-class IntegrationTypeConfiguration:
-    """Represents the configuration for a particular application integration type.
+class InstallTypeConfiguration:
+    """Represents the configuration for a particular application installation type.
 
     .. versionadded:: 2.10
 
     Attributes
     ----------
     install_params: Optional[:class:`InstallParams`]
-        The installation parameters for this integration type.
+        The parameters for this installation type.
     """
 
     __slots__ = ("install_params",)
@@ -101,10 +101,10 @@ class IntegrationTypeConfiguration:
         data: ApplicationIntegrationTypeConfigurationPayload,
         *,
         parent: AppInfo,
-        integration_type: ApplicationIntegrationTypeLiteral,
+        install_type: ApplicationIntegrationTypeLiteral,
     ) -> None:
         self.install_params: Optional[InstallParams] = (
-            InstallParams(install_params, parent=parent, integration_type=integration_type)
+            InstallParams(install_params, parent=parent, install_type=install_type)
             if (install_params := data.get("oauth2_install_params"))
             else None
         )
@@ -183,8 +183,8 @@ class AppInfo:
     install_params: Optional[:class:`InstallParams`]
         The installation parameters for this application.
 
-        See also :attr:`guild_integration_type_config`/:attr:`user_integration_type_config`
-        for integration type-specific configuration.
+        See also :attr:`guild_install_type_config`/:attr:`user_install_type_config`
+        for installation type-specific configuration.
 
         .. versionadded:: 2.5
 
@@ -235,7 +235,7 @@ class AppInfo:
         "role_connections_verification_url",
         "approximate_guild_count",
         "approximate_user_install_count",
-        "_integration_types_config",
+        "_install_types_config",
     )
 
     def __init__(self, state: ConnectionState, data: AppInfoPayload) -> None:
@@ -281,15 +281,15 @@ class AppInfo:
         self.approximate_user_install_count: int = data.get("approximate_user_install_count", 0)
 
         # this is a bit of a mess, but there's no better way to expose this data for now
-        self._integration_types_config: Dict[
-            ApplicationIntegrationTypeLiteral, IntegrationTypeConfiguration
+        self._install_types_config: Dict[
+            ApplicationIntegrationTypeLiteral, InstallTypeConfiguration
         ] = {}
         for type_str, config in (data.get("integration_types_config") or {}).items():
-            integration_type = cast("ApplicationIntegrationTypeLiteral", int(type_str))
-            self._integration_types_config[integration_type] = IntegrationTypeConfiguration(
+            install_type = cast("ApplicationIntegrationTypeLiteral", int(type_str))
+            self._install_types_config[install_type] = InstallTypeConfiguration(
                 config or {},
                 parent=self,
-                integration_type=integration_type,
+                install_type=install_type,
             )
 
     def __repr__(self) -> str:
@@ -342,22 +342,22 @@ class AppInfo:
         return self._summary
 
     @property
-    def guild_integration_type_config(self) -> Optional[IntegrationTypeConfiguration]:
-        """Optional[:class:`IntegrationTypeConfiguration`]: The guild installation parameters for
+    def guild_install_type_config(self) -> Optional[InstallTypeConfiguration]:
+        """Optional[:class:`InstallTypeConfiguration`]: The guild installation parameters for
         this application. If this application cannot be installed to guilds, returns ``None``.
 
         .. versionadded:: 2.10
         """
-        return self._integration_types_config.get(0)
+        return self._install_types_config.get(0)
 
     @property
-    def user_integration_type_config(self) -> Optional[IntegrationTypeConfiguration]:
-        """Optional[:class:`IntegrationTypeConfiguration`]: The user installation parameters for
+    def user_install_type_config(self) -> Optional[InstallTypeConfiguration]:
+        """Optional[:class:`InstallTypeConfiguration`]: The user installation parameters for
         this application. If this application cannot be installed to users, returns ``None``.
 
         .. versionadded:: 2.10
         """
-        return self._integration_types_config.get(1)
+        return self._install_types_config.get(1)
 
 
 class PartialAppInfo:

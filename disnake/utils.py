@@ -329,7 +329,7 @@ def oauth_url(
         .. versionadded:: 2.0
 
     integration_type: :class:`int`
-        An optional integration type/installation context to install the application in.
+        An optional integration type/installation type to install the application with.
 
         .. versionadded:: 2.10
 

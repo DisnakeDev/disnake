@@ -20,7 +20,7 @@ from typing import (
 from disnake import utils
 from disnake.app_commands import Option, SlashCommand
 from disnake.enums import OptionType
-from disnake.flags import ApplicationIntegrationTypes, InteractionContextTypes
+from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
 from disnake.i18n import Localized
 from disnake.interactions import ApplicationCommandInteraction
 from disnake.permissions import Permissions
@@ -99,7 +99,7 @@ async def _call_autocompleter(
 
 
 _INVALID_SUB_KWARGS = frozenset(
-    {"dm_permission", "default_member_permissions", "integration_types", "contexts"}
+    {"dm_permission", "default_member_permissions", "install_types", "contexts"}
 )
 
 
@@ -110,7 +110,7 @@ def _check_invalid_sub_kwargs(func: CommandCallback, kwargs: Dict[str, Any]) -> 
 
     for decorator_key in [
         "__default_member_permissions__",
-        "__integration_types__",
+        "__install_types__",
         "__contexts__",
     ]:
         if hasattr(func, decorator_key):
@@ -446,7 +446,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         dm_permission: Optional[bool] = None,  # deprecated
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
-        integration_types: Optional[ApplicationIntegrationTypes] = None,
+        install_types: Optional[ApplicationInstallTypes] = None,
         contexts: Optional[InteractionContextTypes] = None,
         guild_ids: Optional[Sequence[int]] = None,
         connectors: Optional[Dict[str, str]] = None,
@@ -473,7 +473,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         except AttributeError:
             pass
         try:
-            integration_types = func.__integration_types__
+            install_types = func.__install_types__
         except AttributeError:
             pass
         try:
@@ -490,7 +490,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
             nsfw=nsfw,
-            integration_types=integration_types,
+            install_types=install_types,
             contexts=contexts,
         )
 
@@ -775,7 +775,7 @@ def slash_command(
     dm_permission: Optional[bool] = None,  # deprecated
     default_member_permissions: Optional[Union[Permissions, int]] = None,
     nsfw: Optional[bool] = None,
-    integration_types: Optional[ApplicationIntegrationTypes] = None,
+    install_types: Optional[ApplicationInstallTypes] = None,
     contexts: Optional[InteractionContextTypes] = None,
     options: Optional[List[Option]] = None,
     guild_ids: Optional[Sequence[int]] = None,
@@ -808,9 +808,9 @@ def slash_command(
 
         .. versionadded:: 2.8
 
-    integration_types: Optional[:class:`.ApplicationIntegrationTypes`]
-        The integration types/installation contexts where the command is available.
-        Defaults to :attr:`.ApplicationIntegrationTypes.guild` only.
+    install_types: Optional[:class:`.ApplicationInstallTypes`]
+        The installation types where the command is available.
+        Defaults to :attr:`.ApplicationInstallTypes.guild` only.
         Only available for global commands.
 
         See :ref:`app_command_contexts` for details.
@@ -880,7 +880,7 @@ def slash_command(
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
             nsfw=nsfw,
-            integration_types=integration_types,
+            install_types=install_types,
             contexts=contexts,
             guild_ids=guild_ids,
             connectors=connectors,

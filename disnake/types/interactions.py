@@ -255,7 +255,7 @@ class ModalInteractionData(TypedDict):
 ## Interactions
 
 
-# keys are stringified ApplicationIntegrationType's
+# keys are stringified ApplicationInstallType's
 AuthorizingIntegrationOwners = Dict[str, Snowflake]
 
 

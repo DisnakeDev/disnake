@@ -43,7 +43,7 @@ __all__ = (
     "RoleFlags",
     "AttachmentFlags",
     "SKUFlags",
-    "ApplicationIntegrationTypes",
+    "ApplicationInstallTypes",
     "InteractionContextTypes",
 )
 
@@ -2699,8 +2699,7 @@ class SKUFlags(BaseFlags):
         return 1 << 8
 
 
-# TODO: rename to just `IntegrationTypes`?
-class ApplicationIntegrationTypes(ListBaseFlags):
+class ApplicationInstallTypes(ListBaseFlags):
     """Represents the location(s) in which an application or application command can be installed.
 
     See the :ddocs:`official documentation <resources/application#installation-context>` for more info.
@@ -2709,37 +2708,37 @@ class ApplicationIntegrationTypes(ListBaseFlags):
 
         .. describe:: x == y
 
-            Checks if two ApplicationIntegrationTypes instances are equal.
+            Checks if two ApplicationInstallTypes instances are equal.
         .. describe:: x != y
 
-            Checks if two ApplicationIntegrationTypes instances are not equal.
+            Checks if two ApplicationInstallTypes instances are not equal.
         .. describe:: x <= y
 
-            Checks if an ApplicationIntegrationTypes instance is a subset of another ApplicationIntegrationTypes instance.
+            Checks if an ApplicationInstallTypes instance is a subset of another ApplicationInstallTypes instance.
         .. describe:: x >= y
 
-            Checks if an ApplicationIntegrationTypes instance is a superset of another ApplicationIntegrationTypes instance.
+            Checks if an ApplicationInstallTypes instance is a superset of another ApplicationInstallTypes instance.
         .. describe:: x < y
 
-            Checks if an ApplicationIntegrationTypes instance is a strict subset of another ApplicationIntegrationTypes instance.
+            Checks if an ApplicationInstallTypes instance is a strict subset of another ApplicationInstallTypes instance.
         .. describe:: x > y
 
-            Checks if an ApplicationIntegrationTypes instance is a strict superset of another ApplicationIntegrationTypes instance.
+            Checks if an ApplicationInstallTypes instance is a strict superset of another ApplicationInstallTypes instance.
         .. describe:: x | y, x |= y
 
-            Returns a new ApplicationIntegrationTypes instance with all enabled flags from both x and y.
+            Returns a new ApplicationInstallTypes instance with all enabled flags from both x and y.
             (Using ``|=`` will update in place).
         .. describe:: x & y, x &= y
 
-            Returns a new ApplicationIntegrationTypes instance with only flags enabled on both x and y.
+            Returns a new ApplicationInstallTypes instance with only flags enabled on both x and y.
             (Using ``&=`` will update in place).
         .. describe:: x ^ y, x ^= y
 
-            Returns a new ApplicationIntegrationTypes instance with only flags enabled on one of x or y, but not both.
+            Returns a new ApplicationInstallTypes instance with only flags enabled on one of x or y, but not both.
             (Using ``^=`` will update in place).
         .. describe:: ~x
 
-            Returns a new ApplicationIntegrationTypes instance with all flags from x inverted.
+            Returns a new ApplicationInstallTypes instance with all flags from x inverted.
         .. describe:: hash(x)
 
             Returns the flag's hash.
@@ -2751,13 +2750,13 @@ class ApplicationIntegrationTypes(ListBaseFlags):
 
         Additionally supported are a few operations on class attributes.
 
-        .. describe:: ApplicationIntegrationTypes.y | ApplicationIntegrationTypes.z, ApplicationIntegrationTypes(y=True) | ApplicationIntegrationTypes.z
+        .. describe:: ApplicationInstallTypes.y | ApplicationInstallTypes.z, ApplicationInstallTypes(y=True) | ApplicationInstallTypes.z
 
-            Returns an ApplicationIntegrationTypes instance with all provided flags enabled.
+            Returns an ApplicationInstallTypes instance with all provided flags enabled.
 
-        .. describe:: ~ApplicationIntegrationTypes.y
+        .. describe:: ~ApplicationInstallTypes.y
 
-            Returns an ApplicationIntegrationTypes instance with all flags except ``y`` inverted from their default value.
+            Returns an ApplicationInstallTypes instance with all flags except ``y`` inverted from their default value.
 
     .. versionadded:: 2.10
 
@@ -2778,7 +2777,7 @@ class ApplicationIntegrationTypes(ListBaseFlags):
 
     @classmethod
     def all(cls) -> Self:
-        """A factory method that creates an :class:`ApplicationIntegrationTypes` instance with everything enabled."""
+        """A factory method that creates an :class:`ApplicationInstallTypes` instance with everything enabled."""
         self = cls.__new__(cls)
         self.value = all_flags_value(cls.VALID_FLAGS)
         return self

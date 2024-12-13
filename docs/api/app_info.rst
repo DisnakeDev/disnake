@@ -34,12 +34,12 @@ InstallParams
 .. autoclass:: InstallParams()
     :members:
 
-IntegrationTypeConfiguration
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+InstallTypeConfiguration
+~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. attributetable:: IntegrationTypeConfiguration
+.. attributetable:: InstallTypeConfiguration
 
-.. autoclass:: IntegrationTypeConfiguration()
+.. autoclass:: InstallTypeConfiguration()
     :members:
 
 Team

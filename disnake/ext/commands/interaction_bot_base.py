@@ -28,7 +28,7 @@ import disnake
 from disnake.app_commands import ApplicationCommand, Option
 from disnake.custom_warnings import SyncWarning
 from disnake.enums import ApplicationCommandType
-from disnake.flags import ApplicationIntegrationTypes, InteractionContextTypes
+from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
 from disnake.utils import warn_deprecated
 
 from . import errors
@@ -490,7 +490,7 @@ class InteractionBotBase(CommonBotBase):
         dm_permission: Optional[bool] = None,  # deprecated
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
-        integration_types: Optional[ApplicationIntegrationTypes] = None,
+        install_types: Optional[ApplicationInstallTypes] = None,
         contexts: Optional[InteractionContextTypes] = None,
         options: Optional[List[Option]] = None,
         guild_ids: Optional[Sequence[int]] = None,
@@ -539,9 +539,9 @@ class InteractionBotBase(CommonBotBase):
 
             .. versionadded:: 2.8
 
-        integration_types: Optional[:class:`.ApplicationIntegrationTypes`]
-            The integration types/installation contexts where the command is available.
-            Defaults to :attr:`.ApplicationIntegrationTypes.guild` only.
+        install_types: Optional[:class:`.ApplicationInstallTypes`]
+            The installation types where the command is available.
+            Defaults to :attr:`.ApplicationInstallTypes.guild` only.
             Only available for global commands.
 
             See :ref:`app_command_contexts` for details.
@@ -589,7 +589,7 @@ class InteractionBotBase(CommonBotBase):
                 dm_permission=dm_permission,
                 default_member_permissions=default_member_permissions,
                 nsfw=nsfw,
-                integration_types=integration_types,
+                install_types=install_types,
                 contexts=contexts,
                 guild_ids=guild_ids,
                 connectors=connectors,
@@ -609,7 +609,7 @@ class InteractionBotBase(CommonBotBase):
         dm_permission: Optional[bool] = None,  # deprecated
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
-        integration_types: Optional[ApplicationIntegrationTypes] = None,
+        install_types: Optional[ApplicationInstallTypes] = None,
         contexts: Optional[InteractionContextTypes] = None,
         guild_ids: Optional[Sequence[int]] = None,
         auto_sync: Optional[bool] = None,
@@ -649,9 +649,9 @@ class InteractionBotBase(CommonBotBase):
 
             .. versionadded:: 2.8
 
-        integration_types: Optional[:class:`.ApplicationIntegrationTypes`]
-            The integration types/installation contexts where the command is available.
-            Defaults to :attr:`.ApplicationIntegrationTypes.guild` only.
+        install_types: Optional[:class:`.ApplicationInstallTypes`]
+            The installation types where the command is available.
+            Defaults to :attr:`.ApplicationInstallTypes.guild` only.
             Only available for global commands.
 
             See :ref:`app_command_contexts` for details.
@@ -693,7 +693,7 @@ class InteractionBotBase(CommonBotBase):
                 dm_permission=dm_permission,
                 default_member_permissions=default_member_permissions,
                 nsfw=nsfw,
-                integration_types=integration_types,
+                install_types=install_types,
                 contexts=contexts,
                 guild_ids=guild_ids,
                 auto_sync=auto_sync,
@@ -712,7 +712,7 @@ class InteractionBotBase(CommonBotBase):
         dm_permission: Optional[bool] = None,  # deprecated
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
-        integration_types: Optional[ApplicationIntegrationTypes] = None,
+        install_types: Optional[ApplicationInstallTypes] = None,
         contexts: Optional[InteractionContextTypes] = None,
         guild_ids: Optional[Sequence[int]] = None,
         auto_sync: Optional[bool] = None,
@@ -752,9 +752,9 @@ class InteractionBotBase(CommonBotBase):
 
             .. versionadded:: 2.8
 
-        integration_types: Optional[:class:`.ApplicationIntegrationTypes`]
-            The integration types/installation contexts where the command is available.
-            Defaults to :attr:`.ApplicationIntegrationTypes.guild` only.
+        install_types: Optional[:class:`.ApplicationInstallTypes`]
+            The installation types where the command is available.
+            Defaults to :attr:`.ApplicationInstallTypes.guild` only.
             Only available for global commands.
 
             See :ref:`app_command_contexts` for details.
@@ -796,7 +796,7 @@ class InteractionBotBase(CommonBotBase):
                 dm_permission=dm_permission,
                 default_member_permissions=default_member_permissions,
                 nsfw=nsfw,
-                integration_types=integration_types,
+                install_types=install_types,
                 contexts=contexts,
                 guild_ids=guild_ids,
                 auto_sync=auto_sync,

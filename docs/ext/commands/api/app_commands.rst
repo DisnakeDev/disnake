@@ -202,7 +202,7 @@ Functions
 .. autofunction:: default_member_permissions
     :decorator:
 
-.. autofunction:: integration_types
+.. autofunction:: install_types
     :decorator:
 
 .. autofunction:: contexts

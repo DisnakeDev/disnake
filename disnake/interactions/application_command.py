@@ -161,7 +161,7 @@ class GuildCommandInteraction(ApplicationCommandInteraction[ClientT]):
 
     This restricts the command to only be usable in guilds and only as a guild-installed command,
     by automatically setting :attr:`ApplicationCommand.contexts` to :attr:`~InteractionContextTypes.guild` only
-    and :attr:`ApplicationCommand.integration_types` to :attr:`~ApplicationIntegrationTypes.guild` only.
+    and :attr:`ApplicationCommand.install_types` to :attr:`~ApplicationInstallTypes.guild` only.
     Note that this does not apply to slash subcommands, subcommand groups, or autocomplete callbacks.
 
     Additionally, the type annotations of :attr:`~Interaction.author`, :attr:`~Interaction.guild`,

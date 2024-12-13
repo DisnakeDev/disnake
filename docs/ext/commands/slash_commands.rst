@@ -677,17 +677,17 @@ Yet again, with a file like ``locale/de.json`` containing localizations like thi
 Installation/Interaction Contexts
 ---------------------------------
 
-The :attr:`~ApplicationCommand.integration_types` and :attr:`~ApplicationCommand.contexts` command
+The :attr:`~ApplicationCommand.install_types` and :attr:`~ApplicationCommand.contexts` command
 attributes allow you to control how and where your command can be run.
 
 .. note::
     These fields cannot be configured for a slash subcommand or
     subcommand group, only in top-level slash commands and user/message commands.
 
-Integration Types
-+++++++++++++++++
+Install Types
++++++++++++++
 
-The :attr:`~ApplicationCommand.integration_types` field determines whether your command can be used
+The :attr:`~ApplicationCommand.install_types` field determines whether your command can be used
 when the bot is installed to a guild, a user, or both.
 
 Bots installed to a **guild** are visible to *all members*, which used to be the only entry point for users
@@ -695,18 +695,18 @@ to run commands. Alternatively, bots can now also support being installed to a *
 the commands available everywhere to the *authorizing user* only.
 
 For instance, to make a command only available in a user-installed context, you can
-use the :func:`~.ext.commands.integration_types` decorator:
+use the :func:`~.ext.commands.install_types` decorator:
 
 .. code-block:: python3
 
     @bot.slash_command()
-    @commands.integration_types(user=True)
+    @commands.install_types(user=True)
     async def command(inter: disnake.ApplicationCommandInteraction):
         ...
 
-Alternatively, you may pass e.g. ``integration_types=disnake.ApplicationIntegrationTypes(user=True)``
-as an argument directly to the command decorator. To allow all (guild + user) installation contexts,
-a :meth:`ApplicationIntegrationTypes.all` shorthand is also available.
+Alternatively, you may pass e.g. ``install_types=disnake.ApplicationInstallTypes(user=True)``
+as an argument directly to the command decorator. To allow all (guild + user) installation types,
+a :meth:`ApplicationInstallTypes.all` shorthand is also available.
 
 By default, commands are set to only be usable in guild-installed contexts.
 
@@ -717,7 +717,7 @@ By default, commands are set to only be usable in guild-installed contexts.
 Contexts
 ++++++++
 
-While ``integration_types`` determines where the bot must be *installed* to run a command,
+While ``install_types`` determines where the bot must be *installed* to run a command,
 :attr:`~ApplicationCommand.contexts` dictates where *in Discord* a command can be used.
 
 Possible surfaces are **guilds**, **DMs with the bot**, and **DMs (and group DMs) between other users**,
@@ -726,7 +726,7 @@ or :attr:`~InteractionContextTypes.private_channel` respectively to ``True``.
 The :attr:`~InteractionContextTypes.private_channel` context is only meaningful for user-installed
 commands.
 
-Similarly to ``integration_types``, this can be accomplished using the :func:`~.ext.commands.contexts`
+Similarly to ``install_types``, this can be accomplished using the :func:`~.ext.commands.contexts`
 decorator, to e.g. disallow a command in guilds:
 
 .. code-block:: python3
