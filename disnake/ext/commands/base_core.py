@@ -155,6 +155,13 @@ class InvokableApplicationCommand(ABC):
                 "See `default_member_permissions` and `contexts` instead."
             )
 
+        # XXX: remove in next major/minor version
+        # the parameter was called `integration_types` in earlier stages of the user apps PR.
+        # since unknown kwargs unfortunately get silently ignored, at least try to warn users
+        # in this specific case
+        if "integration_types" in kwargs:
+            raise TypeError("`integration_types` has been renamed to `install_types`.")
+
         try:
             checks = func.__commands_checks__
             checks.reverse()
