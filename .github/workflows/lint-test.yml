@@ -54,7 +54,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12.7"]
         experimental: [false]
       fail-fast: false
     continue-on-error: ${{ matrix.experimental }}
@@ -149,7 +149,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12.7"]
         os: ["windows-latest", "ubuntu-latest", "macos-latest"]
         experimental: [false]
       fail-fast: true
