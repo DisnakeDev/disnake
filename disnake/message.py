@@ -48,7 +48,7 @@ from .sticker import StickerItem
 from .threads import Thread
 from .ui.action_row import components_to_dict
 from .user import User
-from .utils import MISSING, assert_never, escape_mentions
+from .utils import MISSING, _get_as_snowflake, assert_never, deprecated, escape_mentions
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -68,7 +68,9 @@ if TYPE_CHECKING:
         MessageUpdateEvent,
     )
     from .types.interactions import (
+        AuthorizingIntegrationOwners as AuthorizingIntegrationOwnersPayload,
         InteractionMessageReference as InteractionMessageReferencePayload,
+        InteractionMetadata as InteractionMetadataPayload,
     )
     from .types.member import Member as MemberPayload, UserWithMember as UserWithMemberPayload
     from .types.message import (
@@ -92,9 +94,11 @@ __all__ = (
     "Attachment",
     "Message",
     "PartialMessage",
+    "DeletedReferencedMessage",
     "MessageReference",
     "InteractionReference",
-    "DeletedReferencedMessage",
+    "InteractionMetadata",
+    "AuthorizingIntegrationOwners",
     "RoleSubscriptionData",
     "ForwardedMessage",
 )
@@ -732,6 +736,9 @@ class InteractionReference:
 
     .. versionadded:: 2.1
 
+    .. deprecated:: 2.10
+        Use :attr:`Message.interaction_metadata` instead.
+
     Attributes
     ----------
     id: :class:`int`
@@ -789,6 +796,114 @@ class InteractionReference:
     @property
     def author(self) -> Union[User, Member]:
         return self.user
+
+
+class InteractionMetadata:
+    """Represents metadata about the interaction that caused a particular message.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    id: :class:`int`
+        The ID of the interaction.
+    type: :class:`InteractionType`
+        The type of the interaction.
+    user: :class:`User`
+        The user that triggered the interaction.
+    authorizing_integration_owners: :class:`AuthorizingIntegrationOwners`
+        Details about the authorizing user/guild for the application installation
+        related to the interaction.
+    original_response_message_id: Optional[:class:`int`]
+        The ID of the original response message.
+        Only present on :attr:`~Interaction.followup` messages.
+
+    target_user: Optional[:class:`User`]
+        The ID of the message the command was run on.
+        Only present on interactions of :attr:`ApplicationCommandType.message` commands.
+    target_message_id: Optional[:class:`int`]
+        The user the command was run on.
+        Only present on interactions of :attr:`ApplicationCommandType.user` commands.
+
+    interacted_message_id: Optional[:class:`int`]
+        The ID of the message containing the component.
+        Only present on :attr:`InteractionType.component` interactions.
+
+    triggering_interaction_metadata: Optional[:class:`InteractionMetadata`]
+        The metadata of the original interaction that triggered the modal.
+        Only present on :attr:`InteractionType.modal_submit` interactions.
+    """
+
+    __slots__ = (
+        "id",
+        "type",
+        "user",
+        "authorizing_integration_owners",
+        "original_response_message_id",
+        "target_user",
+        "target_message_id",
+        "interacted_message_id",
+        "triggering_interaction_metadata",
+    )
+
+    def __init__(self, *, state: ConnectionState, data: InteractionMetadataPayload) -> None:
+        self.id: int = int(data["id"])
+        self.type: InteractionType = try_enum(InteractionType, int(data["type"]))
+        self.user: User = state.create_user(data["user"])
+        self.authorizing_integration_owners: AuthorizingIntegrationOwners = (
+            AuthorizingIntegrationOwners(data.get("authorizing_integration_owners") or {})
+        )
+
+        # followup only
+        self.original_response_message_id: Optional[int] = _get_as_snowflake(
+            data, "original_response_message_id"
+        )
+
+        # application command/type 2 only
+        self.target_user: Optional[User] = (
+            state.create_user(target_user) if (target_user := data.get("target_user")) else None
+        )
+        self.target_message_id: Optional[int] = _get_as_snowflake(data, "target_message_id")
+
+        # component/type 3 only
+        self.interacted_message_id: Optional[int] = _get_as_snowflake(data, "interacted_message_id")
+
+        # modal_submit/type 5 only
+        self.triggering_interaction_metadata: Optional[InteractionMetadata] = (
+            InteractionMetadata(state=state, data=metadata)
+            if (metadata := data.get("triggering_interaction_metadata"))
+            else None
+        )
+
+
+class AuthorizingIntegrationOwners:
+    """Represents details about the authorizing guild/user for the application installation
+    related to an interaction.
+
+    See the :ddocs:`official docs <interactions/receiving-and-responding#interaction-object-authorizing-integration-owners-object>`
+    for more information.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    guild_id: Optional[:class:`int`]
+        The ID of the authorizing guild, if the application (and command, if applicable)
+        was installed to the guild. In DMs with the bot, this will be ``0``.
+    user_id: Optional[:class:`int`]
+        The ID of the authorizing user, if the application (and command, if applicable)
+        was installed to the user.
+    """
+
+    __slots__ = ("guild_id", "user_id")
+
+    def __init__(self, data: AuthorizingIntegrationOwnersPayload) -> None:
+        # keys are stringified ApplicationInstallTypes
+        self.guild_id: Optional[int] = _get_as_snowflake(data, "0")
+        self.user_id: Optional[int] = _get_as_snowflake(data, "1")
+
+    def __repr__(self) -> str:
+        return f"<{self.__class__.__name__} guild_id={self.guild_id!r} user_id={self.user_id!r}>"
 
 
 class RoleSubscriptionData:
@@ -890,15 +1005,14 @@ class Message(Hashable):
     reference: Optional[:class:`~disnake.MessageReference`]
         The message that this message references. This is only applicable to messages of
         type :attr:`MessageType.pins_add`, crossposted messages created by a
-        followed channel integration, or message replies.
+        followed channel integration, message replies, or application command responses.
 
         .. versionadded:: 1.5
 
-    interaction: Optional[:class:`~disnake.InteractionReference`]
-        The interaction that this message references.
-        This exists only when the message is a response to an interaction without an existing message.
+    interaction_metadata: Optional[:class:`InteractionMetadata`]
+        The metadata about the interaction that caused this message, if any.
 
-        .. versionadded:: 2.1
+        .. versionadded:: 2.10
 
     mention_everyone: :class:`bool`
         Specifies if the message mentions everyone.
@@ -1012,7 +1126,8 @@ class Message(Hashable):
         "flags",
         "reactions",
         "reference",
-        "interaction",
+        "_interaction",
+        "interaction_metadata",
         "message_snapshots",
         "application",
         "activity",
@@ -1085,9 +1200,14 @@ class Message(Hashable):
         except AttributeError:
             self.guild = state._get_guild(utils._get_as_snowflake(data, "guild_id"))
 
-        self.interaction: Optional[InteractionReference] = (
+        self._interaction: Optional[InteractionReference] = (
             InteractionReference(state=state, guild=self.guild, data=interaction)
             if (interaction := data.get("interaction"))
+            else None
+        )
+        self.interaction_metadata: Optional[InteractionMetadata] = (
+            InteractionMetadata(state=state, data=interaction)
+            if (interaction := data.get("interaction_metadata")) is not None
             else None
         )
 
@@ -1680,6 +1800,19 @@ class Message(Hashable):
 
         # in the event of an unknown or unsupported message type, we return nothing
         return None
+
+    @property
+    @deprecated("interaction_metadata")
+    def interaction(self) -> Optional[InteractionReference]:
+        """Optional[:class:`~disnake.InteractionReference`]: The interaction that this message references.
+        This exists only when the message is a response to an interaction without an existing message.
+
+        .. versionadded:: 2.1
+
+        .. deprecated:: 2.10
+            Use :attr:`interaction_metadata` instead.
+        """
+        return self._interaction
 
     async def delete(self, *, delay: Optional[float] = None) -> None:
         """|coro|

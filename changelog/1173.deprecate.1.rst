@@ -1,0 +1,1 @@
+Deprecate :attr:`Message.interaction` attribute and :class:`InteractionReference`. Use :attr:`Message.interaction_metadata` instead.
