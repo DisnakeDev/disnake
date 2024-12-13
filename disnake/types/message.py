@@ -65,11 +65,35 @@ class MessageApplication(TypedDict):
     cover_image: NotRequired[str]
 
 
+MessageReferenceType = Literal[0, 1]
+
+
 class MessageReference(TypedDict):
+    type: MessageReferenceType
     message_id: NotRequired[Snowflake]
     channel_id: Snowflake
     guild_id: NotRequired[Snowflake]
     fail_if_not_exists: NotRequired[bool]
+
+
+class ForwardedMessage(TypedDict):
+    type: MessageType
+    content: str
+    embeds: List[Embed]
+    attachments: List[Attachment]
+    timestamp: str
+    edited_timestamp: Optional[str]
+    flags: NotRequired[int]
+    mentions: Union[List[User], List[UserWithMember]]
+    # apparently mention_roles list is not sent if the msg
+    # is not forwarded in the same guild
+    mention_roles: NotRequired[SnowflakeList]
+    sticker_items: NotRequired[List[StickerItem]]
+    components: NotRequired[List[Component]]
+
+
+class MessageSnapshot(TypedDict):
+    message: ForwardedMessage
 
 
 class RoleSubscriptionData(TypedDict):
@@ -108,6 +132,7 @@ class Message(TypedDict):
     application: NotRequired[MessageApplication]
     application_id: NotRequired[Snowflake]
     message_reference: NotRequired[MessageReference]
+    message_snapshots: NotRequired[List[MessageSnapshot]]
     flags: NotRequired[int]
     referenced_message: NotRequired[Optional[Message]]
     interaction: NotRequired[InteractionMessageReference]  # deprecated

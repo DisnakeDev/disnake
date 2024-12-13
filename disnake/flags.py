@@ -57,6 +57,16 @@ class flag_value(Generic[T]):
         self.__doc__ = func.__doc__
         self._parent: Type[T] = MISSING
 
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, flag_value):
+            return self.flag == other.flag
+        if isinstance(other, BaseFlags):
+            return self._parent is other.__class__ and self.flag == other.value
+        return False
+
+    def __ne__(self, other: Any) -> bool:
+        return not self.__eq__(other)
+
     def __or__(self, other: Union[flag_value[T], T]) -> T:
         if isinstance(other, BaseFlags):
             if self._parent is not other.__class__:
@@ -150,7 +160,11 @@ class BaseFlags:
         return self
 
     def __eq__(self, other: Any) -> bool:
-        return isinstance(other, self.__class__) and self.value == other.value
+        if isinstance(other, self.__class__):
+            return self.value == other.value
+        if isinstance(other, flag_value):
+            return self.__class__ is other._parent and self.value == other.flag
+        return False
 
     def __ne__(self, other: Any) -> bool:
         return not self.__eq__(other)
@@ -588,6 +602,7 @@ class MessageFlags(BaseFlags):
             crossposted: bool = ...,
             ephemeral: bool = ...,
             failed_to_mention_roles_in_thread: bool = ...,
+            has_snapshot: bool = ...,
             has_thread: bool = ...,
             is_crossposted: bool = ...,
             is_voice_message: bool = ...,
@@ -679,6 +694,16 @@ class MessageFlags(BaseFlags):
         .. versionadded:: 2.9
         """
         return 1 << 13
+
+    @flag_value
+    def has_snapshot(self):
+        """:class:`bool`: Returns ``True`` if the message is a forward message.
+
+        Messages with this flag will have only the forward data, and no other content.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 14
 
 
 class PublicUserFlags(BaseFlags):

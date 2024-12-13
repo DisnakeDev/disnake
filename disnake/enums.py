@@ -74,6 +74,7 @@ __all__ = (
     "EntitlementType",
     "PollLayoutType",
     "VoiceChannelEffectAnimationType",
+    "MessageReferenceType",
 )
 
 
@@ -1413,6 +1414,13 @@ class PollLayoutType(Enum):
 class VoiceChannelEffectAnimationType(Enum):
     premium = 0
     basic = 1
+
+
+class MessageReferenceType(Enum):
+    default = 0
+    """A standard message reference used in message replies."""
+    forward = 1
+    """Reference used to point to a message at a point in time (forward)."""
 
 
 T = TypeVar("T")
