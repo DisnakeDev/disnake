@@ -46,7 +46,14 @@ class _PartialTemplateState:
     def member_cache_flags(self):
         return self.__state.member_cache_flags
 
-    def store_emoji(self, guild, packet):
+    @property
+    def _intents(self):
+        return self.__state._intents
+
+    def store_emoji(self, guild, data):
+        return None
+
+    def store_sticker(self, guild, data):
         return None
 
     def _get_voice_client(self, id):
