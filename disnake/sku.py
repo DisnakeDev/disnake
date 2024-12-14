@@ -8,9 +8,11 @@ from typing import TYPE_CHECKING
 from .enums import SKUType, try_enum
 from .flags import SKUFlags
 from .mixins import Hashable
+from .subscription import Subscription
 from .utils import snowflake_time
 
 if TYPE_CHECKING:
+    from .state import ConnectionState
     from .types.sku import SKU as SKUPayload
 
 
@@ -56,9 +58,10 @@ class SKU(Hashable):
         The SKU's URL slug, system-generated based on :attr:`name`.
     """
 
-    __slots__ = ("id", "type", "application_id", "name", "slug", "_flags")
+    __slots__ = ("_state", "id", "type", "application_id", "name", "slug", "_flags")
 
-    def __init__(self, *, data: SKUPayload) -> None:
+    def __init__(self, *, data: SKUPayload, state: ConnectionState) -> None:
+        self._state: ConnectionState = state
         self.id: int = int(data["id"])
         self.type: SKUType = try_enum(SKUType, data["type"])
         self.application_id: int = int(data["application_id"])
@@ -81,3 +84,25 @@ class SKU(Hashable):
     def flags(self) -> SKUFlags:
         """:class:`SKUFlags`: Returns the SKU's flags."""
         return SKUFlags._from_value(self._flags)
+
+    async def subscriptions(self):
+        """|coro|
+
+        Retrieve all the subscriptions for this SKU.
+        """
+        ...
+
+    async def fetch_subscription(self, subscription_id: int, /) -> Subscription:
+        """|coro|
+
+        Retrieve a subscription for this SKU given its ID.
+
+        Raises
+        ------
+        NotFound
+            The subscription does not exist.
+        HTTPException
+            Retrieving the subscription failed.
+        """
+        data = await self._state.http.get_subscription(self.id, subscription_id)
+        return Subscription(data=data, state=self._state)

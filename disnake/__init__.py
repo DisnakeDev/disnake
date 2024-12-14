@@ -65,6 +65,7 @@ from .shard import *
 from .sku import *
 from .stage_instance import *
 from .sticker import *
+from .subscription import *
 from .team import *
 from .template import *
 from .threads import *
