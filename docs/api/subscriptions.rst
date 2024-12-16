@@ -2,7 +2,7 @@
 
 .. currentmodule:: disnake
 
-Subscription(s)
+Subscriptions
 ===============
 
 This section documents everything related to Subscription(s), which represents a user making recurring payments for at least one SKU.
