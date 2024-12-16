@@ -74,6 +74,7 @@ if TYPE_CHECKING:
         role,
         sku,
         sticker,
+        subscription,
         template,
         threads,
         user,
@@ -2408,6 +2409,46 @@ class HTTPClient:
                 "/applications/{application_id}/entitlements/{entitlement_id}",
                 application_id=application_id,
                 entitlement_id=entitlement_id,
+            )
+        )
+
+    def get_subscriptions(
+        self,
+        sku_id: Snowflake,
+        *,
+        before: Optional[Snowflake] = None,
+        after: Optional[Snowflake] = None,
+        limit: int = 50,
+        user_id: Optional[Snowflake] = None,
+    ) -> Response[List[subscription.Subscription]]:
+        params: Dict[str, Any] = {
+            "limit": limit,
+        }
+        if before is not None:
+            params["before"] = before
+        if after is not None:
+            params["after"] = after
+        if user_id is not None:
+            params["user_id"] = user_id
+
+        return self.request(
+            Route(
+                "GET",
+                "/skus/{sku_id}/subscriptions",
+                sku_id=sku_id,
+            ),
+            params=params,
+        )
+
+    def get_subscription(
+        self, sku_id: Snowflake, subscription_id: int
+    ) -> Response[subscription.Subscription]:
+        return self.request(
+            Route(
+                "GET",
+                "/skus/{sku_id}/subscriptions/{subscription_id}",
+                sku_id=sku_id,
+                subscription_id=subscription_id,
             )
         )
 
