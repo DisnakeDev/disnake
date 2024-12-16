@@ -116,6 +116,7 @@ Documents
     permissions
     roles
     skus
+    subscriptions
     stage_instances
     stickers
     users
