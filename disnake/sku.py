@@ -3,15 +3,17 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from .enums import SKUType, try_enum
 from .flags import SKUFlags
+from .iterators import SubscriptionIterator
 from .mixins import Hashable
 from .subscription import Subscription
 from .utils import snowflake_time
 
 if TYPE_CHECKING:
+    from .abc import Snowflake, SnowflakeTime
     from .state import ConnectionState
     from .types.sku import SKU as SKUPayload
 
@@ -85,12 +87,56 @@ class SKU(Hashable):
         """:class:`SKUFlags`: Returns the SKU's flags."""
         return SKUFlags._from_value(self._flags)
 
-    async def subscriptions(self):
+    async def subscriptions(
+        self,
+        *,
+        limit: Optional[int] = 50,
+        before: Optional[SnowflakeTime] = None,
+        after: Optional[SnowflakeTime] = None,
+        user: Optional[Snowflake] = None,
+    ) -> SubscriptionIterator:
         """|coro|
 
-        Retrieve all the subscriptions for this SKU.
+        Retrieves an :class:`.AsyncIterator` that enabled receiving subscriptions for the SKU.
+
+        All parameters are optional.
+
+        Parameters
+        ----------
+        limit: Optional[:class:`int`]
+            The number of subscriptions to retrieve.
+            If ``None``, retrieves every subscription.
+            Note, however, that this would make it a slow operation.
+            Defaults to ``50``.
+        before: Union[:class:`.abc.Snowflake`, :class:`datetime.datetime`]
+            Retrieves subscriptions created before this date or object.
+            If a datetime is provided, it is recommended to use a UTC aware datetime.
+            If the datetime is naive, it is assumed to be local time.
+        after: Union[:class:`.abc.Snowflake`, :class:`datetime.datetime`]
+            Retrieve subscriptions created after this date or object.
+            If a datetime is provided, it is recommended to use a UTC aware datetime.
+            If the datetime is naive, it is assumed to be local time.
+        user: Optional[:class:`.abc.Snowflake`]
+            The user to retrieve subscriptions for.
+
+        Raises
+        ------
+        HTTPException
+            Retrieving the subscriptions failed.
+
+        Yields
+        ------
+        :class:`.Subscription`
+            The subscriptions for the given parameters.
         """
-        ...
+        return SubscriptionIterator(
+            self.id,
+            state=self._state,
+            limit=limit,
+            before=before,
+            after=after,
+            user_id=user.id if user is not None else None,
+        )
 
     async def fetch_subscription(self, subscription_id: int, /) -> Subscription:
         """|coro|
