@@ -120,6 +120,4 @@ class Subscription(Hashable):
         """:class:`bool`: Whether the subscription was canceled,
         based on :attr:`canceled_at`.
         """
-        if self.canceled_at is None:
-            return False
-        return True
+        return self.canceled_at is not None
