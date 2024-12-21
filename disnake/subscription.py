@@ -20,7 +20,8 @@ __all__ = ("Subscription",)
 class Subscription(Hashable):
     """Represents a subscription.
 
-    This can only be retrieved using :meth:`SKU.subscriptions` or :meth:`SKU.fetch_subscription`.
+    This can only be retrieved using :meth:`SKU.subscriptions` or :meth:`SKU.fetch_subscription`,
+    or provided by events (e.g. :func:`on_subscription_create`).
 
     .. warning::
         :class:`Subscription`\\s should not be used to grant perks. Use :class:`Entitlement`\\s as a way of whether a user should have access to a specific :class:`SKU`.
