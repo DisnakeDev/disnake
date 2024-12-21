@@ -24,7 +24,7 @@ class Subscription(Hashable):
     or provided by events (e.g. :func:`on_subscription_create`).
 
     .. warning::
-        :class:`Subscription`\\s should not be used to grant perks. Use :class:`Entitlement`\\s as a way of whether a user should have access to a specific :class:`SKU`.
+        :class:`Subscription`\\s should not be used to grant perks. Use :class:`Entitlement`\\s as a way of determining whether a user should have access to a specific :class:`SKU`.
 
     .. note::
         Some subscriptions may have been canceled already; consider using :meth:`is_canceled` to check whether a given subscription was canceled.
