@@ -91,7 +91,9 @@ class Subscription(Hashable):
         self.sku_ids: List[int] = list(map(int, data["sku_ids"]))
         self.entitlement_ids: List[int] = list(map(int, data["entitlement_ids"]))
         self.renewal_sku_ids: Optional[List[int]] = (
-            list(map(int, data["renewal_sku_ids"])) if data["renewal_sku_ids"] else None
+            list(map(int, renewal_sku_ids))
+            if (renewal_sku_ids := data.get("renewal_sku_ids")) is not None
+            else None
         )
         self.current_period_start: datetime.datetime = parse_time(data["current_period_start"])
         self.current_period_end: datetime.datetime = parse_time(data["current_period_end"])
