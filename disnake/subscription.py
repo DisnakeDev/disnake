@@ -56,7 +56,7 @@ class Subscription(Hashable):
     sku_ids: List[:class:`int`]
         The ID of the SKUs the user is subscribed to.
     renewal_sku_ids: List[:class:`int`]
-        The ID of the SKUs that will be renewed at the start of the new period.
+        The IDs of the SKUs that will be renewed at the start of the new period.
     entitlement_ids: List[:class:`int`]
         The IDs of the entitlements the user has as part of this subscription.
     current_period_start: :class:`datetime.datetime`
