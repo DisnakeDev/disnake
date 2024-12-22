@@ -5100,10 +5100,7 @@ class Guild(Hashable):
         :class:`GuildSoundboardSound`
             The newly created soundboard sound.
         """
-        # TODO: consider trying to determine correct mime type, or leave it at images for now and keep using octet-stream here?
-        sound_data = await utils._assetbytes_to_base64_data(
-            sound, mime_type="application/octet-stream"
-        )
+        sound_data = await utils._assetbytes_to_base64_data(sound)
         emoji_name, emoji_id = PartialEmoji._emoji_to_name_id(emoji)
 
         data = await self._state.http.create_guild_soundboard_sound(
