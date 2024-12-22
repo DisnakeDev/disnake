@@ -5079,7 +5079,7 @@ class Guild(Hashable):
             The sound name. Must be at least 2 characters.
         sound: |resource_type|
             The sound data.
-            Only MP3 is supported.
+            Only MP3 and Ogg formats are supported.
         volume: Optional[:class:`float`]
             The sound's volume (from ``0.0`` to ``1.0``).
             Defaults to ``1.0``.
