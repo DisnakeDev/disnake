@@ -5141,6 +5141,7 @@ def _channel_type_factory(
     cls: Union[Type[disnake.abc.GuildChannel], Type[Thread]]
 ) -> List[ChannelType]:
     return {
+        # FIXME: this includes private channels; improve this once there's a common base type for all channels
         disnake.abc.GuildChannel: list(ChannelType.__members__.values()),
         VocalGuildChannel: [ChannelType.voice, ChannelType.stage_voice],
         disnake.abc.PrivateChannel: [ChannelType.private, ChannelType.group],

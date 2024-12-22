@@ -21,7 +21,7 @@ This is because each slash command is registered in Discord before people can se
 but you can still manage it.
 
 By default, the registration is global. This means that your slash commands will be visible everywhere, including bot DMs,
-though you can disable them in DMs by setting the appropriate :ref:`permissions <app_command_permissions>`.
+though you can adjust this by setting specific :ref:`contexts <app_command_contexts>`.
 You can also change the registration to be local, so your slash commands will only be visible in several guilds.
 
 This code sample shows how to set the registration to be local:
@@ -671,13 +671,96 @@ Yet again, with a file like ``locale/de.json`` containing localizations like thi
         "AUTOCOMP_JAPANESE": "Japanisch"
     }
 
+
+.. _app_command_contexts:
+
+Installation/Interaction Contexts
+---------------------------------
+
+The :attr:`~ApplicationCommand.install_types` and :attr:`~ApplicationCommand.contexts` command
+attributes allow you to control how and where your command can be run.
+
+.. note::
+    These fields cannot be configured for a slash subcommand or
+    subcommand group, only in top-level slash commands and user/message commands.
+
+Install Types
++++++++++++++
+
+The :attr:`~ApplicationCommand.install_types` field determines whether your command can be used
+when the bot is installed to a guild, a user, or both.
+
+Bots installed to a **guild** are visible to *all members*, which used to be the only entry point for users
+to run commands. Alternatively, bots can now also support being installed to a **user**, which makes
+the commands available everywhere to the *authorizing user* only.
+
+For instance, to make a command only available in a user-installed context, you can
+use the :func:`~.ext.commands.install_types` decorator:
+
+.. code-block:: python3
+
+    @bot.slash_command()
+    @commands.install_types(user=True)
+    async def command(inter: disnake.ApplicationCommandInteraction):
+        ...
+
+Alternatively, you may pass e.g. ``install_types=disnake.ApplicationInstallTypes(user=True)``
+as an argument directly to the command decorator. To allow all (guild + user) installation types,
+a :meth:`ApplicationInstallTypes.all` shorthand is also available.
+
+By default, commands are set to only be usable in guild-installed contexts.
+
+.. note::
+    To enable installing the bot in user contexts (or disallow guild contexts), you will need to
+    adjust the settings in the **Developer Portal** on the application's **"Installation"** page.
+
+Contexts
+++++++++
+
+While ``install_types`` determines where the bot must be *installed* to run a command,
+:attr:`~ApplicationCommand.contexts` dictates where *in Discord* a command can be used.
+
+Possible surfaces are **guilds**, **DMs with the bot**, and **DMs (and group DMs) between other users**,
+by setting :attr:`~InteractionContextTypes.guild`, :attr:`~InteractionContextTypes.bot_dm`,
+or :attr:`~InteractionContextTypes.private_channel` respectively to ``True``.
+The :attr:`~InteractionContextTypes.private_channel` context is only meaningful for user-installed
+commands.
+
+Similarly to ``install_types``, this can be accomplished using the :func:`~.ext.commands.contexts`
+decorator, to e.g. disallow a command in guilds:
+
+.. code-block:: python3
+
+    @bot.slash_command()
+    @commands.contexts(bot_dm=True, private_channel=True)
+    async def command(inter: disnake.ApplicationCommandInteraction):
+        ...
+
+In the same way, you can use the ``contexts=`` parameter and :class:`InteractionContextTypes` in the command decorator directly.
+
+The default context for commands is :attr:`~InteractionContextTypes.guild` + :attr:`~InteractionContextTypes.bot_dm`.
+
+This attribute supersedes the old ``dm_permission`` field, which can now be considered
+equivalent to the :attr:`~InteractionContextTypes.bot_dm` flag.
+Therefore, to prevent a command from being run in DMs, use ``InteractionContextTypes(guild=True)``.
+
+Interaction Data
+++++++++++++++++
+
+For a given :class:`ApplicationCommandInteraction`, you can determine the context where the interaction
+was triggered from using the :attr:`~ApplicationCommandInteraction.context` field.
+
+To see how the command was installed, use the :attr:`~ApplicationCommandInteraction.authorizing_integration_owners`
+field, which includes installation details relevant to that specific interaction.
+
+
 .. _app_command_permissions:
 
-Permissions
------------
-
 Default Member Permissions
-++++++++++++++++++++++++++
+--------------------------
+
+Using the :attr:`~ApplicationCommand.default_member_permissions` command attribute,
+you can restrict by whom a command can be run in a guild by default.
 
 These commands will not be enabled/visible for members who do not have all the required guild permissions.
 In this example both the ``manage_guild`` and the ``moderate_members`` permissions would be required:
@@ -701,19 +784,5 @@ This can be overridden by moderators on a per-guild basis; ``default_member_perm
 ignored entirely once a permission override — application-wide or for this command in particular — is configured
 in the guild settings, and will be restored if the permissions are re-synced in the settings.
 
-Note that ``default_member_permissions`` and ``dm_permission`` cannot be configured for a slash subcommand or
+Like the previous fields, this cannot be configured for a slash subcommand or
 subcommand group, only in top-level slash commands and user/message commands.
-
-
-DM Permissions
-++++++++++++++
-
-Using this, you can specify if you want a certain slash command to work in DMs or not:
-
-.. code-block:: python3
-
-    @bot.slash_command(dm_permission=False)
-    async def config(inter: disnake.ApplicationCommandInteraction):
-        ...
-
-This will make the ``config`` slash command invisible in DMs, while it will remain visible in guilds.

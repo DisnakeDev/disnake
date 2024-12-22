@@ -7,8 +7,8 @@ import time
 from collections import deque
 from typing import TYPE_CHECKING, Any, Callable, Deque, Dict, Optional
 
-from disnake.abc import PrivateChannel
 from disnake.enums import Enum
+from disnake.member import Member
 
 from .errors import MaxConcurrencyReached
 
@@ -47,11 +47,9 @@ class BucketType(Enum):
         elif self is BucketType.category:
             return (msg.channel.category or msg.channel).id  # type: ignore
         elif self is BucketType.role:
-            # we return the channel id of a private-channel as there are only roles in guilds
-            # and that yields the same result as for a guild with only the @everyone role
-            # NOTE: PrivateChannel doesn't actually have an id attribute but we assume we are
-            # recieving a DMChannel or GroupChannel which inherit from PrivateChannel and do
-            return (msg.channel if isinstance(msg.channel, PrivateChannel) else msg.author.top_role).id  # type: ignore
+            # if author is not a Member we are in a private-channel context; returning its id
+            # yields the same result as for a guild with only the @everyone role
+            return (msg.author.top_role if isinstance(msg.author, Member) else msg.channel).id
 
     def __call__(self, msg: Message) -> Any:
         return self.get_key(msg)

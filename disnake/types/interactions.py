@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Dict, List, Literal, Optional, TypedDict, Unio
 
 from typing_extensions import NotRequired
 
+from .appinfo import ApplicationIntegrationType
 from .channel import ChannelType
 from .components import Component, Modal
 from .embed import Embed
@@ -23,6 +24,8 @@ if TYPE_CHECKING:
 
 ApplicationCommandType = Literal[1, 2, 3]
 
+InteractionContextType = Literal[1, 2, 3]  # GUILD, BOT_DM, PRIVATE_CHANNEL
+
 
 class ApplicationCommand(TypedDict):
     id: Snowflake
@@ -35,9 +38,11 @@ class ApplicationCommand(TypedDict):
     description_localizations: NotRequired[Optional[LocalizationDict]]
     options: NotRequired[List[ApplicationCommandOption]]
     default_member_permissions: NotRequired[Optional[str]]
-    dm_permission: NotRequired[Optional[bool]]
+    dm_permission: NotRequired[Optional[bool]]  # deprecated
     default_permission: NotRequired[bool]  # deprecated
     nsfw: NotRequired[bool]
+    integration_types: NotRequired[List[ApplicationIntegrationType]]
+    contexts: NotRequired[Optional[List[InteractionContextType]]]
     version: Snowflake
 
 
@@ -105,7 +110,9 @@ class InteractionDataResolved(TypedDict, total=False):
     members: Dict[Snowflake, Member]
     roles: Dict[Snowflake, Role]
     channels: Dict[Snowflake, InteractionChannel]
-    # only in application commands
+
+
+class ApplicationCommandInteractionDataResolved(InteractionDataResolved, total=False):
     messages: Dict[Snowflake, Message]
     attachments: Dict[Snowflake, Attachment]
 
@@ -158,7 +165,7 @@ class ApplicationCommandInteractionData(TypedDict):
     id: Snowflake
     name: str
     type: ApplicationCommandType
-    resolved: NotRequired[InteractionDataResolved]
+    resolved: NotRequired[ApplicationCommandInteractionDataResolved]
     options: NotRequired[List[ApplicationCommandInteractionDataOption]]
     # this is the guild the command is registered to, not the guild the command was invoked in (see interaction.guild_id)
     guild_id: NotRequired[Snowflake]
@@ -248,12 +255,17 @@ class ModalInteractionData(TypedDict):
 ## Interactions
 
 
+# keys are stringified ApplicationInstallType's
+AuthorizingIntegrationOwners = Dict[str, Snowflake]
+
+
 # base type for *all* interactions
 class _BaseInteraction(TypedDict):
     id: Snowflake
     application_id: Snowflake
     token: str
     version: Literal[1]
+    app_permissions: str
 
 
 # common properties in non-ping interactions
@@ -263,10 +275,11 @@ class _BaseUserInteraction(_BaseInteraction):
     channel_id: Snowflake
     channel: InteractionChannel
     locale: str
-    app_permissions: NotRequired[str]
     guild_id: NotRequired[Snowflake]
     guild_locale: NotRequired[str]
     entitlements: NotRequired[List[Entitlement]]
+    authorizing_integration_owners: NotRequired[AuthorizingIntegrationOwners]
+    context: NotRequired[InteractionContextType]
     # one of these two will always exist, according to docs
     member: NotRequired[MemberWithUser]
     user: NotRequired[User]
@@ -338,6 +351,37 @@ class InteractionMessageReference(TypedDict):
     member: NotRequired[Member]
 
 
+class _BaseInteractionMetadata(TypedDict):
+    id: Snowflake
+    type: InteractionType
+    user: User
+    authorizing_integration_owners: AuthorizingIntegrationOwners
+    original_response_message_id: NotRequired[Snowflake]  # only on followups
+
+
+class ApplicationCommandInteractionMetadata(_BaseInteractionMetadata):
+    target_user: NotRequired[User]  # only on user command interactions
+    target_message_id: NotRequired[Snowflake]  # only on message command interactions
+
+
+class MessageComponentInteractionMetadata(_BaseInteractionMetadata):
+    interacted_message_id: Snowflake
+
+
+class ModalInteractionMetadata(_BaseInteractionMetadata):
+    triggering_interaction_metadata: Union[
+        ApplicationCommandInteractionMetadata,
+        MessageComponentInteractionMetadata,
+    ]
+
+
+InteractionMetadata = Union[
+    ApplicationCommandInteractionMetadata,
+    MessageComponentInteractionMetadata,
+    ModalInteractionMetadata,
+]
+
+
 class EditApplicationCommand(TypedDict):
     name: str
     name_localizations: NotRequired[Optional[LocalizationDict]]
@@ -345,8 +389,10 @@ class EditApplicationCommand(TypedDict):
     description_localizations: NotRequired[Optional[LocalizationDict]]
     options: NotRequired[Optional[List[ApplicationCommandOption]]]
     default_member_permissions: NotRequired[Optional[str]]
-    dm_permission: NotRequired[bool]
+    dm_permission: NotRequired[bool]  # deprecated
     default_permission: NotRequired[bool]  # deprecated
     nsfw: NotRequired[bool]
-    # TODO: remove, this cannot be changed
+    integration_types: NotRequired[Optional[List[ApplicationIntegrationType]]]
+    contexts: NotRequired[Optional[List[InteractionContextType]]]
+    # n.b. this cannot be changed
     type: NotRequired[ApplicationCommandType]

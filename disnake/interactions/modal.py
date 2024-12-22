@@ -80,6 +80,21 @@ class ModalInteraction(Interaction[ClientT]):
 
         .. versionadded:: 2.10
 
+    authorizing_integration_owners: :class:`AuthorizingIntegrationOwners`
+        Details about the authorizing user/guild for the application installation
+        related to the interaction.
+
+        .. versionadded:: 2.10
+
+    context: :class:`InteractionContextTypes`
+        The context where the interaction was triggered from.
+
+        This is a flag object, with exactly one of the flags set to ``True``.
+        To check whether an interaction originated from e.g. a :attr:`~InteractionContextTypes.guild`
+        context, you can use ``if interaction.context.guild:``.
+
+        .. versionadded:: 2.10
+
     data: :class:`ModalInteractionData`
         The wrapped interaction data.
     message: Optional[:class:`Message`]

@@ -47,6 +47,7 @@ __all__ = (
     "ComponentType",
     "ButtonStyle",
     "TextInputStyle",
+    "SelectDefaultValueType",
     "StagePrivacyLevel",
     "InteractionType",
     "InteractionResponseType",
@@ -73,6 +74,7 @@ __all__ = (
     "EntitlementType",
     "PollLayoutType",
     "VoiceChannelEffectAnimationType",
+    "MessageReferenceType",
 )
 
 
@@ -262,6 +264,7 @@ class MessageType(Enum):
     guild_incident_alert_mode_disabled = 37
     guild_incident_report_raid = 38
     guild_incident_report_false_alarm = 39
+    poll_result = 46
 
 
 class PartyType(Enum):
@@ -697,6 +700,15 @@ class TextInputStyle(Enum):
     long = 2
 
     def __int__(self) -> int:
+        return self.value
+
+
+class SelectDefaultValueType(Enum):
+    user = "user"
+    role = "role"
+    channel = "channel"
+
+    def __str__(self) -> str:
         return self.value
 
 
@@ -1424,6 +1436,13 @@ class PollLayoutType(Enum):
 class VoiceChannelEffectAnimationType(Enum):
     premium = 0
     basic = 1
+
+
+class MessageReferenceType(Enum):
+    default = 0
+    """A standard message reference used in message replies."""
+    forward = 1
+    """Reference used to point to a message at a point in time (forward)."""
 
 
 T = TypeVar("T")

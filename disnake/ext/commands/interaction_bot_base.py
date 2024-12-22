@@ -28,6 +28,7 @@ import disnake
 from disnake.app_commands import ApplicationCommand, Option
 from disnake.custom_warnings import SyncWarning
 from disnake.enums import ApplicationCommandType
+from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
 from disnake.utils import warn_deprecated
 
 from . import errors
@@ -486,9 +487,11 @@ class InteractionBotBase(CommonBotBase):
         *,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        dm_permission: Optional[bool] = None,
+        dm_permission: Optional[bool] = None,  # deprecated
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
+        install_types: Optional[ApplicationInstallTypes] = None,
+        contexts: Optional[InteractionContextTypes] = None,
         options: Optional[List[Option]] = None,
         guild_ids: Optional[Sequence[int]] = None,
         connectors: Optional[Dict[str, str]] = None,
@@ -519,6 +522,11 @@ class InteractionBotBase(CommonBotBase):
         dm_permission: :class:`bool`
             Whether this command can be used in DMs.
             Defaults to ``True``.
+
+            .. deprecated:: 2.10
+                Use ``contexts`` instead.
+                This is equivalent to the :attr:`.InteractionContextTypes.bot_dm` flag.
+
         default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
             The default required permissions for this command.
             See :attr:`.ApplicationCommand.default_member_permissions` for details.
@@ -530,6 +538,23 @@ class InteractionBotBase(CommonBotBase):
             Defaults to ``False``.
 
             .. versionadded:: 2.8
+
+        install_types: Optional[:class:`.ApplicationInstallTypes`]
+            The installation types where the command is available.
+            Defaults to :attr:`.ApplicationInstallTypes.guild` only.
+            Only available for global commands.
+
+            See :ref:`app_command_contexts` for details.
+
+            .. versionadded:: 2.10
+
+        contexts: Optional[:class:`.InteractionContextTypes`]
+            The interaction contexts where the command can be used.
+            Only available for global commands.
+
+            See :ref:`app_command_contexts` for details.
+
+            .. versionadded:: 2.10
 
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
@@ -564,6 +589,8 @@ class InteractionBotBase(CommonBotBase):
                 dm_permission=dm_permission,
                 default_member_permissions=default_member_permissions,
                 nsfw=nsfw,
+                install_types=install_types,
+                contexts=contexts,
                 guild_ids=guild_ids,
                 connectors=connectors,
                 auto_sync=auto_sync,
@@ -579,9 +606,11 @@ class InteractionBotBase(CommonBotBase):
         self,
         *,
         name: LocalizedOptional = None,
-        dm_permission: Optional[bool] = None,
+        dm_permission: Optional[bool] = None,  # deprecated
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
+        install_types: Optional[ApplicationInstallTypes] = None,
+        contexts: Optional[InteractionContextTypes] = None,
         guild_ids: Optional[Sequence[int]] = None,
         auto_sync: Optional[bool] = None,
         extras: Optional[Dict[str, Any]] = None,
@@ -603,6 +632,11 @@ class InteractionBotBase(CommonBotBase):
         dm_permission: :class:`bool`
             Whether this command can be used in DMs.
             Defaults to ``True``.
+
+            .. deprecated:: 2.10
+                Use ``contexts`` instead.
+                This is equivalent to the :attr:`.InteractionContextTypes.bot_dm` flag.
+
         default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
             The default required permissions for this command.
             See :attr:`.ApplicationCommand.default_member_permissions` for details.
@@ -614,6 +648,23 @@ class InteractionBotBase(CommonBotBase):
             Defaults to ``False``.
 
             .. versionadded:: 2.8
+
+        install_types: Optional[:class:`.ApplicationInstallTypes`]
+            The installation types where the command is available.
+            Defaults to :attr:`.ApplicationInstallTypes.guild` only.
+            Only available for global commands.
+
+            See :ref:`app_command_contexts` for details.
+
+            .. versionadded:: 2.10
+
+        contexts: Optional[:class:`.InteractionContextTypes`]
+            The interaction contexts where the command can be used.
+            Only available for global commands.
+
+            See :ref:`app_command_contexts` for details.
+
+            .. versionadded:: 2.10
 
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``.
@@ -642,6 +693,8 @@ class InteractionBotBase(CommonBotBase):
                 dm_permission=dm_permission,
                 default_member_permissions=default_member_permissions,
                 nsfw=nsfw,
+                install_types=install_types,
+                contexts=contexts,
                 guild_ids=guild_ids,
                 auto_sync=auto_sync,
                 extras=extras,
@@ -656,9 +709,11 @@ class InteractionBotBase(CommonBotBase):
         self,
         *,
         name: LocalizedOptional = None,
-        dm_permission: Optional[bool] = None,
+        dm_permission: Optional[bool] = None,  # deprecated
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
+        install_types: Optional[ApplicationInstallTypes] = None,
+        contexts: Optional[InteractionContextTypes] = None,
         guild_ids: Optional[Sequence[int]] = None,
         auto_sync: Optional[bool] = None,
         extras: Optional[Dict[str, Any]] = None,
@@ -680,6 +735,11 @@ class InteractionBotBase(CommonBotBase):
         dm_permission: :class:`bool`
             Whether this command can be used in DMs.
             Defaults to ``True``.
+
+            .. deprecated:: 2.10
+                Use ``contexts`` instead.
+                This is equivalent to the :attr:`.InteractionContextTypes.bot_dm` flag.
+
         default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
             The default required permissions for this command.
             See :attr:`.ApplicationCommand.default_member_permissions` for details.
@@ -691,6 +751,23 @@ class InteractionBotBase(CommonBotBase):
             Defaults to ``False``.
 
             .. versionadded:: 2.8
+
+        install_types: Optional[:class:`.ApplicationInstallTypes`]
+            The installation types where the command is available.
+            Defaults to :attr:`.ApplicationInstallTypes.guild` only.
+            Only available for global commands.
+
+            See :ref:`app_command_contexts` for details.
+
+            .. versionadded:: 2.10
+
+        contexts: Optional[:class:`.InteractionContextTypes`]
+            The interaction contexts where the command can be used.
+            Only available for global commands.
+
+            See :ref:`app_command_contexts` for details.
+
+            .. versionadded:: 2.10
 
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
@@ -719,6 +796,8 @@ class InteractionBotBase(CommonBotBase):
                 dm_permission=dm_permission,
                 default_member_permissions=default_member_permissions,
                 nsfw=nsfw,
+                install_types=install_types,
+                contexts=contexts,
                 guild_ids=guild_ids,
                 auto_sync=auto_sync,
                 extras=extras,

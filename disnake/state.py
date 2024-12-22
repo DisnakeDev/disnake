@@ -483,7 +483,7 @@ class ConnectionState:
         /,
     ) -> None:
         if not application_command.id:
-            AssertionError("The provided application command does not have an ID")
+            raise AssertionError("The provided application command does not have an ID")
         self._global_application_commands[application_command.id] = application_command
 
     def _remove_global_application_command(self, application_command_id: int, /) -> None:
@@ -503,7 +503,7 @@ class ConnectionState:
         self, guild_id: int, application_command: APIApplicationCommand
     ) -> None:
         if not application_command.id:
-            AssertionError("The provided application command does not have an ID")
+            raise AssertionError("The provided application command does not have an ID")
         try:
             granula = self._guild_application_commands[guild_id]
             granula[application_command.id] = application_command
@@ -2234,14 +2234,10 @@ class ConnectionState:
 
         # the factory can't be a DMChannel or GroupChannel here
         data.setdefault("position", 0)  # type: ignore
-        return (
-            isinstance(guild, Guild)
-            and guild.get_channel_or_thread(channel_id)
-            or factory(
-                guild=guild,  # type: ignore  # FIXME: create proper fallback guild instead of passing Object
-                state=self,
-                data=data,  # type: ignore  # generic payload type
-            )
+        return (isinstance(guild, Guild) and guild.get_channel_or_thread(channel_id)) or factory(
+            guild=guild,  # type: ignore  # FIXME: create proper fallback guild instead of passing Object
+            state=self,
+            data=data,  # type: ignore  # generic payload type
         )
 
     def get_channel(self, id: Optional[int]) -> Optional[Union[Channel, Thread]]:

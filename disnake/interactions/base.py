@@ -41,11 +41,11 @@ from ..errors import (
     ModalChainNotSupported,
     NotFound,
 )
-from ..flags import MessageFlags
+from ..flags import InteractionContextTypes, MessageFlags
 from ..guild import Guild
 from ..i18n import Localized
 from ..member import Member
-from ..message import Attachment, Message
+from ..message import Attachment, AuthorizingIntegrationOwners, Message
 from ..object import Object
 from ..permissions import Permissions
 from ..role import Role
@@ -162,6 +162,21 @@ class Interaction(Generic[ClientT]):
         representing access to an application subscription.
 
         .. versionadded:: 2.10
+
+    authorizing_integration_owners: :class:`AuthorizingIntegrationOwners`
+        Details about the authorizing user/guild for the application installation
+        related to the interaction.
+
+        .. versionadded:: 2.10
+
+    context: :class:`InteractionContextTypes`
+        The context where the interaction was triggered from.
+
+        This is a flag object, with exactly one of the flags set to ``True``.
+        To check whether an interaction originated from e.g. a :attr:`~InteractionContextTypes.guild`
+        context, you can use ``if interaction.context.guild:``.
+
+        .. versionadded:: 2.10
     """
 
     __slots__: Tuple[str, ...] = (
@@ -178,6 +193,8 @@ class Interaction(Generic[ClientT]):
         "guild_locale",
         "client",
         "entitlements",
+        "authorizing_integration_owners",
+        "context",
         "_app_permissions",
         "_permissions",
         "_state",
@@ -223,11 +240,10 @@ class Interaction(Generic[ClientT]):
             self.author = (
                 isinstance(guild_fallback, Guild)
                 and guild_fallback.get_member(int(member["user"]["id"]))
-                or Member(
-                    state=self._state,
-                    guild=guild_fallback,  # type: ignore  # may be `Object`
-                    data=member,
-                )
+            ) or Member(
+                state=self._state,
+                guild=guild_fallback,  # type: ignore  # may be `Object`
+                data=member,
             )
             self._permissions = int(member.get("permissions", 0))
         elif user := data.get("user"):
@@ -242,6 +258,15 @@ class Interaction(Generic[ClientT]):
             [Entitlement(data=e, state=state) for e in entitlements_data]
             if (entitlements_data := data.get("entitlements"))
             else []
+        )
+
+        self.authorizing_integration_owners: AuthorizingIntegrationOwners = (
+            AuthorizingIntegrationOwners(data.get("authorizing_integration_owners") or {})
+        )
+
+        # this *should* always exist, but fall back to an empty flag object if it somehow doesn't
+        self.context: InteractionContextTypes = InteractionContextTypes._from_values(
+            [context] if (context := data.get("context")) is not None else []
         )
 
     @property
@@ -263,17 +288,27 @@ class Interaction(Generic[ClientT]):
 
     @property
     def guild(self) -> Optional[Guild]:
-        """Optional[:class:`Guild`]: The guild the interaction was sent from."""
+        """Optional[:class:`Guild`]: The guild the interaction was sent from.
+
+        .. note::
+            In some scenarios, e.g. for user-installed applications, this will usually be
+            ``None``, despite the interaction originating from a guild.
+            This will only return a full :class:`Guild` for cached guilds,
+            i.e. those the bot is already a member of.
+
+            To check whether an interaction was sent from a guild, consider using
+            :attr:`guild_id` or :attr:`context` instead.
+        """
         return self._state._get_guild(self.guild_id)
 
     @utils.cached_slot_property("_cs_me")
     def me(self) -> Union[Member, ClientUser]:
-        """Union[:class:`.Member`, :class:`.ClientUser`]:
-        Similar to :attr:`.Guild.me` except it may return the :class:`.ClientUser` in private message contexts.
+        """Union[:class:`.Member`, :class:`.ClientUser`]: Similar to :attr:`.Guild.me`,
+        except it may return the :class:`.ClientUser` in private message contexts or
+        when the bot is not a member of the guild (e.g. in the case of user-installed applications).
         """
-        if self.guild is None:
-            return None if self.bot is None else self.bot.user  # type: ignore
-        return self.guild.me
+        # NOTE: guild.me will return None if we start using the partial guild from the interaction
+        return self.guild.me if self.guild is not None else self.client.user
 
     @property
     def channel_id(self) -> int:
@@ -299,15 +334,12 @@ class Interaction(Generic[ClientT]):
     def app_permissions(self) -> Permissions:
         """:class:`Permissions`: The resolved permissions of the bot in the channel, including overwrites.
 
-        In a guild context, this is provided directly by Discord.
-
-        In a non-guild context this will be an instance of :meth:`Permissions.private_channel`.
-
         .. versionadded:: 2.6
+
+        .. versionchanged:: 2.10
+            This is now always provided by Discord.
         """
-        if self.guild_id:
-            return Permissions(self._app_permissions)
-        return Permissions.private_channel()
+        return Permissions(self._app_permissions)
 
     @utils.cached_slot_property("_cs_response")
     def response(self) -> InteractionResponse:
@@ -621,7 +653,7 @@ class Interaction(Generic[ClientT]):
             raise
 
     # legacy namings
-    # these MAY begin a deprecation warning in 2.7 but SHOULD have a deprecation version in 2.8
+    # TODO: these should have a deprecation warning before 3.0
     original_message = original_response
     edit_original_message = edit_original_response
     delete_original_message = delete_original_response
@@ -1540,11 +1572,10 @@ class InteractionMessage(Message):
         Could be a :class:`DMChannel` or :class:`GroupChannel` if it's a private message.
     reference: Optional[:class:`~disnake.MessageReference`]
         The message that this message references. This is only applicable to message replies.
-    interaction: Optional[:class:`~disnake.InteractionReference`]
-        The interaction that this message references.
-        This exists only when the message is a response to an interaction without an existing message.
+    interaction_metadata: Optional[:class:`InteractionMetadata`]
+        The metadata about the interaction that caused this message, if any.
 
-        .. versionadded:: 2.1
+        .. versionadded:: 2.10
 
     mention_everyone: :class:`bool`
         Specifies if the message mentions everyone.
@@ -1915,15 +1946,11 @@ class InteractionDataResolved(Dict[str, Any]):
             user_id = int(str_id)
             member = members.get(str_id)
             if member is not None:
-                self.members[user_id] = (
-                    guild
-                    and guild.get_member(user_id)
-                    or Member(
-                        data=member,
-                        user_data=user,
-                        guild=guild_fallback,  # type: ignore
-                        state=state,
-                    )
+                self.members[user_id] = (guild and guild.get_member(user_id)) or Member(
+                    data=member,
+                    user_data=user,
+                    guild=guild_fallback,  # type: ignore
+                    state=state,
                 )
             else:
                 self.users[user_id] = User(state=state, data=user)
