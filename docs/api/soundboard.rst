@@ -16,7 +16,7 @@ PartialSoundboardSound
 
 .. attributetable:: PartialSoundboardSound
 
-.. autoclass:: PartialSoundboardSound
+.. autoclass:: PartialSoundboardSound()
     :members:
     :inherited-members:
 
