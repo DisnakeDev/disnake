@@ -247,7 +247,7 @@ def _create_decorator(
         raise RuntimeError("expected no *args")
 
     if not callable(cls):
-        raise TypeError("cls parameter must be callable")
+        raise TypeError("cls argument must be callable")
 
     def decorator(func: ItemCallbackType[V_co, S_co]) -> DecoratedItem[S_co]:
         if not asyncio.iscoroutinefunction(func):

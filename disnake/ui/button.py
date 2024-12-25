@@ -12,7 +12,6 @@ from typing import (
     Tuple,
     TypeVar,
     Union,
-    get_origin,
     overload,
 )
 
@@ -318,11 +317,8 @@ def button(
         For example, row=1 will show up before row=2. Defaults to ``None``, which is automatic
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     """
-    if (origin := get_origin(cls)) is not None:
-        cls = origin
-
-    if not isinstance(cls, type) or not issubclass(cls, Button):
-        raise TypeError(f"cls argument must be a subclass of Button, got {cls!r}")
+    if not callable(cls):
+        raise TypeError("cls argument must be callable")
 
     def decorator(func: ItemCallbackType[V_co, B_co]) -> DecoratedItem[B_co]:
         if not asyncio.iscoroutinefunction(func):
