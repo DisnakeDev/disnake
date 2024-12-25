@@ -675,10 +675,15 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
 
     @property
     def _contexts_with_default(self) -> Optional[InteractionContextTypes]:
-        # (same logic as `_install_types_with_default`, but without a fallback for contexts)
-        if self.contexts is None and not isinstance(self, _APIApplicationCommandMixin):
-            if self._default_contexts is not None:
-                return self._default_contexts
+        # (basically the same logic as `_install_types_with_default`, but without a fallback)
+        if (
+            self.contexts is None
+            and not isinstance(self, _APIApplicationCommandMixin)
+            and self._default_contexts is not None
+            # only use default if legacy `dm_permission` wasn't set
+            and self._dm_permission is None
+        ):
+            return self._default_contexts
 
         return self.contexts
 
