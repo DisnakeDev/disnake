@@ -5017,6 +5017,28 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
 
         return base
 
+    def get_partial_message(self, message_id: int, /) -> PartialMessage:
+        """Creates a :class:`PartialMessage` from the given message ID.
+
+        This is useful if you want to work with a message and only have its ID without
+        doing an unnecessary API call.
+
+        .. versionadded:: 2.10
+
+        Parameters
+        ----------
+        message_id: :class:`int`
+            The message ID to create a partial message for.
+
+        Returns
+        -------
+        :class:`PartialMessage`
+            The partial message object.
+        """
+        from .message import PartialMessage
+
+        return PartialMessage(channel=self, id=message_id)
+
     async def leave(self) -> None:
         """|coro|
 
