@@ -41,14 +41,14 @@ class TestDecorator:
             res = ui.button(custom_id="123")(func)
             assert_type(res, ui.item.DecoratedItem[ui.Button[_CustomView]])
 
-            assert func.__discord_ui_model_type__ is ui.Button
+            assert func.__discord_ui_model_type__ is ui.Button[Any]
             assert func.__discord_ui_model_kwargs__ == {"custom_id": "123"}
 
         with create_callback(_CustomView, ui.StringSelect[ui.View]) as func:
             res = ui.string_select(custom_id="123")(func)
             assert_type(res, ui.item.DecoratedItem[ui.StringSelect[_CustomView]])
 
-            assert func.__discord_ui_model_type__ is ui.StringSelect
+            assert func.__discord_ui_model_type__ is ui.StringSelect[Any]
             assert func.__discord_ui_model_kwargs__ == {"custom_id": "123"}
 
     # from here on out we're mostly only testing the button decorator,
@@ -60,8 +60,7 @@ class TestDecorator:
             res = ui.button(cls=cls, param=1337)(func)
             assert_type(res, ui.item.DecoratedItem[cls])
 
-            # should strip to origin type
-            assert func.__discord_ui_model_type__ is _CustomButton
+            assert func.__discord_ui_model_type__ is cls
             assert func.__discord_ui_model_kwargs__ == {"param": 1337}
 
     # typing-only check
