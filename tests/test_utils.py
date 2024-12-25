@@ -267,17 +267,20 @@ def test_maybe_cast() -> None:
         (b"\x47\x49\x46\x38\x37\x61", "image/gif", ".gif"),
         (b"\x47\x49\x46\x38\x39\x61", "image/gif", ".gif"),
         (b"RIFFxxxxWEBP", "image/webp", ".webp"),
+        (b"ID3", "audio/mpeg", ".mp3"),
+        (b"\xFF\xF3", "audio/mpeg", ".mp3"),
+        (b"OggS", "audio/ogg", ".ogg"),
     ],
 )
 def test_mime_type_valid(data, expected_mime, expected_ext) -> None:
     for d in (data, data + b"\xFF"):
-        assert utils._get_mime_type_for_image(d) == expected_mime
-        assert utils._get_extension_for_image(d) == expected_ext
+        assert utils._get_mime_type_for_data(d) == expected_mime
+        assert utils._get_extension_for_data(d) == expected_ext
 
     prefixed = b"\xFF" + data
-    with pytest.raises(ValueError, match=r"Unsupported image type given"):
-        utils._get_mime_type_for_image(prefixed)
-    assert utils._get_extension_for_image(prefixed) is None
+    with pytest.raises(ValueError, match=r"Unsupported file type provided"):
+        utils._get_mime_type_for_data(prefixed)
+    assert utils._get_extension_for_data(prefixed) is None
 
 
 @pytest.mark.parametrize(
@@ -291,9 +294,9 @@ def test_mime_type_valid(data, expected_mime, expected_ext) -> None:
     ],
 )
 def test_mime_type_invalid(data) -> None:
-    with pytest.raises(ValueError, match=r"Unsupported image type given"):
-        utils._get_mime_type_for_image(data)
-    assert utils._get_extension_for_image(data) is None
+    with pytest.raises(ValueError, match=r"Unsupported file type provided"):
+        utils._get_mime_type_for_data(data)
+    assert utils._get_extension_for_data(data) is None
 
 
 @pytest.mark.asyncio

@@ -73,6 +73,7 @@ if TYPE_CHECKING:
         poll,
         role,
         sku,
+        soundboard,
         sticker,
         template,
         threads,
@@ -1654,7 +1655,7 @@ class HTTPClient:
         initial_bytes = file.fp.read(16)
 
         try:
-            mime_type = utils._get_mime_type_for_image(initial_bytes)
+            mime_type = utils._get_mime_type_for_data(initial_bytes)
         except ValueError:
             if initial_bytes.startswith(b"{"):
                 mime_type = "application/json"
@@ -2815,6 +2816,124 @@ class HTTPClient:
             command_id=command_id,
         )
         return self.request(r)
+
+    # Soundboard
+
+    def get_default_soundboard_sounds(self) -> Response[List[soundboard.SoundboardSound]]:
+        return self.request(Route("GET", "/soundboard-default-sounds"))
+
+    def get_guild_soundboard_sound(
+        self, guild_id: Snowflake, sound_id: Snowflake
+    ) -> Response[soundboard.GuildSoundboardSound]:
+        return self.request(
+            Route(
+                "GET",
+                "/guilds/{guild_id}/soundboard-sounds/{sound_id}",
+                guild_id=guild_id,
+                sound_id=sound_id,
+            )
+        )
+
+    def get_guild_soundboard_sounds(
+        self, guild_id: Snowflake
+    ) -> Response[soundboard.ListGuildSoundboardSounds]:
+        return self.request(
+            Route(
+                "GET",
+                "/guilds/{guild_id}/soundboard-sounds",
+                guild_id=guild_id,
+            )
+        )
+
+    def create_guild_soundboard_sound(
+        self,
+        guild_id: Snowflake,
+        *,
+        name: str,
+        sound: Optional[str],
+        volume: Optional[float] = None,
+        emoji_id: Optional[Snowflake] = None,
+        emoji_name: Optional[str] = None,
+        reason: Optional[str] = None,
+    ) -> Response[soundboard.GuildSoundboardSound]:
+        payload: Dict[str, Any] = {
+            "name": name,
+            "sound": sound,
+        }
+
+        if volume is not None:
+            payload["volume"] = volume
+        if emoji_id is not None:
+            payload["emoji_id"] = emoji_id
+        if emoji_name is not None:
+            payload["emoji_name"] = emoji_name
+
+        return self.request(
+            Route("POST", "/guilds/{guild_id}/soundboard-sounds", guild_id=guild_id),
+            json=payload,
+            reason=reason,
+        )
+
+    def edit_guild_soundboard_sound(
+        self,
+        guild_id: Snowflake,
+        sound_id: Snowflake,
+        *,
+        reason: Optional[str] = None,
+        **fields: Any,
+    ) -> Response[soundboard.GuildSoundboardSound]:
+        valid_keys = (
+            "name",
+            "volume",
+            "emoji_id",
+            "emoji_name",
+        )
+        payload = {k: v for k, v in fields.items() if k in valid_keys}
+        return self.request(
+            Route(
+                "PATCH",
+                "/guilds/{guild_id}/soundboard-sounds/{sound_id}",
+                guild_id=guild_id,
+                sound_id=sound_id,
+            ),
+            json=payload,
+            reason=reason,
+        )
+
+    def delete_guild_soundboard_sound(
+        self,
+        guild_id: Snowflake,
+        sound_id: Snowflake,
+        *,
+        reason: Optional[str] = None,
+    ) -> Response[None]:
+        return self.request(
+            Route(
+                "DELETE",
+                "/guilds/{guild_id}/soundboard-sounds/{sound_id}",
+                guild_id=guild_id,
+                sound_id=sound_id,
+            ),
+            reason=reason,
+        )
+
+    def send_soundboard_sound(
+        self,
+        channel_id: Snowflake,
+        sound_id: Snowflake,
+        *,
+        source_guild_id: Optional[Snowflake] = None,
+    ) -> Response[None]:
+        payload: Dict[str, Any] = {
+            "sound_id": sound_id,
+        }
+        if source_guild_id is not None:
+            payload["source_guild_id"] = source_guild_id
+
+        return self.request(
+            Route("POST", "/channels/{channel_id}/send-soundboard-sound", channel_id=channel_id),
+            json=payload,
+        )
 
     # Misc
 
