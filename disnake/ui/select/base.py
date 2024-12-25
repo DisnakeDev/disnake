@@ -18,7 +18,6 @@ from typing import (
     Type,
     TypeVar,
     Union,
-    get_origin,
 )
 
 from ...components import AnySelectMenu, SelectDefaultValue
@@ -247,8 +246,8 @@ def _create_decorator(
         # the `*args` def above is just to satisfy the typechecker
         raise RuntimeError("expected no *args")
 
-    if (origin := get_origin(cls)) is not None:
-        cls = origin
+    if not callable(cls):
+        raise TypeError("cls parameter must be callable")
 
     def decorator(func: ItemCallbackType[V_co, S_co]) -> DecoratedItem[S_co]:
         if not asyncio.iscoroutinefunction(func):
