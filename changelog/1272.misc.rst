@@ -1,0 +1,1 @@
+Decrease the default :attr:`Guild.filesize_limit` from 25MB to 10MB.
