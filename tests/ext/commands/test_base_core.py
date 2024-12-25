@@ -118,6 +118,36 @@ def test_contexts_guildcommandinteraction(meta: DecoratorMeta) -> None:
         assert c.cmd.install_types == disnake.ApplicationInstallTypes(guild=True)
 
 
+class TestDefaultContexts:
+    @pytest.fixture
+    def bot(self) -> commands.InteractionBot:
+        return commands.InteractionBot(
+            default_contexts=disnake.InteractionContextTypes(bot_dm=True)
+        )
+
+    def test_default(self, bot: commands.InteractionBot) -> None:
+        @bot.slash_command()
+        async def c(inter) -> None:
+            ...
+
+        assert c.body.to_dict().get("contexts") == [1]
+
+    def test_decorator_override(self, bot: commands.InteractionBot) -> None:
+        @commands.contexts(private_channel=True)
+        @bot.slash_command()
+        async def c(inter) -> None:
+            ...
+
+        assert c.body.to_dict().get("contexts") == [2]
+
+    def test_annotation_override(self, bot: commands.InteractionBot) -> None:
+        @bot.slash_command()
+        async def c(inter: disnake.GuildCommandInteraction) -> None:
+            ...
+
+        assert c.body.to_dict().get("contexts") == [0]
+
+
 def test_localization_copy() -> None:
     class Cog(commands.Cog):
         @commands.slash_command()
