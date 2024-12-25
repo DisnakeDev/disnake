@@ -709,6 +709,14 @@ as an argument directly to the command decorator. To allow all (guild + user) in
 a :meth:`ApplicationInstallTypes.all` shorthand is also available.
 
 By default, commands are set to only be usable in guild-installed contexts.
+You can set bot-wide defaults using the ``default_install_types`` parameter on
+the :class:`~ext.commands.Bot` constructor:
+
+.. code-block:: python3
+
+    bot = commands.Bot(
+        default_install_types=disnake.ApplicationInstallTypes(user=True),
+    )
 
 .. note::
     To enable installing the bot in user contexts (or disallow guild contexts), you will need to
@@ -739,6 +747,7 @@ decorator, to e.g. disallow a command in guilds:
 In the same way, you can use the ``contexts=`` parameter and :class:`InteractionContextTypes` in the command decorator directly.
 
 The default context for commands is :attr:`~InteractionContextTypes.guild` + :attr:`~InteractionContextTypes.bot_dm`.
+This can also be adjusted using the ``default_contexts`` parameter on the :class:`~ext.commands.Bot` constructor.
 
 This attribute supersedes the old ``dm_permission`` field, which can now be considered
 equivalent to the :attr:`~InteractionContextTypes.bot_dm` flag.
