@@ -123,12 +123,24 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
         .. versionadded:: 2.5
 
     default_install_types: Optional[:class:`.ApplicationInstallTypes`]
-        TODO
+        The default installation types where application commands will be available.
+        This applies to all commands added either through the respective decorators
+        or directly using :meth:`.add_slash_command` (etc.).
+
+        Any value set directly on the command, e.g. using the :func:`.install_types` decorator,
+        the ``install_types`` parameter, ``slash_command_attrs`` (etc.) at the cog-level, or from
+        the :class:`.GuildCommandInteraction` annotation, takes precedence over this default.
 
         .. versionadded:: 2.10
 
     default_contexts: Optional[:class:`.InteractionContextTypes`]
-        TODO
+        The default contexts where application commands will be usable.
+        This applies to all commands added either through the respective decorators
+        or directly using :meth:`.add_slash_command` (etc.).
+
+        Any value set directly on the command, e.g. using the :func:`.contexts` decorator,
+        the ``contexts`` parameter, ``slash_command_attrs`` (etc.) at the cog-level, or from
+        the :class:`.GuildCommandInteraction` annotation, takes precedence over this default.
 
         .. versionadded:: 2.10
 
@@ -411,12 +423,24 @@ class InteractionBot(InteractionBotBase, disnake.Client):
         .. versionadded:: 2.5
 
     default_install_types: Optional[:class:`.ApplicationInstallTypes`]
-        TODO
+        The default installation types where application commands will be available.
+        This applies to all commands added either through the respective decorators
+        or directly using :meth:`.add_slash_command` (etc.).
+
+        Any value set directly on the command, e.g. using the :func:`.install_types` decorator,
+        the ``install_types`` parameter, ``slash_command_attrs`` (etc.) at the cog-level, or from
+        the :class:`.GuildCommandInteraction` annotation, takes precedence over this default.
 
         .. versionadded:: 2.10
 
     default_contexts: Optional[:class:`.InteractionContextTypes`]
-        TODO
+        The default contexts where application commands will be usable.
+        This applies to all commands added either through the respective decorators
+        or directly using :meth:`.add_slash_command` (etc.).
+
+        Any value set directly on the command, e.g. using the :func:`.contexts` decorator,
+        the ``contexts`` parameter, ``slash_command_attrs`` (etc.) at the cog-level, or from
+        the :class:`.GuildCommandInteraction` annotation, takes precedence over this default.
 
         .. versionadded:: 2.10
 
