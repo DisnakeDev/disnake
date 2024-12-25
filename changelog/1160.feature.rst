@@ -1,0 +1,1 @@
+:attr:`InteractionReference.user` can now be a :class:`Member` in guild contexts.

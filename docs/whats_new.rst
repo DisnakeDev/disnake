@@ -17,6 +17,55 @@ in specific versions. Please see :ref:`version_guarantees` for more information.
 
 .. towncrier release notes start
 
+.. _vp2p9p3:
+
+v2.9.3
+------
+
+This is a maintainance release with several minor bugfixes.
+Notably, this includes support for a newer voice encryption mode;
+all modes supported in previous versions are scheduled to be :ddocs:`discontinued <change-log#voice-encryption-modes>` on 18th November 2024,
+and voice connections using the builtin :class:`VoiceClient` will fail to connect.
+
+New Features
+~~~~~~~~~~~~
+- Add support for ``aead_xchacha20_poly1305_rtpsize`` encryption mode for voice connections, and remove deprecated ``xsalsa20_poly1305*`` modes. (:issue:`1228`)
+
+Bug Fixes
+~~~~~~~~~
+- Attempt to handle abrupt websocket closures on ``aiohttp >= 3.9.0`` and ``python < 3.11.0`` gracefully. (:issue:`1241`)
+
+Documentation
+~~~~~~~~~~~~~
+- Adding some clarifying documentation around the type of :attr:`AuditLogEntry.extra` when the action is :attr:`~AuditLogAction.overwrite_create`. (:issue:`1180`)
+
+Miscellaneous
+~~~~~~~~~~~~~
+- Raise PyNaCl version requirement to ``v1.5.0``. (:issue:`1228`)
+
+
+.. _vp2p9p2:
+
+v2.9.2
+------
+
+Bug Fixes
+~~~~~~~~~
+- |commands| Fix erroneous :class:`LocalizationWarning`\s when using localized slash command parameters in cogs. (:issue:`1133`)
+- Handle unexpected ``RECONNECT`` opcode where ``HELLO`` is expected during initial shard connection. (:issue:`1155`)
+- Reconnect gateway websocket on protocol errors. (:issue:`1159`)
+- Avoid ``AttributeError`` in :class:`FFmpegAudio` when cleaning up after failing to spawn ffmpeg process. (:issue:`1164`)
+- Fix base URL for stickers with :attr:`StickerFormatType.gif`. (:issue:`1189`)
+
+Documentation
+~~~~~~~~~~~~~
+- Adding some clarifying documentation around the executable parameters of audio classes based off of internal discussions. (:issue:`1158`)
+
+Miscellaneous
+~~~~~~~~~~~~~
+- Add :class:`StandardSticker` to ``stickers`` parameter type annotation of :meth:`Messageable.send` and :meth:`ForumChannel.create_thread`. (:issue:`1134`)
+
+
 .. _vp2p9p1:
 
 v2.9.1

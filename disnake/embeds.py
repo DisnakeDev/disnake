@@ -106,7 +106,7 @@ if TYPE_CHECKING:
         icon_url: Optional[str]
         proxy_icon_url: Optional[str]
 
-    _FileKey = Literal["image", "thumbnail"]
+    _FileKey = Literal["image", "thumbnail", "footer", "author"]
 
 
 class Embed:
@@ -385,11 +385,31 @@ class Embed:
         """
         return cast("_EmbedFooterProxy", EmbedProxy(self._footer))
 
-    def set_footer(self, *, text: Any, icon_url: Optional[Any] = None) -> Self:
+    @overload
+    def set_footer(self, *, text: Any, icon_url: Optional[Any] = ...) -> Self:
+        ...
+
+    @overload
+    def set_footer(self, *, text: Any, icon_file: File = ...) -> Self:
+        ...
+
+    def set_footer(
+        self, *, text: Any, icon_url: Optional[Any] = MISSING, icon_file: File = MISSING
+    ) -> Self:
         """Sets the footer for the embed content.
 
         This function returns the class instance to allow for fluent-style
         chaining.
+
+        At most one of ``icon_url`` or ``icon_file`` may be passed.
+
+        .. warning::
+            Passing a :class:`disnake.File` object will make the embed not
+            reusable.
+
+        .. warning::
+            If used with the other ``set_*`` methods, you must ensure
+            that the :attr:`.File.filename` is unique to avoid duplication.
 
         Parameters
         ----------
@@ -401,13 +421,18 @@ class Embed:
 
         icon_url: Optional[:class:`str`]
             The URL of the footer icon. Only HTTP(S) is supported.
+        icon_file: :class:`File`
+            The file to use as the footer icon.
+
+            .. versionadded:: 2.10
         """
         self._footer = {
             "text": str(text),
         }
 
-        if icon_url is not None:
-            self._footer["icon_url"] = str(icon_url)
+        result = self._handle_resource(icon_url, icon_file, key="footer", required=False)
+        if result is not None:
+            self._footer["icon_url"] = result
 
         return self
 
@@ -456,6 +481,10 @@ class Embed:
         .. warning::
             Passing a :class:`disnake.File` object will make the embed not
             reusable.
+
+        .. warning::
+            If used with the other ``set_*`` methods, you must ensure
+            that the :attr:`.File.filename` is unique to avoid duplication.
 
         .. versionchanged:: 1.4
             Passing ``None`` removes the image.
@@ -508,6 +537,10 @@ class Embed:
             Passing a :class:`disnake.File` object will make the embed not
             reusable.
 
+        .. warning::
+            If used with the other ``set_*`` methods, you must ensure
+            that the :attr:`.File.filename` is unique to avoid duplication.
+
         .. versionchanged:: 1.4
             Passing ``None`` removes the thumbnail.
 
@@ -559,17 +592,38 @@ class Embed:
         """
         return cast("_EmbedAuthorProxy", EmbedProxy(self._author))
 
+    @overload
+    def set_author(
+        self, *, name: Any, url: Optional[Any] = ..., icon_url: Optional[Any] = ...
+    ) -> Self:
+        ...
+
+    @overload
+    def set_author(self, *, name: Any, url: Optional[Any] = ..., icon_file: File = ...) -> Self:
+        ...
+
     def set_author(
         self,
         *,
         name: Any,
         url: Optional[Any] = None,
-        icon_url: Optional[Any] = None,
+        icon_url: Optional[Any] = MISSING,
+        icon_file: File = MISSING,
     ) -> Self:
         """Sets the author for the embed content.
 
         This function returns the class instance to allow for fluent-style
         chaining.
+
+        At most one of ``icon_url`` or ``icon_file`` may be passed.
+
+        .. warning::
+            Passing a :class:`disnake.File` object will make the embed not
+            reusable.
+
+        .. warning::
+            If used with the other ``set_*`` methods, you must ensure
+            that the :attr:`.File.filename` is unique to avoid duplication.
 
         Parameters
         ----------
@@ -579,6 +633,10 @@ class Embed:
             The URL for the author.
         icon_url: Optional[:class:`str`]
             The URL of the author icon. Only HTTP(S) is supported.
+        icon_file: :class:`File`
+            The file to use as the author icon.
+
+            .. versionadded:: 2.10
         """
         self._author = {
             "name": str(name),
@@ -587,8 +645,9 @@ class Embed:
         if url is not None:
             self._author["url"] = str(url)
 
-        if icon_url is not None:
-            self._author["icon_url"] = str(icon_url)
+        result = self._handle_resource(icon_url, icon_file, key="author", required=False)
+        if result is not None:
+            self._author["icon_url"] = result
 
         return self
 
@@ -821,9 +880,15 @@ class Embed:
 
     get_default_color = get_default_colour
 
-    def _handle_resource(self, url: Optional[Any], file: File, *, key: _FileKey) -> Optional[str]:
-        if not (url is MISSING) ^ (file is MISSING):
-            raise TypeError("Exactly one of url or file must be provided")
+    def _handle_resource(
+        self, url: Optional[Any], file: Optional[File], *, key: _FileKey, required: bool = True
+    ) -> Optional[str]:
+        if required:
+            if not (url is MISSING) ^ (file is MISSING):
+                raise TypeError("Exactly one of url or file must be provided")
+        else:
+            if url is not MISSING and file is not MISSING:
+                raise TypeError("At most one of url or file may be provided, not both.")
 
         if file:
             if file.filename is None:
@@ -832,7 +897,7 @@ class Embed:
             return f"attachment://{file.filename}"
         else:
             self._files.pop(key, None)
-            return str(url) if url is not None else None
+            return str(url) if url else None
 
     def check_limits(self) -> None:
         """Checks if this embed fits within the limits dictated by Discord.

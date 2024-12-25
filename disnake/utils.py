@@ -120,6 +120,7 @@ if TYPE_CHECKING:
     from .invite import Invite
     from .permissions import Permissions
     from .template import Template
+    from .types.appinfo import ApplicationIntegrationType as ApplicationIntegrationTypeLiteral
 
     class _RequestLike(Protocol):
         headers: Mapping[str, Any]
@@ -255,7 +256,9 @@ def copy_doc(original: Callable) -> Callable[[T], T]:
     return decorator
 
 
-def deprecated(instead: Optional[str] = None) -> Callable[[Callable[P, T]], Callable[P, T]]:
+def deprecated(
+    instead: Optional[str] = None, *, skip_internal_frames: bool = False
+) -> Callable[[Callable[P, T]], Callable[P, T]]:
     def actual_decorator(func: Callable[P, T]) -> Callable[P, T]:
         @functools.wraps(func)
         def decorated(*args: P.args, **kwargs: P.kwargs) -> T:
@@ -264,7 +267,7 @@ def deprecated(instead: Optional[str] = None) -> Callable[[Callable[P, T]], Call
             else:
                 msg = f"{func.__name__} is deprecated."
 
-            warn_deprecated(msg, stacklevel=2)
+            warn_deprecated(msg, stacklevel=2, skip_internal_frames=skip_internal_frames)
             return func(*args, **kwargs)
 
         return decorated
@@ -272,7 +275,18 @@ def deprecated(instead: Optional[str] = None) -> Callable[[Callable[P, T]], Call
     return actual_decorator
 
 
-def warn_deprecated(*args: Any, stacklevel: int = 1, **kwargs: Any) -> None:
+_root_module_path = os.path.join(os.path.dirname(__file__), "")  # add trailing slash
+
+
+def warn_deprecated(
+    *args: Any, stacklevel: int = 1, skip_internal_frames: bool = False, **kwargs: Any
+) -> None:
+    # NOTE: skip_file_prefixes was added in 3.12; in older versions,
+    # we'll just have to live with the warning location possibly being wrong
+    if sys.version_info >= (3, 12) and skip_internal_frames:
+        kwargs["skip_file_prefixes"] = (_root_module_path,)
+        stacklevel = 1  # reset stacklevel, assume we just want the first frame outside library code
+
     old_filters = warnings.filters[:]
     try:
         warnings.simplefilter("always", DeprecationWarning)
@@ -289,9 +303,9 @@ def oauth_url(
     redirect_uri: str = MISSING,
     scopes: Iterable[str] = MISSING,
     disable_guild_select: bool = False,
+    integration_type: ApplicationIntegrationTypeLiteral = MISSING,
 ) -> str:
-    """A helper function that returns the OAuth2 URL for inviting the bot
-    into guilds.
+    """A helper function that returns the OAuth2 URL for authorizing the application.
 
     Parameters
     ----------
@@ -314,6 +328,11 @@ def oauth_url(
 
         .. versionadded:: 2.0
 
+    integration_type: :class:`int`
+        An optional integration type/installation type to install the application with.
+
+        .. versionadded:: 2.10
+
     Returns
     -------
     :class:`str`
@@ -329,6 +348,8 @@ def oauth_url(
         url += "&response_type=code&" + urlencode({"redirect_uri": redirect_uri})
     if disable_guild_select:
         url += "&disable_guild_select=true"
+    if integration_type is not MISSING:
+        url += f"&integration_type={integration_type}"
     return url
 
 
@@ -1158,7 +1179,7 @@ def evaluate_annotation(
             return cache[tp]
 
         # this is how annotations are supposed to be unstringifed
-        evaluated = eval(tp, globals, locals)  # noqa: PGH001, S307
+        evaluated = eval(tp, globals, locals)  # noqa: S307
         # recurse to resolve nested args further
         evaluated = evaluate_annotation(evaluated, globals, locals, cache)
 

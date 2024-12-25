@@ -39,6 +39,7 @@ __all__ = (
     "MemberIterator",
     "GuildScheduledEventUserIterator",
     "EntitlementIterator",
+    "PollAnswerIterator",
 )
 
 if TYPE_CHECKING:
@@ -1043,6 +1044,7 @@ class EntitlementIterator(_AsyncIterator["Entitlement"]):
         before: Optional[Union[Snowflake, datetime.datetime]] = None,
         after: Optional[Union[Snowflake, datetime.datetime]] = None,
         exclude_ended: bool = False,
+        exclude_deleted: bool = True,
         oldest_first: bool = False,
     ) -> None:
         if isinstance(before, datetime.datetime):
@@ -1058,6 +1060,7 @@ class EntitlementIterator(_AsyncIterator["Entitlement"]):
         self.guild_id: Optional[int] = guild_id
         self.sku_ids: Optional[List[int]] = sku_ids
         self.exclude_ended: bool = exclude_ended
+        self.exclude_deleted: bool = exclude_deleted
 
         self.state: ConnectionState = state
         self.request = state.http.get_entitlements
@@ -1115,6 +1118,7 @@ class EntitlementIterator(_AsyncIterator["Entitlement"]):
             user_id=self.user_id,
             guild_id=self.guild_id,
             exclude_ended=self.exclude_ended,
+            exclude_deleted=self.exclude_deleted,
         )
 
         if len(data):
@@ -1132,6 +1136,7 @@ class EntitlementIterator(_AsyncIterator["Entitlement"]):
             user_id=self.user_id,
             guild_id=self.guild_id,
             exclude_ended=self.exclude_ended,
+            exclude_deleted=self.exclude_deleted,
         )
 
         if len(data):
@@ -1140,3 +1145,65 @@ class EntitlementIterator(_AsyncIterator["Entitlement"]):
             # endpoint returns items in ascending order when `after` is used
             self.after = Object(id=int(data[-1]["id"]))
         return data
+
+
+class PollAnswerIterator(_AsyncIterator[Union["User", "Member"]]):
+    def __init__(
+        self,
+        message: Message,
+        answer_id: int,
+        *,
+        limit: Optional[int],
+        after: Optional[Snowflake] = None,
+    ) -> None:
+        self.channel_id: int = message.channel.id
+        self.message_id: int = message.id
+        self.answer_id: int = answer_id
+        self.guild: Optional[Guild] = message.guild
+        self.state: ConnectionState = message._state
+
+        self.limit: Optional[int] = limit
+        self.after: Optional[Snowflake] = after
+
+        self.getter = message._state.http.get_poll_answer_voters
+        self.users = asyncio.Queue()
+
+    async def next(self) -> Union[User, Member]:
+        if self.users.empty():
+            await self.fill_users()
+
+        try:
+            return self.users.get_nowait()
+        except asyncio.QueueEmpty:
+            raise NoMoreItems from None
+
+    def _get_retrieve(self) -> bool:
+        self.retrieve = min(self.limit, 100) if self.limit is not None else 100
+        return self.retrieve > 0
+
+    async def fill_users(self) -> None:
+        if self._get_retrieve():
+            after = self.after.id if self.after else None
+            data = (
+                await self.getter(
+                    channel_id=self.channel_id,
+                    message_id=self.message_id,
+                    answer_id=self.answer_id,
+                    after=after,
+                    limit=self.retrieve,
+                )
+            )["users"]
+
+            if len(data):
+                if self.limit is not None:
+                    self.limit -= self.retrieve
+                self.after = Object(id=int(data[-1]["id"]))
+
+            if len(data) < 100:
+                self.limit = 0  # terminate loop
+
+            for element in data:
+                member = None
+                if not (self.guild is None or isinstance(self.guild, Object)):
+                    member = self.guild.get_member(int(element["id"]))
+                await self.users.put(member or self.state.create_user(data=element))

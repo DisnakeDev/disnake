@@ -45,6 +45,14 @@ SKUType
 
     .. versionadded:: 2.10
 
+    .. attribute:: durable
+
+        Represents a durable one-time purchase.
+
+    .. attribute:: consumable
+
+        Represents a consumable one-time purchase.
+
     .. attribute:: subscription
 
         Represents a recurring subscription.

@@ -35,6 +35,7 @@ from .enums import (
     ThreadLayout,
     ThreadSortOrder,
     VideoQualityMode,
+    VoiceChannelEffectAnimationType,
     try_enum,
     try_enum_to_int,
 )
@@ -50,6 +51,7 @@ from .threads import ForumTag, Thread
 from .utils import MISSING
 
 __all__ = (
+    "VoiceChannelEffect",
     "TextChannel",
     "VoiceChannel",
     "StageChannel",
@@ -90,11 +92,57 @@ if TYPE_CHECKING:
     )
     from .types.snowflake import SnowflakeList
     from .types.threads import ThreadArchiveDurationLiteral
+    from .types.voice import VoiceChannelEffect as VoiceChannelEffectPayload
     from .ui.action_row import Components, MessageUIComponent
     from .ui.view import View
     from .user import BaseUser, ClientUser, User
     from .voice_region import VoiceRegion
     from .webhook import Webhook
+
+
+class VoiceChannelEffect:
+    """An effect sent by a member in a voice channel.
+
+    Different sets of attributes will be present, depending on the type of effect.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    emoji: Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]
+        The emoji, for emoji reaction effects.
+    animation_type: Optional[:class:`VoiceChannelEffectAnimationType`]
+        The emoji animation type, for emoji reaction effects.
+    animation_id: Optional[:class:`int`]
+        The emoji animation ID, for emoji reaction effects.
+    """
+
+    __slots__ = (
+        "emoji",
+        "animation_type",
+        "animation_id",
+    )
+
+    def __init__(self, *, data: VoiceChannelEffectPayload, state: ConnectionState) -> None:
+        self.emoji: Optional[Union[Emoji, PartialEmoji]] = None
+        if emoji_data := data.get("emoji"):
+            emoji = state._get_emoji_from_data(emoji_data)
+            if isinstance(emoji, str):
+                emoji = PartialEmoji(name=emoji)
+            self.emoji = emoji
+
+        self.animation_type = (
+            try_enum(VoiceChannelEffectAnimationType, value)
+            if (value := data.get("animation_type")) is not None
+            else None
+        )
+        self.animation_id: Optional[int] = utils._get_as_snowflake(data, "animation_id")
+
+    def __repr__(self) -> str:
+        return (
+            f"<VoiceChannelEffect emoji={self.emoji!r} animation_type={self.animation_type!r}"
+            f" animation_id={self.animation_id!r}>"
+        )
 
 
 async def _single_delete_strategy(messages: Iterable[Message]) -> None:
@@ -3494,7 +3542,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
     ) -> ThreadWithMessage:
         """|coro|
 
-        Creates a thread in this channel.
+        Creates a thread (with an initial message) in this channel.
 
         You must have the :attr:`~Permissions.create_forum_threads` permission to do this.
 
@@ -3506,6 +3554,10 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
 
         .. versionchanged:: 2.6
             The ``content`` parameter is no longer required.
+
+        .. note::
+            Unlike :meth:`TextChannel.create_thread`,
+            this **returns a tuple** with both the created **thread and message**.
 
         Parameters
         ----------
@@ -3583,10 +3635,8 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
 
         Returns
         -------
-        Tuple[:class:`Thread`, :class:`Message`]
+        :class:`ThreadWithMessage`
             A :class:`~typing.NamedTuple` with the newly created thread and the message sent in it.
-
-            These values can also be accessed through the ``thread`` and ``message`` fields.
         """
         from .message import Message
         from .webhook.async_ import handle_message_parameters_dict
@@ -4661,7 +4711,10 @@ class DMChannel(disnake.abc.Messageable, Hashable):
 
     def __init__(self, *, me: ClientUser, state: ConnectionState, data: DMChannelPayload) -> None:
         self._state: ConnectionState = state
-        self.recipient: Optional[User] = state.store_user(data["recipients"][0])  # type: ignore
+        self.recipient: Optional[User] = None
+        if recipients := data.get("recipients"):
+            self.recipient = state.store_user(recipients[0])  # type: ignore
+
         self.me: ClientUser = me
         self.id: int = int(data["id"])
         self.last_pin_timestamp: Optional[datetime.datetime] = utils.parse_time(
@@ -4801,8 +4854,10 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
     ----------
     recipients: List[:class:`User`]
         The users you are participating with in the group channel.
+        If this channel is received through the gateway, the recipient information
+        may not be always available.
     me: :class:`ClientUser`
-        The user presenting yourself.
+        The user representing yourself.
     id: :class:`int`
         The group channel ID.
     owner: Optional[:class:`User`]
@@ -5037,6 +5092,7 @@ def _channel_type_factory(
     cls: Union[Type[disnake.abc.GuildChannel], Type[Thread]]
 ) -> List[ChannelType]:
     return {
+        # FIXME: this includes private channels; improve this once there's a common base type for all channels
         disnake.abc.GuildChannel: list(ChannelType.__members__.values()),
         VocalGuildChannel: [ChannelType.voice, ChannelType.stage_voice],
         disnake.abc.PrivateChannel: [ChannelType.private, ChannelType.group],
