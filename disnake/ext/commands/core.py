@@ -2426,6 +2426,9 @@ def dm_only() -> Callable[[T], T]:
     This check raises a special exception, :exc:`.PrivateMessageOnly`
     that is inherited from :exc:`.CheckFailure`.
 
+    .. note::
+        For application commands, consider setting the allowed :ref:`contexts <app_command_contexts>` instead.
+
     .. versionadded:: 1.1
     """
 
@@ -2444,6 +2447,9 @@ def guild_only() -> Callable[[T], T]:
 
     This check raises a special exception, :exc:`.NoPrivateMessage`
     that is inherited from :exc:`.CheckFailure`.
+
+    .. note::
+        For application commands, consider setting the allowed :ref:`contexts <app_command_contexts>` instead.
     """
 
     def predicate(ctx: AnyContext) -> bool:
