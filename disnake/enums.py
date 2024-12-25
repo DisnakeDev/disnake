@@ -1326,14 +1326,20 @@ class Event(Enum):
     subscription_create = "subscription_create"
     """Called when a subscription for a premium app is created.
     Represents the :func:`on_subscription_create` event.
+
+    .. versionadded:: 2.10
     """
     subscription_update = "subscription_update"
     """Called when a subscription for a premium app is updated.
     Represents the :func:`on_subscription_update` event.
+
+    .. versionadded:: 2.10
     """
     subscription_delete = "subscription_delete"
     """Called when a subscription for a premium app is deleted.
     Represents the :func:`on_subscription_delete` event.
+
+    .. versionadded:: 2.10
     """
     # ext.commands events
     command = "command"
