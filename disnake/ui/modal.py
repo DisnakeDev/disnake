@@ -86,7 +86,9 @@ class Modal:
         self.components: List[ActionRow] = rows
         self.timeout: float = timeout
 
+        # function for the modal to remove itself from the store, if any
         self.__remove_callback: Optional[Callable[[Modal], None]] = None
+        # timer handle for the scheduled timeout
         self.__timeout_handle: Optional[asyncio.TimerHandle] = None
 
     def __repr__(self) -> str:
@@ -235,7 +237,7 @@ class Modal:
             await self.on_error(e, interaction)
         finally:
             if interaction.response._response_type is None:
-                # If the interaction was not responded to, the modal didn't close for the user.
+                # If the interaction was not successfully responded to, the modal didn't close for the user.
                 # Since the timeout was already stopped at this point, restart it.
                 self._start_listening(self.__remove_callback)
             else:
@@ -269,7 +271,8 @@ class Modal:
         asyncio.create_task(self.on_timeout(), name=f"disnake-ui-modal-timeout-{self.custom_id}")
 
     def dispatch(self, interaction: ModalInteraction) -> None:
-        # stop the timeout, but don't remove the modal from the store yet in case it's not responded to
+        # stop the timeout, but don't remove the modal from the store yet in case the
+        # response fails and the modal stays open
         if self.__timeout_handle is not None:
             self.__timeout_handle.cancel()
 
