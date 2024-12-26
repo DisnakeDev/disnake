@@ -13,7 +13,7 @@ from .subscription import Subscription
 from .utils import snowflake_time
 
 if TYPE_CHECKING:
-    from .abc import Snowflake, SnowflakeTime
+    from .abc import SnowflakeTime
     from .state import ConnectionState
     from .types.sku import SKU as SKUPayload
 
@@ -89,11 +89,11 @@ class SKU(Hashable):
 
     async def subscriptions(
         self,
+        user_id: int,
         *,
         limit: Optional[int] = 50,
         before: Optional[SnowflakeTime] = None,
         after: Optional[SnowflakeTime] = None,
-        user: Optional[Snowflake] = None,
     ) -> SubscriptionIterator:
         """|coro|
 
@@ -103,6 +103,8 @@ class SKU(Hashable):
 
         Parameters
         ----------
+        user: :class:`int`
+            The user to retrieve subscriptions for.
         limit: Optional[:class:`int`]
             The number of subscriptions to retrieve.
             If ``None``, retrieves every subscription.
@@ -116,8 +118,6 @@ class SKU(Hashable):
             Retrieve subscriptions created after this date or object.
             If a datetime is provided, it is recommended to use a UTC aware datetime.
             If the datetime is naive, it is assumed to be local time.
-        user: Optional[:class:`.abc.Snowflake`]
-            The user to retrieve subscriptions for.
 
         Raises
         ------
@@ -135,7 +135,7 @@ class SKU(Hashable):
             limit=limit,
             before=before,
             after=after,
-            user_id=user.id if user is not None else None,
+            user_id=user_id,
         )
 
     async def fetch_subscription(self, subscription_id: int, /) -> Subscription:
