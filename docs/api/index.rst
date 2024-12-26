@@ -117,6 +117,7 @@ Documents
     roles
     skus
     subscriptions
+    soundboard
     stage_instances
     stickers
     users
