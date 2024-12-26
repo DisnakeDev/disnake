@@ -292,7 +292,7 @@ class ModalStore:
 
         # if another modal with the same user+custom_id already exists,
         # stop its timeout to avoid overlaps/collisions
-        if existing := self._modals.get(key):
+        if (existing := self._modals.get(key)) is not None:
             existing._stop_listening()
 
         # start timeout, store modal
@@ -305,6 +305,5 @@ class ModalStore:
 
     def dispatch(self, interaction: ModalInteraction) -> None:
         key = (interaction.author.id, interaction.custom_id)
-        modal = self._modals.get(key)
-        if modal is not None:
+        if (modal := self._modals.get(key)) is not None:
             modal.dispatch(interaction)
