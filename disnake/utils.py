@@ -6,14 +6,16 @@ import array
 import asyncio
 import datetime
 import functools
+import inspect
 import json
 import os
 import pkgutil
 import re
 import sys
+import types
 import unicodedata
 import warnings
-from base64 import b64encode, urlsafe_b64decode as b64decode
+from base64 import b64encode
 from bisect import bisect_left
 from inspect import getdoc as _getdoc, isawaitable as _isawaitable, signature as _signature
 from operator import attrgetter
@@ -58,7 +60,6 @@ else:
 
 __all__ = (
     "oauth_url",
-    "parse_token",
     "snowflake_time",
     "time_snowflake",
     "find",
@@ -119,6 +120,7 @@ if TYPE_CHECKING:
     from .invite import Invite
     from .permissions import Permissions
     from .template import Template
+    from .types.appinfo import ApplicationIntegrationType as ApplicationIntegrationTypeLiteral
 
     class _RequestLike(Protocol):
         headers: Mapping[str, Any]
@@ -133,6 +135,7 @@ T = TypeVar("T")
 V = TypeVar("V")
 T_co = TypeVar("T_co", covariant=True)
 _Iter = Union[Iterator[T], AsyncIterator[T]]
+_BytesLike = Union[bytes, bytearray, memoryview]
 
 
 class CachedSlotProperty(Generic[T, T_co]):
@@ -142,14 +145,14 @@ class CachedSlotProperty(Generic[T, T_co]):
         self.__doc__ = function.__doc__
 
     @overload
-    def __get__(self, instance: None, owner: Type[T]) -> Self:
+    def __get__(self, instance: None, owner: Type[Any]) -> Self:
         ...
 
     @overload
-    def __get__(self, instance: T, owner: Type[T]) -> T_co:
+    def __get__(self, instance: T, owner: Type[Any]) -> T_co:
         ...
 
-    def __get__(self, instance: Optional[T], owner: Type[T]) -> Any:
+    def __get__(self, instance: Optional[T], owner: Type[Any]) -> Any:
         if instance is None:
             return self
 
@@ -253,7 +256,9 @@ def copy_doc(original: Callable) -> Callable[[T], T]:
     return decorator
 
 
-def deprecated(instead: Optional[str] = None) -> Callable[[Callable[P, T]], Callable[P, T]]:
+def deprecated(
+    instead: Optional[str] = None, *, skip_internal_frames: bool = False
+) -> Callable[[Callable[P, T]], Callable[P, T]]:
     def actual_decorator(func: Callable[P, T]) -> Callable[P, T]:
         @functools.wraps(func)
         def decorated(*args: P.args, **kwargs: P.kwargs) -> T:
@@ -262,7 +267,7 @@ def deprecated(instead: Optional[str] = None) -> Callable[[Callable[P, T]], Call
             else:
                 msg = f"{func.__name__} is deprecated."
 
-            warn_deprecated(msg, stacklevel=2)
+            warn_deprecated(msg, stacklevel=2, skip_internal_frames=skip_internal_frames)
             return func(*args, **kwargs)
 
         return decorated
@@ -270,7 +275,18 @@ def deprecated(instead: Optional[str] = None) -> Callable[[Callable[P, T]], Call
     return actual_decorator
 
 
-def warn_deprecated(*args: Any, stacklevel: int = 1, **kwargs: Any) -> None:
+_root_module_path = os.path.join(os.path.dirname(__file__), "")  # add trailing slash
+
+
+def warn_deprecated(
+    *args: Any, stacklevel: int = 1, skip_internal_frames: bool = False, **kwargs: Any
+) -> None:
+    # NOTE: skip_file_prefixes was added in 3.12; in older versions,
+    # we'll just have to live with the warning location possibly being wrong
+    if sys.version_info >= (3, 12) and skip_internal_frames:
+        kwargs["skip_file_prefixes"] = (_root_module_path,)
+        stacklevel = 1  # reset stacklevel, assume we just want the first frame outside library code
+
     old_filters = warnings.filters[:]
     try:
         warnings.simplefilter("always", DeprecationWarning)
@@ -287,9 +303,9 @@ def oauth_url(
     redirect_uri: str = MISSING,
     scopes: Iterable[str] = MISSING,
     disable_guild_select: bool = False,
+    integration_type: ApplicationIntegrationTypeLiteral = MISSING,
 ) -> str:
-    """A helper function that returns the OAuth2 URL for inviting the bot
-    into guilds.
+    """A helper function that returns the OAuth2 URL for authorizing the application.
 
     Parameters
     ----------
@@ -312,6 +328,11 @@ def oauth_url(
 
         .. versionadded:: 2.0
 
+    integration_type: :class:`int`
+        An optional integration type/installation type to install the application with.
+
+        .. versionadded:: 2.10
+
     Returns
     -------
     :class:`str`
@@ -327,39 +348,13 @@ def oauth_url(
         url += "&response_type=code&" + urlencode({"redirect_uri": redirect_uri})
     if disable_guild_select:
         url += "&disable_guild_select=true"
+    if integration_type is not MISSING:
+        url += f"&integration_type={integration_type}"
     return url
 
 
-def parse_token(token: str) -> Tuple[int, datetime.datetime, bytes]:
-    """Parse a token into its parts
-
-    Returns
-
-    Parameters
-    ----------
-    token: :class:`str`
-        The bot token
-
-    Returns
-    -------
-    Tuple[:class:`int`, :class:`datetime.datetime`, :class:`bytes`]
-        The bot's ID, the time when the token was generated and the hmac.
-    """
-    parts = token.split(".")
-
-    user_id = int(b64decode(parts[0]))
-
-    timestamp = int.from_bytes(b64decode(parts[1] + "=="), "big")
-    created_at = datetime.datetime.fromtimestamp(timestamp, datetime.timezone.utc)
-
-    hmac = b64decode(parts[2] + "==")
-
-    return user_id, created_at, hmac
-
-
 def snowflake_time(id: int) -> datetime.datetime:
-    """
-    Parameters
+    """Parameters
     ----------
     id: :class:`int`
         The snowflake ID.
@@ -418,7 +413,6 @@ def find(predicate: Callable[[T], Any], seq: Iterable[T]) -> Optional[T]:
     seq: :class:`collections.abc.Iterable`
         The iterable to search through.
     """
-
     for element in seq:
         if predicate(element):
             return element
@@ -426,8 +420,7 @@ def find(predicate: Callable[[T], Any], seq: Iterable[T]) -> Optional[T]:
 
 
 def get(iterable: Iterable[T], **attrs: Any) -> Optional[T]:
-    """
-    A helper that returns the first element in the iterable that meets
+    """A helper that returns the first element in the iterable that meets
     all the traits passed in ``attrs``. This is an alternative for
     :func:`~disnake.utils.find`.
 
@@ -443,7 +436,6 @@ def get(iterable: Iterable[T], **attrs: Any) -> Optional[T]:
 
     Examples
     --------
-
     Basic usage:
 
     .. code-block:: python3
@@ -469,7 +461,6 @@ def get(iterable: Iterable[T], **attrs: Any) -> Optional[T]:
     **attrs
         Keyword arguments that denote attributes to search with.
     """
-
     # global -> local
     _all = all
     attrget = attrgetter
@@ -517,10 +508,12 @@ _mime_type_extensions = {
     "image/jpeg": ".jpg",
     "image/gif": ".gif",
     "image/webp": ".webp",
+    "audio/mpeg": ".mp3",
+    "audio/ogg": ".ogg",
 }
 
 
-def _get_mime_type_for_image(data: bytes) -> str:
+def _get_mime_type_for_data(data: _BytesLike) -> str:
     if data[0:8] == b"\x89\x50\x4E\x47\x0D\x0A\x1A\x0A":
         return "image/png"
     elif data[0:3] == b"\xff\xd8\xff" or data[6:10] in (b"JFIF", b"Exif"):
@@ -529,20 +522,26 @@ def _get_mime_type_for_image(data: bytes) -> str:
         return "image/gif"
     elif data[0:4] == b"RIFF" and data[8:12] == b"WEBP":
         return "image/webp"
+    elif data[0:3] == b"ID3" or data[0:2] in (b"\xff\xfb", b"\xff\xf3", b"\xff\xf2"):
+        # n.b. this doesn't support the unofficial MPEG-2.5 frame header (which starts with 0xFFEx).
+        # Discord also doesn't accept it.
+        return "audio/mpeg"
+    elif data[0:4] == b"OggS":
+        return "audio/ogg"
     else:
-        raise ValueError("Unsupported image type given")
+        raise ValueError("Unsupported file type provided")
 
 
-def _bytes_to_base64_data(data: bytes) -> str:
+def _bytes_to_base64_data(data: _BytesLike) -> str:
     fmt = "data:{mime};base64,{data}"
-    mime = _get_mime_type_for_image(data)
+    mime = _get_mime_type_for_data(data)
     b64 = b64encode(data).decode("ascii")
     return fmt.format(mime=mime, data=b64)
 
 
-def _get_extension_for_image(data: bytes) -> Optional[str]:
+def _get_extension_for_data(data: _BytesLike) -> Optional[str]:
     try:
-        mime_type = _get_mime_type_for_image(data)
+        mime_type = _get_mime_type_for_data(data)
     except ValueError:
         return None
     return _mime_type_extensions.get(mime_type)
@@ -569,7 +568,7 @@ async def _assetbytes_to_base64_data(data: Optional[AssetBytes]) -> Optional[str
 if HAS_ORJSON:
 
     def _to_json(obj: Any) -> str:
-        return orjson.dumps(obj).decode("utf-8")
+        return orjson.dumps(obj).decode("utf-8")  # type: ignore
 
     _from_json = orjson.loads  # type: ignore
 
@@ -602,7 +601,8 @@ async def maybe_coroutine(
         return value  # type: ignore  # typeguard doesn't narrow in the negative case
 
 
-async def async_all(gen: Iterable[Union[Awaitable[bool], bool]], *, check=_isawaitable) -> bool:
+async def async_all(gen: Iterable[Union[Awaitable[bool], bool]]) -> bool:
+    check = _isawaitable
     for elem in gen:
         if check(elem):
             elem = await elem
@@ -616,7 +616,7 @@ async def sane_wait_for(futures: Iterable[Awaitable[T]], *, timeout: float) -> S
     done, pending = await asyncio.wait(ensured, timeout=timeout, return_when=asyncio.ALL_COMPLETED)
 
     if len(pending) != 0:
-        raise asyncio.TimeoutError()
+        raise asyncio.TimeoutError
 
     return done
 
@@ -743,8 +743,7 @@ def resolve_invite(
 def resolve_invite(
     invite: Union[Invite, str], *, with_params: bool = False
 ) -> Union[str, Tuple[str, Dict[str, str]]]:
-    """
-    Resolves an invite from a :class:`~disnake.Invite`, URL or code.
+    """Resolves an invite from a :class:`~disnake.Invite`, URL or code.
 
     Parameters
     ----------
@@ -780,8 +779,7 @@ def resolve_invite(
 
 
 def resolve_template(code: Union[Template, str]) -> str:
-    """
-    Resolves a template code from a :class:`~disnake.Template`, URL or code.
+    """Resolves a template code from a :class:`~disnake.Template`, URL or code.
 
     .. versionadded:: 1.4
 
@@ -853,12 +851,11 @@ def remove_markdown(text: str, *, ignore_links: bool = True) -> str:
     regex = _MARKDOWN_STOCK_REGEX
     if ignore_links:
         regex = f"(?:{_URL_REGEX}|{regex})"
-    return re.sub(regex, replacement, text, 0, re.MULTILINE)
+    return re.sub(regex, replacement, text, flags=re.MULTILINE)
 
 
 def escape_markdown(text: str, *, as_needed: bool = False, ignore_links: bool = True) -> str:
-    """
-    A helper function that escapes Discord's markdown.
+    """A helper function that escapes Discord's markdown.
 
     Parameters
     ----------
@@ -881,7 +878,6 @@ def escape_markdown(text: str, *, as_needed: bool = False, ignore_links: bool = 
     :class:`str`
         The text with the markdown special characters escaped with a slash.
     """
-
     if not as_needed:
 
         def replacement(match):
@@ -894,7 +890,7 @@ def escape_markdown(text: str, *, as_needed: bool = False, ignore_links: bool = 
         regex = _MARKDOWN_STOCK_REGEX
         if ignore_links:
             regex = f"(?:{_URL_REGEX}|{regex})"
-        return re.sub(regex, replacement, text, 0, re.MULTILINE)
+        return re.sub(regex, replacement, text, flags=re.MULTILINE)
     else:
         text = re.sub(r"\\", r"\\\\", text)
         return _MARKDOWN_ESCAPE_REGEX.sub(r"\\\1", text)
@@ -1155,6 +1151,24 @@ def normalise_optional_params(parameters: Iterable[Any]) -> Tuple[Any, ...]:
     return tuple(p for p in parameters if p is not none_cls) + (none_cls,)
 
 
+def _resolve_typealiastype(
+    tp: Any, globals: Dict[str, Any], locals: Dict[str, Any], cache: Dict[str, Any]
+):
+    # Use __module__ to get the (global) namespace in which the type alias was defined.
+    if mod := sys.modules.get(tp.__module__):
+        mod_globals = mod.__dict__
+        if mod_globals is not globals or mod_globals is not locals:
+            # if the namespace changed (usually when a TypeAliasType was imported from a different module),
+            # drop the cache since names can resolve differently now
+            cache = {}
+        globals = locals = mod_globals
+
+    # Accessing `__value__` automatically evaluates the type alias in the annotation scope.
+    # (recurse to resolve possible forwardrefs, aliases, etc.)
+    return evaluate_annotation(tp.__value__, globals, locals, cache)
+
+
+# FIXME: this should be split up into smaller functions for clarity and easier maintenance
 def evaluate_annotation(
     tp: Any,
     globals: Dict[str, Any],
@@ -1171,29 +1185,40 @@ def evaluate_annotation(
     if implicit_str and isinstance(tp, str):
         if tp in cache:
             return cache[tp]
-        evaluated = eval(  # noqa: S307  # this is how annotations are supposed to be evaled
-            tp, globals, locals
-        )
-        cache[tp] = evaluated
-        return evaluate_annotation(evaluated, globals, locals, cache)
 
+        # this is how annotations are supposed to be unstringifed
+        evaluated = eval(tp, globals, locals)  # noqa: S307
+        # recurse to resolve nested args further
+        evaluated = evaluate_annotation(evaluated, globals, locals, cache)
+
+        cache[tp] = evaluated
+        return evaluated
+
+    # GenericAlias / UnionType
     if hasattr(tp, "__args__"):
-        implicit_str = True
-        is_literal = False
-        orig_args = args = tp.__args__
         if not hasattr(tp, "__origin__"):
             if tp.__class__ is UnionType:
-                converted = Union[args]  # type: ignore
+                converted = Union[tp.__args__]  # type: ignore
                 return evaluate_annotation(converted, globals, locals, cache)
 
             return tp
-        if tp.__origin__ is Union:
+
+        implicit_str = True
+        is_literal = False
+        orig_args = args = tp.__args__
+        orig_origin = origin = tp.__origin__
+
+        # origin can be a TypeAliasType too, resolve it and continue
+        if hasattr(origin, "__value__"):
+            origin = _resolve_typealiastype(origin, globals, locals, cache)
+
+        if origin is Union:
             try:
                 if args.index(type(None)) != len(args) - 1:
                     args = normalise_optional_params(tp.__args__)
             except ValueError:
                 pass
-        if tp.__origin__ is Literal:
+        if origin is Literal:
             if not PY_310:
                 args = flatten_literal_params(tp.__args__)
             implicit_str = False
@@ -1209,13 +1234,21 @@ def evaluate_annotation(
         ):
             raise TypeError("Literal arguments must be of type str, int, bool, or NoneType.")
 
+        if origin != orig_origin:
+            # we can't use `copy_with` in this case, so just skip all of the following logic
+            return origin[evaluated_args]
+
         if evaluated_args == orig_args:
             return tp
 
         try:
             return tp.copy_with(evaluated_args)
         except AttributeError:
-            return tp.__origin__[evaluated_args]
+            return origin[evaluated_args]
+
+    # TypeAliasType, 3.12+
+    if hasattr(tp, "__value__"):
+        return _resolve_typealiastype(tp, globals, locals, cache)
 
     return tp
 
@@ -1235,6 +1268,137 @@ def resolve_annotation(
     if cache is None:
         cache = {}
     return evaluate_annotation(annotation, globalns, locals, cache)
+
+
+def unwrap_function(function: Callable[..., Any]) -> Callable[..., Any]:
+    partial = functools.partial
+    while True:
+        if hasattr(function, "__wrapped__"):
+            function = function.__wrapped__
+        elif isinstance(function, partial):
+            function = function.func
+        else:
+            return function
+
+
+def _get_function_globals(function: Callable[..., Any]) -> Dict[str, Any]:
+    unwrap = unwrap_function(function)
+    try:
+        return unwrap.__globals__
+    except AttributeError:
+        return {}
+
+
+_inspect_empty = inspect.Parameter.empty
+
+
+def get_signature_parameters(
+    function: Callable[..., Any],
+    globalns: Optional[Dict[str, Any]] = None,
+    *,
+    skip_standard_params: bool = False,
+) -> Dict[str, inspect.Parameter]:
+    # if no globalns provided, unwrap (where needed) and get global namespace from there
+    if globalns is None:
+        globalns = _get_function_globals(function)
+
+    params: Dict[str, inspect.Parameter] = {}
+    cache: Dict[str, Any] = {}
+
+    signature = inspect.signature(function)
+    iterator = iter(signature.parameters.items())
+
+    if skip_standard_params:
+        # skip `self` (if present) and `ctx` parameters,
+        # since their annotations are irrelevant
+        skip = 2 if signature_has_self_param(function) else 1
+
+        for _ in range(skip):
+            try:
+                next(iterator)
+            except StopIteration:
+                raise ValueError(
+                    f"Expected command callback to have at least {skip} parameter(s)"
+                ) from None
+
+    # eval all parameter annotations
+    for name, parameter in iterator:
+        annotation = parameter.annotation
+        if annotation is _inspect_empty:
+            params[name] = parameter
+            continue
+
+        if annotation is None:
+            annotation = type(None)
+        else:
+            annotation = evaluate_annotation(annotation, globalns, globalns, cache)
+
+        params[name] = parameter.replace(annotation=annotation)
+
+    return params
+
+
+def get_signature_return(function: Callable[..., Any]) -> Any:
+    signature = inspect.signature(function)
+
+    # same as parameters above, but for the return annotation
+    ret = signature.return_annotation
+    if ret is not _inspect_empty:
+        if ret is None:
+            ret = type(None)
+        else:
+            globalns = _get_function_globals(function)
+            ret = evaluate_annotation(ret, globalns, globalns, {})
+
+    return ret
+
+
+def signature_has_self_param(function: Callable[..., Any]) -> bool:
+    # If a function was defined in a class and is not bound (i.e. is not types.MethodType),
+    # it should have a `self` parameter.
+    # Bound methods technically also have a `self` parameter, but this is
+    # used in conjunction with `inspect.signature`, which drops that parameter.
+    #
+    # There isn't really any way to reliably detect whether a function
+    # was defined in a class, other than `__qualname__`, thanks to PEP 3155.
+    # As noted in the PEP, this doesn't work with rebinding, but that should be a pretty rare edge case.
+    #
+    #
+    # There are a few possible situations here - for the purposes of this method,
+    # we want to detect the first case only:
+    # (1) The preceding component for *methods in classes* will be the class name, resulting in `Clazz.func`.
+    # (2) For *unbound* functions (not methods), `__qualname__ == __name__`.
+    # (3) Bound methods (i.e. types.MethodType) don't have a `self` parameter in the context of this function (see first paragraph).
+    #     (we currently don't expect to handle bound methods anywhere, except the default help command implementation).
+    # (4) A somewhat special case are lambdas defined in a class namespace (but not inside a method), which use `Clazz.<lambda>` and shouldn't match (1).
+    #     (lambdas at class level are a bit funky; we currently only expect them in the `Param(converter=)` kwarg, which doesn't take a `self` parameter).
+    # (5) Similarly, *nested functions* use `containing_func.<locals>.func` and shouldn't have a `self` parameter.
+    #
+    # Working solely based on this string is certainly not ideal,
+    # but the compiler does a bunch of processing just for that attribute,
+    # and there's really no other way to retrieve this information through other means later.
+    # (3.10: https://github.com/python/cpython/blob/e07086db03d2dc1cd2e2a24f6c9c0ddd422b4cf0/Python/compile.c#L744)
+    #
+    # Not reliable for classmethod/staticmethod.
+
+    qname = function.__qualname__
+    if qname == function.__name__:
+        # (2)
+        return False
+
+    if isinstance(function, types.MethodType):
+        # (3)
+        return False
+
+    # "a.b.c.d" => "a.b.c", "d"
+    parent, basename = qname.rsplit(".", 1)
+
+    if basename == "<lambda>":
+        # (4)
+        return False
+
+    # (5)
+    return not parent.endswith(".<locals>")
 
 
 TimestampStyle = Literal["f", "F", "d", "D", "t", "T", "R"]
@@ -1295,7 +1459,7 @@ def search_directory(path: str) -> Iterator[str]:
         The path to search for modules
 
     Yields
-    -------
+    ------
     :class:`str`
         The name of the found module. (usable in load_extension)
     """
@@ -1323,8 +1487,7 @@ def search_directory(path: str) -> Iterator[str]:
 
 
 def as_valid_locale(locale: str) -> Optional[str]:
-    """
-    Converts the provided locale name to a name that is valid for use with the API,
+    """Converts the provided locale name to a name that is valid for use with the API,
     for example by returning ``en-US`` for ``en_US``.
     Returns ``None`` for invalid names.
 

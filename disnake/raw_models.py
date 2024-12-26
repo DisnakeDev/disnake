@@ -6,9 +6,10 @@ import datetime
 from typing import TYPE_CHECKING, List, Literal, Optional, Set, Union, cast
 
 from .enums import ChannelType, try_enum
-from .utils import get_slots
+from .utils import _get_as_snowflake, get_slots
 
 if TYPE_CHECKING:
+    from .channel import VoiceChannelEffect
     from .member import Member
     from .message import Message
     from .partial_emoji import PartialEmoji
@@ -24,8 +25,12 @@ if TYPE_CHECKING:
         MessageReactionRemoveEmojiEvent,
         MessageReactionRemoveEvent,
         MessageUpdateEvent,
+        PollVoteAddEvent,
+        PollVoteRemoveEvent,
+        PresenceUpdateEvent,
         ThreadDeleteEvent,
         TypingStartEvent,
+        VoiceChannelEffectSendEvent,
     )
     from .user import User
 
@@ -43,6 +48,9 @@ __all__ = (
     "RawThreadMemberRemoveEvent",
     "RawTypingEvent",
     "RawGuildMemberRemoveEvent",
+    "RawPresenceUpdateEvent",
+    "RawPollVoteActionEvent",
+    "RawVoiceChannelEffectEvent",
 )
 
 
@@ -145,6 +153,62 @@ class RawMessageUpdateEvent(_RawReprMixin):
             self.guild_id: Optional[int] = None
 
 
+PollEventType = Literal["POLL_VOTE_ADD", "POLL_VOTE_REMOVE"]
+
+
+class RawPollVoteActionEvent(_RawReprMixin):
+    """Represents the event payload for :func:`on_raw_poll_vote_add` and
+    :func:`on_raw_poll_vote_remove` events.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    message_id: :class:`int`
+        The message ID that got or lost a vote.
+    user_id: :class:`int`
+        The user ID who added the vote or whose vote was removed.
+    cached_member: Optional[:class:`Member`]
+        The member who added the vote. Available only when the guilds and members are cached.
+    channel_id: :class:`int`
+        The channel ID where the vote addition or removal took place.
+    guild_id: Optional[:class:`int`]
+        The guild ID where the vote addition or removal took place, if applicable.
+    answer_id: :class:`int`
+        The ID of the answer that was voted or unvoted.
+    event_type: :class:`str`
+        The event type that triggered this action. Can be
+        ``POLL_VOTE_ADD`` for vote addition or
+        ``POLL_VOTE_REMOVE`` for vote removal.
+    """
+
+    __slots__ = (
+        "message_id",
+        "user_id",
+        "cached_member",
+        "channel_id",
+        "guild_id",
+        "event_type",
+        "answer_id",
+    )
+
+    def __init__(
+        self,
+        data: Union[PollVoteAddEvent, PollVoteRemoveEvent],
+        event_type: PollEventType,
+    ) -> None:
+        self.message_id: int = int(data["message_id"])
+        self.user_id: int = int(data["user_id"])
+        self.cached_member: Optional[Member] = None
+        self.channel_id: int = int(data["channel_id"])
+        self.event_type = event_type
+        self.answer_id: int = int(data["answer_id"])
+        try:
+            self.guild_id: Optional[int] = int(data["guild_id"])
+        except KeyError:
+            self.guild_id: Optional[int] = None
+
+
 ReactionEventType = Literal["REACTION_ADD", "REACTION_REMOVE"]
 
 
@@ -164,8 +228,12 @@ class RawReactionActionEvent(_RawReprMixin):
         The guild ID where the reaction addition or removal took place, if applicable.
     emoji: :class:`PartialEmoji`
         The custom or unicode emoji being used.
+
+        .. versionchanged:: 2.9
+            This now also includes the correct :attr:`~PartialEmoji.animated` value when a reaction was removed.
+
     member: Optional[:class:`Member`]
-        The member who added the reaction. Only available if `event_type` is `REACTION_ADD` and the reaction is inside a guild.
+        The member who added the reaction. Only available if :attr:`event_type` is ``REACTION_ADD`` and the reaction is inside a guild.
 
         .. versionadded:: 1.3
 
@@ -175,9 +243,25 @@ class RawReactionActionEvent(_RawReprMixin):
         ``REACTION_REMOVE`` for reaction removal.
 
         .. versionadded:: 1.3
+
+    message_author_id: Optional[:class:`int`]
+        The ID of the author who created the message that got a reaction.
+        Only available if :attr:`event_type` is ``REACTION_ADD``.
+        May also be ``None`` if the message was created by a webhook.
+
+        .. versionadded:: 2.10
     """
 
-    __slots__ = ("message_id", "user_id", "channel_id", "guild_id", "emoji", "event_type", "member")
+    __slots__ = (
+        "message_id",
+        "user_id",
+        "channel_id",
+        "guild_id",
+        "emoji",
+        "event_type",
+        "member",
+        "message_author_id",
+    )
 
     def __init__(
         self,
@@ -195,6 +279,7 @@ class RawReactionActionEvent(_RawReprMixin):
             self.guild_id: Optional[int] = int(data["guild_id"])
         except KeyError:
             self.guild_id: Optional[int] = None
+        self.message_author_id: Optional[int] = _get_as_snowflake(data, "message_author_id")
 
 
 class RawReactionClearEvent(_RawReprMixin):
@@ -236,6 +321,9 @@ class RawReactionClearEmojiEvent(_RawReprMixin):
         The guild ID where the reaction clear took place, if applicable.
     emoji: :class:`PartialEmoji`
         The custom or unicode emoji being removed.
+
+        .. versionchanged:: 2.9
+            This now also includes the correct :attr:`~PartialEmoji.animated` value.
     """
 
     __slots__ = ("message_id", "channel_id", "guild_id", "emoji")
@@ -381,6 +469,9 @@ class RawTypingEvent(_RawReprMixin):
         The member object of the user who started typing or ``None`` if it was in a DM.
     timestamp: :class:`datetime.datetime`
         The UTC datetime when the user started typing.
+
+        .. versionchanged:: 2.9
+            Changed from naive to aware datetime.
     """
 
     __slots__ = ("user_id", "channel_id", "guild_id", "member", "timestamp")
@@ -389,7 +480,9 @@ class RawTypingEvent(_RawReprMixin):
         self.user_id: int = int(data["user_id"])
         self.channel_id: int = int(data["channel_id"])
         self.member: Optional[Member] = None
-        self.timestamp: datetime.datetime = datetime.datetime.utcfromtimestamp(data["timestamp"])
+        self.timestamp: datetime.datetime = datetime.datetime.fromtimestamp(
+            data["timestamp"], tz=datetime.timezone.utc
+        )
         try:
             self.guild_id: Optional[int] = int(data["guild_id"])
         except KeyError:
@@ -417,3 +510,66 @@ class RawGuildMemberRemoveEvent(_RawReprMixin):
     def __init__(self, user: Union[User, Member], guild_id: int) -> None:
         self.user: Union[User, Member] = user
         self.guild_id: int = guild_id
+
+
+class RawPresenceUpdateEvent(_RawReprMixin):
+    """Represents the event payload for an :func:`on_raw_presence_update` event.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    user_id: :class:`int`
+        The ID of the user whose presence was updated.
+    guild_id: :class:`int`
+        The ID of the guild where the user's presence changed.
+    data: :class:`dict`
+        The raw data given by the :ddocs:`gateway <topics/gateway-events#presence-update>`.
+    """
+
+    __slots__ = (
+        "user_id",
+        "guild_id",
+        "data",
+    )
+
+    def __init__(self, data: PresenceUpdateEvent) -> None:
+        self.user_id: int = int(data["user"]["id"])
+        self.guild_id: int = int(data["guild_id"])
+        self.data: PresenceUpdateEvent = data
+
+
+class RawVoiceChannelEffectEvent(_RawReprMixin):
+    """Represents the event payload for an :func:`on_raw_voice_channel_effect` event.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    channel_id: :class:`int`
+        The ID of the channel where the effect was sent.
+    guild_id: :class:`int`
+        The ID of the guild where the effect was sent.
+    user_id: :class:`int`
+        The ID of the user who sent the effect.
+    effect: :class:`VoiceChannelEffect`
+        The effect that was sent.
+    cached_member: Optional[:class:`Member`]
+        The member who sent the effect, if they could be found in the internal cache.
+    """
+
+    __slots__ = (
+        "channel_id",
+        "guild_id",
+        "user_id",
+        "effect",
+        "cached_member",
+    )
+
+    def __init__(self, data: VoiceChannelEffectSendEvent, effect: VoiceChannelEffect) -> None:
+        self.channel_id: int = int(data["channel_id"])
+        self.guild_id: int = int(data["guild_id"])
+        self.user_id: int = int(data["user_id"])
+        self.effect: VoiceChannelEffect = effect
+
+        self.cached_member: Optional[Member] = None

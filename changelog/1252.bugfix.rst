@@ -1,0 +1,1 @@
+|commands| Fix incorrect exception when using the :func:`~ext.commands.default_member_permissions` decorator on a :func:`~ext.commands.user_command` while also using the cog-level ``user_command_attrs`` field.

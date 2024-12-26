@@ -40,6 +40,7 @@ from .errors import (
     EmojiNotFound,
     GuildNotFound,
     GuildScheduledEventNotFound,
+    GuildSoundboardSoundNotFound,
     GuildStickerNotFound,
     MemberNotFound,
     MessageNotFound,
@@ -71,6 +72,7 @@ __all__ = (
     "StageChannelConverter",
     "CategoryChannelConverter",
     "ForumChannelConverter",
+    "MediaChannelConverter",
     "ThreadConverter",
     "ColourConverter",
     "ColorConverter",
@@ -81,6 +83,7 @@ __all__ = (
     "EmojiConverter",
     "PartialEmojiConverter",
     "GuildStickerConverter",
+    "GuildSoundboardSoundConverter",
     "PermissionsConverter",
     "GuildScheduledEventConverter",
     "clean_content",
@@ -127,7 +130,7 @@ class Converter(Protocol[T_co]):
         properly propagate to the error handlers.
 
         Parameters
-        -----------
+        ----------
         ctx: Union[:class:`.Context`, :class:`.ApplicationCommandInteraction`]
             The invocation context that the argument is being used in.
         argument: :class:`str`
@@ -186,11 +189,15 @@ class MemberConverter(IDConverter[disnake.Member]):
 
     The lookup strategy is as follows (in order):
 
-    1. Lookup by ID.
-    2. Lookup by mention.
-    3. Lookup by name#discrim
-    4. Lookup by name
+    1. Lookup by ID
+    2. Lookup by mention
+    3. Lookup by username#discrim
+    4. Lookup by username#0
     5. Lookup by nickname
+    6. Lookup by global name
+    7. Lookup by username
+
+    The name resolution order matches the one used by :meth:`.Guild.get_member_named`.
 
     .. versionchanged:: 1.5
         Raise :exc:`.MemberNotFound` instead of generic :exc:`.BadArgument`
@@ -198,19 +205,30 @@ class MemberConverter(IDConverter[disnake.Member]):
     .. versionchanged:: 1.5.1
         This converter now lazily fetches members from the gateway and HTTP APIs,
         optionally caching the result if :attr:`.MemberCacheFlags.joined` is enabled.
+
+    .. versionchanged:: 2.9
+        Name resolution order changed from ``username > nick`` to
+        ``nick > global_name > username`` to account for the username migration.
     """
 
     async def query_member_named(
         self, guild: disnake.Guild, argument: str
     ) -> Optional[disnake.Member]:
         cache = guild._state.member_cache_flags.joined
-        if len(argument) > 5 and argument[-5] == "#":
-            username, _, discriminator = argument.rpartition("#")
+
+        username, _, discriminator = argument.rpartition("#")
+        if username and (
+            discriminator == "0" or (len(discriminator) == 4 and discriminator.isdecimal())
+        ):
+            # legacy behavior
             members = await guild.query_members(username, limit=100, cache=cache)
             return _utils_get(members, name=username, discriminator=discriminator)
         else:
             members = await guild.query_members(argument, limit=100, cache=cache)
-            return disnake.utils.find(lambda m: m.name == argument or m.nick == argument, members)
+            return disnake.utils.find(
+                lambda m: m.nick == argument or m.global_name == argument or m.name == argument,
+                members,
+            )
 
     async def query_member_by_id(
         self, bot: disnake.Client, guild: disnake.Guild, user_id: int
@@ -284,10 +302,12 @@ class UserConverter(IDConverter[disnake.User]):
 
     The lookup strategy is as follows (in order):
 
-    1. Lookup by ID.
-    2. Lookup by mention.
-    3. Lookup by name#discrim
-    4. Lookup by name
+    1. Lookup by ID
+    2. Lookup by mention
+    3. Lookup by username#discrim
+    4. Lookup by username#0
+    5. Lookup by global name
+    6. Lookup by username
 
     .. versionchanged:: 1.5
         Raise :exc:`.UserNotFound` instead of generic :exc:`.BadArgument`
@@ -295,6 +315,10 @@ class UserConverter(IDConverter[disnake.User]):
     .. versionchanged:: 1.6
         This converter now lazily fetches users from the HTTP APIs if an ID is passed
         and it's not available in cache.
+
+    .. versionchanged:: 2.9
+        Now takes :attr:`~disnake.User.global_name` into account.
+        No longer automatically removes ``"@"`` prefix from arguments.
     """
 
     async def convert(self, ctx: AnyContext, argument: str) -> disnake.User:
@@ -323,24 +347,21 @@ class UserConverter(IDConverter[disnake.User]):
                 return result._user
             return result
 
-        arg = argument
-
-        # Remove the '@' character if this is the first character from the argument
-        if arg[0] == "@":
-            # Remove first character
-            arg = arg[1:]
-
-        # check for discriminator if it exists,
-        if len(arg) > 5 and arg[-5] == "#":
-            discrim = arg[-4:]
-            name = arg[:-5]
-            result = disnake.utils.find(
-                lambda u: u.name == name and u.discriminator == discrim, state._users.values()
-            )
+        username, _, discriminator = argument.rpartition("#")
+        # n.b. there's no builtin method that only matches arabic digits, `isdecimal` is the closest one.
+        # it really doesn't matter much, worst case is unnecessary computations
+        if username and (
+            discriminator == "0" or (len(discriminator) == 4 and discriminator.isdecimal())
+        ):
+            # legacy behavior
+            result = _utils_get(state._users.values(), name=username, discriminator=discriminator)
             if result is not None:
                 return result
 
-        result = disnake.utils.find(lambda u: u.name == arg, state._users.values())
+        result = disnake.utils.find(
+            lambda u: u.global_name == argument or u.name == argument,
+            state._users.values(),
+        )
 
         if result is None:
             raise UserNotFound(argument)
@@ -431,9 +452,9 @@ class MessageConverter(IDConverter[disnake.Message]):
         try:
             return await channel.fetch_message(message_id)
         except disnake.NotFound:
-            raise MessageNotFound(argument)
+            raise MessageNotFound(argument) from None
         except disnake.Forbidden:
-            raise ChannelNotReadable(channel)  # type: ignore
+            raise ChannelNotReadable(channel) from None  # type: ignore
 
 
 class GuildChannelConverter(IDConverter[disnake.abc.GuildChannel]):
@@ -613,6 +634,27 @@ class ForumChannelConverter(IDConverter[disnake.ForumChannel]):
         )
 
 
+class MediaChannelConverter(IDConverter[disnake.MediaChannel]):
+    """Converts to a :class:`~disnake.MediaChannel`.
+
+    .. versionadded:: 2.10
+
+    All lookups are via the local guild. If in a DM context, then the lookup
+    is done by the global cache.
+
+    The lookup strategy is as follows (in order):
+
+    1. Lookup by ID.
+    2. Lookup by mention.
+    3. Lookup by name
+    """
+
+    async def convert(self, ctx: AnyContext, argument: str) -> disnake.MediaChannel:
+        return GuildChannelConverter._resolve_channel(
+            ctx, argument, "media_channels", disnake.MediaChannel
+        )
+
+
 class ThreadConverter(IDConverter[disnake.Thread]):
     """Coverts to a :class:`~disnake.Thread`.
 
@@ -668,7 +710,7 @@ class ColourConverter(Converter[disnake.Colour]):
             if not (0 <= value <= 0xFFFFFF):
                 raise BadColourArgument(argument)
         except ValueError:
-            raise BadColourArgument(argument)
+            raise BadColourArgument(argument) from None
         else:
             return disnake.Color(value=value)
 
@@ -738,7 +780,7 @@ class RoleConverter(IDConverter[disnake.Role]):
     async def convert(self, ctx: AnyContext, argument: str) -> disnake.Role:
         guild = ctx.guild
         if not guild:
-            raise NoPrivateMessage()
+            raise NoPrivateMessage
 
         match = self._get_id_match(argument) or re.match(r"<@&([0-9]{17,19})>$", argument)
         if match:
@@ -904,6 +946,43 @@ class GuildStickerConverter(IDConverter[disnake.GuildSticker]):
         return result
 
 
+class GuildSoundboardSoundConverter(IDConverter[disnake.GuildSoundboardSound]):
+    """Converts to a :class:`~disnake.GuildSoundboardSound`.
+
+    All lookups are done for the local guild first, if available. If that lookup
+    fails, then it checks the client's global cache.
+
+    The lookup strategy is as follows (in order):
+
+    1. Lookup by ID
+    2. Lookup by name
+
+    .. versionadded:: 2.10
+    """
+
+    async def convert(self, ctx: AnyContext, argument: str) -> disnake.GuildSoundboardSound:
+        match = self._get_id_match(argument)
+        result = None
+        bot: disnake.Client = ctx.bot
+        guild = ctx.guild
+
+        if match is None:
+            # Try to get the sound by name. Try local guild first.
+            if guild:
+                result = _utils_get(guild.soundboard_sounds, name=argument)
+
+            if result is None:
+                result = _utils_get(bot.soundboard_sounds, name=argument)
+        else:
+            # Try to look up sound by id.
+            result = bot.get_soundboard_sound(int(match.group(1)))
+
+        if result is None:
+            raise GuildSoundboardSoundNotFound(argument)
+
+        return result
+
+
 class PermissionsConverter(Converter[disnake.Permissions]):
     """Converts to a :class:`~disnake.Permissions`.
 
@@ -1000,7 +1079,8 @@ class clean_content(Converter[str]):
     fix_channel_mentions: :class:`bool`
         Whether to clean channel mentions.
     use_nicknames: :class:`bool`
-        Whether to use nicknames when transforming mentions.
+        Whether to use :attr:`nicknames <.Member.nick>` and
+        :attr:`global names <.Member.global_name>` when transforming mentions.
     escape_markdown: :class:`bool`
         Whether to also escape special markdown characters.
     remove_markdown: :class:`bool`
@@ -1027,9 +1107,11 @@ class clean_content(Converter[str]):
         bot: disnake.Client = ctx.bot
 
         def resolve_user(id: int) -> str:
-            m = (msg and _utils_get(msg.mentions, id=id)) or bot.get_user(id)
-            if m is None and ctx.guild:
-                m = ctx.guild.get_member(id)
+            m = (
+                (msg and _utils_get(msg.mentions, id=id))
+                or (ctx.guild and ctx.guild.get_member(id))
+                or bot.get_user(id)
+            )
             return f"@{m.display_name if self.use_nicknames else m.name}" if m else "@deleted-user"
 
         def resolve_role(id: int) -> str:
@@ -1068,8 +1150,7 @@ class clean_content(Converter[str]):
 
 
 class Greedy(List[T]):
-    """
-    A special converter that greedily consumes arguments until it can't.
+    """A special converter that greedily consumes arguments until it can't.
     As a consequence of this behaviour, most input errors are silently discarded,
     since it is used as an indicator of when to stop parsing.
 
@@ -1113,7 +1194,7 @@ class Greedy(List[T]):
             raise TypeError("Greedy[...] expects a type or a Converter instance.")
 
         if converter in (str, type(None)) or origin is Greedy:
-            raise TypeError(f"Greedy[{converter.__name__}] is invalid.")  # type: ignore
+            raise TypeError(f"Greedy[{converter.__name__}] is invalid.")
 
         if origin is Union and type(None) in args:
             raise TypeError(f"Greedy[{converter!r}] is invalid.")
@@ -1141,11 +1222,11 @@ def get_converter(param: inspect.Parameter) -> Any:
     return converter
 
 
-_GenericAlias = type(List[T])
+_GenericAlias = type(List[Any])
 
 
 def is_generic_type(tp: Any, *, _GenericAlias: Type = _GenericAlias) -> bool:
-    return isinstance(tp, type) and issubclass(tp, Generic) or isinstance(tp, _GenericAlias)
+    return (isinstance(tp, type) and issubclass(tp, Generic)) or isinstance(tp, _GenericAlias)
 
 
 CONVERTER_MAPPING: Dict[Type[Any], Type[Converter]] = {
@@ -1166,9 +1247,11 @@ CONVERTER_MAPPING: Dict[Type[Any], Type[Converter]] = {
     disnake.PartialEmoji: PartialEmojiConverter,
     disnake.CategoryChannel: CategoryChannelConverter,
     disnake.ForumChannel: ForumChannelConverter,
+    disnake.MediaChannel: MediaChannelConverter,
     disnake.Thread: ThreadConverter,
     disnake.abc.GuildChannel: GuildChannelConverter,
     disnake.GuildSticker: GuildStickerConverter,
+    disnake.GuildSoundboardSound: GuildSoundboardSoundConverter,
     disnake.Permissions: PermissionsConverter,
     disnake.GuildScheduledEvent: GuildScheduledEventConverter,
 }
@@ -1176,7 +1259,7 @@ CONVERTER_MAPPING: Dict[Type[Any], Type[Converter]] = {
 
 async def _actual_conversion(
     ctx: Context,
-    converter: Union[Type[T], Converter[T], Callable[[str], T]],
+    converter: Union[Type[T], Type[Converter[T]], Converter[T], Callable[[str], T]],
     argument: str,
     param: inspect.Parameter,
 ) -> T:
@@ -1202,7 +1285,7 @@ async def _actual_conversion(
         raise ConversionError(converter, exc) from exc
 
     try:
-        return converter(argument)
+        return converter(argument)  # type: ignore
     except CommandError:
         raise
     except Exception as exc:

@@ -20,6 +20,7 @@ from typing import (
 from disnake import utils
 from disnake.app_commands import Option, SlashCommand
 from disnake.enums import OptionType
+from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
 from disnake.i18n import Localized
 from disnake.interactions import ApplicationCommandInteraction
 from disnake.permissions import Permissions
@@ -97,6 +98,29 @@ async def _call_autocompleter(
     return choices
 
 
+_INVALID_SUB_KWARGS = frozenset(
+    {"dm_permission", "default_member_permissions", "install_types", "contexts"}
+)
+
+
+# this is just a helpful message for users trying to set specific
+# top-level-only fields on subcommands or groups
+def _check_invalid_sub_kwargs(func: CommandCallback, kwargs: Dict[str, Any]) -> None:
+    invalid_keys = kwargs.keys() & _INVALID_SUB_KWARGS
+
+    for decorator_key in [
+        "__default_member_permissions__",
+        "__install_types__",
+        "__contexts__",
+    ]:
+        if hasattr(func, decorator_key):
+            invalid_keys.add(decorator_key.strip("_"))
+
+    if invalid_keys:
+        msg = f"Cannot set {utils.humanize_list(list(invalid_keys), 'or')} on subcommands or subcommand groups"
+        raise TypeError(msg)
+
+
 class SubCommandGroup(InvokableApplicationCommand):
     """A class that implements the protocol for a bot slash command group.
 
@@ -142,7 +166,7 @@ class SubCommandGroup(InvokableApplicationCommand):
         parent: InvokableSlashCommand,
         *,
         name: LocalizedOptional = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
@@ -156,14 +180,7 @@ class SubCommandGroup(InvokableApplicationCommand):
         )
         self.qualified_name: str = f"{parent.qualified_name} {self.name}"
 
-        if (
-            "dm_permission" in kwargs
-            or "default_member_permissions" in kwargs
-            or hasattr(func, "__default_member_permissions__")
-        ):
-            raise TypeError(
-                "Cannot set `default_member_permissions` or `dm_permission` on subcommand groups"
-            )
+        _check_invalid_sub_kwargs(func, kwargs)
 
     @property
     def root_parent(self) -> InvokableSlashCommand:
@@ -193,10 +210,9 @@ class SubCommandGroup(InvokableApplicationCommand):
         options: Optional[list] = None,
         connectors: Optional[dict] = None,
         extras: Optional[Dict[str, Any]] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> Callable[[CommandCallback], SubCommand]:
-        """
-        A decorator that creates a subcommand in the subcommand group.
+        """A decorator that creates a subcommand in the subcommand group.
         Parameters are the same as in :class:`InvokableSlashCommand.sub_command`
 
         Returns
@@ -273,7 +289,7 @@ class SubCommand(InvokableApplicationCommand):
         description: LocalizedOptional = None,
         options: Optional[list] = None,
         connectors: Optional[Dict[str, str]] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
@@ -297,14 +313,7 @@ class SubCommand(InvokableApplicationCommand):
         )
         self.qualified_name = f"{parent.qualified_name} {self.name}"
 
-        if (
-            "dm_permission" in kwargs
-            or "default_member_permissions" in kwargs
-            or hasattr(func, "__default_member_permissions__")
-        ):
-            raise TypeError(
-                "Cannot set `default_member_permissions` or `dm_permission` on subcommands"
-            )
+        _check_invalid_sub_kwargs(func, kwargs)
 
     @property
     def root_parent(self) -> InvokableSlashCommand:
@@ -333,10 +342,12 @@ class SubCommand(InvokableApplicationCommand):
 
     @property
     def description(self) -> str:
+        """:class:`str`: The slash sub command's description. Shorthand for :attr:`self.body.description <.Option.description>`."""
         return self.body.description
 
     @property
     def body(self) -> Option:
+        """:class:`.Option`: The API representation for this slash sub command. Shorthand for :attr:`.SubCommand.option`"""
         return self.option
 
     async def _call_autocompleter(
@@ -344,7 +355,7 @@ class SubCommand(InvokableApplicationCommand):
     ) -> Optional[Choices]:
         return await _call_autocompleter(self, param, inter, user_input)
 
-    async def invoke(self, inter: ApplicationCommandInteraction, *args, **kwargs) -> None:
+    async def invoke(self, inter: ApplicationCommandInteraction, *args: Any, **kwargs: Any) -> None:
         for k, v in self.connectors.items():
             if k in kwargs:
                 kwargs[v] = kwargs.pop(k)
@@ -432,13 +443,15 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
         options: Optional[List[Option]] = None,
-        dm_permission: Optional[bool] = None,
+        dm_permission: Optional[bool] = None,  # deprecated
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
+        install_types: Optional[ApplicationInstallTypes] = None,
+        contexts: Optional[InteractionContextTypes] = None,
         guild_ids: Optional[Sequence[int]] = None,
         connectors: Optional[Dict[str, str]] = None,
         auto_sync: Optional[bool] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
@@ -459,8 +472,14 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             default_member_permissions = func.__default_member_permissions__
         except AttributeError:
             pass
-
-        dm_permission = True if dm_permission is None else dm_permission
+        try:
+            install_types = func.__install_types__
+        except AttributeError:
+            pass
+        try:
+            contexts = func.__contexts__
+        except AttributeError:
+            pass
 
         self.body: SlashCommand = SlashCommand(
             name=name_loc._upgrade(self.name, key=self.docstring["localization_key_name"]),
@@ -468,10 +487,14 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                 self.docstring["description"] or "-", key=self.docstring["localization_key_desc"]
             ),
             options=options or [],
-            dm_permission=dm_permission and not self._guild_only,
+            dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
             nsfw=nsfw,
+            install_types=install_types,
+            contexts=contexts,
         )
+
+        self._apply_guild_only()
 
     @property
     def root_parent(self) -> None:
@@ -509,10 +532,12 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
     @property
     def description(self) -> str:
+        """:class:`str`: The slash command's description. Shorthand for :attr:`self.body.description <.SlashCommand.description>`."""
         return self.body.description
 
     @property
     def options(self) -> List[Option]:
+        """List[:class:`.Option`]: The list of options the slash command has. Shorthand for :attr:`self.body.options <.SlashCommand.options>`."""
         return self.body.options
 
     def sub_command(
@@ -522,10 +547,9 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         options: Optional[list] = None,
         connectors: Optional[dict] = None,
         extras: Optional[Dict[str, Any]] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> Callable[[CommandCallback], SubCommand]:
-        """
-        A decorator that creates a subcommand under the base command.
+        """A decorator that creates a subcommand under the base command.
 
         Parameters
         ----------
@@ -585,10 +609,9 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         self,
         name: LocalizedOptional = None,
         extras: Optional[Dict[str, Any]] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> Callable[[CommandCallback], SubCommandGroup]:
-        """
-        A decorator that creates a subcommand group under the base command.
+        """A decorator that creates a subcommand group under the base command.
 
         Parameters
         ----------
@@ -628,8 +651,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         return decorator
 
     def autocomplete(self, option_name: str) -> Callable[[Callable], Callable]:
-        """
-        A decorator that registers an autocomplete function for the specified option.
+        """A decorator that registers an autocomplete function for the specified option.
 
         Parameters
         ----------
@@ -670,7 +692,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             group = self.children.get(chain[0])
             if not isinstance(group, SubCommandGroup):
                 raise AssertionError("the first subcommand is not a SubCommandGroup instance")
-            subcmd = group.children.get(chain[1]) if group is not None else None
+            subcmd = group.children.get(chain[1])
         else:
             raise ValueError("Command chain is too long")
 
@@ -699,7 +721,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             group = self.children.get(chain[0])
             if not isinstance(group, SubCommandGroup):
                 raise AssertionError("the first subcommand is not a SubCommandGroup instance")
-            subcmd = group.children.get(chain[1]) if group is not None else None
+            subcmd = group.children.get(chain[1])
         else:
             raise ValueError("Command chain is too long")
 
@@ -750,15 +772,17 @@ def slash_command(
     *,
     name: LocalizedOptional = None,
     description: LocalizedOptional = None,
-    dm_permission: Optional[bool] = None,
+    dm_permission: Optional[bool] = None,  # deprecated
     default_member_permissions: Optional[Union[Permissions, int]] = None,
     nsfw: Optional[bool] = None,
+    install_types: Optional[ApplicationInstallTypes] = None,
+    contexts: Optional[InteractionContextTypes] = None,
     options: Optional[List[Option]] = None,
     guild_ids: Optional[Sequence[int]] = None,
     connectors: Optional[Dict[str, str]] = None,
     auto_sync: Optional[bool] = None,
     extras: Optional[Dict[str, Any]] = None,
-    **kwargs,
+    **kwargs: Any,
 ) -> Callable[[CommandCallback], InvokableSlashCommand]:
     """A decorator that builds a slash command.
 
@@ -784,12 +808,34 @@ def slash_command(
 
         .. versionadded:: 2.8
 
+    install_types: Optional[:class:`.ApplicationInstallTypes`]
+        The installation types where the command is available.
+        Defaults to :attr:`.ApplicationInstallTypes.guild` only.
+        Only available for global commands.
+
+        See :ref:`app_command_contexts` for details.
+
+        .. versionadded:: 2.10
+
+    contexts: Optional[:class:`.InteractionContextTypes`]
+        The interaction contexts where the command can be used.
+        Only available for global commands.
+
+        See :ref:`app_command_contexts` for details.
+
+        .. versionadded:: 2.10
+
     options: List[:class:`.Option`]
         The list of slash command options. The options will be visible in Discord.
         This is the old way of specifying options. Consider using :ref:`param_syntax` instead.
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
         Defaults to ``True``.
+
+        .. deprecated:: 2.10
+            Use ``contexts`` instead.
+            This is equivalent to the :attr:`.InteractionContextTypes.bot_dm` flag.
+
     default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
         The default required permissions for this command.
         See :attr:`.ApplicationCommand.default_member_permissions` for details.
@@ -834,6 +880,8 @@ def slash_command(
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
             nsfw=nsfw,
+            install_types=install_types,
+            contexts=contexts,
             guild_ids=guild_ids,
             connectors=connectors,
             auto_sync=auto_sync,

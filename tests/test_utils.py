@@ -2,13 +2,14 @@
 
 import asyncio
 import datetime
+import functools
 import inspect
 import os
 import sys
 import warnings
 from dataclasses import dataclass
 from datetime import timedelta, timezone
-from typing import Any, Dict, List, Literal, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, TypeVar, Union
 from unittest import mock
 
 import pytest
@@ -17,52 +18,58 @@ import yarl
 import disnake
 from disnake import utils
 
-from . import helpers
+from . import helpers, utils_helper_module
+
+if TYPE_CHECKING:
+    from typing_extensions import TypeAliasType
+elif sys.version_info >= (3, 12):
+    # non-3.12 tests shouldn't be using this
+    from typing import TypeAliasType
 
 
-def test_missing():
+def test_missing() -> None:
     assert utils.MISSING != utils.MISSING
     assert not bool(utils.MISSING)
 
 
-def test_cached_property():
+def test_cached_property() -> None:
     class Test:
         @utils.cached_property
         def prop(self) -> object:
-            """stuff"""
+            """Does things"""
             return object()
 
     inst = Test()
     assert inst.prop is inst.prop
-    assert Test.prop.__doc__ == "stuff"
+    assert Test.prop.__doc__ == "Does things"
     assert isinstance(Test.prop, utils.cached_property)
 
 
-def test_cached_slot_property():
+def test_cached_slot_property() -> None:
     class Test:
         __slots__ = ("_cs_prop",)
 
         @utils.cached_slot_property("_cs_prop")
         def prop(self) -> object:
-            """stuff"""
+            """Does things"""
             return object()
 
     inst = Test()
     assert inst.prop is inst.prop
-    assert Test.prop.__doc__ == "stuff"
+    assert Test.prop.__doc__ == "Does things"
     assert isinstance(Test.prop, utils.CachedSlotProperty)
 
 
-def test_parse_time():
+def test_parse_time() -> None:
     assert utils.parse_time(None) is None
     assert utils.parse_time("2021-08-29T13:50:00+00:00") == datetime.datetime(
         2021, 8, 29, 13, 50, 0, tzinfo=timezone.utc
     )
 
 
-def test_copy_doc():
+def test_copy_doc() -> None:
     def func(num: int, *, arg: str) -> float:
-        """returns the best number"""
+        """Returns the best number"""
         ...
 
     @utils.copy_doc(func)
@@ -78,7 +85,7 @@ def test_copy_doc():
     ("instead", "msg"),
     [(None, "stuff is deprecated."), ("other", "stuff is deprecated, use other instead.")],
 )
-def test_deprecated(mock_warn: mock.Mock, instead, msg):
+def test_deprecated(mock_warn: mock.Mock, instead, msg) -> None:
     @utils.deprecated(instead)
     def stuff(num: int) -> int:
         return num
@@ -87,18 +94,46 @@ def test_deprecated(mock_warn: mock.Mock, instead, msg):
     mock_warn.assert_called_once_with(msg, stacklevel=3, category=DeprecationWarning)
 
 
+@mock.patch.object(utils, "_root_module_path", os.path.dirname(__file__))
+@pytest.mark.xfail(
+    sys.version_info < (3, 12),
+    raises=AssertionError,
+    strict=True,
+    reason="requires 3.12 functionality",
+)
+def test_deprecated_skip() -> None:
+    def func(n: int) -> None:
+        if n == 0:
+            utils.warn_deprecated("test", skip_internal_frames=True)
+        else:
+            func(n - 1)
+
+    with warnings.catch_warnings(record=True) as result:
+        # show a warning a couple frames deep
+        func(10)
+
+    # if we successfully skipped all frames in the current module,
+    # we should end up in the mock decorator's frame
+    assert len(result) == 1
+    assert result[0].filename == mock.__file__
+
+
 @pytest.mark.parametrize(
-    ("expected", "perms", "guild", "redirect", "scopes", "disable_select"),
+    ("params", "expected"),
     [
         (
+            {},
             {"scope": "bot"},
-            utils.MISSING,
-            utils.MISSING,
-            utils.MISSING,
-            utils.MISSING,
-            False,
         ),
         (
+            {
+                "permissions": disnake.Permissions(42),
+                "guild": disnake.Object(9999),
+                "redirect_uri": "http://endless.horse",
+                "scopes": ["bot", "applications.commands"],
+                "disable_guild_select": True,
+                "integration_type": 1,
+            },
             {
                 "scope": "bot applications.commands",
                 "permissions": "42",
@@ -106,36 +141,14 @@ def test_deprecated(mock_warn: mock.Mock, instead, msg):
                 "response_type": "code",
                 "redirect_uri": "http://endless.horse",
                 "disable_guild_select": "true",
+                "integration_type": "1",
             },
-            disnake.Permissions(42),
-            disnake.Object(9999),
-            "http://endless.horse",
-            ["bot", "applications.commands"],
-            True,
         ),
     ],
 )
-def test_oauth_url(expected, perms, guild, redirect, scopes, disable_select):
-    url = utils.oauth_url(
-        1234,
-        permissions=perms,
-        guild=guild,
-        redirect_uri=redirect,
-        scopes=scopes,
-        disable_guild_select=disable_select,
-    )
+def test_oauth_url(params, expected) -> None:
+    url = utils.oauth_url(1234, **params)
     assert dict(yarl.URL(url).query) == {"client_id": "1234", **expected}
-
-
-def test_parse_token():
-    # don't get your hopes up, this token isn't valid.
-    # taken from https://guide.disnake.dev/getting-started/initial-files
-    token = "OTA4MjgxMjk4NTU1MTA5Mzk2.YYzc4A.TB7Ng6DOnVDlpMS4idjGptsreFg"  # noqa: S105
-
-    parts = utils.parse_token(token)
-    assert parts[0] == 908281298555109396
-    assert parts[1] == datetime.datetime(2021, 11, 11, 9, 5, 36, tzinfo=timezone.utc)
-    assert parts[2] == bytes.fromhex("4c1ecd83a0ce9d50e5a4c4b889d8c6a6db2b7858")
 
 
 @pytest.mark.parametrize(
@@ -146,7 +159,7 @@ def test_parse_token():
         (10000000000000000000, datetime.datetime(2090, 7, 20, 17, 49, 51, tzinfo=timezone.utc)),
     ],
 )
-def test_snowflake_time(num, expected):
+def test_snowflake_time(num: int, expected) -> None:
     assert utils.snowflake_time(num).replace(microsecond=0) == expected
 
 
@@ -157,7 +170,7 @@ def test_snowflake_time(num, expected):
         (datetime.datetime(2021, 8, 29, 13, 50, 0, tzinfo=timezone.utc), 881536165478400000),
     ],
 )
-def test_time_snowflake(dt, expected):
+def test_time_snowflake(dt, expected) -> None:
     low = utils.time_snowflake(dt)
     assert low == expected
 
@@ -166,7 +179,7 @@ def test_time_snowflake(dt, expected):
     assert high + 1 == utils.time_snowflake(dt + timedelta(milliseconds=1))
 
 
-def test_find():
+def test_find() -> None:
     pred = lambda i: i == 42  # type: ignore
     assert utils.find(pred, []) is None
     assert utils.find(pred, [42]) == 42
@@ -177,7 +190,7 @@ def test_find():
     assert utils.find(pred, lst) is lst[1]
 
 
-def test_get():
+def test_get() -> None:
     @dataclass
     class A:
         value: int
@@ -214,7 +227,7 @@ def test_get():
         ([2, 1], [2, 1]),
     ],
 )
-def test_unique(it, expected):
+def test_unique(it, expected) -> None:
     assert utils._unique(it) == expected
 
 
@@ -228,11 +241,11 @@ def test_unique(it, expected):
         ({"key": "42"}, 42),
     ],
 )
-def test_get_as_snowflake(data, expected):
+def test_get_as_snowflake(data, expected) -> None:
     assert utils._get_as_snowflake(data, "key") == expected
 
 
-def test_maybe_cast():
+def test_maybe_cast() -> None:
     convert = lambda v: v + 1  # type: ignore
     default = object()
 
@@ -254,17 +267,20 @@ def test_maybe_cast():
         (b"\x47\x49\x46\x38\x37\x61", "image/gif", ".gif"),
         (b"\x47\x49\x46\x38\x39\x61", "image/gif", ".gif"),
         (b"RIFFxxxxWEBP", "image/webp", ".webp"),
+        (b"ID3", "audio/mpeg", ".mp3"),
+        (b"\xFF\xF3", "audio/mpeg", ".mp3"),
+        (b"OggS", "audio/ogg", ".ogg"),
     ],
 )
-def test_mime_type_valid(data, expected_mime, expected_ext):
+def test_mime_type_valid(data, expected_mime, expected_ext) -> None:
     for d in (data, data + b"\xFF"):
-        assert utils._get_mime_type_for_image(d) == expected_mime
-        assert utils._get_extension_for_image(d) == expected_ext
+        assert utils._get_mime_type_for_data(d) == expected_mime
+        assert utils._get_extension_for_data(d) == expected_ext
 
     prefixed = b"\xFF" + data
-    with pytest.raises(ValueError, match=r"Unsupported image type given"):
-        utils._get_mime_type_for_image(prefixed)
-    assert utils._get_extension_for_image(prefixed) is None
+    with pytest.raises(ValueError, match=r"Unsupported file type provided"):
+        utils._get_mime_type_for_data(prefixed)
+    assert utils._get_extension_for_data(prefixed) is None
 
 
 @pytest.mark.parametrize(
@@ -277,14 +293,14 @@ def test_mime_type_valid(data, expected_mime, expected_ext):
         b"",
     ],
 )
-def test_mime_type_invalid(data):
-    with pytest.raises(ValueError, match=r"Unsupported image type given"):
-        utils._get_mime_type_for_image(data)
-    assert utils._get_extension_for_image(data) is None
+def test_mime_type_invalid(data) -> None:
+    with pytest.raises(ValueError, match=r"Unsupported file type provided"):
+        utils._get_mime_type_for_data(data)
+    assert utils._get_extension_for_data(data) is None
 
 
 @pytest.mark.asyncio
-async def test_assetbytes_base64():
+async def test_assetbytes_base64() -> None:
     assert await utils._assetbytes_to_base64_data(None) is None
 
     # test bytes
@@ -312,7 +328,7 @@ async def test_assetbytes_base64():
     ],
 )
 @helpers.freeze_time()
-def test_parse_ratelimit_header(after, use_clock, expected):
+def test_parse_ratelimit_header(after, use_clock, expected) -> None:
     reset_time = utils.utcnow() + timedelta(seconds=7)
 
     request = mock.Mock()
@@ -331,7 +347,7 @@ def test_parse_ratelimit_header(after, use_clock, expected):
     ],
 )
 @pytest.mark.asyncio
-async def test_maybe_coroutine(func: mock.Mock):
+async def test_maybe_coroutine(func: mock.Mock) -> None:
     assert await utils.maybe_coroutine(func, 42, arg="uwu") is func.return_value
     func.assert_called_once_with(42, arg="uwu")
 
@@ -348,13 +364,13 @@ async def test_maybe_coroutine(func: mock.Mock):
     ],
 )
 @pytest.mark.asyncio
-async def test_async_all(mock_type, gen, expected):
+async def test_async_all(mock_type, gen, expected) -> None:
     assert await utils.async_all(mock_type(return_value=x)() for x in gen) is expected
 
 
 @pytest.mark.looptime
 @pytest.mark.asyncio
-async def test_sane_wait_for(looptime):
+async def test_sane_wait_for(looptime) -> None:
     times = [10, 50, 25]
 
     def create():
@@ -377,7 +393,7 @@ async def test_sane_wait_for(looptime):
     assert all(t.done() for t in tasks)
 
 
-def test_get_slots():
+def test_get_slots() -> None:
     class A:
         __slots__ = ("a", "a2")
 
@@ -388,7 +404,7 @@ def test_get_slots():
         __slots__ = {"c": "uwu"}
 
     class D(B, C):
-        __slots__ = "xyz"
+        __slots__ = "xyz"  # noqa: PLC0205  # this is intentional
 
     assert list(utils.get_slots(D)) == ["a", "a2", "c", "xyz"]
 
@@ -406,8 +422,8 @@ def test_get_slots():
 )
 @pytest.mark.parametrize(("delta", "expected"), [(7, 7), (-100, 0)])
 @helpers.freeze_time()
-def test_compute_timedelta(tz, delta, expected):
-    dt = datetime.datetime.now()
+def test_compute_timedelta(tz, delta, expected) -> None:
+    dt = datetime.datetime.now()  # noqa: DTZ005
     if tz is not utils.MISSING:
         dt = dt.astimezone(tz)
     assert utils.compute_timedelta(dt + timedelta(seconds=delta)) == expected
@@ -417,17 +433,17 @@ def test_compute_timedelta(tz, delta, expected):
 @pytest.mark.looptime
 @pytest.mark.asyncio
 @helpers.freeze_time()
-async def test_sleep_until(looptime, delta, expected):
+async def test_sleep_until(looptime, delta, expected) -> None:
     o = object()
     assert await utils.sleep_until(utils.utcnow() + timedelta(seconds=delta), o) is o
     assert looptime == expected
 
 
-def test_utcnow():
+def test_utcnow() -> None:
     assert utils.utcnow().tzinfo == timezone.utc
 
 
-def test_valid_icon_size():
+def test_valid_icon_size() -> None:
     for s in (2**x for x in range(4, 13)):
         assert utils.valid_icon_size(s)
 
@@ -436,7 +452,7 @@ def test_valid_icon_size():
 
 
 @pytest.mark.parametrize(("s", "expected"), [("a一b", 4), ("abc", 3)])
-def test_string_width(s, expected):
+def test_string_width(s, expected) -> None:
     assert utils._string_width(s) == expected
 
 
@@ -452,7 +468,7 @@ def test_string_width(s, expected):
     ],
 )
 @pytest.mark.parametrize("with_params", [False, True])
-def test_resolve_invite(url, params, expected, with_params):
+def test_resolve_invite(url, params, expected, with_params) -> None:
     res = utils.resolve_invite(url, with_params=with_params)
     if with_params:
         assert res == (expected, params)
@@ -471,7 +487,7 @@ def test_resolve_invite(url, params, expected, with_params):
         ("https://discordapp.com/template/disnake", "disnake"),
     ],
 )
-def test_resolve_template(url, expected):
+def test_resolve_template(url, expected) -> None:
     assert utils.resolve_template(url) == expected
 
 
@@ -498,7 +514,7 @@ def test_resolve_template(url, expected):
         ),
     ],
 )
-def test_markdown(text, exp_remove, exp_escape):
+def test_markdown(text: str, exp_remove, exp_escape) -> None:
     assert utils.remove_markdown(text, ignore_links=False) == exp_remove
     assert utils.remove_markdown(text, ignore_links=True) == exp_remove
 
@@ -521,7 +537,7 @@ def test_markdown(text, exp_remove, exp_escape):
         ),
     ],
 )
-def test_markdown_links(text, expected, expected_ignore):
+def test_markdown_links(text: str, expected, expected_ignore) -> None:
     assert utils.remove_markdown(text, ignore_links=False) == expected
     assert utils.remove_markdown(text, ignore_links=True) == expected_ignore
 
@@ -536,7 +552,7 @@ def test_markdown_links(text, expected, expected_ignore):
         ("<@&12341234123412341>", "<@\u200b&12341234123412341>"),
     ],
 )
-def test_escape_mentions(text, expected):
+def test_escape_mentions(text: str, expected) -> None:
     assert utils.escape_mentions(text) == expected
 
 
@@ -590,8 +606,8 @@ def test_escape_mentions(text, expected):
         ),
     ],
 )
-def test_parse_docstring_desc(docstring, expected):
-    def f():
+def test_parse_docstring_desc(docstring: Optional[str], expected) -> None:
+    def f() -> None:
         ...
 
     f.__doc__ = docstring
@@ -650,8 +666,8 @@ def test_parse_docstring_desc(docstring, expected):
         ),
     ],
 )
-def test_parse_docstring_param(docstring, expected):
-    def f():
+def test_parse_docstring_param(docstring: str, expected) -> None:
+    def f() -> None:
         ...
 
     f.__doc__ = docstring
@@ -662,10 +678,9 @@ def test_parse_docstring_param(docstring, expected):
     assert utils.parse_docstring(f)["params"] == expected  # ignore description
 
 
-def test_parse_docstring_localizations():
-    def f():
-        """
-        Does stuff. {{cool_key}}
+def test_parse_docstring_localizations() -> None:
+    def f() -> None:
+        """Does stuff. {{cool_key}}
 
         Parameters
         ----------
@@ -708,7 +723,7 @@ def test_parse_docstring_localizations():
 )
 @pytest.mark.parametrize("sync", [False, True])
 @pytest.mark.asyncio
-async def test_as_chunks(sync, it, max_size, expected):
+async def test_as_chunks(sync, it, max_size: int, expected) -> None:
     if sync:
         assert list(utils.as_chunks(it, max_size)) == expected
     else:
@@ -721,7 +736,7 @@ async def test_as_chunks(sync, it, max_size, expected):
 
 
 @pytest.mark.parametrize("max_size", [-1, 0])
-def test_as_chunks_size(max_size):
+def test_as_chunks_size(max_size: int) -> None:
     with pytest.raises(ValueError, match=r"Chunk sizes must be greater than 0."):
         utils.as_chunks(iter([]), max_size)
 
@@ -736,7 +751,7 @@ def test_as_chunks_size(max_size):
         ([Literal[1, 1, 2, 3, 3]], (1, 2, 3)),
     ],
 )
-def test_flatten_literal_params(params, expected):
+def test_flatten_literal_params(params, expected) -> None:
     assert utils.flatten_literal_params(params) == expected
 
 
@@ -747,7 +762,7 @@ NoneType = type(None)
     ("params", "expected"),
     [([NoneType], (NoneType,)), ([NoneType, int, NoneType, float], (int, float, NoneType))],
 )
-def test_normalise_optional_params(params, expected):
+def test_normalise_optional_params(params, expected) -> None:
     assert utils.normalise_optional_params(params) == expected
 
 
@@ -770,14 +785,14 @@ def test_normalise_optional_params(params, expected):
         ("Tuple[dict, List[Literal[42, 99]]]", Tuple[dict, List[Literal[42, 99]]], True),
         # 3.10 union syntax
         pytest.param(
-            "int | Literal[False]",
-            Union[int, Literal[False]],
+            "int | float",
+            Union[int, float],
             True,
             marks=pytest.mark.skipif(sys.version_info < (3, 10), reason="syntax requires py3.10"),
         ),
     ],
 )
-def test_resolve_annotation(tp, expected, expected_cache):
+def test_resolve_annotation(tp, expected, expected_cache) -> None:
     cache = {}
     result = utils.resolve_annotation(tp, globals(), locals(), cache)
     assert result == expected
@@ -789,11 +804,70 @@ def test_resolve_annotation(tp, expected, expected_cache):
         assert utils.resolve_annotation(tp, globals(), locals(), cache) is result
 
 
-def test_resolve_annotation_literal():
+def test_resolve_annotation_literal() -> None:
     with pytest.raises(
         TypeError, match=r"Literal arguments must be of type str, int, bool, or NoneType."
     ):
-        utils.resolve_annotation(Literal[datetime.datetime.now(), 3], globals(), locals(), {})  # type: ignore
+        utils.resolve_annotation(Literal[timezone.utc, 3], globals(), locals(), {})  # type: ignore
+
+
+@pytest.mark.skipif(sys.version_info < (3, 12), reason="syntax requires py3.12")
+class TestResolveAnnotationTypeAliasType:
+    def test_simple(self) -> None:
+        # this is equivalent to `type CoolList = List[int]`
+        CoolList = TypeAliasType("CoolList", List[int])
+        assert utils.resolve_annotation(CoolList, globals(), locals(), {}) == List[int]
+
+    def test_generic(self) -> None:
+        # this is equivalent to `type CoolList[T] = List[T]; CoolList[int]`
+        T = TypeVar("T")
+        CoolList = TypeAliasType("CoolList", List[T], type_params=(T,))
+
+        annotation = CoolList[int]
+        assert utils.resolve_annotation(annotation, globals(), locals(), {}) == List[int]
+
+    # alias and arg in local scope
+    def test_forwardref_local(self) -> None:
+        T = TypeVar("T")
+        IntOrStr = Union[int, str]
+        CoolList = TypeAliasType("CoolList", List[T], type_params=(T,))
+
+        annotation = CoolList["IntOrStr"]
+        assert utils.resolve_annotation(annotation, globals(), locals(), {}) == List[IntOrStr]
+
+    # alias and arg in other module scope
+    def test_forwardref_module(self) -> None:
+        resolved = utils.resolve_annotation(
+            utils_helper_module.ListWithForwardRefAlias, globals(), locals(), {}
+        )
+        assert resolved == List[Union[int, str]]
+
+    # combination of the previous two, alias in other module scope and arg in local scope
+    def test_forwardref_mixed(self) -> None:
+        LocalIntOrStr = Union[int, str]
+
+        annotation = utils_helper_module.GenericListAlias["LocalIntOrStr"]
+        assert utils.resolve_annotation(annotation, globals(), locals(), {}) == List[LocalIntOrStr]
+
+    # two different forwardrefs with same name
+    def test_forwardref_duplicate(self) -> None:
+        DuplicateAlias = int
+
+        # first, resolve an annotation where `DuplicateAlias` resolves to the local int
+        cache = {}
+        assert (
+            utils.resolve_annotation(List["DuplicateAlias"], globals(), locals(), cache)
+            == List[int]
+        )
+
+        # then, resolve an annotation where the globalns changes and `DuplicateAlias` resolves to something else
+        # (i.e. this should not resolve to `List[int]` despite {"DuplicateAlias": int} in the cache)
+        assert (
+            utils.resolve_annotation(
+                utils_helper_module.ListWithDuplicateAlias, globals(), locals(), cache
+            )
+            == List[str]
+        )
 
 
 @pytest.mark.parametrize(
@@ -804,7 +878,7 @@ def test_resolve_annotation_literal():
         (datetime.datetime(2021, 8, 29, 13, 50, 0, tzinfo=timezone.utc), "f", "<t:1630245000:f>"),
     ],
 )
-def test_format_dt(dt, style, expected):
+def test_format_dt(dt, style, expected) -> None:
     assert utils.format_dt(dt, style) == expected
 
 
@@ -834,7 +908,7 @@ def tmp_module_root(tmp_path_factory):
         ("empty/", []),
     ],
 )
-def test_search_directory(tmp_module_root, path, expected):
+def test_search_directory(tmp_module_root, path, expected) -> None:
     orig_cwd = os.getcwd()
     try:
         os.chdir(tmp_module_root)
@@ -854,7 +928,7 @@ def test_search_directory(tmp_module_root, path, expected):
         ("test.py", r"Provided path '.*?test.py' is not a directory"),
     ],
 )
-def test_search_directory_exc(tmp_module_root, path, exc):
+def test_search_directory_exc(tmp_module_root, path, exc) -> None:
     orig_cwd = os.getcwd()
     try:
         os.chdir(tmp_module_root)
@@ -876,7 +950,7 @@ def test_search_directory_exc(tmp_module_root, path, exc):
         ("de_DE", "de"),
     ],
 )
-def test_as_valid_locale(locale, expected):
+def test_as_valid_locale(locale, expected) -> None:
     assert utils.as_valid_locale(locale) == expected
 
 
@@ -890,5 +964,86 @@ def test_as_valid_locale(locale, expected):
         (["one", "two", "three", "four"], "one, two, three, plus four"),
     ],
 )
-def test_humanize_list(values, expected):
+def test_humanize_list(values, expected) -> None:
     assert utils.humanize_list(values, "plus") == expected
+
+
+# used for `test_signature_has_self_param`
+def _toplevel():
+    def inner() -> None:
+        ...
+
+    return inner
+
+
+def decorator(f):
+    @functools.wraps(f)
+    def wrap(self, *args, **kwargs):
+        return f(self, *args, **kwargs)
+
+    return wrap
+
+
+# used for `test_signature_has_self_param`
+class _Clazz:
+    def func(self):
+        def inner() -> None:
+            ...
+
+        return inner
+
+    @classmethod
+    def cmethod(cls) -> None:
+        ...
+
+    @staticmethod
+    def smethod() -> None:
+        ...
+
+    class Nested:
+        def func(self):
+            def inner() -> None:
+                ...
+
+            return inner
+
+    rebind = _toplevel
+
+    @decorator
+    def decorated(self) -> None:
+        ...
+
+    _lambda = lambda: None
+
+
+@pytest.mark.parametrize(
+    ("function", "expected"),
+    [
+        # top-level function
+        (_toplevel, False),
+        # methods in class
+        (_Clazz.func, True),
+        (_Clazz().func, False),
+        # unfortunately doesn't work
+        (_Clazz.rebind, False),
+        (_Clazz().rebind, False),
+        # classmethod/staticmethod isn't supported, but checked to ensure consistency
+        (_Clazz.cmethod, False),
+        (_Clazz.smethod, True),
+        # nested class methods
+        (_Clazz.Nested.func, True),
+        (_Clazz.Nested().func, False),
+        # inner methods
+        (_toplevel(), False),
+        (_Clazz().func(), False),
+        (_Clazz.Nested().func(), False),
+        # decorated method
+        (_Clazz.decorated, True),
+        (_Clazz().decorated, False),
+        # lambda (class-level)
+        (_Clazz._lambda, False),
+        (_Clazz()._lambda, False),
+    ],
+)
+def test_signature_has_self_param(function, expected) -> None:
+    assert utils.signature_has_self_param(function) == expected

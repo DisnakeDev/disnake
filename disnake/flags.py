@@ -39,6 +39,12 @@ __all__ = (
     "ApplicationFlags",
     "ChannelFlags",
     "AutoModKeywordPresets",
+    "MemberFlags",
+    "RoleFlags",
+    "AttachmentFlags",
+    "SKUFlags",
+    "ApplicationInstallTypes",
+    "InteractionContextTypes",
 )
 
 BF = TypeVar("BF", bound="BaseFlags")
@@ -50,6 +56,16 @@ class flag_value(Generic[T]):
         self.flag = func(None)
         self.__doc__ = func.__doc__
         self._parent: Type[T] = MISSING
+
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, flag_value):
+            return self.flag == other.flag
+        if isinstance(other, BaseFlags):
+            return self._parent is other.__class__ and self.flag == other.value
+        return False
+
+    def __ne__(self, other: Any) -> bool:
+        return not self.__eq__(other)
 
     def __or__(self, other: Union[flag_value[T], T]) -> T:
         if isinstance(other, BaseFlags):
@@ -144,7 +160,11 @@ class BaseFlags:
         return self
 
     def __eq__(self, other: Any) -> bool:
-        return isinstance(other, self.__class__) and self.value == other.value
+        if isinstance(other, self.__class__):
+            return self.value == other.value
+        if isinstance(other, flag_value):
+            return self.__class__ is other._parent and self.value == other.flag
+        return False
 
     def __ne__(self, other: Any) -> bool:
         return not self.__eq__(other)
@@ -282,8 +302,7 @@ class BaseFlags:
 
 
 class ListBaseFlags(BaseFlags, no_fill_flags=True):
-    """
-    A base class for flags that aren't powers of 2.
+    """A base class for flags that aren't powers of 2.
     Instead, values are used as exponents to map to powers of 2 to avoid collisions,
     and only the combined value is stored, which allows all bitwise operations to work as expected.
     """
@@ -317,8 +336,7 @@ class ListBaseFlags(BaseFlags, no_fill_flags=True):
 
 
 class SystemChannelFlags(BaseFlags, inverted=True):
-    """
-    Wraps up a Discord system channel flag value.
+    """Wraps up a Discord system channel flag value.
 
     Similar to :class:`Permissions`\\, the properties provided are two way.
     You can set and retrieve individual bits using the properties as if they
@@ -328,7 +346,7 @@ class SystemChannelFlags(BaseFlags, inverted=True):
     to enable or disable.
     Arguments are applied in order, similar to :class:`Permissions`.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -418,6 +436,8 @@ class SystemChannelFlags(BaseFlags, inverted=True):
             join_notification_replies: bool = ...,
             join_notifications: bool = ...,
             premium_subscriptions: bool = ...,
+            role_subscription_purchase_notification_replies: bool = ...,
+            role_subscription_purchase_notifications: bool = ...,
         ) -> None:
             ...
 
@@ -438,40 +458,57 @@ class SystemChannelFlags(BaseFlags, inverted=True):
             raise TypeError("Value to set for SystemChannelFlags must be a bool.")
 
     @flag_value
-    def join_notifications(self):
+    def join_notifications(self) -> int:
         """:class:`bool`: Returns ``True`` if the system channel is used for member join notifications."""
-        return 1
+        return 1 << 0
 
     @flag_value
-    def premium_subscriptions(self):
+    def premium_subscriptions(self) -> int:
         """:class:`bool`: Returns ``True`` if the system channel is used for "Nitro boosting" notifications."""
-        return 2
+        return 1 << 1
 
     @flag_value
-    def guild_reminder_notifications(self):
+    def guild_reminder_notifications(self) -> int:
         """:class:`bool`: Returns ``True`` if the system channel is used for server setup helpful tips notifications.
 
         .. versionadded:: 2.0
         """
-        return 4
+        return 1 << 2
 
     @flag_value
-    def join_notification_replies(self):
+    def join_notification_replies(self) -> int:
         """:class:`bool`: Returns ``True`` if the system channel shows sticker reply
         buttons for member join notifications.
 
         .. versionadded:: 2.3
         """
-        return 8
+        return 1 << 3
+
+    @flag_value
+    def role_subscription_purchase_notifications(self):
+        """:class:`bool`: Returns ``True`` if the system channel shows role
+        subscription purchase/renewal notifications.
+
+        .. versionadded:: 2.9
+        """
+        return 1 << 4
+
+    @flag_value
+    def role_subscription_purchase_notification_replies(self):
+        """:class:`bool`: Returns ``True`` if the system channel shows sticker reply
+        buttons for role subscription purchase/renewal notifications.
+
+        .. versionadded:: 2.9
+        """
+        return 1 << 5
 
 
 class MessageFlags(BaseFlags):
-    """
-    Wraps up a Discord Message flag value.
+    """Wraps up a Discord Message flag value.
 
     See :class:`SystemChannelFlags`.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -565,11 +602,14 @@ class MessageFlags(BaseFlags):
             crossposted: bool = ...,
             ephemeral: bool = ...,
             failed_to_mention_roles_in_thread: bool = ...,
+            has_snapshot: bool = ...,
             has_thread: bool = ...,
             is_crossposted: bool = ...,
+            is_voice_message: bool = ...,
             loading: bool = ...,
             source_message_deleted: bool = ...,
             suppress_embeds: bool = ...,
+            suppress_notifications: bool = ...,
             urgent: bool = ...,
         ) -> None:
             ...
@@ -596,7 +636,7 @@ class MessageFlags(BaseFlags):
 
     @flag_value
     def urgent(self):
-        """:class:`bool`: Returns ``True`` if the source message is an urgent message.
+        """:class:`bool`: Returns ``True`` if the message is an urgent message.
 
         An urgent message is one sent by Discord Trust and Safety.
         """
@@ -604,7 +644,7 @@ class MessageFlags(BaseFlags):
 
     @flag_value
     def has_thread(self):
-        """:class:`bool`: Returns ``True`` if the source message is associated with a thread.
+        """:class:`bool`: Returns ``True`` if the message is associated with a thread.
 
         .. versionadded:: 2.0
         """
@@ -612,7 +652,7 @@ class MessageFlags(BaseFlags):
 
     @flag_value
     def ephemeral(self):
-        """:class:`bool`: Returns ``True`` if the source message is ephemeral.
+        """:class:`bool`: Returns ``True`` if the message is ephemeral.
 
         .. versionadded:: 2.0
         """
@@ -620,7 +660,7 @@ class MessageFlags(BaseFlags):
 
     @flag_value
     def loading(self):
-        """:class:`bool`: Returns ``True`` if the source message is a deferred
+        """:class:`bool`: Returns ``True`` if the message is a deferred
         interaction response and shows a "thinking" state.
 
         .. versionadded:: 2.3
@@ -629,19 +669,47 @@ class MessageFlags(BaseFlags):
 
     @flag_value
     def failed_to_mention_roles_in_thread(self):
-        """:class:`bool`: Returns ``True`` if the source message failed to
+        """:class:`bool`: Returns ``True`` if the message failed to
         mention some roles and add their members to the thread.
 
         .. versionadded:: 2.4
         """
         return 1 << 8
 
+    @flag_value
+    def suppress_notifications(self):
+        """:class:`bool`: Returns ``True`` if the message does not
+        trigger push and desktop notifications.
+
+        .. versionadded:: 2.9
+        """
+        return 1 << 12
+
+    @flag_value
+    def is_voice_message(self):
+        """:class:`bool`: Returns ``True`` if the message is a voice message.
+
+        Messages with this flag will have a single audio attachment, and no other content.
+
+        .. versionadded:: 2.9
+        """
+        return 1 << 13
+
+    @flag_value
+    def has_snapshot(self):
+        """:class:`bool`: Returns ``True`` if the message is a forward message.
+
+        Messages with this flag will have only the forward data, and no other content.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 14
+
 
 class PublicUserFlags(BaseFlags):
-    """
-    Wraps up the Discord User Public flags.
+    """Wraps up the Discord User Public flags.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -744,6 +812,7 @@ class PublicUserFlags(BaseFlags):
             hypesquad_balance: bool = ...,
             hypesquad_bravery: bool = ...,
             hypesquad_brilliance: bool = ...,
+            moderator_programs_alumni: bool = ...,
             partner: bool = ...,
             spammer: bool = ...,
             staff: bool = ...,
@@ -828,8 +897,16 @@ class PublicUserFlags(BaseFlags):
         return UserFlags.verified_bot_developer.value
 
     @flag_value
+    def moderator_programs_alumni(self):
+        """:class:`bool`: Returns ``True`` if the user is a Discord Moderator Programs Alumni.
+
+        .. versionadded:: 2.8
+        """
+        return UserFlags.discord_certified_moderator.value
+
+    @alias_flag_value
     def discord_certified_moderator(self):
-        """:class:`bool`: Returns ``True`` if the user is a Discord Certified Moderator.
+        """:class:`bool`: An alias for :attr:`moderator_programs_alumni`.
 
         .. versionadded:: 2.0
         """
@@ -865,8 +942,7 @@ class PublicUserFlags(BaseFlags):
 
 
 class Intents(BaseFlags):
-    """
-    Wraps up a Discord gateway intent flag.
+    """Wraps up a Discord gateway intent flag.
 
     Similar to :class:`Permissions`\\, the properties provided are two way.
     You can set and retrieve individual bits using the properties as if they
@@ -882,7 +958,7 @@ class Intents(BaseFlags):
 
     .. versionadded:: 1.5
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -946,12 +1022,12 @@ class Intents(BaseFlags):
 
         .. describe:: Intents.y | Intents.z, Intents(y=True) | Intents.z
 
-            Returns a Intents instance with all provided flags enabled.
+            Returns an Intents instance with all provided flags enabled.
 
             .. versionadded:: 2.6
         .. describe:: ~Intents.y
 
-            Returns a Intents instance with all flags except ``y`` inverted from their default value.
+            Returns an Intents instance with all flags except ``y`` inverted from their default value.
 
             .. versionadded:: 2.6
 
@@ -979,11 +1055,14 @@ class Intents(BaseFlags):
         automod_execution: bool = ...,
         bans: bool = ...,
         dm_messages: bool = ...,
+        dm_polls: bool = ...,
         dm_reactions: bool = ...,
         dm_typing: bool = ...,
         emojis: bool = ...,
         emojis_and_stickers: bool = ...,
+        expressions: bool = ...,
         guild_messages: bool = ...,
+        guild_polls: bool = ...,
         guild_reactions: bool = ...,
         guild_scheduled_events: bool = ...,
         guild_typing: bool = ...,
@@ -993,6 +1072,8 @@ class Intents(BaseFlags):
         members: bool = ...,
         message_content: bool = ...,
         messages: bool = ...,
+        moderation: bool = ...,
+        polls: bool = ...,
         presences: bool = ...,
         reactions: bool = ...,
         typing: bool = ...,
@@ -1024,21 +1105,21 @@ class Intents(BaseFlags):
 
     @classmethod
     def all(cls) -> Self:
-        """A factory method that creates a :class:`Intents` with everything enabled."""
+        """A factory method that creates an :class:`Intents` instance with everything enabled."""
         self = cls.__new__(cls)
         self.value = all_flags_value(cls.VALID_FLAGS)
         return self
 
     @classmethod
     def none(cls) -> Self:
-        """A factory method that creates a :class:`Intents` with everything disabled."""
+        """A factory method that creates an :class:`Intents` instance with everything disabled."""
         self = cls.__new__(cls)
         self.value = self.DEFAULT_VALUE
         return self
 
     @classmethod
     def default(cls) -> Self:
-        """A factory method that creates a :class:`Intents` with everything enabled
+        """A factory method that creates an :class:`Intents` instance with everything enabled
         except :attr:`presences`, :attr:`members`, and :attr:`message_content`.
         """
         self = cls.all()
@@ -1100,6 +1181,7 @@ class Intents(BaseFlags):
         - :attr:`User.name`
         - :attr:`User.avatar`
         - :attr:`User.discriminator`
+        - :attr:`User.global_name`
 
         For more information go to the :ref:`member intent documentation <need_members_intent>`.
 
@@ -1111,48 +1193,75 @@ class Intents(BaseFlags):
         return 1 << 1
 
     @flag_value
-    def bans(self):
-        """:class:`bool`: Whether guild ban related events are enabled.
+    def moderation(self):
+        """:class:`bool`: Whether guild moderation related events are enabled.
 
         This corresponds to the following events:
 
         - :func:`on_member_ban`
         - :func:`on_member_unban`
+        - :func:`on_audit_log_entry_create`
 
         This does not correspond to any attributes or classes in the library in terms of cache.
         """
         return 1 << 2
 
-    @flag_value
-    def emojis(self):
-        """:class:`bool`: Alias of :attr:`.emojis_and_stickers`.
+    @alias_flag_value
+    def bans(self):
+        """:class:`bool`: Alias of :attr:`.moderation`.
 
-        .. versionchanged:: 2.0
+        .. versionchanged:: 2.8
             Changed to an alias.
         """
-        return 1 << 3
+        return 1 << 2
 
-    @alias_flag_value
-    def emojis_and_stickers(self):
-        """:class:`bool`: Whether guild emoji and sticker related events are enabled.
+    @flag_value
+    def expressions(self):
+        """:class:`bool`: Whether events related to guild emojis, stickers, and
+        soundboard sounds are enabled.
 
-        .. versionadded:: 2.0
+        .. versionadded:: 2.10
 
         This corresponds to the following events:
 
         - :func:`on_guild_emojis_update`
         - :func:`on_guild_stickers_update`
+        - :func:`on_guild_soundboard_sounds_update`
 
         This also corresponds to the following attributes and classes in terms of cache:
 
         - :class:`Emoji`
         - :class:`GuildSticker`
+        - :class:`GuildSoundboardSound`
         - :meth:`Client.get_emoji`
         - :meth:`Client.get_sticker`
+        - :meth:`Client.get_soundboard_sound`
         - :meth:`Client.emojis`
         - :meth:`Client.stickers`
+        - :meth:`Client.soundboard_sounds`
         - :attr:`Guild.emojis`
         - :attr:`Guild.stickers`
+        - :attr:`Guild.soundboard_sounds`
+        """
+        return 1 << 3
+
+    @alias_flag_value
+    def emojis_and_stickers(self):
+        """:class:`bool`: Alias of :attr:`.expressions`.
+
+        .. versionadded:: 2.0
+
+        .. versionchanged:: 2.10
+            Changed to an alias.
+        """
+        return 1 << 3
+
+    @alias_flag_value
+    def emojis(self):
+        """:class:`bool`: Alias of :attr:`.expressions`.
+
+        .. versionchanged:: 2.0
+            Changed to an alias.
         """
         return 1 << 3
 
@@ -1203,6 +1312,8 @@ class Intents(BaseFlags):
         This corresponds to the following events:
 
         - :func:`on_voice_state_update`
+        - :func:`on_voice_channel_effect`
+        - :func:`on_raw_voice_channel_effect`
 
         This also corresponds to the following attributes and classes in terms of cache:
 
@@ -1223,6 +1334,7 @@ class Intents(BaseFlags):
         This corresponds to the following events:
 
         - :func:`on_presence_update`
+        - :func:`on_raw_presence_update`
 
         This also corresponds to the following attributes and classes in terms of cache:
 
@@ -1381,7 +1493,7 @@ class Intents(BaseFlags):
 
     @flag_value
     def guild_reactions(self):
-        """:class:`bool`: Whether guild message reaction related events are enabled.
+        """:class:`bool`: Whether guild reaction related events are enabled.
 
         See also :attr:`dm_reactions` for DMs or :attr:`reactions` for both.
 
@@ -1437,7 +1549,7 @@ class Intents(BaseFlags):
 
     @flag_value
     def guild_typing(self):
-        """:class:`bool`: Whether guild and direct message typing related events are enabled.
+        """:class:`bool`: Whether guild typing related events are enabled.
 
         See also :attr:`dm_typing` for DMs or :attr:`typing` for both.
 
@@ -1451,7 +1563,7 @@ class Intents(BaseFlags):
 
     @flag_value
     def dm_typing(self):
-        """:class:`bool`: Whether guild and direct message typing related events are enabled.
+        """:class:`bool`: Whether direct message typing related events are enabled.
 
         See also :attr:`guild_typing` for guilds or :attr:`typing` for both.
 
@@ -1536,6 +1648,61 @@ class Intents(BaseFlags):
         """
         return (1 << 20) | (1 << 21)
 
+    @alias_flag_value
+    def polls(self):
+        """:class:`bool`: Whether guild and direct message polls related events are enabled.
+
+        This is a shortcut to set or get both :attr:`guild_polls` and :attr:`dm_polls`.
+
+        This corresponds to the following events:
+
+        - :func:`on_poll_vote_add` (both guilds and DMs)
+        - :func:`on_poll_vote_remove` (both guilds and DMs)
+        - :func:`on_raw_poll_vote_add` (both guilds and DMs)
+        - :func:`on_raw_poll_vote_remove` (both guilds and DMs)
+        """
+        return (1 << 24) | (1 << 25)
+
+    @flag_value
+    def guild_polls(self):
+        """:class:`bool`: Whether guild polls related events are enabled.
+
+        .. versionadded:: 2.10
+
+        This corresponds to the following events:
+
+        - :func:`on_poll_vote_add` (only for guilds)
+        - :func:`on_poll_vote_remove` (only for guilds)
+        - :func:`on_raw_poll_vote_add` (only for guilds)
+        - :func:`on_raw_poll_vote_remove` (only for guilds)
+
+        This also corresponds to the following attributes and classes in terms of cache:
+
+        - :attr:`Message.poll` (only for guild messages)
+        - :class:`Poll` and all its attributes.
+        """
+        return 1 << 24
+
+    @flag_value
+    def dm_polls(self):
+        """:class:`bool`: Whether direct message polls related events are enabled.
+
+        .. versionadded:: 2.10
+
+        This corresponds to the following events:
+
+        - :func:`on_poll_vote_add` (only for DMs)
+        - :func:`on_poll_vote_remove` (only for DMs)
+        - :func:`on_raw_poll_vote_add` (only for DMs)
+        - :func:`on_raw_poll_vote_remove` (only for DMs)
+
+        This also corresponds to the following attributes and classes in terms of cache:
+
+        - :attr:`Message.poll` (only for DM messages)
+        - :class:`Poll` and all its attributes.
+        """
+        return 1 << 25
+
 
 class MemberCacheFlags(BaseFlags):
     """Controls the library's cache policy when it comes to members.
@@ -1557,7 +1724,7 @@ class MemberCacheFlags(BaseFlags):
 
     .. versionadded:: 1.5
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -1658,14 +1825,14 @@ class MemberCacheFlags(BaseFlags):
 
     @classmethod
     def all(cls) -> Self:
-        """A factory method that creates a :class:`MemberCacheFlags` with everything enabled."""
+        """A factory method that creates a :class:`MemberCacheFlags` instance with everything enabled."""
         self = cls.__new__(cls)
         self.value = all_flags_value(cls.VALID_FLAGS)
         return self
 
     @classmethod
     def none(cls) -> Self:
-        """A factory method that creates a :class:`MemberCacheFlags` with everything disabled."""
+        """A factory method that creates a :class:`MemberCacheFlags` instance with everything disabled."""
         self = cls.__new__(cls)
         self.value = self.DEFAULT_VALUE
         return self
@@ -1675,7 +1842,7 @@ class MemberCacheFlags(BaseFlags):
         return self.value == self.DEFAULT_VALUE
 
     @flag_value
-    def voice(self):
+    def voice(self) -> int:
         """:class:`bool`: Whether to cache members that are in voice.
 
         This requires :attr:`Intents.voice_states`.
@@ -1685,7 +1852,7 @@ class MemberCacheFlags(BaseFlags):
         return 1
 
     @flag_value
-    def joined(self):
+    def joined(self) -> int:
         """:class:`bool`: Whether to cache members that joined the guild
         or are chunked as part of the initial log in flow.
 
@@ -1697,7 +1864,7 @@ class MemberCacheFlags(BaseFlags):
 
     @classmethod
     def from_intents(cls, intents: Intents) -> Self:
-        """A factory method that creates a :class:`MemberCacheFlags` based on
+        """A factory method that creates a :class:`MemberCacheFlags` instance based on
         the currently selected :class:`Intents`.
 
         Parameters
@@ -1731,10 +1898,9 @@ class MemberCacheFlags(BaseFlags):
 
 
 class ApplicationFlags(BaseFlags):
-    """
-    Wraps up the Discord Application flags.
+    """Wraps up the Discord Application flags.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -1799,12 +1965,12 @@ class ApplicationFlags(BaseFlags):
 
         .. describe:: ApplicationFlags.y | ApplicationFlags.z, ApplicationFlags(y=True) | ApplicationFlags.z
 
-            Returns a ApplicationFlags instance with all provided flags enabled.
+            Returns an ApplicationFlags instance with all provided flags enabled.
 
             .. versionadded:: 2.6
         .. describe:: ~ApplicationFlags.y
 
-            Returns a ApplicationFlags instance with all flags except ``y`` inverted from their default value.
+            Returns an ApplicationFlags instance with all flags except ``y`` inverted from their default value.
 
             .. versionadded:: 2.6
 
@@ -1825,6 +1991,7 @@ class ApplicationFlags(BaseFlags):
         def __init__(
             self,
             *,
+            application_auto_moderation_rule_create_badge: bool = ...,
             application_command_badge: bool = ...,
             embedded: bool = ...,
             gateway_guild_members: bool = ...,
@@ -1836,6 +2003,11 @@ class ApplicationFlags(BaseFlags):
             verification_pending_guild_limit: bool = ...,
         ) -> None:
             ...
+
+    @flag_value
+    def application_auto_moderation_rule_create_badge(self):
+        """:class:`bool`: Returns ``True`` if the application uses the Auto Moderation API."""
+        return 1 << 6
 
     @flag_value
     def gateway_presence(self):
@@ -1903,7 +2075,7 @@ class ApplicationFlags(BaseFlags):
 class ChannelFlags(BaseFlags):
     """Wraps up the Discord Channel flags.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -1991,14 +2163,20 @@ class ChannelFlags(BaseFlags):
     if TYPE_CHECKING:
 
         @_generated
-        def __init__(self, *, pinned: bool = ..., require_tag: bool = ...) -> None:
+        def __init__(
+            self,
+            *,
+            hide_media_download_options: bool = ...,
+            pinned: bool = ...,
+            require_tag: bool = ...,
+        ) -> None:
             ...
 
     @flag_value
     def pinned(self):
         """:class:`bool`: Returns ``True`` if the thread is pinned.
 
-        This only applies to channels of type :class:`Thread`.
+        This only applies to threads that are part of a :class:`ForumChannel` or :class:`MediaChannel`.
         """
         return 1 << 1
 
@@ -2006,18 +2184,27 @@ class ChannelFlags(BaseFlags):
     def require_tag(self):
         """:class:`bool`: Returns ``True`` if the channel requires all newly created threads to have a tag.
 
-        This only applies to channels of type :class:`ForumChannel`.
+        This only applies to channels of types :class:`ForumChannel` or :class:`MediaChannel`.
 
         .. versionadded:: 2.6
         """
         return 1 << 4
 
+    @flag_value
+    def hide_media_download_options(self):
+        """:class:`bool`: Returns ``True`` if the channel hides the embedded media download options.
+
+        This only applies to channels of type :class:`MediaChannel`.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 15
+
 
 class AutoModKeywordPresets(ListBaseFlags):
-    """
-    Wraps up the pre-defined auto moderation keyword lists, provided by Discord.
+    """Wraps up the pre-defined auto moderation keyword lists, provided by Discord.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -2066,11 +2253,11 @@ class AutoModKeywordPresets(ListBaseFlags):
 
         .. describe:: AutoModKeywordPresets.y | AutoModKeywordPresets.z, AutoModKeywordPresets(y=True) | AutoModKeywordPresets.z
 
-            Returns a AutoModKeywordPresets instance with all provided flags enabled.
+            Returns an AutoModKeywordPresets instance with all provided flags enabled.
 
         .. describe:: ~AutoModKeywordPresets.y
 
-            Returns a AutoModKeywordPresets instance with all flags except ``y`` inverted from their default value.
+            Returns an AutoModKeywordPresets instance with all flags except ``y`` inverted from their default value.
 
     .. versionadded:: 2.6
 
@@ -2092,15 +2279,15 @@ class AutoModKeywordPresets(ListBaseFlags):
             ...
 
     @classmethod
-    def all(cls: Type[AutoModKeywordPresets]) -> AutoModKeywordPresets:
-        """A factory method that creates a :class:`AutoModKeywordPresets` with everything enabled."""
+    def all(cls) -> Self:
+        """A factory method that creates an :class:`AutoModKeywordPresets` instance with everything enabled."""
         self = cls.__new__(cls)
         self.value = all_flags_value(cls.VALID_FLAGS)
         return self
 
     @classmethod
-    def none(cls: Type[AutoModKeywordPresets]) -> AutoModKeywordPresets:
-        """A factory method that creates a :class:`AutoModKeywordPresets` with everything disabled."""
+    def none(cls) -> Self:
+        """A factory method that creates an :class:`AutoModKeywordPresets` instance with everything disabled."""
         self = cls.__new__(cls)
         self.value = self.DEFAULT_VALUE
         return self
@@ -2125,3 +2312,601 @@ class AutoModKeywordPresets(ListBaseFlags):
         (contains insults or words that may be considered hate speech).
         """
         return 1 << 3
+
+
+class MemberFlags(BaseFlags):
+    """Wraps up Discord Member flags.
+
+    .. collapse:: operations
+
+        .. describe:: x == y
+
+            Checks if two MemberFlags instances are equal.
+        .. describe:: x != y
+
+            Checks if two MemberFlags instances are not equal.
+        .. describe:: x <= y
+
+            Checks if a MemberFlags instance is a subset of another MemberFlags instance.
+        .. describe:: x >= y
+
+            Checks if a MemberFlags instance is a superset of another MemberFlags instance.
+        .. describe:: x < y
+
+            Checks if a MemberFlags instance is a strict subset of another MemberFlags instance.
+        .. describe:: x > y
+
+            Checks if a MemberFlags instance is a strict superset of another MemberFlags instance.
+        .. describe:: x | y, x |= y
+
+            Returns a new MemberFlags instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
+        .. describe:: x & y, x &= y
+
+            Returns a new MemberFlags instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new MemberFlags instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+        .. describe:: ~x
+
+            Returns a new MemberFlags instance with all flags from x inverted.
+        .. describe:: hash(x)
+
+            Returns the flag's hash.
+        .. describe:: iter(x)
+
+            Returns an iterator of ``(name, value)`` pairs. This allows it
+            to be, for example, constructed as a dict or a list of pairs.
+            Note that aliases are not shown.
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: MemberFlags.y | MemberFlags.z, MemberFlags(y=True) | MemberFlags.z
+
+            Returns a MemberFlags instance with all provided flags enabled.
+
+        .. describe:: ~MemberFlags.y
+
+            Returns a MemberFlags instance with all flags except ``y`` inverted from their default value.
+
+    .. versionadded:: 2.8
+
+    Attributes
+    ----------
+    value: :class:`int`
+        The raw value. You should query flags via the properties
+        rather than using this raw value.
+    """
+
+    __slots__ = ()
+
+    if TYPE_CHECKING:
+
+        @_generated
+        def __init__(
+            self,
+            *,
+            automod_quarantined_username: bool = ...,
+            bypasses_verification: bool = ...,
+            completed_home_actions: bool = ...,
+            completed_onboarding: bool = ...,
+            did_rejoin: bool = ...,
+            dm_settings_upsell_acknowledged: bool = ...,
+            is_guest: bool = ...,
+            started_home_actions: bool = ...,
+            started_onboarding: bool = ...,
+        ) -> None:
+            ...
+
+    @flag_value
+    def did_rejoin(self):
+        """:class:`bool`: Returns ``True`` if the member has left and rejoined the guild."""
+        return 1 << 0
+
+    @flag_value
+    def completed_onboarding(self):
+        """:class:`bool`: Returns ``True`` if the member has completed onboarding."""
+        return 1 << 1
+
+    @flag_value
+    def bypasses_verification(self):
+        """:class:`bool`: Returns ``True`` if the member is able to bypass guild verification requirements."""
+        return 1 << 2
+
+    @flag_value
+    def started_onboarding(self):
+        """:class:`bool`: Returns ``True`` if the member has started onboarding."""
+        return 1 << 3
+
+    @flag_value
+    def is_guest(self):
+        """:class:`bool`: Returns ``True`` if the member is a guest and can only access the voice channel they were invited to.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 4
+
+    @flag_value
+    def started_home_actions(self):
+        """:class:`bool`: Returns ``True`` if the member has started the Server Guide actions.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 5
+
+    @flag_value
+    def completed_home_actions(self):
+        """:class:`bool`: Returns ``True`` if the member has completed the Server Guide actions.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 6
+
+    @flag_value
+    def automod_quarantined_username(self):
+        """:class:`bool`: Returns ``True`` if the member's username, display name, or nickname is blocked by AutoMod.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 7
+
+    @flag_value
+    def dm_settings_upsell_acknowledged(self):
+        """:class:`bool`: Returns ``True`` if the member has dismissed the DM settings upsell.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 9
+
+
+class RoleFlags(BaseFlags):
+    """Wraps up Discord Role flags.
+
+    .. collapse:: operations
+
+        .. describe:: x == y
+
+            Checks if two RoleFlags instances are equal.
+        .. describe:: x != y
+
+            Checks if two RoleFlags instances are not equal.
+        .. describe:: x <= y
+
+            Checks if a RoleFlags instance is a subset of another RoleFlags instance.
+        .. describe:: x >= y
+
+            Checks if a RoleFlags instance is a superset of another RoleFlags instance.
+        .. describe:: x < y
+
+            Checks if a RoleFlags instance is a strict subset of another RoleFlags instance.
+        .. describe:: x > y
+
+            Checks if a RoleFlags instance is a strict superset of another RoleFlags instance.
+        .. describe:: x | y, x |= y
+
+            Returns a new RoleFlags instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
+        .. describe:: x & y, x &= y
+
+            Returns a new RoleFlags instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new RoleFlags instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+        .. describe:: ~x
+
+            Returns a new RoleFlags instance with all flags from x inverted.
+        .. describe:: hash(x)
+
+            Returns the flag's hash.
+        .. describe:: iter(x)
+
+            Returns an iterator of ``(name, value)`` pairs. This allows it
+            to be, for example, constructed as a dict or a list of pairs.
+            Note that aliases are not shown.
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: RoleFlags.y | RoleFlags.z, RoleFlags(y=True) | RoleFlags.z
+
+            Returns a RoleFlags instance with all provided flags enabled.
+
+        .. describe:: ~RoleFlags.y
+
+            Returns a RoleFlags instance with all flags except ``y`` inverted from their default value.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    value: :class:`int`
+        The raw value. You should query flags via the properties
+        rather than using this raw value.
+    """
+
+    __slots__ = ()
+
+    if TYPE_CHECKING:
+
+        @_generated
+        def __init__(self, *, in_prompt: bool = ...) -> None:
+            ...
+
+    @flag_value
+    def in_prompt(self):
+        """:class:`bool`: Returns ``True`` if the role can be selected by members in an onboarding prompt."""
+        return 1 << 0
+
+
+class AttachmentFlags(BaseFlags):
+    """Wraps up Discord Attachment flags.
+
+    .. collapse:: operations
+
+        .. describe:: x == y
+
+            Checks if two AttachmentFlags instances are equal.
+        .. describe:: x != y
+
+            Checks if two AttachmentFlags instances are not equal.
+        .. describe:: x <= y
+
+            Checks if an AttachmentFlags instance is a subset of another AttachmentFlags instance.
+        .. describe:: x >= y
+
+            Checks if an AttachmentFlags instance is a superset of another AttachmentFlags instance.
+        .. describe:: x < y
+
+            Checks if an AttachmentFlags instance is a strict subset of another AttachmentFlags instance.
+        .. describe:: x > y
+
+            Checks if an AttachmentFlags instance is a strict superset of another AttachmentFlags instance.
+        .. describe:: x | y, x |= y
+
+            Returns a new AttachmentFlags instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
+        .. describe:: x & y, x &= y
+
+            Returns a new AttachmentFlags instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new AttachmentFlags instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+        .. describe:: ~x
+
+            Returns a new AttachmentFlags instance with all flags from x inverted.
+        .. describe:: hash(x)
+
+            Returns the flag's hash.
+        .. describe:: iter(x)
+
+            Returns an iterator of ``(name, value)`` pairs. This allows it
+            to be, for example, constructed as a dict or a list of pairs.
+            Note that aliases are not shown.
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: AttachmentFlags.y | AttachmentFlags.z, AttachmentFlags(y=True) | AttachmentFlags.z
+
+            Returns an AttachmentFlags instance with all provided flags enabled.
+
+        .. describe:: ~AttachmentFlags.y
+
+            Returns an AttachmentFlags instance with all flags except ``y`` inverted from their default value.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    value: :class:`int`
+        The raw value. You should query flags via the properties
+        rather than using this raw value.
+    """
+
+    __slots__ = ()
+
+    if TYPE_CHECKING:
+
+        @_generated
+        def __init__(self, *, is_remix: bool = ...) -> None:
+            ...
+
+    @flag_value
+    def is_remix(self):
+        """:class:`bool`: Returns ``True`` if the attachment has been edited using the Remix feature."""
+        return 1 << 2
+
+
+class SKUFlags(BaseFlags):
+    """Wraps up Discord SKU flags.
+
+    .. collapse:: operations
+
+        .. describe:: x == y
+
+            Checks if two SKUFlags instances are equal.
+        .. describe:: x != y
+
+            Checks if two SKUFlags instances are not equal.
+        .. describe:: x <= y
+
+            Checks if an SKUFlags instance is a subset of another SKUFlags instance.
+        .. describe:: x >= y
+
+            Checks if an SKUFlags instance is a superset of another SKUFlags instance.
+        .. describe:: x < y
+
+            Checks if an SKUFlags instance is a strict subset of another SKUFlags instance.
+        .. describe:: x > y
+
+            Checks if an SKUFlags instance is a strict superset of another SKUFlags instance.
+        .. describe:: x | y, x |= y
+
+            Returns a new SKUFlags instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
+        .. describe:: x & y, x &= y
+
+            Returns a new SKUFlags instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new SKUFlags instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+        .. describe:: ~x
+
+            Returns a new SKUFlags instance with all flags from x inverted.
+        .. describe:: hash(x)
+
+            Returns the flag's hash.
+        .. describe:: iter(x)
+
+            Returns an iterator of ``(name, value)`` pairs. This allows it
+            to be, for example, constructed as a dict or a list of pairs.
+            Note that aliases are not shown.
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: SKUFlags.y | SKUFlags.z, SKUFlags(y=True) | SKUFlags.z
+
+            Returns an SKUFlags instance with all provided flags enabled.
+
+        .. describe:: ~SKUFlags.y
+
+            Returns an SKUFlags instance with all flags except ``y`` inverted from their default value.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    value: :class:`int`
+        The raw value. You should query flags via the properties
+        rather than using this raw value.
+    """
+
+    __slots__ = ()
+
+    if TYPE_CHECKING:
+
+        @_generated
+        def __init__(
+            self,
+            *,
+            available: bool = ...,
+            guild_subscription: bool = ...,
+            user_subscription: bool = ...,
+        ) -> None:
+            ...
+
+    @flag_value
+    def available(self):
+        """:class:`bool`: Returns ``True`` if the SKU can be purchased."""
+        return 1 << 2
+
+    @flag_value
+    def guild_subscription(self):
+        """:class:`bool`: Returns ``True`` if the SKU is an application subscription applied to a guild."""
+        return 1 << 7
+
+    @flag_value
+    def user_subscription(self):
+        """:class:`bool`: Returns ``True`` if the SKU is an application subscription applied to a user."""
+        return 1 << 8
+
+
+class ApplicationInstallTypes(ListBaseFlags):
+    """Represents the location(s) in which an application or application command can be installed.
+
+    See the :ddocs:`official documentation <resources/application#installation-context>` for more info.
+
+    .. collapse:: operations
+
+        .. describe:: x == y
+
+            Checks if two ApplicationInstallTypes instances are equal.
+        .. describe:: x != y
+
+            Checks if two ApplicationInstallTypes instances are not equal.
+        .. describe:: x <= y
+
+            Checks if an ApplicationInstallTypes instance is a subset of another ApplicationInstallTypes instance.
+        .. describe:: x >= y
+
+            Checks if an ApplicationInstallTypes instance is a superset of another ApplicationInstallTypes instance.
+        .. describe:: x < y
+
+            Checks if an ApplicationInstallTypes instance is a strict subset of another ApplicationInstallTypes instance.
+        .. describe:: x > y
+
+            Checks if an ApplicationInstallTypes instance is a strict superset of another ApplicationInstallTypes instance.
+        .. describe:: x | y, x |= y
+
+            Returns a new ApplicationInstallTypes instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
+        .. describe:: x & y, x &= y
+
+            Returns a new ApplicationInstallTypes instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new ApplicationInstallTypes instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+        .. describe:: ~x
+
+            Returns a new ApplicationInstallTypes instance with all flags from x inverted.
+        .. describe:: hash(x)
+
+            Returns the flag's hash.
+        .. describe:: iter(x)
+
+            Returns an iterator of ``(name, value)`` pairs. This allows it
+            to be, for example, constructed as a dict or a list of pairs.
+            Note that aliases are not shown.
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: ApplicationInstallTypes.y | ApplicationInstallTypes.z, ApplicationInstallTypes(y=True) | ApplicationInstallTypes.z
+
+            Returns an ApplicationInstallTypes instance with all provided flags enabled.
+
+        .. describe:: ~ApplicationInstallTypes.y
+
+            Returns an ApplicationInstallTypes instance with all flags except ``y`` inverted from their default value.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    value: :class:`int`
+        The raw value. You should query flags via the properties
+        rather than using this raw value.
+    """
+
+    __slots__ = ()
+
+    if TYPE_CHECKING:
+
+        @_generated
+        def __init__(self, *, guild: bool = ..., user: bool = ...) -> None:
+            ...
+
+    @classmethod
+    def all(cls) -> Self:
+        """A factory method that creates an :class:`ApplicationInstallTypes` instance with everything enabled."""
+        self = cls.__new__(cls)
+        self.value = all_flags_value(cls.VALID_FLAGS)
+        return self
+
+    @flag_value
+    def guild(self):
+        """:class:`bool`: Returns ``True`` if installable to guilds."""
+        return 1 << 0
+
+    @flag_value
+    def user(self):
+        """:class:`bool`: Returns ``True`` if installable to users."""
+        return 1 << 1
+
+
+class InteractionContextTypes(ListBaseFlags):
+    """Represents the context(s) in which an application command can be used.
+
+    See the :ddocs:`official documentation <interactions/application-commands#interaction-contexts>` for more info.
+
+    .. collapse:: operations
+
+        .. describe:: x == y
+
+            Checks if two InteractionContextTypes instances are equal.
+        .. describe:: x != y
+
+            Checks if two InteractionContextTypes instances are not equal.
+        .. describe:: x <= y
+
+            Checks if an InteractionContextTypes instance is a subset of another InteractionContextTypes instance.
+        .. describe:: x >= y
+
+            Checks if an InteractionContextTypes instance is a superset of another InteractionContextTypes instance.
+        .. describe:: x < y
+
+            Checks if an InteractionContextTypes instance is a strict subset of another InteractionContextTypes instance.
+        .. describe:: x > y
+
+            Checks if an InteractionContextTypes instance is a strict superset of another InteractionContextTypes instance.
+        .. describe:: x | y, x |= y
+
+            Returns a new InteractionContextTypes instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
+        .. describe:: x & y, x &= y
+
+            Returns a new InteractionContextTypes instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new InteractionContextTypes instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+        .. describe:: ~x
+
+            Returns a new InteractionContextTypes instance with all flags from x inverted.
+        .. describe:: hash(x)
+
+            Returns the flag's hash.
+        .. describe:: iter(x)
+
+            Returns an iterator of ``(name, value)`` pairs. This allows it
+            to be, for example, constructed as a dict or a list of pairs.
+            Note that aliases are not shown.
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: InteractionContextTypes.y | InteractionContextTypes.z, InteractionContextTypes(y=True) | InteractionContextTypes.z
+
+            Returns an InteractionContextTypes instance with all provided flags enabled.
+
+        .. describe:: ~InteractionContextTypes.y
+
+            Returns an InteractionContextTypes instance with all flags except ``y`` inverted from their default value.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    value: :class:`int`
+        The raw value. You should query flags via the properties
+        rather than using this raw value.
+    """
+
+    __slots__ = ()
+
+    if TYPE_CHECKING:
+
+        @_generated
+        def __init__(
+            self, *, bot_dm: bool = ..., guild: bool = ..., private_channel: bool = ...
+        ) -> None:
+            ...
+
+    @classmethod
+    def all(cls) -> Self:
+        """A factory method that creates an :class:`InteractionContextTypes` instance with everything enabled."""
+        self = cls.__new__(cls)
+        self.value = all_flags_value(cls.VALID_FLAGS)
+        return self
+
+    @flag_value
+    def guild(self):
+        """:class:`bool`: Returns ``True`` if the command is usable in guilds."""
+        return 1 << 0
+
+    @flag_value
+    def bot_dm(self):
+        """:class:`bool`: Returns ``True`` if the command is usable in DMs with the bot."""
+        return 1 << 1
+
+    @flag_value
+    def private_channel(self):
+        """:class:`bool`: Returns ``True`` if the command is usable in DMs and group DMs with other users."""
+        return 1 << 2

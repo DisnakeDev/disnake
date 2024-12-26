@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from errno import ECONNRESET
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -136,7 +137,7 @@ class Shard:
         if self._client.is_closed():
             return
 
-        if isinstance(e, OSError) and e.errno in (54, 10054):
+        if isinstance(e, OSError) and e.errno == ECONNRESET:
             # If we get Connection reset by peer then always try to RESUME the connection.
             exc = ReconnectWebSocket(self.id, resume=True)
             self._queue_put(EventItem(EventType.resume, self, exc))
@@ -189,6 +190,16 @@ class Shard:
                 gateway=self.ws.resume_gateway if exc.resume else None,
             )
             self.ws = await asyncio.wait_for(coro, timeout=60.0)
+        # n.b. this is the same error handling as for the actual worker, but for the initial connect steps
+        except ReconnectWebSocket as e:
+            _log.debug(
+                "Unexpectedly received request to %s shard ID %s while attempting to %s",
+                e.op,
+                self.id,
+                exc.op,
+            )
+            etype = EventType.resume if e.resume else EventType.identify
+            self._queue_put(EventItem(etype, self, e))
         except self._handled_exceptions as e:
             await self._handle_disconnect(e)
         except asyncio.CancelledError:
@@ -203,6 +214,14 @@ class Shard:
         try:
             coro = DiscordWebSocket.from_client(self._client, shard_id=self.id)
             self.ws = await asyncio.wait_for(coro, timeout=60.0)
+        except ReconnectWebSocket as e:
+            _log.debug(
+                "Unexpectedly received request to %s shard ID %s while attempting to reconnect",
+                e.op,
+                self.id,
+            )
+            etype = EventType.resume if e.resume else EventType.identify
+            self._queue_put(EventItem(etype, self, e))
         except self._handled_exceptions as e:
             await self._handle_disconnect(e)
         except asyncio.CancelledError:
@@ -588,7 +607,8 @@ class AutoShardedClient(Client):
         activities = () if activity is None else (activity,)
         for guild in guilds:
             me = guild.me
-            if me is None:
+            if me is None:  # pyright: ignore[reportUnnecessaryComparison]
+                # may happen if guild is unavailable
                 continue
 
             # Member.activities is typehinted as Tuple[ActivityType, ...], we may be setting it as Tuple[BaseActivity, ...]

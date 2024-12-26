@@ -103,7 +103,7 @@ Historically however, thanks to:
   --rtd-ad-background: var(--grey-2);
   --rtd-ad-main-text: var(--grey-6);
   --rtd-ad-small-text: var(--grey-4);
-  --rtd-version-background: #272525;
+  --rtd-version-background: #272725;
   --rtd-version-main-text: #fcfcfc;
   --attribute-table-title: var(--grey-6);
   --attribute-table-list-border: var(--grey-3);
@@ -295,7 +295,7 @@ footer a {
 
 main {
   /* aside width + 10px because of scrollbar gutter */
-  margin-left: 395px;
+  margin-left: 350px;
   padding: 12px;
   z-index: 1;
 }
@@ -315,7 +315,7 @@ aside {
   z-index: 3;
   top: 50px; /* Space for sticky header */
   bottom: 0;
-  width: 385px;
+  width: 350px;
   overscroll-behavior: contain;
   scrollbar-width: thin;
 }
@@ -533,13 +533,13 @@ header form.search {
   }
 
   main > * {
-    margin-left: calc(calc(calc(calc(100vw - 1500px) / 2) + 395px) + 12px) !important;
-    max-width: calc(1500px - 395px);
+    margin-left: calc(calc(calc(calc(100vw - 1500px) / 2) + 350px) + 12px) !important;
+    max-width: calc(1500px - 350px);
     padding-right: 12px;
   }
 
   main > .admonition {
-    max-width: calc(calc(1500px - 395px) - 12px);
+    max-width: calc(calc(1500px - 350px) - 12px);
   }
 
   aside {
@@ -669,6 +669,35 @@ aside .material-icons {
   align-items: baseline;
 }
 
+/* sidebar search box stuff */
+
+.sidebar-search-wrapper {
+  display: flex;
+  border: 2px solid var(--search-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Make toc search bar take up entire screen width only on smaller screens */
+@media screen and (min-width: 425px) {
+  .sidebar-search-wrapper {
+    width: 200px;
+  }
+}
+
+.sidebar-search-wrapper:focus-within {
+  border-color: var(--search-focus);
+}
+
+#sidebar-search-box {
+  background-color: var(--sub-header-background);
+  border: none;
+  color: var(--search-text);
+  padding: 0.4em 1em;
+  flex: 10;
+}
+
+
 aside::-webkit-scrollbar {
   width: 0.5em;
   overflow-y: overlay;
@@ -797,7 +826,7 @@ section h3 {
 }
 
 #to-top.is-rtd {
-  bottom: 90px;
+  bottom: 100px;
 }
 
 #to-top > span {
@@ -1284,21 +1313,20 @@ rect.highlighted {
     fill: var(--highlighted-text);
 }
 
-.container.operations {
+details.operations {
   padding: 10px;
   border: 1px solid var(--codeblock-border);
   margin-bottom: 20px;
 }
 
-.container.operations::before {
-  content: 'Supported Operations';
-  color: var(--main-big-headers-text);
-  display: block;
-  padding-bottom: 0.5em;
+details.operations dl {
+  margin-top: 15px;
+  margin-bottom: 15px;
 }
 
-.container.operations > dl.describe > dt {
-  background-color: var(--api-entry-background);
+details.operations > summary::after {
+  content: 'Supported Operations';
+  color: var(--main-big-headers-text);
 }
 
 .table-wrapper {

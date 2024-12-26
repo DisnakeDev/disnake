@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""
-A basic example showing how to integrate audio from youtube-dl into voice chat.
-"""
+"""A basic example showing how to integrate audio from youtube-dl into voice chat."""
 
 # NOTE: this example requires ffmpeg (https://ffmpeg.org/download.html) to be installed
 #       and available in your `%PATH%` or `$PATH`
@@ -35,8 +33,6 @@ ytdl_format_options = {
     "source_address": "0.0.0.0",  # bind to ipv4 since ipv6 addresses cause issues sometimes
 }
 
-ffmpeg_options = {"options": "-vn"}
-
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
 
@@ -61,7 +57,7 @@ class YTDLSource(disnake.PCMVolumeTransformer):
 
         filename = data["url"] if stream else ytdl.prepare_filename(data)
 
-        return cls(disnake.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
+        return cls(disnake.FFmpegPCMAudio(filename, options="-vn"), data=data)
 
 
 class Music(commands.Cog):
@@ -71,7 +67,6 @@ class Music(commands.Cog):
     @commands.command()
     async def join(self, ctx, *, channel: disnake.VoiceChannel):
         """Joins a voice channel"""
-
         if ctx.voice_client is not None:
             return await ctx.voice_client.move_to(channel)
 
@@ -109,7 +104,6 @@ class Music(commands.Cog):
     @commands.command()
     async def volume(self, ctx, volume: int):
         """Changes the player's volume"""
-
         if ctx.voice_client is None:
             return await ctx.send("Not connected to a voice channel.")
 
@@ -119,7 +113,6 @@ class Music(commands.Cog):
     @commands.command()
     async def stop(self, ctx):
         """Stops and disconnects the bot from voice"""
-
         await ctx.voice_client.disconnect()
 
     async def ensure_voice(self, ctx):

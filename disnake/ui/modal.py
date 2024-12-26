@@ -7,7 +7,7 @@ import os
 import sys
 import traceback
 from functools import partial
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Tuple, TypeVar, Union
 
 from ..enums import TextInputStyle
 from ..utils import MISSING
@@ -15,6 +15,7 @@ from .action_row import ActionRow, components_to_rows
 from .text_input import TextInput
 
 if TYPE_CHECKING:
+    from ..client import Client
     from ..interactions.modal import ModalInteraction
     from ..state import ConnectionState
     from ..types.components import Modal as ModalPayload
@@ -22,6 +23,8 @@ if TYPE_CHECKING:
 
 
 __all__ = ("Modal",)
+
+ClientT = TypeVar("ClientT", bound="Client")
 
 
 class Modal:
@@ -71,7 +74,7 @@ class Modal:
         custom_id: str = MISSING,
         timeout: float = 600,
     ) -> None:
-        if timeout is None:
+        if timeout is None:  # pyright: ignore[reportUnnecessaryComparison]
             raise ValueError("Timeout may not be None")
 
         rows = components_to_rows(components)
@@ -178,7 +181,7 @@ class Modal:
             )
         )
 
-    async def callback(self, interaction: ModalInteraction, /) -> None:
+    async def callback(self, interaction: ModalInteraction[ClientT], /) -> None:
         """|coro|
 
         The callback associated with this modal.
@@ -192,7 +195,7 @@ class Modal:
         """
         pass
 
-    async def on_error(self, error: Exception, interaction: ModalInteraction) -> None:
+    async def on_error(self, error: Exception, interaction: ModalInteraction[ClientT]) -> None:
         """|coro|
 
         A callback that is called when an error occurs.

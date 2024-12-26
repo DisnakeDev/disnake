@@ -7,8 +7,8 @@ import time
 from collections import deque
 from typing import TYPE_CHECKING, Any, Callable, Deque, Dict, Optional
 
-from disnake.abc import PrivateChannel
 from disnake.enums import Enum
+from disnake.member import Member
 
 from .errors import MaxConcurrencyReached
 
@@ -47,11 +47,9 @@ class BucketType(Enum):
         elif self is BucketType.category:
             return (msg.channel.category or msg.channel).id  # type: ignore
         elif self is BucketType.role:
-            # we return the channel id of a private-channel as there are only roles in guilds
-            # and that yields the same result as for a guild with only the @everyone role
-            # NOTE: PrivateChannel doesn't actually have an id attribute but we assume we are
-            # recieving a DMChannel or GroupChannel which inherit from PrivateChannel and do
-            return (msg.channel if isinstance(msg.channel, PrivateChannel) else msg.author.top_role).id  # type: ignore
+            # if author is not a Member we are in a private-channel context; returning its id
+            # yields the same result as for a guild with only the @everyone role
+            return (msg.author.top_role if isinstance(msg.author, Member) else msg.channel).id
 
     def __call__(self, msg: Message) -> Any:
         return self.get_key(msg)
@@ -198,7 +196,7 @@ class CooldownMapping:
         return self._type
 
     @classmethod
-    def from_cooldown(cls, rate, per, type) -> Self:
+    def from_cooldown(cls, rate: float, per: float, type) -> Self:
         return cls(Cooldown(rate, per), type)
 
     def _bucket_key(self, msg: Message) -> Any:
@@ -228,7 +226,7 @@ class CooldownMapping:
         key = self._bucket_key(message)
         if key not in self._cache:
             bucket = self.create_bucket(message)
-            if bucket is not None:
+            if bucket is not None:  # pyright: ignore[reportUnnecessaryComparison]
                 self._cache[key] = bucket
         else:
             bucket = self._cache[key]
@@ -267,7 +265,7 @@ class DynamicCooldownMapping(CooldownMapping):
 
 
 class _Semaphore:
-    """This class is a version of a semaphore.
+    """A custom version of a semaphore.
 
     If you're wondering why asyncio.Semaphore isn't being used,
     it's because it doesn't expose the internal value. This internal

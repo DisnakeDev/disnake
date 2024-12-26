@@ -1,0 +1,13 @@
+Add support for user-installed commands. See :ref:`app_command_contexts` for further details.
+- Add :attr:`ApplicationCommand.install_types` and :attr:`ApplicationCommand.contexts` fields,
+  with respective :class:`ApplicationInstallTypes` and :class:`InteractionContextTypes` flag types.
+- :class:`Interaction` changes:
+    - Add :attr:`Interaction.context` field, reflecting the context in which the interaction occurred.
+    - Add :attr:`Interaction.authorizing_integration_owners` field and :class:`AuthorizingIntegrationOwners` class, containing details about the application installation.
+    - :attr:`Interaction.app_permissions` is now always provided by Discord.
+- Add :attr:`Message.interaction_metadata` and :class:`InteractionMetadata` type, containing metadata for the interaction associated with a message.
+- Add ``integration_type`` parameter to :func:`utils.oauth_url`.
+- Add :attr:`AppInfo.guild_install_type_config` and :attr:`AppInfo.user_install_type_config` fields.
+- |commands| Add ``install_types`` and ``contexts`` parameters to application command decorators.
+- |commands| Add :func:`~ext.commands.install_types` and :func:`~ext.commands.contexts` decorators.
+- |commands| Using the :class:`GuildCommandInteraction` annotation now sets :attr:`~ApplicationCommand.install_types` and :attr:`~ApplicationCommand.contexts`, instead of :attr:`~ApplicationCommand.dm_permission`.

@@ -224,10 +224,11 @@ class KeepAliveHandler(threading.Thread):
                             frame = sys._current_frames()[self._main_thread_id]
                         except KeyError:
                             msg = self.block_msg
+                            _log.warning(msg, self.shard_id, total)
                         else:
                             stack = "".join(traceback.format_stack(frame))
-                            msg = f"{self.block_msg}\nLoop thread traceback (most recent call last):\n{stack}"
-                        _log.warning(msg, self.shard_id, total)
+                            msg = f"{self.block_msg}\nLoop thread traceback (most recent call last):\n%s"
+                            _log.warning(msg, self.shard_id, total, stack)
 
             except Exception:
                 self.stop()
@@ -273,7 +274,7 @@ class DiscordClientWebSocketResponse(aiohttp.ClientWebSocketResponse):
 
 
 class HeartbeatWebSocket(Protocol):
-    HEARTBEAT: Final[Literal[1, 3]]  # type: ignore
+    HEARTBEAT: Final[Literal[1, 3]]
 
     thread_id: int
     loop: asyncio.AbstractEventLoop
@@ -482,7 +483,6 @@ class DiscordWebSocket:
         asyncio.Future
             A future to wait for.
         """
-
         future = self.loop.create_future()
         entry = EventListener(event=event, predicate=predicate, result=result, future=future)
         self._dispatch_listeners.append(entry)
@@ -490,7 +490,6 @@ class DiscordWebSocket:
 
     async def identify(self) -> None:
         """Sends the IDENTIFY packet."""
-
         state = self._connection
 
         payload: IdentifyCommand = {
@@ -688,6 +687,21 @@ class DiscordWebSocket:
         return float("inf") if heartbeat is None else heartbeat.latency
 
     def _can_handle_close(self) -> bool:
+        # bandaid fix for https://github.com/aio-libs/aiohttp/issues/8138
+        # tl;dr: on aiohttp >= 3.9.0 and python < 3.11.0, aiohttp returns close code 1000 (OK)
+        # on abrupt connection loss, not 1006 (ABNORMAL_CLOSURE) like one would expect, ultimately
+        # due to faulty ssl lifecycle handling in cpython.
+        # If we end up in a situation where the close code is 1000 but we didn't
+        # initiate the closure (i.e. `self._close_code` isn't set), assume this has happened and
+        # try to reconnect.
+        if self._close_code is None and self.socket.close_code == 1000:
+            _log.info(
+                "Websocket remote in shard ID %s closed with %s. Assuming the connection dropped.",
+                self.shard_id,
+                self.socket.close_code,
+            )
+            return True  # consider this a reconnectable close code
+
         code = self._close_code or self.socket.close_code
         return code not in (1000, 4004, 4010, 4011, 4012, 4013, 4014)
 
@@ -707,7 +721,8 @@ class DiscordWebSocket:
                 await self.received_message(msg.data)
             elif msg.type is aiohttp.WSMsgType.ERROR:
                 _log.debug("Received %s", msg)
-                raise msg.data
+                # This is usually just an intermittent gateway hiccup, so try to reconnect again and resume
+                raise WebSocketClosure from msg.data
             elif msg.type in (
                 aiohttp.WSMsgType.CLOSED,
                 aiohttp.WSMsgType.CLOSING,
@@ -1022,23 +1037,23 @@ class DiscordVoiceWebSocket:
         state.voice_port = data["port"]
         state.endpoint_ip = data["ip"]
 
-        packet = bytearray(70)
+        packet = bytearray(74)
         struct.pack_into(">H", packet, 0, 1)  # 1 = Send
         struct.pack_into(">H", packet, 2, 70)  # 70 = Length
         struct.pack_into(">I", packet, 4, state.ssrc)
         state.socket.sendto(packet, (state.endpoint_ip, state.voice_port))
-        recv = await self.loop.sock_recv(state.socket, 70)
+        recv = await self.loop.sock_recv(state.socket, 74)
         _log.debug("received packet in initial_connection: %s", recv)
 
-        # the ip is ascii starting at the 4th byte and ending at the first null
-        ip_start = 4
+        # the ip is ascii starting at the 8th byte and ending at the first null
+        ip_start = 8
         ip_end = recv.index(0, ip_start)
         state.ip = recv[ip_start:ip_end].decode("ascii")
 
         state.port = struct.unpack_from(">H", recv, len(recv) - 2)[0]
         _log.debug("detected ip: %s port: %s", state.ip, state.port)
 
-        # there *should* always be at least one supported mode (xsalsa20_poly1305)
+        # there *should* always be at least one supported mode
         modes: List[SupportedModes] = [
             mode for mode in data["modes"] if mode in self._connection.supported_modes
         ]
@@ -1066,7 +1081,7 @@ class DiscordVoiceWebSocket:
     async def load_secret_key(self, data: VoiceSessionDescriptionPayload) -> None:
         _log.info("received secret key for voice connection")
         self.secret_key = self._connection.secret_key = data["secret_key"]
-        await self.speak()
+        # need to send this at least once to set the ssrc
         await self.speak(False)
 
     async def poll_event(self) -> None:
@@ -1076,14 +1091,14 @@ class DiscordVoiceWebSocket:
             await self.received_message(utils._from_json(msg.data))
         elif msg.type is aiohttp.WSMsgType.ERROR:
             _log.debug("Received %s", msg)
-            raise ConnectionClosed(self.ws, shard_id=None) from msg.data
+            raise ConnectionClosed(self.ws, shard_id=None, voice=True) from msg.data
         elif msg.type in (
             aiohttp.WSMsgType.CLOSED,
             aiohttp.WSMsgType.CLOSE,
             aiohttp.WSMsgType.CLOSING,
         ):
             _log.debug("Received %s", msg)
-            raise ConnectionClosed(self.ws, shard_id=None, code=self._close_code)
+            raise ConnectionClosed(self.ws, shard_id=None, code=self._close_code, voice=True)
 
     async def close(self, code: int = 1000) -> None:
         if self._keep_alive is not None:

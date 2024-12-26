@@ -17,7 +17,7 @@ from disnake.utils import MISSING
         "👩‍👩‍👧‍👦",
     ],
 )
-def test_convert_emoji_reaction__standard(emoji):
+def test_convert_emoji_reaction__standard(emoji) -> None:
     assert message.convert_emoji_reaction(emoji) == emoji
 
 
@@ -31,7 +31,7 @@ def test_convert_emoji_reaction__standard(emoji):
         "<a:test:1234>",
     ],
 )
-def test_convert_emoji_reaction__custom(emoji):
+def test_convert_emoji_reaction__custom(emoji) -> None:
     assert message.convert_emoji_reaction(emoji) == "test:1234"
 
 
@@ -53,5 +53,5 @@ def _create_emoji(animated: bool) -> disnake.Emoji:
         (_create_emoji(True)._to_partial(), "test:1234"),
     ],
 )
-def test_convert_emoji_reaction__object(emoji, expected):
+def test_convert_emoji_reaction__object(emoji, expected) -> None:
     assert message.convert_emoji_reaction(emoji) == expected

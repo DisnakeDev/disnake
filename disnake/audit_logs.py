@@ -10,6 +10,7 @@ from typing import (
     Dict,
     Generator,
     List,
+    Mapping,
     Optional,
     Tuple,
     Type,
@@ -63,6 +64,7 @@ if TYPE_CHECKING:
         DefaultReaction as DefaultReactionPayload,
         PermissionOverwrite as PermissionOverwritePayload,
     )
+    from .types.invite import Invite as InvitePayload
     from .types.role import Role as RolePayload
     from .types.snowflake import Snowflake
     from .types.threads import ForumTag as ForumTagPayload
@@ -102,7 +104,7 @@ def _transform_role(
 
 def _transform_member_id(
     entry: AuditLogEntry, data: Optional[Snowflake]
-) -> Union[Member, User, None]:
+) -> Union[Member, User, Object, None]:
     if data is None:
         return None
     return entry._get_member(int(data))
@@ -175,18 +177,18 @@ def _transform_tag_id(
         return None
 
     # cyclic imports
-    from .channel import ForumChannel
+    from .channel import ThreadOnlyGuildChannel
 
     tag: Optional[ForumTag] = None
     tag_id = int(data)
     thread = entry.target
     # try thread parent first
-    if isinstance(thread, Thread) and isinstance(thread.parent, ForumChannel):
+    if isinstance(thread, Thread) and isinstance(thread.parent, ThreadOnlyGuildChannel):
         tag = thread.parent.get_tag(tag_id)
     else:
-        # if not found (possibly deleted thread), search all forum channels
-        for forum in entry.guild.forum_channels:
-            if tag := forum.get_tag(tag_id):
+        # if not found (possibly deleted thread), search all forum/media channels
+        for channel in entry.guild._channels.values():
+            if isinstance(channel, ThreadOnlyGuildChannel) and (tag := channel.get_tag(tag_id)):
                 break
 
     return tag or Object(id=tag_id)
@@ -244,7 +246,7 @@ def _transform_datetime(entry: AuditLogEntry, data: Optional[str]) -> Optional[d
 
 
 def _transform_privacy_level(
-    entry: AuditLogEntry, data: int
+    entry: AuditLogEntry, data: Optional[int]
 ) -> Optional[Union[enums.StagePrivacyLevel, enums.GuildScheduledEventPrivacyLevel]]:
     if data is None:
         return None
@@ -282,8 +284,9 @@ def _transform_default_reaction(
 ) -> Optional[Union[Emoji, PartialEmoji]]:
     if data is None:
         return None
-    return PartialEmoji._emoji_from_name_id(
-        data.get("emoji_name"), utils._get_as_snowflake(data, "emoji_id"), state=entry._state
+    return entry._state._get_emoji_from_fields(
+        name=data.get("emoji_name"),
+        id=utils._get_as_snowflake(data, "emoji_id"),
     )
 
 
@@ -362,12 +365,15 @@ class AuditLogChanges:
         "available_tags":                     (None, _list_transformer(_transform_tag)),
         "default_reaction_emoji":             ("default_reaction", _transform_default_reaction),
         "default_sort_order":                 (None, _enum_transformer(enums.ThreadSortOrder)),
+        "sound_id":                           ("id", _transform_snowflake),
     }
     # fmt: on
 
     def __init__(self, entry: AuditLogEntry, data: List[AuditLogChangePayload]) -> None:
         self.before = AuditLogDiff()
         self.after = AuditLogDiff()
+
+        has_emoji_fields = False
 
         for elem in data:
             attr = elem["key"]
@@ -386,6 +392,10 @@ class AuditLogChanges:
                     entry, cast("AuditLogChangeAppCmdPermsPayload", elem)
                 )
                 continue
+
+            # special case for flat emoji fields (discord, why), these will be merged later
+            if attr == "emoji_id" or attr == "emoji_name":
+                has_emoji_fields = True
 
             transformer: Optional[Transformer]
 
@@ -416,6 +426,9 @@ class AuditLogChanges:
                     after = transformer(entry, after)
 
             setattr(self.after, attr, after)
+
+        if has_emoji_fields:
+            self._merge_emoji(entry)
 
         # add an alias
         if hasattr(self.after, "colour"):
@@ -475,6 +488,16 @@ class AuditLogChanges:
                 data=new, guild_id=guild_id
             )
 
+    def _merge_emoji(self, entry: AuditLogEntry) -> None:
+        for diff in (self.before, self.after):
+            emoji_id: Optional[str] = diff.__dict__.pop("emoji_id", None)
+            emoji_name: Optional[str] = diff.__dict__.pop("emoji_name", None)
+
+            diff.emoji = entry._state._get_emoji_from_fields(
+                name=emoji_name,
+                id=int(emoji_id) if emoji_id else None,
+            )
+
 
 class _AuditLogProxyMemberPrune:
     delete_member_days: int
@@ -482,7 +505,7 @@ class _AuditLogProxyMemberPrune:
 
 
 class _AuditLogProxyMemberMoveOrMessageDelete:
-    channel: abc.GuildChannel
+    channel: Union[abc.GuildChannel, Thread]
     count: int
 
 
@@ -491,7 +514,7 @@ class _AuditLogProxyMemberDisconnect:
 
 
 class _AuditLogProxyPinAction:
-    channel: abc.GuildChannel
+    channel: Union[abc.GuildChannel, Thread]
     message_id: int
 
 
@@ -499,19 +522,23 @@ class _AuditLogProxyStageInstanceAction:
     channel: abc.GuildChannel
 
 
-class _AuditLogProxyAutoModBlockMessage:
-    channel: abc.GuildChannel
+class _AuditLogProxyAutoModAction:
+    channel: Optional[Union[abc.GuildChannel, Thread]]
     rule_name: str
     rule_trigger_type: enums.AutoModTriggerType
 
 
+class _AuditLogProxyKickOrMemberRoleAction:
+    integration_type: Optional[str]
+
+
 class AuditLogEntry(Hashable):
-    """
-    Represents an Audit Log entry.
+    """Represents an Audit Log entry.
 
-    You retrieve these via :meth:`Guild.audit_logs`.
+    You can retrieve these via :meth:`Guild.audit_logs`,
+    or via the :func:`on_audit_log_entry_create` event.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -532,9 +559,12 @@ class AuditLogEntry(Hashable):
     ----------
     action: :class:`AuditLogAction`
         The action that was done.
-    user: :class:`abc.User`
-        The user who initiated this action. Usually a :class:`Member`\\, unless gone
+    user: Optional[Union[:class:`Member`, :class:`User`, :class:`Object`]]
+        The user who initiated this action. Usually :class:`Member`\\, unless gone
         then it's a :class:`User`.
+
+        .. versionchanged:: 2.8
+            May now be an :class:`Object` if the user could not be found.
     id: :class:`int`
         The entry ID.
     target: Any
@@ -554,13 +584,13 @@ class AuditLogEntry(Hashable):
         *,
         data: AuditLogEntryPayload,
         guild: Guild,
-        application_commands: Dict[int, APIApplicationCommand],
-        automod_rules: Dict[int, AutoModRule],
-        guild_scheduled_events: Dict[int, GuildScheduledEvent],
-        integrations: Dict[int, PartialIntegration],
-        threads: Dict[int, Thread],
-        users: Dict[int, User],
-        webhooks: Dict[int, Webhook],
+        application_commands: Mapping[int, APIApplicationCommand],
+        automod_rules: Mapping[int, AutoModRule],
+        guild_scheduled_events: Mapping[int, GuildScheduledEvent],
+        integrations: Mapping[int, PartialIntegration],
+        threads: Mapping[int, Thread],
+        users: Mapping[int, User],
+        webhooks: Mapping[int, Webhook],
     ) -> None:
         self._state = guild._state
         self.guild = guild
@@ -585,36 +615,36 @@ class AuditLogEntry(Hashable):
 
         if isinstance(self.action, enums.AuditLogAction) and extra:
             if self.action is enums.AuditLogAction.member_prune:
-                # member prune has two keys with useful information
-                self.extra = type(
-                    "_AuditLogProxy", (), {k: int(v) for k, v in extra.items()}  # type: ignore
-                )()
+                elems = {
+                    "delete_member_days": utils._get_as_snowflake(extra, "delete_member_days"),
+                    "members_removed": utils._get_as_snowflake(extra, "members_removed"),
+                }
+                self.extra = type("_AuditLogProxy", (), elems)()
             elif (
                 self.action is enums.AuditLogAction.member_move
                 or self.action is enums.AuditLogAction.message_delete
             ):
-                channel_id = int(extra["channel_id"])
                 elems = {
                     "count": int(extra["count"]),
-                    "channel": self.guild.get_channel(channel_id) or Object(id=channel_id),
+                    "channel": self._get_channel_or_thread(
+                        utils._get_as_snowflake(extra, "channel_id")
+                    ),
                 }
                 self.extra = type("_AuditLogProxy", (), elems)()
             elif self.action is enums.AuditLogAction.member_disconnect:
-                # The member disconnect action has a dict with some information
                 elems = {
                     "count": int(extra["count"]),
                 }
                 self.extra = type("_AuditLogProxy", (), elems)()
             elif self.action.name.endswith("pin"):
-                # the pin actions have a dict with some information
-                channel_id = int(extra["channel_id"])
                 elems = {
-                    "channel": self.guild.get_channel(channel_id) or Object(id=channel_id),
+                    "channel": self._get_channel_or_thread(
+                        utils._get_as_snowflake(extra, "channel_id")
+                    ),
                     "message_id": int(extra["message_id"]),
                 }
                 self.extra = type("_AuditLogProxy", (), elems)()
             elif self.action.name.startswith("overwrite_"):
-                # the overwrite_ actions have a dict with some information
                 instance_id = int(extra["id"])
                 the_type = extra.get("type")
                 if the_type == "1":
@@ -626,8 +656,11 @@ class AuditLogEntry(Hashable):
                         role.name = extra.get("role_name")  # type: ignore
                     self.extra = role
             elif self.action.name.startswith("stage_instance"):
-                channel_id = int(extra["channel_id"])
-                elems = {"channel": self.guild.get_channel(channel_id) or Object(id=channel_id)}
+                elems = {
+                    "channel": self._get_channel_or_thread(
+                        utils._get_as_snowflake(extra, "channel_id")
+                    )
+                }
                 self.extra = type("_AuditLogProxy", (), elems)()
             elif self.action is enums.AuditLogAction.application_command_permission_update:
                 app_id = int(extra["application_id"])
@@ -640,16 +673,24 @@ class AuditLogEntry(Hashable):
                 enums.AuditLogAction.automod_send_alert_message,
                 enums.AuditLogAction.automod_timeout,
             ):
-                channel_id = int(extra["channel_id"])
                 elems = {
                     "channel": (
-                        self.guild.get_channel_or_thread(channel_id) or Object(id=channel_id)
+                        self._get_channel_or_thread(utils._get_as_snowflake(extra, "channel_id"))
                     ),
                     "rule_name": extra["auto_moderation_rule_name"],
                     "rule_trigger_type": enums.try_enum(
                         enums.AutoModTriggerType,
                         int(extra["auto_moderation_rule_trigger_type"]),
                     ),
+                }
+                self.extra = type("_AuditLogProxy", (), elems)()
+            elif self.action in (
+                enums.AuditLogAction.kick,
+                enums.AuditLogAction.member_role_update,
+            ):
+                elems = {
+                    # unlike other extras, this key isn't always provided
+                    "integration_type": extra.get("integration_type"),
                 }
                 self.extra = type("_AuditLogProxy", (), elems)()
 
@@ -661,7 +702,8 @@ class AuditLogEntry(Hashable):
         #     _AuditLogProxyMemberDisconnect,
         #     _AuditLogProxyPinAction,
         #     _AuditLogProxyStageInstanceAction,
-        #     _AuditLogProxyAutoModBlockMessage,
+        #     _AuditLogProxyAutoModAction,
+        #     _AuditLogProxyKickOrMemberRoleAction,
         #     Member, User, None,
         #     Role,
         # ]
@@ -673,11 +715,20 @@ class AuditLogEntry(Hashable):
         # into meaningful data when requested
         self._changes = data.get("changes", [])
 
-        self.user = self._get_member(utils._get_as_snowflake(data, "user_id"))  # type: ignore
+        self.user = self._get_member(utils._get_as_snowflake(data, "user_id"))
         self._target_id = utils._get_as_snowflake(data, "target_id")
 
-    def _get_member(self, user_id: int) -> Union[Member, User, None]:
-        return self.guild.get_member(user_id) or self._users.get(user_id)
+    def _get_member(self, user_id: Optional[int]) -> Union[Member, User, Object, None]:
+        if not user_id:
+            return None
+        return self.guild.get_member(user_id) or self._users.get(user_id) or Object(id=user_id)
+
+    def _get_channel_or_thread(
+        self, channel_id: Optional[int]
+    ) -> Union[abc.GuildChannel, Thread, Object, None]:
+        if not channel_id:
+            return None
+        return self.guild.get_channel_or_thread(channel_id) or Object(channel_id)
 
     def _get_integration_by_application_id(
         self, application_id: int
@@ -758,7 +809,7 @@ class AuditLogEntry(Hashable):
     def _convert_target_channel(self, target_id: int) -> Union[abc.GuildChannel, Object]:
         return self.guild.get_channel(target_id) or Object(id=target_id)
 
-    def _convert_target_user(self, target_id: int) -> Union[Member, User, None]:
+    def _convert_target_user(self, target_id: int) -> Union[Member, User, Object, None]:
         return self._get_member(target_id)
 
     def _convert_target_role(self, target_id: int) -> Union[Role, Object]:
@@ -769,15 +820,19 @@ class AuditLogEntry(Hashable):
         # so figure out which change has the full invite data
         changeset = self.before if self.action is enums.AuditLogAction.invite_delete else self.after
 
-        fake_payload = {
+        fake_payload: InvitePayload = {
             "max_age": changeset.max_age,
             "max_uses": changeset.max_uses,
             "code": changeset.code,
             "temporary": changeset.temporary,
             "uses": changeset.uses,
+            "type": 0,
+            "channel": None,
         }
 
-        obj = Invite(state=self._state, data=fake_payload, guild=self.guild, channel=changeset.channel)  # type: ignore
+        obj = Invite(
+            state=self._state, data=fake_payload, guild=self.guild, channel=changeset.channel
+        )
         try:
             obj.inviter = changeset.inviter
         except AttributeError:
@@ -790,7 +845,7 @@ class AuditLogEntry(Hashable):
     def _convert_target_emoji(self, target_id: int) -> Union[Emoji, Object]:
         return self._state.get_emoji(target_id) or Object(id=target_id)
 
-    def _convert_target_message(self, target_id: int) -> Union[Member, User, None]:
+    def _convert_target_message(self, target_id: int) -> Union[Member, User, Object, None]:
         return self._get_member(target_id)
 
     def _convert_target_integration(self, target_id: int) -> Union[PartialIntegration, Object]:

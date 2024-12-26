@@ -38,7 +38,7 @@ class PartialEmoji(_EmojiTag, AssetMixin):
     - "Raw" data events such as :func:`on_raw_reaction_add`
     - Custom emoji that the bot cannot see from e.g. :attr:`Message.reactions`
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -267,25 +267,3 @@ class PartialEmoji(_EmojiTag, AssetMixin):
             return None, emoji.id
         else:
             return emoji.name, None
-
-    # utility method for unusual emoji model in forums
-    @staticmethod
-    def _emoji_from_name_id(
-        name: Optional[str], id: Optional[int], *, state: ConnectionState
-    ) -> Optional[Union[Emoji, PartialEmoji]]:
-        if not (name or id):
-            return None
-
-        emoji: Optional[Union[Emoji, PartialEmoji]] = None
-        if id:
-            emoji = state.get_emoji(id)
-        if not emoji:
-            emoji = PartialEmoji.with_state(
-                state=state,
-                # Note: this does not render correctly if it's a custom emoji, there's just no name information for those here.
-                # This may change in a future API version, but for now we'll just have to accept it.
-                name=name or "",
-                id=id,
-                # `animated` is unknown but presumably we already got the (animated) emoji from the guild cache at this point
-            )
-        return emoji

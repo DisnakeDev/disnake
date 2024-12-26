@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Mapping, Optional, Tuple, Union
 
 if TYPE_CHECKING:
     from aiohttp import ClientResponse, ClientWebSocketResponse
@@ -224,20 +224,56 @@ class ConnectionClosed(ClientException):
         The shard ID that got closed if applicable.
     """
 
+    # https://discord.com/developers/docs/topics/opcodes-and-status-codes#gateway-gateway-close-event-codes
+    GATEWAY_CLOSE_EVENT_REASONS: ClassVar[Mapping[int, str]] = {
+        4000: "Unknown error",
+        4001: "Unknown opcode",
+        4002: "Decode error",
+        4003: "Not authenticated",
+        4004: "Authentication failed",
+        4005: "Already authenticated",
+        4007: "Invalid sequence",
+        4008: "Rate limited",
+        4009: "Session timed out",
+        4010: "Invalid Shard",
+        4011: "Sharding required - you are required to shard your connection in order to connect.",
+        4012: "Invalid API version",
+        4013: "Invalid intents",
+        4014: "Disallowed intents - you tried to specify an intent that you have not enabled or are not approved for.",
+    }
+
+    # https://discord.com/developers/docs/topics/opcodes-and-status-codes#voice-voice-close-event-codes
+    GATEWAY_VOICE_CLOSE_EVENT_REASONS: ClassVar[Mapping[int, str]] = {
+        **GATEWAY_CLOSE_EVENT_REASONS,
+        4002: "Failed to decode payload",
+        4006: "Session no longer valid",
+        4011: "Server not found",
+        4012: "Unknown protocol",
+        4014: "Disconnected, channel was deleted, you were kicked, voice server changed, or the main gateway session was dropped.",
+        4015: "Voice server crashed",
+        4016: "Unknown encryption mode",
+    }
+
     def __init__(
         self,
         socket: ClientWebSocketResponse,
         *,
         shard_id: Optional[int],
         code: Optional[int] = None,
+        voice: bool = False,
     ) -> None:
         # This exception is just the same exception except
         # reconfigured to subclass ClientException for users
         self.code: int = code or socket.close_code or -1
         # aiohttp doesn't seem to consistently provide close reason
-        self.reason: str = ""
+        self.reason: str = self.GATEWAY_CLOSE_EVENT_REASONS.get(self.code, "Unknown reason")
+        if voice:
+            self.reason = self.GATEWAY_VOICE_CLOSE_EVENT_REASONS.get(self.code, "Unknown reason")
+
         self.shard_id: Optional[int] = shard_id
-        super().__init__(f"Shard ID {self.shard_id} WebSocket closed with {self.code}")
+        super().__init__(
+            f"Shard ID {self.shard_id} WebSocket closed with {self.code}: {self.reason}"
+        )
 
 
 class PrivilegedIntentsRequired(ClientException):

@@ -21,7 +21,7 @@ from ..components import Button as ButtonComponent
 from ..enums import ButtonStyle, ComponentType
 from ..partial_emoji import PartialEmoji, _EmojiTag
 from ..utils import MISSING
-from .item import DecoratedItem, Item, Object
+from .item import DecoratedItem, Item, ItemShape
 
 __all__ = (
     "Button",
@@ -269,13 +269,13 @@ def button(
 
 @overload
 def button(
-    cls: Type[Object[B_co, P]], *_: P.args, **kwargs: P.kwargs
+    cls: Type[ItemShape[B_co, P]], *_: P.args, **kwargs: P.kwargs
 ) -> Callable[[ItemCallbackType[B_co]], DecoratedItem[B_co]]:
     ...
 
 
 def button(
-    cls: Type[Object[B_co, P]] = Button[Any], **kwargs: Any
+    cls: Type[ItemShape[B_co, ...]] = Button[Any], **kwargs: Any
 ) -> Callable[[ItemCallbackType[B_co]], DecoratedItem[B_co]]:
     """A decorator that attaches a button to a component.
 
@@ -295,7 +295,7 @@ def button(
     ----------
     cls: Type[:class:`Button`]
         The button subclass to create an instance of. If provided, the following parameters
-        described below do no apply. Instead, this decorator will accept the same keywords
+        described below do not apply. Instead, this decorator will accept the same keywords
         as the passed cls does.
 
         .. versionadded:: 2.6
@@ -319,7 +319,6 @@ def button(
         For example, row=1 will show up before row=2. Defaults to ``None``, which is automatic
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     """
-
     if (origin := get_origin(cls)) is not None:
         cls = origin
 

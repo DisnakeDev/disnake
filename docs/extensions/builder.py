@@ -1,15 +1,19 @@
 # SPDX-License-Identifier: MIT
+from __future__ import annotations
 
 import functools
 import inspect
 from typing import TYPE_CHECKING, Any
 
-from _types import SphinxExtensionMeta
-from docutils import nodes
-from sphinx.application import Sphinx
-from sphinx.config import Config
 from sphinx.environment.adapters.indexentries import IndexEntries
-from sphinx.writers.html5 import HTML5Translator
+
+if TYPE_CHECKING:
+    from docutils import nodes
+    from sphinx.application import Sphinx
+    from sphinx.config import Config
+    from sphinx.writers.html5 import HTML5Translator
+
+    from ._types import SphinxExtensionMeta
 
 if TYPE_CHECKING:
     translator_base = HTML5Translator
@@ -61,7 +65,7 @@ def disable_mathjax(app: Sphinx, config: Config) -> None:
     # inspired by https://github.com/readthedocs/sphinx-hoverxref/blob/003b84fee48262f1a969c8143e63c177bd98aa26/hoverxref/extension.py#L151
 
     for listener in app.events.listeners.get("html-page-context", []):
-        module_name = inspect.getmodule(listener.handler).__name__  # type: ignore
+        module_name = inspect.getmodule(listener.handler).__name__
         if module_name == "sphinx.ext.mathjax":
             app.disconnect(listener.id)
 

@@ -1,0 +1,1 @@
+Add ``applied_tags`` parameter to :meth:`Webhook.send`.

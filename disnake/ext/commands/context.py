@@ -14,7 +14,7 @@ from disnake.message import Message
 if TYPE_CHECKING:
     from typing_extensions import ParamSpec
 
-    from disnake.channel import DMChannel
+    from disnake.channel import DMChannel, GroupChannel
     from disnake.guild import Guild, GuildMessageable
     from disnake.member import Member
     from disnake.state import ConnectionState
@@ -42,8 +42,7 @@ else:
 
 
 class Context(disnake.abc.Messageable, Generic[BotT]):
-    """
-    Represents the context in which a command is being invoked under.
+    """Represents the context in which a command is being invoked under.
 
     This class contains a lot of meta data to help you understand more about
     the invocation context. This class is not created manually and is instead
@@ -131,8 +130,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         self._state: ConnectionState = self.message._state
 
     async def invoke(self, command: Command[CogT, P, T], /, *args: P.args, **kwargs: P.kwargs) -> T:
-        """
-        |coro|
+        """|coro|
 
         Calls a command with the arguments given.
 
@@ -264,7 +262,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         return self.message.guild
 
     @disnake.utils.cached_property
-    def channel(self) -> Union[GuildMessageable, DMChannel]:
+    def channel(self) -> Union[GuildMessageable, DMChannel, GroupChannel]:
         """Union[:class:`.abc.Messageable`]: Returns the channel associated with this context's command.
         Shorthand for :attr:`.Message.channel`.
         """
@@ -292,9 +290,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         return g.voice_client if g else None
 
     async def send_help(self, *args: Any) -> Any:
-        """send_help(entity=<bot>)
-
-        |coro|
+        """|coro|
 
         Shows the help command for the specified entity if given.
         The entity can be a command or a cog.
@@ -349,9 +345,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         if entity is None:
             return None
 
-        try:
-            entity.qualified_name
-        except AttributeError:
+        if not hasattr(entity, "qualified_name"):
             # if we're here then it's not a cog, group, or command.
             return None
 

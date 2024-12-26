@@ -63,8 +63,7 @@ StringT = TypeVar("StringT", str, Optional[str], covariant=True)
 
 
 class Localized(Generic[StringT]):
-    """
-    A container type used for localized parameters.
+    """A container type used for localized parameters.
 
     Exactly one of ``key`` or ``data`` must be provided.
 
@@ -177,8 +176,7 @@ Localised = Localized
 
 
 class LocalizationValue:
-    """
-    Container type for (pending) localization data.
+    """Container type for (pending) localization data.
 
     .. versionadded:: 2.5
     """
@@ -227,12 +225,20 @@ class LocalizationValue:
         if self._key is not None:
             self._data = store.get(self._key)
 
+    def _copy(self) -> LocalizationValue:
+        cls = self.__class__
+        ins = cls.__new__(cls)
+        ins._key = self._key
+        ins._data = self._data
+        return ins
+
     @property
     def data(self) -> Optional[Dict[str, str]]:
         """Optional[Dict[:class:`str`, :class:`str`]]: A dict with a locale -> localization mapping, if available."""
         if self._data is MISSING:
+            # This will happen when `_link(store)` hasn't been called yet, which *shouldn't* occur under normal circumstances.
             warnings.warn(
-                "value was never localized, this is likely a library bug",
+                f"Localization value ('{self._key}') was never linked to bot; this may be a library bug.",
                 LocalizationWarning,
                 stacklevel=2,
             )
@@ -240,6 +246,10 @@ class LocalizationValue:
         return self._data
 
     def __eq__(self, other) -> bool:
+        # if both are pending, compare keys instead
+        if self._data is MISSING and other._data is MISSING:
+            return self._key == other._key
+
         d1 = self.data
         d2 = other.data
         # consider values equal if they're both falsy, or actually equal
@@ -248,8 +258,7 @@ class LocalizationValue:
 
 
 class LocalizationProtocol(ABC):
-    """
-    Manages a key-value mapping of localizations.
+    """Manages a key-value mapping of localizations.
 
     This is an abstract class, a concrete implementation is provided as :class:`LocalizationStore`.
 
@@ -258,8 +267,7 @@ class LocalizationProtocol(ABC):
 
     @abstractmethod
     def get(self, key: str) -> Optional[Dict[str, str]]:
-        """
-        Returns localizations for the specified key.
+        """Returns localizations for the specified key.
 
         Parameters
         ----------
@@ -282,8 +290,7 @@ class LocalizationProtocol(ABC):
 
     # subtypes don't have to implement this
     def load(self, path: Union[str, os.PathLike]) -> None:
-        """
-        Adds localizations from the provided path.
+        """Adds localizations from the provided path.
 
         Parameters
         ----------
@@ -299,21 +306,19 @@ class LocalizationProtocol(ABC):
 
     # subtypes don't have to implement this
     def reload(self) -> None:
-        """
-        Clears localizations and reloads all previously loaded sources again.
+        """Clears localizations and reloads all previously loaded sources again.
         If an exception occurs, the previous data gets restored and the exception is re-raised.
         """
         pass
 
 
 class LocalizationStore(LocalizationProtocol):
-    """
-    Manages a key-value mapping of localizations using ``.json`` files.
+    """Manages a key-value mapping of localizations using ``.json`` files.
 
     .. versionadded:: 2.5
 
     Attributes
-    ------------
+    ----------
     strict: :class:`bool`
         Specifies whether :meth:`.get` raises an exception if localizations for a provided key couldn't be found.
     """
@@ -325,8 +330,7 @@ class LocalizationStore(LocalizationProtocol):
         self._paths: Set[Path] = set()
 
     def get(self, key: str) -> Optional[Dict[str, str]]:
-        """
-        Returns localizations for the specified key.
+        """Returns localizations for the specified key.
 
         Parameters
         ----------
@@ -345,15 +349,13 @@ class LocalizationStore(LocalizationProtocol):
             The localizations for the provided key.
             Returns ``None`` if no localizations could be found and :attr:`strict` is disabled.
         """
-
         data = self._loc.get(key)
         if data is None and self.strict:
             raise LocalizationKeyError(key)
         return data
 
     def load(self, path: Union[str, os.PathLike]) -> None:
-        """
-        Adds localizations from the provided path to the store.
+        """Adds localizations from the provided path to the store.
         If the path points to a file, the file gets loaded.
         If it's a directory, all ``.json`` files in that directory get loaded (non-recursive).
 
@@ -367,7 +369,6 @@ class LocalizationStore(LocalizationProtocol):
         RuntimeError
             The provided path is invalid or couldn't be loaded
         """
-
         path = Path(path)
 
         if path.is_file():
@@ -383,12 +384,10 @@ class LocalizationStore(LocalizationProtocol):
         self._paths.add(path)
 
     def reload(self) -> None:
-        """
-        Clears localizations and reloads all previously loaded files/directories again.
+        """Clears localizations and reloads all previously loaded files/directories again.
         If an exception occurs, the previous data gets restored and the exception is re-raised.
         See :func:`~LocalizationStore.load` for possible raised exceptions.
         """
-
         old = self._loc
         try:
             self._loc = defaultdict(dict)
@@ -415,7 +414,7 @@ class LocalizationStore(LocalizationProtocol):
         except Exception as e:
             raise RuntimeError(f"Unable to load '{path}': {e}") from e
 
-    def _load_dict(self, data: Dict[str, str], locale: str) -> None:
+    def _load_dict(self, data: Dict[str, Optional[str]], locale: str) -> None:
         if not isinstance(data, dict) or not all(
             o is None or isinstance(o, str) for o in data.values()
         ):

@@ -10,18 +10,7 @@ import logging
 import sys
 import traceback
 import warnings
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Iterable,
-    List,
-    Optional,
-    Type,
-    TypeVar,
-    Union,
-    cast,
-)
+from typing import TYPE_CHECKING, Any, Callable, Iterable, List, Optional, Type, TypeVar, Union
 
 import disnake
 
@@ -72,8 +61,7 @@ def when_mentioned_or(*prefixes: str) -> Callable[[BotBase, Message], List[str]]
     These are meant to be passed into the :attr:`.Bot.command_prefix` attribute.
 
     Example
-    --------
-
+    -------
     .. code-block:: python3
 
         bot = commands.Bot(command_prefix=commands.when_mentioned_or('!'))
@@ -92,7 +80,7 @@ def when_mentioned_or(*prefixes: str) -> Callable[[BotBase, Message], List[str]]
 
 
     See Also
-    ----------
+    --------
     :func:`.when_mentioned`
     """
 
@@ -131,7 +119,7 @@ class BotBase(CommonBotBase, GroupMixin):
         super().__init__(**options)
 
         if not isinstance(self, disnake.Client):
-            raise RuntimeError("BotBase mixin must be used with disnake.Client")
+            raise RuntimeError("BotBase mixin must be used with disnake.Client")  # noqa: TRY004
 
         alternative = (
             "AutoShardedInteractionBot"
@@ -263,8 +251,7 @@ class BotBase(CommonBotBase, GroupMixin):
             pass
 
     def check(self, func: T) -> T:
-        """
-        A decorator that adds a global check to the bot.
+        """A decorator that adds a global check to the bot.
 
         This is for text commands only, and doesn't apply to application commands.
 
@@ -281,8 +268,7 @@ class BotBase(CommonBotBase, GroupMixin):
         :exc:`.CommandError`.
 
         Example
-        ---------
-
+        -------
         .. code-block:: python3
 
             @bot.check
@@ -295,8 +281,7 @@ class BotBase(CommonBotBase, GroupMixin):
         return func
 
     def check_once(self, func: CFT) -> CFT:
-        """
-        A decorator that adds a "call once" global check to the bot.
+        """A decorator that adds a "call once" global check to the bot.
 
         This is for text commands only, and doesn't apply to application commands.
 
@@ -323,8 +308,7 @@ class BotBase(CommonBotBase, GroupMixin):
         :exc:`.CommandError`.
 
         Example
-        ---------
-
+        -------
         .. code-block:: python3
 
             @bot.check_once
@@ -379,8 +363,7 @@ class BotBase(CommonBotBase, GroupMixin):
         return coro
 
     def after_invoke(self, coro: CFT) -> CFT:
-        """
-        A decorator that registers a coroutine as a post-invoke hook.
+        """A decorator that registers a coroutine as a post-invoke hook.
 
         This is for text commands only, and doesn't apply to application commands.
 
@@ -420,7 +403,7 @@ class BotBase(CommonBotBase, GroupMixin):
         super()._remove_module_references(name)
         # remove all the commands from the module
         for cmd in self.all_commands.copy().values():
-            if cmd.module is not None and _is_submodule(name, cmd.module):
+            if cmd.module and _is_submodule(name, cmd.module):
                 if isinstance(cmd, GroupMixin):
                     cmd.recursively_remove_all_commands()
                 self.remove_command(cmd.name)
@@ -482,7 +465,7 @@ class BotBase(CommonBotBase, GroupMixin):
                 raise TypeError(
                     "command_prefix must be plain string, iterable of strings, or callable "
                     f"returning either of these, not {ret.__class__.__name__}"
-                )
+                ) from None
 
             if not ret:
                 raise ValueError("Iterable command_prefix must contain at least one prefix")
@@ -490,8 +473,7 @@ class BotBase(CommonBotBase, GroupMixin):
         return ret
 
     async def get_context(self, message: Message, *, cls: Type[CXT] = Context) -> CXT:
-        """
-        |coro|
+        """|coro|
 
         Returns the invocation context from the message.
 
@@ -519,9 +501,8 @@ class BotBase(CommonBotBase, GroupMixin):
             The invocation context. The type of this can change via the
             ``cls`` parameter.
         """
-
         view = StringView(message.content)
-        ctx = cast("CXT", cls(prefix=None, view=view, bot=self, message=message))
+        ctx = cls(prefix=None, view=view, bot=self, message=message)
 
         if message.author.id == self.user.id:  # type: ignore
             return ctx
@@ -548,7 +529,7 @@ class BotBase(CommonBotBase, GroupMixin):
                     raise TypeError(
                         "get_prefix must return either a string or a list of string, "
                         f"not {prefix.__class__.__name__}"
-                    )
+                    ) from None
 
                 # It's possible a bad command_prefix got us here.
                 for value in prefix:
@@ -556,7 +537,7 @@ class BotBase(CommonBotBase, GroupMixin):
                         raise TypeError(
                             "Iterable command_prefix or list returned from get_prefix must "
                             f"contain only strings, not {value.__class__.__name__}"
-                        )
+                        ) from None
 
                 # Getting here shouldn't happen
                 raise

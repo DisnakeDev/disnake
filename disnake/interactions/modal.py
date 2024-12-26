@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional
 from ..enums import ComponentType
 from ..message import Message
 from ..utils import cached_slot_property
-from .base import Interaction
+from .base import ClientT, Interaction
 
 if TYPE_CHECKING:
     from ..state import ConnectionState
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 __all__ = ("ModalInteraction", "ModalInteractionData")
 
 
-class ModalInteraction(Interaction):
+class ModalInteraction(Interaction[ClientT]):
     """Represents an interaction with a modal.
 
     .. versionadded:: 2.4
@@ -39,8 +39,23 @@ class ModalInteraction(Interaction):
         These are valid for 15 minutes.
     guild_id: Optional[:class:`int`]
         The guild ID the interaction was sent from.
-    channel_id: :class:`int`
-        The channel ID the interaction was sent from.
+    channel: Union[:class:`abc.GuildChannel`, :class:`Thread`, :class:`abc.PrivateChannel`, :class:`PartialMessageable`]
+        The channel the interaction was sent from.
+
+        Note that due to a Discord limitation, DM channels
+        may not contain recipient information.
+        Unknown channel types will be :class:`PartialMessageable`.
+
+        .. versionchanged:: 2.10
+            If the interaction was sent from a thread and the bot cannot normally access the thread,
+            this is now a proper :class:`Thread` object.
+            Private channels are now proper :class:`DMChannel`/:class:`GroupChannel`
+            objects instead of :class:`PartialMessageable`.
+
+        .. note::
+            If you want to compute the interaction author's or bot's permissions in the channel,
+            consider using :attr:`permissions` or :attr:`app_permissions`.
+
     author: Union[:class:`User`, :class:`Member`]
         The user or member that sent the interaction.
     locale: :class:`Locale`
@@ -57,16 +72,36 @@ class ModalInteraction(Interaction):
         .. versionchanged:: 2.5
             Changed to :class:`Locale` instead of :class:`str`.
 
+    client: :class:`Client`
+        The interaction client.
+    entitlements: List[:class:`Entitlement`]
+        The entitlements for the invoking user and guild,
+        representing access to an application subscription.
+
+        .. versionadded:: 2.10
+
+    authorizing_integration_owners: :class:`AuthorizingIntegrationOwners`
+        Details about the authorizing user/guild for the application installation
+        related to the interaction.
+
+        .. versionadded:: 2.10
+
+    context: :class:`InteractionContextTypes`
+        The context where the interaction was triggered from.
+
+        This is a flag object, with exactly one of the flags set to ``True``.
+        To check whether an interaction originated from e.g. a :attr:`~InteractionContextTypes.guild`
+        context, you can use ``if interaction.context.guild:``.
+
+        .. versionadded:: 2.10
+
+    data: :class:`ModalInteractionData`
+        The wrapped interaction data.
     message: Optional[:class:`Message`]
         The message that this interaction's modal originated from,
         if the modal was sent in response to a component interaction.
 
         .. versionadded:: 2.5
-
-    data: :class:`ModalInteractionData`
-        The wrapped interaction data.
-    client: :class:`Client`
-        The interaction client.
     """
 
     __slots__ = ("message", "_cs_text_values")
@@ -82,8 +117,7 @@ class ModalInteraction(Interaction):
         self.message: Optional[Message] = message
 
     def walk_raw_components(self) -> Generator[ModalInteractionComponentDataPayload, None, None]:
-        """
-        Returns a generator that yields raw component data from action rows one by one, as provided by Discord.
+        """Returns a generator that yields raw component data from action rows one by one, as provided by Discord.
         This does not contain all fields of the components due to API limitations.
 
         .. versionadded:: 2.6
@@ -98,7 +132,8 @@ class ModalInteraction(Interaction):
     @cached_slot_property("_cs_text_values")
     def text_values(self) -> Dict[str, str]:
         """Dict[:class:`str`, :class:`str`]: Returns the text values the user has entered in the modal.
-        This is a dict of the form ``{custom_id: value}``."""
+        This is a dict of the form ``{custom_id: value}``.
+        """
         text_input_type = ComponentType.text_input.value
         return {
             component["custom_id"]: component.get("value") or ""
