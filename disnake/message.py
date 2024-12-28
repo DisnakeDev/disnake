@@ -2511,6 +2511,7 @@ class PartialMessage(Hashable):
     - :meth:`StageChannel.get_partial_message`
     - :meth:`Thread.get_partial_message`
     - :meth:`DMChannel.get_partial_message`
+    - :meth:`GroupChannel.get_partial_message`
     - :meth:`PartialMessageable.get_partial_message`
 
     Note that this class is trimmed down and has no rich attributes.
@@ -2560,6 +2561,7 @@ class PartialMessage(Hashable):
             ChannelType.text,
             ChannelType.news,
             ChannelType.private,
+            ChannelType.group,
             ChannelType.news_thread,
             ChannelType.public_thread,
             ChannelType.private_thread,
@@ -2567,7 +2569,7 @@ class PartialMessage(Hashable):
             ChannelType.stage_voice,
         ):
             raise TypeError(
-                f"Expected TextChannel, VoiceChannel, DMChannel, StageChannel, Thread, or PartialMessageable "
+                f"Expected TextChannel, VoiceChannel, StageChannel, Thread, DMChannel, GroupChannel, or PartialMessageable "
                 f"with a valid type, not {type(channel)!r} (type: {channel.type!r})"
             )
 
