@@ -508,10 +508,12 @@ _mime_type_extensions = {
     "image/jpeg": ".jpg",
     "image/gif": ".gif",
     "image/webp": ".webp",
+    "audio/mpeg": ".mp3",
+    "audio/ogg": ".ogg",
 }
 
 
-def _get_mime_type_for_image(data: _BytesLike) -> str:
+def _get_mime_type_for_data(data: _BytesLike) -> str:
     if data[0:8] == b"\x89\x50\x4E\x47\x0D\x0A\x1A\x0A":
         return "image/png"
     elif data[0:3] == b"\xff\xd8\xff" or data[6:10] in (b"JFIF", b"Exif"):
@@ -520,20 +522,26 @@ def _get_mime_type_for_image(data: _BytesLike) -> str:
         return "image/gif"
     elif data[0:4] == b"RIFF" and data[8:12] == b"WEBP":
         return "image/webp"
+    elif data[0:3] == b"ID3" or data[0:2] in (b"\xff\xfb", b"\xff\xf3", b"\xff\xf2"):
+        # n.b. this doesn't support the unofficial MPEG-2.5 frame header (which starts with 0xFFEx).
+        # Discord also doesn't accept it.
+        return "audio/mpeg"
+    elif data[0:4] == b"OggS":
+        return "audio/ogg"
     else:
-        raise ValueError("Unsupported image type given")
+        raise ValueError("Unsupported file type provided")
 
 
 def _bytes_to_base64_data(data: _BytesLike) -> str:
     fmt = "data:{mime};base64,{data}"
-    mime = _get_mime_type_for_image(data)
+    mime = _get_mime_type_for_data(data)
     b64 = b64encode(data).decode("ascii")
     return fmt.format(mime=mime, data=b64)
 
 
-def _get_extension_for_image(data: _BytesLike) -> Optional[str]:
+def _get_extension_for_data(data: _BytesLike) -> Optional[str]:
     try:
-        mime_type = _get_mime_type_for_image(data)
+        mime_type = _get_mime_type_for_data(data)
     except ValueError:
         return None
     return _mime_type_extensions.get(mime_type)

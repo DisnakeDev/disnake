@@ -10,10 +10,8 @@ from typing import (
     Callable,
     Optional,
     Tuple,
-    Type,
     TypeVar,
     Union,
-    get_origin,
     overload,
 )
 
@@ -21,7 +19,7 @@ from ..components import Button as ButtonComponent
 from ..enums import ButtonStyle, ComponentType
 from ..partial_emoji import PartialEmoji, _EmojiTag
 from ..utils import MISSING
-from .item import DecoratedItem, Item, ItemShape
+from .item import DecoratedItem, Item
 
 __all__ = (
     "Button",
@@ -263,20 +261,20 @@ def button(
     style: ButtonStyle = ButtonStyle.secondary,
     emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
     row: Optional[int] = None,
-) -> Callable[[ItemCallbackType[Button[V_co]]], DecoratedItem[Button[V_co]]]:
+) -> Callable[[ItemCallbackType[V_co, Button[V_co]]], DecoratedItem[Button[V_co]]]:
     ...
 
 
 @overload
 def button(
-    cls: Type[ItemShape[B_co, P]], *_: P.args, **kwargs: P.kwargs
-) -> Callable[[ItemCallbackType[B_co]], DecoratedItem[B_co]]:
+    cls: Callable[P, B_co], *_: P.args, **kwargs: P.kwargs
+) -> Callable[[ItemCallbackType[V_co, B_co]], DecoratedItem[B_co]]:
     ...
 
 
 def button(
-    cls: Type[ItemShape[B_co, ...]] = Button[Any], **kwargs: Any
-) -> Callable[[ItemCallbackType[B_co]], DecoratedItem[B_co]]:
+    cls: Callable[..., B_co] = Button[Any], **kwargs: Any
+) -> Callable[[ItemCallbackType[V_co, B_co]], DecoratedItem[B_co]]:
     """A decorator that attaches a button to a component.
 
     The function being decorated should have three parameters, ``self`` representing
@@ -293,13 +291,12 @@ def button(
 
     Parameters
     ----------
-    cls: Type[:class:`Button`]
-        The button subclass to create an instance of. If provided, the following parameters
-        described below do not apply. Instead, this decorator will accept the same keywords
-        as the passed cls does.
+    cls: Callable[..., :class:`Button`]
+        A callable (may be a :class:`Button` subclass) to create a new instance of this component.
+        If provided, the other parameters described below do not apply.
+        Instead, this decorator will accept the same keywords as the passed callable/class does.
 
         .. versionadded:: 2.6
-
     label: Optional[:class:`str`]
         The label of the button, if any.
     custom_id: Optional[:class:`str`]
@@ -319,13 +316,10 @@ def button(
         For example, row=1 will show up before row=2. Defaults to ``None``, which is automatic
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     """
-    if (origin := get_origin(cls)) is not None:
-        cls = origin
+    if not callable(cls):
+        raise TypeError("cls argument must be callable")
 
-    if not isinstance(cls, type) or not issubclass(cls, Button):
-        raise TypeError(f"cls argument must be a subclass of Button, got {cls!r}")
-
-    def decorator(func: ItemCallbackType[B_co]) -> DecoratedItem[B_co]:
+    def decorator(func: ItemCallbackType[V_co, B_co]) -> DecoratedItem[B_co]:
         if not asyncio.iscoroutinefunction(func):
             raise TypeError("button function must be a coroutine function")
 
