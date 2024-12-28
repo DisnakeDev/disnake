@@ -237,6 +237,7 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
 
 
 def _create_decorator(
+    # FIXME(3.0): rename `cls` parameter to more closely represent any callable argument type
     cls: Callable[P, S_co],
     /,
     *args: P.args,
