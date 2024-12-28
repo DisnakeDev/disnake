@@ -49,7 +49,9 @@ class BucketType(Enum):
         elif self is BucketType.role:
             # if author is not a Member we are in a private-channel context; returning its id
             # yields the same result as for a guild with only the @everyone role
-            return (msg.author.top_role if isinstance(msg.author, Member) else msg.channel).id
+            return (
+                msg.author.top_role if msg.guild and isinstance(msg.author, Member) else msg.channel
+            ).id
 
     def __call__(self, msg: Message) -> Any:
         return self.get_key(msg)
