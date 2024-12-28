@@ -291,13 +291,12 @@ def button(
 
     Parameters
     ----------
-    cls: Type[:class:`Button`]
-        The button subclass to create an instance of. If provided, the following parameters
-        described below do not apply. Instead, this decorator will accept the same keywords
-        as the passed cls does.
+    cls: Callable[..., :class:`Button`]
+        A callable (may be a :class:`Button` subclass) to create a new instance of this component.
+        If provided, the other parameters described below do not apply.
+        Instead, this decorator will accept the same keywords as the passed callable/class does.
 
         .. versionadded:: 2.6
-
     label: Optional[:class:`str`]
         The label of the button, if any.
     custom_id: Optional[:class:`str`]

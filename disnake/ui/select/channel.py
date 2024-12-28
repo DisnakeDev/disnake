@@ -224,10 +224,10 @@ def channel_select(
 
     Parameters
     ----------
-    cls: Type[:class:`ChannelSelect`]
-        The select subclass to create an instance of. If provided, the following parameters
-        described below do not apply. Instead, this decorator will accept the same keywords
-        as the passed cls does.
+    cls: Callable[..., :class:`ChannelSelect`]
+        A callable (may be a :class:`ChannelSelect` subclass) to create a new instance of this component.
+        If provided, the other parameters described below do not apply.
+        Instead, this decorator will accept the same keywords as the passed callable/class does.
     placeholder: Optional[:class:`str`]
         The placeholder text that is shown if nothing is selected, if any.
     custom_id: :class:`str`

@@ -293,13 +293,12 @@ def string_select(
 
     Parameters
     ----------
-    cls: Type[:class:`StringSelect`]
-        The select subclass to create an instance of. If provided, the following parameters
-        described below do not apply. Instead, this decorator will accept the same keywords
-        as the passed cls does.
+    cls: Callable[..., :class:`StringSelect`]
+        A callable (may be a :class:`StringSelect` subclass) to create a new instance of this component.
+        If provided, the other parameters described below do not apply.
+        Instead, this decorator will accept the same keywords as the passed callable/class does.
 
         .. versionadded:: 2.6
-
     placeholder: Optional[:class:`str`]
         The placeholder text that is shown if nothing is selected, if any.
     custom_id: :class:`str`
