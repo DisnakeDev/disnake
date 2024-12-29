@@ -22,6 +22,13 @@ in specific versions. Please see :ref:`version_guarantees` for more information.
 v2.10.0
 -------
 
+This release comes with support for user apps (see :ref:`app_command_contexts`), polls, message forwarding,
+avatar decorations, media channels, soundboards, subscriptions/monetization,
+proper support for Python 3.12 and 3.13 functionality (such as 3.12's new ``type`` statement),
+and lots of smaller features, improvements, and other bugfixes.
+
+See below for a complete list of changes.
+
 Deprecations
 ~~~~~~~~~~~~
 - :meth:`Client.fetch_premium_sticker_packs` was renamed to :meth:`Client.fetch_sticker_packs`; the old name is deprecated. (:issue:`1082`)
@@ -110,7 +117,6 @@ New Features
     - |commands| Add ``default_install_types`` and ``default_contexts`` parameters to :class:`~ext.commands.Bot`.
 - Support banning multiple users at once using :meth:`Guild.bulk_ban`. (:issue:`1174`)
 - Add the new poll discord API feature. This includes the following new classes and events: (:issue:`1175`)
-  
     - New types: :class:`Poll`, :class:`PollAnswer`, :class:`PollMedia`, :class:`RawPollVoteActionEvent` and :class:`PollLayoutType`.
     - Edited :meth:`abc.Messageable.send`, :meth:`Webhook.send`, :meth:`ext.commands.Context.send` and :meth:`disnake.InteractionResponse.send_message` to be able to send polls.
     - Edited :class:`Message` to store a new :attr:`Message.poll` attribute for polls.
@@ -142,17 +148,9 @@ Bug Fixes
 - Fix :class:`ui.Modal` timeout issues with long-running callbacks, and multiple modals with the same user and ``custom_id``. (:issue:`914`)
 - |commands| Fix incorrect typings of :meth:`InvokableApplicationCommand.add_check <.ext.commands.InvokableApplicationCommand.add_check>`, :meth:`InvokableApplicationCommand.remove_check <.ext.commands.InvokableApplicationCommand.remove_check>`, :meth:`Bot.add_app_command_check <.ext.commands.Bot.add_app_command_check>` and :meth:`Bot.remove_app_command_check <.ext.commands.Bot.remove_app_command_check>`. (:issue:`1045`)
 - Update :meth:`Colour.dark_theme` to match Discord theme change. (:issue:`1102`)
-- Allow ``cls`` argument in select menu decorators (e.g. :func:`ui.string_select`) to be specified by keyword instead of being positional-only. (:issue:`1111`)
-- |commands| Fix edge case in evaluation of multiple identical annotations with forwardrefs in a single signature. (:issue:`1120`)
-- Fix :meth:`Thread.permissions_for` not working in some cases due to an incorrect import. (:issue:`1123`)
-- |commands| Fix erroneous :class:`LocalizationWarning`\s when using localized slash command parameters in cogs. (:issue:`1133`)
 - Update ``choices`` type in app commands to accept any :class:`~py:typing.Sequence` or :class:`~py:typing.Mapping`, instead of the more constrained :class:`list`/:class:`dict` types. (:issue:`1136`)
 - Support fetching invites with ``null`` channel (e.g. friend invites). (:issue:`1142`)
-- Handle unexpected ``RECONNECT`` opcode where ``HELLO`` is expected during initial shard connection. (:issue:`1155`)
-- Reconnect gateway websocket on protocol errors. (:issue:`1159`)
 - Adjust type annotations to allow :class:`Object` as ``category`` parameter in :meth:`Guild.create_text_channel` and similar methods. (:issue:`1162`)
-- Avoid ``AttributeError`` in :class:`FFmpegAudio` when cleaning up after failing to spawn ffmpeg process. (:issue:`1164`)
-- Fix base URL for stickers with :attr:`StickerFormatType.gif`. (:issue:`1189`)
 - |commands| Fix usage of :attr:`~ext.commands.BucketType.role`\-type cooldowns in threads, which incorrectly operated on a per-channel basis instead. (:issue:`1200`)
 - |commands| Fix incorrect exception when using the :func:`~ext.commands.default_member_permissions` decorator on a :func:`~ext.commands.user_command` while also using the cog-level ``user_command_attrs`` field. (:issue:`1252`)
 - Escape forward slashes in HTTP route parameters. (:issue:`1264`)
@@ -160,10 +158,8 @@ Bug Fixes
 Documentation
 ~~~~~~~~~~~~~
 - Add inherited attributes to :class:`TeamMember`, and fix :attr:`TeamMember.avatar` documentation. (:issue:`1094`)
-- Miscellaneous grammar/typo fixes for :doc:`api/audit_logs`. (:issue:`1105`)
 - Document the :class:`.Option` attributes, the ``description`` and ``options`` properties for :class:`.ext.commands.InvokableSlashCommand` and the ``description`` and ``body`` properties for :class:`.ext.commands.SubCommand`. (:issue:`1112`)
 - Make all "Supported Operations" container elements collapsible. (:issue:`1126`)
-- Adding some clarifying documentation around the executable parameters of audio classes based off of internal discussions. (:issue:`1158`)
 
 Miscellaneous
 ~~~~~~~~~~~~~
@@ -171,7 +167,6 @@ Miscellaneous
 - Overhaul and simplify `contribution guide <https://github.com/DisnakeDev/disnake/tree/master/CONTRIBUTING.md>`__. (:issue:`1098`)
 - |commands| Rewrite slash command signature evaluation to use the same mechanism as prefix command signatures. This should not have an impact on user code, but streamlines future changes. (:issue:`1116`)
 - Start testing with Python 3.12 in CI. (:issue:`1117`)
-- Add :class:`StandardSticker` to ``stickers`` parameter type annotation of :meth:`Messageable.send` and :meth:`ForumChannel.create_thread`. (:issue:`1134`)
 - Reduce the amount of unknown (unresolved) types in public-facing APIs. (:issue:`1167`)
 - Remove ``disnake[discord]`` extra; the shim is deprecated, and has not been updated for several versions. (:issue:`1196`)
 - Move enum member documentation into docstrings. (:issue:`1243`)
