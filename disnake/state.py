@@ -2433,10 +2433,10 @@ class AutoShardedConnectionState(ConnectionState):
             if new_author is not None and new_author is not msg.author:
                 msg.author = new_author
 
-            if msg.interaction is not None and isinstance(msg.interaction.user, Member):
-                new_author = msg.guild.get_member(msg.interaction.user.id)
-                if new_author is not None and new_author is not msg.interaction.user:
-                    msg.interaction.user = new_author
+            if msg._interaction is not None and isinstance(msg._interaction.user, Member):
+                new_author = msg.guild.get_member(msg._interaction.user.id)
+                if new_author is not None and new_author is not msg._interaction.user:
+                    msg._interaction.user = new_author
 
     async def chunker(
         self,

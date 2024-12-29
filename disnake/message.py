@@ -1446,8 +1446,8 @@ class Message(Hashable):
         # updated later in _update_member_references, after re-chunking
         if isinstance(self.author, Member):
             self.author.guild = new_guild
-        if self.interaction and isinstance(self.interaction.user, Member):
-            self.interaction.user.guild = new_guild
+        if self._interaction and isinstance(self._interaction.user, Member):
+            self._interaction.user.guild = new_guild
 
     @utils.cached_slot_property("_cs_raw_mentions")
     def raw_mentions(self) -> List[int]:
