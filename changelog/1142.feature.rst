@@ -1,1 +1,0 @@
-Add :attr:`Invite.type`.

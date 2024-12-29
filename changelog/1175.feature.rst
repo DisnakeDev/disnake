@@ -1,6 +1,0 @@
-Add the new poll discord API feature. This includes the following new classes and events:
-
-- New types: :class:`Poll`, :class:`PollAnswer`, :class:`PollMedia`, :class:`RawPollVoteActionEvent` and :class:`PollLayoutType`.
-- Edited :meth:`abc.Messageable.send`, :meth:`Webhook.send`, :meth:`ext.commands.Context.send` and :meth:`disnake.InteractionResponse.send_message` to be able to send polls.
-- Edited :class:`Message` to store a new :attr:`Message.poll` attribute for polls.
-- Edited :class:`Event` to contain the new :func:`on_poll_vote_add`, :func:`on_poll_vote_remove`, :func:`on_raw_poll_vote_add` and :func:`on_raw_poll_vote_remove`.

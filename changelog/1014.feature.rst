@@ -1,1 +1,0 @@
-Add ``delete_after`` parameter to :meth:`Interaction.edit_original_response`, :meth:`InteractionResponse.edit_message` and :meth:`InteractionMessage.edit`.
