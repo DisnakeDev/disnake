@@ -1155,8 +1155,8 @@ class SubscriptionIterator(_AsyncIterator["Subscription"]):
         self,
         sku_id: int,
         *,
-        user_id: Optional[int] = None,
         state: ConnectionState,
+        user_id: Optional[int] = None,  # required, except for oauth queries
         limit: Optional[int] = None,
         before: Optional[Union[Snowflake, datetime.datetime]] = None,
         after: Optional[Union[Snowflake, datetime.datetime]] = None,
