@@ -36,6 +36,7 @@ if TYPE_CHECKING:
 
     from ._types import AppCheck, Coro, Error, Hook
     from .cog import Cog
+    from .interaction_bot_base import InteractionBotBase
 
     ApplicationCommandInteractionT = TypeVar(
         "ApplicationCommandInteractionT", bound=ApplicationCommandInteraction, covariant=True
@@ -267,6 +268,10 @@ class InvokableApplicationCommand(ABC):
             # FIXME(3.0): this should raise if these were set elsewhere (except `*_command_attrs`) already
             self.body.contexts = InteractionContextTypes(guild=True)
             self.body.install_types = ApplicationInstallTypes(guild=True)
+
+    def _apply_defaults(self, bot: InteractionBotBase) -> None:
+        self.body._default_install_types = bot._default_install_types
+        self.body._default_contexts = bot._default_contexts
 
     @property
     def dm_permission(self) -> bool:

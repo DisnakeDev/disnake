@@ -149,6 +149,8 @@ class InteractionBotBase(CommonBotBase):
         sync_commands_debug: bool = MISSING,
         sync_commands_on_cog_unload: bool = MISSING,
         test_guilds: Optional[Sequence[int]] = None,
+        default_install_types: Optional[ApplicationInstallTypes] = None,
+        default_contexts: Optional[InteractionContextTypes] = None,
         **options: Any,
     ) -> None:
         if test_guilds and not all(isinstance(guild_id, int) for guild_id in test_guilds):
@@ -199,6 +201,9 @@ class InteractionBotBase(CommonBotBase):
 
         self._command_sync_flags = command_sync_flags
         self._sync_queued: asyncio.Lock = asyncio.Lock()
+
+        self._default_install_types = default_install_types
+        self._default_contexts = default_contexts
 
         self._slash_command_checks = []
         self._slash_command_check_once = []
@@ -286,6 +291,7 @@ class InteractionBotBase(CommonBotBase):
         if slash_command.name in self.all_slash_commands:
             raise CommandRegistrationError(slash_command.name)
 
+        slash_command._apply_defaults(self)
         slash_command.body.localize(self.i18n)
         self.all_slash_commands[slash_command.name] = slash_command
 
@@ -316,6 +322,7 @@ class InteractionBotBase(CommonBotBase):
         if user_command.name in self.all_user_commands:
             raise CommandRegistrationError(user_command.name)
 
+        user_command._apply_defaults(self)
         user_command.body.localize(self.i18n)
         self.all_user_commands[user_command.name] = user_command
 
@@ -348,6 +355,7 @@ class InteractionBotBase(CommonBotBase):
         if message_command.name in self.all_message_commands:
             raise CommandRegistrationError(message_command.name)
 
+        message_command._apply_defaults(self)
         message_command.body.localize(self.i18n)
         self.all_message_commands[message_command.name] = message_command
 
