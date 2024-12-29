@@ -177,7 +177,11 @@ class Route:
         url = self.BASE + self.path
         if parameters:
             url = url.format_map(
-                {k: _uriquote(v) if isinstance(v, str) else v for k, v in parameters.items()}
+                {
+                    # `/` should not be considered a safe character by default
+                    k: _uriquote(v, safe="") if isinstance(v, str) else v
+                    for k, v in parameters.items()
+                }
             )
         self.url: str = url
 
