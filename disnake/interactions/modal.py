@@ -58,6 +58,13 @@ class ModalInteraction(Interaction[ClientT]):
 
     author: Union[:class:`User`, :class:`Member`]
         The user or member that sent the interaction.
+
+        .. note::
+            In scenarios where an interaction occurs in a guild but :attr:`.guild` is unavailable,
+            such as with user-installed applications in guilds, some attributes of :class:`Member`\\s
+            that depend on the guild/role cache will not work due to an API limitation.
+            This includes :attr:`~Member.roles`, :attr:`~Member.top_role`, :attr:`~Member.role_icon`,
+            and :attr:`~Member.guild_permissions`.
     locale: :class:`Locale`
         The selected language of the interaction's author.
 
@@ -77,6 +84,21 @@ class ModalInteraction(Interaction[ClientT]):
     entitlements: List[:class:`Entitlement`]
         The entitlements for the invoking user and guild,
         representing access to an application subscription.
+
+        .. versionadded:: 2.10
+
+    authorizing_integration_owners: :class:`AuthorizingIntegrationOwners`
+        Details about the authorizing user/guild for the application installation
+        related to the interaction.
+
+        .. versionadded:: 2.10
+
+    context: :class:`InteractionContextTypes`
+        The context where the interaction was triggered from.
+
+        This is a flag object, with exactly one of the flags set to ``True``.
+        To check whether an interaction originated from e.g. a :attr:`~InteractionContextTypes.guild`
+        context, you can use ``if interaction.context.guild:``.
 
         .. versionadded:: 2.10
 

@@ -46,6 +46,7 @@ from .iterators import ArchivedThreadIterator
 from .mixins import Hashable
 from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite, Permissions
+from .soundboard import GuildSoundboardSound, PartialSoundboardSound, SoundboardSound
 from .stage_instance import StageInstance
 from .threads import ForumTag, Thread
 from .utils import MISSING
@@ -91,6 +92,7 @@ if TYPE_CHECKING:
         VoiceChannel as VoiceChannelPayload,
     )
     from .types.snowflake import SnowflakeList
+    from .types.soundboard import PartialSoundboardSound as PartialSoundboardSoundPayload
     from .types.threads import ThreadArchiveDurationLiteral
     from .types.voice import VoiceChannelEffect as VoiceChannelEffectPayload
     from .ui.action_row import Components, MessageUIComponent
@@ -110,17 +112,22 @@ class VoiceChannelEffect:
     Attributes
     ----------
     emoji: Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]
-        The emoji, for emoji reaction effects.
+        The emoji, for emoji reaction effects and soundboard effects.
     animation_type: Optional[:class:`VoiceChannelEffectAnimationType`]
-        The emoji animation type, for emoji reaction effects.
+        The emoji animation type, for emoji reaction and soundboard effects.
     animation_id: Optional[:class:`int`]
-        The emoji animation ID, for emoji reaction effects.
+        The emoji animation ID, for emoji reaction and soundboard effects.
+    sound: Optional[Union[:class:`GuildSoundboardSound`, :class:`PartialSoundboardSound`]]
+        The sound data, for soundboard effects.
+        This will be a :class:`PartialSoundboardSound` if it's a default sound
+        or from an external guild.
     """
 
     __slots__ = (
         "emoji",
         "animation_type",
         "animation_id",
+        "sound",
     )
 
     def __init__(self, *, data: VoiceChannelEffectPayload, state: ConnectionState) -> None:
@@ -138,10 +145,21 @@ class VoiceChannelEffect:
         )
         self.animation_id: Optional[int] = utils._get_as_snowflake(data, "animation_id")
 
+        self.sound: Optional[Union[GuildSoundboardSound, PartialSoundboardSound]] = None
+        if sound_id := utils._get_as_snowflake(data, "sound_id"):
+            if sound := state.get_soundboard_sound(sound_id):
+                self.sound = sound
+            else:
+                sound_data: PartialSoundboardSoundPayload = {
+                    "sound_id": sound_id,
+                    "volume": data.get("sound_volume"),  # type: ignore  # assume this exists if sound_id is set
+                }
+                self.sound = PartialSoundboardSound(data=sound_data, state=state)
+
     def __repr__(self) -> str:
         return (
             f"<VoiceChannelEffect emoji={self.emoji!r} animation_type={self.animation_type!r}"
-            f" animation_id={self.animation_id!r}>"
+            f" animation_id={self.animation_id!r} sound={self.sound!r}>"
         )
 
 
@@ -1915,6 +1933,37 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             self.id, name=str(name), avatar=avatar_data, reason=reason
         )
         return Webhook.from_state(data, state=self._state)
+
+    async def send_soundboard_sound(self, sound: SoundboardSound, /) -> None:
+        """|coro|
+
+        Sends a soundboard sound in this channel.
+
+        You must have :attr:`~Permissions.speak` and :attr:`~Permissions.use_soundboard`
+        permissions to do this. For sounds from different guilds, you must also have
+        :attr:`~Permissions.use_external_sounds` permission.
+        Additionally, you may not be muted or deafened.
+
+        Parameters
+        ----------
+        sound: Union[:class:`SoundboardSound`, :class:`GuildSoundboardSound`]
+            The sound to send in the channel.
+
+        Raises
+        ------
+        Forbidden
+            You are not allowed to send soundboard sounds.
+        HTTPException
+            An error occurred sending the soundboard sound.
+        """
+        if isinstance(sound, GuildSoundboardSound):
+            source_guild_id = sound.guild_id
+        else:
+            source_guild_id = None
+
+        await self._state.http.send_soundboard_sound(
+            self.id, sound.id, source_guild_id=source_guild_id
+        )
 
 
 class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
@@ -4967,6 +5016,28 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
             base.kick_members = True
 
         return base
+
+    def get_partial_message(self, message_id: int, /) -> PartialMessage:
+        """Creates a :class:`PartialMessage` from the given message ID.
+
+        This is useful if you want to work with a message and only have its ID without
+        doing an unnecessary API call.
+
+        .. versionadded:: 2.10
+
+        Parameters
+        ----------
+        message_id: :class:`int`
+            The message ID to create a partial message for.
+
+        Returns
+        -------
+        :class:`PartialMessage`
+            The partial message object.
+        """
+        from .message import PartialMessage
+
+        return PartialMessage(channel=self, id=message_id)
 
     async def leave(self) -> None:
         """|coro|

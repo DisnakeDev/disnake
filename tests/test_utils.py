@@ -94,18 +94,46 @@ def test_deprecated(mock_warn: mock.Mock, instead, msg) -> None:
     mock_warn.assert_called_once_with(msg, stacklevel=3, category=DeprecationWarning)
 
 
+@mock.patch.object(utils, "_root_module_path", os.path.dirname(__file__))
+@pytest.mark.xfail(
+    sys.version_info < (3, 12),
+    raises=AssertionError,
+    strict=True,
+    reason="requires 3.12 functionality",
+)
+def test_deprecated_skip() -> None:
+    def func(n: int) -> None:
+        if n == 0:
+            utils.warn_deprecated("test", skip_internal_frames=True)
+        else:
+            func(n - 1)
+
+    with warnings.catch_warnings(record=True) as result:
+        # show a warning a couple frames deep
+        func(10)
+
+    # if we successfully skipped all frames in the current module,
+    # we should end up in the mock decorator's frame
+    assert len(result) == 1
+    assert result[0].filename == mock.__file__
+
+
 @pytest.mark.parametrize(
-    ("expected", "perms", "guild", "redirect", "scopes", "disable_select"),
+    ("params", "expected"),
     [
         (
+            {},
             {"scope": "bot"},
-            utils.MISSING,
-            utils.MISSING,
-            utils.MISSING,
-            utils.MISSING,
-            False,
         ),
         (
+            {
+                "permissions": disnake.Permissions(42),
+                "guild": disnake.Object(9999),
+                "redirect_uri": "http://endless.horse",
+                "scopes": ["bot", "applications.commands"],
+                "disable_guild_select": True,
+                "integration_type": 1,
+            },
             {
                 "scope": "bot applications.commands",
                 "permissions": "42",
@@ -113,24 +141,13 @@ def test_deprecated(mock_warn: mock.Mock, instead, msg) -> None:
                 "response_type": "code",
                 "redirect_uri": "http://endless.horse",
                 "disable_guild_select": "true",
+                "integration_type": "1",
             },
-            disnake.Permissions(42),
-            disnake.Object(9999),
-            "http://endless.horse",
-            ["bot", "applications.commands"],
-            True,
         ),
     ],
 )
-def test_oauth_url(expected, perms, guild, redirect, scopes, disable_select) -> None:
-    url = utils.oauth_url(
-        1234,
-        permissions=perms,
-        guild=guild,
-        redirect_uri=redirect,
-        scopes=scopes,
-        disable_guild_select=disable_select,
-    )
+def test_oauth_url(params, expected) -> None:
+    url = utils.oauth_url(1234, **params)
     assert dict(yarl.URL(url).query) == {"client_id": "1234", **expected}
 
 
@@ -250,17 +267,20 @@ def test_maybe_cast() -> None:
         (b"\x47\x49\x46\x38\x37\x61", "image/gif", ".gif"),
         (b"\x47\x49\x46\x38\x39\x61", "image/gif", ".gif"),
         (b"RIFFxxxxWEBP", "image/webp", ".webp"),
+        (b"ID3", "audio/mpeg", ".mp3"),
+        (b"\xFF\xF3", "audio/mpeg", ".mp3"),
+        (b"OggS", "audio/ogg", ".ogg"),
     ],
 )
 def test_mime_type_valid(data, expected_mime, expected_ext) -> None:
     for d in (data, data + b"\xFF"):
-        assert utils._get_mime_type_for_image(d) == expected_mime
-        assert utils._get_extension_for_image(d) == expected_ext
+        assert utils._get_mime_type_for_data(d) == expected_mime
+        assert utils._get_extension_for_data(d) == expected_ext
 
     prefixed = b"\xFF" + data
-    with pytest.raises(ValueError, match=r"Unsupported image type given"):
-        utils._get_mime_type_for_image(prefixed)
-    assert utils._get_extension_for_image(prefixed) is None
+    with pytest.raises(ValueError, match=r"Unsupported file type provided"):
+        utils._get_mime_type_for_data(prefixed)
+    assert utils._get_extension_for_data(prefixed) is None
 
 
 @pytest.mark.parametrize(
@@ -274,9 +294,9 @@ def test_mime_type_valid(data, expected_mime, expected_ext) -> None:
     ],
 )
 def test_mime_type_invalid(data) -> None:
-    with pytest.raises(ValueError, match=r"Unsupported image type given"):
-        utils._get_mime_type_for_image(data)
-    assert utils._get_extension_for_image(data) is None
+    with pytest.raises(ValueError, match=r"Unsupported file type provided"):
+        utils._get_mime_type_for_data(data)
+    assert utils._get_extension_for_data(data) is None
 
 
 @pytest.mark.asyncio

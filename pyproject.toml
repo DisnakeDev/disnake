@@ -71,7 +71,7 @@ tools = [
     "slotscheck~=0.16.4",
     "python-dotenv~=1.0.0",
     "check-manifest==0.49",
-    "ruff==0.3.4",
+    "ruff==0.8.0",
 ]
 changelog = [
     "towncrier==23.6.0",
@@ -149,7 +149,7 @@ select = [
     # "RET", # flake8-return
     # "SIM", # flake8-simplify
     "TID251", # flake8-tidy-imports, replaces S404
-    "TCH",    # flake8-type-checking
+    "TC",     # flake8-type-checking
     "RUF",    # ruff specific exceptions
     "PT",     # flake8-pytest-style
     "Q",      # flake8-quotes
@@ -178,6 +178,10 @@ ignore = [
     "RUF005", # might not be actually faster
     "RUF006", # might not be an issue/very extreme cases
 
+    # we keep __all__ and __slots__ (roughly) sorted by source, not alphabetically
+    "RUF022",
+    "RUF023",
+
     # calling subprocess with dynamic arguments is generally fine, the only way to avoid this is ignoring it
     "S603",
 
@@ -202,12 +206,14 @@ ignore = [
     # ignore imports that could be moved into type-checking blocks
     # (no real advantage other than possibly avoiding cycles,
     # but can be dangerous in places where we need to parse signatures)
-    "TCH001",
-    "TCH002",
-    "TCH003",
+    "TC001",
+    "TC002",
+    "TC003",
 
     "S311",    # insecure RNG usage, we don't use these for security-related things
     "PLE0237", # pyright seems to catch this already
+
+    "E741",  # ambiguous variable names
 
     # temporary disables, to fix later
     "D205",   # blank line required between summary and description
@@ -244,7 +250,6 @@ ignore = [
     "T201", # print found, printing is okay in examples
 ]
 "examples/basic_voice.py" = ["S104"] # possible binding to all interfaces
-"examples/views/tic_tac_toe.py" = ["E741"] # ambigious variable name: `O`
 
 [tool.ruff.lint.isort]
 combine-as-imports = true
@@ -258,6 +263,13 @@ mark-parentheses = false
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "subprocess".msg = "Consider possible security implications associated with the subprocess module." # replaces S404
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = [
+    # this is immutable, except for storing locks, which are fine to share across contexts
+    "disnake.webhook.async_.AsyncWebhookAdapter",
+]
+
 
 [tool.towncrier]
 template = "changelog/_template.rst.jinja"

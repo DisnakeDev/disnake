@@ -51,7 +51,15 @@ InteractionReference
 
 .. attributetable:: InteractionReference
 
-.. autoclass:: InteractionReference
+.. autoclass:: InteractionReference()
+    :members:
+
+InteractionMetadata
+~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: InteractionMetadata
+
+.. autoclass:: InteractionMetadata()
     :members:
 
 RoleSubscriptionData
@@ -59,7 +67,7 @@ RoleSubscriptionData
 
 .. attributetable:: RoleSubscriptionData
 
-.. autoclass:: RoleSubscriptionData
+.. autoclass:: RoleSubscriptionData()
     :members:
 
 RawTypingEvent
@@ -209,6 +217,14 @@ PollMedia
 .. autoclass:: PollMedia
     :members:
 
+ForwardedMessage
+~~~~~~~~~~~~~~~~
+
+.. attributetable:: ForwardedMessage
+
+.. autoclass:: ForwardedMessage
+    :members:
+
 Enumerations
 ------------
 
@@ -222,6 +238,12 @@ PollLayoutType
 ~~~~~~~~~~~~~~
 
 .. autoclass:: PollLayoutType()
+    :members:
+
+MessageReferenceType
+~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: MessageReferenceType()
     :members:
 
 Events

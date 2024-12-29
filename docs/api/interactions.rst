@@ -172,6 +172,17 @@ ModalInteractionData
 .. autoclass:: ModalInteractionData()
     :members:
 
+Data Classes
+------------
+
+AuthorizingIntegrationOwners
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: AuthorizingIntegrationOwners
+
+.. autoclass:: AuthorizingIntegrationOwners()
+    :members:
+
 Enumerations
 ------------
 

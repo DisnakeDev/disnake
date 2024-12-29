@@ -108,6 +108,22 @@ OptionChoice
 .. autoclass:: OptionChoice()
     :members:
 
+ApplicationInstallTypes
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: ApplicationInstallTypes
+
+.. autoclass:: ApplicationInstallTypes()
+    :members:
+
+InteractionContextTypes
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: InteractionContextTypes
+
+.. autoclass:: InteractionContextTypes()
+    :members:
+
 Enumerations
 ------------
 

@@ -29,7 +29,7 @@ from .base import BaseSelect, P, SelectDefaultValueMultiInputType, V_co, _create
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ..item import DecoratedItem, ItemCallbackType, ItemShape
+    from ..item import DecoratedItem, ItemCallbackType
 
 
 __all__ = (
@@ -174,20 +174,22 @@ def mentionable_select(
         Sequence[SelectDefaultValueMultiInputType[Union[User, Member, Role]]]
     ] = None,
     row: Optional[int] = None,
-) -> Callable[[ItemCallbackType[MentionableSelect[V_co]]], DecoratedItem[MentionableSelect[V_co]]]:
+) -> Callable[
+    [ItemCallbackType[V_co, MentionableSelect[V_co]]], DecoratedItem[MentionableSelect[V_co]]
+]:
     ...
 
 
 @overload
 def mentionable_select(
-    cls: Type[ItemShape[S_co, P]], *_: P.args, **kwargs: P.kwargs
-) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
+    cls: Callable[P, S_co], *_: P.args, **kwargs: P.kwargs
+) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
     ...
 
 
 def mentionable_select(
-    cls: Type[ItemShape[S_co, ...]] = MentionableSelect[Any], **kwargs: Any
-) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
+    cls: Callable[..., S_co] = MentionableSelect[Any], **kwargs: Any
+) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
     """A decorator that attaches a mentionable (user/member/role) select menu to a component.
 
     The function being decorated should have three parameters, ``self`` representing
@@ -201,10 +203,10 @@ def mentionable_select(
 
     Parameters
     ----------
-    cls: Type[:class:`MentionableSelect`]
-        The select subclass to create an instance of. If provided, the following parameters
-        described below do not apply. Instead, this decorator will accept the same keywords
-        as the passed cls does.
+    cls: Callable[..., :class:`MentionableSelect`]
+        A callable (may be a :class:`MentionableSelect` subclass) to create a new instance of this component.
+        If provided, the other parameters described below do not apply.
+        Instead, this decorator will accept the same keywords as the passed callable/class does.
     placeholder: Optional[:class:`str`]
         The placeholder text that is shown if nothing is selected, if any.
     custom_id: :class:`str`
@@ -232,4 +234,4 @@ def mentionable_select(
 
         .. versionadded:: 2.10
     """
-    return _create_decorator(cls, MentionableSelect, **kwargs)
+    return _create_decorator(cls, **kwargs)

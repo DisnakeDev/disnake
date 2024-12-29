@@ -34,6 +34,14 @@ InstallParams
 .. autoclass:: InstallParams()
     :members:
 
+InstallTypeConfiguration
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: InstallTypeConfiguration
+
+.. autoclass:: InstallTypeConfiguration()
+    :members:
+
 Team
 ~~~~
 

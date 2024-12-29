@@ -1,0 +1,1 @@
+Add :meth:`GroupChannel.get_partial_message`.

@@ -72,8 +72,10 @@ __all__ = (
     "OnboardingPromptType",
     "SKUType",
     "EntitlementType",
+    "SubscriptionStatus",
     "PollLayoutType",
     "VoiceChannelEffectAnimationType",
+    "MessageReferenceType",
 )
 
 
@@ -418,6 +420,11 @@ class MessageType(Enum):
 
     .. versionadded:: 2.10
     """
+    poll_result = 46
+    """The system message denoting that a poll expired, announcing the most voted answer.
+
+    .. versionadded:: 2.10
+    """
 
 
 class PartyType(Enum):
@@ -722,6 +729,9 @@ class AuditLogAction(Enum):
     thread_update                         = 111
     thread_delete                         = 112
     application_command_permission_update = 121
+    soundboard_sound_create               = 130
+    soundboard_sound_update               = 131
+    soundboard_sound_delete               = 132
     automod_rule_create                   = 140
     automod_rule_update                   = 141
     automod_rule_delete                   = 142
@@ -784,6 +794,9 @@ class AuditLogAction(Enum):
             AuditLogAction.guild_scheduled_event_update:          AuditLogActionCategory.update,
             AuditLogAction.guild_scheduled_event_delete:          AuditLogActionCategory.delete,
             AuditLogAction.application_command_permission_update: AuditLogActionCategory.update,
+            AuditLogAction.soundboard_sound_create:               AuditLogActionCategory.create,
+            AuditLogAction.soundboard_sound_update:               AuditLogActionCategory.update,
+            AuditLogAction.soundboard_sound_delete:               AuditLogActionCategory.delete,
             AuditLogAction.automod_rule_create:                   AuditLogActionCategory.create,
             AuditLogAction.automod_rule_update:                   AuditLogActionCategory.update,
             AuditLogAction.automod_rule_delete:                   AuditLogActionCategory.delete,
@@ -1827,6 +1840,12 @@ class Event(Enum):
     """Called when a `Guild` updates its stickers.
     Represents the :func:`on_guild_stickers_update` event.
     """
+    guild_soundboard_sounds_update = "guild_soundboard_sounds_update"
+    """Called when a `Guild` updates its soundboard sounds.
+    Represents the :func:`on_guild_soundboard_sounds_update` event.
+
+    .. versionadded:: 2.10
+    """
     guild_integrations_update = "guild_integrations_update"
     """Called whenever an integration is created, modified, or removed from a guild.
     Represents the :func:`on_guild_integrations_update` event.
@@ -2050,7 +2069,8 @@ class Event(Enum):
     """
     raw_presence_update = "raw_presence_update"
     """Called when a user's presence changes regardless of the state of the internal member cache.
-    Represents the :func:`on_raw_presence_update` event."""
+    Represents the :func:`on_raw_presence_update` event.
+    """
     raw_reaction_add = "raw_reaction_add"
     """Called when a message has a reaction added regardless of the state of the internal message cache.
     Represents the :func:`on_raw_reaction_add` event.
@@ -2077,13 +2097,37 @@ class Event(Enum):
     """
     entitlement_create = "entitlement_create"
     """Called when a user subscribes to an SKU, creating a new :class:`Entitlement`.
-    Represents the :func:`on_entitlement_create` event."""
+    Represents the :func:`on_entitlement_create` event.
+
+    .. versionadded:: 2.10
+    """
     entitlement_update = "entitlement_update"
     """Called when a user's subscription renews.
-    Represents the :func:`on_entitlement_update` event."""
+    Represents the :func:`on_entitlement_update` event.
+
+    .. versionadded:: 2.10
+    """
     entitlement_delete = "entitlement_delete"
     """Called when a user's entitlement is deleted.
     Represents the :func:`on_entitlement_delete` event."""
+    subscription_create = "subscription_create"
+    """Called when a subscription for a premium app is created.
+    Represents the :func:`on_subscription_create` event.
+
+    .. versionadded:: 2.10
+    """
+    subscription_update = "subscription_update"
+    """Called when a subscription for a premium app is updated.
+    Represents the :func:`on_subscription_update` event.
+
+    .. versionadded:: 2.10
+    """
+    subscription_delete = "subscription_delete"
+    """Called when a subscription for a premium app is deleted.
+    Represents the :func:`on_subscription_delete` event.
+
+    .. versionadded:: 2.10
+    """
     # ext.commands events
     command = "command"
     """Called when a command is found and is about to be invoked.
@@ -2214,6 +2258,20 @@ class EntitlementType(Enum):
     """Represents an entitlement for an application subscription."""
 
 
+class SubscriptionStatus(Enum):
+    """Represents the status of a subscription.
+
+    .. versionadded:: 2.10
+    """
+
+    active = 0
+    """Represents an active Subscription which is scheduled to renew."""
+    ending = 1
+    """Represents an active Subscription which will not renew."""
+    inactive = 2
+    """Represents an inactive Subscription which is not being charged."""
+
+
 class PollLayoutType(Enum):
     """Specifies the layout of a :class:`Poll`.
 
@@ -2234,6 +2292,19 @@ class VoiceChannelEffectAnimationType(Enum):
     """A fun animation, sent by a Nitro subscriber."""
     basic = 1
     """A standard animation."""
+
+
+class MessageReferenceType(Enum):
+    """Specifies the type of :class:`MessageReference`. This can be used to determine
+    if a message is e.g. a reply or a forwarded message.
+
+    .. versionadded:: 2.10
+    """
+
+    default = 0
+    """A standard message reference used in message replies."""
+    forward = 1
+    """Reference used to point to a message at a point in time (forward)."""
 
 
 T = TypeVar("T")

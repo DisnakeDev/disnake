@@ -12,17 +12,18 @@ from typing import (
     Optional,
     Protocol,
     Tuple,
+    Type,
     TypeVar,
     overload,
 )
 
 __all__ = ("Item", "WrappedComponent")
 
-ItemT = TypeVar("ItemT", bound="Item")
+I = TypeVar("I", bound="Item[Any]")
 V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
 
 if TYPE_CHECKING:
-    from typing_extensions import ParamSpec, Self
+    from typing_extensions import Self
 
     from ..client import Client
     from ..components import NestedComponent
@@ -31,7 +32,7 @@ if TYPE_CHECKING:
     from ..types.components import Component as ComponentPayload
     from .view import View
 
-    ItemCallbackType = Callable[[Any, ItemT, MessageInteraction], Coroutine[Any, Any, Any]]
+    ItemCallbackType = Callable[[V_co, I, MessageInteraction], Coroutine[Any, Any, Any]]
 
 else:
     ParamSpec = TypeVar
@@ -160,29 +161,17 @@ class Item(WrappedComponent, Generic[V_co]):
         pass
 
 
-I_co = TypeVar("I_co", bound=Item, covariant=True)
+SelfViewT = TypeVar("SelfViewT", bound="Optional[View]")
 
 
-# while the decorators don't actually return a descriptor that matches this protocol,
+# While the decorators don't actually return a descriptor that matches this protocol,
 # this protocol ensures that type checkers don't complain about statements like `self.button.disabled = True`,
-# which work as `View.__init__` replaces the handler with the item
-class DecoratedItem(Protocol[I_co]):
+# which work as `View.__init__` replaces the handler with the item.
+class DecoratedItem(Protocol[I]):
     @overload
-    def __get__(self, obj: None, objtype: Any) -> ItemCallbackType:
+    def __get__(self, obj: None, objtype: Type[SelfViewT]) -> ItemCallbackType[SelfViewT, I]:
         ...
 
     @overload
-    def __get__(self, obj: Any, objtype: Any) -> I_co:
-        ...
-
-
-T_co = TypeVar("T_co", covariant=True)
-P = ParamSpec("P")
-
-
-class ItemShape(Protocol[T_co, P]):
-    def __new__(cls) -> T_co:
-        ...
-
-    def __init__(self, *args: P.args, **kwargs: P.kwargs) -> None:
+    def __get__(self, obj: Any, objtype: Any) -> I:
         ...

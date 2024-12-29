@@ -1604,6 +1604,12 @@ class Messageable:
 
             .. versionadded:: 1.6
 
+            .. note::
+
+                Passing a :class:`.Message` or :class:`.PartialMessage` will only allow replies. To forward a message
+                you must explicitly transform the message to a :class:`.MessageReference` using :meth:`.Message.to_reference` and specify the :class:`.MessageReferenceType`,
+                or use :meth:`.Message.forward`.
+
         mention_author: Optional[:class:`bool`]
             If set, overrides the :attr:`.AllowedMentions.replied_user` attribute of ``allowed_mentions``.
 

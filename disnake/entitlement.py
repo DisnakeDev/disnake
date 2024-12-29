@@ -76,7 +76,6 @@ class Entitlement(Hashable):
         Set to ``None`` when this is a test entitlement.
     ends_at: Optional[:class:`datetime.datetime`]
         The time at which the entitlement stops being active.
-        Set to ``None`` when this is a test entitlement.
 
         You can use :meth:`is_active` to check whether this entitlement is still active.
     """
