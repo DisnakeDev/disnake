@@ -2426,11 +2426,14 @@ def dm_only() -> Callable[[T], T]:
     This check raises a special exception, :exc:`.PrivateMessageOnly`
     that is inherited from :exc:`.CheckFailure`.
 
+    .. note::
+        For application commands, consider setting the allowed :ref:`contexts <app_command_contexts>` instead.
+
     .. versionadded:: 1.1
     """
 
     def predicate(ctx: AnyContext) -> bool:
-        if ctx.guild is not None:
+        if (ctx.guild if isinstance(ctx, Context) else ctx.guild_id) is not None:
             raise PrivateMessageOnly
         return True
 
@@ -2444,10 +2447,13 @@ def guild_only() -> Callable[[T], T]:
 
     This check raises a special exception, :exc:`.NoPrivateMessage`
     that is inherited from :exc:`.CheckFailure`.
+
+    .. note::
+        For application commands, consider setting the allowed :ref:`contexts <app_command_contexts>` instead.
     """
 
     def predicate(ctx: AnyContext) -> bool:
-        if ctx.guild is None:
+        if (ctx.guild if isinstance(ctx, Context) else ctx.guild_id) is None:
             raise NoPrivateMessage
         return True
 

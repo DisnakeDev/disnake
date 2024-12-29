@@ -22,6 +22,7 @@ from .member import MemberWithUser
 from .message import Message
 from .role import Role
 from .snowflake import Snowflake, SnowflakeList
+from .soundboard import GuildSoundboardSound
 from .sticker import GuildSticker
 from .threads import Thread, ThreadMember, ThreadMemberWithPresence, ThreadType
 from .user import AvatarDecorationData, User
@@ -666,3 +667,23 @@ EntitlementUpdate = Entitlement
 
 # https://discord.com/developers/docs/monetization/entitlements#deleted-entitlement
 EntitlementDelete = Entitlement
+
+
+# https://discord.com/developers/docs/topics/gateway-events#guild-soundboard-sound-create
+GuildSoundboardSoundCreate = GuildSoundboardSound
+
+
+# https://discord.com/developers/docs/topics/gateway-events#guild-soundboard-sound-update
+GuildSoundboardSoundUpdate = GuildSoundboardSound
+
+
+# https://discord.com/developers/docs/topics/gateway-events#guild-soundboard-sound-delete
+class GuildSoundboardSoundDelete(TypedDict):
+    guild_id: Snowflake
+    sound_id: Snowflake
+
+
+# https://discord.com/developers/docs/topics/gateway-events#guild-soundboard-sounds-update
+class GuildSoundboardSoundsUpdate(TypedDict):
+    guild_id: Snowflake
+    soundboard_sounds: List[GuildSoundboardSound]
