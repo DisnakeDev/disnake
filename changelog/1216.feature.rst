@@ -1,1 +1,0 @@
-Add :meth:`Guild.fetch_voice_state` to fetch the :class:`VoiceState` of a member.

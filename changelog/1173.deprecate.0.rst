@@ -1,1 +1,0 @@
-Deprecate :attr:`ApplicationCommand.dm_permission` and related fields/parameters of application command objects. Use ``contexts`` instead.

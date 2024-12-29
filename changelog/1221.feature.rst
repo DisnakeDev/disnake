@@ -1,1 +1,0 @@
-Add new :meth:`.Client.fetch_sticker_pack` method.

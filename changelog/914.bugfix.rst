@@ -1,1 +1,0 @@
-Fix :class:`ui.Modal` timeout issues with long-running callbacks, and multiple modals with the same user and ``custom_id``.

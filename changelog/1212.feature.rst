@@ -1,1 +1,0 @@
-Add new :attr:`~MessageType.poll_result` message type.
