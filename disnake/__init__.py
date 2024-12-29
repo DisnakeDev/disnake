@@ -66,6 +66,7 @@ from .sku import *
 from .soundboard import *
 from .stage_instance import *
 from .sticker import *
+from .subscription import *
 from .team import *
 from .template import *
 from .threads import *
