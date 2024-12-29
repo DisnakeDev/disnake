@@ -77,6 +77,13 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
 
     author: Union[:class:`User`, :class:`Member`]
         The user or member that sent the interaction.
+
+        .. note::
+            In scenarios where an interaction occurs in a guild but :attr:`.guild` is unavailable,
+            such as with user-installed applications in guilds, some attributes of :class:`Member`\\s
+            that depend on the guild/role cache will not work due to an API limitation.
+            This includes :attr:`~Member.roles`, :attr:`~Member.top_role`, :attr:`~Member.role_icon`,
+            and :attr:`~Member.guild_permissions`.
     locale: :class:`Locale`
         The selected language of the interaction's author.
 

@@ -25,27 +25,8 @@ Enumerations
 StagePrivacyLevel
 ~~~~~~~~~~~~~~~~~
 
-.. class:: StagePrivacyLevel
-
-    Represents a stage instance's privacy level.
-
-    .. versionadded:: 2.0
-
-    .. attribute:: public
-
-        The stage instance can be joined by external users.
-
-        .. deprecated:: 2.5
-
-            Public stages are no longer supported by discord.
-
-    .. attribute:: closed
-
-        The stage instance can only be joined by members of the guild.
-
-    .. attribute:: guild_only
-
-        Alias for :attr:`.closed`
+.. autoclass:: StagePrivacyLevel()
+    :members:
 
 Events
 ------

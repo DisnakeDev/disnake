@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 
     from ...emoji import Emoji
     from ...partial_emoji import PartialEmoji
-    from ..item import DecoratedItem, ItemCallbackType, ItemShape
+    from ..item import DecoratedItem, ItemCallbackType
 
 
 __all__ = (
@@ -265,20 +265,20 @@ def string_select(
     options: SelectOptionInput = ...,
     disabled: bool = False,
     row: Optional[int] = None,
-) -> Callable[[ItemCallbackType[StringSelect[V_co]]], DecoratedItem[StringSelect[V_co]]]:
+) -> Callable[[ItemCallbackType[V_co, StringSelect[V_co]]], DecoratedItem[StringSelect[V_co]]]:
     ...
 
 
 @overload
 def string_select(
-    cls: Type[ItemShape[S_co, P]], *_: P.args, **kwargs: P.kwargs
-) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
+    cls: Callable[P, S_co], *_: P.args, **kwargs: P.kwargs
+) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
     ...
 
 
 def string_select(
-    cls: Type[ItemShape[S_co, ...]] = StringSelect[Any], **kwargs: Any
-) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
+    cls: Callable[..., S_co] = StringSelect[Any], **kwargs: Any
+) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
     """A decorator that attaches a string select menu to a component.
 
     The function being decorated should have three parameters, ``self`` representing
@@ -293,13 +293,12 @@ def string_select(
 
     Parameters
     ----------
-    cls: Type[:class:`StringSelect`]
-        The select subclass to create an instance of. If provided, the following parameters
-        described below do not apply. Instead, this decorator will accept the same keywords
-        as the passed cls does.
+    cls: Callable[..., :class:`StringSelect`]
+        A callable (may be a :class:`StringSelect` subclass) to create a new instance of this component.
+        If provided, the other parameters described below do not apply.
+        Instead, this decorator will accept the same keywords as the passed callable/class does.
 
         .. versionadded:: 2.6
-
     placeholder: Optional[:class:`str`]
         The placeholder text that is shown if nothing is selected, if any.
     custom_id: :class:`str`
@@ -329,7 +328,7 @@ def string_select(
     disabled: :class:`bool`
         Whether the select is disabled. Defaults to ``False``.
     """
-    return _create_decorator(cls, StringSelect, **kwargs)
+    return _create_decorator(cls, **kwargs)
 
 
 select = string_select  # backwards compatibility

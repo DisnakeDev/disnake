@@ -1580,8 +1580,8 @@ This section documents events related to entitlements, which are used for applic
 
     Called when an entitlement is updated.
 
-    This happens e.g. when a user's subscription gets renewed (in which case the
-    :attr:`Entitlement.ends_at` attribute reflects the new expiration date).
+    This happens **only** when a user's subscription ends or is cancelled (in which case the
+    :attr:`Entitlement.ends_at` attribute reflects the expiration date).
 
     .. versionadded:: 2.10
 
@@ -1601,11 +1601,38 @@ This section documents events related to entitlements, which are used for applic
     :param entitlement: The entitlement that was deleted.
     :type entitlement: :class:`Entitlement`
 
+.. function:: on_subscription_create(subscription)
+
+    Called when a subscription is created.
+
+    .. versionadded:: 2.10
+
+    :param subscription: The subscription that was created.
+    :type subscription: :class:`Subscription`
+
+.. function:: on_subscription_update(subscription)
+
+    Called when a subscription is updated.
+
+    .. versionadded:: 2.10
+
+    :param subscription: The subscription that was updated.
+    :type subscription: :class:`Subscription`
+
+.. function:: on_subscription_delete(subscription)
+
+    Called when a subscription is deleted.
+
+    .. versionadded:: 2.10
+
+    :param subscription: The subscription that was deleted.
+    :type subscription: :class:`Subscription`
+
 Enumerations
 ------------
 
 Event
 ~~~~~
 
-.. autoclass:: Event
+.. autoclass:: Event()
     :members:

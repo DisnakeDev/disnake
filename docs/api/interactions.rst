@@ -189,84 +189,14 @@ Enumerations
 InteractionType
 ~~~~~~~~~~~~~~~
 
-.. class:: InteractionType
-
-    Specifies the type of :class:`Interaction`.
-
-    .. versionadded:: 2.0
-
-    .. attribute:: ping
-
-        Represents Discord pinging to see if the interaction response server is alive.
-    .. attribute:: application_command
-
-        Represents an application command interaction.
-    .. attribute:: component
-
-        Represents a component based interaction, i.e. using the Discord Bot UI Kit.
-    .. attribute:: application_command_autocomplete
-
-        Represents an application command autocomplete interaction.
-    .. attribute:: modal_submit
-
-        Represents a modal submit interaction.
+.. autoclass:: InteractionType()
+    :members:
 
 InteractionResponseType
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-.. class:: InteractionResponseType
-
-    Specifies the response type for the interaction.
-
-    .. versionadded:: 2.0
-
-    .. attribute:: pong
-
-        Pongs the interaction when given a ping.
-
-        See also :meth:`InteractionResponse.pong`
-    .. attribute:: channel_message
-
-        Responds to the interaction with a message.
-
-        See also :meth:`InteractionResponse.send_message`
-    .. attribute:: deferred_channel_message
-
-        Responds to the interaction with a message at a later time.
-
-        See also :meth:`InteractionResponse.defer`
-    .. attribute:: deferred_message_update
-
-        Acknowledges the component interaction with a promise that
-        the message will update later (though there is no need to actually update the message).
-
-        See also :meth:`InteractionResponse.defer`
-    .. attribute:: message_update
-
-        Responds to the interaction by editing the message.
-
-        See also :meth:`InteractionResponse.edit_message`
-    .. attribute:: application_command_autocomplete_result
-
-        Responds to the autocomplete interaction with suggested choices.
-
-        See also :meth:`InteractionResponse.autocomplete`
-    .. attribute:: modal
-
-        Responds to the interaction by displaying a modal.
-
-        See also :meth:`InteractionResponse.send_modal`
-
-        .. versionadded:: 2.4
-
-    .. attribute:: premium_required
-
-        Responds to the interaction with a message containing an upgrade button.
-        Only available for applications with monetization enabled.
-
-        See also :meth:`InteractionResponse.require_premium`
-
-        .. versionadded:: 2.10
+.. autoclass:: InteractionResponseType()
+    :members:
 
 Events
 ------

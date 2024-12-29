@@ -40,44 +40,14 @@ Enumerations
 InviteType
 ~~~~~~~~~~
 
-.. class:: InviteType
-
-    Represents the type of an invite.
-
-    .. versionadded:: 2.10
-
-    .. attribute:: guild
-
-        Represents an invite to a guild.
-
-    .. attribute:: group_dm
-
-        Represents an invite to a group channel.
-
-    .. attribute:: friend
-
-        Represents a friend invite.
+.. autoclass:: InviteType()
+    :members:
 
 InviteTarget
 ~~~~~~~~~~~~
 
-.. class:: InviteTarget
-
-    Represents the invite type for voice channel invites.
-
-    .. versionadded:: 2.0
-
-    .. attribute:: unknown
-
-        The invite doesn't target anyone or anything.
-
-    .. attribute:: stream
-
-        A stream invite that targets a user.
-
-    .. attribute:: embedded_application
-
-        A stream invite that targets an embedded application.
+.. autoclass:: InviteTarget()
+    :members:
 
 Events
 ------

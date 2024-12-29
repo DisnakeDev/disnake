@@ -96,7 +96,6 @@ Documents
     app_info
     audit_logs
     automod
-    ui
     channels
     clients
     components
@@ -119,6 +118,8 @@ Documents
     soundboard
     stage_instances
     stickers
+    subscriptions
+    ui
     users
     utilities
     voice

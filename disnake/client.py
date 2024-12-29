@@ -3180,7 +3180,7 @@ class Client:
             The list of SKUs.
         """
         data = await self.http.get_skus(self.application_id)
-        return [SKU(data=d) for d in data]
+        return [SKU(data=d, state=self._connection) for d in data]
 
     def entitlements(
         self,

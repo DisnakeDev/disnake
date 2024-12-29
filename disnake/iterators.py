@@ -27,6 +27,7 @@ from .errors import NoMoreItems
 from .guild_scheduled_event import GuildScheduledEvent
 from .integrations import PartialIntegration
 from .object import Object
+from .subscription import Subscription
 from .threads import Thread
 from .utils import maybe_coroutine, snowflake_time, time_snowflake
 
@@ -39,6 +40,7 @@ __all__ = (
     "MemberIterator",
     "GuildScheduledEventUserIterator",
     "EntitlementIterator",
+    "SubscriptionIterator",
     "PollAnswerIterator",
 )
 
@@ -60,6 +62,7 @@ if TYPE_CHECKING:
         GuildScheduledEventUser as GuildScheduledEventUserPayload,
     )
     from .types.message import Message as MessagePayload
+    from .types.subscription import Subscription as SubscriptionPayload
     from .types.threads import Thread as ThreadPayload
     from .types.user import PartialUser as PartialUserPayload
     from .user import User
@@ -1144,6 +1147,104 @@ class EntitlementIterator(_AsyncIterator["Entitlement"]):
                 self.limit -= retrieve
             # endpoint returns items in ascending order when `after` is used
             self.after = Object(id=int(data[-1]["id"]))
+        return data
+
+
+class SubscriptionIterator(_AsyncIterator["Subscription"]):
+    def __init__(
+        self,
+        sku_id: int,
+        *,
+        state: ConnectionState,
+        user_id: Optional[int] = None,  # required, except for oauth queries
+        limit: Optional[int] = None,
+        before: Optional[Union[Snowflake, datetime.datetime]] = None,
+        after: Optional[Union[Snowflake, datetime.datetime]] = None,
+    ) -> None:
+        if isinstance(before, datetime.datetime):
+            before = Object(id=time_snowflake(before, high=False))
+        if isinstance(after, datetime.datetime):
+            after = Object(id=time_snowflake(after, high=True))
+
+        self.sku_id: int = sku_id
+        self.user_id: Optional[int] = user_id
+        self.limit: Optional[int] = limit
+        self.before: Optional[Snowflake] = before
+        self.after: Snowflake = after or OLDEST_OBJECT
+
+        self._state: ConnectionState = state
+        self.request = self._state.http.get_subscriptions
+        self.subscriptions: asyncio.Queue[Subscription] = asyncio.Queue()
+
+        self._filter: Optional[Callable[[SubscriptionPayload], bool]] = None
+        if self.before:
+            self._strategy = self._before_strategy
+            if self.after != OLDEST_OBJECT:
+                self._filter = lambda s: int(s["id"]) > self.after.id
+        else:
+            self._strategy = self._after_strategy
+
+    async def next(self) -> Subscription:
+        if self.subscriptions.empty():
+            await self._fill()
+
+        try:
+            return self.subscriptions.get_nowait()
+        except asyncio.QueueEmpty:
+            raise NoMoreItems from None
+
+    def _get_retrieve(self) -> bool:
+        limit = self.limit
+        if limit is None or limit > 100:
+            retrieve = 100
+        else:
+            retrieve = limit
+        self.retrieve: int = retrieve
+        return retrieve > 0
+
+    async def _fill(self) -> None:
+        if not self._get_retrieve():
+            return
+
+        data = await self._strategy(self.retrieve)
+        if len(data) < 100:
+            self.limit = 0  # terminate loop
+
+        if self._filter:
+            data = filter(self._filter, data)
+
+        for subscription in data:
+            await self.subscriptions.put(Subscription(data=subscription, state=self._state))
+
+    async def _before_strategy(self, retrieve: int) -> List[SubscriptionPayload]:
+        before = self.before.id if self.before else None
+        data = await self.request(
+            self.sku_id,
+            before=before,
+            limit=retrieve,
+            user_id=self.user_id,
+        )
+
+        if len(data):
+            if self.limit is not None:
+                self.limit -= retrieve
+            # since pagination order isn't documented, don't rely on results being sorted one way or the other
+            self.before = Object(id=min(int(data[0]["id"]), int(data[-1]["id"])))
+        return data
+
+    async def _after_strategy(self, retrieve: int) -> List[SubscriptionPayload]:
+        after = self.after.id
+        data = await self.request(
+            self.sku_id,
+            after=after,
+            limit=retrieve,
+            user_id=self.user_id,
+        )
+
+        if len(data):
+            if self.limit is not None:
+                self.limit -= retrieve
+            self.after = Object(id=max(int(data[0]["id"]), int(data[-1]["id"])))
         return data
 
 
