@@ -1228,7 +1228,8 @@ class SubscriptionIterator(_AsyncIterator["Subscription"]):
         if len(data):
             if self.limit is not None:
                 self.limit -= retrieve
-            self.before = Object(id=int(data[-1]["id"]))
+            # since pagination order isn't documented, don't rely on results being sorted one way or the other
+            self.before = Object(id=min(int(data[0]["id"]), int(data[-1]["id"])))
         return data
 
     async def _after_strategy(self, retrieve: int) -> List[SubscriptionPayload]:
@@ -1243,7 +1244,7 @@ class SubscriptionIterator(_AsyncIterator["Subscription"]):
         if len(data):
             if self.limit is not None:
                 self.limit -= retrieve
-            self.after = Object(id=int(data[-1]["id"]))
+            self.after = Object(id=max(int(data[0]["id"]), int(data[-1]["id"])))
         return data
 
 
