@@ -54,6 +54,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        # FIXME: using specific patch version for 3.12 due to pdm bug
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12.7"]
         experimental: [false]
       fail-fast: false

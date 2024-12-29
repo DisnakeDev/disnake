@@ -25,9 +25,14 @@ if TYPE_CHECKING:
 
     from .voice_client import VoiceClient
 
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore", DeprecationWarning)
-    import audioop
+try:
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", DeprecationWarning)
+        import audioop
+
+    has_audioop = True
+except ImportError:
+    has_audioop = False
 
 MISSING = utils.MISSING
 
@@ -660,6 +665,11 @@ class PCMVolumeTransformer(AudioSource, Generic[AT]):
     """
 
     def __init__(self, original: AT, volume: float = 1.0) -> None:
+        if not has_audioop:
+            raise RuntimeError(
+                f"audioop-lts library needed in Python >=3.13 in order to use {type(self).__name__}"
+            )
+
         if not isinstance(original, AudioSource):
             raise TypeError(f"expected AudioSource not {original.__class__.__name__}.")
 
