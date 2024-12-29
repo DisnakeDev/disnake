@@ -72,6 +72,7 @@ __all__ = (
     "OnboardingPromptType",
     "SKUType",
     "EntitlementType",
+    "SubscriptionStatus",
     "PollLayoutType",
     "VoiceChannelEffectAnimationType",
     "MessageReferenceType",
@@ -1340,7 +1341,22 @@ class Event(Enum):
     """
     entitlement_delete = "entitlement_delete"
     """Called when a user's entitlement is deleted.
-    Represents the :func:`on_entitlement_delete` event.
+    Represents the :func:`on_entitlement_delete` event."""
+    subscription_create = "subscription_create"
+    """Called when a subscription for a premium app is created.
+    Represents the :func:`on_subscription_create` event.
+
+    .. versionadded:: 2.10
+    """
+    subscription_update = "subscription_update"
+    """Called when a subscription for a premium app is updated.
+    Represents the :func:`on_subscription_update` event.
+
+    .. versionadded:: 2.10
+    """
+    subscription_delete = "subscription_delete"
+    """Called when a subscription for a premium app is deleted.
+    Represents the :func:`on_subscription_delete` event.
 
     .. versionadded:: 2.10
     """
@@ -1427,6 +1443,12 @@ class EntitlementType(Enum):
     user_gift = 6
     premium_purchase = 7
     application_subscription = 8
+
+
+class SubscriptionStatus(Enum):
+    active = 0
+    ending = 1
+    inactive = 2
 
 
 class PollLayoutType(Enum):
