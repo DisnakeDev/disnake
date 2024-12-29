@@ -17,6 +17,16 @@ in specific versions. Please see :ref:`version_guarantees` for more information.
 
 .. towncrier release notes start
 
+.. _vp2p10p1:
+
+v2.10.1
+-------
+
+Bug Fixes
+~~~~~~~~~
+- Prevent :class:`py:DeprecationWarning` related to :attr:`Message.interaction` field on shard reconnect. (:issue:`1267`)
+
+
 .. _vp2p10p0:
 
 v2.10.0
