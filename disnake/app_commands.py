@@ -547,6 +547,13 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
         self.install_types: Optional[ApplicationInstallTypes] = install_types
         self.contexts: Optional[InteractionContextTypes] = contexts
 
+        # TODO(3.0): refactor
+        # These are for ext.commands defaults. It's quite ugly to do it this way,
+        # but since __eq__ and to_dict functionality is encapsulated here and can't be moved trivially,
+        # it'll do until the presumably soon-ish refactor of the entire commands framework.
+        self._default_install_types: Optional[ApplicationInstallTypes] = None
+        self._default_contexts: Optional[InteractionContextTypes] = None
+
         self._always_synced: bool = False
 
         # reset `default_permission` if set before
@@ -614,6 +621,9 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
         return self.name
 
     def __eq__(self, other) -> bool:
+        if not isinstance(other, ApplicationCommand):
+            return False
+
         if not (
             self.type == other.type
             and self.name == other.name
@@ -634,8 +644,10 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
             # `contexts` takes priority over `dm_permission`;
             # ignore `dm_permission` if `contexts` is set,
             # since the API returns both even when only `contexts` was provided
-            if self.contexts is not None or other.contexts is not None:
-                if self.contexts != other.contexts:
+            self_contexts = self._contexts_with_default
+            other_contexts = other._contexts_with_default
+            if self_contexts is not None or other_contexts is not None:
+                if self_contexts != other_contexts:
                     return False
             else:
                 # this is a bit awkward; `None` is equivalent to `True` in this case
@@ -648,6 +660,9 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
     def _install_types_with_default(self) -> Optional[ApplicationInstallTypes]:
         # if this is an api-provided command object, keep things as-is
         if self.install_types is None and not isinstance(self, _APIApplicationCommandMixin):
+            if self._default_install_types is not None:
+                return self._default_install_types
+
             # The purpose of this default is to avoid re-syncing after the updating to the new version,
             # at least as long as the user hasn't enabled user installs in the dev portal
             # (i.e. if they haven't, the api defaults to this value as well).
@@ -657,6 +672,20 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
             return ApplicationInstallTypes(guild=True)
 
         return self.install_types
+
+    @property
+    def _contexts_with_default(self) -> Optional[InteractionContextTypes]:
+        # (basically the same logic as `_install_types_with_default`, but without a fallback)
+        if (
+            self.contexts is None
+            and not isinstance(self, _APIApplicationCommandMixin)
+            and self._default_contexts is not None
+            # only use default if legacy `dm_permission` wasn't set
+            and self._dm_permission is None
+        ):
+            return self._default_contexts
+
+        return self.contexts
 
     def to_dict(self) -> EditApplicationCommandPayload:
         data: EditApplicationCommandPayload = {
@@ -678,7 +707,9 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
         )
         data["integration_types"] = install_types
 
-        contexts = self.contexts.values if self.contexts is not None else None
+        contexts = (
+            self._contexts_with_default.values if self._contexts_with_default is not None else None
+        )
         data["contexts"] = contexts
 
         # don't set `dm_permission` if `contexts` is set

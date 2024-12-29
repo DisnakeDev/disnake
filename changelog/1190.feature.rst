@@ -1,0 +1,1 @@
+The ``cls`` parameter of UI component decorators (such as :func:`ui.button`) now accepts any matching callable, in addition to item subclasses.
