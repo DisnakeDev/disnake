@@ -25,20 +25,5 @@ Enumerations
 SubscriptionStatus
 ~~~~~~~~~~~~~~~~~~
 
-.. class:: SubscriptionStatus
-
-    Represents the status of a subscription.
-
-    .. versionadded:: 2.10
-
-    .. attribute:: active
-
-        Represents an active Subscription which is scheduled to renew.
-
-    .. attribute:: ending
-
-        Represents an active Subscription which will not renew.
-
-    .. attribute:: inactive
-
-        Represents an inactive Subscription which is not being charged.
+.. autoclass:: SubscriptionStatus()
+    :members:

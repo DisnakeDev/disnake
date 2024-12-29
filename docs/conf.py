@@ -53,6 +53,7 @@ extensions = [
     "attributetable",
     "resourcelinks",
     "collapse",
+    "enumattrs",
     "nitpick_file_ignorer",
 ]
 
