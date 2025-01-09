@@ -1208,6 +1208,41 @@ class ComponentType(Enum):
 
     .. versionadded:: 2.7
     """
+    section = 9
+    """Represents a Components V2 section component.
+
+    .. versionadded:: 2.11
+    """
+    text_display = 10
+    """Represents a Components V2 text display component.
+
+    .. versionadded:: 2.11
+    """
+    thumbnail = 11
+    """Represents a Components V2 thumbnail component.
+
+    .. versionadded:: 2.11
+    """
+    media_gallery = 12
+    """Represents a Components V2 media gallery component.
+
+    .. versionadded:: 2.11
+    """
+    file = 13
+    """Represents a Components V2 file component.
+
+    .. versionadded:: 2.11
+    """
+    separator = 14
+    """Represents a Components V2 separator component.
+
+    .. versionadded:: 2.11
+    """
+    container = 17
+    """Represents a Components V2 container component.
+
+    .. versionadded:: 2.11
+    """
 
     def __int__(self) -> int:
         return self.value
