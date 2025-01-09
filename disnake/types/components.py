@@ -13,20 +13,40 @@ from .snowflake import Snowflake
 ComponentType = Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 17]
 ButtonStyle = Literal[1, 2, 3, 4, 5, 6]
 TextInputStyle = Literal[1, 2]
+SeparatorSpacing = Literal[1, 2]
 
 SelectDefaultValueType = Literal["user", "role", "channel"]
 
-Component = Union["ActionRow", "ButtonComponent", "AnySelectMenu", "TextInput"]
+Component = Union[
+    "ActionRow",
+    "ButtonComponent",
+    "AnySelectMenu",
+    "TextInput",
+    "SectionComponent",
+    "TextDisplayComponent",
+    "ThumbnailComponent",  # TODO: reconsider the semantics of this `Component` union, not all of these types can appear in all places
+    "MediaGalleryComponent",
+    "SeparatorComponent",
+    "FileComponent",
+    "ContainerComponent",
+]
+
+
+# base types
 
 
 class _BaseComponent(TypedDict):
     # type: ComponentType  # FIXME: current version of pyright complains about overriding types, latest might be fine
+    # TODO: always present in responses?
     id: NotRequired[int]  # NOTE: not implemented (yet?)
 
 
 class ActionRow(_BaseComponent):
     type: Literal[1]
     components: List[Component]
+
+
+# button
 
 
 class ButtonComponent(_BaseComponent):
@@ -38,6 +58,9 @@ class ButtonComponent(_BaseComponent):
     url: NotRequired[str]
     disabled: NotRequired[bool]
     sku_id: NotRequired[Snowflake]
+
+
+# selects
 
 
 class SelectOption(TypedDict):
@@ -98,6 +121,9 @@ AnySelectMenu = Union[
 ]
 
 
+# modal
+
+
 class Modal(TypedDict):
     title: str
     custom_id: str
@@ -114,3 +140,70 @@ class TextInput(_BaseComponent):
     required: NotRequired[bool]
     value: NotRequired[str]
     placeholder: NotRequired[str]
+
+
+# components v2
+# NOTE: these are type definitions for *sending*, while *receiving* likely has fewer optional fields
+
+
+# TODO: this likely expands to an `EmbedImage`-like structure
+class UnfurledMediaItem(TypedDict):
+    url: str
+
+
+# XXX: drop `Component` suffix? `ButtonComponent` also uses it, selects don't.
+class SectionComponent(_BaseComponent):
+    type: Literal[9]
+    components: List[TextDisplayComponent]
+    accessory: Component
+
+
+class TextDisplayComponent(_BaseComponent):
+    type: Literal[10]
+    content: str
+
+
+class ThumbnailComponent(_BaseComponent):
+    type: Literal[11]
+    media: UnfurledMediaItem
+    description: NotRequired[str]
+    spoiler: NotRequired[bool]
+
+
+class MediaGalleryItem(TypedDict):
+    media: UnfurledMediaItem
+    description: NotRequired[str]
+    spoiler: NotRequired[bool]
+
+
+class MediaGalleryComponent(_BaseComponent):
+    type: Literal[12]
+    items: List[MediaGalleryItem]
+
+
+class FileComponent(_BaseComponent):
+    type: Literal[13]
+    file: UnfurledMediaItem  # only supports `attachment://` urls
+    spoiler: NotRequired[bool]
+
+
+class SeparatorComponent(_BaseComponent):
+    type: Literal[14]
+    divider: NotRequired[bool]
+    spacing: NotRequired[SeparatorSpacing]
+
+
+class ContainerComponent(_BaseComponent):
+    type: Literal[17]
+    accent_color: NotRequired[int]
+    spoiler: NotRequired[bool]
+    components: List[
+        Union[
+            ActionRow,
+            TextDisplayComponent,
+            SectionComponent,
+            MediaGalleryComponent,
+            FileComponent,
+            SeparatorComponent,
+        ]
+    ]
