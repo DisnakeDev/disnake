@@ -146,7 +146,7 @@ class TextInput(_BaseComponent):
 # NOTE: these are type definitions for *sending*, while *receiving* likely has fewer optional fields
 
 
-# TODO: this likely expands to an `EmbedImage`-like structure
+# TODO: this expands to an `EmbedImage`-like structure in responses, with more than just the `url` field
 class UnfurledMediaItem(TypedDict):
     url: str
 
@@ -155,6 +155,8 @@ class UnfurledMediaItem(TypedDict):
 class SectionComponent(_BaseComponent):
     type: Literal[9]
     components: List[TextDisplayComponent]
+    # this currently only supports ThumbnailComponent, others will be added in the future
+    # (the API seemingly also allows buttons, but they don't render yet)
     accessory: Component
 
 
@@ -163,9 +165,11 @@ class TextDisplayComponent(_BaseComponent):
     content: str
 
 
+# note, can't be used at top level, appears to be exclusively for `SectionComponent.accessory`?
 class ThumbnailComponent(_BaseComponent):
     type: Literal[11]
-    media: UnfurledMediaItem
+    # TODO: this will be renamed to `media`
+    image: UnfurledMediaItem
     description: NotRequired[str]
     spoiler: NotRequired[bool]
 
@@ -200,8 +204,8 @@ class ContainerComponent(_BaseComponent):
     components: List[
         Union[
             ActionRow,
-            TextDisplayComponent,
             SectionComponent,
+            TextDisplayComponent,
             MediaGalleryComponent,
             FileComponent,
             SeparatorComponent,
