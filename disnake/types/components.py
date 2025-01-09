@@ -19,12 +19,17 @@ SelectDefaultValueType = Literal["user", "role", "channel"]
 Component = Union["ActionRow", "ButtonComponent", "AnySelectMenu", "TextInput"]
 
 
-class ActionRow(TypedDict):
+class _BaseComponent(TypedDict):
+    # type: ComponentType  # FIXME: current version of pyright complains about overriding types, latest might be fine
+    id: NotRequired[int]  # NOTE: not implemented (yet?)
+
+
+class ActionRow(_BaseComponent):
     type: Literal[1]
     components: List[Component]
 
 
-class ButtonComponent(TypedDict):
+class ButtonComponent(_BaseComponent):
     type: Literal[2]
     style: ButtonStyle
     label: NotRequired[str]
@@ -48,7 +53,7 @@ class SelectDefaultValue(TypedDict):
     type: SelectDefaultValueType
 
 
-class _SelectMenu(TypedDict):
+class _SelectMenu(_BaseComponent):
     custom_id: str
     placeholder: NotRequired[str]
     min_values: NotRequired[int]
@@ -99,7 +104,7 @@ class Modal(TypedDict):
     components: List[ActionRow]
 
 
-class TextInput(TypedDict):
+class TextInput(_BaseComponent):
     type: Literal[4]
     custom_id: str
     style: TextInputStyle
