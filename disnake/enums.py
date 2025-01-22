@@ -1148,6 +1148,9 @@ class InteractionResponseType(Enum):
     See also :meth:`InteractionResponse.require_premium`.
 
     .. versionadded:: 2.10
+
+    .. deprecated:: 2.11
+        Use premium buttons (:class:`ui.Button` with :attr:`~ui.Button.sku_id`) instead.
     """
 
 
