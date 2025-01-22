@@ -3298,6 +3298,10 @@ class Client:
 
         Creates a new test :class:`.Entitlement` for the given user or guild, with no expiry.
 
+        .. note::
+            This is only meant to be used with subscription SKUs. To test one-time purchases,
+            use Application Test Mode.
+
         Parameters
         ----------
         sku: :class:`.abc.Snowflake`
