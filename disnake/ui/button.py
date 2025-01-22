@@ -53,7 +53,7 @@ class Button(Item[V_co]):
         The style of the button.
     custom_id: Optional[:class:`str`]
         The ID of the button that gets received during an interaction.
-        If this button is for a URL, it does not have a custom ID.
+        If this button is for a URL or an SKU, it does not have a custom ID.
     url: Optional[:class:`str`]
         The URL this button sends you to.
     disabled: :class:`bool`
@@ -63,7 +63,10 @@ class Button(Item[V_co]):
     emoji: Optional[Union[:class:`.PartialEmoji`, :class:`.Emoji`, :class:`str`]]
         The emoji of the button, if available.
     sku_id: Optional[:class:`int`]
-        TODO
+        The ID of a purchasable SKU, for premium buttons.
+        Premium buttons additionally cannot have a ``label``, ``url``, or ``emoji``.
+
+        .. versionadded:: 2.11
     row: Optional[:class:`int`]
         The relative row this button belongs to. A Discord component can only have 5
         rows. By default, items are arranged automatically into those 5 rows. If you'd
@@ -180,7 +183,7 @@ class Button(Item[V_co]):
     def custom_id(self) -> Optional[str]:
         """Optional[:class:`str`]: The ID of the button that gets received during an interaction.
 
-        If this button is for a URL, it does not have a custom ID.
+        If this button is for a URL or an SKU, it does not have a custom ID.
         """
         return self._underlying.custom_id
 
@@ -241,7 +244,10 @@ class Button(Item[V_co]):
 
     @property
     def sku_id(self) -> Optional[int]:
-        """Optional[:class:`int`]: TODO"""
+        """Optional[:class:`int`]: The ID of a purchasable SKU, for premium buttons.
+
+        .. versionadded:: 2.11
+        """
         return self._underlying.sku_id
 
     @sku_id.setter
@@ -308,11 +314,10 @@ def button(
 
     .. note::
 
-        Buttons with a URL cannot be created with this function.
-        Consider creating a :class:`Button` manually instead.
-        This is because buttons with a URL do not have a callback
-        associated with them since Discord does not do any processing
-        with it.
+        Link/Premium buttons cannot be created with this function,
+        since these buttons do not have a callback associated with them.
+        Consider creating a :class:`Button` manually instead, and adding it
+        using :meth:`View.add_item`.
 
     Parameters
     ----------

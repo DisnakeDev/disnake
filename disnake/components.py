@@ -184,7 +184,7 @@ class Button(Component):
         The style of the button.
     custom_id: Optional[:class:`str`]
         The ID of the button that gets received during an interaction.
-        If this button is for a URL, it does not have a custom ID.
+        If this button is for a URL or an SKU, it does not have a custom ID.
     url: Optional[:class:`str`]
         The URL this button sends you to.
     disabled: :class:`bool`
@@ -194,7 +194,10 @@ class Button(Component):
     emoji: Optional[:class:`PartialEmoji`]
         The emoji of the button, if available.
     sku_id: Optional[:class:`int`]
-        TODO
+        The ID of a purchasable SKU, for premium buttons.
+        Premium buttons additionally cannot have a ``label``, ``url``, or ``emoji``.
+
+        .. versionadded:: 2.11
     """
 
     __slots__: Tuple[str, ...] = (
