@@ -62,6 +62,8 @@ class Button(Item[V_co]):
         The label of the button, if any.
     emoji: Optional[Union[:class:`.PartialEmoji`, :class:`.Emoji`, :class:`str`]]
         The emoji of the button, if available.
+    sku_id: Optional[:class:`int`]
+        TODO
     row: Optional[:class:`int`]
         The relative row this button belongs to. A Discord component can only have 5
         rows. By default, items are arranged automatically into those 5 rows. If you'd
@@ -76,6 +78,7 @@ class Button(Item[V_co]):
         "disabled",
         "label",
         "emoji",
+        "sku_id",
         "row",
     )
     # We have to set this to MISSING in order to overwrite the abstract property from WrappedComponent
@@ -91,6 +94,7 @@ class Button(Item[V_co]):
         custom_id: Optional[str] = None,
         url: Optional[str] = None,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        sku_id: Optional[int] = None,
         row: Optional[int] = None,
     ) -> None:
         ...
@@ -105,6 +109,7 @@ class Button(Item[V_co]):
         custom_id: Optional[str] = None,
         url: Optional[str] = None,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        sku_id: Optional[int] = None,
         row: Optional[int] = None,
     ) -> None:
         ...
@@ -118,18 +123,21 @@ class Button(Item[V_co]):
         custom_id: Optional[str] = None,
         url: Optional[str] = None,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        sku_id: Optional[int] = None,
         row: Optional[int] = None,
     ) -> None:
         super().__init__()
-        if custom_id is not None and url is not None:
-            raise TypeError("cannot mix both url and custom_id with Button")
+        if custom_id is not None and (url is not None or sku_id is not None):
+            raise TypeError("cannot mix both url/sku_id and custom_id with Button")
 
         self._provided_custom_id = custom_id is not None
-        if url is None and custom_id is None:
+        if url is None and sku_id is None and custom_id is None:
             custom_id = os.urandom(16).hex()
 
         if url is not None:
             style = ButtonStyle.link
+        if sku_id is not None:
+            style = ButtonStyle.premium
 
         if emoji is not None:
             if isinstance(emoji, str):
@@ -149,6 +157,7 @@ class Button(Item[V_co]):
             label=label,
             style=style,
             emoji=emoji,
+            sku_id=sku_id,
         )
         self.row = row
 
@@ -228,6 +237,17 @@ class Button(Item[V_co]):
         else:
             self._underlying.emoji = None
 
+    @property
+    def sku_id(self) -> Optional[int]:
+        """Optional[:class:`int`]: TODO"""
+        return self._underlying.sku_id
+
+    @sku_id.setter
+    def sku_id(self, value: Optional[int]) -> None:
+        if value is not None and not isinstance(value, int):
+            raise TypeError("sku_id must be None or int")
+        self._underlying.sku_id = value
+
     @classmethod
     def from_component(cls, button: ButtonComponent) -> Self:
         return cls(
@@ -237,6 +257,7 @@ class Button(Item[V_co]):
             custom_id=button.custom_id,
             url=button.url,
             emoji=button.emoji,
+            sku_id=button.sku_id,
             row=None,
         )
 
@@ -246,6 +267,8 @@ class Button(Item[V_co]):
     def is_persistent(self) -> bool:
         if self.style is ButtonStyle.link:
             return self.url is not None
+        elif self.style is ButtonStyle.premium:
+            return self.sku_id is not None
         return super().is_persistent()
 
     def refresh_component(self, button: ButtonComponent) -> None:

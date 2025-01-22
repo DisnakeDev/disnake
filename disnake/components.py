@@ -27,7 +27,7 @@ from .enums import (
     try_enum,
 )
 from .partial_emoji import PartialEmoji, _EmojiTag
-from .utils import MISSING, assert_never, get_slots
+from .utils import MISSING, _get_as_snowflake, assert_never, get_slots
 
 if TYPE_CHECKING:
     from typing_extensions import Self, TypeAlias
@@ -193,6 +193,8 @@ class Button(Component):
         The label of the button, if any.
     emoji: Optional[:class:`PartialEmoji`]
         The emoji of the button, if available.
+    sku_id: Optional[:class:`int`]
+        TODO
     """
 
     __slots__: Tuple[str, ...] = (
@@ -202,6 +204,7 @@ class Button(Component):
         "disabled",
         "label",
         "emoji",
+        "sku_id",
     )
 
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
@@ -218,6 +221,8 @@ class Button(Component):
             self.emoji = PartialEmoji.from_dict(data["emoji"])
         except KeyError:
             self.emoji = None
+
+        self.sku_id: Optional[int] = _get_as_snowflake(data, "sku_id")
 
     def to_dict(self) -> ButtonComponentPayload:
         payload: ButtonComponentPayload = {
@@ -237,6 +242,9 @@ class Button(Component):
 
         if self.emoji:
             payload["emoji"] = self.emoji.to_dict()
+
+        if self.sku_id:
+            payload["sku_id"] = self.sku_id
 
         return payload
 

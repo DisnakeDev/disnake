@@ -477,8 +477,9 @@ class View:
     def is_persistent(self) -> bool:
         """Whether the view is set up as persistent.
 
-        A persistent view has all their components with a set ``custom_id`` and
-        a :attr:`timeout` set to ``None``.
+        A persistent view only has components with a set ``custom_id``
+        (or non-interactive components such as :attr:`~.ButtonStyle.link` or :attr:`~.ButtonStyle.premium` buttons),
+        and a :attr:`timeout` set to ``None``.
 
         :return type: :class:`bool`
         """
