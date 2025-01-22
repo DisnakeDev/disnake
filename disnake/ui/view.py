@@ -413,7 +413,7 @@ class View:
         )
 
     def refresh(self, components: List[ActionRowComponent[MessageComponent]]) -> None:
-        # TODO: this is pretty hacky at the moment
+        # TODO: this is pretty hacky at the moment, see https://github.com/DisnakeDev/disnake/commit/9384a72acb8c515b13a600592121357e165368da
         old_state: Dict[Tuple[int, str], Item] = {
             (item.type.value, item.custom_id): item  # type: ignore
             for item in self.children
