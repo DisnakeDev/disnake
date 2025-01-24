@@ -132,12 +132,12 @@ class Button(Item[V_co]):
         super().__init__()
 
         self._provided_custom_id = custom_id is not None
-        if url is None and sku_id is None:
-            if custom_id is None:
-                custom_id = os.urandom(16).hex()
-        else:
-            if custom_id is not None:
-                raise TypeError("cannot mix both url/sku_id and custom_id with Button")
+        mutually_exclusive = 3 - (custom_id, url, sku_id).count(None)
+
+        if mutually_exclusive == 0:
+            custom_id = os.urandom(16).hex()
+        elif mutually_exclusive != 1:
+            raise TypeError("cannot mix url, sku_id and custom_id with Button")
 
         if url is not None:
             style = ButtonStyle.link
