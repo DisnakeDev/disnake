@@ -168,8 +168,7 @@ class TextDisplayComponent(_BaseComponent):
 # note, can't be used at top level, appears to be exclusively for `SectionComponent.accessory`?
 class ThumbnailComponent(_BaseComponent):
     type: Literal[11]
-    # TODO: this will be renamed to `media`
-    image: UnfurledMediaItem
+    media: UnfurledMediaItem
     description: NotRequired[str]
     spoiler: NotRequired[bool]
 
