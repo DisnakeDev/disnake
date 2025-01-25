@@ -251,6 +251,7 @@ class ActionRow(Generic[UIComponentT]):
         custom_id: Optional[str] = None,
         url: Optional[str] = None,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        sku_id: Optional[int] = None,
     ) -> ButtonCompatibleActionRowT:
         """Add a button to the action row. Can only be used if the action
         row holds message components.
@@ -282,6 +283,11 @@ class ActionRow(Generic[UIComponentT]):
             The label of the button, if any.
         emoji: Optional[Union[:class:`.PartialEmoji`, :class:`.Emoji`, :class:`str`]]
             The emoji of the button, if available.
+        sku_id: Optional[:class:`int`]
+            The ID of a purchasable SKU, for premium buttons.
+            Premium buttons additionally cannot have a ``label``, ``url``, or ``emoji``.
+
+            .. versionadded:: 2.11
 
         Raises
         ------
@@ -297,6 +303,7 @@ class ActionRow(Generic[UIComponentT]):
                 custom_id=custom_id,
                 url=url,
                 emoji=emoji,
+                sku_id=sku_id,
             ),
         )
         return self
