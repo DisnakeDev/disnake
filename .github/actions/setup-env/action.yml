@@ -6,12 +6,6 @@ inputs:
   python-version:
     description: The python version to install
     required: true
-  cache-dependency-path:
-    description: The path(s) to use for pip caching, defaults to setup + pdm
-    required: false
-    default: |
-      pyproject.toml
-      setup.py
 outputs:
   python-version:
     description: The python version that was installed.
@@ -26,9 +20,7 @@ runs:
       with:
         python-version: ${{ inputs.python-version }}
         version: "2.20.1"  # last version to support python 3.8
-        # TODO:
         cache: false
-        cache-dependency-path: ${{ inputs.cache-dependency-path }}
 
     - name: Disable PDM version check
       shell: bash
@@ -67,10 +59,9 @@ runs:
         path: |
           pdm.lock
         # cache lockfile for the current day, roughly
-        key: pdm-${{ steps.get-cache-meta.outputs.date }}
+        key: pdm-${{ steps.get-cache-meta.outputs.date }}-${{ hashFiles('pyproject.toml') }}
         # pdm lockfiles should be platform-agnostic
         enableCrossOsArchive: true
-        # TODO: restore-key?
 
     - if: ${{ steps.cache.outputs.cache-hit != 'true' }}
       name: Lock all dependencies
