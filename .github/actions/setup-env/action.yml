@@ -54,12 +54,11 @@ runs:
       shell: bash
       run: echo "python-version=$(python -c 'import sys; print(".".join(map(str,sys.version_info[:2])))')" >> $GITHUB_OUTPUT
 
-    - name: Get Date
+    - name: Get metadata for cache
       id: get-cache-meta
       shell: bash
       run: |
         echo "date=$(date -u "+%Y%m%d")" >> $GITHUB_OUTPUT
-        echo "cache-dir=$(pdm config cache_dir)" >> $GITHUB_OUTPUT
 
     - name: Setup/Restore cache
       id: cache
@@ -67,11 +66,9 @@ runs:
       with:
         path: |
           pdm.lock
-          ${{ steps.get-cache-meta.outputs.cache-dir }}
         # cache lockfile for the current day, roughly
         key: pdm-${{ steps.get-cache-meta.outputs.date }}
         # pdm lockfiles should be platform-agnostic
-        # (cached wheels aren't, but we can't really do anything about that.)
         enableCrossOsArchive: true
         # TODO: restore-key?
 
@@ -80,5 +77,3 @@ runs:
       shell: bash
       run: |
         pdm lock -G:all  # create pdm.lock
-        # XXX: there might be a better way to do this?
-        pdm install -G:all  # cache wheels in ~/.cache/pdm/ (i.e. `pdm config cache_dir` above)
