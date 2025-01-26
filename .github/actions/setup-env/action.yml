@@ -49,13 +49,31 @@ runs:
       shell: bash
       run: pip install nox
 
-    # TODO: tmp
-    # this is necessary for workflow jobs that run `pdm install` multiple times with different dependency groups
-    - name: Lock all dependencies
-      shell: bash
-      run: pdm lock -G:all
-
     - name: Set python version
       id: python-version
       shell: bash
       run: echo "python-version=$(python -c 'import sys; print(".".join(map(str,sys.version_info[:2])))')" >> $GITHUB_OUTPUT
+
+    - name: Get Date
+      id: get-cache-meta
+      shell: bash
+      run: |
+        echo "date=$(date -u "+%Y%m%d")" >> $GITHUB_OUTPUT
+        echo "cache-dir=$(pdm config cache_dir)" >> $GITHUB_OUTPUT
+
+    - name: Setup/Restore cache
+      id: cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          pdm.lock
+          ${{ steps.get-cache-meta.outputs.cache-dir }}
+        # cache lockfile for the current day, roughly
+        key: ${{ runner.os }}-pdm-${{ steps.get-cache-meta.outputs.date }}
+        # TODO: restore-key?
+        # TODO: enableCrossOsArchive?
+
+    - if: ${{ steps.cache.outputs.cache-hit != 'true' }}
+      name: Lock all dependencies
+      shell: bash
+      run: pdm lock -G:all
