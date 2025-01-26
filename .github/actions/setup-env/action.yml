@@ -76,4 +76,7 @@ runs:
     - if: ${{ steps.cache.outputs.cache-hit != 'true' }}
       name: Lock all dependencies
       shell: bash
-      run: pdm lock -G:all
+      run: |
+        pdm lock -G:all  # create pdm.lock
+        # XXX: there might be a better way to do this?
+        pdm install -G:all  # cache wheels in ~/.cache/pdm/ (i.e. `pdm config cache_dir` above)
