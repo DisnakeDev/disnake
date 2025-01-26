@@ -64,7 +64,7 @@ docs = [
     "sphinx-notfound-page==0.8.3",
 ]
 
-[tool.pdm.dev-dependencies]
+[dependency-groups]
 nox = [
     "nox==2022.11.21",
 ]
