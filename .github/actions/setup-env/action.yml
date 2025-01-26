@@ -69,9 +69,11 @@ runs:
           pdm.lock
           ${{ steps.get-cache-meta.outputs.cache-dir }}
         # cache lockfile for the current day, roughly
-        key: ${{ runner.os }}-pdm-${{ steps.get-cache-meta.outputs.date }}
+        key: pdm-${{ steps.get-cache-meta.outputs.date }}
+        # pdm lockfiles should be platform-agnostic
+        # (cached wheels aren't, but we can't really do anything about that.)
+        enableCrossOsArchive: true
         # TODO: restore-key?
-        # TODO: enableCrossOsArchive?
 
     - if: ${{ steps.cache.outputs.cache-hit != 'true' }}
       name: Lock all dependencies
