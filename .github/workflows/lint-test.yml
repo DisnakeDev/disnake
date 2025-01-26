@@ -35,10 +35,12 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set up environment
-      uses: ./.github/actions/setup-env
+    # Instead of setup-env, we call the cache-pdm action here directly.
+    # This avoids having to install PDM, only to find out the cache is already up to date sometimes.
+    - name: Configure cache
+      uses: ./.github/actions/cache-pdm
       with:
-        python-version: 3.8
+        env-already-initialized: false
 
   lint:
     runs-on: ubuntu-latest

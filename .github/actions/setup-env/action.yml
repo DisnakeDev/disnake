@@ -46,25 +46,5 @@ runs:
       shell: bash
       run: echo "python-version=$(python -c 'import sys; print(".".join(map(str,sys.version_info[:2])))')" >> $GITHUB_OUTPUT
 
-    - name: Get metadata for cache
-      id: get-cache-meta
-      shell: bash
-      run: |
-        echo "date=$(date -u "+%Y%m%d")" >> $GITHUB_OUTPUT
-
-    - name: Setup/Restore cache
-      id: cache
-      uses: actions/cache@v4
-      with:
-        path: |
-          pdm.lock
-        # cache lockfile for the current day, roughly
-        key: pdm-${{ steps.get-cache-meta.outputs.date }}-${{ hashFiles('pyproject.toml') }}
-        # pdm lockfiles should be platform-agnostic
-        enableCrossOsArchive: true
-
-    - if: ${{ steps.cache.outputs.cache-hit != 'true' }}
-      name: Lock all dependencies
-      shell: bash
-      run: |
-        pdm lock -G:all  # create pdm.lock
+    - name: Configure cache
+      uses: ./.github/actions/cache-pdm
