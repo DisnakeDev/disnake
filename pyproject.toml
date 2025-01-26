@@ -104,6 +104,13 @@ build = [
     "twine~=5.1.1",
 ]
 
+
+[tool.pdm]
+# Ignore `requires-python` warnings when locking, the latest versions of some
+# dependencies already require >=3.9
+# See also https://pdm-project.org/en/latest/usage/config/#ignore-package-warnings
+ignore_package_warnings = ["*"]
+
 [tool.pdm.scripts]
 black = { composite = ["lint black"], help = "Run black" }
 docs = { cmd = "nox -Rs docs --", help = "Build the documentation for development" }
