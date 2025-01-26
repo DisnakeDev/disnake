@@ -42,7 +42,6 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
-    needs: lock-dependencies
     steps:
     - uses: actions/checkout@v4
 
