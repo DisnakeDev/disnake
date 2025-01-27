@@ -36,7 +36,6 @@ runs:
       shell: bash
       run: python -m pip install -U pip wheel setuptools
 
-    # TODO: use `pdm run nox` instead?
     - name: Install nox
       shell: bash
       run: pip install nox
