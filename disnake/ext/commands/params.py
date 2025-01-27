@@ -479,22 +479,22 @@ class ParamInfo:
 
     TYPES: ClassVar[Dict[type, int]] = {
         # fmt: off
-        str:                                               OptionType.string.value,
-        int:                                               OptionType.integer.value,
-        bool:                                              OptionType.boolean.value,
-        disnake.abc.User:                                  OptionType.user.value,
-        disnake.User:                                      OptionType.user.value,
-        disnake.Member:                                    OptionType.user.value,
-        Union[disnake.User, disnake.Member]:               OptionType.user.value,
+        str: OptionType.string.value,
+        int: OptionType.integer.value,
+        bool: OptionType.boolean.value,
+        disnake.abc.User: OptionType.user.value,
+        disnake.User: OptionType.user.value,
+        disnake.Member: OptionType.user.value,
+        Union[disnake.User, disnake.Member]: OptionType.user.value,
         # channels handled separately
-        disnake.abc.GuildChannel:                          OptionType.channel.value,
-        disnake.Role:                                      OptionType.role.value,
-        disnake.abc.Snowflake:                             OptionType.mentionable.value,
-        Union[disnake.Member, disnake.Role]:               OptionType.mentionable.value,
-        Union[disnake.User, disnake.Role]:                 OptionType.mentionable.value,
+        disnake.abc.GuildChannel: OptionType.channel.value,
+        disnake.Role: OptionType.role.value,
+        disnake.abc.Snowflake: OptionType.mentionable.value,
+        Union[disnake.Member, disnake.Role]: OptionType.mentionable.value,
+        Union[disnake.User, disnake.Role]: OptionType.mentionable.value,
         Union[disnake.User, disnake.Member, disnake.Role]: OptionType.mentionable.value,
-        float:                                             OptionType.number.value,
-        disnake.Attachment:                                OptionType.attachment.value,
+        float: OptionType.number.value,
+        disnake.Attachment: OptionType.attachment.value,
         # fmt: on
     }
     _registered_converters: ClassVar[Dict[type, Callable]] = {}
@@ -675,7 +675,10 @@ class ParamInfo:
 
     def _parse_enum(self, annotation: Any) -> None:
         if isinstance(annotation, (EnumMeta, disnake.enums.EnumMeta)):
-            self.choices = [OptionChoice(name, value.value) for name, value in annotation.__members__.items()]  # type: ignore
+            self.choices = [
+                OptionChoice(name, value.value)  # type: ignore
+                for name, value in annotation.__members__.items()
+            ]
         else:
             self.choices = [OptionChoice(str(i), i) for i in annotation.__args__]
 
