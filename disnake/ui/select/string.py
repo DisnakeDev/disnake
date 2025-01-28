@@ -117,8 +117,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         options: SelectOptionInput = ...,
         disabled: bool = False,
         row: Optional[int] = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     def __init__(
@@ -131,8 +130,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         options: SelectOptionInput = ...,
         disabled: bool = False,
         row: Optional[int] = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     def __init__(
         self,
@@ -265,15 +263,13 @@ def string_select(
     options: SelectOptionInput = ...,
     disabled: bool = False,
     row: Optional[int] = None,
-) -> Callable[[ItemCallbackType[V_co, StringSelect[V_co]]], DecoratedItem[StringSelect[V_co]]]:
-    ...
+) -> Callable[[ItemCallbackType[V_co, StringSelect[V_co]]], DecoratedItem[StringSelect[V_co]]]: ...
 
 
 @overload
 def string_select(
     cls: Callable[P, S_co], *_: P.args, **kwargs: P.kwargs
-) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
-    ...
+) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]: ...
 
 
 def string_select(

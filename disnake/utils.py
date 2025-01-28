@@ -145,12 +145,10 @@ class CachedSlotProperty(Generic[T, T_co]):
         self.__doc__ = function.__doc__
 
     @overload
-    def __get__(self, instance: None, owner: Type[Any]) -> Self:
-        ...
+    def __get__(self, instance: None, owner: Type[Any]) -> Self: ...
 
     @overload
-    def __get__(self, instance: T, owner: Type[Any]) -> T_co:
-        ...
+    def __get__(self, instance: T, owner: Type[Any]) -> T_co: ...
 
     def __get__(self, instance: Optional[T], owner: Type[Any]) -> Any:
         if instance is None:
@@ -211,18 +209,15 @@ class SequenceProxy(Sequence[T_co]):
 
 
 @overload
-def parse_time(timestamp: None) -> None:
-    ...
+def parse_time(timestamp: None) -> None: ...
 
 
 @overload
-def parse_time(timestamp: str) -> datetime.datetime:
-    ...
+def parse_time(timestamp: str) -> datetime.datetime: ...
 
 
 @overload
-def parse_time(timestamp: Optional[str]) -> Optional[datetime.datetime]:
-    ...
+def parse_time(timestamp: Optional[str]) -> Optional[datetime.datetime]: ...
 
 
 def parse_time(timestamp: Optional[str]) -> Optional[datetime.datetime]:
@@ -232,13 +227,11 @@ def parse_time(timestamp: Optional[str]) -> Optional[datetime.datetime]:
 
 
 @overload
-def isoformat_utc(dt: datetime.datetime) -> str:
-    ...
+def isoformat_utc(dt: datetime.datetime) -> str: ...
 
 
 @overload
-def isoformat_utc(dt: Optional[datetime.datetime]) -> Optional[str]:
-    ...
+def isoformat_utc(dt: Optional[datetime.datetime]) -> Optional[str]: ...
 
 
 def isoformat_utc(dt: Optional[datetime.datetime]) -> Optional[str]:
@@ -514,7 +507,7 @@ _mime_type_extensions = {
 
 
 def _get_mime_type_for_data(data: _BytesLike) -> str:
-    if data[0:8] == b"\x89\x50\x4E\x47\x0D\x0A\x1A\x0A":
+    if data[0:8] == b"\x89\x50\x4e\x47\x0d\x0a\x1a\x0a":
         return "image/png"
     elif data[0:3] == b"\xff\xd8\xff" or data[6:10] in (b"JFIF", b"Exif"):
         return "image/jpeg"
@@ -548,13 +541,11 @@ def _get_extension_for_data(data: _BytesLike) -> Optional[str]:
 
 
 @overload
-async def _assetbytes_to_base64_data(data: None) -> None:
-    ...
+async def _assetbytes_to_base64_data(data: None) -> None: ...
 
 
 @overload
-async def _assetbytes_to_base64_data(data: AssetBytes) -> str:
-    ...
+async def _assetbytes_to_base64_data(data: AssetBytes) -> str: ...
 
 
 async def _assetbytes_to_base64_data(data: Optional[AssetBytes]) -> Optional[str]:
@@ -695,8 +686,7 @@ class SnowflakeList(array.array):
 
     if TYPE_CHECKING:
 
-        def __init__(self, data: Iterable[int], *, is_sorted: bool = False) -> None:
-            ...
+        def __init__(self, data: Iterable[int], *, is_sorted: bool = False) -> None: ...
 
     def __new__(cls, data: Iterable[int], *, is_sorted: bool = False):
         return array.array.__new__(cls, "Q", data if is_sorted else sorted(data))  # type: ignore
@@ -729,15 +719,13 @@ def _string_width(string: str, *, _IS_ASCII=_IS_ASCII) -> int:
 
 
 @overload
-def resolve_invite(invite: Union[Invite, str], *, with_params: Literal[False] = False) -> str:
-    ...
+def resolve_invite(invite: Union[Invite, str], *, with_params: Literal[False] = False) -> str: ...
 
 
 @overload
 def resolve_invite(
     invite: Union[Invite, str], *, with_params: Literal[True]
-) -> Tuple[str, Dict[str, str]]:
-    ...
+) -> Tuple[str, Dict[str, str]]: ...
 
 
 def resolve_invite(
@@ -1089,13 +1077,11 @@ async def _achunk(iterator: AsyncIterator[T], max_size: int) -> AsyncIterator[Li
 
 
 @overload
-def as_chunks(iterator: Iterator[T], max_size: int) -> Iterator[List[T]]:
-    ...
+def as_chunks(iterator: Iterator[T], max_size: int) -> Iterator[List[T]]: ...
 
 
 @overload
-def as_chunks(iterator: AsyncIterator[T], max_size: int) -> AsyncIterator[List[T]]:
-    ...
+def as_chunks(iterator: AsyncIterator[T], max_size: int) -> AsyncIterator[List[T]]: ...
 
 
 def as_chunks(iterator: _Iter[T], max_size: int) -> _Iter[List[T]]:

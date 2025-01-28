@@ -73,7 +73,7 @@ tools = [
     "slotscheck~=0.16.4",
     "python-dotenv~=1.0.0",
     "check-manifest==0.49",
-    "ruff==0.8.0",
+    "ruff==0.9.3",
 ]
 changelog = [
     "towncrier==23.6.0",
@@ -81,7 +81,7 @@ changelog = [
 codemod = [
     # run codemods on the respository (mostly automated typing)
     "libcst~=1.1.0",
-    "black==23.9.1",
+    "ruff==0.9.3",
     "autotyping==23.2.0",
 ]
 typing = [
@@ -105,7 +105,6 @@ build = [
 ]
 
 [tool.pdm.scripts]
-black = { composite = ["lint black"], help = "Run black" }
 docs = { cmd = "nox -Rs docs --", help = "Build the documentation for development" }
 lint = { cmd = "nox -Rs lint --", help = "Check all files for linting errors" }
 pyright = { cmd = "nox -Rs pyright --", help = "Run pyright" }
@@ -115,7 +114,6 @@ test = { cmd = "nox -Rs test --", help = "Run pytest" }
 
 # legacy tasks for those who still type `task`
 [tool.taskipy.tasks]
-black = { cmd = "black", help = "Run black" }
 docs = { cmd = "docs", help = "Build the documentation for development" }
 lint = { cmd = "lint", help = "Check all files for linting errors" }
 pyright = { cmd = "pyright", help = "Run pyright" }
@@ -124,9 +122,6 @@ test = { cmd = "test", help = "Run pytest" }
 
 [tool.taskipy.settings]
 runner = "pdm run"
-
-[tool.black]
-line-length = 100
 
 [tool.ruff]
 line-length = 100

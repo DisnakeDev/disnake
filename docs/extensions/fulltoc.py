@@ -24,7 +24,7 @@ of a parent page.
 
 # Changes made:
 # - added typehinting
-# - formatted with black
+# - formatted with ruff
 # - refactored generated toc to suit project documentation structure
 
 from __future__ import annotations

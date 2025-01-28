@@ -37,14 +37,9 @@ repos:
         exclude_types: [json, pofile]
         exclude: 'changelog/|py.typed|disnake/bin/COPYING|.github/PULL_REQUEST_TEMPLATE.md|.github/CODEOWNERS|LICENSE|MANIFEST.in'
 
-  - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 23.9.1
-    hooks:
-      - id: black
-        name: "run black in all files"
-
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.8.0
+    rev: v0.9.3
     hooks:
+      - id: ruff-format
       - id: ruff
         args: [--fix, --fixable=I]

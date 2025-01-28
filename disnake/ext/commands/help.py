@@ -952,7 +952,7 @@ class DefaultHelpCommand(HelpCommand):
         for command in commands:
             name = command.name
             width = max_size - (get_width(name) - len(name))
-            entry = f'{self.indent * " "}{name:<{width}} {command.short_doc}'
+            entry = f"{self.indent * ' '}{name:<{width}} {command.short_doc}"
             self.paginator.add_line(self.shorten_text(entry))
 
     async def send_pages(self) -> None:
@@ -1199,7 +1199,7 @@ class MinimalHelpCommand(HelpCommand):
         aliases: Sequence[:class:`str`]
             A list of aliases to format.
         """
-        self.paginator.add_line(f'**{self.aliases_heading}** {", ".join(aliases)}', empty=True)
+        self.paginator.add_line(f"**{self.aliases_heading}** {', '.join(aliases)}", empty=True)
 
     def add_command_formatting(self, command) -> None:
         """A utility function to format commands and groups.

@@ -88,12 +88,10 @@ class flag_value(Generic[T]):
         return ~self._parent._from_value(self.flag)
 
     @overload
-    def __get__(self, instance: None, owner: Type[BF]) -> flag_value[BF]:
-        ...
+    def __get__(self, instance: None, owner: Type[BF]) -> flag_value[BF]: ...
 
     @overload
-    def __get__(self, instance: BF, owner: Type[BF]) -> bool:
-        ...
+    def __get__(self, instance: BF, owner: Type[BF]) -> bool: ...
 
     def __get__(self, instance: Optional[BF], owner: Type[BF]) -> Any:
         if instance is None:
@@ -438,8 +436,7 @@ class SystemChannelFlags(BaseFlags, inverted=True):
             premium_subscriptions: bool = ...,
             role_subscription_purchase_notification_replies: bool = ...,
             role_subscription_purchase_notifications: bool = ...,
-        ) -> None:
-            ...
+        ) -> None: ...
 
     # For some reason the flags for system channels are "inverted"
     # ergo, if they're set then it means "suppress" (off in the GUI toggle)
@@ -611,8 +608,7 @@ class MessageFlags(BaseFlags):
             suppress_embeds: bool = ...,
             suppress_notifications: bool = ...,
             urgent: bool = ...,
-        ) -> None:
-            ...
+        ) -> None: ...
 
     @flag_value
     def crossposted(self):
@@ -820,8 +816,7 @@ class PublicUserFlags(BaseFlags):
             team_user: bool = ...,
             verified_bot: bool = ...,
             verified_bot_developer: bool = ...,
-        ) -> None:
-            ...
+        ) -> None: ...
 
     @flag_value
     def staff(self):
@@ -1079,13 +1074,11 @@ class Intents(BaseFlags):
         typing: bool = ...,
         voice_states: bool = ...,
         webhooks: bool = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     @_generated
-    def __init__(self: NoReturn) -> None:
-        ...
+    def __init__(self: NoReturn) -> None: ...
 
     def __init__(self, value: Optional[int] = None, **kwargs: bool) -> None:
         if value is not None:
@@ -1808,13 +1801,11 @@ class MemberCacheFlags(BaseFlags):
 
     @overload
     @_generated
-    def __init__(self, *, joined: bool = ..., voice: bool = ...) -> None:
-        ...
+    def __init__(self, *, joined: bool = ..., voice: bool = ...) -> None: ...
 
     @overload
     @_generated
-    def __init__(self: NoReturn) -> None:
-        ...
+    def __init__(self: NoReturn) -> None: ...
 
     def __init__(self, **kwargs: bool) -> None:
         self.value = all_flags_value(self.VALID_FLAGS)
@@ -2001,8 +1992,7 @@ class ApplicationFlags(BaseFlags):
             gateway_presence: bool = ...,
             gateway_presence_limited: bool = ...,
             verification_pending_guild_limit: bool = ...,
-        ) -> None:
-            ...
+        ) -> None: ...
 
     @flag_value
     def application_auto_moderation_rule_create_badge(self):
@@ -2169,8 +2159,7 @@ class ChannelFlags(BaseFlags):
             hide_media_download_options: bool = ...,
             pinned: bool = ...,
             require_tag: bool = ...,
-        ) -> None:
-            ...
+        ) -> None: ...
 
     @flag_value
     def pinned(self):
@@ -2275,8 +2264,7 @@ class AutoModKeywordPresets(ListBaseFlags):
         @_generated
         def __init__(
             self, *, profanity: bool = ..., sexual_content: bool = ..., slurs: bool = ...
-        ) -> None:
-            ...
+        ) -> None: ...
 
     @classmethod
     def all(cls) -> Self:
@@ -2397,8 +2385,7 @@ class MemberFlags(BaseFlags):
             is_guest: bool = ...,
             started_home_actions: bool = ...,
             started_onboarding: bool = ...,
-        ) -> None:
-            ...
+        ) -> None: ...
 
     @flag_value
     def did_rejoin(self):
@@ -2532,8 +2519,7 @@ class RoleFlags(BaseFlags):
     if TYPE_CHECKING:
 
         @_generated
-        def __init__(self, *, in_prompt: bool = ...) -> None:
-            ...
+        def __init__(self, *, in_prompt: bool = ...) -> None: ...
 
     @flag_value
     def in_prompt(self):
@@ -2612,8 +2598,7 @@ class AttachmentFlags(BaseFlags):
     if TYPE_CHECKING:
 
         @_generated
-        def __init__(self, *, is_remix: bool = ...) -> None:
-            ...
+        def __init__(self, *, is_remix: bool = ...) -> None: ...
 
     @flag_value
     def is_remix(self):
@@ -2698,8 +2683,7 @@ class SKUFlags(BaseFlags):
             available: bool = ...,
             guild_subscription: bool = ...,
             user_subscription: bool = ...,
-        ) -> None:
-            ...
+        ) -> None: ...
 
     @flag_value
     def available(self):
@@ -2790,8 +2774,7 @@ class ApplicationInstallTypes(ListBaseFlags):
     if TYPE_CHECKING:
 
         @_generated
-        def __init__(self, *, guild: bool = ..., user: bool = ...) -> None:
-            ...
+        def __init__(self, *, guild: bool = ..., user: bool = ...) -> None: ...
 
     @classmethod
     def all(cls) -> Self:
@@ -2886,8 +2869,7 @@ class InteractionContextTypes(ListBaseFlags):
         @_generated
         def __init__(
             self, *, bot_dm: bool = ..., guild: bool = ..., private_channel: bool = ...
-        ) -> None:
-            ...
+        ) -> None: ...
 
     @classmethod
     def all(cls) -> Self:
