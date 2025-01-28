@@ -64,7 +64,7 @@ docs = [
     "sphinx-notfound-page==0.8.3",
 ]
 
-[tool.pdm.dev-dependencies]
+[dependency-groups]
 nox = [
     "nox==2022.11.21",
 ]
@@ -104,24 +104,20 @@ build = [
     "twine~=5.1.1",
 ]
 
+
+[tool.pdm]
+# Ignore `requires-python` warnings when locking, the latest versions of some
+# dependencies already require >=3.9
+# See also https://pdm-project.org/en/latest/usage/config/#ignore-package-warnings
+ignore_package_warnings = ["*"]
+
 [tool.pdm.scripts]
 docs = { cmd = "nox -Rs docs --", help = "Build the documentation for development" }
 lint = { cmd = "nox -Rs lint --", help = "Check all files for linting errors" }
 pyright = { cmd = "nox -Rs pyright --", help = "Run pyright" }
-setup_env = { cmd = "pdm install -d -G speed -G docs -G voice", help = "Set up the local environment and all dependencies" }
+setup_env = { cmd = "{pdm} install -G:all", help = "Set up the local environment and all dependencies" }
 post_setup_env = { composite = ["python -m ensurepip --default-pip", "pre-commit install --install-hooks"] }
 test = { cmd = "nox -Rs test --", help = "Run pytest" }
-
-# legacy tasks for those who still type `task`
-[tool.taskipy.tasks]
-docs = { cmd = "docs", help = "Build the documentation for development" }
-lint = { cmd = "lint", help = "Check all files for linting errors" }
-pyright = { cmd = "pyright", help = "Run pyright" }
-setup_env = { cmd = "setup_env", help = "Setup the local environment and set up all dependencies" }
-test = { cmd = "test", help = "Run pytest" }
-
-[tool.taskipy.settings]
-runner = "pdm run"
 
 [tool.ruff]
 line-length = 100

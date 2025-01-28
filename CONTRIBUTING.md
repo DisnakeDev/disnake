@@ -63,7 +63,7 @@ Specific development aspects are further explained below.
 
 ### Initial setup
 
-We use [`PDM`](https://pdm.fming.dev/) as our dependency manager. If it isn't already installed on your system, you can follow the installation steps [here](https://pdm.fming.dev/latest/#installation) to get started.
+We use [`PDM`](https://pdm-project.org/) as our dependency manager. If it isn't already installed on your system, you can follow the installation steps [here](https://pdm-project.org/latest/#installation) to get started.
 
 Once PDM is installed, use the following command to initialize a virtual environment, install the necessary development dependencies, and install the [`pre-commit`](#pre-commit) hooks.
 ```
