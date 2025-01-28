@@ -63,14 +63,14 @@ Specific development aspects are further explained below.
 
 ### Initial setup
 
-We use [`PDM`](https://pdm.fming.dev/) as our dependency manager. If it isn't already installed on your system, you can follow the installation steps [here](https://pdm.fming.dev/latest/#installation) to get started.
+We use [`PDM`](https://pdm-project.org/) as our dependency manager. If it isn't already installed on your system, you can follow the installation steps [here](https://pdm-project.org/latest/#installation) to get started.
 
 Once PDM is installed, use the following command to initialize a virtual environment, install the necessary development dependencies, and install the [`pre-commit`](#pre-commit) hooks.
 ```
 $ pdm run setup_env
 ```
 
-Other tools used in this project include [black](https://black.readthedocs.io/en/stable/) (formatter), [ruff](https://beta.ruff.rs/docs/) (linter), and [pyright](https://microsoft.github.io/pyright/#/) (type-checker). For the most part, these automatically run on every commit with no additional action required - see below for details.
+Other tools used in this project include [ruff](https://docs.astral.sh/ruff) (formatter and linter), and [pyright](https://microsoft.github.io/pyright/#/) (type-checker). For the most part, these automatically run on every commit with no additional action required - see below for details.
 
 All of the following checks also automatically run for every PR on GitHub, so don't worry if you're not sure whether you missed anything. A PR cannot be merged as long as there are any failing checks.
 

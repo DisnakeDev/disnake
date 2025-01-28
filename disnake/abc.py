@@ -269,8 +269,7 @@ class GuildChannel(ABC):
 
         def __init__(
             self, *, state: ConnectionState, guild: Guild, data: Mapping[str, Any]
-        ) -> None:
-            ...
+        ) -> None: ...
 
     def __str__(self) -> str:
         return self.name
@@ -843,8 +842,7 @@ class GuildChannel(ABC):
         *,
         overwrite: Optional[PermissionOverwrite] = ...,
         reason: Optional[str] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     @_overload_with_permissions
@@ -911,8 +909,7 @@ class GuildChannel(ABC):
         view_channel: Optional[bool] = ...,
         view_creator_monetization_analytics: Optional[bool] = ...,
         view_guild_insights: Optional[bool] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     async def set_permissions(
         self,
@@ -1118,8 +1115,7 @@ class GuildChannel(ABC):
         category: Optional[Snowflake] = ...,
         sync_permissions: bool = ...,
         reason: Optional[str] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     async def move(
@@ -1130,8 +1126,7 @@ class GuildChannel(ABC):
         category: Optional[Snowflake] = ...,
         sync_permissions: bool = ...,
         reason: Optional[str] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     async def move(
@@ -1142,8 +1137,7 @@ class GuildChannel(ABC):
         category: Optional[Snowflake] = ...,
         sync_permissions: bool = ...,
         reason: Optional[str] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     async def move(
@@ -1154,8 +1148,7 @@ class GuildChannel(ABC):
         category: Optional[Snowflake] = ...,
         sync_permissions: bool = ...,
         reason: Optional[str] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     async def move(self, **kwargs: Any) -> None:
         """|coro|
@@ -1442,8 +1435,7 @@ class Messageable:
         view: View = ...,
         components: Components[MessageUIComponent] = ...,
         poll: Poll = ...,
-    ) -> Message:
-        ...
+    ) -> Message: ...
 
     @overload
     async def send(
@@ -1464,8 +1456,7 @@ class Messageable:
         view: View = ...,
         components: Components[MessageUIComponent] = ...,
         poll: Poll = ...,
-    ) -> Message:
-        ...
+    ) -> Message: ...
 
     @overload
     async def send(
@@ -1486,8 +1477,7 @@ class Messageable:
         view: View = ...,
         components: Components[MessageUIComponent] = ...,
         poll: Poll = ...,
-    ) -> Message:
-        ...
+    ) -> Message: ...
 
     @overload
     async def send(
@@ -1508,8 +1498,7 @@ class Messageable:
         view: View = ...,
         components: Components[MessageUIComponent] = ...,
         poll: Poll = ...,
-    ) -> Message:
-        ...
+    ) -> Message: ...
 
     async def send(
         self,

@@ -252,6 +252,7 @@ class ConnectionClosed(ClientException):
         4014: "Disconnected, channel was deleted, you were kicked, voice server changed, or the main gateway session was dropped.",
         4015: "Voice server crashed",
         4016: "Unknown encryption mode",
+        4020: "Bad request - you sent a malformed request",
     }
 
     def __init__(

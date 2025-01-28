@@ -31,8 +31,7 @@ class _CustomButton(ui.Button[V_co]):
         pass
 
 
-class _CustomView(ui.View):
-    ...
+class _CustomView(ui.View): ...
 
 
 class TestDecorator:

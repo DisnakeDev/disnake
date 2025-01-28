@@ -1,0 +1,1 @@
+Fix missing/faulty :class:`Subscription`\-related gateway events.
