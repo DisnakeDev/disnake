@@ -24,6 +24,7 @@ from .role import Role
 from .snowflake import Snowflake, SnowflakeList
 from .soundboard import GuildSoundboardSound
 from .sticker import GuildSticker
+from .subscription import Subscription
 from .threads import Thread, ThreadMember, ThreadMemberWithPresence, ThreadType
 from .user import AvatarDecorationData, User
 from .voice import GuildVoiceState, SupportedModes, VoiceChannelEffect
@@ -657,16 +658,28 @@ class AutoModerationActionExecutionEvent(TypedDict):
     matched_keyword: NotRequired[Optional[str]]
 
 
-# https://discord.com/developers/docs/monetization/entitlements#new-entitlement
+# https://discord.com/developers/docs/events/gateway-events#entitlement-create
 EntitlementCreate = Entitlement
 
 
-# https://discord.com/developers/docs/monetization/entitlements#updated-entitlement
+# https://discord.com/developers/docs/events/gateway-events#entitlement-update
 EntitlementUpdate = Entitlement
 
 
-# https://discord.com/developers/docs/monetization/entitlements#deleted-entitlement
+# https://discord.com/developers/docs/events/gateway-events#entitlement-delete
 EntitlementDelete = Entitlement
+
+
+# https://discord.com/developers/docs/events/gateway-events#subscription-create
+SubscriptionCreate = Subscription
+
+
+# https://discord.com/developers/docs/events/gateway-events#subscription-update
+SubscriptionUpdate = Subscription
+
+
+# https://discord.com/developers/docs/events/gateway-events#subscription-delete
+SubscriptionDelete = Subscription
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-soundboard-sound-create

@@ -87,6 +87,7 @@ from .role import Role
 from .soundboard import GuildSoundboardSound
 from .stage_instance import StageInstance
 from .sticker import GuildSticker
+from .subscription import Subscription
 from .threads import Thread, ThreadMember
 from .ui.modal import Modal, ModalStore
 from .ui.view import View, ViewStore
@@ -2006,6 +2007,18 @@ class ConnectionState:
     def parse_entitlement_delete(self, data: gateway.EntitlementDelete) -> None:
         entitlement = Entitlement(data=data, state=self)
         self.dispatch("entitlement_delete", entitlement)
+
+    def parse_subscription_create(self, data: gateway.SubscriptionCreate) -> None:
+        subscription = Subscription(data=data, state=self)
+        self.dispatch("subscription_create", subscription)
+
+    def parse_subscription_update(self, data: gateway.SubscriptionUpdate) -> None:
+        subscription = Subscription(data=data, state=self)
+        self.dispatch("subscription_update", subscription)
+
+    def parse_subscription_delete(self, data: gateway.SubscriptionDelete) -> None:
+        subscription = Subscription(data=data, state=self)
+        self.dispatch("subscription_delete", subscription)
 
     def parse_guild_soundboard_sound_create(self, data: gateway.GuildSoundboardSoundCreate) -> None:
         guild_id = utils._get_as_snowflake(data, "guild_id")

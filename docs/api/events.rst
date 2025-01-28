@@ -1559,10 +1559,11 @@ This section documents events related to Discord chat messages.
     :param data: The raw event payload data.
     :type data: :class:`RawTypingEvent`
 
-Entitlements
+Monetization
 ~~~~~~~~~~~~
 
-This section documents events related to entitlements, which are used for application subscriptions.
+This section documents events related to :ddocs:`monetization <monetization/overview>`,
+including application subscriptions and entitlements.
 
 .. function:: on_entitlement_create(entitlement)
 
