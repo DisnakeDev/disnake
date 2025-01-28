@@ -369,12 +369,10 @@ class AutoShardedClient(Client):
         member_cache_flags: Optional[MemberCacheFlags] = None,
         localization_provider: Optional[LocalizationProtocol] = None,
         strict_localization: bool = False,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
-    def __init__(self: NoReturn) -> None:
-        ...
+    def __init__(self: NoReturn) -> None: ...
 
     def __init__(self, *args: Any, shard_ids: Optional[List[int]] = None, **kwargs: Any) -> None:
         self.shard_ids = shard_ids

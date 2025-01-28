@@ -557,8 +557,7 @@ class FFmpegOpusAudio(FFmpegAudio):
             fallback = cls._probe_codec_fallback
         else:
             raise TypeError(
-                "Expected str or callable for parameter 'probe', "
-                f"not '{method.__class__.__name__}'"
+                f"Expected str or callable for parameter 'probe', not '{method.__class__.__name__}'"
             )
 
         codec = bitrate = None

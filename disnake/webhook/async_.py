@@ -1507,8 +1507,7 @@ class Webhook(BaseWebhook):
         applied_tags: Sequence[Snowflake] = ...,
         wait: Literal[True],
         delete_after: float = ...,
-    ) -> WebhookMessage:
-        ...
+    ) -> WebhookMessage: ...
 
     @overload
     async def send(
@@ -1534,8 +1533,7 @@ class Webhook(BaseWebhook):
         applied_tags: Sequence[Snowflake] = ...,
         wait: Literal[False] = ...,
         delete_after: float = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     async def send(
         self,
