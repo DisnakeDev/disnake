@@ -56,13 +56,11 @@ class WrappedComponent(ABC):
 
     @property
     @abstractmethod
-    def _underlying(self) -> NestedComponent:
-        ...
+    def _underlying(self) -> NestedComponent: ...
 
     @property
     @abstractmethod
-    def width(self) -> int:
-        ...
+    def width(self) -> int: ...
 
     def __repr__(self) -> str:
         attrs = " ".join(f"{key}={getattr(self, key)!r}" for key in self.__repr_attributes__)
@@ -93,12 +91,10 @@ class Item(WrappedComponent, Generic[V_co]):
     __repr_attributes__: Tuple[str, ...] = ("row",)
 
     @overload
-    def __init__(self: Item[None]) -> None:
-        ...
+    def __init__(self: Item[None]) -> None: ...
 
     @overload
-    def __init__(self: Item[V_co]) -> None:
-        ...
+    def __init__(self: Item[V_co]) -> None: ...
 
     def __init__(self) -> None:
         self._view: V_co = None  # type: ignore
@@ -169,9 +165,7 @@ SelfViewT = TypeVar("SelfViewT", bound="Optional[View]")
 # which work as `View.__init__` replaces the handler with the item.
 class DecoratedItem(Protocol[I]):
     @overload
-    def __get__(self, obj: None, objtype: Type[SelfViewT]) -> ItemCallbackType[SelfViewT, I]:
-        ...
+    def __get__(self, obj: None, objtype: Type[SelfViewT]) -> ItemCallbackType[SelfViewT, I]: ...
 
     @overload
-    def __get__(self, obj: Any, objtype: Any) -> I:
-        ...
+    def __get__(self, obj: Any, objtype: Any) -> I: ...
