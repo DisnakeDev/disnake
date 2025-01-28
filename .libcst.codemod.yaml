@@ -6,7 +6,7 @@ generated_code_marker: '@generated_module'
 # Command line and arguments for invoking a code formatter. Anything
 # specified here must be capable of taking code via stdin and returning
 # formatted code via stdout.
-formatter: ['black', '-q' , '-']
+formatter: ['ruff', 'format' , '-']
 # List of regex patterns which LibCST will evaluate against filenames to
 # determine if the module should be touched.
 blacklist_patterns: []

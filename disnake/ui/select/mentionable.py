@@ -102,8 +102,7 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
             Sequence[SelectDefaultValueMultiInputType[Union[User, Member, Role]]]
         ] = None,
         row: Optional[int] = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     def __init__(
@@ -118,8 +117,7 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
             Sequence[SelectDefaultValueMultiInputType[Union[User, Member, Role]]]
         ] = None,
         row: Optional[int] = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     def __init__(
         self,
@@ -176,15 +174,13 @@ def mentionable_select(
     row: Optional[int] = None,
 ) -> Callable[
     [ItemCallbackType[V_co, MentionableSelect[V_co]]], DecoratedItem[MentionableSelect[V_co]]
-]:
-    ...
+]: ...
 
 
 @overload
 def mentionable_select(
     cls: Callable[P, S_co], *_: P.args, **kwargs: P.kwargs
-) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
-    ...
+) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]: ...
 
 
 def mentionable_select(

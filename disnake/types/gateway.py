@@ -260,8 +260,7 @@ class ReadyEvent(TypedDict):
 
 
 # https://discord.com/developers/docs/topics/gateway-events#resumed
-class ResumedEvent(TypedDict):
-    ...
+class ResumedEvent(TypedDict): ...
 
 
 # https://discord.com/developers/docs/topics/gateway-events#application-command-permissions-update
@@ -306,8 +305,7 @@ class MessageReactionAddEvent(_BaseReactionEvent):
 
 
 # https://discord.com/developers/docs/topics/gateway-events#message-reaction-remove
-class MessageReactionRemoveEvent(_BaseReactionEvent):
-    ...
+class MessageReactionRemoveEvent(_BaseReactionEvent): ...
 
 
 # https://discord.com/developers/docs/topics/gateway-events#message-reaction-remove-all
