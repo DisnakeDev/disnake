@@ -694,7 +694,7 @@ class InteractionBotBase(CommonBotBase):
         """
 
         def decorator(
-            func: InteractionCommandCallback[CogT, UserCommandInteraction, P]
+            func: InteractionCommandCallback[CogT, UserCommandInteraction, P],
         ) -> InvokableUserCommand:
             result = user_command(
                 name=name,
@@ -797,7 +797,7 @@ class InteractionBotBase(CommonBotBase):
         """
 
         def decorator(
-            func: InteractionCommandCallback[CogT, MessageCommandInteraction, P]
+            func: InteractionCommandCallback[CogT, MessageCommandInteraction, P],
         ) -> InvokableMessageCommand:
             result = message_command(
                 name=name,
@@ -1262,7 +1262,7 @@ class InteractionBotBase(CommonBotBase):
             message_commands = True
 
         def decorator(
-            func: Callable[[ApplicationCommandInteraction], Any]
+            func: Callable[[ApplicationCommandInteraction], Any],
         ) -> Callable[[ApplicationCommandInteraction], Any]:
             # T was used instead of Check to ensure the type matches on return
             self.add_app_command_check(

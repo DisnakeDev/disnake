@@ -142,8 +142,7 @@ class ActionRow(Generic[UIComponentT]):
     # When unspecified and called empty, default to an ActionRow that takes any kind of component.
 
     @overload
-    def __init__(self: ActionRow[WrappedComponent]) -> None:
-        ...
+    def __init__(self: ActionRow[WrappedComponent]) -> None: ...
 
     # Explicit definitions are needed to make
     # "ActionRow(StringSelect(), TextInput())" and
@@ -151,18 +150,15 @@ class ActionRow(Generic[UIComponentT]):
     # differentiate themselves properly.
 
     @overload
-    def __init__(self: ActionRow[MessageUIComponent], *components: MessageUIComponent) -> None:
-        ...
+    def __init__(self: ActionRow[MessageUIComponent], *components: MessageUIComponent) -> None: ...
 
     @overload
-    def __init__(self: ActionRow[ModalUIComponent], *components: ModalUIComponent) -> None:
-        ...
+    def __init__(self: ActionRow[ModalUIComponent], *components: ModalUIComponent) -> None: ...
 
     # Allow use of "ActionRow[StrictUIComponent]" externally.
 
     @overload
-    def __init__(self: ActionRow[StrictUIComponentT], *components: StrictUIComponentT) -> None:
-        ...
+    def __init__(self: ActionRow[StrictUIComponentT], *components: StrictUIComponentT) -> None: ...
 
     # n.b. this should be `*components: UIComponentT`, but pyright does not like it
     def __init__(self, *components: Union[MessageUIComponent, ModalUIComponent]) -> None:
@@ -725,12 +721,10 @@ class ActionRow(Generic[UIComponentT]):
         del self._children[index]
 
     @overload
-    def __getitem__(self, index: int) -> UIComponentT:
-        ...
+    def __getitem__(self, index: int) -> UIComponentT: ...
 
     @overload
-    def __getitem__(self, index: slice) -> Sequence[UIComponentT]:
-        ...
+    def __getitem__(self, index: slice) -> Sequence[UIComponentT]: ...
 
     def __getitem__(self, index: Union[int, slice]) -> Union[UIComponentT, Sequence[UIComponentT]]:
         return self._children[index]

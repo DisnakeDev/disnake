@@ -52,9 +52,9 @@ jobs:
       uses: pre-commit/action@v3.0.1
 
   docs:
-    # unlike the other workflows, we are using version 20.04 here as
-    # readthedocs uses 20.04 for building our docs, and we want to be explicit
-    runs-on: ubuntu-20.04
+    # unlike the other workflows, we explicitly use the same version as
+    # readthedocs (see .readthedocs.yml) here for consistency
+    runs-on: ubuntu-24.04
     needs: lock-dependencies
     steps:
     - uses: actions/checkout@v4

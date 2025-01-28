@@ -70,7 +70,7 @@ Once PDM is installed, use the following command to initialize a virtual environ
 $ pdm run setup_env
 ```
 
-Other tools used in this project include [black](https://black.readthedocs.io/en/stable/) (formatter), [ruff](https://beta.ruff.rs/docs/) (linter), and [pyright](https://microsoft.github.io/pyright/#/) (type-checker). For the most part, these automatically run on every commit with no additional action required - see below for details.
+Other tools used in this project include [ruff](https://docs.astral.sh/ruff) (formatter and linter), and [pyright](https://microsoft.github.io/pyright/#/) (type-checker). For the most part, these automatically run on every commit with no additional action required - see below for details.
 
 All of the following checks also automatically run for every PR on GitHub, so don't worry if you're not sure whether you missed anything. A PR cannot be merged as long as there are any failing checks.
 

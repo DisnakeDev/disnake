@@ -95,8 +95,7 @@ class RoleSelect(BaseSelect[RoleSelectMenu, "Role", V_co]):
         disabled: bool = False,
         default_values: Optional[Sequence[SelectDefaultValueInputType[Role]]] = None,
         row: Optional[int] = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     def __init__(
@@ -109,8 +108,7 @@ class RoleSelect(BaseSelect[RoleSelectMenu, "Role", V_co]):
         disabled: bool = False,
         default_values: Optional[Sequence[SelectDefaultValueInputType[Role]]] = None,
         row: Optional[int] = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     def __init__(
         self,
@@ -161,15 +159,13 @@ def role_select(
     disabled: bool = False,
     default_values: Optional[Sequence[SelectDefaultValueInputType[Role]]] = None,
     row: Optional[int] = None,
-) -> Callable[[ItemCallbackType[V_co, RoleSelect[V_co]]], DecoratedItem[RoleSelect[V_co]]]:
-    ...
+) -> Callable[[ItemCallbackType[V_co, RoleSelect[V_co]]], DecoratedItem[RoleSelect[V_co]]]: ...
 
 
 @overload
 def role_select(
     cls: Callable[P, S_co], *_: P.args, **kwargs: P.kwargs
-) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
-    ...
+) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]: ...
 
 
 def role_select(
