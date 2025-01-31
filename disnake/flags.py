@@ -2600,7 +2600,16 @@ class AttachmentFlags(BaseFlags):
     if TYPE_CHECKING:
 
         @_generated
-        def __init__(self, *, is_remix: bool = ...) -> None: ...
+        def __init__(
+            self,
+            *,
+            contains_explicit_media: bool = ...,
+            is_animated: bool = ...,
+            is_clip: bool = ...,
+            is_remix: bool = ...,
+            is_spoiler: bool = ...,
+            is_thumbnail: bool = ...,
+        ) -> None: ...
 
     @flag_value
     def is_clip(self):
@@ -3002,6 +3011,13 @@ class EmbedFlags(BaseFlags):
         rather than using this raw value.
     """
 
+    if TYPE_CHECKING:
+
+        @_generated
+        def __init__(
+            self, *, contains_explicit_media: bool = ..., is_content_inventory_entry: bool = ...
+        ) -> None: ...
+
     @flag_value
     def contains_explicit_media(self):
         """:class:`bool`: Returns ``True`` if the embed was flagged as sensitive content."""
@@ -3078,6 +3094,11 @@ class EmbedMediaFlags(BaseFlags):
         The raw value. You should query flags via the properties
         rather than using this raw value.
     """
+
+    if TYPE_CHECKING:
+
+        @_generated
+        def __init__(self, *, is_animated: bool = ...) -> None: ...
 
     @flag_value
     def is_animated(self):
