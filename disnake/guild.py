@@ -179,6 +179,7 @@ class Guild(Hashable):
         The guild's ID.
     owner_id: Optional[:class:`int`]
         The guild owner's ID. Use :attr:`Guild.owner` if you need a :class:`Member` object instead.
+        This may be ``None`` if the guild is :attr:`~Guild.unavailable`.
     unavailable: :class:`bool`
         Whether the guild is unavailable. If this is ``True`` then the
         reliability of other attributes outside of :attr:`Guild.id` is slim and they might
