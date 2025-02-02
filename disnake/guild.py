@@ -177,7 +177,7 @@ class Guild(Hashable):
         The channel that denotes the AFK channel. ``None`` if it doesn't exist.
     id: :class:`int`
         The guild's ID.
-    owner_id: :class:`Optional[int]`
+    owner_id: Optional[:class:`int`]
         The guild owner's ID. Use :attr:`Guild.owner` if you need a :class:`Member` object instead.
     unavailable: :class:`bool`
         Whether the guild is unavailable. If this is ``True`` then the
