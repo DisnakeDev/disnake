@@ -664,7 +664,7 @@ class Embed:
         """
         return cast("List[_EmbedFieldProxy]", [EmbedProxy(d) for d in (self._fields or [])])
 
-    def add_field(self, name: Any, value: Any, *, inline: bool = True) -> Self:
+    def add_field(self, name: Any, value: Any, *, inline: bool = False) -> Self:
         """Adds a field to the embed object.
 
         This function returns the class instance to allow for fluent-style
@@ -693,7 +693,7 @@ class Embed:
 
         return self
 
-    def insert_field_at(self, index: int, name: Any, value: Any, *, inline: bool = True) -> Self:
+    def insert_field_at(self, index: int, name: Any, value: Any, *, inline: bool = False) -> Self:
         """Inserts a field before a specified index to the embed.
 
         This function returns the class instance to allow for fluent-style
@@ -752,7 +752,7 @@ class Embed:
             except IndexError:
                 pass
 
-    def set_field_at(self, index: int, name: Any, value: Any, *, inline: bool = True) -> Self:
+    def set_field_at(self, index: int, name: Any, value: Any, *, inline: bool = False) -> Self:
         """Modifies a field to the embed object.
 
         The index must point to a valid pre-existing field.
