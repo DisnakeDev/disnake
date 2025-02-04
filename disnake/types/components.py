@@ -155,8 +155,8 @@ class UnfurledMediaItem(TypedDict):
 class SectionComponent(_BaseComponent):
     type: Literal[9]
     components: List[TextDisplayComponent]
-    # this currently only supports ThumbnailComponent, others will be added in the future
-    # (the API seemingly also allows buttons, but they don't render yet)
+    # this currently only supports ThumbnailComponent and ButtonComponent,
+    # others will be added in the future
     accessory: Component
 
 
