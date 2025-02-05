@@ -1148,6 +1148,9 @@ class InteractionResponseType(Enum):
     See also :meth:`InteractionResponse.require_premium`.
 
     .. versionadded:: 2.10
+
+    .. deprecated:: 2.11
+        Use premium buttons (:class:`ui.Button` with :attr:`~ui.Button.sku_id`) instead.
     """
 
 
@@ -1226,6 +1229,11 @@ class ButtonStyle(Enum):
     """Represents a red button for a dangerous action."""
     link = 5
     """Represents a link button."""
+    premium = 6
+    """Represents a premium/SKU button.
+
+    .. versionadded:: 2.11
+    """
 
     # Aliases
     blurple = 1
@@ -1240,6 +1248,11 @@ class ButtonStyle(Enum):
     """An alias for :attr:`danger`."""
     url = 5
     """An alias for :attr:`link`."""
+    sku = 6
+    """An alias for :attr:`premium`.
+
+    .. versionadded:: 2.11
+    """
 
     def __int__(self) -> int:
         return self.value

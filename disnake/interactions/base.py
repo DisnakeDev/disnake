@@ -1483,6 +1483,7 @@ class InteractionResponse:
         if modal is not None:
             parent._state.store_modal(parent.author.id, modal)
 
+    @utils.deprecated("premium buttons")
     async def require_premium(self) -> None:
         """|coro|
 
@@ -1491,6 +1492,9 @@ class InteractionResponse:
         Only available for applications with monetization enabled.
 
         .. versionadded:: 2.10
+
+        .. deprecated:: 2.11
+            Use premium buttons (:class:`ui.Button` with :attr:`~ui.Button.sku_id`) instead.
 
         Example
         -------
