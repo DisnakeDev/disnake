@@ -73,8 +73,7 @@ def test_copy_doc() -> None:
         ...
 
     @utils.copy_doc(func)
-    def func2(*args: Any, **kwargs: Any) -> Any:
-        ...
+    def func2(*args: Any, **kwargs: Any) -> Any: ...
 
     assert func2.__doc__ == func.__doc__
     assert inspect.signature(func) == inspect.signature(func2)
@@ -259,25 +258,25 @@ def test_maybe_cast() -> None:
 @pytest.mark.parametrize(
     ("data", "expected_mime", "expected_ext"),
     [
-        (b"\x89\x50\x4E\x47\x0D\x0A\x1A\x0A", "image/png", ".png"),
-        (b"\xFF\xD8\xFFxxxJFIF", "image/jpeg", ".jpg"),
-        (b"\xFF\xD8\xFFxxxExif", "image/jpeg", ".jpg"),
-        (b"\xFF\xD8\xFFxxxxxxxxxxxx", "image/jpeg", ".jpg"),
+        (b"\x89\x50\x4e\x47\x0d\x0a\x1a\x0a", "image/png", ".png"),
+        (b"\xff\xd8\xffxxxJFIF", "image/jpeg", ".jpg"),
+        (b"\xff\xd8\xffxxxExif", "image/jpeg", ".jpg"),
+        (b"\xff\xd8\xffxxxxxxxxxxxx", "image/jpeg", ".jpg"),
         (b"xxxxxxJFIF", "image/jpeg", ".jpg"),
         (b"\x47\x49\x46\x38\x37\x61", "image/gif", ".gif"),
         (b"\x47\x49\x46\x38\x39\x61", "image/gif", ".gif"),
         (b"RIFFxxxxWEBP", "image/webp", ".webp"),
         (b"ID3", "audio/mpeg", ".mp3"),
-        (b"\xFF\xF3", "audio/mpeg", ".mp3"),
+        (b"\xff\xf3", "audio/mpeg", ".mp3"),
         (b"OggS", "audio/ogg", ".ogg"),
     ],
 )
 def test_mime_type_valid(data, expected_mime, expected_ext) -> None:
-    for d in (data, data + b"\xFF"):
+    for d in (data, data + b"\xff"):
         assert utils._get_mime_type_for_data(d) == expected_mime
         assert utils._get_extension_for_data(d) == expected_ext
 
-    prefixed = b"\xFF" + data
+    prefixed = b"\xff" + data
     with pytest.raises(ValueError, match=r"Unsupported file type provided"):
         utils._get_mime_type_for_data(prefixed)
     assert utils._get_extension_for_data(prefixed) is None
@@ -286,7 +285,7 @@ def test_mime_type_valid(data, expected_mime, expected_ext) -> None:
 @pytest.mark.parametrize(
     "data",
     [
-        b"\x89\x50\x4E\x47\x0D\x0A\x1A\xFF",  # invalid png end
+        b"\x89\x50\x4e\x47\x0d\x0a\x1a\xff",  # invalid png end
         b"\x47\x49\x46\x38\x38\x61",  # invalid gif version
         b"RIFFxxxxAAAA",
         b"AAAAxxxxWEBP",
@@ -607,8 +606,7 @@ def test_escape_mentions(text: str, expected) -> None:
     ],
 )
 def test_parse_docstring_desc(docstring: Optional[str], expected) -> None:
-    def f() -> None:
-        ...
+    def f() -> None: ...
 
     f.__doc__ = docstring
     assert utils.parse_docstring(f) == {
@@ -667,8 +665,7 @@ def test_parse_docstring_desc(docstring: Optional[str], expected) -> None:
     ],
 )
 def test_parse_docstring_param(docstring: str, expected) -> None:
-    def f() -> None:
-        ...
+    def f() -> None: ...
 
     f.__doc__ = docstring
     expected = {
@@ -970,8 +967,7 @@ def test_humanize_list(values, expected) -> None:
 
 # used for `test_signature_has_self_param`
 def _toplevel():
-    def inner() -> None:
-        ...
+    def inner() -> None: ...
 
     return inner
 
@@ -987,31 +983,26 @@ def decorator(f):
 # used for `test_signature_has_self_param`
 class _Clazz:
     def func(self):
-        def inner() -> None:
-            ...
+        def inner() -> None: ...
 
         return inner
 
     @classmethod
-    def cmethod(cls) -> None:
-        ...
+    def cmethod(cls) -> None: ...
 
     @staticmethod
-    def smethod() -> None:
-        ...
+    def smethod() -> None: ...
 
     class Nested:
         def func(self):
-            def inner() -> None:
-                ...
+            def inner() -> None: ...
 
             return inner
 
     rebind = _toplevel
 
     @decorator
-    def decorated(self) -> None:
-        ...
+    def decorated(self) -> None: ...
 
     _lambda = lambda: None
 

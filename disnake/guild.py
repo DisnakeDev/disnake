@@ -374,9 +374,9 @@ class Guild(Hashable):
     )
 
     _PREMIUM_GUILD_LIMITS: ClassVar[Dict[Optional[int], _GuildLimit]] = {
-        None: _GuildLimit(emoji=50, stickers=5, bitrate=96e3, filesize=26214400, sounds=8),
-        0: _GuildLimit(emoji=50, stickers=5, bitrate=96e3, filesize=26214400, sounds=8),
-        1: _GuildLimit(emoji=100, stickers=15, bitrate=128e3, filesize=26214400, sounds=24),
+        None: _GuildLimit(emoji=50, stickers=5, bitrate=96e3, filesize=10485760, sounds=8),
+        0: _GuildLimit(emoji=50, stickers=5, bitrate=96e3, filesize=10485760, sounds=8),
+        1: _GuildLimit(emoji=100, stickers=15, bitrate=128e3, filesize=10485760, sounds=24),
         2: _GuildLimit(emoji=150, stickers=30, bitrate=256e3, filesize=52428800, sounds=36),
         3: _GuildLimit(emoji=250, stickers=60, bitrate=384e3, filesize=104857600, sounds=48),
     }
@@ -624,7 +624,9 @@ class Guild(Hashable):
         self._large: Optional[bool] = None if member_count is None else self._member_count >= 250
 
         self.owner_id: Optional[int] = utils._get_as_snowflake(guild, "owner_id")
-        self.afk_channel: Optional[VocalGuildChannel] = self.get_channel(utils._get_as_snowflake(guild, "afk_channel_id"))  # type: ignore
+        self.afk_channel: Optional[VocalGuildChannel] = self.get_channel(
+            utils._get_as_snowflake(guild, "afk_channel_id")  # type: ignore
+        )
 
         for obj in guild.get("voice_states", []):
             self._update_voice_state(obj, utils._get_as_snowflake(obj, "channel_id"))
@@ -2496,8 +2498,7 @@ class Guild(Hashable):
         description: str = ...,
         image: AssetBytes = ...,
         reason: Optional[str] = ...,
-    ) -> GuildScheduledEvent:
-        ...
+    ) -> GuildScheduledEvent: ...
 
     @overload
     async def create_scheduled_event(
@@ -2515,8 +2516,7 @@ class Guild(Hashable):
         description: str = ...,
         image: AssetBytes = ...,
         reason: Optional[str] = ...,
-    ) -> GuildScheduledEvent:
-        ...
+    ) -> GuildScheduledEvent: ...
 
     @overload
     async def create_scheduled_event(
@@ -2532,8 +2532,7 @@ class Guild(Hashable):
         description: str = ...,
         image: AssetBytes = ...,
         reason: Optional[str] = ...,
-    ) -> GuildScheduledEvent:
-        ...
+    ) -> GuildScheduledEvent: ...
 
     async def create_scheduled_event(
         self,
@@ -3662,12 +3661,10 @@ class Guild(Hashable):
     @overload
     async def get_or_fetch_member(
         self, member_id: int, *, strict: Literal[False] = ...
-    ) -> Optional[Member]:
-        ...
+    ) -> Optional[Member]: ...
 
     @overload
-    async def get_or_fetch_member(self, member_id: int, *, strict: Literal[True]) -> Member:
-        ...
+    async def get_or_fetch_member(self, member_id: int, *, strict: Literal[True]) -> Member: ...
 
     async def get_or_fetch_member(
         self, member_id: int, *, strict: bool = False
@@ -3722,8 +3719,7 @@ class Guild(Hashable):
         icon: AssetBytes = ...,
         emoji: str = ...,
         mentionable: bool = ...,
-    ) -> Role:
-        ...
+    ) -> Role: ...
 
     @overload
     async def create_role(
@@ -3737,8 +3733,7 @@ class Guild(Hashable):
         icon: AssetBytes = ...,
         emoji: str = ...,
         mentionable: bool = ...,
-    ) -> Role:
-        ...
+    ) -> Role: ...
 
     async def create_role(
         self,
@@ -3944,8 +3939,7 @@ class Guild(Hashable):
         *,
         clean_history_duration: Union[int, datetime.timedelta] = 86400,
         reason: Optional[str] = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     async def ban(
@@ -3954,8 +3948,7 @@ class Guild(Hashable):
         *,
         delete_message_days: Literal[0, 1, 2, 3, 4, 5, 6, 7] = 1,
         reason: Optional[str] = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     async def ban(
         self,
@@ -4800,8 +4793,7 @@ class Guild(Hashable):
         *,
         duration: Optional[Union[float, datetime.timedelta]],
         reason: Optional[str] = None,
-    ) -> Member:
-        ...
+    ) -> Member: ...
 
     @overload
     async def timeout(
@@ -4810,8 +4802,7 @@ class Guild(Hashable):
         *,
         until: Optional[datetime.datetime],
         reason: Optional[str] = None,
-    ) -> Member:
-        ...
+    ) -> Member: ...
 
     async def timeout(
         self,
