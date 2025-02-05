@@ -677,12 +677,10 @@ class Client:
     @overload
     async def get_or_fetch_user(
         self, user_id: int, *, strict: Literal[False] = ...
-    ) -> Optional[User]:
-        ...
+    ) -> Optional[User]: ...
 
     @overload
-    async def get_or_fetch_user(self, user_id: int, *, strict: Literal[True]) -> User:
-        ...
+    async def get_or_fetch_user(self, user_id: int, *, strict: Literal[True]) -> User: ...
 
     async def get_or_fetch_user(self, user_id: int, *, strict: bool = False) -> Optional[User]:
         """|coro|
@@ -2738,22 +2736,20 @@ class Client:
         return await self._connection.fetch_global_command(command_id)
 
     @overload
-    async def create_global_command(self, application_command: SlashCommand) -> APISlashCommand:
-        ...
+    async def create_global_command(self, application_command: SlashCommand) -> APISlashCommand: ...
 
     @overload
-    async def create_global_command(self, application_command: UserCommand) -> APIUserCommand:
-        ...
+    async def create_global_command(self, application_command: UserCommand) -> APIUserCommand: ...
 
     @overload
-    async def create_global_command(self, application_command: MessageCommand) -> APIMessageCommand:
-        ...
+    async def create_global_command(
+        self, application_command: MessageCommand
+    ) -> APIMessageCommand: ...
 
     @overload
     async def create_global_command(
         self, application_command: ApplicationCommand
-    ) -> APIApplicationCommand:
-        ...
+    ) -> APIApplicationCommand: ...
 
     async def create_global_command(
         self, application_command: ApplicationCommand
@@ -2780,26 +2776,22 @@ class Client:
     @overload
     async def edit_global_command(
         self, command_id: int, new_command: SlashCommand
-    ) -> APISlashCommand:
-        ...
+    ) -> APISlashCommand: ...
 
     @overload
     async def edit_global_command(
         self, command_id: int, new_command: UserCommand
-    ) -> APIUserCommand:
-        ...
+    ) -> APIUserCommand: ...
 
     @overload
     async def edit_global_command(
         self, command_id: int, new_command: MessageCommand
-    ) -> APIMessageCommand:
-        ...
+    ) -> APIMessageCommand: ...
 
     @overload
     async def edit_global_command(
         self, command_id: int, new_command: ApplicationCommand
-    ) -> APIApplicationCommand:
-        ...
+    ) -> APIApplicationCommand: ...
 
     async def edit_global_command(
         self, command_id: int, new_command: ApplicationCommand
@@ -2918,26 +2910,22 @@ class Client:
     @overload
     async def create_guild_command(
         self, guild_id: int, application_command: SlashCommand
-    ) -> APISlashCommand:
-        ...
+    ) -> APISlashCommand: ...
 
     @overload
     async def create_guild_command(
         self, guild_id: int, application_command: UserCommand
-    ) -> APIUserCommand:
-        ...
+    ) -> APIUserCommand: ...
 
     @overload
     async def create_guild_command(
         self, guild_id: int, application_command: MessageCommand
-    ) -> APIMessageCommand:
-        ...
+    ) -> APIMessageCommand: ...
 
     @overload
     async def create_guild_command(
         self, guild_id: int, application_command: ApplicationCommand
-    ) -> APIApplicationCommand:
-        ...
+    ) -> APIApplicationCommand: ...
 
     async def create_guild_command(
         self, guild_id: int, application_command: ApplicationCommand
@@ -2966,26 +2954,22 @@ class Client:
     @overload
     async def edit_guild_command(
         self, guild_id: int, command_id: int, new_command: SlashCommand
-    ) -> APISlashCommand:
-        ...
+    ) -> APISlashCommand: ...
 
     @overload
     async def edit_guild_command(
         self, guild_id: int, command_id: int, new_command: UserCommand
-    ) -> APIUserCommand:
-        ...
+    ) -> APIUserCommand: ...
 
     @overload
     async def edit_guild_command(
         self, guild_id: int, command_id: int, new_command: MessageCommand
-    ) -> APIMessageCommand:
-        ...
+    ) -> APIMessageCommand: ...
 
     @overload
     async def edit_guild_command(
         self, guild_id: int, command_id: int, new_command: ApplicationCommand
-    ) -> APIApplicationCommand:
-        ...
+    ) -> APIApplicationCommand: ...
 
     async def edit_guild_command(
         self, guild_id: int, command_id: int, new_command: ApplicationCommand
@@ -3297,6 +3281,10 @@ class Client:
         """|coro|
 
         Creates a new test :class:`.Entitlement` for the given user or guild, with no expiry.
+
+        .. note::
+            This is only meant to be used with subscription SKUs. To test one-time purchases,
+            use Application Test Mode.
 
         Parameters
         ----------

@@ -753,16 +753,14 @@ def default_member_permissions(
     view_channel: bool = ...,
     view_creator_monetization_analytics: bool = ...,
     view_guild_insights: bool = ...,
-) -> Callable[[T], T]:
-    ...
+) -> Callable[[T], T]: ...
 
 
 @overload
 @_generated
 def default_member_permissions(
     value: int = 0,
-) -> Callable[[T], T]:
-    ...
+) -> Callable[[T], T]: ...
 
 
 @_overload_with_permissions

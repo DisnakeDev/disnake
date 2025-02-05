@@ -100,13 +100,11 @@ class CommandSyncFlags(BaseFlags):
         sync_global_commands: bool = ...,
         sync_guild_commands: bool = ...,
         sync_on_cog_actions: bool = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     @_generated
-    def __init__(self: NoReturn) -> None:
-        ...
+    def __init__(self: NoReturn) -> None: ...
 
     def __init__(self, **kwargs: bool) -> None:
         self.value = all_flags_value(self.VALID_FLAGS)
