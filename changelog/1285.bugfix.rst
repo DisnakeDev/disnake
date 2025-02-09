@@ -1,0 +1,1 @@
+|commands| Fix extracting localization key for :meth:`~ext.commands.InvokableSlashCommand.sub_command_group`\s from docstring, to be more consistent with top-level slash commands and sub commands.
