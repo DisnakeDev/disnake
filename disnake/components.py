@@ -977,7 +977,11 @@ class Container(Component):
         "components",
     )
 
-    __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+    __repr_info__: ClassVar[Tuple[str, ...]] = tuple(
+        # no comment. it is what it is.
+        ("accent_colour" if s == "_accent_colour" else s)
+        for s in __slots__
+    )
 
     def __init__(self, data: ContainerComponentPayload) -> None:
         self.type: Literal[ComponentType.container] = ComponentType.container
