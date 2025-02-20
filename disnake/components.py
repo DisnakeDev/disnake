@@ -18,11 +18,13 @@ from typing import (
     cast,
 )
 
+from .colour import Colour
 from .enums import (
     ButtonStyle,
     ChannelType,
     ComponentType,
     SelectDefaultValueType,
+    SeparatorSpacingSize,
     TextInputStyle,
     try_enum,
 )
@@ -40,12 +42,20 @@ if TYPE_CHECKING:
         ButtonComponent as ButtonComponentPayload,
         ChannelSelectMenu as ChannelSelectMenuPayload,
         Component as ComponentPayload,
+        ContainerComponent as ContainerComponentPayload,
+        FileComponent as FileComponentPayload,
+        MediaGalleryComponent as MediaGalleryComponentPayload,
+        MediaGalleryItem as MediaGalleryItemPayload,
         MentionableSelectMenu as MentionableSelectMenuPayload,
         RoleSelectMenu as RoleSelectMenuPayload,
+        SectionComponent as SectionComponentPayload,
         SelectDefaultValue as SelectDefaultValuePayload,
         SelectOption as SelectOptionPayload,
+        SeparatorComponent as SeparatorComponentPayload,
         StringSelectMenu as StringSelectMenuPayload,
+        TextDisplayComponent as TextDisplayComponentPayload,
         TextInput as TextInputPayload,
+        ThumbnailComponent as ThumbnailComponentPayload,
         UserSelectMenu as UserSelectMenuPayload,
     )
 
@@ -63,6 +73,14 @@ __all__ = (
     "SelectOption",
     "SelectDefaultValue",
     "TextInput",
+    "Section",
+    "TextDisplay",
+    "Thumbnail",
+    "MediaGallery",
+    "MediaGalleryItem",
+    "File",
+    "Separator",
+    "Container",
 )
 
 C = TypeVar("C", bound="Component")
@@ -82,6 +100,8 @@ SelectMenuType = Literal[
     ComponentType.mentionable_select,
     ComponentType.channel_select,
 ]
+
+# TODO: update type aliases for cv2
 
 MessageComponent = Union["Button", "AnySelectMenu"]
 ModalComponent: TypeAlias = "TextInput"
@@ -781,6 +801,211 @@ class TextInput(Component):
             payload["max_length"] = self.max_length
 
         return payload
+
+
+class Section(Component):
+    """TODO"""
+
+    __slots__: Tuple[str, ...] = ("accessory", "components")
+
+    __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+
+    # TODO: consider making typehints for `accessory` and `components` more accurate, while keeping runtime behavior generic
+    def __init__(self, data: SectionComponentPayload) -> None:
+        self.type: Literal[ComponentType.section] = ComponentType.section
+        self.accessory: Component = _component_factory(data["accessory"])
+        # TODO: reconsider `components` vs `children`
+        self.components: List[Component] = [
+            _component_factory(d) for d in data.get("components", [])
+        ]
+
+    def to_dict(self) -> SectionComponentPayload:
+        return {
+            "type": self.type.value,
+            "accessory": self.accessory.to_dict(),  # type: ignore  # FIXME: see comment above
+            "components": [child.to_dict() for child in self.components],
+        }
+
+
+class TextDisplay(Component):
+    """TODO"""
+
+    __slots__: Tuple[str, ...] = ("content",)
+
+    __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+
+    def __init__(self, data: TextDisplayComponentPayload) -> None:
+        self.type: Literal[ComponentType.text_display] = ComponentType.text_display
+        self.content: str = data["content"]
+
+    def to_dict(self) -> TextDisplayComponentPayload:
+        return {
+            "type": self.type.value,
+            "content": self.content,
+        }
+
+
+class Thumbnail(Component):
+    """TODO"""
+
+    __slots__: Tuple[str, ...] = (
+        "media",
+        "description",
+        "spoiler",
+    )
+
+    __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+
+    def __init__(self, data: ThumbnailComponentPayload) -> None:
+        self.type: Literal[ComponentType.thumbnail] = ComponentType.thumbnail
+        self.media: Any = data["media"]  # TODO: UnfurledMediaItem
+        self.description: Optional[str] = data.get("description")
+        self.spoiler: bool = data.get("spoiler", False)
+
+    def to_dict(self) -> ThumbnailComponentPayload:
+        payload: ThumbnailComponentPayload = {
+            "type": self.type.value,
+            "media": self.media,
+            "spoiler": self.spoiler,
+        }
+
+        if self.description:
+            payload["description"] = self.description
+
+        return payload
+
+
+class MediaGallery(Component):
+    """TODO"""
+
+    __slots__: Tuple[str, ...] = ("items",)
+
+    __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+
+    def __init__(self, data: MediaGalleryComponentPayload) -> None:
+        self.type: Literal[ComponentType.media_gallery] = ComponentType.media_gallery
+        # XXX: `items` vs `children` etc.?
+        self.items: List[MediaGalleryItem] = [MediaGalleryItem(i) for i in data["items"]]
+
+    def to_dict(self) -> MediaGalleryComponentPayload:
+        return {
+            "type": self.type.value,
+            "items": [i.to_dict() for i in self.items],
+        }
+
+
+class MediaGalleryItem:
+    """TODO"""
+
+    __slots__: Tuple[str, ...] = (
+        "media",
+        "description",
+        "spoiler",
+    )
+
+    # XXX: should this be user-instantiable?
+    def __init__(self, data: MediaGalleryItemPayload) -> None:
+        self.media: Any = data["media"]  # TODO: UnfurledMediaItem
+        self.description: Optional[str] = data.get("description")
+        self.spoiler: bool = data.get("spoiler", False)
+
+    def to_dict(self) -> MediaGalleryItemPayload:
+        payload: MediaGalleryItemPayload = {
+            "media": self.media,
+            "spoiler": self.spoiler,
+        }
+
+        if self.description:
+            payload["description"] = self.description
+
+        return payload
+
+    def __repr__(self) -> str:
+        return f"<MediaGalleryItem media={self.media!r} description={self.description!r}>"
+
+
+class File(Component):
+    """TODO"""
+
+    __slots__: Tuple[str, ...] = ("file", "spoiler")
+
+    __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+
+    def __init__(self, data: FileComponentPayload) -> None:
+        self.type: Literal[ComponentType.file] = ComponentType.file
+        self.file: Any = data["file"]  # TODO: UnfurledMediaItem
+        self.spoiler: bool = data.get("spoiler", False)
+
+    def to_dict(self) -> FileComponentPayload:
+        return {
+            "type": self.type.value,
+            "file": self.file,
+            "spoiler": self.spoiler,
+        }
+
+
+class Separator(Component):
+    """TODO"""
+
+    __slots__: Tuple[str, ...] = ("divider", "spacing")
+
+    __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+
+    def __init__(self, data: SeparatorComponentPayload) -> None:
+        self.type: Literal[ComponentType.separator] = ComponentType.separator
+        self.divider: bool = data.get("divider", True)
+        self.spacing: SeparatorSpacingSize = try_enum(SeparatorSpacingSize, data.get("spacing", 1))
+
+    def to_dict(self) -> SeparatorComponentPayload:
+        return {
+            "type": self.type.value,
+            "divider": self.divider,
+            "spacing": self.spacing.value,
+        }
+
+
+class Container(Component):
+    """TODO"""
+
+    __slots__: Tuple[str, ...] = (
+        "_accent_colour",
+        "spoiler",
+        "components",
+    )
+
+    __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+
+    def __init__(self, data: ContainerComponentPayload) -> None:
+        self.type: Literal[ComponentType.container] = ComponentType.container
+        self._accent_colour: Optional[int] = data.get("accent_color")
+        self.spoiler: bool = data.get("spoiler", False)
+        # TODO: once again, reconsider `components` vs `children`
+        # TODO: stricter types
+        self.components: List[Component] = [
+            _component_factory(d) for d in data.get("components", [])
+        ]
+
+    def to_dict(self) -> ContainerComponentPayload:
+        payload: ContainerComponentPayload = {
+            "type": self.type.value,
+            "spoiler": self.spoiler,
+            "components": [child.to_dict() for child in self.components],  # type: ignore  # FIXME: see Section component
+        }
+
+        if self._accent_colour is not None:
+            payload["accent_color"] = self._accent_colour
+
+        return payload
+
+    @property
+    def accent_colour(self) -> Optional[Colour]:
+        """TODO"""
+        return Colour(self._accent_colour) if self._accent_colour is not None else None
+
+    @property
+    def accent_color(self) -> Optional[Colour]:
+        """TODO"""
+        return self.accent_colour
 
 
 def _component_factory(data: ComponentPayload, *, type: Type[C] = Component) -> C:
