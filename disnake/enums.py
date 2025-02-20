@@ -76,6 +76,7 @@ __all__ = (
     "PollLayoutType",
     "VoiceChannelEffectAnimationType",
     "MessageReferenceType",
+    "SeparatorSpacingSize",
 )
 
 
@@ -2353,6 +2354,18 @@ class MessageReferenceType(Enum):
     """A standard message reference used in message replies."""
     forward = 1
     """Reference used to point to a message at a point in time (forward)."""
+
+
+class SeparatorSpacingSize(Enum):
+    """Specifies the size of a :class:`Separator` component.
+
+    .. versionadded:: 2.11
+    """
+
+    small = 1
+    """TODO"""
+    large = 2
+    """TODO"""
 
 
 T = TypeVar("T")

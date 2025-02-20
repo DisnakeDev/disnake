@@ -13,7 +13,7 @@ from .snowflake import Snowflake
 ComponentType = Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 17]
 ButtonStyle = Literal[1, 2, 3, 4, 5, 6]
 TextInputStyle = Literal[1, 2]
-SeparatorSpacing = Literal[1, 2]
+SeparatorSpacingSize = Literal[1, 2]
 
 SelectDefaultValueType = Literal["user", "role", "channel"]
 
@@ -195,7 +195,7 @@ class FileComponent(_BaseComponent):
 class SeparatorComponent(_BaseComponent):
     type: Literal[14]
     divider: NotRequired[bool]
-    spacing: NotRequired[SeparatorSpacing]
+    spacing: NotRequired[SeparatorSpacingSize]
 
 
 class ContainerComponent(_BaseComponent):
