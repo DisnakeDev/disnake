@@ -120,6 +120,9 @@ class Component:
     - subtypes of :class:`BaseSelectMenu` (:class:`ChannelSelectMenu`, :class:`MentionableSelectMenu`, :class:`RoleSelectMenu`, :class:`StringSelectMenu`, :class:`UserSelectMenu`)
     - :class:`TextInput`
 
+    ..
+        TODO: add cv2 components to list
+
     This class is abstract and cannot be instantiated.
 
     .. versionadded:: 2.0
@@ -1009,6 +1012,7 @@ class Container(Component):
         return self.accent_colour
 
 
+# TODO: this should use a static mapping
 def _component_factory(data: ComponentPayload, *, type: Type[C] = Component) -> C:
     # NOTE: due to speed, this method does not use the ComponentType enum
     #       as this runs every single time a component is received from the api
@@ -1030,6 +1034,20 @@ def _component_factory(data: ComponentPayload, *, type: Type[C] = Component) -> 
         return MentionableSelectMenu(data)  # type: ignore
     elif component_type == 8:
         return ChannelSelectMenu(data)  # type: ignore
+    elif component_type == 9:
+        return Section(data)  # type: ignore
+    elif component_type == 10:
+        return TextDisplay(data)  # type: ignore
+    elif component_type == 11:
+        return Thumbnail(data)  # type: ignore
+    elif component_type == 12:
+        return MediaGallery(data)  # type: ignore
+    elif component_type == 13:
+        return FileComponent(data)  # type: ignore
+    elif component_type == 14:
+        return Separator(data)  # type: ignore
+    elif component_type == 17:
+        return Container(data)  # type: ignore
     else:
         assert_never(component_type)
         as_enum = try_enum(ComponentType, component_type)
