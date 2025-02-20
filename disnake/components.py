@@ -78,7 +78,7 @@ __all__ = (
     "Thumbnail",
     "MediaGallery",
     "MediaGalleryItem",
-    "File",
+    "FileComponent",
     "Separator",
     "Container",
 )
@@ -924,7 +924,8 @@ class MediaGalleryItem:
         return f"<MediaGalleryItem media={self.media!r} description={self.description!r}>"
 
 
-class File(Component):
+# TODO: temporary name to avoid shadowing `disnake.file.File`
+class FileComponent(Component):
     """TODO"""
 
     __slots__: Tuple[str, ...] = ("file", "spoiler")
