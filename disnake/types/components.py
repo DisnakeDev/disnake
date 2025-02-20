@@ -152,9 +152,11 @@ class UnfurledMediaItem(TypedDict):
 
 
 # XXX: drop `Component` suffix? `ButtonComponent` also uses it, selects don't.
+# TODO: tighten component typings here, plain buttons and such are impossible in `components` or `accessory`
 class SectionComponent(_BaseComponent):
     type: Literal[9]
-    components: List[TextDisplayComponent]
+    # note: this will currently always be TextDisplayComponent; may or may not be expanded to more types in the future
+    components: List[Component]
     # this currently only supports ThumbnailComponent and ButtonComponent,
     # others will be added in the future
     accessory: Component
