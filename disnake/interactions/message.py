@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Union
 
-from ..components import MessageComponent
+from ..components import ActionRowMessageComponent
 from ..enums import ComponentType, try_enum
 from ..message import Message
 from ..utils import cached_slot_property
@@ -166,7 +166,7 @@ class MessageInteraction(Interaction[ClientT]):
         return values
 
     @cached_slot_property("_cs_component")
-    def component(self) -> MessageComponent:
+    def component(self) -> ActionRowMessageComponent:
         """Union[:class:`Button`, :class:`BaseSelectMenu`]: The component the user interacted with"""
         for action_row in self.message.components:
             for component in action_row.children:

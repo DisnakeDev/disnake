@@ -21,10 +21,10 @@ from typing import (
 
 from ..components import (
     ActionRow as ActionRowComponent,
+    ActionRowChildComponent,
     Button as ButtonComponent,
     ChannelSelectMenu as ChannelSelectComponent,
     MentionableSelectMenu as MentionableSelectComponent,
-    NestedComponent,
     RoleSelectMenu as RoleSelectComponent,
     StringSelectMenu as StringSelectComponent,
     UserSelectMenu as UserSelectComponent,
@@ -715,7 +715,7 @@ class ActionRow(Generic[UIComponentT]):
         return component
 
     @property
-    def _underlying(self) -> ActionRowComponent[NestedComponent]:
+    def _underlying(self) -> ActionRowComponent[ActionRowChildComponent]:
         return ActionRowComponent._raw_construct(
             type=self.type,
             children=[comp._underlying for comp in self._children],

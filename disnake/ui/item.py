@@ -26,7 +26,7 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from ..client import Client
-    from ..components import NestedComponent
+    from ..components import ActionRowChildComponent
     from ..enums import ComponentType
     from ..interactions import MessageInteraction
     from ..types.components import Component as ComponentPayload
@@ -56,7 +56,7 @@ class WrappedComponent(ABC):
 
     @property
     @abstractmethod
-    def _underlying(self) -> NestedComponent: ...
+    def _underlying(self) -> ActionRowChildComponent: ...
 
     @property
     @abstractmethod
@@ -108,14 +108,14 @@ class Item(WrappedComponent, Generic[V_co]):
         # only called upon edit and we're mainly interested during initial creation time.
         self._provided_custom_id: bool = False
 
-    def refresh_component(self, component: NestedComponent) -> None:
+    def refresh_component(self, component: ActionRowChildComponent) -> None:
         return None
 
     def refresh_state(self, interaction: MessageInteraction) -> None:
         return None
 
     @classmethod
-    def from_component(cls, component: NestedComponent) -> Self:
+    def from_component(cls, component: ActionRowChildComponent) -> Self:
         return cls()
 
     def is_dispatchable(self) -> bool:

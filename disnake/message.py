@@ -24,7 +24,7 @@ from typing import (
 
 from . import utils
 from .channel import PartialMessageable
-from .components import ActionRow, MessageComponent, _component_factory
+from .components import ActionRow, ActionRowMessageComponent, _component_factory
 from .embeds import Embed
 from .emoji import Emoji
 from .enums import (
@@ -1185,8 +1185,8 @@ class Message(Hashable):
         self.stickers: List[StickerItem] = [
             StickerItem(data=d, state=state) for d in data.get("sticker_items", [])
         ]
-        self.components: List[ActionRow[MessageComponent]] = [
-            _component_factory(d, type=ActionRow[MessageComponent])
+        self.components: List[ActionRow[ActionRowMessageComponent]] = [
+            _component_factory(d, type=ActionRow[ActionRowMessageComponent])
             for d in data.get("components", [])
         ]
 
@@ -1435,7 +1435,7 @@ class Message(Hashable):
 
     def _handle_components(self, components: List[ComponentPayload]) -> None:
         self.components = [
-            _component_factory(d, type=ActionRow[MessageComponent]) for d in components
+            _component_factory(d, type=ActionRow[ActionRowMessageComponent]) for d in components
         ]
 
     def _rebind_cached_references(self, new_guild: Guild, new_channel: GuildMessageable) -> None:
@@ -2930,7 +2930,7 @@ class ForwardedMessage:
             StickerItem(data=d, state=state) for d in data.get("sticker_items", [])
         ]
         self.components = [
-            _component_factory(d, type=ActionRow[MessageComponent])
+            _component_factory(d, type=ActionRow[ActionRowMessageComponent])
             for d in data.get("components", [])
         ]
         self.guild_id = guild_id

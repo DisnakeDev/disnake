@@ -37,7 +37,7 @@ Component = Union[
 
 class _BaseComponent(TypedDict):
     # type: ComponentType  # FIXME: current version of pyright complains about overriding types, latest might be fine
-    # TODO: always present in responses?
+    # TODO: always present in responses
     id: NotRequired[int]  # NOTE: not implemented (yet?)
 
 
@@ -151,14 +151,12 @@ class UnfurledMediaItem(TypedDict):
     url: str
 
 
-# XXX: drop `Component` suffix? `ButtonComponent` also uses it, selects don't.
-# TODO: tighten component typings here, plain buttons and such are impossible in `components` or `accessory`
+# TODO: tighten component typings here, plain buttons and such are impossible in `components`
 class SectionComponent(_BaseComponent):
     type: Literal[9]
-    # note: this will currently always be TextDisplayComponent; may or may not be expanded to more types in the future
+    # note: currently always TextDisplayComponent, but don't hardcode assumptions
     components: List[Component]
-    # this currently only supports ThumbnailComponent and ButtonComponent,
-    # others will be added in the future
+    # note: currently only supports ThumbnailComponent and ButtonComponent, same as above
     accessory: Component
 
 
@@ -167,7 +165,7 @@ class TextDisplayComponent(_BaseComponent):
     content: str
 
 
-# note, can't be used at top level, appears to be exclusively for `SectionComponent.accessory`?
+# note, can't be used at top level, this is exclusively for use in `SectionComponent.accessory`
 class ThumbnailComponent(_BaseComponent):
     type: Literal[11]
     media: UnfurledMediaItem

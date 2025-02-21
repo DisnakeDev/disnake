@@ -83,8 +83,6 @@ __all__ = (
     "Container",
 )
 
-C = TypeVar("C", bound="Component")
-
 AnySelectMenu = Union[
     "StringSelectMenu",
     "UserSelectMenu",
@@ -103,11 +101,11 @@ SelectMenuType = Literal[
 
 # TODO: update type aliases for cv2
 
-MessageComponent = Union["Button", "AnySelectMenu"]
-ModalComponent: TypeAlias = "TextInput"
+ActionRowMessageComponent = Union["Button", "AnySelectMenu"]
+ActionRowModalComponent: TypeAlias = "TextInput"
 
-NestedComponent = Union[MessageComponent, ModalComponent]
-ComponentT = TypeVar("ComponentT", bound=NestedComponent)
+ActionRowChildComponent = Union[ActionRowMessageComponent, ActionRowModalComponent]
+ActionRowChildComponentT = TypeVar("ActionRowChildComponentT", bound=ActionRowChildComponent)
 
 
 class Component:
@@ -158,7 +156,7 @@ class Component:
         raise NotImplementedError
 
 
-class ActionRow(Component, Generic[ComponentT]):
+class ActionRow(Component, Generic[ActionRowChildComponentT]):
     """Represents an action row.
 
     This is a component that holds up to 5 children components in a row.
@@ -180,7 +178,7 @@ class ActionRow(Component, Generic[ComponentT]):
     def __init__(self, data: ActionRowPayload) -> None:
         self.type: Literal[ComponentType.action_row] = ComponentType.action_row
         children = [_component_factory(d) for d in data.get("components", [])]
-        self.children: List[ComponentT] = children  # type: ignore
+        self.children: List[ActionRowChildComponentT] = children  # type: ignore
 
     def to_dict(self) -> ActionRowPayload:
         return {
@@ -1014,6 +1012,9 @@ class Container(Component):
     def accent_color(self) -> Optional[Colour]:
         """TODO"""
         return self.accent_colour
+
+
+C = TypeVar("C", bound="Component")
 
 
 # TODO: this should use a static mapping

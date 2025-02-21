@@ -23,10 +23,10 @@ from typing import (
 
 from ..components import (
     ActionRow as ActionRowComponent,
+    ActionRowMessageComponent,
     Button as ButtonComponent,
     ChannelSelectMenu as ChannelSelectComponent,
     MentionableSelectMenu as MentionableSelectComponent,
-    MessageComponent,
     RoleSelectMenu as RoleSelectComponent,
     StringSelectMenu as StringSelectComponent,
     UserSelectMenu as UserSelectComponent,
@@ -51,13 +51,13 @@ if TYPE_CHECKING:
 
 
 def _walk_all_components(
-    components: List[ActionRowComponent[MessageComponent]],
-) -> Iterator[MessageComponent]:
+    components: List[ActionRowComponent[ActionRowMessageComponent]],
+) -> Iterator[ActionRowMessageComponent]:
     for item in components:
         yield from item.children
 
 
-def _component_to_item(component: MessageComponent) -> Item:
+def _component_to_item(component: ActionRowMessageComponent) -> Item:
     if isinstance(component, ButtonComponent):
         from .button import Button
 
@@ -412,7 +412,7 @@ class View:
             self._scheduled_task(item, interaction), name=f"disnake-ui-view-dispatch-{self.id}"
         )
 
-    def refresh(self, components: List[ActionRowComponent[MessageComponent]]) -> None:
+    def refresh(self, components: List[ActionRowComponent[ActionRowMessageComponent]]) -> None:
         # TODO: this is pretty hacky at the moment, see https://github.com/DisnakeDev/disnake/commit/9384a72acb8c515b13a600592121357e165368da
         old_state: Dict[Tuple[int, str], Item] = {
             (item.type.value, item.custom_id): item  # type: ignore
@@ -573,5 +573,8 @@ class ViewStore:
         # pre-req: is_message_tracked == true
         view = self._synced_message_views[message_id]
         view.refresh(
-            [_component_factory(d, type=ActionRowComponent[MessageComponent]) for d in components]
+            [
+                _component_factory(d, type=ActionRowComponent[ActionRowMessageComponent])
+                for d in components
+            ]
         )
