@@ -123,6 +123,77 @@ TextInput
     :members:
     :inherited-members:
 
+Section
+~~~~~~~
+
+.. attributetable:: Section
+
+.. autoclass:: Section()
+    :members:
+    :inherited-members:
+
+TextDisplay
+~~~~~~~~~~~
+
+.. attributetable:: TextDisplay
+
+.. autoclass:: TextDisplay()
+    :members:
+    :inherited-members:
+
+Thumbnail
+~~~~~~~~~
+
+.. attributetable:: Thumbnail
+
+.. autoclass:: Thumbnail()
+    :members:
+    :inherited-members:
+
+MediaGallery
+~~~~~~~~~~~~
+
+.. attributetable:: MediaGallery
+
+.. autoclass:: MediaGallery()
+    :members:
+    :inherited-members:
+
+MediaGalleryItem
+~~~~~~~~~~~~~~~~
+
+.. attributetable:: MediaGalleryItem
+
+.. autoclass:: MediaGalleryItem
+    :members:
+
+FileComponent
+~~~~~~~~~~~~~
+
+.. attributetable:: FileComponent
+
+.. autoclass:: FileComponent()
+    :members:
+    :inherited-members:
+
+Separator
+~~~~~~~~~
+
+.. attributetable:: Separator
+
+.. autoclass:: Separator()
+    :members:
+    :inherited-members:
+
+Container
+~~~~~~~~~
+
+.. attributetable:: Container
+
+.. autoclass:: Container()
+    :members:
+    :inherited-members:
+
 Enumerations
 ------------
 
@@ -148,4 +219,10 @@ SelectDefaultValueType
 ~~~~~~~~~~~~~~~~~~~~~~
 
 .. autoclass:: SelectDefaultValueType()
+    :members:
+
+SeparatorSpacingSize
+~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: SeparatorSpacingSize()
     :members:

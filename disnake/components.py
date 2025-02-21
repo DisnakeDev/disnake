@@ -824,11 +824,28 @@ class TextInput(Component):
 # list of more general TODOs:
 # TODO: reconsider `components` vs `items` vs `children`
 # TODO: deserialize UnfurledMediaItem (?)
-# TODO: docstrings
+# TODO: adopt descriptions from API docs once published
+# TODO: document limits
 
 
 class Section(Component):
-    """TODO"""
+    """Represents a section from the Discord Bot UI Kit (v2).
+
+    This allows displaying an accessory (thumbnail or button) next to a block of text.
+
+    .. note::
+        The user constructible and usable type to create a
+        section is :class:`disnake.ui.Section`.
+
+    .. versionadded:: 2.11
+
+    Attributes
+    ----------
+    accessory: Union[:class:`Thumbnail`, :class:`Button`]
+        The accessory component displayed next to the section text.
+    components: List[:class:`TextDisplay`]
+        The text items in this section.
+    """
 
     __slots__: Tuple[str, ...] = ("accessory", "components")
 
@@ -853,7 +870,19 @@ class Section(Component):
 
 
 class TextDisplay(Component):
-    """TODO"""
+    """Represents a text display from the Discord Bot UI Kit (v2).
+
+    .. note::
+        The user constructible and usable type to create a
+        text display is :class:`disnake.ui.TextDisplay`.
+
+    .. versionadded:: 2.11
+
+    Attributes
+    ----------
+    content: :class:`str`
+        The text displayed by this component.
+    """
 
     __slots__: Tuple[str, ...] = ("content",)
 
@@ -871,7 +900,25 @@ class TextDisplay(Component):
 
 
 class Thumbnail(Component):
-    """TODO"""
+    """Represents a thumbnail from the Discord Bot UI Kit (v2).
+
+    This is only supported as the :attr:`~Section.accessory` of a section component.
+
+    .. note::
+        The user constructible and usable type to create a
+        thumbnail is :class:`disnake.ui.Thumbnail`.
+
+    .. versionadded:: 2.11
+
+    Attributes
+    ----------
+    media: Any
+        n/a
+    description: Optional[:class:`str`]
+        The thumbnail's description ("alt text"), if any.
+    spoiler: :class:`bool`
+        Whether the thumbnail is marked as a spoiler. Defaults to ``False``.
+    """
 
     __slots__: Tuple[str, ...] = (
         "media",
@@ -901,7 +948,21 @@ class Thumbnail(Component):
 
 
 class MediaGallery(Component):
-    """TODO"""
+    """Represents a media gallery from the Discord Bot UI Kit (v2).
+
+    This allows displaying up to 10 images in a gallery.
+
+    .. note::
+        The user constructible and usable type to create a
+        media gallery is :class:`disnake.ui.MediaGallery`.
+
+    .. versionadded:: 2.11
+
+    Attributes
+    ----------
+    items: List[:class:`MediaGalleryItem`]
+        The images in this gallery.
+    """
 
     __slots__: Tuple[str, ...] = ("items",)
 
@@ -950,7 +1011,23 @@ class MediaGalleryItem:
 
 # TODO: temporary name to avoid shadowing `disnake.file.File`
 class FileComponent(Component):
-    """TODO"""
+    """Represents a file component from the Discord Bot UI Kit (v2).
+
+    This allows displaying attached files.
+
+    .. note::
+        The user constructible and usable type to create a
+        file component is :class:`disnake.ui.File`.
+
+    .. versionadded:: 2.11
+
+    Attributes
+    ----------
+    file: Any
+        n/a
+    spoiler: :class:`bool`
+        Whether the file is marked as a spoiler. Defaults to ``False``.
+    """
 
     __slots__: Tuple[str, ...] = ("file", "spoiler")
 
@@ -970,7 +1047,24 @@ class FileComponent(Component):
 
 
 class Separator(Component):
-    """TODO"""
+    """Represents a separator from the Discord Bot UI Kit (v2).
+
+    This allows vertically separating components.
+
+    .. note::
+        The user constructible and usable type to create a
+        separator is :class:`disnake.ui.Separator`.
+
+    .. versionadded:: 2.11
+
+    Attributes
+    ----------
+    divider: :class:`bool`
+        Whether the separator should be visible, instead of just being vertical padding/spacing.
+        Defaults to ``True``.
+    spacing: :class:`SeparatorSpacingSize`
+        The size of the separator.
+    """
 
     __slots__: Tuple[str, ...] = ("divider", "spacing")
 
@@ -979,6 +1073,7 @@ class Separator(Component):
     def __init__(self, data: SeparatorComponentPayload) -> None:
         self.type: Literal[ComponentType.separator] = ComponentType.separator
         self.divider: bool = data.get("divider", True)
+        # TODO: `size` instead of `spacing`?
         self.spacing: SeparatorSpacingSize = try_enum(SeparatorSpacingSize, data.get("spacing", 1))
 
     def to_dict(self) -> SeparatorComponentPayload:
@@ -990,7 +1085,23 @@ class Separator(Component):
 
 
 class Container(Component):
-    """TODO"""
+    """Represents a container from the Discord Bot UI Kit (v2).
+
+    This is visually similar to :class:`Embed`\\s, and contains other components.
+
+    .. note::
+        The user constructible and usable type to create a
+        container is :class:`disnake.ui.Container`.
+
+    .. versionadded:: 2.11
+
+    Attributes
+    ----------
+    spoiler: :class:`bool`
+        Whether the container is marked as a spoiler. Defaults to ``False``.
+    components: List[Union[:class:`ActionRow`, :class:`Section`, :class:`TextDisplay`, :class:`MediaGallery`, :class:`FileComponent`, :class:`Separator`]]
+        The components in this container.
+    """
 
     __slots__: Tuple[str, ...] = (
         "_accent_colour",
@@ -1026,12 +1137,16 @@ class Container(Component):
 
     @property
     def accent_colour(self) -> Optional[Colour]:
-        """TODO"""
+        """Optional[:class:`Colour`]: Returns the accent colour of the container.
+        An alias exists under ``accent_color``.
+        """
         return Colour(self._accent_colour) if self._accent_colour is not None else None
 
     @property
     def accent_color(self) -> Optional[Colour]:
-        """TODO"""
+        """Optional[:class:`Colour`]: Returns the accent color of the container.
+        An alias exists under ``accent_colour``.
+        """
         return self.accent_colour
 
 
