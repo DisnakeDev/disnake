@@ -101,13 +101,28 @@ SelectMenuType = Literal[
     ComponentType.channel_select,
 ]
 
-# TODO: update type aliases for cv2
-
+# valid `ActionRow.components` item types in a message/modal
 ActionRowMessageComponent = Union["Button", "AnySelectMenu"]
 ActionRowModalComponent: TypeAlias = "TextInput"
 
+# any child component type of action rows
 ActionRowChildComponent = Union[ActionRowMessageComponent, ActionRowModalComponent]
 ActionRowChildComponentT = TypeVar("ActionRowChildComponentT", bound=ActionRowChildComponent)
+
+# valid `Section.accessory` types
+SectionAccessoryComponent = Union["Thumbnail", "Button"]
+# valid `Section.components` item types
+SectionChildComponent: TypeAlias = "TextDisplay"
+
+# valid `Container.components` item types
+ContainerChildComponent = Union[
+    "ActionRow[ActionRowMessageComponent]",
+    "Section",
+    "TextDisplay",
+    "MediaGallery",
+    "FileComponent",
+    "Separator",
+]
 
 
 class Component:
@@ -813,19 +828,21 @@ class Section(Component):
 
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
 
-    # TODO: consider making typehints for `accessory` and `components` more accurate, while keeping runtime behavior generic
     def __init__(self, data: SectionComponentPayload) -> None:
         self.type: Literal[ComponentType.section] = ComponentType.section
-        self.accessory: Component = _component_factory(data["accessory"])
+
+        accessory = _component_factory(data["accessory"])
+        self.accessory: SectionAccessoryComponent = accessory  # type: ignore
+
         # TODO: reconsider `components` vs `children`
-        self.components: List[Component] = [
-            _component_factory(d) for d in data.get("components", [])
+        self.components: List[SectionChildComponent] = [
+            _component_factory(d, type=SectionChildComponent) for d in data.get("components", [])
         ]
 
     def to_dict(self) -> SectionComponentPayload:
         return {
             "type": self.type.value,
-            "accessory": self.accessory.to_dict(),  # type: ignore  # FIXME: see comment above
+            "accessory": self.accessory.to_dict(),
             "components": [child.to_dict() for child in self.components],
         }
 
@@ -977,27 +994,26 @@ class Container(Component):
         "components",
     )
 
-    __repr_info__: ClassVar[Tuple[str, ...]] = tuple(
-        # no comment. it is what it is.
-        ("accent_colour" if s == "_accent_colour" else s)
-        for s in __slots__
+    __repr_info__: ClassVar[Tuple[str, ...]] = (
+        "accent_colour",
+        "spoiler",
+        "components",
     )
 
     def __init__(self, data: ContainerComponentPayload) -> None:
         self.type: Literal[ComponentType.container] = ComponentType.container
         self._accent_colour: Optional[int] = data.get("accent_color")
         self.spoiler: bool = data.get("spoiler", False)
+
         # TODO: once again, reconsider `components` vs `children`
-        # TODO: stricter types
-        self.components: List[Component] = [
-            _component_factory(d) for d in data.get("components", [])
-        ]
+        components = [_component_factory(d) for d in data.get("components", [])]
+        self.components: List[ContainerChildComponent] = components  # type: ignore
 
     def to_dict(self) -> ContainerComponentPayload:
         payload: ContainerComponentPayload = {
             "type": self.type.value,
             "spoiler": self.spoiler,
-            "components": [child.to_dict() for child in self.components],  # type: ignore  # FIXME: see Section component
+            "components": [child.to_dict() for child in self.components],
         }
 
         if self._accent_colour is not None:
