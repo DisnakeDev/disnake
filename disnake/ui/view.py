@@ -19,6 +19,7 @@ from typing import (
     Optional,
     Sequence,
     Tuple,
+    cast,
 )
 
 from ..components import (
@@ -46,7 +47,11 @@ if TYPE_CHECKING:
     from ..interactions import MessageInteraction
     from ..message import Message
     from ..state import ConnectionState
-    from ..types.components import ActionRow as ActionRowPayload, Component as ComponentPayload
+    from ..types.components import (
+        ActionRow as ActionRowPayload,
+        ActionRowChildComponent as ActionRowChildComponentPayload,
+        Component as ComponentPayload,
+    )
     from .item import ItemCallbackType
 
 
@@ -213,7 +218,11 @@ class View:
         children = sorted(self.children, key=key)
         components: List[ActionRowPayload] = []
         for _, group in groupby(children, key=key):
-            children = [item.to_component_dict() for item in group]
+            # these will always be valid actionrow child components
+            children = cast(
+                "List[ActionRowChildComponentPayload]",
+                [item.to_component_dict() for item in group],
+            )
             if not children:
                 continue
 
@@ -569,7 +578,7 @@ class ViewStore:
     def remove_message_tracking(self, message_id: int) -> Optional[View]:
         return self._synced_message_views.pop(message_id, None)
 
-    def update_from_message(self, message_id: int, components: List[ComponentPayload]) -> None:
+    def update_from_message(self, message_id: int, components: Sequence[ComponentPayload]) -> None:
         # pre-req: is_message_tracked == true
         view = self._synced_message_views[message_id]
         view.refresh(
