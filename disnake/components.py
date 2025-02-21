@@ -10,6 +10,7 @@ from typing import (
     Generic,
     List,
     Literal,
+    Mapping,
     Optional,
     Tuple,
     Type,
@@ -29,7 +30,7 @@ from .enums import (
     try_enum,
 )
 from .partial_emoji import PartialEmoji, _EmojiTag
-from .utils import MISSING, _get_as_snowflake, assert_never, get_slots
+from .utils import MISSING, _get_as_snowflake, get_slots
 
 if TYPE_CHECKING:
     from typing_extensions import Self, TypeAlias
@@ -42,6 +43,7 @@ if TYPE_CHECKING:
         ButtonComponent as ButtonComponentPayload,
         ChannelSelectMenu as ChannelSelectMenuPayload,
         Component as ComponentPayload,
+        ComponentType as ComponentTypeLiteral,
         ContainerComponent as ContainerComponentPayload,
         FileComponent as FileComponentPayload,
         MediaGalleryComponent as MediaGalleryComponentPayload,
@@ -1017,43 +1019,31 @@ class Container(Component):
 C = TypeVar("C", bound="Component")
 
 
-# TODO: this should use a static mapping
+COMPONENT_LOOKUP: Mapping[ComponentTypeLiteral, Type[Component]] = {
+    ComponentType.action_row.value: ActionRow,
+    ComponentType.button.value: Button,
+    ComponentType.string_select.value: StringSelectMenu,
+    ComponentType.text_input.value: TextInput,
+    ComponentType.user_select.value: UserSelectMenu,
+    ComponentType.role_select.value: RoleSelectMenu,
+    ComponentType.mentionable_select.value: MentionableSelectMenu,
+    ComponentType.channel_select.value: ChannelSelectMenu,
+    ComponentType.section.value: Section,
+    ComponentType.text_display.value: TextDisplay,
+    ComponentType.thumbnail.value: Thumbnail,
+    ComponentType.media_gallery.value: MediaGallery,
+    ComponentType.file.value: FileComponent,
+    ComponentType.separator.value: Separator,
+    ComponentType.container.value: Container,
+}
+
+
+# NOTE: The type param is purely for type-checking, it has no implications on runtime behavior.
 def _component_factory(data: ComponentPayload, *, type: Type[C] = Component) -> C:
-    # NOTE: due to speed, this method does not use the ComponentType enum
-    #       as this runs every single time a component is received from the api
-    # NOTE: The type param is purely for type-checking, it has no implications on runtime behavior.
     component_type = data["type"]
-    if component_type == 1:
-        return ActionRow(data)  # type: ignore
-    elif component_type == 2:
-        return Button(data)  # type: ignore
-    elif component_type == 3:
-        return StringSelectMenu(data)  # type: ignore
-    elif component_type == 4:
-        return TextInput(data)  # type: ignore
-    elif component_type == 5:
-        return UserSelectMenu(data)  # type: ignore
-    elif component_type == 6:
-        return RoleSelectMenu(data)  # type: ignore
-    elif component_type == 7:
-        return MentionableSelectMenu(data)  # type: ignore
-    elif component_type == 8:
-        return ChannelSelectMenu(data)  # type: ignore
-    elif component_type == 9:
-        return Section(data)  # type: ignore
-    elif component_type == 10:
-        return TextDisplay(data)  # type: ignore
-    elif component_type == 11:
-        return Thumbnail(data)  # type: ignore
-    elif component_type == 12:
-        return MediaGallery(data)  # type: ignore
-    elif component_type == 13:
-        return FileComponent(data)  # type: ignore
-    elif component_type == 14:
-        return Separator(data)  # type: ignore
-    elif component_type == 17:
-        return Container(data)  # type: ignore
+
+    if component_cls := COMPONENT_LOOKUP.get(component_type):
+        return component_cls(data)  # type: ignore
     else:
-        assert_never(component_type)
         as_enum = try_enum(ComponentType, component_type)
         return Component._raw_construct(type=as_enum)  # type: ignore
