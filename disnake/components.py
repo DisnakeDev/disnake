@@ -821,6 +821,12 @@ class TextInput(Component):
         return payload
 
 
+# list of more general TODOs:
+# TODO: reconsider `components` vs `items` vs `children`
+# TODO: deserialize UnfurledMediaItem (?)
+# TODO: docstrings
+
+
 class Section(Component):
     """TODO"""
 
@@ -834,7 +840,6 @@ class Section(Component):
         accessory = _component_factory(data["accessory"])
         self.accessory: SectionAccessoryComponent = accessory  # type: ignore
 
-        # TODO: reconsider `components` vs `children`
         self.components: List[SectionChildComponent] = [
             _component_factory(d, type=SectionChildComponent) for d in data.get("components", [])
         ]
@@ -904,7 +909,6 @@ class MediaGallery(Component):
 
     def __init__(self, data: MediaGalleryComponentPayload) -> None:
         self.type: Literal[ComponentType.media_gallery] = ComponentType.media_gallery
-        # XXX: `items` vs `children` etc.?
         self.items: List[MediaGalleryItem] = [MediaGalleryItem(i) for i in data["items"]]
 
     def to_dict(self) -> MediaGalleryComponentPayload:
@@ -1005,7 +1009,6 @@ class Container(Component):
         self._accent_colour: Optional[int] = data.get("accent_color")
         self.spoiler: bool = data.get("spoiler", False)
 
-        # TODO: once again, reconsider `components` vs `children`
         components = [_component_factory(d) for d in data.get("components", [])]
         self.components: List[ContainerChildComponent] = components  # type: ignore
 
