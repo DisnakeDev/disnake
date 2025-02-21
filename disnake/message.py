@@ -24,7 +24,10 @@ from typing import (
 
 from . import utils
 from .channel import PartialMessageable
-from .components import ActionRow, ActionRowMessageComponent, _component_factory
+from .components import (
+    MessageTopLevelComponent,
+    _message_component_factory,
+)
 from .embeds import Embed
 from .emoji import Emoji
 from .enums import (
@@ -60,7 +63,9 @@ if TYPE_CHECKING:
     from .role import Role
     from .state import ConnectionState
     from .threads import AnyThreadArchiveDuration
-    from .types.components import Component as ComponentPayload
+    from .types.components import (
+        MessageTopLevelComponent as MessageTopLevelComponentPayload,
+    )
     from .types.embed import Embed as EmbedPayload
     from .types.gateway import (
         MessageReactionAddEvent,
@@ -1185,9 +1190,8 @@ class Message(Hashable):
         self.stickers: List[StickerItem] = [
             StickerItem(data=d, state=state) for d in data.get("sticker_items", [])
         ]
-        self.components: List[ActionRow[ActionRowMessageComponent]] = [
-            _component_factory(d, type=ActionRow[ActionRowMessageComponent])
-            for d in data.get("components", [])
+        self.components: List[MessageTopLevelComponent] = [
+            _message_component_factory(d) for d in data.get("components", [])
         ]
 
         self.poll: Optional[Poll] = None
@@ -1433,10 +1437,8 @@ class Message(Hashable):
                 if role is not None:
                     self.role_mentions.append(role)
 
-    def _handle_components(self, components: List[ComponentPayload]) -> None:
-        self.components = [
-            _component_factory(d, type=ActionRow[ActionRowMessageComponent]) for d in components
-        ]
+    def _handle_components(self, components: List[MessageTopLevelComponentPayload]) -> None:
+        self.components = [_message_component_factory(d) for d in components]
 
     def _rebind_cached_references(self, new_guild: Guild, new_channel: GuildMessageable) -> None:
         self.guild = new_guild
@@ -2929,9 +2931,8 @@ class ForwardedMessage:
         self.stickers: List[StickerItem] = [
             StickerItem(data=d, state=state) for d in data.get("sticker_items", [])
         ]
-        self.components = [
-            _component_factory(d, type=ActionRow[ActionRowMessageComponent])
-            for d in data.get("components", [])
+        self.components: List[MessageTopLevelComponent] = [
+            _message_component_factory(d) for d in data.get("components", [])
         ]
         self.guild_id = guild_id
 

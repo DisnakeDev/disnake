@@ -49,6 +49,7 @@ if TYPE_CHECKING:
         MediaGalleryComponent as MediaGalleryComponentPayload,
         MediaGalleryItem as MediaGalleryItemPayload,
         MentionableSelectMenu as MentionableSelectMenuPayload,
+        MessageTopLevelComponent as MessageTopLevelComponentPayload,
         RoleSelectMenu as RoleSelectMenuPayload,
         SectionComponent as SectionComponentPayload,
         SelectDefaultValue as SelectDefaultValuePayload,
@@ -1194,3 +1195,10 @@ def _component_factory(data: ComponentPayload, *, type: Type[C] = Component) -> 
     else:
         as_enum = try_enum(ComponentType, component_type)
         return Component._raw_construct(type=as_enum)  # type: ignore
+
+
+# this is just a rebranded _component_factory,
+# as a workaround to Python not supporting typescript-like mapped types
+# XXX: an alternative would be declaring 14 _component_factory overloads, which also isn't too great.
+def _message_component_factory(data: MessageTopLevelComponentPayload) -> MessageTopLevelComponent:
+    return _component_factory(data)  # type: ignore
