@@ -124,6 +124,19 @@ ContainerChildComponent = Union[
     "Separator",
 ]
 
+# valid `Message.components` item types (v1/v2)
+MessageTopLevelComponentV1: TypeAlias = "ActionRow[ActionRowMessageComponent]"
+MessageTopLevelComponentV2 = Union[
+    MessageTopLevelComponentV1,
+    "Section",
+    "TextDisplay",
+    "MediaGallery",
+    "FileComponent",
+    "Separator",
+    "Container",
+]
+MessageTopLevelComponent = Union[MessageTopLevelComponentV1, MessageTopLevelComponentV2]
+
 
 class Component:
     """Represents a Discord Bot UI Kit Component.

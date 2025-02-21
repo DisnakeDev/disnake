@@ -8,7 +8,7 @@ from typing_extensions import NotRequired
 
 from .appinfo import ApplicationIntegrationType
 from .channel import ChannelType
-from .components import Component, Modal
+from .components import MessageTopLevelComponent, Modal
 from .embed import Embed
 from .entitlement import Entitlement
 from .i18n import LocalizationDict
@@ -321,7 +321,7 @@ class InteractionApplicationCommandCallbackData(TypedDict, total=False):
     embeds: List[Embed]
     allowed_mentions: AllowedMentions
     flags: int
-    components: List[Component]
+    components: List[MessageTopLevelComponent]
     attachments: List[Attachment]
 
 

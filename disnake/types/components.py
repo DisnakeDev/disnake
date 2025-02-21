@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import List, Literal, TypedDict, Union
+from typing import List, Literal, TypeAlias, TypedDict, Union
 
 from typing_extensions import NotRequired
 
@@ -17,6 +17,10 @@ SeparatorSpacingSize = Literal[1, 2]
 
 SelectDefaultValueType = Literal["user", "role", "channel"]
 
+
+# component type aliases/groupings
+
+# all implemented components
 Component = Union[
     "ActionRow",
     "ButtonComponent",
@@ -24,12 +28,27 @@ Component = Union[
     "TextInput",
     "SectionComponent",
     "TextDisplayComponent",
-    "ThumbnailComponent",  # TODO: reconsider the semantics of this `Component` union, not all of these types can appear in all places
+    "ThumbnailComponent",
     "MediaGalleryComponent",
-    "SeparatorComponent",
     "FileComponent",
+    "SeparatorComponent",
     "ContainerComponent",
 ]
+
+ActionRowChildComponent = Union["ButtonComponent", "AnySelectMenu", "TextInput"]
+
+MessageTopLevelComponentV1: TypeAlias = "ActionRow"
+# currently, all v2 components except Thumbnail
+MessageTopLevelComponentV2 = Union[
+    MessageTopLevelComponentV1,
+    "SectionComponent",
+    "TextDisplayComponent",
+    "MediaGalleryComponent",
+    "FileComponent",
+    "SeparatorComponent",
+    "ContainerComponent",
+]
+MessageTopLevelComponent = Union[MessageTopLevelComponentV1, MessageTopLevelComponentV2]
 
 
 # base types
@@ -43,7 +62,7 @@ class _BaseComponent(TypedDict):
 
 class ActionRow(_BaseComponent):
     type: Literal[1]
-    components: List[Component]
+    components: List[ActionRowChildComponent]
 
 
 # button
@@ -151,13 +170,12 @@ class UnfurledMediaItem(TypedDict):
     url: str
 
 
-# TODO: tighten component typings here, plain buttons and such are impossible in `components`
 class SectionComponent(_BaseComponent):
     type: Literal[9]
-    # note: currently always TextDisplayComponent, but don't hardcode assumptions
-    components: List[Component]
-    # note: currently only supports ThumbnailComponent and ButtonComponent, same as above
-    accessory: Component
+    # note: this may be expanded to more component types in the future
+    components: List[TextDisplayComponent]
+    # note: same as above
+    accessory: Union[ThumbnailComponent, ButtonComponent]
 
 
 class TextDisplayComponent(_BaseComponent):
