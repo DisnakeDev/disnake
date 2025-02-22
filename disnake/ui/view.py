@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 import os
 import sys
 import time
@@ -14,7 +15,6 @@ from typing import (
     Callable,
     ClassVar,
     Dict,
-    Iterator,
     List,
     Optional,
     Sequence,
@@ -23,18 +23,15 @@ from typing import (
 )
 
 from ..components import (
+    VALID_ACTION_ROW_MESSAGE_TYPES,
     ActionRow as ActionRowComponent,
     ActionRowMessageComponent,
     Button as ButtonComponent,
-    ChannelSelectMenu as ChannelSelectComponent,
-    MentionableSelectMenu as MentionableSelectComponent,
-    RoleSelectMenu as RoleSelectComponent,
-    StringSelectMenu as StringSelectComponent,
-    UserSelectMenu as UserSelectComponent,
     _component_factory,
+    _walk_all_components,
 )
 from ..enums import try_enum_to_int
-from ..utils import assert_never
+from .action_row import _message_component_to_item
 from .button import Button
 from .item import Item
 
@@ -55,41 +52,14 @@ if TYPE_CHECKING:
     from .item import ItemCallbackType
 
 
-def _walk_all_components(
-    components: List[ActionRowComponent[ActionRowMessageComponent]],
-) -> Iterator[ActionRowMessageComponent]:
-    for item in components:
-        yield from item.children
+_log = logging.getLogger(__name__)
 
 
 def _component_to_item(component: ActionRowMessageComponent) -> Item:
-    if isinstance(component, ButtonComponent):
-        from .button import Button
-
-        return Button.from_component(component)
-    if isinstance(component, StringSelectComponent):
-        from .select import StringSelect
-
-        return StringSelect.from_component(component)
-    if isinstance(component, UserSelectComponent):
-        from .select import UserSelect
-
-        return UserSelect.from_component(component)
-    if isinstance(component, RoleSelectComponent):
-        from .select import RoleSelect
-
-        return RoleSelect.from_component(component)
-    if isinstance(component, MentionableSelectComponent):
-        from .select import MentionableSelect
-
-        return MentionableSelect.from_component(component)
-    if isinstance(component, ChannelSelectComponent):
-        from .select import ChannelSelect
-
-        return ChannelSelect.from_component(component)
-
-    assert_never(component)
-    return Item.from_component(component)
+    if item := _message_component_to_item(component):
+        return item
+    else:
+        return Item.from_component(component)
 
 
 class _ViewWeights:
@@ -251,6 +221,12 @@ class View:
         timeout: Optional[:class:`float`]
             The timeout of the converted view.
 
+        Raises
+        ------
+        TypeError
+            Message contains v2 components, which are not supported by :class:`View`.
+            See also :attr:`.MessageFlags.is_components_v2`.
+
         Returns
         -------
         :class:`View`
@@ -258,7 +234,15 @@ class View:
             one of its subclasses.
         """
         view = View(timeout=timeout)
+        # FIXME: preserve rows
         for component in _walk_all_components(message.components):
+            if isinstance(component, ActionRowComponent):
+                continue
+            elif not isinstance(component, VALID_ACTION_ROW_MESSAGE_TYPES):
+                # can happen if message uses components v2
+                raise TypeError(
+                    f"Cannot construct view from message - unexpected {type(component).__name__}"
+                )
             view.add_item(_component_to_item(component))
         return view
 
@@ -428,8 +412,9 @@ class View:
             for item in self.children
             if item.is_dispatchable()
         }
+
         children: List[Item] = []
-        for component in _walk_all_components(components):
+        for component in (c for row in components for c in row.children):
             older: Optional[Item] = None
             try:
                 older = old_state[(component.type.value, component.custom_id)]  # type: ignore
@@ -581,9 +566,18 @@ class ViewStore:
     def update_from_message(self, message_id: int, components: Sequence[ComponentPayload]) -> None:
         # pre-req: is_message_tracked == true
         view = self._synced_message_views[message_id]
-        view.refresh(
-            [
-                _component_factory(d, type=ActionRowComponent[ActionRowMessageComponent])
-                for d in components
-            ]
-        )
+
+        rows = [
+            _component_factory(d, type=ActionRowComponent[ActionRowMessageComponent])
+            for d in components
+        ]
+        for row in rows:
+            if not isinstance(row, ActionRowComponent):
+                _log.warning(
+                    "cannot update view for message %d, unexpected %s",
+                    message_id,
+                    type(row).__name__,
+                )
+                return
+
+        view.refresh(rows)

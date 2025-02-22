@@ -7,11 +7,15 @@ from typing import (
     Any,
     ClassVar,
     Dict,
+    Final,
     Generic,
+    Iterator,
     List,
     Literal,
     Mapping,
     Optional,
+    Sequence,
+    Set,
     Tuple,
     Type,
     TypeVar,
@@ -1162,6 +1166,44 @@ class Container(Component):
         An alias exists under ``accent_colour``.
         """
         return self.accent_colour
+
+
+# see ActionRowMessageComponent
+VALID_ACTION_ROW_MESSAGE_TYPES: Final = (
+    Button,
+    StringSelectMenu,
+    UserSelectMenu,
+    RoleSelectMenu,
+    MentionableSelectMenu,
+    ChannelSelectMenu,
+)
+
+
+def _walk_internal(component: Component, seen: Set[Component]) -> Iterator[Component]:
+    if component in seen:
+        # prevent infinite recursion if anyone manages to nest a component in itself
+        return
+    seen.add(component)
+
+    yield component
+
+    if isinstance(component, ActionRow):
+        for item in component.children:
+            yield from _walk_internal(item, seen)
+    elif isinstance(component, Section):
+        yield from _walk_internal(component.accessory, seen)
+        for item in component.components:
+            yield from _walk_internal(item, seen)
+    elif isinstance(component, Container):
+        for item in component.components:
+            yield from _walk_internal(item, seen)
+
+
+# yields *all* components recursively
+def _walk_all_components(components: Sequence[Component]) -> Iterator[Component]:
+    seen = set()
+    for item in components:
+        yield from _walk_internal(item, seen)
 
 
 C = TypeVar("C", bound="Component")

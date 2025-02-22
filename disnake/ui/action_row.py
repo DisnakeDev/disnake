@@ -22,6 +22,7 @@ from typing import (
 from ..components import (
     ActionRow as ActionRowComponent,
     ActionRowChildComponent,
+    ActionRowMessageComponent,
     Button as ButtonComponent,
     ChannelSelectMenu as ChannelSelectComponent,
     MentionableSelectMenu as MentionableSelectComponent,
@@ -91,6 +92,26 @@ TextInputCompatibleActionRowT = TypeVar(
     "TextInputCompatibleActionRowT",
     bound="Union[ActionRow[ModalUIComponent], ActionRow[WrappedComponent]]",
 )
+
+
+def _message_component_to_item(
+    component: ActionRowMessageComponent,
+) -> Optional[MessageUIComponent]:
+    if isinstance(component, ButtonComponent):
+        return Button.from_component(component)
+    if isinstance(component, StringSelectComponent):
+        return StringSelect.from_component(component)
+    if isinstance(component, UserSelectComponent):
+        return UserSelect.from_component(component)
+    if isinstance(component, RoleSelectComponent):
+        return RoleSelect.from_component(component)
+    if isinstance(component, MentionableSelectComponent):
+        return MentionableSelect.from_component(component)
+    if isinstance(component, ChannelSelectComponent):
+        return ChannelSelect.from_component(component)
+
+    assert_never(component)
+    return None
 
 
 class ActionRow(Generic[UIComponentT]):
@@ -794,7 +815,8 @@ class ActionRow(Generic[UIComponentT]):
         Raises
         ------
         TypeError
-            Strict-mode is enabled and an unknown component type is encountered.
+            Strict-mode is enabled, and an unknown component type is encountered
+            or message uses v2 components (see also :attr:`.MessageFlags.is_components_v2`).
 
         Returns
         -------
@@ -802,25 +824,20 @@ class ActionRow(Generic[UIComponentT]):
             The action rows parsed from the components on the message.
         """
         rows: List[ActionRow[MessageUIComponent]] = []
+        # TODO: consolidate the action row checks from here + `View.from_message` + `ViewStore.update_from_message` into one
         for row in message.components:
+            if not isinstance(row, ActionRowComponent):
+                # can happen if message uses components v2
+                if strict:
+                    raise TypeError(f"Unexpected top-level component type: {row.type!r}")
+                continue
+
             rows.append(current_row := ActionRow.with_message_components())
             for component in row.children:
-                if isinstance(component, ButtonComponent):
-                    current_row.append_item(Button.from_component(component))
-                elif isinstance(component, StringSelectComponent):
-                    current_row.append_item(StringSelect.from_component(component))
-                elif isinstance(component, UserSelectComponent):
-                    current_row.append_item(UserSelect.from_component(component))
-                elif isinstance(component, RoleSelectComponent):
-                    current_row.append_item(RoleSelect.from_component(component))
-                elif isinstance(component, MentionableSelectComponent):
-                    current_row.append_item(MentionableSelect.from_component(component))
-                elif isinstance(component, ChannelSelectComponent):
-                    current_row.append_item(ChannelSelect.from_component(component))
-                else:
-                    assert_never(component)
-                    if strict:
-                        raise TypeError(f"Encountered unknown component type: {component.type!r}.")
+                if item := _message_component_to_item(component):
+                    current_row.append_item(item)
+                elif strict:
+                    raise TypeError(f"Encountered unknown component type: {component.type!r}.")
 
         return rows
 

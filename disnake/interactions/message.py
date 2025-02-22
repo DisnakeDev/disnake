@@ -4,7 +4,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Union
 
-from ..components import ActionRowMessageComponent
+from ..components import (
+    VALID_ACTION_ROW_MESSAGE_TYPES,
+    ActionRowMessageComponent,
+    _walk_all_components,
+)
 from ..enums import ComponentType, try_enum
 from ..message import Message
 from ..utils import cached_slot_property
@@ -167,11 +171,14 @@ class MessageInteraction(Interaction[ClientT]):
 
     @cached_slot_property("_cs_component")
     def component(self) -> ActionRowMessageComponent:
-        """Union[:class:`Button`, :class:`BaseSelectMenu`]: The component the user interacted with"""
-        for action_row in self.message.components:
-            for component in action_row.children:
-                if component.custom_id == self.data.custom_id:
-                    return component
+        """Union[:class:`Button`, :class:`BaseSelectMenu`]: The component the user interacted with."""
+        # FIXME(3.0?): introduce common base type for components with `custom_id`
+        for component in _walk_all_components(self.message.components):
+            if (
+                isinstance(component, VALID_ACTION_ROW_MESSAGE_TYPES)
+                and component.custom_id == self.data.custom_id
+            ):
+                return component
 
         raise Exception("MessageInteraction is malformed - no component found")  # noqa: TRY002
 
