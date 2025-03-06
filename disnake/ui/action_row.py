@@ -195,6 +195,7 @@ class ActionRow(Generic[UIComponentT]):
     def __repr__(self) -> str:
         return f"<ActionRow children={self._children!r}>"
 
+    # FIXME(3.0)?: `bool(ActionRow())` returns False, which may be undesired
     def __len__(self) -> int:
         return len(self._children)
 
@@ -824,7 +825,6 @@ class ActionRow(Generic[UIComponentT]):
             The action rows parsed from the components on the message.
         """
         rows: List[ActionRow[MessageUIComponent]] = []
-        # TODO: consolidate the action row checks from here + `View.from_message` + `ViewStore.update_from_message` into one
         for row in message.components:
             if not isinstance(row, ActionRowComponent):
                 # can happen if message uses components v2

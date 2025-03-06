@@ -177,6 +177,7 @@ class ApplicationCommandInteractionData(TypedDict):
 
 class _BaseComponentInteractionData(TypedDict):
     custom_id: str
+    id: int
 
 
 class _BaseSnowflakeComponentInteractionData(_BaseComponentInteractionData):

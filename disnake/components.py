@@ -839,13 +839,6 @@ class TextInput(Component):
         return payload
 
 
-# list of more general TODOs:
-# TODO: reconsider `components` vs `items` vs `children`
-# TODO: deserialize UnfurledMediaItem (?)
-# TODO: adopt descriptions from API docs once published
-# TODO: document limits
-
-
 class Section(Component):
     """Represents a section from the Discord Bot UI Kit (v2).
 

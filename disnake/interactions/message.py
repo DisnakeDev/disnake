@@ -192,6 +192,10 @@ class MessageInteractionData(Dict[str, Any]):
     ----------
     custom_id: :class:`str`
         The custom ID of the component.
+    id: :class:`int`
+        TODO
+
+        .. versionadded:: 2.11
     component_type: :class:`ComponentType`
         The type of the component.
     values: Optional[List[:class:`str`]]
@@ -203,7 +207,7 @@ class MessageInteractionData(Dict[str, Any]):
         .. versionadded:: 2.7
     """
 
-    __slots__ = ("custom_id", "component_type", "values", "resolved")
+    __slots__ = ("custom_id", "id", "component_type", "values", "resolved")
 
     def __init__(
         self,
@@ -213,6 +217,7 @@ class MessageInteractionData(Dict[str, Any]):
     ) -> None:
         super().__init__(data)
         self.custom_id: str = data["custom_id"]
+        self.id: int = data.get("id")
         self.component_type: ComponentType = try_enum(ComponentType, data["component_type"])
         self.values: Optional[List[str]] = (
             list(map(str, values)) if (values := data.get("values")) else None
