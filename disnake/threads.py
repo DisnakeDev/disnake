@@ -11,6 +11,7 @@ from .enums import ChannelType, ThreadArchiveDuration, try_enum, try_enum_to_int
 from .errors import ClientException
 from .flags import ChannelFlags
 from .mixins import Hashable
+from .object import Object
 from .partial_emoji import PartialEmoji, _EmojiTag
 from .permissions import Permissions
 from .utils import MISSING, _get_as_snowflake, _unique, parse_time, snowflake_time
@@ -244,12 +245,14 @@ class Thread(Messageable, Hashable):
     @property
     def parent(self) -> Optional[Union[TextChannel, ForumChannel, MediaChannel]]:
         """Optional[Union[:class:`TextChannel`, :class:`ForumChannel`, :class:`MediaChannel`]]: The parent channel this thread belongs to."""
+        if isinstance(self.guild, Object):
+            return None
         return self.guild.get_channel(self.parent_id)  # type: ignore
 
     @property
     def owner(self) -> Optional[Member]:
         """Optional[:class:`Member`]: The member this thread belongs to."""
-        if self.owner_id is None:
+        if self.owner_id is None or isinstance(self.guild, Object):
             return None
         return self.guild.get_member(self.owner_id)
 
