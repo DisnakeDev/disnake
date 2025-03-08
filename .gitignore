@@ -34,5 +34,6 @@ __pypackages__/
 .pdm.toml
 .pdm-python
 pdm.lock
+uv.lock
 
 !test_bot/locale/*.json
