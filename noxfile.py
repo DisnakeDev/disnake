@@ -28,7 +28,7 @@ os.environ.update(
 
 nox.options.error_on_external_run = True
 nox.options.reuse_venv = "yes"
-nox.options.default_venv_backend = "uv"
+nox.options.default_venv_backend = "uv|virtualenv"
 nox.options.sessions = [
     "lint",
     "check-manifest",
