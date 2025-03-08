@@ -19,7 +19,6 @@ from typing import (
     Optional,
     Sequence,
     Tuple,
-    cast,
 )
 
 from ..components import (
@@ -46,7 +45,6 @@ if TYPE_CHECKING:
     from ..state import ConnectionState
     from ..types.components import (
         ActionRow as ActionRowPayload,
-        ActionRowChildComponent as ActionRowChildComponentPayload,
         Component as ComponentPayload,
     )
     from .item import ItemCallbackType
@@ -188,11 +186,7 @@ class View:
         children = sorted(self.children, key=key)
         components: List[ActionRowPayload] = []
         for _, group in groupby(children, key=key):
-            # these will always be valid actionrow child components
-            children = cast(
-                "List[ActionRowChildComponentPayload]",
-                [item.to_component_dict() for item in group],
-            )
+            children = [item.to_component_dict() for item in group]
             if not children:
                 continue
 

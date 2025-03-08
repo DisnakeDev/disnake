@@ -45,6 +45,14 @@ WrappedComponent
 .. autoclass:: WrappedComponent
     :members:
 
+UIComponent
+~~~~~~~~~~~
+
+.. attributetable:: UIComponent
+
+.. autoclass:: UIComponent
+    :members:
+
 Button
 ~~~~~~
 

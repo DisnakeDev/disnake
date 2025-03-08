@@ -8,6 +8,7 @@ from typing import (
     Any,
     Callable,
     Coroutine,
+    Dict,
     Generic,
     Optional,
     Protocol,
@@ -17,7 +18,11 @@ from typing import (
     overload,
 )
 
-__all__ = ("Item", "WrappedComponent")
+__all__ = (
+    "UIComponent",
+    "WrappedComponent",
+    "Item",
+)
 
 I = TypeVar("I", bound="Item[Any]")
 V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
@@ -26,22 +31,61 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from ..client import Client
-    from ..components import ActionRowChildComponent
+    from ..components import ActionRowChildComponent, Component
     from ..enums import ComponentType
     from ..interactions import MessageInteraction
-    from ..types.components import Component as ComponentPayload
+    from ..types.components import ActionRowChildComponent as ActionRowChildComponentPayload
     from .view import View
 
     ItemCallbackType = Callable[[V_co, I, MessageInteraction], Coroutine[Any, Any, Any]]
 
-else:
-    ParamSpec = TypeVar
-
 ClientT = TypeVar("ClientT", bound="Client")
 
 
-class WrappedComponent(ABC):
+class UIComponent(ABC):
     """Represents the base UI component that all UI components inherit from.
+
+    The following classes implement this ABC:
+
+    - :class:`disnake.ui.Button`
+    - subtypes of :class:`disnake.ui.BaseSelect` (:class:`disnake.ui.ChannelSelect`, :class:`disnake.ui.MentionableSelect`, :class:`disnake.ui.RoleSelect`, :class:`disnake.ui.StringSelect`, :class:`disnake.ui.UserSelect`)
+    - :class:`disnake.ui.TextInput`
+    - :class:`disnake.ui.Section`
+    - :class:`disnake.ui.TextDisplay`
+    - :class:`disnake.ui.Thumbnail`
+    - :class:`disnake.ui.MediaGallery`
+    - :class:`disnake.ui.File`
+    - :class:`disnake.ui.Separator`
+    - :class:`disnake.ui.Container`
+
+    .. versionadded:: 2.11
+    """
+
+    __repr_attributes__: Tuple[str, ...]
+
+    @property
+    @abstractmethod
+    def _underlying(self) -> Component: ...
+
+    def __repr__(self) -> str:
+        attrs = " ".join(f"{key}={getattr(self, key)!r}" for key in self.__repr_attributes__)
+        return f"<{type(self).__name__} {attrs}>"
+
+    @property
+    def type(self) -> ComponentType:
+        return self._underlying.type
+
+    def to_component_dict(self) -> Dict[str, Any]:
+        return self._underlying.to_dict()
+
+
+# Essentially the same as the base `UIComponent`, with the addition of `width`.
+class WrappedComponent(UIComponent):
+    """Represents the base UI component that all :class:`ActionRow`\\-compatible
+    UI components inherit from.
+
+    This class adds more functionality on top of the :class:`UIComponent` base class,
+    specifically for action rows.
 
     The following classes implement this ABC:
 
@@ -52,30 +96,22 @@ class WrappedComponent(ABC):
     .. versionadded:: 2.4
     """
 
-    __repr_attributes__: Tuple[str, ...]
+    # the purpose of these two is just more precise typechecking compared to the base type
 
     @property
     @abstractmethod
     def _underlying(self) -> ActionRowChildComponent: ...
 
+    def to_component_dict(self) -> ActionRowChildComponentPayload:
+        return self._underlying.to_dict()
+
     @property
     @abstractmethod
     def width(self) -> int: ...
 
-    def __repr__(self) -> str:
-        attrs = " ".join(f"{key}={getattr(self, key)!r}" for key in self.__repr_attributes__)
-        return f"<{type(self).__name__} {attrs}>"
-
-    @property
-    def type(self) -> ComponentType:
-        return self._underlying.type
-
-    def to_component_dict(self) -> ComponentPayload:
-        return self._underlying.to_dict()
-
 
 class Item(WrappedComponent, Generic[V_co]):
-    """Represents the base UI item that all UI items inherit from.
+    """Represents the base UI item that all interactive UI items inherit from.
 
     This class adds more functionality on top of the :class:`WrappedComponent` base class.
     This functionality mostly relates to :class:`disnake.ui.View`.

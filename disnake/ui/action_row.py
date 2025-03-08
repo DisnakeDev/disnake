@@ -114,6 +114,7 @@ def _message_component_to_item(
     return None
 
 
+# TODO: this can likely also subclass the new `UIComponent` base type
 class ActionRow(Generic[UIComponentT]):
     """Represents a UI action row. Useful for lower level component manipulation.
 
