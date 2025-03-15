@@ -35,10 +35,10 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    # Instead of setup-env, we call the cache-pdm action here directly.
+    # Instead of setup-env, we call the cache-uv action here directly.
     # This avoids having to install PDM, only to find out the cache is already up to date sometimes.
     - name: Configure cache
-      uses: ./.github/actions/cache-pdm
+      uses: ./.github/actions/cache-uv
       with:
         env-already-initialized: false
 
@@ -83,14 +83,11 @@ jobs:
     - name: Set up environment
       id: setup-env
       uses: ./.github/actions/setup-env
-      env:
-        PDM_USE_VENV: true
-        PDM_VENV_IN_PROJECT: true
       with:
         python-version: ${{ matrix.python-version }}
 
     - name: Install dependencies
-      run: pdm install -d -Gspeed -Gdocs -Gvoice
+      run: uv sync --all-extras
 
     - name: Add .venv/bin to PATH
       run: dirname "$(pdm info --python)" >> $GITHUB_PATH

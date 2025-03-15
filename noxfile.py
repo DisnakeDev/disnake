@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 import pathlib
 from typing import TYPE_CHECKING, Callable, Dict, List, Tuple, TypeVar
 
@@ -17,14 +16,6 @@ if TYPE_CHECKING:
     NoxSessionFunc = Callable[Concatenate[nox.Session, P], T]
 
 PYPROJECT = nox.project.load_toml()
-
-# see https://pdm-project.org/latest/usage/advanced/#use-nox-as-the-runner
-os.environ.update(
-    {
-        "PDM_IGNORE_SAVED_PYTHON": "1",
-    },
-)
-
 
 nox.options.error_on_external_run = True
 nox.options.reuse_venv = "yes"

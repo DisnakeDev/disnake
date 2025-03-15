@@ -46,4 +46,4 @@ runs:
       run: echo "python-version=$(python -c 'import sys; print(".".join(map(str,sys.version_info[:2])))')" >> $GITHUB_OUTPUT
 
     - name: Configure cache
-      uses: ./.github/actions/cache-pdm
+      uses: ./.github/actions/cache-uv
