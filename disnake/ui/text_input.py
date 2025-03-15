@@ -49,7 +49,7 @@ class TextInput(WrappedComponent):
         "min_length",
         "max_length",
     )
-    # We have to set this to MISSING in order to overwrite the abstract property from WrappedComponent
+    # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: TextInputComponent = MISSING
 
     def __init__(

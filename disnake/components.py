@@ -112,6 +112,7 @@ ActionRowModalComponent: TypeAlias = "TextInput"
 
 # any child component type of action rows
 ActionRowChildComponent = Union[ActionRowMessageComponent, ActionRowModalComponent]
+# TODO: this might have to be covariant
 ActionRowChildComponentT = TypeVar("ActionRowChildComponentT", bound=ActionRowChildComponent)
 
 # valid `Section.accessory` types
@@ -1020,7 +1021,7 @@ class MediaGalleryItem:
         return f"<MediaGalleryItem media={self.media!r} description={self.description!r}>"
 
 
-# TODO: temporary name to avoid shadowing `disnake.file.File`
+# TODO: temporary(?) name to avoid shadowing `disnake.file.File`
 class FileComponent(Component):
     """Represents a file component from the Discord Bot UI Kit (v2).
 

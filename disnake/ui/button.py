@@ -84,7 +84,7 @@ class Button(Item[V_co]):
         "sku_id",
         "row",
     )
-    # We have to set this to MISSING in order to overwrite the abstract property from WrappedComponent
+    # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: ButtonComponent = MISSING
 
     @overload
