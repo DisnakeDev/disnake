@@ -22,9 +22,9 @@ class Separator(UIComponent):
     divider: :class:`bool`
         Whether the separator should be visible, instead of just being vertical padding/spacing.
         Defaults to ``True``.
-    spacing: :class:`SeparatorSpacingSize`
+    spacing: :class:`.SeparatorSpacingSize`
         The size of the separator.
-        Defaults to :attr:`~SeparatorSpacingSize.small`.
+        Defaults to :attr:`~.SeparatorSpacingSize.small`.
     """
 
     __repr_attributes__: Tuple[str, ...] = (
@@ -57,7 +57,7 @@ class Separator(UIComponent):
 
     @property
     def spacing(self) -> SeparatorSpacingSize:
-        """:class:`SeparatorSpacingSize`: The size of the separator."""
+        """:class:`.SeparatorSpacingSize`: The size of the separator."""
         return self._underlying.spacing
 
     @spacing.setter

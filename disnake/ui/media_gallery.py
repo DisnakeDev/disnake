@@ -19,7 +19,7 @@ class MediaGallery(UIComponent):
 
     Parameters
     ----------
-    *items: :class:`MediaGalleryItem`
+    *items: :class:`.MediaGalleryItem`
         The list of images in this gallery.
     """
 
@@ -36,7 +36,7 @@ class MediaGallery(UIComponent):
 
     @property
     def items(self) -> List[MediaGalleryItem]:
-        """List[:class:`MediaGalleryItem`]: The images in this gallery."""
+        """List[:class:`.MediaGalleryItem`]: The images in this gallery."""
         return self._underlying.items
 
     @items.setter

@@ -24,9 +24,9 @@ class Section(UIComponent):
 
     Parameters
     ----------
-    *components: :class:`~ui.TextDisplay`
+    *components: :class:`~.ui.TextDisplay`
         The list of text items in this section.
-    accessory: Union[:class:`~ui.Thumbnail`, :class:`~ui.Button`]
+    accessory: Union[:class:`~.ui.Thumbnail`, :class:`~.ui.Button`]
         The accessory component displayed next to the section text.
     """
 
@@ -50,14 +50,12 @@ class Section(UIComponent):
     # TODO: consider moving runtime checks from constructor into property setters, also making these fields writable
     @property
     def components(self) -> Sequence[TextDisplay]:
-        """Sequence[:class:`~ui.TextDisplay`]:
-        A read-only copy of the text items in this section.
-        """
+        """Sequence[:class:`~.ui.TextDisplay`]: A read-only copy of the text items in this section."""
         return SequenceProxy(self._components)
 
     @property
     def accessory(self) -> Union[Thumbnail, Button]:
-        """Union[:class:`~ui.Thumbnail`, :class:`~ui.Button`]: The accessory component displayed next to the section text."""
+        """Union[:class:`~.ui.Thumbnail`, :class:`~.ui.Button`]: The accessory component displayed next to the section text."""
         return self._accessory
 
     def __repr__(self) -> str:

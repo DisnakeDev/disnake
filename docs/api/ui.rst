@@ -133,6 +133,69 @@ TextInput
 .. autoclass:: TextInput
     :members:
 
+Section
+~~~~~~~
+
+.. attributetable:: Section
+
+.. autoclass:: Section
+    :members:
+    :inherited-members:
+
+TextDisplay
+~~~~~~~~~~~
+
+.. attributetable:: TextDisplay
+
+.. autoclass:: TextDisplay
+    :members:
+    :inherited-members:
+
+Thumbnail
+~~~~~~~~~
+
+.. attributetable:: Thumbnail
+
+.. autoclass:: Thumbnail
+    :members:
+    :inherited-members:
+
+MediaGallery
+~~~~~~~~~~~~
+
+.. attributetable:: MediaGallery
+
+.. autoclass:: MediaGallery
+    :members:
+    :inherited-members:
+
+File
+~~~~
+
+.. attributetable:: File
+
+.. autoclass:: File
+    :members:
+    :inherited-members:
+
+Separator
+~~~~~~~~~
+
+.. attributetable:: Separator
+
+.. autoclass:: Separator
+    :members:
+    :inherited-members:
+
+Container
+~~~~~~~~~
+
+.. attributetable:: Container
+
+.. autoclass:: Container
+    :members:
+    :inherited-members:
+
 
 Functions
 ---------

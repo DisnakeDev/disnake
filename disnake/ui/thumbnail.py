@@ -15,7 +15,7 @@ __all__ = ("Thumbnail",)
 class Thumbnail(UIComponent):
     """Represents a UI thumbnail.
 
-    This is only supported as the :attr:`~ui.Section.accessory` of a section component.
+    This is only supported as the :attr:`~.ui.Section.accessory` of a section component.
 
     .. versionadded:: 2.11
 

@@ -33,22 +33,22 @@ __all__ = ("Container",)
 class Container(UIComponent):
     """Represents a UI container.
 
-    This is visually similar to :class:`Embed`\\s, and contains other components.
+    This is visually similar to :class:`.Embed`\\s, and contains other components.
 
     .. versionadded:: 2.11
 
     Parameters
     ----------
-    *components: Union[:class:`~ui.ActionRow`, :class:`~ui.Section`, :class:`~ui.TextDisplay`, :class:`~ui.MediaGallery`, :class:`~ui.FileComponent`, :class:`~ui.Separator`]
+    *components: Union[:class:`~.ui.ActionRow`, :class:`~.ui.Section`, :class:`~.ui.TextDisplay`, :class:`~.ui.MediaGallery`, :class:`~.ui.File`, :class:`~.ui.Separator`]
         The components in this container.
-    accent_colour: Optional[:class:`Colour`]
+    accent_colour: Optional[:class:`.Colour`]
         The accent colour of the container.
     spoiler: :class:`bool`
         Whether the container is marked as a spoiler. Defaults to ``False``.
 
     Attributes
     ----------
-    accent_colour: Optional[:class:`Colour`]
+    accent_colour: Optional[:class:`.Colour`]
         The accent colour of the container.
     spoiler: :class:`bool`
         Whether the container is marked as a spoiler.
@@ -80,9 +80,7 @@ class Container(UIComponent):
     # TODO: consider moving runtime checks from constructor into property setters, also making these fields writable
     @property
     def components(self) -> Sequence[ContainerChildUIComponent]:
-        """Sequence[Union[:class:`~ui.ActionRow`, :class:`~ui.Section`, :class:`~ui.TextDisplay`, :class:`~ui.MediaGallery`, :class:`~ui.FileComponent`, :class:`~ui.Separator`]]:
-        A read-only copy of the components in this container.
-        """
+        """Sequence[Union[:class:`~.ui.ActionRow`, :class:`~.ui.Section`, :class:`~.ui.TextDisplay`, :class:`~.ui.MediaGallery`, :class:`~.ui.File`, :class:`~.ui.Separator`]]: A read-only copy of the components in this container."""
         return SequenceProxy(self._components)
 
     def __repr__(self) -> str:
