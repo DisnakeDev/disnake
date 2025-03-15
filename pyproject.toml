@@ -74,6 +74,7 @@ tools = [
     "python-dotenv~=1.0.0",
     "check-manifest==0.49",
     "ruff==0.9.3",
+    "taskipy==1.14.1",
 ]
 changelog = [
     "towncrier==23.6.0",
@@ -104,20 +105,25 @@ build = [
     "twine~=5.1.1",
 ]
 
+[tool.uv]
+default-groups = ['nox', 'tools', 'changelog', 'codemod', 'typing', 'test', 'build',]
 
-[tool.pdm]
-# Ignore `requires-python` warnings when locking, the latest versions of some
-# dependencies already require >=3.9
-# See also https://pdm-project.org/en/latest/usage/config/#ignore-package-warnings
-ignore_package_warnings = ["*"]
+[tool.taskipy.settings]
+use_vars = true
 
-[tool.pdm.scripts]
-docs = { cmd = "nox -Rs docs --", help = "Build the documentation for development" }
-lint = { cmd = "nox -Rs lint --", help = "Check all files for linting errors" }
-pyright = { cmd = "nox -Rs pyright --", help = "Run pyright" }
-setup_env = { cmd = "{pdm} install -G:all", help = "Set up the local environment and all dependencies" }
-post_setup_env = { composite = ["python -m ensurepip --default-pip", "pre-commit install --install-hooks"] }
-test = { cmd = "nox -Rs test --", help = "Run pytest" }
+[tool.taskipy.variables]
+nox = "nox -Rs"
+
+[tool.taskipy.tasks]
+pre_build = "{nox} check-manifest"
+build = { cmd = "uv run -m build", help = "Build a safe version of disnake" }
+ci = { cmd = "{nox}", help = "Run all valid CI" }
+codemod = { cmd = "{nox} codemod autotyping --" }
+docs = { cmd = "{nox} docs --", help = "Build the documentation for development" }
+lint = { cmd = "{nox} lint --", help = "Check all files for linting errors" }
+pyright = { cmd = "{nox} pyright --", help = "Run pyright" }
+setup_env = { cmd = "pre-commit install --install-hooks && nox --install-only", use_vars = false }
+test = { cmd = "{nox} test --", help = "Run pytest" }
 
 [tool.ruff]
 line-length = 100
