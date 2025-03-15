@@ -52,7 +52,7 @@ If you're unsure about some aspect of development, feel free to use existing fil
 The general workflow can be summarized as follows:
 
 1. Fork + clone the repository.
-2. Initialize the development environment: `pdm run setup_env`.
+2. Initialize the development environment: `uv run setup_env`.
 3. Create a new branch.
 4. Commit your changes, update documentation if required.
 5. Add a changelog entry (e.g. `changelog/1234.feature.rst`).
@@ -63,11 +63,12 @@ Specific development aspects are further explained below.
 
 ### Initial setup
 
-We use [`PDM`](https://pdm-project.org/) as our dependency manager. If it isn't already installed on your system, you can follow the installation steps [here](https://pdm-project.org/latest/#installation) to get started.
+We use [`UV`][uv] as our dependency manager. If it isn't already installed on your system, you can follow the installation steps [here](https://docs.astral.sh/uv/getting-started/installation/) to get started.
 
-Once PDM is installed, use the following command to initialize a virtual environment, install the necessary development dependencies, and install the [`pre-commit`](#pre-commit) hooks.
+Once UV is installed, use the following commands to initialize a virtual environment, install the necessary development dependencies, and install the [`pre-commit`](#pre-commit) hooks.
 ```
-$ pdm run setup_env
+uv sync --all-extras --all-groups
+uv run pre-commit install --install-hooks
 ```
 
 Other tools used in this project include [ruff](https://docs.astral.sh/ruff) (formatter and linter), and [pyright](https://microsoft.github.io/pyright/#/) (type-checker). For the most part, these automatically run on every commit with no additional action required - see below for details.
@@ -107,7 +108,7 @@ Most of the time, running pre-commit will automatically fix any issues that aris
 
 ### Pyright
 
-For type-checking, run `pdm run pyright` (append `-w` to have it automatically re-check on every file change).
+For type-checking, run `uv run task pyright` (append `-w` to have it automatically re-check on every file change).
 > [!NOTE]
 > If you're using VSCode and pylance, it will use the same type-checking settings, which generally means that you don't necessarily have to run `pyright` separately.  
 > However, since we use a specific version of `pyright` (which may not match pylance's version), there can be version differences which may lead to different results.
@@ -120,4 +121,7 @@ We use [towncrier](https://github.com/twisted/towncrier) for managing our change
 
 ### Documentation
 We use Sphinx to build the project's documentation, which includes [automatically generating](https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html) the API Reference from docstrings using the [NumPy style](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_numpy.html).  
-To build the documentation locally, use `pdm run docs` and visit http://127.0.0.1:8009/ once built.
+To build the documentation locally, use `uv run task docs` and visit http://127.0.0.1:8009/ once built.
+
+
+[uv]: https://docs.astral.sh/uv
