@@ -1,12 +1,16 @@
 # SPDX-License-Identifier: MIT
 
-name: Configure PDM cache
+name: Configure UV cache
 description: .
 inputs:
   env-already-initialized:
-    description: Whether Python/PDM is already configured
+    description: Whether Python/UV is already configured
     required: false
     default: 'true'
+  python-version:
+    description: Python version to use
+    required: false
+    default: '3.8'
 
 runs:
   using: composite
@@ -22,21 +26,21 @@ runs:
       uses: actions/cache@v4
       with:
         path: |
-          pdm.lock
+          uv.lock
         # cache lockfile for the current day, roughly
-        key: pdm-${{ steps.get-cache-meta.outputs.date }}-${{ hashFiles('pyproject.toml') }}
-        # pdm lockfiles should be platform-agnostic
+        key: uv-${{ steps.get-cache-meta.outputs.date }}-${{ hashFiles('pyproject.toml') }}
+        # uv lockfiles should be platform-agnostic
         enableCrossOsArchive: true
 
     - if: ${{ steps.cache.outputs.cache-hit != 'true' && inputs.env-already-initialized != 'true' }}
-      name: Set up PDM
-      uses: pdm-project/setup-pdm@v4
+      name: Set up UV
+      uses: astral-sh/setup-uv@5
       with:
-        python-version: 3.8
-        version: "2.20.1"
+        python-version: ${{ inputs.python-version }}
+        version: "0.6.6"
 
     - if: ${{ steps.cache.outputs.cache-hit != 'true' }}
       name: Lock all dependencies
       shell: bash
       run: |
-        pdm lock -G:all  # create pdm.lock
+       uv lock
