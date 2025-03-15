@@ -40,6 +40,14 @@ ActionRowModalComponent: TypeAlias = "TextInput"
 
 # valid message component types (v1/v2)
 MessageTopLevelComponentV1: TypeAlias = "ActionRow[ActionRowMessageComponent]"
+MessageTopLevelComponentV2 = Union[
+    "Section",
+    "TextDisplay",
+    "MediaGallery",
+    "File",
+    "Separator",
+    "Container",
+]
 
 ActionRowChildT = TypeVar("ActionRowChildT", bound="WrappedComponent")
 # valid input types where action rows are expected
@@ -53,5 +61,10 @@ ActionRowInput = Union[
 ]
 
 # shortcuts for valid actionrow-ish input types
-MessageComponentInput = ActionRowInput[ActionRowMessageComponent]
+MessageComponentInputV1 = ActionRowInput[ActionRowMessageComponent]
+MessageComponentInputV2 = Union[
+    MessageTopLevelComponentV2,
+    Sequence[MessageTopLevelComponentV2],
+]
+MessageComponentInput = Union[MessageComponentInputV1, MessageComponentInputV2]
 ModalComponentInput = ActionRowInput[ActionRowModalComponent]
