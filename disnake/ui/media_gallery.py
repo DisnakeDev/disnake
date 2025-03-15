@@ -28,7 +28,7 @@ class MediaGallery(UIComponent):
     _underlying: MediaGalleryComponent = MISSING
 
     # FIXME: MediaGalleryItem currently isn't user-instantiable
-    def __init__(self, *items: Sequence[MediaGalleryItem]) -> None:
+    def __init__(self, *items: MediaGalleryItem) -> None:
         self._underlying = MediaGalleryComponent._raw_construct(
             type=ComponentType.media_gallery,
             items=list(items),
