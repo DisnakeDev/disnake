@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, List, Optional, Sequence, Tuple, Union
 
 from ..colour import Colour
 from ..components import Container as ContainerComponent
 from ..enums import ComponentType
-from ..utils import MISSING
-from .item import UIComponent
+from ..utils import SequenceProxy
+from .item import UIComponent, ensure_ui_component
 
 if TYPE_CHECKING:
     from .action_row import ActionRow, MessageUIComponent
@@ -45,59 +45,55 @@ class Container(UIComponent):
         The accent colour of the container.
     spoiler: :class:`bool`
         Whether the container is marked as a spoiler. Defaults to ``False``.
+
+    Attributes
+    ----------
+    accent_colour: Optional[:class:`Colour`]
+        The accent colour of the container.
+    spoiler: :class:`bool`
+        Whether the container is marked as a spoiler.
     """
 
+    # unused, but technically required by base type
     __repr_attributes__: Tuple[str, ...] = (
         "components",
         "accent_colour",
         "spoiler",
     )
-    # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
-    _underlying: ContainerComponent = MISSING
 
+    # TODO: consider providing sequence operations (append, insert, remove, etc.)
     def __init__(
         self,
         *components: ContainerChildUIComponent,
         accent_colour: Optional[Colour] = None,
         spoiler: bool = False,
     ) -> None:
-        # TODO: this also just doesn't work this way
-        self._underlying = ContainerComponent._raw_construct(
-            type=ComponentType.container,
-            components=list(components),
-            _accent_colour=accent_colour.value if accent_colour is not None else None,
-            spoiler=spoiler,
-        )
+        self._components: List[ContainerChildUIComponent] = [
+            # FIXME: typing broken until action rows become UIComponents
+            ensure_ui_component(c, "components")
+            for c in components
+        ]
+        # FIXME: add accent_color
+        self.accent_colour: Optional[Colour] = accent_colour
+        self.spoiler: bool = spoiler
 
+    # TODO: consider moving runtime checks from constructor into property setters, also making these fields writable
     @property
     def components(self) -> Sequence[ContainerChildUIComponent]:
-        """Sequence[Union[:class:`~ui.ActionRow`, :class:`~ui.Section`, :class:`~ui.TextDisplay`, :class:`~ui.MediaGallery`, :class:`~ui.FileComponent`, :class:`~ui.Separator`]]: The components in this container."""
-        # TODO: SequenceProxy?
-        return self._underlying.components
+        """Sequence[Union[:class:`~ui.ActionRow`, :class:`~ui.Section`, :class:`~ui.TextDisplay`, :class:`~ui.MediaGallery`, :class:`~ui.FileComponent`, :class:`~ui.Separator`]]:
+        A read-only copy of the components in this container.
+        """
+        return SequenceProxy(self._components)
 
-    @components.setter
-    def components(self, values: Sequence[ContainerChildUIComponent]) -> None:
-        # don't be too restrictive for easier future compatibility
-        for value in values:
-            if not isinstance(value, UIComponent):
-                raise TypeError("TODO")
-        self._underlying.components = values
-
-    # FIXME: add accent_color
-    @property
-    def accent_colour(self) -> Optional[Colour]:
-        """Optional[:class:`Colour`]: The accent colour of the container."""
-        return self._underlying.accent_colour
-
-    @accent_colour.setter
-    def accent_colour(self, value: Optional[Colour]) -> None:
-        self._underlying._accent_colour = value.value if value is not None else None
+    def __repr__(self) -> str:
+        # implemented separately for now, due to SequenceProxy repr
+        return f"<Container components={self._components!r} accent_colour={self.accent_colour!r} spoiler={self.spoiler!r}>"
 
     @property
-    def spoiler(self) -> bool:
-        """:class:`bool`: Whether the container is marked as a spoiler."""
-        return self._underlying.spoiler
-
-    @spoiler.setter
-    def spoiler(self, value: bool) -> None:
-        self._underlying.spoiler = value
+    def _underlying(self) -> ContainerComponent:
+        return ContainerComponent._raw_construct(
+            type=ComponentType.container,
+            components=[comp._underlying for comp in self._components],
+            _accent_colour=self.accent_colour.value if self.accent_colour is not None else None,
+            spoiler=self.spoiler,
+        )

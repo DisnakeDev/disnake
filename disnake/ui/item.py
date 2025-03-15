@@ -40,6 +40,13 @@ if TYPE_CHECKING:
     ItemCallbackType = Callable[[V_co, I, MessageInteraction], Coroutine[Any, Any, Any]]
 
 ClientT = TypeVar("ClientT", bound="Client")
+UIComponentT = TypeVar("UIComponentT", bound="UIComponent")
+
+
+def ensure_ui_component(obj: UIComponentT, name: str) -> UIComponentT:
+    if not isinstance(obj, UIComponent):
+        raise TypeError(f"{name} should be a valid UI component, got {type(obj).__name__}.")
+    return obj
 
 
 class UIComponent(ABC):
