@@ -90,7 +90,7 @@ if TYPE_CHECKING:
     )
     from .types.threads import ThreadArchiveDurationLiteral
     from .types.user import User as UserPayload
-    from .ui.action_row import Components, MessageUIComponent
+    from .ui._types import MessageComponentInput
     from .ui.view import View
 
     EmojiInputType = Union[Emoji, PartialEmoji, str]
@@ -152,7 +152,7 @@ async def _edit_handler(
     flags: MessageFlags,
     allowed_mentions: Optional[AllowedMentions],
     view: Optional[View],
-    components: Optional[Components[MessageUIComponent]],
+    components: Optional[MessageComponentInput],
 ) -> Message:
     if embed is not MISSING and embeds is not MISSING:
         raise TypeError("Cannot mix embed and embeds keyword arguments.")
@@ -1868,7 +1868,7 @@ class Message(Hashable):
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components[MessageUIComponent]] = ...,
+        components: Optional[MessageComponentInput] = ...,
         delete_after: Optional[float] = ...,
     ) -> Message: ...
 
@@ -1884,7 +1884,7 @@ class Message(Hashable):
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components[MessageUIComponent]] = ...,
+        components: Optional[MessageComponentInput] = ...,
         delete_after: Optional[float] = ...,
     ) -> Message: ...
 
@@ -1900,7 +1900,7 @@ class Message(Hashable):
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components[MessageUIComponent]] = ...,
+        components: Optional[MessageComponentInput] = ...,
         delete_after: Optional[float] = ...,
     ) -> Message: ...
 
@@ -1916,7 +1916,7 @@ class Message(Hashable):
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components[MessageUIComponent]] = ...,
+        components: Optional[MessageComponentInput] = ...,
         delete_after: Optional[float] = ...,
     ) -> Message: ...
 
@@ -1934,7 +1934,7 @@ class Message(Hashable):
         flags: MessageFlags = MISSING,
         allowed_mentions: Optional[AllowedMentions] = MISSING,
         view: Optional[View] = MISSING,
-        components: Optional[Components[MessageUIComponent]] = MISSING,
+        components: Optional[MessageComponentInput] = MISSING,
         delete_after: Optional[float] = None,
     ) -> Message:
         """|coro|
@@ -2631,7 +2631,7 @@ class PartialMessage(Hashable):
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components[MessageUIComponent]] = ...,
+        components: Optional[MessageComponentInput] = ...,
         delete_after: Optional[float] = ...,
     ) -> Message: ...
 
@@ -2647,7 +2647,7 @@ class PartialMessage(Hashable):
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components[MessageUIComponent]] = ...,
+        components: Optional[MessageComponentInput] = ...,
         delete_after: Optional[float] = ...,
     ) -> Message: ...
 
@@ -2663,7 +2663,7 @@ class PartialMessage(Hashable):
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components[MessageUIComponent]] = ...,
+        components: Optional[MessageComponentInput] = ...,
         delete_after: Optional[float] = ...,
     ) -> Message: ...
 
@@ -2679,7 +2679,7 @@ class PartialMessage(Hashable):
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components[MessageUIComponent]] = ...,
+        components: Optional[MessageComponentInput] = ...,
         delete_after: Optional[float] = ...,
     ) -> Message: ...
 
@@ -2697,7 +2697,7 @@ class PartialMessage(Hashable):
         flags: MessageFlags = MISSING,
         allowed_mentions: Optional[AllowedMentions] = MISSING,
         view: Optional[View] = MISSING,
-        components: Optional[Components[MessageUIComponent]] = MISSING,
+        components: Optional[MessageComponentInput] = MISSING,
         delete_after: Optional[float] = None,
     ) -> Message:
         """|coro|

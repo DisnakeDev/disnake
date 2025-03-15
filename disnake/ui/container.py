@@ -11,7 +11,7 @@ from ..utils import SequenceProxy
 from .item import UIComponent, ensure_ui_component
 
 if TYPE_CHECKING:
-    from .action_row import ActionRow, MessageUIComponent
+    from .action_row import ActionRow, ActionRowMessageComponent
     from .file import File
     from .media_gallery import MediaGallery
     from .section import Section
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from .text_display import TextDisplay
 
     ContainerChildUIComponent = Union[
-        ActionRow[MessageUIComponent],
+        ActionRow[ActionRowMessageComponent],
         Section,
         TextDisplay,
         MediaGallery,
