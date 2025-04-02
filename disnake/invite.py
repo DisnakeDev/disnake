@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, List, Optional, Union
 
 from .appinfo import PartialAppInfo
 from .asset import Asset
-from .enums import ChannelType, InviteTarget, NSFWLevel, VerificationLevel, try_enum
+from .enums import ChannelType, InviteTarget, InviteType, NSFWLevel, VerificationLevel, try_enum
 from .guild_scheduled_event import GuildScheduledEvent
 from .mixins import Hashable
 from .object import Object
@@ -307,8 +307,13 @@ class Invite(Hashable):
     ----------
     code: :class:`str`
         The URL fragment used for the invite.
+    type: :class:`InviteType`
+        The type of the invite.
+
+        .. versionadded:: 2.10
+
     guild: Optional[Union[:class:`Guild`, :class:`Object`, :class:`PartialInviteGuild`]]
-        The guild the invite is for. Can be ``None`` if it's from a group direct message.
+        The guild the invite is for. Can be ``None`` if it's not a guild invite (see :attr:`type`).
     max_age: Optional[:class:`int`]
         How long before the invite expires in seconds.
         A value of ``0`` indicates that it doesn't expire.
@@ -382,6 +387,7 @@ class Invite(Hashable):
     __slots__ = (
         "max_age",
         "code",
+        "type",
         "guild",
         "created_at",
         "uses",
@@ -412,6 +418,7 @@ class Invite(Hashable):
     ) -> None:
         self._state: ConnectionState = state
         self.code: str = data["code"]
+        self.type: InviteType = try_enum(InviteType, data.get("type", 0))
         self.guild: Optional[InviteGuildType] = self._resolve_guild(data.get("guild"), guild)
 
         self.max_age: Optional[int] = data.get("max_age")
@@ -428,7 +435,9 @@ class Invite(Hashable):
         )
 
         inviter_data = data.get("inviter")
-        self.inviter: Optional[User] = None if inviter_data is None else self._state.create_user(inviter_data)  # type: ignore
+        self.inviter: Optional[User] = (
+            None if inviter_data is None else self._state.create_user(inviter_data)  # type: ignore
+        )
 
         self.channel: Optional[InviteChannelType] = self._resolve_channel(
             data.get("channel"), channel
@@ -450,7 +459,9 @@ class Invite(Hashable):
             self.guild_welcome_screen: Optional[WelcomeScreen] = None
 
         target_user_data = data.get("target_user")
-        self.target_user: Optional[User] = None if target_user_data is None else self._state.create_user(target_user_data)  # type: ignore
+        self.target_user: Optional[User] = (
+            None if target_user_data is None else self._state.create_user(target_user_data)  # type: ignore
+        )
 
         self.target_type: InviteTarget = try_enum(InviteTarget, data.get("target_type", 0))
 
@@ -481,15 +492,12 @@ class Invite(Hashable):
                 # If it's not cached, then it has to be a partial guild
                 guild = PartialInviteGuild(state, guild_data, guild_id)
 
-        # todo: this is no longer true
-        # As far as I know, invites always need a channel
-        # So this should never raise.
-        channel: Union[PartialInviteChannel, GuildChannel] = PartialInviteChannel(
-            data=data["channel"], state=state
-        )
-        if guild is not None and not isinstance(guild, PartialInviteGuild):
-            # Upgrade the partial data if applicable
-            channel = guild.get_channel(channel.id) or channel
+        channel: Optional[Union[PartialInviteChannel, GuildChannel]] = None
+        if channel_data := data.get("channel"):
+            channel = PartialInviteChannel(data=channel_data, state=state)
+            if guild is not None and not isinstance(guild, PartialInviteGuild):
+                # Upgrade the partial data if applicable
+                channel = guild.get_channel(channel.id) or channel
 
         return cls(state=state, data=data, guild=guild, channel=channel)
 
@@ -543,11 +551,13 @@ class Invite(Hashable):
         return self.url
 
     def __repr__(self) -> str:
-        return (
-            f"<Invite code={self.code!r} guild={self.guild!r} "
-            f"online={self.approximate_presence_count} "
-            f"members={self.approximate_member_count}>"
-        )
+        s = f"<Invite code={self.code!r} type={self.type!r}"
+        if self.type is InviteType.guild:
+            s += f" guild={self.guild!r} online={self.approximate_presence_count}"
+        if self.type is not InviteType.friend:
+            s += f" members={self.approximate_member_count}"
+        s += ">"
+        return s
 
     def __hash__(self) -> int:
         return hash(self.code)

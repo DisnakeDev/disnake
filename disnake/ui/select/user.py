@@ -2,19 +2,34 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, Optional, Type, TypeVar, Union, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    ClassVar,
+    Mapping,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    overload,
+)
 
+from ...abc import Snowflake
 from ...components import UserSelectMenu
-from ...enums import ComponentType
+from ...enums import ComponentType, SelectDefaultValueType
+from ...member import Member
+from ...object import Object
+from ...user import ClientUser, User
 from ...utils import MISSING
-from .base import BaseSelect, P, V_co, _create_decorator
+from .base import BaseSelect, P, SelectDefaultValueInputType, V_co, _create_decorator
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ...member import Member
-    from ...user import User
-    from ..item import DecoratedItem, ItemCallbackType, Object
+    from ..item import DecoratedItem, ItemCallbackType
 
 
 __all__ = (
@@ -47,6 +62,11 @@ class UserSelect(BaseSelect[UserSelectMenu, "Union[User, Member]", V_co]):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select is disabled.
+    default_values: Optional[Sequence[Union[:class:`~disnake.User`, :class:`.Member`, :class:`.SelectDefaultValue`, :class:`.Object`]]]
+        The list of values (users/members) that are selected by default.
+        If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
+
+        .. versionadded:: 2.10
     row: Optional[:class:`int`]
         The relative row this select menu belongs to. A Discord component can only have 5
         rows. By default, items are arranged automatically into those 5 rows. If you'd
@@ -60,6 +80,12 @@ class UserSelect(BaseSelect[UserSelectMenu, "Union[User, Member]", V_co]):
         A list of users/members that have been selected by the user.
     """
 
+    _default_value_type_map: ClassVar[
+        Mapping[SelectDefaultValueType, Tuple[Type[Snowflake], ...]]
+    ] = {
+        SelectDefaultValueType.user: (Member, User, ClientUser, Object),
+    }
+
     @overload
     def __init__(
         self: UserSelect[None],
@@ -69,9 +95,9 @@ class UserSelect(BaseSelect[UserSelectMenu, "Union[User, Member]", V_co]):
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
+        default_values: Optional[Sequence[SelectDefaultValueInputType[Union[User, Member]]]] = None,
         row: Optional[int] = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     def __init__(
@@ -82,9 +108,9 @@ class UserSelect(BaseSelect[UserSelectMenu, "Union[User, Member]", V_co]):
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
+        default_values: Optional[Sequence[SelectDefaultValueInputType[Union[User, Member]]]] = None,
         row: Optional[int] = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     def __init__(
         self,
@@ -94,6 +120,7 @@ class UserSelect(BaseSelect[UserSelectMenu, "Union[User, Member]", V_co]):
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
+        default_values: Optional[Sequence[SelectDefaultValueInputType[Union[User, Member]]]] = None,
         row: Optional[int] = None,
     ) -> None:
         super().__init__(
@@ -104,6 +131,7 @@ class UserSelect(BaseSelect[UserSelectMenu, "Union[User, Member]", V_co]):
             min_values=min_values,
             max_values=max_values,
             disabled=disabled,
+            default_values=default_values,
             row=row,
         )
 
@@ -115,6 +143,7 @@ class UserSelect(BaseSelect[UserSelectMenu, "Union[User, Member]", V_co]):
             min_values=component.min_values,
             max_values=component.max_values,
             disabled=component.disabled,
+            default_values=component.default_values,
             row=None,
         )
 
@@ -130,21 +159,20 @@ def user_select(
     min_values: int = 1,
     max_values: int = 1,
     disabled: bool = False,
+    default_values: Optional[Sequence[SelectDefaultValueInputType[Union[User, Member]]]] = None,
     row: Optional[int] = None,
-) -> Callable[[ItemCallbackType[UserSelect[V_co]]], DecoratedItem[UserSelect[V_co]]]:
-    ...
+) -> Callable[[ItemCallbackType[V_co, UserSelect[V_co]]], DecoratedItem[UserSelect[V_co]]]: ...
 
 
 @overload
 def user_select(
-    cls: Type[Object[S_co, P]], *_: P.args, **kwargs: P.kwargs
-) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
-    ...
+    cls: Callable[P, S_co], *_: P.args, **kwargs: P.kwargs
+) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]: ...
 
 
 def user_select(
-    cls: Type[Object[S_co, ...]] = UserSelect[Any], **kwargs: Any
-) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
+    cls: Callable[..., S_co] = UserSelect[Any], **kwargs: Any
+) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
     """A decorator that attaches a user select menu to a component.
 
     The function being decorated should have three parameters, ``self`` representing
@@ -158,10 +186,10 @@ def user_select(
 
     Parameters
     ----------
-    cls: Type[:class:`UserSelect`]
-        The select subclass to create an instance of. If provided, the following parameters
-        described below do not apply. Instead, this decorator will accept the same keywords
-        as the passed cls does.
+    cls: Callable[..., :class:`UserSelect`]
+        A callable (may be a :class:`UserSelect` subclass) to create a new instance of this component.
+        If provided, the other parameters described below do not apply.
+        Instead, this decorator will accept the same keywords as the passed callable/class does.
     placeholder: Optional[:class:`str`]
         The placeholder text that is shown if nothing is selected, if any.
     custom_id: :class:`str`
@@ -181,5 +209,10 @@ def user_select(
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select is disabled. Defaults to ``False``.
+    default_values: Optional[Sequence[Union[:class:`~disnake.User`, :class:`.Member`, :class:`.SelectDefaultValue`, :class:`.Object`]]]
+        The list of values (users/members) that are selected by default.
+        If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
+
+        .. versionadded:: 2.10
     """
-    return _create_decorator(cls, UserSelect, **kwargs)
+    return _create_decorator(cls, **kwargs)

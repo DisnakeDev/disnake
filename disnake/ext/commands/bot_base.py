@@ -136,8 +136,7 @@ class BotBase(CommonBotBase, GroupMixin):
         elif (
             # note: no need to check for empty iterables,
             # as they won't be allowed by `get_prefix`
-            command_prefix is not when_mentioned
-            and not self.intents.message_content
+            command_prefix is not when_mentioned and not self.intents.message_content
         ):
             warnings.warn(
                 "Message Content intent is not enabled and a prefix is configured. "

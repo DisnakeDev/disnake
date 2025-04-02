@@ -1,1 +1,0 @@
-Support ``integration_type`` field in :attr:`AuditLogEntry.extra` (for :attr:`~AuditLogAction.kick` and :attr:`~AuditLogAction.member_role_update` actions).

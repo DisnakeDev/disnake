@@ -32,8 +32,9 @@ from ..components import (
     UserSelectMenu as UserSelectComponent,
     _component_factory,
 )
-from ..enums import ComponentType, try_enum_to_int
+from ..enums import try_enum_to_int
 from ..utils import assert_never
+from .button import Button
 from .item import Item
 
 __all__ = ("View",)
@@ -153,10 +154,10 @@ class View:
     """
 
     __discord_ui_view__: ClassVar[bool] = True
-    __view_children_items__: ClassVar[List[ItemCallbackType[Item]]] = []
+    __view_children_items__: ClassVar[List[ItemCallbackType[Self, Item[Self]]]] = []
 
     def __init_subclass__(cls) -> None:
-        children: List[ItemCallbackType[Item]] = []
+        children: List[ItemCallbackType[Self, Item[Self]]] = []
         for base in reversed(cls.__mro__):
             for member in base.__dict__.values():
                 if hasattr(member, "__discord_ui_model_type__"):
@@ -169,9 +170,9 @@ class View:
 
     def __init__(self, *, timeout: Optional[float] = 180.0) -> None:
         self.timeout = timeout
-        self.children: List[Item] = []
+        self.children: List[Item[Self]] = []
         for func in self.__view_children_items__:
-            item: Item = func.__discord_ui_model_type__(**func.__discord_ui_model_kwargs__)
+            item: Item[Self] = func.__discord_ui_model_type__(**func.__discord_ui_model_kwargs__)
             item.callback = partial(func, self, item)
             item._view = self
             setattr(self, func.__name__, item)
@@ -410,7 +411,7 @@ class View:
         )
 
     def refresh(self, components: List[ActionRowComponent[MessageComponent]]) -> None:
-        # TODO: this is pretty hacky at the moment
+        # TODO: this is pretty hacky at the moment, see https://github.com/DisnakeDev/disnake/commit/9384a72acb8c515b13a600592121357e165368da
         old_state: Dict[Tuple[int, str], Item] = {
             (item.type.value, item.custom_id): item  # type: ignore
             for item in self.children
@@ -422,21 +423,24 @@ class View:
             try:
                 older = old_state[(component.type.value, component.custom_id)]  # type: ignore
             except (KeyError, AttributeError):
-                # workaround for url buttons, since they're not part of `old_state`
+                # workaround for non-interactive buttons, since they're not part of `old_state`
                 if isinstance(component, ButtonComponent):
                     for child in self.children:
+                        if not isinstance(child, Button):
+                            continue
+                        # try finding the corresponding child in this view based on other attributes
                         if (
-                            child.type is ComponentType.button
-                            and child.label == component.label  # type: ignore
-                            and child.url == component.url  # type: ignore
-                        ):
+                            (child.label and child.label == component.label)
+                            and (child.url and child.url == component.url)
+                        ) or (child.sku_id and child.sku_id == component.sku_id):
                             older = child
                             break
 
             if older:
-                older.refresh_component(component)
+                older.refresh_component(component)  # type: ignore  # this is fine, pyright is trying to be smart
                 children.append(older)
             else:
+                # fallback, should not happen as long as implementation covers all cases
                 children.append(_component_to_item(component))
 
         self.children = children
@@ -475,8 +479,9 @@ class View:
     def is_persistent(self) -> bool:
         """Whether the view is set up as persistent.
 
-        A persistent view has all their components with a set ``custom_id`` and
-        a :attr:`timeout` set to ``None``.
+        A persistent view only has components with a set ``custom_id``
+        (or non-interactive components such as :attr:`~.ButtonStyle.link` or :attr:`~.ButtonStyle.premium` buttons),
+        and a :attr:`timeout` set to ``None``.
 
         :return type: :class:`bool`
         """
