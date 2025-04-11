@@ -600,6 +600,8 @@ class GuildChannel(ABC):
 
         If there is no category then this is ``None``.
         """
+        if isinstance(self.guild, Object):
+            return None
         return self.guild.get_channel(self.category_id)  # type: ignore
 
     @property
@@ -611,7 +613,7 @@ class GuildChannel(ABC):
 
         .. versionadded:: 1.3
         """
-        if self.category_id is None:
+        if self.category_id is None or isinstance(self.guild, Object):
             return False
 
         category = self.guild.get_channel(self.category_id)
