@@ -7,7 +7,6 @@ import os
 from abc import ABC, abstractmethod
 from typing import (
     TYPE_CHECKING,
-    Any,
     Callable,
     ClassVar,
     Generic,
@@ -19,14 +18,13 @@ from typing import (
     Type,
     TypeVar,
     Union,
-    get_origin,
 )
 
 from ...components import AnySelectMenu, SelectDefaultValue
 from ...enums import ComponentType, SelectDefaultValueType
 from ...object import Object
 from ...utils import MISSING, humanize_list
-from ..item import DecoratedItem, Item, ItemShape
+from ..item import DecoratedItem, Item
 
 __all__ = ("BaseSelect",)
 
@@ -239,24 +237,20 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
 
 
 def _create_decorator(
-    cls: Type[ItemShape[S_co, P]],
-    # only for input validation
-    base_cls: Type[BaseSelect[Any, Any, Any]],
+    # FIXME(3.0): rename `cls` parameter to more closely represent any callable argument type
+    cls: Callable[P, S_co],
     /,
     *args: P.args,
     **kwargs: P.kwargs,
-) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
+) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
     if args:
         # the `*args` def above is just to satisfy the typechecker
         raise RuntimeError("expected no *args")
 
-    if (origin := get_origin(cls)) is not None:
-        cls = origin
+    if not callable(cls):
+        raise TypeError("cls argument must be callable")
 
-    if not isinstance(cls, type) or not issubclass(cls, base_cls):
-        raise TypeError(f"cls argument must be a subclass of {base_cls.__name__}, got {cls!r}")
-
-    def decorator(func: ItemCallbackType[S_co]) -> DecoratedItem[S_co]:
+    def decorator(func: ItemCallbackType[V_co, S_co]) -> DecoratedItem[S_co]:
         if not asyncio.iscoroutinefunction(func):
             raise TypeError("select function must be a coroutine function")
 

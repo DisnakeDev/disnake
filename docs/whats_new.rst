@@ -17,6 +17,172 @@ in specific versions. Please see :ref:`version_guarantees` for more information.
 
 .. towncrier release notes start
 
+.. _vp2p10p1:
+
+v2.10.1
+-------
+
+Bug Fixes
+~~~~~~~~~
+- Prevent :class:`py:DeprecationWarning` related to :attr:`Message.interaction` field on shard reconnect. (:issue:`1267`)
+
+
+.. _vp2p10p0:
+
+v2.10.0
+-------
+
+This release comes with support for user apps (see :ref:`app_command_contexts`), polls, message forwarding,
+avatar decorations, media channels, soundboards, subscriptions/monetization,
+proper support for Python 3.12 and 3.13 functionality (such as 3.12's new ``type`` statement),
+and lots of smaller features, improvements, and other bugfixes.
+
+See below for a complete list of changes.
+
+Deprecations
+~~~~~~~~~~~~
+- :meth:`Client.fetch_premium_sticker_packs` was renamed to :meth:`Client.fetch_sticker_packs`; the old name is deprecated. (:issue:`1082`)
+- Deprecate :attr:`Message.interaction` attribute and :class:`InteractionReference`. Use :attr:`Message.interaction_metadata` instead. (:issue:`1173`)
+- Deprecate :attr:`ApplicationCommand.dm_permission` and related fields/parameters of application command objects. Use ``contexts`` instead. (:issue:`1173`)
+
+New Features
+~~~~~~~~~~~~
+- Support activity assets with ``mp:`` prefix in :attr:`Activity.large_image_url` and :attr:`Activity.small_image_url`, now returning the correct url. (:issue:`687`)
+- Move asset properties from :class:`Activity` to all activity types: :attr:`~Game.large_image_url`, :attr:`~Game.small_image_url`, :attr:`~Game.large_image_text`, :attr:`~Game.small_image_text`. (:issue:`687`)
+- |commands| Skip evaluating annotations of ``self`` (if present) and ``ctx`` parameters in prefix commands. These may now use stringified annotations with types that aren't available at runtime. (:issue:`847`)
+- Add ``guild_scheduled_event`` parameter to :meth:`StageChannel.create_instance`. (:issue:`882`)
+- Add support for avatar decorations using: (:issue:`889`)
+    - :attr:`User.avatar_decoration`
+    - :attr:`Member.display_avatar_decoration`
+    - :attr:`Member.guild_avatar_decoration`
+- Added ``with_counts`` parameter to :meth:`Client.fetch_guild` and :meth:`Client.fetch_guilds`, used to determine whether to include the guild's member count and presence information. (:issue:`892`)
+- Move the event listener system implementation from :class:`.ext.commands.Bot` to :class:`.Client`, making Clients able to have more than one listener per event type. (:issue:`975`)
+- Support voice channel effect events. (:issue:`993`)
+    - New events: :func:`on_voice_channel_effect`, :func:`on_raw_voice_channel_effect`.
+    - New types: :class:`VoiceChannelEffect`, :class:`RawVoiceChannelEffectEvent`.
+    - New enum: :class:`VoiceChannelEffectAnimationType`.
+- :class:`Interaction`\s now always have a proper :attr:`~Interaction.channel` attribute, even when the bot is not part of the guild or cannot access the channel due to other reasons. (:issue:`1012`)
+- Add ``delete_after`` parameter to :meth:`Interaction.edit_original_response`, :meth:`InteractionResponse.edit_message` and :meth:`InteractionMessage.edit`. (:issue:`1014`)
+- Make :class:`Interaction` and subtypes accept the bot type as a generic parameter to denote the type returned by the :attr:`~Interaction.bot` and :attr:`~Interaction.client` properties. (:issue:`1036`, :issue:`1121`)
+- |commands| Implement :func:`~disnake.ext.commands.app_check` and :func:`~disnake.ext.commands.app_check_any` decorators. (:issue:`1045`)
+- |commands| Log errors raised by :meth:`.ext.commands.Cog.cog_unload`. (:issue:`1046`)
+- Add support for media channels. (:issue:`1050`)
+    - Add :class:`MediaChannel`.
+        - Unless otherwise noted, media channels behave just like forum channels.
+    - Add :attr:`ChannelType.media`.
+    - Add :attr:`CategoryChannel.media_channels`, :attr:`Guild.media_channels`.
+    - Add :attr:`CategoryChannel.create_media_channel`, :attr:`Guild.create_media_channel`.
+    - Add :attr:`ChannelFlags.hide_media_download_options`.
+- Rename :attr:`Intents.emojis_and_stickers` to :attr:`Intents.expressions`. An alias is provided for backwards compatibility. (:issue:`1068`)
+- Implement soundboard features. (:issue:`1068`)
+    - Sound models: :class:`PartialSoundboardSound`, :class:`SoundboardSound`, :class:`GuildSoundboardSound`
+    - Managing sounds:
+        - Get soundboard sounds using :attr:`Guild.soundboard_sounds`, :attr:`Client.get_soundboard_sound`, or fetch them using :meth:`Guild.fetch_soundboard_sound`, :meth:`Guild.fetch_soundboard_sounds`, or :meth:`Client.fetch_default_soundboard_sounds`
+        - New sounds can be created with :meth:`Guild.create_soundboard_sound`
+        - Handle guild soundboard sound updates using the :attr:`~Event.guild_soundboard_sounds_update` event
+    - Send sounds using :meth:`VoiceChannel.send_soundboard_sound`
+    - New attributes: :attr:`Guild.soundboard_limit`, :attr:`VoiceChannelEffect.sound`, :attr:`Client.soundboard_sounds`
+    - New audit log actions: :attr:`AuditLogAction.soundboard_sound_create`, :attr:`~AuditLogAction.soundboard_sound_update`, :attr:`~AuditLogAction.soundboard_sound_delete`
+- Add :class:`RoleFlags` type and :attr:`Role.flags`. (:issue:`1069`)
+- Add :class:`AttachmentFlags` type and :attr:`Attachment.flags`. (:issue:`1073`)
+- Add support for threads in :meth:`Webhook.fetch_message`, :meth:`~Webhook.edit_message`, and :meth:`~Webhook.delete_message`, as well as their sync counterparts. (:issue:`1077`)
+- Add ``default_layout`` parameter to :meth:`Guild.create_forum_channel` and :meth:`ForumChannel.clone`. (:issue:`1078`)
+- Add :attr:`RawReactionActionEvent.message_author_id`. (:issue:`1079`)
+- Add :class:`AuditLogAction` values related to creator monetization. (:issue:`1080`)
+- Add ``applied_tags`` parameter to :meth:`Webhook.send`. (:issue:`1085`)
+- Make :attr:`CustomActivity.state` fall back to the provided :attr:`~CustomActivity.name`, simplifying setting a custom status. (:issue:`1087`)
+- Add :attr:`Permissions.create_guild_expressions` and :attr:`Permissions.create_events`. (:issue:`1091`)
+- Add :attr:`TeamMember.role`. (:issue:`1094`)
+- |commands| Update :meth:`Bot.is_owner <ext.commands.Bot.is_owner>` to take team member roles into account. (:issue:`1094`)
+- Add ``created_at`` property to :attr:`AutoModRule <AutoModRule.created_at>`, :attr:`ForumTag <ForumTag.created_at>`, :attr:`Integration <Integration.created_at>`, :attr:`StageInstance <StageInstance.created_at>`, and :attr:`Team <Team.created_at>`. (:issue:`1095`)
+- Support ``integration_type`` field in :attr:`AuditLogEntry.extra` (for :attr:`~AuditLogAction.kick` and :attr:`~AuditLogAction.member_role_update` actions). (:issue:`1096`)
+- Add new :class:`Colour`\s: :meth:`~Colour.light_embed` and :meth:`~Colour.dark_embed`. (:issue:`1102`)
+- Support application subscriptions and one-time purchases (see the :ddocs:`official docs <monetization/overview>` for more info). (:issue:`1113`, :issue:`1186`, :issue:`1249`, :issue:`1257`)
+    - New types: :class:`SKU`, :class:`Entitlement`, :class:`Subscription`.
+    - New :attr:`Interaction.entitlements` attribute, and :meth:`InteractionResponse.require_premium` response type.
+    - New events: :func:`on_entitlement_create`, :func:`on_entitlement_update`, :func:`on_entitlement_delete`, :func:`on_subscription_create`, :func:`on_subscription_update` and :func:`on_subscription_delete`.
+    - New :class:`Client` methods: :meth:`~Client.skus`, :meth:`~Client.entitlements`, :meth:`~Client.fetch_entitlement`, :meth:`~Client.create_entitlement`.
+- Add :class:`SelectDefaultValue`, and add :attr:`~UserSelectMenu.default_values` to all auto-populated select menu types. (:issue:`1115`)
+- Support Python 3.12. (:issue:`1117`, :issue:`1128`, :issue:`1135`)
+- |commands| Support Python 3.12's ``type`` statement and :class:`py:typing.TypeAliasType` annotations in command signatures. (:issue:`1128`)
+- Add :attr:`Invite.type`. (:issue:`1142`)
+- Add :attr:`Locale.es_LATAM` locale. (:issue:`1148`)
+- Make typing more precise for :meth:`Client.create_global_command`, :meth:`Client.edit_global_command`, :meth:`Client.create_guild_command` and :meth:`Client.edit_guild_command`. (:issue:`1151`)
+- Add raw equivalent of :func:`on_presence_update` - :func:`on_raw_presence_update`. (:issue:`1152`)
+- :attr:`InteractionReference.user` can now be a :class:`Member` in guild contexts. (:issue:`1160`)
+- Add ``banner`` parameter to :meth:`ClientUser.edit`. (:issue:`1165`)
+- Add support for user-installed commands. See :ref:`app_command_contexts` for further details. (:issue:`1173`, :issue:`1261`)
+    - Add :attr:`ApplicationCommand.install_types` and :attr:`ApplicationCommand.contexts` fields,
+      with respective :class:`ApplicationInstallTypes` and :class:`InteractionContextTypes` flag types.
+    - :class:`Interaction` changes:
+        - Add :attr:`Interaction.context` field, reflecting the context in which the interaction occurred.
+        - Add :attr:`Interaction.authorizing_integration_owners` field and :class:`AuthorizingIntegrationOwners` class, containing details about the application installation.
+        - :attr:`Interaction.app_permissions` is now always provided by Discord.
+    - Add :attr:`Message.interaction_metadata` and :class:`InteractionMetadata` type, containing metadata for the interaction associated with a message.
+    - Add ``integration_type`` parameter to :func:`utils.oauth_url`.
+    - Add :attr:`AppInfo.guild_install_type_config` and :attr:`AppInfo.user_install_type_config` fields.
+    - |commands| Add ``install_types`` and ``contexts`` parameters to application command decorators.
+    - |commands| Add :func:`~ext.commands.install_types` and :func:`~ext.commands.contexts` decorators.
+    - |commands| Using the :class:`GuildCommandInteraction` annotation now sets :attr:`~ApplicationCommand.install_types` and :attr:`~ApplicationCommand.contexts`, instead of :attr:`~ApplicationCommand.dm_permission`.
+    - |commands| Add ``default_install_types`` and ``default_contexts`` parameters to :class:`~ext.commands.Bot`.
+- Support banning multiple users at once using :meth:`Guild.bulk_ban`. (:issue:`1174`)
+- Add the new poll discord API feature. This includes the following new classes and events: (:issue:`1175`)
+    - New types: :class:`Poll`, :class:`PollAnswer`, :class:`PollMedia`, :class:`RawPollVoteActionEvent` and :class:`PollLayoutType`.
+    - Edited :meth:`abc.Messageable.send`, :meth:`Webhook.send`, :meth:`ext.commands.Context.send` and :meth:`disnake.InteractionResponse.send_message` to be able to send polls.
+    - Edited :class:`Message` to store a new :attr:`Message.poll` attribute for polls.
+    - Edited :class:`Event` to contain the new :func:`on_poll_vote_add`, :func:`on_poll_vote_remove`, :func:`on_raw_poll_vote_add` and :func:`on_raw_poll_vote_remove`.
+- Add the possibility to pass :class:`disnake.File` objects to :meth:`Embed.set_author` and :meth:`~Embed.set_footer`. (:issue:`1184`)
+- Add support for message forwarding. New :class:`ForwardedMessage`, new enum :class:`MessageReferenceType`,  new method :func:`Message.forward`, edited :class:`MessageReference` to support message forwarding. (:issue:`1187`)
+- The ``cls`` parameter of UI component decorators (such as :func:`ui.button`) now accepts any matching callable, in addition to item subclasses. (:issue:`1190`)
+- Implement new :attr:`Message.type`\s: (:issue:`1197`)
+        - :attr:`MessageType.guild_incident_alert_mode_enabled`
+        - :attr:`MessageType.guild_incident_alert_mode_disabled`
+        - :attr:`MessageType.guild_incident_report_raid`
+        - :attr:`MessageType.guild_incident_report_false_alarm`
+- Implement new :attr:`.Member.guild_banner` property. (:issue:`1203`)
+- Add :attr:`Permissions.use_external_apps`, and a new :attr:`Permissions.apps` category to match the Discord client UI. (:issue:`1211`)
+- Add new :attr:`~MessageType.poll_result` message type. (:issue:`1212`)
+- Add :meth:`Guild.fetch_voice_state` to fetch the :class:`VoiceState` of a member. (:issue:`1216`)
+- Add new :attr:`Attachment.title` attribute. (:issue:`1218`)
+- Add :attr:`AppInfo.approximate_guild_count` and :attr:`AppInfo.approximate_user_install_count`. (:issue:`1220`)
+- Add new :meth:`.Client.fetch_sticker_pack` method. (:issue:`1221`)
+- For interactions in private channels, :attr:`Interaction.channel` is now always a proper :class:`DMChannel` or :class:`GroupChannel` object, instead of :class:`PartialMessageable`. (:issue:`1233`)
+    - This also applies to other channel objects in interactions, e.g. channel parameters in slash commands, or :attr:`ui.ChannelSelect.values`.
+- Add support for ``BaseFlags`` to allow comparison with ``flag_values`` and vice versa. (:issue:`1238`)
+- Implement :attr:`~MemberFlags.is_guest`, :attr:`~MemberFlags.started_home_actions`, :attr:`~MemberFlags.completed_home_actions`, :attr:`~MemberFlags.automod_quarantined_username`, :attr:`~MemberFlags.dm_settings_upsell_acknowledged` new member flags. (:issue:`1245`)
+- Implement the new :meth:`.Guild.fetch_role` API method. (:issue:`1247`)
+- Add :meth:`GroupChannel.get_partial_message`. (:issue:`1256`)
+
+Bug Fixes
+~~~~~~~~~
+- Fix :class:`ui.Modal` timeout issues with long-running callbacks, and multiple modals with the same user and ``custom_id``. (:issue:`914`)
+- |commands| Fix incorrect typings of :meth:`InvokableApplicationCommand.add_check <.ext.commands.InvokableApplicationCommand.add_check>`, :meth:`InvokableApplicationCommand.remove_check <.ext.commands.InvokableApplicationCommand.remove_check>`, :meth:`Bot.add_app_command_check <.ext.commands.Bot.add_app_command_check>` and :meth:`Bot.remove_app_command_check <.ext.commands.Bot.remove_app_command_check>`. (:issue:`1045`)
+- Update :meth:`Colour.dark_theme` to match Discord theme change. (:issue:`1102`)
+- Update ``choices`` type in app commands to accept any :class:`~py:typing.Sequence` or :class:`~py:typing.Mapping`, instead of the more constrained :class:`list`/:class:`dict` types. (:issue:`1136`)
+- Support fetching invites with ``null`` channel (e.g. friend invites). (:issue:`1142`)
+- Adjust type annotations to allow :class:`Object` as ``category`` parameter in :meth:`Guild.create_text_channel` and similar methods. (:issue:`1162`)
+- |commands| Fix usage of :attr:`~ext.commands.BucketType.role`\-type cooldowns in threads, which incorrectly operated on a per-channel basis instead. (:issue:`1200`)
+- |commands| Fix incorrect exception when using the :func:`~ext.commands.default_member_permissions` decorator on a :func:`~ext.commands.user_command` while also using the cog-level ``user_command_attrs`` field. (:issue:`1252`)
+- Escape forward slashes in HTTP route parameters. (:issue:`1264`)
+
+Documentation
+~~~~~~~~~~~~~
+- Add inherited attributes to :class:`TeamMember`, and fix :attr:`TeamMember.avatar` documentation. (:issue:`1094`)
+- Document the :class:`.Option` attributes, the ``description`` and ``options`` properties for :class:`.ext.commands.InvokableSlashCommand` and the ``description`` and ``body`` properties for :class:`.ext.commands.SubCommand`. (:issue:`1112`)
+- Make all "Supported Operations" container elements collapsible. (:issue:`1126`)
+
+Miscellaneous
+~~~~~~~~~~~~~
+- Update the ``python -m disnake newcog`` template to include all missing special methods. (:issue:`808`)
+- Overhaul and simplify `contribution guide <https://github.com/DisnakeDev/disnake/tree/master/CONTRIBUTING.md>`__. (:issue:`1098`)
+- |commands| Rewrite slash command signature evaluation to use the same mechanism as prefix command signatures. This should not have an impact on user code, but streamlines future changes. (:issue:`1116`)
+- Start testing with Python 3.12 in CI. (:issue:`1117`)
+- Reduce the amount of unknown (unresolved) types in public-facing APIs. (:issue:`1167`)
+- Remove ``disnake[discord]`` extra; the shim is deprecated, and has not been updated for several versions. (:issue:`1196`)
+- Move enum member documentation into docstrings. (:issue:`1243`)
+- Support Python 3.13. (:issue:`1263`)
+
+
 .. _vp2p9p3:
 
 v2.9.3

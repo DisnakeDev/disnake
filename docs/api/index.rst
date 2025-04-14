@@ -96,7 +96,6 @@ Documents
     app_info
     audit_logs
     automod
-    ui
     channels
     clients
     components
@@ -116,8 +115,11 @@ Documents
     permissions
     roles
     skus
+    soundboard
     stage_instances
     stickers
+    subscriptions
+    ui
     users
     utilities
     voice

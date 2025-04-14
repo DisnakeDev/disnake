@@ -22,7 +22,7 @@ class MyModal(disnake.ui.Modal):
                 style=TextInputStyle.paragraph,
             ),
         ]
-        super().__init__(title="Create Tag", custom_id="create_tag", components=components)
+        super().__init__(title="Create Tag", components=components)
 
     async def callback(self, inter: disnake.ModalInteraction[commands.Bot]) -> None:
         embed = disnake.Embed(title="Tag Creation")

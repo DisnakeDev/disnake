@@ -18,6 +18,7 @@ from typing import (
     Coroutine,
     Deque,
     Dict,
+    Generic,
     List,
     Literal,
     Optional,
@@ -83,8 +84,10 @@ from .raw_models import (
     RawVoiceChannelEffectEvent,
 )
 from .role import Role
+from .soundboard import GuildSoundboardSound
 from .stage_instance import StageInstance
 from .sticker import GuildSticker
+from .subscription import Subscription
 from .threads import Thread, ThreadMember
 from .ui.modal import Modal, ModalStore
 from .ui.view import View, ViewStore
@@ -106,17 +109,44 @@ if TYPE_CHECKING:
     from .types.guild import Guild as GuildPayload, UnavailableGuild as UnavailableGuildPayload
     from .types.interactions import InteractionChannel as InteractionChannelPayload
     from .types.message import Message as MessagePayload
+    from .types.soundboard import GuildSoundboardSound as GuildSoundboardSoundPayload
     from .types.sticker import GuildSticker as GuildStickerPayload
     from .types.user import User as UserPayload
     from .types.webhook import Webhook as WebhookPayload
     from .voice_client import VoiceProtocol
 
-    T = TypeVar("T")
     Channel = Union[GuildChannel, VocalGuildChannel, PrivateChannel]
     PartialChannel = Union[Channel, PartialMessageable]
 
+T = TypeVar("T")
 
-class ChunkRequest:
+
+class AsyncRequest(Generic[T]):
+    def __init__(self, guild_id: int, loop: asyncio.AbstractEventLoop) -> None:
+        self.guild_id: int = guild_id
+        self.loop: asyncio.AbstractEventLoop = loop
+        self.waiters: List[asyncio.Future[T]] = []
+
+    async def wait(self) -> T:
+        future: asyncio.Future[T] = self.loop.create_future()
+        self.waiters.append(future)
+        try:
+            return await future
+        finally:
+            self.waiters.remove(future)
+
+    def get_future(self) -> asyncio.Future[T]:
+        future: asyncio.Future[T] = self.loop.create_future()
+        self.waiters.append(future)
+        return future
+
+    def set_result(self, result: T) -> None:
+        for future in self.waiters:
+            if not future.done():
+                future.set_result(result)
+
+
+class ChunkRequest(AsyncRequest[List[Member]]):
     def __init__(
         self,
         guild_id: int,
@@ -125,13 +155,11 @@ class ChunkRequest:
         *,
         cache: bool = True,
     ) -> None:
-        self.guild_id: int = guild_id
+        super().__init__(guild_id=guild_id, loop=loop)
         self.resolver: Callable[[int], Any] = resolver
-        self.loop: asyncio.AbstractEventLoop = loop
         self.cache: bool = cache
         self.nonce: str = os.urandom(16).hex()
         self.buffer: List[Member] = []
-        self.waiters: List[asyncio.Future[List[Member]]] = []
 
     def add_members(self, members: List[Member]) -> None:
         self.buffer.extend(members)
@@ -145,23 +173,8 @@ class ChunkRequest:
                 if existing is None or existing.joined_at is None:
                     guild._add_member(member)
 
-    async def wait(self) -> List[Member]:
-        future = self.loop.create_future()
-        self.waiters.append(future)
-        try:
-            return await future
-        finally:
-            self.waiters.remove(future)
-
-    def get_future(self) -> asyncio.Future[List[Member]]:
-        future = self.loop.create_future()
-        self.waiters.append(future)
-        return future
-
     def done(self) -> None:
-        for future in self.waiters:
-            if not future.done():
-                future.set_result(self.buffer)
+        self.set_result(self.buffer)
 
 
 _log = logging.getLogger(__name__)
@@ -304,6 +317,7 @@ class ConnectionState:
         self._emojis: Dict[int, Emoji] = {}
         self._application_emojis: Dict[int, Emoji] = {}
         self._stickers: Dict[int, GuildSticker] = {}
+        self._soundboard_sounds: Dict[int, GuildSoundboardSound] = {}
         self._guilds: Dict[int, Guild] = {}
 
         if application_commands:
@@ -419,6 +433,15 @@ class ConnectionState:
         self._stickers[sticker_id] = sticker = GuildSticker(state=self, data=data)
         return sticker
 
+    def store_soundboard_sound(
+        self, guild: Guild, data: GuildSoundboardSoundPayload
+    ) -> GuildSoundboardSound:
+        sound_id = int(data["sound_id"])
+        self._soundboard_sounds[sound_id] = sound = GuildSoundboardSound(
+            state=self, data=data, guild_id=guild.id
+        )
+        return sound
+
     def store_view(self, view: View, message_id: Optional[int] = None) -> None:
         self._view_store.add_view(view, message_id)
 
@@ -453,6 +476,9 @@ class ConnectionState:
 
         for sticker in guild.stickers:
             self._stickers.pop(sticker.id, None)
+
+        for sound in guild.soundboard_sounds:
+            self._soundboard_sounds.pop(sound.id, None)
 
         del guild
 
@@ -533,6 +559,10 @@ class ConnectionState:
     def stickers(self) -> List[GuildSticker]:
         return list(self._stickers.values())
 
+    @property
+    def soundboard_sounds(self) -> List[GuildSoundboardSound]:
+        return list(self._soundboard_sounds.values())
+
     def get_emoji(self, emoji_id: Optional[int]) -> Optional[Emoji]:
         # the keys of self._emojis are ints
         return self._emojis.get(emoji_id)  # type: ignore
@@ -544,6 +574,10 @@ class ConnectionState:
     def get_sticker(self, sticker_id: Optional[int]) -> Optional[GuildSticker]:
         # the keys of self._stickers are ints
         return self._stickers.get(sticker_id)  # type: ignore
+
+    def get_soundboard_sound(self, sound_id: Optional[int]) -> Optional[GuildSoundboardSound]:
+        # the keys of self._soundboard_sounds are ints
+        return self._soundboard_sounds.get(sound_id)  # type: ignore
 
     @property
     def private_channels(self) -> List[PrivateChannel]:
@@ -1407,8 +1441,8 @@ class ConnectionState:
             return
 
         before_stickers = guild.stickers
-        for emoji in before_stickers:
-            self._stickers.pop(emoji.id, None)
+        for sticker in before_stickers:
+            self._stickers.pop(sticker.id, None)
         guild.stickers = tuple(self.store_sticker(guild, d) for d in data["stickers"])
         self.dispatch("guild_stickers_update", guild, before_stickers, guild.stickers)
 
@@ -1431,14 +1465,12 @@ class ConnectionState:
     @overload
     async def chunk_guild(
         self, guild: Guild, *, wait: Literal[False], cache: Optional[bool] = None
-    ) -> asyncio.Future[List[Member]]:
-        ...
+    ) -> asyncio.Future[List[Member]]: ...
 
     @overload
     async def chunk_guild(
         self, guild: Guild, *, wait: Literal[True] = True, cache: Optional[bool] = None
-    ) -> List[Member]:
-        ...
+    ) -> List[Member]: ...
 
     async def chunk_guild(
         self, guild: Guild, *, wait: bool = True, cache: Optional[bool] = None
@@ -1991,6 +2023,119 @@ class ConnectionState:
         entitlement = Entitlement(data=data, state=self)
         self.dispatch("entitlement_delete", entitlement)
 
+    def parse_subscription_create(self, data: gateway.SubscriptionCreate) -> None:
+        subscription = Subscription(data=data, state=self)
+        self.dispatch("subscription_create", subscription)
+
+    def parse_subscription_update(self, data: gateway.SubscriptionUpdate) -> None:
+        subscription = Subscription(data=data, state=self)
+        self.dispatch("subscription_update", subscription)
+
+    def parse_subscription_delete(self, data: gateway.SubscriptionDelete) -> None:
+        subscription = Subscription(data=data, state=self)
+        self.dispatch("subscription_delete", subscription)
+
+    def parse_guild_soundboard_sound_create(self, data: gateway.GuildSoundboardSoundCreate) -> None:
+        guild_id = utils._get_as_snowflake(data, "guild_id")
+        guild = self._get_guild(guild_id)
+        if guild is None:
+            _log.debug(
+                "GUILD_SOUNDBOARD_SOUND_CREATE referencing unknown guild ID: %s. Discarding.",
+                guild_id,
+            )
+            return
+
+        sound = self.store_soundboard_sound(guild, data)
+
+        # since both single-target `SOUND_CREATE`/`_UPDATE`/`_DELETE`s and a generic `SOUNDS_UPDATE`
+        # exist, turn these events into synthetic `SOUNDS_UPDATE`s
+        self._handle_soundboard_update(
+            guild,
+            # append new sound
+            guild.soundboard_sounds + (sound,),
+        )
+
+    def parse_guild_soundboard_sound_update(self, data: gateway.GuildSoundboardSoundUpdate) -> None:
+        guild_id = utils._get_as_snowflake(data, "guild_id")
+        guild = self._get_guild(guild_id)
+        if guild is None:
+            _log.debug(
+                "GUILD_SOUNDBOARD_SOUND_UPDATE referencing an unknown guild ID: %s. Discarding.",
+                guild_id,
+            )
+            return
+
+        sound_id = int(data["sound_id"])
+        sound = self.get_soundboard_sound(sound_id)
+        if sound is None:
+            _log.debug(
+                "GUILD_SOUNDBOARD_SOUND_UPDATE referencing unknown sound ID: %s. Discarding.",
+                sound_id,
+            )
+            return
+
+        self._soundboard_sounds.pop(sound.id, None)
+        new_sound = self.store_soundboard_sound(guild, data)
+
+        self._handle_soundboard_update(
+            guild,
+            # replace sound in tuple at same position
+            tuple((new_sound if s.id == sound.id else s) for s in guild.soundboard_sounds),
+        )
+
+    def parse_guild_soundboard_sound_delete(self, data: gateway.GuildSoundboardSoundDelete) -> None:
+        guild = self._get_guild(int(data["guild_id"]))
+        if guild is None:
+            _log.debug(
+                "GUILD_SOUNDBOARD_SOUND_DELETE referencing an unknown guild ID: %s. Discarding.",
+                data["guild_id"],
+            )
+            return
+
+        sound_id = int(data["sound_id"])
+        sound = self.get_soundboard_sound(sound_id)
+        if sound is None:
+            _log.debug(
+                "GUILD_SOUNDBOARD_SOUND_UPDATE referencing unknown sound ID: %s. Discarding.",
+                sound_id,
+            )
+            return
+
+        self._soundboard_sounds.pop(sound.id, None)
+
+        self._handle_soundboard_update(
+            guild,
+            # remove sound from tuple
+            tuple(s for s in guild.soundboard_sounds if s.id != sound.id),
+        )
+
+    def parse_guild_soundboard_sounds_update(
+        self, data: gateway.GuildSoundboardSoundsUpdate
+    ) -> None:
+        guild = self._get_guild(int(data["guild_id"]))
+        if guild is None:
+            _log.debug(
+                "GUILD_SOUNDBOARD_SOUNDS_UPDATE referencing an unknown guild ID: %s. Discarding.",
+                data["guild_id"],
+            )
+            return
+
+        for sound in guild.soundboard_sounds:
+            self._soundboard_sounds.pop(sound.id, None)
+
+        self._handle_soundboard_update(
+            guild,
+            tuple(self.store_soundboard_sound(guild, d) for d in data["soundboard_sounds"]),
+        )
+
+    def _handle_soundboard_update(
+        self, guild: Guild, new_sounds: Tuple[GuildSoundboardSound, ...]
+    ) -> None:
+        before_sounds = guild.soundboard_sounds
+        guild.soundboard_sounds = new_sounds
+
+        self.dispatch("guild_soundboard_sounds_update", guild, before_sounds, new_sounds)
+
     def _get_reaction_user(
         self, channel: MessageableChannel, user_id: int
     ) -> Optional[Union[User, Member]]:
@@ -2075,8 +2220,7 @@ class ConnectionState:
         guild: Optional[Union[Guild, Object]],
         *,
         return_messageable: Literal[False] = False,
-    ) -> AnyChannel:
-        ...
+    ) -> AnyChannel: ...
 
     @overload
     def _get_partial_interaction_channel(
@@ -2085,8 +2229,7 @@ class ConnectionState:
         guild: Optional[Union[Guild, Object]],
         *,
         return_messageable: Literal[True],
-    ) -> MessageableChannel:
-        ...
+    ) -> MessageableChannel: ...
 
     # note: this resolves unknown types to `PartialMessageable`
     def _get_partial_interaction_channel(
@@ -2156,7 +2299,10 @@ class ConnectionState:
         *,
         with_localizations: bool = True,
     ) -> List[APIApplicationCommand]:
-        results = await self.http.get_global_commands(self.application_id, with_localizations=with_localizations)  # type: ignore
+        results = await self.http.get_global_commands(
+            self.application_id,  # type: ignore
+            with_localizations=with_localizations,
+        )
         return [application_command_factory(data) for data in results]
 
     async def fetch_global_command(self, command_id: int) -> APIApplicationCommand:
@@ -2167,7 +2313,8 @@ class ConnectionState:
         self, application_command: ApplicationCommand
     ) -> APIApplicationCommand:
         result = await self.http.upsert_global_command(
-            self.application_id, application_command.to_dict()  # type: ignore
+            self.application_id,  # type: ignore
+            application_command.to_dict(),
         )
         cmd = application_command_factory(result)
         self._add_global_application_command(cmd)
@@ -2177,7 +2324,9 @@ class ConnectionState:
         self, command_id: int, new_command: ApplicationCommand
     ) -> APIApplicationCommand:
         result = await self.http.edit_global_command(
-            self.application_id, command_id, new_command.to_dict()  # type: ignore
+            self.application_id,  # type: ignore
+            command_id,
+            new_command.to_dict(),
         )
         cmd = application_command_factory(result)
         self._add_global_application_command(cmd)
@@ -2204,7 +2353,11 @@ class ConnectionState:
         *,
         with_localizations: bool = True,
     ) -> List[APIApplicationCommand]:
-        results = await self.http.get_guild_commands(self.application_id, guild_id, with_localizations=with_localizations)  # type: ignore
+        results = await self.http.get_guild_commands(
+            self.application_id,  # type: ignore
+            guild_id,
+            with_localizations=with_localizations,
+        )
         return [application_command_factory(data) for data in results]
 
     async def fetch_guild_command(self, guild_id: int, command_id: int) -> APIApplicationCommand:
@@ -2215,7 +2368,9 @@ class ConnectionState:
         self, guild_id: int, application_command: ApplicationCommand
     ) -> APIApplicationCommand:
         result = await self.http.upsert_guild_command(
-            self.application_id, guild_id, application_command.to_dict()  # type: ignore
+            self.application_id,  # type: ignore
+            guild_id,
+            application_command.to_dict(),
         )
         cmd = application_command_factory(result)
         self._add_guild_application_command(guild_id, cmd)
@@ -2225,7 +2380,10 @@ class ConnectionState:
         self, guild_id: int, command_id: int, new_command: ApplicationCommand
     ) -> APIApplicationCommand:
         result = await self.http.edit_guild_command(
-            self.application_id, guild_id, command_id, new_command.to_dict()  # type: ignore
+            self.application_id,  # type: ignore
+            guild_id,
+            command_id,
+            new_command.to_dict(),
         )
         cmd = application_command_factory(result)
         self._add_guild_application_command(guild_id, cmd)
@@ -2233,7 +2391,9 @@ class ConnectionState:
 
     async def delete_guild_command(self, guild_id: int, command_id: int) -> None:
         await self.http.delete_guild_command(
-            self.application_id, guild_id, command_id  # type: ignore
+            self.application_id,  # type: ignore
+            guild_id,
+            command_id,
         )
         self._remove_guild_application_command(guild_id, command_id)
 
@@ -2242,7 +2402,9 @@ class ConnectionState:
     ) -> List[APIApplicationCommand]:
         payload = [cmd.to_dict() for cmd in application_commands]
         results = await self.http.bulk_upsert_guild_commands(
-            self.application_id, guild_id, payload  # type: ignore
+            self.application_id,  # type: ignore
+            guild_id,
+            payload,
         )
         commands = [application_command_factory(data) for data in results]
         self._guild_application_commands[guild_id] = {cmd.id: cmd for cmd in commands}
@@ -2254,7 +2416,8 @@ class ConnectionState:
         self, guild_id: int
     ) -> List[GuildApplicationCommandPermissions]:
         array = await self.http.get_guild_application_command_permissions(
-            self.application_id, guild_id  # type: ignore
+            self.application_id,  # type: ignore
+            guild_id,
         )
         return [GuildApplicationCommandPermissions(state=self, data=obj) for obj in array]
 
@@ -2262,7 +2425,9 @@ class ConnectionState:
         self, guild_id: int, command_id: int
     ) -> GuildApplicationCommandPermissions:
         data = await self.http.get_application_command_permissions(
-            self.application_id, guild_id, command_id  # type: ignore
+            self.application_id,  # type: ignore
+            guild_id,
+            command_id,
         )
         return GuildApplicationCommandPermissions(state=self, data=data)
 
@@ -2316,10 +2481,10 @@ class AutoShardedConnectionState(ConnectionState):
             if new_author is not None and new_author is not msg.author:
                 msg.author = new_author
 
-            if msg.interaction is not None and isinstance(msg.interaction.user, Member):
-                new_author = msg.guild.get_member(msg.interaction.user.id)
-                if new_author is not None and new_author is not msg.interaction.user:
-                    msg.interaction.user = new_author
+            if msg._interaction is not None and isinstance(msg._interaction.user, Member):
+                new_author = msg.guild.get_member(msg._interaction.user.id)
+                if new_author is not None and new_author is not msg._interaction.user:
+                    msg._interaction.user = new_author
 
     async def chunker(
         self,

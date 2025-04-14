@@ -146,192 +146,32 @@ Enumerations
 VerificationLevel
 ~~~~~~~~~~~~~~~~~
 
-.. class:: VerificationLevel
-
-    Specifies a :class:`Guild`\'s verification level, which is the criteria in
-    which a member must meet before being able to send messages to the guild.
-
-    .. collapse:: operations
-
-        .. versionadded:: 2.0
-
-        .. describe:: x == y
-
-            Checks if two verification levels are equal.
-        .. describe:: x != y
-
-            Checks if two verification levels are not equal.
-        .. describe:: x > y
-
-            Checks if a verification level is higher than another.
-        .. describe:: x < y
-
-            Checks if a verification level is lower than another.
-        .. describe:: x >= y
-
-            Checks if a verification level is higher or equal to another.
-        .. describe:: x <= y
-
-            Checks if a verification level is lower or equal to another.
-
-    .. attribute:: none
-
-        No criteria set.
-    .. attribute:: low
-
-        Member must have a verified email on their Discord account.
-    .. attribute:: medium
-
-        Member must have a verified email and be registered on Discord for more
-        than five minutes.
-    .. attribute:: high
-
-        Member must have a verified email, be registered on Discord for more
-        than five minutes, and be a member of the guild itself for more than
-        ten minutes.
-    .. attribute:: highest
-
-        Member must have a verified phone on their Discord account.
+.. autoclass:: VerificationLevel()
+    :members:
 
 NotificationLevel
 ~~~~~~~~~~~~~~~~~
 
-.. class:: NotificationLevel
-
-    Specifies whether a :class:`Guild` has notifications on for all messages or mentions only by default.
-
-    .. collapse:: operations
-
-        .. describe:: x == y
-
-            Checks if two notification levels are equal.
-        .. describe:: x != y
-
-            Checks if two notification levels are not equal.
-        .. describe:: x > y
-
-            Checks if a notification level is higher than another.
-        .. describe:: x < y
-
-            Checks if a notification level is lower than another.
-        .. describe:: x >= y
-
-            Checks if a notification level is higher or equal to another.
-        .. describe:: x <= y
-
-            Checks if a notification level is lower or equal to another.
-
-    .. attribute:: all_messages
-
-        Members receive notifications for every message regardless of them being mentioned.
-    .. attribute:: only_mentions
-
-        Members receive notifications for messages they are mentioned in.
+.. autoclass:: NotificationLevel()
+    :members:
 
 ContentFilter
 ~~~~~~~~~~~~~
 
-.. class:: ContentFilter
-
-    Specifies a :class:`Guild`\'s explicit content filter, which is the machine
-    learning algorithms that Discord uses to detect if an image contains
-    NSFW content.
-
-    .. collapse:: operations
-
-        .. describe:: x == y
-
-            Checks if two content filter levels are equal.
-        .. describe:: x != y
-
-            Checks if two content filter levels are not equal.
-        .. describe:: x > y
-
-            Checks if a content filter level is higher than another.
-        .. describe:: x < y
-
-            Checks if a content filter level is lower than another.
-        .. describe:: x >= y
-
-            Checks if a content filter level is higher or equal to another.
-        .. describe:: x <= y
-
-            Checks if a content filter level is lower or equal to another.
-
-    .. attribute:: disabled
-
-        The guild does not have the content filter enabled.
-    .. attribute:: no_role
-
-        The guild has the content filter enabled for members without a role.
-    .. attribute:: all_members
-
-        The guild has the content filter enabled for every member.
+.. autoclass:: ContentFilter()
+    :members:
 
 NSFWLevel
 ~~~~~~~~~
 
-.. class:: NSFWLevel
-
-    Represents the NSFW level of a guild.
-
-    .. versionadded:: 2.0
-
-    .. collapse:: operations
-
-        .. describe:: x == y
-
-            Checks if two NSFW levels are equal.
-        .. describe:: x != y
-
-            Checks if two NSFW levels are not equal.
-        .. describe:: x > y
-
-            Checks if a NSFW level is higher than another.
-        .. describe:: x < y
-
-            Checks if a NSFW level is lower than another.
-        .. describe:: x >= y
-
-            Checks if a NSFW level is higher or equal to another.
-        .. describe:: x <= y
-
-            Checks if a NSFW level is lower or equal to another.
-
-    .. attribute:: default
-
-        The guild has not been categorised yet.
-
-    .. attribute:: explicit
-
-        The guild contains NSFW content.
-
-    .. attribute:: safe
-
-        The guild does not contain any NSFW content.
-
-    .. attribute:: age_restricted
-
-        The guild may contain NSFW content.
-
+.. autoclass:: NSFWLevel()
+    :members:
 
 OnboardingPromptType
 ~~~~~~~~~~~~~~~~~~~~
 
-.. class:: OnboardingPromptType
-
-    Represents the type of onboarding prompt.
-
-    .. versionadded:: 2.9
-
-    .. attribute:: multiple_choice
-
-        The prompt is a multiple choice prompt.
-
-    .. attribute:: dropdown
-
-        The prompt is a dropdown prompt.
-
+.. autoclass:: OnboardingPromptType()
+    :members:
 
 Events
 ------

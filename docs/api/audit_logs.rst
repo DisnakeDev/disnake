@@ -525,11 +525,15 @@ AuditLogDiff
 
     .. attribute:: emoji
 
-        The name of the sticker's or role's emoji being changed.
+        For stickers or roles, the emoji name of the target being changed
+        (this will be of type :class:`str`).
 
-        See also :attr:`GuildSticker.emoji` or :attr:`Role.emoji`.
+        For soundboard sounds, the associated emoji of the target being changed
+        (this will be of type Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]).
 
-        :type: :class:`str`
+        See also :attr:`GuildSticker.emoji`, :attr:`Role.emoji`, or :attr:`GuildSoundboardSound.emoji`.
+
+        :type: Union[:class:`str`, Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]]
 
     .. attribute:: description
 
@@ -715,6 +719,12 @@ AuditLogDiff
         The default sort order of threads in a forum/media channel being changed.
 
         :type: Optional[:class:`ThreadSortOrder`]
+
+    .. attribute:: volume
+
+        The volume of a soundboard sound being changed.
+
+        :type: :class:`float`
 
 Enumerations
 ------------
@@ -1585,6 +1595,44 @@ AuditLogAction
         .. versionchanged:: 2.6
             Added support for :class:`PartialIntegration`, and added ``integration`` to :attr:`~AuditLogEntry.extra`.
 
+    .. attribute:: soundboard_sound_create
+
+        A soundboard sound was created.
+
+        Possible attributes for :class:`AuditLogDiff`:
+
+        - :attr:`~AuditLogDiff.id`
+        - :attr:`~AuditLogDiff.name`
+        - :attr:`~AuditLogDiff.volume`
+        - :attr:`~AuditLogDiff.emoji`
+
+        .. versionadded:: 2.10
+
+    .. attribute:: soundboard_sound_update
+
+        A soundboard sound was updated.
+
+        Possible attributes for :class:`AuditLogDiff`:
+
+        - :attr:`~AuditLogDiff.name`
+        - :attr:`~AuditLogDiff.volume`
+        - :attr:`~AuditLogDiff.emoji`
+
+        .. versionadded:: 2.10
+
+    .. attribute:: soundboard_sound_delete
+
+        A soundboard sound was deleted.
+
+        Possible attributes for :class:`AuditLogDiff`:
+
+        - :attr:`~AuditLogDiff.id`
+        - :attr:`~AuditLogDiff.name`
+        - :attr:`~AuditLogDiff.volume`
+        - :attr:`~AuditLogDiff.emoji`
+
+        .. versionadded:: 2.10
+
     .. attribute:: automod_rule_create
 
         An auto moderation rule was created.
@@ -1706,23 +1754,8 @@ AuditLogAction
 AuditLogActionCategory
 ~~~~~~~~~~~~~~~~~~~~~~
 
-.. class:: AuditLogActionCategory
-
-    Represents the category that the :class:`AuditLogAction` belongs to.
-
-    This can be retrieved via :attr:`AuditLogEntry.category`.
-
-    .. attribute:: create
-
-        The action is the creation of something.
-
-    .. attribute:: delete
-
-        The action is the deletion of something.
-
-    .. attribute:: update
-
-        The action is the update of something.
+.. autoclass:: AuditLogActionCategory()
+    :members:
 
 Events
 ------

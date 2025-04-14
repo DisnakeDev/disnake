@@ -303,8 +303,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         data: Union[MemberWithUserPayload, GuildMemberUpdateEvent],
         guild: Guild,
         state: ConnectionState,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     def __init__(
@@ -314,8 +313,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         guild: Guild,
         state: ConnectionState,
         user_data: UserPayload,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     def __init__(
         self,
@@ -387,11 +385,15 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     @classmethod
     def _try_upgrade(
-        cls, *, data: UserWithMemberPayload, guild: Guild, state: ConnectionState
+        cls,
+        *,
+        data: Union[UserPayload, UserWithMemberPayload],
+        guild: Guild,
+        state: ConnectionState,
     ) -> Union[User, Self]:
         # A User object with a 'member' key
         try:
-            member_data = data.pop("member")
+            member_data = data.pop("member")  # type: ignore
         except KeyError:
             return state.create_user(data)
         else:
@@ -451,7 +453,8 @@ class Member(disnake.abc.Messageable, _UserTag):
     ) -> Optional[Tuple[User, User]]:
         self.activities = tuple(create_activity(a, state=self._state) for a in data["activities"])
         self._client_status = {
-            sys.intern(key): sys.intern(value) for key, value in data.get("client_status", {}).items()  # type: ignore
+            sys.intern(key): sys.intern(value)  # type: ignore
+            for key, value in data.get("client_status", {}).items()
         }
         self._client_status[None] = sys.intern(data["status"])
 
@@ -806,8 +809,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         *,
         clean_history_duration: Union[int, datetime.timedelta] = 86400,
         reason: Optional[str] = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     async def ban(
@@ -815,8 +817,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         *,
         delete_message_days: Literal[0, 1, 2, 3, 4, 5, 6, 7] = 1,
         reason: Optional[str] = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     async def ban(
         self,
@@ -1190,8 +1191,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         *,
         duration: Optional[Union[float, datetime.timedelta]],
         reason: Optional[str] = None,
-    ) -> Member:
-        ...
+    ) -> Member: ...
 
     @overload
     async def timeout(
@@ -1199,8 +1199,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         *,
         until: Optional[datetime.datetime],
         reason: Optional[str] = None,
-    ) -> Member:
-        ...
+    ) -> Member: ...
 
     async def timeout(
         self,

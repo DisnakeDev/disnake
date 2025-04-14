@@ -25,9 +25,25 @@ defaults:
     shell: bash
 
 jobs:
+  lock-dependencies:
+    # The only purpose of this is to create a lockfile, which will be cached
+    # to be used with subsequent jobs.
+    # This provides somewhat of a middle ground and avoids having each job lock dependencies on its own,
+    # while still not needing to commit a lockfile to the repo, which is discouraged for libraries as per
+    # https://pdm-project.org/en/latest/usage/lockfile/
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    # Instead of setup-env, we call the cache-pdm action here directly.
+    # This avoids having to install PDM, only to find out the cache is already up to date sometimes.
+    - name: Configure cache
+      uses: ./.github/actions/cache-pdm
+      with:
+        env-already-initialized: false
+
   lint:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v4
 
@@ -36,9 +52,10 @@ jobs:
       uses: pre-commit/action@v3.0.1
 
   docs:
-    # unlike the other workflows, we are using version 20.04 here as
-    # readthedocs uses 20.04 for building our docs, and we want to be explicit
-    runs-on: ubuntu-20.04
+    # unlike the other workflows, we explicitly use the same version as
+    # readthedocs (see .readthedocs.yml) here for consistency
+    runs-on: ubuntu-24.04
+    needs: lock-dependencies
     steps:
     - uses: actions/checkout@v4
 
@@ -52,6 +69,7 @@ jobs:
 
   pyright:
     runs-on: ubuntu-latest
+    needs: lock-dependencies
     strategy:
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
@@ -104,6 +122,7 @@ jobs:
 
   misc:
     runs-on: ubuntu-latest
+    needs: lock-dependencies
     steps:
     - uses: actions/checkout@v4
 
@@ -147,6 +166,7 @@ jobs:
 
   pytest:
     runs-on: ${{ matrix.os }}
+    needs: lock-dependencies
     strategy:
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]

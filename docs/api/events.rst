@@ -670,7 +670,7 @@ Emojis
 
     Called when a :class:`Guild` adds or removes :class:`Emoji`.
 
-    This requires :attr:`Intents.emojis_and_stickers` to be enabled.
+    This requires :attr:`Intents.expressions` to be enabled.
 
     :param guild: The guild who got their emojis updated.
     :type guild: :class:`Guild`
@@ -978,6 +978,24 @@ Scheduled Events
     :param payload: The raw event payload data.
     :type payload: :class:`RawGuildScheduledEventUserActionEvent`
 
+Soundboard
+++++++++++
+
+.. function:: on_guild_soundboard_sounds_update(guild, before, after)
+
+    Called when a :class:`Guild` updates its soundboard sounds.
+
+    This requires :attr:`Intents.expressions` to be enabled.
+
+    .. versionadded:: 2.10
+
+    :param guild: The guild who got their soundboard sounds updated.
+    :type guild: :class:`Guild`
+    :param before: A list of soundboard sounds before the update.
+    :type before: Sequence[:class:`GuildSoundboardSound`]
+    :param after: A list of soundboard sounds after the update.
+    :type after: Sequence[:class:`GuildSoundboardSound`]
+
 Stage Instances
 +++++++++++++++
 
@@ -1014,7 +1032,7 @@ Stickers
 
     Called when a :class:`Guild` updates its stickers.
 
-    This requires :attr:`Intents.emojis_and_stickers` to be enabled.
+    This requires :attr:`Intents.expressions` to be enabled.
 
     .. versionadded:: 2.0
 
@@ -1541,10 +1559,11 @@ This section documents events related to Discord chat messages.
     :param data: The raw event payload data.
     :type data: :class:`RawTypingEvent`
 
-Entitlements
+Monetization
 ~~~~~~~~~~~~
 
-This section documents events related to entitlements, which are used for application subscriptions.
+This section documents events related to :ddocs:`monetization <monetization/overview>`,
+including application subscriptions and entitlements.
 
 .. function:: on_entitlement_create(entitlement)
 
@@ -1562,8 +1581,8 @@ This section documents events related to entitlements, which are used for applic
 
     Called when an entitlement is updated.
 
-    This happens e.g. when a user's subscription gets renewed (in which case the
-    :attr:`Entitlement.ends_at` attribute reflects the new expiration date).
+    This happens **only** when a user's subscription ends or is cancelled (in which case the
+    :attr:`Entitlement.ends_at` attribute reflects the expiration date).
 
     .. versionadded:: 2.10
 
@@ -1583,11 +1602,38 @@ This section documents events related to entitlements, which are used for applic
     :param entitlement: The entitlement that was deleted.
     :type entitlement: :class:`Entitlement`
 
+.. function:: on_subscription_create(subscription)
+
+    Called when a subscription is created.
+
+    .. versionadded:: 2.10
+
+    :param subscription: The subscription that was created.
+    :type subscription: :class:`Subscription`
+
+.. function:: on_subscription_update(subscription)
+
+    Called when a subscription is updated.
+
+    .. versionadded:: 2.10
+
+    :param subscription: The subscription that was updated.
+    :type subscription: :class:`Subscription`
+
+.. function:: on_subscription_delete(subscription)
+
+    Called when a subscription is deleted.
+
+    .. versionadded:: 2.10
+
+    :param subscription: The subscription that was deleted.
+    :type subscription: :class:`Subscription`
+
 Enumerations
 ------------
 
 Event
 ~~~~~
 
-.. autoclass:: Event
+.. autoclass:: Event()
     :members:

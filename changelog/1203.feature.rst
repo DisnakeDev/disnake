@@ -1,1 +1,0 @@
-Implement new :attr:`.Member.guild_banner` property.

@@ -14,7 +14,7 @@ __title__ = "disnake"
 __author__ = "Rapptz, EQUENOS"
 __license__ = "MIT"
 __copyright__ = "Copyright 2015-present Rapptz, 2021-present EQUENOS"
-__version__ = "2.10.0a"
+__version__ = "2.11.0a"
 
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
@@ -63,8 +63,10 @@ from .reaction import *
 from .role import *
 from .shard import *
 from .sku import *
+from .soundboard import *
 from .stage_instance import *
 from .sticker import *
+from .subscription import *
 from .team import *
 from .template import *
 from .threads import *
@@ -85,7 +87,7 @@ class VersionInfo(NamedTuple):
 
 
 # fmt: off
-version_info: VersionInfo = VersionInfo(major=2, minor=10, micro=0, releaselevel="alpha", serial=0)
+version_info: VersionInfo = VersionInfo(major=2, minor=11, micro=0, releaselevel="alpha", serial=0)
 # fmt: on
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())

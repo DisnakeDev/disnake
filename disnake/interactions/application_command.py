@@ -77,6 +77,13 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
 
     author: Union[:class:`User`, :class:`Member`]
         The user or member that sent the interaction.
+
+        .. note::
+            In scenarios where an interaction occurs in a guild but :attr:`.guild` is unavailable,
+            such as with user-installed applications in guilds, some attributes of :class:`Member`\\s
+            that depend on the guild/role cache will not work due to an API limitation.
+            This includes :attr:`~Member.roles`, :attr:`~Member.top_role`, :attr:`~Member.role_icon`,
+            and :attr:`~Member.guild_permissions`.
     locale: :class:`Locale`
         The selected language of the interaction's author.
 
@@ -102,6 +109,21 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
     entitlements: List[:class:`Entitlement`]
         The entitlements for the invoking user and guild,
         representing access to an application subscription.
+
+        .. versionadded:: 2.10
+
+    authorizing_integration_owners: :class:`AuthorizingIntegrationOwners`
+        Details about the authorizing user/guild for the application installation
+        related to the interaction.
+
+        .. versionadded:: 2.10
+
+    context: :class:`InteractionContextTypes`
+        The context where the interaction was triggered from.
+
+        This is a flag object, with exactly one of the flags set to ``True``.
+        To check whether an interaction originated from e.g. a :attr:`~InteractionContextTypes.guild`
+        context, you can use ``if interaction.context.guild:``.
 
         .. versionadded:: 2.10
 
@@ -140,15 +162,18 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
         return kwargs
 
 
+# TODO(3.0): consider making these classes @type_check_only and not affect runtime behavior, or even remove entirely
 class GuildCommandInteraction(ApplicationCommandInteraction[ClientT]):
     """An :class:`ApplicationCommandInteraction` subclass, primarily meant for annotations.
 
-    This prevents the command from being invoked in DMs by automatically setting
-    :attr:`ApplicationCommand.dm_permission` to ``False`` for user/message commands and top-level slash commands.
-
+    This restricts the command to only be usable in guilds and only as a guild-installed command,
+    by automatically setting :attr:`ApplicationCommand.contexts` to :attr:`~InteractionContextTypes.guild` only
+    and :attr:`ApplicationCommand.install_types` to :attr:`~ApplicationInstallTypes.guild` only.
     Note that this does not apply to slash subcommands, subcommand groups, or autocomplete callbacks.
 
-    Additionally, annotations of some attributes are modified to match the expected types in guilds.
+    Additionally, the type annotations of :attr:`~Interaction.author`, :attr:`~Interaction.guild`,
+    :attr:`~Interaction.guild_id`, :attr:`~Interaction.guild_locale`, and :attr:`~Interaction.me`
+    are modified to match the expected types in guilds.
     """
 
     author: Member
@@ -159,20 +184,22 @@ class GuildCommandInteraction(ApplicationCommandInteraction[ClientT]):
 
 
 class UserCommandInteraction(ApplicationCommandInteraction[ClientT]):
-    """An :class:`ApplicationCommandInteraction` subclass meant for annotations.
+    """An :class:`ApplicationCommandInteraction` subclass meant for annotations
+    in user context menu commands.
 
-    No runtime behavior is changed but annotations are modified
-    to seem like the interaction is specifically a user command.
+    No runtime behavior is changed, but the type annotations of :attr:`~ApplicationCommandInteraction.target`
+    are modified to match the expected type with user commands.
     """
 
     target: Union[User, Member]
 
 
 class MessageCommandInteraction(ApplicationCommandInteraction[ClientT]):
-    """An :class:`ApplicationCommandInteraction` subclass meant for annotations.
+    """An :class:`ApplicationCommandInteraction` subclass meant for annotations
+    in message context menu commands.
 
-    No runtime behavior is changed but annotations are modified
-    to seem like the interaction is specifically a message command.
+    No runtime behavior is changed, but the type annotations of :attr:`~ApplicationCommandInteraction.target`
+    are modified to match the expected type with message commands.
     """
 
     target: Message
