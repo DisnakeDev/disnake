@@ -2425,11 +2425,7 @@ class Client:
 
         Retrieves an application level :class:`~disnake.Emoji` based on its ID.
 
-        .. note::
-
-            This method is an API call. If you have :attr:`disnake.Client.cache_application_emojis` enabled, consider :meth:`get_application_emoji` instead.
-
-        .. versionadded:: 2.10
+        .. versionadded:: 2.11
 
         Parameters
         ----------
@@ -2456,7 +2452,7 @@ class Client:
 
         Creates an application emoji.
 
-        .. versionadded:: 2.10
+        .. versionadded:: 2.11
 
         Parameters
         ----------
@@ -2493,7 +2489,7 @@ class Client:
 
         Retrieves all the :class:`.Emoji` of the application.
 
-        ..  versionadded:: 2.10
+        ..  versionadded:: 2.11
 
         Raises
         ------

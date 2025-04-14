@@ -51,9 +51,9 @@ class Emoji(_EmojiTag, AssetMixin):
 
             Returns the emoji rendered for Discord.
 
-    .. versionchanged:: 2.10
+    .. versionchanged:: 2.11
 
-        This class can now represents app emojis too. Denoted by having :attr:`.Emoji.guild_id` as ``None``.
+        This class can now represents app emojis too. You can use :meth:`Emoji.is_app_emoji` to check for this.
 
     Attributes
     ----------
@@ -168,7 +168,7 @@ class Emoji(_EmojiTag, AssetMixin):
     def guild(self) -> Optional[Guild]:
         """Optional[:class:`Guild`]: The guild this emoji belongs to. ``None`` if this is an app emoji.
 
-        .. versionchanged:: 2.10
+        .. versionchanged:: 2.11
 
             This can now return ``None`` if the emoji is an
             application owned emoji.
@@ -180,11 +180,21 @@ class Emoji(_EmojiTag, AssetMixin):
     def application_id(self) -> Optional[int]:
         """Optional[:class:`int`]: The ID of the application which owns this emoji.
 
-        .. versionadded:: 2.10
+        .. versionadded:: 2.11
         """
         if self.guild is None:
             return None
         return self._state.application_id
+
+    @property
+    def is_app_emoji(self) -> bool:
+        """:class:`bool`: Whether this is an application emoji.
+
+        .. versionadded:: 2.11
+        """
+        if self.guild is None:
+            return True
+        return False
 
     def is_usable(self) -> bool:
         """Whether the bot can use this emoji.
@@ -226,7 +236,7 @@ class Emoji(_EmojiTag, AssetMixin):
         if self.guild is None:
             if self.application_id is None:
                 # should never happen
-                raise ValueError("Idk message about invalid state?! Pls catch this when reviewing")
+                raise ValueError("This may be a library bug! Open an issue on GitHub.")
 
             return await self._state.http.delete_app_emoji(self.application_id, self.id)
         await self._state.http.delete_custom_emoji(self.guild.id, self.id, reason=reason)
@@ -278,7 +288,7 @@ class Emoji(_EmojiTag, AssetMixin):
         if self.guild is None:
             if self.application_id is None:
                 # should never happen
-                raise ValueError("Idk message about invalid state?! Pls catch this when reviewing")
+                raise ValueError("This may be a library bug! Open an issue on GitHub.")
 
             data = await self._state.http.edit_app_emoji(self.application_id, self.id, name)
         else:
