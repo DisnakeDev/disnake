@@ -182,7 +182,7 @@ class Emoji(_EmojiTag, AssetMixin):
 
         .. versionadded:: 2.11
         """
-        if self.guild is None:
+        if self.guild_id is None:
             return None
         return self._state.application_id
 
@@ -192,7 +192,7 @@ class Emoji(_EmojiTag, AssetMixin):
 
         .. versionadded:: 2.11
         """
-        if self.guild is None:
+        if self.guild_id is None:
             return True
         return False
 
