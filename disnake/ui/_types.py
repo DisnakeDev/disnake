@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Optional, Sequence, TypeVar, Union
+from typing import TYPE_CHECKING, Any, NoReturn, Optional, Sequence, TypeVar, Union
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
@@ -48,23 +48,30 @@ MessageTopLevelComponentV2 = Union[
     "Separator",
     "Container",
 ]
+MessageTopLevelComponent = Union[MessageTopLevelComponentV1, MessageTopLevelComponentV2]
 
 ActionRowChildT = TypeVar("ActionRowChildT", bound="WrappedComponent")
-# valid input types where action rows are expected
-# (provides some shortcuts, such as converting lists to action rows)
-ActionRowInput = Union[
-    ActionRowChildT,  # single child component
-    "ActionRow[ActionRowChildT]",  # single action row
-    Sequence[  # multiple items, rows, or lists of items
-        Union[ActionRowChildT, "ActionRow[ActionRowChildT]", Sequence[ActionRowChildT]]
+NonActionRowChildT = TypeVar("NonActionRowChildT", bound=MessageTopLevelComponentV2)
+
+# generic utility type for any single ui component (within some generic bounds)
+AnyUIComponentInput = Union[
+    ActionRowChildT,  # action row child component
+    "ActionRow[ActionRowChildT]",  # action row with given child types
+    NonActionRowChildT,  # some subset of (v2) components that work outside of action rows
+]
+
+# The generic to end all generics.
+# This represents valid input types where components are expected,
+# providing some shortcuts/quality-of-life input shapes.
+ComponentInput = Union[
+    AnyUIComponentInput[ActionRowChildT, NonActionRowChildT],  # any single component
+    Sequence[  # or, a sequence of either -
+        Union[
+            AnyUIComponentInput[ActionRowChildT, NonActionRowChildT],  # - any single component
+            Sequence[ActionRowChildT],  # - a sequence of action row child types
+        ]
     ],
 ]
 
-# shortcuts for valid actionrow-ish input types
-MessageComponentInputV1 = ActionRowInput[ActionRowMessageComponent]
-MessageComponentInputV2 = Union[
-    MessageTopLevelComponentV2,
-    Sequence[MessageTopLevelComponentV2],
-]
-MessageComponentInput = Union[MessageComponentInputV1, MessageComponentInputV2]
-ModalComponentInput = ActionRowInput[ActionRowModalComponent]
+MessageComponentInput = ComponentInput[ActionRowMessageComponent, MessageTopLevelComponentV2]
+ModalComponentInput = ComponentInput[ActionRowModalComponent, NoReturn]

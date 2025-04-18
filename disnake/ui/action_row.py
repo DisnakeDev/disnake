@@ -10,6 +10,7 @@ from typing import (
     Iterator,
     List,
     Literal,
+    NoReturn,
     Optional,
     Sequence,
     Tuple,
@@ -33,12 +34,13 @@ from ..enums import ButtonStyle, ChannelType, ComponentType, TextInputStyle
 from ..utils import MISSING, SequenceProxy, assert_never
 from ._types import (
     ActionRowChildT,
-    ActionRowInput,
     ActionRowMessageComponent,
     ActionRowModalComponent,
+    ComponentInput,
+    NonActionRowChildT,
 )
 from .button import Button
-from .item import WrappedComponent
+from .item import UIComponent, WrappedComponent
 from .select import ChannelSelect, MentionableSelect, RoleSelect, StringSelect, UserSelect
 from .text_input import TextInput
 
@@ -68,7 +70,7 @@ __all__ = (
 # FIXME(3.0): legacy
 MessageUIComponent: TypeAlias = ActionRowMessageComponent
 ModalUIComponent: TypeAlias = ActionRowModalComponent
-Components: TypeAlias = ActionRowInput[ActionRowChildT]
+Components: TypeAlias = ComponentInput[ActionRowChildT, NoReturn]
 
 StrictActionRowChildT = TypeVar(
     "StrictActionRowChildT", ActionRowMessageComponent, ActionRowModalComponent
@@ -176,17 +178,11 @@ class ActionRow(Generic[ActionRowChildT]):
         self: ActionRow[ActionRowModalComponent], *components: ActionRowModalComponent
     ) -> None: ...
 
-    # Allow use of "ActionRow[StrictUIComponent]" externally.
-
     @overload
-    def __init__(
-        self: ActionRow[StrictActionRowChildT], *components: StrictActionRowChildT
-    ) -> None: ...
+    def __init__(self, *components: ActionRowChildT) -> None: ...
 
     # n.b. this should be `*components: ActionRowChildT`, but pyright does not like it
-    def __init__(
-        self, *components: Union[ActionRowMessageComponent, ActionRowModalComponent]
-    ) -> None:
+    def __init__(self, *components: WrappedComponent) -> None:
         self._children: List[ActionRowChildT] = []
 
         for component in components:
@@ -876,45 +872,64 @@ MessageActionRow = ActionRow[ActionRowMessageComponent]
 ModalActionRow = ActionRow[ActionRowModalComponent]
 
 
-def components_to_rows(
-    components: ActionRowInput[StrictActionRowChildT],
-) -> List[ActionRow[StrictActionRowChildT]]:
+@overload
+def normalize_components(
+    components: ComponentInput[NoReturn, NonActionRowChildT], /
+) -> Sequence[NonActionRowChildT]: ...
+
+
+@overload
+def normalize_components(
+    components: ComponentInput[ActionRowChildT, NonActionRowChildT], /
+) -> Sequence[Union[ActionRow[ActionRowChildT], NonActionRowChildT]]: ...
+
+
+def normalize_components(
+    components: ComponentInput[ActionRowChildT, NonActionRowChildT], /
+) -> Sequence[Union[ActionRow[ActionRowChildT], NonActionRowChildT]]:
     if not isinstance(components, Sequence):
         components = [components]
 
-    action_rows: List[ActionRow[StrictActionRowChildT]] = []
-    auto_row: ActionRow[StrictActionRowChildT] = ActionRow[StrictActionRowChildT]()
+    result: List[Union[ActionRow[ActionRowChildT], NonActionRowChildT]] = []
+    auto_row: ActionRow[ActionRowChildT] = ActionRow[ActionRowChildT]()
 
     for component in components:
         if isinstance(component, WrappedComponent):
+            # action row child component, try to insert into current row, otherwise create new row
             try:
                 auto_row.append_item(component)
             except ValueError:
-                action_rows.append(auto_row)
-                auto_row = ActionRow[StrictActionRowChildT](component)
+                result.append(auto_row)
+                auto_row = ActionRow[ActionRowChildT](component)
         else:
             if auto_row.width > 0:
-                action_rows.append(auto_row)
-                auto_row = ActionRow[StrictActionRowChildT]()
+                # if the current action row has items, finish it
+                result.append(auto_row)
+                auto_row = ActionRow[ActionRowChildT]()
 
-            if isinstance(component, ActionRow):
-                action_rows.append(component)
+            # FIXME: once issubclass(ActionRow, UIComponent), simplify this
+            if isinstance(component, (ActionRow, UIComponent)):
+                # append non-actionrow-child components (action rows or v2 components) as-is
+                result.append(component)
 
             elif isinstance(component, Sequence):
-                action_rows.append(ActionRow[StrictActionRowChildT](*component))
+                result.append(ActionRow[ActionRowChildT](*component))
 
             else:
+                assert_never(component)
                 raise TypeError(
-                    "`components` must be a `WrappedComponent` or `ActionRow`, "
-                    "a sequence/list of `WrappedComponent`s or `ActionRow`s, "
-                    "or a nested sequence/list of `WrappedComponent`s"
+                    "`components` must be a single component, "
+                    "a sequence/list of components (or action rows), "
+                    "or a nested sequence/list of action row compatible components"
                 )
 
     if auto_row.width > 0:
-        action_rows.append(auto_row)
+        result.append(auto_row)
 
-    return action_rows
+    return result
 
 
-def components_to_dict(components: ActionRowInput[StrictActionRowChildT]) -> List[ActionRowPayload]:
-    return [row.to_component_dict() for row in components_to_rows(components)]
+def components_to_dict(
+    components: ComponentInput[ActionRowChildT, NonActionRowChildT],
+) -> List[ActionRowPayload]:
+    return [row.to_component_dict() for row in normalize_components(components)]
