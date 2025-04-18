@@ -1,0 +1,2 @@
+Remove the deprecated :meth:`Guild.delete`, :meth:`Client.guild_builder`, :meth:`Client.create_guild` and :class:`GuildBuilder` discord API features.
+For more information look at https://github.com/discord/discord-api-docs/pull/7469.
