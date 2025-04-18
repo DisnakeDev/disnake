@@ -1991,11 +1991,6 @@ class Guild(Hashable):
 
         Leaves the guild.
 
-        .. note::
-
-            You cannot leave the guild that you own, you must delete it instead
-            via :meth:`delete`.
-
         Raises
         ------
         HTTPException
