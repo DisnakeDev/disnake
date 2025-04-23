@@ -432,6 +432,13 @@ class Thread(Messageable, Hashable):
         :attr:`GuildChannel.permissions_for <.abc.GuildChannel.permissions_for>`
         method directly.
 
+        .. note::
+            If the thread originated from an :class:`.Interaction` and
+            the :attr:`.guild` attribute is unavailable, such as with
+            user-installed applications in guilds, this method will not work
+            due to an API limitation.
+            Consider using :attr:`.Interaction.permissions` or :attr:`~.Interaction.app_permissions` instead.
+
         .. versionchanged:: 2.9
             Properly takes :attr:`Permissions.send_messages_in_threads`
             into consideration.
