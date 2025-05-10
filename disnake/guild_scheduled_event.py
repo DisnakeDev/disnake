@@ -218,13 +218,16 @@ class GuildScheduledEventRecurrenceRule:
             "interval": self.interval,
         }
 
-        if self.by_weekday:
+        if self.by_weekday is not None:
             data["by_weekday"] = [d.value for d in self.by_weekday]
-        if self.by_n_weekday:
+
+        if self.by_n_weekday is not None:
             data["by_n_weekday"] = [{"n": n.n, "day": n.day.value} for n in self.by_n_weekday]
-        if self.by_month:
+
+        if self.by_month is not None:
             data["by_month"] = [m.value for m in self.by_month]
-        if self.by_month_day:
+
+        if self.by_month_day is not None:
             data["by_month_day"] = self.by_month_day
 
         return data
