@@ -235,19 +235,28 @@ class GuildScheduledEventRecurrenceRule:
             start=datetime.fromisoformat(data["start"]),
             frequency=GuildScheduledEventFrequency(data["frequency"]),
             interval=data.get("interval", 1),
-            by_weekday=[GuildScheduledEventWeekday(d) for d in data.get("by_weekday", [])]
-            if "by_weekday" in data
-            else None,
-            by_n_weekday=[
-                GuildScheduledEventNWeekday(n=nd["n"], day=GuildScheduledEventWeekday(nd["day"]))
-                for nd in data.get("by_n_weekday", [])
-            ]
-            if "by_n_weekday" in data
-            else None,
-            by_month=[GuildScheduledEventMonth(m) for m in data.get("by_month", [])]
-            if "by_month" in data
-            else None,
-            by_month_day=data.get("by_month_day"),
+            by_weekday=(
+                [GuildScheduledEventWeekday(d) for d in data.get("by_weekday", [])]
+                if data.get("by_weekday") is not None
+                else None
+            ),
+            by_n_weekday=(
+                [
+                    GuildScheduledEventNWeekday(
+                        n=nd["n"],
+                        day=GuildScheduledEventWeekday(nd["day"]),
+                    )
+                    for nd in data.get("by_n_weekday", [])
+                ]
+                if data.get("by_n_weekday") is not None
+                else None
+            ),
+            by_month=(
+                [GuildScheduledEventMonth(m) for m in data.get("by_month", [])]
+                if data.get("by_month") is not None
+                else None
+            ),
+            by_month_day=(data["by_month_day"] if data.get("by_month_day") is not None else None),
         )
 
 
