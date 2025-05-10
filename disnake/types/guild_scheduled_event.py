@@ -34,10 +34,10 @@ class GuildScheduledEventRecurrenceRule(TypedDict):
     frequency: GuildScheduledEventFrequency  # YEARLY, MONTHLY, WEEKLY, DAILY
     interval: int
 
-    by_weekday: List[int]  # List of Weekday int values (0-6)
-    by_n_weekday: List[GuildScheduledEventNWeekday]
-    by_month: List[int]  # 1-12
-    by_month_day: List[int]  # 1-31
+    by_weekday: Optional[List[int]]  # List of Weekday int values (0-6)
+    by_n_weekday: Optional[List[GuildScheduledEventNWeekday]]
+    by_month: Optional[List[int]]  # 1-12
+    by_month_day: Optional[List[int]]  # 1-31
 
 
 class GuildScheduledEvent(TypedDict):
