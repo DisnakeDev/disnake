@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, Literal, Optional, overload
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, overload
 
 from .asset import Asset
 from .enums import (
@@ -190,27 +190,24 @@ class GuildScheduledEventRecurrenceRule:
             f"by_month_day={self.by_month_day!r}>"
         )
 
-    def __init__(self, data: GuildScheduledEventRecurrenceRulePayload) -> None:
-        self.start = datetime.fromisoformat(data["start"])
-        self.frequency = GuildScheduledEventFrequency(data["frequency"])
-        self.interval = data.get("interval", 1)
-        self.by_weekday = (
-            [GuildScheduledEventWeekday(d) for d in data["by_weekday"]]
-            if "by_weekday" in data
-            else None
-        )
-        self.by_n_weekday = (
-            [
-                GuildScheduledEventNWeekday(n=nd["n"], day=GuildScheduledEventWeekday(nd["day"]))
-                for nd in data["by_n_weekday"]
-            ]
-            if "by_n_weekday" in data
-            else None
-        )
-        self.by_month = (
-            [GuildScheduledEventMonth(m) for m in data["by_month"]] if "by_month" in data else None
-        )
-        self.by_month_day = data.get("by_month_day")
+    def __init__(
+        self,
+        *,
+        start: datetime,
+        frequency: GuildScheduledEventFrequency,
+        interval: int = 1,
+        by_weekday: Optional[List[GuildScheduledEventWeekday]] = None,
+        by_n_weekday: Optional[List[GuildScheduledEventNWeekday]] = None,
+        by_month: Optional[List[GuildScheduledEventMonth]] = None,
+        by_month_day: Optional[List[int]] = None,
+    ) -> None:
+        self.start = start
+        self.frequency = frequency
+        self.interval = interval
+        self.by_weekday = by_weekday
+        self.by_n_weekday = by_n_weekday
+        self.by_month = by_month
+        self.by_month_day = by_month_day
 
     def to_dict(self) -> GuildScheduledEventRecurrenceRulePayload:
         data: GuildScheduledEventRecurrenceRulePayload = {
@@ -234,7 +231,24 @@ class GuildScheduledEventRecurrenceRule:
     def from_dict(
         cls, data: GuildScheduledEventRecurrenceRulePayload
     ) -> GuildScheduledEventRecurrenceRule:
-        return cls(data)
+        return cls(
+            start=datetime.fromisoformat(data["start"]),
+            frequency=GuildScheduledEventFrequency(data["frequency"]),
+            interval=data.get("interval", 1),
+            by_weekday=[GuildScheduledEventWeekday(d) for d in data.get("by_weekday", [])]
+            if "by_weekday" in data
+            else None,
+            by_n_weekday=[
+                GuildScheduledEventNWeekday(n=nd["n"], day=GuildScheduledEventWeekday(nd["day"]))
+                for nd in data.get("by_n_weekday", [])
+            ]
+            if "by_n_weekday" in data
+            else None,
+            by_month=[GuildScheduledEventMonth(m) for m in data.get("by_month", [])]
+            if "by_month" in data
+            else None,
+            by_month_day=data.get("by_month_day"),
+        )
 
 
 class GuildScheduledEvent(Hashable):
