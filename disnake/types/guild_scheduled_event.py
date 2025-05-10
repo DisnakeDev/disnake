@@ -29,7 +29,7 @@ class GuildScheduledEventNWeekday(TypedDict):
     day: int  # Matches Weekday enum int value (0-6)
 
 
-class GuildScheduledEventRecurrenceRule(TypedDict, total=False):
+class GuildScheduledEventRecurrenceRule(TypedDict):
     start: str  # ISO8601 string
     frequency: GuildScheduledEventFrequency  # YEARLY, MONTHLY, WEEKLY, DAILY
     interval: int
