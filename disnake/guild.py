@@ -48,6 +48,7 @@ from .enums import (
     ChannelType,
     ContentFilter,
     GuildScheduledEventEntityType,
+    GuildScheduledEventFrequency,
     GuildScheduledEventPrivacyLevel,
     Locale,
     NotificationLevel,
@@ -63,7 +64,11 @@ from .enums import (
 from .errors import ClientException, HTTPException, InvalidData
 from .file import File
 from .flags import SystemChannelFlags
-from .guild_scheduled_event import GuildScheduledEvent, GuildScheduledEventMetadata
+from .guild_scheduled_event import (
+    GuildScheduledEvent,
+    GuildScheduledEventMetadata,
+    GuildScheduledEventRecurrenceRule,
+)
 from .integrations import Integration, _integration_factory
 from .invite import Invite
 from .iterators import AuditLogIterator, BanIterator, MemberIterator
@@ -2497,6 +2502,7 @@ class Guild(Hashable):
         privacy_level: GuildScheduledEventPrivacyLevel = ...,
         description: str = ...,
         image: AssetBytes = ...,
+        recurrence_rule: Optional[GuildScheduledEventRecurrenceRule] = ...,
         reason: Optional[str] = ...,
     ) -> GuildScheduledEvent: ...
 
@@ -2515,6 +2521,7 @@ class Guild(Hashable):
         privacy_level: GuildScheduledEventPrivacyLevel = ...,
         description: str = ...,
         image: AssetBytes = ...,
+        recurrence_rule: Optional[GuildScheduledEventRecurrenceRule] = ...,
         reason: Optional[str] = ...,
     ) -> GuildScheduledEvent: ...
 
@@ -2531,6 +2538,7 @@ class Guild(Hashable):
         privacy_level: GuildScheduledEventPrivacyLevel = ...,
         description: str = ...,
         image: AssetBytes = ...,
+        recurrence_rule: Optional[GuildScheduledEventRecurrenceRule] = ...,
         reason: Optional[str] = ...,
     ) -> GuildScheduledEvent: ...
 
@@ -2546,6 +2554,7 @@ class Guild(Hashable):
         entity_metadata: GuildScheduledEventMetadata = MISSING,
         description: str = MISSING,
         image: AssetBytes = MISSING,
+        recurrence_rule: Optional[GuildScheduledEventRecurrenceRule] = MISSING,
         reason: Optional[str] = None,
     ) -> GuildScheduledEvent:
         """|coro|
@@ -2567,6 +2576,32 @@ class Guild(Hashable):
             ``None``, :attr:`~GuildScheduledEventEntityType.external` (set automatically), required, required
             unset, :attr:`~GuildScheduledEventEntityType.external`, required, required
 
+        Based on the recurrence frequency, there are different restrictions regarding other parameter values, as shown below:
+
+        .. csv-table::
+            :header: "`Frequency`", "`A`llowed Fields`", "`Notes`"
+            :widths: 15, 35, 50
+
+            "Daily (3)", "by_weekday", "Must match one of the approved weekday sets (e.g. Mon-Fri, Sat-Sun)"
+            "Weekly (2)", "by_weekday", "Only one weekday allowed; interval=2 is allowed for biweekly"
+            "Monty (1)", "by_n_weekday", "Only one n-th weekday allowed (e.g. 2nd Tuesday)"
+            "Yearly (0)", "by_month + by_month_day", "Must both be provided; each must contain exactly one value"
+
+        Additional constraints:
+
+        - ``by_weekday`` and ``by_n_weekday`` cannot both be set.
+        - ``by_month`` and ``by_month_day`` cannot both be set.
+        - ``interval`` must be 1, except for WEEKLY frequency where it may be 2.
+
+        Valid weekday sets for Daily frequency:
+
+        - Monday - Friday: [0, 1, 2, 3, 4]
+        - Tuesday - Saturday: [1, 2, 3, 4, 5]
+        - Sunday - Thursday: [6, 0, 1, 2, 3]
+        - Friday & Saturday: [4, 5]
+        - Saturday & Sunday: [5, 6]
+        - Sunday & Monday: [6, 0]
+
         .. versionadded:: 2.3
 
         .. versionchanged:: 2.6
@@ -2582,6 +2617,10 @@ class Guild(Hashable):
 
         .. versionchanged:: 2.6
             Infer ``entity_type`` from channel if provided.
+
+        .. versionchanged:: 2.11
+            Added the ``recurrence_rule`` parameter to support recurring events.
+
 
         Parameters
         ----------
@@ -2613,8 +2652,11 @@ class Guild(Hashable):
             If the datetime is naive, it is assumed to be local time.
         entity_type: :class:`GuildScheduledEventEntityType`
             The entity type of the guild scheduled event.
-        entity_metadata: :class:`GuildScheduledEventMetadata`
+        entity_metadata: Optional[:class:`GuildScheduledEventMetadata`]
             The entity metadata of the guild scheduled event.
+        recurrence_rule: :class:`GuildScheduledEventRecurrenceRule`
+            An optional recurrence rule that specifies how the event should repeat over time.
+            This allows for recurring scheduled events such as weekly meetings or monthly check-ins.
         reason: Optional[:class:`str`]
             The reason for creating the guild scheduled event. Shows up on the audit log.
 
@@ -2672,6 +2714,85 @@ class Guild(Hashable):
                 )
 
             fields["entity_metadata"] = entity_metadata.to_dict()
+
+        if recurrence_rule is not MISSING:
+            if not isinstance(recurrence_rule, GuildScheduledEventRecurrenceRule):
+                raise TypeError(
+                    "recurrence_rule must be an instance of GuildScheduledEventRecurrenceRule"
+                )
+
+            # Mutually exclusive: by_weekday vs by_n_weekday
+            if recurrence_rule.by_weekday and recurrence_rule.by_n_weekday:
+                raise ValueError("'by_weekday' and 'by_n_weekday' cannot both be set.")
+
+            # Mutually exclusive: by_month + by_month_day
+            if recurrence_rule.by_month and recurrence_rule.by_month_day:
+                raise ValueError("'by_month' and 'by_month_day' cannot both be set.")
+
+            # by_weekday restrictions
+            if recurrence_rule.by_weekday:
+                if recurrence_rule.frequency not in (
+                    GuildScheduledEventFrequency.DAILY,
+                    GuildScheduledEventFrequency.WEEKLY,
+                ):
+                    raise ValueError("'by_weekday' is only valid for DAILY or WEEKLY frequencies.")
+
+                # DAILY: must be one of the allowed sets
+                if recurrence_rule.frequency == GuildScheduledEventFrequency.DAILY:
+                    allowed_sets = [
+                        {0, 1, 2, 3, 4},  # Mon-Fri
+                        {1, 2, 3, 4, 5},  # Tue-Sat
+                        {6, 0, 1, 2, 3},  # Sun-Thu
+                        {4, 5},  # Fri-Sat
+                        {5, 6},  # Sat-Sun
+                        {6, 0},  # Sun-Mon
+                    ]
+                    current_set = {d.value for d in recurrence_rule.by_weekday}
+                    if current_set not in allowed_sets:
+                        raise ValueError(
+                            "Invalid 'by_weekday' set for DAILY recurrence. "
+                            "Must be one of the known allowed weekday sets."
+                        )
+
+                # WEEKLY: can only have 1 weekday
+                elif recurrence_rule.frequency == GuildScheduledEventFrequency.WEEKLY:
+                    if len(recurrence_rule.by_weekday) != 1:
+                        raise ValueError(
+                            "'by_weekday' must contain exactly one day for WEEKLY recurrence."
+                        )
+
+            # by_n_weekday restriction: only for MONTHLY and only 1 entry
+            if recurrence_rule.by_n_weekday:
+                if recurrence_rule.frequency != GuildScheduledEventFrequency.MONTHLY:
+                    raise ValueError("'by_n_weekday' is only valid for MONTHLY recurrence.")
+                if len(recurrence_rule.by_n_weekday) != 1:
+                    raise ValueError("'by_n_weekday' must contain exactly one entry.")
+
+            # by_month + by_month_day restriction: only for YEARLY and length 1 each
+            if recurrence_rule.by_month or recurrence_rule.by_month_day:
+                if recurrence_rule.frequency != GuildScheduledEventFrequency.YEARLY:
+                    raise ValueError(
+                        "'by_month' and 'by_month_day' are only valid for YEARLY recurrence."
+                    )
+                if not recurrence_rule.by_month or not recurrence_rule.by_month_day:
+                    raise ValueError(
+                        "Both 'by_month' and 'by_month_day' must be provided together."
+                    )
+                if len(recurrence_rule.by_month) != 1 or len(recurrence_rule.by_month_day) != 1:
+                    raise ValueError(
+                        "'by_month' and 'by_month_day' must each contain exactly one value."
+                    )
+
+            # interval restriction
+            if recurrence_rule.interval != 1:
+                if recurrence_rule.frequency != GuildScheduledEventFrequency.WEEKLY:
+                    raise ValueError(
+                        "Only WEEKLY recurrence can have interval values other than 1."
+                    )
+                if recurrence_rule.interval != 2:
+                    raise ValueError("For WEEKLY recurrence, interval can only be 1 or 2.")
+
+            fields["recurrence_rule"] = recurrence_rule.to_dict()
 
         if description is not MISSING:
             fields["description"] = description
