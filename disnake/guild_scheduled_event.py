@@ -326,6 +326,7 @@ class GuildScheduledEvent(Hashable):
         "guild_id",
         "channel_id",
         "creator_id",
+        "creator",
         "name",
         "description",
         "scheduled_start_time",
