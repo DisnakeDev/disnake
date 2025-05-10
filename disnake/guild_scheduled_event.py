@@ -5,6 +5,8 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, overload
 
+from disnake import utils
+
 from .asset import Asset
 from .enums import (
     ChannelType,
@@ -211,7 +213,7 @@ class GuildScheduledEventRecurrenceRule:
 
     def to_dict(self) -> GuildScheduledEventRecurrenceRulePayload:
         data: GuildScheduledEventRecurrenceRulePayload = {
-            "start": self.start.isoformat(),
+            "start": utils.isoformat_utc(self.start),
             "frequency": self.frequency.value,
             "interval": self.interval,
         }
