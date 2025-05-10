@@ -137,8 +137,8 @@ class GuildScheduledEventRecurrenceRule:
 
         Valid only when ``frequency`` is :attr:`GuildScheduledEventFrequency.WEEKLY` if greater than ``1``.
 
-    by_weekday: Optional[List[:class:`int`]]
-        A list of integers representing weekdays the event repeats on (0 = Monday, ..., 6 = Sunday).
+    by_weekday: Optional[List[:class:`GuildScheduledEventWeekday`]]
+        A list of :class:`GuildScheduledEventWeekday` values indicating the weekdays the event repeats on.
 
         Valid only when ``frequency`` is :attr:`GuildScheduledEventFrequency.DAILY` or
         :attr:`GuildScheduledEventFrequency.WEEKLY`.
@@ -146,7 +146,7 @@ class GuildScheduledEventRecurrenceRule:
         - For ``DAILY`` frequency: Must match one of the allowed weekday sets.
         - For ``WEEKLY`` frequency: May only contain one entry.
 
-    by_n_weekday: List[:class:`GuildScheduledEventNWeekday`]
+    by_n_weekday: Optional[List[:class:`GuildScheduledEventNWeekday`]]
         A list of weekday-within-week combinations, such as "2nd Tuesday".
 
         Each item represents a specific week (1-5) and a weekday (0 = Monday, ..., 6 = Sunday),
@@ -155,14 +155,14 @@ class GuildScheduledEventRecurrenceRule:
         - Valid only when ``frequency`` is :attr:`GuildScheduledEventFrequency.MONTHLY`.
         - Must contain exactly one item.
 
-    by_month: List[:class:`int`]
-        A list of month numbers (1 = January, ..., 12 = December).
+    by_month: Optional[List[:class:`GuildScheduledEventMonth`]]
+        A list of month values, represented by :class:`GuildScheduledEventMonth`.
 
         - Valid only when ``frequency`` is :attr:`GuildScheduledEventFrequency.YEARLY`.
         - Must be used together with ``by_month_day``.
         - Must contain exactly one item.
 
-    by_month_day: List[:class:`int`]
+    by_month_day: Optional[List[:class:`int`]]
         A list of days in the month (1-31).
 
         - Valid only when ``frequency`` is :attr:`GuildScheduledEventFrequency.YEARLY`.

@@ -2579,7 +2579,7 @@ class Guild(Hashable):
         Based on the recurrence frequency, there are different restrictions regarding other parameter values, as shown below:
 
         .. csv-table::
-            :header: "`Frequency`", "`A`llowed Fields`", "`Notes`"
+            :header: "``Frequency``", "``A`llowed Fields``", "``Notes``"
             :widths: 15, 35, 50
 
             "Daily (3)", "by_weekday", "Must match one of the approved weekday sets (e.g. Mon-Fri, Sat-Sun)"
