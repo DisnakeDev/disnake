@@ -335,7 +335,7 @@ class GuildScheduledEvent(Hashable):
         "entity_type",
         "entity_id",
         "entity_metadata",
-        "recurrence_rulecreator",
+        "recurrence_rule",
         "user_count",
         "_image",
         "_cs_guild",
