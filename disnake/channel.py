@@ -95,7 +95,7 @@ if TYPE_CHECKING:
     from .types.soundboard import PartialSoundboardSound as PartialSoundboardSoundPayload
     from .types.threads import ThreadArchiveDurationLiteral
     from .types.voice import VoiceChannelEffect as VoiceChannelEffectPayload
-    from .ui._types import MessageComponentInput
+    from .ui._types import MessageComponents
     from .ui.view import View
     from .user import BaseUser, ClientUser, User
     from .voice_region import VoiceRegion
@@ -3484,7 +3484,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
-        components: MessageComponentInput = ...,
+        components: MessageComponents = ...,
         reason: Optional[str] = None,
     ) -> ThreadWithMessage: ...
 
@@ -3504,7 +3504,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
-        components: MessageComponentInput = ...,
+        components: MessageComponents = ...,
         reason: Optional[str] = None,
     ) -> ThreadWithMessage: ...
 
@@ -3524,7 +3524,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
-        components: MessageComponentInput = ...,
+        components: MessageComponents = ...,
         reason: Optional[str] = None,
     ) -> ThreadWithMessage: ...
 
@@ -3544,7 +3544,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
-        components: MessageComponentInput = ...,
+        components: MessageComponents = ...,
         reason: Optional[str] = None,
     ) -> ThreadWithMessage: ...
 
@@ -3565,7 +3565,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
-        components: MessageComponentInput = MISSING,
+        components: MessageComponents = MISSING,
         reason: Optional[str] = None,
     ) -> ThreadWithMessage:
         """|coro|

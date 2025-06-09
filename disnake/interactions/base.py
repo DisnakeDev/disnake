@@ -81,7 +81,7 @@ if TYPE_CHECKING:
         InteractionDataResolved as InteractionDataResolvedPayload,
     )
     from ..types.snowflake import Snowflake
-    from ..ui._types import MessageComponentInput, ModalComponentInput
+    from ..ui._types import MessageComponents, ModalComponents
     from ..ui.modal import Modal
     from ..ui.view import View
     from .message import MessageInteraction
@@ -433,7 +433,7 @@ class Interaction(Generic[ClientT]):
         files: List[File] = MISSING,
         attachments: Optional[List[Attachment]] = MISSING,
         view: Optional[View] = MISSING,
-        components: Optional[MessageComponentInput] = MISSING,
+        components: Optional[MessageComponents] = MISSING,
         poll: Poll = MISSING,
         suppress_embeds: bool = MISSING,
         flags: MessageFlags = MISSING,
@@ -675,7 +675,7 @@ class Interaction(Generic[ClientT]):
         files: List[File] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
-        components: MessageComponentInput = MISSING,
+        components: MessageComponents = MISSING,
         tts: bool = False,
         ephemeral: bool = MISSING,
         suppress_embeds: bool = MISSING,
@@ -959,7 +959,7 @@ class InteractionResponse:
         files: List[File] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
-        components: MessageComponentInput = MISSING,
+        components: MessageComponents = MISSING,
         tts: bool = False,
         ephemeral: bool = MISSING,
         suppress_embeds: bool = MISSING,
@@ -1153,7 +1153,7 @@ class InteractionResponse:
         attachments: Optional[List[Attachment]] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: Optional[View] = MISSING,
-        components: Optional[MessageComponentInput] = MISSING,
+        components: Optional[MessageComponents] = MISSING,
         delete_after: Optional[float] = None,
     ) -> None:
         """|coro|
@@ -1393,7 +1393,7 @@ class InteractionResponse:
         *,
         title: str,
         custom_id: str,
-        components: ModalComponentInput,
+        components: ModalComponents,
     ) -> None: ...
 
     async def send_modal(
@@ -1402,7 +1402,7 @@ class InteractionResponse:
         *,
         title: Optional[str] = None,
         custom_id: Optional[str] = None,
-        components: Optional[ModalComponentInput] = None,
+        components: Optional[ModalComponents] = None,
     ) -> None:
         """|coro|
 
@@ -1644,7 +1644,7 @@ class InteractionMessage(Message):
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[MessageComponentInput] = ...,
+        components: Optional[MessageComponents] = ...,
         delete_after: Optional[float] = ...,
     ) -> InteractionMessage: ...
 
@@ -1660,7 +1660,7 @@ class InteractionMessage(Message):
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[MessageComponentInput] = ...,
+        components: Optional[MessageComponents] = ...,
         delete_after: Optional[float] = ...,
     ) -> InteractionMessage: ...
 
@@ -1676,7 +1676,7 @@ class InteractionMessage(Message):
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[MessageComponentInput] = ...,
+        components: Optional[MessageComponents] = ...,
         delete_after: Optional[float] = ...,
     ) -> InteractionMessage: ...
 
@@ -1692,7 +1692,7 @@ class InteractionMessage(Message):
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[MessageComponentInput] = ...,
+        components: Optional[MessageComponents] = ...,
         delete_after: Optional[float] = ...,
     ) -> InteractionMessage: ...
 
@@ -1709,7 +1709,7 @@ class InteractionMessage(Message):
         flags: MessageFlags = MISSING,
         allowed_mentions: Optional[AllowedMentions] = MISSING,
         view: Optional[View] = MISSING,
-        components: Optional[MessageComponentInput] = MISSING,
+        components: Optional[MessageComponents] = MISSING,
         delete_after: Optional[float] = None,
     ) -> Message:
         """|coro|

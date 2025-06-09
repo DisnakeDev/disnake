@@ -84,7 +84,7 @@ if TYPE_CHECKING:
         PermissionOverwrite as PermissionOverwritePayload,
     )
     from .types.threads import PartialForumTag as PartialForumTagPayload
-    from .ui._types import MessageComponentInput
+    from .ui._types import MessageComponents
     from .ui.view import View
     from .user import ClientUser
     from .voice_region import VoiceRegion
@@ -1433,7 +1433,7 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
         view: View = ...,
-        components: MessageComponentInput = ...,
+        components: MessageComponents = ...,
         poll: Poll = ...,
     ) -> Message: ...
 
@@ -1454,7 +1454,7 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
         view: View = ...,
-        components: MessageComponentInput = ...,
+        components: MessageComponents = ...,
         poll: Poll = ...,
     ) -> Message: ...
 
@@ -1475,7 +1475,7 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
         view: View = ...,
-        components: MessageComponentInput = ...,
+        components: MessageComponents = ...,
         poll: Poll = ...,
     ) -> Message: ...
 
@@ -1496,7 +1496,7 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
         view: View = ...,
-        components: MessageComponentInput = ...,
+        components: MessageComponents = ...,
         poll: Poll = ...,
     ) -> Message: ...
 
@@ -1518,7 +1518,7 @@ class Messageable:
         reference: Optional[Union[Message, MessageReference, PartialMessage]] = None,
         mention_author: Optional[bool] = None,
         view: Optional[View] = None,
-        components: Optional[MessageComponentInput] = None,
+        components: Optional[MessageComponents] = None,
         poll: Optional[Poll] = None,
     ):
         """|coro|

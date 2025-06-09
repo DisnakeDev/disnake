@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from ..interactions.modal import ModalInteraction
     from ..state import ConnectionState
     from ..types.components import Modal as ModalPayload
-    from ..ui._types import ModalComponentInput
+    from ..ui._types import ModalComponents
 
 
 __all__ = ("Modal",)
@@ -70,7 +70,7 @@ class Modal:
         self,
         *,
         title: str,
-        components: ModalComponentInput,
+        components: ModalComponents,
         custom_id: str = MISSING,
         timeout: float = 600,
     ) -> None:

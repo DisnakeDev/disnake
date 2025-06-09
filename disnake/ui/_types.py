@@ -73,5 +73,5 @@ ComponentInput = Union[
     ],
 ]
 
-MessageComponentInput = ComponentInput[ActionRowMessageComponent, MessageTopLevelComponentV2]
-ModalComponentInput = ComponentInput[ActionRowModalComponent, NoReturn]
+MessageComponents = ComponentInput[ActionRowMessageComponent, MessageTopLevelComponentV2]
+ModalComponents = ComponentInput[ActionRowModalComponent, NoReturn]
