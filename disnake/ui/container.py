@@ -69,9 +69,7 @@ class Container(UIComponent):
         spoiler: bool = False,
     ) -> None:
         self._components: List[ContainerChildUIComponent] = [
-            # FIXME: typing broken until action rows become UIComponents
-            ensure_ui_component(c, "components")
-            for c in components
+            ensure_ui_component(c, "components") for c in components
         ]
         # FIXME: add accent_color
         self.accent_colour: Optional[Colour] = accent_colour

@@ -49,7 +49,7 @@ from ..message import Attachment, AuthorizingIntegrationOwners, Message
 from ..object import Object
 from ..permissions import Permissions
 from ..role import Role
-from ..ui.action_row import components_to_dict
+from ..ui.action_row import components_to_dict, normalize_components
 from ..user import ClientUser, User
 from ..webhook.async_ import Webhook, async_context, handle_message_parameters
 
@@ -1457,14 +1457,14 @@ class InteractionResponse:
         if modal is not None:
             modal_data = modal.to_components()
         elif title and components and custom_id:
-            rows = components_to_dict(components)
+            rows = normalize_components(components)
             if len(rows) > 5:
                 raise ValueError("Maximum number of components exceeded.")
 
             modal_data = {
                 "title": title,
                 "custom_id": custom_id,
-                "components": rows,
+                "components": [component.to_component_dict() for component in rows],
             }
         else:
             raise TypeError("Either modal or title, custom_id, components must be provided")

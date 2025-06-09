@@ -54,6 +54,7 @@ class UIComponent(ABC):
 
     The following classes implement this ABC:
 
+    - :class:`disnake.ui.ActionRow`
     - :class:`disnake.ui.Button`
     - subtypes of :class:`disnake.ui.BaseSelect` (:class:`disnake.ui.ChannelSelect`, :class:`disnake.ui.MentionableSelect`, :class:`disnake.ui.RoleSelect`, :class:`disnake.ui.StringSelect`, :class:`disnake.ui.UserSelect`)
     - :class:`disnake.ui.TextInput`

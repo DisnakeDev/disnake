@@ -4,18 +4,17 @@ from __future__ import annotations
 
 from typing import (
     TYPE_CHECKING,
-    ClassVar,
     Generator,
     Generic,
     Iterator,
     List,
-    Literal,
     NoReturn,
     Optional,
     Sequence,
     Tuple,
     TypeVar,
     Union,
+    cast,
     overload,
 )
 
@@ -53,7 +52,10 @@ if TYPE_CHECKING:
     from ..message import Message
     from ..partial_emoji import PartialEmoji
     from ..role import Role
-    from ..types.components import ActionRow as ActionRowPayload
+    from ..types.components import (
+        ActionRow as ActionRowPayload,
+        MessageTopLevelComponent as MessageTopLevelComponentPayload,
+    )
     from ..user import User
     from .select.base import SelectDefaultValueInputType, SelectDefaultValueMultiInputType
     from .select.string import SelectOptionInput
@@ -111,8 +113,7 @@ def _message_component_to_item(
     return None
 
 
-# TODO: this can likely also subclass the new `UIComponent` base type
-class ActionRow(Generic[ActionRowChildT]):
+class ActionRow(UIComponent, Generic[ActionRowChildT]):
     """Represents a UI action row. Useful for lower level component manipulation.
 
     .. collapse:: operations
@@ -156,7 +157,8 @@ class ActionRow(Generic[ActionRowChildT]):
             context of a modal. Combining components from both contexts is not supported.
     """
 
-    type: ClassVar[Literal[ComponentType.action_row]] = ComponentType.action_row
+    # unused, but technically required by base type
+    __repr_attributes__: Tuple[str, ...] = ("children",)
 
     # When unspecified and called empty, default to an ActionRow that takes any kind of component.
 
@@ -193,6 +195,7 @@ class ActionRow(Generic[ActionRowChildT]):
             self.append_item(component)  # type: ignore
 
     def __repr__(self) -> str:
+        # implemented separately for now, due to SequenceProxy repr
         return f"<ActionRow children={self._children!r}>"
 
     # FIXME(3.0)?: `bool(ActionRow())` returns False, which may be undesired
@@ -739,10 +742,11 @@ class ActionRow(Generic[ActionRowChildT]):
     @property
     def _underlying(self) -> ActionRowComponent[ActionRowChildComponent]:
         return ActionRowComponent._raw_construct(
-            type=self.type,
+            type=ComponentType.action_row,
             children=[comp._underlying for comp in self._children],
         )
 
+    # already provided by base type, reimplemented here for more precise return types
     def to_component_dict(self) -> ActionRowPayload:
         return self._underlying.to_dict()
 
@@ -907,8 +911,7 @@ def normalize_components(
                 result.append(auto_row)
                 auto_row = ActionRow[ActionRowChildT]()
 
-            # FIXME: once issubclass(ActionRow, UIComponent), simplify this
-            if isinstance(component, (ActionRow, UIComponent)):
+            if isinstance(component, UIComponent):
                 # append non-actionrow-child components (action rows or v2 components) as-is
                 result.append(component)
 
@@ -931,5 +934,8 @@ def normalize_components(
 
 def components_to_dict(
     components: ComponentInput[ActionRowChildT, NonActionRowChildT],
-) -> List[ActionRowPayload]:
-    return [row.to_component_dict() for row in normalize_components(components)]
+) -> List[MessageTopLevelComponentPayload]:
+    return [
+        cast("MessageTopLevelComponentPayload", c.to_component_dict())
+        for c in normalize_components(components)
+    ]
