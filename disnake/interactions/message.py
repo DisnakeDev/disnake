@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Union
 
 from ..components import (
-    VALID_ACTION_ROW_MESSAGE_TYPES,
+    VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES,
     ActionRowMessageComponent,
     _walk_all_components,
 )
@@ -175,7 +175,7 @@ class MessageInteraction(Interaction[ClientT]):
         # FIXME(3.0?): introduce common base type for components with `custom_id`
         for component in _walk_all_components(self.message.components):
             if (
-                isinstance(component, VALID_ACTION_ROW_MESSAGE_TYPES)
+                isinstance(component, VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES)
                 and component.custom_id == self.data.custom_id
             ):
                 return component

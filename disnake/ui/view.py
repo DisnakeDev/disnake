@@ -22,7 +22,7 @@ from typing import (
 )
 
 from ..components import (
-    VALID_ACTION_ROW_MESSAGE_TYPES,
+    VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES,
     ActionRow as ActionRowComponent,
     ActionRowMessageComponent,
     Button as ButtonComponent,
@@ -232,7 +232,7 @@ class View:
         for component in _walk_all_components(message.components):
             if isinstance(component, ActionRowComponent):
                 continue
-            elif not isinstance(component, VALID_ACTION_ROW_MESSAGE_TYPES):
+            elif not isinstance(component, VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES):
                 # can happen if message uses components v2
                 raise TypeError(
                     f"Cannot construct view from message - unexpected {type(component).__name__}"

@@ -1161,8 +1161,9 @@ class Container(Component):
         return self.accent_colour
 
 
-# see ActionRowMessageComponent
-VALID_ACTION_ROW_MESSAGE_TYPES: Final = (
+# types of components that are allowed in a message's action rows;
+# see also `ActionRowMessageComponent` type alias
+VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES: Final = (
     Button,
     StringSelectMenu,
     UserSelectMenu,
