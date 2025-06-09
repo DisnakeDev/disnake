@@ -1226,11 +1226,14 @@ COMPONENT_LOOKUP: Mapping[ComponentTypeLiteral, Type[Component]] = {
 def _component_factory(data: ComponentPayload, *, type: Type[C] = Component) -> C:
     component_type = data["type"]
 
-    if component_cls := COMPONENT_LOOKUP.get(component_type):
-        return component_cls(data)  # type: ignore
-    else:
+    try:
+        component_cls = COMPONENT_LOOKUP[component_type]
+    except KeyError:
+        # if we encounter an unknown component type, just construct a placeholder component for it
         as_enum = try_enum(ComponentType, component_type)
         return Component._raw_construct(type=as_enum)  # type: ignore
+    else:
+        return component_cls(data)  # type: ignore
 
 
 # this is just a rebranded _component_factory,
