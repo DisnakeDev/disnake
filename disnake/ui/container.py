@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, ClassVar, List, Optional, Sequence, Tuple, Union
 
 from ..colour import Colour
 from ..components import Container as ContainerComponent
@@ -55,7 +55,7 @@ class Container(UIComponent):
     """
 
     # unused, but technically required by base type
-    __repr_attributes__: Tuple[str, ...] = (
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
         "components",
         "accent_colour",
         "spoiler",

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Optional, Tuple
+from typing import ClassVar, Optional, Tuple
 
 from ..components import TextInput as TextInputComponent
 from ..enums import ComponentType, TextInputStyle
@@ -39,7 +39,7 @@ class TextInput(WrappedComponent):
         The maximum length of the text input.
     """
 
-    __repr_attributes__: Tuple[str, ...] = (
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
         "style",
         "label",
         "custom_id",

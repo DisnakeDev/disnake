@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import List, Sequence, Tuple
+from typing import ClassVar, List, Sequence, Tuple
 
 from ..components import MediaGallery as MediaGalleryComponent, MediaGalleryItem
 from ..enums import ComponentType
@@ -23,7 +23,7 @@ class MediaGallery(UIComponent):
         The list of images in this gallery.
     """
 
-    __repr_attributes__: Tuple[str, ...] = ("items",)
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = ("items",)
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: MediaGalleryComponent = MISSING
 

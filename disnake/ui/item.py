@@ -7,6 +7,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
+    ClassVar,
     Coroutine,
     Dict,
     Generic,
@@ -69,7 +70,7 @@ class UIComponent(ABC):
     .. versionadded:: 2.11
     """
 
-    __repr_attributes__: Tuple[str, ...]
+    __repr_attributes__: ClassVar[Tuple[str, ...]]
 
     @property
     @abstractmethod
@@ -132,7 +133,7 @@ class Item(WrappedComponent, Generic[V_co]):
     .. versionadded:: 2.0
     """
 
-    __repr_attributes__: Tuple[str, ...] = ("row",)
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = ("row",)
 
     @overload
     def __init__(self: Item[None]) -> None: ...

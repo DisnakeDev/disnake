@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Tuple
+from typing import ClassVar, Tuple
 
 from ..components import Separator as SeparatorComponent
 from ..enums import ComponentType, SeparatorSpacingSize
@@ -27,7 +27,7 @@ class Separator(UIComponent):
         Defaults to :attr:`~.SeparatorSpacingSize.small`.
     """
 
-    __repr_attributes__: Tuple[str, ...] = (
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
         "divider",
         "spacing",
     )

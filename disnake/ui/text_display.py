@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Tuple
+from typing import ClassVar, Tuple
 
 from ..components import TextDisplay as TextDisplayComponent
 from ..enums import ComponentType
@@ -24,7 +24,7 @@ class TextDisplay(UIComponent):
         The text displayed by this component.
     """
 
-    __repr_attributes__: Tuple[str, ...] = ("content",)
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = ("content",)
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: TextDisplayComponent = MISSING
 

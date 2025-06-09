@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, ClassVar, List, Sequence, Tuple, Union
 
 from ..components import Section as SectionComponent
 from ..enums import ComponentType
@@ -31,7 +31,7 @@ class Section(UIComponent):
     """
 
     # unused, but technically required by base type
-    __repr_attributes__: Tuple[str, ...] = (
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
         "components",
         "accessory",
     )

@@ -84,7 +84,9 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
         A list of channels that have been selected by the user.
     """
 
-    __repr_attributes__: Tuple[str, ...] = BaseSelect.__repr_attributes__ + ("channel_types",)
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = BaseSelect.__repr_attributes__ + (
+        "channel_types",
+    )
 
     _default_value_type_map: ClassVar[
         Mapping[SelectDefaultValueType, Tuple[Type[Snowflake], ...]]

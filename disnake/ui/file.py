@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Tuple
+from typing import Any, ClassVar, Tuple
 
 from ..components import FileComponent
 from ..enums import ComponentType
@@ -25,7 +25,7 @@ class File(UIComponent):
         Whether the file is marked as a spoiler. Defaults to ``False``.
     """
 
-    __repr_attributes__: Tuple[str, ...] = (
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
         "file",
         "spoiler",
     )

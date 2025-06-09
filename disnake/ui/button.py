@@ -8,6 +8,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
+    ClassVar,
     Optional,
     Tuple,
     TypeVar,
@@ -75,7 +76,7 @@ class Button(Item[V_co]):
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     """
 
-    __repr_attributes__: Tuple[str, ...] = (
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
         "style",
         "url",
         "disabled",

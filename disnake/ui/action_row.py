@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import (
     TYPE_CHECKING,
+    ClassVar,
     Generator,
     Generic,
     Iterator,
@@ -158,7 +159,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
     """
 
     # unused, but technically required by base type
-    __repr_attributes__: Tuple[str, ...] = ("children",)
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = ("children",)
 
     # When unspecified and called empty, default to an ActionRow that takes any kind of component.
 

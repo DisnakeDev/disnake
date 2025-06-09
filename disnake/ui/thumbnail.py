@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Optional, Tuple
+from typing import Any, ClassVar, Optional, Tuple
 
 from ..components import Thumbnail as ThumbnailComponent
 from ..enums import ComponentType
@@ -29,7 +29,7 @@ class Thumbnail(UIComponent):
         Whether the thumbnail is marked as a spoiler. Defaults to ``False``.
     """
 
-    __repr_attributes__: Tuple[str, ...] = (
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
         "media",
         "description",
         "spoiler",
