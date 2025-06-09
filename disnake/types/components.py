@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from typing import List, Literal, TypeAlias, TypedDict, Union
+from typing import List, Literal, TypedDict, Union
 
-from typing_extensions import NotRequired
+from typing_extensions import NotRequired, TypeAlias
 
 from .channel import ChannelType
 from .emoji import PartialEmoji
