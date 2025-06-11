@@ -1177,7 +1177,9 @@ def _walk_internal(component: Component, seen: Set[Component]) -> Iterator[Compo
     if component in seen:
         # prevent infinite recursion if anyone manages to nest a component in itself
         return
-    seen.add(component)
+    # add current component, while also creating a copy to allow reusing a component multiple times,
+    # as long as it's not within itself
+    seen = {*seen, component}
 
     yield component
 
