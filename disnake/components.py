@@ -1236,8 +1236,12 @@ def _component_factory(data: ComponentPayload, *, type: Type[C] = Component) -> 
         return component_cls(data)  # type: ignore
 
 
-# this is just a rebranded _component_factory,
-# as a workaround to Python not supporting typescript-like mapped types
-# XXX: an alternative would be declaring 14 _component_factory overloads, which also isn't too great.
-def _message_component_factory(data: MessageTopLevelComponentPayload) -> MessageTopLevelComponent:
-    return _component_factory(data)  # type: ignore
+# this is just a rebranded _component_factory, as a workaround to Python not supporting typescript-like mapped types
+if TYPE_CHECKING:
+
+    def _message_component_factory(
+        data: MessageTopLevelComponentPayload,
+    ) -> MessageTopLevelComponent: ...
+
+else:
+    _message_component_factory = _component_factory
