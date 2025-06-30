@@ -253,6 +253,8 @@ class ConnectionClosed(ClientException):
         4015: "Voice server crashed",
         4016: "Unknown encryption mode",
         4020: "Bad request - you sent a malformed request",
+        4021: "Disconnected: Rate Limited",
+        4022: "Disconnected: Call Terminated (channel deleted, voice server changed, etc...)",
     }
 
     def __init__(
