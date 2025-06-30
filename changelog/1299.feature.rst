@@ -1,0 +1,1 @@
+Add `approximate_user_authorization_count` to :class:`AppInfo`
