@@ -2,18 +2,35 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, List, Optional, Tuple, Type, TypeVar, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    ClassVar,
+    List,
+    Mapping,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+    TypeVar,
+    overload,
+)
 
+from ...abc import GuildChannel, Snowflake
+from ...channel import DMChannel, GroupChannel, PartialMessageable
 from ...components import ChannelSelectMenu
-from ...enums import ChannelType, ComponentType
+from ...enums import ChannelType, ComponentType, SelectDefaultValueType
+from ...object import Object
+from ...threads import Thread
 from ...utils import MISSING
-from .base import BaseSelect, P, V_co, _create_decorator
+from .base import BaseSelect, P, SelectDefaultValueInputType, V_co, _create_decorator
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ...interactions.base import InteractionChannel
-    from ..item import DecoratedItem, ItemCallbackType, Object
+    from ...abc import AnyChannel
+    from ..item import DecoratedItem, ItemCallbackType
 
 
 __all__ = (
@@ -22,7 +39,7 @@ __all__ = (
 )
 
 
-class ChannelSelect(BaseSelect[ChannelSelectMenu, "InteractionChannel", V_co]):
+class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
     """Represents a UI channel select menu.
 
     This is usually represented as a drop down menu.
@@ -46,23 +63,41 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "InteractionChannel", V_co]):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select is disabled.
+    channel_types: Optional[List[:class:`.ChannelType`]]
+        The list of channel types that can be selected in this select menu.
+        Defaults to all types (i.e. ``None``).
+    default_values: Optional[Sequence[Union[:class:`.abc.GuildChannel`, :class:`.Thread`, :class:`.abc.PrivateChannel`, :class:`.PartialMessageable`, :class:`.SelectDefaultValue`, :class:`.Object`]]]
+        The list of values (channels) that are selected by default.
+        If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
+
+        .. versionadded:: 2.10
     row: Optional[:class:`int`]
         The relative row this select menu belongs to. A Discord component can only have 5
         rows. By default, items are arranged automatically into those 5 rows. If you'd
         like to control the relative positioning of the row then passing an index is advised.
         For example, row=1 will show up before row=2. Defaults to ``None``, which is automatic
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
-    channel_types: Optional[List[:class:`.ChannelType`]]
-        The list of channel types that can be selected in this select menu.
-        Defaults to all types (i.e. ``None``).
 
     Attributes
     ----------
-    values: List[Union[:class:`.abc.GuildChannel`, :class:`.Thread`, :class:`.PartialMessageable`]]
+    values: List[Union[:class:`.abc.GuildChannel`, :class:`.Thread`, :class:`.abc.PrivateChannel`, :class:`.PartialMessageable`]]
         A list of channels that have been selected by the user.
     """
 
     __repr_attributes__: Tuple[str, ...] = BaseSelect.__repr_attributes__ + ("channel_types",)
+
+    _default_value_type_map: ClassVar[
+        Mapping[SelectDefaultValueType, Tuple[Type[Snowflake], ...]]
+    ] = {
+        SelectDefaultValueType.channel: (
+            GuildChannel,
+            Thread,
+            DMChannel,
+            GroupChannel,
+            PartialMessageable,
+            Object,
+        ),
+    }
 
     @overload
     def __init__(
@@ -74,9 +109,9 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "InteractionChannel", V_co]):
         max_values: int = 1,
         disabled: bool = False,
         channel_types: Optional[List[ChannelType]] = None,
+        default_values: Optional[Sequence[SelectDefaultValueInputType[AnyChannel]]] = None,
         row: Optional[int] = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     def __init__(
@@ -88,9 +123,9 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "InteractionChannel", V_co]):
         max_values: int = 1,
         disabled: bool = False,
         channel_types: Optional[List[ChannelType]] = None,
+        default_values: Optional[Sequence[SelectDefaultValueInputType[AnyChannel]]] = None,
         row: Optional[int] = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     def __init__(
         self,
@@ -101,6 +136,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "InteractionChannel", V_co]):
         max_values: int = 1,
         disabled: bool = False,
         channel_types: Optional[List[ChannelType]] = None,
+        default_values: Optional[Sequence[SelectDefaultValueInputType[AnyChannel]]] = None,
         row: Optional[int] = None,
     ) -> None:
         super().__init__(
@@ -111,6 +147,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "InteractionChannel", V_co]):
             min_values=min_values,
             max_values=max_values,
             disabled=disabled,
+            default_values=default_values,
             row=row,
         )
         self._underlying.channel_types = channel_types or None
@@ -124,6 +161,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "InteractionChannel", V_co]):
             max_values=component.max_values,
             disabled=component.disabled,
             channel_types=component.channel_types,
+            default_values=component.default_values,
             row=None,
         )
 
@@ -155,21 +193,22 @@ def channel_select(
     max_values: int = 1,
     disabled: bool = False,
     channel_types: Optional[List[ChannelType]] = None,
+    default_values: Optional[Sequence[SelectDefaultValueInputType[AnyChannel]]] = None,
     row: Optional[int] = None,
-) -> Callable[[ItemCallbackType[ChannelSelect[V_co]]], DecoratedItem[ChannelSelect[V_co]]]:
-    ...
+) -> Callable[
+    [ItemCallbackType[V_co, ChannelSelect[V_co]]], DecoratedItem[ChannelSelect[V_co]]
+]: ...
 
 
 @overload
 def channel_select(
-    cls: Type[Object[S_co, P]], *_: P.args, **kwargs: P.kwargs
-) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
-    ...
+    cls: Callable[P, S_co], *_: P.args, **kwargs: P.kwargs
+) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]: ...
 
 
 def channel_select(
-    cls: Type[Object[S_co, ...]] = ChannelSelect[Any], **kwargs: Any
-) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
+    cls: Callable[..., S_co] = ChannelSelect[Any], **kwargs: Any
+) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
     """A decorator that attaches a channel select menu to a component.
 
     The function being decorated should have three parameters, ``self`` representing
@@ -183,10 +222,10 @@ def channel_select(
 
     Parameters
     ----------
-    cls: Type[:class:`ChannelSelect`]
-        The select subclass to create an instance of. If provided, the following parameters
-        described below do not apply. Instead, this decorator will accept the same keywords
-        as the passed cls does.
+    cls: Callable[..., :class:`ChannelSelect`]
+        A callable (may be a :class:`ChannelSelect` subclass) to create a new instance of this component.
+        If provided, the other parameters described below do not apply.
+        Instead, this decorator will accept the same keywords as the passed callable/class does.
     placeholder: Optional[:class:`str`]
         The placeholder text that is shown if nothing is selected, if any.
     custom_id: :class:`str`
@@ -209,5 +248,10 @@ def channel_select(
     channel_types: Optional[List[:class:`.ChannelType`]]
         The list of channel types that can be selected in this select menu.
         Defaults to all types (i.e. ``None``).
+    default_values: Optional[Sequence[Union[:class:`.abc.GuildChannel`, :class:`.Thread`, :class:`.abc.PrivateChannel`, :class:`.PartialMessageable`, :class:`.SelectDefaultValue`, :class:`.Object`]]]
+        The list of values (channels) that are selected by default.
+        If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
+
+        .. versionadded:: 2.10
     """
-    return _create_decorator(cls, ChannelSelect, **kwargs)
+    return _create_decorator(cls, **kwargs)

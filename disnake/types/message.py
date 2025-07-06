@@ -10,8 +10,9 @@ from .channel import ChannelType
 from .components import Component
 from .embed import Embed
 from .emoji import PartialEmoji
-from .interactions import InteractionMessageReference
+from .interactions import InteractionDataResolved, InteractionMessageReference, InteractionMetadata
 from .member import Member, UserWithMember
+from .poll import Poll
 from .snowflake import Snowflake, SnowflakeList
 from .sticker import StickerItem
 from .threads import Thread
@@ -34,6 +35,7 @@ class Reaction(TypedDict):
 class Attachment(TypedDict):
     id: Snowflake
     filename: str
+    title: NotRequired[str]
     description: NotRequired[str]
     content_type: NotRequired[str]
     size: int
@@ -63,11 +65,35 @@ class MessageApplication(TypedDict):
     cover_image: NotRequired[str]
 
 
+MessageReferenceType = Literal[0, 1]
+
+
 class MessageReference(TypedDict):
+    type: MessageReferenceType
     message_id: NotRequired[Snowflake]
     channel_id: Snowflake
     guild_id: NotRequired[Snowflake]
     fail_if_not_exists: NotRequired[bool]
+
+
+class ForwardedMessage(TypedDict):
+    type: MessageType
+    content: str
+    embeds: List[Embed]
+    attachments: List[Attachment]
+    timestamp: str
+    edited_timestamp: Optional[str]
+    flags: NotRequired[int]
+    mentions: Union[List[User], List[UserWithMember]]
+    # apparently mention_roles list is not sent if the msg
+    # is not forwarded in the same guild
+    mention_roles: NotRequired[SnowflakeList]
+    sticker_items: NotRequired[List[StickerItem]]
+    components: NotRequired[List[Component]]
+
+
+class MessageSnapshot(TypedDict):
+    message: ForwardedMessage
 
 
 class RoleSubscriptionData(TypedDict):
@@ -78,7 +104,7 @@ class RoleSubscriptionData(TypedDict):
 
 
 # fmt: off
-MessageType = Literal[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32]
+MessageType = Literal[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 36, 37, 38, 39, 46]
 # fmt: on
 
 
@@ -106,14 +132,19 @@ class Message(TypedDict):
     application: NotRequired[MessageApplication]
     application_id: NotRequired[Snowflake]
     message_reference: NotRequired[MessageReference]
+    message_snapshots: NotRequired[List[MessageSnapshot]]
     flags: NotRequired[int]
     referenced_message: NotRequired[Optional[Message]]
-    interaction: NotRequired[InteractionMessageReference]
+    interaction: NotRequired[InteractionMessageReference]  # deprecated
+    interaction_metadata: NotRequired[InteractionMetadata]
     thread: NotRequired[Thread]
     components: NotRequired[List[Component]]
     sticker_items: NotRequired[List[StickerItem]]
     position: NotRequired[int]
     role_subscription_data: NotRequired[RoleSubscriptionData]
+    poll: NotRequired[Poll]
+    # contains resolved objects for `default_values` of select menus in this message; we currently don't have a use for this
+    resolved: NotRequired[InteractionDataResolved]
 
     # specific to MESSAGE_CREATE/MESSAGE_UPDATE events
     guild_id: NotRequired[Snowflake]

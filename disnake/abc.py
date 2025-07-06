@@ -43,7 +43,6 @@ from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite, Permissions
 from .role import Role
 from .sticker import GuildSticker, StandardSticker, StickerItem
-from .ui.action_row import components_to_dict
 from .utils import _overload_with_permissions
 from .voice_client import VoiceClient, VoiceProtocol
 
@@ -64,16 +63,17 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from .asset import Asset
-    from .channel import CategoryChannel, DMChannel, PartialMessageable
+    from .channel import CategoryChannel, DMChannel, GroupChannel, PartialMessageable
     from .client import Client
     from .embeds import Embed
     from .emoji import Emoji
     from .enums import InviteTarget
-    from .guild import Guild, GuildMessageable
+    from .guild import Guild, GuildChannel as AnyGuildChannel, GuildMessageable
     from .guild_scheduled_event import GuildScheduledEvent
     from .iterators import HistoryIterator
     from .member import Member
     from .message import Message, MessageReference, PartialMessage
+    from .poll import Poll
     from .state import ConnectionState
     from .threads import AnyThreadArchiveDuration, ForumTag
     from .types.channel import (
@@ -89,7 +89,10 @@ if TYPE_CHECKING:
     from .user import ClientUser
     from .voice_region import VoiceRegion
 
-    MessageableChannel = Union[GuildMessageable, DMChannel, PartialMessageable]
+    MessageableChannel = Union[GuildMessageable, DMChannel, GroupChannel, PartialMessageable]
+    # include non-messageable channels, e.g. category/forum
+    AnyChannel = Union[MessageableChannel, AnyGuildChannel]
+
     SnowflakeTime = Union["Snowflake", datetime]
 
 MISSING = utils.MISSING
@@ -175,6 +178,7 @@ class User(Snowflake, Protocol):
         raise NotImplementedError
 
 
+# FIXME: this shouldn't be a protocol. isinstance(thread, PrivateChannel) returns true, and issubclass doesn't work.
 @runtime_checkable
 class PrivateChannel(Snowflake, Protocol):
     """An ABC that details the common operations on a private Discord channel.
@@ -265,8 +269,7 @@ class GuildChannel(ABC):
 
         def __init__(
             self, *, state: ConnectionState, guild: Guild, data: Mapping[str, Any]
-        ) -> None:
-            ...
+        ) -> None: ...
 
     def __str__(self) -> str:
         return self.name
@@ -640,6 +643,7 @@ class GuildChannel(ABC):
         if not base.send_messages:
             base.send_tts_messages = False
             base.send_voice_messages = False
+            base.send_polls = False
             base.mention_everyone = False
             base.embed_links = False
             base.attach_files = False
@@ -838,8 +842,7 @@ class GuildChannel(ABC):
         *,
         overwrite: Optional[PermissionOverwrite] = ...,
         reason: Optional[str] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     @_overload_with_permissions
@@ -887,6 +890,7 @@ class GuildChannel(ABC):
         request_to_speak: Optional[bool] = ...,
         send_messages: Optional[bool] = ...,
         send_messages_in_threads: Optional[bool] = ...,
+        send_polls: Optional[bool] = ...,
         send_tts_messages: Optional[bool] = ...,
         send_voice_messages: Optional[bool] = ...,
         speak: Optional[bool] = ...,
@@ -894,6 +898,7 @@ class GuildChannel(ABC):
         stream: Optional[bool] = ...,
         use_application_commands: Optional[bool] = ...,
         use_embedded_activities: Optional[bool] = ...,
+        use_external_apps: Optional[bool] = ...,
         use_external_emojis: Optional[bool] = ...,
         use_external_sounds: Optional[bool] = ...,
         use_external_stickers: Optional[bool] = ...,
@@ -904,8 +909,7 @@ class GuildChannel(ABC):
         view_channel: Optional[bool] = ...,
         view_creator_monetization_analytics: Optional[bool] = ...,
         view_guild_insights: Optional[bool] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     async def set_permissions(
         self,
@@ -1111,8 +1115,7 @@ class GuildChannel(ABC):
         category: Optional[Snowflake] = ...,
         sync_permissions: bool = ...,
         reason: Optional[str] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     async def move(
@@ -1123,8 +1126,7 @@ class GuildChannel(ABC):
         category: Optional[Snowflake] = ...,
         sync_permissions: bool = ...,
         reason: Optional[str] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     async def move(
@@ -1135,8 +1137,7 @@ class GuildChannel(ABC):
         category: Optional[Snowflake] = ...,
         sync_permissions: bool = ...,
         reason: Optional[str] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     async def move(
@@ -1147,8 +1148,7 @@ class GuildChannel(ABC):
         category: Optional[Snowflake] = ...,
         sync_permissions: bool = ...,
         reason: Optional[str] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     async def move(self, **kwargs: Any) -> None:
         """|coro|
@@ -1434,8 +1434,8 @@ class Messageable:
         mention_author: bool = ...,
         view: View = ...,
         components: Components[MessageUIComponent] = ...,
-    ) -> Message:
-        ...
+        poll: Poll = ...,
+    ) -> Message: ...
 
     @overload
     async def send(
@@ -1455,8 +1455,8 @@ class Messageable:
         mention_author: bool = ...,
         view: View = ...,
         components: Components[MessageUIComponent] = ...,
-    ) -> Message:
-        ...
+        poll: Poll = ...,
+    ) -> Message: ...
 
     @overload
     async def send(
@@ -1476,8 +1476,8 @@ class Messageable:
         mention_author: bool = ...,
         view: View = ...,
         components: Components[MessageUIComponent] = ...,
-    ) -> Message:
-        ...
+        poll: Poll = ...,
+    ) -> Message: ...
 
     @overload
     async def send(
@@ -1497,8 +1497,8 @@ class Messageable:
         mention_author: bool = ...,
         view: View = ...,
         components: Components[MessageUIComponent] = ...,
-    ) -> Message:
-        ...
+        poll: Poll = ...,
+    ) -> Message: ...
 
     async def send(
         self,
@@ -1519,6 +1519,7 @@ class Messageable:
         mention_author: Optional[bool] = None,
         view: Optional[View] = None,
         components: Optional[Components[MessageUIComponent]] = None,
+        poll: Optional[Poll] = None,
     ):
         """|coro|
 
@@ -1527,7 +1528,7 @@ class Messageable:
         The content must be a type that can convert to a string through ``str(content)``.
 
         At least one of ``content``, ``embed``/``embeds``, ``file``/``files``,
-        ``stickers``, ``components``, or ``view`` must be provided.
+        ``stickers``, ``components``, ``poll`` or ``view`` must be provided.
 
         To upload a single file, the ``file`` parameter should be used with a
         single :class:`.File` object. To upload multiple files, the ``files``
@@ -1592,6 +1593,12 @@ class Messageable:
 
             .. versionadded:: 1.6
 
+            .. note::
+
+                Passing a :class:`.Message` or :class:`.PartialMessage` will only allow replies. To forward a message
+                you must explicitly transform the message to a :class:`.MessageReference` using :meth:`.Message.to_reference` and specify the :class:`.MessageReferenceType`,
+                or use :meth:`.Message.forward`.
+
         mention_author: Optional[:class:`bool`]
             If set, overrides the :attr:`.AllowedMentions.replied_user` attribute of ``allowed_mentions``.
 
@@ -1622,6 +1629,11 @@ class Messageable:
             that will override the setting of :attr:`.MessageFlags.suppress_embeds`.
 
             .. versionadded:: 2.9
+
+        poll: :class:`.Poll`
+            The poll to send with the message.
+
+            .. versionadded:: 2.10
 
         Raises
         ------
@@ -1675,6 +1687,10 @@ class Messageable:
         if stickers is not None:
             stickers_payload = [sticker.id for sticker in stickers]
 
+        poll_payload = None
+        if poll:
+            poll_payload = poll._to_dict()
+
         allowed_mentions_payload = None
         if allowed_mentions is None:
             allowed_mentions_payload = state.allowed_mentions and state.allowed_mentions.to_dict()
@@ -1698,16 +1714,14 @@ class Messageable:
 
         if view is not None and components is not None:
             raise TypeError("cannot pass both view and components parameter to send()")
-
         elif view:
             if not hasattr(view, "__discord_ui_view__"):
                 raise TypeError(f"view parameter must be View not {view.__class__!r}")
-
             components_payload = view.to_components()
-
         elif components:
-            components_payload = components_to_dict(components)
+            from .ui.action_row import components_to_dict
 
+            components_payload = components_to_dict(components)
         else:
             components_payload = None
 
@@ -1736,6 +1750,7 @@ class Messageable:
                     message_reference=reference_payload,
                     stickers=stickers_payload,
                     components=components_payload,
+                    poll=poll_payload,
                     flags=flags_payload,
                 )
             finally:
@@ -1752,6 +1767,7 @@ class Messageable:
                 message_reference=reference_payload,
                 stickers=stickers_payload,
                 components=components_payload,
+                poll=poll_payload,
                 flags=flags_payload,
             )
 

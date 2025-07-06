@@ -14,6 +14,7 @@
 - When that's all done, we receive opcode 4 from the vWS.
 - Finally we can transmit data to endpoint:port.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -228,11 +229,7 @@ class VoiceClient(VoiceProtocol):
         self.ws: DiscordVoiceWebSocket = MISSING
 
     warn_nacl = not has_nacl
-    supported_modes: Tuple[SupportedModes, ...] = (
-        "xsalsa20_poly1305_lite",
-        "xsalsa20_poly1305_suffix",
-        "xsalsa20_poly1305",
-    )
+    supported_modes: Tuple[SupportedModes, ...] = ("aead_xchacha20_poly1305_rtpsize",)
 
     @property
     def guild(self) -> Guild:
@@ -512,8 +509,8 @@ class VoiceClient(VoiceProtocol):
         header = bytearray(12)
 
         # Formulate rtp header
-        header[0] = 0x80
-        header[1] = 0x78
+        header[0] = 0x80  # version = 2
+        header[1] = 0x78  # payload type = 120 (opus)
         struct.pack_into(">H", header, 2, self.sequence)
         struct.pack_into(">I", header, 4, self.timestamp)
         struct.pack_into(">I", header, 8, self.ssrc)
@@ -521,27 +518,26 @@ class VoiceClient(VoiceProtocol):
         encrypt_packet = getattr(self, f"_encrypt_{self.mode}")
         return encrypt_packet(header, data)
 
-    def _encrypt_xsalsa20_poly1305(self, header: bytes, data) -> bytes:
-        box = nacl.secret.SecretBox(bytes(self.secret_key))
-        nonce = bytearray(24)
-        nonce[:12] = header
+    def _get_nonce(self, pad: int):
+        # returns (nonce, padded_nonce).
+        # n.b. all currently implemented modes use the same nonce size (192 bits / 24 bytes)
+        nonce = struct.pack(">I", self._lite_nonce)
 
-        return header + box.encrypt(bytes(data), bytes(nonce)).ciphertext
+        self._lite_nonce += 1
+        if self._lite_nonce > 4294967295:
+            self._lite_nonce = 0
 
-    def _encrypt_xsalsa20_poly1305_suffix(self, header: bytes, data) -> bytes:
-        box = nacl.secret.SecretBox(bytes(self.secret_key))
-        nonce = nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)
+        return (nonce, nonce.ljust(pad, b"\0"))
 
-        return header + box.encrypt(bytes(data), nonce).ciphertext + nonce
+    def _encrypt_aead_xchacha20_poly1305_rtpsize(self, header: bytes, data) -> bytes:
+        box = nacl.secret.Aead(bytes(self.secret_key))
+        nonce, padded_nonce = self._get_nonce(nacl.secret.Aead.NONCE_SIZE)
 
-    def _encrypt_xsalsa20_poly1305_lite(self, header: bytes, data) -> bytes:
-        box = nacl.secret.SecretBox(bytes(self.secret_key))
-        nonce = bytearray(24)
-
-        nonce[:4] = struct.pack(">I", self._lite_nonce)
-        self.checked_add("_lite_nonce", 1, 4294967295)
-
-        return header + box.encrypt(bytes(data), bytes(nonce)).ciphertext + nonce[:4]
+        return (
+            header
+            + box.encrypt(bytes(data), aad=bytes(header), nonce=padded_nonce).ciphertext
+            + nonce
+        )
 
     def play(
         self, source: AudioSource, *, after: Optional[Callable[[Optional[Exception]], Any]] = None

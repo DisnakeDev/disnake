@@ -64,6 +64,7 @@ if TYPE_CHECKING:
         DefaultReaction as DefaultReactionPayload,
         PermissionOverwrite as PermissionOverwritePayload,
     )
+    from .types.invite import Invite as InvitePayload
     from .types.role import Role as RolePayload
     from .types.snowflake import Snowflake
     from .types.threads import ForumTag as ForumTagPayload
@@ -215,7 +216,7 @@ def _flags_transformer(
 
 
 def _list_transformer(
-    func: Callable[[AuditLogEntry, Any], T]
+    func: Callable[[AuditLogEntry, Any], T],
 ) -> Callable[[AuditLogEntry, Any], List[T]]:
     def _transform(entry: AuditLogEntry, data: Any) -> List[T]:
         if not data:
@@ -302,11 +303,9 @@ class AuditLogDiff:
 
     if TYPE_CHECKING:
 
-        def __getattr__(self, item: str) -> Any:
-            ...
+        def __getattr__(self, item: str) -> Any: ...
 
-        def __setattr__(self, key: str, value: Any) -> Any:
-            ...
+        def __setattr__(self, key: str, value: Any) -> Any: ...
 
 
 Transformer = Callable[["AuditLogEntry", Any], Any]
@@ -364,12 +363,15 @@ class AuditLogChanges:
         "available_tags":                     (None, _list_transformer(_transform_tag)),
         "default_reaction_emoji":             ("default_reaction", _transform_default_reaction),
         "default_sort_order":                 (None, _enum_transformer(enums.ThreadSortOrder)),
+        "sound_id":                           ("id", _transform_snowflake),
     }
     # fmt: on
 
     def __init__(self, entry: AuditLogEntry, data: List[AuditLogChangePayload]) -> None:
         self.before = AuditLogDiff()
         self.after = AuditLogDiff()
+
+        has_emoji_fields = False
 
         for elem in data:
             attr = elem["key"]
@@ -388,6 +390,10 @@ class AuditLogChanges:
                     entry, cast("AuditLogChangeAppCmdPermsPayload", elem)
                 )
                 continue
+
+            # special case for flat emoji fields (discord, why), these will be merged later
+            if attr == "emoji_id" or attr == "emoji_name":
+                has_emoji_fields = True
 
             transformer: Optional[Transformer]
 
@@ -418,6 +424,9 @@ class AuditLogChanges:
                     after = transformer(entry, after)
 
             setattr(self.after, attr, after)
+
+        if has_emoji_fields:
+            self._merge_emoji(entry)
 
         # add an alias
         if hasattr(self.after, "colour"):
@@ -475,6 +484,16 @@ class AuditLogChanges:
         if (new := data.get("new_value")) is not None:
             self.after.command_permissions[entity_id] = ApplicationCommandPermissions(
                 data=new, guild_id=guild_id
+            )
+
+    def _merge_emoji(self, entry: AuditLogEntry) -> None:
+        for diff in (self.before, self.after):
+            emoji_id: Optional[str] = diff.__dict__.pop("emoji_id", None)
+            emoji_name: Optional[str] = diff.__dict__.pop("emoji_name", None)
+
+            diff.emoji = entry._state._get_emoji_from_fields(
+                name=emoji_name,
+                id=int(emoji_id) if emoji_id else None,
             )
 
 
@@ -799,15 +818,19 @@ class AuditLogEntry(Hashable):
         # so figure out which change has the full invite data
         changeset = self.before if self.action is enums.AuditLogAction.invite_delete else self.after
 
-        fake_payload = {
+        fake_payload: InvitePayload = {
             "max_age": changeset.max_age,
             "max_uses": changeset.max_uses,
             "code": changeset.code,
             "temporary": changeset.temporary,
             "uses": changeset.uses,
+            "type": 0,
+            "channel": None,
         }
 
-        obj = Invite(state=self._state, data=fake_payload, guild=self.guild, channel=changeset.channel)  # type: ignore
+        obj = Invite(
+            state=self._state, data=fake_payload, guild=self.guild, channel=changeset.channel
+        )
         try:
             obj.inviter = changeset.inviter
         except AttributeError:

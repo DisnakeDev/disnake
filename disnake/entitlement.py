@@ -67,13 +67,15 @@ class Entitlement(Hashable):
     application_id: :class:`int`
         The parent application's ID.
     deleted: :class:`bool`
-        Whether the entitlement was deleted.
+        Whether the entitlement has been deleted.
+    consumed: :class:`bool`
+        Whether the entitlement has been consumed. Only applies to consumable items,
+        i.e. those associated with a :attr:`~SKUType.consumable` SKU.
     starts_at: Optional[:class:`datetime.datetime`]
         The time at which the entitlement starts being active.
         Set to ``None`` when this is a test entitlement.
     ends_at: Optional[:class:`datetime.datetime`]
         The time at which the entitlement stops being active.
-        Set to ``None`` when this is a test entitlement.
 
         You can use :meth:`is_active` to check whether this entitlement is still active.
     """
@@ -87,6 +89,7 @@ class Entitlement(Hashable):
         "application_id",
         "type",
         "deleted",
+        "consumed",
         "starts_at",
         "ends_at",
     )
@@ -101,6 +104,7 @@ class Entitlement(Hashable):
         self.application_id: int = int(data["application_id"])
         self.type: EntitlementType = try_enum(EntitlementType, data["type"])
         self.deleted: bool = data.get("deleted", False)
+        self.consumed: bool = data.get("consumed", False)
         self.starts_at: Optional[datetime.datetime] = parse_time(data.get("starts_at"))
         self.ends_at: Optional[datetime.datetime] = parse_time(data.get("ends_at"))
 
@@ -154,6 +158,22 @@ class Entitlement(Hashable):
             return False
 
         return True
+
+    async def consume(self) -> None:
+        """|coro|
+
+        Marks the entitlement as consumed.
+
+        This is only valid for consumable one-time entitlements; see :attr:`consumed`.
+
+        Raises
+        ------
+        NotFound
+            The entitlement does not exist.
+        HTTPException
+            Consuming the entitlement failed.
+        """
+        await self._state.http.consume_entitlement(self.application_id, self.id)
 
     async def delete(self) -> None:
         """|coro|

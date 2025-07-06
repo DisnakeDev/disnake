@@ -197,6 +197,7 @@ class Permissions(BaseFlags):
         request_to_speak: bool = ...,
         send_messages: bool = ...,
         send_messages_in_threads: bool = ...,
+        send_polls: bool = ...,
         send_tts_messages: bool = ...,
         send_voice_messages: bool = ...,
         speak: bool = ...,
@@ -204,6 +205,7 @@ class Permissions(BaseFlags):
         stream: bool = ...,
         use_application_commands: bool = ...,
         use_embedded_activities: bool = ...,
+        use_external_apps: bool = ...,
         use_external_emojis: bool = ...,
         use_external_sounds: bool = ...,
         use_external_stickers: bool = ...,
@@ -214,16 +216,14 @@ class Permissions(BaseFlags):
         view_channel: bool = ...,
         view_creator_monetization_analytics: bool = ...,
         view_guild_insights: bool = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     @_generated
     def __init__(
         self,
         permissions: int = 0,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @_overload_with_permissions
     def __init__(self, permissions: int = 0, **kwargs: bool) -> None:
@@ -407,6 +407,9 @@ class Permissions(BaseFlags):
 
         .. versionchanged:: 2.9
             Added :attr:`send_voice_messages` permission.
+
+        .. versionchanged:: 2.10
+            Moved :attr:`use_application_commands` permission to :attr:`apps`.
         """
         return cls(
             send_messages=True,
@@ -423,8 +426,8 @@ class Permissions(BaseFlags):
             manage_threads=True,
             read_message_history=True,
             send_tts_messages=True,
-            use_slash_commands=True,
             send_voice_messages=True,
+            send_polls=True,
         )
 
     @classmethod
@@ -438,12 +441,14 @@ class Permissions(BaseFlags):
 
         .. versionchanged:: 2.9
             Added :attr:`use_soundboard` and :attr:`use_external_sounds` permissions.
+
+        .. versionchanged:: 2.10
+            Moved :attr:`use_embedded_activities` permission to :attr:`apps`.
         """
         return cls(
             connect=True,
             speak=True,
             stream=True,
-            use_embedded_activities=True,
             use_soundboard=True,
             use_external_sounds=True,
             use_voice_activation=True,
@@ -477,6 +482,20 @@ class Permissions(BaseFlags):
             manage_channels=True,
             mute_members=True,
             move_members=True,
+        )
+
+    @classmethod
+    @cached_creation
+    def apps(cls) -> Self:
+        """A factory method that creates a :class:`Permissions` with all
+        "Apps" permissions from the official Discord UI set to ``True``.
+
+        .. versionadded:: 2.10
+        """
+        return cls(
+            use_application_commands=True,
+            use_embedded_activities=True,
+            use_external_apps=True,
         )
 
     @classmethod
@@ -580,6 +599,7 @@ class Permissions(BaseFlags):
         request_to_speak: bool = ...,
         send_messages: bool = ...,
         send_messages_in_threads: bool = ...,
+        send_polls: bool = ...,
         send_tts_messages: bool = ...,
         send_voice_messages: bool = ...,
         speak: bool = ...,
@@ -587,6 +607,7 @@ class Permissions(BaseFlags):
         stream: bool = ...,
         use_application_commands: bool = ...,
         use_embedded_activities: bool = ...,
+        use_external_apps: bool = ...,
         use_external_emojis: bool = ...,
         use_external_sounds: bool = ...,
         use_external_stickers: bool = ...,
@@ -597,15 +618,13 @@ class Permissions(BaseFlags):
         view_channel: bool = ...,
         view_creator_monetization_analytics: bool = ...,
         view_guild_insights: bool = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     @_generated
     def update(
         self,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @_overload_with_permissions
     def update(self, **kwargs: bool) -> None:
@@ -1038,6 +1057,26 @@ class Permissions(BaseFlags):
         """
         return 1 << 46
 
+    @flag_value
+    def send_polls(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can send polls.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 49
+
+    @flag_value
+    def use_external_apps(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user's apps can send public responses.
+
+        If disabled, users can still use their user-installed applications, but the responses
+        will be forced ephemeral (i.e. only visible to them).
+        Only applies to user-installed apps that are not also installed to the guild.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 50
+
 
 def _augment_from_permissions(cls):
     cls.VALID_NAMES = set(Permissions.VALID_FLAGS)
@@ -1143,6 +1182,7 @@ class PermissionOverwrite:
         request_to_speak: Optional[bool]
         send_messages: Optional[bool]
         send_messages_in_threads: Optional[bool]
+        send_polls: Optional[bool]
         send_tts_messages: Optional[bool]
         send_voice_messages: Optional[bool]
         speak: Optional[bool]
@@ -1150,6 +1190,7 @@ class PermissionOverwrite:
         stream: Optional[bool]
         use_application_commands: Optional[bool]
         use_embedded_activities: Optional[bool]
+        use_external_apps: Optional[bool]
         use_external_emojis: Optional[bool]
         use_external_sounds: Optional[bool]
         use_external_stickers: Optional[bool]
@@ -1209,6 +1250,7 @@ class PermissionOverwrite:
         request_to_speak: Optional[bool] = ...,
         send_messages: Optional[bool] = ...,
         send_messages_in_threads: Optional[bool] = ...,
+        send_polls: Optional[bool] = ...,
         send_tts_messages: Optional[bool] = ...,
         send_voice_messages: Optional[bool] = ...,
         speak: Optional[bool] = ...,
@@ -1216,6 +1258,7 @@ class PermissionOverwrite:
         stream: Optional[bool] = ...,
         use_application_commands: Optional[bool] = ...,
         use_embedded_activities: Optional[bool] = ...,
+        use_external_apps: Optional[bool] = ...,
         use_external_emojis: Optional[bool] = ...,
         use_external_sounds: Optional[bool] = ...,
         use_external_stickers: Optional[bool] = ...,
@@ -1226,15 +1269,13 @@ class PermissionOverwrite:
         view_channel: Optional[bool] = ...,
         view_creator_monetization_analytics: Optional[bool] = ...,
         view_guild_insights: Optional[bool] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     @_generated
     def __init__(
         self,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @_overload_with_permissions
     def __init__(self, **kwargs: Optional[bool]) -> None:
@@ -1342,6 +1383,7 @@ class PermissionOverwrite:
         request_to_speak: Optional[bool] = ...,
         send_messages: Optional[bool] = ...,
         send_messages_in_threads: Optional[bool] = ...,
+        send_polls: Optional[bool] = ...,
         send_tts_messages: Optional[bool] = ...,
         send_voice_messages: Optional[bool] = ...,
         speak: Optional[bool] = ...,
@@ -1349,6 +1391,7 @@ class PermissionOverwrite:
         stream: Optional[bool] = ...,
         use_application_commands: Optional[bool] = ...,
         use_embedded_activities: Optional[bool] = ...,
+        use_external_apps: Optional[bool] = ...,
         use_external_emojis: Optional[bool] = ...,
         use_external_sounds: Optional[bool] = ...,
         use_external_stickers: Optional[bool] = ...,
@@ -1359,15 +1402,13 @@ class PermissionOverwrite:
         view_channel: Optional[bool] = ...,
         view_creator_monetization_analytics: Optional[bool] = ...,
         view_guild_insights: Optional[bool] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     @_generated
     def update(
         self,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @_overload_with_permissions
     def update(self, **kwargs: Optional[bool]) -> None:

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional, cast
 
 from . import utils
 from .asset import Asset
@@ -14,6 +14,8 @@ if TYPE_CHECKING:
     from .state import ConnectionState
     from .types.appinfo import (
         AppInfo as AppInfoPayload,
+        ApplicationIntegrationType as ApplicationIntegrationTypeLiteral,
+        ApplicationIntegrationTypeConfiguration as ApplicationIntegrationTypeConfigurationPayload,
         InstallParams as InstallParamsPayload,
         PartialAppInfo as PartialAppInfoPayload,
         Team as TeamPayload,
@@ -24,6 +26,7 @@ __all__ = (
     "AppInfo",
     "PartialAppInfo",
     "InstallParams",
+    "InstallTypeConfiguration",
 )
 
 
@@ -42,12 +45,20 @@ class InstallParams:
 
     __slots__ = (
         "_app_id",
+        "_install_type",
         "scopes",
         "permissions",
     )
 
-    def __init__(self, data: InstallParamsPayload, parent: AppInfo) -> None:
+    def __init__(
+        self,
+        data: InstallParamsPayload,
+        parent: AppInfo,
+        *,
+        install_type: Optional[ApplicationIntegrationTypeLiteral] = None,
+    ) -> None:
         self._app_id = parent.id
+        self._install_type: Optional[ApplicationIntegrationTypeLiteral] = install_type
         self.scopes = data["scopes"]
         self.permissions = Permissions(int(data["permissions"]))
 
@@ -55,14 +66,48 @@ class InstallParams:
         return f"<InstallParams scopes={self.scopes!r} permissions={self.permissions!r}>"
 
     def to_url(self) -> str:
-        """Return a string that can be used to add this application to a server.
+        """Returns a string that can be used to install this application.
 
         Returns
         -------
         :class:`str`
             The invite url.
         """
-        return utils.oauth_url(self._app_id, scopes=self.scopes, permissions=self.permissions)
+        return utils.oauth_url(
+            self._app_id,
+            scopes=self.scopes,
+            permissions=self.permissions,
+            integration_type=(
+                self._install_type if self._install_type is not None else utils.MISSING
+            ),
+        )
+
+
+class InstallTypeConfiguration:
+    """Represents the configuration for a particular application installation type.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    install_params: Optional[:class:`InstallParams`]
+        The parameters for this installation type.
+    """
+
+    __slots__ = ("install_params",)
+
+    def __init__(
+        self,
+        data: ApplicationIntegrationTypeConfigurationPayload,
+        *,
+        parent: AppInfo,
+        install_type: ApplicationIntegrationTypeLiteral,
+    ) -> None:
+        self.install_params: Optional[InstallParams] = (
+            InstallParams(install_params, parent=parent, install_type=install_type)
+            if (install_params := data.get("oauth2_install_params"))
+            else None
+        )
 
 
 class AppInfo:
@@ -98,8 +143,7 @@ class AppInfo:
         .. versionadded:: 1.3
 
     guild_id: Optional[:class:`int`]
-        If this application is a game sold on Discord,
-        this field will be the guild to which it has been linked to.
+        The ID of the guild associated with the application, if any.
 
         .. versionadded:: 1.3
 
@@ -139,6 +183,9 @@ class AppInfo:
     install_params: Optional[:class:`InstallParams`]
         The installation parameters for this application.
 
+        See also :attr:`guild_install_type_config`/:attr:`user_install_type_config`
+        for installation type-specific configuration.
+
         .. versionadded:: 2.5
 
     custom_install_url: Optional[:class:`str`]
@@ -151,6 +198,15 @@ class AppInfo:
         in the guild role verification configuration.
 
         .. versionadded:: 2.8
+    approximate_guild_count: :class:`int`
+        The approximate number of guilds the application is installed to.
+
+        .. versionadded:: 2.10
+    approximate_user_install_count: :class:`int`
+        The approximate number of users that have installed the application
+        (for user-installable apps).
+
+        .. versionadded:: 2.10
     """
 
     __slots__ = (
@@ -177,6 +233,9 @@ class AppInfo:
         "install_params",
         "custom_install_url",
         "role_connections_verification_url",
+        "approximate_guild_count",
+        "approximate_user_install_count",
+        "_install_types_config",
     )
 
     def __init__(self, state: ConnectionState, data: AppInfoPayload) -> None:
@@ -218,6 +277,20 @@ class AppInfo:
         self.role_connections_verification_url: Optional[str] = data.get(
             "role_connections_verification_url"
         )
+        self.approximate_guild_count: int = data.get("approximate_guild_count", 0)
+        self.approximate_user_install_count: int = data.get("approximate_user_install_count", 0)
+
+        # this is a bit of a mess, but there's no better way to expose this data for now
+        self._install_types_config: Dict[
+            ApplicationIntegrationTypeLiteral, InstallTypeConfiguration
+        ] = {}
+        for type_str, config in (data.get("integration_types_config") or {}).items():
+            install_type = cast("ApplicationIntegrationTypeLiteral", int(type_str))
+            self._install_types_config[install_type] = InstallTypeConfiguration(
+                config or {},
+                parent=self,
+                install_type=install_type,
+            )
 
     def __repr__(self) -> str:
         return (
@@ -245,8 +318,7 @@ class AppInfo:
 
     @property
     def guild(self) -> Optional[Guild]:
-        """Optional[:class:`Guild`]: If this application is a game sold on Discord,
-        this field will be the guild to which it has been linked
+        """Optional[:class:`Guild`]: The guild associated with the application, if any.
 
         .. versionadded:: 1.3
         """
@@ -268,6 +340,24 @@ class AppInfo:
             stacklevel=2,
         )
         return self._summary
+
+    @property
+    def guild_install_type_config(self) -> Optional[InstallTypeConfiguration]:
+        """Optional[:class:`InstallTypeConfiguration`]: The guild installation parameters for
+        this application. If this application cannot be installed to guilds, returns ``None``.
+
+        .. versionadded:: 2.10
+        """
+        return self._install_types_config.get(0)
+
+    @property
+    def user_install_type_config(self) -> Optional[InstallTypeConfiguration]:
+        """Optional[:class:`InstallTypeConfiguration`]: The user installation parameters for
+        this application. If this application cannot be installed to users, returns ``None``.
+
+        .. versionadded:: 2.10
+        """
+        return self._install_types_config.get(1)
 
 
 class PartialAppInfo:

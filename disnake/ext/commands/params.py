@@ -478,7 +478,6 @@ class ParamInfo:
     """
 
     TYPES: ClassVar[Dict[type, int]] = {
-        # fmt: off
         str:                                               OptionType.string.value,
         int:                                               OptionType.integer.value,
         bool:                                              OptionType.boolean.value,
@@ -495,8 +494,7 @@ class ParamInfo:
         Union[disnake.User, disnake.Member, disnake.Role]: OptionType.mentionable.value,
         float:                                             OptionType.number.value,
         disnake.Attachment:                                OptionType.attachment.value,
-        # fmt: on
-    }
+    }  # fmt: skip
     _registered_converters: ClassVar[Dict[type, Callable]] = {}
 
     def __init__(
@@ -675,7 +673,10 @@ class ParamInfo:
 
     def _parse_enum(self, annotation: Any) -> None:
         if isinstance(annotation, (EnumMeta, disnake.enums.EnumMeta)):
-            self.choices = [OptionChoice(name, value.value) for name, value in annotation.__members__.items()]  # type: ignore
+            self.choices = [
+                OptionChoice(name, value.value)  # type: ignore
+                for name, value in annotation.__members__.items()
+            ]
         else:
             self.choices = [OptionChoice(str(i), i) for i in annotation.__args__]
 
@@ -804,7 +805,7 @@ class ParamInfo:
         self.param_name = param.name
 
     def parse_doc(self, doc: disnake.utils._DocstringParam) -> None:
-        if self.type == str and doc["type"] is not None:
+        if self.type is str and doc["type"] is not None:
             self.parse_annotation(doc["type"])
 
         self.description = self.description or doc["description"]

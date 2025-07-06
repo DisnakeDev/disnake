@@ -275,7 +275,7 @@ class Loop(Generic[LF]):
         """
         if self._task is MISSING:
             return None
-        elif self._task and self._task.done() or self._stop_next_iteration:
+        elif (self._task and self._task.done()) or self._stop_next_iteration:
             return None
         return self._next_iteration
 
@@ -705,11 +705,9 @@ L_co = TypeVar("L_co", bound=Loop, covariant=True)
 
 
 class Object(Protocol[T_co, P]):
-    def __new__(cls) -> T_co:
-        ...
+    def __new__(cls) -> T_co: ...
 
-    def __init__(self, *args: P.args, **kwargs: P.kwargs) -> None:
-        ...
+    def __init__(self, *args: P.args, **kwargs: P.kwargs) -> None: ...
 
 
 @overload
@@ -722,15 +720,13 @@ def loop(
     count: Optional[int] = None,
     reconnect: bool = True,
     loop: asyncio.AbstractEventLoop = ...,
-) -> Callable[[LF], Loop[LF]]:
-    ...
+) -> Callable[[LF], Loop[LF]]: ...
 
 
 @overload
 def loop(
     cls: Type[Object[L_co, Concatenate[LF, P]]], *_: P.args, **kwargs: P.kwargs
-) -> Callable[[LF], L_co]:
-    ...
+) -> Callable[[LF], L_co]: ...
 
 
 def loop(
