@@ -2235,6 +2235,7 @@ class Client:
         *,
         with_counts: bool = True,
         guild_scheduled_event_id: Optional[int] = None,
+        with_expiration: bool = False,
     ) -> Invite:
         """|coro|
 
@@ -2273,6 +2274,13 @@ class Client:
         :class:`.Invite`
             The invite from the URL/ID.
         """
+        if with_expiration:
+            utils.warn_deprecated(
+                "Using the `with_expiration` argument is deprecated and will "
+                "result in an error in future versions.",
+                stacklevel=2,
+            )
+
         invite_id, params = utils.resolve_invite(url, with_params=True)
 
         if not guild_scheduled_event_id:
