@@ -35,6 +35,8 @@ if TYPE_CHECKING:
 __all__ = (
     "User",
     "ClientUser",
+    "Nameplate",
+    "Collectibles",
 )
 
 
@@ -502,7 +504,7 @@ class Nameplate:
     def nameplate_animated_asset(self) -> Asset:
         """Asset: returns the animated nameplate for the user.
 
-        .. versionaddedd:: 2.11
+        .. versionadded:: 2.11
         """
         return Asset._from_nameplate(self.__state, self._asset)
 
@@ -510,7 +512,7 @@ class Nameplate:
     def nameplate_static_asset(self) -> Asset:
         """Asset: returns the static nameplate for the user.
 
-        .. versionaddedd:: 2.11
+        .. versionadded:: 2.11
         """
         return Asset._from_nameplate(self.__state, self._asset, animated=False)
 
