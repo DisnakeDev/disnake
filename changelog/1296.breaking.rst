@@ -1,1 +1,0 @@
-Remove old `with_expiration` query parameter from :meth:`Client.fetch_invite`.
