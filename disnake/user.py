@@ -25,6 +25,8 @@ if TYPE_CHECKING:
     from .types.channel import DMChannel as DMChannelPayload
     from .types.user import (
         AvatarDecorationData as AvatarDecorationDataPayload,
+        CollectiblesData as CollectiblesDataPayload,
+        NameplateData as NameplateDataPayload,
         PartialUser as PartialUserPayload,
         User as UserPayload,
     )
@@ -55,6 +57,7 @@ class BaseUser(_UserTag):
         "_accent_colour",
         "_public_flags",
         "_state",
+        "collectibles",
     )
 
     if TYPE_CHECKING:
@@ -111,6 +114,9 @@ class BaseUser(_UserTag):
         self._public_flags = data.get("public_flags", 0)
         self.bot = data.get("bot", False)
         self.system = data.get("system", False)
+        self.collectibles: Optional[Collectibles] = None
+        if collectibles_data := data.get("collectibles"):
+            self.collectibles = Collectibles(self._state, collectibles_data)
 
     @classmethod
     def _copy(cls, user: BaseUser) -> Self:
@@ -361,6 +367,10 @@ class ClientUser(BaseUser):
 
     mfa_enabled: :class:`bool`
         Specifies if the user has MFA turned on and working.
+    collectibles: Optional[:class:`Collectibles`]
+        The collectibles the user has, if available.
+
+        .. versionadded:: 2.11
     """
 
     __slots__ = ("locale", "_flags", "verified", "mfa_enabled", "__weakref__")
@@ -456,6 +466,75 @@ class ClientUser(BaseUser):
         return ClientUser(state=self._state, data=data)
 
 
+class Nameplate:
+    """
+    Represent the decoration behind the name of a user that appears
+    in the server / DM / DM group members list.
+
+    .. versionadded:: 2.11
+
+    Attributes
+    ----------
+    sku_id: :class:`int`
+        id of the nameplate SKU.
+    label: :class:`str`
+        The label of this nameplate.
+    palette: :class:`str`
+        The background color of the nameplate
+    """
+
+    __slots__ = (
+        "__state",
+        "sku_id",
+        "_asset",
+        "label",
+        "palette",
+    )
+
+    def __init__(self, state: ConnectionState, data: NameplateDataPayload) -> None:
+        self.__state: ConnectionState = state
+        self.sku_id: int = int(data["sku_id"])
+        self._asset: str = data["asset"]
+        self.label: str = data["label"]
+        self.palette = data["palette"]
+
+    @property
+    def nameplate_animated_asset(self) -> Asset:
+        """Asset: returns the animated nameplate for the user.
+
+        .. versionaddedd:: 2.11
+        """
+        return Asset._from_nameplate(self.__state, self._asset)
+
+    @property
+    def nameplate_static_asset(self) -> Asset:
+        """Asset: returns the static nameplate for the user.
+
+        .. versionaddedd:: 2.11
+        """
+        return Asset._from_nameplate(self.__state, self._asset, animated=False)
+
+
+class Collectibles:
+    """
+    Represents the collectibles the user has, excluding Avatar Decorations and Profile Effects.
+
+    .. versionadded:: 2.11
+
+    Attributes
+    ----------
+    nameplate: Optional[:class:`Nameplate`]
+        The nameplate of the user, if available.
+    """
+
+    __slots__ = ("nameplate",)
+
+    def __init__(self, state: ConnectionState, data: CollectiblesDataPayload) -> None:
+        self.nameplate: Optional[Nameplate] = None
+        if nameplate_data := data.get("nameplate"):
+            self.nameplate = Nameplate(state, data=nameplate_data)
+
+
 class User(BaseUser, disnake.abc.Messageable):
     """Represents a Discord user.
 
@@ -502,6 +581,10 @@ class User(BaseUser, disnake.abc.Messageable):
         Specifies if the user is a bot account.
     system: :class:`bool`
         Specifies if the user is a system user (i.e. represents Discord officially).
+    collectibles: Optional[:class:`Collectibles`]
+        The collectibles the user has, if available.
+
+        .. versionadded:: 2.11
     """
 
     __slots__ = ("__weakref__",)
