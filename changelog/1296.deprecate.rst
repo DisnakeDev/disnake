@@ -1,0 +1,1 @@
+Deprecate `with_expiration` query parameter of :meth:`Client.fetch_invite` as it is no longer supported from the discord API.

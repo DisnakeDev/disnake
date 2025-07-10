@@ -40,5 +40,5 @@ class Invite(_InviteMetadata):
     target_application: NotRequired[PartialAppInfo]
     approximate_presence_count: NotRequired[int]
     approximate_member_count: NotRequired[int]
-    expires_at: NotRequired[Optional[str]]
+    expires_at: Optional[str]
     guild_scheduled_event: NotRequired[GuildScheduledEvent]
