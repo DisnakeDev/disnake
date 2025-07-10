@@ -51,6 +51,7 @@ class AppInfo(BaseAppInfo):
     role_connections_verification_url: NotRequired[str]
     approximate_guild_count: NotRequired[int]
     approximate_user_install_count: NotRequired[int]
+    approximate_user_authorization_count: NotRequired[int]
     # values in this dict generally shouldn't be null, but they can be empty dicts
     integration_types_config: NotRequired[Dict[str, ApplicationIntegrationTypeConfiguration]]
 
