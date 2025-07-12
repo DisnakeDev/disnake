@@ -340,6 +340,15 @@ class Asset(AssetMixin):
             animated=animated,
         )
 
+    @classmethod
+    def _from_nameplate(cls, state: AnyState, nameplate_asset: str, animated: bool = True) -> Self:
+        return cls(
+            state,
+            url=f"{cls.BASE}/{nameplate_asset}/asset.{'webm' if animated else 'png'}",
+            key=nameplate_asset,
+            animated=animated,
+        )
+
     def __str__(self) -> str:
         return self._url
 
