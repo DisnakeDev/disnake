@@ -144,17 +144,21 @@ MessageTopLevelComponent = Union[MessageTopLevelComponentV1, MessageTopLevelComp
 
 
 class Component:
-    """Represents a Discord Bot UI Kit Component.
+    """Represents the base component that all other components inherit from.
 
-    Currently, the only components supported by Discord are:
+    The components supported by Discord are:
 
     - :class:`ActionRow`
     - :class:`Button`
     - subtypes of :class:`BaseSelectMenu` (:class:`ChannelSelectMenu`, :class:`MentionableSelectMenu`, :class:`RoleSelectMenu`, :class:`StringSelectMenu`, :class:`UserSelectMenu`)
     - :class:`TextInput`
-
-    ..
-        TODO: add cv2 components to list
+    - :class:`Section`
+    - :class:`TextDisplay`
+    - :class:`Thumbnail`
+    - :class:`MediaGallery`
+    - :class:`FileComponent`
+    - :class:`Separator`
+    - :class:`Container`
 
     This class is abstract and cannot be instantiated.
 
