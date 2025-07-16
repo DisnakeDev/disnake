@@ -25,7 +25,6 @@ if TYPE_CHECKING:
     from ..role import Role
     from ..state import ConnectionState
     from ..types.interactions import (
-        InteractionDataResolved as InteractionDataResolvedPayload,
         MessageComponentInteractionData as MessageComponentInteractionDataPayload,
         MessageInteraction as MessageInteractionPayload,
     )
@@ -192,10 +191,6 @@ class MessageInteractionData(Dict[str, Any]):
     ----------
     custom_id: :class:`str`
         The custom ID of the component.
-    id: :class:`int`
-        TODO
-
-        .. versionadded:: 2.11
     component_type: :class:`ComponentType`
         The type of the component.
     values: Optional[List[:class:`str`]]
@@ -207,7 +202,7 @@ class MessageInteractionData(Dict[str, Any]):
         .. versionadded:: 2.7
     """
 
-    __slots__ = ("custom_id", "id", "component_type", "values", "resolved")
+    __slots__ = ("custom_id", "component_type", "values", "resolved")
 
     def __init__(
         self,
@@ -217,16 +212,12 @@ class MessageInteractionData(Dict[str, Any]):
     ) -> None:
         super().__init__(data)
         self.custom_id: str = data["custom_id"]
-        self.id: int = data.get("id")
         self.component_type: ComponentType = try_enum(ComponentType, data["component_type"])
         self.values: Optional[List[str]] = (
             list(map(str, values)) if (values := data.get("values")) else None
         )
 
-        empty_resolved: InteractionDataResolvedPayload = {}  # pyright shenanigans
-        self.resolved = InteractionDataResolved(
-            data=data.get("resolved", empty_resolved), parent=parent
-        )
+        self.resolved = InteractionDataResolved(data=data.get("resolved", {}), parent=parent)
 
     def __repr__(self) -> str:
         return (
