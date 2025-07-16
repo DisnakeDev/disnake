@@ -55,7 +55,7 @@ MessageTopLevelComponent = Union[MessageTopLevelComponentV1, MessageTopLevelComp
 
 
 class _BaseComponent(TypedDict):
-    # type: ComponentType  # FIXME: current version of pyright complains about overriding types, latest might be fine
+    # type: ComponentType  # FIXME: current version of pyright only supports PEP 705 experimentally, this can be re-enabled in 1.1.353+
     # TODO: always present in responses
     id: NotRequired[int]  # NOTE: not implemented (yet?)
 
