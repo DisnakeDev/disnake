@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, List, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, Any, ClassVar, List, Sequence, Tuple, Union
 
 from ..components import Section as SectionComponent
 from ..enums import ComponentType
@@ -39,12 +39,12 @@ class Section(UIComponent):
     def __init__(
         self,
         *components: TextDisplay,
-        accessory: Union[Thumbnail, Button],
+        accessory: Union[Thumbnail, Button[Any]],
     ) -> None:
         self._components: List[TextDisplay] = [
             ensure_ui_component(c, "components") for c in components
         ]
-        self._accessory: Union[Thumbnail, Button] = ensure_ui_component(accessory, "accessory")
+        self._accessory: Union[Thumbnail, Button[Any]] = ensure_ui_component(accessory, "accessory")
 
     # TODO: consider moving runtime checks from constructor into property setters, also making these fields writable
     @property
@@ -53,7 +53,7 @@ class Section(UIComponent):
         return SequenceProxy(self._components)
 
     @property
-    def accessory(self) -> Union[Thumbnail, Button]:
+    def accessory(self) -> Union[Thumbnail, Button[Any]]:
         """Union[:class:`~.ui.Thumbnail`, :class:`~.ui.Button`]: The accessory component displayed next to the section text."""
         return self._accessory
 
