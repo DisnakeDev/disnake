@@ -128,6 +128,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         .. describe:: len(x)
 
             Returns the number of components in this row.
+            Note that this means empty rows will be considered falsy.
 
             .. versionadded:: 2.6
 
@@ -194,7 +195,6 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
                 )
             self.append_item(component)  # type: ignore
 
-    # FIXME(3.0)?: `bool(ActionRow())` returns False, which may be undesired
     def __len__(self) -> int:
         return len(self._children)
 
