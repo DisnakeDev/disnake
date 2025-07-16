@@ -2363,9 +2363,9 @@ class SeparatorSpacingSize(Enum):
     """
 
     small = 1
-    """TODO"""
+    """Small spacing."""
     large = 2
-    """TODO"""
+    """Large spacing."""
 
 
 T = TypeVar("T")
