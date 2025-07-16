@@ -49,7 +49,7 @@ class Section(UIComponent):
     # TODO: consider moving runtime checks from constructor into property setters, also making these fields writable
     @property
     def components(self) -> Sequence[TextDisplay]:
-        """Sequence[:class:`~.ui.TextDisplay`]: A read-only copy of the text items in this section."""
+        """Sequence[:class:`~.ui.TextDisplay`]: A read-only proxy of the text items in this section."""
         return SequenceProxy(self._components)
 
     @property

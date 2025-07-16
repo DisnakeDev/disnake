@@ -77,7 +77,7 @@ class Container(UIComponent):
     # TODO: consider moving runtime checks from constructor into property setters, also making these fields writable
     @property
     def components(self) -> Sequence[ContainerChildUIComponent]:
-        """Sequence[Union[:class:`~.ui.ActionRow`, :class:`~.ui.Section`, :class:`~.ui.TextDisplay`, :class:`~.ui.MediaGallery`, :class:`~.ui.File`, :class:`~.ui.Separator`]]: A read-only copy of the components in this container."""
+        """Sequence[Union[:class:`~.ui.ActionRow`, :class:`~.ui.Section`, :class:`~.ui.TextDisplay`, :class:`~.ui.MediaGallery`, :class:`~.ui.File`, :class:`~.ui.Separator`]]: A read-only proxy of the components in this container."""
         return SequenceProxy(self._components)
 
     @property
