@@ -158,8 +158,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             context of a modal. Combining components from both contexts is not supported.
     """
 
-    # unused, but technically required by base type
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = ("children",)
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = ("_children",)
 
     # When unspecified and called empty, default to an ActionRow that takes any kind of component.
 
@@ -194,10 +193,6 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
                     f"components should be of type WrappedComponent, got {type(component).__name__}."
                 )
             self.append_item(component)  # type: ignore
-
-    def __repr__(self) -> str:
-        # implemented separately for now, due to SequenceProxy repr
-        return f"<ActionRow children={self._children!r}>"
 
     # FIXME(3.0)?: `bool(ActionRow())` returns False, which may be undesired
     def __len__(self) -> int:

@@ -77,7 +77,9 @@ class UIComponent(ABC):
     def _underlying(self) -> Component: ...
 
     def __repr__(self) -> str:
-        attrs = " ".join(f"{key}={getattr(self, key)!r}" for key in self.__repr_attributes__)
+        attrs = " ".join(
+            f"{key.lstrip('_')}={getattr(self, key)!r}" for key in self.__repr_attributes__
+        )
         return f"<{type(self).__name__} {attrs}>"
 
     @property

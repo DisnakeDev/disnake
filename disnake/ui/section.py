@@ -30,9 +30,8 @@ class Section(UIComponent):
         The accessory component displayed next to the section text.
     """
 
-    # unused, but technically required by base type
     __repr_attributes__: ClassVar[Tuple[str, ...]] = (
-        "components",
+        "_components",
         "accessory",
     )
 
@@ -57,10 +56,6 @@ class Section(UIComponent):
     def accessory(self) -> Union[Thumbnail, Button]:
         """Union[:class:`~.ui.Thumbnail`, :class:`~.ui.Button`]: The accessory component displayed next to the section text."""
         return self._accessory
-
-    def __repr__(self) -> str:
-        # implemented separately for now, due to SequenceProxy repr
-        return f"<Section components={self._components!r} accessory={self._accessory!r}>"
 
     @property
     def _underlying(self) -> SectionComponent:

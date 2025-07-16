@@ -54,9 +54,8 @@ class Container(UIComponent):
         Whether the container is marked as a spoiler.
     """
 
-    # unused, but technically required by base type
     __repr_attributes__: ClassVar[Tuple[str, ...]] = (
-        "components",
+        "_components",
         "accent_colour",
         "spoiler",
     )
@@ -80,10 +79,6 @@ class Container(UIComponent):
     def components(self) -> Sequence[ContainerChildUIComponent]:
         """Sequence[Union[:class:`~.ui.ActionRow`, :class:`~.ui.Section`, :class:`~.ui.TextDisplay`, :class:`~.ui.MediaGallery`, :class:`~.ui.File`, :class:`~.ui.Separator`]]: A read-only copy of the components in this container."""
         return SequenceProxy(self._components)
-
-    def __repr__(self) -> str:
-        # implemented separately for now, due to SequenceProxy repr
-        return f"<Container components={self._components!r} accent_colour={self.accent_colour!r} spoiler={self.spoiler!r}>"
 
     @property
     def _underlying(self) -> ContainerComponent:
