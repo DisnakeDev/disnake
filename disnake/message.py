@@ -1137,6 +1137,7 @@ class Message(Hashable):
         "poll",
         "_edited_timestamp",
         "_role_subscription_data",
+        "_pinned_at",
     )
 
     if TYPE_CHECKING:
@@ -1177,6 +1178,7 @@ class Message(Hashable):
         )
         self.type: MessageType = try_enum(MessageType, data["type"])
         self.pinned: bool = data["pinned"]
+        self._pinned_at: Optional[datetime.datetime] = None
         self.flags: MessageFlags = MessageFlags._from_value(data.get("flags", 0))
         self.mention_everyone: bool = data["mention_everyone"]
         self.tts: bool = data["tts"]
@@ -1350,6 +1352,9 @@ class Message(Hashable):
 
     def _handle_edited_timestamp(self, value: str) -> None:
         self._edited_timestamp = utils.parse_time(value)
+
+    def _handle_pinned_timestamp(self, value: str) -> None:
+        self._pinned_at = utils.parse_time(value)
 
     def _handle_pinned(self, value: bool) -> None:
         self.pinned = value
@@ -1537,6 +1542,11 @@ class Message(Hashable):
     def edited_at(self) -> Optional[datetime.datetime]:
         """Optional[:class:`datetime.datetime`]: An aware UTC datetime object containing the edited time of the message."""
         return self._edited_timestamp
+
+    @property
+    def pinned_at(self) -> Optional[datetime.datetime]:
+        """Optional[:class:`datetime.datetime`]: An aware UTC datetime object containing the pin time of the message."""
+        return self._pinned_at
 
     @property
     def jump_url(self) -> str:
