@@ -1363,9 +1363,13 @@ class ChannelPinsIterator(_AsyncIterator["Message"]):
         return self.retrieve > 0
 
     async def fill_messages(self) -> None:
+        if self.channel_id is None or self.channel is None:
+            # should never happen
+            raise RuntimeError("The library has a bug. Contact a maintainer!")
+
         if self._get_retrieve():
             data = await self.getter(
-                channel_id=self.channel_id,  # type: ignore
+                channel_id=self.channel_id,
                 before=self.before,
                 limit=self.retrieve,
             )
@@ -1381,6 +1385,6 @@ class ChannelPinsIterator(_AsyncIterator["Message"]):
                 self.limit = 0  # terminate loop
 
             for element in data["items"]:
-                message = self._state.create_message(channel=self.channel, data=element["message"])  # type: ignore
+                message = self._state.create_message(channel=self.channel, data=element["message"])
                 message._handle_pinned_timestamp(element["pinned_at"])
                 await self.messages.put(message)
