@@ -1320,14 +1320,15 @@ class ChannelPinsIterator(_AsyncIterator["Message"]):
         before: Optional[Union[Snowflake, datetime.datetime]] = None,
     ) -> None:
         before_ = None
-        if isinstance(before, datetime.datetime):
-            before_ = before.isoformat()
-        elif isinstance(before, Object):
-            before_ = snowflake_time(before.id).isoformat()
-        else:
-            raise TypeError(
-                f"Expected either `disnake.Snowflake` or `datetime.datetime` for `before`. Got `{before.__class__.__name__!r}`."
-            )
+        if before is not None:
+            if isinstance(before, datetime.datetime):
+                before_ = before.isoformat()
+            elif isinstance(before, Object):
+                before_ = snowflake_time(before.id).isoformat()
+            else:
+                raise TypeError(
+                    f"Expected either `disnake.Snowflake` or `datetime.datetime` for `before`. Got `{before.__class__.__name__!r}`."
+                )
 
         print(before_)
 
