@@ -30,7 +30,7 @@ from .integrations import PartialIntegration
 from .object import Object
 from .subscription import Subscription
 from .threads import Thread
-from .utils import deprecated, maybe_coroutine, parse_time, snowflake_time, time_snowflake
+from .utils import deprecated, maybe_coroutine, snowflake_time, time_snowflake
 
 __all__ = (
     "ReactionIterator",
@@ -1319,21 +1319,30 @@ class ChannelPinsIterator(_AsyncIterator["Message"]):
         limit: Optional[int],
         before: Optional[Union[Snowflake, datetime.datetime]] = None,
     ) -> None:
+        before_ = None
         if isinstance(before, datetime.datetime):
-            before = Object(id=time_snowflake(before, high=False))
+            before_ = before.isoformat()
+        elif isinstance(before, Object):
+            before_ = snowflake_time(before.id).isoformat()
+        else:
+            raise TypeError(
+                f"Expected either `disnake.Snowflake` or `datetime.datetime` for `before`. Got `{before.__class__.__name__!r}`."
+            )
+
+        print(before_)
 
         self.messageable = messageable
         self._state = messageable._state
         self.channel: Optional[MessageableChannel] = None
         self.channel_id: Optional[int] = None
         self.limit = limit
-        self.before = before
+        self.before: str | None = before_
 
         self.getter = self._state.http.get_pins
         self.messages: asyncio.Queue[Message] = asyncio.Queue()
 
     # defined to maintain backward compatibility with the old `pins` method
-    @deprecated()
+    @deprecated("async for msg in channel.pins()")
     def __await__(self) -> Generator[None, None, List[Message]]:
         return self.flatten().__await__()
 
@@ -1356,22 +1365,18 @@ class ChannelPinsIterator(_AsyncIterator["Message"]):
 
     async def fill_messages(self) -> None:
         if self._get_retrieve():
-            before = self.before.id if self.before else None
             data = await self.getter(
                 channel_id=self.channel_id,  # type: ignore
-                before=before,
+                before=self.before,
                 limit=self.retrieve,
             )
 
             if len(data):
                 if self.limit is not None:
                     self.limit -= self.retrieve
-                self.before = Object(
-                    id=time_snowflake(
-                        parse_time(data["items"][-1]["pinned_at"]),
-                        high=False,
-                    )
-                )
+
+                if data["items"]:
+                    self.before = data["items"][-1]["pinned_at"]
 
             if not data["has_more"]:
                 self.limit = 0  # terminate loop

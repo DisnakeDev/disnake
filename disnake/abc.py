@@ -37,7 +37,6 @@ from .errors import ClientException
 from .file import File
 from .flags import ChannelFlags, MessageFlags
 from .invite import Invite
-from .iterators import ChannelPinsIterator
 from .mentions import AllowedMentions
 from .object import Object
 from .partial_emoji import PartialEmoji
@@ -71,7 +70,7 @@ if TYPE_CHECKING:
     from .enums import InviteTarget
     from .guild import Guild, GuildChannel as AnyGuildChannel, GuildMessageable
     from .guild_scheduled_event import GuildScheduledEvent
-    from .iterators import HistoryIterator
+    from .iterators import ChannelPinsIterator, HistoryIterator
     from .member import Member
     from .message import Message, MessageReference, PartialMessage
     from .poll import Poll
@@ -1892,6 +1891,8 @@ class Messageable:
         :class:`.Message`
             The pinned message with the message data parsed.
         """
+        from .iterators import ChannelPinsIterator  # due to cyclic imports
+
         return ChannelPinsIterator(self, limit=limit, before=before)
 
     def history(
