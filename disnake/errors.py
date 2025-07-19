@@ -249,10 +249,12 @@ class ConnectionClosed(ClientException):
         4006: "Session no longer valid",
         4011: "Server not found",
         4012: "Unknown protocol",
-        4014: "Disconnected, channel was deleted, you were kicked, voice server changed, or the main gateway session was dropped.",
+        4014: "Disconnected (you were kicked, the main gateway session was dropped, etc.)",
         4015: "Voice server crashed",
         4016: "Unknown encryption mode",
         4020: "Bad request - you sent a malformed request",
+        4021: "Disconnected: Rate Limited",
+        4022: "Disconnected: Call Terminated (channel deleted, voice server changed, etc.)",
     }
 
     def __init__(
