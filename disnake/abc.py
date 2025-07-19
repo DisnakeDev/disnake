@@ -1851,6 +1851,13 @@ class Messageable:
             objects returned by this method do not contain complete
             :attr:`.Message.reactions` data.
 
+        .. note::
+
+            When passing an :class:`.Object` as the `before` argument the API will
+            return messages that were pinned before the creation date of that snowflake.
+            This happens because the API endpoint is paginated based on the ``pinned_at``
+            timestamp and not the creation timestamp of the snowflake.
+
         Examples
         --------
         Usage ::
