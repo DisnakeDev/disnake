@@ -1892,8 +1892,7 @@ class Messageable:
         :class:`.Message`
             The pinned message with the message data parsed.
         """
-        # channel = await self._get_channel()
-        # return ChannelPinsIterator(channel, limit=limit, before=before)
+        return ChannelPinsIterator(self, limit=limit, before=before)
 
     def history(
         self,

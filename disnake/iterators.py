@@ -1314,7 +1314,7 @@ class PollAnswerIterator(_AsyncIterator[Union["User", "Member"]]):
 class ChannelPinsIterator(_AsyncIterator["Message"]):
     def __init__(
         self,
-        channel: MessageableChannel,
+        messageable: Messageable,
         *,
         limit: Optional[int],
         before: Optional[Union[Snowflake, datetime.datetime]] = None,
@@ -1322,9 +1322,10 @@ class ChannelPinsIterator(_AsyncIterator["Message"]):
         if isinstance(before, datetime.datetime):
             before = Object(id=time_snowflake(before, high=False))
 
-        self._state = channel._state
-        self.channel = channel
-        self.channel_id = channel.id
+        self.messageable = messageable
+        self._state = messageable._state
+        self.channel: Optional[MessageableChannel] = None
+        self.channel_id: Optional[int] = None
         self.limit = limit
         self.before = before
 
@@ -1337,6 +1338,10 @@ class ChannelPinsIterator(_AsyncIterator["Message"]):
         return self.flatten().__await__()
 
     async def next(self) -> Message:
+        if self.channel is None:
+            self.channel = await self.messageable._get_channel()
+            self.channel_id = self.channel.id
+
         if self.messages.empty():
             await self.fill_messages()
 
@@ -1353,7 +1358,7 @@ class ChannelPinsIterator(_AsyncIterator["Message"]):
         if self._get_retrieve():
             before = self.before.id if self.before else None
             data = await self.getter(
-                channel_id=self.channel_id,
+                channel_id=self.channel_id,  # type: ignore
                 before=before,
                 limit=self.retrieve,
             )
@@ -1372,8 +1377,6 @@ class ChannelPinsIterator(_AsyncIterator["Message"]):
                 self.limit = 0  # terminate loop
 
             for element in data["items"]:
-                message = self._state._get_message(
-                    int(element["message"]["id"])
-                ) or self._state.create_message(channel=self.channel, data=element["message"])
+                message = self._state.create_message(channel=self.channel, data=element["message"])  # type: ignore
                 message._handle_pinned_timestamp(element["pinned_at"])
                 await self.messages.put(message)
