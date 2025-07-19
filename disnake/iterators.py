@@ -1330,8 +1330,6 @@ class ChannelPinsIterator(_AsyncIterator["Message"]):
                     f"Expected either `disnake.Snowflake` or `datetime.datetime` for `before`. Got `{before.__class__.__name__!r}`."
                 )
 
-        print(before_)
-
         self.messageable = messageable
         self._state = messageable._state
         self.channel: Optional[MessageableChannel] = None
