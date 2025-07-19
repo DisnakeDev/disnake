@@ -83,6 +83,12 @@ Status
 .. autoclass:: Status()
     :members:
 
+StatusDisplayType
+~~~~~~~~~~~~~~~~~
+
+.. autoclass:: StatusDisplayType()
+    :members:
+
 Events
 ------
 

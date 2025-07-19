@@ -1,0 +1,1 @@
+Add the new :attr:`Activity.details_url`, :attr:`Activity.state_url`, :attr:`Activity.status_display_type` and :class:`StatusDisplayType` RPC attributes and enum.
