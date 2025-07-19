@@ -607,7 +607,7 @@ class Status(Enum):
 class StatusDisplayType(Enum):
     """Specifies an :class:`Activity` display status.
 
-    .. versionaddedd:: 2.11
+    .. versionadded:: 2.11
     """
 
     name = 0  # type: ignore[reportAssignmentType]
