@@ -23,6 +23,7 @@ from typing import (
     cast,
 )
 
+from .asset import AssetMixin
 from .colour import Colour
 from .enums import (
     ButtonStyle,
@@ -63,6 +64,7 @@ if TYPE_CHECKING:
         TextDisplayComponent as TextDisplayComponentPayload,
         TextInput as TextInputPayload,
         ThumbnailComponent as ThumbnailComponentPayload,
+        UnfurledMediaItem as UnfurledMediaItemPayload,
         UserSelectMenu as UserSelectMenuPayload,
     )
 
@@ -82,6 +84,7 @@ __all__ = (
     "TextInput",
     "Section",
     "TextDisplay",
+    "UnfurledMediaItem",
     "Thumbnail",
     "MediaGallery",
     "MediaGalleryItem",
@@ -914,6 +917,67 @@ class TextDisplay(Component):
         }
 
 
+class UnfurledMediaItem(AssetMixin):
+    """Represents an unfurled/resolved media item within a component.
+
+    .. versionadded:: 2.11
+
+    Attributes
+    ----------
+    url: :class:`str`
+        The URL of this media item.
+    proxy_url: :class:`str`
+        The proxied URL of this media item. This is a cached version of
+        the :attr:`url` in the case of images.
+    height: Optional[:class:`int`]
+        The height of this media item, if applicable.
+    width: Optional[:class:`int`]
+        The width of this media item, if applicable.
+    content_type: Optional[:class:`str`]
+        The `media type <https://en.wikipedia.org/wiki/Media_type>`_ of this media item.
+    attachment_id: Optional[:class:`int`]
+        The ID of the uploaded attachment. Only present if the media item was
+        uploaded as an attachment.
+    """
+
+    __slots__: Tuple[str, ...] = (
+        "url",
+        "proxy_url",
+        "height",
+        "width",
+        "content_type",
+        "attachment_id",
+    )
+
+    # generally, users should also be able to pass a plain url where applicable instead of
+    # an UnfurledMediaItem instance; this is largely for internal use
+    def __init__(self, url: str) -> None:
+        self.url: str = url
+        self.proxy_url: Optional[str] = None
+        self.height: Optional[int] = None
+        self.width: Optional[int] = None
+        self.content_type: Optional[str] = None
+        self.attachment_id: Optional[int] = None
+
+    # FIXME: when deserializing, try to attach _state for AssetMixin as well
+    @classmethod
+    def from_dict(cls, data: UnfurledMediaItemPayload) -> Self:
+        self = cls(data["url"])
+        self.proxy_url = data.get("proxy_url")
+        self.height = _get_as_snowflake(data, "height")
+        self.width = _get_as_snowflake(data, "width")
+        self.content_type = data.get("content_type")
+        self.attachment_id = _get_as_snowflake(data, "attachment_id")
+        return self
+
+    def to_dict(self) -> UnfurledMediaItemPayload:
+        # for sending, only `url` is required, and other fields are ignored regardless
+        return {"url": self.url}
+
+    def __repr__(self) -> str:
+        return f"<UnfurledMediaItem url={self.url} content_type={self.content_type}>"
+
+
 class Thumbnail(Component):
     """Represents a thumbnail from the Discord Bot UI Kit (v2).
 
@@ -945,14 +1009,14 @@ class Thumbnail(Component):
 
     def __init__(self, data: ThumbnailComponentPayload) -> None:
         self.type: Literal[ComponentType.thumbnail] = ComponentType.thumbnail
-        self.media: Any = data["media"]  # TODO: UnfurledMediaItem
+        self.media: UnfurledMediaItem = UnfurledMediaItem.from_dict(data["media"])
         self.description: Optional[str] = data.get("description")
         self.spoiler: bool = data.get("spoiler", False)
 
     def to_dict(self) -> ThumbnailComponentPayload:
         payload: ThumbnailComponentPayload = {
             "type": self.type.value,
-            "media": self.media,
+            "media": self.media.to_dict(),
             "spoiler": self.spoiler,
         }
 
@@ -1005,13 +1069,13 @@ class MediaGalleryItem:
 
     # XXX: should this be user-instantiable?
     def __init__(self, data: MediaGalleryItemPayload) -> None:
-        self.media: Any = data["media"]  # TODO: UnfurledMediaItem
+        self.media: UnfurledMediaItem = UnfurledMediaItem.from_dict(data["media"])
         self.description: Optional[str] = data.get("description")
         self.spoiler: bool = data.get("spoiler", False)
 
     def to_dict(self) -> MediaGalleryItemPayload:
         payload: MediaGalleryItemPayload = {
-            "media": self.media,
+            "media": self.media.to_dict(),
             "spoiler": self.spoiler,
         }
 
@@ -1050,13 +1114,13 @@ class FileComponent(Component):
 
     def __init__(self, data: FileComponentPayload) -> None:
         self.type: Literal[ComponentType.file] = ComponentType.file
-        self.file: Any = data["file"]  # TODO: UnfurledMediaItem
+        self.file: UnfurledMediaItem = UnfurledMediaItem.from_dict(data["file"])
         self.spoiler: bool = data.get("spoiler", False)
 
     def to_dict(self) -> FileComponentPayload:
         return {
             "type": self.type.value,
-            "file": self.file,
+            "file": self.file.to_dict(),
             "spoiler": self.spoiler,
         }
 

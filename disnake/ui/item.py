@@ -19,6 +19,8 @@ from typing import (
     overload,
 )
 
+from ..components import UnfurledMediaItem
+
 __all__ = (
     "UIComponent",
     "WrappedComponent",
@@ -36,6 +38,7 @@ if TYPE_CHECKING:
     from ..enums import ComponentType
     from ..interactions import MessageInteraction
     from ..types.components import ActionRowChildComponent as ActionRowChildComponentPayload
+    from ._types import MediaItemInput
     from .view import View
 
     ItemCallbackType = Callable[[V_co, I, MessageInteraction], Coroutine[Any, Any, Any]]
@@ -48,6 +51,13 @@ def ensure_ui_component(obj: UIComponentT, name: str) -> UIComponentT:
     if not isinstance(obj, UIComponent):
         raise TypeError(f"{name} should be a valid UI component, got {type(obj).__name__}.")
     return obj
+
+
+# TODO: support `disnake.File`
+def handle_media_item_input(value: MediaItemInput) -> UnfurledMediaItem:
+    if isinstance(value, str):
+        return UnfurledMediaItem(value)
+    return value
 
 
 class UIComponent(ABC):

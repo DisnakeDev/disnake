@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any, NoReturn, Optional, Sequence, TypeVar, Un
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
+    from ..components import UnfurledMediaItem
     from . import (
         ActionRow,
         Button,
@@ -75,3 +76,7 @@ ComponentInput = Union[
 
 MessageComponents = ComponentInput[ActionRowMessageComponent, MessageTopLevelComponentV2]
 ModalComponents = ComponentInput[ActionRowModalComponent, NoReturn]
+
+
+# TODO: support `disnake.File`
+MediaItemInput = Union[str, "UnfurledMediaItem"]

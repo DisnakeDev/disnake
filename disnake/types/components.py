@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from typing import List, Literal, TypedDict, Union
+from typing import List, Literal, Optional, TypedDict, Union
 
-from typing_extensions import NotRequired, TypeAlias
+from typing_extensions import NotRequired, Required, TypeAlias
 
 from .channel import ChannelType
 from .emoji import PartialEmoji
@@ -162,12 +162,18 @@ class TextInput(_BaseComponent):
 
 
 # components v2
+
+
+class UnfurledMediaItem(TypedDict, total=False):
+    url: Required[str]  # this is the only field required for sending
+    proxy_url: str
+    height: Optional[int]
+    width: Optional[int]
+    content_type: str
+    attachment_id: Snowflake
+
+
 # NOTE: these are type definitions for *sending*, while *receiving* likely has fewer optional fields
-
-
-# TODO: this expands to an `EmbedImage`-like structure in responses, with more than just the `url` field
-class UnfurledMediaItem(TypedDict):
-    url: str
 
 
 class SectionComponent(_BaseComponent):

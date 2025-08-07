@@ -141,6 +141,16 @@ TextDisplay
     :members:
     :inherited-members:
 
+
+UnfurledMediaItem
+~~~~~~~~~~~~~~~~~
+
+.. attributetable:: UnfurledMediaItem
+
+.. autoclass:: UnfurledMediaItem()
+    :members:
+    :inherited-members:
+
 Thumbnail
 ~~~~~~~~~
 

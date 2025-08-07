@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
-from typing import Any, ClassVar, Optional, Tuple
+from typing import TYPE_CHECKING, ClassVar, Optional, Tuple
 
-from ..components import Thumbnail as ThumbnailComponent
+from ..components import Thumbnail as ThumbnailComponent, UnfurledMediaItem
 from ..enums import ComponentType
 from ..utils import MISSING
-from .item import UIComponent
+from .item import UIComponent, handle_media_item_input
+
+if TYPE_CHECKING:
+    from ._types import MediaItemInput
 
 __all__ = ("Thumbnail",)
 
@@ -21,8 +24,8 @@ class Thumbnail(UIComponent):
 
     Parameters
     ----------
-    media: Any
-        n/a
+    media: Union[:class:`str`, :class:`.UnfurledMediaItem`]
+        The media item to display. Can be an arbitrary URL or attachment reference.
     description: Optional[:class:`str`]
         The thumbnail's description ("alt text"), if any.
     spoiler: :class:`bool`
@@ -39,26 +42,26 @@ class Thumbnail(UIComponent):
 
     def __init__(
         self,
-        media: Any,
+        media: MediaItemInput,
         description: Optional[str] = None,
         *,
         spoiler: bool = False,
     ) -> None:
         self._underlying = ThumbnailComponent._raw_construct(
             type=ComponentType.thumbnail,
-            media=media,
+            media=handle_media_item_input(media),
             description=description,
             spoiler=spoiler,
         )
 
     @property
-    def media(self) -> Any:
-        """Any: n/a"""
+    def media(self) -> UnfurledMediaItem:
+        """:class:`.UnfurledMediaItem`: The media item to display."""
         return self._underlying.media
 
     @media.setter
-    def media(self, value: Any) -> None:
-        self._underlying.media = value
+    def media(self, value: MediaItemInput) -> None:
+        self._underlying.media = handle_media_item_input(value)
 
     @property
     def description(self) -> Optional[str]:
