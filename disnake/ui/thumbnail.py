@@ -39,9 +39,9 @@ class Thumbnail(UIComponent):
 
     def __init__(
         self,
-        *,
-        media: Any,  # XXX: positional?
+        media: Any,
         description: Optional[str] = None,
+        *,
         spoiler: bool = False,
     ) -> None:
         self._underlying = ThumbnailComponent._raw_construct(
