@@ -24,7 +24,7 @@ class File(UIComponent):
     ----------
     file: Union[:class:`str`, :class:`.UnfurledMediaItem`]
         The file to display. This **only** supports attachment references (i.e.
-        using the ``attachment://`` syntax), not arbitrary URLs.
+        using the ``attachment://<filename>`` syntax), not arbitrary URLs.
     spoiler: :class:`bool`
         Whether the file is marked as a spoiler. Defaults to ``False``.
     """

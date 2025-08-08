@@ -25,7 +25,8 @@ class Thumbnail(UIComponent):
     Parameters
     ----------
     media: Union[:class:`str`, :class:`.UnfurledMediaItem`]
-        The media item to display. Can be an arbitrary URL or attachment reference.
+        The media item to display. Can be an arbitrary URL or attachment
+        reference (``attachment://<filename>``).
     description: Optional[:class:`str`]
         The thumbnail's description ("alt text"), if any.
     spoiler: :class:`bool`
