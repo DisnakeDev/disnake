@@ -19,7 +19,10 @@ from typing import (
     overload,
 )
 
+from ..asset import AssetMixin
 from ..components import UnfurledMediaItem
+from ..message import Attachment
+from ..utils import assert_never
 
 __all__ = (
     "UIComponent",
@@ -53,10 +56,16 @@ def ensure_ui_component(obj: UIComponentT, name: str) -> UIComponentT:
     return obj
 
 
-# TODO: support `disnake.File`
 def handle_media_item_input(value: MediaItemInput) -> UnfurledMediaItem:
-    if isinstance(value, str):
+    if isinstance(value, UnfurledMediaItem):
+        return value
+    elif isinstance(value, str):
         return UnfurledMediaItem(value)
+    elif isinstance(value, (AssetMixin, Attachment)):
+        return UnfurledMediaItem(value.url)
+
+    # TODO: raise proper exception (?)
+    assert_never(value)
     return value
 
 

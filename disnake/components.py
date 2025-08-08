@@ -1265,7 +1265,7 @@ def _walk_internal(component: Component, seen: Set[Component]) -> Iterator[Compo
 
 # yields *all* components recursively
 def _walk_all_components(components: Sequence[Component]) -> Iterator[Component]:
-    seen = set()
+    seen: Set[Component] = set()
     for item in components:
         yield from _walk_internal(item, seen)
 

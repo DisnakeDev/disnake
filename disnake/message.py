@@ -49,7 +49,6 @@ from .poll import Poll
 from .reaction import Reaction
 from .sticker import StickerItem
 from .threads import Thread
-from .ui.action_row import components_to_dict
 from .user import User
 from .utils import MISSING, _get_as_snowflake, assert_never, deprecated, escape_mentions
 
@@ -218,6 +217,8 @@ async def _edit_handler(
             payload["components"] = []
 
     if components is not MISSING:
+        from .ui.action_row import components_to_dict
+
         payload["components"] = [] if components is None else components_to_dict(components)
 
     try:
