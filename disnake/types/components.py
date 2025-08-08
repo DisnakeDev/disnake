@@ -56,8 +56,7 @@ MessageTopLevelComponent = Union[MessageTopLevelComponentV1, MessageTopLevelComp
 
 class _BaseComponent(TypedDict):
     # type: ComponentType  # FIXME: current version of pyright only supports PEP 705 experimentally, this can be re-enabled in 1.1.353+
-    # TODO: always present in responses
-    id: NotRequired[int]  # NOTE: not implemented (yet?)
+    id: int  # note: technically optional when sending, we just default to 0 for simplicity, which is equivalent (https://discord.com/developers/docs/components/reference#anatomy-of-a-component)
 
 
 class ActionRow(_BaseComponent):

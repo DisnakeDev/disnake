@@ -171,12 +171,21 @@ class Component:
     ----------
     type: :class:`ComponentType`
         The type of component.
+    id: :class:`int`
+        The numeric identifier for the component.
+        This is always present in components received from the API,
+        and unique within a message.
+        If left unset (i.e. the default ``0``) when sending a component, the API will assign sequential
+        identifiers to the components in the message.
+
+        .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = ("type",)
+    __slots__: Tuple[str, ...] = ("type", "id")
 
     __repr_info__: ClassVar[Tuple[str, ...]]
     type: ComponentType
+    id: int
 
     def __repr__(self) -> str:
         attrs = " ".join(f"{key}={getattr(self, key)!r}" for key in self.__repr_info__)
@@ -219,12 +228,15 @@ class ActionRow(Component, Generic[ActionRowChildComponentT]):
 
     def __init__(self, data: ActionRowPayload) -> None:
         self.type: Literal[ComponentType.action_row] = ComponentType.action_row
+        self.id = data.get("id", 0)
+
         children = [_component_factory(d) for d in data.get("components", [])]
         self.children: List[ActionRowChildComponentT] = children  # type: ignore
 
     def to_dict(self) -> ActionRowPayload:
         return {
             "type": self.type.value,
+            "id": self.id,
             "components": [child.to_dict() for child in self.children],
         }
 
@@ -277,6 +289,8 @@ class Button(Component):
 
     def __init__(self, data: ButtonComponentPayload) -> None:
         self.type: Literal[ComponentType.button] = ComponentType.button
+        self.id = data.get("id", 0)
+
         self.style: ButtonStyle = try_enum(ButtonStyle, data["style"])
         self.custom_id: Optional[str] = data.get("custom_id")
         self.url: Optional[str] = data.get("url")
@@ -293,6 +307,7 @@ class Button(Component):
     def to_dict(self) -> ButtonComponentPayload:
         payload: ButtonComponentPayload = {
             "type": self.type.value,
+            "id": self.id,
             "style": self.style.value,
             "disabled": self.disabled,
         }
@@ -373,6 +388,7 @@ class BaseSelectMenu(Component):
     def __init__(self, data: AnySelectMenuPayload) -> None:
         component_type = try_enum(ComponentType, data["type"])
         self.type: SelectMenuType = component_type  # type: ignore
+        self.id = data.get("id", 0)
 
         self.custom_id: str = data["custom_id"]
         self.placeholder: Optional[str] = data.get("placeholder")
@@ -386,6 +402,7 @@ class BaseSelectMenu(Component):
     def to_dict(self) -> BaseSelectMenuPayload:
         payload: BaseSelectMenuPayload = {
             "type": self.type.value,
+            "id": self.id,
             "custom_id": self.custom_id,
             "min_values": self.min_values,
             "max_values": self.max_values,
@@ -810,11 +827,13 @@ class TextInput(Component):
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
 
     def __init__(self, data: TextInputPayload) -> None:
-        style = data.get("style", TextInputStyle.short.value)
-
         self.type: Literal[ComponentType.text_input] = ComponentType.text_input
+        self.id = data.get("id", 0)
+
         self.custom_id: str = data["custom_id"]
-        self.style: TextInputStyle = try_enum(TextInputStyle, style)
+        self.style: TextInputStyle = try_enum(
+            TextInputStyle, data.get("style", TextInputStyle.short.value)
+        )
         self.label: Optional[str] = data.get("label")
         self.placeholder: Optional[str] = data.get("placeholder")
         self.value: Optional[str] = data.get("value")
@@ -825,6 +844,7 @@ class TextInput(Component):
     def to_dict(self) -> TextInputPayload:
         payload: TextInputPayload = {
             "type": self.type.value,
+            "id": self.id,
             "style": self.style.value,
             "label": cast(str, self.label),
             "custom_id": self.custom_id,
@@ -871,6 +891,7 @@ class Section(Component):
 
     def __init__(self, data: SectionComponentPayload) -> None:
         self.type: Literal[ComponentType.section] = ComponentType.section
+        self.id = data.get("id", 0)
 
         accessory = _component_factory(data["accessory"])
         self.accessory: SectionAccessoryComponent = accessory  # type: ignore
@@ -882,6 +903,7 @@ class Section(Component):
     def to_dict(self) -> SectionComponentPayload:
         return {
             "type": self.type.value,
+            "id": self.id,
             "accessory": self.accessory.to_dict(),
             "components": [child.to_dict() for child in self.components],
         }
@@ -908,11 +930,14 @@ class TextDisplay(Component):
 
     def __init__(self, data: TextDisplayComponentPayload) -> None:
         self.type: Literal[ComponentType.text_display] = ComponentType.text_display
+        self.id = data.get("id", 0)
+
         self.content: str = data["content"]
 
     def to_dict(self) -> TextDisplayComponentPayload:
         return {
             "type": self.type.value,
+            "id": self.id,
             "content": self.content,
         }
 
@@ -1009,6 +1034,8 @@ class Thumbnail(Component):
 
     def __init__(self, data: ThumbnailComponentPayload) -> None:
         self.type: Literal[ComponentType.thumbnail] = ComponentType.thumbnail
+        self.id = data.get("id", 0)
+
         self.media: UnfurledMediaItem = UnfurledMediaItem.from_dict(data["media"])
         self.description: Optional[str] = data.get("description")
         self.spoiler: bool = data.get("spoiler", False)
@@ -1016,6 +1043,7 @@ class Thumbnail(Component):
     def to_dict(self) -> ThumbnailComponentPayload:
         payload: ThumbnailComponentPayload = {
             "type": self.type.value,
+            "id": self.id,
             "media": self.media.to_dict(),
             "spoiler": self.spoiler,
         }
@@ -1049,11 +1077,14 @@ class MediaGallery(Component):
 
     def __init__(self, data: MediaGalleryComponentPayload) -> None:
         self.type: Literal[ComponentType.media_gallery] = ComponentType.media_gallery
+        self.id = data.get("id", 0)
+
         self.items: List[MediaGalleryItem] = [MediaGalleryItem(i) for i in data["items"]]
 
     def to_dict(self) -> MediaGalleryComponentPayload:
         return {
             "type": self.type.value,
+            "id": self.id,
             "items": [i.to_dict() for i in self.items],
         }
 
@@ -1114,12 +1145,15 @@ class FileComponent(Component):
 
     def __init__(self, data: FileComponentPayload) -> None:
         self.type: Literal[ComponentType.file] = ComponentType.file
+        self.id = data.get("id", 0)
+
         self.file: UnfurledMediaItem = UnfurledMediaItem.from_dict(data["file"])
         self.spoiler: bool = data.get("spoiler", False)
 
     def to_dict(self) -> FileComponentPayload:
         return {
             "type": self.type.value,
+            "id": self.id,
             "file": self.file.to_dict(),
             "spoiler": self.spoiler,
         }
@@ -1151,6 +1185,8 @@ class Separator(Component):
 
     def __init__(self, data: SeparatorComponentPayload) -> None:
         self.type: Literal[ComponentType.separator] = ComponentType.separator
+        self.id = data.get("id", 0)
+
         self.divider: bool = data.get("divider", True)
         # TODO: `size` instead of `spacing`?
         self.spacing: SeparatorSpacingSize = try_enum(SeparatorSpacingSize, data.get("spacing", 1))
@@ -1158,6 +1194,7 @@ class Separator(Component):
     def to_dict(self) -> SeparatorComponentPayload:
         return {
             "type": self.type.value,
+            "id": self.id,
             "divider": self.divider,
             "spacing": self.spacing.value,
         }
@@ -1196,6 +1233,8 @@ class Container(Component):
 
     def __init__(self, data: ContainerComponentPayload) -> None:
         self.type: Literal[ComponentType.container] = ComponentType.container
+        self.id = data.get("id", 0)
+
         self._accent_colour: Optional[int] = data.get("accent_color")
         self.spoiler: bool = data.get("spoiler", False)
 
@@ -1205,6 +1244,7 @@ class Container(Component):
     def to_dict(self) -> ContainerComponentPayload:
         payload: ContainerComponentPayload = {
             "type": self.type.value,
+            "id": self.id,
             "spoiler": self.spoiler,
             "components": [child.to_dict() for child in self.components],
         }

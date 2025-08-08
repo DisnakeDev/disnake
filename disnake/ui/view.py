@@ -193,6 +193,7 @@ class View:
             components.append(
                 {
                     "type": 1,
+                    "id": 0,
                     "components": children,
                 }
             )
