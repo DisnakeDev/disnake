@@ -263,14 +263,17 @@ def test_components_to_dict() -> None:
     assert result == [
         {
             "type": 1,
+            "id": 0,
             "components": [button1.to_component_dict(), button2.to_component_dict()],
         },
         {
             "type": 1,
+            "id": 0,
             "components": [select.to_component_dict()],
         },
         {
             "type": 1,
+            "id": 0,
             "components": [button3.to_component_dict()],
         },
     ]
