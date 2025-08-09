@@ -39,7 +39,7 @@ class TextInput(WrappedComponent):
         The maximum length of the text input.
     id: :class:`int`
         The numeric identifier for the component. Must be unique within the message.
-        If left unset (i.e. the default ``0``) when sending a component, the API will assign
+        If set to ``0`` (the default) when sending a component, the API will assign
         sequential identifiers to the components in the message.
 
         .. versionadded:: 2.11

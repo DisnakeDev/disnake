@@ -159,7 +159,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             context of a modal. Combining components from both contexts is not supported.
     id: :class:`int`
         The numeric identifier for the component. Must be unique within the message.
-        If left unset (i.e. the default ``0``) when sending a component, the API will assign
+        If set to ``0`` (the default) when sending a component, the API will assign
         sequential identifiers to the components in the message.
 
         .. versionadded:: 2.11
@@ -330,7 +330,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             .. versionadded:: 2.11
         id: :class:`int`
             The numeric identifier for the component.
-            If left unset (i.e. the default ``0``) when sending a component, the API will assign
+            If set to ``0`` (the default) when sending a component, the API will assign
             sequential identifiers to the components in the message.
 
             .. versionadded:: 2.11
@@ -398,7 +398,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             Whether the select is disabled or not.
         id: :class:`int`
             The numeric identifier for the component.
-            If left unset (i.e. the default ``0``) when sending a component, the API will assign
+            If set to ``0`` (the default) when sending a component, the API will assign
             sequential identifiers to the components in the message.
 
             .. versionadded:: 2.11
@@ -466,7 +466,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             .. versionadded:: 2.10
         id: :class:`int`
             The numeric identifier for the component.
-            If left unset (i.e. the default ``0``) when sending a component, the API will assign
+            If set to ``0`` (the default) when sending a component, the API will assign
             sequential identifiers to the components in the message.
 
             .. versionadded:: 2.11
@@ -532,7 +532,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             .. versionadded:: 2.10
         id: :class:`int`
             The numeric identifier for the component.
-            If left unset (i.e. the default ``0``) when sending a component, the API will assign
+            If set to ``0`` (the default) when sending a component, the API will assign
             sequential identifiers to the components in the message.
 
             .. versionadded:: 2.11
@@ -602,7 +602,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             .. versionadded:: 2.10
         id: :class:`int`
             The numeric identifier for the component.
-            If left unset (i.e. the default ``0``) when sending a component, the API will assign
+            If set to ``0`` (the default) when sending a component, the API will assign
             sequential identifiers to the components in the message.
 
             .. versionadded:: 2.11
@@ -672,7 +672,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             .. versionadded:: 2.10
         id: :class:`int`
             The numeric identifier for the component.
-            If left unset (i.e. the default ``0``) when sending a component, the API will assign
+            If set to ``0`` (the default) when sending a component, the API will assign
             sequential identifiers to the components in the message.
 
             .. versionadded:: 2.11
@@ -739,7 +739,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             The maximum length of the text input.
         id: :class:`int`
             The numeric identifier for the component.
-            If left unset (i.e. the default ``0``) when sending a component, the API will assign
+            If set to ``0`` (the default) when sending a component, the API will assign
             sequential identifiers to the components in the message.
 
             .. versionadded:: 2.11
