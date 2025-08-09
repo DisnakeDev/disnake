@@ -37,6 +37,12 @@ class TextInput(WrappedComponent):
         The minimum length of the text input.
     max_length: Optional[:class:`int`]
         The maximum length of the text input.
+    id: :class:`int`
+        The numeric identifier for the component.
+        If left unset (i.e. the default ``0``) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
+
+        .. versionadded:: 2.11
     """
 
     __repr_attributes__: ClassVar[Tuple[str, ...]] = (
@@ -63,9 +69,11 @@ class TextInput(WrappedComponent):
         required: bool = True,
         min_length: Optional[int] = None,
         max_length: Optional[int] = None,
+        id: int = 0,
     ) -> None:
         self._underlying = TextInputComponent._raw_construct(
             type=ComponentType.text_input,
+            id=id,
             style=style,
             label=label,
             custom_id=custom_id,

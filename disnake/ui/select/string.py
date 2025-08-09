@@ -86,6 +86,12 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
 
     disabled: :class:`bool`
         Whether the select is disabled.
+    id: :class:`int`
+        The numeric identifier for the component.
+        If left unset (i.e. the default ``0``) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
+
+        .. versionadded:: 2.11
     row: Optional[:class:`int`]
         The relative row this select menu belongs to. A Discord component can only have 5
         rows. By default, items are arranged automatically into those 5 rows. If you'd
@@ -116,6 +122,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         max_values: int = 1,
         options: SelectOptionInput = ...,
         disabled: bool = False,
+        id: int = 0,
         row: Optional[int] = None,
     ) -> None: ...
 
@@ -129,6 +136,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         max_values: int = 1,
         options: SelectOptionInput = ...,
         disabled: bool = False,
+        id: int = 0,
         row: Optional[int] = None,
     ) -> None: ...
 
@@ -141,6 +149,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         max_values: int = 1,
         options: SelectOptionInput = MISSING,
         disabled: bool = False,
+        id: int = 0,
         row: Optional[int] = None,
     ) -> None:
         super().__init__(
@@ -152,6 +161,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
             max_values=max_values,
             disabled=disabled,
             default_values=None,
+            id=id,
             row=row,
         )
         self._underlying.options = [] if options is MISSING else _parse_select_options(options)
@@ -165,6 +175,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
             max_values=component.max_values,
             options=component.options,
             disabled=component.disabled,
+            id=component.id,
             row=None,
         )
 

@@ -31,6 +31,10 @@ class Thumbnail(UIComponent):
         The thumbnail's description ("alt text"), if any.
     spoiler: :class:`bool`
         Whether the thumbnail is marked as a spoiler. Defaults to ``False``.
+    id: :class:`int`
+        The numeric identifier for the component.
+        If left unset (i.e. the default ``0``) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
     """
 
     __repr_attributes__: ClassVar[Tuple[str, ...]] = (
@@ -47,9 +51,11 @@ class Thumbnail(UIComponent):
         description: Optional[str] = None,
         *,
         spoiler: bool = False,
+        id: int = 0,
     ) -> None:
         self._underlying = ThumbnailComponent._raw_construct(
             type=ComponentType.thumbnail,
+            id=id,
             media=handle_media_item_input(media),
             description=description,
             spoiler=spoiler,

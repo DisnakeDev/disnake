@@ -71,6 +71,12 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
         .. versionadded:: 2.10
+    id: :class:`int`
+        The numeric identifier for the component.
+        If left unset (i.e. the default ``0``) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
+
+        .. versionadded:: 2.11
     row: Optional[:class:`int`]
         The relative row this select menu belongs to. A Discord component can only have 5
         rows. By default, items are arranged automatically into those 5 rows. If you'd
@@ -112,6 +118,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
         disabled: bool = False,
         channel_types: Optional[List[ChannelType]] = None,
         default_values: Optional[Sequence[SelectDefaultValueInputType[AnyChannel]]] = None,
+        id: int = 0,
         row: Optional[int] = None,
     ) -> None: ...
 
@@ -126,6 +133,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
         disabled: bool = False,
         channel_types: Optional[List[ChannelType]] = None,
         default_values: Optional[Sequence[SelectDefaultValueInputType[AnyChannel]]] = None,
+        id: int = 0,
         row: Optional[int] = None,
     ) -> None: ...
 
@@ -139,6 +147,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
         disabled: bool = False,
         channel_types: Optional[List[ChannelType]] = None,
         default_values: Optional[Sequence[SelectDefaultValueInputType[AnyChannel]]] = None,
+        id: int = 0,
         row: Optional[int] = None,
     ) -> None:
         super().__init__(
@@ -150,6 +159,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
             max_values=max_values,
             disabled=disabled,
             default_values=default_values,
+            id=id,
             row=row,
         )
         self._underlying.channel_types = channel_types or None
@@ -164,6 +174,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
             disabled=component.disabled,
             channel_types=component.channel_types,
             default_values=component.default_values,
+            id=component.id,
             row=None,
         )
 

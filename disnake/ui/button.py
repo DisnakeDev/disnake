@@ -68,6 +68,12 @@ class Button(Item[V_co]):
         Premium buttons additionally cannot have a ``label``, ``url``, or ``emoji``.
 
         .. versionadded:: 2.11
+    id: :class:`int`
+        The numeric identifier for the component.
+        If left unset (i.e. the default ``0``) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
+
+        .. versionadded:: 2.11
     row: Optional[:class:`int`]
         The relative row this button belongs to. A Discord component can only have 5
         rows. By default, items are arranged automatically into those 5 rows. If you'd
@@ -99,6 +105,7 @@ class Button(Item[V_co]):
         url: Optional[str] = None,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
         sku_id: Optional[int] = None,
+        id: int = 0,
         row: Optional[int] = None,
     ) -> None: ...
 
@@ -113,6 +120,7 @@ class Button(Item[V_co]):
         url: Optional[str] = None,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
         sku_id: Optional[int] = None,
+        id: int = 0,
         row: Optional[int] = None,
     ) -> None: ...
 
@@ -126,6 +134,7 @@ class Button(Item[V_co]):
         url: Optional[str] = None,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
         sku_id: Optional[int] = None,
+        id: int = 0,
         row: Optional[int] = None,
     ) -> None:
         super().__init__()
@@ -155,6 +164,7 @@ class Button(Item[V_co]):
 
         self._underlying = ButtonComponent._raw_construct(
             type=ComponentType.button,
+            id=id,
             custom_id=custom_id,
             url=url,
             disabled=disabled,
@@ -265,6 +275,7 @@ class Button(Item[V_co]):
             url=button.url,
             emoji=button.emoji,
             sku_id=button.sku_id,
+            id=button.id,
             row=None,
         )
 

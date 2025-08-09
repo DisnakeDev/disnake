@@ -25,6 +25,10 @@ class Separator(UIComponent):
     spacing: :class:`.SeparatorSpacingSize`
         The size of the separator.
         Defaults to :attr:`~.SeparatorSpacingSize.small`.
+    id: :class:`int`
+        The numeric identifier for the component.
+        If left unset (i.e. the default ``0``) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
     """
 
     __repr_attributes__: ClassVar[Tuple[str, ...]] = (
@@ -39,9 +43,11 @@ class Separator(UIComponent):
         *,
         divider: bool = True,
         spacing: SeparatorSpacingSize = SeparatorSpacingSize.small,
+        id: int = 0,
     ) -> None:
         self._underlying = SeparatorComponent._raw_construct(
             type=ComponentType.separator,
+            id=id,
             divider=divider,
             spacing=spacing,
         )

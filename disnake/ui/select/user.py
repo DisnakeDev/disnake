@@ -67,6 +67,12 @@ class UserSelect(BaseSelect[UserSelectMenu, "Union[User, Member]", V_co]):
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
         .. versionadded:: 2.10
+    id: :class:`int`
+        The numeric identifier for the component.
+        If left unset (i.e. the default ``0``) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
+
+        .. versionadded:: 2.11
     row: Optional[:class:`int`]
         The relative row this select menu belongs to. A Discord component can only have 5
         rows. By default, items are arranged automatically into those 5 rows. If you'd
@@ -96,6 +102,7 @@ class UserSelect(BaseSelect[UserSelectMenu, "Union[User, Member]", V_co]):
         max_values: int = 1,
         disabled: bool = False,
         default_values: Optional[Sequence[SelectDefaultValueInputType[Union[User, Member]]]] = None,
+        id: int = 0,
         row: Optional[int] = None,
     ) -> None: ...
 
@@ -109,6 +116,7 @@ class UserSelect(BaseSelect[UserSelectMenu, "Union[User, Member]", V_co]):
         max_values: int = 1,
         disabled: bool = False,
         default_values: Optional[Sequence[SelectDefaultValueInputType[Union[User, Member]]]] = None,
+        id: int = 0,
         row: Optional[int] = None,
     ) -> None: ...
 
@@ -121,6 +129,7 @@ class UserSelect(BaseSelect[UserSelectMenu, "Union[User, Member]", V_co]):
         max_values: int = 1,
         disabled: bool = False,
         default_values: Optional[Sequence[SelectDefaultValueInputType[Union[User, Member]]]] = None,
+        id: int = 0,
         row: Optional[int] = None,
     ) -> None:
         super().__init__(
@@ -132,6 +141,7 @@ class UserSelect(BaseSelect[UserSelectMenu, "Union[User, Member]", V_co]):
             max_values=max_values,
             disabled=disabled,
             default_values=default_values,
+            id=id,
             row=row,
         )
 
@@ -144,6 +154,7 @@ class UserSelect(BaseSelect[UserSelectMenu, "Union[User, Member]", V_co]):
             max_values=component.max_values,
             disabled=component.disabled,
             default_values=component.default_values,
+            id=component.id,
             row=None,
         )
 

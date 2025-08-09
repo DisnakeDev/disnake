@@ -105,6 +105,20 @@ class UIComponent(ABC):
     def type(self) -> ComponentType:
         return self._underlying.type
 
+    @property
+    def id(self) -> int:
+        """:class:`int`: The numeric identifier for the component.
+        This is always present in components received from the API,
+        and unique within a message.
+
+        .. versionadded:: 2.11
+        """
+        return self._underlying.id
+
+    @id.setter
+    def id(self, value: int) -> None:
+        self._underlying.id = value
+
     def to_component_dict(self) -> Dict[str, Any]:
         return self._underlying.to_dict()
 

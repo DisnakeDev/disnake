@@ -22,15 +22,20 @@ class TextDisplay(UIComponent):
     ----------
     content: :class:`str`
         The text displayed by this component.
+    id: :class:`int`
+        The numeric identifier for the component.
+        If left unset (i.e. the default ``0``) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
     """
 
     __repr_attributes__: ClassVar[Tuple[str, ...]] = ("content",)
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: TextDisplayComponent = MISSING
 
-    def __init__(self, content: str) -> None:
+    def __init__(self, content: str, *, id: int = 0) -> None:
         self._underlying = TextDisplayComponent._raw_construct(
             type=ComponentType.text_display,
+            id=id,
             content=content,
         )
 

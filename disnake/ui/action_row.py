@@ -31,7 +31,7 @@ from ..components import (
     UserSelectMenu as UserSelectComponent,
 )
 from ..enums import ButtonStyle, ChannelType, ComponentType, TextInputStyle
-from ..utils import MISSING, SequenceProxy, assert_never
+from ..utils import MISSING, SequenceProxy, assert_never, copy_doc
 from ._types import (
     ActionRowChildT,
     ActionRowMessageComponent,
@@ -157,6 +157,12 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         .. versionchanged:: 2.6
             Components can now be either valid in the context of a message, or in the
             context of a modal. Combining components from both contexts is not supported.
+    id: :class:`int`
+        The numeric identifier for the component.
+        If left unset (i.e. the default ``0``) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
+
+        .. versionadded:: 2.11
     """
 
     __repr_attributes__: ClassVar[Tuple[str, ...]] = ("_children",)
@@ -164,7 +170,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
     # When unspecified and called empty, default to an ActionRow that takes any kind of component.
 
     @overload
-    def __init__(self: ActionRow[WrappedComponent]) -> None: ...
+    def __init__(self: ActionRow[WrappedComponent], *, id: int = 0) -> None: ...
 
     # Explicit definitions are needed to make
     # "ActionRow(StringSelect(), TextInput())" and
@@ -173,19 +179,24 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
 
     @overload
     def __init__(
-        self: ActionRow[ActionRowMessageComponent], *components: ActionRowMessageComponent
+        self: ActionRow[ActionRowMessageComponent],
+        *components: ActionRowMessageComponent,
+        id: int = 0,
     ) -> None: ...
 
     @overload
     def __init__(
-        self: ActionRow[ActionRowModalComponent], *components: ActionRowModalComponent
+        self: ActionRow[ActionRowModalComponent],
+        *components: ActionRowModalComponent,
+        id: int = 0,
     ) -> None: ...
 
     @overload
-    def __init__(self, *components: ActionRowChildT) -> None: ...
+    def __init__(self, *components: ActionRowChildT, id: int = 0) -> None: ...
 
     # n.b. this should be `*components: ActionRowChildT`, but pyright does not like it
-    def __init__(self, *components: WrappedComponent) -> None:
+    def __init__(self, *components: WrappedComponent, id: int = 0) -> None:
+        self._id: int = id
         self._children: List[ActionRowChildT] = []
 
         for component in components:
@@ -197,6 +208,17 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
 
     def __len__(self) -> int:
         return len(self._children)
+
+    # these are reimplemented here to store the value in a separate attribute,
+    # since `ActionRow` lazily constructs `_underlying`, unlike most components
+    @property
+    @copy_doc(UIComponent.id)
+    def id(self) -> int:
+        return self._id
+
+    @id.setter
+    def id(self, value: int) -> None:
+        self._id = value
 
     @property
     def children(self) -> Sequence[ActionRowChildT]:
@@ -739,6 +761,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
     def _underlying(self) -> ActionRowComponent[ActionRowChildComponent]:
         return ActionRowComponent._raw_construct(
             type=ComponentType.action_row,
+            id=self._id,
             children=[comp._underlying for comp in self._children],
         )
 
@@ -764,7 +787,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         return iter(self._children)
 
     @classmethod
-    def with_modal_components(cls) -> ActionRow[ActionRowModalComponent]:
+    def with_modal_components(cls, *, id: int = 0) -> ActionRow[ActionRowModalComponent]:
         """Create an empty action row meant to store components compatible with
         :class:`disnake.ui.Modal`. Saves the need to import type specifiers to
         typehint empty action rows.
@@ -776,10 +799,10 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         :class:`ActionRow`:
             The newly created empty action row, intended for modal components.
         """
-        return ActionRow[ActionRowModalComponent]()
+        return ActionRow[ActionRowModalComponent](id=id)
 
     @classmethod
-    def with_message_components(cls) -> ActionRow[ActionRowMessageComponent]:
+    def with_message_components(cls, *, id: int = 0) -> ActionRow[ActionRowMessageComponent]:
         """Create an empty action row meant to store components compatible with
         :class:`disnake.Message`. Saves the need to import type specifiers to
         typehint empty action rows.
@@ -791,7 +814,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         :class:`ActionRow`:
             The newly created empty action row, intended for message components.
         """
-        return ActionRow[ActionRowMessageComponent]()
+        return ActionRow[ActionRowMessageComponent](id=id)
 
     @classmethod
     def rows_from_message(

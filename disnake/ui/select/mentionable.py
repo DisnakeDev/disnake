@@ -69,6 +69,12 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
         Note that unlike other select menu types, this does not support :class:`.Object`\\s due to ambiguities.
 
         .. versionadded:: 2.10
+    id: :class:`int`
+        The numeric identifier for the component.
+        If left unset (i.e. the default ``0``) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
+
+        .. versionadded:: 2.11
     row: Optional[:class:`int`]
         The relative row this select menu belongs to. A Discord component can only have 5
         rows. By default, items are arranged automatically into those 5 rows. If you'd
@@ -101,6 +107,7 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
         default_values: Optional[
             Sequence[SelectDefaultValueMultiInputType[Union[User, Member, Role]]]
         ] = None,
+        id: int = 0,
         row: Optional[int] = None,
     ) -> None: ...
 
@@ -116,6 +123,7 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
         default_values: Optional[
             Sequence[SelectDefaultValueMultiInputType[Union[User, Member, Role]]]
         ] = None,
+        id: int = 0,
         row: Optional[int] = None,
     ) -> None: ...
 
@@ -130,6 +138,7 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
         default_values: Optional[
             Sequence[SelectDefaultValueMultiInputType[Union[User, Member, Role]]]
         ] = None,
+        id: int = 0,
         row: Optional[int] = None,
     ) -> None:
         super().__init__(
@@ -141,6 +150,7 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
             max_values=max_values,
             disabled=disabled,
             default_values=default_values,
+            id=id,
             row=row,
         )
 
@@ -153,6 +163,7 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
             max_values=component.max_values,
             disabled=component.disabled,
             default_values=component.default_values,
+            id=component.id,
             row=None,
         )
 

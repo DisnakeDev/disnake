@@ -27,6 +27,10 @@ class File(UIComponent):
         using the ``attachment://<filename>`` syntax), not arbitrary URLs.
     spoiler: :class:`bool`
         Whether the file is marked as a spoiler. Defaults to ``False``.
+    id: :class:`int`
+        The numeric identifier for the component.
+        If left unset (i.e. the default ``0``) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
     """
 
     __repr_attributes__: ClassVar[Tuple[str, ...]] = (
@@ -41,9 +45,11 @@ class File(UIComponent):
         file: MediaItemInput,
         *,
         spoiler: bool = False,
+        id: int = 0,
     ) -> None:
         self._underlying = FileComponent._raw_construct(
             type=ComponentType.file,
+            id=id,
             file=handle_media_item_input(file),
             spoiler=spoiler,
         )

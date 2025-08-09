@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, ClassVar, List, Optional, Sequence, Tuple, Uni
 from ..colour import Colour
 from ..components import Container as ContainerComponent
 from ..enums import ComponentType
-from ..utils import SequenceProxy
+from ..utils import SequenceProxy, copy_doc
 from .item import UIComponent, ensure_ui_component
 
 if TYPE_CHECKING:
@@ -45,6 +45,10 @@ class Container(UIComponent):
         The accent colour of the container.
     spoiler: :class:`bool`
         Whether the container is marked as a spoiler. Defaults to ``False``.
+    id: :class:`int`
+        The numeric identifier for the component.
+        If left unset (i.e. the default ``0``) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
 
     Attributes
     ----------
@@ -66,13 +70,26 @@ class Container(UIComponent):
         *components: ContainerChildUIComponent,
         accent_colour: Optional[Colour] = None,
         spoiler: bool = False,
+        id: int = 0,
     ) -> None:
+        self._id: int = id
         self._components: List[ContainerChildUIComponent] = [
             ensure_ui_component(c, "components") for c in components
         ]
         # FIXME: add accent_color
         self.accent_colour: Optional[Colour] = accent_colour
         self.spoiler: bool = spoiler
+
+    # these are reimplemented here to store the value in a separate attribute,
+    # since `Container` lazily constructs `_underlying`, unlike most components
+    @property
+    @copy_doc(UIComponent.id)
+    def id(self) -> int:
+        return self._id
+
+    @id.setter
+    def id(self, value: int) -> None:
+        self._id = value
 
     # TODO: consider moving runtime checks from constructor into property setters, also making these fields writable
     @property
@@ -84,6 +101,7 @@ class Container(UIComponent):
     def _underlying(self) -> ContainerComponent:
         return ContainerComponent._raw_construct(
             type=ComponentType.container,
+            id=self._id,
             components=[comp._underlying for comp in self._components],
             _accent_colour=self.accent_colour.value if self.accent_colour is not None else None,
             spoiler=self.spoiler,

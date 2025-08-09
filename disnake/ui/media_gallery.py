@@ -21,6 +21,10 @@ class MediaGallery(UIComponent):
     ----------
     *items: :class:`.MediaGalleryItem`
         The list of images in this gallery.
+    id: :class:`int`
+        The numeric identifier for the component.
+        If left unset (i.e. the default ``0``) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
     """
 
     __repr_attributes__: ClassVar[Tuple[str, ...]] = ("items",)
@@ -28,9 +32,10 @@ class MediaGallery(UIComponent):
     _underlying: MediaGalleryComponent = MISSING
 
     # FIXME: MediaGalleryItem currently isn't user-instantiable
-    def __init__(self, *items: MediaGalleryItem) -> None:
+    def __init__(self, *items: MediaGalleryItem, id: int = 0) -> None:
         self._underlying = MediaGalleryComponent._raw_construct(
             type=ComponentType.media_gallery,
+            id=id,
             items=list(items),
         )
 
