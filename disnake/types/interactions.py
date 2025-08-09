@@ -226,7 +226,6 @@ MessageComponentInteractionData = Union[
 ### Modal interaction components
 
 
-# TODO: add other select types
 class ModalInteractionStringSelectData(_BaseComponentInteractionData):
     type: Literal[3]
     values: List[str]
@@ -245,6 +244,7 @@ ModalInteractionComponentData = Union[
 
 class ModalInteractionActionRow(TypedDict):
     type: Literal[1]
+    id: int
     components: List[ModalInteractionComponentData]
 
 
