@@ -67,13 +67,13 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
     .. versionadded:: 2.7
     """
 
-    __repr_attributes__: Tuple[str, ...] = (
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
         "placeholder",
         "min_values",
         "max_values",
         "disabled",
     )
-    # We have to set this to MISSING in order to overwrite the abstract property from WrappedComponent
+    # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: SelectMenuT = MISSING
 
     # Subclasses are expected to set this
@@ -90,6 +90,7 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         max_values: int,
         disabled: bool,
         default_values: Optional[Sequence[SelectDefaultValueInputType[SelectValueT]]],
+        id: int,
         row: Optional[int],
     ) -> None:
         super().__init__()
@@ -97,8 +98,9 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         self._provided_custom_id = custom_id is not MISSING
         custom_id = os.urandom(16).hex() if custom_id is MISSING else custom_id
         self._underlying = underlying_type._raw_construct(
-            custom_id=custom_id,
             type=component_type,
+            id=id,
+            custom_id=custom_id,
             placeholder=placeholder,
             min_values=min_values,
             max_values=max_values,

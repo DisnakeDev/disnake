@@ -24,7 +24,10 @@ from typing import (
 
 from . import utils
 from .channel import PartialMessageable
-from .components import ActionRow, MessageComponent, _component_factory
+from .components import (
+    MessageTopLevelComponent,
+    _message_component_factory,
+)
 from .embeds import Embed
 from .emoji import Emoji
 from .enums import (
@@ -46,7 +49,6 @@ from .poll import Poll
 from .reaction import Reaction
 from .sticker import StickerItem
 from .threads import Thread
-from .ui.action_row import components_to_dict
 from .user import User
 from .utils import MISSING, _get_as_snowflake, assert_never, deprecated, escape_mentions
 
@@ -60,7 +62,9 @@ if TYPE_CHECKING:
     from .role import Role
     from .state import ConnectionState
     from .threads import AnyThreadArchiveDuration
-    from .types.components import Component as ComponentPayload
+    from .types.components import (
+        MessageTopLevelComponent as MessageTopLevelComponentPayload,
+    )
     from .types.embed import Embed as EmbedPayload
     from .types.gateway import (
         MessageReactionAddEvent,
@@ -85,7 +89,7 @@ if TYPE_CHECKING:
     )
     from .types.threads import ThreadArchiveDurationLiteral
     from .types.user import User as UserPayload
-    from .ui.action_row import Components, MessageUIComponent
+    from .ui._types import MessageComponents
     from .ui.view import View
 
     EmojiInputType = Union[Emoji, PartialEmoji, str]
@@ -147,7 +151,7 @@ async def _edit_handler(
     flags: MessageFlags,
     allowed_mentions: Optional[AllowedMentions],
     view: Optional[View],
-    components: Optional[Components[MessageUIComponent]],
+    components: Optional[MessageComponents],
 ) -> Message:
     if embed is not MISSING and embeds is not MISSING:
         raise TypeError("Cannot mix embed and embeds keyword arguments.")
@@ -213,6 +217,8 @@ async def _edit_handler(
             payload["components"] = []
 
     if components is not MISSING:
+        from .ui.action_row import components_to_dict
+
         payload["components"] = [] if components is None else components_to_dict(components)
 
     try:
@@ -1185,9 +1191,8 @@ class Message(Hashable):
         self.stickers: List[StickerItem] = [
             StickerItem(data=d, state=state) for d in data.get("sticker_items", [])
         ]
-        self.components: List[ActionRow[MessageComponent]] = [
-            _component_factory(d, type=ActionRow[MessageComponent])
-            for d in data.get("components", [])
+        self.components: List[MessageTopLevelComponent] = [
+            _message_component_factory(d) for d in data.get("components", [])
         ]
 
         self.poll: Optional[Poll] = None
@@ -1433,10 +1438,8 @@ class Message(Hashable):
                 if role is not None:
                     self.role_mentions.append(role)
 
-    def _handle_components(self, components: List[ComponentPayload]) -> None:
-        self.components = [
-            _component_factory(d, type=ActionRow[MessageComponent]) for d in components
-        ]
+    def _handle_components(self, components: List[MessageTopLevelComponentPayload]) -> None:
+        self.components = [_message_component_factory(d) for d in components]
 
     def _rebind_cached_references(self, new_guild: Guild, new_channel: GuildMessageable) -> None:
         self.guild = new_guild
@@ -1866,7 +1869,7 @@ class Message(Hashable):
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components[MessageUIComponent]] = ...,
+        components: Optional[MessageComponents] = ...,
         delete_after: Optional[float] = ...,
     ) -> Message: ...
 
@@ -1882,7 +1885,7 @@ class Message(Hashable):
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components[MessageUIComponent]] = ...,
+        components: Optional[MessageComponents] = ...,
         delete_after: Optional[float] = ...,
     ) -> Message: ...
 
@@ -1898,7 +1901,7 @@ class Message(Hashable):
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components[MessageUIComponent]] = ...,
+        components: Optional[MessageComponents] = ...,
         delete_after: Optional[float] = ...,
     ) -> Message: ...
 
@@ -1914,7 +1917,7 @@ class Message(Hashable):
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components[MessageUIComponent]] = ...,
+        components: Optional[MessageComponents] = ...,
         delete_after: Optional[float] = ...,
     ) -> Message: ...
 
@@ -1932,7 +1935,7 @@ class Message(Hashable):
         flags: MessageFlags = MISSING,
         allowed_mentions: Optional[AllowedMentions] = MISSING,
         view: Optional[View] = MISSING,
-        components: Optional[Components[MessageUIComponent]] = MISSING,
+        components: Optional[MessageComponents] = MISSING,
         delete_after: Optional[float] = None,
     ) -> Message:
         """|coro|
@@ -2629,7 +2632,7 @@ class PartialMessage(Hashable):
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components[MessageUIComponent]] = ...,
+        components: Optional[MessageComponents] = ...,
         delete_after: Optional[float] = ...,
     ) -> Message: ...
 
@@ -2645,7 +2648,7 @@ class PartialMessage(Hashable):
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components[MessageUIComponent]] = ...,
+        components: Optional[MessageComponents] = ...,
         delete_after: Optional[float] = ...,
     ) -> Message: ...
 
@@ -2661,7 +2664,7 @@ class PartialMessage(Hashable):
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components[MessageUIComponent]] = ...,
+        components: Optional[MessageComponents] = ...,
         delete_after: Optional[float] = ...,
     ) -> Message: ...
 
@@ -2677,7 +2680,7 @@ class PartialMessage(Hashable):
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components[MessageUIComponent]] = ...,
+        components: Optional[MessageComponents] = ...,
         delete_after: Optional[float] = ...,
     ) -> Message: ...
 
@@ -2695,7 +2698,7 @@ class PartialMessage(Hashable):
         flags: MessageFlags = MISSING,
         allowed_mentions: Optional[AllowedMentions] = MISSING,
         view: Optional[View] = MISSING,
-        components: Optional[Components[MessageUIComponent]] = MISSING,
+        components: Optional[MessageComponents] = MISSING,
         delete_after: Optional[float] = None,
     ) -> Message:
         """|coro|
@@ -2929,9 +2932,8 @@ class ForwardedMessage:
         self.stickers: List[StickerItem] = [
             StickerItem(data=d, state=state) for d in data.get("sticker_items", [])
         ]
-        self.components = [
-            _component_factory(d, type=ActionRow[MessageComponent])
-            for d in data.get("components", [])
+        self.components: List[MessageTopLevelComponent] = [
+            _message_component_factory(d) for d in data.get("components", [])
         ]
         self.guild_id = guild_id
 

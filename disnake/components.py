@@ -7,10 +7,15 @@ from typing import (
     Any,
     ClassVar,
     Dict,
+    Final,
     Generic,
+    Iterator,
     List,
     Literal,
+    Mapping,
     Optional,
+    Sequence,
+    Set,
     Tuple,
     Type,
     TypeVar,
@@ -18,16 +23,19 @@ from typing import (
     cast,
 )
 
+from .asset import AssetMixin
+from .colour import Colour
 from .enums import (
     ButtonStyle,
     ChannelType,
     ComponentType,
     SelectDefaultValueType,
+    SeparatorSpacingSize,
     TextInputStyle,
     try_enum,
 )
 from .partial_emoji import PartialEmoji, _EmojiTag
-from .utils import MISSING, _get_as_snowflake, assert_never, get_slots
+from .utils import MISSING, _get_as_snowflake, get_slots
 
 if TYPE_CHECKING:
     from typing_extensions import Self, TypeAlias
@@ -40,12 +48,23 @@ if TYPE_CHECKING:
         ButtonComponent as ButtonComponentPayload,
         ChannelSelectMenu as ChannelSelectMenuPayload,
         Component as ComponentPayload,
+        ComponentType as ComponentTypeLiteral,
+        ContainerComponent as ContainerComponentPayload,
+        FileComponent as FileComponentPayload,
+        MediaGalleryComponent as MediaGalleryComponentPayload,
+        MediaGalleryItem as MediaGalleryItemPayload,
         MentionableSelectMenu as MentionableSelectMenuPayload,
+        MessageTopLevelComponent as MessageTopLevelComponentPayload,
         RoleSelectMenu as RoleSelectMenuPayload,
+        SectionComponent as SectionComponentPayload,
         SelectDefaultValue as SelectDefaultValuePayload,
         SelectOption as SelectOptionPayload,
+        SeparatorComponent as SeparatorComponentPayload,
         StringSelectMenu as StringSelectMenuPayload,
+        TextDisplayComponent as TextDisplayComponentPayload,
         TextInput as TextInputPayload,
+        ThumbnailComponent as ThumbnailComponentPayload,
+        UnfurledMediaItem as UnfurledMediaItemPayload,
         UserSelectMenu as UserSelectMenuPayload,
     )
 
@@ -63,9 +82,16 @@ __all__ = (
     "SelectOption",
     "SelectDefaultValue",
     "TextInput",
+    "Section",
+    "TextDisplay",
+    "UnfurledMediaItem",
+    "Thumbnail",
+    "MediaGallery",
+    "MediaGalleryItem",
+    "FileComponent",
+    "Separator",
+    "Container",
 )
-
-C = TypeVar("C", bound="Component")
 
 AnySelectMenu = Union[
     "StringSelectMenu",
@@ -83,22 +109,59 @@ SelectMenuType = Literal[
     ComponentType.channel_select,
 ]
 
-MessageComponent = Union["Button", "AnySelectMenu"]
-ModalComponent: TypeAlias = "TextInput"
+# valid `ActionRow.components` item types in a message/modal
+ActionRowMessageComponent = Union["Button", "AnySelectMenu"]
+ActionRowModalComponent: TypeAlias = "TextInput"
 
-NestedComponent = Union[MessageComponent, ModalComponent]
-ComponentT = TypeVar("ComponentT", bound=NestedComponent)
+# any child component type of action rows
+ActionRowChildComponent = Union[ActionRowMessageComponent, ActionRowModalComponent]
+# TODO: this might have to be covariant
+ActionRowChildComponentT = TypeVar("ActionRowChildComponentT", bound=ActionRowChildComponent)
+
+# valid `Section.accessory` types
+SectionAccessoryComponent = Union["Thumbnail", "Button"]
+# valid `Section.components` item types
+SectionChildComponent: TypeAlias = "TextDisplay"
+
+# valid `Container.components` item types
+ContainerChildComponent = Union[
+    "ActionRow[ActionRowMessageComponent]",
+    "Section",
+    "TextDisplay",
+    "MediaGallery",
+    "FileComponent",
+    "Separator",
+]
+
+# valid `Message.components` item types (v1/v2)
+MessageTopLevelComponentV1: TypeAlias = "ActionRow[ActionRowMessageComponent]"
+MessageTopLevelComponentV2 = Union[
+    "Section",
+    "TextDisplay",
+    "MediaGallery",
+    "FileComponent",
+    "Separator",
+    "Container",
+]
+MessageTopLevelComponent = Union[MessageTopLevelComponentV1, MessageTopLevelComponentV2]
 
 
 class Component:
-    """Represents a Discord Bot UI Kit Component.
+    """Represents the base component that all other components inherit from.
 
-    Currently, the only components supported by Discord are:
+    The components supported by Discord are:
 
     - :class:`ActionRow`
     - :class:`Button`
     - subtypes of :class:`BaseSelectMenu` (:class:`ChannelSelectMenu`, :class:`MentionableSelectMenu`, :class:`RoleSelectMenu`, :class:`StringSelectMenu`, :class:`UserSelectMenu`)
     - :class:`TextInput`
+    - :class:`Section`
+    - :class:`TextDisplay`
+    - :class:`Thumbnail`
+    - :class:`MediaGallery`
+    - :class:`FileComponent`
+    - :class:`Separator`
+    - :class:`Container`
 
     This class is abstract and cannot be instantiated.
 
@@ -108,12 +171,21 @@ class Component:
     ----------
     type: :class:`ComponentType`
         The type of component.
+    id: :class:`int`
+        The numeric identifier for the component.
+        This is always present in components received from the API,
+        and unique within a message.
+        If left unset (i.e. the default ``0``) when sending a component, the API will assign sequential
+        identifiers to the components in the message.
+
+        .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = ("type",)
+    __slots__: Tuple[str, ...] = ("type", "id")
 
     __repr_info__: ClassVar[Tuple[str, ...]]
     type: ComponentType
+    id: int
 
     def __repr__(self) -> str:
         attrs = " ".join(f"{key}={getattr(self, key)!r}" for key in self.__repr_info__)
@@ -135,7 +207,7 @@ class Component:
         raise NotImplementedError
 
 
-class ActionRow(Component, Generic[ComponentT]):
+class ActionRow(Component, Generic[ActionRowChildComponentT]):
     """Represents an action row.
 
     This is a component that holds up to 5 children components in a row.
@@ -156,12 +228,15 @@ class ActionRow(Component, Generic[ComponentT]):
 
     def __init__(self, data: ActionRowPayload) -> None:
         self.type: Literal[ComponentType.action_row] = ComponentType.action_row
+        self.id = data.get("id", 0)
+
         children = [_component_factory(d) for d in data.get("components", [])]
-        self.children: List[ComponentT] = children  # type: ignore
+        self.children: List[ActionRowChildComponentT] = children  # type: ignore
 
     def to_dict(self) -> ActionRowPayload:
         return {
             "type": self.type.value,
+            "id": self.id,
             "components": [child.to_dict() for child in self.children],
         }
 
@@ -214,6 +289,8 @@ class Button(Component):
 
     def __init__(self, data: ButtonComponentPayload) -> None:
         self.type: Literal[ComponentType.button] = ComponentType.button
+        self.id = data.get("id", 0)
+
         self.style: ButtonStyle = try_enum(ButtonStyle, data["style"])
         self.custom_id: Optional[str] = data.get("custom_id")
         self.url: Optional[str] = data.get("url")
@@ -230,6 +307,7 @@ class Button(Component):
     def to_dict(self) -> ButtonComponentPayload:
         payload: ButtonComponentPayload = {
             "type": self.type.value,
+            "id": self.id,
             "style": self.style.value,
             "disabled": self.disabled,
         }
@@ -310,6 +388,7 @@ class BaseSelectMenu(Component):
     def __init__(self, data: AnySelectMenuPayload) -> None:
         component_type = try_enum(ComponentType, data["type"])
         self.type: SelectMenuType = component_type  # type: ignore
+        self.id = data.get("id", 0)
 
         self.custom_id: str = data["custom_id"]
         self.placeholder: Optional[str] = data.get("placeholder")
@@ -323,6 +402,7 @@ class BaseSelectMenu(Component):
     def to_dict(self) -> BaseSelectMenuPayload:
         payload: BaseSelectMenuPayload = {
             "type": self.type.value,
+            "id": self.id,
             "custom_id": self.custom_id,
             "min_values": self.min_values,
             "max_values": self.max_values,
@@ -747,11 +827,13 @@ class TextInput(Component):
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
 
     def __init__(self, data: TextInputPayload) -> None:
-        style = data.get("style", TextInputStyle.short.value)
-
         self.type: Literal[ComponentType.text_input] = ComponentType.text_input
+        self.id = data.get("id", 0)
+
         self.custom_id: str = data["custom_id"]
-        self.style: TextInputStyle = try_enum(TextInputStyle, style)
+        self.style: TextInputStyle = try_enum(
+            TextInputStyle, data.get("style", TextInputStyle.short.value)
+        )
         self.label: Optional[str] = data.get("label")
         self.placeholder: Optional[str] = data.get("placeholder")
         self.value: Optional[str] = data.get("value")
@@ -762,6 +844,7 @@ class TextInput(Component):
     def to_dict(self) -> TextInputPayload:
         payload: TextInputPayload = {
             "type": self.type.value,
+            "id": self.id,
             "style": self.style.value,
             "label": cast(str, self.label),
             "custom_id": self.custom_id,
@@ -783,28 +866,492 @@ class TextInput(Component):
         return payload
 
 
+class Section(Component):
+    """Represents a section from the Discord Bot UI Kit (v2).
+
+    This allows displaying an accessory (thumbnail or button) next to a block of text.
+
+    .. note::
+        The user constructible and usable type to create a
+        section is :class:`disnake.ui.Section`.
+
+    .. versionadded:: 2.11
+
+    Attributes
+    ----------
+    accessory: Union[:class:`Thumbnail`, :class:`Button`]
+        The accessory component displayed next to the section text.
+    components: List[:class:`TextDisplay`]
+        The text items in this section.
+    """
+
+    __slots__: Tuple[str, ...] = ("accessory", "components")
+
+    __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+
+    def __init__(self, data: SectionComponentPayload) -> None:
+        self.type: Literal[ComponentType.section] = ComponentType.section
+        self.id = data.get("id", 0)
+
+        accessory = _component_factory(data["accessory"])
+        self.accessory: SectionAccessoryComponent = accessory  # type: ignore
+
+        self.components: List[SectionChildComponent] = [
+            _component_factory(d, type=SectionChildComponent) for d in data.get("components", [])
+        ]
+
+    def to_dict(self) -> SectionComponentPayload:
+        return {
+            "type": self.type.value,
+            "id": self.id,
+            "accessory": self.accessory.to_dict(),
+            "components": [child.to_dict() for child in self.components],
+        }
+
+
+class TextDisplay(Component):
+    """Represents a text display from the Discord Bot UI Kit (v2).
+
+    .. note::
+        The user constructible and usable type to create a
+        text display is :class:`disnake.ui.TextDisplay`.
+
+    .. versionadded:: 2.11
+
+    Attributes
+    ----------
+    content: :class:`str`
+        The text displayed by this component.
+    """
+
+    __slots__: Tuple[str, ...] = ("content",)
+
+    __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+
+    def __init__(self, data: TextDisplayComponentPayload) -> None:
+        self.type: Literal[ComponentType.text_display] = ComponentType.text_display
+        self.id = data.get("id", 0)
+
+        self.content: str = data["content"]
+
+    def to_dict(self) -> TextDisplayComponentPayload:
+        return {
+            "type": self.type.value,
+            "id": self.id,
+            "content": self.content,
+        }
+
+
+class UnfurledMediaItem(AssetMixin):
+    """Represents an unfurled/resolved media item within a component.
+
+    .. versionadded:: 2.11
+
+    Attributes
+    ----------
+    url: :class:`str`
+        The URL of this media item.
+    proxy_url: :class:`str`
+        The proxied URL of this media item. This is a cached version of
+        the :attr:`url` in the case of images.
+    height: Optional[:class:`int`]
+        The height of this media item, if applicable.
+    width: Optional[:class:`int`]
+        The width of this media item, if applicable.
+    content_type: Optional[:class:`str`]
+        The `media type <https://en.wikipedia.org/wiki/Media_type>`_ of this media item.
+    attachment_id: Optional[:class:`int`]
+        The ID of the uploaded attachment. Only present if the media item was
+        uploaded as an attachment.
+    """
+
+    __slots__: Tuple[str, ...] = (
+        "url",
+        "proxy_url",
+        "height",
+        "width",
+        "content_type",
+        "attachment_id",
+    )
+
+    # generally, users should also be able to pass a plain url where applicable instead of
+    # an UnfurledMediaItem instance; this is largely for internal use
+    def __init__(self, url: str) -> None:
+        self.url: str = url
+        self.proxy_url: Optional[str] = None
+        self.height: Optional[int] = None
+        self.width: Optional[int] = None
+        self.content_type: Optional[str] = None
+        self.attachment_id: Optional[int] = None
+
+    # FIXME: when deserializing, try to attach _state for AssetMixin as well
+    @classmethod
+    def from_dict(cls, data: UnfurledMediaItemPayload) -> Self:
+        self = cls(data["url"])
+        self.proxy_url = data.get("proxy_url")
+        self.height = _get_as_snowflake(data, "height")
+        self.width = _get_as_snowflake(data, "width")
+        self.content_type = data.get("content_type")
+        self.attachment_id = _get_as_snowflake(data, "attachment_id")
+        return self
+
+    def to_dict(self) -> UnfurledMediaItemPayload:
+        # for sending, only `url` is required, and other fields are ignored regardless
+        return {"url": self.url}
+
+    def __repr__(self) -> str:
+        return f"<UnfurledMediaItem url={self.url} content_type={self.content_type}>"
+
+
+class Thumbnail(Component):
+    """Represents a thumbnail from the Discord Bot UI Kit (v2).
+
+    This is only supported as the :attr:`~Section.accessory` of a section component.
+
+    .. note::
+        The user constructible and usable type to create a
+        thumbnail is :class:`disnake.ui.Thumbnail`.
+
+    .. versionadded:: 2.11
+
+    Attributes
+    ----------
+    media: Any
+        n/a
+    description: Optional[:class:`str`]
+        The thumbnail's description ("alt text"), if any.
+    spoiler: :class:`bool`
+        Whether the thumbnail is marked as a spoiler. Defaults to ``False``.
+    """
+
+    __slots__: Tuple[str, ...] = (
+        "media",
+        "description",
+        "spoiler",
+    )
+
+    __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+
+    def __init__(self, data: ThumbnailComponentPayload) -> None:
+        self.type: Literal[ComponentType.thumbnail] = ComponentType.thumbnail
+        self.id = data.get("id", 0)
+
+        self.media: UnfurledMediaItem = UnfurledMediaItem.from_dict(data["media"])
+        self.description: Optional[str] = data.get("description")
+        self.spoiler: bool = data.get("spoiler", False)
+
+    def to_dict(self) -> ThumbnailComponentPayload:
+        payload: ThumbnailComponentPayload = {
+            "type": self.type.value,
+            "id": self.id,
+            "media": self.media.to_dict(),
+            "spoiler": self.spoiler,
+        }
+
+        if self.description:
+            payload["description"] = self.description
+
+        return payload
+
+
+class MediaGallery(Component):
+    """Represents a media gallery from the Discord Bot UI Kit (v2).
+
+    This allows displaying up to 10 images in a gallery.
+
+    .. note::
+        The user constructible and usable type to create a
+        media gallery is :class:`disnake.ui.MediaGallery`.
+
+    .. versionadded:: 2.11
+
+    Attributes
+    ----------
+    items: List[:class:`MediaGalleryItem`]
+        The images in this gallery.
+    """
+
+    __slots__: Tuple[str, ...] = ("items",)
+
+    __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+
+    def __init__(self, data: MediaGalleryComponentPayload) -> None:
+        self.type: Literal[ComponentType.media_gallery] = ComponentType.media_gallery
+        self.id = data.get("id", 0)
+
+        self.items: List[MediaGalleryItem] = [MediaGalleryItem(i) for i in data["items"]]
+
+    def to_dict(self) -> MediaGalleryComponentPayload:
+        return {
+            "type": self.type.value,
+            "id": self.id,
+            "items": [i.to_dict() for i in self.items],
+        }
+
+
+class MediaGalleryItem:
+    """TODO"""
+
+    __slots__: Tuple[str, ...] = (
+        "media",
+        "description",
+        "spoiler",
+    )
+
+    # XXX: should this be user-instantiable?
+    def __init__(self, data: MediaGalleryItemPayload) -> None:
+        self.media: UnfurledMediaItem = UnfurledMediaItem.from_dict(data["media"])
+        self.description: Optional[str] = data.get("description")
+        self.spoiler: bool = data.get("spoiler", False)
+
+    def to_dict(self) -> MediaGalleryItemPayload:
+        payload: MediaGalleryItemPayload = {
+            "media": self.media.to_dict(),
+            "spoiler": self.spoiler,
+        }
+
+        if self.description:
+            payload["description"] = self.description
+
+        return payload
+
+    def __repr__(self) -> str:
+        return f"<MediaGalleryItem media={self.media!r} description={self.description!r}>"
+
+
+# TODO: temporary(?) name to avoid shadowing `disnake.file.File`
+class FileComponent(Component):
+    """Represents a file component from the Discord Bot UI Kit (v2).
+
+    This allows displaying attached files.
+
+    .. note::
+        The user constructible and usable type to create a
+        file component is :class:`disnake.ui.File`.
+
+    .. versionadded:: 2.11
+
+    Attributes
+    ----------
+    file: Any
+        n/a
+    spoiler: :class:`bool`
+        Whether the file is marked as a spoiler. Defaults to ``False``.
+    """
+
+    __slots__: Tuple[str, ...] = ("file", "spoiler")
+
+    __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+
+    def __init__(self, data: FileComponentPayload) -> None:
+        self.type: Literal[ComponentType.file] = ComponentType.file
+        self.id = data.get("id", 0)
+
+        self.file: UnfurledMediaItem = UnfurledMediaItem.from_dict(data["file"])
+        self.spoiler: bool = data.get("spoiler", False)
+
+    def to_dict(self) -> FileComponentPayload:
+        return {
+            "type": self.type.value,
+            "id": self.id,
+            "file": self.file.to_dict(),
+            "spoiler": self.spoiler,
+        }
+
+
+class Separator(Component):
+    """Represents a separator from the Discord Bot UI Kit (v2).
+
+    This allows vertically separating components.
+
+    .. note::
+        The user constructible and usable type to create a
+        separator is :class:`disnake.ui.Separator`.
+
+    .. versionadded:: 2.11
+
+    Attributes
+    ----------
+    divider: :class:`bool`
+        Whether the separator should be visible, instead of just being vertical padding/spacing.
+        Defaults to ``True``.
+    spacing: :class:`SeparatorSpacingSize`
+        The size of the separator.
+    """
+
+    __slots__: Tuple[str, ...] = ("divider", "spacing")
+
+    __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+
+    def __init__(self, data: SeparatorComponentPayload) -> None:
+        self.type: Literal[ComponentType.separator] = ComponentType.separator
+        self.id = data.get("id", 0)
+
+        self.divider: bool = data.get("divider", True)
+        # TODO: `size` instead of `spacing`?
+        self.spacing: SeparatorSpacingSize = try_enum(SeparatorSpacingSize, data.get("spacing", 1))
+
+    def to_dict(self) -> SeparatorComponentPayload:
+        return {
+            "type": self.type.value,
+            "id": self.id,
+            "divider": self.divider,
+            "spacing": self.spacing.value,
+        }
+
+
+class Container(Component):
+    """Represents a container from the Discord Bot UI Kit (v2).
+
+    This is visually similar to :class:`Embed`\\s, and contains other components.
+
+    .. note::
+        The user constructible and usable type to create a
+        container is :class:`disnake.ui.Container`.
+
+    .. versionadded:: 2.11
+
+    Attributes
+    ----------
+    spoiler: :class:`bool`
+        Whether the container is marked as a spoiler. Defaults to ``False``.
+    components: List[Union[:class:`ActionRow`, :class:`Section`, :class:`TextDisplay`, :class:`MediaGallery`, :class:`FileComponent`, :class:`Separator`]]
+        The components in this container.
+    """
+
+    __slots__: Tuple[str, ...] = (
+        "_accent_colour",
+        "spoiler",
+        "components",
+    )
+
+    __repr_info__: ClassVar[Tuple[str, ...]] = (
+        "accent_colour",
+        "spoiler",
+        "components",
+    )
+
+    def __init__(self, data: ContainerComponentPayload) -> None:
+        self.type: Literal[ComponentType.container] = ComponentType.container
+        self.id = data.get("id", 0)
+
+        self._accent_colour: Optional[int] = data.get("accent_color")
+        self.spoiler: bool = data.get("spoiler", False)
+
+        components = [_component_factory(d) for d in data.get("components", [])]
+        self.components: List[ContainerChildComponent] = components  # type: ignore
+
+    def to_dict(self) -> ContainerComponentPayload:
+        payload: ContainerComponentPayload = {
+            "type": self.type.value,
+            "id": self.id,
+            "spoiler": self.spoiler,
+            "components": [child.to_dict() for child in self.components],
+        }
+
+        if self._accent_colour is not None:
+            payload["accent_color"] = self._accent_colour
+
+        return payload
+
+    @property
+    def accent_colour(self) -> Optional[Colour]:
+        """Optional[:class:`Colour`]: Returns the accent colour of the container.
+        An alias exists under ``accent_color``.
+        """
+        return Colour(self._accent_colour) if self._accent_colour is not None else None
+
+    @property
+    def accent_color(self) -> Optional[Colour]:
+        """Optional[:class:`Colour`]: Returns the accent color of the container.
+        An alias exists under ``accent_colour``.
+        """
+        return self.accent_colour
+
+
+# types of components that are allowed in a message's action rows;
+# see also `ActionRowMessageComponent` type alias
+VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES: Final = (
+    Button,
+    StringSelectMenu,
+    UserSelectMenu,
+    RoleSelectMenu,
+    MentionableSelectMenu,
+    ChannelSelectMenu,
+)
+
+
+def _walk_internal(component: Component, seen: Set[Component]) -> Iterator[Component]:
+    if component in seen:
+        # prevent infinite recursion if anyone manages to nest a component in itself
+        return
+    # add current component, while also creating a copy to allow reusing a component multiple times,
+    # as long as it's not within itself
+    seen = {*seen, component}
+
+    yield component
+
+    if isinstance(component, ActionRow):
+        for item in component.children:
+            yield from _walk_internal(item, seen)
+    elif isinstance(component, Section):
+        yield from _walk_internal(component.accessory, seen)
+        for item in component.components:
+            yield from _walk_internal(item, seen)
+    elif isinstance(component, Container):
+        for item in component.components:
+            yield from _walk_internal(item, seen)
+
+
+# yields *all* components recursively
+def _walk_all_components(components: Sequence[Component]) -> Iterator[Component]:
+    seen: Set[Component] = set()
+    for item in components:
+        yield from _walk_internal(item, seen)
+
+
+C = TypeVar("C", bound="Component")
+
+
+COMPONENT_LOOKUP: Mapping[ComponentTypeLiteral, Type[Component]] = {
+    ComponentType.action_row.value: ActionRow,
+    ComponentType.button.value: Button,
+    ComponentType.string_select.value: StringSelectMenu,
+    ComponentType.text_input.value: TextInput,
+    ComponentType.user_select.value: UserSelectMenu,
+    ComponentType.role_select.value: RoleSelectMenu,
+    ComponentType.mentionable_select.value: MentionableSelectMenu,
+    ComponentType.channel_select.value: ChannelSelectMenu,
+    ComponentType.section.value: Section,
+    ComponentType.text_display.value: TextDisplay,
+    ComponentType.thumbnail.value: Thumbnail,
+    ComponentType.media_gallery.value: MediaGallery,
+    ComponentType.file.value: FileComponent,
+    ComponentType.separator.value: Separator,
+    ComponentType.container.value: Container,
+}
+
+
+# NOTE: The type param is purely for type-checking, it has no implications on runtime behavior.
 def _component_factory(data: ComponentPayload, *, type: Type[C] = Component) -> C:
-    # NOTE: due to speed, this method does not use the ComponentType enum
-    #       as this runs every single time a component is received from the api
-    # NOTE: The type param is purely for type-checking, it has no implications on runtime behavior.
     component_type = data["type"]
-    if component_type == 1:
-        return ActionRow(data)  # type: ignore
-    elif component_type == 2:
-        return Button(data)  # type: ignore
-    elif component_type == 3:
-        return StringSelectMenu(data)  # type: ignore
-    elif component_type == 4:
-        return TextInput(data)  # type: ignore
-    elif component_type == 5:
-        return UserSelectMenu(data)  # type: ignore
-    elif component_type == 6:
-        return RoleSelectMenu(data)  # type: ignore
-    elif component_type == 7:
-        return MentionableSelectMenu(data)  # type: ignore
-    elif component_type == 8:
-        return ChannelSelectMenu(data)  # type: ignore
-    else:
-        assert_never(component_type)
+
+    try:
+        component_cls = COMPONENT_LOOKUP[component_type]
+    except KeyError:
+        # if we encounter an unknown component type, just construct a placeholder component for it
         as_enum = try_enum(ComponentType, component_type)
         return Component._raw_construct(type=as_enum)  # type: ignore
+    else:
+        return component_cls(data)  # type: ignore
+
+
+# this is just a rebranded _component_factory, as a workaround to Python not supporting typescript-like mapped types
+if TYPE_CHECKING:
+
+    def _message_component_factory(
+        data: MessageTopLevelComponentPayload,
+    ) -> MessageTopLevelComponent: ...
+
+else:
+    _message_component_factory = _component_factory

@@ -7,7 +7,7 @@ from typing import List, Literal, Optional, TypedDict, Union
 from typing_extensions import NotRequired
 
 from .channel import ChannelType
-from .components import Component
+from .components import MessageTopLevelComponent
 from .embed import Embed
 from .emoji import PartialEmoji
 from .interactions import InteractionDataResolved, InteractionMessageReference, InteractionMetadata
@@ -89,7 +89,7 @@ class ForwardedMessage(TypedDict):
     # is not forwarded in the same guild
     mention_roles: NotRequired[SnowflakeList]
     sticker_items: NotRequired[List[StickerItem]]
-    components: NotRequired[List[Component]]
+    components: NotRequired[List[MessageTopLevelComponent]]
 
 
 class MessageSnapshot(TypedDict):
@@ -138,7 +138,7 @@ class Message(TypedDict):
     interaction: NotRequired[InteractionMessageReference]  # deprecated
     interaction_metadata: NotRequired[InteractionMetadata]
     thread: NotRequired[Thread]
-    components: NotRequired[List[Component]]
+    components: NotRequired[List[MessageTopLevelComponent]]
     sticker_items: NotRequired[List[StickerItem]]
     position: NotRequired[int]
     role_subscription_data: NotRequired[RoleSubscriptionData]

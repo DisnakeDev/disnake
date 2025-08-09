@@ -1,0 +1,84 @@
+# SPDX-License-Identifier: MIT
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, ClassVar, List, Sequence, Tuple, Union
+
+from ..components import Section as SectionComponent
+from ..enums import ComponentType
+from ..utils import SequenceProxy, copy_doc
+from .item import UIComponent, ensure_ui_component
+
+if TYPE_CHECKING:
+    from .button import Button
+    from .text_display import TextDisplay
+    from .thumbnail import Thumbnail
+
+__all__ = ("Section",)
+
+
+class Section(UIComponent):
+    """Represents a UI section.
+
+    .. versionadded:: 2.11
+
+    Parameters
+    ----------
+    *components: :class:`~.ui.TextDisplay`
+        The list of text items in this section.
+    accessory: Union[:class:`~.ui.Thumbnail`, :class:`~.ui.Button`]
+        The accessory component displayed next to the section text.
+    id: :class:`int`
+        The numeric identifier for the component.
+        If left unset (i.e. the default ``0``) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
+    """
+
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
+        "_components",
+        "accessory",
+    )
+
+    # TODO: consider providing sequence operations (append, insert, remove, etc.)
+    def __init__(
+        self,
+        *components: TextDisplay,
+        accessory: Union[Thumbnail, Button[Any]],
+        id: int = 0,
+    ) -> None:
+        self._id: int = id
+        self._components: List[TextDisplay] = [
+            ensure_ui_component(c, "components") for c in components
+        ]
+        self._accessory: Union[Thumbnail, Button[Any]] = ensure_ui_component(accessory, "accessory")
+
+    # these are reimplemented here to store the value in a separate attribute,
+    # since `Section` lazily constructs `_underlying`, unlike most components
+    @property
+    @copy_doc(UIComponent.id)
+    def id(self) -> int:
+        return self._id
+
+    @id.setter
+    def id(self, value: int) -> None:
+        self._id = value
+
+    # TODO: consider moving runtime checks from constructor into property setters, also making these fields writable
+    @property
+    def components(self) -> Sequence[TextDisplay]:
+        """Sequence[:class:`~.ui.TextDisplay`]: A read-only proxy of the text items in this section."""
+        return SequenceProxy(self._components)
+
+    @property
+    def accessory(self) -> Union[Thumbnail, Button[Any]]:
+        """Union[:class:`~.ui.Thumbnail`, :class:`~.ui.Button`]: The accessory component displayed next to the section text."""
+        return self._accessory
+
+    @property
+    def _underlying(self) -> SectionComponent:
+        return SectionComponent._raw_construct(
+            type=ComponentType.section,
+            id=self._id,
+            components=[comp._underlying for comp in self._components],
+            accessory=self._accessory._underlying,
+        )

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Optional, Tuple
+from typing import ClassVar, Optional, Tuple
 
 from ..components import TextInput as TextInputComponent
 from ..enums import ComponentType, TextInputStyle
@@ -37,9 +37,15 @@ class TextInput(WrappedComponent):
         The minimum length of the text input.
     max_length: Optional[:class:`int`]
         The maximum length of the text input.
+    id: :class:`int`
+        The numeric identifier for the component.
+        If left unset (i.e. the default ``0``) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
+
+        .. versionadded:: 2.11
     """
 
-    __repr_attributes__: Tuple[str, ...] = (
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
         "style",
         "label",
         "custom_id",
@@ -49,7 +55,7 @@ class TextInput(WrappedComponent):
         "min_length",
         "max_length",
     )
-    # We have to set this to MISSING in order to overwrite the abstract property from WrappedComponent
+    # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: TextInputComponent = MISSING
 
     def __init__(
@@ -63,9 +69,11 @@ class TextInput(WrappedComponent):
         required: bool = True,
         min_length: Optional[int] = None,
         max_length: Optional[int] = None,
+        id: int = 0,
     ) -> None:
         self._underlying = TextInputComponent._raw_construct(
             type=ComponentType.text_input,
+            id=id,
             style=style,
             label=label,
             custom_id=custom_id,

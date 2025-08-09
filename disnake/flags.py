@@ -601,6 +601,7 @@ class MessageFlags(BaseFlags):
             failed_to_mention_roles_in_thread: bool = ...,
             has_snapshot: bool = ...,
             has_thread: bool = ...,
+            is_components_v2: bool = ...,
             is_crossposted: bool = ...,
             is_voice_message: bool = ...,
             loading: bool = ...,
@@ -700,6 +701,17 @@ class MessageFlags(BaseFlags):
         .. versionadded:: 2.10
         """
         return 1 << 14
+
+    @flag_value
+    def is_components_v2(self):
+        """:class:`bool`: Returns ``True`` if the message uses the Components V2 system.
+
+        Messages with this flag will use specific components for content layout,
+        instead of :attr:`~Message.content` and :attr:`~Message.embeds`.
+
+        .. versionadded:: 2.11
+        """
+        return 1 << 15
 
 
 class PublicUserFlags(BaseFlags):
