@@ -22,7 +22,7 @@ class File(UIComponent):
 
     Parameters
     ----------
-    file: Union[:class:`str`, :class:`.AssetMixin`, :class:`.Attachment`, :class:`.UnfurledMediaItem`]
+    file: Union[:class:`str`, :class:`.Asset`, :class:`.Attachment`, :class:`.UnfurledMediaItem`]
         The file to display. This **only** supports attachment references (i.e.
         using the ``attachment://<filename>`` syntax), not arbitrary URLs.
     spoiler: :class:`bool`
