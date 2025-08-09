@@ -273,6 +273,7 @@ def string_select(
     max_values: int = 1,
     options: SelectOptionInput = ...,
     disabled: bool = False,
+    id: int = 0,
     row: Optional[int] = None,
 ) -> Callable[[ItemCallbackType[V_co, StringSelect[V_co]]], DecoratedItem[StringSelect[V_co]]]: ...
 
@@ -311,12 +312,6 @@ def string_select(
     custom_id: :class:`str`
         The ID of the select menu that gets received during an interaction.
         It is recommended not to set this parameter to prevent conflicts.
-    row: Optional[:class:`int`]
-        The relative row this select menu belongs to. A Discord component can only have 5
-        rows. By default, items are arranged automatically into those 5 rows. If you'd
-        like to control the relative positioning of the row then passing an index is advised.
-        For example, row=1 will show up before row=2. Defaults to ``None``, which is automatic
-        ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     min_values: :class:`int`
         The minimum number of items that must be chosen for this select menu.
         Defaults to 1 and must be between 1 and 25.
@@ -334,6 +329,18 @@ def string_select(
 
     disabled: :class:`bool`
         Whether the select is disabled. Defaults to ``False``.
+    id: :class:`int`
+        The numeric identifier for the component.
+        If left unset (i.e. the default ``0``) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
+
+        .. versionadded:: 2.11
+    row: Optional[:class:`int`]
+        The relative row this select menu belongs to. A Discord component can only have 5
+        rows. By default, items are arranged automatically into those 5 rows. If you'd
+        like to control the relative positioning of the row then passing an index is advised.
+        For example, row=1 will show up before row=2. Defaults to ``None``, which is automatic
+        ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     """
     return _create_decorator(cls, **kwargs)
 

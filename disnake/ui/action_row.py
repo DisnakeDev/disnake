@@ -291,6 +291,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         url: Optional[str] = None,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
         sku_id: Optional[int] = None,
+        id: int = 0,
     ) -> ButtonCompatibleActionRowT:
         """Add a button to the action row. Can only be used if the action
         row holds message components.
@@ -327,6 +328,12 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             Premium buttons additionally cannot have a ``label``, ``url``, or ``emoji``.
 
             .. versionadded:: 2.11
+        id: :class:`int`
+            The numeric identifier for the component.
+            If left unset (i.e. the default ``0``) when sending a component, the API will assign
+            sequential identifiers to the components in the message.
+
+            .. versionadded:: 2.11
 
         Raises
         ------
@@ -336,6 +343,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         self.insert_item(
             len(self) if index is None else index,
             Button(
+                id=id,
                 style=style,
                 label=label,
                 disabled=disabled,
@@ -356,6 +364,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         max_values: int = 1,
         options: SelectOptionInput = MISSING,
         disabled: bool = False,
+        id: int = 0,
     ) -> SelectCompatibleActionRowT:
         """Add a string select menu to the action row. Can only be used if the action
         row holds message components.
@@ -387,6 +396,12 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             as a list of labels, and a dict will be treated as a mapping of labels to values.
         disabled: :class:`bool`
             Whether the select is disabled or not.
+        id: :class:`int`
+            The numeric identifier for the component.
+            If left unset (i.e. the default ``0``) when sending a component, the API will assign
+            sequential identifiers to the components in the message.
+
+            .. versionadded:: 2.11
 
         Raises
         ------
@@ -395,6 +410,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         """
         self.append_item(
             StringSelect(
+                id=id,
                 custom_id=custom_id,
                 placeholder=placeholder,
                 min_values=min_values,
@@ -416,6 +432,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         max_values: int = 1,
         disabled: bool = False,
         default_values: Optional[Sequence[SelectDefaultValueInputType[Union[User, Member]]]] = None,
+        id: int = 0,
     ) -> SelectCompatibleActionRowT:
         """Add a user select menu to the action row. Can only be used if the action
         row holds message components.
@@ -447,6 +464,12 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
             .. versionadded:: 2.10
+        id: :class:`int`
+            The numeric identifier for the component.
+            If left unset (i.e. the default ``0``) when sending a component, the API will assign
+            sequential identifiers to the components in the message.
+
+            .. versionadded:: 2.11
 
         Raises
         ------
@@ -455,6 +478,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         """
         self.append_item(
             UserSelect(
+                id=id,
                 custom_id=custom_id,
                 placeholder=placeholder,
                 min_values=min_values,
@@ -474,6 +498,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         max_values: int = 1,
         disabled: bool = False,
         default_values: Optional[Sequence[SelectDefaultValueInputType[Role]]] = None,
+        id: int = 0,
     ) -> SelectCompatibleActionRowT:
         """Add a role select menu to the action row. Can only be used if the action
         row holds message components.
@@ -505,6 +530,12 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
             .. versionadded:: 2.10
+        id: :class:`int`
+            The numeric identifier for the component.
+            If left unset (i.e. the default ``0``) when sending a component, the API will assign
+            sequential identifiers to the components in the message.
+
+            .. versionadded:: 2.11
 
         Raises
         ------
@@ -513,6 +544,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         """
         self.append_item(
             RoleSelect(
+                id=id,
                 custom_id=custom_id,
                 placeholder=placeholder,
                 min_values=min_values,
@@ -534,6 +566,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         default_values: Optional[
             Sequence[SelectDefaultValueMultiInputType[Union[User, Member, Role]]]
         ] = None,
+        id: int = 0,
     ) -> SelectCompatibleActionRowT:
         """Add a mentionable (user/member/role) select menu to the action row. Can only be used if the action
         row holds message components.
@@ -567,6 +600,12 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             Note that unlike other select menu types, this does not support :class:`.Object`\\s due to ambiguities.
 
             .. versionadded:: 2.10
+        id: :class:`int`
+            The numeric identifier for the component.
+            If left unset (i.e. the default ``0``) when sending a component, the API will assign
+            sequential identifiers to the components in the message.
+
+            .. versionadded:: 2.11
 
         Raises
         ------
@@ -575,6 +614,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         """
         self.append_item(
             MentionableSelect(
+                id=id,
                 custom_id=custom_id,
                 placeholder=placeholder,
                 min_values=min_values,
@@ -595,6 +635,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         disabled: bool = False,
         channel_types: Optional[List[ChannelType]] = None,
         default_values: Optional[Sequence[SelectDefaultValueInputType[AnyChannel]]] = None,
+        id: int = 0,
     ) -> SelectCompatibleActionRowT:
         """Add a channel select menu to the action row. Can only be used if the action
         row holds message components.
@@ -629,6 +670,12 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
             .. versionadded:: 2.10
+        id: :class:`int`
+            The numeric identifier for the component.
+            If left unset (i.e. the default ``0``) when sending a component, the API will assign
+            sequential identifiers to the components in the message.
+
+            .. versionadded:: 2.11
 
         Raises
         ------
@@ -637,6 +684,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         """
         self.append_item(
             ChannelSelect(
+                id=id,
                 custom_id=custom_id,
                 placeholder=placeholder,
                 min_values=min_values,
@@ -659,6 +707,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         required: bool = True,
         min_length: Optional[int] = None,
         max_length: Optional[int] = None,
+        id: int = 0,
     ) -> TextInputCompatibleActionRowT:
         """Add a text input to the action row. Can only be used if the action
         row holds modal components.
@@ -688,6 +737,12 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             The minimum length of the text input.
         max_length: Optional[:class:`int`]
             The maximum length of the text input.
+        id: :class:`int`
+            The numeric identifier for the component.
+            If left unset (i.e. the default ``0``) when sending a component, the API will assign
+            sequential identifiers to the components in the message.
+
+            .. versionadded:: 2.11
 
         Raises
         ------
@@ -696,6 +751,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         """
         self.append_item(
             TextInput(
+                id=id,
                 label=label,
                 custom_id=custom_id,
                 style=style,

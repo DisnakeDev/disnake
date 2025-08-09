@@ -301,6 +301,7 @@ def button(
     disabled: bool = False,
     style: ButtonStyle = ButtonStyle.secondary,
     emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+    id: int = 0,
     row: Optional[int] = None,
 ) -> Callable[[ItemCallbackType[V_co, Button[V_co]]], DecoratedItem[Button[V_co]]]: ...
 
@@ -347,6 +348,12 @@ def button(
     emoji: Optional[Union[:class:`str`, :class:`.Emoji`, :class:`.PartialEmoji`]]
         The emoji of the button. This can be in string form or a :class:`.PartialEmoji`
         or a full :class:`.Emoji`.
+    id: :class:`int`
+        The numeric identifier for the component.
+        If left unset (i.e. the default ``0``) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
+
+        .. versionadded:: 2.11
     row: Optional[:class:`int`]
         The relative row this button belongs to. A Discord component can only have 5
         rows. By default, items are arranged automatically into those 5 rows. If you'd
