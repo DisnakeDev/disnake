@@ -158,7 +158,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             Components can now be either valid in the context of a message, or in the
             context of a modal. Combining components from both contexts is not supported.
     id: :class:`int`
-        The numeric identifier for the component.
+        The numeric identifier for the component. Must be unique within the message.
         If left unset (i.e. the default ``0``) when sending a component, the API will assign
         sequential identifiers to the components in the message.
 

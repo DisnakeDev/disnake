@@ -29,7 +29,7 @@ class Section(UIComponent):
     accessory: Union[:class:`~.ui.Thumbnail`, :class:`~.ui.Button`]
         The accessory component displayed next to the section text.
     id: :class:`int`
-        The numeric identifier for the component.
+        The numeric identifier for the component. Must be unique within the message.
         If left unset (i.e. the default ``0``) when sending a component, the API will assign
         sequential identifiers to the components in the message.
     """

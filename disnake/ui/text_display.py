@@ -23,7 +23,7 @@ class TextDisplay(UIComponent):
     content: :class:`str`
         The text displayed by this component.
     id: :class:`int`
-        The numeric identifier for the component.
+        The numeric identifier for the component. Must be unique within the message.
         If left unset (i.e. the default ``0``) when sending a component, the API will assign
         sequential identifiers to the components in the message.
     """
