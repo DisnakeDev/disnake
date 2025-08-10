@@ -19,11 +19,6 @@ from typing import (
     overload,
 )
 
-from ..asset import AssetMixin
-from ..components import UnfurledMediaItem
-from ..message import Attachment
-from ..utils import assert_never
-
 __all__ = (
     "UIComponent",
     "WrappedComponent",
@@ -41,7 +36,6 @@ if TYPE_CHECKING:
     from ..enums import ComponentType
     from ..interactions import MessageInteraction
     from ..types.components import ActionRowChildComponent as ActionRowChildComponentPayload
-    from ._types import MediaItemInput
     from .view import View
 
     ItemCallbackType = Callable[[V_co, I, MessageInteraction], Coroutine[Any, Any, Any]]
@@ -54,19 +48,6 @@ def ensure_ui_component(obj: UIComponentT, name: str) -> UIComponentT:
     if not isinstance(obj, UIComponent):
         raise TypeError(f"{name} should be a valid UI component, got {type(obj).__name__}.")
     return obj
-
-
-def handle_media_item_input(value: MediaItemInput) -> UnfurledMediaItem:
-    if isinstance(value, UnfurledMediaItem):
-        return value
-    elif isinstance(value, str):
-        return UnfurledMediaItem(value)
-    elif isinstance(value, (AssetMixin, Attachment)):
-        return UnfurledMediaItem(value.url)
-
-    # TODO: raise proper exception (?)
-    assert_never(value)
-    return value
 
 
 class UIComponent(ABC):

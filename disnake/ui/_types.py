@@ -7,9 +7,6 @@ from typing import TYPE_CHECKING, Any, NoReturn, Optional, Sequence, TypeVar, Un
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
-    from ..asset import AssetMixin
-    from ..components import UnfurledMediaItem
-    from ..message import Attachment
     from . import (
         ActionRow,
         Button,
@@ -78,6 +75,3 @@ ComponentInput = Union[
 
 MessageComponents = ComponentInput[ActionRowMessageComponent, MessageTopLevelComponentV2]
 ModalComponents = ComponentInput[ActionRowModalComponent, NoReturn]
-
-
-MediaItemInput = Union[str, "AssetMixin", "Attachment", "UnfurledMediaItem"]

@@ -4,13 +4,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, ClassVar, Tuple
 
-from ..components import FileComponent, UnfurledMediaItem
+from ..components import FileComponent, UnfurledMediaItem, handle_media_item_input
 from ..enums import ComponentType
 from ..utils import MISSING
-from .item import UIComponent, handle_media_item_input
+from .item import UIComponent
 
 if TYPE_CHECKING:
-    from ._types import MediaItemInput
+    from ..components import MediaItemInput
 
 __all__ = ("File",)
 

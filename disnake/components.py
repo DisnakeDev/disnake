@@ -35,12 +35,13 @@ from .enums import (
     try_enum,
 )
 from .partial_emoji import PartialEmoji, _EmojiTag
-from .utils import MISSING, _get_as_snowflake, get_slots
+from .utils import MISSING, _get_as_snowflake, assert_never, get_slots
 
 if TYPE_CHECKING:
     from typing_extensions import Self, TypeAlias
 
     from .emoji import Emoji
+    from .message import Attachment
     from .types.components import (
         ActionRow as ActionRowPayload,
         AnySelectMenu as AnySelectMenuPayload,
@@ -67,6 +68,8 @@ if TYPE_CHECKING:
         UnfurledMediaItem as UnfurledMediaItemPayload,
         UserSelectMenu as UserSelectMenuPayload,
     )
+
+    MediaItemInput = Union[str, "AssetMixin", "Attachment", "UnfurledMediaItem"]
 
 __all__ = (
     "Component",
@@ -1308,6 +1311,23 @@ def _walk_all_components(components: Sequence[Component]) -> Iterator[Component]
     seen: Set[Component] = set()
     for item in components:
         yield from _walk_internal(item, seen)
+
+
+def handle_media_item_input(value: MediaItemInput) -> UnfurledMediaItem:
+    if isinstance(value, UnfurledMediaItem):
+        return value
+    elif isinstance(value, str):
+        return UnfurledMediaItem(value)
+
+    # circular import
+    from .message import Attachment
+
+    if isinstance(value, (AssetMixin, Attachment)):
+        return UnfurledMediaItem(value.url)
+
+    # TODO: raise proper exception (?)
+    assert_never(value)
+    return value
 
 
 C = TypeVar("C", bound="Component")
