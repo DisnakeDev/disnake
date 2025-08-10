@@ -31,7 +31,6 @@ class MediaGallery(UIComponent):
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: MediaGalleryComponent = MISSING
 
-    # FIXME: MediaGalleryItem currently isn't user-instantiable
     def __init__(self, *items: MediaGalleryItem, id: int = 0) -> None:
         self._underlying = MediaGalleryComponent._raw_construct(
             type=ComponentType.media_gallery,

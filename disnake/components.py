@@ -1082,7 +1082,7 @@ class MediaGallery(Component):
         self.type: Literal[ComponentType.media_gallery] = ComponentType.media_gallery
         self.id = data.get("id", 0)
 
-        self.items: List[MediaGalleryItem] = [MediaGalleryItem(i) for i in data["items"]]
+        self.items: List[MediaGalleryItem] = [MediaGalleryItem.from_dict(i) for i in data["items"]]
 
     def to_dict(self) -> MediaGalleryComponentPayload:
         return {
@@ -1093,7 +1093,20 @@ class MediaGallery(Component):
 
 
 class MediaGalleryItem:
-    """TODO"""
+    """Represents an item inside a :class:`MediaGallery`.
+
+    .. versionadded:: 2.11
+
+    Parameters
+    ----------
+    media: Union[:class:`str`, :class:`.Asset`, :class:`.Attachment`, :class:`.UnfurledMediaItem`]
+        The media item to display. Can be an arbitrary URL or attachment
+        reference (``attachment://<filename>``).
+    description: Optional[:class:`str`]
+        The item's description ("alt text"), if any.
+    spoiler: :class:`bool`
+        Whether the item is marked as a spoiler. Defaults to ``False``.
+    """
 
     __slots__: Tuple[str, ...] = (
         "media",
@@ -1101,11 +1114,25 @@ class MediaGalleryItem:
         "spoiler",
     )
 
-    # XXX: should this be user-instantiable?
-    def __init__(self, data: MediaGalleryItemPayload) -> None:
-        self.media: UnfurledMediaItem = UnfurledMediaItem.from_dict(data["media"])
-        self.description: Optional[str] = data.get("description")
-        self.spoiler: bool = data.get("spoiler", False)
+    def __init__(
+        self,
+        media: MediaItemInput,
+        description: Optional[str] = None,
+        *,
+        spoiler: bool = False,
+    ) -> None:
+        self.media: UnfurledMediaItem = handle_media_item_input(media)
+        self.description: Optional[str] = description
+        self.spoiler: bool = spoiler
+
+    # FIXME: when deserializing, try to attach _state for `self.media` as well
+    @classmethod
+    def from_dict(cls, data: MediaGalleryItemPayload) -> Self:
+        return cls(
+            media=UnfurledMediaItem.from_dict(data["media"]),
+            description=data.get("description"),
+            spoiler=data.get("spoiler", False),
+        )
 
     def to_dict(self) -> MediaGalleryItemPayload:
         payload: MediaGalleryItemPayload = {
@@ -1122,7 +1149,6 @@ class MediaGalleryItem:
         return f"<MediaGalleryItem media={self.media!r} description={self.description!r}>"
 
 
-# TODO: temporary(?) name to avoid shadowing `disnake.file.File`
 class FileComponent(Component):
     """Represents a file component from the Discord Bot UI Kit (v2).
 
