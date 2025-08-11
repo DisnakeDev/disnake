@@ -1351,9 +1351,8 @@ def handle_media_item_input(value: MediaItemInput) -> UnfurledMediaItem:
     if isinstance(value, (AssetMixin, Attachment)):
         return UnfurledMediaItem(value.url)
 
-    # TODO: raise proper exception (?)
     assert_never(value)
-    return value
+    raise TypeError(f"{type(value).__name__} cannot be converted to UnfurledMediaItem")
 
 
 C = TypeVar("C", bound="Component")
