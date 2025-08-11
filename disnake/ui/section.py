@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar, List, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, Any, ClassVar, List, Tuple, Union
 
 from ..components import Section as SectionComponent
 from ..enums import ComponentType
-from ..utils import SequenceProxy, copy_doc
+from ..utils import copy_doc
 from .item import UIComponent, ensure_ui_component
 
 if TYPE_CHECKING:
@@ -25,17 +25,24 @@ class Section(UIComponent):
     Parameters
     ----------
     *components: :class:`~.ui.TextDisplay`
-        The list of text items in this section.
+        The text items in this section.
     accessory: Union[:class:`~.ui.Thumbnail`, :class:`~.ui.Button`]
         The accessory component displayed next to the section text.
     id: :class:`int`
         The numeric identifier for the component. Must be unique within the message.
         If set to ``0`` (the default) when sending a component, the API will assign
         sequential identifiers to the components in the message.
+
+    Attributes
+    ----------
+    components: List[:class:`~.ui.TextDisplay`]
+        The list of text items in this section.
+    accessory: Union[:class:`~.ui.Thumbnail`, :class:`~.ui.Button`]
+        The accessory component displayed next to the section text.
     """
 
     __repr_attributes__: ClassVar[Tuple[str, ...]] = (
-        "_components",
+        "components",
         "accessory",
     )
 
@@ -47,10 +54,12 @@ class Section(UIComponent):
         id: int = 0,
     ) -> None:
         self._id: int = id
-        self._components: List[TextDisplay] = [
+        # this list can be modified without any runtime checks later on,
+        # just assume the user knows what they're doing at that point
+        self.components: List[TextDisplay] = [
             ensure_ui_component(c, "components") for c in components
         ]
-        self._accessory: Union[Thumbnail, Button[Any]] = ensure_ui_component(accessory, "accessory")
+        self.accessory: Union[Thumbnail, Button[Any]] = ensure_ui_component(accessory, "accessory")
 
     # these are reimplemented here to store the value in a separate attribute,
     # since `Section` lazily constructs `_underlying`, unlike most components
@@ -63,22 +72,11 @@ class Section(UIComponent):
     def id(self, value: int) -> None:
         self._id = value
 
-    # TODO: consider moving runtime checks from constructor into property setters, also making these fields writable
-    @property
-    def components(self) -> Sequence[TextDisplay]:
-        """Sequence[:class:`~.ui.TextDisplay`]: A read-only proxy of the text items in this section."""
-        return SequenceProxy(self._components)
-
-    @property
-    def accessory(self) -> Union[Thumbnail, Button[Any]]:
-        """Union[:class:`~.ui.Thumbnail`, :class:`~.ui.Button`]: The accessory component displayed next to the section text."""
-        return self._accessory
-
     @property
     def _underlying(self) -> SectionComponent:
         return SectionComponent._raw_construct(
             type=ComponentType.section,
             id=self._id,
-            components=[comp._underlying for comp in self._components],
-            accessory=self._accessory._underlying,
+            components=[comp._underlying for comp in self.components],
+            accessory=self.accessory._underlying,
         )

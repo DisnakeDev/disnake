@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, List, Optional, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, ClassVar, List, Optional, Tuple, Union
 
 from ..colour import Colour
 from ..components import Container as ContainerComponent
 from ..enums import ComponentType
-from ..utils import SequenceProxy, copy_doc
+from ..utils import copy_doc
 from .item import UIComponent, ensure_ui_component
 
 if TYPE_CHECKING:
@@ -52,6 +52,8 @@ class Container(UIComponent):
 
     Attributes
     ----------
+    components: List[Union[:class:`~.ui.ActionRow`, :class:`~.ui.Section`, :class:`~.ui.TextDisplay`, :class:`~.ui.MediaGallery`, :class:`~.ui.File`, :class:`~.ui.Separator`]]
+        The list of components in this container.
     accent_colour: Optional[:class:`.Colour`]
         The accent colour of the container.
     spoiler: :class:`bool`
@@ -59,7 +61,7 @@ class Container(UIComponent):
     """
 
     __repr_attributes__: ClassVar[Tuple[str, ...]] = (
-        "_components",
+        "components",
         "accent_colour",
         "spoiler",
     )
@@ -73,7 +75,9 @@ class Container(UIComponent):
         id: int = 0,
     ) -> None:
         self._id: int = id
-        self._components: List[ContainerChildUIComponent] = [
+        # this list can be modified without any runtime checks later on,
+        # just assume the user knows what they're doing at that point
+        self.components: List[ContainerChildUIComponent] = [
             ensure_ui_component(c, "components") for c in components
         ]
         # FIXME: add accent_color
@@ -91,18 +95,12 @@ class Container(UIComponent):
     def id(self, value: int) -> None:
         self._id = value
 
-    # TODO: consider moving runtime checks from constructor into property setters, also making these fields writable
-    @property
-    def components(self) -> Sequence[ContainerChildUIComponent]:
-        """Sequence[Union[:class:`~.ui.ActionRow`, :class:`~.ui.Section`, :class:`~.ui.TextDisplay`, :class:`~.ui.MediaGallery`, :class:`~.ui.File`, :class:`~.ui.Separator`]]: A read-only proxy of the components in this container."""
-        return SequenceProxy(self._components)
-
     @property
     def _underlying(self) -> ContainerComponent:
         return ContainerComponent._raw_construct(
             type=ComponentType.container,
             id=self._id,
-            components=[comp._underlying for comp in self._components],
+            components=[comp._underlying for comp in self.components],
             _accent_colour=self.accent_colour.value if self.accent_colour is not None else None,
             spoiler=self.spoiler,
         )
