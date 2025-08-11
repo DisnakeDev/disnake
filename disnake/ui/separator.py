@@ -23,7 +23,7 @@ class Separator(UIComponent):
         Whether the separator should be visible, instead of just being vertical padding/spacing.
         Defaults to ``True``.
     spacing: :class:`.SeparatorSpacingSize`
-        The size of the separator.
+        The size of the separator padding.
         Defaults to :attr:`~.SeparatorSpacingSize.small`.
     id: :class:`int`
         The numeric identifier for the component. Must be unique within the message.

@@ -1205,7 +1205,7 @@ class Separator(Component):
         Whether the separator should be visible, instead of just being vertical padding/spacing.
         Defaults to ``True``.
     spacing: :class:`SeparatorSpacingSize`
-        The size of the separator.
+        The size of the separator padding.
     """
 
     __slots__: Tuple[str, ...] = ("divider", "spacing")
@@ -1217,7 +1217,6 @@ class Separator(Component):
         self.id = data.get("id", 0)
 
         self.divider: bool = data.get("divider", True)
-        # TODO: `size` instead of `spacing`?
         self.spacing: SeparatorSpacingSize = try_enum(SeparatorSpacingSize, data.get("spacing", 1))
 
     def to_dict(self) -> SeparatorComponentPayload:
