@@ -22,8 +22,6 @@ if TYPE_CHECKING:
     from .select import ChannelSelect, MentionableSelect, RoleSelect, StringSelect, UserSelect
     from .view import View
 
-# TODO: consider if there are any useful types to make public (e.g. disnake-compass used MessageUIComponent)
-
 V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
 
 AnySelect = Union[

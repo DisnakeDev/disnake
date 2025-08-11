@@ -206,7 +206,7 @@ class TestActionRow:
         assert_type(ActionRow(button1, select), ActionRow[ActionRowMessageComponent])
         assert_type(ActionRow(select, button1), ActionRow[ActionRowMessageComponent])
 
-        # TODO: no longer works since the overload changed for normalize_components. may revisit this.
+        # FIXME: no longer works since the overload changed for normalize_components. may revisit this.
         # # these should fail to type-check - if they pass, there will be an error
         # # because of the unnecessary ignore comment
         # ActionRow(button1, text_input)
