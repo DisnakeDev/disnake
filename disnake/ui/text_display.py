@@ -36,7 +36,7 @@ class TextDisplay(UIComponent):
         self._underlying = TextDisplayComponent._raw_construct(
             type=ComponentType.text_display,
             id=id,
-            content=content,
+            content=str(content),
         )
 
     @property
@@ -46,5 +46,4 @@ class TextDisplay(UIComponent):
 
     @content.setter
     def content(self, value: str) -> None:
-        # TODO: consider str cast?
-        self._underlying.content = value
+        self._underlying.content = str(value)
