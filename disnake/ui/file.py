@@ -10,7 +10,7 @@ from ..utils import MISSING
 from .item import UIComponent
 
 if TYPE_CHECKING:
-    from ..components import MediaItemInput
+    from ..components import LocalMediaItemInput
 
 __all__ = ("File",)
 
@@ -22,7 +22,7 @@ class File(UIComponent):
 
     Parameters
     ----------
-    file: Union[:class:`str`, :class:`.Asset`, :class:`.Attachment`, :class:`.UnfurledMediaItem`]
+    file: Union[:class:`str`, :class:`.UnfurledMediaItem`]
         The file to display. This **only** supports attachment references (i.e.
         using the ``attachment://<filename>`` syntax), not arbitrary URLs.
     spoiler: :class:`bool`
@@ -42,15 +42,19 @@ class File(UIComponent):
 
     def __init__(
         self,
-        file: MediaItemInput,
+        file: LocalMediaItemInput,
         *,
         spoiler: bool = False,
         id: int = 0,
     ) -> None:
+        file_media = handle_media_item_input(file)
+        if not file_media.url.startswith("attachment://"):
+            raise ValueError("File component does not support external media URLs")
+
         self._underlying = FileComponent._raw_construct(
             type=ComponentType.file,
             id=id,
-            file=handle_media_item_input(file),
+            file=file_media,
             spoiler=spoiler,
         )
 
@@ -60,8 +64,11 @@ class File(UIComponent):
         return self._underlying.file
 
     @file.setter
-    def file(self, value: MediaItemInput) -> None:
-        self._underlying.file = handle_media_item_input(value)
+    def file(self, value: LocalMediaItemInput) -> None:
+        file_media = handle_media_item_input(value)
+        if not file_media.url.startswith("attachment://"):
+            raise ValueError("File component does not support external media URLs")
+        self._underlying.file = handle_media_item_input(file_media)
 
     @property
     def spoiler(self) -> bool:

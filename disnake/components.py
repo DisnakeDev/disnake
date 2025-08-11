@@ -69,7 +69,8 @@ if TYPE_CHECKING:
         UserSelectMenu as UserSelectMenuPayload,
     )
 
-    MediaItemInput = Union[str, "AssetMixin", "Attachment", "UnfurledMediaItem"]
+    LocalMediaItemInput = Union[str, "UnfurledMediaItem"]
+    MediaItemInput = Union[LocalMediaItemInput, "AssetMixin", "Attachment"]
 
 __all__ = (
     "Component",
