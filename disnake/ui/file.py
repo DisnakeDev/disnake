@@ -68,7 +68,7 @@ class File(UIComponent):
         file_media = handle_media_item_input(value)
         if not file_media.url.startswith("attachment://"):
             raise ValueError("File component does not support external media URLs")
-        self._underlying.file = handle_media_item_input(file_media)
+        self._underlying.file = file_media
 
     @property
     def spoiler(self) -> bool:
