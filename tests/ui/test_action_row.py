@@ -10,6 +10,7 @@ import disnake
 from disnake.ui import (
     ActionRow,
     Button,
+    Separator,
     StringSelect,
     TextInput,
     WrappedComponent,
@@ -22,6 +23,7 @@ button2 = Button()
 button3 = Button()
 select = StringSelect()
 text_input = TextInput(label="a", custom_id="b")
+separator = Separator()
 
 
 class TestActionRow:
@@ -217,9 +219,6 @@ class TestActionRow:
         assert_type(ActionRow(text_input, select), ActionRow[ActionRowModalComponent])  # type: ignore
 
 
-# TODO: expand tests to cover v2 components
-
-
 @pytest.mark.parametrize(
     ("value", "expected"),
     [
@@ -243,10 +242,32 @@ class TestActionRow:
         ([select, button1, button2], [[select], [button1, button2]]),
     ],
 )
-def test_normalize_components(value, expected) -> None:
+def test_normalize_components__actionrow(value, expected) -> None:
     rows = normalize_components(value)
     assert all(isinstance(row, ActionRow) for row in rows)
     assert [list(row.children) for row in rows] == expected
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        # simple cases
+        ([separator], [separator]),
+        ([separator, ActionRow(button1)], [separator, [button1]]),
+        ([ActionRow(button1), separator], [[button1], separator]),
+        ([separator, ActionRow(button1), separator], [separator, [button1], separator]),
+        # flat list
+        ([button1, separator], [[button1], separator]),
+        ([separator, button1], [separator, [button1]]),
+        (
+            [separator, button1, button2, separator, button3],
+            [separator, [button1, button2], separator, [button3]],
+        ),
+    ],
+)
+def test_normalize_components__v2(value, expected) -> None:
+    result = normalize_components(value)
+    assert [(list(c.children) if isinstance(c, ActionRow) else c) for c in result] == expected
 
 
 def test_normalize_components__invalid() -> None:

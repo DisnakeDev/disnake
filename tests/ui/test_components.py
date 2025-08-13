@@ -26,7 +26,7 @@ all_ui_component_objects: List[ui.UIComponent] = [
     ui.TextDisplay(""),
     ui.Thumbnail(""),
     ui.MediaGallery(),
-    ui.File(""),
+    ui.File("attachment://x"),
     ui.Separator(),
     ui.Container(),
 ]
