@@ -211,6 +211,8 @@ class FileComponent(_BaseComponent):
     type: Literal[13]
     file: UnfurledMediaItem  # only supports `attachment://` urls
     spoiler: NotRequired[bool]
+    name: NotRequired[str]  # only provided by api
+    size: NotRequired[int]  # only provided by api
 
 
 class SeparatorComponent(_BaseComponent):

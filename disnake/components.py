@@ -1171,9 +1171,15 @@ class FileComponent(Component):
         using the ``attachment://<filename>`` syntax), not arbitrary URLs.
     spoiler: :class:`bool`
         Whether the file is marked as a spoiler. Defaults to ``False``.
+    name: Optional[:class:`str`]
+        The name of the file.
+        This is available in objects from the API, and ignored when sending.
+    size: Optional[:class:`int`]
+        The size of the file.
+        This is available in objects from the API, and ignored when sending.
     """
 
-    __slots__: Tuple[str, ...] = ("file", "spoiler")
+    __slots__: Tuple[str, ...] = ("file", "spoiler", "name", "size")
 
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
 
@@ -1183,6 +1189,9 @@ class FileComponent(Component):
 
         self.file: UnfurledMediaItem = UnfurledMediaItem.from_dict(data["file"])
         self.spoiler: bool = data.get("spoiler", False)
+
+        self.name: Optional[str] = data.get("name")
+        self.size: Optional[int] = data.get("size")
 
     def to_dict(self) -> FileComponentPayload:
         return {
