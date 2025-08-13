@@ -1022,8 +1022,9 @@ class Thumbnail(Component):
 
     Attributes
     ----------
-    media: Any
-        n/a
+    media: :class:`UnfurledMediaItem`
+        The media item to display. Can be an arbitrary URL or attachment
+        reference (``attachment://<filename>``).
     description: Optional[:class:`str`]
         The thumbnail's description ("alt text"), if any.
     spoiler: :class:`bool`
@@ -1165,8 +1166,9 @@ class FileComponent(Component):
 
     Attributes
     ----------
-    file: Any
-        n/a
+    file: :class:`UnfurledMediaItem`
+        The file to display. This **only** supports attachment references (i.e.
+        using the ``attachment://<filename>`` syntax), not arbitrary URLs.
     spoiler: :class:`bool`
         Whether the file is marked as a spoiler. Defaults to ``False``.
     """
