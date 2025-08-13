@@ -69,9 +69,6 @@ if TYPE_CHECKING:
         UserSelectMenu as UserSelectMenuPayload,
     )
 
-    LocalMediaItemInput = Union[str, "UnfurledMediaItem"]
-    MediaItemInput = Union[LocalMediaItemInput, "AssetMixin", "Attachment"]
-
 __all__ = (
     "Component",
     "ActionRow",
@@ -96,6 +93,11 @@ __all__ = (
     "Separator",
     "Container",
 )
+
+# miscellaneous components-related type aliases
+
+LocalMediaItemInput = Union[str, "UnfurledMediaItem"]
+MediaItemInput = Union[LocalMediaItemInput, "AssetMixin", "Attachment"]
 
 AnySelectMenu = Union[
     "StringSelectMenu",
