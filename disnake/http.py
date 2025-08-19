@@ -438,10 +438,7 @@ class HTTPClient:
             raise RuntimeError("Unreachable code in HTTP handling")
 
     async def get_from_cdn(self, url: str) -> bytes:
-        # `encoded=True` to prevent aiohttp from canonicalizing URLs and unescaping characters,
-        # which can break some urls (e.g. signed image proxy urls in components)
-        # https://github.com/aio-libs/aiohttp/issues/7393
-        async with self.__session.get(yarl.URL(url, encoded=True)) as resp:
+        async with self.__session.get(url) as resp:
             if resp.status == 200:
                 return await resp.read()
             elif resp.status == 404:

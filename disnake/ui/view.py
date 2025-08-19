@@ -562,11 +562,7 @@ class ViewStore:
         view = self._synced_message_views[message_id]
 
         rows = [
-            _component_factory(
-                d,
-                state=self._state,
-                type=ActionRowComponent[ActionRowMessageComponent],
-            )
+            _component_factory(d, type=ActionRowComponent[ActionRowMessageComponent])
             for d in components
         ]
         for row in rows:
