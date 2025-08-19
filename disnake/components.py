@@ -39,6 +39,7 @@ if TYPE_CHECKING:
 
     from .emoji import Emoji
     from .message import Attachment
+    from .state import ConnectionState
     from .types.components import (
         ActionRow as ActionRowPayload,
         AnySelectMenu as AnySelectMenuPayload,
@@ -229,11 +230,11 @@ class ActionRow(Component, Generic[ActionRowChildComponentT]):
 
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
 
-    def __init__(self, data: ActionRowPayload) -> None:
+    def __init__(self, data: ActionRowPayload, *, state: Optional[ConnectionState] = None) -> None:
         self.type: Literal[ComponentType.action_row] = ComponentType.action_row
         self.id = data.get("id", 0)
 
-        children = [_component_factory(d) for d in data.get("components", [])]
+        children = [_component_factory(d, state=state) for d in data.get("components", [])]
         self.children: List[ActionRowChildComponentT] = children  # type: ignore
 
     def to_dict(self) -> ActionRowPayload:
@@ -290,7 +291,9 @@ class Button(Component):
 
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
 
-    def __init__(self, data: ButtonComponentPayload) -> None:
+    def __init__(
+        self, data: ButtonComponentPayload, *, state: Optional[ConnectionState] = None
+    ) -> None:
         self.type: Literal[ComponentType.button] = ComponentType.button
         self.id = data.get("id", 0)
 
@@ -302,6 +305,7 @@ class Button(Component):
         self.emoji: Optional[PartialEmoji]
         try:
             self.emoji = PartialEmoji.from_dict(data["emoji"])
+            self.emoji._state = state
         except KeyError:
             self.emoji = None
 
@@ -388,7 +392,9 @@ class BaseSelectMenu(Component):
     # n.b: ideally this would be `BaseSelectMenuPayload`,
     # but pyright made TypedDict keys invariant and doesn't
     # fully support readonly items yet (which would help avoid this)
-    def __init__(self, data: AnySelectMenuPayload) -> None:
+    def __init__(
+        self, data: AnySelectMenuPayload, *, state: Optional[ConnectionState] = None
+    ) -> None:
         component_type = try_enum(ComponentType, data["type"])
         self.type: SelectMenuType = component_type  # type: ignore
         self.id = data.get("id", 0)
@@ -456,8 +462,10 @@ class StringSelectMenu(BaseSelectMenu):
     __repr_info__: ClassVar[Tuple[str, ...]] = BaseSelectMenu.__repr_info__ + __slots__
     type: Literal[ComponentType.string_select]
 
-    def __init__(self, data: StringSelectMenuPayload) -> None:
-        super().__init__(data)
+    def __init__(
+        self, data: StringSelectMenuPayload, *, state: Optional[ConnectionState] = None
+    ) -> None:
+        super().__init__(data, state=state)
         self.options: List[SelectOption] = [
             SelectOption.from_dict(option) for option in data.get("options", [])
         ]
@@ -629,8 +637,10 @@ class ChannelSelectMenu(BaseSelectMenu):
     __repr_info__: ClassVar[Tuple[str, ...]] = BaseSelectMenu.__repr_info__ + __slots__
     type: Literal[ComponentType.channel_select]
 
-    def __init__(self, data: ChannelSelectMenuPayload) -> None:
-        super().__init__(data)
+    def __init__(
+        self, data: ChannelSelectMenuPayload, *, state: Optional[ConnectionState] = None
+    ) -> None:
+        super().__init__(data, state=state)
         # on the API side, an empty list is (currently) equivalent to no value
         channel_types = data.get("channel_types")
         self.channel_types: Optional[List[ChannelType]] = (
@@ -829,7 +839,7 @@ class TextInput(Component):
 
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
 
-    def __init__(self, data: TextInputPayload) -> None:
+    def __init__(self, data: TextInputPayload, *, state: Optional[ConnectionState] = None) -> None:
         self.type: Literal[ComponentType.text_input] = ComponentType.text_input
         self.id = data.get("id", 0)
 
@@ -892,15 +902,18 @@ class Section(Component):
 
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
 
-    def __init__(self, data: SectionComponentPayload) -> None:
+    def __init__(
+        self, data: SectionComponentPayload, *, state: Optional[ConnectionState] = None
+    ) -> None:
         self.type: Literal[ComponentType.section] = ComponentType.section
         self.id = data.get("id", 0)
 
-        accessory = _component_factory(data["accessory"])
+        accessory = _component_factory(data["accessory"], state=state)
         self.accessory: SectionAccessoryComponent = accessory  # type: ignore
 
         self.components: List[SectionChildComponent] = [
-            _component_factory(d, type=SectionChildComponent) for d in data.get("components", [])
+            _component_factory(d, state=state, type=SectionChildComponent)
+            for d in data.get("components", [])
         ]
 
     def to_dict(self) -> SectionComponentPayload:
@@ -931,7 +944,9 @@ class TextDisplay(Component):
 
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
 
-    def __init__(self, data: TextDisplayComponentPayload) -> None:
+    def __init__(
+        self, data: TextDisplayComponentPayload, *, state: Optional[ConnectionState] = None
+    ) -> None:
         self.type: Literal[ComponentType.text_display] = ComponentType.text_display
         self.id = data.get("id", 0)
 
@@ -987,15 +1002,16 @@ class UnfurledMediaItem(AssetMixin):
         self.content_type: Optional[str] = None
         self.attachment_id: Optional[int] = None
 
-    # FIXME: when deserializing, try to attach _state for AssetMixin as well
     @classmethod
-    def from_dict(cls, data: UnfurledMediaItemPayload) -> Self:
+    def from_dict(cls, data: UnfurledMediaItemPayload, *, state: Optional[ConnectionState]) -> Self:
         self = cls(data["url"])
         self.proxy_url = data.get("proxy_url")
         self.height = _get_as_snowflake(data, "height")
         self.width = _get_as_snowflake(data, "width")
         self.content_type = data.get("content_type")
         self.attachment_id = _get_as_snowflake(data, "attachment_id")
+        # this may be missing, and is provided on a best-effort basis
+        self._state = state
         return self
 
     def to_dict(self) -> UnfurledMediaItemPayload:
@@ -1036,11 +1052,13 @@ class Thumbnail(Component):
 
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
 
-    def __init__(self, data: ThumbnailComponentPayload) -> None:
+    def __init__(
+        self, data: ThumbnailComponentPayload, *, state: Optional[ConnectionState] = None
+    ) -> None:
         self.type: Literal[ComponentType.thumbnail] = ComponentType.thumbnail
         self.id = data.get("id", 0)
 
-        self.media: UnfurledMediaItem = UnfurledMediaItem.from_dict(data["media"])
+        self.media: UnfurledMediaItem = UnfurledMediaItem.from_dict(data["media"], state=state)
         self.description: Optional[str] = data.get("description")
         self.spoiler: bool = data.get("spoiler", False)
 
@@ -1079,11 +1097,15 @@ class MediaGallery(Component):
 
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
 
-    def __init__(self, data: MediaGalleryComponentPayload) -> None:
+    def __init__(
+        self, data: MediaGalleryComponentPayload, *, state: Optional[ConnectionState] = None
+    ) -> None:
         self.type: Literal[ComponentType.media_gallery] = ComponentType.media_gallery
         self.id = data.get("id", 0)
 
-        self.items: List[MediaGalleryItem] = [MediaGalleryItem.from_dict(i) for i in data["items"]]
+        self.items: List[MediaGalleryItem] = [
+            MediaGalleryItem.from_dict(i, state=state) for i in data["items"]
+        ]
 
     def to_dict(self) -> MediaGalleryComponentPayload:
         return {
@@ -1126,11 +1148,10 @@ class MediaGalleryItem:
         self.description: Optional[str] = description
         self.spoiler: bool = spoiler
 
-    # FIXME: when deserializing, try to attach _state for `self.media` as well
     @classmethod
-    def from_dict(cls, data: MediaGalleryItemPayload) -> Self:
+    def from_dict(cls, data: MediaGalleryItemPayload, *, state: Optional[ConnectionState]) -> Self:
         return cls(
-            media=UnfurledMediaItem.from_dict(data["media"]),
+            media=UnfurledMediaItem.from_dict(data["media"], state=state),
             description=data.get("description"),
             spoiler=data.get("spoiler", False),
         )
@@ -1180,11 +1201,13 @@ class FileComponent(Component):
 
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
 
-    def __init__(self, data: FileComponentPayload) -> None:
+    def __init__(
+        self, data: FileComponentPayload, *, state: Optional[ConnectionState] = None
+    ) -> None:
         self.type: Literal[ComponentType.file] = ComponentType.file
         self.id = data.get("id", 0)
 
-        self.file: UnfurledMediaItem = UnfurledMediaItem.from_dict(data["file"])
+        self.file: UnfurledMediaItem = UnfurledMediaItem.from_dict(data["file"], state=state)
         self.spoiler: bool = data.get("spoiler", False)
 
         self.name: Optional[str] = data.get("name")
@@ -1223,7 +1246,9 @@ class Separator(Component):
 
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
 
-    def __init__(self, data: SeparatorComponentPayload) -> None:
+    def __init__(
+        self, data: SeparatorComponentPayload, *, state: Optional[ConnectionState] = None
+    ) -> None:
         self.type: Literal[ComponentType.separator] = ComponentType.separator
         self.id = data.get("id", 0)
 
@@ -1270,14 +1295,16 @@ class Container(Component):
         "components",
     )
 
-    def __init__(self, data: ContainerComponentPayload) -> None:
+    def __init__(
+        self, data: ContainerComponentPayload, *, state: Optional[ConnectionState] = None
+    ) -> None:
         self.type: Literal[ComponentType.container] = ComponentType.container
         self.id = data.get("id", 0)
 
         self._accent_colour: Optional[int] = data.get("accent_color")
         self.spoiler: bool = data.get("spoiler", False)
 
-        components = [_component_factory(d) for d in data.get("components", [])]
+        components = [_component_factory(d, state=state) for d in data.get("components", [])]
         self.components: List[ContainerChildComponent] = components  # type: ignore
 
     def to_dict(self) -> ContainerComponentPayload:
@@ -1359,7 +1386,12 @@ COMPONENT_LOOKUP: Mapping[ComponentTypeLiteral, Type[Component]] = {
 
 
 # NOTE: The type param is purely for type-checking, it has no implications on runtime behavior.
-def _component_factory(data: ComponentPayload, *, type: Type[C] = Component) -> C:
+def _component_factory(
+    data: ComponentPayload,
+    *,
+    state: Optional[ConnectionState],
+    type: Type[C] = Component,
+) -> C:
     component_type = data["type"]
 
     try:
@@ -1369,7 +1401,7 @@ def _component_factory(data: ComponentPayload, *, type: Type[C] = Component) -> 
         as_enum = try_enum(ComponentType, component_type)
         return Component._raw_construct(type=as_enum)  # type: ignore
     else:
-        return component_cls(data)  # type: ignore
+        return component_cls(data, state=state)  # type: ignore
 
 
 # this is just a rebranded _component_factory, as a workaround to Python not supporting typescript-like mapped types
@@ -1377,6 +1409,8 @@ if TYPE_CHECKING:
 
     def _message_component_factory(
         data: MessageTopLevelComponentPayload,
+        *,
+        state: Optional[ConnectionState],
     ) -> MessageTopLevelComponent: ...
 
 else:

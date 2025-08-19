@@ -1192,7 +1192,7 @@ class Message(Hashable):
             StickerItem(data=d, state=state) for d in data.get("sticker_items", [])
         ]
         self.components: List[MessageTopLevelComponent] = [
-            _message_component_factory(d) for d in data.get("components", [])
+            _message_component_factory(d, state=state) for d in data.get("components", [])
         ]
 
         self.poll: Optional[Poll] = None
@@ -1439,7 +1439,7 @@ class Message(Hashable):
                     self.role_mentions.append(role)
 
     def _handle_components(self, components: List[MessageTopLevelComponentPayload]) -> None:
-        self.components = [_message_component_factory(d) for d in components]
+        self.components = [_message_component_factory(d, state=self._state) for d in components]
 
     def _rebind_cached_references(self, new_guild: Guild, new_channel: GuildMessageable) -> None:
         self.guild = new_guild
@@ -2933,7 +2933,7 @@ class ForwardedMessage:
             StickerItem(data=d, state=state) for d in data.get("sticker_items", [])
         ]
         self.components: List[MessageTopLevelComponent] = [
-            _message_component_factory(d) for d in data.get("components", [])
+            _message_component_factory(d, state=state) for d in data.get("components", [])
         ]
         self.guild_id = guild_id
 
