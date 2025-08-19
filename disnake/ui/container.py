@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, ClassVar, List, Optional, Tuple, Union, cast
 
 from ..colour import Colour
 from ..components import Container as ContainerComponent
@@ -11,6 +11,8 @@ from ..utils import copy_doc
 from .item import UIComponent, ensure_ui_component
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from .action_row import ActionRow, ActionRowMessageComponent
     from .file import File
     from .media_gallery import MediaGallery
@@ -103,4 +105,18 @@ class Container(UIComponent):
             components=[comp._underlying for comp in self.components],
             _accent_colour=self.accent_colour.value if self.accent_colour is not None else None,
             spoiler=self.spoiler,
+        )
+
+    @classmethod
+    def from_component(cls, container: ContainerComponent) -> Self:
+        from .action_row import _to_ui_component
+
+        return cls(
+            *cast(
+                "List[ContainerChildUIComponent]",
+                [_to_ui_component(c) for c in container.components],
+            ),
+            accent_colour=container.accent_colour,
+            spoiler=container.spoiler,
+            id=container.id,
         )

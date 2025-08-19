@@ -103,6 +103,10 @@ class UIComponent(ABC):
     def to_component_dict(self) -> Dict[str, Any]:
         return self._underlying.to_dict()
 
+    @classmethod
+    def from_component(cls, component: Component, /) -> Self:
+        return cls()
+
 
 # Essentially the same as the base `UIComponent`, with the addition of `width`.
 class WrappedComponent(UIComponent):
@@ -122,13 +126,13 @@ class WrappedComponent(UIComponent):
     """
 
     # the purpose of these two is just more precise typechecking compared to the base type
+    if TYPE_CHECKING:
 
-    @property
-    @abstractmethod
-    def _underlying(self) -> ActionRowChildComponent: ...
+        @property
+        @abstractmethod
+        def _underlying(self) -> ActionRowChildComponent: ...
 
-    def to_component_dict(self) -> ActionRowChildComponentPayload:
-        return self._underlying.to_dict()
+        def to_component_dict(self) -> ActionRowChildComponentPayload: ...
 
     @property
     @abstractmethod
@@ -174,10 +178,6 @@ class Item(WrappedComponent, Generic[V_co]):
 
     def refresh_state(self, interaction: MessageInteraction) -> None:
         return None
-
-    @classmethod
-    def from_component(cls, component: ActionRowChildComponent) -> Self:
-        return cls()
 
     def is_dispatchable(self) -> bool:
         return False

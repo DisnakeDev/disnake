@@ -219,3 +219,5 @@ Functions
     :decorator:
 
 .. autofunction:: walk_components
+
+.. autofunction:: components_from_message

@@ -9,11 +9,13 @@ from typing import (
     Generic,
     Iterator,
     List,
+    Mapping,
     NoReturn,
     Optional,
     Sequence,
     Set,
     Tuple,
+    Type,
     TypeVar,
     Union,
     cast,
@@ -28,10 +30,16 @@ from ..components import (
     ChannelSelectMenu as ChannelSelectComponent,
     Component,
     Container as ContainerComponent,
+    FileComponent as FileComponent,
+    MediaGallery as MediaGalleryComponent,
     MentionableSelectMenu as MentionableSelectComponent,
     RoleSelectMenu as RoleSelectComponent,
     Section as SectionComponent,
+    Separator as SeparatorComponent,
     StringSelectMenu as StringSelectComponent,
+    TextDisplay as TextDisplayComponent,
+    TextInput as TextInputComponent,
+    Thumbnail as ThumbnailComponent,
     UserSelectMenu as UserSelectComponent,
 )
 from ..enums import ButtonStyle, ChannelType, ComponentType, TextInputStyle
@@ -41,14 +49,20 @@ from ._types import (
     ActionRowMessageComponent,
     ActionRowModalComponent,
     ComponentInput,
+    MessageTopLevelComponent,
     NonActionRowChildT,
 )
 from .button import Button
 from .container import Container
+from .file import File
 from .item import UIComponent, WrappedComponent
+from .media_gallery import MediaGallery
 from .section import Section
 from .select import ChannelSelect, MentionableSelect, RoleSelect, StringSelect, UserSelect
+from .separator import Separator
+from .text_display import TextDisplay
 from .text_input import TextInput
+from .thumbnail import Thumbnail
 
 if TYPE_CHECKING:
     from typing_extensions import Self, TypeAlias
@@ -75,6 +89,7 @@ __all__ = (
     "MessageActionRow",
     "ModalActionRow",
     "walk_components",
+    "components_from_message",
 )
 
 # FIXME(3.0): legacy
@@ -99,26 +114,6 @@ TextInputCompatibleActionRowT = TypeVar(
     "TextInputCompatibleActionRowT",
     bound="Union[ActionRow[ActionRowModalComponent], ActionRow[WrappedComponent]]",
 )
-
-
-def _message_component_to_item(
-    component: ActionRowMessageComponentRaw,
-) -> Optional[ActionRowMessageComponent]:
-    if isinstance(component, ButtonComponent):
-        return Button.from_component(component)
-    if isinstance(component, StringSelectComponent):
-        return StringSelect.from_component(component)
-    if isinstance(component, UserSelectComponent):
-        return UserSelect.from_component(component)
-    if isinstance(component, RoleSelectComponent):
-        return RoleSelect.from_component(component)
-    if isinstance(component, MentionableSelectComponent):
-        return MentionableSelect.from_component(component)
-    if isinstance(component, ChannelSelectComponent):
-        return ChannelSelect.from_component(component)
-
-    assert_never(component)
-    return None
 
 
 class ActionRow(UIComponent, Generic[ActionRowChildT]):
@@ -832,6 +827,16 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
     def to_component_dict(self) -> ActionRowPayload:
         return self._underlying.to_dict()
 
+    @classmethod
+    def from_component(cls, action_row: ActionRowComponent) -> Self:
+        return cls(
+            *cast(
+                "List[ActionRowChildT]",
+                [_to_ui_component(c) for c in action_row.children],
+            ),
+            id=action_row.id,
+        )
+
     def __delitem__(self, index: Union[int, slice]) -> None:
         del self._children[index]
 
@@ -1068,3 +1073,80 @@ def walk_components(components: Sequence[ComponentT]) -> Iterator[ComponentT]:
     seen: Set[ComponentT] = set()
     for item in components:
         yield from _walk_internal(item, seen)
+
+
+def components_from_message(message: Message) -> List[MessageTopLevelComponent]:
+    """Create a list of :class:`UIComponent`\\s from the components of an existing message.
+
+    This will abide by existing component format on the message, including component
+    ordering. Components will be transformed to UI kit components, such that
+    they can be easily modified and re-sent.
+
+    .. versionadded:: 2.11
+
+    Parameters
+    ----------
+    message: :class:`disnake.Message`
+        The message from which to extract the components.
+
+    Raises
+    ------
+    TypeError
+        An unknown component type is encountered.
+
+    Returns
+    -------
+    List[:class:`UIComponent`]:
+        The ui components parsed from the components on the message.
+    """
+    components: List[UIComponent] = [_to_ui_component(c) for c in message.components]
+    return cast("List[MessageTopLevelComponent]", components)
+
+
+UI_COMPONENT_LOOKUP: Mapping[Type[Component], Type[UIComponent]] = {
+    ActionRowComponent: ActionRow,
+    ButtonComponent: Button,
+    StringSelectComponent: StringSelect,
+    TextInputComponent: TextInput,
+    UserSelectComponent: UserSelect,
+    RoleSelectComponent: RoleSelect,
+    MentionableSelectComponent: MentionableSelect,
+    ChannelSelectComponent: ChannelSelect,
+    SectionComponent: Section,
+    TextDisplayComponent: TextDisplay,
+    ThumbnailComponent: Thumbnail,
+    MediaGalleryComponent: MediaGallery,
+    FileComponent: File,
+    SeparatorComponent: Separator,
+    ContainerComponent: Container,
+}
+
+
+def _to_ui_component(component: Component) -> UIComponent:
+    try:
+        ui_cls = UI_COMPONENT_LOOKUP[type(component)]
+    except KeyError:
+        # this should never happen
+        raise TypeError(f"unknown component type: {type(component)}")
+    else:
+        return ui_cls.from_component(component)  # type: ignore
+
+
+def _message_component_to_item(
+    component: ActionRowMessageComponentRaw,
+) -> Optional[ActionRowMessageComponent]:
+    if isinstance(
+        component,
+        (
+            ButtonComponent,
+            StringSelectComponent,
+            UserSelectComponent,
+            RoleSelectComponent,
+            MentionableSelectComponent,
+            ChannelSelectComponent,
+        ),
+    ):
+        return _to_ui_component(component)  # type: ignore
+
+    assert_never(component)
+    return None

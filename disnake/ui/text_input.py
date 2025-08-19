@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
-from typing import ClassVar, Optional, Tuple
+from typing import TYPE_CHECKING, ClassVar, Optional, Tuple
 
 from ..components import TextInput as TextInputComponent
 from ..enums import ComponentType, TextInputStyle
 from ..utils import MISSING
 from .item import WrappedComponent
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
 __all__ = ("TextInput",)
 
@@ -159,3 +162,17 @@ class TextInput(WrappedComponent):
     @max_length.setter
     def max_length(self, value: Optional[int]) -> None:
         self._underlying.max_length = value
+
+    @classmethod
+    def from_component(cls, text_input: TextInputComponent) -> Self:
+        return cls(
+            label=text_input.label or "",
+            custom_id=text_input.custom_id,
+            style=text_input.style,
+            placeholder=text_input.placeholder,
+            value=text_input.value,
+            required=text_input.required,
+            min_length=text_input.min_length,
+            max_length=text_input.max_length,
+            id=text_input.id,
+        )

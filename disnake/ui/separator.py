@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
-from typing import ClassVar, Tuple
+from typing import TYPE_CHECKING, ClassVar, Tuple
 
 from ..components import Separator as SeparatorComponent
 from ..enums import ComponentType, SeparatorSpacingSize
 from ..utils import MISSING
 from .item import UIComponent
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
 __all__ = ("Separator",)
 
@@ -69,3 +72,11 @@ class Separator(UIComponent):
     @spacing.setter
     def spacing(self, value: SeparatorSpacingSize) -> None:
         self._underlying.spacing = value
+
+    @classmethod
+    def from_component(cls, separator: SeparatorComponent) -> Self:
+        return cls(
+            divider=separator.divider,
+            spacing=separator.spacing,
+            id=separator.id,
+        )

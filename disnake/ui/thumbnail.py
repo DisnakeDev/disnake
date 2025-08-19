@@ -10,6 +10,8 @@ from ..utils import MISSING
 from .item import UIComponent
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from ..components import MediaItemInput
 
 __all__ = ("Thumbnail",)
@@ -87,3 +89,13 @@ class Thumbnail(UIComponent):
     @spoiler.setter
     def spoiler(self, value: bool) -> None:
         self._underlying.spoiler = value
+
+    @classmethod
+    def from_component(cls, thumbnail: ThumbnailComponent) -> Self:
+        return cls(
+            # FIXME: this might not work with items created with `attachment://`
+            media=thumbnail.media,
+            description=thumbnail.description,
+            spoiler=thumbnail.spoiler,
+            id=thumbnail.id,
+        )

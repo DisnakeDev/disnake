@@ -10,6 +10,8 @@ from ..utils import MISSING
 from .item import UIComponent
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from ..components import LocalMediaItemInput
 
 __all__ = ("File",)
@@ -98,3 +100,20 @@ class File(UIComponent):
         This is available in objects from the API, and ignored when sending.
         """
         return self._underlying.size
+
+    @classmethod
+    def from_component(cls, file: FileComponent) -> Self:
+        media = file.file
+        if not media.url.startswith("attachment://") and file.name:
+            # TODO: does this work correctly with special characters?
+            media = UnfurledMediaItem(f"attachment://{file.name}")
+
+        self = cls(
+            file=media,
+            spoiler=file.spoiler,
+            id=file.id,
+        )
+        # copy read-only fields
+        self._underlying.name = file.name
+        self._underlying.size = file.size
+        return self

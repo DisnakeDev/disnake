@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar, List, Tuple, Union
+from typing import TYPE_CHECKING, Any, ClassVar, List, Tuple, Union, cast
 
 from ..components import Section as SectionComponent
 from ..enums import ComponentType
@@ -10,6 +10,8 @@ from ..utils import copy_doc
 from .item import UIComponent, ensure_ui_component
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from .button import Button
     from .text_display import TextDisplay
     from .thumbnail import Thumbnail
@@ -79,4 +81,17 @@ class Section(UIComponent):
             id=self._id,
             components=[comp._underlying for comp in self.components],
             accessory=self.accessory._underlying,
+        )
+
+    @classmethod
+    def from_component(cls, section: SectionComponent) -> Self:
+        from .action_row import _to_ui_component
+
+        return cls(
+            *cast(
+                "List[TextDisplay]",
+                [_to_ui_component(c) for c in section.components],
+            ),
+            accessory=cast("Union[Thumbnail, Button[Any]]", _to_ui_component(section.accessory)),
+            id=section.id,
         )

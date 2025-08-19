@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
-from typing import ClassVar, Tuple
+from typing import TYPE_CHECKING, ClassVar, Tuple
 
 from ..components import TextDisplay as TextDisplayComponent
 from ..enums import ComponentType
 from ..utils import MISSING
 from .item import UIComponent
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
 __all__ = ("TextDisplay",)
 
@@ -47,3 +50,10 @@ class TextDisplay(UIComponent):
     @content.setter
     def content(self, value: str) -> None:
         self._underlying.content = str(value)
+
+    @classmethod
+    def from_component(cls, text_display: TextDisplayComponent) -> Self:
+        return cls(
+            content=text_display.content,
+            id=text_display.id,
+        )

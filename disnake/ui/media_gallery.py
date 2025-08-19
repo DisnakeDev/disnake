@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
-from typing import ClassVar, List, Sequence, Tuple
+from typing import TYPE_CHECKING, ClassVar, List, Sequence, Tuple
 
 from ..components import MediaGallery as MediaGalleryComponent, MediaGalleryItem
 from ..enums import ComponentType
 from ..utils import MISSING
 from .item import UIComponent
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
 __all__ = ("MediaGallery",)
 
@@ -46,3 +49,12 @@ class MediaGallery(UIComponent):
     @items.setter
     def items(self, values: Sequence[MediaGalleryItem]) -> None:
         self._underlying.items = list(values)
+
+    @classmethod
+    def from_component(cls, media_gallery: MediaGalleryComponent) -> Self:
+        return cls(
+            # FIXME: this might not work with items created with `attachment://`
+            # XXX: consider copying items
+            *media_gallery.items,
+            id=media_gallery.id,
+        )

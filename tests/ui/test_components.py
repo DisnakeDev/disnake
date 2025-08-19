@@ -45,6 +45,5 @@ def test_id_property(obj: ui.UIComponent) -> None:
     obj.id = 1234
     assert obj.id == 1234
 
-    if isinstance(obj, ui.Item):
-        obj2 = type(obj).from_component(obj._underlying)
-        assert obj2.id == 1234
+    obj2 = type(obj).from_component(obj._underlying)
+    assert obj2.id == 1234
