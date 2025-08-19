@@ -12,6 +12,7 @@ from typing import (
     NoReturn,
     Optional,
     Sequence,
+    Set,
     Tuple,
     TypeVar,
     Union,
@@ -25,8 +26,11 @@ from ..components import (
     ActionRowMessageComponent as ActionRowMessageComponentRaw,
     Button as ButtonComponent,
     ChannelSelectMenu as ChannelSelectComponent,
+    Component,
+    Container as ContainerComponent,
     MentionableSelectMenu as MentionableSelectComponent,
     RoleSelectMenu as RoleSelectComponent,
+    Section as SectionComponent,
     StringSelectMenu as StringSelectComponent,
     UserSelectMenu as UserSelectComponent,
 )
@@ -40,7 +44,9 @@ from ._types import (
     NonActionRowChildT,
 )
 from .button import Button
+from .container import Container
 from .item import UIComponent, WrappedComponent
+from .section import Section
 from .select import ChannelSelect, MentionableSelect, RoleSelect, StringSelect, UserSelect
 from .text_input import TextInput
 
@@ -68,6 +74,7 @@ __all__ = (
     "ModalUIComponent",
     "MessageActionRow",
     "ModalActionRow",
+    "walk_components",
 )
 
 # FIXME(3.0): legacy
@@ -1014,3 +1021,50 @@ def components_to_dict(
         cast("MessageTopLevelComponentPayload", c.to_component_dict())
         for c in normalize_components(components)
     ]
+
+
+ComponentT = TypeVar("ComponentT", Component, UIComponent)
+
+
+def _walk_internal(component: ComponentT, seen: Set[ComponentT]) -> Iterator[ComponentT]:
+    if component in seen:
+        # prevent infinite recursion in case anyone manages to nest a component in itself
+        return
+    # add current component, while also creating a copy to allow reusing a component multiple times,
+    # as long as it's not within itself
+    seen = {*seen, component}
+
+    yield component
+
+    if isinstance(component, (ActionRowComponent, ActionRow)):
+        for item in component.children:
+            yield from _walk_internal(item, seen)
+    elif isinstance(component, (SectionComponent, Section)):
+        yield from _walk_internal(component.accessory, seen)
+        for item in component.components:
+            yield from _walk_internal(item, seen)  # type: ignore  # this is fine, pyright loses the conditional type when iterating
+    elif isinstance(component, (ContainerComponent, Container)):
+        for item in component.components:
+            yield from _walk_internal(item, seen)  # type: ignore
+
+
+def walk_components(components: Sequence[ComponentT]) -> Iterator[ComponentT]:
+    """Iterate over given components, yielding each individual component,
+    including child components where applicable (e.g. for :class:`ActionRow` and :class:`Container`).
+
+    .. versionadded:: 2.11
+
+    Parameters
+    ----------
+    components: Union[Sequence[:class:`~disnake.Component`], Sequence[:class:`UIComponent`]]
+        The sequence of components to iterate over. This supports both :class:`disnake.Component`
+        objects and :class:`.ui.UIComponent` objects.
+
+    Yields
+    ------
+    Union[:class:`~disnake.Component`, :class:`UIComponent`]
+        A component from the given sequence or child component thereof.
+    """
+    seen: Set[ComponentT] = set()
+    for item in components:
+        yield from _walk_internal(item, seen)

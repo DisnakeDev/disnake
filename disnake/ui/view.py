@@ -27,10 +27,9 @@ from ..components import (
     ActionRowMessageComponent,
     Button as ButtonComponent,
     _component_factory,
-    _walk_all_components,
 )
 from ..enums import try_enum_to_int
-from .action_row import _message_component_to_item
+from .action_row import _message_component_to_item, walk_components
 from .button import Button
 from .item import Item
 
@@ -230,7 +229,7 @@ class View:
         """
         view = View(timeout=timeout)
         # FIXME: preserve rows
-        for component in _walk_all_components(message.components):
+        for component in walk_components(message.components):
             if isinstance(component, ActionRowComponent):
                 continue
             elif not isinstance(component, VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES):

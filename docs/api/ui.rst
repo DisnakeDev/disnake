@@ -217,3 +217,5 @@ Functions
 
 .. autofunction:: user_select(cls=UserSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, disabled=False, default_values=None, row=None)
     :decorator:
+
+.. autofunction:: walk_components

@@ -9,13 +9,10 @@ from typing import (
     Dict,
     Final,
     Generic,
-    Iterator,
     List,
     Literal,
     Mapping,
     Optional,
-    Sequence,
-    Set,
     Tuple,
     Type,
     TypeVar,
@@ -1321,35 +1318,6 @@ VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES: Final = (
     MentionableSelectMenu,
     ChannelSelectMenu,
 )
-
-
-def _walk_internal(component: Component, seen: Set[Component]) -> Iterator[Component]:
-    if component in seen:
-        # prevent infinite recursion if anyone manages to nest a component in itself
-        return
-    # add current component, while also creating a copy to allow reusing a component multiple times,
-    # as long as it's not within itself
-    seen = {*seen, component}
-
-    yield component
-
-    if isinstance(component, ActionRow):
-        for item in component.children:
-            yield from _walk_internal(item, seen)
-    elif isinstance(component, Section):
-        yield from _walk_internal(component.accessory, seen)
-        for item in component.components:
-            yield from _walk_internal(item, seen)
-    elif isinstance(component, Container):
-        for item in component.components:
-            yield from _walk_internal(item, seen)
-
-
-# yields *all* components recursively
-def _walk_all_components(components: Sequence[Component]) -> Iterator[Component]:
-    seen: Set[Component] = set()
-    for item in components:
-        yield from _walk_internal(item, seen)
 
 
 def handle_media_item_input(value: MediaItemInput) -> UnfurledMediaItem:
