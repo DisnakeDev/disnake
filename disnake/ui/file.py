@@ -58,6 +58,8 @@ class File(UIComponent):
             id=id,
             file=file_media,
             spoiler=spoiler,
+            name=None,
+            size=None,
         )
 
     @property
