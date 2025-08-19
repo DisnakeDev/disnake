@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 from typing import TYPE_CHECKING, ClassVar, Optional, Tuple
 
 from ..components import FileComponent, UnfurledMediaItem, handle_media_item_input
@@ -105,8 +106,9 @@ class File(UIComponent):
     def from_component(cls, file: FileComponent) -> Self:
         media = file.file
         if not media.url.startswith("attachment://") and file.name:
-            # TODO: does this work correctly with special characters?
-            media = UnfurledMediaItem(f"attachment://{file.name}")
+            # turn cdn url into `attachment://` url, retain other fields
+            media = copy.copy(media)
+            media.url = f"attachment://{file.name}"
 
         self = cls(
             file=media,
