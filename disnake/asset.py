@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import io
 import os
-from typing import TYPE_CHECKING, Any, Literal, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, Optional, Tuple, Union
 
 import yarl
 
@@ -33,47 +33,59 @@ VALID_ASSET_FORMATS = VALID_STATIC_FORMATS | {"gif"}
 MISSING = utils.MISSING
 
 
-class AssetMixin:
-    url: str
+class ResourceMixin:
+    _resource_url_attr: ClassVar[str]
+
     _state: Optional[AnyState]
 
     __slots__: Tuple[str, ...] = ("_state",)
 
+    def __init_subclass__(cls, url_attr: Optional[str] = None) -> None:
+        # either this subclass has a `url_attr`, or a parent class already should
+        if url_attr:
+            cls._resource_url_attr = url_attr
+        elif not hasattr(cls, "_resource_url_attr"):
+            raise RuntimeError("ResourceMixin subclass must specify `url_attr`")
+
+    @property
+    def _resource_url(self) -> str:
+        return getattr(self, self._resource_url_attr)
+
     async def read(self) -> bytes:
         """|coro|
 
-        Retrieves the content of this asset as a :class:`bytes` object.
+        Retrieves the content of this resource as a :class:`bytes` object.
 
         Raises
         ------
         DiscordException
             There was no internal connection state.
         HTTPException
-            Downloading the asset failed.
+            Downloading the resource failed.
         NotFound
-            The asset was deleted.
+            The resource was deleted.
 
         Returns
         -------
         :class:`bytes`
-            The content of the asset.
+            The content of the resource.
         """
         if self._state is None:
             raise DiscordException("Invalid state (no ConnectionState provided)")
 
-        return await self._state.http.get_from_cdn(self.url)
+        return await self._state.http.get_from_cdn(self._resource_url)
 
     async def save(
         self, fp: Union[str, bytes, os.PathLike, io.BufferedIOBase], *, seek_begin: bool = True
     ) -> int:
         """|coro|
 
-        Saves this asset into a file-like object.
+        Saves this resource into a file-like object.
 
         Parameters
         ----------
         fp: Union[:class:`io.BufferedIOBase`, :class:`os.PathLike`]
-            The file-like object to save this asset to or the filename
+            The file-like object to save this resource to or the filename
             to use. If a filename is passed then a file is created with that
             filename and used instead.
         seek_begin: :class:`bool`
@@ -85,9 +97,9 @@ class AssetMixin:
         DiscordException
             There was no internal connection state.
         HTTPException
-            Downloading the asset failed.
+            Downloading the resource failed.
         NotFound
-            The asset was deleted.
+            The resource was deleted.
 
         Returns
         -------
@@ -113,7 +125,7 @@ class AssetMixin:
     ) -> File:
         """|coro|
 
-        Converts the asset into a :class:`File` suitable for sending via
+        Converts the resource into a :class:`File` suitable for sending via
         :meth:`abc.Messageable.send`.
 
         .. versionadded:: 2.5
@@ -127,30 +139,30 @@ class AssetMixin:
             Whether the file is a spoiler.
         filename: Optional[:class:`str`]
             The filename to display when uploading to Discord. If this is not given, it defaults to
-            the name of the asset's URL.
+            the name of the resource's URL.
         description: Optional[:class:`str`]
             The file's description.
 
         Raises
         ------
         DiscordException
-            The asset does not have an associated state.
+            The resource does not have an associated state.
         HTTPException
-            Downloading the asset failed.
+            Downloading the resource failed.
         NotFound
-            The asset was deleted.
+            The resource was deleted.
         TypeError
-            The asset is a unicode emoji or a sticker with lottie type.
+            The resource is a unicode emoji or a sticker with lottie type.
 
         Returns
         -------
         :class:`File`
-            The asset as a file suitable for sending.
+            The resource as a file suitable for sending.
         """
         data = await self.read()
 
         if not filename:
-            filename = yarl.URL(self.url).name
+            filename = yarl.URL(self._resource_url).name
             # if the filename doesn't have an extension (e.g. widget member avatars),
             # try to infer it from the data
             if not os.path.splitext(filename)[1]:
@@ -159,6 +171,10 @@ class AssetMixin:
                     filename += ext
 
         return File(io.BytesIO(data), filename=filename, spoiler=spoiler, description=description)
+
+
+class AssetMixin(ResourceMixin, url_attr="url"):
+    url: str
 
 
 class Asset(AssetMixin):

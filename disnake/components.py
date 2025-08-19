@@ -20,7 +20,7 @@ from typing import (
     cast,
 )
 
-from .asset import AssetMixin
+from .asset import AssetMixin, ResourceMixin
 from .colour import Colour
 from .enums import (
     ButtonStyle,
@@ -960,7 +960,7 @@ class TextDisplay(Component):
         }
 
 
-class UnfurledMediaItem(AssetMixin):
+class UnfurledMediaItem(ResourceMixin, url_attr="proxy_url"):
     """Represents an unfurled/resolved media item within a component.
 
     .. versionadded:: 2.11
@@ -1401,8 +1401,7 @@ def _component_factory(
         as_enum = try_enum(ComponentType, component_type)
         return Component._raw_construct(type=as_enum)  # type: ignore
     else:
-        # FIXME: pass state=state once `AssetMixin` can use `proxy_url`
-        return component_cls(data, state=None)  # type: ignore
+        return component_cls(data, state=state)  # type: ignore
 
 
 # this is just a rebranded _component_factory, as a workaround to Python not supporting typescript-like mapped types
