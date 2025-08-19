@@ -1401,7 +1401,8 @@ def _component_factory(
         as_enum = try_enum(ComponentType, component_type)
         return Component._raw_construct(type=as_enum)  # type: ignore
     else:
-        return component_cls(data, state=state)  # type: ignore
+        # FIXME: pass state=state once `AssetMixin` can use `proxy_url`
+        return component_cls(data, state=None)  # type: ignore
 
 
 # this is just a rebranded _component_factory, as a workaround to Python not supporting typescript-like mapped types
