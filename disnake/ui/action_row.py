@@ -897,6 +897,10 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         ordering and rows. Components will be transformed to UI kit components, such that
         they can be easily modified and re-sent as action rows.
 
+        .. note::
+            This only supports :class:`ActionRow`\\s and associated components, i.e. no v2 components.
+            See :func:`.ui.components_from_message` for a function that supports all component types.
+
         .. versionadded:: 2.6
 
         Parameters
@@ -940,6 +944,10 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
     ) -> Generator[Tuple[ActionRow[ActionRowChildT], ActionRowChildT], None, None]:
         """Iterate over the components in a sequence of action rows, yielding each
         individual component together with the action row of which it is a child.
+
+        .. note::
+            This only supports :class:`ActionRow`\\s, i.e. no v2 components.
+            See :func:`.ui.walk_components` for a function that supports all component types.
 
         .. versionadded:: 2.6
 
