@@ -187,6 +187,10 @@ class Component:
     __slots__: Tuple[str, ...] = ("type", "id")
 
     __repr_info__: ClassVar[Tuple[str, ...]]
+
+    # subclasses are expected to overwrite this if they're only usable with `MessageFlags.is_components_v2`
+    is_v2: ClassVar[bool] = False
+
     type: ComponentType
     id: int
 
@@ -952,6 +956,8 @@ class Section(Component):
 
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
 
+    is_v2 = True
+
     def __init__(self, data: SectionComponentPayload) -> None:
         self.type: Literal[ComponentType.section] = ComponentType.section
         self.id = data.get("id", 0)
@@ -996,6 +1002,8 @@ class TextDisplay(Component):
     __slots__: Tuple[str, ...] = ("content",)
 
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+
+    is_v2 = True
 
     def __init__(self, data: TextDisplayComponentPayload) -> None:
         self.type: Literal[ComponentType.text_display] = ComponentType.text_display
@@ -1107,6 +1115,8 @@ class Thumbnail(Component):
 
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
 
+    is_v2 = True
+
     def __init__(self, data: ThumbnailComponentPayload) -> None:
         self.type: Literal[ComponentType.thumbnail] = ComponentType.thumbnail
         self.id = data.get("id", 0)
@@ -1155,6 +1165,8 @@ class MediaGallery(Component):
     __slots__: Tuple[str, ...] = ("items",)
 
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+
+    is_v2 = True
 
     def __init__(self, data: MediaGalleryComponentPayload) -> None:
         self.type: Literal[ComponentType.media_gallery] = ComponentType.media_gallery
@@ -1262,6 +1274,8 @@ class FileComponent(Component):
 
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
 
+    is_v2 = True
+
     def __init__(self, data: FileComponentPayload) -> None:
         self.type: Literal[ComponentType.file] = ComponentType.file
         self.id = data.get("id", 0)
@@ -1310,6 +1324,8 @@ class Separator(Component):
     __slots__: Tuple[str, ...] = ("divider", "spacing")
 
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+
+    is_v2 = True
 
     def __init__(self, data: SeparatorComponentPayload) -> None:
         self.type: Literal[ComponentType.separator] = ComponentType.separator
@@ -1361,6 +1377,8 @@ class Container(Component):
     )
 
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+
+    is_v2 = True
 
     def __init__(self, data: ContainerComponentPayload) -> None:
         self.type: Literal[ComponentType.container] = ComponentType.container

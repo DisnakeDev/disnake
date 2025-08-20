@@ -83,6 +83,10 @@ class UIComponent(ABC):
         return f"<{type(self).__name__} {attrs}>"
 
     @property
+    def is_v2(self) -> bool:
+        return self._underlying.is_v2
+
+    @property
     def type(self) -> ComponentType:
         return self._underlying.type
 

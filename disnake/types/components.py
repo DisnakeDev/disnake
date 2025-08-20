@@ -40,7 +40,6 @@ ActionRowChildComponent = Union["ButtonComponent", "AnySelectMenu", "TextInput"]
 MessageTopLevelComponentV1: TypeAlias = "ActionRow"
 # currently, all v2 components except Thumbnail
 MessageTopLevelComponentV2 = Union[
-    MessageTopLevelComponentV1,
     "SectionComponent",
     "TextDisplayComponent",
     "MediaGalleryComponent",
