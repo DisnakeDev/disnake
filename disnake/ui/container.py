@@ -54,8 +54,8 @@ class Container(UIComponent):
 
     Attributes
     ----------
-    components: List[Union[:class:`~.ui.ActionRow`, :class:`~.ui.Section`, :class:`~.ui.TextDisplay`, :class:`~.ui.MediaGallery`, :class:`~.ui.File`, :class:`~.ui.Separator`]]
-        The list of components in this container.
+    children: List[Union[:class:`~.ui.ActionRow`, :class:`~.ui.Section`, :class:`~.ui.TextDisplay`, :class:`~.ui.MediaGallery`, :class:`~.ui.File`, :class:`~.ui.Separator`]]
+        The list of child components in this container.
     accent_colour: Optional[:class:`.Colour`]
         The accent colour of the container.
         An alias exists under ``accent_color``.
@@ -64,7 +64,7 @@ class Container(UIComponent):
     """
 
     __repr_attributes__: ClassVar[Tuple[str, ...]] = (
-        "components",
+        "children",
         "accent_colour",
         "spoiler",
     )
@@ -79,7 +79,7 @@ class Container(UIComponent):
         self._id: int = id
         # this list can be modified without any runtime checks later on,
         # just assume the user knows what they're doing at that point
-        self.components: List[ContainerChildUIComponent] = [
+        self.children: List[ContainerChildUIComponent] = [
             ensure_ui_component(c, "components") for c in components
         ]
         self._accent_colour: Optional[Colour] = accent_colour
@@ -118,7 +118,7 @@ class Container(UIComponent):
         return ContainerComponent._raw_construct(
             type=ComponentType.container,
             id=self._id,
-            components=[comp._underlying for comp in self.components],
+            children=[comp._underlying for comp in self.children],
             accent_colour=self._accent_colour,
             spoiler=self.spoiler,
         )
@@ -130,7 +130,7 @@ class Container(UIComponent):
         return cls(
             *cast(
                 "List[ContainerChildUIComponent]",
-                [_to_ui_component(c) for c in container.components],
+                [_to_ui_component(c) for c in container.children],
             ),
             accent_colour=container.accent_colour,
             spoiler=container.spoiler,

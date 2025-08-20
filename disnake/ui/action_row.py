@@ -1054,10 +1054,10 @@ def _walk_internal(component: ComponentT, seen: Set[ComponentT]) -> Iterator[Com
             yield from _walk_internal(item, seen)
     elif isinstance(component, (SectionComponent, Section)):
         yield from _walk_internal(component.accessory, seen)
-        for item in component.components:
+        for item in component.children:
             yield from _walk_internal(item, seen)  # type: ignore  # this is fine, pyright loses the conditional type when iterating
     elif isinstance(component, (ContainerComponent, Container)):
-        for item in component.components:
+        for item in component.children:
             yield from _walk_internal(item, seen)  # type: ignore
 
 

@@ -37,14 +37,14 @@ class Section(UIComponent):
 
     Attributes
     ----------
-    components: List[:class:`~.ui.TextDisplay`]
+    children: List[:class:`~.ui.TextDisplay`]
         The list of text items in this section.
     accessory: Union[:class:`~.ui.Thumbnail`, :class:`~.ui.Button`]
         The accessory component displayed next to the section text.
     """
 
     __repr_attributes__: ClassVar[Tuple[str, ...]] = (
-        "components",
+        "children",
         "accessory",
     )
 
@@ -58,7 +58,7 @@ class Section(UIComponent):
         self._id: int = id
         # this list can be modified without any runtime checks later on,
         # just assume the user knows what they're doing at that point
-        self.components: List[TextDisplay] = [
+        self.children: List[TextDisplay] = [
             ensure_ui_component(c, "components") for c in components
         ]
         self.accessory: Union[Thumbnail, Button[Any]] = ensure_ui_component(accessory, "accessory")
@@ -79,7 +79,7 @@ class Section(UIComponent):
         return SectionComponent._raw_construct(
             type=ComponentType.section,
             id=self._id,
-            components=[comp._underlying for comp in self.components],
+            children=[comp._underlying for comp in self.children],
             accessory=self.accessory._underlying,
         )
 
@@ -90,7 +90,7 @@ class Section(UIComponent):
         return cls(
             *cast(
                 "List[TextDisplay]",
-                [_to_ui_component(c) for c in section.components],
+                [_to_ui_component(c) for c in section.children],
             ),
             accessory=cast("Union[Thumbnail, Button[Any]]", _to_ui_component(section.accessory)),
             id=section.id,

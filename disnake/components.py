@@ -936,10 +936,10 @@ class Section(Component):
 
     Attributes
     ----------
+    children: List[:class:`TextDisplay`]
+        The text items in this section.
     accessory: Union[:class:`Thumbnail`, :class:`Button`]
         The accessory component displayed next to the section text.
-    components: List[:class:`TextDisplay`]
-        The text items in this section.
     id: :class:`int`
         The numeric identifier for the component.
         This is always present in components received from the API,
@@ -948,7 +948,7 @@ class Section(Component):
         .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = ("accessory", "components")
+    __slots__: Tuple[str, ...] = ("children", "accessory")
 
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
 
@@ -956,19 +956,19 @@ class Section(Component):
         self.type: Literal[ComponentType.section] = ComponentType.section
         self.id = data.get("id", 0)
 
-        accessory = _component_factory(data["accessory"])
-        self.accessory: SectionAccessoryComponent = accessory  # type: ignore
-
-        self.components: List[SectionChildComponent] = [
+        self.children: List[SectionChildComponent] = [
             _component_factory(d, type=SectionChildComponent) for d in data.get("components", [])
         ]
+
+        accessory = _component_factory(data["accessory"])
+        self.accessory: SectionAccessoryComponent = accessory  # type: ignore
 
     def to_dict(self) -> SectionComponentPayload:
         return {
             "type": self.type.value,
             "id": self.id,
             "accessory": self.accessory.to_dict(),
-            "components": [child.to_dict() for child in self.components],
+            "components": [child.to_dict() for child in self.children],
         }
 
 
@@ -1340,8 +1340,8 @@ class Container(Component):
 
     Attributes
     ----------
-    components: List[Union[:class:`ActionRow`, :class:`Section`, :class:`TextDisplay`, :class:`MediaGallery`, :class:`FileComponent`, :class:`Separator`]]
-        The components in this container.
+    children: List[Union[:class:`ActionRow`, :class:`Section`, :class:`TextDisplay`, :class:`MediaGallery`, :class:`FileComponent`, :class:`Separator`]]
+        The child components in this container.
     accent_colour: Optional[:class:`Colour`]
         The accent colour of the container. An alias exists under ``accent_color``.
     spoiler: :class:`bool`
@@ -1355,9 +1355,9 @@ class Container(Component):
     """
 
     __slots__: Tuple[str, ...] = (
+        "children",
         "accent_colour",
         "spoiler",
-        "components",
     )
 
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
@@ -1366,20 +1366,20 @@ class Container(Component):
         self.type: Literal[ComponentType.container] = ComponentType.container
         self.id = data.get("id", 0)
 
+        components = [_component_factory(d) for d in data.get("components", [])]
+        self.children: List[ContainerChildComponent] = components  # type: ignore
+
         self.accent_colour: Optional[Colour] = (
             Colour(accent_color) if (accent_color := data.get("accent_color")) is not None else None
         )
         self.spoiler: bool = data.get("spoiler", False)
-
-        components = [_component_factory(d) for d in data.get("components", [])]
-        self.components: List[ContainerChildComponent] = components  # type: ignore
 
     def to_dict(self) -> ContainerComponentPayload:
         payload: ContainerComponentPayload = {
             "type": self.type.value,
             "id": self.id,
             "spoiler": self.spoiler,
-            "components": [child.to_dict() for child in self.components],
+            "components": [child.to_dict() for child in self.children],
         }
 
         if self.accent_colour is not None:
