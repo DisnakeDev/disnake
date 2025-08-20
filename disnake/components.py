@@ -27,7 +27,7 @@ from .enums import (
     ChannelType,
     ComponentType,
     SelectDefaultValueType,
-    SeparatorSpacingSize,
+    SeparatorSpacing,
     TextInputStyle,
     try_enum,
 )
@@ -1297,7 +1297,7 @@ class Separator(Component):
     divider: :class:`bool`
         Whether the separator should be visible, instead of just being vertical padding/spacing.
         Defaults to ``True``.
-    spacing: :class:`SeparatorSpacingSize`
+    spacing: :class:`SeparatorSpacing`
         The size of the separator padding.
     id: :class:`int`
         The numeric identifier for the component.
@@ -1316,7 +1316,7 @@ class Separator(Component):
         self.id = data.get("id", 0)
 
         self.divider: bool = data.get("divider", True)
-        self.spacing: SeparatorSpacingSize = try_enum(SeparatorSpacingSize, data.get("spacing", 1))
+        self.spacing: SeparatorSpacing = try_enum(SeparatorSpacing, data.get("spacing", 1))
 
     def to_dict(self) -> SeparatorComponentPayload:
         return {

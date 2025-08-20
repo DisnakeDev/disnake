@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, ClassVar, Tuple
 
 from ..components import Separator as SeparatorComponent
-from ..enums import ComponentType, SeparatorSpacingSize
+from ..enums import ComponentType, SeparatorSpacing
 from ..utils import MISSING
 from .item import UIComponent
 
@@ -25,9 +25,9 @@ class Separator(UIComponent):
     divider: :class:`bool`
         Whether the separator should be visible, instead of just being vertical padding/spacing.
         Defaults to ``True``.
-    spacing: :class:`.SeparatorSpacingSize`
+    spacing: :class:`.SeparatorSpacing`
         The size of the separator padding.
-        Defaults to :attr:`~.SeparatorSpacingSize.small`.
+        Defaults to :attr:`~.SeparatorSpacing.small`.
     id: :class:`int`
         The numeric identifier for the component. Must be unique within the message.
         If set to ``0`` (the default) when sending a component, the API will assign
@@ -45,7 +45,7 @@ class Separator(UIComponent):
         self,
         *,
         divider: bool = True,
-        spacing: SeparatorSpacingSize = SeparatorSpacingSize.small,
+        spacing: SeparatorSpacing = SeparatorSpacing.small,
         id: int = 0,
     ) -> None:
         self._underlying = SeparatorComponent._raw_construct(
@@ -65,12 +65,12 @@ class Separator(UIComponent):
         self._underlying.divider = value
 
     @property
-    def spacing(self) -> SeparatorSpacingSize:
-        """:class:`.SeparatorSpacingSize`: The size of the separator."""
+    def spacing(self) -> SeparatorSpacing:
+        """:class:`.SeparatorSpacing`: The size of the separator."""
         return self._underlying.spacing
 
     @spacing.setter
-    def spacing(self, value: SeparatorSpacingSize) -> None:
+    def spacing(self, value: SeparatorSpacing) -> None:
         self._underlying.spacing = value
 
     @classmethod

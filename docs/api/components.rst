@@ -231,8 +231,8 @@ SelectDefaultValueType
 .. autoclass:: SelectDefaultValueType()
     :members:
 
-SeparatorSpacingSize
-~~~~~~~~~~~~~~~~~~~~
+SeparatorSpacing
+~~~~~~~~~~~~~~~~
 
-.. autoclass:: SeparatorSpacingSize()
+.. autoclass:: SeparatorSpacing()
     :members:

@@ -76,7 +76,7 @@ __all__ = (
     "PollLayoutType",
     "VoiceChannelEffectAnimationType",
     "MessageReferenceType",
-    "SeparatorSpacingSize",
+    "SeparatorSpacing",
 )
 
 
@@ -2356,8 +2356,8 @@ class MessageReferenceType(Enum):
     """Reference used to point to a message at a point in time (forward)."""
 
 
-class SeparatorSpacingSize(Enum):
-    """Specifies the size of a :class:`Separator` component.
+class SeparatorSpacing(Enum):
+    """Specifies the size of a :class:`Separator` component's padding.
 
     .. versionadded:: 2.11
     """
