@@ -223,6 +223,12 @@ class ActionRow(Component, Generic[ActionRowChildComponentT]):
     ----------
     children: List[Union[:class:`Button`, :class:`BaseSelectMenu`, :class:`TextInput`]]
         The children components that this holds, if any.
+    id: :class:`int`
+        The numeric identifier for the component.
+        This is always present in components received from the API,
+        and unique within a message.
+
+        .. versionadded:: 2.11
     """
 
     __slots__: Tuple[str, ...] = ("children",)
@@ -274,6 +280,12 @@ class Button(Component):
     sku_id: Optional[:class:`int`]
         The ID of a purchasable SKU, for premium buttons.
         Premium buttons additionally cannot have a ``label``, ``url``, or ``emoji``.
+
+        .. versionadded:: 2.11
+    id: :class:`int`
+        The numeric identifier for the component.
+        This is always present in components received from the API,
+        and unique within a message.
 
         .. versionadded:: 2.11
     """
@@ -371,6 +383,12 @@ class BaseSelectMenu(Component):
         Only available for auto-populated select menus.
 
         .. versionadded:: 2.10
+    id: :class:`int`
+        The numeric identifier for the component.
+        This is always present in components received from the API,
+        and unique within a message.
+
+        .. versionadded:: 2.11
     """
 
     __slots__: Tuple[str, ...] = (
@@ -449,6 +467,12 @@ class StringSelectMenu(BaseSelectMenu):
         Whether the select menu is disabled or not.
     options: List[:class:`SelectOption`]
         A list of options that can be selected in this select menu.
+    id: :class:`int`
+        The numeric identifier for the component.
+        This is always present in components received from the API,
+        and unique within a message.
+
+        .. versionadded:: 2.11
     """
 
     __slots__: Tuple[str, ...] = ("options",)
@@ -499,6 +523,12 @@ class UserSelectMenu(BaseSelectMenu):
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
         .. versionadded:: 2.10
+    id: :class:`int`
+        The numeric identifier for the component.
+        This is always present in components received from the API,
+        and unique within a message.
+
+        .. versionadded:: 2.11
     """
 
     __slots__: Tuple[str, ...] = ()
@@ -539,6 +569,12 @@ class RoleSelectMenu(BaseSelectMenu):
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
         .. versionadded:: 2.10
+    id: :class:`int`
+        The numeric identifier for the component.
+        This is always present in components received from the API,
+        and unique within a message.
+
+        .. versionadded:: 2.11
     """
 
     __slots__: Tuple[str, ...] = ()
@@ -579,6 +615,12 @@ class MentionableSelectMenu(BaseSelectMenu):
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
         .. versionadded:: 2.10
+    id: :class:`int`
+        The numeric identifier for the component.
+        This is always present in components received from the API,
+        and unique within a message.
+
+        .. versionadded:: 2.11
     """
 
     __slots__: Tuple[str, ...] = ()
@@ -622,6 +664,12 @@ class ChannelSelectMenu(BaseSelectMenu):
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
         .. versionadded:: 2.10
+    id: :class:`int`
+        The numeric identifier for the component.
+        This is always present in components received from the API,
+        and unique within a message.
+
+        .. versionadded:: 2.11
     """
 
     __slots__: Tuple[str, ...] = ("channel_types",)
@@ -814,6 +862,12 @@ class TextInput(Component):
         The minimum length of the text input.
     max_length: Optional[:class:`int`]
         The maximum length of the text input.
+    id: :class:`int`
+        The numeric identifier for the component.
+        This is always present in components received from the API,
+        and unique within a message.
+
+        .. versionadded:: 2.11
     """
 
     __slots__: Tuple[str, ...] = (
@@ -886,6 +940,12 @@ class Section(Component):
         The accessory component displayed next to the section text.
     components: List[:class:`TextDisplay`]
         The text items in this section.
+    id: :class:`int`
+        The numeric identifier for the component.
+        This is always present in components received from the API,
+        and unique within a message.
+
+        .. versionadded:: 2.11
     """
 
     __slots__: Tuple[str, ...] = ("accessory", "components")
@@ -925,6 +985,12 @@ class TextDisplay(Component):
     ----------
     content: :class:`str`
         The text displayed by this component.
+    id: :class:`int`
+        The numeric identifier for the component.
+        This is always present in components received from the API,
+        and unique within a message.
+
+        .. versionadded:: 2.11
     """
 
     __slots__: Tuple[str, ...] = ("content",)
@@ -1025,6 +1091,12 @@ class Thumbnail(Component):
         The thumbnail's description ("alt text"), if any.
     spoiler: :class:`bool`
         Whether the thumbnail is marked as a spoiler. Defaults to ``False``.
+    id: :class:`int`
+        The numeric identifier for the component.
+        This is always present in components received from the API,
+        and unique within a message.
+
+        .. versionadded:: 2.11
     """
 
     __slots__: Tuple[str, ...] = (
@@ -1072,6 +1144,12 @@ class MediaGallery(Component):
     ----------
     items: List[:class:`MediaGalleryItem`]
         The images in this gallery.
+    id: :class:`int`
+        The numeric identifier for the component.
+        This is always present in components received from the API,
+        and unique within a message.
+
+        .. versionadded:: 2.11
     """
 
     __slots__: Tuple[str, ...] = ("items",)
@@ -1172,6 +1250,12 @@ class FileComponent(Component):
     size: Optional[:class:`int`]
         The size of the file.
         This is available in objects from the API, and ignored when sending.
+    id: :class:`int`
+        The numeric identifier for the component.
+        This is always present in components received from the API,
+        and unique within a message.
+
+        .. versionadded:: 2.11
     """
 
     __slots__: Tuple[str, ...] = ("file", "spoiler", "name", "size")
@@ -1215,6 +1299,12 @@ class Separator(Component):
         Defaults to ``True``.
     spacing: :class:`SeparatorSpacingSize`
         The size of the separator padding.
+    id: :class:`int`
+        The numeric identifier for the component.
+        This is always present in components received from the API,
+        and unique within a message.
+
+        .. versionadded:: 2.11
     """
 
     __slots__: Tuple[str, ...] = ("divider", "spacing")
@@ -1256,6 +1346,12 @@ class Container(Component):
         The accent colour of the container. An alias exists under ``accent_color``.
     spoiler: :class:`bool`
         Whether the container is marked as a spoiler. Defaults to ``False``.
+    id: :class:`int`
+        The numeric identifier for the component.
+        This is always present in components received from the API,
+        and unique within a message.
+
+        .. versionadded:: 2.11
     """
 
     __slots__: Tuple[str, ...] = (
