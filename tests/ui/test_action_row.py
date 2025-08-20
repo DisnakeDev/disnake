@@ -16,7 +16,7 @@ from disnake.ui import (
     WrappedComponent,
 )
 from disnake.ui._types import ActionRowMessageComponent, ActionRowModalComponent
-from disnake.ui.action_row import components_to_dict, normalize_components
+from disnake.ui.action_row import normalize_components, normalize_components_to_dict
 
 button1 = Button()
 button2 = Button()
@@ -279,8 +279,8 @@ def test_normalize_components__invalid() -> None:
             normalize_components(value)  # type: ignore
 
 
-def test_components_to_dict() -> None:
-    result = components_to_dict([button1, button2, select, ActionRow(button3)])
+def test_normalize_components_to_dict() -> None:
+    result, is_v2 = normalize_components_to_dict([button1, button2, select, ActionRow(button3)])
     assert result == [
         {
             "type": 1,
@@ -298,3 +298,9 @@ def test_components_to_dict() -> None:
             "components": [button3.to_component_dict()],
         },
     ]
+    assert not is_v2
+
+
+def test_normalize_components_to_dict__v2() -> None:
+    _, is_v2 = normalize_components_to_dict([button1, separator, button2])
+    assert is_v2

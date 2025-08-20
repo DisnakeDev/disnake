@@ -49,7 +49,7 @@ from ..message import Attachment, AuthorizingIntegrationOwners, Message
 from ..object import Object
 from ..permissions import Permissions
 from ..role import Role
-from ..ui.action_row import components_to_dict, normalize_components
+from ..ui.action_row import normalize_components, normalize_components_to_dict
 from ..user import ClientUser, User
 from ..webhook.async_ import Webhook, async_context, handle_message_parameters
 
@@ -1093,6 +1093,23 @@ class InteractionResponse:
         if content is not None:
             payload["content"] = str(content)
 
+        is_v2 = False
+        if view is not MISSING:
+            payload["components"] = view.to_components()
+        elif components is not MISSING:
+            payload["components"], is_v2 = normalize_components_to_dict(components)
+
+        # set cv2 flag automatically
+        if is_v2:
+            flags = MessageFlags._from_value(0 if flags is MISSING else flags.value)
+            flags.is_components_v2 = True
+        # components v2 cannot be used with other content fields
+        if flags and flags.is_components_v2 and (content or embeds or poll):
+            raise ValueError("Cannot use v2 components with content, embeds, or polls")
+
+        if poll is not MISSING:
+            payload["poll"] = poll._to_dict()
+
         if suppress_embeds is not MISSING or ephemeral is not MISSING:
             flags = MessageFlags._from_value(0 if flags is MISSING else flags.value)
             if suppress_embeds is not MISSING:
@@ -1101,14 +1118,6 @@ class InteractionResponse:
                 flags.ephemeral = ephemeral
         if flags is not MISSING:
             payload["flags"] = flags.value
-
-        if view is not MISSING:
-            payload["components"] = view.to_components()
-
-        if components is not MISSING:
-            payload["components"] = components_to_dict(components)
-        if poll is not MISSING:
-            payload["poll"] = poll._to_dict()
 
         parent = self._parent
         adapter = async_context.get()
@@ -1298,12 +1307,24 @@ class InteractionResponse:
         if view is not MISSING and components is not MISSING:
             raise TypeError("cannot mix view and components keyword arguments")
 
+        is_v2 = False
         if view is not MISSING:
             state.prevent_view_updates_for(message.id)
             payload["components"] = [] if view is None else view.to_components()
+        elif components is not MISSING:
+            if components:
+                payload["components"], is_v2 = normalize_components_to_dict(components)
+            else:
+                payload["components"] = []
 
-        if components is not MISSING:
-            payload["components"] = [] if components is None else components_to_dict(components)
+        flags = None  # FIXME: temporary, add `flags` parameter and add to payload
+        # set cv2 flag automatically
+        if is_v2:
+            flags = MessageFlags._from_value(0 if flags is None else flags.value)
+            flags.is_components_v2 = True
+        # components v2 cannot be used with other content fields
+        if flags and flags.is_components_v2 and (content or embeds):
+            raise ValueError("Cannot use v2 components with content or embeds")
 
         adapter = async_context.get()
         response_type = InteractionResponseType.message_update

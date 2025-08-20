@@ -188,12 +188,6 @@ async def _edit_handler(
                 files = files or []
                 files.extend(embed._files.values())
 
-    if suppress_embeds is not MISSING:
-        flags = MessageFlags._from_value(default_flags if flags is MISSING else flags.value)
-        flags.suppress_embeds = suppress_embeds
-    if flags is not MISSING:
-        payload["flags"] = flags.value
-
     if allowed_mentions is MISSING:
         if previous_allowed_mentions:
             payload["allowed_mentions"] = previous_allowed_mentions.to_dict()
@@ -216,10 +210,30 @@ async def _edit_handler(
         else:
             payload["components"] = []
 
+    is_v2 = False
     if components is not MISSING:
-        from .ui.action_row import components_to_dict
+        from .ui.action_row import normalize_components_to_dict
 
-        payload["components"] = [] if components is None else components_to_dict(components)
+        if components:
+            payload["components"], is_v2 = normalize_components_to_dict(components)
+        else:
+            payload["components"] = []
+
+    # set cv2 flag automatically
+    if is_v2:
+        flags = MessageFlags._from_value(0 if flags is MISSING else flags.value)
+        flags.is_components_v2 = True
+    # components v2 cannot be used with other content fields
+    # (n.b. this doesn't take into account editing messages that *already* have content/embeds,
+    # since we can't know that for certain with partial messages anyway)
+    if flags and flags.is_components_v2 and (content or embeds):
+        raise ValueError("Cannot use v2 components with content or embeds")
+
+    if suppress_embeds is not MISSING:
+        flags = MessageFlags._from_value(default_flags if flags is MISSING else flags.value)
+        flags.suppress_embeds = suppress_embeds
+    if flags is not MISSING:
+        payload["flags"] = flags.value
 
     try:
         data = await msg._state.http.edit_message(msg.channel.id, msg.id, **payload, files=files)

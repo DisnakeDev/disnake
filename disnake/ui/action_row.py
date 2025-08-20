@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import (
     TYPE_CHECKING,
+    Any,
     ClassVar,
     Generator,
     Generic,
@@ -986,6 +987,9 @@ def normalize_components(
 def normalize_components(
     components: ComponentInput[ActionRowChildT, NonActionRowChildT], /
 ) -> Sequence[Union[ActionRow[ActionRowChildT], NonActionRowChildT]]:
+    """Wraps consecutive actionrow-compatible components or lists in `ActionRow`s,
+    while respecting the width limit. Other components are returned as-is.
+    """
     if not isinstance(components, Sequence):
         components = [components]
 
@@ -1027,13 +1031,20 @@ def normalize_components(
     return result
 
 
-def components_to_dict(
+def normalize_components_to_dict(
     components: ComponentInput[ActionRowChildT, NonActionRowChildT],
-) -> List[MessageTopLevelComponentPayload]:
-    return [
-        cast("MessageTopLevelComponentPayload", c.to_component_dict())
-        for c in normalize_components(components)
-    ]
+) -> Tuple[List[MessageTopLevelComponentPayload], bool]:
+    """`normalize_components`, but also turns components into dicts.
+    Returns ([d1, d2, ...], has_v2_component).
+    """
+    component_payloads: List[Mapping[str, Any]] = []
+    is_v2 = False
+
+    for c in normalize_components(components):
+        component_payloads.append(c.to_component_dict())
+        is_v2 |= c.is_v2
+
+    return cast("List[MessageTopLevelComponentPayload]", component_payloads), is_v2
 
 
 ComponentT = TypeVar("ComponentT", Component, UIComponent)

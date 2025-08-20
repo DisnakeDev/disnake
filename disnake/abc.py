@@ -1712,6 +1712,7 @@ class Messageable:
                     "reference parameter must be Message, MessageReference, or PartialMessage"
                 ) from None
 
+        is_v2 = False
         if view is not None and components is not None:
             raise TypeError("cannot pass both view and components parameter to send()")
         elif view:
@@ -1719,11 +1720,19 @@ class Messageable:
                 raise TypeError(f"view parameter must be View not {view.__class__!r}")
             components_payload = view.to_components()
         elif components:
-            from .ui.action_row import components_to_dict
+            from .ui.action_row import normalize_components_to_dict
 
-            components_payload = components_to_dict(components)
+            components_payload, is_v2 = normalize_components_to_dict(components)
         else:
             components_payload = None
+
+        # set cv2 flag automatically
+        if is_v2:
+            flags = MessageFlags._from_value(0 if flags is None else flags.value)
+            flags.is_components_v2 = True
+        # components v2 cannot be used with other content fields
+        if flags and flags.is_components_v2 and (content or embeds or stickers or poll):
+            raise ValueError("Cannot use v2 components with content, embeds, stickers, or polls")
 
         flags_payload = None
         if suppress_embeds is not None:

@@ -38,7 +38,7 @@ from ..http import Route, set_attachments, to_multipart, to_multipart_with_attac
 from ..message import Message
 from ..mixins import Hashable
 from ..object import Object
-from ..ui.action_row import components_to_dict
+from ..ui.action_row import normalize_components_to_dict
 from ..user import BaseUser, User
 
 __all__ = (
@@ -541,10 +541,23 @@ def handle_message_parameters_dict(
 
     if content is not MISSING:
         payload["content"] = str(content) if content is not None else None
+
+    is_v2 = False
     if view is not MISSING:
         payload["components"] = view.to_components() if view is not None else []
     if components is not MISSING:
-        payload["components"] = [] if components is None else components_to_dict(components)
+        if components:
+            payload["components"], is_v2 = normalize_components_to_dict(components)
+        else:
+            payload["components"] = []
+
+    # set cv2 flag automatically
+    if is_v2:
+        flags = MessageFlags._from_value(0 if flags is MISSING else flags.value)
+        flags.is_components_v2 = True
+    # components v2 cannot be used with other content fields
+    if flags and flags.is_components_v2 and (content or embeds or stickers or poll):
+        raise ValueError("Cannot use v2 components with content, embeds, stickers, or polls")
 
     if attachments is not MISSING:
         payload["attachments"] = [] if attachments is None else [a.to_dict() for a in attachments]
