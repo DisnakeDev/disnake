@@ -27,7 +27,7 @@ class Section(UIComponent):
     Parameters
     ----------
     *components: :class:`~.ui.TextDisplay`
-        The text items in this section.
+        The text items in this section (up to 3).
     accessory: Union[:class:`~.ui.Thumbnail`, :class:`~.ui.Button`]
         The accessory component displayed next to the section text.
     id: :class:`int`
