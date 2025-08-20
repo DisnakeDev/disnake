@@ -1250,29 +1250,29 @@ class Container(Component):
 
     Attributes
     ----------
-    spoiler: :class:`bool`
-        Whether the container is marked as a spoiler. Defaults to ``False``.
     components: List[Union[:class:`ActionRow`, :class:`Section`, :class:`TextDisplay`, :class:`MediaGallery`, :class:`FileComponent`, :class:`Separator`]]
         The components in this container.
+    accent_colour: Optional[:class:`Colour`]
+        The accent colour of the container. An alias exists under ``accent_color``.
+    spoiler: :class:`bool`
+        Whether the container is marked as a spoiler. Defaults to ``False``.
     """
 
     __slots__: Tuple[str, ...] = (
-        "_accent_colour",
-        "spoiler",
-        "components",
-    )
-
-    __repr_info__: ClassVar[Tuple[str, ...]] = (
         "accent_colour",
         "spoiler",
         "components",
     )
 
+    __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+
     def __init__(self, data: ContainerComponentPayload) -> None:
         self.type: Literal[ComponentType.container] = ComponentType.container
         self.id = data.get("id", 0)
 
-        self._accent_colour: Optional[int] = data.get("accent_color")
+        self.accent_colour: Optional[Colour] = (
+            Colour(accent_color) if (accent_color := data.get("accent_color")) is not None else None
+        )
         self.spoiler: bool = data.get("spoiler", False)
 
         components = [_component_factory(d) for d in data.get("components", [])]
@@ -1286,21 +1286,14 @@ class Container(Component):
             "components": [child.to_dict() for child in self.components],
         }
 
-        if self._accent_colour is not None:
-            payload["accent_color"] = self._accent_colour
+        if self.accent_colour is not None:
+            payload["accent_color"] = self.accent_colour.value
 
         return payload
 
     @property
-    def accent_colour(self) -> Optional[Colour]:
-        """Optional[:class:`Colour`]: Returns the accent colour of the container.
-        An alias exists under ``accent_color``.
-        """
-        return Colour(self._accent_colour) if self._accent_colour is not None else None
-
-    @property
     def accent_color(self) -> Optional[Colour]:
-        """Optional[:class:`Colour`]: Returns the accent color of the container.
+        """Optional[:class:`Colour`]: The accent color of the container.
         An alias exists under ``accent_colour``.
         """
         return self.accent_colour

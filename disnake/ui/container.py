@@ -58,6 +58,7 @@ class Container(UIComponent):
         The list of components in this container.
     accent_colour: Optional[:class:`.Colour`]
         The accent colour of the container.
+        An alias exists under ``accent_color``.
     spoiler: :class:`bool`
         Whether the container is marked as a spoiler.
     """
@@ -68,7 +69,6 @@ class Container(UIComponent):
         "spoiler",
     )
 
-    # TODO: consider providing sequence operations (append, insert, remove, etc.)
     def __init__(
         self,
         *components: ContainerChildUIComponent,
@@ -82,8 +82,7 @@ class Container(UIComponent):
         self.components: List[ContainerChildUIComponent] = [
             ensure_ui_component(c, "components") for c in components
         ]
-        # FIXME: add accent_color
-        self.accent_colour: Optional[Colour] = accent_colour
+        self._accent_colour: Optional[Colour] = accent_colour
         self.spoiler: bool = spoiler
 
     # these are reimplemented here to store the value in a separate attribute,
@@ -98,12 +97,29 @@ class Container(UIComponent):
         self._id = value
 
     @property
+    def accent_colour(self) -> Optional[Colour]:
+        return self._accent_colour
+
+    @accent_colour.setter
+    def accent_colour(self, value: Optional[Union[int, Colour]]) -> None:
+        if isinstance(value, int):
+            self._accent_colour = Colour(value)
+        elif value is None or isinstance(value, Colour):
+            self._accent_colour = value
+        else:
+            raise TypeError(
+                f"Expected Colour, int, or None but received {type(value).__name__} instead."
+            )
+
+    accent_color = accent_colour
+
+    @property
     def _underlying(self) -> ContainerComponent:
         return ContainerComponent._raw_construct(
             type=ComponentType.container,
             id=self._id,
             components=[comp._underlying for comp in self.components],
-            _accent_colour=self.accent_colour.value if self.accent_colour is not None else None,
+            accent_colour=self._accent_colour,
             spoiler=self.spoiler,
         )
 
