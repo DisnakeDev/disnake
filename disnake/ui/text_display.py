@@ -15,7 +15,6 @@ if TYPE_CHECKING:
 __all__ = ("TextDisplay",)
 
 
-# XXX: `TextDisplay` vs just `Text`
 class TextDisplay(UIComponent):
     """Represents a UI text display.
 

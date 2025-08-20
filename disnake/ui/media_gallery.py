@@ -53,8 +53,6 @@ class MediaGallery(UIComponent):
     @classmethod
     def from_component(cls, media_gallery: MediaGalleryComponent) -> Self:
         return cls(
-            # FIXME: this might not work with items created with `attachment://`
-            # XXX: consider copying items
             *media_gallery.items,
             id=media_gallery.id,
         )

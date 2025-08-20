@@ -93,7 +93,6 @@ class Thumbnail(UIComponent):
     @classmethod
     def from_component(cls, thumbnail: ThumbnailComponent) -> Self:
         return cls(
-            # FIXME: this might not work with items created with `attachment://`
             media=thumbnail.media,
             description=thumbnail.description,
             spoiler=thumbnail.spoiler,
