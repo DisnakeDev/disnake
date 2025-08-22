@@ -1620,7 +1620,7 @@ class AutoModActionType(Enum):
     block_member_interaction = 4
     """The rule will prevent the user from using text, voice, or other interactions.
 
-    .. versionadded:: 2.10
+    .. versionadded:: 2.11
     """
 
 
@@ -1648,7 +1648,7 @@ class AutoModEventType(Enum):
     member_update = 2
     """The rule will apply when a member joins or edits their profile.
 
-    .. versionadded:: 2.10
+    .. versionadded:: 2.11
     """
 
 
@@ -1690,7 +1690,7 @@ class AutoModTriggerType(Enum):
 
     This trigger type requires additional :class:`metadata <AutoModTriggerMetadata>`.
 
-    .. versionadded:: 2.10
+    .. versionadded:: 2.11
     """
 
 
