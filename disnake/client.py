@@ -2277,7 +2277,8 @@ class Client:
         if with_expiration:
             utils.warn_deprecated(
                 "Using the `with_expiration` argument is deprecated and will "
-                "result in an error in future versions.",
+                "result in an error in future versions. "
+                "The `expires_at` field is always included now.",
                 stacklevel=2,
             )
 
