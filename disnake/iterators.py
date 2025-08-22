@@ -1333,7 +1333,6 @@ class ChannelPinsIterator(_AsyncIterator["Message"]):
         self.messageable = messageable
         self._state = messageable._state
         self.channel: Optional[MessageableChannel] = None
-        self.channel_id: Optional[int] = None
         self.limit = limit
         self.before: Optional[str] = before_
 
@@ -1348,7 +1347,6 @@ class ChannelPinsIterator(_AsyncIterator["Message"]):
     async def next(self) -> Message:
         if self.channel is None:
             self.channel = await self.messageable._get_channel()
-            self.channel_id = self.channel.id
 
         if self.messages.empty():
             await self.fill_messages()
@@ -1363,13 +1361,13 @@ class ChannelPinsIterator(_AsyncIterator["Message"]):
         return self.retrieve > 0
 
     async def fill_messages(self) -> None:
-        if self.channel_id is None or self.channel is None:
+        if self.channel is None:
             # should never happen
             raise RuntimeError("The library has a bug. Contact a maintainer!")
 
         if self._get_retrieve():
             data = await self.getter(
-                channel_id=self.channel_id,
+                channel_id=self.channel.id,
                 before=self.before,
                 limit=self.retrieve,
             )
