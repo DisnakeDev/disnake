@@ -709,6 +709,8 @@ class MessageFlags(BaseFlags):
         Messages with this flag will use specific components for content layout,
         instead of :attr:`~Message.content` and :attr:`~Message.embeds`.
 
+        Note that once this flag is set on a message, it cannot be reverted.
+
         .. versionadded:: 2.11
         """
         return 1 << 15

@@ -37,7 +37,8 @@ class Modal:
     title: :class:`str`
         The title of the modal.
     components: |components_type|
-        The components to display in the modal. Up to 5 action rows.
+        The components to display in the modal. A maximum of 5.
+        Currently only supports :class:`.ui.TextInput` (optionally inside :class:`.ui.ActionRow`).
     custom_id: :class:`str`
         The custom ID of the modal. This is usually not required.
         If not given, then a unique one is generated for you.

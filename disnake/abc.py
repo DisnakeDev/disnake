@@ -1614,6 +1614,11 @@ class Messageable:
 
             .. versionadded:: 2.4
 
+            .. note::
+                Passing v2 components here automatically sets the :attr:`~.MessageFlags.is_components_v2` flag.
+                Setting this flag cannot be reverted. Note that this also disables the
+                ``content``, ``embeds``, ``stickers``, and ``poll`` fields.
+
         suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This hides
             all the embeds from the UI if set to ``True``.
@@ -1648,7 +1653,8 @@ class Messageable:
             or the ``reference`` object is not a :class:`.Message`,
             :class:`.MessageReference` or :class:`.PartialMessage`.
         ValueError
-            The ``files`` or ``embeds`` list is too large.
+            The ``files`` or ``embeds`` list is too large, or
+            you tried to send v2 components together with ``content``, ``embeds``, ``stickers``, or ``poll``.
 
         Returns
         -------

@@ -499,6 +499,12 @@ class Interaction(Generic[ClientT]):
 
             .. versionadded:: 2.4
 
+            .. note::
+                Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
+                Setting this flag cannot be reverted. Note that this also disables the
+                ``content`` and ``embeds`` fields.
+                If the message previously had any of these fields set, you must set them to ``None``.
+
         poll: :class:`Poll`
             A poll. This can only be sent after a defer. If not used after a defer the
             discord API ignore the field.
@@ -543,9 +549,10 @@ class Interaction(Generic[ClientT]):
         Forbidden
             Edited a message that is not yours.
         TypeError
-            You specified both ``embed`` and ``embeds`` or ``file`` and ``files``
+            You specified both ``embed`` and ``embeds`` or ``file`` and ``files``.
         ValueError
-            The length of ``embeds`` was invalid.
+            The length of ``embeds`` was invalid, or
+            you tried to send v2 components together with ``content`` or ``embeds``.
 
         Returns
         -------
@@ -727,6 +734,11 @@ class Interaction(Generic[ClientT]):
 
             .. versionadded:: 2.4
 
+            .. note::
+                Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
+                Setting this flag cannot be reverted. Note that this also disables the
+                ``content``, ``embeds``, and ``poll`` fields.
+
         ephemeral: :class:`bool`
             Whether the message should only be visible to the user who started the interaction.
             If a view is sent with an ephemeral message and it has no timeout set then the timeout
@@ -770,7 +782,8 @@ class Interaction(Generic[ClientT]):
         TypeError
             You specified both ``embed`` and ``embeds``.
         ValueError
-            The length of ``embeds`` was invalid.
+            The length of ``embeds`` was invalid, or
+            you tried to send v2 components together with ``content``, ``embeds``, or ``poll``.
         """
         if self.response._response_type is not None:
             sender = self.followup.send
@@ -995,6 +1008,11 @@ class InteractionResponse:
 
             .. versionadded:: 2.4
 
+            .. note::
+                Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
+                Setting this flag cannot be reverted. Note that this also disables the
+                ``content``, ``embeds``, and ``poll`` fields.
+
         tts: :class:`bool`
             Whether the message should be sent using text-to-speech.
         ephemeral: :class:`bool`
@@ -1041,7 +1059,8 @@ class InteractionResponse:
         TypeError
             You specified both ``embed`` and ``embeds``.
         ValueError
-            The length of ``embeds`` was invalid.
+            The length of ``embeds`` was invalid, or
+            you tried to send v2 components together with ``content``, ``embeds``, or ``poll``.
         InteractionResponded
             This interaction has already been responded to before.
         """
@@ -1225,6 +1244,12 @@ class InteractionResponse:
 
             .. versionadded:: 2.4
 
+            .. note::
+                Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
+                Setting this flag cannot be reverted. Note that this also disables the
+                ``content`` and ``embeds`` fields.
+                If the message previously had any of these fields set, you must set them to ``None``.
+
         flags: :class:`MessageFlags`
             The new flags to set for this message. Overrides existing flags.
             Only :attr:`~MessageFlags.suppress_embeds` is supported.
@@ -1250,6 +1275,8 @@ class InteractionResponse:
             Editing the message failed.
         TypeError
             You specified both ``embed`` and ``embeds``.
+        ValueError
+            You tried to send v2 components together with ``content`` or ``embeds``.
         InteractionResponded
             This interaction has already been responded to before.
         """
@@ -1457,6 +1484,7 @@ class InteractionResponse:
             This cannot be mixed with the ``modal`` parameter.
         components: |components_type|
             The components to display in the modal. A maximum of 5.
+            Currently only supports :class:`ui.TextInput` (optionally inside :class:`ui.ActionRow`).
             This cannot be mixed with the ``modal`` parameter.
 
         Raises
@@ -1792,6 +1820,12 @@ class InteractionMessage(Message):
 
             .. versionadded:: 2.4
 
+            .. note::
+                Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
+                Setting this flag cannot be reverted. Note that this also disables the
+                ``content`` and ``embeds`` fields.
+                If the message previously had any of these fields set, you must set them to ``None``.
+
         suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This hides
             all the embeds from the UI if set to ``True``. If set
@@ -1829,9 +1863,10 @@ class InteractionMessage(Message):
         Forbidden
             Edited a message that is not yours.
         TypeError
-            You specified both ``embed`` and ``embeds`` or ``file`` and ``files``
+            You specified both ``embed`` and ``embeds`` or ``file`` and ``files``.
         ValueError
-            The length of ``embeds`` was invalid.
+            The length of ``embeds`` was invalid, or
+            you tried to send v2 components together with ``content`` or ``embeds``.
 
         Returns
         -------

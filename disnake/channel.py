@@ -3643,6 +3643,12 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
             A Discord UI View to add to the message. This cannot be mixed with ``components``.
         components: |components_type|
             A list of components to include in the message. This cannot be mixed with ``view``.
+
+            .. note::
+                Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
+                Setting this flag cannot be reverted. Note that this also disables the
+                ``content``, ``embeds``, and ``stickers`` fields.
+
         reason: Optional[:class:`str`]
             The reason for creating the thread. Shows up on the audit log.
 
@@ -3655,11 +3661,11 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         TypeError
             Specified both ``file`` and ``files``,
             or you specified both ``embed`` and ``embeds``,
-            or you specified both ``view`` and ``components``.
+            or you specified both ``view`` and ``components``,
             or you have passed an object that is not :class:`File` to ``file`` or ``files``.
         ValueError
-            Specified more than 10 embeds,
-            or more than 10 files.
+            Specified more than 10 embeds, or more than 10 files, or
+            you tried to send v2 components together with ``content``, ``embeds``, or ``stickers``.
 
         Returns
         -------

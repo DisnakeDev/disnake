@@ -2058,6 +2058,12 @@ class Message(Hashable):
 
             .. versionadded:: 2.4
 
+            .. note::
+                Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
+                Setting this flag cannot be reverted. Note that this also disables the
+                ``content`` and ``embeds`` fields.
+                If the message previously had any of these fields set, you must set them to ``None``.
+
         Raises
         ------
         HTTPException
@@ -2067,6 +2073,8 @@ class Message(Hashable):
             edited a message's content or embed that isn't yours.
         TypeError
             You specified both ``embed`` and ``embeds``, or ``file`` and ``files``, or ``view`` and ``components``.
+        ValueError
+            You tried to send v2 components together with ``content`` or ``embeds``.
 
         Returns
         -------
@@ -2822,6 +2830,12 @@ class PartialMessage(Hashable):
 
             .. versionadded:: 2.4
 
+            .. note::
+                Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
+                Setting this flag cannot be reverted. Note that this also disables the
+                ``content`` and ``embeds`` fields.
+                If the message previously had any of these fields set, you must set them to ``None``.
+
         Raises
         ------
         NotFound
@@ -2833,6 +2847,8 @@ class PartialMessage(Hashable):
             edited a message's content or embed that isn't yours.
         TypeError
             You specified both ``embed`` and ``embeds``, or ``file`` and ``files``, or ``view`` and ``components``.
+        ValueError
+            You tried to send v2 components together with ``content`` or ``embeds``.
 
         Returns
         -------

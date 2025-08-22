@@ -868,6 +868,12 @@ class WebhookMessage(Message):
 
             .. versionadded:: 2.4
 
+            .. note::
+                Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
+                Setting this flag cannot be reverted. Note that this also disables the
+                ``content`` and ``embeds`` fields.
+                If the message previously had any of these fields set, you must set them to ``None``.
+
         flags: :class:`MessageFlags`
             The new flags to set for this message. Overrides existing flags.
             Only :attr:`~MessageFlags.suppress_embeds` is supported.
@@ -885,9 +891,10 @@ class WebhookMessage(Message):
         Forbidden
             Edited a message that is not yours.
         TypeError
-            You specified both ``embed`` and ``embeds`` or ``file`` and ``files``
+            You specified both ``embed`` and ``embeds`` or ``file`` and ``files``.
         ValueError
-            The length of ``embeds`` was invalid
+            The length of ``embeds`` was invalid, or
+            you tried to send v2 components together with ``content`` or ``embeds``.
         WebhookTokenMissing
             There was no token associated with this webhook.
 
@@ -1654,6 +1661,11 @@ class Webhook(BaseWebhook):
 
             .. versionadded:: 2.4
 
+            .. note::
+                Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
+                Setting this flag cannot be reverted. Note that this also disables the
+                ``content``, ``embeds``, and ``poll`` fields.
+
         thread: :class:`~disnake.abc.Snowflake`
             The thread to send this message to.
 
@@ -1727,7 +1739,8 @@ class Webhook(BaseWebhook):
         WebhookTokenMissing
             There was no token associated with this webhook.
         ValueError
-            The length of ``embeds`` was invalid.
+            The length of ``embeds`` was invalid, or
+            you tried to send v2 components together with ``content``, ``embeds``, or ``poll``.
 
         Returns
         -------
@@ -1945,10 +1958,17 @@ class Webhook(BaseWebhook):
 
             .. versionadded:: 2.0
 
-        components: |components_type|
+        components: Optional[|components_type|]
             A list of components to update this message with. This cannot be mixed with ``view``.
+            If ``None`` is passed then the components are removed.
 
             .. versionadded:: 2.4
+
+            .. note::
+                Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
+                Setting this flag cannot be reverted. Note that this also disables the
+                ``content`` and ``embeds`` fields.
+                If the message previously had any of these fields set, you must set them to ``None``.
 
         flags: :class:`MessageFlags`
             The new flags to set for this message. Overrides existing flags.
@@ -1977,7 +1997,8 @@ class Webhook(BaseWebhook):
         WebhookTokenMissing
             There was no token associated with this webhook.
         ValueError
-            The length of ``embeds`` was invalid
+            The length of ``embeds`` was invalid, or
+            you tried to send v2 components together with ``content`` or ``embeds``.
 
         Returns
         -------
