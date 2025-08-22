@@ -173,7 +173,6 @@ class Emoji(_EmojiTag, AssetMixin):
             This can now return ``None`` if the emoji is an
             application owned emoji.
         """
-        # this will most likely never return None but there's a possibility
         return self._state._get_guild(self.guild_id)
 
     @property
