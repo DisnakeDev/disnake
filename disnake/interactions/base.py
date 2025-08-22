@@ -1151,9 +1151,10 @@ class InteractionResponse:
         file: File = MISSING,
         files: List[File] = MISSING,
         attachments: Optional[List[Attachment]] = MISSING,
-        allowed_mentions: AllowedMentions = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[Components[MessageUIComponent]] = MISSING,
+        flags: MessageFlags = MISSING,
+        allowed_mentions: AllowedMentions = MISSING,
         delete_after: Optional[float] = None,
     ) -> None:
         """|coro|
@@ -1206,8 +1207,6 @@ class InteractionResponse:
             .. versionchanged:: 2.5
                 Supports passing ``None`` to clear attachments.
 
-        allowed_mentions: :class:`AllowedMentions`
-            Controls the mentions being processed in this message.
         view: Optional[:class:`~disnake.ui.View`]
             The updated view to update this message with. This cannot be mixed with ``components``.
             If ``None`` is passed then the view is removed.
@@ -1216,6 +1215,15 @@ class InteractionResponse:
             If ``None`` is passed then the components are removed.
 
             .. versionadded:: 2.4
+
+        flags: :class:`MessageFlags`
+            The new flags to set for this message. Overrides existing flags.
+            Only :attr:`~MessageFlags.suppress_embeds` is supported.
+
+            .. versionadded:: 2.11
+
+        allowed_mentions: :class:`AllowedMentions`
+            Controls the mentions being processed in this message.
 
         delete_after: Optional[:class:`float`]
             If provided, the number of seconds to wait in the background
@@ -1304,6 +1312,9 @@ class InteractionResponse:
 
         if components is not MISSING:
             payload["components"] = [] if components is None else components_to_dict(components)
+
+        if flags is not MISSING:
+            payload["flags"] = flags.value
 
         adapter = async_context.get()
         response_type = InteractionResponseType.message_update
