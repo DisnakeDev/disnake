@@ -9,6 +9,7 @@ from typing import (
     Dict,
     Generic,
     List,
+    Literal,
     Optional,
     Tuple,
     Type,
@@ -17,22 +18,31 @@ from typing import (
     cast,
 )
 
-from .enums import ButtonStyle, ChannelType, ComponentType, TextInputStyle, try_enum
+from .enums import (
+    ButtonStyle,
+    ChannelType,
+    ComponentType,
+    SelectDefaultValueType,
+    TextInputStyle,
+    try_enum,
+)
 from .partial_emoji import PartialEmoji, _EmojiTag
-from .utils import MISSING, assert_never, get_slots
+from .utils import MISSING, _get_as_snowflake, assert_never, get_slots
 
 if TYPE_CHECKING:
-    from typing_extensions import Self
+    from typing_extensions import Self, TypeAlias
 
     from .emoji import Emoji
     from .types.components import (
         ActionRow as ActionRowPayload,
+        AnySelectMenu as AnySelectMenuPayload,
         BaseSelectMenu as BaseSelectMenuPayload,
         ButtonComponent as ButtonComponentPayload,
         ChannelSelectMenu as ChannelSelectMenuPayload,
         Component as ComponentPayload,
         MentionableSelectMenu as MentionableSelectMenuPayload,
         RoleSelectMenu as RoleSelectMenuPayload,
+        SelectDefaultValue as SelectDefaultValuePayload,
         SelectOption as SelectOptionPayload,
         StringSelectMenu as StringSelectMenuPayload,
         TextInput as TextInputPayload,
@@ -51,6 +61,7 @@ __all__ = (
     "MentionableSelectMenu",
     "ChannelSelectMenu",
     "SelectOption",
+    "SelectDefaultValue",
     "TextInput",
 )
 
@@ -63,12 +74,16 @@ AnySelectMenu = Union[
     "MentionableSelectMenu",
     "ChannelSelectMenu",
 ]
+
+SelectMenuType = Literal[
+    ComponentType.string_select,
+    ComponentType.user_select,
+    ComponentType.role_select,
+    ComponentType.mentionable_select,
+    ComponentType.channel_select,
+]
+
 MessageComponent = Union["Button", "AnySelectMenu"]
-
-if TYPE_CHECKING:  # TODO: remove when we add modal select support
-    from typing_extensions import TypeAlias
-
-# ModalComponent = Union["TextInput", "AnySelectMenu"]
 ModalComponent: TypeAlias = "TextInput"
 
 NestedComponent = Union[MessageComponent, ModalComponent]
@@ -131,8 +146,6 @@ class ActionRow(Component, Generic[ComponentT]):
 
     Attributes
     ----------
-    type: :class:`ComponentType`
-        The type of component.
     children: List[Union[:class:`Button`, :class:`BaseSelectMenu`, :class:`TextInput`]]
         The children components that this holds, if any.
     """
@@ -142,10 +155,9 @@ class ActionRow(Component, Generic[ComponentT]):
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
 
     def __init__(self, data: ActionRowPayload) -> None:
-        self.type: ComponentType = try_enum(ComponentType, data["type"])
-        self.children: List[ComponentT] = [
-            _component_factory(d) for d in data.get("components", [])
-        ]
+        self.type: Literal[ComponentType.action_row] = ComponentType.action_row
+        children = [_component_factory(d) for d in data.get("components", [])]
+        self.children: List[ComponentT] = children  # type: ignore
 
     def to_dict(self) -> ActionRowPayload:
         return {
@@ -172,7 +184,7 @@ class Button(Component):
         The style of the button.
     custom_id: Optional[:class:`str`]
         The ID of the button that gets received during an interaction.
-        If this button is for a URL, it does not have a custom ID.
+        If this button is for a URL or an SKU, it does not have a custom ID.
     url: Optional[:class:`str`]
         The URL this button sends you to.
     disabled: :class:`bool`
@@ -181,6 +193,11 @@ class Button(Component):
         The label of the button, if any.
     emoji: Optional[:class:`PartialEmoji`]
         The emoji of the button, if available.
+    sku_id: Optional[:class:`int`]
+        The ID of a purchasable SKU, for premium buttons.
+        Premium buttons additionally cannot have a ``label``, ``url``, or ``emoji``.
+
+        .. versionadded:: 2.11
     """
 
     __slots__: Tuple[str, ...] = (
@@ -190,12 +207,13 @@ class Button(Component):
         "disabled",
         "label",
         "emoji",
+        "sku_id",
     )
 
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
 
     def __init__(self, data: ButtonComponentPayload) -> None:
-        self.type: ComponentType = try_enum(ComponentType, data["type"])
+        self.type: Literal[ComponentType.button] = ComponentType.button
         self.style: ButtonStyle = try_enum(ButtonStyle, data["style"])
         self.custom_id: Optional[str] = data.get("custom_id")
         self.url: Optional[str] = data.get("url")
@@ -207,9 +225,11 @@ class Button(Component):
         except KeyError:
             self.emoji = None
 
+        self.sku_id: Optional[int] = _get_as_snowflake(data, "sku_id")
+
     def to_dict(self) -> ButtonComponentPayload:
         payload: ButtonComponentPayload = {
-            "type": 2,
+            "type": self.type.value,
             "style": self.style.value,
             "disabled": self.disabled,
         }
@@ -225,6 +245,9 @@ class Button(Component):
 
         if self.emoji:
             payload["emoji"] = self.emoji.to_dict()
+
+        if self.sku_id:
+            payload["sku_id"] = self.sku_id
 
         return payload
 
@@ -261,6 +284,12 @@ class BaseSelectMenu(Component):
         A list of options that can be selected in this select menu.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
+    default_values: List[:class:`SelectDefaultValue`]
+        The list of values (users/roles/channels) that are selected by default.
+        If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
+        Only available for auto-populated select menus.
+
+        .. versionadded:: 2.10
     """
 
     __slots__: Tuple[str, ...] = (
@@ -269,17 +298,27 @@ class BaseSelectMenu(Component):
         "min_values",
         "max_values",
         "disabled",
+        "default_values",
     )
 
-    __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+    # FIXME: this isn't pretty; we should decouple __repr__ from slots
+    __repr_info__: ClassVar[Tuple[str, ...]] = tuple(s for s in __slots__ if s != "default_values")
 
-    def __init__(self, data: BaseSelectMenuPayload) -> None:
-        self.type: ComponentType = try_enum(ComponentType, data["type"])
+    # n.b: ideally this would be `BaseSelectMenuPayload`,
+    # but pyright made TypedDict keys invariant and doesn't
+    # fully support readonly items yet (which would help avoid this)
+    def __init__(self, data: AnySelectMenuPayload) -> None:
+        component_type = try_enum(ComponentType, data["type"])
+        self.type: SelectMenuType = component_type  # type: ignore
+
         self.custom_id: str = data["custom_id"]
         self.placeholder: Optional[str] = data.get("placeholder")
         self.min_values: int = data.get("min_values", 1)
         self.max_values: int = data.get("max_values", 1)
         self.disabled: bool = data.get("disabled", False)
+        self.default_values: List[SelectDefaultValue] = [
+            SelectDefaultValue._from_dict(d) for d in (data.get("default_values") or [])
+        ]
 
     def to_dict(self) -> BaseSelectMenuPayload:
         payload: BaseSelectMenuPayload = {
@@ -292,6 +331,9 @@ class BaseSelectMenu(Component):
 
         if self.placeholder:
             payload["placeholder"] = self.placeholder
+
+        if self.default_values:
+            payload["default_values"] = [v.to_dict() for v in self.default_values]
 
         return payload
 
@@ -329,6 +371,7 @@ class StringSelectMenu(BaseSelectMenu):
     __slots__: Tuple[str, ...] = ("options",)
 
     __repr_info__: ClassVar[Tuple[str, ...]] = BaseSelectMenu.__repr_info__ + __slots__
+    type: Literal[ComponentType.string_select]
 
     def __init__(self, data: StringSelectMenuPayload) -> None:
         super().__init__(data)
@@ -368,9 +411,16 @@ class UserSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
+    default_values: List[:class:`SelectDefaultValue`]
+        The list of values (users/members) that are selected by default.
+        If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
+
+        .. versionadded:: 2.10
     """
 
     __slots__: Tuple[str, ...] = ()
+
+    type: Literal[ComponentType.user_select]
 
     if TYPE_CHECKING:
 
@@ -401,9 +451,16 @@ class RoleSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
+    default_values: List[:class:`SelectDefaultValue`]
+        The list of values (roles) that are selected by default.
+        If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
+
+        .. versionadded:: 2.10
     """
 
     __slots__: Tuple[str, ...] = ()
+
+    type: Literal[ComponentType.role_select]
 
     if TYPE_CHECKING:
 
@@ -434,9 +491,16 @@ class MentionableSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
+    default_values: List[:class:`SelectDefaultValue`]
+        The list of values (users/roles) that are selected by default.
+        If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
+
+        .. versionadded:: 2.10
     """
 
     __slots__: Tuple[str, ...] = ()
+
+    type: Literal[ComponentType.mentionable_select]
 
     if TYPE_CHECKING:
 
@@ -470,11 +534,17 @@ class ChannelSelectMenu(BaseSelectMenu):
     channel_types: Optional[List[:class:`ChannelType`]]
         A list of channel types that can be selected in this select menu.
         If ``None``, channels of all types may be selected.
+    default_values: List[:class:`SelectDefaultValue`]
+        The list of values (channels) that are selected by default.
+        If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
+
+        .. versionadded:: 2.10
     """
 
     __slots__: Tuple[str, ...] = ("channel_types",)
 
     __repr_info__: ClassVar[Tuple[str, ...]] = BaseSelectMenu.__repr_info__ + __slots__
+    type: Literal[ComponentType.channel_select]
 
     def __init__(self, data: ChannelSelectMenuPayload) -> None:
         super().__init__(data)
@@ -597,6 +667,42 @@ class SelectOption:
         return payload
 
 
+class SelectDefaultValue:
+    """Represents a default value of an auto-populated select menu (currently all
+    select menu types except :class:`StringSelectMenu`).
+
+    Depending on the :attr:`type` attribute, this can represent different types of objects.
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    id: :class:`int`
+        The ID of the target object.
+    type: :class:`SelectDefaultValueType`
+        The type of the target object.
+    """
+
+    __slots__: Tuple[str, ...] = ("id", "type")
+
+    def __init__(self, id: int, type: SelectDefaultValueType) -> None:
+        self.id: int = id
+        self.type: SelectDefaultValueType = type
+
+    @classmethod
+    def _from_dict(cls, data: SelectDefaultValuePayload) -> Self:
+        return cls(int(data["id"]), try_enum(SelectDefaultValueType, data["type"]))
+
+    def to_dict(self) -> SelectDefaultValuePayload:
+        return {
+            "id": self.id,
+            "type": self.type.value,
+        }
+
+    def __repr__(self) -> str:
+        return f"<SelectDefaultValue id={self.id!r} type={self.type.value!r}>"
+
+
 class TextInput(Component):
     """Represents a text input from the Discord Bot UI Kit.
 
@@ -643,7 +749,7 @@ class TextInput(Component):
     def __init__(self, data: TextInputPayload) -> None:
         style = data.get("style", TextInputStyle.short.value)
 
-        self.type: ComponentType = try_enum(ComponentType, data["type"])
+        self.type: Literal[ComponentType.text_input] = ComponentType.text_input
         self.custom_id: str = data["custom_id"]
         self.style: TextInputStyle = try_enum(TextInputStyle, style)
         self.label: Optional[str] = data.get("label")

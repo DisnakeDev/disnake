@@ -27,7 +27,12 @@ from typing import (
 )
 
 import disnake
-from disnake.utils import _generated, _overload_with_permissions
+from disnake.utils import (
+    _generated,
+    _overload_with_permissions,
+    get_signature_parameters,
+    unwrap_function,
+)
 
 from ._types import _BaseCommand
 from .cog import Cog
@@ -62,7 +67,7 @@ if TYPE_CHECKING:
 
     from disnake.message import Message
 
-    from ._types import Check, Coro, CoroFunc, Error, Hook
+    from ._types import AppCheck, Check, Coro, CoroFunc, Error, Hook
 
 
 __all__ = (
@@ -76,6 +81,8 @@ __all__ = (
     "has_any_role",
     "check",
     "check_any",
+    "app_check",
+    "app_check_any",
     "before_invoke",
     "after_invoke",
     "bot_has_role",
@@ -112,42 +119,6 @@ if TYPE_CHECKING:
     ]
 else:
     P = TypeVar("P")
-
-
-def unwrap_function(function: Callable[..., Any]) -> Callable[..., Any]:
-    partial = functools.partial
-    while True:
-        if hasattr(function, "__wrapped__"):
-            function = function.__wrapped__
-        elif isinstance(function, partial):
-            function = function.func
-        else:
-            return function
-
-
-def get_signature_parameters(
-    function: Callable[..., Any], globalns: Dict[str, Any]
-) -> Dict[str, inspect.Parameter]:
-    signature = inspect.signature(function)
-    params = {}
-    cache: Dict[str, Any] = {}
-    eval_annotation = disnake.utils.evaluate_annotation
-    for name, parameter in signature.parameters.items():
-        annotation = parameter.annotation
-        if annotation is parameter.empty:
-            params[name] = parameter
-            continue
-        if annotation is None:
-            params[name] = parameter.replace(annotation=type(None))
-            continue
-
-        annotation = eval_annotation(annotation, globalns, globalns, cache)
-        if annotation is Greedy:
-            raise TypeError("Unparameterized Greedy[...] is disallowed in signature.")
-
-        params[name] = parameter.replace(annotation=annotation)
-
-    return params
 
 
 def wrap_callback(coro):
@@ -410,7 +381,11 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         except AttributeError:
             globalns = {}
 
-        self.params = get_signature_parameters(function, globalns)
+        params = get_signature_parameters(function, globalns, skip_standard_params=True)
+        for param in params.values():
+            if param.annotation is Greedy:
+                raise TypeError("Unparameterized Greedy[...] is disallowed in signature.")
+        self.params = params
 
     def add_check(self, func: Check) -> None:
         """Adds a check to the command.
@@ -632,21 +607,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
         Useful for inspecting signature.
         """
-        result = self.params.copy()
-        if self.cog is not None:
-            # first parameter is self
-            try:
-                del result[next(iter(result))]
-            except StopIteration:
-                raise ValueError("missing 'self' parameter") from None
-
-        try:
-            # first/second parameter is context
-            del result[next(iter(result))]
-        except StopIteration:
-            raise ValueError("missing 'context' parameter") from None
-
-        return result
+        return self.params.copy()
 
     @property
     def full_parent_name(self) -> str:
@@ -718,27 +679,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         kwargs = ctx.kwargs
 
         view = ctx.view
-        iterator = iter(self.params.items())
-
-        if self.cog is not None:
-            # we have 'self' as the first parameter so just advance
-            # the iterator and resume parsing
-            try:
-                next(iterator)
-            except StopIteration:
-                raise disnake.ClientException(
-                    f'Callback for {self.name} command is missing "self" parameter.'
-                ) from None
-
-        # next we have the 'ctx' as the next parameter
-        try:
-            next(iterator)
-        except StopIteration:
-            raise disnake.ClientException(
-                f'Callback for {self.name} command is missing "ctx" parameter.'
-            ) from None
-
-        for name, param in iterator:
+        for name, param in self.params.items():
             ctx.current_parameter = param
             if param.kind in (param.POSITIONAL_OR_KEYWORD, param.POSITIONAL_ONLY):
                 transformed = await self.transform(ctx, param)
@@ -814,7 +755,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             dt = ctx.message.edited_at or ctx.message.created_at
             current = dt.replace(tzinfo=datetime.timezone.utc).timestamp()
             bucket = self._buckets.get_bucket(ctx.message, current)
-            if bucket is not None:
+            if bucket is not None:  # pyright: ignore[reportUnnecessaryComparison]
                 retry_after = bucket.update_rate_limit(current)
                 if retry_after:
                     raise CommandOnCooldown(bucket, retry_after, self._buckets.type)  # type: ignore
@@ -1034,7 +975,9 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         return ""
 
     def _is_typing_optional(self, annotation: Union[T, Optional[T]]) -> TypeGuard[Optional[T]]:
-        return getattr(annotation, "__origin__", None) is Union and type(None) in annotation.__args__  # type: ignore
+        return (
+            getattr(annotation, "__origin__", None) is Union and type(None) in annotation.__args__  # type: ignore
+        )
 
     @property
     def signature(self) -> str:
@@ -1322,8 +1265,7 @@ class GroupMixin(Generic[CogT]):
         cls: Type[CommandT],
         *args: Any,
         **kwargs: Any,
-    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]:
-        ...
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]: ...
 
     @overload
     def command(
@@ -1332,8 +1274,7 @@ class GroupMixin(Generic[CogT]):
         *args: Any,
         cls: Type[CommandT],
         **kwargs: Any,
-    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]:
-        ...
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]: ...
 
     @overload
     def command(
@@ -1341,8 +1282,7 @@ class GroupMixin(Generic[CogT]):
         name: str = ...,
         *args: Any,
         **kwargs: Any,
-    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Command[CogT, P, T]]:
-        ...
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Command[CogT, P, T]]: ...
 
     def command(
         self,
@@ -1375,8 +1315,7 @@ class GroupMixin(Generic[CogT]):
         cls: Type[GroupT],
         *args: Any,
         **kwargs: Any,
-    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]:
-        ...
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]: ...
 
     @overload
     def group(
@@ -1385,8 +1324,7 @@ class GroupMixin(Generic[CogT]):
         *args: Any,
         cls: Type[GroupT],
         **kwargs: Any,
-    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]:
-        ...
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]: ...
 
     @overload
     def group(
@@ -1394,8 +1332,7 @@ class GroupMixin(Generic[CogT]):
         name: str = ...,
         *args: Any,
         **kwargs: Any,
-    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Group[CogT, P, T]]:
-        ...
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Group[CogT, P, T]]: ...
 
     def group(
         self,
@@ -1542,25 +1479,23 @@ if TYPE_CHECKING:
         @overload
         def __call__(
             self, func: Callable[Concatenate[ContextT, P], Coro[T]]
-        ) -> Command[None, P, T]:
-            ...
+        ) -> Command[None, P, T]: ...
 
         @overload
         def __call__(
             self, func: Callable[Concatenate[CogT, ContextT, P], Coro[T]]
-        ) -> Command[CogT, P, T]:
-            ...
+        ) -> Command[CogT, P, T]: ...
 
     class GroupDecorator(Protocol):
         @overload
-        def __call__(self, func: Callable[Concatenate[ContextT, P], Coro[T]]) -> Group[None, P, T]:
-            ...
+        def __call__(
+            self, func: Callable[Concatenate[ContextT, P], Coro[T]]
+        ) -> Group[None, P, T]: ...
 
         @overload
         def __call__(
             self, func: Callable[Concatenate[CogT, ContextT, P], Coro[T]]
-        ) -> Group[CogT, P, T]:
-            ...
+        ) -> Group[CogT, P, T]: ...
 
 
 # Small explanation regarding these overloads:
@@ -1577,8 +1512,7 @@ def command(
     name: str,
     cls: Type[CommandT],
     **attrs: Any,
-) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]:
-    ...
+) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]: ...
 
 
 @overload
@@ -1587,16 +1521,14 @@ def command(
     *,
     cls: Type[CommandT],
     **attrs: Any,
-) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]:
-    ...
+) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]: ...
 
 
 @overload
 def command(
     name: str = ...,
     **attrs: Any,
-) -> CommandDecorator:
-    ...
+) -> CommandDecorator: ...
 
 
 def command(
@@ -1649,8 +1581,7 @@ def group(
     name: str,
     cls: Type[GroupT],
     **attrs: Any,
-) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]:
-    ...
+) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]: ...
 
 
 @overload
@@ -1659,16 +1590,14 @@ def group(
     *,
     cls: Type[GroupT],
     **attrs: Any,
-) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]:
-    ...
+) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]: ...
 
 
 @overload
 def group(
     name: str = ...,
     **attrs: Any,
-) -> GroupDecorator:
-    ...
+) -> GroupDecorator: ...
 
 
 def group(
@@ -1722,6 +1651,9 @@ def check(predicate: Check) -> Callable[[T], T]:
         The function returned by ``predicate`` is **always** a coroutine,
         even if the original function was not a coroutine.
 
+    .. note::
+        See :func:`.app_check` for this function's application command counterpart.
+
     .. versionchanged:: 1.3
         The ``predicate`` attribute was added.
 
@@ -1774,7 +1706,7 @@ def check(predicate: Check) -> Callable[[T], T]:
         decorator.predicate = predicate
     else:
 
-        @functools.wraps(predicate)
+        @functools.wraps(predicate)  # type: ignore
         async def wrapper(ctx):
             return predicate(ctx)  # type: ignore
 
@@ -1793,6 +1725,9 @@ def check_any(*checks: Check) -> Callable[[T], T]:
     .. note::
 
         The ``predicate`` attribute for this function **is** a coroutine.
+
+    .. note::
+        See :func:`.app_check_any` for this function's application command counterpart.
 
     .. versionadded:: 1.3
 
@@ -1848,6 +1783,46 @@ def check_any(*checks: Check) -> Callable[[T], T]:
         raise CheckAnyFailure(unwrapped, errors)
 
     return check(predicate)
+
+
+def app_check(predicate: AppCheck) -> Callable[[T], T]:
+    """Same as :func:`.check`, but for app commands.
+
+    .. versionadded:: 2.10
+
+    Parameters
+    ----------
+    predicate: Callable[[:class:`disnake.ApplicationCommandInteraction`], :class:`bool`]
+        The predicate to check if the command should be invoked.
+    """
+    return check(predicate)  # type: ignore  # impl is the same, typings are different
+
+
+def app_check_any(*checks: AppCheck) -> Callable[[T], T]:
+    """Same as :func:`.check_any`, but for app commands.
+
+    .. note::
+        See :func:`.check_any` for this function's prefix command counterpart.
+
+    .. versionadded:: 2.10
+
+    Parameters
+    ----------
+    *checks: Callable[[:class:`disnake.ApplicationCommandInteraction`], :class:`bool`]
+        An argument list of checks that have been decorated with
+        the :func:`app_check` decorator.
+
+    Raises
+    ------
+    TypeError
+        A check passed has not been decorated with the :func:`app_check`
+        decorator.
+    """
+    try:
+        return check_any(*checks)  # type: ignore  # impl is the same, typings are different
+    except TypeError as e:
+        msg = str(e).replace("commands.check", "commands.app_check")  # fix err message
+        raise TypeError(msg) from None
 
 
 def has_role(item: Union[int, str]) -> Callable[[T], T]:
@@ -2012,7 +1987,9 @@ def has_permissions(
     ban_members: bool = ...,
     change_nickname: bool = ...,
     connect: bool = ...,
+    create_events: bool = ...,
     create_forum_threads: bool = ...,
+    create_guild_expressions: bool = ...,
     create_instant_invite: bool = ...,
     create_private_threads: bool = ...,
     create_public_threads: bool = ...,
@@ -2043,6 +2020,7 @@ def has_permissions(
     request_to_speak: bool = ...,
     send_messages: bool = ...,
     send_messages_in_threads: bool = ...,
+    send_polls: bool = ...,
     send_tts_messages: bool = ...,
     send_voice_messages: bool = ...,
     speak: bool = ...,
@@ -2050,6 +2028,7 @@ def has_permissions(
     stream: bool = ...,
     use_application_commands: bool = ...,
     use_embedded_activities: bool = ...,
+    use_external_apps: bool = ...,
     use_external_emojis: bool = ...,
     use_external_sounds: bool = ...,
     use_external_stickers: bool = ...,
@@ -2060,14 +2039,12 @@ def has_permissions(
     view_channel: bool = ...,
     view_creator_monetization_analytics: bool = ...,
     view_guild_insights: bool = ...,
-) -> Callable[[T], T]:
-    ...
+) -> Callable[[T], T]: ...
 
 
 @overload
 @_generated
-def has_permissions() -> Callable[[T], T]:
-    ...
+def has_permissions() -> Callable[[T], T]: ...
 
 
 @_overload_with_permissions
@@ -2134,7 +2111,9 @@ def bot_has_permissions(
     ban_members: bool = ...,
     change_nickname: bool = ...,
     connect: bool = ...,
+    create_events: bool = ...,
     create_forum_threads: bool = ...,
+    create_guild_expressions: bool = ...,
     create_instant_invite: bool = ...,
     create_private_threads: bool = ...,
     create_public_threads: bool = ...,
@@ -2165,6 +2144,7 @@ def bot_has_permissions(
     request_to_speak: bool = ...,
     send_messages: bool = ...,
     send_messages_in_threads: bool = ...,
+    send_polls: bool = ...,
     send_tts_messages: bool = ...,
     send_voice_messages: bool = ...,
     speak: bool = ...,
@@ -2172,6 +2152,7 @@ def bot_has_permissions(
     stream: bool = ...,
     use_application_commands: bool = ...,
     use_embedded_activities: bool = ...,
+    use_external_apps: bool = ...,
     use_external_emojis: bool = ...,
     use_external_sounds: bool = ...,
     use_external_stickers: bool = ...,
@@ -2182,14 +2163,12 @@ def bot_has_permissions(
     view_channel: bool = ...,
     view_creator_monetization_analytics: bool = ...,
     view_guild_insights: bool = ...,
-) -> Callable[[T], T]:
-    ...
+) -> Callable[[T], T]: ...
 
 
 @overload
 @_generated
-def bot_has_permissions() -> Callable[[T], T]:
-    ...
+def bot_has_permissions() -> Callable[[T], T]: ...
 
 
 @_overload_with_permissions
@@ -2234,7 +2213,9 @@ def has_guild_permissions(
     ban_members: bool = ...,
     change_nickname: bool = ...,
     connect: bool = ...,
+    create_events: bool = ...,
     create_forum_threads: bool = ...,
+    create_guild_expressions: bool = ...,
     create_instant_invite: bool = ...,
     create_private_threads: bool = ...,
     create_public_threads: bool = ...,
@@ -2265,6 +2246,7 @@ def has_guild_permissions(
     request_to_speak: bool = ...,
     send_messages: bool = ...,
     send_messages_in_threads: bool = ...,
+    send_polls: bool = ...,
     send_tts_messages: bool = ...,
     send_voice_messages: bool = ...,
     speak: bool = ...,
@@ -2272,6 +2254,7 @@ def has_guild_permissions(
     stream: bool = ...,
     use_application_commands: bool = ...,
     use_embedded_activities: bool = ...,
+    use_external_apps: bool = ...,
     use_external_emojis: bool = ...,
     use_external_sounds: bool = ...,
     use_external_stickers: bool = ...,
@@ -2282,14 +2265,12 @@ def has_guild_permissions(
     view_channel: bool = ...,
     view_creator_monetization_analytics: bool = ...,
     view_guild_insights: bool = ...,
-) -> Callable[[T], T]:
-    ...
+) -> Callable[[T], T]: ...
 
 
 @overload
 @_generated
-def has_guild_permissions() -> Callable[[T], T]:
-    ...
+def has_guild_permissions() -> Callable[[T], T]: ...
 
 
 @_overload_with_permissions
@@ -2331,7 +2312,9 @@ def bot_has_guild_permissions(
     ban_members: bool = ...,
     change_nickname: bool = ...,
     connect: bool = ...,
+    create_events: bool = ...,
     create_forum_threads: bool = ...,
+    create_guild_expressions: bool = ...,
     create_instant_invite: bool = ...,
     create_private_threads: bool = ...,
     create_public_threads: bool = ...,
@@ -2362,6 +2345,7 @@ def bot_has_guild_permissions(
     request_to_speak: bool = ...,
     send_messages: bool = ...,
     send_messages_in_threads: bool = ...,
+    send_polls: bool = ...,
     send_tts_messages: bool = ...,
     send_voice_messages: bool = ...,
     speak: bool = ...,
@@ -2369,6 +2353,7 @@ def bot_has_guild_permissions(
     stream: bool = ...,
     use_application_commands: bool = ...,
     use_embedded_activities: bool = ...,
+    use_external_apps: bool = ...,
     use_external_emojis: bool = ...,
     use_external_sounds: bool = ...,
     use_external_stickers: bool = ...,
@@ -2379,14 +2364,12 @@ def bot_has_guild_permissions(
     view_channel: bool = ...,
     view_creator_monetization_analytics: bool = ...,
     view_guild_insights: bool = ...,
-) -> Callable[[T], T]:
-    ...
+) -> Callable[[T], T]: ...
 
 
 @overload
 @_generated
-def bot_has_guild_permissions() -> Callable[[T], T]:
-    ...
+def bot_has_guild_permissions() -> Callable[[T], T]: ...
 
 
 @_overload_with_permissions
@@ -2423,11 +2406,14 @@ def dm_only() -> Callable[[T], T]:
     This check raises a special exception, :exc:`.PrivateMessageOnly`
     that is inherited from :exc:`.CheckFailure`.
 
+    .. note::
+        For application commands, consider setting the allowed :ref:`contexts <app_command_contexts>` instead.
+
     .. versionadded:: 1.1
     """
 
     def predicate(ctx: AnyContext) -> bool:
-        if ctx.guild is not None:
+        if (ctx.guild if isinstance(ctx, Context) else ctx.guild_id) is not None:
             raise PrivateMessageOnly
         return True
 
@@ -2441,10 +2427,13 @@ def guild_only() -> Callable[[T], T]:
 
     This check raises a special exception, :exc:`.NoPrivateMessage`
     that is inherited from :exc:`.CheckFailure`.
+
+    .. note::
+        For application commands, consider setting the allowed :ref:`contexts <app_command_contexts>` instead.
     """
 
     def predicate(ctx: AnyContext) -> bool:
-        if ctx.guild is None:
+        if (ctx.guild if isinstance(ctx, Context) else ctx.guild_id) is None:
             raise NoPrivateMessage
         return True
 

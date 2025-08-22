@@ -1,0 +1,1 @@
+Prevent :class:`py:DeprecationWarning` related to :attr:`Message.interaction` field on shard reconnect.

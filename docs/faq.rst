@@ -87,8 +87,8 @@ Where can I find usage examples?
 Example code can be found in the `examples folder <https://github.com/DisnakeDev/disnake/tree/master/examples>`_
 in the repository.
 
-How do I set the "Playing" status?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+How do I set an activity/status?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``activity`` keyword argument may be passed in the :class:`Client` constructor or :meth:`Client.change_presence`, given an :class:`Activity` object.
 
@@ -100,15 +100,19 @@ The constructor may be used for static activities, while :meth:`Client.change_pr
 
     There is a high chance of disconnecting if presences are changed right after connecting.
 
-The status type (playing, listening, streaming, watching) can be set using the :class:`ActivityType` enum.
+The status type (playing, listening, streaming, watching, or custom) can be set using the :class:`ActivityType` enum.
 For memory optimisation purposes, some activities are offered in slimmed-down versions:
 
 - :class:`Game`
 - :class:`Streaming`
+- :class:`CustomActivity`
 
 Putting both of these pieces of info together, you get the following: ::
 
     client = disnake.Client(activity=disnake.Game(name='my game'))
+
+    # alternatively, a plain custom status:
+    client = disnake.Client(activity=disnake.CustomActivity(name='As seen on TV!'))
 
     # or, for watching:
     activity = disnake.Activity(name='my activity', type=disnake.ActivityType.watching)

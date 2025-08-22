@@ -1,12 +1,15 @@
 # SPDX-License-Identifier: MIT
+from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Dict
+from typing import TYPE_CHECKING, Dict
 
-from _types import SphinxExtensionMeta
 from sphinx.application import Sphinx
 from sphinx.util.fileutil import copy_asset_file
+
+if TYPE_CHECKING:
+    from ._types import SphinxExtensionMeta
 
 SCRIPT_PATH = "_templates/api_redirect.js_t"
 

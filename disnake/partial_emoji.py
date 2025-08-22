@@ -38,7 +38,7 @@ class PartialEmoji(_EmojiTag, AssetMixin):
     - "Raw" data events such as :func:`on_raw_reaction_add`
     - Custom emoji that the bot cannot see from e.g. :attr:`Message.reactions`
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -254,7 +254,7 @@ class PartialEmoji(_EmojiTag, AssetMixin):
     # (e.g. default reaction, tag emoji)
     @staticmethod
     def _emoji_to_name_id(
-        emoji: Optional[Union[str, Emoji, PartialEmoji]]
+        emoji: Optional[Union[str, Emoji, PartialEmoji]],
     ) -> Tuple[Optional[str], Optional[int]]:
         if emoji is None:
             return None, None

@@ -5,7 +5,7 @@ import copy
 import functools
 import itertools
 import re
-from typing import TYPE_CHECKING, Any, Callable, Iterable, Optional
+from typing import TYPE_CHECKING, Any, Callable, ClassVar, Iterable, Mapping, Optional
 
 import disnake.utils
 
@@ -48,7 +48,7 @@ __all__ = (
 class Paginator:
     """A class that aids in paginating code blocks for Discord messages.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: len(x)
 
@@ -202,16 +202,6 @@ class _HelpCommandImpl(Command):
     async def _on_error_cog_implementation(self, dummy, ctx, error) -> None:
         await self._injected.on_help_command_error(ctx, error)
 
-    @property
-    def clean_params(self):
-        result = self.params.copy()
-        try:
-            del result[next(iter(result))]
-        except StopIteration:
-            raise ValueError("Missing context parameter") from None
-        else:
-            return result
-
     def _inject_into_cog(self, cog) -> None:
         # Warning: hacky
 
@@ -279,7 +269,7 @@ class HelpCommand:
         ones passed in the :class:`.Command` constructor.
     """
 
-    MENTION_TRANSFORMS = {
+    MENTION_TRANSFORMS: ClassVar[Mapping[str, str]] = {
         "@everyone": "@\u200beveryone",
         "@here": "@\u200bhere",
         r"<@!?[0-9]{17,19}>": "@deleted-user",
@@ -378,7 +368,11 @@ class HelpCommand:
         """
         command_name = self._command_impl.name
         ctx = self.context
-        if ctx is None or ctx.command is None or ctx.command.qualified_name != command_name:
+        if (
+            ctx is disnake.utils.MISSING
+            or ctx.command is None
+            or ctx.command.qualified_name != command_name
+        ):
             return command_name
         return ctx.invoked_with
 
@@ -958,7 +952,7 @@ class DefaultHelpCommand(HelpCommand):
         for command in commands:
             name = command.name
             width = max_size - (get_width(name) - len(name))
-            entry = f'{self.indent * " "}{name:<{width}} {command.short_doc}'
+            entry = f"{self.indent * ' '}{name:<{width}} {command.short_doc}"
             self.paginator.add_line(self.shorten_text(entry))
 
     async def send_pages(self) -> None:
@@ -1205,7 +1199,7 @@ class MinimalHelpCommand(HelpCommand):
         aliases: Sequence[:class:`str`]
             A list of aliases to format.
         """
-        self.paginator.add_line(f'**{self.aliases_heading}** {", ".join(aliases)}', empty=True)
+        self.paginator.add_line(f"**{self.aliases_heading}** {', '.join(aliases)}", empty=True)
 
     def add_command_formatting(self, command) -> None:
         """A utility function to format commands and groups.

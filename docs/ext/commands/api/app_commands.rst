@@ -199,6 +199,15 @@ Functions
 
 .. autofunction:: option_enum
 
+.. autofunction:: default_member_permissions
+    :decorator:
+
+.. autofunction:: install_types
+    :decorator:
+
+.. autofunction:: contexts
+    :decorator:
+
 Events
 ------
 
