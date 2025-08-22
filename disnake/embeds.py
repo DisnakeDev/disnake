@@ -223,7 +223,7 @@ class Embed:
         self._image: Optional[EmbedImagePayload] = None
         self._footer: Optional[EmbedFooterPayload] = None
         self._fields: Optional[List[EmbedFieldPayload]] = None
-        self._flags: Optional[int] = None
+        self._flags: int = 0
 
         self._files: Dict[_FileKey, File] = {}
 
@@ -284,7 +284,7 @@ class Embed:
 
         self._footer = data.get("footer")
         self._fields = data.get("fields")
-        self._flags = data.get("flags")
+        self._flags = data.get("flags", 0)
 
         return self
 
@@ -389,8 +389,6 @@ class Embed:
 
         .. versionadded:: 2.11
         """
-        if self._flags is None:
-            return
         return EmbedFlags._from_value(self._flags)
 
     @property
