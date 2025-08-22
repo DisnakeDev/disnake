@@ -876,7 +876,8 @@ class WebhookMessage(Message):
 
         flags: :class:`MessageFlags`
             The new flags to set for this message. Overrides existing flags.
-            Only :attr:`~MessageFlags.suppress_embeds` is supported.
+            Only :attr:`~MessageFlags.suppress_embeds` and :attr:`~MessageFlags.is_components_v2`
+            are supported.
 
             .. versionadded:: 2.11
 
@@ -1709,8 +1710,9 @@ class Webhook(BaseWebhook):
 
         flags: :class:`MessageFlags`
             The flags to set for this message.
-            Only :attr:`~MessageFlags.suppress_embeds`, :attr:`~MessageFlags.ephemeral`
-            and :attr:`~MessageFlags.suppress_notifications` are supported.
+            Only :attr:`~MessageFlags.suppress_embeds`, :attr:`~MessageFlags.ephemeral`,
+            :attr:`~MessageFlags.suppress_notifications`, and :attr:`~MessageFlags.is_components_v2`
+            are supported.
 
             If parameters ``suppress_embeds`` or ``ephemeral`` are provided,
             they will override the corresponding setting of this ``flags`` parameter.
@@ -1972,7 +1974,8 @@ class Webhook(BaseWebhook):
 
         flags: :class:`MessageFlags`
             The new flags to set for this message. Overrides existing flags.
-            Only :attr:`~MessageFlags.suppress_embeds` is supported.
+            Only :attr:`~MessageFlags.suppress_embeds` and :attr:`~MessageFlags.is_components_v2`
+            are supported.
 
             .. versionadded:: 2.11
 

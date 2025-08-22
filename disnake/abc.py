@@ -1627,8 +1627,8 @@ class Messageable:
 
         flags: :class:`.MessageFlags`
             The flags to set for this message.
-            Only :attr:`~.MessageFlags.suppress_embeds` and :attr:`~.MessageFlags.suppress_notifications`
-            are supported.
+            Only :attr:`~.MessageFlags.suppress_embeds`, :attr:`~.MessageFlags.suppress_notifications`,
+            and :attr:`~.MessageFlags.is_components_v2` are supported.
 
             If parameter ``suppress_embeds`` is provided,
             that will override the setting of :attr:`.MessageFlags.suppress_embeds`.

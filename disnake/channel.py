@@ -3618,7 +3618,8 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
             all the embeds from the UI if set to ``True``.
         flags: :class:`MessageFlags`
             The flags to set for this message.
-            Only :attr:`~MessageFlags.suppress_embeds` is supported.
+            Only :attr:`~MessageFlags.suppress_embeds` and :attr:`~MessageFlags.is_components_v2`
+            are supported.
 
             If parameter ``suppress_embeds`` is provided,
             that will override the setting of :attr:`MessageFlags.suppress_embeds`.
