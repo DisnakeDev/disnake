@@ -295,8 +295,6 @@ class Invite(Hashable):
     +------------------------------------+---------------------------------------------------------------------+
     | :attr:`approximate_presence_count` | :meth:`Client.fetch_invite` with ``with_counts`` enabled            |
     +------------------------------------+---------------------------------------------------------------------+
-    | :attr:`expires_at`                 | :meth:`Client.fetch_invite` always included                         |
-    +------------------------------------+---------------------------------------------------------------------+
     | :attr:`guild_scheduled_event`      | :meth:`Client.fetch_invite` with valid ``guild_scheduled_event_id`` |
     |                                    | or valid event ID in URL or invite object                           |
     +------------------------------------+---------------------------------------------------------------------+
