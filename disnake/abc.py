@@ -1851,12 +1851,9 @@ class Messageable:
             objects returned by this method do not contain complete
             :attr:`.Message.reactions` data.
 
-        .. note::
-
-            When passing an :class:`.Object` as the `before` argument the API will
-            return messages that were pinned before the creation date of that snowflake.
-            This happens because the API endpoint is paginated based on the ``pinned_at``
-            timestamp and not the creation timestamp of the snowflake.
+        .. versionchanged:: 2.11
+            Return an :class:`.AsyncIterator` to support the discord API changes.
+            ``await channel.pins()`` is still maintained but deprecated in favor of ``async for msg in channel.pins()``.
 
         Examples
         --------
@@ -1874,9 +1871,6 @@ class Messageable:
 
         All parameters are optional.
 
-        .. versionchanged:: 2.11
-            Return an :class:`.AsyncIterator` to support the discord API changes.
-
         Parameters
         ----------
         limit: Optional[:class:`int`]
@@ -1887,6 +1881,10 @@ class Messageable:
             Retrieve pinned messages before this date or message.
             If a datetime is provided, it is recommended to use a UTC aware datetime.
             If the datetime is naive, it is assumed to be local time.
+            When passing an :class:`.Object` the API will return messages that were pinned
+            before the creation date of that snowflake. This happens because the API endpoint
+            is paginated based on the ``pinned_at`` timestamp and not the creation
+            timestamp of the snowflake.
 
         Raises
         ------
