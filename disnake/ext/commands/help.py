@@ -328,7 +328,7 @@ class HelpCommand:
 
     def __init__(self, **options: Any) -> None:
         self.show_hidden: bool = options.pop("show_hidden", False)
-        self.verify_checks: bool = options.pop("verify_checks", True)
+        self.verify_checks: Optional[bool] = options.pop("verify_checks", True)
 
         attrs = options.pop("command_attrs", {})
         attrs.setdefault("name", "help")
@@ -426,7 +426,7 @@ class HelpCommand:
         :class:`str`
             The signature for the command.
         """
-        parent: Group[Any, ..., Any] = command.parent  # type: ignore
+        parent: Optional[Group[Any, ..., Any]] = command.parent  # type: ignore
         entries = []
         while parent is not None:
             if not parent.signature or parent.invoke_without_command:
@@ -914,7 +914,7 @@ class DefaultHelpCommand(HelpCommand):
         output is DM'd. If ``None``, then the bot will only DM when the help
         message becomes too long (dictated by more than :attr:`dm_help_threshold` characters).
         Defaults to ``False``.
-    dm_help_threshold: Optional[:class:`int`]
+    dm_help_threshold: :class:`int`
         The number of characters the paginator must accumulate before getting DM'd to the
         user if :attr:`dm_help` is set to ``None``. Defaults to 1000.
     indent: :class:`int`
@@ -933,7 +933,7 @@ class DefaultHelpCommand(HelpCommand):
         self.width: int = options.pop("width", 80)
         self.indent: int = options.pop("indent", 2)
         self.sort_commands: bool = options.pop("sort_commands", True)
-        self.dm_help: bool = options.pop("dm_help", False)
+        self.dm_help: Optional[bool] = options.pop("dm_help", False)
         self.dm_help_threshold: int = options.pop("dm_help_threshold", 1000)
         self.commands_heading: str = options.pop("commands_heading", "Commands:")
         self.no_category: str = options.pop("no_category", "No Category")
@@ -1133,7 +1133,7 @@ class MinimalHelpCommand(HelpCommand):
         output is DM'd. If ``None``, then the bot will only DM when the help
         message becomes too long (dictated by more than :attr:`dm_help_threshold` characters).
         Defaults to ``False``.
-    dm_help_threshold: Optional[:class:`int`]
+    dm_help_threshold: :class:`int`
         The number of characters the paginator must accumulate before getting DM'd to the
         user if :attr:`dm_help` is set to ``None``. Defaults to 1000.
     no_category: :class:`str`
@@ -1146,7 +1146,7 @@ class MinimalHelpCommand(HelpCommand):
     def __init__(self, **options: Any) -> None:
         self.sort_commands: bool = options.pop("sort_commands", True)
         self.commands_heading: str = options.pop("commands_heading", "Commands")
-        self.dm_help: bool = options.pop("dm_help", False)
+        self.dm_help: Optional[bool] = options.pop("dm_help", False)
         self.dm_help_threshold: int = options.pop("dm_help_threshold", 1000)
         self.aliases_heading: str = options.pop("aliases_heading", "Aliases:")
         self.no_category: str = options.pop("no_category", "No Category")
