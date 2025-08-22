@@ -368,9 +368,9 @@ class Activity(BaseActivity):
         )
 
         self.status_display_type: Optional[StatusDisplayType] = (
-            status_display_type
-            if isinstance(status_display_type, StatusDisplayType)
-            else try_enum(StatusDisplayType, status_display_type)
+            try_enum(StatusDisplayType, status_display_type)
+            if isinstance(status_display_type, int)
+            else status_display_type
         )
 
         self.emoji: Optional[PartialEmoji] = (
