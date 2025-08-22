@@ -164,7 +164,9 @@ class Permissions(BaseFlags):
         ban_members: bool = ...,
         change_nickname: bool = ...,
         connect: bool = ...,
+        create_events: bool = ...,
         create_forum_threads: bool = ...,
+        create_guild_expressions: bool = ...,
         create_instant_invite: bool = ...,
         create_private_threads: bool = ...,
         create_public_threads: bool = ...,
@@ -195,6 +197,7 @@ class Permissions(BaseFlags):
         request_to_speak: bool = ...,
         send_messages: bool = ...,
         send_messages_in_threads: bool = ...,
+        send_polls: bool = ...,
         send_tts_messages: bool = ...,
         send_voice_messages: bool = ...,
         speak: bool = ...,
@@ -202,6 +205,7 @@ class Permissions(BaseFlags):
         stream: bool = ...,
         use_application_commands: bool = ...,
         use_embedded_activities: bool = ...,
+        use_external_apps: bool = ...,
         use_external_emojis: bool = ...,
         use_external_sounds: bool = ...,
         use_external_stickers: bool = ...,
@@ -212,16 +216,14 @@ class Permissions(BaseFlags):
         view_channel: bool = ...,
         view_creator_monetization_analytics: bool = ...,
         view_guild_insights: bool = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     @_generated
     def __init__(
         self,
         permissions: int = 0,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @_overload_with_permissions
     def __init__(self, permissions: int = 0, **kwargs: bool) -> None:
@@ -291,6 +293,7 @@ class Permissions(BaseFlags):
         ``True`` and the guild-specific ones set to ``False``. The guild-specific
         permissions are currently:
 
+        - :attr:`create_guild_expressions`
         - :attr:`manage_guild_expressions`
         - :attr:`view_audit_log`
         - :attr:`view_guild_insights`
@@ -316,12 +319,16 @@ class Permissions(BaseFlags):
 
         .. versionchanged:: 2.9
             Added :attr:`use_soundboard` and :attr:`send_voice_messages` permissions.
+
+        .. versionchanged:: 2.10
+            Added :attr:`create_events` permission.
         """
         instance = cls.all()
         instance.update(
             administrator=False,
             ban_members=False,
             change_nickname=False,
+            create_guild_expressions=False,
             kick_members=False,
             manage_guild=False,
             manage_guild_expressions=False,
@@ -347,11 +354,15 @@ class Permissions(BaseFlags):
 
         .. versionchanged:: 2.9
             Added :attr:`view_creator_monetization_analytics` permission.
+
+        .. versionchanged:: 2.10
+            Added :attr:`create_guild_expressions` permission.
         """
         return cls(
             view_channel=True,
             manage_channels=True,
             manage_roles=True,
+            create_guild_expressions=True,
             manage_guild_expressions=True,
             view_audit_log=True,
             view_guild_insights=True,
@@ -396,6 +407,9 @@ class Permissions(BaseFlags):
 
         .. versionchanged:: 2.9
             Added :attr:`send_voice_messages` permission.
+
+        .. versionchanged:: 2.10
+            Moved :attr:`use_application_commands` permission to :attr:`apps`.
         """
         return cls(
             send_messages=True,
@@ -412,8 +426,8 @@ class Permissions(BaseFlags):
             manage_threads=True,
             read_message_history=True,
             send_tts_messages=True,
-            use_slash_commands=True,
             send_voice_messages=True,
+            send_polls=True,
         )
 
     @classmethod
@@ -427,12 +441,14 @@ class Permissions(BaseFlags):
 
         .. versionchanged:: 2.9
             Added :attr:`use_soundboard` and :attr:`use_external_sounds` permissions.
+
+        .. versionchanged:: 2.10
+            Moved :attr:`use_embedded_activities` permission to :attr:`apps`.
         """
         return cls(
             connect=True,
             speak=True,
             stream=True,
-            use_embedded_activities=True,
             use_soundboard=True,
             use_external_sounds=True,
             use_voice_activation=True,
@@ -470,13 +486,31 @@ class Permissions(BaseFlags):
 
     @classmethod
     @cached_creation
+    def apps(cls) -> Self:
+        """A factory method that creates a :class:`Permissions` with all
+        "Apps" permissions from the official Discord UI set to ``True``.
+
+        .. versionadded:: 2.10
+        """
+        return cls(
+            use_application_commands=True,
+            use_embedded_activities=True,
+            use_external_apps=True,
+        )
+
+    @classmethod
+    @cached_creation
     def events(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with all
         "Events" permissions from the official Discord UI set to ``True``.
 
         .. versionadded:: 2.4
+
+        .. versionchanged:: 2.10
+            Added :attr:`create_events` permission.
         """
         return cls(
+            create_events=True,
             manage_events=True,
         )
 
@@ -532,7 +566,9 @@ class Permissions(BaseFlags):
         ban_members: bool = ...,
         change_nickname: bool = ...,
         connect: bool = ...,
+        create_events: bool = ...,
         create_forum_threads: bool = ...,
+        create_guild_expressions: bool = ...,
         create_instant_invite: bool = ...,
         create_private_threads: bool = ...,
         create_public_threads: bool = ...,
@@ -563,6 +599,7 @@ class Permissions(BaseFlags):
         request_to_speak: bool = ...,
         send_messages: bool = ...,
         send_messages_in_threads: bool = ...,
+        send_polls: bool = ...,
         send_tts_messages: bool = ...,
         send_voice_messages: bool = ...,
         speak: bool = ...,
@@ -570,6 +607,7 @@ class Permissions(BaseFlags):
         stream: bool = ...,
         use_application_commands: bool = ...,
         use_embedded_activities: bool = ...,
+        use_external_apps: bool = ...,
         use_external_emojis: bool = ...,
         use_external_sounds: bool = ...,
         use_external_stickers: bool = ...,
@@ -580,15 +618,13 @@ class Permissions(BaseFlags):
         view_channel: bool = ...,
         view_creator_monetization_analytics: bool = ...,
         view_guild_insights: bool = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     @_generated
     def update(
         self,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @_overload_with_permissions
     def update(self, **kwargs: bool) -> None:
@@ -699,7 +735,7 @@ class Permissions(BaseFlags):
     @flag_value
     def send_messages(self) -> int:
         """:class:`bool`: Returns ``True`` if a user can send messages from all or specific text channels
-        and create threads in forum channels.
+        and create threads in forum/media channels.
         """
         return 1 << 11
 
@@ -830,8 +866,10 @@ class Permissions(BaseFlags):
 
     @flag_value
     def manage_guild_expressions(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can create, edit, or delete
-        emojis, stickers, and soundboard sounds.
+        """:class:`bool`: Returns ``True`` if a user can edit or delete
+        emojis, stickers, and soundboard sounds created by all users.
+
+        See also :attr:`create_guild_expressions`.
 
         .. versionadded:: 2.9
         """
@@ -879,7 +917,10 @@ class Permissions(BaseFlags):
 
     @flag_value
     def manage_events(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can manage guild events.
+        """:class:`bool`: Returns ``True`` if a user can edit or delete guild scheduled events
+        created by all users.
+
+        See also :attr:`create_events`.
 
         .. versionadded:: 2.0
         """
@@ -979,6 +1020,28 @@ class Permissions(BaseFlags):
         return 1 << 42
 
     @flag_value
+    def create_guild_expressions(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can create emojis, stickers,
+        and soundboard sounds, as well as edit and delete the ones they created.
+
+        See also :attr:`manage_guild_expressions`.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 43
+
+    @flag_value
+    def create_events(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can create guild scheduled events,
+        as well as edit and delete the ones they created.
+
+        See also :attr:`manage_events`.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 44
+
+    @flag_value
     def use_external_sounds(self) -> int:
         """:class:`bool`: Returns ``True`` if a user can use custom soundboard sounds from other guilds.
 
@@ -993,6 +1056,26 @@ class Permissions(BaseFlags):
         .. versionadded:: 2.9
         """
         return 1 << 46
+
+    @flag_value
+    def send_polls(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can send polls.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 49
+
+    @flag_value
+    def use_external_apps(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user's apps can send public responses.
+
+        If disabled, users can still use their user-installed applications, but the responses
+        will be forced ephemeral (i.e. only visible to them).
+        Only applies to user-installed apps that are not also installed to the guild.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 50
 
 
 def _augment_from_permissions(cls):
@@ -1066,7 +1149,9 @@ class PermissionOverwrite:
         ban_members: Optional[bool]
         change_nickname: Optional[bool]
         connect: Optional[bool]
+        create_events: Optional[bool]
         create_forum_threads: Optional[bool]
+        create_guild_expressions: Optional[bool]
         create_instant_invite: Optional[bool]
         create_private_threads: Optional[bool]
         create_public_threads: Optional[bool]
@@ -1097,6 +1182,7 @@ class PermissionOverwrite:
         request_to_speak: Optional[bool]
         send_messages: Optional[bool]
         send_messages_in_threads: Optional[bool]
+        send_polls: Optional[bool]
         send_tts_messages: Optional[bool]
         send_voice_messages: Optional[bool]
         speak: Optional[bool]
@@ -1104,6 +1190,7 @@ class PermissionOverwrite:
         stream: Optional[bool]
         use_application_commands: Optional[bool]
         use_embedded_activities: Optional[bool]
+        use_external_apps: Optional[bool]
         use_external_emojis: Optional[bool]
         use_external_sounds: Optional[bool]
         use_external_stickers: Optional[bool]
@@ -1130,7 +1217,9 @@ class PermissionOverwrite:
         ban_members: Optional[bool] = ...,
         change_nickname: Optional[bool] = ...,
         connect: Optional[bool] = ...,
+        create_events: Optional[bool] = ...,
         create_forum_threads: Optional[bool] = ...,
+        create_guild_expressions: Optional[bool] = ...,
         create_instant_invite: Optional[bool] = ...,
         create_private_threads: Optional[bool] = ...,
         create_public_threads: Optional[bool] = ...,
@@ -1161,6 +1250,7 @@ class PermissionOverwrite:
         request_to_speak: Optional[bool] = ...,
         send_messages: Optional[bool] = ...,
         send_messages_in_threads: Optional[bool] = ...,
+        send_polls: Optional[bool] = ...,
         send_tts_messages: Optional[bool] = ...,
         send_voice_messages: Optional[bool] = ...,
         speak: Optional[bool] = ...,
@@ -1168,6 +1258,7 @@ class PermissionOverwrite:
         stream: Optional[bool] = ...,
         use_application_commands: Optional[bool] = ...,
         use_embedded_activities: Optional[bool] = ...,
+        use_external_apps: Optional[bool] = ...,
         use_external_emojis: Optional[bool] = ...,
         use_external_sounds: Optional[bool] = ...,
         use_external_stickers: Optional[bool] = ...,
@@ -1178,15 +1269,13 @@ class PermissionOverwrite:
         view_channel: Optional[bool] = ...,
         view_creator_monetization_analytics: Optional[bool] = ...,
         view_guild_insights: Optional[bool] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     @_generated
     def __init__(
         self,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @_overload_with_permissions
     def __init__(self, **kwargs: Optional[bool]) -> None:
@@ -1261,7 +1350,9 @@ class PermissionOverwrite:
         ban_members: Optional[bool] = ...,
         change_nickname: Optional[bool] = ...,
         connect: Optional[bool] = ...,
+        create_events: Optional[bool] = ...,
         create_forum_threads: Optional[bool] = ...,
+        create_guild_expressions: Optional[bool] = ...,
         create_instant_invite: Optional[bool] = ...,
         create_private_threads: Optional[bool] = ...,
         create_public_threads: Optional[bool] = ...,
@@ -1292,6 +1383,7 @@ class PermissionOverwrite:
         request_to_speak: Optional[bool] = ...,
         send_messages: Optional[bool] = ...,
         send_messages_in_threads: Optional[bool] = ...,
+        send_polls: Optional[bool] = ...,
         send_tts_messages: Optional[bool] = ...,
         send_voice_messages: Optional[bool] = ...,
         speak: Optional[bool] = ...,
@@ -1299,6 +1391,7 @@ class PermissionOverwrite:
         stream: Optional[bool] = ...,
         use_application_commands: Optional[bool] = ...,
         use_embedded_activities: Optional[bool] = ...,
+        use_external_apps: Optional[bool] = ...,
         use_external_emojis: Optional[bool] = ...,
         use_external_sounds: Optional[bool] = ...,
         use_external_stickers: Optional[bool] = ...,
@@ -1309,15 +1402,13 @@ class PermissionOverwrite:
         view_channel: Optional[bool] = ...,
         view_creator_monetization_analytics: Optional[bool] = ...,
         view_guild_insights: Optional[bool] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     @_generated
     def update(
         self,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @_overload_with_permissions
     def update(self, **kwargs: Optional[bool]) -> None:

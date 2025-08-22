@@ -87,12 +87,10 @@ class Localized(Generic[StringT]):
     __slots__ = ("string", "localizations")
 
     @overload
-    def __init__(self: Localized[StringT], string: StringT, *, key: str) -> None:
-        ...
+    def __init__(self: Localized[StringT], string: StringT, *, key: str) -> None: ...
 
     @overload
-    def __init__(self: Localized[Optional[str]], *, key: str) -> None:
-        ...
+    def __init__(self: Localized[Optional[str]], *, key: str) -> None: ...
 
     @overload
     def __init__(
@@ -100,16 +98,14 @@ class Localized(Generic[StringT]):
         string: StringT,
         *,
         data: Union[Optional[LocalizationsDict], LocalizationValue],
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     def __init__(
         self: Localized[Optional[str]],
         *,
         data: Union[Optional[LocalizationsDict], LocalizationValue],
-    ) -> None:
-        ...
+    ) -> None: ...
 
     # note: `data` accepting `LocalizationValue` is intentionally undocumented,
     # as it's only meant to be used internally
@@ -131,13 +127,13 @@ class Localized(Generic[StringT]):
 
     @overload
     @classmethod
-    def _cast(cls, string: LocalizedOptional, required: Literal[False]) -> Localized[Optional[str]]:
-        ...
+    def _cast(
+        cls, string: LocalizedOptional, required: Literal[False]
+    ) -> Localized[Optional[str]]: ...
 
     @overload
     @classmethod
-    def _cast(cls, string: LocalizedRequired, required: Literal[True]) -> Localized[str]:
-        ...
+    def _cast(cls, string: LocalizedRequired, required: Literal[True]) -> Localized[str]: ...
 
     @classmethod
     def _cast(cls, string: Union[Optional[str], Localized[Any]], required: bool) -> Localized[Any]:
@@ -150,12 +146,10 @@ class Localized(Generic[StringT]):
         return string
 
     @overload
-    def _upgrade(self, *, key: Optional[str]) -> Self:
-        ...
+    def _upgrade(self, *, key: Optional[str]) -> Self: ...
 
     @overload
-    def _upgrade(self, string: str, *, key: Optional[str] = None) -> Localized[str]:
-        ...
+    def _upgrade(self, string: str, *, key: Optional[str] = None) -> Localized[str]: ...
 
     def _upgrade(
         self: Localized[Any], string: Optional[str] = None, *, key: Optional[str] = None
@@ -236,8 +230,9 @@ class LocalizationValue:
     def data(self) -> Optional[Dict[str, str]]:
         """Optional[Dict[:class:`str`, :class:`str`]]: A dict with a locale -> localization mapping, if available."""
         if self._data is MISSING:
+            # This will happen when `_link(store)` hasn't been called yet, which *shouldn't* occur under normal circumstances.
             warnings.warn(
-                f"value ('{self._key}') was never localized, this is likely a library bug",
+                f"Localization value ('{self._key}') was never linked to bot; this may be a library bug.",
                 LocalizationWarning,
                 stacklevel=2,
             )
@@ -245,6 +240,10 @@ class LocalizationValue:
         return self._data
 
     def __eq__(self, other) -> bool:
+        # if both are pending, compare keys instead
+        if self._data is MISSING and other._data is MISSING:
+            return self._key == other._key
+
         d1 = self.data
         d2 = other.data
         # consider values equal if they're both falsy, or actually equal
@@ -409,7 +408,7 @@ class LocalizationStore(LocalizationProtocol):
         except Exception as e:
             raise RuntimeError(f"Unable to load '{path}': {e}") from e
 
-    def _load_dict(self, data: Dict[str, str], locale: str) -> None:
+    def _load_dict(self, data: Dict[str, Optional[str]], locale: str) -> None:
         if not isinstance(data, dict) or not all(
             o is None or isinstance(o, str) for o in data.values()
         ):

@@ -10,10 +10,8 @@ from typing import (
     Callable,
     Optional,
     Tuple,
-    Type,
     TypeVar,
     Union,
-    get_origin,
     overload,
 )
 
@@ -21,7 +19,7 @@ from ..components import Button as ButtonComponent
 from ..enums import ButtonStyle, ComponentType
 from ..partial_emoji import PartialEmoji, _EmojiTag
 from ..utils import MISSING
-from .item import DecoratedItem, Item, Object
+from .item import DecoratedItem, Item
 
 __all__ = (
     "Button",
@@ -55,7 +53,7 @@ class Button(Item[V_co]):
         The style of the button.
     custom_id: Optional[:class:`str`]
         The ID of the button that gets received during an interaction.
-        If this button is for a URL, it does not have a custom ID.
+        If this button is for a URL or an SKU, it does not have a custom ID.
     url: Optional[:class:`str`]
         The URL this button sends you to.
     disabled: :class:`bool`
@@ -64,6 +62,11 @@ class Button(Item[V_co]):
         The label of the button, if any.
     emoji: Optional[Union[:class:`.PartialEmoji`, :class:`.Emoji`, :class:`str`]]
         The emoji of the button, if available.
+    sku_id: Optional[:class:`int`]
+        The ID of a purchasable SKU, for premium buttons.
+        Premium buttons additionally cannot have a ``label``, ``url``, or ``emoji``.
+
+        .. versionadded:: 2.11
     row: Optional[:class:`int`]
         The relative row this button belongs to. A Discord component can only have 5
         rows. By default, items are arranged automatically into those 5 rows. If you'd
@@ -78,6 +81,7 @@ class Button(Item[V_co]):
         "disabled",
         "label",
         "emoji",
+        "sku_id",
         "row",
     )
     # We have to set this to MISSING in order to overwrite the abstract property from WrappedComponent
@@ -93,9 +97,9 @@ class Button(Item[V_co]):
         custom_id: Optional[str] = None,
         url: Optional[str] = None,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        sku_id: Optional[int] = None,
         row: Optional[int] = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     def __init__(
@@ -107,9 +111,9 @@ class Button(Item[V_co]):
         custom_id: Optional[str] = None,
         url: Optional[str] = None,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        sku_id: Optional[int] = None,
         row: Optional[int] = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     def __init__(
         self,
@@ -120,18 +124,23 @@ class Button(Item[V_co]):
         custom_id: Optional[str] = None,
         url: Optional[str] = None,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        sku_id: Optional[int] = None,
         row: Optional[int] = None,
     ) -> None:
         super().__init__()
-        if custom_id is not None and url is not None:
-            raise TypeError("cannot mix both url and custom_id with Button")
 
         self._provided_custom_id = custom_id is not None
-        if url is None and custom_id is None:
+        mutually_exclusive = 3 - (custom_id, url, sku_id).count(None)
+
+        if mutually_exclusive == 0:
             custom_id = os.urandom(16).hex()
+        elif mutually_exclusive != 1:
+            raise TypeError("cannot mix url, sku_id and custom_id with Button")
 
         if url is not None:
             style = ButtonStyle.link
+        if sku_id is not None:
+            style = ButtonStyle.premium
 
         if emoji is not None:
             if isinstance(emoji, str):
@@ -151,6 +160,7 @@ class Button(Item[V_co]):
             label=label,
             style=style,
             emoji=emoji,
+            sku_id=sku_id,
         )
         self.row = row
 
@@ -171,7 +181,7 @@ class Button(Item[V_co]):
     def custom_id(self) -> Optional[str]:
         """Optional[:class:`str`]: The ID of the button that gets received during an interaction.
 
-        If this button is for a URL, it does not have a custom ID.
+        If this button is for a URL or an SKU, it does not have a custom ID.
         """
         return self._underlying.custom_id
 
@@ -230,6 +240,20 @@ class Button(Item[V_co]):
         else:
             self._underlying.emoji = None
 
+    @property
+    def sku_id(self) -> Optional[int]:
+        """Optional[:class:`int`]: The ID of a purchasable SKU, for premium buttons.
+
+        .. versionadded:: 2.11
+        """
+        return self._underlying.sku_id
+
+    @sku_id.setter
+    def sku_id(self, value: Optional[int]) -> None:
+        if value is not None and not isinstance(value, int):
+            raise TypeError("sku_id must be None or int")
+        self._underlying.sku_id = value
+
     @classmethod
     def from_component(cls, button: ButtonComponent) -> Self:
         return cls(
@@ -239,6 +263,7 @@ class Button(Item[V_co]):
             custom_id=button.custom_id,
             url=button.url,
             emoji=button.emoji,
+            sku_id=button.sku_id,
             row=None,
         )
 
@@ -248,6 +273,8 @@ class Button(Item[V_co]):
     def is_persistent(self) -> bool:
         if self.style is ButtonStyle.link:
             return self.url is not None
+        elif self.style is ButtonStyle.premium:
+            return self.sku_id is not None
         return super().is_persistent()
 
     def refresh_component(self, button: ButtonComponent) -> None:
@@ -263,20 +290,18 @@ def button(
     style: ButtonStyle = ButtonStyle.secondary,
     emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
     row: Optional[int] = None,
-) -> Callable[[ItemCallbackType[Button[V_co]]], DecoratedItem[Button[V_co]]]:
-    ...
+) -> Callable[[ItemCallbackType[V_co, Button[V_co]]], DecoratedItem[Button[V_co]]]: ...
 
 
 @overload
 def button(
-    cls: Type[Object[B_co, P]], *_: P.args, **kwargs: P.kwargs
-) -> Callable[[ItemCallbackType[B_co]], DecoratedItem[B_co]]:
-    ...
+    cls: Callable[P, B_co], *_: P.args, **kwargs: P.kwargs
+) -> Callable[[ItemCallbackType[V_co, B_co]], DecoratedItem[B_co]]: ...
 
 
 def button(
-    cls: Type[Object[B_co, P]] = Button[Any], **kwargs: Any
-) -> Callable[[ItemCallbackType[B_co]], DecoratedItem[B_co]]:
+    cls: Callable[..., B_co] = Button[Any], **kwargs: Any
+) -> Callable[[ItemCallbackType[V_co, B_co]], DecoratedItem[B_co]]:
     """A decorator that attaches a button to a component.
 
     The function being decorated should have three parameters, ``self`` representing
@@ -285,21 +310,19 @@ def button(
 
     .. note::
 
-        Buttons with a URL cannot be created with this function.
-        Consider creating a :class:`Button` manually instead.
-        This is because buttons with a URL do not have a callback
-        associated with them since Discord does not do any processing
-        with it.
+        Link/Premium buttons cannot be created with this function,
+        since these buttons do not have a callback associated with them.
+        Consider creating a :class:`Button` manually instead, and adding it
+        using :meth:`View.add_item`.
 
     Parameters
     ----------
-    cls: Type[:class:`Button`]
-        The button subclass to create an instance of. If provided, the following parameters
-        described below do not apply. Instead, this decorator will accept the same keywords
-        as the passed cls does.
+    cls: Callable[..., :class:`Button`]
+        A callable (may be a :class:`Button` subclass) to create a new instance of this component.
+        If provided, the other parameters described below do not apply.
+        Instead, this decorator will accept the same keywords as the passed callable/class does.
 
         .. versionadded:: 2.6
-
     label: Optional[:class:`str`]
         The label of the button, if any.
     custom_id: Optional[:class:`str`]
@@ -319,13 +342,10 @@ def button(
         For example, row=1 will show up before row=2. Defaults to ``None``, which is automatic
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     """
-    if (origin := get_origin(cls)) is not None:
-        cls = origin
+    if not callable(cls):
+        raise TypeError("cls argument must be callable")
 
-    if not isinstance(cls, type) or not issubclass(cls, Button):
-        raise TypeError(f"cls argument must be a subclass of Button, got {cls!r}")
-
-    def decorator(func: ItemCallbackType[B_co]) -> DecoratedItem[B_co]:
+    def decorator(func: ItemCallbackType[V_co, B_co]) -> DecoratedItem[B_co]:
         if not asyncio.iscoroutinefunction(func):
             raise TypeError("button function must be a coroutine function")
 

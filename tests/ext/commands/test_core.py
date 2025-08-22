@@ -6,12 +6,10 @@ from disnake.ext import commands
 from tests.helpers import reveal_type
 
 
-class CustomContext(commands.Context):
-    ...
+class CustomContext(commands.Context): ...
 
 
-class CustomCog(commands.Cog):
-    ...
+class CustomCog(commands.Cog): ...
 
 
 class TestDecorators:
@@ -20,8 +18,7 @@ class TestDecorators:
 
         # no cog
 
-        async def f1(ctx: CustomContext, a: int, b: str) -> bool:
-            ...
+        async def f1(ctx: CustomContext, a: int, b: str) -> bool: ...
 
         for cd in (commands.command(), base.command()):
             reveal_type(
@@ -38,8 +35,7 @@ class TestDecorators:
         # custom cog
         base = commands.GroupMixin[CustomCog]()
 
-        async def f2(_self: CustomCog, ctx: CustomContext, a: int, b: str) -> bool:
-            ...
+        async def f2(_self: CustomCog, ctx: CustomContext, a: int, b: str) -> bool: ...
 
         for cd in (commands.command(), base.command()):
             reveal_type(
@@ -54,19 +50,16 @@ class TestDecorators:
             )
 
     def _test_typing_cls(self) -> None:
-        class CustomCommand(commands.Command):
-            ...
+        class CustomCommand(commands.Command): ...
 
-        class CustomGroup(commands.Group):
-            ...
+        class CustomGroup(commands.Group): ...
 
         base = commands.GroupMixin[None]()
 
         command_decorators = (commands.command(cls=CustomCommand), base.command(cls=CustomCommand))
         group_decorators = (commands.group(cls=CustomGroup), base.group(cls=CustomGroup))
 
-        async def f(ctx: CustomContext, a: int, b: str) -> bool:
-            ...
+        async def f(ctx: CustomContext, a: int, b: str) -> bool: ...
 
         for cd in command_decorators:
             assert_type(cd(f), CustomCommand)

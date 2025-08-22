@@ -4,10 +4,16 @@ from typing import List, Literal, Optional, TypedDict
 
 from typing_extensions import NotRequired
 
+from .emoji import PartialEmoji
 from .member import MemberWithUser
 from .snowflake import Snowflake
 
-SupportedModes = Literal["xsalsa20_poly1305_lite", "xsalsa20_poly1305_suffix", "xsalsa20_poly1305"]
+SupportedModes = Literal[
+    # "aead_aes256_gcm_rtpsize",  # supported in libsodium, but not exposed by pynacl
+    "aead_xchacha20_poly1305_rtpsize",
+]
+
+VoiceChannelEffectAnimationType = Literal[0, 1]
 
 
 class _VoiceState(TypedDict):
@@ -54,3 +60,11 @@ class VoiceReady(TypedDict):
     port: int
     modes: List[SupportedModes]
     heartbeat_interval: int
+
+
+class VoiceChannelEffect(TypedDict, total=False):
+    emoji: Optional[PartialEmoji]
+    animation_type: Optional[VoiceChannelEffectAnimationType]
+    animation_id: int
+    sound_id: Snowflake
+    sound_volume: float

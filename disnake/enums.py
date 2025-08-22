@@ -35,16 +35,19 @@ __all__ = (
     "ActivityType",
     "NotificationLevel",
     "TeamMembershipState",
+    "TeamMemberRole",
     "WebhookType",
     "ExpireBehaviour",
     "ExpireBehavior",
     "StickerType",
     "StickerFormatType",
+    "InviteType",
     "InviteTarget",
     "VideoQualityMode",
     "ComponentType",
     "ButtonStyle",
     "TextInputStyle",
+    "SelectDefaultValueType",
     "StagePrivacyLevel",
     "InteractionType",
     "InteractionResponseType",
@@ -67,6 +70,12 @@ __all__ = (
     "Event",
     "ApplicationRoleConnectionMetadataType",
     "OnboardingPromptType",
+    "SKUType",
+    "EntitlementType",
+    "SubscriptionStatus",
+    "PollLayoutType",
+    "VoiceChannelEffectAnimationType",
+    "MessageReferenceType",
 )
 
 
@@ -108,6 +117,7 @@ class EnumMeta(type):
         _enum_member_names_: ClassVar[List[str]]
         _enum_member_map_: ClassVar[Dict[str, Any]]
         _enum_value_map_: ClassVar[Dict[Any, Any]]
+        _enum_value_cls_: ClassVar[Type[_EnumValueBase]]
 
     def __new__(cls, name: str, bases, attrs, *, comparable: bool = False):
         value_mapping = {}
@@ -201,74 +211,275 @@ else:
 
 
 class ChannelType(Enum):
+    """Specifies the type of channel."""
+
     text = 0
+    """A text channel."""
     private = 1
+    """A private text channel. Also called a direct message."""
     voice = 2
+    """A voice channel."""
     group = 3
+    """A private group text channel."""
     category = 4
+    """A category channel."""
     news = 5
+    """A guild news channel."""
     news_thread = 10
+    """A news thread.
+
+    .. versionadded:: 2.0
+    """
     public_thread = 11
+    """A public thread.
+
+    .. versionadded:: 2.0
+    """
     private_thread = 12
+    """A private thread.
+
+    .. versionadded:: 2.0
+    """
     stage_voice = 13
+    """A guild stage voice channel.
+
+    .. versionadded:: 1.7
+    """
     guild_directory = 14
+    """A student hub channel.
+
+    .. versionadded:: 2.1
+    """
     forum = 15
+    """A channel of only threads.
+
+    .. versionadded:: 2.5
+    """
+    media = 16
+    """A channel of only threads but with a focus on media, similar to forum channels.
+
+    .. versionadded:: 2.10
+    """
 
     def __str__(self) -> str:
         return self.name
 
 
 class MessageType(Enum):
+    """Specifies the type of :class:`Message`. This is used to denote if a message
+    is to be interpreted as a system message or a regular message.
+    """
+
     default = 0
+    """The default message type. This is the same as regular messages."""
     recipient_add = 1
+    """The system message when a user is added to a group private message or a thread."""
     recipient_remove = 2
+    """The system message when a user is removed from a group private message or a thread."""
     call = 3
+    """The system message denoting call state, e.g. missed call, started call, etc."""
     channel_name_change = 4
+    """The system message denoting that a channel's name has been changed."""
     channel_icon_change = 5
+    """The system message denoting that a channel's icon has been changed."""
     pins_add = 6
+    """The system message denoting that a pinned message has been added to a channel."""
     new_member = 7
+    """The system message denoting that a new member has joined a Guild."""
     premium_guild_subscription = 8
+    """The system message denoting that a member has "nitro boosted" a guild."""
     premium_guild_tier_1 = 9
+    """The system message denoting that a member has "nitro boosted" a guild and it achieved level 1."""
     premium_guild_tier_2 = 10
+    """The system message denoting that a member has "nitro boosted" a guild and it achieved level 2."""
     premium_guild_tier_3 = 11
+    """The system message denoting that a member has "nitro boosted" a guild and it achieved level 3."""
     channel_follow_add = 12
+    """The system message denoting that an announcement channel has been followed.
+
+    .. versionadded:: 1.3
+    """
     guild_stream = 13
+    """The system message denoting that a member is streaming in the guild.
+
+    .. versionadded:: 1.7
+    """
     guild_discovery_disqualified = 14
+    """The system message denoting that the guild is no longer eligible for Server Discovery.
+
+    .. versionadded:: 1.7
+    """
     guild_discovery_requalified = 15
+    """The system message denoting that the guild has become eligible again for Server Discovery.
+
+    .. versionadded:: 1.7
+    """
     guild_discovery_grace_period_initial_warning = 16
+    """The system message denoting that the guild has failed to meet the Server
+    Discovery requirements for one week.
+
+    .. versionadded:: 1.7
+    """
     guild_discovery_grace_period_final_warning = 17
+    """The system message denoting that the guild has failed to meet the Server
+    Discovery requirements for 3 weeks in a row.
+
+    .. versionadded:: 1.7
+    """
     thread_created = 18
+    """The system message denoting that a thread has been created. This is only
+    sent if the thread has been created from an older message. The period of time
+    required for a message to be considered old cannot be relied upon and is up to
+    Discord.
+
+    .. versionadded:: 2.0
+    """
     reply = 19
+    """The system message denoting that the author is replying to a message.
+
+    .. versionadded:: 2.0
+    """
     application_command = 20
+    """The system message denoting that an application (or "slash") command was executed.
+
+    .. versionadded:: 2.0
+    """
     thread_starter_message = 21
+    """The system message denoting the message in the thread that is the one that started the
+    thread's conversation topic.
+
+    .. versionadded:: 2.0
+    """
     guild_invite_reminder = 22
+    """The system message sent as a reminder to invite people to the guild.
+
+    .. versionadded:: 2.0
+    """
     context_menu_command = 23
+    """The system message denoting that a context menu command was executed.
+
+    .. versionadded:: 2.3
+    """
     auto_moderation_action = 24
+    """The system message denoting that an auto moderation action was executed.
+
+    .. versionadded:: 2.5
+    """
     role_subscription_purchase = 25
+    """The system message denoting that a role subscription was purchased.
+
+    .. versionadded:: 2.9
+    """
     interaction_premium_upsell = 26
+    """The system message for an application premium subscription upsell.
+
+    .. versionadded:: 2.8
+    """
     stage_start = 27
+    """The system message denoting the stage has been started.
+
+    .. versionadded:: 2.9
+    """
     stage_end = 28
+    """The system message denoting the stage has ended.
+
+    .. versionadded:: 2.9
+    """
     stage_speaker = 29
+    """The system message denoting a user has become a speaker.
+
+    .. versionadded:: 2.9
+    """
     stage_topic = 31
+    """The system message denoting the stage topic has been changed.
+
+    .. versionadded:: 2.9
+    """
     guild_application_premium_subscription = 32
+    """The system message denoting that a guild member has subscribed to an application.
+
+    .. versionadded:: 2.8
+    """
+    guild_incident_alert_mode_enabled = 36
+    """The system message denoting that an admin enabled security actions.
+
+    .. versionadded:: 2.10
+    """
+    guild_incident_alert_mode_disabled = 37
+    """The system message denoting that an admin disabled security actions.
+
+    .. versionadded:: 2.10
+    """
+    guild_incident_report_raid = 38
+    """The system message denoting that an admin reported a raid.
+
+    .. versionadded:: 2.10
+    """
+    guild_incident_report_false_alarm = 39
+    """The system message denoting that a raid report was a false alarm.
+
+    .. versionadded:: 2.10
+    """
+    poll_result = 46
+    """The system message denoting that a poll expired, announcing the most voted answer.
+
+    .. versionadded:: 2.10
+    """
 
 
 class PartyType(Enum):
+    """Represents the type of a voice channel activity/application.
+
+    .. deprecated:: 2.9
+    """
+
     poker = 755827207812677713
+    """The "Poker Night" activity."""
     betrayal = 773336526917861400
+    """The "Betrayal.io" activity."""
     fishing = 814288819477020702
+    """The "Fishington.io" activity."""
     chess = 832012774040141894
+    """The "Chess In The Park" activity."""
     letter_tile = 879863686565621790
+    """The "Letter Tile" activity."""
     word_snack = 879863976006127627
+    """The "Word Snacks" activity."""
     doodle_crew = 878067389634314250
+    """The "Doodle Crew" activity."""
     checkers = 832013003968348200
+    """The "Checkers In The Park" activity.
+
+    .. versionadded:: 2.3
+    """
     spellcast = 852509694341283871
+    """The "SpellCast" activity.
+
+    .. versionadded:: 2.3
+    """
     watch_together = 880218394199220334
+    """The "Watch Together" activity, a Youtube application.
+
+    .. versionadded:: 2.3
+    """
     sketch_heads = 902271654783242291
+    """The "Sketch Heads" activity.
+
+    .. versionadded:: 2.4
+    """
     ocho = 832025144389533716
+    """The "Ocho" activity.
+
+    .. versionadded:: 2.4
+    """
     gartic_phone = 1007373802981822582
+    """The "Gartic Phone" activity.
+
+    .. versionadded:: 2.9
+    """
 
 
+# undocumented/internal
 class SpeakingState(Enum):
     none = 0
     voice = 1 << 0
@@ -283,63 +494,192 @@ class SpeakingState(Enum):
 
 
 class VerificationLevel(Enum, comparable=True):
+    """Specifies a :class:`Guild`\\'s verification level, which is the criteria in
+    which a member must meet before being able to send messages to the guild.
+
+    .. collapse:: operations
+
+        .. versionadded:: 2.0
+
+        .. describe:: x == y
+
+            Checks if two verification levels are equal.
+        .. describe:: x != y
+
+            Checks if two verification levels are not equal.
+        .. describe:: x > y
+
+            Checks if a verification level is higher than another.
+        .. describe:: x < y
+
+            Checks if a verification level is lower than another.
+        .. describe:: x >= y
+
+            Checks if a verification level is higher or equal to another.
+        .. describe:: x <= y
+
+            Checks if a verification level is lower or equal to another.
+    """
+
     none = 0
+    """No criteria set."""
     low = 1
+    """Member must have a verified email on their Discord account."""
     medium = 2
+    """Member must have a verified email and be registered on Discord for more than five minutes."""
     high = 3
+    """Member must have a verified email, be registered on Discord for more
+    than five minutes, and be a member of the guild itself for more than ten minutes.
+    """
     highest = 4
+    """Member must have a verified phone on their Discord account."""
 
     def __str__(self) -> str:
         return self.name
 
 
 class ContentFilter(Enum, comparable=True):
+    """Specifies a :class:`Guild`\\'s explicit content filter, which is the machine
+    learning algorithms that Discord uses to detect if an image contains NSFW content.
+
+    .. collapse:: operations
+
+        .. describe:: x == y
+
+            Checks if two content filter levels are equal.
+        .. describe:: x != y
+
+            Checks if two content filter levels are not equal.
+        .. describe:: x > y
+
+            Checks if a content filter level is higher than another.
+        .. describe:: x < y
+
+            Checks if a content filter level is lower than another.
+        .. describe:: x >= y
+
+            Checks if a content filter level is higher or equal to another.
+        .. describe:: x <= y
+
+            Checks if a content filter level is lower or equal to another.
+    """
+
     disabled = 0
+    """The guild does not have the content filter enabled."""
     no_role = 1
+    """The guild has the content filter enabled for members without a role."""
     all_members = 2
+    """The guild has the content filter enabled for every member."""
 
     def __str__(self) -> str:
         return self.name
 
 
 class Status(Enum):
+    """Specifies a :class:`Member`\\'s status."""
+
     online = "online"
+    """The member is online."""
     offline = "offline"
+    """The member is offline."""
     idle = "idle"
+    """The member is idle."""
     dnd = "dnd"
+    """The member is "Do Not Disturb"."""
     do_not_disturb = "dnd"
+    """An alias for :attr:`dnd`."""
     invisible = "invisible"
+    """The member is "invisible". In reality, this is only used in sending
+    a presence a la :meth:`Client.change_presence`. When you receive a
+    user's presence this will be :attr:`offline` instead.
+    """
     streaming = "streaming"
+    """The member is live streaming to Twitch or YouTube.
+
+    .. versionadded:: 2.3
+    """
 
     def __str__(self) -> str:
         return self.value
 
 
 class DefaultAvatar(Enum):
+    """Represents the default avatar of a Discord :class:`User`."""
+
     blurple = 0
+    """Represents the default avatar with the color blurple. See also :attr:`Colour.blurple`."""
     grey = 1
+    """Represents the default avatar with the color grey. See also :attr:`Colour.greyple`."""
     gray = 1
+    """An alias for :attr:`grey`."""
     green = 2
+    """Represents the default avatar with the color green. See also :attr:`Colour.green`."""
     orange = 3
+    """Represents the default avatar with the color orange. See also :attr:`Colour.orange`."""
     red = 4
+    """Represents the default avatar with the color red. See also :attr:`Colour.red`."""
     fuchsia = 5
+    """Represents the default avatar with the color fuchsia. See also :attr:`Colour.fuchsia`.
+
+    .. versionadded:: 2.9
+    """
 
     def __str__(self) -> str:
         return self.name
 
 
 class NotificationLevel(Enum, comparable=True):
+    """Specifies whether a :class:`Guild` has notifications on for all messages or mentions only by default.
+
+    .. collapse:: operations
+
+        .. describe:: x == y
+
+            Checks if two notification levels are equal.
+        .. describe:: x != y
+
+            Checks if two notification levels are not equal.
+        .. describe:: x > y
+
+            Checks if a notification level is higher than another.
+        .. describe:: x < y
+
+            Checks if a notification level is lower than another.
+        .. describe:: x >= y
+
+            Checks if a notification level is higher or equal to another.
+        .. describe:: x <= y
+
+            Checks if a notification level is lower or equal to another.
+    """
+
     all_messages = 0
+    """Members receive notifications for every message regardless of them being mentioned."""
     only_mentions = 1
+    """Members receive notifications for messages they are mentioned in."""
 
 
 class AuditLogActionCategory(Enum):
+    """Represents the category that the :class:`AuditLogAction` belongs to.
+
+    This can be retrieved via :attr:`AuditLogEntry.category`.
+    """
+
     create = 1
+    """The action is the creation of something."""
     delete = 2
+    """The action is the deletion of something."""
     update = 3
+    """The action is the update of something."""
 
 
+# NOTE: these fields are only fully documented in audit_logs.rst,
+# as the docstrings alone would be ~1000-1500 additional lines
 class AuditLogAction(Enum):
+    """Represents the type of action being done for a :class:`AuditLogEntry`\\,
+    which is retrievable via :meth:`Guild.audit_logs` or via the :func:`on_audit_log_entry_create` event.
+    """
+
     # fmt: off
     guild_update                          = 1
     channel_create                        = 10
@@ -389,6 +729,9 @@ class AuditLogAction(Enum):
     thread_update                         = 111
     thread_delete                         = 112
     application_command_permission_update = 121
+    soundboard_sound_create               = 130
+    soundboard_sound_update               = 131
+    soundboard_sound_delete               = 132
     automod_rule_create                   = 140
     automod_rule_update                   = 141
     automod_rule_delete                   = 142
@@ -451,6 +794,9 @@ class AuditLogAction(Enum):
             AuditLogAction.guild_scheduled_event_update:          AuditLogActionCategory.update,
             AuditLogAction.guild_scheduled_event_delete:          AuditLogActionCategory.delete,
             AuditLogAction.application_command_permission_update: AuditLogActionCategory.update,
+            AuditLogAction.soundboard_sound_create:               AuditLogActionCategory.create,
+            AuditLogAction.soundboard_sound_update:               AuditLogActionCategory.update,
+            AuditLogAction.soundboard_sound_delete:               AuditLogActionCategory.delete,
             AuditLogAction.automod_rule_create:                   AuditLogActionCategory.create,
             AuditLogAction.automod_rule_update:                   AuditLogActionCategory.update,
             AuditLogAction.automod_rule_delete:                   AuditLogActionCategory.delete,
@@ -466,7 +812,7 @@ class AuditLogAction(Enum):
     @property
     def target_type(self) -> Optional[str]:
         v = self.value
-        if v == -1:
+        if v == -1:  # pyright: ignore[reportUnnecessaryComparison]
             return "all"
         elif v < 10:
             return "guild"
@@ -511,70 +857,186 @@ class AuditLogAction(Enum):
 
 
 class UserFlags(Enum):
+    """Represents Discord user flags."""
+
     staff = 1 << 0
+    """The user is a Discord Employee."""
     partner = 1 << 1
+    """The user is a Discord Partner."""
     hypesquad = 1 << 2
+    """The user is a HypeSquad Events member."""
     bug_hunter = 1 << 3
+    """The user is a Bug Hunter."""
     mfa_sms = 1 << 4
+    """The user has SMS recovery for Multi Factor Authentication enabled."""
     premium_promo_dismissed = 1 << 5
+    """The user has dismissed the Discord Nitro promotion."""
     hypesquad_bravery = 1 << 6
+    """The user is a HypeSquad Bravery member."""
     hypesquad_brilliance = 1 << 7
+    """The user is a HypeSquad Brilliance member."""
     hypesquad_balance = 1 << 8
+    """The user is a HypeSquad Balance member."""
     early_supporter = 1 << 9
+    """The user is an Early Supporter."""
     team_user = 1 << 10
+    """The user is a Team User."""
     system = 1 << 12
+    """The user is a system user (i.e. represents Discord officially)."""
     has_unread_urgent_messages = 1 << 13
+    """The user has an unread system message."""
     bug_hunter_level_2 = 1 << 14
+    """The user is a Bug Hunter Level 2."""
     verified_bot = 1 << 16
+    """The user is a Verified Bot."""
     verified_bot_developer = 1 << 17
+    """The user is an Early Verified Bot Developer."""
     discord_certified_moderator = 1 << 18
+    """The user is a Discord Certified Moderator."""
     http_interactions_bot = 1 << 19
+    """The user is a bot that only uses HTTP interactions.
+
+    .. versionadded:: 2.3
+    """
     spammer = 1 << 20
+    """The user is marked as a spammer.
+
+    .. versionadded:: 2.3
+    """
     active_developer = 1 << 22
+    """The user is an Active Developer.
+
+    .. versionadded:: 2.8
+    """
 
 
 class ActivityType(Enum):
+    """Specifies the type of :class:`Activity`. This is used to check how to
+    interpret the activity itself.
+    """
+
     unknown = -1
+    """An unknown activity type. This should generally not happen."""
     playing = 0
+    """A "Playing" activity type."""
     streaming = 1
+    """A "Streaming" activity type."""
     listening = 2
+    """A "Listening" activity type."""
     watching = 3
+    """A "Watching" activity type."""
     custom = 4
+    """A custom activity type."""
     competing = 5
+    """A competing activity type.
+
+    .. versionadded:: 1.5
+    """
 
     def __int__(self) -> int:
         return self.value
 
 
 class TeamMembershipState(Enum):
+    """Represents the membership state of a team member retrieved through :func:`Client.application_info`.
+
+    .. versionadded:: 1.3
+    """
+
     invited = 1
+    """Represents an invited member."""
     accepted = 2
+    """Represents a member currently in the team."""
+
+
+class TeamMemberRole(Enum):
+    """Represents the role of a team member retrieved through :func:`Client.application_info`.
+
+    .. versionadded:: 2.10
+    """
+
+    admin = "admin"
+    """Admins have the most permissions. An admin can only take destructive actions
+    on the team or team-owned apps if they are the team owner.
+    """
+    developer = "developer"
+    """Developers can access information about a team and team-owned applications,
+    and take limited actions on them, like configuring interaction
+    endpoints or resetting the bot token.
+    """
+    read_only = "read_only"
+    """Read-only members can access information about a team and team-owned applications."""
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class WebhookType(Enum):
+    """Represents the type of webhook that can be received.
+
+    .. versionadded:: 1.3
+    """
+
     incoming = 1
+    """Represents a webhook that can post messages to channels with a token."""
     channel_follower = 2
+    """Represents a webhook that is internally managed by Discord, used for following channels."""
     application = 3
+    """Represents a webhook that is used for interactions or applications.
+
+    .. versionadded:: 2.0
+    """
 
 
 class ExpireBehaviour(Enum):
+    """Represents the behaviour the :class:`Integration` should perform
+    when a user's subscription has finished.
+
+    There is an alias for this called ``ExpireBehavior``.
+
+    .. versionadded:: 1.4
+    """
+
     remove_role = 0
+    """This will remove the :attr:`StreamIntegration.role` from the user
+    when their subscription is finished.
+    """
     kick = 1
+    """This will kick the user when their subscription is finished."""
 
 
 ExpireBehavior = ExpireBehaviour
 
 
 class StickerType(Enum):
+    """Represents the type of sticker.
+
+    .. versionadded:: 2.0
+    """
+
     standard = 1
+    """Represents a standard sticker that all users can use."""
     guild = 2
+    """Represents a custom sticker created in a guild."""
 
 
 class StickerFormatType(Enum):
+    """Represents the type of sticker images.
+
+    .. versionadded:: 1.6
+    """
+
     png = 1
+    """Represents a sticker with a png image."""
     apng = 2
+    """Represents a sticker with an apng image."""
     lottie = 3
+    """Represents a sticker with a lottie image."""
     gif = 4
+    """Represents a sticker with a gif image.
+
+    .. versionadded:: 2.8
+    """
 
     @property
     def file_extension(self) -> str:
@@ -589,162 +1051,456 @@ STICKER_FORMAT_LOOKUP: Dict[StickerFormatType, str] = {
 }
 
 
+class InviteType(Enum):
+    """Represents the type of an invite.
+
+    .. versionadded:: 2.10
+    """
+
+    guild = 0
+    """Represents an invite to a guild."""
+    group_dm = 1
+    """Represents an invite to a group channel."""
+    friend = 2
+    """Represents a friend invite."""
+
+
 class InviteTarget(Enum):
+    """Represents the invite type for voice channel invites.
+
+    .. versionadded:: 2.0
+    """
+
     unknown = 0
+    """The invite doesn't target anyone or anything."""
     stream = 1
+    """A stream invite that targets a user."""
     embedded_application = 2
+    """A stream invite that targets an embedded application."""
 
 
 class InteractionType(Enum):
+    """Specifies the type of :class:`Interaction`.
+
+    .. versionadded:: 2.0
+    """
+
     ping = 1
+    """Represents Discord pinging to see if the interaction response server is alive."""
     application_command = 2
+    """Represents an application command interaction."""
     component = 3
+    """Represents a component based interaction, i.e. using the Discord Bot UI Kit."""
     application_command_autocomplete = 4
+    """Represents an application command autocomplete interaction."""
     modal_submit = 5
+    """Represents a modal submit interaction."""
 
 
 class InteractionResponseType(Enum):
+    """Specifies the response type for the interaction.
+
+    .. versionadded:: 2.0
+    """
+
     pong = 1
-    # ack = 2 (deprecated)
-    # channel_message = 3 (deprecated)
-    channel_message = 4  # (with source)
-    deferred_channel_message = 5  # (with source)
-    deferred_message_update = 6  # for components
-    message_update = 7  # for components
-    application_command_autocomplete_result = 8  # for autocomplete
-    modal = 9  # for modals
+    """Pongs the interaction when given a ping.
+
+    See also :meth:`InteractionResponse.pong`.
+    """
+    channel_message = 4
+    """Responds to the interaction with a message.
+
+    See also :meth:`InteractionResponse.send_message`.
+    """
+    deferred_channel_message = 5
+    """Responds to the interaction with a message at a later time.
+
+    See also :meth:`InteractionResponse.defer`.
+    """
+    deferred_message_update = 6
+    """Acknowledges the component interaction with a promise that
+    the message will update later (though there is no need to actually update the message).
+
+    See also :meth:`InteractionResponse.defer`.
+    """
+    message_update = 7
+    """Responds to the interaction by editing the message.
+
+    See also :meth:`InteractionResponse.edit_message`.
+    """
+    application_command_autocomplete_result = 8
+    """Responds to the autocomplete interaction with suggested choices.
+
+    See also :meth:`InteractionResponse.autocomplete`.
+    """
+    modal = 9
+    """Responds to the interaction by displaying a modal.
+
+    See also :meth:`InteractionResponse.send_modal`.
+
+    .. versionadded:: 2.4
+    """
+    premium_required = 10
+    """Responds to the interaction with a message containing an upgrade button.
+    Only available for applications with monetization enabled.
+
+    See also :meth:`InteractionResponse.require_premium`.
+
+    .. versionadded:: 2.10
+
+    .. deprecated:: 2.11
+        Use premium buttons (:class:`ui.Button` with :attr:`~ui.Button.sku_id`) instead.
+    """
 
 
 class VideoQualityMode(Enum):
+    """Represents the camera video quality mode for voice channel participants.
+
+    .. versionadded:: 2.0
+    """
+
     auto = 1
+    """Represents auto camera video quality."""
     full = 2
+    """Represents full camera video quality."""
 
     def __int__(self) -> int:
         return self.value
 
 
 class ComponentType(Enum):
+    """Represents the type of component.
+
+    .. versionadded:: 2.0
+    """
+
     action_row = 1
+    """Represents the group component which holds different components in a row."""
     button = 2
+    """Represents a button component."""
     string_select = 3
-    select = string_select  # backwards compatibility
+    """Represents a string select component.
+
+    .. versionadded:: 2.7
+    """
+    select = 3  # backwards compatibility
+    """An alias of :attr:`string_select`."""
     text_input = 4
+    """Represents a text input component."""
     user_select = 5
+    """Represents a user select component.
+
+    .. versionadded:: 2.7
+    """
     role_select = 6
+    """Represents a role select component.
+
+    .. versionadded:: 2.7
+    """
     mentionable_select = 7
+    """Represents a mentionable (user/member/role) select component.
+
+    .. versionadded:: 2.7
+    """
     channel_select = 8
+    """Represents a channel select component.
+
+    .. versionadded:: 2.7
+    """
 
     def __int__(self) -> int:
         return self.value
 
 
 class ButtonStyle(Enum):
+    """Represents the style of the button component.
+
+    .. versionadded:: 2.0
+    """
+
     primary = 1
+    """Represents a blurple button for the primary action."""
     secondary = 2
+    """Represents a grey button for the secondary action."""
     success = 3
+    """Represents a green button for a successful action."""
     danger = 4
+    """Represents a red button for a dangerous action."""
     link = 5
+    """Represents a link button."""
+    premium = 6
+    """Represents a premium/SKU button.
+
+    .. versionadded:: 2.11
+    """
 
     # Aliases
     blurple = 1
+    """An alias for :attr:`primary`."""
     grey = 2
+    """An alias for :attr:`secondary`."""
     gray = 2
+    """An alias for :attr:`secondary`."""
     green = 3
+    """An alias for :attr:`success`."""
     red = 4
+    """An alias for :attr:`danger`."""
     url = 5
+    """An alias for :attr:`link`."""
+    sku = 6
+    """An alias for :attr:`premium`.
+
+    .. versionadded:: 2.11
+    """
 
     def __int__(self) -> int:
         return self.value
 
 
 class TextInputStyle(Enum):
+    """Represents a style of the text input component.
+
+    .. versionadded:: 2.4
+    """
+
     short = 1
+    """Represents a single-line text input component."""
     paragraph = 2
+    """Represents a multi-line text input component."""
+
     # Aliases
     single_line = 1
+    """An alias for :attr:`short`."""
     multi_line = 2
+    """An alias for :attr:`paragraph`."""
     long = 2
+    """An alias for :attr:`paragraph`."""
 
     def __int__(self) -> int:
         return self.value
 
 
+class SelectDefaultValueType(Enum):
+    """Represents the type of a :class:`SelectDefaultValue`.
+
+    .. versionadded:: 2.10
+    """
+
+    user = "user"
+    """Represents a user/member."""
+    role = "role"
+    """Represents a role."""
+    channel = "channel"
+    """Represents a channel."""
+
+    def __str__(self) -> str:
+        return self.value
+
+
 class ApplicationCommandType(Enum):
+    """Represents the type of an application command.
+
+    .. versionadded:: 2.1
+    """
+
     chat_input = 1
+    """Represents a slash command."""
     user = 2
+    """Represents a user command from the context menu."""
     message = 3
+    """Represents a message command from the context menu."""
 
 
 class ApplicationCommandPermissionType(Enum):
+    """Represents the type of a permission of an application command.
+
+    .. versionadded:: 2.5
+    """
+
     role = 1
+    """Represents a permission that affects roles."""
     user = 2
+    """Represents a permission that affects users."""
     channel = 3
+    """Represents a permission that affects channels."""
 
     def __int__(self) -> int:
         return self.value
 
 
 class OptionType(Enum):
+    """Represents the type of an option.
+
+    .. versionadded:: 2.1
+    """
+
     sub_command = 1
+    """Represents a sub command of the main command or group."""
     sub_command_group = 2
+    """Represents a sub command group of the main command."""
     string = 3
+    """Represents a string option."""
     integer = 4
+    """Represents an integer option."""
     boolean = 5
+    """Represents a boolean option."""
     user = 6
+    """Represents a user option."""
     channel = 7
+    """Represents a channel option."""
     role = 8
+    """Represents a role option."""
     mentionable = 9
+    """Represents a role + user option."""
     number = 10
+    """Represents a float option."""
     attachment = 11
+    """Represents an attachment option.
+
+    .. versionadded:: 2.4
+    """
 
 
 class StagePrivacyLevel(Enum):
+    """Represents a stage instance's privacy level.
+
+    .. versionadded:: 2.0
+    """
+
     public = 1
+    """The stage instance can be joined by external users.
+
+    .. deprecated:: 2.5
+        Public stages are no longer supported by discord.
+    """
     closed = 2
+    """The stage instance can only be joined by members of the guild."""
     guild_only = 2
+    """Alias for :attr:`.closed`"""
 
 
 class NSFWLevel(Enum, comparable=True):
+    """Represents the NSFW level of a guild.
+
+    .. versionadded:: 2.0
+
+    .. collapse:: operations
+
+        .. describe:: x == y
+
+            Checks if two NSFW levels are equal.
+        .. describe:: x != y
+
+            Checks if two NSFW levels are not equal.
+        .. describe:: x > y
+
+            Checks if an NSFW level is higher than another.
+        .. describe:: x < y
+
+            Checks if an NSFW level is lower than another.
+        .. describe:: x >= y
+
+            Checks if an NSFW level is higher or equal to another.
+        .. describe:: x <= y
+
+            Checks if an NSFW level is lower or equal to another.
+    """
+
     default = 0
+    """The guild has not been categorised yet."""
     explicit = 1
+    """The guild contains NSFW content."""
     safe = 2
+    """The guild does not contain any NSFW content."""
     age_restricted = 3
+    """The guild may contain NSFW content."""
 
 
 class GuildScheduledEventEntityType(Enum):
+    """Represents the type of a guild scheduled event entity.
+
+    .. versionadded:: 2.3
+    """
+
     stage_instance = 1
+    """The guild scheduled event will take place in a stage channel."""
     voice = 2
+    """The guild scheduled event will take place in a voice channel."""
     external = 3
+    """The guild scheduled event will take place in a custom location."""
 
 
 class GuildScheduledEventStatus(Enum):
+    """Represents the status of a guild scheduled event.
+
+    .. versionadded:: 2.3
+    """
+
     scheduled = 1
+    """Represents a scheduled event."""
     active = 2
+    """Represents an active event."""
     completed = 3
+    """Represents a completed event."""
     canceled = 4
+    """Represents a canceled event."""
     cancelled = 4
+    """An alias for :attr:`canceled`.
+
+    .. versionadded:: 2.6
+    """
 
 
 class GuildScheduledEventPrivacyLevel(Enum):
+    """Represents the privacy level of a guild scheduled event.
+
+    .. versionadded:: 2.3
+    """
+
     guild_only = 2
+    """The guild scheduled event is only for a specific guild."""
 
 
 class ThreadArchiveDuration(Enum):
+    """Represents the automatic archive duration of a thread in minutes.
+
+    .. versionadded:: 2.3
+    """
+
     hour = 60
+    """The thread will archive after an hour of inactivity."""
     day = 1440
+    """The thread will archive after a day of inactivity."""
     three_days = 4320
+    """The thread will archive after three days of inactivity."""
     week = 10080
+    """The thread will archive after a week of inactivity."""
 
     def __int__(self) -> int:
         return self.value
 
 
 class WidgetStyle(Enum):
+    """Represents the supported widget image styles.
+
+    .. versionadded:: 2.5
+    """
+
     shield = "shield"
+    """A shield style image with a Discord icon and the online member count."""
     banner1 = "banner1"
+    """A large image with guild icon, name and online member count and a footer."""
     banner2 = "banner2"
+    """A small image with guild icon, name and online member count."""
     banner3 = "banner3"
+    """A large image with guild icon, name and online member count and a footer,
+    with a "Chat Now" label on the right.
+    """
     banner4 = "banner4"
+    """A large image with a large Discord logo, guild icon, name and online member count,
+    with a "Join My Server" label at the bottom.
+    """
 
     def __str__(self) -> str:
         return self.value
@@ -752,110 +1508,181 @@ class WidgetStyle(Enum):
 
 # reference: https://discord.com/developers/docs/reference#locales
 class Locale(Enum):
+    """Represents supported locales by Discord.
+
+    .. versionadded:: 2.5
+    """
+
     bg = "bg"
-    "Bulgarian | български"
+    """The ``bg`` (Bulgarian) locale."""
     cs = "cs"
-    "Czech | Čeština"
+    """The ``cs`` (Czech) locale."""
     da = "da"
-    "Danish | Dansk"
+    """The ``da`` (Danish) locale."""
     de = "de"
-    "German | Deutsch"
+    """The ``de`` (German) locale."""
     el = "el"
-    "Greek | Ελληνικά"
+    """The ``el`` (Greek) locale."""
     en_GB = "en-GB"
-    "English, UK | English, UK"
+    """The ``en-GB`` (English, UK) locale."""
     en_US = "en-US"
-    "English, US | English, US"
+    """The ``en-US`` (English, US) locale."""
     es_ES = "es-ES"
-    "Spanish | Español"
+    """The ``es-ES`` (Spanish) locale."""
+    es_LATAM = "es-419"
+    """The ``es-419`` (Spanish, LATAM) locale.
+
+    .. versionadded:: 2.10
+    """
     fi = "fi"
-    "Finnish | Suomi"
+    """The ``fi`` (Finnish) locale."""
     fr = "fr"
-    "French | Français"
+    """The ``fr`` (French) locale."""
     hi = "hi"
-    "Hindi | हिन्दी"
+    """The ``hi`` (Hindi) locale."""
     hr = "hr"
-    "Croatian | Hrvatski"
+    """The ``hr`` (Croatian) locale."""
     hu = "hu"
-    "Hungarian | Magyar"
+    """The ``hu`` (Hungarian) locale."""
     id = "id"
-    "Indonesian | Bahasa Indonesia"
+    """The ``id`` (Indonesian) locale.
+
+    .. versionadded:: 2.8
+    """
     it = "it"
-    "Italian | Italiano"
+    """The ``it`` (Italian) locale."""
     ja = "ja"
-    "Japanese | 日本語"
+    """The ``ja`` (Japanese) locale."""
     ko = "ko"
-    "Korean | 한국어"
+    """The ``ko`` (Korean) locale."""
     lt = "lt"
-    "Lithuanian | Lietuviškai"
+    """The ``lt`` (Lithuanian) locale."""
     nl = "nl"
-    "Dutch | Nederlands"
+    """The ``nl`` (Dutch) locale."""
     no = "no"
-    "Norwegian | Norsk"
+    """The ``no`` (Norwegian) locale."""
     pl = "pl"
-    "Polish | Polski"
+    """The ``pl`` (Polish) locale."""
     pt_BR = "pt-BR"
-    "Portuguese, Brazilian | Português do Brasil"
+    """The ``pt-BR`` (Portuguese) locale."""
     ro = "ro"
-    "Romanian, Romania | Română"
+    """The ``ro`` (Romanian) locale."""
     ru = "ru"
-    "Russian | Pусский"  # noqa: RUF001
+    """The ``ru`` (Russian) locale."""
     sv_SE = "sv-SE"
-    "Swedish | Svenska"
+    """The ``sv-SE`` (Swedish) locale."""
     th = "th"
-    "Thai | ไทย"
+    """The ``th`` (Thai) locale."""
     tr = "tr"
-    "Turkish | Türkçe"
+    """The ``tr`` (Turkish) locale."""
     uk = "uk"
-    "Ukrainian | Українська"
+    """The ``uk`` (Ukrainian) locale."""
     vi = "vi"
-    "Vietnamese | Tiếng Việt"
+    """The ``vi`` (Vietnamese) locale."""
     zh_CN = "zh-CN"
-    "Chinese, China | 中文"
+    """The ``zh-CN`` (Chinese, China) locale."""
     zh_TW = "zh-TW"
-    "Chinese, Taiwan | 繁體中文"
+    """The ``zh-TW`` (Chinese, Taiwan) locale."""
 
     def __str__(self) -> str:
         return self.value
 
 
 class AutoModActionType(Enum):
+    """Represents the type of action an auto moderation rule will take upon execution.
+
+    .. versionadded:: 2.6
+    """
+
     block_message = 1
+    """The rule will prevent matching messages from being posted."""
     send_alert_message = 2
+    """The rule will send an alert to a specified channel."""
     timeout = 3
+    """The rule will timeout the user that sent the message.
+
+    .. note::
+        This action type is only available for rules with trigger type
+        :attr:`~AutoModTriggerType.keyword` or :attr:`~AutoModTriggerType.mention_spam`,
+        and :attr:`~Permissions.moderate_members` permissions are required to use it.
+    """
 
 
 class AutoModEventType(Enum):
+    """Represents the type of event/context an auto moderation rule will be checked in.
+
+    .. versionadded:: 2.6
+    """
+
     message_send = 1
+    """The rule will apply when a member sends or edits a message in the guild."""
 
 
 class AutoModTriggerType(Enum):
+    """Represents the type of content that can trigger an auto moderation rule.
+
+    .. versionadded:: 2.6
+
+    .. versionchanged:: 2.9
+        Removed obsolete ``harmful_link`` type.
+    """
+
     keyword = 1
+    """The rule will filter messages based on a custom keyword list.
+
+    This trigger type requires additional :class:`metadata <AutoModTriggerMetadata>`.
+    """
+
     if not TYPE_CHECKING:
         harmful_link = 2  # obsolete/deprecated
+
     spam = 3
+    """The rule will filter messages suspected of being spam."""
     keyword_preset = 4
+    """The rule will filter messages based on predefined lists containing commonly flagged words.
+
+    This trigger type requires additional :class:`metadata <AutoModTriggerMetadata>`.
+    """
     mention_spam = 5
+    """The rule will filter messages based on the number of member/role mentions they contain.
+
+    This trigger type requires additional :class:`metadata <AutoModTriggerMetadata>`.
+    """
 
 
 class ThreadSortOrder(Enum):
+    """Represents the sort order of threads in a :class:`ForumChannel` or :class:`MediaChannel`.
+
+    .. versionadded:: 2.6
+    """
+
     latest_activity = 0
+    """Sort forum threads by activity."""
     creation_date = 1
+    """Sort forum threads by creation date/time (from newest to oldest)."""
 
 
 class ThreadLayout(Enum):
+    """Represents the layout of threads in :class:`ForumChannel`\\s.
+
+    .. versionadded:: 2.8
+    """
+
     not_set = 0
+    """No preferred layout has been set."""
     list_view = 1
+    """Display forum threads in a text-focused list."""
     gallery_view = 2
+    """Display forum threads in a media-focused collection of tiles."""
 
 
 class Event(Enum):
-    """Represents all the events of the library.
+    """
+    Represents all the events of the library.
 
     These offer to register listeners/events in a more pythonic way; additionally autocompletion and documentation are both supported.
 
     .. versionadded:: 2.8
-
     """
 
     connect = "connect"
@@ -1026,6 +1853,12 @@ class Event(Enum):
     """Called when a `Guild` updates its stickers.
     Represents the :func:`on_guild_stickers_update` event.
     """
+    guild_soundboard_sounds_update = "guild_soundboard_sounds_update"
+    """Called when a `Guild` updates its soundboard sounds.
+    Represents the :func:`on_guild_soundboard_sounds_update` event.
+
+    .. versionadded:: 2.10
+    """
     guild_integrations_update = "guild_integrations_update"
     """Called whenever an integration is created, modified, or removed from a guild.
     Represents the :func:`on_guild_integrations_update` event.
@@ -1134,6 +1967,19 @@ class Event(Enum):
     """Called when a `Member` changes their `VoiceState`.
     Represents the :func:`on_voice_state_update` event.
     """
+    voice_channel_effect = "voice_channel_effect"
+    """Called when a `Member` sends an effect in a voice channel the bot is connected to.
+    Represents the :func:`on_voice_channel_effect` event.
+
+    .. versionadded:: 2.10
+    """
+    raw_voice_channel_effect = "raw_voice_channel_effect"
+    """Called when a `Member` sends an effect in a voice channel the bot is connected to,
+    regardless of the member cache.
+    Represents the :func:`on_raw_voice_channel_effect` event.
+
+    .. versionadded:: 2.10
+    """
     stage_instance_create = "stage_instance_create"
     """Called when a `StageInstance` is created for a `StageChannel`.
     Represents the :func:`on_stage_instance_create` event.
@@ -1190,6 +2036,14 @@ class Event(Enum):
     """Called when messages are bulk deleted.
     Represents the :func:`on_bulk_message_delete` event.
     """
+    poll_vote_add = "poll_vote_add"
+    """Called when a vote is added on a `Poll`.
+    Represents the :func:`on_poll_vote_add` event.
+    """
+    poll_vote_remove = "poll_vote_remove"
+    """Called when a vote is removed from a `Poll`.
+    Represents the :func:`on_poll_vote_remove` event.
+    """
     raw_message_edit = "raw_message_edit"
     """Called when a message is edited regardless of the state of the internal message cache.
     Represents the :func:`on_raw_message_edit` event.
@@ -1201,6 +2055,14 @@ class Event(Enum):
     raw_bulk_message_delete = "raw_bulk_message_delete"
     """Called when a bulk delete is triggered regardless of the messages being in the internal message cache or not.
     Represents the :func:`on_raw_bulk_message_delete` event.
+    """
+    raw_poll_vote_add = "raw_poll_vote_add"
+    """Called when a vote is added on a `Poll` regardless of the internal message cache.
+    Represents the :func:`on_raw_poll_vote_add` event.
+    """
+    raw_poll_vote_remove = "raw_poll_vote_remove"
+    """Called when a vote is removed from a `Poll` regardless of the internal message cache.
+    Represents the :func:`on_raw_poll_vote_remove` event.
     """
     reaction_add = "reaction_add"
     """Called when a message has a reaction added to it.
@@ -1217,6 +2079,10 @@ class Event(Enum):
     reaction_clear_emoji = "reaction_clear_emoji"
     """Called when a message has a specific reaction removed from it.
     Represents the :func:`on_reaction_clear_emoji` event.
+    """
+    raw_presence_update = "raw_presence_update"
+    """Called when a user's presence changes regardless of the state of the internal member cache.
+    Represents the :func:`on_raw_presence_update` event.
     """
     raw_reaction_add = "raw_reaction_add"
     """Called when a message has a reaction added regardless of the state of the internal message cache.
@@ -1241,6 +2107,39 @@ class Event(Enum):
     raw_typing = "raw_typing"
     """Called when someone begins typing a message regardless of whether `Intents.members` and `Intents.guilds` are enabled.
     Represents the :func:`on_raw_typing` event.
+    """
+    entitlement_create = "entitlement_create"
+    """Called when a user subscribes to an SKU, creating a new :class:`Entitlement`.
+    Represents the :func:`on_entitlement_create` event.
+
+    .. versionadded:: 2.10
+    """
+    entitlement_update = "entitlement_update"
+    """Called when a user's subscription renews.
+    Represents the :func:`on_entitlement_update` event.
+
+    .. versionadded:: 2.10
+    """
+    entitlement_delete = "entitlement_delete"
+    """Called when a user's entitlement is deleted.
+    Represents the :func:`on_entitlement_delete` event."""
+    subscription_create = "subscription_create"
+    """Called when a subscription for a premium app is created.
+    Represents the :func:`on_subscription_create` event.
+
+    .. versionadded:: 2.10
+    """
+    subscription_update = "subscription_update"
+    """Called when a subscription for a premium app is updated.
+    Represents the :func:`on_subscription_update` event.
+
+    .. versionadded:: 2.10
+    """
+    subscription_delete = "subscription_delete"
+    """Called when a subscription for a premium app is deleted.
+    Represents the :func:`on_subscription_delete` event.
+
+    .. versionadded:: 2.10
     """
     # ext.commands events
     command = "command"
@@ -1294,19 +2193,131 @@ class Event(Enum):
 
 
 class ApplicationRoleConnectionMetadataType(Enum):
+    """Represents the type of a role connection metadata value.
+
+    These offer comparison operations, which allow guilds to configure role requirements
+    based on the metadata value for each user and a guild-specified configured value.
+
+    .. versionadded:: 2.8
+    """
+
     integer_less_than_or_equal = 1
+    """The metadata value (``integer``) is less than or equal to the guild's configured value."""
     integer_greater_than_or_equal = 2
+    """The metadata value (``integer``) is greater than or equal to the guild's configured value."""
     integer_equal = 3
+    """The metadata value (``integer``) is equal to the guild's configured value."""
     integer_not_equal = 4
+    """The metadata value (``integer``) is not equal to the guild's configured value."""
     datetime_less_than_or_equal = 5
+    """The metadata value (``ISO8601 string``) is less than or equal to the guild's configured value (``integer``; days before current date)."""
     datetime_greater_than_or_equal = 6
+    """The metadata value (``ISO8601 string``) is greater than or equal to the guild's configured value (``integer``; days before current date)."""
     boolean_equal = 7
+    """The metadata value (``integer``) is equal to the guild's configured value."""
     boolean_not_equal = 8
+    """The metadata value (``integer``) is not equal to the guild's configured value."""
 
 
 class OnboardingPromptType(Enum):
+    """Represents the type of onboarding prompt.
+
+    .. versionadded:: 2.9
+    """
+
     multiple_choice = 0
+    """The prompt is a multiple choice prompt."""
     dropdown = 1
+    """The prompt is a dropdown prompt."""
+
+
+class SKUType(Enum):
+    """Represents the type of an SKU.
+
+    .. versionadded:: 2.10
+    """
+
+    durable = 2
+    """Represents a durable one-time purchase."""
+    consumable = 3
+    """Represents a consumable one-time purchase."""
+    subscription = 5
+    """Represents a recurring subscription."""
+    subscription_group = 6
+    """Represents a system-generated group for each :attr:`subscription` SKU."""
+
+
+class EntitlementType(Enum):
+    """Represents the type of an entitlement.
+
+    .. versionadded:: 2.10
+    """
+
+    purchase = 1
+    """Represents an entitlement purchased by a user."""
+    premium_subscription = 2
+    """Represents an entitlement for a Discord Nitro subscription."""
+    developer_gift = 3
+    """Represents an entitlement gifted by the application developer."""
+    test_mode_purchase = 4
+    """Represents an entitlement purchased by a developer in application test mode."""
+    free_purchase = 5
+    """Represents an entitlement granted when the SKU was free."""
+    user_gift = 6
+    """Represents an entitlement gifted by another user."""
+    premium_purchase = 7
+    """Represents an entitlement claimed by a user for free as a Discord Nitro subscriber."""
+    application_subscription = 8
+    """Represents an entitlement for an application subscription."""
+
+
+class SubscriptionStatus(Enum):
+    """Represents the status of a subscription.
+
+    .. versionadded:: 2.10
+    """
+
+    active = 0
+    """Represents an active Subscription which is scheduled to renew."""
+    ending = 1
+    """Represents an active Subscription which will not renew."""
+    inactive = 2
+    """Represents an inactive Subscription which is not being charged."""
+
+
+class PollLayoutType(Enum):
+    """Specifies the layout of a :class:`Poll`.
+
+    .. versionadded:: 2.10
+    """
+
+    default = 1
+    """The default poll layout type."""
+
+
+class VoiceChannelEffectAnimationType(Enum):
+    """The type of an emoji reaction effect animation in a voice channel.
+
+    .. versionadded:: 2.10
+    """
+
+    premium = 0
+    """A fun animation, sent by a Nitro subscriber."""
+    basic = 1
+    """A standard animation."""
+
+
+class MessageReferenceType(Enum):
+    """Specifies the type of :class:`MessageReference`. This can be used to determine
+    if a message is e.g. a reply or a forwarded message.
+
+    .. versionadded:: 2.10
+    """
+
+    default = 0
+    """A standard message reference used in message replies."""
+    forward = 1
+    """Reference used to point to a message at a point in time (forward)."""
 
 
 T = TypeVar("T")

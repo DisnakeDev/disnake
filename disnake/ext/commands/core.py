@@ -755,7 +755,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             dt = ctx.message.edited_at or ctx.message.created_at
             current = dt.replace(tzinfo=datetime.timezone.utc).timestamp()
             bucket = self._buckets.get_bucket(ctx.message, current)
-            if bucket is not None:
+            if bucket is not None:  # pyright: ignore[reportUnnecessaryComparison]
                 retry_after = bucket.update_rate_limit(current)
                 if retry_after:
                     raise CommandOnCooldown(bucket, retry_after, self._buckets.type)  # type: ignore
@@ -975,7 +975,9 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         return ""
 
     def _is_typing_optional(self, annotation: Union[T, Optional[T]]) -> TypeGuard[Optional[T]]:
-        return getattr(annotation, "__origin__", None) is Union and type(None) in annotation.__args__  # type: ignore
+        return (
+            getattr(annotation, "__origin__", None) is Union and type(None) in annotation.__args__  # type: ignore
+        )
 
     @property
     def signature(self) -> str:
@@ -1263,8 +1265,7 @@ class GroupMixin(Generic[CogT]):
         cls: Type[CommandT],
         *args: Any,
         **kwargs: Any,
-    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]:
-        ...
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]: ...
 
     @overload
     def command(
@@ -1273,8 +1274,7 @@ class GroupMixin(Generic[CogT]):
         *args: Any,
         cls: Type[CommandT],
         **kwargs: Any,
-    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]:
-        ...
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]: ...
 
     @overload
     def command(
@@ -1282,8 +1282,7 @@ class GroupMixin(Generic[CogT]):
         name: str = ...,
         *args: Any,
         **kwargs: Any,
-    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Command[CogT, P, T]]:
-        ...
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Command[CogT, P, T]]: ...
 
     def command(
         self,
@@ -1316,8 +1315,7 @@ class GroupMixin(Generic[CogT]):
         cls: Type[GroupT],
         *args: Any,
         **kwargs: Any,
-    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]:
-        ...
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]: ...
 
     @overload
     def group(
@@ -1326,8 +1324,7 @@ class GroupMixin(Generic[CogT]):
         *args: Any,
         cls: Type[GroupT],
         **kwargs: Any,
-    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]:
-        ...
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]: ...
 
     @overload
     def group(
@@ -1335,8 +1332,7 @@ class GroupMixin(Generic[CogT]):
         name: str = ...,
         *args: Any,
         **kwargs: Any,
-    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Group[CogT, P, T]]:
-        ...
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Group[CogT, P, T]]: ...
 
     def group(
         self,
@@ -1483,25 +1479,23 @@ if TYPE_CHECKING:
         @overload
         def __call__(
             self, func: Callable[Concatenate[ContextT, P], Coro[T]]
-        ) -> Command[None, P, T]:
-            ...
+        ) -> Command[None, P, T]: ...
 
         @overload
         def __call__(
             self, func: Callable[Concatenate[CogT, ContextT, P], Coro[T]]
-        ) -> Command[CogT, P, T]:
-            ...
+        ) -> Command[CogT, P, T]: ...
 
     class GroupDecorator(Protocol):
         @overload
-        def __call__(self, func: Callable[Concatenate[ContextT, P], Coro[T]]) -> Group[None, P, T]:
-            ...
+        def __call__(
+            self, func: Callable[Concatenate[ContextT, P], Coro[T]]
+        ) -> Group[None, P, T]: ...
 
         @overload
         def __call__(
             self, func: Callable[Concatenate[CogT, ContextT, P], Coro[T]]
-        ) -> Group[CogT, P, T]:
-            ...
+        ) -> Group[CogT, P, T]: ...
 
 
 # Small explanation regarding these overloads:
@@ -1518,8 +1512,7 @@ def command(
     name: str,
     cls: Type[CommandT],
     **attrs: Any,
-) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]:
-    ...
+) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]: ...
 
 
 @overload
@@ -1528,16 +1521,14 @@ def command(
     *,
     cls: Type[CommandT],
     **attrs: Any,
-) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]:
-    ...
+) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]: ...
 
 
 @overload
 def command(
     name: str = ...,
     **attrs: Any,
-) -> CommandDecorator:
-    ...
+) -> CommandDecorator: ...
 
 
 def command(
@@ -1590,8 +1581,7 @@ def group(
     name: str,
     cls: Type[GroupT],
     **attrs: Any,
-) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]:
-    ...
+) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]: ...
 
 
 @overload
@@ -1600,16 +1590,14 @@ def group(
     *,
     cls: Type[GroupT],
     **attrs: Any,
-) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]:
-    ...
+) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]: ...
 
 
 @overload
 def group(
     name: str = ...,
     **attrs: Any,
-) -> GroupDecorator:
-    ...
+) -> GroupDecorator: ...
 
 
 def group(
@@ -1718,7 +1706,7 @@ def check(predicate: Check) -> Callable[[T], T]:
         decorator.predicate = predicate
     else:
 
-        @functools.wraps(predicate)
+        @functools.wraps(predicate)  # type: ignore
         async def wrapper(ctx):
             return predicate(ctx)  # type: ignore
 
@@ -1999,7 +1987,9 @@ def has_permissions(
     ban_members: bool = ...,
     change_nickname: bool = ...,
     connect: bool = ...,
+    create_events: bool = ...,
     create_forum_threads: bool = ...,
+    create_guild_expressions: bool = ...,
     create_instant_invite: bool = ...,
     create_private_threads: bool = ...,
     create_public_threads: bool = ...,
@@ -2030,6 +2020,7 @@ def has_permissions(
     request_to_speak: bool = ...,
     send_messages: bool = ...,
     send_messages_in_threads: bool = ...,
+    send_polls: bool = ...,
     send_tts_messages: bool = ...,
     send_voice_messages: bool = ...,
     speak: bool = ...,
@@ -2037,6 +2028,7 @@ def has_permissions(
     stream: bool = ...,
     use_application_commands: bool = ...,
     use_embedded_activities: bool = ...,
+    use_external_apps: bool = ...,
     use_external_emojis: bool = ...,
     use_external_sounds: bool = ...,
     use_external_stickers: bool = ...,
@@ -2047,14 +2039,12 @@ def has_permissions(
     view_channel: bool = ...,
     view_creator_monetization_analytics: bool = ...,
     view_guild_insights: bool = ...,
-) -> Callable[[T], T]:
-    ...
+) -> Callable[[T], T]: ...
 
 
 @overload
 @_generated
-def has_permissions() -> Callable[[T], T]:
-    ...
+def has_permissions() -> Callable[[T], T]: ...
 
 
 @_overload_with_permissions
@@ -2121,7 +2111,9 @@ def bot_has_permissions(
     ban_members: bool = ...,
     change_nickname: bool = ...,
     connect: bool = ...,
+    create_events: bool = ...,
     create_forum_threads: bool = ...,
+    create_guild_expressions: bool = ...,
     create_instant_invite: bool = ...,
     create_private_threads: bool = ...,
     create_public_threads: bool = ...,
@@ -2152,6 +2144,7 @@ def bot_has_permissions(
     request_to_speak: bool = ...,
     send_messages: bool = ...,
     send_messages_in_threads: bool = ...,
+    send_polls: bool = ...,
     send_tts_messages: bool = ...,
     send_voice_messages: bool = ...,
     speak: bool = ...,
@@ -2159,6 +2152,7 @@ def bot_has_permissions(
     stream: bool = ...,
     use_application_commands: bool = ...,
     use_embedded_activities: bool = ...,
+    use_external_apps: bool = ...,
     use_external_emojis: bool = ...,
     use_external_sounds: bool = ...,
     use_external_stickers: bool = ...,
@@ -2169,14 +2163,12 @@ def bot_has_permissions(
     view_channel: bool = ...,
     view_creator_monetization_analytics: bool = ...,
     view_guild_insights: bool = ...,
-) -> Callable[[T], T]:
-    ...
+) -> Callable[[T], T]: ...
 
 
 @overload
 @_generated
-def bot_has_permissions() -> Callable[[T], T]:
-    ...
+def bot_has_permissions() -> Callable[[T], T]: ...
 
 
 @_overload_with_permissions
@@ -2221,7 +2213,9 @@ def has_guild_permissions(
     ban_members: bool = ...,
     change_nickname: bool = ...,
     connect: bool = ...,
+    create_events: bool = ...,
     create_forum_threads: bool = ...,
+    create_guild_expressions: bool = ...,
     create_instant_invite: bool = ...,
     create_private_threads: bool = ...,
     create_public_threads: bool = ...,
@@ -2252,6 +2246,7 @@ def has_guild_permissions(
     request_to_speak: bool = ...,
     send_messages: bool = ...,
     send_messages_in_threads: bool = ...,
+    send_polls: bool = ...,
     send_tts_messages: bool = ...,
     send_voice_messages: bool = ...,
     speak: bool = ...,
@@ -2259,6 +2254,7 @@ def has_guild_permissions(
     stream: bool = ...,
     use_application_commands: bool = ...,
     use_embedded_activities: bool = ...,
+    use_external_apps: bool = ...,
     use_external_emojis: bool = ...,
     use_external_sounds: bool = ...,
     use_external_stickers: bool = ...,
@@ -2269,14 +2265,12 @@ def has_guild_permissions(
     view_channel: bool = ...,
     view_creator_monetization_analytics: bool = ...,
     view_guild_insights: bool = ...,
-) -> Callable[[T], T]:
-    ...
+) -> Callable[[T], T]: ...
 
 
 @overload
 @_generated
-def has_guild_permissions() -> Callable[[T], T]:
-    ...
+def has_guild_permissions() -> Callable[[T], T]: ...
 
 
 @_overload_with_permissions
@@ -2318,7 +2312,9 @@ def bot_has_guild_permissions(
     ban_members: bool = ...,
     change_nickname: bool = ...,
     connect: bool = ...,
+    create_events: bool = ...,
     create_forum_threads: bool = ...,
+    create_guild_expressions: bool = ...,
     create_instant_invite: bool = ...,
     create_private_threads: bool = ...,
     create_public_threads: bool = ...,
@@ -2349,6 +2345,7 @@ def bot_has_guild_permissions(
     request_to_speak: bool = ...,
     send_messages: bool = ...,
     send_messages_in_threads: bool = ...,
+    send_polls: bool = ...,
     send_tts_messages: bool = ...,
     send_voice_messages: bool = ...,
     speak: bool = ...,
@@ -2356,6 +2353,7 @@ def bot_has_guild_permissions(
     stream: bool = ...,
     use_application_commands: bool = ...,
     use_embedded_activities: bool = ...,
+    use_external_apps: bool = ...,
     use_external_emojis: bool = ...,
     use_external_sounds: bool = ...,
     use_external_stickers: bool = ...,
@@ -2366,14 +2364,12 @@ def bot_has_guild_permissions(
     view_channel: bool = ...,
     view_creator_monetization_analytics: bool = ...,
     view_guild_insights: bool = ...,
-) -> Callable[[T], T]:
-    ...
+) -> Callable[[T], T]: ...
 
 
 @overload
 @_generated
-def bot_has_guild_permissions() -> Callable[[T], T]:
-    ...
+def bot_has_guild_permissions() -> Callable[[T], T]: ...
 
 
 @_overload_with_permissions
@@ -2410,11 +2406,14 @@ def dm_only() -> Callable[[T], T]:
     This check raises a special exception, :exc:`.PrivateMessageOnly`
     that is inherited from :exc:`.CheckFailure`.
 
+    .. note::
+        For application commands, consider setting the allowed :ref:`contexts <app_command_contexts>` instead.
+
     .. versionadded:: 1.1
     """
 
     def predicate(ctx: AnyContext) -> bool:
-        if ctx.guild is not None:
+        if (ctx.guild if isinstance(ctx, Context) else ctx.guild_id) is not None:
             raise PrivateMessageOnly
         return True
 
@@ -2428,10 +2427,13 @@ def guild_only() -> Callable[[T], T]:
 
     This check raises a special exception, :exc:`.NoPrivateMessage`
     that is inherited from :exc:`.CheckFailure`.
+
+    .. note::
+        For application commands, consider setting the allowed :ref:`contexts <app_command_contexts>` instead.
     """
 
     def predicate(ctx: AnyContext) -> bool:
-        if ctx.guild is None:
+        if (ctx.guild if isinstance(ctx, Context) else ctx.guild_id) is None:
             raise NoPrivateMessage
         return True
 

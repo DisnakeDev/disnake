@@ -81,8 +81,13 @@ class CommonBotBase(Generic[CogT]):
 
         app: disnake.AppInfo = await self.application_info()  # type: ignore
         if app.team:
-            self.owners = set(app.team.members)
-            self.owner_ids = {m.id for m in app.team.members}
+            self.owners = owners = {
+                member
+                for member in app.team.members
+                # these roles can access the bot token, consider them bot owners
+                if member.role in (disnake.TeamMemberRole.admin, disnake.TeamMemberRole.developer)
+            }
+            self.owner_ids = {m.id for m in owners}
         else:
             self.owner = app.owner
             self.owner_id = app.owner.id
@@ -130,6 +135,10 @@ class CommonBotBase(Generic[CogT]):
             The function also checks if the application is team-owned if
             :attr:`owner_ids` is not set.
 
+        .. versionchanged:: 2.10
+            Also takes team roles into account; only team members with the :attr:`~disnake.TeamMemberRole.admin`
+            or :attr:`~disnake.TeamMemberRole.developer` roles are considered bot owners.
+
         Parameters
         ----------
         user: :class:`.abc.User`
@@ -152,6 +161,10 @@ class CommonBotBase(Generic[CogT]):
         """Adds a "cog" to the bot.
 
         A cog is a class that has its own event listeners and commands.
+
+        This automatically re-syncs application commands, provided that
+        :attr:`command_sync_flags.sync_on_cog_actions <.CommandSyncFlags.sync_on_cog_actions>`
+        isn't disabled.
 
         .. versionchanged:: 2.0
 
@@ -218,6 +231,10 @@ class CommonBotBase(Generic[CogT]):
         cog has registered will be removed as well.
 
         If no cog is found then this method has no effect.
+
+        This automatically re-syncs application commands, provided that
+        :attr:`command_sync_flags.sync_on_cog_actions <.CommandSyncFlags.sync_on_cog_actions>`
+        isn't disabled.
 
         Parameters
         ----------

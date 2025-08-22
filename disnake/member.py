@@ -58,7 +58,7 @@ if TYPE_CHECKING:
         MemberWithUser as MemberWithUserPayload,
         UserWithMember as UserWithMemberPayload,
     )
-    from .types.user import User as UserPayload
+    from .types.user import AvatarDecorationData as AvatarDecorationDataPayload, User as UserPayload
     from .types.voice import (
         GuildVoiceState as GuildVoiceStatePayload,
         VoiceState as VoiceStatePayload,
@@ -272,8 +272,10 @@ class Member(disnake.abc.Messageable, _UserTag):
         "_user",
         "_state",
         "_avatar",
+        "_banner",
         "_communication_disabled_until",
         "_flags",
+        "_avatar_decoration_data",
     )
 
     if TYPE_CHECKING:
@@ -301,8 +303,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         data: Union[MemberWithUserPayload, GuildMemberUpdateEvent],
         guild: Guild,
         state: ConnectionState,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     def __init__(
@@ -312,8 +313,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         guild: Guild,
         state: ConnectionState,
         user_data: UserPayload,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     def __init__(
         self,
@@ -339,9 +339,13 @@ class Member(disnake.abc.Messageable, _UserTag):
         self.nick: Optional[str] = data.get("nick")
         self.pending: bool = data.get("pending", False)
         self._avatar: Optional[str] = data.get("avatar")
+        self._banner: Optional[str] = data.get("banner")
         timeout_datetime = utils.parse_time(data.get("communication_disabled_until"))
         self._communication_disabled_until: Optional[datetime.datetime] = timeout_datetime
         self._flags: int = data.get("flags", 0)
+        self._avatar_decoration_data: Optional[AvatarDecorationDataPayload] = data.get(
+            "avatar_decoration_data"
+        )
 
     def __str__(self) -> str:
         return str(self._user)
@@ -381,11 +385,15 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     @classmethod
     def _try_upgrade(
-        cls, *, data: UserWithMemberPayload, guild: Guild, state: ConnectionState
+        cls,
+        *,
+        data: Union[UserPayload, UserWithMemberPayload],
+        guild: Guild,
+        state: ConnectionState,
     ) -> Union[User, Self]:
         # A User object with a 'member' key
         try:
-            member_data = data.pop("member")
+            member_data = data.pop("member")  # type: ignore
         except KeyError:
             return state.create_user(data)
         else:
@@ -405,6 +413,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         self.activities = member.activities
         self._state = member._state
         self._avatar = member._avatar
+        self._banner = member._banner
         self._communication_disabled_until = member.current_timeout
         self._flags = member._flags
 
@@ -433,16 +442,19 @@ class Member(disnake.abc.Messageable, _UserTag):
         self.premium_since = utils.parse_time(data.get("premium_since"))
         self._roles = utils.SnowflakeList(map(int, data["roles"]))
         self._avatar = data.get("avatar")
+        self._banner = data.get("banner")
         timeout_datetime = utils.parse_time(data.get("communication_disabled_until"))
         self._communication_disabled_until = timeout_datetime
         self._flags = data.get("flags", 0)
+        self._avatar_decoration_data = data.get("avatar_decoration_data")
 
     def _presence_update(
         self, data: PresenceData, user: UserPayload
     ) -> Optional[Tuple[User, User]]:
         self.activities = tuple(create_activity(a, state=self._state) for a in data["activities"])
         self._client_status = {
-            sys.intern(key): sys.intern(value) for key, value in data.get("client_status", {}).items()  # type: ignore
+            sys.intern(key): sys.intern(value)  # type: ignore
+            for key, value in data.get("client_status", {}).items()
         }
         self._client_status[None] = sys.intern(data["status"])
 
@@ -452,7 +464,14 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     def _update_inner_user(self, user: UserPayload) -> Optional[Tuple[User, User]]:
         u = self._user
-        original = (u.name, u._avatar, u.discriminator, u.global_name, u._public_flags)
+        original = (
+            u.name,
+            u._avatar,
+            u.discriminator,
+            u.global_name,
+            u._public_flags,
+            u._avatar_decoration_data,
+        )
         # These keys seem to always be available
         modified = (
             user["username"],
@@ -460,10 +479,18 @@ class Member(disnake.abc.Messageable, _UserTag):
             user["discriminator"],
             user.get("global_name"),
             user.get("public_flags", 0),
+            user.get("avatar_decoration_data", None),
         )
         if original != modified:
             to_return = User._copy(self._user)
-            u.name, u._avatar, u.discriminator, u.global_name, u._public_flags = modified
+            (
+                u.name,
+                u._avatar,
+                u.discriminator,
+                u.global_name,
+                u._public_flags,
+                u._avatar_decoration_data,
+            ) = modified
             # Signal to dispatch on_user_update
             return to_return, u
 
@@ -599,6 +626,21 @@ class Member(disnake.abc.Messageable, _UserTag):
             return None
         return Asset._from_guild_avatar(self._state, self.guild.id, self.id, self._avatar)
 
+    # TODO
+    # implement a `display_banner` property
+    # for more info on why this wasn't implemented read this discussion
+    # https://github.com/DisnakeDev/disnake/pull/1204#discussion_r1685773429
+    @property
+    def guild_banner(self) -> Optional[Asset]:
+        """Optional[:class:`Asset`]: Returns an :class:`Asset` for the guild banner
+        the member has. If unavailable, ``None`` is returned.
+
+        .. versionadded:: 2.10
+        """
+        if self._banner is None:
+            return None
+        return Asset._from_guild_banner(self._state, self.guild.id, self.id, self._banner)
+
     @property
     def activity(self) -> Optional[ActivityTypes]:
         """Optional[Union[:class:`BaseActivity`, :class:`Spotify`]]: Returns the primary
@@ -718,14 +760,56 @@ class Member(disnake.abc.Messageable, _UserTag):
         """
         return MemberFlags._from_value(self._flags)
 
+    @property
+    def display_avatar_decoration(self) -> Optional[Asset]:
+        """Optional[:class:`Asset`]: Returns the member's display avatar decoration.
+
+        For regular members this is just their avatar decoration, but
+        if they have a guild specific avatar decoration then that
+        is returned instead.
+
+        .. versionadded:: 2.10
+
+        .. note::
+
+            Since Discord always sends an animated PNG for animated avatar decorations,
+            the following methods will not work as expected:
+
+            - :meth:`Asset.replace`
+            - :meth:`Asset.with_size`
+            - :meth:`Asset.with_format`
+            - :meth:`Asset.with_static_format`
+        """
+        return self.guild_avatar_decoration or self._user.avatar_decoration
+
+    @property
+    def guild_avatar_decoration(self) -> Optional[Asset]:
+        """Optional[:class:`Asset`]: Returns an :class:`Asset` for the guild avatar decoration
+        the member has. If unavailable, ``None`` is returned.
+
+        .. versionadded:: 2.10
+
+        .. note::
+
+            Since Discord always sends an animated PNG for animated avatar decorations,
+            the following methods will not work as expected:
+
+            - :meth:`Asset.replace`
+            - :meth:`Asset.with_size`
+            - :meth:`Asset.with_format`
+            - :meth:`Asset.with_static_format`
+        """
+        if self._avatar_decoration_data is None:
+            return None
+        return Asset._from_avatar_decoration(self._state, self._avatar_decoration_data["asset"])
+
     @overload
     async def ban(
         self,
         *,
         clean_history_duration: Union[int, datetime.timedelta] = 86400,
         reason: Optional[str] = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     async def ban(
@@ -733,8 +817,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         *,
         delete_message_days: Literal[0, 1, 2, 3, 4, 5, 6, 7] = 1,
         reason: Optional[str] = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     async def ban(
         self,
@@ -788,25 +871,29 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         Depending on the parameter passed, this requires different permissions listed below:
 
-        +------------------------------+-------------------------------------+
-        |   Parameter                  |              Permission             |
-        +------------------------------+-------------------------------------+
-        | nick                         | :attr:`Permissions.manage_nicknames`|
-        +------------------------------+-------------------------------------+
-        | mute                         | :attr:`Permissions.mute_members`    |
-        +------------------------------+-------------------------------------+
-        | deafen                       | :attr:`Permissions.deafen_members`  |
-        +------------------------------+-------------------------------------+
-        | roles                        | :attr:`Permissions.manage_roles`    |
-        +------------------------------+-------------------------------------+
-        | voice_channel                | :attr:`Permissions.move_members`    |
-        +------------------------------+-------------------------------------+
-        | timeout                      | :attr:`Permissions.moderate_members`|
-        +------------------------------+-------------------------------------+
-        | flags                        | :attr:`Permissions.moderate_members`|
-        +------------------------------+-------------------------------------+
-        | bypasses_verification        | :attr:`Permissions.moderate_members`|
-        +------------------------------+-------------------------------------+
+        +------------------------------+--------------------------------------+
+        |   Parameter                  |              Permission              |
+        +==============================+======================================+
+        | nick                         | :attr:`Permissions.manage_nicknames` |
+        +------------------------------+--------------------------------------+
+        | mute                         | :attr:`Permissions.mute_members`     |
+        +------------------------------+--------------------------------------+
+        | deafen                       | :attr:`Permissions.deafen_members`   |
+        +------------------------------+--------------------------------------+
+        | roles                        | :attr:`Permissions.manage_roles`     |
+        +------------------------------+--------------------------------------+
+        | voice_channel                | :attr:`Permissions.move_members`     |
+        +------------------------------+--------------------------------------+
+        | timeout                      | :attr:`Permissions.moderate_members` |
+        +------------------------------+--------------------------------------+
+        | flags                        | :attr:`Permissions.manage_guild` or  |
+        |                              | :attr:`Permissions.manage_roles` or  |
+        |                              | (:attr:`Permissions.moderate_members`|
+        |                              | + :attr:`Permissions.kick_members`   |
+        |                              | + :attr:`Permissions.ban_members`)   |
+        +------------------------------+--------------------------------------+
+        | bypasses_verification        | (same as ``flags``)                  |
+        +------------------------------+--------------------------------------+
 
         All parameters are optional.
 
@@ -1104,8 +1191,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         *,
         duration: Optional[Union[float, datetime.timedelta]],
         reason: Optional[str] = None,
-    ) -> Member:
-        ...
+    ) -> Member: ...
 
     @overload
     async def timeout(
@@ -1113,8 +1199,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         *,
         until: Optional[datetime.datetime],
         reason: Optional[str] = None,
-    ) -> Member:
-        ...
+    ) -> Member: ...
 
     async def timeout(
         self,

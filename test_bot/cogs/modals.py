@@ -22,7 +22,7 @@ class MyModal(disnake.ui.Modal):
                 style=TextInputStyle.paragraph,
             ),
         ]
-        super().__init__(title="Create Tag", custom_id="create_tag", components=components)
+        super().__init__(title="Create Tag", components=components)
 
     async def callback(self, inter: disnake.ModalInteraction[commands.Bot]) -> None:
         embed = disnake.Embed(title="Tag Creation")
@@ -65,7 +65,7 @@ class Modals(commands.Cog):
 
         modal_inter: disnake.ModalInteraction = await self.bot.wait_for(
             "modal_submit",
-            check=lambda i: i.custom_id == "create_tag2" and i.author.id == inter.author.id,
+            check=lambda i: i.custom_id == "create_tag2" and i.author.id == inter.author.id,  # type: ignore  # unknown parameter type
         )
 
         embed = disnake.Embed(title="Tag Creation")

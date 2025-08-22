@@ -120,6 +120,7 @@ if TYPE_CHECKING:
     from .invite import Invite
     from .permissions import Permissions
     from .template import Template
+    from .types.appinfo import ApplicationIntegrationType as ApplicationIntegrationTypeLiteral
 
     class _RequestLike(Protocol):
         headers: Mapping[str, Any]
@@ -134,6 +135,7 @@ T = TypeVar("T")
 V = TypeVar("V")
 T_co = TypeVar("T_co", covariant=True)
 _Iter = Union[Iterator[T], AsyncIterator[T]]
+_BytesLike = Union[bytes, bytearray, memoryview]
 
 
 class CachedSlotProperty(Generic[T, T_co]):
@@ -143,12 +145,10 @@ class CachedSlotProperty(Generic[T, T_co]):
         self.__doc__ = function.__doc__
 
     @overload
-    def __get__(self, instance: None, owner: Type[Any]) -> Self:
-        ...
+    def __get__(self, instance: None, owner: Type[Any]) -> Self: ...
 
     @overload
-    def __get__(self, instance: T, owner: Type[Any]) -> T_co:
-        ...
+    def __get__(self, instance: T, owner: Type[Any]) -> T_co: ...
 
     def __get__(self, instance: Optional[T], owner: Type[Any]) -> Any:
         if instance is None:
@@ -209,18 +209,15 @@ class SequenceProxy(Sequence[T_co]):
 
 
 @overload
-def parse_time(timestamp: None) -> None:
-    ...
+def parse_time(timestamp: None) -> None: ...
 
 
 @overload
-def parse_time(timestamp: str) -> datetime.datetime:
-    ...
+def parse_time(timestamp: str) -> datetime.datetime: ...
 
 
 @overload
-def parse_time(timestamp: Optional[str]) -> Optional[datetime.datetime]:
-    ...
+def parse_time(timestamp: Optional[str]) -> Optional[datetime.datetime]: ...
 
 
 def parse_time(timestamp: Optional[str]) -> Optional[datetime.datetime]:
@@ -230,13 +227,11 @@ def parse_time(timestamp: Optional[str]) -> Optional[datetime.datetime]:
 
 
 @overload
-def isoformat_utc(dt: datetime.datetime) -> str:
-    ...
+def isoformat_utc(dt: datetime.datetime) -> str: ...
 
 
 @overload
-def isoformat_utc(dt: Optional[datetime.datetime]) -> Optional[str]:
-    ...
+def isoformat_utc(dt: Optional[datetime.datetime]) -> Optional[str]: ...
 
 
 def isoformat_utc(dt: Optional[datetime.datetime]) -> Optional[str]:
@@ -254,7 +249,9 @@ def copy_doc(original: Callable) -> Callable[[T], T]:
     return decorator
 
 
-def deprecated(instead: Optional[str] = None) -> Callable[[Callable[P, T]], Callable[P, T]]:
+def deprecated(
+    instead: Optional[str] = None, *, skip_internal_frames: bool = False
+) -> Callable[[Callable[P, T]], Callable[P, T]]:
     def actual_decorator(func: Callable[P, T]) -> Callable[P, T]:
         @functools.wraps(func)
         def decorated(*args: P.args, **kwargs: P.kwargs) -> T:
@@ -263,7 +260,7 @@ def deprecated(instead: Optional[str] = None) -> Callable[[Callable[P, T]], Call
             else:
                 msg = f"{func.__name__} is deprecated."
 
-            warn_deprecated(msg, stacklevel=2)
+            warn_deprecated(msg, stacklevel=2, skip_internal_frames=skip_internal_frames)
             return func(*args, **kwargs)
 
         return decorated
@@ -271,7 +268,18 @@ def deprecated(instead: Optional[str] = None) -> Callable[[Callable[P, T]], Call
     return actual_decorator
 
 
-def warn_deprecated(*args: Any, stacklevel: int = 1, **kwargs: Any) -> None:
+_root_module_path = os.path.join(os.path.dirname(__file__), "")  # add trailing slash
+
+
+def warn_deprecated(
+    *args: Any, stacklevel: int = 1, skip_internal_frames: bool = False, **kwargs: Any
+) -> None:
+    # NOTE: skip_file_prefixes was added in 3.12; in older versions,
+    # we'll just have to live with the warning location possibly being wrong
+    if sys.version_info >= (3, 12) and skip_internal_frames:
+        kwargs["skip_file_prefixes"] = (_root_module_path,)
+        stacklevel = 1  # reset stacklevel, assume we just want the first frame outside library code
+
     old_filters = warnings.filters[:]
     try:
         warnings.simplefilter("always", DeprecationWarning)
@@ -288,9 +296,9 @@ def oauth_url(
     redirect_uri: str = MISSING,
     scopes: Iterable[str] = MISSING,
     disable_guild_select: bool = False,
+    integration_type: ApplicationIntegrationTypeLiteral = MISSING,
 ) -> str:
-    """A helper function that returns the OAuth2 URL for inviting the bot
-    into guilds.
+    """A helper function that returns the OAuth2 URL for authorizing the application.
 
     Parameters
     ----------
@@ -313,6 +321,11 @@ def oauth_url(
 
         .. versionadded:: 2.0
 
+    integration_type: :class:`int`
+        An optional integration type/installation type to install the application with.
+
+        .. versionadded:: 2.10
+
     Returns
     -------
     :class:`str`
@@ -328,6 +341,8 @@ def oauth_url(
         url += "&response_type=code&" + urlencode({"redirect_uri": redirect_uri})
     if disable_guild_select:
         url += "&disable_guild_select=true"
+    if integration_type is not MISSING:
+        url += f"&integration_type={integration_type}"
     return url
 
 
@@ -486,11 +501,13 @@ _mime_type_extensions = {
     "image/jpeg": ".jpg",
     "image/gif": ".gif",
     "image/webp": ".webp",
+    "audio/mpeg": ".mp3",
+    "audio/ogg": ".ogg",
 }
 
 
-def _get_mime_type_for_image(data: bytes) -> str:
-    if data[0:8] == b"\x89\x50\x4E\x47\x0D\x0A\x1A\x0A":
+def _get_mime_type_for_data(data: _BytesLike) -> str:
+    if data[0:8] == b"\x89\x50\x4e\x47\x0d\x0a\x1a\x0a":
         return "image/png"
     elif data[0:3] == b"\xff\xd8\xff" or data[6:10] in (b"JFIF", b"Exif"):
         return "image/jpeg"
@@ -498,33 +515,37 @@ def _get_mime_type_for_image(data: bytes) -> str:
         return "image/gif"
     elif data[0:4] == b"RIFF" and data[8:12] == b"WEBP":
         return "image/webp"
+    elif data[0:3] == b"ID3" or data[0:2] in (b"\xff\xfb", b"\xff\xf3", b"\xff\xf2"):
+        # n.b. this doesn't support the unofficial MPEG-2.5 frame header (which starts with 0xFFEx).
+        # Discord also doesn't accept it.
+        return "audio/mpeg"
+    elif data[0:4] == b"OggS":
+        return "audio/ogg"
     else:
-        raise ValueError("Unsupported image type given")
+        raise ValueError("Unsupported file type provided")
 
 
-def _bytes_to_base64_data(data: bytes) -> str:
+def _bytes_to_base64_data(data: _BytesLike) -> str:
     fmt = "data:{mime};base64,{data}"
-    mime = _get_mime_type_for_image(data)
+    mime = _get_mime_type_for_data(data)
     b64 = b64encode(data).decode("ascii")
     return fmt.format(mime=mime, data=b64)
 
 
-def _get_extension_for_image(data: bytes) -> Optional[str]:
+def _get_extension_for_data(data: _BytesLike) -> Optional[str]:
     try:
-        mime_type = _get_mime_type_for_image(data)
+        mime_type = _get_mime_type_for_data(data)
     except ValueError:
         return None
     return _mime_type_extensions.get(mime_type)
 
 
 @overload
-async def _assetbytes_to_base64_data(data: None) -> None:
-    ...
+async def _assetbytes_to_base64_data(data: None) -> None: ...
 
 
 @overload
-async def _assetbytes_to_base64_data(data: AssetBytes) -> str:
-    ...
+async def _assetbytes_to_base64_data(data: AssetBytes) -> str: ...
 
 
 async def _assetbytes_to_base64_data(data: Optional[AssetBytes]) -> Optional[str]:
@@ -538,7 +559,7 @@ async def _assetbytes_to_base64_data(data: Optional[AssetBytes]) -> Optional[str
 if HAS_ORJSON:
 
     def _to_json(obj: Any) -> str:
-        return orjson.dumps(obj).decode("utf-8")
+        return orjson.dumps(obj).decode("utf-8")  # type: ignore
 
     _from_json = orjson.loads  # type: ignore
 
@@ -571,7 +592,8 @@ async def maybe_coroutine(
         return value  # type: ignore  # typeguard doesn't narrow in the negative case
 
 
-async def async_all(gen: Iterable[Union[Awaitable[bool], bool]], *, check=_isawaitable) -> bool:
+async def async_all(gen: Iterable[Union[Awaitable[bool], bool]]) -> bool:
+    check = _isawaitable
     for elem in gen:
         if check(elem):
             elem = await elem
@@ -664,8 +686,7 @@ class SnowflakeList(array.array):
 
     if TYPE_CHECKING:
 
-        def __init__(self, data: Iterable[int], *, is_sorted: bool = False) -> None:
-            ...
+        def __init__(self, data: Iterable[int], *, is_sorted: bool = False) -> None: ...
 
     def __new__(cls, data: Iterable[int], *, is_sorted: bool = False):
         return array.array.__new__(cls, "Q", data if is_sorted else sorted(data))  # type: ignore
@@ -698,15 +719,13 @@ def _string_width(string: str, *, _IS_ASCII=_IS_ASCII) -> int:
 
 
 @overload
-def resolve_invite(invite: Union[Invite, str], *, with_params: Literal[False] = False) -> str:
-    ...
+def resolve_invite(invite: Union[Invite, str], *, with_params: Literal[False] = False) -> str: ...
 
 
 @overload
 def resolve_invite(
     invite: Union[Invite, str], *, with_params: Literal[True]
-) -> Tuple[str, Dict[str, str]]:
-    ...
+) -> Tuple[str, Dict[str, str]]: ...
 
 
 def resolve_invite(
@@ -1058,13 +1077,11 @@ async def _achunk(iterator: AsyncIterator[T], max_size: int) -> AsyncIterator[Li
 
 
 @overload
-def as_chunks(iterator: Iterator[T], max_size: int) -> Iterator[List[T]]:
-    ...
+def as_chunks(iterator: Iterator[T], max_size: int) -> Iterator[List[T]]: ...
 
 
 @overload
-def as_chunks(iterator: AsyncIterator[T], max_size: int) -> AsyncIterator[List[T]]:
-    ...
+def as_chunks(iterator: AsyncIterator[T], max_size: int) -> AsyncIterator[List[T]]: ...
 
 
 def as_chunks(iterator: _Iter[T], max_size: int) -> _Iter[List[T]]:
@@ -1120,6 +1137,24 @@ def normalise_optional_params(parameters: Iterable[Any]) -> Tuple[Any, ...]:
     return tuple(p for p in parameters if p is not none_cls) + (none_cls,)
 
 
+def _resolve_typealiastype(
+    tp: Any, globals: Dict[str, Any], locals: Dict[str, Any], cache: Dict[str, Any]
+):
+    # Use __module__ to get the (global) namespace in which the type alias was defined.
+    if mod := sys.modules.get(tp.__module__):
+        mod_globals = mod.__dict__
+        if mod_globals is not globals or mod_globals is not locals:
+            # if the namespace changed (usually when a TypeAliasType was imported from a different module),
+            # drop the cache since names can resolve differently now
+            cache = {}
+        globals = locals = mod_globals
+
+    # Accessing `__value__` automatically evaluates the type alias in the annotation scope.
+    # (recurse to resolve possible forwardrefs, aliases, etc.)
+    return evaluate_annotation(tp.__value__, globals, locals, cache)
+
+
+# FIXME: this should be split up into smaller functions for clarity and easier maintenance
 def evaluate_annotation(
     tp: Any,
     globals: Dict[str, Any],
@@ -1138,30 +1173,38 @@ def evaluate_annotation(
             return cache[tp]
 
         # this is how annotations are supposed to be unstringifed
-        evaluated = eval(tp, globals, locals)  # noqa: PGH001, S307
+        evaluated = eval(tp, globals, locals)  # noqa: S307
         # recurse to resolve nested args further
         evaluated = evaluate_annotation(evaluated, globals, locals, cache)
 
         cache[tp] = evaluated
         return evaluated
 
+    # GenericAlias / UnionType
     if hasattr(tp, "__args__"):
-        implicit_str = True
-        is_literal = False
-        orig_args = args = tp.__args__
         if not hasattr(tp, "__origin__"):
             if tp.__class__ is UnionType:
-                converted = Union[args]  # type: ignore
+                converted = Union[tp.__args__]  # type: ignore
                 return evaluate_annotation(converted, globals, locals, cache)
 
             return tp
-        if tp.__origin__ is Union:
+
+        implicit_str = True
+        is_literal = False
+        orig_args = args = tp.__args__
+        orig_origin = origin = tp.__origin__
+
+        # origin can be a TypeAliasType too, resolve it and continue
+        if hasattr(origin, "__value__"):
+            origin = _resolve_typealiastype(origin, globals, locals, cache)
+
+        if origin is Union:
             try:
                 if args.index(type(None)) != len(args) - 1:
                     args = normalise_optional_params(tp.__args__)
             except ValueError:
                 pass
-        if tp.__origin__ is Literal:
+        if origin is Literal:
             if not PY_310:
                 args = flatten_literal_params(tp.__args__)
             implicit_str = False
@@ -1177,13 +1220,21 @@ def evaluate_annotation(
         ):
             raise TypeError("Literal arguments must be of type str, int, bool, or NoneType.")
 
+        if origin != orig_origin:
+            # we can't use `copy_with` in this case, so just skip all of the following logic
+            return origin[evaluated_args]
+
         if evaluated_args == orig_args:
             return tp
 
         try:
             return tp.copy_with(evaluated_args)
         except AttributeError:
-            return tp.__origin__[evaluated_args]
+            return origin[evaluated_args]
+
+    # TypeAliasType, 3.12+
+    if hasattr(tp, "__value__"):
+        return _resolve_typealiastype(tp, globals, locals, cache)
 
     return tp
 

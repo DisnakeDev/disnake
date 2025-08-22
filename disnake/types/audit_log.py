@@ -79,6 +79,9 @@ AuditLogEvent = Literal[
     111,
     112,
     121,
+    130,
+    131,
+    132,
     140,
     141,
     142,
@@ -103,8 +106,8 @@ class _AuditLogChange_Str(TypedDict):
         "permissions",
         "tags",
     ]
-    new_value: str
-    old_value: str
+    new_value: NotRequired[str]
+    old_value: NotRequired[str]
 
 
 class _AuditLogChange_AssetHash(TypedDict):
@@ -116,8 +119,8 @@ class _AuditLogChange_AssetHash(TypedDict):
         "avatar_hash",
         "asset",
     ]
-    new_value: str
-    old_value: str
+    new_value: NotRequired[str]
+    old_value: NotRequired[str]
 
 
 class _AuditLogChange_Snowflake(TypedDict):
@@ -134,8 +137,8 @@ class _AuditLogChange_Snowflake(TypedDict):
         "inviter_id",
         "guild_id",
     ]
-    new_value: Snowflake
-    old_value: Snowflake
+    new_value: NotRequired[Snowflake]
+    old_value: NotRequired[Snowflake]
 
 
 class _AuditLogChange_Bool(TypedDict):
@@ -157,8 +160,8 @@ class _AuditLogChange_Bool(TypedDict):
         "premium_progress_bar_enabled",
         "enabled",
     ]
-    new_value: bool
-    old_value: bool
+    new_value: NotRequired[bool]
+    old_value: NotRequired[bool]
 
 
 class _AuditLogChange_Int(TypedDict):
@@ -175,104 +178,104 @@ class _AuditLogChange_Int(TypedDict):
         "auto_archive_duration",
         "default_auto_archive_duration",
     ]
-    new_value: int
-    old_value: int
+    new_value: NotRequired[int]
+    old_value: NotRequired[int]
 
 
 class _AuditLogChange_ListSnowflake(TypedDict):
     key: Literal["exempt_roles", "exempt_channels"]
-    new_value: List[Snowflake]
-    old_value: List[Snowflake]
+    new_value: NotRequired[List[Snowflake]]
+    old_value: NotRequired[List[Snowflake]]
 
 
 class _AuditLogChange_ListRole(TypedDict):
     key: Literal["$add", "$remove"]
-    new_value: List[Role]
-    old_value: List[Role]
+    new_value: NotRequired[List[Role]]
+    old_value: NotRequired[List[Role]]
 
 
 class _AuditLogChange_MFALevel(TypedDict):
     key: Literal["mfa_level"]
-    new_value: MFALevel
-    old_value: MFALevel
+    new_value: NotRequired[MFALevel]
+    old_value: NotRequired[MFALevel]
 
 
 class _AuditLogChange_VerificationLevel(TypedDict):
     key: Literal["verification_level"]
-    new_value: VerificationLevel
-    old_value: VerificationLevel
+    new_value: NotRequired[VerificationLevel]
+    old_value: NotRequired[VerificationLevel]
 
 
 class _AuditLogChange_ExplicitContentFilter(TypedDict):
     key: Literal["explicit_content_filter"]
-    new_value: ExplicitContentFilterLevel
-    old_value: ExplicitContentFilterLevel
+    new_value: NotRequired[ExplicitContentFilterLevel]
+    old_value: NotRequired[ExplicitContentFilterLevel]
 
 
 class _AuditLogChange_DefaultMessageNotificationLevel(TypedDict):
     key: Literal["default_message_notifications"]
-    new_value: DefaultMessageNotificationLevel
-    old_value: DefaultMessageNotificationLevel
+    new_value: NotRequired[DefaultMessageNotificationLevel]
+    old_value: NotRequired[DefaultMessageNotificationLevel]
 
 
 class _AuditLogChange_ChannelType(TypedDict):
     key: Literal["type"]
-    new_value: ChannelType
-    old_value: ChannelType
+    new_value: NotRequired[ChannelType]
+    old_value: NotRequired[ChannelType]
 
 
 class _AuditLogChange_IntegrationExpireBehaviour(TypedDict):
     key: Literal["expire_behavior"]
-    new_value: IntegrationExpireBehavior
-    old_value: IntegrationExpireBehavior
+    new_value: NotRequired[IntegrationExpireBehavior]
+    old_value: NotRequired[IntegrationExpireBehavior]
 
 
 class _AuditLogChange_VideoQualityMode(TypedDict):
     key: Literal["video_quality_mode"]
-    new_value: VideoQualityMode
-    old_value: VideoQualityMode
+    new_value: NotRequired[VideoQualityMode]
+    old_value: NotRequired[VideoQualityMode]
 
 
 class _AuditLogChange_Overwrites(TypedDict):
     key: Literal["permission_overwrites"]
-    new_value: List[PermissionOverwrite]
-    old_value: List[PermissionOverwrite]
+    new_value: NotRequired[List[PermissionOverwrite]]
+    old_value: NotRequired[List[PermissionOverwrite]]
 
 
 class _AuditLogChange_Datetime(TypedDict):
     key: Literal["communication_disabled_until"]
-    new_value: datetime.datetime
-    old_value: datetime.datetime
+    new_value: NotRequired[datetime.datetime]
+    old_value: NotRequired[datetime.datetime]
 
 
 class _AuditLogChange_ApplicationCommandPermissions(TypedDict):
     key: str
-    new_value: ApplicationCommandPermissions
-    old_value: ApplicationCommandPermissions
+    new_value: NotRequired[ApplicationCommandPermissions]
+    old_value: NotRequired[ApplicationCommandPermissions]
 
 
 class _AuditLogChange_AutoModTriggerType(TypedDict):
     key: Literal["trigger_type"]
-    new_value: AutoModTriggerType
-    old_value: AutoModTriggerType
+    new_value: NotRequired[AutoModTriggerType]
+    old_value: NotRequired[AutoModTriggerType]
 
 
 class _AuditLogChange_AutoModEventType(TypedDict):
     key: Literal["event_type"]
-    new_value: AutoModEventType
-    old_value: AutoModEventType
+    new_value: NotRequired[AutoModEventType]
+    old_value: NotRequired[AutoModEventType]
 
 
 class _AuditLogChange_AutoModActions(TypedDict):
     key: Literal["actions"]
-    new_value: List[AutoModAction]
-    old_value: List[AutoModAction]
+    new_value: NotRequired[List[AutoModAction]]
+    old_value: NotRequired[List[AutoModAction]]
 
 
 class _AuditLogChange_AutoModTriggerMetadata(TypedDict):
     key: Literal["trigger_metadata"]
-    new_value: AutoModTriggerMetadata
-    old_value: AutoModTriggerMetadata
+    new_value: NotRequired[AutoModTriggerMetadata]
+    old_value: NotRequired[AutoModTriggerMetadata]
 
 
 AuditLogChange = Union[

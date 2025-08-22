@@ -890,13 +890,11 @@ ActivityTypes = Union[Activity, Game, CustomActivity, Streaming, Spotify]
 @overload
 def create_activity(
     data: Union[ActivityPayload, WidgetActivityPayload], *, state: Optional[ConnectionState] = None
-) -> ActivityTypes:
-    ...
+) -> ActivityTypes: ...
 
 
 @overload
-def create_activity(data: None, *, state: Optional[ConnectionState] = None) -> None:
-    ...
+def create_activity(data: None, *, state: Optional[ConnectionState] = None) -> None: ...
 
 
 def create_activity(
@@ -921,7 +919,7 @@ def create_activity(
     elif game_type is ActivityType.listening and "sync_id" in data and "session_id" in data:
         activity = Spotify(**data)
     else:
-        activity = Activity(**data)
+        activity = Activity(**data)  # type: ignore
 
     if isinstance(activity, (Activity, CustomActivity)) and activity.emoji and state:
         activity.emoji._state = state
