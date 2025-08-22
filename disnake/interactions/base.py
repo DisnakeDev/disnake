@@ -1325,10 +1325,9 @@ class InteractionResponse:
             else:
                 payload["components"] = []
 
-        flags = None  # FIXME: temporary, add `flags` parameter and add to payload
         # set cv2 flag automatically
         if is_v2:
-            flags = MessageFlags._from_value(0 if flags is None else flags.value)
+            flags = MessageFlags._from_value(0 if flags is MISSING else flags.value)
             flags.is_components_v2 = True
         # components v2 cannot be used with other content fields
         if flags and flags.is_components_v2 and (content or embeds):
