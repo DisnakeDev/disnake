@@ -192,9 +192,7 @@ class Emoji(_EmojiTag, AssetMixin):
 
         .. versionadded:: 2.11
         """
-        if self.guild_id is None:
-            return True
-        return False
+        return self.guild_id is None
 
     def is_usable(self) -> bool:
         """Whether the bot can use this emoji.
