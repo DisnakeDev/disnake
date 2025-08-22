@@ -1335,7 +1335,7 @@ class ChannelPinsIterator(_AsyncIterator["Message"]):
         self.channel: Optional[MessageableChannel] = None
         self.channel_id: Optional[int] = None
         self.limit = limit
-        self.before: str | None = before_
+        self.before: Optional[str] = before_
 
         self.getter = self._state.http.get_pins
         self.messages: asyncio.Queue[Message] = asyncio.Queue()
