@@ -15,6 +15,8 @@ build:
       - UV_PROJECT_ENVIRONMENT=$READTHEDOCS_VIRTUALENV_PATH uv sync --no-default-groups --extra docs
     install:
       - "true"
+    post_checkout:
+      - git fetch --tags || true
 
 sphinx:
   configuration: docs/conf.py

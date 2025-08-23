@@ -78,7 +78,7 @@ EXECUTION_GROUPS: Sequence[ExecutionGroup] = [
             project=True,
             extras=("speed", "voice"),
             groups=("test", "nox"),
-            dependencies=("setuptools", "pytz", "requests"),  # needed for type checking
+            dependencies=("pytz", "requests"),  # needed for type checking
         )
         for python in ALL_PYTHONS
     ),
@@ -91,7 +91,7 @@ EXECUTION_GROUPS: Sequence[ExecutionGroup] = [
     # codemodding and pyright
     ExecutionGroup(
         sessions=("codemod", "autotyping", "pyright"),
-        pyright_paths=("scripts",),
+        pyright_paths=("scripts/codemods", "scripts/ci"),
         groups=("codemod",),
     ),
     # the other sessions, they don't need pyright, but they need to run
@@ -101,7 +101,8 @@ EXECUTION_GROUPS: Sequence[ExecutionGroup] = [
     ),
     # build
     ExecutionGroup(
-        sessions=("build",),
+        sessions=("build", "pyright"),
+        pyright_paths=("scripts/versioning.py",),
         groups=("build",),
     ),
     ## testing
