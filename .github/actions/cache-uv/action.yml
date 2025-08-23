@@ -34,10 +34,10 @@ runs:
 
     - if: ${{ steps.cache.outputs.cache-hit != 'true' && inputs.env-already-initialized != 'true' }}
       name: Set up UV
-      uses: astral-sh/setup-uv@5
+      uses: astral-sh/setup-uv@6
       with:
         python-version: ${{ inputs.python-version }}
-        version: "0.6.6"
+        version: "0.8.13"
 
     - if: ${{ steps.cache.outputs.cache-hit != 'true' }}
       name: Lock all dependencies
