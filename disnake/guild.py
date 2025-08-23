@@ -110,7 +110,7 @@ if TYPE_CHECKING:
         MFALevel,
     )
     from .types.integration import IntegrationType
-    from .types.role import CreateRole as CreateRolePayload, RoleColors as RoleColorsPayload
+    from .types.role import CreateRole as CreateRolePayload
     from .types.sticker import CreateGuildSticker as CreateStickerPayload
     from .types.threads import Thread as ThreadPayload, ThreadArchiveDurationLiteral
     from .types.voice import GuildVoiceState
@@ -3826,27 +3826,25 @@ class Guild(Hashable):
         else:
             fields["permissions"] = "0"
 
-        colours: Dict[str, Any] = {}
-        actual_primary_colour = colour or color or Colour.default()
-        actual_secondary_colour = secondary_colour or secondary_color
-        actual_tertiary_colour = tertiary_colour or tertiary_color
-        if isinstance(actual_primary_colour, int):
-            colours["primary_color"] = actual_primary_colour
-        else:
-            colours["primary_color"] = actual_primary_colour.value
+        actual_primary_color = colour or color
+        actual_secondary_color = secondary_colour or secondary_color
+        actual_tertiary_color = tertiary_colour or tertiary_color
+        if actual_primary_color is MISSING:
+            actual_primary_color = 0
+        elif isinstance(actual_primary_color, Colour):
+            actual_primary_color = actual_primary_color.value
 
-        if isinstance(actual_secondary_colour, Colour):
-            colours["secondary_color"] = actual_secondary_colour.value
-        else:
-            colours["secondary_color"] = actual_secondary_colour
+        if isinstance(actual_secondary_color, Colour):
+            actual_secondary_color = actual_secondary_color.value
 
-        if isinstance(actual_tertiary_colour, Colour):
-            colours["tertiary_color"] = actual_tertiary_colour.value
-        else:
-            colours["tertiary_color"] = actual_tertiary_colour
+        if isinstance(actual_tertiary_color, Colour):
+            actual_tertiary_color = actual_tertiary_color.value
 
-        colours_: RoleColorsPayload = colours  # type: ignore
-        fields["colors"] = colours_
+        fields["colors"] = {
+            "primary_color": actual_primary_color,
+            "secondary_color": actual_secondary_color,
+            "tertiary_color": actual_tertiary_color,
+        }
 
         if hoist is not MISSING:
             fields["hoist"] = hoist

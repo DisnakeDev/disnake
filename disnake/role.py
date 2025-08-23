@@ -208,7 +208,6 @@ class Role(Hashable):
         "id",
         "name",
         "_permissions",
-        "_colour",
         "position",
         "managed",
         "mentionable",
@@ -219,6 +218,7 @@ class Role(Hashable):
         "tags",
         "_flags",
         "_state",
+        "_primary_color",
         "_secondary_color",
         "_tertiary_color",
     )
@@ -275,10 +275,10 @@ class Role(Hashable):
         self.name: str = data["name"]
         self._permissions: int = int(data.get("permissions", 0))
         self.position: int = data.get("position", 0)
-        colours = data["colors"]
-        self._colour: int = colours["primary_color"]
-        self._secondary_color: int = colours["secondary_color"] or 0
-        self._tertiary_color: int = colours["tertiary_color"] or 0
+        colors = data["colors"]
+        self._primary_color: int = colors["primary_color"]
+        self._secondary_color: int = colors["secondary_color"] or 0
+        self._tertiary_color: int = colors["tertiary_color"] or 0
         self.hoist: bool = data.get("hoist", False)
         self._icon: Optional[str] = data.get("icon")
         self._emoji: Optional[str] = data.get("unicode_emoji")
@@ -376,7 +376,7 @@ class Role(Hashable):
     @property
     def colour(self) -> Colour:
         """:class:`Colour`: Returns the role colour. An alias exists under ``color``."""
-        return Colour(self._colour)
+        return Colour(self._primary_color)
 
     @property
     def color(self) -> Colour:
@@ -574,35 +574,35 @@ class Role(Hashable):
 
         payload: Dict[str, Any] = {}
 
-        colours: Dict[str, Any] = {}
+        colors: Dict[str, Any] = {}
         if color is not MISSING:
             colour = color
 
         if colour is not MISSING:
             if isinstance(colour, int):
-                colours["primary_color"] = colour
+                colors["primary_color"] = colour
             else:
-                colours["primary_color"] = colour.value
+                colors["primary_color"] = colour.value
 
         if secondary_color is not MISSING:
             secondary_colour = secondary_color
 
         if secondary_colour is not MISSING:
             if isinstance(secondary_colour, Colour):
-                colours["secondary_color"] = secondary_colour.value
+                colors["secondary_color"] = secondary_colour.value
             else:
-                colours["secondary_color"] = secondary_colour
+                colors["secondary_color"] = secondary_colour
 
         if tertiary_color is not MISSING:
             tertiary_colour = tertiary_color
 
         if tertiary_colour is not MISSING:
             if isinstance(tertiary_colour, Colour):
-                colours["tertiary_color"] = tertiary_colour.value
+                colors["tertiary_color"] = tertiary_colour.value
             else:
-                colours["tertiary_color"] = tertiary_colour
+                colors["tertiary_color"] = tertiary_colour
 
-        payload["colors"] = colours
+        payload["colors"] = colors
 
         if name is not MISSING:
             payload["name"] = name
