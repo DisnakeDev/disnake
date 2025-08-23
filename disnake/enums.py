@@ -756,6 +756,7 @@ class AuditLogAction(Enum):
     automod_block_message                 = 143
     automod_send_alert_message            = 144
     automod_timeout                       = 145
+    automod_quarantine_user               = 146
     creator_monetization_request_created  = 150
     creator_monetization_terms_accepted   = 151
     # fmt: on
@@ -821,6 +822,7 @@ class AuditLogAction(Enum):
             AuditLogAction.automod_block_message:                 None,
             AuditLogAction.automod_send_alert_message:            None,
             AuditLogAction.automod_timeout:                       None,
+            AuditLogAction.automod_quarantine_user:               None,
             AuditLogAction.creator_monetization_request_created:  None,
             AuditLogAction.creator_monetization_terms_accepted:   None,
         }
@@ -866,7 +868,7 @@ class AuditLogAction(Enum):
             return None
         elif v < 143:
             return "automod_rule"
-        elif v < 146:
+        elif v < 147:
             return "user"
         elif v < 152:
             return None
