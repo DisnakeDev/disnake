@@ -295,8 +295,6 @@ class Invite(Hashable):
     +------------------------------------+---------------------------------------------------------------------+
     | :attr:`approximate_presence_count` | :meth:`Client.fetch_invite` with ``with_counts`` enabled            |
     +------------------------------------+---------------------------------------------------------------------+
-    | :attr:`expires_at`                 | :meth:`Client.fetch_invite` with ``with_expiration`` enabled        |
-    +------------------------------------+---------------------------------------------------------------------+
     | :attr:`guild_scheduled_event`      | :meth:`Client.fetch_invite` with valid ``guild_scheduled_event_id`` |
     |                                    | or valid event ID in URL or invite object                           |
     +------------------------------------+---------------------------------------------------------------------+
@@ -347,8 +345,7 @@ class Invite(Hashable):
 
         Optional according to the :ref:`table <invite_attr_table>` above.
     expires_at: Optional[:class:`datetime.datetime`]
-        The expiration date of the invite. If the value is ``None`` when received through
-        :meth:`Client.fetch_invite` with ``with_expiration`` enabled, the invite will never expire.
+        The expiration date of the invite. If the value is ``None`` the invite will never expire.
 
         .. versionadded:: 2.0
 

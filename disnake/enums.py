@@ -28,6 +28,7 @@ __all__ = (
     "VerificationLevel",
     "ContentFilter",
     "Status",
+    "StatusDisplayType",
     "DefaultAvatar",
     "AuditLogAction",
     "AuditLogActionCategory",
@@ -601,6 +602,23 @@ class Status(Enum):
     """
 
     def __str__(self) -> str:
+        return self.value
+
+
+class StatusDisplayType(Enum):
+    """Specifies an :class:`Activity` display status.
+
+    .. versionadded:: 2.11
+    """
+
+    name = 0  # type: ignore[reportAssignmentType]
+    """The name of the activity is displayed, e.g: ``Listening to Spotify``."""
+    state = 1
+    """The state of the activity is displayed, e.g: ``Listening to Rick Astley``."""
+    details = 2
+    """The details of the activity are displayed, e.g: ``Listening to Never Gonna Give You Up``."""
+
+    def __int__(self) -> int:
         return self.value
 
 
