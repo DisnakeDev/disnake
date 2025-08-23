@@ -118,7 +118,6 @@ ActionRowModalComponent: TypeAlias = "TextInput"
 
 # any child component type of action rows
 ActionRowChildComponent = Union[ActionRowMessageComponent, ActionRowModalComponent]
-# TODO: this might have to be covariant
 ActionRowChildComponentT = TypeVar("ActionRowChildComponentT", bound=ActionRowChildComponent)
 
 # valid `Section.accessory` types
@@ -1464,6 +1463,7 @@ COMPONENT_LOOKUP: Mapping[ComponentTypeLiteral, Type[Component]] = {
 
 
 # NOTE: The type param is purely for type-checking, it has no implications on runtime behavior.
+# FIXME: could be improved with https://peps.python.org/pep-0747/
 def _component_factory(data: ComponentPayload, *, type: Type[C] = Component) -> C:
     component_type = data["type"]
 

@@ -48,7 +48,6 @@ class Section(UIComponent):
         "accessory",
     )
 
-    # TODO: consider providing sequence operations (append, insert, remove, etc.)
     def __init__(
         self,
         *components: TextDisplay,
