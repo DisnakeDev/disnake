@@ -1,1 +1,1 @@
-Add the pin messages permission :meth:`Permissions.pin_messages`.
+Add the :attr:`~Permissions.pin_messages` permission`.
