@@ -1,0 +1,1 @@
+Add the pin messages permission :meth:`Permissions.pin_messages`.
