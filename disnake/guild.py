@@ -3776,6 +3776,16 @@ class Guild(Hashable):
         colour: Union[:class:`Colour`, :class:`int`]
             The colour for the role. Defaults to :meth:`Colour.default`.
             This is aliased to ``color`` as well.
+        secondary_colour: Optional[Union[:class:`Colour`, :class:`int`]]
+            The secondary_colour for the role. Defaults to ``None``.
+            This is aliased to ``secondary_color`` as well.
+
+            .. versionadded:: 2.11
+        tertiary_colour: Optional[Union[:class:`Colour`, :class:`int`]]
+            The tertiary_colour for the role. Defaults to ``None``.
+            This is aliased to ``tertiary_color`` as well.
+
+            .. versionadded:: 2.11
         hoist: :class:`bool`
             Whether the role should be shown separately in the member list.
             Defaults to ``False``.

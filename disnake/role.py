@@ -524,6 +524,14 @@ class Role(Hashable):
             The new permissions to change to.
         colour: Union[:class:`Colour`, :class:`int`]
             The new colour to change to. (aliased to ``color`` as well)
+        secondary_colour: Optional[Union[:class:`Colour`, :class:`int`]]
+            The new secondary_colour to change to. (aliased to ``secondary_color`` as well)
+
+            .. versionadded:: 2.11
+        tertiary_colour: Optional[Union[:class:`Colour`, :class:`int`]]
+            The new tertiary_colour to change to. (aliased to ``tertiary_color`` as well)
+
+            .. versionadded:: 2.11
         hoist: :class:`bool`
             Indicates if the role should be shown separately in the member list.
         icon: Optional[|resource_type|]
