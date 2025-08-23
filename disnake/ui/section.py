@@ -22,6 +22,8 @@ __all__ = ("Section",)
 class Section(UIComponent):
     """Represents a UI section.
 
+    This allows displaying an accessory (thumbnail or button) next to a block of text.
+
     .. versionadded:: 2.11
 
     Parameters

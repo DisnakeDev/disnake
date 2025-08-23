@@ -18,6 +18,8 @@ __all__ = ("MediaGallery",)
 class MediaGallery(UIComponent):
     """Represents a UI media gallery.
 
+    This allows displaying up to 10 images in a gallery.
+
     .. versionadded:: 2.11
 
     Parameters
