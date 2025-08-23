@@ -110,7 +110,7 @@ if TYPE_CHECKING:
         MFALevel,
     )
     from .types.integration import IntegrationType
-    from .types.role import CreateRole as CreateRolePayload
+    from .types.role import CreateRole as CreateRolePayload, RoleColors as RoleColorsPayload
     from .types.sticker import CreateGuildSticker as CreateStickerPayload
     from .types.threads import Thread as ThreadPayload, ThreadArchiveDurationLiteral
     from .types.voice import GuildVoiceState
@@ -3742,6 +3742,10 @@ class Guild(Hashable):
         permissions: Permissions = MISSING,
         color: Union[Colour, int] = MISSING,
         colour: Union[Colour, int] = MISSING,
+        secondary_colour: Optional[Union[Colour, int]] = None,
+        secondary_color: Optional[Union[Colour, int]] = None,
+        tertiary_colour: Optional[Union[Colour, int]] = None,
+        tertiary_color: Optional[Union[Colour, int]] = None,
         hoist: bool = MISSING,
         icon: AssetBytes = MISSING,
         emoji: str = MISSING,
@@ -3812,11 +3816,27 @@ class Guild(Hashable):
         else:
             fields["permissions"] = "0"
 
-        actual_colour = colour or color or Colour.default()
-        if isinstance(actual_colour, int):
-            fields["color"] = actual_colour
+        colours: Dict[str, Any] = {}
+        actual_primary_colour = colour or color or Colour.default()
+        actual_secondary_colour = secondary_colour or secondary_color
+        actual_tertiary_colour = tertiary_colour or tertiary_color
+        if isinstance(actual_primary_colour, int):
+            colours["primary_color"] = actual_primary_colour
         else:
-            fields["color"] = actual_colour.value
+            colours["primary_color"] = actual_primary_colour.value
+
+        if isinstance(actual_secondary_colour, Colour):
+            colours["secondary_color"] = actual_secondary_colour.value
+        else:
+            colours["secondary_color"] = actual_secondary_colour
+
+        if isinstance(actual_tertiary_colour, Colour):
+            colours["tertiary_color"] = actual_tertiary_colour.value
+        else:
+            colours["tertiary_color"] = actual_tertiary_colour
+
+        colours_: RoleColorsPayload = colours  # type: ignore
+        fields["colors"] = colours_
 
         if hoist is not MISSING:
             fields["hoist"] = hoist

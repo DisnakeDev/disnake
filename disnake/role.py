@@ -219,6 +219,8 @@ class Role(Hashable):
         "tags",
         "_flags",
         "_state",
+        "_secondary_color",
+        "_tertiary_color",
     )
 
     def __init__(self, *, guild: Guild, state: ConnectionState, data: RolePayload) -> None:
@@ -273,7 +275,9 @@ class Role(Hashable):
         self.name: str = data["name"]
         self._permissions: int = int(data.get("permissions", 0))
         self.position: int = data.get("position", 0)
-        self._colour: int = data.get("color", 0)
+        self._colour: int = data["colors"]["primary_color"]
+        self._secondary_color: int = data["colors"].get("secondary_color", 0)
+        self._tertiary_color: int = data["colors"].get("tertiary_color", 0)
         self.hoist: bool = data.get("hoist", False)
         self._icon: Optional[str] = data.get("icon")
         self._emoji: Optional[str] = data.get("unicode_emoji")
@@ -379,6 +383,26 @@ class Role(Hashable):
         return self.colour
 
     @property
+    def secondary_colour(self) -> Colour:
+        """:class:`Colour`: Returns the secondary colour for the role. An alias exists under ``color``."""
+        return Colour(self._secondary_color)
+
+    @property
+    def secondary_color(self) -> Colour:
+        """:class:`Colour`: Returns the secondary color for the role. An alias exists under ``colour``."""
+        return Colour(self._secondary_color)
+
+    @property
+    def tertiary_colour(self) -> Colour:
+        """:class:`Colour`: Returns the tertiary colour for the role. An alias exists under ``color``."""
+        return Colour(self._tertiary_color)
+
+    @property
+    def tertiary_color(self) -> Colour:
+        """:class:`Colour`: Returns the tertiary color for the role. An alias exists under ``colour``."""
+        return Colour(self._tertiary_color)
+
+    @property
     def icon(self) -> Optional[Asset]:
         """Optional[:class:`Asset`]: Returns the role's icon asset, if available.
 
@@ -462,6 +486,10 @@ class Role(Hashable):
         permissions: Permissions = MISSING,
         colour: Union[Colour, int] = MISSING,
         color: Union[Colour, int] = MISSING,
+        secondary_colour: Optional[Union[Colour, int]] = MISSING,
+        secondary_color: Optional[Union[Colour, int]] = MISSING,
+        tertiary_colour: Optional[Union[Colour, int]] = MISSING,
+        tertiary_color: Optional[Union[Colour, int]] = MISSING,
         hoist: bool = MISSING,
         icon: Optional[AssetBytes] = MISSING,
         emoji: Optional[str] = MISSING,
@@ -536,14 +564,36 @@ class Role(Hashable):
             await self._move(position, reason=reason)
 
         payload: Dict[str, Any] = {}
+
+        colours: Dict[str, Any] = {}
         if color is not MISSING:
             colour = color
 
         if colour is not MISSING:
             if isinstance(colour, int):
-                payload["color"] = colour
+                colours["primary_color"] = colour
             else:
-                payload["color"] = colour.value
+                colours["primary_color"] = colour.value
+
+        if secondary_color is not MISSING:
+            secondary_colour = secondary_color
+
+        if secondary_colour is not MISSING:
+            if isinstance(secondary_colour, Colour):
+                colours["secondary_color"] = secondary_colour.value
+            else:
+                colours["secondary_color"] = secondary_colour
+
+        if tertiary_color is not MISSING:
+            tertiary_colour = tertiary_color
+
+        if tertiary_colour is not MISSING:
+            if isinstance(tertiary_colour, Colour):
+                colours["tertiary_color"] = tertiary_colour.value
+            else:
+                colours["tertiary_color"] = tertiary_colour
+
+        payload["colors"] = colours
 
         if name is not MISSING:
             payload["name"] = name
