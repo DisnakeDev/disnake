@@ -275,9 +275,10 @@ class Role(Hashable):
         self.name: str = data["name"]
         self._permissions: int = int(data.get("permissions", 0))
         self.position: int = data.get("position", 0)
-        self._colour: int = data["colors"]["primary_color"]
-        self._secondary_color: int = data["colors"].get("secondary_color", 0)
-        self._tertiary_color: int = data["colors"].get("tertiary_color", 0)
+        colours = data["colors"]
+        self._colour: int = colours["primary_color"]
+        self._secondary_color: int = colours["secondary_color"] or 0
+        self._tertiary_color: int = colours["tertiary_color"] or 0
         self.hoist: bool = data.get("hoist", False)
         self._icon: Optional[str] = data.get("icon")
         self._emoji: Optional[str] = data.get("unicode_emoji")

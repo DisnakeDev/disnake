@@ -319,5 +319,35 @@ class Colour:
         """
         return cls(0x2B2D31)
 
+    @classmethod
+    def holographic_style_colour(cls) -> Tuple[Self, Self, Self]:
+        """A factory method that returns a tuple of :class:`Colour` with values of
+        ``0xA9C9FF``, ``0xFFBBEC``, ``0xFFC3A0``. This matches the holographic colour style
+        for roles.
+
+        The first value represents the ``colour`` (``primary_color``), the second and the third
+        represents the ``secondary_colour`` and ``tertiary_colour`` respectively.
+
+        An alias exists under :meth:`Colour.holographic_style_color`.
+
+        .. versionadded:: 2.11
+        """
+        return cls(0xA9C9FF), cls(0xFFBBEC), cls(0xFFC3A0)
+
+    @classmethod
+    def holographic_style_color(cls) -> Tuple[Self, Self, Self]:
+        """A factory method that returns a tuple of :class:`Colour` with values of
+        ``0xA9C9FF``, ``0xFFBBEC``, ``0xFFC3A0``. This matches the holographic color style
+        for roles.
+
+        The first value represents the ``color`` (``primary_color``), the second and the third
+        represents the ``secondary_color`` and ``tertiary_color`` respectively.
+
+        An alias exists under :meth:`Colour.holographic_style_colour`.
+
+        .. versionadded:: 2.11
+        """
+        return cls.holographic_style_colour()
+
 
 Color = Colour
