@@ -2450,7 +2450,7 @@ class MemberFlags(BaseFlags):
 
     @flag_value
     def automod_quarantined_guild_tag(self):
-        """:class:`bool`: Returns ``True`` if the member's guild tag is blocked by AutoMod
+        """:class:`bool`: Returns ``True`` if the member's guild tag is blocked by AutoMod.
 
         .. versionadded:: 2.11
         """
