@@ -8,12 +8,12 @@ from ..components import Section as SectionComponent
 from ..enums import ComponentType
 from ..utils import copy_doc
 from .item import UIComponent, ensure_ui_component
+from .text_display import TextDisplay
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
     from .button import Button
-    from .text_display import TextDisplay
     from .thumbnail import Thumbnail
 
 __all__ = ("Section",)
@@ -28,7 +28,7 @@ class Section(UIComponent):
 
     Parameters
     ----------
-    *components: :class:`~.ui.TextDisplay`
+    *components: Union[:class:`str`, :class:`~.ui.TextDisplay`]
         The text items in this section (up to 3).
     accessory: Union[:class:`~.ui.Thumbnail`, :class:`~.ui.Button`]
         The accessory component displayed next to the section text.
@@ -52,7 +52,7 @@ class Section(UIComponent):
 
     def __init__(
         self,
-        *components: TextDisplay,
+        *components: Union[str, TextDisplay],
         accessory: Union[Thumbnail, Button[Any]],
         id: int = 0,
     ) -> None:
@@ -60,7 +60,8 @@ class Section(UIComponent):
         # this list can be modified without any runtime checks later on,
         # just assume the user knows what they're doing at that point
         self.children: List[TextDisplay] = [
-            ensure_ui_component(c, "components") for c in components
+            TextDisplay(c) if isinstance(c, str) else ensure_ui_component(c, "components")
+            for c in components
         ]
         self.accessory: Union[Thumbnail, Button[Any]] = ensure_ui_component(accessory, "accessory")
 
