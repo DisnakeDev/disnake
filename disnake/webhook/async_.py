@@ -291,8 +291,9 @@ class AsyncWebhookAdapter:
         files: Optional[List[File]] = None,
         thread_id: Optional[int] = None,
         wait: bool = False,
+        with_components: bool = True,
     ) -> Response[Optional[MessagePayload]]:
-        params = {"wait": int(wait)}
+        params = {"wait": int(wait), "with_components": int(with_components)}
         if thread_id:
             params["thread_id"] = thread_id
 
@@ -1666,6 +1667,10 @@ class Webhook(BaseWebhook):
                 Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
                 Setting this flag cannot be reverted. Note that this also disables the
                 ``content``, ``embeds``, and ``poll`` fields.
+
+            .. note::
+                Non-application-owned webhooks can only send non-interactive components,
+                e.g. link buttons or v2 layout components.
 
         thread: :class:`~disnake.abc.Snowflake`
             The thread to send this message to.

@@ -708,6 +708,8 @@ class MessageFlags(BaseFlags):
 
         Messages with this flag will use specific components for content layout,
         instead of :attr:`~Message.content` and :attr:`~Message.embeds`.
+        Further details, limits, and example images can be found
+        in the :ddocs:`API documentation <components/reference>`.
 
         Note that once this flag is set on a message, it cannot be reverted.
 
