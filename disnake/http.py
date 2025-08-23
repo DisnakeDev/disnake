@@ -1387,50 +1387,6 @@ class HTTPClient:
         params = {"with_counts": int(with_counts)}
         return self.request(Route("GET", "/guilds/{guild_id}", guild_id=guild_id), params=params)
 
-    def delete_guild(self, guild_id: Snowflake) -> Response[None]:
-        return self.request(Route("DELETE", "/guilds/{guild_id}", guild_id=guild_id))
-
-    def create_guild(
-        self,
-        name: str,
-        icon: Optional[str] = None,
-        *,
-        verification_level: Optional[guild.VerificationLevel] = None,
-        default_message_notifications: Optional[guild.DefaultMessageNotificationLevel] = None,
-        explicit_content_filter: Optional[guild.ExplicitContentFilterLevel] = None,
-        roles: Optional[List[guild.CreateGuildPlaceholderRole]] = None,
-        channels: Optional[List[guild.CreateGuildPlaceholderChannel]] = None,
-        afk_channel: Optional[Snowflake] = None,
-        afk_timeout: Optional[int] = None,
-        system_channel: Optional[Snowflake] = None,
-        system_channel_flags: Optional[int] = None,
-    ) -> Response[guild.Guild]:
-        payload: guild.CreateGuild = {
-            "name": name,
-        }
-        if icon:
-            payload["icon"] = icon
-        if verification_level is not None:
-            payload["verification_level"] = verification_level
-        if default_message_notifications is not None:
-            payload["default_message_notifications"] = default_message_notifications
-        if explicit_content_filter is not None:
-            payload["explicit_content_filter"] = explicit_content_filter
-        if roles is not None:
-            payload["roles"] = roles
-        if channels is not None:
-            payload["channels"] = channels
-        if afk_channel is not None:
-            payload["afk_channel_id"] = afk_channel
-        if afk_timeout is not None:
-            payload["afk_timeout"] = afk_timeout
-        if system_channel is not None:
-            payload["system_channel_id"] = system_channel
-        if system_channel_flags is not None:
-            payload["system_channel_flags"] = system_channel_flags
-
-        return self.request(Route("POST", "/guilds"), json=payload)
-
     def edit_guild(
         self, guild_id: Snowflake, *, reason: Optional[str] = None, **fields: Any
     ) -> Response[guild.Guild]:
@@ -1498,16 +1454,6 @@ class HTTPClient:
         return self.request(
             Route("DELETE", "/guilds/{guild_id}/templates/{code}", guild_id=guild_id, code=code)
         )
-
-    def create_from_template(
-        self, code: str, name: str, icon: Optional[str]
-    ) -> Response[guild.Guild]:
-        payload = {
-            "name": name,
-        }
-        if icon:
-            payload["icon"] = icon
-        return self.request(Route("POST", "/guilds/templates/{code}", code=code), json=payload)
 
     def get_guild_preview(self, guild_id: Snowflake) -> Response[guild.GuildPreview]:
         return self.request(Route("GET", "/guilds/{guild_id}/preview", guild_id=guild_id))
