@@ -1739,6 +1739,15 @@ AuditLogAction
 
         .. versionadded:: 2.6
 
+    .. attribute:: automod_quarantine_user
+
+        A member was quarantined by auto moderation.
+
+        When this is the action, the type of :attr:`~AuditLogEntry.target` is
+        the :class:`Member` who was quarantined.
+
+        .. versionadded:: 2.11
+
     .. attribute:: creator_monetization_request_created
 
         A creator monetization request was created.
