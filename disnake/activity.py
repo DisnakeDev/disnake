@@ -192,6 +192,22 @@ class _BaseActivity:
         """
         return self.assets.get("small_text", None)
 
+    @property
+    def large_image_link(self) -> Optional[str]:
+        """Optional[:class:`str`]: Returns the large image asset URL of this activity, if applicable.
+
+        .. versionadded:: 2.11
+        """
+        return self.assets.get("large_url")
+
+    @property
+    def small_image_link(self) -> Optional[str]:
+        """Optional[:class:`str`]: Returns the small image asset URL of this activity, if applicable.
+
+        .. versionadded:: 2.11
+        """
+        return self.assets.get("small_url")
+
 
 # tag type for user-settable activities
 class BaseActivity(_BaseActivity):
@@ -267,8 +283,10 @@ class Activity(BaseActivity):
 
         - ``large_image``: A string representing the ID for the large image asset.
         - ``large_text``: A string representing the text when hovering over the large image asset.
+        - ``large_url``: A string representing an URL that is opened when clicking on the large image.
         - ``small_image``: A string representing the ID for the small image asset.
         - ``small_text``: A string representing the text when hovering over the small image asset.
+        - ``small_url``: A string representing a URL that is opened when clicking on the small image.
     party: :class:`dict`
         A dictionary representing the activity party. It contains the following optional keys:
 
