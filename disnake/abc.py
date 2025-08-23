@@ -884,6 +884,7 @@ class GuildChannel(ABC):
         moderate_members: Optional[bool] = ...,
         move_members: Optional[bool] = ...,
         mute_members: Optional[bool] = ...,
+        pin_messages: Optional[bool] = ...,
         priority_speaker: Optional[bool] = ...,
         read_message_history: Optional[bool] = ...,
         read_messages: Optional[bool] = ...,
