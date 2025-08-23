@@ -14,31 +14,13 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Set up pdm with python ${{ inputs.python-version }}
+    - name: Set up uv with python ${{ inputs.python-version }}
       id: setup-python
-      uses: pdm-project/setup-pdm@v4
+      uses: astral-sh/setup-uv@6
       with:
         python-version: ${{ inputs.python-version }}
-        version: "2.20.1"  # last version to support python 3.8
+        version: "0.8.13"
         cache: false
-
-    - name: Disable PDM version check
-      shell: bash
-      run: |
-        pdm config check_update false
-
-    - name: Ignore saved pythons
-      shell: bash
-      run: |
-        echo "PDM_IGNORE_SAVED_PYTHON=1" >> $GITHUB_ENV
-
-    - name: Update pip, wheel, setuptools
-      shell: bash
-      run: python -m pip install -U pip wheel setuptools
-
-    - name: Install nox
-      shell: bash
-      run: pip install nox
 
     - name: Set python version
       id: python-version
