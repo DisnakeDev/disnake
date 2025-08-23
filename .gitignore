@@ -34,3 +34,4 @@ __pypackages__/
 .pdm.toml
 .pdm-python
 pdm.lock
+disnake/_version.py
