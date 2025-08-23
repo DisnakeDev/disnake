@@ -36,3 +36,5 @@ __pypackages__/
 pdm.lock
 
 !test_bot/locale/*.json
+
+disnake/_version.py
