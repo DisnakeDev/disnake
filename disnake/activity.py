@@ -181,7 +181,7 @@ class _BaseActivity:
         .. versionchanged:: 2.10
             Moved from :class:`Activity` to base type, making this available to all activity types.
         """
-        return self.assets.get("large_text", None)
+        return self.assets.get("large_text")
 
     @property
     def small_image_text(self) -> Optional[str]:
@@ -190,7 +190,7 @@ class _BaseActivity:
         .. versionchanged:: 2.10
             Moved from :class:`Activity` to base type, making this available to all activity types.
         """
-        return self.assets.get("small_text", None)
+        return self.assets.get("small_text")
 
     @property
     def large_image_link(self) -> Optional[str]:
