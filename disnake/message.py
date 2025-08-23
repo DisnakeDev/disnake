@@ -221,7 +221,7 @@ async def _edit_handler(
 
     # set cv2 flag automatically
     if is_v2:
-        flags = MessageFlags._from_value(0 if flags is MISSING else flags.value)
+        flags = MessageFlags._from_value(default_flags if flags is MISSING else flags.value)
         flags.is_components_v2 = True
     # components v2 cannot be used with other content fields
     # (n.b. this doesn't take into account editing messages that *already* have content/embeds,
