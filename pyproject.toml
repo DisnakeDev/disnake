@@ -106,7 +106,8 @@ build = [
 ]
 
 [tool.uv]
-default-groups = ['nox', 'tools', 'changelog', 'codemod', 'typing', 'test', 'build',]
+required-version = ">=0.8.4"
+default-groups = "all"
 
 [tool.taskipy.settings]
 use_vars = true
