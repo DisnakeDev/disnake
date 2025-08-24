@@ -100,4 +100,5 @@ class Label(UIComponent):
             text=label.text,
             description=label.description,
             component=cast("LabelChildUIComponent", _to_ui_component(label.component)),
+            id=label.id,
         )
