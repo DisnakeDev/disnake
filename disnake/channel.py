@@ -44,6 +44,7 @@ from .file import File
 from .flags import ChannelFlags, MessageFlags
 from .iterators import ArchivedThreadIterator
 from .mixins import Hashable
+from .object import Object
 from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite, Permissions
 from .soundboard import GuildSoundboardSound, PartialSoundboardSound, SoundboardSound
@@ -95,7 +96,7 @@ if TYPE_CHECKING:
     from .types.soundboard import PartialSoundboardSound as PartialSoundboardSoundPayload
     from .types.threads import ThreadArchiveDurationLiteral
     from .types.voice import VoiceChannelEffect as VoiceChannelEffectPayload
-    from .ui.action_row import Components, MessageUIComponent
+    from .ui._types import MessageComponents
     from .ui.view import View
     from .user import BaseUser, ClientUser, User
     from .voice_region import VoiceRegion
@@ -341,6 +342,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
     @property
     def members(self) -> List[Member]:
         """List[:class:`Member`]: Returns all members that can see this channel."""
+        if isinstance(self.guild, Object):
+            return []
         return [m for m in self.guild.members if self.permissions_for(m).view_channel]
 
     @property
@@ -349,6 +352,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         .. versionadded:: 2.0
         """
+        if isinstance(self.guild, Object):
+            return []
         return [thread for thread in self.guild._threads.values() if thread.parent_id == self.id]
 
     def is_nsfw(self) -> bool:
@@ -978,6 +983,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         Optional[:class:`Thread`]
             The returned thread or ``None`` if not found.
         """
+        if isinstance(self.guild, Object):
+            return None
         return self.guild.get_thread(thread_id)
 
     @overload
@@ -1217,6 +1224,9 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
     @property
     def members(self) -> List[Member]:
         """List[:class:`Member`]: Returns all members that are currently inside this voice channel."""
+        if isinstance(self.guild, Object):
+            return []
+
         ret = []
         for user_id, state in self.guild._voice_states.items():
             if state.channel and state.channel.id == self.id:
@@ -1241,6 +1251,9 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
         Mapping[:class:`int`, :class:`VoiceState`]
             The mapping of member ID to a voice state.
         """
+        if isinstance(self.guild, Object):
+            return {}
+
         return {
             key: value
             for key, value in self.guild._voice_states.items()
@@ -2277,6 +2290,8 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         .. versionadded:: 2.0
         """
+        if isinstance(self.guild, Object):
+            return None
         return utils.get(self.guild.stage_instances, channel_id=self.id)
 
     async def create_instance(
@@ -3090,6 +3105,8 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
         These are sorted by the official Discord UI, which places voice channels below the text channels.
         """
+        if isinstance(self.guild, Object):
+            return []
 
         def comparator(channel):
             return (
@@ -3104,6 +3121,9 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
     @property
     def text_channels(self) -> List[TextChannel]:
         """List[:class:`TextChannel`]: Returns the text channels that are under this category."""
+        if isinstance(self.guild, Object):
+            return []
+
         ret = [
             c
             for c in self.guild.channels
@@ -3115,6 +3135,9 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
     @property
     def voice_channels(self) -> List[VoiceChannel]:
         """List[:class:`VoiceChannel`]: Returns the voice channels that are under this category."""
+        if isinstance(self.guild, Object):
+            return []
+
         ret = [
             c
             for c in self.guild.channels
@@ -3129,6 +3152,9 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
         .. versionadded:: 1.7
         """
+        if isinstance(self.guild, Object):
+            return []
+
         ret = [
             c
             for c in self.guild.channels
@@ -3143,6 +3169,9 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
         .. versionadded:: 2.5
         """
+        if isinstance(self.guild, Object):
+            return []
+
         ret = [
             c
             for c in self.guild.channels
@@ -3157,6 +3186,9 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
         .. versionadded:: 2.10
         """
+        if isinstance(self.guild, Object):
+            return []
+
         ret = [
             c
             for c in self.guild.channels
@@ -3368,11 +3400,15 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
     @property
     def members(self) -> List[Member]:
         """List[:class:`Member`]: Returns all members that can see this channel."""
+        if isinstance(self.guild, Object):
+            return []
         return [m for m in self.guild.members if self.permissions_for(m).view_channel]
 
     @property
     def threads(self) -> List[Thread]:
         """List[:class:`Thread`]: Returns all the threads that you can see."""
+        if isinstance(self.guild, Object):
+            return []
         return [thread for thread in self.guild._threads.values() if thread.parent_id == self.id]
 
     def is_nsfw(self) -> bool:
@@ -3466,6 +3502,8 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         Optional[:class:`Thread`]
             The returned thread of ``None`` if not found.
         """
+        if isinstance(self.guild, Object):
+            return None
         return self.guild.get_thread(thread_id)
 
     @overload
@@ -3484,7 +3522,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
-        components: Components = ...,
+        components: MessageComponents = ...,
         reason: Optional[str] = None,
     ) -> ThreadWithMessage: ...
 
@@ -3504,7 +3542,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
-        components: Components = ...,
+        components: MessageComponents = ...,
         reason: Optional[str] = None,
     ) -> ThreadWithMessage: ...
 
@@ -3524,7 +3562,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
-        components: Components = ...,
+        components: MessageComponents = ...,
         reason: Optional[str] = None,
     ) -> ThreadWithMessage: ...
 
@@ -3544,7 +3582,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
-        components: Components = ...,
+        components: MessageComponents = ...,
         reason: Optional[str] = None,
     ) -> ThreadWithMessage: ...
 
@@ -3565,7 +3603,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
-        components: Components[MessageUIComponent] = MISSING,
+        components: MessageComponents = MISSING,
         reason: Optional[str] = None,
     ) -> ThreadWithMessage:
         """|coro|
@@ -3618,16 +3656,17 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
             all the embeds from the UI if set to ``True``.
         flags: :class:`MessageFlags`
             The flags to set for this message.
-            Only :attr:`~MessageFlags.suppress_embeds` is supported.
+            Only :attr:`~MessageFlags.suppress_embeds` and :attr:`~MessageFlags.is_components_v2`
+            are supported.
 
             If parameter ``suppress_embeds`` is provided,
             that will override the setting of :attr:`MessageFlags.suppress_embeds`.
 
             .. versionadded:: 2.9
 
-        file: :class:`.File`
+        file: :class:`~disnake.File`
             The file to upload. This cannot be mixed with the ``files`` parameter.
-        files: List[:class:`.File`]
+        files: List[:class:`~disnake.File`]
             A list of files to upload. Must be a maximum of 10.
             This cannot be mixed with the ``file`` parameter.
         stickers: Sequence[Union[:class:`.GuildSticker`, :class:`.StandardSticker`, :class:`.StickerItem`]]
@@ -3643,6 +3682,12 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
             A Discord UI View to add to the message. This cannot be mixed with ``components``.
         components: |components_type|
             A list of components to include in the message. This cannot be mixed with ``view``.
+
+            .. note::
+                Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
+                Setting this flag cannot be reverted. Note that this also disables the
+                ``content``, ``embeds``, and ``stickers`` fields.
+
         reason: Optional[:class:`str`]
             The reason for creating the thread. Shows up on the audit log.
 
@@ -3655,11 +3700,11 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         TypeError
             Specified both ``file`` and ``files``,
             or you specified both ``embed`` and ``embeds``,
-            or you specified both ``view`` and ``components``.
+            or you specified both ``view`` and ``components``,
             or you have passed an object that is not :class:`File` to ``file`` or ``files``.
         ValueError
-            Specified more than 10 embeds,
-            or more than 10 files.
+            Specified more than 10 embeds, or more than 10 files, or
+            you tried to send v2 components together with ``content``, ``embeds``, or ``stickers``.
 
         Returns
         -------
