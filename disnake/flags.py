@@ -2392,6 +2392,7 @@ class MemberFlags(BaseFlags):
         def __init__(
             self,
             *,
+            automod_quarantined_guild_tag: bool = ...,
             automod_quarantined_username: bool = ...,
             bypasses_verification: bool = ...,
             completed_home_actions: bool = ...,
@@ -2462,6 +2463,14 @@ class MemberFlags(BaseFlags):
         .. versionadded:: 2.10
         """
         return 1 << 9
+
+    @flag_value
+    def automod_quarantined_guild_tag(self):
+        """:class:`bool`: Returns ``True`` if the member's guild tag is blocked by AutoMod.
+
+        .. versionadded:: 2.11
+        """
+        return 1 << 10
 
 
 class RoleFlags(BaseFlags):

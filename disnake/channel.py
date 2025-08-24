@@ -44,6 +44,7 @@ from .file import File
 from .flags import ChannelFlags, MessageFlags
 from .iterators import ArchivedThreadIterator
 from .mixins import Hashable
+from .object import Object
 from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite, Permissions
 from .soundboard import GuildSoundboardSound, PartialSoundboardSound, SoundboardSound
@@ -341,6 +342,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
     @property
     def members(self) -> List[Member]:
         """List[:class:`Member`]: Returns all members that can see this channel."""
+        if isinstance(self.guild, Object):
+            return []
         return [m for m in self.guild.members if self.permissions_for(m).view_channel]
 
     @property
@@ -349,6 +352,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         .. versionadded:: 2.0
         """
+        if isinstance(self.guild, Object):
+            return []
         return [thread for thread in self.guild._threads.values() if thread.parent_id == self.id]
 
     def is_nsfw(self) -> bool:
@@ -978,6 +983,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         Optional[:class:`Thread`]
             The returned thread or ``None`` if not found.
         """
+        if isinstance(self.guild, Object):
+            return None
         return self.guild.get_thread(thread_id)
 
     @overload
@@ -1217,6 +1224,9 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
     @property
     def members(self) -> List[Member]:
         """List[:class:`Member`]: Returns all members that are currently inside this voice channel."""
+        if isinstance(self.guild, Object):
+            return []
+
         ret = []
         for user_id, state in self.guild._voice_states.items():
             if state.channel and state.channel.id == self.id:
@@ -1241,6 +1251,9 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
         Mapping[:class:`int`, :class:`VoiceState`]
             The mapping of member ID to a voice state.
         """
+        if isinstance(self.guild, Object):
+            return {}
+
         return {
             key: value
             for key, value in self.guild._voice_states.items()
@@ -2277,6 +2290,8 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         .. versionadded:: 2.0
         """
+        if isinstance(self.guild, Object):
+            return None
         return utils.get(self.guild.stage_instances, channel_id=self.id)
 
     async def create_instance(
@@ -3090,6 +3105,8 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
         These are sorted by the official Discord UI, which places voice channels below the text channels.
         """
+        if isinstance(self.guild, Object):
+            return []
 
         def comparator(channel):
             return (
@@ -3104,6 +3121,9 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
     @property
     def text_channels(self) -> List[TextChannel]:
         """List[:class:`TextChannel`]: Returns the text channels that are under this category."""
+        if isinstance(self.guild, Object):
+            return []
+
         ret = [
             c
             for c in self.guild.channels
@@ -3115,6 +3135,9 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
     @property
     def voice_channels(self) -> List[VoiceChannel]:
         """List[:class:`VoiceChannel`]: Returns the voice channels that are under this category."""
+        if isinstance(self.guild, Object):
+            return []
+
         ret = [
             c
             for c in self.guild.channels
@@ -3129,6 +3152,9 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
         .. versionadded:: 1.7
         """
+        if isinstance(self.guild, Object):
+            return []
+
         ret = [
             c
             for c in self.guild.channels
@@ -3143,6 +3169,9 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
         .. versionadded:: 2.5
         """
+        if isinstance(self.guild, Object):
+            return []
+
         ret = [
             c
             for c in self.guild.channels
@@ -3157,6 +3186,9 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
         .. versionadded:: 2.10
         """
+        if isinstance(self.guild, Object):
+            return []
+
         ret = [
             c
             for c in self.guild.channels
@@ -3368,11 +3400,15 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
     @property
     def members(self) -> List[Member]:
         """List[:class:`Member`]: Returns all members that can see this channel."""
+        if isinstance(self.guild, Object):
+            return []
         return [m for m in self.guild.members if self.permissions_for(m).view_channel]
 
     @property
     def threads(self) -> List[Thread]:
         """List[:class:`Thread`]: Returns all the threads that you can see."""
+        if isinstance(self.guild, Object):
+            return []
         return [thread for thread in self.guild._threads.values() if thread.parent_id == self.id]
 
     def is_nsfw(self) -> bool:
@@ -3466,6 +3502,8 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         Optional[:class:`Thread`]
             The returned thread of ``None`` if not found.
         """
+        if isinstance(self.guild, Object):
+            return None
         return self.guild.get_thread(thread_id)
 
     @overload
