@@ -6,16 +6,16 @@ from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional
 
 from ..enums import ComponentType
 from ..message import Message
-from ..utils import cached_slot_property
+from ..utils import assert_never, cached_slot_property
 from .base import ClientT, Interaction
 
 if TYPE_CHECKING:
     from ..state import ConnectionState
     from ..types.interactions import (
         ModalInteraction as ModalInteractionPayload,
-        ModalInteractionActionRow as ModalInteractionActionRowPayload,
         ModalInteractionComponentData as ModalInteractionComponentDataPayload,
         ModalInteractionData as ModalInteractionDataPayload,
+        ModalInteractionInnerComponentData as ModalInteractionInnerComponentDataPayload,
     )
 
 __all__ = ("ModalInteraction", "ModalInteractionData")
@@ -131,7 +131,9 @@ class ModalInteraction(Interaction[ClientT]):
             message = None
         self.message: Optional[Message] = message
 
-    def walk_raw_components(self) -> Generator[ModalInteractionComponentDataPayload, None, None]:
+    def walk_raw_components(
+        self,
+    ) -> Generator[ModalInteractionInnerComponentDataPayload, None, None]:
         """Returns a generator that yields raw component data from action rows one by one, as provided by Discord.
         This does not contain all fields of the components due to API limitations.
 
@@ -141,8 +143,14 @@ class ModalInteraction(Interaction[ClientT]):
         -------
         Generator[:class:`dict`, None, None]
         """
-        for action_row in self.data.components:
-            yield from action_row["components"]
+        # TODO: consider walking components recursively
+        for component in self.data.components:
+            if component["type"] == ComponentType.action_row.value:
+                yield from component["components"]
+            elif component["type"] == ComponentType.label.value:
+                yield component["component"]
+            else:
+                assert_never(component)
 
     @cached_slot_property("_cs_text_values")
     def text_values(self) -> Dict[str, str]:
@@ -153,7 +161,7 @@ class ModalInteraction(Interaction[ClientT]):
         return {
             component["custom_id"]: component.get("value") or ""
             for component in self.walk_raw_components()
-            if component.get("type") == text_input_type
+            if component["type"] == text_input_type
         }
 
     @property
@@ -186,7 +194,7 @@ class ModalInteractionData(Dict[str, Any]):
         # This uses a stripped-down action row TypedDict, as we only receive
         # partial data from the API, generally only containing `type`, `custom_id`, `id`,
         # and relevant fields like a select's `values`.
-        self.components: List[ModalInteractionActionRowPayload] = data["components"]
+        self.components: List[ModalInteractionComponentDataPayload] = data["components"]
 
     def __repr__(self) -> str:
         return f"<ModalInteractionData custom_id={self.custom_id!r} components={self.components!r}>"
