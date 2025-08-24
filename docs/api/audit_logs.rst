@@ -1744,7 +1744,11 @@ AuditLogAction
         A member was quarantined by auto moderation.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`Member` who was quarantined.
+        the :class:`Member` or :class:`User` who was quarantined.
+        If the user is not found then it is a :class:`Object` with the user's ID.
+
+        See :attr:`automod_block_message` for more information on how the
+        :attr:`~AuditLogEntry.extra` field is set.
 
         .. versionadded:: 2.11
 
