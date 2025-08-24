@@ -600,6 +600,8 @@ class GuildChannel(ABC):
 
         If there is no category then this is ``None``.
         """
+        if isinstance(self.guild, Object):
+            return None
         return self.guild.get_channel(self.category_id)  # type: ignore
 
     @property
@@ -611,7 +613,7 @@ class GuildChannel(ABC):
 
         .. versionadded:: 1.3
         """
-        if self.category_id is None:
+        if self.category_id is None or isinstance(self.guild, Object):
             return False
 
         category = self.guild.get_channel(self.category_id)
@@ -678,6 +680,13 @@ class GuildChannel(ABC):
         - The permissions of the role used as a parameter
         - The default role permission overwrites
         - The permission overwrites of the role used as a parameter
+
+        .. note::
+            If the channel originated from an :class:`.Interaction` and
+            the :attr:`.guild` attribute is unavailable, such as with
+            user-installed applications in guilds, this method will not work
+            due to an API limitation.
+            Consider using :attr:`.Interaction.permissions` or :attr:`~.Interaction.app_permissions` instead.
 
         .. versionchanged:: 2.0
             The object passed in can now be a role object.
