@@ -96,7 +96,8 @@ class TestActionRow:
             _ = ActionRow.with_modal_components().add_select  # type: ignore
 
     def test_add_text_input(self) -> None:
-        r = ActionRow.with_modal_components()
+        with pytest.warns(DeprecationWarning):
+            r = ActionRow.with_modal_components()
         r.add_text_input(label="a", custom_id="asdf")
 
         (c,) = r.children
@@ -132,7 +133,8 @@ class TestActionRow:
         assert list(r.children) == [button2]
 
     def test_with_components(self) -> None:
-        row_modal = ActionRow.with_modal_components()
+        with pytest.warns(DeprecationWarning):
+            row_modal = ActionRow.with_modal_components()
         assert list(row_modal.children) == []
         row_msg = ActionRow.with_message_components()
         assert list(row_msg.children) == []
