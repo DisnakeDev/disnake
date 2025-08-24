@@ -33,12 +33,18 @@ Component = Union[
     "FileComponent",
     "SeparatorComponent",
     "ContainerComponent",
+    "LabelComponent",
 ]
 
-ActionRowChildComponent = Union["ButtonComponent", "AnySelectMenu", "TextInput"]
+ActionRowChildComponent = Union[
+    "ButtonComponent",
+    "AnySelectMenu",
+    "TextInput",  # deprecated
+]
 
 LabelChildComponent = Union["TextInput", "StringSelectMenu"]
 
+# valid message component types (v1/v2)
 MessageTopLevelComponentV1: TypeAlias = "ActionRow"
 # currently, all v2 components except Thumbnail
 MessageTopLevelComponentV2 = Union[
@@ -50,6 +56,12 @@ MessageTopLevelComponentV2 = Union[
     "ContainerComponent",
 ]
 MessageTopLevelComponent = Union[MessageTopLevelComponentV1, MessageTopLevelComponentV2]
+
+# valid modal component types
+ModalTopLevelComponent = Union[
+    "ActionRow",  # deprecated
+    "LabelComponent",
+]
 
 
 # base types
@@ -146,14 +158,14 @@ AnySelectMenu = Union[
 class Modal(TypedDict):
     title: str
     custom_id: str
-    components: List[ActionRow]
+    components: List[ModalTopLevelComponent]
 
 
 class TextInput(_BaseComponent):
     type: Literal[4]
     custom_id: str
     style: TextInputStyle
-    label: str
+    label: NotRequired[Optional[str]]
     min_length: NotRequired[int]
     max_length: NotRequired[int]
     required: NotRequired[bool]

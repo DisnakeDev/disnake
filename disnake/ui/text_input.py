@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, ClassVar, Optional, Tuple
 
 from ..components import TextInput as TextInputComponent
 from ..enums import ComponentType, TextInputStyle
-from ..utils import MISSING
+from ..utils import MISSING, deprecated
 from .item import WrappedComponent
 
 if TYPE_CHECKING:
@@ -24,8 +24,13 @@ class TextInput(WrappedComponent):
 
     Parameters
     ----------
-    label: :class:`str`
+    label: Optional[:class:`str`]
         The label of the text input.
+
+        .. deprecated:: 2.11
+            This is deprecated in favor of :attr:`Label.text <.ui.Label.text>` and
+            :attr:`.description <.ui.Label.description>`.
+
     custom_id: :class:`str`
         The ID of the text input that gets received during an interaction.
     style: :class:`.TextInputStyle`
@@ -50,7 +55,6 @@ class TextInput(WrappedComponent):
 
     __repr_attributes__: ClassVar[Tuple[str, ...]] = (
         "style",
-        "label",
         "custom_id",
         "placeholder",
         "value",
@@ -64,7 +68,7 @@ class TextInput(WrappedComponent):
     def __init__(
         self,
         *,
-        label: str,
+        label: Optional[str] = None,
         custom_id: str,
         style: TextInputStyle = TextInputStyle.short,
         placeholder: Optional[str] = None,
@@ -101,11 +105,17 @@ class TextInput(WrappedComponent):
         self._underlying.style = value
 
     @property
-    def label(self) -> str:
-        """:class:`str`: The label of the text input."""
-        return self._underlying.label  # type: ignore
+    @deprecated('ui.Label("text", ui.TextInput(...))')
+    def label(self) -> Optional[str]:
+        """:class:`str`: The label of the text input.
+
+        .. deprecated:: 2.11
+            This is deprecated in favor of :class:`.ui.Label`.
+        """
+        return self._underlying.label
 
     @label.setter
+    @deprecated('ui.Label("text", ui.TextInput(...))')
     def label(self, value: str) -> None:
         self._underlying.label = value
 

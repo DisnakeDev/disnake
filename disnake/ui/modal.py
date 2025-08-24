@@ -7,19 +7,27 @@ import os
 import sys
 import traceback
 from functools import partial
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Tuple, TypeVar, Union
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Tuple, TypeVar, Union, cast
 
 from ..enums import TextInputStyle
 from ..utils import MISSING
 from .action_row import ActionRow, normalize_components
+from .item import ensure_ui_component
+from .label import Label
 from .text_input import TextInput
 
 if TYPE_CHECKING:
     from ..client import Client
     from ..interactions.modal import ModalInteraction
     from ..state import ConnectionState
-    from ..types.components import Modal as ModalPayload
-    from ..ui._types import ModalComponents
+    from ..types.components import (
+        Modal as ModalPayload,
+        ModalTopLevelComponent as ModalTopLevelComponentPayload,
+    )
+    from ..ui._types import ModalComponents, ModalTopLevelComponent
+
+    # backwards compatibility, `TextInput` internally gets wrapped in an action row (deprecated)
+    ModalTopLevelComponentInput = Union[ModalTopLevelComponent, TextInput]
 
 
 __all__ = ("Modal",)
@@ -36,9 +44,16 @@ class Modal:
     ----------
     title: :class:`str`
         The title of the modal.
-    components: |components_type|
+    components: |modal_components_type|
         The components to display in the modal. A maximum of 5.
-        Currently only supports :class:`.ui.TextInput` (optionally inside :class:`.ui.ActionRow`).
+        Currently only supports :class:`.ui.TextInput` and
+        :class:`.ui.StringSelect`, wrapped in :class:`.ui.Label`\\s.
+
+        .. deprecated:: 2.11
+            Using action rows in modals or passing :class:`.ui.TextInput` directly
+            (which implicitly wraps it in an action row) is deprecated.
+            Use :class:`.ui.TextInput` inside a :class:`.ui.Label` instead.
+
     custom_id: :class:`str`
         The custom ID of the modal. This is usually not required.
         If not given, then a unique one is generated for you.
@@ -78,13 +93,13 @@ class Modal:
         if timeout is None:  # pyright: ignore[reportUnnecessaryComparison]
             raise ValueError("Timeout may not be None")
 
-        rows = normalize_components(components)
-        if len(rows) > 5:
+        items = normalize_components(components)
+        if len(items) > 5:
             raise ValueError("Maximum number of components exceeded.")
 
         self.title: str = title
         self.custom_id: str = os.urandom(16).hex() if custom_id is MISSING else custom_id
-        self.components: List[ActionRow] = list(rows)
+        self.components: List[ModalTopLevelComponent] = list(items)
         self.timeout: float = timeout
 
         # function for the modal to remove itself from the store, if any
@@ -98,21 +113,31 @@ class Modal:
             f"components={self.components!r}>"
         )
 
-    def append_component(self, component: Union[TextInput, List[TextInput]]) -> None:
+    def append_component(
+        self, component: Union[ModalTopLevelComponentInput, List[ModalTopLevelComponentInput]]
+    ) -> None:
         """Adds one or multiple component(s) to the modal.
 
         Parameters
         ----------
-        component: Union[:class:`~.ui.TextInput`, List[:class:`~.ui.TextInput`]]
+        component: |modal_components_type|
             The component(s) to add to the modal.
             This can be a single component or a list of components.
+
+            Currently only supports :class:`.ui.TextInput` and
+            :class:`.ui.StringSelect`, wrapped in :class:`.ui.Label`\\s.
+
+            .. deprecated:: 2.11
+                Using action rows in modals or passing :class:`.ui.TextInput` directly
+                (which implicitly wraps it in an action row) is deprecated.
+                Use :class:`.ui.TextInput` inside a :class:`.ui.Label` instead.
 
         Raises
         ------
         ValueError
             Maximum number of components (5) exceeded.
         TypeError
-            An object of type :class:`TextInput` was not passed.
+            An invalid component object was passed.
         """
         if not isinstance(component, list):
             component = [component]
@@ -121,14 +146,13 @@ class Modal:
             raise ValueError("Maximum number of components exceeded.")
 
         for c in component:
-            if not isinstance(c, TextInput):
-                raise TypeError(
-                    f"component must be of type 'TextInput' or a list of 'TextInput' objects, not {type(c).__name__}."
-                )
-            try:
-                self.components[-1].append_item(c)
-            except (ValueError, IndexError):
-                self.components.append(ActionRow(c))
+            c = ensure_ui_component(c)
+
+            # backwards compatibility, action rows in modals are deprecated.
+            if isinstance(c, TextInput):
+                c = ActionRow(c)
+
+            self.components.append(c)
 
     def add_text_input(
         self,
@@ -144,8 +168,7 @@ class Modal:
     ) -> None:
         """Creates and adds a text input component to the modal.
 
-        To append a pre-existing instance of :class:`~disnake.ui.TextInput` use the
-        :meth:`append_component` method.
+        To append an existing component instance, use :meth:`append_component`.
 
         Parameters
         ----------
@@ -172,15 +195,17 @@ class Modal:
             Maximum number of components (5) exceeded.
         """
         self.append_component(
-            TextInput(
-                label=label,
-                custom_id=custom_id,
-                style=style,
-                placeholder=placeholder,
-                value=value,
-                required=required,
-                min_length=min_length,
-                max_length=max_length,
+            Label(
+                label,
+                TextInput(
+                    custom_id=custom_id,
+                    style=style,
+                    placeholder=placeholder,
+                    value=value,
+                    required=required,
+                    min_length=min_length,
+                    max_length=max_length,
+                ),
             )
         )
 
@@ -223,13 +248,14 @@ class Modal:
         pass
 
     def to_components(self) -> ModalPayload:
-        payload: ModalPayload = {
+        return {
             "title": self.title,
             "custom_id": self.custom_id,
-            "components": [component.to_component_dict() for component in self.components],
+            "components": cast(
+                "List[ModalTopLevelComponentPayload]",
+                [component.to_component_dict() for component in self.components],
+            ),
         }
-
-        return payload
 
     async def _scheduled_task(self, interaction: ModalInteraction) -> None:
         try:
