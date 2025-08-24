@@ -1151,9 +1151,10 @@ class InteractionResponse:
         file: File = MISSING,
         files: List[File] = MISSING,
         attachments: Optional[List[Attachment]] = MISSING,
-        allowed_mentions: AllowedMentions = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[Components[MessageUIComponent]] = MISSING,
+        flags: MessageFlags = MISSING,
+        allowed_mentions: AllowedMentions = MISSING,
         delete_after: Optional[float] = None,
     ) -> None:
         """|coro|
@@ -1206,8 +1207,6 @@ class InteractionResponse:
             .. versionchanged:: 2.5
                 Supports passing ``None`` to clear attachments.
 
-        allowed_mentions: :class:`AllowedMentions`
-            Controls the mentions being processed in this message.
         view: Optional[:class:`~disnake.ui.View`]
             The updated view to update this message with. This cannot be mixed with ``components``.
             If ``None`` is passed then the view is removed.
@@ -1216,6 +1215,15 @@ class InteractionResponse:
             If ``None`` is passed then the components are removed.
 
             .. versionadded:: 2.4
+
+        flags: :class:`MessageFlags`
+            The new flags to set for this message. Overrides existing flags.
+            Only :attr:`~MessageFlags.suppress_embeds` is supported.
+
+            .. versionadded:: 2.11
+
+        allowed_mentions: :class:`AllowedMentions`
+            Controls the mentions being processed in this message.
 
         delete_after: Optional[:class:`float`]
             If provided, the number of seconds to wait in the background
@@ -1305,6 +1313,9 @@ class InteractionResponse:
         if components is not MISSING:
             payload["components"] = [] if components is None else components_to_dict(components)
 
+        if flags is not MISSING:
+            payload["flags"] = flags.value
+
         adapter = async_context.get()
         response_type = InteractionResponseType.message_update
         try:
@@ -1385,8 +1396,7 @@ class InteractionResponse:
         self._response_type = response_type
 
     @overload
-    async def send_modal(self, modal: Modal) -> None:
-        ...
+    async def send_modal(self, modal: Modal) -> None: ...
 
     @overload
     async def send_modal(
@@ -1395,8 +1405,7 @@ class InteractionResponse:
         title: str,
         custom_id: str,
         components: Components[ModalUIComponent],
-    ) -> None:
-        ...
+    ) -> None: ...
 
     async def send_modal(
         self,
@@ -1485,6 +1494,7 @@ class InteractionResponse:
         if modal is not None:
             parent._state.store_modal(parent.author.id, modal)
 
+    @utils.deprecated("premium buttons")
     async def require_premium(self) -> None:
         """|coro|
 
@@ -1493,6 +1503,9 @@ class InteractionResponse:
         Only available for applications with monetization enabled.
 
         .. versionadded:: 2.10
+
+        .. deprecated:: 2.11
+            Use premium buttons (:class:`ui.Button` with :attr:`~ui.Button.sku_id`) instead.
 
         Example
         -------
@@ -1644,8 +1657,7 @@ class InteractionMessage(Message):
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
         delete_after: Optional[float] = ...,
-    ) -> InteractionMessage:
-        ...
+    ) -> InteractionMessage: ...
 
     @overload
     async def edit(
@@ -1661,8 +1673,7 @@ class InteractionMessage(Message):
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
         delete_after: Optional[float] = ...,
-    ) -> InteractionMessage:
-        ...
+    ) -> InteractionMessage: ...
 
     @overload
     async def edit(
@@ -1678,8 +1689,7 @@ class InteractionMessage(Message):
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
         delete_after: Optional[float] = ...,
-    ) -> InteractionMessage:
-        ...
+    ) -> InteractionMessage: ...
 
     @overload
     async def edit(
@@ -1695,8 +1705,7 @@ class InteractionMessage(Message):
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
         delete_after: Optional[float] = ...,
-    ) -> InteractionMessage:
-        ...
+    ) -> InteractionMessage: ...
 
     async def edit(
         self,
@@ -2007,14 +2016,12 @@ class InteractionDataResolved(Dict[str, Any]):
     @overload
     def get_with_type(
         self, key: Snowflake, data_type: Union[OptionType, ComponentType]
-    ) -> Union[Member, User, Role, AnyChannel, Message, Attachment, None]:
-        ...
+    ) -> Union[Member, User, Role, AnyChannel, Message, Attachment, None]: ...
 
     @overload
     def get_with_type(
         self, key: Snowflake, data_type: Union[OptionType, ComponentType], default: T
-    ) -> Union[Member, User, Role, AnyChannel, Message, Attachment, T]:
-        ...
+    ) -> Union[Member, User, Role, AnyChannel, Message, Attachment, T]: ...
 
     def get_with_type(
         self, key: Snowflake, data_type: Union[OptionType, ComponentType], default: T = None

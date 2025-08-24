@@ -142,8 +142,7 @@ class ActionRow(Generic[UIComponentT]):
     # When unspecified and called empty, default to an ActionRow that takes any kind of component.
 
     @overload
-    def __init__(self: ActionRow[WrappedComponent]) -> None:
-        ...
+    def __init__(self: ActionRow[WrappedComponent]) -> None: ...
 
     # Explicit definitions are needed to make
     # "ActionRow(StringSelect(), TextInput())" and
@@ -151,18 +150,15 @@ class ActionRow(Generic[UIComponentT]):
     # differentiate themselves properly.
 
     @overload
-    def __init__(self: ActionRow[MessageUIComponent], *components: MessageUIComponent) -> None:
-        ...
+    def __init__(self: ActionRow[MessageUIComponent], *components: MessageUIComponent) -> None: ...
 
     @overload
-    def __init__(self: ActionRow[ModalUIComponent], *components: ModalUIComponent) -> None:
-        ...
+    def __init__(self: ActionRow[ModalUIComponent], *components: ModalUIComponent) -> None: ...
 
     # Allow use of "ActionRow[StrictUIComponent]" externally.
 
     @overload
-    def __init__(self: ActionRow[StrictUIComponentT], *components: StrictUIComponentT) -> None:
-        ...
+    def __init__(self: ActionRow[StrictUIComponentT], *components: StrictUIComponentT) -> None: ...
 
     # n.b. this should be `*components: UIComponentT`, but pyright does not like it
     def __init__(self, *components: Union[MessageUIComponent, ModalUIComponent]) -> None:
@@ -251,6 +247,7 @@ class ActionRow(Generic[UIComponentT]):
         custom_id: Optional[str] = None,
         url: Optional[str] = None,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        sku_id: Optional[int] = None,
     ) -> ButtonCompatibleActionRowT:
         """Add a button to the action row. Can only be used if the action
         row holds message components.
@@ -282,6 +279,11 @@ class ActionRow(Generic[UIComponentT]):
             The label of the button, if any.
         emoji: Optional[Union[:class:`.PartialEmoji`, :class:`.Emoji`, :class:`str`]]
             The emoji of the button, if available.
+        sku_id: Optional[:class:`int`]
+            The ID of a purchasable SKU, for premium buttons.
+            Premium buttons additionally cannot have a ``label``, ``url``, or ``emoji``.
+
+            .. versionadded:: 2.11
 
         Raises
         ------
@@ -297,6 +299,7 @@ class ActionRow(Generic[UIComponentT]):
                 custom_id=custom_id,
                 url=url,
                 emoji=emoji,
+                sku_id=sku_id,
             ),
         )
         return self
@@ -725,12 +728,10 @@ class ActionRow(Generic[UIComponentT]):
         del self._children[index]
 
     @overload
-    def __getitem__(self, index: int) -> UIComponentT:
-        ...
+    def __getitem__(self, index: int) -> UIComponentT: ...
 
     @overload
-    def __getitem__(self, index: slice) -> Sequence[UIComponentT]:
-        ...
+    def __getitem__(self, index: slice) -> Sequence[UIComponentT]: ...
 
     def __getitem__(self, index: Union[int, slice]) -> Union[UIComponentT, Sequence[UIComponentT]]:
         return self._children[index]

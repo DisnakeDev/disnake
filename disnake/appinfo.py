@@ -207,6 +207,11 @@ class AppInfo:
         (for user-installable apps).
 
         .. versionadded:: 2.10
+
+    approximate_user_authorization_count: :class:`int`
+        The approximate number of users that have authorized the app with OAuth2.
+
+        .. versionadded:: 2.11
     """
 
     __slots__ = (
@@ -235,6 +240,7 @@ class AppInfo:
         "role_connections_verification_url",
         "approximate_guild_count",
         "approximate_user_install_count",
+        "approximate_user_authorization_count",
         "_install_types_config",
     )
 
@@ -279,6 +285,9 @@ class AppInfo:
         )
         self.approximate_guild_count: int = data.get("approximate_guild_count", 0)
         self.approximate_user_install_count: int = data.get("approximate_user_install_count", 0)
+        self.approximate_user_authorization_count: int = data.get(
+            "approximate_user_authorization_count", 0
+        )
 
         # this is a bit of a mess, but there's no better way to expose this data for now
         self._install_types_config: Dict[

@@ -790,6 +790,7 @@ class WebhookMessage(Message):
         attachments: Optional[List[Attachment]] = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[Components[MessageUIComponent]] = MISSING,
+        flags: MessageFlags = MISSING,
         allowed_mentions: Optional[AllowedMentions] = None,
     ) -> WebhookMessage:
         """|coro|
@@ -854,6 +855,12 @@ class WebhookMessage(Message):
 
             .. versionadded:: 2.4
 
+        flags: :class:`MessageFlags`
+            The new flags to set for this message. Overrides existing flags.
+            Only :attr:`~MessageFlags.suppress_embeds` is supported.
+
+            .. versionadded:: 2.11
+
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
@@ -891,6 +898,7 @@ class WebhookMessage(Message):
             attachments=attachments,
             view=view,
             components=components,
+            flags=flags,
             allowed_mentions=allowed_mentions,
             thread=self._state._thread,
         )
@@ -1507,8 +1515,7 @@ class Webhook(BaseWebhook):
         applied_tags: Sequence[Snowflake] = ...,
         wait: Literal[True],
         delete_after: float = ...,
-    ) -> WebhookMessage:
-        ...
+    ) -> WebhookMessage: ...
 
     @overload
     async def send(
@@ -1534,8 +1541,7 @@ class Webhook(BaseWebhook):
         applied_tags: Sequence[Snowflake] = ...,
         wait: Literal[False] = ...,
         delete_after: float = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     async def send(
         self,
@@ -1856,6 +1862,7 @@ class Webhook(BaseWebhook):
         attachments: Optional[List[Attachment]] = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[Components[MessageUIComponent]] = MISSING,
+        flags: MessageFlags = MISSING,
         allowed_mentions: Optional[AllowedMentions] = None,
         thread: Optional[Snowflake] = None,
     ) -> WebhookMessage:
@@ -1930,9 +1937,16 @@ class Webhook(BaseWebhook):
 
             .. versionadded:: 2.4
 
+        flags: :class:`MessageFlags`
+            The new flags to set for this message. Overrides existing flags.
+            Only :attr:`~MessageFlags.suppress_embeds` is supported.
+
+            .. versionadded:: 2.11
+
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
+
         thread: Optional[:class:`~disnake.abc.Snowflake`]
             The thread the message is in, if any.
 
@@ -1983,6 +1997,7 @@ class Webhook(BaseWebhook):
             embeds=embeds,
             view=view,
             components=components,
+            flags=flags,
             allowed_mentions=allowed_mentions,
             previous_allowed_mentions=previous_mentions,
         )
