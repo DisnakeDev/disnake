@@ -3742,6 +3742,8 @@ class Guild(Hashable):
         permissions: Permissions = MISSING,
         color: Union[Colour, int] = MISSING,
         colour: Union[Colour, int] = MISSING,
+        primary_colour: Union[Colour, int] = MISSING,
+        primary_color: Union[Colour, int] = MISSING,
         secondary_colour: Optional[Union[Colour, int]] = None,
         secondary_color: Optional[Union[Colour, int]] = None,
         tertiary_colour: Optional[Union[Colour, int]] = None,
@@ -3776,6 +3778,14 @@ class Guild(Hashable):
         colour: Union[:class:`Colour`, :class:`int`]
             The colour for the role. Defaults to :meth:`Colour.default`.
             This is aliased to ``color`` as well.
+
+            .. note::
+                This is equivalent to ``primary_colour``.
+        primary_colour: Union[:class:`Colour`, :class:`int`]
+            The primary_colour for the role. Defaults to :meth:`Colour.default`.
+            This is aliased to ``primary_color`` as well.
+
+            .. versionadded:: 2.11
         secondary_colour: Optional[Union[:class:`Colour`, :class:`int`]]
             The secondary_colour for the role. Defaults to ``None``.
             This is aliased to ``secondary_color`` as well.
@@ -3826,7 +3836,7 @@ class Guild(Hashable):
         else:
             fields["permissions"] = "0"
 
-        actual_primary_color = colour or color
+        actual_primary_color = colour or color or primary_colour or primary_color
         actual_secondary_color = secondary_colour or secondary_color
         actual_tertiary_color = tertiary_colour or tertiary_color
         if actual_primary_color is MISSING:

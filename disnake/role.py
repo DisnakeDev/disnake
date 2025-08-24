@@ -375,33 +375,53 @@ class Role(Hashable):
 
     @property
     def colour(self) -> Colour:
-        """:class:`Colour`: Returns the role colour. An alias exists under ``color``."""
-        return Colour(self._primary_color)
+        """:class:`Colour`: Returns the role colour. An alias exists under ``color``.
+
+        .. note::
+
+            This is equivalent to :meth:`primary_colour`.
+        """
+        return self.primary_colour
 
     @property
     def color(self) -> Colour:
-        """:class:`Colour`: Returns the role color. An alias exists under ``colour``."""
-        return self.colour
+        """:class:`Colour`: Returns the role color. An alias exists under ``colour``.
+
+        .. note::
+
+            This is equivalent to :meth:`primary_color`.
+        """
+        return self.primary_colour
+
+    @property
+    def primary_colour(self) -> Colour:
+        """:class:`Colour`: Returns the primary colour for the role. An alias exists under ``primary_color``."""
+        return Colour(self._primary_color)
+
+    @property
+    def primary_color(self) -> Colour:
+        """:class:`Colour`: Returns the primary color for the role. An alias exists under ``primary_colour``."""
+        return self.primary_colour
 
     @property
     def secondary_colour(self) -> Colour:
-        """:class:`Colour`: Returns the secondary colour for the role. An alias exists under ``color``."""
+        """:class:`Colour`: Returns the secondary colour for the role. An alias exists under ``secondary_color``."""
         return Colour(self._secondary_color)
 
     @property
     def secondary_color(self) -> Colour:
-        """:class:`Colour`: Returns the secondary color for the role. An alias exists under ``colour``."""
-        return Colour(self._secondary_color)
+        """:class:`Colour`: Returns the secondary color for the role. An alias exists under ``secondary_colour``."""
+        return self.secondary_colour
 
     @property
     def tertiary_colour(self) -> Colour:
-        """:class:`Colour`: Returns the tertiary colour for the role. An alias exists under ``color``."""
+        """:class:`Colour`: Returns the tertiary colour for the role. An alias exists under ``tertiary_color``."""
         return Colour(self._tertiary_color)
 
     @property
     def tertiary_color(self) -> Colour:
-        """:class:`Colour`: Returns the tertiary color for the role. An alias exists under ``colour``."""
-        return Colour(self._tertiary_color)
+        """:class:`Colour`: Returns the tertiary color for the role. An alias exists under ``tertiary_colour``."""
+        return self.tertiary_colour
 
     @property
     def icon(self) -> Optional[Asset]:
@@ -487,6 +507,8 @@ class Role(Hashable):
         permissions: Permissions = MISSING,
         colour: Union[Colour, int] = MISSING,
         color: Union[Colour, int] = MISSING,
+        primary_colour: Union[Colour, int] = MISSING,
+        primary_color: Union[Colour, int] = MISSING,
         secondary_colour: Optional[Union[Colour, int]] = MISSING,
         secondary_color: Optional[Union[Colour, int]] = MISSING,
         tertiary_colour: Optional[Union[Colour, int]] = MISSING,
@@ -524,6 +546,13 @@ class Role(Hashable):
             The new permissions to change to.
         colour: Union[:class:`Colour`, :class:`int`]
             The new colour to change to. (aliased to ``color`` as well)
+
+            .. note::
+                This is equivalent to ``primary_colour``.
+        primary_colour: Union[:class:`Colour`, :class:`int`]
+            The new primary_colour to change to. (aliased to ``primary_color`` as well)
+
+            .. versionadded:: 2.11
         secondary_colour: Optional[Union[:class:`Colour`, :class:`int`]]
             The new secondary_colour to change to. (aliased to ``secondary_color`` as well)
 
@@ -575,14 +604,17 @@ class Role(Hashable):
         payload: Dict[str, Any] = {}
 
         colors: Dict[str, Any] = {}
-        if color is not MISSING:
-            colour = color
+        if color is not MISSING or colour is not MISSING:
+            primary_colour = color or colour
 
-        if colour is not MISSING:
-            if isinstance(colour, int):
-                colors["primary_color"] = colour
+        if primary_color is not MISSING:
+            primary_colour = color
+
+        if primary_colour is not MISSING:
+            if isinstance(primary_colour, int):
+                colors["primary_color"] = primary_colour
             else:
-                colors["primary_color"] = colour.value
+                colors["primary_color"] = primary_colour.value
 
         if secondary_color is not MISSING:
             secondary_colour = secondary_color
