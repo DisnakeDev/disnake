@@ -10,7 +10,7 @@ from .channel import ChannelType
 from .emoji import PartialEmoji
 from .snowflake import Snowflake
 
-ComponentType = Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 17]
+ComponentType = Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 17, 18]
 ButtonStyle = Literal[1, 2, 3, 4, 5, 6]
 TextInputStyle = Literal[1, 2]
 SeparatorSpacing = Literal[1, 2]
@@ -36,6 +36,8 @@ Component = Union[
 ]
 
 ActionRowChildComponent = Union["ButtonComponent", "AnySelectMenu", "TextInput"]
+
+LabelChildComponent = Union["TextInput", "StringSelectMenu"]
 
 MessageTopLevelComponentV1: TypeAlias = "ActionRow"
 # currently, all v2 components except Thumbnail
@@ -157,6 +159,13 @@ class TextInput(_BaseComponent):
     required: NotRequired[bool]
     value: NotRequired[str]
     placeholder: NotRequired[str]
+
+
+class LabelComponent(_BaseComponent):
+    type: Literal[18]
+    label: str
+    description: NotRequired[str]
+    component: LabelChildComponent
 
 
 # components v2

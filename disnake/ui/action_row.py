@@ -32,6 +32,7 @@ from ..components import (
     Component,
     Container as ContainerComponent,
     FileComponent as FileComponent,
+    Label as LabelComponent,
     MediaGallery as MediaGalleryComponent,
     MentionableSelectMenu as MentionableSelectComponent,
     RoleSelectMenu as RoleSelectComponent,
@@ -57,6 +58,7 @@ from .button import Button
 from .container import Container
 from .file import File
 from .item import UIComponent, WrappedComponent
+from .label import Label
 from .media_gallery import MediaGallery
 from .section import Section
 from .select import ChannelSelect, MentionableSelect, RoleSelect, StringSelect, UserSelect
@@ -1138,6 +1140,7 @@ UI_COMPONENT_LOOKUP: Mapping[Type[Component], Type[UIComponent]] = {
     FileComponent: File,
     SeparatorComponent: Separator,
     ContainerComponent: Container,
+    LabelComponent: Label,
 }
 
 

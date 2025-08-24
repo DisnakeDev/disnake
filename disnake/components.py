@@ -49,6 +49,7 @@ if TYPE_CHECKING:
         ComponentType as ComponentTypeLiteral,
         ContainerComponent as ContainerComponentPayload,
         FileComponent as FileComponentPayload,
+        LabelComponent as LabelComponentPayload,
         MediaGalleryComponent as MediaGalleryComponentPayload,
         MediaGalleryItem as MediaGalleryItemPayload,
         MentionableSelectMenu as MentionableSelectMenuPayload,
@@ -89,6 +90,7 @@ __all__ = (
     "FileComponent",
     "Separator",
     "Container",
+    "Label",
 )
 
 # miscellaneous components-related type aliases
@@ -135,6 +137,12 @@ ContainerChildComponent = Union[
     "Separator",
 ]
 
+# valid `Label.component` types
+LabelChildComponent = Union[
+    "TextInput",
+    "StringSelectMenu",
+]
+
 # valid `Message.components` item types (v1/v2)
 MessageTopLevelComponentV1: TypeAlias = "ActionRow[ActionRowMessageComponent]"
 MessageTopLevelComponentV2 = Union[
@@ -164,6 +172,7 @@ class Component:
     - :class:`FileComponent`
     - :class:`Separator`
     - :class:`Container`
+    - :class:`Label`
 
     This class is abstract and cannot be instantiated.
 
@@ -1420,6 +1429,65 @@ class Container(Component):
         return self.accent_colour
 
 
+class Label(Component):
+    """Represents a label from the Discord Bot UI Kit.
+
+    This wraps other components with a label and an optional description,
+    and can only be used in modals.
+
+    .. versionadded:: 2.11
+
+    .. note::
+
+        The user constructible and usable type to create a label is
+        :class:`disnake.ui.Label`, not this one.
+
+    Attributes
+    ----------
+    label: :class:`str`
+        The label text.
+    description: Optional[:class:`str`]
+        The description text for the label.
+    component: Union[:class:`TextInput`, :class:`StringSelectMenu`]
+        The component within the label.
+    id: :class:`int`
+        The numeric identifier for the component.
+        This is always present in components received from the API,
+        and unique within a message.
+    """
+
+    __slots__: Tuple[str, ...] = (
+        "label",
+        "description",
+        "component",
+    )
+
+    __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+
+    def __init__(self, data: LabelComponentPayload) -> None:
+        self.type: Literal[ComponentType.label] = ComponentType.label
+        self.id = data.get("id", 0)
+
+        self.label: str = data["label"]
+        self.description: Optional[str] = data.get("description")
+
+        component = _component_factory(data["component"])
+        self.component: LabelChildComponent = component  # type: ignore
+
+    def to_dict(self) -> LabelComponentPayload:
+        payload: LabelComponentPayload = {
+            "type": self.type.value,
+            "id": self.id,
+            "label": self.label,
+            "component": self.component.to_dict(),
+        }
+
+        if self.description is not None:
+            payload["description"] = self.description
+
+        return payload
+
+
 # types of components that are allowed in a message's action rows;
 # see also `ActionRowMessageComponent` type alias
 VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES: Final = (
@@ -1467,6 +1535,7 @@ COMPONENT_LOOKUP: Mapping[ComponentTypeLiteral, Type[Component]] = {
     ComponentType.file.value: FileComponent,
     ComponentType.separator.value: Separator,
     ComponentType.container.value: Container,
+    ComponentType.label.value: Label,
 }
 
 
