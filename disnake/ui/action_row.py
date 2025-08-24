@@ -1077,6 +1077,8 @@ def _walk_internal(component: ComponentT, seen: Set[ComponentT]) -> Iterator[Com
     elif isinstance(component, (ContainerComponent, Container)):
         for item in component.children:
             yield from _walk_internal(item, seen)  # type: ignore
+    elif isinstance(component, (LabelComponent, Label)):
+        yield from _walk_internal(component.component, seen)
 
 
 def walk_components(components: Sequence[ComponentT]) -> Iterator[ComponentT]:
