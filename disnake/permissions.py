@@ -413,7 +413,7 @@ class Permissions(BaseFlags):
             Moved :attr:`use_application_commands` permission to :attr:`apps`.
 
         .. versionchanged:: 2.11
-            Permission :attr:`pin_messages` is no longer part of the text permissions.
+            Added :attr:`pin_messages` permission.
         """
         return cls(
             send_messages=True,
@@ -431,6 +431,7 @@ class Permissions(BaseFlags):
             read_message_history=True,
             send_tts_messages=True,
             send_voice_messages=True,
+            pin_messages=True,
             send_polls=True,
         )
 
