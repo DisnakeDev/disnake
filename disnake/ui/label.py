@@ -30,7 +30,7 @@ class Label(UIComponent):
 
     Parameters
     ----------
-    label: :class:`str`
+    text: :class:`str`
         The label text.
     component: Union[:class:`TextInput`, :class:`StringSelectMenu`]
         The component within the label.
@@ -43,7 +43,7 @@ class Label(UIComponent):
 
     Attributes
     ----------
-    label: :class:`str`
+    text: :class:`str`
         The label text.
     component: Union[:class:`TextInput`, :class:`StringSelectMenu`]
         The component within the label.
@@ -52,14 +52,14 @@ class Label(UIComponent):
     """
 
     __repr_attributes__: ClassVar[Tuple[str, ...]] = (
-        "label",
+        "text",
         "description",
         "component",
     )
 
     def __init__(
         self,
-        label: str,
+        text: str,
         component: LabelChildUIComponent,
         *,
         description: Optional[str] = None,
@@ -67,7 +67,7 @@ class Label(UIComponent):
     ) -> None:
         self._id: int = id
 
-        self.label: str = label
+        self.text: str = text
         self.description: Optional[str] = description
         self.component: LabelChildUIComponent = ensure_ui_component(component)
 
@@ -87,17 +87,17 @@ class Label(UIComponent):
         return LabelComponent._raw_construct(
             type=ComponentType.label,
             id=self._id,
-            label=self.label,
+            text=self.text,
             description=self.description,
             component=self.component._underlying,
         )
 
     @classmethod
-    def from_component(cls, section: LabelComponent) -> Self:
+    def from_component(cls, label: LabelComponent) -> Self:
         from .action_row import _to_ui_component
 
         return cls(
-            label=section.label,
-            description=section.description,
-            component=cast("LabelChildUIComponent", _to_ui_component(section.component)),
+            text=label.text,
+            description=label.description,
+            component=cast("LabelChildUIComponent", _to_ui_component(label.component)),
         )
