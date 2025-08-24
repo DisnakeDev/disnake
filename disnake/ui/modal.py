@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Tuple, TypeVar
 
 from ..enums import TextInputStyle
 from ..utils import MISSING
-from .action_row import ActionRow, components_to_rows
+from .action_row import ActionRow, normalize_components
 from .text_input import TextInput
 
 if TYPE_CHECKING:
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from ..interactions.modal import ModalInteraction
     from ..state import ConnectionState
     from ..types.components import Modal as ModalPayload
-    from .action_row import Components, ModalUIComponent
+    from ..ui._types import ModalComponents
 
 
 __all__ = ("Modal",)
@@ -37,7 +37,8 @@ class Modal:
     title: :class:`str`
         The title of the modal.
     components: |components_type|
-        The components to display in the modal. Up to 5 action rows.
+        The components to display in the modal. A maximum of 5.
+        Currently only supports :class:`.ui.TextInput` (optionally inside :class:`.ui.ActionRow`).
     custom_id: :class:`str`
         The custom ID of the modal. This is usually not required.
         If not given, then a unique one is generated for you.
@@ -70,20 +71,20 @@ class Modal:
         self,
         *,
         title: str,
-        components: Components[ModalUIComponent],
+        components: ModalComponents,
         custom_id: str = MISSING,
         timeout: float = 600,
     ) -> None:
         if timeout is None:  # pyright: ignore[reportUnnecessaryComparison]
             raise ValueError("Timeout may not be None")
 
-        rows = components_to_rows(components)
+        rows = normalize_components(components)
         if len(rows) > 5:
             raise ValueError("Maximum number of components exceeded.")
 
         self.title: str = title
         self.custom_id: str = os.urandom(16).hex() if custom_id is MISSING else custom_id
-        self.components: List[ActionRow] = rows
+        self.components: List[ActionRow] = list(rows)
         self.timeout: float = timeout
 
         # function for the modal to remove itself from the store, if any
