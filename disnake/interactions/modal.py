@@ -176,7 +176,7 @@ class ModalInteractionData(Dict[str, Any]):
         super().__init__(data)
         self.custom_id: str = data["custom_id"]
         # This uses a stripped-down action row TypedDict, as we only receive
-        # partial data from the API, generally only containing `type`, `custom_id`,
+        # partial data from the API, generally only containing `type`, `custom_id`, `id`,
         # and relevant fields like a select's `values`.
         self.components: List[ModalInteractionActionRowPayload] = data["components"]
 
