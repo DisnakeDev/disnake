@@ -267,6 +267,7 @@ class _BaseInteraction(TypedDict):
     token: str
     version: Literal[1]
     app_permissions: str
+    attachment_size_limit: int
 
 
 # common properties in non-ping interactions
