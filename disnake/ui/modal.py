@@ -114,11 +114,11 @@ class Modal:
         TypeError
             An object of type :class:`TextInput` was not passed.
         """
-        if len(self.components) >= 5:
-            raise ValueError("Maximum number of components exceeded.")
-
         if not isinstance(component, list):
             component = [component]
+
+        if len(self.components) + len(component) >= 5:
+            raise ValueError("Maximum number of components exceeded.")
 
         for c in component:
             if not isinstance(c, TextInput):
