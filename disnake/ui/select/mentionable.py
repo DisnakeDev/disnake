@@ -69,6 +69,12 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
         Note that unlike other select menu types, this does not support :class:`.Object`\\s due to ambiguities.
 
         .. versionadded:: 2.10
+    id: :class:`int`
+        The numeric identifier for the component. Must be unique within the message.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
+
+        .. versionadded:: 2.11
     row: Optional[:class:`int`]
         The relative row this select menu belongs to. A Discord component can only have 5
         rows. By default, items are arranged automatically into those 5 rows. If you'd
@@ -101,6 +107,7 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
         default_values: Optional[
             Sequence[SelectDefaultValueMultiInputType[Union[User, Member, Role]]]
         ] = None,
+        id: int = 0,
         row: Optional[int] = None,
     ) -> None: ...
 
@@ -116,6 +123,7 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
         default_values: Optional[
             Sequence[SelectDefaultValueMultiInputType[Union[User, Member, Role]]]
         ] = None,
+        id: int = 0,
         row: Optional[int] = None,
     ) -> None: ...
 
@@ -130,6 +138,7 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
         default_values: Optional[
             Sequence[SelectDefaultValueMultiInputType[Union[User, Member, Role]]]
         ] = None,
+        id: int = 0,
         row: Optional[int] = None,
     ) -> None:
         super().__init__(
@@ -141,6 +150,7 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
             max_values=max_values,
             disabled=disabled,
             default_values=default_values,
+            id=id,
             row=row,
         )
 
@@ -153,6 +163,7 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
             max_values=component.max_values,
             disabled=component.disabled,
             default_values=component.default_values,
+            id=component.id,
             row=None,
         )
 
@@ -171,6 +182,7 @@ def mentionable_select(
     default_values: Optional[
         Sequence[SelectDefaultValueMultiInputType[Union[User, Member, Role]]]
     ] = None,
+    id: int = 0,
     row: Optional[int] = None,
 ) -> Callable[
     [ItemCallbackType[V_co, MentionableSelect[V_co]]], DecoratedItem[MentionableSelect[V_co]]
@@ -208,12 +220,6 @@ def mentionable_select(
     custom_id: :class:`str`
         The ID of the select menu that gets received during an interaction.
         It is recommended not to set this parameter to prevent conflicts.
-    row: Optional[:class:`int`]
-        The relative row this select menu belongs to. A Discord component can only have 5
-        rows. By default, items are arranged automatically into those 5 rows. If you'd
-        like to control the relative positioning of the row then passing an index is advised.
-        For example, row=1 will show up before row=2. Defaults to ``None``, which is automatic
-        ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     min_values: :class:`int`
         The minimum number of items that must be chosen for this select menu.
         Defaults to 1 and must be between 1 and 25.
@@ -229,5 +235,17 @@ def mentionable_select(
         Note that unlike other select menu types, this does not support :class:`.Object`\\s due to ambiguities.
 
         .. versionadded:: 2.10
+    id: :class:`int`
+        The numeric identifier for the component. Must be unique within the message.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
+
+        .. versionadded:: 2.11
+    row: Optional[:class:`int`]
+        The relative row this select menu belongs to. A Discord component can only have 5
+        rows. By default, items are arranged automatically into those 5 rows. If you'd
+        like to control the relative positioning of the row then passing an index is advised.
+        For example, row=1 will show up before row=2. Defaults to ``None``, which is automatic
+        ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     """
     return _create_decorator(cls, **kwargs)

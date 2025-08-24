@@ -49,7 +49,7 @@ from ..message import Attachment, AuthorizingIntegrationOwners, Message
 from ..object import Object
 from ..permissions import Permissions
 from ..role import Role
-from ..ui.action_row import components_to_dict
+from ..ui.action_row import normalize_components, normalize_components_to_dict
 from ..user import ClientUser, User
 from ..webhook.async_ import Webhook, async_context, handle_message_parameters
 
@@ -81,7 +81,7 @@ if TYPE_CHECKING:
         InteractionDataResolved as InteractionDataResolvedPayload,
     )
     from ..types.snowflake import Snowflake
-    from ..ui.action_row import Components, MessageUIComponent, ModalUIComponent
+    from ..ui._types import MessageComponents, ModalComponents
     from ..ui.modal import Modal
     from ..ui.view import View
     from .message import MessageInteraction
@@ -433,7 +433,7 @@ class Interaction(Generic[ClientT]):
         files: List[File] = MISSING,
         attachments: Optional[List[Attachment]] = MISSING,
         view: Optional[View] = MISSING,
-        components: Optional[Components[MessageUIComponent]] = MISSING,
+        components: Optional[MessageComponents] = MISSING,
         poll: Poll = MISSING,
         suppress_embeds: bool = MISSING,
         flags: MessageFlags = MISSING,
@@ -499,6 +499,12 @@ class Interaction(Generic[ClientT]):
 
             .. versionadded:: 2.4
 
+            .. note::
+                Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
+                Setting this flag cannot be reverted. Note that this also disables the
+                ``content`` and ``embeds`` fields.
+                If the message previously had any of these fields set, you must set them to ``None``.
+
         poll: :class:`Poll`
             A poll. This can only be sent after a defer. If not used after a defer the
             discord API ignore the field.
@@ -519,7 +525,8 @@ class Interaction(Generic[ClientT]):
 
         flags: :class:`MessageFlags`
             The new flags to set for this message. Overrides existing flags.
-            Only :attr:`~MessageFlags.suppress_embeds` is supported.
+            Only :attr:`~MessageFlags.suppress_embeds` and :attr:`~MessageFlags.is_components_v2`
+            are supported.
 
             If parameter ``suppress_embeds`` is provided,
             that will override the setting of :attr:`.MessageFlags.suppress_embeds`.
@@ -543,9 +550,10 @@ class Interaction(Generic[ClientT]):
         Forbidden
             Edited a message that is not yours.
         TypeError
-            You specified both ``embed`` and ``embeds`` or ``file`` and ``files``
+            You specified both ``embed`` and ``embeds`` or ``file`` and ``files``.
         ValueError
-            The length of ``embeds`` was invalid.
+            The length of ``embeds`` was invalid, or
+            you tried to send v2 components together with ``content`` or ``embeds``.
 
         Returns
         -------
@@ -675,7 +683,7 @@ class Interaction(Generic[ClientT]):
         files: List[File] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
-        components: Components[MessageUIComponent] = MISSING,
+        components: MessageComponents = MISSING,
         tts: bool = False,
         ephemeral: bool = MISSING,
         suppress_embeds: bool = MISSING,
@@ -727,6 +735,11 @@ class Interaction(Generic[ClientT]):
 
             .. versionadded:: 2.4
 
+            .. note::
+                Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
+                Setting this flag cannot be reverted. Note that this also disables the
+                ``content``, ``embeds``, and ``poll`` fields.
+
         ephemeral: :class:`bool`
             Whether the message should only be visible to the user who started the interaction.
             If a view is sent with an ephemeral message and it has no timeout set then the timeout
@@ -739,8 +752,9 @@ class Interaction(Generic[ClientT]):
 
         flags: :class:`MessageFlags`
             The flags to set for this message.
-            Only :attr:`~MessageFlags.suppress_embeds`, :attr:`~MessageFlags.ephemeral`
-            and :attr:`~MessageFlags.suppress_notifications` are supported.
+            Only :attr:`~MessageFlags.suppress_embeds`, :attr:`~MessageFlags.ephemeral`,
+            :attr:`~MessageFlags.suppress_notifications`, and :attr:`~MessageFlags.is_components_v2`
+            are supported.
 
             If parameters ``suppress_embeds`` or ``ephemeral`` are provided,
             they will override the corresponding setting of this ``flags`` parameter.
@@ -770,7 +784,8 @@ class Interaction(Generic[ClientT]):
         TypeError
             You specified both ``embed`` and ``embeds``.
         ValueError
-            The length of ``embeds`` was invalid.
+            The length of ``embeds`` was invalid, or
+            you tried to send v2 components together with ``content``, ``embeds``, or ``poll``.
         """
         if self.response._response_type is not None:
             sender = self.followup.send
@@ -959,7 +974,7 @@ class InteractionResponse:
         files: List[File] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
-        components: Components[MessageUIComponent] = MISSING,
+        components: MessageComponents = MISSING,
         tts: bool = False,
         ephemeral: bool = MISSING,
         suppress_embeds: bool = MISSING,
@@ -995,6 +1010,11 @@ class InteractionResponse:
 
             .. versionadded:: 2.4
 
+            .. note::
+                Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
+                Setting this flag cannot be reverted. Note that this also disables the
+                ``content``, ``embeds``, and ``poll`` fields.
+
         tts: :class:`bool`
             Whether the message should be sent using text-to-speech.
         ephemeral: :class:`bool`
@@ -1020,8 +1040,9 @@ class InteractionResponse:
 
         flags: :class:`MessageFlags`
             The flags to set for this message.
-            Only :attr:`~MessageFlags.suppress_embeds`, :attr:`~MessageFlags.ephemeral`
-            and :attr:`~MessageFlags.suppress_notifications` are supported.
+            Only :attr:`~MessageFlags.suppress_embeds`, :attr:`~MessageFlags.ephemeral`,
+            :attr:`~MessageFlags.suppress_notifications`, and :attr:`~MessageFlags.is_components_v2`
+            are supported.
 
             If parameters ``suppress_embeds`` or ``ephemeral`` are provided,
             they will override the corresponding setting of this ``flags`` parameter.
@@ -1041,7 +1062,8 @@ class InteractionResponse:
         TypeError
             You specified both ``embed`` and ``embeds``.
         ValueError
-            The length of ``embeds`` was invalid.
+            The length of ``embeds`` was invalid, or
+            you tried to send v2 components together with ``content``, ``embeds``, or ``poll``.
         InteractionResponded
             This interaction has already been responded to before.
         """
@@ -1093,6 +1115,23 @@ class InteractionResponse:
         if content is not None:
             payload["content"] = str(content)
 
+        is_v2 = False
+        if view is not MISSING:
+            payload["components"] = view.to_components()
+        elif components is not MISSING:
+            payload["components"], is_v2 = normalize_components_to_dict(components)
+
+        # set cv2 flag automatically
+        if is_v2:
+            flags = MessageFlags._from_value(0 if flags is MISSING else flags.value)
+            flags.is_components_v2 = True
+        # components v2 cannot be used with other content fields
+        if flags and flags.is_components_v2 and (content or embeds or poll):
+            raise ValueError("Cannot use v2 components with content, embeds, or polls")
+
+        if poll is not MISSING:
+            payload["poll"] = poll._to_dict()
+
         if suppress_embeds is not MISSING or ephemeral is not MISSING:
             flags = MessageFlags._from_value(0 if flags is MISSING else flags.value)
             if suppress_embeds is not MISSING:
@@ -1101,14 +1140,6 @@ class InteractionResponse:
                 flags.ephemeral = ephemeral
         if flags is not MISSING:
             payload["flags"] = flags.value
-
-        if view is not MISSING:
-            payload["components"] = view.to_components()
-
-        if components is not MISSING:
-            payload["components"] = components_to_dict(components)
-        if poll is not MISSING:
-            payload["poll"] = poll._to_dict()
 
         parent = self._parent
         adapter = async_context.get()
@@ -1152,7 +1183,7 @@ class InteractionResponse:
         files: List[File] = MISSING,
         attachments: Optional[List[Attachment]] = MISSING,
         view: Optional[View] = MISSING,
-        components: Optional[Components[MessageUIComponent]] = MISSING,
+        components: Optional[MessageComponents] = MISSING,
         flags: MessageFlags = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         delete_after: Optional[float] = None,
@@ -1216,9 +1247,16 @@ class InteractionResponse:
 
             .. versionadded:: 2.4
 
+            .. note::
+                Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
+                Setting this flag cannot be reverted. Note that this also disables the
+                ``content`` and ``embeds`` fields.
+                If the message previously had any of these fields set, you must set them to ``None``.
+
         flags: :class:`MessageFlags`
             The new flags to set for this message. Overrides existing flags.
-            Only :attr:`~MessageFlags.suppress_embeds` is supported.
+            Only :attr:`~MessageFlags.suppress_embeds` and :attr:`~MessageFlags.is_components_v2`
+            are supported.
 
             .. versionadded:: 2.11
 
@@ -1241,6 +1279,8 @@ class InteractionResponse:
             Editing the message failed.
         TypeError
             You specified both ``embed`` and ``embeds``.
+        ValueError
+            You tried to send v2 components together with ``content`` or ``embeds``.
         InteractionResponded
             This interaction has already been responded to before.
         """
@@ -1306,12 +1346,23 @@ class InteractionResponse:
         if view is not MISSING and components is not MISSING:
             raise TypeError("cannot mix view and components keyword arguments")
 
+        is_v2 = False
         if view is not MISSING:
             state.prevent_view_updates_for(message.id)
             payload["components"] = [] if view is None else view.to_components()
+        elif components is not MISSING:
+            if components:
+                payload["components"], is_v2 = normalize_components_to_dict(components)
+            else:
+                payload["components"] = []
 
-        if components is not MISSING:
-            payload["components"] = [] if components is None else components_to_dict(components)
+        # set cv2 flag automatically
+        if is_v2:
+            flags = MessageFlags._from_value(0 if flags is MISSING else flags.value)
+            flags.is_components_v2 = True
+        # components v2 cannot be used with other content fields
+        if flags and flags.is_components_v2 and (content or embeds):
+            raise ValueError("Cannot use v2 components with content or embeds")
 
         if flags is not MISSING:
             payload["flags"] = flags.value
@@ -1404,7 +1455,7 @@ class InteractionResponse:
         *,
         title: str,
         custom_id: str,
-        components: Components[ModalUIComponent],
+        components: ModalComponents,
     ) -> None: ...
 
     async def send_modal(
@@ -1413,7 +1464,7 @@ class InteractionResponse:
         *,
         title: Optional[str] = None,
         custom_id: Optional[str] = None,
-        components: Optional[Components[ModalUIComponent]] = None,
+        components: Optional[ModalComponents] = None,
     ) -> None:
         """|coro|
 
@@ -1437,6 +1488,7 @@ class InteractionResponse:
             This cannot be mixed with the ``modal`` parameter.
         components: |components_type|
             The components to display in the modal. A maximum of 5.
+            Currently only supports :class:`ui.TextInput` (optionally inside :class:`ui.ActionRow`).
             This cannot be mixed with the ``modal`` parameter.
 
         Raises
@@ -1468,14 +1520,14 @@ class InteractionResponse:
         if modal is not None:
             modal_data = modal.to_components()
         elif title and components and custom_id:
-            rows = components_to_dict(components)
+            rows = normalize_components(components)
             if len(rows) > 5:
                 raise ValueError("Maximum number of components exceeded.")
 
             modal_data = {
                 "title": title,
                 "custom_id": custom_id,
-                "components": rows,
+                "components": [component.to_component_dict() for component in rows],
             }
         else:
             raise TypeError("Either modal or title, custom_id, components must be provided")
@@ -1655,7 +1707,7 @@ class InteractionMessage(Message):
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components[MessageUIComponent]] = ...,
+        components: Optional[MessageComponents] = ...,
         delete_after: Optional[float] = ...,
     ) -> InteractionMessage: ...
 
@@ -1671,7 +1723,7 @@ class InteractionMessage(Message):
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components[MessageUIComponent]] = ...,
+        components: Optional[MessageComponents] = ...,
         delete_after: Optional[float] = ...,
     ) -> InteractionMessage: ...
 
@@ -1687,7 +1739,7 @@ class InteractionMessage(Message):
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components[MessageUIComponent]] = ...,
+        components: Optional[MessageComponents] = ...,
         delete_after: Optional[float] = ...,
     ) -> InteractionMessage: ...
 
@@ -1703,7 +1755,7 @@ class InteractionMessage(Message):
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components[MessageUIComponent]] = ...,
+        components: Optional[MessageComponents] = ...,
         delete_after: Optional[float] = ...,
     ) -> InteractionMessage: ...
 
@@ -1720,7 +1772,7 @@ class InteractionMessage(Message):
         flags: MessageFlags = MISSING,
         allowed_mentions: Optional[AllowedMentions] = MISSING,
         view: Optional[View] = MISSING,
-        components: Optional[Components[MessageUIComponent]] = MISSING,
+        components: Optional[MessageComponents] = MISSING,
         delete_after: Optional[float] = None,
     ) -> Message:
         """|coro|
@@ -1772,6 +1824,12 @@ class InteractionMessage(Message):
 
             .. versionadded:: 2.4
 
+            .. note::
+                Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
+                Setting this flag cannot be reverted. Note that this also disables the
+                ``content`` and ``embeds`` fields.
+                If the message previously had any of these fields set, you must set them to ``None``.
+
         suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This hides
             all the embeds from the UI if set to ``True``. If set
@@ -1782,7 +1840,8 @@ class InteractionMessage(Message):
 
         flags: :class:`MessageFlags`
             The new flags to set for this message. Overrides existing flags.
-            Only :attr:`~MessageFlags.suppress_embeds` is supported.
+            Only :attr:`~MessageFlags.suppress_embeds` and :attr:`~MessageFlags.is_components_v2`
+            are supported.
 
             If parameter ``suppress_embeds`` is provided,
             that will override the setting of :attr:`.MessageFlags.suppress_embeds`.
@@ -1809,9 +1868,10 @@ class InteractionMessage(Message):
         Forbidden
             Edited a message that is not yours.
         TypeError
-            You specified both ``embed`` and ``embeds`` or ``file`` and ``files``
+            You specified both ``embed`` and ``embeds`` or ``file`` and ``files``.
         ValueError
-            The length of ``embeds`` was invalid.
+            The length of ``embeds`` was invalid, or
+            you tried to send v2 components together with ``content`` or ``embeds``.
 
         Returns
         -------
