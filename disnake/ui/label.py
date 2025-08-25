@@ -32,7 +32,7 @@ class Label(UIComponent):
     ----------
     text: :class:`str`
         The label text.
-    component: Union[:class:`TextInput`, :class:`StringSelectMenu`]
+    component: Union[:class:`TextInput`, :class:`StringSelect`]
         The component within the label.
     description: Optional[:class:`str`]
         The description text for the label.
@@ -45,7 +45,7 @@ class Label(UIComponent):
     ----------
     text: :class:`str`
         The label text.
-    component: Union[:class:`TextInput`, :class:`StringSelectMenu`]
+    component: Union[:class:`TextInput`, :class:`StringSelect`]
         The component within the label.
     description: Optional[:class:`str`]
         The description text for the label.

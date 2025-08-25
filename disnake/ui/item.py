@@ -66,6 +66,7 @@ class UIComponent(ABC):
     - :class:`disnake.ui.File`
     - :class:`disnake.ui.Separator`
     - :class:`disnake.ui.Container`
+    - :class:`disnake.ui.Label`
 
     .. versionadded:: 2.11
     """
