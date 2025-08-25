@@ -482,7 +482,10 @@ class StringSelectMenu(BaseSelectMenu):
 
     __slots__: Tuple[str, ...] = ("options",)
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = (*BaseSelectMenu.__repr_attributes__, *__slots__)
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
+        *BaseSelectMenu.__repr_attributes__,
+        *__slots__,
+    )
     type: Literal[ComponentType.string_select]
 
     def __init__(self, data: StringSelectMenuPayload) -> None:
@@ -679,7 +682,10 @@ class ChannelSelectMenu(BaseSelectMenu):
 
     __slots__: Tuple[str, ...] = ("channel_types",)
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = (*BaseSelectMenu.__repr_attributes__, *__slots__)
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
+        *BaseSelectMenu.__repr_attributes__,
+        *__slots__,
+    )
     type: Literal[ComponentType.channel_select]
 
     def __init__(self, data: ChannelSelectMenuPayload) -> None:
