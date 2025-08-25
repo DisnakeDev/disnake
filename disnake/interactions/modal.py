@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Sequence, Union
 
 from ..enums import ComponentType
 from ..message import Message
-from ..utils import assert_never, cached_slot_property
+from ..utils import cached_slot_property
 from .base import ClientT, Interaction
 
 if TYPE_CHECKING:
@@ -131,10 +131,25 @@ class ModalInteraction(Interaction[ClientT]):
             message = None
         self.message: Optional[Message] = message
 
+    def _walk_components(
+        self,
+        components: Sequence[
+            Union[ModalInteractionComponentDataPayload, ModalInteractionInnerComponentDataPayload]
+        ],
+    ) -> Generator[ModalInteractionInnerComponentDataPayload, None, None]:
+        for component in components:
+            if component["type"] == ComponentType.action_row.value:
+                yield from self._walk_components(component["components"])
+            elif component["type"] == ComponentType.label.value:
+                yield from self._walk_components([component["component"]])
+            else:
+                yield component
+
     def walk_raw_components(
         self,
     ) -> Generator[ModalInteractionInnerComponentDataPayload, None, None]:
-        """Returns a generator that yields raw component data from action rows one by one, as provided by Discord.
+        """Returns a generator that yields raw component data of the innermost/non-layout
+        components one by one, as provided by Discord.
         This does not contain all fields of the components due to API limitations.
 
         .. versionadded:: 2.6
@@ -143,14 +158,7 @@ class ModalInteraction(Interaction[ClientT]):
         -------
         Generator[:class:`dict`, None, None]
         """
-        # TODO: consider walking components recursively
-        for component in self.data.components:
-            if component["type"] == ComponentType.action_row.value:
-                yield from component["components"]
-            elif component["type"] == ComponentType.label.value:
-                yield component["component"]
-            else:
-                assert_never(component)
+        yield from self._walk_components(self.data.components)
 
     @cached_slot_property("_cs_text_values")
     def text_values(self) -> Dict[str, str]:
