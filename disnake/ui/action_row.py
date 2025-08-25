@@ -32,6 +32,7 @@ from ..components import (
     Component,
     Container as ContainerComponent,
     FileComponent as FileComponent,
+    Label as LabelComponent,
     MediaGallery as MediaGalleryComponent,
     MentionableSelectMenu as MentionableSelectComponent,
     RoleSelectMenu as RoleSelectComponent,
@@ -44,7 +45,7 @@ from ..components import (
     UserSelectMenu as UserSelectComponent,
 )
 from ..enums import ButtonStyle, ChannelType, ComponentType, TextInputStyle
-from ..utils import MISSING, SequenceProxy, assert_never, copy_doc
+from ..utils import MISSING, SequenceProxy, assert_never, copy_doc, deprecated
 from ._types import (
     ActionRowChildT,
     ActionRowMessageComponent,
@@ -57,6 +58,7 @@ from .button import Button
 from .container import Container
 from .file import File
 from .item import UIComponent, WrappedComponent
+from .label import Label
 from .media_gallery import MediaGallery
 from .section import Section
 from .select import ChannelSelect, MentionableSelect, RoleSelect, StringSelect, UserSelect
@@ -699,6 +701,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         )
         return self
 
+    @deprecated()
     def add_text_input(
         self: TextInputCompatibleActionRowT,
         *,
@@ -721,6 +724,10 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         This function returns the class instance to allow for fluent-style chaining.
 
         .. versionadded:: 2.4
+
+        .. deprecated:: 2.11
+            Use of action rows in modals is deprecated, use ``Label("...", TextInput(...))``
+            directly instead.
 
         Parameters
         ----------
@@ -856,12 +863,17 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         return iter(self._children)
 
     @classmethod
+    @deprecated()
     def with_modal_components(cls, *, id: int = 0) -> ActionRow[ActionRowModalComponent]:
         """Create an empty action row meant to store components compatible with
         :class:`disnake.ui.Modal`. Saves the need to import type specifiers to
         typehint empty action rows.
 
         .. versionadded:: 2.6
+
+        .. deprecated:: 2.11
+            Use of action rows in modals is deprecated, compatible components
+            can be passed directly to modals.
 
         Returns
         -------
@@ -1070,6 +1082,8 @@ def _walk_internal(component: ComponentT, seen: Set[ComponentT]) -> Iterator[Com
     elif isinstance(component, (ContainerComponent, Container)):
         for item in component.children:
             yield from _walk_internal(item, seen)  # type: ignore
+    elif isinstance(component, (LabelComponent, Label)):
+        yield from _walk_internal(component.component, seen)
 
 
 def walk_components(components: Sequence[ComponentT]) -> Iterator[ComponentT]:
@@ -1138,6 +1152,7 @@ UI_COMPONENT_LOOKUP: Mapping[Type[Component], Type[UIComponent]] = {
     FileComponent: File,
     SeparatorComponent: Separator,
     ContainerComponent: Container,
+    LabelComponent: Label,
 }
 
 

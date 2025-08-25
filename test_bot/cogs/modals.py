@@ -8,18 +8,24 @@ from disnake.ext import commands
 class MyModal(disnake.ui.Modal):
     def __init__(self) -> None:
         components = [
-            disnake.ui.TextInput(
-                label="Name",
-                placeholder="The name of the tag",
-                custom_id="name",
-                style=TextInputStyle.short,
-                max_length=50,
+            disnake.ui.Label(
+                "Name",
+                description="The name of the tag",
+                component=disnake.ui.TextInput(
+                    custom_id="name",
+                    style=TextInputStyle.short,
+                    max_length=50,
+                ),
             ),
-            disnake.ui.TextInput(
-                label="Description",
-                placeholder="The description of the tag",
-                custom_id="description",
-                style=TextInputStyle.paragraph,
+            disnake.ui.Label(
+                "Description",
+                description="The description of the tag",
+                component=disnake.ui.TextInput(
+                    placeholder="(optional)",
+                    custom_id="description",
+                    style=TextInputStyle.paragraph,
+                    required=False,
+                ),
             ),
         ]
         super().__init__(title="Create Tag", components=components)
@@ -47,18 +53,24 @@ class Modals(commands.Cog):
             title="Create Tag",
             custom_id="create_tag2",
             components=[
-                disnake.ui.TextInput(
-                    label="Name",
-                    placeholder="The name of the tag",
-                    custom_id="name",
-                    style=TextInputStyle.short,
-                    max_length=50,
+                disnake.ui.Label(
+                    "Name",
+                    description="The name of the tag",
+                    component=disnake.ui.TextInput(
+                        custom_id="name",
+                        style=TextInputStyle.short,
+                        max_length=50,
+                    ),
                 ),
-                disnake.ui.TextInput(
-                    label="Description",
-                    placeholder="The description of the tag",
-                    custom_id="description",
-                    style=TextInputStyle.paragraph,
+                disnake.ui.Label(
+                    "Description",
+                    description="The description of the tag",
+                    component=disnake.ui.TextInput(
+                        placeholder="(optional)",
+                        custom_id="description",
+                        style=TextInputStyle.paragraph,
+                        required=False,
+                    ),
                 ),
             ],
         )

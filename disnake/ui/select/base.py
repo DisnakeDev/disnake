@@ -72,6 +72,7 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         "min_values",
         "max_values",
         "disabled",
+        "required",
     )
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: SelectMenuT = MISSING
@@ -90,6 +91,7 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         max_values: int,
         disabled: bool,
         default_values: Optional[Sequence[SelectDefaultValueInputType[SelectValueT]]],
+        required: bool,
         id: int,
         row: Optional[int],
     ) -> None:
@@ -106,6 +108,7 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
             max_values=max_values,
             disabled=disabled,
             default_values=self._transform_default_values(default_values) if default_values else [],
+            required=required,
         )
         self.row = row
 
@@ -172,6 +175,19 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         self, value: Optional[Sequence[SelectDefaultValueInputType[SelectValueT]]]
     ) -> None:
         self._underlying.default_values = self._transform_default_values(value) if value else []
+
+    @property
+    def required(self) -> bool:
+        """:class:`bool`: Whether the select menu is required.
+        Only applies to components in modals.
+
+        .. versionadded:: 2.11
+        """
+        return self._underlying.required
+
+    @required.setter
+    def required(self, value: bool) -> None:
+        self._underlying.required = bool(value)
 
     @property
     def values(self) -> List[SelectValueT]:

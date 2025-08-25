@@ -29,6 +29,7 @@ all_ui_component_objects: List[ui.UIComponent] = [
     ui.File("attachment://x"),
     ui.Separator(),
     ui.Container(),
+    ui.Label("", ui.TextInput(label="", custom_id="")),
 ]
 
 _missing = set(all_ui_component_types) ^ set(map(type, all_ui_component_objects))

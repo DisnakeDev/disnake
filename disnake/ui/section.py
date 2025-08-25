@@ -16,6 +16,8 @@ if TYPE_CHECKING:
     from .button import Button
     from .thumbnail import Thumbnail
 
+    SectionAccessoryUIComponent = Union[Thumbnail, Button[Any]]
+
 __all__ = ("Section",)
 
 
@@ -53,7 +55,7 @@ class Section(UIComponent):
     def __init__(
         self,
         *components: Union[str, TextDisplay],
-        accessory: Union[Thumbnail, Button[Any]],
+        accessory: SectionAccessoryUIComponent,
         id: int = 0,
     ) -> None:
         self._id: int = id
@@ -63,7 +65,7 @@ class Section(UIComponent):
             TextDisplay(c) if isinstance(c, str) else ensure_ui_component(c, "components")
             for c in components
         ]
-        self.accessory: Union[Thumbnail, Button[Any]] = ensure_ui_component(accessory, "accessory")
+        self.accessory: SectionAccessoryUIComponent = ensure_ui_component(accessory, "accessory")
 
     # these are reimplemented here to store the value in a separate attribute,
     # since `Section` lazily constructs `_underlying`, unlike most components
@@ -94,6 +96,6 @@ class Section(UIComponent):
                 "List[TextDisplay]",
                 [_to_ui_component(c) for c in section.children],
             ),
-            accessory=cast("Union[Thumbnail, Button[Any]]", _to_ui_component(section.accessory)),
+            accessory=cast("SectionAccessoryUIComponent", _to_ui_component(section.accessory)),
             id=section.id,
         )

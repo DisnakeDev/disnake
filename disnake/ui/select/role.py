@@ -65,6 +65,11 @@ class RoleSelect(BaseSelect[RoleSelectMenu, "Role", V_co]):
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
         .. versionadded:: 2.10
+    required: :class:`bool`
+        Whether the select menu is required. Only applies to components in modals.
+        Defaults to ``True``.
+
+        .. versionadded:: 2.11
     id: :class:`int`
         The numeric identifier for the component. Must be unique within the message.
         If set to ``0`` (the default) when sending a component, the API will assign
@@ -100,6 +105,7 @@ class RoleSelect(BaseSelect[RoleSelectMenu, "Role", V_co]):
         max_values: int = 1,
         disabled: bool = False,
         default_values: Optional[Sequence[SelectDefaultValueInputType[Role]]] = None,
+        required: bool = True,
         id: int = 0,
         row: Optional[int] = None,
     ) -> None: ...
@@ -114,6 +120,7 @@ class RoleSelect(BaseSelect[RoleSelectMenu, "Role", V_co]):
         max_values: int = 1,
         disabled: bool = False,
         default_values: Optional[Sequence[SelectDefaultValueInputType[Role]]] = None,
+        required: bool = True,
         id: int = 0,
         row: Optional[int] = None,
     ) -> None: ...
@@ -127,6 +134,7 @@ class RoleSelect(BaseSelect[RoleSelectMenu, "Role", V_co]):
         max_values: int = 1,
         disabled: bool = False,
         default_values: Optional[Sequence[SelectDefaultValueInputType[Role]]] = None,
+        required: bool = True,
         id: int = 0,
         row: Optional[int] = None,
     ) -> None:
@@ -139,6 +147,7 @@ class RoleSelect(BaseSelect[RoleSelectMenu, "Role", V_co]):
             max_values=max_values,
             disabled=disabled,
             default_values=default_values,
+            required=required,
             id=id,
             row=row,
         )
@@ -152,6 +161,7 @@ class RoleSelect(BaseSelect[RoleSelectMenu, "Role", V_co]):
             max_values=component.max_values,
             disabled=component.disabled,
             default_values=component.default_values,
+            required=component.required,
             id=component.id,
             row=None,
         )
