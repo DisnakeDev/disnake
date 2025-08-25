@@ -98,7 +98,7 @@ class TestActionRow:
     def test_add_text_input(self) -> None:
         with pytest.warns(DeprecationWarning):
             r = ActionRow.with_modal_components()
-        r.add_text_input(label="a", custom_id="asdf")
+            r.add_text_input(label="a", custom_id="asdf")
 
         (c,) = r.children
         assert isinstance(c, TextInput)
