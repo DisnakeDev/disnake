@@ -534,7 +534,7 @@ class Collectibles:
     def __init__(self, state: ConnectionState, data: CollectiblesDataPayload) -> None:
         self.nameplate: Optional[Nameplate] = None
         if nameplate_data := data.get("nameplate"):
-            self.nameplate = Nameplate(state, data=nameplate_data)
+            self.nameplate = Nameplate(state=state, data=nameplate_data)
 
 
 class User(BaseUser, disnake.abc.Messageable):
