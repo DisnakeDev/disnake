@@ -843,7 +843,7 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
     """
 
     __repr_attributes__: ClassVar[Tuple[str, ...]] = (
-        UserCommand.__repr_attributes__ + _APIApplicationCommandMixin.__repr_attributes__
+        *UserCommand.__repr_attributes__, *_APIApplicationCommandMixin.__repr_attributes__
     )
 
     @classmethod
@@ -970,7 +970,7 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
     """
 
     __repr_attributes__: ClassVar[Tuple[str, ...]] = (
-        MessageCommand.__repr_attributes__ + _APIApplicationCommandMixin.__repr_attributes__
+        *MessageCommand.__repr_attributes__, *_APIApplicationCommandMixin.__repr_attributes__
     )
 
     @classmethod
@@ -1190,7 +1190,7 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
     """
 
     __repr_attributes__: ClassVar[Tuple[str, ...]] = (
-        SlashCommand.__repr_attributes__ + _APIApplicationCommandMixin.__repr_attributes__
+        *SlashCommand.__repr_attributes__, *_APIApplicationCommandMixin.__repr_attributes__
     )
 
     @classmethod
