@@ -478,7 +478,7 @@ class Nameplate:
     Attributes
     ----------
     sku_id: :class:`int`
-        id of the nameplate SKU.
+        The ID of the nameplate SKU.
     label: :class:`str`
         The label of this nameplate.
     palette: :class:`str`
