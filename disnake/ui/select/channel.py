@@ -90,7 +90,8 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
         A list of channels that have been selected by the user.
     """
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = BaseSelect.__repr_attributes__ + (
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
+        *BaseSelect.__repr_attributes__,
         "channel_types",
     )
 

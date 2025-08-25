@@ -1042,9 +1042,8 @@ class SlashCommand(ApplicationCommand):
         The list of options the slash command has.
     """
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = tuple(
-        n for n in ApplicationCommand.__repr_attributes__ if n != "type"
-    ) + (
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
+        *tuple(n for n in ApplicationCommand.__repr_attributes__ if n != "type"),
         "description",
         "options",
     )
