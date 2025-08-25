@@ -32,7 +32,7 @@ class TextInput(WrappedComponent):
             This is deprecated in favor of :attr:`Label.text <.ui.Label.text>` and
             :attr:`.description <.ui.Label.description>`.
 
-    custom_id: Optional[:class:`str`]
+    custom_id: :class:`str`
         The ID of the text input that gets received during an interaction.
         If not given then one is generated for you.
     style: :class:`.TextInputStyle`
@@ -71,7 +71,7 @@ class TextInput(WrappedComponent):
         self,
         *,
         label: Optional[str] = None,
-        custom_id: Optional[str] = None,
+        custom_id: str = MISSING,
         style: TextInputStyle = TextInputStyle.short,
         placeholder: Optional[str] = None,
         value: Optional[str] = None,
@@ -80,7 +80,7 @@ class TextInput(WrappedComponent):
         max_length: Optional[int] = None,
         id: int = 0,
     ) -> None:
-        custom_id = os.urandom(16).hex() if custom_id is None else custom_id
+        custom_id = os.urandom(16).hex() if custom_id is MISSING else custom_id
         self._underlying = TextInputComponent._raw_construct(
             type=ComponentType.text_input,
             id=id,
