@@ -482,7 +482,7 @@ class Nameplate:
     label: :class:`str`
         The label of this nameplate.
     palette: :class:`str`
-        The background color of the nameplate
+        The background color of the nameplate.
     """
 
     __slots__ = (
