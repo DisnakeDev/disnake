@@ -506,7 +506,7 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
         .. versionadded:: 2.10
     """
 
-    __repr_info__: ClassVar[Tuple[str, ...]] = (
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
         "type",
         "name",
         "default_member_permissions",
@@ -614,7 +614,7 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
         self._dm_permission = value
 
     def __repr__(self) -> str:
-        attrs = " ".join(f"{key}={getattr(self, key)!r}" for key in self.__repr_info__)
+        attrs = " ".join(f"{key}={getattr(self, key)!r}" for key in self.__repr_attributes__)
         return f"<{type(self).__name__} {attrs}>"
 
     def __str__(self) -> str:
@@ -726,7 +726,7 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
 
 
 class _APIApplicationCommandMixin:
-    __repr_info__ = ("id",)
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = ("id",)
 
     def _update_common(self, data: ApplicationCommandPayload) -> None:
         if not isinstance(self, ApplicationCommand):
@@ -776,7 +776,9 @@ class UserCommand(ApplicationCommand):
         .. versionadded:: 2.10
     """
 
-    __repr_info__ = tuple(n for n in ApplicationCommand.__repr_info__ if n != "type")
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = tuple(
+        n for n in ApplicationCommand.__repr_attributes__ if n != "type"
+    )
 
     def __init__(
         self,
@@ -840,7 +842,9 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
         Autoincrementing version identifier updated during substantial record changes.
     """
 
-    __repr_info__ = UserCommand.__repr_info__ + _APIApplicationCommandMixin.__repr_info__
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
+        UserCommand.__repr_attributes__ + _APIApplicationCommandMixin.__repr_attributes__
+    )
 
     @classmethod
     def from_dict(cls, data: ApplicationCommandPayload) -> Self:
@@ -899,7 +903,9 @@ class MessageCommand(ApplicationCommand):
         .. versionadded:: 2.10
     """
 
-    __repr_info__ = tuple(n for n in ApplicationCommand.__repr_info__ if n != "type")
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = tuple(
+        n for n in ApplicationCommand.__repr_attributes__ if n != "type"
+    )
 
     def __init__(
         self,
@@ -963,7 +969,9 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
         Autoincrementing version identifier updated during substantial record changes.
     """
 
-    __repr_info__ = MessageCommand.__repr_info__ + _APIApplicationCommandMixin.__repr_info__
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
+        MessageCommand.__repr_attributes__ + _APIApplicationCommandMixin.__repr_attributes__
+    )
 
     @classmethod
     def from_dict(cls, data: ApplicationCommandPayload) -> Self:
@@ -1032,7 +1040,9 @@ class SlashCommand(ApplicationCommand):
         The list of options the slash command has.
     """
 
-    __repr_info__ = tuple(n for n in ApplicationCommand.__repr_info__ if n != "type") + (
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = tuple(
+        n for n in ApplicationCommand.__repr_attributes__ if n != "type"
+    ) + (
         "description",
         "options",
     )
@@ -1179,7 +1189,9 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
         Autoincrementing version identifier updated during substantial record changes.
     """
 
-    __repr_info__ = SlashCommand.__repr_info__ + _APIApplicationCommandMixin.__repr_info__
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
+        SlashCommand.__repr_attributes__ + _APIApplicationCommandMixin.__repr_attributes__
+    )
 
     @classmethod
     def from_dict(cls, data: ApplicationCommandPayload) -> Self:
