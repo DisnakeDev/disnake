@@ -1,0 +1,3 @@
+Using :class:`ActionRow`\s (or plain :class:`TextInput`\s, which implicitly get wrapped in action rows) in modals is now deprecated in favor of :class:`ui.Label`.
+- This deprecates :meth:`ActionRow.add_text_input`, :meth:`ActionRow.with_modal_components`
+- Using :class:`TextInput.label` is also deprecated in favor of ``Label("...", TextInput(...))``.
