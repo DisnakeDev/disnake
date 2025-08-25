@@ -502,7 +502,7 @@ class Nameplate:
 
     @property
     def nameplate_animated_asset(self) -> Asset:
-        """Asset: returns the animated nameplate for the user.
+        """:class:`Asset`: Returns the animated nameplate for the user.
 
         .. versionadded:: 2.11
         """
