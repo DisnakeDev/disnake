@@ -130,6 +130,9 @@ only-include = [
 [tool.hatch.version]
 source = "versioningit"
 
+[tool.versioningit]
+default-version = "0.0.0"
+
 [tool.versioningit.vcs]
 method = "git-archive"
 describe-subst = "$Format:%(describe:tags,match=v*)$"
