@@ -510,7 +510,7 @@ class Nameplate:
 
     @property
     def nameplate_static_asset(self) -> Asset:
-        """Asset: returns the static nameplate for the user.
+        """:class:`Asset`: Returns the static nameplate for the user.
 
         .. versionadded:: 2.11
         """
