@@ -493,7 +493,7 @@ class Nameplate:
         "palette",
     )
 
-    def __init__(self, state: ConnectionState, data: NameplateDataPayload) -> None:
+    def __init__(self, *, state: ConnectionState, data: NameplateDataPayload) -> None:
         self._state: ConnectionState = state
         self.sku_id: int = int(data["sku_id"])
         self._asset: str = data["asset"]
