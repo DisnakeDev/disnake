@@ -670,6 +670,7 @@ class AuditLogEntry(Hashable):
                 enums.AuditLogAction.automod_block_message,
                 enums.AuditLogAction.automod_send_alert_message,
                 enums.AuditLogAction.automod_timeout,
+                enums.AuditLogAction.automod_quarantine_user,
             ):
                 elems = {
                     "channel": (
