@@ -701,6 +701,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         )
         return self
 
+    @deprecated()
     def add_text_input(
         self: TextInputCompatibleActionRowT,
         *,
@@ -723,6 +724,10 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         This function returns the class instance to allow for fluent-style chaining.
 
         .. versionadded:: 2.4
+
+        .. deprecated:: 2.11
+            Use of action rows in modals is deprecated, use ``Label("...", TextInput(...))``
+            directly instead.
 
         Parameters
         ----------
