@@ -158,7 +158,7 @@ class Modal:
         self,
         *,
         label: str,
-        custom_id: Optional[str] = None,
+        custom_id: str = MISSING,
         style: TextInputStyle = TextInputStyle.short,
         placeholder: Optional[str] = None,
         value: Optional[str] = None,
