@@ -158,7 +158,7 @@ class Modal:
         self,
         *,
         label: str,
-        custom_id: str,
+        custom_id: Optional[str] = None,
         style: TextInputStyle = TextInputStyle.short,
         placeholder: Optional[str] = None,
         value: Optional[str] = None,
@@ -176,6 +176,7 @@ class Modal:
             The label of the text input.
         custom_id: :class:`str`
             The ID of the text input that gets received during an interaction.
+            If not given then one is generated for you.
         style: :class:`.TextInputStyle`
             The style of the text input.
         placeholder: Optional[:class:`str`]
