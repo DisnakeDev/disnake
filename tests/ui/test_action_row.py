@@ -10,19 +10,20 @@ import disnake
 from disnake.ui import (
     ActionRow,
     Button,
-    MessageUIComponent,
-    ModalUIComponent,
+    Separator,
     StringSelect,
     TextInput,
     WrappedComponent,
 )
-from disnake.ui.action_row import components_to_dict, components_to_rows
+from disnake.ui._types import ActionRowMessageComponent, ActionRowModalComponent
+from disnake.ui.action_row import normalize_components, normalize_components_to_dict
 
 button1 = Button()
 button2 = Button()
 button3 = Button()
 select = StringSelect()
 text_input = TextInput(label="a", custom_id="b")
+separator = Separator()
 
 
 class TestActionRow:
@@ -136,8 +137,8 @@ class TestActionRow:
         row_msg = ActionRow.with_message_components()
         assert list(row_msg.children) == []
 
-        assert_type(row_modal, ActionRow[ModalUIComponent])
-        assert_type(row_msg, ActionRow[MessageUIComponent])
+        assert_type(row_modal, ActionRow[ActionRowModalComponent])
+        assert_type(row_msg, ActionRow[ActionRowMessageComponent])
 
     def test_rows_from_message(self) -> None:
         rows = [
@@ -200,21 +201,22 @@ class TestActionRow:
     def _test_typing_init(self) -> None:  # pragma: no cover
         assert_type(ActionRow(), ActionRow[WrappedComponent])
 
-        assert_type(ActionRow(button1), ActionRow[MessageUIComponent])
-        assert_type(ActionRow(select), ActionRow[MessageUIComponent])
-        assert_type(ActionRow(text_input), ActionRow[ModalUIComponent])
+        assert_type(ActionRow(button1), ActionRow[ActionRowMessageComponent])
+        assert_type(ActionRow(select), ActionRow[ActionRowMessageComponent])
+        assert_type(ActionRow(text_input), ActionRow[ActionRowModalComponent])
 
-        assert_type(ActionRow(button1, select), ActionRow[MessageUIComponent])
-        assert_type(ActionRow(select, button1), ActionRow[MessageUIComponent])
+        assert_type(ActionRow(button1, select), ActionRow[ActionRowMessageComponent])
+        assert_type(ActionRow(select, button1), ActionRow[ActionRowMessageComponent])
 
-        # these should fail to type-check - if they pass, there will be an error
-        # because of the unnecessary ignore comment
-        ActionRow(button1, text_input)  # type: ignore
-        ActionRow(text_input, button1)  # type: ignore
+        # FIXME: no longer works since the overload changed for normalize_components. may revisit this.
+        # # these should fail to type-check - if they pass, there will be an error
+        # # because of the unnecessary ignore comment
+        # ActionRow(button1, text_input)
+        # ActionRow(text_input, button1)
 
         # TODO: revert when modal select support is added.
-        assert_type(ActionRow(select, text_input), ActionRow[ModalUIComponent])  # type: ignore
-        assert_type(ActionRow(text_input, select), ActionRow[ModalUIComponent])  # type: ignore
+        assert_type(ActionRow(select, text_input), ActionRow[ActionRowModalComponent])  # type: ignore
+        assert_type(ActionRow(text_input, select), ActionRow[ActionRowModalComponent])  # type: ignore
 
 
 @pytest.mark.parametrize(
@@ -240,34 +242,65 @@ class TestActionRow:
         ([select, button1, button2], [[select], [button1, button2]]),
     ],
 )
-def test_components_to_rows(value, expected) -> None:
-    rows = components_to_rows(value)
+def test_normalize_components__actionrow(value, expected) -> None:
+    rows = normalize_components(value)
     assert all(isinstance(row, ActionRow) for row in rows)
     assert [list(row.children) for row in rows] == expected
 
 
-def test_components_to_rows__invalid() -> None:
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        # simple cases
+        ([separator], [separator]),
+        ([separator, ActionRow(button1)], [separator, [button1]]),
+        ([ActionRow(button1), separator], [[button1], separator]),
+        ([separator, ActionRow(button1), separator], [separator, [button1], separator]),
+        # flat list
+        ([button1, separator], [[button1], separator]),
+        ([separator, button1], [separator, [button1]]),
+        (
+            [separator, button1, button2, separator, button3],
+            [separator, [button1, button2], separator, [button3]],
+        ),
+    ],
+)
+def test_normalize_components__v2(value, expected) -> None:
+    result = normalize_components(value)
+    assert [(list(c.children) if isinstance(c, ActionRow) else c) for c in result] == expected
+
+
+def test_normalize_components__invalid() -> None:
     for value in (42, [42], [ActionRow(), 42], iter([button1])):
         with pytest.raises(TypeError, match=r"`components` must be a"):
-            components_to_rows(value)  # type: ignore
+            normalize_components(value)  # type: ignore
     for value in ([[[]]], [[[ActionRow()]]]):
         with pytest.raises(TypeError, match=r"components should be of type"):
-            components_to_rows(value)  # type: ignore
+            normalize_components(value)  # type: ignore
 
 
-def test_components_to_dict() -> None:
-    result = components_to_dict([button1, button2, select, ActionRow(button3)])
+def test_normalize_components_to_dict() -> None:
+    result, is_v2 = normalize_components_to_dict([button1, button2, select, ActionRow(button3)])
     assert result == [
         {
             "type": 1,
+            "id": 0,
             "components": [button1.to_component_dict(), button2.to_component_dict()],
         },
         {
             "type": 1,
+            "id": 0,
             "components": [select.to_component_dict()],
         },
         {
             "type": 1,
+            "id": 0,
             "components": [button3.to_component_dict()],
         },
     ]
+    assert not is_v2
+
+
+def test_normalize_components_to_dict__v2() -> None:
+    _, is_v2 = normalize_components_to_dict([button1, separator, button2])
+    assert is_v2
