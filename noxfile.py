@@ -168,7 +168,7 @@ def codemod(session: nox.Session) -> None:
     session.run_always("pdm", "install", "-dG", "codemod", external=True)
 
     base_command = ["python", "-m", "libcst.tool"]
-    base_command_codemod = base_command + ["codemod"]
+    base_command_codemod = [*base_command, "codemod"]
     if not session.interactive:
         base_command_codemod += ["--hide-progress"]
 

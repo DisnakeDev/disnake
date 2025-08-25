@@ -105,7 +105,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         A list of values that have been selected by the user.
     """
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = BaseSelect.__repr_attributes__ + ("options",)
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (*BaseSelect.__repr_attributes__, "options")
 
     # In practice this should never be used by anything, might as well have it anyway though.
     _default_value_type_map: ClassVar[

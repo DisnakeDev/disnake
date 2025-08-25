@@ -2035,7 +2035,7 @@ class ConnectionState:
         self._handle_soundboard_update(
             guild,
             # append new sound
-            guild.soundboard_sounds + (sound,),
+            (*guild.soundboard_sounds, sound),
         )
 
     def parse_guild_soundboard_sound_update(self, data: gateway.GuildSoundboardSoundUpdate) -> None:
