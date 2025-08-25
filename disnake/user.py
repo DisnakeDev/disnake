@@ -53,13 +53,13 @@ class BaseUser(_UserTag):
         "global_name",
         "bot",
         "system",
+        "collectibles",
         "_avatar",
         "_banner",
         "_avatar_decoration_data",
         "_accent_colour",
         "_public_flags",
         "_state",
-        "collectibles",
     )
 
     if TYPE_CHECKING:
