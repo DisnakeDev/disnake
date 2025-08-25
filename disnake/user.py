@@ -470,8 +470,8 @@ class ClientUser(BaseUser):
 
 class Nameplate:
     """
-    Represent the decoration behind the name of a user that appears
-    in the server / DM / DM group members list.
+    Represents the decoration behind the name of a user that appears
+    in the server, DM and DM group members list.
 
     .. versionadded:: 2.11
 
