@@ -1,0 +1,2 @@
+Adds :attr:`User.collectibles`, :attr:`ClientUser.collectibles`, :class:`Nameplate`, :class:`Collectibles` new attributes and classes
+to represent user nameplates and collectibles.

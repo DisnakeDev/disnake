@@ -6,10 +6,35 @@ from typing_extensions import NotRequired
 
 from .snowflake import Snowflake
 
+PaletteTypes = Literal[
+    "crimson",
+    "berry",
+    "sky",
+    "teal",
+    "forest",
+    "bubble_gum",
+    "violet",
+    "cobalt",
+    "clover",
+    "lemon",
+    "white",
+]
+
 
 class AvatarDecorationData(TypedDict):
     asset: str
     sku_id: Snowflake
+
+
+class NameplateData(TypedDict):
+    sku_id: Snowflake
+    asset: str
+    label: str
+    palette: PaletteTypes
+
+
+class CollectiblesData(TypedDict, total=False):
+    nameplate: NameplateData
 
 
 class PartialUser(TypedDict):
@@ -36,3 +61,4 @@ class User(PartialUser, total=False):
     premium_type: PremiumType
     public_flags: int
     avatar_decoration_data: Optional[AvatarDecorationData]
+    collectibles: Optional[CollectiblesData]
