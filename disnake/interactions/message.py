@@ -4,9 +4,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Union
 
-from ..components import MessageComponent
+from ..components import VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES, ActionRowMessageComponent
 from ..enums import ComponentType, try_enum
 from ..message import Message
+from ..ui.action_row import walk_components
 from ..utils import cached_slot_property
 from .base import ClientT, Interaction, InteractionDataResolved
 
@@ -21,7 +22,6 @@ if TYPE_CHECKING:
     from ..role import Role
     from ..state import ConnectionState
     from ..types.interactions import (
-        InteractionDataResolved as InteractionDataResolvedPayload,
         MessageComponentInteractionData as MessageComponentInteractionDataPayload,
         MessageInteraction as MessageInteractionPayload,
     )
@@ -166,12 +166,15 @@ class MessageInteraction(Interaction[ClientT]):
         return values
 
     @cached_slot_property("_cs_component")
-    def component(self) -> MessageComponent:
-        """Union[:class:`Button`, :class:`BaseSelectMenu`]: The component the user interacted with"""
-        for action_row in self.message.components:
-            for component in action_row.children:
-                if component.custom_id == self.data.custom_id:
-                    return component
+    def component(self) -> ActionRowMessageComponent:
+        """Union[:class:`Button`, :class:`BaseSelectMenu`]: The component the user interacted with."""
+        # FIXME(3.0?): introduce common base type for components with `custom_id`
+        for component in walk_components(self.message.components):
+            if (
+                isinstance(component, VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES)
+                and component.custom_id == self.data.custom_id
+            ):
+                return component
 
         raise Exception("MessageInteraction is malformed - no component found")  # noqa: TRY002
 
@@ -211,10 +214,7 @@ class MessageInteractionData(Dict[str, Any]):
             list(map(str, values)) if (values := data.get("values")) else None
         )
 
-        empty_resolved: InteractionDataResolvedPayload = {}  # pyright shenanigans
-        self.resolved = InteractionDataResolved(
-            data=data.get("resolved", empty_resolved), parent=parent
-        )
+        self.resolved = InteractionDataResolved(data=data.get("resolved", {}), parent=parent)
 
     def __repr__(self) -> str:
         return (

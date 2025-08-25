@@ -1,0 +1,1 @@
+Add :meth:`MemberFlags.automod_quarantined_guild_tag` member flag.

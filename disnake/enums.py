@@ -28,6 +28,7 @@ __all__ = (
     "VerificationLevel",
     "ContentFilter",
     "Status",
+    "StatusDisplayType",
     "DefaultAvatar",
     "AuditLogAction",
     "AuditLogActionCategory",
@@ -76,6 +77,7 @@ __all__ = (
     "PollLayoutType",
     "VoiceChannelEffectAnimationType",
     "MessageReferenceType",
+    "SeparatorSpacing",
 )
 
 
@@ -603,6 +605,23 @@ class Status(Enum):
         return self.value
 
 
+class StatusDisplayType(Enum):
+    """Specifies an :class:`Activity` display status.
+
+    .. versionadded:: 2.11
+    """
+
+    name = 0  # type: ignore[reportAssignmentType]
+    """The name of the activity is displayed, e.g: ``Listening to Spotify``."""
+    state = 1
+    """The state of the activity is displayed, e.g: ``Listening to Rick Astley``."""
+    details = 2
+    """The details of the activity are displayed, e.g: ``Listening to Never Gonna Give You Up``."""
+
+    def __int__(self) -> int:
+        return self.value
+
+
 class DefaultAvatar(Enum):
     """Represents the default avatar of a Discord :class:`User`."""
 
@@ -738,6 +757,7 @@ class AuditLogAction(Enum):
     automod_block_message                 = 143
     automod_send_alert_message            = 144
     automod_timeout                       = 145
+    automod_quarantine_user               = 146
     creator_monetization_request_created  = 150
     creator_monetization_terms_accepted   = 151
     # fmt: on
@@ -803,6 +823,7 @@ class AuditLogAction(Enum):
             AuditLogAction.automod_block_message:                 None,
             AuditLogAction.automod_send_alert_message:            None,
             AuditLogAction.automod_timeout:                       None,
+            AuditLogAction.automod_quarantine_user:               None,
             AuditLogAction.creator_monetization_request_created:  None,
             AuditLogAction.creator_monetization_terms_accepted:   None,
         }
@@ -848,7 +869,7 @@ class AuditLogAction(Enum):
             return None
         elif v < 143:
             return "automod_rule"
-        elif v < 146:
+        elif v < 147:
             return "user"
         elif v < 152:
             return None
@@ -1207,6 +1228,41 @@ class ComponentType(Enum):
     """Represents a channel select component.
 
     .. versionadded:: 2.7
+    """
+    section = 9
+    """Represents a Components V2 section component.
+
+    .. versionadded:: 2.11
+    """
+    text_display = 10
+    """Represents a Components V2 text display component.
+
+    .. versionadded:: 2.11
+    """
+    thumbnail = 11
+    """Represents a Components V2 thumbnail component.
+
+    .. versionadded:: 2.11
+    """
+    media_gallery = 12
+    """Represents a Components V2 media gallery component.
+
+    .. versionadded:: 2.11
+    """
+    file = 13
+    """Represents a Components V2 file component.
+
+    .. versionadded:: 2.11
+    """
+    separator = 14
+    """Represents a Components V2 separator component.
+
+    .. versionadded:: 2.11
+    """
+    container = 17
+    """Represents a Components V2 container component.
+
+    .. versionadded:: 2.11
     """
 
     def __int__(self) -> int:
@@ -2318,6 +2374,18 @@ class MessageReferenceType(Enum):
     """A standard message reference used in message replies."""
     forward = 1
     """Reference used to point to a message at a point in time (forward)."""
+
+
+class SeparatorSpacing(Enum):
+    """Specifies the size of a :class:`Separator` component's padding.
+
+    .. versionadded:: 2.11
+    """
+
+    small = 1
+    """Small spacing."""
+    large = 2
+    """Large spacing."""
 
 
 T = TypeVar("T")
