@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Sequence
 
 from ..enums import ComponentType
 from ..message import Message
-from ..utils import cached_slot_property
+from ..utils import assert_never, cached_slot_property
 from .base import ClientT, Interaction
 
 if TYPE_CHECKING:
@@ -119,7 +119,7 @@ class ModalInteraction(Interaction[ClientT]):
         .. versionadded:: 2.5
     """
 
-    __slots__ = ("message", "_cs_text_values")
+    __slots__ = ("message", "_cs_values", "_cs_text_values")
 
     def __init__(self, *, data: ModalInteractionPayload, state: ConnectionState) -> None:
         super().__init__(data=data, state=state)
@@ -159,6 +159,27 @@ class ModalInteraction(Interaction[ClientT]):
         Generator[:class:`dict`, None, None]
         """
         yield from self._walk_components(self.data.components)
+
+    @cached_slot_property("_cs_values")
+    def values(self) -> Dict[str, Union[str, Sequence[str]]]:
+        """Dict[:class:`str`, Union[:class:`str`, Sequence[:class:`str`]]]: Returns all raw values the user has entered in the modal.
+        This is a dict of the form ``{custom_id: value}``.
+
+        For select menus, the corresponding dict value is a list of the values the user has selected.
+
+        .. versionadded:: 2.11
+        """
+        values: Dict[str, Any] = {}
+        for component in self.walk_raw_components():
+            if component["type"] == ComponentType.text_input.value:
+                value = component.get("value")
+            elif component["type"] == ComponentType.string_select.value:
+                value = component.get("values")
+            else:
+                assert_never(component)
+                continue
+            values[component["custom_id"]] = value
+        return values
 
     @cached_slot_property("_cs_text_values")
     def text_values(self) -> Dict[str, str]:
