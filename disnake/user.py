@@ -470,19 +470,19 @@ class ClientUser(BaseUser):
 
 class Nameplate:
     """
-    Represent the decoration behind the name of a user that appears
-    in the server / DM / DM group members list.
+    Represents the decoration behind the name of a user that appears
+    in the server, DM and DM group members list.
 
     .. versionadded:: 2.11
 
     Attributes
     ----------
     sku_id: :class:`int`
-        id of the nameplate SKU.
+        The ID of the nameplate SKU.
     label: :class:`str`
         The label of this nameplate.
     palette: :class:`str`
-        The background color of the nameplate
+        The background color of the nameplate.
     """
 
     __slots__ = (
@@ -502,7 +502,7 @@ class Nameplate:
 
     @property
     def nameplate_animated_asset(self) -> Asset:
-        """Asset: returns the animated nameplate for the user.
+        """:class:`Asset`: Returns the animated nameplate for the user.
 
         .. versionadded:: 2.11
         """
