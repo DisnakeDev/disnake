@@ -292,7 +292,7 @@ class _BaseRange(ABC):
             )
 
             # infer type from min/max values
-            params = (cls._infer_type(params),) + params
+            params = (cls._infer_type(params), *params)
 
         if len(params) != 3:
             raise TypeError(
