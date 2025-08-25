@@ -115,6 +115,7 @@ class _SelectMenu(_BaseComponent):
     disabled: NotRequired[bool]
     # This is technically not applicable to string selects, but for simplicity we'll just have it here
     default_values: NotRequired[List[SelectDefaultValue]]
+    required: NotRequired[bool]
 
 
 class BaseSelectMenu(_SelectMenu):

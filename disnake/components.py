@@ -395,6 +395,11 @@ class BaseSelectMenu(Component):
         Only available for auto-populated select menus.
 
         .. versionadded:: 2.10
+    required: :class:`bool`
+        Whether the select menu is required. Only applies to components in modals.
+        Defaults to ``True``.
+
+        .. versionadded:: 2.11
     id: :class:`int`
         The numeric identifier for the component.
         This is always present in components received from the API,
@@ -410,6 +415,7 @@ class BaseSelectMenu(Component):
         "max_values",
         "disabled",
         "default_values",
+        "required",
     )
 
     # FIXME: this isn't pretty; we should decouple __repr__ from slots
@@ -433,6 +439,7 @@ class BaseSelectMenu(Component):
         self.default_values: List[SelectDefaultValue] = [
             SelectDefaultValue._from_dict(d) for d in (data.get("default_values") or [])
         ]
+        self.required: bool = data.get("required", True)
 
     def to_dict(self) -> BaseSelectMenuPayload:
         payload: BaseSelectMenuPayload = {
@@ -442,6 +449,7 @@ class BaseSelectMenu(Component):
             "min_values": self.min_values,
             "max_values": self.max_values,
             "disabled": self.disabled,
+            "required": self.required,
         }
 
         if self.placeholder:
@@ -481,6 +489,11 @@ class StringSelectMenu(BaseSelectMenu):
         Whether the select menu is disabled or not.
     options: List[:class:`SelectOption`]
         A list of options that can be selected in this select menu.
+    required: :class:`bool`
+        Whether the select menu is required. Only applies to components in modals.
+        Defaults to ``True``.
+
+        .. versionadded:: 2.11
     id: :class:`int`
         The numeric identifier for the component.
         This is always present in components received from the API,
@@ -540,6 +553,11 @@ class UserSelectMenu(BaseSelectMenu):
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
         .. versionadded:: 2.10
+    required: :class:`bool`
+        Whether the select menu is required. Only applies to components in modals.
+        Defaults to ``True``.
+
+        .. versionadded:: 2.11
     id: :class:`int`
         The numeric identifier for the component.
         This is always present in components received from the API,
@@ -586,6 +604,11 @@ class RoleSelectMenu(BaseSelectMenu):
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
         .. versionadded:: 2.10
+    required: :class:`bool`
+        Whether the select menu is required. Only applies to components in modals.
+        Defaults to ``True``.
+
+        .. versionadded:: 2.11
     id: :class:`int`
         The numeric identifier for the component.
         This is always present in components received from the API,
@@ -632,6 +655,11 @@ class MentionableSelectMenu(BaseSelectMenu):
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
         .. versionadded:: 2.10
+    required: :class:`bool`
+        Whether the select menu is required. Only applies to components in modals.
+        Defaults to ``True``.
+
+        .. versionadded:: 2.11
     id: :class:`int`
         The numeric identifier for the component.
         This is always present in components received from the API,
@@ -681,6 +709,11 @@ class ChannelSelectMenu(BaseSelectMenu):
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
         .. versionadded:: 2.10
+    required: :class:`bool`
+        Whether the select menu is required. Only applies to components in modals.
+        Defaults to ``True``.
+
+        .. versionadded:: 2.11
     id: :class:`int`
         The numeric identifier for the component.
         This is always present in components received from the API,
