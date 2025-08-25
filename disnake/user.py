@@ -486,15 +486,15 @@ class Nameplate:
     """
 
     __slots__ = (
-        "__state",
-        "sku_id",
+        "_state",
         "_asset",
+        "sku_id",
         "label",
         "palette",
     )
 
     def __init__(self, state: ConnectionState, data: NameplateDataPayload) -> None:
-        self.__state: ConnectionState = state
+        self._state: ConnectionState = state
         self.sku_id: int = int(data["sku_id"])
         self._asset: str = data["asset"]
         self.label: str = data["label"]
@@ -506,7 +506,7 @@ class Nameplate:
 
         .. versionadded:: 2.11
         """
-        return Asset._from_nameplate(self.__state, self._asset)
+        return Asset._from_nameplate(self._state, self._asset)
 
     @property
     def nameplate_static_asset(self) -> Asset:
@@ -514,7 +514,7 @@ class Nameplate:
 
         .. versionadded:: 2.11
         """
-        return Asset._from_nameplate(self.__state, self._asset, animated=False)
+        return Asset._from_nameplate(self._state, self._asset, animated=False)
 
 
 class Collectibles:
