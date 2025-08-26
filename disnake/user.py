@@ -486,11 +486,11 @@ class Nameplate:
     """
 
     __slots__ = (
-        "_state",
-        "_asset",
         "sku_id",
         "label",
         "palette",
+        "_state",
+        "_asset",
     )
 
     def __init__(self, *, state: ConnectionState, data: NameplateDataPayload) -> None:
