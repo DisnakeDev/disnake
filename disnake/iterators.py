@@ -46,7 +46,7 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
-    from .abc import Messageable, MessageableChannel, Snowflake
+    from .abc import Messageable, Snowflake
     from .app_commands import APIApplicationCommand
     from .guild import Guild
     from .member import Member
@@ -1332,7 +1332,6 @@ class ChannelPinsIterator(_AsyncIterator["Message"]):
 
         self.messageable = messageable
         self._state = messageable._state
-        self.channel: Optional[MessageableChannel] = None
         self.limit = limit
         self.before: Optional[str] = before_
 
@@ -1345,9 +1344,6 @@ class ChannelPinsIterator(_AsyncIterator["Message"]):
         return self.flatten().__await__()
 
     async def next(self) -> Message:
-        if self.channel is None:
-            self.channel = await self.messageable._get_channel()
-
         if self.messages.empty():
             await self.fill_messages()
 
@@ -1361,9 +1357,9 @@ class ChannelPinsIterator(_AsyncIterator["Message"]):
         return self.retrieve > 0
 
     async def fill_messages(self) -> None:
-        if self.channel is None:
-            # should never happen
-            raise RuntimeError("The library has a bug. Contact a maintainer!")
+        if not hasattr(self, "channel"):
+            channel = await self.messageable._get_channel()
+            self.channel = channel
 
         if self._get_retrieve():
             data = await self.getter(
