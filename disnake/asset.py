@@ -342,9 +342,11 @@ class Asset(AssetMixin):
 
     @classmethod
     def _from_nameplate(cls, state: AnyState, nameplate_asset: str, animated: bool = True) -> Self:
+        suffix = "asset.webm" if animated else "static.png"
         return cls(
             state,
-            url=f"{cls.BASE}/assets/collectibles/{nameplate_asset}/asset.{'webm' if animated else 'png'}",
+            # nameplate_asset already includes an ending /
+            url=f"{cls.BASE}/assets/collectibles/{nameplate_asset}{suffix}",
             key=nameplate_asset,
             animated=animated,
         )
