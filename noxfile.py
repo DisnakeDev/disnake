@@ -1,19 +1,13 @@
 # SPDX-License-Identifier: MIT
 
+
 from __future__ import annotations
 
 import pathlib
-from typing import TYPE_CHECKING, Callable, Dict, List, Tuple, TypeVar
+import subprocess  # noqa: TID251
+from typing import Dict, List, Tuple
 
 import nox
-
-if TYPE_CHECKING:
-    from typing_extensions import Concatenate, ParamSpec
-
-    P = ParamSpec("P")
-    T = TypeVar("T")
-
-    NoxSessionFunc = Callable[Concatenate[nox.Session, P], T]
 
 PYPROJECT = nox.project.load_toml()
 
@@ -27,11 +21,32 @@ nox.options.sessions = [
     "pyright",
     "test",
 ]
-nox.needs_version = ">=2022.1.7"
+nox.needs_version = ">=2025.2.9"
 
 
 # used to reset cached coverage data once for the first test run only
 reset_coverage = True
+
+
+# Helper to install dependencies from a group, using uv if venv_backend is uv
+def install_group(session: nox.Session, *groups: str) -> None:
+    if getattr(session, "venv_backend", None) == "uv":
+        for group in groups:
+            result = subprocess.run(
+                ["uv", "export", "--no-hashes", "--no-annotate", "--only-group", group],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            requirements = [
+                line.strip()
+                for line in result.stdout.splitlines()
+                if line.strip() and not line.lstrip().startswith("#")
+            ]
+            if requirements:
+                session.install(*requirements)
+    else:
+        session.install(*nox.project.dependency_groups(PYPROJECT, *groups))
 
 
 @nox.session
@@ -42,7 +57,7 @@ def docs(session: nox.Session) -> None:
     If running in CI, will build a production version of the documentation.
     """
     session.install("-e", ".")
-    session.install(*nox.project.dependency_groups(PYPROJECT, "docs"))
+    install_group(session, "docs")
     with session.chdir("docs"):
         args = ["-b", "html", "-n", ".", "_build/html", *session.posargs]
         if session.interactive:
@@ -72,7 +87,7 @@ def docs(session: nox.Session) -> None:
 def lint(session: nox.Session) -> None:
     """Check all files for linting errors"""
     session.install("-e", ".")
-    session.install(*nox.project.dependency_groups(PYPROJECT, "tools"))
+    install_group(session, "tools")
 
     session.run("pre-commit", "run", "--all-files", *session.posargs)
 
@@ -80,14 +95,14 @@ def lint(session: nox.Session) -> None:
 @nox.session(name="check-manifest")
 def check_manifest(session: nox.Session) -> None:
     """Run check-manifest."""
-    session.install(*nox.project.dependency_groups(PYPROJECT, "tools"))
+    install_group(session, "tools")
     session.run("check-manifest", "-v")
 
 
 @nox.session()
 def slotscheck(session: nox.Session) -> None:
     """Run slotscheck."""
-    session.install(*nox.project.dependency_groups(PYPROJECT, "tools"))
+    install_group(session, "tools")
     session.install("-e", ".")
     session.run("python", "-m", "slotscheck", "--verbose", "-m", "disnake")
 
@@ -99,7 +114,8 @@ def autotyping(session: nox.Session) -> None:
     Because of the nature of changes that autotyping makes, and the goal design of examples,
     this runs on each folder in the repository with specific settings.
     """
-    session.install("-e", ".", *nox.project.dependency_groups(PYPROJECT, "codemod"))
+    session.install("-e", ".")
+    install_group(session, "codemod")
 
     base_command = ["python", "-m", "libcst.tool", "codemod", "autotyping.AutotypeCommand"]
     if not session.interactive:
@@ -159,7 +175,8 @@ def autotyping(session: nox.Session) -> None:
 @nox.session(name="codemod")
 def codemod(session: nox.Session) -> None:
     """Run libcst codemods."""
-    session.install("-e", ".", *nox.project.dependency_groups(PYPROJECT, "codemod"))
+    session.install("-e", ".")
+    install_group(session, "codemod")
 
     base_command = ["python", "-m", "libcst.tool"]
     base_command_codemod = [*base_command, "codemod"]
@@ -186,20 +203,17 @@ def codemod(session: nox.Session) -> None:
 @nox.session()
 def pyright(session: nox.Session) -> None:
     """Run pyright."""
-    session.install(
-        "-e",
-        ".[speed,voice]",
-        *nox.project.dependency_groups(
-            PYPROJECT,
-            "test",
-            "nox",
-            "changelog",
-            "docs",
-            "codemod",
-            "typing",
-            "build",
-            "tools",
-        ),
+    session.install("-e", ".[speed,voice]")
+    install_group(
+        session,
+        "test",
+        "nox",
+        "changelog",
+        "docs",
+        "codemod",
+        "typing",
+        "build",
+        "tools",
     )
     env = {
         "PYRIGHT_PYTHON_IGNORE_WARNINGS": "1",
@@ -226,7 +240,8 @@ def test(session: nox.Session, extras: List[str]) -> None:
         arg = ".[" + ",".join(extras) + "]"
     else:
         arg = "."
-    session.install("-e", arg, *nox.project.dependency_groups(PYPROJECT, "test", "typing"))
+    session.install("-e", arg)
+    install_group(session, "test", "typing")
 
     pytest_args = ["--cov", "--cov-context=test"]
     global reset_coverage  # noqa: PLW0603
@@ -248,7 +263,8 @@ def test(session: nox.Session, extras: List[str]) -> None:
 @nox.session()
 def coverage(session: nox.Session) -> None:
     """Display coverage information from the tests."""
-    session.install("-e", ".", *nox.project.dependency_groups(PYPROJECT, "test"))
+    session.install("-e", ".")
+    install_group(session, "test")
     if "html" in session.posargs or "serve" in session.posargs:
         session.run("coverage", "html", "--show-contexts")
     if "serve" in session.posargs:
