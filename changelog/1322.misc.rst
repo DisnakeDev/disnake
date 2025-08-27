@@ -1,0 +1,1 @@
+Migrate away from PDM and to uv for developer venv and dependency management. Speed gains during development improve significantly, and setting up a new environment now takes just a few seconds to lock and install.
