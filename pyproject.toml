@@ -90,11 +90,6 @@ test = [
     "looptime~=0.2",
     "coverage[toml]~=6.5.0",
 ]
-build = [
-    "wheel~=0.40.0",
-    "build~=0.10.0",
-    "twine~=5.1.1",
-]
 docs = [
     "sphinx==7.0.1",
     "sphinxcontrib-trio~=1.1.2",

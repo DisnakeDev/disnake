@@ -36,7 +36,7 @@ jobs:
     - uses: actions/checkout@v4
 
     # Instead of setup-env, we call the cache-uv action here directly.
-    # This avoids having to install PDM, only to find out the cache is already up to date sometimes.
+    # This avoids having to install uv, only to find out the cache is already up to date sometimes.
     - name: Configure cache
       uses: ./.github/actions/cache-uv
       with:
@@ -65,7 +65,7 @@ jobs:
         python-version: 3.8
 
     - name: Run sphinx-build
-      run: nox -s docs -- --keep-going -W -w $GITHUB_STEP_SUMMARY
+      run: uv run nox -s docs -- --keep-going -W -w $GITHUB_STEP_SUMMARY
 
   pyright:
     runs-on: ubuntu-latest
@@ -90,11 +90,11 @@ jobs:
       run: uv sync --all-extras
 
     - name: Add .venv/bin to PATH
-      run: dirname "$(pdm info --python)" >> $GITHUB_PATH
+      run: dirname "$(uv run which python)" >> $GITHUB_PATH
 
     - name: Set pyright version
       run: |
-        PYRIGHT_VERSION="$(pdm run python -c 'import pyright; print(pyright.__pyright_version__)')"
+        PYRIGHT_VERSION="$(uv run python -c 'import pyright; print(pyright.__pyright_version__)')"
         echo "PYRIGHT_VERSION=$PYRIGHT_VERSION" >> $GITHUB_ENV
 
     - name: Run pyright (Linux)
@@ -131,28 +131,26 @@ jobs:
 
     - name: Run slotscheck
       if: (success() || failure()) && steps.setup.outcome == 'success'
-      run: nox -s slotscheck
+      run: uv run nox -s slotscheck
 
     - name: Run check-manifest
       if: (success() || failure()) && steps.setup.outcome == 'success'
-      run: nox -s check-manifest
+      run: uv run nox -s check-manifest
 
     # This only runs if the previous steps were successful, no point in running it otherwise
     - name: Try building package
       run: |
-        pdm install -dG build
-
-        pdm run python -m build
+        uvx --from=build pyproject-build
         ls -la dist/
 
-        pdm run twine check --strict dist/*
+        uvx twine check --strict dist/*
 
     # run the libcst parsers and check for changes
     - name: libcst codemod
       run: |
-        nox -s codemod -- run-all
+        uv run nox -s codemod -- run-all
         if [ -n "$(git status --porcelain)" ]; then
-          echo "::error::Please run 'nox -s codemod -- run-all' locally and commit the changes." >&2;
+          echo "::error::Please run 'uv run nox -s codemod -- run-all' locally and commit the changes." >&2;
           echo "::group::git diff"
           git diff
           echo "::endgroup::"
@@ -186,11 +184,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - name: Install dependencies
-      run: pdm install -dG test  # needed for coverage
-
-    - name: Test package install
-      run: |
-        python -m pip install .
+      run: uv sync --no-default-groups --group test --no-editable
 
     - name: Run pytest
       id: run_tests
@@ -199,14 +193,14 @@ jobs:
         TZ: "America/New_York"
       run: |
         echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/Test Summary/" >> $GITHUB_STEP_SUMMARY
-        nox --force-python ${{ steps.setup-env.outputs.python-version }} -s test -- --color=no --cov-report= | tee -a $GITHUB_STEP_SUMMARY
+        uv run nox --force-python ${{ steps.setup-env.outputs.python-version }} -s test -- --color=no --cov-report= | tee -a $GITHUB_STEP_SUMMARY
         echo "$GITHUB_STEP_SUMMARY_FOOTER" >> $GITHUB_STEP_SUMMARY
 
     - name: Print Coverage Output
       if: always() && (steps.run_tests.outcome == 'success' || steps.run_tests.outcome == 'failure')
       run: |
         echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/Coverage Summary/" >> $GITHUB_STEP_SUMMARY
-        pdm run coverage report | tee -a $GITHUB_STEP_SUMMARY
+        uv run coverage report | tee -a $GITHUB_STEP_SUMMARY
         echo "$GITHUB_STEP_SUMMARY_FOOTER" >> $GITHUB_STEP_SUMMARY
 
   # thanks to aiohttp for this part of the workflow
