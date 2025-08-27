@@ -16,7 +16,7 @@ runs:
   steps:
     - name: Set up uv with python ${{ inputs.python-version }}
       id: setup-python
-      uses: astral-sh/setup-uv@6
+      uses: astral-sh/setup-uv@v6
       with:
         python-version: ${{ inputs.python-version }}
         version: "0.8.13"
