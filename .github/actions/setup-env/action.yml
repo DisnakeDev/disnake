@@ -20,7 +20,7 @@ runs:
       with:
         python-version: ${{ inputs.python-version }}
         version: "0.8.13"
-        cache: false
+        enable-cache: true
 
     - name: Set python version
       id: python-version
