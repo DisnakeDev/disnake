@@ -87,7 +87,7 @@ test = [
     "pytest~=7.4.2",
     "pytest-cov~=4.0.0",
     "pytest-asyncio~=0.20.3",
-    "looptime~=0.2",
+    "looptime~=0.2.0",
     "coverage[toml]~=6.5.0",
 ]
 docs = [
