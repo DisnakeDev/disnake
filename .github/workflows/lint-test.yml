@@ -186,6 +186,9 @@ jobs:
     - name: Install dependencies
       run: uv sync --no-default-groups --group test --no-editable
 
+    - name: Install nox environment
+      run: uv run nox -s test --install-only --force-python ${{ steps.setup-env.outputs.python-version }}
+
     - name: Run pytest
       id: run_tests
       # use non-utc timezone, to test time/date-dependent features properly
