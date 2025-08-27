@@ -41,7 +41,8 @@ def docs(session: nox.Session) -> None:
     If running locally, will build automatic reloading docs.
     If running in CI, will build a production version of the documentation.
     """
-    session.install("-e", ".[docs]")
+    session.install("-e", ".")
+    session.install(*nox.project.dependency_groups(PYPROJECT, "docs"))
     with session.chdir("docs"):
         args = ["-b", "html", "-n", ".", "_build/html", *session.posargs]
         if session.interactive:
@@ -187,12 +188,13 @@ def pyright(session: nox.Session) -> None:
     """Run pyright."""
     session.install(
         "-e",
-        ".[speed,docs,voice]",
+        ".[speed,voice]",
         *nox.project.dependency_groups(
             PYPROJECT,
             "test",
             "nox",
             "changelog",
+            "docs",
             "codemod",
             "typing",
             "build",
