@@ -21,6 +21,7 @@ import subprocess  # noqa: TID251
 import sys
 from typing import Any, Dict, Optional
 
+import versioningit
 from sphinx.application import Sphinx
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -112,6 +113,11 @@ release = importlib.metadata.version("disnake")
 # The short X.Y version.
 version = ".".join(release.split(".")[:2])
 
+next_version = versioningit.get_next_version(os.path.abspath(".."))
+
+rst_prolog += f"""
+.. |next_version| replace:: {next_version}
+"""
 
 _IS_READTHEDOCS = bool(os.getenv("READTHEDOCS"))
 

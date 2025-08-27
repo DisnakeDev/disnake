@@ -13,7 +13,7 @@ Changelog
 This page keeps a detailed human friendly rendering of what's new and changed
 in specific versions. Please see :ref:`version_guarantees` for more information.
 
-.. towncrier-draft-entries:: |release| [UNRELEASED]
+.. towncrier-draft-entries:: |next_version| [UNRELEASED]
 
 .. towncrier release notes start
 
