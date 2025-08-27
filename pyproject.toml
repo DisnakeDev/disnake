@@ -124,6 +124,7 @@ artifacts = ["disnake/_version.py"]
 [tool.hatch.build.targets.sdist]
 only-include = [
     "disnake",
+    "scripts/versioning.py",
 ]
 
 [tool.hatch.version]
@@ -134,13 +135,12 @@ method = "git-archive"
 describe-subst = "$Format:%(describe:tags,match=v*)$"
 
 [tool.versioningit.format]
-distance = "{base_version}a{distance}.{vcs}{rev}"
+distance = "{base_version}a{distance}+{vcs}{rev}"
 dirty = "{base_version}+d{build_date:%Y%m%d}"
 distance-dirty = "{base_version}a{distance}+{vcs}{rev}.d{build_date:%Y%m%d}"
 
-[tool.versioningit.template-fields.version-tuple]
-split-on = '^(\d+)\.(\d+)\.(\d+)\.([a-zA-Z])(\d+)(?:.\d+)?'
-
+[tool.versioningit.template-fields]
+method = { module = "scripts.versioning", value = "template_fields"}
 
 [tool.versioningit.write]
 file = "disnake/_version.py"
@@ -159,11 +159,7 @@ class VersionInfo(NamedTuple):
     releaselevel: Literal["alpha", "beta", "candidate", "final"]
     serial: int
 
-
-# fmt: off
-version_info: VersionInfo = VersionInfo(*{version_tuple}[:5])
-# fmt: on
-
+version_info: VersionInfo = VersionInfo{version_tuple}
 """
 
 
