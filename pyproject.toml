@@ -72,7 +72,6 @@ tools = [
     "pre-commit~=3.0",
     "slotscheck~=0.16.4",
     "python-dotenv~=1.0.0",
-    "check-manifest==0.49",
     "ruff==0.9.3",
     "versioningit>=3.3.0",
 ]
@@ -439,23 +438,3 @@ exclude_lines = [
     "^\\s*\\.\\.\\.$",
 ]
 
-
-[tool.check-manifest]
-ignore = [
-    # CI
-    ".pre-commit-config.yaml",
-    ".readthedocs.yml",
-    ".libcst.codemod.yaml",
-    "noxfile.py",
-    # docs
-    "CONTRIBUTING.md",
-    "RELEASE.md",
-    "assets/**",
-    "changelog/**",
-    "docs/**",
-    "examples/**",
-    # tests
-    "test_bot/**",
-    "tests/**",
-    "scripts/**",
-]
