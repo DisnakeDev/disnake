@@ -119,14 +119,6 @@ setup_env = { cmd = "{pdm} install -G:all", help = "Set up the local environment
 post_setup_env = { composite = ["python -m ensurepip --default-pip", "pre-commit install --install-hooks"] }
 test = { cmd = "nox -Rs test --", help = "Run pytest" }
 
-# legacy tasks for those who still type `task`
-[tool.taskipy.tasks]
-docs = { cmd = "docs", help = "Build the documentation for development" }
-lint = { cmd = "lint", help = "Check all files for linting errors" }
-pyright = { cmd = "pyright", help = "Run pyright" }
-setup_env = { cmd = "setup_env", help = "Setup the local environment and set up all dependencies" }
-test = { cmd = "test", help = "Run pytest" }
-
 [tool.hatch.build]
 include = [
     "disnake/",
