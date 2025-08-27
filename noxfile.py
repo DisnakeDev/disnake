@@ -81,6 +81,7 @@ def lint(session: nox.Session) -> None:
 
     session.run("pre-commit", "run", "--all-files", *session.posargs)
 
+
 @nox.session()
 def slotscheck(session: nox.Session) -> None:
     """Run slotscheck."""

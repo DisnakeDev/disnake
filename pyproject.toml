@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 
 [build-system]
-requires = ["hatchling", "versioningit>=3.3.0"]
+requires = ["hatchling", "versioningit>=3.3.0,<4.0", "packaging"]
 build-backend = "hatchling.build"
 
 [project]
@@ -133,6 +133,11 @@ include = [
 ]
 artifacts = ["disnake/_version.py"]
 
+[tool.hatch.build.targets.sdist]
+include = [
+    "scripts/versioning.py"
+]
+
 [tool.hatch.version]
 source = "versioningit"
 
@@ -148,9 +153,8 @@ distance = "{base_version}+{distance}.{vcs}{rev}"
 dirty = "{base_version}+d{build_date:%Y%m%d}"
 distance-dirty = "{base_version}.a{distance}+{vcs}{rev}.d{build_date:%Y%m%d}"
 
-[tool.versioningit.template-fields.version-tuple]
-split-on = '^(\d+)\.(\d+)\.(\d+)\.([a-zA-Z])(\d+)(?:.\d+)?'
-
+[tool.versioningit.template-fields]
+method = { module = "scripts.versioning", value = "template_fields"}
 
 [tool.versioningit.write]
 file = "disnake/_version.py"
@@ -169,11 +173,7 @@ class VersionInfo(NamedTuple):
     releaselevel: Literal["alpha", "beta", "candidate", "final"]
     serial: int
 
-
-# fmt: off
-version_info: VersionInfo = VersionInfo(*{version_tuple}[:5])
-# fmt: on
-
+version_info: VersionInfo = VersionInfo{version_tuple}
 """
 
 [tool.ruff]
@@ -437,4 +437,3 @@ exclude_lines = [
     "^\\s*raise NotImplementedError$",
     "^\\s*\\.\\.\\.$",
 ]
-
