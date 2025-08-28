@@ -25,8 +25,8 @@ if TYPE_CHECKING:
     from .types.channel import DMChannel as DMChannelPayload
     from .types.user import (
         AvatarDecorationData as AvatarDecorationDataPayload,
-        CollectiblesData as CollectiblesDataPayload,
-        NameplateData as NameplateDataPayload,
+        Collectibles as CollectiblesPayload,
+        Nameplate as NameplatePayload,
         PartialUser as PartialUserPayload,
         User as UserPayload,
     )
@@ -53,10 +53,10 @@ class BaseUser(_UserTag):
         "global_name",
         "bot",
         "system",
-        "collectibles",
         "_avatar",
         "_banner",
         "_avatar_decoration_data",
+        "_collectibles",
         "_accent_colour",
         "_public_flags",
         "_state",
@@ -73,6 +73,7 @@ class BaseUser(_UserTag):
         _avatar: Optional[str]
         _banner: Optional[str]
         _avatar_decoration_data: Optional[AvatarDecorationDataPayload]
+        _collectibles: Optional[CollectiblesPayload]
         _accent_colour: Optional[int]
         _public_flags: int
 
@@ -112,13 +113,11 @@ class BaseUser(_UserTag):
         self._avatar = data["avatar"]
         self._banner = data.get("banner", None)
         self._avatar_decoration_data = data.get("avatar_decoration_data", None)
+        self._collectibles = data.get("collectibles")
         self._accent_colour = data.get("accent_color", None)
         self._public_flags = data.get("public_flags", 0)
         self.bot = data.get("bot", False)
         self.system = data.get("system", False)
-        self.collectibles: Optional[Collectibles] = None
-        if collectibles_data := data.get("collectibles"):
-            self.collectibles = Collectibles(self._state, collectibles_data)
 
     @classmethod
     def _copy(cls, user: BaseUser) -> Self:
@@ -148,6 +147,7 @@ class BaseUser(_UserTag):
             "bot": self.bot,
             "public_flags": self._public_flags,
             "avatar_decoration_data": self._avatar_decoration_data,
+            "collectibles": self._collectibles,
         }
 
     @property
@@ -493,7 +493,7 @@ class Nameplate:
         "_asset",
     )
 
-    def __init__(self, *, state: ConnectionState, data: NameplateDataPayload) -> None:
+    def __init__(self, *, state: ConnectionState, data: NameplatePayload) -> None:
         self._state: ConnectionState = state
         self.sku_id: int = int(data["sku_id"])
         self._asset: str = data["asset"]
@@ -531,7 +531,7 @@ class Collectibles:
 
     __slots__ = ("nameplate",)
 
-    def __init__(self, state: ConnectionState, data: CollectiblesDataPayload) -> None:
+    def __init__(self, state: ConnectionState, data: CollectiblesPayload) -> None:
         self.nameplate: Optional[Nameplate] = None
         if nameplate_data := data.get("nameplate"):
             self.nameplate = Nameplate(state=state, data=nameplate_data)
