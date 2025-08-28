@@ -507,6 +507,16 @@ class Nameplate:
     def animated_asset(self) -> Asset:
         """:class:`Asset`: Returns the animated nameplate for the user.
 
+        .. note::
+
+             Since Discord always sends a WEBM for animated nameplates,
+             the following methods will not work as expected:
+
+             - :meth:`Asset.replace`
+             - :meth:`Asset.with_size`
+             - :meth:`Asset.with_format`
+             - :meth:`Asset.with_static_format`
+
         .. versionadded:: 2.11
         """
         return Asset._from_nameplate(self._state, self._asset)
