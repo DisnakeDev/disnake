@@ -500,6 +500,9 @@ class Nameplate:
         self.label: str = data["label"]
         self.palette = data["palette"]
 
+    def __repr__(self) -> str:
+        return f"<Nameplate sku_id={self.sku_id} label={self.label!r} palette={self.palette}>"
+
     @property
     def nameplate_animated_asset(self) -> Asset:
         """:class:`Asset`: Returns the animated nameplate for the user.
@@ -535,6 +538,9 @@ class Collectibles:
         self.nameplate: Optional[Nameplate] = None
         if nameplate_data := data.get("nameplate"):
             self.nameplate = Nameplate(state=state, data=nameplate_data)
+
+    def __repr__(self) -> str:
+        return f"<Collectibles nameplate={self.nameplate}>"
 
 
 class User(BaseUser, disnake.abc.Messageable):
