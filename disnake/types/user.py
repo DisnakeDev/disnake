@@ -6,7 +6,7 @@ from typing_extensions import NotRequired
 
 from .snowflake import Snowflake
 
-PaletteTypes = Literal[
+PaletteType = Literal[
     "crimson",
     "berry",
     "sky",
