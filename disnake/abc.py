@@ -1894,7 +1894,7 @@ class Messageable:
         Yields
         ------
         :class:`.Message`
-            The pinned message with the message data parsed.
+            The pinned message from the parsed message data.
         """
         from .iterators import ChannelPinsIterator  # due to cyclic imports
 
