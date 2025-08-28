@@ -65,7 +65,7 @@ tools = [
     "python-dotenv~=1.0.0",
     "check-manifest==0.49",
     "ruff==0.9.3",
-    "taskipy==1.14.1",
+    "poethepoet==0.30.0",
 ]
 changelog = [
     "towncrier==23.6.0",
@@ -106,22 +106,17 @@ default-groups = "all"
 # temporary: keep version compat with pdm locking
 fork-strategy   = "fewest"
 
-[tool.taskipy.settings]
-use_vars = true
 
-[tool.taskipy.variables]
-nox = "nox -Rs"
-
-[tool.taskipy.tasks]
-pre_build = "{nox} check-manifest"
-build = { cmd = "uv run -m build", help = "Build a safe version of disnake" }
-ci = { cmd = "{nox}", help = "Run all valid CI" }
-codemod = { cmd = "{nox} codemod autotyping --" }
-docs = { cmd = "{nox} docs --", help = "Build the documentation for development" }
-lint = { cmd = "{nox} lint --", help = "Check all files for linting errors" }
-pyright = { cmd = "{nox} pyright --", help = "Run pyright" }
-setup_env = { cmd = "pre-commit install --install-hooks && nox --install-only", use_vars = false }
-test = { cmd = "{nox} test --", help = "Run pytest" }
+[tool.poe.tasks]
+pre_build = { cmd = "nox -Rs check-manifest" }
+build = { shell = "uv run -m build", help = "Build a safe version of disnake" }
+ci = { shell = "nox -Rs", help = "Run all valid CI" }
+codemod = { shell = "nox -Rs codemod autotyping --" }
+docs = { shell = "nox -Rs docs --", help = "Build the documentation for development" }
+lint = { shell = "nox -Rs lint --", help = "Check all files for linting errors" }
+pyright = { shell = "nox -Rs pyright --", help = "Run pyright" }
+setup_env = { shell = "pre-commit install --install-hooks && nox --install-only" }
+test = { shell = "nox -Rs test --", help = "Run pytest" }
 
 [tool.ruff]
 line-length = 100

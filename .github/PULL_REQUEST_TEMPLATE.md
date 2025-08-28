@@ -8,8 +8,8 @@
 
 - [ ] If code changes were made, then they have been tested
     - [ ] I have updated the documentation to reflect the changes
-    - [ ] I have formatted the code properly by running `uv run task lint`
-    - [ ] I have type-checked the code by running `uv run task pyright`
+    - [ ] I have formatted the code properly by running `uv run poe lint`
+    - [ ] I have type-checked the code by running `uv run poe pyright`
 - [ ] This PR fixes an issue
 - [ ] This PR adds something new (e.g. new method or parameters)
 - [ ] This PR is a breaking change (e.g. methods or parameters removed/renamed)

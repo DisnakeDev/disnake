@@ -6,23 +6,29 @@ First off, thanks for taking the time to contribute! It makes the library substa
 
 The following is a set of guidelines for contributing to the repository. These are not necessarily hard rules, but they streamline the process for everyone involved.
 
-### Table of Contents
+## Table of Contents
 
-- [Bug Reports](#good-bug-reports)
-- [Creating Pull Requests](#creating-a-pull-request)
+- [Contributing to disnake](#contributing-to-disnake)
+  - [Table of Contents](#table-of-contents)
+  - [This is too much to read! I want to ask a question](#this-is-too-much-to-read-i-want-to-ask-a-question)
+  - [Good Bug Reports](#good-bug-reports)
+  - [Creating a Pull Request](#creating-a-pull-request)
     - [Overview](#overview)
     - [Initial setup](#initial-setup)
     - [Commit/PR Naming Guidelines](#commitpr-naming-guidelines)
+    - [Formatting](#formatting)
+    - [Pyright](#pyright)
+    - [Changelogs](#changelogs)
+    - [Documentation](#documentation)
 
-
-## This is too much to read! I want to ask a question!
+## This is too much to read! I want to ask a question
 
 > [!IMPORTANT]
 > Please try your best not to create new issues in the issue tracker just to ask questions, unless they provide value to a larger audience.
 
 Generally speaking, questions are better suited in our resources below.
 
-- The official Discord server: https://discord.gg/disnake
+- The official Discord server: <https://discord.gg/disnake>
 - The [FAQ in the documentation](https://docs.disnake.dev/en/latest/faq.html)
 - The project's [discussions section](https://github.com/DisnakeDev/disnake/discussions)
 
@@ -60,12 +66,12 @@ The general workflow can be summarized as follows:
 
 Specific development aspects are further explained below.
 
-
 ### Initial setup
 
 We use [`UV`][uv] as our dependency manager. If it isn't already installed on your system, you can follow the installation steps [here](https://docs.astral.sh/uv/getting-started/installation/) to get started.
 
 Once UV is installed, use the following commands to initialize a virtual environment, install the necessary development dependencies, and install the [`pre-commit`](#pre-commit) hooks.
+
 ```
 uv sync --all-extras --all-groups
 uv run pre-commit install --install-hooks
@@ -74,7 +80,6 @@ uv run pre-commit install --install-hooks
 Other tools used in this project include [ruff](https://docs.astral.sh/ruff) (formatter and linter), and [pyright](https://microsoft.github.io/pyright/#/) (type-checker). For the most part, these automatically run on every commit with no additional action required - see below for details.
 
 All of the following checks also automatically run for every PR on GitHub, so don't worry if you're not sure whether you missed anything. A PR cannot be merged as long as there are any failing checks.
-
 
 ### Commit/PR Naming Guidelines
 
@@ -96,7 +101,6 @@ While not necessarily required (but appreciated) for individual commit messages,
 Examples: `feat: support new avatar format` or `fix(gateway): use correct url for resuming connection`.  
 Details about the specific commit types can be found [here](https://github.com/commitizen/conventional-commit-types/blob/master/index.json).
 
-
 ### Formatting
 
 This project follows PEP-8 guidelines (mostly) with a column limit of 100 characters, and uses the tools mentioned above to enforce a consistent coding style.
@@ -105,23 +109,24 @@ The installed [`pre-commit`](https://pre-commit.com/) hooks will automatically r
 to match the project's style. Note that you will have to stage and commit again if anything was updated!  
 Most of the time, running pre-commit will automatically fix any issues that arise.
 
-
 ### Pyright
 
-For type-checking, run `uv run task pyright` (append `-w` to have it automatically re-check on every file change).
+For type-checking, run `uv run poe pyright` (append `-w` to have it automatically re-check on every file change).
 > [!NOTE]
 > If you're using VSCode and pylance, it will use the same type-checking settings, which generally means that you don't necessarily have to run `pyright` separately.  
 > However, since we use a specific version of `pyright` (which may not match pylance's version), there can be version differences which may lead to different results.
-
 
 ### Changelogs
 
 We use [towncrier](https://github.com/twisted/towncrier) for managing our changelogs. Each change is required to have at least one file in the [`changelog/`](changelog/README.rst) directory, unless it's a trivial change. There is more documentation in that directory on how to create a changelog entry.
 
-
 ### Documentation
-We use Sphinx to build the project's documentation, which includes [automatically generating](https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html) the API Reference from docstrings using the [NumPy style](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_numpy.html).  
-To build the documentation locally, use `uv run task docs` and visit http://127.0.0.1:8009/ once built.
 
+We use Sphinx to build the project's documentation, which includes [automatically generating](https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html) the API Reference from docstrings using the [NumPy style](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_numpy.html).  
+To build the documentation locally, use `uv run poe docs` and visit <http://127.0.0.1:8009/> once built.
+
+## Migrating from `pdm` to `uv`
+
+We've recently migrated to [`uv`][uv] for dependency and environment management for local development, a few years since we moved to `pdm` (move fast, second guess is our motto!) in hopes of a more satifying developer experience
 
 [uv]: https://docs.astral.sh/uv
