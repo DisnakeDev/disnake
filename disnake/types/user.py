@@ -26,15 +26,15 @@ class AvatarDecorationData(TypedDict):
     sku_id: Snowflake
 
 
-class NameplateData(TypedDict):
+class Nameplate(TypedDict):
     sku_id: Snowflake
     asset: str
     label: str
     palette: PaletteTypes
 
 
-class CollectiblesData(TypedDict, total=False):
-    nameplate: NameplateData
+class Collectibles(TypedDict, total=False):
+    nameplate: Nameplate
 
 
 class PartialUser(TypedDict):
