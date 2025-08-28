@@ -30,7 +30,7 @@ class Nameplate(TypedDict):
     sku_id: Snowflake
     asset: str
     label: str
-    palette: PaletteTypes
+    palette: PaletteType
 
 
 class Collectibles(TypedDict, total=False):
