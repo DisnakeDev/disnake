@@ -61,7 +61,7 @@ jobs:
       - name: Set up environment
         uses: ./.github/actions/setup-env
         with:
-          python-version: 3.8
+          python-version: 3.11
 
       - name: Run sphinx-build
         run: nox -s docs -- --keep-going -W -w $GITHUB_STEP_SUMMARY
