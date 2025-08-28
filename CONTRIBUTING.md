@@ -127,6 +127,10 @@ To build the documentation locally, use `uv run poe docs` and visit <http://127.
 
 ## Migrating from `pdm` to `uv`
 
-We've recently migrated to [`uv`][uv] for dependency and environment management for local development, a few years since we moved to `pdm` (move fast, second guess is our motto!) in hopes of a more satifying developer experience
+We've recently migrated to [`uv`][uv] for dependency and environment management for local development, a few years since we moved to `pdm` (move fast, second guess is our motto!) in hopes of a less friction-filled developer experience.
+
+1. run `uv sync --all-extras`
+2. delete `pdm.lock`
+3. run `uv run poe setup_env`to refresh the installation of pre-commit, and the nox environments.
 
 [uv]: https://docs.astral.sh/uv
