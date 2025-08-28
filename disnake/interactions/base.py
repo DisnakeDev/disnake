@@ -227,7 +227,7 @@ class Interaction(Generic[ClientT]):
         self._state: ConnectionState = state
         # TODO: Maybe use a unique session
         self._session: ClientSession = state.http._HTTPClient__session  # type: ignore
-        self.client: ClientT = cast(ClientT, state._get_client())
+        self.client: ClientT = cast("ClientT", state._get_client())
         self._original_response: Optional[InteractionMessage] = None
 
         self.id: int = int(data["id"])
