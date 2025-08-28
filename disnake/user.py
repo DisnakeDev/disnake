@@ -225,6 +225,16 @@ class BaseUser(_UserTag):
         return Asset._from_avatar_decoration(self._state, self._avatar_decoration_data["asset"])
 
     @property
+    def collectibles(self) -> Collectibles:
+        """:class:`Collectibles`: Returns the user's collectibles.
+
+        .. versionadded:: 2.11
+        """
+        return Collectibles(
+            state=self._state, data=(self._collectibles if self._collectibles else {})
+        )
+
+    @property
     def accent_colour(self) -> Optional[Colour]:
         """Optional[:class:`Colour`]: Returns the user's accent colour, if applicable.
 
