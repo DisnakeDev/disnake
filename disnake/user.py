@@ -504,7 +504,7 @@ class Nameplate:
         return f"<Nameplate sku_id={self.sku_id} label={self.label!r} palette={self.palette}>"
 
     @property
-    def nameplate_animated_asset(self) -> Asset:
+    def animated_asset(self) -> Asset:
         """:class:`Asset`: Returns the animated nameplate for the user.
 
         .. versionadded:: 2.11
@@ -512,7 +512,7 @@ class Nameplate:
         return Asset._from_nameplate(self._state, self._asset)
 
     @property
-    def nameplate_static_asset(self) -> Asset:
+    def static_asset(self) -> Asset:
         """:class:`Asset`: Returns the static nameplate for the user.
 
         .. versionadded:: 2.11
