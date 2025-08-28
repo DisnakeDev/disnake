@@ -167,7 +167,6 @@ ignore = [
     "D416", # section name should end with a colon, incompatible with D406
 
     # unknown if this is actually an issue
-    "RUF005", # might not be actually faster
     "RUF006", # might not be an issue/very extreme cases
 
     # we keep __all__ and __slots__ (roughly) sorted by source, not alphabetically

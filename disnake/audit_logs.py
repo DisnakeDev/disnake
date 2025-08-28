@@ -670,6 +670,7 @@ class AuditLogEntry(Hashable):
                 enums.AuditLogAction.automod_block_message,
                 enums.AuditLogAction.automod_send_alert_message,
                 enums.AuditLogAction.automod_timeout,
+                enums.AuditLogAction.automod_quarantine_user,
             ):
                 elems = {
                     "channel": (
@@ -826,6 +827,7 @@ class AuditLogEntry(Hashable):
             "uses": changeset.uses,
             "type": 0,
             "channel": None,
+            "expires_at": None,
         }
 
         obj = Invite(

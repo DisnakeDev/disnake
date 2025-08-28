@@ -240,11 +240,12 @@ def isoformat_utc(dt: Optional[datetime.datetime]) -> Optional[str]:
     return None
 
 
-def copy_doc(original: Callable) -> Callable[[T], T]:
-    def decorator(overriden: T) -> T:
-        overriden.__doc__ = original.__doc__
-        overriden.__signature__ = _signature(original)  # type: ignore
-        return overriden
+def copy_doc(original: Union[Callable, property]) -> Callable[[T], T]:
+    def decorator(overridden: T) -> T:
+        overridden.__doc__ = original.__doc__
+        if callable(original):
+            overridden.__signature__ = _signature(original)  # type: ignore
+        return overridden
 
     return decorator
 
@@ -1134,7 +1135,7 @@ def flatten_literal_params(parameters: Iterable[Any]) -> Tuple[Any, ...]:
 
 def normalise_optional_params(parameters: Iterable[Any]) -> Tuple[Any, ...]:
     none_cls = type(None)
-    return tuple(p for p in parameters if p is not none_cls) + (none_cls,)
+    return (*tuple(p for p in parameters if p is not none_cls), none_cls)
 
 
 def _resolve_typealiastype(

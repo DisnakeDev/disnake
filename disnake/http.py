@@ -1927,12 +1927,10 @@ class HTTPClient:
         invite_id: str,
         *,
         with_counts: bool = True,
-        with_expiration: bool = True,
         guild_scheduled_event_id: Optional[int] = None,
     ) -> Response[invite.Invite]:
         params = {
             "with_counts": int(with_counts),
-            "with_expiration": int(with_expiration),
         }
         if guild_scheduled_event_id:
             params["guild_scheduled_event_id"] = guild_scheduled_event_id

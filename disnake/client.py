@@ -2234,8 +2234,8 @@ class Client:
         url: Union[Invite, str],
         *,
         with_counts: bool = True,
-        with_expiration: bool = True,
         guild_scheduled_event_id: Optional[int] = None,
+        with_expiration: bool = False,
     ) -> Invite:
         """|coro|
 
@@ -2255,12 +2255,6 @@ class Client:
             Whether to include count information in the invite. This fills the
             :attr:`.Invite.approximate_member_count` and :attr:`.Invite.approximate_presence_count`
             fields.
-        with_expiration: :class:`bool`
-            Whether to include the expiration date of the invite. This fills the
-            :attr:`.Invite.expires_at` field.
-
-            .. versionadded:: 2.0
-
         guild_scheduled_event_id: :class:`int`
             The ID of the scheduled event to include in the invite.
             If not provided, defaults to the ``event`` parameter in the URL if it exists,
@@ -2280,6 +2274,14 @@ class Client:
         :class:`.Invite`
             The invite from the URL/ID.
         """
+        if with_expiration:
+            utils.warn_deprecated(
+                "Using the `with_expiration` argument is deprecated and will "
+                "result in an error in future versions. "
+                "The `expires_at` field is always included now.",
+                stacklevel=2,
+            )
+
         invite_id, params = utils.resolve_invite(url, with_params=True)
 
         if not guild_scheduled_event_id:
@@ -2292,7 +2294,6 @@ class Client:
         data = await self.http.get_invite(
             invite_id,
             with_counts=with_counts,
-            with_expiration=with_expiration,
             guild_scheduled_event_id=guild_scheduled_event_id,
         )
         return Invite.from_incomplete(state=self._connection, data=data)
