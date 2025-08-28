@@ -1545,7 +1545,13 @@ class Message(Hashable):
 
     @property
     def pinned_at(self) -> Optional[datetime.datetime]:
-        """Optional[:class:`datetime.datetime`]: An aware UTC datetime object containing the pin time of the message."""
+        """Optional[:class:`datetime.datetime`]: An aware UTC datetime object containing the pin time of the message.
+
+        .. note::
+            This is only set on messages retrieved using :meth:`abc.Messageable.pins`.
+        
+        .. versionadded:: 2.11
+        """
         return self._pinned_at
 
     @property
