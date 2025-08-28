@@ -379,10 +379,6 @@ class ClientUser(BaseUser):
 
     mfa_enabled: :class:`bool`
         Specifies if the user has MFA turned on and working.
-    collectibles: Optional[:class:`Collectibles`]
-        The collectibles the user has, if available.
-
-        .. versionadded:: 2.11
     """
 
     __slots__ = ("locale", "_flags", "verified", "mfa_enabled", "__weakref__")
@@ -611,10 +607,6 @@ class User(BaseUser, disnake.abc.Messageable):
         Specifies if the user is a bot account.
     system: :class:`bool`
         Specifies if the user is a system user (i.e. represents Discord officially).
-    collectibles: Optional[:class:`Collectibles`]
-        The collectibles the user has, if available.
-
-        .. versionadded:: 2.11
     """
 
     __slots__ = ("__weakref__",)
