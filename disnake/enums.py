@@ -78,6 +78,7 @@ __all__ = (
     "VoiceChannelEffectAnimationType",
     "MessageReferenceType",
     "SeparatorSpacing",
+    "NameplatePalette",
 )
 
 
@@ -2386,6 +2387,25 @@ class SeparatorSpacing(Enum):
     """Small spacing."""
     large = 2
     """Large spacing."""
+
+
+class NameplatePalette(Enum):
+    """Specifies the palette of a :class:`Nameplate`.
+
+    .. versionadded:: 2.11
+    """
+
+    crimson = "crimson"
+    berry = "berry"
+    sky = "sky"
+    teal = "teal"
+    forest = "forest"
+    bubble_gum = "bubble_gum"
+    violet = "violet"
+    cobalt = "cobalt"
+    clover = "clover"
+    lemon = "lemon"
+    white = "white"
 
 
 T = TypeVar("T")

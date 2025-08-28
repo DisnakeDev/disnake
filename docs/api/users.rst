@@ -76,6 +76,12 @@ DefaultAvatar
 .. autoclass:: DefaultAvatar()
     :members:
 
+NameplatePalette
+~~~~~~~~~~~~~~~~
+
+.. autoclass:: NameplatePalette()
+    :members:
+
 Events
 ------
 

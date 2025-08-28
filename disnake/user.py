@@ -8,7 +8,7 @@ import disnake.abc
 
 from .asset import Asset
 from .colour import Colour
-from .enums import Locale, try_enum
+from .enums import Locale, NameplatePalette, try_enum
 from .flags import PublicUserFlags
 from .utils import MISSING, _assetbytes_to_base64_data, snowflake_time
 
@@ -491,7 +491,7 @@ class Nameplate:
         The ID of the nameplate SKU.
     label: :class:`str`
         The label of this nameplate.
-    palette: :class:`str`
+    palette: :class:`NameplatePalette`
         The background color of the nameplate.
     """
 
@@ -508,7 +508,7 @@ class Nameplate:
         self.sku_id: int = int(data["sku_id"])
         self._asset: str = data["asset"]
         self.label: str = data["label"]
-        self.palette = data["palette"]
+        self.palette = try_enum(NameplatePalette, data["palette"])
 
     def __repr__(self) -> str:
         return f"<Nameplate sku_id={self.sku_id} label={self.label!r} palette={self.palette}>"
