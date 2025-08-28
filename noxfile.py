@@ -212,7 +212,6 @@ def pyright(session: nox.Session) -> None:
         "docs",
         "codemod",
         "typing",
-        "build",
         "tools",
     )
     env = {
