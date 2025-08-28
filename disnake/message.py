@@ -1549,7 +1549,7 @@ class Message(Hashable):
 
         .. note::
             This is only set on messages retrieved using :meth:`abc.Messageable.pins`.
-        
+
         .. versionadded:: 2.11
         """
         return self._pinned_at
