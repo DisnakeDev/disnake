@@ -532,9 +532,11 @@ class Collectibles:
     __slots__ = ("nameplate",)
 
     def __init__(self, state: ConnectionState, data: CollectiblesDataPayload) -> None:
-        self.nameplate: Optional[Nameplate] = None
-        if nameplate_data := data.get("nameplate"):
-            self.nameplate = Nameplate(state=state, data=nameplate_data)
+        self.nameplate: Optional[Nameplate] = (
+            Nameplate(state=state, data=nameplate_data)
+            if (nameplate_data := data.get("nameplate"))
+            else None
+        )
 
 
 class User(BaseUser, disnake.abc.Messageable):
