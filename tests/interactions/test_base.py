@@ -159,6 +159,7 @@ class TestInteractionDataResolved:
             "discriminator": "1111",
             "username": "h",
             "avatar": None,
+            "collectibles": None,
         }
 
         # user only, should deserialize user object
