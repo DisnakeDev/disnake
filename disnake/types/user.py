@@ -43,6 +43,7 @@ class PartialUser(TypedDict):
     discriminator: str  # may be removed in future API versions
     global_name: NotRequired[Optional[str]]
     avatar: Optional[str]
+    collectibles: Optional[Collectibles]
 
 
 PremiumType = Literal[0, 1, 2]
@@ -61,4 +62,3 @@ class User(PartialUser, total=False):
     premium_type: PremiumType
     public_flags: int
     avatar_decoration_data: Optional[AvatarDecorationData]
-    collectibles: Optional[CollectiblesData]
