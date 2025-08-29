@@ -48,6 +48,8 @@ from typing import (
 )
 from urllib.parse import parse_qs, urlencode
 
+from typing_extensions import Self
+
 from .enums import Locale
 
 try:
@@ -689,8 +691,8 @@ class SnowflakeList(array.array):
 
         def __init__(self, data: Iterable[int], *, is_sorted: bool = False) -> None: ...
 
-    def __new__(cls, data: Iterable[int], *, is_sorted: bool = False):
-        return array.array.__new__(cls, "Q", data if is_sorted else sorted(data))
+    def __new__(cls, data: Iterable[int], *, is_sorted: bool = False) -> Self:
+        return array.array.__new__(cls, "Q", data if is_sorted else sorted(data))  # type: ignore
 
     def add(self, element: int) -> None:
         i = bisect_left(self, element)
