@@ -58,6 +58,8 @@ jobs:
     needs: lock-dependencies
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: '0'
 
     - name: Set up environment
       uses: ./.github/actions/setup-env
@@ -125,6 +127,9 @@ jobs:
     needs: lock-dependencies
     steps:
     - uses: actions/checkout@v4
+      with:
+          fetch-depth: '0'
+
 
     - name: Set up environment
       id: setup
@@ -135,10 +140,6 @@ jobs:
     - name: Run slotscheck
       if: (success() || failure()) && steps.setup.outcome == 'success'
       run: nox -s slotscheck
-
-    - name: Run check-manifest
-      if: (success() || failure()) && steps.setup.outcome == 'success'
-      run: nox -s check-manifest
 
     # This only runs if the previous steps were successful, no point in running it otherwise
     - name: Try building package
