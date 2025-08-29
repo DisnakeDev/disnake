@@ -914,7 +914,7 @@ class TextInput(Component):
             "type": self.type.value,
             "id": self.id,
             "style": self.style.value,
-            "label": cast(str, self.label),
+            "label": cast("str", self.label),
             "custom_id": self.custom_id,
             "required": self.required,
         }
