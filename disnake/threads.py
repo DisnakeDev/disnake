@@ -6,12 +6,14 @@ import asyncio
 import time
 from typing import TYPE_CHECKING, Callable, Dict, Iterable, List, Literal, Optional, Sequence, Union
 
-from .abc import Messageable
+from .abc import GuildChannel, Messageable
 from .enums import ChannelType, ThreadArchiveDuration, try_enum, try_enum_to_int
 from .errors import ClientException
 from .flags import ChannelFlags
 from .mixins import Hashable
+from .object import Object
 from .partial_emoji import PartialEmoji, _EmojiTag
+from .permissions import Permissions
 from .utils import MISSING, _get_as_snowflake, _unique, parse_time, snowflake_time
 
 __all__ = (
@@ -26,12 +28,11 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from .abc import Snowflake, SnowflakeTime
-    from .channel import CategoryChannel, ForumChannel, TextChannel
+    from .channel import CategoryChannel, ForumChannel, MediaChannel, TextChannel
     from .emoji import Emoji
     from .guild import Guild
     from .member import Member
     from .message import Message, PartialMessage
-    from .permissions import Permissions
     from .role import Role
     from .state import ConnectionState
     from .types.snowflake import SnowflakeList
@@ -54,7 +55,7 @@ if TYPE_CHECKING:
 class Thread(Messageable, Hashable):
     """Represents a Discord thread.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -83,7 +84,7 @@ class Thread(Messageable, Hashable):
     id: :class:`int`
         The thread ID.
     parent_id: :class:`int`
-        The parent :class:`TextChannel` or :class:`ForumChannel` ID this thread belongs to.
+        The parent :class:`TextChannel`, :class:`ForumChannel`, or :class:`MediaChannel` ID this thread belongs to.
     owner_id: Optional[:class:`int`]
         The user's ID that created this thread.
     last_message_id: Optional[:class:`int`]
@@ -242,14 +243,16 @@ class Thread(Messageable, Hashable):
         return self._type
 
     @property
-    def parent(self) -> Optional[Union[TextChannel, ForumChannel]]:
-        """Optional[Union[:class:`TextChannel`, :class:`ForumChannel`]]: The parent channel this thread belongs to."""
+    def parent(self) -> Optional[Union[TextChannel, ForumChannel, MediaChannel]]:
+        """Optional[Union[:class:`TextChannel`, :class:`ForumChannel`, :class:`MediaChannel`]]: The parent channel this thread belongs to."""
+        if isinstance(self.guild, Object):
+            return None
         return self.guild.get_channel(self.parent_id)  # type: ignore
 
     @property
     def owner(self) -> Optional[Member]:
         """Optional[:class:`Member`]: The member this thread belongs to."""
-        if self.owner_id is None:
+        if self.owner_id is None or isinstance(self.guild, Object):
             return None
         return self.guild.get_member(self.owner_id)
 
@@ -332,7 +335,7 @@ class Thread(Messageable, Hashable):
         """:class:`datetime.datetime`: Returns the thread's creation time in UTC.
 
         .. versionchanged:: 2.4
-            If create_timestamp is provided by discord, that will be used instead of the time in the ID.
+            If ``create_timestamp`` is provided by Discord, that will be used instead of the time in the ID.
         """
         return self.create_timestamp or snowflake_time(self.id)
 
@@ -384,7 +387,7 @@ class Thread(Messageable, Hashable):
         return parent is not None and parent.is_nsfw()
 
     def is_pinned(self) -> bool:
-        """Whether the thread is pinned in a :class:`ForumChannel`
+        """Whether the thread is pinned in a :class:`ForumChannel` or :class:`MediaChannel`.
 
         Pinned threads are not affected by the auto archive duration.
 
@@ -399,14 +402,14 @@ class Thread(Messageable, Hashable):
     @property
     def applied_tags(self) -> List[ForumTag]:
         """List[:class:`ForumTag`]: The tags currently applied to this thread.
-        Only applicable to threads in :class:`ForumChannel`\\s.
+        Only applicable to threads in channels of type :class:`ForumChannel` or :class:`MediaChannel`.
 
         .. versionadded:: 2.6
         """
-        from .channel import ForumChannel  # cyclic import
+        from .channel import ThreadOnlyGuildChannel  # cyclic import
 
         parent = self.parent
-        if not isinstance(parent, ForumChannel):
+        if not isinstance(parent, ThreadOnlyGuildChannel):
             return []
 
         # threads may have tag IDs for tags that don't exist anymore
@@ -423,9 +426,22 @@ class Thread(Messageable, Hashable):
         or :class:`~disnake.Role`.
 
         Since threads do not have their own permissions, they inherit them
-        from the parent channel. This is a convenience method for
-        calling :meth:`~disnake.TextChannel.permissions_for` on the
-        parent channel.
+        from the parent channel.
+        However, the permission context is different compared to a normal channel,
+        so this method has different behavior than calling the parent's
+        :attr:`GuildChannel.permissions_for <.abc.GuildChannel.permissions_for>`
+        method directly.
+
+        .. note::
+            If the thread originated from an :class:`.Interaction` and
+            the :attr:`.guild` attribute is unavailable, such as with
+            user-installed applications in guilds, this method will not work
+            due to an API limitation.
+            Consider using :attr:`.Interaction.permissions` or :attr:`~.Interaction.app_permissions` instead.
+
+        .. versionchanged:: 2.9
+            Properly takes :attr:`Permissions.send_messages_in_threads`
+            into consideration.
 
         Parameters
         ----------
@@ -460,7 +476,25 @@ class Thread(Messageable, Hashable):
         parent = self.parent
         if parent is None:
             raise ClientException("Parent channel not found")
-        return parent.permissions_for(obj, ignore_timeout=ignore_timeout)
+        # n.b. GuildChannel is used here so implicit overrides are not applied based on send_messages
+        base = GuildChannel.permissions_for(parent, obj, ignore_timeout=ignore_timeout)
+
+        # if you can't send a message in a channel then you can't have certain
+        # permissions as well
+        if not base.send_messages_in_threads:
+            base.send_tts_messages = False
+            base.send_voice_messages = False
+            base.send_polls = False
+            base.mention_everyone = False
+            base.embed_links = False
+            base.attach_files = False
+
+        # if you can't view a channel then you have no permissions there
+        if not base.view_channel:
+            denied = Permissions.all_channel()
+            base.value &= ~denied.value
+
+        return base
 
     async def delete_messages(self, messages: Iterable[Snowflake]) -> None:
         """|coro|
@@ -674,7 +708,7 @@ class Thread(Messageable, Hashable):
             Specifies the slowmode rate limit for users in this thread, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
         pinned: :class:`bool`
-            Whether to pin the thread or not. This is only available for threads created in a :class:`ForumChannel`.
+            Whether to pin the thread or not. This is only available for threads created in a :class:`ForumChannel` or :class:`MediaChannel`.
 
             .. versionadded:: 2.5
 
@@ -688,7 +722,7 @@ class Thread(Messageable, Hashable):
             The new tags of the thread. Maximum of 5.
             Can also be used to reorder existing tags.
 
-            This is only available for threads in a :class:`ForumChannel`.
+            This is only available for threads in a :class:`ForumChannel` or :class:`MediaChannel`.
 
             If :attr:`~ForumTag.moderated` tags are edited, :attr:`Permissions.manage_threads`
             permissions are required.
@@ -808,7 +842,7 @@ class Thread(Messageable, Hashable):
         Parameters
         ----------
         user: :class:`abc.Snowflake`
-            The user to add to the thread.
+            The user to remove from the thread.
 
         Raises
         ------
@@ -871,7 +905,7 @@ class Thread(Messageable, Hashable):
         Deletes this thread.
 
         You must have :attr:`~Permissions.manage_threads` to delete threads.
-        Alternatively, you may delete a thread if it's in a :class:`ForumChannel`,
+        Alternatively, you may delete a thread if it's in a :class:`ForumChannel` or :class:`MediaChannel`,
         you are the thread creator, and there are no messages other than the initial message.
 
         Parameters
@@ -895,7 +929,7 @@ class Thread(Messageable, Hashable):
 
         Adds the given tags to this thread, up to 5 in total.
 
-        The thread must be in a :class:`ForumChannel`.
+        The thread must be in a :class:`ForumChannel` or :class:`MediaChannel`.
 
         Adding tags requires you to have :attr:`.Permissions.manage_threads` permissions,
         or be the owner of the thread.
@@ -932,7 +966,7 @@ class Thread(Messageable, Hashable):
 
         Removes the given tags from this thread.
 
-        The thread must be in a :class:`ForumChannel`.
+        The thread must be in a :class:`ForumChannel` or :class:`MediaChannel`.
 
         Removing tags requires you to have :attr:`.Permissions.manage_threads` permissions,
         or be the owner of the thread.
@@ -995,7 +1029,7 @@ class Thread(Messageable, Hashable):
 class ThreadMember(Hashable):
     """Represents a Discord thread member.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -1067,9 +1101,9 @@ class ThreadMember(Hashable):
 
 
 class ForumTag(Hashable):
-    """Represents a tag for threads in forum channels.
+    """Represents a tag for threads in forum/media channels.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -1160,6 +1194,14 @@ class ForumTag(Hashable):
             f" moderated={self.moderated!r} emoji={self.emoji!r}>"
         )
 
+    @property
+    def created_at(self) -> datetime.datetime:
+        """:class:`datetime.datetime`: Returns the tag's creation time in UTC.
+
+        .. versionadded:: 2.10
+        """
+        return snowflake_time(self.id)
+
     def to_dict(self) -> PartialForumTagPayload:
         emoji_name, emoji_id = PartialEmoji._emoji_to_name_id(self.emoji)
         data: PartialForumTagPayload = {
@@ -1198,7 +1240,7 @@ class ForumTag(Hashable):
         moderated: bool = MISSING,
     ) -> Self:
         """Returns a new instance with the given changes applied,
-        for easy use with :func:`ForumChannel.edit`.
+        for easy use with :func:`ForumChannel.edit` or :func:`MediaChannel.edit`.
         All other fields will be kept intact.
 
         Returns

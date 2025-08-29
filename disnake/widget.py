@@ -34,7 +34,7 @@ __all__ = (
 class WidgetChannel:
     """Represents a "partial" widget channel.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -89,7 +89,7 @@ class WidgetChannel:
 class WidgetMember(BaseUser):
     """Represents a "partial" member of the widget's guild.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -262,7 +262,7 @@ class WidgetSettings:
 class Widget:
     """Represents a :class:`Guild` widget.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -325,7 +325,9 @@ class Widget:
             elif connected_channel:
                 connected_channel = WidgetChannel(id=connected_channel, name="", position=0)
 
-            self.members.append(WidgetMember(state=self._state, data=member, connected_channel=connected_channel))  # type: ignore
+            self.members.append(
+                WidgetMember(state=self._state, data=member, connected_channel=connected_channel)  # type: ignore
+            )
 
     def __str__(self) -> str:
         return self.json_url

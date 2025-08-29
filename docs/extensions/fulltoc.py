@@ -24,14 +24,13 @@ of a parent page.
 
 # Changes made:
 # - added typehinting
-# - formatted with black
+# - formatted with ruff
 # - refactored generated toc to suit project documentation structure
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, List, cast
 
-from _types import SphinxExtensionMeta
 from docutils import nodes
 from sphinx import addnodes
 
@@ -39,6 +38,8 @@ if TYPE_CHECKING:
     from sphinx.application import Sphinx
     from sphinx.builders.html import StandaloneHTMLBuilder
     from sphinx.environment import BuildEnvironment
+
+    from ._types import SphinxExtensionMeta
 
 # {prefix: index_doc} mapping
 # Any document that matches `prefix` will use `index_doc`'s toctree instead.

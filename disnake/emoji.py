@@ -28,7 +28,7 @@ class Emoji(_EmojiTag, AssetMixin):
     Depending on the way this object was created, some of the attributes can
     have a value of ``None``.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -151,7 +151,7 @@ class Emoji(_EmojiTag, AssetMixin):
         and count towards a separate limit of 25 emojis.
         """
         guild = self.guild
-        if guild is None:
+        if guild is None:  # pyright: ignore[reportUnnecessaryComparison]
             return []
 
         return [role for role in guild.roles if self._roles.has(role.id)]
@@ -192,7 +192,7 @@ class Emoji(_EmojiTag, AssetMixin):
         Raises
         ------
         Forbidden
-            You are not allowed to delete emojis.
+            You are not allowed to delete this emoji.
         HTTPException
             An error occurred deleting the emoji.
         """
@@ -227,7 +227,7 @@ class Emoji(_EmojiTag, AssetMixin):
         Raises
         ------
         Forbidden
-            You are not allowed to edit emojis.
+            You are not allowed to edit this emoji.
         HTTPException
             An error occurred editing the emoji.
 

@@ -6,8 +6,10 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
+    ClassVar,
     Dict,
     List,
+    Mapping,
     Optional,
     Tuple,
     Type,
@@ -16,8 +18,9 @@ from typing import (
     overload,
 )
 
+from ...abc import Snowflake
 from ...components import SelectOption, StringSelectMenu
-from ...enums import ComponentType
+from ...enums import ComponentType, SelectDefaultValueType
 from ...utils import MISSING
 from .base import BaseSelect, P, V_co, _create_decorator
 
@@ -26,7 +29,7 @@ if TYPE_CHECKING:
 
     from ...emoji import Emoji
     from ...partial_emoji import PartialEmoji
-    from ..item import DecoratedItem, ItemCallbackType, Object
+    from ..item import DecoratedItem, ItemCallbackType
 
 
 __all__ = (
@@ -83,6 +86,12 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
 
     disabled: :class:`bool`
         Whether the select is disabled.
+    id: :class:`int`
+        The numeric identifier for the component. Must be unique within the message.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
+
+        .. versionadded:: 2.11
     row: Optional[:class:`int`]
         The relative row this select menu belongs to. A Discord component can only have 5
         rows. By default, items are arranged automatically into those 5 rows. If you'd
@@ -96,7 +105,12 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         A list of values that have been selected by the user.
     """
 
-    __repr_attributes__: Tuple[str, ...] = BaseSelect.__repr_attributes__ + ("options",)
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (*BaseSelect.__repr_attributes__, "options")
+
+    # In practice this should never be used by anything, might as well have it anyway though.
+    _default_value_type_map: ClassVar[
+        Mapping[SelectDefaultValueType, Tuple[Type[Snowflake], ...]]
+    ] = {}
 
     @overload
     def __init__(
@@ -108,9 +122,9 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         max_values: int = 1,
         options: SelectOptionInput = ...,
         disabled: bool = False,
+        id: int = 0,
         row: Optional[int] = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     def __init__(
@@ -122,9 +136,9 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         max_values: int = 1,
         options: SelectOptionInput = ...,
         disabled: bool = False,
+        id: int = 0,
         row: Optional[int] = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     def __init__(
         self,
@@ -135,6 +149,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         max_values: int = 1,
         options: SelectOptionInput = MISSING,
         disabled: bool = False,
+        id: int = 0,
         row: Optional[int] = None,
     ) -> None:
         super().__init__(
@@ -145,6 +160,8 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
             min_values=min_values,
             max_values=max_values,
             disabled=disabled,
+            default_values=None,
+            id=id,
             row=row,
         )
         self._underlying.options = [] if options is MISSING else _parse_select_options(options)
@@ -158,6 +175,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
             max_values=component.max_values,
             options=component.options,
             disabled=component.disabled,
+            id=component.id,
             row=None,
         )
 
@@ -255,23 +273,20 @@ def string_select(
     max_values: int = 1,
     options: SelectOptionInput = ...,
     disabled: bool = False,
+    id: int = 0,
     row: Optional[int] = None,
-) -> Callable[[ItemCallbackType[StringSelect[V_co]]], DecoratedItem[StringSelect[V_co]]]:
-    ...
+) -> Callable[[ItemCallbackType[V_co, StringSelect[V_co]]], DecoratedItem[StringSelect[V_co]]]: ...
 
 
 @overload
 def string_select(
-    cls: Type[Object[S_co, P]], *_: P.args, **kwargs: P.kwargs
-) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
-    ...
+    cls: Callable[P, S_co], *_: P.args, **kwargs: P.kwargs
+) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]: ...
 
 
 def string_select(
-    cls: Type[Object[S_co, P]] = StringSelect[Any],
-    /,
-    **kwargs: Any,
-) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
+    cls: Callable[..., S_co] = StringSelect[Any], **kwargs: Any
+) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
     """A decorator that attaches a string select menu to a component.
 
     The function being decorated should have three parameters, ``self`` representing
@@ -286,24 +301,17 @@ def string_select(
 
     Parameters
     ----------
-    cls: Type[:class:`StringSelect`]
-        The select subclass to create an instance of. If provided, the following parameters
-        described below do no apply. Instead, this decorator will accept the same keywords
-        as the passed cls does.
+    cls: Callable[..., :class:`StringSelect`]
+        A callable (may be a :class:`StringSelect` subclass) to create a new instance of this component.
+        If provided, the other parameters described below do not apply.
+        Instead, this decorator will accept the same keywords as the passed callable/class does.
 
         .. versionadded:: 2.6
-
     placeholder: Optional[:class:`str`]
         The placeholder text that is shown if nothing is selected, if any.
     custom_id: :class:`str`
         The ID of the select menu that gets received during an interaction.
         It is recommended not to set this parameter to prevent conflicts.
-    row: Optional[:class:`int`]
-        The relative row this select menu belongs to. A Discord component can only have 5
-        rows. By default, items are arranged automatically into those 5 rows. If you'd
-        like to control the relative positioning of the row then passing an index is advised.
-        For example, row=1 will show up before row=2. Defaults to ``None``, which is automatic
-        ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     min_values: :class:`int`
         The minimum number of items that must be chosen for this select menu.
         Defaults to 1 and must be between 1 and 25.
@@ -321,8 +329,20 @@ def string_select(
 
     disabled: :class:`bool`
         Whether the select is disabled. Defaults to ``False``.
+    id: :class:`int`
+        The numeric identifier for the component. Must be unique within the message.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
+
+        .. versionadded:: 2.11
+    row: Optional[:class:`int`]
+        The relative row this select menu belongs to. A Discord component can only have 5
+        rows. By default, items are arranged automatically into those 5 rows. If you'd
+        like to control the relative positioning of the row then passing an index is advised.
+        For example, row=1 will show up before row=2. Defaults to ``None``, which is automatic
+        ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     """
-    return _create_decorator(cls, StringSelect, **kwargs)
+    return _create_decorator(cls, **kwargs)
 
 
 select = string_select  # backwards compatibility

@@ -34,6 +34,14 @@ RawGuildMemberRemoveEvent
 .. autoclass:: RawGuildMemberRemoveEvent()
     :members:
 
+RawPresenceUpdateEvent
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: RawPresenceUpdateEvent
+
+.. autoclass:: RawPresenceUpdateEvent()
+    :members:
+
 Events
 ------
 
@@ -45,4 +53,5 @@ Events
 - :func:`on_member_ban(guild, user) <disnake.on_member_ban>`
 - :func:`on_member_unban(guild, user) <disnake.on_member_unban>`
 - :func:`on_presence_update(before, after) <disnake.on_presence_update>`
+- :func:`on_raw_presence_update(payload) <disnake.on_raw_presence_update>`
 - :func:`on_user_update(before, after) <disnake.on_user_update>`

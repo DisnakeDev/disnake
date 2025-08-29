@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from disnake.threads import Thread
     from disnake.types.snowflake import Snowflake, SnowflakeList
 
-    from .context import Context
+    from .context import AnyContext
     from .cooldowns import BucketType, Cooldown
     from .flag_converter import Flag
 
@@ -49,6 +49,7 @@ __all__ = (
     "BadInviteArgument",
     "EmojiNotFound",
     "GuildStickerNotFound",
+    "GuildSoundboardSoundNotFound",
     "GuildScheduledEventNotFound",
     "PartialEmojiConversionFailure",
     "BadBoolArgument",
@@ -181,7 +182,8 @@ class BadArgument(UserInputError):
 
 
 class CheckFailure(CommandError):
-    """Exception raised when the predicates in :attr:`.Command.checks` have failed.
+    """Exception raised when the predicates in :attr:`.Command.checks` or
+    :attr:`.InvokableApplicationCommand.checks` have failed.
 
     This inherits from :exc:`CommandError`
     """
@@ -190,7 +192,7 @@ class CheckFailure(CommandError):
 
 
 class CheckAnyFailure(CheckFailure):
-    """Exception raised when all predicates in :func:`check_any` fail.
+    """Exception raised when all predicates in :func:`check_any` or :func:`app_check_any` fail.
 
     This inherits from :exc:`CheckFailure`.
 
@@ -200,13 +202,15 @@ class CheckAnyFailure(CheckFailure):
     ----------
     errors: List[:class:`CheckFailure`]
         A list of errors that were caught during execution.
-    checks: List[Callable[[:class:`Context`], :class:`bool`]]
+    checks: List[Callable[[Union[:class:`Context`, :class:`disnake.ApplicationCommandInteraction`]], :class:`bool`]]
         A list of check predicates that failed.
     """
 
-    def __init__(self, checks: List[CheckFailure], errors: List[Callable[[Context], bool]]) -> None:
+    def __init__(
+        self, checks: List[CheckFailure], errors: List[Callable[[AnyContext], bool]]
+    ) -> None:
         self.checks: List[CheckFailure] = checks
-        self.errors: List[Callable[[Context], bool]] = errors
+        self.errors: List[Callable[[AnyContext], bool]] = errors
         super().__init__("You do not have permission to run this command.")
 
 
@@ -494,6 +498,24 @@ class GuildStickerNotFound(BadArgument):
     def __init__(self, argument: str) -> None:
         self.argument: str = argument
         super().__init__(f'Sticker "{argument}" not found.')
+
+
+class GuildSoundboardSoundNotFound(BadArgument):
+    """Exception raised when the bot can not find the soundboard sound.
+
+    This inherits from :exc:`BadArgument`
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    argument: :class:`str`
+        The soundboard sound supplied by the caller that was not found
+    """
+
+    def __init__(self, argument: str) -> None:
+        self.argument: str = argument
+        super().__init__(f'Soundboard sound "{argument}" not found.')
 
 
 class GuildScheduledEventNotFound(BadArgument):
