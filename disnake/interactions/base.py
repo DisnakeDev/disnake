@@ -43,6 +43,7 @@ from ..errors import (
 )
 from ..flags import InteractionContextTypes, MessageFlags
 from ..guild import Guild
+from ..http import HTTPClient
 from ..i18n import Localized
 from ..member import Member
 from ..message import Attachment, AuthorizingIntegrationOwners, Message
@@ -1611,17 +1612,17 @@ class _InteractionMessageState:
         self._interaction: Interaction = interaction
         self._parent: ConnectionState = parent
 
-    def _get_guild(self, guild_id):
+    def _get_guild(self, guild_id) -> Guild | None:
         return self._parent._get_guild(guild_id)
 
-    def store_user(self, data):
+    def store_user(self, data) -> User:
         return self._parent.store_user(data)
 
-    def create_user(self, data):
+    def create_user(self, data) -> User:
         return self._parent.create_user(data)
 
     @property
-    def http(self):
+    def http(self) -> HTTPClient:
         return self._parent.http
 
     def __getattr__(self, attr):

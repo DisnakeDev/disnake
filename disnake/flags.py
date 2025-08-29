@@ -482,7 +482,7 @@ class SystemChannelFlags(BaseFlags, inverted=True):
         return 1 << 3
 
     @flag_value
-    def role_subscription_purchase_notifications(self):
+    def role_subscription_purchase_notifications(self) -> int:
         """:class:`bool`: Returns ``True`` if the system channel shows role
         subscription purchase/renewal notifications.
 
@@ -491,7 +491,7 @@ class SystemChannelFlags(BaseFlags, inverted=True):
         return 1 << 4
 
     @flag_value
-    def role_subscription_purchase_notification_replies(self):
+    def role_subscription_purchase_notification_replies(self) -> int:
         """:class:`bool`: Returns ``True`` if the system channel shows sticker reply
         buttons for role subscription purchase/renewal notifications.
 
@@ -612,27 +612,27 @@ class MessageFlags(BaseFlags):
         ) -> None: ...
 
     @flag_value
-    def crossposted(self):
+    def crossposted(self) -> int:
         """:class:`bool`: Returns ``True`` if the message is the original crossposted message."""
         return 1 << 0
 
     @flag_value
-    def is_crossposted(self):
+    def is_crossposted(self) -> int:
         """:class:`bool`: Returns ``True`` if the message was crossposted from another channel."""
         return 1 << 1
 
     @flag_value
-    def suppress_embeds(self):
+    def suppress_embeds(self) -> int:
         """:class:`bool`: Returns ``True`` if the message's embeds have been suppressed."""
         return 1 << 2
 
     @flag_value
-    def source_message_deleted(self):
+    def source_message_deleted(self) -> int:
         """:class:`bool`: Returns ``True`` if the source message for this crosspost has been deleted."""
         return 1 << 3
 
     @flag_value
-    def urgent(self):
+    def urgent(self) -> int:
         """:class:`bool`: Returns ``True`` if the message is an urgent message.
 
         An urgent message is one sent by Discord Trust and Safety.
@@ -640,7 +640,7 @@ class MessageFlags(BaseFlags):
         return 1 << 4
 
     @flag_value
-    def has_thread(self):
+    def has_thread(self) -> int:
         """:class:`bool`: Returns ``True`` if the message is associated with a thread.
 
         .. versionadded:: 2.0
@@ -648,7 +648,7 @@ class MessageFlags(BaseFlags):
         return 1 << 5
 
     @flag_value
-    def ephemeral(self):
+    def ephemeral(self) -> int:
         """:class:`bool`: Returns ``True`` if the message is ephemeral.
 
         .. versionadded:: 2.0
@@ -656,7 +656,7 @@ class MessageFlags(BaseFlags):
         return 1 << 6
 
     @flag_value
-    def loading(self):
+    def loading(self) -> int:
         """:class:`bool`: Returns ``True`` if the message is a deferred
         interaction response and shows a "thinking" state.
 
@@ -665,7 +665,7 @@ class MessageFlags(BaseFlags):
         return 1 << 7
 
     @flag_value
-    def failed_to_mention_roles_in_thread(self):
+    def failed_to_mention_roles_in_thread(self) -> int:
         """:class:`bool`: Returns ``True`` if the message failed to
         mention some roles and add their members to the thread.
 
@@ -674,7 +674,7 @@ class MessageFlags(BaseFlags):
         return 1 << 8
 
     @flag_value
-    def suppress_notifications(self):
+    def suppress_notifications(self) -> int:
         """:class:`bool`: Returns ``True`` if the message does not
         trigger push and desktop notifications.
 
@@ -683,7 +683,7 @@ class MessageFlags(BaseFlags):
         return 1 << 12
 
     @flag_value
-    def is_voice_message(self):
+    def is_voice_message(self) -> int:
         """:class:`bool`: Returns ``True`` if the message is a voice message.
 
         Messages with this flag will have a single audio attachment, and no other content.
@@ -693,7 +693,7 @@ class MessageFlags(BaseFlags):
         return 1 << 13
 
     @flag_value
-    def has_snapshot(self):
+    def has_snapshot(self) -> int:
         """:class:`bool`: Returns ``True`` if the message is a forward message.
 
         Messages with this flag will have only the forward data, and no other content.
@@ -703,7 +703,7 @@ class MessageFlags(BaseFlags):
         return 1 << 14
 
     @flag_value
-    def is_components_v2(self):
+    def is_components_v2(self) -> int:
         """:class:`bool`: Returns ``True`` if the message uses the Components V2 system.
 
         Messages with this flag will use specific components for content layout,
@@ -835,72 +835,72 @@ class PublicUserFlags(BaseFlags):
         ) -> None: ...
 
     @flag_value
-    def staff(self):
+    def staff(self) -> int:
         """:class:`bool`: Returns ``True`` if the user is a Discord Employee."""
         return UserFlags.staff.value
 
     @flag_value
-    def partner(self):
+    def partner(self) -> int:
         """:class:`bool`: Returns ``True`` if the user is a Discord Partner."""
         return UserFlags.partner.value
 
     @flag_value
-    def hypesquad(self):
+    def hypesquad(self) -> int:
         """:class:`bool`: Returns ``True`` if the user is a HypeSquad Events member."""
         return UserFlags.hypesquad.value
 
     @flag_value
-    def bug_hunter(self):
+    def bug_hunter(self) -> int:
         """:class:`bool`: Returns ``True`` if the user is a Bug Hunter"""
         return UserFlags.bug_hunter.value
 
     @flag_value
-    def hypesquad_bravery(self):
+    def hypesquad_bravery(self) -> int:
         """:class:`bool`: Returns ``True`` if the user is a HypeSquad Bravery member."""
         return UserFlags.hypesquad_bravery.value
 
     @flag_value
-    def hypesquad_brilliance(self):
+    def hypesquad_brilliance(self) -> int:
         """:class:`bool`: Returns ``True`` if the user is a HypeSquad Brilliance member."""
         return UserFlags.hypesquad_brilliance.value
 
     @flag_value
-    def hypesquad_balance(self):
+    def hypesquad_balance(self) -> int:
         """:class:`bool`: Returns ``True`` if the user is a HypeSquad Balance member."""
         return UserFlags.hypesquad_balance.value
 
     @flag_value
-    def early_supporter(self):
+    def early_supporter(self) -> int:
         """:class:`bool`: Returns ``True`` if the user is an Early Supporter."""
         return UserFlags.early_supporter.value
 
     @flag_value
-    def team_user(self):
+    def team_user(self) -> int:
         """:class:`bool`: Returns ``True`` if the user is a Team User."""
         return UserFlags.team_user.value
 
     @flag_value
-    def system(self):
+    def system(self) -> int:
         """:class:`bool`: Returns ``True`` if the user is a system user (i.e. represents Discord officially)."""
         return UserFlags.system.value
 
     @flag_value
-    def bug_hunter_level_2(self):
+    def bug_hunter_level_2(self) -> int:
         """:class:`bool`: Returns ``True`` if the user is a Bug Hunter Level 2"""
         return UserFlags.bug_hunter_level_2.value
 
     @flag_value
-    def verified_bot(self):
+    def verified_bot(self) -> int:
         """:class:`bool`: Returns ``True`` if the user is a Verified Bot."""
         return UserFlags.verified_bot.value
 
     @flag_value
-    def verified_bot_developer(self):
+    def verified_bot_developer(self) -> int:
         """:class:`bool`: Returns ``True`` if the user is an Early Verified Bot Developer."""
         return UserFlags.verified_bot_developer.value
 
     @alias_flag_value
-    def early_verified_bot_developer(self):
+    def early_verified_bot_developer(self) -> int:
         """:class:`bool`: An alias for :attr:`verified_bot_developer`.
 
         .. versionadded:: 1.5
@@ -908,7 +908,7 @@ class PublicUserFlags(BaseFlags):
         return UserFlags.verified_bot_developer.value
 
     @flag_value
-    def moderator_programs_alumni(self):
+    def moderator_programs_alumni(self) -> int:
         """:class:`bool`: Returns ``True`` if the user is a Discord Moderator Programs Alumni.
 
         .. versionadded:: 2.8
@@ -916,7 +916,7 @@ class PublicUserFlags(BaseFlags):
         return UserFlags.discord_certified_moderator.value
 
     @alias_flag_value
-    def discord_certified_moderator(self):
+    def discord_certified_moderator(self) -> int:
         """:class:`bool`: An alias for :attr:`moderator_programs_alumni`.
 
         .. versionadded:: 2.0
@@ -924,7 +924,7 @@ class PublicUserFlags(BaseFlags):
         return UserFlags.discord_certified_moderator.value
 
     @flag_value
-    def http_interactions_bot(self):
+    def http_interactions_bot(self) -> int:
         """:class:`bool`: Returns ``True`` if the user is a bot that only uses HTTP interactions.
 
         .. versionadded:: 2.3
@@ -932,7 +932,7 @@ class PublicUserFlags(BaseFlags):
         return UserFlags.http_interactions_bot.value
 
     @flag_value
-    def spammer(self):
+    def spammer(self) -> int:
         """:class:`bool`: Returns ``True`` if the user is marked as a spammer.
 
         .. versionadded:: 2.3
@@ -940,7 +940,7 @@ class PublicUserFlags(BaseFlags):
         return UserFlags.spammer.value
 
     @flag_value
-    def active_developer(self):
+    def active_developer(self) -> int:
         """:class:`bool`: Returns ``True`` if the user is an Active Developer.
 
         .. versionadded:: 2.8
@@ -1138,7 +1138,7 @@ class Intents(BaseFlags):
         return self
 
     @flag_value
-    def guilds(self):
+    def guilds(self) -> int:
         """:class:`bool`: Whether guild related events are enabled.
 
         This corresponds to the following events:
@@ -1164,7 +1164,7 @@ class Intents(BaseFlags):
         return 1 << 0
 
     @flag_value
-    def members(self):
+    def members(self) -> int:
         """:class:`bool`: Whether guild member related events are enabled.
 
         This corresponds to the following events:
@@ -1202,7 +1202,7 @@ class Intents(BaseFlags):
         return 1 << 1
 
     @flag_value
-    def moderation(self):
+    def moderation(self) -> int:
         """:class:`bool`: Whether guild moderation related events are enabled.
 
         This corresponds to the following events:
@@ -1216,7 +1216,7 @@ class Intents(BaseFlags):
         return 1 << 2
 
     @alias_flag_value
-    def bans(self):
+    def bans(self) -> int:
         """:class:`bool`: Alias of :attr:`.moderation`.
 
         .. versionchanged:: 2.8
@@ -1225,7 +1225,7 @@ class Intents(BaseFlags):
         return 1 << 2
 
     @flag_value
-    def expressions(self):
+    def expressions(self) -> int:
         """:class:`bool`: Whether events related to guild emojis, stickers, and
         soundboard sounds are enabled.
 
@@ -1255,7 +1255,7 @@ class Intents(BaseFlags):
         return 1 << 3
 
     @alias_flag_value
-    def emojis_and_stickers(self):
+    def emojis_and_stickers(self) -> int:
         """:class:`bool`: Alias of :attr:`.expressions`.
 
         .. versionadded:: 2.0
@@ -1266,7 +1266,7 @@ class Intents(BaseFlags):
         return 1 << 3
 
     @alias_flag_value
-    def emojis(self):
+    def emojis(self) -> int:
         """:class:`bool`: Alias of :attr:`.expressions`.
 
         .. versionchanged:: 2.0
@@ -1275,7 +1275,7 @@ class Intents(BaseFlags):
         return 1 << 3
 
     @flag_value
-    def integrations(self):
+    def integrations(self) -> int:
         """:class:`bool`: Whether guild integration related events are enabled.
 
         This corresponds to the following events:
@@ -1290,7 +1290,7 @@ class Intents(BaseFlags):
         return 1 << 4
 
     @flag_value
-    def webhooks(self):
+    def webhooks(self) -> int:
         """:class:`bool`: Whether guild webhook related events are enabled.
 
         This corresponds to the following events:
@@ -1302,7 +1302,7 @@ class Intents(BaseFlags):
         return 1 << 5
 
     @flag_value
-    def invites(self):
+    def invites(self) -> int:
         """:class:`bool`: Whether guild invite related events are enabled.
 
         This corresponds to the following events:
@@ -1315,7 +1315,7 @@ class Intents(BaseFlags):
         return 1 << 6
 
     @flag_value
-    def voice_states(self):
+    def voice_states(self) -> int:
         """:class:`bool`: Whether guild voice state related events are enabled.
 
         This corresponds to the following events:
@@ -1337,7 +1337,7 @@ class Intents(BaseFlags):
         return 1 << 7
 
     @flag_value
-    def presences(self):
+    def presences(self) -> int:
         """:class:`bool`: Whether guild presence related events are enabled.
 
         This corresponds to the following events:
@@ -1361,7 +1361,7 @@ class Intents(BaseFlags):
         return 1 << 8
 
     @alias_flag_value
-    def messages(self):
+    def messages(self) -> int:
         """:class:`bool`: Whether guild and direct message related events are enabled.
 
         This is a shortcut to set or get both :attr:`guild_messages` and :attr:`dm_messages`.
@@ -1392,7 +1392,7 @@ class Intents(BaseFlags):
         return (1 << 9) | (1 << 12)
 
     @flag_value
-    def guild_messages(self):
+    def guild_messages(self) -> int:
         """:class:`bool`: Whether guild message related events are enabled.
 
         See also :attr:`dm_messages` for DMs or :attr:`messages` for both.
@@ -1419,7 +1419,7 @@ class Intents(BaseFlags):
         return 1 << 9
 
     @flag_value
-    def dm_messages(self):
+    def dm_messages(self) -> int:
         """:class:`bool`: Whether direct message related events are enabled.
 
         See also :attr:`guild_messages` for guilds or :attr:`messages` for both.
@@ -1446,7 +1446,7 @@ class Intents(BaseFlags):
         return 1 << 12
 
     @flag_value
-    def message_content(self):
+    def message_content(self) -> int:
         """:class:`bool`: Whether messages will have access to message content.
 
         .. versionadded:: 2.5
@@ -1480,7 +1480,7 @@ class Intents(BaseFlags):
         return 1 << 15
 
     @alias_flag_value
-    def reactions(self):
+    def reactions(self) -> int:
         """:class:`bool`: Whether guild and direct message reaction related events are enabled.
 
         This is a shortcut to set or get both :attr:`guild_reactions` and :attr:`dm_reactions`.
@@ -1501,7 +1501,7 @@ class Intents(BaseFlags):
         return (1 << 10) | (1 << 13)
 
     @flag_value
-    def guild_reactions(self):
+    def guild_reactions(self) -> int:
         """:class:`bool`: Whether guild reaction related events are enabled.
 
         See also :attr:`dm_reactions` for DMs or :attr:`reactions` for both.
@@ -1522,7 +1522,7 @@ class Intents(BaseFlags):
         return 1 << 10
 
     @flag_value
-    def dm_reactions(self):
+    def dm_reactions(self) -> int:
         """:class:`bool`: Whether direct message reaction related events are enabled.
 
         See also :attr:`guild_reactions` for guilds or :attr:`reactions` for both.
@@ -1543,7 +1543,7 @@ class Intents(BaseFlags):
         return 1 << 13
 
     @alias_flag_value
-    def typing(self):
+    def typing(self) -> int:
         """:class:`bool`: Whether guild and direct message typing related events are enabled.
 
         This is a shortcut to set or get both :attr:`guild_typing` and :attr:`dm_typing`.
@@ -1557,7 +1557,7 @@ class Intents(BaseFlags):
         return (1 << 11) | (1 << 14)
 
     @flag_value
-    def guild_typing(self):
+    def guild_typing(self) -> int:
         """:class:`bool`: Whether guild typing related events are enabled.
 
         See also :attr:`dm_typing` for DMs or :attr:`typing` for both.
@@ -1571,7 +1571,7 @@ class Intents(BaseFlags):
         return 1 << 11
 
     @flag_value
-    def dm_typing(self):
+    def dm_typing(self) -> int:
         """:class:`bool`: Whether direct message typing related events are enabled.
 
         See also :attr:`guild_typing` for guilds or :attr:`typing` for both.
@@ -1585,7 +1585,7 @@ class Intents(BaseFlags):
         return 1 << 14
 
     @flag_value
-    def guild_scheduled_events(self):
+    def guild_scheduled_events(self) -> int:
         """:class:`bool`: Whether guild scheduled event related events are enabled.
 
         .. versionadded:: 2.3
@@ -1609,7 +1609,7 @@ class Intents(BaseFlags):
         return 1 << 16
 
     @flag_value
-    def automod_configuration(self):
+    def automod_configuration(self) -> int:
         """:class:`bool`: Whether auto moderation configuration related events are enabled.
 
         .. versionadded:: 2.6
@@ -1625,7 +1625,7 @@ class Intents(BaseFlags):
         return 1 << 20
 
     @flag_value
-    def automod_execution(self):
+    def automod_execution(self) -> int:
         """:class:`bool`: Whether auto moderation execution related events are enabled.
 
         .. versionadded:: 2.6
@@ -1639,7 +1639,7 @@ class Intents(BaseFlags):
         return 1 << 21
 
     @alias_flag_value
-    def automod(self):
+    def automod(self) -> int:
         """:class:`bool`: Whether auto moderation related events are enabled.
 
         .. versionadded:: 2.6
@@ -1658,7 +1658,7 @@ class Intents(BaseFlags):
         return (1 << 20) | (1 << 21)
 
     @alias_flag_value
-    def polls(self):
+    def polls(self) -> int:
         """:class:`bool`: Whether guild and direct message polls related events are enabled.
 
         This is a shortcut to set or get both :attr:`guild_polls` and :attr:`dm_polls`.
@@ -1673,7 +1673,7 @@ class Intents(BaseFlags):
         return (1 << 24) | (1 << 25)
 
     @flag_value
-    def guild_polls(self):
+    def guild_polls(self) -> int:
         """:class:`bool`: Whether guild polls related events are enabled.
 
         .. versionadded:: 2.10
@@ -1693,7 +1693,7 @@ class Intents(BaseFlags):
         return 1 << 24
 
     @flag_value
-    def dm_polls(self):
+    def dm_polls(self) -> int:
         """:class:`bool`: Whether direct message polls related events are enabled.
 
         .. versionadded:: 2.10
@@ -1845,7 +1845,7 @@ class MemberCacheFlags(BaseFlags):
         return self
 
     @property
-    def _empty(self):
+    def _empty(self) -> bool:
         return self.value == self.DEFAULT_VALUE
 
     @flag_value
@@ -1900,7 +1900,7 @@ class MemberCacheFlags(BaseFlags):
             raise ValueError("MemberCacheFlags.joined requires Intents.members")
 
     @property
-    def _voice_only(self):
+    def _voice_only(self) -> bool:
         return self.value == 1
 
 
@@ -2011,66 +2011,66 @@ class ApplicationFlags(BaseFlags):
         ) -> None: ...
 
     @flag_value
-    def application_auto_moderation_rule_create_badge(self):
+    def application_auto_moderation_rule_create_badge(self) -> int:
         """:class:`bool`: Returns ``True`` if the application uses the Auto Moderation API."""
         return 1 << 6
 
     @flag_value
-    def gateway_presence(self):
+    def gateway_presence(self) -> int:
         """:class:`bool`: Returns ``True`` if the application is verified and is allowed to
         receive presence information over the gateway.
         """
         return 1 << 12
 
     @flag_value
-    def gateway_presence_limited(self):
+    def gateway_presence_limited(self) -> int:
         """:class:`bool`: Returns ``True`` if the application is allowed to receive limited
         presence information over the gateway.
         """
         return 1 << 13
 
     @flag_value
-    def gateway_guild_members(self):
+    def gateway_guild_members(self) -> int:
         """:class:`bool`: Returns ``True`` if the application is verified and is allowed to
         receive guild members information over the gateway.
         """
         return 1 << 14
 
     @flag_value
-    def gateway_guild_members_limited(self):
+    def gateway_guild_members_limited(self) -> int:
         """:class:`bool`: Returns ``True`` if the application is allowed to receive limited
         guild members information over the gateway.
         """
         return 1 << 15
 
     @flag_value
-    def verification_pending_guild_limit(self):
+    def verification_pending_guild_limit(self) -> int:
         """:class:`bool`: Returns ``True`` if the application is currently pending verification
         and has hit the guild limit.
         """
         return 1 << 16
 
     @flag_value
-    def embedded(self):
+    def embedded(self) -> int:
         """:class:`bool`: Returns ``True`` if the application is embedded within the Discord client."""
         return 1 << 17
 
     @flag_value
-    def gateway_message_content(self):
+    def gateway_message_content(self) -> int:
         """:class:`bool`: Returns ``True`` if the application is verified and is allowed to
         receive message content over the gateway.
         """
         return 1 << 18
 
     @flag_value
-    def gateway_message_content_limited(self):
+    def gateway_message_content_limited(self) -> int:
         """:class:`bool`: Returns ``True`` if the application is verified and is allowed to
         receive limited message content over the gateway.
         """
         return 1 << 19
 
     @flag_value
-    def application_command_badge(self):
+    def application_command_badge(self) -> int:
         """:class:`bool`: Returns ``True`` if the application has registered global application commands.
 
         .. versionadded:: 2.6
@@ -2178,7 +2178,7 @@ class ChannelFlags(BaseFlags):
         ) -> None: ...
 
     @flag_value
-    def pinned(self):
+    def pinned(self) -> int:
         """:class:`bool`: Returns ``True`` if the thread is pinned.
 
         This only applies to threads that are part of a :class:`ForumChannel` or :class:`MediaChannel`.
@@ -2186,7 +2186,7 @@ class ChannelFlags(BaseFlags):
         return 1 << 1
 
     @flag_value
-    def require_tag(self):
+    def require_tag(self) -> int:
         """:class:`bool`: Returns ``True`` if the channel requires all newly created threads to have a tag.
 
         This only applies to channels of types :class:`ForumChannel` or :class:`MediaChannel`.
@@ -2196,7 +2196,7 @@ class ChannelFlags(BaseFlags):
         return 1 << 4
 
     @flag_value
-    def hide_media_download_options(self):
+    def hide_media_download_options(self) -> int:
         """:class:`bool`: Returns ``True`` if the channel hides the embedded media download options.
 
         This only applies to channels of type :class:`MediaChannel`.
@@ -2297,21 +2297,21 @@ class AutoModKeywordPresets(ListBaseFlags):
         return self
 
     @flag_value
-    def profanity(self):
+    def profanity(self) -> int:
         """:class:`bool`: Returns ``True`` if the profanity preset is enabled
         (contains words that may be considered swearing or cursing).
         """
         return 1 << 1
 
     @flag_value
-    def sexual_content(self):
+    def sexual_content(self) -> int:
         """:class:`bool`: Returns ``True`` if the sexual content preset is enabled
         (contains sexually explicit words).
         """
         return 1 << 2
 
     @flag_value
-    def slurs(self):
+    def slurs(self) -> int:
         """:class:`bool`: Returns ``True`` if the slurs preset is enabled
         (contains insults or words that may be considered hate speech).
         """
@@ -2405,27 +2405,27 @@ class MemberFlags(BaseFlags):
         ) -> None: ...
 
     @flag_value
-    def did_rejoin(self):
+    def did_rejoin(self) -> int:
         """:class:`bool`: Returns ``True`` if the member has left and rejoined the guild."""
         return 1 << 0
 
     @flag_value
-    def completed_onboarding(self):
+    def completed_onboarding(self) -> int:
         """:class:`bool`: Returns ``True`` if the member has completed onboarding."""
         return 1 << 1
 
     @flag_value
-    def bypasses_verification(self):
+    def bypasses_verification(self) -> int:
         """:class:`bool`: Returns ``True`` if the member is able to bypass guild verification requirements."""
         return 1 << 2
 
     @flag_value
-    def started_onboarding(self):
+    def started_onboarding(self) -> int:
         """:class:`bool`: Returns ``True`` if the member has started onboarding."""
         return 1 << 3
 
     @flag_value
-    def is_guest(self):
+    def is_guest(self) -> int:
         """:class:`bool`: Returns ``True`` if the member is a guest and can only access the voice channel they were invited to.
 
         .. versionadded:: 2.10
@@ -2433,7 +2433,7 @@ class MemberFlags(BaseFlags):
         return 1 << 4
 
     @flag_value
-    def started_home_actions(self):
+    def started_home_actions(self) -> int:
         """:class:`bool`: Returns ``True`` if the member has started the Server Guide actions.
 
         .. versionadded:: 2.10
@@ -2441,7 +2441,7 @@ class MemberFlags(BaseFlags):
         return 1 << 5
 
     @flag_value
-    def completed_home_actions(self):
+    def completed_home_actions(self) -> int:
         """:class:`bool`: Returns ``True`` if the member has completed the Server Guide actions.
 
         .. versionadded:: 2.10
@@ -2449,7 +2449,7 @@ class MemberFlags(BaseFlags):
         return 1 << 6
 
     @flag_value
-    def automod_quarantined_username(self):
+    def automod_quarantined_username(self) -> int:
         """:class:`bool`: Returns ``True`` if the member's username, display name, or nickname is blocked by AutoMod.
 
         .. versionadded:: 2.10
@@ -2457,7 +2457,7 @@ class MemberFlags(BaseFlags):
         return 1 << 7
 
     @flag_value
-    def dm_settings_upsell_acknowledged(self):
+    def dm_settings_upsell_acknowledged(self) -> int:
         """:class:`bool`: Returns ``True`` if the member has dismissed the DM settings upsell.
 
         .. versionadded:: 2.10
@@ -2465,7 +2465,7 @@ class MemberFlags(BaseFlags):
         return 1 << 9
 
     @flag_value
-    def automod_quarantined_guild_tag(self):
+    def automod_quarantined_guild_tag(self) -> int:
         """:class:`bool`: Returns ``True`` if the member's guild tag is blocked by AutoMod.
 
         .. versionadded:: 2.11
@@ -2547,7 +2547,7 @@ class RoleFlags(BaseFlags):
         def __init__(self, *, in_prompt: bool = ...) -> None: ...
 
     @flag_value
-    def in_prompt(self):
+    def in_prompt(self) -> int:
         """:class:`bool`: Returns ``True`` if the role can be selected by members in an onboarding prompt."""
         return 1 << 0
 
@@ -2626,7 +2626,7 @@ class AttachmentFlags(BaseFlags):
         def __init__(self, *, is_remix: bool = ...) -> None: ...
 
     @flag_value
-    def is_remix(self):
+    def is_remix(self) -> int:
         """:class:`bool`: Returns ``True`` if the attachment has been edited using the Remix feature."""
         return 1 << 2
 
@@ -2711,17 +2711,17 @@ class SKUFlags(BaseFlags):
         ) -> None: ...
 
     @flag_value
-    def available(self):
+    def available(self) -> int:
         """:class:`bool`: Returns ``True`` if the SKU can be purchased."""
         return 1 << 2
 
     @flag_value
-    def guild_subscription(self):
+    def guild_subscription(self) -> int:
         """:class:`bool`: Returns ``True`` if the SKU is an application subscription applied to a guild."""
         return 1 << 7
 
     @flag_value
-    def user_subscription(self):
+    def user_subscription(self) -> int:
         """:class:`bool`: Returns ``True`` if the SKU is an application subscription applied to a user."""
         return 1 << 8
 
@@ -2809,12 +2809,12 @@ class ApplicationInstallTypes(ListBaseFlags):
         return self
 
     @flag_value
-    def guild(self):
+    def guild(self) -> int:
         """:class:`bool`: Returns ``True`` if installable to guilds."""
         return 1 << 0
 
     @flag_value
-    def user(self):
+    def user(self) -> int:
         """:class:`bool`: Returns ``True`` if installable to users."""
         return 1 << 1
 
@@ -2904,16 +2904,16 @@ class InteractionContextTypes(ListBaseFlags):
         return self
 
     @flag_value
-    def guild(self):
+    def guild(self) -> int:
         """:class:`bool`: Returns ``True`` if the command is usable in guilds."""
         return 1 << 0
 
     @flag_value
-    def bot_dm(self):
+    def bot_dm(self) -> int:
         """:class:`bool`: Returns ``True`` if the command is usable in DMs with the bot."""
         return 1 << 1
 
     @flag_value
-    def private_channel(self):
+    def private_channel(self) -> int:
         """:class:`bool`: Returns ``True`` if the command is usable in DMs and group DMs with other users."""
         return 1 << 2

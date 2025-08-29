@@ -5133,7 +5133,9 @@ class PartialMessageable(disnake.abc.Messageable, Hashable):
         return PartialMessage(channel=self, id=message_id)
 
 
-def _guild_channel_factory(channel_type: int):
+def _guild_channel_factory(
+    channel_type: int,
+) -> Tuple[Union[Type[GuildChannelType], None], ChannelType]:
     value = try_enum(ChannelType, channel_type)
     if value is ChannelType.text:
         return TextChannel, value
@@ -5153,7 +5155,9 @@ def _guild_channel_factory(channel_type: int):
         return None, value
 
 
-def _channel_factory(channel_type: int):
+def _channel_factory(
+    channel_type: int,
+) -> Tuple[Union[Type[GuildChannelType], Type[DMChannel], Type[GroupChannel], None], ChannelType]:
     cls, value = _guild_channel_factory(channel_type)
     if value is ChannelType.private:
         return DMChannel, value
@@ -5163,14 +5167,21 @@ def _channel_factory(channel_type: int):
         return cls, value
 
 
-def _threaded_channel_factory(channel_type: int):
+def _threaded_channel_factory(
+    channel_type: int,
+) -> Tuple[
+    Union[Type[GuildChannelType], Type[DMChannel], Type[GroupChannel], Type[Thread], None],
+    ChannelType,
+]:
     cls, value = _channel_factory(channel_type)
     if value in (ChannelType.private_thread, ChannelType.public_thread, ChannelType.news_thread):
         return Thread, value
     return cls, value
 
 
-def _threaded_guild_channel_factory(channel_type: int):
+def _threaded_guild_channel_factory(
+    channel_type: int,
+) -> Tuple[Union[Type[GuildChannelType], Type[Thread], None], ChannelType]:
     cls, value = _guild_channel_factory(channel_type)
     if value in (ChannelType.private_thread, ChannelType.public_thread, ChannelType.news_thread):
         return Thread, value

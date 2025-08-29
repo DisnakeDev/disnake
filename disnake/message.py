@@ -1538,7 +1538,7 @@ class Message(Hashable):
             }
             transformations.update(role_transforms)
 
-        def repl(obj):
+        def repl(obj) -> str:
             return transformations.get(re.escape(obj.group(0)), "")
 
         pattern = re.compile("|".join(transformations.keys()))

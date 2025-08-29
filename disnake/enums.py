@@ -109,7 +109,7 @@ def _create_value_cls(name: str, comparable: bool) -> Type[_EnumValueBase]:
     return type(f"{parent.__name__}_{name}", (parent,), {"_cls_name": name})  # type: ignore
 
 
-def _is_descriptor(obj):
+def _is_descriptor(obj) -> bool:
     return hasattr(obj, "__get__") or hasattr(obj, "__set__") or hasattr(obj, "__delete__")
 
 

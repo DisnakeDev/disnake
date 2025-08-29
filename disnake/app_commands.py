@@ -149,7 +149,7 @@ class OptionChoice:
         return payload
 
     @classmethod
-    def from_dict(cls, data: ApplicationCommandOptionChoicePayload):
+    def from_dict(cls, data: ApplicationCommandOptionChoicePayload) -> OptionChoice:
         return OptionChoice(
             name=Localized(data["name"], data=data.get("name_localizations")),
             value=data["value"],
@@ -1250,7 +1250,7 @@ class ApplicationCommandPermissions:
     def __repr__(self) -> str:
         return f"<ApplicationCommandPermissions id={self.id!r} type={self.type!r} permission={self.permission!r}>"
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         return (
             self.id == other.id and self.type == other.type and self.permission == other.permission
         )

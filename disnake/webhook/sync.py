@@ -879,7 +879,7 @@ class SyncWebhook(BaseWebhook):
 
     def _create_message(
         self, data, *, thread: Optional[Snowflake] = None, thread_name: Optional[str] = None
-    ):
+    ) -> SyncWebhookMessage:
         # see async webhook's _create_message for details
         channel_id = int(data["channel_id"])
         if self.channel_id != channel_id and thread_name:

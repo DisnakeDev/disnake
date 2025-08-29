@@ -80,7 +80,7 @@ class _Diff(TypedDict):
     delete_ignored: NotRequired[List[ApplicationCommand]]
 
 
-def _get_to_send_from_diff(diff: _Diff):
+def _get_to_send_from_diff(diff: _Diff) -> list[ApplicationCommand]:
     return diff["no_changes"] + diff["upsert"] + diff["edit"] + diff.get("delete_ignored", [])
 
 

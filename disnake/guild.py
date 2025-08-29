@@ -100,7 +100,9 @@ if TYPE_CHECKING:
     from .state import ConnectionState
     from .template import Template
     from .threads import AnyThreadArchiveDuration, ForumTag
-    from .types.channel import PermissionOverwrite as PermissionOverwritePayload
+    from .types.channel import (
+        PermissionOverwrite as PermissionOverwritePayload,
+    )
     from .types.guild import (
         Ban as BanPayload,
         CreateGuildPlaceholderChannel,
@@ -109,7 +111,7 @@ if TYPE_CHECKING:
         GuildFeature,
         MFALevel,
     )
-    from .types.integration import IntegrationType
+    from .types.integration import Integration as IntegrationPayload, IntegrationType
     from .types.role import CreateRole as CreateRolePayload
     from .types.sticker import CreateGuildSticker as CreateStickerPayload
     from .types.threads import Thread as ThreadPayload, ThreadArchiveDurationLiteral
@@ -3302,7 +3304,9 @@ class Guild(Hashable):
         """
         data = await self._state.http.get_all_integrations(self.id)
 
-        def convert(d):
+        def convert(
+            d: IntegrationPayload,
+        ) -> Integration:
             factory, _ = _integration_factory(d["type"])
             return factory(guild=self, data=d)
 
