@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import io
 import os
-from typing import TYPE_CHECKING, Any, Literal, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, Literal, Optional, Tuple, Union
 
 import yarl
 
@@ -150,7 +150,7 @@ class AssetMixin:
         data = await self.read()
 
         if not filename:
-            filename = cast("str", yarl.URL(self.url).name)
+            filename = yarl.URL(self.url).name
             # if the filename doesn't have an extension (e.g. widget member avatars),
             # try to infer it from the data
             if not os.path.splitext(filename)[1]:

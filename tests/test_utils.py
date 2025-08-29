@@ -805,7 +805,7 @@ def test_resolve_annotation_literal() -> None:
     with pytest.raises(
         TypeError, match=r"Literal arguments must be of type str, int, bool, or NoneType."
     ):
-        utils.resolve_annotation(Literal[timezone.utc, 3], globals(), locals(), {})  # type: ignore
+        utils.resolve_annotation(Literal[timezone.utc, 3], globals(), locals(), {})
 
 
 @pytest.mark.skipif(sys.version_info < (3, 12), reason="syntax requires py3.12")

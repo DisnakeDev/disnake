@@ -354,7 +354,7 @@ class _BaseRange(ABC):
     if sys.version_info >= (3, 10):
 
         def __or__(self, other):
-            return Union[self, other]  # type: ignore
+            return Union[self, other]
 
 
 if TYPE_CHECKING:
