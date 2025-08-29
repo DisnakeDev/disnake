@@ -265,10 +265,10 @@ class Permissions(BaseFlags):
         return self.is_superset(other) and self != other
 
     # the parent uses `Self` for the `other` typehint but we use `Permissions` here for backwards compat.
-    __le__ = is_subset  # type: ignore
-    __ge__ = is_superset  # type: ignore
-    __lt__ = is_strict_subset  # type: ignore
-    __gt__ = is_strict_superset  # type: ignore
+    __le__ = is_subset
+    __ge__ = is_superset
+    __lt__ = is_strict_subset
+    __gt__ = is_strict_superset
 
     @classmethod
     @cached_creation

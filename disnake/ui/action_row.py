@@ -1148,7 +1148,7 @@ def _to_ui_component(component: Component) -> UIComponent:
         # this should never happen
         raise TypeError(f"unknown component type: {type(component)}")
     else:
-        return ui_cls.from_component(component)  # type: ignore
+        return ui_cls.from_component(component)
 
 
 def _message_component_to_item(

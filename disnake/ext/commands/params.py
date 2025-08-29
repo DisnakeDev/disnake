@@ -141,7 +141,7 @@ def remove_optionals(annotation: Any) -> Any:
         if len(args) == 1:
             annotation = args[0]
         else:
-            annotation = Union[args]  # type: ignore
+            annotation = Union[args]
 
     return annotation
 
@@ -717,15 +717,20 @@ class ParamInfo:
         if annotation is inspect.Parameter.empty or annotation is Any:
             return False
 
+        # due to how all of the annotations are parsed
+        # Range, String, DO NOT EXIST at typing, they are aliased to Annotated.
+        # todo: figure out how to get Range and String to exist
+        # when type checking during development of disnake
+
         # resolve type aliases and special types
-        if isinstance(annotation, Range):
-            self.min_value = annotation.min_value
-            self.max_value = annotation.max_value
-            annotation = annotation.underlying_type
-        if isinstance(annotation, String):
-            self.min_length = annotation.min_value
-            self.max_length = annotation.max_value
-            annotation = annotation.underlying_type
+        if isinstance(annotation, Range):  # type: ignore
+            self.min_value = annotation.min_value  # type: ignore
+            self.max_value = annotation.max_value  # type: ignore
+            annotation = annotation.underlying_type  # type: ignore
+        if isinstance(annotation, String):  # type: ignore
+            self.min_length = annotation.min_value  # type: ignore
+            self.max_length = annotation.max_value  # type: ignore
+            annotation = annotation.underlying_type  # type: ignore
         if issubclass_(annotation, LargeInt):
             self.large = True
             annotation = int

@@ -413,7 +413,7 @@ async def convert_flag(ctx: Context, argument: str, flag: Flag, annotation: Any 
             return await convert_flag(ctx, argument, flag, annotation)
         elif origin is Union and args[-1] is type(None):
             # typing.Optional[x]
-            annotation = Union[args[:-1]]  # type: ignore
+            annotation = Union[args[:-1]]
             return await run_converters(ctx, annotation, argument, param)
         elif origin is dict:
             # typing.Dict[K, V] -> typing.Tuple[K, V]

@@ -33,8 +33,10 @@ if TYPE_CHECKING:
         ApplicationCommandOptionChoice as ApplicationCommandOptionChoicePayload,
         ApplicationCommandOptionChoiceValue,
         ApplicationCommandPermissions as ApplicationCommandPermissionsPayload,
+        ApplicationIntegrationType as ApplicationIntegrationTypePayload,
         EditApplicationCommand as EditApplicationCommandPayload,
         GuildApplicationCommandPermissions as GuildApplicationCommandPermissionsPayload,
+        InteractionContextType as InteractionContextTypePayload,
     )
 
     Choices = Union[
@@ -700,16 +702,16 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
             "nsfw": self.nsfw,
         }
 
-        install_types = (
+        install_types: Optional[List[ApplicationIntegrationTypePayload]] = (
             self._install_types_with_default.values
             if self._install_types_with_default is not None
             else None
-        )
+        )  # pyright: ignore[reportAssignmentType]
         data["integration_types"] = install_types
 
-        contexts = (
+        contexts: Optional[List[InteractionContextTypePayload]] = (
             self._contexts_with_default.values if self._contexts_with_default is not None else None
-        )
+        )  # pyright: ignore[reportAssignmentType]
         data["contexts"] = contexts
 
         # don't set `dm_permission` if `contexts` is set

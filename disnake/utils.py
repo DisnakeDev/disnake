@@ -590,7 +590,7 @@ async def maybe_coroutine(
     if _isawaitable(value):
         return await value
     else:
-        return value  # type: ignore  # typeguard doesn't narrow in the negative case
+        return value
 
 
 async def async_all(gen: Iterable[Union[Awaitable[bool], bool]]) -> bool:
@@ -690,7 +690,7 @@ class SnowflakeList(array.array):
         def __init__(self, data: Iterable[int], *, is_sorted: bool = False) -> None: ...
 
     def __new__(cls, data: Iterable[int], *, is_sorted: bool = False):
-        return array.array.__new__(cls, "Q", data if is_sorted else sorted(data))  # type: ignore
+        return array.array.__new__(cls, "Q", data if is_sorted else sorted(data))
 
     def add(self, element: int) -> None:
         i = bisect_left(self, element)
@@ -1185,7 +1185,7 @@ def evaluate_annotation(
     if hasattr(tp, "__args__"):
         if not hasattr(tp, "__origin__"):
             if tp.__class__ is UnionType:
-                converted = Union[tp.__args__]  # type: ignore
+                converted = Union[tp.__args__]
                 return evaluate_annotation(converted, globals, locals, cache)
 
             return tp

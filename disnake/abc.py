@@ -1232,15 +1232,16 @@ class GuildChannel(ABC):
             raise TypeError("Only one of [before, after, end, beginning] can be used.")
 
         bucket = self._sorting_bucket
-        parent_id = kwargs.get("category", MISSING)
-        if parent_id not in (MISSING, None):
-            parent_id = parent_id.id
+        parent: Union[Object, MISSING] = kwargs.get("category", MISSING)
+        if parent not in (MISSING, None):
+            parent_id = parent.id
             channels = [
                 ch
                 for ch in self.guild.channels
                 if ch._sorting_bucket == bucket and ch.category_id == parent_id
             ]
         else:
+            parent_id = MISSING
             channels = [
                 ch
                 for ch in self.guild.channels

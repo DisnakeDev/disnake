@@ -543,7 +543,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             overwrites=overwrites,
             flags=flags,
             reason=reason,
-            **kwargs,  # type: ignore
+            **kwargs,
         )
         if payload is not None:
             # the payload will always be the proper channel payload
@@ -1702,7 +1702,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             slowmode_delay=slowmode_delay,
             flags=flags,
             reason=reason,
-            **kwargs,  # type: ignore
+            **kwargs,
         )
         if payload is not None:
             # the payload will always be the proper channel payload
@@ -2557,7 +2557,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
             flags=flags,
             slowmode_delay=slowmode_delay,
             reason=reason,
-            **kwargs,  # type: ignore
+            **kwargs,
         )
         if payload is not None:
             # the payload will always be the proper channel payload
@@ -3048,7 +3048,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             overwrites=overwrites,
             flags=flags,
             reason=reason,
-            **kwargs,  # type: ignore
+            **kwargs,
         )
         if payload is not None:
             # the payload will always be the proper channel payload
@@ -4204,7 +4204,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
             default_sort_order=default_sort_order,
             default_layout=default_layout,
             reason=reason,
-            **kwargs,  # type: ignore
+            **kwargs,
         )
         if payload is not None:
             # the payload will always be the proper channel payload
@@ -4602,7 +4602,7 @@ class MediaChannel(ThreadOnlyGuildChannel):
             default_reaction=default_reaction,
             default_sort_order=default_sort_order,
             reason=reason,
-            **kwargs,  # type: ignore
+            **kwargs,
         )
         if payload is not None:
             # the payload will always be the proper channel payload
