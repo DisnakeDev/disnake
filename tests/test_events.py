@@ -10,12 +10,12 @@ from disnake.ext import commands
 
 # n.b. the specific choice of events used in this file is irrelevant
 @pytest.fixture
-def client():
+def client() -> disnake.Client:
     return disnake.Client()
 
 
 @pytest.fixture
-def bot():
+def bot() -> commands.Bot:
     return commands.Bot(
         command_prefix=commands.when_mentioned,
         command_sync_flags=commands.CommandSyncFlags.none(),
