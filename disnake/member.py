@@ -393,7 +393,7 @@ class Member(disnake.abc.Messageable, _UserTag):
     ) -> Union[User, Self]:
         # A User object with a 'member' key
         try:
-            member_data = data.pop("member")
+            member_data: BaseMemberPayload = data.pop("member")  # type: ignore
         except KeyError:
             return state.create_user(data)
         else:
