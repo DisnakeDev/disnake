@@ -57,7 +57,7 @@ class FlagTypings(BaseCodemodCommand):
         # no reason to continue into classes
         return False
 
-    def leave_ClassDef(self, _: cst.ClassDef, node: cst.ClassDef):
+    def leave_ClassDef(self, _: cst.ClassDef, node: cst.ClassDef) -> cst.ClassDef:
         if not m.matches(node.name, m.OneOf(*map(m.Name, self.flag_classes))):
             return node
 
