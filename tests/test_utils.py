@@ -9,7 +9,18 @@ import sys
 import warnings
 from dataclasses import dataclass
 from datetime import timedelta, timezone
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    Tuple,
+    TypeVar,
+    Union,
+)
 from unittest import mock
 
 import pytest
@@ -994,12 +1005,12 @@ class _Clazz:
 
             return inner
 
-    rebind = _toplevel
+    rebind: Callable[["_Clazz"], Any] = lambda _: _toplevel()
 
     @decorator
     def decorated(self) -> None: ...
 
-    _lambda = lambda: None
+    _lambda: Callable[["_Clazz"], None] = lambda _: None
 
 
 @pytest.mark.parametrize(
