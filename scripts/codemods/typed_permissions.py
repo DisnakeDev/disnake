@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 
 import itertools
-from typing import Optional
+from typing import List, Optional, Union
 
 import libcst as cst
 import libcst.codemod.visitors as codevisitors
@@ -16,7 +16,7 @@ ALL_PERMISSIONS = sorted(Permissions.VALID_FLAGS.keys())
 PERMISSION_MATCHERS = m.OneOf(*map(m.Name, ALL_PERMISSIONS))
 
 
-def get_perm_kwargs(annotation: cst.Annotation):
+def get_perm_kwargs(annotation: cst.Annotation) -> List[cst.Param]:
     return [
         cst.Param(
             cst.Name(perm),
@@ -67,7 +67,7 @@ class PermissionTypings(BaseCodemodCommand):
     DESCRIPTION: str = "Adds overloads for all permissions."
     CHECK_MARKER: str = "@_overload_with_permissions"
 
-    def leave_ClassDef(self, _: cst.ClassDef, node: cst.ClassDef):
+    def leave_ClassDef(self, _: cst.ClassDef, node: cst.ClassDef) -> Union[cst.ClassDef, cst.If]:
         # this method manages where PermissionOverwrite defines the typed augmented permissions.
         # in order to type these properly, we destroy that node and recreate it with the proper permissions.
         if not m.matches(node.name, m.Name("PermissionOverwrite")):
@@ -108,7 +108,9 @@ class PermissionTypings(BaseCodemodCommand):
         # don't recurse into the body of a function
         return False
 
-    def leave_FunctionDef(self, _: cst.FunctionDef, node: cst.FunctionDef):
+    def leave_FunctionDef(
+        self, _: cst.FunctionDef, node: cst.FunctionDef
+    ) -> Union[cst.FlattenSentinel[cst.FunctionDef], cst.FunctionDef, cst.RemovalSentinel]:
         # we don't care about the original node
         has_overload_deco = False
         is_overload = False

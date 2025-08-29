@@ -11,7 +11,7 @@ import disnake
 from disnake.ext import commands
 
 
-def injected(user: disnake.User, channel: disnake.TextChannel):
+def injected(user: disnake.User, channel: disnake.TextChannel) -> Tuple[int, str]:
     """An injection callback. This description should not be shown.
 
     Parameters
@@ -31,7 +31,7 @@ class PrefixConverter:
         self.prefix = prefix
         self.suffix = suffix
 
-    def __call__(self, inter: disnake.CommandInteraction[commands.Bot], a: str = "init"):
+    def __call__(self, inter: disnake.CommandInteraction[commands.Bot], a: str = "init") -> str:
         return self.prefix + a + self.suffix
 
 

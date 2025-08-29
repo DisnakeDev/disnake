@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, List, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Union
 
 from .enums import MessageType
 
@@ -116,8 +116,8 @@ class AllowedMentions:
         )
 
     def to_dict(self) -> AllowedMentionsPayload:
-        parse = []
-        data = {}
+        parse: List[str] = []
+        data: Dict[str, Union[List[int], bool, List[str]]] = {}
 
         if self.everyone:
             parse.append("everyone")

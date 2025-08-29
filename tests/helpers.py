@@ -41,7 +41,7 @@ class freeze_time(ContextManager):
         dt = dt or datetime.datetime.now(datetime.timezone.utc)
         assert dt.tzinfo
 
-        def fake_now(tz=None):
+        def fake_now(tz=None) -> datetime.datetime:
             return dt.astimezone(tz).replace(tzinfo=tz)
 
         self.mock_datetime = mock.MagicMock(wraps=datetime.datetime)

@@ -1241,7 +1241,7 @@ class HTTPClient:
             "GET", "/channels/{channel_id}/threads/archived/private", channel_id=channel_id
         )
 
-        params = {}
+        params: Dict[str, int | str] = {}
         if before:
             params["before"] = before
         params["limit"] = limit
@@ -1255,7 +1255,7 @@ class HTTPClient:
             "/channels/{channel_id}/users/@me/threads/archived/private",
             channel_id=channel_id,
         )
-        params = {}
+        params: Dict[str, int | str] = {}
         if before:
             params["before"] = before
         params["limit"] = limit
