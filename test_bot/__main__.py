@@ -98,5 +98,5 @@ print(f"disnake: {disnake.__version__}\n")
 
 if __name__ == "__main__":
     bot = TestBot()
-    bot.load_extensions(os.path.join(__package__, Config.cogs_folder))
+    bot.load_extensions(os.path.join(__package__ or "", Config.cogs_folder))
     bot.run(Config.token)
