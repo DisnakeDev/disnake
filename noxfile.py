@@ -42,14 +42,14 @@ nox.needs_version = ">=2022.1.7"
 reset_coverage = True
 
 
-@nox.session
+@nox.session(python="3.11")
 def docs(session: nox.Session) -> None:
     """Build and generate the documentation.
 
     If running locally, will build automatic reloading docs.
     If running in CI, will build a production version of the documentation.
     """
-    session.run_always("pdm", "install", "--prod", "-G", "docs", external=True)
+    session.run_always("pdm", "install", "-dG", "docs", external=True)
     with session.chdir("docs"):
         args = ["-b", "html", "-n", ".", "_build/html", *session.posargs]
         if session.interactive:
