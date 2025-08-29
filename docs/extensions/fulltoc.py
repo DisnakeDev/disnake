@@ -121,7 +121,7 @@ def build_full_toctree(
             **kwargs,
         )
         if toctree is not None:
-            toctrees.append(cast(nodes.Element, toctree))
+            toctrees.append(cast("nodes.Element", toctree))
 
     if not toctrees:
         raise RuntimeError("Expected at least one toctree")
