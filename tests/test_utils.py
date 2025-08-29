@@ -26,6 +26,9 @@ elif sys.version_info >= (3, 12):
     # non-3.12 tests shouldn't be using this
     from typing import TypeAliasType
 
+T = TypeVar("T")
+CoolList = TypeAliasType("CoolList", List[T], type_params=(T,))
+
 
 def test_missing() -> None:
     assert utils.MISSING != utils.MISSING
@@ -811,23 +814,15 @@ def test_resolve_annotation_literal() -> None:
 @pytest.mark.skipif(sys.version_info < (3, 12), reason="syntax requires py3.12")
 class TestResolveAnnotationTypeAliasType:
     def test_simple(self) -> None:
-        # this is equivalent to `type CoolList = List[int]`
-        CoolList = TypeAliasType("CoolList", List[int])
-        assert utils.resolve_annotation(CoolList, globals(), locals(), {}) == List[int]
+        assert utils.resolve_annotation(CoolList[int], globals(), locals(), {}) == List[int]
 
     def test_generic(self) -> None:
-        # this is equivalent to `type CoolList[T] = List[T]; CoolList[int]`
-        T = TypeVar("T")
-        CoolList = TypeAliasType("CoolList", List[T], type_params=(T,))
-
         annotation = CoolList[int]
         assert utils.resolve_annotation(annotation, globals(), locals(), {}) == List[int]
 
     # alias and arg in local scope
     def test_forwardref_local(self) -> None:
-        T = TypeVar("T")
         IntOrStr = Union[int, str]
-        CoolList = TypeAliasType("CoolList", List[T], type_params=(T,))
 
         annotation = CoolList["IntOrStr"]
         assert utils.resolve_annotation(annotation, globals(), locals(), {}) == List[IntOrStr]
