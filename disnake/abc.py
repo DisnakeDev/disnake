@@ -1,5 +1,4 @@
 # SPDX-License-Identifier: MIT
-
 from __future__ import annotations
 
 import asyncio
@@ -83,6 +82,7 @@ if TYPE_CHECKING:
         OverwriteType,
         PermissionOverwrite as PermissionOverwritePayload,
     )
+    from .types.guild import ChannelPositionUpdate as ChannelPositionUpdatePayload
     from .types.threads import PartialForumTag as PartialForumTagPayload
     from .ui._types import MessageComponents
     from .ui.view import View
@@ -312,9 +312,9 @@ class GuildChannel(ABC):
             # add ourselves at our designated position
             channels.insert(index, self)
 
-        payload = []
+        payload: List[ChannelPositionUpdatePayload] = []
         for index, c in enumerate(channels):
-            d: Dict[str, Any] = {"id": c.id, "position": index}
+            d: ChannelPositionUpdatePayload = {"id": c.id, "position": index}
             if parent_id is not MISSING and c.id == self.id:
                 d.update(parent_id=parent_id, lock_permissions=lock_permissions)
             payload.append(d)
@@ -508,7 +508,7 @@ class GuildChannel(ABC):
         """List[:class:`.Role`]: Returns a list of roles that have been overridden from
         their default values in the :attr:`.Guild.roles` attribute.
         """
-        ret = []
+        ret: List[Role] = []
         g = self.guild
         for overwrite in filter(lambda o: o.is_role(), self._overwrites):
             role = g.get_role(overwrite.id)
@@ -1271,11 +1271,11 @@ class GuildChannel(ABC):
             raise ValueError("Could not resolve appropriate move position")
 
         channels.insert(max((index + offset), 0), self)
-        payload = []
+        payload: List[ChannelPositionUpdatePayload] = []
         lock_permissions = kwargs.get("sync_permissions", False)
         reason = kwargs.get("reason")
         for index, channel in enumerate(channels):
-            d = {"id": channel.id, "position": index}
+            d: ChannelPositionUpdatePayload = {"id": channel.id, "position": index}
             if parent_id is not MISSING and channel.id == self.id:
                 d.update(parent_id=parent_id, lock_permissions=lock_permissions)
             payload.append(d)

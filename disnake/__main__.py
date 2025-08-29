@@ -5,7 +5,7 @@ import importlib.metadata
 import platform
 import sys
 from pathlib import Path
-from typing import Tuple, Union
+from typing import List, Tuple, Union
 
 import aiohttp
 
@@ -13,7 +13,7 @@ import disnake
 
 
 def show_version() -> None:
-    entries = []
+    entries: List[str] = []
 
     sys_ver = sys.version_info
     entries.append(

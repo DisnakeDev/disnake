@@ -38,7 +38,7 @@ class FlagTypings(BaseCodemodCommand):
         # import and load the module
         module = importlib.import_module(current_module)
         # we preformulate a list of all flag classes on the imported flags module
-        all_flag_classes = []
+        all_flag_classes: List[str] = []
         for attr_name in dir(module):
             obj = getattr(module, attr_name)
             if (

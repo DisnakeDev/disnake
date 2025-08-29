@@ -1105,7 +1105,7 @@ class Message(Hashable):
 
         .. versionadded:: 2.0
 
-    message_snapshots: list[:class:`ForwardedMessage`]
+    message_snapshots: List[:class:`ForwardedMessage`]
         A list of forwarded messages.
 
         .. versionadded:: 2.10

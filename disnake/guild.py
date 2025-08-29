@@ -101,6 +101,7 @@ if TYPE_CHECKING:
     from .template import Template
     from .threads import AnyThreadArchiveDuration, ForumTag
     from .types.channel import (
+        GuildChannel as GuildChannelPayload,
         PermissionOverwrite as PermissionOverwritePayload,
     )
     from .types.guild import (
@@ -1494,7 +1495,7 @@ class Guild(Hashable):
         :class:`VoiceChannel`
             The channel that was just created.
         """
-        options = {}
+        options: Dict[str, int] = {}
         if position is not MISSING:
             options["position"] = position
 
@@ -1885,7 +1886,7 @@ class Guild(Hashable):
         :class:`MediaChannel`
             The channel that was just created.
         """
-        options = {}
+        options: Dict[str, int] = {}
         if position is not MISSING:
             options["position"] = position
 
@@ -2388,7 +2389,7 @@ class Guild(Hashable):
         """
         data = await self._state.http.get_all_guild_channels(self.id)
 
-        def convert(d):
+        def convert(d: GuildChannelPayload) -> GuildChannel:
             factory, _ = _guild_channel_factory(d["type"])
             if factory is None:
                 raise InvalidData("Unknown channel type {type} for channel ID {id}.".format_map(d))
@@ -3207,7 +3208,7 @@ class Guild(Hashable):
             The list of invites that are currently active.
         """
         data = await self._state.http.invites_from(self.id)
-        result = []
+        result: List[Invite] = []
         for invite in data:
             if channel_data := invite.get("channel"):
                 channel = self.get_channel(int(channel_data["id"]))
