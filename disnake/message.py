@@ -1238,17 +1238,13 @@ class Message(Hashable):
             "role_subscription_data"
         )
 
-        try:
-            ref = data["message_reference"]
-        except KeyError:
-            self.reference = None
-        else:
+        self.reference = None
+        ref = data.get("message_reference")
+        if ref is not None:
             self.reference = ref = MessageReference.with_state(state, ref)
-            try:
+
+            if "referenced_message" in data:
                 resolved = data["referenced_message"]
-            except KeyError:
-                pass
-            else:
                 if resolved is None:
                     ref.resolved = DeletedReferencedMessage(ref)
                 else:
@@ -1273,10 +1269,9 @@ class Message(Hashable):
         ]
 
         for handler in ("author", "member", "mentions", "mention_roles"):
-            try:
-                getattr(self, f"_handle_{handler}")(data[handler])
-            except KeyError:
-                continue
+            arg = data.get(handler)
+            if arg:
+                getattr(self, f"_handle_{handler}")(arg)
 
     def __repr__(self) -> str:
         name = self.__class__.__name__

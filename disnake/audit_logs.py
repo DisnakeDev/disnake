@@ -405,23 +405,15 @@ class AuditLogChanges:
                 if key:
                     attr = key
 
-            try:
-                before = elem["old_value"]
-            except KeyError:
-                before = None
-            else:
-                if transformer:
-                    before = transformer(entry, before)
+            before = elem.get("old_value")
+            if before and transformer:
+                before = transformer(entry, before)
 
             setattr(self.before, attr, before)
 
-            try:
-                after = elem["new_value"]
-            except KeyError:
-                after = None
-            else:
-                if transformer:
-                    after = transformer(entry, after)
+            after = elem.get("new_value")
+            if after and transformer:
+                after = transformer(entry, after)
 
             setattr(self.after, attr, after)
 

@@ -429,15 +429,13 @@ class Member(disnake.abc.Messageable, _UserTag):
     def _update(self, data: GuildMemberUpdateEvent) -> None:
         # the nickname change is optional,
         # if it isn't in the payload then it didn't change
-        try:
-            self.nick = data["nick"]
-        except KeyError:
-            pass
+        nick = data.get("nick")
+        if nick is not None:
+            self.nick = nick
 
-        try:
-            self.pending = data["pending"]
-        except KeyError:
-            pass
+        pending = data.get("pending")
+        if pending is not None:
+            self.pending = pending
 
         self.premium_since = utils.parse_time(data.get("premium_since"))
         self._roles = utils.SnowflakeList(map(int, data["roles"]))

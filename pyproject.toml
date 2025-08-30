@@ -345,7 +345,7 @@ reportIncompatibleVariableOverride = false
 
 # this got expanded to include try-catch blocks
 # TODO: re-enable
-reportTypedDictNotRequiredAccess = false
+reportTypedDictNotRequiredAccess = true
 
 # these are largely due to missing type hints, and make up most of the error count
 reportUnknownMemberType = false
