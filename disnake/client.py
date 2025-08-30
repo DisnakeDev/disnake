@@ -1284,7 +1284,11 @@ class Client:
         Parameters
         ----------
         token: :class:`str`
-            The discord token of the bot that is being ran.
+            The authentication token. Do not prefix this token with anything as the library will do it for you.
+        reconnect: :class:`bool`
+            Whether reconnecting should be attempted, either due to internet failure or a specific failure on Discord's part. Certain disconnects that lead to bad state will not be handled (such as invalid sharding payloads or bad tokens).
+        ignore_session_start_limit: :class:`bool`
+            Whether the API provided session start limit should be ignored when connecting to the API.
         """
         loop = self.loop
 
