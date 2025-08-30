@@ -242,7 +242,7 @@ def isoformat_utc(dt: Optional[datetime.datetime]) -> Optional[str]:
     return None
 
 
-def copy_doc(original: Union[Callable, property]) -> Callable[[T], T]:
+def copy_doc(original: Union[Callable[..., Any], property]) -> Callable[[T], T]:
     def decorator(overridden: T) -> T:
         overridden.__doc__ = original.__doc__
         if callable(original):
@@ -1029,7 +1029,7 @@ def _get_option_desc(lines: List[str]) -> Dict[str, _DocstringParam]:
     return options
 
 
-def parse_docstring(func: Callable) -> _ParsedDocstring:
+def parse_docstring(func: Callable[..., Any]) -> _ParsedDocstring:
     doc = _getdoc(func)
     if doc is None:
         return {

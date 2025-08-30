@@ -54,6 +54,8 @@ if TYPE_CHECKING:
     import datetime
     from types import TracebackType
 
+    from typing_extensions import Self
+
     from ..abc import Snowflake
     from ..asset import AssetBytes
     from ..channel import ForumChannel, MediaChannel, StageChannel, TextChannel, VoiceChannel
@@ -735,7 +737,7 @@ class _WebhookState(Generic[WebhookT]):
     def __init__(
         self,
         webhook: WebhookT,
-        parent: Optional[Union[ConnectionState, _WebhookState]],
+        parent: Optional[Union[ConnectionState, _WebhookState[Any]]],
         *,
         thread: Optional[Snowflake] = None,
     ) -> None:
@@ -983,7 +985,7 @@ class BaseWebhook(Hashable):
         state: Optional[ConnectionState] = None,
     ) -> None:
         self.auth_token: Optional[str] = token
-        self._state: Union[ConnectionState, _WebhookState] = state or _WebhookState(
+        self._state: Union[ConnectionState, _WebhookState[Self]] = state or _WebhookState(
             self, parent=state
         )
         self._update(data)

@@ -96,6 +96,8 @@ from .utils import MISSING
 from .webhook import Webhook
 
 if TYPE_CHECKING:
+    from typing_extensions import Concatenate
+
     from .abc import AnyChannel, MessageableChannel, PrivateChannel
     from .app_commands import APIApplicationCommand, ApplicationCommand
     from .client import Client
@@ -117,6 +119,8 @@ if TYPE_CHECKING:
 
     Channel = Union[GuildChannel, VocalGuildChannel, PrivateChannel]
     PartialChannel = Union[Channel, PartialMessageable]
+else:
+    Concatenate = Tuple  # for the use-case of T[type, ...] Tuple works perfectly
 
 T = TypeVar("T")
 
@@ -207,9 +211,9 @@ class ConnectionState:
     def __init__(
         self,
         *,
-        dispatch: Callable,
-        handlers: Dict[str, Callable],
-        hooks: Dict[str, Callable],
+        dispatch: Callable[Concatenate[str, ...], Any],
+        handlers: Dict[str, Callable[..., Any]],
+        hooks: Dict[str, Callable[..., Any]],
         http: HTTPClient,
         loop: asyncio.AbstractEventLoop,
         max_messages: Optional[int] = 1000,
@@ -229,9 +233,9 @@ class ConnectionState:
         if self.max_messages is not None and self.max_messages <= 0:
             self.max_messages = 1000
 
-        self.dispatch: Callable = dispatch
-        self.handlers: Dict[str, Callable] = handlers
-        self.hooks: Dict[str, Callable] = hooks
+        self.dispatch: Callable[Concatenate[str, ...], Any] = dispatch
+        self.handlers: Dict[str, Callable[..., Any]] = handlers
+        self.hooks: Dict[str, Callable[..., Any]] = hooks
         self.shard_count: Optional[int] = None
         self._ready_task: Optional[asyncio.Task] = None
         self.application_id: Optional[int] = None if application_id is None else int(application_id)
