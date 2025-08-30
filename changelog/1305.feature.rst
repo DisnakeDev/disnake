@@ -1,2 +1,1 @@
-Update the :meth:`.Messageable.pins`, :meth:`Message.pin` and :meth:`Message.unpin` methods to use the new API endpoints.
-:meth:`.Messageable.pins` returns now an asynchronous iterator to yield all pinned messages.
+Update the :meth:`.Messageable.pins`, :meth:`Message.pin` and :meth:`Message.unpin` methods to use the new API endpoints. :meth:`.Messageable.pins` returns now an asynchronous iterator to yield all pinned messages.
