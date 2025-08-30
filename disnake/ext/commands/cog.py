@@ -143,7 +143,7 @@ class CogMeta(type):
     __cog_slash_settings__: Dict[str, Any]
     __cog_user_settings__: Dict[str, Any]
     __cog_message_settings__: Dict[str, Any]
-    __cog_commands__: List[Command]
+    __cog_commands__: List[Command[Any, ..., Any]]
     __cog_app_commands__: List[InvokableApplicationCommand]
     __cog_listeners__: List[Tuple[str, str]]
 
@@ -236,7 +236,7 @@ class Cog(metaclass=CogMeta):
 
     __cog_name__: ClassVar[str]
     __cog_settings__: ClassVar[Dict[str, Any]]
-    __cog_commands__: ClassVar[List[Command]]
+    __cog_commands__: ClassVar[List[Command[Self, ..., Any]]]
     __cog_app_commands__: ClassVar[List[InvokableApplicationCommand]]
     __cog_listeners__: ClassVar[List[Tuple[str, str]]]
 
@@ -283,7 +283,7 @@ class Cog(metaclass=CogMeta):
 
         return self
 
-    def get_commands(self) -> List[Command]:
+    def get_commands(self) -> List[Command[Self, ..., Any]]:
         """Returns a list of commands the cog has.
 
         Returns
@@ -364,7 +364,7 @@ class Cog(metaclass=CogMeta):
     def description(self, description: str) -> None:
         self.__cog_description__ = description
 
-    def walk_commands(self) -> Generator[Command, None, None]:
+    def walk_commands(self) -> Generator[Command[Self, ..., Any], None, None]:
         """An iterator that recursively walks through this cog's commands and subcommands.
 
         Yields
