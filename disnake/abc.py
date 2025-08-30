@@ -1867,7 +1867,7 @@ class Messageable:
     ) -> ChannelPinsIterator:
         """Returns an :class:`.AsyncIterator` that enables receiving the destination's pinned messages.
 
-        You must have the :attr:`.Permissions.read_message_history` and :attr:`.Permissions.view_channel` to use this.
+        You must have the :attr:`.Permissions.read_message_history` and :attr:`.Permissions.view_channel` permissions to use this.
 
         .. note::
 
