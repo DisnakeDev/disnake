@@ -26,6 +26,22 @@ User
     .. automethod:: typing
         :async-with:
 
+Collectibles
+~~~~~~~~~~~~
+
+.. attributetable:: Collectibles
+
+.. autoclass:: Collectibles()
+    :members:
+
+Nameplate
+~~~~~~~~~
+
+.. attributetable:: Nameplate
+
+.. autoclass:: Nameplate()
+    :members:
+
 Data Classes
 ------------
 
@@ -58,6 +74,12 @@ DefaultAvatar
 ~~~~~~~~~~~~~
 
 .. autoclass:: DefaultAvatar()
+    :members:
+
+NameplatePalette
+~~~~~~~~~~~~~~~~
+
+.. autoclass:: NameplatePalette()
     :members:
 
 Events
