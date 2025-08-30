@@ -1903,13 +1903,9 @@ class Messageable:
             If ``None``, retrieves every pinned message in the channel. Note, however,
             that this would make it a slow operation.
         before: Optional[Union[:class:`.abc.Snowflake`, :class:`datetime.datetime`]]
-            Retrieve pinned messages before this date or message.
+            Retrieve messages pinned before this date or message.
             If a datetime is provided, it is recommended to use a UTC aware datetime.
             If the datetime is naive, it is assumed to be local time.
-            When passing an :class:`.Object` the API will return messages that were pinned
-            before the creation date of that snowflake. This happens because the API endpoint
-            is paginated based on the ``pinned_at`` timestamp and not the creation
-            timestamp of the snowflake.
 
         Raises
         ------
