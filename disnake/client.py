@@ -1257,7 +1257,9 @@ class Client:
             reconnect=reconnect, ignore_session_start_limit=ignore_session_start_limit
         )
 
-    def run(self, *args: Any, **kwargs: Any) -> None:
+    def run(
+        self, token: str, *, reconnect: bool = True, ignore_session_start_limit: bool = False
+    ) -> None:
         """A blocking call that abstracts away the event loop
         initialisation from you.
 
@@ -1284,11 +1286,7 @@ class Client:
         Parameters
         ----------
         token: :class:`str`
-            The authentication token. Do not prefix this token with anything as the library will do it for you.
-        reconnect: :class:`bool`
-            Whether reconnecting should be attempted, either due to internet failure or a specific failure on Discord's part. Certain disconnects that lead to bad state will not be handled (such as invalid sharding payloads or bad tokens).
-        ignore_session_start_limit: :class:`bool`
-            Whether the API provided session start limit should be ignored when connecting to the API.
+            The discord token of the bot that is being ran.
         """
         loop = self.loop
 
@@ -1300,7 +1298,7 @@ class Client:
 
         async def runner() -> None:
             try:
-                await self.start(*args, **kwargs)
+                await self.start(token, reconnect, ignore_session_start_limit)
             finally:
                 if not self.is_closed():
                     await self.close()
