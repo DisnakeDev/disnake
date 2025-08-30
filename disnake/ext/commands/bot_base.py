@@ -605,5 +605,5 @@ class BotBase(CommonBotBase, GroupMixin):
         ctx = await self.get_context(message)
         await self.invoke(ctx)
 
-    async def on_message(self, message) -> None:
+    async def on_message(self, message: Message) -> None:
         await self.process_commands(message)
