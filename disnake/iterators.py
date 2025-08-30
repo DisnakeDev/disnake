@@ -815,6 +815,8 @@ class MemberIterator(_AsyncIterator["Member"]):
                 # no data, terminate
                 return
 
+            if self.limit is not None:
+                self.limit -= self.retrieve
             if len(data) < 1000:
                 self.limit = 0  # terminate loop
 
