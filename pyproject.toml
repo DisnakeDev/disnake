@@ -73,7 +73,7 @@ tools = [
     "slotscheck~=0.16.4",
     "python-dotenv~=1.0.0",
     "check-manifest==0.49",
-    "ruff==0.9.3",
+    "ruff==0.12.11",
 ]
 changelog = [
     "towncrier==23.6.0",
@@ -81,7 +81,7 @@ changelog = [
 codemod = [
     # run codemods on the respository (mostly automated typing)
     "libcst~=1.1.0",
-    "ruff==0.9.3",
+    "ruff==0.12.11",
     "autotyping==23.2.0",
 ]
 typing = [
@@ -167,7 +167,6 @@ ignore = [
     "D416", # section name should end with a colon, incompatible with D406
 
     # unknown if this is actually an issue
-    "RUF005", # might not be actually faster
     "RUF006", # might not be an issue/very extreme cases
 
     # we keep __all__ and __slots__ (roughly) sorted by source, not alphabetically
@@ -194,6 +193,16 @@ ignore = [
 
     # outer loop variables are overwritten by inner assignment target, these are mostly intentional
     "PLW2901",
+
+    # TODO:
+    # pytest.warns() without a match variable is too broad
+    "PT030",
+
+    # object does not implement hashing
+    "PLW1641",
+
+    # ignore non-to-level imports
+    "PLC0415",
 
     # ignore imports that could be moved into type-checking blocks
     # (no real advantage other than possibly avoiding cycles,

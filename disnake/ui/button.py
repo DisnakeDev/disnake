@@ -8,6 +8,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
+    ClassVar,
     Optional,
     Tuple,
     TypeVar,
@@ -53,7 +54,7 @@ class Button(Item[V_co]):
         The style of the button.
     custom_id: Optional[:class:`str`]
         The ID of the button that gets received during an interaction.
-        If this button is for a URL, it does not have a custom ID.
+        If this button is for a URL or an SKU, it does not have a custom ID.
     url: Optional[:class:`str`]
         The URL this button sends you to.
     disabled: :class:`bool`
@@ -62,6 +63,17 @@ class Button(Item[V_co]):
         The label of the button, if any.
     emoji: Optional[Union[:class:`.PartialEmoji`, :class:`.Emoji`, :class:`str`]]
         The emoji of the button, if available.
+    sku_id: Optional[:class:`int`]
+        The ID of a purchasable SKU, for premium buttons.
+        Premium buttons additionally cannot have a ``label``, ``url``, or ``emoji``.
+
+        .. versionadded:: 2.11
+    id: :class:`int`
+        The numeric identifier for the component. Must be unique within the message.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
+
+        .. versionadded:: 2.11
     row: Optional[:class:`int`]
         The relative row this button belongs to. A Discord component can only have 5
         rows. By default, items are arranged automatically into those 5 rows. If you'd
@@ -70,15 +82,16 @@ class Button(Item[V_co]):
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     """
 
-    __repr_attributes__: Tuple[str, ...] = (
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
         "style",
         "url",
         "disabled",
         "label",
         "emoji",
+        "sku_id",
         "row",
     )
-    # We have to set this to MISSING in order to overwrite the abstract property from WrappedComponent
+    # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: ButtonComponent = MISSING
 
     @overload
@@ -91,6 +104,8 @@ class Button(Item[V_co]):
         custom_id: Optional[str] = None,
         url: Optional[str] = None,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        sku_id: Optional[int] = None,
+        id: int = 0,
         row: Optional[int] = None,
     ) -> None: ...
 
@@ -104,6 +119,8 @@ class Button(Item[V_co]):
         custom_id: Optional[str] = None,
         url: Optional[str] = None,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        sku_id: Optional[int] = None,
+        id: int = 0,
         row: Optional[int] = None,
     ) -> None: ...
 
@@ -116,18 +133,24 @@ class Button(Item[V_co]):
         custom_id: Optional[str] = None,
         url: Optional[str] = None,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        sku_id: Optional[int] = None,
+        id: int = 0,
         row: Optional[int] = None,
     ) -> None:
         super().__init__()
-        if custom_id is not None and url is not None:
-            raise TypeError("cannot mix both url and custom_id with Button")
 
         self._provided_custom_id = custom_id is not None
-        if url is None and custom_id is None:
+        mutually_exclusive = 3 - (custom_id, url, sku_id).count(None)
+
+        if mutually_exclusive == 0:
             custom_id = os.urandom(16).hex()
+        elif mutually_exclusive != 1:
+            raise TypeError("cannot mix url, sku_id and custom_id with Button")
 
         if url is not None:
             style = ButtonStyle.link
+        if sku_id is not None:
+            style = ButtonStyle.premium
 
         if emoji is not None:
             if isinstance(emoji, str):
@@ -141,12 +164,14 @@ class Button(Item[V_co]):
 
         self._underlying = ButtonComponent._raw_construct(
             type=ComponentType.button,
+            id=id,
             custom_id=custom_id,
             url=url,
             disabled=disabled,
             label=label,
             style=style,
             emoji=emoji,
+            sku_id=sku_id,
         )
         self.row = row
 
@@ -167,7 +192,7 @@ class Button(Item[V_co]):
     def custom_id(self) -> Optional[str]:
         """Optional[:class:`str`]: The ID of the button that gets received during an interaction.
 
-        If this button is for a URL, it does not have a custom ID.
+        If this button is for a URL or an SKU, it does not have a custom ID.
         """
         return self._underlying.custom_id
 
@@ -226,6 +251,20 @@ class Button(Item[V_co]):
         else:
             self._underlying.emoji = None
 
+    @property
+    def sku_id(self) -> Optional[int]:
+        """Optional[:class:`int`]: The ID of a purchasable SKU, for premium buttons.
+
+        .. versionadded:: 2.11
+        """
+        return self._underlying.sku_id
+
+    @sku_id.setter
+    def sku_id(self, value: Optional[int]) -> None:
+        if value is not None and not isinstance(value, int):
+            raise TypeError("sku_id must be None or int")
+        self._underlying.sku_id = value
+
     @classmethod
     def from_component(cls, button: ButtonComponent) -> Self:
         return cls(
@@ -235,6 +274,8 @@ class Button(Item[V_co]):
             custom_id=button.custom_id,
             url=button.url,
             emoji=button.emoji,
+            sku_id=button.sku_id,
+            id=button.id,
             row=None,
         )
 
@@ -244,6 +285,8 @@ class Button(Item[V_co]):
     def is_persistent(self) -> bool:
         if self.style is ButtonStyle.link:
             return self.url is not None
+        elif self.style is ButtonStyle.premium:
+            return self.sku_id is not None
         return super().is_persistent()
 
     def refresh_component(self, button: ButtonComponent) -> None:
@@ -258,6 +301,7 @@ def button(
     disabled: bool = False,
     style: ButtonStyle = ButtonStyle.secondary,
     emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+    id: int = 0,
     row: Optional[int] = None,
 ) -> Callable[[ItemCallbackType[V_co, Button[V_co]]], DecoratedItem[Button[V_co]]]: ...
 
@@ -279,11 +323,10 @@ def button(
 
     .. note::
 
-        Buttons with a URL cannot be created with this function.
-        Consider creating a :class:`Button` manually instead.
-        This is because buttons with a URL do not have a callback
-        associated with them since Discord does not do any processing
-        with it.
+        Link/Premium buttons cannot be created with this function,
+        since these buttons do not have a callback associated with them.
+        Consider creating a :class:`Button` manually instead, and adding it
+        using :meth:`View.add_item`.
 
     Parameters
     ----------
@@ -305,6 +348,12 @@ def button(
     emoji: Optional[Union[:class:`str`, :class:`.Emoji`, :class:`.PartialEmoji`]]
         The emoji of the button. This can be in string form or a :class:`.PartialEmoji`
         or a full :class:`.Emoji`.
+    id: :class:`int`
+        The numeric identifier for the component. Must be unique within the message.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
+
+        .. versionadded:: 2.11
     row: Optional[:class:`int`]
         The relative row this button belongs to. A Discord component can only have 5
         rows. By default, items are arranged automatically into those 5 rows. If you'd

@@ -257,12 +257,16 @@ class HTTPClient:
             )
 
     async def ws_connect(self, url: str, *, compress: int = 0) -> aiohttp.ClientWebSocketResponse:
+        if hasattr(aiohttp, "ClientWSTimeout"):
+            timeout = aiohttp.ClientWSTimeout(ws_close=30.0)  # pyright: ignore[reportGeneralTypeIssues]
+        else:
+            timeout = 30.0
         return await self.__session.ws_connect(
             url,
             proxy_auth=self.proxy_auth,
             proxy=self.proxy,
             max_msg_size=0,
-            timeout=30.0,
+            timeout=timeout,
             autoclose=False,
             headers={
                 "User-Agent": self.user_agent,
@@ -1912,12 +1916,10 @@ class HTTPClient:
         invite_id: str,
         *,
         with_counts: bool = True,
-        with_expiration: bool = True,
         guild_scheduled_event_id: Optional[int] = None,
     ) -> Response[invite.Invite]:
         params = {
             "with_counts": int(with_counts),
-            "with_expiration": int(with_expiration),
         }
         if guild_scheduled_event_id:
             params["guild_scheduled_event_id"] = guild_scheduled_event_id

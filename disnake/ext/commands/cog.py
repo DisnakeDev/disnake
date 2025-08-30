@@ -16,7 +16,6 @@ from typing import (
     Optional,
     Tuple,
     Type,
-    TypeVar,
     Union,
 )
 
@@ -34,7 +33,7 @@ if TYPE_CHECKING:
 
     from disnake.interactions import ApplicationCommandInteraction
 
-    from ._types import MaybeCoro
+    from ._types import FuncT, MaybeCoro
     from .bot import AutoShardedBot, AutoShardedInteractionBot, Bot, InteractionBot
     from .context import Context
     from .core import Command
@@ -46,8 +45,6 @@ __all__ = (
     "CogMeta",
     "Cog",
 )
-
-FuncT = TypeVar("FuncT", bound=Callable[..., Any])
 
 MISSING: Any = disnake.utils.MISSING
 _log = logging.getLogger(__name__)
@@ -173,12 +170,9 @@ class CogMeta(type):
         new_cls = super().__new__(cls, name, bases, attrs, **kwargs)
         for base in reversed(new_cls.__mro__):
             for elem, value in base.__dict__.items():
-                if elem in commands:
-                    del commands[elem]
-                if elem in app_commands:
-                    del app_commands[elem]
-                if elem in listeners:
-                    del listeners[elem]
+                commands.pop(elem, None)
+                app_commands.pop(elem, None)
+                listeners.pop(elem, None)
 
                 is_static_method = isinstance(value, staticmethod)
                 if is_static_method:

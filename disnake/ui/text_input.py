@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
-from typing import Optional, Tuple
+from typing import TYPE_CHECKING, ClassVar, Optional, Tuple
 
 from ..components import TextInput as TextInputComponent
 from ..enums import ComponentType, TextInputStyle
 from ..utils import MISSING
 from .item import WrappedComponent
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
 __all__ = ("TextInput",)
 
@@ -37,9 +40,15 @@ class TextInput(WrappedComponent):
         The minimum length of the text input.
     max_length: Optional[:class:`int`]
         The maximum length of the text input.
+    id: :class:`int`
+        The numeric identifier for the component. Must be unique within the message.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
+
+        .. versionadded:: 2.11
     """
 
-    __repr_attributes__: Tuple[str, ...] = (
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
         "style",
         "label",
         "custom_id",
@@ -49,7 +58,7 @@ class TextInput(WrappedComponent):
         "min_length",
         "max_length",
     )
-    # We have to set this to MISSING in order to overwrite the abstract property from WrappedComponent
+    # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: TextInputComponent = MISSING
 
     def __init__(
@@ -63,9 +72,11 @@ class TextInput(WrappedComponent):
         required: bool = True,
         min_length: Optional[int] = None,
         max_length: Optional[int] = None,
+        id: int = 0,
     ) -> None:
         self._underlying = TextInputComponent._raw_construct(
             type=ComponentType.text_input,
+            id=id,
             style=style,
             label=label,
             custom_id=custom_id,
@@ -151,3 +162,17 @@ class TextInput(WrappedComponent):
     @max_length.setter
     def max_length(self, value: Optional[int]) -> None:
         self._underlying.max_length = value
+
+    @classmethod
+    def from_component(cls, text_input: TextInputComponent) -> Self:
+        return cls(
+            label=text_input.label or "",
+            custom_id=text_input.custom_id,
+            style=text_input.style,
+            placeholder=text_input.placeholder,
+            value=text_input.value,
+            required=text_input.required,
+            min_length=text_input.min_length,
+            max_length=text_input.max_length,
+            id=text_input.id,
+        )
