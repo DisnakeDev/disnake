@@ -899,10 +899,10 @@ class ArchivedThreadIterator(_AsyncIterator["Thread"]):
         if not self.has_more:
             raise NoMoreItems
 
-        limit = 50 if self.limit is None else max(self.limit, 50)
+        # endpoint requires at least 2, for unknown reasons
+        limit = 100 if self.limit is None else max(2, min(self.limit, 100))
         data = await self.endpoint(self.channel_id, before=self.before, limit=limit)
 
-        # This stuff is obviously WIP because 'members' is always empty
         threads: List[ThreadPayload] = data.get("threads", [])
         for d in reversed(threads):
             self.queue.put_nowait(self.create_thread(d))
