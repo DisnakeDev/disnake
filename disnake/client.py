@@ -425,12 +425,14 @@ class Client:
             loop=self.loop,
         )
 
-        self._handlers: Dict[str, Callable] = {
+        self._handlers: Dict[str, Callable[..., Any]] = {
             "ready": self._handle_ready,
             "connect_internal": self._handle_first_connect,
         }
 
-        self._hooks: Dict[str, Callable] = {"before_identify": self._call_before_identify_hook}
+        self._hooks: Dict[str, Callable[..., Any]] = {
+            "before_identify": self._call_before_identify_hook
+        }
 
         self._enable_debug_events: bool = enable_debug_events
         self._enable_gateway_error_handler: bool = enable_gateway_error_handler
