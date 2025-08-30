@@ -892,8 +892,8 @@ class HTTPClient:
     def get_pins(
         self,
         channel_id: Snowflake,
-        before: Optional[Snowflake],
         limit: int,
+        before: Optional[Snowflake] = None,
     ) -> Response[channel.ChannelPins]:
         r = Route(
             "GET",
