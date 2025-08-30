@@ -1876,8 +1876,9 @@ class Messageable:
             :attr:`.Message.reactions` data.
 
         .. versionchanged:: 2.11
-            Return an :class:`.AsyncIterator` to support the discord API changes.
-            ``await channel.pins()`` is deprecated in favor of ``async for msg in channel.pins()``.
+            Now returns an :class:`.AsyncIterator` to support changes in Discord's API.
+            ``await``\\ing the result of this method remains supported, but is deprecated
+            in favor of ``async for msg in channel.pins()``.
 
         Examples
         --------
