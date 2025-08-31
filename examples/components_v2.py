@@ -12,7 +12,7 @@ bot = commands.Bot(command_prefix=commands.when_mentioned)
 
 
 @bot.command()
-async def send_components(ctx: commands.Context):
+async def send_components(ctx: commands.Context) -> None:
     media_data: Any = ...  # placeholder for actual data
 
     await ctx.send(
@@ -30,7 +30,7 @@ async def send_components(ctx: commands.Context):
 
 
 @bot.event
-async def on_ready():
+async def on_ready() -> None:
     print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------")
 
 

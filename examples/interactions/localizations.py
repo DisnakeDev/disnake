@@ -53,7 +53,7 @@ async def highscore(
             OptionChoice(Localized("Last Month", key="CHOICE_MONTH"), "month"),
         ]
     ),
-):
+) -> None:
     """Shows the highscore of the selected user within the specified interval.
     {{ HIGHSCORE_COMMAND }}
 
@@ -81,7 +81,7 @@ async def game_autocomp(inter: disnake.CommandInteraction, string: str):
 
 
 @bot.event
-async def on_ready():
+async def on_ready() -> None:
     print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------")
 
 

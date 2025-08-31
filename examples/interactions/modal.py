@@ -58,7 +58,7 @@ class MyModal(disnake.ui.Modal):
 
 
 @bot.slash_command()
-async def create_tag(inter: disnake.CommandInteraction):
+async def create_tag(inter: disnake.CommandInteraction) -> None:
     await inter.response.send_modal(modal=MyModal())
 
 
@@ -73,7 +73,7 @@ async def create_tag(inter: disnake.CommandInteraction):
 
 
 @bot.slash_command()
-async def create_tag_low(inter: disnake.CommandInteraction):
+async def create_tag_low(inter: disnake.CommandInteraction) -> None:
     # Works same as the above code but using a low level interface.
     # It's recommended to use this if you don't want to increase cache usage.
     await inter.response.send_modal(
@@ -120,7 +120,7 @@ async def create_tag_low(inter: disnake.CommandInteraction):
 
 
 @bot.event
-async def on_ready():
+async def on_ready() -> None:
     print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------")
 
 

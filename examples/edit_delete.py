@@ -18,7 +18,7 @@ bot = commands.Bot(command_prefix=commands.when_mentioned_or("!"), intents=inten
 # with the old and new message objects.
 # NOTE: This only works as long as the message is in the bot's message cache.
 @bot.event
-async def on_message_edit(before: disnake.Message, after: disnake.Message):
+async def on_message_edit(before: disnake.Message, after: disnake.Message) -> None:
     msg = f"**{before.author}** edited their message:\n{before.content} -> {after.content}"
     await before.channel.send(msg)
 
@@ -26,20 +26,20 @@ async def on_message_edit(before: disnake.Message, after: disnake.Message):
 # Similarly, when a message gets deleted, the `on_message_delete` event will be called
 # with the now deleted message.
 @bot.event
-async def on_message_delete(message: disnake.Message):
+async def on_message_delete(message: disnake.Message) -> None:
     msg = f"The message by **{message.author}** was deleted:\n{message.content}"
     await message.channel.send(msg)
 
 
 @bot.command()
-async def edit(ctx: commands.Context):
+async def edit(ctx: commands.Context) -> None:
     msg = await ctx.channel.send("10")
     await asyncio.sleep(3.0)
     await msg.edit(content="40")
 
 
 @bot.command()
-async def delete(ctx: commands.Context):
+async def delete(ctx: commands.Context) -> None:
     # send and immediately delete a message
     msg = await ctx.channel.send("I will delete myself now...")
     await msg.delete()
@@ -49,7 +49,7 @@ async def delete(ctx: commands.Context):
 
 
 @bot.event
-async def on_ready():
+async def on_ready() -> None:
     print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------")
 
 

@@ -11,7 +11,7 @@ CHANNEL_ID = 1234567  # channel ID goes here
 
 
 class MyClient(disnake.Client):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
         # an attribute we can access from our task
@@ -21,13 +21,13 @@ class MyClient(disnake.Client):
         self.my_background_task.start()
 
     @tasks.loop(seconds=60)  # task runs every 60 seconds
-    async def my_background_task(self):
+    async def my_background_task(self) -> None:
         self.counter += 1
         await self.channel.send(str(self.counter))
 
     # called before the task/loop starts running
     @my_background_task.before_loop
-    async def before_my_task(self):
+    async def before_my_task(self) -> None:
         await self.wait_until_ready()  # wait until the cache is populated
 
         channel = self.get_channel(CHANNEL_ID)
@@ -36,7 +36,7 @@ class MyClient(disnake.Client):
 
         self.channel = channel
 
-    async def on_ready(self):
+    async def on_ready(self) -> None:
         print(f"Logged in as {self.user} (ID: {self.user.id})\n------")
 
 

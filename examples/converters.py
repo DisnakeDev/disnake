@@ -19,7 +19,7 @@ bot = commands.Bot(commands.when_mentioned_or("!"), intents=intents)
 
 
 @bot.command()
-async def userinfo(ctx: commands.Context, user: disnake.User):
+async def userinfo(ctx: commands.Context, user: disnake.User) -> None:
     # In the command signature above, you can see that the `user`
     # parameter is typehinted to `disnake.User`. This means that
     # during command invocation, we will attempt to convert
@@ -43,7 +43,9 @@ async def userinfo_error(ctx: commands.Context, error: commands.CommandError):
 
 
 @bot.command()
-async def ignore(ctx: commands.Context, target: typing.Union[disnake.Member, disnake.TextChannel]):
+async def ignore(
+    ctx: commands.Context, target: typing.Union[disnake.Member, disnake.TextChannel]
+) -> None:
     # This command signature utilises the `typing.Union` typehint.
     # The `commands` framework attempts a conversion of each type in this Union *in order*.
     # So, it will attempt to convert whatever is passed to `target` to a `disnake.Member` instance.
@@ -74,7 +76,7 @@ async def multiply(ctx: commands.Context, number: int, maybe: bool):
 
 
 @bot.event
-async def on_ready():
+async def on_ready() -> None:
     print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------")
 
 

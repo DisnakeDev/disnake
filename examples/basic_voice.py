@@ -37,7 +37,9 @@ ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
 
 class YTDLSource(disnake.PCMVolumeTransformer):
-    def __init__(self, source: disnake.AudioSource, *, data: Dict[str, Any], volume: float = 0.5):
+    def __init__(
+        self, source: disnake.AudioSource, *, data: Dict[str, Any], volume: float = 0.5
+    ) -> None:
         super().__init__(source, volume)
 
         self.title = data.get("title")
@@ -61,7 +63,7 @@ class YTDLSource(disnake.PCMVolumeTransformer):
 
 
 class Music(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
     @commands.command()
@@ -73,7 +75,7 @@ class Music(commands.Cog):
         await channel.connect()
 
     @commands.command()
-    async def play(self, ctx, *, query: str):
+    async def play(self, ctx, *, query: str) -> None:
         """Plays a file from the local filesystem"""
         await self.ensure_voice(ctx)
         source = disnake.PCMVolumeTransformer(disnake.FFmpegPCMAudio(query))
@@ -82,16 +84,16 @@ class Music(commands.Cog):
         await ctx.send(f"Now playing: {query}")
 
     @commands.command()
-    async def yt(self, ctx, *, url: str):
+    async def yt(self, ctx, *, url: str) -> None:
         """Plays from a url (almost anything youtube_dl supports)"""
         await self._play_url(ctx, url=url, stream=False)
 
     @commands.command()
-    async def stream(self, ctx, *, url: str):
+    async def stream(self, ctx, *, url: str) -> None:
         """Streams from a url (same as yt, but doesn't predownload)"""
         await self._play_url(ctx, url=url, stream=True)
 
-    async def _play_url(self, ctx, *, url: str, stream: bool):
+    async def _play_url(self, ctx, *, url: str, stream: bool) -> None:
         await self.ensure_voice(ctx)
         async with ctx.typing():
             player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=stream)
@@ -111,11 +113,11 @@ class Music(commands.Cog):
         await ctx.send(f"Changed volume to {volume}%")
 
     @commands.command()
-    async def stop(self, ctx):
+    async def stop(self, ctx) -> None:
         """Stops and disconnects the bot from voice"""
         await ctx.voice_client.disconnect()
 
-    async def ensure_voice(self, ctx):
+    async def ensure_voice(self, ctx) -> None:
         if ctx.voice_client is None:
             if ctx.author.voice:
                 await ctx.author.voice.channel.connect()
@@ -133,7 +135,7 @@ bot = commands.Bot(
 
 
 @bot.event
-async def on_ready():
+async def on_ready() -> None:
     print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------")
 
 

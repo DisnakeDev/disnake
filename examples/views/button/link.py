@@ -18,7 +18,7 @@ from disnake.ext import commands
 # Define a simple View that gives us a google link button.
 # We take in `query` as the query that the command author requested.
 class Google(disnake.ui.View):
-    def __init__(self, query: str):
+    def __init__(self, query: str) -> None:
         super().__init__()
         # Quote the query string to make a valid url. Discord will raise an error if it isn't valid.
         query = quote_plus(query)
@@ -33,14 +33,14 @@ bot = commands.Bot(command_prefix=commands.when_mentioned)
 
 
 @bot.command()
-async def google(ctx: commands.Context, *, query: str):
+async def google(ctx: commands.Context, *, query: str) -> None:
     """Returns a google link for a query"""
     clean_query = await commands.clean_content().convert(ctx, query)
     await ctx.send(f"Google Result for: `{clean_query}`", view=Google(query))
 
 
 @bot.event
-async def on_ready():
+async def on_ready() -> None:
     print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------")
 
 

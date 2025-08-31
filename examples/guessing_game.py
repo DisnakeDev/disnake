@@ -36,7 +36,7 @@ async def guess(ctx: commands.Context):
 
 
 @bot.event
-async def on_ready():
+async def on_ready() -> None:
     print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------")
 
 

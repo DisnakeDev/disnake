@@ -46,7 +46,7 @@ if TYPE_CHECKING:
 GROUPED_SECTIONS = {"api/": "api/index", "ext/commands/api/": "ext/commands/api/index"}
 
 
-def html_page_context(app: Sphinx, docname: str, templatename, context, doctree):
+def html_page_context(app: Sphinx, docname: str, templatename, context, doctree) -> None:
     """Event handler for the html-page-context signal.
 
     Modifies the context directly, if `docname` matches one of the items in `GROUPED_SECTIONS`.

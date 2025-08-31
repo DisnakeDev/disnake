@@ -20,7 +20,7 @@ bot = commands.Bot(command_prefix=commands.when_mentioned)
 
 
 @bot.command()
-async def send_button(ctx: commands.Context):
+async def send_button(ctx: commands.Context) -> None:
     await ctx.send(
         "Here's a button!",
         components=disnake.ui.Button(label="Click me!", custom_id="cool_button"),
@@ -28,7 +28,7 @@ async def send_button(ctx: commands.Context):
 
 
 @bot.command()
-async def send_select(ctx: commands.Context):
+async def send_select(ctx: commands.Context) -> None:
     await ctx.send(
         "Here's a select!",
         components=disnake.ui.StringSelect(options=["1", "2", "3"], custom_id="cool_select"),
@@ -41,7 +41,7 @@ async def send_select(ctx: commands.Context):
 
 
 @bot.command()
-async def send_all_the_buttons(ctx: commands.Context):
+async def send_all_the_buttons(ctx: commands.Context) -> None:
     buttons = []
     for y in range(4):
         row = disnake.ui.ActionRow()
@@ -65,7 +65,7 @@ async def send_all_the_buttons(ctx: commands.Context):
 
 
 @bot.listen("on_button_click")
-async def cool_button_listener(inter: disnake.MessageInteraction):
+async def cool_button_listener(inter: disnake.MessageInteraction) -> None:
     if inter.component.custom_id != "cool_button":
         # Since `inter.component` returns the component that triggered the interaction,
         # this is used to filter interactions for components other than the button we wish to
@@ -82,7 +82,7 @@ async def cool_button_listener(inter: disnake.MessageInteraction):
 
 
 @bot.listen("on_dropdown")
-async def cool_select_listener(inter: disnake.MessageInteraction):
+async def cool_select_listener(inter: disnake.MessageInteraction) -> None:
     if inter.component.custom_id != "cool_select":
         # The same principle as for the button, any selects with the wrong `custom_id` are ignored.
         return
@@ -94,7 +94,7 @@ async def cool_select_listener(inter: disnake.MessageInteraction):
 
 
 @bot.listen("on_button_click")
-async def grid_listener(inter: disnake.MessageInteraction):
+async def grid_listener(inter: disnake.MessageInteraction) -> None:
     if not inter.component.custom_id or not inter.component.custom_id.startswith("gridbutton"):
         # The same principle again, except this time we want all buttons that start with grid_button,
         # as there are now 16 different `custom_id`s. This is a much better idea than making 16
@@ -115,7 +115,7 @@ async def grid_listener(inter: disnake.MessageInteraction):
 
 
 @bot.event
-async def on_ready():
+async def on_ready() -> None:
     print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------")
 
 

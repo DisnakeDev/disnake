@@ -10,7 +10,7 @@ from disnake.ext import commands
 
 
 class MyContext(commands.Context):
-    async def tick(self, value: bool):
+    async def tick(self, value: bool) -> None:
         # reacts to the message with an emoji
         # depending on whether value is True or False
         # if its True, it'll add a green check mark
@@ -34,7 +34,7 @@ class MyBot(commands.Bot):
         # use the new MyContext class
         return await super().get_context(message, cls=cls)
 
-    async def on_ready(self):
+    async def on_ready(self) -> None:
         print(f"Logged in as {self.user} (ID: {self.user.id})\n------")
 
 
@@ -42,7 +42,7 @@ bot = MyBot(command_prefix=commands.when_mentioned)
 
 
 @bot.command()
-async def guess(ctx: MyContext, number: int):
+async def guess(ctx: MyContext, number: int) -> None:
     """Guess a random number from 1 to 6."""
     value = random.randint(1, 6)
     # with your new helper function, you can add a

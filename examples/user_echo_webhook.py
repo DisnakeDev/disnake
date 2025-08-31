@@ -18,7 +18,7 @@ bot = commands.Bot(command_prefix=commands.when_mentioned_or("!"), intents=inten
 @commands.has_permissions(
     administrator=True  # To make sure that not everyone can use this command.
 )
-async def userecho(ctx: commands.Context, member: disnake.Member, *, content: str):
+async def userecho(ctx: commands.Context, member: disnake.Member, *, content: str) -> None:
     # We don't want users to see who initiated the command, to make it more realistic :P
     await ctx.message.delete()
 
@@ -49,7 +49,7 @@ async def userecho(ctx: commands.Context, member: disnake.Member, *, content: st
 
 
 @bot.event
-async def on_ready():
+async def on_ready() -> None:
     print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------")
 
 

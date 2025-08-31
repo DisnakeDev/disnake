@@ -59,7 +59,7 @@ async def injected1(
     inter: disnake.CommandInteraction,
     number: int,
     config: Config = commands.inject(get_config),
-):
+) -> None:
     """A command which takes in a number and some config parameters
 
     Parameters
@@ -73,7 +73,7 @@ async def injected2(
     inter: disnake.CommandInteraction,
     string: str,
     config: Config = commands.inject(get_config),
-):
+) -> None:
     """A command which takes in a string and some config parameters
 
     Parameters
@@ -122,12 +122,12 @@ async def get_game_user(
 
 
 @bot.slash_command()
-async def implicit_injection(inter: disnake.CommandInteraction, user: GameUser):
+async def implicit_injection(inter: disnake.CommandInteraction, user: GameUser) -> None:
     """A command which uses an implicit injection"""
 
 
 @bot.event
-async def on_ready():
+async def on_ready() -> None:
     print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------")
 
 

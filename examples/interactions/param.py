@@ -24,7 +24,7 @@ async def simple(
     inter: disnake.CommandInteraction,
     required: str,
     optional: int = 0,
-): ...
+) -> None: ...
 
 
 # builtins are not the only types supported.
@@ -36,7 +36,7 @@ async def other_types(
     user: disnake.User,
     emoji: disnake.Emoji,
     member_or_role: Union[disnake.Member, disnake.Role],
-): ...
+) -> None: ...
 
 
 # Adding descriptions to the command itself and to its options is
@@ -46,7 +46,7 @@ async def description(
     inter: disnake.CommandInteraction,
     user: disnake.User,
     channel: disnake.TextChannel,
-):
+) -> None:
     """A random command
 
     Parameters
@@ -64,7 +64,7 @@ async def defaults(
     inter: disnake.CommandInteraction[commands.Bot],
     string: str = "this is a default value",
     user: disnake.User = commands.Param(lambda inter: inter.author),
-): ...
+) -> None: ...
 
 
 # You may limit numbers to a certain range using `commands.Range`.
@@ -77,7 +77,7 @@ async def ranges(
     ranking: commands.Range[int, 1, 10],
     negative: commands.Range[int, ..., 0],
     fraction: commands.Range[float, 0, 1.0],
-):
+) -> None:
     """Command with limited ranges
 
     Parameters
@@ -93,11 +93,11 @@ async def ranges(
 # This results in the slash command using a string option, which will be
 # converted to an integer locally, allowing for a wider range of numbers.
 @bot.slash_command()
-async def large(inter: disnake.CommandInteraction, largenumber: commands.LargeInt): ...
+async def large(inter: disnake.CommandInteraction, largenumber: commands.LargeInt) -> None: ...
 
 
 @bot.event
-async def on_ready():
+async def on_ready() -> None:
     print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------")
 
 

@@ -11,7 +11,7 @@ from disnake.ext import commands
 # Defines a custom StringSelect containing colour options that the user can choose.
 # The callback function of this class is called when the user changes their choice.
 class Dropdown(disnake.ui.StringSelect):
-    def __init__(self):
+    def __init__(self) -> None:
         # Define the options that will be presented inside the dropdown
         options = [
             disnake.SelectOption(
@@ -35,7 +35,7 @@ class Dropdown(disnake.ui.StringSelect):
             options=options,
         )
 
-    async def callback(self, inter: disnake.MessageInteraction):
+    async def callback(self, inter: disnake.MessageInteraction) -> None:
         # Use the interaction object to send a response message containing
         # the user's favourite colour or choice. The `self` object refers to the
         # StringSelect object, and the `values` attribute gets a list of the user's
@@ -44,7 +44,7 @@ class Dropdown(disnake.ui.StringSelect):
 
 
 class DropdownView(disnake.ui.View):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         # Add the dropdown to our view object.
@@ -55,7 +55,7 @@ bot = commands.Bot(command_prefix=commands.when_mentioned)
 
 
 @bot.command()
-async def colour(ctx):
+async def colour(ctx) -> None:
     """Sends a message with our dropdown containing colours"""
     # Create the view containing our dropdown
     view = DropdownView()
@@ -65,7 +65,7 @@ async def colour(ctx):
 
 
 @bot.event
-async def on_ready():
+async def on_ready() -> None:
     print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------")
 
 

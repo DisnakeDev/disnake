@@ -30,7 +30,7 @@ class Player(IntEnum):
 # The ["TicTacToe"] bit is for type hinting purposes to tell your IDE or linter
 # what the type of `self.view` is. It is not required.
 class TicTacToeButton(disnake.ui.Button["TicTacToe"]):
-    def __init__(self, x: int, y: int):
+    def __init__(self, x: int, y: int) -> None:
         # A label is required, but we don't need one so a zero-width space is used
         # The row parameter tells the View which row to place the button under.
         # A View can only contain up to 5 rows -- each row can only have 5 buttons.
@@ -41,7 +41,7 @@ class TicTacToeButton(disnake.ui.Button["TicTacToe"]):
 
     # This function is called whenever this particular button is pressed
     # This is part of the "meat" of the game logic
-    async def callback(self, inter: disnake.MessageInteraction):
+    async def callback(self, inter: disnake.MessageInteraction) -> None:
         view = self.view
         state = view.board[self.y][self.x]
         if state in (Player.X, Player.O):
@@ -78,7 +78,7 @@ class TicTacToe(disnake.ui.View):
     # (this is not required)
     children: List[TicTacToeButton]
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         self.current_player: Player = Player.X
@@ -136,13 +136,13 @@ bot = commands.Bot(command_prefix=commands.when_mentioned)
 
 
 @bot.command()
-async def tic(ctx: commands.Context):
+async def tic(ctx: commands.Context) -> None:
     """Starts a tic-tac-toe game with yourself."""
     await ctx.send("Tic Tac Toe: X goes first", view=TicTacToe())
 
 
 @bot.event
-async def on_ready():
+async def on_ready() -> None:
     print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------")
 
 

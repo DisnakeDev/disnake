@@ -11,7 +11,7 @@ from disnake.ext import commands
 
 # Define a simple View that gives us a confirmation menu
 class Confirm(disnake.ui.View):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(timeout=10.0)
         self.value: Optional[bool] = None
 
@@ -19,14 +19,14 @@ class Confirm(disnake.ui.View):
     # stop the View from listening to more input.
     # We also send the user an ephemeral message that we're confirming their choice.
     @disnake.ui.button(label="Confirm", style=disnake.ButtonStyle.green)
-    async def confirm(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
+    async def confirm(self, button: disnake.ui.Button, inter: disnake.MessageInteraction) -> None:
         await inter.response.send_message("Confirming...", ephemeral=True)
         self.value = True
         self.stop()
 
     # This one is similar to the confirmation button except sets the inner value to `False`.
     @disnake.ui.button(label="Cancel", style=disnake.ButtonStyle.grey)
-    async def cancel(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
+    async def cancel(self, button: disnake.ui.Button, inter: disnake.MessageInteraction) -> None:
         await inter.response.send_message("Cancelling...", ephemeral=True)
         self.value = False
         self.stop()
@@ -36,7 +36,7 @@ bot = commands.Bot(command_prefix=commands.when_mentioned)
 
 
 @bot.command()
-async def ask(ctx: commands.Context):
+async def ask(ctx: commands.Context) -> None:
     """Asks the user a question to confirm something."""
     # We create the view and assign it to a variable so we can wait for it later.
     view = Confirm()
@@ -61,7 +61,7 @@ async def ask(ctx: commands.Context):
 
 
 @bot.event
-async def on_ready():
+async def on_ready() -> None:
     print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------")
 
 

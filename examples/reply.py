@@ -8,7 +8,7 @@ import disnake
 
 
 class MyClient(disnake.Client):
-    async def on_message(self, message: disnake.Message):
+    async def on_message(self, message: disnake.Message) -> None:
         # we do not want the bot to reply to itself
         if message.author.id == self.user.id:
             return
@@ -16,7 +16,7 @@ class MyClient(disnake.Client):
         if message.content.startswith("!hello"):
             await message.reply("Hello!", mention_author=True)
 
-    async def on_ready(self):
+    async def on_ready(self) -> None:
         print(f"Logged in as {self.user} (ID: {self.user.id})\n------")
 
 

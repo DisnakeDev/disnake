@@ -15,7 +15,7 @@ class EphemeralCounter(disnake.ui.View):
     # Define the actual button
     # note: The name of the function does not matter to the library
     @disnake.ui.button(label="0", style=disnake.ButtonStyle.red)
-    async def count(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
+    async def count(self, button: disnake.ui.Button, inter: disnake.MessageInteraction) -> None:
         # When pressed, this increments the number displayed until it hits 5.
         # When it hits 5, the counter button is disabled and it turns green.
         number = int(button.label) if button.label else 0
@@ -38,7 +38,7 @@ class CreateCounter(disnake.ui.View):
     # When this button is pressed, it will respond with a Counter view that will
     # give the user their own personal button they can press 5 times.
     @disnake.ui.button(label="Click", style=disnake.ButtonStyle.blurple)
-    async def receive(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
+    async def receive(self, button: disnake.ui.Button, inter: disnake.MessageInteraction) -> None:
         # ephemeral=True makes the message hidden from everyone except the button presser
         await inter.response.send_message("Enjoy!", view=EphemeralCounter(), ephemeral=True)
 
@@ -47,12 +47,12 @@ bot = commands.Bot(command_prefix=commands.when_mentioned)
 
 
 @bot.command()
-async def counter(ctx: commands.Context):
+async def counter(ctx: commands.Context) -> None:
     await ctx.send("Press!", view=CreateCounter())
 
 
 @bot.event
-async def on_ready():
+async def on_ready() -> None:
     print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------")
 
 

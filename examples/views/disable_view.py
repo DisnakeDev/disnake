@@ -13,11 +13,11 @@ bot = commands.Bot(command_prefix=commands.when_mentioned)
 class MyView(disnake.ui.View):
     message: disnake.Message
 
-    def __init__(self):
+    def __init__(self) -> None:
         # Set a timeout of 30 seconds, after which `on_timeout` will be called
         super().__init__(timeout=30.0)
 
-    async def on_timeout(self):
+    async def on_timeout(self) -> None:
         # Once the view times out, we disable the first button and remove the second button
         self.disable_button.disabled = True
         self.remove_item(self.remove_button)
@@ -26,7 +26,9 @@ class MyView(disnake.ui.View):
         await self.message.edit(view=self)
 
     @disnake.ui.button(label="Disable the view", style=disnake.ButtonStyle.grey)
-    async def disable_button(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
+    async def disable_button(
+        self, button: disnake.ui.Button, inter: disnake.MessageInteraction
+    ) -> None:
         # We disable every single component in this view
         for child in self.children:
             if isinstance(child, disnake.ui.Button):
@@ -38,7 +40,9 @@ class MyView(disnake.ui.View):
         self.stop()
 
     @disnake.ui.button(label="Remove the view", style=disnake.ButtonStyle.red)
-    async def remove_button(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
+    async def remove_button(
+        self, button: disnake.ui.Button, inter: disnake.MessageInteraction
+    ) -> None:
         # view=None removes the view
         await inter.response.edit_message(view=None)
 
@@ -47,7 +51,7 @@ class MyView(disnake.ui.View):
 
 
 @bot.command()
-async def view(ctx: commands.Context):
+async def view(ctx: commands.Context) -> None:
     # Create our view
     view = MyView()
 
@@ -59,7 +63,7 @@ async def view(ctx: commands.Context):
 
 
 @bot.event
-async def on_ready():
+async def on_ready() -> None:
     print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------")
 
 

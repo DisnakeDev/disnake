@@ -20,20 +20,20 @@ bot = commands.Bot(command_prefix=commands.when_mentioned)
 
 
 @bot.user_command(name="Avatar")  # name is optional
-async def avatar(inter: disnake.UserCommandInteraction, user: disnake.User):
+async def avatar(inter: disnake.UserCommandInteraction, user: disnake.User) -> None:
     embed = disnake.Embed(title=f"{user}'s avatar")
     embed.set_image(url=user.display_avatar.url)
     await inter.response.send_message(embed=embed)
 
 
 @bot.message_command(name="Reverse")  # name is optional
-async def reverse(inter: disnake.MessageCommandInteraction, message: disnake.Message):
+async def reverse(inter: disnake.MessageCommandInteraction, message: disnake.Message) -> None:
     # Let's reverse it and send it back
     await inter.response.send_message(message.content[::-1])
 
 
 @bot.event
-async def on_ready():
+async def on_ready() -> None:
     print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------")
 
 

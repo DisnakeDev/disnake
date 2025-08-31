@@ -8,13 +8,13 @@ import disnake
 
 
 class MyClient(disnake.Client):
-    async def on_member_join(self, member: disnake.Member):
+    async def on_member_join(self, member: disnake.Member) -> None:
         guild = member.guild
         if guild.system_channel:
             to_send = f"Welcome {member.mention} to {guild.name}!"
             await guild.system_channel.send(to_send)
 
-    async def on_ready(self):
+    async def on_ready(self) -> None:
         print(f"Logged in as {self.user} (ID: {self.user.id})\n------")
 
 

@@ -13,7 +13,7 @@ bot = commands.Bot(command_prefix=commands.when_mentioned, description="Nothing 
 
 # the `hidden` keyword argument hides this command group from the help command.
 @bot.group(hidden=True)
-async def secret(ctx: commands.Context):
+async def secret(ctx: commands.Context) -> None:
     """What is this "secret" you speak of?"""
     if ctx.invoked_subcommand is None:
         await ctx.send("Shh!", delete_after=5)
@@ -49,7 +49,7 @@ def create_overwrites(ctx: commands.GuildContext, *objects: Union[disnake.Role, 
 @commands.guild_only()
 async def text(
     ctx: commands.GuildContext, name: str, *objects: Union[disnake.Role, disnake.Member]
-):
+) -> None:
     """Creates a text channel with the specified name
     that is only visible to the specified roles and/or members.
     """
@@ -67,7 +67,7 @@ async def text(
 @commands.guild_only()
 async def voice(
     ctx: commands.GuildContext, name: str, *objects: Union[disnake.Role, disnake.Member]
-):
+) -> None:
     """Does the same thing as the `text` subcommand but instead creates a voice channel."""
     overwrites = create_overwrites(ctx, *objects)
 
@@ -78,7 +78,9 @@ async def voice(
 
 @secret.command()
 @commands.guild_only()
-async def emoji(ctx: commands.GuildContext, emoji: disnake.PartialEmoji, *roles: disnake.Role):
+async def emoji(
+    ctx: commands.GuildContext, emoji: disnake.PartialEmoji, *roles: disnake.Role
+) -> None:
     """Clones a specified emoji that only specified roles are allowed to use."""
     # fetch the emoji asset and read it as bytes.
     emoji_bytes = await emoji.read()
@@ -91,7 +93,7 @@ async def emoji(ctx: commands.GuildContext, emoji: disnake.PartialEmoji, *roles:
 
 
 @bot.event
-async def on_ready():
+async def on_ready() -> None:
     print(f"Logged in as {bot.user} (ID: {bot.user.id})\n------")
 
 

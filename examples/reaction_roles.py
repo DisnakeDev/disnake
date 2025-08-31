@@ -16,7 +16,7 @@ EMOJI_TO_ROLE = {
 
 
 class MyClient(disnake.Client):
-    async def on_raw_reaction_add(self, payload: disnake.RawReactionActionEvent):
+    async def on_raw_reaction_add(self, payload: disnake.RawReactionActionEvent) -> None:
         """Gives a role based on a reaction emoji."""
         if payload.guild_id is None or payload.member is None:
             return
@@ -48,7 +48,7 @@ class MyClient(disnake.Client):
             # If we want to do something in case of errors we'd do it here.
             pass
 
-    async def on_raw_reaction_remove(self, payload: disnake.RawReactionActionEvent):
+    async def on_raw_reaction_remove(self, payload: disnake.RawReactionActionEvent) -> None:
         """Removes a role based on a reaction emoji."""
         if payload.guild_id is None:
             return
@@ -87,7 +87,7 @@ class MyClient(disnake.Client):
             # If we want to do something in case of errors we'd do it here.
             pass
 
-    async def on_ready(self):
+    async def on_ready(self) -> None:
         print(f"Logged in as {self.user} (ID: {self.user.id})\n------")
 
 
