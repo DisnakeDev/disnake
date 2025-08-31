@@ -90,7 +90,7 @@ jobs:
       run: uv sync --all-extras
 
     - name: Add .venv/bin to PATH
-      run: dirname "$(uv run which python)" >> $GITHUB_PATH
+      run: dirname "$(uv python find)" >> $GITHUB_PATH
 
     - name: Set pyright version
       run: |
