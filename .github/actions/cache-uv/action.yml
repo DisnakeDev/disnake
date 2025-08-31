@@ -43,4 +43,4 @@ runs:
       name: Lock all dependencies
       shell: bash
       run: |
-       uv lock
+        uv lock
