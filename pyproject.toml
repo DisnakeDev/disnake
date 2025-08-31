@@ -64,7 +64,7 @@ tools = [
     "slotscheck~=0.16.4",
     "python-dotenv~=1.0.0",
     "check-manifest==0.49",
-    "ruff==0.9.3",
+    "ruff==0.12.11",
     "poethepoet==0.30.0",
 ]
 changelog = [
@@ -73,7 +73,7 @@ changelog = [
 codemod = [
     # run codemods on the respository (mostly automated typing)
     "libcst~=1.1.0",
-    "ruff==0.9.3",
+    "ruff==0.12.11",
     "autotyping==23.2.0",
 ]
 typing = [
@@ -192,6 +192,16 @@ ignore = [
 
     # outer loop variables are overwritten by inner assignment target, these are mostly intentional
     "PLW2901",
+
+    # TODO:
+    # pytest.warns() without a match variable is too broad
+    "PT030",
+
+    # object does not implement hashing
+    "PLW1641",
+
+    # ignore non-to-level imports
+    "PLC0415",
 
     # ignore imports that could be moved into type-checking blocks
     # (no real advantage other than possibly avoiding cycles,
