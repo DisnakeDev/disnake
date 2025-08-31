@@ -111,7 +111,7 @@ fork-strategy   = "fewest"
 pre_build = { cmd = "nox -Rs check-manifest" }
 build = { shell = "uv run -m build", help = "Build a safe version of disnake" }
 ci = { shell = "nox -Rs", help = "Run all valid CI" }
-codemod = { shell = "nox -Rs codemod autotyping --" }
+codemod = { shell = "nox -Rs codemod --" }
 docs = { shell = "nox -Rs docs --", help = "Build the documentation for development" }
 lint = { shell = "nox -Rs lint --", help = "Check all files for linting errors" }
 pyright = { shell = "nox -Rs pyright --", help = "Run pyright" }
