@@ -127,7 +127,7 @@ To build the documentation locally, use `uv run poe docs` and visit <http://127.
 
 ## Migrating from `pdm` to `uv`
 
-We've recently migrated to [`uv`][uv] for dependency and environment management for local development, a few years since we moved to `pdm` (move fast, second guess is our motto!) in hopes of a less friction-filled developer experience.
+We've recently migrated from `pdm` to [`uv`][uv] for dependency and environment management for local development, in hopes of a developer experience with less friction.
 
 1. run `uv sync --all-extras`
 2. delete `pdm.lock` and `.pdm-python`
