@@ -58,7 +58,7 @@ If you're unsure about some aspect of development, feel free to use existing fil
 The general workflow can be summarized as follows:
 
 1. Fork + clone the repository.
-2. Initialize the development environment: `uv run setup_env`.
+2. Initialize the development environment: `uv run poe setup_env`.
 3. Create a new branch.
 4. Commit your changes, update documentation if required.
 5. Add a changelog entry (e.g. `changelog/1234.feature.rst`).
