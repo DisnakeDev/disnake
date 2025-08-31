@@ -689,7 +689,7 @@ class SnowflakeList(array.array):
 
         def __init__(self, data: Iterable[int], *, is_sorted: bool = False) -> None: ...
 
-    def __new__(cls, data: Iterable[int], *, is_sorted: bool = False):
+    def __new__(cls, data: Iterable[int], *, is_sorted: bool = False):  # noqa: ANN204
         return array.array.__new__(cls, "Q", data if is_sorted else sorted(data))  # type: ignore
 
     def add(self, element: int) -> None:
@@ -1140,7 +1140,7 @@ def normalise_optional_params(parameters: Iterable[Any]) -> Tuple[Any, ...]:
 
 def _resolve_typealiastype(
     tp: Any, globals: Dict[str, Any], locals: Dict[str, Any], cache: Dict[str, Any]
-):
+) -> Any:
     # Use __module__ to get the (global) namespace in which the type alias was defined.
     if mod := sys.modules.get(tp.__module__):
         mod_globals = mod.__dict__
@@ -1163,7 +1163,7 @@ def evaluate_annotation(
     cache: Dict[str, Any],
     *,
     implicit_str: bool = True,
-):
+) -> Any:
     if isinstance(tp, ForwardRef):
         tp = tp.__forward_arg__
         # ForwardRefs always evaluate their internals

@@ -52,6 +52,7 @@ if TYPE_CHECKING:
     from ..file import File
     from ..mentions import AllowedMentions
     from ..message import Attachment
+    from ..types.message import Message as MessagePayload
     from ..types.webhook import Webhook as WebhookPayload
 
     try:
@@ -220,7 +221,7 @@ class WebhookAdapter:
         token: Optional[str] = None,
         session: Session,
         reason: Optional[str] = None,
-    ):
+    ) -> None:
         route = Route("DELETE", "/webhooks/{webhook_id}", webhook_id=webhook_id)
         return self.request(route, session, reason=reason, auth_token=token)
 
@@ -231,7 +232,7 @@ class WebhookAdapter:
         *,
         session: Session,
         reason: Optional[str] = None,
-    ):
+    ) -> None:
         route = Route(
             "DELETE",
             "/webhooks/{webhook_id}/{webhook_token}",
@@ -248,7 +249,7 @@ class WebhookAdapter:
         *,
         session: Session,
         reason: Optional[str] = None,
-    ):
+    ) -> WebhookPayload:
         route = Route("PATCH", "/webhooks/{webhook_id}", webhook_id=webhook_id)
         return self.request(route, session, reason=reason, payload=payload, auth_token=token)
 
@@ -260,7 +261,7 @@ class WebhookAdapter:
         *,
         session: Session,
         reason: Optional[str] = None,
-    ):
+    ) -> WebhookPayload:
         route = Route(
             "PATCH",
             "/webhooks/{webhook_id}/{webhook_token}",
@@ -268,6 +269,34 @@ class WebhookAdapter:
             webhook_token=token,
         )
         return self.request(route, session, reason=reason, payload=payload)
+
+    @overload
+    def execute_webhook(
+        self,
+        webhook_id: int,
+        token: str,
+        *,
+        session: Session,
+        payload: Optional[Dict[str, Any]] = None,
+        multipart: Optional[List[Dict[str, Any]]] = None,
+        files: Optional[List[File]] = None,
+        thread_id: Optional[int] = None,
+        wait: bool = False,
+    ) -> MessagePayload: ...
+
+    @overload
+    def execute_webhook(
+        self,
+        webhook_id: int,
+        token: str,
+        *,
+        session: Session,
+        payload: Optional[Dict[str, Any]] = None,
+        multipart: Optional[List[Dict[str, Any]]] = None,
+        files: Optional[List[File]] = None,
+        thread_id: Optional[int] = None,
+        wait: bool = False,
+    ) -> None: ...
 
     def execute_webhook(
         self,
@@ -280,7 +309,7 @@ class WebhookAdapter:
         files: Optional[List[File]] = None,
         thread_id: Optional[int] = None,
         wait: bool = False,
-    ):
+    ) -> Optional[MessagePayload]:
         params = {"wait": int(wait)}
         if thread_id:
             params["thread_id"] = thread_id
@@ -303,7 +332,7 @@ class WebhookAdapter:
         *,
         session: Session,
         thread_id: Optional[int] = None,
-    ):
+    ) -> MessagePayload:
         params: Dict[str, Any] = {}
         if thread_id is not None:
             params["thread_id"] = thread_id
@@ -328,7 +357,7 @@ class WebhookAdapter:
         multipart: Optional[List[Dict[str, Any]]] = None,
         files: Optional[List[File]] = None,
         thread_id: Optional[int] = None,
-    ):
+    ) -> MessagePayload:
         params: Dict[str, Any] = {}
         if thread_id is not None:
             params["thread_id"] = thread_id
@@ -352,7 +381,7 @@ class WebhookAdapter:
         *,
         session: Session,
         thread_id: Optional[int] = None,
-    ):
+    ) -> None:
         params: Dict[str, Any] = {}
         if thread_id is not None:
             params["thread_id"] = thread_id
@@ -372,7 +401,7 @@ class WebhookAdapter:
         token: str,
         *,
         session: Session,
-    ):
+    ) -> WebhookPayload:
         route = Route("GET", "/webhooks/{webhook_id}", webhook_id=webhook_id)
         return self.request(route, session=session, auth_token=token)
 
@@ -382,7 +411,7 @@ class WebhookAdapter:
         token: str,
         *,
         session: Session,
-    ):
+    ) -> WebhookPayload:
         route = Route(
             "GET",
             "/webhooks/{webhook_id}/{webhook_token}",

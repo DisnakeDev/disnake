@@ -505,7 +505,7 @@ class VoiceClient(VoiceProtocol):
 
     # audio related
 
-    def _get_voice_packet(self, data: bytes):
+    def _get_voice_packet(self, data: bytes) -> Any:
         header = bytearray(12)
 
         # Formulate rtp header

@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, NoReturn, Optional
+from typing import TYPE_CHECKING, Any, List, NoReturn, Optional
 
-from .guild import Guild
+from .guild import Guild, Member
 from .utils import MISSING, _assetbytes_to_base64_data, parse_time
 
 __all__ = ("Template",)
@@ -58,7 +58,7 @@ class _PartialTemplateState:
     def _get_guild(self, id):
         return self.__state._get_guild(id)
 
-    async def query_members(self, **kwargs: Any):
+    async def query_members(self, **kwargs: Any) -> List[Member]:
         return []
 
     def __getattr__(self, attr) -> NoReturn:

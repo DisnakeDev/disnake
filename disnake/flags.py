@@ -129,7 +129,7 @@ class BaseFlags:
             setattr(self, key, value)
 
     @classmethod
-    def __init_subclass__(cls, inverted: bool = False, no_fill_flags: bool = False):
+    def __init_subclass__(cls, inverted: bool = False, no_fill_flags: bool = False) -> Self:
         # add a way to bypass filling flags, eg for ListBaseFlags.
         if no_fill_flags:
             return cls
@@ -308,7 +308,7 @@ class ListBaseFlags(BaseFlags, no_fill_flags=True):
     __slots__ = ()
 
     @classmethod
-    def _from_values(cls, values: Sequence[int]):
+    def _from_values(cls, values: Sequence[int]) -> Self:
         self = cls.__new__(cls)
         value = 0
         for n in values:

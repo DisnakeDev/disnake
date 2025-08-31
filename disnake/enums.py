@@ -80,6 +80,8 @@ __all__ = (
     "SeparatorSpacing",
 )
 
+EnumMetaT = TypeVar("EnumMetaT", bound="Type[EnumMeta]")
+
 
 class _EnumValueBase(NamedTuple):
     if TYPE_CHECKING:
@@ -121,7 +123,7 @@ class EnumMeta(type):
         _enum_value_map_: ClassVar[Dict[Any, Any]]
         _enum_value_cls_: ClassVar[Type[_EnumValueBase]]
 
-    def __new__(cls, name: str, bases, attrs, *, comparable: bool = False):
+    def __new__(cls: EnumMetaT, name: str, bases, attrs, *, comparable: bool = False) -> EnumMetaT:
         value_mapping = {}
         member_mapping = {}
         member_names = []
