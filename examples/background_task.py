@@ -11,7 +11,7 @@ CHANNEL_ID = 1234567  # channel ID goes here
 
 
 class MyClient(disnake.Client):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
         # an attribute we can access from our task

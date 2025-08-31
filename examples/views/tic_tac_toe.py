@@ -30,7 +30,7 @@ class Player(IntEnum):
 # The ["TicTacToe"] bit is for type hinting purposes to tell your IDE or linter
 # what the type of `self.view` is. It is not required.
 class TicTacToeButton(disnake.ui.Button["TicTacToe"]):
-    def __init__(self, x: int, y: int):
+    def __init__(self, x: int, y: int) -> None:
         # A label is required, but we don't need one so a zero-width space is used
         # The row parameter tells the View which row to place the button under.
         # A View can only contain up to 5 rows -- each row can only have 5 buttons.
@@ -78,7 +78,7 @@ class TicTacToe(disnake.ui.View):
     # (this is not required)
     children: List[TicTacToeButton]
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         self.current_player: Player = Player.X
@@ -97,7 +97,7 @@ class TicTacToe(disnake.ui.View):
                 self.add_item(TicTacToeButton(x, y))
 
     # This method checks for the board winner -- it is used by the TicTacToeButton
-    def check_board_winner(self):
+    def check_board_winner(self) -> Player | None:
         def check_winner(value: int) -> Optional[Player]:
             if value == Player.O * 3:
                 return Player.O

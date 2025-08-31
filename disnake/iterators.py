@@ -326,7 +326,7 @@ class HistoryIterator(_AsyncIterator["Message"]):
         except asyncio.QueueEmpty:
             raise NoMoreItems from None
 
-    def _get_retrieve(self):
+    def _get_retrieve(self) -> bool:
         limit = self.limit
         if limit is None or limit > 100:
             retrieve = 100
@@ -355,7 +355,7 @@ class HistoryIterator(_AsyncIterator["Message"]):
             for element in data:
                 await self.messages.put(self.state.create_message(channel=channel, data=element))
 
-    async def _retrieve_messages(self, retrieve) -> List[MessagePayload]:
+    async def _retrieve_messages(self, retrieve: int) -> List[MessagePayload]:
         """Retrieve messages and update next parameters."""
         raise NotImplementedError
 
@@ -576,7 +576,7 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
         except asyncio.QueueEmpty:
             raise NoMoreItems from None
 
-    def _get_retrieve(self):
+    def _get_retrieve(self) -> bool:
         limit = self.limit
         if limit is None or limit > 100:
             retrieve = 100
@@ -719,7 +719,7 @@ class GuildIterator(_AsyncIterator["Guild"]):
         except asyncio.QueueEmpty:
             raise NoMoreItems from None
 
-    def _get_retrieve(self):
+    def _get_retrieve(self) -> bool:
         limit = self.limit
         if limit is None or limit > 200:
             retrieve = 200
@@ -728,7 +728,7 @@ class GuildIterator(_AsyncIterator["Guild"]):
         self.retrieve = retrieve
         return retrieve > 0
 
-    def create_guild(self, data):
+    def create_guild(self, data: Guild) -> Guild:
         from .guild import Guild
 
         return Guild(state=self.state, data=data)
@@ -747,7 +747,7 @@ class GuildIterator(_AsyncIterator["Guild"]):
             for element in data:
                 await self.guilds.put(self.create_guild(element))
 
-    async def _retrieve_guilds(self, retrieve) -> List[Guild]:
+    async def _retrieve_guilds(self, retrieve: int) -> List[Guild]:
         """Retrieve guilds and update next parameters."""
         raise NotImplementedError
 
@@ -798,7 +798,7 @@ class MemberIterator(_AsyncIterator["Member"]):
         except asyncio.QueueEmpty:
             raise NoMoreItems from None
 
-    def _get_retrieve(self):
+    def _get_retrieve(self) -> bool:
         limit = self.limit
         if limit is None or limit > 1000:
             retrieve = 1000
@@ -823,7 +823,7 @@ class MemberIterator(_AsyncIterator["Member"]):
             for element in reversed(data):
                 await self.members.put(self.create_member(element))
 
-    def create_member(self, data):
+    def create_member(self, data) -> Member:
         from .member import Member
 
         return Member(data=data, guild=self.guild, state=self.state)

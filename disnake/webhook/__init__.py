@@ -14,6 +14,6 @@ from . import async_, sync
 from .async_ import *
 from .sync import *
 
-__all__ = []
+__all__: list[str] = []
 __all__.extend(async_.__all__)
 __all__.extend(sync.__all__)

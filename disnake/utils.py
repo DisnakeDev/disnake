@@ -689,7 +689,7 @@ class SnowflakeList(array.array):
 
         def __init__(self, data: Iterable[int], *, is_sorted: bool = False) -> None: ...
 
-    def __new__(cls, data: Iterable[int], *, is_sorted: bool = False):
+    def __new__(cls, data: Iterable[int], *, is_sorted: bool = False) -> array[int]:
         return array.array.__new__(cls, "Q", data if is_sorted else sorted(data))  # type: ignore
 
     def add(self, element: int) -> None:

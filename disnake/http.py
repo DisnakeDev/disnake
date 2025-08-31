@@ -966,7 +966,7 @@ class HTTPClient:
         r = Route(
             "PATCH", "/guilds/{guild_id}/members/{user_id}", guild_id=guild_id, user_id=user_id
         )
-        payload = {}
+        payload: dict[str, bool] = {}
         if mute is not None:
             payload["mute"] = mute
 
@@ -1228,7 +1228,7 @@ class HTTPClient:
             "GET", "/channels/{channel_id}/threads/archived/public", channel_id=channel_id
         )
 
-        params = {}
+        params: dict[str, int | str] = {}
         if before:
             params["before"] = before
         params["limit"] = limit
@@ -1241,7 +1241,7 @@ class HTTPClient:
             "GET", "/channels/{channel_id}/threads/archived/private", channel_id=channel_id
         )
 
-        params = {}
+        params: dict[str, int | str] = {}
         if before:
             params["before"] = before
         params["limit"] = limit
@@ -1255,7 +1255,7 @@ class HTTPClient:
             "/channels/{channel_id}/users/@me/threads/archived/private",
             channel_id=channel_id,
         )
-        params = {}
+        params: dict[str, int | str] = {}
         if before:
             params["before"] = before
         params["limit"] = limit

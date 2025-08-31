@@ -1,5 +1,4 @@
 # SPDX-License-Identifier: MIT
-
 """Shhhh! It's a secret."""
 
 import os
@@ -7,6 +6,9 @@ from typing import Union
 
 import disnake
 from disnake.ext import commands
+from disnake.member import Member
+from disnake.permissions import PermissionOverwrite
+from disnake.role import Role
 
 bot = commands.Bot(command_prefix=commands.when_mentioned, description="Nothing to see here!")
 
@@ -19,7 +21,9 @@ async def secret(ctx: commands.Context):
         await ctx.send("Shh!", delete_after=5)
 
 
-def create_overwrites(ctx: commands.GuildContext, *objects: Union[disnake.Role, disnake.Member]):
+def create_overwrites(
+    ctx: commands.GuildContext, *objects: Union[disnake.Role, disnake.Member]
+) -> dict[Member | Role, PermissionOverwrite]:
     """A helper function that creates the overwrites for the voice/text channels.
 
     A `disnake.PermissionOverwrite` allows you to determine the permissions

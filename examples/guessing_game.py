@@ -19,7 +19,7 @@ bot = commands.Bot(command_prefix=commands.when_mentioned_or("!"), intents=inten
 async def guess(ctx: commands.Context):
     await ctx.send("Guess a number between 1 and 10.")
 
-    def is_guess_message(m: disnake.Message):
+    def is_guess_message(m: disnake.Message) -> bool:
         return m.author == ctx.message.author and m.content.isdigit()
 
     answer = random.randint(1, 10)

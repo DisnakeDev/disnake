@@ -5,17 +5,19 @@ import pytest
 
 import disnake
 from disnake import Event
+from disnake.client import Client
 from disnake.ext import commands
+from disnake.ext.commands.bot import Bot
 
 
 # n.b. the specific choice of events used in this file is irrelevant
 @pytest.fixture
-def client():
+def client() -> Client:
     return disnake.Client()
 
 
 @pytest.fixture
-def bot():
+def bot() -> Bot:
     return commands.Bot(
         command_prefix=commands.when_mentioned,
         command_sync_flags=commands.CommandSyncFlags.none(),

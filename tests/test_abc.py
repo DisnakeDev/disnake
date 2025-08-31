@@ -2,6 +2,7 @@
 
 from typing import cast
 from unittest import mock
+from unittest.mock import Mock
 
 import pytest
 
@@ -14,7 +15,7 @@ from disnake.utils import MISSING
 class TestGuildChannelEdit:
     # TODO: use proper mock models once we have state/guild mocks
     @pytest.fixture
-    def channel(self):
+    def channel(self) -> Mock:
         ch = mock.Mock(GuildChannel, id=123, category_id=456)
         ch._state = mock.Mock(http=mock.AsyncMock())
         ch.guild = mock.Mock()

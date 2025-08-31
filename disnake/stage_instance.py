@@ -175,7 +175,7 @@ class StageInstance(Hashable):
         HTTPException
             Editing a stage instance failed.
         """
-        payload = {}
+        payload: dict[str, str] = {}
 
         if topic is not MISSING:
             payload["topic"] = topic

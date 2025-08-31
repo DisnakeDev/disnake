@@ -13,7 +13,7 @@ bot = commands.Bot(command_prefix=commands.when_mentioned)
 class MyView(disnake.ui.View):
     message: disnake.Message
 
-    def __init__(self):
+    def __init__(self) -> None:
         # Set a timeout of 30 seconds, after which `on_timeout` will be called
         super().__init__(timeout=30.0)
 

@@ -5,33 +5,34 @@ from typing import TYPE_CHECKING
 import pytest
 
 from disnake import activity as _activity
+from disnake.activity import Activity, CustomActivity, Game, Spotify, Streaming
 
 if TYPE_CHECKING:
     from disnake.types.activity import ActivityAssets
 
 
 @pytest.fixture
-def activity():
+def activity() -> Activity:
     return _activity.Activity()
 
 
 @pytest.fixture
-def game():
+def game() -> Game:
     return _activity.Game(name="Celeste")
 
 
 @pytest.fixture
-def custom_activity():
+def custom_activity() -> CustomActivity:
     return _activity.CustomActivity(name="custom")
 
 
 @pytest.fixture
-def streaming():
+def streaming() -> Streaming:
     return _activity.Streaming(name="me", url="https://disnake.dev")
 
 
 @pytest.fixture
-def spotify():
+def spotify() -> Spotify:
     return _activity.Spotify()
 
 

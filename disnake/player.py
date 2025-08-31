@@ -288,7 +288,7 @@ class FFmpegPCMAudio(FFmpegAudio):
         before_options: Optional[str] = None,
         options: Optional[str] = None,
     ) -> None:
-        args = []
+        args: list[str] = []
         subprocess_kwargs = {
             "stdin": subprocess.PIPE if pipe else subprocess.DEVNULL,
             "stderr": stderr,
@@ -397,7 +397,7 @@ class FFmpegOpusAudio(FFmpegAudio):
         before_options=None,
         options=None,
     ) -> None:
-        args = []
+        args: list[str] = []
         subprocess_kwargs = {
             "stdin": subprocess.PIPE if pipe else subprocess.DEVNULL,
             "stderr": stderr,

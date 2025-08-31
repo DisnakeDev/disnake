@@ -18,7 +18,7 @@ from disnake.ext import commands
 
 
 class PersistentView(disnake.ui.View):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(timeout=None)
 
     @disnake.ui.button(
@@ -41,7 +41,7 @@ class PersistentView(disnake.ui.View):
 
 
 class PersistentViewBot(commands.Bot):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(command_prefix=commands.when_mentioned)
         self.persistent_views_added = False
 

@@ -841,7 +841,7 @@ class SyncWebhook(BaseWebhook):
         if self.token is None and self.auth_token is None:
             raise WebhookTokenMissing("This webhook does not have a token associated with it")
 
-        payload = {}
+        payload: dict[str, str] = {}
         if name is not MISSING:
             payload["name"] = str(name) if name is not None else None
 
@@ -879,7 +879,7 @@ class SyncWebhook(BaseWebhook):
 
     def _create_message(
         self, data, *, thread: Optional[Snowflake] = None, thread_name: Optional[str] = None
-    ):
+    ) -> SyncWebhookMessage:
         # see async webhook's _create_message for details
         channel_id = int(data["channel_id"])
         if self.channel_id != channel_id and thread_name:

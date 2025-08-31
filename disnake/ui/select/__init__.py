@@ -18,7 +18,7 @@ from .role import *
 from .string import *
 from .user import *
 
-__all__ = []
+__all__: list[str] = []
 __all__.extend(base.__all__)
 __all__.extend(channel.__all__)
 __all__.extend(mentionable.__all__)

@@ -66,7 +66,7 @@ def get_current_version() -> VersionInfo:
 
 
 def replace_line(text: str, regex: str, repl: str) -> str:
-    lines = []
+    lines: list[str] = []
     found = False
 
     for line in text.split("\n"):

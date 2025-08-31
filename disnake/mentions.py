@@ -116,8 +116,8 @@ class AllowedMentions:
         )
 
     def to_dict(self) -> AllowedMentionsPayload:
-        parse = []
-        data = {}
+        parse: list[str] = []
+        data: dict[str, list[int]] = {}
 
         if self.everyone:
             parse.append("everyone")

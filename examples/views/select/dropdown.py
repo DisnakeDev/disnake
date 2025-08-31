@@ -11,7 +11,7 @@ from disnake.ext import commands
 # Defines a custom StringSelect containing colour options that the user can choose.
 # The callback function of this class is called when the user changes their choice.
 class Dropdown(disnake.ui.StringSelect):
-    def __init__(self):
+    def __init__(self) -> None:
         # Define the options that will be presented inside the dropdown
         options = [
             disnake.SelectOption(
@@ -44,7 +44,7 @@ class Dropdown(disnake.ui.StringSelect):
 
 
 class DropdownView(disnake.ui.View):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         # Add the dropdown to our view object.

@@ -19,10 +19,15 @@ from typing import (
     Sequence,
     Set,
     Tuple,
+    TypedDict,
     Union,
     cast,
     overload,
 )
+
+from disnake.channel import NewsChannel
+from disnake.integrations import BotIntegration, StreamIntegration
+from disnake.types.channel import ThreadChannel
 
 from . import abc, utils
 from .app_commands import GuildApplicationCommandPermissions
@@ -1371,7 +1376,7 @@ class Guild(Hashable):
         :class:`TextChannel`
             The channel that was just created.
         """
-        options = {}
+        options: dict[str, int] = {}
         if position is not MISSING:
             options["position"] = position
 
@@ -1492,7 +1497,7 @@ class Guild(Hashable):
         :class:`VoiceChannel`
             The channel that was just created.
         """
-        options = {}
+        options: dict[str, int] = {}
         if position is not MISSING:
             options["position"] = position
 
@@ -1754,7 +1759,7 @@ class Guild(Hashable):
         :class:`ForumChannel`
             The channel that was just created.
         """
-        options = {}
+        options: dict[str, int] = {}
         if position is not MISSING:
             options["position"] = position
 
@@ -1883,7 +1888,7 @@ class Guild(Hashable):
         :class:`MediaChannel`
             The channel that was just created.
         """
-        options = {}
+        options: dict[str, int] = {}
         if position is not MISSING:
             options["position"] = position
 
@@ -2386,7 +2391,23 @@ class Guild(Hashable):
         """
         data = await self._state.http.get_all_guild_channels(self.id)
 
-        def convert(d):
+        def convert(
+            d: TypedDict[CategoryChannel]
+            | TypedDict[ForumChannel]
+            | TypedDict[MediaChannel]
+            | TypedDict[NewsChannel]
+            | TypedDict[StageChannel]
+            | TypedDict[TextChannel]
+            | TypedDict[ThreadChannel]
+            | TypedDict[VoiceChannel],
+        ) -> (
+            CategoryChannel
+            | ForumChannel
+            | MediaChannel
+            | StageChannel
+            | TextChannel
+            | VoiceChannel
+        ):
             factory, _ = _guild_channel_factory(d["type"])
             if factory is None:
                 raise InvalidData("Unknown channel type {type} for channel ID {id}.".format_map(d))
@@ -2760,7 +2781,7 @@ class Guild(Hashable):
         :class:`WelcomeScreen`
             The newly edited welcome screen.
         """
-        payload = {}
+        payload: dict[str, bool] = {}
 
         if enabled is not MISSING:
             payload["enabled"] = enabled
@@ -3205,7 +3226,7 @@ class Guild(Hashable):
             The list of invites that are currently active.
         """
         data = await self._state.http.invites_from(self.id)
-        result = []
+        result: list[Invite] = []
         for invite in data:
             if channel_data := invite.get("channel"):
                 channel = self.get_channel(int(channel_data["id"]))
@@ -3302,7 +3323,9 @@ class Guild(Hashable):
         """
         data = await self._state.http.get_all_integrations(self.id)
 
-        def convert(d):
+        def convert(
+            d: TypedDict[BotIntegration] | TypedDict[StreamIntegration],
+        ) -> Integration:
             factory, _ = _integration_factory(d["type"])
             return factory(guild=self, data=d)
 
@@ -4368,7 +4391,7 @@ class Guild(Hashable):
         :class:`WidgetSettings`
             The new widget settings.
         """
-        payload = {}
+        payload: dict[str, int | None] = {}
         if channel is not MISSING:
             payload["channel_id"] = None if channel is None else channel.id
         if enabled is not MISSING:

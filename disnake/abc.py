@@ -16,12 +16,15 @@ from typing import (
     Protocol,
     Sequence,
     Tuple,
+    TypedDict,
     TypeVar,
     Union,
     cast,
     overload,
     runtime_checkable,
 )
+
+from disnake.types.guild import ChannelPositionUpdate
 
 from . import utils
 from .context_managers import Typing
@@ -312,7 +315,7 @@ class GuildChannel(ABC):
             # add ourselves at our designated position
             channels.insert(index, self)
 
-        payload = []
+        payload: list[TypedDict[ChannelPositionUpdate]] = []
         for index, c in enumerate(channels):
             d: Dict[str, Any] = {"id": c.id, "position": index}
             if parent_id is not MISSING and c.id == self.id:
@@ -508,7 +511,7 @@ class GuildChannel(ABC):
         """List[:class:`.Role`]: Returns a list of roles that have been overridden from
         their default values in the :attr:`.Guild.roles` attribute.
         """
-        ret = []
+        ret: list[Role] = []
         g = self.guild
         for overwrite in filter(lambda o: o.is_role(), self._overwrites):
             role = g.get_role(overwrite.id)
@@ -1271,7 +1274,7 @@ class GuildChannel(ABC):
             raise ValueError("Could not resolve appropriate move position")
 
         channels.insert(max((index + offset), 0), self)
-        payload = []
+        payload: list[TypedDict[ChannelPositionUpdate]] = []
         lock_permissions = kwargs.get("sync_permissions", False)
         reason = kwargs.get("reason")
         for index, channel in enumerate(channels):

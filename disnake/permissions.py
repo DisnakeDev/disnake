@@ -1093,10 +1093,10 @@ def _augment_from_permissions(cls):
             continue
 
         # god bless Python
-        def getter(self, x=key):
+        def getter(self, x: str = key):
             return self._values.get(x)
 
-        def setter(self, value, x=key) -> None:
+        def setter(self, value, x: str = key) -> None:
             self._set(x, value)
 
         prop = property(getter, setter)

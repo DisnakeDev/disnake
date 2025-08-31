@@ -19,6 +19,8 @@ from typing import (
     overload,
 )
 
+from disnake.http import HTTPClient
+
 from .. import utils
 from ..app_commands import OptionChoice
 from ..channel import PartialMessageable
@@ -1309,7 +1311,7 @@ class InteractionResponse:
         if not message:
             raise InteractionNotEditable(parent)
 
-        payload = {}
+        payload: dict[str, str] = {}
         if content is not MISSING:
             payload["content"] = None if content is None else str(content)
 
@@ -1611,17 +1613,17 @@ class _InteractionMessageState:
         self._interaction: Interaction = interaction
         self._parent: ConnectionState = parent
 
-    def _get_guild(self, guild_id):
+    def _get_guild(self, guild_id) -> Guild | None:
         return self._parent._get_guild(guild_id)
 
-    def store_user(self, data):
+    def store_user(self, data) -> User:
         return self._parent.store_user(data)
 
-    def create_user(self, data):
+    def create_user(self, data) -> User:
         return self._parent.create_user(data)
 
     @property
-    def http(self):
+    def http(self) -> HTTPClient:
         return self._parent.http
 
     def __getattr__(self, attr):

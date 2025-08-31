@@ -13,7 +13,7 @@ from disnake.ext import commands
 
 # Defines a simple view of row buttons.
 class RowButtons(disnake.ui.View):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(timeout=None)
 
     @disnake.ui.button(label="Hi", style=ButtonStyle.red)

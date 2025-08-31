@@ -8,6 +8,7 @@ import inspect
 import sys
 import traceback
 import warnings
+from asyncio import Future
 from collections.abc import Sequence
 from typing import (
     TYPE_CHECKING,
@@ -138,7 +139,7 @@ class Loop(Generic[LF]):
         else:
             await coro(*args, **kwargs)
 
-    def _try_sleep_until(self, dt: datetime.datetime):
+    def _try_sleep_until(self, dt: datetime.datetime) -> Future[bool]:
         self._handle = SleepHandle(dt=dt, loop=self.loop)
         return self._handle.wait()
 

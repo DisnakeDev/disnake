@@ -28,6 +28,8 @@ from urllib.parse import quote as urlquote
 
 import aiohttp
 
+from disnake.http import HTTPClient
+
 from .. import utils
 from ..asset import Asset
 from ..channel import PartialMessageable
@@ -749,23 +751,23 @@ class _WebhookState(Generic[WebhookT]):
 
         self._thread: Optional[Snowflake] = thread
 
-    def _get_guild(self, guild_id):
+    def _get_guild(self, guild_id: int | None) -> Guild | None:
         if self._parent is not None:
             return self._parent._get_guild(guild_id)
         return None
 
-    def store_user(self, data):
+    def store_user(self, data) -> BaseUser | User:
         if self._parent is not None:
             return self._parent.store_user(data)
         # state parameter is artificial
         return BaseUser(state=self, data=data)  # type: ignore
 
-    def create_user(self, data):
+    def create_user(self, data) -> BaseUser:
         # state parameter is artificial
         return BaseUser(state=self, data=data)  # type: ignore
 
     @property
-    def http(self):
+    def http(self) -> HTTPClient | _FriendlyHttpAttributeErrorHelper:
         if self._parent is not None:
             return self._parent.http
 
@@ -1452,7 +1454,7 @@ class Webhook(BaseWebhook):
         if self.token is None and self.auth_token is None:
             raise WebhookTokenMissing("This webhook does not have a token associated with it")
 
-        payload = {}
+        payload: dict[str, str] = {}
         if name is not MISSING:
             payload["name"] = str(name) if name is not None else None
 
@@ -1487,8 +1489,12 @@ class Webhook(BaseWebhook):
         return Webhook(data=data, session=self.session, token=self.auth_token, state=self._state)
 
     def _create_message(
-        self, data, *, thread: Optional[Snowflake] = None, thread_name: Optional[str] = None
-    ):
+        self,
+        data: Message | None,
+        *,
+        thread: Optional[Snowflake] = None,
+        thread_name: Optional[str] = None,
+    ) -> WebhookMessage:
         channel_id = int(data["channel_id"])
 
         # If channel IDs don't match, a new thread was most likely created;

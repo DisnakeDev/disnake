@@ -4,6 +4,7 @@ import argparse
 import importlib.metadata
 import platform
 import sys
+from argparse import ArgumentParser, Namespace, _SubParsersAction
 from pathlib import Path
 from typing import Union
 
@@ -13,7 +14,7 @@ import disnake
 
 
 def show_version() -> None:
-    entries = []
+    entries: list[str] = []
 
     sys_ver = sys.version_info
     entries.append(
@@ -232,7 +233,7 @@ _base_table = {**_ascii_table, **_byte_table}
 _translation_table = str.maketrans(_base_table)
 
 
-def to_path(parser, name: Union[str, Path], *, replace_spaces: bool = False):
+def to_path(parser, name: Union[str, Path], *, replace_spaces: bool = False) -> Path:
     if isinstance(name, Path):
         return name
 
@@ -351,7 +352,7 @@ def newcog(parser, args) -> None:
         print("successfully made cog at", directory)
 
 
-def add_newbot_args(subparser) -> None:
+def add_newbot_args(subparser: _SubParsersAction[ArgumentParser]) -> None:
     parser = subparser.add_parser("newbot", help="creates a command bot project quickly")
     parser.set_defaults(func=newbot)
 
@@ -378,7 +379,7 @@ def add_newbot_args(subparser) -> None:
     )
 
 
-def add_newcog_args(subparser) -> None:
+def add_newcog_args(subparser: _SubParsersAction[ArgumentParser]) -> None:
     parser = subparser.add_parser("newcog", help="creates a new cog template quickly")
     parser.set_defaults(func=newcog)
 
@@ -399,7 +400,7 @@ def add_newcog_args(subparser) -> None:
     parser.add_argument("--full", help="add all special methods as well", action="store_true")
 
 
-def parse_args():
+def parse_args() -> tuple[ArgumentParser, Namespace]:
     parser = argparse.ArgumentParser(prog="disnake", description="Tools for helping with disnake")
     parser.add_argument("-v", "--version", action="store_true", help="shows the library version")
     parser.set_defaults(func=core)

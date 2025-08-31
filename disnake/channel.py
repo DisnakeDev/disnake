@@ -1227,7 +1227,7 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
         if isinstance(self.guild, Object):
             return []
 
-        ret = []
+        ret: list[Member] = []
         for user_id, state in self.guild._voice_states.items():
             if state.channel and state.channel.id == self.id:
                 member = self.guild.get_member(user_id)
@@ -5133,7 +5133,17 @@ class PartialMessageable(disnake.abc.Messageable, Hashable):
         return PartialMessage(channel=self, id=message_id)
 
 
-def _guild_channel_factory(channel_type: int):
+def _guild_channel_factory(
+    channel_type: int,
+) -> (
+    tuple[type[CategoryChannel], ChannelType]
+    | tuple[type[ForumChannel], ChannelType]
+    | tuple[type[MediaChannel], ChannelType]
+    | tuple[type[StageChannel], ChannelType]
+    | tuple[type[TextChannel], ChannelType]
+    | tuple[type[VoiceChannel], ChannelType]
+    | tuple[None, ChannelType | ChannelType | ChannelType | ChannelType | ChannelType | ChannelType]
+):
     value = try_enum(ChannelType, channel_type)
     if value is ChannelType.text:
         return TextChannel, value
@@ -5153,7 +5163,32 @@ def _guild_channel_factory(channel_type: int):
         return None, value
 
 
-def _channel_factory(channel_type: int):
+def _channel_factory(
+    channel_type: int,
+) -> (
+    tuple[
+        type[CategoryChannel]
+        | type[ForumChannel]
+        | type[MediaChannel]
+        | type[StageChannel]
+        | type[TextChannel]
+        | type[VoiceChannel]
+        | None,
+        ChannelType
+        | ChannelType
+        | ChannelType
+        | ChannelType
+        | ChannelType
+        | ChannelType
+        | ChannelType
+        | ChannelType
+        | ChannelType
+        | ChannelType
+        | ChannelType,
+    ]
+    | tuple[type[DMChannel], ChannelType]
+    | tuple[type[GroupChannel], ChannelType]
+):
     cls, value = _guild_channel_factory(channel_type)
     if value is ChannelType.private:
         return DMChannel, value
@@ -5163,14 +5198,66 @@ def _channel_factory(channel_type: int):
         return cls, value
 
 
-def _threaded_channel_factory(channel_type: int):
+def _threaded_channel_factory(
+    channel_type: int,
+) -> (
+    tuple[
+        type[CategoryChannel]
+        | type[DMChannel]
+        | type[ForumChannel]
+        | type[GroupChannel]
+        | type[MediaChannel]
+        | type[StageChannel]
+        | type[TextChannel]
+        | type[VoiceChannel]
+        | None,
+        ChannelType
+        | ChannelType
+        | ChannelType
+        | ChannelType
+        | ChannelType
+        | ChannelType
+        | ChannelType
+        | ChannelType
+        | ChannelType
+        | ChannelType
+        | ChannelType
+        | ChannelType,
+    ]
+    | tuple[type[Thread], ChannelType | ChannelType | ChannelType]
+):
     cls, value = _channel_factory(channel_type)
     if value in (ChannelType.private_thread, ChannelType.public_thread, ChannelType.news_thread):
         return Thread, value
     return cls, value
 
 
-def _threaded_guild_channel_factory(channel_type: int):
+def _threaded_guild_channel_factory(
+    channel_type: int,
+) -> (
+    tuple[
+        type[CategoryChannel]
+        | type[ForumChannel]
+        | type[MediaChannel]
+        | type[StageChannel]
+        | type[TextChannel]
+        | type[VoiceChannel]
+        | None,
+        ChannelType
+        | ChannelType
+        | ChannelType
+        | ChannelType
+        | ChannelType
+        | ChannelType
+        | ChannelType
+        | ChannelType
+        | ChannelType
+        | ChannelType
+        | ChannelType
+        | ChannelType,
+    ]
+    | tuple[type[Thread], ChannelType | ChannelType | ChannelType]
+):
     cls, value = _guild_channel_factory(channel_type)
     if value in (ChannelType.private_thread, ChannelType.public_thread, ChannelType.news_thread):
         return Thread, value

@@ -11,7 +11,7 @@ from disnake.ext import commands
 
 # Define a simple View that gives us a confirmation menu
 class Confirm(disnake.ui.View):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(timeout=10.0)
         self.value: Optional[bool] = None
 

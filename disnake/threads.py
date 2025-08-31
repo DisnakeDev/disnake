@@ -748,7 +748,7 @@ class Thread(Messageable, Hashable):
         :class:`Thread`
             The newly edited thread.
         """
-        payload = {}
+        payload: dict[str, str] = {}
         if name is not MISSING:
             payload["name"] = str(name)
         if archived is not MISSING:

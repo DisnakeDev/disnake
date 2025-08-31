@@ -1,11 +1,12 @@
 # SPDX-License-Identifier: MIT
 
 from disnake.ext import commands
+from disnake.ext.commands.cog import Cog
 
 
 class TestParents:
     # not using a fixture for typing reasons
-    def _create_cog(self):
+    def _create_cog(self) -> Cog:
         class Cog(commands.Cog):
             @commands.slash_command()
             async def a(self, _) -> None: ...

@@ -1330,7 +1330,7 @@ async def run_converters(ctx: Context, converter, argument: str, param: inspect.
     origin = getattr(converter, "__origin__", None)
 
     if origin is Union:
-        errors = []
+        errors: list[CommandError] = []
         _NoneType = type(None)
         union_args = converter.__args__
         for conv in union_args:
@@ -1352,7 +1352,7 @@ async def run_converters(ctx: Context, converter, argument: str, param: inspect.
         raise BadUnionArgument(param, union_args, errors)
 
     if origin is Literal:
-        errors = []
+        errors: list[CommandError] = []
         conversions = {}
         literal_args = converter.__args__
         for literal in literal_args:

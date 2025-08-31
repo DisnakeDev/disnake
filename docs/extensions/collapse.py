@@ -36,7 +36,7 @@ class CollapseDirective(Directive):
 
     option_spec: ClassVar[OptionSpec] = {"open": directives.flag}
 
-    def run(self):
+    def run(self) -> list[collapse]:
         self.assert_has_content()
         node = collapse(
             "\n".join(self.content),

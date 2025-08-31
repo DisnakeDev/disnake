@@ -37,14 +37,16 @@ ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
 
 class YTDLSource(disnake.PCMVolumeTransformer):
-    def __init__(self, source: disnake.AudioSource, *, data: Dict[str, Any], volume: float = 0.5):
+    def __init__(
+        self, source: disnake.AudioSource, *, data: Dict[str, Any], volume: float = 0.5
+    ) -> None:
         super().__init__(source, volume)
 
         self.title = data.get("title")
 
     @classmethod
     async def from_url(
-        cls, url, *, loop: Optional[asyncio.AbstractEventLoop] = None, stream: bool = False
+        cls, url: str, *, loop: Optional[asyncio.AbstractEventLoop] = None, stream: bool = False
     ):
         loop = loop or asyncio.get_event_loop()
         data: Any = await loop.run_in_executor(
@@ -61,7 +63,7 @@ class YTDLSource(disnake.PCMVolumeTransformer):
 
 
 class Music(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
     @commands.command()
