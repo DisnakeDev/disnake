@@ -23,6 +23,13 @@ class PartialUser(TypedDict):
 PremiumType = Literal[0, 1, 2]
 
 
+class UserPrimaryGuild(TypedDict):
+    identity_guild_id: Optional[Snowflake]
+    identity_enabled: Optional[bool]
+    tag: Optional[str]
+    badge: Optional[str]
+
+
 class User(PartialUser, total=False):
     bot: bool
     system: bool
@@ -36,3 +43,4 @@ class User(PartialUser, total=False):
     premium_type: PremiumType
     public_flags: int
     avatar_decoration_data: Optional[AvatarDecorationData]
+    primary_guild: Optional[UserPrimaryGuild]

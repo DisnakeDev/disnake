@@ -10,7 +10,7 @@ from .asset import Asset
 from .colour import Colour
 from .enums import Locale, try_enum
 from .flags import PublicUserFlags
-from .utils import MISSING, _assetbytes_to_base64_data, snowflake_time
+from .utils import MISSING, _assetbytes_to_base64_data, _get_as_snowflake, snowflake_time
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -27,6 +27,7 @@ if TYPE_CHECKING:
         AvatarDecorationData as AvatarDecorationDataPayload,
         PartialUser as PartialUserPayload,
         User as UserPayload,
+        UserPrimaryGuild as UserPrimaryGuildPayload,
     )
 
 
@@ -504,7 +505,10 @@ class User(BaseUser, disnake.abc.Messageable):
         Specifies if the user is a system user (i.e. represents Discord officially).
     """
 
-    __slots__ = ("__weakref__",)
+    __slots__ = (
+        "__weakref__",
+        "_primary_guild",
+    )
 
     def __repr__(self) -> str:
         return (
@@ -512,9 +516,26 @@ class User(BaseUser, disnake.abc.Messageable):
             f" discriminator={self.discriminator!r} bot={self.bot}>"
         )
 
+    def _update(self, data: UserPayload) -> None:
+        super()._update(data)
+        self._primary_guild = data.get("primary_guild")
+
     async def _get_channel(self) -> DMChannel:
         ch = await self.create_dm()
         return ch
+
+    @property
+    def primary_guild(self) -> Optional[UserPrimaryGuild]:
+        """Optional[:class:`UserPrimaryGuild`]: Returns the user's primary guild, if any.
+
+        .. versionadded:: 2.11
+        """
+        if self._primary_guild:
+            return UserPrimaryGuild(
+                state=self._state,
+                data=self._primary_guild,
+            )
+        return None
 
     @property
     def dm_channel(self) -> Optional[DMChannel]:
@@ -557,3 +578,47 @@ class User(BaseUser, disnake.abc.Messageable):
         state = self._state
         data: DMChannelPayload = await state.http.start_private_message(self.id)
         return state.add_dm_channel(data)
+
+
+class UserPrimaryGuild:
+    """Represents user guild tags.
+
+    .. versionadded:: 2,11
+
+    Attributes
+    ----------
+    identity_guild_id: Optional[int]
+        The ID of the user's primary guild.
+    identity_enabled: Optional[bool]
+        Whether the user is displaying the primary guild's server tag. This can be ``None``
+        if the system clears the identity, e.g. the server no longer supports tags. This will be ``False``
+        if the user manually removes their tag.
+    tag: Optional[str]
+        The text of the user's server tag. Limited to 4 characters.
+    """
+
+    __slots__ = (
+        "identity_guild_id",
+        "identity_enabled",
+        "tag",
+        "_state",
+        "_badge",
+    )
+
+    def __init__(self, *, state: ConnectionState, data: UserPrimaryGuildPayload) -> None:
+        self._state = state
+        self.identity_guild_id: Optional[int] = _get_as_snowflake(data, "identity_guild_id")
+        self.identity_enabled: Optional[bool] = data["identity_enabled"]
+        self.tag: Optional[str] = data["tag"]
+        self._badge: Optional[str] = data["badge"]
+
+    def __repr__(self) -> str:
+        return f"<UserPrimaryGuild identity_guild_id={self.identity_guild_id} identity_enabled={self.identity_enabled} tag={self.tag}>"
+
+    @property
+    def badge(self) -> Optional[Asset]:
+        """Optional[:class:`Asset`]: Returns the server tag badge, if any."""
+        # if badge is not None identity_guild_id won't be None either
+        if self._badge and self.identity_guild_id:
+            return Asset._from_clan_badge(self._state, self.identity_guild_id, self._badge)
+        return None
