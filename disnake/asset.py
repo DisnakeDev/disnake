@@ -344,7 +344,7 @@ class Asset(AssetMixin):
     def _from_clan_badge(cls, state: AnyState, primary_guild_id: int, badge_hash: str) -> Self:
         return cls(
             state,
-            url=f"{cls.BASE}/clan-badges/{primary_guild_id}/{badge_hash}.png?size=16",
+            url=f"{cls.BASE}/guild-tag-badges/{primary_guild_id}/{badge_hash}.png?size=16",
             key=badge_hash,
             animated=False,
         )
