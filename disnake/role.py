@@ -608,7 +608,7 @@ class Role(Hashable):
             primary_colour = color or colour
 
         if primary_color is not MISSING:
-            primary_colour = color
+            primary_colour = primary_color
 
         if primary_colour is not MISSING:
             if isinstance(primary_colour, int):
