@@ -1372,9 +1372,6 @@ class Message(Hashable):
     def _handle_edited_timestamp(self, value: str) -> None:
         self._edited_timestamp = utils.parse_time(value)
 
-    def _handle_pinned_timestamp(self, value: str) -> None:
-        self._pinned_at = utils.parse_time(value)
-
     def _handle_pinned(self, value: bool) -> None:
         self.pinned = value
 

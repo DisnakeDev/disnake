@@ -30,7 +30,7 @@ from .integrations import PartialIntegration
 from .object import Object
 from .subscription import Subscription
 from .threads import Thread
-from .utils import deprecated, maybe_coroutine, snowflake_time, time_snowflake
+from .utils import deprecated, maybe_coroutine, parse_time, snowflake_time, time_snowflake
 
 __all__ = (
     "ReactionIterator",
@@ -1380,5 +1380,5 @@ class ChannelPinsIterator(_AsyncIterator["Message"]):
 
             for element in data["items"]:
                 message = self._state.create_message(channel=self.channel, data=element["message"])
-                message._handle_pinned_timestamp(element["pinned_at"])
+                message._pinned_at = parse_time(element["pinned_at"])
                 await self.messages.put(message)
