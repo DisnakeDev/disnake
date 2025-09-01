@@ -249,7 +249,7 @@ def pyright(session: nox.Session) -> None:
         pass
 
 
-@nox.session(python=["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"])
+@nox.session(python=nox.project.python_versions(PYPROJECT))
 @nox.parametrize(
     "extras",
     [

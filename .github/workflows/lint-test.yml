@@ -159,13 +159,33 @@ jobs:
           exit 0;
         fi
 
+  determine-tests:
+    runs-on: ubuntu-latest
+    needs: lock-dependencies
+    outputs:
+      python-versions: ${{ steps.set-matrix.outputs.python-versions }}
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up environment
+      id: setup
+      uses: ./.github/actions/setup-env
+      with:
+        python-version: 3.12
+
+    - name: Install nox
+      run: uv sync --no-default-groups --group nox --no-install-project
+
+    - name: Determine Python versions to test against
+      id: set-matrix
+      run: echo python-versions=$(uv run nox -s test --list --json | jq -c '[.[].python]') | tee --append $GITHUB_OUTPUT
+
   pytest:
     runs-on: ${{ matrix.os }}
-    needs: lock-dependencies
+    needs: determine-tests
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
         os: ["windows-latest", "ubuntu-latest", "macos-latest"]
+        python-version: ${{ fromJson(needs.determine-tests.outputs.python-versions) }}
         experimental: [false]
       fail-fast: true
     continue-on-error: ${{ matrix.experimental }}
