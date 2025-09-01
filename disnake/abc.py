@@ -84,7 +84,7 @@ if TYPE_CHECKING:
         PermissionOverwrite as PermissionOverwritePayload,
     )
     from .types.threads import PartialForumTag as PartialForumTagPayload
-    from .ui.action_row import Components, MessageUIComponent
+    from .ui._types import MessageComponents
     from .ui.view import View
     from .user import ClientUser
     from .voice_region import VoiceRegion
@@ -295,7 +295,7 @@ class GuildChannel(ABC):
         http = self._state.http
         bucket = self._sorting_bucket
         channels = [c for c in self.guild.channels if c._sorting_bucket == bucket]
-        channels = cast(List[GuildChannel], channels)
+        channels = cast("List[GuildChannel]", channels)
 
         channels.sort(key=lambda c: c.position)
 
@@ -600,6 +600,8 @@ class GuildChannel(ABC):
 
         If there is no category then this is ``None``.
         """
+        if isinstance(self.guild, Object):
+            return None
         return self.guild.get_channel(self.category_id)  # type: ignore
 
     @property
@@ -611,7 +613,7 @@ class GuildChannel(ABC):
 
         .. versionadded:: 1.3
         """
-        if self.category_id is None:
+        if self.category_id is None or isinstance(self.guild, Object):
             return False
 
         category = self.guild.get_channel(self.category_id)
@@ -678,6 +680,13 @@ class GuildChannel(ABC):
         - The permissions of the role used as a parameter
         - The default role permission overwrites
         - The permission overwrites of the role used as a parameter
+
+        .. note::
+            If the channel originated from an :class:`.Interaction` and
+            the :attr:`.guild` attribute is unavailable, such as with
+            user-installed applications in guilds, this method will not work
+            due to an API limitation.
+            Consider using :attr:`.Interaction.permissions` or :attr:`~.Interaction.app_permissions` instead.
 
         .. versionchanged:: 2.0
             The object passed in can now be a role object.
@@ -1239,7 +1248,7 @@ class GuildChannel(ABC):
             ]
 
         channels.sort(key=lambda c: (c.position, c.id))
-        channels = cast(List[GuildChannel], channels)
+        channels = cast("List[GuildChannel]", channels)
 
         try:
             # Try to remove ourselves from the channel list
@@ -1433,7 +1442,7 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
         view: View = ...,
-        components: Components[MessageUIComponent] = ...,
+        components: MessageComponents = ...,
         poll: Poll = ...,
     ) -> Message: ...
 
@@ -1454,7 +1463,7 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
         view: View = ...,
-        components: Components[MessageUIComponent] = ...,
+        components: MessageComponents = ...,
         poll: Poll = ...,
     ) -> Message: ...
 
@@ -1475,7 +1484,7 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
         view: View = ...,
-        components: Components[MessageUIComponent] = ...,
+        components: MessageComponents = ...,
         poll: Poll = ...,
     ) -> Message: ...
 
@@ -1496,7 +1505,7 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
         view: View = ...,
-        components: Components[MessageUIComponent] = ...,
+        components: MessageComponents = ...,
         poll: Poll = ...,
     ) -> Message: ...
 
@@ -1518,7 +1527,7 @@ class Messageable:
         reference: Optional[Union[Message, MessageReference, PartialMessage]] = None,
         mention_author: Optional[bool] = None,
         view: Optional[View] = None,
-        components: Optional[Components[MessageUIComponent]] = None,
+        components: Optional[MessageComponents] = None,
         poll: Optional[Poll] = None,
     ):
         """|coro|
@@ -1531,8 +1540,8 @@ class Messageable:
         ``stickers``, ``components``, ``poll`` or ``view`` must be provided.
 
         To upload a single file, the ``file`` parameter should be used with a
-        single :class:`.File` object. To upload multiple files, the ``files``
-        parameter should be used with a :class:`list` of :class:`.File` objects.
+        single :class:`~disnake.File` object. To upload multiple files, the ``files``
+        parameter should be used with a :class:`list` of :class:`~disnake.File` objects.
         **Specifying both parameters will lead to an exception**.
 
         To upload a single embed, the ``embed`` parameter should be used with a
@@ -1558,9 +1567,9 @@ class Messageable:
 
             .. versionadded:: 2.0
 
-        file: :class:`.File`
+        file: :class:`~disnake.File`
             The file to upload. This cannot be mixed with the ``files`` parameter.
-        files: List[:class:`.File`]
+        files: List[:class:`~disnake.File`]
             A list of files to upload. Must be a maximum of 10.
             This cannot be mixed with the ``file`` parameter.
         stickers: Sequence[Union[:class:`.GuildSticker`, :class:`.StandardSticker`, :class:`.StickerItem`]]
@@ -1614,6 +1623,11 @@ class Messageable:
 
             .. versionadded:: 2.4
 
+            .. note::
+                Passing v2 components here automatically sets the :attr:`~.MessageFlags.is_components_v2` flag.
+                Setting this flag cannot be reverted. Note that this also disables the
+                ``content``, ``embeds``, ``stickers``, and ``poll`` fields.
+
         suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This hides
             all the embeds from the UI if set to ``True``.
@@ -1622,8 +1636,8 @@ class Messageable:
 
         flags: :class:`.MessageFlags`
             The flags to set for this message.
-            Only :attr:`~.MessageFlags.suppress_embeds` and :attr:`~.MessageFlags.suppress_notifications`
-            are supported.
+            Only :attr:`~.MessageFlags.suppress_embeds`, :attr:`~.MessageFlags.suppress_notifications`,
+            and :attr:`~.MessageFlags.is_components_v2` are supported.
 
             If parameter ``suppress_embeds`` is provided,
             that will override the setting of :attr:`.MessageFlags.suppress_embeds`.
@@ -1648,7 +1662,8 @@ class Messageable:
             or the ``reference`` object is not a :class:`.Message`,
             :class:`.MessageReference` or :class:`.PartialMessage`.
         ValueError
-            The ``files`` or ``embeds`` list is too large.
+            The ``files`` or ``embeds`` list is too large, or
+            you tried to send v2 components together with ``content``, ``embeds``, ``stickers``, or ``poll``.
 
         Returns
         -------
@@ -1712,6 +1727,7 @@ class Messageable:
                     "reference parameter must be Message, MessageReference, or PartialMessage"
                 ) from None
 
+        is_v2 = False
         if view is not None and components is not None:
             raise TypeError("cannot pass both view and components parameter to send()")
         elif view:
@@ -1719,11 +1735,19 @@ class Messageable:
                 raise TypeError(f"view parameter must be View not {view.__class__!r}")
             components_payload = view.to_components()
         elif components:
-            from .ui.action_row import components_to_dict
+            from .ui.action_row import normalize_components_to_dict
 
-            components_payload = components_to_dict(components)
+            components_payload, is_v2 = normalize_components_to_dict(components)
         else:
             components_payload = None
+
+        # set cv2 flag automatically
+        if is_v2:
+            flags = MessageFlags._from_value(0 if flags is None else flags.value)
+            flags.is_components_v2 = True
+        # components v2 cannot be used with other content fields
+        if flags and flags.is_components_v2 and (content or embeds or stickers or poll):
+            raise ValueError("Cannot use v2 components with content, embeds, stickers, or polls")
 
         flags_payload = None
         if suppress_embeds is not None:

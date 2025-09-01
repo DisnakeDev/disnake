@@ -102,6 +102,14 @@ class ModalInteraction(Interaction[ClientT]):
 
         .. versionadded:: 2.10
 
+    attachment_size_limit: :class:`int`
+        The maximum number of bytes files can have in responses to this interaction.
+
+        This may be higher than the default limit, depending on the guild's boost
+        status or the invoking user's nitro status.
+
+        .. versionadded:: 2.11
+
     data: :class:`ModalInteractionData`
         The wrapped interaction data.
     message: Optional[:class:`Message`]
@@ -176,7 +184,7 @@ class ModalInteractionData(Dict[str, Any]):
         super().__init__(data)
         self.custom_id: str = data["custom_id"]
         # This uses a stripped-down action row TypedDict, as we only receive
-        # partial data from the API, generally only containing `type`, `custom_id`,
+        # partial data from the API, generally only containing `type`, `custom_id`, `id`,
         # and relevant fields like a select's `values`.
         self.components: List[ModalInteractionActionRowPayload] = data["components"]
 

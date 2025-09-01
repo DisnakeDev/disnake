@@ -8,7 +8,7 @@ from typing_extensions import NotRequired
 
 from .appinfo import ApplicationIntegrationType
 from .channel import ChannelType
-from .components import Component, Modal
+from .components import MessageTopLevelComponent, Modal
 from .embed import Embed
 from .entitlement import Entitlement
 from .i18n import LocalizationDict
@@ -177,6 +177,7 @@ class ApplicationCommandInteractionData(TypedDict):
 
 class _BaseComponentInteractionData(TypedDict):
     custom_id: str
+    id: int
 
 
 class _BaseSnowflakeComponentInteractionData(_BaseComponentInteractionData):
@@ -225,7 +226,6 @@ MessageComponentInteractionData = Union[
 ### Modal interaction components
 
 
-# TODO: add other select types
 class ModalInteractionStringSelectData(_BaseComponentInteractionData):
     type: Literal[3]
     values: List[str]
@@ -244,6 +244,7 @@ ModalInteractionComponentData = Union[
 
 class ModalInteractionActionRow(TypedDict):
     type: Literal[1]
+    id: int
     components: List[ModalInteractionComponentData]
 
 
@@ -266,6 +267,7 @@ class _BaseInteraction(TypedDict):
     token: str
     version: Literal[1]
     app_permissions: str
+    attachment_size_limit: int
 
 
 # common properties in non-ping interactions
@@ -321,7 +323,7 @@ class InteractionApplicationCommandCallbackData(TypedDict, total=False):
     embeds: List[Embed]
     allowed_mentions: AllowedMentions
     flags: int
-    components: List[Component]
+    components: List[MessageTopLevelComponent]
     attachments: List[Attachment]
 
 
