@@ -20,7 +20,7 @@ nox.options.sessions = [
     "pyright",
     "test",
 ]
-nox.needs_version = ">=2025.2.9"
+nox.needs_version = ">=2025.5.1"
 
 
 # used to reset cached coverage data once for the first test run only
