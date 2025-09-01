@@ -320,7 +320,7 @@ class Colour:
         return cls(0x2B2D31)
 
     @classmethod
-    def holographic_styled(cls) -> Tuple[Self, Self, Self]:
+    def holographic_style(cls) -> Tuple[Self, Self, Self]:
         """A factory method that returns a tuple of :class:`Colour` with values of
         ``0xA9C9FF``, ``0xFFBBEC``, ``0xFFC3A0``. This matches the holographic colour style
         for roles.
