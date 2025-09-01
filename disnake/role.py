@@ -604,8 +604,10 @@ class Role(Hashable):
         payload: Dict[str, Any] = {}
 
         colors: Dict[str, Any] = {}
-        if color is not MISSING or colour is not MISSING:
-            primary_colour = color or colour
+        if color is not MISSING:
+            primary_colour = color
+        elif colour is not MISSING:
+            primary_colour = colour
 
         if primary_color is not MISSING:
             primary_colour = primary_color
