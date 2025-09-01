@@ -22,7 +22,7 @@ jobs:
     if: contains(github.event.pull_request.labels.*.name, 'skip news') != true
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           # towncrier needs a non-shallow clone
           fetch-depth: '0'
@@ -33,7 +33,7 @@ jobs:
           python-version: '3.9'
 
       - name: Install dependencies
-        run: pdm install -dG tools
+        run: pdm install -dG changelog
 
       - name: Check for presence of a Change Log fragment (only pull requests)
         # NOTE: The pull request' base branch needs to be fetched so towncrier
