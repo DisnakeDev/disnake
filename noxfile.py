@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import pathlib
 import subprocess  # noqa: TID251
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Tuple
 
 import nox
 
@@ -31,6 +31,7 @@ reset_coverage = True
 # Helper to install dependencies from a group, using uv if venv_backend is uv
 def install_group(session: nox.Session, *groups: str) -> None:
     if getattr(session, "venv_backend", None) == "uv":
+        requirements: Dict[str, Any] = {}
         for group in groups:
             result = subprocess.run(
                 ["uv", "export", "--no-hashes", "--no-annotate", "--only-group", group],
@@ -38,13 +39,15 @@ def install_group(session: nox.Session, *groups: str) -> None:
                 text=True,
                 check=True,
             )
-            requirements = [
-                line.strip()
-                for line in result.stdout.splitlines()
-                if line.strip() and not line.lstrip().startswith("#")
-            ]
-            if requirements:
-                session.install(*requirements)
+            requirements.update(
+                {
+                    line.strip(): None
+                    for line in result.stdout.splitlines()
+                    if line.strip() and not line.lstrip().startswith("#")
+                }
+            )
+        if requirements:
+            session.install(*requirements)
     else:
         session.install(*nox.project.dependency_groups(PYPROJECT, *groups))
 
