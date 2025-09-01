@@ -208,7 +208,7 @@ class InvokableApplicationCommand(ABC):
             other._buckets = self._buckets.copy()
         if self._max_concurrency != other._max_concurrency:
             # _max_concurrency won't be None at this point
-            other._max_concurrency = cast(MaxConcurrency, self._max_concurrency).copy()
+            other._max_concurrency = cast("MaxConcurrency", self._max_concurrency).copy()
 
         if (
             # see https://github.com/DisnakeDev/disnake/pull/678#discussion_r938113624:
