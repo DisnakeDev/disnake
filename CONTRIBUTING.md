@@ -68,7 +68,7 @@ Specific development aspects are further explained below.
 
 ### Initial setup
 
-We use [`UV`][uv] as our dependency manager. If it isn't already installed on your system, you can follow the installation steps [here](https://docs.astral.sh/uv/getting-started/installation/) to get started.
+We use [`uv`][uv] as our dependency manager. If it isn't already installed on your system, you can follow the installation steps [here](https://docs.astral.sh/uv/getting-started/installation/) to get started.
 
 Once UV is installed, use the following commands to initialize a virtual environment, install the necessary development dependencies, and install the [`pre-commit`](#pre-commit) hooks.
 
