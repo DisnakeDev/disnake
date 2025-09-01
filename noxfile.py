@@ -4,8 +4,7 @@
 from __future__ import annotations
 
 import pathlib
-import subprocess  # noqa: TID251
-from typing import Any, Dict, List, Tuple
+from typing import Dict, List, Optional, Sequence, Tuple
 
 import nox
 
@@ -27,29 +26,56 @@ nox.needs_version = ">=2025.2.9"
 # used to reset cached coverage data once for the first test run only
 reset_coverage = True
 
+EMPTY_SEQUENCE: Sequence[str] = set()  # type: ignore
+
 
 # Helper to install dependencies from a group, using uv if venv_backend is uv
-def install_group(session: nox.Session, *groups: str) -> None:
-    if getattr(session, "venv_backend", None) == "uv":
-        requirements: Dict[str, Any] = {}
-        for group in groups:
-            result = subprocess.run(
-                ["uv", "export", "--no-hashes", "--no-annotate", "--only-group", group],
-                capture_output=True,
-                text=True,
-                check=True,
-            )
-            requirements.update(
-                {
-                    line.strip(): None
-                    for line in result.stdout.splitlines()
-                    if line.strip() and not line.lstrip().startswith("#")
-                }
-            )
-        if requirements:
-            session.install(*requirements)
-    else:
-        session.install(*nox.project.dependency_groups(PYPROJECT, *groups))
+def install_deps(
+    session: nox.Session,
+    *,
+    extras: Sequence[str] = EMPTY_SEQUENCE,
+    groups: Sequence[str] = EMPTY_SEQUENCE,
+    project: bool = True,
+    fork_strategy: Optional[str] = None,
+    resolution: Optional[str] = None,
+) -> None:
+    if not project and extras:  # cannot install extras without also installing the project
+        raise TypeError("Cannot install extras without also installing the project")
+
+    command: List[str] = []
+
+    # If not using uv, install with pip
+    if getattr(session, "venv_backend", None) != "uv":
+        if groups:
+            for g in groups:
+                command.append(f"--group={g}")
+        if project:
+            command.append("-e")
+            command.append(".")
+            if extras:
+                command[-1] += "[" + ",".join(extras) + "]"
+        session.install(*command)
+        return None
+
+    # install with UV
+    command = [
+        "uv",
+        "sync",
+        f"--python={session.virtualenv.location}",
+        "--no-default-groups",
+    ]
+    if extras:
+        for e in extras:
+            command.append(f"--extra={e}")
+    if groups:
+        for g in groups:
+            command.append(f"--group={g}")
+    if not project:
+        command.append("--no-install-project")
+    session.run_install(
+        *command,
+        env={"UV_PROJECT_ENVIRONMENT": session.virtualenv.location},
+    )
 
 
 @nox.session
@@ -59,8 +85,7 @@ def docs(session: nox.Session) -> None:
     If running locally, will build automatic reloading docs.
     If running in CI, will build a production version of the documentation.
     """
-    session.install("-e", ".")
-    install_group(session, "docs")
+    install_deps(session, groups=["docs"])
     with session.chdir("docs"):
         args = ["-b", "html", "-n", ".", "_build/html", *session.posargs]
         if session.interactive:
@@ -89,8 +114,7 @@ def docs(session: nox.Session) -> None:
 @nox.session
 def lint(session: nox.Session) -> None:
     """Check all files for linting errors"""
-    session.install("-e", ".")
-    install_group(session, "tools")
+    install_deps(session, groups=["tools"])
 
     session.run("pre-commit", "run", "--all-files", *session.posargs)
 
@@ -98,15 +122,14 @@ def lint(session: nox.Session) -> None:
 @nox.session(name="check-manifest")
 def check_manifest(session: nox.Session) -> None:
     """Run check-manifest."""
-    install_group(session, "tools")
+    install_deps(session, groups=["tools"])
     session.run("check-manifest", "-v")
 
 
 @nox.session()
 def slotscheck(session: nox.Session) -> None:
     """Run slotscheck."""
-    install_group(session, "tools")
-    session.install("-e", ".")
+    install_deps(session, groups=["tools"])
     session.run("python", "-m", "slotscheck", "--verbose", "-m", "disnake")
 
 
@@ -117,8 +140,7 @@ def autotyping(session: nox.Session) -> None:
     Because of the nature of changes that autotyping makes, and the goal design of examples,
     this runs on each folder in the repository with specific settings.
     """
-    session.install("-e", ".")
-    install_group(session, "codemod")
+    install_deps(session, project=False, groups=["codemod"])
 
     base_command = ["python", "-m", "libcst.tool", "codemod", "autotyping.AutotypeCommand"]
     if not session.interactive:
@@ -178,8 +200,7 @@ def autotyping(session: nox.Session) -> None:
 @nox.session(name="codemod")
 def codemod(session: nox.Session) -> None:
     """Run libcst codemods."""
-    session.install("-e", ".")
-    install_group(session, "codemod")
+    install_deps(session, groups=["codemod"])
 
     base_command = ["python", "-m", "libcst.tool"]
     base_command_codemod = [*base_command, "codemod"]
@@ -206,16 +227,19 @@ def codemod(session: nox.Session) -> None:
 @nox.session()
 def pyright(session: nox.Session) -> None:
     """Run pyright."""
-    session.install("-e", ".[speed,voice]")
-    install_group(
+    install_deps(
         session,
-        "test",
-        "nox",
-        "changelog",
-        "docs",
-        "codemod",
-        "typing",
-        "tools",
+        project=True,
+        extras=["speed", "voice"],
+        groups=[
+            "test",
+            "nox",
+            "changelog",
+            "docs",
+            "codemod",
+            "typing",
+            "tools",
+        ],
     )
     env = {
         "PYRIGHT_PYTHON_IGNORE_WARNINGS": "1",
@@ -238,12 +262,7 @@ def pyright(session: nox.Session) -> None:
 )
 def test(session: nox.Session, extras: List[str]) -> None:
     """Run tests."""
-    if extras:
-        arg = ".[" + ",".join(extras) + "]"
-    else:
-        arg = "."
-    session.install("-e", arg)
-    install_group(session, "test", "typing")
+    install_deps(session, project=True, extras=extras, groups=["test", "typing"])
 
     pytest_args = ["--cov", "--cov-context=test"]
     global reset_coverage  # noqa: PLW0603
@@ -265,8 +284,7 @@ def test(session: nox.Session, extras: List[str]) -> None:
 @nox.session()
 def coverage(session: nox.Session) -> None:
     """Display coverage information from the tests."""
-    session.install("-e", ".")
-    install_group(session, "test")
+    install_deps(session, project=True, groups=["test"])
     if "html" in session.posargs or "serve" in session.posargs:
         session.run("coverage", "html", "--show-contexts")
     if "serve" in session.posargs:

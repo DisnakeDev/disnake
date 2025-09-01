@@ -25,7 +25,7 @@ runs:
     - name: Set python version
       id: python-version
       shell: bash
-      run: echo "python-version=$(python -c 'import sys; print(".".join(map(str,sys.version_info[:2])))')" >> $GITHUB_OUTPUT
+      run: echo "python-version=$(uv run python -c 'import sys; print(".".join(map(str,sys.version_info[:2])))')" >> $GITHUB_OUTPUT
 
     - name: Configure cache
       uses: ./.github/actions/cache-uv
