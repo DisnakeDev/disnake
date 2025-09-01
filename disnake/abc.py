@@ -295,7 +295,7 @@ class GuildChannel(ABC):
         http = self._state.http
         bucket = self._sorting_bucket
         channels = [c for c in self.guild.channels if c._sorting_bucket == bucket]
-        channels = cast(List[GuildChannel], channels)
+        channels = cast("List[GuildChannel]", channels)
 
         channels.sort(key=lambda c: c.position)
 
@@ -1248,7 +1248,7 @@ class GuildChannel(ABC):
             ]
 
         channels.sort(key=lambda c: (c.position, c.id))
-        channels = cast(List[GuildChannel], channels)
+        channels = cast("List[GuildChannel]", channels)
 
         try:
             # Try to remove ourselves from the channel list
