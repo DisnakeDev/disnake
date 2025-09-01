@@ -1957,6 +1957,7 @@ class HTTPClient:
         valid_keys = (
             "name",
             "permissions",
+            "color",
             "colors",
             "hoist",
             "mentionable",
