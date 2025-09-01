@@ -46,14 +46,13 @@ def install_deps(
 
     # If not using uv, install with pip
     if getattr(session, "venv_backend", None) != "uv":
-        if groups:
-            for g in groups:
-                command.append(f"--group={g}")
         if project:
             command.append("-e")
             command.append(".")
             if extras:
                 command[-1] += "[" + ",".join(extras) + "]"
+        if groups:
+            command.extend(nox.project.dependency_groups(PYPROJECT, *groups))
         session.install(*command)
         return None
 
