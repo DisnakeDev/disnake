@@ -328,8 +328,6 @@ class Colour:
         The first value represents the ``colour`` (``primary_color``), the second and the third
         represents the ``secondary_colour`` and ``tertiary_colour`` respectively.
 
-        An alias exists under :meth:`Colour.holographic_style_color`.
-
         .. versionadded:: 2.11
         """
         return cls(0xA9C9FF), cls(0xFFBBEC), cls(0xFFC3A0)
