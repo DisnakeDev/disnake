@@ -7,7 +7,14 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type
 
 from .enums import ExpireBehaviour, try_enum
 from .user import User
-from .utils import MISSING, _get_as_snowflake, deprecated, parse_time, warn_deprecated
+from .utils import (
+    MISSING,
+    _get_as_snowflake,
+    deprecated,
+    parse_time,
+    snowflake_time,
+    warn_deprecated,
+)
 
 __all__ = (
     "IntegrationAccount",
@@ -98,6 +105,15 @@ class PartialIntegration:
         self.name: str = data["name"]
         self.account: IntegrationAccount = IntegrationAccount(data["account"])
         self.application_id: Optional[int] = _get_as_snowflake(data, "application_id")
+
+    @property
+    def created_at(self) -> datetime.datetime:
+        """:class:`datetime.datetime`: Returns the integration's
+        (*not* the associated application's) creation time in UTC.
+
+        .. versionadded:: 2.10
+        """
+        return snowflake_time(self.id)
 
 
 class Integration(PartialIntegration):
@@ -402,10 +418,7 @@ class BotIntegration(Integration):
         self.scopes: List[str] = data.get("scopes") or []
 
     def __repr__(self) -> str:
-        return (
-            f"<{self.__class__.__name__} id={self.id}"
-            f" name={self.name!r} scopes={self.scopes!r}>"
-        )
+        return f"<{self.__class__.__name__} id={self.id} name={self.name!r} scopes={self.scopes!r}>"
 
 
 def _integration_factory(value: str) -> Tuple[Type[Integration], str]:

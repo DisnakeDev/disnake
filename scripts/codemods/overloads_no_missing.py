@@ -4,12 +4,13 @@ from typing import List, Optional, Sequence
 
 import libcst as cst
 import libcst.matchers as m
-from libcst import codemod
+
+from .base import BaseCodemodCommand
 
 EllipsisType = type(Ellipsis)
 
 
-class EllipsisOverloads(codemod.VisitorBasedCodemodCommand):
+class EllipsisOverloads(BaseCodemodCommand):
     DESCRIPTION = "Ensure that `MISSING` is not used in any overloads as a default."
 
     def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:

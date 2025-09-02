@@ -387,6 +387,7 @@ A lot of Discord models work out of the gate as a parameter:
 - :class:`StageChannel` (since v1.7)
 - :class:`CategoryChannel`
 - :class:`ForumChannel` (since v2.5)
+- :class:`MediaChannel` (since v2.10)
 - :class:`Thread` (since v2.0)
 - :class:`Colour`
 - :class:`Role`
@@ -398,6 +399,7 @@ A lot of Discord models work out of the gate as a parameter:
 - :class:`GuildSticker` (since v2.0)
 - :class:`Permissions` (since v2.3)
 - :class:`GuildScheduledEvent` (since v2.5)
+- :class:`GuildSoundboardSound` (since v2.10)
 
 Having any of these set as the converter will intelligently convert the argument to the appropriate target type you
 specify.
@@ -430,6 +432,8 @@ converter is given below:
 +------------------------------+--------------------------------------------------------+
 | :class:`ForumChannel`        | :class:`~ext.commands.ForumChannelConverter`           |
 +------------------------------+--------------------------------------------------------+
+| :class:`MediaChannel`        | :class:`~ext.commands.MediaChannelConverter`           |
++------------------------------+--------------------------------------------------------+
 | :class:`Thread`              | :class:`~ext.commands.ThreadConverter`                 |
 +------------------------------+--------------------------------------------------------+
 | :class:`Colour`              | :class:`~ext.commands.ColourConverter`                 |
@@ -451,6 +455,8 @@ converter is given below:
 | :class:`Permissions`         | :class:`~ext.commands.PermissionsConverter`            |
 +------------------------------+--------------------------------------------------------+
 | :class:`GuildScheduledEvent` | :class:`~ext.commands.GuildScheduledEventConverter`    |
++------------------------------+--------------------------------------------------------+
+| :class:`GuildSoundboardSound`| :class:`~ext.commands.GuildSoundboardSoundConverter`   |
 +------------------------------+--------------------------------------------------------+
 
 By providing the converter it allows us to use them as building blocks for another converter:

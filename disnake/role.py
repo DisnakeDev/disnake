@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from .asset import Asset
 from .colour import Colour
+from .flags import RoleFlags
 from .mixins import Hashable
 from .partial_emoji import PartialEmoji
 from .permissions import Permissions
@@ -139,7 +140,7 @@ class RoleTags:
 class Role(Hashable):
     """Represents a Discord role in a :class:`Guild`.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -216,6 +217,7 @@ class Role(Hashable):
         "_emoji",
         "guild",
         "tags",
+        "_flags",
         "_state",
     )
 
@@ -283,6 +285,8 @@ class Role(Hashable):
             self.tags = RoleTags(data["tags"])
         except KeyError:
             self.tags = None
+
+        self._flags: int = data.get("flags", 0)
 
     def is_default(self) -> bool:
         """Checks if the role is the default role.
@@ -393,6 +397,14 @@ class Role(Hashable):
         if self._emoji is None:
             return None
         return PartialEmoji(name=self._emoji)
+
+    @property
+    def flags(self) -> RoleFlags:
+        """:class:`RoleFlags`: Returns the role's flags.
+
+        .. versionadded:: 2.10
+        """
+        return RoleFlags._from_value(self._flags)
 
     @property
     def created_at(self) -> datetime.datetime:

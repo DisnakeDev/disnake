@@ -8,7 +8,7 @@ import disnake.abc
 
 from .asset import Asset
 from .colour import Colour
-from .enums import DefaultAvatar, Locale, try_enum
+from .enums import Locale, try_enum
 from .flags import PublicUserFlags
 from .utils import MISSING, _assetbytes_to_base64_data, snowflake_time
 
@@ -23,7 +23,11 @@ if TYPE_CHECKING:
     from .message import Message
     from .state import ConnectionState
     from .types.channel import DMChannel as DMChannelPayload
-    from .types.user import PartialUser as PartialUserPayload, User as UserPayload
+    from .types.user import (
+        AvatarDecorationData as AvatarDecorationDataPayload,
+        PartialUser as PartialUserPayload,
+        User as UserPayload,
+    )
 
 
 __all__ = (
@@ -43,11 +47,12 @@ class BaseUser(_UserTag):
         "id",
         "discriminator",
         "global_name",
-        "_avatar",
-        "_banner",
-        "_accent_colour",
         "bot",
         "system",
+        "_avatar",
+        "_banner",
+        "_avatar_decoration_data",
+        "_accent_colour",
         "_public_flags",
         "_state",
     )
@@ -62,7 +67,8 @@ class BaseUser(_UserTag):
         _state: ConnectionState
         _avatar: Optional[str]
         _banner: Optional[str]
-        _accent_colour: Optional[str]
+        _avatar_decoration_data: Optional[AvatarDecorationDataPayload]
+        _accent_colour: Optional[int]
         _public_flags: int
 
     def __init__(
@@ -100,6 +106,7 @@ class BaseUser(_UserTag):
         self.global_name = data.get("global_name")
         self._avatar = data["avatar"]
         self._banner = data.get("banner", None)
+        self._avatar_decoration_data = data.get("avatar_decoration_data", None)
         self._accent_colour = data.get("accent_color", None)
         self._public_flags = data.get("public_flags", 0)
         self.bot = data.get("bot", False)
@@ -115,6 +122,7 @@ class BaseUser(_UserTag):
         self.global_name = user.global_name
         self._avatar = user._avatar
         self._banner = user._banner
+        self._avatar_decoration_data = user._avatar_decoration_data
         self._accent_colour = user._accent_colour
         self.bot = user.bot
         self._state = user._state
@@ -131,6 +139,7 @@ class BaseUser(_UserTag):
             "global_name": self.global_name,
             "bot": self.bot,
             "public_flags": self._public_flags,
+            "avatar_decoration_data": self._avatar_decoration_data,
         }
 
     @property
@@ -157,11 +166,11 @@ class BaseUser(_UserTag):
             Added handling for users migrated to the new username system without discriminators.
         """
         if self.discriminator == "0":
-            num = self.id >> 22
+            index = (self.id >> 22) % 6
         else:
             # legacy behavior
-            num = int(self.discriminator)
-        return Asset._from_default_avatar(self._state, num % len(DefaultAvatar))
+            index = int(self.discriminator) % 5
+        return Asset._from_default_avatar(self._state, index)
 
     @property
     def display_avatar(self) -> Asset:
@@ -180,11 +189,32 @@ class BaseUser(_UserTag):
         .. versionadded:: 2.0
 
         .. note::
+
             This information is only available via :meth:`Client.fetch_user`.
         """
         if self._banner is None:
             return None
         return Asset._from_banner(self._state, self.id, self._banner)
+
+    @property
+    def avatar_decoration(self) -> Optional[Asset]:
+        """Optional[:class:`Asset`]: Returns the user's avatar decoration asset, if available.
+
+        .. versionadded:: 2.10
+
+        .. note::
+
+            Since Discord always sends an animated PNG for animated avatar decorations,
+            the following methods will not work as expected:
+
+            - :meth:`Asset.replace`
+            - :meth:`Asset.with_size`
+            - :meth:`Asset.with_format`
+            - :meth:`Asset.with_static_format`
+        """
+        if self._avatar_decoration_data is None:
+            return None
+        return Asset._from_avatar_decoration(self._state, self._avatar_decoration_data["asset"])
 
     @property
     def accent_colour(self) -> Optional[Colour]:
@@ -281,7 +311,7 @@ class BaseUser(_UserTag):
 class ClientUser(BaseUser):
     """Represents your Discord user.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -308,17 +338,9 @@ class ClientUser(BaseUser):
     discriminator: :class:`str`
         The user's discriminator.
 
-        .. note::
-            This is being phased out by Discord; the username system is moving away from ``username#discriminator``
-            to users having a globally unique username.
-            The value of a single zero (``"0"``) indicates that the user has been migrated to the new system.
-            See the `help article <https://dis.gd/app-usernames>`__ for details.
-
     global_name: Optional[:class:`str`]
         The user's global display name, if set.
         This takes precedence over :attr:`.name` when shown.
-
-        For bots, this is the application name.
 
         .. versionadded:: 2.9
 
@@ -367,18 +389,15 @@ class ClientUser(BaseUser):
         self.mfa_enabled = data.get("mfa_enabled", False)
 
     async def edit(
-        self, *, username: str = MISSING, avatar: Optional[AssetBytes] = MISSING
+        self,
+        *,
+        username: str = MISSING,
+        avatar: Optional[AssetBytes] = MISSING,
+        banner: Optional[AssetBytes] = MISSING,
     ) -> ClientUser:
         """|coro|
 
         Edits the current profile of the client.
-
-        .. note::
-
-            To upload an avatar, a resource (see below) or a :term:`py:bytes-like object`
-            must be passed in that represents the image being uploaded.
-
-            The only image formats supported for uploading are JPG and PNG.
 
         .. versionchanged:: 2.0
             The edit is no longer in-place, instead the newly edited client user is returned.
@@ -394,19 +413,29 @@ class ClientUser(BaseUser):
             A :term:`py:bytes-like object` or asset representing the image to upload.
             Could be ``None`` to denote no avatar.
 
+            Only JPG, PNG, WEBP (static), and GIF (static/animated) images are supported.
+
             .. versionchanged:: 2.5
                 Now accepts various resource types in addition to :class:`bytes`.
+
+        banner: Optional[|resource_type|]
+            A :term:`py:bytes-like object` or asset representing the image to upload.
+            Could be ``None`` to denote no banner.
+
+            Only JPG, PNG, WEBP (static), and GIF (static/animated) images are supported.
+
+            .. versionadded:: 2.10
 
         Raises
         ------
         NotFound
-            The ``avatar`` asset couldn't be found.
+            The ``avatar`` or ``banner`` asset couldn't be found.
         HTTPException
             Editing your profile failed.
         TypeError
-            The ``avatar`` asset is a lottie sticker (see :func:`Sticker.read`).
+            The ``avatar`` or ``banner`` asset is a lottie sticker (see :func:`Sticker.read`).
         ValueError
-            Wrong image format passed for ``avatar``.
+            Wrong image format passed for ``avatar`` or ``banner``.
 
         Returns
         -------
@@ -420,6 +449,9 @@ class ClientUser(BaseUser):
         if avatar is not MISSING:
             payload["avatar"] = await _assetbytes_to_base64_data(avatar)
 
+        if banner is not MISSING:
+            payload["banner"] = await _assetbytes_to_base64_data(banner)
+
         data: UserPayload = await self._state.http.edit_profile(payload)
         return ClientUser(state=self._state, data=data)
 
@@ -427,7 +459,7 @@ class ClientUser(BaseUser):
 class User(BaseUser, disnake.abc.Messageable):
     """Represents a Discord user.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -463,8 +495,6 @@ class User(BaseUser, disnake.abc.Messageable):
     global_name: Optional[:class:`str`]
         The user's global display name, if set.
         This takes precedence over :attr:`.name` when shown.
-
-        For bots, this is the application name.
 
         .. versionadded:: 2.9
 

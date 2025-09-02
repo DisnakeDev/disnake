@@ -1,1 +1,0 @@
-Support ``animated`` emoji field in reaction removal events (e.g. :func:`on_raw_reaction_remove`).

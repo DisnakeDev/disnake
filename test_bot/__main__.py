@@ -5,6 +5,7 @@ import logging
 import os
 import sys
 import traceback
+from typing import Union
 
 import disnake
 from disnake.ext import commands
@@ -55,9 +56,14 @@ class TestBot(commands.Bot):
         logger.info("Loading cog %s", cog.qualified_name)
         return super().add_cog(cog, override=override)
 
-    async def on_command_error(self, ctx: commands.Context, error: commands.CommandError) -> None:
-        msg = f"Command `{ctx.command}` failed due to `{error}`"
-        logger.error(msg, exc_info=True)
+    async def _handle_error(
+        self, ctx: Union[commands.Context, disnake.AppCommandInter], error: Exception, prefix: str
+    ) -> None:
+        if isinstance(error, commands.CommandInvokeError):
+            error = error.original
+
+        msg = f"{prefix} failed due to `{error}`"
+        logger.error(msg, exc_info=error)
 
         embed = disnake.Embed(
             title=msg,
@@ -66,60 +72,26 @@ class TestBot(commands.Bot):
         )
         await ctx.send(embed=embed)
 
-    async def on_slash_command_error(
-        self,
-        inter: disnake.AppCmdInter,
-        error: commands.CommandError,
-    ) -> None:
-        msg = f"Slash command `{inter.data.name}` failed due to `{error}`"
-        logger.error(msg, exc_info=True)
+    async def on_command_error(self, ctx: commands.Context, error: commands.CommandError) -> None:
+        await self._handle_error(ctx, error, f"Prefix command `{ctx.command}`")
 
-        embed = disnake.Embed(
-            title=msg,
-            description=fancy_traceback(error),
-            color=disnake.Color.red(),
-        )
-        if inter.response.is_done():
-            send = inter.channel.send
-        else:
-            send = inter.response.send_message
-        await send(embed=embed)
+    async def on_slash_command_error(
+        self, inter: disnake.AppCommandInter, error: commands.CommandError
+    ) -> None:
+        cmd = inter.application_command
+        await self._handle_error(inter, error, f"Slash command `/{cmd.qualified_name}`")
 
     async def on_user_command_error(
-        self,
-        inter: disnake.AppCmdInter,
-        error: commands.CommandError,
+        self, inter: disnake.AppCommandInter, error: commands.CommandError
     ) -> None:
-        msg = f"User command `{inter.data.name}` failed due to `{error}`"
-        logger.error(msg, exc_info=True)
-        embed = disnake.Embed(
-            title=msg,
-            description=fancy_traceback(error),
-            color=disnake.Color.red(),
-        )
-        if inter.response.is_done():
-            send = inter.channel.send
-        else:
-            send = inter.response.send_message
-        await send(embed=embed)
+        cmd = inter.application_command
+        await self._handle_error(inter, error, f"User command `{cmd.name}`")
 
     async def on_message_command_error(
-        self,
-        inter: disnake.AppCmdInter,
-        error: commands.CommandError,
+        self, inter: disnake.AppCommandInter, error: commands.CommandError
     ) -> None:
-        msg = f"Message command `{inter.data.name}` failed due to `{error}`"
-        logger.error(msg, exc_info=True)
-        embed = disnake.Embed(
-            title=msg,
-            description=fancy_traceback(error),
-            color=disnake.Color.red(),
-        )
-        if inter.response.is_done():
-            send = inter.channel.send
-        else:
-            send = inter.response.send_message
-        await send(embed=embed)
+        cmd = inter.application_command
+        await self._handle_error(inter, error, f"Message command `{cmd.name}`")
 
 
 print(f"disnake: {disnake.__version__}\n")

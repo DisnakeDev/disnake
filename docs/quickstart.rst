@@ -23,7 +23,10 @@ It looks something like this:
 
     import disnake
 
-    client = disnake.Client()
+    intents = disnake.Intents.default()
+    intents.message_content = True
+
+    client = disnake.Client(intents=intents)
 
     @client.event
     async def on_ready():
@@ -46,20 +49,21 @@ There's a lot going on here, so let's walk you through it step by step.
 
 1. The first line just imports the library, if this raises a `ModuleNotFoundError` or `ImportError`
    then head on over to :ref:`installing` section to properly install.
-2. Next, we create an instance of a :class:`Client`. This client is our connection to Discord.
-3. We then use the :meth:`Client.event` decorator to register an event. This library has many events.
+2. Next, we must define the :class:`Intents` required by the client. Make sure to read :doc:`./intents` for additional information.
+3. Following that, we create an instance of a :class:`Client`. This client is our connection to Discord.
+4. We then use the :meth:`Client.event` decorator to register an event. This library has many events.
    Since this library is asynchronous, we do things in a "callback" style manner.
 
    A callback is essentially a function that is called when something happens. In our case,
    the :func:`on_ready` event is called when the bot has finished logging in and setting things
    up and the :func:`on_message` event is called when the bot has received a message.
-4. Since the :func:`on_message` event triggers for *every* message received, we have to make
+5. Since the :func:`on_message` event triggers for *every* message received, we have to make
    sure that we ignore messages from ourselves. We do this by checking if the :attr:`Message.author`
    is the same as the :attr:`Client.user`.
-5. Afterwards, we check if the :class:`Message.content` starts with ``'$hello'``. If it does,
+6. Afterwards, we check if the :class:`Message.content` starts with ``'$hello'``. If it does,
    then we send a message in the channel it was used in with ``'Hello!'``. This is a basic way of
    handling commands, which can be later automated with the :doc:`./ext/commands/index` framework.
-6. Finally, we run the bot with our login token. If you need help getting your token or creating a bot,
+7. Finally, we run the bot with our login token. If you need help getting your token or creating a bot,
    look in the :ref:`discord_intro` section.
 
 

@@ -38,11 +38,11 @@ from .file import File
 from .flags import ChannelFlags, MessageFlags
 from .invite import Invite
 from .mentions import AllowedMentions
+from .object import Object
 from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite, Permissions
 from .role import Role
-from .sticker import GuildSticker, StickerItem
-from .ui.action_row import components_to_dict
+from .sticker import GuildSticker, StandardSticker, StickerItem
 from .utils import _overload_with_permissions
 from .voice_client import VoiceClient, VoiceProtocol
 
@@ -63,16 +63,17 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from .asset import Asset
-    from .channel import CategoryChannel, DMChannel, PartialMessageable
+    from .channel import CategoryChannel, DMChannel, GroupChannel, PartialMessageable
     from .client import Client
     from .embeds import Embed
     from .emoji import Emoji
     from .enums import InviteTarget
-    from .guild import Guild, GuildMessageable
+    from .guild import Guild, GuildChannel as AnyGuildChannel, GuildMessageable
     from .guild_scheduled_event import GuildScheduledEvent
     from .iterators import HistoryIterator
     from .member import Member
     from .message import Message, MessageReference, PartialMessage
+    from .poll import Poll
     from .state import ConnectionState
     from .threads import AnyThreadArchiveDuration, ForumTag
     from .types.channel import (
@@ -83,12 +84,15 @@ if TYPE_CHECKING:
         PermissionOverwrite as PermissionOverwritePayload,
     )
     from .types.threads import PartialForumTag as PartialForumTagPayload
-    from .ui.action_row import Components, MessageUIComponent
+    from .ui._types import MessageComponents
     from .ui.view import View
     from .user import ClientUser
     from .voice_region import VoiceRegion
 
-    MessageableChannel = Union[GuildMessageable, DMChannel, PartialMessageable]
+    MessageableChannel = Union[GuildMessageable, DMChannel, GroupChannel, PartialMessageable]
+    # include non-messageable channels, e.g. category/forum
+    AnyChannel = Union[MessageableChannel, AnyGuildChannel]
+
     SnowflakeTime = Union["Snowflake", datetime]
 
 MISSING = utils.MISSING
@@ -143,12 +147,8 @@ class User(Snowflake, Protocol):
         The user's global display name, if set.
         This takes precedence over :attr:`.name` when shown.
 
-        For bots, this is the application name.
-
         .. versionadded:: 2.9
 
-    avatar: :class:`~disnake.Asset`
-        The avatar asset the user has.
     bot: :class:`bool`
         Whether the user is a bot account.
     """
@@ -158,7 +158,6 @@ class User(Snowflake, Protocol):
     name: str
     discriminator: str
     global_name: Optional[str]
-    avatar: Asset
     bot: bool
 
     @property
@@ -171,7 +170,15 @@ class User(Snowflake, Protocol):
         """:class:`str`: Returns a string that allows you to mention the given user."""
         raise NotImplementedError
 
+    @property
+    def avatar(self) -> Optional[Asset]:
+        """Optional[:class:`~disnake.Asset`]: Returns an :class:`~disnake.Asset` for
+        the avatar the user has.
+        """
+        raise NotImplementedError
 
+
+# FIXME: this shouldn't be a protocol. isinstance(thread, PrivateChannel) returns true, and issubclass doesn't work.
 @runtime_checkable
 class PrivateChannel(Snowflake, Protocol):
     """An ABC that details the common operations on a private Discord channel.
@@ -231,6 +238,7 @@ class GuildChannel(ABC):
     - :class:`.CategoryChannel`
     - :class:`.StageChannel`
     - :class:`.ForumChannel`
+    - :class:`.MediaChannel`
 
     This ABC must also implement :class:`.abc.Snowflake`.
 
@@ -261,8 +269,7 @@ class GuildChannel(ABC):
 
         def __init__(
             self, *, state: ConnectionState, guild: Guild, data: Mapping[str, Any]
-        ) -> None:
-            ...
+        ) -> None: ...
 
     def __str__(self) -> str:
         return self.name
@@ -288,7 +295,7 @@ class GuildChannel(ABC):
         http = self._state.http
         bucket = self._sorting_bucket
         channels = [c for c in self.guild.channels if c._sorting_bucket == bucket]
-        channels = cast(List[GuildChannel], channels)
+        channels = cast("List[GuildChannel]", channels)
 
         channels.sort(key=lambda c: c.position)
 
@@ -387,7 +394,7 @@ class GuildChannel(ABC):
             if p_id is not None and (parent := self.guild.get_channel(p_id)):
                 overwrites_payload = [c._asdict() for c in parent._overwrites]
 
-        if overwrites is not MISSING and overwrites is not None:
+        if overwrites not in (MISSING, None):
             overwrites_payload = []
             for target, perm in overwrites.items():
                 if not isinstance(perm, PermissionOverwrite):
@@ -593,6 +600,8 @@ class GuildChannel(ABC):
 
         If there is no category then this is ``None``.
         """
+        if isinstance(self.guild, Object):
+            return None
         return self.guild.get_channel(self.category_id)  # type: ignore
 
     @property
@@ -604,7 +613,7 @@ class GuildChannel(ABC):
 
         .. versionadded:: 1.3
         """
-        if self.category_id is None:
+        if self.category_id is None or isinstance(self.guild, Object):
             return False
 
         category = self.guild.get_channel(self.category_id)
@@ -629,6 +638,22 @@ class GuildChannel(ABC):
             This exists for all guild channels but may not be usable by the client for all guild channel types.
         """
         return f"https://discord.com/channels/{self.guild.id}/{self.id}"
+
+    def _apply_implict_permissions(self, base: Permissions) -> None:
+        # if you can't send a message in a channel then you can't have certain
+        # permissions as well
+        if not base.send_messages:
+            base.send_tts_messages = False
+            base.send_voice_messages = False
+            base.send_polls = False
+            base.mention_everyone = False
+            base.embed_links = False
+            base.attach_files = False
+
+        # if you can't view a channel then you have no permissions there
+        if not base.view_channel:
+            denied = Permissions.all_channel()
+            base.value &= ~denied.value
 
     def permissions_for(
         self,
@@ -655,6 +680,13 @@ class GuildChannel(ABC):
         - The permissions of the role used as a parameter
         - The default role permission overwrites
         - The permission overwrites of the role used as a parameter
+
+        .. note::
+            If the channel originated from an :class:`.Interaction` and
+            the :attr:`.guild` attribute is unavailable, such as with
+            user-installed applications in guilds, this method will not work
+            due to an API limitation.
+            Consider using :attr:`.Interaction.permissions` or :attr:`~.Interaction.app_permissions` instead.
 
         .. versionchanged:: 2.0
             The object passed in can now be a role object.
@@ -781,25 +813,11 @@ class GuildChannel(ABC):
                 base.handle_overwrite(allow=overwrite.allow, deny=overwrite.deny)
                 break
 
-        # if you can't send a message in a channel then you can't have certain
-        # permissions as well
-        if not base.send_messages:
-            base.send_tts_messages = False
-            base.send_voice_messages = False
-            base.mention_everyone = False
-            base.embed_links = False
-            base.attach_files = False
-
-        # if you can't view a channel then you have no permissions there
-        if not base.view_channel:
-            denied = Permissions.all_channel()
-            base.value &= ~denied.value
-
         # if you have a timeout then you can't have any permissions
         # except read messages and read message history
         if not ignore_timeout and obj.current_timeout:
-            denied = Permissions(view_channel=True, read_message_history=True)
-            base.value &= denied.value
+            allowed = Permissions(view_channel=True, read_message_history=True)
+            base.value &= allowed.value
 
         return base
 
@@ -833,8 +851,7 @@ class GuildChannel(ABC):
         *,
         overwrite: Optional[PermissionOverwrite] = ...,
         reason: Optional[str] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     @_overload_with_permissions
@@ -849,7 +866,9 @@ class GuildChannel(ABC):
         ban_members: Optional[bool] = ...,
         change_nickname: Optional[bool] = ...,
         connect: Optional[bool] = ...,
+        create_events: Optional[bool] = ...,
         create_forum_threads: Optional[bool] = ...,
+        create_guild_expressions: Optional[bool] = ...,
         create_instant_invite: Optional[bool] = ...,
         create_private_threads: Optional[bool] = ...,
         create_public_threads: Optional[bool] = ...,
@@ -874,12 +893,14 @@ class GuildChannel(ABC):
         moderate_members: Optional[bool] = ...,
         move_members: Optional[bool] = ...,
         mute_members: Optional[bool] = ...,
+        pin_messages: Optional[bool] = ...,
         priority_speaker: Optional[bool] = ...,
         read_message_history: Optional[bool] = ...,
         read_messages: Optional[bool] = ...,
         request_to_speak: Optional[bool] = ...,
         send_messages: Optional[bool] = ...,
         send_messages_in_threads: Optional[bool] = ...,
+        send_polls: Optional[bool] = ...,
         send_tts_messages: Optional[bool] = ...,
         send_voice_messages: Optional[bool] = ...,
         speak: Optional[bool] = ...,
@@ -887,6 +908,7 @@ class GuildChannel(ABC):
         stream: Optional[bool] = ...,
         use_application_commands: Optional[bool] = ...,
         use_embedded_activities: Optional[bool] = ...,
+        use_external_apps: Optional[bool] = ...,
         use_external_emojis: Optional[bool] = ...,
         use_external_sounds: Optional[bool] = ...,
         use_external_stickers: Optional[bool] = ...,
@@ -897,8 +919,7 @@ class GuildChannel(ABC):
         view_channel: Optional[bool] = ...,
         view_creator_monetization_analytics: Optional[bool] = ...,
         view_guild_insights: Optional[bool] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     async def set_permissions(
         self,
@@ -1104,8 +1125,7 @@ class GuildChannel(ABC):
         category: Optional[Snowflake] = ...,
         sync_permissions: bool = ...,
         reason: Optional[str] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     async def move(
@@ -1116,8 +1136,7 @@ class GuildChannel(ABC):
         category: Optional[Snowflake] = ...,
         sync_permissions: bool = ...,
         reason: Optional[str] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     async def move(
@@ -1128,8 +1147,7 @@ class GuildChannel(ABC):
         category: Optional[Snowflake] = ...,
         sync_permissions: bool = ...,
         reason: Optional[str] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     async def move(
@@ -1140,10 +1158,9 @@ class GuildChannel(ABC):
         category: Optional[Snowflake] = ...,
         sync_permissions: bool = ...,
         reason: Optional[str] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
-    async def move(self, **kwargs) -> None:
+    async def move(self, **kwargs: Any) -> None:
         """|coro|
 
         A rich interface to help move a channel relative to other channels.
@@ -1232,7 +1249,7 @@ class GuildChannel(ABC):
             ]
 
         channels.sort(key=lambda c: (c.position, c.id))
-        channels = cast(List[GuildChannel], channels)
+        channels = cast("List[GuildChannel]", channels)
 
         try:
             # Try to remove ourselves from the channel list
@@ -1276,7 +1293,7 @@ class GuildChannel(ABC):
         unique: bool = True,
         target_type: Optional[InviteTarget] = None,
         target_user: Optional[User] = None,
-        target_application: Optional[PartyType] = None,
+        target_application: Optional[Union[Snowflake, PartyType]] = None,
         guild_scheduled_event: Optional[GuildScheduledEvent] = None,
     ) -> Invite:
         """|coro|
@@ -1289,7 +1306,7 @@ class GuildChannel(ABC):
         Parameters
         ----------
         max_age: :class:`int`
-            How long the invite should last in seconds. If it's 0 then the invite
+            How long the invite should last in seconds. If set to ``0``, then the invite
             doesn't expire. Defaults to ``0``.
         max_uses: :class:`int`
             How many uses the invite could be used for. If it's 0 then there
@@ -1307,15 +1324,18 @@ class GuildChannel(ABC):
             .. versionadded:: 2.0
 
         target_user: Optional[:class:`User`]
-            The user whose stream to display for this invite, required if `target_type` is `TargetType.stream`.
+            The user whose stream to display for this invite, required if ``target_type`` is :attr:`.InviteTarget.stream`.
             The user must be streaming in the channel.
 
             .. versionadded:: 2.0
 
-        target_application: Optional[:class:`.PartyType`]
-            The ID of the embedded application for the invite, required if `target_type` is `TargetType.embedded_application`.
+        target_application: Optional[:class:`.Snowflake`]
+            The ID of the embedded application for the invite, required if ``target_type`` is :attr:`.InviteTarget.embedded_application`.
 
             .. versionadded:: 2.0
+
+            .. versionchanged:: 2.9
+                ``PartyType`` is deprecated, and :class:`.Snowflake` should be used instead.
 
         guild_scheduled_event: Optional[:class:`.GuildScheduledEvent`]
             The guild scheduled event to include with the invite.
@@ -1337,6 +1357,12 @@ class GuildChannel(ABC):
         :class:`.Invite`
             The newly created invite.
         """
+        if isinstance(target_application, PartyType):
+            utils.warn_deprecated(
+                "PartyType is deprecated and will be removed in future version",
+                stacklevel=2,
+            )
+            target_application = Object(target_application.value)
         data = await self._state.http.create_invite(
             self.id,
             reason=reason,
@@ -1346,7 +1372,7 @@ class GuildChannel(ABC):
             unique=unique,
             target_type=try_enum_to_int(target_type),
             target_user_id=target_user.id if target_user else None,
-            target_application_id=try_enum_to_int(target_application),
+            target_application_id=target_application.id if target_application else None,
         )
         invite = Invite.from_incomplete(data=data, state=self._state)
         invite.guild_scheduled_event = guild_scheduled_event
@@ -1408,7 +1434,7 @@ class Messageable:
         tts: bool = ...,
         embed: Embed = ...,
         file: File = ...,
-        stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
+        stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
         suppress_embeds: bool = ...,
@@ -1417,9 +1443,9 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
         view: View = ...,
-        components: Components[MessageUIComponent] = ...,
-    ) -> Message:
-        ...
+        components: MessageComponents = ...,
+        poll: Poll = ...,
+    ) -> Message: ...
 
     @overload
     async def send(
@@ -1429,7 +1455,7 @@ class Messageable:
         tts: bool = ...,
         embed: Embed = ...,
         files: List[File] = ...,
-        stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
+        stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
         suppress_embeds: bool = ...,
@@ -1438,9 +1464,9 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
         view: View = ...,
-        components: Components[MessageUIComponent] = ...,
-    ) -> Message:
-        ...
+        components: MessageComponents = ...,
+        poll: Poll = ...,
+    ) -> Message: ...
 
     @overload
     async def send(
@@ -1450,7 +1476,7 @@ class Messageable:
         tts: bool = ...,
         embeds: List[Embed] = ...,
         file: File = ...,
-        stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
+        stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
         suppress_embeds: bool = ...,
@@ -1459,9 +1485,9 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
         view: View = ...,
-        components: Components[MessageUIComponent] = ...,
-    ) -> Message:
-        ...
+        components: MessageComponents = ...,
+        poll: Poll = ...,
+    ) -> Message: ...
 
     @overload
     async def send(
@@ -1471,7 +1497,7 @@ class Messageable:
         tts: bool = ...,
         embeds: List[Embed] = ...,
         files: List[File] = ...,
-        stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
+        stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
         suppress_embeds: bool = ...,
@@ -1480,9 +1506,9 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
         view: View = ...,
-        components: Components[MessageUIComponent] = ...,
-    ) -> Message:
-        ...
+        components: MessageComponents = ...,
+        poll: Poll = ...,
+    ) -> Message: ...
 
     async def send(
         self,
@@ -1493,7 +1519,7 @@ class Messageable:
         embeds: Optional[List[Embed]] = None,
         file: Optional[File] = None,
         files: Optional[List[File]] = None,
-        stickers: Optional[Sequence[Union[GuildSticker, StickerItem]]] = None,
+        stickers: Optional[Sequence[Union[GuildSticker, StandardSticker, StickerItem]]] = None,
         delete_after: Optional[float] = None,
         nonce: Optional[Union[str, int]] = None,
         suppress_embeds: Optional[bool] = None,
@@ -1502,7 +1528,8 @@ class Messageable:
         reference: Optional[Union[Message, MessageReference, PartialMessage]] = None,
         mention_author: Optional[bool] = None,
         view: Optional[View] = None,
-        components: Optional[Components[MessageUIComponent]] = None,
+        components: Optional[MessageComponents] = None,
+        poll: Optional[Poll] = None,
     ):
         """|coro|
 
@@ -1511,11 +1538,11 @@ class Messageable:
         The content must be a type that can convert to a string through ``str(content)``.
 
         At least one of ``content``, ``embed``/``embeds``, ``file``/``files``,
-        ``stickers``, ``components``, or ``view`` must be provided.
+        ``stickers``, ``components``, ``poll`` or ``view`` must be provided.
 
         To upload a single file, the ``file`` parameter should be used with a
-        single :class:`.File` object. To upload multiple files, the ``files``
-        parameter should be used with a :class:`list` of :class:`.File` objects.
+        single :class:`~disnake.File` object. To upload multiple files, the ``files``
+        parameter should be used with a :class:`list` of :class:`~disnake.File` objects.
         **Specifying both parameters will lead to an exception**.
 
         To upload a single embed, the ``embed`` parameter should be used with a
@@ -1541,12 +1568,12 @@ class Messageable:
 
             .. versionadded:: 2.0
 
-        file: :class:`.File`
+        file: :class:`~disnake.File`
             The file to upload. This cannot be mixed with the ``files`` parameter.
-        files: List[:class:`.File`]
+        files: List[:class:`~disnake.File`]
             A list of files to upload. Must be a maximum of 10.
             This cannot be mixed with the ``file`` parameter.
-        stickers: Sequence[Union[:class:`.GuildSticker`, :class:`.StickerItem`]]
+        stickers: Sequence[Union[:class:`.GuildSticker`, :class:`.StandardSticker`, :class:`.StickerItem`]]
             A list of stickers to upload. Must be a maximum of 3.
 
             .. versionadded:: 2.0
@@ -1576,6 +1603,12 @@ class Messageable:
 
             .. versionadded:: 1.6
 
+            .. note::
+
+                Passing a :class:`.Message` or :class:`.PartialMessage` will only allow replies. To forward a message
+                you must explicitly transform the message to a :class:`.MessageReference` using :meth:`.Message.to_reference` and specify the :class:`.MessageReferenceType`,
+                or use :meth:`.Message.forward`.
+
         mention_author: Optional[:class:`bool`]
             If set, overrides the :attr:`.AllowedMentions.replied_user` attribute of ``allowed_mentions``.
 
@@ -1591,6 +1624,11 @@ class Messageable:
 
             .. versionadded:: 2.4
 
+            .. note::
+                Passing v2 components here automatically sets the :attr:`~.MessageFlags.is_components_v2` flag.
+                Setting this flag cannot be reverted. Note that this also disables the
+                ``content``, ``embeds``, ``stickers``, and ``poll`` fields.
+
         suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This hides
             all the embeds from the UI if set to ``True``.
@@ -1599,13 +1637,18 @@ class Messageable:
 
         flags: :class:`.MessageFlags`
             The flags to set for this message.
-            Only :attr:`~.MessageFlags.suppress_embeds` and :attr:`~.MessageFlags.suppress_notifications`
-            are supported.
+            Only :attr:`~.MessageFlags.suppress_embeds`, :attr:`~.MessageFlags.suppress_notifications`,
+            and :attr:`~.MessageFlags.is_components_v2` are supported.
 
             If parameter ``suppress_embeds`` is provided,
             that will override the setting of :attr:`.MessageFlags.suppress_embeds`.
 
             .. versionadded:: 2.9
+
+        poll: :class:`.Poll`
+            The poll to send with the message.
+
+            .. versionadded:: 2.10
 
         Raises
         ------
@@ -1620,7 +1663,8 @@ class Messageable:
             or the ``reference`` object is not a :class:`.Message`,
             :class:`.MessageReference` or :class:`.PartialMessage`.
         ValueError
-            The ``files`` or ``embeds`` list is too large.
+            The ``files`` or ``embeds`` list is too large, or
+            you tried to send v2 components together with ``content``, ``embeds``, ``stickers``, or ``poll``.
 
         Returns
         -------
@@ -1659,6 +1703,10 @@ class Messageable:
         if stickers is not None:
             stickers_payload = [sticker.id for sticker in stickers]
 
+        poll_payload = None
+        if poll:
+            poll_payload = poll._to_dict()
+
         allowed_mentions_payload = None
         if allowed_mentions is None:
             allowed_mentions_payload = state.allowed_mentions and state.allowed_mentions.to_dict()
@@ -1680,20 +1728,27 @@ class Messageable:
                     "reference parameter must be Message, MessageReference, or PartialMessage"
                 ) from None
 
+        is_v2 = False
         if view is not None and components is not None:
             raise TypeError("cannot pass both view and components parameter to send()")
-
         elif view:
             if not hasattr(view, "__discord_ui_view__"):
                 raise TypeError(f"view parameter must be View not {view.__class__!r}")
-
             components_payload = view.to_components()
-
         elif components:
-            components_payload = components_to_dict(components)
+            from .ui.action_row import normalize_components_to_dict
 
+            components_payload, is_v2 = normalize_components_to_dict(components)
         else:
             components_payload = None
+
+        # set cv2 flag automatically
+        if is_v2:
+            flags = MessageFlags._from_value(0 if flags is None else flags.value)
+            flags.is_components_v2 = True
+        # components v2 cannot be used with other content fields
+        if flags and flags.is_components_v2 and (content or embeds or stickers or poll):
+            raise ValueError("Cannot use v2 components with content, embeds, stickers, or polls")
 
         flags_payload = None
         if suppress_embeds is not None:
@@ -1720,6 +1775,7 @@ class Messageable:
                     message_reference=reference_payload,
                     stickers=stickers_payload,
                     components=components_payload,
+                    poll=poll_payload,
                     flags=flags_payload,
                 )
             finally:
@@ -1736,6 +1792,7 @@ class Messageable:
                 message_reference=reference_payload,
                 stickers=stickers_payload,
                 components=components_payload,
+                poll=poll_payload,
                 flags=flags_payload,
             )
 

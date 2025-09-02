@@ -11,6 +11,7 @@ from .guild_scheduled_event import GuildScheduledEvent
 from .member import Member
 from .role import CreateRole, Role
 from .snowflake import Snowflake
+from .soundboard import GuildSoundboardSound
 from .sticker import GuildSticker
 from .threads import Thread
 from .user import User
@@ -21,6 +22,11 @@ from .welcome_screen import WelcomeScreen
 class Ban(TypedDict):
     reason: Optional[str]
     user: User
+
+
+class BulkBanResult(TypedDict):
+    banned_users: List[Snowflake]
+    failed_users: List[Snowflake]
 
 
 class UnavailableGuild(TypedDict):
@@ -56,6 +62,7 @@ GuildFeature = Literal[
     "MEMBER_PROFILES",  # not sure what this does, if anything
     "MEMBER_VERIFICATION_GATE_ENABLED",
     "MORE_EMOJI",
+    "MORE_SOUNDBOARD",
     "MORE_STICKERS",
     "NEWS",
     "NEW_THREAD_PERMISSIONS",  # deprecated
@@ -68,6 +75,7 @@ GuildFeature = Literal[
     "ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE",
     "ROLE_SUBSCRIPTIONS_ENABLED",
     "SEVEN_DAY_THREAD_ARCHIVE",  # deprecated
+    "SOUNDBOARD",
     "TEXT_IN_VOICE_ENABLED",  # deprecated
     "THREADS_ENABLED",  # deprecated
     "THREE_DAY_THREAD_ARCHIVE",  # deprecated
@@ -142,6 +150,7 @@ class Guild(_BaseGuildPreview):
     presences: NotRequired[List[PartialPresenceUpdate]]
     stage_instances: NotRequired[List[StageInstance]]
     guild_scheduled_events: NotRequired[List[GuildScheduledEvent]]
+    soundboard_sounds: NotRequired[List[GuildSoundboardSound]]
 
 
 class InviteGuild(Guild, total=False):
