@@ -71,10 +71,12 @@ jobs:
     needs: lock-dependencies
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
-        experimental: [false]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
+        include:
+          - python-version: '3.14.0-alpha - 3.14'
+            experimental: true
       fail-fast: false
-    continue-on-error: ${{ matrix.experimental }}
+    continue-on-error: ${{ matrix.experimental || false}}
 
     steps:
       - uses: actions/checkout@v4
@@ -168,11 +170,20 @@ jobs:
     needs: lock-dependencies
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
         os: ["windows-latest", "ubuntu-latest", "macos-latest"]
-        experimental: [false]
+        include:
+          - python-version: '3.14.0-alpha - 3.14'
+            experimental: true
+            os: "ubuntu-latest"
+          - python-version: '3.14.0-alpha - 3.14'
+            experimental: true
+            os: "windows-latest"
+          - python-version: '3.14.0-alpha - 3.14'
+            experimental: true
+            os: "macos-latest"
       fail-fast: true
-    continue-on-error: ${{ matrix.experimental }}
+    continue-on-error: ${{ matrix.experimental || false }}
 
     env:
       GITHUB_STEP_SUMMARY_HEADER: "<details><summary>#name#</summary>\n<pre>"
