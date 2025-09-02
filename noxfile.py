@@ -1,11 +1,12 @@
+#!/usr/bin/env -S uv run --script
 # /// script
 # requires-python = ">=3.8"
 # dependencies = [
 #     "nox==2025.5.01",
 # ]
 # ///
-
 # SPDX-License-Identifier: MIT
+
 
 from __future__ import annotations
 
