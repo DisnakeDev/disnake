@@ -8,19 +8,19 @@ The following is a set of guidelines for contributing to the repository. These a
 
 ## Table of Contents
 
-- [Contributing to disnake](#contributing-to-disnake)
-  - [Table of Contents](#table-of-contents)
-  - [This is too much to read! I want to ask a question](#this-is-too-much-to-read-i-want-to-ask-a-question)
-  - [Good Bug Reports](#good-bug-reports)
-  - [Creating a Pull Request](#creating-a-pull-request)
-    - [Overview](#overview)
-    - [Initial setup](#initial-setup)
-    - [Commit/PR Naming Guidelines](#commitpr-naming-guidelines)
-    - [Formatting](#formatting)
-    - [Pyright](#pyright)
-    - [Changelogs](#changelogs)
-    - [Documentation](#documentation)
+- [This is too much to read! I want to ask a question](#this-is-too-much-to-read-i-want-to-ask-a-question)
+- [Good Bug Reports](#good-bug-reports)
+- [Creating a Pull Request](#creating-a-pull-request)
+  - [Overview](#overview)
+  - [Initial setup](#initial-setup)
+  - [Commit/PR Naming Guidelines](#commitpr-naming-guidelines)
+  - [Formatting](#formatting)
+  - [Pyright](#pyright)
+  - [Changelogs](#changelogs)
+  - [Documentation](#documentation)
+- [Migrating development environments](#migrating-development-environments)
   - [Migrating from `pdm` to `uv`](#migrating-from-pdm-to-uv)
+  - [Migrating `pdm`'s scripts to `nox`](#migrating-pdms-scripts-to-nox)
 
 ## This is too much to read! I want to ask a question
 
@@ -87,6 +87,11 @@ This will:
   - install all pre-commit hooks to make them ready for later
 - install all nox environments
 
+> [!NOTE]
+> If you're wondering why this command is unique, and uses `uvx` and not `uv`, its because `uvx` is a different part of uv.
+> This command downloads `nox` to an ephemeral environment, and then runs `nox` within that environment.
+> `nox` itself then runs the environment set-up session `dev` which is defined within [`noxfile.py`](./noxfile.py)
+
 Other tools used in this project include [ruff](https://docs.astral.sh/ruff) (formatter and linter), and [pyright](https://microsoft.github.io/pyright/#/) (type-checker). For the most part, these automatically run on every commit with no additional action required - see below for details.
 
 All of the following checks also automatically run for every PR on GitHub, so don't worry if you're not sure whether you missed anything. A PR cannot be merged as long as there are any failing checks.
@@ -135,11 +140,43 @@ We use [towncrier](https://github.com/twisted/towncrier) for managing our change
 We use Sphinx to build the project's documentation, which includes [automatically generating](https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html) the API Reference from docstrings using the [NumPy style](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_numpy.html).  
 To build the documentation locally, use `uv run nox -s docs` and visit <http://127.0.0.1:8009/> once built.
 
-## Migrating from `pdm` to `uv`
+## Migrating development environments
+
+### Migrating from `pdm` to `uv`
 
 We've recently migrated from `pdm` to [`uv`][uv] for dependency and environment management for local development, in hopes of a developer experience with less friction.
 
 1. delete `pdm.lock` and `.pdm-python`
-1. run `uvx nox -s dev`to recreate the .venv, refresh installation of pre-commit, and install all dependencies for the nox environments.
+2. run `uvx nox -s dev`to recreate the .venv, refresh installation of pre-commit, and install all dependencies for the nox environments.
+
+### Migrating `pdm`'s scripts to `nox`
+
+Previously, we were using pdm's scripts functions as a simple caller for our nox scripts.
+With our migration to uv, we have dropped a separate task caller entirely and switch to nox for all tasks.
+
+Command Migration:
+
+```sh
+pdm docs  
+pdm lint  
+pdm pyright  
+pdm test  
+pdm setup_env
+```
+
+Becomes:
+
+```sh
+uv run nox -s docs
+uv run nox -s lint
+uv run nox -s pyright
+uv run nox -s test
+uvx nox -s dev
+```
+
+If it would be easier, `nox` can be installed to your path with `uv tool install nox`, and used as if it wasn't in the project venv: nox will integrate with our noxfile and use the correct version of nox when needed.
+
+> [!TIP]
+> To provide arguments to the selected sessions with `nox`, pass them **after** `--`. For example, to tell `pre-commit` to only run `ruff format`, run `nox -s lint -- ruff-format`.
 
 [uv]: https://docs.astral.sh/uv
