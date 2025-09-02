@@ -21,12 +21,12 @@ from typing import (
     Type,
     Union,
     cast,
-    overload,
+    overload, TypeVar,
 )
 
 import disnake.abc
 
-from . import utils
+from . import utils, Object
 from .asset import Asset
 from .context_managers import Typing
 from .enums import (
@@ -102,6 +102,7 @@ if TYPE_CHECKING:
     from .voice_region import VoiceRegion
     from .webhook import Webhook
 
+    OverwriteKeyT = TypeVar('OverwriteKeyT', Role, Object, Union[Role, Member, Object])
 
 class VoiceChannelEffect:
     """An effect sent by a member in a voice channel.
@@ -426,7 +427,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         default_thread_slowmode_delay: Optional[int] = ...,
         default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = ...,
         type: ChannelType = ...,
-        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
+        overwrites: Mapping[OverwriteKeyT, PermissionOverwrite] = ...,
         flags: ChannelFlags = ...,
         reason: Optional[str] = ...,
     ) -> TextChannel: ...
@@ -444,7 +445,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         default_thread_slowmode_delay: Optional[int] = MISSING,
         default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
         type: ChannelType = MISSING,
-        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
+        overwrites: Mapping[OverwriteKeyT, PermissionOverwrite] = MISSING,
         flags: ChannelFlags = MISSING,
         reason: Optional[str] = None,
         **kwargs: Never,
@@ -1580,7 +1581,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         position: int = ...,
         sync_permissions: bool = ...,
         category: Optional[Snowflake] = ...,
-        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
+        overwrites: Mapping[OverwriteKeyT, PermissionOverwrite] = ...,
         rtc_region: Optional[Union[str, VoiceRegion]] = ...,
         video_quality_mode: VideoQualityMode = ...,
         nsfw: bool = ...,
@@ -1598,7 +1599,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         position: int = MISSING,
         sync_permissions: bool = MISSING,
         category: Optional[Snowflake] = MISSING,
-        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
+        overwrites: Mapping[OverwriteKeyT, PermissionOverwrite] = MISSING,
         rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
         nsfw: bool = MISSING,
@@ -2427,7 +2428,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         position: int = ...,
         sync_permissions: bool = ...,
         category: Optional[Snowflake] = ...,
-        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
+        overwrites: Mapping[OverwriteKeyT, PermissionOverwrite] = ...,
         rtc_region: Optional[Union[str, VoiceRegion]] = ...,
         video_quality_mode: VideoQualityMode = ...,
         nsfw: bool = ...,
@@ -2445,7 +2446,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         position: int = MISSING,
         sync_permissions: bool = MISSING,
         category: Optional[Snowflake] = MISSING,
-        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
+        overwrites: Mapping[OverwriteKeyT, PermissionOverwrite] = MISSING,
         rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
         nsfw: bool = MISSING,
@@ -2973,7 +2974,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         name: str = ...,
         position: int = ...,
         nsfw: bool = ...,
-        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
+        overwrites: Mapping[OverwriteKeyT, PermissionOverwrite] = ...,
         flags: ChannelFlags = ...,
         reason: Optional[str] = ...,
     ) -> CategoryChannel: ...
@@ -2984,7 +2985,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         name: str = MISSING,
         position: int = MISSING,
         nsfw: bool = MISSING,
-        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
+        overwrites: Mapping[OverwriteKeyT, PermissionOverwrite] = MISSING,
         flags: ChannelFlags = MISSING,
         reason: Optional[str] = None,
         **kwargs: Never,
@@ -4049,7 +4050,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
         slowmode_delay: Optional[int] = ...,
         default_thread_slowmode_delay: Optional[int] = ...,
         default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = ...,
-        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
+        overwrites: Mapping[OverwriteKeyT, PermissionOverwrite] = ...,
         flags: ChannelFlags = ...,
         require_tag: bool = ...,
         available_tags: Sequence[ForumTag] = ...,
@@ -4071,7 +4072,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
         slowmode_delay: Optional[int] = MISSING,
         default_thread_slowmode_delay: Optional[int] = MISSING,
         default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
-        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
+        overwrites: Mapping[OverwriteKeyT, PermissionOverwrite] = MISSING,
         flags: ChannelFlags = MISSING,
         require_tag: bool = MISSING,
         available_tags: Sequence[ForumTag] = MISSING,
