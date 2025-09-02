@@ -583,7 +583,7 @@ class User(BaseUser, disnake.abc.Messageable):
 class UserPrimaryGuild:
     """Represents user guild tags.
 
-    .. versionadded:: 2,11
+    .. versionadded:: 2.11
 
     Attributes
     ----------
