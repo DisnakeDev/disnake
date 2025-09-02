@@ -27,6 +27,7 @@ env:
   USE_UV_VERSION: "0.8.14"
   UV_RESOLUTION: "highest"
   UV_LOCKED: 1
+  UV_NO_SYNC: 1
 
 jobs:
   lock-dependencies:
@@ -292,6 +293,8 @@ jobs:
 
       - name: Print Coverage Output
         if: always() && (steps.run_tests.outcome == 'success' || steps.run_tests.outcome == 'failure')
+        env:
+          UV_NO_SYNC: 0
         run: |
           echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/Coverage Summary/" >> $GITHUB_STEP_SUMMARY
           uv run --no-default-groups --group test coverage report | tee -a $GITHUB_STEP_SUMMARY
