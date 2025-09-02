@@ -387,6 +387,7 @@ ignore = [
     ".readthedocs.yml",
     ".libcst.codemod.yaml",
     "noxfile.py",
+    "noxfile.py.lock",
     # docs
     "CONTRIBUTING.md",
     "RELEASE.md",
