@@ -203,11 +203,8 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Install dependencies
-      run: uv sync --no-default-groups --group test --no-editable
-
     - name: Install nox environment
-      run: uv run --no-sync nox -s test --install-only --force-python ${{ steps.setup-env.outputs.python-version }}
+      run: uvx nox -s test --install-only --force-python ${{ steps.setup-env.outputs.python-version }}
 
     - name: Run pytest
       id: run_tests
@@ -216,14 +213,14 @@ jobs:
         TZ: "America/New_York"
       run: |
         echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/Test Summary/" >> $GITHUB_STEP_SUMMARY
-        uv run nox --force-python ${{ steps.setup-env.outputs.python-version }} -s test -- --color=no --cov-report= | tee -a $GITHUB_STEP_SUMMARY
+        uvx nox --force-python ${{ steps.setup-env.outputs.python-version }} -s test -- --color=no --cov-report= | tee -a $GITHUB_STEP_SUMMARY
         echo "$GITHUB_STEP_SUMMARY_FOOTER" >> $GITHUB_STEP_SUMMARY
 
     - name: Print Coverage Output
       if: always() && (steps.run_tests.outcome == 'success' || steps.run_tests.outcome == 'failure')
       run: |
         echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/Coverage Summary/" >> $GITHUB_STEP_SUMMARY
-        uv run coverage report | tee -a $GITHUB_STEP_SUMMARY
+        uv run --no-default-groups --group test coverage report | tee -a $GITHUB_STEP_SUMMARY
         echo "$GITHUB_STEP_SUMMARY_FOOTER" >> $GITHUB_STEP_SUMMARY
 
   # thanks to aiohttp for this part of the workflow
