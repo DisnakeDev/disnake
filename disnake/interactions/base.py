@@ -184,6 +184,14 @@ class Interaction(Generic[ClientT]):
         context, you can use ``if interaction.context.guild:``.
 
         .. versionadded:: 2.10
+
+    attachment_size_limit: :class:`int`
+        The maximum number of bytes files can have in responses to this interaction.
+
+        This may be higher than the default limit, depending on the guild's boost
+        status or the invoking user's nitro status.
+
+        .. versionadded:: 2.11
     """
 
     __slots__: Tuple[str, ...] = (
@@ -202,6 +210,7 @@ class Interaction(Generic[ClientT]):
         "entitlements",
         "authorizing_integration_owners",
         "context",
+        "attachment_size_limit",
         "_app_permissions",
         "_permissions",
         "_state",
@@ -218,7 +227,7 @@ class Interaction(Generic[ClientT]):
         self._state: ConnectionState = state
         # TODO: Maybe use a unique session
         self._session: ClientSession = state.http._HTTPClient__session  # type: ignore
-        self.client: ClientT = cast(ClientT, state._get_client())
+        self.client: ClientT = cast("ClientT", state._get_client())
         self._original_response: Optional[InteractionMessage] = None
 
         self.id: int = int(data["id"])
@@ -275,6 +284,8 @@ class Interaction(Generic[ClientT]):
         self.context: InteractionContextTypes = InteractionContextTypes._from_values(
             [context] if (context := data.get("context")) is not None else []
         )
+
+        self.attachment_size_limit: int = data["attachment_size_limit"]
 
     @property
     def bot(self) -> ClientT:

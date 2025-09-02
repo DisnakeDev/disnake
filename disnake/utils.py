@@ -1135,7 +1135,7 @@ def flatten_literal_params(parameters: Iterable[Any]) -> Tuple[Any, ...]:
 
 def normalise_optional_params(parameters: Iterable[Any]) -> Tuple[Any, ...]:
     none_cls = type(None)
-    return tuple(p for p in parameters if p is not none_cls) + (none_cls,)
+    return (*tuple(p for p in parameters if p is not none_cls), none_cls)
 
 
 def _resolve_typealiastype(
