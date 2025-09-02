@@ -2228,9 +2228,8 @@ class Guild(Hashable):
             .. versionadded:: 2.6
 
         invites_disabled_until: Optional[Union[:class:`datetime.datetime`, :class:`datetime.timedelta`]]
-            The time until/for which invites are paused.
+            The time until/for which invites are paused, up to 24 hours in the future.
             See also the ``invites_disabled`` parameter.
-
             Can be set to ``None`` to re-enable invites.
 
             This is only available to guilds that contain ``COMMUNITY``
@@ -2239,12 +2238,11 @@ class Guild(Hashable):
             .. versionadded:: 2.10
 
         dms_disabled_until: Union[:class:`datetime.datetime`, :class:`datetime.timedelta`]
-            The time until/for which DMs between guild members are disabled.
+            The time until/for which DMs between guild members are disabled, up to 24 hours in the future.
+            Can be set to ``None`` to re-enable DMs.
 
             This does not apply to moderators, bots, or members who are
             already friends with each other.
-
-            Can be set to ``None`` to re-enable DMs.
 
             This is only available to guilds that contain ``COMMUNITY``
             in :attr:`Guild.features`.
