@@ -5,16 +5,15 @@ name: Lint & Test
 on:
   push:
     branches:
-      - 'master'
-      - 'v[0-9]+.[0-9]+.x'  # matches to backport branches, e.g. v3.6.x
-      - 'run-ci/*'
+      - "master"
+      - "v[0-9]+.[0-9]+.x" # matches to backport branches, e.g. v3.6.x
+      - "run-ci/*"
     tags:
   pull_request:
   merge_group:
     types: [checks_requested]
 
-permissions:
-  read-all
+permissions: read-all
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
@@ -23,6 +22,12 @@ concurrency:
 defaults:
   run:
     shell: bash
+
+env:
+  USE_UV_VERSION: "0.8.14"
+  UV_FROZEN: 1
+  UV_RESOLUTION: "highest"
+
 
 jobs:
   lock-dependencies:
@@ -33,23 +38,54 @@ jobs:
     # https://pdm-project.org/en/latest/usage/lockfile/
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    # Instead of setup-env, we call the cache-uv action here directly.
-    # This avoids having to install uv, only to find out the cache is already up to date sometimes.
-    - name: Configure cache
-      uses: ./.github/actions/cache-uv
-      with:
-        env-already-initialized: false
+      - name: Set up uv to lock dependencies
+        id: setup-python
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: ${{ env.USE_UV_VERSION }}
+          enable-cache: true
+
+      - name: Lock dependencies
+
+        env:
+          UV_FROZEN: 0
+        run: uv lock --refresh
+
+      - uses: actions/upload-artifact@v4
+        name: upload-uv-lock
+        with:
+          name: uv-lock-${{hashFiles('pyproject.toml')}}-resolved-${{ env.UV_RESOLUTION}}
+          path: uv.lock
+          if-no-files-found: error
+
+  # used for pyright and tests
+  determine-python-versions:
+    runs-on: ubuntu-latest
+    outputs:
+      test-python-versions: ${{ steps.set-matrix.outputs.test-python-versions }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: ${{ env.USE_UV_VERSION }}
+          enable-cache: true
+
+      - name: Determine Python versions to test and lint against
+        id: set-matrix
+        run: |
+          echo test-python-versions=$(uvx nox -s test --list --json | jq -c '[.[].python]') | tee --append $GITHUB_OUTPUT
 
   lint:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Run pre-commit
-      id: pre-commit
-      uses: pre-commit/action@v3.0.1
+      - name: Run pre-commit
+        id: pre-commit
+        uses: pre-commit/action@v3.0.1
 
   docs:
     # unlike the other workflows, we explicitly use the same version as
@@ -57,135 +93,124 @@ jobs:
     runs-on: ubuntu-24.04
     needs: lock-dependencies
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up environment
-      uses: ./.github/actions/setup-env
-      with:
-        python-version: 3.8
+      - name: Set up environment
+        id: setup-env
+        uses: ./.github/actions/setup-env
+        with:
+          python-version: 3.8
+          uv-version: ${{ env.USE_UV_VERSION }}
 
-    - name: Run sphinx-build
-      run: uv run nox -s docs -- --keep-going -W -w $GITHUB_STEP_SUMMARY
+      - name: Run sphinx-build
+        run: uvx nox --force-python ${{ steps.setup-env.outputs.python-version }} -s docs -- --keep-going -W -w $GITHUB_STEP_SUMMARY
 
   pyright:
     runs-on: ubuntu-latest
-    needs: lock-dependencies
+    needs:
+      - lock-dependencies
+      - determine-python-versions
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ${{ fromJson(needs.determine-python-versions.outputs.test-python-versions) }}
         experimental: [false]
       fail-fast: false
     continue-on-error: ${{ matrix.experimental }}
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up environment
-      id: setup-env
-      uses: ./.github/actions/setup-env
-      with:
-        python-version: ${{ matrix.python-version }}
+      - name: Set up environment
+        id: setup-env
+        uses: ./.github/actions/setup-env
+        with:
+          python-version: ${{ matrix.python-version }}
+          uv-version: ${{ env.USE_UV_VERSION }}
 
-    - name: Install dependencies
-      run: uv sync --all-extras
+      - name: Install dependencies
+        run: uv sync --all-extras --all-groups
 
-    - name: Add .venv/bin to PATH
-      run: dirname "$(uv python find)" >> $GITHUB_PATH
+      - name: Add .venv/bin to PATH
+        run: dirname "$(uv python find)" >> $GITHUB_PATH
 
-    - name: Set pyright version
-      run: |
-        PYRIGHT_VERSION="$(uv run python -c 'import pyright; print(pyright.__pyright_version__)')"
-        echo "PYRIGHT_VERSION=$PYRIGHT_VERSION" >> $GITHUB_ENV
+      - name: Set pyright version
+        id: pyright-version
+        run: |
+          PYRIGHT_VERSION="$(uv run python -c 'import pyright; print(pyright.__pyright_version__)')"
+          echo "pyright_version=$PYRIGHT_VERSION" >> $GITHUB_OUTPUT
 
-    - name: Run pyright (Linux)
-      uses: jakebailey/pyright-action@v2.2.1
-      id: pyright-linux
-      with:
-        version: ${{ env.PYRIGHT_VERSION }}
-        python-version: ${{ steps.setup-env.outputs.python-version }}
-        python-platform: "Linux"
-        annotate: ${{ matrix.python-version == '3.8' }}  # only add comments for one version
-        warnings: true
+      - name: Run pyright (Linux)
+        uses: jakebailey/pyright-action@v2.2.1
+        id: pyright-linux
+        with:
+          version: ${{ steps.pyright-version.outputs.pyright_version }}
+          python-version: ${{ steps.setup-env.outputs.python-version }}
+          python-platform: "Linux"
+          annotate: ${{ matrix.python-version == '3.8' }} # only add comments for one version
+          warnings: true
 
-    - name: Run pyright (Windows)
-      uses: jakebailey/pyright-action@v2.2.1
-      if: always() && (steps.pyright-linux.outcome == 'success' || steps.pyright-linux.outcome == 'failure')
-      with:
-        version: ${{ env.PYRIGHT_VERSION }}
-        python-version: ${{ steps.setup-env.outputs.python-version }}
-        python-platform: "Windows"
-        annotate: false  # only add comments for one platform (see above)
-        warnings: true
+      - name: Run pyright (Windows)
+        uses: jakebailey/pyright-action@v2.2.1
+        if: always() && (steps.pyright-linux.outcome == 'success' || steps.pyright-linux.outcome == 'failure')
+        with:
+          version: ${{ steps.pyright-version.outputs.pyright_version }}
+          python-version: ${{ steps.setup-env.outputs.python-version }}
+          python-platform: "Windows"
+          annotate: false # only add comments for one platform (see above)
+          warnings: true
 
   misc:
     runs-on: ubuntu-latest
     needs: lock-dependencies
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up environment
-      id: setup
-      uses: ./.github/actions/setup-env
-      with:
-        python-version: 3.8
+      - name: Set up environment
+        id: setup
+        uses: ./.github/actions/setup-env
+        with:
+          python-version: 3.8
+          uv-version: ${{ env.USE_UV_VERSION }}
 
-    - name: Run slotscheck
-      if: (success() || failure()) && steps.setup.outcome == 'success'
-      run: uv run nox -s slotscheck
+      - name: Run slotscheck
+        if: (success() || failure()) && steps.setup.outcome == 'success'
+        run: uv run nox -s slotscheck
 
-    - name: Run check-manifest
-      if: (success() || failure()) && steps.setup.outcome == 'success'
-      run: uv run nox -s check-manifest
+      - name: Run check-manifest
+        if: (success() || failure()) && steps.setup.outcome == 'success'
+        run: uv run nox -s check-manifest
 
-    # This only runs if the previous steps were successful, no point in running it otherwise
-    - name: Try building package
-      run: |
-        uvx --from=build pyproject-build
-        ls -la dist/
+      # This only runs if the previous steps were successful, no point in running it otherwise
+      - name: Try building package
+        run: |
+          uvx --from=build pyproject-build
+          ls -la dist/
 
-        uvx twine check --strict dist/*
+          uvx twine check --strict dist/*
 
-    # run the libcst parsers and check for changes
-    - name: libcst codemod
-      run: |
-        uv run nox -s codemod -- run-all
-        if [ -n "$(git status --porcelain)" ]; then
-          echo "::error::Please run 'uv run nox -s codemod -- run-all' locally and commit the changes." >&2;
-          echo "::group::git diff"
-          git diff
-          echo "::endgroup::"
-          exit 1;
-        else
-          exit 0;
-        fi
-
-  determine-tests:
-    runs-on: ubuntu-latest
-    needs: lock-dependencies
-    outputs:
-      python-versions: ${{ steps.set-matrix.outputs.python-versions }}
-    steps:
-    - uses: actions/checkout@v4
-    - name: Set up environment
-      id: setup
-      uses: ./.github/actions/setup-env
-      with:
-        python-version: 3.12
-
-    - name: Install nox
-      run: uv sync --no-default-groups --group nox --no-install-project
-
-    - name: Determine Python versions to test against
-      id: set-matrix
-      run: echo python-versions=$(uv run nox -s test --list --json | jq -c '[.[].python]') | tee --append $GITHUB_OUTPUT
+      # run the libcst parsers and check for changes
+      - name: libcst codemod
+        run: |
+          uv run nox -s codemod -- run-all
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::error::Please run 'uv run nox -s codemod -- run-all' locally and commit the changes." >&2;
+            echo "::group::git diff"
+            git diff
+            echo "::endgroup::"
+            exit 1;
+          else
+            exit 0;
+          fi
 
   pytest:
     runs-on: ${{ matrix.os }}
-    needs: determine-tests
+    needs:
+      - determine-python-versions
+      - lock-dependencies
     strategy:
       matrix:
         os: ["windows-latest", "ubuntu-latest", "macos-latest"]
-        python-version: ${{ fromJson(needs.determine-tests.outputs.python-versions) }}
+        python-version: ${{ fromJson(needs.determine-python-versions.outputs.test-python-versions) }}
         experimental: [false]
       fail-fast: true
     continue-on-error: ${{ matrix.experimental }}
@@ -195,48 +220,49 @@ jobs:
       GITHUB_STEP_SUMMARY_FOOTER: "</pre></details>\n"
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up environment
-      id: setup-env
-      uses: ./.github/actions/setup-env
-      with:
-        python-version: ${{ matrix.python-version }}
+      - name: Set up environment
+        id: setup-env
+        uses: ./.github/actions/setup-env
+        with:
+          uv-version: ${{ env.USE_UV_VERSION }}
+          python-version: ${{ matrix.python-version }}
 
-    - name: Install nox environment
-      run: uvx nox -s test --install-only --force-python ${{ steps.setup-env.outputs.python-version }}
+      - name: Install nox environment
+        run: uvx nox -s test --install-only --force-python ${{ steps.setup-env.outputs.python-version }}
 
-    - name: Run pytest
-      id: run_tests
-      # use non-utc timezone, to test time/date-dependent features properly
-      env:
-        TZ: "America/New_York"
-      run: |
-        echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/Test Summary/" >> $GITHUB_STEP_SUMMARY
-        uvx nox --force-python ${{ steps.setup-env.outputs.python-version }} -s test -- --color=no --cov-report= | tee -a $GITHUB_STEP_SUMMARY
-        echo "$GITHUB_STEP_SUMMARY_FOOTER" >> $GITHUB_STEP_SUMMARY
+      - name: Run pytest
+        id: run_tests
+        # use non-utc timezone, to test time/date-dependent features properly
+        env:
+          TZ: "America/New_York"
+        run: |
+          echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/Test Summary/" >> $GITHUB_STEP_SUMMARY
+          uvx nox --force-python ${{ steps.setup-env.outputs.python-version }} -s test -- --color=no --cov-report= | tee -a $GITHUB_STEP_SUMMARY
+          echo "$GITHUB_STEP_SUMMARY_FOOTER" >> $GITHUB_STEP_SUMMARY
 
-    - name: Print Coverage Output
-      if: always() && (steps.run_tests.outcome == 'success' || steps.run_tests.outcome == 'failure')
-      run: |
-        echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/Coverage Summary/" >> $GITHUB_STEP_SUMMARY
-        uv run --no-default-groups --group test coverage report | tee -a $GITHUB_STEP_SUMMARY
-        echo "$GITHUB_STEP_SUMMARY_FOOTER" >> $GITHUB_STEP_SUMMARY
+      - name: Print Coverage Output
+        if: always() && (steps.run_tests.outcome == 'success' || steps.run_tests.outcome == 'failure')
+        run: |
+          echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/Coverage Summary/" >> $GITHUB_STEP_SUMMARY
+          uv run --no-default-groups --group test coverage report | tee -a $GITHUB_STEP_SUMMARY
+          echo "$GITHUB_STEP_SUMMARY_FOOTER" >> $GITHUB_STEP_SUMMARY
 
   # thanks to aiohttp for this part of the workflow
-  check:  # This job does nothing and is only used for the branch protection
+  check: # This job does nothing and is only used for the branch protection
     if: always()
     needs:
-    - lint
-    - docs
-    - pyright
-    - misc
-    - pytest
+      - lint
+      - docs
+      - pyright
+      - misc
+      - pytest
 
     runs-on: ubuntu-latest
 
     steps:
-    - name: Decide whether the needed jobs succeeded or failed
-      uses: re-actors/alls-green@v1.2.2
-      with:
-        jobs: ${{ toJSON(needs) }}
+      - name: Decide whether the needed jobs succeeded or failed
+        uses: re-actors/alls-green@v1.2.2
+        with:
+          jobs: ${{ toJSON(needs) }}

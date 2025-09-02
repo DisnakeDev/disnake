@@ -6,6 +6,9 @@ inputs:
   python-version:
     description: The python version to install
     required: true
+  uv-version:
+    description: The uv version to install
+    required: true
 outputs:
   python-version:
     description: The python version that was installed.
@@ -14,18 +17,24 @@ outputs:
 runs:
   using: composite
   steps:
+    - name: Download uv lock
+      uses: actions/download-artifact@v5
+      with:
+        name: uv-lock-${{hashFiles('pyproject.toml')}}-resolved-${{ env.UV_RESOLUTION }}
+
     - name: Set up uv with python ${{ inputs.python-version }}
       id: setup-python
       uses: astral-sh/setup-uv@v6
       with:
         python-version: ${{ inputs.python-version }}
-        version: "0.8.13"
+        version: ${{ inputs.uv-version }}
         enable-cache: true
 
     - name: Set python version
       id: python-version
       shell: bash
-      run: echo "python-version=$(uv run python -c 'import sys; print(".".join(map(str,sys.version_info[:2])))')" >> $GITHUB_OUTPUT
-
-    - name: Configure cache
-      uses: ./.github/actions/cache-uv
+      env:
+        UV_VENV_CLEAR: 1
+      run: |
+        uv venv .venv
+        echo "python-version=$($(uv python find) -c 'import sys; print(".".join(map(str,sys.version_info[:2])))')" >> $GITHUB_OUTPUT
