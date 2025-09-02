@@ -8,7 +8,7 @@
 
 - [ ] If code changes were made, then they have been tested
     - [ ] I have updated the documentation to reflect the changes
-    -ve formatted the code properly by running `uv run nox -s lint`
+    - [ ] I have formatted the code properly by running `uv run nox -s lint`
     - [ ] I have type-checked the code by running `uv run nox -s pyright`
 - [ ] This PR fixes an issue
 - [ ] This PR adds something new (e.g. new method or parameters)
