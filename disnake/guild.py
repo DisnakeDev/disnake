@@ -213,6 +213,14 @@ class IncidentsData:
             and self.raid_detected_at == other.raid_detected_at
         )
 
+    def __repr__(self) -> str:
+        return (
+            f"<IncidentsData invites_disabled_until={self.invites_disabled_until!r}"
+            f" dms_disabled_until={self.dms_disabled_until!r}"
+            f" dm_spam_detected_at={self.dm_spam_detected_at!r}"
+            f" raid_detected_at={self.raid_detected_at!r}>"
+        )
+
 
 class Guild(Hashable):
     """Represents a Discord guild.
