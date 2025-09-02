@@ -1310,7 +1310,7 @@ class InteractionResponse:
         if not message:
             raise InteractionNotEditable(parent)
 
-        payload: Dict[str, str] = {}
+        payload = {}
         if content is not MISSING:
             payload["content"] = None if content is None else str(content)
 

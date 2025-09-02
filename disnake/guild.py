@@ -1495,7 +1495,7 @@ class Guild(Hashable):
         :class:`VoiceChannel`
             The channel that was just created.
         """
-        options: Dict[str, int] = {}
+        options = {}
         if position is not MISSING:
             options["position"] = position
 
@@ -1886,7 +1886,7 @@ class Guild(Hashable):
         :class:`MediaChannel`
             The channel that was just created.
         """
-        options: Dict[str, int] = {}
+        options = {}
         if position is not MISSING:
             options["position"] = position
 
@@ -2394,7 +2394,11 @@ class Guild(Hashable):
             if factory is None:
                 raise InvalidData("Unknown channel type {type} for channel ID {id}.".format_map(d))
 
-            channel = factory(guild=self, state=self._state, data=d)
+            channel = factory(
+                guild=self,
+                state=self._state,
+                data=d,  # type: ignore
+            )
             return channel
 
         return [convert(d) for d in data]

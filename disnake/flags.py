@@ -129,7 +129,7 @@ class BaseFlags:
             setattr(self, key, value)
 
     @classmethod
-    def __init_subclass__(cls, inverted: bool = False, no_fill_flags: bool = False) -> Self:
+    def __init_subclass__(cls, inverted: bool = False, no_fill_flags: bool = False) -> Type[Self]:
         # add a way to bypass filling flags, eg for ListBaseFlags.
         if no_fill_flags:
             return cls
