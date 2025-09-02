@@ -48,7 +48,6 @@ reset_coverage = True
 EMPTY_SEQUENCE: Sequence[str] = set()  # type: ignore
 
 
-# Helper to install dependencies from a group, using uv if venv_backend is uv
 def install_deps(
     session: nox.Session,
     *,
@@ -57,7 +56,8 @@ def install_deps(
     dependencies: Sequence[str] = EMPTY_SEQUENCE,  # a parameter itself for pip
     project: bool = True,
 ) -> None:
-    if not project and extras:  # cannot install extras without also installing the project
+    """Helper to install dependencies from a group, using uv if venv_backend is uv."""
+    if not project and extras:
         raise TypeError("Cannot install extras without also installing the project")
 
     command: List[str] = []
